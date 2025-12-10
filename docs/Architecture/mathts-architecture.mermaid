@@ -1,0 +1,88 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#2563eb', 'primaryTextColor': '#fff', 'primaryBorderColor': '#1d4ed8', 'lineColor': '#64748b', 'secondaryColor': '#f1f5f9', 'tertiaryColor': '#f8fafc'}}}%%
+
+flowchart TB
+    subgraph UserApp["User Application"]
+        App["import { math } from '@mathts/mathts'<br/>math.multiply(A, B)"]
+    end
+
+    subgraph MathTS["@mathts/mathts"]
+        Create["create()"]
+        Instance["Default Instance"]
+    end
+
+    subgraph Core["@mathts/core"]
+        Types["Types<br/>• number<br/>• Complex<br/>• Fraction<br/>• BigNumber"]
+        Typed["typed-function-ts<br/>Type Dispatch"]
+        Factory["Factory Pattern<br/>Dependency Injection"]
+    end
+
+    subgraph Matrix["@mathts/matrix"]
+        MatrixTypes["Matrix Types<br/>• DenseMatrix<br/>• SparseMatrix<br/>• ImmutableMatrix"]
+        Operations["Operations<br/>• add, multiply<br/>• transpose<br/>• decomposition"]
+    end
+
+    subgraph Backends["Backend Selection Layer"]
+        Manager["BackendManager<br/>Auto-selection"]
+        JS["JSBackend<br/>(default)"]
+        WASM["WASMBackend<br/>(>1K elements)"]
+        GPU["GPUBackend<br/>(>100K elements)"]
+    end
+
+    subgraph Acceleration["Acceleration Layer"]
+        ASM["AssemblyScript<br/>WASM Modules<br/>(SIMD enabled)"]
+        WGSL["WebGPU WGSL<br/>Compute Shaders<br/>(tiled matmul)"]
+    end
+
+    subgraph Parallel["@mathts/parallel"]
+        Pool["ComputePool"]
+        Workers["Worker Pool<br/>workerpool-ts"]
+        Strategies["Strategies<br/>• Chunk<br/>• Pipeline<br/>• Map-Reduce"]
+    end
+
+    subgraph Functions["@mathts/functions"]
+        Arith["arithmetic<br/>add, multiply, pow"]
+        Algebra["algebra<br/>simplify, solve"]
+        Stats["statistics<br/>mean, std, variance"]
+        Trig["trigonometry<br/>sin, cos, tan"]
+        MatrixFn["matrix<br/>det, inv, eigs"]
+        Signal["signal<br/>fft, ifft, conv"]
+    end
+
+    App --> MathTS
+    MathTS --> Core
+    MathTS --> Matrix
+    MathTS --> Functions
+
+    Core --> Typed
+    Types --> Typed
+    Typed --> Factory
+
+    Matrix --> MatrixTypes
+    Matrix --> Operations
+    Operations --> Manager
+
+    Manager --> JS
+    Manager --> WASM
+    Manager --> GPU
+
+    WASM --> ASM
+    GPU --> WGSL
+
+    Operations --> Pool
+    Pool --> Workers
+    Workers --> Strategies
+
+    Functions --> Core
+    Functions --> Matrix
+    
+    classDef primary fill:#2563eb,stroke:#1d4ed8,color:#fff
+    classDef secondary fill:#f1f5f9,stroke:#cbd5e1,color:#1e293b
+    classDef accent fill:#10b981,stroke:#059669,color:#fff
+    classDef warning fill:#f59e0b,stroke:#d97706,color:#fff
+    
+    class App,Create,Instance primary
+    class Types,Typed,Factory secondary
+    class MatrixTypes,Operations secondary
+    class JS,WASM,GPU accent
+    class ASM,WGSL warning
+    class Pool,Workers,Strategies accent

@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Cache
+.cache/
+.turbo/
+
+# Generated
+*.generated.*
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# CHANGELOG (managed by changesets)
+CHANGELOG.md

@@ -1,0 +1,974 @@
+# MathTS Scientific Workbench Example
+# Schwarzschild Spacetime Analysis
+# This demonstrates all cell types and features of the .mtsw format
+
+mtsw_version: "2.0.0"
+
+#═══════════════════════════════════════════════════════════════════════════════
+# DOCUMENT METADATA
+#═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  title: "Schwarzschild Spacetime: Geodesics and Curvature"
+  id: "550e8400-e29b-41d4-a716-446655440000"
+  created: "2025-12-06T12:00:00Z"
+  modified: "2025-12-06T14:30:00Z"
+  author: "Daniel Simon Jr."
+  email: "daniel@example.com"
+  institution: "UPTF Research"
+  description: |
+    A comprehensive analysis of the Schwarzschild metric, including:
+    - Christoffel symbols computation
+    - Riemann and Ricci curvature tensors
+    - Geodesic equation derivation
+    - 3D visualization of particle trajectories
+    
+    This notebook demonstrates the MathTS tensor algebra system
+    for general relativity calculations.
+    
+  tags: [general-relativity, schwarzschild, geodesics, tensor-algebra, UPTF]
+  license: "MIT"
+  
+  bibliography:
+    - key: "schwarzschild1916"
+      type: article
+      author: "Karl Schwarzschild"
+      title: "Über das Gravitationsfeld eines Massenpunktes nach der Einsteinschen Theorie"
+      journal: "Sitzungsberichte der Königlich Preußischen Akademie der Wissenschaften"
+      year: 1916
+      pages: "189-196"
+      
+    - key: "misner1973"
+      type: book
+      author: "Charles W. Misner, Kip S. Thorne, John Archibald Wheeler"
+      title: "Gravitation"
+      publisher: "W. H. Freeman"
+      year: 1973
+
+#═══════════════════════════════════════════════════════════════════════════════
+# RUNTIME CONFIGURATION
+#═══════════════════════════════════════════════════════════════════════════════
+
+runtime:
+  engine: mathts
+  version: ">=1.0.0"
+  
+  packages:
+    - name: "@mathts/core"
+      version: "^1.0.0"
+    - name: "@mathts/tensor"
+      version: "^1.0.0"
+    - name: "@mathts/symbolic"
+      version: "^1.0.0"
+    - name: "@mathts/viz"
+      version: "^1.0.0"
+  
+  execution:
+    mode: reactive
+    auto_run: true
+    parallel: true
+    max_workers: 4
+    timeout: 30000
+    
+  backend:
+    prefer: webgpu
+    fallback: [wasm, js]
+    precision: double
+    
+  limits:
+    max_matrix_size: 10000
+    max_tensor_rank: 8
+    max_symbolic_depth: 100
+
+#═══════════════════════════════════════════════════════════════════════════════
+# KERNEL INITIALIZATION
+#═══════════════════════════════════════════════════════════════════════════════
+
+kernel:
+  init:
+    - name: c
+      type: constant
+      value: 299792458
+      unit: "m/s"
+      description: "Speed of light in vacuum"
+      
+    - name: G
+      type: constant
+      value: 6.67430e-11
+      unit: "m³/(kg·s²)"
+      description: "Newtonian gravitational constant"
+      
+    - name: M_sun
+      type: constant
+      value: 1.989e30
+      unit: "kg"
+      description: "Solar mass"
+  
+  coordinates:
+    - name: schwarzschild
+      symbols: [t, r, θ, φ]
+      domain: real
+      constraints:
+        r: "> r_s"
+        θ: "[0, π]"
+        φ: "[0, 2π)"
+        
+    - name: spacetime
+      symbols: [t, x, y, z]
+      signature: [-1, 1, 1, 1]
+      type: lorentzian
+
+#═══════════════════════════════════════════════════════════════════════════════
+# VISUALIZATION CONFIGURATION
+#═══════════════════════════════════════════════════════════════════════════════
+
+visualization:
+  mathjax:
+    macros:
+      "\\R": "\\mathbb{R}"
+      "\\dd": "\\mathrm{d}"
+      "\\pp": "\\partial"
+      "\\christoffel": "\\Gamma"
+      "\\riemann": "R"
+      "\\ricci": "R"
+      "\\metric": "g"
+    packages: [ams, physics, tensor]
+    
+  threejs:
+    renderer:
+      type: webgpu
+      antialias: true
+      pixelRatio: "device"
+      
+    camera:
+      type: perspective
+      fov: 60
+      near: 0.1
+      far: 1000
+      position: [15, 15, 15]
+      lookAt: [0, 0, 0]
+      
+    controls:
+      type: orbit
+      enableDamping: true
+      dampingFactor: 0.05
+      
+    lighting:
+      ambient:
+        color: 0xffffff
+        intensity: 0.4
+      directional:
+        color: 0xffffff
+        intensity: 0.8
+        position: [10, 20, 10]
+        
+    style:
+      background: 0x0a0a1a
+      gridHelper: true
+      axesHelper: true
+      
+  graphviz:
+    engine: dot
+    format: svg
+    rankdir: TB
+    splines: spline
+    node:
+      shape: box
+      style: "rounded,filled"
+      fillcolor: "#e8f4fc"
+      fontname: "Arial"
+    edge:
+      fontname: "Arial"
+      fontsize: 10
+      
+  colormaps:
+    default: viridis
+    available: [viridis, plasma, inferno, magma, coolwarm]
+
+#═══════════════════════════════════════════════════════════════════════════════
+# EXPORT CONFIGURATION
+#═══════════════════════════════════════════════════════════════════════════════
+
+export:
+  latex:
+    documentclass: article
+    packages:
+      - amsmath
+      - amssymb
+      - physics
+      - tensor
+      - graphicx
+      - hyperref
+    preamble: |
+      \newcommand{\schwarzschild}{Schwarzschild}
+      
+  pdf:
+    engine: pdflatex
+    paper: letter
+    margin: 1in
+    
+  html:
+    template: default
+    theme: dark
+    standalone: true
+    
+  jupyter:
+    kernel: typescript
+    include_outputs: true
+
+#═══════════════════════════════════════════════════════════════════════════════
+# CELLS
+#═══════════════════════════════════════════════════════════════════════════════
+
+cells:
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 1: Introduction
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: markdown
+    id: intro
+    content: |
+      # Schwarzschild Spacetime Analysis
+      
+      The **Schwarzschild solution** is the unique spherically symmetric 
+      vacuum solution to Einstein's field equations. It describes the 
+      spacetime geometry outside a non-rotating, uncharged spherical mass.
+      
+      ## The Metric
+      
+      The Schwarzschild line element in coordinates $(t, r, \theta, \phi)$ is:
+      
+      $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2 dt^2 + 
+               \left(1 - \frac{r_s}{r}\right)^{-1} dr^2 + 
+               r^2 d\theta^2 + r^2\sin^2\theta \, d\phi^2$$
+      
+      where $r_s = \frac{2GM}{c^2}$ is the **Schwarzschild radius**.
+      
+      In this notebook, we will:
+      1. Compute the Christoffel symbols
+      2. Derive the Riemann curvature tensor
+      3. Calculate the Ricci tensor and scalar
+      4. Solve the geodesic equations
+      5. Visualize particle trajectories
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 2: Physical Constants
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: data
+    id: constants
+    format: yaml
+    content:
+      physical_constants:
+        c: 299792458           # m/s
+        G: 6.67430e-11         # m³/(kg·s²)
+        M_sun: 1.989e30        # kg
+        M_earth: 5.972e24      # kg
+        
+      schwarzschild_radii:
+        sun: 2953.25           # meters
+        earth: 0.00887         # meters
+        M87_black_hole: 1.9e13 # meters (M87*)
+        
+    options:
+      export: true
+      
+    display:
+      style: table
+      caption: "Physical constants and Schwarzschild radii"
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 3: Metric Tensor Definition
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: code
+    id: metric-definition
+    language: typescript
+    source: |
+      import { 
+        symbol, MetricTensor, schwarzschild,
+        Expression, simplify 
+      } from '@mathts/tensor';
+      
+      // Define symbolic parameters
+      const M = symbol('M', { positive: true, real: true });
+      const c = symbol('c', { positive: true, real: true });
+      const G = symbol('G', { positive: true, real: true });
+      
+      // Schwarzschild radius
+      const r_s = (2 * G * M) / (c ** 2);
+      
+      // Create Schwarzschild metric
+      // g_μν in coordinates (t, r, θ, φ)
+      const g = schwarzschild(M, { 
+        coordinates: ['t', 'r', 'θ', 'φ'],
+        geometricUnits: false  // Keep c, G explicit
+      });
+      
+      // Display metric components
+      console.log("Schwarzschild Metric Components:");
+      console.log(`g_{tt} = ${g.at(0, 0).toLatex()}`);
+      console.log(`g_{rr} = ${g.at(1, 1).toLatex()}`);
+      console.log(`g_{θθ} = ${g.at(2, 2).toLatex()}`);
+      console.log(`g_{φφ} = ${g.at(3, 3).toLatex()}`);
+      
+      // Compute inverse metric
+      const g_inv = g.inverse();
+      
+      // Export for other cells
+      export { g, g_inv, M, r_s };
+      
+    options:
+      autorun: true
+      cache: true
+      timeout: 10000
+      
+    outputs:
+      - name: g
+        display: latex
+        label: "Metric tensor $g_{\\mu\\nu}$"
+      - name: g_inv
+        display: latex
+        label: "Inverse metric $g^{\\mu\\nu}$"
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 4: Christoffel Symbols
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: markdown
+    id: christoffel-intro
+    content: |
+      ## Christoffel Symbols
+      
+      The Christoffel symbols of the second kind are defined as:
+      
+      $$\Gamma^{\alpha}_{\beta\gamma} = \frac{1}{2} g^{\alpha\delta} 
+        \left( \partial_\beta g_{\delta\gamma} + 
+               \partial_\gamma g_{\delta\beta} - 
+               \partial_\delta g_{\beta\gamma} \right)$$
+      
+      These encode how vectors change under parallel transport and 
+      appear in the geodesic equation.
+
+  - type: code
+    id: christoffel-computation
+    language: typescript
+    source: |
+      import { g, g_inv } from '#metric-definition';
+      import { ChristoffelSymbol, simplify } from '@mathts/tensor';
+      
+      // Compute Christoffel symbols
+      const Gamma = g.christoffelSecond();
+      
+      // Get non-zero components
+      const nonZero = Gamma.nonZeroComponents();
+      
+      console.log(`Found ${nonZero.length} non-zero Christoffel symbols:`);
+      
+      for (const { indices, value } of nonZero) {
+        const [α, β, γ] = indices;
+        const simplified = simplify(value);
+        console.log(`Γ^${α}_{${β}${γ}} = ${simplified.toLatex()}`);
+      }
+      
+      export { Gamma };
+      
+    depends_on: [metric-definition]
+    
+    options:
+      autorun: true
+      
+    outputs:
+      - name: Gamma
+        display: table
+        label: "Christoffel symbols $\\Gamma^\\alpha_{\\beta\\gamma}$"
+
+  - type: tensor
+    id: christoffel-explicit
+    notation: einstein
+    content: |
+      # Non-zero Christoffel symbols for Schwarzschild metric
+      # (Using geometric units where c = G = 1)
+      
+      # Time-radial components
+      Γ^t_{tr} := (r_s) / (2r(r - r_s))
+      Γ^t_{rt} := (r_s) / (2r(r - r_s))
+      
+      # Radial components
+      Γ^r_{tt} := (r_s(r - r_s)) / (2r³)
+      Γ^r_{rr} := -(r_s) / (2r(r - r_s))
+      Γ^r_{θθ} := -(r - r_s)
+      Γ^r_{φφ} := -(r - r_s) sin²θ
+      
+      # Angular components
+      Γ^θ_{rθ} := 1/r
+      Γ^θ_{θr} := 1/r
+      Γ^θ_{φφ} := -sinθ cosθ
+      
+      Γ^φ_{rφ} := 1/r
+      Γ^φ_{φr} := 1/r
+      Γ^φ_{θφ} := cotθ
+      Γ^φ_{φθ} := cotθ
+      
+    options:
+      coordinates: schwarzschild
+      metric: g
+      dimension: 4
+      simplify: true
+      
+    depends_on: [metric-definition]
+    
+    display:
+      format: latex
+      numbered: true
+      align: true
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 5: Curvature Tensors
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: markdown
+    id: curvature-intro
+    content: |
+      ## Curvature Tensors
+      
+      The **Riemann curvature tensor** measures the failure of parallel 
+      transport to preserve vector directions around closed loops:
+      
+      $$R^{\rho}{}_{\sigma\mu\nu} = \partial_\mu \Gamma^{\rho}_{\nu\sigma} 
+        - \partial_\nu \Gamma^{\rho}_{\mu\sigma} 
+        + \Gamma^{\rho}_{\mu\lambda} \Gamma^{\lambda}_{\nu\sigma} 
+        - \Gamma^{\rho}_{\nu\lambda} \Gamma^{\lambda}_{\mu\sigma}$$
+      
+      The **Ricci tensor** is the contraction:
+      
+      $$R_{\mu\nu} = R^{\rho}{}_{\mu\rho\nu}$$
+      
+      The **Ricci scalar** (scalar curvature):
+      
+      $$R = g^{\mu\nu} R_{\mu\nu}$$
+
+  - type: tensor
+    id: curvature-tensors
+    notation: einstein
+    content: |
+      # Riemann curvature tensor definition
+      R^ρ_{σμν} := ∂_μ Γ^ρ_{νσ} - ∂_ν Γ^ρ_{μσ} 
+                   + Γ^ρ_{μλ} Γ^λ_{νσ} - Γ^ρ_{νλ} Γ^λ_{μσ}
+      
+      # Ricci tensor (contraction)
+      R_{μν} := R^ρ_{μρν}
+      
+      # Ricci scalar
+      R := g^{μν} R_{μν}
+      
+      # Einstein tensor
+      G_{μν} := R_{μν} - (1/2) g_{μν} R
+      
+      # Kretschmann scalar (curvature invariant)
+      K := R^{αβγδ} R_{αβγδ}
+      
+    options:
+      coordinates: schwarzschild
+      metric: g
+      dimension: 4
+      simplify: true
+      
+    depends_on: [metric-definition, christoffel-computation]
+    
+    display:
+      format: latex
+      numbered: true
+
+  - type: code
+    id: curvature-computation
+    language: typescript
+    source: |
+      import { g, Gamma } from '#christoffel-computation';
+      import { CurvatureTensors, simplify } from '@mathts/tensor';
+      
+      // Create curvature calculator
+      const curvature = new CurvatureTensors(g, Gamma);
+      
+      // Compute all curvature tensors
+      const Riemann = curvature.riemann();
+      const Ricci = curvature.ricci();
+      const RicciScalar = curvature.ricciScalar();
+      const Einstein = curvature.einstein();
+      const Kretschmann = curvature.kretschmann();
+      
+      // For Schwarzschild: R_μν = 0 (vacuum solution)
+      // But Kretschmann scalar K = 48M²/r⁶ is non-zero
+      
+      console.log("Ricci scalar R =", simplify(RicciScalar).toLatex());
+      console.log("Kretschmann K =", simplify(Kretschmann).toLatex());
+      
+      // Verify vacuum condition
+      const isVacuum = Ricci.allComponents().every(
+        c => simplify(c.value).equals(0)
+      );
+      console.log("Vacuum solution (R_μν = 0):", isVacuum);
+      
+      export { Riemann, Ricci, RicciScalar, Einstein, Kretschmann };
+      
+    depends_on: [christoffel-computation]
+    
+    outputs:
+      - name: Riemann
+        display: latex
+        label: "Riemann tensor"
+      - name: Kretschmann
+        display: latex
+        label: "Kretschmann scalar"
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 6: Curvature Hierarchy Diagram
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: visualization
+    id: tensor-hierarchy
+    renderer: graphviz
+    source: |
+      digraph TensorHierarchy {
+        rankdir=TB;
+        node [shape=box, style="rounded,filled", fontname="Arial"];
+        edge [fontname="Arial", fontsize=10];
+        
+        // Nodes with colors
+        g [label="Metric Tensor\ng_{μν}", fillcolor="#e1f5fe"];
+        Gamma [label="Christoffel Symbols\nΓ^α_{βγ}", fillcolor="#fff3e0"];
+        R [label="Riemann Tensor\nR^ρ_{σμν}", fillcolor="#fce4ec"];
+        Ric [label="Ricci Tensor\nR_{μν}", fillcolor="#f3e5f5"];
+        S [label="Ricci Scalar\nR", fillcolor="#e8f5e9"];
+        G [label="Einstein Tensor\nG_{μν}", fillcolor="#fffde7"];
+        K [label="Kretschmann\nK", fillcolor="#ffebee"];
+        
+        // Edges showing derivations
+        g -> Gamma [label="  ∂g  ", color="#1976d2"];
+        Gamma -> R [label="  ∂Γ + Γ²  ", color="#d32f2f"];
+        R -> Ric [label="  contract  ", color="#7b1fa2"];
+        Ric -> S [label="  trace  ", color="#388e3c"];
+        R -> K [label="  R·R  ", color="#f57c00"];
+        
+        g -> G [style=dashed, color="#666"];
+        Ric -> G [color="#fbc02d"];
+        S -> G [color="#fbc02d"];
+        
+        // Subgraphs for organization
+        subgraph cluster_curvature {
+          label="Curvature";
+          style=dashed;
+          color="#999";
+          R; Ric; S; K;
+        }
+      }
+      
+    options:
+      engine: dot
+      format: svg
+      
+    display:
+      width: 600
+      height: 500
+      caption: "Tensor hierarchy: from metric to curvature invariants"
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 7: Geodesic Equations
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: markdown
+    id: geodesic-intro
+    content: |
+      ## Geodesic Equations
+      
+      The geodesic equation describes the worldline of a freely falling 
+      particle (one experiencing only gravity):
+      
+      $$\frac{d^2 x^\mu}{d\tau^2} + \Gamma^\mu_{\alpha\beta} 
+        \frac{dx^\alpha}{d\tau} \frac{dx^\beta}{d\tau} = 0$$
+      
+      For the Schwarzschild metric, we get four coupled second-order ODEs.
+      Due to spherical symmetry, we can restrict to the equatorial plane 
+      ($\theta = \pi/2$), reducing to three equations.
+
+  - type: equation
+    id: geodesic-equation
+    content: |
+      \frac{d^2 x^\mu}{d\tau^2} + \Gamma^\mu_{\alpha\beta} 
+      \frac{dx^\alpha}{d\tau} \frac{dx^\beta}{d\tau} = 0
+    options:
+      numbered: true
+      label: "eq:geodesic"
+    ref: "eq:geodesic"
+
+  - type: code
+    id: geodesic-solver
+    language: typescript
+    source: |
+      import { g, Gamma } from '#christoffel-computation';
+      import { GeodesicSolver, Vector4 } from '@mathts/tensor';
+      import { ODE45 } from '@mathts/calculus';
+      
+      // Create geodesic solver
+      const solver = new GeodesicSolver(g, Gamma, {
+        method: 'rk45',
+        relativeTolerance: 1e-10,
+        absoluteTolerance: 1e-12
+      });
+      
+      // Initial conditions for a bound orbit
+      // Start at r = 10M, θ = π/2 (equatorial plane)
+      const r0 = 10;  // In units of M
+      const theta0 = Math.PI / 2;
+      const phi0 = 0;
+      
+      // Initial 4-velocity for a circular-ish orbit
+      // Energy and angular momentum chosen for bound orbit
+      const E = 0.95;  // Specific energy (< 1 for bound)
+      const L = 4.0;   // Specific angular momentum
+      
+      const initialPosition: Vector4 = [0, r0, theta0, phi0];
+      const initialVelocity = solver.computeInitialVelocity(
+        initialPosition, { E, L, type: 'timelike' }
+      );
+      
+      // Solve geodesic
+      const solution = solver.solve({
+        initialPosition,
+        initialVelocity,
+        properTimeRange: [0, 500],
+        maxSteps: 10000
+      });
+      
+      console.log(`Computed ${solution.points.length} points`);
+      console.log(`Proper time range: [${solution.tau[0]}, ${solution.tau[solution.tau.length-1]}]`);
+      
+      // Extract trajectory for visualization
+      const trajectory = solution.points.map(p => ({
+        x: p[1] * Math.sin(p[2]) * Math.cos(p[3]),
+        y: p[1] * Math.sin(p[2]) * Math.sin(p[3]),
+        z: p[1] * Math.cos(p[2]),
+        tau: 0  // Will be filled
+      }));
+      
+      export { solver, solution, trajectory, r0, E, L };
+      
+    depends_on: [christoffel-computation]
+    
+    options:
+      autorun: true
+      timeout: 30000
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 8: 3D Visualization
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: visualization
+    id: geodesic-3d
+    renderer: threejs
+    source: |
+      import { Scene, GeodesicPlotter, Sphere, Grid } from '@mathts/viz';
+      import { trajectory, r0 } from '#geodesic-solver';
+      
+      // Create scene
+      const scene = new Scene({
+        width: 800,
+        height: 600,
+        background: 0x0a0a1a,
+        camera: {
+          position: [20, 15, 20],
+          lookAt: [0, 0, 0],
+          fov: 60
+        }
+      });
+      
+      // Add coordinate grid
+      scene.addGrid({
+        size: 30,
+        divisions: 30,
+        color1: 0x333355,
+        color2: 0x222244,
+        opacity: 0.5
+      });
+      
+      // Add axes
+      scene.addAxes({ size: 15 });
+      
+      // Add event horizon (black sphere at r = 2M)
+      const r_s = 2;  // Schwarzschild radius in units of M
+      scene.addSphere({
+        radius: r_s,
+        color: 0x000000,
+        opacity: 1.0,
+        name: 'Event Horizon'
+      });
+      
+      // Add photon sphere (r = 3M/2)
+      scene.addSphere({
+        radius: 3,
+        color: 0xffaa00,
+        opacity: 0.1,
+        wireframe: true,
+        name: 'Photon Sphere'
+      });
+      
+      // Add geodesic trajectory
+      scene.addCurve(trajectory, {
+        color: 'tau',  // Color by proper time
+        colormap: 'viridis',
+        lineWidth: 2,
+        name: 'Geodesic'
+      });
+      
+      // Add initial position marker
+      const start = trajectory[0];
+      scene.addSphere({
+        center: [start.x, start.y, start.z],
+        radius: 0.3,
+        color: 0x00ff00,
+        name: 'Start'
+      });
+      
+      // Add labels
+      scene.addLabel({
+        position: [r_s + 1, 0, 0],
+        text: 'Event Horizon (r = 2M)',
+        color: 0xffffff
+      });
+      
+      // Setup lighting
+      scene.addAmbientLight({ intensity: 0.3 });
+      scene.addDirectionalLight({
+        position: [20, 30, 20],
+        intensity: 0.8
+      });
+      
+      // Enable orbit controls
+      scene.enableControls({
+        type: 'orbit',
+        enableDamping: true,
+        autoRotate: false
+      });
+      
+      // Render
+      scene.render();
+      
+      export { scene };
+      
+    depends_on: [geodesic-solver]
+    
+    options:
+      interactive: true
+      controls: orbit
+      animate: false
+      
+    display:
+      width: 800
+      height: 600
+      caption: "Geodesic trajectory around a Schwarzschild black hole. The black sphere represents the event horizon (r = 2M), and the orange wireframe shows the photon sphere (r = 3M)."
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 9: Curvature Plot
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: visualization
+    id: kretschmann-plot
+    renderer: d3
+    source: |
+      import { LineChart } from '@mathts/viz/d3';
+      import { Kretschmann } from '#curvature-computation';
+      import { linspace } from '@mathts/core';
+      
+      // Evaluate Kretschmann scalar K = 48M²/r⁶ vs radius
+      const r_s = 2;  // Schwarzschild radius
+      const rValues = linspace(r_s * 1.01, 20, 200);
+      
+      // K = 48/(r/M)^6 in geometric units
+      const kValues = rValues.map(r => 48 / Math.pow(r, 6));
+      
+      // Create chart
+      const chart = new LineChart({
+        width: 700,
+        height: 400,
+        margin: { top: 30, right: 30, bottom: 60, left: 80 }
+      });
+      
+      // Plot Kretschmann scalar
+      chart.plot(rValues, kValues, {
+        color: '#e53935',
+        lineWidth: 2,
+        label: 'K = 48M²/r⁶'
+      });
+      
+      // Add vertical line at horizon
+      chart.addVerticalLine(r_s, {
+        color: '#1565c0',
+        style: 'dashed',
+        label: 'Horizon (r = 2M)'
+      });
+      
+      // Configure axes
+      chart.setXAxis({
+        label: 'r / M',
+        min: r_s,
+        max: 20
+      });
+      
+      chart.setYAxis({
+        label: 'Kretschmann Scalar K',
+        scale: 'log',
+        min: 1e-6,
+        max: 1
+      });
+      
+      chart.setTitle('Curvature Singularity at r = 0');
+      
+      // Add annotation
+      chart.addAnnotation({
+        x: 4,
+        y: 0.01,
+        text: 'K → ∞ as r → 0',
+        fontSize: 12
+      });
+      
+      export { chart };
+      
+    depends_on: [curvature-computation]
+    
+    options:
+      format: svg
+      
+    display:
+      width: 700
+      height: 400
+      caption: "Kretschmann scalar K = R^{αβγδ}R_{αβγδ} = 48M²/r⁶ showing the curvature singularity"
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 10: Tests
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: test
+    id: metric-tests
+    source: |
+      import { expect, describe, it } from '@mathts/test';
+      import { g, g_inv } from '#metric-definition';
+      import { Ricci, RicciScalar } from '#curvature-computation';
+      
+      describe('Schwarzschild Metric Properties', () => {
+        
+        it('should be symmetric', () => {
+          for (let i = 0; i < 4; i++) {
+            for (let j = i + 1; j < 4; j++) {
+              expect(g.at(i, j).simplify()).toEqual(g.at(j, i).simplify());
+            }
+          }
+        });
+        
+        it('should have Lorentzian signature (-,+,+,+)', () => {
+          const [positive, negative] = g.signature();
+          expect(positive).toBe(3);
+          expect(negative).toBe(1);
+        });
+        
+        it('should satisfy g · g^(-1) = I', () => {
+          const product = g.multiply(g_inv);
+          for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+              const expected = i === j ? 1 : 0;
+              expect(product.at(i, j).evaluate({})).toBeCloseTo(expected);
+            }
+          }
+        });
+        
+        it('should be a vacuum solution (R_μν = 0)', () => {
+          for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+              const component = Ricci.at(i, j).simplify();
+              expect(component.isZero()).toBe(true);
+            }
+          }
+        });
+        
+        it('should have zero Ricci scalar', () => {
+          expect(RicciScalar.simplify().isZero()).toBe(true);
+        });
+        
+        it('should reduce to Minkowski metric at infinity', () => {
+          const gInf = g.evaluate({ r: 1e10, M: 1 });
+          expect(gInf.at(0, 0)).toBeCloseTo(-1, 5);
+          expect(gInf.at(1, 1)).toBeCloseTo(1, 5);
+          expect(gInf.at(2, 2)).toBeCloseTo(1e20, -15);
+        });
+        
+      });
+      
+    options:
+      autorun: false
+      critical: true
+      timeout: 10000
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Section 11: Conclusions
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: markdown
+    id: conclusions
+    content: |
+      ## Conclusions
+      
+      This notebook demonstrated the MathTS tensor algebra system for 
+      analyzing the Schwarzschild spacetime:
+      
+      1. **Metric Tensor**: Defined the Schwarzschild line element and 
+         computed the inverse metric.
+         
+      2. **Christoffel Symbols**: Calculated all 40 components (13 non-zero) 
+         of the connection coefficients.
+         
+      3. **Curvature Tensors**: Derived the Riemann tensor, confirming 
+         $R_{\mu\nu} = 0$ (vacuum solution) while $K \neq 0$ (non-trivial curvature).
+         
+      4. **Geodesics**: Solved the geodesic equations numerically, visualizing 
+         bound orbits around the black hole.
+         
+      5. **Visualization**: Created interactive 3D visualizations using Three.js 
+         and 2D plots showing the curvature singularity.
+      
+      ### References
+      
+      See \cite{schwarzschild1916} for the original derivation and 
+      \cite{misner1973} for comprehensive coverage of black hole physics.
+
+  #─────────────────────────────────────────────────────────────────────────────
+  # Exports
+  #─────────────────────────────────────────────────────────────────────────────
+  
+  - type: export
+    id: document-exports
+    exports:
+      - name: schwarzschildMetric
+        from: metric-definition
+        description: "Schwarzschild metric tensor"
+        
+      - name: christoffelSymbols
+        from: christoffel-computation
+        description: "Christoffel symbols for Schwarzschild"
+        
+      - name: geodesicSolver
+        from: geodesic-solver
+        description: "Configured geodesic solver"
+        
+    on_save:
+      - action: export_figures
+        cells: [geodesic-3d, tensor-hierarchy, kretschmann-plot]
+        format: [svg, png]
+        directory: "./figures"
+        
+      - action: export_latex
+        cells: [geodesic-equation, curvature-tensors]
+        file: "./equations.tex"
+
+#═══════════════════════════════════════════════════════════════════════════════
+# END OF DOCUMENT
+#═══════════════════════════════════════════════════════════════════════════════

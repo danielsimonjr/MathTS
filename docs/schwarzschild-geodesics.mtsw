@@ -1,0 +1,419 @@
+# MathTS Scientific Workbook
+# Universal Physics Tensor Framework - Schwarzschild Geodesics
+# https://github.com/danielsimonjr/mathts
+
+version: "1.0"
+
+metadata:
+  title: "UPTF: Schwarzschild Geodesics"
+  author: "Daniel Simon Jr."
+  created: 2025-12-05T20:00:00Z
+  description: |
+    Derivation and visualization of geodesic motion in Schwarzschild spacetime.
+    
+    This workbook demonstrates:
+    - Tensor cell notation for metric definition
+    - Symbolic computation of Christoffel symbols
+    - 3D visualization of geodesics using Three.js
+    - Test cells for verification
+  tags: [UPTF, general-relativity, geodesics, schwarzschild, tensor-physics]
+  license: MIT
+
+runtime:
+  engine: mathts
+  version: ">=1.0.0"
+  packages:
+    - "@mathts/core"
+    - "@mathts/tensor"
+    - "@mathts/symbolic"
+    - "@mathts/viz"
+  execution: reactive
+
+cells:
+
+  # ==========================================================================
+  # Introduction
+  # ==========================================================================
+  
+  - markdown: |
+      # Schwarzschild Geodesics
+      
+      The **Schwarzschild metric** describes the spacetime geometry around a 
+      spherically symmetric, non-rotating mass $M$. It is the simplest black 
+      hole solution to Einstein's field equations.
+      
+      ## Physical Setup
+      
+      We work in Schwarzschild coordinates $(t, r, \theta, \phi)$ with the 
+      metric signature $(-,+,+,+)$.
+      
+      The **Schwarzschild radius** is:
+      
+      $$r_s = \frac{2GM}{c^2}$$
+      
+      Below this radius lies the **event horizon** — the point of no return.
+    id: intro
+
+  # ==========================================================================
+  # Physical Constants
+  # ==========================================================================
+
+  - data: |
+      # Physical constants (SI units)
+      G: 6.674e-11        # Gravitational constant [m³/(kg·s²)]
+      c: 2.998e8          # Speed of light [m/s]
+      M_sun: 1.989e30     # Solar mass [kg]
+      
+      # Simulation parameters
+      M: 1.0              # Black hole mass [solar masses]
+      r_init: 10.0        # Initial radius [Schwarzschild radii]
+      E: 0.95             # Energy per unit mass
+      L: 4.0              # Angular momentum per unit mass
+    id: constants
+    format: yaml
+
+  # ==========================================================================
+  # Metric Tensor Definition
+  # ==========================================================================
+
+  - markdown: |
+      ## The Schwarzschild Metric
+      
+      In Schwarzschild coordinates, the line element is:
+      
+      $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2 dt^2 
+             + \left(1 - \frac{r_s}{r}\right)^{-1} dr^2 
+             + r^2 d\theta^2 + r^2\sin^2\theta \, d\phi^2$$
+    id: metric-intro
+
+  - tensor: |
+      # Schwarzschild metric tensor (covariant form)
+      # Coordinates: x^μ = (t, r, θ, φ)
+      
+      # Define the metric function
+      f(r) = 1 - r_s/r = 1 - 2GM/(c²r)
+      
+      # Metric components g_μν
+      g_{tt} = -f(r) · c²
+      g_{rr} = 1/f(r)
+      g_{θθ} = r²
+      g_{φφ} = r² sin²(θ)
+      
+      # Matrix form
+      g_{μν} = diag(-f·c², 1/f, r², r²sin²θ)
+      
+      # Inverse metric g^μν
+      g^{μν} = diag(-1/(f·c²), f, 1/r², 1/(r²sin²θ))
+    id: metric-tensor
+    notation: einstein
+    metadata:
+      verify: true
+
+  # ==========================================================================
+  # Christoffel Symbols
+  # ==========================================================================
+
+  - markdown: |
+      ## Christoffel Symbols
+      
+      The Christoffel symbols of the second kind are computed from the metric:
+      
+      $$\Gamma^\alpha_{\beta\gamma} = \frac{1}{2}g^{\alpha\delta}
+        \left(\partial_\beta g_{\delta\gamma} + \partial_\gamma g_{\beta\delta} 
+        - \partial_\delta g_{\beta\gamma}\right)$$
+    id: christoffel-intro
+
+  - code: |
+      import { Tensor, Metric, ChristoffelSymbols } from '@mathts/tensor';
+      import { symbolic, simplify, diff } from '@mathts/symbolic';
+      import { G, c, M } from '#constants';
+      
+      // Symbolic coordinates
+      const [t, r, theta, phi] = symbolic.coords('t', 'r', 'θ', 'φ');
+      const rs = symbolic('r_s');  // Schwarzschild radius
+      
+      // Metric function
+      const f = symbolic.expr('1 - r_s/r');
+      
+      // Build metric tensor
+      const g = Metric.fromDiagonal([
+        f.neg().mul(c.pow(2)),           // g_tt
+        f.pow(-1),                        // g_rr  
+        r.pow(2),                         // g_θθ
+        r.pow(2).mul(symbolic('sin(θ)').pow(2))  // g_φφ
+      ], { 
+        coords: [t, r, theta, phi],
+        signature: [-1, 1, 1, 1]
+      });
+      
+      // Compute Christoffel symbols
+      const christoffel = ChristoffelSymbols.fromMetric(g);
+      
+      // Display non-zero components
+      console.log('Non-zero Christoffel symbols:');
+      for (const [indices, value] of christoffel.nonZero()) {
+        console.log(`  Γ^${indices[0]}_{${indices[1]}${indices[2]}} = ${value.simplify()}`);
+      }
+      
+      export { g, christoffel, f, rs };
+    id: christoffel-compute
+    language: typescript
+    depends_on: [constants]
+
+  # ==========================================================================
+  # Geodesic Equations
+  # ==========================================================================
+
+  - equation: |
+      \frac{d^2 x^\mu}{d\tau^2} + \Gamma^\mu_{\alpha\beta} 
+      \frac{dx^\alpha}{d\tau} \frac{dx^\beta}{d\tau} = 0
+    id: geodesic-equation
+    format: latex
+    label: eq:geodesic
+    numbered: true
+
+  - markdown: |
+      ## Effective Potential
+      
+      For equatorial motion ($\theta = \pi/2$), the geodesic equations reduce 
+      to an effective 1D problem with potential:
+      
+      $$V_{eff}(r) = -\frac{GM}{r} + \frac{L^2}{2r^2} - \frac{GML^2}{c^2 r^3}$$
+      
+      The last term is the relativistic correction absent in Newtonian gravity.
+    id: effective-potential-intro
+
+  - code: |
+      import { symbolic, diff, solve } from '@mathts/symbolic';
+      import { G, c, M, E, L } from '#constants';
+      
+      const r = symbolic('r');
+      
+      // Effective potential
+      const V_eff = symbolic.expr(`
+        -G*M/r + L^2/(2*r^2) - G*M*L^2/(c^2 * r^3)
+      `).substitute({ G, M, L, c });
+      
+      // Find turning points (where E = V_eff)
+      const turningPoints = solve(V_eff.sub(E), r);
+      
+      console.log('Effective potential:', V_eff.simplify().toLaTeX());
+      console.log('Turning points:', turningPoints);
+      
+      // Orbital types based on energy
+      const V_max = V_eff.max();  // Maximum of effective potential
+      const orbitType = E < V_max ? 'bound' : (E === 0 ? 'parabolic' : 'unbound');
+      
+      console.log('Orbit type:', orbitType);
+      
+      export { V_eff, turningPoints, orbitType };
+    id: effective-potential
+    language: typescript
+    depends_on: [constants]
+
+  # ==========================================================================
+  # Numerical Integration
+  # ==========================================================================
+
+  - code: |
+      import { Matrix, integrate } from '@mathts/core';
+      import { christoffel } from '#christoffel-compute';
+      import { r_init, E, L } from '#constants';
+      
+      // Initial conditions (equatorial plane)
+      const x0 = [0, r_init, Math.PI / 2, 0];  // t, r, θ, φ
+      
+      // Initial 4-velocity (normalized)
+      const u0 = computeInitialVelocity(E, L, r_init);
+      
+      // Geodesic equation: d²x^μ/dτ² = -Γ^μ_αβ dx^α/dτ dx^β/dτ
+      function geodesicODE(tau: number, state: number[]): number[] {
+        const [x, u] = [state.slice(0, 4), state.slice(4, 8)];
+        
+        // Compute acceleration from Christoffel symbols
+        const a = [0, 0, 0, 0];
+        for (let mu = 0; mu < 4; mu++) {
+          for (let alpha = 0; alpha < 4; alpha++) {
+            for (let beta = 0; beta < 4; beta++) {
+              const gamma = christoffel.evaluate(mu, alpha, beta, x);
+              a[mu] -= gamma * u[alpha] * u[beta];
+            }
+          }
+        }
+        
+        return [...u, ...a];  // [dx/dτ, du/dτ]
+      }
+      
+      // Integrate geodesic
+      const result = integrate.rk45(geodesicODE, [...x0, ...u0], {
+        tSpan: [0, 100],
+        dt: 0.01,
+        adaptive: true
+      });
+      
+      console.log(`Integrated ${result.steps} steps`);
+      console.log(`Final position: r = ${result.y[result.steps - 1][1].toFixed(2)}`);
+      
+      export { result as geodesic };
+      
+      // Helper function
+      function computeInitialVelocity(E: number, L: number, r: number): number[] {
+        // From conservation laws for Schwarzschild geodesics
+        const f = 1 - 2 / r;  // In units where rs = 2
+        const ut = E / f;
+        const uphi = L / (r * r);
+        const ur2 = E * E - f * (1 + L * L / (r * r));
+        const ur = Math.sqrt(Math.max(0, ur2));
+        return [ut, -ur, 0, uphi];  // Ingoing orbit
+      }
+    id: integrate-geodesic
+    language: typescript
+    depends_on: [christoffel-compute, constants]
+    metadata:
+      execution_count: 1
+
+  # ==========================================================================
+  # 3D Visualization
+  # ==========================================================================
+
+  - visualization: |
+      import { Scene, Mesh, Line3D, ColorMap } from '@mathts/viz';
+      import { geodesic } from '#integrate-geodesic';
+      
+      const scene = new Scene({
+        renderer: 'webgpu',
+        width: 800,
+        height: 600,
+        camera: { position: [0, 20, 30], target: [0, 0, 0] }
+      });
+      
+      // Event horizon (Schwarzschild sphere)
+      const eventHorizon = Mesh.sphere({
+        radius: 2,  // r_s = 2 in our units
+        color: 0x000000,
+        opacity: 0.9
+      });
+      scene.add(eventHorizon);
+      
+      // Photon sphere (r = 1.5 r_s)
+      const photonSphere = Mesh.sphere({
+        radius: 3,
+        color: 0xffff00,
+        wireframe: true,
+        opacity: 0.3
+      });
+      scene.add(photonSphere);
+      
+      // Convert geodesic to Cartesian for plotting
+      const trajectory = geodesic.y.map(state => {
+        const [t, r, theta, phi] = state;
+        return [
+          r * Math.sin(theta) * Math.cos(phi),
+          r * Math.sin(theta) * Math.sin(phi),
+          r * Math.cos(theta)
+        ];
+      });
+      
+      // Geodesic path
+      const geodesicPath = Line3D.fromPoints(trajectory, {
+        color: ColorMap.viridis,
+        colorBy: 'index',  // Color by proper time
+        lineWidth: 2
+      });
+      scene.add(geodesicPath);
+      
+      // Add coordinate grid
+      scene.addGrid({ size: 30, divisions: 15, color: 0x444444 });
+      
+      // Labels
+      scene.addLabel('Event Horizon (r = 2M)', [3, 0, 0]);
+      scene.addLabel('Photon Sphere (r = 3M)', [4.5, 0, 0]);
+      
+      // Render with orbit controls
+      scene.setControls('orbit');
+      scene.render();
+    id: viz-geodesic
+    renderer: threejs
+    metadata:
+      interactive: true
+      export_formats: [png, gltf]
+
+  # ==========================================================================
+  # Verification Tests
+  # ==========================================================================
+
+  - test: |
+      import { assert, almostEqual } from '@mathts/test';
+      import { g, christoffel } from '#christoffel-compute';
+      import { geodesic } from '#integrate-geodesic';
+      
+      // Test 1: Metric signature
+      assert.deepEqual(g.signature(), [-1, 1, 1, 1], 'Metric should have signature (-,+,+,+)');
+      
+      // Test 2: Metric determinant
+      const detG = g.determinant();
+      assert(detG.isNegative(), 'det(g) should be negative for Lorentzian metric');
+      
+      // Test 3: Christoffel symmetry Γ^α_βγ = Γ^α_γβ
+      for (const [indices, value] of christoffel.entries()) {
+        const [a, b, c] = indices;
+        const symmetric = christoffel.get(a, c, b);
+        almostEqual(value, symmetric, 1e-12, `Γ^${a}_{${b}${c}} should equal Γ^${a}_{${c}${b}}`);
+      }
+      
+      // Test 4: Geodesic stays outside event horizon
+      const minRadius = Math.min(...geodesic.y.map(s => s[1]));
+      assert(minRadius > 2, `Geodesic should stay outside event horizon (min r = ${minRadius})`);
+      
+      // Test 5: Energy conservation (E = const along geodesic)
+      const energies = geodesic.y.map(s => computeEnergy(s));
+      const energyVariation = Math.max(...energies) - Math.min(...energies);
+      almostEqual(energyVariation, 0, 1e-6, 'Energy should be conserved');
+      
+      console.log('All tests passed!');
+      
+      function computeEnergy(state: number[]): number {
+        const [t, r, theta, phi, ut, ur, utheta, uphi] = [...state.slice(0, 4), ...state.slice(4)];
+        const f = 1 - 2 / r;
+        return f * ut;  // E = -g_tt u^t for timelike geodesics
+      }
+    id: verify-geodesic
+    metadata:
+      critical: true
+      timeout: 10000
+
+  # ==========================================================================
+  # Export to Publication
+  # ==========================================================================
+
+  - export: |
+      // Export figures for publication
+      exportFigure('#viz-geodesic', {
+        format: 'pdf',
+        width: '6in',
+        height: '4.5in',
+        dpi: 300,
+        caption: 'Geodesic motion in Schwarzschild spacetime. The black sphere represents the event horizon at $r = 2M$, the yellow wireframe shows the photon sphere at $r = 3M$. The colored trajectory shows the path of a test particle with $E = 0.95$ and $L = 4M$.',
+        label: 'fig:schwarzschild-geodesic'
+      });
+      
+      // Export equations to LaTeX
+      exportEquations([
+        '#geodesic-equation',
+        '#metric-tensor',
+        '#christoffel-compute'
+      ], {
+        format: 'latex',
+        style: 'amsmath',
+        output: './schwarzschild_equations.tex'
+      });
+      
+      // Export data
+      exportData('#geodesic', {
+        format: 'csv',
+        output: './geodesic_trajectory.csv',
+        columns: ['tau', 't', 'r', 'theta', 'phi']
+      });
+    id: export-publication
+    metadata:
+      on_save: false
