@@ -8,11 +8,7 @@
       "@mathts/workbook": ["packages/workbook/src"]
     }
   },
-  "references": [
-    { "path": "packages/core" },
-    { "path": "packages/matrix" },
-    { "path": "packages/workbook" }
-  ],
+  "references": [],
   "include": [],
   "exclude": ["node_modules", "dist", "**/dist"]
 }
