@@ -1,0 +1,58 @@
+{
+  "name": "@mathts/wasm",
+  "version": "0.1.0",
+  "description": "MathTS WebAssembly module - high-performance numerical computing",
+  "type": "module",
+  "main": "build/release.js",
+  "types": "build/release.d.ts",
+  "exports": {
+    ".": {
+      "import": "./build/release.js",
+      "types": "./build/release.d.ts"
+    },
+    "./wasm": {
+      "import": "./build/mathts.wasm"
+    },
+    "./debug": {
+      "import": "./build/mathts-debug.wasm"
+    }
+  },
+  "files": [
+    "build/",
+    "src/bindings/"
+  ],
+  "scripts": {
+    "asbuild:debug": "asc src/index.ts --target debug",
+    "asbuild:release": "asc src/index.ts --target release",
+    "asbuild": "npm run asbuild:debug && npm run asbuild:release",
+    "build:bindings": "tsc -p tsconfig.bindings.json",
+    "build": "npm run asbuild && npm run build:bindings",
+    "clean": "rm -rf build/",
+    "test": "node --experimental-wasm-simd tests/run.js",
+    "benchmark": "node --experimental-wasm-simd benchmarks/run.js"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.27.27",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "math",
+    "wasm",
+    "webassembly",
+    "assemblyscript",
+    "numerical",
+    "matrix",
+    "linear-algebra",
+    "simd"
+  ],
+  "author": "MathTS Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielsimonjr/MathTS.git",
+    "directory": "assembly"
+  },
+  "bugs": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues"
+  }
+}

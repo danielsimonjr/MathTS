@@ -1,0 +1,19 @@
+# Build outputs
+build/*.wasm
+build/*.wat
+build/*.js
+build/*.d.ts
+build/*.map
+build/bindings/
+
+# Dependencies
+node_modules/
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

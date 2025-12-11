@@ -14,15 +14,18 @@
     "functions",
     "expression",
     "parallel",
-    "workbook"
+    "workbook",
+    "assembly"
   ],
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
     "build": "turbo run build",
+    "build:wasm": "npm run asbuild -w @mathts/wasm",
     "dev": "turbo run dev",
     "test": "turbo run test",
+    "test:wasm": "npm run test -w @mathts/wasm",
     "test:coverage": "turbo run test:coverage",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
