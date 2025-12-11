@@ -510,7 +510,9 @@ function quantileChunk(
 // Register Worker Functions
 // =============================================================================
 
-worker({
+// Type assertion needed as workerpool expects generic function signatures
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const workerMethods: Record<string, (...args: any[]) => any> = {
   // Array reductions
   sumChunk,
   dotChunk,
@@ -543,4 +545,6 @@ worker({
   // Statistics
   histogramChunk,
   quantileChunk,
-});
+};
+
+worker(workerMethods);

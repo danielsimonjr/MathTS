@@ -1,24 +1,42 @@
 /**
- * Type declarations for workerpool
+ * Type declarations for workerpool (danielsimonjr fork)
+ * Re-exports types from the TypeScript source
  */
 
 declare module 'workerpool' {
+  export type WorkerType = 'auto' | 'web' | 'process' | 'thread';
+  export type QueueStrategy = 'fifo' | 'lifo';
+
   export interface PoolOptions {
     minWorkers?: number | 'max';
     maxWorkers?: number;
-    workerType?: 'auto' | 'web' | 'thread';
+    maxQueueSize?: number;
+    workerType?: WorkerType;
+    queueStrategy?: QueueStrategy;
+    script?: string;
     workerTerminateTimeout?: number;
     forkArgs?: string[];
     forkOpts?: object;
-    onCreateWorker?: () => void;
-    onTerminateWorker?: () => void;
+    workerOpts?: object;
+    workerThreadOpts?: object;
     emitStdStreams?: boolean;
+    onCreateWorker?: (arg: WorkerArg) => WorkerArg | void;
+    onTerminateWorker?: (arg: WorkerArg) => void;
+    debugPortStart?: number;
   }
 
-  export interface ExecOptions {
+  export interface WorkerArg {
+    forkArgs?: string[];
+    forkOpts?: object;
+    workerOpts?: object;
+    workerThreadOpts?: object;
+    script?: string;
+  }
+
+  export interface ExecOptions<T = unknown> {
     on?: (payload: unknown) => void;
     transfer?: Transferable[];
-    timeout?: number;
+    metadata?: T;
   }
 
   export interface PoolStats {
@@ -29,22 +47,39 @@ declare module 'workerpool' {
     activeTasks: number;
   }
 
+  export interface WorkerpoolPromise<T, E = unknown> extends Promise<T> {
+    readonly resolved: boolean;
+    readonly rejected: boolean;
+    readonly pending: boolean;
+    cancel(): this;
+    timeout(delay: number): this;
+    always<TResult>(fn: () => TResult | PromiseLike<TResult>): WorkerpoolPromise<TResult, unknown>;
+  }
+
   export interface Pool {
-    exec<T = unknown>(method: string, params?: unknown[], options?: ExecOptions): Promise<T>;
-    proxy(): Promise<Record<string, (...args: unknown[]) => Promise<unknown>>>;
+    exec<T = unknown>(
+      method: string | ((...args: unknown[]) => T),
+      params?: unknown[],
+      options?: ExecOptions
+    ): WorkerpoolPromise<T, unknown>;
+    proxy<T extends Record<string, (...args: unknown[]) => unknown>>(): Promise<{
+      [K in keyof T]: (...args: Parameters<T[K]>) => WorkerpoolPromise<ReturnType<T[K]>>;
+    }>;
     stats(): PoolStats;
     terminate(force?: boolean, timeout?: number): Promise<void>;
   }
 
   export function pool(script?: string | null, options?: PoolOptions): Pool;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export function worker(methods: Record<string, (...args: any[]) => any>): void;
+  export function worker(
+    methods: Record<string, (...args: unknown[]) => unknown>,
+    options?: { onTerminate?: (code: number | undefined) => void | PromiseLike<void> }
+  ): void;
 
   export class Transfer {
     constructor(value: unknown, transferList?: Transferable[]);
-    value: unknown;
-    transferList: Transferable[];
+    message: unknown;
+    transfer: Transferable[];
   }
 
   export function isMainThread(): boolean;

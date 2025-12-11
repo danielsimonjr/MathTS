@@ -34,7 +34,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "workerpool": "^9.0.0"
+    "workerpool": "github:danielsimonjr/workerpool"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

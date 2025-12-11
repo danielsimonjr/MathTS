@@ -86,6 +86,8 @@ export interface TaskOptions extends ExecOptions {
   forceSequential?: boolean;
   /** Custom chunk size for this task */
   chunkSize?: number;
+  /** Task timeout in milliseconds */
+  taskTimeout?: number;
 }
 
 // =============================================================================
@@ -225,11 +227,12 @@ export class MathWorkerPool {
     }
 
     const execOptions: ExecOptions = {
-      ...options,
-      timeout: options?.timeout ?? this.config.taskTimeout,
+      on: options?.on,
+      transfer: options?.transfer,
     };
 
-    return this.pool.exec(method, params, execOptions) as Promise<T>;
+    const timeout = options?.taskTimeout ?? this.config.taskTimeout;
+    return this.pool.exec<T>(method, params, execOptions).timeout(timeout) as Promise<T>;
   }
 
   /**
@@ -244,10 +247,9 @@ export class MathWorkerPool {
       throw new Error('WorkerPool not initialized. Call initialize() first.');
     }
 
+    const timeout = options?.taskTimeout ?? this.config.taskTimeout;
     // Use workerpool's ability to execute functions directly
-    return this.pool.exec(fn as unknown as string, [arg], {
-      timeout: options?.timeout ?? this.config.taskTimeout,
-    }) as Promise<R>;
+    return this.pool.exec<R>(fn as unknown as string, [arg]).timeout(timeout) as Promise<R>;
   }
 
   // =========================================================================
