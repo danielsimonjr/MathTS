@@ -117,6 +117,81 @@ export type {
 } from './factory/index.js';
 
 // =============================================================================
+// Parallel processing (parallel-first approach)
+// =============================================================================
+
+export {
+  // Configuration
+  DEFAULT_PARALLEL_CONFIG,
+  getParallelConfig,
+  setParallelConfig,
+  resetParallelConfig,
+
+  // Core utilities
+  getCpuCount,
+  shouldParallelize,
+  chunkArray,
+  chunkFloat64Array,
+
+  // Parallel array operations
+  parallelMap,
+  parallelReduce,
+  parallelFilter,
+  parallelFind,
+  parallelEvery,
+  parallelSome,
+
+  // Parallel numeric operations
+  parallelSum,
+  parallelProduct,
+  parallelMinMax,
+  parallelMean,
+  parallelVariance,
+  parallelStdDev,
+
+  // Execution utilities
+  parallelAll,
+  parallelLimit,
+  parallelRace,
+  parallelBatch,
+
+  // Iterators
+  parallelIterator,
+  asyncParallelIterator,
+} from './parallel/index.js';
+
+export type {
+  ParallelConfig,
+  ParallelResult,
+  ParallelOptions,
+} from './parallel/index.js';
+
+// Batch numeric type operations
+export {
+  // Complex batch operations
+  batchComplexAdd,
+  batchComplexSubtract,
+  batchComplexMultiply,
+  batchComplexDivide,
+  batchComplexSum,
+  batchComplexMap,
+
+  // Fraction batch operations
+  batchFractionAdd,
+  batchFractionMultiply,
+  batchFractionSum,
+
+  // BigNumber batch operations
+  batchBigNumberAdd,
+  batchBigNumberMultiply,
+  batchBigNumberSum,
+
+  // Generic batch operations
+  batchBinaryOp,
+  batchReduce,
+} from './parallel/numeric-batch.js';
+
+// =============================================================================
 // Version
 // =============================================================================
 
