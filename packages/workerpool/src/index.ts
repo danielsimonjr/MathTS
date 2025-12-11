@@ -765,6 +765,646 @@ export class MathWorkerPool {
   }
 
   // =========================================================================
+  // Statistical Operations
+  // =========================================================================
+
+  /**
+   * Find min and max values in parallel
+   */
+  async minMax(
+    data: Float64Array,
+    options?: TaskOptions
+  ): Promise<ParallelResult<{ min: number; max: number; minIdx: number; maxIdx: number }>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(data.length, options)) {
+      let min = data[0];
+      let max = data[0];
+      let minIdx = 0;
+      let maxIdx = 0;
+      for (let i = 1; i < data.length; i++) {
+        if (data[i] < min) {
+          min = data[i];
+          minIdx = i;
+        }
+        if (data[i] > max) {
+          max = data[i];
+          maxIdx = i;
+        }
+      }
+      return {
+        result: { min, max, minIdx, maxIdx },
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const stats = this.stats();
+
+    const results = await Promise.all(
+      chunks.map((chunk, idx) =>
+        this.exec<{ min: number; max: number; minIdx: number; maxIdx: number }>(
+          'minMaxChunk',
+          [chunk.buffer, 0, chunk.length]
+        ).then(result => ({
+          ...result,
+          minIdx: result.minIdx + idx * (options?.chunkSize ?? this.config.chunkSize),
+          maxIdx: result.maxIdx + idx * (options?.chunkSize ?? this.config.chunkSize),
+        }))
+      )
+    );
+
+    // Reduce to find global min/max
+    let min = results[0].min;
+    let max = results[0].max;
+    let minIdx = results[0].minIdx;
+    let maxIdx = results[0].maxIdx;
+    for (let i = 1; i < results.length; i++) {
+      if (results[i].min < min) {
+        min = results[i].min;
+        minIdx = results[i].minIdx;
+      }
+      if (results[i].max > max) {
+        max = results[i].max;
+        maxIdx = results[i].maxIdx;
+      }
+    }
+
+    return {
+      result: { min, max, minIdx, maxIdx },
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * Compute variance in parallel using Welford's algorithm
+   */
+  async variance(
+    data: Float64Array,
+    options?: TaskOptions
+  ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(data.length, options)) {
+      let mean = 0;
+      let m2 = 0;
+      for (let i = 0; i < data.length; i++) {
+        const delta = data[i] - mean;
+        mean += delta / (i + 1);
+        const delta2 = data[i] - mean;
+        m2 += delta * delta2;
+      }
+      const variance = m2 / data.length;
+      return {
+        result: { mean, variance, std: Math.sqrt(variance) },
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const stats = this.stats();
+
+    const results = await Promise.all(
+      chunks.map((chunk) =>
+        this.exec<{ count: number; mean: number; m2: number }>(
+          'varianceChunk',
+          [chunk.buffer, 0, chunk.length]
+        )
+      )
+    );
+
+    // Combine partial results using parallel algorithm
+    let totalCount = results[0].count;
+    let totalMean = results[0].mean;
+    let totalM2 = results[0].m2;
+    for (let i = 1; i < results.length; i++) {
+      const { count, mean, m2 } = results[i];
+      const delta = mean - totalMean;
+      const newCount = totalCount + count;
+      totalMean = (totalMean * totalCount + mean * count) / newCount;
+      totalM2 = totalM2 + m2 + delta * delta * (totalCount * count) / newCount;
+      totalCount = newCount;
+    }
+
+    const variance = totalM2 / totalCount;
+
+    return {
+      result: { mean: totalMean, variance, std: Math.sqrt(variance) },
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * Compute norm (Euclidean length) in parallel
+   */
+  async norm(
+    data: Float64Array,
+    options?: TaskOptions
+  ): Promise<ParallelResult<number>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(data.length, options)) {
+      let sumSq = 0;
+      for (let i = 0; i < data.length; i++) {
+        sumSq += data[i] * data[i];
+      }
+      return {
+        result: Math.sqrt(sumSq),
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const stats = this.stats();
+
+    const partialNorms = await Promise.all(
+      chunks.map((chunk) =>
+        this.exec<number>('normChunk', [chunk.buffer, 0, chunk.length])
+      )
+    );
+
+    const sumSq = partialNorms.reduce((a, b) => a + b, 0);
+
+    return {
+      result: Math.sqrt(sumSq),
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * Compute Euclidean distance in parallel
+   */
+  async distance(
+    a: Float64Array,
+    b: Float64Array,
+    options?: TaskOptions
+  ): Promise<ParallelResult<number>> {
+    if (a.length !== b.length) {
+      throw new Error(`Vector lengths must match: ${a.length} vs ${b.length}`);
+    }
+
+    const start = performance.now();
+
+    if (!this.shouldParallelize(a.length, options)) {
+      let sumSq = 0;
+      for (let i = 0; i < a.length; i++) {
+        const diff = a[i] - b[i];
+        sumSq += diff * diff;
+      }
+      return {
+        result: Math.sqrt(sumSq),
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunkPairs = this.chunkPairFloat64Array(a, b, options?.chunkSize);
+    const stats = this.stats();
+
+    const partialDistances = await Promise.all(
+      chunkPairs.map(([chunkA, chunkB]) =>
+        this.exec<number>('distanceChunk', [
+          chunkA.buffer,
+          chunkB.buffer,
+          0,
+          chunkA.length,
+        ])
+      )
+    );
+
+    const sumSq = partialDistances.reduce((acc, val) => acc + val, 0);
+
+    return {
+      result: Math.sqrt(sumSq),
+      duration: performance.now() - start,
+      chunks: chunkPairs.length,
+      parallelized: true,
+      workersUsed: Math.min(chunkPairs.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * Apply unary function in parallel
+   */
+  async unary(
+    data: Float64Array,
+    fn: 'abs' | 'sqrt' | 'exp' | 'log' | 'sin' | 'cos' | 'tan' | 'negate' | 'square',
+    options?: TaskOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(data.length, options)) {
+      const result = new Float64Array(data.length);
+      for (let i = 0; i < data.length; i++) {
+        switch (fn) {
+          case 'abs': result[i] = Math.abs(data[i]); break;
+          case 'sqrt': result[i] = Math.sqrt(data[i]); break;
+          case 'exp': result[i] = Math.exp(data[i]); break;
+          case 'log': result[i] = Math.log(data[i]); break;
+          case 'sin': result[i] = Math.sin(data[i]); break;
+          case 'cos': result[i] = Math.cos(data[i]); break;
+          case 'tan': result[i] = Math.tan(data[i]); break;
+          case 'negate': result[i] = -data[i]; break;
+          case 'square': result[i] = data[i] * data[i]; break;
+        }
+      }
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const stats = this.stats();
+
+    const results = await Promise.all(
+      chunks.map((chunk) =>
+        this.exec<ArrayBuffer>('unaryChunk', [chunk.buffer, 0, chunk.length, fn])
+      )
+    );
+
+    const combined = this.combineArrayBuffers(results, data.length);
+
+    return {
+      result: combined,
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * Compute histogram in parallel
+   */
+  async histogram(
+    data: Float64Array,
+    bins: number,
+    min?: number,
+    max?: number,
+    options?: TaskOptions
+  ): Promise<ParallelResult<number[]>> {
+    const start = performance.now();
+
+    // Find min/max if not provided
+    let actualMin = min;
+    let actualMax = max;
+    if (actualMin === undefined || actualMax === undefined) {
+      const minMaxResult = await this.minMax(data, options);
+      actualMin = actualMin ?? minMaxResult.result.min;
+      actualMax = actualMax ?? minMaxResult.result.max;
+    }
+
+    if (!this.shouldParallelize(data.length, options)) {
+      const histogram = new Array(bins).fill(0);
+      const binWidth = (actualMax - actualMin) / bins;
+      for (let i = 0; i < data.length; i++) {
+        const val = data[i];
+        if (val >= actualMin && val <= actualMax) {
+          const binIdx = Math.min(Math.floor((val - actualMin) / binWidth), bins - 1);
+          histogram[binIdx]++;
+        }
+      }
+      return {
+        result: histogram,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const statsInfo = this.stats();
+
+    const results = await Promise.all(
+      chunks.map((chunk) =>
+        this.exec<number[]>('histogramChunk', [
+          chunk.buffer,
+          0,
+          chunk.length,
+          actualMin,
+          actualMax,
+          bins,
+        ])
+      )
+    );
+
+    // Combine histograms
+    const histogram = new Array(bins).fill(0);
+    for (const partial of results) {
+      for (let i = 0; i < bins; i++) {
+        histogram[i] += partial[i];
+      }
+    }
+
+    return {
+      result: histogram,
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, statsInfo.totalWorkers),
+    };
+  }
+
+  /**
+   * Matrix-vector multiplication in parallel
+   */
+  async matvec(
+    matrix: Float64Array,
+    rows: number,
+    cols: number,
+    vector: Float64Array,
+    options?: TaskOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    if (cols !== vector.length) {
+      throw new Error(`Matrix columns (${cols}) must match vector length (${vector.length})`);
+    }
+
+    const start = performance.now();
+
+    if (!this.shouldParallelize(rows * cols, options)) {
+      const result = new Float64Array(rows);
+      for (let i = 0; i < rows; i++) {
+        let sum = 0;
+        for (let j = 0; j < cols; j++) {
+          sum += matrix[i * cols + j] * vector[j];
+        }
+        result[i] = sum;
+      }
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const stats = this.stats();
+    const numWorkers = Math.max(1, stats.totalWorkers);
+    const rowsPerWorker = Math.ceil(rows / numWorkers);
+    const tasks: Promise<ArrayBuffer>[] = [];
+
+    for (let w = 0; w < numWorkers; w++) {
+      const rowStart = w * rowsPerWorker;
+      const rowEnd = Math.min(rowStart + rowsPerWorker, rows);
+      if (rowStart >= rows) break;
+
+      tasks.push(
+        this.exec<ArrayBuffer>('matvecRows', [
+          matrix.buffer,
+          vector.buffer,
+          rows,
+          cols,
+          rowStart,
+          rowEnd,
+        ])
+      );
+    }
+
+    const results = await Promise.all(tasks);
+    const result = new Float64Array(rows);
+    let offset = 0;
+    for (const buf of results) {
+      const chunk = new Float64Array(buf);
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: tasks.length,
+      parallelized: true,
+      workersUsed: tasks.length,
+    };
+  }
+
+  /**
+   * Outer product in parallel
+   */
+  async outer(
+    a: Float64Array,
+    b: Float64Array,
+    options?: TaskOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    const resultSize = a.length * b.length;
+    const start = performance.now();
+
+    if (!this.shouldParallelize(resultSize, options)) {
+      const result = new Float64Array(resultSize);
+      for (let i = 0; i < a.length; i++) {
+        for (let j = 0; j < b.length; j++) {
+          result[i * b.length + j] = a[i] * b[j];
+        }
+      }
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const stats = this.stats();
+    const numWorkers = Math.max(1, stats.totalWorkers);
+    const rowsPerWorker = Math.ceil(a.length / numWorkers);
+    const tasks: Promise<ArrayBuffer>[] = [];
+
+    for (let w = 0; w < numWorkers; w++) {
+      const rowStart = w * rowsPerWorker;
+      const rowEnd = Math.min(rowStart + rowsPerWorker, a.length);
+      if (rowStart >= a.length) break;
+
+      tasks.push(
+        this.exec<ArrayBuffer>('outerProductRows', [
+          a.buffer,
+          b.buffer,
+          a.length,
+          b.length,
+          rowStart,
+          rowEnd,
+        ])
+      );
+    }
+
+    const results = await Promise.all(tasks);
+    const result = new Float64Array(resultSize);
+    let offset = 0;
+    for (const buf of results) {
+      const chunk = new Float64Array(buf);
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: tasks.length,
+      parallelized: true,
+      workersUsed: tasks.length,
+    };
+  }
+
+  /**
+   * Find first element matching predicate
+   */
+  async find<T>(
+    data: T[],
+    predicate: (item: T) => boolean,
+    options?: TaskOptions
+  ): Promise<ParallelResult<{ found: boolean; value?: T; index?: number }>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(data.length, options)) {
+      const index = data.findIndex(predicate);
+      return {
+        result: index === -1
+          ? { found: false }
+          : { found: true, value: data[index], index },
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunkSize = options?.chunkSize ?? this.config.chunkSize;
+    const chunks = this.chunkArray(data, chunkSize);
+    const stats = this.stats();
+
+    // Search chunks in parallel
+    const results = await Promise.all(
+      chunks.map((chunk, idx) =>
+        this.exec<{ found: boolean; value?: T; index?: number }>(
+          'findChunk',
+          [chunk, predicate.toString(), idx * chunkSize]
+        )
+      )
+    );
+
+    // Find the first match across all chunks
+    for (const result of results) {
+      if (result.found) {
+        return {
+          result,
+          duration: performance.now() - start,
+          chunks: chunks.length,
+          parallelized: true,
+          workersUsed: Math.min(chunks.length, stats.totalWorkers),
+        };
+      }
+    }
+
+    return {
+      result: { found: false },
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * Sort array in parallel (merge sort approach)
+   */
+  async sort<T>(
+    data: T[],
+    compare?: (a: T, b: T) => number,
+    options?: TaskOptions
+  ): Promise<ParallelResult<T[]>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(data.length, options)) {
+      const result = [...data].sort(compare);
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunkSize = options?.chunkSize ?? this.config.chunkSize;
+    const chunks = this.chunkArray(data, chunkSize);
+    const stats = this.stats();
+
+    // Sort each chunk in parallel
+    const sortedChunks = await Promise.all(
+      chunks.map((chunk) =>
+        this.exec<T[]>('sortChunk', [chunk, compare?.toString()])
+      )
+    );
+
+    // Merge sorted chunks (k-way merge)
+    const result = this.kWayMerge(sortedChunks, compare);
+
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * K-way merge of sorted arrays
+   */
+  private kWayMerge<T>(arrays: T[][], compare?: (a: T, b: T) => number): T[] {
+    const result: T[] = [];
+    const indices = new Array(arrays.length).fill(0);
+    const compareFn = compare ?? ((a: any, b: any) => (a < b ? -1 : a > b ? 1 : 0));
+
+    while (true) {
+      let minIdx = -1;
+      let minVal: T | undefined;
+
+      for (let i = 0; i < arrays.length; i++) {
+        if (indices[i] < arrays[i].length) {
+          const val = arrays[i][indices[i]];
+          if (minIdx === -1 || compareFn(val, minVal!) < 0) {
+            minIdx = i;
+            minVal = val;
+          }
+        }
+      }
+
+      if (minIdx === -1) break;
+      result.push(minVal!);
+      indices[minIdx]++;
+    }
+
+    return result;
+  }
+
+  // =========================================================================
   // Generic Parallel Operations
   // =========================================================================
 
