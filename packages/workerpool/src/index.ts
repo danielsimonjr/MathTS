@@ -155,7 +155,7 @@ export class MathWorkerPool {
     if (this.config.workerScript) {
       this.pool = createPool(this.config.workerScript, options);
     } else {
-      this.pool = createPool(options);
+      this.pool = createPool(null, options);
     }
 
     this.initialized = true;

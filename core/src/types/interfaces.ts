@@ -22,7 +22,7 @@ export interface Scalar extends MathTSValue {
   multiply(other: Scalar): Scalar;
   divide(other: Scalar): Scalar;
   negate(): Scalar;
-  abs(): Scalar;
+  abs(): Scalar | number;  // Complex.abs() returns number (magnitude)
 }
 
 /**

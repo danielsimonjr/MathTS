@@ -1,7 +1,7 @@
 {
   "name": "@mathts/typed-function",
   "version": "0.1.0",
-  "description": "Type dispatch system for MathTS with runtime polymorphism",
+  "description": "Utility helpers for typed-function integration in MathTS",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -30,7 +30,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "typed-function": "^4.0.0"
+    "typed-function": "^4.2.1"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

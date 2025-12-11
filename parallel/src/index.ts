@@ -19,9 +19,24 @@ export type {
   ParallelResult,
 } from './ComputePool.js';
 
-// Re-export workerpool types for advanced usage
-export type {
-  PoolOptions,
-  ExecOptions,
-  PoolStats,
-} from 'workerpool';
+// Re-export workerpool types for advanced usage (locally defined to avoid type resolution issues)
+export interface PoolOptions {
+  minWorkers?: number | 'max';
+  maxWorkers?: number;
+  workerType?: 'auto' | 'web' | 'thread';
+  workerTerminateTimeout?: number;
+}
+
+export interface ExecOptions {
+  on?: (payload: unknown) => void;
+  transfer?: unknown[];
+  timeout?: number;
+}
+
+export interface PoolStats {
+  totalWorkers: number;
+  busyWorkers: number;
+  idleWorkers: number;
+  pendingTasks: number;
+  activeTasks: number;
+}

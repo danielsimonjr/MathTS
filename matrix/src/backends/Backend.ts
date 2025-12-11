@@ -116,9 +116,9 @@ export interface MatrixBackend {
   // =========================================================================
 
   /**
-   * Sum of all elements
+   * Sum of all elements (may be async for parallel backends)
    */
-  sum(a: DenseMatrix): number;
+  sum(a: DenseMatrix): number | Promise<number>;
 
   /**
    * Sum along an axis (0 = columns, 1 = rows)
@@ -131,9 +131,9 @@ export interface MatrixBackend {
   norm(a: DenseMatrix): number;
 
   /**
-   * Dot product of two vectors
+   * Dot product of two vectors (may be async for parallel backends)
    */
-  dot(a: DenseMatrix, b: DenseMatrix): number;
+  dot(a: DenseMatrix, b: DenseMatrix): number | Promise<number>;
 }
 
 /**

@@ -30,8 +30,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@mathts/core": "workspace:*",
-    "@mathts/parallel": "workspace:*"
+    "@mathts/core": "*",
+    "@mathts/parallel": "*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

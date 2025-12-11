@@ -8,7 +8,7 @@ export {
   createMathTSTyped,
   typed,
   create,
-  createTyped,
+  createTypedFunction,
   TypeRegistry,
 
   // Type definitions and conversions
