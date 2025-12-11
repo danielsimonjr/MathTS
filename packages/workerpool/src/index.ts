@@ -18,13 +18,84 @@ import {
   type PoolStats,
 } from 'workerpool';
 
+// Try to import WASM feature detection from workerpool/wasm subpath
+// These may not be available in all environments
+let _canUseWasm: (() => boolean) | undefined;
+let _canUseSharedMemory: (() => boolean) | undefined;
+
+// Dynamically import WASM utilities if available
+try {
+  // Use dynamic import to avoid TypeScript resolution issues
+  const wasmPath = 'workerpool/wasm';
+  import(/* @vite-ignore */ wasmPath).then((wasmModule) => {
+    _canUseWasm = wasmModule.canUseWasm;
+    _canUseSharedMemory = wasmModule.canUseSharedMemory;
+  }).catch(() => {
+    // WASM module not available, fallbacks will be used
+  });
+} catch {
+  // Import not available
+}
+
 // =============================================================================
-// WASM Support
+// Synchronous Feature Detection
 // =============================================================================
 
-// WASM module and feature detection (loaded dynamically)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let wasmModule: any = null;
+/**
+ * Check if WebAssembly is available (synchronous)
+ * Can be called before pool initialization for configuration decisions.
+ */
+export function canUseWasm(): boolean {
+  // Use workerpool's native sync detection if available
+  if (typeof _canUseWasm === 'function') {
+    return _canUseWasm();
+  }
+  // Fallback: check WebAssembly global
+  return typeof WebAssembly !== 'undefined';
+}
+
+/**
+ * Check if SharedArrayBuffer is available (synchronous)
+ * Required for shared memory workers.
+ */
+export function canUseSharedMemory(): boolean {
+  // Use workerpool's native sync detection if available
+  if (typeof _canUseSharedMemory === 'function') {
+    return _canUseSharedMemory();
+  }
+  // Fallback: check SharedArrayBuffer global
+  return typeof SharedArrayBuffer !== 'undefined';
+}
+
+// =============================================================================
+// Transfer Helpers
+// =============================================================================
+
+/**
+ * Mark a Float64Array for zero-copy transfer to worker
+ * Automatically handles Transferable marking.
+ *
+ * @param array - The Float64Array to transfer
+ * @returns Transfer-wrapped array
+ */
+export function transferFloat64(array: Float64Array): Transfer {
+  // Wrap with Transfer for zero-copy transfer
+  return new Transfer(array, [array.buffer]);
+}
+
+/**
+ * Mark an ArrayBuffer for zero-copy transfer to worker
+ *
+ * @param buffer - The ArrayBuffer to transfer
+ * @returns Transfer-wrapped buffer
+ */
+export function transferArrayBuffer(buffer: ArrayBuffer): Transfer {
+  return new Transfer(buffer, [buffer]);
+}
+
+// =============================================================================
+// WASM Support (Async)
+// =============================================================================
 
 /**
  * WASM feature status
@@ -49,37 +120,13 @@ let wasmFeatures: WasmFeatureStatus | null = null;
 export async function initWorkerWasm(): Promise<WasmFeatureStatus | null> {
   if (wasmFeatures !== null) return wasmFeatures;
 
-  try {
-    // Dynamic import for WASM module (may not exist in all workerpool builds)
-    // Use string variable to prevent TypeScript from type-checking the module path
-    const wasmPath = 'workerpool/wasm';
-    wasmModule = await import(/* @vite-ignore */ wasmPath).catch(() => null);
-
-    if (wasmModule && typeof wasmModule.detectWASMFeatures === 'function') {
-      const features = wasmModule.detectWASMFeatures();
-      wasmFeatures = {
-        hasWebAssembly: features.hasWebAssembly ?? false,
-        hasSharedArrayBuffer: features.hasSharedArrayBuffer ?? false,
-        hasAtomics: features.hasAtomics ?? false,
-        hasWASMThreads: features.hasWASMThreads ?? false,
-      };
-    } else {
-      wasmFeatures = {
-        hasWebAssembly: false,
-        hasSharedArrayBuffer: false,
-        hasAtomics: false,
-        hasWASMThreads: false,
-      };
-    }
-  } catch {
-    // WASM not available
-    wasmFeatures = {
-      hasWebAssembly: false,
-      hasSharedArrayBuffer: false,
-      hasAtomics: false,
-      hasWASMThreads: false,
-    };
-  }
+  // Use sync detection for initial values
+  wasmFeatures = {
+    hasWebAssembly: canUseWasm(),
+    hasSharedArrayBuffer: canUseSharedMemory(),
+    hasAtomics: typeof Atomics !== 'undefined',
+    hasWASMThreads: canUseWasm() && canUseSharedMemory(),
+  };
 
   return wasmFeatures;
 }
@@ -88,7 +135,7 @@ export async function initWorkerWasm(): Promise<WasmFeatureStatus | null> {
  * Check if WASM task queue is available
  */
 export function isWorkerWasmAvailable(): boolean {
-  return wasmFeatures?.hasWebAssembly ?? false;
+  return wasmFeatures?.hasWebAssembly ?? canUseWasm();
 }
 
 /**

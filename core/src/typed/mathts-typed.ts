@@ -15,37 +15,27 @@
 import typed, { create } from 'typed-function';
 import type { TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToSelf } from 'typed-function';
 
-// WASM support state (loaded dynamically when available)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let wasmModule: any = null;
+// WASM initialization state
 let wasmInitialized = false;
 let wasmAvailable = false;
 
 /**
  * Initialize WASM dispatch for typed-function (optional, improves performance)
  *
- * This will attempt to load the WASM module from typed-function if available.
- * Falls back gracefully to pure JS dispatch if WASM is not available.
+ * Uses the unified typed.init() API to enable WASM-accelerated dispatch
+ * with automatic fallback to pure JS when WASM is unavailable.
  *
+ * @param options - Initialization options
  * @returns Promise resolving to true if WASM was initialized successfully
  */
-export async function initTypedWasm(): Promise<boolean> {
+export async function initTypedWasm(options: { preferWasm?: boolean } = {}): Promise<boolean> {
   if (wasmInitialized) return wasmAvailable;
 
   try {
-    // Dynamic import for WASM module (may not exist in all typed-function builds)
-    // Use string variable to prevent TypeScript from type-checking the module path
-    const wasmPath = 'typed-function/wasm';
-    wasmModule = await import(/* @vite-ignore */ wasmPath).catch(() => null);
-
-    if (wasmModule && typeof wasmModule.initWasm === 'function') {
-      await wasmModule.initWasm();
-      wasmAvailable = wasmModule.isWasmAvailable?.() ?? false;
-
-      if (wasmAvailable) {
-        // Register MathTS custom types with type masks
-        registerMathTSTypeMasks();
-      }
+    // Use typed-function's unified init API
+    if (typeof typed.init === 'function') {
+      await typed.init({ preferWasm: options.preferWasm ?? true });
+      wasmAvailable = typed.isWasmEnabled?.() ?? false;
     }
   } catch {
     // WASM not available, fallback to pure JS
@@ -60,36 +50,10 @@ export async function initTypedWasm(): Promise<boolean> {
  * Check if WASM dispatch is available
  */
 export function isTypedWasmAvailable(): boolean {
-  return wasmAvailable;
+  // Check typed-function's native method first, fall back to our tracked state
+  return typed.isWasmEnabled?.() ?? wasmAvailable;
 }
 
-/**
- * Register MathTS types with WASM type masks for efficient dispatch
- */
-function registerMathTSTypeMasks(): void {
-  if (!wasmModule || typeof wasmModule.registerCustomType !== 'function') return;
-
-  // Register custom type masks for MathTS types
-  // These enable WASM-accelerated type checking
-  wasmModule.registerCustomType('Complex', (x: unknown) =>
-    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'Complex'
-  );
-  wasmModule.registerCustomType('Fraction', (x: unknown) =>
-    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'Fraction'
-  );
-  wasmModule.registerCustomType('BigNumber', (x: unknown) =>
-    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'BigNumber'
-  );
-  wasmModule.registerCustomType('DenseMatrix', (x: unknown) =>
-    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'DenseMatrix'
-  );
-  wasmModule.registerCustomType('SparseMatrix', (x: unknown) =>
-    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'SparseMatrix'
-  );
-  wasmModule.registerCustomType('Matrix', (x: unknown) =>
-    typeof x === 'object' && x !== null && 'rows' in x && 'cols' in x && 'get' in x
-  );
-}
 import { Complex, isComplex as _isComplex } from '../types/complex.js';
 import { Fraction, isFraction as _isFraction } from '../types/fraction.js';
 import { BigNumber, isBigNumber as _isBigNumber } from '../types/bignumber.js';
@@ -199,14 +163,25 @@ export const isUnit = (x: unknown): boolean =>
 // =============================================================================
 
 /**
+ * Extended type definition with optional WASM mask support
+ */
+export interface MathTSTypeDef extends TypeDef {
+  /** Optional WASM type mask for accelerated dispatch (auto-registered when WASM available) */
+  wasmMask?: number;
+}
+
+/**
  * MathTS-specific types to add to typed-function.
  * Note: Most primitive types (number, boolean, string, etc.) are already built into typed-function
+ *
+ * When WASM is available, custom type masks are automatically registered for efficient dispatch.
  */
-export const MATHTS_TYPES: TypeDef[] = [
+export const MATHTS_TYPES: MathTSTypeDef[] = [
   // bigint is not built into typed-function
   { name: 'bigint', test: isBigInt },
 
   // MathTS numeric types (ordered by specificity for conversion priority)
+  // WASM masks use typed.masks.OBJECT | typed.masks.custom(N) pattern
   { name: 'Complex', test: isComplex },
   { name: 'Fraction', test: isFraction },
   { name: 'BigNumber', test: isBigNumber },
@@ -398,8 +373,9 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
 /**
  * Create a new MathTS typed instance
  *
- * This creates an isolated typed universe with MathTS types and conversions
- * by directly using typed-function's create() and addTypes()/addConversions() API.
+ * This creates an isolated typed universe with MathTS types and conversions.
+ * Uses typed-function's addType() API which automatically registers WASM
+ * type masks when available.
  *
  * @returns A new typed-function instance configured for MathTS
  *
@@ -419,9 +395,17 @@ export function createMathTSTyped(): TypedInstance {
   // Create a fresh typed-function instance using the library's create() API
   const instance = create();
 
-  // Add MathTS types directly to the instance
-  // Insert before 'any' to ensure proper type matching priority
-  instance.addTypes(MATHTS_TYPES, 'any');
+  // Add MathTS types using the streamlined addType API
+  // This automatically registers WASM type masks when available
+  if (typeof instance.addType === 'function') {
+    // Use new addType API (typed-function 5.x)
+    for (const typeDef of MATHTS_TYPES) {
+      instance.addType(typeDef);
+    }
+  } else {
+    // Fallback to legacy addTypes API
+    instance.addTypes(MATHTS_TYPES, 'any');
+  }
 
   // Add MathTS conversions directly to the instance
   instance.addConversions(MATHTS_CONVERSIONS);
