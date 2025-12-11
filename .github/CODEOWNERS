@@ -1,0 +1,28 @@
+# CODEOWNERS file for MathTS
+# These owners will be requested for review when someone opens a pull request
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @danielsimonjr
+
+# Core package
+/packages/core/ @danielsimonjr
+
+# Matrix package
+/packages/matrix/ @danielsimonjr
+
+# Workbook package
+/packages/workbook/ @danielsimonjr
+
+# Documentation
+/docs/ @danielsimonjr
+*.md @danielsimonjr
+
+# CI/CD and GitHub configuration
+/.github/ @danielsimonjr
+
+# Build configuration
+package.json @danielsimonjr
+tsconfig*.json @danielsimonjr
+turbo.json @danielsimonjr
+vitest.config.ts @danielsimonjr

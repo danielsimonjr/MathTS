@@ -20,7 +20,7 @@ Security vulnerabilities should **not** be reported through public GitHub issues
 
 Please report security vulnerabilities by emailing:
 
-**[INSERT SECURITY EMAIL]**
+**security@mathts.dev** (or danielsimonjr@gmail.com)
 
 Include the following information:
 - Type of vulnerability

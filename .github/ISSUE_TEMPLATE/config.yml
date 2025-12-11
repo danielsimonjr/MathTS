@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/danielsimonjr/mathts/tree/main/docs
+    about: Check out the documentation before opening an issue
+  - name: Discussions
+    url: https://github.com/danielsimonjr/mathts/discussions
+    about: Ask questions and discuss ideas in GitHub Discussions
+  - name: Stack Overflow
+    url: https://stackoverflow.com/questions/tagged/mathts
+    about: Search for answers or ask questions on Stack Overflow

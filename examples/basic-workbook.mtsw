@@ -1,0 +1,98 @@
+version: "1.0"
+
+metadata:
+  title: "Basic MathTS Workbook Example"
+  author: "MathTS Team"
+  description: "A simple example demonstrating the .mtsw workbook format"
+  tags: [example, tutorial, basics]
+  created: 2025-12-10T00:00:00Z
+
+runtime:
+  engine: mathts
+  execution: reactive
+
+cells:
+  - markdown: |
+      # Basic MathTS Workbook
+
+      This workbook demonstrates the fundamental features of MathTS scientific workbooks.
+
+      ## What is a Workbook?
+
+      A workbook (`.mtsw` file) is a YAML-based document that combines:
+      - **Markdown** for documentation
+      - **Code** for computation
+      - **Equations** for mathematical notation
+      - **Visualizations** for data display
+    id: intro
+
+  - markdown: |
+      ## Simple Calculation
+
+      Let's start with a basic calculation. The cell below computes
+      the sum of the first 10 natural numbers using the formula:
+
+      $$S_n = \frac{n(n+1)}{2}$$
+    id: sum-intro
+
+  - code: |
+      // Calculate the sum of first n natural numbers
+      const n = 10;
+      const sum = (n * (n + 1)) / 2;
+
+      console.log(`Sum of first ${n} natural numbers:`, sum);
+      export { n, sum };
+    id: sum-calc
+    language: typescript
+
+  - markdown: |
+      ## Dependency Example
+
+      Cells can depend on other cells. The next cell uses the result
+      from the calculation above.
+    id: dep-intro
+
+  - code: |
+      import { n, sum } from '#sum-calc';
+
+      // Verify our calculation
+      let manualSum = 0;
+      for (let i = 1; i <= n; i++) {
+        manualSum += i;
+      }
+
+      const verified = manualSum === sum;
+      console.log('Verified:', verified);
+      console.log('Manual sum:', manualSum);
+
+      export { verified };
+    id: verify
+    depends_on: [sum-calc]
+
+  - markdown: |
+      ## Data Cells
+
+      Data cells allow you to define structured data in YAML format.
+    id: data-intro
+
+  - data: |
+      constants:
+        pi: 3.14159265359
+        e: 2.71828182846
+        phi: 1.61803398875
+      description: "Mathematical constants"
+    id: math-constants
+    format: yaml
+
+  - markdown: |
+      ## Next Steps
+
+      Explore more advanced features:
+      - **Tensor cells** for Einstein notation
+      - **Visualization cells** for 3D graphics
+      - **Test cells** for assertions
+      - **Export cells** for publication output
+
+      See the [Workbook Specification](../docs/Architecture/MATHTS_WORKBOOK_SPECIFICATION.md)
+      for complete documentation.
+    id: conclusion
