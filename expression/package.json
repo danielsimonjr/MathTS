@@ -30,9 +30,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "typed-function": "workspace:*",
-    "@mathts/core": "workspace:*",
-    "@mathts/functions": "workspace:*"
+    "typed-function": "^4.0.0"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

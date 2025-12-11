@@ -1,7 +1,7 @@
 {
   "name": "@mathts/matrix",
   "version": "0.1.0",
-  "description": "High-performance matrix operations with multi-backend support (JS/WASM/GPU)",
+  "description": "Matrix operations for MathTS with WASM/WebGPU backend support",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -16,13 +16,10 @@
   },
   "files": [
     "dist",
-    "assembly",
-    "gpu",
     "README.md"
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
-    "build:wasm": "asc assembly/index.ts -o dist/matrix.wasm --optimize",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -32,12 +29,8 @@
     "lint:fix": "eslint src --ext .ts --fix",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "typed-function": "workspace:*",
-    "@mathts/core": "workspace:*"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "assemblyscript": "^0.27.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "vitest": "^2.0.0"
@@ -52,11 +45,10 @@
   },
   "keywords": [
     "math",
-    "typescript",
     "matrix",
     "linear-algebra",
+    "typescript",
     "wasm",
-    "webgpu",
-    "simd"
+    "webgpu"
   ]
 }
