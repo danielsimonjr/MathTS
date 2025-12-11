@@ -117,6 +117,38 @@ export interface IFraction extends Scalar {
 }
 
 /**
+ * BigNumber interface for arbitrary precision decimals
+ */
+export interface IBigNumber extends MathTSValue {
+  add(other: IBigNumber | number | string): IBigNumber;
+  subtract(other: IBigNumber | number | string): IBigNumber;
+  multiply(other: IBigNumber | number | string): IBigNumber;
+  divide(other: IBigNumber | number | string): IBigNumber;
+  negate(): IBigNumber;
+  abs(): IBigNumber;
+  pow(n: number | bigint): IBigNumber;
+  sqrt(): IBigNumber;
+
+  isNaN(): boolean;
+  isFinite(): boolean;
+  isInfinite(): boolean;
+  isZero(): boolean;
+  isPositive(): boolean;
+  isNegative(): boolean;
+  isInteger(): boolean;
+
+  equals(other: IBigNumber): boolean;
+  lessThan(other: IBigNumber): boolean;
+  greaterThan(other: IBigNumber): boolean;
+  compareTo(other: IBigNumber): number;
+
+  toFixed(decimalPlaces?: number): string;
+  toExponential(decimalPlaces?: number): string;
+  toPrecision(significantDigits?: number): string;
+  toBigInt(): bigint;
+}
+
+/**
  * Matrix dimensions
  */
 export interface MatrixDimensions {

@@ -14,6 +14,7 @@ export function isComplex(value: unknown): value is Complex {
 
 /**
  * Complex number class with full arithmetic support
+ * Implements the IComplex interface for type-safe complex number operations.
  */
 export class Complex implements IComplex {
   readonly type = 'Complex';
@@ -25,8 +26,14 @@ export class Complex implements IComplex {
     this.im = im;
   }
 
+  // ============================================================
+  // Static Factory Methods
+  // ============================================================
+
   /**
-   * Create a Complex from polar form
+   * Create a Complex from polar form (r, θ)
+   * @param r - magnitude (radius)
+   * @param theta - angle in radians
    */
   static fromPolar(r: number, theta: number): Complex {
     return new Complex(r * Math.cos(theta), r * Math.sin(theta));
@@ -39,6 +46,57 @@ export class Complex implements IComplex {
     return new Complex(n, 0);
   }
 
+  /**
+   * Create a Complex from a JSON object
+   */
+  static fromJSON(json: { re: number; im: number }): Complex {
+    return new Complex(json.re, json.im);
+  }
+
+  /**
+   * Parse a complex number from a string
+   * Supports formats: "3+4i", "3-4i", "3", "4i", "-4i", "i", "-i"
+   */
+  static parse(str: string): Complex {
+    str = str.replace(/\s/g, '');
+
+    // Check for complex form first: "a+bi" or "a-bi"
+    const match = str.match(/^([+-]?[\d.]+)([+-])([\d.]*)i$/);
+    if (match) {
+      const re = parseFloat(match[1]);
+      const sign = match[2] === '-' ? -1 : 1;
+      const imMag = match[3] === '' ? 1 : parseFloat(match[3]);
+      return new Complex(re, sign * imMag);
+    }
+
+    // Pure imaginary: "i", "-i", "4i", "-4i"
+    if (str.endsWith('i')) {
+      const imStr = str.slice(0, -1);
+      if (imStr === '' || imStr === '+') return new Complex(0, 1);
+      if (imStr === '-') return new Complex(0, -1);
+      return new Complex(0, parseFloat(imStr));
+    }
+
+    // Pure real number
+    return new Complex(parseFloat(str), 0);
+  }
+
+  /**
+   * Compare two complex numbers lexicographically (re first, then im)
+   * @returns -1, 0, or 1
+   */
+  static compare(a: Complex, b: Complex): number {
+    if (a.re > b.re) return 1;
+    if (a.re < b.re) return -1;
+    if (a.im > b.im) return 1;
+    if (a.im < b.im) return -1;
+    return 0;
+  }
+
+  // ============================================================
+  // Conversion Methods
+  // ============================================================
+
   valueOf(): number {
     // Return magnitude for numeric context
     return this.abs();
@@ -46,96 +104,194 @@ export class Complex implements IComplex {
 
   toString(): string {
     if (this.im === 0) return `${this.re}`;
-    if (this.re === 0) return `${this.im}i`;
-    const sign = this.im >= 0 ? '+' : '-';
-    return `${this.re} ${sign} ${Math.abs(this.im)}i`;
+    if (this.re === 0) {
+      if (this.im === 1) return 'i';
+      if (this.im === -1) return '-i';
+      return `${this.im}i`;
+    }
+    const sign = this.im >= 0 ? ' + ' : ' - ';
+    const absIm = Math.abs(this.im);
+    const imStr = absIm === 1 ? 'i' : `${absIm}i`;
+    return `${this.re}${sign}${imStr}`;
   }
 
-  toJSON(): { re: number; im: number } {
-    return { re: this.re, im: this.im };
+  toJSON(): { mathjs: string; re: number; im: number } {
+    return { mathjs: 'Complex', re: this.re, im: this.im };
   }
 
   /**
-   * Complex conjugate
+   * Return polar representation
+   */
+  toPolar(): { r: number; phi: number } {
+    return { r: this.abs(), phi: this.arg() };
+  }
+
+  /**
+   * Format with options (precision, notation, etc.)
+   */
+  format(options?: { precision?: number; notation?: 'fixed' | 'exponential' | 'auto' }): string {
+    const formatNum = (n: number): string => {
+      if (!options) return String(n);
+      if (options.precision !== undefined) {
+        if (options.notation === 'exponential') {
+          return n.toExponential(options.precision);
+        }
+        if (options.notation === 'fixed') {
+          return n.toFixed(options.precision);
+        }
+        return Number(n.toPrecision(options.precision)).toString();
+      }
+      return String(n);
+    };
+
+    let re = this.re;
+    let im = this.im;
+
+    // Round small values to zero based on precision
+    if (options?.precision !== undefined) {
+      const epsilon = Math.pow(10, -options.precision);
+      if (Math.abs(re) < epsilon * Math.abs(im)) re = 0;
+      if (Math.abs(im) < epsilon * Math.abs(re)) im = 0;
+    }
+
+    if (im === 0) return formatNum(re);
+    if (re === 0) {
+      if (im === 1) return 'i';
+      if (im === -1) return '-i';
+      return `${formatNum(im)}i`;
+    }
+
+    const sign = im < 0 ? ' - ' : ' + ';
+    const absIm = Math.abs(im);
+    if (absIm === 1) {
+      return `${formatNum(re)}${sign}i`;
+    }
+    return `${formatNum(re)}${sign}${formatNum(absIm)}i`;
+  }
+
+  // ============================================================
+  // Basic Properties
+  // ============================================================
+
+  /**
+   * Complex conjugate (a + bi → a - bi)
    */
   conjugate(): Complex {
     return new Complex(this.re, -this.im);
   }
 
   /**
-   * Magnitude (absolute value)
+   * Magnitude (absolute value) |z| = √(re² + im²)
    */
   abs(): number {
     return Math.hypot(this.re, this.im);
   }
 
   /**
-   * Phase angle (argument)
+   * Phase angle (argument) in radians, range (-π, π]
    */
   arg(): number {
     return Math.atan2(this.im, this.re);
   }
 
   /**
-   * Addition
+   * Squared magnitude |z|² = re² + im²
+   * More efficient than abs() when you don't need the square root
+   */
+  abs2(): number {
+    return this.re * this.re + this.im * this.im;
+  }
+
+  // ============================================================
+  // Arithmetic Operations (Scalar interface)
+  // ============================================================
+
+  /**
+   * Addition: (a + bi) + (c + di) = (a + c) + (b + d)i
    */
   add(other: Scalar): Complex {
     if (other instanceof Complex) {
       return new Complex(this.re + other.re, this.im + other.im);
     }
-    return new Complex(this.re + (other.valueOf() as number), this.im);
+    return new Complex(this.re + Number(other.valueOf()), this.im);
   }
 
   /**
-   * Subtraction
+   * Subtraction: (a + bi) - (c + di) = (a - c) + (b - d)i
    */
   subtract(other: Scalar): Complex {
     if (other instanceof Complex) {
       return new Complex(this.re - other.re, this.im - other.im);
     }
-    return new Complex(this.re - (other.valueOf() as number), this.im);
+    return new Complex(this.re - Number(other.valueOf()), this.im);
   }
 
   /**
-   * Multiplication
+   * Multiplication: (a + bi)(c + di) = (ac - bd) + (ad + bc)i
    */
   multiply(other: Scalar): Complex {
     if (other instanceof Complex) {
-      // (a + bi)(c + di) = (ac - bd) + (ad + bc)i
       return new Complex(
         this.re * other.re - this.im * other.im,
         this.re * other.im + this.im * other.re
       );
     }
-    const n = other.valueOf() as number;
+    const n = Number(other.valueOf());
     return new Complex(this.re * n, this.im * n);
   }
 
   /**
-   * Division
+   * Division: (a + bi)/(c + di) = ((ac + bd) + (bc - ad)i) / (c² + d²)
    */
   divide(other: Scalar): Complex {
     if (other instanceof Complex) {
-      // (a + bi)/(c + di) = ((ac + bd) + (bc - ad)i) / (c² + d²)
       const denom = other.re * other.re + other.im * other.im;
+      if (denom === 0) {
+        return new Complex(
+          this.re !== 0 ? (this.re > 0 ? Infinity : -Infinity) : NaN,
+          this.im !== 0 ? (this.im > 0 ? Infinity : -Infinity) : NaN
+        );
+      }
       return new Complex(
         (this.re * other.re + this.im * other.im) / denom,
         (this.im * other.re - this.re * other.im) / denom
       );
     }
-    const n = other.valueOf() as number;
+    const n = Number(other.valueOf());
+    if (n === 0) {
+      return new Complex(
+        this.re !== 0 ? (this.re > 0 ? Infinity : -Infinity) : NaN,
+        this.im !== 0 ? (this.im > 0 ? Infinity : -Infinity) : NaN
+      );
+    }
     return new Complex(this.re / n, this.im / n);
   }
 
   /**
-   * Negation
+   * Negation: -(a + bi) = -a - bi
    */
   negate(): Complex {
     return new Complex(-this.re, -this.im);
   }
 
   /**
-   * Square root
+   * Multiplicative inverse: 1/z = z̄/|z|²
+   */
+  inverse(): Complex {
+    const denom = this.abs2();
+    if (denom === 0) {
+      return new Complex(Infinity, Infinity);
+    }
+    return new Complex(this.re / denom, -this.im / denom);
+  }
+
+  // ============================================================
+  // Transcendental Functions
+  // ============================================================
+
+  /**
+   * Square root using principal branch
+   * √z = √r · e^(iθ/2) where r = |z|, θ = arg(z)
    */
   sqrt(): Complex {
     const r = this.abs();
@@ -144,39 +300,85 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Exponential
+   * n-th root (returns principal root)
+   */
+  nthRoot(n: number): Complex {
+    const r = this.abs();
+    const theta = this.arg();
+    return Complex.fromPolar(Math.pow(r, 1 / n), theta / n);
+  }
+
+  /**
+   * All n-th roots
+   */
+  nthRoots(n: number): Complex[] {
+    const r = this.abs();
+    const theta = this.arg();
+    const rootR = Math.pow(r, 1 / n);
+    const roots: Complex[] = [];
+    for (let k = 0; k < n; k++) {
+      roots.push(Complex.fromPolar(rootR, (theta + 2 * Math.PI * k) / n));
+    }
+    return roots;
+  }
+
+  /**
+   * Exponential: e^(a+bi) = e^a · (cos(b) + i·sin(b))
    */
   exp(): Complex {
-    // e^(a+bi) = e^a * (cos(b) + i*sin(b))
     const ea = Math.exp(this.re);
     return new Complex(ea * Math.cos(this.im), ea * Math.sin(this.im));
   }
 
   /**
-   * Natural logarithm
+   * Natural logarithm: ln(z) = ln|z| + i·arg(z)
    */
   log(): Complex {
     return new Complex(Math.log(this.abs()), this.arg());
   }
 
   /**
-   * Power
+   * Logarithm base 10
+   */
+  log10(): Complex {
+    return this.log().divide(new Complex(Math.LN10, 0));
+  }
+
+  /**
+   * Logarithm base 2
+   */
+  log2(): Complex {
+    return this.log().divide(new Complex(Math.LN2, 0));
+  }
+
+  /**
+   * Power: z^w = e^(w·ln(z))
    */
   pow(n: number | Complex): Complex {
     if (typeof n === 'number') {
+      // Optimization for real exponents
+      if (this.re === 0 && this.im === 0) {
+        return n === 0 ? new Complex(1, 0) : new Complex(0, 0);
+      }
       const r = this.abs();
       const theta = this.arg();
       return Complex.fromPolar(Math.pow(r, n), theta * n);
     }
-    // z^w = e^(w * ln(z))
+    // General case: z^w = e^(w * ln(z))
+    if (this.re === 0 && this.im === 0) {
+      return new Complex(0, 0);
+    }
     return this.log().multiply(n).exp();
   }
 
+  // ============================================================
+  // Trigonometric Functions
+  // ============================================================
+
   /**
-   * Sine
+   * Sine: sin(a + bi) = sin(a)cosh(b) + i·cos(a)sinh(b)
    */
   sin(): Complex {
-    // sin(a + bi) = sin(a)cosh(b) + i*cos(a)sinh(b)
     return new Complex(
       Math.sin(this.re) * Math.cosh(this.im),
       Math.cos(this.re) * Math.sinh(this.im)
@@ -184,10 +386,9 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Cosine
+   * Cosine: cos(a + bi) = cos(a)cosh(b) - i·sin(a)sinh(b)
    */
   cos(): Complex {
-    // cos(a + bi) = cos(a)cosh(b) - i*sin(a)sinh(b)
     return new Complex(
       Math.cos(this.re) * Math.cosh(this.im),
       -Math.sin(this.re) * Math.sinh(this.im)
@@ -195,7 +396,152 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Check equality
+   * Tangent: tan(z) = sin(z) / cos(z)
+   */
+  tan(): Complex {
+    return this.sin().divide(this.cos());
+  }
+
+  /**
+   * Cotangent: cot(z) = cos(z) / sin(z)
+   */
+  cot(): Complex {
+    return this.cos().divide(this.sin());
+  }
+
+  /**
+   * Secant: sec(z) = 1 / cos(z)
+   */
+  sec(): Complex {
+    return this.cos().inverse();
+  }
+
+  /**
+   * Cosecant: csc(z) = 1 / sin(z)
+   */
+  csc(): Complex {
+    return this.sin().inverse();
+  }
+
+  // ============================================================
+  // Hyperbolic Functions
+  // ============================================================
+
+  /**
+   * Hyperbolic sine: sinh(z) = (e^z - e^(-z)) / 2
+   */
+  sinh(): Complex {
+    return new Complex(
+      Math.sinh(this.re) * Math.cos(this.im),
+      Math.cosh(this.re) * Math.sin(this.im)
+    );
+  }
+
+  /**
+   * Hyperbolic cosine: cosh(z) = (e^z + e^(-z)) / 2
+   */
+  cosh(): Complex {
+    return new Complex(
+      Math.cosh(this.re) * Math.cos(this.im),
+      Math.sinh(this.re) * Math.sin(this.im)
+    );
+  }
+
+  /**
+   * Hyperbolic tangent: tanh(z) = sinh(z) / cosh(z)
+   */
+  tanh(): Complex {
+    return this.sinh().divide(this.cosh());
+  }
+
+  /**
+   * Hyperbolic cotangent: coth(z) = cosh(z) / sinh(z)
+   */
+  coth(): Complex {
+    return this.cosh().divide(this.sinh());
+  }
+
+  /**
+   * Hyperbolic secant: sech(z) = 1 / cosh(z)
+   */
+  sech(): Complex {
+    return this.cosh().inverse();
+  }
+
+  /**
+   * Hyperbolic cosecant: csch(z) = 1 / sinh(z)
+   */
+  csch(): Complex {
+    return this.sinh().inverse();
+  }
+
+  // ============================================================
+  // Inverse Trigonometric Functions
+  // ============================================================
+
+  /**
+   * Arc sine: asin(z) = -i·ln(iz + √(1 - z²))
+   */
+  asin(): Complex {
+    const iz = new Complex(-this.im, this.re); // i * z
+    const one = new Complex(1, 0);
+    const sqrt = one.subtract(this.multiply(this)).sqrt();
+    return iz.add(sqrt).log().multiply(new Complex(0, -1));
+  }
+
+  /**
+   * Arc cosine: acos(z) = π/2 - asin(z)
+   */
+  acos(): Complex {
+    return new Complex(Math.PI / 2, 0).subtract(this.asin());
+  }
+
+  /**
+   * Arc tangent: atan(z) = (i/2)·ln((i + z)/(i - z))
+   */
+  atan(): Complex {
+    const i = new Complex(0, 1);
+    const iHalf = new Complex(0, 0.5);
+    const num = i.add(this);
+    const denom = i.subtract(this);
+    return num.divide(denom).log().multiply(iHalf);
+  }
+
+  // ============================================================
+  // Inverse Hyperbolic Functions
+  // ============================================================
+
+  /**
+   * Inverse hyperbolic sine: asinh(z) = ln(z + √(z² + 1))
+   */
+  asinh(): Complex {
+    const one = new Complex(1, 0);
+    return this.add(this.multiply(this).add(one).sqrt()).log();
+  }
+
+  /**
+   * Inverse hyperbolic cosine: acosh(z) = ln(z + √(z² - 1))
+   */
+  acosh(): Complex {
+    const one = new Complex(1, 0);
+    return this.add(this.multiply(this).subtract(one).sqrt()).log();
+  }
+
+  /**
+   * Inverse hyperbolic tangent: atanh(z) = (1/2)·ln((1 + z)/(1 - z))
+   */
+  atanh(): Complex {
+    const one = new Complex(1, 0);
+    const half = new Complex(0.5, 0);
+    return one.add(this).divide(one.subtract(this)).log().multiply(half);
+  }
+
+  // ============================================================
+  // Utility Methods
+  // ============================================================
+
+  /**
+   * Check equality within tolerance
    */
   equals(other: Complex, epsilon: number = 1e-12): boolean {
     return (
@@ -205,21 +551,90 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Check if this is a real number (im === 0)
+   * Check if this is a real number (im ≈ 0)
    */
-  isReal(): boolean {
-    return this.im === 0;
+  isReal(epsilon: number = 0): boolean {
+    return Math.abs(this.im) <= epsilon;
   }
 
   /**
-   * Check if this is purely imaginary (re === 0)
+   * Check if this is purely imaginary (re ≈ 0, im ≠ 0)
    */
-  isImaginary(): boolean {
-    return this.re === 0 && this.im !== 0;
+  isImaginary(epsilon: number = 0): boolean {
+    return Math.abs(this.re) <= epsilon && Math.abs(this.im) > epsilon;
+  }
+
+  /**
+   * Check if this is zero
+   */
+  isZero(epsilon: number = 0): boolean {
+    return Math.abs(this.re) <= epsilon && Math.abs(this.im) <= epsilon;
+  }
+
+  /**
+   * Check if this is NaN
+   */
+  isNaN(): boolean {
+    return Number.isNaN(this.re) || Number.isNaN(this.im);
+  }
+
+  /**
+   * Check if this is infinite
+   */
+  isInfinite(): boolean {
+    return !this.isNaN() && (!Number.isFinite(this.re) || !Number.isFinite(this.im));
+  }
+
+  /**
+   * Clone this complex number
+   */
+  clone(): Complex {
+    return new Complex(this.re, this.im);
+  }
+
+  /**
+   * Round real and imaginary parts to specified decimals
+   */
+  round(decimals: number = 0): Complex {
+    const factor = Math.pow(10, decimals);
+    return new Complex(
+      Math.round(this.re * factor) / factor,
+      Math.round(this.im * factor) / factor
+    );
+  }
+
+  /**
+   * Floor real and imaginary parts
+   */
+  floor(): Complex {
+    return new Complex(Math.floor(this.re), Math.floor(this.im));
+  }
+
+  /**
+   * Ceil real and imaginary parts
+   */
+  ceil(): Complex {
+    return new Complex(Math.ceil(this.re), Math.ceil(this.im));
+  }
+
+  /**
+   * Sign function: z / |z| (unit complex number in same direction)
+   */
+  sign(): Complex {
+    const r = this.abs();
+    if (r === 0) return new Complex(0, 0);
+    return new Complex(this.re / r, this.im / r);
   }
 }
 
 /**
- * Imaginary unit constant
+ * Imaginary unit constant: i = √(-1)
  */
 export const I = new Complex(0, 1);
+
+/**
+ * Common constants
+ */
+export const COMPLEX_ZERO = new Complex(0, 0);
+export const COMPLEX_ONE = new Complex(1, 0);
+export const COMPLEX_NEG_ONE = new Complex(-1, 0);

@@ -199,3 +199,138 @@ Current workbook runtime is implemented. Pending:
 - Three.js visualization bindings
 - Web UI (Monaco + reactive rendering)
 - LaTeX/PDF export
+
+## Sprint Development Guidelines
+
+### CRITICAL: typed-function and workerpool Integration
+
+**Every sprint MUST integrate typed-function and workerpool.** This is a core architectural requirement.
+
+#### typed-function Integration Pattern
+
+All new types and functions must register with the typed-function system for runtime polymorphic dispatch:
+
+```typescript
+// 1. Import the mathTyped instance
+import { mathTyped, Complex, Fraction, BigNumber } from '@mathts/core';
+
+// 2. Create polymorphic functions with type signatures
+const add = mathTyped('add', {
+  'number, number': (a, b) => a + b,
+  'Complex, Complex': (a, b) => a.add(b),
+  'Fraction, Fraction': (a, b) => a.add(b),
+  'BigNumber, BigNumber': (a, b) => a.add(b),
+  'Matrix, Matrix': (a, b) => a.add(b),
+});
+
+// 3. For new types, add to MATHTS_TYPES in core/src/typed/mathts-typed.ts
+export const MATHTS_TYPES: TypeDef[] = [
+  { name: 'YourNewType', test: isYourNewType },
+  // ...
+];
+
+// 4. Add conversions in MATHTS_CONVERSIONS
+export const MATHTS_CONVERSIONS: ConversionDef[] = [
+  { from: 'number', to: 'YourNewType', convert: (n) => YourNewType.fromNumber(n) },
+  // ...
+];
+```
+
+#### workerpool Integration Pattern
+
+**Use parallel execution whenever possible.** The ComputePool should be the default approach, not just for large datasets. Workers provide isolation, prevent main thread blocking, and enable true concurrency.
+
+```typescript
+import { computePool, ComputePool } from '@mathts/parallel';
+
+// 1. Initialize pool (once at startup)
+await computePool.initialize();
+
+// 2. ALWAYS prefer parallel execution - use workers by default
+const result = await computePool.matmul(a, aRows, aCols, b, bCols);
+const sum = await computePool.sum(data);
+const mapped = await computePool.map(data, fn);
+
+// 3. Available parallel operations:
+await computePool.sum(data);                    // Parallel reduction
+await computePool.elementwise(a, b, 'add');     // Element-wise ops
+await computePool.matmul(a, aRows, aCols, b, bCols);  // Matrix multiply
+await computePool.map(data, fn);                // Parallel map
+await computePool.exec('customMethod', params); // Custom worker method
+
+// 4. Batch operations - run multiple independent tasks in parallel
+const [result1, result2, result3] = await Promise.all([
+  computePool.sum(data1),
+  computePool.sum(data2),
+  computePool.sum(data3),
+]);
+```
+
+**Parallel-first philosophy:**
+- Use workers for ALL matrix operations regardless of size
+- Use workers for ALL array transformations (map, reduce, filter)
+- Use workers for ALL numerical computations that can be batched
+- Only fall back to sequential for trivial scalar operations
+- Leverage `Promise.all()` for independent parallel tasks
+
+#### Sprint Checklist
+
+For each sprint, verify:
+
+- [ ] New numeric types implement `Scalar` interface
+- [ ] New types are registered in `MATHTS_TYPES`
+- [ ] Type conversions are added to `MATHTS_CONVERSIONS`
+- [ ] Type test functions (`isYourType()`) use `instanceof`
+- [ ] Functions use `mathTyped()` for polymorphic dispatch
+- [ ] ALL operations use `ComputePool` (parallel-first, not just large data)
+- [ ] Independent operations use `Promise.all()` for concurrency
+- [ ] Tests cover typed-function dispatch and conversions
+- [ ] Tests verify parallel execution paths
+
+### Core Type System
+
+MathTS core types in `core/src/types/`:
+
+| Type | File | Interface | Description |
+|------|------|-----------|-------------|
+| `Complex` | `complex.ts` | `IComplex` | Complex numbers with full arithmetic |
+| `Fraction` | `fraction.ts` | `IFraction` | Exact rationals with bigint |
+| `BigNumber` | `bignumber.ts` | `IBigNumber` | Arbitrary precision decimals |
+| `Matrix` | (pending) | `IMatrix` | Dense/Sparse with backend selection |
+
+### Type Conversion Hierarchy
+
+```
+string ──┬──> number ──┬──> Complex
+         │             │
+bigint ──┴──> Fraction ┴──> BigNumber
+```
+
+Conversions flow upward (number → Complex) automatically via typed-function.
+
+### Backend Selection Strategy
+
+**Parallel-first with backend optimization:**
+
+| Backend | Use Case | Notes |
+|---------|----------|-------|
+| **Workers** | ALL operations | Default for everything - parallel first |
+| JS | Scalar-only fallback | Only when workers unavailable |
+| WASM | SIMD acceleration | Within workers for vectorized ops |
+| GPU | WebGPU compute | Within workers for massive parallelism |
+
+The worker pool is always used. WASM and GPU backends run **inside** workers for additional acceleration:
+
+```
+User Code → ComputePool (workers) → WASM/GPU Backend → Result
+```
+
+Never bypass workers for "small" operations - the overhead is minimal and consistency matters.
+
+## Sprint Planning Files
+
+Sprint JSON files are in `docs/planning/sprints/`:
+- `PHASE_1_SPRINT_1_TODO.json` through `PHASE_6_SPRINT_28_TODO.json`
+- Post-v1.0 sprints in `docs/planning/phases/`
+
+Each sprint file contains tasks, dependencies, success criteria, and files to create/modify.

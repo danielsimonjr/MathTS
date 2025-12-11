@@ -3,13 +3,17 @@
  */
 
 export {
+  // typed-function instance and factory
   mathTyped,
   createMathTSTyped,
   typed,
   create,
+
+  // Type definitions and conversions
   MATHTS_TYPES,
   MATHTS_CONVERSIONS,
-  // Type test functions
+
+  // Primitive type test functions
   isNumber,
   isBoolean,
   isString,
@@ -19,12 +23,18 @@ export {
   isObject,
   isNull,
   isUndefined,
+
+  // MathTS type test functions (re-exported from types for convenience)
   isComplex,
+  isFraction,
+  isBigNumber,
+
+  // Matrix type test functions (duck typing until Matrix class is implemented)
   isMatrix,
   isDenseMatrix,
   isSparseMatrix,
-  isFraction,
-  isBigNumber,
+
+  // Unit type test function
   isUnit,
 } from './mathts-typed.js';
 

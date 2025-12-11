@@ -4,7 +4,15 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['packages/*/tests/**/*.test.ts'],
+    include: [
+      'packages/*/test/**/*.test.ts',
+      'packages/*/tests/**/*.test.ts',
+      'core/tests/**/*.test.ts',
+      'matrix/tests/**/*.test.ts',
+      'functions/tests/**/*.test.ts',
+      'parallel/tests/**/*.test.ts',
+      'expression/tests/**/*.test.ts',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
