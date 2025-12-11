@@ -68,7 +68,7 @@ export {
   createMathTSTyped,
   typed,
   create,
-  createTyped,
+  createTypedFunction,
   TypeRegistry,
 
   // Type definitions and conversions for runtime dispatch
@@ -104,7 +104,6 @@ export type { TypedInstance, TypeDef, ConversionDef } from './typed/index.js';
 export {
   FunctionRegistry,
   createFactory,
-  createTypedFunction,
   registry,
   math,
   DEFAULT_CONFIG,

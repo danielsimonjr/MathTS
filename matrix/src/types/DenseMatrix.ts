@@ -23,7 +23,7 @@ export class DenseMatrix extends Matrix<number> {
   /**
    * Internal data storage (row-major Float64Array)
    */
-  private readonly data: Float64Array;
+  private readonly data!: Float64Array;
 
   /**
    * Whether this matrix is a view into another matrix's data

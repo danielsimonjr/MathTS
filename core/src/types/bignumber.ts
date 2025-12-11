@@ -326,7 +326,6 @@ export class BigNumber implements MathTSValue {
 
     const sign = this._sign === -1 ? '-' : '';
     const digits = this._coefficient.toString();
-    const totalDigits = digits.length + this._exponent;
 
     if (this._exponent >= 0) {
       // No decimal places needed in internal representation

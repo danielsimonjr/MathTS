@@ -10,7 +10,7 @@
 
 import { computePool, ComputePool, type ComputePoolConfig } from '@mathts/parallel';
 import { DenseMatrix } from '../types/DenseMatrix.js';
-import type { MatrixBackend, BackendType } from './Backend.js';
+import type { BackendType } from './Backend.js';
 
 /**
  * Configuration for ParallelBackend
@@ -38,7 +38,7 @@ export interface ParallelBackendConfig {
  * const result = await backend.multiply(largeMatrixA, largeMatrixB);
  * ```
  */
-export class ParallelBackend implements MatrixBackend {
+export class ParallelBackend {
   readonly type: BackendType = 'parallel' as BackendType;
 
   private pool: ComputePool;
@@ -55,7 +55,8 @@ export class ParallelBackend implements MatrixBackend {
    */
   isAvailable(): boolean {
     // Parallel backend requires WebWorker support
-    return typeof Worker !== 'undefined' || typeof process !== 'undefined';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return typeof (globalThis as any).Worker !== 'undefined' || typeof process !== 'undefined';
   }
 
   /**

@@ -7,19 +7,8 @@
  * @packageDocumentation
  */
 
-import { mathTyped, isMatrix, isDenseMatrix } from '@mathts/core';
-import { DenseMatrix, isDenseMatrix as isLocalDenseMatrix } from './types/DenseMatrix.js';
-
-// =============================================================================
-// Type Registration for DenseMatrix
-// =============================================================================
-
-// Register DenseMatrix type test that checks for our local implementation
-const isTypedDenseMatrix = (x: unknown): x is DenseMatrix =>
-  isLocalDenseMatrix(x) || isDenseMatrix(x);
-
-const isTypedMatrix = (x: unknown): boolean =>
-  isTypedDenseMatrix(x) || isMatrix(x);
+import { mathTyped } from '@mathts/core';
+import { DenseMatrix } from './types/DenseMatrix.js';
 
 // =============================================================================
 // Typed Matrix Creation Functions

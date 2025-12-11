@@ -3,14 +3,13 @@
  * @packageDocumentation
  */
 
-export {
-  Matrix,
+export { Matrix, isMatrix } from './Matrix.js';
+export type {
   MatrixDimensions,
   MatrixIndex,
   SliceSpec,
   MatrixEntry,
   MatrixType,
-  isMatrix,
 } from './Matrix.js';
 
 export { DenseMatrix, isDenseMatrix } from './DenseMatrix.js';

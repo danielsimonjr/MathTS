@@ -4,44 +4,74 @@
  * Creates a configured typed-function instance with MathTS types
  * for runtime type dispatch across numeric types, matrices, and more.
  *
+ * This module directly uses the typed-function library API without
+ * any intermediate abstraction layers.
+ *
  * @packageDocumentation
  */
 
-import {
-  typed,
-  create,
-  createTyped,
-  TypeRegistry,
-  isNumber as _isNumber,
-  isBigInt as _isBigInt,
-  isString as _isString,
-  isBoolean as _isBoolean,
-  isArray as _isArray,
-  isObject as _isObject,
-  isFunction as _isFunction,
-  isNull as _isNull,
-  isUndefined as _isUndefined,
-  type TypedInstance,
-  type TypeDef,
-  type ConversionDef,
-} from '@mathts/typed-function';
+import typed, { create } from 'typed-function';
+import type { TypedFunction } from 'typed-function';
 import { Complex, isComplex as _isComplex } from '../types/complex.js';
 import { Fraction, isFraction as _isFraction } from '../types/fraction.js';
 import { BigNumber, isBigNumber as _isBigNumber } from '../types/bignumber.js';
 
 // =============================================================================
-// Primitive Type Test Functions (re-exported from @mathts/typed-function)
+// TypedInstance type alias for typed-function instance
 // =============================================================================
 
-export const isNumber = _isNumber;
-export const isBoolean = _isBoolean;
-export const isString = _isString;
-export const isBigInt = _isBigInt;
-export const isArray = _isArray;
-export const isFunction = _isFunction;
-export const isObject = _isObject;
-export const isNull = _isNull;
-export const isUndefined = _isUndefined;
+/**
+ * Type alias for a typed-function instance
+ */
+export type TypedInstance = TypedFunction;
+
+/**
+ * Type definition for typed-function
+ */
+export interface TypeDef {
+  name: string;
+  test: (x: unknown) => boolean;
+}
+
+/**
+ * Conversion definition for typed-function
+ */
+export interface ConversionDef {
+  from: string;
+  to: string;
+  convert: (value: unknown) => unknown;
+}
+
+// =============================================================================
+// Primitive Type Test Functions
+// =============================================================================
+
+export const isNumber = (x: unknown): x is number =>
+  typeof x === 'number';
+
+export const isBoolean = (x: unknown): x is boolean =>
+  typeof x === 'boolean';
+
+export const isString = (x: unknown): x is string =>
+  typeof x === 'string';
+
+export const isBigInt = (x: unknown): x is bigint =>
+  typeof x === 'bigint';
+
+export const isArray = (x: unknown): x is unknown[] =>
+  Array.isArray(x);
+
+export const isFunction = (x: unknown): x is (...args: unknown[]) => unknown =>
+  typeof x === 'function';
+
+export const isObject = (x: unknown): x is object =>
+  typeof x === 'object' && x !== null && !Array.isArray(x);
+
+export const isNull = (x: unknown): x is null =>
+  x === null;
+
+export const isUndefined = (x: unknown): x is undefined =>
+  x === undefined;
 
 // =============================================================================
 // MathTS Type Test Functions (using actual class implementations)
@@ -293,8 +323,8 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
 /**
  * Create a new MathTS typed instance
  *
- * This creates an isolated typed universe with MathTS types and conversions.
- * Use this for custom configurations or testing.
+ * This creates an isolated typed universe with MathTS types and conversions
+ * by directly using typed-function's create() and addTypes()/addConversions() API.
  *
  * @returns A new typed-function instance configured for MathTS
  *
@@ -311,11 +341,17 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
  * ```
  */
 export function createMathTSTyped(): TypedInstance {
-  // Use the @mathts/typed-function createTyped for base setup
-  return createTyped({
-    types: MATHTS_TYPES,
-    conversions: MATHTS_CONVERSIONS,
-  });
+  // Create a fresh typed-function instance using the library's create() API
+  const instance = create();
+
+  // Add MathTS types directly to the instance
+  // Insert before 'any' to ensure proper type matching priority
+  instance.addTypes(MATHTS_TYPES, 'any');
+
+  // Add MathTS conversions directly to the instance
+  instance.addConversions(MATHTS_CONVERSIONS);
+
+  return instance;
 }
 
 /**
@@ -345,6 +381,107 @@ export function createMathTSTyped(): TypedInstance {
  */
 export const mathTyped = createMathTSTyped();
 
-// Re-export typed-function utilities for convenience
-export { typed, create, createTyped, TypeRegistry };
-export type { TypedInstance, TypeDef, ConversionDef };
+// =============================================================================
+// Re-export typed-function for convenience
+// =============================================================================
+
+/**
+ * The default typed-function export (for creating functions without MathTS types)
+ */
+export { typed };
+
+/**
+ * Create a new typed-function instance (typed-function's create)
+ */
+export { create };
+
+/**
+ * TypeRegistry class for managing custom type registrations
+ * This is a MathTS utility, not from typed-function
+ */
+export class TypeRegistry {
+  private types: Map<string, TypeDef> = new Map();
+  private conversions: Map<string, ConversionDef> = new Map();
+  private instance: TypedInstance | null = null;
+
+  /**
+   * Register a new type
+   */
+  registerType<T>(name: string, test: (x: unknown) => x is T): this {
+    this.types.set(name, { name, test: test as (x: unknown) => boolean });
+    this.instance = null;
+    return this;
+  }
+
+  /**
+   * Register a type conversion
+   */
+  registerConversion<From, To>(
+    from: string,
+    to: string,
+    convert: (value: From) => To
+  ): this {
+    const key = `${from}->${to}`;
+    this.conversions.set(key, {
+      from,
+      to,
+      convert: convert as (value: unknown) => unknown,
+    });
+    this.instance = null;
+    return this;
+  }
+
+  /**
+   * Check if a type is registered
+   */
+  hasType(name: string): boolean {
+    return this.types.has(name);
+  }
+
+  /**
+   * Check if a conversion is registered
+   */
+  hasConversion(from: string, to: string): boolean {
+    return this.conversions.has(`${from}->${to}`);
+  }
+
+  /**
+   * Get all registered type names
+   */
+  getTypeNames(): string[] {
+    return Array.from(this.types.keys());
+  }
+
+  /**
+   * Build a typed-function instance from the registry
+   */
+  build(): TypedInstance {
+    if (!this.instance) {
+      const inst = create();
+      inst.addTypes(Array.from(this.types.values()), 'any');
+      inst.addConversions(Array.from(this.conversions.values()));
+      this.instance = inst;
+    }
+    return this.instance;
+  }
+
+  /**
+   * Clear all registered types and conversions
+   */
+  clear(): void {
+    this.types.clear();
+    this.conversions.clear();
+    this.instance = null;
+  }
+}
+
+/**
+ * Helper to create a typed function with the MathTS typed instance
+ */
+export function createTypedFunction<T>(
+  name: string,
+  signatures: { [signature: string]: (...args: unknown[]) => T },
+  typedInstance: TypedInstance = mathTyped
+): (...args: unknown[]) => T {
+  return typedInstance(name, signatures) as (...args: unknown[]) => T;
+}

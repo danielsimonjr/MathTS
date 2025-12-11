@@ -226,8 +226,8 @@ export function createFactory<T = TypedFunction>(
 export function createTypedFunction(
   name: string,
   signatures: Record<string, SignatureFunction | ReferTo | ReferToSelf>
-): TypedFunction {
-  return mathTyped(name, signatures);
+): (...args: unknown[]) => unknown {
+  return mathTyped(name, signatures as Record<string, (...args: unknown[]) => unknown>);
 }
 
 // Global registry instance

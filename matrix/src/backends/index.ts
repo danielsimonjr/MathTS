@@ -4,12 +4,15 @@
  */
 
 export {
-  MatrixBackend,
-  BackendType,
-  BackendHints,
   BackendRegistry,
   backendRegistry,
   DEFAULT_BACKEND_HINTS,
+} from './Backend.js';
+
+export type {
+  MatrixBackend,
+  BackendType,
+  BackendHints,
 } from './Backend.js';
 
 export { JSBackend, jsBackend } from './JSBackend.js';
