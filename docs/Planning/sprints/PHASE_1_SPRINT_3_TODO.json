@@ -4,7 +4,7 @@
   "title": "typed-function Integration",
   "week": "Week 3",
   "effort": "24-28 hours",
-  "status": "in_progress",
+  "status": "completed",
   "prerequisite": "Sprint 2 completion",
   "tasks": [
     {
@@ -25,7 +25,7 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [1],
-      "files": ["core/src/typed/type-definitions.ts"]
+      "files": ["core/src/typed/mathts-typed.ts"]
     },
     {
       "id": 3,
@@ -55,17 +55,17 @@
       "estimatedHours": 4,
       "complexity": "High",
       "dependencies": [4],
-      "files": ["core/src/factory/dependencies.ts"]
+      "files": ["core/src/factory/factory.ts"]
     },
     {
       "id": 6,
       "category": "Testing",
       "description": "Test typed dispatch - verify all type combinations dispatch correctly, test conversion chains, test error handling",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4, 5],
-      "files": ["core/tests/typed/dispatch.test.ts", "core/tests/typed/conversions.test.ts", "core/tests/factory/factory.test.ts"]
+      "files": ["core/tests/typed/mathts-typed.test.ts", "core/tests/factory/factory.test.ts"]
     }
   ],
   "successCriteria": [
@@ -77,15 +77,16 @@
   ],
   "filesCreated": [
     "core/src/typed/mathts-typed.ts",
-    "core/src/typed/type-definitions.ts",
     "core/src/typed/index.ts",
     "core/src/factory/factory.ts",
-    "core/src/factory/dependencies.ts",
-    "core/src/factory/index.ts"
+    "core/src/factory/index.ts",
+    "core/tests/typed/mathts-typed.test.ts",
+    "core/tests/factory/factory.test.ts"
   ],
   "filesModified": [
     "core/src/index.ts"
   ],
   "totalEstimatedHours": 28,
-  "notes": "Sprint 3 integrates typed-function for runtime type dispatch and implements the factory pattern for function creation with dependency injection. This is the foundation for all MathTS function definitions."
+  "completedAt": "2025-12-11",
+  "notes": "Sprint 3 integrates typed-function for runtime type dispatch and implements the factory pattern for function creation with dependency injection. All 207 tests passing."
 }
