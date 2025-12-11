@@ -7,11 +7,89 @@
  * This module directly uses the typed-function library API without
  * any intermediate abstraction layers.
  *
+ * Supports WASM-accelerated dispatch when available.
+ *
  * @packageDocumentation
  */
 
 import typed, { create } from 'typed-function';
 import type { TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToSelf } from 'typed-function';
+
+// WASM support state (loaded dynamically when available)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let wasmModule: any = null;
+let wasmInitialized = false;
+let wasmAvailable = false;
+
+/**
+ * Initialize WASM dispatch for typed-function (optional, improves performance)
+ *
+ * This will attempt to load the WASM module from typed-function if available.
+ * Falls back gracefully to pure JS dispatch if WASM is not available.
+ *
+ * @returns Promise resolving to true if WASM was initialized successfully
+ */
+export async function initTypedWasm(): Promise<boolean> {
+  if (wasmInitialized) return wasmAvailable;
+
+  try {
+    // Dynamic import for WASM module (may not exist in all typed-function builds)
+    // Use string variable to prevent TypeScript from type-checking the module path
+    const wasmPath = 'typed-function/wasm';
+    wasmModule = await import(/* @vite-ignore */ wasmPath).catch(() => null);
+
+    if (wasmModule && typeof wasmModule.initWasm === 'function') {
+      await wasmModule.initWasm();
+      wasmAvailable = wasmModule.isWasmAvailable?.() ?? false;
+
+      if (wasmAvailable) {
+        // Register MathTS custom types with type masks
+        registerMathTSTypeMasks();
+      }
+    }
+  } catch {
+    // WASM not available, fallback to pure JS
+    wasmAvailable = false;
+  }
+
+  wasmInitialized = true;
+  return wasmAvailable;
+}
+
+/**
+ * Check if WASM dispatch is available
+ */
+export function isTypedWasmAvailable(): boolean {
+  return wasmAvailable;
+}
+
+/**
+ * Register MathTS types with WASM type masks for efficient dispatch
+ */
+function registerMathTSTypeMasks(): void {
+  if (!wasmModule || typeof wasmModule.registerCustomType !== 'function') return;
+
+  // Register custom type masks for MathTS types
+  // These enable WASM-accelerated type checking
+  wasmModule.registerCustomType('Complex', (x: unknown) =>
+    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'Complex'
+  );
+  wasmModule.registerCustomType('Fraction', (x: unknown) =>
+    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'Fraction'
+  );
+  wasmModule.registerCustomType('BigNumber', (x: unknown) =>
+    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'BigNumber'
+  );
+  wasmModule.registerCustomType('DenseMatrix', (x: unknown) =>
+    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'DenseMatrix'
+  );
+  wasmModule.registerCustomType('SparseMatrix', (x: unknown) =>
+    typeof x === 'object' && x !== null && (x as { type?: string }).type === 'SparseMatrix'
+  );
+  wasmModule.registerCustomType('Matrix', (x: unknown) =>
+    typeof x === 'object' && x !== null && 'rows' in x && 'cols' in x && 'get' in x
+  );
+}
 import { Complex, isComplex as _isComplex } from '../types/complex.js';
 import { Fraction, isFraction as _isFraction } from '../types/fraction.js';
 import { BigNumber, isBigNumber as _isBigNumber } from '../types/bignumber.js';

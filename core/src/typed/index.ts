@@ -38,6 +38,10 @@ export {
 
   // Unit type test function
   isUnit,
+
+  // WASM support
+  initTypedWasm,
+  isTypedWasmAvailable,
 } from './mathts-typed.js';
 
 export type { TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf } from './mathts-typed.js';

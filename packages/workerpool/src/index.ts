@@ -4,6 +4,8 @@
  * Worker pool management for MathTS parallel computations.
  * Wraps the workerpool library with MathTS-specific operations and optimizations.
  *
+ * Supports WASM-accelerated task queue when available for improved performance.
+ *
  * @packageDocumentation
  */
 
@@ -15,6 +17,86 @@ import {
   type ExecOptions,
   type PoolStats,
 } from 'workerpool';
+
+// =============================================================================
+// WASM Support
+// =============================================================================
+
+// WASM module and feature detection (loaded dynamically)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let wasmModule: any = null;
+
+/**
+ * WASM feature status
+ */
+export interface WasmFeatureStatus {
+  hasWebAssembly: boolean;
+  hasSharedArrayBuffer: boolean;
+  hasAtomics: boolean;
+  hasWASMThreads: boolean;
+}
+
+let wasmFeatures: WasmFeatureStatus | null = null;
+
+/**
+ * Initialize WASM task queue support (optional, improves performance)
+ *
+ * This will attempt to load the WASM module from workerpool if available.
+ * Falls back gracefully if WASM support is not available.
+ *
+ * @returns Promise resolving to feature status
+ */
+export async function initWorkerWasm(): Promise<WasmFeatureStatus | null> {
+  if (wasmFeatures !== null) return wasmFeatures;
+
+  try {
+    // Dynamic import for WASM module (may not exist in all workerpool builds)
+    // Use string variable to prevent TypeScript from type-checking the module path
+    const wasmPath = 'workerpool/wasm';
+    wasmModule = await import(/* @vite-ignore */ wasmPath).catch(() => null);
+
+    if (wasmModule && typeof wasmModule.detectWASMFeatures === 'function') {
+      const features = wasmModule.detectWASMFeatures();
+      wasmFeatures = {
+        hasWebAssembly: features.hasWebAssembly ?? false,
+        hasSharedArrayBuffer: features.hasSharedArrayBuffer ?? false,
+        hasAtomics: features.hasAtomics ?? false,
+        hasWASMThreads: features.hasWASMThreads ?? false,
+      };
+    } else {
+      wasmFeatures = {
+        hasWebAssembly: false,
+        hasSharedArrayBuffer: false,
+        hasAtomics: false,
+        hasWASMThreads: false,
+      };
+    }
+  } catch {
+    // WASM not available
+    wasmFeatures = {
+      hasWebAssembly: false,
+      hasSharedArrayBuffer: false,
+      hasAtomics: false,
+      hasWASMThreads: false,
+    };
+  }
+
+  return wasmFeatures;
+}
+
+/**
+ * Check if WASM task queue is available
+ */
+export function isWorkerWasmAvailable(): boolean {
+  return wasmFeatures?.hasWebAssembly ?? false;
+}
+
+/**
+ * Get WASM feature status
+ */
+export function getWasmFeatures(): WasmFeatureStatus | null {
+  return wasmFeatures;
+}
 
 // =============================================================================
 // Configuration Types

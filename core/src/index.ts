@@ -93,6 +93,10 @@ export {
 
   // Unit type test function
   isUnit,
+
+  // WASM support for typed-function
+  initTypedWasm,
+  isTypedWasmAvailable,
 } from './typed/index.js';
 
 export type { TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf } from './typed/index.js';
