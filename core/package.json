@@ -30,7 +30,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "typed-function": "^4.2.1"
+    "typed-function": "github:danielsimonjr/typed-function"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

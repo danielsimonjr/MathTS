@@ -11,19 +11,16 @@
  */
 
 import typed, { create } from 'typed-function';
-import type { TypedFunction } from 'typed-function';
+import type { TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToSelf } from 'typed-function';
 import { Complex, isComplex as _isComplex } from '../types/complex.js';
 import { Fraction, isFraction as _isFraction } from '../types/fraction.js';
 import { BigNumber, isBigNumber as _isBigNumber } from '../types/bignumber.js';
 
 // =============================================================================
-// TypedInstance type alias for typed-function instance
+// Re-export typed-function types for convenience
 // =============================================================================
 
-/**
- * Type alias for a typed-function instance
- */
-export type TypedInstance = TypedFunction;
+export type { TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToSelf };
 
 /**
  * Type definition for typed-function

@@ -40,4 +40,4 @@ export {
   isUnit,
 } from './mathts-typed.js';
 
-export type { TypedInstance, TypeDef, ConversionDef } from './mathts-typed.js';
+export type { TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf } from './mathts-typed.js';
