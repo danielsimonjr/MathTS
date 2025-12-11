@@ -1,0 +1,102 @@
+{
+  "phase": 2,
+  "sprint": 6,
+  "title": "WASM Matrix Operations",
+  "week": "Week 6",
+  "effort": "32-36 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 5 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "WASM Implementation",
+      "description": "Element-wise operations (WASM) - implement add, subtract, multiply, divide in AssemblyScript with SIMD",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 5"],
+      "files": ["matrix/assembly/elementwise.ts"]
+    },
+    {
+      "id": 2,
+      "category": "WASM Implementation",
+      "description": "Matrix transpose (WASM) - implement cache-blocked transpose for large matrices",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 5"],
+      "files": ["matrix/assembly/transpose.ts"]
+    },
+    {
+      "id": 3,
+      "category": "WASM Implementation",
+      "description": "Matrix multiplication (WASM) - implement matmul with tiled algorithm and SIMD vectorization",
+      "status": "pending",
+      "estimatedHours": 8,
+      "complexity": "High",
+      "dependencies": ["Sprint 5"],
+      "files": ["matrix/assembly/matmul.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Optimization",
+      "description": "SIMD optimizations - add SIMD (v128) intrinsics for parallel processing of f64x2 vectors",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "High",
+      "dependencies": [1, 2, 3],
+      "files": ["matrix/assembly/elementwise.ts", "matrix/assembly/matmul.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Backend",
+      "description": "Bind WASM to Backend - connect WASM functions to WASMBackend class interface",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3],
+      "files": ["matrix/src/backends/WASMBackend.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Benchmarking",
+      "description": "Performance benchmarks - create benchmarks comparing JS vs WASM for various matrix sizes",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [5],
+      "files": ["tools/benchmark/wasm/matmul.bench.ts", "tools/benchmark/wasm/elementwise.bench.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Testing",
+      "description": "WASM operation tests - verify correctness of WASM operations against JS reference",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [5],
+      "files": ["matrix/tests/wasm/operations.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "WASM matmul 5-10x faster than JS for 1000x1000 matrices",
+    "WASM operations produce identical results to JS",
+    "SIMD code path activates when available",
+    "Memory usage stays bounded for large matrices",
+    "All numerical accuracy tests pass"
+  ],
+  "filesCreated": [
+    "matrix/assembly/elementwise.ts",
+    "matrix/assembly/transpose.ts",
+    "matrix/assembly/matmul.ts",
+    "tools/benchmark/wasm/matmul.bench.ts",
+    "tools/benchmark/wasm/elementwise.bench.ts",
+    "matrix/tests/wasm/operations.test.ts"
+  ],
+  "filesModified": [
+    "matrix/src/backends/WASMBackend.ts",
+    "matrix/assembly/index.ts"
+  ],
+  "totalEstimatedHours": 36,
+  "notes": "Sprint 6 implements the core matrix operations in AssemblyScript WASM. Focus is on matmul, transpose, and element-wise operations with SIMD optimization."
+}

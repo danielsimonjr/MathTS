@@ -1,0 +1,88 @@
+{
+  "phase": 5,
+  "sprint": 18,
+  "title": "Arithmetic Functions (Part 2)",
+  "week": "Week 18",
+  "effort": "20-24 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 17 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Functions",
+      "description": "gcd, lcm - implement greatest common divisor and least common multiple",
+      "status": "pending",
+      "estimatedHours": 3,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 17"],
+      "files": ["functions/src/arithmetic/gcd.ts", "functions/src/arithmetic/lcm.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Functions",
+      "description": "mod, xgcd - implement modulo and extended GCD algorithm",
+      "status": "pending",
+      "estimatedHours": 3,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["functions/src/arithmetic/mod.ts", "functions/src/arithmetic/xgcd.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Functions",
+      "description": "dotMultiply, dotDivide, dotPow - implement element-wise matrix operations",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 17"],
+      "files": ["functions/src/arithmetic/dotMultiply.ts", "functions/src/arithmetic/dotDivide.ts", "functions/src/arithmetic/dotPow.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Functions",
+      "description": "nthRoot, hypot, norm - implement advanced numeric operations",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 17"],
+      "files": ["functions/src/arithmetic/nthRoot.ts", "functions/src/arithmetic/hypot.ts", "functions/src/arithmetic/norm.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Testing",
+      "description": "Extended arithmetic tests - test GCD/LCM, dot operations, and advanced functions",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4],
+      "files": ["functions/tests/arithmetic/gcd.test.ts", "functions/tests/arithmetic/dot.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "GCD/LCM work for integers and BigNumber",
+    "Extended GCD produces correct Bezout coefficients",
+    "Dot operations work element-wise on matrices",
+    "nthRoot handles fractional roots correctly",
+    "All functions have comprehensive test coverage"
+  ],
+  "filesCreated": [
+    "functions/src/arithmetic/gcd.ts",
+    "functions/src/arithmetic/lcm.ts",
+    "functions/src/arithmetic/mod.ts",
+    "functions/src/arithmetic/xgcd.ts",
+    "functions/src/arithmetic/dotMultiply.ts",
+    "functions/src/arithmetic/dotDivide.ts",
+    "functions/src/arithmetic/dotPow.ts",
+    "functions/src/arithmetic/nthRoot.ts",
+    "functions/src/arithmetic/hypot.ts",
+    "functions/src/arithmetic/norm.ts",
+    "functions/tests/arithmetic/gcd.test.ts",
+    "functions/tests/arithmetic/dot.test.ts"
+  ],
+  "filesModified": [
+    "functions/src/arithmetic/index.ts",
+    "functions/src/index.ts"
+  ],
+  "totalEstimatedHours": 20,
+  "notes": "Sprint 18 completes arithmetic functions with number theory operations and element-wise matrix operations."
+}

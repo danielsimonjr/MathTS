@@ -1,0 +1,91 @@
+{
+  "phase": 1,
+  "sprint": 3,
+  "title": "typed-function Integration",
+  "week": "Week 3",
+  "effort": "24-28 hours",
+  "status": "in_progress",
+  "prerequisite": "Sprint 2 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Integration",
+      "description": "Create MathTS typed instance - configure typed-function with MathTS-specific type registry and test functions",
+      "status": "completed",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 2"],
+      "files": ["core/src/typed/mathts-typed.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Integration",
+      "description": "Register core types - add all MathTS types (number, Complex, Fraction, BigNumber, Matrix, Unit) to typed registry with proper test functions",
+      "status": "completed",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["core/src/typed/type-definitions.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Integration",
+      "description": "Define type conversions - implement automatic conversions: number→Complex, number→BigNumber, Array→Matrix, etc.",
+      "status": "completed",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [2],
+      "files": ["core/src/typed/mathts-typed.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Factory Pattern",
+      "description": "Implement factory pattern - create FunctionRegistry class for dependency injection and lazy function creation",
+      "status": "completed",
+      "estimatedHours": 6,
+      "complexity": "High",
+      "dependencies": [1],
+      "files": ["core/src/factory/factory.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Factory Pattern",
+      "description": "Dependency injection system - implement dependency resolution for inter-function references (e.g., multiply depends on add)",
+      "status": "completed",
+      "estimatedHours": 4,
+      "complexity": "High",
+      "dependencies": [4],
+      "files": ["core/src/factory/dependencies.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Testing",
+      "description": "Test typed dispatch - verify all type combinations dispatch correctly, test conversion chains, test error handling",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4, 5],
+      "files": ["core/tests/typed/dispatch.test.ts", "core/tests/typed/conversions.test.ts", "core/tests/factory/factory.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "typed-function dispatches correctly for all MathTS types",
+    "Type conversions work automatically when needed",
+    "Factory pattern resolves dependencies correctly",
+    "Circular dependency detection works",
+    "Error messages are informative for type mismatches"
+  ],
+  "filesCreated": [
+    "core/src/typed/mathts-typed.ts",
+    "core/src/typed/type-definitions.ts",
+    "core/src/typed/index.ts",
+    "core/src/factory/factory.ts",
+    "core/src/factory/dependencies.ts",
+    "core/src/factory/index.ts"
+  ],
+  "filesModified": [
+    "core/src/index.ts"
+  ],
+  "totalEstimatedHours": 28,
+  "notes": "Sprint 3 integrates typed-function for runtime type dispatch and implements the factory pattern for function creation with dependency injection. This is the foundation for all MathTS function definitions."
+}

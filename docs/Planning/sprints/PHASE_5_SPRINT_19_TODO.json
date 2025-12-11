@@ -1,0 +1,86 @@
+{
+  "phase": 5,
+  "sprint": 19,
+  "title": "Matrix Functions (Part 1)",
+  "week": "Week 19",
+  "effort": "28-32 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 18 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Functions",
+      "description": "det, inv - implement determinant and matrix inverse using backend decompositions",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 18"],
+      "files": ["functions/src/matrix/det.ts", "functions/src/matrix/inv.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Functions",
+      "description": "transpose, trace - implement matrix transpose and trace operations",
+      "status": "pending",
+      "estimatedHours": 3,
+      "complexity": "Low",
+      "dependencies": ["Sprint 18"],
+      "files": ["functions/src/matrix/transpose.ts", "functions/src/matrix/trace.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Functions",
+      "description": "eigs, svd - expose eigendecomposition and SVD as high-level functions",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 18"],
+      "files": ["functions/src/matrix/eigs.ts", "functions/src/matrix/svd.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Functions",
+      "description": "lu, qr - expose LU and QR decomposition as high-level functions",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 18"],
+      "files": ["functions/src/matrix/lu.ts", "functions/src/matrix/qr.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Testing",
+      "description": "Matrix function tests - test decompositions, determinant, inverse for various matrix types",
+      "status": "pending",
+      "estimatedHours": 8,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4],
+      "files": ["functions/tests/matrix/decomposition.test.ts", "functions/tests/matrix/basic.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "Determinant matches expected values for test matrices",
+    "inv(A) * A = I within numerical tolerance",
+    "eigs returns correct eigenvalue/eigenvector pairs",
+    "SVD satisfies A = U * S * V'",
+    "LU and QR produce valid factorizations"
+  ],
+  "filesCreated": [
+    "functions/src/matrix/det.ts",
+    "functions/src/matrix/inv.ts",
+    "functions/src/matrix/transpose.ts",
+    "functions/src/matrix/trace.ts",
+    "functions/src/matrix/eigs.ts",
+    "functions/src/matrix/svd.ts",
+    "functions/src/matrix/lu.ts",
+    "functions/src/matrix/qr.ts",
+    "functions/src/matrix/index.ts",
+    "functions/tests/matrix/decomposition.test.ts",
+    "functions/tests/matrix/basic.test.ts"
+  ],
+  "filesModified": [
+    "functions/src/index.ts"
+  ],
+  "totalEstimatedHours": 27,
+  "notes": "Sprint 19 exposes matrix operations from the backend as high-level typed functions. These form the core linear algebra API."
+}

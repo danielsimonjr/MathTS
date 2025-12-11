@@ -1,0 +1,90 @@
+{
+  "phase": 4,
+  "sprint": 16,
+  "title": "Unified Backend Selection",
+  "week": "Week 16",
+  "effort": "22-26 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 15 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Backend",
+      "description": "Update BackendManager for GPU - integrate GPUBackend into backend selection logic",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 15"],
+      "files": ["matrix/src/backends/BackendManager.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Backend",
+      "description": "Adaptive threshold tuning - implement dynamic threshold adjustment based on runtime profiling",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "High",
+      "dependencies": [1],
+      "files": ["matrix/src/backends/BackendManager.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Backend",
+      "description": "Backend preference API - expose API for users to configure backend preferences",
+      "status": "pending",
+      "estimatedHours": 3,
+      "complexity": "Low",
+      "dependencies": [2],
+      "files": ["matrix/src/backends/BackendManager.ts", "matrix/src/config.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Benchmarking",
+      "description": "End-to-end benchmarks - comprehensive benchmarks comparing JS, WASM, and GPU backends",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3],
+      "files": ["tools/benchmark/e2e/backend-comparison.bench.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Documentation",
+      "description": "Backend documentation - document backend selection, configuration, and capabilities",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Low",
+      "dependencies": [1, 2, 3],
+      "files": ["docs/backends.md"]
+    },
+    {
+      "id": 6,
+      "category": "Documentation",
+      "description": "Performance guide - document performance characteristics and tuning guidelines",
+      "status": "pending",
+      "estimatedHours": 3,
+      "complexity": "Low",
+      "dependencies": [4],
+      "files": ["docs/performance.md"]
+    }
+  ],
+  "successCriteria": [
+    "Three-tier backend selection (JS → WASM → GPU) works seamlessly",
+    "Adaptive thresholds improve default performance",
+    "User preferences are respected when configured",
+    "Benchmarks demonstrate clear performance tiers",
+    "Documentation covers all backend options"
+  ],
+  "filesCreated": [
+    "matrix/src/config.ts",
+    "tools/benchmark/e2e/backend-comparison.bench.ts",
+    "docs/backends.md",
+    "docs/performance.md"
+  ],
+  "filesModified": [
+    "matrix/src/backends/BackendManager.ts",
+    "matrix/src/backends/index.ts"
+  ],
+  "totalEstimatedHours": 22,
+  "notes": "Sprint 16 completes Phase 4 by unifying backend selection. The three-tier system (JS → WASM → GPU) automatically selects optimal backend based on operation and data size."
+}

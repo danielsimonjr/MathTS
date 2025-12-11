@@ -1,0 +1,101 @@
+{
+  "phase": 4,
+  "sprint": 14,
+  "title": "GPU Matrix Operations",
+  "week": "Week 14",
+  "effort": "32-36 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 13 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Shaders",
+      "description": "Element-wise shader - implement WGSL compute shader for add, subtract, multiply, divide",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 13"],
+      "files": ["matrix/gpu/shaders/elementwise.wgsl"]
+    },
+    {
+      "id": 2,
+      "category": "Shaders",
+      "description": "Matmul shader (naive) - implement basic matrix multiplication compute shader",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "High",
+      "dependencies": ["Sprint 13"],
+      "files": ["matrix/gpu/shaders/matmul.wgsl"]
+    },
+    {
+      "id": 3,
+      "category": "Shaders",
+      "description": "Matmul shader (tiled) - implement tiled/blocked matmul for cache efficiency",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "High",
+      "dependencies": [2],
+      "files": ["matrix/gpu/shaders/matmul.wgsl"]
+    },
+    {
+      "id": 4,
+      "category": "Shaders",
+      "description": "Reduce shader - implement parallel reduction for sum, max, min operations",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 13"],
+      "files": ["matrix/gpu/shaders/reduce.wgsl"]
+    },
+    {
+      "id": 5,
+      "category": "Backend",
+      "description": "Bind shaders to GPUBackend - connect WGSL shaders to GPUBackend interface methods",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4],
+      "files": ["matrix/src/backends/GPUBackend.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Benchmarking",
+      "description": "GPU operation benchmarks - measure GPU vs CPU performance for various matrix sizes",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [5],
+      "files": ["tools/benchmark/gpu/matmul.bench.ts", "tools/benchmark/gpu/elementwise.bench.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Testing",
+      "description": "GPU accuracy tests - verify GPU operations match CPU within numerical tolerance",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [5],
+      "files": ["matrix/tests/gpu/operations.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "Element-wise GPU ops are faster than CPU for large matrices",
+    "Tiled matmul achieves >10x speedup for 4096x4096 matrices",
+    "Reduce operations correctly compute sum/max/min",
+    "GPU results match CPU within 1e-6 tolerance",
+    "Benchmarks show clear GPU advantage at threshold"
+  ],
+  "filesCreated": [
+    "matrix/gpu/shaders/elementwise.wgsl",
+    "matrix/gpu/shaders/matmul.wgsl",
+    "matrix/gpu/shaders/reduce.wgsl",
+    "tools/benchmark/gpu/matmul.bench.ts",
+    "tools/benchmark/gpu/elementwise.bench.ts",
+    "matrix/tests/gpu/operations.test.ts"
+  ],
+  "filesModified": [
+    "matrix/src/backends/GPUBackend.ts"
+  ],
+  "totalEstimatedHours": 32,
+  "notes": "Sprint 14 implements core GPU matrix operations in WGSL. The tiled matmul is critical for achieving high performance on large matrices."
+}

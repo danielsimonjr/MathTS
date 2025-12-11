@@ -1,0 +1,110 @@
+{
+  "phase": 1,
+  "sprint": 1,
+  "title": "Project Setup & Core Types",
+  "week": "Week 1",
+  "effort": "18-22 hours",
+  "status": "completed",
+  "prerequisite": "typed-function and workerpool TypeScript conversions complete",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Build Infrastructure",
+      "description": "Initialize monorepo with npm workspaces - create root package.json with workspace configuration for core, matrix, functions, expression, parallel packages",
+      "status": "completed",
+      "estimatedHours": 2,
+      "complexity": "Low",
+      "dependencies": [],
+      "files": ["package.json", "pnpm-workspace.yaml"]
+    },
+    {
+      "id": 2,
+      "category": "Build Infrastructure",
+      "description": "Configure TypeScript, Vitest, ESLint - strict TypeScript config with ESM modules, Vitest for testing, ESLint for linting",
+      "status": "completed",
+      "estimatedHours": 2,
+      "complexity": "Low",
+      "dependencies": [1],
+      "files": ["tsconfig.json", "vitest.config.ts", ".eslintrc.js"]
+    },
+    {
+      "id": 3,
+      "category": "Package Integration",
+      "description": "Link typed-function-ts package - create symlink to local typed-function TypeScript port in packages/ folder",
+      "status": "completed",
+      "estimatedHours": 1,
+      "complexity": "Low",
+      "dependencies": [1],
+      "files": ["packages/typed-function/"]
+    },
+    {
+      "id": 4,
+      "category": "Package Integration",
+      "description": "Link workerpool-ts package - create symlink to local workerpool TypeScript port in packages/ folder",
+      "status": "completed",
+      "estimatedHours": 1,
+      "complexity": "Low",
+      "dependencies": [1],
+      "files": ["packages/workerpool/"]
+    },
+    {
+      "id": 5,
+      "category": "Core Module",
+      "description": "Create core package structure - set up @mathts/core package with src/, tests/, package.json, tsconfig.json",
+      "status": "completed",
+      "estimatedHours": 2,
+      "complexity": "Low",
+      "dependencies": [1],
+      "files": ["core/package.json", "core/tsconfig.json", "core/src/"]
+    },
+    {
+      "id": 6,
+      "category": "Type Definitions",
+      "description": "Implement base interfaces - MathTSValue, Scalar, IMatrix, IComplex, MatrixBackend interfaces defining core type contracts",
+      "status": "completed",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [5],
+      "files": ["core/src/types/interfaces.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Type Definitions",
+      "description": "Implement number type wrapper - create number type with typed-function integration for runtime dispatch",
+      "status": "completed",
+      "estimatedHours": 2,
+      "complexity": "Low",
+      "dependencies": [6],
+      "files": ["core/src/types/number.ts"]
+    },
+    {
+      "id": 8,
+      "category": "Testing",
+      "description": "Write core type tests - comprehensive tests for interfaces, type checking, and basic operations",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [6, 7],
+      "files": ["core/tests/types/"]
+    }
+  ],
+  "successCriteria": [
+    "Monorepo builds successfully with npm run build",
+    "typed-function package accessible via workspace:* protocol",
+    "workerpool package accessible via workspace:* protocol",
+    "Core type interfaces compile with strict TypeScript",
+    "Basic type tests pass with Vitest"
+  ],
+  "filesCreated": [
+    "package.json",
+    "turbo.json",
+    "core/package.json",
+    "core/src/index.ts",
+    "core/src/types/interfaces.ts",
+    "core/src/typed/mathts-typed.ts",
+    "core/src/factory/factory.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 18,
+  "notes": "Sprint 1 establishes the foundational monorepo structure and core type system. The typed-function and workerpool packages are linked as local TypeScript forks for integrated development."
+}

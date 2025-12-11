@@ -1,0 +1,92 @@
+{
+  "phase": 4,
+  "sprint": 13,
+  "title": "WebGPU Infrastructure",
+  "week": "Week 13",
+  "effort": "24-28 hours",
+  "status": "pending",
+  "prerequisite": "Phase 3 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Infrastructure",
+      "description": "WebGPU detection - implement runtime detection of WebGPU support and adapter capabilities",
+      "status": "pending",
+      "estimatedHours": 2,
+      "complexity": "Low",
+      "dependencies": ["Phase 3"],
+      "files": ["matrix/src/backends/gpu/detect.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Infrastructure",
+      "description": "GPUContext class - create WebGPU device, queue, and command encoder management",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "High",
+      "dependencies": [1],
+      "files": ["matrix/src/backends/gpu/GPUContext.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Infrastructure",
+      "description": "Buffer management - implement GPU buffer pool with allocation, deallocation, and reuse",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [2],
+      "files": ["matrix/src/backends/gpu/BufferPool.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Infrastructure",
+      "description": "Shader compilation pipeline - implement WGSL shader loading, compilation, and caching",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [2],
+      "files": ["matrix/src/backends/gpu/ShaderManager.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Backend",
+      "description": "GPUBackend skeleton - create GPUBackend class implementing MatrixBackend interface",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [2, 3, 4],
+      "files": ["matrix/src/backends/GPUBackend.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Testing",
+      "description": "GPU initialization tests - test device creation, buffer allocation, and shader compilation",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [5],
+      "files": ["matrix/tests/gpu/initialization.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "WebGPU detection correctly identifies support",
+    "GPUContext initializes device and queue",
+    "Buffer pool efficiently manages GPU memory",
+    "Shader manager compiles and caches WGSL shaders",
+    "GPUBackend skeleton passes initialization tests"
+  ],
+  "filesCreated": [
+    "matrix/src/backends/gpu/detect.ts",
+    "matrix/src/backends/gpu/GPUContext.ts",
+    "matrix/src/backends/gpu/BufferPool.ts",
+    "matrix/src/backends/gpu/ShaderManager.ts",
+    "matrix/src/backends/gpu/index.ts",
+    "matrix/src/backends/GPUBackend.ts",
+    "matrix/tests/gpu/initialization.test.ts"
+  ],
+  "filesModified": [
+    "matrix/src/backends/index.ts"
+  ],
+  "totalEstimatedHours": 24,
+  "notes": "Sprint 13 establishes WebGPU infrastructure. The GPUContext and BufferPool provide the foundation for GPU-accelerated matrix operations."
+}

@@ -1,0 +1,74 @@
+{
+  "phase": 6,
+  "sprint": 26,
+  "title": "mathjs Compatibility Layer",
+  "week": "Week 26",
+  "effort": "22-26 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 25 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Analysis",
+      "description": "API compatibility analysis - document differences between mathjs and MathTS APIs",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 25"],
+      "files": ["docs/migration/api-diff.md"]
+    },
+    {
+      "id": 2,
+      "category": "Compatibility",
+      "description": "Compatibility shim - create @mathts/compat package for mathjs compatibility",
+      "status": "pending",
+      "estimatedHours": 8,
+      "complexity": "High",
+      "dependencies": [1],
+      "files": ["compat/package.json", "compat/src/index.ts", "compat/src/shims.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Documentation",
+      "description": "Migration guide - document step-by-step migration from mathjs to MathTS",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [1, 2],
+      "files": ["docs/migration/guide.md"]
+    },
+    {
+      "id": 4,
+      "category": "Documentation",
+      "description": "Example migrations - provide real-world migration examples",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Low",
+      "dependencies": [3],
+      "files": ["docs/migration/examples/basic.md", "docs/migration/examples/matrix.md", "docs/migration/examples/complex.md"]
+    }
+  ],
+  "successCriteria": [
+    "API differences are clearly documented",
+    "Compatibility shim allows drop-in replacement",
+    "Migration guide covers common patterns",
+    "Example migrations are tested and working",
+    "Breaking changes are clearly marked"
+  ],
+  "filesCreated": [
+    "docs/migration/api-diff.md",
+    "compat/package.json",
+    "compat/tsconfig.json",
+    "compat/src/index.ts",
+    "compat/src/shims.ts",
+    "docs/migration/guide.md",
+    "docs/migration/examples/basic.md",
+    "docs/migration/examples/matrix.md",
+    "docs/migration/examples/complex.md"
+  ],
+  "filesModified": [
+    "package.json"
+  ],
+  "totalEstimatedHours": 22,
+  "notes": "Sprint 26 provides migration path from mathjs. The compat layer helps users transition gradually."
+}

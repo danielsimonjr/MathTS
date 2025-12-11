@@ -1,7 +1,7 @@
 {
-  "name": "@mathts/matrix",
+  "name": "@mathts/expression",
   "version": "0.1.0",
-  "description": "High-performance matrix operations with multi-backend support (JS/WASM/GPU)",
+  "description": "Expression parser and evaluator for MathTS",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -16,13 +16,10 @@
   },
   "files": [
     "dist",
-    "assembly",
-    "gpu",
     "README.md"
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
-    "build:wasm": "asc assembly/index.ts -o dist/matrix.wasm --optimize",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -34,10 +31,10 @@
   },
   "dependencies": {
     "typed-function": "workspace:*",
-    "@mathts/core": "workspace:*"
+    "@mathts/core": "workspace:*",
+    "@mathts/functions": "workspace:*"
   },
   "devDependencies": {
-    "assemblyscript": "^0.27.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "vitest": "^2.0.0"
@@ -48,15 +45,14 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/danielsimonjr/mathts",
-    "directory": "matrix"
+    "directory": "expression"
   },
   "keywords": [
     "math",
     "typescript",
-    "matrix",
-    "linear-algebra",
-    "wasm",
-    "webgpu",
-    "simd"
+    "expression",
+    "parser",
+    "evaluator",
+    "compiler"
   ]
 }

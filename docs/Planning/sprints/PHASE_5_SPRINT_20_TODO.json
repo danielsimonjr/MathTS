@@ -1,0 +1,92 @@
+{
+  "phase": 5,
+  "sprint": 20,
+  "title": "Matrix Functions (Part 2)",
+  "week": "Week 20",
+  "effort": "26-30 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 19 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Functions",
+      "description": "concat, reshape, flatten, squeeze - implement matrix shape manipulation functions",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 19"],
+      "files": ["functions/src/matrix/concat.ts", "functions/src/matrix/reshape.ts", "functions/src/matrix/flatten.ts", "functions/src/matrix/squeeze.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Functions",
+      "description": "diag, identity, ones, zeros - implement matrix creation functions",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Low",
+      "dependencies": ["Sprint 19"],
+      "files": ["functions/src/matrix/diag.ts", "functions/src/matrix/identity.ts", "functions/src/matrix/ones.ts", "functions/src/matrix/zeros.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Functions",
+      "description": "dot, cross - implement dot product and cross product",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 19"],
+      "files": ["functions/src/matrix/dot.ts", "functions/src/matrix/cross.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Functions",
+      "description": "kron, expm, sqrtm - implement Kronecker product and matrix functions",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "High",
+      "dependencies": ["Sprint 19"],
+      "files": ["functions/src/matrix/kron.ts", "functions/src/matrix/expm.ts", "functions/src/matrix/sqrtm.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Testing",
+      "description": "Matrix manipulation tests - test shape operations, creation, and products",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4],
+      "files": ["functions/tests/matrix/shape.test.ts", "functions/tests/matrix/creation.test.ts", "functions/tests/matrix/products.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "reshape preserves data while changing dimensions",
+    "identity produces proper identity matrices",
+    "dot product matches mathematical definition",
+    "cross product is orthogonal to both inputs",
+    "kron produces correct Kronecker product"
+  ],
+  "filesCreated": [
+    "functions/src/matrix/concat.ts",
+    "functions/src/matrix/reshape.ts",
+    "functions/src/matrix/flatten.ts",
+    "functions/src/matrix/squeeze.ts",
+    "functions/src/matrix/diag.ts",
+    "functions/src/matrix/identity.ts",
+    "functions/src/matrix/ones.ts",
+    "functions/src/matrix/zeros.ts",
+    "functions/src/matrix/dot.ts",
+    "functions/src/matrix/cross.ts",
+    "functions/src/matrix/kron.ts",
+    "functions/src/matrix/expm.ts",
+    "functions/src/matrix/sqrtm.ts",
+    "functions/tests/matrix/shape.test.ts",
+    "functions/tests/matrix/creation.test.ts",
+    "functions/tests/matrix/products.test.ts"
+  ],
+  "filesModified": [
+    "functions/src/matrix/index.ts",
+    "functions/src/index.ts"
+  ],
+  "totalEstimatedHours": 26,
+  "notes": "Sprint 20 completes matrix functions with shape manipulation, creation utilities, and advanced matrix operations."
+}

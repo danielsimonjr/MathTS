@@ -1,0 +1,88 @@
+{
+  "phase": 6,
+  "sprint": 28,
+  "title": "Release Preparation",
+  "week": "Week 28",
+  "effort": "26-30 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 27 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "CI/CD",
+      "description": "CI/CD pipeline - set up GitHub Actions for testing, building, and publishing",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 27"],
+      "files": [".github/workflows/ci.yml", ".github/workflows/release.yml"]
+    },
+    {
+      "id": 2,
+      "category": "CI/CD",
+      "description": "npm publishing setup - configure npm packages for publishing",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Low",
+      "dependencies": [1],
+      "files": ["core/package.json", "matrix/package.json", "functions/package.json", "parallel/package.json", "expression/package.json"]
+    },
+    {
+      "id": 3,
+      "category": "Optimization",
+      "description": "Bundle size optimization - configure tree-shaking, minification, and code splitting",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [2],
+      "files": ["rollup.config.js", "tsconfig.build.json"]
+    },
+    {
+      "id": 4,
+      "category": "Testing",
+      "description": "Performance regression tests - create benchmark suite for CI",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["tools/benchmark/regression/matmul.bench.ts", "tools/benchmark/regression/fft.bench.ts", ".github/workflows/benchmark.yml"]
+    },
+    {
+      "id": 5,
+      "category": "Release",
+      "description": "v1.0.0 release - prepare changelog, tag, and publish to npm",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Low",
+      "dependencies": [1, 2, 3, 4],
+      "files": ["CHANGELOG.md"]
+    }
+  ],
+  "successCriteria": [
+    "CI runs on every PR",
+    "Packages publish correctly to npm",
+    "Bundle size meets target (<50KB core)",
+    "Performance regressions are detected",
+    "v1.0.0 is published and functional"
+  ],
+  "filesCreated": [
+    ".github/workflows/ci.yml",
+    ".github/workflows/release.yml",
+    ".github/workflows/benchmark.yml",
+    "rollup.config.js",
+    "tsconfig.build.json",
+    "tools/benchmark/regression/matmul.bench.ts",
+    "tools/benchmark/regression/fft.bench.ts",
+    "CHANGELOG.md"
+  ],
+  "filesModified": [
+    "core/package.json",
+    "matrix/package.json",
+    "functions/package.json",
+    "parallel/package.json",
+    "expression/package.json",
+    "package.json"
+  ],
+  "totalEstimatedHours": 26,
+  "notes": "Sprint 28 is the final sprint, preparing for the v1.0.0 release. This includes CI/CD, optimization, and publishing to npm."
+}

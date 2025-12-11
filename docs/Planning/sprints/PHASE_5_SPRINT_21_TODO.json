@@ -1,0 +1,101 @@
+{
+  "phase": 5,
+  "sprint": 21,
+  "title": "Statistical Functions",
+  "week": "Week 21",
+  "effort": "24-28 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 20 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Functions",
+      "description": "mean, median, mode - implement central tendency measures",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 20"],
+      "files": ["functions/src/statistics/mean.ts", "functions/src/statistics/median.ts", "functions/src/statistics/mode.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Functions",
+      "description": "std, variance - implement standard deviation and variance",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["functions/src/statistics/std.ts", "functions/src/statistics/variance.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Functions",
+      "description": "min, max, sum, prod - implement aggregation functions with axis support",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 20"],
+      "files": ["functions/src/statistics/min.ts", "functions/src/statistics/max.ts", "functions/src/statistics/sum.ts", "functions/src/statistics/prod.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Functions",
+      "description": "quantile, percentile, mad - implement quantiles and median absolute deviation",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["functions/src/statistics/quantile.ts", "functions/src/statistics/mad.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Functions",
+      "description": "corr, cov - implement correlation and covariance matrices",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [2],
+      "files": ["functions/src/statistics/corr.ts", "functions/src/statistics/cov.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Testing",
+      "description": "Statistics function tests - test all statistical functions with known distributions",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4, 5],
+      "files": ["functions/tests/statistics/central.test.ts", "functions/tests/statistics/spread.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "Mean/median/mode match expected values",
+    "Variance uses Bessel's correction by default",
+    "Aggregations support axis parameter",
+    "Quantile uses linear interpolation",
+    "Correlation matrix is symmetric with 1s on diagonal"
+  ],
+  "filesCreated": [
+    "functions/src/statistics/mean.ts",
+    "functions/src/statistics/median.ts",
+    "functions/src/statistics/mode.ts",
+    "functions/src/statistics/std.ts",
+    "functions/src/statistics/variance.ts",
+    "functions/src/statistics/min.ts",
+    "functions/src/statistics/max.ts",
+    "functions/src/statistics/sum.ts",
+    "functions/src/statistics/prod.ts",
+    "functions/src/statistics/quantile.ts",
+    "functions/src/statistics/mad.ts",
+    "functions/src/statistics/corr.ts",
+    "functions/src/statistics/cov.ts",
+    "functions/src/statistics/index.ts",
+    "functions/tests/statistics/central.test.ts",
+    "functions/tests/statistics/spread.test.ts"
+  ],
+  "filesModified": [
+    "functions/src/index.ts"
+  ],
+  "totalEstimatedHours": 24,
+  "notes": "Sprint 21 implements core statistical functions. These are frequently used for data analysis and machine learning preprocessing."
+}

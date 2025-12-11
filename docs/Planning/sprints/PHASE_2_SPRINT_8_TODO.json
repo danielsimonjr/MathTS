@@ -1,0 +1,92 @@
+{
+  "phase": 2,
+  "sprint": 8,
+  "title": "Backend Manager & Sparse Matrices",
+  "week": "Week 8",
+  "effort": "29-33 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 7 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Backend",
+      "description": "BackendManager implementation - create centralized backend management with JS, WASM, GPU support",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 7"],
+      "files": ["matrix/src/backends/index.ts", "matrix/src/backends/BackendManager.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Backend",
+      "description": "Auto-selection logic - implement automatic backend selection based on matrix size and operation type",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["matrix/src/backends/BackendManager.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Core Module",
+      "description": "SparseMatrix (CSR format) - implement Compressed Sparse Row matrix storage format",
+      "status": "pending",
+      "estimatedHours": 8,
+      "complexity": "High",
+      "dependencies": ["Sprint 7"],
+      "files": ["matrix/src/types/SparseMatrix.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Core Module",
+      "description": "Sparse operations (JS) - implement add, multiply, transpose for sparse matrices",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "High",
+      "dependencies": [3],
+      "files": ["matrix/src/types/SparseMatrix.ts", "matrix/src/backends/JSBackend.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Core Module",
+      "description": "Sparse ↔ Dense conversion - implement toDense() and toSparse() methods",
+      "status": "pending",
+      "estimatedHours": 3,
+      "complexity": "Medium",
+      "dependencies": [3, 4],
+      "files": ["matrix/src/types/SparseMatrix.ts", "matrix/src/types/DenseMatrix.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Testing",
+      "description": "Sparse tests - comprehensive tests for CSR storage, sparse operations, and conversions",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [3, 4, 5],
+      "files": ["matrix/tests/sparse/SparseMatrix.test.ts", "matrix/tests/sparse/operations.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "BackendManager auto-selects optimal backend based on size",
+    "SparseMatrix stores data in CSR format efficiently",
+    "Sparse-dense multiplication produces correct results",
+    "Sparse ↔ Dense conversions are lossless",
+    "Sparse operations maintain sparsity where possible"
+  ],
+  "filesCreated": [
+    "matrix/src/backends/BackendManager.ts",
+    "matrix/src/types/SparseMatrix.ts",
+    "matrix/tests/sparse/SparseMatrix.test.ts",
+    "matrix/tests/sparse/operations.test.ts"
+  ],
+  "filesModified": [
+    "matrix/src/backends/index.ts",
+    "matrix/src/backends/JSBackend.ts",
+    "matrix/src/types/DenseMatrix.ts",
+    "matrix/src/types/index.ts"
+  ],
+  "totalEstimatedHours": 29,
+  "notes": "Sprint 8 completes Phase 2 by adding backend auto-selection and sparse matrix support. The CSR format is efficient for sparse linear algebra operations."
+}

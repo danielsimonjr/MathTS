@@ -1,0 +1,99 @@
+{
+  "phase": 5,
+  "sprint": 24,
+  "title": "Expression Parser",
+  "week": "Week 24",
+  "effort": "36-40 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 23 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Parser",
+      "description": "Expression tokenizer - implement lexer for mathematical expressions",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "High",
+      "dependencies": ["Sprint 23"],
+      "files": ["expression/src/parser/tokenizer.ts", "expression/src/parser/tokens.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Parser",
+      "description": "Expression parser - implement recursive descent parser for expressions",
+      "status": "pending",
+      "estimatedHours": 8,
+      "complexity": "High",
+      "dependencies": [1],
+      "files": ["expression/src/parser/parser.ts", "expression/src/parser/nodes.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Parser",
+      "description": "AST nodes - implement expression AST node types",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [2],
+      "files": ["expression/src/parser/nodes.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Evaluator",
+      "description": "Expression evaluator - implement AST evaluation with scope support",
+      "status": "pending",
+      "estimatedHours": 8,
+      "complexity": "High",
+      "dependencies": [2, 3],
+      "files": ["expression/src/evaluator/evaluator.ts", "expression/src/evaluator/scope.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Compiler",
+      "description": "Expression compiler - compile expressions to JavaScript functions",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "High",
+      "dependencies": [2, 3],
+      "files": ["expression/src/compiler/compiler.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Testing",
+      "description": "Expression tests - test parsing, evaluation, and compilation",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4, 5],
+      "files": ["expression/tests/parser.test.ts", "expression/tests/evaluator.test.ts", "expression/tests/compiler.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "Parser handles operator precedence correctly",
+    "Function calls are parsed and evaluated",
+    "Variables can be defined and referenced",
+    "Compiled expressions are faster than interpreted",
+    "Error messages indicate parse location"
+  ],
+  "filesCreated": [
+    "expression/package.json",
+    "expression/tsconfig.json",
+    "expression/src/index.ts",
+    "expression/src/parser/tokenizer.ts",
+    "expression/src/parser/tokens.ts",
+    "expression/src/parser/parser.ts",
+    "expression/src/parser/nodes.ts",
+    "expression/src/parser/index.ts",
+    "expression/src/evaluator/evaluator.ts",
+    "expression/src/evaluator/scope.ts",
+    "expression/src/evaluator/index.ts",
+    "expression/src/compiler/compiler.ts",
+    "expression/src/compiler/index.ts",
+    "expression/tests/parser.test.ts",
+    "expression/tests/evaluator.test.ts",
+    "expression/tests/compiler.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 38,
+  "notes": "Sprint 24 completes Phase 5 with the expression parser. This enables string-based mathematical expressions like mathjs's evaluate()."
+}

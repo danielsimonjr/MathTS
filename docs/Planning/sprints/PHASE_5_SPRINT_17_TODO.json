@@ -1,0 +1,90 @@
+{
+  "phase": 5,
+  "sprint": 17,
+  "title": "Arithmetic Functions (Part 1)",
+  "week": "Week 17",
+  "effort": "24-28 hours",
+  "status": "pending",
+  "prerequisite": "Phase 4 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Functions",
+      "description": "add, subtract, multiply, divide - implement basic arithmetic with typed dispatch",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": ["Phase 4"],
+      "files": ["functions/src/arithmetic/add.ts", "functions/src/arithmetic/subtract.ts", "functions/src/arithmetic/multiply.ts", "functions/src/arithmetic/divide.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Functions",
+      "description": "pow, sqrt, cbrt - implement power and root functions for all numeric types",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["functions/src/arithmetic/pow.ts", "functions/src/arithmetic/sqrt.ts", "functions/src/arithmetic/cbrt.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Functions",
+      "description": "exp, log, log10, log2 - implement exponential and logarithm functions",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["functions/src/arithmetic/exp.ts", "functions/src/arithmetic/log.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Functions",
+      "description": "abs, sign, ceil, floor, round - implement sign and rounding functions",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Low",
+      "dependencies": ["Phase 4"],
+      "files": ["functions/src/arithmetic/abs.ts", "functions/src/arithmetic/sign.ts", "functions/src/arithmetic/round.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Testing",
+      "description": "Arithmetic function tests - test all arithmetic functions for numbers, Complex, Fraction, BigNumber",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4],
+      "files": ["functions/tests/arithmetic/basic.test.ts", "functions/tests/arithmetic/power.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "All arithmetic functions work for number, Complex, Fraction, BigNumber",
+    "Type dispatch correctly selects implementation",
+    "Functions handle edge cases (division by zero, negative sqrt)",
+    "Complex arithmetic follows mathematical definitions",
+    "Test coverage >90% for arithmetic functions"
+  ],
+  "filesCreated": [
+    "functions/src/arithmetic/add.ts",
+    "functions/src/arithmetic/subtract.ts",
+    "functions/src/arithmetic/multiply.ts",
+    "functions/src/arithmetic/divide.ts",
+    "functions/src/arithmetic/pow.ts",
+    "functions/src/arithmetic/sqrt.ts",
+    "functions/src/arithmetic/cbrt.ts",
+    "functions/src/arithmetic/exp.ts",
+    "functions/src/arithmetic/log.ts",
+    "functions/src/arithmetic/abs.ts",
+    "functions/src/arithmetic/sign.ts",
+    "functions/src/arithmetic/round.ts",
+    "functions/src/arithmetic/index.ts",
+    "functions/tests/arithmetic/basic.test.ts",
+    "functions/tests/arithmetic/power.test.ts"
+  ],
+  "filesModified": [
+    "functions/src/index.ts"
+  ],
+  "totalEstimatedHours": 24,
+  "notes": "Sprint 17 begins the function library with core arithmetic operations. All functions use typed-function for polymorphic dispatch."
+}

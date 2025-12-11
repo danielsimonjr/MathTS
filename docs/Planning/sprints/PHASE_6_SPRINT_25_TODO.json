@@ -1,0 +1,82 @@
+{
+  "phase": 6,
+  "sprint": 25,
+  "title": "Main Package Assembly",
+  "week": "Week 25",
+  "effort": "21-25 hours",
+  "status": "pending",
+  "prerequisite": "Phase 5 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Package Setup",
+      "description": "Create mathts main package - set up @mathts/mathts package as main entry point",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Phase 5"],
+      "files": ["src/package.json", "src/tsconfig.json"]
+    },
+    {
+      "id": 2,
+      "category": "Core Module",
+      "description": "Instance factory (create) - implement create() function for customized instances",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["src/create.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Core Module",
+      "description": "Default instance - create default mathts instance with all functions",
+      "status": "pending",
+      "estimatedHours": 2,
+      "complexity": "Low",
+      "dependencies": [2],
+      "files": ["src/instance.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Core Module",
+      "description": "Public API exports - export all functions, types, and utilities",
+      "status": "pending",
+      "estimatedHours": 3,
+      "complexity": "Low",
+      "dependencies": [3],
+      "files": ["src/index.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Testing",
+      "description": "Integration tests - test full math instance with all packages integrated",
+      "status": "pending",
+      "estimatedHours": 8,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4],
+      "files": ["tests/integration/instance.test.ts", "tests/integration/functions.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "create() produces working math instance",
+    "Default instance has all functions",
+    "Re-exports are correctly typed",
+    "Import paths work as documented",
+    "Integration tests pass for common use cases"
+  ],
+  "filesCreated": [
+    "src/package.json",
+    "src/tsconfig.json",
+    "src/create.ts",
+    "src/instance.ts",
+    "src/index.ts",
+    "tests/integration/instance.test.ts",
+    "tests/integration/functions.test.ts"
+  ],
+  "filesModified": [
+    "package.json"
+  ],
+  "totalEstimatedHours": 21,
+  "notes": "Sprint 25 assembles the main MathTS package. This provides the unified entry point similar to mathjs's create() API."
+}

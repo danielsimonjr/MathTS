@@ -1,0 +1,81 @@
+{
+  "phase": 6,
+  "sprint": 27,
+  "title": "Documentation & Examples",
+  "week": "Week 27",
+  "effort": "30-34 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 26 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Documentation",
+      "description": "API documentation - generate comprehensive API docs for all packages",
+      "status": "pending",
+      "estimatedHours": 12,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 26"],
+      "files": ["docs/api/core.md", "docs/api/matrix.md", "docs/api/functions.md", "docs/api/parallel.md", "docs/api/expression.md"]
+    },
+    {
+      "id": 2,
+      "category": "Documentation",
+      "description": "Getting started guide - write quick start and installation guide",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Low",
+      "dependencies": ["Sprint 26"],
+      "files": ["docs/getting-started.md"]
+    },
+    {
+      "id": 3,
+      "category": "Documentation",
+      "description": "Advanced usage guide - document backend selection, parallelization, and optimization",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [2],
+      "files": ["docs/advanced.md"]
+    },
+    {
+      "id": 4,
+      "category": "Examples",
+      "description": "Example projects - create runnable example projects demonstrating MathTS",
+      "status": "pending",
+      "estimatedHours": 8,
+      "complexity": "Medium",
+      "dependencies": [2],
+      "files": ["examples/basic-usage/", "examples/matrix-operations/", "examples/parallel-computing/", "examples/webgpu-acceleration/"]
+    }
+  ],
+  "successCriteria": [
+    "API docs cover all public functions",
+    "Getting started works for new users",
+    "Advanced guide explains optimization",
+    "Examples are runnable and tested",
+    "Documentation is searchable"
+  ],
+  "filesCreated": [
+    "docs/api/core.md",
+    "docs/api/matrix.md",
+    "docs/api/functions.md",
+    "docs/api/parallel.md",
+    "docs/api/expression.md",
+    "docs/api/index.md",
+    "docs/getting-started.md",
+    "docs/advanced.md",
+    "examples/basic-usage/package.json",
+    "examples/basic-usage/index.ts",
+    "examples/matrix-operations/package.json",
+    "examples/matrix-operations/index.ts",
+    "examples/parallel-computing/package.json",
+    "examples/parallel-computing/index.ts",
+    "examples/webgpu-acceleration/package.json",
+    "examples/webgpu-acceleration/index.ts"
+  ],
+  "filesModified": [
+    "docs/README.md"
+  ],
+  "totalEstimatedHours": 30,
+  "notes": "Sprint 27 focuses on documentation and examples. Good documentation is essential for adoption and developer experience."
+}

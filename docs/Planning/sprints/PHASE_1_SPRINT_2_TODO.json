@@ -1,0 +1,103 @@
+{
+  "phase": 1,
+  "sprint": 2,
+  "title": "Complex & Fraction Types",
+  "week": "Week 2",
+  "effort": "26-30 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 1 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Type Implementation",
+      "description": "Implement Complex class - create Complex number class with re, im properties, implementing IComplex interface with proper immutability",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 1"],
+      "files": ["core/src/types/complex.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Type Implementation",
+      "description": "Complex arithmetic operations - implement add, subtract, multiply, divide methods with proper complex number math",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["core/src/types/complex.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Type Implementation",
+      "description": "Complex transcendental functions - implement exp, log, sqrt, pow, sin, cos, etc. for complex numbers",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "High",
+      "dependencies": [2],
+      "files": ["core/src/types/complex.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Type Implementation",
+      "description": "Implement Fraction class - create exact rational number representation with numerator/denominator as bigint",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": ["Sprint 1"],
+      "files": ["core/src/types/fraction.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Type Implementation",
+      "description": "Fraction arithmetic with GCD - implement add, subtract, multiply, divide with automatic reduction using GCD",
+      "status": "pending",
+      "estimatedHours": 3,
+      "complexity": "Medium",
+      "dependencies": [4],
+      "files": ["core/src/types/fraction.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Type Implementation",
+      "description": "BigNumber integration - create wrapper class around decimal.js for arbitrary precision decimals",
+      "status": "pending",
+      "estimatedHours": 3,
+      "complexity": "Low",
+      "dependencies": ["Sprint 1"],
+      "files": ["core/src/types/bignumber.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Testing",
+      "description": "Write comprehensive tests - test all type operations including edge cases, precision, and conversions",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [1, 2, 3, 4, 5, 6],
+      "files": ["core/tests/types/complex.test.ts", "core/tests/types/fraction.test.ts", "core/tests/types/bignumber.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "Complex arithmetic matches mathematical definitions",
+    "Complex transcendental functions pass accuracy tests",
+    "Fraction operations maintain exact precision",
+    "Fraction automatically reduces to lowest terms",
+    "BigNumber wrapper provides consistent API",
+    "All type conversions work correctly"
+  ],
+  "filesCreated": [
+    "core/src/types/complex.ts",
+    "core/src/types/fraction.ts",
+    "core/src/types/bignumber.ts",
+    "core/tests/types/complex.test.ts",
+    "core/tests/types/fraction.test.ts",
+    "core/tests/types/bignumber.test.ts"
+  ],
+  "filesModified": [
+    "core/src/types/index.ts",
+    "core/src/typed/mathts-typed.ts"
+  ],
+  "totalEstimatedHours": 30,
+  "notes": "Sprint 2 implements the fundamental numeric types beyond plain numbers. Complex provides complex arithmetic, Fraction provides exact rationals, and BigNumber provides arbitrary precision decimals."
+}

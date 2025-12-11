@@ -1,0 +1,103 @@
+{
+  "phase": 1,
+  "sprint": 4,
+  "title": "Basic Matrix Implementation",
+  "week": "Week 4",
+  "effort": "32-36 hours",
+  "status": "pending",
+  "prerequisite": "Sprint 3 completion",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Package Setup",
+      "description": "Create matrix package - set up @mathts/matrix package with src/, tests/, assembly/, gpu/ directories",
+      "status": "completed",
+      "estimatedHours": 2,
+      "complexity": "Low",
+      "dependencies": ["Sprint 3"],
+      "files": ["matrix/package.json", "matrix/tsconfig.json"]
+    },
+    {
+      "id": 2,
+      "category": "Core Module",
+      "description": "Implement Matrix base class - abstract Matrix class with common interface for DenseMatrix and SparseMatrix",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [1],
+      "files": ["matrix/src/types/Matrix.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Core Module",
+      "description": "Implement DenseMatrix - row-major dense matrix implementation with Float64Array backing store",
+      "status": "pending",
+      "estimatedHours": 8,
+      "complexity": "High",
+      "dependencies": [2],
+      "files": ["matrix/src/types/DenseMatrix.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Core Module",
+      "description": "Matrix indexing and slicing - implement get/set, row(), column(), slice() with view semantics (no copy where possible)",
+      "status": "pending",
+      "estimatedHours": 4,
+      "complexity": "Medium",
+      "dependencies": [3],
+      "files": ["matrix/src/types/DenseMatrix.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Backend",
+      "description": "Implement JSBackend - pure TypeScript matrix operation implementations as baseline",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [2],
+      "files": ["matrix/src/backends/JSBackend.ts", "matrix/src/backends/Backend.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Backend",
+      "description": "Basic operations - implement add, subtract, multiply (element-wise and matrix), transpose in JSBackend",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [5],
+      "files": ["matrix/src/backends/JSBackend.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Testing",
+      "description": "Matrix tests - comprehensive tests for DenseMatrix operations, indexing, slicing, and JSBackend",
+      "status": "pending",
+      "estimatedHours": 6,
+      "complexity": "Medium",
+      "dependencies": [3, 4, 5, 6],
+      "files": ["matrix/tests/DenseMatrix.test.ts", "matrix/tests/JSBackend.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "DenseMatrix stores data efficiently in Float64Array",
+    "Matrix indexing is O(1) for element access",
+    "Slicing returns views without copying data",
+    "Matrix multiplication is mathematically correct",
+    "All basic operations pass accuracy tests"
+  ],
+  "filesCreated": [
+    "matrix/package.json",
+    "matrix/tsconfig.json",
+    "matrix/src/index.ts",
+    "matrix/src/types/Matrix.ts",
+    "matrix/src/types/DenseMatrix.ts",
+    "matrix/src/backends/Backend.ts",
+    "matrix/src/backends/JSBackend.ts",
+    "matrix/src/backends/index.ts",
+    "matrix/tests/DenseMatrix.test.ts",
+    "matrix/tests/JSBackend.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 36,
+  "notes": "Sprint 4 implements the core DenseMatrix type with pure TypeScript backend. This establishes the matrix infrastructure before adding WASM/GPU acceleration in Phase 2."
+}

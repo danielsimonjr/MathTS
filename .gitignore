@@ -87,3 +87,7 @@ docs/.docusaurus/
 
 # Turbo
 .turbo/
+
+# Linked packages (separate repos)
+packages/typed-function/
+packages/workerpool/
