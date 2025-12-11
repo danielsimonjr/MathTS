@@ -88,6 +88,4 @@ docs/.docusaurus/
 # Turbo
 .turbo/
 
-# Linked packages (separate repos)
-packages/typed-function/
-packages/workerpool/
+# Note: packages/typed-function/ and packages/workerpool/ are now included in this repo

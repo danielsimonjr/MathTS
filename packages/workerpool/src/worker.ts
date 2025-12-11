@@ -1,0 +1,546 @@
+/**
+ * @mathts/workerpool Worker Implementation
+ *
+ * Worker functions for parallel MathTS computations.
+ * This file is loaded by worker threads and provides computation functions.
+ *
+ * @packageDocumentation
+ */
+
+import { worker } from 'workerpool';
+
+// =============================================================================
+// Array Reduction Operations
+// =============================================================================
+
+/**
+ * Sum elements in a chunk of Float64Array
+ */
+function sumChunk(buffer: ArrayBuffer, start: number, length: number): number {
+  const data = new Float64Array(buffer);
+  let total = 0;
+  const end = start + length;
+  for (let i = start; i < end; i++) {
+    total += data[i];
+  }
+  return total;
+}
+
+/**
+ * Compute dot product for a chunk
+ */
+function dotChunk(
+  aBuffer: ArrayBuffer,
+  bBuffer: ArrayBuffer,
+  start: number,
+  length: number
+): number {
+  const a = new Float64Array(aBuffer);
+  const b = new Float64Array(bBuffer);
+  let result = 0;
+  const end = start + length;
+
+  for (let i = start; i < end; i++) {
+    result += a[i] * b[i];
+  }
+
+  return result;
+}
+
+/**
+ * Compute variance statistics using Welford's algorithm
+ */
+function varianceChunk(
+  buffer: ArrayBuffer,
+  start: number,
+  length: number
+): { count: number; mean: number; m2: number } {
+  const data = new Float64Array(buffer);
+  let mean = 0;
+  let m2 = 0;
+
+  for (let i = 0; i < length; i++) {
+    const x = data[start + i];
+    const n = i + 1;
+    const delta = x - mean;
+    mean += delta / n;
+    const delta2 = x - mean;
+    m2 += delta * delta2;
+  }
+
+  return { count: length, mean, m2 };
+}
+
+/**
+ * Find min/max values in a chunk
+ */
+function minMaxChunk(
+  buffer: ArrayBuffer,
+  start: number,
+  length: number
+): { min: number; max: number; minIdx: number; maxIdx: number } {
+  const data = new Float64Array(buffer);
+  let min = data[start];
+  let max = data[start];
+  let minIdx = start;
+  let maxIdx = start;
+
+  const end = start + length;
+  for (let i = start + 1; i < end; i++) {
+    if (data[i] < min) {
+      min = data[i];
+      minIdx = i;
+    }
+    if (data[i] > max) {
+      max = data[i];
+      maxIdx = i;
+    }
+  }
+
+  return { min, max, minIdx, maxIdx };
+}
+
+/**
+ * Compute norm (sum of squares) for a chunk
+ */
+function normChunk(buffer: ArrayBuffer, start: number, length: number): number {
+  const data = new Float64Array(buffer);
+  let sumSq = 0;
+  const end = start + length;
+
+  for (let i = start; i < end; i++) {
+    sumSq += data[i] * data[i];
+  }
+
+  return sumSq;
+}
+
+// =============================================================================
+// Element-wise Operations
+// =============================================================================
+
+/**
+ * Element-wise binary operation on two chunks
+ */
+function elementwiseChunk(
+  aBuffer: ArrayBuffer,
+  bBuffer: ArrayBuffer,
+  start: number,
+  length: number,
+  op: 'add' | 'subtract' | 'multiply' | 'divide'
+): ArrayBuffer {
+  const a = new Float64Array(aBuffer);
+  const b = new Float64Array(bBuffer);
+  const result = new Float64Array(length);
+
+  for (let i = 0; i < length; i++) {
+    const ai = a[start + i];
+    const bi = b[start + i];
+    switch (op) {
+      case 'add':
+        result[i] = ai + bi;
+        break;
+      case 'subtract':
+        result[i] = ai - bi;
+        break;
+      case 'multiply':
+        result[i] = ai * bi;
+        break;
+      case 'divide':
+        result[i] = ai / bi;
+        break;
+    }
+  }
+
+  return result.buffer;
+}
+
+/**
+ * Scale a chunk by a scalar value
+ */
+function scaleChunk(
+  buffer: ArrayBuffer,
+  start: number,
+  length: number,
+  scalar: number
+): ArrayBuffer {
+  const data = new Float64Array(buffer);
+  const result = new Float64Array(length);
+
+  for (let i = 0; i < length; i++) {
+    result[i] = data[start + i] * scalar;
+  }
+
+  return result.buffer;
+}
+
+/**
+ * Apply a unary function to a chunk
+ */
+function unaryChunk(
+  buffer: ArrayBuffer,
+  start: number,
+  length: number,
+  fnName: 'abs' | 'sqrt' | 'exp' | 'log' | 'sin' | 'cos' | 'tan' | 'negate' | 'square'
+): ArrayBuffer {
+  const data = new Float64Array(buffer);
+  const result = new Float64Array(length);
+
+  for (let i = 0; i < length; i++) {
+    const val = data[start + i];
+    switch (fnName) {
+      case 'abs':
+        result[i] = Math.abs(val);
+        break;
+      case 'sqrt':
+        result[i] = Math.sqrt(val);
+        break;
+      case 'exp':
+        result[i] = Math.exp(val);
+        break;
+      case 'log':
+        result[i] = Math.log(val);
+        break;
+      case 'sin':
+        result[i] = Math.sin(val);
+        break;
+      case 'cos':
+        result[i] = Math.cos(val);
+        break;
+      case 'tan':
+        result[i] = Math.tan(val);
+        break;
+      case 'negate':
+        result[i] = -val;
+        break;
+      case 'square':
+        result[i] = val * val;
+        break;
+    }
+  }
+
+  return result.buffer;
+}
+
+// =============================================================================
+// Matrix Operations
+// =============================================================================
+
+/**
+ * Matrix multiplication for a subset of rows
+ */
+function matmulRows(
+  aBuffer: ArrayBuffer,
+  bBuffer: ArrayBuffer,
+  aRows: number,
+  aCols: number,
+  bCols: number,
+  rowStart: number,
+  rowEnd: number
+): ArrayBuffer {
+  const a = new Float64Array(aBuffer);
+  const b = new Float64Array(bBuffer);
+  const resultRows = rowEnd - rowStart;
+  const result = new Float64Array(resultRows * bCols);
+
+  for (let i = 0; i < resultRows; i++) {
+    const aRowIdx = rowStart + i;
+    for (let j = 0; j < bCols; j++) {
+      let sum = 0;
+      for (let k = 0; k < aCols; k++) {
+        sum += a[aRowIdx * aCols + k] * b[k * bCols + j];
+      }
+      result[i * bCols + j] = sum;
+    }
+  }
+
+  return result.buffer;
+}
+
+/**
+ * Transpose a subset of matrix rows
+ */
+function transposeRows(
+  buffer: ArrayBuffer,
+  rows: number,
+  cols: number,
+  rowStart: number,
+  rowEnd: number
+): ArrayBuffer {
+  const data = new Float64Array(buffer);
+  const resultRows = rowEnd - rowStart;
+  const result = new Float64Array(resultRows * cols);
+
+  for (let i = rowStart; i < rowEnd; i++) {
+    const localI = i - rowStart;
+    for (let j = 0; j < cols; j++) {
+      result[j * resultRows + localI] = data[i * cols + j];
+    }
+  }
+
+  return result.buffer;
+}
+
+/**
+ * Compute matrix-vector multiplication for a subset of rows
+ */
+function matvecRows(
+  matBuffer: ArrayBuffer,
+  vecBuffer: ArrayBuffer,
+  rows: number,
+  cols: number,
+  rowStart: number,
+  rowEnd: number
+): ArrayBuffer {
+  const mat = new Float64Array(matBuffer);
+  const vec = new Float64Array(vecBuffer);
+  const resultRows = rowEnd - rowStart;
+  const result = new Float64Array(resultRows);
+
+  for (let i = 0; i < resultRows; i++) {
+    const matRowIdx = rowStart + i;
+    let sum = 0;
+    for (let j = 0; j < cols; j++) {
+      sum += mat[matRowIdx * cols + j] * vec[j];
+    }
+    result[i] = sum;
+  }
+
+  return result.buffer;
+}
+
+/**
+ * Compute outer product for row chunks
+ */
+function outerProductRows(
+  aBuffer: ArrayBuffer,
+  bBuffer: ArrayBuffer,
+  aLen: number,
+  bLen: number,
+  rowStart: number,
+  rowEnd: number
+): ArrayBuffer {
+  const a = new Float64Array(aBuffer);
+  const b = new Float64Array(bBuffer);
+  const resultRows = rowEnd - rowStart;
+  const result = new Float64Array(resultRows * bLen);
+
+  for (let i = 0; i < resultRows; i++) {
+    const aIdx = rowStart + i;
+    for (let j = 0; j < bLen; j++) {
+      result[i * bLen + j] = a[aIdx] * b[j];
+    }
+  }
+
+  return result.buffer;
+}
+
+// =============================================================================
+// Generic Operations
+// =============================================================================
+
+/**
+ * Map function over a chunk
+ * Note: fn is passed as a string and eval'd in the worker context
+ */
+function mapChunk<T, R>(chunk: T[], fnString: string): R[] {
+  // eslint-disable-next-line no-eval
+  const fn = eval(`(${fnString})`) as (item: T) => R;
+  return chunk.map(fn);
+}
+
+/**
+ * Reduce a chunk to a single value
+ */
+function reduceChunk<T, R>(chunk: T[], fnString: string, initial: R): R {
+  // eslint-disable-next-line no-eval
+  const fn = eval(`(${fnString})`) as (acc: R, item: T) => R;
+  return chunk.reduce(fn, initial);
+}
+
+/**
+ * Filter a chunk based on predicate
+ */
+function filterChunk<T>(chunk: T[], predicateString: string): T[] {
+  // eslint-disable-next-line no-eval
+  const predicate = eval(`(${predicateString})`) as (item: T) => boolean;
+  return chunk.filter(predicate);
+}
+
+/**
+ * Find first element matching predicate
+ */
+function findChunk<T>(
+  chunk: T[],
+  predicateString: string,
+  chunkOffset: number
+): { found: boolean; value?: T; index?: number } {
+  // eslint-disable-next-line no-eval
+  const predicate = eval(`(${predicateString})`) as (item: T) => boolean;
+  const index = chunk.findIndex(predicate);
+
+  if (index === -1) {
+    return { found: false };
+  }
+
+  return {
+    found: true,
+    value: chunk[index],
+    index: chunkOffset + index,
+  };
+}
+
+/**
+ * Sort a chunk
+ */
+function sortChunk<T>(chunk: T[], compareString?: string): T[] {
+  if (compareString) {
+    // eslint-disable-next-line no-eval
+    const compare = eval(`(${compareString})`) as (a: T, b: T) => number;
+    return [...chunk].sort(compare);
+  }
+  return [...chunk].sort();
+}
+
+// =============================================================================
+// Distance/Similarity Operations
+// =============================================================================
+
+/**
+ * Compute squared Euclidean distance for a chunk
+ */
+function distanceChunk(
+  aBuffer: ArrayBuffer,
+  bBuffer: ArrayBuffer,
+  start: number,
+  length: number
+): number {
+  const a = new Float64Array(aBuffer);
+  const b = new Float64Array(bBuffer);
+  let sumSquared = 0;
+  const end = start + length;
+
+  for (let i = start; i < end; i++) {
+    const diff = a[i] - b[i];
+    sumSquared += diff * diff;
+  }
+
+  return sumSquared;
+}
+
+/**
+ * Compute cosine similarity components for a chunk
+ */
+function cosineSimilarityChunk(
+  aBuffer: ArrayBuffer,
+  bBuffer: ArrayBuffer,
+  start: number,
+  length: number
+): { dotProduct: number; normA: number; normB: number } {
+  const a = new Float64Array(aBuffer);
+  const b = new Float64Array(bBuffer);
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  const end = start + length;
+
+  for (let i = start; i < end; i++) {
+    dotProduct += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+
+  return { dotProduct, normA, normB };
+}
+
+// =============================================================================
+// Statistical Operations
+// =============================================================================
+
+/**
+ * Compute histogram for a chunk
+ */
+function histogramChunk(
+  buffer: ArrayBuffer,
+  start: number,
+  length: number,
+  min: number,
+  max: number,
+  bins: number
+): number[] {
+  const data = new Float64Array(buffer);
+  const histogram = new Array(bins).fill(0);
+  const binWidth = (max - min) / bins;
+  const end = start + length;
+
+  for (let i = start; i < end; i++) {
+    const val = data[i];
+    if (val >= min && val <= max) {
+      const binIdx = Math.min(Math.floor((val - min) / binWidth), bins - 1);
+      histogram[binIdx]++;
+    }
+  }
+
+  return histogram;
+}
+
+/**
+ * Compute quantile for sorted chunk
+ */
+function quantileChunk(
+  sortedBuffer: ArrayBuffer,
+  start: number,
+  length: number,
+  q: number
+): number {
+  const data = new Float64Array(sortedBuffer);
+  const idx = start + q * (length - 1);
+  const lower = Math.floor(idx);
+  const upper = Math.ceil(idx);
+  const weight = idx - lower;
+
+  if (lower === upper) {
+    return data[lower];
+  }
+
+  return data[lower] * (1 - weight) + data[upper] * weight;
+}
+
+// =============================================================================
+// Register Worker Functions
+// =============================================================================
+
+worker({
+  // Array reductions
+  sumChunk,
+  dotChunk,
+  varianceChunk,
+  minMaxChunk,
+  normChunk,
+
+  // Element-wise operations
+  elementwiseChunk,
+  scaleChunk,
+  unaryChunk,
+
+  // Matrix operations
+  matmulRows,
+  transposeRows,
+  matvecRows,
+  outerProductRows,
+
+  // Generic operations
+  mapChunk,
+  reduceChunk,
+  filterChunk,
+  findChunk,
+  sortChunk,
+
+  // Distance/similarity
+  distanceChunk,
+  cosineSimilarityChunk,
+
+  // Statistics
+  histogramChunk,
+  quantileChunk,
+});

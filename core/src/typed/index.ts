@@ -8,6 +8,8 @@ export {
   createMathTSTyped,
   typed,
   create,
+  createTyped,
+  TypeRegistry,
 
   // Type definitions and conversions
   MATHTS_TYPES,

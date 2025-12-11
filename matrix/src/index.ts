@@ -2,7 +2,7 @@
  * @mathts/matrix
  *
  * Matrix operations for MathTS with pluggable backends
- * (JS, WASM, WebGPU).
+ * (JS, WASM, WebGPU) and typed-function polymorphic dispatch.
  *
  * @packageDocumentation
  */
@@ -12,3 +12,6 @@ export * from './types/index.js';
 
 // Backends
 export * from './backends/index.js';
+
+// Typed operations (polymorphic functions using mathTyped)
+export * from './typed-operations.js';

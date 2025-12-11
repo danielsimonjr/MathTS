@@ -1,7 +1,7 @@
 {
-  "name": "@mathts/matrix",
+  "name": "@mathts/workerpool",
   "version": "0.1.0",
-  "description": "Matrix operations for MathTS with WASM/WebGPU backend support",
+  "description": "Worker pool management for MathTS parallel computations",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -12,6 +12,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./worker": {
+      "import": "./dist/worker.js",
+      "types": "./dist/worker.d.ts"
     }
   },
   "files": [
@@ -19,8 +23,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts src/worker.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts src/worker.ts --format esm --dts --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -30,8 +34,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@mathts/core": "workspace:*",
-    "@mathts/parallel": "workspace:*"
+    "workerpool": "^9.0.0"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
@@ -44,14 +47,15 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/danielsimonjr/mathts",
-    "directory": "matrix"
+    "directory": "packages/workerpool"
   },
   "keywords": [
     "math",
-    "matrix",
-    "linear-algebra",
     "typescript",
-    "wasm",
-    "webgpu"
+    "workerpool",
+    "parallel",
+    "worker",
+    "webworker",
+    "threading"
   ]
 }

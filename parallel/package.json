@@ -30,7 +30,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "workerpool": "^9.0.0"
+    "@mathts/workerpool": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
