@@ -269,6 +269,264 @@ export class ComputePool {
     return toParallelResult(result);
   }
 
+  // =========================================================================
+  // Statistical Operations
+  // =========================================================================
+
+  /**
+   * Find min and max values in parallel
+   */
+  async minMax(
+    data: Float64Array
+  ): Promise<ParallelResult<{ min: number; max: number; minIdx: number; maxIdx: number }>> {
+    const result = await this.workerPool.minMax(data);
+    return toParallelResult(result);
+  }
+
+  /**
+   * Compute variance, mean, and standard deviation in parallel
+   */
+  async variance(
+    data: Float64Array
+  ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
+    const result = await this.workerPool.variance(data);
+    return toParallelResult(result);
+  }
+
+  /**
+   * Compute norm (Euclidean length) in parallel
+   */
+  async norm(data: Float64Array): Promise<ParallelResult<number>> {
+    const result = await this.workerPool.norm(data);
+    return toParallelResult(result);
+  }
+
+  /**
+   * Compute Euclidean distance in parallel
+   */
+  async distance(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
+    const result = await this.workerPool.distance(a, b);
+    return toParallelResult(result);
+  }
+
+  /**
+   * Compute histogram in parallel
+   */
+  async histogram(
+    data: Float64Array,
+    bins: number,
+    min?: number,
+    max?: number
+  ): Promise<ParallelResult<number[]>> {
+    const result = await this.workerPool.histogram(data, bins, min, max);
+    return toParallelResult(result);
+  }
+
+  // =========================================================================
+  // Unary Operations
+  // =========================================================================
+
+  /**
+   * Apply unary function in parallel
+   */
+  async unary(
+    data: Float64Array,
+    fn: 'abs' | 'sqrt' | 'exp' | 'log' | 'sin' | 'cos' | 'tan' | 'negate' | 'square'
+  ): Promise<ParallelResult<Float64Array>> {
+    const result = await this.workerPool.unary(data, fn);
+    return toParallelResult(result);
+  }
+
+  /**
+   * Parallel absolute value
+   */
+  async abs(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'abs');
+  }
+
+  /**
+   * Parallel square root
+   */
+  async sqrt(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'sqrt');
+  }
+
+  /**
+   * Parallel exponential
+   */
+  async exp(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'exp');
+  }
+
+  /**
+   * Parallel natural log
+   */
+  async log(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'log');
+  }
+
+  /**
+   * Parallel sine
+   */
+  async sin(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'sin');
+  }
+
+  /**
+   * Parallel cosine
+   */
+  async cos(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'cos');
+  }
+
+  /**
+   * Parallel tangent
+   */
+  async tan(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'tan');
+  }
+
+  /**
+   * Parallel negation
+   */
+  async negate(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'negate');
+  }
+
+  /**
+   * Parallel square
+   */
+  async square(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'square');
+  }
+
+  // =========================================================================
+  // Additional Matrix Operations
+  // =========================================================================
+
+  /**
+   * Parallel matrix-vector multiplication
+   */
+  async matvec(
+    matrix: Float64Array,
+    rows: number,
+    cols: number,
+    vector: Float64Array
+  ): Promise<ParallelResult<Float64Array>> {
+    const result = await this.workerPool.matvec(matrix, rows, cols, vector);
+    return toParallelResult(result);
+  }
+
+  /**
+   * Parallel outer product
+   */
+  async outer(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+    const result = await this.workerPool.outer(a, b);
+    return toParallelResult(result);
+  }
+
+  // =========================================================================
+  // Search and Sort Operations
+  // =========================================================================
+
+  /**
+   * Parallel find operation
+   */
+  async find<T>(
+    data: T[],
+    predicate: (item: T) => boolean
+  ): Promise<ParallelResult<{ found: boolean; value?: T; index?: number }>> {
+    const result = await this.workerPool.find(data, predicate);
+    return toParallelResult(result);
+  }
+
+  /**
+   * Parallel sort operation
+   */
+  async sort<T>(
+    data: T[],
+    compare?: (a: T, b: T) => number
+  ): Promise<ParallelResult<T[]>> {
+    const result = await this.workerPool.sort(data, compare);
+    return toParallelResult(result);
+  }
+
+  // =========================================================================
+  // Convenience Methods
+  // =========================================================================
+
+  /**
+   * Parallel addition of two arrays
+   */
+  async add(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.elementwise(a, b, 'add');
+  }
+
+  /**
+   * Parallel subtraction of two arrays
+   */
+  async subtract(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.elementwise(a, b, 'subtract');
+  }
+
+  /**
+   * Parallel element-wise multiplication
+   */
+  async multiply(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.elementwise(a, b, 'multiply');
+  }
+
+  /**
+   * Parallel element-wise division
+   */
+  async divide(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+    return this.elementwise(a, b, 'divide');
+  }
+
+  /**
+   * Compute mean in parallel (uses variance internally)
+   */
+  async mean(data: Float64Array): Promise<ParallelResult<number>> {
+    const result = await this.variance(data);
+    return {
+      ...result,
+      result: result.result.mean,
+    };
+  }
+
+  /**
+   * Compute standard deviation in parallel
+   */
+  async std(data: Float64Array): Promise<ParallelResult<number>> {
+    const result = await this.variance(data);
+    return {
+      ...result,
+      result: result.result.std,
+    };
+  }
+
+  /**
+   * Find minimum value in parallel
+   */
+  async min(data: Float64Array): Promise<ParallelResult<number>> {
+    const result = await this.minMax(data);
+    return {
+      ...result,
+      result: result.result.min,
+    };
+  }
+
+  /**
+   * Find maximum value in parallel
+   */
+  async max(data: Float64Array): Promise<ParallelResult<number>> {
+    const result = await this.minMax(data);
+    return {
+      ...result,
+      result: result.result.max,
+    };
+  }
+
   /**
    * Terminate the worker pool
    */

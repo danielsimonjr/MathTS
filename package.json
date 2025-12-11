@@ -75,5 +75,9 @@
     "linear-algebra",
     "scientific-computing",
     "physics"
-  ]
+  ],
+  "dependencies": {
+    "typed-function": "github:danielsimonjr/typed-function",
+    "workerpool": "github:danielsimonjr/workerpool"
+  }
 }
