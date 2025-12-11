@@ -68,6 +68,8 @@ export {
   createMathTSTyped,
   typed,
   create,
+  createTyped,
+  TypeRegistry,
 
   // Type definitions and conversions for runtime dispatch
   MATHTS_TYPES,

@@ -1,7 +1,7 @@
 {
-  "name": "@mathts/matrix",
+  "name": "@mathts/typed-function",
   "version": "0.1.0",
-  "description": "Matrix operations for MathTS with WASM/WebGPU backend support",
+  "description": "Type dispatch system for MathTS with runtime polymorphism",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -30,8 +30,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@mathts/core": "workspace:*",
-    "@mathts/parallel": "workspace:*"
+    "typed-function": "^4.0.0"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
@@ -44,14 +43,13 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/danielsimonjr/mathts",
-    "directory": "matrix"
+    "directory": "packages/typed-function"
   },
   "keywords": [
     "math",
-    "matrix",
-    "linear-algebra",
     "typescript",
-    "wasm",
-    "webgpu"
+    "typed-function",
+    "polymorphism",
+    "type-dispatch"
   ]
 }

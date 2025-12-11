@@ -1,16 +1,24 @@
 /**
  * MathTS Compute Pool
  *
- * High-level wrapper around workerpool for parallel computation in MathTS.
+ * High-level wrapper around @mathts/workerpool for parallel computation in MathTS.
  * Provides automatic parallelization of matrix operations based on data size.
  *
  * @packageDocumentation
  */
 
-import { pool, Pool, Transfer, type PoolOptions, type ExecOptions, type PoolStats } from 'workerpool';
+import {
+  MathWorkerPool,
+  Transfer,
+  type WorkerPoolConfig,
+  type ParallelResult as WorkerParallelResult,
+  type TaskOptions,
+  type PoolStats,
+} from '@mathts/workerpool';
 
 /**
  * Configuration for ComputePool
+ * Extends the base WorkerPoolConfig with MathTS-specific options
  */
 export interface ComputePoolConfig {
   /** Enable parallel processing */
@@ -62,7 +70,37 @@ export interface ParallelResult<T> {
 }
 
 /**
+ * Convert WorkerParallelResult to ParallelResult (drops workersUsed)
+ */
+function toParallelResult<T>(result: WorkerParallelResult<T>): ParallelResult<T> {
+  return {
+    result: result.result,
+    duration: result.duration,
+    chunks: result.chunks,
+    parallelized: result.parallelized,
+  };
+}
+
+/**
+ * Convert ComputePoolConfig to WorkerPoolConfig
+ */
+function toWorkerConfig(config: ComputePoolConfig): Partial<WorkerPoolConfig> {
+  return {
+    enabled: config.enabled,
+    minWorkers: config.minWorkers,
+    maxWorkers: config.maxWorkers,
+    parallelThreshold: config.thresholdElements,
+    chunkSize: config.chunkSize,
+    workerType: config.workerType,
+    idleTimeout: config.workerIdleTimeout,
+    taskTimeout: config.taskTimeout,
+  };
+}
+
+/**
  * ComputePool for parallel MathTS operations
+ *
+ * Wraps the @mathts/workerpool MathWorkerPool with a MathTS-specific API.
  *
  * @example
  * ```typescript
@@ -72,7 +110,7 @@ export interface ParallelResult<T> {
  * await pool.initialize();
  *
  * // Parallel matrix multiplication
- * const result = await pool.matmul(matrixA, matrixB);
+ * const result = await pool.matmul(matrixA, aRows, aCols, matrixB, bCols);
  *
  * // Parallel element-wise operation
  * const sum = await pool.elementwise(a, b, 'add');
@@ -82,130 +120,67 @@ export interface ParallelResult<T> {
  * ```
  */
 export class ComputePool {
-  private pool: Pool | null = null;
+  private workerPool: MathWorkerPool;
   private config: ComputePoolConfig;
-  private initialized = false;
 
   constructor(config: Partial<ComputePoolConfig> = {}) {
     this.config = { ...DEFAULT_POOL_CONFIG, ...config };
+    this.workerPool = new MathWorkerPool(toWorkerConfig(this.config));
   }
 
   /**
    * Initialize the worker pool
    */
   async initialize(): Promise<void> {
-    if (!this.config.enabled) {
-      this.initialized = true;
-      return;
-    }
-
-    if (this.pool) {
-      return; // Already initialized
-    }
-
-    const options: PoolOptions = {
-      minWorkers: this.config.minWorkers,
-      maxWorkers: this.config.maxWorkers,
-      workerType: this.config.workerType,
-      workerTerminateTimeout: this.config.workerIdleTimeout,
-    };
-
-    this.pool = pool(options);
-    this.initialized = true;
+    await this.workerPool.initialize();
   }
 
   /**
    * Check if pool is ready
    */
   isReady(): boolean {
-    return this.initialized && (this.pool !== null || !this.config.enabled);
+    return this.workerPool.isReady();
   }
 
   /**
    * Determine if operation should be parallelized
    */
   shouldParallelize(elementCount: number): boolean {
-    return (
-      this.config.enabled &&
-      this.pool !== null &&
-      elementCount >= this.config.thresholdElements
-    );
+    return this.workerPool.shouldParallelize(elementCount);
   }
 
   /**
-   * Execute a function in the worker pool
+   * Execute a method in the worker pool
    */
   async exec<T>(
     method: string,
     params: unknown[],
-    options?: ExecOptions
+    options?: TaskOptions
   ): Promise<T> {
-    if (!this.pool) {
-      throw new Error('ComputePool not initialized. Call initialize() first.');
-    }
-
-    const execOptions: ExecOptions = {
-      ...options,
-      timeout: options?.timeout ?? this.config.taskTimeout,
-    };
-
-    return this.pool.exec(method, params, execOptions) as Promise<T>;
+    return this.workerPool.exec<T>(method, params, options);
   }
 
   /**
    * Get pool statistics
    */
   stats(): PoolStats {
-    if (!this.pool) {
-      return {
-        totalWorkers: 0,
-        busyWorkers: 0,
-        idleWorkers: 0,
-        pendingTasks: 0,
-        activeTasks: 0,
-      };
-    }
-    return this.pool.stats();
+    return this.workerPool.stats();
   }
 
   /**
    * Parallel sum of array elements
    */
   async sum(data: Float64Array): Promise<ParallelResult<number>> {
-    const start = performance.now();
+    const result = await this.workerPool.sum(data);
+    return toParallelResult(result);
+  }
 
-    if (!this.shouldParallelize(data.length)) {
-      // Sequential fallback
-      let total = 0;
-      for (let i = 0; i < data.length; i++) {
-        total += data[i];
-      }
-      return {
-        result: total,
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-      };
-    }
-
-    // Parallel execution
-    const chunks = this.chunkData(data);
-    const partialSums = await Promise.all(
-      chunks.map((chunk) =>
-        this.exec<number>('sumChunk', [chunk.buffer, 0, chunk.length], {
-          transfer: [],
-        })
-      )
-    );
-
-    const result = partialSums.reduce((a, b) => a + b, 0);
-
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: chunks.length,
-      parallelized: true,
-    };
+  /**
+   * Parallel dot product
+   */
+  async dot(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
+    const result = await this.workerPool.dot(a, b);
+    return toParallelResult(result);
   }
 
   /**
@@ -216,62 +191,16 @@ export class ComputePool {
     b: Float64Array,
     op: 'add' | 'subtract' | 'multiply' | 'divide'
   ): Promise<ParallelResult<Float64Array>> {
-    if (a.length !== b.length) {
-      throw new Error(`Length mismatch: ${a.length} vs ${b.length}`);
-    }
+    const result = await this.workerPool.elementwise(a, b, op);
+    return toParallelResult(result);
+  }
 
-    const start = performance.now();
-
-    if (!this.shouldParallelize(a.length)) {
-      // Sequential fallback
-      const result = new Float64Array(a.length);
-      for (let i = 0; i < a.length; i++) {
-        switch (op) {
-          case 'add':
-            result[i] = a[i] + b[i];
-            break;
-          case 'subtract':
-            result[i] = a[i] - b[i];
-            break;
-          case 'multiply':
-            result[i] = a[i] * b[i];
-            break;
-          case 'divide':
-            result[i] = a[i] / b[i];
-            break;
-        }
-      }
-      return {
-        result,
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-      };
-    }
-
-    // Parallel execution
-    const chunkPairs = this.chunkDataPair(a, b);
-    const results = await Promise.all(
-      chunkPairs.map(([chunkA, chunkB]) =>
-        this.exec<ArrayBuffer>('elementwiseChunk', [
-          chunkA.buffer,
-          chunkB.buffer,
-          0,
-          chunkA.length,
-          op,
-        ])
-      )
-    );
-
-    // Combine results
-    const combined = this.combineArrayBuffers(results, a.length);
-
-    return {
-      result: combined,
-      duration: performance.now() - start,
-      chunks: chunkPairs.length,
-      parallelized: true,
-    };
+  /**
+   * Parallel scale operation
+   */
+  async scale(data: Float64Array, scalar: number): Promise<ParallelResult<Float64Array>> {
+    const result = await this.workerPool.scale(data, scalar);
+    return toParallelResult(result);
   }
 
   /**
@@ -290,70 +219,20 @@ export class ComputePool {
     b: Float64Array,
     bCols: number
   ): Promise<ParallelResult<Float64Array>> {
-    const resultSize = aRows * bCols;
-    const start = performance.now();
+    const result = await this.workerPool.matmul(a, aRows, aCols, b, bCols);
+    return toParallelResult(result);
+  }
 
-    if (!this.shouldParallelize(resultSize)) {
-      // Sequential fallback
-      const result = new Float64Array(resultSize);
-      for (let i = 0; i < aRows; i++) {
-        for (let j = 0; j < bCols; j++) {
-          let sum = 0;
-          for (let k = 0; k < aCols; k++) {
-            sum += a[i * aCols + k] * b[k * bCols + j];
-          }
-          result[i * bCols + j] = sum;
-        }
-      }
-      return {
-        result,
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-      };
-    }
-
-    // Parallel: distribute rows across workers
-    const numWorkers = this.stats().totalWorkers;
-    const rowsPerWorker = Math.ceil(aRows / numWorkers);
-    const tasks: Promise<ArrayBuffer>[] = [];
-
-    for (let w = 0; w < numWorkers; w++) {
-      const rowStart = w * rowsPerWorker;
-      const rowEnd = Math.min(rowStart + rowsPerWorker, aRows);
-
-      if (rowStart >= aRows) break;
-
-      tasks.push(
-        this.exec<ArrayBuffer>('matmulRows', [
-          a.buffer,
-          b.buffer,
-          aRows,
-          aCols,
-          bCols,
-          rowStart,
-          rowEnd,
-        ])
-      );
-    }
-
-    const results = await Promise.all(tasks);
-
-    // Combine row blocks
-    const result = new Float64Array(resultSize);
-    let offset = 0;
-    for (const buf of results) {
-      const chunk = new Float64Array(buf);
-      result.set(chunk, offset);
-      offset += chunk.length;
-    }
-
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: tasks.length,
-      parallelized: true,
-    };
+  /**
+   * Parallel matrix transpose
+   */
+  async transpose(
+    data: Float64Array,
+    rows: number,
+    cols: number
+  ): Promise<ParallelResult<Float64Array>> {
+    const result = await this.workerPool.transpose(data, rows, cols);
+    return toParallelResult(result);
   }
 
   /**
@@ -363,41 +242,38 @@ export class ComputePool {
     data: T[],
     fn: (item: T) => R
   ): Promise<ParallelResult<R[]>> {
-    const start = performance.now();
+    const result = await this.workerPool.map(data, fn);
+    return toParallelResult(result);
+  }
 
-    if (!this.shouldParallelize(data.length)) {
-      return {
-        result: data.map(fn),
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-      };
-    }
+  /**
+   * Parallel reduce operation
+   */
+  async reduce<T, R>(
+    data: T[],
+    fn: (acc: R, item: T) => R,
+    initial: R
+  ): Promise<ParallelResult<R>> {
+    const result = await this.workerPool.reduce(data, fn, initial);
+    return toParallelResult(result);
+  }
 
-    const chunks = this.chunkArray(data);
-    const results = await Promise.all(
-      chunks.map((chunk) =>
-        this.exec<R[]>('mapChunk', [chunk, fn.toString()])
-      )
-    );
-
-    return {
-      result: results.flat(),
-      duration: performance.now() - start,
-      chunks: chunks.length,
-      parallelized: true,
-    };
+  /**
+   * Parallel filter operation
+   */
+  async filter<T>(
+    data: T[],
+    predicate: (item: T) => boolean
+  ): Promise<ParallelResult<T[]>> {
+    const result = await this.workerPool.filter(data, predicate);
+    return toParallelResult(result);
   }
 
   /**
    * Terminate the worker pool
    */
   async terminate(force = false): Promise<void> {
-    if (this.pool) {
-      await this.pool.terminate(force);
-      this.pool = null;
-    }
-    this.initialized = false;
+    await this.workerPool.terminate(force);
   }
 
   /**
@@ -405,6 +281,7 @@ export class ComputePool {
    */
   updateConfig(config: Partial<ComputePoolConfig>): void {
     this.config = { ...this.config, ...config };
+    this.workerPool.updateConfig(toWorkerConfig(this.config));
   }
 
   /**
@@ -414,43 +291,11 @@ export class ComputePool {
     return { ...this.config };
   }
 
-  // Helper methods
-
-  private chunkData(data: Float64Array): Float64Array[] {
-    const chunks: Float64Array[] = [];
-    for (let i = 0; i < data.length; i += this.config.chunkSize) {
-      const end = Math.min(i + this.config.chunkSize, data.length);
-      chunks.push(data.subarray(i, end));
-    }
-    return chunks;
-  }
-
-  private chunkDataPair(a: Float64Array, b: Float64Array): [Float64Array, Float64Array][] {
-    const pairs: [Float64Array, Float64Array][] = [];
-    for (let i = 0; i < a.length; i += this.config.chunkSize) {
-      const end = Math.min(i + this.config.chunkSize, a.length);
-      pairs.push([a.subarray(i, end), b.subarray(i, end)]);
-    }
-    return pairs;
-  }
-
-  private chunkArray<T>(arr: T[]): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < arr.length; i += this.config.chunkSize) {
-      chunks.push(arr.slice(i, i + this.config.chunkSize));
-    }
-    return chunks;
-  }
-
-  private combineArrayBuffers(buffers: ArrayBuffer[], totalLength: number): Float64Array {
-    const result = new Float64Array(totalLength);
-    let offset = 0;
-    for (const buf of buffers) {
-      const chunk = new Float64Array(buf);
-      result.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return result;
+  /**
+   * Get the underlying MathWorkerPool for advanced operations
+   */
+  getWorkerPool(): MathWorkerPool {
+    return this.workerPool;
   }
 }
 
@@ -463,3 +308,8 @@ export const computePool = new ComputePool();
  * Create a Transferable wrapper for zero-copy data transfer
  */
 export { Transfer };
+
+/**
+ * Re-export types from @mathts/workerpool
+ */
+export type { TaskOptions, PoolStats };

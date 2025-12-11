@@ -7,41 +7,41 @@
  * @packageDocumentation
  */
 
-import typed, { create, type TypedInstance, type TypeDef, type ConversionDef } from 'typed-function';
+import {
+  typed,
+  create,
+  createTyped,
+  TypeRegistry,
+  isNumber as _isNumber,
+  isBigInt as _isBigInt,
+  isString as _isString,
+  isBoolean as _isBoolean,
+  isArray as _isArray,
+  isObject as _isObject,
+  isFunction as _isFunction,
+  isNull as _isNull,
+  isUndefined as _isUndefined,
+  type TypedInstance,
+  type TypeDef,
+  type ConversionDef,
+} from '@mathts/typed-function';
 import { Complex, isComplex as _isComplex } from '../types/complex.js';
 import { Fraction, isFraction as _isFraction } from '../types/fraction.js';
 import { BigNumber, isBigNumber as _isBigNumber } from '../types/bignumber.js';
 
 // =============================================================================
-// Primitive Type Test Functions
+// Primitive Type Test Functions (re-exported from @mathts/typed-function)
 // =============================================================================
 
-export const isNumber = (x: unknown): x is number =>
-  typeof x === 'number';
-
-export const isBoolean = (x: unknown): x is boolean =>
-  typeof x === 'boolean';
-
-export const isString = (x: unknown): x is string =>
-  typeof x === 'string';
-
-export const isBigInt = (x: unknown): x is bigint =>
-  typeof x === 'bigint';
-
-export const isArray = (x: unknown): x is unknown[] =>
-  Array.isArray(x);
-
-export const isFunction = (x: unknown): x is (...args: unknown[]) => unknown =>
-  typeof x === 'function';
-
-export const isObject = (x: unknown): x is object =>
-  typeof x === 'object' && x !== null && !Array.isArray(x);
-
-export const isNull = (x: unknown): x is null =>
-  x === null;
-
-export const isUndefined = (x: unknown): x is undefined =>
-  x === undefined;
+export const isNumber = _isNumber;
+export const isBoolean = _isBoolean;
+export const isString = _isString;
+export const isBigInt = _isBigInt;
+export const isArray = _isArray;
+export const isFunction = _isFunction;
+export const isObject = _isObject;
+export const isNull = _isNull;
+export const isUndefined = _isUndefined;
 
 // =============================================================================
 // MathTS Type Test Functions (using actual class implementations)
@@ -311,15 +311,11 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
  * ```
  */
 export function createMathTSTyped(): TypedInstance {
-  const instance = create();
-
-  // Add MathTS types (ordered by specificity)
-  instance.addTypes(MATHTS_TYPES, 'any');
-
-  // Add MathTS conversions
-  instance.addConversions(MATHTS_CONVERSIONS);
-
-  return instance;
+  // Use the @mathts/typed-function createTyped for base setup
+  return createTyped({
+    types: MATHTS_TYPES,
+    conversions: MATHTS_CONVERSIONS,
+  });
 }
 
 /**
@@ -350,5 +346,5 @@ export function createMathTSTyped(): TypedInstance {
 export const mathTyped = createMathTSTyped();
 
 // Re-export typed-function utilities for convenience
-export { typed, create };
+export { typed, create, createTyped, TypeRegistry };
 export type { TypedInstance, TypeDef, ConversionDef };
