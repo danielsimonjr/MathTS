@@ -41,7 +41,9 @@ export {
   qrDecomposition,
   choleskyDecomposition,
   luSolve,
-  luDeterminant
+  luDeterminant,
+  luInverse,
+  determinant
 } from './algebra/decomposition'
 
 // Signal processing

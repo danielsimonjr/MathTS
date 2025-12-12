@@ -55,6 +55,8 @@ export interface WasmModule {
   choleskyDecomposition: (aPtr: number, n: number, lPtr: number) => number
   luSolve: (luPtr: number, n: number, permPtr: number, bPtr: number, xPtr: number) => void
   luDeterminant: (luPtr: number, n: number, permPtr: number) => number
+  luInverse: (aPtr: number, n: number, resultPtr: number) => number
+  determinant: (aPtr: number, n: number) => number
 
   // Signal processing
   fft: (dataPtr: number, n: number, inverse: number) => void
