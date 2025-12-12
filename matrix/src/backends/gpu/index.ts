@@ -41,3 +41,23 @@ export {
   type ShaderSource,
   type PipelineConfig,
 } from './ShaderManager.js';
+
+// Batch Executor
+export {
+  BatchExecutor,
+  type BatchOperation,
+  type BatchOperationType,
+  type BatchResult,
+  type BatchOptions,
+} from './BatchExecutor.js';
+
+// Synchronization
+export {
+  SyncManager,
+  createSyncManager,
+  type SyncStrategy,
+  type TransferDirection,
+  type TransferRequest,
+  type TransferResult,
+  type SyncConfig,
+} from './Sync.js';
