@@ -113,6 +113,25 @@ export const isUndefined = (x: unknown): x is undefined =>
   x === undefined;
 
 // =============================================================================
+// TypedArray Test Functions
+// =============================================================================
+
+export const isFloat64Array = (x: unknown): x is Float64Array =>
+  x instanceof Float64Array;
+
+export const isFloat32Array = (x: unknown): x is Float32Array =>
+  x instanceof Float32Array;
+
+export const isInt32Array = (x: unknown): x is Int32Array =>
+  x instanceof Int32Array;
+
+export const isUint32Array = (x: unknown): x is Uint32Array =>
+  x instanceof Uint32Array;
+
+export const isUint8Array = (x: unknown): x is Uint8Array =>
+  x instanceof Uint8Array;
+
+// =============================================================================
 // MathTS Type Test Functions (using actual class implementations)
 // =============================================================================
 
@@ -185,6 +204,13 @@ export const MATHTS_TYPES: MathTSTypeDef[] = [
   { name: 'Complex', test: isComplex },
   { name: 'Fraction', test: isFraction },
   { name: 'BigNumber', test: isBigNumber },
+
+  // TypedArrays (for parallel-first WASM operations)
+  { name: 'Float64Array', test: isFloat64Array },
+  { name: 'Float32Array', test: isFloat32Array },
+  { name: 'Int32Array', test: isInt32Array },
+  { name: 'Uint32Array', test: isUint32Array },
+  { name: 'Uint8Array', test: isUint8Array },
 
   // Matrix types
   { name: 'DenseMatrix', test: isDenseMatrix },

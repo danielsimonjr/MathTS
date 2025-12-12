@@ -31,6 +31,13 @@ export {
   isFraction,
   isBigNumber,
 
+  // TypedArray test functions (for parallel-first operations)
+  isFloat64Array,
+  isFloat32Array,
+  isInt32Array,
+  isUint32Array,
+  isUint8Array,
+
   // Matrix type test functions (duck typing until Matrix class is implemented)
   isMatrix,
   isDenseMatrix,
