@@ -19,10 +19,15 @@ export { typedTrigonometry } from './trigonometry.js';
 export * from './parallel-arithmetic.js';
 export { parallelArithmetic } from './parallel-arithmetic.js';
 
+// Parallel-first signal processing functions
+export * from './parallel-signal.js';
+export { parallelSignal } from './parallel-signal.js';
+
 // Combined export
 import { typedArithmetic } from './arithmetic.js';
 import { typedTrigonometry } from './trigonometry.js';
 import { parallelArithmetic } from './parallel-arithmetic.js';
+import { parallelSignal } from './parallel-signal.js';
 
 /**
  * All typed functions combined
@@ -37,4 +42,5 @@ export const typedFunctions = {
  */
 export const typedParallelFunctions = {
   ...parallelArithmetic,
+  ...parallelSignal,
 };
