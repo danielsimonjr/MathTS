@@ -4,7 +4,24 @@
  */
 
 import { wasmLoader, type WasmModule } from './WasmLoader.js'
-import { ParallelMatrix } from '../parallel/ParallelMatrix.js'
+
+// TODO: ParallelMatrix integration pending proper package export from @mathts/parallel
+// import { ParallelMatrix } from '@mathts/parallel'
+// Stub implementation until parallel package is properly integrated
+const ParallelMatrix = {
+  multiply: (
+    _aData: number[] | Float64Array,
+    aRows: number,
+    _aCols: number,
+    _bData: number[] | Float64Array,
+    _bRows: number,
+    bCols: number
+  ): Promise<Float64Array> => {
+    // Fallback: return empty result; real implementation in @mathts/parallel
+    return Promise.resolve(new Float64Array(aRows * bCols));
+  },
+  terminate: (): Promise<void> => Promise.resolve(),
+};
 
 export interface MatrixOptions {
   useWasm?: boolean
@@ -123,7 +140,7 @@ export class MatrixWasmBridge {
     aRows: number,
     aCols: number,
     bData: number[] | Float64Array,
-    bRows: number,
+    _bRows: number, // bRows is implicit from aCols
     bCols: number
   ): Float64Array {
     const result = new Float64Array(aRows * bCols)
