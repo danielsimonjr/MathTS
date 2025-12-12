@@ -24,6 +24,25 @@ export {
   type ParallelBackendConfig,
 } from './ParallelBackend.js';
 
+export {
+  WASMBackend,
+  wasmBackend,
+  createWASMBackend,
+  type WASMBackendConfig,
+} from './WASMBackend.js';
+
+// WASM utilities
+export {
+  detectWasmFeatures,
+  isWasmAvailable,
+  isSharedMemoryAvailable,
+  isAtomicsAvailable,
+  clearFeatureCache,
+  getCachedFeatures,
+} from './wasm/index.js';
+
+export type { WasmFeatures } from './wasm/index.js';
+
 // Register JS backend by default
 import { backendRegistry } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
