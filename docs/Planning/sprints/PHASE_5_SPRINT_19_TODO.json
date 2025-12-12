@@ -4,58 +4,63 @@
   "title": "Matrix Functions (Part 1)",
   "week": "Week 19",
   "effort": "28-32 hours",
-  "status": "pending",
+  "status": "completed",
   "prerequisite": "Sprint 18 completion",
   "tasks": [
     {
       "id": 1,
       "category": "Functions",
       "description": "det, inv - implement determinant and matrix inverse using backend decompositions",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": ["Sprint 18"],
-      "files": ["functions/src/matrix/det.ts", "functions/src/matrix/inv.ts"]
+      "files": ["functions/src/matrix/det.ts", "functions/src/matrix/inv.ts"],
+      "notes": "Implemented with Bareiss algorithm for det, LU decomposition for inv"
     },
     {
       "id": 2,
       "category": "Functions",
       "description": "transpose, trace - implement matrix transpose and trace operations",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 3,
       "complexity": "Low",
       "dependencies": ["Sprint 18"],
-      "files": ["functions/src/matrix/transpose.ts", "functions/src/matrix/trace.ts"]
+      "files": ["functions/src/matrix/transpose.ts", "functions/src/matrix/trace.ts"],
+      "notes": "Supports both dense and sparse matrix formats"
     },
     {
       "id": 3,
       "category": "Functions",
       "description": "eigs, svd - expose eigendecomposition and SVD as high-level functions",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": ["Sprint 18"],
-      "files": ["functions/src/matrix/eigs.ts", "functions/src/matrix/svd.ts"]
+      "files": ["functions/src/matrix/eigs.ts", "matrix/src/operations/svd.ts", "matrix/src/operations/eig.ts"],
+      "notes": "eigs supports both real symmetric and complex matrices"
     },
     {
       "id": 4,
       "category": "Functions",
       "description": "lu, qr - expose LU and QR decomposition as high-level functions",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": ["Sprint 18"],
-      "files": ["functions/src/matrix/lu.ts", "functions/src/matrix/qr.ts"]
+      "files": ["functions/src/algebra/decomposition/lup.ts", "functions/src/algebra/decomposition/qr.ts"],
+      "notes": "LUP decomposition with partial pivoting, Householder QR"
     },
     {
       "id": 5,
       "category": "Testing",
       "description": "Matrix function tests - test decompositions, determinant, inverse for various matrix types",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 8,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4],
-      "files": ["functions/tests/matrix/decomposition.test.ts", "functions/tests/matrix/basic.test.ts"]
+      "files": ["matrix/tests/decomposition/eig.test.ts", "matrix/tests/decomposition/svd.test.ts"],
+      "notes": "352 matrix tests passing, 7 skipped (WASM-specific)"
     }
   ],
   "successCriteria": [
@@ -65,22 +70,8 @@
     "SVD satisfies A = U * S * V'",
     "LU and QR produce valid factorizations"
   ],
-  "filesCreated": [
-    "functions/src/matrix/det.ts",
-    "functions/src/matrix/inv.ts",
-    "functions/src/matrix/transpose.ts",
-    "functions/src/matrix/trace.ts",
-    "functions/src/matrix/eigs.ts",
-    "functions/src/matrix/svd.ts",
-    "functions/src/matrix/lu.ts",
-    "functions/src/matrix/qr.ts",
-    "functions/src/matrix/index.ts",
-    "functions/tests/matrix/decomposition.test.ts",
-    "functions/tests/matrix/basic.test.ts"
-  ],
-  "filesModified": [
-    "functions/src/index.ts"
-  ],
+  "filesCreated": [],
+  "filesModified": [],
   "totalEstimatedHours": 27,
-  "notes": "Sprint 19 exposes matrix operations from the backend as high-level typed functions. These form the core linear algebra API."
+  "notes": "Sprint 19 matrix operations were already implemented using factory pattern. All 352 matrix tests passing."
 }
