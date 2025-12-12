@@ -127,7 +127,12 @@ export class WASMBackend implements MatrixBackend {
     const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
 
     try {
-      this.wasmModule!.add(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.addSIMD(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.add(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
       const resultData = Array.from(new Float64Array(resultAlloc.array));
       return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
     } finally {
@@ -152,7 +157,12 @@ export class WASMBackend implements MatrixBackend {
     const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
 
     try {
-      this.wasmModule!.subtract(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.subtractSIMD(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.subtract(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
       const resultData = Array.from(new Float64Array(resultAlloc.array));
       return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
     } finally {
@@ -163,15 +173,63 @@ export class WASMBackend implements MatrixBackend {
   }
 
   multiplyElementwise(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
-    // Element-wise multiply not directly in WASM interface
-    // Fall back to JS for now
-    return jsBackend.multiplyElementwise(a, b);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.multiplyElementwise(a, b);
+    }
+
+    const aData = a.toFloat64Array();
+    const bData = b.toFloat64Array();
+
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const bAlloc = wasmLoader.allocateFloat64Array(bData);
+    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.multiplyElementwiseSIMD(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.multiplyElementwise(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
+      const resultData = Array.from(new Float64Array(resultAlloc.array));
+      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(bAlloc.ptr);
+      wasmLoader.free(resultAlloc.ptr);
+    }
   }
 
   divideElementwise(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
-    // Element-wise divide not directly in WASM interface
-    // Fall back to JS for now
-    return jsBackend.divideElementwise(a, b);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.divideElementwise(a, b);
+    }
+
+    const aData = a.toFloat64Array();
+    const bData = b.toFloat64Array();
+
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const bAlloc = wasmLoader.allocateFloat64Array(bData);
+    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.divideElementwiseSIMD(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.divideElementwise(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
+      const resultData = Array.from(new Float64Array(resultAlloc.array));
+      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(bAlloc.ptr);
+      wasmLoader.free(resultAlloc.ptr);
+    }
   }
 
   scale(a: DenseMatrix, scalar: number): DenseMatrix {
@@ -186,7 +244,12 @@ export class WASMBackend implements MatrixBackend {
     const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
 
     try {
-      this.wasmModule!.scalarMultiply(aAlloc.ptr, scalar, elementCount, resultAlloc.ptr);
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.scalarMultiplySIMD(aAlloc.ptr, scalar, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.scalarMultiply(aAlloc.ptr, scalar, elementCount, resultAlloc.ptr);
+      }
       const resultData = Array.from(new Float64Array(resultAlloc.array));
       return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
     } finally {
@@ -196,13 +259,55 @@ export class WASMBackend implements MatrixBackend {
   }
 
   abs(a: DenseMatrix): DenseMatrix {
-    // No direct WASM function, use JS
-    return jsBackend.abs(a);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.abs(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.absSIMD(aAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.abs(aAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
+      const resultData = Array.from(new Float64Array(resultAlloc.array));
+      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(resultAlloc.ptr);
+    }
   }
 
   negate(a: DenseMatrix): DenseMatrix {
-    // Use scale with -1
-    return this.scale(a, -1);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.negate(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.negateSIMD(aAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.negate(aAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
+      const resultData = Array.from(new Float64Array(resultAlloc.array));
+      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(resultAlloc.ptr);
+    }
   }
 
   // =========================================================================
@@ -274,8 +379,25 @@ export class WASMBackend implements MatrixBackend {
   // =========================================================================
 
   sum(a: DenseMatrix): number {
-    // Use JS backend - no direct WASM sum function
-    return jsBackend.sum(a) as number;
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.sum(a) as number;
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        return this.wasmModule!.sumSIMD(aAlloc.ptr, elementCount);
+      } else {
+        return this.wasmModule!.sum(aAlloc.ptr, elementCount);
+      }
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+    }
   }
 
   sumAxis(a: DenseMatrix, axis: 0 | 1): DenseMatrix {
@@ -284,7 +406,25 @@ export class WASMBackend implements MatrixBackend {
   }
 
   norm(a: DenseMatrix): number {
-    return jsBackend.norm(a);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.norm(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        return this.wasmModule!.normSIMD(aAlloc.ptr, elementCount);
+      } else {
+        return this.wasmModule!.norm(aAlloc.ptr, elementCount);
+      }
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+    }
   }
 
   dot(a: DenseMatrix, b: DenseMatrix): number {
@@ -301,7 +441,12 @@ export class WASMBackend implements MatrixBackend {
     const bAlloc = wasmLoader.allocateFloat64Array(bData);
 
     try {
-      return this.wasmModule!.dotProduct(aAlloc.ptr, bAlloc.ptr, elementCount);
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        return this.wasmModule!.dotProductSIMD(aAlloc.ptr, bAlloc.ptr, elementCount);
+      } else {
+        return this.wasmModule!.dotProduct(aAlloc.ptr, bAlloc.ptr, elementCount);
+      }
     } finally {
       wasmLoader.free(aAlloc.ptr);
       wasmLoader.free(bAlloc.ptr);

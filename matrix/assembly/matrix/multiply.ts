@@ -200,6 +200,360 @@ export function dotProduct(
   return sum
 }
 
+/**
+ * Element-wise multiplication: C[i] = A[i] * B[i]
+ */
+export function multiplyElementwise(
+  a: Float64Array,
+  b: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  for (let i: i32 = 0; i < size; i++) {
+    result[i] = a[i] * b[i]
+  }
+}
+
+/**
+ * Element-wise division: C[i] = A[i] / B[i]
+ */
+export function divideElementwise(
+  a: Float64Array,
+  b: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  for (let i: i32 = 0; i < size; i++) {
+    result[i] = a[i] / b[i]
+  }
+}
+
+/**
+ * SIMD-optimized element-wise addition using v128
+ * Processes 2 f64 values at a time
+ */
+export function addSIMD(
+  a: Float64Array,
+  b: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+
+  // Process pairs using SIMD (v128 = 2 x f64)
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    const bVec: v128 = v128.load(changetype<usize>(b) + (i << 3))
+    const sumVec: v128 = f64x2.add(aVec, bVec)
+    v128.store(changetype<usize>(result) + (i << 3), sumVec)
+  }
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    result[i] = a[i] + b[i]
+  }
+}
+
+/**
+ * SIMD-optimized element-wise subtraction using v128
+ * Processes 2 f64 values at a time
+ */
+export function subtractSIMD(
+  a: Float64Array,
+  b: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+
+  // Process pairs using SIMD (v128 = 2 x f64)
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    const bVec: v128 = v128.load(changetype<usize>(b) + (i << 3))
+    const diffVec: v128 = f64x2.sub(aVec, bVec)
+    v128.store(changetype<usize>(result) + (i << 3), diffVec)
+  }
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    result[i] = a[i] - b[i]
+  }
+}
+
+/**
+ * SIMD-optimized element-wise multiplication using v128
+ * Processes 2 f64 values at a time
+ */
+export function multiplyElementwiseSIMD(
+  a: Float64Array,
+  b: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+
+  // Process pairs using SIMD (v128 = 2 x f64)
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    const bVec: v128 = v128.load(changetype<usize>(b) + (i << 3))
+    const prodVec: v128 = f64x2.mul(aVec, bVec)
+    v128.store(changetype<usize>(result) + (i << 3), prodVec)
+  }
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    result[i] = a[i] * b[i]
+  }
+}
+
+/**
+ * SIMD-optimized element-wise division using v128
+ * Processes 2 f64 values at a time
+ */
+export function divideElementwiseSIMD(
+  a: Float64Array,
+  b: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+
+  // Process pairs using SIMD (v128 = 2 x f64)
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    const bVec: v128 = v128.load(changetype<usize>(b) + (i << 3))
+    const quotVec: v128 = f64x2.div(aVec, bVec)
+    v128.store(changetype<usize>(result) + (i << 3), quotVec)
+  }
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    result[i] = a[i] / b[i]
+  }
+}
+
+/**
+ * SIMD-optimized scalar multiplication using v128
+ * Processes 2 f64 values at a time
+ */
+export function scalarMultiplySIMD(
+  a: Float64Array,
+  scalar: f64,
+  size: i32,
+  result: Float64Array
+): void {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+  const scalarVec: v128 = f64x2.splat(scalar)
+
+  // Process pairs using SIMD
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    const prodVec: v128 = f64x2.mul(aVec, scalarVec)
+    v128.store(changetype<usize>(result) + (i << 3), prodVec)
+  }
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    result[i] = a[i] * scalar
+  }
+}
+
+/**
+ * SIMD-optimized dot product using v128
+ * Processes 2 f64 values at a time
+ */
+export function dotProductSIMD(
+  a: Float64Array,
+  b: Float64Array,
+  size: i32
+): f64 {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+  let sumVec: v128 = f64x2.splat(0.0)
+
+  // Process pairs using SIMD
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    const bVec: v128 = v128.load(changetype<usize>(b) + (i << 3))
+    const prodVec: v128 = f64x2.mul(aVec, bVec)
+    sumVec = f64x2.add(sumVec, prodVec)
+  }
+
+  // Extract sum from vector
+  let sum: f64 = f64x2.extract_lane(sumVec, 0) + f64x2.extract_lane(sumVec, 1)
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    sum += a[i] * b[i]
+  }
+
+  return sum
+}
+
+/**
+ * Compute sum of all elements
+ */
+export function sum(
+  a: Float64Array,
+  size: i32
+): f64 {
+  let total: f64 = 0.0
+  for (let i: i32 = 0; i < size; i++) {
+    total += a[i]
+  }
+  return total
+}
+
+/**
+ * SIMD-optimized sum using v128
+ */
+export function sumSIMD(
+  a: Float64Array,
+  size: i32
+): f64 {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+  let sumVec: v128 = f64x2.splat(0.0)
+
+  // Process pairs using SIMD
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    sumVec = f64x2.add(sumVec, aVec)
+  }
+
+  // Extract sum from vector
+  let total: f64 = f64x2.extract_lane(sumVec, 0) + f64x2.extract_lane(sumVec, 1)
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    total += a[i]
+  }
+
+  return total
+}
+
+/**
+ * Compute Frobenius norm (sqrt of sum of squares)
+ */
+export function norm(
+  a: Float64Array,
+  size: i32
+): f64 {
+  let sumSq: f64 = 0.0
+  for (let i: i32 = 0; i < size; i++) {
+    sumSq += a[i] * a[i]
+  }
+  return Math.sqrt(sumSq)
+}
+
+/**
+ * SIMD-optimized Frobenius norm
+ */
+export function normSIMD(
+  a: Float64Array,
+  size: i32
+): f64 {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+  let sumSqVec: v128 = f64x2.splat(0.0)
+
+  // Process pairs using SIMD
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    const sqVec: v128 = f64x2.mul(aVec, aVec)
+    sumSqVec = f64x2.add(sumSqVec, sqVec)
+  }
+
+  // Extract sum from vector
+  let sumSq: f64 = f64x2.extract_lane(sumSqVec, 0) + f64x2.extract_lane(sumSqVec, 1)
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    sumSq += a[i] * a[i]
+  }
+
+  return Math.sqrt(sumSq)
+}
+
+/**
+ * Element-wise absolute value
+ */
+export function abs(
+  a: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  for (let i: i32 = 0; i < size; i++) {
+    result[i] = Math.abs(a[i])
+  }
+}
+
+/**
+ * SIMD-optimized absolute value using v128
+ */
+export function absSIMD(
+  a: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+
+  // Process pairs using SIMD
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    const absVec: v128 = f64x2.abs(aVec)
+    v128.store(changetype<usize>(result) + (i << 3), absVec)
+  }
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    result[i] = Math.abs(a[i])
+  }
+}
+
+/**
+ * Negate all elements
+ */
+export function negate(
+  a: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  for (let i: i32 = 0; i < size; i++) {
+    result[i] = -a[i]
+  }
+}
+
+/**
+ * SIMD-optimized negation using v128
+ */
+export function negateSIMD(
+  a: Float64Array,
+  size: i32,
+  result: Float64Array
+): void {
+  let i: i32 = 0
+  const limit: i32 = size - (size % 2)
+
+  // Process pairs using SIMD
+  for (; i < limit; i += 2) {
+    const aVec: v128 = v128.load(changetype<usize>(a) + (i << 3))
+    const negVec: v128 = f64x2.neg(aVec)
+    v128.store(changetype<usize>(result) + (i << 3), negVec)
+  }
+
+  // Handle remaining elements
+  for (; i < size; i++) {
+    result[i] = -a[i]
+  }
+}
+
 // Helper function
 @inline
 function min(a: i32, b: i32): i32 {

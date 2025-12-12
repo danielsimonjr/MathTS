@@ -25,6 +25,30 @@ export interface WasmModule {
   scalarMultiply: (aPtr: number, scalar: number, size: number, resultPtr: number) => void
   dotProduct: (aPtr: number, bPtr: number, size: number) => number
 
+  // Element-wise operations
+  multiplyElementwise: (aPtr: number, bPtr: number, size: number, resultPtr: number) => void
+  divideElementwise: (aPtr: number, bPtr: number, size: number, resultPtr: number) => void
+
+  // SIMD-optimized operations
+  addSIMD: (aPtr: number, bPtr: number, size: number, resultPtr: number) => void
+  subtractSIMD: (aPtr: number, bPtr: number, size: number, resultPtr: number) => void
+  multiplyElementwiseSIMD: (aPtr: number, bPtr: number, size: number, resultPtr: number) => void
+  divideElementwiseSIMD: (aPtr: number, bPtr: number, size: number, resultPtr: number) => void
+  scalarMultiplySIMD: (aPtr: number, scalar: number, size: number, resultPtr: number) => void
+  dotProductSIMD: (aPtr: number, bPtr: number, size: number) => number
+
+  // Reduction operations
+  sum: (aPtr: number, size: number) => number
+  sumSIMD: (aPtr: number, size: number) => number
+  norm: (aPtr: number, size: number) => number
+  normSIMD: (aPtr: number, size: number) => number
+
+  // Unary operations
+  abs: (aPtr: number, size: number, resultPtr: number) => void
+  absSIMD: (aPtr: number, size: number, resultPtr: number) => void
+  negate: (aPtr: number, size: number, resultPtr: number) => void
+  negateSIMD: (aPtr: number, size: number, resultPtr: number) => void
+
   // Linear algebra
   luDecomposition: (aPtr: number, n: number, permPtr: number) => number
   qrDecomposition: (aPtr: number, m: number, n: number, qPtr: number, rPtr: number) => void
