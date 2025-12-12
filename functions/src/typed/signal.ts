@@ -1,8 +1,16 @@
 /**
- * Parallel-First Signal Processing Functions
+ * Typed Signal Processing Functions (Parallel-First)
  *
  * AssemblyScript-friendly TypeScript implementations with typed-function
  * integration and workerpool parallel execution.
+ *
+ * Includes FFT, IFFT, convolution, and correlation functions optimized
+ * for Float64Array with parallel execution support.
+ *
+ * Following the parallel-first philosophy per CLAUDE.md:
+ * - Use workers for ALL array transformations (Float64Array)
+ * - Use workers for ALL numerical computations that can be batched
+ * - Only fall back to sequential for trivial scalar operations
  *
  * @packageDocumentation
  */
@@ -372,10 +380,13 @@ export const parallelAutoCorr = mathTyped('parallelAutoCorr', {
 });
 
 // =============================================================================
-// Export All Parallel Signal Functions
+// Export All Signal Functions
 // =============================================================================
 
-export const parallelSignal = {
+/**
+ * Primary export: typed signal processing functions
+ */
+export const typedSignal = {
   fft: parallelFFT,
   ifft: parallelIFFT,
   fftMagnitude: parallelFFTMagnitude,
@@ -384,6 +395,11 @@ export const parallelSignal = {
   xcorr: parallelXCorr,
   autocorr: parallelAutoCorr,
 };
+
+/**
+ * @deprecated Use typedSignal instead
+ */
+export const parallelSignal = typedSignal;
 
 /**
  * Initialize parallel signal processing

@@ -1,8 +1,13 @@
 /**
- * Parallel-First Statistics Functions
+ * Typed Statistics Functions (Parallel-First)
  *
  * AssemblyScript-friendly TypeScript implementations with typed-function
  * integration and workerpool parallel execution.
+ *
+ * Following the parallel-first philosophy per CLAUDE.md:
+ * - Use workers for ALL array transformations (Float64Array)
+ * - Use workers for ALL numerical computations that can be batched
+ * - Only fall back to sequential for trivial scalar operations
  *
  * @packageDocumentation
  */
@@ -696,7 +701,10 @@ export const parallelStatHistogram = mathTyped('parallelStatHistogram', {
 // Export All Parallel Statistics Functions
 // =============================================================================
 
-export const parallelStatistics = {
+/**
+ * Primary export: typed statistics functions
+ */
+export const typedStatistics = {
   sum: parallelStatSum,
   mean: parallelStatMean,
   variance: parallelStatVariance,
@@ -715,6 +723,11 @@ export const parallelStatistics = {
   quantile: parallelStatQuantile,
   histogram: parallelStatHistogram,
 };
+
+/**
+ * @deprecated Use typedStatistics instead
+ */
+export const parallelStatistics = typedStatistics;
 
 /**
  * Initialize parallel statistics processing

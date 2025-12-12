@@ -2,7 +2,15 @@
  * Parallel-First Matrix Operations
  *
  * AssemblyScript-friendly TypeScript implementations with typed-function
- * integration and workerpool parallel execution.
+ * integration and workerpool parallel execution via @mathts/parallel.
+ *
+ * These operations use Float64Array flat row-major format for efficient
+ * parallel processing through the ComputePool worker infrastructure.
+ *
+ * Following the parallel-first philosophy per CLAUDE.md:
+ * - Use workers for ALL matrix operations (matmul, transpose, etc.)
+ * - Use workers for ALL element-wise operations on matrices
+ * - Only fall back to sequential for trivial scalar operations
  *
  * @packageDocumentation
  */

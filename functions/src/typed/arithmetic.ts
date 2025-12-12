@@ -1,8 +1,13 @@
 /**
- * Typed Arithmetic Functions
+ * Typed Arithmetic Functions (Parallel-First)
  *
  * Polymorphic arithmetic operations using typed-function for runtime dispatch.
- * Supports Complex, Fraction, BigNumber, and Matrix types.
+ * Supports Complex, Fraction, BigNumber, and Float64Array types.
+ *
+ * Following the parallel-first philosophy per CLAUDE.md:
+ * - Use workers for ALL array transformations (Float64Array)
+ * - Use workers for ALL numerical computations that can be batched
+ * - Only fall back to sequential for trivial scalar operations
  *
  * @packageDocumentation
  */
@@ -14,305 +19,396 @@ import {
   BigNumber,
 } from '@mathts/core';
 
+import { computePool, ComputePool } from '@mathts/parallel';
+
 // =============================================================================
-// Addition
+// AssemblyScript-Compatible Type Aliases
+// =============================================================================
+
+/** 64-bit float (default for decimals) */
+type f64 = number;
+
+/** 32-bit signed integer */
+type i32 = number;
+
+/** 64-bit signed integer */
+type i64 = bigint;
+
+// =============================================================================
+// Addition (Parallel-First)
 // =============================================================================
 
 /**
- * Polymorphic addition function
+ * Polymorphic addition function with parallel execution for arrays
+ *
+ * For Float64Array inputs, uses worker pool for parallel computation.
+ * Falls back to sequential for scalar types.
  *
  * @example
  * ```typescript
- * add(1, 2);                          // 3
- * add(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
+ * add(1, 2);                                    // 3
+ * add(new Complex(1, 2), new Complex(3, 4));   // Complex(4, 6)
  * add(new Fraction(1, 2), new Fraction(1, 3)); // Fraction(5, 6)
+ * await add(float64A, float64B);               // Parallel array add
  * ```
  */
 export const add = mathTyped('add', {
-  'number, number': (a: number, b: number) => a + b,
+  'number, number': (a: f64, b: f64): f64 => a + b,
 
-  'bigint, bigint': (a: bigint, b: bigint) => a + b,
+  'bigint, bigint': (a: i64, b: i64): i64 => a + b,
 
-  'Complex, Complex': (a: Complex, b: Complex) => a.add(b),
+  'Complex, Complex': (a: Complex, b: Complex): Complex => a.add(b),
 
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.add(b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.add(b),
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.add(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.add(b),
 
   // Mixed type operations (auto-coercion via conversions)
-  'number, Complex': (a: number, b: Complex) => Complex.fromNumber(a).add(b),
-  'Complex, number': (a: Complex, b: number) => a.add(Complex.fromNumber(b)),
+  'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).add(b),
+  'Complex, number': (a: Complex, b: f64): Complex => a.add(Complex.fromNumber(b)),
 
-  'number, Fraction': (a: number, b: Fraction) => Fraction.fromNumber(a).add(b),
-  'Fraction, number': (a: Fraction, b: number) => a.add(Fraction.fromNumber(b)),
+  'number, Fraction': (a: f64, b: Fraction): Fraction => Fraction.fromNumber(a).add(b),
+  'Fraction, number': (a: Fraction, b: f64): Fraction => a.add(Fraction.fromNumber(b)),
 
-  'number, BigNumber': (a: number, b: BigNumber) => BigNumber.fromNumber(a).add(b),
-  'BigNumber, number': (a: BigNumber, b: number) => a.add(BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: f64, b: BigNumber): BigNumber => BigNumber.fromNumber(a).add(b),
+  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.add(BigNumber.fromNumber(b)),
+
+  // Parallel array addition using ComputePool
+  'Float64Array, Float64Array': async (a: Float64Array, b: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.add(a, b);
+    return result.result;
+  },
 
   // Variadic addition
-  'number, number, ...number': (a: number, b: number, ...rest: number[]) =>
-    rest.reduce((acc, val) => acc + val, a + b),
+  'number, number, ...number': (a: f64, b: f64, ...rest: f64[]): f64 =>
+    rest.reduce((acc: f64, val: f64): f64 => acc + val, a + b),
 });
 
 // =============================================================================
-// Subtraction
+// Subtraction (Parallel-First)
 // =============================================================================
 
 /**
- * Polymorphic subtraction function
+ * Polymorphic subtraction function with parallel execution for arrays
  */
 export const subtract = mathTyped('subtract', {
-  'number, number': (a: number, b: number) => a - b,
+  'number, number': (a: f64, b: f64): f64 => a - b,
 
-  'bigint, bigint': (a: bigint, b: bigint) => a - b,
+  'bigint, bigint': (a: i64, b: i64): i64 => a - b,
 
-  'Complex, Complex': (a: Complex, b: Complex) => a.subtract(b),
+  'Complex, Complex': (a: Complex, b: Complex): Complex => a.subtract(b),
 
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.subtract(b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.subtract(b),
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.subtract(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.subtract(b),
 
-  'number, Complex': (a: number, b: Complex) => Complex.fromNumber(a).subtract(b),
-  'Complex, number': (a: Complex, b: number) => a.subtract(Complex.fromNumber(b)),
+  'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).subtract(b),
+  'Complex, number': (a: Complex, b: f64): Complex => a.subtract(Complex.fromNumber(b)),
 
-  'number, Fraction': (a: number, b: Fraction) => Fraction.fromNumber(a).subtract(b),
-  'Fraction, number': (a: Fraction, b: number) => a.subtract(Fraction.fromNumber(b)),
+  'number, Fraction': (a: f64, b: Fraction): Fraction => Fraction.fromNumber(a).subtract(b),
+  'Fraction, number': (a: Fraction, b: f64): Fraction => a.subtract(Fraction.fromNumber(b)),
 
-  'number, BigNumber': (a: number, b: BigNumber) => BigNumber.fromNumber(a).subtract(b),
-  'BigNumber, number': (a: BigNumber, b: number) => a.subtract(BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: f64, b: BigNumber): BigNumber => BigNumber.fromNumber(a).subtract(b),
+  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.subtract(BigNumber.fromNumber(b)),
+
+  // Parallel array subtraction
+  'Float64Array, Float64Array': async (a: Float64Array, b: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.subtract(a, b);
+    return result.result;
+  },
 });
 
 // =============================================================================
-// Multiplication
+// Multiplication (Parallel-First)
 // =============================================================================
 
 /**
- * Polymorphic multiplication function
+ * Polymorphic multiplication function with parallel execution for arrays
  */
 export const multiply = mathTyped('multiply', {
-  'number, number': (a: number, b: number) => a * b,
+  'number, number': (a: f64, b: f64): f64 => a * b,
 
-  'bigint, bigint': (a: bigint, b: bigint) => a * b,
+  'bigint, bigint': (a: i64, b: i64): i64 => a * b,
 
-  'Complex, Complex': (a: Complex, b: Complex) => a.multiply(b),
+  'Complex, Complex': (a: Complex, b: Complex): Complex => a.multiply(b),
 
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.multiply(b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.multiply(b),
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.multiply(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.multiply(b),
 
-  'number, Complex': (a: number, b: Complex) => b.multiply(Complex.fromNumber(a)),
-  'Complex, number': (a: Complex, b: number) => a.multiply(Complex.fromNumber(b)),
+  'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
+  'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
 
-  'number, Fraction': (a: number, b: Fraction) => b.multiply(Fraction.fromNumber(a)),
-  'Fraction, number': (a: Fraction, b: number) => a.multiply(Fraction.fromNumber(b)),
+  'number, Fraction': (a: f64, b: Fraction): Fraction => b.multiply(Fraction.fromNumber(a)),
+  'Fraction, number': (a: Fraction, b: f64): Fraction => a.multiply(Fraction.fromNumber(b)),
 
-  'number, BigNumber': (a: number, b: BigNumber) => b.multiply(BigNumber.fromNumber(a)),
-  'BigNumber, number': (a: BigNumber, b: number) => a.multiply(BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: f64, b: BigNumber): BigNumber => b.multiply(BigNumber.fromNumber(a)),
+  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.multiply(BigNumber.fromNumber(b)),
+
+  // Parallel element-wise multiplication
+  'Float64Array, Float64Array': async (a: Float64Array, b: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.multiply(a, b);
+    return result.result;
+  },
+
+  // Parallel scalar multiplication (scale)
+  'Float64Array, number': async (a: Float64Array, scalar: f64): Promise<Float64Array> => {
+    const result = await computePool.scale(a, scalar);
+    return result.result;
+  },
+
+  'number, Float64Array': async (scalar: f64, a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.scale(a, scalar);
+    return result.result;
+  },
 
   // Variadic multiplication
-  'number, number, ...number': (a: number, b: number, ...rest: number[]) =>
-    rest.reduce((acc, val) => acc * val, a * b),
+  'number, number, ...number': (a: f64, b: f64, ...rest: f64[]): f64 =>
+    rest.reduce((acc: f64, val: f64): f64 => acc * val, a * b),
 });
 
 // =============================================================================
-// Division
+// Division (Parallel-First)
 // =============================================================================
 
 /**
- * Polymorphic division function
+ * Polymorphic division function with parallel execution for arrays
  */
 export const divide = mathTyped('divide', {
-  'number, number': (a: number, b: number) => a / b,
+  'number, number': (a: f64, b: f64): f64 => a / b,
 
-  'bigint, bigint': (a: bigint, b: bigint) => a / b,
+  'bigint, bigint': (a: i64, b: i64): i64 => a / b,
 
-  'Complex, Complex': (a: Complex, b: Complex) => a.divide(b),
+  'Complex, Complex': (a: Complex, b: Complex): Complex => a.divide(b),
 
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.divide(b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.divide(b),
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.divide(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.divide(b),
 
-  'number, Complex': (a: number, b: Complex) => Complex.fromNumber(a).divide(b),
-  'Complex, number': (a: Complex, b: number) => a.divide(Complex.fromNumber(b)),
+  'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).divide(b),
+  'Complex, number': (a: Complex, b: f64): Complex => a.divide(Complex.fromNumber(b)),
 
-  'number, Fraction': (a: number, b: Fraction) => Fraction.fromNumber(a).divide(b),
-  'Fraction, number': (a: Fraction, b: number) => a.divide(Fraction.fromNumber(b)),
+  'number, Fraction': (a: f64, b: Fraction): Fraction => Fraction.fromNumber(a).divide(b),
+  'Fraction, number': (a: Fraction, b: f64): Fraction => a.divide(Fraction.fromNumber(b)),
 
-  'number, BigNumber': (a: number, b: BigNumber) => BigNumber.fromNumber(a).divide(b),
-  'BigNumber, number': (a: BigNumber, b: number) => a.divide(BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: f64, b: BigNumber): BigNumber => BigNumber.fromNumber(a).divide(b),
+  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.divide(BigNumber.fromNumber(b)),
+
+  // Parallel element-wise division
+  'Float64Array, Float64Array': async (a: Float64Array, b: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.divide(a, b);
+    return result.result;
+  },
 });
 
 // =============================================================================
-// Unary Operations
+// Unary Operations (Parallel-First)
 // =============================================================================
 
 /**
- * Unary negation
+ * Unary negation with parallel array support
  */
 export const unaryMinus = mathTyped('unaryMinus', {
-  'number': (a: number) => -a,
-  'bigint': (a: bigint) => -a,
-  'Complex': (a: Complex) => a.neg(),
-  'Fraction': (a: Fraction) => a.neg(),
-  'BigNumber': (a: BigNumber) => a.neg(),
+  'number': (a: f64): f64 => -a,
+  'bigint': (a: i64): i64 => -a,
+  'Complex': (a: Complex): Complex => a.neg(),
+  'Fraction': (a: Fraction): Fraction => a.neg(),
+  'BigNumber': (a: BigNumber): BigNumber => a.neg(),
+
+  // Parallel array negation
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.negate(a);
+    return result.result;
+  },
 });
 
 /**
  * Unary plus (identity)
  */
 export const unaryPlus = mathTyped('unaryPlus', {
-  'number': (a: number) => +a,
-  'bigint': (a: bigint) => a,
-  'Complex': (a: Complex) => a,
-  'Fraction': (a: Fraction) => a,
-  'BigNumber': (a: BigNumber) => a,
+  'number': (a: f64): f64 => +a,
+  'bigint': (a: i64): i64 => a,
+  'Complex': (a: Complex): Complex => a,
+  'Fraction': (a: Fraction): Fraction => a,
+  'BigNumber': (a: BigNumber): BigNumber => a,
+  'Float64Array': (a: Float64Array): Float64Array => a, // Identity, no copy needed
 });
 
 /**
- * Absolute value
+ * Absolute value with parallel array support
  */
 export const abs = mathTyped('abs', {
-  'number': (a: number) => Math.abs(a),
-  'bigint': (a: bigint) => (a < 0n ? -a : a),
-  'Complex': (a: Complex) => a.abs(),
-  'Fraction': (a: Fraction) => a.abs(),
-  'BigNumber': (a: BigNumber) => a.abs(),
+  'number': (a: f64): f64 => Math.abs(a),
+  'bigint': (a: i64): i64 => (a < 0n ? -a : a),
+  'Complex': (a: Complex): f64 => a.abs(),
+  'Fraction': (a: Fraction): Fraction => a.abs(),
+  'BigNumber': (a: BigNumber): BigNumber => a.abs(),
+
+  // Parallel array abs
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.abs(a);
+    return result.result;
+  },
 });
 
 /**
  * Sign function
  */
 export const sign = mathTyped('sign', {
-  'number': (a: number) => Math.sign(a),
-  'bigint': (a: bigint) => (a > 0n ? 1n : a < 0n ? -1n : 0n),
-  'Fraction': (a: Fraction) => new Fraction(BigInt(a.sign()), 1n),
-  'BigNumber': (a: BigNumber) => BigNumber.fromNumber(a.sign()),
+  'number': (a: f64): f64 => Math.sign(a),
+  'bigint': (a: i64): i64 => (a > 0n ? 1n : a < 0n ? -1n : 0n),
+  'Fraction': (a: Fraction): Fraction => new Fraction(BigInt(a.sign()), 1n),
+  'BigNumber': (a: BigNumber): BigNumber => BigNumber.fromNumber(a.sign()),
 });
 
 // =============================================================================
-// Power and Root Operations
+// Power and Root Operations (Parallel-First)
 // =============================================================================
 
 /**
  * Power function
  */
 export const pow = mathTyped('pow', {
-  'number, number': (a: number, b: number) => Math.pow(a, b),
-  'bigint, bigint': (a: bigint, b: bigint) => a ** b,
-  'Complex, number': (a: Complex, b: number) => a.pow(b),
-  'Complex, Complex': (a: Complex, b: Complex) => a.pow(b),
-  'Fraction, number': (a: Fraction, b: number) => a.pow(Math.floor(b)),
-  'BigNumber, number': (a: BigNumber, b: number) => a.pow(b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.pow(b),
+  'number, number': (a: f64, b: f64): f64 => Math.pow(a, b),
+  'bigint, bigint': (a: i64, b: i64): i64 => a ** b,
+  'Complex, number': (a: Complex, b: f64): Complex => a.pow(b),
+  'Complex, Complex': (a: Complex, b: Complex): Complex => a.pow(b),
+  'Fraction, number': (a: Fraction, b: f64): Fraction => a.pow(Math.floor(b)),
+  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.pow(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.pow(b),
 });
 
 /**
- * Square root
+ * Square root with parallel array support
  */
 export const sqrt = mathTyped('sqrt', {
-  'number': (a: number) => {
+  'number': (a: f64): f64 | Complex => {
     if (a < 0) {
       return new Complex(0, Math.sqrt(-a));
     }
     return Math.sqrt(a);
   },
-  'Complex': (a: Complex) => a.sqrt(),
-  'BigNumber': (a: BigNumber) => a.sqrt(),
+  'Complex': (a: Complex): Complex => a.sqrt(),
+  'BigNumber': (a: BigNumber): BigNumber => a.sqrt(),
+
+  // Parallel array sqrt
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.sqrt(a);
+    return result.result;
+  },
 });
 
 /**
- * Square
+ * Square with parallel array support
  */
 export const square = mathTyped('square', {
-  'number': (a: number) => a * a,
-  'bigint': (a: bigint) => a * a,
-  'Complex': (a: Complex) => a.multiply(a),
-  'Fraction': (a: Fraction) => a.multiply(a),
-  'BigNumber': (a: BigNumber) => a.multiply(a),
+  'number': (a: f64): f64 => a * a,
+  'bigint': (a: i64): i64 => a * a,
+  'Complex': (a: Complex): Complex => a.multiply(a),
+  'Fraction': (a: Fraction): Fraction => a.multiply(a),
+  'BigNumber': (a: BigNumber): BigNumber => a.multiply(a),
+
+  // Parallel array square
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.square(a);
+    return result.result;
+  },
 });
 
 /**
  * Cube
  */
 export const cube = mathTyped('cube', {
-  'number': (a: number) => a * a * a,
-  'bigint': (a: bigint) => a * a * a,
-  'Complex': (a: Complex) => a.multiply(a).multiply(a),
-  'Fraction': (a: Fraction) => a.multiply(a).multiply(a),
-  'BigNumber': (a: BigNumber) => a.multiply(a).multiply(a),
+  'number': (a: f64): f64 => a * a * a,
+  'bigint': (a: i64): i64 => a * a * a,
+  'Complex': (a: Complex): Complex => a.multiply(a).multiply(a),
+  'Fraction': (a: Fraction): Fraction => a.multiply(a).multiply(a),
+  'BigNumber': (a: BigNumber): BigNumber => a.multiply(a).multiply(a),
 });
 
 /**
  * Cube root
  */
 export const cbrt = mathTyped('cbrt', {
-  'number': (a: number) => Math.cbrt(a),
-  'Complex': (a: Complex) => a.pow(1 / 3),
-  'BigNumber': (a: BigNumber) => a.cbrt(),
+  'number': (a: f64): f64 => Math.cbrt(a),
+  'Complex': (a: Complex): Complex => a.pow(1 / 3),
+  'BigNumber': (a: BigNumber): BigNumber => a.cbrt(),
 });
 
 /**
  * N-th root
  */
 export const nthRoot = mathTyped('nthRoot', {
-  'number, number': (a: number, n: number) => Math.pow(a, 1 / n),
-  'Complex, number': (a: Complex, n: number) => a.pow(1 / n),
-  'BigNumber, number': (a: BigNumber, n: number) => a.pow(1 / n),
+  'number, number': (a: f64, n: f64): f64 => Math.pow(a, 1 / n),
+  'Complex, number': (a: Complex, n: f64): Complex => a.pow(1 / n),
+  'BigNumber, number': (a: BigNumber, n: f64): BigNumber => a.pow(1 / n),
 });
 
 // =============================================================================
-// Exponential and Logarithmic
+// Exponential and Logarithmic (Parallel-First)
 // =============================================================================
 
 /**
- * Exponential function (e^x)
+ * Exponential function (e^x) with parallel array support
  */
 export const exp = mathTyped('exp', {
-  'number': (a: number) => Math.exp(a),
-  'Complex': (a: Complex) => a.exp(),
-  'BigNumber': (a: BigNumber) => a.exp(),
+  'number': (a: f64): f64 => Math.exp(a),
+  'Complex': (a: Complex): Complex => a.exp(),
+  'BigNumber': (a: BigNumber): BigNumber => a.exp(),
+
+  // Parallel array exp
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.exp(a);
+    return result.result;
+  },
 });
 
 /**
- * Natural logarithm (ln x)
+ * Natural logarithm (ln x) with parallel array support
  */
 export const log = mathTyped('log', {
-  'number': (a: number) => Math.log(a),
-  'Complex': (a: Complex) => a.log(),
-  'BigNumber': (a: BigNumber) => a.ln(),
-  'number, number': (a: number, base: number) => Math.log(a) / Math.log(base),
+  'number': (a: f64): f64 => Math.log(a),
+  'Complex': (a: Complex): Complex => a.log(),
+  'BigNumber': (a: BigNumber): BigNumber => a.ln(),
+  'number, number': (a: f64, base: f64): f64 => Math.log(a) / Math.log(base),
+
+  // Parallel array log
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.log(a);
+    return result.result;
+  },
 });
 
 /**
  * Base-10 logarithm
  */
 export const log10 = mathTyped('log10', {
-  'number': (a: number) => Math.log10(a),
-  'Complex': (a: Complex) => a.log().divide(Complex.fromNumber(Math.LN10)),
-  'BigNumber': (a: BigNumber) => a.log10(),
+  'number': (a: f64): f64 => Math.log10(a),
+  'Complex': (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN10)),
+  'BigNumber': (a: BigNumber): BigNumber => a.log10(),
 });
 
 /**
  * Base-2 logarithm
  */
 export const log2 = mathTyped('log2', {
-  'number': (a: number) => Math.log2(a),
-  'Complex': (a: Complex) => a.log().divide(Complex.fromNumber(Math.LN2)),
-  'BigNumber': (a: BigNumber) => a.log2(),
+  'number': (a: f64): f64 => Math.log2(a),
+  'Complex': (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN2)),
+  'BigNumber': (a: BigNumber): BigNumber => a.log2(),
 });
 
 /**
  * log(1 + x) with higher precision for small x
  */
 export const log1p = mathTyped('log1p', {
-  'number': (a: number) => Math.log1p(a),
+  'number': (a: f64): f64 => Math.log1p(a),
 });
 
 /**
  * exp(x) - 1 with higher precision for small x
  */
 export const expm1 = mathTyped('expm1', {
-  'number': (a: number) => Math.expm1(a),
+  'number': (a: f64): f64 => Math.expm1(a),
 });
 
 // =============================================================================
@@ -323,10 +419,10 @@ export const expm1 = mathTyped('expm1', {
  * Round to nearest integer
  */
 export const round = mathTyped('round', {
-  'number': (a: number) => Math.round(a),
-  'Fraction': (a: Fraction) => a.round(),
-  'BigNumber': (a: BigNumber) => a.round(),
-  'number, number': (a: number, decimals: number) => {
+  'number': (a: f64): f64 => Math.round(a),
+  'Fraction': (a: Fraction): Fraction => a.round(),
+  'BigNumber': (a: BigNumber): BigNumber => a.round(),
+  'number, number': (a: f64, decimals: f64): f64 => {
     const factor = Math.pow(10, decimals);
     return Math.round(a * factor) / factor;
   },
@@ -336,27 +432,27 @@ export const round = mathTyped('round', {
  * Floor (round down)
  */
 export const floor = mathTyped('floor', {
-  'number': (a: number) => Math.floor(a),
-  'Fraction': (a: Fraction) => a.floor(),
-  'BigNumber': (a: BigNumber) => a.floor(),
+  'number': (a: f64): f64 => Math.floor(a),
+  'Fraction': (a: Fraction): Fraction => a.floor(),
+  'BigNumber': (a: BigNumber): BigNumber => a.floor(),
 });
 
 /**
  * Ceiling (round up)
  */
 export const ceil = mathTyped('ceil', {
-  'number': (a: number) => Math.ceil(a),
-  'Fraction': (a: Fraction) => a.ceil(),
-  'BigNumber': (a: BigNumber) => a.ceil(),
+  'number': (a: f64): f64 => Math.ceil(a),
+  'Fraction': (a: Fraction): Fraction => a.ceil(),
+  'BigNumber': (a: BigNumber): BigNumber => a.ceil(),
 });
 
 /**
  * Truncate (round toward zero)
  */
 export const fix = mathTyped('fix', {
-  'number': (a: number) => Math.trunc(a),
-  'Fraction': (a: Fraction) => a.trunc(),
-  'BigNumber': (a: BigNumber) => a.trunc(),
+  'number': (a: f64): f64 => Math.trunc(a),
+  'Fraction': (a: Fraction): Fraction => a.trunc(),
+  'BigNumber': (a: BigNumber): BigNumber => a.trunc(),
 });
 
 // =============================================================================
@@ -367,17 +463,17 @@ export const fix = mathTyped('fix', {
  * Modulo operation
  */
 export const mod = mathTyped('mod', {
-  'number, number': (a: number, b: number) => ((a % b) + b) % b,
-  'bigint, bigint': (a: bigint, b: bigint) => ((a % b) + b) % b,
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.mod(b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.mod(b),
+  'number, number': (a: f64, b: f64): f64 => ((a % b) + b) % b,
+  'bigint, bigint': (a: i64, b: i64): i64 => ((a % b) + b) % b,
+  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => a.mod(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.mod(b),
 });
 
 /**
  * Greatest common divisor
  */
 export const gcd = mathTyped('gcd', {
-  'number, number': (a: number, b: number) => {
+  'number, number': (a: f64, b: f64): f64 => {
     a = Math.abs(Math.floor(a));
     b = Math.abs(Math.floor(b));
     while (b !== 0) {
@@ -387,7 +483,7 @@ export const gcd = mathTyped('gcd', {
     }
     return a;
   },
-  'bigint, bigint': (a: bigint, b: bigint) => {
+  'bigint, bigint': (a: i64, b: i64): i64 => {
     a = a < 0n ? -a : a;
     b = b < 0n ? -b : b;
     while (b !== 0n) {
@@ -403,11 +499,11 @@ export const gcd = mathTyped('gcd', {
  * Least common multiple
  */
 export const lcm = mathTyped('lcm', {
-  'number, number': (a: number, b: number) => {
+  'number, number': (a: f64, b: f64): f64 => {
     const g = gcd(a, b) as number;
     return Math.abs(a * b) / g;
   },
-  'bigint, bigint': (a: bigint, b: bigint) => {
+  'bigint, bigint': (a: i64, b: i64): i64 => {
     const g = gcd(a, b) as bigint;
     const absA = a < 0n ? -a : a;
     const absB = b < 0n ? -b : b;
@@ -420,7 +516,7 @@ export const lcm = mathTyped('lcm', {
  * Returns [gcd, x, y] where gcd = a*x + b*y (Bezout coefficients)
  */
 export const xgcd = mathTyped('xgcd', {
-  'number, number': (a: number, b: number): [number, number, number] => {
+  'number, number': (a: f64, b: f64): [f64, f64, f64] => {
     a = Math.floor(a);
     b = Math.floor(b);
     let x = 0, lastX = 1;
@@ -433,7 +529,7 @@ export const xgcd = mathTyped('xgcd', {
     }
     return a < 0 ? [-a, -lastX, -lastY] : [a, lastX, lastY];
   },
-  'bigint, bigint': (a: bigint, b: bigint): [bigint, bigint, bigint] => {
+  'bigint, bigint': (a: i64, b: i64): [i64, i64, i64] => {
     let x = 0n, lastX = 1n;
     let y = 1n, lastY = 0n;
     while (b !== 0n) {
@@ -447,18 +543,24 @@ export const xgcd = mathTyped('xgcd', {
 });
 
 /**
- * Vector/array norm (Euclidean norm by default)
+ * Vector/array norm (Euclidean norm by default) with parallel support
  */
 export const norm = mathTyped('norm', {
-  'number': (a: number) => Math.abs(a),
-  'Complex': (a: Complex) => a.abs(),
-  'BigNumber': (a: BigNumber) => a.abs(),
-  'Array': (arr: number[]) => Math.sqrt(arr.reduce((sum, x) => sum + x * x, 0)),
-  'Array, number': (arr: number[], p: number) => {
+  'number': (a: f64): f64 => Math.abs(a),
+  'Complex': (a: Complex): f64 => a.abs(),
+  'BigNumber': (a: BigNumber): BigNumber => a.abs(),
+  'Array': (arr: f64[]): f64 => Math.sqrt(arr.reduce((sum, x) => sum + x * x, 0)),
+  'Array, number': (arr: f64[], p: f64): f64 => {
     if (p === Infinity) return Math.max(...arr.map(Math.abs));
     if (p === -Infinity) return Math.min(...arr.map(Math.abs));
     if (p === 0) return arr.filter(x => x !== 0).length;
     return Math.pow(arr.reduce((sum, x) => sum + Math.pow(Math.abs(x), p), 0), 1/p);
+  },
+
+  // Parallel Float64Array norm
+  'Float64Array': async (a: Float64Array): Promise<f64> => {
+    const result = await computePool.norm(a);
+    return result.result;
   },
 });
 
@@ -470,27 +572,27 @@ export const norm = mathTyped('norm', {
  * Hyperbolic sine
  */
 export const sinh = mathTyped('sinh', {
-  'number': (a: number) => Math.sinh(a),
-  'Complex': (a: Complex) => a.sinh(),
-  'BigNumber': (a: BigNumber) => a.sinh(),
+  'number': (a: f64): f64 => Math.sinh(a),
+  'Complex': (a: Complex): Complex => a.sinh(),
+  'BigNumber': (a: BigNumber): BigNumber => a.sinh(),
 });
 
 /**
  * Hyperbolic cosine
  */
 export const cosh = mathTyped('cosh', {
-  'number': (a: number) => Math.cosh(a),
-  'Complex': (a: Complex) => a.cosh(),
-  'BigNumber': (a: BigNumber) => a.cosh(),
+  'number': (a: f64): f64 => Math.cosh(a),
+  'Complex': (a: Complex): Complex => a.cosh(),
+  'BigNumber': (a: BigNumber): BigNumber => a.cosh(),
 });
 
 /**
  * Hyperbolic tangent
  */
 export const tanh = mathTyped('tanh', {
-  'number': (a: number) => Math.tanh(a),
-  'Complex': (a: Complex) => a.tanh(),
-  'BigNumber': (a: BigNumber) => a.tanh(),
+  'number': (a: f64): f64 => Math.tanh(a),
+  'Complex': (a: Complex): Complex => a.tanh(),
+  'BigNumber': (a: BigNumber): BigNumber => a.tanh(),
 });
 
 // =============================================================================
@@ -501,92 +603,308 @@ export const tanh = mathTyped('tanh', {
  * Check if values are equal
  */
 export const equal = mathTyped('equal', {
-  'number, number': (a: number, b: number) => a === b,
-  'bigint, bigint': (a: bigint, b: bigint) => a === b,
-  'Complex, Complex': (a: Complex, b: Complex) => a.equals(b),
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.equals(b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.equals(b),
+  'number, number': (a: f64, b: f64): boolean => a === b,
+  'bigint, bigint': (a: i64, b: i64): boolean => a === b,
+  'Complex, Complex': (a: Complex, b: Complex): boolean => a.equals(b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.equals(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.equals(b),
 });
 
 /**
  * Check if a < b
  */
 export const smaller = mathTyped('smaller', {
-  'number, number': (a: number, b: number) => a < b,
-  'bigint, bigint': (a: bigint, b: bigint) => a < b,
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.compare(b) < 0,
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.compare(b) < 0,
+  'number, number': (a: f64, b: f64): boolean => a < b,
+  'bigint, bigint': (a: i64, b: i64): boolean => a < b,
+  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) < 0,
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) < 0,
 });
 
 /**
  * Check if a > b
  */
 export const larger = mathTyped('larger', {
-  'number, number': (a: number, b: number) => a > b,
-  'bigint, bigint': (a: bigint, b: bigint) => a > b,
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.compare(b) > 0,
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.compare(b) > 0,
+  'number, number': (a: f64, b: f64): boolean => a > b,
+  'bigint, bigint': (a: i64, b: i64): boolean => a > b,
+  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) > 0,
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) > 0,
 });
 
 /**
  * Check if a <= b
  */
 export const smallerEq = mathTyped('smallerEq', {
-  'number, number': (a: number, b: number) => a <= b,
-  'bigint, bigint': (a: bigint, b: bigint) => a <= b,
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.compare(b) <= 0,
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.compare(b) <= 0,
+  'number, number': (a: f64, b: f64): boolean => a <= b,
+  'bigint, bigint': (a: i64, b: i64): boolean => a <= b,
+  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) <= 0,
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) <= 0,
 });
 
 /**
  * Check if a >= b
  */
 export const largerEq = mathTyped('largerEq', {
-  'number, number': (a: number, b: number) => a >= b,
-  'bigint, bigint': (a: bigint, b: bigint) => a >= b,
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.compare(b) >= 0,
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.compare(b) >= 0,
+  'number, number': (a: f64, b: f64): boolean => a >= b,
+  'bigint, bigint': (a: i64, b: i64): boolean => a >= b,
+  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) >= 0,
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) >= 0,
 });
 
 /**
  * Compare two values: -1, 0, or 1
  */
 export const compare = mathTyped('compare', {
-  'number, number': (a: number, b: number) => (a > b ? 1 : a < b ? -1 : 0),
-  'bigint, bigint': (a: bigint, b: bigint) => (a > b ? 1 : a < b ? -1 : 0),
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.compare(b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.compare(b),
+  'number, number': (a: f64, b: f64): i32 => (a > b ? 1 : a < b ? -1 : 0),
+  'bigint, bigint': (a: i64, b: i64): i32 => (a > b ? 1 : a < b ? -1 : 0),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): i32 => a.compare(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): i32 => a.compare(b),
 });
 
 // =============================================================================
-// Min/Max Operations
+// Min/Max Operations (Parallel-First)
 // =============================================================================
 
 /**
- * Minimum of values
+ * Minimum of values with parallel array support
  */
 export const min = mathTyped('min', {
-  'bigint, bigint': (a: bigint, b: bigint) => (a < b ? a : b),
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => (a.compare(b) < 0 ? a : b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => (a.compare(b) < 0 ? a : b),
-  'Array': (arr: number[]) => Math.min(...arr),
-  'number': (a: number) => a,
-  'number, number': (a: number, b: number) => Math.min(a, b),
-  'number, number, ...number': (a: number, b: number, ...rest: number[]) => Math.min(a, b, ...rest),
+  'bigint, bigint': (a: i64, b: i64): i64 => (a < b ? a : b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (a.compare(b) < 0 ? a : b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (a.compare(b) < 0 ? a : b),
+  'Array': (arr: f64[]): f64 => Math.min(...arr),
+  'number': (a: f64): f64 => a,
+  'number, number': (a: f64, b: f64): f64 => Math.min(a, b),
+  'number, number, ...number': (a: f64, b: f64, ...rest: f64[]): f64 => Math.min(a, b, ...rest),
+
+  // Parallel Float64Array min
+  'Float64Array': async (a: Float64Array): Promise<f64> => {
+    const result = await computePool.min(a);
+    return result.result;
+  },
 });
 
 /**
- * Maximum of values
+ * Maximum of values with parallel array support
  */
 export const max = mathTyped('max', {
-  'bigint, bigint': (a: bigint, b: bigint) => (a > b ? a : b),
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => (a.compare(b) > 0 ? a : b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => (a.compare(b) > 0 ? a : b),
-  'Array': (arr: number[]) => Math.max(...arr),
-  'number': (a: number) => a,
-  'number, number': (a: number, b: number) => Math.max(a, b),
-  'number, number, ...number': (a: number, b: number, ...rest: number[]) => Math.max(a, b, ...rest),
+  'bigint, bigint': (a: i64, b: i64): i64 => (a > b ? a : b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (a.compare(b) > 0 ? a : b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (a.compare(b) > 0 ? a : b),
+  'Array': (arr: f64[]): f64 => Math.max(...arr),
+  'number': (a: f64): f64 => a,
+  'number, number': (a: f64, b: f64): f64 => Math.max(a, b),
+  'number, number, ...number': (a: f64, b: f64, ...rest: f64[]): f64 => Math.max(a, b, ...rest),
+
+  // Parallel Float64Array max
+  'Float64Array': async (a: Float64Array): Promise<f64> => {
+    const result = await computePool.max(a);
+    return result.result;
+  },
 });
+
+// =============================================================================
+// Statistical Operations (Parallel-First)
+// =============================================================================
+
+/**
+ * Sum with parallel array support
+ */
+export const sum = mathTyped('sum', {
+  'Array': (arr: f64[]): f64 => {
+    let total: f64 = 0;
+    for (let i: i32 = 0; i < arr.length; i++) {
+      total += arr[i];
+    }
+    return total;
+  },
+
+  // Parallel Float64Array sum
+  'Float64Array': async (a: Float64Array): Promise<f64> => {
+    const result = await computePool.sum(a);
+    return result.result;
+  },
+});
+
+/**
+ * Mean with parallel array support
+ */
+export const mean = mathTyped('mean', {
+  'Array': (arr: f64[]): f64 => {
+    if (arr.length === 0) return NaN;
+    let total: f64 = 0;
+    for (let i: i32 = 0; i < arr.length; i++) {
+      total += arr[i];
+    }
+    return total / arr.length;
+  },
+
+  // Parallel Float64Array mean
+  'Float64Array': async (a: Float64Array): Promise<f64> => {
+    const result = await computePool.mean(a);
+    return result.result;
+  },
+});
+
+/**
+ * Variance with parallel array support
+ */
+export const variance = mathTyped('variance', {
+  'Array': (arr: f64[]): f64 => {
+    if (arr.length === 0) return NaN;
+    let m: f64 = 0;
+    let m2: f64 = 0;
+    for (let i: i32 = 0; i < arr.length; i++) {
+      const delta: f64 = arr[i] - m;
+      m += delta / (i + 1);
+      const delta2: f64 = arr[i] - m;
+      m2 += delta * delta2;
+    }
+    return m2 / arr.length;
+  },
+
+  // Parallel Float64Array variance
+  'Float64Array': async (a: Float64Array): Promise<f64> => {
+    const result = await computePool.variance(a);
+    return result.result.variance;
+  },
+});
+
+/**
+ * Standard deviation with parallel array support
+ */
+export const std = mathTyped('std', {
+  'Array': (arr: f64[]): f64 => {
+    if (arr.length === 0) return NaN;
+    let m: f64 = 0;
+    let m2: f64 = 0;
+    for (let i: i32 = 0; i < arr.length; i++) {
+      const delta: f64 = arr[i] - m;
+      m += delta / (i + 1);
+      const delta2: f64 = arr[i] - m;
+      m2 += delta * delta2;
+    }
+    return Math.sqrt(m2 / arr.length);
+  },
+
+  // Parallel Float64Array std
+  'Float64Array': async (a: Float64Array): Promise<f64> => {
+    const result = await computePool.std(a);
+    return result.result;
+  },
+});
+
+/**
+ * Dot product with parallel array support
+ */
+export const dot = mathTyped('dot', {
+  'Array, Array': (a: f64[], b: f64[]): f64 => {
+    if (a.length !== b.length) {
+      throw new Error(`Vector lengths must match: ${a.length} vs ${b.length}`);
+    }
+    let total: f64 = 0;
+    for (let i: i32 = 0; i < a.length; i++) {
+      total += a[i] * b[i];
+    }
+    return total;
+  },
+
+  // Parallel Float64Array dot product
+  'Float64Array, Float64Array': async (a: Float64Array, b: Float64Array): Promise<f64> => {
+    const result = await computePool.dot(a, b);
+    return result.result;
+  },
+});
+
+// =============================================================================
+// Matrix Operations (Parallel-First)
+// =============================================================================
+
+/**
+ * Parallel matrix multiplication
+ * @param a First matrix as flat Float64Array (row-major)
+ * @param aRows Number of rows in A
+ * @param aCols Number of columns in A (must equal bRows)
+ * @param b Second matrix as flat Float64Array (row-major)
+ * @param bCols Number of columns in B
+ */
+export async function matmul(
+  a: Float64Array,
+  aRows: i32,
+  aCols: i32,
+  b: Float64Array,
+  bCols: i32
+): Promise<Float64Array> {
+  const result = await computePool.matmul(a, aRows, aCols, b, bCols);
+  return result.result;
+}
+
+/**
+ * Parallel matrix transpose
+ */
+export async function transpose(
+  data: Float64Array,
+  rows: i32,
+  cols: i32
+): Promise<Float64Array> {
+  const result = await computePool.transpose(data, rows, cols);
+  return result.result;
+}
+
+/**
+ * Parallel matrix-vector multiplication
+ */
+export async function matvec(
+  matrix: Float64Array,
+  rows: i32,
+  cols: i32,
+  vector: Float64Array
+): Promise<Float64Array> {
+  const result = await computePool.matvec(matrix, rows, cols, vector);
+  return result.result;
+}
+
+/**
+ * Parallel outer product
+ */
+export async function outer(
+  a: Float64Array,
+  b: Float64Array
+): Promise<Float64Array> {
+  const result = await computePool.outer(a, b);
+  return result.result;
+}
+
+// =============================================================================
+// Pool Lifecycle Management
+// =============================================================================
+
+/**
+ * Initialize the compute pool (call before using parallel operations)
+ */
+export async function initializePool(): Promise<void> {
+  await computePool.initialize();
+}
+
+/**
+ * Terminate the compute pool (call when done)
+ */
+export async function terminatePool(): Promise<void> {
+  await computePool.terminate();
+}
+
+/**
+ * Check if parallelization should be used for given element count
+ */
+export function shouldParallelize(elementCount: i32): boolean {
+  return computePool.shouldParallelize(elementCount);
+}
+
+/**
+ * Get the underlying ComputePool instance
+ */
+export function getComputePool(): ComputePool {
+  return computePool;
+}
 
 // =============================================================================
 // Export all functions
@@ -652,4 +970,170 @@ export const typedArithmetic = {
   // Min/max
   min,
   max,
+
+  // Statistics
+  sum,
+  mean,
+  variance,
+  std,
+  dot,
+
+  // Matrix operations
+  matmul,
+  transpose,
+  matvec,
+  outer,
+
+  // Lifecycle
+  initializePool,
+  terminatePool,
+  shouldParallelize,
+  getComputePool,
 };
+
+// =============================================================================
+// Backward Compatibility Aliases (Deprecated)
+// =============================================================================
+
+/**
+ * @deprecated Use `add` instead - arithmetic is now parallel-first
+ */
+export const parallelAdd = add;
+
+/**
+ * @deprecated Use `subtract` instead - arithmetic is now parallel-first
+ */
+export const parallelSubtract = subtract;
+
+/**
+ * @deprecated Use `multiply` instead - arithmetic is now parallel-first
+ */
+export const parallelMultiply = multiply;
+
+/**
+ * @deprecated Use `divide` instead - arithmetic is now parallel-first
+ */
+export const parallelDivide = divide;
+
+/**
+ * @deprecated Use `abs` instead - arithmetic is now parallel-first
+ */
+export const parallelAbs = abs;
+
+/**
+ * @deprecated Use `unaryMinus` instead - arithmetic is now parallel-first
+ */
+export const parallelNegate = unaryMinus;
+
+/**
+ * @deprecated Use `square` instead - arithmetic is now parallel-first
+ */
+export const parallelSquare = square;
+
+/**
+ * @deprecated Use `sqrt` instead - arithmetic is now parallel-first
+ */
+export const parallelSqrt = sqrt;
+
+/**
+ * @deprecated Use `exp` instead - arithmetic is now parallel-first
+ */
+export const parallelExp = exp;
+
+/**
+ * @deprecated Use `log` instead - arithmetic is now parallel-first
+ */
+export const parallelLog = log;
+
+/**
+ * @deprecated Use `sin` from trigonometry instead
+ */
+export const parallelSin = mathTyped('parallelSin', {
+  'number': (a: f64): f64 => Math.sin(a),
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.sin(a);
+    return result.result;
+  },
+});
+
+/**
+ * @deprecated Use `cos` from trigonometry instead
+ */
+export const parallelCos = mathTyped('parallelCos', {
+  'number': (a: f64): f64 => Math.cos(a),
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.cos(a);
+    return result.result;
+  },
+});
+
+/**
+ * @deprecated Use `tan` from trigonometry instead
+ */
+export const parallelTan = mathTyped('parallelTan', {
+  'number': (a: f64): f64 => Math.tan(a),
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.tan(a);
+    return result.result;
+  },
+});
+
+/**
+ * @deprecated Use `sum` instead - arithmetic is now parallel-first
+ */
+export const parallelSum = sum;
+
+/**
+ * @deprecated Use `mean` instead - arithmetic is now parallel-first
+ */
+export const parallelMean = mean;
+
+/**
+ * @deprecated Use `variance` instead - arithmetic is now parallel-first
+ */
+export const parallelVariance = variance;
+
+/**
+ * @deprecated Use `std` instead - arithmetic is now parallel-first
+ */
+export const parallelStd = std;
+
+/**
+ * @deprecated Use `min` instead - arithmetic is now parallel-first
+ */
+export const parallelMin = min;
+
+/**
+ * @deprecated Use `max` instead - arithmetic is now parallel-first
+ */
+export const parallelMax = max;
+
+/**
+ * @deprecated Use `norm` instead - arithmetic is now parallel-first
+ */
+export const parallelNorm = norm;
+
+/**
+ * @deprecated Use `dot` instead - arithmetic is now parallel-first
+ */
+export const parallelDot = dot;
+
+/**
+ * @deprecated Use `matmul` instead
+ */
+export const parallelMatmul = matmul;
+
+/**
+ * @deprecated Use `transpose` instead
+ */
+export const parallelTranspose = transpose;
+
+/**
+ * @deprecated Use `initializePool` instead
+ */
+export const initializeParallel = initializePool;
+
+/**
+ * @deprecated Use `terminatePool` instead
+ */
+export const terminateParallel = terminatePool;

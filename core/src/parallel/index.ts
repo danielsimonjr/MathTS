@@ -1,12 +1,24 @@
 /**
- * MathTS Parallel Processing Module
+ * MathTS Parallel Processing Module (LEGACY)
  *
- * Provides parallel-first utilities for all MathTS operations.
- * Following the parallel-first philosophy:
- * - Use workers for ALL array transformations (map, reduce, filter)
- * - Use workers for ALL numerical computations that can be batched
- * - Only fall back to sequential for trivial scalar operations
- * - Leverage Promise.all() for independent parallel tasks
+ * @deprecated This module provides Promise.all()-based parallel utilities.
+ * For worker pool-based parallel execution, use @mathts/parallel instead.
+ *
+ * The @mathts/parallel package provides ComputePool with true worker-based
+ * parallelization for significantly better performance on large datasets.
+ *
+ * Migration example:
+ * ```typescript
+ * // Before (this module):
+ * import { parallelSum, parallelMap } from '@mathts/core';
+ *
+ * // After (@mathts/parallel - recommended):
+ * import { computePool } from '@mathts/parallel';
+ * const result = await computePool.sum(data);
+ * const mapped = await computePool.map(data, fn);
+ * ```
+ *
+ * This module will be removed in a future major version.
  *
  * @packageDocumentation
  */
