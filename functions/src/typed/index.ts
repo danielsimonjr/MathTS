@@ -54,17 +54,3 @@ export const typedFunctions = {
   ...typedStatistics,
   ...typedSignal,
 };
-
-/**
- * @deprecated Use typedFunctions instead - all functions are now parallel-first
- */
-export const typedParallelFunctions = typedFunctions;
-
-// =============================================================================
-// Backward Compatibility Aliases
-// =============================================================================
-
-/**
- * @deprecated Use typedArithmetic instead - arithmetic is now parallel-first
- */
-export const parallelArithmetic = typedArithmetic;

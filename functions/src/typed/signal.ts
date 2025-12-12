@@ -397,20 +397,15 @@ export const typedSignal = {
 };
 
 /**
- * @deprecated Use typedSignal instead
+ * Initialize signal processing pool
  */
-export const parallelSignal = typedSignal;
-
-/**
- * Initialize parallel signal processing
- */
-export async function initializeParallelSignal(): Promise<void> {
+export async function initializeSignal(): Promise<void> {
   await computePool.initialize();
 }
 
 /**
- * Terminate parallel signal processing pool
+ * Terminate signal processing pool
  */
-export async function terminateParallelSignal(): Promise<void> {
+export async function terminateSignal(): Promise<void> {
   await computePool.terminate();
 }

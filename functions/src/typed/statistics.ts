@@ -725,20 +725,15 @@ export const typedStatistics = {
 };
 
 /**
- * @deprecated Use typedStatistics instead
+ * Initialize statistics processing pool
  */
-export const parallelStatistics = typedStatistics;
-
-/**
- * Initialize parallel statistics processing
- */
-export async function initializeParallelStatistics(): Promise<void> {
+export async function initializeStatistics(): Promise<void> {
   await computePool.initialize();
 }
 
 /**
- * Terminate parallel statistics processing pool
+ * Terminate statistics processing pool
  */
-export async function terminateParallelStatistics(): Promise<void> {
+export async function terminateStatistics(): Promise<void> {
   await computePool.terminate();
 }
