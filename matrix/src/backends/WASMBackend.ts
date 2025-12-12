@@ -127,7 +127,12 @@ export class WASMBackend implements MatrixBackend {
     const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
 
     try {
-      this.wasmModule!.add(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.addSIMD(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.add(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
       const resultData = Array.from(new Float64Array(resultAlloc.array));
       return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
     } finally {
@@ -152,7 +157,12 @@ export class WASMBackend implements MatrixBackend {
     const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
 
     try {
-      this.wasmModule!.subtract(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.subtractSIMD(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.subtract(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
       const resultData = Array.from(new Float64Array(resultAlloc.array));
       return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
     } finally {
@@ -163,15 +173,63 @@ export class WASMBackend implements MatrixBackend {
   }
 
   multiplyElementwise(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
-    // Element-wise multiply not directly in WASM interface
-    // Fall back to JS for now
-    return jsBackend.multiplyElementwise(a, b);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.multiplyElementwise(a, b);
+    }
+
+    const aData = a.toFloat64Array();
+    const bData = b.toFloat64Array();
+
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const bAlloc = wasmLoader.allocateFloat64Array(bData);
+    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.multiplyElementwiseSIMD(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.multiplyElementwise(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
+      const resultData = Array.from(new Float64Array(resultAlloc.array));
+      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(bAlloc.ptr);
+      wasmLoader.free(resultAlloc.ptr);
+    }
   }
 
   divideElementwise(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
-    // Element-wise divide not directly in WASM interface
-    // Fall back to JS for now
-    return jsBackend.divideElementwise(a, b);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.divideElementwise(a, b);
+    }
+
+    const aData = a.toFloat64Array();
+    const bData = b.toFloat64Array();
+
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const bAlloc = wasmLoader.allocateFloat64Array(bData);
+    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.divideElementwiseSIMD(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.divideElementwise(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
+      const resultData = Array.from(new Float64Array(resultAlloc.array));
+      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(bAlloc.ptr);
+      wasmLoader.free(resultAlloc.ptr);
+    }
   }
 
   scale(a: DenseMatrix, scalar: number): DenseMatrix {
@@ -186,7 +244,12 @@ export class WASMBackend implements MatrixBackend {
     const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
 
     try {
-      this.wasmModule!.scalarMultiply(aAlloc.ptr, scalar, elementCount, resultAlloc.ptr);
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.scalarMultiplySIMD(aAlloc.ptr, scalar, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.scalarMultiply(aAlloc.ptr, scalar, elementCount, resultAlloc.ptr);
+      }
       const resultData = Array.from(new Float64Array(resultAlloc.array));
       return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
     } finally {
@@ -196,13 +259,55 @@ export class WASMBackend implements MatrixBackend {
   }
 
   abs(a: DenseMatrix): DenseMatrix {
-    // No direct WASM function, use JS
-    return jsBackend.abs(a);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.abs(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.absSIMD(aAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.abs(aAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
+      const resultData = Array.from(new Float64Array(resultAlloc.array));
+      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(resultAlloc.ptr);
+    }
   }
 
   negate(a: DenseMatrix): DenseMatrix {
-    // Use scale with -1
-    return this.scale(a, -1);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.negate(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        this.wasmModule!.negateSIMD(aAlloc.ptr, elementCount, resultAlloc.ptr);
+      } else {
+        this.wasmModule!.negate(aAlloc.ptr, elementCount, resultAlloc.ptr);
+      }
+      const resultData = Array.from(new Float64Array(resultAlloc.array));
+      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(resultAlloc.ptr);
+    }
   }
 
   // =========================================================================
@@ -274,8 +379,25 @@ export class WASMBackend implements MatrixBackend {
   // =========================================================================
 
   sum(a: DenseMatrix): number {
-    // Use JS backend - no direct WASM sum function
-    return jsBackend.sum(a) as number;
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.sum(a) as number;
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        return this.wasmModule!.sumSIMD(aAlloc.ptr, elementCount);
+      } else {
+        return this.wasmModule!.sum(aAlloc.ptr, elementCount);
+      }
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+    }
   }
 
   sumAxis(a: DenseMatrix, axis: 0 | 1): DenseMatrix {
@@ -284,7 +406,25 @@ export class WASMBackend implements MatrixBackend {
   }
 
   norm(a: DenseMatrix): number {
-    return jsBackend.norm(a);
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldUseWasm(elementCount)) {
+      return jsBackend.norm(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+
+    try {
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        return this.wasmModule!.normSIMD(aAlloc.ptr, elementCount);
+      } else {
+        return this.wasmModule!.norm(aAlloc.ptr, elementCount);
+      }
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+    }
   }
 
   dot(a: DenseMatrix, b: DenseMatrix): number {
@@ -301,7 +441,12 @@ export class WASMBackend implements MatrixBackend {
     const bAlloc = wasmLoader.allocateFloat64Array(bData);
 
     try {
-      return this.wasmModule!.dotProduct(aAlloc.ptr, bAlloc.ptr, elementCount);
+      // Use SIMD-optimized version if available
+      if (this.config.useSIMD && this.features?.simd) {
+        return this.wasmModule!.dotProductSIMD(aAlloc.ptr, bAlloc.ptr, elementCount);
+      } else {
+        return this.wasmModule!.dotProduct(aAlloc.ptr, bAlloc.ptr, elementCount);
+      }
     } finally {
       wasmLoader.free(aAlloc.ptr);
       wasmLoader.free(bAlloc.ptr);
@@ -400,6 +545,316 @@ export class WASMBackend implements MatrixBackend {
     }
 
     return { lu: DenseMatrix.fromFlat(n, n, Array.from(data)), perm, singular: false };
+  }
+
+  // =========================================================================
+  // QR Decomposition (WASM-accelerated)
+  // =========================================================================
+
+  /**
+   * QR Decomposition using WASM
+   */
+  async qrDecomposition(a: DenseMatrix): Promise<{
+    q: DenseMatrix;
+    r: DenseMatrix;
+  }> {
+    const m = a.rows;
+    const n = a.cols;
+
+    if (!this.shouldUseWasm(m * n)) {
+      return this.qrDecompositionJS(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const qAlloc = wasmLoader.allocateFloat64Array(new Float64Array(m * m));
+    const rAlloc = wasmLoader.allocateFloat64Array(new Float64Array(m * n));
+
+    try {
+      this.wasmModule!.qrDecomposition(aAlloc.ptr, m, n, qAlloc.ptr, rAlloc.ptr);
+
+      return {
+        q: DenseMatrix.fromFlat(m, m, Array.from(new Float64Array(qAlloc.array))),
+        r: DenseMatrix.fromFlat(m, n, Array.from(new Float64Array(rAlloc.array))),
+      };
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(qAlloc.ptr);
+      wasmLoader.free(rAlloc.ptr);
+    }
+  }
+
+  private qrDecompositionJS(a: DenseMatrix): { q: DenseMatrix; r: DenseMatrix } {
+    const m = a.rows;
+    const n = a.cols;
+    const aData = a.toFloat64Array();
+    const r = new Float64Array(m * n);
+    const q = new Float64Array(m * m);
+
+    // Copy a to r
+    for (let i = 0; i < m * n; i++) {
+      r[i] = aData[i];
+    }
+
+    // Initialize Q as identity
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < m; j++) {
+        q[i * m + j] = i === j ? 1.0 : 0.0;
+      }
+    }
+
+    const minDim = Math.min(m, n);
+
+    for (let k = 0; k < minDim; k++) {
+      let norm = 0.0;
+      for (let i = k; i < m; i++) {
+        const val = r[i * n + k];
+        norm += val * val;
+      }
+      norm = Math.sqrt(norm);
+
+      if (norm < 1e-14) continue;
+
+      const sign = r[k * n + k] >= 0.0 ? 1.0 : -1.0;
+      const u1 = r[k * n + k] + sign * norm;
+
+      const v = new Float64Array(m - k);
+      v[0] = 1.0;
+      for (let i = 1; i < m - k; i++) {
+        v[i] = r[(k + i) * n + k] / u1;
+      }
+
+      let vDotV = 0.0;
+      for (let i = 0; i < m - k; i++) {
+        vDotV += v[i] * v[i];
+      }
+      const tau = 2.0 / vDotV;
+
+      // Apply to R
+      for (let j = k; j < n; j++) {
+        let vDotCol = 0.0;
+        for (let i = 0; i < m - k; i++) {
+          vDotCol += v[i] * r[(k + i) * n + j];
+        }
+        const factor = tau * vDotCol;
+        for (let i = 0; i < m - k; i++) {
+          r[(k + i) * n + j] -= factor * v[i];
+        }
+      }
+
+      // Apply to Q
+      for (let j = 0; j < m; j++) {
+        let vDotCol = 0.0;
+        for (let i = 0; i < m - k; i++) {
+          vDotCol += v[i] * q[(k + i) * m + j];
+        }
+        const factor = tau * vDotCol;
+        for (let i = 0; i < m - k; i++) {
+          q[(k + i) * m + j] -= factor * v[i];
+        }
+      }
+    }
+
+    return {
+      q: DenseMatrix.fromFlat(m, m, Array.from(q)),
+      r: DenseMatrix.fromFlat(m, n, Array.from(r)),
+    };
+  }
+
+  // =========================================================================
+  // Matrix Inversion (WASM-accelerated)
+  // =========================================================================
+
+  /**
+   * Matrix inversion using LU decomposition
+   */
+  async inverse(a: DenseMatrix): Promise<{ inverse: DenseMatrix; singular: boolean }> {
+    const n = a.rows;
+    if (n !== a.cols) {
+      throw new Error('Matrix inversion requires a square matrix');
+    }
+
+    if (!this.shouldUseWasm(n * n)) {
+      return this.inverseJS(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(n * n));
+
+    try {
+      const success = this.wasmModule!.luInverse(aAlloc.ptr, n, resultAlloc.ptr);
+
+      return {
+        inverse: DenseMatrix.fromFlat(n, n, Array.from(new Float64Array(resultAlloc.array))),
+        singular: success === 0,
+      };
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(resultAlloc.ptr);
+    }
+  }
+
+  private async inverseJS(a: DenseMatrix): Promise<{ inverse: DenseMatrix; singular: boolean }> {
+    const n = a.rows;
+    const { lu, perm, singular } = this.luDecompositionJS(a);
+
+    if (singular) {
+      return { inverse: DenseMatrix.zeros(n, n), singular: true };
+    }
+
+    const luData = lu.toFloat64Array();
+    const result = new Float64Array(n * n);
+    const b = new Float64Array(n);
+    const x = new Float64Array(n);
+
+    for (let col = 0; col < n; col++) {
+      // Create column of identity
+      for (let i = 0; i < n; i++) {
+        b[i] = i === col ? 1.0 : 0.0;
+      }
+
+      // Forward substitution
+      for (let i = 0; i < n; i++) {
+        let sum = b[perm[i]];
+        for (let j = 0; j < i; j++) {
+          sum -= luData[i * n + j] * x[j];
+        }
+        x[i] = sum;
+      }
+
+      // Backward substitution
+      for (let i = n - 1; i >= 0; i--) {
+        let sum = x[i];
+        for (let j = i + 1; j < n; j++) {
+          sum -= luData[i * n + j] * x[j];
+        }
+        x[i] = sum / luData[i * n + i];
+      }
+
+      // Store column
+      for (let i = 0; i < n; i++) {
+        result[i * n + col] = x[i];
+      }
+    }
+
+    return { inverse: DenseMatrix.fromFlat(n, n, Array.from(result)), singular: false };
+  }
+
+  // =========================================================================
+  // Determinant (WASM-accelerated)
+  // =========================================================================
+
+  /**
+   * Compute matrix determinant using LU decomposition
+   */
+  async determinantWasm(a: DenseMatrix): Promise<number> {
+    const n = a.rows;
+    if (n !== a.cols) {
+      throw new Error('Determinant requires a square matrix');
+    }
+
+    if (!this.shouldUseWasm(n * n)) {
+      return this.determinantJS(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+
+    try {
+      return this.wasmModule!.determinant(aAlloc.ptr, n);
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+    }
+  }
+
+  private determinantJS(a: DenseMatrix): number {
+    const n = a.rows;
+    const { lu, perm, singular } = this.luDecompositionJS(a);
+
+    if (singular) {
+      return 0.0;
+    }
+
+    const luData = lu.toFloat64Array();
+    let det = 1.0;
+
+    for (let i = 0; i < n; i++) {
+      det *= luData[i * n + i];
+    }
+
+    // Count row swaps
+    let swaps = 0;
+    for (let i = 0; i < n; i++) {
+      if (perm[i] !== i) swaps++;
+    }
+
+    return swaps % 2 === 0 ? det : -det;
+  }
+
+  // =========================================================================
+  // Cholesky Decomposition (WASM-accelerated)
+  // =========================================================================
+
+  /**
+   * Cholesky Decomposition using WASM
+   * For symmetric positive-definite matrices: A = L * L^T
+   */
+  async choleskyDecomposition(a: DenseMatrix): Promise<{
+    l: DenseMatrix;
+    positiveDefinite: boolean;
+  }> {
+    const n = a.rows;
+    if (n !== a.cols) {
+      throw new Error('Cholesky decomposition requires a square matrix');
+    }
+
+    if (!this.shouldUseWasm(n * n)) {
+      return this.choleskyDecompositionJS(a);
+    }
+
+    const aData = a.toFloat64Array();
+    const aAlloc = wasmLoader.allocateFloat64Array(aData);
+    const lAlloc = wasmLoader.allocateFloat64Array(new Float64Array(n * n));
+
+    try {
+      const success = this.wasmModule!.choleskyDecomposition(aAlloc.ptr, n, lAlloc.ptr);
+
+      return {
+        l: DenseMatrix.fromFlat(n, n, Array.from(new Float64Array(lAlloc.array))),
+        positiveDefinite: success === 1,
+      };
+    } finally {
+      wasmLoader.free(aAlloc.ptr);
+      wasmLoader.free(lAlloc.ptr);
+    }
+  }
+
+  private choleskyDecompositionJS(a: DenseMatrix): { l: DenseMatrix; positiveDefinite: boolean } {
+    const n = a.rows;
+    const aData = a.toFloat64Array();
+    const l = new Float64Array(n * n);
+
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j <= i; j++) {
+        let sum = aData[i * n + j];
+
+        for (let k = 0; k < j; k++) {
+          sum -= l[i * n + k] * l[j * n + k];
+        }
+
+        if (i === j) {
+          if (sum <= 0.0) {
+            return { l: DenseMatrix.zeros(n, n), positiveDefinite: false };
+          }
+          l[i * n + j] = Math.sqrt(sum);
+        } else {
+          l[i * n + j] = sum / l[j * n + j];
+        }
+      }
+    }
+
+    return { l: DenseMatrix.fromFlat(n, n, Array.from(l)), positiveDefinite: true };
   }
 
   /**

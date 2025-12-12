@@ -4,14 +4,14 @@
   "title": "Release Preparation",
   "week": "Week 28",
   "effort": "26-30 hours",
-  "status": "pending",
+  "status": "in_progress",
   "prerequisite": "Sprint 27 completion",
   "tasks": [
     {
       "id": 1,
       "category": "CI/CD",
       "description": "CI/CD pipeline - set up GitHub Actions for testing, building, and publishing",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": ["Sprint 27"],

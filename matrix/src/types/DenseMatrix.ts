@@ -8,6 +8,7 @@
  */
 
 import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
+import type { SparseMatrix } from './SparseMatrix.js';
 
 /**
  * Dense matrix implementation using Float64Array
@@ -543,6 +544,44 @@ export class DenseMatrix extends Matrix<number> {
    */
   clone(): DenseMatrix {
     return new DenseMatrix(this.rows, this.cols, this.toFlatFloat64Array());
+  }
+
+  /**
+   * Convert to sparse matrix (CSR format)
+   *
+   * This is a synchronous conversion that creates a SparseMatrix
+   * containing only the non-zero elements of this matrix.
+   *
+   * @param dropTolerance - Values below this threshold are treated as zero
+   * @returns SparseMatrix representation
+   */
+  toSparse(dropTolerance: number = 0): SparseMatrix {
+    // Build CSR components directly to avoid circular import issues
+    const values: number[] = [];
+    const colIndices: number[] = [];
+    const rowPointers: number[] = [0];
+
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
+        const val = this.get(i, j);
+        if (Math.abs(val) > dropTolerance) {
+          values.push(val);
+          colIndices.push(j);
+        }
+      }
+      rowPointers.push(values.length);
+    }
+
+    // Use dynamic import pattern for ES modules
+    // The SparseMatrix class will be loaded when this method is called
+    const SparseMatrixModule = require('./SparseMatrix.js');
+    return new SparseMatrixModule.SparseMatrix(
+      this.rows,
+      this.cols,
+      new Float64Array(values),
+      new Int32Array(colIndices),
+      new Int32Array(rowPointers)
+    );
   }
 
   // =========================================================================

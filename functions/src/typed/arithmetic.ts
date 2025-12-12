@@ -66,20 +66,20 @@ export const subtract = mathTyped('subtract', {
 
   'bigint, bigint': (a: bigint, b: bigint) => a - b,
 
-  'Complex, Complex': (a: Complex, b: Complex) => a.sub(b),
+  'Complex, Complex': (a: Complex, b: Complex) => a.subtract(b),
 
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.sub(b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.subtract(b),
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.sub(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.subtract(b),
 
-  'number, Complex': (a: number, b: Complex) => Complex.fromNumber(a).sub(b),
-  'Complex, number': (a: Complex, b: number) => a.sub(Complex.fromNumber(b)),
+  'number, Complex': (a: number, b: Complex) => Complex.fromNumber(a).subtract(b),
+  'Complex, number': (a: Complex, b: number) => a.subtract(Complex.fromNumber(b)),
 
-  'number, Fraction': (a: number, b: Fraction) => Fraction.fromNumber(a).sub(b),
-  'Fraction, number': (a: Fraction, b: number) => a.sub(Fraction.fromNumber(b)),
+  'number, Fraction': (a: number, b: Fraction) => Fraction.fromNumber(a).subtract(b),
+  'Fraction, number': (a: Fraction, b: number) => a.subtract(Fraction.fromNumber(b)),
 
-  'number, BigNumber': (a: number, b: BigNumber) => BigNumber.fromNumber(a).sub(b),
-  'BigNumber, number': (a: BigNumber, b: number) => a.sub(BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: number, b: BigNumber) => BigNumber.fromNumber(a).subtract(b),
+  'BigNumber, number': (a: BigNumber, b: number) => a.subtract(BigNumber.fromNumber(b)),
 });
 
 // =============================================================================
@@ -94,20 +94,20 @@ export const multiply = mathTyped('multiply', {
 
   'bigint, bigint': (a: bigint, b: bigint) => a * b,
 
-  'Complex, Complex': (a: Complex, b: Complex) => a.mul(b),
+  'Complex, Complex': (a: Complex, b: Complex) => a.multiply(b),
 
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.mul(b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.multiply(b),
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.mul(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.multiply(b),
 
-  'number, Complex': (a: number, b: Complex) => b.mul(Complex.fromNumber(a)),
-  'Complex, number': (a: Complex, b: number) => a.mul(Complex.fromNumber(b)),
+  'number, Complex': (a: number, b: Complex) => b.multiply(Complex.fromNumber(a)),
+  'Complex, number': (a: Complex, b: number) => a.multiply(Complex.fromNumber(b)),
 
-  'number, Fraction': (a: number, b: Fraction) => b.mul(Fraction.fromNumber(a)),
-  'Fraction, number': (a: Fraction, b: number) => a.mul(Fraction.fromNumber(b)),
+  'number, Fraction': (a: number, b: Fraction) => b.multiply(Fraction.fromNumber(a)),
+  'Fraction, number': (a: Fraction, b: number) => a.multiply(Fraction.fromNumber(b)),
 
-  'number, BigNumber': (a: number, b: BigNumber) => b.mul(BigNumber.fromNumber(a)),
-  'BigNumber, number': (a: BigNumber, b: number) => a.mul(BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: number, b: BigNumber) => b.multiply(BigNumber.fromNumber(a)),
+  'BigNumber, number': (a: BigNumber, b: number) => a.multiply(BigNumber.fromNumber(b)),
 
   // Variadic multiplication
   'number, number, ...number': (a: number, b: number, ...rest: number[]) =>
@@ -126,20 +126,20 @@ export const divide = mathTyped('divide', {
 
   'bigint, bigint': (a: bigint, b: bigint) => a / b,
 
-  'Complex, Complex': (a: Complex, b: Complex) => a.div(b),
+  'Complex, Complex': (a: Complex, b: Complex) => a.divide(b),
 
-  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.div(b),
+  'Fraction, Fraction': (a: Fraction, b: Fraction) => a.divide(b),
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.div(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => a.divide(b),
 
-  'number, Complex': (a: number, b: Complex) => Complex.fromNumber(a).div(b),
-  'Complex, number': (a: Complex, b: number) => a.div(Complex.fromNumber(b)),
+  'number, Complex': (a: number, b: Complex) => Complex.fromNumber(a).divide(b),
+  'Complex, number': (a: Complex, b: number) => a.divide(Complex.fromNumber(b)),
 
-  'number, Fraction': (a: number, b: Fraction) => Fraction.fromNumber(a).div(b),
-  'Fraction, number': (a: Fraction, b: number) => a.div(Fraction.fromNumber(b)),
+  'number, Fraction': (a: number, b: Fraction) => Fraction.fromNumber(a).divide(b),
+  'Fraction, number': (a: Fraction, b: number) => a.divide(Fraction.fromNumber(b)),
 
-  'number, BigNumber': (a: number, b: BigNumber) => BigNumber.fromNumber(a).div(b),
-  'BigNumber, number': (a: BigNumber, b: number) => a.div(BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: number, b: BigNumber) => BigNumber.fromNumber(a).divide(b),
+  'BigNumber, number': (a: BigNumber, b: number) => a.divide(BigNumber.fromNumber(b)),
 });
 
 // =============================================================================
@@ -226,9 +226,9 @@ export const sqrt = mathTyped('sqrt', {
 export const square = mathTyped('square', {
   'number': (a: number) => a * a,
   'bigint': (a: bigint) => a * a,
-  'Complex': (a: Complex) => a.mul(a),
-  'Fraction': (a: Fraction) => a.mul(a),
-  'BigNumber': (a: BigNumber) => a.mul(a),
+  'Complex': (a: Complex) => a.multiply(a),
+  'Fraction': (a: Fraction) => a.multiply(a),
+  'BigNumber': (a: BigNumber) => a.multiply(a),
 });
 
 /**
@@ -237,9 +237,9 @@ export const square = mathTyped('square', {
 export const cube = mathTyped('cube', {
   'number': (a: number) => a * a * a,
   'bigint': (a: bigint) => a * a * a,
-  'Complex': (a: Complex) => a.mul(a).mul(a),
-  'Fraction': (a: Fraction) => a.mul(a).mul(a),
-  'BigNumber': (a: BigNumber) => a.mul(a).mul(a),
+  'Complex': (a: Complex) => a.multiply(a).multiply(a),
+  'Fraction': (a: Fraction) => a.multiply(a).multiply(a),
+  'BigNumber': (a: BigNumber) => a.multiply(a).multiply(a),
 });
 
 /**
@@ -288,7 +288,7 @@ export const log = mathTyped('log', {
  */
 export const log10 = mathTyped('log10', {
   'number': (a: number) => Math.log10(a),
-  'Complex': (a: Complex) => a.log().div(Complex.fromNumber(Math.LN10)),
+  'Complex': (a: Complex) => a.log().divide(Complex.fromNumber(Math.LN10)),
   'BigNumber': (a: BigNumber) => a.log10(),
 });
 
@@ -297,7 +297,7 @@ export const log10 = mathTyped('log10', {
  */
 export const log2 = mathTyped('log2', {
   'number': (a: number) => Math.log2(a),
-  'Complex': (a: Complex) => a.log().div(Complex.fromNumber(Math.LN2)),
+  'Complex': (a: Complex) => a.log().divide(Complex.fromNumber(Math.LN2)),
   'BigNumber': (a: BigNumber) => a.log2(),
 });
 
@@ -415,6 +415,53 @@ export const lcm = mathTyped('lcm', {
   },
 });
 
+/**
+ * Extended greatest common divisor
+ * Returns [gcd, x, y] where gcd = a*x + b*y (Bezout coefficients)
+ */
+export const xgcd = mathTyped('xgcd', {
+  'number, number': (a: number, b: number): [number, number, number] => {
+    a = Math.floor(a);
+    b = Math.floor(b);
+    let x = 0, lastX = 1;
+    let y = 1, lastY = 0;
+    while (b !== 0) {
+      const q = Math.floor(a / b);
+      [a, b] = [b, a % b];
+      [x, lastX] = [lastX - q * x, x];
+      [y, lastY] = [lastY - q * y, y];
+    }
+    return a < 0 ? [-a, -lastX, -lastY] : [a, lastX, lastY];
+  },
+  'bigint, bigint': (a: bigint, b: bigint): [bigint, bigint, bigint] => {
+    let x = 0n, lastX = 1n;
+    let y = 1n, lastY = 0n;
+    while (b !== 0n) {
+      const q = a / b;
+      [a, b] = [b, a % b];
+      [x, lastX] = [lastX - q * x, x];
+      [y, lastY] = [lastY - q * y, y];
+    }
+    return a < 0n ? [-a, -lastX, -lastY] : [a, lastX, lastY];
+  },
+});
+
+/**
+ * Vector/array norm (Euclidean norm by default)
+ */
+export const norm = mathTyped('norm', {
+  'number': (a: number) => Math.abs(a),
+  'Complex': (a: Complex) => a.abs(),
+  'BigNumber': (a: BigNumber) => a.abs(),
+  'Array': (arr: number[]) => Math.sqrt(arr.reduce((sum, x) => sum + x * x, 0)),
+  'Array, number': (arr: number[], p: number) => {
+    if (p === Infinity) return Math.max(...arr.map(Math.abs));
+    if (p === -Infinity) return Math.min(...arr.map(Math.abs));
+    if (p === 0) return arr.filter(x => x !== 0).length;
+    return Math.pow(arr.reduce((sum, x) => sum + Math.pow(Math.abs(x), p), 0), 1/p);
+  },
+});
+
 // =============================================================================
 // Hyperbolic Functions
 // =============================================================================
@@ -519,24 +566,26 @@ export const compare = mathTyped('compare', {
  * Minimum of values
  */
 export const min = mathTyped('min', {
-  'number, number': (a: number, b: number) => Math.min(a, b),
   'bigint, bigint': (a: bigint, b: bigint) => (a < b ? a : b),
   'Fraction, Fraction': (a: Fraction, b: Fraction) => (a.compare(b) < 0 ? a : b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => (a.compare(b) < 0 ? a : b),
   'Array': (arr: number[]) => Math.min(...arr),
-  '...number': (...args: number[]) => Math.min(...args),
+  'number': (a: number) => a,
+  'number, number': (a: number, b: number) => Math.min(a, b),
+  'number, number, ...number': (a: number, b: number, ...rest: number[]) => Math.min(a, b, ...rest),
 });
 
 /**
  * Maximum of values
  */
 export const max = mathTyped('max', {
-  'number, number': (a: number, b: number) => Math.max(a, b),
   'bigint, bigint': (a: bigint, b: bigint) => (a > b ? a : b),
   'Fraction, Fraction': (a: Fraction, b: Fraction) => (a.compare(b) > 0 ? a : b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber) => (a.compare(b) > 0 ? a : b),
   'Array': (arr: number[]) => Math.max(...arr),
-  '...number': (...args: number[]) => Math.max(...args),
+  'number': (a: number) => a,
+  'number, number': (a: number, b: number) => Math.max(a, b),
+  'number, number, ...number': (a: number, b: number, ...rest: number[]) => Math.max(a, b, ...rest),
 });
 
 // =============================================================================
@@ -582,6 +631,10 @@ export const typedArithmetic = {
   mod,
   gcd,
   lcm,
+  xgcd,
+
+  // Norm
+  norm,
 
   // Hyperbolic
   sinh,

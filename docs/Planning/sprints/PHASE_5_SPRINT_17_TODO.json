@@ -4,58 +4,63 @@
   "title": "Arithmetic Functions (Part 1)",
   "week": "Week 17",
   "effort": "24-28 hours",
-  "status": "pending",
+  "status": "completed",
   "prerequisite": "Phase 4 completion",
   "tasks": [
     {
       "id": 1,
       "category": "Functions",
       "description": "add, subtract, multiply, divide - implement basic arithmetic with typed dispatch",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": ["Phase 4"],
-      "files": ["functions/src/arithmetic/add.ts", "functions/src/arithmetic/subtract.ts", "functions/src/arithmetic/multiply.ts", "functions/src/arithmetic/divide.ts"]
+      "files": ["functions/src/typed/arithmetic.ts"],
+      "notes": "Implemented in unified arithmetic.ts with typed-function dispatch for number, bigint, Complex, Fraction, BigNumber"
     },
     {
       "id": 2,
       "category": "Functions",
       "description": "pow, sqrt, cbrt - implement power and root functions for all numeric types",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [1],
-      "files": ["functions/src/arithmetic/pow.ts", "functions/src/arithmetic/sqrt.ts", "functions/src/arithmetic/cbrt.ts"]
+      "files": ["functions/src/typed/arithmetic.ts"],
+      "notes": "Implemented pow, sqrt, square, cube, cbrt, nthRoot with Complex returning for negative sqrt"
     },
     {
       "id": 3,
       "category": "Functions",
       "description": "exp, log, log10, log2 - implement exponential and logarithm functions",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [1],
-      "files": ["functions/src/arithmetic/exp.ts", "functions/src/arithmetic/log.ts"]
+      "files": ["functions/src/typed/arithmetic.ts"],
+      "notes": "Implemented exp, log, log10, log2, log1p, expm1 for number, Complex, BigNumber"
     },
     {
       "id": 4,
       "category": "Functions",
       "description": "abs, sign, ceil, floor, round - implement sign and rounding functions",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4,
       "complexity": "Low",
       "dependencies": ["Phase 4"],
-      "files": ["functions/src/arithmetic/abs.ts", "functions/src/arithmetic/sign.ts", "functions/src/arithmetic/round.ts"]
+      "files": ["functions/src/typed/arithmetic.ts"],
+      "notes": "Implemented abs, sign, ceil, floor, round, fix (trunc), unaryMinus, unaryPlus"
     },
     {
       "id": 5,
       "category": "Testing",
       "description": "Arithmetic function tests - test all arithmetic functions for numbers, Complex, Fraction, BigNumber",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4],
-      "files": ["functions/tests/arithmetic/basic.test.ts", "functions/tests/arithmetic/power.test.ts"]
+      "files": ["functions/tests/typed-arithmetic.test.ts"],
+      "notes": "40 tests covering all arithmetic operations across all numeric types"
     }
   ],
   "successCriteria": [
@@ -66,25 +71,12 @@
     "Test coverage >90% for arithmetic functions"
   ],
   "filesCreated": [
-    "functions/src/arithmetic/add.ts",
-    "functions/src/arithmetic/subtract.ts",
-    "functions/src/arithmetic/multiply.ts",
-    "functions/src/arithmetic/divide.ts",
-    "functions/src/arithmetic/pow.ts",
-    "functions/src/arithmetic/sqrt.ts",
-    "functions/src/arithmetic/cbrt.ts",
-    "functions/src/arithmetic/exp.ts",
-    "functions/src/arithmetic/log.ts",
-    "functions/src/arithmetic/abs.ts",
-    "functions/src/arithmetic/sign.ts",
-    "functions/src/arithmetic/round.ts",
-    "functions/src/arithmetic/index.ts",
-    "functions/tests/arithmetic/basic.test.ts",
-    "functions/tests/arithmetic/power.test.ts"
+    "functions/src/typed/arithmetic.ts",
+    "functions/tests/typed-arithmetic.test.ts"
   ],
   "filesModified": [
-    "functions/src/index.ts"
+    "functions/src/typed/index.ts"
   ],
   "totalEstimatedHours": 24,
-  "notes": "Sprint 17 begins the function library with core arithmetic operations. All functions use typed-function for polymorphic dispatch."
+  "notes": "Sprint 17 arithmetic functions implemented in unified arithmetic.ts. Fixed method name bugs (sub->subtract, mul->multiply, div->divide) for Complex, Fraction, BigNumber type dispatch."
 }

@@ -245,6 +245,85 @@ export function luDeterminant(
   return swaps % 2 === 0 ? det : -det
 }
 
+/**
+ * Matrix inversion using LU decomposition
+ * Computes inv(A) by solving A * X = I for each column
+ * @param a - Input square matrix (will be modified to contain LU factors)
+ * @param n - Size of the matrix
+ * @param result - Output inverse matrix
+ * @returns 1 if successful, 0 if matrix is singular
+ */
+export function luInverse(
+  a: Float64Array,
+  n: i32,
+  result: Float64Array
+): i32 {
+  // Create working copy of A for LU decomposition
+  const lu: Float64Array = new Float64Array(n * n)
+  for (let i: i32 = 0; i < n * n; i++) {
+    lu[i] = a[i]
+  }
+
+  // Permutation vector
+  const perm: Int32Array = new Int32Array(n)
+
+  // Perform LU decomposition
+  const success: i32 = luDecomposition(lu, n, perm)
+  if (success === 0) {
+    return 0 // Matrix is singular
+  }
+
+  // Temporary arrays for solving
+  const b: Float64Array = new Float64Array(n)
+  const x: Float64Array = new Float64Array(n)
+
+  // Solve for each column of the inverse
+  for (let col: i32 = 0; col < n; col++) {
+    // Create column of identity matrix
+    for (let i: i32 = 0; i < n; i++) {
+      b[i] = i === col ? 1.0 : 0.0
+    }
+
+    // Solve LU * x = b
+    luSolve(lu, n, perm, b, x)
+
+    // Store result column
+    for (let i: i32 = 0; i < n; i++) {
+      result[i * n + col] = x[i]
+    }
+  }
+
+  return 1 // Success
+}
+
+/**
+ * Compute determinant of a matrix using LU decomposition
+ * @param a - Input square matrix (will be modified to contain LU factors)
+ * @param n - Size of the matrix
+ * @returns The determinant value
+ */
+export function determinant(
+  a: Float64Array,
+  n: i32
+): f64 {
+  // Create working copy for LU decomposition
+  const lu: Float64Array = new Float64Array(n * n)
+  for (let i: i32 = 0; i < n * n; i++) {
+    lu[i] = a[i]
+  }
+
+  // Permutation vector
+  const perm: Int32Array = new Int32Array(n)
+
+  // Perform LU decomposition
+  const success: i32 = luDecomposition(lu, n, perm)
+  if (success === 0) {
+    return 0.0 // Singular matrix has determinant 0
+  }
+
+  return luDeterminant(lu, n, perm)
+}
+
 // Helper functions
 
 @inline

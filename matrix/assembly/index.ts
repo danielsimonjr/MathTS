@@ -12,7 +12,27 @@ export {
   add,
   subtract,
   scalarMultiply,
-  dotProduct
+  dotProduct,
+  // Element-wise operations
+  multiplyElementwise,
+  divideElementwise,
+  // SIMD-optimized versions
+  addSIMD,
+  subtractSIMD,
+  multiplyElementwiseSIMD,
+  divideElementwiseSIMD,
+  scalarMultiplySIMD,
+  dotProductSIMD,
+  // Reduction operations
+  sum,
+  sumSIMD,
+  norm,
+  normSIMD,
+  // Unary operations
+  abs,
+  absSIMD,
+  negate,
+  negateSIMD
 } from './matrix/multiply'
 
 // Linear algebra decompositions
@@ -21,7 +41,9 @@ export {
   qrDecomposition,
   choleskyDecomposition,
   luSolve,
-  luDeterminant
+  luDeterminant,
+  luInverse,
+  determinant
 } from './algebra/decomposition'
 
 // Signal processing

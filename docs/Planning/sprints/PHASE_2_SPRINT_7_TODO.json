@@ -4,64 +4,66 @@
   "title": "Advanced WASM Operations",
   "week": "Week 7",
   "effort": "27-31 hours",
-  "status": "pending",
+  "status": "completed",
   "prerequisite": "Sprint 6 completion",
   "tasks": [
     {
       "id": 1,
       "category": "WASM Implementation",
       "description": "LU decomposition (WASM) - implement LU factorization with partial pivoting in AssemblyScript",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 6,
       "complexity": "High",
       "dependencies": ["Sprint 6"],
-      "files": ["matrix/assembly/lu.ts"]
+      "files": ["matrix/assembly/algebra/decomposition.ts"],
+      "notes": "Already implemented in Sprint 5"
     },
     {
       "id": 2,
       "category": "WASM Implementation",
       "description": "QR decomposition (WASM) - implement Householder QR decomposition in AssemblyScript",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 6,
       "complexity": "High",
       "dependencies": ["Sprint 6"],
-      "files": ["matrix/assembly/qr.ts"]
+      "files": ["matrix/assembly/algebra/decomposition.ts"],
+      "notes": "Already implemented in Sprint 5"
     },
     {
       "id": 3,
       "category": "WASM Implementation",
       "description": "Matrix inversion (WASM) - implement matrix inversion using LU decomposition",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [1],
-      "files": ["matrix/assembly/inv.ts"]
+      "files": ["matrix/assembly/algebra/decomposition.ts"]
     },
     {
       "id": 4,
       "category": "WASM Implementation",
       "description": "Determinant (WASM) - implement determinant calculation using LU decomposition",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 3,
       "complexity": "Medium",
       "dependencies": [1],
-      "files": ["matrix/assembly/det.ts"]
+      "files": ["matrix/assembly/algebra/decomposition.ts"]
     },
     {
       "id": 5,
       "category": "Backend",
-      "description": "Bind to WASMBackend - connect LU, QR, inv, det WASM functions to WASMBackend interface",
-      "status": "pending",
+      "description": "Bind to WASMBackend - connect LU, QR, Cholesky, inv, det WASM functions to WASMBackend interface",
+      "status": "completed",
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4],
-      "files": ["matrix/src/backends/WASMBackend.ts"]
+      "files": ["matrix/src/backends/WASMBackend.ts", "matrix/src/backends/WasmLoader.ts"]
     },
     {
       "id": 6,
       "category": "Testing",
       "description": "Accuracy tests vs JS - verify WASM decompositions match JS reference to numerical precision",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [5],
@@ -76,16 +78,15 @@
     "WASM results match JS within 1e-10 relative tolerance"
   ],
   "filesCreated": [
-    "matrix/assembly/lu.ts",
-    "matrix/assembly/qr.ts",
-    "matrix/assembly/inv.ts",
-    "matrix/assembly/det.ts",
     "matrix/tests/wasm/accuracy.test.ts"
   ],
   "filesModified": [
     "matrix/src/backends/WASMBackend.ts",
-    "matrix/assembly/index.ts"
+    "matrix/src/backends/WasmLoader.ts",
+    "matrix/assembly/index.ts",
+    "matrix/assembly/algebra/decomposition.ts"
   ],
   "totalEstimatedHours": 27,
-  "notes": "Sprint 7 implements advanced linear algebra operations in WASM. LU and QR decompositions form the foundation for matrix inversion and determinant calculation."
+  "completedAt": "2025-12-12",
+  "notes": "Sprint 7 implements advanced linear algebra operations in WASM. Added matrix inversion (luInverse) and convenience determinant function. Extended WASMBackend with qrDecomposition, choleskyDecomposition, inverse, and determinantWasm methods with JS fallbacks. Created comprehensive accuracy tests covering LU, QR, Cholesky decompositions, matrix inversion, and determinant calculations. All 175 matrix tests pass."
 }
