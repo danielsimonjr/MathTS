@@ -13,3 +13,5 @@ export type {
 } from './Matrix.js';
 
 export { DenseMatrix, isDenseMatrix } from './DenseMatrix.js';
+
+export { SparseMatrix, isSparseMatrix } from './SparseMatrix.js';

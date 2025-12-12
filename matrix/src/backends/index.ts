@@ -31,6 +31,15 @@ export {
   type WASMBackendConfig,
 } from './WASMBackend.js';
 
+export {
+  BackendManager,
+  backendManager,
+  createBackendManager,
+  DEFAULT_EXTENDED_HINTS,
+  type ExtendedBackendHints,
+  type OperationType,
+} from './BackendManager.js';
+
 // WASM utilities
 export {
   detectWasmFeatures,
