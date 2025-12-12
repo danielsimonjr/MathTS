@@ -32,6 +32,22 @@ export {
 } from './WASMBackend.js';
 
 export {
+  GPUMatrixBackend,
+  gpuMatrixBackend,
+  createGPUMatrixBackend,
+  type GPUMatrixBackendConfig,
+} from './GPUMatrixBackend.js';
+
+export {
+  GPUBackend,
+  getGlobalGPUBackend,
+  initializeGlobalGPUBackend,
+  destroyGlobalGPUBackend,
+  type GPUBackendOptions,
+  type GPUBackendStatus,
+} from './GPUBackend.js';
+
+export {
   BackendManager,
   backendManager,
   createBackendManager,
@@ -51,6 +67,29 @@ export {
 } from './wasm/index.js';
 
 export type { WasmFeatures } from './wasm/index.js';
+
+// GPU utilities
+export {
+  hasWebGPU,
+  detectGPUCapabilities,
+  getRecommendedWorkgroupSize,
+  GPUContext,
+  getGlobalGPUContext,
+  destroyGlobalGPU,
+  BufferPool,
+  ShaderManager,
+  BUILTIN_SHADERS,
+  BatchExecutor,
+  SyncManager,
+  createSyncManager,
+} from './gpu/index.js';
+
+export type {
+  GPUCapabilities,
+  GPUContextOptions,
+  SyncStrategy,
+  SyncConfig,
+} from './gpu/index.js';
 
 // Register JS backend by default
 import { backendRegistry } from './Backend.js';

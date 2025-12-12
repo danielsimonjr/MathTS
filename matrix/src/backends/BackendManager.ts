@@ -3,6 +3,7 @@
  *
  * Centralized management for matrix operation backends with automatic
  * selection based on matrix size, operation type, and availability.
+ * Includes adaptive threshold tuning based on runtime profiling.
  *
  * @packageDocumentation
  */
@@ -11,6 +12,7 @@ import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { MatrixBackend, BackendType, BackendHints } from './Backend.js';
 import { backendRegistry, DEFAULT_BACKEND_HINTS } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
+import { getConfig, onConfigChange, type MatrixConfig } from '../config.js';
 
 /**
  * Operation type hints for backend selection
@@ -52,18 +54,76 @@ export const DEFAULT_EXTENDED_HINTS: Required<ExtendedBackendHints> = {
 };
 
 /**
+ * Performance sample for adaptive tuning
+ */
+interface PerformanceSample {
+  operation: OperationType;
+  elementCount: number;
+  backend: BackendType;
+  durationMs: number;
+  timestamp: number;
+}
+
+/**
+ * Adaptive threshold state
+ */
+interface AdaptiveThresholdState {
+  samples: PerformanceSample[];
+  lastAdjustment: number;
+  adjustedThresholds: Map<OperationType, { wasm: number; gpu: number }>;
+}
+
+/**
  * Centralized Backend Manager
  *
  * Provides a unified interface for executing matrix operations with
  * automatic backend selection based on matrix size and operation type.
+ * Features adaptive threshold tuning based on runtime profiling.
  */
 export class BackendManager {
   private hints: Required<ExtendedBackendHints>;
   private initialized: boolean = false;
   private initializationPromise: Promise<void> | null = null;
+  private adaptiveState: AdaptiveThresholdState;
+  private configUnsubscribe: (() => void) | null = null;
 
   constructor(hints: ExtendedBackendHints = {}) {
     this.hints = { ...DEFAULT_EXTENDED_HINTS, ...hints };
+    this.adaptiveState = {
+      samples: [],
+      lastAdjustment: 0,
+      adjustedThresholds: new Map(),
+    };
+
+    // Subscribe to config changes
+    this.configUnsubscribe = onConfigChange((config) => {
+      this.syncWithConfig(config);
+    });
+  }
+
+  /**
+   * Sync manager state with global config
+   */
+  private syncWithConfig(config: MatrixConfig): void {
+    const { backends } = config;
+
+    // Update thresholds from config
+    this.hints.wasmThreshold = backends.wasm.threshold;
+    this.hints.gpuThreshold = backends.gpu.threshold;
+
+    // Update operation thresholds
+    if (backends.wasm.operationThresholds || backends.gpu.operationThresholds) {
+      const opThresholds: Partial<Record<OperationType, { wasm?: number; gpu?: number }>> = {};
+
+      for (const op of ['multiply', 'decomposition', 'transpose'] as OperationType[]) {
+        opThresholds[op] = {
+          wasm: backends.wasm.operationThresholds?.[op] ?? this.hints.wasmThreshold,
+          gpu: backends.gpu.operationThresholds?.[op] ?? this.hints.gpuThreshold,
+        };
+      }
+
+      this.hints.operationThresholds = opThresholds;
+    }
   }
 
   /**
@@ -358,6 +418,211 @@ export class BackendManager {
       this.hints.preferredBackend = 'js';
     } else {
       this.hints.preferredBackend = type;
+    }
+  }
+
+  // =========================================================================
+  // Adaptive Threshold Tuning
+  // =========================================================================
+
+  /**
+   * Record a performance sample for adaptive tuning
+   */
+  recordSample(
+    operation: OperationType,
+    elementCount: number,
+    backend: BackendType,
+    durationMs: number
+  ): void {
+    const config = getConfig();
+    if (!config.adaptiveTuning.enabled) return;
+
+    this.adaptiveState.samples.push({
+      operation,
+      elementCount,
+      backend,
+      durationMs,
+      timestamp: Date.now(),
+    });
+
+    // Limit sample size
+    const maxSamples = config.adaptiveTuning.sampleSize * 10;
+    if (this.adaptiveState.samples.length > maxSamples) {
+      this.adaptiveState.samples = this.adaptiveState.samples.slice(-maxSamples);
+    }
+
+    // Check if we should adjust thresholds
+    this.maybeAdjustThresholds();
+  }
+
+  /**
+   * Adjust thresholds based on collected samples
+   */
+  private maybeAdjustThresholds(): void {
+    const config = getConfig();
+    if (!config.adaptiveTuning.enabled) return;
+
+    const now = Date.now();
+    const { cooldownMs, sampleSize, minSpeedupRatio, maxAdjustmentPercent } =
+      config.adaptiveTuning;
+
+    // Check cooldown
+    if (now - this.adaptiveState.lastAdjustment < cooldownMs) {
+      return;
+    }
+
+    // Group samples by operation
+    const operationSamples = new Map<OperationType, PerformanceSample[]>();
+    for (const sample of this.adaptiveState.samples) {
+      const existing = operationSamples.get(sample.operation) ?? [];
+      existing.push(sample);
+      operationSamples.set(sample.operation, existing);
+    }
+
+    // Analyze each operation
+    for (const [operation, samples] of operationSamples) {
+      if (samples.length < sampleSize) continue;
+
+      // Group by backend
+      const byBackend = new Map<BackendType, PerformanceSample[]>();
+      for (const s of samples) {
+        const existing = byBackend.get(s.backend) ?? [];
+        existing.push(s);
+        byBackend.set(s.backend, existing);
+      }
+
+      // Calculate average throughput (elements/ms) for each backend
+      const throughput = new Map<BackendType, number>();
+      for (const [backend, backendSamples] of byBackend) {
+        const totalElements = backendSamples.reduce((s, x) => s + x.elementCount, 0);
+        const totalTime = backendSamples.reduce((s, x) => s + x.durationMs, 0);
+        if (totalTime > 0) {
+          throughput.set(backend, totalElements / totalTime);
+        }
+      }
+
+      // Find crossover points where faster backend becomes better
+      const jsThroughput = throughput.get('js') ?? 0;
+      const wasmThroughput = throughput.get('wasm') ?? 0;
+      const gpuThroughput = throughput.get('gpu') ?? 0;
+
+      const currentThresholds = this.adaptiveState.adjustedThresholds.get(operation) ?? {
+        wasm: this.hints.operationThresholds?.[operation]?.wasm ?? this.hints.wasmThreshold,
+        gpu: this.hints.operationThresholds?.[operation]?.gpu ?? this.hints.gpuThreshold,
+      };
+
+      let newWasmThreshold = currentThresholds.wasm;
+      let newGpuThreshold = currentThresholds.gpu;
+
+      // Adjust WASM threshold
+      if (wasmThroughput > jsThroughput * minSpeedupRatio) {
+        // WASM is significantly faster - lower threshold
+        const adjustment = currentThresholds.wasm * (maxAdjustmentPercent / 100);
+        newWasmThreshold = Math.max(100, currentThresholds.wasm - adjustment);
+      } else if (jsThroughput > wasmThroughput * minSpeedupRatio) {
+        // JS is faster - raise threshold
+        const adjustment = currentThresholds.wasm * (maxAdjustmentPercent / 100);
+        newWasmThreshold = currentThresholds.wasm + adjustment;
+      }
+
+      // Adjust GPU threshold
+      if (gpuThroughput > wasmThroughput * minSpeedupRatio) {
+        // GPU is significantly faster - lower threshold
+        const adjustment = currentThresholds.gpu * (maxAdjustmentPercent / 100);
+        newGpuThreshold = Math.max(1000, currentThresholds.gpu - adjustment);
+      } else if (wasmThroughput > gpuThroughput * minSpeedupRatio) {
+        // WASM is faster - raise GPU threshold
+        const adjustment = currentThresholds.gpu * (maxAdjustmentPercent / 100);
+        newGpuThreshold = currentThresholds.gpu + adjustment;
+      }
+
+      // Update adjusted thresholds
+      this.adaptiveState.adjustedThresholds.set(operation, {
+        wasm: Math.round(newWasmThreshold),
+        gpu: Math.round(newGpuThreshold),
+      });
+    }
+
+    this.adaptiveState.lastAdjustment = now;
+  }
+
+  /**
+   * Get current adaptive thresholds
+   */
+  getAdaptiveThresholds(): Map<OperationType, { wasm: number; gpu: number }> {
+    return new Map(this.adaptiveState.adjustedThresholds);
+  }
+
+  /**
+   * Reset adaptive tuning state
+   */
+  resetAdaptiveState(): void {
+    this.adaptiveState = {
+      samples: [],
+      lastAdjustment: 0,
+      adjustedThresholds: new Map(),
+    };
+  }
+
+  /**
+   * Get performance statistics
+   */
+  getPerformanceStats(): {
+    sampleCount: number;
+    operationStats: Map<OperationType, {
+      avgDuration: number;
+      samples: number;
+      backendUsage: Record<BackendType, number>;
+    }>;
+  } {
+    const operationStats = new Map<OperationType, {
+      avgDuration: number;
+      samples: number;
+      backendUsage: Record<BackendType, number>;
+    }>();
+
+    // Group by operation
+    const byOperation = new Map<OperationType, PerformanceSample[]>();
+    for (const sample of this.adaptiveState.samples) {
+      const existing = byOperation.get(sample.operation) ?? [];
+      existing.push(sample);
+      byOperation.set(sample.operation, existing);
+    }
+
+    for (const [op, samples] of byOperation) {
+      const avgDuration = samples.reduce((s, x) => s + x.durationMs, 0) / samples.length;
+
+      const backendUsage: Record<BackendType, number> = {
+        js: 0,
+        wasm: 0,
+        gpu: 0,
+        parallel: 0,
+      };
+
+      for (const s of samples) {
+        backendUsage[s.backend]++;
+      }
+
+      operationStats.set(op, {
+        avgDuration,
+        samples: samples.length,
+        backendUsage,
+      });
+    }
+
+    return {
+      sampleCount: this.adaptiveState.samples.length,
+      operationStats,
+    };
+  }
+
+  /**
+   * Cleanup resources
+   */
+  destroy(): void {
+    if (this.configUnsubscribe) {
+      this.configUnsubscribe();
+      this.configUnsubscribe = null;
     }
   }
 }
