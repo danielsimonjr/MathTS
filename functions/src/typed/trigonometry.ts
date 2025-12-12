@@ -197,8 +197,9 @@ export const toDegrees = mathTyped('toDegrees', {
  * Hypotenuse (sqrt(a^2 + b^2)) without intermediate overflow
  */
 export const hypot = mathTyped('hypot', {
+  'number': (a: number) => Math.abs(a),
   'number, number': (a: number, b: number) => Math.hypot(a, b),
-  '...number': (...args: number[]) => Math.hypot(...args),
+  'number, number, ...number': (a: number, b: number, ...rest: number[]) => Math.hypot(a, b, ...rest),
   'Array': (arr: number[]) => Math.hypot(...arr),
 });
 
