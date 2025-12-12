@@ -121,9 +121,15 @@ export type {
 } from './factory/index.js';
 
 // =============================================================================
-// Parallel processing (parallel-first approach)
+// Parallel processing (LEGACY - use @mathts/parallel for worker pool-based parallelization)
 // =============================================================================
 
+/**
+ * @deprecated These Promise.all()-based parallel utilities are legacy.
+ * Use @mathts/parallel (ComputePool) for true worker-based parallelization.
+ *
+ * Migration: `import { computePool } from '@mathts/parallel'`
+ */
 export {
   // Configuration
   DEFAULT_PARALLEL_CONFIG,

@@ -1,8 +1,13 @@
 /**
- * Typed Trigonometric Functions
+ * Typed Trigonometric Functions (Parallel-First)
  *
  * Polymorphic trigonometric operations using typed-function.
- * Supports Complex and BigNumber types.
+ * Supports Complex, BigNumber, and Float64Array types.
+ *
+ * Following the parallel-first philosophy per CLAUDE.md:
+ * - Use workers for ALL array transformations (Float64Array)
+ * - Use workers for ALL numerical computations that can be batched
+ * - Only fall back to sequential for trivial scalar operations
  *
  * @packageDocumentation
  */
@@ -13,35 +18,62 @@ import {
   BigNumber,
 } from '@mathts/core';
 
+import { computePool } from '@mathts/parallel';
+
+// =============================================================================
+// AssemblyScript-Compatible Type Aliases
+// =============================================================================
+
+/** 64-bit float (default for decimals) */
+type f64 = number;
+
 // =============================================================================
 // Basic Trigonometric Functions
 // =============================================================================
 
 /**
- * Sine function
+ * Sine function with parallel array support
  */
 export const sin = mathTyped('sin', {
-  'number': (a: number) => Math.sin(a),
-  'Complex': (a: Complex) => a.sin(),
-  'BigNumber': (a: BigNumber) => a.sin(),
+  'number': (a: f64): f64 => Math.sin(a),
+  'Complex': (a: Complex): Complex => a.sin(),
+  'BigNumber': (a: BigNumber): BigNumber => a.sin(),
+
+  // Parallel Float64Array sin
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.sin(a);
+    return result.result;
+  },
 });
 
 /**
- * Cosine function
+ * Cosine function with parallel array support
  */
 export const cos = mathTyped('cos', {
-  'number': (a: number) => Math.cos(a),
-  'Complex': (a: Complex) => a.cos(),
-  'BigNumber': (a: BigNumber) => a.cos(),
+  'number': (a: f64): f64 => Math.cos(a),
+  'Complex': (a: Complex): Complex => a.cos(),
+  'BigNumber': (a: BigNumber): BigNumber => a.cos(),
+
+  // Parallel Float64Array cos
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.cos(a);
+    return result.result;
+  },
 });
 
 /**
- * Tangent function
+ * Tangent function with parallel array support
  */
 export const tan = mathTyped('tan', {
-  'number': (a: number) => Math.tan(a),
-  'Complex': (a: Complex) => a.tan(),
-  'BigNumber': (a: BigNumber) => a.tan(),
+  'number': (a: f64): f64 => Math.tan(a),
+  'Complex': (a: Complex): Complex => a.tan(),
+  'BigNumber': (a: BigNumber): BigNumber => a.tan(),
+
+  // Parallel Float64Array tan
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    const result = await computePool.tan(a);
+    return result.result;
+  },
 });
 
 /**
