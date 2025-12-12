@@ -415,6 +415,53 @@ export const lcm = mathTyped('lcm', {
   },
 });
 
+/**
+ * Extended greatest common divisor
+ * Returns [gcd, x, y] where gcd = a*x + b*y (Bezout coefficients)
+ */
+export const xgcd = mathTyped('xgcd', {
+  'number, number': (a: number, b: number): [number, number, number] => {
+    a = Math.floor(a);
+    b = Math.floor(b);
+    let x = 0, lastX = 1;
+    let y = 1, lastY = 0;
+    while (b !== 0) {
+      const q = Math.floor(a / b);
+      [a, b] = [b, a % b];
+      [x, lastX] = [lastX - q * x, x];
+      [y, lastY] = [lastY - q * y, y];
+    }
+    return a < 0 ? [-a, -lastX, -lastY] : [a, lastX, lastY];
+  },
+  'bigint, bigint': (a: bigint, b: bigint): [bigint, bigint, bigint] => {
+    let x = 0n, lastX = 1n;
+    let y = 1n, lastY = 0n;
+    while (b !== 0n) {
+      const q = a / b;
+      [a, b] = [b, a % b];
+      [x, lastX] = [lastX - q * x, x];
+      [y, lastY] = [lastY - q * y, y];
+    }
+    return a < 0n ? [-a, -lastX, -lastY] : [a, lastX, lastY];
+  },
+});
+
+/**
+ * Vector/array norm (Euclidean norm by default)
+ */
+export const norm = mathTyped('norm', {
+  'number': (a: number) => Math.abs(a),
+  'Complex': (a: Complex) => a.abs(),
+  'BigNumber': (a: BigNumber) => a.abs(),
+  'Array': (arr: number[]) => Math.sqrt(arr.reduce((sum, x) => sum + x * x, 0)),
+  'Array, number': (arr: number[], p: number) => {
+    if (p === Infinity) return Math.max(...arr.map(Math.abs));
+    if (p === -Infinity) return Math.min(...arr.map(Math.abs));
+    if (p === 0) return arr.filter(x => x !== 0).length;
+    return Math.pow(arr.reduce((sum, x) => sum + Math.pow(Math.abs(x), p), 0), 1/p);
+  },
+});
+
 // =============================================================================
 // Hyperbolic Functions
 // =============================================================================
@@ -584,6 +631,10 @@ export const typedArithmetic = {
   mod,
   gcd,
   lcm,
+  xgcd,
+
+  // Norm
+  norm,
 
   // Hyperbolic
   sinh,
