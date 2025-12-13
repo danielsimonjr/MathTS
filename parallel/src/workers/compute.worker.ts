@@ -239,6 +239,7 @@ function minMaxChunk(
 }
 
 // Register all worker functions
+// Type assertion needed as workerpool expects generic function signatures
 worker({
   sumChunk,
   elementwiseChunk,
@@ -250,4 +251,4 @@ worker({
   mapChunk,
   scaleChunk,
   minMaxChunk,
-});
+} as Record<string, (...args: unknown[]) => unknown>);

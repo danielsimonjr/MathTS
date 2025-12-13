@@ -6,42 +6,44 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Complex, Fraction, BigNumber } from '@mathts/core';
+import { computePool } from '@mathts/parallel';
 import {
-  parallelAdd,
-  parallelSubtract,
-  parallelMultiply,
-  parallelDivide,
-  parallelAbs,
-  parallelNegate,
-  parallelSquare,
-  parallelSqrt,
-  parallelExp,
-  parallelLog,
-  parallelSin,
-  parallelCos,
-  parallelTan,
-  parallelSum,
-  parallelMean,
-  parallelVariance,
-  parallelStd,
-  parallelMin,
-  parallelMax,
-  parallelNorm,
-  parallelDot,
-  parallelMatmul,
-  parallelTranspose,
-  initializeParallel,
-  terminateParallel,
+  add as parallelAdd,
+  subtract as parallelSubtract,
+  multiply as parallelMultiply,
+  divide as parallelDivide,
+  abs as parallelAbs,
+  unaryMinus as parallelNegate,
+  square as parallelSquare,
+  sqrt as parallelSqrt,
+  exp as parallelExp,
+  log as parallelLog,
+  sum as parallelSum,
+  mean as parallelMean,
+  variance as parallelVariance,
+  std as parallelStd,
+  min as parallelMin,
+  max as parallelMax,
+  norm as parallelNorm,
+  dot as parallelDot,
+  matmul as parallelMatmul,
+  transpose as parallelTranspose,
 } from '../src/index.js';
+// Import trig functions from trigonometry module
+import {
+  sin as parallelSin,
+  cos as parallelCos,
+  tan as parallelTan,
+} from '../src/typed/trigonometry.js';
 
 describe('Parallel Arithmetic Functions', () => {
   // Initialize and terminate pool for parallel tests
   beforeAll(async () => {
-    await initializeParallel();
+    await computePool.initialize();
   });
 
   afterAll(async () => {
-    await terminateParallel();
+    await computePool.terminate();
   });
 
   describe('Scalar operations (synchronous)', () => {

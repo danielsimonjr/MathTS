@@ -5,6 +5,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { computePool } from '@mathts/parallel';
 import {
   parallelFFT,
   parallelIFFT,
@@ -13,17 +14,15 @@ import {
   parallelConv,
   parallelXCorr,
   parallelAutoCorr,
-  initializeParallelSignal,
-  terminateParallelSignal,
 } from '../src/index.js';
 
 describe('Parallel Signal Processing Functions', () => {
   beforeAll(async () => {
-    await initializeParallelSignal();
+    await computePool.initialize();
   });
 
   afterAll(async () => {
-    await terminateParallelSignal();
+    await computePool.terminate();
   });
 
   describe('FFT', () => {

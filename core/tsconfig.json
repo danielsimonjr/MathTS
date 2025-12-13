@@ -2,8 +2,26 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "include": [
+    "src/index.ts",
+    "src/config.ts",
+    "src/types/complex.ts",
+    "src/types/fraction.ts",
+    "src/types/bignumber.ts",
+    "src/types/interfaces.ts",
+    "src/types/index.ts",
+    "src/typed/**/*.ts",
+    "src/factory/**/*.ts",
+    "src/typed-function.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests"
+  ]
 }

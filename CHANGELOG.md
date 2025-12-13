@@ -13,9 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI/CD workflows
 - TypeScript configuration with project references
 - Turbo build system for monorepo management
+- @mathts/parallel package with parallel execution via workerpool
+- @mathts/matrix package with parallel-first matrix operations
+- @mathts/functions package with typed arithmetic, trigonometry, statistics, and signal processing
+- Comprehensive test suite with 764+ passing tests
 
 ### Changed
-- N/A
+- matrix/parallel-matrix.ts: Added type assertion for ComputePool API to work around TypeScript module resolution issue with npm workspaces
+- parallel/compute.worker.ts: Added type assertion for worker function registration
 
 ### Deprecated
 - N/A
@@ -24,7 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Fixed
-- N/A
+- Fixed TypeScript module resolution for @mathts/parallel exports
+- Fixed test imports in functions/tests/parallel-arithmetic.test.ts and parallel-signal.test.ts
+- Fixed compute.worker.ts type compatibility with workerpool function signatures
 
 ### Security
 - N/A

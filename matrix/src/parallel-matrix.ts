@@ -16,37 +16,159 @@
  */
 
 import { mathTyped } from '@mathts/core';
-import {
-  computePool,
-  parallelSum as pSum,
-  parallelMean as pMean,
-  parallelMin as pMin,
-  parallelMax as pMax,
-  parallelVariance as pVariance,
-  parallelStd as pStd,
-  parallelNorm as pNorm,
-  parallelDistance as pDistance,
-  parallelHistogram as pHistogram,
-  parallelAbs as pAbs,
-  parallelSqrt as pSqrt,
-  parallelSquare as pSquare,
-  parallelExp as pExp,
-  parallelLog as pLog,
-  parallelSin as pSin,
-  parallelCos as pCos,
-  parallelTan as pTan,
-  parallelNegate as pNegate,
-  parallelMatmul as pMatmul,
-  parallelMatvec as pMatvec,
-  parallelOuter as pOuter,
-  parallelTranspose as pTranspose,
-  parallelAdd as pAdd,
-  parallelSubtract as pSubtract,
-  parallelScale as pScale,
-  parallelDot as pDot,
-  parallelMultiply as pMultiply,
-  parallelDivide as pDivide,
-} from '@mathts/parallel';
+import { computePool as importedPool, type ParallelResult } from '@mathts/parallel';
+
+// Type assertion to work around TypeScript module resolution issue
+// The ComputePool class has all these methods but TypeScript can't resolve them
+// through the monorepo symlink. This is a known issue with TypeScript + npm workspaces.
+interface ComputePoolAPI {
+  initialize(): Promise<void>;
+  terminate(force?: boolean): Promise<void>;
+  sum(data: Float64Array): Promise<ParallelResult<number>>;
+  mean(data: Float64Array): Promise<ParallelResult<number>>;
+  min(data: Float64Array): Promise<ParallelResult<number>>;
+  max(data: Float64Array): Promise<ParallelResult<number>>;
+  variance(data: Float64Array): Promise<ParallelResult<{ mean: number; variance: number; std: number }>>;
+  std(data: Float64Array): Promise<ParallelResult<number>>;
+  norm(data: Float64Array): Promise<ParallelResult<number>>;
+  distance(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>>;
+  histogram(data: Float64Array, bins: number, min?: number, max?: number): Promise<ParallelResult<number[]>>;
+  abs(data: Float64Array): Promise<ParallelResult<Float64Array>>;
+  sqrt(data: Float64Array): Promise<ParallelResult<Float64Array>>;
+  square(data: Float64Array): Promise<ParallelResult<Float64Array>>;
+  exp(data: Float64Array): Promise<ParallelResult<Float64Array>>;
+  log(data: Float64Array): Promise<ParallelResult<Float64Array>>;
+  sin(data: Float64Array): Promise<ParallelResult<Float64Array>>;
+  cos(data: Float64Array): Promise<ParallelResult<Float64Array>>;
+  tan(data: Float64Array): Promise<ParallelResult<Float64Array>>;
+  negate(data: Float64Array): Promise<ParallelResult<Float64Array>>;
+  matmul(a: Float64Array, aRows: number, aCols: number, b: Float64Array, bCols: number): Promise<ParallelResult<Float64Array>>;
+  matvec(matrix: Float64Array, rows: number, cols: number, vector: Float64Array): Promise<ParallelResult<Float64Array>>;
+  outer(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>>;
+  transpose(data: Float64Array, rows: number, cols: number): Promise<ParallelResult<Float64Array>>;
+  add(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>>;
+  subtract(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>>;
+  scale(data: Float64Array, scalar: number): Promise<ParallelResult<Float64Array>>;
+  dot(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>>;
+  multiply(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>>;
+  divide(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>>;
+}
+
+const computePool = importedPool as unknown as ComputePoolAPI;
+
+// Wrapper functions that use computePool directly
+// These provide the same interface as the parallel* convenience functions
+async function pSum(data: Float64Array): Promise<ParallelResult<number>> {
+  return computePool.sum(data);
+}
+
+async function pMean(data: Float64Array): Promise<ParallelResult<number>> {
+  return computePool.mean(data);
+}
+
+async function pMin(data: Float64Array): Promise<ParallelResult<number>> {
+  return computePool.min(data);
+}
+
+async function pMax(data: Float64Array): Promise<ParallelResult<number>> {
+  return computePool.max(data);
+}
+
+async function pVariance(data: Float64Array): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
+  return computePool.variance(data);
+}
+
+async function pStd(data: Float64Array): Promise<ParallelResult<number>> {
+  return computePool.std(data);
+}
+
+async function pNorm(data: Float64Array): Promise<ParallelResult<number>> {
+  return computePool.norm(data);
+}
+
+async function pDistance(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
+  return computePool.distance(a, b);
+}
+
+async function pHistogram(data: Float64Array, bins: number, min?: number, max?: number): Promise<ParallelResult<number[]>> {
+  return computePool.histogram(data, bins, min, max);
+}
+
+async function pAbs(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.abs(data);
+}
+
+async function pSqrt(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.sqrt(data);
+}
+
+async function pSquare(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.square(data);
+}
+
+async function pExp(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.exp(data);
+}
+
+async function pLog(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.log(data);
+}
+
+async function pSin(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.sin(data);
+}
+
+async function pCos(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.cos(data);
+}
+
+async function pTan(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.tan(data);
+}
+
+async function pNegate(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.negate(data);
+}
+
+async function pMatmul(a: Float64Array, aRows: number, aCols: number, b: Float64Array, bCols: number): Promise<ParallelResult<Float64Array>> {
+  return computePool.matmul(a, aRows, aCols, b, bCols);
+}
+
+async function pMatvec(matrix: Float64Array, rows: number, cols: number, vector: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.matvec(matrix, rows, cols, vector);
+}
+
+async function pOuter(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.outer(a, b);
+}
+
+async function pTranspose(data: Float64Array, rows: number, cols: number): Promise<ParallelResult<Float64Array>> {
+  return computePool.transpose(data, rows, cols);
+}
+
+async function pAdd(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.add(a, b);
+}
+
+async function pSubtract(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.subtract(a, b);
+}
+
+async function pScale(data: Float64Array, scalar: number): Promise<ParallelResult<Float64Array>> {
+  return computePool.scale(data, scalar);
+}
+
+async function pDot(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
+  return computePool.dot(a, b);
+}
+
+async function pMultiply(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.multiply(a, b);
+}
+
+async function pDivide(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+  return computePool.divide(a, b);
+}
 import { DenseMatrix } from './types/DenseMatrix.js';
 import type { SignatureFunction } from '@mathts/core';
 
@@ -174,7 +296,7 @@ export const parallelMatrixAdd = mathTyped('parallelMatrixAdd', {
 
   // scalar + DenseMatrix
   'number, DenseMatrix': async (scalar: f64, a: DenseMatrix): Promise<DenseMatrix> => {
-    return parallelMatrixAdd(a, scalar);
+    return parallelMatrixAdd(a, scalar) as Promise<DenseMatrix>;
   },
 
   // Float64Array + Float64Array - parallel execution
@@ -256,7 +378,7 @@ export const parallelMatrixMultiply = mathTyped('parallelMatrixMultiply', {
 
   // scalar * Matrix (scale)
   'number, DenseMatrix': async (scalar: f64, a: DenseMatrix): Promise<DenseMatrix> => {
-    return parallelMatrixMultiply(a, scalar);
+    return parallelMatrixMultiply(a, scalar) as Promise<DenseMatrix>;
   },
 
   // Fallback
