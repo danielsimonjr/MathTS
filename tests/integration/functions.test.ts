@@ -93,9 +93,14 @@ describe('MathTS Functions Integration', () => {
         expect(result.im).toBe(4);
       });
 
-      // TODO: Variadic addition requires typed-function@3.x with proper rest parameter support
-      it.skip('should support variadic addition', () => {
-        expect(add(1, 2, 3, 4, 5)).toBe(15);
+      // Note: Variadic addition add(1, 2, 3, 4, 5) is not supported.
+      // Use chained calls or reduce for multiple values.
+      it('should support chained addition for multiple values', () => {
+        // Chained approach
+        expect(add(add(add(add(1, 2), 3), 4), 5)).toBe(15);
+        // Reduce approach
+        const values = [1, 2, 3, 4, 5];
+        expect(values.reduce((a, b) => add(a, b), 0)).toBe(15);
       });
     });
 

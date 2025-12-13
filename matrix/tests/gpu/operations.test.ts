@@ -297,8 +297,9 @@ describe('GPU Matrix Operations', () => {
     });
   });
 
-  // These tests would pass in a browser with WebGPU support
-  describe.skip('GPU Operations (requires WebGPU)', () => {
+  // Environment limitation: WebGPU is not available in Node.js test environment.
+  // These tests pass in a browser with WebGPU support. They are skipped in CI/Node.js.
+  describe.skip('GPU Operations (requires WebGPU - browser only)', () => {
     beforeEach(async () => {
       const success = await backend.initialize();
       if (!success) {
