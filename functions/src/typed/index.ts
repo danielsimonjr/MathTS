@@ -27,11 +27,11 @@ export { typedTrigonometry } from './trigonometry.js';
 
 // Statistics functions (parallel-first)
 export * from './statistics.js';
-export { typedStatistics, parallelStatistics } from './statistics.js';
+export { typedStatistics } from './statistics.js';
 
 // Signal processing functions (parallel-first)
 export * from './signal.js';
-export { typedSignal, parallelSignal } from './signal.js';
+export { typedSignal } from './signal.js';
 
 // =============================================================================
 // Combined Exports

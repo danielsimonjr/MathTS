@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive test suite with 1050+ passing tests
 - Integration tests for MathTS instance creation and cross-package operations
 - Integration tests for typed arithmetic, trigonometric, and statistical functions
+- @mathts/compat package for mathjs compatibility layer
+- mathjs-compatible `create(all)` API in compat package
+- Compatibility shims for complex, fraction, bignumber, matrix, sparse creation
+- Compatibility shims for arithmetic, trigonometry, statistics functions
+- Matrix-specific shims: transpose, det, identity, zeros, ones, size
+- Complex-specific shims: conj, re, im, arg
+- Type checking functions: isComplex, isFraction, isBigNumber, isNumber, isMatrix
+- mathjs-compatible constants: i, pi, e, phi, tau, LN2, LN10, etc.
+- API differences documentation (docs/migration/api-diff.md)
+- Migration guide (docs/migration/guide.md)
 
 ### Changed
 - matrix/parallel-matrix.ts: Added type assertion for ComputePool API to work around TypeScript module resolution issue with npm workspaces

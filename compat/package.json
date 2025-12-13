@@ -1,0 +1,49 @@
+{
+  "name": "@mathts/compat",
+  "version": "0.1.0",
+  "description": "mathjs compatibility layer for MathTS",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mathts/core": "*",
+    "@mathts/functions": "*",
+    "@mathts/matrix": "*",
+    "@mathts/parallel": "*"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.9"
+  },
+  "keywords": [
+    "math",
+    "mathjs",
+    "compat",
+    "compatibility",
+    "migration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielsimonjr/Mathts.git",
+    "directory": "compat"
+  }
+}
