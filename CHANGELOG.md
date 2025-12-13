@@ -31,6 +31,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migration guide (docs/migration/guide.md)
 - Comprehensive README with accurate usage examples
 - Package overview table in README
+- API documentation for all packages (docs/api/)
+  - Core API reference (Complex, Fraction, BigNumber)
+  - Matrix API reference (DenseMatrix, SparseMatrix)
+  - Functions API reference (typed arithmetic, trig, stats, signal)
+  - Parallel API reference (ComputePool)
+  - Compat API reference (mathjs compatibility layer)
+- Example projects (examples/)
+  - basic-arithmetic.ts: Basic arithmetic with all numeric types
+  - matrix-operations.ts: Dense and sparse matrix operations
+  - parallel-computing.ts: ComputePool parallel operations
+  - mathjs-migration.ts: Migration from mathjs using compat layer
 
 ### Changed
 - matrix/parallel-matrix.ts: Added type assertion for ComputePool API to work around TypeScript module resolution issue with npm workspaces

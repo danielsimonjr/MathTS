@@ -1,0 +1,302 @@
+# @mathts/compat API Reference
+
+mathjs compatibility layer for easy migration.
+
+## Installation
+
+```bash
+npm install @mathts/compat
+```
+
+## Overview
+
+The compat package provides a mathjs-compatible API, allowing drop-in replacement:
+
+```typescript
+// Before (mathjs)
+import { create, all } from 'mathjs';
+const math = create(all);
+
+// After (MathTS)
+import { create, all } from '@mathts/compat';
+const math = create(all);
+
+// Same API works
+math.add(1, 2);
+math.complex(3, 4);
+math.matrix([[1,2],[3,4]]);
+```
+
+---
+
+## create(all)
+
+Creates a math instance with all functions.
+
+```typescript
+import { create, all } from '@mathts/compat';
+
+const math = create(all);
+```
+
+### Configuration
+
+```typescript
+const math = create(all, {
+  precision: 64,        // BigNumber precision
+  matrix: 'Matrix',     // 'Matrix' or 'Array'
+  number: 'number',     // 'number' | 'BigNumber' | 'Fraction'
+  epsilon: 1e-12,       // Floating point tolerance
+});
+
+// Update configuration
+math.config({ precision: 128 });
+```
+
+---
+
+## MathInstance API
+
+### Type Creation
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `complex` | `(re?, im?) => Complex` | Create complex number |
+| `fraction` | `(num?, denom?) => Fraction` | Create fraction |
+| `bignumber` | `(value?) => BigNumber` | Create BigNumber |
+| `matrix` | `(data?, format?) => Matrix` | Create matrix |
+| `sparse` | `(data?) => SparseMatrix` | Create sparse matrix |
+
+### Arithmetic
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `add` | `(a, b) => result` | Addition |
+| `subtract` | `(a, b) => result` | Subtraction |
+| `multiply` | `(a, b) => result` | Multiplication |
+| `divide` | `(a, b) => result` | Division |
+| `pow` | `(base, exp) => result` | Power |
+| `sqrt` | `(x) => result` | Square root |
+| `abs` | `(x) => result` | Absolute value |
+| `exp` | `(x) => result` | Exponential |
+| `log` | `(x) => result` | Natural log |
+
+### Trigonometry
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `sin` | `(x) => result` | Sine |
+| `cos` | `(x) => result` | Cosine |
+| `tan` | `(x) => result` | Tangent |
+| `asin` | `(x) => result` | Arc sine |
+| `acos` | `(x) => result` | Arc cosine |
+| `atan` | `(x) => result` | Arc tangent |
+| `atan2` | `(y, x) => result` | Two-arg arc tangent |
+
+### Statistics
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `sum` | `(arr) => number` | Sum |
+| `mean` | `(arr) => number` | Mean |
+| `min` | `(arr) => number` | Minimum |
+| `max` | `(arr) => number` | Maximum |
+
+### Number Theory
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `gcd` | `(a, b) => number` | Greatest common divisor |
+| `lcm` | `(a, b) => number` | Least common multiple |
+
+### Rounding
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `round` | `(x, decimals?) => number` | Round |
+| `floor` | `(x) => number` | Floor |
+| `ceil` | `(x) => number` | Ceiling |
+
+### Complex Operations
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `conj` | `(c) => Complex` | Conjugate |
+| `re` | `(c) => number` | Real part |
+| `im` | `(c) => number` | Imaginary part |
+| `arg` | `(c) => number` | Argument (phase) |
+
+### Matrix Operations
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `transpose` | `(m) => Matrix` | Transpose |
+| `det` | `(m) => number` | Determinant |
+| `identity` | `(n) => Matrix` | Identity matrix |
+| `zeros` | `(rows, cols?) => Matrix` | Zero matrix |
+| `ones` | `(rows, cols?) => Matrix` | Ones matrix |
+| `size` | `(m) => [rows, cols]` | Matrix dimensions |
+
+### Type Checking
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `isComplex` | `(x) => boolean` | Is Complex? |
+| `isFraction` | `(x) => boolean` | Is Fraction? |
+| `isBigNumber` | `(x) => boolean` | Is BigNumber? |
+| `isNumber` | `(x) => boolean` | Is number? |
+| `isMatrix` | `(x) => boolean` | Is Matrix? |
+
+### Constants
+
+| Property | Value |
+|----------|-------|
+| `i` | Imaginary unit |
+| `pi` | π |
+| `e` | Euler's number |
+| `phi` | Golden ratio |
+| `tau` | 2π |
+| `LN2` | ln(2) |
+| `LN10` | ln(10) |
+| `LOG2E` | log₂(e) |
+| `LOG10E` | log₁₀(e) |
+| `SQRT2` | √2 |
+| `SQRT1_2` | √(1/2) |
+| `Infinity` | ∞ |
+| `NaN` | Not a Number |
+
+---
+
+## Direct Imports
+
+You can also import functions directly without `create()`:
+
+```typescript
+import {
+  complex,
+  fraction,
+  bignumber,
+  matrix,
+  sparse,
+  add,
+  subtract,
+  multiply,
+  divide,
+  sin,
+  cos,
+  tan,
+  transpose,
+  det,
+  identity,
+  zeros,
+  ones,
+  size,
+  conj,
+  re,
+  im,
+  arg,
+  isComplex_,
+  isFraction_,
+  isBigNumber_,
+  isNumber_,
+  isMatrix,
+  i,
+  pi,
+  e,
+} from '@mathts/compat';
+
+// Use directly
+const c = complex(3, 4);
+const m = matrix([[1, 2], [3, 4]]);
+const d = det(m);
+```
+
+---
+
+## Type Re-exports
+
+The compat package re-exports core types:
+
+```typescript
+import {
+  Complex,
+  Fraction,
+  BigNumber,
+  DenseMatrix,
+  SparseMatrix,
+  I,
+  COMPLEX_ZERO,
+  COMPLEX_ONE,
+  FRACTION_ZERO,
+  FRACTION_ONE,
+  BIGNUMBER_ZERO,
+  BIGNUMBER_ONE,
+  BIGNUMBER_PI,
+  BIGNUMBER_E,
+} from '@mathts/compat';
+```
+
+---
+
+## Examples
+
+### Basic Usage
+
+```typescript
+import { create, all } from '@mathts/compat';
+
+const math = create(all);
+
+// Arithmetic
+console.log(math.add(1, 2));           // 3
+console.log(math.multiply(3, 4));      // 12
+console.log(math.pow(2, 10));          // 1024
+
+// Complex numbers
+const z = math.complex(3, 4);
+console.log(math.abs(z));              // 5
+console.log(math.conj(z));             // Complex(3, -4)
+
+// Matrices
+const A = math.matrix([[1, 2], [3, 4]]);
+const B = math.identity(2);
+console.log(math.det(A));              // -2
+console.log(math.transpose(A));        // [[1,3],[2,4]]
+```
+
+### Migration Pattern
+
+```typescript
+// Step 1: Replace import
+// import { create, all } from 'mathjs';
+import { create, all } from '@mathts/compat';
+
+// Step 2: Your existing code works
+const math = create(all);
+
+function calculateEigenvalues(matrix) {
+  const A = math.matrix(matrix);
+  // ... existing code
+}
+
+// Step 3: Gradually adopt native API where needed
+import { computePool } from '@mathts/parallel';
+
+async function parallelSum(data) {
+  await computePool.initialize();
+  return computePool.sum(new Float64Array(data));
+}
+```
+
+---
+
+## API Differences from mathjs
+
+| mathjs | @mathts/compat |
+|--------|----------------|
+| `math.bignumber(x).toNumber()` | `math.bignumber(x).valueOf()` |
+| `m.get([row, col])` | `m.get(row, col)` |
+| `m.size()` | `math.size(m)` returns `[rows, cols]` |
+| `f.n`, `f.d` | `f.numerator`, `f.denominator` (bigint) |
+
+See [Migration Guide](../migration/guide.md) for complete details.

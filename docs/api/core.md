@@ -1,0 +1,257 @@
+# @mathts/core API Reference
+
+The core package provides fundamental types and utilities for MathTS.
+
+## Installation
+
+```bash
+npm install @mathts/core
+```
+
+## Types
+
+### Complex
+
+Complex numbers with real and imaginary parts.
+
+```typescript
+import { Complex, I, COMPLEX_ZERO, COMPLEX_ONE } from '@mathts/core';
+```
+
+#### Constructor
+
+```typescript
+new Complex(re: number, im: number)
+```
+
+#### Static Methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `fromNumber` | `(n: number) => Complex` | Create from real number |
+| `fromPolar` | `(r: number, theta: number) => Complex` | Create from polar form |
+| `parse` | `(str: string) => Complex` | Parse string like "3+4i" |
+
+#### Instance Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `re` | `number` | Real part |
+| `im` | `number` | Imaginary part |
+
+#### Instance Methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `add` | `(other: Complex) => Complex` | Addition |
+| `subtract` | `(other: Complex) => Complex` | Subtraction |
+| `multiply` | `(other: Complex) => Complex` | Multiplication |
+| `divide` | `(other: Complex) => Complex` | Division |
+| `abs` | `() => number` | Magnitude (modulus) |
+| `arg` | `() => number` | Argument (phase) in radians |
+| `conjugate` | `() => Complex` | Complex conjugate |
+| `negate` | `() => Complex` | Negation |
+| `inverse` | `() => Complex` | Multiplicative inverse |
+| `sqrt` | `() => Complex` | Square root |
+| `exp` | `() => Complex` | Exponential |
+| `log` | `() => Complex` | Natural logarithm |
+| `pow` | `(n: number \| Complex) => Complex` | Power |
+| `sin` | `() => Complex` | Sine |
+| `cos` | `() => Complex` | Cosine |
+| `tan` | `() => Complex` | Tangent |
+| `equals` | `(other: Complex) => boolean` | Equality check |
+| `toString` | `() => string` | String representation |
+
+#### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `I` | `Complex(0, 1)` | Imaginary unit |
+| `COMPLEX_ZERO` | `Complex(0, 0)` | Zero |
+| `COMPLEX_ONE` | `Complex(1, 0)` | One |
+
+#### Example
+
+```typescript
+import { Complex, I } from '@mathts/core';
+
+const z = new Complex(3, 4);
+console.log(z.abs());        // 5
+console.log(z.arg());        // 0.9272952180016122
+
+const w = z.multiply(I);     // Complex(-4, 3)
+const sum = z.add(w);        // Complex(-1, 7)
+
+const parsed = Complex.parse('2+3i');
+console.log(parsed.re, parsed.im); // 2, 3
+```
+
+---
+
+### Fraction
+
+Exact rational numbers using bigint for perfect precision.
+
+```typescript
+import { Fraction, FRACTION_ZERO, FRACTION_ONE } from '@mathts/core';
+```
+
+#### Constructor
+
+```typescript
+new Fraction(numerator: number | bigint, denominator: number | bigint)
+```
+
+#### Static Methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `fromNumber` | `(n: number, tolerance?: number) => Fraction` | Approximate from decimal |
+| `parse` | `(str: string) => Fraction` | Parse "1/2" or "0.5" |
+
+#### Instance Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `numerator` | `bigint` | Numerator (always simplified) |
+| `denominator` | `bigint` | Denominator (always positive) |
+
+#### Instance Methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `add` | `(other: Fraction) => Fraction` | Addition |
+| `subtract` | `(other: Fraction) => Fraction` | Subtraction |
+| `multiply` | `(other: Fraction) => Fraction` | Multiplication |
+| `divide` | `(other: Fraction) => Fraction` | Division |
+| `negate` | `() => Fraction` | Negation |
+| `inverse` | `() => Fraction` | Reciprocal |
+| `abs` | `() => Fraction` | Absolute value |
+| `pow` | `(n: number) => Fraction` | Integer power |
+| `valueOf` | `() => number` | Convert to number |
+| `equals` | `(other: Fraction) => boolean` | Equality check |
+| `compareTo` | `(other: Fraction) => number` | Comparison (-1, 0, 1) |
+| `toString` | `() => string` | String "n/d" |
+| `toDecimalString` | `(decimals?: number) => string` | Decimal string |
+
+#### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `FRACTION_ZERO` | `Fraction(0, 1)` | Zero |
+| `FRACTION_ONE` | `Fraction(1, 1)` | One |
+
+#### Example
+
+```typescript
+import { Fraction } from '@mathts/core';
+
+const half = new Fraction(1, 2);
+const third = new Fraction(1, 3);
+
+const sum = half.add(third);      // Fraction(5, 6)
+console.log(sum.toString());      // "5/6"
+console.log(sum.valueOf());       // 0.8333...
+
+const fromDecimal = Fraction.fromNumber(0.125);
+console.log(fromDecimal.toString()); // "1/8"
+```
+
+---
+
+### BigNumber
+
+Arbitrary precision decimal numbers.
+
+```typescript
+import { BigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_PI, BIGNUMBER_E } from '@mathts/core';
+```
+
+#### Static Methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `fromNumber` | `(n: number) => BigNumber` | Create from number |
+| `parse` | `(str: string) => BigNumber` | Parse decimal string |
+| `config` | `(opts: { precision?: number }) => void` | Configure precision |
+
+#### Instance Methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `add` | `(other: BigNumber) => BigNumber` | Addition |
+| `subtract` | `(other: BigNumber) => BigNumber` | Subtraction |
+| `multiply` | `(other: BigNumber) => BigNumber` | Multiplication |
+| `divide` | `(other: BigNumber) => BigNumber` | Division |
+| `negate` | `() => BigNumber` | Negation |
+| `abs` | `() => BigNumber` | Absolute value |
+| `pow` | `(n: number) => BigNumber` | Power |
+| `sqrt` | `() => BigNumber` | Square root |
+| `valueOf` | `() => number` | Convert to number |
+| `toString` | `() => string` | String representation |
+| `equals` | `(other: BigNumber) => boolean` | Equality |
+| `compareTo` | `(other: BigNumber) => number` | Comparison |
+| `isZero` | `() => boolean` | Check if zero |
+| `isNegative` | `() => boolean` | Check if negative |
+| `isPositive` | `() => boolean` | Check if positive |
+
+#### Constants
+
+| Constant | Description |
+|----------|-------------|
+| `BIGNUMBER_ZERO` | Zero |
+| `BIGNUMBER_ONE` | One |
+| `BIGNUMBER_PI` | Pi (to configured precision) |
+| `BIGNUMBER_E` | Euler's number |
+
+#### Example
+
+```typescript
+import { BigNumber } from '@mathts/core';
+
+// No floating point errors
+const a = BigNumber.parse('0.1');
+const b = BigNumber.parse('0.2');
+const sum = a.add(b);
+console.log(sum.toString()); // "0.3" (exact)
+
+// High precision
+BigNumber.config({ precision: 100 });
+const pi = BIGNUMBER_PI;
+console.log(pi.toString()); // Pi to 100 digits
+```
+
+---
+
+## Type Guards
+
+```typescript
+import { isComplex, isFraction, isBigNumber, isNumber } from '@mathts/core';
+```
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `isComplex` | `(x: unknown) => x is Complex` | Check if Complex |
+| `isFraction` | `(x: unknown) => x is Fraction` | Check if Fraction |
+| `isBigNumber` | `(x: unknown) => x is BigNumber` | Check if BigNumber |
+| `isNumber` | `(x: unknown) => x is number` | Check if number |
+
+---
+
+## mathTyped
+
+The typed-function system for polymorphic dispatch.
+
+```typescript
+import { mathTyped } from '@mathts/core';
+
+const myAdd = mathTyped('myAdd', {
+  'number, number': (a, b) => a + b,
+  'Complex, Complex': (a, b) => a.add(b),
+});
+
+myAdd(1, 2);                              // 3
+myAdd(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
+```
+
+See [typed-function documentation](https://github.com/josdejong/typed-function) for advanced usage.
