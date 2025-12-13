@@ -10,53 +10,175 @@ A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acc
 ## Features
 
 - **Native TypeScript** - Full type safety with compile-time type checking
+- **Parallel-First** - WebWorker-based parallelization via ComputePool
 - **Multi-Backend Acceleration** - Automatic selection between JS, WASM (SIMD), and WebGPU
-- **Parallel Execution** - WebWorker-based parallelization for large computations
+- **mathjs Compatible** - Drop-in replacement with `@mathts/compat`
 - **Scientific Workbooks** - YAML-based reactive notebooks (`.mtsw` format)
 - **Tree-Shakeable** - Full ESM support for minimal bundle sizes
 - **Physics-First** - Built for tensor mathematics and the Universal Physics Tensor Framework (UPTF)
 
 ## Installation
 
+### For mathjs Users (Quickest Migration)
+
 ```bash
-npm install @mathts/core
+npm install @mathts/compat
 ```
 
-### Optional Packages
+```typescript
+import { create, all } from '@mathts/compat';
+const math = create(all);
+
+// Use familiar mathjs API
+math.add(1, 2);              // 3
+math.complex(3, 4);          // Complex(3, 4)
+math.matrix([[1,2],[3,4]]);  // DenseMatrix
+math.sin(Math.PI / 2);       // 1
+```
+
+### For New Projects
 
 ```bash
-npm install @mathts/matrix      # Matrix operations with backend selection
-npm install @mathts/tensor      # Tensor mathematics and Einstein notation
-npm install @mathts/symbolic    # Symbolic computation
-npm install @mathts/viz         # Three.js/D3 visualization
-npm install @mathts/workbook    # Scientific workbook runtime
+npm install @mathts/core @mathts/functions @mathts/matrix @mathts/parallel
+```
+
+```typescript
+import { Complex, Fraction, BigNumber } from '@mathts/core';
+import { add, multiply, sin, cos } from '@mathts/functions';
+import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
+import { computePool } from '@mathts/parallel';
 ```
 
 ## Quick Start
 
-### Basic Usage
+### Complex Numbers
 
 ```typescript
-import { Matrix, Complex } from '@mathts/core';
+import { Complex, I } from '@mathts/core';
 
-// Matrix operations
-const A = Matrix.from([
+const z = new Complex(3, 4);
+console.log(z.abs());       // 5
+console.log(z.arg());       // 0.927... radians
+console.log(z.conjugate()); // Complex(3, -4)
+
+// Using imaginary unit
+const w = z.add(I);         // Complex(3, 5)
+```
+
+### Fractions
+
+```typescript
+import { Fraction } from '@mathts/core';
+
+const f = new Fraction(1, 3);
+const g = new Fraction(1, 6);
+const sum = f.add(g);       // Fraction(1, 2) - auto-simplified
+console.log(sum.toString()); // "1/2"
+```
+
+### BigNumbers
+
+```typescript
+import { BigNumber } from '@mathts/core';
+
+const a = BigNumber.parse('0.1');
+const b = BigNumber.parse('0.2');
+const sum = a.add(b);
+console.log(sum.toString()); // "0.3" - exact, no floating point errors
+```
+
+### Matrices
+
+```typescript
+import { DenseMatrix } from '@mathts/matrix';
+
+const A = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
   [7, 8, 9]
 ]);
 
-const det = A.determinant();
-const inv = A.inverse();
-const eig = A.eigenvalues();
+const B = DenseMatrix.identity(3);
+const C = A.multiply(B);
+const T = A.transpose();
 
-// Complex numbers
-const z = new Complex(3, 4);
-console.log(z.abs());  // 5
-console.log(z.arg());  // 0.927...
+console.log(A.rows, A.cols); // 3, 3
+console.log(A.get(0, 1));    // 2
 ```
 
-### Scientific Workbook
+### Parallel Operations
+
+```typescript
+import { computePool } from '@mathts/parallel';
+
+// Initialize once at app startup
+await computePool.initialize();
+
+// Parallel operations on large arrays
+const data = new Float64Array(100000);
+for (let i = 0; i < data.length; i++) data[i] = Math.random();
+
+const sum = await computePool.sum(data);
+const mean = await computePool.mean(data);
+const { variance, std } = (await computePool.variance(data)).result;
+
+// Parallel matrix multiplication
+const A = new Float64Array([1, 2, 3, 4]);
+const B = new Float64Array([5, 6, 7, 8]);
+const C = await computePool.matmul(A, 2, 2, B, 2);
+
+// Cleanup on app shutdown
+await computePool.terminate();
+```
+
+### Typed Functions
+
+```typescript
+import { add, multiply, sin } from '@mathts/functions';
+import { Complex, Fraction, BigNumber } from '@mathts/core';
+
+// Automatic type dispatch
+add(1, 2);                                    // 3
+add(new Complex(1, 2), new Complex(3, 4));   // Complex(4, 6)
+add(new Fraction(1, 2), new Fraction(1, 3)); // Fraction(5, 6)
+add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber(0.3)
+
+// Works with mixed types too (automatic conversion)
+sin(0);                   // 0
+sin(Math.PI / 2);         // 1
+sin(new Complex(0, 1));   // Complex sinh(1)
+```
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `@mathts/core` | Core types: Complex, Fraction, BigNumber, mathTyped |
+| `@mathts/functions` | Mathematical functions with typed dispatch |
+| `@mathts/matrix` | Dense and sparse matrices with backend selection |
+| `@mathts/parallel` | Parallel execution via ComputePool (Web Workers) |
+| `@mathts/compat` | mathjs compatibility layer |
+| `@mathts/workbook` | Scientific workbook runtime (.mtsw) |
+
+## Architecture
+
+### Parallel-First Design
+
+MathTS uses Web Workers for all large computations:
+
+```
+User Code → ComputePool (workers) → WASM/GPU Backend → Result
+```
+
+### Backend Selection
+
+| Backend | Trigger | Use Case |
+|---------|---------|----------|
+| **JS** | Default | Small matrices, maximum compatibility |
+| **WASM** | >1,000 elements | Medium matrices, SIMD acceleration |
+| **WebGPU** | >100,000 elements | Large matrices, GPU compute shaders |
+
+## Scientific Workbook
 
 Create a file `example.mtsw`:
 
@@ -74,19 +196,18 @@ cells:
     id: intro
 
   - code: |
-      import { Matrix } from '@mathts/core';
+      import { DenseMatrix } from '@mathts/matrix';
 
-      const A = Matrix.random(3, 3);
-      const eigenvalues = A.eigenvalues();
-
-      console.log('Eigenvalues:', eigenvalues);
-      export { A, eigenvalues };
+      const A = DenseMatrix.random(3, 3);
+      console.log('Matrix A:', A.toArray());
+      export { A };
     id: compute
 
-  - visualization: |
-      import { plotEigenspectrum } from '@mathts/viz';
-      plotEigenspectrum(eigenvalues);
-    id: viz
+  - test: |
+      import { A } from '#compute';
+      assert(A.rows === 3);
+      assert(A.cols === 3);
+    id: verify
     depends_on: [compute]
 ```
 
@@ -94,31 +215,6 @@ Run with the CLI:
 
 ```bash
 npx mtsw run example.mtsw
-```
-
-## Architecture
-
-MathTS uses a three-tier backend system for optimal performance:
-
-| Backend | Trigger | Use Case |
-|---------|---------|----------|
-| **JS** | Default | Small matrices, maximum compatibility |
-| **WASM** | >1,000 elements | Medium matrices, SIMD acceleration |
-| **WebGPU** | >100,000 elements | Large matrices, GPU compute shaders |
-
-```typescript
-import { Matrix, backends } from '@mathts/matrix';
-
-// Automatic backend selection (default)
-const result = A.multiply(B);
-
-// Force specific backend
-backends.configure({ preferred: 'wasm' });
-const wasmResult = A.multiply(B);
-
-// GPU for massive matrices
-backends.configure({ preferred: 'gpu' });
-const gpuResult = largeA.multiply(largeB);
 ```
 
 ## Workbook CLI
@@ -133,23 +229,48 @@ mtsw export <file> -f html   # Export to HTML/PDF/LaTeX
 mtsw new <name> -t physics   # Create from template
 ```
 
-## Performance
+## Migration from mathjs
 
-Benchmarks vs mathjs (Node.js, Apple M2):
+See the [Migration Guide](./docs/migration/guide.md) for detailed instructions.
 
-| Operation | Size | mathjs | MathTS (JS) | MathTS (WASM) | MathTS (GPU) |
-|-----------|------|--------|-------------|---------------|--------------|
-| matmul | 100×100 | 15ms | 12ms | 3ms | - |
-| matmul | 1000×1000 | 1.5s | 1.2s | 150ms | 50ms |
-| FFT | 1M points | 500ms | 400ms | 50ms | 20ms |
-| SVD | 500×500 | 8s | 6s | 1.2s | 400ms |
+### Quick Migration
+
+1. Install: `npm install @mathts/compat`
+2. Replace import: `import { create, all } from '@mathts/compat'`
+3. Continue using `math.*` API
+
+### Key Differences
+
+| mathjs | MathTS |
+|--------|--------|
+| `math.complex(3, 4)` | `new Complex(3, 4)` |
+| `math.matrix([[1,2]])` | `DenseMatrix.fromArray([[1,2]])` |
+| `math.bignumber('123')` | `BigNumber.parse('123')` |
+| `bn.toNumber()` | `bn.valueOf()` |
+| `m.get([row, col])` | `m.get(row, col)` |
 
 ## Documentation
 
-- [API Reference](./docs/api/)
-- [Architecture Guide](./docs/Architecture/)
-- [Migration from mathjs](./docs/migration/)
+- [API Differences](./docs/migration/api-diff.md)
+- [Migration Guide](./docs/migration/guide.md)
 - [Workbook Specification](./docs/Architecture/MATHTS_WORKBOOK_SPECIFICATION.md)
+- [Architecture Guide](./docs/Architecture/)
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Build all packages
+npm run build
+
+# Run tests
+npm test
+
+# Type check
+npm run typecheck
+```
 
 ## Contributing
 
@@ -162,4 +283,5 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 ## Acknowledgments
 
 - Inspired by [mathjs](https://mathjs.org/)
+- Type dispatch via [typed-function](https://github.com/josdejong/typed-function)
 - Workbook format influenced by [Observable](https://observablehq.com/), [marimo](https://marimo.io/), and [Maple](https://www.maplesoft.com/)

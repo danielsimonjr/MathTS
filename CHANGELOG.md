@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - mathjs-compatible constants: i, pi, e, phi, tau, LN2, LN10, etc.
 - API differences documentation (docs/migration/api-diff.md)
 - Migration guide (docs/migration/guide.md)
+- Comprehensive README with accurate usage examples
+- Package overview table in README
 
 ### Changed
 - matrix/parallel-matrix.ts: Added type assertion for ComputePool API to work around TypeScript module resolution issue with npm workspaces
