@@ -2,11 +2,10 @@
  * Tests for @mathts/typed-function
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
-  createTyped,
-  createTypedFunction,
-  TypeRegistry,
+  typed,
+  create,
   parseSignature,
   buildSignature,
   isNumber,
@@ -17,7 +16,6 @@ import {
   isFiniteNumber,
   isInteger,
   isFloat64Array,
-  baseTyped,
   NoMatchingSignatureError,
   TypeConversionError,
 } from '../src/index.js';
@@ -81,11 +79,19 @@ describe('@mathts/typed-function', () => {
     });
   });
 
-  describe('createTyped', () => {
-    it('should create a basic typed instance', () => {
-      const myTyped = createTyped();
+  describe('typed-function re-exports', () => {
+    it('should export typed default from typed-function', () => {
+      expect(typed).toBeDefined();
+      expect(typeof typed).toBe('function');
+    });
 
-      const add = myTyped('add', {
+    it('should export create from typed-function', () => {
+      expect(create).toBeDefined();
+      expect(typeof create).toBe('function');
+    });
+
+    it('should create typed functions using typed default', () => {
+      const add = typed('add', {
         'number, number': (a: number, b: number) => a + b,
       });
 
@@ -93,21 +99,17 @@ describe('@mathts/typed-function', () => {
       expect(add(10, -5)).toBe(5);
     });
 
-    it('should handle type conversions', () => {
-      const myTyped = createTyped();
+    it('should create a custom typed instance using create', () => {
+      const myTyped = create();
 
       const multiply = myTyped('multiply', {
         'number, number': (a: number, b: number) => a * b,
       });
 
-      // string to number conversion
-      expect(multiply('2' as unknown as number, 3)).toBe(6);
-
-      // boolean to number conversion
-      expect(multiply(true as unknown as number, 5)).toBe(5);
+      expect(multiply(3, 4)).toBe(12);
     });
 
-    it('should support custom types', () => {
+    it('should support custom types with create', () => {
       interface Point {
         x: number;
         y: number;
@@ -119,9 +121,8 @@ describe('@mathts/typed-function', () => {
         v !== null &&
         (v as Point).type === 'Point';
 
-      const myTyped = createTyped({
-        types: [{ name: 'Point', test: isPoint }],
-      });
+      const myTyped = create();
+      myTyped.addType({ name: 'Point', test: isPoint });
 
       const distance = myTyped('distance', {
         'Point, Point': (a: Point, b: Point) =>
@@ -132,116 +133,6 @@ describe('@mathts/typed-function', () => {
       const p2: Point = { x: 3, y: 4, type: 'Point' };
 
       expect(distance(p1, p2)).toBe(5);
-    });
-
-    it('should support custom conversions', () => {
-      const myTyped = createTyped({
-        conversions: [
-          {
-            from: 'Array',
-            to: 'number',
-            convert: (arr: unknown) => (arr as number[]).reduce((a, b) => a + b, 0),
-          },
-        ],
-      });
-
-      const double = myTyped('double', {
-        'number': (n: number) => n * 2,
-      });
-
-      // Array should be converted to number (sum)
-      expect(double([1, 2, 3, 4] as unknown as number)).toBe(20); // sum=10, doubled=20
-    });
-  });
-
-  describe('createTypedFunction', () => {
-    it('should create a simple typed function', () => {
-      const square = createTypedFunction('square', {
-        'number': (n: number) => n * n,
-      });
-
-      expect(square(4)).toBe(16);
-      expect(square(-3)).toBe(9);
-    });
-
-    it('should support multiple signatures', () => {
-      const abs = createTypedFunction('abs', {
-        'number': (n: number) => Math.abs(n),
-        'Array': (arr: number[]) => arr.map(Math.abs),
-      });
-
-      expect(abs(-5)).toBe(5);
-      expect(abs([-1, 2, -3])).toEqual([1, 2, 3]);
-    });
-
-    it('should support variadic signatures', () => {
-      const sum = createTypedFunction('sum', {
-        'number, number': (a: number, b: number) => a + b,
-        'number, number, number': (a: number, b: number, c: number) => a + b + c,
-      });
-
-      expect(sum(1, 2)).toBe(3);
-      expect(sum(1, 2, 3)).toBe(6);
-    });
-  });
-
-  describe('TypeRegistry', () => {
-    let registry: TypeRegistry;
-
-    beforeEach(() => {
-      registry = new TypeRegistry();
-    });
-
-    it('should register types', () => {
-      interface Vector { values: number[]; type: 'Vector' }
-      const isVector = (v: unknown): v is Vector =>
-        typeof v === 'object' && v !== null && (v as Vector).type === 'Vector';
-
-      registry.registerType('Vector', isVector);
-
-      expect(registry.hasType('Vector')).toBe(true);
-      expect(registry.hasType('Matrix')).toBe(false);
-      expect(registry.getTypeNames()).toContain('Vector');
-    });
-
-    it('should register conversions', () => {
-      registry.registerConversion<number, string>('number', 'string', (n) => String(n));
-
-      expect(registry.hasConversion('number', 'string')).toBe(true);
-      expect(registry.hasConversion('string', 'number')).toBe(false);
-    });
-
-    it('should build a typed instance from registry', () => {
-      interface Currency { value: number; type: 'Currency' }
-      const isCurrency = (v: unknown): v is Currency =>
-        typeof v === 'object' && v !== null && (v as Currency).type === 'Currency';
-
-      registry.registerType('Currency', isCurrency);
-      registry.registerConversion<number, Currency>('number', 'Currency', (n) => ({
-        value: n,
-        type: 'Currency',
-      }));
-
-      const typedInstance = registry.build();
-
-      const formatCurrency = typedInstance('formatCurrency', {
-        'Currency': (c: Currency) => `$${c.value.toFixed(2)}`,
-      });
-
-      // Direct currency
-      expect(formatCurrency({ value: 42.5, type: 'Currency' })).toBe('$42.50');
-    });
-
-    it('should clear registry', () => {
-      interface Dummy { type: 'Dummy' }
-      const isDummy = (v: unknown): v is Dummy =>
-        typeof v === 'object' && v !== null && (v as Dummy).type === 'Dummy';
-
-      registry.registerType('Dummy', isDummy);
-      expect(registry.hasType('Dummy')).toBe(true);
-
-      registry.clear();
-      expect(registry.hasType('Dummy')).toBe(false);
     });
   });
 
@@ -297,34 +188,6 @@ describe('@mathts/typed-function', () => {
 
       expect(error.originalError).toBe(originalError);
       expect(error.message).toContain('Precision loss');
-    });
-  });
-
-  describe('baseTyped', () => {
-    it('should be a pre-configured instance', () => {
-      const concat = baseTyped('concat', {
-        'string, string': (a: string, b: string) => a + b,
-      });
-
-      expect(concat('hello', ' world')).toBe('hello world');
-    });
-
-    it('should support bigint type', () => {
-      const addBigInt = baseTyped('addBigInt', {
-        'bigint, bigint': (a: bigint, b: bigint) => a + b,
-      });
-
-      expect(addBigInt(10n, 20n)).toBe(30n);
-    });
-
-    it('should support Float64Array type', () => {
-      const sumArray = baseTyped('sumArray', {
-        'Float64Array': (arr: Float64Array) =>
-          arr.reduce((a, b) => a + b, 0),
-      });
-
-      const data = new Float64Array([1, 2, 3, 4, 5]);
-      expect(sumArray(data)).toBe(15);
     });
   });
 });

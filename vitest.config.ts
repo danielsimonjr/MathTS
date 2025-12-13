@@ -12,6 +12,7 @@ export default defineConfig({
       'functions/tests/**/*.test.ts',
       'parallel/tests/**/*.test.ts',
       'expression/tests/**/*.test.ts',
+      'tests/integration/**/*.test.ts',
     ],
     coverage: {
       provider: 'v8',

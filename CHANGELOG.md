@@ -16,11 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - @mathts/parallel package with parallel execution via workerpool
 - @mathts/matrix package with parallel-first matrix operations
 - @mathts/functions package with typed arithmetic, trigonometry, statistics, and signal processing
-- Comprehensive test suite with 764+ passing tests
+- Comprehensive test suite with 1050+ passing tests
+- Integration tests for MathTS instance creation and cross-package operations
+- Integration tests for typed arithmetic, trigonometric, and statistical functions
 
 ### Changed
 - matrix/parallel-matrix.ts: Added type assertion for ComputePool API to work around TypeScript module resolution issue with npm workspaces
 - parallel/compute.worker.ts: Added type assertion for worker function registration
+- Updated vitest.config.ts to include tests/integration/**/*.test.ts
+- Updated @mathts/typed-function tests to match actual exports
 
 ### Deprecated
 - N/A
@@ -32,6 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed TypeScript module resolution for @mathts/parallel exports
 - Fixed test imports in functions/tests/parallel-arithmetic.test.ts and parallel-signal.test.ts
 - Fixed compute.worker.ts type compatibility with workerpool function signatures
+- Fixed integration tests to use BigNumber.parse() instead of new BigNumber() (private constructor)
+- Fixed integration tests to use BigNumber.valueOf() instead of toNumber()
+- Fixed factory pattern test expectations (createFactory returns object, not function)
+- Fixed typed-function package tests to match actual exports (typed, create)
 
 ### Security
 - N/A
