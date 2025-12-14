@@ -42,6 +42,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - matrix-operations.ts: Dense and sparse matrix operations
   - parallel-computing.ts: ComputePool parallel operations
   - mathjs-migration.ts: Migration from mathjs using compat layer
+- Migration examples (docs/migration/examples/)
+  - basic.md: Arithmetic and type usage migration from mathjs
+  - matrix.md: Matrix operations migration from mathjs
+  - complex.md: Complex, Fraction, and BigNumber migration
+- Getting Started guide (docs/getting-started.md)
+- Advanced Usage guide (docs/advanced.md)
+  - Backend selection (JS, WASM, GPU)
+  - Parallel computing with ComputePool
+  - Performance optimization techniques
+  - Type dispatch system
+  - Memory management
 
 ### Changed
 - matrix/parallel-matrix.ts: Added type assertion for ComputePool API to work around TypeScript module resolution issue with npm workspaces
