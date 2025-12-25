@@ -2,7 +2,7 @@
  * Workbook YAML parser
  */
 
-import type { Workbook, ParseResult, Cell, CellType } from './types';
+import type { Workbook, ParseResult, CellType } from './types';
 
 /**
  * Detect cell type from YAML keys
