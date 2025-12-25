@@ -89,3 +89,4 @@ docs/.docusaurus/
 .turbo/
 
 # Note: packages/typed-function/ and packages/workerpool/ are now included in this repo
+.mcp.txt
