@@ -1,7 +1,47 @@
-import { factory } from '../../utils/factory.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { factory } from '../utils/factory.js'
+import type { TypedFunction } from '../core/function/typed.js'
 
-type Dependencies = 'typed' | 'abs' | 'add' | 'pow' | 'conj' | 'sqrt' | 'multiply' | 'equalScalar' | 'larger' | 'smaller' | 'matrix' | 'ctranspose' | 'eigs'
+// Type definitions for norm
+interface ComplexType {
+  abs(): number
+}
+
+interface BigNumberType {
+  abs(): BigNumberType
+}
+
+interface MatrixType {
+  size(): number[]
+  forEach(
+    callback: (
+      value: number | BigNumberType | ComplexType,
+      index: number[],
+      matrix: MatrixType
+    ) => void,
+    skipZeros?: boolean
+  ): void
+  toArray(): (number | BigNumberType | ComplexType)[]
+}
+
+interface EigsResult {
+  values: MatrixType
+}
+
+interface NormDependencies {
+  typed: TypedFunction
+  abs: TypedFunction
+  add: TypedFunction
+  pow: TypedFunction
+  conj: TypedFunction
+  sqrt: TypedFunction
+  multiply: TypedFunction
+  equalScalar: TypedFunction
+  larger: (a: number | BigNumberType, b: number | BigNumberType) => boolean
+  smaller: (a: number | BigNumberType, b: number | BigNumberType) => boolean
+  matrix: (data: unknown) => MatrixType
+  ctranspose: TypedFunction
+  eigs: (x: MatrixType) => EigsResult
+}
 
 const name = 'norm'
 const dependencies = [
@@ -37,7 +77,7 @@ export const createNorm = /* #__PURE__ */ factory(
     matrix,
     ctranspose,
     eigs
-  }: any): TypedFunction => {
+  }: NormDependencies): TypedFunction => {
     /**
      * Calculate the norm of a number, vector or matrix.
      *
@@ -79,11 +119,11 @@ export const createNorm = /* #__PURE__ */ factory(
     return typed(name, {
       number: Math.abs,
 
-      Complex: function (x: any) {
+      Complex: function (x: ComplexType): number {
         return x.abs()
       },
 
-      BigNumber: function (x: any) {
+      BigNumber: function (x: BigNumberType): BigNumberType {
         // norm(x) = abs(x)
         return x.abs()
       },
@@ -93,19 +133,25 @@ export const createNorm = /* #__PURE__ */ factory(
         return Math.abs(x ? 1 : 0)
       },
 
-      Array: function (x: any) {
+      Array: function (x: unknown[]): number | BigNumberType {
         return _norm(matrix(x), 2)
       },
 
-      Matrix: function (x: any) {
+      Matrix: function (x: MatrixType): number | BigNumberType {
         return _norm(x, 2)
       },
 
-      'Array, number | BigNumber | string': function (x: any, p: any) {
+      'Array, number | BigNumber | string': function (
+        x: unknown[],
+        p: number | BigNumberType | string
+      ): number | BigNumberType {
         return _norm(matrix(x), p)
       },
 
-      'Matrix, number | BigNumber | string': function (x: any, p: any) {
+      'Matrix, number | BigNumber | string': function (
+        x: MatrixType,
+        p: number | BigNumberType | string
+      ): number | BigNumberType {
         return _norm(x, p)
       }
     })
@@ -113,15 +159,15 @@ export const createNorm = /* #__PURE__ */ factory(
     /**
      * Calculate the plus infinity norm for a vector
      * @param {Matrix} x
-     * @returns {number} Returns the norm
+     * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _vectorNormPlusInfinity (x: any): any {
+    function _vectorNormPlusInfinity(x: MatrixType): number | BigNumberType {
       // norm(x, Infinity) = max(abs(x))
-      let pinf = 0
+      let pinf: number | BigNumberType = 0
       // skip zeros since abs(0) === 0
-      x.forEach(function (value: any) {
-        const v = abs(value)
+      x.forEach(function (value: number | BigNumberType | ComplexType) {
+        const v = abs(value) as number | BigNumberType
         if (larger(v, pinf)) {
           pinf = v
         }
@@ -132,15 +178,15 @@ export const createNorm = /* #__PURE__ */ factory(
     /**
      * Calculate the minus infinity norm for a vector
      * @param {Matrix} x
-     * @returns {number} Returns the norm
+     * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _vectorNormMinusInfinity (x: any): any {
+    function _vectorNormMinusInfinity(x: MatrixType): number | BigNumberType {
       // norm(x, -Infinity) = min(abs(x))
-      let ninf: any
+      let ninf: number | BigNumberType | undefined
       // skip zeros since abs(0) === 0
-      x.forEach(function (value: any) {
-        const v = abs(value)
+      x.forEach(function (value: number | BigNumberType | ComplexType) {
+        const v = abs(value) as number | BigNumberType
         if (!ninf || smaller(v, ninf)) {
           ninf = v
         }
@@ -151,11 +197,14 @@ export const createNorm = /* #__PURE__ */ factory(
     /**
      * Calculate the norm for a vector
      * @param {Matrix} x
-     * @param {number | string} p
-     * @returns {number} Returns the norm
+     * @param {number | BigNumberType | string} p
+     * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _vectorNorm (x: any, p: any): any {
+    function _vectorNorm(
+      x: MatrixType,
+      p: number | BigNumberType | string
+    ): number | BigNumberType {
       // check p
       if (p === Number.POSITIVE_INFINITY || p === 'inf') {
         return _vectorNormPlusInfinity(x)
@@ -170,12 +219,12 @@ export const createNorm = /* #__PURE__ */ factory(
         // check p != 0
         if (!equalScalar(p, 0)) {
           // norm(x, p) = sum(abs(xi) ^ p) ^ 1/p
-          let n = 0
+          let n: number | BigNumberType = 0
           // skip zeros since abs(0) === 0
-          x.forEach(function (value: any) {
-            n = add(pow(abs(value), p), n)
+          x.forEach(function (value: number | BigNumberType | ComplexType) {
+            n = add(pow(abs(value), p), n) as number | BigNumberType
           }, true)
-          return pow(n, 1 / p)
+          return pow(n, 1 / p) as number | BigNumberType
         }
         return Number.POSITIVE_INFINITY
       }
@@ -186,33 +235,36 @@ export const createNorm = /* #__PURE__ */ factory(
     /**
      * Calculate the Frobenius norm for a matrix
      * @param {Matrix} x
-     * @returns {number} Returns the norm
+     * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _matrixNormFrobenius (x: any): any {
+    function _matrixNormFrobenius(x: MatrixType): number | BigNumberType {
       // norm(x) = sqrt(sum(diag(x'x)))
-      let fro = 0
-      x.forEach(function (value: any, index: any) {
-        fro = add(fro, multiply(value, conj(value)))
+      let fro: number | BigNumberType = 0
+      x.forEach(function (value: number | BigNumberType | ComplexType) {
+        fro = add(fro, multiply(value, conj(value))) as number | BigNumberType
       })
-      return abs(sqrt(fro))
+      return abs(sqrt(fro)) as number | BigNumberType
     }
 
     /**
      * Calculate the norm L1 for a matrix
      * @param {Matrix} x
-     * @returns {number} Returns the norm
+     * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _matrixNormOne (x: any): any {
+    function _matrixNormOne(x: MatrixType): number | BigNumberType {
       // norm(x) = the largest column sum
-      const c: any[] = []
+      const c: (number | BigNumberType)[] = []
       // result
-      let maxc = 0
+      let maxc: number | BigNumberType = 0
       // skip zeros since abs(0) == 0
-      x.forEach(function (value: any, index: any[]) {
+      x.forEach(function (
+        value: number | BigNumberType | ComplexType,
+        index: number[]
+      ) {
         const j = index[1]
-        const cj = add(c[j] || 0, abs(value))
+        const cj = add(c[j] || 0, abs(value)) as number | BigNumberType
         if (larger(cj, maxc)) {
           maxc = cj
         }
@@ -224,37 +276,40 @@ export const createNorm = /* #__PURE__ */ factory(
     /**
      * Calculate the norm L2 for a matrix
      * @param {Matrix} x
-     * @returns {number} Returns the norm
+     * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _matrixNormTwo (x: any): any {
+    function _matrixNormTwo(x: MatrixType): number | BigNumberType {
       // norm(x) = sqrt( max eigenvalue of A*.A)
       const sizeX = x.size()
       if (sizeX[0] !== sizeX[1]) {
         throw new RangeError('Invalid matrix dimensions')
       }
-      const tx = ctranspose(x)
-      const squaredX = multiply(tx, x)
+      const tx = ctranspose(x) as MatrixType
+      const squaredX = multiply(tx, x) as MatrixType
       const eigenVals = eigs(squaredX).values.toArray()
       const rho = eigenVals[eigenVals.length - 1]
-      return abs(sqrt(rho))
+      return abs(sqrt(rho)) as number | BigNumberType
     }
 
     /**
      * Calculate the infinity norm for a matrix
      * @param {Matrix} x
-     * @returns {number} Returns the norm
+     * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _matrixNormInfinity (x: any): any {
+    function _matrixNormInfinity(x: MatrixType): number | BigNumberType {
       // norm(x) = the largest row sum
-      const r: any[] = []
+      const r: (number | BigNumberType)[] = []
       // result
-      let maxr = 0
+      let maxr: number | BigNumberType = 0
       // skip zeros since abs(0) == 0
-      x.forEach(function (value: any, index: any[]) {
+      x.forEach(function (
+        value: number | BigNumberType | ComplexType,
+        index: number[]
+      ) {
         const i = index[0]
-        const ri = add(r[i] || 0, abs(value))
+        const ri = add(r[i] || 0, abs(value)) as number | BigNumberType
         if (larger(ri, maxr)) {
           maxr = ri
         }
@@ -266,11 +321,14 @@ export const createNorm = /* #__PURE__ */ factory(
     /**
      * Calculate the norm for a 2D Matrix (M*N)
      * @param {Matrix} x
-     * @param {number | string} p
-     * @returns {number} Returns the norm
+     * @param {number | BigNumberType | string} p
+     * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _matrixNorm (x: any, p: any): any {
+    function _matrixNorm(
+      x: MatrixType,
+      p: number | BigNumberType | string
+    ): number | BigNumberType {
       // check p
       if (p === 1) {
         return _matrixNormOne(x)
@@ -291,11 +349,14 @@ export const createNorm = /* #__PURE__ */ factory(
     /**
      * Calculate the norm for an array
      * @param {Matrix} x
-     * @param {number | string} p
-     * @returns {number} Returns the norm
+     * @param {number | BigNumberType | string} p
+     * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _norm (x: any, p: any): any {
+    function _norm(
+      x: MatrixType,
+      p: number | BigNumberType | string
+    ): number | BigNumberType {
       // size
       const sizeX = x.size()
 
@@ -311,6 +372,7 @@ export const createNorm = /* #__PURE__ */ factory(
           throw new RangeError('Invalid matrix dimensions')
         }
       }
+      throw new Error('Unsupported matrix dimensions')
     }
   }
-) as any
+)

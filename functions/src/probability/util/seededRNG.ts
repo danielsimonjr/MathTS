@@ -1,13 +1,16 @@
-// @ts-expect-error - seedrandom has no type declarations
+// @ts-ignore - seedrandom may not have type declarations
 import seedrandom from 'seedrandom'
 
-const singletonRandom = /* #__PURE__ */ seedrandom(Date.now())
+// Type for seedrandom function
+type RngFunction = () => number
 
-export function createRng (randomSeed: any) {
-  let random: any
+const singletonRandom: RngFunction = /* #__PURE__ */ seedrandom(Date.now())
+
+export function createRng(randomSeed: string | number | null): RngFunction {
+  let random: RngFunction
 
   // create a new random generator with given seed
-  function setSeed (seed: any) {
+  function setSeed(seed: string | number | null): void {
     random = seed === null ? singletonRandom : seedrandom(String(seed))
   }
 
@@ -15,7 +18,7 @@ export function createRng (randomSeed: any) {
   setSeed(randomSeed)
 
   // wrapper function so the rng can be updated via generator
-  function rng () {
+  function rng() {
     return random()
   }
 

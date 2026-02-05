@@ -1,4 +1,9 @@
-import { typeOf } from '../../../utils/is.js'
+import { typeOf } from '../../utils/is.js'
+
+// Error with additional data property
+interface TypedError extends Error {
+  data?: { actual: string }
+}
 
 /**
  * Improve error messages for statistics functions. Errors are typically
@@ -10,24 +15,37 @@ import { typeOf } from '../../../utils/is.js'
  * @param {*} [value]
  * @return {Error}
  */
-export function improveErrorMessage (err: any, fnName: any, value: any) {
+export function improveErrorMessage(
+  err: TypedError,
+  fnName: string,
+  value?: unknown
+): Error {
   // TODO: add information with the index (also needs transform in expression parser)
   let details
 
   if (String(err).includes('Unexpected type')) {
-    details = arguments.length > 2
-      ? ' (type: ' + typeOf(value) + ', value: ' + JSON.stringify(value) + ')'
-      : ' (type: ' + err.data.actual + ')'
+    details =
+      value !== undefined
+        ? ' (type: ' + typeOf(value) + ', value: ' + JSON.stringify(value) + ')'
+        : ' (type: ' + (err.data?.actual ?? 'unknown') + ')'
 
-    return new TypeError('Cannot calculate ' + fnName + ', unexpected type of argument' + details)
+    return new TypeError(
+      'Cannot calculate ' + fnName + ', unexpected type of argument' + details
+    )
   }
 
   if (String(err).includes('complex numbers')) {
-    details = arguments.length > 2
-      ? ' (type: ' + typeOf(value) + ', value: ' + JSON.stringify(value) + ')'
-      : ''
+    details =
+      value !== undefined
+        ? ' (type: ' + typeOf(value) + ', value: ' + JSON.stringify(value) + ')'
+        : ''
 
-    return new TypeError('Cannot calculate ' + fnName + ', no ordering relation is defined for complex numbers' + details)
+    return new TypeError(
+      'Cannot calculate ' +
+        fnName +
+        ', no ordering relation is defined for complex numbers' +
+        details
+    )
   }
 
   return err

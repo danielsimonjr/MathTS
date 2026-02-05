@@ -1,54 +1,65 @@
-import { factory } from '../../utils/factory.js'
-import type { TypedFunction } from '../../core/function/typed.js'
-import type { MathJsConfig } from '../../core/config.js'
-import type { Complex } from '../../type/complex/Complex.js'
-import type { BigNumber } from '../../type/bignumber/BigNumber.js'
-import { atanhNumber } from '../../plain/number/index.js'
+import { factory } from '../utils/factory.js'
+import type { TypedFunction } from '../core/function/typed.js'
+import type { ConfigOptions } from '../core/config.js'
+import type { Complex } from '../type/complex/Complex.js'
+import type { BigNumber } from '../type/bignumber/BigNumber.js'
+import { atanhNumber } from '../plain/number/index.js'
+
+// Type definitions for atanh
+interface ComplexConstructor {
+  new (re: number, im: number): Complex
+}
+
+interface AtanhDependencies {
+  typed: TypedFunction
+  config: ConfigOptions
+  Complex: ComplexConstructor
+}
 
 const name = 'atanh'
 const dependencies = ['typed', 'config', 'Complex']
 
-export const createAtanh = /* #__PURE__ */ factory(name, dependencies, ({ typed, config, Complex }: {
-  typed: TypedFunction
-  config: MathJsConfig
-  Complex: any
-}) => {
-  /**
-   * Calculate the hyperbolic arctangent of a value,
-   * defined as `atanh(x) = ln((1 + x)/(1 - x)) / 2`.
-   *
-   * To avoid confusion with the matrix hyperbolic arctangent, this function
-   * does not apply to matrices.
-   *
-   * Syntax:
-   *
-   *    math.atanh(x)
-   *
-   * Examples:
-   *
-   *    math.atanh(0.5)       // returns 0.5493061443340549
-   *
-   * See also:
-   *
-   *    acosh, asinh
-   *
-   * @param {number | BigNumber | Complex} x  Function input
-   * @return {number | BigNumber | Complex} Hyperbolic arctangent of x
-   */
-  return typed(name, {
-    number: function (x: number) {
-      if ((x <= 1 && x >= -1) || config.predictable) {
-        return atanhNumber(x)
+export const createAtanh = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  ({ typed, config, Complex }: AtanhDependencies) => {
+    /**
+     * Calculate the hyperbolic arctangent of a value,
+     * defined as `atanh(x) = ln((1 + x)/(1 - x)) / 2`.
+     *
+     * To avoid confusion with the matrix hyperbolic arctangent, this function
+     * does not apply to matrices.
+     *
+     * Syntax:
+     *
+     *    math.atanh(x)
+     *
+     * Examples:
+     *
+     *    math.atanh(0.5)       // returns 0.5493061443340549
+     *
+     * See also:
+     *
+     *    acosh, asinh
+     *
+     * @param {number | BigNumber | Complex} x  Function input
+     * @return {number | BigNumber | Complex} Hyperbolic arctangent of x
+     */
+    return typed(name, {
+      number: function (x: number) {
+        if ((x <= 1 && x >= -1) || config.predictable) {
+          return atanhNumber(x)
+        }
+        return new Complex(x, 0).atanh()
+      },
+
+      Complex: function (x: Complex) {
+        return x.atanh()
+      },
+
+      BigNumber: function (x: BigNumber): BigNumber {
+        return (x as unknown as { atanh(): BigNumber }).atanh()
       }
-      return new Complex(x, 0).atanh()
-    },
-
-    Complex: function (x: Complex) {
-      return x.atanh()
-    },
-
-    BigNumber: function (x: BigNumber) {
-      return (x as any).atanh()
-    }
-  }) as TypedFunction
-})
+    }) as TypedFunction
+  }
+)

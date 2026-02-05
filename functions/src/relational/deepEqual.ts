@@ -1,87 +1,88 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
+import type { TypedFunction } from '../core/function/typed.js'
 
-// Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T
-}
-
-interface Dependencies {
+// Type definitions for deepEqual
+interface DeepEqualDependencies {
   typed: TypedFunction
   equal: TypedFunction
 }
 
 const name = 'deepEqual'
-const dependencies = [
-  'typed',
-  'equal'
-]
+const dependencies = ['typed', 'equal']
 
-export const createDeepEqual = /* #__PURE__ */ factory(name, dependencies, ({ typed, equal }: Dependencies) => {
-  /**
-   * Test element wise whether two matrices are equal.
-   * The function accepts both matrices and scalar values.
-   *
-   * Strings are compared by their numerical value.
-   *
-   * Syntax:
-   *
-   *    math.deepEqual(x, y)
-   *
-   * Examples:
-   *
-   *    math.deepEqual(2, 4)   // returns false
-   *
-   *    a = [2, 5, 1]
-   *    b = [2, 7, 1]
-   *
-   *    math.deepEqual(a, b)   // returns false
-   *    math.equal(a, b)       // returns [true, false, true]
-   *
-   * See also:
-   *
-   *    equal, unequal
-   *
-   * @param  {number | BigNumber | Fraction | Complex | Unit | Array | Matrix} x First matrix to compare
-   * @param  {number | BigNumber | Fraction | Complex | Unit | Array | Matrix} y Second matrix to compare
-   * @return {number | BigNumber | Fraction | Complex | Unit | Array | Matrix}
-   *            Returns true when the input matrices have the same size and each of their elements is equal.
-   */
-  return typed(name, {
-    'any, any': function (x: any, y: any): boolean {
-      return _deepEqual(x.valueOf(), y.valueOf())
-    }
-  })
+export const createDeepEqual = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  ({ typed, equal }: DeepEqualDependencies) => {
+    /**
+     * Test element wise whether two matrices are equal.
+     * The function accepts both matrices and scalar values.
+     *
+     * Strings are compared by their numerical value.
+     *
+     * Syntax:
+     *
+     *    math.deepEqual(x, y)
+     *
+     * Examples:
+     *
+     *    math.deepEqual(2, 4)   // returns false
+     *
+     *    a = [2, 5, 1]
+     *    b = [2, 7, 1]
+     *
+     *    math.deepEqual(a, b)   // returns false
+     *    math.equal(a, b)       // returns [true, false, true]
+     *
+     * See also:
+     *
+     *    equal, unequal
+     *
+     * @param  {number | BigNumber | Fraction | Complex | Unit | Array | Matrix} x First matrix to compare
+     * @param  {number | BigNumber | Fraction | Complex | Unit | Array | Matrix} y Second matrix to compare
+     * @return {number | BigNumber | Fraction | Complex | Unit | Array | Matrix}
+     *            Returns true when the input matrices have the same size and each of their elements is equal.
+     */
+    return typed(name, {
+      'any, any': function (
+        x: { valueOf(): unknown },
+        y: { valueOf(): unknown }
+      ): boolean {
+        return _deepEqual(x.valueOf(), y.valueOf())
+      }
+    })
 
-  /**
-   * Test whether two arrays have the same size and all elements are equal
-   * @param {Array | *} x
-   * @param {Array | *} y
-   * @return {boolean} Returns true if both arrays are deep equal
-   */
-  function _deepEqual (x: any, y: any): boolean {
-    if (Array.isArray(x)) {
-      if (Array.isArray(y)) {
-        const len = x.length
-        if (len !== y.length) {
-          return false
-        }
-
-        for (let i = 0; i < len; i++) {
-          if (!_deepEqual(x[i], y[i])) {
+    /**
+     * Test whether two arrays have the same size and all elements are equal
+     * @param {Array | *} x
+     * @param {Array | *} y
+     * @return {boolean} Returns true if both arrays are deep equal
+     */
+    function _deepEqual(x: unknown, y: unknown): boolean {
+      if (Array.isArray(x)) {
+        if (Array.isArray(y)) {
+          const len = x.length
+          if (len !== y.length) {
             return false
           }
-        }
 
-        return true
+          for (let i = 0; i < len; i++) {
+            if (!_deepEqual(x[i], y[i])) {
+              return false
+            }
+          }
+
+          return true
+        } else {
+          return false
+        }
       } else {
-        return false
-      }
-    } else {
-      if (Array.isArray(y)) {
-        return false
-      } else {
-        return equal(x, y)
+        if (Array.isArray(y)) {
+          return false
+        } else {
+          return equal(x, y) as boolean
+        }
       }
     }
   }
-})
+)

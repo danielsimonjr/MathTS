@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
 
+// Sparse matrix internal structure
+interface SparseMatrixData {
+  _size: number[]
+  _values?: any[]
+  _index: number[]
+  _ptr: number[]
+}
+
 /**
  * Computes the elimination tree of Matrix A (using triu(A)) or the
  * elimination tree of A'A without forming A'A.
@@ -9,9 +17,14 @@
  * @param {Matrix}  a               The A Matrix
  * @param {boolean} ata             A value of true the function computes the etree of A'A
  */
-export function csEtree (a: any, ata: boolean): number[] | null {
+export function csEtree(
+  a: SparseMatrixData | null,
+  ata: boolean
+): number[] | null {
   // check inputs
-  if (!a) { return null }
+  if (!a) {
+    return null
+  }
   // a arrays
   const aindex = a._index
   const aptr = a._ptr
@@ -33,7 +46,9 @@ export function csEtree (a: any, ata: boolean): number[] | null {
   // check we are calculating A'A
   if (ata) {
     // initialize workspace
-    for (i = 0; i < m; i++) { w[prev + i] = -1 }
+    for (i = 0; i < m; i++) {
+      w[prev + i] = -1
+    }
   }
   // loop columns
   for (let k = 0; k < n; k++) {
@@ -46,7 +61,7 @@ export function csEtree (a: any, ata: boolean): number[] | null {
       // row
       const r = aindex[p]
       // node
-      i = ata ? (w[prev + r]) : r
+      i = ata ? w[prev + r] : r
       // traverse from i to k
       for (; i !== -1 && i < k; i = inext) {
         // inext = ancestor of i
@@ -54,9 +69,13 @@ export function csEtree (a: any, ata: boolean): number[] | null {
         // path compression
         w[ancestor + i] = k
         // check no anc., parent is k
-        if (inext === -1) { parent[i] = k }
+        if (inext === -1) {
+          parent[i] = k
+        }
       }
-      if (ata) { w[prev + r] = k }
+      if (ata) {
+        w[prev + r] = k
+      }
     }
   }
   return parent

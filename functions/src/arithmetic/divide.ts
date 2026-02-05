@@ -1,21 +1,12 @@
-import { factory } from '../../utils/factory.js'
-import { extend } from '../../utils/object.js'
-import { createMatAlgo11xS0s } from '../../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatAlgo14xDs } from '../../type/matrix/utils/matAlgo14xDs.js'
+import { factory } from '../utils/factory.js'
+import { extend } from '../utils/object.js'
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
+import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js'
 
 // Type definitions
 interface TypedFunction<T = any> {
   (...args: any[]): T
   signatures?: Record<string, Function>
-}
-
-interface MatrixData {
-  data?: any[] | any[][]
-  values?: any[]
-  index?: number[]
-  ptr?: number[]
-  size: number[]
-  datatype?: string
 }
 
 interface DenseMatrix {
@@ -44,6 +35,16 @@ interface MatrixConstructor {
   (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix
 }
 
+interface NodeOperations {
+  createBinaryNode: (
+    op: string,
+    fn: string,
+    left: unknown,
+    right: unknown
+  ) => unknown
+  hasNodeArg: (...args: unknown[]) => boolean
+}
+
 interface Dependencies {
   typed: TypedFunction
   matrix: MatrixConstructor
@@ -51,6 +52,7 @@ interface Dependencies {
   equalScalar: TypedFunction
   divideScalar: TypedFunction
   inv: TypedFunction
+  nodeOperations: NodeOperations
 }
 
 const name = 'divide'
@@ -60,70 +62,153 @@ const dependencies = [
   'multiply',
   'equalScalar',
   'divideScalar',
-  'inv'
+  'inv',
+  'nodeOperations'
 ]
 
-export const createDivide = /* #__PURE__ */ factory(name, dependencies, ({ typed, matrix, multiply, equalScalar, divideScalar, inv }: Dependencies) => {
-  const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
-  const matAlgo14xDs = createMatAlgo14xDs({ typed })
+export const createDivide = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  ({
+    typed,
+    matrix,
+    multiply,
+    equalScalar,
+    divideScalar,
+    inv,
+    nodeOperations
+  }: Dependencies) => {
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
+    const matAlgo14xDs = createMatAlgo14xDs({ typed })
 
-  /**
-   * Divide two values, `x / y`.
-   * To divide matrices, `x` is multiplied with the inverse of `y`: `x * inv(y)`.
-   *
-   * Syntax:
-   *
-   *    math.divide(x, y)
-   *
-   * Examples:
-   *
-   *    math.divide(2, 3)            // returns number 0.6666666666666666
-   *
-   *    const a = math.complex(5, 14)
-   *    const b = math.complex(4, 1)
-   *    math.divide(a, b)            // returns Complex 2 + 3i
-   *
-   *    const c = [[7, -6], [13, -4]]
-   *    const d = [[1, 2], [4, 3]]
-   *    math.divide(c, d)            // returns Array [[-9, 4], [-11, 6]]
-   *
-   *    const e = math.unit('18 km')
-   *    math.divide(e, 4.5)          // returns Unit 4 km
-   *
-   * See also:
-   *
-   *    multiply
-   *
-   * @param  {number | BigNumber | bigint | Fraction | Complex | Unit | Array | Matrix} x   Numerator
-   * @param  {number | BigNumber | bigint | Fraction | Complex | Array | Matrix} y          Denominator
-   * @return {number | BigNumber | bigint | Fraction | Complex | Unit | Array | Matrix}                      Quotient, `x / y`
-   */
-  return typed('divide', extend({
-    // we extend the signatures of divideScalar with signatures dealing with matrices
+    /**
+     * Divide two values, `x / y`.
+     * To divide matrices, `x` is multiplied with the inverse of `y`: `x * inv(y)`.
+     *
+     * Syntax:
+     *
+     *    math.divide(x, y)
+     *
+     * Examples:
+     *
+     *    math.divide(2, 3)            // returns number 0.6666666666666666
+     *
+     *    const a = math.complex(5, 14)
+     *    const b = math.complex(4, 1)
+     *    math.divide(a, b)            // returns Complex 2 + 3i
+     *
+     *    const c = [[7, -6], [13, -4]]
+     *    const d = [[1, 2], [4, 3]]
+     *    math.divide(c, d)            // returns Array [[-9, 4], [-11, 6]]
+     *
+     *    const e = math.unit('18 km')
+     *    math.divide(e, 4.5)          // returns Unit 4 km
+     *
+     * See also:
+     *
+     *    multiply
+     *
+     * @param  {number | BigNumber | bigint | Fraction | Complex | Unit | Array | Matrix} x   Numerator
+     * @param  {number | BigNumber | bigint | Fraction | Complex | Array | Matrix} y          Denominator
+     * @return {number | BigNumber | bigint | Fraction | Complex | Unit | Array | Matrix}                      Quotient, `x / y`
+     */
+    return typed(
+      'divide',
+      extend(
+        {
+          // =========================================================================
+          // NODE SIGNATURES - Must be FIRST (before divideScalar signatures)
+          // When any operand is a Node, return an OperatorNode for symbolic computation
+          // =========================================================================
 
-    'Array | Matrix, Array | Matrix': function (x: any[] | Matrix, y: any[] | Matrix): any[] | Matrix {
-      // TODO: implement matrix right division using pseudo inverse
-      // https://www.mathworks.nl/help/matlab/ref/mrdivide.html
-      // https://www.gnu.org/software/octave/doc/interpreter/Arithmetic-Ops.html
-      // https://stackoverflow.com/questions/12263932/how-does-gnu-octave-matrix-division-work-getting-unexpected-behaviour
-      return multiply(x, inv(y))
-    },
+          'Node, Node': (x: unknown, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
 
-    'DenseMatrix, any': function (x: DenseMatrix, y: any): DenseMatrix {
-      return matAlgo14xDs(x as any, y, divideScalar, false) as unknown as DenseMatrix
-    },
+          'number, Node': (x: number, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
+          'Node, number': (x: unknown, y: number) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
 
-    'SparseMatrix, any': function (x: SparseMatrix, y: any): SparseMatrix {
-      return matAlgo11xS0s(x as any, y, divideScalar, false) as unknown as SparseMatrix
-    },
+          'BigNumber, Node': (x: unknown, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
+          'Node, BigNumber': (x: unknown, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
 
-    'Array, any': function (x: any[], y: any): any[] {
-      // use matrix implementation
-      return matAlgo14xDs(matrix(x) as any, y, divideScalar, false).valueOf() as any[]
-    },
+          'Complex, Node': (x: unknown, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
+          'Node, Complex': (x: unknown, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
 
-    'any, Array | Matrix': function (x: any, y: any[] | Matrix): any[] | Matrix {
-      return multiply(x, inv(y))
-    }
-  }, divideScalar.signatures))
-})
+          'Fraction, Node': (x: unknown, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
+          'Node, Fraction': (x: unknown, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
+
+          'Unit, Node': (x: unknown, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
+          'Node, Unit': (x: unknown, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
+
+          'string, Node': (x: string, y: unknown) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
+          'Node, string': (x: unknown, y: string) =>
+            nodeOperations.createBinaryNode('/', 'divide', x, y),
+
+          // =========================================================================
+          // MATRIX SIGNATURES - Deal with matrices
+          // =========================================================================
+
+          'Array | Matrix, Array | Matrix': function (
+            x: any[] | Matrix,
+            y: any[] | Matrix
+          ): any[] | Matrix {
+            // TODO: implement matrix right division using pseudo inverse
+            // https://www.mathworks.nl/help/matlab/ref/mrdivide.html
+            // https://www.gnu.org/software/octave/doc/interpreter/Arithmetic-Ops.html
+            // https://stackoverflow.com/questions/12263932/how-does-gnu-octave-matrix-division-work-getting-unexpected-behaviour
+            return multiply(x, inv(y))
+          },
+
+          'DenseMatrix, any': function (x: DenseMatrix, y: any): DenseMatrix {
+            return matAlgo14xDs(
+              x as any,
+              y,
+              divideScalar,
+              false
+            ) as unknown as DenseMatrix
+          },
+
+          'SparseMatrix, any': function (
+            x: SparseMatrix,
+            y: any
+          ): SparseMatrix {
+            return matAlgo11xS0s(
+              x as any,
+              y,
+              divideScalar,
+              false
+            ) as unknown as SparseMatrix
+          },
+
+          'Array, any': function (x: any[], y: any): any[] {
+            // use matrix implementation
+            return matAlgo14xDs(
+              matrix(x) as any,
+              y,
+              divideScalar,
+              false
+            ).valueOf() as any[]
+          },
+
+          'any, Array | Matrix': function (
+            x: any,
+            y: any[] | Matrix
+          ): any[] | Matrix {
+            return multiply(x, inv(y))
+          }
+        },
+        divideScalar.signatures
+      )
+    )
+  }
+)

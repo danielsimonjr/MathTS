@@ -1,18 +1,21 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
+import type { TypedFunction } from '../core/function/typed.js'
 
-// Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T
+// Type definitions for hex formatting
+interface BigNumberType {
+  // BigNumber placeholder
 }
+
+type NumericValue = number | bigint | BigNumberType
 
 interface FormatOptions {
   notation: string
   wordSize?: number | bigint
 }
 
-interface Dependencies {
+interface HexDependencies {
   typed: TypedFunction
-  format: (value: any, options: FormatOptions) => string
+  format: (value: NumericValue, options: FormatOptions) => string
 }
 
 const name = 'hex'
@@ -38,13 +41,20 @@ const dependencies = ['typed', 'format']
  * @param {number | BigNumber} wordSize Optional word size (see `format`)
  * @return {string}         The formatted value
  */
-export const createHex = /* #__PURE__ */ factory(name, dependencies, ({ typed, format }: Dependencies): TypedFunction => {
-  return typed(name, {
-    'number | BigNumber': function (n: number | bigint): string {
-      return format(n, { notation: 'hex' })
-    },
-    'number | BigNumber, number | BigNumber': function (n: number | bigint, wordSize: number | bigint): string {
-      return format(n, { notation: 'hex', wordSize })
-    }
-  })
-})
+export const createHex = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  ({ typed, format }: HexDependencies) => {
+    return typed(name, {
+      'number | BigNumber': function (n: number | bigint): string {
+        return format(n, { notation: 'hex' })
+      },
+      'number | BigNumber, number | BigNumber': function (
+        n: number | bigint,
+        wordSize: number | bigint
+      ): string {
+        return format(n, { notation: 'hex', wordSize })
+      }
+    })
+  }
+)

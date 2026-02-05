@@ -1,18 +1,21 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
+import type { TypedFunction } from '../core/function/typed.js'
 
-// Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T
+// Type definitions for oct formatting
+interface BigNumberType {
+  // BigNumber placeholder
 }
+
+type NumericValue = number | bigint | BigNumberType
 
 interface FormatOptions {
   notation: string
   wordSize?: number | bigint
 }
 
-interface Dependencies {
+interface OctDependencies {
   typed: TypedFunction
-  format: (value: any, options: FormatOptions) => string
+  format: (value: NumericValue, options: FormatOptions) => string
 }
 
 const name = 'oct'
@@ -40,13 +43,20 @@ const dependencies = ['typed', 'format']
  * @return {string}         The formatted value
  */
 
-export const createOct = /* #__PURE__ */ factory(name, dependencies, ({ typed, format }: Dependencies): TypedFunction => {
-  return typed(name, {
-    'number | BigNumber': function (n: number | bigint): string {
-      return format(n, { notation: 'oct' })
-    },
-    'number | BigNumber, number | BigNumber': function (n: number | bigint, wordSize: number | bigint): string {
-      return format(n, { notation: 'oct', wordSize })
-    }
-  })
-})
+export const createOct = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  ({ typed, format }: OctDependencies) => {
+    return typed(name, {
+      'number | BigNumber': function (n: number | bigint): string {
+        return format(n, { notation: 'oct' })
+      },
+      'number | BigNumber, number | BigNumber': function (
+        n: number | bigint,
+        wordSize: number | bigint
+      ): string {
+        return format(n, { notation: 'oct', wordSize })
+      }
+    })
+  }
+)

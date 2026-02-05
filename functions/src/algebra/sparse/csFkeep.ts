@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
 
+// Sparse matrix internal structure
+interface SparseMatrixData {
+  _size: number[]
+  _values?: any[]
+  _index: number[]
+  _ptr: number[]
+}
+
 /**
  * Keeps entries in the matrix when the callback function returns true, removes the entry otherwise
  *
@@ -15,10 +23,10 @@
  *
  * @return                          The number of nonzero elements in the matrix
  */
-export function csFkeep<T> (
-  a: any,
-  callback: (row: number, col: number, value: T, state: any) => boolean,
-  other: any
+export function csFkeep<T, S = unknown>(
+  a: SparseMatrixData,
+  callback: (row: number, col: number, value: T, state: S) => boolean,
+  other: S
 ): number {
   // a arrays
   const avalues = a._values
@@ -41,7 +49,9 @@ export function csFkeep<T> (
         // keep A(i,j)
         aindex[nz] = aindex[p]
         // check we need to process values (pattern only)
-        if (avalues) { avalues[nz] = avalues[p] }
+        if (avalues) {
+          avalues[nz] = avalues[p]
+        }
         // increment nonzero items
         nz++
       }
@@ -52,7 +62,9 @@ export function csFkeep<T> (
   // trim arrays
   aindex.splice(nz, aindex.length - nz)
   // check we need to process values (pattern only)
-  if (avalues) { avalues.splice(nz, avalues.length - nz) }
+  if (avalues) {
+    avalues.splice(nz, avalues.length - nz)
+  }
   // return number of nonzero items
   return nz
 }

@@ -6,6 +6,14 @@ import { csMarked } from './csMarked.js'
 import { csMark } from './csMark.js'
 import { csDfs } from './csDfs.js'
 
+// Sparse matrix internal structure
+interface SparseMatrixData {
+  _size: number[]
+  _values?: any[]
+  _index: number[]
+  _ptr: number[]
+}
+
 /**
  * The csReach function computes X = Reach(B), where B is the nonzero pattern of the n-by-1
  * sparse column of vector b. The function returns the set of nodes reachable from any node in B. The
@@ -20,7 +28,13 @@ import { csDfs } from './csDfs.js'
  *
  * @return {Number}                 The index for the nonzero pattern
  */
-export function csReach (g: any, b: any, k: number, xi: number[], pinv: number[] | null): number {
+export function csReach(
+  g: SparseMatrixData,
+  b: SparseMatrixData,
+  k: number,
+  xi: number[],
+  pinv: number[] | null
+): number {
   // g arrays
   const gptr = g._ptr
   const gsize = g._size

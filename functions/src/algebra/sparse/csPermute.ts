@@ -2,6 +2,22 @@
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
 
+// Sparse matrix internal structure
+interface SparseMatrixData {
+  _size: number[]
+  _values?: any[]
+  _index: number[]
+  _ptr: number[]
+  _datatype?: string
+  createSparseMatrix(data: {
+    values: any[] | null
+    index: number[]
+    ptr: number[]
+    size: number[]
+    datatype?: string
+  }): SparseMatrixData
+}
+
 /**
  * Permutes a sparse matrix C = P * A * Q
  *
@@ -12,7 +28,12 @@
  *
  * @return {Matrix}                 C = P * A * Q, null on error
  */
-export function csPermute (a: any, pinv: number[] | null, q: number[] | null, values: boolean): any {
+export function csPermute(
+  a: SparseMatrixData,
+  pinv: number[] | null,
+  q: number[] | null,
+  values: boolean
+): SparseMatrixData {
   // a arrays
   const avalues = a._values
   const aindex = a._index
@@ -33,7 +54,7 @@ export function csPermute (a: any, pinv: number[] | null, q: number[] | null, va
     // column k of C is column q[k] of A
     cptr[k] = nz
     // apply column permutation
-    const j = q ? (q[k]) : k
+    const j = q ? q[k] : k
     // loop values in column j of A
     for (let t0 = aptr[j], t1 = aptr[j + 1], t = t0; t < t1; t++) {
       // row i of A is row pinv[i] of C
@@ -41,7 +62,9 @@ export function csPermute (a: any, pinv: number[] | null, q: number[] | null, va
       // index
       cindex[nz] = r
       // check we need to populate values
-      if (cvalues) { cvalues[nz] = avalues[t] }
+      if (cvalues) {
+        cvalues[nz] = avalues[t]
+      }
       // increment number of nonzero elements
       nz++
     }

@@ -1,77 +1,122 @@
-import { factory } from '../../utils/factory.js'
-import { isInteger } from '../../utils/number.js'
+import { factory } from '../utils/factory.js'
+import { isInteger } from '../utils/number.js'
+import type { TypedFunction } from '../core/function/typed.js'
+import type { ConfigOptions } from '../core/config.js'
 
-import { TypedFunction } from '../../types.js';
+// Type definitions for bernoulli
+
+// Cache entry type: [cotangent coefficient, prefactor, Bernoulli number]
+type CacheEntry<T> = [T, T, T] | undefined
+
+interface BigNumberConstructor {
+  new (value: number): unknown
+}
+
+interface FractionConstructor {
+  new (value: number): unknown
+}
+
+interface BernoulliDependencies {
+  typed: TypedFunction
+  config: ConfigOptions
+  isInteger: (value: unknown) => boolean
+  number: (value: unknown) => number
+  BigNumber?: BigNumberConstructor
+  Fraction?: FractionConstructor
+}
 
 const name = 'bernoulli'
 const dependencies = [
-  'typed', 'config', 'isInteger', 'number', '?BigNumber', '?Fraction'
+  'typed',
+  'config',
+  'isInteger',
+  'number',
+  '?BigNumber',
+  '?Fraction'
 ]
 
-export const createBernoulli = /* #__PURE__ */ factory(name, dependencies, (
-  {
+export const createBernoulli = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  ({
     typed,
     config,
+    isInteger: _isInteger,
     number,
     BigNumber,
     Fraction
-  }: {
-    typed: TypedFunction;
-    config: any;
-    number: any;
-    BigNumber: any;
-    Fraction: any;
-  }
-): TypedFunction => {
-  /**
-   * Return the `n`th Bernoulli number, for positive integers `n`
-   *
-   * Syntax:
-   *
-   *     math.bernoulli(n)
-   *
-   * Examples:
-   *
-   *     math.bernoulli(1)                  // returns -0.5
-   *     // All other odd Bernoulli numbers are 0:
-   *     math.bernoulli(7)                  // returns 0
-   *     math.bernoulli(math.bignumber(6))  // value bignumber(1).div(42)
-   *     // Produces exact rationals for bigint or fraction input:
-   *     math.bernoulli(8n)                 // Fraction -1,30
-   *     math.bernoulli(math.fraction(10))  // Fraction 5,66
-   *
-   * See also:
-   *
-   *     combinations, gamma, stirlingS2
-   *
-   * @param {number | BigNumber | bigint | Fraction} n
-   *    Index of the Bernoulli number
-   * @return {number | BigNumber | Fraction}
-   *    nth Bernoulli number, of a type corresponding to the argument n
-   */
+  }: BernoulliDependencies) => {
+    /**
+     * Return the `n`th Bernoulli number, for positive integers `n`
+     *
+     * Syntax:
+     *
+     *     math.bernoulli(n)
+     *
+     * Examples:
+     *
+     *     math.bernoulli(1)                  // returns -0.5
+     *     // All other odd Bernoulli numbers are 0:
+     *     math.bernoulli(7)                  // returns 0
+     *     math.bernoulli(math.bignumber(6))  // value bignumber(1).div(42)
+     *     // Produces exact rationals for bigint or fraction input:
+     *     math.bernoulli(8n)                 // Fraction -1,30
+     *     math.bernoulli(math.fraction(10))  // Fraction 5,66
+     *
+     * See also:
+     *
+     *     combinations, gamma, stirlingS2
+     *
+     * @param {number | BigNumber | bigint | Fraction} n
+     *    Index of the Bernoulli number
+     * @return {number | BigNumber | Fraction}
+     *    nth Bernoulli number, of a type corresponding to the argument n
+     */
 
-  const numberCache: any[] = [undefined]
-  const fractionCache: any[] = [undefined]
-  let bigCache: any[] = [undefined]
-  let cachedPrecision = 50
-  return typed(name, {
-    number: (index: number) => _bernoulli(
-      index, (n: any) => n, numberCache,
-      (a: any, b: any) => a + b, (a: any, b: any) => a * b, (a: any, b: any) => a / b),
-    'bigint | Fraction': (index: bigint | any) => _bernoulli(
-      number(index), (n: any) => new Fraction(n), fractionCache,
-      (a: any, b: any) => a.add(b), (a: any, b: any) => a.mul(b), (a: any, b: any) => a.div(b)),
-    BigNumber: (index: any) => {
-      if (config.precision !== cachedPrecision) {
-        bigCache = [undefined]
-        cachedPrecision = config.precision
+    const numberCache: CacheEntry<number>[] = [undefined]
+    const fractionCache: CacheEntry<unknown>[] = [undefined]
+    let bigCache: CacheEntry<unknown>[] = [undefined]
+    let cachedPrecision = 50
+    return typed(name, {
+      number: (index: number): number =>
+        _bernoulli<number>(
+          index,
+          (n: number) => n,
+          numberCache,
+          (a: number, b: number) => a + b,
+          (a: number, b: number) => a * b,
+          (a: number, b: number) => a / b
+        ),
+      'bigint | Fraction': (index: bigint | unknown): unknown =>
+        _bernoulli<unknown>(
+          number(index),
+          (n: number) => new (Fraction as FractionConstructor)(n),
+          fractionCache,
+          (a: unknown, b: unknown) =>
+            (a as { add(b: unknown): unknown }).add(b),
+          (a: unknown, b: unknown) =>
+            (a as { mul(b: unknown): unknown }).mul(b),
+          (a: unknown, b: unknown) => (a as { div(b: unknown): unknown }).div(b)
+        ),
+      BigNumber: (index: unknown): unknown => {
+        if (config.precision !== cachedPrecision) {
+          bigCache = [undefined]
+          cachedPrecision = config.precision
+        }
+        return _bernoulli<unknown>(
+          number(index),
+          (n: number) => new (BigNumber as BigNumberConstructor)(n),
+          bigCache,
+          (a: unknown, b: unknown) =>
+            (a as { add(b: unknown): unknown }).add(b),
+          (a: unknown, b: unknown) =>
+            (a as { mul(b: unknown): unknown }).mul(b),
+          (a: unknown, b: unknown) => (a as { div(b: unknown): unknown }).div(b)
+        )
       }
-      return _bernoulli(
-        number(index), (n: any) => new BigNumber(n), bigCache,
-        (a: any, b: any) => a.add(b), (a: any, b: any) => a.mul(b), (a: any, b: any) => a.div(b))
-    }
-  });
-})
+    })
+  }
+)
 
 /**
  * Underlying implementation, with all operations passed in.
@@ -86,7 +131,14 @@ export const createBernoulli = /* #__PURE__ */ factory(name, dependencies, (
  * 5. times: a function that multiplies two values of the desired type.
  * 6. divide: a function that divides one value of the desired type by another.
  */
-function _bernoulli (index: any, promote: any, A: any, plus: any, times: any, divide: any) {
+function _bernoulli<T>(
+  index: number,
+  promote: (n: number) => T,
+  A: CacheEntry<T>[],
+  plus: (a: T, b: T) => T,
+  times: (a: T, b: T) => T,
+  divide: (a: T, b: T) => T
+): T {
   if (index < 0 || !isInteger(index)) {
     throw new RangeError('Bernoulli index must be nonnegative integer')
   }
@@ -113,14 +165,23 @@ function _bernoulli (index: any, promote: any, A: any, plus: any, times: any, di
     const lim = Math.floor((i + 1) / 2)
     let a = zero
     for (let m = 1; m < lim; ++m) {
-      a = plus(a, times(A[m][0], A[i - m][0]))
+      const entry_m = A[m] as [T, T, T]
+      const entry_i_m = A[i - m] as [T, T, T]
+      a = plus(a, times(entry_m[0], entry_i_m[0]))
     }
     a = times(a, two)
-    if (i % 2 === 0) a = plus(a, times(A[lim][0], A[lim][0]))
+    if (i % 2 === 0) {
+      const entry_lim = A[lim] as [T, T, T]
+      a = plus(a, times(entry_lim[0], entry_lim[0]))
+    }
     a = divide(a, promote(-(2 * i + 1)))
+    const entry_i_1 = A[i - 1] as [T, T, T]
     const prefactor = divide(
-      times(A[i - 1][1], promote(-i * (2 * i - 1))), two)
+      times(entry_i_1[1], promote(-i * (2 * i - 1))),
+      two
+    )
     A.push([a, prefactor, times(prefactor, a)])
   }
-  return A[half][2]
+  const entry_half = A[half] as [T, T, T]
+  return entry_half[2]
 }

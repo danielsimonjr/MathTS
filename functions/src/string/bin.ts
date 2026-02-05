@@ -1,18 +1,21 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
+import type { TypedFunction } from '../core/function/typed.js'
 
-// Type definitions
-interface TypedFunction<T = any> {
-  (...args: any[]): T
+// Type definitions for bin formatting
+interface BigNumberType {
+  // BigNumber placeholder
 }
+
+type NumericValue = number | bigint | BigNumberType
 
 interface FormatOptions {
   notation: string
   wordSize?: number | bigint
 }
 
-interface Dependencies {
+interface BinDependencies {
   typed: TypedFunction
-  format: (value: any, options: FormatOptions) => string
+  format: (value: NumericValue, options: FormatOptions) => string
 }
 
 const name = 'bin'
@@ -39,13 +42,20 @@ const dependencies = ['typed', 'format']
  * @param {number | BigNumber} wordSize Optional word size (see `format`)
  * @return {string}         The formatted value
  */
-export const createBin = /* #__PURE__ */ factory(name, dependencies, ({ typed, format }: Dependencies): TypedFunction => {
-  return typed(name, {
-    'number | BigNumber': function (n: number | bigint): string {
-      return format(n, { notation: 'bin' })
-    },
-    'number | BigNumber, number | BigNumber': function (n: number | bigint, wordSize: number | bigint): string {
-      return format(n, { notation: 'bin', wordSize })
-    }
-  })
-})
+export const createBin = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  ({ typed, format }: BinDependencies) => {
+    return typed(name, {
+      'number | BigNumber': function (n: number | bigint): string {
+        return format(n, { notation: 'bin' })
+      },
+      'number | BigNumber, number | BigNumber': function (
+        n: number | bigint,
+        wordSize: number | bigint
+      ): string {
+        return format(n, { notation: 'bin', wordSize })
+      }
+    })
+  }
+)
