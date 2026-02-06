@@ -215,3 +215,50 @@ Sprint JSON files are in `docs/planning/sprints/`:
 - Post-v1.0 sprints in `docs/planning/phases/`
 
 Each sprint file contains tasks, dependencies, success criteria, and files to create/modify.
+
+## Syncing from mathjs
+
+The functions package contains files synced from the mathjs fork (`~/Dropbox/Github/mathjs`):
+
+- **Active code**: `functions/src/typed/` - parallel-first implementations using `@mathts/core` and `@mathts/parallel`
+- **Synced from mathjs**: `functions/src/<category>/` - dormant factory-pattern functions (not in build entry)
+- **Support files**: `functions/src/{utils,core,plain,type,expression,error,wasm}/`
+
+### Sync Process
+
+```bash
+# Use sync script (adjusts import paths automatically)
+python scratchpad/sync_mathjs_to_mathts.py
+
+# Key transformations:
+# - ../../utils/ → ../utils/ (mathts has no intermediate function/ dir)
+# - .ts extensions → .js extensions in imports
+# - Delete legacy .js files after sync (mathts is TS-only)
+```
+
+### Import Path Difference
+
+| Project | Function location | Import to utils |
+|---------|------------------|-----------------|
+| mathjs | `src/function/arithmetic/add.ts` | `../../utils/factory.ts` |
+| mathts | `functions/src/arithmetic/add.ts` | `../utils/factory.js` |
+
+## Known Build Issues
+
+Pre-existing issues (not blocking core functionality):
+- `@types/node` missing in parallel, workbook packages → `npm i -D @types/node`
+- `assembly/` WASM build fails (asc compiler issues)
+- `expression/` and `functions/` have no test files (vitest exits with "no tests found")
+
+## Quick Commands
+
+```bash
+# Monorepo build (core packages)
+npx turbo build --filter=@mathts/core --filter=@mathts/matrix --filter=@mathts/functions --filter=@mathts/compat
+
+# Run all vitest tests from root
+npx vitest run
+
+# Typecheck functions package
+cd functions && npx tsc --noEmit
+```
