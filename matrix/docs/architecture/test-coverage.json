@@ -1,0 +1,276 @@
+{
+  "metadata": {
+    "generatedAt": "2026-02-06T03:45:31.822Z",
+    "totalSourceFiles": 36,
+    "totalTestFiles": 13,
+    "testedCount": 26,
+    "untestedCount": 10,
+    "coveragePercent": "72.2"
+  },
+  "untestedFiles": [
+    "src/backends.ts",
+    "src/backends/MatrixWasmBridge.ts",
+    "src/backends/WasmLoader.ts",
+    "src/config.ts",
+    "src/dense-matrix.ts",
+    "src/matrix.ts",
+    "src/operations/index.ts",
+    "src/sparse-matrix.ts",
+    "src/types.ts",
+    "src/types/parallel.d.ts"
+  ],
+  "testedFiles": [
+    "src/backends/Backend.ts",
+    "src/backends/BackendManager.ts",
+    "src/backends/GPUBackend.ts",
+    "src/backends/GPUMatrixBackend.ts",
+    "src/backends/JSBackend.ts",
+    "src/backends/ParallelBackend.ts",
+    "src/backends/WASMBackend.ts",
+    "src/backends/gpu/BatchExecutor.ts",
+    "src/backends/gpu/BufferPool.ts",
+    "src/backends/gpu/GPUContext.ts",
+    "src/backends/gpu/ShaderManager.ts",
+    "src/backends/gpu/Sync.ts",
+    "src/backends/gpu/detect.ts",
+    "src/backends/gpu/index.ts",
+    "src/backends/index.ts",
+    "src/backends/wasm/detect.ts",
+    "src/backends/wasm/index.ts",
+    "src/index.ts",
+    "src/operations/eig.ts",
+    "src/operations/svd.ts",
+    "src/parallel-matrix.ts",
+    "src/typed-operations.ts",
+    "src/types/DenseMatrix.ts",
+    "src/types/Matrix.ts",
+    "src/types/SparseMatrix.ts",
+    "src/types/index.ts"
+  ],
+  "coverageMap": {
+    "src/backends/Backend.ts": [
+      "tests/JSBackend.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/BackendManager.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/gpu/BatchExecutor.ts": [
+      "tests/gpu/integration.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/gpu/BufferPool.ts": [
+      "tests/gpu/initialization.test.ts",
+      "tests/gpu/integration.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/gpu/detect.ts": [
+      "tests/gpu/initialization.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/gpu/GPUContext.ts": [
+      "tests/gpu/initialization.test.ts",
+      "tests/gpu/integration.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/gpu/index.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/gpu/ShaderManager.ts": [
+      "tests/gpu/initialization.test.ts",
+      "tests/gpu/integration.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/gpu/Sync.ts": [
+      "tests/gpu/integration.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/GPUBackend.ts": [
+      "tests/gpu/initialization.test.ts",
+      "tests/gpu/operations.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/GPUMatrixBackend.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/index.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/JSBackend.ts": [
+      "tests/JSBackend.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts",
+      "tests/wasm/operations.test.ts"
+    ],
+    "src/backends/MatrixWasmBridge.ts": [],
+    "src/backends/ParallelBackend.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/wasm/detect.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/wasm/index.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/WASMBackend.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/accuracy.test.ts",
+      "tests/wasm/loading.test.ts",
+      "tests/wasm/operations.test.ts"
+    ],
+    "src/backends/WasmLoader.ts": [],
+    "src/backends.ts": [],
+    "src/config.ts": [],
+    "src/dense-matrix.ts": [],
+    "src/index.ts": [
+      "tests/typed-operations.test.ts"
+    ],
+    "src/matrix.ts": [],
+    "src/operations/eig.ts": [
+      "tests/decomposition/eig.test.ts"
+    ],
+    "src/operations/index.ts": [],
+    "src/operations/svd.ts": [
+      "tests/decomposition/svd.test.ts"
+    ],
+    "src/parallel-matrix.ts": [
+      "tests/typed-operations.test.ts"
+    ],
+    "src/sparse-matrix.ts": [],
+    "src/typed-operations.ts": [
+      "tests/typed-operations.test.ts"
+    ],
+    "src/types/DenseMatrix.ts": [
+      "tests/DenseMatrix.test.ts",
+      "tests/JSBackend.test.ts",
+      "tests/sparse/operations.test.ts",
+      "tests/sparse/SparseMatrix.test.ts",
+      "tests/typed-operations.test.ts",
+      "tests/wasm/accuracy.test.ts",
+      "tests/wasm/operations.test.ts"
+    ],
+    "src/types/index.ts": [
+      "tests/typed-operations.test.ts"
+    ],
+    "src/types/Matrix.ts": [
+      "tests/typed-operations.test.ts"
+    ],
+    "src/types/parallel.d.ts": [],
+    "src/types/SparseMatrix.ts": [
+      "tests/sparse/operations.test.ts",
+      "tests/sparse/SparseMatrix.test.ts",
+      "tests/typed-operations.test.ts"
+    ],
+    "src/types.ts": []
+  },
+  "testToSourceMap": {
+    "tests/decomposition/eig.test.ts": [
+      "src/operations/eig.ts"
+    ],
+    "tests/decomposition/svd.test.ts": [
+      "src/operations/svd.ts"
+    ],
+    "tests/DenseMatrix.test.ts": [
+      "src/types/DenseMatrix.ts"
+    ],
+    "tests/gpu/initialization.test.ts": [
+      "src/backends/gpu/detect.ts",
+      "src/backends/gpu/GPUContext.ts",
+      "src/backends/gpu/BufferPool.ts",
+      "src/backends/gpu/ShaderManager.ts",
+      "src/backends/GPUBackend.ts"
+    ],
+    "tests/gpu/integration.test.ts": [
+      "src/backends/gpu/GPUContext.ts",
+      "src/backends/gpu/BufferPool.ts",
+      "src/backends/gpu/ShaderManager.ts",
+      "src/backends/gpu/BatchExecutor.ts",
+      "src/backends/gpu/Sync.ts"
+    ],
+    "tests/gpu/operations.test.ts": [
+      "src/backends/GPUBackend.ts"
+    ],
+    "tests/JSBackend.test.ts": [
+      "src/backends/JSBackend.ts",
+      "src/types/DenseMatrix.ts",
+      "src/backends/Backend.ts"
+    ],
+    "tests/sparse/operations.test.ts": [
+      "src/types/SparseMatrix.ts",
+      "src/types/DenseMatrix.ts"
+    ],
+    "tests/sparse/SparseMatrix.test.ts": [
+      "src/types/SparseMatrix.ts",
+      "src/types/DenseMatrix.ts"
+    ],
+    "tests/typed-operations.test.ts": [
+      "src/index.ts",
+      "src/types/index.ts",
+      "src/backends/index.ts",
+      "src/typed-operations.ts",
+      "src/parallel-matrix.ts",
+      "src/types/Matrix.ts",
+      "src/types/DenseMatrix.ts",
+      "src/types/SparseMatrix.ts",
+      "src/backends/Backend.ts",
+      "src/backends/JSBackend.ts",
+      "src/backends/ParallelBackend.ts",
+      "src/backends/WASMBackend.ts",
+      "src/backends/GPUMatrixBackend.ts",
+      "src/backends/GPUBackend.ts",
+      "src/backends/BackendManager.ts",
+      "src/backends/wasm/index.ts",
+      "src/backends/gpu/index.ts",
+      "src/backends/wasm/detect.ts",
+      "src/backends/gpu/detect.ts",
+      "src/backends/gpu/GPUContext.ts",
+      "src/backends/gpu/BufferPool.ts",
+      "src/backends/gpu/ShaderManager.ts",
+      "src/backends/gpu/BatchExecutor.ts",
+      "src/backends/gpu/Sync.ts"
+    ],
+    "tests/wasm/accuracy.test.ts": [
+      "src/types/DenseMatrix.ts",
+      "src/backends/WASMBackend.ts"
+    ],
+    "tests/wasm/loading.test.ts": [
+      "src/backends/index.ts",
+      "src/backends/Backend.ts",
+      "src/backends/JSBackend.ts",
+      "src/backends/ParallelBackend.ts",
+      "src/backends/WASMBackend.ts",
+      "src/backends/GPUMatrixBackend.ts",
+      "src/backends/GPUBackend.ts",
+      "src/backends/BackendManager.ts",
+      "src/backends/wasm/index.ts",
+      "src/backends/gpu/index.ts",
+      "src/backends/wasm/detect.ts",
+      "src/backends/gpu/detect.ts",
+      "src/backends/gpu/GPUContext.ts",
+      "src/backends/gpu/BufferPool.ts",
+      "src/backends/gpu/ShaderManager.ts",
+      "src/backends/gpu/BatchExecutor.ts",
+      "src/backends/gpu/Sync.ts"
+    ],
+    "tests/wasm/operations.test.ts": [
+      "src/types/DenseMatrix.ts",
+      "src/backends/JSBackend.ts",
+      "src/backends/WASMBackend.ts"
+    ]
+  }
+}

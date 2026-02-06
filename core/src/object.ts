@@ -1,4 +1,5 @@
 import { isBigNumber, isObject, BigNumber } from './is.js'
+import { hasOwnProperty } from './shared.js'
 
 /**
  * Clone an object
@@ -281,14 +282,8 @@ export function traverse(object: Record<string, any>, path: string | string[]): 
   return obj
 }
 
-/**
- * A safe hasOwnProperty
- * @param {Object} object
- * @param {string} property
- */
-export function hasOwnProperty(object: any, property: string): boolean {
-  return object && Object.hasOwnProperty.call(object, property)
-}
+// Re-export hasOwnProperty for backward compatibility
+export { hasOwnProperty }
 
 /**
  * Test whether an object is a factory. a factory has fields:

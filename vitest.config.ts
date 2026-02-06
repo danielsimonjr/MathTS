@@ -12,11 +12,53 @@ export default defineConfig({
       'functions/tests/**/*.test.ts',
       'parallel/tests/**/*.test.ts',
       'expression/tests/**/*.test.ts',
+      'workbook/tests/**/*.test.ts',
+      'compat/tests/**/*.test.ts',
       'tests/integration/**/*.test.ts',
     ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      include: [
+        // Core - active modules only
+        'core/src/config.ts',
+        'core/src/shared.ts',
+        'core/src/utils.ts',
+        'core/src/factory/**',
+        'core/src/typed/**',
+        'core/src/types/complex.ts',
+        'core/src/types/fraction.ts',
+        'core/src/types/bignumber.ts',
+        // Matrix - active modules
+        'matrix/src/DenseMatrix.ts',
+        'matrix/src/SparseMatrix.ts',
+        'matrix/src/types.ts',
+        'matrix/src/config.ts',
+        'matrix/src/backends/JSBackend.ts',
+        'matrix/src/backends/Backend.ts',
+        'matrix/src/backends/BackendManager.ts',
+        'matrix/src/backends/WASMBackend.ts',
+        'matrix/src/backends/WasmLoader.ts',
+        'matrix/src/backends/wasm/**',
+        'matrix/src/decomposition/**',
+        'matrix/src/operations/**',
+        // Functions - active typed functions only
+        'functions/src/typed/**',
+        // Parallel - testable modules
+        'parallel/src/ComputePool.ts',
+        'parallel/src/ParallelMatrix.ts',
+        'parallel/src/operations/elementwise.ts',
+        'parallel/src/operations/matmul.ts',
+        'parallel/src/operations/reduce.ts',
+        'parallel/src/strategies/**',
+        // Workbook - testable modules
+        'workbook/src/parser.ts',
+        'workbook/src/graph.ts',
+        'workbook/src/executor.ts',
+        'workbook/src/types.ts',
+        // Compat - all active
+        'compat/src/**',
+      ],
       exclude: [
         'node_modules/',
         'dist/',

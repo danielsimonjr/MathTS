@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "generatedAt": "2026-02-06T03:46:07.623Z",
+    "totalSourceFiles": 14,
+    "totalTestFiles": 5,
+    "testedCount": 5,
+    "untestedCount": 9,
+    "coveragePercent": "35.7"
+  },
+  "untestedFiles": [
+    "src/ParallelMatrix.ts",
+    "src/WorkerPool.ts",
+    "src/index.ts",
+    "src/matrix.worker.ts",
+    "src/operations/index.ts",
+    "src/operations/map.ts",
+    "src/operations/reduce.ts",
+    "src/strategies/index.ts",
+    "src/workers/compute.worker.ts"
+  ],
+  "testedFiles": [
+    "src/ComputePool.ts",
+    "src/operations/elementwise.ts",
+    "src/operations/matmul.ts",
+    "src/strategies/chunk.ts",
+    "src/strategies/threshold.ts"
+  ],
+  "coverageMap": {
+    "src/ComputePool.ts": [
+      "tests/ComputePool.test.ts",
+      "tests/operations/elementwise.test.ts",
+      "tests/operations/matmul.test.ts",
+      "tests/operations/threshold.test.ts"
+    ],
+    "src/index.ts": [],
+    "src/matrix.worker.ts": [],
+    "src/operations/elementwise.ts": [
+      "tests/operations/elementwise.test.ts"
+    ],
+    "src/operations/index.ts": [],
+    "src/operations/map.ts": [],
+    "src/operations/matmul.ts": [
+      "tests/operations/matmul.test.ts"
+    ],
+    "src/operations/reduce.ts": [],
+    "src/ParallelMatrix.ts": [],
+    "src/strategies/chunk.ts": [
+      "tests/chunk.test.ts"
+    ],
+    "src/strategies/index.ts": [],
+    "src/strategies/threshold.ts": [
+      "tests/operations/threshold.test.ts"
+    ],
+    "src/WorkerPool.ts": [],
+    "src/workers/compute.worker.ts": []
+  },
+  "testToSourceMap": {
+    "tests/chunk.test.ts": [
+      "src/strategies/chunk.ts"
+    ],
+    "tests/ComputePool.test.ts": [
+      "src/ComputePool.ts"
+    ],
+    "tests/operations/elementwise.test.ts": [
+      "src/operations/elementwise.ts",
+      "src/ComputePool.ts"
+    ],
+    "tests/operations/matmul.test.ts": [
+      "src/operations/matmul.ts",
+      "src/ComputePool.ts"
+    ],
+    "tests/operations/threshold.test.ts": [
+      "src/strategies/threshold.ts",
+      "src/ComputePool.ts"
+    ]
+  }
+}

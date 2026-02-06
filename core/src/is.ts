@@ -12,7 +12,6 @@
 //   for security reasons, so these functions are not exposed in the expression
 //   parser.
 
-import { ObjectWrappingMap } from './map.js'
 
 // Type interfaces for math.js types
 export interface BigNumber {
@@ -298,7 +297,6 @@ export function isMap(object: unknown): object is Map<any, any> {
     return false
   }
   return object instanceof Map ||
-    object instanceof ObjectWrappingMap ||
     (
       typeof (object as any).set === 'function' &&
       typeof (object as any).get === 'function' &&
@@ -311,8 +309,10 @@ export function isPartitionedMap(object: unknown): object is PartitionedMap {
   return isMap(object) && isMap((object as any).a) && isMap((object as any).b)
 }
 
-export function isObjectWrappingMap(object: unknown): object is ObjectWrappingMap {
-  return isMap(object) && isObject((object as any).wrappedObject)
+export function isObjectWrappingMap(object: unknown): boolean {
+  if (\!isMap(object)) return false
+  const wrapper = object as { wrappedObject?: unknown, [Symbol.toStringTag]?: string }
+  return wrapper[Symbol.toStringTag] === 'ObjectWrappingMap' && isObject(wrapper.wrappedObject)
 }
 
 export function isNull(x: unknown): x is null {

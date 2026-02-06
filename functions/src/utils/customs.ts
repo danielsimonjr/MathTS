@@ -1,4 +1,4 @@
-import { hasOwnProperty } from './object.ts'
+import { hasOwnProperty } from './shared.ts'
 
 /**
  * Get a property of a plain object

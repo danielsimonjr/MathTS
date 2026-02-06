@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "generatedAt": "2026-02-06T03:46:14.555Z",
+    "totalSourceFiles": 3,
+    "totalTestFiles": 1,
+    "testedCount": 2,
+    "untestedCount": 1,
+    "coveragePercent": "66.7"
+  },
+  "untestedFiles": [
+    "src/functions.d.ts"
+  ],
+  "testedFiles": [
+    "src/index.ts",
+    "src/shims.ts"
+  ],
+  "coverageMap": {
+    "src/functions.d.ts": [],
+    "src/index.ts": [
+      "tests/compat.test.ts"
+    ],
+    "src/shims.ts": [
+      "tests/compat.test.ts"
+    ]
+  },
+  "testToSourceMap": {
+    "tests/compat.test.ts": [
+      "src/index.ts",
+      "src/shims.ts"
+    ]
+  }
+}

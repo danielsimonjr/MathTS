@@ -12,7 +12,6 @@
 //   for security reasons, so these functions are not exposed in the expression
 //   parser.
 
-import { ObjectWrappingMap } from './map.ts'
 
 // Type interfaces for math.js types
 export interface BigNumber {
@@ -350,7 +349,7 @@ export function isMap(object: unknown): object is Map<unknown, unknown> {
   if (!object) {
     return false
   }
-  if (object instanceof Map || object instanceof ObjectWrappingMap) {
+  if (object instanceof Map) {
     return true
   }
   // Duck typing check for Map-like objects
@@ -376,10 +375,10 @@ export function isPartitionedMap(object: unknown): object is PartitionedMap {
 
 export function isObjectWrappingMap(
   object: unknown
-): object is ObjectWrappingMap {
+): boolean {
   if (!isMap(object)) return false
-  const wrapper = object as { wrappedObject?: unknown }
-  return isObject(wrapper.wrappedObject)
+  const wrapper = object as { wrappedObject?: unknown; [Symbol.toStringTag]?: string }
+  return wrapper[Symbol.toStringTag] === 'ObjectWrappingMap' && isObject(wrapper.wrappedObject)
 }
 
 export function isNull(x: unknown): x is null {

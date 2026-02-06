@@ -54,6 +54,8 @@ interface ParsedFile {
   externalDependencies: ExternalDependency[];
   nodeDependencies: NodeDependency[];
   internalDependencies: Dependency[];
+  workspaceDependencies: WorkspaceDependency[];
+  packageName: string | null;
   exports: FileExports;
   description: string | null;
 }
@@ -106,10 +108,23 @@ interface PackageJson {
   version: string;
 }
 
+interface WorkspacePackage {
+  name: string;       // npm name, e.g., "@mathts/core"
+  directory: string;  // relative dir, e.g., "core"
+  srcDir: string;     // relative src dir, e.g., "core/src"
+}
+
+interface WorkspaceDependency {
+  package: string;     // workspace package name
+  directory: string;   // workspace package directory
+  imports: string[];   // imported symbols
+}
+
 // CLI options interface
 interface CLIOptions {
   root: string;
   includeTests: boolean;
+  all: boolean;
 }
 
 // Constants - support CLI argument or current working directory for portability
@@ -118,6 +133,7 @@ function parseCliOptions(): CLIOptions {
   const options: CLIOptions = {
     root: process.cwd(),
     includeTests: false,
+    all: false,
   };
 
   for (const arg of args) {
@@ -125,6 +141,8 @@ function parseCliOptions(): CLIOptions {
       options.root = arg.slice(7);
     } else if (arg === '--include-tests' || arg === '-t') {
       options.includeTests = true;
+    } else if (arg === '--all' || arg === '-a') {
+      options.all = true;
     } else if (arg === '--help' || arg === '-h') {
       console.log(`
 Dependency Graph Generator
@@ -136,12 +154,20 @@ Options:
   --root=<path>      Project root directory (default: current directory)
   --include-tests    Include test files in dependency analysis
   -t                 Short form of --include-tests
+  --all, -a          Include dormant/unreachable files (monorepo mode)
   --help, -h         Show this help
+
+Monorepo Support:
+  When run from a monorepo root with workspaces in package.json,
+  automatically scans all workspace packages and builds a unified graph.
+  By default, only files reachable from each package src/index.ts are
+  included. Use --all to include dormant code too.
 
 Examples:
   create-dependency-graph                         # Use current directory
   create-dependency-graph ./my-project            # Specify project path
   create-dependency-graph --include-tests         # Include test file analysis
+  create-dependency-graph --all                   # Include dormant code
   create-dependency-graph --root=C:/projects/my-app -t
 `);
       process.exit(0);
@@ -168,6 +194,70 @@ try {
   packageJson = JSON.parse(readFileSync(join(ROOT_DIR, 'package.json'), 'utf-8')) as PackageJson;
 } catch {
   console.warn('Warning: Could not read package.json, using defaults');
+}
+
+// Module-level workspace map (set in main() for monorepo mode)
+let workspaceMap: Map<string, WorkspacePackage> = new Map();
+
+/**
+ * Detect workspace packages from a monorepo root.
+ * Returns a Map keyed by npm package name.
+ * Returns empty map if no workspaces field (backward compat with single packages).
+ */
+function detectWorkspaces(rootDir: string): Map<string, WorkspacePackage> {
+  const workspaces = new Map<string, WorkspacePackage>();
+
+  try {
+    const rootPkg = JSON.parse(readFileSync(join(rootDir, 'package.json'), 'utf-8'));
+    const wsPatterns: string[] = rootPkg.workspaces || [];
+    if (wsPatterns.length === 0) return workspaces;
+
+    for (const pattern of wsPatterns) {
+      if (pattern.endsWith('/*')) {
+        // Glob pattern like "packages/*"
+        const parentDir = pattern.slice(0, -2);
+        const fullParent = join(rootDir, parentDir);
+        if (!existsSync(fullParent)) continue;
+
+        const entries = readdirSync(fullParent);
+        for (const entry of entries) {
+          const pkgDir = join(parentDir, entry);
+          const pkgJsonPath = join(rootDir, pkgDir, 'package.json');
+          if (existsSync(pkgJsonPath)) {
+            try {
+              const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
+              if (pkg.name) {
+                const srcDir = join(pkgDir, 'src');
+                workspaces.set(pkg.name, {
+                  name: pkg.name,
+                  directory: pkgDir.replace(/\\/g, '/'),
+                  srcDir: srcDir.replace(/\\/g, '/'),
+                });
+              }
+            } catch { /* skip invalid package.json */ }
+          }
+        }
+      } else {
+        // Direct path like "core", "matrix"
+        const pkgJsonPath = join(rootDir, pattern, 'package.json');
+        if (existsSync(pkgJsonPath)) {
+          try {
+            const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
+            if (pkg.name) {
+              const srcDir = join(pattern, 'src');
+              workspaces.set(pkg.name, {
+                name: pkg.name,
+                directory: pattern.replace(/\\/g, '/'),
+                srcDir: srcDir.replace(/\\/g, '/'),
+              });
+            }
+          } catch { /* skip invalid package.json */ }
+        }
+      }
+    }
+  } catch { /* no package.json or no workspaces field */ }
+
+  return workspaces;
 }
 
 /**
@@ -412,12 +502,28 @@ function parseFile(filePath: string): ParsedFile {
   const content = readFileSync(filePath, 'utf-8');
   const relativePath = relative(ROOT_DIR, filePath).replace(/\\/g, '/');
 
+  // Determine which workspace package this file belongs to
+  let detectedPackageName: string | null = null;
+  for (const [name, ws] of workspaceMap) {
+    if (relativePath.startsWith(ws.directory + '/')) {
+      detectedPackageName = name;
+      break;
+    }
+  }
+
+  // Strip comments for import/export parsing (prevents picking up imports in JSDoc examples)
+  const code = content
+    .replace(/\/\*[\s\S]*?\*\//g, '')   // Remove block comments (/** ... */ and /* ... */)
+    .replace(/\/\/.*$/gm, '');          // Remove single-line comments
+
   const result: ParsedFile = {
     path: relativePath,
     name: basename(filePath, '.ts'),
     externalDependencies: [],
     nodeDependencies: [],
     internalDependencies: [],
+    workspaceDependencies: [],
+    packageName: detectedPackageName,
     exports: {
       named: [],
       default: null,
@@ -439,7 +545,7 @@ function parseFile(filePath: string): ParsedFile {
 
   const nodeBuiltins = ['fs', 'path', 'url', 'crypto', 'util', 'stream', 'events', 'buffer', 'os', 'child_process', 'http', 'https', 'net', 'dns', 'tls', 'zlib', 'readline', 'assert', 'cluster', 'dgram', 'domain', 'inspector', 'module', 'perf_hooks', 'process', 'punycode', 'querystring', 'repl', 'string_decoder', 'timers', 'tty', 'v8', 'vm', 'worker_threads'];
 
-  while ((match = importRegex.exec(content)) !== null) {
+  while ((match = importRegex.exec(code)) !== null) {
     const isTypeOnlyImport = !!match[1]; // "import type" prefix
     const namedImports = match[2] || match[5] || '';
     const defaultImport = match[3] || match[6] || '';
@@ -469,11 +575,20 @@ function parseFile(filePath: string): ParsedFile {
 
     const typeOnly = isTypeOnlyImport || !hasRuntimeImport;
 
+    // Check if source is a workspace package import
+    const wsPackage = workspaceMap.get(source);
+
     if (source.startsWith('.')) {
       result.internalDependencies.push({
         file: source,
         imports: imports,
         typeOnly: typeOnly
+      });
+    } else if (wsPackage) {
+      result.workspaceDependencies.push({
+        package: wsPackage.name,
+        directory: wsPackage.directory,
+        imports: imports
       });
     } else if (source.startsWith('node:') || nodeBuiltins.includes(source.split('/')[0])) {
       result.nodeDependencies.push({
@@ -491,93 +606,123 @@ function parseFile(filePath: string): ParsedFile {
   // Parse exports
   // Named exports: export { foo, bar }
   const namedExportRegex = /export\s*{\s*([^}]+)\s*}/g;
-  while ((match = namedExportRegex.exec(content)) !== null) {
-    const exports = match[1].split(',').map(s => s.trim().split(' as ')[0]).filter(Boolean);
+  while ((match = namedExportRegex.exec(code)) !== null) {
+    const exports = match[1].split(',').map(s => cleanExportName(s.split(' as ')[0])).filter(Boolean);
     result.exports.named.push(...exports);
   }
 
   // Export declarations
   // export const/let/var
   const constExportRegex = /export\s+(?:const|let|var)\s+(\w+)/g;
-  while ((match = constExportRegex.exec(content)) !== null) {
+  while ((match = constExportRegex.exec(code)) !== null) {
     result.exports.constants.push(match[1]);
     result.exports.named.push(match[1]);
   }
 
   // export function
   const funcExportRegex = /export\s+(?:async\s+)?function\s+(\w+)/g;
-  while ((match = funcExportRegex.exec(content)) !== null) {
+  while ((match = funcExportRegex.exec(code)) !== null) {
     result.exports.functions.push(match[1]);
     result.exports.named.push(match[1]);
   }
 
   // export class
   const classExportRegex = /export\s+class\s+(\w+)/g;
-  while ((match = classExportRegex.exec(content)) !== null) {
+  while ((match = classExportRegex.exec(code)) !== null) {
     result.exports.classes.push(match[1]);
     result.exports.named.push(match[1]);
   }
 
   // export interface
   const interfaceExportRegex = /export\s+interface\s+(\w+)/g;
-  while ((match = interfaceExportRegex.exec(content)) !== null) {
+  while ((match = interfaceExportRegex.exec(code)) !== null) {
     result.exports.interfaces.push(match[1]);
     result.exports.types.push(match[1]);
   }
 
   // export type
   const typeExportRegex = /export\s+type\s+(\w+)/g;
-  while ((match = typeExportRegex.exec(content)) !== null) {
+  while ((match = typeExportRegex.exec(code)) !== null) {
     result.exports.types.push(match[1]);
   }
 
   // export enum
   const enumExportRegex = /export\s+enum\s+(\w+)/g;
-  while ((match = enumExportRegex.exec(content)) !== null) {
+  while ((match = enumExportRegex.exec(code)) !== null) {
     result.exports.enums.push(match[1]);
     result.exports.named.push(match[1]);
   }
 
   // export default
   const defaultExportRegex = /export\s+default\s+(?:class|function|const|let|var)?\s*(\w+)?/;
-  const defaultMatch = content.match(defaultExportRegex);
+  const defaultMatch = code.match(defaultExportRegex);
   if (defaultMatch) {
     result.exports.default = defaultMatch[1] || 'default';
   }
 
   // Re-exports: export * from
   const reExportAllRegex = /export\s+\*\s+from\s+['"]([^'"]+)['"]/g;
-  while ((match = reExportAllRegex.exec(content)) !== null) {
-    result.internalDependencies.push({
-      file: match[1],
-      imports: ['*'],
-      reExport: true
-    });
-    result.exports.reExported.push(`* from ${match[1]}`);
+  while ((match = reExportAllRegex.exec(code)) !== null) {
+    const reSource = match[1];
+    const reWs = workspaceMap.get(reSource);
+    if (reWs) {
+      result.workspaceDependencies.push({
+        package: reWs.name,
+        directory: reWs.directory,
+        imports: ['*']
+      });
+    } else {
+      result.internalDependencies.push({
+        file: reSource,
+        imports: ['*'],
+        reExport: true
+      });
+    }
+    result.exports.reExported.push(`* from ${reSource}`);
   }
 
   // Re-exports: export { foo } from
   const reExportNamedRegex = /export\s*{\s*([^}]+)\s*}\s*from\s+['"]([^'"]+)['"]/g;
-  while ((match = reExportNamedRegex.exec(content)) !== null) {
-    const exports = match[1].split(',').map(s => s.trim().split(' as ')[0]).filter(Boolean);
-    result.internalDependencies.push({
-      file: match[2],
-      imports: exports,
-      reExport: true
-    });
+  while ((match = reExportNamedRegex.exec(code)) !== null) {
+    const exports = match[1].split(',').map(s => cleanExportName(s.split(' as ')[0])).filter(Boolean);
+    const reSource = match[2];
+    const reWs = workspaceMap.get(reSource);
+    if (reWs) {
+      result.workspaceDependencies.push({
+        package: reWs.name,
+        directory: reWs.directory,
+        imports: exports
+      });
+    } else {
+      result.internalDependencies.push({
+        file: reSource,
+        imports: exports,
+        reExport: true
+      });
+    }
     result.exports.named.push(...exports);
     result.exports.reExported.push(...exports);
   }
 
   // Re-exports: export type * from (type-only re-exports)
   const reExportTypeAllRegex = /export\s+type\s+\*\s+from\s+['"]([^'"]+)['"]/g;
-  while ((match = reExportTypeAllRegex.exec(content)) !== null) {
-    result.internalDependencies.push({
-      file: match[1],
-      imports: ['*'],
-      reExport: true,
-      typeOnly: true
-    });
+  while ((match = reExportTypeAllRegex.exec(code)) !== null) {
+    const reSource = match[1];
+    const reWs = workspaceMap.get(reSource);
+    if (reWs) {
+      result.workspaceDependencies.push({
+        package: reWs.name,
+        directory: reWs.directory,
+        imports: ['*']
+      });
+    } else {
+      result.internalDependencies.push({
+        file: reSource,
+        imports: ['*'],
+        reExport: true,
+        typeOnly: true
+      });
+    }
     result.exports.reExported.push(`type * from ${match[1]}`);
   }
 
@@ -592,56 +737,150 @@ function parseFile(filePath: string): ParsedFile {
 /**
  * Extract file description from comments
  */
+
+
+/**
+ * Generate a meaningful fallback description from file metadata
+ */
+function generateFallbackDescription(file: ParsedFile): string {
+  const fileName = basename(file.path, '.ts');
+  
+  // For index files, describe what they re-export
+  if (fileName === 'index') {
+    if (file.exports.reExported.length > 0) {
+      const pkgName = file.packageName || dirname(file.path).split('/').pop() || '';
+      return `Package entry point for ${pkgName || 'module'} (re-exports ${file.exports.reExported.length} symbols)`;
+    }
+    if (file.exports.named.length > 0) {
+      return `Entry point exporting ${file.exports.named.length} symbols`;
+    }
+    return `Package entry point`;
+  }
+
+  // For type-only files
+  const hasOnlyTypes = file.exports.named.length === 0 && 
+    !file.exports.default &&
+    (file.exports.interfaces.length > 0 || file.exports.types.length > 0);
+  if (hasOnlyTypes) {
+    return `Type definitions (${file.exports.interfaces.length} interfaces, ${file.exports.types.filter(t => !file.exports.interfaces.includes(t)).length} type aliases)`;
+  }
+
+  return `${fileName} module`;
+}
+
 function extractDescription(content: string): string | null {
   // Try to find JSDoc comment at the top
   const jsdocMatch = content.match(/\/\*\*\s*\n([^*]*(?:\*(?!\/)[^*]*)*)\*\//);
   if (jsdocMatch) {
     const lines = jsdocMatch[1].split('\n')
       .map(line => line.replace(/^\s*\*\s?/, '').trim())
-      .filter(line => !line.startsWith('@') && line.length > 0);
+      .map(line => {
+        // Extract description from @scope/package - description lines
+        if (line.startsWith('@') && line.includes(' - ')) {
+          return line.split(' - ').slice(1).join(' - ').trim();
+        }
+        return line;
+      })
+      .filter(line => !line.startsWith('@') && line.length > 0)
+      .filter(line => !/^[=\-*~#_]{3,}$/.test(line));
     if (lines.length > 0) {
-      return lines[0];
+      return lines[0].slice(0, 120);
     }
   }
 
   // Try single-line comment
   const singleLineMatch = content.match(/^\/\/\s*(.+)$/m);
   if (singleLineMatch) {
-    return singleLineMatch[1];
+    const desc = singleLineMatch[1].trim();
+    if (/^[=\-*~#_]{3,}$/.test(desc)) return null;
+    return desc.slice(0, 120);
   }
 
   return null;
 }
 
 /**
+ * Clean export name by stripping inline comments and whitespace
+ */
+function cleanExportName(name: string): string {
+  // Remove single-line comments
+  let cleaned = name.replace(/\/\/.*$/gm, '');
+  // Remove multi-line comments
+  cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, '');
+  // Collapse whitespace to single space, then trim
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  // Strip leading type keyword for non-type exports
+  if (cleaned.startsWith('type ') && !cleaned.includes('{')) {
+    cleaned = cleaned.slice(5).trim();
+  }
+  return cleaned;
+}
+
+/**
  * Dynamically discover and categorize files into modules based on directory structure
  */
-function categorizeFiles(files: ParsedFile[]): ModuleMap {
+function categorizeFiles(files: ParsedFile[], isMonorepo: boolean = false): ModuleMap {
   const modules: ModuleMap = {};
 
-  for (const file of files) {
-    const relativePath = file.path;
+  if (isMonorepo) {
+    // Monorepo mode: first level = workspace package directory, second = submodule
+    for (const file of files) {
+      // Determine package key from path
+      let pkgKey = 'unknown';
+      for (const [, ws] of workspaceMap) {
+        if (file.path.startsWith(ws.directory + '/')) {
+          pkgKey = ws.directory;
+          break;
+        }
+      }
 
-    // Handle entry point (src/index.ts)
-    if (relativePath === 'src/index.ts') {
-      if (!modules.entry) modules.entry = {};
-      modules.entry[relativePath] = file;
-      continue;
-    }
+      // Determine submodule within the package
+      const pkgParts = pkgKey.split('/');
+      const parts = file.path.split('/');
+      const afterPkg = parts.slice(pkgParts.length); // e.g., ['src', 'types', 'Complex.ts']
 
-    // Extract the module name from path (first directory after src/)
-    const parts = relativePath.split('/');
-    if (parts.length >= 2 && parts[0] === 'src') {
-      const moduleName = parts[1].replace('.ts', '');
-
-      // If it's a file directly in src/, categorize by filename
-      if (parts.length === 2) {
-        if (!modules.root) modules.root = {};
-        modules.root[relativePath] = file;
+      if (afterPkg.length >= 2 && afterPkg[0] === 'src') {
+        if (afterPkg.length === 2) {
+          // File directly in src/ (e.g., core/src/index.ts)
+          if (!modules[pkgKey]) modules[pkgKey] = {};
+          modules[pkgKey][file.path] = file;
+        } else {
+          // File in subdirectory (e.g., core/src/types/Complex.ts)
+          const subModule = `${pkgKey}/${afterPkg[1]}`;
+          if (!modules[subModule]) modules[subModule] = {};
+          modules[subModule][file.path] = file;
+        }
       } else {
-        // It's in a subdirectory
-        if (!modules[moduleName]) modules[moduleName] = {};
-        modules[moduleName][relativePath] = file;
+        if (!modules[pkgKey]) modules[pkgKey] = {};
+        modules[pkgKey][file.path] = file;
+      }
+    }
+  } else {
+    // Single-package mode: original behavior
+    for (const file of files) {
+      const relativePath = file.path;
+
+      // Handle entry point (src/index.ts)
+      if (relativePath === 'src/index.ts') {
+        if (!modules.entry) modules.entry = {};
+        modules.entry[relativePath] = file;
+        continue;
+      }
+
+      // Extract the module name from path (first directory after src/)
+      const parts = relativePath.split('/');
+      if (parts.length >= 2 && parts[0] === 'src') {
+        const moduleName = parts[1].replace('.ts', '');
+
+        // If it's a file directly in src/, categorize by filename
+        if (parts.length === 2) {
+          if (!modules.root) modules.root = {};
+          modules.root[relativePath] = file;
+        } else {
+          // It's in a subdirectory
+          if (!modules[moduleName]) modules[moduleName] = {};
+          modules[moduleName][relativePath] = file;
+        }
       }
     }
   }
@@ -652,7 +891,6 @@ function categorizeFiles(files: ParsedFile[]): ModuleMap {
       delete modules[key];
     }
   }
-
   return modules;
 }
 
@@ -710,6 +948,36 @@ function resolvePath(fromPath: string, relativePath: string): string {
   resolved = resolved.replace(/\\/g, '/');
 
   return resolved;
+}
+
+/**
+ * Find all files reachable from entry points via internal dependencies (BFS).
+ * Used in monorepo mode to distinguish active from dormant code.
+ */
+function findReachableFiles(entryPoints: string[], allFiles: ParsedFile[]): Set<string> {
+  const fileMap = new Map<string, ParsedFile>();
+  for (const f of allFiles) fileMap.set(f.path, f);
+
+  const reachable = new Set<string>();
+  const queue = [...entryPoints];
+
+  while (queue.length > 0) {
+    const current = queue.pop()!;
+    if (reachable.has(current)) continue;
+    reachable.add(current);
+
+    const file = fileMap.get(current);
+    if (!file) continue;
+
+    for (const dep of file.internalDependencies) {
+      const resolved = resolvePath(current, dep.file);
+      if (fileMap.has(resolved) && !reachable.has(resolved)) {
+        queue.push(resolved);
+      }
+    }
+  }
+
+  return reachable;
 }
 
 interface CircularDependencyResult {
@@ -964,7 +1232,7 @@ function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics
     modulesJson[category] = {};
     for (const [path, file] of Object.entries(categoryFiles)) {
       const fileData: Record<string, unknown> = {
-        description: file.description || `${file.name} module`,
+        description: file.description || generateFallbackDescription(file),
         externalDependencies: file.externalDependencies,
         nodeDependencies: file.nodeDependencies,
         internalDependencies: file.internalDependencies.map(d => ({
@@ -1009,7 +1277,7 @@ function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics
       totalExports: stats.totalExports
     },
     entryPoints: files
-      .filter(f => f.path === 'src/index.ts')
+      .filter(f => f.path.endsWith('src/index.ts'))
       .map(f => ({
         file: f.path,
         type: 'main',
@@ -1048,16 +1316,16 @@ function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]): string
     lines.push(`    subgraph ${title}`);
 
     const moduleFiles = Object.keys(modules[moduleName]);
-    for (const filePath of moduleFiles.slice(0, 5)) { // Limit to 5 files per module for readability
+    for (const filePath of moduleFiles.slice(0, 10)) { // Limit to 10 files per module
       const name = basename(filePath, '.ts');
       const nodeId = `N${nodeCounter++}`;
       nodeIds.set(filePath, nodeId);
       lines.push(`        ${nodeId}[${name}]`);
     }
 
-    if (moduleFiles.length > 5) {
+    if (moduleFiles.length > 10) {
       const nodeId = `N${nodeCounter++}`;
-      lines.push(`        ${nodeId}[...${moduleFiles.length - 5} more]`);
+      lines.push(`        ${nodeId}[...${moduleFiles.length - 10} more]`);
     }
 
     lines.push('    end');
@@ -1067,7 +1335,7 @@ function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]): string
   // Add edges for dependencies (limited for readability)
   const addedEdges = new Set<string>();
   let edgeCount = 0;
-  const maxEdges = 30;
+  const maxEdges = 75;
 
   for (const file of files) {
     const sourceId = nodeIds.get(file.path);
@@ -1115,10 +1383,12 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   lines.push('## Table of Contents');
   lines.push('');
   lines.push('1. [Overview](#overview)');
-  let tocIndex = 2;
+  lines.push('2. [Package Dependencies](#package-dependencies)');
+  let tocIndex = 3;
   for (const category of Object.keys(modules)) {
     const title = category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ');
-    lines.push(`${tocIndex}. [${title} Dependencies](#${category.toLowerCase().replace(/\s+/g, '-')}-dependencies)`);
+    const slug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    lines.push(`${tocIndex}. [${title} Dependencies](#${slug}-dependencies)`);
     tocIndex++;
   }
   lines.push(`${tocIndex}. [Dependency Matrix](#dependency-matrix)`);
@@ -1130,6 +1400,7 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   lines.push('');
 
   // Overview
+  lines.push('<a id="overview"></a>');
   lines.push('## Overview');
   lines.push('');
   lines.push('The codebase is organized into the following modules:');
@@ -1145,12 +1416,15 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   // Generate sections for each module category
   for (const [category, categoryFiles] of Object.entries(modules)) {
     const title = category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ');
+    const sectionSlug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    lines.push(`<a id="${sectionSlug}-dependencies"></a>`);
+    lines.push('');
     lines.push(`## ${title} Dependencies`);
     lines.push('');
 
     for (const [path, file] of Object.entries(categoryFiles)) {
       const fileName = basename(path, '.ts');
-      lines.push(`### \`${path}\` - ${file.description || `${fileName} module`}`);
+      lines.push(`### \`${path}\` - ${file.description || generateFallbackDescription(file)}`);
       lines.push('');
 
       // External dependencies
@@ -1189,13 +1463,17 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
       }
 
       // Exports
-      if (file.exports.named.length > 0 || file.exports.default || file.exports.reExported.length > 0) {
+      if (file.exports.named.length > 0 || file.exports.default || file.exports.reExported.length > 0 || file.exports.interfaces.length > 0 || file.exports.types.length > 0) {
         lines.push('**Exports:**');
         if (file.exports.classes.length > 0) {
           lines.push(`- Classes: \`${file.exports.classes.join('`, `')}\``);
         }
         if (file.exports.interfaces.length > 0) {
           lines.push(`- Interfaces: \`${file.exports.interfaces.join('`, `')}\``);
+        }
+        const typeAliases = file.exports.types.filter(t => !file.exports.interfaces.includes(t));
+        if (typeAliases.length > 0) {
+          lines.push(`- Types: \`${typeAliases.join('`, `')}\``);
         }
         if (file.exports.enums.length > 0) {
           lines.push(`- Enums: \`${file.exports.enums.join('`, `')}\``);
@@ -1221,6 +1499,7 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   }
 
   // Dependency Matrix
+  lines.push('<a id="dependency-matrix"></a>');
   lines.push('## Dependency Matrix');
   lines.push('');
   lines.push('### File Import/Export Matrix');
@@ -1228,18 +1507,22 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   lines.push('| File | Imports From | Exports To |');
   lines.push('|------|--------------|------------|');
 
-  const matrixEntries = Object.entries(matrix).slice(0, 30); // Limit for readability
-  for (const [path, deps] of matrixEntries) {
-    const shortPath = basename(path, '.ts');
+  const matrixEntries = Object.entries(matrix)
+    .sort((a, b) => (b[1].importsFrom.length + b[1].exportsTo.length) - (a[1].importsFrom.length + a[1].exportsTo.length))
+    .slice(0, 40); // Top 40 by connectivity
+  for (const [filePath, deps] of matrixEntries) {
+    // Use relative path (e.g., "core/src/typed/mathts-typed") instead of just basename
+    const shortPath = filePath.replace(/\.ts$/, '');
     const importsCount = deps.importsFrom.length;
     const exportsCount = deps.exportsTo.length;
-    lines.push(`| \`${shortPath}\` | ${importsCount} files | ${exportsCount} files |`);
+    lines.push(`| \`${shortPath}\` | ${importsCount} file${importsCount !== 1 ? 's' : ''} | ${exportsCount} file${exportsCount !== 1 ? 's' : ''} |`);
   }
   lines.push('');
   lines.push('---');
   lines.push('');
 
   // Circular Dependencies
+  lines.push('<a id="circular-dependency-analysis"></a>');
   lines.push('## Circular Dependency Analysis');
   lines.push('');
   if (circularDeps.all.length === 0) {
@@ -1283,6 +1566,7 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   lines.push('');
 
   // Visual Dependency Graph
+  lines.push('<a id="visual-dependency-graph"></a>');
   lines.push('## Visual Dependency Graph');
   lines.push('');
   lines.push(generateMermaidDiagram(modules, files));
@@ -1291,6 +1575,7 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   lines.push('');
 
   // Summary Statistics
+  lines.push('<a id="summary-statistics"></a>');
   lines.push('## Summary Statistics');
   lines.push('');
   lines.push('| Category | Count |');
@@ -1357,7 +1642,7 @@ function generateCompactSummary(files: ParsedFile[], modules: ModuleMap, stats: 
   // Compact module summary
   for (const [modName, modFiles] of Object.entries(modules)) {
     const fileList = Object.values(modFiles);
-    const exports = fileList.flatMap(f => f.exports.named).slice(0, 20);
+    const exports = fileList.flatMap(f => f.exports.named).map(cleanExportName).filter(Boolean).slice(0, 20);
     const classes = fileList.flatMap(f => f.exports.classes);
     const interfaces = fileList.flatMap(f => f.exports.interfaces).slice(0, 10);
 
@@ -1515,6 +1800,94 @@ function generateTestCoverageJson(coverage: TestCoverageAnalysis): object {
 }
 
 /**
+ * Generate package-level dependency markdown section for monorepo mode.
+ */
+function generatePackageDependencySection(
+  parsedFiles: ParsedFile[],
+  workspaces: Map<string, WorkspacePackage>,
+  reachableFiles?: Set<string>,
+  dormantFiles?: Set<string>
+): string {
+  const lines: string[] = [];
+
+  lines.push('<a id="package-dependencies"></a>');
+  lines.push('## Package Dependencies');
+  lines.push('');
+
+  // Build package-level dependency map from workspace deps
+  const pkgDeps = new Map<string, Set<string>>();
+  for (const [name] of workspaces) pkgDeps.set(name, new Set());
+
+  for (const file of parsedFiles) {
+    if (!file.packageName) continue;
+    // Only count deps from reachable (active) files, not dormant ones
+    if (reachableFiles && !reachableFiles.has(file.path)) continue;
+    for (const wsDep of file.workspaceDependencies) {
+      // Skip self-references (package importing itself by npm name)
+      if (wsDep.package !== file.packageName) {
+        pkgDeps.get(file.packageName)?.add(wsDep.package);
+      }
+    }
+  }
+
+  // Package dependency table
+  lines.push('| Package | Depends On | Files (Active) | Files (Dormant) |');
+  lines.push('|---------|------------|----------------|-----------------|');
+
+  for (const [name, ws] of workspaces) {
+    const deps = pkgDeps.get(name);
+    const depStr = deps && deps.size > 0 ? [...deps].map(d => `\`${d}\``).join(', ') : '(none)';
+
+    const pkgFiles = parsedFiles.filter(f => f.packageName === name);
+    const activeCount = reachableFiles
+      ? pkgFiles.filter(f => reachableFiles.has(f.path)).length
+      : pkgFiles.length;
+    const dormantCount = dormantFiles
+      ? pkgFiles.filter(f => dormantFiles.has(f.path)).length
+      : 0;
+
+    lines.push(`| \`${name}\` (\`${ws.directory}/\`) | ${depStr} | ${activeCount} | ${dormantCount} |`);
+  }
+
+  lines.push('');
+
+  // Mermaid package-level diagram
+  lines.push('### Package Dependency Diagram');
+  lines.push('');
+  lines.push('```mermaid');
+  lines.push('graph LR');
+
+  // Create short IDs for packages
+  const pkgIds = new Map<string, string>();
+  let idx = 0;
+  for (const [name, ws] of workspaces) {
+    const id = `P${idx++}`;
+    pkgIds.set(name, id);
+    const shortName = ws.directory;
+    lines.push(`    ${id}[${shortName}]`);
+  }
+
+  // Add edges
+  for (const [name, deps] of pkgDeps) {
+    const sourceId = pkgIds.get(name);
+    if (!sourceId || !deps) continue;
+    for (const dep of deps) {
+      const targetId = pkgIds.get(dep);
+      if (targetId) {
+        lines.push(`    ${sourceId} --> ${targetId}`);
+      }
+    }
+  }
+
+  lines.push('```');
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+
+  return lines.join('\n');
+}
+
+/**
  * Main function
  */
 async function main(): Promise<void> {
@@ -1524,6 +1897,20 @@ async function main(): Promise<void> {
     console.log('Test file analysis enabled');
   }
 
+  // Detect workspace packages
+  workspaceMap = detectWorkspaces(ROOT_DIR);
+  const isMonorepo = workspaceMap.size > 0;
+
+  if (isMonorepo) {
+    console.log(`Monorepo detected: ${workspaceMap.size} workspace packages`);
+    for (const [name, ws] of workspaceMap) {
+      console.log(`  - ${name} (${ws.directory}/)`);
+    }
+    if (cliOptions.all) {
+      console.log('Including dormant/unreachable files (--all)');
+    }
+  }
+
   // Ensure output directory exists
   if (!existsSync(OUTPUT_DIR)) {
     mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -1531,11 +1918,23 @@ async function main(): Promise<void> {
   }
 
   // Get all TypeScript files
-  const tsFiles = getAllTsFiles(SRC_DIR);
-  console.log(`Found ${tsFiles.length} TypeScript files`);
+  let tsFiles: string[];
+  if (isMonorepo) {
+    // Scan each workspace package's src/ directory
+    tsFiles = [];
+    for (const [, ws] of workspaceMap) {
+      const srcDir = join(ROOT_DIR, ws.srcDir);
+      const pkgFiles = getAllTsFiles(srcDir);
+      tsFiles.push(...pkgFiles);
+      console.log(`  ${ws.directory}/src: ${pkgFiles.length} files`);
+    }
+  } else {
+    tsFiles = getAllTsFiles(SRC_DIR);
+  }
+  console.log(`Found ${tsFiles.length} TypeScript files total`);
 
   if (tsFiles.length === 0) {
-    console.error('No TypeScript files found in src/');
+    console.error('No TypeScript files found');
     process.exit(1);
   }
 
@@ -1543,28 +1942,75 @@ async function main(): Promise<void> {
   const parsedFiles = tsFiles.map(parseFile);
   console.log('Parsed all files');
 
+  // Reachability analysis (monorepo only)
+  let reachableSet: Set<string> | undefined;
+  let dormantSet: Set<string> | undefined;
+  let activeParsedFiles = parsedFiles;
+
+  if (isMonorepo) {
+    // Find entry points: each package's src/index.ts
+    const entryPoints: string[] = [];
+    for (const [, ws] of workspaceMap) {
+      const entryPath = `${ws.srcDir}/index.ts`.replace(/\\/g, '/');
+      const found = parsedFiles.find(f => f.path === entryPath);
+      if (found) {
+        entryPoints.push(found.path);
+      }
+    }
+
+    console.log(`Entry points: ${entryPoints.length}`);
+    reachableSet = findReachableFiles(entryPoints, parsedFiles);
+    dormantSet = new Set(parsedFiles.filter(f => !reachableSet!.has(f.path)).map(f => f.path));
+    console.log(`Reachable files: ${reachableSet.size}`);
+    console.log(`Dormant files: ${dormantSet.size}`);
+
+    if (!cliOptions.all) {
+      activeParsedFiles = parsedFiles.filter(f => reachableSet!.has(f.path));
+      console.log(`Analyzing ${activeParsedFiles.length} reachable files (use --all to include dormant)`);
+    } else {
+      activeParsedFiles = parsedFiles;
+      console.log(`Analyzing all ${activeParsedFiles.length} files (including dormant)`);
+    }
+  }
+
   // Categorize into modules
-  const modules = categorizeFiles(parsedFiles);
+  const modules = categorizeFiles(activeParsedFiles, isMonorepo);
   console.log(`Categorized into ${Object.keys(modules).length} modules`);
 
   // Detect circular dependencies
-  const circularDeps = detectCircularDependencies(parsedFiles);
+  const circularDeps = detectCircularDependencies(activeParsedFiles);
   console.log(`Found ${circularDeps.all.length} circular dependencies (${circularDeps.runtime.length} runtime, ${circularDeps.typeOnly.length} type-only)`);
 
   // Detect unused files and exports
-  const unusedAnalysis = detectUnused(parsedFiles);
+  const unusedAnalysis = detectUnused(activeParsedFiles);
 
   // Generate statistics
-  const stats = generateStatistics(parsedFiles, modules, circularDeps, unusedAnalysis);
+  const stats = generateStatistics(activeParsedFiles, modules, circularDeps, unusedAnalysis);
   console.log('Generated statistics');
 
   // Build dependency matrix
-  const matrix = buildDependencyMatrix(parsedFiles);
+  const matrix = buildDependencyMatrix(activeParsedFiles);
   console.log('Built dependency matrix');
 
   // Generate outputs
-  const json = generateJSON(parsedFiles, modules, stats, circularDeps);
-  const markdown = generateMarkdown(parsedFiles, modules, stats, circularDeps, matrix);
+  const json = generateJSON(activeParsedFiles, modules, stats, circularDeps);
+  let markdown = generateMarkdown(activeParsedFiles, modules, stats, circularDeps, matrix);
+
+  // Insert package-level section for monorepo mode
+  if (isMonorepo) {
+    const pkgSection = generatePackageDependencySection(parsedFiles, workspaceMap, reachableSet, dormantSet);
+    // Insert after the Overview section
+    const overviewMarker = '## Overview';
+    const overviewIdx = markdown.indexOf(overviewMarker);
+    if (overviewIdx !== -1) {
+      // Find the '---' separator after Overview
+      const sepIdx = markdown.indexOf('\n---\n', overviewIdx + overviewMarker.length);
+      if (sepIdx !== -1) {
+        const insertPoint = sepIdx + 5; // after '\n---\n'
+        markdown = markdown.slice(0, insertPoint) + '\n' + pkgSection + markdown.slice(insertPoint);
+      }
+    }
+  }
 
   // Write outputs
   writeFileSync(join(OUTPUT_DIR, 'dependency-graph.json'), JSON.stringify(json, null, 2));
@@ -1586,7 +2032,7 @@ async function main(): Promise<void> {
   console.log('Written: docs/architecture/DEPENDENCY_GRAPH.md');
 
   // Write compact summary for LLM consumption (CTON-style, ~10KB)
-  const compactSummary = generateCompactSummary(parsedFiles, modules, stats, circularDeps);
+  const compactSummary = generateCompactSummary(activeParsedFiles, modules, stats, circularDeps);
   writeFileSync(join(OUTPUT_DIR, 'dependency-summary.compact.json'), compactSummary);
   const compactSize = Buffer.byteLength(compactSummary, 'utf8');
   console.log(`Written: docs/architecture/dependency-summary.compact.json (${(compactSize / 1024).toFixed(1)}KB)`);
@@ -1596,12 +2042,26 @@ async function main(): Promise<void> {
   if (cliOptions.includeTests) {
     console.log('\nAnalyzing test coverage...');
 
-    // Scan for test files in tests/ directory and src/ (for any .test.ts files)
-    const testDir = join(ROOT_DIR, 'tests');
-    const testFilePaths = [
-      ...getAllTestFiles(testDir),
-      ...getAllTestFiles(SRC_DIR),
-    ];
+    // Scan for test files
+    let testFilePaths: string[];
+    if (isMonorepo) {
+      testFilePaths = [];
+      for (const [, ws] of workspaceMap) {
+        const testDir = join(ROOT_DIR, ws.directory, 'tests');
+        const srcDir = join(ROOT_DIR, ws.srcDir);
+        testFilePaths.push(...getAllTestFiles(testDir));
+        testFilePaths.push(...getAllTestFiles(srcDir));
+      }
+      // Also check root tests/ directory
+      const rootTestDir = join(ROOT_DIR, 'tests');
+      testFilePaths.push(...getAllTestFiles(rootTestDir));
+    } else {
+      const testDir = join(ROOT_DIR, 'tests');
+      testFilePaths = [
+        ...getAllTestFiles(testDir),
+        ...getAllTestFiles(SRC_DIR),
+      ];
+    }
     console.log(`Found ${testFilePaths.length} test files`);
 
     // Parse test files
@@ -1609,7 +2069,7 @@ async function main(): Promise<void> {
     console.log('Parsed all test files');
 
     // Analyze test coverage
-    testCoverage = analyzeTestCoverage(parsedFiles, parsedTestFiles);
+    testCoverage = analyzeTestCoverage(activeParsedFiles, parsedTestFiles);
 
     // Generate test coverage outputs
     const testCoverageMarkdown = generateTestCoverageMarkdown(testCoverage);
@@ -1624,6 +2084,12 @@ async function main(): Promise<void> {
   }
 
   console.log('\nDependency graph generation complete!');
+  if (isMonorepo) {
+    console.log(`  - ${workspaceMap.size} workspace packages scanned`);
+    if (reachableSet) {
+      console.log(`  - ${reachableSet.size} reachable files, ${dormantSet?.size || 0} dormant files`);
+    }
+  }
   console.log(`  - ${stats.totalTypeScriptFiles} files analyzed`);
   console.log(`  - ${stats.totalExports} exports found (${stats.totalReExports} re-exports)`);
   console.log(`  - ${stats.totalTypeOnlyImports} type-only imports detected`);

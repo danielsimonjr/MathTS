@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "generatedAt": "2026-02-06T03:46:24.032Z",
+    "totalSourceFiles": 6,
+    "totalTestFiles": 0,
+    "testedCount": 0,
+    "untestedCount": 6,
+    "coveragePercent": "0.0"
+  },
+  "untestedFiles": [
+    "src/cli.ts",
+    "src/executor.ts",
+    "src/graph.ts",
+    "src/index.ts",
+    "src/parser.ts",
+    "src/types.ts"
+  ],
+  "testedFiles": [],
+  "coverageMap": {
+    "src/cli.ts": [],
+    "src/executor.ts": [],
+    "src/graph.ts": [],
+    "src/index.ts": [],
+    "src/parser.ts": [],
+    "src/types.ts": []
+  },
+  "testToSourceMap": {}
+}

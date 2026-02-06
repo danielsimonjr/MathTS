@@ -1,0 +1,4808 @@
+{
+  "metadata": {
+    "name": "mathts",
+    "version": "0.1.0",
+    "lastUpdated": "2026-02-06",
+    "totalFiles": 11,
+    "totalModules": 2,
+    "totalExports": 636
+  },
+  "entryPoints": [
+    {
+      "file": "src/index.ts",
+      "type": "main",
+      "description": "Entry Point"
+    }
+  ],
+  "modules": {
+    "root": {
+      "src/allFactoriesAny.ts": {
+        "description": "creating all factories here in a separate file is needed to get tree-shaking working",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../factoriesAny.js",
+            "imports": [
+              "* as allFactories"
+            ]
+          }
+        ],
+        "exports": [
+          "all"
+        ],
+        "constants": [
+          "all"
+        ]
+      },
+      "src/allFactoriesNumber.ts": {
+        "description": "creating all factories here in a separate file is needed to get tree-shaking working",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../factoriesNumber.js",
+            "imports": [
+              "* as allFactories"
+            ]
+          }
+        ],
+        "exports": [
+          "all"
+        ],
+        "constants": [
+          "all"
+        ]
+      },
+      "src/configReadonly.ts": {
+        "description": "create a read-only version of config",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core/config.js",
+            "imports": [
+              "DEFAULT_CONFIG"
+            ]
+          },
+          {
+            "file": "../core/function/config.js",
+            "imports": [
+              "MATRIX_OPTIONS",
+              "NUMBER_OPTIONS"
+            ]
+          }
+        ],
+        "exports": [
+          "config"
+        ],
+        "constants": [
+          "config"
+        ]
+      },
+      "src/defaultInstance.ts": {
+        "description": "defaultInstance module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./factoriesAny.js",
+            "imports": [
+              "* as all"
+            ]
+          },
+          {
+            "file": "./core/create.js",
+            "imports": [
+              "create"
+            ]
+          }
+        ],
+        "exports": []
+      },
+      "src/factoriesAny.ts": {
+        "description": "factoriesAny module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./core/function/typed.js",
+            "imports": [
+              "createTyped"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/resultset/ResultSet.js",
+            "imports": [
+              "createResultSet"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/bignumber/BigNumber.js",
+            "imports": [
+              "createBigNumberClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/complex/Complex.js",
+            "imports": [
+              "createComplexClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/fraction/Fraction.js",
+            "imports": [
+              "createFractionClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/Range.js",
+            "imports": [
+              "createRangeClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/Matrix.js",
+            "imports": [
+              "createMatrixClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/DenseMatrix.js",
+            "imports": [
+              "createDenseMatrixClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/clone.js",
+            "imports": [
+              "createClone"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isInteger.js",
+            "imports": [
+              "createIsInteger"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isNegative.js",
+            "imports": [
+              "createIsNegative"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isNumeric.js",
+            "imports": [
+              "createIsNumeric"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/hasNumericValue.js",
+            "imports": [
+              "createHasNumericValue"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isPositive.js",
+            "imports": [
+              "createIsPositive"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isZero.js",
+            "imports": [
+              "createIsZero"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isNaN.js",
+            "imports": [
+              "createIsNaN"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isBounded.js",
+            "imports": [
+              "createIsBounded"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isFinite.js",
+            "imports": [
+              "createIsFinite"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/typeOf.js",
+            "imports": [
+              "createTypeOf"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/equalScalar.js",
+            "imports": [
+              "createEqualScalar"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/SparseMatrix.js",
+            "imports": [
+              "createSparseMatrixClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/number.js",
+            "imports": [
+              "createNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/bigint.js",
+            "imports": [
+              "createBigint"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/string.js",
+            "imports": [
+              "createString"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/boolean.js",
+            "imports": [
+              "createBoolean"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/bignumber/function/bignumber.js",
+            "imports": [
+              "createBignumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/complex/function/complex.js",
+            "imports": [
+              "createComplex"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/fraction/function/fraction.js",
+            "imports": [
+              "createFraction"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/function/matrix.js",
+            "imports": [
+              "createMatrix"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/matrixFromFunction.js",
+            "imports": [
+              "createMatrixFromFunction"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/matrixFromRows.js",
+            "imports": [
+              "createMatrixFromRows"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/matrixFromColumns.js",
+            "imports": [
+              "createMatrixFromColumns"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/unit/function/splitUnit.js",
+            "imports": [
+              "createSplitUnit"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/unaryMinus.js",
+            "imports": [
+              "createUnaryMinus"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/unaryPlus.js",
+            "imports": [
+              "createUnaryPlus"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/abs.js",
+            "imports": [
+              "createAbs"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/mapSlices.js",
+            "imports": [
+              "createMapSlices"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/addScalar.js",
+            "imports": [
+              "createAddScalar"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/subtractScalar.js",
+            "imports": [
+              "createSubtractScalar"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/cbrt.js",
+            "imports": [
+              "createCbrt"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/ceil.js",
+            "imports": [
+              "createCeil"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/cube.js",
+            "imports": [
+              "createCube"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/exp.js",
+            "imports": [
+              "createExp"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/expm1.js",
+            "imports": [
+              "createExpm1"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/fix.js",
+            "imports": [
+              "createFix"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/floor.js",
+            "imports": [
+              "createFloor"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/gcd.js",
+            "imports": [
+              "createGcd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/lcm.js",
+            "imports": [
+              "createLcm"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/log10.js",
+            "imports": [
+              "createLog10"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/log2.js",
+            "imports": [
+              "createLog2"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/mod.js",
+            "imports": [
+              "createMod"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/multiplyScalar.js",
+            "imports": [
+              "createMultiplyScalar"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/multiply.js",
+            "imports": [
+              "createMultiply"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/nthRoot.js",
+            "imports": [
+              "createNthRoot"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/sign.js",
+            "imports": [
+              "createSign"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/sqrt.js",
+            "imports": [
+              "createSqrt"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/square.js",
+            "imports": [
+              "createSquare"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/subtract.js",
+            "imports": [
+              "createSubtract"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/xgcd.js",
+            "imports": [
+              "createXgcd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/invmod.js",
+            "imports": [
+              "createInvmod"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/dotMultiply.js",
+            "imports": [
+              "createDotMultiply"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/bitwise/bitAnd.js",
+            "imports": [
+              "createBitAnd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/bitwise/bitNot.js",
+            "imports": [
+              "createBitNot"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/bitwise/bitOr.js",
+            "imports": [
+              "createBitOr"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/bitwise/bitXor.js",
+            "imports": [
+              "createBitXor"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/complex/arg.js",
+            "imports": [
+              "createArg"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/complex/conj.js",
+            "imports": [
+              "createConj"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/complex/im.js",
+            "imports": [
+              "createIm"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/complex/re.js",
+            "imports": [
+              "createRe"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/logical/not.js",
+            "imports": [
+              "createNot"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/logical/nullish.js",
+            "imports": [
+              "createNullish"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/logical/or.js",
+            "imports": [
+              "createOr"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/logical/xor.js",
+            "imports": [
+              "createXor"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/concat.js",
+            "imports": [
+              "createConcat"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/column.js",
+            "imports": [
+              "createColumn"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/count.js",
+            "imports": [
+              "createCount"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/cross.js",
+            "imports": [
+              "createCross"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/diag.js",
+            "imports": [
+              "createDiag"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/filter.js",
+            "imports": [
+              "createFilter"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/flatten.js",
+            "imports": [
+              "createFlatten"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/forEach.js",
+            "imports": [
+              "createForEach"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/getMatrixDataType.js",
+            "imports": [
+              "createGetMatrixDataType"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/identity.js",
+            "imports": [
+              "createIdentity"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/kron.js",
+            "imports": [
+              "createKron"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/map.js",
+            "imports": [
+              "createMap"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/diff.js",
+            "imports": [
+              "createDiff"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/ones.js",
+            "imports": [
+              "createOnes"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/range.js",
+            "imports": [
+              "createRange"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/reshape.js",
+            "imports": [
+              "createReshape"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/resize.js",
+            "imports": [
+              "createResize"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/rotate.js",
+            "imports": [
+              "createRotate"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/rotationMatrix.js",
+            "imports": [
+              "createRotationMatrix"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/row.js",
+            "imports": [
+              "createRow"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/size.js",
+            "imports": [
+              "createSize"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/squeeze.js",
+            "imports": [
+              "createSqueeze"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/subset.js",
+            "imports": [
+              "createSubset"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/transpose.js",
+            "imports": [
+              "createTranspose"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/ctranspose.js",
+            "imports": [
+              "createCtranspose"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/zeros.js",
+            "imports": [
+              "createZeros"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/fft.js",
+            "imports": [
+              "createFft"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/ifft.js",
+            "imports": [
+              "createIfft"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/numeric/solveODE.js",
+            "imports": [
+              "createSolveODE"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/special/erf.js",
+            "imports": [
+              "createErf"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/special/zeta.js",
+            "imports": [
+              "createZeta"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/mode.js",
+            "imports": [
+              "createMode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/prod.js",
+            "imports": [
+              "createProd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/string/format.js",
+            "imports": [
+              "createFormat"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/string/bin.js",
+            "imports": [
+              "createBin"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/string/oct.js",
+            "imports": [
+              "createOct"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/string/hex.js",
+            "imports": [
+              "createHex"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/string/print.js",
+            "imports": [
+              "createPrint"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/unit/to.js",
+            "imports": [
+              "createTo"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/unit/toBest.js",
+            "imports": [
+              "createToBest"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isPrime.js",
+            "imports": [
+              "createIsPrime"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/numeric.js",
+            "imports": [
+              "createNumeric"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/divideScalar.js",
+            "imports": [
+              "createDivideScalar"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/pow.js",
+            "imports": [
+              "createPow"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/round.js",
+            "imports": [
+              "createRound"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/log.js",
+            "imports": [
+              "createLog"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/log1p.js",
+            "imports": [
+              "createLog1p"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/nthRoots.js",
+            "imports": [
+              "createNthRoots"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/dotPow.js",
+            "imports": [
+              "createDotPow"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/dotDivide.js",
+            "imports": [
+              "createDotDivide"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/solver/lsolve.js",
+            "imports": [
+              "createLsolve"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/solver/usolve.js",
+            "imports": [
+              "createUsolve"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/solver/lsolveAll.js",
+            "imports": [
+              "createLsolveAll"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/solver/usolveAll.js",
+            "imports": [
+              "createUsolveAll"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/bitwise/leftShift.js",
+            "imports": [
+              "createLeftShift"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/bitwise/rightArithShift.js",
+            "imports": [
+              "createRightArithShift"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/bitwise/rightLogShift.js",
+            "imports": [
+              "createRightLogShift"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/logical/and.js",
+            "imports": [
+              "createAnd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/compare.js",
+            "imports": [
+              "createCompare"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/compareNatural.js",
+            "imports": [
+              "createCompareNatural"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/compareText.js",
+            "imports": [
+              "createCompareText"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/equal.js",
+            "imports": [
+              "createEqual"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/equalText.js",
+            "imports": [
+              "createEqualText"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/smaller.js",
+            "imports": [
+              "createSmaller"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/smallerEq.js",
+            "imports": [
+              "createSmallerEq"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/larger.js",
+            "imports": [
+              "createLarger"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/largerEq.js",
+            "imports": [
+              "createLargerEq"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/deepEqual.js",
+            "imports": [
+              "createDeepEqual"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/unequal.js",
+            "imports": [
+              "createUnequal"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/partitionSelect.js",
+            "imports": [
+              "createPartitionSelect"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/sort.js",
+            "imports": [
+              "createSort"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/max.js",
+            "imports": [
+              "createMax"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/min.js",
+            "imports": [
+              "createMin"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/ImmutableDenseMatrix.js",
+            "imports": [
+              "createImmutableDenseMatrixClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/MatrixIndex.js",
+            "imports": [
+              "createIndexClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/FibonacciHeap.js",
+            "imports": [
+              "createFibonacciHeapClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/Spa.js",
+            "imports": [
+              "createSpaClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/unit/Unit.js",
+            "imports": [
+              "createUnitClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/unit/function/unit.js",
+            "imports": [
+              "createUnitFunction"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/function/sparse.js",
+            "imports": [
+              "createSparse"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/unit/function/createUnit.js",
+            "imports": [
+              "createCreateUnit"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/acos.js",
+            "imports": [
+              "createAcos"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/acosh.js",
+            "imports": [
+              "createAcosh"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/acot.js",
+            "imports": [
+              "createAcot"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/acoth.js",
+            "imports": [
+              "createAcoth"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/acsc.js",
+            "imports": [
+              "createAcsc"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/acsch.js",
+            "imports": [
+              "createAcsch"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/asec.js",
+            "imports": [
+              "createAsec"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/asech.js",
+            "imports": [
+              "createAsech"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/asin.js",
+            "imports": [
+              "createAsin"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/asinh.js",
+            "imports": [
+              "createAsinh"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/atan.js",
+            "imports": [
+              "createAtan"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/atan2.js",
+            "imports": [
+              "createAtan2"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/atanh.js",
+            "imports": [
+              "createAtanh"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/cos.js",
+            "imports": [
+              "createCos"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/cosh.js",
+            "imports": [
+              "createCosh"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/cot.js",
+            "imports": [
+              "createCot"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/coth.js",
+            "imports": [
+              "createCoth"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/csc.js",
+            "imports": [
+              "createCsc"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/csch.js",
+            "imports": [
+              "createCsch"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/sec.js",
+            "imports": [
+              "createSec"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/sech.js",
+            "imports": [
+              "createSech"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/sin.js",
+            "imports": [
+              "createSin"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/sinh.js",
+            "imports": [
+              "createSinh"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/tan.js",
+            "imports": [
+              "createTan"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/trigonometry/tanh.js",
+            "imports": [
+              "createTanh"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setCartesian.js",
+            "imports": [
+              "createSetCartesian"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setDifference.js",
+            "imports": [
+              "createSetDifference"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setDistinct.js",
+            "imports": [
+              "createSetDistinct"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setIntersect.js",
+            "imports": [
+              "createSetIntersect"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setIsSubset.js",
+            "imports": [
+              "createSetIsSubset"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setMultiplicity.js",
+            "imports": [
+              "createSetMultiplicity"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setPowerset.js",
+            "imports": [
+              "createSetPowerset"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setSize.js",
+            "imports": [
+              "createSetSize"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setSymDifference.js",
+            "imports": [
+              "createSetSymDifference"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/set/setUnion.js",
+            "imports": [
+              "createSetUnion"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/add.js",
+            "imports": [
+              "createAdd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/hypot.js",
+            "imports": [
+              "createHypot"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/norm.js",
+            "imports": [
+              "createNorm"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/dot.js",
+            "imports": [
+              "createDot"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/trace.js",
+            "imports": [
+              "createTrace"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/function/index.js",
+            "imports": [
+              "createIndex"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/Node.js",
+            "imports": [
+              "createNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/AccessorNode.js",
+            "imports": [
+              "createAccessorNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ArrayNode.js",
+            "imports": [
+              "createArrayNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/AssignmentNode.js",
+            "imports": [
+              "createAssignmentNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/BlockNode.js",
+            "imports": [
+              "createBlockNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ConditionalNode.js",
+            "imports": [
+              "createConditionalNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ConstantNode.js",
+            "imports": [
+              "createConstantNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/FunctionAssignmentNode.js",
+            "imports": [
+              "createFunctionAssignmentNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/IndexNode.js",
+            "imports": [
+              "createIndexNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ObjectNode.js",
+            "imports": [
+              "createObjectNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/OperatorNode.js",
+            "imports": [
+              "createOperatorNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ParenthesisNode.js",
+            "imports": [
+              "createParenthesisNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/RangeNode.js",
+            "imports": [
+              "createRangeNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/RelationalNode.js",
+            "imports": [
+              "createRelationalNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/SymbolNode.js",
+            "imports": [
+              "createSymbolNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/FunctionNode.js",
+            "imports": [
+              "createFunctionNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/parse.js",
+            "imports": [
+              "createParse"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/function/compile.js",
+            "imports": [
+              "createCompile"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/function/evaluate.js",
+            "imports": [
+              "createEvaluate"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/Parser.js",
+            "imports": [
+              "createParserClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/function/parser.js",
+            "imports": [
+              "createParser"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/decomposition/lup.js",
+            "imports": [
+              "createLup"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/decomposition/qr.js",
+            "imports": [
+              "createQr"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/decomposition/slu.js",
+            "imports": [
+              "createSlu"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/solver/lusolve.js",
+            "imports": [
+              "createLusolve"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/polynomialRoot.js",
+            "imports": [
+              "createPolynomialRoot"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/Help.js",
+            "imports": [
+              "createHelpClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/chain/Chain.js",
+            "imports": [
+              "createChainClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/function/help.js",
+            "imports": [
+              "createHelp"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/chain/function/chain.js",
+            "imports": [
+              "createChain"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/det.js",
+            "imports": [
+              "createDet"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/inv.js",
+            "imports": [
+              "createInv"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/pinv.js",
+            "imports": [
+              "createPinv"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/eigs.js",
+            "imports": [
+              "createEigs"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/expm.js",
+            "imports": [
+              "createExpm"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/sqrtm.js",
+            "imports": [
+              "createSqrtm"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/sylvester.js",
+            "imports": [
+              "createSylvester"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/decomposition/schur.js",
+            "imports": [
+              "createSchur"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/lyap.js",
+            "imports": [
+              "createLyap"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/divide.js",
+            "imports": [
+              "createDivide"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/geometry/distance.js",
+            "imports": [
+              "createDistance"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/geometry/intersect.js",
+            "imports": [
+              "createIntersect"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/sum.js",
+            "imports": [
+              "createSum"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/cumsum.js",
+            "imports": [
+              "createCumSum"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/mean.js",
+            "imports": [
+              "createMean"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/median.js",
+            "imports": [
+              "createMedian"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/mad.js",
+            "imports": [
+              "createMad"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/variance.js",
+            "imports": [
+              "createVariance"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/quantileSeq.js",
+            "imports": [
+              "createQuantileSeq"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/std.js",
+            "imports": [
+              "createStd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/corr.js",
+            "imports": [
+              "createCorr"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/bernoulli.js",
+            "imports": [
+              "createBernoulli"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/combinations.js",
+            "imports": [
+              "createCombinations"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/combinationsWithRep.js",
+            "imports": [
+              "createCombinationsWithRep"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/gamma.js",
+            "imports": [
+              "createGamma"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/lgamma.js",
+            "imports": [
+              "createLgamma"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/factorial.js",
+            "imports": [
+              "createFactorial"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/kldivergence.js",
+            "imports": [
+              "createKldivergence"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/multinomial.js",
+            "imports": [
+              "createMultinomial"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/permutations.js",
+            "imports": [
+              "createPermutations"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/pickRandom.js",
+            "imports": [
+              "createPickRandom"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/random.js",
+            "imports": [
+              "createRandom"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/randomInt.js",
+            "imports": [
+              "createRandomInt"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/combinatorics/stirlingS2.js",
+            "imports": [
+              "createStirlingS2"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/combinatorics/bellNumbers.js",
+            "imports": [
+              "createBellNumbers"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/combinatorics/catalan.js",
+            "imports": [
+              "createCatalan"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/combinatorics/composition.js",
+            "imports": [
+              "createComposition"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/leafCount.js",
+            "imports": [
+              "createLeafCount"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/simplify.js",
+            "imports": [
+              "createSimplify"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/simplifyConstant.js",
+            "imports": [
+              "createSimplifyConstant"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/simplifyCore.js",
+            "imports": [
+              "createSimplifyCore"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/resolve.js",
+            "imports": [
+              "createResolve"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/symbolicEqual.js",
+            "imports": [
+              "createSymbolicEqual"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/derivative.js",
+            "imports": [
+              "createDerivative"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/rationalize.js",
+            "imports": [
+              "createRationalize"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/signal/zpk2tf.js",
+            "imports": [
+              "createZpk2tf"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/signal/freqz.js",
+            "imports": [
+              "createFreqz"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./json/reviver.js",
+            "imports": [
+              "createReviver"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./json/replacer.js",
+            "imports": [
+              "createReplacer"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./constants.js",
+            "imports": [
+              "createE",
+              "createUppercaseE",
+              "createFalse",
+              "createI",
+              "createInfinity",
+              "createLN10",
+              "createLN2",
+              "createLOG10E",
+              "createLOG2E",
+              "createNaN",
+              "createNull",
+              "createPhi",
+              "createPi",
+              "createUppercasePi",
+              "createSQRT1_2",
+              "// eslint-disable-line camelcase\r\n  createSQRT2",
+              "createTau",
+              "createTrue",
+              "createVersion"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/unit/physicalConstants.js",
+            "imports": [
+              "createAtomicMass",
+              "createAvogadro",
+              "createBohrMagneton",
+              "createBohrRadius",
+              "createBoltzmann",
+              "createClassicalElectronRadius",
+              "createConductanceQuantum",
+              "createCoulomb",
+              "createCoulombConstant",
+              "createDeuteronMass",
+              "createEfimovFactor",
+              "createElectricConstant",
+              "createElectronMass",
+              "createElementaryCharge",
+              "createFaraday",
+              "createFermiCoupling",
+              "createFineStructure",
+              "createFirstRadiation",
+              "createGasConstant",
+              "createGravitationConstant",
+              "createGravity",
+              "createHartreeEnergy",
+              "createInverseConductanceQuantum",
+              "createKlitzing",
+              "createLoschmidt",
+              "createMagneticConstant",
+              "createMagneticFluxQuantum",
+              "createMolarMass",
+              "createMolarMassC12",
+              "createMolarPlanckConstant",
+              "createMolarVolume",
+              "createNeutronMass",
+              "createNuclearMagneton",
+              "createPlanckCharge",
+              "createPlanckConstant",
+              "createPlanckLength",
+              "createPlanckMass",
+              "createPlanckTemperature",
+              "createPlanckTime",
+              "createProtonMass",
+              "createQuantumOfCirculation",
+              "createReducedPlanckConstant",
+              "createRydberg",
+              "createSackurTetrode",
+              "createSecondRadiation",
+              "createSpeedOfLight",
+              "createStefanBoltzmann",
+              "createThomsonCrossSection",
+              "createVacuumImpedance",
+              "createWeakMixingAngle",
+              "createWienDisplacement"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/mapSlices.transform.js",
+            "imports": [
+              "createMapSlicesTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/column.transform.js",
+            "imports": [
+              "createColumnTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/filter.transform.js",
+            "imports": [
+              "createFilterTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/forEach.transform.js",
+            "imports": [
+              "createForEachTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/index.transform.js",
+            "imports": [
+              "createIndexTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/map.transform.js",
+            "imports": [
+              "createMapTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/max.transform.js",
+            "imports": [
+              "createMaxTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/mean.transform.js",
+            "imports": [
+              "createMeanTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/min.transform.js",
+            "imports": [
+              "createMinTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/range.transform.js",
+            "imports": [
+              "createRangeTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/row.transform.js",
+            "imports": [
+              "createRowTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/subset.transform.js",
+            "imports": [
+              "createSubsetTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/concat.transform.js",
+            "imports": [
+              "createConcatTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/diff.transform.js",
+            "imports": [
+              "createDiffTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/std.transform.js",
+            "imports": [
+              "createStdTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/sum.transform.js",
+            "imports": [
+              "createSumTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/quantileSeq.transform.js",
+            "imports": [
+              "createQuantileSeqTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/cumsum.transform.js",
+            "imports": [
+              "createCumSumTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/variance.transform.js",
+            "imports": [
+              "createVarianceTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/print.transform.js",
+            "imports": [
+              "createPrintTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/and.transform.js",
+            "imports": [
+              "createAndTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/or.transform.js",
+            "imports": [
+              "createOrTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/nullish.transform.js",
+            "imports": [
+              "createNullishTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/bitAnd.transform.js",
+            "imports": [
+              "createBitAndTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/bitOr.transform.js",
+            "imports": [
+              "createBitOrTransform"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "createTyped",
+          "createResultSet",
+          "createBigNumberClass",
+          "createComplexClass",
+          "createFractionClass",
+          "createRangeClass",
+          "createMatrixClass",
+          "createDenseMatrixClass",
+          "createClone",
+          "createIsInteger",
+          "createIsNegative",
+          "createIsNumeric",
+          "createHasNumericValue",
+          "createIsPositive",
+          "createIsZero",
+          "createIsNaN",
+          "createIsBounded",
+          "createIsFinite",
+          "createTypeOf",
+          "createEqualScalar",
+          "createSparseMatrixClass",
+          "createNumber",
+          "createBigint",
+          "createString",
+          "createBoolean",
+          "createBignumber",
+          "createComplex",
+          "createFraction",
+          "createMatrix",
+          "createMatrixFromFunction",
+          "createMatrixFromRows",
+          "createMatrixFromColumns",
+          "createSplitUnit",
+          "createUnaryMinus",
+          "createUnaryPlus",
+          "createAbs",
+          "createMapSlices",
+          "createAddScalar",
+          "createSubtractScalar",
+          "createCbrt",
+          "createCeil",
+          "createCube",
+          "createExp",
+          "createExpm1",
+          "createFix",
+          "createFloor",
+          "createGcd",
+          "createLcm",
+          "createLog10",
+          "createLog2",
+          "createMod",
+          "createMultiplyScalar",
+          "createMultiply",
+          "createNthRoot",
+          "createSign",
+          "createSqrt",
+          "createSquare",
+          "createSubtract",
+          "createXgcd",
+          "createInvmod",
+          "createDotMultiply",
+          "createBitAnd",
+          "createBitNot",
+          "createBitOr",
+          "createBitXor",
+          "createArg",
+          "createConj",
+          "createIm",
+          "createRe",
+          "createNot",
+          "createNullish",
+          "createOr",
+          "createXor",
+          "createConcat",
+          "createColumn",
+          "createCount",
+          "createCross",
+          "createDiag",
+          "createFilter",
+          "createFlatten",
+          "createForEach",
+          "createGetMatrixDataType",
+          "createIdentity",
+          "createKron",
+          "createMap",
+          "createDiff",
+          "createOnes",
+          "createRange",
+          "createReshape",
+          "createResize",
+          "createRotate",
+          "createRotationMatrix",
+          "createRow",
+          "createSize",
+          "createSqueeze",
+          "createSubset",
+          "createTranspose",
+          "createCtranspose",
+          "createZeros",
+          "createFft",
+          "createIfft",
+          "createSolveODE",
+          "createErf",
+          "createZeta",
+          "createMode",
+          "createProd",
+          "createFormat",
+          "createBin",
+          "createOct",
+          "createHex",
+          "createPrint",
+          "createTo",
+          "createToBest",
+          "createIsPrime",
+          "createNumeric",
+          "createDivideScalar",
+          "createPow",
+          "createRound",
+          "createLog",
+          "createLog1p",
+          "createNthRoots",
+          "createDotPow",
+          "createDotDivide",
+          "createLsolve",
+          "createUsolve",
+          "createLsolveAll",
+          "createUsolveAll",
+          "createLeftShift",
+          "createRightArithShift",
+          "createRightLogShift",
+          "createAnd",
+          "createCompare",
+          "createCompareNatural",
+          "createCompareText",
+          "createEqual",
+          "createEqualText",
+          "createSmaller",
+          "createSmallerEq",
+          "createLarger",
+          "createLargerEq",
+          "createDeepEqual",
+          "createUnequal",
+          "createPartitionSelect",
+          "createSort",
+          "createMax",
+          "createMin",
+          "createImmutableDenseMatrixClass",
+          "createIndexClass",
+          "createFibonacciHeapClass",
+          "createSpaClass",
+          "createUnitClass",
+          "createUnitFunction",
+          "createSparse",
+          "createCreateUnit",
+          "createAcos",
+          "createAcosh",
+          "createAcot",
+          "createAcoth",
+          "createAcsc",
+          "createAcsch",
+          "createAsec",
+          "createAsech",
+          "createAsin",
+          "createAsinh",
+          "createAtan",
+          "createAtan2",
+          "createAtanh",
+          "createCos",
+          "createCosh",
+          "createCot",
+          "createCoth",
+          "createCsc",
+          "createCsch",
+          "createSec",
+          "createSech",
+          "createSin",
+          "createSinh",
+          "createTan",
+          "createTanh",
+          "createSetCartesian",
+          "createSetDifference",
+          "createSetDistinct",
+          "createSetIntersect",
+          "createSetIsSubset",
+          "createSetMultiplicity",
+          "createSetPowerset",
+          "createSetSize",
+          "createSetSymDifference",
+          "createSetUnion",
+          "createAdd",
+          "createHypot",
+          "createNorm",
+          "createDot",
+          "createTrace",
+          "createIndex",
+          "createNode",
+          "createAccessorNode",
+          "createArrayNode",
+          "createAssignmentNode",
+          "createBlockNode",
+          "createConditionalNode",
+          "createConstantNode",
+          "createFunctionAssignmentNode",
+          "createIndexNode",
+          "createObjectNode",
+          "createOperatorNode",
+          "createParenthesisNode",
+          "createRangeNode",
+          "createRelationalNode",
+          "createSymbolNode",
+          "createFunctionNode",
+          "createParse",
+          "createCompile",
+          "createEvaluate",
+          "createParserClass",
+          "createParser",
+          "createLup",
+          "createQr",
+          "createSlu",
+          "createLusolve",
+          "createPolynomialRoot",
+          "createHelpClass",
+          "createChainClass",
+          "createHelp",
+          "createChain",
+          "createDet",
+          "createInv",
+          "createPinv",
+          "createEigs",
+          "createExpm",
+          "createSqrtm",
+          "createSylvester",
+          "createSchur",
+          "createLyap",
+          "createDivide",
+          "createDistance",
+          "createIntersect",
+          "createSum",
+          "createCumSum",
+          "createMean",
+          "createMedian",
+          "createMad",
+          "createVariance",
+          "createQuantileSeq",
+          "createStd",
+          "createCorr",
+          "createBernoulli",
+          "createCombinations",
+          "createCombinationsWithRep",
+          "createGamma",
+          "createLgamma",
+          "createFactorial",
+          "createKldivergence",
+          "createMultinomial",
+          "createPermutations",
+          "createPickRandom",
+          "createRandom",
+          "createRandomInt",
+          "createStirlingS2",
+          "createBellNumbers",
+          "createCatalan",
+          "createComposition",
+          "createLeafCount",
+          "createSimplify",
+          "createSimplifyConstant",
+          "createSimplifyCore",
+          "createResolve",
+          "createSymbolicEqual",
+          "createDerivative",
+          "createRationalize",
+          "createZpk2tf",
+          "createFreqz",
+          "createReviver",
+          "createReplacer",
+          "createE",
+          "createUppercaseE",
+          "createFalse",
+          "createI",
+          "createInfinity",
+          "createLN10",
+          "createLN2",
+          "createLOG10E",
+          "createLOG2E",
+          "createNaN",
+          "createNull",
+          "createPhi",
+          "createPi",
+          "createUppercasePi",
+          "createSQRT1_2",
+          "// eslint-disable-line camelcase\r\n  createSQRT2",
+          "createTau",
+          "createTrue",
+          "createVersion",
+          "createAtomicMass",
+          "createAvogadro",
+          "createBohrMagneton",
+          "createBohrRadius",
+          "createBoltzmann",
+          "createClassicalElectronRadius",
+          "createConductanceQuantum",
+          "createCoulomb",
+          "createCoulombConstant",
+          "createDeuteronMass",
+          "createEfimovFactor",
+          "createElectricConstant",
+          "createElectronMass",
+          "createElementaryCharge",
+          "createFaraday",
+          "createFermiCoupling",
+          "createFineStructure",
+          "createFirstRadiation",
+          "createGasConstant",
+          "createGravitationConstant",
+          "createGravity",
+          "createHartreeEnergy",
+          "createInverseConductanceQuantum",
+          "createKlitzing",
+          "createLoschmidt",
+          "createMagneticConstant",
+          "createMagneticFluxQuantum",
+          "createMolarMass",
+          "createMolarMassC12",
+          "createMolarPlanckConstant",
+          "createMolarVolume",
+          "createNeutronMass",
+          "createNuclearMagneton",
+          "createPlanckCharge",
+          "createPlanckConstant",
+          "createPlanckLength",
+          "createPlanckMass",
+          "createPlanckTemperature",
+          "createPlanckTime",
+          "createProtonMass",
+          "createQuantumOfCirculation",
+          "createReducedPlanckConstant",
+          "createRydberg",
+          "createSackurTetrode",
+          "createSecondRadiation",
+          "createSpeedOfLight",
+          "createStefanBoltzmann",
+          "createThomsonCrossSection",
+          "createVacuumImpedance",
+          "createWeakMixingAngle",
+          "createWienDisplacement",
+          "createMapSlicesTransform",
+          "createColumnTransform",
+          "createFilterTransform",
+          "createForEachTransform",
+          "createIndexTransform",
+          "createMapTransform",
+          "createMaxTransform",
+          "createMeanTransform",
+          "createMinTransform",
+          "createRangeTransform",
+          "createRowTransform",
+          "createSubsetTransform",
+          "createConcatTransform",
+          "createDiffTransform",
+          "createStdTransform",
+          "createSumTransform",
+          "createQuantileSeqTransform",
+          "createCumSumTransform",
+          "createVarianceTransform",
+          "createPrintTransform",
+          "createAndTransform",
+          "createOrTransform",
+          "createNullishTransform",
+          "createBitAndTransform",
+          "createBitOrTransform"
+        ],
+        "reExported": [
+          "createTyped",
+          "createResultSet",
+          "createBigNumberClass",
+          "createComplexClass",
+          "createFractionClass",
+          "createRangeClass",
+          "createMatrixClass",
+          "createDenseMatrixClass",
+          "createClone",
+          "createIsInteger",
+          "createIsNegative",
+          "createIsNumeric",
+          "createHasNumericValue",
+          "createIsPositive",
+          "createIsZero",
+          "createIsNaN",
+          "createIsBounded",
+          "createIsFinite",
+          "createTypeOf",
+          "createEqualScalar",
+          "createSparseMatrixClass",
+          "createNumber",
+          "createBigint",
+          "createString",
+          "createBoolean",
+          "createBignumber",
+          "createComplex",
+          "createFraction",
+          "createMatrix",
+          "createMatrixFromFunction",
+          "createMatrixFromRows",
+          "createMatrixFromColumns",
+          "createSplitUnit",
+          "createUnaryMinus",
+          "createUnaryPlus",
+          "createAbs",
+          "createMapSlices",
+          "createAddScalar",
+          "createSubtractScalar",
+          "createCbrt",
+          "createCeil",
+          "createCube",
+          "createExp",
+          "createExpm1",
+          "createFix",
+          "createFloor",
+          "createGcd",
+          "createLcm",
+          "createLog10",
+          "createLog2",
+          "createMod",
+          "createMultiplyScalar",
+          "createMultiply",
+          "createNthRoot",
+          "createSign",
+          "createSqrt",
+          "createSquare",
+          "createSubtract",
+          "createXgcd",
+          "createInvmod",
+          "createDotMultiply",
+          "createBitAnd",
+          "createBitNot",
+          "createBitOr",
+          "createBitXor",
+          "createArg",
+          "createConj",
+          "createIm",
+          "createRe",
+          "createNot",
+          "createNullish",
+          "createOr",
+          "createXor",
+          "createConcat",
+          "createColumn",
+          "createCount",
+          "createCross",
+          "createDiag",
+          "createFilter",
+          "createFlatten",
+          "createForEach",
+          "createGetMatrixDataType",
+          "createIdentity",
+          "createKron",
+          "createMap",
+          "createDiff",
+          "createOnes",
+          "createRange",
+          "createReshape",
+          "createResize",
+          "createRotate",
+          "createRotationMatrix",
+          "createRow",
+          "createSize",
+          "createSqueeze",
+          "createSubset",
+          "createTranspose",
+          "createCtranspose",
+          "createZeros",
+          "createFft",
+          "createIfft",
+          "createSolveODE",
+          "createErf",
+          "createZeta",
+          "createMode",
+          "createProd",
+          "createFormat",
+          "createBin",
+          "createOct",
+          "createHex",
+          "createPrint",
+          "createTo",
+          "createToBest",
+          "createIsPrime",
+          "createNumeric",
+          "createDivideScalar",
+          "createPow",
+          "createRound",
+          "createLog",
+          "createLog1p",
+          "createNthRoots",
+          "createDotPow",
+          "createDotDivide",
+          "createLsolve",
+          "createUsolve",
+          "createLsolveAll",
+          "createUsolveAll",
+          "createLeftShift",
+          "createRightArithShift",
+          "createRightLogShift",
+          "createAnd",
+          "createCompare",
+          "createCompareNatural",
+          "createCompareText",
+          "createEqual",
+          "createEqualText",
+          "createSmaller",
+          "createSmallerEq",
+          "createLarger",
+          "createLargerEq",
+          "createDeepEqual",
+          "createUnequal",
+          "createPartitionSelect",
+          "createSort",
+          "createMax",
+          "createMin",
+          "createImmutableDenseMatrixClass",
+          "createIndexClass",
+          "createFibonacciHeapClass",
+          "createSpaClass",
+          "createUnitClass",
+          "createUnitFunction",
+          "createSparse",
+          "createCreateUnit",
+          "createAcos",
+          "createAcosh",
+          "createAcot",
+          "createAcoth",
+          "createAcsc",
+          "createAcsch",
+          "createAsec",
+          "createAsech",
+          "createAsin",
+          "createAsinh",
+          "createAtan",
+          "createAtan2",
+          "createAtanh",
+          "createCos",
+          "createCosh",
+          "createCot",
+          "createCoth",
+          "createCsc",
+          "createCsch",
+          "createSec",
+          "createSech",
+          "createSin",
+          "createSinh",
+          "createTan",
+          "createTanh",
+          "createSetCartesian",
+          "createSetDifference",
+          "createSetDistinct",
+          "createSetIntersect",
+          "createSetIsSubset",
+          "createSetMultiplicity",
+          "createSetPowerset",
+          "createSetSize",
+          "createSetSymDifference",
+          "createSetUnion",
+          "createAdd",
+          "createHypot",
+          "createNorm",
+          "createDot",
+          "createTrace",
+          "createIndex",
+          "createNode",
+          "createAccessorNode",
+          "createArrayNode",
+          "createAssignmentNode",
+          "createBlockNode",
+          "createConditionalNode",
+          "createConstantNode",
+          "createFunctionAssignmentNode",
+          "createIndexNode",
+          "createObjectNode",
+          "createOperatorNode",
+          "createParenthesisNode",
+          "createRangeNode",
+          "createRelationalNode",
+          "createSymbolNode",
+          "createFunctionNode",
+          "createParse",
+          "createCompile",
+          "createEvaluate",
+          "createParserClass",
+          "createParser",
+          "createLup",
+          "createQr",
+          "createSlu",
+          "createLusolve",
+          "createPolynomialRoot",
+          "createHelpClass",
+          "createChainClass",
+          "createHelp",
+          "createChain",
+          "createDet",
+          "createInv",
+          "createPinv",
+          "createEigs",
+          "createExpm",
+          "createSqrtm",
+          "createSylvester",
+          "createSchur",
+          "createLyap",
+          "createDivide",
+          "createDistance",
+          "createIntersect",
+          "createSum",
+          "createCumSum",
+          "createMean",
+          "createMedian",
+          "createMad",
+          "createVariance",
+          "createQuantileSeq",
+          "createStd",
+          "createCorr",
+          "createBernoulli",
+          "createCombinations",
+          "createCombinationsWithRep",
+          "createGamma",
+          "createLgamma",
+          "createFactorial",
+          "createKldivergence",
+          "createMultinomial",
+          "createPermutations",
+          "createPickRandom",
+          "createRandom",
+          "createRandomInt",
+          "createStirlingS2",
+          "createBellNumbers",
+          "createCatalan",
+          "createComposition",
+          "createLeafCount",
+          "createSimplify",
+          "createSimplifyConstant",
+          "createSimplifyCore",
+          "createResolve",
+          "createSymbolicEqual",
+          "createDerivative",
+          "createRationalize",
+          "createZpk2tf",
+          "createFreqz",
+          "createReviver",
+          "createReplacer",
+          "createE",
+          "createUppercaseE",
+          "createFalse",
+          "createI",
+          "createInfinity",
+          "createLN10",
+          "createLN2",
+          "createLOG10E",
+          "createLOG2E",
+          "createNaN",
+          "createNull",
+          "createPhi",
+          "createPi",
+          "createUppercasePi",
+          "createSQRT1_2",
+          "// eslint-disable-line camelcase\r\n  createSQRT2",
+          "createTau",
+          "createTrue",
+          "createVersion",
+          "createAtomicMass",
+          "createAvogadro",
+          "createBohrMagneton",
+          "createBohrRadius",
+          "createBoltzmann",
+          "createClassicalElectronRadius",
+          "createConductanceQuantum",
+          "createCoulomb",
+          "createCoulombConstant",
+          "createDeuteronMass",
+          "createEfimovFactor",
+          "createElectricConstant",
+          "createElectronMass",
+          "createElementaryCharge",
+          "createFaraday",
+          "createFermiCoupling",
+          "createFineStructure",
+          "createFirstRadiation",
+          "createGasConstant",
+          "createGravitationConstant",
+          "createGravity",
+          "createHartreeEnergy",
+          "createInverseConductanceQuantum",
+          "createKlitzing",
+          "createLoschmidt",
+          "createMagneticConstant",
+          "createMagneticFluxQuantum",
+          "createMolarMass",
+          "createMolarMassC12",
+          "createMolarPlanckConstant",
+          "createMolarVolume",
+          "createNeutronMass",
+          "createNuclearMagneton",
+          "createPlanckCharge",
+          "createPlanckConstant",
+          "createPlanckLength",
+          "createPlanckMass",
+          "createPlanckTemperature",
+          "createPlanckTime",
+          "createProtonMass",
+          "createQuantumOfCirculation",
+          "createReducedPlanckConstant",
+          "createRydberg",
+          "createSackurTetrode",
+          "createSecondRadiation",
+          "createSpeedOfLight",
+          "createStefanBoltzmann",
+          "createThomsonCrossSection",
+          "createVacuumImpedance",
+          "createWeakMixingAngle",
+          "createWienDisplacement",
+          "createMapSlicesTransform",
+          "createColumnTransform",
+          "createFilterTransform",
+          "createForEachTransform",
+          "createIndexTransform",
+          "createMapTransform",
+          "createMaxTransform",
+          "createMeanTransform",
+          "createMinTransform",
+          "createRangeTransform",
+          "createRowTransform",
+          "createSubsetTransform",
+          "createConcatTransform",
+          "createDiffTransform",
+          "createStdTransform",
+          "createSumTransform",
+          "createQuantileSeqTransform",
+          "createCumSumTransform",
+          "createVarianceTransform",
+          "createPrintTransform",
+          "createAndTransform",
+          "createOrTransform",
+          "createNullishTransform",
+          "createBitAndTransform",
+          "createBitOrTransform"
+        ]
+      },
+      "src/factoriesNumber.ts": {
+        "description": "----------------------------------------------------------------------------",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./plain/number/index.js",
+            "imports": [
+              "absNumber",
+              "acoshNumber",
+              "acosNumber",
+              "acothNumber",
+              "acotNumber",
+              "acschNumber",
+              "acscNumber",
+              "addNumber",
+              "andNumber",
+              "asechNumber",
+              "asecNumber",
+              "asinhNumber",
+              "asinNumber",
+              "atan2Number",
+              "atanhNumber",
+              "atanNumber",
+              "bitAndNumber",
+              "bitNotNumber",
+              "bitOrNumber",
+              "bitXorNumber",
+              "cbrtNumber",
+              "combinationsNumber",
+              "coshNumber",
+              "cosNumber",
+              "cothNumber",
+              "cotNumber",
+              "cschNumber",
+              "cscNumber",
+              "cubeNumber",
+              "divideNumber",
+              "expm1Number",
+              "expNumber",
+              "gammaNumber",
+              "gcdNumber",
+              "isIntegerNumber",
+              "isNaNNumber",
+              "isNegativeNumber",
+              "isPositiveNumber",
+              "isZeroNumber",
+              "lcmNumber",
+              "leftShiftNumber",
+              "lgammaNumber",
+              "log10Number",
+              "log1pNumber",
+              "log2Number",
+              "logNumber",
+              "modNumber",
+              "multiplyNumber",
+              "normNumber",
+              "notNumber",
+              "nthRootNumber",
+              "orNumber",
+              "powNumber",
+              "rightArithShiftNumber",
+              "rightLogShiftNumber",
+              "roundNumber",
+              "sechNumber",
+              "secNumber",
+              "signNumber",
+              "sinhNumber",
+              "sinNumber",
+              "sqrtNumber",
+              "squareNumber",
+              "subtractNumber",
+              "tanhNumber",
+              "tanNumber",
+              "unaryMinusNumber",
+              "unaryPlusNumber",
+              "xgcdNumber",
+              "xorNumber"
+            ]
+          },
+          {
+            "file": "./utils/factory.js",
+            "imports": [
+              "factory"
+            ]
+          },
+          {
+            "file": "./utils/noop.js",
+            "imports": [
+              "noIndex",
+              "noMatrix",
+              "noSubset"
+            ]
+          },
+          {
+            "file": "./types.js",
+            "imports": [
+              "TypedFunction"
+            ]
+          },
+          {
+            "file": "./core/function/typed.js",
+            "imports": [
+              "createTyped"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/resultset/ResultSet.js",
+            "imports": [
+              "createResultSet"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/matrix/Range.js",
+            "imports": [
+              "createRangeClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/Help.js",
+            "imports": [
+              "createHelpClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/chain/Chain.js",
+            "imports": [
+              "createChainClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/function/help.js",
+            "imports": [
+              "createHelp"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/chain/function/chain.js",
+            "imports": [
+              "createChain"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/resolve.js",
+            "imports": [
+              "createResolve"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/simplify.js",
+            "imports": [
+              "createSimplify"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/simplifyConstant.js",
+            "imports": [
+              "createSimplifyConstant"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/simplifyCore.js",
+            "imports": [
+              "createSimplifyCore"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/derivative.js",
+            "imports": [
+              "createDerivative"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/algebra/rationalize.js",
+            "imports": [
+              "createRationalize"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/ceil.js",
+            "imports": [
+              "createCeilNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/fix.js",
+            "imports": [
+              "createFixNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/floor.js",
+            "imports": [
+              "createFloorNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/arithmetic/hypot.js",
+            "imports": [
+              "createHypot"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/combinatorics/stirlingS2.js",
+            "imports": [
+              "createStirlingS2"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/combinatorics/bellNumbers.js",
+            "imports": [
+              "createBellNumbers"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/combinatorics/catalan.js",
+            "imports": [
+              "createCatalan"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/combinatorics/composition.js",
+            "imports": [
+              "createComposition"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./constants.js",
+            "imports": [
+              "createE",
+              "createUppercaseE",
+              "createFalse",
+              "// createI",
+              "createInfinity",
+              "createLN10",
+              "createLN2",
+              "createLOG10E",
+              "createLOG2E",
+              "createNaN",
+              "createNull",
+              "createPhi",
+              "createPi",
+              "createUppercasePi",
+              "createSQRT1_2",
+              "// eslint-disable-line camelcase\r\n  createSQRT2",
+              "createTau",
+              "createTrue",
+              "createVersion"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/number.js",
+            "imports": [
+              "createNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/bigint.js",
+            "imports": [
+              "createBigint"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/string.js",
+            "imports": [
+              "createString"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./type/boolean.js",
+            "imports": [
+              "createBoolean"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/function/parser.js",
+            "imports": [
+              "createParser"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/Node.js",
+            "imports": [
+              "createNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/AccessorNode.js",
+            "imports": [
+              "createAccessorNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ArrayNode.js",
+            "imports": [
+              "createArrayNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/AssignmentNode.js",
+            "imports": [
+              "createAssignmentNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/BlockNode.js",
+            "imports": [
+              "createBlockNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ConditionalNode.js",
+            "imports": [
+              "createConditionalNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ConstantNode.js",
+            "imports": [
+              "createConstantNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/FunctionAssignmentNode.js",
+            "imports": [
+              "createFunctionAssignmentNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/IndexNode.js",
+            "imports": [
+              "createIndexNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ObjectNode.js",
+            "imports": [
+              "createObjectNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/OperatorNode.js",
+            "imports": [
+              "createOperatorNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/ParenthesisNode.js",
+            "imports": [
+              "createParenthesisNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/RangeNode.js",
+            "imports": [
+              "createRangeNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/RelationalNode.js",
+            "imports": [
+              "createRelationalNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/SymbolNode.js",
+            "imports": [
+              "createSymbolNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/node/FunctionNode.js",
+            "imports": [
+              "createFunctionNode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/parse.js",
+            "imports": [
+              "createParse"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/function/compile.js",
+            "imports": [
+              "createCompile"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/function/evaluate.js",
+            "imports": [
+              "createEvaluate"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/Parser.js",
+            "imports": [
+              "createParserClass"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/mapSlices.js",
+            "imports": [
+              "createMapSlices"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/filter.js",
+            "imports": [
+              "createFilter"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/forEach.js",
+            "imports": [
+              "createForEach"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/map.js",
+            "imports": [
+              "createMap"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/range.js",
+            "imports": [
+              "createRange"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/size.js",
+            "imports": [
+              "createSize"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/matrix/partitionSelect.js",
+            "imports": [
+              "createPartitionSelect"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/bernoulli.js",
+            "imports": [
+              "createBernoulli"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/combinationsWithRep.js",
+            "imports": [
+              "createCombinationsWithRep"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/factorial.js",
+            "imports": [
+              "createFactorial"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/multinomial.js",
+            "imports": [
+              "createMultinomial"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/permutations.js",
+            "imports": [
+              "createPermutations"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/pickRandom.js",
+            "imports": [
+              "createPickRandom"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/random.js",
+            "imports": [
+              "createRandomNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/probability/randomInt.js",
+            "imports": [
+              "createRandomInt"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/equalScalar.js",
+            "imports": [
+              "createEqualScalarNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/compare.js",
+            "imports": [
+              "createCompareNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/compareNatural.js",
+            "imports": [
+              "createCompareNatural"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/compareText.js",
+            "imports": [
+              "createCompareTextNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/equal.js",
+            "imports": [
+              "createEqualNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/equalText.js",
+            "imports": [
+              "createEqualText"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/smaller.js",
+            "imports": [
+              "createSmallerNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/smallerEq.js",
+            "imports": [
+              "createSmallerEqNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/larger.js",
+            "imports": [
+              "createLargerNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/largerEq.js",
+            "imports": [
+              "createLargerEqNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/deepEqual.js",
+            "imports": [
+              "createDeepEqual"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/relational/unequal.js",
+            "imports": [
+              "createUnequalNumber"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/special/erf.js",
+            "imports": [
+              "createErf"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/special/zeta.js",
+            "imports": [
+              "createZeta"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/mode.js",
+            "imports": [
+              "createMode"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/prod.js",
+            "imports": [
+              "createProd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/max.js",
+            "imports": [
+              "createMax"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/min.js",
+            "imports": [
+              "createMin"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/sum.js",
+            "imports": [
+              "createSum"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/cumsum.js",
+            "imports": [
+              "createCumSum"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/mean.js",
+            "imports": [
+              "createMean"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/median.js",
+            "imports": [
+              "createMedian"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/mad.js",
+            "imports": [
+              "createMad"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/variance.js",
+            "imports": [
+              "createVariance"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/quantileSeq.js",
+            "imports": [
+              "createQuantileSeq"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/std.js",
+            "imports": [
+              "createStd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/statistics/corr.js",
+            "imports": [
+              "createCorr"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/string/format.js",
+            "imports": [
+              "createFormat"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/string/print.js",
+            "imports": [
+              "createPrint"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/mapSlices.transform.js",
+            "imports": [
+              "createMapSlicesTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/filter.transform.js",
+            "imports": [
+              "createFilterTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/forEach.transform.js",
+            "imports": [
+              "createForEachTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/map.transform.js",
+            "imports": [
+              "createMapTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/max.transform.js",
+            "imports": [
+              "createMaxTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/mean.transform.js",
+            "imports": [
+              "createMeanTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/min.transform.js",
+            "imports": [
+              "createMinTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/range.transform.js",
+            "imports": [
+              "createRangeTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/std.transform.js",
+            "imports": [
+              "createStdTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/sum.transform.js",
+            "imports": [
+              "createSumTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/cumsum.transform.js",
+            "imports": [
+              "createCumSumTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./expression/transform/variance.transform.js",
+            "imports": [
+              "createVarianceTransform"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/clone.js",
+            "imports": [
+              "createClone"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isNumeric.js",
+            "imports": [
+              "createIsNumeric"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/hasNumericValue.js",
+            "imports": [
+              "createHasNumericValue"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isBounded.js",
+            "imports": [
+              "createIsBounded"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isFinite.js",
+            "imports": [
+              "createIsFinite"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/typeOf.js",
+            "imports": [
+              "createTypeOf"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/isPrime.js",
+            "imports": [
+              "createIsPrime"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./function/utils/numeric.js",
+            "imports": [
+              "createNumeric"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./json/reviver.js",
+            "imports": [
+              "createReviver"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./json/replacer.js",
+            "imports": [
+              "createReplacer"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "createTyped",
+          "createResultSet",
+          "createRangeClass",
+          "createHelpClass",
+          "createChainClass",
+          "createHelp",
+          "createChain",
+          "createResolve",
+          "createSimplify",
+          "createSimplifyConstant",
+          "createSimplifyCore",
+          "createDerivative",
+          "createRationalize",
+          "createCeilNumber",
+          "createFixNumber",
+          "createFloorNumber",
+          "createHypot",
+          "createStirlingS2",
+          "createBellNumbers",
+          "createCatalan",
+          "createComposition",
+          "createE",
+          "createUppercaseE",
+          "createFalse",
+          "// createI",
+          "createInfinity",
+          "createLN10",
+          "createLN2",
+          "createLOG10E",
+          "createLOG2E",
+          "createNaN",
+          "createNull",
+          "createPhi",
+          "createPi",
+          "createUppercasePi",
+          "createSQRT1_2",
+          "// eslint-disable-line camelcase\r\n  createSQRT2",
+          "createTau",
+          "createTrue",
+          "createVersion",
+          "createNumber",
+          "createBigint",
+          "createString",
+          "createBoolean",
+          "createParser",
+          "createNode",
+          "createAccessorNode",
+          "createArrayNode",
+          "createAssignmentNode",
+          "createBlockNode",
+          "createConditionalNode",
+          "createConstantNode",
+          "createFunctionAssignmentNode",
+          "createIndexNode",
+          "createObjectNode",
+          "createOperatorNode",
+          "createParenthesisNode",
+          "createRangeNode",
+          "createRelationalNode",
+          "createSymbolNode",
+          "createFunctionNode",
+          "createParse",
+          "createCompile",
+          "createEvaluate",
+          "createParserClass",
+          "createMapSlices",
+          "createFilter",
+          "createForEach",
+          "createMap",
+          "createRange",
+          "createSize",
+          "createPartitionSelect",
+          "createBernoulli",
+          "createCombinationsWithRep",
+          "createFactorial",
+          "createMultinomial",
+          "createPermutations",
+          "createPickRandom",
+          "createRandomNumber",
+          "createRandomInt",
+          "createEqualScalarNumber",
+          "createCompareNumber",
+          "createCompareNatural",
+          "createCompareTextNumber",
+          "createEqualNumber",
+          "createEqualText",
+          "createSmallerNumber",
+          "createSmallerEqNumber",
+          "createLargerNumber",
+          "createLargerEqNumber",
+          "createDeepEqual",
+          "createUnequalNumber",
+          "createErf",
+          "createZeta",
+          "createMode",
+          "createProd",
+          "createMax",
+          "createMin",
+          "createSum",
+          "createCumSum",
+          "createMean",
+          "createMedian",
+          "createMad",
+          "createVariance",
+          "createQuantileSeq",
+          "createStd",
+          "createCorr",
+          "createFormat",
+          "createPrint",
+          "createMapSlicesTransform",
+          "createFilterTransform",
+          "createForEachTransform",
+          "createMapTransform",
+          "createMaxTransform",
+          "createMeanTransform",
+          "createMinTransform",
+          "createRangeTransform",
+          "createStdTransform",
+          "createSumTransform",
+          "createCumSumTransform",
+          "createVarianceTransform",
+          "createClone",
+          "createIsNumeric",
+          "createHasNumericValue",
+          "createIsBounded",
+          "createIsFinite",
+          "createTypeOf",
+          "createIsPrime",
+          "createNumeric",
+          "createReviver",
+          "createReplacer",
+          "createUnaryMinus",
+          "createUnaryPlus",
+          "createAbs",
+          "createAddScalar",
+          "createSubtractScalar",
+          "createCbrt",
+          "createCube",
+          "createExp",
+          "createExpm1",
+          "createGcd",
+          "createLcm",
+          "createLog10",
+          "createLog2",
+          "createMod",
+          "createMultiplyScalar",
+          "createMultiply",
+          "createNthRoot",
+          "createSign",
+          "createSqrt",
+          "createSquare",
+          "createSubtract",
+          "createXgcd",
+          "createDivideScalar",
+          "createPow",
+          "createRound",
+          "createLog",
+          "createLog1p",
+          "createAdd",
+          "createNorm",
+          "createDivide",
+          "createBitAnd",
+          "createBitNot",
+          "createBitOr",
+          "createBitXor",
+          "createLeftShift",
+          "createRightArithShift",
+          "createRightLogShift",
+          "createAnd",
+          "createNot",
+          "createOr",
+          "createXor",
+          "createIndex",
+          "createMatrix",
+          "createSubset",
+          "createCombinations",
+          "createGamma",
+          "createLgamma",
+          "createAcos",
+          "createAcosh",
+          "createAcot",
+          "createAcoth",
+          "createAcsc",
+          "createAcsch",
+          "createAsec",
+          "createAsech",
+          "createAsin",
+          "createAsinh",
+          "createAtan",
+          "createAtan2",
+          "createAtanh",
+          "createCos",
+          "createCosh",
+          "createCot",
+          "createCoth",
+          "createCsc",
+          "createCsch",
+          "createSec",
+          "createSech",
+          "createSin",
+          "createSinh",
+          "createTan",
+          "createTanh",
+          "createSubsetTransform",
+          "createIsInteger",
+          "createIsNegative",
+          "createIsPositive",
+          "createIsZero",
+          "createIsNaN"
+        ],
+        "reExported": [
+          "createTyped",
+          "createResultSet",
+          "createRangeClass",
+          "createHelpClass",
+          "createChainClass",
+          "createHelp",
+          "createChain",
+          "createResolve",
+          "createSimplify",
+          "createSimplifyConstant",
+          "createSimplifyCore",
+          "createDerivative",
+          "createRationalize",
+          "createCeilNumber",
+          "createFixNumber",
+          "createFloorNumber",
+          "createHypot",
+          "createStirlingS2",
+          "createBellNumbers",
+          "createCatalan",
+          "createComposition",
+          "createE",
+          "createUppercaseE",
+          "createFalse",
+          "// createI",
+          "createInfinity",
+          "createLN10",
+          "createLN2",
+          "createLOG10E",
+          "createLOG2E",
+          "createNaN",
+          "createNull",
+          "createPhi",
+          "createPi",
+          "createUppercasePi",
+          "createSQRT1_2",
+          "// eslint-disable-line camelcase\r\n  createSQRT2",
+          "createTau",
+          "createTrue",
+          "createVersion",
+          "createNumber",
+          "createBigint",
+          "createString",
+          "createBoolean",
+          "createParser",
+          "createNode",
+          "createAccessorNode",
+          "createArrayNode",
+          "createAssignmentNode",
+          "createBlockNode",
+          "createConditionalNode",
+          "createConstantNode",
+          "createFunctionAssignmentNode",
+          "createIndexNode",
+          "createObjectNode",
+          "createOperatorNode",
+          "createParenthesisNode",
+          "createRangeNode",
+          "createRelationalNode",
+          "createSymbolNode",
+          "createFunctionNode",
+          "createParse",
+          "createCompile",
+          "createEvaluate",
+          "createParserClass",
+          "createMapSlices",
+          "createFilter",
+          "createForEach",
+          "createMap",
+          "createRange",
+          "createSize",
+          "createPartitionSelect",
+          "createBernoulli",
+          "createCombinationsWithRep",
+          "createFactorial",
+          "createMultinomial",
+          "createPermutations",
+          "createPickRandom",
+          "createRandomNumber",
+          "createRandomInt",
+          "createEqualScalarNumber",
+          "createCompareNumber",
+          "createCompareNatural",
+          "createCompareTextNumber",
+          "createEqualNumber",
+          "createEqualText",
+          "createSmallerNumber",
+          "createSmallerEqNumber",
+          "createLargerNumber",
+          "createLargerEqNumber",
+          "createDeepEqual",
+          "createUnequalNumber",
+          "createErf",
+          "createZeta",
+          "createMode",
+          "createProd",
+          "createMax",
+          "createMin",
+          "createSum",
+          "createCumSum",
+          "createMean",
+          "createMedian",
+          "createMad",
+          "createVariance",
+          "createQuantileSeq",
+          "createStd",
+          "createCorr",
+          "createFormat",
+          "createPrint",
+          "createMapSlicesTransform",
+          "createFilterTransform",
+          "createForEachTransform",
+          "createMapTransform",
+          "createMaxTransform",
+          "createMeanTransform",
+          "createMinTransform",
+          "createRangeTransform",
+          "createStdTransform",
+          "createSumTransform",
+          "createCumSumTransform",
+          "createVarianceTransform",
+          "createClone",
+          "createIsNumeric",
+          "createHasNumericValue",
+          "createIsBounded",
+          "createIsFinite",
+          "createTypeOf",
+          "createIsPrime",
+          "createNumeric",
+          "createReviver",
+          "createReplacer"
+        ],
+        "constants": [
+          "createUnaryMinus",
+          "createUnaryPlus",
+          "createAbs",
+          "createAddScalar",
+          "createSubtractScalar",
+          "createCbrt",
+          "createCube",
+          "createExp",
+          "createExpm1",
+          "createGcd",
+          "createLcm",
+          "createLog10",
+          "createLog2",
+          "createMod",
+          "createMultiplyScalar",
+          "createMultiply",
+          "createNthRoot",
+          "createSign",
+          "createSqrt",
+          "createSquare",
+          "createSubtract",
+          "createXgcd",
+          "createDivideScalar",
+          "createPow",
+          "createRound",
+          "createLog",
+          "createLog1p",
+          "createAdd",
+          "createNorm",
+          "createDivide",
+          "createBitAnd",
+          "createBitNot",
+          "createBitOr",
+          "createBitXor",
+          "createLeftShift",
+          "createRightArithShift",
+          "createRightLogShift",
+          "createAnd",
+          "createNot",
+          "createOr",
+          "createXor",
+          "createIndex",
+          "createMatrix",
+          "createSubset",
+          "createCombinations",
+          "createGamma",
+          "createLgamma",
+          "createAcos",
+          "createAcosh",
+          "createAcot",
+          "createAcoth",
+          "createAcsc",
+          "createAcsch",
+          "createAsec",
+          "createAsech",
+          "createAsin",
+          "createAsinh",
+          "createAtan",
+          "createAtan2",
+          "createAtanh",
+          "createCos",
+          "createCosh",
+          "createCot",
+          "createCoth",
+          "createCsc",
+          "createCsch",
+          "createSec",
+          "createSech",
+          "createSin",
+          "createSinh",
+          "createTan",
+          "createTanh",
+          "createSubsetTransform",
+          "createIsInteger",
+          "createIsNegative",
+          "createIsPositive",
+          "createIsZero",
+          "createIsNaN"
+        ]
+      },
+      "src/mainAny.ts": {
+        "description": "configuration",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./pureFunctionsAny.generated.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./impureFunctionsAny.generated.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./typeChecks.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./dependenciesAny.generated.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../factoriesAny.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./configReadonly.js",
+            "imports": [
+              "config"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../error/IndexError.js",
+            "imports": [
+              "IndexError"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../error/DimensionError.js",
+            "imports": [
+              "DimensionError"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../error/ArgumentsError.js",
+            "imports": [
+              "ArgumentsError"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../core/create.js",
+            "imports": [
+              "create"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../utils/factory.js",
+            "imports": [
+              "factory"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "config",
+          "IndexError",
+          "DimensionError",
+          "ArgumentsError",
+          "create",
+          "factory"
+        ],
+        "reExported": [
+          "* from ./pureFunctionsAny.generated.js",
+          "* from ./impureFunctionsAny.generated.js",
+          "* from ./typeChecks.js",
+          "* from ./dependenciesAny.generated.js",
+          "* from ../factoriesAny.js",
+          "config",
+          "IndexError",
+          "DimensionError",
+          "ArgumentsError",
+          "create",
+          "factory"
+        ]
+      },
+      "src/mainNumber.ts": {
+        "description": "configuration",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./pureFunctionsNumber.generated.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./impureFunctionsNumber.generated.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./typeChecks.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./dependenciesNumber.generated.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../factoriesNumber.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./configReadonly.js",
+            "imports": [
+              "config"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../error/IndexError.js",
+            "imports": [
+              "IndexError"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../error/DimensionError.js",
+            "imports": [
+              "DimensionError"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../error/ArgumentsError.js",
+            "imports": [
+              "ArgumentsError"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../core/create.js",
+            "imports": [
+              "create"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "../utils/factory.js",
+            "imports": [
+              "factory"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "config",
+          "IndexError",
+          "DimensionError",
+          "ArgumentsError",
+          "create",
+          "factory"
+        ],
+        "reExported": [
+          "* from ./pureFunctionsNumber.generated.js",
+          "* from ./impureFunctionsNumber.generated.js",
+          "* from ./typeChecks.js",
+          "* from ./dependenciesNumber.generated.js",
+          "* from ../factoriesNumber.js",
+          "config",
+          "IndexError",
+          "DimensionError",
+          "ArgumentsError",
+          "create",
+          "factory"
+        ]
+      },
+      "src/number.ts": {
+        "description": "number module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./entry/mainNumber.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [],
+        "reExported": [
+          "* from ./entry/mainNumber.js"
+        ]
+      },
+      "src/typeChecks.ts": {
+        "description": "util functions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/is.js",
+            "imports": [
+              "isAccessorNode",
+              "isArray",
+              "isArrayNode",
+              "isAssignmentNode",
+              "isBigNumber",
+              "isBigInt",
+              "isBlockNode",
+              "isBoolean",
+              "isChain",
+              "isCollection",
+              "isComplex",
+              "isConditionalNode",
+              "isConstantNode",
+              "isDate",
+              "isDenseMatrix",
+              "isFraction",
+              "isFunction",
+              "isFunctionAssignmentNode",
+              "isFunctionNode",
+              "isHelp",
+              "isIndex",
+              "isIndexNode",
+              "isMatrix",
+              "isNode",
+              "isNull",
+              "isNumber",
+              "isString",
+              "isUndefined",
+              "isObject",
+              "isMap",
+              "isPartitionedMap",
+              "isObjectWrappingMap",
+              "isObjectNode",
+              "isOperatorNode",
+              "isParenthesisNode",
+              "isRange",
+              "isRangeNode",
+              "isRelationalNode",
+              "isRegExp",
+              "isResultSet",
+              "isSparseMatrix",
+              "isSymbolNode",
+              "isUnit"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "isAccessorNode",
+          "isArray",
+          "isArrayNode",
+          "isAssignmentNode",
+          "isBigNumber",
+          "isBigInt",
+          "isBlockNode",
+          "isBoolean",
+          "isChain",
+          "isCollection",
+          "isComplex",
+          "isConditionalNode",
+          "isConstantNode",
+          "isDate",
+          "isDenseMatrix",
+          "isFraction",
+          "isFunction",
+          "isFunctionAssignmentNode",
+          "isFunctionNode",
+          "isHelp",
+          "isIndex",
+          "isIndexNode",
+          "isMatrix",
+          "isNode",
+          "isNull",
+          "isNumber",
+          "isString",
+          "isUndefined",
+          "isObject",
+          "isMap",
+          "isPartitionedMap",
+          "isObjectWrappingMap",
+          "isObjectNode",
+          "isOperatorNode",
+          "isParenthesisNode",
+          "isRange",
+          "isRangeNode",
+          "isRelationalNode",
+          "isRegExp",
+          "isResultSet",
+          "isSparseMatrix",
+          "isSymbolNode",
+          "isUnit"
+        ],
+        "reExported": [
+          "isAccessorNode",
+          "isArray",
+          "isArrayNode",
+          "isAssignmentNode",
+          "isBigNumber",
+          "isBigInt",
+          "isBlockNode",
+          "isBoolean",
+          "isChain",
+          "isCollection",
+          "isComplex",
+          "isConditionalNode",
+          "isConstantNode",
+          "isDate",
+          "isDenseMatrix",
+          "isFraction",
+          "isFunction",
+          "isFunctionAssignmentNode",
+          "isFunctionNode",
+          "isHelp",
+          "isIndex",
+          "isIndexNode",
+          "isMatrix",
+          "isNode",
+          "isNull",
+          "isNumber",
+          "isString",
+          "isUndefined",
+          "isObject",
+          "isMap",
+          "isPartitionedMap",
+          "isObjectWrappingMap",
+          "isObjectNode",
+          "isOperatorNode",
+          "isParenthesisNode",
+          "isRange",
+          "isRangeNode",
+          "isRelationalNode",
+          "isRegExp",
+          "isResultSet",
+          "isSparseMatrix",
+          "isSymbolNode",
+          "isUnit"
+        ]
+      }
+    },
+    "entry": {
+      "src/index.ts": {
+        "description": "index module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./entry/mainAny.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [],
+        "reExported": [
+          "* from ./entry/mainAny.js"
+        ]
+      }
+    }
+  },
+  "dependencyGraph": {
+    "circularDependencies": {
+      "runtime": [],
+      "typeOnly": [],
+      "total": 0,
+      "runtimeCount": 0,
+      "typeOnlyCount": 0
+    },
+    "layers": [
+      {
+        "name": "Root",
+        "files": [
+          "src/allFactoriesAny.ts",
+          "src/allFactoriesNumber.ts",
+          "src/configReadonly.ts",
+          "src/defaultInstance.ts",
+          "src/factoriesAny.ts",
+          "src/factoriesNumber.ts",
+          "src/mainAny.ts",
+          "src/mainNumber.ts",
+          "src/number.ts",
+          "src/typeChecks.ts"
+        ]
+      },
+      {
+        "name": "Entry",
+        "files": [
+          "src/index.ts"
+        ]
+      }
+    ]
+  },
+  "statistics": {
+    "totalTypeScriptFiles": 11,
+    "totalModules": 2,
+    "totalLinesOfCode": 857,
+    "totalExports": 636,
+    "totalClasses": 0,
+    "totalInterfaces": 0,
+    "totalFunctions": 0,
+    "totalTypeGuards": 0,
+    "totalEnums": 0,
+    "totalConstants": 81,
+    "totalReExports": 567,
+    "totalTypeOnlyImports": 0,
+    "runtimeCircularDeps": 0,
+    "typeOnlyCircularDeps": 0,
+    "unusedFilesCount": 7,
+    "unusedExportsCount": 0
+  }
+}
