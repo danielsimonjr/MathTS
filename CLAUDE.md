@@ -4,261 +4,158 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MathTS is a ground-up TypeScript rewrite of mathjs with WASM/WebGPU/WebWorker optimization. It includes a Scientific Workbook system (`.mtsw` files) for reactive YAML-based notebooks targeting theoretical physics and tensor mathematics, specifically the Universal Physics Tensor Framework (UPTF).
+MathTS is a TypeScript rewrite of mathjs with WASM/WebGPU/WebWorker optimization. It uses an npm workspaces monorepo with Turborepo orchestration. All packages are ESM-only (`"type": "module"`), target ES2022, and use `tsup` for bundling with `vitest` for testing.
+
+It also includes a Scientific Workbook system (`.mtsw` files) for reactive YAML-based notebooks.
 
 ## Build & Development Commands
 
-The workbook package is located in `docs/`:
-
 ```bash
-cd docs
+# From repo root:
+npm run build               # turbo run build (all packages)
+npm run test                # turbo run test (all packages)
+npm run typecheck           # turbo run typecheck (all packages)
+npm run lint                # turbo run lint (all packages)
+npm run format              # prettier --write all files
+npm run format:check        # prettier --check (CI)
 
-# Install dependencies
-npm install
+# Single package:
+npx turbo build --filter=@mathts/core
+npx turbo test --filter=@mathts/matrix
 
-# Build the project
-npm run build           # tsup builds src/index.ts and src/cli.ts
+# Run specific test file (from repo root):
+npx vitest run core/tests/utils.test.ts
+npx vitest run matrix/tests/DenseMatrix.test.ts
 
-# Development mode (watch)
-npm run dev
+# Run tests for one package directly:
+cd core && npx vitest run
+cd matrix && npx vitest run
 
-# Run tests
-npm run test            # vitest
-npm run test -- --watch # Watch mode
-
-# Run specific test file
-npx vitest run path/to/test.ts
-
-# Type checking
-npm run typecheck       # tsc --noEmit
-
-# Linting
-npm run lint            # eslint src --ext .ts
+# Typecheck a single package:
+cd functions && npx tsc --noEmit
 ```
 
-### CLI Tool (mtsw)
+## Monorepo Structure
 
-```bash
-# Run a workbook
-mtsw run <file.mtsw>
-mtsw run <file.mtsw> -c <cell-id>    # Run specific cell
-mtsw run <file.mtsw> -v              # Verbose output
+### Workspaces (in `package.json`)
 
-# Watch mode
-mtsw watch <file.mtsw>
-
-# Validate workbook structure
-mtsw validate <file.mtsw>
-
-# Strip outputs for git
-mtsw strip <file.mtsw> -o clean.mtsw
-
-# Show dependency graph
-mtsw graph <file.mtsw>               # Text format
-mtsw graph <file.mtsw> -f mermaid    # Mermaid diagram
-
-# Create new workbook from template
-mtsw new <name> -t basic             # basic | tensor-physics | data-science
-
-# Export to other formats
-mtsw export <file.mtsw> -f html      # html | pdf | ipynb | latex
 ```
+packages/typed-function/   # @mathts/typed-function - forked type dispatch system
+packages/workerpool/       # @mathts/workerpool - forked worker pool management
+core/                      # @mathts/core - types, typed-function integration, factory
+matrix/                    # @mathts/matrix - DenseMatrix, SparseMatrix, backends (JS/WASM/GPU)
+functions/                 # @mathts/functions - math functions via typed dispatch
+parallel/                  # @mathts/parallel - ComputePool, WebWorker operations
+expression/                # @mathts/expression - parser/evaluator (build skipped, incomplete)
+workbook/                  # @mathts/workbook - .mtsw notebook runtime + CLI
+assembly/                  # WASM source (AssemblyScript, build broken)
+compat/                    # @mathts/compat - mathjs API compatibility shim
+```
+
+### Dependency Graph
+
+```
+typed-function ← core ← matrix ← functions
+                   ↑        ↑         ↑
+workerpool ← parallel ─────┘         │
+                   ↑                  │
+                   └──────────────────┘
+core ← workbook
+core, matrix, functions, parallel ← compat
+```
+
+### Package Build Details
+
+All packages use `tsup src/index.ts --format esm --dts --clean` except:
+- **functions**: no `--dts` flag (build is `tsup src/index.ts --format esm --clean`)
+- **workbook**: builds two entry points (`src/index.ts` and `src/cli.ts`)
+- **expression**: build is `echo 'Skipping build'` (incomplete package)
 
 ## Architecture
 
-### Workbook Runtime (`docs/`)
+### Two-Layer Code in `functions/`
 
-The workbook package (`@mathts/workbook`) provides a YAML-based reactive notebook system:
+The functions package has two distinct code layers:
 
-- **`types.ts`** - Core type definitions: `Workbook`, `Cell`, `DependencyGraph`, `ExecutionContext`
-- **`index.ts`** - YAML parser/serializer: `parseWorkbook()`, `serializeWorkbook()`, `stripOutputs()`
-- **`graph.ts`** - Dependency graph: `buildDependencyGraph()`, `topologicalSort()`, `getDependents()`
-- **`executor.ts`** - Cell execution: `WorkbookExecutor` class with reactive execution
-- **`cli.ts`** - Command-line interface
+1. **Active typed functions** (`functions/src/typed/`): New parallel-first implementations using `@mathts/core` typed dispatch. These are the only files exported from `functions/src/index.ts`. Includes: `arithmetic.ts`, `trigonometry.ts`, `statistics.ts`, `signal.ts`.
 
-### Cell Types
+2. **Synced mathjs factories** (`functions/src/{arithmetic,algebra,bitwise,...}/`): ~20 category directories containing factory-pattern functions synced from the mathjs fork (`~/Dropbox/Github/mathjs`). These are **not exported** and not in the build entry point. Support files in `functions/src/{utils,core,plain,type,expression,error,wasm}/`.
 
-The workbook supports 8 cell types, each detected by its primary key:
-- `markdown` - Documentation with LaTeX math support
-- `code` - TypeScript/JavaScript execution
-- `tensor` - Einstein notation for tensor math
-- `equation` - LaTeX equations with labels
-- `visualization` - Three.js/D3/Plotly rendering
-- `data` - YAML/JSON/CSV data cells
-- `test` - Assertions with timeout support
-- `export` - Publication output generation
+Import path difference from mathjs: mathjs uses `../../utils/` (extra `function/` directory level), mathts uses `../utils/`. Import extensions are `.js` in mathts.
 
-### Dependency Resolution
+### `@mathts/core` Exports
 
-Cells declare dependencies via:
-1. Explicit `depends_on: [cell-ids]` field
-2. Auto-detection from `import ... from '#cell-id'` patterns
+Three main systems:
+- **Numeric types**: `Complex`, `Fraction`, `BigNumber` with type guards and constants
+- **typed-function integration**: `mathTyped` instance, `createMathTSTyped()`, `TypeRegistry`, type test functions (`isNumber`, `isComplex`, `isMatrix`, etc.)
+- **Factory pattern**: `FunctionRegistry`, `createFactory()`, `registry`, `math` singleton, `DEFAULT_CONFIG`
 
-The executor runs cells in topological order, supporting three modes:
-- `reactive` - Auto-rerun when dependencies change
-- `sequential` - Top-to-bottom execution
-- `manual` - Explicit trigger only
+### Matrix Backends
 
-### Planned Package Structure (Full MathTS)
-
-```
-mathts/
-├── packages/
-│   ├── typed-function/    # Type dispatch system
-│   └── workerpool/        # Worker pool management
-├── core/                  # @mathts/core - types, config, factory
-├── matrix/                # @mathts/matrix - DenseMatrix, SparseMatrix, backends
-├── functions/             # @mathts/functions - arithmetic, algebra, stats
-├── parallel/              # @mathts/parallel - ComputePool, workers
-└── expression/            # @mathts/expression - parser, evaluator
-```
-
-### Backend Selection Strategy
-
-Matrix operations support three backends with automatic selection:
-- **JSBackend** - Pure TypeScript (default)
+`@mathts/matrix` supports three backends with automatic selection via `BackendManager`:
+- **JSBackend** - Pure TypeScript (default, always available)
 - **WASMBackend** - AssemblyScript with SIMD (>1K elements)
 - **GPUBackend** - WebGPU compute shaders (>100K elements)
 
-## Key Patterns
+### `@mathts/compat` Pattern
 
-### Workbook Parsing
+Provides mathjs-compatible API via shims:
 ```typescript
-const result = parseWorkbook(yamlContent);
-if (result.success && result.workbook) {
-  const executor = createExecutor(result.workbook);
-  await executor.runAll();
-}
+import { create, all } from '@mathts/compat';
+const math = create(all);
+math.add(1, 2);  // delegates to @mathts/core types + operations
 ```
 
-### Cell References
-Cells reference each other using `#cell-id` syntax:
-```typescript
-import { result } from '#previous-cell';
-```
+### Workbook Runtime
 
-### Event Handling
-```typescript
-executor.on((event: WorkbookEvent) => {
-  switch (event.type) {
-    case 'cell:success': // Handle success
-    case 'cell:error':   // Handle error
-    case 'cell:stale':   // Dependencies changed
-  }
-});
-```
+YAML-based reactive notebook (`.mtsw` files). Key source files in `workbook/src/`:
+- `types.ts` - `Workbook`, `Cell`, `DependencyGraph`, `ExecutionContext`
+- `parser.ts` / `index.ts` - YAML parsing/serialization
+- `graph.ts` - dependency resolution with topological sort
+- `executor.ts` - `WorkbookExecutor` with reactive/sequential/manual execution modes
 
-## File Format (.mtsw)
+## Testing
 
-YAML-based workbook format designed for Git-friendliness:
-```yaml
-version: "1.0"
-metadata:
-  title: "Workbook Title"
-  author: "Author Name"
-runtime:
-  engine: mathts
-  execution: reactive
-cells:
-  - markdown: |
-      # Title
-    id: intro
-  - code: |
-      const x = 42;
-      export { x };
-    id: compute
-```
+**Framework**: Vitest. Root `vitest.config.ts` aggregates all test paths. Individual packages also have their own `vitest.config.ts`.
+
+**Test file locations** (all use `*.test.ts` convention):
+- `core/tests/` - type system, factory, typed-function
+- `matrix/tests/` - DenseMatrix, SparseMatrix, backends (JS, WASM, GPU), SVD/eig decompositions
+- `functions/tests/` - typed arithmetic, signal processing (FFT, convolution), parallel ops
+- `parallel/tests/` - ComputePool, chunking, threshold strategies, elementwise/matmul operations
+- `compat/tests/` - compatibility layer
+- `packages/typed-function/tests/`, `packages/workerpool/tests/`
+- `tests/integration/` - cross-package instance and function tests
+
+**Packages without tests**: `expression/`, `workbook/`, `assembly/`
+
+**Gotcha**: Always `import { describe, it, expect } from 'vitest'` explicitly in test files. The `globals` setting is inconsistent across package configs.
+
+## TypeScript Configuration
+
+- `tsconfig.base.json`: strict mode, ES2022 target, ESNext modules, bundler resolution
+- Each package extends the base config
+- Import extensions must be `.js` (ESM resolution)
 
 ## Code Style
 
-### Naming Conventions
-- **Files**: `kebab-case.ts`
-- **Classes**: `PascalCase`
-- **Functions/Variables**: `camelCase`
-- **Constants**: `UPPER_SNAKE_CASE`
-- **Types/Interfaces**: `PascalCase`
+- Files: `kebab-case.ts`, Classes: `PascalCase`, Functions/Variables: `camelCase`, Constants: `UPPER_SNAKE_CASE`
+- Commit messages: Conventional Commits (`feat(matrix):`, `fix(workbook):`, etc.)
+- Pre-commit hook (husky + lint-staged): auto-runs `eslint --fix` + `prettier --write` on staged files
 
-### Commit Messages
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
-```
-<type>(<scope>): <description>
-```
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+## Known Issues
 
-Examples:
-```
-feat(matrix): add sparse matrix CSR format support
-fix(workbook): resolve circular dependency detection
-perf(wasm): optimize matmul with SIMD instructions
-```
-
-## Implementation Status
-
-Current workbook runtime is implemented. Pending:
-- MathTS core library integration
-- Three.js visualization bindings
-- Web UI (Monaco + reactive rendering)
-- LaTeX/PDF export
-
-## WASM & Sprint Guidelines
-
-See `docs/architecture/` for:
-- AssemblyScript-compatible TypeScript patterns
-- Sprint development guidelines and checklists
-- ComputePool API reference
-- typed-function and workerpool integration patterns
-
-## Sprint Planning Files
-
-Sprint JSON files are in `docs/planning/sprints/`:
-- `PHASE_1_SPRINT_1_TODO.json` through `PHASE_6_SPRINT_28_TODO.json`
-- Post-v1.0 sprints in `docs/planning/phases/`
-
-Each sprint file contains tasks, dependencies, success criteria, and files to create/modify.
-
-## Syncing from mathjs
-
-The functions package contains files synced from the mathjs fork (`~/Dropbox/Github/mathjs`):
-
-- **Active code**: `functions/src/typed/` - parallel-first implementations using `@mathts/core` and `@mathts/parallel`
-- **Synced from mathjs**: `functions/src/<category>/` - dormant factory-pattern functions (not in build entry)
-- **Support files**: `functions/src/{utils,core,plain,type,expression,error,wasm}/`
-
-### Sync Process
-
-```bash
-# Use sync script (adjusts import paths automatically)
-python scratchpad/sync_mathjs_to_mathts.py
-
-# Key transformations:
-# - ../../utils/ → ../utils/ (mathts has no intermediate function/ dir)
-# - .ts extensions → .js extensions in imports
-# - Delete legacy .js files after sync (mathts is TS-only)
-```
-
-### Import Path Difference
-
-| Project | Function location | Import to utils |
-|---------|------------------|-----------------|
-| mathjs | `src/function/arithmetic/add.ts` | `../../utils/factory.ts` |
-| mathts | `functions/src/arithmetic/add.ts` | `../utils/factory.js` |
-
-## Known Build Issues
-
-Pre-existing issues (not blocking core functionality):
-- `@types/node` missing in parallel, workbook packages → `npm i -D @types/node`
+- `expression/` build is skipped (incomplete package)
 - `assembly/` WASM build fails (asc compiler issues)
-- `expression/` and `functions/` have no test files (vitest exits with "no tests found")
+- Some packages may need `npm i -D @types/node` if missing
 
-## Quick Commands
+## Tools
 
-```bash
-# Monorepo build (core packages)
-npx turbo build --filter=@mathts/core --filter=@mathts/matrix --filter=@mathts/functions --filter=@mathts/compat
+`tools/` contains standalone utility packages (not workspace members):
+- `create-dependency-graph/` - generates package dependency graphs
+- `compress-for-context/` - compresses code for LLM context windows
+- `chunking-for-files/` - splits large files into chunks
 
-# Run all vitest tests from root
-npx vitest run
+## Sprint Planning
 
-# Typecheck functions package
-cd functions && npx tsc --noEmit
-```
+Sprint JSON files in `docs/Planning/sprints/`: `PHASE_1_SPRINT_1_TODO.json` through `PHASE_6_SPRINT_28_TODO.json`. Architecture docs in `docs/Architecture/Workbook/`.
