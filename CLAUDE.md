@@ -155,18 +155,20 @@ The `functions/` package contains synced factory-pattern functions from the math
 
 The script:
 1. Copies `.ts` files from `~/Dropbox/Github/Mathjs/src/function/<category>/` → `functions/src/<category>/`
-2. Copies support dirs from `~/Dropbox/Github/Mathjs/src/{utils,core,plain,type,expression,error,wasm}/` → `functions/src/`
-3. Copies `src/types.ts` standalone file and `types/` definition directory
+2. Copies function subdirs: `src/function/shared/` → `functions/src/shared/`
+3. Copies support dirs from `~/Dropbox/Github/Mathjs/src/{utils,core,plain,type,expression,error,wasm}/` → `functions/src/`
+4. Copies standalone files: `types.ts`, `constants.ts`, `factoriesAny.ts`, `factoriesNumber.ts`, `defaultInstance.ts`
+5. Copies `types/` definition directory
 4. Transforms imports:
    - Relative depth reduction: `../../utils/` → `../utils/` (removes one `../` for any depth)
    - Standalone file: `../../types.js` → `../types.js`
    - Function segment strip: `../../function/<category>/` → `../../<category>/` (for support dir cross-refs)
    - Scoped packages: `@danielsimonjr/typed-function` → `typed-function`, `@danielsimonjr/workerpool` → `workerpool`
    - Extensions: `.ts` → `.js`, adds `.js` to bare relative imports
-5. Skips Dropbox conflict files
-6. Only writes files that actually changed
+7. Skips Dropbox conflict files
+8. Only writes files that actually changed
 
-**Last sync**: 2026-04-02 (mathjs v15.3.4, 0 module resolution errors)
+**Last sync**: 2026-04-03 (mathjs v15.3.4, 0 module resolution errors)
 
 **Important**: Synced files are dormant — they are NOT exported from `functions/src/index.ts`. Only `functions/src/typed/` contains active implementations. The synced code has ~700 upstream type errors (missing casts, AssemblyScript types) that exist in mathjs itself — `functions/tsconfig.json` uses `strict: false` to allow compilation.
 
