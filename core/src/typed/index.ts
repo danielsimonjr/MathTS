@@ -52,3 +52,5 @@ export {
 } from './mathts-typed.js';
 
 export type { TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf } from './mathts-typed.js';
+
+export { registerNativeTypes } from './type-bridge.js';

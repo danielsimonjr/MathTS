@@ -723,6 +723,557 @@ export class BigNumber implements MathTSValue {
   }
 
   // ============================================================
+  // Modular Arithmetic
+  // ============================================================
+
+  /**
+   * Modulo (remainder after division)
+   * Result has the same sign as the dividend (this).
+   */
+  mod(other: Scalar | BigNumber | number | string): BigNumber {
+    const b = this.ensureBigNumber(other);
+    if (this._isNaN || b._isNaN || b._sign === 0) return new BigNumber(0, 0n, 0, true);
+    if (this._isInfinite) return new BigNumber(0, 0n, 0, true);
+    if (b._isInfinite) return this;
+    if (this._sign === 0) return this;
+
+    // a mod b = a - b * trunc(a / b)
+    const quotient = this.divide(b).trunc();
+    return this.subtract(b.multiply(quotient));
+  }
+
+  // ============================================================
+  // Trigonometric Functions
+  // ============================================================
+
+  /**
+   * Sine of this BigNumber (in radians)
+   * Uses Taylor series: sin(x) = x - x^3/3! + x^5/5! - ...
+   */
+  sin(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._isInfinite) return new BigNumber(0, 0n, 0, true);
+    if (this._sign === 0) return this;
+
+    // Range reduction: bring x into [-PI, PI]
+    const x = this._reduceAngle();
+    return x._sinTaylor();
+  }
+
+  /**
+   * Cosine of this BigNumber (in radians)
+   * Uses Taylor series: cos(x) = 1 - x^2/2! + x^4/4! - ...
+   */
+  cos(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._isInfinite) return new BigNumber(0, 0n, 0, true);
+    if (this._sign === 0) return BigNumber.fromNumber(1);
+
+    const x = this._reduceAngle();
+    return x._cosTaylor();
+  }
+
+  /**
+   * Tangent of this BigNumber (in radians)
+   * tan(x) = sin(x) / cos(x)
+   */
+  tan(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._isInfinite) return new BigNumber(0, 0n, 0, true);
+    if (this._sign === 0) return this;
+
+    const x = this._reduceAngle();
+    return x._sinTaylor().divide(x._cosTaylor());
+  }
+
+  /**
+   * Arcsine of this BigNumber
+   * Returns value in [-PI/2, PI/2]
+   */
+  asin(): BigNumber {
+    if (this._isNaN) return this;
+    // Domain: [-1, 1]
+    const one = BigNumber.fromNumber(1);
+    if (this.abs().compareTo(one) > 0) return new BigNumber(0, 0n, 0, true);
+    if (this._sign === 0) return this;
+
+    // For |x| close to 1: asin(x) = PI/2 - 2*asin(sqrt((1-x)/2)) * sign(x)
+    // For small x use Taylor series via atan: asin(x) = atan(x / sqrt(1 - x^2))
+    const xSquared = this.multiply(this);
+    const denominator = one.subtract(xSquared).sqrt();
+    if (denominator.isZero()) {
+      // |x| = 1 exactly
+      return this._sign === 1
+        ? BIGNUMBER_PI.divide(2)
+        : BIGNUMBER_PI.divide(-2);
+    }
+    return this.divide(denominator).atan();
+  }
+
+  /**
+   * Arccosine of this BigNumber
+   * Returns value in [0, PI]
+   */
+  acos(): BigNumber {
+    if (this._isNaN) return this;
+    const one = BigNumber.fromNumber(1);
+    if (this.abs().compareTo(one) > 0) return new BigNumber(0, 0n, 0, true);
+
+    // acos(x) = PI/2 - asin(x)
+    return BIGNUMBER_PI.divide(2).subtract(this.asin());
+  }
+
+  /**
+   * Arctangent of this BigNumber
+   * Returns value in (-PI/2, PI/2)
+   * Uses Taylor series with argument reduction for convergence.
+   */
+  atan(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._sign === 0) return this;
+    if (this._isInfinite) {
+      return this._sign === 1
+        ? BIGNUMBER_PI.divide(2)
+        : BIGNUMBER_PI.divide(-2);
+    }
+
+    // For |x| > 1: atan(x) = sign(x)*PI/2 - atan(1/x)
+    const one = BigNumber.fromNumber(1);
+    if (this.abs().compareTo(one) > 0) {
+      const reciprocal = one.divide(this);
+      const piHalf = BIGNUMBER_PI.divide(2);
+      return this._sign === 1
+        ? piHalf.subtract(reciprocal.atan())
+        : piHalf.negate().subtract(reciprocal.atan());
+    }
+
+    // For |x| > 0.5: atan(x) = 2*atan(x / (1 + sqrt(1 + x^2)))
+    const half = BigNumber.fromNumber(0.5);
+    if (this.abs().compareTo(half) > 0) {
+      const xSq = this.multiply(this);
+      const reduced = this.divide(one.add(one.add(xSq).sqrt()));
+      return reduced.atan().multiply(BigNumber.fromNumber(2));
+    }
+
+    // Taylor series: atan(x) = x - x^3/3 + x^5/5 - x^7/7 + ...
+    // Converges for |x| <= 0.5
+    return this._atanTaylor();
+  }
+
+  /**
+   * Two-argument arctangent: atan2(y, x)
+   * this = y, argument = x
+   * Returns angle in (-PI, PI]
+   */
+  atan2(x: BigNumber): BigNumber {
+    if (this._isNaN || x._isNaN) return new BigNumber(0, 0n, 0, true);
+
+    // atan2(0, 0) = 0
+    if (this._sign === 0 && x._sign === 0) return BigNumber.fromNumber(0);
+
+    // atan2(y, 0)
+    if (x._sign === 0) {
+      return this._sign === 1 ? BIGNUMBER_PI.divide(2) : BIGNUMBER_PI.divide(-2);
+    }
+
+    const angle = this.divide(x).atan();
+
+    if (x.isPositive()) {
+      return angle;
+    } else if (this.isNegative()) {
+      return angle.subtract(BIGNUMBER_PI);
+    } else {
+      return angle.add(BIGNUMBER_PI);
+    }
+  }
+
+  // ============================================================
+  // Hyperbolic Functions
+  // ============================================================
+
+  /**
+   * Hyperbolic sine: sinh(x) = (e^x - e^(-x)) / 2
+   */
+  sinh(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._isInfinite) return this;
+    if (this._sign === 0) return this;
+
+    const ex = this.exp();
+    const enx = this.negate().exp();
+    return ex.subtract(enx).divide(BigNumber.fromNumber(2));
+  }
+
+  /**
+   * Hyperbolic cosine: cosh(x) = (e^x + e^(-x)) / 2
+   */
+  cosh(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._isInfinite) return new BigNumber(1, 0n, 0, false, true); // +Infinity
+    if (this._sign === 0) return BigNumber.fromNumber(1);
+
+    const ex = this.exp();
+    const enx = this.negate().exp();
+    return ex.add(enx).divide(BigNumber.fromNumber(2));
+  }
+
+  /**
+   * Hyperbolic tangent: tanh(x) = sinh(x) / cosh(x)
+   */
+  tanh(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._sign === 0) return this;
+    if (this._isInfinite) return BigNumber.fromNumber(this._sign);
+
+    const ex = this.exp();
+    const enx = this.negate().exp();
+    return ex.subtract(enx).divide(ex.add(enx));
+  }
+
+  /**
+   * Inverse hyperbolic sine: asinh(x) = ln(x + sqrt(x^2 + 1))
+   */
+  asinh(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._isInfinite) return this;
+    if (this._sign === 0) return this;
+
+    const one = BigNumber.fromNumber(1);
+    return this.add(this.multiply(this).add(one).sqrt()).ln();
+  }
+
+  /**
+   * Inverse hyperbolic cosine: acosh(x) = ln(x + sqrt(x^2 - 1))
+   * Domain: x >= 1
+   */
+  acosh(): BigNumber {
+    if (this._isNaN) return this;
+    const one = BigNumber.fromNumber(1);
+    if (this.compareTo(one) < 0) return new BigNumber(0, 0n, 0, true);
+    if (this._isInfinite) return this;
+
+    return this.add(this.multiply(this).subtract(one).sqrt()).ln();
+  }
+
+  /**
+   * Inverse hyperbolic tangent: atanh(x) = 0.5 * ln((1+x)/(1-x))
+   * Domain: -1 < x < 1
+   */
+  atanh(): BigNumber {
+    if (this._isNaN) return this;
+    const one = BigNumber.fromNumber(1);
+    const absVal = this.abs();
+
+    if (absVal.compareTo(one) > 0) return new BigNumber(0, 0n, 0, true);
+    if (absVal.equals(one)) {
+      return this._sign === 1
+        ? new BigNumber(1, 0n, 0, false, true)
+        : new BigNumber(-1, 0n, 0, false, true);
+    }
+    if (this._sign === 0) return this;
+
+    const half = BigNumber.fromNumber(0.5);
+    return one.add(this).divide(one.subtract(this)).ln().multiply(half);
+  }
+
+  // ============================================================
+  // Transcendental Functions
+  // ============================================================
+
+  /**
+   * Exponential function: e^x
+   * Uses Taylor series: e^x = 1 + x + x^2/2! + x^3/3! + ...
+   * With argument reduction: e^x = (e^(x/2^k))^(2^k) for faster convergence.
+   */
+  exp(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._sign === 0) return BigNumber.fromNumber(1);
+    if (this._isInfinite) {
+      return this._sign === 1 ? this : BigNumber.fromNumber(0);
+    }
+
+    // Argument reduction: reduce x to small range
+    // e^x = (e^(x/2^k))^(2^k)
+    const precision = globalConfig.precision;
+    const val = Math.abs(this.valueOf());
+
+    // Choose k so that |x/2^k| < 0.5
+    let k = 0;
+    if (val > 0.5) {
+      k = Math.ceil(Math.log2(val * 2));
+    }
+
+    const divisor = BigNumber.fromNumber(2 ** k);
+    const reduced = this.divide(divisor);
+
+    // Taylor series for small argument
+    let sum = BigNumber.fromNumber(1);
+    let term = BigNumber.fromNumber(1);
+    const maxIter = precision + 20;
+
+    for (let n = 1; n <= maxIter; n++) {
+      term = term.multiply(reduced).divide(BigNumber.fromNumber(n));
+      const newSum = sum.add(term);
+      if (sum.equals(newSum)) break;
+      sum = newSum;
+    }
+
+    // Square back up k times
+    for (let i = 0; i < k; i++) {
+      sum = sum.multiply(sum);
+    }
+
+    return sum.roundToPrecision(precision);
+  }
+
+  /**
+   * Natural logarithm: ln(x)
+   * Uses the AGM (arithmetic-geometric mean) method for fast convergence.
+   * Fallback: series ln((1+y)/(1-y)) = 2*(y + y^3/3 + y^5/5 + ...) where y = (x-1)/(x+1)
+   */
+  ln(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._sign === -1) return new BigNumber(0, 0n, 0, true);
+    if (this._sign === 0) return new BigNumber(-1, 0n, 0, false, true);
+    if (this._isInfinite) return this;
+
+    const one = BigNumber.fromNumber(1);
+    if (this.equals(one)) return BigNumber.fromNumber(0);
+
+    const precision = globalConfig.precision;
+
+    // Argument reduction: ln(x) = ln(x / 2^k) + k * ln(2)
+    // Bring x into range [0.5, 2] for better convergence
+    let x = this.clone();
+    let k = 0;
+    const two = BigNumber.fromNumber(2);
+    const half = BigNumber.fromNumber(0.5);
+
+    while (x.compareTo(two) > 0) {
+      x = x.divide(two);
+      k++;
+    }
+    while (x.compareTo(half) < 0) {
+      x = x.multiply(two);
+      k--;
+    }
+
+    // Series: ln(x) = 2 * sum_{n=0}^{inf} (1/(2n+1)) * ((x-1)/(x+1))^(2n+1)
+    const y = x.subtract(one).divide(x.add(one));
+    const ySq = y.multiply(y);
+    let term = y;
+    let sum = y;
+    const maxIter = precision + 20;
+
+    for (let n = 1; n <= maxIter; n++) {
+      term = term.multiply(ySq);
+      const contribution = term.divide(BigNumber.fromNumber(2 * n + 1));
+      const newSum = sum.add(contribution);
+      if (sum.equals(newSum)) break;
+      sum = newSum;
+    }
+
+    sum = sum.multiply(two);
+
+    // Add back reduction: k * ln(2)
+    if (k !== 0) {
+      sum = sum.add(BIGNUMBER_LN2.multiply(BigNumber.fromNumber(k)));
+    }
+
+    return sum.roundToPrecision(precision);
+  }
+
+  /**
+   * Base-10 logarithm: log10(x) = ln(x) / ln(10)
+   */
+  log10(): BigNumber {
+    return this.ln().divide(BIGNUMBER_LN10);
+  }
+
+  /**
+   * Base-2 logarithm: log2(x) = ln(x) / ln(2)
+   */
+  log2(): BigNumber {
+    return this.ln().divide(BIGNUMBER_LN2);
+  }
+
+  /**
+   * Cube root
+   * Uses Newton-Raphson iteration.
+   */
+  cbrt(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._sign === 0) return this;
+    if (this._isInfinite) return this;
+
+    // Handle negative numbers: cbrt(-x) = -cbrt(x)
+    if (this._sign === -1) {
+      return this.negate().cbrt().negate();
+    }
+
+    const precision = globalConfig.precision;
+    const three = BigNumber.fromNumber(3);
+    let guess = BigNumber.fromNumber(Math.cbrt(this.valueOf()));
+
+    // Newton's method: x_{n+1} = (2*x_n + a / x_n^2) / 3
+    for (let i = 0; i < 100; i++) {
+      const guessSquared = guess.multiply(guess);
+      const newGuess = guess.multiply(BigNumber.fromNumber(2)).add(this.divide(guessSquared)).divide(three);
+      if (guess.subtract(newGuess).abs().compareTo(
+        guess.abs().multiply(BigNumber.parse('1e-' + (precision + 5)))
+      ) <= 0) {
+        return newGuess.roundToPrecision(precision);
+      }
+      guess = newGuess;
+    }
+
+    return guess.roundToPrecision(precision);
+  }
+
+  /**
+   * e^x - 1 (more precise than exp(x) - 1 for small x)
+   * Uses Taylor series directly: expm1(x) = x + x^2/2! + x^3/3! + ...
+   */
+  expm1(): BigNumber {
+    if (this._isNaN) return this;
+    if (this._sign === 0) return this;
+    if (this._isInfinite) {
+      return this._sign === 1 ? this : BigNumber.fromNumber(-1);
+    }
+
+    // For large |x|, just use exp(x) - 1
+    if (Math.abs(this.valueOf()) > 0.5) {
+      return this.exp().subtract(BigNumber.fromNumber(1));
+    }
+
+    // Taylor series: x + x^2/2! + x^3/3! + ...
+    const precision = globalConfig.precision;
+    let term = this.clone();
+    let sum = this.clone();
+    const maxIter = precision + 20;
+
+    for (let n = 2; n <= maxIter; n++) {
+      term = term.multiply(this).divide(BigNumber.fromNumber(n));
+      const newSum = sum.add(term);
+      if (sum.equals(newSum)) break;
+      sum = newSum;
+    }
+
+    return sum.roundToPrecision(precision);
+  }
+
+  /**
+   * ln(1 + x) (more precise than ln(1 + x) for small x)
+   */
+  log1p(): BigNumber {
+    if (this._isNaN) return this;
+    const one = BigNumber.fromNumber(1);
+    const negOne = BigNumber.fromNumber(-1);
+
+    if (this.compareTo(negOne) < 0) return new BigNumber(0, 0n, 0, true);
+    if (this.equals(negOne)) return new BigNumber(-1, 0n, 0, false, true);
+    if (this._sign === 0) return this;
+
+    return one.add(this).ln();
+  }
+
+  /**
+   * Hypotenuse: sqrt(this^2 + other^2)
+   */
+  hypot(other: BigNumber): BigNumber {
+    if (this._isNaN || other._isNaN) return new BigNumber(0, 0n, 0, true);
+    if (this._isInfinite || other._isInfinite) return new BigNumber(1, 0n, 0, false, true);
+
+    return this.multiply(this).add(other.multiply(other)).sqrt();
+  }
+
+  // ============================================================
+  // Private Taylor Series Helpers
+  // ============================================================
+
+  /** Reduce angle to [-PI, PI] range */
+  private _reduceAngle(): BigNumber {
+    const twoPi = BIGNUMBER_PI.multiply(BigNumber.fromNumber(2));
+
+    // Quick check if already in range
+    if (this.abs().compareTo(BIGNUMBER_PI) <= 0) {
+      return this;
+    }
+
+    // x mod 2PI, then shift to [-PI, PI]
+    const quotient = this.divide(twoPi).round(0, 'halfUp');
+    let reduced = this.subtract(twoPi.multiply(quotient));
+
+    // Ensure in [-PI, PI]
+    if (reduced.compareTo(BIGNUMBER_PI) > 0) {
+      reduced = reduced.subtract(twoPi);
+    } else if (reduced.compareTo(BIGNUMBER_PI.negate()) < 0) {
+      reduced = reduced.add(twoPi);
+    }
+
+    return reduced;
+  }
+
+  /** Taylor series for sin(x), assumes x is in [-PI, PI] */
+  private _sinTaylor(): BigNumber {
+    const precision = globalConfig.precision;
+    let term = this.clone();
+    let sum = this.clone();
+    const xSquared = this.multiply(this);
+    const maxIter = precision + 20;
+
+    for (let n = 1; n <= maxIter; n++) {
+      term = term.multiply(xSquared).divide(
+        BigNumber.fromNumber((2 * n) * (2 * n + 1))
+      ).negate();
+      const newSum = sum.add(term);
+      if (sum.equals(newSum)) break;
+      sum = newSum;
+    }
+
+    return sum.roundToPrecision(precision);
+  }
+
+  /** Taylor series for cos(x), assumes x is in [-PI, PI] */
+  private _cosTaylor(): BigNumber {
+    const precision = globalConfig.precision;
+    let term = BigNumber.fromNumber(1);
+    let sum = BigNumber.fromNumber(1);
+    const xSquared = this.multiply(this);
+    const maxIter = precision + 20;
+
+    for (let n = 1; n <= maxIter; n++) {
+      term = term.multiply(xSquared).divide(
+        BigNumber.fromNumber((2 * n - 1) * (2 * n))
+      ).negate();
+      const newSum = sum.add(term);
+      if (sum.equals(newSum)) break;
+      sum = newSum;
+    }
+
+    return sum.roundToPrecision(precision);
+  }
+
+  /** Taylor series for atan(x), assumes |x| <= 0.5 */
+  private _atanTaylor(): BigNumber {
+    const precision = globalConfig.precision;
+    const xSquared = this.multiply(this);
+    let term = this.clone();
+    let sum = this.clone();
+    const maxIter = precision + 20;
+
+    for (let n = 1; n <= maxIter; n++) {
+      term = term.multiply(xSquared).negate();
+      const contribution = term.divide(BigNumber.fromNumber(2 * n + 1));
+      const newSum = sum.add(contribution);
+      if (sum.equals(newSum)) break;
+      sum = newSum;
+    }
+
+    return sum.roundToPrecision(precision);
+  }
+
+  // ============================================================
   // Utility Methods
   // ============================================================
 

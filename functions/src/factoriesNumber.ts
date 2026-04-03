@@ -90,12 +90,12 @@ export { createHelp } from './expression/function/help.js'
 export { createChain } from './type/chain/function/chain.js'
 
 // algebra
-export { createResolve } from './function/algebra/resolve.js'
-export { createSimplify } from './function/algebra/simplify.js'
-export { createSimplifyConstant } from './function/algebra/simplifyConstant.js'
-export { createSimplifyCore } from './function/algebra/simplifyCore.js'
-export { createDerivative } from './function/algebra/derivative.js'
-export { createRationalize } from './function/algebra/rationalize.js'
+export { createResolve } from './algebra/resolve.js'
+export { createSimplify } from './algebra/simplify.js'
+export { createSimplifyConstant } from './algebra/simplifyConstant.js'
+export { createSimplifyCore } from './algebra/simplifyCore.js'
+export { createDerivative } from './algebra/derivative.js'
+export { createRationalize } from './algebra/rationalize.js'
 
 // arithmetic
 export const createUnaryMinus = /* #__PURE__ */ createNumberFactory(
@@ -119,7 +119,7 @@ export const createCbrt = /* #__PURE__ */ createNumberFactory(
   'cbrt',
   cbrtNumber
 )
-export { createCeilNumber as createCeil } from './function/arithmetic/ceil.js'
+export { createCeilNumber as createCeil } from './arithmetic/ceil.js'
 export const createCube = /* #__PURE__ */ createNumberFactory(
   'cube',
   cubeNumber
@@ -129,8 +129,8 @@ export const createExpm1 = /* #__PURE__ */ createNumberFactory(
   'expm1',
   expm1Number
 )
-export { createFixNumber as createFix } from './function/arithmetic/fix.js'
-export { createFloorNumber as createFloor } from './function/arithmetic/floor.js'
+export { createFixNumber as createFix } from './arithmetic/fix.js'
+export { createFloorNumber as createFloor } from './arithmetic/floor.js'
 export const createGcd = /* #__PURE__ */ createNumberFactory('gcd', gcdNumber)
 export const createLcm = /* #__PURE__ */ createNumberFactory('lcm', lcmNumber)
 export const createLog10 = /* #__PURE__ */ createNumberFactory(
@@ -189,7 +189,7 @@ export const createLog1p = /* #__PURE__ */ createNumberFactory(
   log1pNumber
 )
 export const createAdd = /* #__PURE__ */ createNumberFactory('add', addNumber)
-export { createHypot } from './function/arithmetic/hypot.js'
+export { createHypot } from './arithmetic/hypot.js'
 export const createNorm = /* #__PURE__ */ createNumberFactory(
   'norm',
   normNumber
@@ -230,10 +230,10 @@ export const createRightLogShift = /* #__PURE__ */ createNumberFactory(
 )
 
 // combinatorics
-export { createStirlingS2 } from './function/combinatorics/stirlingS2.js'
-export { createBellNumbers } from './function/combinatorics/bellNumbers.js'
-export { createCatalan } from './function/combinatorics/catalan.js'
-export { createComposition } from './function/combinatorics/composition.js'
+export { createStirlingS2 } from './combinatorics/stirlingS2.js'
+export { createBellNumbers } from './combinatorics/bellNumbers.js'
+export { createCatalan } from './combinatorics/catalan.js'
+export { createComposition } from './combinatorics/composition.js'
 
 // constants
 export {
@@ -294,12 +294,12 @@ export const createOr = /* #__PURE__ */ createNumberFactory('or', orNumber)
 export const createXor = /* #__PURE__ */ createNumberFactory('xor', xorNumber)
 
 // matrix
-export { createMapSlices } from './function/matrix/mapSlices.js'
-export { createFilter } from './function/matrix/filter.js'
-export { createForEach } from './function/matrix/forEach.js'
-export { createMap } from './function/matrix/map.js'
-export { createRange } from './function/matrix/range.js'
-export { createSize } from './function/matrix/size.js'
+export { createMapSlices } from './matrix/mapSlices.js'
+export { createFilter } from './matrix/filter.js'
+export { createForEach } from './matrix/forEach.js'
+export { createMap } from './matrix/map.js'
+export { createRange } from './matrix/range.js'
+export { createSize } from './matrix/size.js'
 // FIXME: create a lightweight "number" implementation of subset only supporting plain objects/arrays
 export const createIndex = /* #__PURE__ */ factory('index', [], () => noIndex)
 export const createMatrix = /* #__PURE__ */ factory(
@@ -314,59 +314,59 @@ export const createSubset = /* #__PURE__ */ factory(
 )
 // TODO: provide number+array implementations for map, filter, forEach, zeros, ...?
 // TODO: create range implementation for range?
-export { createPartitionSelect } from './function/matrix/partitionSelect.js'
+export { createPartitionSelect } from './matrix/partitionSelect.js'
 
 // probability
-export { createBernoulli } from './function/probability/bernoulli.js'
+export { createBernoulli } from './probability/bernoulli.js'
 export const createCombinations = createNumberFactory(
   'combinations',
   combinationsNumber
 )
 export const createGamma = createNumberFactory('gamma', gammaNumber)
 export const createLgamma = createNumberFactory('lgamma', lgammaNumber)
-export { createCombinationsWithRep } from './function/probability/combinationsWithRep.js'
-export { createFactorial } from './function/probability/factorial.js'
-export { createMultinomial } from './function/probability/multinomial.js'
-export { createPermutations } from './function/probability/permutations.js'
-export { createPickRandom } from './function/probability/pickRandom.js'
-export { createRandomNumber as createRandom } from './function/probability/random.js'
-export { createRandomInt } from './function/probability/randomInt.js'
+export { createCombinationsWithRep } from './probability/combinationsWithRep.js'
+export { createFactorial } from './probability/factorial.js'
+export { createMultinomial } from './probability/multinomial.js'
+export { createPermutations } from './probability/permutations.js'
+export { createPickRandom } from './probability/pickRandom.js'
+export { createRandomNumber as createRandom } from './probability/random.js'
+export { createRandomInt } from './probability/randomInt.js'
 
 // relational
-export { createEqualScalarNumber as createEqualScalar } from './function/relational/equalScalar.js'
-export { createCompareNumber as createCompare } from './function/relational/compare.js'
-export { createCompareNatural } from './function/relational/compareNatural.js'
-export { createCompareTextNumber as createCompareText } from './function/relational/compareText.js'
-export { createEqualNumber as createEqual } from './function/relational/equal.js'
-export { createEqualText } from './function/relational/equalText.js'
-export { createSmallerNumber as createSmaller } from './function/relational/smaller.js'
-export { createSmallerEqNumber as createSmallerEq } from './function/relational/smallerEq.js'
-export { createLargerNumber as createLarger } from './function/relational/larger.js'
-export { createLargerEqNumber as createLargerEq } from './function/relational/largerEq.js'
-export { createDeepEqual } from './function/relational/deepEqual.js'
-export { createUnequalNumber as createUnequal } from './function/relational/unequal.js'
+export { createEqualScalarNumber as createEqualScalar } from './relational/equalScalar.js'
+export { createCompareNumber as createCompare } from './relational/compare.js'
+export { createCompareNatural } from './relational/compareNatural.js'
+export { createCompareTextNumber as createCompareText } from './relational/compareText.js'
+export { createEqualNumber as createEqual } from './relational/equal.js'
+export { createEqualText } from './relational/equalText.js'
+export { createSmallerNumber as createSmaller } from './relational/smaller.js'
+export { createSmallerEqNumber as createSmallerEq } from './relational/smallerEq.js'
+export { createLargerNumber as createLarger } from './relational/larger.js'
+export { createLargerEqNumber as createLargerEq } from './relational/largerEq.js'
+export { createDeepEqual } from './relational/deepEqual.js'
+export { createUnequalNumber as createUnequal } from './relational/unequal.js'
 
 // special
-export { createErf } from './function/special/erf.js'
-export { createZeta } from './function/special/zeta.js'
+export { createErf } from './special/erf.js'
+export { createZeta } from './special/zeta.js'
 // statistics
-export { createMode } from './function/statistics/mode.js'
-export { createProd } from './function/statistics/prod.js'
-export { createMax } from './function/statistics/max.js'
-export { createMin } from './function/statistics/min.js'
-export { createSum } from './function/statistics/sum.js'
-export { createCumSum } from './function/statistics/cumsum.js'
-export { createMean } from './function/statistics/mean.js'
-export { createMedian } from './function/statistics/median.js'
-export { createMad } from './function/statistics/mad.js'
-export { createVariance } from './function/statistics/variance.js'
-export { createQuantileSeq } from './function/statistics/quantileSeq.js'
-export { createStd } from './function/statistics/std.js'
-export { createCorr } from './function/statistics/corr.js'
+export { createMode } from './statistics/mode.js'
+export { createProd } from './statistics/prod.js'
+export { createMax } from './statistics/max.js'
+export { createMin } from './statistics/min.js'
+export { createSum } from './statistics/sum.js'
+export { createCumSum } from './statistics/cumsum.js'
+export { createMean } from './statistics/mean.js'
+export { createMedian } from './statistics/median.js'
+export { createMad } from './statistics/mad.js'
+export { createVariance } from './statistics/variance.js'
+export { createQuantileSeq } from './statistics/quantileSeq.js'
+export { createStd } from './statistics/std.js'
+export { createCorr } from './statistics/corr.js'
 
 // string
-export { createFormat } from './function/string/format.js'
-export { createPrint } from './function/string/print.js'
+export { createFormat } from './string/format.js'
+export { createPrint } from './string/print.js'
 
 // trigonometry
 export const createAcos = /* #__PURE__ */ createNumberFactory(
@@ -473,7 +473,7 @@ export { createCumSumTransform } from './expression/transform/cumsum.transform.j
 export { createVarianceTransform } from './expression/transform/variance.transform.js'
 
 // utils
-export { createClone } from './function/utils/clone.js'
+export { createClone } from './utils/clone.js'
 export const createIsInteger = /* #__PURE__ */ createNumberFactory(
   'isInteger',
   isIntegerNumber
@@ -482,8 +482,8 @@ export const createIsNegative = /* #__PURE__ */ createNumberFactory(
   'isNegative',
   isNegativeNumber
 )
-export { createIsNumeric } from './function/utils/isNumeric.js'
-export { createHasNumericValue } from './function/utils/hasNumericValue.js'
+export { createIsNumeric } from './utils/isNumeric.js'
+export { createHasNumericValue } from './utils/hasNumericValue.js'
 export const createIsPositive = /* #__PURE__ */ createNumberFactory(
   'isPositive',
   isPositiveNumber
@@ -496,11 +496,11 @@ export const createIsNaN = /* #__PURE__ */ createNumberFactory(
   'isNaN',
   isNaNNumber
 )
-export { createIsBounded } from './function/utils/isBounded.js'
-export { createIsFinite } from './function/utils/isFinite.js'
-export { createTypeOf } from './function/utils/typeOf.js'
-export { createIsPrime } from './function/utils/isPrime.js'
-export { createNumeric } from './function/utils/numeric.js'
+export { createIsBounded } from './utils/isBounded.js'
+export { createIsFinite } from './utils/isFinite.js'
+export { createTypeOf } from './utils/typeOf.js'
+export { createIsPrime } from './utils/isPrime.js'
+export { createNumeric } from './utils/numeric.js'
 export { createParseNumberWithConfig } from './utils/parseNumber.js'
 
 // json

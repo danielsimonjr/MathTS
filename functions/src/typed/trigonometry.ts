@@ -81,8 +81,8 @@ export const tan = mathTyped('tan', {
  */
 export const csc = mathTyped('csc', {
   'number': (a: number) => 1 / Math.sin(a),
-  'Complex': (a: Complex) => a.sin().reciprocal(),
-  'BigNumber': (a: BigNumber) => BigNumber.fromNumber(1).div(a.sin()),
+  'Complex': (a: Complex) => a.sin().inverse(),
+  'BigNumber': (a: BigNumber) => BigNumber.fromNumber(1).divide(a.sin()),
 });
 
 /**
@@ -90,8 +90,8 @@ export const csc = mathTyped('csc', {
  */
 export const sec = mathTyped('sec', {
   'number': (a: number) => 1 / Math.cos(a),
-  'Complex': (a: Complex) => a.cos().reciprocal(),
-  'BigNumber': (a: BigNumber) => BigNumber.fromNumber(1).div(a.cos()),
+  'Complex': (a: Complex) => a.cos().inverse(),
+  'BigNumber': (a: BigNumber) => BigNumber.fromNumber(1).divide(a.cos()),
 });
 
 /**
@@ -99,8 +99,8 @@ export const sec = mathTyped('sec', {
  */
 export const cot = mathTyped('cot', {
   'number': (a: number) => 1 / Math.tan(a),
-  'Complex': (a: Complex) => a.tan().reciprocal(),
-  'BigNumber': (a: BigNumber) => BigNumber.fromNumber(1).div(a.tan()),
+  'Complex': (a: Complex) => a.tan().inverse(),
+  'BigNumber': (a: BigNumber) => BigNumber.fromNumber(1).divide(a.tan()),
 });
 
 // =============================================================================
@@ -157,7 +157,7 @@ export const atan2 = mathTyped('atan2', {
  */
 export const acsc = mathTyped('acsc', {
   'number': (a: number) => Math.asin(1 / a),
-  'Complex': (a: Complex) => a.reciprocal().asin(),
+  'Complex': (a: Complex) => a.inverse().asin(),
 });
 
 /**
@@ -165,7 +165,7 @@ export const acsc = mathTyped('acsc', {
  */
 export const asec = mathTyped('asec', {
   'number': (a: number) => Math.acos(1 / a),
-  'Complex': (a: Complex) => a.reciprocal().acos(),
+  'Complex': (a: Complex) => a.inverse().acos(),
 });
 
 /**
@@ -173,7 +173,7 @@ export const asec = mathTyped('asec', {
  */
 export const acot = mathTyped('acot', {
   'number': (a: number) => Math.atan(1 / a),
-  'Complex': (a: Complex) => a.reciprocal().atan(),
+  'Complex': (a: Complex) => a.inverse().atan(),
 });
 
 // =============================================================================

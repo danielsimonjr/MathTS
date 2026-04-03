@@ -211,9 +211,9 @@ export const divide = mathTyped('divide', {
 export const unaryMinus = mathTyped('unaryMinus', {
   'number': (a: f64): f64 => -a,
   'bigint': (a: i64): i64 => -a,
-  'Complex': (a: Complex): Complex => a.neg(),
-  'Fraction': (a: Fraction): Fraction => a.neg(),
-  'BigNumber': (a: BigNumber): BigNumber => a.neg(),
+  'Complex': (a: Complex): Complex => a.negate(),
+  'Fraction': (a: Fraction): Fraction => a.negate(),
+  'BigNumber': (a: BigNumber): BigNumber => a.negate(),
 
   // Parallel array negation
   'Float64Array': async (a: Float64Array): Promise<Float64Array> => {

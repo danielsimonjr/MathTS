@@ -97,6 +97,9 @@ export {
   // WASM support for typed-function
   initTypedWasm,
   isTypedWasmAvailable,
+
+  // Type compatibility bridge for mathjs duck-typing
+  registerNativeTypes,
 } from './typed/index.js';
 
 export type { TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf } from './typed/index.js';
