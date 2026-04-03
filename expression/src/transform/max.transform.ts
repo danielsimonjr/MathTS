@@ -1,4 +1,4 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
 import { errorTransform } from './utils/errorTransform.js'
 import { createMax } from '../../function/statistics/max.js'
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'

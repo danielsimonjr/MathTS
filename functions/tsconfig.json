@@ -1,0 +1,24 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+    "strict": false,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "paths": {
+      "@mathts/core": ["../core/src"],
+      "@mathts/matrix": ["../matrix/src"],
+      "@mathts/parallel": ["../parallel/src"],
+      "workerpool": ["../parallel/types/workerpool.d.ts"]
+    }
+  },
+  "include": [
+    "src/index.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": ["node_modules", "dist", "tests"]
+}

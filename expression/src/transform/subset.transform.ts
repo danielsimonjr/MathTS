@@ -1,4 +1,4 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
 import { errorTransform } from './utils/errorTransform.js'
 import { createSubset } from '../../function/matrix/subset.js'
 

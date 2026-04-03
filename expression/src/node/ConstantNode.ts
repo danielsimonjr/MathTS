@@ -1,7 +1,7 @@
-import { format } from '../../utils/string.js'
-import { typeOf } from '../../utils/is.js'
-import { escapeLatex } from '../../utils/latex.js'
-import { factory } from '../../utils/factory.js'
+import { format } from '../utils/string.js'
+import { typeOf } from '../utils/is.js'
+import { escapeLatex } from '../utils/latex.js'
+import { factory } from '../utils/factory.js'
 import type { MathNode } from './Node.js'
 
 const name = 'ConstantNode'
@@ -32,8 +32,6 @@ export const createConstantNode = /* #__PURE__ */ factory(name, dependencies, ({
       super()
       this.value = value
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isConstantNode (): boolean { return true }

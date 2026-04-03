@@ -1,8 +1,8 @@
-import { getSafeProperty } from '../../utils/customs.js'
-import { factory } from '../../utils/factory.js'
-import { isNode } from '../../utils/is.js'
-import { hasOwnProperty } from '../../utils/object.js'
-import { escape, stringify } from '../../utils/string.js'
+import { getSafeProperty } from '../utils/customs.js'
+import { factory } from '../utils/factory.js'
+import { isNode } from '../utils/is.js'
+import { hasOwnProperty } from '../utils/object.js'
+import { escape, stringify } from '../utils/string.js'
 
 // Type definitions
 interface Node {
@@ -52,8 +52,6 @@ export const createObjectNode = /* #__PURE__ */ factory(name, dependencies, ({ N
         }
       }
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isObjectNode (): boolean { return true }
@@ -71,7 +69,7 @@ export const createObjectNode = /* #__PURE__ */ factory(name, dependencies, ({ N
      * @return {function} Returns a function which can be called like:
      *                        evalNode(scope: Object, args: Object, context: *)
      */
-    // @ts-expect-error: method signature matches MathNode interface
+    // @ts-expect-error - method overrides property from Node base class
     _compile (math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
       const evalEntries: Record<string, CompileFunction> = {}
 

@@ -1,6 +1,6 @@
-import { isNode } from '../../utils/is.js'
-import { forEach, map } from '../../utils/array.js'
-import { factory } from '../../utils/factory.js'
+import { isNode } from '../utils/is.js'
+import { forEach, map } from '../utils/array.js'
+import { factory } from '../utils/factory.js'
 import type { MathNode } from './Node.js'
 
 const name = 'BlockNode'
@@ -48,8 +48,6 @@ export const createBlockNode = /* #__PURE__ */ factory(name, dependencies, ({ Re
         return { node, visible }
       })
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isBlockNode (): boolean { return true }

@@ -293,42 +293,42 @@ export function array_square(a: Float64Array, result: Float64Array): void {
 }
 
 /**
- * Exponential: result = exp(a)
+ * Exponential: result = Math.exp(a)
  */
 export function array_exp(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = exp(unchecked(a[i])));
+    unchecked(result[i] = Math.exp(unchecked(a[i])));
   }
 }
 
 /**
- * Natural log: result = log(a)
+ * Natural log: result = Math.log(a)
  */
 export function array_log(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = log(unchecked(a[i])));
+    unchecked(result[i] = Math.log(unchecked(a[i])));
   }
 }
 
 /**
- * Sine: result = sin(a)
+ * Sine: result = Math.sin(a)
  */
 export function array_sin(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = sin(unchecked(a[i])));
+    unchecked(result[i] = Math.sin(unchecked(a[i])));
   }
 }
 
 /**
- * Cosine: result = cos(a)
+ * Cosine: result = Math.cos(a)
  */
 export function array_cos(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = cos(unchecked(a[i])));
+    unchecked(result[i] = Math.cos(unchecked(a[i])));
   }
 }
 

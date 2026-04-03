@@ -1,6 +1,6 @@
-import { factory } from '../utils/factory.js'
-import { isFunction } from '../utils/is.js'
-import { createEmptyMap, toObject } from '../utils/map.js'
+import { factory } from './utils/factory.js'
+import { isFunction } from './utils/is.js'
+import { createEmptyMap, toObject } from './utils/map.js'
 
 const name = 'Parser'
 const dependencies = ['evaluate', 'parse'] as const

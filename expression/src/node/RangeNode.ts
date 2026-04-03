@@ -1,5 +1,5 @@
-import { isNode, isSymbolNode } from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
+import { isNode, isSymbolNode } from '../utils/is.js'
+import { factory } from '../utils/factory.js'
 import { getPrecedence } from '../operators.js'
 
 // Type definitions
@@ -92,8 +92,6 @@ export const createRangeNode = /* #__PURE__ */ factory(name, dependencies, ({ No
       this.end = end // included upper-bound
       this.step = step || null // optional step
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isRangeNode (): boolean { return true }
@@ -125,7 +123,7 @@ export const createRangeNode = /* #__PURE__ */ factory(name, dependencies, ({ No
      * @return {function} Returns a function which can be called like:
      *                        evalNode(scope: Object, args: Object, context: *)
      */
-    // @ts-expect-error: method signature matches MathNode interface
+    // @ts-expect-error - method overrides property from Node base class
     _compile (math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
       const range = math.range
       const evalStart = this.start._compile(math, argNames)

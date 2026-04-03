@@ -1,5 +1,5 @@
-import { isBigNumber, isComplex, isNode, isUnit, typeOf } from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
+import { isBigNumber, isComplex, isNode, isUnit, typeOf } from '../utils/is.js'
+import { factory } from '../utils/factory.js'
 import { getPrecedence } from '../operators.js'
 import type { MathNode } from './Node.js'
 
@@ -69,8 +69,6 @@ export const createConditionalNode = /* #__PURE__ */ factory(name, dependencies,
       this.trueExpr = trueExpr
       this.falseExpr = falseExpr
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isConditionalNode (): boolean { return true }

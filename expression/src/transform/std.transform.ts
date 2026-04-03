@@ -1,4 +1,4 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
 import { createStd } from '../../function/statistics/std.js'
 import { errorTransform } from './utils/errorTransform.js'
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'

@@ -101,14 +101,14 @@ export function complex_sqrt(a: Complex): Complex {
  * Complex power: a^n where n is real
  */
 export function complex_pow(a: Complex, n: f64): Complex {
-  return a.pow(n);
+  return a.powReal(n);
 }
 
 /**
  * Complex to complex power: a^b
  */
 export function complex_cpow(a: Complex, b: Complex): Complex {
-  // a^b = exp(b * log(a))
+  // a^b = Math.exp(b * Math.log(a))
   const logA = a.log();
   const product = new Complex(
     b.re * logA.re - b.im * logA.im,

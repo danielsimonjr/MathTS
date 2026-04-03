@@ -1,4 +1,4 @@
-import { isCollection } from '../../../utils/is.js'
+import { isCollection } from '../../utils/is.js'
 import { dimToZeroBase, isNumberOrBigNumber } from './dimToZeroBase.js'
 /**
  * Change last argument dim from one-based to zero-based.

@@ -1,7 +1,7 @@
 import {
   isArray, isBigInt, isBigNumber, isMatrix, isNumber, isRange
-} from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
+} from '../utils/is.js'
+import { factory } from '../utils/factory.js'
 
 interface Range {
   start: number

@@ -1,7 +1,7 @@
-import { escape } from '../../utils/string.js'
-import { getSafeProperty } from '../../utils/customs.js'
-import { factory } from '../../utils/factory.js'
-import { toSymbol } from '../../utils/latex.js'
+import { escape } from '../utils/string.js'
+import { getSafeProperty } from '../utils/customs.js'
+import { factory } from '../utils/factory.js'
+import { toSymbol } from '../utils/latex.js'
 
 // Type definitions
 interface Node {
@@ -140,7 +140,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(name, dependencies, ({ m
      * Create a clone of this node, a shallow copy
      * @return {SymbolNode}
      */
-    // @ts-expect-error: clone returns SymbolNode which is compatible with MathNode
+    // @ts-expect-error - method overrides property from Node base class
     clone (): SymbolNode {
       return new SymbolNode(this.name)
     }

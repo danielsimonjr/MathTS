@@ -1,4 +1,4 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
 
 const name = 'parser'
 const dependencies = ['typed', 'Parser']

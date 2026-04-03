@@ -168,10 +168,10 @@ export class Complex {
 
   /**
    * Argument (phase angle in radians)
-   * arg(z) = atan2(im, re)
+   * arg(z) = Math.atan2(im, re)
    */
   arg(): f64 {
-    return atan2(this.im, this.re);
+    return Math.atan2(this.im, this.re);
   }
 
   // =========================================================================
@@ -180,19 +180,19 @@ export class Complex {
 
   /**
    * Complex exponential
-   * exp(a + bi) = exp(a) * (cos(b) + i*sin(b))
+   * Math.exp(a + bi) = Math.exp(a) * (Math.cos(b) + i*Math.sin(b))
    */
   exp(): Complex {
-    const expRe = exp(this.re);
-    return new Complex(expRe * cos(this.im), expRe * sin(this.im));
+    const expRe = Math.exp(this.re);
+    return new Complex(expRe * Math.cos(this.im), expRe * Math.sin(this.im));
   }
 
   /**
    * Complex natural logarithm (principal value)
-   * log(z) = log|z| + i*arg(z)
+   * Math.log(z) = log|z| + i*arg(z)
    */
   log(): Complex {
-    return new Complex(log(this.abs()), this.arg());
+    return new Complex(Math.log(this.abs()), this.arg());
   }
 
   /**
@@ -202,7 +202,7 @@ export class Complex {
     const r = this.abs();
     const halfArg = this.arg() / 2.0;
     const sqrtR = sqrt(r);
-    return new Complex(sqrtR * cos(halfArg), sqrtR * sin(halfArg));
+    return new Complex(sqrtR * Math.cos(halfArg), sqrtR * Math.sin(halfArg));
   }
 
   /**
@@ -214,14 +214,14 @@ export class Complex {
     }
     const r = this.abs();
     const theta = this.arg();
-    const rn = pow(r, n);
+    const rn = Math.pow(r, n);
     const nTheta = n * theta;
-    return new Complex(rn * cos(nTheta), rn * sin(nTheta));
+    return new Complex(rn * Math.cos(nTheta), rn * Math.sin(nTheta));
   }
 
   /**
    * Complex power (z^w where w is complex)
-   * z^w = exp(w * log(z))
+   * z^w = Math.exp(w * Math.log(z))
    */
   pow(w: Complex): Complex {
     if (this.re == 0.0 && this.im == 0.0) {
@@ -239,29 +239,29 @@ export class Complex {
 
   /**
    * Complex sine
-   * sin(z) = (exp(iz) - exp(-iz)) / 2i
+   * Math.sin(z) = (Math.exp(iz) - Math.exp(-iz)) / 2i
    */
   sin(): Complex {
     return new Complex(
-      sin(this.re) * cosh(this.im),
-      cos(this.re) * sinh(this.im)
+      Math.sin(this.re) * cosh(this.im),
+      Math.cos(this.re) * sinh(this.im)
     );
   }
 
   /**
    * Complex cosine
-   * cos(z) = (exp(iz) + exp(-iz)) / 2
+   * Math.cos(z) = (Math.exp(iz) + Math.exp(-iz)) / 2
    */
   cos(): Complex {
     return new Complex(
-      cos(this.re) * cosh(this.im),
-      -sin(this.re) * sinh(this.im)
+      Math.cos(this.re) * cosh(this.im),
+      -Math.sin(this.re) * sinh(this.im)
     );
   }
 
   /**
    * Complex tangent
-   * tan(z) = sin(z) / cos(z)
+   * Math.tan(z) = Math.sin(z) / Math.cos(z)
    */
   tan(): Complex {
     return this.sin().div(this.cos());
@@ -276,8 +276,8 @@ export class Complex {
    */
   sinh(): Complex {
     return new Complex(
-      sinh(this.re) * cos(this.im),
-      cosh(this.re) * sin(this.im)
+      sinh(this.re) * Math.cos(this.im),
+      cosh(this.re) * Math.sin(this.im)
     );
   }
 
@@ -286,8 +286,8 @@ export class Complex {
    */
   cosh(): Complex {
     return new Complex(
-      cosh(this.re) * cos(this.im),
-      sinh(this.re) * sin(this.im)
+      cosh(this.re) * Math.cos(this.im),
+      sinh(this.re) * Math.sin(this.im)
     );
   }
 
@@ -296,6 +296,68 @@ export class Complex {
    */
   tanh(): Complex {
     return this.sinh().div(this.cosh());
+  }
+
+  /**
+   * Complex inverse sine: asin(z) = -i * ln(iz + sqrt(1 - z²))
+   */
+  asin(): Complex {
+    const iz = new Complex(-this.im, this.re);
+    const z2 = this.mul(this);
+    const inner = new Complex(1.0 - z2.re, -z2.im).sqrt();
+    const logArg = iz.add(inner);
+    const ln = logArg.log();
+    return new Complex(ln.im, -ln.re);
+  }
+
+  /**
+   * Complex inverse cosine: acos(z) = -i * ln(z + sqrt(z² - 1))
+   */
+  acos(): Complex {
+    const z2 = this.mul(this);
+    const inner = new Complex(z2.re - 1.0, z2.im).sqrt();
+    const logArg = this.add(inner);
+    const ln = logArg.log();
+    return new Complex(ln.im, -ln.re);
+  }
+
+  /**
+   * Complex inverse tangent: atan(z) = (i/2) * ln((i+z)/(i-z))
+   */
+  atan(): Complex {
+    const iPlusZ = new Complex(this.re, this.im + 1.0);
+    const iMinusZ = new Complex(-this.re, 1.0 - this.im);
+    const ratio = iPlusZ.div(iMinusZ);
+    const ln = ratio.log();
+    return new Complex(-ln.im * 0.5, ln.re * 0.5);
+  }
+
+  /**
+   * Complex inverse hyperbolic sine: asinh(z) = ln(z + sqrt(z² + 1))
+   */
+  asinh(): Complex {
+    const z2 = this.mul(this);
+    const inner = new Complex(z2.re + 1.0, z2.im).sqrt();
+    return this.add(inner).log();
+  }
+
+  /**
+   * Complex inverse hyperbolic cosine: acosh(z) = ln(z + sqrt(z² - 1))
+   */
+  acosh(): Complex {
+    const z2 = this.mul(this);
+    const inner = new Complex(z2.re - 1.0, z2.im).sqrt();
+    return this.add(inner).log();
+  }
+
+  /**
+   * Complex inverse hyperbolic tangent: atanh(z) = 0.5 * ln((1+z)/(1-z))
+   */
+  atanh(): Complex {
+    const onePlusZ = new Complex(1.0 + this.re, this.im);
+    const oneMinusZ = new Complex(1.0 - this.re, -this.im);
+    const ln = onePlusZ.div(oneMinusZ).log();
+    return new Complex(ln.re * 0.5, ln.im * 0.5);
   }
 
   // =========================================================================
@@ -353,7 +415,7 @@ export function complex(re: f64, im: f64): Complex {
  * Create a complex number from polar coordinates (r, theta)
  */
 export function complexFromPolar(r: f64, theta: f64): Complex {
-  return new Complex(r * cos(theta), r * sin(theta));
+  return new Complex(r * Math.cos(theta), r * Math.sin(theta));
 }
 
 /**
@@ -391,11 +453,11 @@ export const COMPLEX_NEG_ONE: Complex = new Complex(-1.0, 0.0);
 // =============================================================================
 
 function sinh(x: f64): f64 {
-  const ex = exp(x);
+  const ex = Math.exp(x);
   return (ex - 1.0 / ex) / 2.0;
 }
 
 function cosh(x: f64): f64 {
-  const ex = exp(x);
+  const ex = Math.exp(x);
   return (ex + 1.0 / ex) / 2.0;
 }

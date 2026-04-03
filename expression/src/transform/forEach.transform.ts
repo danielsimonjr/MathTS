@@ -1,7 +1,7 @@
 import { createForEach } from '../../function/matrix/forEach.js'
 import { createTransformCallback } from './utils/transformCallback.js'
-import { factory } from '../../utils/factory.js'
-import { isFunctionAssignmentNode, isSymbolNode } from '../../utils/is.js'
+import { factory } from '../utils/factory.js'
+import { isFunctionAssignmentNode, isSymbolNode } from '../utils/is.js'
 import { compileInlineExpression } from './utils/compileInlineExpression.js'
 
 interface TypedFunction<T = any> {

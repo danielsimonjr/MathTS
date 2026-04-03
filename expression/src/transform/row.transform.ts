@@ -1,7 +1,7 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
 import { createRow } from '../../function/matrix/row.js'
 import { errorTransform } from './utils/errorTransform.js'
-import { isNumber } from '../../utils/is.js'
+import { isNumber } from '../utils/is.js'
 
 interface TypedFunction<T = any> {
   (...args: any[]): T

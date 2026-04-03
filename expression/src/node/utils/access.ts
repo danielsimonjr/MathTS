@@ -1,5 +1,5 @@
 import { errorTransform } from '../../transform/utils/errorTransform.js'
-import { getSafeProperty } from '../../../utils/customs.js'
+import { getSafeProperty } from '../../utils/customs.js'
 
 export function accessFactory ({ subset }: { subset: any }) {
   /**

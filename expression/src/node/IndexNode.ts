@@ -1,8 +1,8 @@
-import { map } from '../../utils/array.js'
-import { getSafeProperty } from '../../utils/customs.js'
-import { factory } from '../../utils/factory.js'
-import { isArray, isConstantNode, isMatrix, isNode, isString, typeOf } from '../../utils/is.js'
-import { escape } from '../../utils/string.js'
+import { map } from '../utils/array.js'
+import { getSafeProperty } from '../utils/customs.js'
+import { factory } from '../utils/factory.js'
+import { isArray, isConstantNode, isMatrix, isNode, isString, typeOf } from '../utils/is.js'
+import { escape } from '../utils/string.js'
 
 // Type definitions
 interface Node {
@@ -67,8 +67,6 @@ export const createIndexNode = /* #__PURE__ */ factory(name, dependencies, ({ No
         throw new Error('dotNotation only applicable for object properties')
       }
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isIndexNode (): boolean { return true }
@@ -86,7 +84,7 @@ export const createIndexNode = /* #__PURE__ */ factory(name, dependencies, ({ No
      * @return {function} Returns a function which can be called like:
      *                        evalNode(scope: Object, args: Object, context: *)
      */
-    // @ts-expect-error: method signature matches MathNode interface
+    // @ts-expect-error - method overrides property from Node base class
     _compile (math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
       // TODO: implement support for bignumber (currently bignumbers are silently
       //       reduced to numbers when changing the value to zero-based)

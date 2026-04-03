@@ -1,20 +1,20 @@
-import { isNode } from '../../utils/is.js'
+import { isNode } from '../utils/is.js'
 
 import { keywords } from '../keywords.js'
-import { deepStrictEqual } from '../../utils/object.js'
-import { factory } from '../../utils/factory.js'
-import { createMap } from '../../utils/map.js'
+import { deepStrictEqual } from '../utils/object.js'
+import { factory } from '../utils/factory.js'
+import { createMap } from '../utils/map.js'
 
 // Type definitions
 type Scope = Map<string, any>
 
-interface CompiledExpression {
+export interface CompiledExpression {
   evaluate: (scope?: Record<string, any>) => any
 }
 
 type CompileFunction = (scope: Scope, args: Record<string, any>, context: any) => any
 
-interface StringOptions {
+export interface StringOptions {
   handler?: ((node: Node, options?: StringOptions) => string) | Record<string, (node: Node, options?: StringOptions) => string>
   parenthesis?: 'keep' | 'auto' | 'all'
   implicit?: 'hide' | 'show'

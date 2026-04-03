@@ -1,6 +1,6 @@
-import { isAccessorNode, isIndexNode, isNode, isSymbolNode } from '../../utils/is.js'
-import { getSafeProperty, setSafeProperty } from '../../utils/customs.js'
-import { factory } from '../../utils/factory.js'
+import { isAccessorNode, isIndexNode, isNode, isSymbolNode } from '../utils/is.js'
+import { getSafeProperty, setSafeProperty } from '../utils/customs.js'
+import { factory } from '../utils/factory.js'
 import { accessFactory } from './utils/access.js'
 import { assignFactory } from './utils/assign.js'
 import { getPrecedence } from '../operators.js'
@@ -97,7 +97,6 @@ export const createAssignmentNode = /* #__PURE__ */ factory(name, dependencies, 
     }
 
     // class name for typing purposes:
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
 
     // readonly property name

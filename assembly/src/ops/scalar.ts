@@ -67,7 +67,7 @@ export function sqrt_f64(a: f64): f64 {
  * Power (a^b)
  */
 export function pow_f64(a: f64, b: f64): f64 {
-  return pow(a, b);
+  return Math.pow(a, b);
 }
 
 /**
@@ -89,9 +89,9 @@ export function cube_f64(a: f64): f64 {
  */
 export function cbrt_f64(a: f64): f64 {
   if (a >= 0) {
-    return pow(a, 1.0 / 3.0);
+    return Math.pow(a, 1.0 / 3.0);
   }
-  return -pow(-a, 1.0 / 3.0);
+  return -Math.pow(-a, 1.0 / 3.0);
 }
 
 /**
@@ -100,12 +100,12 @@ export function cbrt_f64(a: f64): f64 {
 export function nthRoot_f64(a: f64, n: f64): f64 {
   if (n == 0.0) return f64.NaN;
   if (a >= 0) {
-    return pow(a, 1.0 / n);
+    return Math.pow(a, 1.0 / n);
   }
   // For negative bases, only odd integer roots are real
   const nInt = i64(n);
   if (f64(nInt) == n && (nInt & 1) == 1) {
-    return -pow(-a, 1.0 / n);
+    return -Math.pow(-a, 1.0 / n);
   }
   return f64.NaN;
 }
@@ -118,42 +118,42 @@ export function nthRoot_f64(a: f64, n: f64): f64 {
  * Natural exponential (e^x)
  */
 export function exp_f64(a: f64): f64 {
-  return exp(a);
+  return Math.exp(a);
 }
 
 /**
  * e^x - 1 (more accurate for small x)
  */
 export function expm1_f64(a: f64): f64 {
-  return expm1(a);
+  return Math.expm1(a);
 }
 
 /**
  * Natural logarithm
  */
 export function log_f64(a: f64): f64 {
-  return log(a);
+  return Math.log(a);
 }
 
 /**
- * log(1 + x) (more accurate for small x)
+ * Math.log(1 + x) (more accurate for small x)
  */
 export function log1p_f64(a: f64): f64 {
-  return log1p(a);
+  return Math.log1p(a);
 }
 
 /**
  * Base-10 logarithm
  */
 export function log10_f64(a: f64): f64 {
-  return log10(a);
+  return Math.log10(a);
 }
 
 /**
  * Base-2 logarithm
  */
 export function log2_f64(a: f64): f64 {
-  return log2(a);
+  return Math.log2(a);
 }
 
 // =============================================================================
@@ -164,49 +164,49 @@ export function log2_f64(a: f64): f64 {
  * Sine
  */
 export function sin_f64(a: f64): f64 {
-  return sin(a);
+  return Math.sin(a);
 }
 
 /**
  * Cosine
  */
 export function cos_f64(a: f64): f64 {
-  return cos(a);
+  return Math.cos(a);
 }
 
 /**
  * Tangent
  */
 export function tan_f64(a: f64): f64 {
-  return tan(a);
+  return Math.tan(a);
 }
 
 /**
  * Arc sine
  */
 export function asin_f64(a: f64): f64 {
-  return asin(a);
+  return Math.asin(a);
 }
 
 /**
  * Arc cosine
  */
 export function acos_f64(a: f64): f64 {
-  return acos(a);
+  return Math.acos(a);
 }
 
 /**
  * Arc tangent
  */
 export function atan_f64(a: f64): f64 {
-  return atan(a);
+  return Math.atan(a);
 }
 
 /**
  * Two-argument arc tangent
  */
 export function atan2_f64(y: f64, x: f64): f64 {
-  return atan2(y, x);
+  return Math.atan2(y, x);
 }
 
 // =============================================================================
@@ -217,7 +217,7 @@ export function atan2_f64(y: f64, x: f64): f64 {
  * Hyperbolic sine
  */
 export function sinh_f64(a: f64): f64 {
-  const ex = exp(a);
+  const ex = Math.exp(a);
   return (ex - 1.0 / ex) / 2.0;
 }
 
@@ -225,7 +225,7 @@ export function sinh_f64(a: f64): f64 {
  * Hyperbolic cosine
  */
 export function cosh_f64(a: f64): f64 {
-  const ex = exp(a);
+  const ex = Math.exp(a);
   return (ex + 1.0 / ex) / 2.0;
 }
 
@@ -233,7 +233,7 @@ export function cosh_f64(a: f64): f64 {
  * Hyperbolic tangent
  */
 export function tanh_f64(a: f64): f64 {
-  const ex = exp(2.0 * a);
+  const ex = Math.exp(2.0 * a);
   return (ex - 1.0) / (ex + 1.0);
 }
 
@@ -241,21 +241,21 @@ export function tanh_f64(a: f64): f64 {
  * Inverse hyperbolic sine
  */
 export function asinh_f64(a: f64): f64 {
-  return log(a + sqrt(a * a + 1.0));
+  return Math.log(a + sqrt(a * a + 1.0));
 }
 
 /**
  * Inverse hyperbolic cosine
  */
 export function acosh_f64(a: f64): f64 {
-  return log(a + sqrt(a * a - 1.0));
+  return Math.log(a + sqrt(a * a - 1.0));
 }
 
 /**
  * Inverse hyperbolic tangent
  */
 export function atanh_f64(a: f64): f64 {
-  return 0.5 * log((1.0 + a) / (1.0 - a));
+  return 0.5 * Math.log((1.0 + a) / (1.0 - a));
 }
 
 // =============================================================================

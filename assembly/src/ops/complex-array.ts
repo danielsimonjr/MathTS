@@ -237,7 +237,7 @@ export function complex_array_arg(a: Float64Array, result: Float64Array): void {
   for (let i = 0; i < n; i++) {
     const re = unchecked(a[i * 2]);
     const im = unchecked(a[i * 2 + 1]);
-    unchecked(result[i] = atan2(im, re));
+    unchecked(result[i] = Math.atan2(im, re));
   }
 }
 
@@ -274,7 +274,7 @@ export function complex_array_imag(a: Float64Array, result: Float64Array): void 
 }
 
 /**
- * Complex exponential: result = exp(a)
+ * Complex exponential: result = Math.exp(a)
  */
 export function complex_array_exp(a: Float64Array, result: Float64Array): void {
   const n = min(a.length, result.length) / 2;
@@ -283,14 +283,14 @@ export function complex_array_exp(a: Float64Array, result: Float64Array): void {
     const re = unchecked(a[idx]);
     const im = unchecked(a[idx + 1]);
 
-    const expRe = exp(re);
-    unchecked(result[idx] = expRe * cos(im));
-    unchecked(result[idx + 1] = expRe * sin(im));
+    const expRe = Math.exp(re);
+    unchecked(result[idx] = expRe * Math.cos(im));
+    unchecked(result[idx + 1] = expRe * Math.sin(im));
   }
 }
 
 /**
- * Complex natural log: result = log(a)
+ * Complex natural log: result = Math.log(a)
  */
 export function complex_array_log(a: Float64Array, result: Float64Array): void {
   const n = min(a.length, result.length) / 2;
@@ -299,8 +299,8 @@ export function complex_array_log(a: Float64Array, result: Float64Array): void {
     const re = unchecked(a[idx]);
     const im = unchecked(a[idx + 1]);
 
-    unchecked(result[idx] = log(sqrt(re * re + im * im)));
-    unchecked(result[idx + 1] = atan2(im, re));
+    unchecked(result[idx] = Math.log(sqrt(re * re + im * im)));
+    unchecked(result[idx + 1] = Math.atan2(im, re));
   }
 }
 
@@ -316,10 +316,10 @@ export function complex_array_sqrt(a: Float64Array, result: Float64Array): void 
 
     const r = sqrt(re * re + im * im);
     const sqrtR = sqrt(r);
-    const halfTheta = atan2(im, re) / 2.0;
+    const halfTheta = Math.atan2(im, re) / 2.0;
 
-    unchecked(result[idx] = sqrtR * cos(halfTheta));
-    unchecked(result[idx + 1] = sqrtR * sin(halfTheta));
+    unchecked(result[idx] = sqrtR * Math.cos(halfTheta));
+    unchecked(result[idx + 1] = sqrtR * Math.sin(halfTheta));
   }
 }
 

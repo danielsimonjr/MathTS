@@ -1,4 +1,4 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
 import { createQuantileSeq } from '../../function/statistics/quantileSeq.js'
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
 

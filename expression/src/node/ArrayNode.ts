@@ -1,6 +1,6 @@
-import { isArrayNode, isNode } from '../../utils/is.js'
-import { map } from '../../utils/array.js'
-import { factory } from '../../utils/factory.js'
+import { isArrayNode, isNode } from '../utils/is.js'
+import { map } from '../utils/array.js'
+import { factory } from '../utils/factory.js'
 import type { MathNode } from './Node.js'
 
 const name = 'ArrayNode'
@@ -29,8 +29,6 @@ export const createArrayNode = /* #__PURE__ */ factory(name, dependencies, ({ No
         throw new TypeError('Array containing Nodes expected')
       }
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isArrayNode (): boolean { return true }

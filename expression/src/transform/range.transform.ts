@@ -1,4 +1,4 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
 import { createRange } from '../../function/matrix/range.js'
 
 interface TypedFunction<T = any> {

@@ -33,6 +33,9 @@ cd matrix && npx vitest run
 
 # Typecheck a single package:
 cd functions && npx tsc --noEmit
+
+# Coverage (uses whitelist in root vitest.config.ts to exclude dormant code):
+npx vitest run --coverage
 ```
 
 ## Monorepo Structure
@@ -69,7 +72,7 @@ core, matrix, functions, parallel ← compat
 All packages use `tsup src/index.ts --format esm --dts --clean` except:
 - **functions**: no `--dts` flag (build is `tsup src/index.ts --format esm --clean`)
 - **workbook**: builds two entry points (`src/index.ts` and `src/cli.ts`)
-- **expression**: build is `echo 'Skipping build'` (incomplete package)
+- **assembly**: AssemblyScript build (`asc src/index.ts`) + TypeScript bindings (`tsc -p tsconfig.bindings.json`)
 
 ## Architecture
 
@@ -153,21 +156,23 @@ The `functions/` package contains synced factory-pattern functions from the math
 The script:
 1. Copies `.ts` files from `~/Dropbox/Github/Mathjs/src/function/<category>/` → `functions/src/<category>/`
 2. Copies support dirs from `~/Dropbox/Github/Mathjs/src/{utils,core,plain,type,expression,error,wasm}/` → `functions/src/`
-3. Transforms imports: `../../utils/` → `../utils/`, `.ts` → `.js`
-4. Skips Dropbox conflict files
-5. Only writes files that actually changed
+3. Copies `src/types.ts` standalone file and `types/` definition directory
+4. Transforms imports:
+   - Relative depth reduction: `../../utils/` → `../utils/` (removes one `../` for any depth)
+   - Standalone file: `../../types.js` → `../types.js`
+   - Function segment strip: `../../function/<category>/` → `../../<category>/` (for support dir cross-refs)
+   - Scoped packages: `@danielsimonjr/typed-function` → `typed-function`, `@danielsimonjr/workerpool` → `workerpool`
+   - Extensions: `.ts` → `.js`, adds `.js` to bare relative imports
+5. Skips Dropbox conflict files
+6. Only writes files that actually changed
 
-**Last sync**: 2026-04-02 (183 files updated from mathjs v15.3.4, 0 TypeScript errors)
+**Last sync**: 2026-04-02 (mathjs v15.3.4, 0 module resolution errors)
 
-**Important**: Synced files are dormant — they are NOT exported from `functions/src/index.ts`. Only `functions/src/typed/` contains active implementations.
+**Important**: Synced files are dormant — they are NOT exported from `functions/src/index.ts`. Only `functions/src/typed/` contains active implementations. The synced code has ~700 upstream type errors (missing casts, AssemblyScript types) that exist in mathjs itself — `functions/tsconfig.json` uses `strict: false` to allow compilation.
 
 ## Known Issues
 
-- `expression/` build is skipped (incomplete package)
-- `assembly/` WASM build fails (asc compiler issues)
-- Some packages may need `npm i -D @types/node` if missing
-- `functions/` has no vitest tests yet (vitest exits with "No test files found")
-- mathjs fork now uses `@danielsimonjr/typed-function` and `@danielsimonjr/workerpool` — synced files may reference these
+- `assembly/` WASM build emits AS235 warnings for exported classes (cosmetic — WASM can only export functions, not classes)
 
 ## Tools
 
@@ -175,6 +180,14 @@ The script:
 - `create-dependency-graph/` - generates package dependency graphs
 - `compress-for-context/` - compresses code for LLM context windows
 - `chunking-for-files/` - splits large files into chunks
+
+## Versioning
+
+Uses [Changesets](https://github.com/changesets/changesets) for version management. Config in `.changeset/config.json` with `"access": "public"`. Do NOT run `npm publish` autonomously — it requires 2FA.
+
+## Turbo Caching
+
+Turbo caches build/test outputs in `node_modules/.cache/turbo/`. The `test` and `typecheck` tasks depend on `^build` (upstream packages must build first). Use `--force` to bypass cache when debugging stale results.
 
 ## Sprint Planning
 

@@ -8,9 +8,9 @@ import {
   isObjectNode,
   isParenthesisNode,
   isSymbolNode
-} from '../../utils/is.js'
-import { getSafeProperty } from '../../utils/customs.js'
-import { factory } from '../../utils/factory.js'
+} from '../utils/is.js'
+import { getSafeProperty } from '../utils/customs.js'
+import { factory } from '../utils/factory.js'
 import { accessFactory } from './utils/access.js'
 import type { MathNode } from './Node.js'
 
@@ -84,8 +84,6 @@ export const createAccessorNode = /* #__PURE__ */ factory(name, dependencies, ({
         return (this.object as any).name || ''
       }
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isAccessorNode (): boolean { return true }

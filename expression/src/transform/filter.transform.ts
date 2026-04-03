@@ -1,6 +1,6 @@
 import { createFilter } from '../../function/matrix/filter.js'
-import { factory } from '../../utils/factory.js'
-import { isFunctionAssignmentNode, isSymbolNode } from '../../utils/is.js'
+import { factory } from '../utils/factory.js'
+import { isFunctionAssignmentNode, isSymbolNode } from '../utils/is.js'
 import { compileInlineExpression } from './utils/compileInlineExpression.js'
 import { createTransformCallback } from './utils/transformCallback.js'
 

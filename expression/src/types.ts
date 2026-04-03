@@ -1,9 +1,10 @@
 // Type definitions for expression module
 // Re-export from internal types
 
-export type {
-  TypedFunction
-} from '../core/function/typed.js'
+// Typed function type - a callable with signatures metadata
+export type TypedFunction = ((...args: any[]) => any) & {
+  signatures: Record<string, (...args: any[]) => any>;
+};
 
 // TypedFunctionConstructor can be defined inline if needed
 export type TypedFunctionConstructor = {

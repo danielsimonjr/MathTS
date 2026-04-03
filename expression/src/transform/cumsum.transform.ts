@@ -1,5 +1,5 @@
-import { isBigNumber, isCollection, isNumber } from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
+import { isBigNumber, isCollection, isNumber } from '../utils/is.js'
+import { factory } from '../utils/factory.js'
 import { errorTransform } from './utils/errorTransform.js'
 import { createCumSum } from '../../function/statistics/cumsum.js'
 

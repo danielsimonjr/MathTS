@@ -1,6 +1,6 @@
-import { isBigNumber, isNumber } from '../../utils/is.js'
+import { isBigNumber, isNumber } from '../utils/is.js'
 import { errorTransform } from './utils/errorTransform.js'
-import { factory } from '../../utils/factory.js'
+import { factory } from '../utils/factory.js'
 import { createConcat } from '../../function/matrix/concat.js'
 
 interface TypedFunction<T = any> {

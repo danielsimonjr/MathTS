@@ -1,8 +1,8 @@
 import { getPrecedence } from '../operators.js'
-import { escape } from '../../utils/string.js'
-import { getSafeProperty } from '../../utils/customs.js'
-import { latexOperators } from '../../utils/latex.js'
-import { factory } from '../../utils/factory.js'
+import { escape } from '../utils/string.js'
+import { getSafeProperty } from '../utils/customs.js'
+import { latexOperators } from '../utils/latex.js'
+import { factory } from '../utils/factory.js'
 
 // Type definitions
 interface Node {
@@ -68,8 +68,6 @@ export const createRelationalNode = /* #__PURE__ */ factory(name, dependencies, 
       this.conditionals = conditionals
       this.params = params
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isRelationalNode (): boolean { return true }
@@ -87,7 +85,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(name, dependencies, 
      * @return {function} Returns a function which can be called like:
      *                        evalNode(scope: Object, args: Object, context: *)
      */
-    // @ts-expect-error: method signature matches MathNode interface
+    // @ts-expect-error - method overrides property from Node base class
     _compile (math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
       const self = this
 

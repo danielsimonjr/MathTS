@@ -34,6 +34,7 @@
     "@mathts/parallel": "*"
   },
   "devDependencies": {
+    "@types/node": "^25.5.2",
     "@webgpu/types": "^0.1.67",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",

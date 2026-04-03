@@ -1,8 +1,8 @@
-import { factory } from '../utils/factory.js'
-import { isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node } from '../utils/is.js'
-import { deepMap } from '../utils/collection.js'
-import { safeNumberType } from '../utils/number.js'
-import { hasOwnProperty } from '../utils/object.js'
+import { factory } from './utils/factory.js'
+import { isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node } from './utils/is.js'
+import { deepMap } from './utils/collection.js'
+import { safeNumberType } from './utils/number.js'
+import { hasOwnProperty } from './utils/object.js'
 import type { MathNode } from './node/Node.js'
 
 const name = 'parse'

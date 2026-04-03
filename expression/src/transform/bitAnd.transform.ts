@@ -1,6 +1,6 @@
 import { createBitAnd } from '../../function/bitwise/bitAnd.js'
-import { factory } from '../../utils/factory.js'
-import { isCollection } from '../../utils/is.js'
+import { factory } from '../utils/factory.js'
+import { isCollection } from '../utils/is.js'
 
 interface TypedFunction<T = any> {
   (...args: any[]): T

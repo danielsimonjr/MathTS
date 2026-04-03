@@ -1,10 +1,10 @@
-import { isAccessorNode, isFunctionAssignmentNode, isIndexNode, isNode, isSymbolNode } from '../../utils/is.js'
-import { escape, format } from '../../utils/string.js'
-import { hasOwnProperty } from '../../utils/object.js'
-import { getSafeProperty, getSafeMethod } from '../../utils/customs.js'
-import { createSubScope } from '../../utils/scope.js'
-import { factory } from '../../utils/factory.js'
-import { defaultTemplate, latexFunctions } from '../../utils/latex.js'
+import { isAccessorNode, isFunctionAssignmentNode, isIndexNode, isNode, isSymbolNode } from '../utils/is.js'
+import { escape, format } from '../utils/string.js'
+import { hasOwnProperty } from '../utils/object.js'
+import { getSafeProperty, getSafeMethod } from '../utils/customs.js'
+import { createSubScope } from '../utils/scope.js'
+import { factory } from '../utils/factory.js'
+import { defaultTemplate, latexFunctions } from '../utils/latex.js'
 import type { MathNode } from './Node.js'
 
 const name = 'FunctionNode'
@@ -130,8 +130,6 @@ export const createFunctionNode = /* #__PURE__ */ factory(name, dependencies, ({
     get name (): string {
       return (this.fn as any).name || ''
     }
-
-    // @ts-expect-error: intentionally overriding Function.name
     static name = name
     get type (): string { return name }
     get isFunctionNode (): boolean { return true }
