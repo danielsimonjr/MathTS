@@ -1,0 +1,4498 @@
+{
+  "metadata": {
+    "generated": "2026-04-03T18:48:24.351906",
+    "project": "mathts",
+    "version": "0.1.0",
+    "description": "A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acceleration",
+    "generator": "tools/build-mathts-inventory.py"
+  },
+  "summary": {
+    "total_files": 2103,
+    "source": 1275,
+    "source_ts": 1275,
+    "wasm_as": 16,
+    "tests": 59,
+    "docs": 90,
+    "declarations": 14,
+    "config": 178,
+    "other": 471,
+    "total_lines": 232707,
+    "extensions": {
+      ".ts": 1363,
+      ".json": 178,
+      "": 142,
+      ".md": 90,
+      ".rs": 71,
+      ".timestamp": 60,
+      ".d": 51,
+      ".rlib": 44,
+      ".rmeta": 44,
+      ".yaml": 14,
+      ".dll": 5,
+      ".exp": 5,
+      ".lib": 5,
+      ".pdb": 5,
+      ".wgsl": 5,
+      ".js": 3,
+      ".mtsw": 3,
+      ".py": 3,
+      ".toml": 3,
+      ".txt": 2,
+      ".TAG": 2,
+      ".wasm": 2,
+      ".lock": 1,
+      ".sh": 1,
+      ".mermaid": 1
+    }
+  },
+  "packages": {
+    "core": {
+      "package": {
+        "name": "@mathts/core",
+        "version": "0.1.0",
+        "dependencies": [
+          "typed-function"
+        ],
+        "scripts": [
+          "build",
+          "dev",
+          "test",
+          "test:watch",
+          "test:coverage",
+          "typecheck",
+          "lint",
+          "lint:fix",
+          "clean"
+        ]
+      },
+      "source_files": 95,
+      "source_lines": 23780,
+      "test_files": 12,
+      "test_lines": 2470,
+      "total_exports": 625
+    },
+    "matrix": {
+      "package": {
+        "name": "@mathts/matrix",
+        "version": "0.1.0",
+        "dependencies": [
+          "@mathts/core",
+          "@mathts/parallel"
+        ],
+        "scripts": [
+          "build",
+          "dev",
+          "test",
+          "test:watch",
+          "test:coverage",
+          "typecheck",
+          "lint",
+          "lint:fix",
+          "clean"
+        ]
+      },
+      "source_files": 33,
+      "source_lines": 13378,
+      "test_files": 14,
+      "test_lines": 5429,
+      "total_exports": 305
+    },
+    "functions": {
+      "package": {
+        "name": "@mathts/functions",
+        "version": "0.1.0",
+        "dependencies": [
+          "@mathts/core",
+          "@mathts/matrix",
+          "@mathts/parallel",
+          "bignumber.js",
+          "complex.js",
+          "decimal.js",
+          "escape-latex",
+          "fraction.js",
+          "javascript-natural-sort",
+          "seedrandom",
+          "tiny-emitter",
+          "typed-function"
+        ],
+        "scripts": [
+          "build",
+          "dev",
+          "test",
+          "test:watch",
+          "test:coverage",
+          "typecheck",
+          "lint",
+          "lint:fix",
+          "clean"
+        ]
+      },
+      "source_files": 750,
+      "source_lines": 125273,
+      "test_files": 9,
+      "test_lines": 2170,
+      "total_exports": 3564
+    },
+    "parallel": {
+      "package": {
+        "name": "@mathts/parallel",
+        "version": "0.1.0",
+        "dependencies": [
+          "@mathts/workerpool"
+        ],
+        "scripts": [
+          "build",
+          "dev",
+          "test",
+          "test:watch",
+          "test:coverage",
+          "typecheck",
+          "lint",
+          "lint:fix",
+          "clean"
+        ]
+      },
+      "source_files": 14,
+      "source_lines": 3115,
+      "test_files": 10,
+      "test_lines": 2116,
+      "total_exports": 162
+    },
+    "expression": {
+      "package": {
+        "name": "@mathts/expression",
+        "version": "0.1.0",
+        "dependencies": [
+          "@mathts/core",
+          "typed-function"
+        ],
+        "scripts": [
+          "build",
+          "dev",
+          "test",
+          "test:watch",
+          "test:coverage",
+          "typecheck",
+          "lint",
+          "lint:fix",
+          "clean"
+        ]
+      },
+      "source_files": 331,
+      "source_lines": 19874,
+      "test_files": 0,
+      "test_lines": 0,
+      "total_exports": 528
+    },
+    "workbook": {
+      "package": {
+        "name": "@mathts/workbook",
+        "version": "0.1.0",
+        "dependencies": [
+          "@mathts/core",
+          "yaml"
+        ],
+        "scripts": [
+          "build",
+          "dev",
+          "test",
+          "test:watch",
+          "test:coverage",
+          "typecheck",
+          "lint",
+          "lint:fix",
+          "clean"
+        ]
+      },
+      "source_files": 6,
+      "source_lines": 690,
+      "test_files": 3,
+      "test_lines": 459,
+      "total_exports": 29
+    },
+    "compat": {
+      "package": {
+        "name": "@mathts/compat",
+        "version": "0.1.0",
+        "dependencies": [
+          "@mathts/core",
+          "@mathts/functions",
+          "@mathts/matrix",
+          "@mathts/parallel"
+        ],
+        "scripts": [
+          "build",
+          "dev",
+          "typecheck",
+          "test"
+        ]
+      },
+      "source_files": 3,
+      "source_lines": 883,
+      "test_files": 2,
+      "test_lines": 540,
+      "total_exports": 132
+    },
+    "assembly": {
+      "package": {
+        "name": "@mathts/wasm",
+        "version": "0.1.0",
+        "dependencies": [],
+        "scripts": [
+          "asbuild:debug",
+          "asbuild:release",
+          "asbuild",
+          "build:bindings",
+          "build",
+          "clean",
+          "test",
+          "benchmark"
+        ]
+      },
+      "source_files": 10,
+      "source_lines": 3324,
+      "test_files": 0,
+      "test_lines": 0,
+      "total_exports": 432
+    },
+    "packages/typed-function": {
+      "package": {
+        "name": "@mathts/typed-function",
+        "version": "0.1.0",
+        "dependencies": [
+          "typed-function"
+        ],
+        "scripts": [
+          "build",
+          "dev",
+          "test",
+          "test:watch",
+          "test:coverage",
+          "typecheck",
+          "lint",
+          "lint:fix",
+          "clean"
+        ]
+      },
+      "source_files": 2,
+      "source_lines": 457,
+      "test_files": 1,
+      "test_lines": 194,
+      "total_exports": 53
+    },
+    "packages/workerpool": {
+      "package": {
+        "name": "@mathts/workerpool",
+        "version": "0.1.0",
+        "dependencies": [
+          "workerpool"
+        ],
+        "scripts": [
+          "build",
+          "dev",
+          "test",
+          "test:watch",
+          "test:coverage",
+          "typecheck",
+          "lint",
+          "lint:fix",
+          "clean"
+        ]
+      },
+      "source_files": 3,
+      "source_lines": 2299,
+      "test_files": 1,
+      "test_lines": 351,
+      "total_exports": 29
+    }
+  },
+  "core_types": {
+    "Complex": {
+      "file": "core/src/types/complex.ts",
+      "lines": 641,
+      "instance_methods": [
+        "Complex",
+        "Magnitude",
+        "Number",
+        "Operations",
+        "String",
+        "abs",
+        "abs2",
+        "acos",
+        "acosh",
+        "add",
+        "angle",
+        "arg",
+        "asin",
+        "asinh",
+        "atan",
+        "atan2",
+        "atanh",
+        "ceil",
+        "clone",
+        "compare",
+        "conjugate",
+        "cos",
+        "cosh",
+        "cot",
+        "coth",
+        "csc",
+        "csch",
+        "divide",
+        "equals",
+        "exp",
+        "floor",
+        "form",
+        "format",
+        "formatNum",
+        "fromJSON",
+        "fromNumber",
+        "fromPolar",
+        "hypot",
+        "imaginary",
+        "inverse",
+        "isFinite",
+        "isImaginary",
+        "isInfinite",
+        "isNaN",
+        "isReal",
+        "isZero",
+        "lexicographically",
+        "ln",
+        "log",
+        "log10",
+        "log2",
+        "magnitude",
+        "match",
+        "multiply",
+        "negate",
+        "nthRoot",
+        "nthRoots",
+        "number",
+        "options",
+        "parse",
+        "parseFloat",
+        "pow",
+        "push",
+        "range",
+        "replace",
+        "root",
+        "round",
+        "sec",
+        "sech",
+        "sign",
+        "sin",
+        "sinh",
+        "slice",
+        "sqrt",
+        "subtract",
+        "tan",
+        "tanh",
+        "toExponential",
+        "toFixed",
+        "toJSON",
+        "toPolar",
+        "toString",
+        "valueOf"
+      ],
+      "static_methods": [
+        "compare",
+        "fromJSON",
+        "fromNumber",
+        "fromPolar",
+        "parse"
+      ],
+      "method_count": 83
+    },
+    "Fraction": {
+      "file": "core/src/types/fraction.ts",
+      "lines": 613,
+      "instance_methods": [
+        "BigInt",
+        "Error",
+        "Fraction",
+        "Number",
+        "Operations",
+        "Power",
+        "Truncate",
+        "abs",
+        "add",
+        "ceil",
+        "clone",
+        "compare",
+        "compareTo",
+        "denominator",
+        "divide",
+        "equals",
+        "floor",
+        "fraction",
+        "fromContinuedFraction",
+        "fromDecimalString",
+        "fromJSON",
+        "fromNumber",
+        "gcd",
+        "greaterThan",
+        "greaterThanOrEqual",
+        "includes",
+        "inverse",
+        "isInteger",
+        "isNegative",
+        "isPositive",
+        "isUnit",
+        "isZero",
+        "lessThan",
+        "lessThanOrEqual",
+        "match",
+        "mediant",
+        "mod",
+        "multiply",
+        "negate",
+        "number",
+        "parse",
+        "pow",
+        "push",
+        "replace",
+        "round",
+        "sign",
+        "simplify",
+        "split",
+        "startsWith",
+        "subtract",
+        "terms",
+        "toContinuedFraction",
+        "toDecimal",
+        "toJSON",
+        "toLatex",
+        "toMixed",
+        "toNumber",
+        "toString",
+        "trim",
+        "trunc",
+        "valueOf"
+      ],
+      "static_methods": [
+        "compare",
+        "fromContinuedFraction",
+        "fromDecimalString",
+        "fromJSON",
+        "fromNumber",
+        "parse"
+      ],
+      "method_count": 61
+    },
+    "BigNumber": {
+      "file": "core/src/types/bignumber.ts",
+      "lines": 1377,
+      "instance_methods": [
+        "1",
+        "AGM",
+        "BigInt",
+        "BigNumber",
+        "Error",
+        "Modulo",
+        "Number",
+        "Power",
+        "_atanTaylor",
+        "_cosTaylor",
+        "_reduceAngle",
+        "_sinTaylor",
+        "abs",
+        "acos",
+        "acosh",
+        "add",
+        "alignExponents",
+        "asin",
+        "asinh",
+        "atan",
+        "atan2",
+        "atanh",
+        "bigint",
+        "cbrt",
+        "ceil",
+        "clone",
+        "compare",
+        "compareMagnitude",
+        "compareTo",
+        "config",
+        "cos",
+        "cosh",
+        "decimal",
+        "divide",
+        "dividend",
+        "ensureBigNumber",
+        "equals",
+        "exp",
+        "expm1",
+        "floor",
+        "fromBigInt",
+        "fromJSON",
+        "fromNumber",
+        "greaterThan",
+        "greaterThanOrEqual",
+        "hypot",
+        "in",
+        "indexOf",
+        "isFinite",
+        "isInfinite",
+        "isInteger",
+        "isNaN",
+        "isNegative",
+        "isPositive",
+        "isZero",
+        "lessThan",
+        "lessThanOrEqual",
+        "ln",
+        "log10",
+        "log1p",
+        "log2",
+        "min",
+        "mod",
+        "multiply",
+        "negate",
+        "normalize",
+        "parse",
+        "parseFloat",
+        "parseInt",
+        "pow",
+        "precision",
+        "repeat",
+        "replace",
+        "resetConfig",
+        "round",
+        "roundToPrecision",
+        "shouldRound",
+        "sign",
+        "sin",
+        "sinh",
+        "slice",
+        "sqrt",
+        "subtract",
+        "tan",
+        "tanh",
+        "toBigInt",
+        "toExponential",
+        "toFixed",
+        "toFixedInternal",
+        "toJSON",
+        "toLowerCase",
+        "toPrecision",
+        "toString",
+        "trim",
+        "trunc",
+        "valueOf"
+      ],
+      "static_methods": [
+        "compare",
+        "compareMagnitude",
+        "config",
+        "fromBigInt",
+        "fromJSON",
+        "fromNumber",
+        "parse",
+        "resetConfig"
+      ],
+      "method_count": 96
+    }
+  },
+  "typed_functions": {
+    "arithmetic": {
+      "file": "functions/src/typed/arithmetic.ts",
+      "lines": 994,
+      "exports": [
+        "add",
+        "subtract",
+        "multiply",
+        "divide",
+        "unaryMinus",
+        "unaryPlus",
+        "abs",
+        "sign",
+        "pow",
+        "sqrt",
+        "square",
+        "cube",
+        "cbrt",
+        "nthRoot",
+        "exp",
+        "log",
+        "log10",
+        "log2",
+        "log1p",
+        "expm1",
+        "round",
+        "floor",
+        "ceil",
+        "fix",
+        "mod",
+        "gcd",
+        "lcm",
+        "xgcd",
+        "norm",
+        "sinh",
+        "cosh",
+        "tanh",
+        "equal",
+        "smaller",
+        "larger",
+        "smallerEq",
+        "largerEq",
+        "compare",
+        "min",
+        "max",
+        "sum",
+        "mean",
+        "variance",
+        "std",
+        "dot",
+        "shouldParallelize",
+        "getComputePool",
+        "typedArithmetic"
+      ],
+      "export_count": 48
+    },
+    "signal": {
+      "file": "functions/src/typed/signal.ts",
+      "lines": 412,
+      "exports": [
+        "parallelFFT",
+        "parallelIFFT",
+        "parallelFFTMagnitude",
+        "parallelFFTPower",
+        "parallelConv",
+        "parallelXCorr",
+        "parallelAutoCorr",
+        "typedSignal"
+      ],
+      "export_count": 8
+    },
+    "statistics": {
+      "file": "functions/src/typed/statistics.ts",
+      "lines": 740,
+      "exports": [
+        "NormalizationType",
+        "parallelStatSum",
+        "parallelStatMean",
+        "parallelStatVariance",
+        "parallelStatStd",
+        "parallelStatMin",
+        "parallelStatMax",
+        "parallelStatMinMax",
+        "parallelStatMedian",
+        "parallelStatMode",
+        "parallelStatProd",
+        "parallelStatNorm",
+        "parallelStatDistance",
+        "parallelStatCorr",
+        "parallelStatMAD",
+        "parallelStatCumsum",
+        "parallelStatQuantile",
+        "parallelStatHistogram",
+        "typedStatistics"
+      ],
+      "export_count": 19
+    },
+    "trigonometry": {
+      "file": "functions/src/typed/trigonometry.ts",
+      "lines": 270,
+      "exports": [
+        "sin",
+        "cos",
+        "tan",
+        "csc",
+        "sec",
+        "cot",
+        "asin",
+        "acos",
+        "atan",
+        "atan2",
+        "acsc",
+        "asec",
+        "acot",
+        "asinh",
+        "acosh",
+        "atanh",
+        "toRadians",
+        "toDegrees",
+        "hypot",
+        "typedTrigonometry"
+      ],
+      "export_count": 20
+    },
+    "typed-bridge": {
+      "file": "functions/src/typed/typed-bridge.ts",
+      "lines": 14,
+      "exports": [
+        "initTypeBridge"
+      ],
+      "export_count": 1
+    }
+  },
+  "synced_factories": {
+    "algebra": {
+      "file_count": 45,
+      "total_lines": 11441,
+      "factory_count": 28,
+      "factories": [
+        {
+          "name": "derivative",
+          "creator": "createDerivative",
+          "deps": [
+            "typed",
+            "config",
+            "parse",
+            "simplify",
+            "equal",
+            "isZero",
+            "numeric",
+            "ConstantNode",
+            "FunctionNode",
+            "OperatorNode",
+            "ParenthesisNode",
+            "SymbolNode"
+          ]
+        },
+        {
+          "name": "leafCount",
+          "creator": "createLeafCount",
+          "deps": [
+            "parse",
+            "typed"
+          ]
+        },
+        {
+          "name": "lyap",
+          "creator": "createLyap",
+          "deps": [
+            "typed",
+            "matrix",
+            "sylvester",
+            "multiply",
+            "transpose"
+          ]
+        },
+        {
+          "name": "polynomialRoot",
+          "creator": "createPolynomialRoot",
+          "deps": [
+            "typed",
+            "isZero",
+            "equalScalar",
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "sqrt",
+            "unaryMinus",
+            "cbrt",
+            "typeOf",
+            "im",
+            "re"
+          ]
+        },
+        {
+          "name": "rationalize",
+          "creator": "createRationalize",
+          "deps": [
+            "config",
+            "typed",
+            "equal",
+            "isZero",
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "pow",
+            "parse",
+            "simplifyConstant",
+            "simplifyCore",
+            "simplify",
+            "?bignumber",
+            "?fraction",
+            "mathWithTransform",
+            "matrix",
+            "AccessorNode",
+            "ArrayNode",
+            "ConstantNode",
+            "FunctionNode",
+            "IndexNode",
+            "ObjectNode",
+            "OperatorNode",
+            "SymbolNode",
+            "ParenthesisNode"
+          ]
+        },
+        {
+          "name": "resolve",
+          "creator": "createResolve",
+          "deps": [
+            "typed",
+            "parse",
+            "ConstantNode",
+            "FunctionNode",
+            "OperatorNode",
+            "ParenthesisNode"
+          ]
+        },
+        {
+          "name": "simplify",
+          "creator": "createSimplify",
+          "deps": [
+            "typed",
+            "parse",
+            "equal",
+            "resolve",
+            "simplifyConstant",
+            "simplifyCore",
+            "AccessorNode",
+            "ArrayNode",
+            "ConstantNode",
+            "FunctionNode",
+            "IndexNode",
+            "ObjectNode",
+            "OperatorNode",
+            "ParenthesisNode",
+            "SymbolNode",
+            "replacer"
+          ]
+        },
+        {
+          "name": "simplifyConstant",
+          "creator": "createSimplifyConstant",
+          "deps": [
+            "typed",
+            "config",
+            "mathWithTransform",
+            "matrix",
+            "parse",
+            "isBounded",
+            "?fraction",
+            "?bignumber",
+            "AccessorNode",
+            "ArrayNode",
+            "ConstantNode",
+            "FunctionNode",
+            "IndexNode",
+            "ObjectNode",
+            "OperatorNode",
+            "SymbolNode"
+          ]
+        },
+        {
+          "name": "simplifyCore",
+          "creator": "createSimplifyCore",
+          "deps": [
+            "typed",
+            "parse",
+            "equal",
+            "isZero",
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "pow",
+            "AccessorNode",
+            "ArrayNode",
+            "ConstantNode",
+            "FunctionNode",
+            "IndexNode",
+            "ObjectNode",
+            "OperatorNode",
+            "ParenthesisNode",
+            "SymbolNode"
+          ]
+        },
+        {
+          "name": "sylvester",
+          "creator": "createSylvester",
+          "deps": [
+            "typed",
+            "schur",
+            "matrixFromColumns",
+            "matrix",
+            "multiply",
+            "range",
+            "concat",
+            "transpose",
+            "index",
+            "subset",
+            "add",
+            "subtract",
+            "identity",
+            "lusolve",
+            "abs"
+          ]
+        },
+        {
+          "name": "symbolicEqual",
+          "creator": "createSymbolicEqual",
+          "deps": [
+            "parse",
+            "simplify",
+            "typed",
+            "OperatorNode"
+          ]
+        },
+        {
+          "name": "lup",
+          "creator": "createLup",
+          "deps": [
+            "typed",
+            "matrix",
+            "abs",
+            "addScalar",
+            "divideScalar",
+            "multiplyScalar",
+            "subtractScalar",
+            "larger",
+            "equalScalar",
+            "unaryMinus",
+            "DenseMatrix",
+            "SparseMatrix",
+            "Spa"
+          ]
+        },
+        {
+          "name": "qr",
+          "creator": "createQr",
+          "deps": [
+            "typed",
+            "matrix",
+            "zeros",
+            "identity",
+            "isZero",
+            "equal",
+            "sign",
+            "sqrt",
+            "conj",
+            "unaryMinus",
+            "addScalar",
+            "divideScalar",
+            "multiplyScalar",
+            "subtractScalar",
+            "complex"
+          ]
+        },
+        {
+          "name": "schur",
+          "creator": "createSchur",
+          "deps": [
+            "typed",
+            "matrix",
+            "identity",
+            "multiply",
+            "qr",
+            "norm",
+            "subtract"
+          ]
+        },
+        {
+          "name": "slu",
+          "creator": "createSlu",
+          "deps": [
+            "typed",
+            "abs",
+            "add",
+            "multiply",
+            "transpose",
+            "divideScalar",
+            "subtract",
+            "larger",
+            "largerEq",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "simplifyUtil",
+          "creator": "createUtil",
+          "deps": [
+            "FunctionNode",
+            "OperatorNode",
+            "SymbolNode"
+          ]
+        },
+        {
+          "name": "lsolve",
+          "creator": "createLsolve",
+          "deps": [
+            "typed",
+            "matrix",
+            "divideScalar",
+            "multiplyScalar",
+            "subtractScalar",
+            "equalScalar",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "lsolveAll",
+          "creator": "createLsolveAll",
+          "deps": [
+            "typed",
+            "matrix",
+            "divideScalar",
+            "multiplyScalar",
+            "subtractScalar",
+            "equalScalar",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "lusolve",
+          "creator": "createLusolve",
+          "deps": [
+            "typed",
+            "matrix",
+            "lup",
+            "slu",
+            "usolve",
+            "lsolve",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "usolve",
+          "creator": "createUsolve",
+          "deps": [
+            "typed",
+            "matrix",
+            "divideScalar",
+            "multiplyScalar",
+            "subtractScalar",
+            "equalScalar",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "usolveAll",
+          "creator": "createUsolveAll",
+          "deps": [
+            "typed",
+            "matrix",
+            "divideScalar",
+            "multiplyScalar",
+            "subtractScalar",
+            "equalScalar",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "csAmd",
+          "creator": "createCsAmd",
+          "deps": [
+            "add",
+            "multiply",
+            "transpose"
+          ]
+        },
+        {
+          "name": "csChol",
+          "creator": "createCsChol",
+          "deps": [
+            "divideScalar",
+            "sqrt",
+            "subtract",
+            "multiply",
+            "im",
+            "re",
+            "conj",
+            "equal",
+            "smallerEq",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "csCounts",
+          "creator": "createCsCounts",
+          "deps": [
+            "transpose"
+          ]
+        },
+        {
+          "name": "csLu",
+          "creator": "createCsLu",
+          "deps": [
+            "abs",
+            "divideScalar",
+            "multiply",
+            "subtract",
+            "larger",
+            "largerEq",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "csSpsolve",
+          "creator": "createCsSpsolve",
+          "deps": [
+            "divideScalar",
+            "multiply",
+            "subtract"
+          ]
+        },
+        {
+          "name": "csSqr",
+          "creator": "createCsSqr",
+          "deps": [
+            "add",
+            "multiply",
+            "transpose"
+          ]
+        },
+        {
+          "name": "csSymperm",
+          "creator": "createCsSymperm",
+          "deps": [
+            "conj",
+            "SparseMatrix"
+          ]
+        }
+      ]
+    },
+    "arithmetic": {
+      "file_count": 40,
+      "total_lines": 7416,
+      "factory_count": 40,
+      "factories": [
+        {
+          "name": "abs",
+          "creator": "createAbs",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "add",
+          "creator": "createAdd",
+          "deps": [
+            "typed",
+            "matrix",
+            "addScalar",
+            "equalScalar",
+            "DenseMatrix",
+            "SparseMatrix",
+            "concat",
+            "nodeOperations"
+          ]
+        },
+        {
+          "name": "addScalar",
+          "creator": "createAddScalar",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "cbrt",
+          "creator": "createCbrt",
+          "deps": [
+            "config",
+            "typed",
+            "isNegative",
+            "unaryMinus",
+            "matrix",
+            "Complex",
+            "BigNumber",
+            "Fraction"
+          ]
+        },
+        {
+          "name": "ceil",
+          "creator": "createCeilNumber",
+          "deps": [
+            "typed",
+            "config",
+            "round",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "cube",
+          "creator": "createCube",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "divide",
+          "creator": "createDivide",
+          "deps": [
+            "typed",
+            "matrix",
+            "multiply",
+            "equalScalar",
+            "divideScalar",
+            "inv",
+            "nodeOperations"
+          ]
+        },
+        {
+          "name": "divideScalar",
+          "creator": "createDivideScalar",
+          "deps": [
+            "typed",
+            "numeric"
+          ]
+        },
+        {
+          "name": "dotDivide",
+          "creator": "createDotDivide",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "divideScalar",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "dotMultiply",
+          "creator": "createDotMultiply",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "multiplyScalar",
+            "concat"
+          ]
+        },
+        {
+          "name": "dotPow",
+          "creator": "createDotPow",
+          "deps": [
+            "typed",
+            "equalScalar",
+            "matrix",
+            "pow",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "exp",
+          "creator": "createExp",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "expm1",
+          "creator": "createExpm1",
+          "deps": [
+            "typed",
+            "Complex"
+          ]
+        },
+        {
+          "name": "fix",
+          "creator": "createFixNumber",
+          "deps": [
+            "typed",
+            "Complex",
+            "matrix",
+            "ceil",
+            "floor",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "floor",
+          "creator": "createFloorNumber",
+          "deps": [
+            "typed",
+            "config",
+            "round",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "gcd",
+          "creator": "createGcd",
+          "deps": [
+            "typed",
+            "config",
+            "round",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "BigNumber",
+            "DenseMatrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "hypot",
+          "creator": "createHypot",
+          "deps": [
+            "typed",
+            "abs",
+            "addScalar",
+            "divideScalar",
+            "multiplyScalar",
+            "sqrt",
+            "smaller",
+            "isPositive"
+          ]
+        },
+        {
+          "name": "invmod",
+          "creator": "createInvmod",
+          "deps": [
+            "typed",
+            "config",
+            "BigNumber",
+            "xgcd",
+            "equal",
+            "smaller",
+            "mod",
+            "add",
+            "isInteger"
+          ]
+        },
+        {
+          "name": "lcm",
+          "creator": "createLcm",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "concat"
+          ]
+        },
+        {
+          "name": "log",
+          "creator": "createLog",
+          "deps": [
+            "config",
+            "typed",
+            "typeOf",
+            "divideScalar",
+            "Complex"
+          ]
+        },
+        {
+          "name": "log10",
+          "creator": "createLog10",
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
+        },
+        {
+          "name": "log1p",
+          "creator": "createLog1p",
+          "deps": [
+            "typed",
+            "config",
+            "divideScalar",
+            "log",
+            "Complex"
+          ]
+        },
+        {
+          "name": "log2",
+          "creator": "createLog2",
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
+        },
+        {
+          "name": "mod",
+          "creator": "createMod",
+          "deps": [
+            "typed",
+            "config",
+            "round",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "multiply",
+          "creator": "createMultiply",
+          "deps": [
+            "typed",
+            "matrix",
+            "addScalar",
+            "multiplyScalar",
+            "equalScalar",
+            "dot",
+            "nodeOperations"
+          ]
+        },
+        {
+          "name": "multiplyScalar",
+          "creator": "createMultiplyScalar",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "norm",
+          "creator": "createNorm",
+          "deps": [
+            "typed",
+            "abs",
+            "add",
+            "pow",
+            "conj",
+            "sqrt",
+            "multiply",
+            "equalScalar",
+            "larger",
+            "smaller",
+            "matrix",
+            "ctranspose",
+            "eigs"
+          ]
+        },
+        {
+          "name": "nthRoot",
+          "creator": "createNthRoot",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "BigNumber",
+            "concat"
+          ]
+        },
+        {
+          "name": "nthRoots",
+          "creator": "createNthRoots",
+          "deps": [
+            "config",
+            "typed",
+            "divideScalar",
+            "Complex"
+          ]
+        },
+        {
+          "name": "pow",
+          "creator": "createPow",
+          "deps": [
+            "typed",
+            "config",
+            "identity",
+            "multiply",
+            "matrix",
+            "inv",
+            "fraction",
+            "number",
+            "Complex"
+          ]
+        },
+        {
+          "name": "round",
+          "creator": "createRound",
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "BigNumber",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "sign",
+          "creator": "createSign",
+          "deps": [
+            "typed",
+            "BigNumber",
+            "complex",
+            "Fraction"
+          ]
+        },
+        {
+          "name": "sqrt",
+          "creator": "createSqrt",
+          "deps": [
+            "config",
+            "typed",
+            "Complex"
+          ]
+        },
+        {
+          "name": "square",
+          "creator": "createSquare",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "subtract",
+          "creator": "createSubtract",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "subtractScalar",
+            "unaryMinus",
+            "DenseMatrix",
+            "concat",
+            "nodeOperations"
+          ]
+        },
+        {
+          "name": "subtractScalar",
+          "creator": "createSubtractScalar",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "unaryMinus",
+          "creator": "createUnaryMinus",
+          "deps": [
+            "typed",
+            "config",
+            "?bignumber"
+          ]
+        },
+        {
+          "name": "unaryPlus",
+          "creator": "createUnaryPlus",
+          "deps": [
+            "typed",
+            "config",
+            "numeric"
+          ]
+        },
+        {
+          "name": "xgcd",
+          "creator": "createXgcd",
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "nodeOperations",
+          "creator": "createNodeOperations",
+          "deps": [
+            "ConstantNode",
+            "OperatorNode"
+          ]
+        }
+      ]
+    },
+    "bitwise": {
+      "file_count": 8,
+      "total_lines": 797,
+      "factory_count": 7,
+      "factories": [
+        {
+          "name": "bitAnd",
+          "creator": "createBitAnd",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "concat"
+          ]
+        },
+        {
+          "name": "bitNot",
+          "creator": "createBitNot",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "bitOr",
+          "creator": "createBitOr",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "DenseMatrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "bitXor",
+          "creator": "createBitXor",
+          "deps": [
+            "typed",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "leftShift",
+          "creator": "createLeftShift",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "rightArithShift",
+          "creator": "createRightArithShift",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "rightLogShift",
+          "creator": "createRightLogShift",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "DenseMatrix",
+            "concat"
+          ]
+        }
+      ]
+    },
+    "combinatorics": {
+      "file_count": 4,
+      "total_lines": 388,
+      "factory_count": 4,
+      "factories": [
+        {
+          "name": "bellNumbers",
+          "creator": "createBellNumbers",
+          "deps": [
+            "typed",
+            "addScalar",
+            "isNegative",
+            "isInteger",
+            "stirlingS2"
+          ]
+        },
+        {
+          "name": "catalan",
+          "creator": "createCatalan",
+          "deps": [
+            "typed",
+            "addScalar",
+            "divideScalar",
+            "multiplyScalar",
+            "combinations",
+            "isNegative",
+            "isInteger"
+          ]
+        },
+        {
+          "name": "composition",
+          "creator": "createComposition",
+          "deps": [
+            "typed",
+            "addScalar",
+            "combinations",
+            "isNegative",
+            "isPositive",
+            "isInteger",
+            "larger"
+          ]
+        },
+        {
+          "name": "stirlingS2",
+          "creator": "createStirlingS2",
+          "deps": [
+            "typed",
+            "addScalar",
+            "subtractScalar",
+            "multiplyScalar",
+            "divideScalar",
+            "pow",
+            "factorial",
+            "combinations",
+            "isNegative",
+            "isInteger",
+            "number",
+            "?bignumber",
+            "larger"
+          ]
+        }
+      ]
+    },
+    "complex": {
+      "file_count": 4,
+      "total_lines": 280,
+      "factory_count": 4,
+      "factories": [
+        {
+          "name": "arg",
+          "creator": "createArg",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "conj",
+          "creator": "createConj",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "im",
+          "creator": "createIm",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "re",
+          "creator": "createRe",
+          "deps": [
+            "typed"
+          ]
+        }
+      ]
+    },
+    "geometry": {
+      "file_count": 2,
+      "total_lines": 1251,
+      "factory_count": 2,
+      "factories": [
+        {
+          "name": "distance",
+          "creator": "createDistance",
+          "deps": [
+            "typed",
+            "addScalar",
+            "subtractScalar",
+            "divideScalar",
+            "multiplyScalar",
+            "deepEqual",
+            "sqrt",
+            "abs"
+          ]
+        },
+        {
+          "name": "intersect",
+          "creator": "createIntersect",
+          "deps": [
+            "typed",
+            "config",
+            "abs",
+            "add",
+            "addScalar",
+            "matrix",
+            "multiply",
+            "multiplyScalar",
+            "divideScalar",
+            "subtract",
+            "smaller",
+            "equalScalar",
+            "flatten",
+            "isZero",
+            "isNumeric"
+          ]
+        }
+      ]
+    },
+    "logical": {
+      "file_count": 5,
+      "total_lines": 665,
+      "factory_count": 5,
+      "factories": [
+        {
+          "name": "and",
+          "creator": "createAnd",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "zeros",
+            "not",
+            "concat"
+          ]
+        },
+        {
+          "name": "not",
+          "creator": "createNot",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "nullish",
+          "creator": "createNullish",
+          "deps": [
+            "typed",
+            "matrix",
+            "size",
+            "flatten",
+            "deepEqual"
+          ]
+        },
+        {
+          "name": "or",
+          "creator": "createOr",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "DenseMatrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "xor",
+          "creator": "createXor",
+          "deps": [
+            "typed",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
+        }
+      ]
+    },
+    "matrix": {
+      "file_count": 44,
+      "total_lines": 9604,
+      "factory_count": 42,
+      "factories": [
+        {
+          "name": "column",
+          "creator": "createColumn",
+          "deps": [
+            "typed",
+            "Index",
+            "matrix",
+            "range"
+          ]
+        },
+        {
+          "name": "concat",
+          "creator": "createConcat",
+          "deps": [
+            "typed",
+            "matrix",
+            "isInteger"
+          ]
+        },
+        {
+          "name": "count",
+          "creator": "createCount",
+          "deps": [
+            "typed",
+            "size",
+            "prod"
+          ]
+        },
+        {
+          "name": "cross",
+          "creator": "createCross",
+          "deps": [
+            "typed",
+            "matrix",
+            "subtract",
+            "multiply"
+          ]
+        },
+        {
+          "name": "ctranspose",
+          "creator": "createCtranspose",
+          "deps": [
+            "typed",
+            "transpose",
+            "conj"
+          ]
+        },
+        {
+          "name": "det",
+          "creator": "createDet",
+          "deps": [
+            "typed",
+            "matrix",
+            "subtractScalar",
+            "multiply",
+            "divideScalar",
+            "isZero",
+            "unaryMinus"
+          ]
+        },
+        {
+          "name": "diag",
+          "creator": "createDiag",
+          "deps": [
+            "typed",
+            "matrix",
+            "DenseMatrix",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "diff",
+          "creator": "createDiff",
+          "deps": [
+            "typed",
+            "matrix",
+            "subtract",
+            "number"
+          ]
+        },
+        {
+          "name": "dot",
+          "creator": "createDot",
+          "deps": [
+            "typed",
+            "addScalar",
+            "multiplyScalar",
+            "conj",
+            "size"
+          ]
+        },
+        {
+          "name": "eigs",
+          "creator": "createEigs",
+          "deps": [
+            "config",
+            "typed",
+            "matrix",
+            "addScalar",
+            "equal",
+            "subtract",
+            "abs",
+            "atan",
+            "cos",
+            "sin",
+            "multiplyScalar",
+            "divideScalar",
+            "inv",
+            "bignumber",
+            "multiply",
+            "add",
+            "larger",
+            "column",
+            "flatten",
+            "number",
+            "complex",
+            "sqrt",
+            "diag",
+            "size",
+            "reshape",
+            "qr",
+            "usolve",
+            "usolveAll",
+            "im",
+            "re",
+            "smaller",
+            "matrixFromColumns",
+            "dot"
+          ]
+        },
+        {
+          "name": "expm",
+          "creator": "createExpm",
+          "deps": [
+            "typed",
+            "abs",
+            "add",
+            "identity",
+            "inv",
+            "multiply"
+          ]
+        },
+        {
+          "name": "fft",
+          "creator": "createFft",
+          "deps": [
+            "typed",
+            "matrix",
+            "addScalar",
+            "multiplyScalar",
+            "divideScalar",
+            "exp",
+            "tau",
+            "i",
+            "dotDivide",
+            "conj",
+            "pow",
+            "ceil",
+            "log2",
+            "complex"
+          ]
+        },
+        {
+          "name": "filter",
+          "creator": "createFilter",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "flatten",
+          "creator": "createFlatten",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "forEach",
+          "creator": "createForEach",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "getMatrixDataType",
+          "creator": "createGetMatrixDataType",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "identity",
+          "creator": "createIdentity",
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "BigNumber",
+            "DenseMatrix",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "ifft",
+          "creator": "createIfft",
+          "deps": [
+            "typed",
+            "fft",
+            "dotDivide",
+            "conj",
+            "complex"
+          ]
+        },
+        {
+          "name": "inv",
+          "creator": "createInv",
+          "deps": [
+            "typed",
+            "matrix",
+            "divideScalar",
+            "addScalar",
+            "multiply",
+            "unaryMinus",
+            "det",
+            "identity",
+            "abs"
+          ]
+        },
+        {
+          "name": "kron",
+          "creator": "createKron",
+          "deps": [
+            "typed",
+            "matrix",
+            "multiplyScalar"
+          ]
+        },
+        {
+          "name": "map",
+          "creator": "createMap",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "mapSlices",
+          "creator": "createMapSlices",
+          "deps": [
+            "typed",
+            "isInteger"
+          ]
+        },
+        {
+          "name": "matrixFromColumns",
+          "creator": "createMatrixFromColumns",
+          "deps": [
+            "typed",
+            "matrix",
+            "flatten",
+            "size"
+          ]
+        },
+        {
+          "name": "matrixFromFunction",
+          "creator": "createMatrixFromFunction",
+          "deps": [
+            "typed",
+            "matrix",
+            "isZero"
+          ]
+        },
+        {
+          "name": "matrixFromRows",
+          "creator": "createMatrixFromRows",
+          "deps": [
+            "typed",
+            "matrix",
+            "flatten",
+            "size"
+          ]
+        },
+        {
+          "name": "ones",
+          "creator": "createOnes",
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "partitionSelect",
+          "creator": "createPartitionSelect",
+          "deps": [
+            "typed",
+            "isNumeric",
+            "isNaN",
+            "compare"
+          ]
+        },
+        {
+          "name": "pinv",
+          "creator": "createPinv",
+          "deps": [
+            "typed",
+            "matrix",
+            "inv",
+            "deepEqual",
+            "equal",
+            "dotDivide",
+            "dot",
+            "ctranspose",
+            "divideScalar",
+            "multiply",
+            "add",
+            "Complex"
+          ]
+        },
+        {
+          "name": "range",
+          "creator": "createRange",
+          "deps": [
+            "typed",
+            "config",
+            "?matrix",
+            "?bignumber",
+            "equal",
+            "smaller",
+            "smallerEq",
+            "larger",
+            "largerEq",
+            "add",
+            "isZero",
+            "isPositive"
+          ]
+        },
+        {
+          "name": "reshape",
+          "creator": "createReshape",
+          "deps": [
+            "typed",
+            "isInteger",
+            "matrix"
+          ]
+        },
+        {
+          "name": "resize",
+          "creator": "createResize",
+          "deps": [
+            "config",
+            "matrix"
+          ]
+        },
+        {
+          "name": "rotate",
+          "creator": "createRotate",
+          "deps": [
+            "typed",
+            "multiply",
+            "rotationMatrix"
+          ]
+        },
+        {
+          "name": "rotationMatrix",
+          "creator": "createRotationMatrix",
+          "deps": [
+            "typed",
+            "config",
+            "multiplyScalar",
+            "addScalar",
+            "unaryMinus",
+            "norm",
+            "matrix",
+            "BigNumber",
+            "DenseMatrix",
+            "SparseMatrix",
+            "cos",
+            "sin"
+          ]
+        },
+        {
+          "name": "row",
+          "creator": "createRow",
+          "deps": [
+            "typed",
+            "Index",
+            "matrix",
+            "range"
+          ]
+        },
+        {
+          "name": "size",
+          "creator": "createSize",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "sort",
+          "creator": "createSort",
+          "deps": [
+            "typed",
+            "matrix",
+            "compare",
+            "compareNatural"
+          ]
+        },
+        {
+          "name": "sqrtm",
+          "creator": "createSqrtm",
+          "deps": [
+            "typed",
+            "abs",
+            "add",
+            "multiply",
+            "map",
+            "sqrt",
+            "subtract",
+            "inv",
+            "size",
+            "max",
+            "identity"
+          ]
+        },
+        {
+          "name": "squeeze",
+          "creator": "createSqueeze",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "subset",
+          "creator": "createSubset",
+          "deps": [
+            "typed",
+            "matrix",
+            "zeros",
+            "add"
+          ]
+        },
+        {
+          "name": "trace",
+          "creator": "createTrace",
+          "deps": [
+            "typed",
+            "matrix",
+            "add"
+          ]
+        },
+        {
+          "name": "transpose",
+          "creator": "createTranspose",
+          "deps": [
+            "typed",
+            "matrix"
+          ]
+        },
+        {
+          "name": "zeros",
+          "creator": "createZeros",
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "BigNumber"
+          ]
+        }
+      ]
+    },
+    "numeric": {
+      "file_count": 1,
+      "total_lines": 712,
+      "factory_count": 1,
+      "factories": [
+        {
+          "name": "solveODE",
+          "creator": "createSolveODE",
+          "deps": [
+            "typed",
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "max",
+            "map",
+            "abs",
+            "isPositive",
+            "isNegative",
+            "larger",
+            "smaller",
+            "matrix",
+            "bignumber",
+            "unaryMinus"
+          ]
+        }
+      ]
+    },
+    "probability": {
+      "file_count": 14,
+      "total_lines": 1740,
+      "factory_count": 12,
+      "factories": [
+        {
+          "name": "bernoulli",
+          "creator": "createBernoulli",
+          "deps": [
+            "typed",
+            "config",
+            "isInteger",
+            "number",
+            "?BigNumber",
+            "?Fraction"
+          ]
+        },
+        {
+          "name": "combinations",
+          "creator": "createCombinations",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "combinationsWithRep",
+          "creator": "createCombinationsWithRep",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "factorial",
+          "creator": "createFactorial",
+          "deps": [
+            "typed",
+            "gamma"
+          ]
+        },
+        {
+          "name": "gamma",
+          "creator": "createGamma",
+          "deps": [
+            "typed",
+            "config",
+            "multiplyScalar",
+            "pow",
+            "BigNumber",
+            "Complex"
+          ]
+        },
+        {
+          "name": "kldivergence",
+          "creator": "createKldivergence",
+          "deps": [
+            "typed",
+            "matrix",
+            "divide",
+            "sum",
+            "multiply",
+            "map",
+            "dotDivide",
+            "log",
+            "isNumeric"
+          ]
+        },
+        {
+          "name": "lgamma",
+          "creator": "createLgamma",
+          "deps": [
+            "Complex",
+            "typed"
+          ]
+        },
+        {
+          "name": "multinomial",
+          "creator": "createMultinomial",
+          "deps": [
+            "typed",
+            "add",
+            "divide",
+            "multiply",
+            "factorial",
+            "isInteger",
+            "isPositive"
+          ]
+        },
+        {
+          "name": "permutations",
+          "creator": "createPermutations",
+          "deps": [
+            "typed",
+            "factorial"
+          ]
+        },
+        {
+          "name": "pickRandom",
+          "creator": "createPickRandom",
+          "deps": [
+            "typed",
+            "config",
+            "?on"
+          ]
+        },
+        {
+          "name": "random",
+          "creator": "createRandom",
+          "deps": [
+            "typed",
+            "config",
+            "?on"
+          ]
+        },
+        {
+          "name": "randomInt",
+          "creator": "createRandomInt",
+          "deps": [
+            "typed",
+            "config",
+            "log2",
+            "?on"
+          ]
+        }
+      ]
+    },
+    "relational": {
+      "file_count": 13,
+      "total_lines": 1807,
+      "factory_count": 12,
+      "factories": [
+        {
+          "name": "compare",
+          "creator": "createCompare",
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "equalScalar",
+            "BigNumber",
+            "Fraction",
+            "DenseMatrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "compareNatural",
+          "creator": "createCompareNatural",
+          "deps": [
+            "typed",
+            "compare"
+          ]
+        },
+        {
+          "name": "compareText",
+          "creator": "createCompareText",
+          "deps": [
+            "typed",
+            "matrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "deepEqual",
+          "creator": "createDeepEqual",
+          "deps": [
+            "typed",
+            "equal"
+          ]
+        },
+        {
+          "name": "equal",
+          "creator": "createEqual",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "DenseMatrix",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "equalScalar",
+          "creator": "createEqualScalar",
+          "deps": [
+            "typed",
+            "config"
+          ]
+        },
+        {
+          "name": "equalText",
+          "creator": "createEqualText",
+          "deps": [
+            "typed",
+            "compareText",
+            "isZero"
+          ]
+        },
+        {
+          "name": "larger",
+          "creator": "createLarger",
+          "deps": [
+            "typed",
+            "config",
+            "bignumber",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "largerEq",
+          "creator": "createLargerEq",
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "smaller",
+          "creator": "createSmaller",
+          "deps": [
+            "typed",
+            "config",
+            "bignumber",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "smallerEq",
+          "creator": "createSmallerEq",
+          "deps": [
+            "typed",
+            "config",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
+        },
+        {
+          "name": "unequal",
+          "creator": "createUnequal",
+          "deps": [
+            "typed",
+            "config",
+            "equalScalar",
+            "matrix",
+            "DenseMatrix",
+            "concat",
+            "SparseMatrix"
+          ]
+        }
+      ]
+    },
+    "set": {
+      "file_count": 10,
+      "total_lines": 847,
+      "factory_count": 10,
+      "factories": [
+        {
+          "name": "setCartesian",
+          "creator": "createSetCartesian",
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "setDifference",
+          "creator": "createSetDifference",
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "setDistinct",
+          "creator": "createSetDistinct",
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "setIntersect",
+          "creator": "createSetIntersect",
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index",
+            "DenseMatrix"
+          ]
+        },
+        {
+          "name": "setIsSubset",
+          "creator": "createSetIsSubset",
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index"
+          ]
+        },
+        {
+          "name": "setMultiplicity",
+          "creator": "createSetMultiplicity",
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index"
+          ]
+        },
+        {
+          "name": "setPowerset",
+          "creator": "createSetPowerset",
+          "deps": [
+            "typed",
+            "size",
+            "subset",
+            "compareNatural",
+            "Index"
+          ]
+        },
+        {
+          "name": "setSize",
+          "creator": "createSetSize",
+          "deps": [
+            "typed",
+            "compareNatural"
+          ]
+        },
+        {
+          "name": "setSymDifference",
+          "creator": "createSetSymDifference",
+          "deps": [
+            "typed",
+            "size",
+            "concat",
+            "subset",
+            "setDifference",
+            "Index"
+          ]
+        },
+        {
+          "name": "setUnion",
+          "creator": "createSetUnion",
+          "deps": [
+            "typed",
+            "size",
+            "concat",
+            "subset",
+            "setIntersect",
+            "setSymDifference",
+            "Index"
+          ]
+        }
+      ]
+    },
+    "signal": {
+      "file_count": 5,
+      "total_lines": 1349,
+      "factory_count": 2,
+      "factories": [
+        {
+          "name": "freqz",
+          "creator": "createFreqz",
+          "deps": [
+            "typed",
+            "add",
+            "multiply",
+            "Complex",
+            "divide",
+            "matrix"
+          ]
+        },
+        {
+          "name": "zpk2tf",
+          "creator": "createZpk2tf",
+          "deps": [
+            "typed",
+            "add",
+            "multiply",
+            "Complex",
+            "number"
+          ]
+        }
+      ]
+    },
+    "special": {
+      "file_count": 2,
+      "total_lines": 502,
+      "factory_count": 2,
+      "factories": [
+        {
+          "name": "erf",
+          "creator": "createErf",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "zeta",
+          "creator": "createZeta",
+          "deps": [
+            "typed",
+            "config",
+            "multiply",
+            "pow",
+            "divide",
+            "factorial",
+            "equal",
+            "smallerEq",
+            "isBounded",
+            "isNegative",
+            "gamma",
+            "sin",
+            "subtract",
+            "add",
+            "?Complex",
+            "?BigNumber",
+            "pi"
+          ]
+        }
+      ]
+    },
+    "statistics": {
+      "file_count": 14,
+      "total_lines": 2461,
+      "factory_count": 13,
+      "factories": [
+        {
+          "name": "corr",
+          "creator": "createCorr",
+          "deps": [
+            "typed",
+            "matrix",
+            "mean",
+            "sqrt",
+            "sum",
+            "add",
+            "subtract",
+            "multiply",
+            "pow",
+            "divide"
+          ]
+        },
+        {
+          "name": "cumsum",
+          "creator": "createCumSum",
+          "deps": [
+            "typed",
+            "add",
+            "unaryPlus"
+          ]
+        },
+        {
+          "name": "mad",
+          "creator": "createMad",
+          "deps": [
+            "typed",
+            "abs",
+            "map",
+            "median",
+            "subtract"
+          ]
+        },
+        {
+          "name": "max",
+          "creator": "createMax",
+          "deps": [
+            "typed",
+            "config",
+            "numeric",
+            "larger",
+            "isNaN"
+          ]
+        },
+        {
+          "name": "mean",
+          "creator": "createMean",
+          "deps": [
+            "typed",
+            "add",
+            "divide"
+          ]
+        },
+        {
+          "name": "median",
+          "creator": "createMedian",
+          "deps": [
+            "typed",
+            "add",
+            "divide",
+            "compare",
+            "partitionSelect"
+          ]
+        },
+        {
+          "name": "min",
+          "creator": "createMin",
+          "deps": [
+            "typed",
+            "config",
+            "numeric",
+            "smaller",
+            "isNaN"
+          ]
+        },
+        {
+          "name": "mode",
+          "creator": "createMode",
+          "deps": [
+            "typed",
+            "isNaN",
+            "isNumeric"
+          ]
+        },
+        {
+          "name": "prod",
+          "creator": "createProd",
+          "deps": [
+            "typed",
+            "config",
+            "multiplyScalar",
+            "numeric",
+            "parseNumberWithConfig"
+          ]
+        },
+        {
+          "name": "quantileSeq",
+          "creator": "createQuantileSeq",
+          "deps": [
+            "typed",
+            "?bignumber",
+            "add",
+            "subtract",
+            "divide",
+            "multiply",
+            "partitionSelect",
+            "compare",
+            "isInteger",
+            "smaller",
+            "smallerEq",
+            "larger",
+            "mapSlices"
+          ]
+        },
+        {
+          "name": "std",
+          "creator": "createStd",
+          "deps": [
+            "typed",
+            "map",
+            "sqrt",
+            "variance"
+          ]
+        },
+        {
+          "name": "sum",
+          "creator": "createSum",
+          "deps": [
+            "typed",
+            "config",
+            "add",
+            "numeric",
+            "parseNumberWithConfig"
+          ]
+        },
+        {
+          "name": "variance",
+          "creator": "createVariance",
+          "deps": [
+            "typed",
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "mapSlices",
+            "isNaN"
+          ]
+        }
+      ]
+    },
+    "string": {
+      "file_count": 5,
+      "total_lines": 441,
+      "factory_count": 5,
+      "factories": [
+        {
+          "name": "bin",
+          "creator": "createBin",
+          "deps": [
+            "typed",
+            "format"
+          ]
+        },
+        {
+          "name": "format",
+          "creator": "createFormat",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "hex",
+          "creator": "createHex",
+          "deps": [
+            "typed",
+            "format"
+          ]
+        },
+        {
+          "name": "oct",
+          "creator": "createOct",
+          "deps": [
+            "typed",
+            "format"
+          ]
+        },
+        {
+          "name": "print",
+          "creator": "createPrint",
+          "deps": [
+            "typed"
+          ]
+        }
+      ]
+    },
+    "trigonometry": {
+      "file_count": 26,
+      "total_lines": 1658,
+      "factory_count": 25,
+      "factories": [
+        {
+          "name": "acos",
+          "creator": "createAcos",
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
+        },
+        {
+          "name": "acosh",
+          "creator": "createAcosh",
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
+        },
+        {
+          "name": "acot",
+          "creator": "createAcot",
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "acoth",
+          "creator": "createAcoth",
+          "deps": [
+            "typed",
+            "config",
+            "Complex",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "acsc",
+          "creator": "createAcsc",
+          "deps": [
+            "typed",
+            "config",
+            "Complex",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "acsch",
+          "creator": "createAcsch",
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "asec",
+          "creator": "createAsec",
+          "deps": [
+            "typed",
+            "config",
+            "Complex",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "asech",
+          "creator": "createAsech",
+          "deps": [
+            "typed",
+            "config",
+            "Complex",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "asin",
+          "creator": "createAsin",
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
+        },
+        {
+          "name": "asinh",
+          "creator": "createAsinh",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "atan",
+          "creator": "createAtan",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "atan2",
+          "creator": "createAtan2",
+          "deps": [
+            "typed",
+            "matrix",
+            "equalScalar",
+            "BigNumber",
+            "DenseMatrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "atanh",
+          "creator": "createAtanh",
+          "deps": [
+            "typed",
+            "config",
+            "Complex"
+          ]
+        },
+        {
+          "name": "cos",
+          "creator": "createCos",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "cosh",
+          "creator": "createCosh",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "cot",
+          "creator": "createCot",
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "coth",
+          "creator": "createCoth",
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "csc",
+          "creator": "createCsc",
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "csch",
+          "creator": "createCsch",
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "sec",
+          "creator": "createSec",
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "sech",
+          "creator": "createSech",
+          "deps": [
+            "typed",
+            "BigNumber"
+          ]
+        },
+        {
+          "name": "sin",
+          "creator": "createSin",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "sinh",
+          "creator": "createSinh",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "tan",
+          "creator": "createTan",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "tanh",
+          "creator": "createTanh",
+          "deps": [
+            "typed"
+          ]
+        }
+      ]
+    },
+    "unit": {
+      "file_count": 2,
+      "total_lines": 137,
+      "factory_count": 2,
+      "factories": [
+        {
+          "name": "to",
+          "creator": "createTo",
+          "deps": [
+            "typed",
+            "matrix",
+            "concat"
+          ]
+        },
+        {
+          "name": "toBest",
+          "creator": "createToBest",
+          "deps": [
+            "typed"
+          ]
+        }
+      ]
+    },
+    "utils": {
+      "file_count": 46,
+      "total_lines": 7649,
+      "factory_count": 15,
+      "factories": [
+        {
+          "name": "clone",
+          "creator": "createClone",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "log",
+          "creator": "createLog",
+          "deps": [
+            "config",
+            "typed",
+            "divideScalar",
+            "Complex"
+          ]
+        },
+        {
+          "name": "hasNumericValue",
+          "creator": "createHasNumericValue",
+          "deps": [
+            "typed",
+            "isNumeric"
+          ]
+        },
+        {
+          "name": "isBounded",
+          "creator": "createIsBounded",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "isFinite",
+          "creator": "createIsFinite",
+          "deps": [
+            "typed",
+            "isBounded",
+            "map"
+          ]
+        },
+        {
+          "name": "isInteger",
+          "creator": "createIsInteger",
+          "deps": [
+            "typed",
+            "equal"
+          ]
+        },
+        {
+          "name": "isNaN",
+          "creator": "createIsNaN",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "isNegative",
+          "creator": "createIsNegative",
+          "deps": [
+            "typed",
+            "config"
+          ]
+        },
+        {
+          "name": "isNumeric",
+          "creator": "createIsNumeric",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "isPositive",
+          "creator": "createIsPositive",
+          "deps": [
+            "typed",
+            "config"
+          ]
+        },
+        {
+          "name": "isPrime",
+          "creator": "createIsPrime",
+          "deps": [
+            "typed"
+          ]
+        },
+        {
+          "name": "isZero",
+          "creator": "createIsZero",
+          "deps": [
+            "typed",
+            "equalScalar"
+          ]
+        },
+        {
+          "name": "numeric",
+          "creator": "createNumeric",
+          "deps": [
+            "number",
+            "?bignumber",
+            "?fraction"
+          ]
+        },
+        {
+          "name": "parseNumberWithConfig",
+          "creator": "createParseNumberWithConfig",
+          "deps": [
+            "config",
+            "?bignumber"
+          ]
+        },
+        {
+          "name": "typeOf",
+          "creator": "createTypeOf",
+          "deps": [
+            "typed"
+          ]
+        }
+      ]
+    }
+  },
+  "matrix_backends": {
+    "Backend": {
+      "lines": 243,
+      "methods": [
+        "Error",
+        "Map",
+        "Set",
+        "add",
+        "available",
+        "filter",
+        "from",
+        "get",
+        "getHints",
+        "has",
+        "initialize",
+        "isAvailable",
+        "map",
+        "register",
+        "selectBackend",
+        "set",
+        "setHints"
+      ],
+      "method_count": 17
+    },
+    "BackendManager": {
+      "lines": 641,
+      "methods": [
+        "Map",
+        "abs",
+        "add",
+        "all",
+        "available",
+        "catch",
+        "configUnsubscribe",
+        "destroy",
+        "divideElementwise",
+        "doInitialize",
+        "dot",
+        "executeWithFallback",
+        "fallback",
+        "forceBackend",
+        "get",
+        "getActiveBackend",
+        "getAdaptiveThresholds",
+        "getAvailableBackends",
+        "getConfig",
+        "getHints",
+        "getPerformanceStats",
+        "has",
+        "hasBackend",
+        "initialize",
+        "map",
+        "max",
+        "maybeAdjustThresholds",
+        "multiply",
+        "multiplyElementwise",
+        "negate",
+        "norm",
+        "now",
+        "onConfigChange",
+        "operation",
+        "push",
+        "recordSample",
+        "reduce",
+        "resetAdaptiveState",
+        "round",
+        "scale",
+        "selectBackend",
+        "set",
+        "setHints",
+        "slice",
+        "subtract",
+        "sum",
+        "sumAxis",
+        "syncWithConfig",
+        "throughput",
+        "transpose",
+        "warn"
+      ],
+      "method_count": 51
+    },
+    "GPUBackend": {
+      "lines": 511,
+      "methods": [
+        "BufferPool",
+        "Error",
+        "Float32Array",
+        "GPUContext",
+        "ShaderManager",
+        "acquireStorageBuffer",
+        "acquireUniformBuffer",
+        "add",
+        "calculateWorkgroups",
+        "capabilities",
+        "catch",
+        "ceil",
+        "clearCache",
+        "createBindGroup",
+        "destroy",
+        "detectGPUCapabilities",
+        "dispatchCompute",
+        "getBufferPool",
+        "getBuiltinPipeline",
+        "getContext",
+        "getGlobalGPUContext",
+        "getRecommendedWorkgroupSize",
+        "getShaderManager",
+        "getStats",
+        "initialize",
+        "isReady",
+        "lastError",
+        "matmul",
+        "precompileBuiltins",
+        "readBuffer",
+        "release",
+        "scale",
+        "shouldUseGPU",
+        "status",
+        "transpose",
+        "writeBuffer"
+      ],
+      "method_count": 36
+    },
+    "GPUMatrixBackend": {
+      "lines": 402,
+      "methods": [
+        "Error",
+        "Float32Array",
+        "GPUBackend",
+        "abs",
+        "add",
+        "addAsync",
+        "catch",
+        "destroy",
+        "detectGPUCapabilities",
+        "divideElementwise",
+        "doInitialize",
+        "dot",
+        "executeWithFallback",
+        "fallback",
+        "fromFlat",
+        "getCapabilities",
+        "getConfig",
+        "getGlobalGPUBackend",
+        "getStats",
+        "gpuOp",
+        "hasWebGPU",
+        "initialize",
+        "initializeGlobalGPUBackend",
+        "isAvailable",
+        "matmul",
+        "multiply",
+        "multiplyAsync",
+        "multiplyElementwise",
+        "negate",
+        "norm",
+        "scale",
+        "scaleAsync",
+        "shouldUseGPU",
+        "subtract",
+        "sum",
+        "sumAxis",
+        "transpose",
+        "transposeAsync",
+        "updateConfig",
+        "warn"
+      ],
+      "method_count": 40
+    },
+    "index": {
+      "lines": 99,
+      "methods": [],
+      "method_count": 0
+    },
+    "JSBackend": {
+      "lines": 306,
+      "methods": [
+        "DenseMatrix",
+        "Error",
+        "Float64Array",
+        "O",
+        "abs",
+        "add",
+        "algorithm",
+        "checkDimensionsMatch",
+        "checkMultiplyDimensions",
+        "columns",
+        "divideElementwise",
+        "dot",
+        "from",
+        "get",
+        "initialize",
+        "isAvailable",
+        "multiply",
+        "multiplyElementwise",
+        "negate",
+        "norm",
+        "rows",
+        "scale",
+        "sqrt",
+        "subtract",
+        "sum",
+        "sumAxis",
+        "transpose",
+        "vectors"
+      ],
+      "method_count": 28
+    },
+    "MatrixWasmBridge": {
+      "lines": 851,
+      "methods": [
+        "A",
+        "Error",
+        "Float64Array",
+        "Int32Array",
+        "JS",
+        "O",
+        "Parallel",
+        "abs",
+        "allocateFloat64Array",
+        "allocateInt32Array",
+        "catch",
+        "cleanup",
+        "collect",
+        "cond1",
+        "cond1JS",
+        "cond1Wasm",
+        "condInf",
+        "condInfJS",
+        "condInfWasm",
+        "configure",
+        "data",
+        "eigenvalue",
+        "eigsSymmetric",
+        "eigsSymmetricJS",
+        "eigsSymmetricWasm",
+        "exp",
+        "expm",
+        "expmJS",
+        "expmWasm",
+        "fft",
+        "fftWasm",
+        "free",
+        "getCapabilities",
+        "init",
+        "intensive",
+        "inv2x2",
+        "inv2x2JS",
+        "inv3x3",
+        "inv3x3JS",
+        "laCond1",
+        "laCondInf",
+        "laInv2x2",
+        "laInv3x3",
+        "load",
+        "luDecomposition",
+        "luDecompositionJS",
+        "luDecompositionWasm",
+        "matrices",
+        "matrix",
+        "multiply",
+        "multiplyDense",
+        "multiplyDenseSIMD",
+        "multiplyJS",
+        "multiplyWasm",
+        "sizes",
+        "sqrt",
+        "sqrtm",
+        "sqrtmJS",
+        "sqrtmWasm",
+        "terminate",
+        "threshold",
+        "warn"
+      ],
+      "method_count": 62
+    },
+    "ParallelBackend": {
+      "lines": 381,
+      "methods": [
+        "ComputePool",
+        "DenseMatrix",
+        "Error",
+        "Float64Array",
+        "abs",
+        "add",
+        "axis",
+        "checkDimensionsMatch",
+        "checkMultiplyDimensions",
+        "divideElementwise",
+        "dot",
+        "elementwise",
+        "from",
+        "get",
+        "getStats",
+        "initialize",
+        "isAvailable",
+        "isReady",
+        "map",
+        "matmul",
+        "multiply",
+        "multiplyElementwise",
+        "negate",
+        "norm",
+        "scale",
+        "shouldParallelize",
+        "stats",
+        "subtract",
+        "sum",
+        "sumAxis",
+        "terminate",
+        "toFloat64Array",
+        "transpose",
+        "typeof",
+        "value"
+      ],
+      "method_count": 35
+    },
+    "WASMBackend": {
+      "lines": 890,
+      "methods": [
+        "Decomposition",
+        "Determinant",
+        "Error",
+        "Float64Array",
+        "Int32Array",
+        "Inversion",
+        "abs",
+        "add",
+        "allocateFloat64Array",
+        "allocateInt32Array",
+        "catch",
+        "choleskyDecomposition",
+        "choleskyDecompositionJS",
+        "detectWasmFeatures",
+        "determinantJS",
+        "determinantWasm",
+        "divideElementwise",
+        "doInitialize",
+        "dot",
+        "dotProduct",
+        "free",
+        "from",
+        "fromFlat",
+        "getConfig",
+        "getFeatures",
+        "initialize",
+        "inverse",
+        "inverseJS",
+        "isAvailable",
+        "laInv",
+        "load",
+        "luDecomposition",
+        "luDecompositionJS",
+        "luDeterminant",
+        "min",
+        "multiply",
+        "multiplyDense",
+        "multiplyDenseSIMD",
+        "multiplyElementwise",
+        "negate",
+        "norm",
+        "qrDecomposition",
+        "qrDecompositionJS",
+        "scalarMultiply",
+        "scale",
+        "shouldUseWasm",
+        "simdAbsF64",
+        "simdAddF64",
+        "simdDotF64",
+        "simdMulF64",
+        "simdNormF64",
+        "simdScaleF64",
+        "simdSubF64",
+        "simdSumF64",
+        "sqrt",
+        "subtract",
+        "sum",
+        "sumAxis",
+        "toFloat64Array",
+        "transpose",
+        "updateConfig",
+        "warn",
+        "zeros"
+      ],
+      "method_count": 63
+    },
+    "WasmLoader": {
+      "lines": 1069,
+      "methods": [
+        "Error",
+        "Float64Array",
+        "Int32Array",
+        "Rust",
+        "URL",
+        "WasmLoader",
+        "__collect",
+        "__new",
+        "__unpin",
+        "allocateFloat64Array",
+        "allocateFloat64ArrayEmpty",
+        "allocateInt32Array",
+        "allocateInt32ArrayEmpty",
+        "arrayBuffer",
+        "clearPool",
+        "collect",
+        "compile",
+        "compileStreaming",
+        "data",
+        "error",
+        "fetch",
+        "filter",
+        "find",
+        "free",
+        "getCompiledModule",
+        "getDefaultWasmPath",
+        "getFromPool",
+        "getImports",
+        "getInstance",
+        "getLoadingMetrics",
+        "getModule",
+        "getPoolStats",
+        "import",
+        "instantiate",
+        "instantiateStreaming",
+        "isLoaded",
+        "isPrecompiled",
+        "it",
+        "load",
+        "loadBrowserWasm",
+        "loadModule",
+        "loadNodeWasm",
+        "loader",
+        "memory",
+        "module",
+        "now",
+        "precompile",
+        "promisify",
+        "readFile",
+        "reduce",
+        "release",
+        "reset",
+        "set",
+        "size"
+      ],
+      "method_count": 54
+    }
+  },
+  "wasm_operations": {
+    "bindings/index.ts": {
+      "lines": 10,
+      "exports": [
+        "MathTSWasm",
+        "loadWasm",
+        "loadWasmSync"
+      ],
+      "export_count": 3
+    },
+    "bindings/wasm-loader.ts": {
+      "lines": 262,
+      "exports": [
+        "MathTSWasmExports",
+        "MathTSWasmInstance",
+        "loadWasmSync",
+        "MathTSWasm"
+      ],
+      "export_count": 4
+    },
+    "env/abort.ts": {
+      "lines": 21,
+      "exports": [
+        "abort"
+      ],
+      "export_count": 1
+    },
+    "index.ts": {
+      "lines": 329,
+      "exports": [
+        "Complex",
+        "complex",
+        "complexFromPolar",
+        "// Basic arithmetic\n  add_f64",
+        "sub_f64",
+        "mul_f64",
+        "div_f64",
+        "mod_f64",
+        "neg_f64",
+        "// Power and roots\n  sqrt_f64",
+        "pow_f64",
+        "square_f64",
+        "cube_f64",
+        "cbrt_f64",
+        "nthRoot_f64",
+        "// Exponential and logarithmic\n  exp_f64",
+        "expm1_f64",
+        "log_f64",
+        "log1p_f64",
+        "log10_f64",
+        "log2_f64",
+        "// Trigonometric\n  sin_f64",
+        "cos_f64",
+        "tan_f64",
+        "asin_f64",
+        "acos_f64",
+        "atan_f64",
+        "atan2_f64",
+        "// Hyperbolic\n  sinh_f64",
+        "cosh_f64",
+        "tanh_f64",
+        "asinh_f64",
+        "acosh_f64",
+        "atanh_f64",
+        "// Rounding and comparison\n  abs_f64",
+        "floor_f64",
+        "ceil_f64",
+        "round_f64",
+        "trunc_f64",
+        "sign_f64",
+        "min_f64",
+        "max_f64",
+        "clamp_f64",
+        "// Special values\n  isNaN_f64",
+        "isFinite_f64",
+        "// Constants\n  PI",
+        "E",
+        "PHI",
+        "SQRT2",
+        "SQRT1_2",
+        "LN2",
+        "LN10",
+        "LOG2E",
+        "LOG10E",
+        "EPSILON",
+        "// Reductions\n  array_sum",
+        "array_product",
+        "array_mean",
+        "array_variance",
+        "array_stddev",
+        "array_min",
+        "array_max",
+        "array_argmin",
+        "array_argmax",
+        "// Norms\n  array_norm",
+        "array_norm_l1",
+        "array_norm_linf",
+        "// Vector operations\n  array_dot",
+        "array_add",
+        "array_sub",
+        "array_mul",
+        "array_div",
+        "array_scale",
+        "array_add_scalar",
+        "array_neg",
+        "array_abs",
+        "array_sqrt",
+        "array_square",
+        "array_exp",
+        "array_log",
+        "array_sin",
+        "array_cos",
+        "// Linear algebra helpers\n  array_axpby",
+        "array_distance",
+        "array_cosine_similarity",
+        "// In-place operations\n  array_scale_inplace",
+        "array_add_scalar_inplace",
+        "array_add_inplace",
+        "array_clamp_inplace",
+        "array_fill",
+        "array_copy",
+        "// Creation\n  matrix_zeros",
+        "matrix_ones",
+        "matrix_fill",
+        "matrix_identity",
+        "matrix_diag",
+        "// Element access\n  matrix_get",
+        "matrix_set",
+        "matrix_get_row",
+        "matrix_get_col",
+        "matrix_get_diag",
+        "// Arithmetic\n  matrix_add",
+        "matrix_sub",
+        "matrix_mul_elementwise",
+        "matrix_div_elementwise",
+        "matrix_scale",
+        "matrix_add_scalar",
+        "matrix_neg",
+        "// Matrix multiplication\n  matrix_multiply",
+        "matrix_vector_multiply",
+        "vector_matrix_multiply",
+        "matrix_outer",
+        "// Transpose\n  matrix_transpose",
+        "// Reductions\n  matrix_sum",
+        "matrix_mean",
+        "matrix_min",
+        "matrix_max",
+        "matrix_norm_frobenius",
+        "matrix_trace",
+        "matrix_sum_rows",
+        "matrix_sum_cols",
+        "// Queries\n  matrix_is_square",
+        "matrix_is_symmetric",
+        "matrix_is_diagonal",
+        "matrix_is_identity",
+        "// In-place operations\n  matrix_scale_inplace",
+        "matrix_add_scalar_inplace",
+        "matrix_add_inplace",
+        "matrix_copy",
+        "// BLAS-like operations\n  matrix_axpy",
+        "matrix_gemm",
+        "matrix_gemv",
+        "// Basic arithmetic\n  complex_add",
+        "complex_sub",
+        "complex_mul",
+        "complex_div",
+        "complex_neg",
+        "complex_conj",
+        "complex_reciprocal",
+        "// Magnitude and phase\n  complex_abs",
+        "complex_arg",
+        "complex_abs_squared",
+        "// Power and root functions\n  complex_sqrt",
+        "complex_pow",
+        "complex_cpow",
+        "complex_square",
+        "complex_cube",
+        "// Exponential and logarithmic\n  complex_exp",
+        "complex_log",
+        "complex_log10",
+        "complex_log2",
+        "// Trigonometric\n  complex_sin",
+        "complex_cos",
+        "complex_tan",
+        "complex_asin",
+        "complex_acos",
+        "complex_atan",
+        "// Hyperbolic\n  complex_sinh",
+        "complex_cosh",
+        "complex_tanh",
+        "complex_asinh",
+        "complex_acosh",
+        "complex_atanh",
+        "// Utility functions\n  complex_equals",
+        "complex_approx_equals",
+        "complex_is_zero",
+        "complex_is_real",
+        "complex_is_imaginary",
+        "complex_is_nan",
+        "complex_is_finite",
+        "// Construction helpers\n  complex_from_real",
+        "complex_from_imag",
+        "complex_from_polar",
+        "complex_to_polar",
+        "// Linear algebra\n  complex_axpby",
+        "complex_distance",
+        "// Creation\n  complex_array_zeros",
+        "complex_array_ones",
+        "complex_array_fill",
+        "// Element access\n  complex_array_get",
+        "complex_array_set",
+        "complex_array_set_parts",
+        "complex_array_get_re",
+        "complex_array_get_im",
+        "complex_array_length",
+        "// Element-wise arithmetic\n  complex_array_add",
+        "complex_array_sub",
+        "complex_array_mul",
+        "complex_array_div",
+        "complex_array_scale_real",
+        "complex_array_scale_complex",
+        "complex_array_neg",
+        "complex_array_conj",
+        "// Element-wise functions\n  complex_array_abs",
+        "complex_array_arg",
+        "complex_array_abs_squared",
+        "complex_array_real",
+        "complex_array_imag",
+        "complex_array_exp",
+        "complex_array_log",
+        "complex_array_sqrt",
+        "// Reductions\n  complex_array_sum",
+        "complex_array_mean",
+        "complex_array_dot",
+        "complex_array_norm",
+        "// In-place operations\n  complex_array_scale_inplace",
+        "complex_array_conj_inplace",
+        "complex_array_add_inplace",
+        "complex_array_copy"
+      ],
+      "export_count": 209
+    },
+    "ops/array.ts": {
+      "lines": 441,
+      "exports": [
+        "array_sum",
+        "array_product",
+        "array_mean",
+        "array_variance",
+        "array_stddev",
+        "array_min",
+        "array_max",
+        "array_argmin",
+        "array_argmax",
+        "array_norm",
+        "array_norm_l1",
+        "array_norm_linf",
+        "array_dot",
+        "array_add",
+        "array_sub",
+        "array_mul",
+        "array_div",
+        "array_scale",
+        "array_add_scalar",
+        "array_neg",
+        "array_abs",
+        "array_sqrt",
+        "array_square",
+        "array_exp",
+        "array_log",
+        "array_sin",
+        "array_cos",
+        "array_axpby",
+        "array_distance",
+        "array_cosine_similarity",
+        "array_scale_inplace",
+        "array_add_scalar_inplace",
+        "array_add_inplace",
+        "array_clamp_inplace",
+        "array_fill",
+        "array_copy"
+      ],
+      "export_count": 36
+    },
+    "ops/complex-array.ts": {
+      "lines": 438,
+      "exports": [
+        "complex_array_zeros",
+        "complex_array_ones",
+        "complex_array_fill",
+        "complex_array_get",
+        "complex_array_set",
+        "complex_array_set_parts",
+        "complex_array_get_re",
+        "complex_array_get_im",
+        "complex_array_length",
+        "complex_array_add",
+        "complex_array_sub",
+        "complex_array_mul",
+        "complex_array_div",
+        "complex_array_scale_real",
+        "complex_array_scale_complex",
+        "complex_array_neg",
+        "complex_array_conj",
+        "complex_array_abs",
+        "complex_array_arg",
+        "complex_array_abs_squared",
+        "complex_array_real",
+        "complex_array_imag",
+        "complex_array_exp",
+        "complex_array_log",
+        "complex_array_sqrt",
+        "complex_array_sum",
+        "complex_array_mean",
+        "complex_array_dot",
+        "complex_array_norm",
+        "complex_array_scale_inplace",
+        "complex_array_conj_inplace",
+        "complex_array_add_inplace",
+        "complex_array_copy"
+      ],
+      "export_count": 33
+    },
+    "ops/complex-ops.ts": {
+      "lines": 379,
+      "exports": [
+        "complex_add",
+        "complex_sub",
+        "complex_mul",
+        "complex_div",
+        "complex_neg",
+        "complex_conj",
+        "complex_reciprocal",
+        "complex_abs",
+        "complex_arg",
+        "complex_abs_squared",
+        "complex_sqrt",
+        "complex_pow",
+        "complex_cpow",
+        "complex_square",
+        "complex_cube",
+        "complex_exp",
+        "complex_log",
+        "complex_log10",
+        "complex_log2",
+        "complex_sin",
+        "complex_cos",
+        "complex_tan",
+        "complex_asin",
+        "complex_acos",
+        "complex_atan",
+        "complex_sinh",
+        "complex_cosh",
+        "complex_tanh",
+        "complex_asinh",
+        "complex_acosh",
+        "complex_atanh",
+        "complex_equals",
+        "complex_approx_equals",
+        "complex_is_zero",
+        "complex_is_real",
+        "complex_is_imaginary",
+        "complex_is_nan",
+        "complex_is_finite",
+        "complex_from_real",
+        "complex_from_imag",
+        "complex_from_polar",
+        "complex_to_polar",
+        "complex_axpby",
+        "complex_distance"
+      ],
+      "export_count": 44
+    },
+    "ops/matrix.ts": {
+      "lines": 599,
+      "exports": [
+        "matrix_zeros",
+        "matrix_ones",
+        "matrix_fill",
+        "matrix_identity",
+        "matrix_diag",
+        "matrix_get",
+        "matrix_set",
+        "matrix_get_row",
+        "matrix_get_col",
+        "matrix_get_diag",
+        "matrix_add",
+        "matrix_sub",
+        "matrix_mul_elementwise",
+        "matrix_div_elementwise",
+        "matrix_scale",
+        "matrix_add_scalar",
+        "matrix_neg",
+        "matrix_multiply",
+        "matrix_vector_multiply",
+        "vector_matrix_multiply",
+        "matrix_outer",
+        "matrix_transpose",
+        "matrix_sum",
+        "matrix_mean",
+        "matrix_min",
+        "matrix_max",
+        "matrix_norm_frobenius",
+        "matrix_trace",
+        "matrix_sum_rows",
+        "matrix_sum_cols",
+        "matrix_is_square",
+        "matrix_is_symmetric",
+        "matrix_is_diagonal",
+        "matrix_is_identity",
+        "matrix_scale_inplace",
+        "matrix_add_scalar_inplace",
+        "matrix_add_inplace",
+        "matrix_copy",
+        "matrix_axpy",
+        "matrix_gemm",
+        "matrix_gemv"
+      ],
+      "export_count": 41
+    },
+    "ops/scalar.ts": {
+      "lines": 381,
+      "exports": [
+        "add_f64",
+        "sub_f64",
+        "mul_f64",
+        "div_f64",
+        "mod_f64",
+        "neg_f64",
+        "sqrt_f64",
+        "pow_f64",
+        "square_f64",
+        "cube_f64",
+        "cbrt_f64",
+        "nthRoot_f64",
+        "exp_f64",
+        "expm1_f64",
+        "log_f64",
+        "log1p_f64",
+        "log10_f64",
+        "log2_f64",
+        "sin_f64",
+        "cos_f64",
+        "tan_f64",
+        "asin_f64",
+        "acos_f64",
+        "atan_f64",
+        "atan2_f64",
+        "sinh_f64",
+        "cosh_f64",
+        "tanh_f64",
+        "asinh_f64",
+        "acosh_f64",
+        "atanh_f64",
+        "abs_f64",
+        "floor_f64",
+        "ceil_f64",
+        "round_f64",
+        "trunc_f64",
+        "sign_f64",
+        "min_f64",
+        "max_f64",
+        "clamp_f64",
+        "isNaN_f64",
+        "isFinite_f64",
+        "PI",
+        "E",
+        "PHI",
+        "SQRT2",
+        "SQRT1_2",
+        "LN2",
+        "LN10",
+        "LOG2E",
+        "LOG10E",
+        "EPSILON"
+      ],
+      "export_count": 52
+    },
+    "types/complex.ts": {
+      "lines": 464,
+      "exports": [
+        "Complex",
+        "complex",
+        "complexFromPolar",
+        "complexFromReal",
+        "complexFromImaginary",
+        "COMPLEX_ZERO",
+        "COMPLEX_ONE",
+        "COMPLEX_I",
+        "COMPLEX_NEG_ONE"
+      ],
+      "export_count": 9
+    }
+  },
+  "cross_package_deps": {
+    "core": {
+      "@mathts/core": 1
+    },
+    "matrix": {
+      "@mathts/core": 5,
+      "@mathts/parallel": 3
+    },
+    "functions": {
+      "@mathts/core": 5,
+      "@mathts/parallel": 4
+    },
+    "parallel": {
+      "@mathts/workerpool": 1,
+      "@mathts/parallel": 1
+    },
+    "compat": {
+      "@mathts/core": 3,
+      "@mathts/compat": 2,
+      "@mathts/matrix": 2,
+      "@mathts/parallel": 1,
+      "@mathts/functions": 1
+    },
+    "packages/typed-function": {
+      "@mathts/core": 1
+    },
+    "packages/workerpool": {
+      "@mathts/workerpool": 1
+    }
+  },
+  "dependency_graph": {
+    "total_factories": 230,
+    "leaf_count": 81,
+    "leaf_factories": [
+      "abs",
+      "acos",
+      "acosh",
+      "acot",
+      "acoth",
+      "acsc",
+      "acsch",
+      "addScalar",
+      "arg",
+      "asec",
+      "asech",
+      "asin",
+      "asinh",
+      "atan",
+      "atanh",
+      "bitNot",
+      "clone",
+      "combinations",
+      "combinationsWithRep",
+      "conj",
+      "cos",
+      "cosh",
+      "cot",
+      "coth",
+      "csc",
+      "csch",
+      "cube",
+      "diag",
+      "equalScalar",
+      "erf",
+      "exp",
+      "expm1",
+      "filter",
+      "flatten",
+      "forEach",
+      "format",
+      "getMatrixDataType",
+      "identity",
+      "im",
+      "isBounded",
+      "isNaN",
+      "isNegative",
+      "isNumeric",
+      "isPositive",
+      "isPrime",
+      "leafCount",
+      "lgamma",
+      "log10",
+      "log2",
+      "map",
+      "multiplyScalar",
+      "nodeOperations",
+      "not",
+      "numeric",
+      "ones",
+      "parseNumberWithConfig",
+      "pickRandom",
+      "print",
+      "random",
+      "re",
+      "resize",
+      "resolve",
+      "sec",
+      "sech",
+      "sign",
+      "simplifyUtil",
+      "sin",
+      "sinh",
+      "size",
+      "sqrt",
+      "square",
+      "squeeze",
+      "subtractScalar",
+      "tan",
+      "tanh",
+      "toBest",
+      "transpose",
+      "typeOf",
+      "unaryMinus",
+      "xgcd",
+      "zeros"
+    ],
+    "external_deps": [
+      "?BigNumber",
+      "?Complex",
+      "?Fraction",
+      "?bignumber",
+      "?fraction",
+      "?matrix",
+      "?on",
+      "AccessorNode",
+      "ArrayNode",
+      "BigNumber",
+      "Complex",
+      "ConstantNode",
+      "DenseMatrix",
+      "Fraction",
+      "FunctionNode",
+      "Index",
+      "IndexNode",
+      "ObjectNode",
+      "OperatorNode",
+      "ParenthesisNode",
+      "Spa",
+      "SparseMatrix",
+      "SymbolNode",
+      "bignumber",
+      "complex",
+      "config",
+      "fraction",
+      "i",
+      "index",
+      "mathWithTransform",
+      "matrix",
+      "number",
+      "parse",
+      "pi",
+      "replacer",
+      "tau",
+      "typed"
+    ]
+  }
+}
