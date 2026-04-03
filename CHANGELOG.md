@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 22 math methods on BigNumber: trig (sin, cos, tan, asin, acos, atan), hyperbolic (sinh, cosh, tanh, asinh, acosh, atanh), transcendental (exp, ln, log10, log2, cbrt, expm1), other (mod, log1p, atan2, hypot) — all pure BigNumber arithmetic with Taylor series
+- Type compatibility bridge (`registerNativeTypes()`) for mathjs duck-typing (`isComplex`, `isFraction`, `isBigNumber` markers on native type prototypes)
+- Typed-function bridge (`initTypeBridge()`) enabling synced mathjs factories to recognize native MathTS types
+- Instance `compare()` method on BigNumber and Fraction (delegates to `compareTo()`)
+- Workbook `executeCode()` implementation using Function constructor with scope injection
+- 5 synced mathjs files: constants.ts, factoriesAny.ts, factoriesNumber.ts, defaultInstance.ts, shared/types.ts
+- `vitest.config.ts` for functions, parallel, workbook, packages/typed-function, packages/workerpool
+- `@types/node` in all 7 workspace package devDependencies
+- 6 inverse trig methods on AssemblyScript Complex class (asin, acos, atan, asinh, acosh, atanh)
+- Codebase inventory tooling (tools/codebase-inventory.json, tools/build-mathts-inventory.py, tools/scan_missing.py, tools/inventory.py)
+- Full codebase inventory reports (docs/inventory/00-05)
+- Integration plan (docs/superpowers/plans/2026-04-03-integration-plan.md)
 - Initial project structure with monorepo setup
 - @mathts/core package with type definitions and utilities
 - GitHub Actions CI/CD workflows
@@ -55,6 +67,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Memory management
 
 ### Changed
+- Synced mathjs factory code now uses correct import paths (./function/ prefix stripped, depth-agnostic ../ reduction, @danielsimonjr/* → unscoped)
+- functions/src/typed: renamed .neg() → .negate(), .reciprocal() → .inverse(), .div() → .divide() to match core type APIs
+- factoriesAny.ts/factoriesNumber.ts: stripped 287 broken ./function/ import prefixes
+- expression/ package: build enabled (was echo-skip), tsconfig added, shared utils copied, 60+ import paths fixed
+- assembly/ WASM: prefixed 114 bare math calls with Math., fixed abort path, fixed complex_pow(→powReal)
+- matrix/WASMBackend: fixed SIMD method names (addSIMD→simdAddF64, etc.) and argument count mismatches
+- parallel/tsconfig: workerpool type stub replaces raw .ts source resolution
+- matrix/tsconfig, compat/tsconfig: added workerpool path override
 - matrix/parallel-matrix.ts: Added type assertion for ComputePool API to work around TypeScript module resolution issue with npm workspaces
 - parallel/compute.worker.ts: Added type assertion for worker function registration
 - Updated vitest.config.ts to include tests/integration/**/*.test.ts
@@ -67,6 +87,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Fixed
+- All 10 packages now build (was 9/10 — assembly WASM was broken)
+- All 14 typecheck tasks now pass (was 9/14 — parallel, matrix, compat, expression, functions failed)
+- Test count: 54 files, 1,445 tests passing (was 51 files, 1,342 tests)
+- assembly/ WASM build: 64 errors → 0 (Math. prefix, abort path, missing Complex methods)
+- parallel/ typecheck: workerpool raw .ts source resolution → type stub
+- expression/ typecheck: removed unnecessary embeddedDocs exclusion, kept intentional transform exclusion
+- functions/ typecheck: re-enabled (was echo-skip), fixed 35 type errors (compare, dispatch casts)
+- workbook executor: executeCode() implemented (was throwing "not yet implemented")
+- ParallelMatrix test: added missing beforeAll/afterAll vitest imports
 - Fixed TypeScript module resolution for @mathts/parallel exports
 - Fixed skipped tests with proper documentation:
   - Converted variadic addition test to test chained addition (workaround)
