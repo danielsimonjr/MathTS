@@ -1,8 +1,8 @@
-import { errorTransform } from './utils/errorTransform.ts'
-import { factory } from '../../utils/factory.ts'
-import { createMapSlices } from '../../function/matrix/mapSlices.ts'
-import { isBigNumber, isNumber } from '../../utils/is.ts'
-import type { TypedFunction, BigNumberLike, VariadicArgs } from './types.ts'
+import { errorTransform } from './utils/errorTransform.js'
+import { factory } from '../../utils/factory.js'
+import { createMapSlices } from '../../function/matrix/mapSlices.js'
+import { isBigNumber, isNumber } from '../../utils/is.js'
+import type { TypedFunction, BigNumberLike, VariadicArgs } from './types.js'
 
 interface MapSlicesDependencies {
   typed: TypedFunction

@@ -114,13 +114,16 @@ export const createZeta = /* #__PURE__ */ factory(
      * @param {number | Complex | BigNumber} s   A Real, Complex or BigNumber parameter to the Riemann Zeta Function
      * @return {number | Complex | BigNumber}    The Riemann Zeta of `s`
      */
+    function zetaNumber(s: number): number {
+      return zetaNumeric(
+        s,
+        (value: number) => value,
+        () => 20
+      )
+    }
+
     return typed(name, {
-      number: (s: number): number =>
-        zetaNumeric(
-          s,
-          (value: number) => value,
-          () => 20
-        ),
+      number: zetaNumber,
       BigNumber: (s: BigNumberType): BigNumberType =>
         zetaNumeric(
           s,

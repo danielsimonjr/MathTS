@@ -1,10 +1,10 @@
 // Copyright (c) 2006-2024, Timothy A. Davis, All Rights Reserved.
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
-import { factory } from '../../utils/factory.js'
+import { factory } from '../../../utils/factory.js'
 import { csEreach } from './csEreach.js'
 import { createCsSymperm } from './csSymperm.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import type { TypedFunction } from '../../../core/function/typed.js'
 
 // Sparse matrix internal structure
 interface SparseMatrixData {

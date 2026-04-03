@@ -1,14 +1,14 @@
-import { factory } from '../../../utils/factory.ts'
-import { deepMap } from '../../../utils/collection.ts'
-import type { TypedFunction } from '../../../core/function/typed.ts'
+import { factory } from '../../../utils/factory.js'
+import { deepMap } from '../../../utils/collection.js'
+import type { TypedFunction } from '../../../core/function/typed.js'
 import type {
   Complex,
   ComplexConstructor,
   ComplexJSON,
   PolarInput,
   AbsArgInput
-} from '../Complex.ts'
-import type { MathCollection } from '../../../types.ts'
+} from '../Complex.js'
+import type { MathCollection } from '../../../types.js'
 
 /**
  * Dependencies for createComplex

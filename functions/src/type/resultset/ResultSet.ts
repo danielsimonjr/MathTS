@@ -1,4 +1,4 @@
-import { factory } from '../../utils/factory.ts'
+import { factory } from '../../utils/factory.js'
 
 const name = 'ResultSet'
 const dependencies: string[] = []

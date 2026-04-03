@@ -3,12 +3,12 @@ import {
   isFunctionNode,
   isOperatorNode,
   isParenthesisNode
-} from '../../utils/is.js'
+} from '../../../utils/is.js'
 export {
   isConstantNode,
   isSymbolNode as isVariableNode
-} from '../../utils/is.js'
-import type { MathNode } from '../../utils/node.js'
+} from '../../../utils/is.js'
+import type { MathNode } from '../../../utils/node.js'
 
 export function isNumericNode(x: MathNode): boolean {
   return (

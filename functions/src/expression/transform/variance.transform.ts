@@ -1,8 +1,8 @@
-import { factory } from '../../utils/factory.ts'
-import { errorTransform } from './utils/errorTransform.ts'
-import { createVariance } from '../../function/statistics/variance.ts'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.ts'
-import type { TypedFunction, VariadicArgs } from './types.ts'
+import { factory } from '../../utils/factory.js'
+import { errorTransform } from './utils/errorTransform.js'
+import { createVariance } from '../../function/statistics/variance.js'
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
+import type { TypedFunction, VariadicArgs } from './types.js'
 
 interface VarianceDependencies {
   typed: TypedFunction

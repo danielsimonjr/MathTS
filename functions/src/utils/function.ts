@@ -1,6 +1,6 @@
 // function utils
 
-import { lruQueue } from './lruQueue.ts'
+import { lruQueue } from './lruQueue.js'
 
 /**
  * Memoize a given function by caching the computed result.

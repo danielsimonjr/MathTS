@@ -1,5 +1,5 @@
-import { factory } from '../../../utils/factory.ts'
-import { clone } from '../../../utils/object.ts'
+import { factory } from '../../../utils/factory.js'
+import { clone } from '../../../utils/object.js'
 import type {
   DataType,
   DenseMatrixData,
@@ -7,7 +7,7 @@ import type {
   TypedFunction,
   DenseMatrixConstructorData,
   MatrixValue
-} from '../types.ts'
+} from '../types.js'
 
 /**
  * DenseMatrix interface for algorithm operations.

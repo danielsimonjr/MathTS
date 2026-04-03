@@ -3,6 +3,7 @@
 import { deepMap } from '../utils/collection.js'
 import { sign } from '../utils/number.js'
 import { factory } from '../utils/factory.js'
+import { wasmLoader } from '../wasm/WasmLoader.js'
 import type { TypedFunction } from '../core/function/typed.js'
 
 // Type definitions for erf
@@ -48,26 +49,55 @@ export const createErf = /* #__PURE__ */ factory(
      * @param {number | Array | Matrix} x   A real number
      * @return {number | Array | Matrix}    The erf of `x`
      */
-    return typed('name', {
-      number: function (x: number): number {
-        const y = Math.abs(x)
+    function erfNumber(x: number): number {
+      const y = Math.abs(x)
 
-        if (y >= MAX_NUM) {
-          return sign(x)
-        }
-        if (y <= THRESH) {
-          return sign(x) * erf1(y)
-        }
-        if (y <= 4.0) {
-          return sign(x) * (1 - erfc2(y))
-        }
-        return sign(x) * (1 - erfc3(y))
-      },
+      if (y >= MAX_NUM) {
+        return sign(x)
+      }
+      if (y <= THRESH) {
+        return sign(x) * erf1(y)
+      }
+      if (y <= 4.0) {
+        return sign(x) * (1 - erfc2(y))
+      }
+      return sign(x) * (1 - erfc3(y))
+    }
+
+    return typed('name', {
+      number: erfNumber,
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
-          (n: unknown[] | Matrix): unknown[] | Matrix =>
-            deepMap(n, self)
+          (n: unknown[] | Matrix): unknown[] | Matrix => {
+            // WASM-accelerated path for plain number arrays of sufficient size
+            if (
+              Array.isArray(n) &&
+              n.length >= 100 &&
+              n.every((x) => typeof x === 'number')
+            ) {
+              const wasm = wasmLoader.getModule()
+              if (wasm) {
+                try {
+                  const input = new Float64Array(n as number[])
+                  const inputAlloc = wasmLoader.allocateFloat64Array(input)
+                  const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(
+                    n.length
+                  )
+                  try {
+                    wasm.erfArray(inputAlloc.ptr, n.length, resultAlloc.ptr)
+                    return Array.from(resultAlloc.array)
+                  } finally {
+                    wasmLoader.free(inputAlloc.ptr)
+                    wasmLoader.free(resultAlloc.ptr)
+                  }
+                } catch {
+                  // Fall through to element-wise JS
+                }
+              }
+            }
+            return deepMap(n, self)
+          }
       )
 
       // TODO: For complex numbers, use the approximation for the Faddeeva function

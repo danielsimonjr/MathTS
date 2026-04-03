@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js'
-import { factory } from '../../utils/factory.ts'
+import { factory } from '../../utils/factory.js'
 
 // EUCLID constant for modulo rounding mode
 const EUCLID = 9

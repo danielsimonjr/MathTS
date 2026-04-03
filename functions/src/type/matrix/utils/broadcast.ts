@@ -1,5 +1,5 @@
-import { broadcastSizes, broadcastTo } from '../../../utils/array.ts'
-import { deepStrictEqual } from '../../../utils/object.ts'
+import { broadcastSizes, broadcastTo } from '../../../utils/array.js'
+import { deepStrictEqual } from '../../../utils/object.js'
 
 // Type definitions for Matrix interface
 interface Matrix {

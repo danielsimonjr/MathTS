@@ -1,9 +1,9 @@
 import typedFunction from '@danielsimonjr/typed-function'
-import { ArgumentsError } from '../error/ArgumentsError.ts'
-import { DimensionError } from '../error/DimensionError.ts'
-import { IndexError } from '../error/IndexError.ts'
-import { factory, isFactory } from '../utils/factory.ts'
-import type { FactoryFunction, LegacyFactory } from '../utils/factory.ts'
+import { ArgumentsError } from '../error/ArgumentsError.js'
+import { DimensionError } from '../error/DimensionError.js'
+import { IndexError } from '../error/IndexError.js'
+import { factory, isFactory } from '../utils/factory.js'
+import type { FactoryFunction, LegacyFactory } from '../utils/factory.js'
 import {
   isAccessorNode,
   isArray,
@@ -48,16 +48,16 @@ import {
   isSymbolNode,
   isUndefined,
   isUnit
-} from '../utils/is.ts'
-import { deepFlatten, isLegacyFactory } from '../utils/object.ts'
-import * as emitter from './../utils/emitter.ts'
-import { DEFAULT_CONFIG } from './config.ts'
-import type { ConfigOptions, MathJsConfig } from './config.ts'
+} from '../utils/is.js'
+import { deepFlatten, isLegacyFactory } from '../utils/object.js'
+import * as emitter from './../utils/emitter.js'
+import { DEFAULT_CONFIG } from './config.js'
+import type { ConfigOptions, MathJsConfig } from './config.js'
 
 // Re-export MathJsConfig for backward compatibility
 export type { MathJsConfig }
-import { configFactory } from './function/config.ts'
-import { importFactory } from './function/import.ts'
+import { configFactory } from './function/config.js'
+import { importFactory } from './function/import.js'
 
 /**
  * Type for the mathjs instance

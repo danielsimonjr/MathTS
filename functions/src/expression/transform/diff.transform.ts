@@ -1,8 +1,8 @@
-import { factory } from '../../utils/factory.ts'
-import { errorTransform } from './utils/errorTransform.ts'
-import { createDiff } from '../../function/matrix/diff.ts'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.ts'
-import type { TypedFunction, MathFunction, VariadicArgs } from './types.ts'
+import { factory } from '../../utils/factory.js'
+import { errorTransform } from './utils/errorTransform.js'
+import { createDiff } from '../../function/matrix/diff.js'
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
+import type { TypedFunction, MathFunction, VariadicArgs } from './types.js'
 
 interface DiffDependencies {
   typed: TypedFunction

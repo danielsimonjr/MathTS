@@ -1,7 +1,7 @@
-import { deepMap } from '../../utils/collection.ts'
-import { factory } from '../../utils/factory.ts'
-import { createEmptyMap } from '../../utils/map.ts'
-import type { MathArray, Matrix } from '../../../types/index.ts'
+import { deepMap } from '../../utils/collection.js'
+import { factory } from '../../utils/factory.js'
+import { createEmptyMap } from '../../utils/map.js'
+import type { MathArray, Matrix } from '../../../types/index.js'
 
 const name = 'evaluate'
 const dependencies = ['typed', 'parse']

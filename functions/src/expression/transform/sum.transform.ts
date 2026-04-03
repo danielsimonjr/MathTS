@@ -1,19 +1,20 @@
-import { factory } from '../../utils/factory.ts'
-import { errorTransform } from './utils/errorTransform.ts'
-import { createSum } from '../../function/statistics/sum.ts'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.ts'
+import { factory } from '../../utils/factory.js'
+import { errorTransform } from './utils/errorTransform.js'
+import { createSum } from '../../function/statistics/sum.js'
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
 import type {
   TypedFunction,
   MathFunction,
   MathJsConfig,
   VariadicArgs
-} from './types.ts'
+} from './types.js'
 
 interface SumDependencies {
   typed: TypedFunction
   config: MathJsConfig
   add: MathFunction
   numeric: MathFunction
+  parseNumberWithConfig: (value: string) => unknown
 }
 
 /**
@@ -24,13 +25,13 @@ interface SumDependencies {
  * from one-based to zero based
  */
 const name = 'sum'
-const dependencies = ['typed', 'config', 'add', 'numeric']
+const dependencies = ['typed', 'config', 'add', 'numeric', 'parseNumberWithConfig']
 
 export const createSumTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, add, numeric }: SumDependencies) => {
-    const sum = createSum({ typed, config, add, numeric })
+  ({ typed, config, add, numeric, parseNumberWithConfig }: SumDependencies) => {
+    const sum = createSum({ typed, config, add, numeric, parseNumberWithConfig })
 
     return typed(name, {
       '...any': function (args: VariadicArgs): unknown {

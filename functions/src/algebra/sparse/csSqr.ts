@@ -6,8 +6,8 @@ import { csPost } from './csPost.js'
 import { csEtree } from './csEtree.js'
 import { createCsAmd } from './csAmd.js'
 import { createCsCounts } from './csCounts.js'
-import { factory } from '../../utils/factory.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { factory } from '../../../utils/factory.js'
+import type { TypedFunction } from '../../../core/function/typed.js'
 
 // Sparse matrix internal structure
 interface SparseMatrixData {

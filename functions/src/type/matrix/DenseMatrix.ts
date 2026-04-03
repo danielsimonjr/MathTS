@@ -8,7 +8,7 @@ import {
   isNumber,
   isString,
   typeOf
-} from '../../utils/is.ts'
+} from '../../utils/is.js'
 import {
   arraySize,
   getArrayDataType,
@@ -20,14 +20,14 @@ import {
   validateIndex,
   broadcastTo,
   get
-} from '../../utils/array.ts'
-import { format } from '../../utils/string.ts'
-import { isInteger } from '../../utils/number.ts'
-import { clone, deepStrictEqual } from '../../utils/object.ts'
-import { DimensionError } from '../../error/DimensionError.ts'
-import { factory } from '../../utils/factory.ts'
-import { optimizeCallback } from '../../utils/optimizeCallback.ts'
-import type { MathJsConfig } from '../../core/config.ts'
+} from '../../utils/array.js'
+import { format } from '../../utils/string.js'
+import { isInteger } from '../../utils/number.js'
+import { clone, deepStrictEqual } from '../../utils/object.js'
+import { DimensionError } from '../../error/DimensionError.js'
+import { factory } from '../../utils/factory.js'
+import { optimizeCallback } from '../../utils/optimizeCallback.js'
+import type { MathJsConfig } from '../../core/config.js'
 import type {
   DenseMatrixData,
   DataType,
@@ -38,7 +38,7 @@ import type {
   DenseMatrixConstructorData,
   MatrixEntry,
   BigNumberLike
-} from './types.ts'
+} from './types.js'
 
 /**
  * Local Index interface for DenseMatrix operations.

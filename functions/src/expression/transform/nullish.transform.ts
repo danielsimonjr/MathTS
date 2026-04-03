@@ -1,6 +1,6 @@
-import { createNullish } from '../../function/logical/nullish.ts'
-import { factory } from '../../utils/factory.ts'
-import { isCollection } from '../../utils/is.ts'
+import { createNullish } from '../../function/logical/nullish.js'
+import { factory } from '../../utils/factory.js'
+import { isCollection } from '../../utils/is.js'
 import type {
   TypedFunction,
   MathFunction,
@@ -8,7 +8,7 @@ import type {
   EvaluationScope,
   MathJsLike,
   RawArgsTransformFunction
-} from './types.ts'
+} from './types.js'
 
 interface NullishDependencies {
   typed: TypedFunction

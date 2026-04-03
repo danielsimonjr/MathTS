@@ -1,5 +1,5 @@
-import { isNode } from '../../utils/is.ts'
-import { factory } from '../../utils/factory.ts'
+import { isNode } from '../../utils/is.js'
+import { factory } from '../../utils/factory.js'
 
 // Type definitions
 interface Node {

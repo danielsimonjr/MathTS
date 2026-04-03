@@ -1,10 +1,10 @@
-import { factory } from '../../utils/factory.ts'
+import { factory } from '../../utils/factory.js'
 import type {
   FibonacciHeapNode,
   FibonacciHeapInterface,
   MatrixValue,
   EqualScalarFunction
-} from './types.ts'
+} from './types.js'
 
 const name = 'Spa'
 const dependencies = ['addScalar', 'equalScalar', 'FibonacciHeap']

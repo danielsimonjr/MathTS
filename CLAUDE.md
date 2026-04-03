@@ -143,11 +143,31 @@ YAML-based reactive notebook (`.mtsw` files). Key source files in `workbook/src/
 - Commit messages: Conventional Commits (`feat(matrix):`, `fix(workbook):`, etc.)
 - Pre-commit hook (husky + lint-staged): auto-runs `eslint --fix` + `prettier --write` on staged files
 
+## Syncing from mathjs
+
+The `functions/` package contains synced factory-pattern functions from the mathjs fork.
+
+**Sync script**: `~/.claude/scripts/sync_mathjs_to_mathts.py`
+**Run with**: `python -X utf8 ~/.claude/scripts/sync_mathjs_to_mathts.py`
+
+The script:
+1. Copies `.ts` files from `~/Dropbox/Github/Mathjs/src/function/<category>/` → `functions/src/<category>/`
+2. Copies support dirs from `~/Dropbox/Github/Mathjs/src/{utils,core,plain,type,expression,error,wasm}/` → `functions/src/`
+3. Transforms imports: `../../utils/` → `../utils/`, `.ts` → `.js`
+4. Skips Dropbox conflict files
+5. Only writes files that actually changed
+
+**Last sync**: 2026-04-02 (183 files updated from mathjs v15.3.4, 0 TypeScript errors)
+
+**Important**: Synced files are dormant — they are NOT exported from `functions/src/index.ts`. Only `functions/src/typed/` contains active implementations.
+
 ## Known Issues
 
 - `expression/` build is skipped (incomplete package)
 - `assembly/` WASM build fails (asc compiler issues)
 - Some packages may need `npm i -D @types/node` if missing
+- `functions/` has no vitest tests yet (vitest exits with "No test files found")
+- mathjs fork now uses `@danielsimonjr/typed-function` and `@danielsimonjr/workerpool` — synced files may reference these
 
 ## Tools
 

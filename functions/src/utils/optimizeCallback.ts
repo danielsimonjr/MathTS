@@ -1,6 +1,6 @@
 import typed from '@danielsimonjr/typed-function'
-import { get, arraySize } from './array.ts'
-import { typeOf as _typeOf } from './is.ts'
+import { get, arraySize } from './array.js'
+import { typeOf as _typeOf } from './is.js'
 
 // Type definitions
 interface Matrix<T = unknown> {

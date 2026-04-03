@@ -1,11 +1,15 @@
 // Copyright (c) 2006-2024, Timothy A. Davis, All Rights Reserved.
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
-import { factory } from '../../utils/factory.js'
+import { factory } from '../../../utils/factory.js'
 import { csFkeep } from './csFkeep.js'
 import { csFlip } from './csFlip.js'
 import { csTdfs } from './csTdfs.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { wasmLoader } from '../../../wasm/WasmLoader.js'
+import type { TypedFunction } from '../../../core/function/typed.js'
+
+// Minimum nonzeros for WASM AMD to be beneficial
+const WASM_AMD_THRESHOLD = 100
 
 // Sparse matrix internal structure
 interface SparseMatrixData {
@@ -29,6 +33,51 @@ export const createCsAmd = /* #__PURE__ */ factory(
   dependencies as unknown as string[],
   ({ add, multiply, transpose }: CsAmdDependencies) => {
     /**
+     * Try WASM-accelerated AMD ordering for large sparse matrices
+     */
+    function _tryWasmAmd(
+      a: SparseMatrixData,
+      n: number
+    ): number[] | null {
+      const wasm = wasmLoader.getModule()
+      if (!wasm || !a._ptr || !a._index) return null
+      const nnz = a._ptr[n]
+      if (nnz < WASM_AMD_THRESHOLD) return null
+
+      try {
+        const colPtr = new Int32Array(a._ptr)
+        const rowIdx = new Int32Array(a._index)
+
+        const colPtrAlloc = wasmLoader.allocateInt32Array(colPtr)
+        const rowIdxAlloc = wasmLoader.allocateInt32Array(rowIdx)
+        const permAlloc = wasmLoader.allocateInt32ArrayEmpty(n)
+        // workPtr: AMD needs ~8*(n+1) i32 workspace
+        const workAlloc = wasmLoader.allocateInt32ArrayEmpty(8 * (n + 1))
+
+        try {
+          wasm.amd(
+            colPtrAlloc.ptr, rowIdxAlloc.ptr, n,
+            permAlloc.ptr, workAlloc.ptr
+          )
+
+          const perm: number[] = new Array(n)
+          for (let i = 0; i < n; i++) {
+            perm[i] = permAlloc.array[i]
+          }
+          return perm
+        } finally {
+          wasmLoader.free(colPtrAlloc.ptr)
+          wasmLoader.free(rowIdxAlloc.ptr)
+          wasmLoader.free(permAlloc.ptr)
+          wasmLoader.free(workAlloc.ptr)
+        }
+      } catch {
+        // Fall through to JS
+      }
+      return null
+    }
+
+    /**
      * Approximate minimum degree ordering. The minimum degree algorithm is a widely used
      * heuristic for finding a permutation P so that P*A*P' has fewer nonzeros in its factorization
      * than A. It is a gready method that selects the sparsest pivot row and column during the course
@@ -50,6 +99,11 @@ export const createCsAmd = /* #__PURE__ */ factory(
       // rows and columns
       const m = asize[0]
       const n = asize[1]
+
+      // Try WASM for large sparse matrices
+      const wasmResult = _tryWasmAmd(a, n)
+      if (wasmResult !== null) return wasmResult
+
       // initialize vars
       let lemax = 0
       // dense threshold

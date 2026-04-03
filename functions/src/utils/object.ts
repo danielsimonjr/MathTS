@@ -1,5 +1,4 @@
-import { isBigNumber, isObject } from './is.ts'
-import { hasOwnProperty } from './shared.ts'
+import { isBigNumber, isObject } from './is.js'
 
 /**
  * Clone an object
@@ -309,8 +308,14 @@ export function traverse(
   return obj
 }
 
-// Re-export hasOwnProperty for backward compatibility
-export { hasOwnProperty }
+/**
+ * A safe hasOwnProperty
+ * @param {Object} object
+ * @param {string} property
+ */
+export function hasOwnProperty(object: unknown, property: string): boolean {
+  return !!object && Object.hasOwnProperty.call(object, property)
+}
 
 /**
  * Test whether an object is a factory. a factory has fields:

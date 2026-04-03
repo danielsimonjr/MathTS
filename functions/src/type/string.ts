@@ -1,7 +1,7 @@
-import { factory } from '../utils/factory.ts'
-import { deepMap } from '../utils/collection.ts'
-import { format } from '../utils/number.ts'
-import type { TypedFunction } from '../core/function/typed.ts'
+import { factory } from '../utils/factory.js'
+import { deepMap } from '../utils/collection.js'
+import { format } from '../utils/number.js'
+import type { TypedFunction } from '../core/function/typed.js'
 
 interface StringDependencies {
   typed: TypedFunction

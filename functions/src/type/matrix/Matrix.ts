@@ -1,4 +1,4 @@
-import { factory } from '../../utils/factory.ts'
+import { factory } from '../../utils/factory.js'
 import type {
   MatrixFormatOptions,
   ForEachCallback,
@@ -7,7 +7,7 @@ import type {
   NestedArray,
   DataType,
   MatrixValue
-} from './types.ts'
+} from './types.js'
 
 const name = 'Matrix'
 const dependencies: string[] = []
@@ -17,19 +17,19 @@ export type { MatrixFormatOptions }
 
 /**
  * Callback function for matrix forEach operations
- * @deprecated Use ForEachCallback from './types.ts' instead
+ * @deprecated Use ForEachCallback from './types.js' instead
  */
 export type MatrixForEachCallback<T> = ForEachCallback<T>
 
 /**
  * Callback function for matrix map operations
- * @deprecated Use MapCallback from './types.ts' instead
+ * @deprecated Use MapCallback from './types.js' instead
  */
 export type MatrixMapCallback<T, U> = MapCallback<T, U>
 
 /**
  * Index type for matrix subsetting
- * @deprecated Use IndexInterface from './types.ts' instead
+ * @deprecated Use IndexInterface from './types.js' instead
  */
 export type Index = IndexInterface
 

@@ -5,16 +5,16 @@ import {
   isMatrix,
   isObject,
   isUnit
-} from '../../utils/is.ts'
+} from '../../utils/is.js'
 import {
   isFactory,
   stripOptionalNotation,
   FactoryFunction,
   FactoryMeta
-} from '../../utils/factory.ts'
-import { hasOwnProperty, lazy } from '../../utils/object.ts'
-import { ArgumentsError } from '../../error/ArgumentsError.ts'
-import type { TypedFunction } from './typed.ts'
+} from '../../utils/factory.js'
+import { hasOwnProperty, lazy } from '../../utils/object.js'
+import { ArgumentsError } from '../../error/ArgumentsError.js'
+import type { TypedFunction } from './typed.js'
 
 /**
  * Options for the import function

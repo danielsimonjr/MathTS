@@ -16,8 +16,8 @@
 //                  left argument doesn't need to be enclosed
 //                  in parentheses
 // latexRightParens: the same for the right argument
-import { hasOwnProperty } from '../utils/object.ts'
-import { isConstantNode, isParenthesisNode, rule2Node } from '../utils/is.ts'
+import { hasOwnProperty } from '../utils/object.js'
+import { isConstantNode, isParenthesisNode, rule2Node } from '../utils/is.js'
 
 export const properties = [
   {

@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js'
 
-export * from './arithmetic.ts'
+export * from './arithmetic.js'
 
 /**
  * Extended BigNumber interface with mathjs-specific properties

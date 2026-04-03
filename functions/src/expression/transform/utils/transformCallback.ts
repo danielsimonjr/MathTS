@@ -1,5 +1,5 @@
-import { factory } from '../../../utils/factory.ts'
-import type { TypedFunction, CallbackFunction } from '../types.ts'
+import { factory } from '../../../utils/factory.js'
+import type { TypedFunction, CallbackFunction } from '../types.js'
 
 /**
  * Typed-function signatures record type

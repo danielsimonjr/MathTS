@@ -1,7 +1,7 @@
-import { factory } from '../../utils/factory.ts'
-import { errorTransform } from './utils/errorTransform.ts'
-import { createSubset } from '../../function/matrix/subset.ts'
-import type { TypedFunction, MathFunction, VariadicArgs } from './types.ts'
+import { factory } from '../../utils/factory.js'
+import { errorTransform } from './utils/errorTransform.js'
+import { createSubset } from '../../function/matrix/subset.js'
+import type { TypedFunction, MathFunction, VariadicArgs } from './types.js'
 
 interface SubsetDependencies {
   typed: TypedFunction

@@ -1,10 +1,14 @@
 import { isSparseMatrix } from '../utils/is.js'
 import { format } from '../utils/string.js'
 import { factory } from '../utils/factory.js'
+import { wasmLoader } from '../wasm/WasmLoader.js'
 
 // Type definitions
 import type { BigNumber } from 'bignumber.js'
 import type Complex from 'complex.js'
+
+// Minimum matrix size (n*n elements) for WASM to be beneficial
+const WASM_EXPM_THRESHOLD = 16 // 4x4 matrix
 
 /** Scalar types supported by expm */
 type Scalar = number | BigNumber | Complex
@@ -77,6 +81,12 @@ export const createExpm = /* #__PURE__ */ factory(
 
         const n = size[0]
 
+        // Try WASM for large plain number matrices
+        const wasmResult = _tryWasmExpm(A, n)
+        if (wasmResult !== null) {
+          return wasmResult
+        }
+
         // Desired accuracy of the approximant (The actual accuracy
         // will be affected by round-off error)
         const eps = 1e-15
@@ -136,6 +146,66 @@ export const createExpm = /* #__PURE__ */ factory(
         return isSparseMatrix(A) ? A.createSparseMatrix!(R) : R
       }
     })
+
+    /**
+     * Try WASM-accelerated matrix exponential for plain number matrices
+     */
+    function _tryWasmExpm(A: Matrix, n: number): Matrix | null {
+      const wasm = wasmLoader.getModule()
+      if (!wasm || n * n < WASM_EXPM_THRESHOLD) return null
+
+      // Extract data and check it's plain numbers
+      const data = (A as any)._data
+      if (!data || !Array.isArray(data)) return null
+
+      try {
+        const flat = new Float64Array(n * n)
+        for (let i = 0; i < n; i++) {
+          const row = data[i]
+          if (!Array.isArray(row)) return null
+          for (let j = 0; j < n; j++) {
+            if (typeof row[j] !== 'number') return null
+            flat[i * n + j] = row[j]
+          }
+        }
+
+        const matrixAlloc = wasmLoader.allocateFloat64Array(flat)
+        const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * n)
+        // workPtr needs 6*n*n f64 values for expm
+        const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(6 * n * n)
+
+        try {
+          const status = wasm.expm(
+            matrixAlloc.ptr, n, resultAlloc.ptr, workAlloc.ptr
+          )
+
+          if (status === 0) {
+            // Read results back into 2D array (AS returns 0 on success)
+            const result: number[][] = []
+            for (let i = 0; i < n; i++) {
+              const row: number[] = []
+              for (let j = 0; j < n; j++) {
+                row[j] = resultAlloc.array[i * n + j]
+              }
+              result[i] = row
+            }
+
+            // Return same Matrix type as input
+            if (isSparseMatrix(A)) {
+              return (A as any).createSparseMatrix({ data: result, size: [n, n] })
+            }
+            return (A as any).createDenseMatrix({ data: result, size: [n, n], datatype: (A as any)._datatype })
+          }
+        } finally {
+          wasmLoader.free(matrixAlloc.ptr)
+          wasmLoader.free(resultAlloc.ptr)
+          wasmLoader.free(workAlloc.ptr)
+        }
+      } catch {
+        // Fall through to JS implementation
+      }
+      return null
+    }
 
     function infinityNorm(A: Matrix): number {
       const n = A.size()[0]

@@ -4,10 +4,10 @@ import {
   isNode,
   isUnit,
   typeOf
-} from '../../utils/is.ts'
-import { factory } from '../../utils/factory.ts'
-import { getPrecedence } from '../operators.ts'
-import type { MathNode } from './Node.ts'
+} from '../../utils/is.js'
+import { factory } from '../../utils/factory.js'
+import { getPrecedence } from '../operators.js'
+import type { MathNode } from './Node.js'
 
 interface NodeConstructor {
   new (...args: any[]): MathNode

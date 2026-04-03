@@ -1,13 +1,13 @@
-import { factory } from '../../utils/factory.ts'
-import { createRow } from '../../function/matrix/row.ts'
-import { errorTransform } from './utils/errorTransform.ts'
-import { isNumber } from '../../utils/is.ts'
+import { factory } from '../../utils/factory.js'
+import { createRow } from '../../function/matrix/row.js'
+import { errorTransform } from './utils/errorTransform.js'
+import { isNumber } from '../../utils/is.js'
 import type {
   TypedFunction,
   MathFunction,
   IndexConstructor,
   VariadicArgs
-} from './types.ts'
+} from './types.js'
 
 interface RowDependencies {
   typed: TypedFunction

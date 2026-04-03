@@ -1,5 +1,5 @@
-import { factory } from '../../utils/factory.ts'
-import type { MathJsConfig } from '../../core/config.ts'
+import { factory } from '../../utils/factory.js'
+import type { MathJsConfig } from '../../core/config.js'
 import type Decimal from 'decimal.js'
 
 /**

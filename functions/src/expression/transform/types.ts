@@ -3,7 +3,7 @@
  * These types provide proper typing for the expression transform system
  */
 
-import type { TypedFunction } from '../../core/function/typed.ts'
+import type { TypedFunction } from '../../core/function/typed.js'
 
 // Re-export TypedFunction for convenience
 export type { TypedFunction }

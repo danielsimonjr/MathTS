@@ -1,7 +1,7 @@
 import ComplexJs, { Complex as ComplexClass } from 'complex.js'
-import { format } from '../../utils/number.ts'
-import { isNumber, isUnit } from '../../utils/is.ts'
-import { factory } from '../../utils/factory.ts'
+import { format } from '../../utils/number.js'
+import { isNumber, isUnit } from '../../utils/is.js'
+import { factory } from '../../utils/factory.js'
 
 /**
  * JSON representation of a Complex number

@@ -1,8 +1,8 @@
-import { factory } from '../../utils/factory.ts'
-import { errorTransform } from './utils/errorTransform.ts'
-import { createMean } from '../../function/statistics/mean.ts'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.ts'
-import type { TypedFunction, VariadicArgs } from './types.ts'
+import { factory } from '../../utils/factory.js'
+import { errorTransform } from './utils/errorTransform.js'
+import { createMean } from '../../function/statistics/mean.js'
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
+import type { TypedFunction, VariadicArgs } from './types.js'
 
 interface MeanDependencies {
   typed: TypedFunction

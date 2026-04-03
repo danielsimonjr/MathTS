@@ -5,8 +5,8 @@ import {
   isMatrix,
   isNumber,
   isRange
-} from '../../utils/is.ts'
-import { factory } from '../../utils/factory.ts'
+} from '../../utils/is.js'
+import { factory } from '../../utils/factory.js'
 import type {
   IndexConstructor,
   IndexInstance,
@@ -14,7 +14,7 @@ import type {
   RangeLike,
   SetLike,
   MatrixLike
-} from './types.ts'
+} from './types.js'
 
 interface IndexDependencies {
   Index: IndexConstructor

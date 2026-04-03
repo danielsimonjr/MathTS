@@ -7,7 +7,7 @@ import {
   log2,
   sign,
   toFixed
-} from '../../utils/number.ts'
+} from '../../utils/number.js'
 
 const n1 = 'number'
 const n2 = 'number, number'

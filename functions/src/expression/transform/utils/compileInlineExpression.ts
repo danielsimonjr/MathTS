@@ -1,6 +1,6 @@
-import { isSymbolNode } from '../../../utils/is.ts'
-import { PartitionedMap } from '../../../utils/map.ts'
-import type { ExpressionNode, EvaluationScope, MathJsLike } from '../types.ts'
+import { isSymbolNode } from '../../../utils/is.js'
+import { PartitionedMap } from '../../../utils/map.js'
+import type { ExpressionNode, EvaluationScope, MathJsLike } from '../types.js'
 
 /**
  * Compile an inline expression like "x > 0"
@@ -44,7 +44,7 @@ export function compileInlineExpression(
   // create a test function for this equation
   const name = symbol.name as string // variable name
   const argsScope = new Map<string, unknown>()
-  const subScope = new PartitionedMap(scope, argsScope, new Set([name]))
+  const subScope = new PartitionedMap(scope as Map<string, unknown>, argsScope, new Set([name]))
   const eq = expression.compile()
 
   return function inlineExpression(x: unknown): unknown {

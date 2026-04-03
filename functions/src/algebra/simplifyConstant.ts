@@ -32,6 +32,7 @@ const dependencies = [
   'config',
   'mathWithTransform',
   'matrix',
+  'parse',
   'isBounded',
   '?fraction',
   '?bignumber',
@@ -53,6 +54,7 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
     config,
     mathWithTransform,
     matrix,
+    parse,
     isBounded,
     fraction,
     bignumber,
@@ -69,6 +71,7 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
     config: any
     mathWithTransform: any
     matrix: any
+    parse: (expr: string) => MathNode
     isBounded: any
     fraction: any
     bignumber: any
@@ -116,6 +119,12 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
      * @return {Node} Returns expression with constant subexpressions evaluated
      */
     const simplifyConstant = typed('simplifyConstant', {
+      string: (expr: string) => _ensureNode(foldFraction(parse(expr), {})),
+
+      'string, Object': function (expr: string, options: any) {
+        return _ensureNode(foldFraction(parse(expr), options))
+      },
+
       Node: (node: MathNode) => _ensureNode(foldFraction(node, {})),
 
       'Node, Object': function (expr: MathNode, options: any) {

@@ -1,4 +1,4 @@
-import { pickShallow } from './object.ts'
+import { pickShallow } from './object.js'
 
 /**
  * Type for a factory function that creates instances

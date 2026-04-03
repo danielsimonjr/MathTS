@@ -1,6 +1,6 @@
-import { map } from '../../utils/array.ts'
-import { getSafeProperty } from '../../utils/customs.ts'
-import { factory } from '../../utils/factory.ts'
+import { map } from '../../utils/array.js'
+import { getSafeProperty } from '../../utils/customs.js'
+import { factory } from '../../utils/factory.js'
 import {
   isArray,
   isConstantNode,
@@ -8,8 +8,8 @@ import {
   isNode,
   isString,
   typeOf
-} from '../../utils/is.ts'
-import { escape } from '../../utils/string.ts'
+} from '../../utils/is.js'
+import { escape } from '../../utils/string.js'
 
 // Type definitions
 interface Node {

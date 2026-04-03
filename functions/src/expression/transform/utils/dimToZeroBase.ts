@@ -1,5 +1,5 @@
-import { isNumber, isBigNumber } from '../../../utils/is.ts'
-import type { BigNumberLike, DimensionValue } from '../types.ts'
+import { isNumber, isBigNumber } from '../../../utils/is.js'
+import type { BigNumberLike, DimensionValue } from '../types.js'
 
 /**
  * Change last argument dim from one-based to zero-based.

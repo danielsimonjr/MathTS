@@ -132,11 +132,10 @@ export interface WasmModule {
   eigsSymmetric: (
     matrixPtr: number,
     n: number,
+    precision: number,
     eigenvaluesPtr: number,
     eigenvectorsPtr: number,
-    workPtr: number,
-    maxIterations: number,
-    tolerance: number
+    workPtr: number
   ) => number // returns number of iterations, -1 on failure
   powerIteration: (
     matrixPtr: number,
@@ -235,10 +234,10 @@ export interface WasmModule {
     matrixPtr: number,
     n: number,
     resultPtr: number,
-    workPtr: number,
+    tolerance: number,
     maxIterations: number,
-    tolerance: number
-  ) => number // returns number of iterations, -1 on failure
+    workPtr: number
+  ) => number // returns 0 on success
   sqrtmNewtonSchulz: (
     matrixPtr: number,
     n: number,
@@ -337,6 +336,32 @@ export interface WasmModule {
     workPtr: number
   ) => void
 
+  // Sparse AMD ordering
+  amd: (
+    colPtrPtr: number,
+    rowIdxPtr: number,
+    n: number,
+    permPtr: number,
+    workPtr: number
+  ) => void
+  amdAggressive: (
+    colPtrPtr: number,
+    rowIdxPtr: number,
+    n: number,
+    permPtr: number,
+    workPtr: number
+  ) => void
+  // Symbolic Cholesky (combines elimination tree + column counts)
+  symbolicCholesky: (
+    indexPtr: number,
+    ptrPtr: number,
+    n: number,
+    parentPtr: number,
+    postPtr: number,
+    colCountPtr: number,
+    workPtr: number
+  ) => void
+
   // SIMD operations
   simdDotF64: (aPtr: number, bPtr: number, length: number) => number
   simdSumF64: (aPtr: number, length: number) => number
@@ -381,12 +406,68 @@ export interface WasmModule {
     n: number
   ) => void
 
+  // Arithmetic operations (array-oriented)
+  gcdArray: (aPtr: number, n: number) => number
+  hypotArray: (aPtr: number, n: number) => number
+  norm1: (aPtr: number, n: number) => number
+  norm2: (aPtr: number, n: number) => number
+  normInf: (aPtr: number, n: number) => number
+  normP: (aPtr: number, n: number, p: number) => number
+
+  // Special functions (array-accelerated)
+  erfArray: (aPtr: number, n: number, resultPtr: number) => void
+  zetaArray: (aPtr: number, n: number, resultPtr: number) => void
+  gammaArray: (aPtr: number, n: number, resultPtr: number) => void
+  lgammaArray: (aPtr: number, n: number, resultPtr: number) => void
+
   // Selection algorithms
   partitionSelect: (
     dataPtr: number,
     n: number,
     k: number,
     workPtr: number
+  ) => number
+
+  // Geometry operations
+  distanceND: (p1Ptr: number, p2Ptr: number, n: number) => number
+  distance2D: (x1: number, y1: number, x2: number, y2: number) => number
+  distance3D: (
+    x1: number,
+    y1: number,
+    z1: number,
+    x2: number,
+    y2: number,
+    z2: number
+  ) => number
+  intersect2DLines: (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    x3: number,
+    y3: number,
+    x4: number,
+    y4: number,
+    resultPtr: number
+  ) => void
+  intersect2DInfiniteLines: (
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    x3: number,
+    y3: number,
+    x4: number,
+    y4: number,
+    resultPtr: number
+  ) => void
+  distancePointToLine2D: (
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
   ) => number
 
   // Statistics operations
@@ -409,6 +490,16 @@ export interface WasmModule {
   ) => number
 
   // Signal processing
+  freqz: (
+    bPtr: number,
+    bLen: number,
+    aPtr: number,
+    aLen: number,
+    wPtr: number,
+    wLen: number,
+    hRealPtr: number,
+    hImagPtr: number
+  ) => void
   fft: (dataPtr: number, n: number, inverse: number) => void
   fft2d: (dataPtr: number, rows: number, cols: number, inverse: number) => void
   convolve: (
@@ -421,6 +512,15 @@ export interface WasmModule {
   rfft: (dataPtr: number, n: number, resultPtr: number) => void
   irfft: (dataPtr: number, n: number, resultPtr: number) => void
   isPowerOf2: (n: number) => number
+
+  // ODE solver vector operations
+  vectorAdd: (aPtr: number, bPtr: number, n: number, resultPtr: number) => void
+  vectorScale: (aPtr: number, scalar: number, n: number, resultPtr: number) => void
+  vectorCopy: (srcPtr: number, n: number, dstPtr: number) => void
+  maxError: (errorPtr: number, n: number) => number
+  computeStepAdjustment: (maxErr: number, tol: number, order: number, minDelta: number, maxDelta: number) => number
+  rk45Step: (yPtr: number, t: number, h: number, n: number, kPtr: number, yNextPtr: number, yErrorPtr: number) => void
+  rk23Step: (yPtr: number, t: number, h: number, n: number, kPtr: number, yNextPtr: number, yErrorPtr: number) => void
 
   // Memory management
   __new: (size: number, id: number) => number
@@ -557,11 +657,20 @@ export class WasmLoader {
     }
   }
 
+  /**
+   * Get the WASM binary path based on the selected backend.
+   * Set MATHJS_WASM_BACKEND=assemblyscript to use the AS binary.
+   * Default is Rust (after migration cutover).
+   */
   private getDefaultWasmPath(): string {
+    const useAS = typeof process !== 'undefined' &&
+      process.env?.MATHJS_WASM_BACKEND === 'assemblyscript'
+
     if (this.isNode) {
-      return './lib/wasm/index.wasm'
+      return useAS ? './lib/wasm/mathjs-as.wasm' : './lib/wasm/mathjs.wasm'
     } else {
-      return new URL('../../lib/wasm/index.wasm', import.meta.url).href
+      const wasmFile = useAS ? 'mathjs-as.wasm' : 'mathjs.wasm'
+      return new URL(`../../lib/wasm/${wasmFile}`, import.meta.url).href
     }
   }
 

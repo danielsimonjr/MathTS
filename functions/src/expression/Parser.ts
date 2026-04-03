@@ -1,7 +1,7 @@
-import { factory } from '../utils/factory.ts'
-import { isFunction } from '../utils/is.ts'
-import { createEmptyMap, toObject } from '../utils/map.ts'
-import type { TypedFunction } from '../core/function/typed.ts'
+import { factory } from '../utils/factory.js'
+import { isFunction } from '../utils/is.js'
+import { createEmptyMap, toObject } from '../utils/map.js'
+import type { TypedFunction } from '../core/function/typed.js'
 
 interface ParserClassDependencies {
   evaluate: TypedFunction

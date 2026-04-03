@@ -1,6 +1,6 @@
-import { isArray, isMatrix, isString, typeOf } from '../../utils/is.ts'
-import { clone } from '../../utils/object.ts'
-import { factory } from '../../utils/factory.ts'
+import { isArray, isMatrix, isString, typeOf } from '../../utils/is.js'
+import { clone } from '../../utils/object.js'
+import { factory } from '../../utils/factory.js'
 import type {
   DenseMatrixData,
   DataType,
@@ -8,7 +8,7 @@ import type {
   IndexInterface,
   ImmutableDenseMatrixJSON,
   ImmutableDenseMatrixConstructorData
-} from './types.ts'
+} from './types.js'
 
 const name = 'ImmutableDenseMatrix'
 const dependencies = ['smaller', 'DenseMatrix']

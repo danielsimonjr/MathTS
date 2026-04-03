@@ -7,20 +7,20 @@ import {
   isNumber,
   isString,
   typeOf
-} from '../../utils/is.ts'
-import { isInteger } from '../../utils/number.ts'
-import { format } from '../../utils/string.ts'
-import { clone, deepStrictEqual } from '../../utils/object.ts'
+} from '../../utils/is.js'
+import { isInteger } from '../../utils/number.js'
+import { format } from '../../utils/string.js'
+import { clone, deepStrictEqual } from '../../utils/object.js'
 import {
   arraySize,
   getArrayDataType,
   processSizesWildcard,
   unsqueeze,
   validateIndex
-} from '../../utils/array.ts'
-import { factory } from '../../utils/factory.ts'
-import { DimensionError } from '../../error/DimensionError.ts'
-import { optimizeCallback } from '../../utils/optimizeCallback.ts'
+} from '../../utils/array.js'
+import { factory } from '../../utils/factory.js'
+import { DimensionError } from '../../error/DimensionError.js'
+import { optimizeCallback } from '../../utils/optimizeCallback.js'
 import type {
   DataType,
   MatrixValue,
@@ -31,7 +31,7 @@ import type {
   SparseMatrixJSON,
   MatrixFormatOptions,
   BigNumberLike
-} from './types.ts'
+} from './types.js'
 
 /**
  * Size type for sparse matrices (always 2D)

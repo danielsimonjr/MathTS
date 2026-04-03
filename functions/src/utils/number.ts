@@ -1,4 +1,4 @@
-import { isBigNumber, isNumber, isObject } from './is.ts'
+import { isBigNumber, isNumber, isObject } from './is.js'
 
 /**
  * Split value representation with sign, coefficients, and exponent

@@ -1,8 +1,8 @@
-import { factory } from '../../utils/factory.ts'
-import { createStd } from '../../function/statistics/std.ts'
-import { errorTransform } from './utils/errorTransform.ts'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.ts'
-import type { TypedFunction, VariadicArgs } from './types.ts'
+import { factory } from '../../utils/factory.js'
+import { createStd } from '../../function/statistics/std.js'
+import { errorTransform } from './utils/errorTransform.js'
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
+import type { TypedFunction, VariadicArgs } from './types.js'
 
 interface StdDependencies {
   typed: TypedFunction

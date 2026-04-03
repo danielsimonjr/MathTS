@@ -1,4 +1,4 @@
-import { nearlyEqual } from './number.ts'
+import { nearlyEqual } from './number.js'
 
 /**
  * Test whether two complex values are equal provided a given relTol and absTol.

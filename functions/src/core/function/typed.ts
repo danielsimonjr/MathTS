@@ -37,7 +37,7 @@
  */
 
 import typedFunction from '@danielsimonjr/typed-function'
-import { factory } from '../../utils/factory.ts'
+import { factory } from '../../utils/factory.js'
 import {
   isAccessorNode,
   isArray,
@@ -80,8 +80,8 @@ import {
   isSymbolNode,
   isUndefined,
   isUnit
-} from '../../utils/is.ts'
-import { digits } from '../../utils/number.ts'
+} from '../../utils/is.js'
+import { digits } from '../../utils/number.js'
 
 /**
  * Type definition for a signature map used in typed functions

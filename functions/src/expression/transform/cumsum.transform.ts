@@ -1,13 +1,13 @@
-import { isBigNumber, isCollection, isNumber } from '../../utils/is.ts'
-import { factory } from '../../utils/factory.ts'
-import { errorTransform } from './utils/errorTransform.ts'
-import { createCumSum } from '../../function/statistics/cumsum.ts'
+import { isBigNumber, isCollection, isNumber } from '../../utils/is.js'
+import { factory } from '../../utils/factory.js'
+import { errorTransform } from './utils/errorTransform.js'
+import { createCumSum } from '../../function/statistics/cumsum.js'
 import type {
   TypedFunction,
   MathFunction,
   BigNumberLike,
   VariadicArgs
-} from './types.ts'
+} from './types.js'
 
 interface CumSumDependencies {
   typed: TypedFunction

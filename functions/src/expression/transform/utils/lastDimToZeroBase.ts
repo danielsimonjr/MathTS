@@ -1,6 +1,6 @@
-import { isCollection } from '../../../utils/is.ts'
-import { dimToZeroBase, isNumberOrBigNumber } from './dimToZeroBase.ts'
-import type { VariadicArgs } from '../types.ts'
+import { isCollection } from '../../../utils/is.js'
+import { dimToZeroBase, isNumberOrBigNumber } from './dimToZeroBase.js'
+import type { VariadicArgs } from '../types.js'
 
 /**
  * Change last argument dim from one-based to zero-based.

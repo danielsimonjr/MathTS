@@ -1,8 +1,8 @@
-import { isChain } from '../../utils/is.ts'
-import { format } from '../../utils/string.ts'
-import { hasOwnProperty, lazy } from '../../utils/object.ts'
-import { factory } from '../../utils/factory.ts'
-import type { TypedFunction } from '../../core/function/typed.ts'
+import { isChain } from '../../utils/is.js'
+import { format } from '../../utils/string.js'
+import { hasOwnProperty, lazy } from '../../utils/object.js'
+import { factory } from '../../utils/factory.js'
+import type { TypedFunction } from '../../core/function/typed.js'
 
 /**
  * JSON representation of a Chain

@@ -1,5 +1,5 @@
-import { factory } from '../../../utils/factory.ts'
-import { DimensionError } from '../../../error/DimensionError.ts'
+import { factory } from '../../../utils/factory.js'
+import { DimensionError } from '../../../error/DimensionError.js'
 import type {
   DataType,
   MatrixValue,
@@ -8,7 +8,7 @@ import type {
   EqualScalarFunction,
   TypedFunction,
   SparseMatrixConstructorData
-} from '../types.ts'
+} from '../types.js'
 
 /**
  * SparseMatrix interface for algorithm operations.

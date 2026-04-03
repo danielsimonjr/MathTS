@@ -1,5 +1,5 @@
-import { factory } from '../../../utils/factory.ts'
-import type { TypedFunction } from '../../../core/function/typed.ts'
+import { factory } from '../../../utils/factory.js'
+import type { TypedFunction } from '../../../core/function/typed.js'
 
 /**
  * Unit definition options

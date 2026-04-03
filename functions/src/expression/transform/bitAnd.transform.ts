@@ -1,6 +1,6 @@
-import { createBitAnd } from '../../function/bitwise/bitAnd.ts'
-import { factory } from '../../utils/factory.ts'
-import { isCollection } from '../../utils/is.ts'
+import { createBitAnd } from '../../function/bitwise/bitAnd.js'
+import { factory } from '../../utils/factory.js'
+import { isCollection } from '../../utils/is.js'
 import type {
   TypedFunction,
   MathFunction,
@@ -8,7 +8,7 @@ import type {
   EvaluationScope,
   MathJsLike,
   RawArgsTransformFunction
-} from './types.ts'
+} from './types.js'
 
 interface BitAndDependencies {
   typed: TypedFunction

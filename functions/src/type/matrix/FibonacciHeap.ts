@@ -1,5 +1,5 @@
-import { factory } from '../../utils/factory.ts'
-import type { FibonacciHeapNode, MatrixValue } from './types.ts'
+import { factory } from '../../utils/factory.js'
+import type { FibonacciHeapNode, MatrixValue } from './types.js'
 
 const name = 'FibonacciHeap'
 const dependencies = ['smaller', 'larger']

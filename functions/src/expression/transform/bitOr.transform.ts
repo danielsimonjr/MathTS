@@ -1,6 +1,6 @@
-import { createBitOr } from '../../function/bitwise/bitOr.ts'
-import { factory } from '../../utils/factory.ts'
-import { isCollection } from '../../utils/is.ts'
+import { createBitOr } from '../../function/bitwise/bitOr.js'
+import { factory } from '../../utils/factory.js'
+import { isCollection } from '../../utils/is.js'
 import type {
   TypedFunction,
   MathFunction,
@@ -9,7 +9,7 @@ import type {
   MathJsLike,
   DenseMatrixConstructor,
   RawArgsTransformFunction
-} from './types.ts'
+} from './types.js'
 
 interface BitOrDependencies {
   typed: TypedFunction

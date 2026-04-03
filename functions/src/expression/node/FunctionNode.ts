@@ -4,14 +4,14 @@ import {
   isIndexNode,
   isNode,
   isSymbolNode
-} from '../../utils/is.ts'
-import { escape, format } from '../../utils/string.ts'
-import { hasOwnProperty } from '../../utils/object.ts'
-import { getSafeProperty, getSafeMethod } from '../../utils/customs.ts'
-import { createSubScope } from '../../utils/scope.ts'
-import { factory } from '../../utils/factory.ts'
-import { defaultTemplate, latexFunctions } from '../../utils/latex.ts'
-import type { MathNode, Scope, CompileFunction, StringOptions } from './Node.ts'
+} from '../../utils/is.js'
+import { escape, format } from '../../utils/string.js'
+import { hasOwnProperty } from '../../utils/object.js'
+import { getSafeProperty, getSafeMethod } from '../../utils/customs.js'
+import { createSubScope } from '../../utils/scope.js'
+import { factory } from '../../utils/factory.js'
+import { defaultTemplate, latexFunctions } from '../../utils/latex.js'
+import type { MathNode, Scope, CompileFunction, StringOptions } from './Node.js'
 
 const name = 'FunctionNode'
 const dependencies = ['math', 'Node', 'SymbolNode']

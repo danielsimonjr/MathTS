@@ -2,7 +2,7 @@ import FractionJs, {
   Fraction as FractionClass,
   NumeratorDenominator
 } from 'fraction.js'
-import { factory } from '../../utils/factory.ts'
+import { factory } from '../../utils/factory.js'
 
 /**
  * JSON representation of a Fraction

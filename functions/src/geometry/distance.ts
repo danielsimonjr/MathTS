@@ -1,7 +1,11 @@
 import { isBigNumber } from '../utils/is.js'
 import { factory } from '../utils/factory.js'
+import { wasmLoader } from '../wasm/WasmLoader.js'
 import type { MathNumericType } from '../../types.js'
 import type { TypedFunction } from '../core/function/typed.js'
+
+// N-dimensional distance only benefits from WASM for >= 4 dimensions
+const WASM_DISTANCE_THRESHOLD = 4
 
 // Type definitions for distance
 interface DistanceDependencies {
@@ -540,6 +544,13 @@ export const createDistance = /* #__PURE__ */ factory(
       y: MathNumericType[]
     ): MathNumericType {
       const vectorSize = x.length
+
+      // WASM fast path for plain number arrays with >= WASM_DISTANCE_THRESHOLD dims
+      if (vectorSize >= WASM_DISTANCE_THRESHOLD) {
+        const wasmResult = _tryWasmDistanceND(x, y, vectorSize)
+        if (wasmResult !== null) return wasmResult
+      }
+
       let result: MathNumericType = 0
       for (let i = 0; i < vectorSize; i++) {
         const diff = subtractScalar(x[i], y[i])
@@ -548,7 +559,38 @@ export const createDistance = /* #__PURE__ */ factory(
       return sqrt(result)
     }
 
+    /**
+     * Try WASM-accelerated N-dimensional Euclidean distance for plain number arrays.
+     * Returns null if WASM is unavailable or values are not plain numbers.
+     */
+    function _tryWasmDistanceND(
+      x: MathNumericType[],
+      y: MathNumericType[],
+      n: number
+    ): number | null {
+      const wasm = wasmLoader.getModule()
+      if (!wasm) return null
+
+      // Verify all values are plain numbers
+      for (let i = 0; i < n; i++) {
+        if (typeof x[i] !== 'number' || typeof y[i] !== 'number') return null
+      }
+
+      const p1Alloc = wasmLoader.allocateFloat64Array(x as number[])
+      const p2Alloc = wasmLoader.allocateFloat64Array(y as number[])
+      try {
+        return wasm.distanceND(p1Alloc.ptr, p2Alloc.ptr, n)
+      } finally {
+        wasmLoader.free(p1Alloc.ptr)
+        wasmLoader.free(p2Alloc.ptr)
+      }
+    }
+
     function _distancePairwise(a: MathNumericType[][]): MathNumericType[] {
+      // Try WASM fast path for pairwise distance with plain number arrays
+      const wasmResult = _tryWasmPairwise(a)
+      if (wasmResult !== null) return wasmResult
+
       const result: MathNumericType[] = []
       let pointA: MathNumericType[] = []
       let pointB: MathNumericType[] = []
@@ -565,6 +607,50 @@ export const createDistance = /* #__PURE__ */ factory(
         }
       }
       return result
+    }
+
+    /**
+     * Try WASM-accelerated pairwise distance computation.
+     * Flattens all points and calls distanceND for each pair.
+     * Returns null if WASM is unavailable or values are not plain numbers.
+     */
+    function _tryWasmPairwise(a: MathNumericType[][]): number[] | null {
+      const wasm = wasmLoader.getModule()
+      if (!wasm) return null
+
+      const numPoints = a.length
+      const dims = a[0].length
+
+      // Verify all values are plain numbers
+      for (let i = 0; i < numPoints; i++) {
+        for (let d = 0; d < dims; d++) {
+          if (typeof a[i][d] !== 'number') return null
+        }
+      }
+
+      // Allocate two reusable buffers for point pairs
+      const p1Alloc = wasmLoader.allocateFloat64ArrayEmpty(dims)
+      const p2Alloc = wasmLoader.allocateFloat64ArrayEmpty(dims)
+      try {
+        const result: number[] = []
+        for (let i = 0; i < numPoints - 1; i++) {
+          // Write point i into p1
+          for (let d = 0; d < dims; d++) {
+            p1Alloc.array[d] = a[i][d] as number
+          }
+          for (let j = i + 1; j < numPoints; j++) {
+            // Write point j into p2
+            for (let d = 0; d < dims; d++) {
+              p2Alloc.array[d] = a[j][d] as number
+            }
+            result.push(wasm.distanceND(p1Alloc.ptr, p2Alloc.ptr, dims))
+          }
+        }
+        return result
+      } finally {
+        wasmLoader.free(p1Alloc.ptr)
+        wasmLoader.free(p2Alloc.ptr)
+      }
     }
   }
 )

@@ -1,7 +1,7 @@
-import { factory } from '../../utils/factory.ts'
-import { createQuantileSeq } from '../../function/statistics/quantileSeq.ts'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.ts'
-import type { TypedFunction, MathFunction, VariadicArgs } from './types.ts'
+import { factory } from '../../utils/factory.js'
+import { createQuantileSeq } from '../../function/statistics/quantileSeq.js'
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
+import type { TypedFunction, MathFunction, VariadicArgs } from './types.js'
 
 interface QuantileSeqDependencies {
   typed: TypedFunction

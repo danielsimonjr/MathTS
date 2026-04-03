@@ -1,5 +1,5 @@
-import { IndexError } from '../../../error/IndexError.ts'
-import type { IndexError as IndexErrorType } from '../types.ts'
+import { IndexError } from '../../../error/IndexError.js'
+import type { IndexError as IndexErrorType } from '../types.js'
 
 /**
  * Transform zero-based indices to one-based indices in errors

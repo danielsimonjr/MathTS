@@ -3,13 +3,13 @@ import {
   isIndexNode,
   isNode,
   isSymbolNode
-} from '../../utils/is.ts'
-import { getSafeProperty, setSafeProperty } from '../../utils/customs.ts'
-import { factory } from '../../utils/factory.ts'
-import { accessFactory } from './utils/access.ts'
-import { assignFactory } from './utils/assign.ts'
-import { getPrecedence } from '../operators.ts'
-import type { MathNode, Scope, CompileFunction, StringOptions } from './Node.ts'
+} from '../../utils/is.js'
+import { getSafeProperty, setSafeProperty } from '../../utils/customs.js'
+import { factory } from '../../utils/factory.js'
+import { accessFactory } from './utils/access.js'
+import { assignFactory } from './utils/assign.js'
+import { getPrecedence } from '../operators.js'
+import type { MathNode, Scope, CompileFunction, StringOptions } from './Node.js'
 
 const name = 'AssignmentNode'
 const dependencies = [

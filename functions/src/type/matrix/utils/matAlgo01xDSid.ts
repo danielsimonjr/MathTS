@@ -1,5 +1,5 @@
-import { factory } from '../../../utils/factory.ts'
-import { DimensionError } from '../../../error/DimensionError.ts'
+import { factory } from '../../../utils/factory.js'
+import { DimensionError } from '../../../error/DimensionError.js'
 import type {
   DataType,
   MatrixValue,
@@ -7,7 +7,7 @@ import type {
   MatrixCallback,
   TypedFunction,
   DenseMatrixConstructorData
-} from '../types.ts'
+} from '../types.js'
 
 /**
  * DenseMatrix interface for algorithm operations.

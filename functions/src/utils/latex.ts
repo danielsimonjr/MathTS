@@ -2,7 +2,7 @@
 
 // @ts-ignore - escape-latex may not have type declarations
 import escapeLatexLib from 'escape-latex'
-import { hasOwnProperty } from './object.ts'
+import { hasOwnProperty } from './object.js'
 
 export const latexSymbols = {
   // GREEK LETTERS

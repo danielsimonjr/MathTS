@@ -13,8 +13,8 @@
  * - JS is faster for arrays < ~50-100 elements due to copy overhead
  */
 
-import { wasmLoader, type WasmModule } from './WasmLoader.ts'
-import { ParallelMatrix } from '../parallel/ParallelMatrix.ts'
+import { wasmLoader, type WasmModule } from './WasmLoader.js'
+import { ParallelMatrix } from '../parallel/ParallelMatrix.js'
 
 export interface MatrixOptions {
   useWasm?: boolean

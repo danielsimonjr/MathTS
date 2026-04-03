@@ -1,13 +1,13 @@
-import { isBigInt, isBigNumber } from '../../utils/is.ts'
-import { format, sign, nearlyEqual } from '../../utils/number.ts'
-import { factory } from '../../utils/factory.ts'
+import { isBigInt, isBigNumber } from '../../utils/is.js'
+import { format, sign, nearlyEqual } from '../../utils/number.js'
+import { factory } from '../../utils/factory.js'
 import type {
   BigNumberLike,
   RangeForEachCallback,
   RangeMapCallback,
   RangeFormatOptions,
   RangeJSON
-} from './types.ts'
+} from './types.js'
 
 const name = 'Range'
 const dependencies: string[] = []

@@ -1,13 +1,13 @@
-import { errorTransform } from './utils/errorTransform.ts'
-import { factory } from '../../utils/factory.ts'
-import { createColumn } from '../../function/matrix/column.ts'
-import { isNumber } from '../../utils/is.ts'
+import { errorTransform } from './utils/errorTransform.js'
+import { factory } from '../../utils/factory.js'
+import { createColumn } from '../../function/matrix/column.js'
+import { isNumber } from '../../utils/is.js'
 import type {
   TypedFunction,
   MathFunction,
   IndexConstructor,
   VariadicArgs
-} from './types.ts'
+} from './types.js'
 
 interface ColumnDependencies {
   typed: TypedFunction

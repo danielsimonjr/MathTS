@@ -1,4 +1,4 @@
-import { factory } from '../../../utils/factory.ts'
+import { factory } from '../../../utils/factory.js'
 
 const name = 'matrix'
 const dependencies = ['typed', 'Matrix', 'DenseMatrix', 'SparseMatrix']

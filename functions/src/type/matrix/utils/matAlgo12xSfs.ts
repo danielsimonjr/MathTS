@@ -1,4 +1,4 @@
-import { factory } from '../../../utils/factory.ts'
+import { factory } from '../../../utils/factory.js'
 import type {
   DataType,
   MatrixValue,
@@ -6,7 +6,7 @@ import type {
   MatrixCallback,
   TypedFunction,
   DenseMatrixConstructorData
-} from '../types.ts'
+} from '../types.js'
 
 /**
  * DenseMatrix interface for algorithm operations.
