@@ -1,0 +1,76 @@
+# Synced mathjs Factory Functions Inventory
+
+## Summary
+
+- Total categories: 19
+- Total factory functions: 252
+- Total synced files (category dirs only): 290
+- Total synced lines (category dirs only): 51,145
+
+> Note: Line counts cover only the 19 category directories under `functions/src/`. Support directories (utils, core, plain, type, error, wasm, expression, shared) add another ~77,689 lines across 494 files.
+
+---
+
+## By Category
+
+| Category | Files | Lines | Factories | Factory Names |
+|----------|------:|------:|----------:|---------------|
+| algebra | 45 | 11,441 | 28 | createLup, createQr, createSchur, createSlu, createDerivative, createLeafCount, createLyap, createPolynomialRoot, createRationalize, createResolve, createUtil, createSimplify, createSimplifyConstant, createSimplifyCore, createLsolve, createLsolveAll, createLusolve, createUsolve, createUsolveAll, createCsAmd, createCsChol, createCsCounts, createCsLu, createCsSpsolve, createCsSqr, createCsSymperm, createSylvester, createSymbolicEqual |
+| arithmetic | 40 | 7,416 | 44 | createAbs, createAdd, createAddScalar, createCbrt, createCeilNumber, createCeil, createCube, createDivide, createDivideScalar, createDotDivide, createDotMultiply, createDotPow, createExp, createExpm1, createFixNumber, createFix, createFloorNumber, createFloor, createGcd, createHypot, createInvmod, createLcm, createLog, createLog10, createLog1p, createLog2, createMod, createMultiply, createMultiplyScalar, createNorm, createNthRoot, createNthRootNumber, createNthRoots, createPow, createRound, createSign, createSqrt, createSquare, createSubtract, createSubtractScalar, createUnaryMinus, createUnaryPlus, createNodeOperations, createXgcd |
+| bitwise | 8 | 797 | 8 | createBitAnd, createBitNot, createBitOr, createBitXor, createLeftShift, createRightArithShift, createRightLogShift, createUseMatrixForArrayScalar |
+| combinatorics | 4 | 388 | 4 | createBellNumbers, createCatalan, createComposition, createStirlingS2 |
+| complex | 4 | 280 | 4 | createArg, createConj, createIm, createRe |
+| geometry | 2 | 1,251 | 2 | createDistance, createIntersect |
+| logical | 5 | 665 | 5 | createAnd, createNot, createNullish, createOr, createXor |
+| matrix | 44 | 9,604 | 42 | createColumn, createConcat, createCount, createCross, createCtranspose, createDet, createDiag, createDiff, createDot, createEigs, createExpm, createFft, createFilter, createFlatten, createForEach, createGetMatrixDataType, createIdentity, createIfft, createInv, createKron, createMap, createMapSlices, createMatrixFromColumns, createMatrixFromFunction, createMatrixFromRows, createOnes, createPartitionSelect, createPinv, createRange, createReshape, createResize, createRotate, createRotationMatrix, createRow, createSize, createSort, createSqrtm, createSqueeze, createSubset, createTrace, createTranspose, createZeros |
+| numeric | 1 | 712 | 1 | createSolveODE |
+| probability | 14 | 1,740 | 13 | createBernoulli, createCombinations, createCombinationsWithRep, createFactorial, createGamma, createKldivergence, createLgamma, createMultinomial, createPermutations, createPickRandom, createRandom, createRandomNumber, createRandomInt |
+| relational | 13 | 1,807 | 22 | createCompare, createCompareNumber, createCompareNatural, createCompareText, createCompareTextNumber, createCompareUnits, createDeepEqual, createEqual, createEqualNumber, createEqualScalar, createEqualScalarNumber, createEqualText, createLarger, createLargerNumber, createLargerEq, createLargerEqNumber, createSmaller, createSmallerNumber, createSmallerEq, createSmallerEqNumber, createUnequal, createUnequalNumber |
+| set | 10 | 847 | 10 | createSetCartesian, createSetDifference, createSetDistinct, createSetIntersect, createSetIsSubset, createSetMultiplicity, createSetPowerset, createSetSize, createSetSymDifference, createSetUnion |
+| signal | 5 | 1,349 | 2 | createFreqz, createZpk2tf |
+| special | 2 | 502 | 2 | createErf, createZeta |
+| statistics | 14 | 2,461 | 13 | createCorr, createCumSum, createMad, createMax, createMean, createMedian, createMin, createMode, createProd, createQuantileSeq, createStd, createSum, createVariance |
+| string | 5 | 441 | 5 | createBin, createFormat, createHex, createOct, createPrint |
+| trigonometry | 26 | 1,658 | 26 | createAcos, createAcosh, createAcot, createAcoth, createAcsc, createAcsch, createAsec, createAsech, createAsin, createAsinh, createAtan, createAtan2, createAtanh, createCos, createCosh, createCot, createCoth, createCsc, createCsch, createSec, createSech, createSin, createSinh, createTan, createTanh, createTrigUnit |
+| unit | 2 | 137 | 2 | createTo, createToBest |
+| utils | 46 | 7,649 | 19 | createBigNumberE, createBigNumberPhi, createBigNumberPi, createBigNumberTau, createClone, createLog, createHasNumericValue, createIsBounded, createIsFinite, createIsInteger, createIsNaN, createIsNegative, createIsNumeric, createIsPositive, createIsPrime, createIsZero, createNumeric, createParseNumberWithConfig, createTypeOf |
+
+---
+
+## Factory Registries
+
+These files are part of the synced code but sit at `functions/src/` root (not in a category subdirectory). They are dormant — not imported by `functions/src/index.ts`.
+
+| File | Lines | Exports |
+|------|------:|-------:|
+| factoriesAny.ts | 375 | 303 |
+| factoriesNumber.ts | 520 | 192 |
+
+`factoriesAny.ts` re-exports all typed factory constructors (classes + functions) for full math support. `factoriesNumber.ts` re-exports the number-only subset for a lighter build. The exports use paths like `./function/utils/clone.js` (note: these paths reflect the original mathjs layout and will resolve incorrectly in the MathTS directory structure — they are dormant reference files only).
+
+---
+
+## Support Directories
+
+These directories were synced alongside the category function files. They provide shared utilities, type definitions, and infrastructure used by the factory functions.
+
+| Directory | Files | Lines | Purpose |
+|-----------|------:|------:|---------|
+| `utils/` | 46 | 7,603 | Shared utility helpers (array, object, number, string, etc.) |
+| `core/` | 5 | 1,790 | Core factory infrastructure (typed dispatch, config) |
+| `plain/` | 12 | 919 | Plain-number fast-path implementations |
+| `type/` | 50 | 17,240 | Type class definitions (BigNumber, Complex, Fraction, Matrix, Range, ResultSet, Unit, etc.) |
+| `error/` | 3 | 178 | Custom error classes |
+| `wasm/` | 63 | 34,040 | AssemblyScript WASM source and generated bindings |
+| `expression/` | 314 | 15,805 | Parser, node types, expression tree (AST) infrastructure |
+| `shared/` | 1 | 114 | Shared constants/helpers used across categories |
+| **Total** | **494** | **77,689** | |
+
+---
+
+## Notes
+
+- All synced files are **dormant** — they are not exported from `functions/src/index.ts`. Only `functions/src/typed/` contains active implementations.
+- The synced code has ~700 upstream type errors inherited from mathjs itself (missing casts, AssemblyScript types). `functions/tsconfig.json` uses `strict: false` to allow compilation.
+- Last sync: 2026-04-02 from mathjs v15.3.4 (0 module resolution errors).
+- Import paths were transformed during sync: one `../` level removed, `.ts` → `.js` extensions added, scoped package names unscoped.
