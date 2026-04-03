@@ -629,6 +629,10 @@ export class BigNumber implements MathTSValue {
     return BigNumber.compare(this, other);
   }
 
+  compare(other: BigNumber): number {
+    return this.compareTo(other);
+  }
+
   // ============================================================
   // Rounding Methods
   // ============================================================

@@ -172,14 +172,14 @@ export const parallelStatVariance = mathTyped('parallelStatVariance', {
   'Array': async (arr: number[]): Promise<f64> => {
     if (arr.length === 0) return NaN;
     const data = toFloat64Array(arr);
-    return parallelStatVariance(data);
+    return parallelStatVariance(data) as Promise<f64>;
   },
 
   // Number array with normalization
   'Array, string': async (arr: number[], normalization: NormalizationType): Promise<f64> => {
     if (arr.length === 0) return NaN;
     const data = toFloat64Array(arr);
-    return parallelStatVariance(data, normalization);
+    return parallelStatVariance(data, normalization) as Promise<f64>;
   },
 
   // Variadic form
@@ -214,21 +214,21 @@ export const parallelStatStd = mathTyped('parallelStatStd', {
   // Float64Array with normalization
   'Float64Array, string': async (data: Float64Array, normalization: NormalizationType): Promise<f64> => {
     const variance = await parallelStatVariance(data, normalization);
-    return Math.sqrt(variance);
+    return Math.sqrt(variance as number);
   },
 
   // Number array
   'Array': async (arr: number[]): Promise<f64> => {
     if (arr.length === 0) return NaN;
     const data = toFloat64Array(arr);
-    return parallelStatStd(data);
+    return parallelStatStd(data) as Promise<f64>;
   },
 
   // Number array with normalization
   'Array, string': async (arr: number[], normalization: NormalizationType): Promise<f64> => {
     if (arr.length === 0) return NaN;
     const data = toFloat64Array(arr);
-    return parallelStatStd(data, normalization);
+    return parallelStatStd(data, normalization) as Promise<f64>;
   },
 });
 
@@ -341,7 +341,7 @@ export const parallelStatMedian = mathTyped('parallelStatMedian', {
   // Number array
   'Array': async (arr: number[]): Promise<f64> => {
     if (arr.length === 0) return NaN;
-    return parallelStatMedian(toFloat64Array(arr));
+    return parallelStatMedian(toFloat64Array(arr)) as Promise<f64>;
   },
 
   // Variadic form
@@ -387,7 +387,7 @@ export const parallelStatMode = mathTyped('parallelStatMode', {
 
   // Float64Array
   'Float64Array': (data: Float64Array): number[] => {
-    return parallelStatMode(Array.from(data));
+    return parallelStatMode(Array.from(data)) as number[];
   },
 });
 
@@ -492,7 +492,7 @@ export const parallelStatNorm = mathTyped('parallelStatNorm', {
 
   // Number array with p-norm
   'Array, number': (arr: number[], p: f64): f64 => {
-    return parallelStatNorm(toFloat64Array(arr), p);
+    return parallelStatNorm(toFloat64Array(arr), p) as f64;
   },
 });
 
@@ -559,7 +559,7 @@ export const parallelStatCorr = mathTyped('parallelStatCorr', {
 
   // Number arrays
   'Array, Array': async (x: number[], y: number[]): Promise<f64> => {
-    return parallelStatCorr(toFloat64Array(x), toFloat64Array(y));
+    return parallelStatCorr(toFloat64Array(x), toFloat64Array(y)) as Promise<f64>;
   },
 });
 
@@ -590,7 +590,7 @@ export const parallelStatMAD = mathTyped('parallelStatMAD', {
 
   // Number array
   'Array': async (arr: number[]): Promise<f64> => {
-    return parallelStatMAD(toFloat64Array(arr));
+    return parallelStatMAD(toFloat64Array(arr)) as Promise<f64>;
   },
 });
 
@@ -657,12 +657,12 @@ export const parallelStatQuantile = mathTyped('parallelStatQuantile', {
 
   // Number array
   'Array, number': (arr: number[], q: f64): f64 => {
-    return parallelStatQuantile(toFloat64Array(arr), q);
+    return parallelStatQuantile(toFloat64Array(arr), q) as f64;
   },
 
   // Multiple quantiles
   'Float64Array, Array': (data: Float64Array, quantiles: number[]): number[] => {
-    return quantiles.map(q => parallelStatQuantile(data, q));
+    return quantiles.map(q => parallelStatQuantile(data, q) as number);
   },
 });
 
@@ -693,7 +693,7 @@ export const parallelStatHistogram = mathTyped('parallelStatHistogram', {
 
   // Number array
   'Array, number': async (arr: number[], bins: f64): Promise<number[]> => {
-    return parallelStatHistogram(toFloat64Array(arr), bins);
+    return parallelStatHistogram(toFloat64Array(arr), bins) as Promise<number[]>;
   },
 });
 

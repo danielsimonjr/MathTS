@@ -130,11 +130,38 @@ export class WorkbookExecutor {
   }
 
   /**
-   * Execute a code cell
+   * Execute a code cell by evaluating its content with scope from dependency outputs.
+   *
+   * Uses the Function constructor to evaluate expressions. Cell dependencies
+   * are injected as named variables in the evaluation scope, allowing cells
+   * to reference outputs of earlier cells by their id.
    */
-  private async executeCode(_cell: Cell): Promise<unknown> {
-    // TODO: Implement sandboxed code execution
-    throw new Error('Code execution not yet implemented');
+  private async executeCode(cell: Cell): Promise<unknown> {
+    // Build scope from dependency outputs
+    const scope: Record<string, unknown> = {};
+    if (cell.dependsOn) {
+      for (const depId of cell.dependsOn) {
+        const output = this.outputs.get(depId);
+        if (output !== undefined) {
+          scope[depId] = output;
+        }
+      }
+    }
+
+    const scopeKeys = Object.keys(scope);
+    const scopeValues = scopeKeys.map((k) => scope[k]);
+
+    try {
+      // Evaluate as an expression first (e.g. "2 + 3", "x * 2")
+      // eslint-disable-next-line no-new-func
+      const fn = new Function(...scopeKeys, `return (${cell.content});`);
+      return fn(...scopeValues);
+    } catch {
+      // If expression evaluation fails, try as statements (e.g. "const x = 1; x + 2")
+      // eslint-disable-next-line no-new-func
+      const fn = new Function(...scopeKeys, cell.content);
+      return fn(...scopeValues);
+    }
   }
 
   /**

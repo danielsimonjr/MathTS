@@ -275,7 +275,7 @@ export const pow = mathTyped('pow', {
   'Complex, Complex': (a: Complex, b: Complex): Complex => a.pow(b),
   'Fraction, number': (a: Fraction, b: f64): Fraction => a.pow(Math.floor(b)),
   'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.pow(b),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.pow(b),
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => a.pow(b.valueOf()),
 });
 
 /**

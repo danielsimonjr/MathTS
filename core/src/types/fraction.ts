@@ -426,6 +426,10 @@ export class Fraction implements IFraction {
     return Fraction.compare(this, other);
   }
 
+  compare(other: Fraction): number {
+    return this.compareTo(other);
+  }
+
   // ============================================================
   // Utility Methods
   // ============================================================

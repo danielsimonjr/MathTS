@@ -14,7 +14,6 @@
     "node_modules",
     "dist",
     "tests",
-    "src/transform/*.transform.ts",
-    "src/embeddedDocs/**"
+    "src/transform/*.transform.ts"
   ]
 }

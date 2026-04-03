@@ -61,10 +61,31 @@ describe('WorkbookExecutor', () => {
       expect(result).toBe('json-data');
     });
 
-    it('should throw for code cell (not yet implemented)', async () => {
-      const wb = makeWorkbook([{ id: 'a', type: 'code', content: 'x = 1' }]);
+    it('should execute code cell with simple expression', async () => {
+      const wb = makeWorkbook([{ id: 'a', type: 'code', content: '2 + 3' }]);
       const exec = new WorkbookExecutor(wb);
-      await expect(exec.runCell('a')).rejects.toThrow('Code execution not yet implemented');
+      const result = await exec.runCell('a');
+      expect(result).toBe(5);
+    });
+
+    it('should execute code cell with dependency scope', async () => {
+      const wb = makeWorkbook([
+        { id: 'x', type: 'code', content: '10' },
+        { id: 'y', type: 'code', content: 'x * 2', dependsOn: ['x'] },
+      ]);
+      const exec = new WorkbookExecutor(wb);
+      await exec.runCell('x');
+      const result = await exec.runCell('y');
+      expect(result).toBe(20);
+    });
+
+    it('should execute code cell with statement block', async () => {
+      const wb = makeWorkbook([
+        { id: 'a', type: 'code', content: 'const v = 3; return v * v;' },
+      ]);
+      const exec = new WorkbookExecutor(wb);
+      const result = await exec.runCell('a');
+      expect(result).toBe(9);
     });
 
     it('should throw for unknown cell id', async () => {
@@ -80,14 +101,16 @@ describe('WorkbookExecutor', () => {
     });
 
     it('should emit error event on failure', async () => {
-      const wb = makeWorkbook([{ id: 'a', type: 'code', content: 'x = 1' }]);
+      const wb = makeWorkbook([
+        { id: 'a', type: 'code', content: 'throw new Error("deliberate")' },
+      ]);
       const exec = new WorkbookExecutor(wb);
       const events: WorkbookEvent[] = [];
       exec.on((e) => events.push(e));
       await exec.runCell('a').catch(() => {});
       const errorEvent = events.find((e) => e.type === 'cell:error');
       expect(errorEvent).toBeDefined();
-      expect(errorEvent!.error).toContain('Code execution not yet implemented');
+      expect(errorEvent!.error).toContain('deliberate');
     });
 
     it('should mark dependents as stale in reactive mode', async () => {

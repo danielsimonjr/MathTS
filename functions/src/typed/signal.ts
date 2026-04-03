@@ -266,7 +266,7 @@ export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
   },
 
   'Object': async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
-    return parallelFFTMagnitude(spectrum.real, spectrum.imag);
+    return parallelFFTMagnitude(spectrum.real, spectrum.imag) as Promise<Float64Array>;
   },
 });
 
@@ -284,7 +284,7 @@ export const parallelFFTPower = mathTyped('parallelFFTPower', {
   },
 
   'Object': async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
-    return parallelFFTPower(spectrum.real, spectrum.imag);
+    return parallelFFTPower(spectrum.real, spectrum.imag) as Promise<Float64Array>;
   },
 });
 
@@ -341,7 +341,7 @@ export const parallelConv = mathTyped('parallelConv', {
 
   // Convolution of number arrays
   'Array, Array': async (x: number[], h: number[]): Promise<Float64Array> => {
-    return parallelConv(new Float64Array(x), new Float64Array(h));
+    return parallelConv(new Float64Array(x), new Float64Array(h)) as Promise<Float64Array>;
   },
 });
 
@@ -358,11 +358,11 @@ export const parallelXCorr = mathTyped('parallelXCorr', {
     for (let i: i32 = 0; i < h.length; i++) {
       hReversed[i] = h[h.length - 1 - i];
     }
-    return parallelConv(x, hReversed);
+    return parallelConv(x, hReversed) as Promise<Float64Array>;
   },
 
   'Array, Array': async (x: number[], h: number[]): Promise<Float64Array> => {
-    return parallelXCorr(new Float64Array(x), new Float64Array(h));
+    return parallelXCorr(new Float64Array(x), new Float64Array(h)) as Promise<Float64Array>;
   },
 });
 
@@ -371,11 +371,11 @@ export const parallelXCorr = mathTyped('parallelXCorr', {
  */
 export const parallelAutoCorr = mathTyped('parallelAutoCorr', {
   'Float64Array': async (x: Float64Array): Promise<Float64Array> => {
-    return parallelXCorr(x, x);
+    return parallelXCorr(x, x) as Promise<Float64Array>;
   },
 
   'Array': async (x: number[]): Promise<Float64Array> => {
-    return parallelAutoCorr(new Float64Array(x));
+    return parallelAutoCorr(new Float64Array(x)) as Promise<Float64Array>;
   },
 });
 

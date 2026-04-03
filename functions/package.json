@@ -24,7 +24,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "echo 'Skipping typecheck - typed functions reference methods not yet on core types (BigNumber.sin, Complex.reciprocal, etc.)'",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "clean": "rm -rf dist"
