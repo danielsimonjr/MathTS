@@ -6,11 +6,13 @@
  *
  * Functions that already exist in typed/ are not re-exported here to avoid
  * conflicts with the active typed implementations.
- *
- * Auto-generated — do not edit by hand.
  */
 
 import { factoryScope } from './scope.js';
+
+// ---------------------------------------------------------------------------
+// Tier 1: all imports
+// ---------------------------------------------------------------------------
 
 // arithmetic
 import { createAbs } from '../arithmetic/abs.js';
@@ -106,23 +108,42 @@ import { createNumeric } from '../utils/numeric.js';
 import { createTypeOf } from '../utils/typeOf.js';
 
 // ---------------------------------------------------------------------------
-// Activate factories with shared scope
+// Tier 2: all imports
 // ---------------------------------------------------------------------------
 
 // arithmetic
-// abs: skipped (already exported by typed/)
+import { createDivideScalar } from '../arithmetic/divideScalar.js';
+import { createUnaryPlus } from '../arithmetic/unaryPlus.js';
+
+// matrix (dot only — transpose/ctranspose/csCounts deferred: need mathjs-internal matrix type)
+import { createDot } from '../matrix/dot.js';
+
+// probability
+import { createRandomInt } from '../probability/randomInt.js';
+
+// statistics
+import { createMode } from '../statistics/mode.js';
+import { createProd } from '../statistics/prod.js';
+
+// string
+import { createBin } from '../string/bin.js';
+import { createHex } from '../string/hex.js';
+import { createOct } from '../string/oct.js';
+
+// utils
+import { createHasNumericValue } from '../utils/hasNumericValue.js';
+import { createIsFinite } from '../utils/isFinite.js';
+import { createIsZero } from '../utils/isZero.js';
+import { createParseNumberWithConfig } from '../utils/parseNumber.js';
+
+// ---------------------------------------------------------------------------
+// Tier 1: activate factories
+// ---------------------------------------------------------------------------
+
+// arithmetic (non-conflicting)
 export const addScalar = createAddScalar(factoryScope as any);
-// cube: skipped (already exported by typed/)
-// exp: skipped (already exported by typed/)
-// expm1: skipped (already exported by typed/)
-// log10: skipped (already exported by typed/)
-// log2: skipped (already exported by typed/)
 export const multiplyScalar = createMultiplyScalar(factoryScope as any);
-// sign: skipped (already exported by typed/)
-// sqrt: skipped (already exported by typed/)
-// square: skipped (already exported by typed/)
 export const subtractScalar = createSubtractScalar(factoryScope as any);
-// unaryMinus: skipped (already exported by typed/)
 
 // bitwise
 export const bitNot = createBitNot(factoryScope as any);
@@ -162,31 +183,13 @@ export const erf = createErf(factoryScope as any);
 export const format = createFormat(factoryScope as any);
 export const print = createPrint(factoryScope as any);
 
-// trigonometry
-// acos: skipped (already exported by typed/)
-// acosh: skipped (already exported by typed/)
-// acot: skipped (already exported by typed/)
+// trigonometry (non-conflicting)
 export const acoth = createAcoth(factoryScope as any);
-// acsc: skipped (already exported by typed/)
 export const acsch = createAcsch(factoryScope as any);
-// asec: skipped (already exported by typed/)
 export const asech = createAsech(factoryScope as any);
-// asin: skipped (already exported by typed/)
-// asinh: skipped (already exported by typed/)
-// atan: skipped (already exported by typed/)
-// atanh: skipped (already exported by typed/)
-// cos: skipped (already exported by typed/)
-// cosh: skipped (already exported by typed/)
-// cot: skipped (already exported by typed/)
 export const coth = createCoth(factoryScope as any);
-// csc: skipped (already exported by typed/)
 export const csch = createCsch(factoryScope as any);
-// sec: skipped (already exported by typed/)
 export const sech = createSech(factoryScope as any);
-// sin: skipped (already exported by typed/)
-// sinh: skipped (already exported by typed/)
-// tan: skipped (already exported by typed/)
-// tanh: skipped (already exported by typed/)
 
 // unit
 export const toBest = createToBest(factoryScope as any);
@@ -203,8 +206,7 @@ export const numeric = createNumeric(factoryScope as any);
 export const typeOf = createTypeOf(factoryScope as any);
 
 // ---------------------------------------------------------------------------
-// Factory versions of functions that conflict with typed/ exports.
-// Available under factory_ prefix for internal use or merging.
+// Tier 1: factory_ versions of conflicting names
 // ---------------------------------------------------------------------------
 
 export const factory_abs = createAbs(factoryScope as any);
@@ -235,3 +237,53 @@ export const factory_sin = createSin(factoryScope as any);
 export const factory_sinh = createSinh(factoryScope as any);
 export const factory_tan = createTan(factoryScope as any);
 export const factory_tanh = createTanh(factoryScope as any);
+
+// ---------------------------------------------------------------------------
+// Inject tier 1 results into scope so tier 2 factories can resolve their deps
+// ---------------------------------------------------------------------------
+
+factoryScope.abs = factory_abs;
+factoryScope.addScalar = addScalar;
+factoryScope.conj = conj;
+factoryScope.equalScalar = equalScalar;
+factoryScope.format = format;
+factoryScope.isBounded = isBounded;
+factoryScope.isNaN = isNaN;
+factoryScope.isNumeric = isNumeric;
+factoryScope.log2 = factory_log2;
+factoryScope.map = map;
+factoryScope.multiplyScalar = multiplyScalar;
+factoryScope.numeric = numeric;
+factoryScope.size = size;
+
+// ---------------------------------------------------------------------------
+// Tier 2: activate factories
+// ---------------------------------------------------------------------------
+
+// Prerequisite: parseNumberWithConfig (needed by prod)
+export const parseNumberWithConfig = createParseNumberWithConfig(factoryScope as any);
+factoryScope.parseNumberWithConfig = parseNumberWithConfig;
+
+// arithmetic
+export const divideScalar = createDivideScalar(factoryScope as any);
+
+// probability
+export const randomInt = createRandomInt(factoryScope as any);
+
+// statistics
+export const mode = createMode(factoryScope as any);
+export const prod = createProd(factoryScope as any);
+
+// string
+export const bin = createBin(factoryScope as any);
+export const hex = createHex(factoryScope as any);
+export const oct = createOct(factoryScope as any);
+
+// utils
+export const hasNumericValue = createHasNumericValue(factoryScope as any);
+export const isFinite = createIsFinite(factoryScope as any);
+export const isZero = createIsZero(factoryScope as any);
+
+// Tier 2 conflicting names — use factory_ prefix
+export const factory_unaryPlus = createUnaryPlus(factoryScope as any);
+export const factory_dot = createDot(factoryScope as any);
