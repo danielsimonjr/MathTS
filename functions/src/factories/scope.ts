@@ -2,12 +2,17 @@
  * Shared factory scope for activating synced mathjs factory functions.
  *
  * Provides all dependencies that leaf factories may request:
- * typed, config, Complex, BigNumber, Fraction, and helper constructors.
+ * typed, config, Complex, BigNumber, Fraction, matrix bridge, and helper constructors.
  */
 
 import { mathTyped, Complex, Fraction, BigNumber } from '@mathts/core';
 import { initTypeBridge } from '../typed/typed-bridge.js';
 import { DEFAULT_CONFIG } from '../core/config.js';
+import {
+  MathJSDenseMatrix,
+  MathJSSparseMatrix,
+  createMatrixBridge,
+} from './matrix-bridge.js';
 
 // Initialize type bridge so typed-function recognizes native types
 initTypeBridge();
@@ -20,6 +25,8 @@ const extraTypes = [
   { name: 'function', test: (x: unknown): x is Function => typeof x === 'function' },
   // Expression 'Node' type — stub that never matches (expression package not active)
   { name: 'Node', test: (_x: unknown): _x is never => false },
+  // Note: DenseMatrix, SparseMatrix, Matrix types are already registered by @mathts/core.
+  // MathJSDenseMatrix passes their duck-type tests via .rows, .cols, .get, .type properties.
 ];
 
 for (const t of extraTypes) {
@@ -43,10 +50,21 @@ export const factoryScope: Record<string, unknown> = {
   BigNumber,
   Fraction,
 
+  // Matrix bridge classes
+  DenseMatrix: MathJSDenseMatrix,
+  SparseMatrix: MathJSSparseMatrix,
+
+  // Matrix factory function — creates MathJSDenseMatrix/MathJSSparseMatrix
+  matrix: createMatrixBridge(),
+
   // Helper factory functions (lowercase) — factories call `complex(re, im)` etc.
   complex: (re: number, im: number) => new Complex(re, im),
   bignumber: (x: number | string) =>
     typeof x === 'string' ? BigNumber.parse(x) : BigNumber.fromNumber(x),
   fraction: (n: number, d?: number) => new Fraction(n, d ?? 1),
   number: Number,
+
+  // Matrix helper factories
+  createDenseMatrix: (data: any) => new MathJSDenseMatrix(data),
+  createSparseMatrix: (data: any) => new MathJSSparseMatrix(data),
 };

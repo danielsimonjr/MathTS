@@ -20,6 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Codebase inventory tooling (tools/codebase-inventory.json, tools/build-mathts-inventory.py, tools/scan_missing.py, tools/inventory.py)
 - Full codebase inventory reports (docs/inventory/00-05)
 - Integration plan (docs/superpowers/plans/2026-04-03-integration-plan.md)
+- Factory activation system: shared scope (`functions/src/factories/scope.ts`), barrel export (`functions/src/factories/index.ts`)
+- 96 mathjs factory functions activated across 3 tiers:
+  - Tier 1: 69 leaf factories (typed-only deps) — abs, sin, cos, sqrt, erf, combinations, etc.
+  - Tier 2: 13 factories (inter-factory deps) — divideScalar, dot, mode, isZero, bin/hex/oct, etc.
+  - Tier 3: 14 matrix factories — transpose, identity, zeros, ones, diag, det, trace, kron, etc.
+- Matrix compatibility bridge (`MathJSDenseMatrix`) — adapts native DenseMatrix to mathjs `._data`/`._size`/`.storage()` interface
+- Expression compiler (`expression/src/compiler/compile.ts`) — tree-walking AST interpreter handling all 16 node types
+- Expression evaluator (`expression/src/evaluator/evaluate.ts`) — `createEvaluate()` factory for `evaluate(expr, scope)` API
+- Parallel operation benchmarks (`parallel/tests/benchmark.test.ts`) — 18 tests covering elementwise, reduce, matmul
+- Priority status tracker (`docs/Planning/PRIORITY_STATUS.md`) with dependency chain analysis
 - Initial project structure with monorepo setup
 - @mathts/core package with type definitions and utilities
 - GitHub Actions CI/CD workflows

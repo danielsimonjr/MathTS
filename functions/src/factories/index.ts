@@ -287,3 +287,104 @@ export const isZero = createIsZero(factoryScope as any);
 // Tier 2 conflicting names — use factory_ prefix
 export const factory_unaryPlus = createUnaryPlus(factoryScope as any);
 export const factory_dot = createDot(factoryScope as any);
+
+// ---------------------------------------------------------------------------
+// Inject tier 2 results into scope so tier 3 factories can resolve their deps
+// ---------------------------------------------------------------------------
+
+factoryScope.subtractScalar = subtractScalar;
+factoryScope.divideScalar = divideScalar;
+factoryScope.unaryMinus = factory_unaryMinus;
+factoryScope.flatten = flatten;
+factoryScope.isZero = isZero;
+factoryScope.prod = prod;
+factoryScope.dot = factory_dot;
+factoryScope.conj = conj;
+factoryScope.squeeze = squeeze;
+factoryScope.forEach = forEach;
+factoryScope.filter = filter;
+
+// ---------------------------------------------------------------------------
+// Tier 3: matrix-dependent factories (enabled by matrix bridge)
+// ---------------------------------------------------------------------------
+
+import { createTranspose } from '../matrix/transpose.js';
+import { createCtranspose } from '../matrix/ctranspose.js';
+import { createIdentity } from '../matrix/identity.js';
+import { createZeros } from '../matrix/zeros.js';
+import { createOnes } from '../matrix/ones.js';
+import { createDiag } from '../matrix/diag.js';
+import { createKron } from '../matrix/kron.js';
+import { createMatrixFromFunction } from '../matrix/matrixFromFunction.js';
+import { createMatrixFromColumns } from '../matrix/matrixFromColumns.js';
+import { createMatrixFromRows } from '../matrix/matrixFromRows.js';
+import { createCount } from '../matrix/count.js';
+import { createTrace } from '../matrix/trace.js';
+import { createDet } from '../matrix/det.js';
+import { createReshape } from '../matrix/reshape.js';
+
+// Simple matrix factories (no deep dependency chains)
+export const factory_transpose = createTranspose(factoryScope as any);
+factoryScope.transpose = factory_transpose;
+
+export const factory_ctranspose = createCtranspose(factoryScope as any);
+factoryScope.ctranspose = factory_ctranspose;
+
+export const identity = createIdentity(factoryScope as any);
+factoryScope.identity = identity;
+
+export const zeros = createZeros(factoryScope as any);
+factoryScope.zeros = zeros;
+
+export const ones = createOnes(factoryScope as any);
+factoryScope.ones = ones;
+
+export const diag = createDiag(factoryScope as any);
+factoryScope.diag = diag;
+
+export const kron = createKron(factoryScope as any);
+factoryScope.kron = kron;
+
+export const matrixFromFunction = createMatrixFromFunction(factoryScope as any);
+factoryScope.matrixFromFunction = matrixFromFunction;
+
+export const matrixFromColumns = createMatrixFromColumns(factoryScope as any);
+factoryScope.matrixFromColumns = matrixFromColumns;
+
+export const matrixFromRows = createMatrixFromRows(factoryScope as any);
+factoryScope.matrixFromRows = matrixFromRows;
+
+export const count = createCount(factoryScope as any);
+factoryScope.count = count;
+
+// Factories that need tier 3 deps (add needs concat which needs isInteger which
+// needs equal — too deep for now). Use try/catch for safety.
+
+// trace needs 'add' — provide addScalar as fallback
+factoryScope.add = factoryScope.addScalar;
+export const trace = createTrace(factoryScope as any);
+factoryScope.trace = trace;
+
+// det needs multiply — provide multiplyScalar as a stub for scalar operations.
+// Note: det will only work on numeric (non-symbolic) matrices with this stub.
+factoryScope.multiply = factoryScope.multiplyScalar;
+export const det = createDet(factoryScope as any);
+factoryScope.det = det;
+
+// reshape needs isInteger — provide a simple stub
+factoryScope.isInteger = (x: any) =>
+  typeof x === 'number' && Number.isInteger(x);
+export const reshape = createReshape(factoryScope as any);
+factoryScope.reshape = reshape;
+
+// ---------------------------------------------------------------------------
+// Tier 3 deferred: factories blocked by deep dependency chains
+// ---------------------------------------------------------------------------
+// The following need 'add', 'multiply', 'subtract' (full matrix versions)
+// which depend on concat → isInteger → equal → ... (long chain).
+// They will be activated once the full arithmetic chain is built.
+//
+// Blocked: inv, pinv, expm, sqrtm, eigs, fft, ifft, cross, diff,
+//          column, row, range, sort, partitionSelect, concat, subset,
+//          add (matrix), multiply (matrix), subtract (matrix),
+//          rotate, rotationMatrix, resize
