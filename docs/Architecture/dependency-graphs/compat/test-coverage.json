@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "generatedAt": "2026-02-06T03:46:14.555Z",
+    "generatedAt": "2026-04-04T00:27:27.880Z",
     "totalSourceFiles": 3,
-    "totalTestFiles": 1,
+    "totalTestFiles": 2,
     "testedCount": 2,
     "untestedCount": 1,
     "coveragePercent": "66.7"
@@ -20,12 +20,16 @@
       "tests/compat.test.ts"
     ],
     "src/shims.ts": [
-      "tests/compat.test.ts"
+      "tests/compat.test.ts",
+      "tests/shims.test.ts"
     ]
   },
   "testToSourceMap": {
     "tests/compat.test.ts": [
       "src/index.ts",
+      "src/shims.ts"
+    ],
+    "tests/shims.test.ts": [
       "src/shims.ts"
     ]
   }

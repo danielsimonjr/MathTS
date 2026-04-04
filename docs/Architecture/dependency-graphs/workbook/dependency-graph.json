@@ -2,7 +2,7 @@
   "metadata": {
     "name": "@mathts/workbook",
     "version": "0.1.0",
-    "lastUpdated": "2026-02-06",
+    "lastUpdated": "2026-04-04",
     "totalFiles": 6,
     "totalModules": 2,
     "totalExports": 19
@@ -11,7 +11,7 @@
     {
       "file": "src/index.ts",
       "type": "main",
-      "description": "Types"
+      "description": "Scientific workbook runtime"
     }
   ],
   "modules": {
@@ -140,7 +140,7 @@
     },
     "entry": {
       "src/index.ts": {
-        "description": "Types",
+        "description": "Scientific workbook runtime",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -228,7 +228,7 @@
   "statistics": {
     "totalTypeScriptFiles": 6,
     "totalModules": 2,
-    "totalLinesOfCode": 663,
+    "totalLinesOfCode": 690,
     "totalExports": 19,
     "totalClasses": 1,
     "totalInterfaces": 8,

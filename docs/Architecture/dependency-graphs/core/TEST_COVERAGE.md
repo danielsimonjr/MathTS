@@ -1,22 +1,22 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-02-06
+**Generated**: 2026-04-04
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 93 |
-| Total Test Files | 6 |
-| Source Files with Tests | 7 |
-| Source Files without Tests | 86 |
-| Coverage | 7.5% |
+| Total Source Files | 95 |
+| Total Test Files | 12 |
+| Source Files with Tests | 12 |
+| Source Files without Tests | 83 |
+| Coverage | 12.6% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 86 source files are not directly imported by any test file:
+The following 83 source files are not directly imported by any test file:
 
 ### root/
 
@@ -24,7 +24,6 @@ The following 86 source files are not directly imported by any test file:
 - `src/bigint.ts` → Expected test: `tests/unit/root/bigint.test.ts`
 - `src/collection.ts` → Expected test: `tests/unit/root/collection.test.ts`
 - `src/complex.ts` → Expected test: `tests/unit/root/complex.test.ts`
-- `src/config.ts` → Expected test: `tests/unit/root/config.test.ts`
 - `src/constants.ts` → Expected test: `tests/unit/root/constants.test.ts`
 - `src/create.ts` → Expected test: `tests/unit/root/create.test.ts`
 - `src/customs.d.ts` → Expected test: `tests/unit/root/customs.d.test.ts`
@@ -32,7 +31,6 @@ The following 86 source files are not directly imported by any test file:
 - `src/emitter.ts` → Expected test: `tests/unit/root/emitter.test.ts`
 - `src/factory.ts` → Expected test: `tests/unit/root/factory.test.ts`
 - `src/function.ts` → Expected test: `tests/unit/root/function.test.ts`
-- `src/index.ts` → Expected test: `tests/unit/root/index.test.ts`
 - `src/is.ts` → Expected test: `tests/unit/root/is.test.ts`
 - `src/latex.d.ts` → Expected test: `tests/unit/root/latex.d.test.ts`
 - `src/latex.ts` → Expected test: `tests/unit/root/latex.test.ts`
@@ -73,10 +71,6 @@ The following 86 source files are not directly imported by any test file:
 - `src/function/config.ts` → Expected test: `tests/unit/function/config.test.ts`
 - `src/function/import.ts` → Expected test: `tests/unit/function/import.test.ts`
 - `src/function/typed.ts` → Expected test: `tests/unit/function/typed.test.ts`
-
-### typed/
-
-- `src/typed/index.ts` → Expected test: `tests/unit/typed/index.test.ts`
 
 ### types/
 
@@ -128,12 +122,17 @@ The following 86 source files are not directly imported by any test file:
 
 | Source File | Test Files |
 |-------------|------------|
-| `factory/factory.ts` | `factory.test.ts` |
-| `factory/index.ts` | `factory.test.ts` |
-| `typed/mathts-typed.ts` | `mathts-typed.test.ts` |
-| `types/bignumber.ts` | `mathts-typed.test.ts`, `bignumber.test.ts` |
-| `types/complex.ts` | `mathts-typed.test.ts`, `complex.test.ts` |
-| `types/fraction.ts` | `mathts-typed.test.ts`, `fraction.test.ts` |
+| `src/config.ts` | `config.test.ts` |
+| `factory/factory.ts` | `factory.test.ts`, `version.test.ts` |
+| `factory/index.ts` | `factory.test.ts`, `version.test.ts` |
+| `src/index.ts` | `version.test.ts` |
+| `src/shared.ts` | `shared.test.ts` |
+| `typed/index.ts` | `version.test.ts` |
+| `typed/mathts-typed.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `version.test.ts` |
+| `typed/type-bridge.ts` | `type-bridge.test.ts`, `version.test.ts` |
+| `types/bignumber.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `bignumber-math.test.ts`, `bignumber.test.ts`, `version.test.ts` |
+| `types/complex.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `complex.test.ts`, `version.test.ts` |
+| `types/fraction.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `fraction.test.ts`, `version.test.ts` |
 | `src/utils.ts` | `utils.test.ts` |
 
 ---
@@ -142,9 +141,15 @@ The following 86 source files are not directly imported by any test file:
 
 | Test File | Imports from Source |
 |-----------|---------------------|
+| `tests/config.test.ts` | 1 files |
 | `factory/factory.test.ts` | 2 files |
+| `tests/shared.test.ts` | 1 files |
+| `typed/mathts-typed-extended.test.ts` | 4 files |
 | `typed/mathts-typed.test.ts` | 4 files |
+| `typed/type-bridge.test.ts` | 4 files |
+| `types/bignumber-math.test.ts` | 1 files |
 | `types/bignumber.test.ts` | 1 files |
 | `types/complex.test.ts` | 1 files |
 | `types/fraction.test.ts` | 1 files |
 | `tests/utils.test.ts` | 1 files |
+| `tests/version.test.ts` | 9 files |

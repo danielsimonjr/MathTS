@@ -1,14 +1,14 @@
 metadata:
   name: "@mathts/core"
   version: 0.1.0
-  lastUpdated: "2026-02-06"
-  totalFiles: 94
+  lastUpdated: "2026-04-04"
+  totalFiles: 95
   totalModules: 8
   totalExports: 512
 entryPoints:
   - file: src/index.ts
     type: main
-    description: "============================================================================="
+    description: Core types and utilities for MathTS
 modules:
   root:
     src/array.ts:
@@ -384,7 +384,6 @@ modules:
           imports:
             - pickShallow
       exports:
-        - createLog
         - factory
         - sortFactories
         - create
@@ -404,8 +403,6 @@ modules:
         - assertDependencies
         - isOptionalDependency
         - stripOptionalNotation
-      constants:
-        - createLog
     src/function.ts:
       description: Memoize a given function by caching the computed result.
       externalDependencies: []
@@ -1102,8 +1099,6 @@ modules:
             - mathTyped
       exports:
         - DEFAULT_CONFIG
-        - addFactory
-        - add
         - registry
         - math
         - createFactory
@@ -1120,8 +1115,6 @@ modules:
         - createTypedFunction
       constants:
         - DEFAULT_CONFIG
-        - addFactory
-        - add
         - registry
         - math
     src/factory/index.ts:
@@ -1155,11 +1148,7 @@ modules:
   function:
     src/function/config.ts:
       description: Type for partial config options
-      externalDependencies:
-        - package: mathjs
-          imports:
-            - create
-            - all
+      externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../utils/object.js
@@ -1183,14 +1172,7 @@ modules:
         - NUMBER_OPTIONS
     src/function/import.ts:
       description: Import functions from an object or a module.
-      externalDependencies:
-        - package: mathjs
-          imports:
-            - create
-            - all
-        - package: numbers
-          imports:
-            - "* as numbers"
+      externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../utils/is.js
@@ -1287,7 +1269,7 @@ modules:
         - createTyped
   entry:
     src/index.ts:
-      description: "============================================================================="
+      description: Core types and utilities for MathTS
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -1326,15 +1308,15 @@ modules:
           reExport: true
         - file: ./typed/index.js
           imports:
-            - "// typed-function instance and factory\r\n  mathTyped"
+            - mathTyped
             - createMathTSTyped
             - typed
             - create
             - createTypedFunction
             - TypeRegistry
-            - "// Type definitions and conversions for runtime dispatch\r\n  MATHTS_TYPES"
+            - MATHTS_TYPES
             - MATHTS_CONVERSIONS
-            - "// Primitive type test functions\r\n  isNumber"
+            - isNumber
             - isBoolean
             - isString
             - isBigInt
@@ -1343,12 +1325,13 @@ modules:
             - isObject
             - isNull
             - isUndefined
-            - "// Matrix type test functions (duck typing until Matrix class)\r\n  isMatrix"
+            - isMatrix
             - isDenseMatrix
             - isSparseMatrix
-            - "// Unit type test function\r\n  isUnit"
-            - "// WASM support for typed-function\r\n  initTypedWasm"
+            - isUnit
+            - initTypedWasm
             - isTypedWasmAvailable
+            - registerNativeTypes
           reExport: true
         - file: ./factory/index.js
           imports:
@@ -1383,15 +1366,15 @@ modules:
         - BIGNUMBER_E
         - BIGNUMBER_LN2
         - BIGNUMBER_LN10
-        - "// typed-function instance and factory\r\n  mathTyped"
+        - mathTyped
         - createMathTSTyped
         - typed
         - create
         - createTypedFunction
         - TypeRegistry
-        - "// Type definitions and conversions for runtime dispatch\r\n  MATHTS_TYPES"
+        - MATHTS_TYPES
         - MATHTS_CONVERSIONS
-        - "// Primitive type test functions\r\n  isNumber"
+        - isNumber
         - isBoolean
         - isString
         - isBigInt
@@ -1400,12 +1383,13 @@ modules:
         - isObject
         - isNull
         - isUndefined
-        - "// Matrix type test functions (duck typing until Matrix class)\r\n  isMatrix"
+        - isMatrix
         - isDenseMatrix
         - isSparseMatrix
-        - "// Unit type test function\r\n  isUnit"
-        - "// WASM support for typed-function\r\n  initTypedWasm"
+        - isUnit
+        - initTypedWasm
         - isTypedWasmAvailable
+        - registerNativeTypes
         - FunctionRegistry
         - createFactory
         - registry
@@ -1437,15 +1421,15 @@ modules:
         - BIGNUMBER_E
         - BIGNUMBER_LN2
         - BIGNUMBER_LN10
-        - "// typed-function instance and factory\r\n  mathTyped"
+        - mathTyped
         - createMathTSTyped
         - typed
         - create
         - createTypedFunction
         - TypeRegistry
-        - "// Type definitions and conversions for runtime dispatch\r\n  MATHTS_TYPES"
+        - MATHTS_TYPES
         - MATHTS_CONVERSIONS
-        - "// Primitive type test functions\r\n  isNumber"
+        - isNumber
         - isBoolean
         - isString
         - isBigInt
@@ -1454,12 +1438,13 @@ modules:
         - isObject
         - isNull
         - isUndefined
-        - "// Matrix type test functions (duck typing until Matrix class)\r\n  isMatrix"
+        - isMatrix
         - isDenseMatrix
         - isSparseMatrix
-        - "// Unit type test function\r\n  isUnit"
-        - "// WASM support for typed-function\r\n  initTypedWasm"
+        - isUnit
+        - initTypedWasm
         - isTypedWasmAvailable
+        - registerNativeTypes
         - FunctionRegistry
         - createFactory
         - registry
@@ -1475,15 +1460,15 @@ modules:
       internalDependencies:
         - file: ./mathts-typed.js
           imports:
-            - "// typed-function instance and factory\r\n  mathTyped"
+            - mathTyped
             - createMathTSTyped
             - typed
             - create
             - createTypedFunction
             - TypeRegistry
-            - "// Type definitions and conversions\r\n  MATHTS_TYPES"
+            - MATHTS_TYPES
             - MATHTS_CONVERSIONS
-            - "// Primitive type test functions\r\n  isNumber"
+            - isNumber
             - isBoolean
             - isString
             - isBigInt
@@ -1492,31 +1477,35 @@ modules:
             - isObject
             - isNull
             - isUndefined
-            - "// MathTS type test functions (re-exported from types for convenience)\r\n  isComplex"
+            - isComplex
             - isFraction
             - isBigNumber
-            - "// TypedArray test functions (for parallel-first operations)\r\n  isFloat64Array"
+            - isFloat64Array
             - isFloat32Array
             - isInt32Array
             - isUint32Array
             - isUint8Array
-            - "// Matrix type test functions (duck typing until Matrix class is implemented)\r\n  isMatrix"
+            - isMatrix
             - isDenseMatrix
             - isSparseMatrix
-            - "// Unit type test function\r\n  isUnit"
-            - "// WASM support\r\n  initTypedWasm"
+            - isUnit
+            - initTypedWasm
             - isTypedWasmAvailable
           reExport: true
+        - file: ./type-bridge.js
+          imports:
+            - registerNativeTypes
+          reExport: true
       exports:
-        - "// typed-function instance and factory\r\n  mathTyped"
+        - mathTyped
         - createMathTSTyped
         - typed
         - create
         - createTypedFunction
         - TypeRegistry
-        - "// Type definitions and conversions\r\n  MATHTS_TYPES"
+        - MATHTS_TYPES
         - MATHTS_CONVERSIONS
-        - "// Primitive type test functions\r\n  isNumber"
+        - isNumber
         - isBoolean
         - isString
         - isBigInt
@@ -1525,30 +1514,31 @@ modules:
         - isObject
         - isNull
         - isUndefined
-        - "// MathTS type test functions (re-exported from types for convenience)\r\n  isComplex"
+        - isComplex
         - isFraction
         - isBigNumber
-        - "// TypedArray test functions (for parallel-first operations)\r\n  isFloat64Array"
+        - isFloat64Array
         - isFloat32Array
         - isInt32Array
         - isUint32Array
         - isUint8Array
-        - "// Matrix type test functions (duck typing until Matrix class is implemented)\r\n  isMatrix"
+        - isMatrix
         - isDenseMatrix
         - isSparseMatrix
-        - "// Unit type test function\r\n  isUnit"
-        - "// WASM support\r\n  initTypedWasm"
+        - isUnit
+        - initTypedWasm
         - isTypedWasmAvailable
+        - registerNativeTypes
       reExported:
-        - "// typed-function instance and factory\r\n  mathTyped"
+        - mathTyped
         - createMathTSTyped
         - typed
         - create
         - createTypedFunction
         - TypeRegistry
-        - "// Type definitions and conversions\r\n  MATHTS_TYPES"
+        - MATHTS_TYPES
         - MATHTS_CONVERSIONS
-        - "// Primitive type test functions\r\n  isNumber"
+        - isNumber
         - isBoolean
         - isString
         - isBigInt
@@ -1557,20 +1547,21 @@ modules:
         - isObject
         - isNull
         - isUndefined
-        - "// MathTS type test functions (re-exported from types for convenience)\r\n  isComplex"
+        - isComplex
         - isFraction
         - isBigNumber
-        - "// TypedArray test functions (for parallel-first operations)\r\n  isFloat64Array"
+        - isFloat64Array
         - isFloat32Array
         - isInt32Array
         - isUint32Array
         - isUint8Array
-        - "// Matrix type test functions (duck typing until Matrix class is implemented)\r\n  isMatrix"
+        - isMatrix
         - isDenseMatrix
         - isSparseMatrix
-        - "// Unit type test function\r\n  isUnit"
-        - "// WASM support\r\n  initTypedWasm"
+        - isUnit
+        - initTypedWasm
         - isTypedWasmAvailable
+        - registerNativeTypes
     src/typed/mathts-typed.ts:
       description: MathTS typed-function Integration
       externalDependencies:
@@ -1585,12 +1576,6 @@ modules:
             - SignatureFunction
             - ReferTo
             - ReferToSelf
-        - package: "@mathts/core"
-          imports:
-            - mathTyped
-            - Complex
-            - Fraction
-            - BigNumber
       nodeDependencies: []
       internalDependencies:
         - file: ../types/complex.js
@@ -1673,6 +1658,24 @@ modules:
         - MATHTS_TYPES
         - MATHTS_CONVERSIONS
         - mathTyped
+    src/typed/type-bridge.ts:
+      description: Type compatibility bridge for mathjs duck-typing.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/complex.js
+          imports:
+            - Complex
+        - file: ../types/fraction.js
+          imports:
+            - Fraction
+        - file: ../types/bignumber.js
+          imports:
+            - BigNumber
+      exports:
+        - registerNativeTypes
+      functions:
+        - registerNativeTypes
   types:
     src/types/bigint.ts:
       description: Create a bigint or convert a string, boolean, or unit to a bigint.
@@ -1947,7 +1950,7 @@ modules:
     src/types/matrix/DenseMatrix.ts:
       description: >-
         Dense Matrix implementation. A regular, dense matrix, supporting multi-dimensional matrices. This is the default
-        matrix type.
+        matrix 
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -2750,6 +2753,7 @@ dependencyGraph:
       files:
         - src/typed/index.ts
         - src/typed/mathts-typed.ts
+        - src/typed/type-bridge.ts
     - name: Types
       files:
         - src/types/bigint.ts
@@ -2797,19 +2801,19 @@ dependencyGraph:
         - src/types/unit/physicalConstants.ts
         - src/types/unit/Unit.ts
 statistics:
-  totalTypeScriptFiles: 94
+  totalTypeScriptFiles: 95
   totalModules: 8
-  totalLinesOfCode: 23142
+  totalLinesOfCode: 23780
   totalExports: 512
   totalClasses: 10
   totalInterfaces: 82
-  totalFunctions: 188
+  totalFunctions: 189
   totalTypeGuards: 58
   totalEnums: 0
-  totalConstants: 191
-  totalReExports: 113
+  totalConstants: 188
+  totalReExports: 115
   totalTypeOnlyImports: 6
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 63
-  unusedExportsCount: 176
+  unusedExportsCount: 167

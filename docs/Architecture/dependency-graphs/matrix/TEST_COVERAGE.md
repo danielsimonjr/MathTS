@@ -1,22 +1,22 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-02-06
+**Generated**: 2026-04-04
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 36 |
-| Total Test Files | 13 |
-| Source Files with Tests | 26 |
-| Source Files without Tests | 10 |
-| Coverage | 72.2% |
+| Total Source Files | 33 |
+| Total Test Files | 14 |
+| Source Files with Tests | 27 |
+| Source Files without Tests | 6 |
+| Coverage | 81.8% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 10 source files are not directly imported by any test file:
+The following 6 source files are not directly imported by any test file:
 
 ### backends/
 
@@ -25,11 +25,7 @@ The following 10 source files are not directly imported by any test file:
 
 ### root/
 
-- `src/backends.ts` → Expected test: `tests/unit/root/backends.test.ts`
-- `src/config.ts` → Expected test: `tests/unit/root/config.test.ts`
-- `src/dense-matrix.ts` → Expected test: `tests/unit/root/dense-matrix.test.ts`
 - `src/matrix.ts` → Expected test: `tests/unit/root/matrix.test.ts`
-- `src/sparse-matrix.ts` → Expected test: `tests/unit/root/sparse-matrix.test.ts`
 - `src/types.ts` → Expected test: `tests/unit/root/types.test.ts`
 
 ### operations/
@@ -63,6 +59,7 @@ The following 10 source files are not directly imported by any test file:
 | `backends/index.ts` | `typed-operations.test.ts`, `loading.test.ts` |
 | `wasm/detect.ts` | `typed-operations.test.ts`, `loading.test.ts` |
 | `wasm/index.ts` | `typed-operations.test.ts`, `loading.test.ts` |
+| `src/config.ts` | `config.test.ts` |
 | `src/index.ts` | `typed-operations.test.ts` |
 | `operations/eig.ts` | `eig.test.ts` |
 | `operations/svd.ts` | `svd.test.ts` |
@@ -79,6 +76,7 @@ The following 10 source files are not directly imported by any test file:
 
 | Test File | Imports from Source |
 |-----------|---------------------|
+| `tests/config.test.ts` | 1 files |
 | `decomposition/eig.test.ts` | 1 files |
 | `decomposition/svd.test.ts` | 1 files |
 | `tests/DenseMatrix.test.ts` | 1 files |

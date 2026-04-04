@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: "2026-02-06"
-  totalFiles: 75
-  totalModules: 21
-  totalExports: 1245
+  lastUpdated: "2026-04-04"
+  totalFiles: 89
+  totalModules: 23
+  totalExports: 1401
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -289,6 +289,7 @@ modules:
             - isUnit
             - initTypedWasm
             - isTypedWasmAvailable
+            - registerNativeTypes
           reExport: true
         - file: ./factory/index.js
           imports:
@@ -346,6 +347,7 @@ modules:
         - isUnit
         - initTypedWasm
         - isTypedWasmAvailable
+        - registerNativeTypes
         - FunctionRegistry
         - createFactory
         - registry
@@ -400,6 +402,7 @@ modules:
         - isUnit
         - initTypedWasm
         - isTypedWasmAvailable
+        - registerNativeTypes
         - FunctionRegistry
         - createFactory
         - registry
@@ -447,6 +450,10 @@ modules:
             - initTypedWasm
             - isTypedWasmAvailable
           reExport: true
+        - file: ./type-bridge.js
+          imports:
+            - registerNativeTypes
+          reExport: true
       exports:
         - mathTyped
         - createMathTSTyped
@@ -479,6 +486,7 @@ modules:
         - isUnit
         - initTypedWasm
         - isTypedWasmAvailable
+        - registerNativeTypes
       reExported:
         - mathTyped
         - createMathTSTyped
@@ -511,6 +519,7 @@ modules:
         - isUnit
         - initTypedWasm
         - isTypedWasmAvailable
+        - registerNativeTypes
     core/src/typed/mathts-typed.ts:
       description: MathTS typed-function Integration
       externalDependencies:
@@ -607,6 +616,24 @@ modules:
         - MATHTS_TYPES
         - MATHTS_CONVERSIONS
         - mathTyped
+    core/src/typed/type-bridge.ts:
+      description: Type compatibility bridge for mathjs duck-typing.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/complex.js
+          imports:
+            - Complex
+        - file: ../types/fraction.js
+          imports:
+            - Fraction
+        - file: ../types/bignumber.js
+          imports:
+            - BigNumber
+      exports:
+        - registerNativeTypes
+      functions:
+        - registerNativeTypes
   core/types:
     core/src/types/bignumber.ts:
       description: BigNumber (arbitrary precision decimal) implementation
@@ -1424,6 +1451,7 @@ modules:
         - WasmLoader
       interfaces:
         - WasmModule
+        - LoadingMetrics
       functions:
         - initWasm
       constants:
@@ -2083,22 +2111,44 @@ modules:
         - toDegrees
         - hypot
         - typedTrigonometry
+  expression/error:
+    expression/src/error/DimensionError.ts:
+      description: "Create a range error with the message:"
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - DimensionError
+      classes:
+        - DimensionError
+    expression/src/error/IndexError.ts:
+      description: Custom error type for index out of range errors
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - createIndexError
+        - IndexError
+      classes:
+        - IndexError
+      functions:
+        - createIndexError
   expression:
     expression/src/Help.ts:
       description: Documentation object
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/is.js
+        - file: ./utils/is.js
           imports:
             - isHelp
-        - file: ../utils/object.js
+        - file: ./utils/object.js
           imports:
             - clone
-        - file: ../utils/string.js
+        - file: ./utils/string.js
           imports:
             - format
-        - file: ../utils/factory.js
+        - file: ./utils/factory.js
           imports:
             - factory
       exports:
@@ -2156,10 +2206,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/object.js
+        - file: ./utils/object.js
           imports:
             - hasOwnProperty
-        - file: ../utils/is.js
+        - file: ./utils/is.js
           imports:
             - isConstantNode
             - isParenthesisNode
@@ -2182,10 +2232,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/factory.js
+        - file: ./utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/is.js
           imports:
             - isAccessorNode
             - isConstantNode
@@ -2193,13 +2243,13 @@ modules:
             - isOperatorNode
             - isSymbolNode
             - rule2Node
-        - file: ../utils/collection.js
+        - file: ./utils/collection.js
           imports:
             - deepMap
-        - file: ../utils/number.js
+        - file: ./utils/number.js
           imports:
             - safeNumberType
-        - file: ../utils/object.js
+        - file: ./utils/object.js
           imports:
             - hasOwnProperty
         - file: ./node/Node.js
@@ -2215,13 +2265,13 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/factory.js
+        - file: ./utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/is.js
           imports:
             - isFunction
-        - file: ../utils/map.js
+        - file: ./utils/map.js
           imports:
             - createEmptyMap
             - toObject
@@ -2241,25 +2291,529 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../../utils/is.js
+        - file: ../utils/is.js
           imports:
             - isNode
         - file: ../keywords.js
           imports:
             - keywords
-        - file: ../../utils/object.js
+        - file: ../utils/object.js
           imports:
             - deepStrictEqual
-        - file: ../../utils/factory.js
+        - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../../utils/map.js
+        - file: ../utils/map.js
           imports:
             - createMap
       exports:
         - createNode
+      interfaces:
+        - CompiledExpression
+        - StringOptions
       constants:
         - createNode
+  expression/utils:
+    expression/src/utils/array.ts:
+      description: Calculate the size of a multi dimensional array.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./number.js
+          imports:
+            - isInteger
+        - file: ./is.js
+          imports:
+            - isNumber
+            - isBigNumber
+            - isArray
+            - isString
+            - Index
+            - Matrix
+            - IndexDimension
+        - file: ./string.js
+          imports:
+            - format
+        - file: ../error/DimensionError.js
+          imports:
+            - DimensionError
+        - file: ../error/IndexError.js
+          imports:
+            - IndexError
+        - file: ./object.js
+          imports:
+            - deepStrictEqual
+      exports:
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - get
+        - deepMap
+        - deepForEach
+        - clone
+      interfaces:
+        - IdentifiedValue
+      functions:
+        - arraySize
+        - validate
+        - validateIndexSourceSize
+        - validateIndex
+        - isEmptyIndex
+        - resize
+        - reshape
+        - processSizesWildcard
+        - squeeze
+        - unsqueeze
+        - flatten
+        - map
+        - forEach
+        - filter
+        - filterRegExp
+        - join
+        - identify
+        - generalize
+        - getArrayDataType
+        - last
+        - initial
+        - concat
+        - broadcastSizes
+        - checkBroadcastingRules
+        - broadcastTo
+        - broadcastArrays
+        - stretch
+        - get
+        - deepMap
+        - deepForEach
+        - clone
+    expression/src/utils/bignumber/formatter.ts:
+      description: Formats a BigNumber in a given base
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../is.js
+          imports:
+            - isBigNumber
+            - isNumber
+        - file: ../number.js
+          imports:
+            - isInteger
+            - normalizeFormatOptions
+      exports:
+        - format
+        - toEngineering
+        - toExponential
+        - toFixed
+      functions:
+        - format
+        - toEngineering
+        - toExponential
+        - toFixed
+    expression/src/utils/collection.ts:
+      description: Test whether an array contains collections
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isCollection
+            - isMatrix
+        - file: ../error/IndexError.js
+          imports:
+            - IndexError
+        - file: ./array.js
+          imports:
+            - arraySize
+            - deepMap
+            - deepForEach
+        - file: ./switch.js
+          imports:
+            - _switch
+      exports:
+        - containsCollections
+        - deepForEach
+        - deepMap
+        - reduce
+        - scatter
+      functions:
+        - containsCollections
+        - deepForEach
+        - deepMap
+        - reduce
+        - scatter
+    expression/src/utils/customs.ts:
+      description: Get a property of a plain object
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./object.js
+          imports:
+            - hasOwnProperty
+      exports:
+        - getSafeProperty
+        - setSafeProperty
+        - isSafeProperty
+        - getSafeMethod
+        - isSafeMethod
+        - isPlainObject
+    expression/src/utils/factory.ts:
+      description: Type for a factory function that creates instances
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./object.js
+          imports:
+            - pickShallow
+      exports:
+        - factory
+        - sortFactories
+        - create
+        - isFactory
+        - assertDependencies
+        - isOptionalDependency
+        - stripOptionalNotation
+      interfaces:
+        - FactoryFunction
+        - LegacyFactory
+        - FactoryMeta
+      functions:
+        - factory
+        - sortFactories
+        - create
+        - isFactory
+        - assertDependencies
+        - isOptionalDependency
+        - stripOptionalNotation
+    expression/src/utils/is.ts:
+      description: "Test whether a value is a collection: an Array or Matrix"
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./map.js
+          imports:
+            - ObjectWrappingMap
+      exports:
+        - isArray
+        - isNumber
+        - isBigNumber
+        - isBigInt
+        - isComplex
+        - isFraction
+        - isUnit
+        - isString
+        - isMatrix
+        - isCollection
+        - isDenseMatrix
+        - isSparseMatrix
+        - isRange
+        - isIndex
+        - isBoolean
+        - isResultSet
+        - isHelp
+        - isFunction
+        - isDate
+        - isRegExp
+        - isObject
+        - isMap
+        - isPartitionedMap
+        - isObjectWrappingMap
+        - isNull
+        - isUndefined
+        - isAccessorNode
+        - isArrayNode
+        - isAssignmentNode
+        - isBlockNode
+        - isConditionalNode
+        - isConstantNode
+        - rule2Node
+        - isFunctionAssignmentNode
+        - isFunctionNode
+        - isIndexNode
+        - isNode
+        - isObjectNode
+        - isOperatorNode
+        - isParenthesisNode
+        - isRangeNode
+        - isRelationalNode
+        - isSymbolNode
+        - isChain
+        - typeOf
+      interfaces:
+        - BigNumber
+        - Complex
+        - Fraction
+        - Unit
+        - Matrix
+        - DenseMatrix
+        - SparseMatrix
+        - Range
+        - IndexDimension
+        - Index
+        - ResultSet
+        - Help
+        - Chain
+        - Node
+        - AccessorNode
+        - ArrayNode
+        - AssignmentNode
+        - BlockNode
+        - ConditionalNode
+        - ConstantNode
+        - FunctionAssignmentNode
+        - FunctionNode
+        - IndexNode
+        - ObjectNode
+        - OperatorNode
+        - ParenthesisNode
+        - RangeNode
+        - RelationalNode
+        - SymbolNode
+        - PartitionedMap
+      functions:
+        - isNumber
+        - isBigNumber
+        - isBigInt
+        - isComplex
+        - isFraction
+        - isUnit
+        - isString
+        - isMatrix
+        - isCollection
+        - isDenseMatrix
+        - isSparseMatrix
+        - isRange
+        - isIndex
+        - isBoolean
+        - isResultSet
+        - isHelp
+        - isFunction
+        - isDate
+        - isRegExp
+        - isObject
+        - isMap
+        - isPartitionedMap
+        - isObjectWrappingMap
+        - isNull
+        - isUndefined
+        - isAccessorNode
+        - isArrayNode
+        - isAssignmentNode
+        - isBlockNode
+        - isConditionalNode
+        - isConstantNode
+        - rule2Node
+        - isFunctionAssignmentNode
+        - isFunctionNode
+        - isIndexNode
+        - isNode
+        - isObjectNode
+        - isOperatorNode
+        - isParenthesisNode
+        - isRangeNode
+        - isRelationalNode
+        - isSymbolNode
+        - isChain
+        - typeOf
+      constants:
+        - isArray
+    expression/src/utils/map.ts:
+      description: A map facade on a bare object.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./customs.js
+          imports:
+            - getSafeProperty
+            - isSafeProperty
+            - setSafeProperty
+        - file: ./is.js
+          imports:
+            - isMap
+            - isObject
+      exports:
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assign
+        - ObjectWrappingMap
+        - PartitionedMap
+      classes:
+        - ObjectWrappingMap
+        - PartitionedMap
+      functions:
+        - createEmptyMap
+        - createMap
+        - toObject
+        - assign
+    expression/src/utils/number.ts:
+      description: Split value representation with sign, coefficients, and exponent
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isNumber
+            - isObject
+      exports:
+        - sign
+        - log2
+        - log10
+        - log1p
+        - cbrt
+        - expm1
+        - acosh
+        - asinh
+        - atanh
+        - cosh
+        - sinh
+        - tanh
+        - isInteger
+        - safeNumberType
+        - format
+        - normalizeFormatOptions
+        - splitNumber
+        - toEngineering
+        - toFixed
+        - toExponential
+        - toPrecision
+        - roundDigits
+        - digits
+        - nearlyEqual
+        - copysign
+      interfaces:
+        - SplitValue
+        - NumberTypeConfig
+        - FormatOptions
+        - NormalizedFormatOptions
+      functions:
+        - isInteger
+        - safeNumberType
+        - format
+        - normalizeFormatOptions
+        - splitNumber
+        - toEngineering
+        - toFixed
+        - toExponential
+        - toPrecision
+        - roundDigits
+        - digits
+        - nearlyEqual
+        - copysign
+      constants:
+        - sign
+        - log2
+        - log10
+        - log1p
+        - cbrt
+        - expm1
+        - acosh
+        - asinh
+        - atanh
+        - cosh
+        - sinh
+        - tanh
+    expression/src/utils/object.ts:
+      description: Clone an object
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isObject
+      exports:
+        - clone
+        - mapObject
+        - extend
+        - deepExtend
+        - deepStrictEqual
+        - deepFlatten
+        - canDefineProperty
+        - lazy
+        - traverse
+        - hasOwnProperty
+        - isLegacyFactory
+        - get
+        - set
+        - pick
+        - pickShallow
+      functions:
+        - clone
+        - mapObject
+        - extend
+        - deepExtend
+        - deepStrictEqual
+        - deepFlatten
+        - canDefineProperty
+        - lazy
+        - traverse
+        - hasOwnProperty
+        - isLegacyFactory
+        - get
+        - set
+        - pick
+        - pickShallow
+    expression/src/utils/string.ts:
+      description: Check if a text ends with a certain string.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./is.js
+          imports:
+            - isBigNumber
+            - isString
+            - typeOf
+        - file: ./number.js
+          imports:
+            - format
+        - file: ./bignumber/formatter.js
+          imports:
+            - format
+      exports:
+        - endsWith
+        - format
+        - stringify
+        - escape
+        - compareText
+      functions:
+        - endsWith
+        - format
+        - stringify
+        - escape
+        - compareText
+    expression/src/utils/switch.ts:
+      description: Transpose a matrix
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - _switch
+      functions:
+        - _switch
   parallel:
     parallel/src/ComputePool.ts:
       description: MathTS Compute Pool
@@ -4348,7 +4902,15 @@ modules:
         - shims
 dependencyGraph:
   circularDependencies:
-    runtime: []
+    runtime:
+      - - expression/src/utils/is.ts
+        - expression/src/utils/map.ts
+        - expression/src/utils/customs.ts
+        - expression/src/utils/object.ts
+        - expression/src/utils/is.ts
+      - - expression/src/utils/is.ts
+        - expression/src/utils/map.ts
+        - expression/src/utils/is.ts
     typeOnly:
       - - matrix/src/types/DenseMatrix.ts
         - matrix/src/types/SparseMatrix.ts
@@ -4356,8 +4918,8 @@ dependencyGraph:
       - - matrix/src/backends/BackendManager.ts
         - matrix/src/config.ts
         - matrix/src/backends/BackendManager.ts
-    total: 2
-    runtimeCount: 0
+    total: 4
+    runtimeCount: 2
     typeOnlyCount: 2
   layers:
     - name: Packages/typed-function
@@ -4377,6 +4939,7 @@ dependencyGraph:
       files:
         - core/src/typed/index.ts
         - core/src/typed/mathts-typed.ts
+        - core/src/typed/type-bridge.ts
     - name: Core/types
       files:
         - core/src/types/bignumber.ts
@@ -4425,6 +4988,10 @@ dependencyGraph:
         - functions/src/typed/signal.ts
         - functions/src/typed/statistics.ts
         - functions/src/typed/trigonometry.ts
+    - name: Expression/error
+      files:
+        - expression/src/error/DimensionError.ts
+        - expression/src/error/IndexError.ts
     - name: Expression
       files:
         - expression/src/Help.ts
@@ -4437,6 +5004,19 @@ dependencyGraph:
     - name: Expression/node
       files:
         - expression/src/node/Node.ts
+    - name: Expression/utils
+      files:
+        - expression/src/utils/array.ts
+        - expression/src/utils/bignumber/formatter.ts
+        - expression/src/utils/collection.ts
+        - expression/src/utils/customs.ts
+        - expression/src/utils/factory.ts
+        - expression/src/utils/is.ts
+        - expression/src/utils/map.ts
+        - expression/src/utils/number.ts
+        - expression/src/utils/object.ts
+        - expression/src/utils/string.ts
+        - expression/src/utils/switch.ts
     - name: Parallel
       files:
         - parallel/src/ComputePool.ts
@@ -4478,19 +5058,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 75
-  totalModules: 21
-  totalLinesOfCode: 27380
-  totalExports: 1245
-  totalClasses: 27
-  totalInterfaces: 75
-  totalFunctions: 366
-  totalTypeGuards: 21
+  totalTypeScriptFiles: 89
+  totalModules: 23
+  totalLinesOfCode: 33654
+  totalExports: 1401
+  totalClasses: 31
+  totalInterfaces: 116
+  totalFunctions: 497
+  totalTypeGuards: 68
   totalEnums: 0
-  totalConstants: 305
-  totalReExports: 558
+  totalConstants: 318
+  totalReExports: 560
   totalTypeOnlyImports: 25
-  runtimeCircularDeps: 0
+  runtimeCircularDeps: 2
   typeOnlyCircularDeps: 2
   unusedFilesCount: 1
-  unusedExportsCount: 50
+  unusedExportsCount: 198

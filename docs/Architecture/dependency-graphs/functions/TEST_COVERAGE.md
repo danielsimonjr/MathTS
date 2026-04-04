@@ -1,22 +1,22 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-02-06
+**Generated**: 2026-04-04
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 738 |
-| Total Test Files | 6 |
-| Source Files with Tests | 8 |
-| Source Files without Tests | 730 |
-| Coverage | 1.1% |
+| Total Source Files | 750 |
+| Total Test Files | 9 |
+| Source Files with Tests | 9 |
+| Source Files without Tests | 741 |
+| Coverage | 1.2% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 730 source files are not directly imported by any test file:
+The following 741 source files are not directly imported by any test file:
 
 ### algebra/
 
@@ -133,6 +133,14 @@ The following 730 source files are not directly imported by any test file:
 - `src/complex/conj.ts` → Expected test: `tests/unit/complex/conj.test.ts`
 - `src/complex/im.ts` → Expected test: `tests/unit/complex/im.test.ts`
 - `src/complex/re.ts` → Expected test: `tests/unit/complex/re.test.ts`
+
+### root/
+
+- `src/constants.ts` → Expected test: `tests/unit/root/constants.test.ts`
+- `src/defaultInstance.ts` → Expected test: `tests/unit/root/defaultInstance.test.ts`
+- `src/factoriesAny.ts` → Expected test: `tests/unit/root/factoriesAny.test.ts`
+- `src/factoriesNumber.ts` → Expected test: `tests/unit/root/factoriesNumber.test.ts`
+- `src/types.ts` → Expected test: `tests/unit/root/types.test.ts`
 
 ### core/
 
@@ -590,6 +598,10 @@ The following 730 source files are not directly imported by any test file:
 - `src/set/setSymDifference.ts` → Expected test: `tests/unit/set/setSymDifference.test.ts`
 - `src/set/setUnion.ts` → Expected test: `tests/unit/set/setUnion.test.ts`
 
+### shared/
+
+- `src/shared/types.ts` → Expected test: `tests/unit/shared/types.test.ts`
+
 ### signal/
 
 - `src/signal/freqz.ts` → Expected test: `tests/unit/signal/freqz.test.ts`
@@ -724,6 +736,7 @@ The following 730 source files are not directly imported by any test file:
 - `src/utils/clone.ts` → Expected test: `tests/unit/utils/clone.test.ts`
 - `src/utils/collection.ts` → Expected test: `tests/unit/utils/collection.test.ts`
 - `src/utils/complex.ts` → Expected test: `tests/unit/utils/complex.test.ts`
+- `src/utils/customs.d.ts` → Expected test: `tests/unit/utils/customs.d.test.ts`
 - `src/utils/customs.ts` → Expected test: `tests/unit/utils/customs.test.ts`
 - `src/utils/emitter.ts` → Expected test: `tests/unit/utils/emitter.test.ts`
 - `src/utils/factory.ts` → Expected test: `tests/unit/utils/factory.test.ts`
@@ -739,6 +752,7 @@ The following 730 source files are not directly imported by any test file:
 - `src/utils/isPositive.ts` → Expected test: `tests/unit/utils/isPositive.test.ts`
 - `src/utils/isPrime.ts` → Expected test: `tests/unit/utils/isPrime.test.ts`
 - `src/utils/isZero.ts` → Expected test: `tests/unit/utils/isZero.test.ts`
+- `src/utils/latex.d.ts` → Expected test: `tests/unit/utils/latex.d.test.ts`
 - `src/utils/latex.ts` → Expected test: `tests/unit/utils/latex.test.ts`
 - `src/utils/log.ts` → Expected test: `tests/unit/utils/log.test.ts`
 - `src/utils/lruQueue.ts` → Expected test: `tests/unit/utils/lruQueue.test.ts`
@@ -753,7 +767,9 @@ The following 730 source files are not directly imported by any test file:
 - `src/utils/print.ts` → Expected test: `tests/unit/utils/print.test.ts`
 - `src/utils/product.ts` → Expected test: `tests/unit/utils/product.test.ts`
 - `src/utils/scope.ts` → Expected test: `tests/unit/utils/scope.test.ts`
+- `src/utils/shared.ts` → Expected test: `tests/unit/utils/shared.test.ts`
 - `src/utils/snapshot.ts` → Expected test: `tests/unit/utils/snapshot.test.ts`
+- `src/utils/string.d.ts` → Expected test: `tests/unit/utils/string.d.test.ts`
 - `src/utils/string.ts` → Expected test: `tests/unit/utils/string.test.ts`
 - `src/utils/switch.ts` → Expected test: `tests/unit/utils/switch.test.ts`
 - `src/utils/typeOf.ts` → Expected test: `tests/unit/utils/typeOf.test.ts`
@@ -821,6 +837,7 @@ The following 730 source files are not directly imported by any test file:
 - `src/wasm/trigonometry/basic.ts` → Expected test: `tests/unit/wasm/basic.test.ts`
 - `src/wasm/unit/conversion.ts` → Expected test: `tests/unit/wasm/conversion.test.ts`
 - `src/wasm/utils/checks.ts` → Expected test: `tests/unit/wasm/checks.test.ts`
+- `src/wasm/utils/constants.ts` → Expected test: `tests/unit/wasm/constants.test.ts`
 - `src/wasm/utils/workPtrValidation.ts` → Expected test: `tests/unit/wasm/workPtrValidation.test.ts`
 
 ---
@@ -835,8 +852,9 @@ The following 730 source files are not directly imported by any test file:
 | `typed/arithmetic.ts` | `arithmetic-extended.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/index.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/signal.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/statistics.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/statistics.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/trigonometry.ts` | `arithmetic-extended.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/typed-bridge.ts` | `typed-bridge.test.ts` |
 
 ---
 
@@ -849,4 +867,7 @@ The following 730 source files are not directly imported by any test file:
 | `tests/parallel-signal.test.ts` | 6 files |
 | `signal/conv.test.ts` | 1 files |
 | `signal/fft.test.ts` | 1 files |
+| `tests/statistics-extended.test.ts` | 1 files |
+| `tests/statistics-extended2.test.ts` | 1 files |
 | `tests/typed-arithmetic.test.ts` | 6 files |
+| `tests/typed-bridge.test.ts` | 1 files |

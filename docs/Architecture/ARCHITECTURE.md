@@ -1,48 +1,78 @@
 # MathTS Architecture
 
-**Generated**: 2026-02-06
+**Generated**: 2026-04-03
 
 ## System Overview
 
-MathTS is organized as an npm workspaces monorepo with 10 packages.
-All packages are ESM-only, target ES2022, and use tsup for bundling.
-Turborepo orchestrates builds and tests across the workspace.
+MathTS is an npm workspaces monorepo with **10 packages**, all ESM-only (ES2022).
+Turborepo orchestrates builds across the workspace. tsup bundles each package.
+
+- **1,247 source files** (99 native, ~1,173 synced from mathjs)
+- **193,073 lines of code** across all packages
+- **5,399 total exports** (1,562 reachable from entry points)
+- **54 test files**, **1,445 tests passing**
+- **All 10 packages build**, 14/14 typecheck
 
 ## Package Dependency Graph
 
-```mermaid
-graph TD
-  TF["@mathts/typed-function"] --> CORE["@mathts/core"]
-  CORE --> MATRIX["@mathts/matrix"]
-  MATRIX --> FUNC["@mathts/functions"]
-  WP["@mathts/workerpool"] --> PAR["@mathts/parallel"]
-  PAR --> MATRIX
-  CORE --> WB["@mathts/workbook"]
-  CORE --> COMPAT["@mathts/compat"]
-  MATRIX --> COMPAT
-  FUNC --> COMPAT
-  PAR --> COMPAT
 ```
+typed-function --> core --> matrix --> functions
+                    |         ^           |
+workerpool --> parallel ------+           |
+                    ^                     |
+                    +---------------------+
+               core --> workbook
+               core, matrix, functions, parallel --> compat
+```
+
+### Cross-Package Import Counts
+
+| Package | Dependencies |
+|---------|-------------|
+| core | @mathts/core (1) |
+| matrix | @mathts/core (5), @mathts/parallel (3) |
+| functions | @mathts/core (5), @mathts/parallel (4) |
+| parallel | @mathts/workerpool (1), @mathts/parallel (1) |
+| compat | @mathts/core (3), @mathts/compat (2), @mathts/matrix (2), @mathts/parallel (1), @mathts/functions (1) |
 
 ## Core Systems
 
-### 1. Type Dispatch
+### 1. Type System
+
+Three native numeric types with full method sets:
+
+| Type | Methods | Capabilities |
+|------|---------|-------------|
+| Complex | 83 | Arithmetic, trig, hyperbolic, transcendental, polar/rectangular |
+| BigNumber | 96 | Arithmetic, comparison, rounding, **22 math methods** (sin, cos, exp, ln, etc. via Taylor series) |
+| Fraction | 61 | Arithmetic, comparison, rounding, GCD/LCM |
+
+Type guards: `isNumber`, `isComplex`, `isFraction`, `isBigNumber`, `isMatrix`, etc. (230 total across codebase).
+
+### 2. Type Dispatch
 
 The `typed-function` package provides runtime type checking and multiple dispatch.
-`TypeRegistry` manages type definitions and conversions. `MathTSTyped` creates
+`TypeRegistry` manages type definitions and conversions. `mathTyped` creates
 typed function instances that select implementations based on argument types.
 
 Supported types: number, boolean, string, BigInt, Complex, Fraction, BigNumber,
 DenseMatrix, SparseMatrix, Array.
 
-### 2. Factory Pattern
+### 3. Factory Pattern
 
-Functions are registered via factories with explicit dependencies.
+Two factory layers exist in the codebase:
+
+| Layer | Location | Count | Status |
+|-------|----------|-------|--------|
+| Native typed functions | `functions/src/typed/` | 5 files, 96 exports | Active, exported |
+| Synced mathjs factories | `functions/src/<category>/` | 19 categories, 231 factories | Dormant, not exported |
+
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
-dependencies and creates instances, and the `math` singleton provides
-the fully configured instance.
+dependencies, and the `math` singleton provides the fully configured instance.
 
-### 3. Matrix Backends
+**Leaf factories**: 81 factories with no unresolved dependencies (ready to activate).
+
+### 4. Matrix Backends
 
 Three computation backends with automatic selection via BackendManager:
 
@@ -53,68 +83,101 @@ Three computation backends with automatic selection via BackendManager:
 | GPUBackend | WebGPU compute shaders | > 100,000 elements |
 
 BackendManager selects based on data size, backend availability, and
-optional adaptive performance tuning with profiling support.
+adaptive performance tuning with profiling support.
 
-### 4. Parallel Execution
+Matrix types: DenseMatrix (Float64Array-backed), SparseMatrix (CSC format).
+Decompositions: SVD, LU, QR, Cholesky, eigendecomposition.
 
-ComputePool manages a pool of Web Workers for parallel operations.
+### 5. Parallel Execution
+
+ComputePool manages Web Workers for parallel operations.
 Chunk strategies determine optimal data partitioning. ThresholdDispatcher
-decides whether to parallelize based on data size.
+decides whether to parallelize based on data size (7 threshold categories).
 
-Operations include elementwise (add, subtract, multiply, divide, scale,
-abs, negate, square, sqrt, exp, log, sin, cos, tan) and matrix operations
-(matmul, matvec, transpose, outer, dot).
+40+ parallel functions: elementwise (add, subtract, multiply, etc.),
+matrix (matmul, matvec, transpose, outer, dot), reduce, and map operations.
 
-Results are wrapped in `ParallelResult<T>` containing the result data,
-execution duration, chunk count, and parallelization flag.
+Results wrapped in `ParallelResult<T>` with result data, duration, chunk count, and parallelization flag.
 
-### 5. Workbook Runtime
+### 6. WASM Layer
+
+AssemblyScript compiles to WebAssembly with 432 exports across 10 source files:
+
+| Category | Operations |
+|----------|-----------|
+| Scalar | 52 ops (arithmetic, trig, transcendental) |
+| Array | 36 ops (element-wise, norms, dot products) |
+| Matrix | 41 ops (multiply, transpose, LU, QR, determinant) |
+| Complex scalar | 44 ops |
+| Complex array | 33 ops |
+
+### 7. Expression Package
+
+Parser ported from mathjs (16 node types, 1,885-line `parse.ts`). The package now
+builds successfully. Compiler and evaluator are stubs. 331 source files, 528 exports.
+
+### 8. Workbook Runtime
 
 YAML-based reactive notebooks (.mtsw files):
 
 - **Parser**: YAML to Workbook with typed cells
 - **Graph**: Dependency resolution via topological sort with cycle detection
-- **Executor**: Three execution modes - reactive (auto-recompute on change),
-  sequential (topological order), manual (on-demand)
+- **Executor**: Three modes (reactive, sequential, manual). `executeCode()` implemented via Function constructor.
 
-## Two-Layer Architecture in Functions
+## Integration Architecture
 
-### Active Layer
+### Type Bridge
 
-Located in `functions/src/typed/`. New TypeScript implementations using
-@mathts/core typed dispatch. These are the only files exported from the
-package entry point.
+`registerNativeTypes()` adds mathjs duck-typing markers (`isComplex`, `isFraction`,
+`isBigNumber`) to native type prototypes, allowing synced factories to recognize
+native type instances.
 
-Files: `arithmetic.ts`, `trigonometry.ts`, `statistics.ts`, `signal.ts`
+### Factory Bridge
 
-### Dormant Layer
+`initTypeBridge()` connects the native `mathTyped` dispatch system with the synced
+mathjs `createTyped` instance, enabling factories from both layers to interoperate.
 
-Approximately 20 category directories in functions/src/ containing
-factory-pattern functions synced from the mathjs fork.
-These are NOT exported from the package and not in the build entry point.
+### Integration Status
 
-## Build System
+| Metric | Value |
+|--------|-------|
+| Reachable files (from entry points) | ~89 |
+| Dormant files (synced, not exported) | ~1,158 |
+| Leaf factories (activatable) | 81 |
+| Total synced factories | 231 |
+| Type bridge | In place |
+| Factory bridge | In place |
+
+### Activation Barriers
+
+1. **Two typed-function instances** -- native (15 types, instanceof) vs. synced (40+ types, duck-typing). Bridge partially resolves this.
+2. **Matrix interface mismatch** -- native DenseMatrix is Float64Array-backed; synced factories expect nested Array with `._data`, `._size`, `.storage()`.
+3. **Missing subsystems** -- Unit, Index, Range, Chain, ResultSet, Help required by 100+ factories.
+
+## Build Pipeline
 
 All packages use `tsup src/index.ts --format esm --dts --clean` with exceptions:
 
-- **functions**: No `--dts` flag (complex typed function signatures)
-- **workbook**: Two entry points (`src/index.ts` and `src/cli.ts`)
-- **expression**: Build is skipped (incomplete package)
+| Package | Build Variation |
+|---------|----------------|
+| functions | No `--dts` flag |
+| workbook | Two entry points (index.ts + cli.ts) |
+| assembly | AssemblyScript (`asc`) + TypeScript bindings |
+
+Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build first).
 
 ## Module Summary
 
-| Module | Files | Key Exports |
-|--------|-------|-------------|
-| core/types | 4 | Complex, Fraction, BigNumber, type guards, constants |
-| core/typed | 2 | mathTyped, TypeRegistry, type tests |
-| core/factory | 2 | createFactory, FunctionRegistry, registry |
-| matrix/backends | 18 | BackendManager, JSBackend, WASMBackend, GPUBackend |
-| matrix/types | 4 | DenseMatrix, SparseMatrix, Matrix base class |
-| matrix (config) | 4 | getConfig, setConfig, backend preference |
-| functions/typed | 5 | add, subtract, multiply, sin, cos, fft, mean |
-| parallel | 2 | ComputePool, Transfer |
-| parallel/operations | 5 | parallelAdd, parallelMatmul, etc. |
-| parallel/strategies | 3 | Chunking, thresholds, dispatch |
-| workbook | 5 | Parser, executor, graph, serializer |
-| expression | 8 | Parser, Node types |
-| compat | 2 | create, all |
+| Package | Source Files | Test Files | Exports |
+|---------|-------------|-----------|---------|
+| core | 95 | 12 | 625 |
+| matrix | 33 | 14 | 305 |
+| functions | 750 | 9 | 3,564 |
+| parallel | 14 | 10 | 162 |
+| expression | 331 | 0 | 528 |
+| workbook | 6 | 3 | 29 |
+| compat | 3 | 2 | 132 |
+| assembly | 10 | 0 | 432 |
+| typed-function | 2 | 1 | 53 |
+| workerpool | 3 | 1 | 29 |
+| **Total** | **1,247** | **52** | **5,859** |

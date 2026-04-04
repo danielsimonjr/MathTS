@@ -1,14 +1,14 @@
 metadata:
   name: "@mathts/compat"
   version: 0.1.0
-  lastUpdated: "2026-02-06"
+  lastUpdated: "2026-04-04"
   totalFiles: 3
   totalModules: 2
   totalExports: 97
 entryPoints:
   - file: src/index.ts
     type: main
-    description: Provides a mathjs-compatible API for gradual migration to MathTS.
+    description: mathjs Compatibility Layer
 modules:
   root:
     src/functions.d.ts:
@@ -264,16 +264,8 @@ modules:
         - shims
   entry:
     src/index.ts:
-      description: Provides a mathjs-compatible API for gradual migration to MathTS.
-      externalDependencies:
-        - package: "@mathts/compat"
-          imports:
-            - create
-            - all
-        - package: "@mathts/compat"
-          imports:
-            - create
-            - all
+      description: mathjs Compatibility Layer
+      externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./shims.js

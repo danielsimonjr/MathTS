@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-02-06
+**Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -21,20 +21,22 @@ This document provides a comprehensive dependency graph of all files, components
 11. [Matrix/types Dependencies](#matrix-types-dependencies)
 12. [Functions Dependencies](#functions-dependencies)
 13. [Functions/typed Dependencies](#functions-typed-dependencies)
-14. [Expression Dependencies](#expression-dependencies)
-15. [Expression/node Dependencies](#expression-node-dependencies)
-16. [Parallel Dependencies](#parallel-dependencies)
-17. [Parallel/operations Dependencies](#parallel-operations-dependencies)
-18. [Parallel/strategies Dependencies](#parallel-strategies-dependencies)
-19. [Workbook Dependencies](#workbook-dependencies)
-20. [Assembly Dependencies](#assembly-dependencies)
-21. [Assembly/ops Dependencies](#assembly-ops-dependencies)
-22. [Assembly/types Dependencies](#assembly-types-dependencies)
-23. [Compat Dependencies](#compat-dependencies)
-24. [Dependency Matrix](#dependency-matrix)
-25. [Circular Dependency Analysis](#circular-dependency-analysis)
-26. [Visual Dependency Graph](#visual-dependency-graph)
-27. [Summary Statistics](#summary-statistics)
+14. [Expression/error Dependencies](#expression-error-dependencies)
+15. [Expression Dependencies](#expression-dependencies)
+16. [Expression/node Dependencies](#expression-node-dependencies)
+17. [Expression/utils Dependencies](#expression-utils-dependencies)
+18. [Parallel Dependencies](#parallel-dependencies)
+19. [Parallel/operations Dependencies](#parallel-operations-dependencies)
+20. [Parallel/strategies Dependencies](#parallel-strategies-dependencies)
+21. [Workbook Dependencies](#workbook-dependencies)
+22. [Assembly Dependencies](#assembly-dependencies)
+23. [Assembly/ops Dependencies](#assembly-ops-dependencies)
+24. [Assembly/types Dependencies](#assembly-types-dependencies)
+25. [Compat Dependencies](#compat-dependencies)
+26. [Dependency Matrix](#dependency-matrix)
+27. [Circular Dependency Analysis](#circular-dependency-analysis)
+28. [Visual Dependency Graph](#visual-dependency-graph)
+29. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -47,15 +49,17 @@ The codebase is organized into the following modules:
 - **packages/workerpool**: 1 file
 - **core/factory**: 2 files
 - **core**: 1 file
-- **core/typed**: 2 files
+- **core/typed**: 3 files
 - **core/types**: 4 files
 - **matrix/backends**: 18 files
 - **matrix**: 4 files
 - **matrix/types**: 4 files
 - **functions**: 1 file
 - **functions/typed**: 5 files
+- **expression/error**: 2 files
 - **expression**: 7 files
 - **expression/node**: 1 file
+- **expression/utils**: 11 files
 - **parallel**: 2 files
 - **parallel/operations**: 5 files
 - **parallel/strategies**: 3 files
@@ -74,10 +78,10 @@ The codebase is organized into the following modules:
 |---------|------------|----------------|-----------------|
 | `@mathts/typed-function` (`packages/typed-function/`) | (none) | 1 | 1 |
 | `@mathts/workerpool` (`packages/workerpool/`) | (none) | 1 | 2 |
-| `@mathts/core` (`core/`) | (none) | 9 | 85 |
+| `@mathts/core` (`core/`) | (none) | 10 | 85 |
 | `@mathts/matrix` (`matrix/`) | `@mathts/parallel`, `@mathts/core` | 26 | 7 |
-| `@mathts/functions` (`functions/`) | `@mathts/core`, `@mathts/parallel` | 6 | 733 |
-| `@mathts/expression` (`expression/`) | (none) | 8 | 306 |
+| `@mathts/functions` (`functions/`) | `@mathts/core`, `@mathts/parallel` | 6 | 744 |
+| `@mathts/expression` (`expression/`) | (none) | 21 | 310 |
 | `@mathts/parallel` (`parallel/`) | `@mathts/workerpool` | 10 | 4 |
 | `@mathts/workbook` (`workbook/`) | (none) | 5 | 1 |
 | `@mathts/wasm` (`assembly/`) | (none) | 7 | 3 |
@@ -195,12 +199,12 @@ graph LR
 | `./types/complex.js` | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE` | Re-export |
 | `./types/fraction.js` | `Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER` | Re-export |
 | `./types/bignumber.js` | `BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10` | Re-export |
-| `./typed/index.js` | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable` | Re-export |
+| `./typed/index.js` | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes` | Re-export |
 | `./factory/index.js` | `FunctionRegistry, createFactory, registry, math, DEFAULT_CONFIG` | Re-export |
 
 **Exports:**
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `initTypedWasm`, `isTypedWasmAvailable`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`
 
 ---
 
@@ -214,9 +218,10 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./mathts-typed.js` | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isComplex, isFraction, isBigNumber, isFloat64Array, isFloat32Array, isInt32Array, isUint32Array, isUint8Array, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable` | Re-export |
+| `./type-bridge.js` | `registerNativeTypes` | Re-export |
 
 **Exports:**
-- Re-exports: `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isComplex`, `isFraction`, `isBigNumber`, `isFloat64Array`, `isFloat32Array`, `isInt32Array`, `isUint32Array`, `isUint8Array`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `initTypedWasm`, `isTypedWasmAvailable`
+- Re-exports: `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isComplex`, `isFraction`, `isBigNumber`, `isFloat64Array`, `isFloat32Array`, `isInt32Array`, `isUint32Array`, `isUint8Array`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`
 
 ---
 
@@ -240,6 +245,20 @@ graph LR
 - Interfaces: `TypeDef`, `ConversionDef`, `MathTSTypeDef`
 - Functions: `initTypedWasm`, `isTypedWasmAvailable`, `createMathTSTyped`, `createTypedFunction`
 - Constants: `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isFloat64Array`, `isFloat32Array`, `isInt32Array`, `isUint32Array`, `isUint8Array`, `isComplex`, `isFraction`, `isBigNumber`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `mathTyped`
+
+---
+
+### `core/src/typed/type-bridge.ts` - Type compatibility bridge for mathjs duck-typing.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/complex.js` | `Complex` | Import |
+| `../types/fraction.js` | `Fraction` | Import |
+| `../types/bignumber.js` | `BigNumber` | Import |
+
+**Exports:**
+- Functions: `registerNativeTypes`
 
 ---
 
@@ -566,7 +585,7 @@ graph LR
 
 **Exports:**
 - Classes: `WasmLoader`
-- Interfaces: `WasmModule`
+- Interfaces: `WasmModule`, `LoadingMetrics`
 - Functions: `initWasm`
 - Constants: `wasmLoader`
 
@@ -763,6 +782,25 @@ graph LR
 
 ---
 
+<a id="expression-error-dependencies"></a>
+
+## Expression/error Dependencies
+
+### `expression/src/error/DimensionError.ts` - Create a range error with the message:
+
+**Exports:**
+- Classes: `DimensionError`
+
+---
+
+### `expression/src/error/IndexError.ts` - Custom error type for index out of range errors
+
+**Exports:**
+- Classes: `IndexError`
+- Functions: `createIndexError`
+
+---
+
 <a id="expression-dependencies"></a>
 
 ## Expression Dependencies
@@ -772,10 +810,10 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/is.js` | `isHelp` | Import |
-| `../utils/object.js` | `clone` | Import |
-| `../utils/string.js` | `format` | Import |
-| `../utils/factory.js` | `factory` | Import |
+| `./utils/is.js` | `isHelp` | Import |
+| `./utils/object.js` | `clone` | Import |
+| `./utils/string.js` | `format` | Import |
+| `./utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Constants: `createHelpClass`
@@ -811,8 +849,8 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/object.js` | `hasOwnProperty` | Import |
-| `../utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
+| `./utils/object.js` | `hasOwnProperty` | Import |
+| `./utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
 
 **Exports:**
 - Functions: `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
@@ -825,11 +863,11 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/factory.js` | `factory` | Import |
-| `../utils/is.js` | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import |
-| `../utils/collection.js` | `deepMap` | Import |
-| `../utils/number.js` | `safeNumberType` | Import |
-| `../utils/object.js` | `hasOwnProperty` | Import |
+| `./utils/factory.js` | `factory` | Import |
+| `./utils/is.js` | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import |
+| `./utils/collection.js` | `deepMap` | Import |
+| `./utils/number.js` | `safeNumberType` | Import |
+| `./utils/object.js` | `hasOwnProperty` | Import |
 | `./node/Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
@@ -842,9 +880,9 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/factory.js` | `factory` | Import |
-| `../utils/is.js` | `isFunction` | Import |
-| `../utils/map.js` | `createEmptyMap, toObject` | Import |
+| `./utils/factory.js` | `factory` | Import |
+| `./utils/is.js` | `isFunction` | Import |
+| `./utils/map.js` | `createEmptyMap, toObject` | Import |
 
 **Exports:**
 - Constants: `createParserClass`
@@ -854,7 +892,7 @@ graph LR
 ### `expression/src/types.ts` - Type definitions for expression module
 
 **Exports:**
-- Types: `TypedFunctionConstructor`
+- Types: `TypedFunction`, `TypedFunctionConstructor`
 
 ---
 
@@ -867,15 +905,167 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.js` | `isNode` | Import |
+| `../utils/is.js` | `isNode` | Import |
 | `../keywords.js` | `keywords` | Import |
-| `../../utils/object.js` | `deepStrictEqual` | Import |
-| `../../utils/factory.js` | `factory` | Import |
-| `../../utils/map.js` | `createMap` | Import |
+| `../utils/object.js` | `deepStrictEqual` | Import |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/map.js` | `createMap` | Import |
 
 **Exports:**
+- Interfaces: `CompiledExpression`, `StringOptions`
 - Types: `MathNode`
 - Constants: `createNode`
+
+---
+
+<a id="expression-utils-dependencies"></a>
+
+## Expression/utils Dependencies
+
+### `expression/src/utils/array.ts` - Calculate the size of a multi dimensional array.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./number.js` | `isInteger` | Import |
+| `./is.js` | `isNumber, isBigNumber, isArray, isString, Index, Matrix, IndexDimension` | Import |
+| `./string.js` | `format` | Import |
+| `../error/DimensionError.js` | `DimensionError` | Import |
+| `../error/IndexError.js` | `IndexError` | Import |
+| `./object.js` | `deepStrictEqual` | Import |
+
+**Exports:**
+- Interfaces: `IdentifiedValue`
+- Types: `NestedArray`, `ArrayOrScalar`
+- Functions: `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`
+
+---
+
+### `expression/src/utils/bignumber/formatter.ts` - Formats a BigNumber in a given base
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../is.js` | `isBigNumber, isNumber` | Import |
+| `../number.js` | `isInteger, normalizeFormatOptions` | Import |
+
+**Exports:**
+- Functions: `format`, `toEngineering`, `toExponential`, `toFixed`
+
+---
+
+### `expression/src/utils/collection.ts` - Test whether an array contains collections
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./is.js` | `isCollection, isMatrix` | Import |
+| `../error/IndexError.js` | `IndexError` | Import |
+| `./array.js` | `arraySize, deepMap, deepForEach` | Import |
+| `./switch.js` | `_switch` | Import |
+
+**Exports:**
+- Functions: `containsCollections`, `deepForEach`, `deepMap`, `reduce`, `scatter`
+
+---
+
+### `expression/src/utils/customs.ts` - Get a property of a plain object
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./object.js` | `hasOwnProperty` | Import |
+
+**Exports:**
+
+---
+
+### `expression/src/utils/factory.ts` - Type for a factory function that creates instances
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./object.js` | `pickShallow` | Import |
+
+**Exports:**
+- Interfaces: `FactoryFunction`, `LegacyFactory`, `FactoryMeta`
+- Types: `DependencyName`, `CreateFunction`
+- Functions: `factory`, `sortFactories`, `create`, `isFactory`, `assertDependencies`, `isOptionalDependency`, `stripOptionalNotation`
+
+---
+
+### `expression/src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./map.js` | `ObjectWrappingMap` | Import |
+
+**Exports:**
+- Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
+- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isObjectWrappingMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
+- Constants: `isArray`
+
+---
+
+### `expression/src/utils/map.ts` - A map facade on a bare object.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./customs.js` | `getSafeProperty, isSafeProperty, setSafeProperty` | Import |
+| `./is.js` | `isMap, isObject` | Import |
+
+**Exports:**
+- Classes: `ObjectWrappingMap`, `PartitionedMap`
+- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`
+
+---
+
+### `expression/src/utils/number.ts` - Split value representation with sign, coefficients, and exponent
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./is.js` | `isBigNumber, isNumber, isObject` | Import |
+
+**Exports:**
+- Interfaces: `SplitValue`, `NumberTypeConfig`, `FormatOptions`, `NormalizedFormatOptions`
+- Functions: `isInteger`, `safeNumberType`, `format`, `normalizeFormatOptions`, `splitNumber`, `toEngineering`, `toFixed`, `toExponential`, `toPrecision`, `roundDigits`, `digits`, `nearlyEqual`, `copysign`
+- Constants: `sign`, `log2`, `log10`, `log1p`, `cbrt`, `expm1`, `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh`
+
+---
+
+### `expression/src/utils/object.ts` - Clone an object
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./is.js` | `isBigNumber, isObject` | Import |
+
+**Exports:**
+- Functions: `clone`, `mapObject`, `extend`, `deepExtend`, `deepStrictEqual`, `deepFlatten`, `canDefineProperty`, `lazy`, `traverse`, `hasOwnProperty`, `isLegacyFactory`, `get`, `set`, `pick`, `pickShallow`
+
+---
+
+### `expression/src/utils/string.ts` - Check if a text ends with a certain string.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./is.js` | `isBigNumber, isString, typeOf` | Import |
+| `./number.js` | `format` | Import |
+| `./bignumber/formatter.js` | `format` | Import |
+
+**Exports:**
+- Functions: `endsWith`, `format`, `stringify`, `escape`, `compareText`
+
+---
+
+### `expression/src/utils/switch.ts` - Transpose a matrix
+
+**Exports:**
+- Functions: `_switch`
 
 ---
 
@@ -1207,11 +1397,14 @@ graph LR
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
+| `expression/src/utils/is` | 1 file | 12 files |
 | `matrix/src/types/DenseMatrix` | 2 files | 10 files |
 | `matrix/src/backends/index` | 9 files | 1 file |
 | `matrix/src/backends/gpu/index` | 6 files | 3 files |
 | `matrix/src/backends/Backend` | 1 file | 7 files |
+| `expression/src/utils/object` | 1 file | 7 files |
 | `expression/src/parse` | 6 files | 1 file |
+| `expression/src/utils/array` | 6 files | 1 file |
 | `matrix/src/backends/BackendManager` | 4 files | 2 files |
 | `matrix/src/backends/gpu/GPUContext` | 1 file | 5 files |
 | `matrix/src/backends/GPUMatrixBackend` | 5 files | 1 file |
@@ -1225,38 +1418,42 @@ graph LR
 | `core/src/typed/mathts-typed` | 3 files | 2 files |
 | `functions/src/typed/index` | 4 files | 1 file |
 | `expression/src/Help` | 4 files | 1 file |
+| `expression/src/utils/collection` | 4 files | 1 file |
+| `expression/src/utils/factory` | 1 file | 4 files |
+| `expression/src/utils/map` | 2 files | 3 files |
+| `expression/src/utils/number` | 1 file | 4 files |
+| `expression/src/utils/string` | 3 files | 2 files |
 | `parallel/src/operations/index` | 4 files | 1 file |
+| `core/src/typed/type-bridge` | 3 files | 1 file |
+| `core/src/types/bignumber` | 1 file | 3 files |
+| `core/src/types/complex` | 1 file | 3 files |
+| `core/src/types/fraction` | 1 file | 3 files |
 | `matrix/src/backends/gpu/BatchExecutor` | 3 files | 1 file |
 | `matrix/src/backends/gpu/BufferPool` | 1 file | 3 files |
 | `matrix/src/index` | 4 files | 0 files |
 | `matrix/src/types/index` | 3 files | 1 file |
 | `matrix/src/types/SparseMatrix` | 2 files | 2 files |
 | `expression/src/Parser` | 3 files | 1 file |
-| `core/src/types/bignumber` | 1 file | 2 files |
-| `core/src/types/complex` | 1 file | 2 files |
-| `core/src/types/fraction` | 1 file | 2 files |
+| `core/src/typed/index` | 2 files | 1 file |
 | `core/src/types/interfaces` | 0 files | 3 files |
 | `matrix/src/backends/gpu/ShaderManager` | 1 file | 2 files |
-| `matrix/src/backends/gpu/Sync` | 2 files | 1 file |
-| `matrix/src/backends/GPUBackend` | 1 file | 2 files |
-| `matrix/src/backends/ParallelBackend` | 2 files | 1 file |
-| `matrix/src/config` | 2 files | 1 file |
-| `matrix/src/types/Matrix` | 0 files | 3 files |
-| `expression/src/operators` | 2 files | 1 file |
-| `parallel/src/index` | 3 files | 0 files |
-| `parallel/src/strategies/index` | 2 files | 1 file |
-| `workbook/src/executor` | 2 files | 1 file |
-| `workbook/src/graph` | 1 file | 2 files |
 
 ---
 
 <a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
-**2 circular dependencies detected:**
+**4 circular dependencies detected:**
 
-- **Runtime cycles**: 0 (require attention)
+- **Runtime cycles**: 2 (require attention)
 - **Type-only cycles**: 2 (safe, no runtime impact)
+
+### Runtime Circular Dependencies
+
+These cycles involve runtime imports and may cause issues:
+
+- expression/src/utils/is.ts -> expression/src/utils/map.ts -> expression/src/utils/customs.ts -> expression/src/utils/object.ts -> expression/src/utils/is.ts
+- expression/src/utils/is.ts -> expression/src/utils/map.ts -> expression/src/utils/is.ts
 
 ### Type-Only Circular Dependencies
 
@@ -1292,192 +1489,212 @@ graph TD
     subgraph Core/typed
         N5[index]
         N6[mathts-typed]
+        N7[type-bridge]
     end
 
     subgraph Core/types
-        N7[bignumber]
-        N8[complex]
-        N9[fraction]
-        N10[interfaces]
+        N8[bignumber]
+        N9[complex]
+        N10[fraction]
+        N11[interfaces]
     end
 
     subgraph Matrix/backends
-        N11[Backend]
-        N12[BackendManager]
-        N13[BatchExecutor]
-        N14[BufferPool]
-        N15[detect]
-        N16[GPUContext]
-        N17[index]
-        N18[ShaderManager]
-        N19[Sync]
-        N20[GPUBackend]
-        N21[...8 more]
+        N12[Backend]
+        N13[BackendManager]
+        N14[BatchExecutor]
+        N15[BufferPool]
+        N16[detect]
+        N17[GPUContext]
+        N18[index]
+        N19[ShaderManager]
+        N20[Sync]
+        N21[GPUBackend]
+        N22[...8 more]
     end
 
     subgraph Matrix
-        N22[config]
-        N23[index]
-        N24[parallel-matrix]
-        N25[typed-operations]
+        N23[config]
+        N24[index]
+        N25[parallel-matrix]
+        N26[typed-operations]
     end
 
     subgraph Matrix/types
-        N26[DenseMatrix]
-        N27[index]
-        N28[Matrix]
-        N29[SparseMatrix]
+        N27[DenseMatrix]
+        N28[index]
+        N29[Matrix]
+        N30[SparseMatrix]
     end
 
     subgraph Functions
-        N30[index]
+        N31[index]
     end
 
     subgraph Functions/typed
-        N31[arithmetic]
-        N32[index]
-        N33[signal]
-        N34[statistics]
-        N35[trigonometry]
+        N32[arithmetic]
+        N33[index]
+        N34[signal]
+        N35[statistics]
+        N36[trigonometry]
+    end
+
+    subgraph Expression/error
+        N37[DimensionError]
+        N38[IndexError]
     end
 
     subgraph Expression
-        N36[Help]
-        N37[index]
-        N38[keywords]
-        N39[operators]
-        N40[parse]
-        N41[Parser]
-        N42[types]
+        N39[Help]
+        N40[index]
+        N41[keywords]
+        N42[operators]
+        N43[parse]
+        N44[Parser]
+        N45[types]
     end
 
     subgraph Expression/node
-        N43[Node]
+        N46[Node]
+    end
+
+    subgraph Expression/utils
+        N47[array]
+        N48[formatter]
+        N49[collection]
+        N50[customs]
+        N51[factory]
+        N52[is]
+        N53[map]
+        N54[number]
+        N55[object]
+        N56[string]
+        N57[...1 more]
     end
 
     subgraph Parallel
-        N44[ComputePool]
-        N45[index]
-    end
-
-    subgraph Parallel/operations
-        N46[elementwise]
-        N47[index]
-        N48[map]
-        N49[matmul]
-        N50[reduce]
-    end
-
-    subgraph Parallel/strategies
-        N51[chunk]
-        N52[index]
-        N53[threshold]
-    end
-
-    subgraph Workbook
-        N54[executor]
-        N55[graph]
-        N56[index]
-        N57[parser]
-        N58[types]
-    end
-
-    subgraph Assembly
+        N58[ComputePool]
         N59[index]
     end
 
+    subgraph Parallel/operations
+        N60[elementwise]
+        N61[index]
+        N62[map]
+        N63[matmul]
+        N64[reduce]
+    end
+
+    subgraph Parallel/strategies
+        N65[chunk]
+        N66[index]
+        N67[threshold]
+    end
+
+    subgraph Workbook
+        N68[executor]
+        N69[graph]
+        N70[index]
+        N71[parser]
+        N72[types]
+    end
+
+    subgraph Assembly
+        N73[index]
+    end
+
     subgraph Assembly/ops
-        N60[array]
-        N61[complex-array]
-        N62[complex-ops]
-        N63[matrix]
-        N64[scalar]
+        N74[array]
+        N75[complex-array]
+        N76[complex-ops]
+        N77[matrix]
+        N78[scalar]
     end
 
     subgraph Assembly/types
-        N65[complex]
+        N79[complex]
     end
 
     subgraph Compat
-        N66[index]
-        N67[shims]
+        N80[index]
+        N81[shims]
     end
 
     N2 --> N6
     N3 --> N2
-    N4 --> N8
     N4 --> N9
-    N4 --> N7
+    N4 --> N10
+    N4 --> N8
     N4 --> N5
     N4 --> N3
     N5 --> N6
-    N6 --> N8
+    N5 --> N7
     N6 --> N9
-    N6 --> N7
+    N6 --> N10
+    N6 --> N8
+    N7 --> N9
     N7 --> N10
-    N8 --> N10
-    N9 --> N10
-    N11 --> N26
-    N12 --> N26
-    N12 --> N11
-    N12 --> N22
-    N13 --> N16
-    N13 --> N18
-    N13 --> N14
-    N14 --> N16
-    N16 --> N15
-    N17 --> N15
+    N7 --> N8
+    N8 --> N11
+    N9 --> N11
+    N10 --> N11
+    N12 --> N27
+    N13 --> N27
+    N13 --> N12
+    N13 --> N23
+    N14 --> N17
+    N14 --> N19
+    N14 --> N15
+    N15 --> N17
     N17 --> N16
-    N17 --> N14
-    N17 --> N18
-    N17 --> N13
-    N17 --> N19
     N18 --> N16
-    N19 --> N16
-    N19 --> N14
+    N18 --> N17
+    N18 --> N15
+    N18 --> N19
+    N18 --> N14
+    N18 --> N20
+    N19 --> N17
     N20 --> N17
-    N22 --> N11
-    N22 --> N12
-    N23 --> N27
-    N23 --> N25
-    N23 --> N24
+    N20 --> N15
+    N21 --> N18
+    N23 --> N12
+    N23 --> N13
+    N24 --> N28
     N24 --> N26
-    N25 --> N26
-    N26 --> N28
-    N26 --> N29
-    N27 --> N28
-    N27 --> N26
+    N24 --> N25
+    N25 --> N27
+    N26 --> N27
     N27 --> N29
-    N29 --> N28
-    N29 --> N26
-    N30 --> N32
-    N32 --> N31
-    N32 --> N35
-    N32 --> N34
-    N32 --> N33
-    N37 --> N42
-    N37 --> N38
-    N37 --> N39
-    N37 --> N40
-    N37 --> N41
-    N37 --> N36
-    N43 --> N38
+    N27 --> N30
+    N28 --> N29
+    N28 --> N27
+    N28 --> N30
+    N30 --> N29
+    N30 --> N27
+    N31 --> N33
+    N33 --> N32
+    N33 --> N36
+    N33 --> N35
+    N33 --> N34
+    N39 --> N52
+    N39 --> N55
+    N39 --> N56
+    N39 --> N51
+    N40 --> N45
+    N40 --> N41
+    N40 --> N42
     N40 --> N43
-    N45 --> N44
-    N45 --> N47
-    N45 --> N52
-    N46 --> N44
-    N47 --> N49
-    N47 --> N46
-    N47 --> N50
-    N47 --> N48
-    N48 --> N44
-    N49 --> N44
-    N50 --> N44
-    N52 --> N51
-    N52 --> N53
-    N53 --> N44
-    N54 --> N58
+    N40 --> N44
+    N40 --> N39
+    N46 --> N52
+    N46 --> N41
+    N46 --> N55
+    N46 --> N51
+    N46 --> N53
+    N42 --> N55
+    N42 --> N52
+    N43 --> N51
+    N43 --> N52
 ```
 
 ---
@@ -1487,21 +1704,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 75 |
-| Total Modules | 21 |
-| Total Lines of Code | 27380 |
-| Total Exports | 1245 |
-| Total Re-exports | 558 |
-| Total Classes | 27 |
-| Total Interfaces | 75 |
-| Total Functions | 366 |
-| Total Type Guards | 21 |
+| Total TypeScript Files | 89 |
+| Total Modules | 23 |
+| Total Lines of Code | 33654 |
+| Total Exports | 1401 |
+| Total Re-exports | 560 |
+| Total Classes | 31 |
+| Total Interfaces | 116 |
+| Total Functions | 497 |
+| Total Type Guards | 68 |
 | Total Enums | 0 |
 | Type-only Imports | 25 |
-| Runtime Circular Deps | 0 |
+| Runtime Circular Deps | 2 |
 | Type-only Circular Deps | 2 |
 
 ---
 
-*Last Updated*: 2026-02-06
+*Last Updated*: 2026-04-04
 *Version*: 0.1.0

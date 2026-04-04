@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-02-06
+**Generated**: 2026-04-04
 
 ## Summary
 
 - **Potentially unused files**: 63
-- **Potentially unused exports**: 176
+- **Potentially unused exports**: 167
 
 ## Potentially Unused Files
 
@@ -124,8 +124,6 @@ These exports are not imported by any other file in the codebase:
 - `FactoryFunction` (interface)
 - `FactoryDependencies` (interface)
 - `FactoryImport` (type)
-- `addFactory` (constant)
-- `add` (constant)
 
 ### `src/function/config.ts`
 
@@ -268,16 +266,9 @@ These exports are not imported by any other file in the codebase:
 
 ### `src/typed/mathts-typed.ts`
 
-- `initTypedWasm` (function)
 - `TypeDef` (interface)
 - `ConversionDef` (interface)
 - `MathTSTypeDef` (interface)
-- `isNumber` (constant)
-- `isFloat64Array` (constant)
-- `isComplex` (constant)
-- `isMatrix` (constant)
-- `isUnit` (constant)
-- `MATHTS_TYPES` (constant)
 
 ### `src/types/bignumber.ts`
 

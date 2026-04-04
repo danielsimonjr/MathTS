@@ -1,21 +1,17 @@
 {
   "metadata": {
-    "generatedAt": "2026-02-06T03:45:31.822Z",
-    "totalSourceFiles": 36,
-    "totalTestFiles": 13,
-    "testedCount": 26,
-    "untestedCount": 10,
-    "coveragePercent": "72.2"
+    "generatedAt": "2026-04-04T00:27:02.640Z",
+    "totalSourceFiles": 33,
+    "totalTestFiles": 14,
+    "testedCount": 27,
+    "untestedCount": 6,
+    "coveragePercent": "81.8"
   },
   "untestedFiles": [
-    "src/backends.ts",
     "src/backends/MatrixWasmBridge.ts",
     "src/backends/WasmLoader.ts",
-    "src/config.ts",
-    "src/dense-matrix.ts",
     "src/matrix.ts",
     "src/operations/index.ts",
-    "src/sparse-matrix.ts",
     "src/types.ts",
     "src/types/parallel.d.ts"
   ],
@@ -37,6 +33,7 @@
     "src/backends/index.ts",
     "src/backends/wasm/detect.ts",
     "src/backends/wasm/index.ts",
+    "src/config.ts",
     "src/index.ts",
     "src/operations/eig.ts",
     "src/operations/svd.ts",
@@ -134,9 +131,9 @@
       "tests/wasm/operations.test.ts"
     ],
     "src/backends/WasmLoader.ts": [],
-    "src/backends.ts": [],
-    "src/config.ts": [],
-    "src/dense-matrix.ts": [],
+    "src/config.ts": [
+      "tests/config.test.ts"
+    ],
     "src/index.ts": [
       "tests/typed-operations.test.ts"
     ],
@@ -151,7 +148,6 @@
     "src/parallel-matrix.ts": [
       "tests/typed-operations.test.ts"
     ],
-    "src/sparse-matrix.ts": [],
     "src/typed-operations.ts": [
       "tests/typed-operations.test.ts"
     ],
@@ -179,6 +175,9 @@
     "src/types.ts": []
   },
   "testToSourceMap": {
+    "tests/config.test.ts": [
+      "src/config.ts"
+    ],
     "tests/decomposition/eig.test.ts": [
       "src/operations/eig.ts"
     ],

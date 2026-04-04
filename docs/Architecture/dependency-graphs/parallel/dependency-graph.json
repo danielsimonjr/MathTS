@@ -2,7 +2,7 @@
   "metadata": {
     "name": "@mathts/parallel",
     "version": "0.1.0",
-    "lastUpdated": "2026-02-06",
+    "lastUpdated": "2026-04-04",
     "totalFiles": 14,
     "totalModules": 5,
     "totalExports": 183
@@ -28,12 +28,6 @@
               "ParallelResult",
               "TaskOptions",
               "PoolStats"
-            ]
-          },
-          {
-            "package": "@mathts/parallel",
-            "imports": [
-              "ComputePool"
             ]
           }
         ],
@@ -119,12 +113,12 @@
           {
             "file": "./operations/index.js",
             "imports": [
-              "// Matrix operations\r\n  parallelMatmul",
+              "parallelMatmul",
               "parallelMatvec",
               "parallelTranspose",
               "parallelOuter",
               "parallelDot",
-              "// Element-wise operations\r\n  parallelAdd",
+              "parallelAdd",
               "parallelSubtract",
               "parallelMultiply",
               "parallelDivide",
@@ -140,7 +134,7 @@
               "parallelTan",
               "parallelElementwise",
               "parallelUnary",
-              "// Reduction operations\r\n  parallelSum",
+              "parallelSum",
               "parallelMean",
               "parallelMin",
               "parallelMax",
@@ -151,7 +145,7 @@
               "parallelDistance",
               "parallelHistogram",
               "parallelReduce",
-              "// Map and transform operations\r\n  parallelMap",
+              "parallelMap",
               "parallelFilter",
               "parallelFind",
               "parallelSort",
@@ -165,7 +159,7 @@
           {
             "file": "./strategies/index.js",
             "imports": [
-              "// Chunking strategies\r\n  calculateOptimalChunks",
+              "calculateOptimalChunks",
               "chunkFloat64Array",
               "chunkArray",
               "mergeFloat64Chunks",
@@ -173,7 +167,7 @@
               "shouldChunkParallelize",
               "partitionRange",
               "partition2D",
-              "// Threshold-based dispatch\r\n  ThresholdDispatcher",
+              "ThresholdDispatcher",
               "thresholdDispatcher",
               "shouldParallelize",
               "dispatch",
@@ -188,12 +182,12 @@
           "computePool",
           "Transfer",
           "DEFAULT_POOL_CONFIG",
-          "// Matrix operations\r\n  parallelMatmul",
+          "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
           "parallelOuter",
           "parallelDot",
-          "// Element-wise operations\r\n  parallelAdd",
+          "parallelAdd",
           "parallelSubtract",
           "parallelMultiply",
           "parallelDivide",
@@ -209,7 +203,7 @@
           "parallelTan",
           "parallelElementwise",
           "parallelUnary",
-          "// Reduction operations\r\n  parallelSum",
+          "parallelSum",
           "parallelMean",
           "parallelMin",
           "parallelMax",
@@ -220,7 +214,7 @@
           "parallelDistance",
           "parallelHistogram",
           "parallelReduce",
-          "// Map and transform operations\r\n  parallelMap",
+          "parallelMap",
           "parallelFilter",
           "parallelFind",
           "parallelSort",
@@ -228,7 +222,7 @@
           "parallelSome",
           "parallelEvery",
           "parallelCount",
-          "// Chunking strategies\r\n  calculateOptimalChunks",
+          "calculateOptimalChunks",
           "chunkFloat64Array",
           "chunkArray",
           "mergeFloat64Chunks",
@@ -236,7 +230,7 @@
           "shouldChunkParallelize",
           "partitionRange",
           "partition2D",
-          "// Threshold-based dispatch\r\n  ThresholdDispatcher",
+          "ThresholdDispatcher",
           "thresholdDispatcher",
           "shouldParallelize",
           "dispatch",
@@ -248,12 +242,12 @@
           "computePool",
           "Transfer",
           "DEFAULT_POOL_CONFIG",
-          "// Matrix operations\r\n  parallelMatmul",
+          "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
           "parallelOuter",
           "parallelDot",
-          "// Element-wise operations\r\n  parallelAdd",
+          "parallelAdd",
           "parallelSubtract",
           "parallelMultiply",
           "parallelDivide",
@@ -269,7 +263,7 @@
           "parallelTan",
           "parallelElementwise",
           "parallelUnary",
-          "// Reduction operations\r\n  parallelSum",
+          "parallelSum",
           "parallelMean",
           "parallelMin",
           "parallelMax",
@@ -280,7 +274,7 @@
           "parallelDistance",
           "parallelHistogram",
           "parallelReduce",
-          "// Map and transform operations\r\n  parallelMap",
+          "parallelMap",
           "parallelFilter",
           "parallelFind",
           "parallelSort",
@@ -288,7 +282,7 @@
           "parallelSome",
           "parallelEvery",
           "parallelCount",
-          "// Chunking strategies\r\n  calculateOptimalChunks",
+          "calculateOptimalChunks",
           "chunkFloat64Array",
           "chunkArray",
           "mergeFloat64Chunks",
@@ -296,7 +290,7 @@
           "shouldChunkParallelize",
           "partitionRange",
           "partition2D",
-          "// Threshold-based dispatch\r\n  ThresholdDispatcher",
+          "ThresholdDispatcher",
           "thresholdDispatcher",
           "shouldParallelize",
           "dispatch",
@@ -384,7 +378,7 @@
               "parallelTranspose",
               "parallelOuter",
               "parallelDot",
-              "type MatmulOptions"
+              "MatmulOptions"
             ],
             "reExport": true
           },
@@ -407,7 +401,7 @@
               "parallelTan",
               "parallelElementwise",
               "parallelUnary",
-              "type ElementwiseOptions"
+              "ElementwiseOptions"
             ],
             "reExport": true
           },
@@ -425,7 +419,7 @@
               "parallelDistance",
               "parallelHistogram",
               "parallelReduce",
-              "type ReduceOptions"
+              "ReduceOptions"
             ],
             "reExport": true
           },
@@ -440,7 +434,7 @@
               "parallelSome",
               "parallelEvery",
               "parallelCount",
-              "type MapOptions"
+              "MapOptions"
             ],
             "reExport": true
           }
@@ -451,7 +445,7 @@
           "parallelTranspose",
           "parallelOuter",
           "parallelDot",
-          "type MatmulOptions",
+          "MatmulOptions",
           "parallelAdd",
           "parallelSubtract",
           "parallelMultiply",
@@ -468,7 +462,7 @@
           "parallelTan",
           "parallelElementwise",
           "parallelUnary",
-          "type ElementwiseOptions",
+          "ElementwiseOptions",
           "parallelSum",
           "parallelMean",
           "parallelMin",
@@ -480,7 +474,7 @@
           "parallelDistance",
           "parallelHistogram",
           "parallelReduce",
-          "type ReduceOptions",
+          "ReduceOptions",
           "parallelMap",
           "parallelFilter",
           "parallelFind",
@@ -489,7 +483,7 @@
           "parallelSome",
           "parallelEvery",
           "parallelCount",
-          "type MapOptions"
+          "MapOptions"
         ],
         "reExported": [
           "parallelMatmul",
@@ -497,7 +491,7 @@
           "parallelTranspose",
           "parallelOuter",
           "parallelDot",
-          "type MatmulOptions",
+          "MatmulOptions",
           "parallelAdd",
           "parallelSubtract",
           "parallelMultiply",
@@ -514,7 +508,7 @@
           "parallelTan",
           "parallelElementwise",
           "parallelUnary",
-          "type ElementwiseOptions",
+          "ElementwiseOptions",
           "parallelSum",
           "parallelMean",
           "parallelMin",
@@ -526,7 +520,7 @@
           "parallelDistance",
           "parallelHistogram",
           "parallelReduce",
-          "type ReduceOptions",
+          "ReduceOptions",
           "parallelMap",
           "parallelFilter",
           "parallelFind",
@@ -535,7 +529,7 @@
           "parallelSome",
           "parallelEvery",
           "parallelCount",
-          "type MapOptions"
+          "MapOptions"
         ]
       },
       "src/operations/map.ts": {
@@ -721,9 +715,9 @@
               "shouldParallelize",
               "partitionRange",
               "partition2D",
-              "type ChunkOptions",
-              "type ChunkResult",
-              "type ChunkInfo"
+              "ChunkOptions",
+              "ChunkResult",
+              "ChunkInfo"
             ],
             "reExport": true
           },
@@ -736,10 +730,10 @@
               "dispatch",
               "calculateChunks",
               "DEFAULT_THRESHOLDS",
-              "type ThresholdConfig",
-              "type OperationCategory",
-              "type ExecutionMode",
-              "type DispatchResult"
+              "ThresholdConfig",
+              "OperationCategory",
+              "ExecutionMode",
+              "DispatchResult"
             ],
             "reExport": true
           }
@@ -753,18 +747,18 @@
           "shouldParallelize",
           "partitionRange",
           "partition2D",
-          "type ChunkOptions",
-          "type ChunkResult",
-          "type ChunkInfo",
+          "ChunkOptions",
+          "ChunkResult",
+          "ChunkInfo",
           "ThresholdDispatcher",
           "thresholdDispatcher",
           "dispatch",
           "calculateChunks",
           "DEFAULT_THRESHOLDS",
-          "type ThresholdConfig",
-          "type OperationCategory",
-          "type ExecutionMode",
-          "type DispatchResult"
+          "ThresholdConfig",
+          "OperationCategory",
+          "ExecutionMode",
+          "DispatchResult"
         ],
         "reExported": [
           "calculateOptimalChunks",
@@ -775,18 +769,18 @@
           "shouldParallelize",
           "partitionRange",
           "partition2D",
-          "type ChunkOptions",
-          "type ChunkResult",
-          "type ChunkInfo",
+          "ChunkOptions",
+          "ChunkResult",
+          "ChunkInfo",
           "ThresholdDispatcher",
           "thresholdDispatcher",
           "dispatch",
           "calculateChunks",
           "DEFAULT_THRESHOLDS",
-          "type ThresholdConfig",
-          "type OperationCategory",
-          "type ExecutionMode",
-          "type DispatchResult"
+          "ThresholdConfig",
+          "OperationCategory",
+          "ExecutionMode",
+          "DispatchResult"
         ]
       },
       "src/strategies/threshold.ts": {
@@ -911,6 +905,6 @@
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 3,
-    "unusedExportsCount": 13
+    "unusedExportsCount": 2
   }
 }

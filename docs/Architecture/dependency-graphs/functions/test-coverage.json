@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generatedAt": "2026-02-06T03:45:58.930Z",
-    "totalSourceFiles": 738,
-    "totalTestFiles": 6,
-    "testedCount": 8,
-    "untestedCount": 730,
-    "coveragePercent": "1.1"
+    "generatedAt": "2026-04-04T00:27:26.459Z",
+    "totalSourceFiles": 750,
+    "totalTestFiles": 9,
+    "testedCount": 9,
+    "untestedCount": 741,
+    "coveragePercent": "1.2"
   },
   "untestedFiles": [
     "src/algebra/decomposition/lup.ts",
@@ -109,11 +109,13 @@
     "src/complex/conj.ts",
     "src/complex/im.ts",
     "src/complex/re.ts",
+    "src/constants.ts",
     "src/core/config.ts",
     "src/core/create.ts",
     "src/core/function/config.ts",
     "src/core/function/import.ts",
     "src/core/function/typed.ts",
+    "src/defaultInstance.ts",
     "src/error/ArgumentsError.ts",
     "src/error/DimensionError.ts",
     "src/error/IndexError.ts",
@@ -431,6 +433,8 @@
     "src/expression/transform/utils/transformCallback.ts",
     "src/expression/transform/variance.transform.ts",
     "src/expression/types.ts",
+    "src/factoriesAny.ts",
+    "src/factoriesNumber.ts",
     "src/geometry/distance.ts",
     "src/geometry/intersect.ts",
     "src/logical/and.ts",
@@ -532,6 +536,7 @@
     "src/set/setSize.ts",
     "src/set/setSymDifference.ts",
     "src/set/setUnion.ts",
+    "src/shared/types.ts",
     "src/signal/freqz.ts",
     "src/signal/index.ts",
     "src/signal/zpk2tf.ts",
@@ -632,6 +637,7 @@
     "src/type/unit/function/splitUnit.ts",
     "src/type/unit/function/unit.ts",
     "src/type/unit/physicalConstants.ts",
+    "src/types.ts",
     "src/unit/to.ts",
     "src/unit/toBest.ts",
     "src/utils/array.ts",
@@ -643,6 +649,7 @@
     "src/utils/clone.ts",
     "src/utils/collection.ts",
     "src/utils/complex.ts",
+    "src/utils/customs.d.ts",
     "src/utils/customs.ts",
     "src/utils/emitter.ts",
     "src/utils/factory.ts",
@@ -658,6 +665,7 @@
     "src/utils/isPositive.ts",
     "src/utils/isPrime.ts",
     "src/utils/isZero.ts",
+    "src/utils/latex.d.ts",
     "src/utils/latex.ts",
     "src/utils/log.ts",
     "src/utils/lruQueue.ts",
@@ -672,7 +680,9 @@
     "src/utils/print.ts",
     "src/utils/product.ts",
     "src/utils/scope.ts",
+    "src/utils/shared.ts",
     "src/utils/snapshot.ts",
+    "src/utils/string.d.ts",
     "src/utils/string.ts",
     "src/utils/switch.ts",
     "src/utils/typeOf.ts",
@@ -737,6 +747,7 @@
     "src/wasm/trigonometry/basic.ts",
     "src/wasm/unit/conversion.ts",
     "src/wasm/utils/checks.ts",
+    "src/wasm/utils/constants.ts",
     "src/wasm/utils/workPtrValidation.ts"
   ],
   "testedFiles": [
@@ -747,7 +758,8 @@
     "src/typed/index.ts",
     "src/typed/signal.ts",
     "src/typed/statistics.ts",
-    "src/typed/trigonometry.ts"
+    "src/typed/trigonometry.ts",
+    "src/typed/typed-bridge.ts"
   ],
   "coverageMap": {
     "src/algebra/decomposition/lup.ts": [],
@@ -851,11 +863,13 @@
     "src/complex/conj.ts": [],
     "src/complex/im.ts": [],
     "src/complex/re.ts": [],
+    "src/constants.ts": [],
     "src/core/config.ts": [],
     "src/core/create.ts": [],
     "src/core/function/config.ts": [],
     "src/core/function/import.ts": [],
     "src/core/function/typed.ts": [],
+    "src/defaultInstance.ts": [],
     "src/error/ArgumentsError.ts": [],
     "src/error/DimensionError.ts": [],
     "src/error/IndexError.ts": [],
@@ -1173,6 +1187,8 @@
     "src/expression/transform/utils/transformCallback.ts": [],
     "src/expression/transform/variance.transform.ts": [],
     "src/expression/types.ts": [],
+    "src/factoriesAny.ts": [],
+    "src/factoriesNumber.ts": [],
     "src/geometry/distance.ts": [],
     "src/geometry/intersect.ts": [],
     "src/index.ts": [
@@ -1279,6 +1295,7 @@
     "src/set/setSize.ts": [],
     "src/set/setSymDifference.ts": [],
     "src/set/setUnion.ts": [],
+    "src/shared/types.ts": [],
     "src/signal/conv.ts": [
       "tests/signal/conv.test.ts"
     ],
@@ -1404,6 +1421,8 @@
     "src/typed/statistics.ts": [
       "tests/parallel-arithmetic.test.ts",
       "tests/parallel-signal.test.ts",
+      "tests/statistics-extended.test.ts",
+      "tests/statistics-extended2.test.ts",
       "tests/typed-arithmetic.test.ts"
     ],
     "src/typed/trigonometry.ts": [
@@ -1412,6 +1431,10 @@
       "tests/parallel-signal.test.ts",
       "tests/typed-arithmetic.test.ts"
     ],
+    "src/typed/typed-bridge.ts": [
+      "tests/typed-bridge.test.ts"
+    ],
+    "src/types.ts": [],
     "src/unit/to.ts": [],
     "src/unit/toBest.ts": [],
     "src/utils/array.ts": [],
@@ -1423,6 +1446,7 @@
     "src/utils/clone.ts": [],
     "src/utils/collection.ts": [],
     "src/utils/complex.ts": [],
+    "src/utils/customs.d.ts": [],
     "src/utils/customs.ts": [],
     "src/utils/emitter.ts": [],
     "src/utils/factory.ts": [],
@@ -1438,6 +1462,7 @@
     "src/utils/isPositive.ts": [],
     "src/utils/isPrime.ts": [],
     "src/utils/isZero.ts": [],
+    "src/utils/latex.d.ts": [],
     "src/utils/latex.ts": [],
     "src/utils/log.ts": [],
     "src/utils/lruQueue.ts": [],
@@ -1452,7 +1477,9 @@
     "src/utils/print.ts": [],
     "src/utils/product.ts": [],
     "src/utils/scope.ts": [],
+    "src/utils/shared.ts": [],
     "src/utils/snapshot.ts": [],
+    "src/utils/string.d.ts": [],
     "src/utils/string.ts": [],
     "src/utils/switch.ts": [],
     "src/utils/typeOf.ts": [],
@@ -1516,6 +1543,7 @@
     "src/wasm/trigonometry/basic.ts": [],
     "src/wasm/unit/conversion.ts": [],
     "src/wasm/utils/checks.ts": [],
+    "src/wasm/utils/constants.ts": [],
     "src/wasm/utils/workPtrValidation.ts": [],
     "src/wasm/WasmLoader.ts": []
   },
@@ -1546,6 +1574,12 @@
     "tests/signal/fft.test.ts": [
       "src/signal/fft.ts"
     ],
+    "tests/statistics-extended.test.ts": [
+      "src/typed/statistics.ts"
+    ],
+    "tests/statistics-extended2.test.ts": [
+      "src/typed/statistics.ts"
+    ],
     "tests/typed-arithmetic.test.ts": [
       "src/index.ts",
       "src/typed/index.ts",
@@ -1553,6 +1587,9 @@
       "src/typed/trigonometry.ts",
       "src/typed/statistics.ts",
       "src/typed/signal.ts"
+    ],
+    "tests/typed-bridge.test.ts": [
+      "src/typed/typed-bridge.ts"
     ]
   }
 }

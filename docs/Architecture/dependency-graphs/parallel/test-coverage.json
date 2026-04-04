@@ -1,27 +1,27 @@
 {
   "metadata": {
-    "generatedAt": "2026-02-06T03:46:07.623Z",
+    "generatedAt": "2026-04-04T00:27:27.227Z",
     "totalSourceFiles": 14,
-    "totalTestFiles": 5,
-    "testedCount": 5,
-    "untestedCount": 9,
-    "coveragePercent": "35.7"
+    "totalTestFiles": 10,
+    "testedCount": 8,
+    "untestedCount": 6,
+    "coveragePercent": "57.1"
   },
   "untestedFiles": [
-    "src/ParallelMatrix.ts",
     "src/WorkerPool.ts",
     "src/index.ts",
     "src/matrix.worker.ts",
     "src/operations/index.ts",
-    "src/operations/map.ts",
-    "src/operations/reduce.ts",
     "src/strategies/index.ts",
     "src/workers/compute.worker.ts"
   ],
   "testedFiles": [
     "src/ComputePool.ts",
+    "src/ParallelMatrix.ts",
     "src/operations/elementwise.ts",
+    "src/operations/map.ts",
     "src/operations/matmul.ts",
+    "src/operations/reduce.ts",
     "src/strategies/chunk.ts",
     "src/strategies/threshold.ts"
   ],
@@ -38,14 +38,22 @@
       "tests/operations/elementwise.test.ts"
     ],
     "src/operations/index.ts": [],
-    "src/operations/map.ts": [],
+    "src/operations/map.ts": [
+      "tests/operations/map-extended.test.ts",
+      "tests/operations/map.test.ts"
+    ],
     "src/operations/matmul.ts": [
       "tests/operations/matmul.test.ts"
     ],
-    "src/operations/reduce.ts": [],
-    "src/ParallelMatrix.ts": [],
+    "src/operations/reduce.ts": [
+      "tests/operations/reduce.test.ts"
+    ],
+    "src/ParallelMatrix.ts": [
+      "tests/ParallelMatrix.test.ts"
+    ],
     "src/strategies/chunk.ts": [
-      "tests/chunk.test.ts"
+      "tests/chunk.test.ts",
+      "tests/strategies/chunk-extended.test.ts"
     ],
     "src/strategies/index.ts": [],
     "src/strategies/threshold.ts": [
@@ -65,13 +73,28 @@
       "src/operations/elementwise.ts",
       "src/ComputePool.ts"
     ],
+    "tests/operations/map-extended.test.ts": [
+      "src/operations/map.ts"
+    ],
+    "tests/operations/map.test.ts": [
+      "src/operations/map.ts"
+    ],
     "tests/operations/matmul.test.ts": [
       "src/operations/matmul.ts",
       "src/ComputePool.ts"
     ],
+    "tests/operations/reduce.test.ts": [
+      "src/operations/reduce.ts"
+    ],
     "tests/operations/threshold.test.ts": [
       "src/strategies/threshold.ts",
       "src/ComputePool.ts"
+    ],
+    "tests/ParallelMatrix.test.ts": [
+      "src/ParallelMatrix.ts"
+    ],
+    "tests/strategies/chunk-extended.test.ts": [
+      "src/strategies/chunk.ts"
     ]
   }
 }

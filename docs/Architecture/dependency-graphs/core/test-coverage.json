@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generatedAt": "2026-02-06T03:45:26.686Z",
-    "totalSourceFiles": 93,
-    "totalTestFiles": 6,
-    "testedCount": 7,
-    "untestedCount": 86,
-    "coveragePercent": "7.5"
+    "generatedAt": "2026-04-04T00:26:51.693Z",
+    "totalSourceFiles": 95,
+    "totalTestFiles": 12,
+    "testedCount": 12,
+    "untestedCount": 83,
+    "coveragePercent": "12.6"
   },
   "untestedFiles": [
     "src/array.ts",
@@ -16,7 +16,6 @@
     "src/bignumber/nearlyEqual.ts",
     "src/collection.ts",
     "src/complex.ts",
-    "src/config.ts",
     "src/constants.ts",
     "src/create.ts",
     "src/customs.d.ts",
@@ -30,7 +29,6 @@
     "src/function/config.ts",
     "src/function/import.ts",
     "src/function/typed.ts",
-    "src/index.ts",
     "src/is.ts",
     "src/latex.d.ts",
     "src/latex.ts",
@@ -50,7 +48,6 @@
     "src/string.ts",
     "src/switch.ts",
     "src/typed-function.d.ts",
-    "src/typed/index.ts",
     "src/types.ts",
     "src/types/bigint.ts",
     "src/types/boolean.ts",
@@ -96,9 +93,14 @@
     "src/version.ts"
   ],
   "testedFiles": [
+    "src/config.ts",
     "src/factory/factory.ts",
     "src/factory/index.ts",
+    "src/index.ts",
+    "src/shared.ts",
+    "src/typed/index.ts",
     "src/typed/mathts-typed.ts",
+    "src/typed/type-bridge.ts",
     "src/types/bignumber.ts",
     "src/types/complex.ts",
     "src/types/fraction.ts",
@@ -113,7 +115,9 @@
     "src/bignumber/nearlyEqual.ts": [],
     "src/collection.ts": [],
     "src/complex.ts": [],
-    "src/config.ts": [],
+    "src/config.ts": [
+      "tests/config.test.ts"
+    ],
     "src/constants.ts": [],
     "src/create.ts": [],
     "src/customs.d.ts": [],
@@ -123,17 +127,21 @@
     "src/error/DimensionError.ts": [],
     "src/error/IndexError.ts": [],
     "src/factory/factory.ts": [
-      "tests/factory/factory.test.ts"
+      "tests/factory/factory.test.ts",
+      "tests/version.test.ts"
     ],
     "src/factory/index.ts": [
-      "tests/factory/factory.test.ts"
+      "tests/factory/factory.test.ts",
+      "tests/version.test.ts"
     ],
     "src/factory.ts": [],
     "src/function/config.ts": [],
     "src/function/import.ts": [],
     "src/function/typed.ts": [],
     "src/function.ts": [],
-    "src/index.ts": [],
+    "src/index.ts": [
+      "tests/version.test.ts"
+    ],
     "src/is.ts": [],
     "src/latex.d.ts": [],
     "src/latex.ts": [],
@@ -148,30 +156,51 @@
     "src/print.ts": [],
     "src/product.ts": [],
     "src/scope.ts": [],
+    "src/shared.ts": [
+      "tests/shared.test.ts"
+    ],
     "src/snapshot.ts": [],
     "src/string.d.ts": [],
     "src/string.ts": [],
     "src/switch.ts": [],
-    "src/typed/index.ts": [],
+    "src/typed/index.ts": [
+      "tests/version.test.ts"
+    ],
     "src/typed/mathts-typed.ts": [
-      "tests/typed/mathts-typed.test.ts"
+      "tests/typed/mathts-typed-extended.test.ts",
+      "tests/typed/mathts-typed.test.ts",
+      "tests/version.test.ts"
+    ],
+    "src/typed/type-bridge.ts": [
+      "tests/typed/type-bridge.test.ts",
+      "tests/version.test.ts"
     ],
     "src/typed-function.d.ts": [],
     "src/types/bigint.ts": [],
     "src/types/bignumber.ts": [
+      "tests/typed/mathts-typed-extended.test.ts",
       "tests/typed/mathts-typed.test.ts",
-      "tests/types/bignumber.test.ts"
+      "tests/typed/type-bridge.test.ts",
+      "tests/types/bignumber-math.test.ts",
+      "tests/types/bignumber.test.ts",
+      "tests/version.test.ts"
     ],
     "src/types/boolean.ts": [],
     "src/types/chain/Chain.ts": [],
     "src/types/chain/function/chain.ts": [],
     "src/types/complex.ts": [
+      "tests/typed/mathts-typed-extended.test.ts",
       "tests/typed/mathts-typed.test.ts",
-      "tests/types/complex.test.ts"
+      "tests/typed/type-bridge.test.ts",
+      "tests/types/complex.test.ts",
+      "tests/version.test.ts"
     ],
     "src/types/fraction.ts": [
+      "tests/typed/mathts-typed-extended.test.ts",
       "tests/typed/mathts-typed.test.ts",
-      "tests/types/fraction.test.ts"
+      "tests/typed/type-bridge.test.ts",
+      "tests/types/fraction.test.ts",
+      "tests/version.test.ts"
     ],
     "src/types/index.ts": [],
     "src/types/interfaces.ts": [],
@@ -217,14 +246,35 @@
     "src/version.ts": []
   },
   "testToSourceMap": {
+    "tests/config.test.ts": [
+      "src/config.ts"
+    ],
     "tests/factory/factory.test.ts": [
       "src/factory/index.ts",
       "src/factory/factory.ts"
+    ],
+    "tests/shared.test.ts": [
+      "src/shared.ts"
+    ],
+    "tests/typed/mathts-typed-extended.test.ts": [
+      "src/typed/mathts-typed.ts",
+      "src/types/complex.ts",
+      "src/types/fraction.ts",
+      "src/types/bignumber.ts"
     ],
     "tests/typed/mathts-typed.test.ts": [
       "src/typed/mathts-typed.ts",
       "src/types/complex.ts",
       "src/types/fraction.ts",
+      "src/types/bignumber.ts"
+    ],
+    "tests/typed/type-bridge.test.ts": [
+      "src/types/complex.ts",
+      "src/types/fraction.ts",
+      "src/types/bignumber.ts",
+      "src/typed/type-bridge.ts"
+    ],
+    "tests/types/bignumber-math.test.ts": [
       "src/types/bignumber.ts"
     ],
     "tests/types/bignumber.test.ts": [
@@ -238,6 +288,17 @@
     ],
     "tests/utils.test.ts": [
       "src/utils.ts"
+    ],
+    "tests/version.test.ts": [
+      "src/index.ts",
+      "src/types/complex.ts",
+      "src/types/fraction.ts",
+      "src/types/bignumber.ts",
+      "src/typed/index.ts",
+      "src/factory/index.ts",
+      "src/typed/mathts-typed.ts",
+      "src/typed/type-bridge.ts",
+      "src/factory/factory.ts"
     ]
   }
 }

@@ -1,7 +1,7 @@
 metadata:
   name: "@mathts/parallel"
   version: 0.1.0
-  lastUpdated: "2026-02-06"
+  lastUpdated: "2026-04-04"
   totalFiles: 14
   totalModules: 5
   totalExports: 183
@@ -22,9 +22,6 @@ modules:
             - ParallelResult
             - TaskOptions
             - PoolStats
-        - package: "@mathts/parallel"
-          imports:
-            - ComputePool
       nodeDependencies: []
       internalDependencies: []
       exports:
@@ -85,12 +82,12 @@ modules:
           reExport: true
         - file: ./operations/index.js
           imports:
-            - "// Matrix operations\r\n  parallelMatmul"
+            - parallelMatmul
             - parallelMatvec
             - parallelTranspose
             - parallelOuter
             - parallelDot
-            - "// Element-wise operations\r\n  parallelAdd"
+            - parallelAdd
             - parallelSubtract
             - parallelMultiply
             - parallelDivide
@@ -106,7 +103,7 @@ modules:
             - parallelTan
             - parallelElementwise
             - parallelUnary
-            - "// Reduction operations\r\n  parallelSum"
+            - parallelSum
             - parallelMean
             - parallelMin
             - parallelMax
@@ -117,7 +114,7 @@ modules:
             - parallelDistance
             - parallelHistogram
             - parallelReduce
-            - "// Map and transform operations\r\n  parallelMap"
+            - parallelMap
             - parallelFilter
             - parallelFind
             - parallelSort
@@ -128,7 +125,7 @@ modules:
           reExport: true
         - file: ./strategies/index.js
           imports:
-            - "// Chunking strategies\r\n  calculateOptimalChunks"
+            - calculateOptimalChunks
             - chunkFloat64Array
             - chunkArray
             - mergeFloat64Chunks
@@ -136,7 +133,7 @@ modules:
             - shouldChunkParallelize
             - partitionRange
             - partition2D
-            - "// Threshold-based dispatch\r\n  ThresholdDispatcher"
+            - ThresholdDispatcher
             - thresholdDispatcher
             - shouldParallelize
             - dispatch
@@ -148,12 +145,12 @@ modules:
         - computePool
         - Transfer
         - DEFAULT_POOL_CONFIG
-        - "// Matrix operations\r\n  parallelMatmul"
+        - parallelMatmul
         - parallelMatvec
         - parallelTranspose
         - parallelOuter
         - parallelDot
-        - "// Element-wise operations\r\n  parallelAdd"
+        - parallelAdd
         - parallelSubtract
         - parallelMultiply
         - parallelDivide
@@ -169,7 +166,7 @@ modules:
         - parallelTan
         - parallelElementwise
         - parallelUnary
-        - "// Reduction operations\r\n  parallelSum"
+        - parallelSum
         - parallelMean
         - parallelMin
         - parallelMax
@@ -180,7 +177,7 @@ modules:
         - parallelDistance
         - parallelHistogram
         - parallelReduce
-        - "// Map and transform operations\r\n  parallelMap"
+        - parallelMap
         - parallelFilter
         - parallelFind
         - parallelSort
@@ -188,7 +185,7 @@ modules:
         - parallelSome
         - parallelEvery
         - parallelCount
-        - "// Chunking strategies\r\n  calculateOptimalChunks"
+        - calculateOptimalChunks
         - chunkFloat64Array
         - chunkArray
         - mergeFloat64Chunks
@@ -196,7 +193,7 @@ modules:
         - shouldChunkParallelize
         - partitionRange
         - partition2D
-        - "// Threshold-based dispatch\r\n  ThresholdDispatcher"
+        - ThresholdDispatcher
         - thresholdDispatcher
         - shouldParallelize
         - dispatch
@@ -207,12 +204,12 @@ modules:
         - computePool
         - Transfer
         - DEFAULT_POOL_CONFIG
-        - "// Matrix operations\r\n  parallelMatmul"
+        - parallelMatmul
         - parallelMatvec
         - parallelTranspose
         - parallelOuter
         - parallelDot
-        - "// Element-wise operations\r\n  parallelAdd"
+        - parallelAdd
         - parallelSubtract
         - parallelMultiply
         - parallelDivide
@@ -228,7 +225,7 @@ modules:
         - parallelTan
         - parallelElementwise
         - parallelUnary
-        - "// Reduction operations\r\n  parallelSum"
+        - parallelSum
         - parallelMean
         - parallelMin
         - parallelMax
@@ -239,7 +236,7 @@ modules:
         - parallelDistance
         - parallelHistogram
         - parallelReduce
-        - "// Map and transform operations\r\n  parallelMap"
+        - parallelMap
         - parallelFilter
         - parallelFind
         - parallelSort
@@ -247,7 +244,7 @@ modules:
         - parallelSome
         - parallelEvery
         - parallelCount
-        - "// Chunking strategies\r\n  calculateOptimalChunks"
+        - calculateOptimalChunks
         - chunkFloat64Array
         - chunkArray
         - mergeFloat64Chunks
@@ -255,7 +252,7 @@ modules:
         - shouldChunkParallelize
         - partitionRange
         - partition2D
-        - "// Threshold-based dispatch\r\n  ThresholdDispatcher"
+        - ThresholdDispatcher
         - thresholdDispatcher
         - shouldParallelize
         - dispatch
@@ -327,7 +324,7 @@ modules:
             - parallelTranspose
             - parallelOuter
             - parallelDot
-            - type MatmulOptions
+            - MatmulOptions
           reExport: true
         - file: ./elementwise.js
           imports:
@@ -347,7 +344,7 @@ modules:
             - parallelTan
             - parallelElementwise
             - parallelUnary
-            - type ElementwiseOptions
+            - ElementwiseOptions
           reExport: true
         - file: ./reduce.js
           imports:
@@ -362,7 +359,7 @@ modules:
             - parallelDistance
             - parallelHistogram
             - parallelReduce
-            - type ReduceOptions
+            - ReduceOptions
           reExport: true
         - file: ./map.js
           imports:
@@ -374,7 +371,7 @@ modules:
             - parallelSome
             - parallelEvery
             - parallelCount
-            - type MapOptions
+            - MapOptions
           reExport: true
       exports:
         - parallelMatmul
@@ -382,7 +379,7 @@ modules:
         - parallelTranspose
         - parallelOuter
         - parallelDot
-        - type MatmulOptions
+        - MatmulOptions
         - parallelAdd
         - parallelSubtract
         - parallelMultiply
@@ -399,7 +396,7 @@ modules:
         - parallelTan
         - parallelElementwise
         - parallelUnary
-        - type ElementwiseOptions
+        - ElementwiseOptions
         - parallelSum
         - parallelMean
         - parallelMin
@@ -411,7 +408,7 @@ modules:
         - parallelDistance
         - parallelHistogram
         - parallelReduce
-        - type ReduceOptions
+        - ReduceOptions
         - parallelMap
         - parallelFilter
         - parallelFind
@@ -420,14 +417,14 @@ modules:
         - parallelSome
         - parallelEvery
         - parallelCount
-        - type MapOptions
+        - MapOptions
       reExported:
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
         - parallelOuter
         - parallelDot
-        - type MatmulOptions
+        - MatmulOptions
         - parallelAdd
         - parallelSubtract
         - parallelMultiply
@@ -444,7 +441,7 @@ modules:
         - parallelTan
         - parallelElementwise
         - parallelUnary
-        - type ElementwiseOptions
+        - ElementwiseOptions
         - parallelSum
         - parallelMean
         - parallelMin
@@ -456,7 +453,7 @@ modules:
         - parallelDistance
         - parallelHistogram
         - parallelReduce
-        - type ReduceOptions
+        - ReduceOptions
         - parallelMap
         - parallelFilter
         - parallelFind
@@ -465,7 +462,7 @@ modules:
         - parallelSome
         - parallelEvery
         - parallelCount
-        - type MapOptions
+        - MapOptions
     src/operations/map.ts:
       description: Parallel Map and Transform Operations
       externalDependencies: []
@@ -610,9 +607,9 @@ modules:
             - shouldParallelize
             - partitionRange
             - partition2D
-            - type ChunkOptions
-            - type ChunkResult
-            - type ChunkInfo
+            - ChunkOptions
+            - ChunkResult
+            - ChunkInfo
           reExport: true
         - file: ./threshold.js
           imports:
@@ -622,10 +619,10 @@ modules:
             - dispatch
             - calculateChunks
             - DEFAULT_THRESHOLDS
-            - type ThresholdConfig
-            - type OperationCategory
-            - type ExecutionMode
-            - type DispatchResult
+            - ThresholdConfig
+            - OperationCategory
+            - ExecutionMode
+            - DispatchResult
           reExport: true
       exports:
         - calculateOptimalChunks
@@ -636,18 +633,18 @@ modules:
         - shouldParallelize
         - partitionRange
         - partition2D
-        - type ChunkOptions
-        - type ChunkResult
-        - type ChunkInfo
+        - ChunkOptions
+        - ChunkResult
+        - ChunkInfo
         - ThresholdDispatcher
         - thresholdDispatcher
         - dispatch
         - calculateChunks
         - DEFAULT_THRESHOLDS
-        - type ThresholdConfig
-        - type OperationCategory
-        - type ExecutionMode
-        - type DispatchResult
+        - ThresholdConfig
+        - OperationCategory
+        - ExecutionMode
+        - DispatchResult
       reExported:
         - calculateOptimalChunks
         - chunkFloat64Array
@@ -657,18 +654,18 @@ modules:
         - shouldParallelize
         - partitionRange
         - partition2D
-        - type ChunkOptions
-        - type ChunkResult
-        - type ChunkInfo
+        - ChunkOptions
+        - ChunkResult
+        - ChunkInfo
         - ThresholdDispatcher
         - thresholdDispatcher
         - dispatch
         - calculateChunks
         - DEFAULT_THRESHOLDS
-        - type ThresholdConfig
-        - type OperationCategory
-        - type ExecutionMode
-        - type DispatchResult
+        - ThresholdConfig
+        - OperationCategory
+        - ExecutionMode
+        - DispatchResult
     src/strategies/threshold.ts:
       description: Threshold-based Dispatch Strategy
       externalDependencies: []
@@ -755,4 +752,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 3
-  unusedExportsCount: 13
+  unusedExportsCount: 2

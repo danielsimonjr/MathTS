@@ -1,6 +1,6 @@
 # @mathts/workbook - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-02-06
+**Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -9,15 +9,17 @@ This document provides a comprehensive dependency graph of all files, components
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Root Dependencies](#root-dependencies)
-3. [Entry Dependencies](#entry-dependencies)
-4. [Dependency Matrix](#dependency-matrix)
-5. [Circular Dependency Analysis](#circular-dependency-analysis)
-6. [Visual Dependency Graph](#visual-dependency-graph)
-7. [Summary Statistics](#summary-statistics)
+2. [Package Dependencies](#package-dependencies)
+3. [Root Dependencies](#root-dependencies)
+4. [Entry Dependencies](#entry-dependencies)
+5. [Dependency Matrix](#dependency-matrix)
+6. [Circular Dependency Analysis](#circular-dependency-analysis)
+7. [Visual Dependency Graph](#visual-dependency-graph)
+8. [Summary Statistics](#summary-statistics)
 
 ---
 
+<a id="overview"></a>
 ## Overview
 
 The codebase is organized into the following modules:
@@ -26,6 +28,8 @@ The codebase is organized into the following modules:
 - **entry**: 1 file
 
 ---
+
+<a id="root-dependencies"></a>
 
 ## Root Dependencies
 
@@ -78,11 +82,17 @@ The codebase is organized into the following modules:
 
 ### `src/types.ts` - Workbook type definitions
 
+**Exports:**
+- Interfaces: `WorkbookMetadata`, `RuntimeConfig`, `Cell`, `Workbook`, `ParseResult`, `WorkbookEvent`, `DependencyNode`, `DependencyGraph`
+- Types: `CellType`, `ExecutionMode`
+
 ---
+
+<a id="entry-dependencies"></a>
 
 ## Entry Dependencies
 
-### `src/index.ts` - Types
+### `src/index.ts` - Scientific workbook runtime
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -97,26 +107,29 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="dependency-matrix"></a>
 ## Dependency Matrix
 
 ### File Import/Export Matrix
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `cli` | 1 files | 0 files |
-| `executor` | 2 files | 1 files |
-| `graph` | 1 files | 2 files |
-| `index` | 3 files | 1 files |
-| `parser` | 1 files | 1 files |
-| `types` | 0 files | 3 files |
+| `src/index` | 3 files | 1 file |
+| `src/executor` | 2 files | 1 file |
+| `src/graph` | 1 file | 2 files |
+| `src/types` | 0 files | 3 files |
+| `src/parser` | 1 file | 1 file |
+| `src/cli` | 1 file | 0 files |
 
 ---
 
+<a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
 **No circular dependencies detected.**
 ---
 
+<a id="visual-dependency-graph"></a>
 ## Visual Dependency Graph
 
 ```mermaid
@@ -145,13 +158,14 @@ graph TD
 
 ---
 
+<a id="summary-statistics"></a>
 ## Summary Statistics
 
 | Category | Count |
 |----------|-------|
 | Total TypeScript Files | 6 |
 | Total Modules | 2 |
-| Total Lines of Code | 663 |
+| Total Lines of Code | 690 |
 | Total Exports | 19 |
 | Total Re-exports | 8 |
 | Total Classes | 1 |
@@ -165,5 +179,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-02-06
+*Last Updated*: 2026-04-04
 *Version*: 0.1.0

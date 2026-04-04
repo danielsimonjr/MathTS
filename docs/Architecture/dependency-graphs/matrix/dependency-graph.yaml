@@ -1,10 +1,10 @@
 metadata:
   name: "@mathts/matrix"
   version: 0.1.0
-  lastUpdated: "2026-02-06"
+  lastUpdated: "2026-04-04"
   totalFiles: 33
   totalModules: 5
-  totalExports: 261
+  totalExports: 262
 entryPoints:
   - file: src/index.ts
     type: main
@@ -173,8 +173,8 @@ modules:
             - isGPUSuitableForMatrixOps
             - getRecommendedWorkgroupSize
             - getMaxMatrixSize
-            - type GPUAdapterInfo
-            - type GPUCapabilities
+            - GPUAdapterInfo
+            - GPUCapabilities
           reExport: true
         - file: ./GPUContext.js
           imports:
@@ -182,39 +182,39 @@ modules:
             - getGlobalGPUContext
             - initializeGlobalGPU
             - destroyGlobalGPU
-            - type GPUContextOptions
-            - type GPUContextStatus
-            - type DeviceLostEvent
+            - GPUContextOptions
+            - GPUContextStatus
+            - DeviceLostEvent
           reExport: true
         - file: ./BufferPool.js
           imports:
             - BufferPool
-            - type BufferPoolOptions
+            - BufferPoolOptions
           reExport: true
         - file: ./ShaderManager.js
           imports:
             - ShaderManager
             - BUILTIN_SHADERS
-            - type ShaderSource
-            - type PipelineConfig
+            - ShaderSource
+            - PipelineConfig
           reExport: true
         - file: ./BatchExecutor.js
           imports:
             - BatchExecutor
-            - type BatchOperation
-            - type BatchOperationType
-            - type BatchResult
-            - type BatchOptions
+            - BatchOperation
+            - BatchOperationType
+            - BatchResult
+            - BatchOptions
           reExport: true
         - file: ./Sync.js
           imports:
             - SyncManager
             - createSyncManager
-            - type SyncStrategy
-            - type TransferDirection
-            - type TransferRequest
-            - type TransferResult
-            - type SyncConfig
+            - SyncStrategy
+            - TransferDirection
+            - TransferRequest
+            - TransferResult
+            - SyncConfig
           reExport: true
       exports:
         - hasWebGPU
@@ -224,33 +224,33 @@ modules:
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
         - getMaxMatrixSize
-        - type GPUAdapterInfo
-        - type GPUCapabilities
+        - GPUAdapterInfo
+        - GPUCapabilities
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
         - destroyGlobalGPU
-        - type GPUContextOptions
-        - type GPUContextStatus
-        - type DeviceLostEvent
+        - GPUContextOptions
+        - GPUContextStatus
+        - DeviceLostEvent
         - BufferPool
-        - type BufferPoolOptions
+        - BufferPoolOptions
         - ShaderManager
         - BUILTIN_SHADERS
-        - type ShaderSource
-        - type PipelineConfig
+        - ShaderSource
+        - PipelineConfig
         - BatchExecutor
-        - type BatchOperation
-        - type BatchOperationType
-        - type BatchResult
-        - type BatchOptions
+        - BatchOperation
+        - BatchOperationType
+        - BatchResult
+        - BatchOptions
         - SyncManager
         - createSyncManager
-        - type SyncStrategy
-        - type TransferDirection
-        - type TransferRequest
-        - type TransferResult
-        - type SyncConfig
+        - SyncStrategy
+        - TransferDirection
+        - TransferRequest
+        - TransferResult
+        - SyncConfig
       reExported:
         - hasWebGPU
         - isBrowser
@@ -259,33 +259,33 @@ modules:
         - isGPUSuitableForMatrixOps
         - getRecommendedWorkgroupSize
         - getMaxMatrixSize
-        - type GPUAdapterInfo
-        - type GPUCapabilities
+        - GPUAdapterInfo
+        - GPUCapabilities
         - GPUContext
         - getGlobalGPUContext
         - initializeGlobalGPU
         - destroyGlobalGPU
-        - type GPUContextOptions
-        - type GPUContextStatus
-        - type DeviceLostEvent
+        - GPUContextOptions
+        - GPUContextStatus
+        - DeviceLostEvent
         - BufferPool
-        - type BufferPoolOptions
+        - BufferPoolOptions
         - ShaderManager
         - BUILTIN_SHADERS
-        - type ShaderSource
-        - type PipelineConfig
+        - ShaderSource
+        - PipelineConfig
         - BatchExecutor
-        - type BatchOperation
-        - type BatchOperationType
-        - type BatchResult
-        - type BatchOptions
+        - BatchOperation
+        - BatchOperationType
+        - BatchResult
+        - BatchOptions
         - SyncManager
         - createSyncManager
-        - type SyncStrategy
-        - type TransferDirection
-        - type TransferRequest
-        - type TransferResult
-        - type SyncConfig
+        - SyncStrategy
+        - TransferDirection
+        - TransferRequest
+        - TransferResult
+        - SyncConfig
     src/backends/gpu/ShaderManager.ts:
       description: GPU Shader Manager
       externalDependencies: []
@@ -423,21 +423,21 @@ modules:
             - ParallelBackend
             - parallelBackend
             - createParallelBackend
-            - type ParallelBackendConfig
+            - ParallelBackendConfig
           reExport: true
         - file: ./WASMBackend.js
           imports:
             - WASMBackend
             - wasmBackend
             - createWASMBackend
-            - type WASMBackendConfig
+            - WASMBackendConfig
           reExport: true
         - file: ./GPUMatrixBackend.js
           imports:
             - GPUMatrixBackend
             - gpuMatrixBackend
             - createGPUMatrixBackend
-            - type GPUMatrixBackendConfig
+            - GPUMatrixBackendConfig
           reExport: true
         - file: ./GPUBackend.js
           imports:
@@ -445,8 +445,8 @@ modules:
             - getGlobalGPUBackend
             - initializeGlobalGPUBackend
             - destroyGlobalGPUBackend
-            - type GPUBackendOptions
-            - type GPUBackendStatus
+            - GPUBackendOptions
+            - GPUBackendStatus
           reExport: true
         - file: ./BackendManager.js
           imports:
@@ -454,8 +454,8 @@ modules:
             - backendManager
             - createBackendManager
             - DEFAULT_EXTENDED_HINTS
-            - type ExtendedBackendHints
-            - type OperationType
+            - ExtendedBackendHints
+            - OperationType
           reExport: true
         - file: ./wasm/index.js
           imports:
@@ -490,27 +490,27 @@ modules:
         - ParallelBackend
         - parallelBackend
         - createParallelBackend
-        - type ParallelBackendConfig
+        - ParallelBackendConfig
         - WASMBackend
         - wasmBackend
         - createWASMBackend
-        - type WASMBackendConfig
+        - WASMBackendConfig
         - GPUMatrixBackend
         - gpuMatrixBackend
         - createGPUMatrixBackend
-        - type GPUMatrixBackendConfig
+        - GPUMatrixBackendConfig
         - GPUBackend
         - getGlobalGPUBackend
         - initializeGlobalGPUBackend
         - destroyGlobalGPUBackend
-        - type GPUBackendOptions
-        - type GPUBackendStatus
+        - GPUBackendOptions
+        - GPUBackendStatus
         - BackendManager
         - backendManager
         - createBackendManager
         - DEFAULT_EXTENDED_HINTS
-        - type ExtendedBackendHints
-        - type OperationType
+        - ExtendedBackendHints
+        - OperationType
         - detectWasmFeatures
         - isWasmAvailable
         - isSharedMemoryAvailable
@@ -538,27 +538,27 @@ modules:
         - ParallelBackend
         - parallelBackend
         - createParallelBackend
-        - type ParallelBackendConfig
+        - ParallelBackendConfig
         - WASMBackend
         - wasmBackend
         - createWASMBackend
-        - type WASMBackendConfig
+        - WASMBackendConfig
         - GPUMatrixBackend
         - gpuMatrixBackend
         - createGPUMatrixBackend
-        - type GPUMatrixBackendConfig
+        - GPUMatrixBackendConfig
         - GPUBackend
         - getGlobalGPUBackend
         - initializeGlobalGPUBackend
         - destroyGlobalGPUBackend
-        - type GPUBackendOptions
-        - type GPUBackendStatus
+        - GPUBackendOptions
+        - GPUBackendStatus
         - BackendManager
         - backendManager
         - createBackendManager
         - DEFAULT_EXTENDED_HINTS
-        - type ExtendedBackendHints
-        - type OperationType
+        - ExtendedBackendHints
+        - OperationType
         - detectWasmFeatures
         - isWasmAvailable
         - isSharedMemoryAvailable
@@ -598,11 +598,8 @@ modules:
       constants:
         - jsBackend
     src/backends/MatrixWasmBridge.ts:
-      description: Matrix WASM Bridge - Integrates WASM operations with mathjs Matrix types
-      externalDependencies:
-        - package: "@mathts/parallel"
-          imports:
-            - ParallelMatrix
+      description: Matrix WASM Bridge - Integrates WASM operations with mathts Matrix types
+      externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./WasmLoader.js
@@ -610,11 +607,14 @@ modules:
             - wasmLoader
             - WasmModule
       exports:
+        - WasmThresholds
         - MatrixWasmBridge
       classes:
         - MatrixWasmBridge
       interfaces:
         - MatrixOptions
+      constants:
+        - WasmThresholds
     src/backends/ParallelBackend.ts:
       description: Parallel Matrix Backend
       externalDependencies:
@@ -742,6 +742,7 @@ modules:
         - WasmLoader
       interfaces:
         - WasmModule
+        - LoadingMetrics
       functions:
         - initWasm
       constants:
@@ -1058,8 +1059,8 @@ modules:
             - eig
             - eigvals
             - powerIteration
-            - type EigResult
-            - type EigOptions
+            - EigResult
+            - EigOptions
           reExport: true
         - file: ./svd.js
           imports:
@@ -1070,15 +1071,15 @@ modules:
             - cond
             - norm2
             - normFro
-            - type SVDResult
-            - type SVDOptions
+            - SVDResult
+            - SVDOptions
           reExport: true
       exports:
         - eig
         - eigvals
         - powerIteration
-        - type EigResult
-        - type EigOptions
+        - EigResult
+        - EigOptions
         - svd
         - singularValues
         - pinv
@@ -1086,14 +1087,14 @@ modules:
         - cond
         - norm2
         - normFro
-        - type SVDResult
-        - type SVDOptions
+        - SVDResult
+        - SVDOptions
       reExported:
         - eig
         - eigvals
         - powerIteration
-        - type EigResult
-        - type EigOptions
+        - EigResult
+        - EigOptions
         - svd
         - singularValues
         - pinv
@@ -1101,8 +1102,8 @@ modules:
         - cond
         - norm2
         - normFro
-        - type SVDResult
-        - type SVDOptions
+        - SVDResult
+        - SVDOptions
     src/operations/svd.ts:
       description: Singular Value Decomposition (SVD)
       externalDependencies: []
@@ -1293,17 +1294,17 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 33
   totalModules: 5
-  totalLinesOfCode: 12031
-  totalExports: 261
+  totalLinesOfCode: 13378
+  totalExports: 262
   totalClasses: 17
-  totalInterfaces: 39
+  totalInterfaces: 40
   totalFunctions: 54
   totalTypeGuards: 8
   totalEnums: 0
-  totalConstants: 83
+  totalConstants: 84
   totalReExports: 111
   totalTypeOnlyImports: 14
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 2
   unusedFilesCount: 3
-  unusedExportsCount: 48
+  unusedExportsCount: 24

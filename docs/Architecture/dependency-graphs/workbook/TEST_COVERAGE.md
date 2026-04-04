@@ -1,31 +1,27 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-02-06
+**Generated**: 2026-04-04
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
 | Total Source Files | 6 |
-| Total Test Files | 0 |
-| Source Files with Tests | 0 |
-| Source Files without Tests | 6 |
-| Coverage | 0.0% |
+| Total Test Files | 3 |
+| Source Files with Tests | 4 |
+| Source Files without Tests | 2 |
+| Coverage | 66.7% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 6 source files are not directly imported by any test file:
+The following 2 source files are not directly imported by any test file:
 
 ### root/
 
 - `src/cli.ts` → Expected test: `tests/unit/root/cli.test.ts`
-- `src/executor.ts` → Expected test: `tests/unit/root/executor.test.ts`
-- `src/graph.ts` → Expected test: `tests/unit/root/graph.test.ts`
 - `src/index.ts` → Expected test: `tests/unit/root/index.test.ts`
-- `src/parser.ts` → Expected test: `tests/unit/root/parser.test.ts`
-- `src/types.ts` → Expected test: `tests/unit/root/types.test.ts`
 
 ---
 
@@ -33,6 +29,10 @@ The following 6 source files are not directly imported by any test file:
 
 | Source File | Test Files |
 |-------------|------------|
+| `src/executor.ts` | `executor.test.ts` |
+| `src/graph.ts` | `graph.test.ts` |
+| `src/parser.ts` | `parser.test.ts` |
+| `src/types.ts` | `executor.test.ts`, `graph.test.ts`, `parser.test.ts` |
 
 ---
 
@@ -40,3 +40,6 @@ The following 6 source files are not directly imported by any test file:
 
 | Test File | Imports from Source |
 |-----------|---------------------|
+| `tests/executor.test.ts` | 2 files |
+| `tests/graph.test.ts` | 2 files |
+| `tests/parser.test.ts` | 2 files |

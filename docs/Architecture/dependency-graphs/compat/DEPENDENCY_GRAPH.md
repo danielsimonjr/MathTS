@@ -1,6 +1,6 @@
 # @mathts/compat - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-02-06
+**Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -9,15 +9,17 @@ This document provides a comprehensive dependency graph of all files, components
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Root Dependencies](#root-dependencies)
-3. [Entry Dependencies](#entry-dependencies)
-4. [Dependency Matrix](#dependency-matrix)
-5. [Circular Dependency Analysis](#circular-dependency-analysis)
-6. [Visual Dependency Graph](#visual-dependency-graph)
-7. [Summary Statistics](#summary-statistics)
+2. [Package Dependencies](#package-dependencies)
+3. [Root Dependencies](#root-dependencies)
+4. [Entry Dependencies](#entry-dependencies)
+5. [Dependency Matrix](#dependency-matrix)
+6. [Circular Dependency Analysis](#circular-dependency-analysis)
+7. [Visual Dependency Graph](#visual-dependency-graph)
+8. [Summary Statistics](#summary-statistics)
 
 ---
 
+<a id="overview"></a>
 ## Overview
 
 The codebase is organized into the following modules:
@@ -26,6 +28,8 @@ The codebase is organized into the following modules:
 - **entry**: 1 file
 
 ---
+
+<a id="root-dependencies"></a>
 
 ## Root Dependencies
 
@@ -56,15 +60,11 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="entry-dependencies"></a>
+
 ## Entry Dependencies
 
-### `src/index.ts` - Provides a mathjs-compatible API for gradual migration to MathTS.
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@mathts/compat` | `create, all` |
-| `@mathts/compat` | `create, all` |
+### `src/index.ts` - mathjs Compatibility Layer
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -83,23 +83,26 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="dependency-matrix"></a>
 ## Dependency Matrix
 
 ### File Import/Export Matrix
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `functions.d` | 0 files | 0 files |
-| `index` | 4 files | 0 files |
-| `shims` | 0 files | 1 files |
+| `src/index` | 4 files | 0 files |
+| `src/shims` | 0 files | 1 file |
+| `src/functions.d` | 0 files | 0 files |
 
 ---
 
+<a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
 **No circular dependencies detected.**
 ---
 
+<a id="visual-dependency-graph"></a>
 ## Visual Dependency Graph
 
 ```mermaid
@@ -118,6 +121,7 @@ graph TD
 
 ---
 
+<a id="summary-statistics"></a>
 ## Summary Statistics
 
 | Category | Count |
@@ -138,5 +142,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-02-06
+*Last Updated*: 2026-04-04
 *Version*: 0.1.0

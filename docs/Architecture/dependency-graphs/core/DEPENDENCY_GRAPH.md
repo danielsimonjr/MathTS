@@ -1,6 +1,6 @@
 # @mathts/core - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-02-06
+**Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -9,21 +9,23 @@ This document provides a comprehensive dependency graph of all files, components
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Root Dependencies](#root-dependencies)
-3. [Bignumber Dependencies](#bignumber-dependencies)
-4. [Error Dependencies](#error-dependencies)
-5. [Factory Dependencies](#factory-dependencies)
-6. [Function Dependencies](#function-dependencies)
-7. [Entry Dependencies](#entry-dependencies)
-8. [Typed Dependencies](#typed-dependencies)
-9. [Types Dependencies](#types-dependencies)
-10. [Dependency Matrix](#dependency-matrix)
-11. [Circular Dependency Analysis](#circular-dependency-analysis)
-12. [Visual Dependency Graph](#visual-dependency-graph)
-13. [Summary Statistics](#summary-statistics)
+2. [Package Dependencies](#package-dependencies)
+3. [Root Dependencies](#root-dependencies)
+4. [Bignumber Dependencies](#bignumber-dependencies)
+5. [Error Dependencies](#error-dependencies)
+6. [Factory Dependencies](#factory-dependencies)
+7. [Function Dependencies](#function-dependencies)
+8. [Entry Dependencies](#entry-dependencies)
+9. [Typed Dependencies](#typed-dependencies)
+10. [Types Dependencies](#types-dependencies)
+11. [Dependency Matrix](#dependency-matrix)
+12. [Circular Dependency Analysis](#circular-dependency-analysis)
+13. [Visual Dependency Graph](#visual-dependency-graph)
+14. [Summary Statistics](#summary-statistics)
 
 ---
 
+<a id="overview"></a>
 ## Overview
 
 The codebase is organized into the following modules:
@@ -34,10 +36,12 @@ The codebase is organized into the following modules:
 - **factory**: 2 files
 - **function**: 3 files
 - **entry**: 1 file
-- **typed**: 2 files
+- **typed**: 3 files
 - **types**: 44 files
 
 ---
+
+<a id="root-dependencies"></a>
 
 ## Root Dependencies
 
@@ -55,6 +59,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `IdentifiedValue`
+- Types: `NestedArray`, `ArrayOrScalar`
 - Functions: `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`
 
 ---
@@ -97,6 +102,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `ConfigOptions`
+- Types: `MathJsConfig`
 - Constants: `DEFAULT_CONFIG`
 
 ---
@@ -139,6 +145,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `MathJsInstance`, `ImportOptions`
+- Types: `FactoriesInput`
 - Functions: `create`
 
 ---
@@ -183,8 +190,8 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `FactoryFunction`, `LegacyFactory`, `FactoryMeta`
+- Types: `DependencyName`, `CreateFunction`
 - Functions: `factory`, `sortFactories`, `create`, `isFactory`, `assertDependencies`, `isOptionalDependency`, `stripOptionalNotation`
-- Constants: `createLog`
 
 ---
 
@@ -404,12 +411,17 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `TypeDef`, `ConversionDef`, `Type`, `Param`, `Signature`, `TypedFunctionData`, `TypedFunction`, `ReferTo`, `ReferToSelf`, `FindSignatureOptions`, `AddConversionOptions`, `TypedErrorData`, `TypedError`, `TypedInstance`
+- Types: `SignatureFunction`, `TypeTest`, `SignatureTest`, `ArgConverter`, `MismatchHandler`
 - Functions: `create`, `isTypedFunction`
 - Default: `typed`
 
 ---
 
 ### `src/types.ts` - Type definitions re-exported for internal use
+
+**Exports:**
+- Interfaces: `SparseMatrix`, `Unit`, `MatrixConstructor`
+- Types: `BigNumber`, `Complex`, `Fraction`
 
 ---
 
@@ -431,6 +443,8 @@ The codebase is organized into the following modules:
 - Constants: `version`
 
 ---
+
+<a id="bignumber-dependencies"></a>
 
 ## Bignumber Dependencies
 
@@ -473,6 +487,8 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="error-dependencies"></a>
+
 ## Error Dependencies
 
 ### `src/error/ArgumentsError.ts` - Custom error type for wrong number of arguments
@@ -498,6 +514,8 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="factory-dependencies"></a>
+
 ## Factory Dependencies
 
 ### `src/factory/factory.ts` - MathTS Function Factory
@@ -511,8 +529,9 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `FunctionRegistry`
 - Interfaces: `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`
+- Types: `FactoryImport`
 - Functions: `createFactory`, `createTypedFunction`
-- Constants: `DEFAULT_CONFIG`, `addFactory`, `add`, `registry`, `math`
+- Constants: `DEFAULT_CONFIG`, `registry`, `math`
 
 ---
 
@@ -528,14 +547,11 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="function-dependencies"></a>
+
 ## Function Dependencies
 
 ### `src/function/config.ts` - Type for partial config options
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `mathjs` | `create, all` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -545,18 +561,13 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `ConfigFunction`
+- Types: `MatrixOption`, `NumberOption`, `ConfigOptions`, `EmitFunction`
 - Functions: `configFactory`
 - Constants: `MATRIX_OPTIONS`, `NUMBER_OPTIONS`
 
 ---
 
 ### `src/function/import.ts` - Import functions from an object or a module.
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `mathjs` | `create, all` |
-| `numbers` | `* as numbers` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -593,9 +604,11 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="entry-dependencies"></a>
+
 ## Entry Dependencies
 
-### `src/index.ts` - =============================================================================
+### `src/index.ts` - Core types and utilities for MathTS
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -603,26 +616,16 @@ The codebase is organized into the following modules:
 | `./types/complex.js` | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE` | Re-export |
 | `./types/fraction.js` | `Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER` | Re-export |
 | `./types/bignumber.js` | `BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10` | Re-export |
-| `./typed/index.js` | `// typed-function instance and factory
-  mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, // Type definitions and conversions for runtime dispatch
-  MATHTS_TYPES, MATHTS_CONVERSIONS, // Primitive type test functions
-  isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, // Matrix type test functions (duck typing until Matrix class)
-  isMatrix, isDenseMatrix, isSparseMatrix, // Unit type test function
-  isUnit, // WASM support for typed-function
-  initTypedWasm, isTypedWasmAvailable` | Re-export |
+| `./typed/index.js` | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes` | Re-export |
 | `./factory/index.js` | `FunctionRegistry, createFactory, registry, math, DEFAULT_CONFIG` | Re-export |
 
 **Exports:**
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `// typed-function instance and factory
-  mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `// Type definitions and conversions for runtime dispatch
-  MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `// Primitive type test functions
-  isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `// Matrix type test functions (duck typing until Matrix class)
-  isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `// Unit type test function
-  isUnit`, `// WASM support for typed-function
-  initTypedWasm`, `isTypedWasmAvailable`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`
 
 ---
+
+<a id="typed-dependencies"></a>
 
 ## Typed Dependencies
 
@@ -631,26 +634,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./mathts-typed.js` | `// typed-function instance and factory
-  mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, // Type definitions and conversions
-  MATHTS_TYPES, MATHTS_CONVERSIONS, // Primitive type test functions
-  isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, // MathTS type test functions (re-exported from types for convenience)
-  isComplex, isFraction, isBigNumber, // TypedArray test functions (for parallel-first operations)
-  isFloat64Array, isFloat32Array, isInt32Array, isUint32Array, isUint8Array, // Matrix type test functions (duck typing until Matrix class is implemented)
-  isMatrix, isDenseMatrix, isSparseMatrix, // Unit type test function
-  isUnit, // WASM support
-  initTypedWasm, isTypedWasmAvailable` | Re-export |
+| `./mathts-typed.js` | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isComplex, isFraction, isBigNumber, isFloat64Array, isFloat32Array, isInt32Array, isUint32Array, isUint8Array, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable` | Re-export |
+| `./type-bridge.js` | `registerNativeTypes` | Re-export |
 
 **Exports:**
-- Re-exports: `// typed-function instance and factory
-  mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `// Type definitions and conversions
-  MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `// Primitive type test functions
-  isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `// MathTS type test functions (re-exported from types for convenience)
-  isComplex`, `isFraction`, `isBigNumber`, `// TypedArray test functions (for parallel-first operations)
-  isFloat64Array`, `isFloat32Array`, `isInt32Array`, `isUint32Array`, `isUint8Array`, `// Matrix type test functions (duck typing until Matrix class is implemented)
-  isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `// Unit type test function
-  isUnit`, `// WASM support
-  initTypedWasm`, `isTypedWasmAvailable`
+- Re-exports: `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isComplex`, `isFraction`, `isBigNumber`, `isFloat64Array`, `isFloat32Array`, `isInt32Array`, `isUint32Array`, `isUint8Array`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`
 
 ---
 
@@ -661,7 +649,6 @@ The codebase is organized into the following modules:
 |---------|--------|
 | `typed-function` | `create, typed` |
 | `typed-function` | `TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToSelf` |
-| `@mathts/core` | `mathTyped, Complex, Fraction, BigNumber` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -677,6 +664,22 @@ The codebase is organized into the following modules:
 - Constants: `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isFloat64Array`, `isFloat32Array`, `isInt32Array`, `isUint32Array`, `isUint8Array`, `isComplex`, `isFraction`, `isBigNumber`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `mathTyped`
 
 ---
+
+### `src/typed/type-bridge.ts` - Type compatibility bridge for mathjs duck-typing.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/complex.js` | `Complex` | Import |
+| `../types/fraction.js` | `Fraction` | Import |
+| `../types/bignumber.js` | `BigNumber` | Import |
+
+**Exports:**
+- Functions: `registerNativeTypes`
+
+---
+
+<a id="types-dependencies"></a>
 
 ## Types Dependencies
 
@@ -704,6 +707,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `BigNumber`
 - Interfaces: `BigNumberConfig`
+- Types: `RoundingMode`
 - Functions: `isBigNumber`
 - Constants: `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`
 
@@ -799,9 +803,13 @@ The codebase is organized into the following modules:
 
 ### `src/types/interfaces.ts` - Base interfaces for MathTS types
 
+**Exports:**
+- Interfaces: `MathTSValue`, `Scalar`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`
+- Types: `BackendType`, `NumericType`
+
 ---
 
-### `src/types/matrix/DenseMatrix.ts` - Dense Matrix implementation. A regular, dense matrix, supporting multi-dimensional matrices. This is the default matrix type.
+### `src/types/matrix/DenseMatrix.ts` - Dense Matrix implementation. A regular, dense matrix, supporting multi-dimensional matrices. This is the default matrix 
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -899,6 +907,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `MatrixFormatOptions`, `Index`
+- Types: `MatrixForEachCallback`, `MatrixMapCallback`, `MatrixData`
 - Constants: `createMatrixClass`
 
 ---
@@ -915,6 +924,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `IndexJSON`
+- Types: `IndexDimension`, `IndexForEachCallback`
 - Constants: `createIndexClass`
 
 ---
@@ -930,6 +940,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `RangeFormatOptions`, `RangeJSON`
+- Types: `RangeForEachCallback`, `RangeMapCallback`
 - Constants: `createRangeClass`
 
 ---
@@ -1280,50 +1291,63 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="dependency-matrix"></a>
 ## Dependency Matrix
 
 ### File Import/Export Matrix
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `array` | 6 files | 2 files |
-| `bigint` | 0 files | 0 files |
-| `bitwise` | 0 files | 0 files |
-| `constants` | 1 files | 0 files |
-| `formatter` | 2 files | 1 files |
-| `nearlyEqual` | 0 files | 0 files |
-| `collection` | 4 files | 0 files |
-| `complex` | 1 files | 0 files |
-| `config` | 0 files | 2 files |
-| `constants` | 4 files | 0 files |
-| `create` | 10 files | 0 files |
-| `customs.d` | 0 files | 0 files |
-| `customs` | 1 files | 1 files |
-| `emitter` | 0 files | 0 files |
-| `ArgumentsError` | 0 files | 0 files |
-| `DimensionError` | 0 files | 12 files |
-| `IndexError` | 0 files | 0 files |
-| `factory` | 1 files | 1 files |
-| `index` | 1 files | 1 files |
-| `factory` | 1 files | 0 files |
-| `config` | 2 files | 1 files |
-| `import` | 5 files | 1 files |
-| `typed` | 3 files | 0 files |
-| `function` | 1 files | 1 files |
-| `index` | 5 files | 0 files |
-| `is` | 0 files | 9 files |
-| `latex.d` | 0 files | 0 files |
-| `latex` | 1 files | 0 files |
-| `log` | 0 files | 0 files |
-| `lruQueue` | 0 files | 1 files |
+| `src/error/DimensionError` | 0 files | 12 files |
+| `src/create` | 10 files | 0 files |
+| `src/is` | 0 files | 9 files |
+| `src/array` | 6 files | 2 files |
+| `src/types/matrix/DenseMatrix` | 8 files | 0 files |
+| `src/types/matrix/SparseMatrix` | 8 files | 0 files |
+| `src/types/unit/Unit` | 7 files | 0 files |
+| `src/function/import` | 5 files | 1 file |
+| `src/index` | 5 files | 0 files |
+| `src/number` | 1 file | 4 files |
+| `src/object` | 2 files | 3 files |
+| `src/string` | 3 files | 2 files |
+| `src/typed/mathts-typed` | 3 files | 2 files |
+| `src/types/bignumber` | 1 file | 4 files |
+| `src/types/complex` | 1 file | 4 files |
+| `src/types/fraction` | 1 file | 4 files |
+| `src/types/matrix/utils/matrixAlgorithmSuite` | 5 files | 0 files |
+| `src/collection` | 4 files | 0 files |
+| `src/constants` | 4 files | 0 files |
+| `src/typed/type-bridge` | 3 files | 1 file |
+| `src/types/chain/Chain` | 4 files | 0 files |
+| `src/types/matrix/MatrixIndex` | 4 files | 0 files |
+| `src/bignumber/formatter` | 2 files | 1 file |
+| `src/function/config` | 2 files | 1 file |
+| `src/function/typed` | 3 files | 0 files |
+| `src/map` | 2 files | 1 file |
+| `src/snapshot` | 3 files | 0 files |
+| `src/typed/index` | 2 files | 1 file |
+| `src/types/bigint` | 3 files | 0 files |
+| `src/types/index` | 3 files | 0 files |
+| `src/types/interfaces` | 0 files | 3 files |
+| `src/types/matrix/ImmutableDenseMatrix` | 3 files | 0 files |
+| `src/types/matrix/Range` | 3 files | 0 files |
+| `src/types/matrix/utils/broadcast` | 2 files | 1 file |
+| `src/types/matrix/utils/matAlgo06xS0S0` | 3 files | 0 files |
+| `src/types/matrix/utils/matAlgo13xDD` | 2 files | 1 file |
+| `src/types/matrix/utils/matAlgo14xDs` | 2 files | 1 file |
+| `src/types/string` | 3 files | 0 files |
+| `src/types` | 0 files | 3 files |
+| `src/config` | 0 files | 2 files |
 
 ---
 
+<a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
 **No circular dependencies detected.**
 ---
 
+<a id="visual-dependency-graph"></a>
 ## Visual Dependency Graph
 
 ```mermaid
@@ -1334,76 +1358,106 @@ graph TD
         N2[collection]
         N3[complex]
         N4[config]
-        N5[...30 more]
+        N5[constants]
+        N6[create]
+        N7[customs.d]
+        N8[customs]
+        N9[emitter]
+        N10[...25 more]
     end
 
     subgraph Bignumber
-        N6[bitwise]
-        N7[constants]
-        N8[formatter]
-        N9[nearlyEqual]
+        N11[bitwise]
+        N12[constants]
+        N13[formatter]
+        N14[nearlyEqual]
     end
 
     subgraph Error
-        N10[ArgumentsError]
-        N11[DimensionError]
-        N12[IndexError]
+        N15[ArgumentsError]
+        N16[DimensionError]
+        N17[IndexError]
     end
 
     subgraph Factory
-        N13[factory]
-        N14[index]
+        N18[factory]
+        N19[index]
     end
 
     subgraph Function
-        N15[config]
-        N16[import]
-        N17[typed]
+        N20[config]
+        N21[import]
+        N22[typed]
     end
 
     subgraph Entry
-        N18[index]
+        N23[index]
     end
 
     subgraph Typed
-        N19[index]
-        N20[mathts-typed]
+        N24[index]
+        N25[mathts-typed]
+        N26[type-bridge]
     end
 
     subgraph Types
-        N21[bigint]
-        N22[bignumber]
-        N23[boolean]
-        N24[Chain]
-        N25[chain]
-        N26[...39 more]
+        N27[bigint]
+        N28[bignumber]
+        N29[boolean]
+        N30[Chain]
+        N31[chain]
+        N32[complex]
+        N33[fraction]
+        N34[index]
+        N35[interfaces]
+        N36[DenseMatrix]
+        N37[...34 more]
     end
 
     N2 --> N0
-    N13 --> N20
-    N14 --> N13
-    N15 --> N4
-    N18 --> N22
-    N18 --> N19
-    N18 --> N14
-    N19 --> N20
-    N20 --> N22
+    N6 --> N4
+    N6 --> N20
+    N6 --> N21
+    N18 --> N25
+    N19 --> N18
+    N20 --> N4
+    N23 --> N32
+    N23 --> N33
+    N23 --> N28
+    N23 --> N24
+    N23 --> N19
+    N24 --> N25
+    N24 --> N26
+    N25 --> N32
+    N25 --> N33
+    N25 --> N28
+    N26 --> N32
+    N26 --> N33
+    N26 --> N28
+    N28 --> N35
+    N32 --> N35
+    N33 --> N35
+    N34 --> N32
+    N34 --> N33
+    N34 --> N28
+    N36 --> N16
 ```
 
 ---
 
+<a id="summary-statistics"></a>
 ## Summary Statistics
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 94 |
+| Total TypeScript Files | 95 |
 | Total Modules | 8 |
-| Total Lines of Code | 23142 |
+| Total Lines of Code | 23780 |
 | Total Exports | 512 |
-| Total Re-exports | 113 |
+| Total Re-exports | 115 |
 | Total Classes | 10 |
 | Total Interfaces | 82 |
-| Total Functions | 188 |
+| Total Functions | 189 |
 | Total Type Guards | 58 |
 | Total Enums | 0 |
 | Type-only Imports | 6 |
@@ -1412,5 +1466,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-02-06
+*Last Updated*: 2026-04-04
 *Version*: 0.1.0
