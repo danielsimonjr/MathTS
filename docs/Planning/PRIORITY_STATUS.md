@@ -146,6 +146,39 @@ Priority 3 (release prep) — independent, can run in parallel
 Priority 4 (WASM/parallel optimization) — independent, can run in parallel
 ```
 
+## Feature Plans Status (docs/plans/)
+
+| Plan | Date | Topic | Status | Evidence |
+|------|------|-------|--------|----------|
+| ts-wasm-optimization | 2026-03-01 | WASM SIMD, workPtr validation, dedup | **MOSTLY DONE** | Assembly builds, 432 exports, WASMBackend works |
+| scientific-calculator | 2026-03-04 | Electron desktop app (5 panels) | **NOT STARTED** | No mathjs-calc directory |
+| deno-notebook | 2026-03-05 | Deno notebook for live documents | **NOT STARTED** | No deno.json |
+| ise-gap-analysis | 2026-03-05 | ISE Workbench gap analysis | **DESIGN ONLY** | Analysis doc, no implementation |
+| ise-guided-discovery | 2026-03-05 | ISE user education design | **DESIGN ONLY** | Design doc, no implementation |
+| ise-workbench | 2026-03-05 | ISE 3-zone workbench (calc+graph+expr) | **NOT STARTED** | 0/16 plan tasks, no implementation |
+| as-to-rust-wasm | 2026-03-11 | Migrate WASM from AssemblyScript to Rust | **PARTIALLY DONE** | 75 .rs files, 2 .wasm built, crate structure exists |
+| wasm-opportunity-audit | 2026-03-11 | Audit codebase for WASM opportunities | **DONE** | Tiered recommendations generated |
+
+## Roadmap Status (docs/roadmap/)
+
+| Plan | Topic | Status | Evidence |
+|------|-------|--------|----------|
+| typed-function improvements | Fork enhancements: error msgs, perf, types | **PARTIALLY DONE** | Package exists, has tests, but improvements list not tracked |
+| workerpool improvements | Fork enhancements: TypeScript, monitoring | **PARTIALLY DONE** | Package exists, has tests, but improvements list not tracked |
+
+## Feature Plans — Priority by Dependency & Complexity
+
+| Priority | Plan | Depends On | Complexity | Value |
+|----------|------|-----------|------------|-------|
+| **A** | Rust WASM migration | WASM optimization (done) | High | High — Rust WASM is 2-5x faster than AS |
+| **B** | Scientific calculator | Core integration (Priorities 1-2) | Medium | High — demonstrates library capabilities |
+| **C** | ISE Workbench | Expression evaluator (Priority 5), calculator | High | High — flagship product |
+| **D** | typed-function improvements | Independent | Low | Medium — improves error messages, perf |
+| **E** | workerpool improvements | Independent | Low | Medium — improves monitoring, TypeScript |
+| **F** | Deno notebook | Workbook + Expression | Medium | Low — alternative to ISE |
+
+---
+
 ## What's Verified Working Today
 
 | Component | Evidence |
