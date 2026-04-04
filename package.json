@@ -24,17 +24,23 @@
   "scripts": {
     "build": "turbo run build",
     "build:wasm": "npm run asbuild -w @mathts/wasm",
+    "build:wasm:rust": "bash wasm-rust/scripts/build.sh",
+    "build:wasm:all": "npm run build:wasm && npm run build:wasm:rust",
     "dev": "turbo run dev",
     "test": "turbo run test",
     "test:wasm": "npm run test -w @mathts/wasm",
+    "test:wasm:integration": "vitest run tests/wasm/",
     "test:coverage": "turbo run test:coverage",
+    "bench:wasm": "npx tsx tests/benchmark/wasm_rust_vs_as_benchmark.ts",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "turbo run clean && rm -rf node_modules",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:prod": "turbo run build:prod",
+    "release": "changeset version && npm run build"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

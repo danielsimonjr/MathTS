@@ -30,7 +30,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "build:prod": "tsup src/index.ts src/cli.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
     "@mathts/core": "*",

@@ -54,5 +54,8 @@
   },
   "bugs": {
     "url": "https://github.com/danielsimonjr/MathTS/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

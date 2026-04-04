@@ -13,13 +13,14 @@
   },
   "files": [
     "dist",
-    "src"
+    "README.md"
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
     "@mathts/core": "*",
@@ -46,5 +47,9 @@
     "type": "git",
     "url": "https://github.com/danielsimonjr/Mathts.git",
     "directory": "compat"
+  },
+  "module": "./dist/index.js",
+  "publishConfig": {
+    "access": "public"
   }
 }

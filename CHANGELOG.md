@@ -38,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Final factory cascade (tiers 10-18): 67 more factories — subtract, divide, simplify, derivative, rationalize, eigs, fft/ifft, mean/median/variance/std, all set operations, solveODE, Chain/Unit, sqrtm, norm, cross, diff
 - Expression node constructors (all 16 types) injected into factory scope for full AST support
 - 242/273 mathjs factories active (89%) — remaining 31 are infrastructure types already in @mathts/core
+- Real SparseMatrix bridge with CSC (Compressed Sparse Column) storage — `_values`, `_index`, `_ptr` with get/set, map, forEach, resize, diagonal, row swap
+- npm publishing setup — all 10 packages have `publishConfig`, `files`, `repository`; root `release` script via changesets
+- Production build optimization (`build:prod`) — minified + tree-shaken bundles, 57% size reduction (1524 KB → 662 KB)
+- Performance regression test suite (`tests/benchmark/performance.test.ts`) — 23 benchmarks covering Complex, BigNumber, Fraction, DenseMatrix, typed dispatch, and factory functions
 - Initial project structure with monorepo setup
 - @mathts/core package with type definitions and utilities
 - GitHub Actions CI/CD workflows
