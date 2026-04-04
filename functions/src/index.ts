@@ -14,3 +14,6 @@ export * from './typed/index.js';
 
 // Activated mathjs leaf factory functions
 export * from './factories/index.js';
+
+// Expression evaluator (wired to full math scope)
+export { evaluate, compileExpr, parse } from './factories/evaluate.js';

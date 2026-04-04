@@ -30,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expression evaluator (`expression/src/evaluator/evaluate.ts`) — `createEvaluate()` factory for `evaluate(expr, scope)` API
 - Parallel operation benchmarks (`parallel/tests/benchmark.test.ts`) — 18 tests covering elementwise, reduce, matmul
 - Priority status tracker (`docs/Planning/PRIORITY_STATUS.md`) with dependency chain analysis
+- Tiered factory cascade activation (tiers 4-9): 73 additional factories including equal, compare, larger, smaller, gcd, lcm, mod, pow, ceil, floor, inv, pinv, qr, concat, subset, range, sort, factorial, gamma, permutations, bellNumbers, stirlingS2
+- `evaluate()` function wired to activated factory scope — `evaluate('sin(pi/2)')` works end-to-end
+- `parse()` bootstrapped from expression node factories through dependency-ordered scope injection
+- `compileExpr()` for reusable compiled expressions
+- Index and Range stub types registered in typed-function for subset/range factory activation
 - Initial project structure with monorepo setup
 - @mathts/core package with type definitions and utilities
 - GitHub Actions CI/CD workflows

@@ -11,6 +11,7 @@
     "noEmit": true,
     "paths": {
       "@mathts/core": ["../core/src"],
+      "@mathts/expression": ["../expression/src"],
       "@mathts/matrix": ["../matrix/src"],
       "@mathts/parallel": ["../parallel/src"],
       "workerpool": ["../parallel/types/workerpool.d.ts"]

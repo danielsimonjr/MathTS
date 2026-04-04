@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@mathts/core": "*",
+    "@mathts/expression": "*",
     "@mathts/matrix": "*",
     "@mathts/parallel": "*",
     "bignumber.js": "^9.1.2",

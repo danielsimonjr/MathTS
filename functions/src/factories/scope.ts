@@ -25,6 +25,10 @@ const extraTypes = [
   { name: 'function', test: (x: unknown): x is Function => typeof x === 'function' },
   // Expression 'Node' type — stub that never matches (expression package not active)
   { name: 'Node', test: (_x: unknown): _x is never => false },
+  // Index type — stub that matches objects with isIndex flag
+  { name: 'Index', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isIndex === true },
+  // Range type — stub that matches objects with isRange flag
+  { name: 'Range', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isRange === true },
   // Note: DenseMatrix, SparseMatrix, Matrix types are already registered by @mathts/core.
   // MathJSDenseMatrix passes their duck-type tests via .rows, .cols, .get, .type properties.
 ];
