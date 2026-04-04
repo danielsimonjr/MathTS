@@ -322,7 +322,8 @@ Object.defineProperty(MathJSDenseMatrix.prototype, 'isMatrix', {
 });
 Object.defineProperty(MathJSDenseMatrix.prototype, 'type', {
   value: 'DenseMatrix',
-  writable: false,
+  writable: true,
+  configurable: true,
   enumerable: false,
 });
 

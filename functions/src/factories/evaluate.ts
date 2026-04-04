@@ -1,8 +1,8 @@
 /**
  * Expression evaluator wired to the activated factory scope.
  *
- * Bootstraps the mathjs parse system (node constructors + createParse)
- * and connects it to the full activated math scope, producing a top-level
+ * Reuses the parse function and node constructors built in index.ts
+ * and connects them to the full activated math scope, producing a top-level
  * `evaluate(expr, scope?)` function.
  *
  * @packageDocumentation
@@ -11,26 +11,8 @@
 import {
   createEvaluate,
   compileExpression as _compileExpression,
-  createParse,
-  createNode,
-  createAccessorNode,
-  createArrayNode,
-  createAssignmentNode,
-  createBlockNode,
-  createConditionalNode,
-  createConstantNode,
-  createFunctionAssignmentNode,
-  createFunctionNode,
-  createIndexNode,
-  createObjectNode,
-  createOperatorNode,
-  createParenthesisNode,
-  createRangeNode,
-  createRelationalNode,
-  createSymbolNode,
 } from '@mathts/expression';
 
-import { createResultSet } from '../type/resultset/ResultSet.js';
 import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';
 import * as typedFns from '../typed/index.js';
@@ -61,103 +43,20 @@ const mathScope: Record<string, any> = {
 };
 
 // ---------------------------------------------------------------------------
-// Step 2: Bootstrap node constructors
-// Order matters: Node must come first (all others depend on it)
+// Step 2: Reuse parse from index.ts (already built with node constructors)
 // ---------------------------------------------------------------------------
-
-// ResultSet class (needed by BlockNode)
-const ResultSet = createResultSet({});
-
-// Base Node class — needs mathWithTransform (full math scope used as proxy)
-const Node = createNode({ mathWithTransform: mathScope });
-
-// Simple nodes that only need Node
-const ArrayNode = createArrayNode({ Node });
-const ObjectNode = createObjectNode({ Node });
-const OperatorNode = createOperatorNode({ Node });
-const ParenthesisNode = createParenthesisNode({ Node });
-const RangeNode = createRangeNode({ Node });
-const RelationalNode = createRelationalNode({ Node });
-const ConditionalNode = createConditionalNode({ Node });
-const BlockNode = createBlockNode({ ResultSet, Node });
-
-// ConstantNode needs Node + isBounded
-const ConstantNode = createConstantNode({
-  Node,
-  isBounded: (activatedFactories as any).isBounded,
-});
-
-// FunctionAssignmentNode needs typed + Node
-const FunctionAssignmentNode = createFunctionAssignmentNode({
-  typed: (factoryScope as any).typed,
-  Node,
-});
-
-// AccessorNode needs subset + Node
-const AccessorNode = createAccessorNode({
-  subset: (activatedFactories as any).subset,
-  Node,
-});
-
-// AssignmentNode needs subset + matrix + Node
-const AssignmentNode = createAssignmentNode({
-  subset: (activatedFactories as any).subset,
-  matrix: (factoryScope as any).matrix,
-  Node,
-});
-
-// IndexNode needs Node + size
-const IndexNode = createIndexNode({
-  Node,
-  size: (activatedFactories as any).size,
-});
-
-// SymbolNode needs math + Node (Unit is optional — omitted)
-const SymbolNode = createSymbolNode({
-  math: mathScope,
-  Node,
-});
-
-// FunctionNode needs math + Node + SymbolNode
-const FunctionNode = createFunctionNode({
-  math: mathScope,
-  Node,
-  SymbolNode,
-});
-
-// ---------------------------------------------------------------------------
-// Step 3: Create the parse function
-// ---------------------------------------------------------------------------
-
-const parseScope: Record<string, any> = {
-  typed: (factoryScope as any).typed,
-  numeric: (activatedFactories as any).numeric,
-  config: (factoryScope as any).config,
-  AccessorNode,
-  ArrayNode,
-  AssignmentNode,
-  BlockNode,
-  ConditionalNode,
-  ConstantNode,
-  FunctionAssignmentNode,
-  FunctionNode,
-  IndexNode,
-  ObjectNode,
-  OperatorNode,
-  ParenthesisNode,
-  RangeNode,
-  RelationalNode,
-  SymbolNode,
-};
 
 /**
  * Parse a math expression string into an AST node.
  * Can be used for inspection or pre-compilation.
+ *
+ * Reuses the parse function built in index.ts to avoid duplicate
+ * typed-function conversion registrations.
  */
-export const parse = createParse(parseScope);
+export const parse = (factoryScope as any).parse;
 
 // ---------------------------------------------------------------------------
-// Step 4: Create the evaluate function
+// Step 3: Create the evaluate function
 // ---------------------------------------------------------------------------
 
 /**

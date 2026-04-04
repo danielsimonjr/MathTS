@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `parse()` bootstrapped from expression node factories through dependency-ordered scope injection
 - `compileExpr()` for reusable compiled expressions
 - Index and Range stub types registered in typed-function for subset/range factory activation
+- Final factory cascade (tiers 10-18): 67 more factories — subtract, divide, simplify, derivative, rationalize, eigs, fft/ifft, mean/median/variance/std, all set operations, solveODE, Chain/Unit, sqrtm, norm, cross, diff
+- Expression node constructors (all 16 types) injected into factory scope for full AST support
+- 242/273 mathjs factories active (89%) — remaining 31 are infrastructure types already in @mathts/core
 - Initial project structure with monorepo setup
 - @mathts/core package with type definitions and utilities
 - GitHub Actions CI/CD workflows

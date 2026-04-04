@@ -295,6 +295,17 @@ factoryScope.square = factory_square;
 factoryScope.tan = factory_tan;
 factoryScope.tanh = factory_tanh;
 factoryScope.typeOf = typeOf;
+factoryScope.getMatrixDataType = getMatrixDataType;
+factoryScope.random = random;
+factoryScope.pickRandom = pickRandom;
+factoryScope.toBest = toBest;
+factoryScope.acoth = acoth;
+factoryScope.acsch = acsch;
+factoryScope.asech = asech;
+factoryScope.coth = coth;
+factoryScope.csch = csch;
+factoryScope.sech = sech;
+factoryScope.map = map;
 
 // ---------------------------------------------------------------------------
 // Tier 2: activate factories
@@ -832,11 +843,456 @@ export const bellNumbers = createBellNumbers(factoryScope as any);
 factoryScope.bellNumbers = bellNumbers;
 
 // ---------------------------------------------------------------------------
-// Tier 10+: factories still blocked (79 remaining)
+// Expression node injection: build node constructors and inject into scope
+// so that nodeOperations, subtract, divide, simplify, etc. can find them.
 // ---------------------------------------------------------------------------
-// The main blockers are:
-// - subtract (20 factories): needs nodeOperations (expression infrastructure)
-// - divide (13 factories): needs nodeOperations
-// - Node/parse/evaluate (14+ factories): expression AST infrastructure
-// - Index (11 factories): needs expression IndexNode
-// These require the expression package to be activated first.
+
+import {
+  createNode,
+  createAccessorNode,
+  createArrayNode,
+  createAssignmentNode,
+  createBlockNode,
+  createConditionalNode,
+  createConstantNode,
+  createFunctionAssignmentNode,
+  createFunctionNode,
+  createIndexNode,
+  createObjectNode,
+  createOperatorNode,
+  createParenthesisNode,
+  createRangeNode,
+  createRelationalNode,
+  createSymbolNode,
+  createParse,
+} from '@mathts/expression';
+
+import { createResultSet } from '../type/resultset/ResultSet.js';
+
+// Build a mathWithTransform proxy (full math scope used as a proxy for now)
+const _mathWithTransform: Record<string, any> = { ...factoryScope };
+factoryScope.mathWithTransform = _mathWithTransform;
+
+// ResultSet class (needed by BlockNode)
+const _ResultSet = createResultSet({});
+factoryScope.ResultSet = _ResultSet;
+
+// Base Node class
+const _Node = createNode({ mathWithTransform: _mathWithTransform });
+factoryScope.Node = _Node;
+
+// Simple nodes
+const _ArrayNode = createArrayNode({ Node: _Node });
+factoryScope.ArrayNode = _ArrayNode;
+
+const _ObjectNode = createObjectNode({ Node: _Node });
+factoryScope.ObjectNode = _ObjectNode;
+
+const _OperatorNode = createOperatorNode({ Node: _Node });
+factoryScope.OperatorNode = _OperatorNode;
+
+const _ParenthesisNode = createParenthesisNode({ Node: _Node });
+factoryScope.ParenthesisNode = _ParenthesisNode;
+
+const _RangeNode = createRangeNode({ Node: _Node });
+factoryScope.RangeNode = _RangeNode;
+
+const _RelationalNode = createRelationalNode({ Node: _Node });
+factoryScope.RelationalNode = _RelationalNode;
+
+const _ConditionalNode = createConditionalNode({ Node: _Node });
+factoryScope.ConditionalNode = _ConditionalNode;
+
+const _BlockNode = createBlockNode({ ResultSet: _ResultSet, Node: _Node });
+factoryScope.BlockNode = _BlockNode;
+
+const _ConstantNode = createConstantNode({
+  Node: _Node,
+  isBounded: isBounded,
+});
+factoryScope.ConstantNode = _ConstantNode;
+
+const _FunctionAssignmentNode = createFunctionAssignmentNode({
+  typed: factoryScope.typed,
+  Node: _Node,
+});
+factoryScope.FunctionAssignmentNode = _FunctionAssignmentNode;
+
+const _AccessorNode = createAccessorNode({
+  subset: subset,
+  Node: _Node,
+});
+factoryScope.AccessorNode = _AccessorNode;
+
+const _AssignmentNode = createAssignmentNode({
+  subset: subset,
+  matrix: factoryScope.matrix,
+  Node: _Node,
+});
+factoryScope.AssignmentNode = _AssignmentNode;
+
+const _IndexNode = createIndexNode({
+  Node: _Node,
+  size: size,
+});
+factoryScope.IndexNode = _IndexNode;
+
+const _SymbolNode = createSymbolNode({
+  math: factoryScope,
+  Node: _Node,
+});
+factoryScope.SymbolNode = _SymbolNode;
+
+const _FunctionNode = createFunctionNode({
+  math: factoryScope,
+  Node: _Node,
+  SymbolNode: _SymbolNode,
+});
+factoryScope.FunctionNode = _FunctionNode;
+
+// Build the parse function
+const _parseScope: Record<string, any> = {
+  typed: factoryScope.typed,
+  numeric: numeric,
+  config: factoryScope.config,
+  AccessorNode: _AccessorNode,
+  ArrayNode: _ArrayNode,
+  AssignmentNode: _AssignmentNode,
+  BlockNode: _BlockNode,
+  ConditionalNode: _ConditionalNode,
+  ConstantNode: _ConstantNode,
+  FunctionAssignmentNode: _FunctionAssignmentNode,
+  FunctionNode: _FunctionNode,
+  IndexNode: _IndexNode,
+  ObjectNode: _ObjectNode,
+  OperatorNode: _OperatorNode,
+  ParenthesisNode: _ParenthesisNode,
+  RangeNode: _RangeNode,
+  RelationalNode: _RelationalNode,
+  SymbolNode: _SymbolNode,
+};
+const _parse = createParse(_parseScope);
+factoryScope.parse = _parse;
+
+// Math constants needed by some factories
+factoryScope.pi = Math.PI;
+factoryScope.tau = 2 * Math.PI;
+factoryScope.i = new (factoryScope.Complex as any)(0, 1);
+factoryScope.e = Math.E;
+
+// 'replacer' is a JSON serialization utility — provide a simple identity stub
+factoryScope.replacer = (_key: string, value: unknown) => value;
+
+// 'math' for Chain — provide factoryScope itself as the math namespace
+factoryScope.math = factoryScope;
+
+// ---------------------------------------------------------------------------
+// Tier 11: expression-dependent factories (nodeOperations, simplify utils, etc.)
+// ---------------------------------------------------------------------------
+
+import { createNodeOperations } from '../arithmetic/utils/nodeOperations.js';
+import { createLeafCount } from '../algebra/leafCount.js';
+import { createResolve } from '../algebra/resolve.js';
+import { createSimplifyConstant } from '../algebra/simplifyConstant.js';
+import { createUtil as createSimplifyUtil } from '../algebra/simplify/util.js';
+import { createSplitUnit } from '../type/unit/function/splitUnit.js';
+import { createFft } from '../matrix/fft.js';
+import { createChainClass } from '../type/chain/Chain.js';
+
+export const nodeOperations = createNodeOperations(factoryScope as any);
+factoryScope.nodeOperations = nodeOperations;
+
+export const leafCount = createLeafCount(factoryScope as any);
+factoryScope.leafCount = leafCount;
+
+export const resolve = createResolve(factoryScope as any);
+factoryScope.resolve = resolve;
+
+export const simplifyConstant = createSimplifyConstant(factoryScope as any);
+factoryScope.simplifyConstant = simplifyConstant;
+
+export const simplifyUtil = createSimplifyUtil(factoryScope as any);
+factoryScope.simplifyUtil = simplifyUtil;
+
+export const splitUnit = createSplitUnit(factoryScope as any);
+factoryScope.splitUnit = splitUnit;
+
+export const fft = createFft(factoryScope as any);
+factoryScope.fft = fft;
+
+export const Chain = createChainClass(factoryScope as any);
+factoryScope.Chain = Chain;
+
+// ---------------------------------------------------------------------------
+// Tier 12: subtract, divide, and dependent types
+// ---------------------------------------------------------------------------
+
+import { createSubtract } from '../arithmetic/subtract.js';
+import { createDivide } from '../arithmetic/divide.js';
+import { createIfft } from '../matrix/ifft.js';
+import { createIndexClass } from '../type/matrix/MatrixIndex.js';
+import { createChain } from '../type/chain/function/chain.js';
+import { createCreateUnit } from '../type/unit/function/createUnit.js';
+import { createUnitFunction } from '../type/unit/function/unit.js';
+import { createUnitClass } from '../type/unit/Unit.js';
+import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
+import { createImmutableDenseMatrixClass } from '../type/matrix/ImmutableDenseMatrix.js';
+
+// Need type constructors for downstream factories
+const _Unit = createUnitClass(factoryScope as any);
+factoryScope.Unit = _Unit;
+
+const _FibonacciHeap = createFibonacciHeapClass(factoryScope as any);
+factoryScope.FibonacciHeap = _FibonacciHeap;
+
+const _ImmutableDenseMatrix = createImmutableDenseMatrixClass(factoryScope as any);
+factoryScope.ImmutableDenseMatrix = _ImmutableDenseMatrix;
+
+export const factory_subtract = createSubtract(factoryScope as any);
+factoryScope.subtract = factory_subtract;
+
+export const factory_divide = createDivide(factoryScope as any);
+factoryScope.divide = factory_divide;
+
+export const ifft = createIfft(factoryScope as any);
+factoryScope.ifft = ifft;
+
+const _Index = createIndexClass(factoryScope as any);
+factoryScope.Index = _Index;
+
+export const chain = createChain(factoryScope as any);
+factoryScope.chain = chain;
+
+export const factory_createUnit = createCreateUnit(factoryScope as any);
+factoryScope.createUnit = factory_createUnit;
+
+export const unit = createUnitFunction(factoryScope as any);
+factoryScope.unit = unit;
+
+// ---------------------------------------------------------------------------
+// Tier 13: factories unlocked by subtract, divide, Index
+// ---------------------------------------------------------------------------
+
+import { createColumn } from '../matrix/column.js';
+import { createRow } from '../matrix/row.js';
+import { createCross } from '../matrix/cross.js';
+import { createDiff } from '../matrix/diff.js';
+import { createSqrtm } from '../matrix/sqrtm.js';
+import { createLup } from '../algebra/decomposition/lup.js';
+import { createSlu } from '../algebra/decomposition/slu.js';
+import { createCsChol } from '../algebra/sparse/csChol.js';
+import { createCsLu } from '../algebra/sparse/csLu.js';
+import { createCsSpsolve } from '../algebra/sparse/csSpsolve.js';
+import { createSpaClass } from '../type/matrix/Spa.js';
+import { createIntersect } from '../geometry/intersect.js';
+import { createMean } from '../statistics/mean.js';
+import { createMedian } from '../statistics/median.js';
+import { createVariance } from '../statistics/variance.js';
+import { createQuantileSeq } from '../statistics/quantileSeq.js';
+import { createKldivergence } from '../probability/kldivergence.js';
+import { createMultinomial } from '../probability/multinomial.js';
+import { createFreqz } from '../signal/freqz.js';
+import { createSetCartesian } from '../set/setCartesian.js';
+import { createSetDifference } from '../set/setDifference.js';
+import { createSetDistinct } from '../set/setDistinct.js';
+import { createSetIntersect } from '../set/setIntersect.js';
+import { createSetIsSubset } from '../set/setIsSubset.js';
+import { createSetMultiplicity } from '../set/setMultiplicity.js';
+import { createSetPowerset } from '../set/setPowerset.js';
+import { createSimplifyCore } from '../algebra/simplifyCore.js';
+import { createPolynomialRoot } from '../algebra/polynomialRoot.js';
+import { createSolveODE } from '../numeric/solveODE.js';
+import { createZeta } from '../special/zeta.js';
+import { createIndex as createIndexFn } from '../type/matrix/function/index.js';
+
+// Spa needs FibonacciHeap
+const _Spa = createSpaClass(factoryScope as any);
+factoryScope.Spa = _Spa;
+
+export const column = createColumn(factoryScope as any);
+factoryScope.column = column;
+
+export const row = createRow(factoryScope as any);
+factoryScope.row = row;
+
+export const cross = createCross(factoryScope as any);
+factoryScope.cross = cross;
+
+export const diff = createDiff(factoryScope as any);
+factoryScope.diff = diff;
+
+export const sqrtm = createSqrtm(factoryScope as any);
+factoryScope.sqrtm = sqrtm;
+
+export const lup = createLup(factoryScope as any);
+factoryScope.lup = lup;
+
+export const slu = createSlu(factoryScope as any);
+factoryScope.slu = slu;
+
+export const csChol = createCsChol(factoryScope as any);
+factoryScope.csChol = csChol;
+
+export const csLu = createCsLu(factoryScope as any);
+factoryScope.csLu = csLu;
+
+export const csSpsolve = createCsSpsolve(factoryScope as any);
+factoryScope.csSpsolve = csSpsolve;
+
+export const intersect = createIntersect(factoryScope as any);
+factoryScope.intersect = intersect;
+
+export const factory_mean = createMean(factoryScope as any);
+factoryScope.mean = factory_mean;
+
+export const median = createMedian(factoryScope as any);
+factoryScope.median = median;
+
+export const factory_variance = createVariance(factoryScope as any);
+factoryScope.variance = factory_variance;
+
+export const quantileSeq = createQuantileSeq(factoryScope as any);
+factoryScope.quantileSeq = quantileSeq;
+
+export const kldivergence = createKldivergence(factoryScope as any);
+factoryScope.kldivergence = kldivergence;
+
+export const multinomial = createMultinomial(factoryScope as any);
+factoryScope.multinomial = multinomial;
+
+export const freqz = createFreqz(factoryScope as any);
+factoryScope.freqz = freqz;
+
+export const setCartesian = createSetCartesian(factoryScope as any);
+factoryScope.setCartesian = setCartesian;
+
+export const setDifference = createSetDifference(factoryScope as any);
+factoryScope.setDifference = setDifference;
+
+export const setDistinct = createSetDistinct(factoryScope as any);
+factoryScope.setDistinct = setDistinct;
+
+export const setIntersect = createSetIntersect(factoryScope as any);
+factoryScope.setIntersect = setIntersect;
+
+export const setIsSubset = createSetIsSubset(factoryScope as any);
+factoryScope.setIsSubset = setIsSubset;
+
+export const setMultiplicity = createSetMultiplicity(factoryScope as any);
+factoryScope.setMultiplicity = setMultiplicity;
+
+export const setPowerset = createSetPowerset(factoryScope as any);
+factoryScope.setPowerset = setPowerset;
+
+export const simplifyCore = createSimplifyCore(factoryScope as any);
+factoryScope.simplifyCore = simplifyCore;
+
+export const polynomialRoot = createPolynomialRoot(factoryScope as any);
+factoryScope.polynomialRoot = polynomialRoot;
+
+export const solveODE = createSolveODE(factoryScope as any);
+factoryScope.solveODE = solveODE;
+
+export const zeta = createZeta(factoryScope as any);
+factoryScope.zeta = zeta;
+
+export const indexFn = createIndexFn(factoryScope as any);
+factoryScope.index = indexFn;
+
+// ---------------------------------------------------------------------------
+// Tier 14: factories unlocked by tier 13
+// ---------------------------------------------------------------------------
+
+import { createEigs } from '../matrix/eigs.js';
+import { createLusolve } from '../algebra/solver/lusolve.js';
+import { createCorr } from '../statistics/corr.js';
+import { createMad } from '../statistics/mad.js';
+import { createStd } from '../statistics/std.js';
+import { createSetSymDifference } from '../set/setSymDifference.js';
+import { createSimplify } from '../algebra/simplify.js';
+
+export const eigs = createEigs(factoryScope as any);
+factoryScope.eigs = eigs;
+
+export const lusolve = createLusolve(factoryScope as any);
+factoryScope.lusolve = lusolve;
+
+export const corr = createCorr(factoryScope as any);
+factoryScope.corr = corr;
+
+export const mad = createMad(factoryScope as any);
+factoryScope.mad = mad;
+
+export const factory_std = createStd(factoryScope as any);
+factoryScope.std = factory_std;
+
+export const setSymDifference = createSetSymDifference(factoryScope as any);
+factoryScope.setSymDifference = setSymDifference;
+
+export const simplify = createSimplify(factoryScope as any);
+factoryScope.simplify = simplify;
+
+// ---------------------------------------------------------------------------
+// Tier 15: factories unlocked by tier 14
+// ---------------------------------------------------------------------------
+
+import { createDerivative } from '../algebra/derivative.js';
+import { createNorm } from '../arithmetic/norm.js';
+import { createRationalize } from '../algebra/rationalize.js';
+import { createSetUnion } from '../set/setUnion.js';
+import { createSymbolicEqual } from '../algebra/symbolicEqual.js';
+
+export const derivative = createDerivative(factoryScope as any);
+factoryScope.derivative = derivative;
+
+export const factory_norm = createNorm(factoryScope as any);
+factoryScope.norm = factory_norm;
+
+export const rationalize = createRationalize(factoryScope as any);
+factoryScope.rationalize = rationalize;
+
+export const setUnion = createSetUnion(factoryScope as any);
+factoryScope.setUnion = setUnion;
+
+export const symbolicEqual = createSymbolicEqual(factoryScope as any);
+factoryScope.symbolicEqual = symbolicEqual;
+
+// ---------------------------------------------------------------------------
+// Tier 16: factories unlocked by tier 15
+// ---------------------------------------------------------------------------
+
+import { createRotationMatrix } from '../matrix/rotationMatrix.js';
+import { createSchur } from '../algebra/decomposition/schur.js';
+
+export const rotationMatrix = createRotationMatrix(factoryScope as any);
+factoryScope.rotationMatrix = rotationMatrix;
+
+export const schur = createSchur(factoryScope as any);
+factoryScope.schur = schur;
+
+// ---------------------------------------------------------------------------
+// Tier 17: factories unlocked by tier 16
+// ---------------------------------------------------------------------------
+
+import { createRotate } from '../matrix/rotate.js';
+import { createSylvester } from '../algebra/sylvester.js';
+
+export const rotate = createRotate(factoryScope as any);
+factoryScope.rotate = rotate;
+
+export const sylvester = createSylvester(factoryScope as any);
+factoryScope.sylvester = sylvester;
+
+// ---------------------------------------------------------------------------
+// Tier 18: factories unlocked by tier 17
+// ---------------------------------------------------------------------------
+
+import { createLyap } from '../algebra/lyap.js';
+
+export const lyap = createLyap(factoryScope as any);
+factoryScope.lyap = lyap;
+
+// ---------------------------------------------------------------------------
+// Update mathWithTransform with all activated factories
+// ---------------------------------------------------------------------------
+Object.assign(_mathWithTransform, factoryScope);
