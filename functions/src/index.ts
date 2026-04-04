@@ -11,3 +11,6 @@
 
 // Typed functions (polymorphic via mathTyped)
 export * from './typed/index.js';
+
+// Activated mathjs leaf factory functions
+export * from './factories/index.js';

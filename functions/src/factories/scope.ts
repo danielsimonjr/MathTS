@@ -1,0 +1,52 @@
+/**
+ * Shared factory scope for activating synced mathjs factory functions.
+ *
+ * Provides all dependencies that leaf factories may request:
+ * typed, config, Complex, BigNumber, Fraction, and helper constructors.
+ */
+
+import { mathTyped, Complex, Fraction, BigNumber } from '@mathts/core';
+import { initTypeBridge } from '../typed/typed-bridge.js';
+import { DEFAULT_CONFIG } from '../core/config.js';
+
+// Initialize type bridge so typed-function recognizes native types
+initTypeBridge();
+
+// Register extra types that mathjs factories reference in their typed() signatures
+// but aren't in the default MathTS typed-function instance.
+const typed = mathTyped as any;
+const extraTypes = [
+  // mathjs uses lowercase 'function' in signatures; typed-function registers 'Function'
+  { name: 'function', test: (x: unknown): x is Function => typeof x === 'function' },
+  // Expression 'Node' type — stub that never matches (expression package not active)
+  { name: 'Node', test: (_x: unknown): _x is never => false },
+];
+
+for (const t of extraTypes) {
+  try {
+    typed.addType(t, false);
+  } catch {
+    // Already registered — ignore
+  }
+}
+
+/**
+ * The scope object passed to each factory's assertAndCreate().
+ * Keys match the dependency names factories declare.
+ */
+export const factoryScope: Record<string, unknown> = {
+  typed: mathTyped,
+  config: DEFAULT_CONFIG,
+
+  // Class constructors (uppercase) — factories use `new BigNumber(...)` etc.
+  Complex,
+  BigNumber,
+  Fraction,
+
+  // Helper factory functions (lowercase) — factories call `complex(re, im)` etc.
+  complex: (re: number, im: number) => new Complex(re, im),
+  bignumber: (x: number | string) =>
+    typeof x === 'string' ? BigNumber.parse(x) : BigNumber.fromNumber(x),
+  fraction: (n: number, d?: number) => new Fraction(n, d ?? 1),
+  number: Number,
+};
