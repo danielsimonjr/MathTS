@@ -20,6 +20,9 @@ export * from './types/index.js';
 // Backends
 export * from './backends/index.js';
 
+// Decomposition operations (eig, svd, etc.)
+export * from './operations/index.js';
+
 // Typed operations (polymorphic functions using mathTyped)
 export * from './typed-operations.js';
 

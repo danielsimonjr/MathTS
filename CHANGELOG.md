@@ -42,6 +42,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - npm publishing setup — all 10 packages have `publishConfig`, `files`, `repository`; root `release` script via changesets
 - Production build optimization (`build:prod`) — minified + tree-shaken bundles, 57% size reduction (1524 KB → 662 KB)
 - Performance regression test suite (`tests/benchmark/performance.test.ts`) — 23 benchmarks covering Complex, BigNumber, Fraction, DenseMatrix, typed dispatch, and factory functions
+- WASM-accelerated FFT (`matrix/src/backends/wasm/fft-wasm.ts`) — Cooley-Tukey radix-2 with Rust WASM acceleration path, JS fallback, spectral analysis utilities
+- Parallel FFT (`parallel/src/operations/fft.ts`) — threshold-based parallel dispatch, auto-padding, parallel convolution via convolution theorem
+- WASM-accelerated eigendecomposition (`matrix/src/operations/eig-wasm.ts`) — Rust WASM Jacobi for symmetric matrices, JS QR fallback
+- WASM-accelerated SVD (`matrix/src/operations/svd-wasm.ts`) — derives SVD from eigendecomposition for symmetric matrices, Golub-Reinsch JS fallback
+- Parallel eigendecomposition (`parallel/src/operations/eig.ts`) — inlined QR algorithm (avoids circular deps), ParallelResult wrapper
 - Initial project structure with monorepo setup
 - @mathts/core package with type definitions and utilities
 - GitHub Actions CI/CD workflows

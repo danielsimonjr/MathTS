@@ -25,3 +25,13 @@ export {
   type SVDResult,
   type SVDOptions,
 } from './svd.js';
+
+// WASM-accelerated eigendecomposition
+export {
+  eigWasm,
+  eigvalsWasm,
+  spectralRadiusWasm,
+} from './eig-wasm.js';
+
+// WASM-accelerated SVD
+export { svdWasm } from './svd-wasm.js';
