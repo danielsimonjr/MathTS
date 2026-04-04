@@ -1423,7 +1423,6 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
     lines.push('');
 
     for (const [path, file] of Object.entries(categoryFiles)) {
-      const fileName = basename(path, '.ts');
       lines.push(`### \`${path}\` - ${file.description || generateFallbackDescription(file)}`);
       lines.push('');
 
