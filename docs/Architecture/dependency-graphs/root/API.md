@@ -4,7 +4,7 @@
 
 ---
 
-## @mathts/core
+## @danielsimonjr/mathts-core
 
 ### Numeric Types
 
@@ -60,7 +60,7 @@ isObject(x)     isNull(x)        isUndefined(x)    isMatrix(x)
 
 ---
 
-## @mathts/functions
+## @danielsimonjr/mathts-functions
 
 All exports come from `functions/src/typed/`. 95 total exports across 4 modules.
 
@@ -101,7 +101,7 @@ Variadic overloads (2–4 numbers) are synchronous.
 
 ---
 
-## @mathts/matrix
+## @danielsimonjr/mathts-matrix
 
 ### Matrix Types
 
@@ -141,7 +141,7 @@ SVD, LU, QR, Cholesky, eigendecomposition (symmetric matrices)
 
 ---
 
-## @mathts/parallel
+## @danielsimonjr/mathts-parallel
 
 ### Pool Management
 
@@ -177,12 +177,12 @@ interface ParallelResult<T> {
 
 ---
 
-## @mathts/compat
+## @danielsimonjr/mathts-compat
 
 Provides a mathjs-compatible API surface. 54 shim functions, all wired to real implementations.
 
 ```typescript
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
 math.add(1, 2);
@@ -200,9 +200,9 @@ Re-exports all core types: `Complex`, `Fraction`, `BigNumber`, `DenseMatrix`, `S
 
 ---
 
-## @mathts/expression
+## @danielsimonjr/mathts-expression
 
-> **Status**: Parser is ported and builds. Compiler and evaluator are empty stubs. Zero tests. Not connected to `@mathts/core`.
+> **Status**: Parser is ported and builds. Compiler and evaluator are empty stubs. Zero tests. Not connected to `@danielsimonjr/mathts-core`.
 
 | Symbol | Description |
 |--------|-------------|
@@ -211,7 +211,7 @@ Re-exports all core types: `Complex`, `Fraction`, `BigNumber`, `DenseMatrix`, `S
 
 ---
 
-## @mathts/workbook
+## @danielsimonjr/mathts-workbook
 
 > **Status**: Infrastructure works (dep graph, topological sort, reactive engine). `executeCode()` throws "not yet implemented". No integration with expression parser.
 
@@ -244,13 +244,13 @@ Execution modes: `reactive` (re-run downstream on change), `sequential` (all cel
 
 ---
 
-## @mathts/typed-function (package)
+## @danielsimonjr/mathts-typed-function (package)
 
-Forked type dispatch system. Provides the `typed()` function used by `@mathts/core`.
+Forked type dispatch system. Provides the `typed()` function used by `@danielsimonjr/mathts-core`.
 
-## @mathts/workerpool (package)
+## @danielsimonjr/mathts-workerpool (package)
 
-Forked worker pool management. Used internally by `@mathts/parallel`.
+Forked worker pool management. Used internally by `@danielsimonjr/mathts-parallel`.
 
 ---
 

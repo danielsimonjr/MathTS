@@ -55,7 +55,7 @@ The goal is to power the **MathTS Scientific Workbook (.mtsw)** format—a YAML-
                                       │
                                       ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           @mathts/workbook                                   │
+│                           @danielsimonjr/mathts-workbook                                   │
 │    YAML Parser │ Cell Executor │ Dependency Graph │ Export Engine            │
 └─────────────────────────────────────────────────────────────────────────────┘
                                       │
@@ -78,7 +78,7 @@ The goal is to power the **MathTS Scientific Workbook (.mtsw)** format—a YAML-
                                       │
                                       ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                            @mathts/core                                      │
+│                            @danielsimonjr/mathts-core                                      │
 │   Matrix │ Complex │ BigNumber │ Fraction │ Unit │ Expression │ Functions   │
 └─────────────────────────────────────────────────────────────────────────────┘
                                       │
@@ -1559,6 +1559,54 @@ interface SurfaceOptions {
   }
 }
 ```
+
+---
+
+## Completed Milestones
+
+### Rust WASM Backend Migration (COMPLETE ✅)
+**Completed**: April 2026  
+**Branch**: `master` (commit range: `e88cd9460` – `55dea0d71`)
+
+The primary WASM backend has been migrated from AssemblyScript to Rust via `wasm-bindgen` + `wasm-pack`. The AssemblyScript modules are retained in `src/wasm/` for benchmarking comparison only.
+
+| Metric | Value |
+|--------|-------|
+| Rust source files | 63 `.rs` files |
+| Exported functions | 826 exports |
+| Binary size | 669 KB (`lib/wasm/mathjs.wasm`) |
+| Crate workspace | `src/wasm-rust/Cargo.toml` |
+| Speed vs JS | 2–55x (operation-dependent) |
+
+**Crate dependencies** (workspace members in `Cargo.toml`):
+- `faer` — dense linear algebra (LU, QR, SVD, eigs)
+- `rustfft` — FFT and signal processing
+- `statrs` — statistical distributions
+- `libm` — portable math (no std required)
+
+**Performance highlights** (measured against JS fallback):
+- Matrix multiply 200×200: **7.4x faster** (20ms → 2.7ms)
+- Dot product 1000 elements: **27.6x faster** (0.05ms → 0.002ms)
+- Determinant 100×100: **6.9x faster** (1.5ms → 0.2ms)
+
+---
+
+## Planned Iterations
+
+### Iteration 2: Benchmark Visualization (Planned)
+
+Add an in-workbook benchmark overlay panel to the MTSW ISE that displays real-time JS vs WASM timing comparisons per operation:
+- Per-cell execution time with backend annotation (JS / WASM-Rust / WASM-AS / WebGPU)
+- Sparkline history showing timing variance across re-evaluations
+- Export benchmark report as `.csv` or embed in `.mtsw` metadata
+
+### Iteration 5: WebGPU Exploration (Planned)
+
+Extend the three-tier backend stack to a four-tier stack by adding WebGPU compute shaders for very large matrices (>100,000 elements):
+- Leverage existing `GPUBackend.ts` scaffolding
+- Target matrix multiply speedup: 50–200x over JS for 1024×1024+
+- Requires Chrome 113+ / Edge 113+; JS fallback always available
+- Integrate with `MATHTS_WASM_BACKEND` env var to allow `backend=webgpu`
 
 ---
 

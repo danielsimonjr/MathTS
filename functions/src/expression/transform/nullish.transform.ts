@@ -1,4 +1,4 @@
-import { createNullish } from '../../function/logical/nullish.js'
+import { createNullish } from '../../logical/nullish.js'
 import { factory } from '../../utils/factory.js'
 import { isCollection } from '../../utils/is.js'
 import type {

@@ -11,7 +11,7 @@
 import {
   createEvaluate,
   compileExpression as _compileExpression,
-} from '@mathts/expression';
+} from '@danielsimonjr/mathts-expression';
 
 import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';

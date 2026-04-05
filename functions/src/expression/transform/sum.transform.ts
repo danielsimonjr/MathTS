@@ -1,6 +1,6 @@
 import { factory } from '../../utils/factory.js'
 import { errorTransform } from './utils/errorTransform.js'
-import { createSum } from '../../function/statistics/sum.js'
+import { createSum } from '../../statistics/sum.js'
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
 import type {
   TypedFunction,

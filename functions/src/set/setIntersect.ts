@@ -1,6 +1,6 @@
 import { flatten, generalize, identify } from '../utils/array.js'
 import { factory } from '../utils/factory.js'
-import type { MathArray, Matrix } from '../../../types/index.js'
+import type { MathArray, Matrix } from '../../types/index.js'
 import type { TypedFunction } from '../core/function/typed.js'
 
 // Type definitions for setIntersect

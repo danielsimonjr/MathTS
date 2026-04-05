@@ -1,4 +1,4 @@
-import typedFunction from '@danielsimonjr/typed-function'
+import typedFunction from 'typed-function'
 import { ArgumentsError } from '../error/ArgumentsError.js'
 import { DimensionError } from '../error/DimensionError.js'
 import { IndexError } from '../error/IndexError.js'
@@ -56,8 +56,8 @@ import type { ConfigOptions, MathJsConfig } from './config.js'
 
 // Re-export MathJsConfig for backward compatibility
 export type { MathJsConfig }
-import { configFactory } from './function/config.js'
-import { importFactory } from './function/import.js'
+import { configFactory } from './config.js'
+import { importFactory } from './import.js'
 
 /**
  * Type for the mathjs instance

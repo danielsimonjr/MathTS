@@ -1,6 +1,6 @@
 import { factory } from '../../utils/factory.js'
 import { isFunctionAssignmentNode, isSymbolNode } from '../../utils/is.js'
-import { createMap } from '../../function/matrix/map.js'
+import { createMap } from '../../matrix/map.js'
 import { compileInlineExpression } from './utils/compileInlineExpression.js'
 import { createTransformCallback } from './utils/transformCallback.js'
 import type {

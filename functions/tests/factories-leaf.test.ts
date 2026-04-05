@@ -54,7 +54,7 @@ import {
   factory_csc,
 } from '../src/factories/index.js';
 
-import { Complex } from '@mathts/core';
+import { Complex } from '@danielsimonjr/mathts-core';
 
 describe('Leaf factories', () => {
   describe('arithmetic (non-conflicting)', () => {

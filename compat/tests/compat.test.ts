@@ -1,5 +1,5 @@
 /**
- * @mathts/compat Tests
+ * @danielsimonjr/mathts-compat Tests
  *
  * Tests for the mathjs compatibility layer.
  */
@@ -40,7 +40,7 @@ import {
   tau,
 } from '../src/index.js';
 
-describe('@mathts/compat', () => {
+describe('@danielsimonjr/mathts-compat', () => {
   describe('create() factory', () => {
     it('should create a math instance with all functions', () => {
       const math = create(all);

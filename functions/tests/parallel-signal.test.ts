@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 import {
   parallelFFT,
   parallelIFFT,

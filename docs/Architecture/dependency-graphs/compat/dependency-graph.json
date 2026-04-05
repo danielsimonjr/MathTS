@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "@mathts/compat",
+    "name": "@danielsimonjr/mathts-compat",
     "version": "0.1.0",
     "lastUpdated": "2026-04-04",
     "totalFiles": 3,
@@ -17,10 +17,10 @@
   "modules": {
     "root": {
       "src/functions.d.ts": {
-        "description": "Type declarations for @mathts/functions",
+        "description": "Type declarations for @danielsimonjr/mathts-functions",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "Complex",
               "Fraction",
@@ -114,7 +114,7 @@
         "description": "mathjs Compatibility Shims",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "Complex",
               "Fraction",
@@ -128,7 +128,7 @@
             ]
           },
           {
-            "package": "@mathts/functions",
+            "package": "@danielsimonjr/mathts-functions",
             "imports": [
               "add",
               "subtract",
@@ -154,7 +154,7 @@
             ]
           },
           {
-            "package": "@mathts/matrix",
+            "package": "@danielsimonjr/mathts-matrix",
             "imports": [
               "DenseMatrix",
               "SparseMatrix"
@@ -309,7 +309,7 @@
             "reExport": true
           },
           {
-            "file": "@mathts/core",
+            "file": "@danielsimonjr/mathts-core",
             "imports": [
               "Complex",
               "Fraction",
@@ -327,7 +327,7 @@
             "reExport": true
           },
           {
-            "file": "@mathts/matrix",
+            "file": "@danielsimonjr/mathts-matrix",
             "imports": [
               "DenseMatrix",
               "SparseMatrix"
@@ -335,7 +335,7 @@
             "reExport": true
           },
           {
-            "file": "@mathts/parallel",
+            "file": "@danielsimonjr/mathts-parallel",
             "imports": [
               "computePool"
             ],

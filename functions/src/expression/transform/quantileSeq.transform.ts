@@ -1,5 +1,5 @@
 import { factory } from '../../utils/factory.js'
-import { createQuantileSeq } from '../../function/statistics/quantileSeq.js'
+import { createQuantileSeq } from '../../statistics/quantileSeq.js'
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
 import type { TypedFunction, MathFunction, VariadicArgs } from './types.js'
 

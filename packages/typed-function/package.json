@@ -1,6 +1,6 @@
 {
-  "name": "@mathts/typed-function",
-  "version": "0.1.0",
+  "name": "@danielsimonjr/mathts-typed-function",
+  "version": "0.1.1",
   "description": "Utility helpers for typed-function integration in MathTS",
   "author": "Daniel Simon Jr.",
   "license": "MIT",

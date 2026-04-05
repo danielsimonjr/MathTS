@@ -1,17 +1,17 @@
-# @mathts/matrix
+# @danielsimonjr/mathts-matrix
 
 High-performance matrix operations with multi-backend support (JS/WASM/GPU).
 
 ## Installation
 
 ```bash
-npm install @mathts/matrix
+npm install @danielsimonjr/mathts-matrix
 ```
 
 ## Usage
 
 ```typescript
-import { Matrix, DenseMatrix, backends } from '@mathts/matrix';
+import { Matrix, DenseMatrix, backends } from '@danielsimonjr/mathts-matrix';
 
 // Create a matrix from a 2D array
 const A = Matrix.from([

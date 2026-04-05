@@ -1,6 +1,6 @@
 import { factory } from '../utils/factory.js'
 
-import { TypedFunction, Matrix } from '../../types.js'
+import { TypedFunction, Matrix } from '../types.js'
 
 const name = 'matrixFromFunction'
 const dependencies = ['typed', 'matrix', 'isZero']

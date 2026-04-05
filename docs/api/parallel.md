@@ -1,11 +1,11 @@
-# @mathts/parallel API Reference
+# @danielsimonjr/mathts-parallel API Reference
 
 Parallel execution via Web Workers using ComputePool.
 
 ## Installation
 
 ```bash
-npm install @mathts/parallel
+npm install @danielsimonjr/mathts-parallel
 ```
 
 ## Overview
@@ -13,7 +13,7 @@ npm install @mathts/parallel
 MathTS uses a parallel-first architecture. The `computePool` provides parallel execution for large numerical computations using Web Workers.
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // Initialize once at app startup
 await computePool.initialize();
@@ -85,7 +85,7 @@ await computePool.initialize({
 ### Example
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 await computePool.initialize();
 

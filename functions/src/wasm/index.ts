@@ -21,7 +21,7 @@ export {
   dotProductSIMD,
   multiplyVectorSIMD,
   transposeSIMD
-} from './matrix/multiply'
+} from './matrix/multiply.js'
 
 // Linear algebra decompositions
 export {
@@ -34,7 +34,7 @@ export {
   luDecompositionSIMD,
   qrDecompositionSIMD,
   choleskyDecompositionSIMD
-} from './algebra/decomposition'
+} from './algebra/decomposition.js'
 
 // Schur decomposition
 export {
@@ -44,7 +44,7 @@ export {
   schurEigenvalues,
   schurResidual,
   schurOrthogonalityError
-} from './algebra/schur'
+} from './algebra/schur.js'
 
 // Signal processing
 export {
@@ -59,7 +59,7 @@ export {
   convolveSIMD,
   powerSpectrumSIMD,
   crossCorrelationSIMD
-} from './signal/fft'
+} from './signal/fft.js'
 
 export {
   freqz,
@@ -71,7 +71,7 @@ export {
   phase,
   unwrapPhase,
   groupDelay
-} from './signal/processing'
+} from './signal/processing.js'
 
 // Numeric solvers
 export {
@@ -85,7 +85,7 @@ export {
   vectorAdd,
   wouldOvershoot,
   trimStep
-} from './numeric/ode'
+} from './numeric/ode.js'
 
 // Complex number operations
 export {
@@ -110,7 +110,7 @@ export {
   cosComplex,
   tanComplex,
   powComplexReal
-} from './complex/operations'
+} from './complex/operations.js'
 
 // Geometry operations
 export {
@@ -129,7 +129,7 @@ export {
   triangleArea2D,
   pointInTriangle2D,
   normalizeND
-} from './geometry/operations'
+} from './geometry/operations.js'
 
 // Logical operations
 export {
@@ -152,7 +152,7 @@ export {
   orArray,
   notArray,
   xorArray
-} from './logical/operations'
+} from './logical/operations.js'
 
 // Relational operations
 export {
@@ -187,7 +187,7 @@ export {
   isInteger,
   sign,
   signArray
-} from './relational/operations'
+} from './relational/operations.js'
 
 // Set operations
 export {
@@ -209,7 +209,7 @@ export {
   setCartesian,
   setPowerSetSize,
   setGetSubset
-} from './set/operations'
+} from './set/operations.js'
 
 // Special mathematical functions
 export {
@@ -231,7 +231,7 @@ export {
   besselJ1,
   besselY0,
   besselY1
-} from './special/functions'
+} from './special/functions.js'
 
 // String/character operations
 export {
@@ -252,7 +252,7 @@ export {
   countPattern,
   utf8ByteLength,
   isNumericString
-} from './string/operations'
+} from './string/operations.js'
 
 // SIMD-optimized operations
 export {
@@ -298,10 +298,10 @@ export {
   simdSupported,
   simdVectorSizeF64,
   simdVectorSizeF32
-} from './simd/operations'
+} from './simd/operations.js'
 
 // Selection algorithms
-export { partitionSelect, selectMedian, selectMin, selectMax } from './statistics/select'
+export { partitionSelect, selectMedian, selectMin, selectMax } from './statistics/select.js'
 
 // Statistics operations
 export {
@@ -329,7 +329,7 @@ export {
   range as statsRange,
   cumsum as statsCumsum,
   zscore as statsZscore
-} from './statistics/basic'
+} from './statistics/basic.js'
 
 // Linear algebra operations from linalg module
 export {
@@ -355,7 +355,7 @@ export {
   solve as laSolve,
   lsolve as laLsolve,
   usolve as laUsolve
-} from './matrix/linalg'
+} from './matrix/linalg.js'
 
 // Eigenvalue operations
 export {
@@ -366,7 +366,7 @@ export {
   // SIMD-accelerated eigenvalue operations
   eigsSymmetricSIMD,
   powerIterationSIMD
-} from './matrix/eigs'
+} from './matrix/eigs.js'
 
 // Complex eigenvalue operations
 export {
@@ -376,21 +376,21 @@ export {
   qrIterationStep,
   qrAlgorithm,
   hessenbergQRStep
-} from './matrix/complexEigs'
+} from './matrix/complexEigs.js'
 
 // Matrix exponential
 export {
   expm,
   expmSmall,
   expmv
-} from './matrix/expm'
+} from './matrix/expm.js'
 
 // Matrix square root
 export {
   sqrtm,
   sqrtmNewtonSchulz,
   sqrtmCholesky
-} from './matrix/sqrtm'
+} from './matrix/sqrtm.js'
 
 // Sparse LU decomposition
 export {
@@ -398,7 +398,7 @@ export {
   sparseForwardSolve,
   sparseBackwardSolve,
   sparseLuSolve
-} from './algebra/sparseLu'
+} from './algebra/sparseLu.js'
 
 // Sparse Cholesky decomposition
 export {
@@ -406,7 +406,7 @@ export {
   sparseCholSolve,
   eliminationTree,
   columnCounts
-} from './algebra/sparseChol'
+} from './algebra/sparseChol.js'
 
 // Plain number operations (with 'plain' prefix for non-conflicting exports)
 export {
@@ -489,7 +489,7 @@ export {
   isPositive as plainIsPositive,
   isZero as plainIsZero,
   isNaN as plainIsNaN
-} from './plain/operations'
+} from './plain/operations.js'
 
 // WorkPtr size validation utilities - individual constants
 export {
@@ -531,4 +531,4 @@ export {
   condWorkSize,
   validateWorkPtrSize,
   getWorkPtrRequirement
-} from './utils/workPtrValidation'
+} from './utils/workPtrValidation.js'

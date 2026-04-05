@@ -1,5 +1,5 @@
-import { clone } from '../../../utils/object.js'
-import { wasmLoader } from '../../../wasm/WasmLoader.js'
+import { clone } from '../../utils/object.js'
+import { wasmLoader } from '../../wasm/WasmLoader.js'
 import type { BigNumber } from 'bignumber.js'
 import type Complex from 'complex.js'
 

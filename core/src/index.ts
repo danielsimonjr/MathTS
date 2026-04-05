@@ -1,5 +1,5 @@
 /**
- * @mathts/core - Core types and utilities for MathTS
+ * @danielsimonjr/mathts-core - Core types and utilities for MathTS
  * @packageDocumentation
  */
 

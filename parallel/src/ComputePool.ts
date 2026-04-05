@@ -1,7 +1,7 @@
 /**
  * MathTS Compute Pool
  *
- * High-level wrapper around @mathts/workerpool for parallel computation in MathTS.
+ * High-level wrapper around @danielsimonjr/mathts-workerpool for parallel computation in MathTS.
  * Provides automatic parallelization of matrix operations based on data size.
  *
  * @packageDocumentation
@@ -14,7 +14,7 @@ import {
   type ParallelResult as WorkerParallelResult,
   type TaskOptions,
   type PoolStats,
-} from '@mathts/workerpool';
+} from '@danielsimonjr/mathts-workerpool';
 
 /**
  * Configuration for ComputePool
@@ -100,11 +100,11 @@ function toWorkerConfig(config: ComputePoolConfig): Partial<WorkerPoolConfig> {
 /**
  * ComputePool for parallel MathTS operations
  *
- * Wraps the @mathts/workerpool MathWorkerPool with a MathTS-specific API.
+ * Wraps the @danielsimonjr/mathts-workerpool MathWorkerPool with a MathTS-specific API.
  *
  * @example
  * ```typescript
- * import { ComputePool } from '@mathts/parallel';
+ * import { ComputePool } from '@danielsimonjr/mathts-parallel';
  *
  * const pool = new ComputePool({ maxWorkers: 8 });
  * await pool.initialize();
@@ -568,6 +568,6 @@ export const computePool = new ComputePool();
 export { Transfer };
 
 /**
- * Re-export types from @mathts/workerpool
+ * Re-export types from @danielsimonjr/mathts-workerpool
  */
 export type { TaskOptions, PoolStats };

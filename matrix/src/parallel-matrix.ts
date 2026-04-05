@@ -2,7 +2,7 @@
  * Parallel-First Matrix Operations
  *
  * AssemblyScript-friendly TypeScript implementations with typed-function
- * integration and workerpool parallel execution via @mathts/parallel.
+ * integration and workerpool parallel execution via @danielsimonjr/mathts-parallel.
  *
  * These operations use Float64Array flat row-major format for efficient
  * parallel processing through the ComputePool worker infrastructure.
@@ -15,8 +15,8 @@
  * @packageDocumentation
  */
 
-import { mathTyped } from '@mathts/core';
-import { computePool as importedPool, type ParallelResult } from '@mathts/parallel';
+import { mathTyped } from '@danielsimonjr/mathts-core';
+import { computePool as importedPool, type ParallelResult } from '@danielsimonjr/mathts-parallel';
 
 // Type assertion to work around TypeScript module resolution issue
 // The ComputePool class has all these methods but TypeScript can't resolve them
@@ -170,7 +170,7 @@ async function pDivide(a: Float64Array, b: Float64Array): Promise<ParallelResult
   return computePool.divide(a, b);
 }
 import { DenseMatrix } from './types/DenseMatrix.js';
-import type { SignatureFunction } from '@mathts/core';
+import type { SignatureFunction } from '@danielsimonjr/mathts-core';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases

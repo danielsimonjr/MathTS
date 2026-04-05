@@ -1,5 +1,5 @@
 /**
- * @mathts/workerpool
+ * @danielsimonjr/mathts-workerpool
  *
  * Worker pool management for MathTS parallel computations.
  * Wraps the workerpool library with MathTS-specific operations and optimizations.
@@ -231,7 +231,7 @@ export interface TaskOptions extends ExecOptions {
  *
  * @example
  * ```typescript
- * import { MathWorkerPool } from '@mathts/workerpool';
+ * import { MathWorkerPool } from '@danielsimonjr/mathts-workerpool';
  *
  * const pool = new MathWorkerPool({ maxWorkers: 8 });
  * await pool.initialize();

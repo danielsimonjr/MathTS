@@ -10,7 +10,7 @@ import {
   shims,
   LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2, Infinity_, NaN_,
 } from '../src/shims.js';
-import { Complex, DenseMatrix, SparseMatrix } from '@mathts/core';
+import { Complex, DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-core';
 
 describe('Inverse trig functions', () => {
   it('asin should wrap Math.asin', () => {

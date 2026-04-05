@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "@mathts/parallel",
+    "name": "@danielsimonjr/mathts-parallel",
     "version": "0.1.0",
     "lastUpdated": "2026-04-04",
     "totalFiles": 14,
@@ -20,7 +20,7 @@
         "description": "MathTS Compute Pool",
         "externalDependencies": [
           {
-            "package": "@mathts/workerpool",
+            "package": "@danielsimonjr/mathts-workerpool",
             "imports": [
               "MathWorkerPool",
               "Transfer",

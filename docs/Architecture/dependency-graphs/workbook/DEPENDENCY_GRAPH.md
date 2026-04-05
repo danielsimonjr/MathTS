@@ -1,4 +1,4 @@
-# @mathts/workbook - Dependency Graph
+# @danielsimonjr/mathts-workbook - Dependency Graph
 
 **Version**: 0.1.0 | **Last Updated**: 2026-04-04
 

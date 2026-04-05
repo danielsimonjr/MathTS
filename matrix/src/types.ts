@@ -2,7 +2,7 @@
  * Matrix type definitions
  */
 
-import type { BackendType } from '@mathts/core';
+import type { BackendType } from '@danielsimonjr/mathts-core';
 
 /**
  * Anything that can be converted to a matrix

@@ -1,5 +1,5 @@
 /**
- * Tests for @mathts/typed-function
+ * Tests for @danielsimonjr/mathts-typed-function
  */
 
 import { describe, it, expect } from 'vitest';
@@ -20,7 +20,7 @@ import {
   TypeConversionError,
 } from '../src/index.js';
 
-describe('@mathts/typed-function', () => {
+describe('@danielsimonjr/mathts-typed-function', () => {
   describe('Type tests', () => {
     it('should correctly identify number', () => {
       expect(isNumber(42)).toBe(true);

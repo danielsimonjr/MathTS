@@ -15,6 +15,8 @@ export default defineConfig({
       'workbook/tests/**/*.test.ts',
       'compat/tests/**/*.test.ts',
       'tests/integration/**/*.test.ts',
+      'tests/wasm/**/*.test.ts',
+      'tests/benchmark/**/*.test.ts',
     ],
     coverage: {
       provider: 'v8',

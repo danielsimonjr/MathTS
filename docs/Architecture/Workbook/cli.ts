@@ -421,7 +421,7 @@ function createTemplate(template: string, title: string): Workbook {
         },
         runtime: {
           engine: 'mathts',
-          packages: ['@mathts/matrix', '@mathts/stats'],
+          packages: ['@danielsimonjr/mathts-matrix', '@mathts/stats'],
           execution: 'reactive',
         },
         cells: [
@@ -439,7 +439,7 @@ function createTemplate(template: string, title: string): Workbook {
           {
             type: 'code',
             id: 'analysis',
-            code: `import { Matrix, stats } from '@mathts/core';\nimport { values } from '#dataset';\n\nconst m = Matrix.from(values);\nconst mean = stats.mean(m);\nconst std = stats.std(m);\n\nconsole.log('Mean:', mean);\nconsole.log('Std:', std);\n\nexport { m, mean, std };`,
+            code: `import { Matrix, stats } from '@danielsimonjr/mathts-core';\nimport { values } from '#dataset';\n\nconst m = Matrix.from(values);\nconst mean = stats.mean(m);\nconst std = stats.std(m);\n\nconsole.log('Mean:', mean);\nconsole.log('Std:', std);\n\nexport { m, mean, std };`,
             language: 'typescript',
           },
         ],

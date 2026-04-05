@@ -1,4 +1,4 @@
-import { typeOf } from '../../../utils/is.js'
+import { typeOf } from '../../utils/is.js'
 
 // Error with additional data property
 interface TypedError extends Error {

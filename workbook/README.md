@@ -1,11 +1,11 @@
-# @mathts/workbook
+# @danielsimonjr/mathts-workbook
 
 Scientific workbook runtime for MathTS with reactive YAML-based notebooks (`.mtsw` format).
 
 ## Installation
 
 ```bash
-npm install @mathts/workbook
+npm install @danielsimonjr/mathts-workbook
 ```
 
 ## Usage
@@ -38,7 +38,7 @@ mtsw export example.mtsw -f html
 ### Programmatic API
 
 ```typescript
-import { parseWorkbook, createExecutor } from '@mathts/workbook';
+import { parseWorkbook, createExecutor } from '@danielsimonjr/mathts-workbook';
 
 const content = `
 version: "1.0"
@@ -84,7 +84,7 @@ cells:
     id: intro
 
   - code: |
-      import { Matrix } from '@mathts/matrix';
+      import { Matrix } from '@danielsimonjr/mathts-matrix';
       const A = Matrix.random(3, 3);
       export { A };
     id: create-matrix

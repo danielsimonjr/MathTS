@@ -9,6 +9,40 @@
 
 ---
 
+## Completed Sprints
+
+### Sprint 0: Rust WASM Backend Migration
+**Status**: COMPLETE ✅  
+**Completed**: April 2026  
+**Commits**: `e88cd9460` – `55dea0d71`
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 0.1 | Set up `src/wasm-rust/` workspace with `Cargo.toml` | ✅ | Workspace: faer, rustfft, statrs, libm |
+| 0.2 | Port 63 WASM modules from AssemblyScript to Rust | ✅ | 63 `.rs` files, ~18,500 lines |
+| 0.3 | Expose 826 exports via `wasm-bindgen` | ✅ | `lib/wasm/mathjs.wasm` — 669 KB |
+| 0.4 | Implement JS↔Rust bridge in `src/wasm-rust/crates/mathjs-wasm/` | ✅ | |
+| 0.5 | Write three-way benchmark (Rust vs AS vs JS) | ✅ | `test/benchmark/wasm-three-way.bench.ts` |
+| 0.6 | Update `backendManager` to prefer Rust WASM | ✅ | Fallback chain: Rust → AS → JS |
+| 0.7 | Add `npm run build:wasm:rust` and `npm run bench:wasm` scripts | ✅ | |
+| 0.8 | Resolve all 166→0 test failures after migration | ✅ | Mocha + Vitest: 0 failures |
+
+**Key results**:
+- 826 exported functions across algebra, arithmetic, matrix, signal, statistics, trigonometry
+- Binary: `lib/wasm/mathjs.wasm` — 669 KB (release build)
+- AssemblyScript retained at `lib/wasm/mathjs-as.wasm` for benchmarking
+- Performance: 2–55x faster than JS fallback (operation-dependent)
+
+**Selected benchmark results** (Rust vs JS):
+
+| Operation | JS | Rust WASM | Speedup |
+|-----------|-----|-----------|---------|
+| Matrix multiply 200×200 | 20ms | 2.7ms | **7.4x** |
+| Dot product 1000 elements | 0.05ms | 0.002ms | **27.6x** |
+| Determinant 100×100 | 1.5ms | 0.2ms | **6.9x** |
+
+---
+
 ## Phase 1: Core Foundation (Weeks 1-4)
 
 ### Sprint 1: Project Setup & Core Types
@@ -34,8 +68,8 @@ pnpm init
 pnpm add -D typescript vitest @vitest/coverage-v8 eslint
 
 # Link existing packages
-pnpm add @mathts/typed-function@github:danielsimonjr/typed-function#develop
-pnpm add @mathts/workerpool@github:danielsimonjr/workerpool#master
+pnpm add @danielsimonjr/mathts-typed-function@github:danielsimonjr/typed-function#develop
+pnpm add @danielsimonjr/mathts-workerpool@github:danielsimonjr/workerpool#master
 ```
 
 ---

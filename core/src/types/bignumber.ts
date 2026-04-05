@@ -1,6 +1,6 @@
 /**
  * BigNumber (arbitrary precision decimal) implementation
- * @module @mathts/core/types/bignumber
+ * @module @danielsimonjr/mathts-core/types/bignumber
  */
 
 import type { Scalar, MathTSValue } from './interfaces';

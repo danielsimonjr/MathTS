@@ -1,6 +1,6 @@
 /**
  * JSBackend Tests
- * @module @mathts/matrix/tests/JSBackend
+ * @module @danielsimonjr/mathts-matrix/tests/JSBackend
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';

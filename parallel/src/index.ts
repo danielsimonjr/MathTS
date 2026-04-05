@@ -1,5 +1,5 @@
 /**
- * @mathts/parallel
+ * @danielsimonjr/mathts-parallel
  *
  * WebWorker parallelization for MathTS computations.
  * Provides automatic parallelization based on data size thresholds.

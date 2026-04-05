@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "@mathts/matrix",
+    "name": "@danielsimonjr/mathts-matrix",
     "version": "0.1.0",
     "lastUpdated": "2026-04-04",
     "totalFiles": 33,
@@ -821,7 +821,7 @@
         "description": "Parallel Matrix Backend",
         "externalDependencies": [
           {
-            "package": "@mathts/parallel",
+            "package": "@danielsimonjr/mathts-parallel",
             "imports": [
               "computePool",
               "ComputePool",
@@ -1090,20 +1090,20 @@
         "description": "Parallel-First Matrix Operations",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "mathTyped"
             ]
           },
           {
-            "package": "@mathts/parallel",
+            "package": "@danielsimonjr/mathts-parallel",
             "imports": [
               "computePool",
               "ParallelResult"
             ]
           },
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "SignatureFunction"
             ]
@@ -1213,13 +1213,13 @@
         "description": "Typed Matrix Operations",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "mathTyped"
             ]
           },
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "SignatureFunction"
             ]
@@ -1305,7 +1305,7 @@
         "description": "Matrix type definitions",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "BackendType"
             ]
@@ -1577,7 +1577,7 @@
         ]
       },
       "src/types/parallel.d.ts": {
-        "description": "Type declarations for @mathts/parallel package",
+        "description": "Type declarations for @danielsimonjr/mathts-parallel package",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],

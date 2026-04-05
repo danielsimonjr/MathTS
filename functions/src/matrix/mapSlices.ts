@@ -3,7 +3,7 @@ import { arraySize } from '../utils/array.js'
 import { isMatrix } from '../utils/is.js'
 import { IndexError } from '../error/IndexError.js'
 
-import { TypedFunction, Matrix, BigNumber } from '../../types.js'
+import { TypedFunction, Matrix, BigNumber } from '../types.js'
 
 const name = 'mapSlices'
 const dependencies = ['typed', 'isInteger']

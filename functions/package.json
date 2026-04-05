@@ -1,6 +1,6 @@
 {
-  "name": "@mathts/functions",
-  "version": "0.1.0",
+  "name": "@danielsimonjr/mathts-functions",
+  "version": "0.1.1",
   "description": "Mathematical functions for MathTS - arithmetic, algebra, trigonometry, statistics, and more",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,10 +31,10 @@
     "build:prod": "tsup src/index.ts --format esm --clean --minify --treeshake"
   },
   "dependencies": {
-    "@mathts/core": "*",
-    "@mathts/expression": "*",
-    "@mathts/matrix": "*",
-    "@mathts/parallel": "*",
+    "@danielsimonjr/mathts-core": "*",
+    "@danielsimonjr/mathts-expression": "*",
+    "@danielsimonjr/mathts-matrix": "*",
+    "@danielsimonjr/mathts-parallel": "*",
     "bignumber.js": "^9.1.2",
     "complex.js": "^2.2.5",
     "decimal.js": "^10.4.3",

@@ -1,5 +1,5 @@
 /**
- * @mathts/typed-function
+ * @danielsimonjr/mathts-typed-function
  *
  * Utility helpers for typed-function integration in MathTS.
  * This package provides type test functions and signature utilities.
@@ -9,9 +9,9 @@
  * import typed, { create } from 'typed-function';
  * ```
  *
- * Or use @mathts/core which provides mathTyped pre-configured with MathTS types:
+ * Or use @danielsimonjr/mathts-core which provides mathTyped pre-configured with MathTS types:
  * ```typescript
- * import { mathTyped } from '@mathts/core';
+ * import { mathTyped } from '@danielsimonjr/mathts-core';
  * ```
  *
  * @packageDocumentation

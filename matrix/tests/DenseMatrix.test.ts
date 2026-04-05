@@ -1,6 +1,6 @@
 /**
  * DenseMatrix Tests
- * @module @mathts/matrix/tests/DenseMatrix
+ * @module @danielsimonjr/mathts-matrix/tests/DenseMatrix
  */
 
 import { describe, it, expect } from 'vitest';

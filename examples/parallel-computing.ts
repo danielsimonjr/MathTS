@@ -6,7 +6,7 @@
  * Run: npx tsx examples/parallel-computing.ts
  */
 
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 async function main() {
   console.log('=== MathTS Parallel Computing ===\n');

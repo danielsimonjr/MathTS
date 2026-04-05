@@ -8,10 +8,10 @@
  * Time limits are set at ~3–5x the expected time on a modern developer machine.
  */
 import { describe, it, expect } from 'vitest';
-import { Complex, Fraction, BigNumber } from '@mathts/core';
-import { mathTyped } from '@mathts/core';
-import { DenseMatrix } from '@mathts/matrix';
-import { add, abs, sqrt, exp } from '@mathts/functions';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { mathTyped } from '@danielsimonjr/mathts-core';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { add, abs, sqrt, exp } from '@danielsimonjr/mathts-functions';
 
 // ---------------------------------------------------------------------------
 // Benchmark helper

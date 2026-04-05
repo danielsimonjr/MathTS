@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "name": "@mathts/functions",
+    "name": "@danielsimonjr/mathts-functions",
     "version": "0.1.0",
     "lastUpdated": "2026-04-04",
     "totalFiles": 750,
@@ -24455,7 +24455,7 @@
         "description": "Typed Arithmetic Functions (Parallel-First)",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "mathTyped",
               "Complex",
@@ -24464,7 +24464,7 @@
             ]
           },
           {
-            "package": "@mathts/parallel",
+            "package": "@danielsimonjr/mathts-parallel",
             "imports": [
               "computePool",
               "ComputePool"
@@ -24699,14 +24699,14 @@
         "description": "Typed Signal Processing Functions (Parallel-First)",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "mathTyped",
               "Complex"
             ]
           },
           {
-            "package": "@mathts/parallel",
+            "package": "@danielsimonjr/mathts-parallel",
             "imports": [
               "computePool"
             ]
@@ -24745,7 +24745,7 @@
         "description": "Typed Statistics Functions (Parallel-First)",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "mathTyped",
               "Complex",
@@ -24754,7 +24754,7 @@
             ]
           },
           {
-            "package": "@mathts/parallel",
+            "package": "@danielsimonjr/mathts-parallel",
             "imports": [
               "computePool"
             ]
@@ -24813,7 +24813,7 @@
         "description": "Typed Trigonometric Functions (Parallel-First)",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "mathTyped",
               "Complex",
@@ -24821,7 +24821,7 @@
             ]
           },
           {
-            "package": "@mathts/parallel",
+            "package": "@danielsimonjr/mathts-parallel",
             "imports": [
               "computePool"
             ]
@@ -24878,7 +24878,7 @@
         "description": "Initialize the type bridge for mathjs factory compatibility.",
         "externalDependencies": [
           {
-            "package": "@mathts/core",
+            "package": "@danielsimonjr/mathts-core",
             "imports": [
               "registerNativeTypes"
             ]

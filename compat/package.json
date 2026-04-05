@@ -1,6 +1,6 @@
 {
-  "name": "@mathts/compat",
-  "version": "0.1.0",
+  "name": "@danielsimonjr/mathts-compat",
+  "version": "0.1.1",
   "description": "mathjs compatibility layer for MathTS",
   "type": "module",
   "main": "./dist/index.js",
@@ -23,10 +23,10 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@mathts/core": "*",
-    "@mathts/functions": "*",
-    "@mathts/matrix": "*",
-    "@mathts/parallel": "*"
+    "@danielsimonjr/mathts-core": "*",
+    "@danielsimonjr/mathts-functions": "*",
+    "@danielsimonjr/mathts-matrix": "*",
+    "@danielsimonjr/mathts-parallel": "*"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",

@@ -180,3 +180,43 @@ The following 34 source files are not directly imported by any test file:
 | `wasm/parallel-processing.test.ts` | 0 files |
 | `wasm/typescript-integration.test.ts` | 0 files |
 | `wasm/wasm-loader.test.ts` | 0 files |
+
+---
+
+## Rust WASM Backend Tests (`wasm-rust/`)
+
+The Rust WASM backend has its own test layer, separate from the Vitest suite.
+
+### Native Rust Tests
+
+```bash
+cargo test                      # Run all Rust unit tests in wasm-rust/
+cargo test --release            # Run with release optimizations
+cargo test -p mathts-wasm       # Run only the mathts-wasm crate tests
+```
+
+Rust tests live alongside source files (`#[cfg(test)]` modules inside each `.rs` file). They test Rust-level correctness for faer, rustfft, statrs, and libm integrations before WASM compilation.
+
+### JavaScript Integration Tests (Vitest)
+
+After `npm run build:wasm:rust`, the compiled binary is tested through the existing `matrix/` Vitest suite:
+
+| Test File | What It Covers |
+|-----------|---------------|
+| `wasm/loading.test.ts` | `WasmLoader` loads Rust binary, memory pool init |
+| `wasm/accuracy.test.ts` | Numerical accuracy vs JS reference implementation |
+| `wasm/operations.test.ts` | Rust-backed matrix multiply, LU, QR, SVD |
+| `wasm/typescript-integration.test.ts` | `MatrixWasmBridge` threshold dispatch |
+
+### Three-Way Benchmark
+
+```bash
+npm run bench:wasm              # Run full three-way benchmark
+```
+
+Compares Rust WASM vs AssemblyScript WASM vs pure JavaScript for a standard set of matrix operations at sizes 64×64, 256×256, 512×512, and 1024×1024. Results written to `test/benchmark/wasm-results.json`.
+
+Typical results (1024×1024 matrix multiply):
+- JavaScript: baseline
+- AssemblyScript WASM: ~2-5x faster
+- Rust WASM: ~5-25x faster

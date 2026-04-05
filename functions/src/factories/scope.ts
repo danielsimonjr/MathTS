@@ -5,7 +5,7 @@
  * typed, config, Complex, BigNumber, Fraction, matrix bridge, and helper constructors.
  */
 
-import { mathTyped, Complex, Fraction, BigNumber } from '@mathts/core';
+import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 import { initTypeBridge } from '../typed/typed-bridge.js';
 import { DEFAULT_CONFIG } from '../core/config.js';
 import {
@@ -46,7 +46,7 @@ const extraTypes = [
   { name: 'Range', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isRange === true },
   // Map type — needed by resolve() and other factories that accept scope maps
   { name: 'Map', test: (x: unknown): x is Map<string, unknown> => x instanceof Map },
-  // Note: DenseMatrix, SparseMatrix, Matrix types are already registered by @mathts/core.
+  // Note: DenseMatrix, SparseMatrix, Matrix types are already registered by @danielsimonjr/mathts-core.
   // MathJSDenseMatrix passes their duck-type tests via .rows, .cols, .get, .type properties.
 ];
 

@@ -16,9 +16,9 @@ import {
   mathTyped,
   Complex,
   BigNumber,
-} from '@mathts/core';
+} from '@danielsimonjr/mathts-core';
 
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases

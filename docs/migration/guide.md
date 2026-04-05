@@ -12,12 +12,12 @@ MathTS is a modern TypeScript rewrite of mathjs with:
 
 ## Migration Strategies
 
-### Strategy 1: Quick Migration with @mathts/compat (Recommended)
+### Strategy 1: Quick Migration with @danielsimonjr/mathts-compat (Recommended)
 
 The fastest way to migrate is using the compatibility layer:
 
 ```bash
-npm install @mathts/compat
+npm install @danielsimonjr/mathts-compat
 ```
 
 ```typescript
@@ -26,7 +26,7 @@ import { create, all } from 'mathjs';
 const math = create(all);
 
 // After (MathTS with compat)
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
 
 // Your existing code continues to work
@@ -45,15 +45,15 @@ This approach allows you to:
 For new projects or complete rewrites:
 
 ```bash
-npm install @mathts/core @mathts/functions @mathts/matrix @mathts/parallel
+npm install @danielsimonjr/mathts-core @danielsimonjr/mathts-functions @danielsimonjr/mathts-matrix @danielsimonjr/mathts-parallel
 ```
 
 ```typescript
 // Native MathTS imports
-import { Complex, Fraction, BigNumber } from '@mathts/core';
-import { add, subtract, multiply, divide } from '@mathts/functions';
-import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
-import { computePool } from '@mathts/parallel';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { add, subtract, multiply, divide } from '@danielsimonjr/mathts-functions';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // Direct usage
 const c = new Complex(3, 4);
@@ -63,11 +63,11 @@ const m = DenseMatrix.fromArray([[1,2],[3,4]]);
 
 ## Step-by-Step Migration
 
-### Step 1: Install @mathts/compat
+### Step 1: Install @danielsimonjr/mathts-compat
 
 ```bash
 npm uninstall mathjs
-npm install @mathts/compat
+npm install @danielsimonjr/mathts-compat
 ```
 
 ### Step 2: Update Imports
@@ -78,7 +78,7 @@ Find and replace:
 import { create, all } from 'mathjs';
 
 // After
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 ```
 
 ### Step 3: Run Your Tests
@@ -91,8 +91,8 @@ Start replacing compat API with native imports where beneficial:
 
 ```typescript
 // Mixed usage is fine during migration
-import { create, all } from '@mathts/compat';
-import { computePool } from '@mathts/parallel';
+import { create, all } from '@danielsimonjr/mathts-compat';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 const math = create(all);
 
@@ -116,7 +116,7 @@ const magnitude = math.abs(c);
 const conjugate = math.conj(c);
 
 // MathTS native
-import { Complex } from '@mathts/core';
+import { Complex } from '@danielsimonjr/mathts-core';
 const c = new Complex(3, 4);
 const magnitude = c.abs();
 const conjugate = c.conjugate();
@@ -135,7 +135,7 @@ const f = math.fraction(1, 2);
 console.log(f.n, f.d);
 
 // MathTS native
-import { Fraction } from '@mathts/core';
+import { Fraction } from '@danielsimonjr/mathts-core';
 const f = new Fraction(1, 2);
 console.log(f.numerator, f.denominator); // Note: bigint type
 
@@ -152,7 +152,7 @@ const bn = math.bignumber('123.456');
 const num = bn.toNumber();
 
 // MathTS native
-import { BigNumber } from '@mathts/core';
+import { BigNumber } from '@danielsimonjr/mathts-core';
 const bn = BigNumber.parse('123.456');
 const num = bn.valueOf();
 
@@ -170,7 +170,7 @@ const element = m.get([0, 1]);
 const dims = m.size();
 
 // MathTS native
-import { DenseMatrix } from '@mathts/matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 const m = DenseMatrix.fromArray([[1,2],[3,4]]);
 const element = m.get(0, 1);    // Direct indices, not array
 const dims = [m.rows, m.cols];  // Properties, not method
@@ -186,7 +186,7 @@ const dims = math.size(m);       // Returns [rows, cols]
 MathTS provides parallel execution for large datasets:
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // Initialize once at app startup
 await computePool.initialize();
@@ -271,9 +271,9 @@ The compat layer uses different types than mathjs. If you have explicit mathjs t
 import type { Complex as MathJSComplex } from 'mathjs';
 
 // After
-import type { Complex } from '@mathts/core';
+import type { Complex } from '@danielsimonjr/mathts-core';
 // or
-import type { Complex } from '@mathts/compat';
+import type { Complex } from '@danielsimonjr/mathts-compat';
 ```
 
 ### Performance Issues

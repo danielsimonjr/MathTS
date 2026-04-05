@@ -1,6 +1,6 @@
 import { factory } from '../utils/factory.js'
 import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { Matrix, Complex } from '../../types.js'
+import type { Matrix, Complex } from '../types.js'
 
 // Minimum number of frequency points for WASM to be beneficial
 const WASM_FREQZ_THRESHOLD = 32

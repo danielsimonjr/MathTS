@@ -7,12 +7,12 @@ MathTS is a TypeScript math library with parallel computing support, designed as
 ### For mathjs Users (Easiest Migration)
 
 ```bash
-npm install @mathts/compat
+npm install @danielsimonjr/mathts-compat
 ```
 
 ```typescript
 // Just change your import!
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
 
@@ -25,14 +25,14 @@ math.sin(math.pi / 2);
 ### For New Projects (Full Control)
 
 ```bash
-npm install @mathts/core @mathts/functions @mathts/matrix @mathts/parallel
+npm install @danielsimonjr/mathts-core @danielsimonjr/mathts-functions @danielsimonjr/mathts-matrix @danielsimonjr/mathts-parallel
 ```
 
 ```typescript
-import { Complex, Fraction, BigNumber } from '@mathts/core';
-import { add, multiply, sin, cos, PI } from '@mathts/functions';
-import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
-import { computePool } from '@mathts/parallel';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { add, multiply, sin, cos, PI } from '@danielsimonjr/mathts-functions';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 ```
 
 ## Quick Examples
@@ -40,7 +40,7 @@ import { computePool } from '@mathts/parallel';
 ### Basic Arithmetic
 
 ```typescript
-import { add, subtract, multiply, divide, pow, sqrt } from '@mathts/functions';
+import { add, subtract, multiply, divide, pow, sqrt } from '@danielsimonjr/mathts-functions';
 
 console.log(add(1, 2));        // 3
 console.log(multiply(3, 4));   // 12
@@ -51,8 +51,8 @@ console.log(sqrt(16));         // 4
 ### Complex Numbers
 
 ```typescript
-import { Complex, I } from '@mathts/core';
-import { add, multiply } from '@mathts/functions';
+import { Complex, I } from '@danielsimonjr/mathts-core';
+import { add, multiply } from '@danielsimonjr/mathts-functions';
 
 const z1 = new Complex(3, 4);  // 3 + 4i
 const z2 = new Complex(1, 2);  // 1 + 2i
@@ -66,8 +66,8 @@ console.log(z1.arg());                    // 0.927... (angle in radians)
 ### Fractions (Exact Arithmetic)
 
 ```typescript
-import { Fraction } from '@mathts/core';
-import { add, multiply, divide } from '@mathts/functions';
+import { Fraction } from '@danielsimonjr/mathts-core';
+import { add, multiply, divide } from '@danielsimonjr/mathts-functions';
 
 const f1 = new Fraction(1, 3);  // 1/3
 const f2 = new Fraction(1, 6);  // 1/6
@@ -79,8 +79,8 @@ console.log(multiply(f1, f2).toString());  // "1/18"
 ### BigNumber (No Floating Point Errors)
 
 ```typescript
-import { BigNumber } from '@mathts/core';
-import { add } from '@mathts/functions';
+import { BigNumber } from '@danielsimonjr/mathts-core';
+import { add } from '@danielsimonjr/mathts-functions';
 
 const bn1 = BigNumber.parse('0.1');
 const bn2 = BigNumber.parse('0.2');
@@ -92,7 +92,7 @@ console.log(0.1 + 0.2);                 // 0.30000000000000004 (JS floating poin
 ### Matrix Operations
 
 ```typescript
-import { DenseMatrix } from '@mathts/matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 const A = DenseMatrix.fromArray([
   [1, 2],
@@ -117,7 +117,7 @@ const ones = DenseMatrix.ones(2, 2);
 ### Parallel Computing
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 async function main() {
   // Initialize the compute pool
@@ -149,11 +149,11 @@ main();
 
 | Package | Purpose |
 |---------|---------|
-| `@mathts/core` | Core types: Complex, Fraction, BigNumber |
-| `@mathts/functions` | Math functions with type dispatch |
-| `@mathts/matrix` | Dense and sparse matrices |
-| `@mathts/parallel` | Parallel computing via ComputePool |
-| `@mathts/compat` | mathjs compatibility layer |
+| `@danielsimonjr/mathts-core` | Core types: Complex, Fraction, BigNumber |
+| `@danielsimonjr/mathts-functions` | Math functions with type dispatch |
+| `@danielsimonjr/mathts-matrix` | Dense and sparse matrices |
+| `@danielsimonjr/mathts-parallel` | Parallel computing via ComputePool |
+| `@danielsimonjr/mathts-compat` | mathjs compatibility layer |
 
 ## Next Steps
 
@@ -167,8 +167,8 @@ main();
 MathTS is written in TypeScript and provides full type definitions:
 
 ```typescript
-import { Complex } from '@mathts/core';
-import { add } from '@mathts/functions';
+import { Complex } from '@danielsimonjr/mathts-core';
+import { add } from '@danielsimonjr/mathts-functions';
 
 const z: Complex = new Complex(3, 4);
 const result: Complex = add(z, z);  // Type-safe!
@@ -183,7 +183,7 @@ MathTS works in both environments:
 
 ```typescript
 // Check available features
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 await computePool.initialize();
 const stats = computePool.stats();

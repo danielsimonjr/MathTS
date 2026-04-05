@@ -1,17 +1,17 @@
-# @mathts/core
+# @danielsimonjr/mathts-core
 
 Core types, utilities, and configuration for MathTS.
 
 ## Installation
 
 ```bash
-npm install @mathts/core
+npm install @danielsimonjr/mathts-core
 ```
 
 ## Usage
 
 ```typescript
-import { createConfig, isNumeric, isMatrix, VERSION } from '@mathts/core';
+import { createConfig, isNumeric, isMatrix, VERSION } from '@danielsimonjr/mathts-core';
 
 // Create custom configuration
 const config = createConfig({

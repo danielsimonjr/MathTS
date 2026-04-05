@@ -1,6 +1,6 @@
 /**
  * MathTS Core Types
- * @module @mathts/core/types
+ * @module @danielsimonjr/mathts-core/types
  */
 
 // Interfaces and type definitions

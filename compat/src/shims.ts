@@ -17,7 +17,7 @@ import {
   isFraction,
   isBigNumber,
   isNumber,
-} from '@mathts/core';
+} from '@danielsimonjr/mathts-core';
 
 import {
   add as _add,
@@ -41,9 +41,9 @@ import {
   round as _round,
   floor as _floor,
   ceil as _ceil,
-} from '@mathts/functions';
+} from '@danielsimonjr/mathts-functions';
 
-import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)

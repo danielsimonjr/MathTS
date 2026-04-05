@@ -109,7 +109,7 @@ interface PackageJson {
 }
 
 interface WorkspacePackage {
-  name: string;       // npm name, e.g., "@mathts/core"
+  name: string;       // npm name, e.g., "@danielsimonjr/mathts-core"
   directory: string;  // relative dir, e.g., "core"
   srcDir: string;     // relative src dir, e.g., "core/src"
 }

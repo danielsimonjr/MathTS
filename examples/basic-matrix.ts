@@ -1,10 +1,10 @@
 /**
  * Basic Matrix Operations Example
  *
- * Demonstrates fundamental matrix operations using @mathts/matrix
+ * Demonstrates fundamental matrix operations using @danielsimonjr/mathts-matrix
  */
 
-import { DenseMatrix } from '@mathts/matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // Create a 3x3 matrix
 const matrix = new DenseMatrix(3, 3);

@@ -1,11 +1,11 @@
-# @mathts/core API Reference
+# @danielsimonjr/mathts-core API Reference
 
 The core package provides fundamental types and utilities for MathTS.
 
 ## Installation
 
 ```bash
-npm install @mathts/core
+npm install @danielsimonjr/mathts-core
 ```
 
 ## Types
@@ -15,7 +15,7 @@ npm install @mathts/core
 Complex numbers with real and imaginary parts.
 
 ```typescript
-import { Complex, I, COMPLEX_ZERO, COMPLEX_ONE } from '@mathts/core';
+import { Complex, I, COMPLEX_ZERO, COMPLEX_ONE } from '@danielsimonjr/mathts-core';
 ```
 
 #### Constructor
@@ -73,7 +73,7 @@ new Complex(re: number, im: number)
 #### Example
 
 ```typescript
-import { Complex, I } from '@mathts/core';
+import { Complex, I } from '@danielsimonjr/mathts-core';
 
 const z = new Complex(3, 4);
 console.log(z.abs());        // 5
@@ -93,7 +93,7 @@ console.log(parsed.re, parsed.im); // 2, 3
 Exact rational numbers using bigint for perfect precision.
 
 ```typescript
-import { Fraction, FRACTION_ZERO, FRACTION_ONE } from '@mathts/core';
+import { Fraction, FRACTION_ZERO, FRACTION_ONE } from '@danielsimonjr/mathts-core';
 ```
 
 #### Constructor
@@ -144,7 +144,7 @@ new Fraction(numerator: number | bigint, denominator: number | bigint)
 #### Example
 
 ```typescript
-import { Fraction } from '@mathts/core';
+import { Fraction } from '@danielsimonjr/mathts-core';
 
 const half = new Fraction(1, 2);
 const third = new Fraction(1, 3);
@@ -164,7 +164,7 @@ console.log(fromDecimal.toString()); // "1/8"
 Arbitrary precision decimal numbers.
 
 ```typescript
-import { BigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_PI, BIGNUMBER_E } from '@mathts/core';
+import { BigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_PI, BIGNUMBER_E } from '@danielsimonjr/mathts-core';
 ```
 
 #### Static Methods
@@ -207,7 +207,7 @@ import { BigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_PI, BIGNUMBER_E } f
 #### Example
 
 ```typescript
-import { BigNumber } from '@mathts/core';
+import { BigNumber } from '@danielsimonjr/mathts-core';
 
 // No floating point errors
 const a = BigNumber.parse('0.1');
@@ -226,7 +226,7 @@ console.log(pi.toString()); // Pi to 100 digits
 ## Type Guards
 
 ```typescript
-import { isComplex, isFraction, isBigNumber, isNumber } from '@mathts/core';
+import { isComplex, isFraction, isBigNumber, isNumber } from '@danielsimonjr/mathts-core';
 ```
 
 | Function | Signature | Description |
@@ -243,7 +243,7 @@ import { isComplex, isFraction, isBigNumber, isNumber } from '@mathts/core';
 The typed-function system for polymorphic dispatch.
 
 ```typescript
-import { mathTyped } from '@mathts/core';
+import { mathTyped } from '@danielsimonjr/mathts-core';
 
 const myAdd = mathTyped('myAdd', {
   'number, number': (a, b) => a + b,

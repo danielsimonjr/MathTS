@@ -17,7 +17,7 @@ MathTS supports multiple computation backends:
 By default, MathTS automatically selects the best backend based on operation size:
 
 ```typescript
-import { DenseMatrix } from '@mathts/matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // Small matrix - uses JS backend
 const small = DenseMatrix.fromArray([[1, 2], [3, 4]]);
@@ -31,7 +31,7 @@ const large = DenseMatrix.zeros(1000, 1000);
 For fine-grained control:
 
 ```typescript
-import { DenseMatrix, JSBackend, WASMBackend, GPUBackend } from '@mathts/matrix';
+import { DenseMatrix, JSBackend, WASMBackend, GPUBackend } from '@danielsimonjr/mathts-matrix';
 
 // Force specific backend
 const matrix = DenseMatrix.fromArray([[1, 2], [3, 4]]);
@@ -59,7 +59,7 @@ if (gpuAvailable) {
 ### ComputePool Configuration
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // Initialize with options
 await computePool.initialize({
@@ -96,7 +96,7 @@ const result2 = await computePool.sum(largeData);
 Run multiple independent operations in parallel:
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 const data1 = new Float64Array(50000).fill(1);
 const data2 = new Float64Array(50000).fill(2);
@@ -181,7 +181,7 @@ for (let i = 0; i < iterations; i++) {
 ### Choose Right Matrix Format
 
 ```typescript
-import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // Dense: Most elements are non-zero
 const dense = DenseMatrix.fromArray([
@@ -220,8 +220,8 @@ await computePool.sum(allData);
 MathTS uses typed-function for polymorphic dispatch:
 
 ```typescript
-import { add } from '@mathts/functions';
-import { Complex, Fraction, BigNumber } from '@mathts/core';
+import { add } from '@danielsimonjr/mathts-functions';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
 // Same function, different types
 add(1, 2);                                      // number + number
@@ -236,7 +236,7 @@ add(1, new Complex(2, 3));  // number coerced to Complex
 ### Custom Type Registration
 
 ```typescript
-import { mathTyped } from '@mathts/core';
+import { mathTyped } from '@danielsimonjr/mathts-core';
 
 // Create a typed function
 const myFunction = mathTyped('myFunction', {
@@ -255,7 +255,7 @@ myFunction(1, 2);        // 3
 ### Worker Pool Cleanup
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 async function processData() {
   await computePool.initialize();
@@ -274,7 +274,7 @@ async function processData() {
 ### Large Matrix Handling
 
 ```typescript
-import { DenseMatrix } from '@mathts/matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // For very large matrices, consider chunking
 async function processLargeMatrix(rows: number, cols: number) {
@@ -299,7 +299,7 @@ async function processLargeMatrix(rows: number, cols: number) {
 ### Enable Verbose Logging
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // Get detailed stats
 const stats = computePool.stats();

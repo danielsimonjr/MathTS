@@ -1,6 +1,6 @@
 # Expression, Compat & Workbook Inventory
 
-## Expression Package (`@mathts/expression`)
+## Expression Package (`@danielsimonjr/mathts-expression`)
 
 ### Entry Point Exports
 
@@ -15,7 +15,7 @@ export * from './Parser.js';      // createParserClass
 export * from './Help.js';
 ```
 
-No `@mathts/core` or `@mathts/matrix` imports — the expression package is self-contained, using its own internal `utils/factory.ts`, `utils/is.ts`, `utils/collection.ts`, etc.
+No `@danielsimonjr/mathts-core` or `@danielsimonjr/mathts-matrix` imports — the expression package is self-contained, using its own internal `utils/factory.ts`, `utils/is.ts`, `utils/collection.ts`, etc.
 
 ### Node Types
 
@@ -65,12 +65,12 @@ No `@mathts/core` or `@mathts/matrix` imports — the expression package is self
 
 - **Builds**: Yes — `dist/index.js` and `dist/index.d.ts` exist. Uses `strict: false`.
 - **Tests**: 0 — `expression/tests/` directory does not exist; CLAUDE.md lists expression as a package without tests.
-- **Connected to core**: No — the expression package has no `@mathts/core` imports. It uses its own internal factory pattern copied from mathjs. Integration with the MathTS type system is not yet wired.
+- **Connected to core**: No — the expression package has no `@danielsimonjr/mathts-core` imports. It uses its own internal factory pattern copied from mathjs. Integration with the MathTS type system is not yet wired.
 - **Build note**: Listed as "build skipped, incomplete" in CLAUDE.md. The `compiler/`, `evaluator/`, and `parser/` subdirectories are empty stubs. TODOs exist in `parse.ts`, `Parser.ts`, `node/IndexNode.ts`, and `function/help.ts`.
 
 ---
 
-## Compat Package (`@mathts/compat`)
+## Compat Package (`@danielsimonjr/mathts-compat`)
 
 ### Exports
 
@@ -80,9 +80,9 @@ No `@mathts/core` or `@mathts/matrix` imports — the expression package is self
 - Types: `MathJSConfig`, `MathInstance`
 - Constants: `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `FRACTION_ZERO`, `FRACTION_ONE`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_PI`, `BIGNUMBER_E`
 - Re-exports from `./shims.js` (all shim functions, see below)
-- Re-exports from `@mathts/core`: `Complex`, `Fraction`, `BigNumber`
-- Re-exports from `@mathts/matrix`: `DenseMatrix`, `SparseMatrix`
-- Re-exports from `@mathts/parallel`: `computePool`
+- Re-exports from `@danielsimonjr/mathts-core`: `Complex`, `Fraction`, `BigNumber`
+- Re-exports from `@danielsimonjr/mathts-matrix`: `DenseMatrix`, `SparseMatrix`
+- Re-exports from `@danielsimonjr/mathts-parallel`: `computePool`
 
 ### What's Wired vs Stub
 
@@ -90,8 +90,8 @@ All functions in `shims.ts` (505 lines) are wired to real implementations:
 
 | Category | Functions | Status |
 |----------|-----------|--------|
-| Construction | `complex`, `fraction`, `bignumber`, `matrix`, `sparse` | Wired to `@mathts/core` and `@mathts/matrix` |
-| Basic arithmetic | `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log` | Wired to `@mathts/functions` typed dispatch |
+| Construction | `complex`, `fraction`, `bignumber`, `matrix`, `sparse` | Wired to `@danielsimonjr/mathts-core` and `@danielsimonjr/mathts-matrix` |
+| Basic arithmetic | `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log` | Wired to `@danielsimonjr/mathts-functions` typed dispatch |
 | Trigonometry | `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2` | Wired (`asin/acos/atan` wrap `Math.*`) |
 | Statistics | `sum`, `mean`, `min`, `max` | Wired |
 | Number theory | `gcd`, `lcm` | Wired |
@@ -99,7 +99,7 @@ All functions in `shims.ts` (505 lines) are wired to real implementations:
 | Complex ops | `conj`, `re`, `im`, `arg` | Wired, throw `TypeError` for wrong types |
 | Matrix ops | `transpose`, `det`, `identity`, `zeros`, `ones`, `size` | Wired — `det` uses LU decomposition |
 | Type guards | `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix` | Wired |
-| Constants | `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_` | All wired to `Math.*` or `@mathts/core` |
+| Constants | `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_` | All wired to `Math.*` or `@danielsimonjr/mathts-core` |
 | `shims` object | Aggregated map of all the above | Wired (`stub_markers: 1` is a false positive from the inventory script detecting a comment) |
 
 The `all` constant is an empty `{}` object — `create()` wires everything regardless of what is passed. This differs from mathjs's selective factory pattern, where `all` contains actual factory functions.
@@ -113,7 +113,7 @@ Two test files, ~87 total `it()` cases:
 
 ---
 
-## Workbook Package (`@mathts/workbook`)
+## Workbook Package (`@danielsimonjr/mathts-workbook`)
 
 ### Structure
 
@@ -168,5 +168,5 @@ Execution modes (reactive/sequential/manual) are defined in types but not yet di
 
 - **Builds**: Yes — package builds to two entry points (`src/index.ts` and `src/cli.ts`)
 - **Tests**: 50 tests across 3 files (executor: 14, graph: 18, parser: 18) — covers the implemented infrastructure
-- **Connected to core**: Only via `@mathts/core` (listed as dependency). The executor does not yet call `@mathts/functions` or evaluate any math expressions.
-- **No expression package integration** — workbook does not import `@mathts/expression`
+- **Connected to core**: Only via `@danielsimonjr/mathts-core` (listed as dependency). The executor does not yet call `@danielsimonjr/mathts-functions` or evaluate any math expressions.
+- **No expression package integration** — workbook does not import `@danielsimonjr/mathts-expression`

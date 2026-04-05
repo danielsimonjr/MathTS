@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
 import { csReach } from './csReach.js'
-import { factory } from '../../../utils/factory.js'
-import type { TypedFunction } from '../../../core/function/typed.js'
+import { factory } from '../../utils/factory.js'
+import type { TypedFunction } from '../../core/function/typed.js'
 
 // Sparse matrix internal structure
 interface SparseMatrixData {

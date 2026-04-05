@@ -15,8 +15,8 @@
  * @packageDocumentation
  */
 
-import { mathTyped, Complex } from '@mathts/core';
-import { computePool } from '@mathts/parallel';
+import { mathTyped, Complex } from '@danielsimonjr/mathts-core';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases

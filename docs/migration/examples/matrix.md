@@ -47,7 +47,7 @@ const sparse = math.sparse([
 ## After (MathTS with compat layer)
 
 ```typescript
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
 
@@ -89,7 +89,7 @@ const sparse = math.sparse([
 ## After (Native MathTS API)
 
 ```typescript
-import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // Create matrices using static methods
 const A = DenseMatrix.fromArray([
@@ -109,7 +109,7 @@ const sum = A.add(B);
 const product = A.multiply(B);
 const transposed = A.transpose();
 // Note: determinant requires import from operations
-import { det } from '@mathts/matrix';
+import { det } from '@danielsimonjr/mathts-matrix';
 const determinant = det(A.toArray());
 
 // Factory methods for special matrices

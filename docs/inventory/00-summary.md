@@ -85,7 +85,7 @@
 - Parser ported (16 node types, 1,885-line parse.ts) — builds
 - **compiler/, evaluator/ are empty stubs**
 - **Zero tests**
-- Not connected to `@mathts/core` type system
+- Not connected to `@danielsimonjr/mathts-core` type system
 
 ### Workbook
 - Infrastructure works (dep graph, topological sort, reactive engine, 50 tests)
@@ -104,7 +104,7 @@
 ### 1. Two Incompatible typed-function Instances
 - **Native** `mathTyped`: 15 types, `instanceof`-based checks
 - **Synced** `createTyped`: 40+ types, duck-typing checks
-- A `@mathts/core` Complex won't pass mathjs's `isComplex` check
+- A `@danielsimonjr/mathts-core` Complex won't pass mathjs's `isComplex` check
 
 ### 2. Two Incompatible Type Hierarchies
 - Native `Complex/Fraction/BigNumber` have different APIs than synced mathjs type wrappers

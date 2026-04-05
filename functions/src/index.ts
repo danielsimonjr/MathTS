@@ -1,5 +1,5 @@
 /**
- * @mathts/functions
+ * @danielsimonjr/mathts-functions
  *
  * Mathematical functions for MathTS - arithmetic, algebra,
  * trigonometry, statistics, and more.

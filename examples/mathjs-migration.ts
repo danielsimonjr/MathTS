@@ -8,7 +8,7 @@
 
 // Step 1: Just change the import!
 // Before: import { create, all } from 'mathjs';
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
 

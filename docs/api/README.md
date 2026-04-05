@@ -6,11 +6,11 @@ Complete API documentation for all MathTS packages.
 
 | Package | Description | Documentation |
 |---------|-------------|---------------|
-| `@mathts/core` | Core types: Complex, Fraction, BigNumber | [API Reference](./core.md) |
-| `@mathts/functions` | Mathematical functions with typed dispatch | [API Reference](./functions.md) |
-| `@mathts/matrix` | Dense and sparse matrices | [API Reference](./matrix.md) |
-| `@mathts/parallel` | Parallel execution via ComputePool | [API Reference](./parallel.md) |
-| `@mathts/compat` | mathjs compatibility layer | [API Reference](./compat.md) |
+| `@danielsimonjr/mathts-core` | Core types: Complex, Fraction, BigNumber | [API Reference](./core.md) |
+| `@danielsimonjr/mathts-functions` | Mathematical functions with typed dispatch | [API Reference](./functions.md) |
+| `@danielsimonjr/mathts-matrix` | Dense and sparse matrices | [API Reference](./matrix.md) |
+| `@danielsimonjr/mathts-parallel` | Parallel execution via ComputePool | [API Reference](./parallel.md) |
+| `@danielsimonjr/mathts-compat` | mathjs compatibility layer | [API Reference](./compat.md) |
 
 ## Quick Reference
 
@@ -18,35 +18,35 @@ Complete API documentation for all MathTS packages.
 
 ```bash
 # For mathjs users (easiest migration)
-npm install @mathts/compat
+npm install @danielsimonjr/mathts-compat
 
 # For new projects (full control)
-npm install @mathts/core @mathts/functions @mathts/matrix @mathts/parallel
+npm install @danielsimonjr/mathts-core @danielsimonjr/mathts-functions @danielsimonjr/mathts-matrix @danielsimonjr/mathts-parallel
 ```
 
 ### Import Patterns
 
 ```typescript
 // mathjs-compatible
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
 
 // Native MathTS
-import { Complex, Fraction, BigNumber } from '@mathts/core';
-import { add, multiply, sin, cos } from '@mathts/functions';
-import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
-import { computePool } from '@mathts/parallel';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { add, multiply, sin, cos } from '@danielsimonjr/mathts-functions';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 ```
 
 ### Type Overview
 
 | Type | Package | Description |
 |------|---------|-------------|
-| `Complex` | `@mathts/core` | Complex numbers (re + im*i) |
-| `Fraction` | `@mathts/core` | Exact rationals (bigint) |
-| `BigNumber` | `@mathts/core` | Arbitrary precision decimals |
-| `DenseMatrix` | `@mathts/matrix` | Row-major dense matrix |
-| `SparseMatrix` | `@mathts/matrix` | CSR sparse matrix |
+| `Complex` | `@danielsimonjr/mathts-core` | Complex numbers (re + im*i) |
+| `Fraction` | `@danielsimonjr/mathts-core` | Exact rationals (bigint) |
+| `BigNumber` | `@danielsimonjr/mathts-core` | Arbitrary precision decimals |
+| `DenseMatrix` | `@danielsimonjr/mathts-matrix` | Row-major dense matrix |
+| `SparseMatrix` | `@danielsimonjr/mathts-matrix` | CSR sparse matrix |
 
 ### Common Operations
 

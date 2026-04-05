@@ -9,7 +9,7 @@ import {
   Fraction,
   BigNumber,
   isComplex,
-} from '@mathts/core';
+} from '@danielsimonjr/mathts-core';
 import {
   add,
   subtract,
@@ -39,7 +39,7 @@ import {
   compare,
   initializePool,
   terminatePool,
-} from '@mathts/functions';
+} from '@danielsimonjr/mathts-functions';
 
 describe('MathTS Functions Integration', () => {
   beforeAll(async () => {

@@ -1,8 +1,8 @@
 /**
- * Type declarations for @mathts/parallel package
+ * Type declarations for @danielsimonjr/mathts-parallel package
  * This provides type safety until the parallel package has proper exports
  */
-declare module '@mathts/parallel' {
+declare module '@danielsimonjr/mathts-parallel' {
   export interface ComputePoolConfig {
     minWorkers?: number;
     maxWorkers?: number;

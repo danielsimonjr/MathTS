@@ -91,3 +91,4 @@ docs/.docusaurus/
 # Note: packages/typed-function/ and packages/workerpool/ are now included in this repo
 .mcp.txt
 CUsersdanieAppDataLocalTempclaudecoverage.txt
+.npmrc

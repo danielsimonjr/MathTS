@@ -1,4 +1,4 @@
-# @mathts/parallel - Dependency Graph
+# @danielsimonjr/mathts-parallel - Dependency Graph
 
 **Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
@@ -44,7 +44,7 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/workerpool` | `MathWorkerPool, Transfer, WorkerPoolConfig, ParallelResult, TaskOptions, PoolStats` |
+| `@danielsimonjr/mathts-workerpool` | `MathWorkerPool, Transfer, WorkerPoolConfig, ParallelResult, TaskOptions, PoolStats` |
 
 **Exports:**
 - Classes: `ComputePool`

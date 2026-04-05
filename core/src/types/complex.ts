@@ -1,6 +1,6 @@
 /**
  * Complex number implementation
- * @module @mathts/core/types/complex
+ * @module @danielsimonjr/mathts-core/types/complex
  */
 
 import type { Scalar, IComplex } from './interfaces';

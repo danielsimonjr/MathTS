@@ -1,4 +1,4 @@
-import { createOr } from '../../function/logical/or.js'
+import { createOr } from '../../logical/or.js'
 import { factory } from '../../utils/factory.js'
 import { isCollection } from '../../utils/is.js'
 import type {

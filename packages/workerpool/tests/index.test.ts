@@ -1,5 +1,5 @@
 /**
- * Tests for @mathts/workerpool
+ * Tests for @danielsimonjr/mathts-workerpool
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -8,7 +8,7 @@ import {
   DEFAULT_WORKER_CONFIG,
 } from '../src/index.js';
 
-describe('@mathts/workerpool', () => {
+describe('@danielsimonjr/mathts-workerpool', () => {
   describe('MathWorkerPool configuration', () => {
     it('should create pool with default config', () => {
       const pool = new MathWorkerPool();

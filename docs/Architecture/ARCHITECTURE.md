@@ -29,11 +29,11 @@ workerpool --> parallel ------+           |
 
 | Package | Dependencies |
 |---------|-------------|
-| core | @mathts/core (1) |
-| matrix | @mathts/core (5), @mathts/parallel (3) |
-| functions | @mathts/core (5), @mathts/parallel (4) |
-| parallel | @mathts/workerpool (1), @mathts/parallel (1) |
-| compat | @mathts/core (3), @mathts/compat (2), @mathts/matrix (2), @mathts/parallel (1), @mathts/functions (1) |
+| core | @danielsimonjr/mathts-core (1) |
+| matrix | @danielsimonjr/mathts-core (5), @danielsimonjr/mathts-parallel (3) |
+| functions | @danielsimonjr/mathts-core (5), @danielsimonjr/mathts-parallel (4) |
+| parallel | @danielsimonjr/mathts-workerpool (1), @danielsimonjr/mathts-parallel (1) |
+| compat | @danielsimonjr/mathts-core (3), @danielsimonjr/mathts-compat (2), @danielsimonjr/mathts-matrix (2), @danielsimonjr/mathts-parallel (1), @danielsimonjr/mathts-functions (1) |
 
 ## Core Systems
 
@@ -101,6 +101,10 @@ Results wrapped in `ParallelResult<T>` with result data, duration, chunk count, 
 
 ### 6. WASM Layer
 
+MathTS has two WASM backends. The Rust backend is primary; AssemblyScript is kept for benchmarking.
+
+#### 6a. AssemblyScript WASM (Legacy — `assembly/`)
+
 AssemblyScript compiles to WebAssembly with 432 exports across 10 source files:
 
 | Category | Operations |
@@ -110,6 +114,34 @@ AssemblyScript compiles to WebAssembly with 432 exports across 10 source files:
 | Matrix | 41 ops (multiply, transpose, LU, QR, determinant) |
 | Complex scalar | 44 ops |
 | Complex array | 33 ops |
+
+#### 6b. Rust WASM (Primary — `wasm-rust/`)
+
+A Cargo workspace with the `mathts-wasm` crate. 63 Rust source files, ~18,500 lines, 826 wasm-bindgen exports. Compiled output: `lib/wasm/mathjs.wasm` (669 KB).
+
+Key crate dependencies:
+
+| Crate | Version | Role |
+|-------|---------|------|
+| faer | 0.24 | LU, QR, SVD, Cholesky, eigendecomposition |
+| rustfft | 6.4 | FFT and IFFT |
+| statrs | 0.18 | Statistical distributions, special functions |
+| libm | 0.2 | Portable math for `no_std` WASM targets |
+
+#### 6c. WASM Bridge Layer (`matrix/src/backends/`)
+
+Two TypeScript files manage the bridge between JavaScript and WASM:
+
+- **`WasmLoader.ts`**: Loads and instantiates the WASM binary, manages a shared linear memory pool, handles allocation/deallocation, and exposes the `MATHTS_WASM_BACKEND` environment variable for selecting `rust`, `assemblyscript`, or `auto` (default).
+- **`MatrixWasmBridge.ts`**: Intercepts typed-function dispatch and decides whether to use JavaScript or WASM for each operation. Selection is based on per-operation element-count thresholds (e.g., matrix multiply switches to WASM above 1,000 elements). Falls back to `JSBackend` transparently on WASM failure.
+
+#### 6d. Three-Tier Performance Model
+
+```
+JS fallback (always)
+  --> WASM acceleration (>1K elements, 2-10x faster)
+        --> Parallel/multi-core (>100K elements, additional 2-4x)
+```
 
 ### 7. Expression Package
 

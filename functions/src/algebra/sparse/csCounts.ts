@@ -1,10 +1,10 @@
 // Copyright (c) 2006-2024, Timothy A. Davis, All Rights Reserved.
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
-import { factory } from '../../../utils/factory.js'
+import { factory } from '../../utils/factory.js'
 import { csLeaf } from './csLeaf.js'
-import { wasmLoader } from '../../../wasm/WasmLoader.js'
-import type { TypedFunction } from '../../../core/function/typed.js'
+import { wasmLoader } from '../../wasm/WasmLoader.js'
+import type { TypedFunction } from '../../core/function/typed.js'
 
 // Minimum columns for WASM column counts to be beneficial
 const WASM_COUNTS_THRESHOLD = 50

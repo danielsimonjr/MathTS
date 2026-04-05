@@ -2,7 +2,7 @@
 
 **Updated**: 2026-04-04
 **Build**: 10/10 | **Typecheck**: 14/14 | **Tests**: 69 files, 1,953 pass
-**Factories**: 242/273 active (89%) — remaining 31 are infrastructure types in @mathts/core
+**Factories**: 242/273 active (89%) — remaining 31 are infrastructure types in @danielsimonjr/mathts-core
 **Sprint Completion**: 165/166 (99.4%) — only v1.0.0 release remains
 
 ---

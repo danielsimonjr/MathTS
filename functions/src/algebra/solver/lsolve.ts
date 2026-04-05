@@ -1,6 +1,6 @@
-import { factory } from '../../../utils/factory.js'
+import { factory } from '../../utils/factory.js'
 import { createSolveValidation } from './utils/solveValidation.js'
-import { wasmLoader } from '../../../wasm/WasmLoader.js'
+import { wasmLoader } from '../../wasm/WasmLoader.js'
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 const WASM_LSOLVE_THRESHOLD = 16 // 4x4 matrix

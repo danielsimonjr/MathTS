@@ -1,6 +1,6 @@
 import { factory } from '../../utils/factory.js'
 import { errorTransform } from './utils/errorTransform.js'
-import { createDiff } from '../../function/matrix/diff.js'
+import { createDiff } from '../../matrix/diff.js'
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
 import type { TypedFunction, MathFunction, VariadicArgs } from './types.js'
 

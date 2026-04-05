@@ -23,7 +23,7 @@
 ### ParallelBackend
 - File: `matrix/src/backends/ParallelBackend.ts` (381 lines)
 - Methods: `add`, `subtract`, `multiplyElementwise`, `divideElementwise`, `scale`, `multiply`, `transpose`, `dot`, `sum`, `sumAxis`, `norm`, `negate`, `abs`, `isAvailable`, `initialize`, `terminate`, `isReady`, `getStats`, `shouldParallelize`, `checkDimensionsMatch`, `checkMultiplyDimensions`, `createParallelBackend`
-- Status: Real — delegates to `@mathts/parallel` worker pool
+- Status: Real — delegates to `@danielsimonjr/mathts-parallel` worker pool
 
 ### BackendManager
 - File: `matrix/src/backends/BackendManager.ts` (641 lines)

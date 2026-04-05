@@ -1,6 +1,6 @@
 # MathTS
 
-[![npm version](https://img.shields.io/npm/v/@mathts/core.svg)](https://www.npmjs.com/package/@mathts/core)
+[![npm version](https://img.shields.io/npm/v/@danielsimonjr/mathts-core.svg)](https://www.npmjs.com/package/@danielsimonjr/mathts-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
@@ -12,7 +12,7 @@ A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acc
 - **Native TypeScript** - Full type safety with compile-time type checking
 - **Parallel-First** - WebWorker-based parallelization via ComputePool
 - **Multi-Backend Acceleration** - Automatic selection between JS, WASM (SIMD), and WebGPU
-- **mathjs Compatible** - Drop-in replacement with `@mathts/compat`
+- **mathjs Compatible** - Drop-in replacement with `@danielsimonjr/mathts-compat`
 - **Scientific Workbooks** - YAML-based reactive notebooks (`.mtsw` format)
 - **Tree-Shakeable** - Full ESM support for minimal bundle sizes
 - **Physics-First** - Built for tensor mathematics and the Universal Physics Tensor Framework (UPTF)
@@ -22,11 +22,11 @@ A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acc
 ### For mathjs Users (Quickest Migration)
 
 ```bash
-npm install @mathts/compat
+npm install @danielsimonjr/mathts-compat
 ```
 
 ```typescript
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
 
 // Use familiar mathjs API
@@ -39,14 +39,14 @@ math.sin(Math.PI / 2);       // 1
 ### For New Projects
 
 ```bash
-npm install @mathts/core @mathts/functions @mathts/matrix @mathts/parallel
+npm install @danielsimonjr/mathts-core @danielsimonjr/mathts-functions @danielsimonjr/mathts-matrix @danielsimonjr/mathts-parallel
 ```
 
 ```typescript
-import { Complex, Fraction, BigNumber } from '@mathts/core';
-import { add, multiply, sin, cos } from '@mathts/functions';
-import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
-import { computePool } from '@mathts/parallel';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { add, multiply, sin, cos } from '@danielsimonjr/mathts-functions';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 ```
 
 ## Quick Start
@@ -54,7 +54,7 @@ import { computePool } from '@mathts/parallel';
 ### Complex Numbers
 
 ```typescript
-import { Complex, I } from '@mathts/core';
+import { Complex, I } from '@danielsimonjr/mathts-core';
 
 const z = new Complex(3, 4);
 console.log(z.abs());       // 5
@@ -68,7 +68,7 @@ const w = z.add(I);         // Complex(3, 5)
 ### Fractions
 
 ```typescript
-import { Fraction } from '@mathts/core';
+import { Fraction } from '@danielsimonjr/mathts-core';
 
 const f = new Fraction(1, 3);
 const g = new Fraction(1, 6);
@@ -79,7 +79,7 @@ console.log(sum.toString()); // "1/2"
 ### BigNumbers
 
 ```typescript
-import { BigNumber } from '@mathts/core';
+import { BigNumber } from '@danielsimonjr/mathts-core';
 
 const a = BigNumber.parse('0.1');
 const b = BigNumber.parse('0.2');
@@ -90,7 +90,7 @@ console.log(sum.toString()); // "0.3" - exact, no floating point errors
 ### Matrices
 
 ```typescript
-import { DenseMatrix } from '@mathts/matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 const A = DenseMatrix.fromArray([
   [1, 2, 3],
@@ -109,7 +109,7 @@ console.log(A.get(0, 1));    // 2
 ### Parallel Operations
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // Initialize once at app startup
 await computePool.initialize();
@@ -134,8 +134,8 @@ await computePool.terminate();
 ### Typed Functions
 
 ```typescript
-import { add, multiply, sin } from '@mathts/functions';
-import { Complex, Fraction, BigNumber } from '@mathts/core';
+import { add, multiply, sin } from '@danielsimonjr/mathts-functions';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
 // Automatic type dispatch
 add(1, 2);                                    // 3
@@ -153,12 +153,12 @@ sin(new Complex(0, 1));   // Complex sinh(1)
 
 | Package | Description |
 |---------|-------------|
-| `@mathts/core` | Core types: Complex, Fraction, BigNumber, mathTyped |
-| `@mathts/functions` | Mathematical functions with typed dispatch |
-| `@mathts/matrix` | Dense and sparse matrices with backend selection |
-| `@mathts/parallel` | Parallel execution via ComputePool (Web Workers) |
-| `@mathts/compat` | mathjs compatibility layer |
-| `@mathts/workbook` | Scientific workbook runtime (.mtsw) |
+| `@danielsimonjr/mathts-core` | Core types: Complex, Fraction, BigNumber, mathTyped |
+| `@danielsimonjr/mathts-functions` | Mathematical functions with typed dispatch |
+| `@danielsimonjr/mathts-matrix` | Dense and sparse matrices with backend selection |
+| `@danielsimonjr/mathts-parallel` | Parallel execution via ComputePool (Web Workers) |
+| `@danielsimonjr/mathts-compat` | mathjs compatibility layer |
+| `@danielsimonjr/mathts-workbook` | Scientific workbook runtime (.mtsw) |
 
 ## Architecture
 
@@ -196,7 +196,7 @@ cells:
     id: intro
 
   - code: |
-      import { DenseMatrix } from '@mathts/matrix';
+      import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
       const A = DenseMatrix.random(3, 3);
       console.log('Matrix A:', A.toArray());
@@ -235,8 +235,8 @@ See the [Migration Guide](./docs/migration/guide.md) for detailed instructions.
 
 ### Quick Migration
 
-1. Install: `npm install @mathts/compat`
-2. Replace import: `import { create, all } from '@mathts/compat'`
+1. Install: `npm install @danielsimonjr/mathts-compat`
+2. Replace import: `import { create, all } from '@danielsimonjr/mathts-compat'`
 3. Continue using `math.*` API
 
 ### Key Differences

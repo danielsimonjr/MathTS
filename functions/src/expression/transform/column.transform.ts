@@ -1,6 +1,6 @@
 import { errorTransform } from './utils/errorTransform.js'
 import { factory } from '../../utils/factory.js'
-import { createColumn } from '../../function/matrix/column.js'
+import { createColumn } from '../../matrix/column.js'
 import { isNumber } from '../../utils/is.js'
 import type {
   TypedFunction,

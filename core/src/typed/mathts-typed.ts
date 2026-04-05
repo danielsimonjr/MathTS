@@ -447,7 +447,7 @@ export function createMathTSTyped(): TypedInstance {
  *
  * @example
  * ```typescript
- * import { mathTyped, Complex, Fraction, BigNumber } from '@mathts/core';
+ * import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
  *
  * // Create a polymorphic add function
  * const add = mathTyped('add', {

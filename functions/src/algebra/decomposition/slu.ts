@@ -1,5 +1,5 @@
-import { isInteger } from '../../../utils/number.js'
-import { factory } from '../../../utils/factory.js'
+import { isInteger } from '../../utils/number.js'
+import { factory } from '../../utils/factory.js'
 import { createCsSqr } from '../sparse/csSqr.js'
 import { createCsLu } from '../sparse/csLu.js'
 

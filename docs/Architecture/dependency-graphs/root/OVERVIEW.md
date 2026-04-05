@@ -13,7 +13,7 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 
 - **Type Safety**: Full TypeScript with strict mode, leveraging the type system for correctness
 - **Performance**: Automatic backend selection (JS/WASM/GPU) based on data size
-- **Compatibility**: Drop-in replacement for math.js via `@mathts/compat`
+- **Compatibility**: Drop-in replacement for math.js via `@danielsimonjr/mathts-compat`
 - **Modularity**: Tree-shakeable ESM packages - use only what you need
 - **Parallelism**: First-class Web Worker support for large-scale computation
 
@@ -37,15 +37,15 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 
 | Package | Description | Active Files |
 |---------|-------------|-------------|
-| `@mathts/typed-function` | Type dispatch system (forked) | 1 |
-| `@mathts/workerpool` | Worker pool management (forked) | 1 |
-| `@mathts/core` | Types, typed-function integration, factory | 9 |
-| `@mathts/matrix` | DenseMatrix, SparseMatrix, backends | 26 |
-| `@mathts/functions` | Math functions via typed dispatch | 6 |
-| `@mathts/parallel` | ComputePool, WebWorker operations | 10 |
-| `@mathts/expression` | Parser/evaluator (incomplete) | 8 |
-| `@mathts/workbook` | .mtsw notebook runtime + CLI | 5 |
-| `@mathts/compat` | mathjs compatibility shim | 2 |
+| `@danielsimonjr/mathts-typed-function` | Type dispatch system (forked) | 1 |
+| `@danielsimonjr/mathts-workerpool` | Worker pool management (forked) | 1 |
+| `@danielsimonjr/mathts-core` | Types, typed-function integration, factory | 9 |
+| `@danielsimonjr/mathts-matrix` | DenseMatrix, SparseMatrix, backends | 26 |
+| `@danielsimonjr/mathts-functions` | Math functions via typed dispatch | 6 |
+| `@danielsimonjr/mathts-parallel` | ComputePool, WebWorker operations | 10 |
+| `@danielsimonjr/mathts-expression` | Parser/evaluator (incomplete) | 8 |
+| `@danielsimonjr/mathts-workbook` | .mtsw notebook runtime + CLI | 5 |
+| `@danielsimonjr/mathts-compat` | mathjs compatibility shim | 2 |
 | `assembly` | WASM source (AssemblyScript) | 7 |
 
 ## Technology Stack
@@ -65,12 +65,12 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 
 ```typescript
 // Direct imports (tree-shakeable)
-import { add, multiply } from "@mathts/functions";
-import { DenseMatrix } from "@mathts/matrix";
-import { Complex, Fraction } from "@mathts/core";
+import { add, multiply } from "@danielsimonjr/mathts-functions";
+import { DenseMatrix } from "@danielsimonjr/mathts-matrix";
+import { Complex, Fraction } from "@danielsimonjr/mathts-core";
 
 // mathjs-compatible API
-import { create, all } from "@mathts/compat";
+import { create, all } from "@danielsimonjr/mathts-compat";
 const math = create(all);
 math.add(1, 2);
 ```

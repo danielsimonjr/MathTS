@@ -30,7 +30,7 @@ import {
   BIGNUMBER_ONE,
   BIGNUMBER_PI,
   BIGNUMBER_E,
-} from '@mathts/core';
+} from '@danielsimonjr/mathts-core';
 
 describe('MathTS Instance Creation', () => {
   describe('Core Exports', () => {

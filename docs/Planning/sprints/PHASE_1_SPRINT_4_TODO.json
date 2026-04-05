@@ -10,7 +10,7 @@
     {
       "id": 1,
       "category": "Package Setup",
-      "description": "Create matrix package - set up @mathts/matrix package with src/, tests/, assembly/, gpu/ directories",
+      "description": "Create matrix package - set up @danielsimonjr/mathts-matrix package with src/, tests/, assembly/, gpu/ directories",
       "status": "completed",
       "estimatedHours": 2,
       "complexity": "Low",

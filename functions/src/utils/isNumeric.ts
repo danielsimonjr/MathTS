@@ -1,6 +1,6 @@
 import { deepMap } from '../utils/collection.js'
 import { factory } from '../utils/factory.js'
-import type { TypedFunction as TypedFn } from '../../types.js'
+import type { TypedFunction as TypedFn } from '../types.js'
 import type { TypedFunction } from '../core/function/typed.js'
 
 const name = 'isNumeric'

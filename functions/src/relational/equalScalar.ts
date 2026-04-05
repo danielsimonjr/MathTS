@@ -4,7 +4,7 @@ import { factory } from '../utils/factory.js'
 import { complexEquals } from '../utils/complex.js'
 import { createCompareUnits } from './compareUnits.js'
 
-import { TypedFunction, BigNumber, Complex, Fraction } from '../../types.js'
+import { TypedFunction, BigNumber, Complex, Fraction } from '../types.js'
 import { ConfigOptions } from '../core/config.js'
 
 const name = 'equalScalar'

@@ -1,6 +1,6 @@
 /**
  * Complex number tests
- * @module @mathts/core/tests/types/complex
+ * @module @danielsimonjr/mathts-core/tests/types/complex
  */
 
 import { describe, it, expect } from 'vitest';

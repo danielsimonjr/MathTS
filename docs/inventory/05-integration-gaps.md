@@ -20,7 +20,7 @@ export const createAdd = factory(name, dependencies,
 
 Key characteristics:
 - **`factory()`** from `functions/src/utils/factory.ts` wraps the creator, attaching `.fn`, `.dependencies`, `.isFactory` metadata
-- **`typed`** is the mathjs typed-function instance (NOT `@mathts/core`'s `mathTyped`). It knows about `Matrix`, `DenseMatrix`, `SparseMatrix`, `BigNumber`, `Complex`, `Fraction`, `Unit`, `Index`, `Range`, etc.
+- **`typed`** is the mathjs typed-function instance (NOT `@danielsimonjr/mathts-core`'s `mathTyped`). It knows about `Matrix`, `DenseMatrix`, `SparseMatrix`, `BigNumber`, `Complex`, `Fraction`, `Unit`, `Index`, `Range`, etc.
 - **Dependencies are injected** by the `create()` bootstrap in `functions/src/core/create.ts`, which resolves them from the math instance namespace
 - **`factoriesAny.ts`** exports 303 factory creators, organized by category
 - **`create()`** iterates factories, calls `factory(math)` passing the `math` instance as the scope, and attaches results to `math.*`
@@ -31,8 +31,8 @@ The native MathTS code uses a **direct typed-function dispatch** pattern:
 
 ```typescript
 // functions/src/typed/arithmetic.ts
-import { mathTyped, Complex, Fraction, BigNumber } from '@mathts/core';
-import { computePool } from '@mathts/parallel';
+import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 export const add = mathTyped('add', {
   'number, number': (a, b) => a + b,
@@ -44,9 +44,9 @@ export const add = mathTyped('add', {
 ```
 
 Key characteristics:
-- Uses `@mathts/core`'s **`mathTyped`** singleton, which is a `typed-function` instance pre-configured with MathTS type tests for `Complex`, `Fraction`, `BigNumber`
+- Uses `@danielsimonjr/mathts-core`'s **`mathTyped`** singleton, which is a `typed-function` instance pre-configured with MathTS type tests for `Complex`, `Fraction`, `BigNumber`
 - **No dependency injection** -- imports are static ES modules
-- **Parallel-first**: Float64Array operations use `@mathts/parallel`'s ComputePool for worker-based parallelism
+- **Parallel-first**: Float64Array operations use `@danielsimonjr/mathts-parallel`'s ComputePool for worker-based parallelism
 - **No Matrix support**: native typed functions handle scalars and Float64Array only -- no `DenseMatrix` or `SparseMatrix` signatures
 - Only 4 modules active: `arithmetic.ts`, `trigonometry.ts`, `statistics.ts`, `signal.ts` (exported from `functions/src/typed/index.ts`)
 
@@ -56,18 +56,18 @@ There are **5 fundamental disconnects** between the two systems:
 
 ### 1. Two Separate `typed-function` Instances
 
-| Aspect | Native (`@mathts/core`) | Synced (mathjs) |
+| Aspect | Native (`@danielsimonjr/mathts-core`) | Synced (mathjs) |
 |--------|------------------------|-----------------|
 | Instance | `mathTyped` singleton | Created per `create()` call via `createTyped` factory |
 | Types known | `Complex`, `Fraction`, `BigNumber`, `number`, `bigint`, `boolean`, `string`, `Date`, `RegExp`, `null`, `undefined`, `Array`, `Float64Array`, `Object`, `Function` | All of the above plus `Matrix`, `DenseMatrix`, `SparseMatrix`, `Unit`, `Index`, `Range`, `ResultSet`, `Help`, `Chain`, `Node` (all AST types), `ObjectWrappingMap`, `PartitionedMap` |
-| Type detection | `instanceof` checks against `@mathts/core` classes | Duck-typing via constructor prototype properties (e.g., `x.constructor.prototype.isBigNumber`) |
+| Type detection | `instanceof` checks against `@danielsimonjr/mathts-core` classes | Duck-typing via constructor prototype properties (e.g., `x.constructor.prototype.isBigNumber`) |
 | Source | `core/src/typed/mathts-typed.ts` | `functions/src/core/function/typed.ts` |
 
-**Impact**: The synced `createTyped` factory constructs its own typed-function instance with ~40 type tests using mathjs-style duck typing. The native `mathTyped` has ~15 type tests using `instanceof`. These two instances are **incompatible** -- a `@mathts/core` `Complex` will NOT be recognized by mathjs's `isComplex` check, and vice versa.
+**Impact**: The synced `createTyped` factory constructs its own typed-function instance with ~40 type tests using mathjs-style duck typing. The native `mathTyped` has ~15 type tests using `instanceof`. These two instances are **incompatible** -- a `@danielsimonjr/mathts-core` `Complex` will NOT be recognized by mathjs's `isComplex` check, and vice versa.
 
 ### 2. Two Separate Type Hierarchies
 
-| Type | Native (`@mathts/core`) | Synced (mathjs factories) |
+| Type | Native (`@danielsimonjr/mathts-core`) | Synced (mathjs factories) |
 |------|------------------------|--------------------------|
 | Complex | `core/src/types/Complex.ts` -- custom class with `.add()`, `.mul()`, etc. | `functions/src/type/complex/Complex.ts` -- wraps `complex.js` npm package |
 | Fraction | `core/src/types/Fraction.ts` -- custom class | `functions/src/type/fraction/Fraction.ts` -- wraps `fraction.js` npm package |
@@ -79,7 +79,7 @@ There are **5 fundamental disconnects** between the two systems:
 
 ### 3. Two Separate Factory Registries
 
-| Aspect | Native (`@mathts/core`) | Synced (mathjs) |
+| Aspect | Native (`@danielsimonjr/mathts-core`) | Synced (mathjs) |
 |--------|------------------------|-----------------|
 | Registry | `FunctionRegistry` class in `core/src/factory/factory.ts` | Implicit -- `create()` in `functions/src/core/create.ts` attaches to `math` namespace |
 | Resolution | `registry.get(name)` with circular dependency detection | `factory(math)` -- each factory gets the full `math` scope object |
@@ -89,7 +89,7 @@ There are **5 fundamental disconnects** between the two systems:
 
 ### 4. Matrix Architecture Gap
 
-The native `@mathts/matrix` DenseMatrix:
+The native `@danielsimonjr/mathts-matrix` DenseMatrix:
 - Backed by `Float64Array` (row-major), numbers only
 - No `storage()` method -- uses `type` property (`'DenseMatrix'`)
 - No `._data` or `._size` internal properties
@@ -262,8 +262,8 @@ typed-function bridge (P0, 2-3 weeks)
 ### Option A: Adapter Pattern (Lower risk, higher ongoing cost)
 
 Create adapter layers that wrap native types to satisfy mathjs duck-typing expectations:
-- `ComplexAdapter` wraps `@mathts/core` `Complex` with `complex.js` API surface
-- `DenseMatrixAdapter` wraps `@mathts/matrix` `DenseMatrix` with `._data`, `.storage()`, etc.
+- `ComplexAdapter` wraps `@danielsimonjr/mathts-core` `Complex` with `complex.js` API surface
+- `DenseMatrixAdapter` wraps `@danielsimonjr/mathts-matrix` `DenseMatrix` with `._data`, `.storage()`, etc.
 - Register adapters in the synced typed-function instance
 
 **Pro**: Activates factories without modifying them. **Con**: Every native type needs a wrapper, performance overhead, two parallel type hierarchies forever.
@@ -280,7 +280,7 @@ Replace native type implementations with the mathjs type classes (which use batt
 ### Option C: Hybrid (Recommended)
 
 1. Use the mathjs typed-function instance (`createTyped`) as the single dispatch system
-2. Register native `@mathts/core` types into it using `typed.addType()`
+2. Register native `@danielsimonjr/mathts-core` types into it using `typed.addType()`
 3. Keep native `DenseMatrix` for Float64Array operations, create a mathjs-compatible `DenseMatrix` subclass or wrapper for factory consumption
 4. Progressively activate factories while maintaining parallel-first native functions as optimized overrides
 

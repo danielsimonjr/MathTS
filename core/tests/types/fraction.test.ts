@@ -1,6 +1,6 @@
 /**
  * Fraction tests
- * @module @mathts/core/tests/types/fraction
+ * @module @danielsimonjr/mathts-core/tests/types/fraction
  */
 
 import { describe, it, expect } from 'vitest';

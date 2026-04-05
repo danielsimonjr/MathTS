@@ -7,7 +7,7 @@ import type {
   Matrix,
   Unit,
   BigNumber
-} from '../../types.js'
+} from '../types.js'
 
 // Minimum y0 vector size for WASM acceleration to be beneficial
 const WASM_ODE_THRESHOLD = 10

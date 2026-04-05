@@ -1,6 +1,6 @@
 import { factory } from '../../utils/factory.js'
 import { errorTransform } from './utils/errorTransform.js'
-import { createMin } from '../../function/statistics/min.js'
+import { createMin } from '../../statistics/min.js'
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
 import type {
   TypedFunction,

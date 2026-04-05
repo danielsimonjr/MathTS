@@ -1,11 +1,11 @@
-# @mathts/compat API Reference
+# @danielsimonjr/mathts-compat API Reference
 
 mathjs compatibility layer for easy migration.
 
 ## Installation
 
 ```bash
-npm install @mathts/compat
+npm install @danielsimonjr/mathts-compat
 ```
 
 ## Overview
@@ -18,7 +18,7 @@ import { create, all } from 'mathjs';
 const math = create(all);
 
 // After (MathTS)
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
 
 // Same API works
@@ -34,7 +34,7 @@ math.matrix([[1,2],[3,4]]);
 Creates a math instance with all functions.
 
 ```typescript
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
 ```
@@ -203,7 +203,7 @@ import {
   i,
   pi,
   e,
-} from '@mathts/compat';
+} from '@danielsimonjr/mathts-compat';
 
 // Use directly
 const c = complex(3, 4);
@@ -233,7 +233,7 @@ import {
   BIGNUMBER_ONE,
   BIGNUMBER_PI,
   BIGNUMBER_E,
-} from '@mathts/compat';
+} from '@danielsimonjr/mathts-compat';
 ```
 
 ---
@@ -243,7 +243,7 @@ import {
 ### Basic Usage
 
 ```typescript
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
 
@@ -269,7 +269,7 @@ console.log(math.transpose(A));        // [[1,3],[2,4]]
 ```typescript
 // Step 1: Replace import
 // import { create, all } from 'mathjs';
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 // Step 2: Your existing code works
 const math = create(all);
@@ -280,7 +280,7 @@ function calculateEigenvalues(matrix) {
 }
 
 // Step 3: Gradually adopt native API where needed
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 async function parallelSum(data) {
   await computePool.initialize();
@@ -292,7 +292,7 @@ async function parallelSum(data) {
 
 ## API Differences from mathjs
 
-| mathjs | @mathts/compat |
+| mathjs | @danielsimonjr/mathts-compat |
 |--------|----------------|
 | `math.bignumber(x).toNumber()` | `math.bignumber(x).valueOf()` |
 | `m.get([row, col])` | `m.get(row, col)` |

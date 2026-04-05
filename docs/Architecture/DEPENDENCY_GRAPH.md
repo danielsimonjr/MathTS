@@ -68,6 +68,7 @@ The codebase is organized into the following modules:
 - **assembly/ops**: 5 files
 - **assembly/types**: 1 file
 - **compat**: 2 files
+- **wasm-rust** (Cargo workspace): 63 files (Rust), primary WASM backend
 
 ---
 
@@ -76,16 +77,30 @@ The codebase is organized into the following modules:
 
 | Package | Depends On | Files (Active) | Files (Dormant) |
 |---------|------------|----------------|-----------------|
-| `@mathts/typed-function` (`packages/typed-function/`) | (none) | 1 | 1 |
-| `@mathts/workerpool` (`packages/workerpool/`) | (none) | 1 | 2 |
-| `@mathts/core` (`core/`) | (none) | 10 | 85 |
-| `@mathts/matrix` (`matrix/`) | `@mathts/parallel`, `@mathts/core` | 26 | 7 |
-| `@mathts/functions` (`functions/`) | `@mathts/core`, `@mathts/parallel` | 6 | 744 |
-| `@mathts/expression` (`expression/`) | (none) | 21 | 310 |
-| `@mathts/parallel` (`parallel/`) | `@mathts/workerpool` | 10 | 4 |
-| `@mathts/workbook` (`workbook/`) | (none) | 5 | 1 |
-| `@mathts/wasm` (`assembly/`) | (none) | 7 | 3 |
-| `@mathts/compat` (`compat/`) | `@mathts/core`, `@mathts/matrix`, `@mathts/parallel`, `@mathts/functions` | 2 | 1 |
+| `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none) | 1 | 1 |
+| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`) | (none) | 1 | 2 |
+| `@danielsimonjr/mathts-core` (`core/`) | (none) | 10 | 85 |
+| `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`, `wasm-rust` (output) | 26 | 7 |
+| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 6 | 744 |
+| `@danielsimonjr/mathts-expression` (`expression/`) | (none) | 21 | 310 |
+| `@danielsimonjr/mathts-parallel` (`parallel/`) | `@danielsimonjr/mathts-workerpool` | 10 | 4 |
+| `@danielsimonjr/mathts-workbook` (`workbook/`) | (none) | 5 | 1 |
+| `@danielsimonjr/mathts-wasm` (`assembly/`) | (none) | 7 | 3 |
+| `wasm-rust` (`wasm-rust/`) | faer 0.24, rustfft 6.4, statrs 0.18, libm 0.2 | 63 | 0 |
+| `@danielsimonjr/mathts-compat` (`compat/`) | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-functions` | 2 | 1 |
+
+### wasm-rust Package Details
+
+`wasm-rust/` is a Cargo workspace (not an npm package) that compiles to `lib/wasm/mathjs.wasm` (669 KB). The `mathts-wasm` crate provides 826 wasm-bindgen exports across 63 source files (~18,500 lines). It is consumed at runtime by `matrix/src/backends/WasmLoader.ts`.
+
+External Rust dependencies:
+
+| Crate | Version | Purpose |
+|-------|---------|---------|
+| faer | 0.24 | LU, QR, SVD, Cholesky, eigen |
+| rustfft | 6.4 | FFT and IFFT |
+| statrs | 0.18 | Statistical distributions, gamma, beta, erf |
+| libm | 0.2 | Portable scalar math for `no_std` |
 
 ### Package Dependency Diagram
 
@@ -101,8 +116,10 @@ graph LR
     P7[workbook]
     P8[assembly]
     P9[compat]
+    P10[wasm-rust]
     P3 --> P6
     P3 --> P2
+    P3 --> P10
     P4 --> P2
     P4 --> P6
     P6 --> P1
@@ -110,6 +127,10 @@ graph LR
     P9 --> P3
     P9 --> P6
     P9 --> P4
+    P10 -.->|faer 0.24| P10
+    P10 -.->|rustfft 6.4| P10
+    P10 -.->|statrs 0.18| P10
+    P10 -.->|libm 0.2| P10
 ```
 
 ---

@@ -10,7 +10,7 @@
  * rewriting each one.
  */
 
-import { DenseMatrix } from '@mathts/matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 /**
  * mathjs-compatible dense matrix adapter.
@@ -37,14 +37,14 @@ export class MathJSDenseMatrix {
   }
 
   /**
-   * Row count — required by @mathts/core isMatrix duck-type check.
+   * Row count — required by @danielsimonjr/mathts-core isMatrix duck-type check.
    */
   get rows(): number {
     return this._size[0] ?? 0;
   }
 
   /**
-   * Column count — required by @mathts/core isMatrix duck-type check.
+   * Column count — required by @danielsimonjr/mathts-core isMatrix duck-type check.
    */
   get cols(): number {
     return this._size[1] ?? 0;
@@ -434,7 +434,7 @@ export class MathJSSparseMatrix {
     }
   }
 
-  // ---- Required duck-type properties for @mathts/core isMatrix check ----
+  // ---- Required duck-type properties for @danielsimonjr/mathts-core isMatrix check ----
 
   get rows(): number {
     return this._size[0] ?? 0;

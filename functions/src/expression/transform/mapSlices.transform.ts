@@ -1,6 +1,6 @@
 import { errorTransform } from './utils/errorTransform.js'
 import { factory } from '../../utils/factory.js'
-import { createMapSlices } from '../../function/matrix/mapSlices.js'
+import { createMapSlices } from '../../matrix/mapSlices.js'
 import { isBigNumber, isNumber } from '../../utils/is.js'
 import type { TypedFunction, BigNumberLike, VariadicArgs } from './types.js'
 

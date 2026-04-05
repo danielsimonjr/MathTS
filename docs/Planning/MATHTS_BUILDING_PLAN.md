@@ -66,7 +66,7 @@ src/
 
 **Integration Pattern**:
 ```typescript
-import { createTyped, TypedFunction } from '@mathts/typed-function';
+import { createTyped, TypedFunction } from '@danielsimonjr/mathts-typed-function';
 
 // Create MathTS-specific typed instance
 const typed = createTyped({
@@ -121,7 +121,7 @@ assembly/
 
 **Integration Pattern**:
 ```typescript
-import { pool, WorkerPool } from '@mathts/workerpool';
+import { pool, WorkerPool } from '@danielsimonjr/mathts-workerpool';
 
 // Create compute pool for matrix operations
 const computePool = pool({
@@ -149,7 +149,7 @@ mathts/
 │   ├── typed-function/              # Your TS port (symlink or npm workspace)
 │   └── workerpool/                  # Your TS port (symlink or npm workspace)
 │
-├── core/                            # @mathts/core
+├── core/                            # @danielsimonjr/mathts-core
 │   ├── src/                         
 │   │   ├── types/                   # Fundamental type definitions
 │   │   │   ├── interfaces.ts
@@ -169,7 +169,7 @@ mathts/
 │   │   └── index.ts                    
 │   └── package.json                    
 │                                       
-├── matrix/                  		 # @mathts/matrix
+├── matrix/                  		 # @danielsimonjr/mathts-matrix
 │   ├── src/
 │   │   ├── types/
 │   │   │   ├── Matrix.ts            # Abstract base
@@ -202,7 +202,7 @@ mathts/
 │   │   └── GPUContext.ts
 │   └── package.json
 │
-├── functions/               # @mathts/functions
+├── functions/               # @danielsimonjr/mathts-functions
 │   ├── src/
 │   │   ├── arithmetic/      # add, subtract, multiply, divide...
 │   │   ├── algebra/         # simplify, derivative, solve...
@@ -223,7 +223,7 @@ mathts/
 │   │   └── index.ts
 │   └── package.json
 │
-├── expression/              # @mathts/expression
+├── expression/              # @danielsimonjr/mathts-expression
 │   ├── src/
 │   │   ├── parser/          # Expression parser
 │   │   ├── evaluator/       # Expression evaluation
@@ -231,7 +231,7 @@ mathts/
 │   │   └── index.ts
 │   └── package.json
 │
-├── parallel/                # @mathts/parallel
+├── parallel/                # @danielsimonjr/mathts-parallel
 │   ├── src/
 │   │   ├── ComputePool.ts   # workerpool integration
 │   │   ├── strategies/      # Parallelization strategies
@@ -474,8 +474,8 @@ export const backends = new BackendManager();
 ```typescript
 // packages/parallel/src/ComputePool.ts
 
-import { pool, Pool, WorkerPool } from '@mathts/workerpool';
-import { IMatrix } from '@mathts/core';
+import { pool, Pool, WorkerPool } from '@danielsimonjr/mathts-workerpool';
+import { IMatrix } from '@danielsimonjr/mathts-core';
 
 export interface ParallelConfig {
   enabled: boolean;
@@ -1064,7 +1064,7 @@ export const computePool = new ComputePool();
         ┌────────────────────────┼────────────────────────┐
         ▼                        ▼                        ▼
 ┌───────────────┐      ┌─────────────────┐      ┌─────────────────┐
-│ @mathts/core  │      │ @mathts/matrix  │      │@mathts/functions│
+│ @danielsimonjr/mathts-core  │      │ @danielsimonjr/mathts-matrix  │      │@danielsimonjr/mathts-functions│
 │               │      │                 │      │                 │
 │ • Types       │      │ • DenseMatrix   │      │ • arithmetic    │
 │ • Config      │      │ • SparseMatrix  │      │ • algebra       │
@@ -1089,7 +1089,7 @@ export const computePool = new ComputePool();
               └────────────────────┘  └────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        @mathts/parallel                             │
+│                        @danielsimonjr/mathts-parallel                             │
 │  ┌────────────────────────────────────────────────────────────┐    │
 │  │                      ComputePool                            │    │
 │  │   ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐       │    │
@@ -1110,7 +1110,7 @@ export const computePool = new ComputePool();
 
 mathts/core/typed/mathts-typed.ts
 ┌─────────────────────────────────────────────────────────────────────┐
-│  import { createTyped } from '@mathts/typed-function';              │
+│  import { createTyped } from '@danielsimonjr/mathts-typed-function';              │
 │                                                                     │
 │  export const typed = createTyped({                                 │
 │    types: [                                                         │
@@ -1211,8 +1211,8 @@ mathts/core/typed/mathts-typed.ts
 
 ```json
 {
-  "@mathts/typed-function": "workspace:*",
-  "@mathts/workerpool": "workspace:*",
+  "@danielsimonjr/mathts-typed-function": "workspace:*",
+  "@danielsimonjr/mathts-workerpool": "workspace:*",
   "decimal.js": "^10.4.3",
   "fraction.js": "^4.3.7"
 }
@@ -1393,6 +1393,61 @@ fn main(
     result[row * dims.N + col] = sum;
   }
 }
+```
+
+---
+
+## Rust WASM Build Pipeline
+
+The following npm scripts are defined (or should be added) for the Rust WASM backend:
+
+### `npm run build:wasm:rust`
+
+Runs `cargo build` via `wasm-pack` for the Rust WASM workspace at `src/wasm-rust/`.
+
+```bash
+# Equivalent command
+wasm-pack build src/wasm-rust/crates/mathjs-wasm --target web --out-dir lib/wasm --release
+```
+
+Output: `lib/wasm/mathjs.wasm` (669 KB release build, 826 exports)
+
+### `npm run build:wasm:all`
+
+Builds both the AssemblyScript WASM (retained for benchmarking) and the Rust WASM backend in sequence:
+
+```bash
+# Equivalent
+npm run build:wasm && npm run build:wasm:rust
+```
+
+Output:
+- `lib/wasm/mathjs-as.wasm` — AssemblyScript binary
+- `lib/wasm/mathjs.wasm` — Rust binary (primary)
+
+### `npm run bench:wasm`
+
+Runs the three-way benchmark comparing Rust WASM vs AssemblyScript WASM vs JavaScript for a standard suite of operations:
+
+```bash
+# Equivalent
+npx ts-node test/benchmark/wasm-three-way.bench.ts
+```
+
+**Benchmark suite coverage**:
+- Matrix multiply: 10×10, 50×50, 100×100, 200×200, 500×500
+- Dot product: 100, 500, 1000, 5000 elements
+- Determinant: 10×10, 50×50, 100×100
+- FFT: 256, 1024, 4096, 16384 points
+- Statistical ops (mean, std, variance): 1000, 10000 elements
+
+**Sample output** (200×200 matmul):
+```
+backend    time(ms)  speedup
+---------  --------  -------
+js         20.0      1.0x
+wasm-as    4.1       4.9x
+wasm-rust  2.7       7.4x
 ```
 
 ---

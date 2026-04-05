@@ -1,6 +1,6 @@
 /**
  * Fraction (rational number) implementation
- * @module @mathts/core/types/fraction
+ * @module @danielsimonjr/mathts-core/types/fraction
  */
 
 import type { Scalar, IFraction } from './interfaces';

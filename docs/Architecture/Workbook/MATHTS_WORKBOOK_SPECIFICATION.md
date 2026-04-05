@@ -62,7 +62,7 @@ runtime:
   engine: mathts           # mathts | python | julia
   version: ">=1.0.0"
   packages:
-    - "@mathts/core"
+    - "@danielsimonjr/mathts-core"
     - "@mathts/tensor"
   execution: reactive      # reactive | sequential | manual
 
@@ -91,7 +91,7 @@ outputs:
 ### 2. Code Cell (TypeScript)
 ```yaml
 - code: |
-    import { Matrix } from '@mathts/core';
+    import { Matrix } from '@danielsimonjr/mathts-core';
     
     const A = Matrix.random(3, 3);
     const det = A.determinant();

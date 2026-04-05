@@ -865,7 +865,7 @@ import {
   createRelationalNode,
   createSymbolNode,
   createParse,
-} from '@mathts/expression';
+} from '@danielsimonjr/mathts-expression';
 
 import { createResultSet } from '../type/resultset/ResultSet.js';
 

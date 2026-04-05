@@ -1,7 +1,7 @@
 import { isBigNumber } from '../utils/is.js'
 import { factory } from '../utils/factory.js'
 import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { MathNumericType } from '../../types.js'
+import type { MathNumericType } from '../types.js'
 import type { TypedFunction } from '../core/function/typed.js'
 
 // N-dimensional distance only benefits from WASM for >= 4 dimensions

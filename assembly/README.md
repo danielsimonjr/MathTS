@@ -1,4 +1,4 @@
-# @mathts/wasm
+# @danielsimonjr/mathts-wasm
 
 High-performance WebAssembly module for MathTS, built with AssemblyScript.
 
@@ -30,7 +30,7 @@ npm run asbuild
 ### Browser
 
 ```typescript
-import { MathTSWasm } from '@mathts/wasm';
+import { MathTSWasm } from '@danielsimonjr/mathts-wasm';
 
 const wasm = await MathTSWasm.create('/path/to/mathts.wasm');
 
@@ -47,7 +47,7 @@ const exports = wasm.raw;
 ### Node.js
 
 ```typescript
-import { loadWasmSync } from '@mathts/wasm';
+import { loadWasmSync } from '@danielsimonjr/mathts-wasm';
 import fs from 'fs';
 
 const buffer = fs.readFileSync('./build/mathts.wasm');

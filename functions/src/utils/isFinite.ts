@@ -1,5 +1,5 @@
 import { factory } from '../utils/factory.js'
-import type { TypedFunction as TypedFn, Matrix } from '../../types.js'
+import type { TypedFunction as TypedFn, Matrix } from '../types.js'
 import type { TypedFunction } from '../core/function/typed.js'
 
 // Type definitions for isFinite

@@ -6,8 +6,8 @@
  * Run: npx tsx examples/basic-arithmetic.ts
  */
 
-import { Complex, Fraction, BigNumber, I } from '@mathts/core';
-import { add, subtract, multiply, divide, pow, sqrt } from '@mathts/functions';
+import { Complex, Fraction, BigNumber, I } from '@danielsimonjr/mathts-core';
+import { add, subtract, multiply, divide, pow, sqrt } from '@danielsimonjr/mathts-functions';
 
 console.log('=== MathTS Basic Arithmetic ===\n');
 

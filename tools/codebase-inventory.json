@@ -48,7 +48,7 @@
   "packages": {
     "core": {
       "package": {
-        "name": "@mathts/core",
+        "name": "@danielsimonjr/mathts-core",
         "version": "0.1.0",
         "dependencies": [
           "typed-function"
@@ -73,11 +73,11 @@
     },
     "matrix": {
       "package": {
-        "name": "@mathts/matrix",
+        "name": "@danielsimonjr/mathts-matrix",
         "version": "0.1.0",
         "dependencies": [
-          "@mathts/core",
-          "@mathts/parallel"
+          "@danielsimonjr/mathts-core",
+          "@danielsimonjr/mathts-parallel"
         ],
         "scripts": [
           "build",
@@ -99,12 +99,12 @@
     },
     "functions": {
       "package": {
-        "name": "@mathts/functions",
+        "name": "@danielsimonjr/mathts-functions",
         "version": "0.1.0",
         "dependencies": [
-          "@mathts/core",
-          "@mathts/matrix",
-          "@mathts/parallel",
+          "@danielsimonjr/mathts-core",
+          "@danielsimonjr/mathts-matrix",
+          "@danielsimonjr/mathts-parallel",
           "bignumber.js",
           "complex.js",
           "decimal.js",
@@ -135,10 +135,10 @@
     },
     "parallel": {
       "package": {
-        "name": "@mathts/parallel",
+        "name": "@danielsimonjr/mathts-parallel",
         "version": "0.1.0",
         "dependencies": [
-          "@mathts/workerpool"
+          "@danielsimonjr/mathts-workerpool"
         ],
         "scripts": [
           "build",
@@ -160,10 +160,10 @@
     },
     "expression": {
       "package": {
-        "name": "@mathts/expression",
+        "name": "@danielsimonjr/mathts-expression",
         "version": "0.1.0",
         "dependencies": [
-          "@mathts/core",
+          "@danielsimonjr/mathts-core",
           "typed-function"
         ],
         "scripts": [
@@ -186,10 +186,10 @@
     },
     "workbook": {
       "package": {
-        "name": "@mathts/workbook",
+        "name": "@danielsimonjr/mathts-workbook",
         "version": "0.1.0",
         "dependencies": [
-          "@mathts/core",
+          "@danielsimonjr/mathts-core",
           "yaml"
         ],
         "scripts": [
@@ -212,13 +212,13 @@
     },
     "compat": {
       "package": {
-        "name": "@mathts/compat",
+        "name": "@danielsimonjr/mathts-compat",
         "version": "0.1.0",
         "dependencies": [
-          "@mathts/core",
-          "@mathts/functions",
-          "@mathts/matrix",
-          "@mathts/parallel"
+          "@danielsimonjr/mathts-core",
+          "@danielsimonjr/mathts-functions",
+          "@danielsimonjr/mathts-matrix",
+          "@danielsimonjr/mathts-parallel"
         ],
         "scripts": [
           "build",
@@ -235,7 +235,7 @@
     },
     "assembly": {
       "package": {
-        "name": "@mathts/wasm",
+        "name": "@danielsimonjr/mathts-wasm",
         "version": "0.1.0",
         "dependencies": [],
         "scripts": [
@@ -257,7 +257,7 @@
     },
     "packages/typed-function": {
       "package": {
-        "name": "@mathts/typed-function",
+        "name": "@danielsimonjr/mathts-typed-function",
         "version": "0.1.0",
         "dependencies": [
           "typed-function"
@@ -282,7 +282,7 @@
     },
     "packages/workerpool": {
       "package": {
-        "name": "@mathts/workerpool",
+        "name": "@danielsimonjr/mathts-workerpool",
         "version": "0.1.0",
         "dependencies": [
           "workerpool"
@@ -4341,32 +4341,32 @@
   },
   "cross_package_deps": {
     "core": {
-      "@mathts/core": 1
+      "@danielsimonjr/mathts-core": 1
     },
     "matrix": {
-      "@mathts/core": 5,
-      "@mathts/parallel": 3
+      "@danielsimonjr/mathts-core": 5,
+      "@danielsimonjr/mathts-parallel": 3
     },
     "functions": {
-      "@mathts/core": 5,
-      "@mathts/parallel": 4
+      "@danielsimonjr/mathts-core": 5,
+      "@danielsimonjr/mathts-parallel": 4
     },
     "parallel": {
-      "@mathts/workerpool": 1,
-      "@mathts/parallel": 1
+      "@danielsimonjr/mathts-workerpool": 1,
+      "@danielsimonjr/mathts-parallel": 1
     },
     "compat": {
-      "@mathts/core": 3,
-      "@mathts/compat": 2,
-      "@mathts/matrix": 2,
-      "@mathts/parallel": 1,
-      "@mathts/functions": 1
+      "@danielsimonjr/mathts-core": 3,
+      "@danielsimonjr/mathts-compat": 2,
+      "@danielsimonjr/mathts-matrix": 2,
+      "@danielsimonjr/mathts-parallel": 1,
+      "@danielsimonjr/mathts-functions": 1
     },
     "packages/typed-function": {
-      "@mathts/core": 1
+      "@danielsimonjr/mathts-core": 1
     },
     "packages/workerpool": {
-      "@mathts/workerpool": 1
+      "@danielsimonjr/mathts-workerpool": 1
     }
   },
   "dependency_graph": {

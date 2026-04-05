@@ -71,13 +71,13 @@ subtractScalar (done) → subtract (needs matrix overload)
 - [ ] **Step 6: Update factory count and verify**
   ```bash
   npx vitest run functions/tests/
-  npx turbo build --filter=@mathts/functions --force
+  npx turbo build --filter=@danielsimonjr/mathts-functions --force
   ```
 
 ### Task 2: Wire expression evaluator to factory scope
 
 - [ ] **Step 1: Create `functions/src/factories/evaluate.ts`**
-  Import `createEvaluate` from `@mathts/expression`, pass it the parse function and a math scope built from all activated factories.
+  Import `createEvaluate` from `@danielsimonjr/mathts-expression`, pass it the parse function and a math scope built from all activated factories.
 
 - [ ] **Step 2: Export `evaluate` from functions package**
   ```typescript
@@ -100,7 +100,7 @@ subtractScalar (done) → subtract (needs matrix overload)
 - [ ] **Step 1: Implement `MathJSSparseMatrix`** with CSC storage
   - `_values`, `_index`, `_ptr`, `_size`, `_datatype`
   - `.storage()` → `'sparse'`
-  - Interop with native `SparseMatrix` from `@mathts/matrix`
+  - Interop with native `SparseMatrix` from `@danielsimonjr/mathts-matrix`
 
 - [ ] **Step 2: Register in factory scope**
 

@@ -5,8 +5,8 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { Complex, Fraction, BigNumber } from '@mathts/core';
-import { computePool } from '@mathts/parallel';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 import {
   add as parallelAdd,
   subtract as parallelSubtract,
@@ -395,7 +395,7 @@ describe('Parallel Arithmetic Functions', () => {
 
   // Note: Large array tests require the full worker pool implementation
   // These tests use sequential fallback for smaller arrays
-  // Large array parallelization is tested in @mathts/workerpool package
+  // Large array parallelization is tested in @danielsimonjr/mathts-workerpool package
   describe('Medium array operations (sequential fallback)', () => {
     it('should handle medium Float64Array addition', async () => {
       const size = 1000;

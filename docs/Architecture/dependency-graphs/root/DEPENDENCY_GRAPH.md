@@ -76,16 +76,16 @@ The codebase is organized into the following modules:
 
 | Package | Depends On | Files (Active) | Files (Dormant) |
 |---------|------------|----------------|-----------------|
-| `@mathts/typed-function` (`packages/typed-function/`) | (none) | 1 | 1 |
-| `@mathts/workerpool` (`packages/workerpool/`) | (none) | 1 | 2 |
-| `@mathts/core` (`core/`) | (none) | 10 | 85 |
-| `@mathts/matrix` (`matrix/`) | `@mathts/parallel`, `@mathts/core` | 26 | 7 |
-| `@mathts/functions` (`functions/`) | `@mathts/core`, `@mathts/parallel` | 6 | 744 |
-| `@mathts/expression` (`expression/`) | (none) | 21 | 310 |
-| `@mathts/parallel` (`parallel/`) | `@mathts/workerpool` | 10 | 4 |
-| `@mathts/workbook` (`workbook/`) | (none) | 5 | 1 |
-| `@mathts/wasm` (`assembly/`) | (none) | 7 | 3 |
-| `@mathts/compat` (`compat/`) | `@mathts/core`, `@mathts/matrix`, `@mathts/parallel`, `@mathts/functions` | 2 | 1 |
+| `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none) | 1 | 1 |
+| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`) | (none) | 1 | 2 |
+| `@danielsimonjr/mathts-core` (`core/`) | (none) | 10 | 85 |
+| `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core` | 26 | 7 |
+| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel` | 6 | 744 |
+| `@danielsimonjr/mathts-expression` (`expression/`) | (none) | 21 | 310 |
+| `@danielsimonjr/mathts-parallel` (`parallel/`) | `@danielsimonjr/mathts-workerpool` | 10 | 4 |
+| `@danielsimonjr/mathts-workbook` (`workbook/`) | (none) | 5 | 1 |
+| `@danielsimonjr/mathts-wasm` (`assembly/`) | (none) | 7 | 3 |
+| `@danielsimonjr/mathts-compat` (`compat/`) | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-functions` | 2 | 1 |
 
 ### Package Dependency Diagram
 

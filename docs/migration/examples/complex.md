@@ -43,7 +43,7 @@ const isComplex = math.isComplex(z1);
 ## After (MathTS with compat layer)
 
 ```typescript
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
 
@@ -81,9 +81,9 @@ const isComplex = math.isComplex(z1);
 ## After (Native MathTS API)
 
 ```typescript
-import { Complex, I } from '@mathts/core';
-import { add, multiply, divide, pow, exp, log, sin, sqrt } from '@mathts/functions';
-import { isComplex } from '@mathts/core';
+import { Complex, I } from '@danielsimonjr/mathts-core';
+import { add, multiply, divide, pow, exp, log, sin, sqrt } from '@danielsimonjr/mathts-functions';
+import { isComplex } from '@danielsimonjr/mathts-core';
 
 // Create complex numbers
 const z1 = new Complex(3, 4);
@@ -151,8 +151,8 @@ const sum = math.add(f, math.fraction(1, 6));
 
 ### MathTS Native
 ```typescript
-import { Fraction } from '@mathts/core';
-import { add } from '@mathts/functions';
+import { Fraction } from '@danielsimonjr/mathts-core';
+import { add } from '@danielsimonjr/mathts-functions';
 
 const f = new Fraction(1, 3);
 const sum = add(f, new Fraction(1, 6));
@@ -172,8 +172,8 @@ const sum = math.add(bn, math.bignumber('0.2'));
 
 ### MathTS Native
 ```typescript
-import { BigNumber } from '@mathts/core';
-import { add } from '@mathts/functions';
+import { BigNumber } from '@danielsimonjr/mathts-core';
+import { add } from '@danielsimonjr/mathts-functions';
 
 const bn = BigNumber.parse('0.1');
 const sum = add(bn, BigNumber.parse('0.2'));

@@ -6,7 +6,7 @@
  * Run: npx tsx examples/matrix-operations.ts
  */
 
-import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 
 console.log('=== MathTS Matrix Operations ===\n');
 

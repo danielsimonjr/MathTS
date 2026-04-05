@@ -1,5 +1,5 @@
-import { factory } from '../../../utils/factory.js'
-import { wasmLoader } from '../../../wasm/WasmLoader.js'
+import { factory } from '../../utils/factory.js'
+import { wasmLoader } from '../../wasm/WasmLoader.js'
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 const WASM_SCHUR_THRESHOLD = 16 // 4x4 matrix

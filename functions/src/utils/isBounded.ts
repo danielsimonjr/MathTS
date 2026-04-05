@@ -3,7 +3,7 @@ import type {
   TypedFunction as TypedFn,
   BigNumber,
   Complex
-} from '../../types.js'
+} from '../types.js'
 import type { TypedFunction } from '../core/function/typed.js'
 
 // Type definitions for isBounded

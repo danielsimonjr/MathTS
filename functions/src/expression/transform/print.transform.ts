@@ -1,4 +1,4 @@
-import { createPrint } from '../../function/string/print.js'
+import { createPrint } from '../../string/print.js'
 import { factory } from '../../utils/factory.js'
 import { printTemplate } from '../../utils/print.js'
 import type { TypedFunction, MathFunction } from './types.js'

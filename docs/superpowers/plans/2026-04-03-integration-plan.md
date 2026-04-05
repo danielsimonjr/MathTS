@@ -412,7 +412,7 @@ git commit -m "feat(core): add type compatibility bridge for mathjs duck-typing"
 - Create: `functions/src/typed/typed-bridge.ts`
 - Create: `functions/tests/typed-bridge.test.ts`
 
-The native `mathTyped` (from `@mathts/core`) and the synced `createTyped` factory (in `functions/src/core/function/typed.ts`) are separate typed-function instances with different type registrations. We need to register native MathTS types in the synced typed-function so factories can dispatch on them.
+The native `mathTyped` (from `@danielsimonjr/mathts-core`) and the synced `createTyped` factory (in `functions/src/core/function/typed.ts`) are separate typed-function instances with different type registrations. We need to register native MathTS types in the synced typed-function so factories can dispatch on them.
 
 - [ ] **Step 1: Analyze what the synced typed.ts does**
 
@@ -423,11 +423,11 @@ Read `functions/src/core/function/typed.ts` to understand how it registers types
 This module imports both typed-function instances, registers native types in the synced one, and exports a unified dispatch function:
 
 ```typescript
-import { mathTyped } from '@mathts/core';
-import { Complex } from '@mathts/core';
-import { Fraction } from '@mathts/core';
-import { BigNumber } from '@mathts/core';
-import { registerNativeTypes } from '@mathts/core';
+import { mathTyped } from '@danielsimonjr/mathts-core';
+import { Complex } from '@danielsimonjr/mathts-core';
+import { Fraction } from '@danielsimonjr/mathts-core';
+import { BigNumber } from '@danielsimonjr/mathts-core';
+import { registerNativeTypes } from '@danielsimonjr/mathts-core';
 
 /**
  * Bridge native MathTS types into the synced mathjs typed-function instance.
@@ -448,7 +448,7 @@ export function initTypeBridge(): void {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { Complex, Fraction, BigNumber } from '@mathts/core';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 import { initTypeBridge } from '../src/typed/typed-bridge.js';
 
 describe('Typed Bridge', () => {
@@ -527,7 +527,7 @@ describe('Leaf factories', () => {
 - [ ] **Step 5: Build and test**
 
 ```bash
-npx turbo build --filter=@mathts/functions
+npx turbo build --filter=@danielsimonjr/mathts-functions
 npx vitest run functions/tests/
 ```
 

@@ -1,6 +1,6 @@
 /**
  * Factory pattern tests
- * @module @mathts/core/tests/factory/factory
+ * @module @danielsimonjr/mathts-core/tests/factory/factory
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';

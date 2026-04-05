@@ -1,4 +1,4 @@
-import { registerNativeTypes } from '@mathts/core';
+import { registerNativeTypes } from '@danielsimonjr/mathts-core';
 
 let initialized = false;
 

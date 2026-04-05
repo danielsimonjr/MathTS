@@ -10,7 +10,7 @@
     {
       "id": 1,
       "category": "Package Setup",
-      "description": "Create parallel package - set up @mathts/parallel package structure with workerpool integration",
+      "description": "Create parallel package - set up @danielsimonjr/mathts-parallel package structure with workerpool integration",
       "status": "completed",
       "estimatedHours": 2,
       "complexity": "Low",
@@ -98,5 +98,5 @@
   "filesModified": [],
   "totalEstimatedHours": 30,
   "completedAt": "2025-12-12",
-  "notes": "Sprint 9 completes the parallel execution infrastructure. The @mathts/parallel package wraps @mathts/workerpool with a ComputePool class providing automatic parallelization based on data size. Features include: task chunking strategies (calculateOptimalChunks, chunkFloat64Array, partition2D), comprehensive parallel operations (sum, dot, matmul, transpose, elementwise ops, statistical ops, unary ops), worker lifecycle management, and zero-copy ArrayBuffer transfer via Transfer wrapper. All 97 parallel tests pass including 31 chunk tests and 66 ComputePool tests."
+  "notes": "Sprint 9 completes the parallel execution infrastructure. The @danielsimonjr/mathts-parallel package wraps @danielsimonjr/mathts-workerpool with a ComputePool class providing automatic parallelization based on data size. Features include: task chunking strategies (calculateOptimalChunks, chunkFloat64Array, partition2D), comprehensive parallel operations (sum, dot, matmul, transpose, elementwise ops, statistical ops, unary ops), worker lifecycle management, and zero-copy ArrayBuffer transfer via Transfer wrapper. All 97 parallel tests pass including 31 chunk tests and 66 ComputePool tests."
 }

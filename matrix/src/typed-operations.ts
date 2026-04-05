@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { mathTyped } from '@mathts/core';
-import type { SignatureFunction } from '@mathts/core';
+import { mathTyped } from '@danielsimonjr/mathts-core';
+import type { SignatureFunction } from '@danielsimonjr/mathts-core';
 import { DenseMatrix } from './types/DenseMatrix.js';
 
 // Helper type for signature records with proper typing

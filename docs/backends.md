@@ -4,19 +4,57 @@ MathTS provides a three-tier backend system for matrix operations that automatic
 
 ## Backend Types
 
+### 0. Rust WASM Backend (Primary)
+- **Status**: Production — primary backend as of April 2026
+- **Best for:** Medium and large matrices (>500 elements); replaces AssemblyScript as the default
+- **Binary**: `lib/wasm/mathjs.wasm` — 669 KB release build
+- **Source**: `src/wasm-rust/` (workspace) → `src/wasm-rust/crates/mathjs-wasm/` (63 `.rs` files, ~18,500 lines)
+- **Exports**: 826 functions via `wasm-bindgen`
+- **Advantages:** LLVM-optimized, aggressive autovectorization, mature crate ecosystem
+- **Crate dependencies**:
+  - `faer` — dense linear algebra (LU, QR, SVD, eigenvalues)
+  - `rustfft` — FFT and inverse FFT
+  - `statrs` — statistical distributions and special functions
+  - `libm` — portable math without `std` (for WASM no-std targets)
+- **Performance**: 2–55x faster than JavaScript fallback; 1.5–3x faster than AssemblyScript WASM
+
+**Selecting the Rust backend**:
+
+```typescript
+import { setConfig } from '@danielsimonjr/mathts-matrix';
+
+// Rust WASM is the default; this is explicit selection
+setConfig({ backends: { wasm: { engine: 'rust' } } });
+```
+
+Or via environment variable:
+
+```bash
+MATHTS_WASM_BACKEND=rust npx mathts serve
+```
+
 ### 1. JavaScript Backend (JS)
 - **Best for:** Small matrices (< 1,000 elements)
 - **Advantages:** No initialization overhead, always available
 - **Implementation:** Pure TypeScript with standard JavaScript operations
 
-### 2. WebAssembly Backend (WASM)
-- **Best for:** Medium matrices (1,000 - 100,000 elements)
+### 2. AssemblyScript WASM Backend (Legacy / Benchmark)
+- **Status**: Retained for benchmarking comparison only — superseded by Rust WASM backend
+- **Best for:** Medium matrices (1,000 - 100,000 elements) when Rust WASM is unavailable
+- **Binary**: `lib/wasm/mathjs-as.wasm`
+- **Source**: `src/wasm/` (57 AssemblyScript modules across 20 categories)
 - **Advantages:** SIMD optimizations, near-native performance
 - **Requirements:** WebAssembly support (available in all modern browsers)
 - **Features:**
   - SIMD acceleration when available
   - Optimized memory management
   - Low-level arithmetic operations
+
+To use the AssemblyScript backend explicitly:
+
+```bash
+MATHTS_WASM_BACKEND=as npx mathts serve
+```
 
 ### 3. WebGPU Backend (GPU)
 - **Best for:** Large matrices (> 100,000 elements)
@@ -50,7 +88,7 @@ The `BackendManager` automatically selects the best backend based on:
 ### Basic Usage (Auto-Selection)
 
 ```typescript
-import { backendManager } from '@mathts/matrix';
+import { backendManager } from '@danielsimonjr/mathts-matrix';
 
 // Initialize all backends
 await backendManager.initialize();
@@ -62,7 +100,7 @@ const result = backendManager.multiply(matrixA, matrixB);
 ### Manual Backend Selection
 
 ```typescript
-import { jsBackend, wasmBackend, gpuMatrixBackend } from '@mathts/matrix';
+import { jsBackend, wasmBackend, gpuMatrixBackend } from '@danielsimonjr/mathts-matrix';
 
 // Force a specific backend
 const jsResult = jsBackend.multiply(a, b);
@@ -76,7 +114,7 @@ const gpuResult = await gpuMatrixBackend.multiplyAsync(a, b);
 ### Configuring Backends
 
 ```typescript
-import { setBackendThreshold, setBackendPreference, forceBackend } from '@mathts/matrix';
+import { setBackendThreshold, setBackendPreference, forceBackend } from '@danielsimonjr/mathts-matrix';
 
 // Adjust thresholds
 setBackendThreshold('wasm', 500);  // Use WASM for > 500 elements
@@ -94,7 +132,7 @@ forceBackend(null);   // Reset to auto-selection
 ### Checking Availability
 
 ```typescript
-import { backendManager } from '@mathts/matrix';
+import { backendManager } from '@danielsimonjr/mathts-matrix';
 
 // Check available backends
 const available = backendManager.getAvailableBackends();
@@ -115,7 +153,7 @@ console.log(`Would use: ${backend}`); // 'gpu'
 MathTS can automatically adjust thresholds based on runtime profiling:
 
 ```typescript
-import { enableAdaptiveTuning, configureAdaptiveTuning } from '@mathts/matrix';
+import { enableAdaptiveTuning, configureAdaptiveTuning } from '@danielsimonjr/mathts-matrix';
 
 // Enable adaptive tuning
 enableAdaptiveTuning();
@@ -140,7 +178,7 @@ console.log('Adjusted multiply threshold:', thresholds.get('multiply'));
 For multiple operations, use batch execution to reduce GPU overhead:
 
 ```typescript
-import { BatchExecutor, GPUContext, ShaderManager, BufferPool } from '@mathts/matrix';
+import { BatchExecutor, GPUContext, ShaderManager, BufferPool } from '@danielsimonjr/mathts-matrix';
 
 const executor = new BatchExecutor(context, shaders, bufferPool);
 
@@ -159,7 +197,7 @@ console.log(`Executed ${result.operationCount} operations in ${result.duration}m
 Control CPU-GPU data synchronization:
 
 ```typescript
-import { createSyncManager } from '@mathts/matrix';
+import { createSyncManager } from '@danielsimonjr/mathts-matrix';
 
 // Strategies: 'immediate', 'lazy', 'double-buffer', 'streaming'
 const sync = createSyncManager(context, bufferPool, 'streaming');
@@ -178,7 +216,7 @@ const result = await sync.downloadStreaming(gpuBuffer, totalSize);
 All backends support graceful fallback:
 
 ```typescript
-import { setConfig } from '@mathts/matrix';
+import { setConfig } from '@danielsimonjr/mathts-matrix';
 
 // Enable fallback on errors (default: true)
 setConfig({
@@ -194,21 +232,24 @@ const result = backendManager.multiply(a, b); // Never throws
 
 ## Backend Comparison
 
-| Feature | JS | WASM | GPU |
-|---------|-----|------|-----|
-| Initialization | Instant | ~10ms | ~100ms |
-| Small matrices | Fastest | Overhead | Overhead |
-| Large matrices | Slow | Fast | Fastest |
-| SIMD support | No | Yes | N/A |
-| Parallel execution | No | Limited | Yes |
-| Memory efficiency | Good | Good | Best |
-| Browser support | 100% | 95%+ | 60%+ |
+| Feature | JS | WASM-AS | WASM-Rust | GPU |
+|---------|-----|---------|-----------|-----|
+| Initialization | Instant | ~10ms | ~15ms | ~100ms |
+| Small matrices | Fastest | Overhead | Overhead | Overhead |
+| Medium matrices | Slow | Fast | Faster | Overhead |
+| Large matrices | Slowest | Fast | Fastest (no GPU) | Fastest |
+| SIMD support | No | Yes | Yes (LLVM auto) | N/A |
+| Parallel execution | No | Limited | Limited | Yes |
+| Memory efficiency | Good | Good | Good | Best |
+| Browser support | 100% | 95%+ | 95%+ | 60%+ |
+| Status | Fallback | Benchmark | **Primary** | Planned |
+| Binary location | — | `lib/wasm/mathjs-as.wasm` | `lib/wasm/mathjs.wasm` | — |
 
 ## Troubleshooting
 
 ### WASM Not Available
 ```typescript
-import { detectWasmFeatures } from '@mathts/matrix';
+import { detectWasmFeatures } from '@danielsimonjr/mathts-matrix';
 
 const features = await detectWasmFeatures();
 console.log('WASM:', features.basic);
@@ -218,7 +259,7 @@ console.log('Threads:', features.threads);
 
 ### GPU Not Available
 ```typescript
-import { detectGPUCapabilities } from '@mathts/matrix';
+import { detectGPUCapabilities } from '@danielsimonjr/mathts-matrix';
 
 const caps = await detectGPUCapabilities();
 console.log('Supported:', caps.supported);
@@ -228,7 +269,7 @@ console.log('Limits:', caps.limits);
 
 ### Performance Issues
 ```typescript
-import { enableProfiling, backendManager } from '@mathts/matrix';
+import { enableProfiling, backendManager } from '@danielsimonjr/mathts-matrix';
 
 enableProfiling();
 

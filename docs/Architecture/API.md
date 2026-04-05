@@ -4,7 +4,7 @@
 
 ---
 
-## @mathts/core
+## @danielsimonjr/mathts-core
 
 ### Numeric Types
 
@@ -60,7 +60,7 @@ isObject(x)     isNull(x)        isUndefined(x)    isMatrix(x)
 
 ---
 
-## @mathts/functions
+## @danielsimonjr/mathts-functions
 
 All exports come from `functions/src/typed/`. 95 total exports across 4 modules.
 
@@ -101,7 +101,7 @@ Variadic overloads (2–4 numbers) are synchronous.
 
 ---
 
-## @mathts/matrix
+## @danielsimonjr/mathts-matrix
 
 ### Matrix Types
 
@@ -141,7 +141,7 @@ SVD, LU, QR, Cholesky, eigendecomposition (symmetric matrices)
 
 ---
 
-## @mathts/parallel
+## @danielsimonjr/mathts-parallel
 
 ### Pool Management
 
@@ -177,12 +177,12 @@ interface ParallelResult<T> {
 
 ---
 
-## @mathts/compat
+## @danielsimonjr/mathts-compat
 
 Provides a mathjs-compatible API surface. 54 shim functions, all wired to real implementations.
 
 ```typescript
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
 math.add(1, 2);
@@ -200,9 +200,9 @@ Re-exports all core types: `Complex`, `Fraction`, `BigNumber`, `DenseMatrix`, `S
 
 ---
 
-## @mathts/expression
+## @danielsimonjr/mathts-expression
 
-> **Status**: Parser is ported and builds. Compiler and evaluator are empty stubs. Zero tests. Not connected to `@mathts/core`.
+> **Status**: Parser is ported and builds. Compiler and evaluator are empty stubs. Zero tests. Not connected to `@danielsimonjr/mathts-core`.
 
 | Symbol | Description |
 |--------|-------------|
@@ -211,7 +211,7 @@ Re-exports all core types: `Complex`, `Fraction`, `BigNumber`, `DenseMatrix`, `S
 
 ---
 
-## @mathts/workbook
+## @danielsimonjr/mathts-workbook
 
 > **Status**: Infrastructure works (dep graph, topological sort, reactive engine). `executeCode()` throws "not yet implemented". No integration with expression parser.
 
@@ -244,19 +244,21 @@ Execution modes: `reactive` (re-run downstream on change), `sequential` (all cel
 
 ---
 
-## @mathts/typed-function (package)
+## @danielsimonjr/mathts-typed-function (package)
 
-Forked type dispatch system. Provides the `typed()` function used by `@mathts/core`.
+Forked type dispatch system. Provides the `typed()` function used by `@danielsimonjr/mathts-core`.
 
-## @mathts/workerpool (package)
+## @danielsimonjr/mathts-workerpool (package)
 
-Forked worker pool management. Used internally by `@mathts/parallel`.
+Forked worker pool management. Used internally by `@danielsimonjr/mathts-parallel`.
 
 ---
 
-## WASM Module (assembly/)
+## WASM Modules
 
-209 exported operations from AssemblyScript source.
+### AssemblyScript WASM (`assembly/`) — Legacy
+
+209 exported operations from AssemblyScript source. Kept for benchmarking against the Rust backend.
 
 | Category | Count | Examples |
 |----------|-------|---------|
@@ -267,3 +269,27 @@ Forked worker pool management. Used internally by `@mathts/parallel`.
 | Complex array | 33 | `complex_array_add`, `complex_array_dot`, `complex_array_norm` |
 
 WASM bindings: `loadWasm()`, `loadWasmSync()`, `MathTSWasm` (instance type)
+
+### Rust WASM (`wasm-rust/`) — Primary
+
+826 exported functions compiled from 63 Rust source files (~18,500 lines). Binary: `lib/wasm/mathjs.wasm` (669 KB). Crates: **faer** (linear algebra), **rustfft** (FFT), **statrs** (statistics/special functions), **libm** (portable math).
+
+WASM bindings (same interface as AssemblyScript): `loadWasm()`, `loadWasmSync()`, `MathTSWasm`
+
+---
+
+## npm Scripts (WASM-related)
+
+| Script | Command | Description |
+|--------|---------|-------------|
+| `build:wasm:rust` | `cargo build --release` in `wasm-rust/` | Build Rust WASM backend |
+| `build:wasm:all` | Builds both Rust and AssemblyScript backends | Full WASM build |
+| `bench:wasm` | Runs three-way benchmark | Rust vs AssemblyScript vs JavaScript |
+
+---
+
+## Environment Variables
+
+| Variable | Values | Default | Description |
+|----------|--------|---------|-------------|
+| `MATHTS_WASM_BACKEND` | `rust`, `assemblyscript`, `auto`, `none` | `auto` | Selects WASM backend. `auto` prefers Rust, falls back to AS. `none` disables WASM entirely. |

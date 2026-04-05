@@ -1,4 +1,4 @@
-# @mathts/compat - Dependency Graph
+# @danielsimonjr/mathts-compat - Dependency Graph
 
 **Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
@@ -33,12 +33,12 @@ The codebase is organized into the following modules:
 
 ## Root Dependencies
 
-### `src/functions.d.ts` - Type declarations for @mathts/functions
+### `src/functions.d.ts` - Type declarations for @danielsimonjr/mathts-functions
 
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `Complex, Fraction, BigNumber` |
+| `@danielsimonjr/mathts-core` | `Complex, Fraction, BigNumber` |
 
 **Exports:**
 - Functions: `add`, `add`, `add`, `add`, `add`, `subtract`, `subtract`, `subtract`, `subtract`, `subtract`, `multiply`, `multiply`, `multiply`, `multiply`, `multiply`, `divide`, `divide`, `divide`, `divide`, `divide`, `pow`, `pow`, `pow`, `pow`, `sqrt`, `sqrt`, `sqrt`, `abs`, `abs`, `abs`, `exp`, `exp`, `exp`, `log`, `log`, `log`, `sin`, `sin`, `sin`, `cos`, `cos`, `cos`, `tan`, `tan`, `tan`, `sum`, `mean`, `min`, `max`, `gcd`, `lcm`, `round`, `floor`, `ceil`
@@ -50,9 +50,9 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber` |
-| `@mathts/functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, sum, mean, min, max, gcd, lcm, round, floor, ceil` |
-| `@mathts/matrix` | `DenseMatrix, SparseMatrix` |
+| `@danielsimonjr/mathts-core` | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber` |
+| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, sum, mean, min, max, gcd, lcm, round, floor, ceil` |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, SparseMatrix` |
 
 **Exports:**
 - Functions: `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `asin`, `acos`, `atan`, `atan2`, `conj`, `re`, `im`, `arg`, `transpose`, `det`, `identity`, `zeros`, `ones`, `size`, `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix`
@@ -71,9 +71,9 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `./shims.js` | `shims` | Import |
 | `./shims.js` | `*` | Re-export |
-| `@mathts/core` | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, COMPLEX_ONE, FRACTION_ZERO, FRACTION_ONE, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_PI, BIGNUMBER_E` | Re-export |
-| `@mathts/matrix` | `DenseMatrix, SparseMatrix` | Re-export |
-| `@mathts/parallel` | `computePool` | Re-export |
+| `@danielsimonjr/mathts-core` | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, COMPLEX_ONE, FRACTION_ZERO, FRACTION_ONE, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_PI, BIGNUMBER_E` | Re-export |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, SparseMatrix` | Re-export |
+| `@danielsimonjr/mathts-parallel` | `computePool` | Re-export |
 
 **Exports:**
 - Interfaces: `MathJSConfig`, `MathInstance`

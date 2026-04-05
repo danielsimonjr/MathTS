@@ -1,6 +1,6 @@
 import { factory } from '../../utils/factory.js'
 import { errorTransform } from './utils/errorTransform.js'
-import { createVariance } from '../../function/statistics/variance.js'
+import { createVariance } from '../../statistics/variance.js'
 import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
 import type { TypedFunction, VariadicArgs } from './types.js'
 

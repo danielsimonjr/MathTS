@@ -8,7 +8,7 @@
  * @packageDocumentation
  */
 
-import { computePool, ComputePool, type ComputePoolConfig } from '@mathts/parallel';
+import { computePool, ComputePool, type ComputePoolConfig } from '@danielsimonjr/mathts-parallel';
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { BackendType } from './Backend.js';
 

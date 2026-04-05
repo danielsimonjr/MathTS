@@ -17,9 +17,9 @@ import {
   Complex,
   Fraction,
   BigNumber,
-} from '@mathts/core';
+} from '@danielsimonjr/mathts-core';
 
-import { computePool, ComputePool } from '@mathts/parallel';
+import { computePool, ComputePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases

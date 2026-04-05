@@ -8,13 +8,13 @@
  * Task: 6.1.5
  */
 
-export * from './arithmetic'
-export * from './bitwise'
-export * from './combinations'
-export * from './constants'
-export * from './logical'
-export * from './probability'
-export * from './trigonometry'
-export * from './utils'
+export * from './arithmetic.js'
+export * from './bitwise.js'
+export * from './combinations.js'
+export * from './constants.js'
+export * from './logical.js'
+export * from './probability.js'
+export * from './trigonometry.js'
+export * from './utils.js'
 
 // Note: relational.js was empty, so no relational module to export

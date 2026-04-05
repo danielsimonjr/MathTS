@@ -150,7 +150,7 @@ function helperFunction() {
 pnpm test
 
 # Specific package
-pnpm --filter @mathts/matrix test
+pnpm --filter @danielsimonjr/mathts-matrix test
 
 # Watch mode
 pnpm test -- --watch
@@ -204,11 +204,11 @@ When adding new functionality, place it in the appropriate package:
 
 | Package | Purpose |
 |---------|---------|
-| `@mathts/core` | Base types, config, typed-function integration |
-| `@mathts/matrix` | Matrix types and operations |
-| `@mathts/functions` | Mathematical functions |
-| `@mathts/parallel` | Worker pool and parallelization |
-| `@mathts/workbook` | Scientific workbook runtime |
+| `@danielsimonjr/mathts-core` | Base types, config, typed-function integration |
+| `@danielsimonjr/mathts-matrix` | Matrix types and operations |
+| `@danielsimonjr/mathts-functions` | Mathematical functions |
+| `@danielsimonjr/mathts-parallel` | Worker pool and parallelization |
+| `@danielsimonjr/mathts-workbook` | Scientific workbook runtime |
 
 ## Performance Considerations
 

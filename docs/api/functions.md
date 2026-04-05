@@ -1,11 +1,11 @@
-# @mathts/functions API Reference
+# @danielsimonjr/mathts-functions API Reference
 
 Mathematical functions with automatic type dispatch.
 
 ## Installation
 
 ```bash
-npm install @mathts/functions
+npm install @danielsimonjr/mathts-functions
 ```
 
 ## Overview
@@ -13,7 +13,7 @@ npm install @mathts/functions
 All functions use typed-function for automatic type dispatch:
 
 ```typescript
-import { add } from '@mathts/functions';
+import { add } from '@danielsimonjr/mathts-functions';
 
 // Works with numbers
 add(1, 2);                    // 3
@@ -70,7 +70,7 @@ add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber(0.3)
 ### Example
 
 ```typescript
-import { add, subtract, multiply, divide, pow, sqrt, abs } from '@mathts/functions';
+import { add, subtract, multiply, divide, pow, sqrt, abs } from '@danielsimonjr/mathts-functions';
 
 add(1, 2);           // 3
 subtract(5, 3);      // 2
@@ -119,7 +119,7 @@ abs(-5);             // 5
 ### Example
 
 ```typescript
-import { sin, cos, tan, atan2 } from '@mathts/functions';
+import { sin, cos, tan, atan2 } from '@danielsimonjr/mathts-functions';
 
 sin(0);              // 0
 cos(0);              // 1
@@ -163,7 +163,7 @@ sin(new Complex(0, 1)); // i * sinh(1)
 ### Example
 
 ```typescript
-import { sum, mean, std, min, max } from '@mathts/functions';
+import { sum, mean, std, min, max } from '@danielsimonjr/mathts-functions';
 
 const data = [1, 2, 3, 4, 5];
 
@@ -188,7 +188,7 @@ max(data);           // 5
 ### Example
 
 ```typescript
-import { gcd, lcm, factorial, isPrime } from '@mathts/functions';
+import { gcd, lcm, factorial, isPrime } from '@danielsimonjr/mathts-functions';
 
 gcd(12, 18);         // 6
 lcm(4, 6);           // 12
@@ -211,7 +211,7 @@ isPrime(17);         // true
 ### Example
 
 ```typescript
-import { round, floor, ceil } from '@mathts/functions';
+import { round, floor, ceil } from '@danielsimonjr/mathts-functions';
 
 round(2.5);          // 3
 round(2.567, 2);     // 2.57
@@ -240,7 +240,7 @@ ceil(2.1);           // 3
 ### Example
 
 ```typescript
-import { fft, ifft, conv } from '@mathts/functions';
+import { fft, ifft, conv } from '@danielsimonjr/mathts-functions';
 
 const signal = [1, 2, 3, 4];
 const spectrum = fft(signal);

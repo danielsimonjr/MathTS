@@ -1,7 +1,7 @@
 import { factory } from '../utils/factory.js'
 import { arraySize } from '../utils/array.js'
 
-import { TypedFunction, Matrix, BigNumber, Complex, Unit } from '../../types.js'
+import { TypedFunction, Matrix, BigNumber, Complex, Unit } from '../types.js'
 
 const name = 'rotate'
 const dependencies = ['typed', 'multiply', 'rotationMatrix']

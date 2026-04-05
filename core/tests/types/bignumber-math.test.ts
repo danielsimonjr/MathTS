@@ -1,6 +1,6 @@
 /**
  * BigNumber trigonometric, hyperbolic, and transcendental function tests
- * @module @mathts/core/tests/types/bignumber-math
+ * @module @danielsimonjr/mathts-core/tests/types/bignumber-math
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';

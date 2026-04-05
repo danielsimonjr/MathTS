@@ -1,12 +1,12 @@
 /**
- * Type declarations for @mathts/functions
+ * Type declarations for @danielsimonjr/mathts-functions
  *
  * These declarations provide type safety for the compat layer
  * until the functions package has proper .d.ts files.
  */
 
-declare module '@mathts/functions' {
-  import type { Complex, Fraction, BigNumber } from '@mathts/core';
+declare module '@danielsimonjr/mathts-functions' {
+  import type { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
   // Arithmetic
   export function add(a: number, b: number): number;

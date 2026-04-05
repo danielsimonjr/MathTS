@@ -38,7 +38,7 @@ console.log(math.i);
 
 ```typescript
 // Step 1: Just change the import!
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
 
@@ -68,8 +68,8 @@ console.log(math.i);
 For better performance and tree-shaking, use the native API:
 
 ```typescript
-import { add, multiply, pow, sqrt, sin, cos, PI, E, I } from '@mathts/functions';
-import { gcd, lcm, round, floor, ceil } from '@mathts/functions';
+import { add, multiply, pow, sqrt, sin, cos, PI, E, I } from '@danielsimonjr/mathts-functions';
+import { gcd, lcm, round, floor, ceil } from '@danielsimonjr/mathts-functions';
 
 // Direct function calls (better tree-shaking)
 const sum = add(1, 2);
@@ -103,6 +103,6 @@ console.log(I);
 
 ## Migration Steps
 
-1. **Quick migration**: Change import from `mathjs` to `@mathts/compat`
+1. **Quick migration**: Change import from `mathjs` to `@danielsimonjr/mathts-compat`
 2. **Gradual adoption**: Replace `math.fn()` calls with direct imports
 3. **Full migration**: Use native MathTS API for best performance

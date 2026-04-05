@@ -10,10 +10,10 @@
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {
-      "@mathts/core": ["../core/src"],
-      "@mathts/expression": ["../expression/src"],
-      "@mathts/matrix": ["../matrix/src"],
-      "@mathts/parallel": ["../parallel/src"],
+      "@danielsimonjr/mathts-core": ["../core/src"],
+      "@danielsimonjr/mathts-expression": ["../expression/src"],
+      "@danielsimonjr/mathts-matrix": ["../matrix/src"],
+      "@danielsimonjr/mathts-parallel": ["../parallel/src"],
       "workerpool": ["../parallel/types/workerpool.d.ts"]
     }
   },

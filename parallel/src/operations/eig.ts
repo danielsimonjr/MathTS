@@ -10,8 +10,8 @@
  *   - Large matrices (>= threshold): sequential fallback with parallel infrastructure
  *     (true divide-and-conquer QR parallelization is a future optimization)
  *
- * The eigendecomposition algorithm is inlined (not imported from @mathts/matrix)
- * because @mathts/parallel cannot depend on @mathts/matrix (circular dependency:
+ * The eigendecomposition algorithm is inlined (not imported from @danielsimonjr/mathts-matrix)
+ * because @danielsimonjr/mathts-parallel cannot depend on @danielsimonjr/mathts-matrix (circular dependency:
  * matrix -> parallel -> matrix via parallel-matrix.ts).
  *
  * @packageDocumentation

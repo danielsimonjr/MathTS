@@ -4,7 +4,7 @@ import type {
   MathArray,
   Matrix,
   MathNumericType
-} from '../../../types/index.js'
+} from '../../types/index.js'
 import type { TypedFunction } from '../core/function/typed.js'
 
 // Type definitions for setSymDifference

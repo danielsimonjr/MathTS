@@ -1,11 +1,11 @@
 /**
- * @mathts/compat - mathjs Compatibility Layer
+ * @danielsimonjr/mathts-compat - mathjs Compatibility Layer
  *
  * Provides a mathjs-compatible API for gradual migration to MathTS.
  *
  * @example
  * ```typescript
- * import { create, all } from '@mathts/compat';
+ * import { create, all } from '@danielsimonjr/mathts-compat';
  * const math = create(all);
  *
  * // Use mathjs-style API
@@ -149,7 +149,7 @@ export interface MathInstance {
  *
  * @example
  * ```typescript
- * import { create, all } from '@mathts/compat';
+ * import { create, all } from '@danielsimonjr/mathts-compat';
  * const math = create(all);
  *
  * math.add(1, 2);           // 3
@@ -283,10 +283,10 @@ export {
   BIGNUMBER_ONE,
   BIGNUMBER_PI,
   BIGNUMBER_E,
-} from '@mathts/core';
+} from '@danielsimonjr/mathts-core';
 
 // Re-export matrix types
-export { DenseMatrix, SparseMatrix } from '@mathts/matrix';
+export { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // Re-export parallel utilities
-export { computePool } from '@mathts/parallel';
+export { computePool } from '@danielsimonjr/mathts-parallel';

@@ -1,5 +1,5 @@
 /**
- * @mathts/workbook - Scientific workbook runtime
+ * @danielsimonjr/mathts-workbook - Scientific workbook runtime
  * @packageDocumentation
  */
 

@@ -20,8 +20,8 @@ npm run format              # prettier --write all files
 npm run format:check        # prettier --check (CI)
 
 # Single package:
-npx turbo build --filter=@mathts/core
-npx turbo test --filter=@mathts/matrix
+npx turbo build --filter=@danielsimonjr/mathts-core
+npx turbo test --filter=@danielsimonjr/mathts-matrix
 
 # Run specific test file (from repo root):
 npx vitest run core/tests/utils.test.ts
@@ -43,16 +43,16 @@ npx vitest run --coverage
 ### Workspaces (in `package.json`)
 
 ```
-packages/typed-function/   # @mathts/typed-function - forked type dispatch system
-packages/workerpool/       # @mathts/workerpool - forked worker pool management
-core/                      # @mathts/core - types, typed-function integration, factory
-matrix/                    # @mathts/matrix - DenseMatrix, SparseMatrix, backends (JS/WASM/GPU)
-functions/                 # @mathts/functions - math functions via typed dispatch
-parallel/                  # @mathts/parallel - ComputePool, WebWorker operations
-expression/                # @mathts/expression - parser/evaluator (build skipped, incomplete)
-workbook/                  # @mathts/workbook - .mtsw notebook runtime + CLI
+packages/typed-function/   # @danielsimonjr/mathts-typed-function - forked type dispatch system
+packages/workerpool/       # @danielsimonjr/mathts-workerpool - forked worker pool management
+core/                      # @danielsimonjr/mathts-core - types, typed-function integration, factory
+matrix/                    # @danielsimonjr/mathts-matrix - DenseMatrix, SparseMatrix, backends (JS/WASM/GPU)
+functions/                 # @danielsimonjr/mathts-functions - math functions via typed dispatch
+parallel/                  # @danielsimonjr/mathts-parallel - ComputePool, WebWorker operations
+expression/                # @danielsimonjr/mathts-expression - parser/evaluator (build skipped, incomplete)
+workbook/                  # @danielsimonjr/mathts-workbook - .mtsw notebook runtime + CLI
 assembly/                  # WASM source (AssemblyScript, build broken)
-compat/                    # @mathts/compat - mathjs API compatibility shim
+compat/                    # @danielsimonjr/mathts-compat - mathjs API compatibility shim
 ```
 
 ### Dependency Graph
@@ -80,13 +80,13 @@ All packages use `tsup src/index.ts --format esm --dts --clean` except:
 
 The functions package has two distinct code layers:
 
-1. **Active typed functions** (`functions/src/typed/`): New parallel-first implementations using `@mathts/core` typed dispatch. These are the only files exported from `functions/src/index.ts`. Includes: `arithmetic.ts`, `trigonometry.ts`, `statistics.ts`, `signal.ts`.
+1. **Active typed functions** (`functions/src/typed/`): New parallel-first implementations using `@danielsimonjr/mathts-core` typed dispatch. These are the only files exported from `functions/src/index.ts`. Includes: `arithmetic.ts`, `trigonometry.ts`, `statistics.ts`, `signal.ts`.
 
 2. **Synced mathjs factories** (`functions/src/{arithmetic,algebra,bitwise,...}/`): ~20 category directories containing factory-pattern functions synced from the mathjs fork (`~/Dropbox/Github/mathjs`). These are **not exported** and not in the build entry point. Support files in `functions/src/{utils,core,plain,type,expression,error,wasm}/`.
 
 Import path difference from mathjs: mathjs uses `../../utils/` (extra `function/` directory level), mathts uses `../utils/`. Import extensions are `.js` in mathts.
 
-### `@mathts/core` Exports
+### `@danielsimonjr/mathts-core` Exports
 
 Three main systems:
 - **Numeric types**: `Complex`, `Fraction`, `BigNumber` with type guards and constants
@@ -95,18 +95,18 @@ Three main systems:
 
 ### Matrix Backends
 
-`@mathts/matrix` supports three backends with automatic selection via `BackendManager`:
+`@danielsimonjr/mathts-matrix` supports three backends with automatic selection via `BackendManager`:
 - **JSBackend** - Pure TypeScript (default, always available)
 - **WASMBackend** - AssemblyScript with SIMD (>1K elements)
 - **GPUBackend** - WebGPU compute shaders (>100K elements)
 
-### `@mathts/compat` Pattern
+### `@danielsimonjr/mathts-compat` Pattern
 
 Provides mathjs-compatible API via shims:
 ```typescript
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
-math.add(1, 2);  // delegates to @mathts/core types + operations
+math.add(1, 2);  // delegates to @danielsimonjr/mathts-core types + operations
 ```
 
 ### Workbook Runtime

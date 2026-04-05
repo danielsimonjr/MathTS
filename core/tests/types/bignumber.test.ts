@@ -1,6 +1,6 @@
 /**
  * BigNumber tests
- * @module @mathts/core/tests/types/bignumber
+ * @module @danielsimonjr/mathts-core/tests/types/bignumber
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';

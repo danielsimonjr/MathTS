@@ -1,4 +1,4 @@
-import { createForEach } from '../../function/matrix/forEach.js'
+import { createForEach } from '../../matrix/forEach.js'
 import { createTransformCallback } from './utils/transformCallback.js'
 import { factory } from '../../utils/factory.js'
 import { isFunctionAssignmentNode, isSymbolNode } from '../../utils/is.js'

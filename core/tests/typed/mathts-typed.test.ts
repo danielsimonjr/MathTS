@@ -1,6 +1,6 @@
 /**
  * typed-function integration tests
- * @module @mathts/core/tests/typed/mathts-typed
+ * @module @danielsimonjr/mathts-core/tests/typed/mathts-typed
  */
 
 import { describe, it, expect } from 'vitest';

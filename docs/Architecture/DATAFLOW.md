@@ -29,7 +29,7 @@ User call: add(a, b)
   6. Returns typed result
 ```
 
-The `mathTyped` instance lives in `@mathts/core`. It uses `instanceof`-based checks
+The `mathTyped` instance lives in `@danielsimonjr/mathts-core`. It uses `instanceof`-based checks
 (not duck-typing). This is incompatible with the synced mathjs `createTyped` instance,
 which uses 40+ duck-typed type checks.
 
@@ -84,16 +84,53 @@ parallelAdd(a, b)   // Float64Array inputs
        { result, duration, chunks, parallelized }
 ```
 
-Statistics and signal functions (`@mathts/functions`) follow the same path:
-array overloads call `@mathts/parallel` internally and return `Promise<ParallelResult<T>>`.
+Statistics and signal functions (`@danielsimonjr/mathts-functions`) follow the same path:
+array overloads call `@danielsimonjr/mathts-parallel` internally and return `Promise<ParallelResult<T>>`.
 Variadic overloads (2–4 scalars) are synchronous.
+
+---
+
+## 3b. WASM Bridge Interception Flow
+
+When `MatrixWasmBridge` is active (WASM backend loaded, operation size above threshold), the
+matrix backend flow is extended:
+
+```text
+typed-function dispatch -> MatrixWasmBridge.execute(op, args)
+  1. Threshold check:
+       element_count < threshold  -> skip to JSBackend immediately
+       element_count >= threshold -> proceed to WASM path
+  2. Memory allocation (WasmLoader):
+       allocate(byteLength) reserves space in the WASM linear memory pool
+       Input Float64Arrays written to WASM memory via copyToWasm()
+  3. WASM function call:
+       Calls exported Rust/AS function with pointer + length args
+       WASM executes natively (faer, rustfft, statrs, libm as needed)
+  4. Result read-back:
+       copyFromWasm(ptr, length) reads result Float64Array from WASM memory
+  5. Memory free:
+       free(ptr) returns memory to the pool
+  6. On any failure (WASM unavailable, OOM, runtime trap):
+       Falls back to JSBackend transparently
+       Error is logged but not re-thrown
+  7. Returns result as DenseMatrix to caller
+```
+
+Backend selected by `MATHTS_WASM_BACKEND` environment variable:
+
+| Value | Behavior |
+|-------|----------|
+| `rust` | Force Rust WASM backend |
+| `assemblyscript` | Force AssemblyScript WASM backend |
+| `auto` (default) | Prefer Rust; fall back to AS if unavailable |
+| `none` | Disable WASM, use JS only |
 
 ---
 
 ## 4. Factory Activation Flow
 
 ```text
-import { math } from '@mathts/core'
+import { math } from '@danielsimonjr/mathts-core'
 math.add(a, b)
   1. FunctionRegistry.resolve('add')
      - Looks up registered factory by name
@@ -137,7 +174,7 @@ workbook.mtsw  (YAML file)
   7. Results written to cell.output fields
 ```
 
-**Blocked on**: expression parser evaluator (`compiler/` and `evaluator/` in `@mathts/expression` are empty stubs).
+**Blocked on**: expression parser evaluator (`compiler/` and `evaluator/` in `@danielsimonjr/mathts-expression` are empty stubs).
 
 ---
 
@@ -147,21 +184,27 @@ workbook.mtsw  (YAML file)
 User Input
     |
     v
-typed-function (@mathts/core)
+typed-function (@danielsimonjr/mathts-core)
     |
     +---> Core Types (Complex / Fraction / BigNumber)
     |
-    +---> Matrix (@mathts/matrix)
+    +---> Matrix (@danielsimonjr/mathts-matrix)
     |         |
-    |         +---> [large data] ComputePool (@mathts/parallel)
+    |         +---> MatrixWasmBridge (threshold check)
+    |         |         |
+    |         |         +---> [>1K elements] WasmLoader --> wasm-rust (Rust/faer/rustfft)
+    |         |         |                              or --> assembly (AS, legacy)
+    |         |         +---> [<1K or fallback] JSBackend
+    |         |
+    |         +---> [>100K elements] ComputePool (@danielsimonjr/mathts-parallel)
     |
-    +---> Parallel Functions (@mathts/functions)
+    +---> Parallel Functions (@danielsimonjr/mathts-functions)
               |
-              +---> ComputePool (@mathts/parallel)
+              +---> ComputePool (@danielsimonjr/mathts-parallel)
 
-@mathts/compat --> typed-function
+@danielsimonjr/mathts-compat --> typed-function
 
-@mathts/workbook --(executeCode stub)--> @mathts/expression
+@danielsimonjr/mathts-workbook --(executeCode stub)--> @danielsimonjr/mathts-expression
                                                |
                                          (not yet wired)
                                                |

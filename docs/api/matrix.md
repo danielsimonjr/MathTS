@@ -1,11 +1,11 @@
-# @mathts/matrix API Reference
+# @danielsimonjr/mathts-matrix API Reference
 
 Dense and sparse matrix implementations with backend selection.
 
 ## Installation
 
 ```bash
-npm install @mathts/matrix
+npm install @danielsimonjr/mathts-matrix
 ```
 
 ## Classes
@@ -15,7 +15,7 @@ npm install @mathts/matrix
 Row-major dense matrix backed by Float64Array.
 
 ```typescript
-import { DenseMatrix } from '@mathts/matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 ```
 
 #### Static Factory Methods
@@ -96,7 +96,7 @@ import { DenseMatrix } from '@mathts/matrix';
 #### Example
 
 ```typescript
-import { DenseMatrix } from '@mathts/matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 const A = DenseMatrix.fromArray([
   [1, 2, 3],
@@ -125,7 +125,7 @@ const scaled = A.scale(2);    // All elements * 2
 CSR (Compressed Sparse Row) format sparse matrix.
 
 ```typescript
-import { SparseMatrix } from '@mathts/matrix';
+import { SparseMatrix } from '@danielsimonjr/mathts-matrix';
 ```
 
 #### Static Factory Methods
@@ -153,7 +153,7 @@ Supports similar methods to DenseMatrix: `get`, `add`, `subtract`, `multiply`, `
 #### Example
 
 ```typescript
-import { SparseMatrix, DenseMatrix } from '@mathts/matrix';
+import { SparseMatrix, DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // Create from dense
 const dense = DenseMatrix.fromArray([
@@ -180,7 +180,7 @@ const coo = SparseMatrix.fromCOO(3, 3, [
 ### Eigenvalue Decomposition
 
 ```typescript
-import { eig } from '@mathts/matrix';
+import { eig } from '@danielsimonjr/mathts-matrix';
 
 const A = DenseMatrix.fromArray([[4, -2], [1, 1]]);
 const { values, vectors } = eig(A);
@@ -191,7 +191,7 @@ const { values, vectors } = eig(A);
 ### SVD (Singular Value Decomposition)
 
 ```typescript
-import { svd } from '@mathts/matrix';
+import { svd } from '@danielsimonjr/mathts-matrix';
 
 const { U, S, V } = svd(A);
 // A ≈ U * diag(S) * V^T
@@ -200,7 +200,7 @@ const { U, S, V } = svd(A);
 ### LU Decomposition
 
 ```typescript
-import { lu } from '@mathts/matrix';
+import { lu } from '@danielsimonjr/mathts-matrix';
 
 const { L, U, P } = lu(A);
 // P * A = L * U
@@ -209,7 +209,7 @@ const { L, U, P } = lu(A);
 ### QR Decomposition
 
 ```typescript
-import { qr } from '@mathts/matrix';
+import { qr } from '@danielsimonjr/mathts-matrix';
 
 const { Q, R } = qr(A);
 // A = Q * R
@@ -220,7 +220,7 @@ const { Q, R } = qr(A);
 ## Type Guards
 
 ```typescript
-import { isDenseMatrix, isSparseMatrix } from '@mathts/matrix';
+import { isDenseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
 
 if (isDenseMatrix(m)) {
   // m is DenseMatrix

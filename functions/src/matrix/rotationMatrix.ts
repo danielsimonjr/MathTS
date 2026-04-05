@@ -8,7 +8,7 @@ import {
   BigNumber,
   Complex,
   Unit
-} from '../../types.js'
+} from '../types.js'
 import type { ConfigOptions } from '../core/config.js'
 
 const name = 'rotationMatrix'

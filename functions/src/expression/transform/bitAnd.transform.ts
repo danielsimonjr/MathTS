@@ -1,4 +1,4 @@
-import { createBitAnd } from '../../function/bitwise/bitAnd.js'
+import { createBitAnd } from '../../bitwise/bitAnd.js'
 import { factory } from '../../utils/factory.js'
 import { isCollection } from '../../utils/is.js'
 import type {

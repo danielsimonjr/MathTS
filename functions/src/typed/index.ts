@@ -2,8 +2,8 @@
  * Typed Functions Index (Parallel-First)
  *
  * Re-exports all typed functions that use polymorphic dispatch
- * via @mathts/core's mathTyped system with parallel-first execution
- * through @mathts/parallel's ComputePool.
+ * via @danielsimonjr/mathts-core's mathTyped system with parallel-first execution
+ * through @danielsimonjr/mathts-parallel's ComputePool.
  *
  * Following the parallel-first philosophy per CLAUDE.md:
  * - Use workers for ALL array transformations (Float64Array)

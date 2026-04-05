@@ -13,7 +13,7 @@ import {
   BigNumber,
   Fraction,
   Unit
-} from '../../types.js'
+} from '../types.js'
 
 // Type definitions for nullish operation
 interface DenseMatrix extends Matrix {

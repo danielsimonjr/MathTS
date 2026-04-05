@@ -2,7 +2,7 @@
  * ComputePool Tests
  *
  * Tests for the ComputePool wrapper around MathWorkerPool.
- * Since MathWorkerPool is tested extensively in @mathts/workerpool,
+ * Since MathWorkerPool is tested extensively in @danielsimonjr/mathts-workerpool,
  * these tests focus on the ComputePool interface and sequential fallback behavior.
  */
 

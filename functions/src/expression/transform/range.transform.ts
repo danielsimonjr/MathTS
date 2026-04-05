@@ -1,5 +1,5 @@
 import { factory } from '../../utils/factory.js'
-import { createRange } from '../../function/matrix/range.js'
+import { createRange } from '../../matrix/range.js'
 import type {
   TypedFunction,
   MathFunction,

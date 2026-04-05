@@ -1,7 +1,7 @@
 import { isBigNumber, isNumber } from '../../utils/is.js'
 import { errorTransform } from './utils/errorTransform.js'
 import { factory } from '../../utils/factory.js'
-import { createConcat } from '../../function/matrix/concat.js'
+import { createConcat } from '../../matrix/concat.js'
 import type {
   TypedFunction,
   MathFunction,

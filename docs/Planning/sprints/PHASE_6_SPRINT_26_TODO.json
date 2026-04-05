@@ -20,7 +20,7 @@
     {
       "id": 2,
       "category": "Compatibility",
-      "description": "Compatibility shim - create @mathts/compat package for mathjs compatibility",
+      "description": "Compatibility shim - create @danielsimonjr/mathts-compat package for mathjs compatibility",
       "status": "completed",
       "estimatedHours": 8,
       "complexity": "High",

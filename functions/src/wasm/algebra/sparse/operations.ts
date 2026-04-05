@@ -20,7 +20,7 @@ import {
   csCumsum,
   csEtree,
   csDfs
-} from './utilities'
+} from './utilities.js'
 
 // ============================================
 // SPARSE MATRIX-VECTOR OPERATIONS

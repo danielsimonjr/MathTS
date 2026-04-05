@@ -1,6 +1,6 @@
 import { factory } from '../utils/factory.js'
 import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { MathNumericType } from '../../types.js'
+import type { MathNumericType } from '../types.js'
 import type { TypedFunction } from '../core/function/typed.js'
 import type { ConfigOptions } from '../core/config.js'
 

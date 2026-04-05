@@ -12,13 +12,13 @@ Turborepo orchestrates builds and tests across the workspace.
 
 ```mermaid
 graph TD
-  TF["@mathts/typed-function"] --> CORE["@mathts/core"]
-  CORE --> MATRIX["@mathts/matrix"]
-  MATRIX --> FUNC["@mathts/functions"]
-  WP["@mathts/workerpool"] --> PAR["@mathts/parallel"]
+  TF["@danielsimonjr/mathts-typed-function"] --> CORE["@danielsimonjr/mathts-core"]
+  CORE --> MATRIX["@danielsimonjr/mathts-matrix"]
+  MATRIX --> FUNC["@danielsimonjr/mathts-functions"]
+  WP["@danielsimonjr/mathts-workerpool"] --> PAR["@danielsimonjr/mathts-parallel"]
   PAR --> MATRIX
-  CORE --> WB["@mathts/workbook"]
-  CORE --> COMPAT["@mathts/compat"]
+  CORE --> WB["@danielsimonjr/mathts-workbook"]
+  CORE --> COMPAT["@danielsimonjr/mathts-compat"]
   MATRIX --> COMPAT
   FUNC --> COMPAT
   PAR --> COMPAT
@@ -82,7 +82,7 @@ YAML-based reactive notebooks (.mtsw files):
 ### Active Layer
 
 Located in `functions/src/typed/`. New TypeScript implementations using
-@mathts/core typed dispatch. These are the only files exported from the
+@danielsimonjr/mathts-core typed dispatch. These are the only files exported from the
 package entry point.
 
 Files: `arithmetic.ts`, `trigonometry.ts`, `statistics.ts`, `signal.ts`

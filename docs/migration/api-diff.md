@@ -20,10 +20,10 @@ const math = create(all);
 
 ### MathTS (Monorepo)
 ```typescript
-import { Complex, Fraction, BigNumber, mathTyped } from '@mathts/core';
-import { add, subtract, multiply, divide } from '@mathts/functions';
-import { DenseMatrix, SparseMatrix } from '@mathts/matrix';
-import { computePool } from '@mathts/parallel';
+import { Complex, Fraction, BigNumber, mathTyped } from '@danielsimonjr/mathts-core';
+import { add, subtract, multiply, divide } from '@danielsimonjr/mathts-functions';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 ```
 
 ## Type System Differences
@@ -108,7 +108,7 @@ import { computePool } from '@mathts/parallel';
 MathTS provides parallel execution via Web Workers:
 
 ```typescript
-import { computePool } from '@mathts/parallel';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // Initialize pool (once at startup)
 await computePool.initialize();
@@ -137,7 +137,7 @@ math.add(complex1, complex2); // Works
 
 ### MathTS
 ```typescript
-import { mathTyped, Complex } from '@mathts/core';
+import { mathTyped, Complex } from '@danielsimonjr/mathts-core';
 
 // Create typed functions
 const add = mathTyped('add', {
@@ -160,10 +160,10 @@ add(new Complex(1,2), new Complex(3,4)); // Complex(4,6)
 
 ## Compatibility Shim
 
-For gradual migration, use `@mathts/compat`:
+For gradual migration, use `@danielsimonjr/mathts-compat`:
 
 ```typescript
-import { create, all } from '@mathts/compat';
+import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
 
 // mathjs-compatible API

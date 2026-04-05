@@ -1,4 +1,4 @@
-import { createBitOr } from '../../function/bitwise/bitOr.js'
+import { createBitOr } from '../../bitwise/bitOr.js'
 import { factory } from '../../utils/factory.js'
 import { isCollection } from '../../utils/is.js'
 import type {

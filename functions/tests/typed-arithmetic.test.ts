@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { Complex, Fraction, BigNumber } from '@mathts/core';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 import {
   add,
   subtract,

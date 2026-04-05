@@ -1,4 +1,4 @@
-# @mathts/functions - Dependency Graph
+# @danielsimonjr/mathts-functions - Dependency Graph
 
 **Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
@@ -8339,8 +8339,8 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped, Complex, Fraction, BigNumber` |
-| `@mathts/parallel` | `computePool, ComputePool` |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber` |
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool` |
 
 **Exports:**
 - Functions: `matmul`, `transpose`, `matvec`, `outer`, `initializePool`, `terminatePool`, `shouldParallelize`, `getComputePool`
@@ -8377,8 +8377,8 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped, Complex` |
-| `@mathts/parallel` | `computePool` |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Exports:**
 - Functions: `initializeSignal`, `terminateSignal`
@@ -8391,8 +8391,8 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped, Complex, Fraction, BigNumber` |
-| `@mathts/parallel` | `computePool` |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Exports:**
 - Types: `NormalizationType`
@@ -8406,8 +8406,8 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped, Complex, BigNumber` |
-| `@mathts/parallel` | `computePool` |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Exports:**
 - Constants: `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `atan2`, `acsc`, `asec`, `acot`, `asinh`, `acosh`, `atanh`, `toRadians`, `toDegrees`, `hypot`, `typedTrigonometry`
@@ -8419,7 +8419,7 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `registerNativeTypes` |
+| `@danielsimonjr/mathts-core` | `registerNativeTypes` |
 
 **Exports:**
 - Functions: `initTypeBridge`

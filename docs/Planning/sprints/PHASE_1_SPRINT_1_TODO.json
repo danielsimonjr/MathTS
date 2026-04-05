@@ -50,7 +50,7 @@
     {
       "id": 5,
       "category": "Core Module",
-      "description": "Create core package structure - set up @mathts/core package with src/, tests/, package.json, tsconfig.json",
+      "description": "Create core package structure - set up @danielsimonjr/mathts-core package with src/, tests/, package.json, tsconfig.json",
       "status": "completed",
       "estimatedHours": 2,
       "complexity": "Low",

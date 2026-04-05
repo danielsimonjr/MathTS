@@ -1,5 +1,5 @@
 /**
- * @mathts/workerpool Worker Implementation
+ * @danielsimonjr/mathts-workerpool Worker Implementation
  *
  * Worker functions for parallel MathTS computations.
  * This file is loaded by worker threads and provides computation functions.

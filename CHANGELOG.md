@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Index and Range stub types registered in typed-function for subset/range factory activation
 - Final factory cascade (tiers 10-18): 67 more factories — subtract, divide, simplify, derivative, rationalize, eigs, fft/ifft, mean/median/variance/std, all set operations, solveODE, Chain/Unit, sqrtm, norm, cross, diff
 - Expression node constructors (all 16 types) injected into factory scope for full AST support
-- 242/273 mathjs factories active (89%) — remaining 31 are infrastructure types already in @mathts/core
+- 242/273 mathjs factories active (89%) — remaining 31 are infrastructure types already in @danielsimonjr/mathts-core
 - Real SparseMatrix bridge with CSC (Compressed Sparse Column) storage — `_values`, `_index`, `_ptr` with get/set, map, forEach, resize, diagonal, row swap
 - npm publishing setup — all 10 packages have `publishConfig`, `files`, `repository`; root `release` script via changesets
 - Production build optimization (`build:prod`) — minified + tree-shaken bundles, 57% size reduction (1524 KB → 662 KB)
@@ -47,18 +47,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WASM-accelerated eigendecomposition (`matrix/src/operations/eig-wasm.ts`) — Rust WASM Jacobi for symmetric matrices, JS QR fallback
 - WASM-accelerated SVD (`matrix/src/operations/svd-wasm.ts`) — derives SVD from eigendecomposition for symmetric matrices, Golub-Reinsch JS fallback
 - Parallel eigendecomposition (`parallel/src/operations/eig.ts`) — inlined QR algorithm (avoids circular deps), ParallelResult wrapper
+- Package scope rename: `@mathts/*` → `@danielsimonjr/mathts-*` for npm publishing under personal scope
 - Initial project structure with monorepo setup
-- @mathts/core package with type definitions and utilities
+- @danielsimonjr/mathts-core package with type definitions and utilities
 - GitHub Actions CI/CD workflows
 - TypeScript configuration with project references
 - Turbo build system for monorepo management
-- @mathts/parallel package with parallel execution via workerpool
-- @mathts/matrix package with parallel-first matrix operations
-- @mathts/functions package with typed arithmetic, trigonometry, statistics, and signal processing
+- @danielsimonjr/mathts-parallel package with parallel execution via workerpool
+- @danielsimonjr/mathts-matrix package with parallel-first matrix operations
+- @danielsimonjr/mathts-functions package with typed arithmetic, trigonometry, statistics, and signal processing
 - Comprehensive test suite with 1050+ passing tests
 - Integration tests for MathTS instance creation and cross-package operations
 - Integration tests for typed arithmetic, trigonometric, and statistical functions
-- @mathts/compat package for mathjs compatibility layer
+- @danielsimonjr/mathts-compat package for mathjs compatibility layer
 - mathjs-compatible `create(all)` API in compat package
 - Compatibility shims for complex, fraction, bignumber, matrix, sparse creation
 - Compatibility shims for arithmetic, trigonometry, statistics functions
@@ -105,7 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - matrix/parallel-matrix.ts: Added type assertion for ComputePool API to work around TypeScript module resolution issue with npm workspaces
 - parallel/compute.worker.ts: Added type assertion for worker function registration
 - Updated vitest.config.ts to include tests/integration/**/*.test.ts
-- Updated @mathts/typed-function tests to match actual exports
+- Updated @danielsimonjr/mathts-typed-function tests to match actual exports
 
 ### Deprecated
 - N/A
@@ -123,7 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - functions/ typecheck: re-enabled (was echo-skip), fixed 35 type errors (compare, dispatch casts)
 - workbook executor: executeCode() implemented (was throwing "not yet implemented")
 - ParallelMatrix test: added missing beforeAll/afterAll vitest imports
-- Fixed TypeScript module resolution for @mathts/parallel exports
+- Fixed TypeScript module resolution for @danielsimonjr/mathts-parallel exports
 - Fixed skipped tests with proper documentation:
   - Converted variadic addition test to test chained addition (workaround)
   - Documented SVD limitations (reduced matrices, numerical stability for larger matrices)

@@ -1,5 +1,5 @@
 /**
- * @mathts/expression
+ * @danielsimonjr/mathts-expression
  *
  * Expression parsing and evaluation for MathTS.
  *

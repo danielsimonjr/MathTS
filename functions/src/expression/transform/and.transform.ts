@@ -1,4 +1,4 @@
-import { createAnd } from '../../function/logical/and.js'
+import { createAnd } from '../../logical/and.js'
 import { factory } from '../../utils/factory.js'
 import { isCollection } from '../../utils/is.js'
 import type {

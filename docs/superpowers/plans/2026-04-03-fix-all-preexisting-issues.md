@@ -32,13 +32,13 @@ The root `tsconfig.json` has `"include": []` which makes `npx turbo typecheck` a
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@mathts/core": ["core/src"],
-      "@mathts/matrix": ["matrix/src"],
-      "@mathts/parallel": ["parallel/src"],
-      "@mathts/workbook": ["workbook/src"],
-      "@mathts/compat": ["compat/src"],
-      "@mathts/expression": ["expression/src"],
-      "@mathts/functions": ["functions/src"]
+      "@danielsimonjr/mathts-core": ["core/src"],
+      "@danielsimonjr/mathts-matrix": ["matrix/src"],
+      "@danielsimonjr/mathts-parallel": ["parallel/src"],
+      "@danielsimonjr/mathts-workbook": ["workbook/src"],
+      "@danielsimonjr/mathts-compat": ["compat/src"],
+      "@danielsimonjr/mathts-expression": ["expression/src"],
+      "@danielsimonjr/mathts-functions": ["functions/src"]
     }
   },
   "references": [],
@@ -56,13 +56,13 @@ Actually — the root tsconfig should stay `"include": []` because each package 
 Run from repo root:
 
 ```bash
-npm install -D @types/node -w @mathts/core -w @mathts/matrix -w @mathts/functions -w @mathts/parallel -w @mathts/compat -w @mathts/workbook -w @mathts/expression
+npm install -D @types/node -w @danielsimonjr/mathts-core -w @danielsimonjr/mathts-matrix -w @danielsimonjr/mathts-functions -w @danielsimonjr/mathts-parallel -w @danielsimonjr/mathts-compat -w @danielsimonjr/mathts-workbook -w @danielsimonjr/mathts-expression
 ```
 
 - [ ] **Step 3: Verify no regressions**
 
 ```bash
-npx turbo build --filter='!@mathts/wasm' && npx vitest run
+npx turbo build --filter='!@danielsimonjr/mathts-wasm' && npx vitest run
 ```
 
 Expected: 9 packages build, 1342 tests pass.
@@ -167,7 +167,7 @@ Expected: Each package finds and runs its own test files.
 - [ ] **Step 7: Verify turbo test passes for all**
 
 ```bash
-npx turbo test --filter='!@mathts/wasm'
+npx turbo test --filter='!@danielsimonjr/mathts-wasm'
 ```
 
 - [ ] **Step 8: Commit**
@@ -198,7 +198,7 @@ The errors come from `../node_modules/workerpool/src/workers/worker.ts` and `../
     "noUnusedParameters": false,
     "skipLibCheck": true,
     "paths": {
-      "@mathts/workerpool": ["../packages/workerpool/dist/index.d.ts"],
+      "@danielsimonjr/mathts-workerpool": ["../packages/workerpool/dist/index.d.ts"],
       "workerpool": ["../node_modules/workerpool/dist/index.d.ts"]
     }
   },
@@ -220,7 +220,7 @@ Expected: Exit 0, no errors.
 - [ ] **Step 3: Verify turbo typecheck passes**
 
 ```bash
-npx turbo typecheck --filter='!@mathts/wasm'
+npx turbo typecheck --filter='!@danielsimonjr/mathts-wasm'
 ```
 
 Expected: All packages pass.
@@ -439,7 +439,7 @@ Change `"build": "echo 'Skipping build - expression package is incomplete'"` to:
 "build": "tsup src/index.ts --format esm --dts --clean"
 ```
 
-Add `@mathts/core` dependency and `tsup` devDependency if missing.
+Add `@danielsimonjr/mathts-core` dependency and `tsup` devDependency if missing.
 
 - [ ] **Step 5: Verify build succeeds**
 
@@ -452,7 +452,7 @@ Expected: `dist/index.js` and `dist/index.d.ts` created.
 - [ ] **Step 6: Verify turbo build passes**
 
 ```bash
-npx turbo build --filter='!@mathts/wasm'
+npx turbo build --filter='!@danielsimonjr/mathts-wasm'
 ```
 
 Expected: All packages build including expression.

@@ -1,4 +1,4 @@
-# @mathts/matrix - Dependency Graph
+# @danielsimonjr/mathts-matrix - Dependency Graph
 
 **Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
@@ -262,7 +262,7 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/parallel` | `computePool, ComputePool, ComputePoolConfig` |
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, ComputePoolConfig` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -361,9 +361,9 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped` |
-| `@mathts/parallel` | `computePool, ParallelResult` |
-| `@mathts/core` | `SignatureFunction` |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-parallel` | `computePool, ParallelResult` |
+| `@danielsimonjr/mathts-core` | `SignatureFunction` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -381,8 +381,8 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped` |
-| `@mathts/core` | `SignatureFunction` |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-core` | `SignatureFunction` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -399,7 +399,7 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `BackendType` |
+| `@danielsimonjr/mathts-core` | `BackendType` |
 
 **Exports:**
 - Interfaces: `MatrixOptions`
@@ -500,7 +500,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/types/parallel.d.ts` - Type declarations for @mathts/parallel package
+### `src/types/parallel.d.ts` - Type declarations for @danielsimonjr/mathts-parallel package
 
 **Exports:**
 - Classes: `ComputePool`

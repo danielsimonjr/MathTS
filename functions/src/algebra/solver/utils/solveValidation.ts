@@ -3,9 +3,9 @@ import {
   isMatrix,
   isDenseMatrix,
   isSparseMatrix
-} from '../../../../utils/is.js'
-import { arraySize } from '../../../../utils/array.js'
-import { format } from '../../../../utils/string.js'
+} from '../../../utils/is.js'
+import { arraySize } from '../../../utils/array.js'
+import { format } from '../../../utils/string.js'
 
 // Type definitions
 interface DenseMatrixType {

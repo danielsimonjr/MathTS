@@ -1,12 +1,12 @@
 // Copyright (c) 2006-2024, Timothy A. Davis, All Rights Reserved.
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
-import { factory } from '../../../utils/factory.js'
+import { factory } from '../../utils/factory.js'
 import { csFkeep } from './csFkeep.js'
 import { csFlip } from './csFlip.js'
 import { csTdfs } from './csTdfs.js'
-import { wasmLoader } from '../../../wasm/WasmLoader.js'
-import type { TypedFunction } from '../../../core/function/typed.js'
+import { wasmLoader } from '../../wasm/WasmLoader.js'
+import type { TypedFunction } from '../../core/function/typed.js'
 
 // Minimum nonzeros for WASM AMD to be beneficial
 const WASM_AMD_THRESHOLD = 100

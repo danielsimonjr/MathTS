@@ -12,8 +12,8 @@
  * @packageDocumentation
  */
 
-import { mathTyped, Complex, Fraction, BigNumber } from '@mathts/core';
-import { computePool } from '@mathts/parallel';
+import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases

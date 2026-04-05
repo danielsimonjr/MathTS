@@ -1,4 +1,4 @@
-# @mathts/wasm - Dependency Graph
+# @danielsimonjr/mathts-wasm - Dependency Graph
 
 **Version**: 0.1.0 | **Last Updated**: 2026-04-04
 

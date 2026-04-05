@@ -7,7 +7,7 @@
     "noUnusedParameters": false,
     "skipLibCheck": true,
     "paths": {
-      "@mathts/workerpool": ["../packages/workerpool/dist/index.d.ts"],
+      "@danielsimonjr/mathts-workerpool": ["../packages/workerpool/dist/index.d.ts"],
       "workerpool": ["./types/workerpool.d.ts"]
     }
   },

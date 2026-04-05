@@ -92,7 +92,7 @@ The **MathTS Scientific Workbench (MTSW)** is a comprehensive scientific computi
 │ └───────────────────┘ │   │ └───────────────────┘ │   │ └───────────────────┘ │
 │                       │   │                       │   │                       │
 │ ┌───────────────────┐ │   │ ┌───────────────────┐ │   │ ┌───────────────────┐ │
-│ │ Three.js Renderer │ │   │ │ @mathts/core      │ │   │ │ Jupyter Exporter  │ │
+│ │ Three.js Renderer │ │   │ │ @danielsimonjr/mathts-core      │ │   │ │ Jupyter Exporter  │ │
 │ │ (3D Visualization)│ │   │ │ Matrix/Numeric    │ │   │ │ (.ipynb)          │ │
 │ └───────────────────┘ │   │ └───────────────────┘ │   │ └───────────────────┘ │
 │                       │   │                       │   │                       │
@@ -157,7 +157,7 @@ runtime:
   
   # Package dependencies
   packages:
-    - name: "@mathts/core"
+    - name: "@danielsimonjr/mathts-core"
       version: "^1.0.0"
     - name: "@mathts/tensor"
       version: "^1.0.0"
@@ -982,7 +982,7 @@ The Abstract Computation Layer (ACL) bridges the YAML document format and the Ma
 │                     │   │                     │   │                     │
 │  @mathts/symbolic   │   │  MathJax Controller │   │  LaTeX Generator    │
 │  @mathts/tensor     │   │  Graphviz Controller│   │  PDF Renderer       │
-│  @mathts/core       │   │  Three.js Controller│   │  Jupyter Exporter   │
+│  @danielsimonjr/mathts-core       │   │  Three.js Controller│   │  Jupyter Exporter   │
 │  @mathts/calculus   │   │  D3.js Controller   │   │  HTML Exporter      │
 └─────────────────────┘   └─────────────────────┘   └─────────────────────┘
 ```
@@ -6774,6 +6774,86 @@ Is it math/equations?
                                                    ├─▶ Web (readable)  ─▶ .gltf
                                                    └─▶ Omniverse/Prod  ─▶ .usda
                                        └─▶ NO ──▶ .svg (fallback)
+```
+
+-----
+
+## WASM Backend Integration
+
+### WASM Engine Toggle
+
+The MTSW ISE exposes a per-session WASM engine toggle that controls which backend is used for all computation cells. This allows developers and researchers to compare backends without changing code.
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  WASM Engine  ┌──────┐  ┌──────────┐  ┌──────────────┐  │
+│               │  JS  │  │ WASM-AS  │  │  WASM-Rust   │  │
+│               └──────┘  └──────────┘  └──────────────┘  │
+│               (fallback) (benchmark)  (primary ✅)        │
+└──────────────────────────────────────────────────────────┘
+```
+
+**Behavior**:
+- `JS` — forces pure TypeScript execution (no WASM); useful for debugging type dispatch
+- `WASM-AS` — forces the AssemblyScript backend (`lib/wasm/mathjs-as.wasm`); retained for benchmarking
+- `WASM-Rust` — (default) uses the Rust backend (`lib/wasm/mathjs.wasm`); 2–55x faster than JS
+
+The toggle maps to the `MATHTS_WASM_BACKEND` environment variable (see below).
+
+### Benchmark Overlay
+
+When the benchmark overlay is enabled in the ISE toolbar, each output cell annotates its execution with:
+
+| Annotation | Meaning |
+|------------|---------|
+| `[JS 12.3ms]` | Executed on JavaScript fallback |
+| `[AS 1.8ms]` | Executed on AssemblyScript WASM |
+| `[Rust 1.2ms]` | Executed on Rust WASM (primary) |
+| `[GPU 0.4ms]` | Executed on WebGPU compute shader |
+
+The overlay timer captures wall-clock time from cell dispatch to result receipt (excludes render time). For WASM operations this includes the JS↔WASM bridge overhead.
+
+**Enabling the overlay**:
+
+```yaml
+# In workbench config (.mtsw metadata or settings.yaml)
+workbench:
+  debug:
+    benchmarkOverlay: true       # Show per-cell timing badges
+    backendAnnotation: true      # Show which backend ran each op
+    timingHistory: 10            # Keep last N timings per cell
+```
+
+### `MATHTS_WASM_BACKEND` Environment Variable
+
+Set this variable to control backend selection at startup:
+
+```bash
+# Use Rust WASM (default — primary backend)
+MATHTS_WASM_BACKEND=rust npx mathts serve
+
+# Use AssemblyScript WASM (benchmark/comparison)
+MATHTS_WASM_BACKEND=as npx mathts serve
+
+# Force JavaScript fallback (debugging)
+MATHTS_WASM_BACKEND=js npx mathts serve
+
+# Enable WebGPU (experimental, requires Chrome 113+)
+MATHTS_WASM_BACKEND=webgpu npx mathts serve
+```
+
+Valid values: `rust` (default), `as`, `js`, `webgpu`
+
+The runtime reads this variable during `backendManager.initialize()` and sets the preferred backend before any computation cells execute. Auto-fallback remains active: if Rust WASM fails to load, the system falls back to `as`, then to `js`.
+
+**Accessing the current backend from a cell**:
+
+```typescript
+import { backendManager } from '@danielsimonjr/mathts-matrix';
+
+// Check what's active
+const active = backendManager.getActiveBackendName();
+// → 'wasm-rust' | 'wasm-as' | 'js' | 'webgpu'
 ```
 
 -----

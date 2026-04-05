@@ -118,11 +118,11 @@ Extracted from `tools/inventory.py cross-deps`:
 
 ```
 core           → (no @mathts/* deps)   [1 self-ref: typed-function]
-matrix         → @mathts/core (×5), @mathts/parallel (×3)
-functions      → @mathts/core (×4), @mathts/parallel (×4)
-parallel       → @mathts/workerpool (×1), @mathts/parallel (×1, internal)
-compat         → @mathts/core (×3), @mathts/compat (×2, internal),
-                 @mathts/matrix (×2), @mathts/parallel (×1), @mathts/functions (×1)
+matrix         → @danielsimonjr/mathts-core (×5), @danielsimonjr/mathts-parallel (×3)
+functions      → @danielsimonjr/mathts-core (×4), @danielsimonjr/mathts-parallel (×4)
+parallel       → @danielsimonjr/mathts-workerpool (×1), @danielsimonjr/mathts-parallel (×1, internal)
+compat         → @danielsimonjr/mathts-core (×3), @danielsimonjr/mathts-compat (×2, internal),
+                 @danielsimonjr/mathts-matrix (×2), @danielsimonjr/mathts-parallel (×1), @danielsimonjr/mathts-functions (×1)
 ```
 
 Dependency order (build sequence): `typed-function` → `core` → `matrix`/`parallel` → `functions` → `compat`
