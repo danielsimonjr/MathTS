@@ -1,6 +1,6 @@
-# @mathts/functions - Dependency Graph
+# @danielsimonjr/mathts-functions - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-02-06
+**Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -9,40 +9,44 @@ This document provides a comprehensive dependency graph of all files, components
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Algebra Dependencies](#algebra-dependencies)
-3. [Arithmetic Dependencies](#arithmetic-dependencies)
-4. [Bitwise Dependencies](#bitwise-dependencies)
-5. [Combinatorics Dependencies](#combinatorics-dependencies)
-6. [Complex Dependencies](#complex-dependencies)
-7. [Core Dependencies](#core-dependencies)
-8. [Error Dependencies](#error-dependencies)
-9. [Expression Dependencies](#expression-dependencies)
-10. [Geometry Dependencies](#geometry-dependencies)
-11. [Entry Dependencies](#entry-dependencies)
-12. [Logical Dependencies](#logical-dependencies)
-13. [Matrix Dependencies](#matrix-dependencies)
-14. [Numeric Dependencies](#numeric-dependencies)
-15. [Plain Dependencies](#plain-dependencies)
-16. [Probability Dependencies](#probability-dependencies)
-17. [Relational Dependencies](#relational-dependencies)
-18. [Set Dependencies](#set-dependencies)
-19. [Signal Dependencies](#signal-dependencies)
-20. [Special Dependencies](#special-dependencies)
-21. [Statistics Dependencies](#statistics-dependencies)
-22. [String Dependencies](#string-dependencies)
-23. [Trigonometry Dependencies](#trigonometry-dependencies)
-24. [Type Dependencies](#type-dependencies)
-25. [Typed Dependencies](#typed-dependencies)
-26. [Unit Dependencies](#unit-dependencies)
-27. [Utils Dependencies](#utils-dependencies)
-28. [Wasm Dependencies](#wasm-dependencies)
-29. [Dependency Matrix](#dependency-matrix)
-30. [Circular Dependency Analysis](#circular-dependency-analysis)
-31. [Visual Dependency Graph](#visual-dependency-graph)
-32. [Summary Statistics](#summary-statistics)
+2. [Package Dependencies](#package-dependencies)
+3. [Algebra Dependencies](#algebra-dependencies)
+4. [Arithmetic Dependencies](#arithmetic-dependencies)
+5. [Bitwise Dependencies](#bitwise-dependencies)
+6. [Combinatorics Dependencies](#combinatorics-dependencies)
+7. [Complex Dependencies](#complex-dependencies)
+8. [Root Dependencies](#root-dependencies)
+9. [Core Dependencies](#core-dependencies)
+10. [Error Dependencies](#error-dependencies)
+11. [Expression Dependencies](#expression-dependencies)
+12. [Geometry Dependencies](#geometry-dependencies)
+13. [Entry Dependencies](#entry-dependencies)
+14. [Logical Dependencies](#logical-dependencies)
+15. [Matrix Dependencies](#matrix-dependencies)
+16. [Numeric Dependencies](#numeric-dependencies)
+17. [Plain Dependencies](#plain-dependencies)
+18. [Probability Dependencies](#probability-dependencies)
+19. [Relational Dependencies](#relational-dependencies)
+20. [Set Dependencies](#set-dependencies)
+21. [Shared Dependencies](#shared-dependencies)
+22. [Signal Dependencies](#signal-dependencies)
+23. [Special Dependencies](#special-dependencies)
+24. [Statistics Dependencies](#statistics-dependencies)
+25. [String Dependencies](#string-dependencies)
+26. [Trigonometry Dependencies](#trigonometry-dependencies)
+27. [Type Dependencies](#type-dependencies)
+28. [Typed Dependencies](#typed-dependencies)
+29. [Unit Dependencies](#unit-dependencies)
+30. [Utils Dependencies](#utils-dependencies)
+31. [Wasm Dependencies](#wasm-dependencies)
+32. [Dependency Matrix](#dependency-matrix)
+33. [Circular Dependency Analysis](#circular-dependency-analysis)
+34. [Visual Dependency Graph](#visual-dependency-graph)
+35. [Summary Statistics](#summary-statistics)
 
 ---
 
+<a id="overview"></a>
 ## Overview
 
 The codebase is organized into the following modules:
@@ -52,6 +56,7 @@ The codebase is organized into the following modules:
 - **bitwise**: 8 files
 - **combinatorics**: 4 files
 - **complex**: 4 files
+- **root**: 5 files
 - **core**: 5 files
 - **error**: 3 files
 - **expression**: 314 files
@@ -64,18 +69,21 @@ The codebase is organized into the following modules:
 - **probability**: 14 files
 - **relational**: 13 files
 - **set**: 10 files
+- **shared**: 1 file
 - **signal**: 5 files
 - **special**: 2 files
 - **statistics**: 14 files
 - **string**: 5 files
 - **trigonometry**: 26 files
 - **type**: 50 files
-- **typed**: 5 files
+- **typed**: 6 files
 - **unit**: 2 files
-- **utils**: 43 files
-- **wasm**: 62 files
+- **utils**: 46 files
+- **wasm**: 63 files
 
 ---
+
+<a id="algebra-dependencies"></a>
 
 ## Algebra Dependencies
 
@@ -119,7 +127,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/algebra/decomposition/slu.ts` - Calculate the Sparse Matrix LU decomposition with full pivoting. Sparse Matrix `A` is decomposed in two matrices (`L`, `U`) and two permutation vectors (`pinv`, `q`) where
+### `src/algebra/decomposition/slu.ts` - Calculate the Sparse Matrix LU decomposition with full pivoting. Sparse Matrix `A` is decomposed in two matrices (`L`, `
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -389,7 +397,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/algebra/sparse/csAmd.ts` - Approximate minimum degree ordering. The minimum degree algorithm is a widely used
+### `src/algebra/sparse/csAmd.ts` - Try WASM-accelerated AMD ordering for large sparse matrices
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -398,6 +406,7 @@ The codebase is organized into the following modules:
 | `./csFkeep.js` | `csFkeep` | Import |
 | `./csFlip.js` | `csFlip` | Import |
 | `./csTdfs.js` | `csTdfs` | Import |
+| `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -427,6 +436,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../utils/factory.js` | `factory` | Import |
 | `./csLeaf.js` | `csLeaf` | Import |
+| `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -661,6 +671,8 @@ The codebase is organized into the following modules:
 - Constants: `createSymbolicEqual`
 
 ---
+
+<a id="arithmetic-dependencies"></a>
 
 ## Arithmetic Dependencies
 
@@ -930,6 +942,7 @@ The codebase is organized into the following modules:
 | `../type/matrix/utils/matAlgo10xSids.js` | `createMatAlgo10xSids` | Import |
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 | `../error/ArgumentsError.js` | `ArgumentsError` | Import |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
 - Constants: `createGcd`
@@ -945,6 +958,7 @@ The codebase is organized into the following modules:
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../utils/array.js` | `flatten` | Import |
 | `../utils/is.js` | `isComplex` | Import |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
 - Constants: `createHypot`
@@ -1107,6 +1121,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
 - Constants: `createNorm`
@@ -1321,6 +1336,8 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="bitwise-dependencies"></a>
+
 ## Bitwise Dependencies
 
 ### `src/bitwise/bitAnd.ts` - Bitwise AND two values, `x & y`.
@@ -1480,9 +1497,11 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="combinatorics-dependencies"></a>
+
 ## Combinatorics Dependencies
 
-### `src/combinatorics/bellNumbers.ts` - The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose union is S.
+### `src/combinatorics/bellNumbers.ts` - The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose union is 
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1534,6 +1553,8 @@ The codebase is organized into the following modules:
 - Constants: `createStirlingS2`
 
 ---
+
+<a id="complex-dependencies"></a>
 
 ## Complex Dependencies
 
@@ -1593,12 +1614,505 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="root-dependencies"></a>
+
+## Root Dependencies
+
+### `src/constants.ts` - golden ratio, (1+sqrt(5))/2
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `decimal.js` | `Decimal` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/factory.js` | `factory` | Import |
+| `./version.js` | `version` | Import |
+| `./utils/bignumber/constants.js` | `createBigNumberE, createBigNumberPhi, createBigNumberPi, createBigNumberTau` | Import |
+| `./plain/number/index.js` | `pi, tau, e, phi` | Import |
+| `./core/config.js` | `MathJsConfig` | Import (type-only) |
+
+**Exports:**
+- Constants: `createTrue`, `createFalse`, `createNull`, `createInfinity`, `createNaN`, `createPi`, `createTau`, `createE`, `createPhi`, `createLN2`, `createLN10`, `createLOG2E`, `createLOG10E`, `createSQRT1_2`, `createSQRT2`, `createI`, `createUppercasePi`, `createUppercaseE`, `createVersion`
+
+---
+
+### `src/defaultInstance.ts` - defaultInstance module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./factoriesAny.js` | `* as all` | Import |
+| `./core/create.js` | `create` | Import |
+
+**Exports:**
+- Default: `create`
+
+---
+
+### `src/factoriesAny.ts` - factoriesAny module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./core/function/typed.js` | `createTyped` | Re-export |
+| `./type/resultset/ResultSet.js` | `createResultSet` | Re-export |
+| `./type/bignumber/BigNumber.js` | `createBigNumberClass` | Re-export |
+| `./type/complex/Complex.js` | `createComplexClass` | Re-export |
+| `./type/fraction/Fraction.js` | `createFractionClass` | Re-export |
+| `./type/matrix/Range.js` | `createRangeClass` | Re-export |
+| `./type/matrix/Matrix.js` | `createMatrixClass` | Re-export |
+| `./type/matrix/DenseMatrix.js` | `createDenseMatrixClass` | Re-export |
+| `./utils/clone.js` | `createClone` | Re-export |
+| `./utils/isInteger.js` | `createIsInteger` | Re-export |
+| `./utils/isNegative.js` | `createIsNegative` | Re-export |
+| `./utils/isNumeric.js` | `createIsNumeric` | Re-export |
+| `./utils/hasNumericValue.js` | `createHasNumericValue` | Re-export |
+| `./utils/isPositive.js` | `createIsPositive` | Re-export |
+| `./utils/isZero.js` | `createIsZero` | Re-export |
+| `./utils/isNaN.js` | `createIsNaN` | Re-export |
+| `./utils/isBounded.js` | `createIsBounded` | Re-export |
+| `./utils/isFinite.js` | `createIsFinite` | Re-export |
+| `./utils/typeOf.js` | `createTypeOf` | Re-export |
+| `./relational/equalScalar.js` | `createEqualScalar` | Re-export |
+| `./type/matrix/SparseMatrix.js` | `createSparseMatrixClass` | Re-export |
+| `./type/number.js` | `createNumber` | Re-export |
+| `./type/bigint.js` | `createBigint` | Re-export |
+| `./type/string.js` | `createString` | Re-export |
+| `./type/boolean.js` | `createBoolean` | Re-export |
+| `./type/bignumber/function/bignumber.js` | `createBignumber` | Re-export |
+| `./type/complex/function/complex.js` | `createComplex` | Re-export |
+| `./type/fraction/function/fraction.js` | `createFraction` | Re-export |
+| `./type/matrix/function/matrix.js` | `createMatrix` | Re-export |
+| `./matrix/matrixFromFunction.js` | `createMatrixFromFunction` | Re-export |
+| `./matrix/matrixFromRows.js` | `createMatrixFromRows` | Re-export |
+| `./matrix/matrixFromColumns.js` | `createMatrixFromColumns` | Re-export |
+| `./type/unit/function/splitUnit.js` | `createSplitUnit` | Re-export |
+| `./arithmetic/unaryMinus.js` | `createUnaryMinus` | Re-export |
+| `./arithmetic/unaryPlus.js` | `createUnaryPlus` | Re-export |
+| `./arithmetic/abs.js` | `createAbs` | Re-export |
+| `./matrix/mapSlices.js` | `createMapSlices` | Re-export |
+| `./arithmetic/addScalar.js` | `createAddScalar` | Re-export |
+| `./arithmetic/subtractScalar.js` | `createSubtractScalar` | Re-export |
+| `./arithmetic/cbrt.js` | `createCbrt` | Re-export |
+| `./arithmetic/ceil.js` | `createCeil` | Re-export |
+| `./arithmetic/cube.js` | `createCube` | Re-export |
+| `./arithmetic/exp.js` | `createExp` | Re-export |
+| `./arithmetic/expm1.js` | `createExpm1` | Re-export |
+| `./arithmetic/fix.js` | `createFix` | Re-export |
+| `./arithmetic/floor.js` | `createFloor` | Re-export |
+| `./arithmetic/gcd.js` | `createGcd` | Re-export |
+| `./arithmetic/lcm.js` | `createLcm` | Re-export |
+| `./arithmetic/log10.js` | `createLog10` | Re-export |
+| `./arithmetic/log2.js` | `createLog2` | Re-export |
+| `./arithmetic/mod.js` | `createMod` | Re-export |
+| `./arithmetic/multiplyScalar.js` | `createMultiplyScalar` | Re-export |
+| `./arithmetic/multiply.js` | `createMultiply` | Re-export |
+| `./arithmetic/nthRoot.js` | `createNthRoot` | Re-export |
+| `./arithmetic/sign.js` | `createSign` | Re-export |
+| `./arithmetic/sqrt.js` | `createSqrt` | Re-export |
+| `./arithmetic/square.js` | `createSquare` | Re-export |
+| `./arithmetic/subtract.js` | `createSubtract` | Re-export |
+| `./arithmetic/xgcd.js` | `createXgcd` | Re-export |
+| `./arithmetic/invmod.js` | `createInvmod` | Re-export |
+| `./arithmetic/dotMultiply.js` | `createDotMultiply` | Re-export |
+| `./arithmetic/utils/nodeOperations.js` | `createNodeOperations` | Re-export |
+| `./bitwise/bitAnd.js` | `createBitAnd` | Re-export |
+| `./bitwise/bitNot.js` | `createBitNot` | Re-export |
+| `./bitwise/bitOr.js` | `createBitOr` | Re-export |
+| `./bitwise/bitXor.js` | `createBitXor` | Re-export |
+| `./complex/arg.js` | `createArg` | Re-export |
+| `./complex/conj.js` | `createConj` | Re-export |
+| `./complex/im.js` | `createIm` | Re-export |
+| `./complex/re.js` | `createRe` | Re-export |
+| `./logical/not.js` | `createNot` | Re-export |
+| `./logical/nullish.js` | `createNullish` | Re-export |
+| `./logical/or.js` | `createOr` | Re-export |
+| `./logical/xor.js` | `createXor` | Re-export |
+| `./matrix/concat.js` | `createConcat` | Re-export |
+| `./matrix/column.js` | `createColumn` | Re-export |
+| `./matrix/count.js` | `createCount` | Re-export |
+| `./matrix/cross.js` | `createCross` | Re-export |
+| `./matrix/diag.js` | `createDiag` | Re-export |
+| `./matrix/filter.js` | `createFilter` | Re-export |
+| `./matrix/flatten.js` | `createFlatten` | Re-export |
+| `./matrix/forEach.js` | `createForEach` | Re-export |
+| `./matrix/getMatrixDataType.js` | `createGetMatrixDataType` | Re-export |
+| `./matrix/identity.js` | `createIdentity` | Re-export |
+| `./matrix/kron.js` | `createKron` | Re-export |
+| `./matrix/map.js` | `createMap` | Re-export |
+| `./matrix/diff.js` | `createDiff` | Re-export |
+| `./matrix/ones.js` | `createOnes` | Re-export |
+| `./matrix/range.js` | `createRange` | Re-export |
+| `./matrix/reshape.js` | `createReshape` | Re-export |
+| `./matrix/resize.js` | `createResize` | Re-export |
+| `./matrix/rotate.js` | `createRotate` | Re-export |
+| `./matrix/rotationMatrix.js` | `createRotationMatrix` | Re-export |
+| `./matrix/row.js` | `createRow` | Re-export |
+| `./matrix/size.js` | `createSize` | Re-export |
+| `./matrix/squeeze.js` | `createSqueeze` | Re-export |
+| `./matrix/subset.js` | `createSubset` | Re-export |
+| `./matrix/transpose.js` | `createTranspose` | Re-export |
+| `./matrix/ctranspose.js` | `createCtranspose` | Re-export |
+| `./matrix/zeros.js` | `createZeros` | Re-export |
+| `./matrix/fft.js` | `createFft` | Re-export |
+| `./matrix/ifft.js` | `createIfft` | Re-export |
+| `./numeric/solveODE.js` | `createSolveODE` | Re-export |
+| `./special/erf.js` | `createErf` | Re-export |
+| `./special/zeta.js` | `createZeta` | Re-export |
+| `./statistics/mode.js` | `createMode` | Re-export |
+| `./statistics/prod.js` | `createProd` | Re-export |
+| `./string/format.js` | `createFormat` | Re-export |
+| `./string/bin.js` | `createBin` | Re-export |
+| `./string/oct.js` | `createOct` | Re-export |
+| `./string/hex.js` | `createHex` | Re-export |
+| `./string/print.js` | `createPrint` | Re-export |
+| `./unit/to.js` | `createTo` | Re-export |
+| `./unit/toBest.js` | `createToBest` | Re-export |
+| `./utils/isPrime.js` | `createIsPrime` | Re-export |
+| `./utils/numeric.js` | `createNumeric` | Re-export |
+| `./utils/parseNumber.js` | `createParseNumberWithConfig` | Re-export |
+| `./arithmetic/divideScalar.js` | `createDivideScalar` | Re-export |
+| `./arithmetic/pow.js` | `createPow` | Re-export |
+| `./arithmetic/round.js` | `createRound` | Re-export |
+| `./arithmetic/log.js` | `createLog` | Re-export |
+| `./arithmetic/log1p.js` | `createLog1p` | Re-export |
+| `./arithmetic/nthRoots.js` | `createNthRoots` | Re-export |
+| `./arithmetic/dotPow.js` | `createDotPow` | Re-export |
+| `./arithmetic/dotDivide.js` | `createDotDivide` | Re-export |
+| `./algebra/solver/lsolve.js` | `createLsolve` | Re-export |
+| `./algebra/solver/usolve.js` | `createUsolve` | Re-export |
+| `./algebra/solver/lsolveAll.js` | `createLsolveAll` | Re-export |
+| `./algebra/solver/usolveAll.js` | `createUsolveAll` | Re-export |
+| `./bitwise/leftShift.js` | `createLeftShift` | Re-export |
+| `./bitwise/rightArithShift.js` | `createRightArithShift` | Re-export |
+| `./bitwise/rightLogShift.js` | `createRightLogShift` | Re-export |
+| `./logical/and.js` | `createAnd` | Re-export |
+| `./relational/compare.js` | `createCompare` | Re-export |
+| `./relational/compareNatural.js` | `createCompareNatural` | Re-export |
+| `./relational/compareText.js` | `createCompareText` | Re-export |
+| `./relational/equal.js` | `createEqual` | Re-export |
+| `./relational/equalText.js` | `createEqualText` | Re-export |
+| `./relational/smaller.js` | `createSmaller` | Re-export |
+| `./relational/smallerEq.js` | `createSmallerEq` | Re-export |
+| `./relational/larger.js` | `createLarger` | Re-export |
+| `./relational/largerEq.js` | `createLargerEq` | Re-export |
+| `./relational/deepEqual.js` | `createDeepEqual` | Re-export |
+| `./relational/unequal.js` | `createUnequal` | Re-export |
+| `./matrix/partitionSelect.js` | `createPartitionSelect` | Re-export |
+| `./matrix/sort.js` | `createSort` | Re-export |
+| `./statistics/max.js` | `createMax` | Re-export |
+| `./statistics/min.js` | `createMin` | Re-export |
+| `./type/matrix/ImmutableDenseMatrix.js` | `createImmutableDenseMatrixClass` | Re-export |
+| `./type/matrix/MatrixIndex.js` | `createIndexClass` | Re-export |
+| `./type/matrix/FibonacciHeap.js` | `createFibonacciHeapClass` | Re-export |
+| `./type/matrix/Spa.js` | `createSpaClass` | Re-export |
+| `./type/unit/Unit.js` | `createUnitClass` | Re-export |
+| `./type/unit/function/unit.js` | `createUnitFunction` | Re-export |
+| `./type/matrix/function/sparse.js` | `createSparse` | Re-export |
+| `./type/unit/function/createUnit.js` | `createCreateUnit` | Re-export |
+| `./trigonometry/acos.js` | `createAcos` | Re-export |
+| `./trigonometry/acosh.js` | `createAcosh` | Re-export |
+| `./trigonometry/acot.js` | `createAcot` | Re-export |
+| `./trigonometry/acoth.js` | `createAcoth` | Re-export |
+| `./trigonometry/acsc.js` | `createAcsc` | Re-export |
+| `./trigonometry/acsch.js` | `createAcsch` | Re-export |
+| `./trigonometry/asec.js` | `createAsec` | Re-export |
+| `./trigonometry/asech.js` | `createAsech` | Re-export |
+| `./trigonometry/asin.js` | `createAsin` | Re-export |
+| `./trigonometry/asinh.js` | `createAsinh` | Re-export |
+| `./trigonometry/atan.js` | `createAtan` | Re-export |
+| `./trigonometry/atan2.js` | `createAtan2` | Re-export |
+| `./trigonometry/atanh.js` | `createAtanh` | Re-export |
+| `./trigonometry/cos.js` | `createCos` | Re-export |
+| `./trigonometry/cosh.js` | `createCosh` | Re-export |
+| `./trigonometry/cot.js` | `createCot` | Re-export |
+| `./trigonometry/coth.js` | `createCoth` | Re-export |
+| `./trigonometry/csc.js` | `createCsc` | Re-export |
+| `./trigonometry/csch.js` | `createCsch` | Re-export |
+| `./trigonometry/sec.js` | `createSec` | Re-export |
+| `./trigonometry/sech.js` | `createSech` | Re-export |
+| `./trigonometry/sin.js` | `createSin` | Re-export |
+| `./trigonometry/sinh.js` | `createSinh` | Re-export |
+| `./trigonometry/tan.js` | `createTan` | Re-export |
+| `./trigonometry/tanh.js` | `createTanh` | Re-export |
+| `./set/setCartesian.js` | `createSetCartesian` | Re-export |
+| `./set/setDifference.js` | `createSetDifference` | Re-export |
+| `./set/setDistinct.js` | `createSetDistinct` | Re-export |
+| `./set/setIntersect.js` | `createSetIntersect` | Re-export |
+| `./set/setIsSubset.js` | `createSetIsSubset` | Re-export |
+| `./set/setMultiplicity.js` | `createSetMultiplicity` | Re-export |
+| `./set/setPowerset.js` | `createSetPowerset` | Re-export |
+| `./set/setSize.js` | `createSetSize` | Re-export |
+| `./set/setSymDifference.js` | `createSetSymDifference` | Re-export |
+| `./set/setUnion.js` | `createSetUnion` | Re-export |
+| `./arithmetic/add.js` | `createAdd` | Re-export |
+| `./arithmetic/hypot.js` | `createHypot` | Re-export |
+| `./arithmetic/norm.js` | `createNorm` | Re-export |
+| `./matrix/dot.js` | `createDot` | Re-export |
+| `./matrix/trace.js` | `createTrace` | Re-export |
+| `./type/matrix/function/index.js` | `createIndex` | Re-export |
+| `./expression/node/Node.js` | `createNode` | Re-export |
+| `./expression/node/AccessorNode.js` | `createAccessorNode` | Re-export |
+| `./expression/node/ArrayNode.js` | `createArrayNode` | Re-export |
+| `./expression/node/AssignmentNode.js` | `createAssignmentNode` | Re-export |
+| `./expression/node/BlockNode.js` | `createBlockNode` | Re-export |
+| `./expression/node/ConditionalNode.js` | `createConditionalNode` | Re-export |
+| `./expression/node/ConstantNode.js` | `createConstantNode` | Re-export |
+| `./expression/node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode` | Re-export |
+| `./expression/node/IndexNode.js` | `createIndexNode` | Re-export |
+| `./expression/node/ObjectNode.js` | `createObjectNode` | Re-export |
+| `./expression/node/OperatorNode.js` | `createOperatorNode` | Re-export |
+| `./expression/node/ParenthesisNode.js` | `createParenthesisNode` | Re-export |
+| `./expression/node/RangeNode.js` | `createRangeNode` | Re-export |
+| `./expression/node/RelationalNode.js` | `createRelationalNode` | Re-export |
+| `./expression/node/SymbolNode.js` | `createSymbolNode` | Re-export |
+| `./expression/node/FunctionNode.js` | `createFunctionNode` | Re-export |
+| `./expression/parse.js` | `createParse` | Re-export |
+| `./expression/function/compile.js` | `createCompile` | Re-export |
+| `./expression/function/evaluate.js` | `createEvaluate` | Re-export |
+| `./expression/Parser.js` | `createParserClass` | Re-export |
+| `./expression/function/parser.js` | `createParser` | Re-export |
+| `./algebra/decomposition/lup.js` | `createLup` | Re-export |
+| `./algebra/decomposition/qr.js` | `createQr` | Re-export |
+| `./algebra/decomposition/slu.js` | `createSlu` | Re-export |
+| `./algebra/solver/lusolve.js` | `createLusolve` | Re-export |
+| `./algebra/polynomialRoot.js` | `createPolynomialRoot` | Re-export |
+| `./expression/Help.js` | `createHelpClass` | Re-export |
+| `./type/chain/Chain.js` | `createChainClass` | Re-export |
+| `./expression/function/help.js` | `createHelp` | Re-export |
+| `./type/chain/function/chain.js` | `createChain` | Re-export |
+| `./matrix/det.js` | `createDet` | Re-export |
+| `./matrix/inv.js` | `createInv` | Re-export |
+| `./matrix/pinv.js` | `createPinv` | Re-export |
+| `./matrix/eigs.js` | `createEigs` | Re-export |
+| `./matrix/expm.js` | `createExpm` | Re-export |
+| `./matrix/sqrtm.js` | `createSqrtm` | Re-export |
+| `./algebra/sylvester.js` | `createSylvester` | Re-export |
+| `./algebra/decomposition/schur.js` | `createSchur` | Re-export |
+| `./algebra/lyap.js` | `createLyap` | Re-export |
+| `./arithmetic/divide.js` | `createDivide` | Re-export |
+| `./geometry/distance.js` | `createDistance` | Re-export |
+| `./geometry/intersect.js` | `createIntersect` | Re-export |
+| `./statistics/sum.js` | `createSum` | Re-export |
+| `./statistics/cumsum.js` | `createCumSum` | Re-export |
+| `./statistics/mean.js` | `createMean` | Re-export |
+| `./statistics/median.js` | `createMedian` | Re-export |
+| `./statistics/mad.js` | `createMad` | Re-export |
+| `./statistics/variance.js` | `createVariance` | Re-export |
+| `./statistics/quantileSeq.js` | `createQuantileSeq` | Re-export |
+| `./statistics/std.js` | `createStd` | Re-export |
+| `./statistics/corr.js` | `createCorr` | Re-export |
+| `./probability/bernoulli.js` | `createBernoulli` | Re-export |
+| `./probability/combinations.js` | `createCombinations` | Re-export |
+| `./probability/combinationsWithRep.js` | `createCombinationsWithRep` | Re-export |
+| `./probability/gamma.js` | `createGamma` | Re-export |
+| `./probability/lgamma.js` | `createLgamma` | Re-export |
+| `./probability/factorial.js` | `createFactorial` | Re-export |
+| `./probability/kldivergence.js` | `createKldivergence` | Re-export |
+| `./probability/multinomial.js` | `createMultinomial` | Re-export |
+| `./probability/permutations.js` | `createPermutations` | Re-export |
+| `./probability/pickRandom.js` | `createPickRandom` | Re-export |
+| `./probability/random.js` | `createRandom` | Re-export |
+| `./probability/randomInt.js` | `createRandomInt` | Re-export |
+| `./combinatorics/stirlingS2.js` | `createStirlingS2` | Re-export |
+| `./combinatorics/bellNumbers.js` | `createBellNumbers` | Re-export |
+| `./combinatorics/catalan.js` | `createCatalan` | Re-export |
+| `./combinatorics/composition.js` | `createComposition` | Re-export |
+| `./algebra/leafCount.js` | `createLeafCount` | Re-export |
+| `./algebra/simplify.js` | `createSimplify` | Re-export |
+| `./algebra/simplifyConstant.js` | `createSimplifyConstant` | Re-export |
+| `./algebra/simplifyCore.js` | `createSimplifyCore` | Re-export |
+| `./algebra/resolve.js` | `createResolve` | Re-export |
+| `./algebra/symbolicEqual.js` | `createSymbolicEqual` | Re-export |
+| `./algebra/derivative.js` | `createDerivative` | Re-export |
+| `./algebra/rationalize.js` | `createRationalize` | Re-export |
+| `./signal/zpk2tf.js` | `createZpk2tf` | Re-export |
+| `./signal/freqz.js` | `createFreqz` | Re-export |
+| `./json/reviver.js` | `createReviver` | Re-export |
+| `./json/replacer.js` | `createReplacer` | Re-export |
+| `./constants.js` | `createE, createUppercaseE, createFalse, createI, createInfinity, createLN10, createLN2, createLOG10E, createLOG2E, createNaN, createNull, createPhi, createPi, createUppercasePi, createSQRT1_2, createSQRT2, createTau, createTrue, createVersion` | Re-export |
+| `./type/unit/physicalConstants.js` | `createAtomicMass, createAvogadro, createBohrMagneton, createBohrRadius, createBoltzmann, createClassicalElectronRadius, createConductanceQuantum, createCoulomb, createCoulombConstant, createDeuteronMass, createEfimovFactor, createElectricConstant, createElectronMass, createElementaryCharge, createFaraday, createFermiCoupling, createFineStructure, createFirstRadiation, createGasConstant, createGravitationConstant, createGravity, createHartreeEnergy, createInverseConductanceQuantum, createKlitzing, createLoschmidt, createMagneticConstant, createMagneticFluxQuantum, createMolarMass, createMolarMassC12, createMolarPlanckConstant, createMolarVolume, createNeutronMass, createNuclearMagneton, createPlanckCharge, createPlanckConstant, createPlanckLength, createPlanckMass, createPlanckTemperature, createPlanckTime, createProtonMass, createQuantumOfCirculation, createReducedPlanckConstant, createRydberg, createSackurTetrode, createSecondRadiation, createSpeedOfLight, createStefanBoltzmann, createThomsonCrossSection, createVacuumImpedance, createWeakMixingAngle, createWienDisplacement` | Re-export |
+| `./expression/transform/mapSlices.transform.js` | `createMapSlicesTransform` | Re-export |
+| `./expression/transform/column.transform.js` | `createColumnTransform` | Re-export |
+| `./expression/transform/filter.transform.js` | `createFilterTransform` | Re-export |
+| `./expression/transform/forEach.transform.js` | `createForEachTransform` | Re-export |
+| `./expression/transform/index.transform.js` | `createIndexTransform` | Re-export |
+| `./expression/transform/map.transform.js` | `createMapTransform` | Re-export |
+| `./expression/transform/max.transform.js` | `createMaxTransform` | Re-export |
+| `./expression/transform/mean.transform.js` | `createMeanTransform` | Re-export |
+| `./expression/transform/min.transform.js` | `createMinTransform` | Re-export |
+| `./expression/transform/range.transform.js` | `createRangeTransform` | Re-export |
+| `./expression/transform/row.transform.js` | `createRowTransform` | Re-export |
+| `./expression/transform/subset.transform.js` | `createSubsetTransform` | Re-export |
+| `./expression/transform/concat.transform.js` | `createConcatTransform` | Re-export |
+| `./expression/transform/diff.transform.js` | `createDiffTransform` | Re-export |
+| `./expression/transform/std.transform.js` | `createStdTransform` | Re-export |
+| `./expression/transform/sum.transform.js` | `createSumTransform` | Re-export |
+| `./expression/transform/quantileSeq.transform.js` | `createQuantileSeqTransform` | Re-export |
+| `./expression/transform/cumsum.transform.js` | `createCumSumTransform` | Re-export |
+| `./expression/transform/variance.transform.js` | `createVarianceTransform` | Re-export |
+| `./expression/transform/print.transform.js` | `createPrintTransform` | Re-export |
+| `./expression/transform/and.transform.js` | `createAndTransform` | Re-export |
+| `./expression/transform/or.transform.js` | `createOrTransform` | Re-export |
+| `./expression/transform/nullish.transform.js` | `createNullishTransform` | Re-export |
+| `./expression/transform/bitAnd.transform.js` | `createBitAndTransform` | Re-export |
+| `./expression/transform/bitOr.transform.js` | `createBitOrTransform` | Re-export |
+
+**Exports:**
+- Re-exports: `createTyped`, `createResultSet`, `createBigNumberClass`, `createComplexClass`, `createFractionClass`, `createRangeClass`, `createMatrixClass`, `createDenseMatrixClass`, `createClone`, `createIsInteger`, `createIsNegative`, `createIsNumeric`, `createHasNumericValue`, `createIsPositive`, `createIsZero`, `createIsNaN`, `createIsBounded`, `createIsFinite`, `createTypeOf`, `createEqualScalar`, `createSparseMatrixClass`, `createNumber`, `createBigint`, `createString`, `createBoolean`, `createBignumber`, `createComplex`, `createFraction`, `createMatrix`, `createMatrixFromFunction`, `createMatrixFromRows`, `createMatrixFromColumns`, `createSplitUnit`, `createUnaryMinus`, `createUnaryPlus`, `createAbs`, `createMapSlices`, `createAddScalar`, `createSubtractScalar`, `createCbrt`, `createCeil`, `createCube`, `createExp`, `createExpm1`, `createFix`, `createFloor`, `createGcd`, `createLcm`, `createLog10`, `createLog2`, `createMod`, `createMultiplyScalar`, `createMultiply`, `createNthRoot`, `createSign`, `createSqrt`, `createSquare`, `createSubtract`, `createXgcd`, `createInvmod`, `createDotMultiply`, `createNodeOperations`, `createBitAnd`, `createBitNot`, `createBitOr`, `createBitXor`, `createArg`, `createConj`, `createIm`, `createRe`, `createNot`, `createNullish`, `createOr`, `createXor`, `createConcat`, `createColumn`, `createCount`, `createCross`, `createDiag`, `createFilter`, `createFlatten`, `createForEach`, `createGetMatrixDataType`, `createIdentity`, `createKron`, `createMap`, `createDiff`, `createOnes`, `createRange`, `createReshape`, `createResize`, `createRotate`, `createRotationMatrix`, `createRow`, `createSize`, `createSqueeze`, `createSubset`, `createTranspose`, `createCtranspose`, `createZeros`, `createFft`, `createIfft`, `createSolveODE`, `createErf`, `createZeta`, `createMode`, `createProd`, `createFormat`, `createBin`, `createOct`, `createHex`, `createPrint`, `createTo`, `createToBest`, `createIsPrime`, `createNumeric`, `createParseNumberWithConfig`, `createDivideScalar`, `createPow`, `createRound`, `createLog`, `createLog1p`, `createNthRoots`, `createDotPow`, `createDotDivide`, `createLsolve`, `createUsolve`, `createLsolveAll`, `createUsolveAll`, `createLeftShift`, `createRightArithShift`, `createRightLogShift`, `createAnd`, `createCompare`, `createCompareNatural`, `createCompareText`, `createEqual`, `createEqualText`, `createSmaller`, `createSmallerEq`, `createLarger`, `createLargerEq`, `createDeepEqual`, `createUnequal`, `createPartitionSelect`, `createSort`, `createMax`, `createMin`, `createImmutableDenseMatrixClass`, `createIndexClass`, `createFibonacciHeapClass`, `createSpaClass`, `createUnitClass`, `createUnitFunction`, `createSparse`, `createCreateUnit`, `createAcos`, `createAcosh`, `createAcot`, `createAcoth`, `createAcsc`, `createAcsch`, `createAsec`, `createAsech`, `createAsin`, `createAsinh`, `createAtan`, `createAtan2`, `createAtanh`, `createCos`, `createCosh`, `createCot`, `createCoth`, `createCsc`, `createCsch`, `createSec`, `createSech`, `createSin`, `createSinh`, `createTan`, `createTanh`, `createSetCartesian`, `createSetDifference`, `createSetDistinct`, `createSetIntersect`, `createSetIsSubset`, `createSetMultiplicity`, `createSetPowerset`, `createSetSize`, `createSetSymDifference`, `createSetUnion`, `createAdd`, `createHypot`, `createNorm`, `createDot`, `createTrace`, `createIndex`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `createFunctionNode`, `createParse`, `createCompile`, `createEvaluate`, `createParserClass`, `createParser`, `createLup`, `createQr`, `createSlu`, `createLusolve`, `createPolynomialRoot`, `createHelpClass`, `createChainClass`, `createHelp`, `createChain`, `createDet`, `createInv`, `createPinv`, `createEigs`, `createExpm`, `createSqrtm`, `createSylvester`, `createSchur`, `createLyap`, `createDivide`, `createDistance`, `createIntersect`, `createSum`, `createCumSum`, `createMean`, `createMedian`, `createMad`, `createVariance`, `createQuantileSeq`, `createStd`, `createCorr`, `createBernoulli`, `createCombinations`, `createCombinationsWithRep`, `createGamma`, `createLgamma`, `createFactorial`, `createKldivergence`, `createMultinomial`, `createPermutations`, `createPickRandom`, `createRandom`, `createRandomInt`, `createStirlingS2`, `createBellNumbers`, `createCatalan`, `createComposition`, `createLeafCount`, `createSimplify`, `createSimplifyConstant`, `createSimplifyCore`, `createResolve`, `createSymbolicEqual`, `createDerivative`, `createRationalize`, `createZpk2tf`, `createFreqz`, `createReviver`, `createReplacer`, `createE`, `createUppercaseE`, `createFalse`, `createI`, `createInfinity`, `createLN10`, `createLN2`, `createLOG10E`, `createLOG2E`, `createNaN`, `createNull`, `createPhi`, `createPi`, `createUppercasePi`, `createSQRT1_2`, `createSQRT2`, `createTau`, `createTrue`, `createVersion`, `createAtomicMass`, `createAvogadro`, `createBohrMagneton`, `createBohrRadius`, `createBoltzmann`, `createClassicalElectronRadius`, `createConductanceQuantum`, `createCoulomb`, `createCoulombConstant`, `createDeuteronMass`, `createEfimovFactor`, `createElectricConstant`, `createElectronMass`, `createElementaryCharge`, `createFaraday`, `createFermiCoupling`, `createFineStructure`, `createFirstRadiation`, `createGasConstant`, `createGravitationConstant`, `createGravity`, `createHartreeEnergy`, `createInverseConductanceQuantum`, `createKlitzing`, `createLoschmidt`, `createMagneticConstant`, `createMagneticFluxQuantum`, `createMolarMass`, `createMolarMassC12`, `createMolarPlanckConstant`, `createMolarVolume`, `createNeutronMass`, `createNuclearMagneton`, `createPlanckCharge`, `createPlanckConstant`, `createPlanckLength`, `createPlanckMass`, `createPlanckTemperature`, `createPlanckTime`, `createProtonMass`, `createQuantumOfCirculation`, `createReducedPlanckConstant`, `createRydberg`, `createSackurTetrode`, `createSecondRadiation`, `createSpeedOfLight`, `createStefanBoltzmann`, `createThomsonCrossSection`, `createVacuumImpedance`, `createWeakMixingAngle`, `createWienDisplacement`, `createMapSlicesTransform`, `createColumnTransform`, `createFilterTransform`, `createForEachTransform`, `createIndexTransform`, `createMapTransform`, `createMaxTransform`, `createMeanTransform`, `createMinTransform`, `createRangeTransform`, `createRowTransform`, `createSubsetTransform`, `createConcatTransform`, `createDiffTransform`, `createStdTransform`, `createSumTransform`, `createQuantileSeqTransform`, `createCumSumTransform`, `createVarianceTransform`, `createPrintTransform`, `createAndTransform`, `createOrTransform`, `createNullishTransform`, `createBitAndTransform`, `createBitOrTransform`
+
+---
+
+### `src/factoriesNumber.ts` - factoriesNumber module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./plain/number/index.js` | `absNumber, acoshNumber, acosNumber, acothNumber, acotNumber, acschNumber, acscNumber, addNumber, andNumber, asechNumber, asecNumber, asinhNumber, asinNumber, atan2Number, atanhNumber, atanNumber, bitAndNumber, bitNotNumber, bitOrNumber, bitXorNumber, cbrtNumber, combinationsNumber, coshNumber, cosNumber, cothNumber, cotNumber, cschNumber, cscNumber, cubeNumber, divideNumber, expm1Number, expNumber, gammaNumber, gcdNumber, isIntegerNumber, isNaNNumber, isNegativeNumber, isPositiveNumber, isZeroNumber, lcmNumber, leftShiftNumber, lgammaNumber, log10Number, log1pNumber, log2Number, logNumber, modNumber, multiplyNumber, normNumber, notNumber, nthRootNumber, orNumber, powNumber, rightArithShiftNumber, rightLogShiftNumber, roundNumber, sechNumber, secNumber, signNumber, sinhNumber, sinNumber, sqrtNumber, squareNumber, subtractNumber, tanhNumber, tanNumber, unaryMinusNumber, unaryPlusNumber, xgcdNumber, xorNumber` | Import |
+| `./utils/factory.js` | `factory` | Import |
+| `./utils/noop.js` | `noIndex, noMatrix, noSubset` | Import |
+| `./core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| `./core/function/typed.js` | `createTyped` | Re-export |
+| `./type/resultset/ResultSet.js` | `createResultSet` | Re-export |
+| `./type/matrix/Range.js` | `createRangeClass` | Re-export |
+| `./expression/Help.js` | `createHelpClass` | Re-export |
+| `./type/chain/Chain.js` | `createChainClass` | Re-export |
+| `./expression/function/help.js` | `createHelp` | Re-export |
+| `./type/chain/function/chain.js` | `createChain` | Re-export |
+| `./algebra/resolve.js` | `createResolve` | Re-export |
+| `./algebra/simplify.js` | `createSimplify` | Re-export |
+| `./algebra/simplifyConstant.js` | `createSimplifyConstant` | Re-export |
+| `./algebra/simplifyCore.js` | `createSimplifyCore` | Re-export |
+| `./algebra/derivative.js` | `createDerivative` | Re-export |
+| `./algebra/rationalize.js` | `createRationalize` | Re-export |
+| `./arithmetic/ceil.js` | `createCeilNumber` | Re-export |
+| `./arithmetic/fix.js` | `createFixNumber` | Re-export |
+| `./arithmetic/floor.js` | `createFloorNumber` | Re-export |
+| `./arithmetic/hypot.js` | `createHypot` | Re-export |
+| `./combinatorics/stirlingS2.js` | `createStirlingS2` | Re-export |
+| `./combinatorics/bellNumbers.js` | `createBellNumbers` | Re-export |
+| `./combinatorics/catalan.js` | `createCatalan` | Re-export |
+| `./combinatorics/composition.js` | `createComposition` | Re-export |
+| `./constants.js` | `createE, createUppercaseE, createFalse, createInfinity, createLN10, createLN2, createLOG10E, createLOG2E, createNaN, createNull, createPhi, createPi, createUppercasePi, createSQRT1_2, createSQRT2, createTau, createTrue, createVersion` | Re-export |
+| `./type/number.js` | `createNumber` | Re-export |
+| `./type/bigint.js` | `createBigint` | Re-export |
+| `./type/string.js` | `createString` | Re-export |
+| `./type/boolean.js` | `createBoolean` | Re-export |
+| `./expression/function/parser.js` | `createParser` | Re-export |
+| `./expression/node/Node.js` | `createNode` | Re-export |
+| `./expression/node/AccessorNode.js` | `createAccessorNode` | Re-export |
+| `./expression/node/ArrayNode.js` | `createArrayNode` | Re-export |
+| `./expression/node/AssignmentNode.js` | `createAssignmentNode` | Re-export |
+| `./expression/node/BlockNode.js` | `createBlockNode` | Re-export |
+| `./expression/node/ConditionalNode.js` | `createConditionalNode` | Re-export |
+| `./expression/node/ConstantNode.js` | `createConstantNode` | Re-export |
+| `./expression/node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode` | Re-export |
+| `./expression/node/IndexNode.js` | `createIndexNode` | Re-export |
+| `./expression/node/ObjectNode.js` | `createObjectNode` | Re-export |
+| `./expression/node/OperatorNode.js` | `createOperatorNode` | Re-export |
+| `./expression/node/ParenthesisNode.js` | `createParenthesisNode` | Re-export |
+| `./expression/node/RangeNode.js` | `createRangeNode` | Re-export |
+| `./expression/node/RelationalNode.js` | `createRelationalNode` | Re-export |
+| `./expression/node/SymbolNode.js` | `createSymbolNode` | Re-export |
+| `./expression/node/FunctionNode.js` | `createFunctionNode` | Re-export |
+| `./expression/parse.js` | `createParse` | Re-export |
+| `./expression/function/compile.js` | `createCompile` | Re-export |
+| `./expression/function/evaluate.js` | `createEvaluate` | Re-export |
+| `./expression/Parser.js` | `createParserClass` | Re-export |
+| `./matrix/mapSlices.js` | `createMapSlices` | Re-export |
+| `./matrix/filter.js` | `createFilter` | Re-export |
+| `./matrix/forEach.js` | `createForEach` | Re-export |
+| `./matrix/map.js` | `createMap` | Re-export |
+| `./matrix/range.js` | `createRange` | Re-export |
+| `./matrix/size.js` | `createSize` | Re-export |
+| `./matrix/partitionSelect.js` | `createPartitionSelect` | Re-export |
+| `./probability/bernoulli.js` | `createBernoulli` | Re-export |
+| `./probability/combinationsWithRep.js` | `createCombinationsWithRep` | Re-export |
+| `./probability/factorial.js` | `createFactorial` | Re-export |
+| `./probability/multinomial.js` | `createMultinomial` | Re-export |
+| `./probability/permutations.js` | `createPermutations` | Re-export |
+| `./probability/pickRandom.js` | `createPickRandom` | Re-export |
+| `./probability/random.js` | `createRandomNumber` | Re-export |
+| `./probability/randomInt.js` | `createRandomInt` | Re-export |
+| `./relational/equalScalar.js` | `createEqualScalarNumber` | Re-export |
+| `./relational/compare.js` | `createCompareNumber` | Re-export |
+| `./relational/compareNatural.js` | `createCompareNatural` | Re-export |
+| `./relational/compareText.js` | `createCompareTextNumber` | Re-export |
+| `./relational/equal.js` | `createEqualNumber` | Re-export |
+| `./relational/equalText.js` | `createEqualText` | Re-export |
+| `./relational/smaller.js` | `createSmallerNumber` | Re-export |
+| `./relational/smallerEq.js` | `createSmallerEqNumber` | Re-export |
+| `./relational/larger.js` | `createLargerNumber` | Re-export |
+| `./relational/largerEq.js` | `createLargerEqNumber` | Re-export |
+| `./relational/deepEqual.js` | `createDeepEqual` | Re-export |
+| `./relational/unequal.js` | `createUnequalNumber` | Re-export |
+| `./special/erf.js` | `createErf` | Re-export |
+| `./special/zeta.js` | `createZeta` | Re-export |
+| `./statistics/mode.js` | `createMode` | Re-export |
+| `./statistics/prod.js` | `createProd` | Re-export |
+| `./statistics/max.js` | `createMax` | Re-export |
+| `./statistics/min.js` | `createMin` | Re-export |
+| `./statistics/sum.js` | `createSum` | Re-export |
+| `./statistics/cumsum.js` | `createCumSum` | Re-export |
+| `./statistics/mean.js` | `createMean` | Re-export |
+| `./statistics/median.js` | `createMedian` | Re-export |
+| `./statistics/mad.js` | `createMad` | Re-export |
+| `./statistics/variance.js` | `createVariance` | Re-export |
+| `./statistics/quantileSeq.js` | `createQuantileSeq` | Re-export |
+| `./statistics/std.js` | `createStd` | Re-export |
+| `./statistics/corr.js` | `createCorr` | Re-export |
+| `./string/format.js` | `createFormat` | Re-export |
+| `./string/print.js` | `createPrint` | Re-export |
+| `./expression/transform/mapSlices.transform.js` | `createMapSlicesTransform` | Re-export |
+| `./expression/transform/filter.transform.js` | `createFilterTransform` | Re-export |
+| `./expression/transform/forEach.transform.js` | `createForEachTransform` | Re-export |
+| `./expression/transform/map.transform.js` | `createMapTransform` | Re-export |
+| `./expression/transform/max.transform.js` | `createMaxTransform` | Re-export |
+| `./expression/transform/mean.transform.js` | `createMeanTransform` | Re-export |
+| `./expression/transform/min.transform.js` | `createMinTransform` | Re-export |
+| `./expression/transform/range.transform.js` | `createRangeTransform` | Re-export |
+| `./expression/transform/std.transform.js` | `createStdTransform` | Re-export |
+| `./expression/transform/sum.transform.js` | `createSumTransform` | Re-export |
+| `./expression/transform/cumsum.transform.js` | `createCumSumTransform` | Re-export |
+| `./expression/transform/variance.transform.js` | `createVarianceTransform` | Re-export |
+| `./utils/clone.js` | `createClone` | Re-export |
+| `./utils/isNumeric.js` | `createIsNumeric` | Re-export |
+| `./utils/hasNumericValue.js` | `createHasNumericValue` | Re-export |
+| `./utils/isBounded.js` | `createIsBounded` | Re-export |
+| `./utils/isFinite.js` | `createIsFinite` | Re-export |
+| `./utils/typeOf.js` | `createTypeOf` | Re-export |
+| `./utils/isPrime.js` | `createIsPrime` | Re-export |
+| `./utils/numeric.js` | `createNumeric` | Re-export |
+| `./utils/parseNumber.js` | `createParseNumberWithConfig` | Re-export |
+| `./json/reviver.js` | `createReviver` | Re-export |
+| `./json/replacer.js` | `createReplacer` | Re-export |
+
+**Exports:**
+- Constants: `createUnaryMinus`, `createUnaryPlus`, `createAbs`, `createAddScalar`, `createSubtractScalar`, `createCbrt`, `createCube`, `createExp`, `createExpm1`, `createGcd`, `createLcm`, `createLog10`, `createLog2`, `createMod`, `createMultiplyScalar`, `createMultiply`, `createNthRoot`, `createSign`, `createSqrt`, `createSquare`, `createSubtract`, `createXgcd`, `createDivideScalar`, `createPow`, `createRound`, `createLog`, `createLog1p`, `createAdd`, `createNorm`, `createDivide`, `createBitAnd`, `createBitNot`, `createBitOr`, `createBitXor`, `createLeftShift`, `createRightArithShift`, `createRightLogShift`, `createAnd`, `createNot`, `createOr`, `createXor`, `createIndex`, `createMatrix`, `createSubset`, `createCombinations`, `createGamma`, `createLgamma`, `createAcos`, `createAcosh`, `createAcot`, `createAcoth`, `createAcsc`, `createAcsch`, `createAsec`, `createAsech`, `createAsin`, `createAsinh`, `createAtan`, `createAtan2`, `createAtanh`, `createCos`, `createCosh`, `createCot`, `createCoth`, `createCsc`, `createCsch`, `createSec`, `createSech`, `createSin`, `createSinh`, `createTan`, `createTanh`, `createSubsetTransform`, `createIsInteger`, `createIsNegative`, `createIsPositive`, `createIsZero`, `createIsNaN`
+- Re-exports: `createTyped`, `createResultSet`, `createRangeClass`, `createHelpClass`, `createChainClass`, `createHelp`, `createChain`, `createResolve`, `createSimplify`, `createSimplifyConstant`, `createSimplifyCore`, `createDerivative`, `createRationalize`, `createCeilNumber`, `createFixNumber`, `createFloorNumber`, `createHypot`, `createStirlingS2`, `createBellNumbers`, `createCatalan`, `createComposition`, `createE`, `createUppercaseE`, `createFalse`, `createInfinity`, `createLN10`, `createLN2`, `createLOG10E`, `createLOG2E`, `createNaN`, `createNull`, `createPhi`, `createPi`, `createUppercasePi`, `createSQRT1_2`, `createSQRT2`, `createTau`, `createTrue`, `createVersion`, `createNumber`, `createBigint`, `createString`, `createBoolean`, `createParser`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `createFunctionNode`, `createParse`, `createCompile`, `createEvaluate`, `createParserClass`, `createMapSlices`, `createFilter`, `createForEach`, `createMap`, `createRange`, `createSize`, `createPartitionSelect`, `createBernoulli`, `createCombinationsWithRep`, `createFactorial`, `createMultinomial`, `createPermutations`, `createPickRandom`, `createRandomNumber`, `createRandomInt`, `createEqualScalarNumber`, `createCompareNumber`, `createCompareNatural`, `createCompareTextNumber`, `createEqualNumber`, `createEqualText`, `createSmallerNumber`, `createSmallerEqNumber`, `createLargerNumber`, `createLargerEqNumber`, `createDeepEqual`, `createUnequalNumber`, `createErf`, `createZeta`, `createMode`, `createProd`, `createMax`, `createMin`, `createSum`, `createCumSum`, `createMean`, `createMedian`, `createMad`, `createVariance`, `createQuantileSeq`, `createStd`, `createCorr`, `createFormat`, `createPrint`, `createMapSlicesTransform`, `createFilterTransform`, `createForEachTransform`, `createMapTransform`, `createMaxTransform`, `createMeanTransform`, `createMinTransform`, `createRangeTransform`, `createStdTransform`, `createSumTransform`, `createCumSumTransform`, `createVarianceTransform`, `createClone`, `createIsNumeric`, `createHasNumericValue`, `createIsBounded`, `createIsFinite`, `createTypeOf`, `createIsPrime`, `createNumeric`, `createParseNumberWithConfig`, `createReviver`, `createReplacer`
+
+---
+
+### `src/types.ts` - Type definitions re-exported for internal use
+
+**Exports:**
+- Interfaces: `SparseMatrix`, `Unit`, `MatrixConstructor`
+- Types: `BigNumber`, `Complex`, `Fraction`
+
+---
+
+<a id="core-dependencies"></a>
+
 ## Core Dependencies
 
 ### `src/core/config.ts` - Configuration interface for math.js
 
 **Exports:**
 - Interfaces: `ConfigOptions`
+- Types: `MathJsConfig`
 - Constants: `DEFAULT_CONFIG`
 
 ---
@@ -1608,45 +2122,42 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/typed-function` | `typedFunction` |
+| `typed-function` | `typedFunction` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../error/ArgumentsError.ts` | `ArgumentsError` | Import |
-| `../error/DimensionError.ts` | `DimensionError` | Import |
-| `../error/IndexError.ts` | `IndexError` | Import |
-| `../utils/factory.ts` | `factory, isFactory` | Import |
-| `../utils/factory.ts` | `FactoryFunction, LegacyFactory` | Import (type-only) |
-| `../utils/is.ts` | `isAccessorNode, isArray, isArrayNode, isAssignmentNode, isBigInt, isBigNumber, isBlockNode, isBoolean, isChain, isCollection, isComplex, isConditionalNode, isConstantNode, isDate, isDenseMatrix, isFraction, isFunction, isFunctionAssignmentNode, isFunctionNode, isHelp, isIndex, isIndexNode, isMap, isMatrix, isNode, isNull, isNumber, isObject, isObjectNode, isObjectWrappingMap, isOperatorNode, isParenthesisNode, isPartitionedMap, isRange, isRangeNode, isRegExp, isRelationalNode, isResultSet, isSparseMatrix, isString, isSymbolNode, isUndefined, isUnit` | Import |
-| `../utils/object.ts` | `deepFlatten, isLegacyFactory` | Import |
-| `./../utils/emitter.ts` | `* as emitter` | Import |
-| `./config.ts` | `DEFAULT_CONFIG` | Import |
-| `./config.ts` | `ConfigOptions, MathJsConfig` | Import (type-only) |
-| `./function/config.ts` | `configFactory` | Import |
-| `./function/import.ts` | `importFactory` | Import |
+| `../error/ArgumentsError.js` | `ArgumentsError` | Import |
+| `../error/DimensionError.js` | `DimensionError` | Import |
+| `../error/IndexError.js` | `IndexError` | Import |
+| `../utils/factory.js` | `factory, isFactory` | Import |
+| `../utils/factory.js` | `FactoryFunction, LegacyFactory` | Import (type-only) |
+| `../utils/is.js` | `isAccessorNode, isArray, isArrayNode, isAssignmentNode, isBigInt, isBigNumber, isBlockNode, isBoolean, isChain, isCollection, isComplex, isConditionalNode, isConstantNode, isDate, isDenseMatrix, isFraction, isFunction, isFunctionAssignmentNode, isFunctionNode, isHelp, isIndex, isIndexNode, isMap, isMatrix, isNode, isNull, isNumber, isObject, isObjectNode, isObjectWrappingMap, isOperatorNode, isParenthesisNode, isPartitionedMap, isRange, isRangeNode, isRegExp, isRelationalNode, isResultSet, isSparseMatrix, isString, isSymbolNode, isUndefined, isUnit` | Import |
+| `../utils/object.js` | `deepFlatten, isLegacyFactory` | Import |
+| `./../utils/emitter.js` | `* as emitter` | Import |
+| `./config.js` | `DEFAULT_CONFIG` | Import |
+| `./config.js` | `ConfigOptions, MathJsConfig` | Import (type-only) |
+| `./config.js` | `configFactory` | Import |
+| `./import.js` | `importFactory` | Import |
 
 **Exports:**
 - Interfaces: `MathJsInstance`, `ImportOptions`
+- Types: `FactoriesInput`
 - Functions: `create`
 
 ---
 
 ### `src/core/function/config.ts` - Type for partial config options
 
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `mathjs` | `create, all` |
-
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/object.ts` | `clone, deepExtend` | Import |
-| `../config.ts` | `DEFAULT_CONFIG, MathJsConfig` | Import |
+| `../../utils/object.js` | `clone, deepExtend` | Import |
+| `../config.js` | `DEFAULT_CONFIG, MathJsConfig` | Import |
 
 **Exports:**
 - Interfaces: `ConfigFunction`
+- Types: `MatrixOption`, `NumberOption`, `ConfigOptions`, `EmitFunction`
 - Functions: `configFactory`
 - Constants: `MATRIX_OPTIONS`, `NUMBER_OPTIONS`
 
@@ -1654,20 +2165,14 @@ The codebase is organized into the following modules:
 
 ### `src/core/function/import.ts` - Options for the import function
 
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `mathjs` | `create, all` |
-| `numbers` | `* as numbers` |
-
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isBigNumber, isComplex, isFraction, isMatrix, isObject, isUnit` | Import |
-| `../../utils/factory.ts` | `isFactory, stripOptionalNotation, FactoryFunction, FactoryMeta` | Import |
-| `../../utils/object.ts` | `hasOwnProperty, lazy` | Import |
-| `../../error/ArgumentsError.ts` | `ArgumentsError` | Import |
-| `./typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../utils/is.js` | `isBigNumber, isComplex, isFraction, isMatrix, isObject, isUnit` | Import |
+| `../../utils/factory.js` | `isFactory, stripOptionalNotation, FactoryFunction, FactoryMeta` | Import |
+| `../../utils/object.js` | `hasOwnProperty, lazy` | Import |
+| `../../error/ArgumentsError.js` | `ArgumentsError` | Import |
+| `./typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Interfaces: `ImportOptions`
@@ -1681,20 +2186,23 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/typed-function` | `typedFunction` |
+| `typed-function` | `typedFunction` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isAccessorNode, isArray, isArrayNode, isAssignmentNode, isBigInt, isBigNumber, isBlockNode, isBoolean, isChain, isCollection, isComplex, isConditionalNode, isConstantNode, isDate, isDenseMatrix, isFraction, isFunction, isFunctionAssignmentNode, isFunctionNode, isHelp, isIndex, isIndexNode, isMap, isMatrix, isNode, isNull, isNumber, isObject, isObjectNode, isOperatorNode, isParenthesisNode, isRange, isRangeNode, isRegExp, isRelationalNode, isResultSet, isSparseMatrix, isString, isSymbolNode, isUndefined, isUnit` | Import |
-| `../../utils/number.ts` | `digits` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isAccessorNode, isArray, isArrayNode, isAssignmentNode, isBigInt, isBigNumber, isBlockNode, isBoolean, isChain, isCollection, isComplex, isConditionalNode, isConstantNode, isDate, isDenseMatrix, isFraction, isFunction, isFunctionAssignmentNode, isFunctionNode, isHelp, isIndex, isIndexNode, isMap, isMatrix, isNode, isNull, isNumber, isObject, isObjectNode, isOperatorNode, isParenthesisNode, isRange, isRangeNode, isRegExp, isRelationalNode, isResultSet, isSparseMatrix, isString, isSymbolNode, isUndefined, isUnit` | Import |
+| `../../utils/number.js` | `digits` | Import |
 
 **Exports:**
 - Interfaces: `TypedFunction`
+- Types: `TypedSignatures`, `TypeTest`, `TypeConversion`, `TypeDefinition`
 - Constants: `createTyped`
 
 ---
+
+<a id="error-dependencies"></a>
 
 ## Error Dependencies
 
@@ -1720,6 +2228,8 @@ The codebase is organized into the following modules:
 - Functions: `createIndexError`
 
 ---
+
+<a id="expression-dependencies"></a>
 
 ## Expression Dependencies
 
@@ -1884,7 +2394,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/expression/embeddedDocs/construction/index.ts` - index module
+### `src/expression/embeddedDocs/construction/index.ts` - Entry point exporting 1 symbols
 
 **Exports:**
 - Constants: `indexDocs`
@@ -1959,259 +2469,259 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./constants/e.ts` | `eDocs` | Import |
-| `./constants/false.ts` | `falseDocs` | Import |
-| `./constants/i.ts` | `iDocs` | Import |
-| `./constants/Infinity.ts` | `InfinityDocs` | Import |
-| `./constants/LN10.ts` | `LN10Docs` | Import |
-| `./constants/LN2.ts` | `LN2Docs` | Import |
-| `./constants/LOG10E.ts` | `LOG10EDocs` | Import |
-| `./constants/LOG2E.ts` | `LOG2EDocs` | Import |
-| `./constants/NaN.ts` | `NaNDocs` | Import |
-| `./constants/null.ts` | `nullDocs` | Import |
-| `./constants/phi.ts` | `phiDocs` | Import |
-| `./constants/pi.ts` | `piDocs` | Import |
-| `./constants/SQRT1_2.ts` | `SQRT12Docs` | Import |
-| `./constants/SQRT2.ts` | `SQRT2Docs` | Import |
-| `./constants/tau.ts` | `tauDocs` | Import |
-| `./constants/true.ts` | `trueDocs` | Import |
-| `./constants/version.ts` | `versionDocs` | Import |
-| `./construction/bignumber.ts` | `bignumberDocs` | Import |
-| `./construction/bigint.ts` | `bigintDocs` | Import |
-| `./construction/boolean.ts` | `booleanDocs` | Import |
-| `./construction/complex.ts` | `complexDocs` | Import |
-| `./construction/createUnit.ts` | `createUnitDocs` | Import |
-| `./construction/fraction.ts` | `fractionDocs` | Import |
-| `./construction/index.ts` | `indexDocs` | Import |
-| `./construction/matrix.ts` | `matrixDocs` | Import |
-| `./construction/number.ts` | `numberDocs` | Import |
-| `./construction/sparse.ts` | `sparseDocs` | Import |
-| `./construction/splitUnit.ts` | `splitUnitDocs` | Import |
-| `./construction/string.ts` | `stringDocs` | Import |
-| `./construction/unit.ts` | `unitDocs` | Import |
-| `./core/config.ts` | `configDocs` | Import |
-| `./core/import.ts` | `importDocs` | Import |
-| `./core/typed.ts` | `typedDocs` | Import |
-| `./function/algebra/derivative.ts` | `derivativeDocs` | Import |
-| `./function/algebra/leafCount.ts` | `leafCountDocs` | Import |
-| `./function/algebra/lsolve.ts` | `lsolveDocs` | Import |
-| `./function/algebra/lsolveAll.ts` | `lsolveAllDocs` | Import |
-| `./function/algebra/lup.ts` | `lupDocs` | Import |
-| `./function/algebra/lusolve.ts` | `lusolveDocs` | Import |
-| `./function/algebra/polynomialRoot.ts` | `polynomialRootDocs` | Import |
-| `./function/algebra/qr.ts` | `qrDocs` | Import |
-| `./function/algebra/rationalize.ts` | `rationalizeDocs` | Import |
-| `./function/algebra/resolve.ts` | `resolveDocs` | Import |
-| `./function/algebra/simplify.ts` | `simplifyDocs` | Import |
-| `./function/algebra/simplifyConstant.ts` | `simplifyConstantDocs` | Import |
-| `./function/algebra/simplifyCore.ts` | `simplifyCoreDocs` | Import |
-| `./function/algebra/slu.ts` | `sluDocs` | Import |
-| `./function/algebra/symbolicEqual.ts` | `symbolicEqualDocs` | Import |
-| `./function/algebra/usolve.ts` | `usolveDocs` | Import |
-| `./function/algebra/usolveAll.ts` | `usolveAllDocs` | Import |
-| `./function/arithmetic/abs.ts` | `absDocs` | Import |
-| `./function/arithmetic/add.ts` | `addDocs` | Import |
-| `./function/arithmetic/cbrt.ts` | `cbrtDocs` | Import |
-| `./function/arithmetic/ceil.ts` | `ceilDocs` | Import |
-| `./function/arithmetic/cube.ts` | `cubeDocs` | Import |
-| `./function/arithmetic/divide.ts` | `divideDocs` | Import |
-| `./function/arithmetic/dotDivide.ts` | `dotDivideDocs` | Import |
-| `./function/arithmetic/dotMultiply.ts` | `dotMultiplyDocs` | Import |
-| `./function/arithmetic/dotPow.ts` | `dotPowDocs` | Import |
-| `./function/arithmetic/exp.ts` | `expDocs` | Import |
-| `./function/arithmetic/expm.ts` | `expmDocs` | Import |
-| `./function/arithmetic/expm1.ts` | `expm1Docs` | Import |
-| `./function/arithmetic/fix.ts` | `fixDocs` | Import |
-| `./function/arithmetic/floor.ts` | `floorDocs` | Import |
-| `./function/arithmetic/gcd.ts` | `gcdDocs` | Import |
-| `./function/arithmetic/hypot.ts` | `hypotDocs` | Import |
-| `./function/arithmetic/invmod.ts` | `invmodDocs` | Import |
-| `./function/arithmetic/lcm.ts` | `lcmDocs` | Import |
-| `./function/arithmetic/log.ts` | `logDocs` | Import |
-| `./function/arithmetic/log10.ts` | `log10Docs` | Import |
-| `./function/arithmetic/log1p.ts` | `log1pDocs` | Import |
-| `./function/arithmetic/log2.ts` | `log2Docs` | Import |
-| `./function/arithmetic/mod.ts` | `modDocs` | Import |
-| `./function/arithmetic/multiply.ts` | `multiplyDocs` | Import |
-| `./function/arithmetic/norm.ts` | `normDocs` | Import |
-| `./function/arithmetic/nthRoot.ts` | `nthRootDocs` | Import |
-| `./function/arithmetic/nthRoots.ts` | `nthRootsDocs` | Import |
-| `./function/arithmetic/pow.ts` | `powDocs` | Import |
-| `./function/arithmetic/round.ts` | `roundDocs` | Import |
-| `./function/arithmetic/sign.ts` | `signDocs` | Import |
-| `./function/arithmetic/sqrt.ts` | `sqrtDocs` | Import |
-| `./function/arithmetic/sqrtm.ts` | `sqrtmDocs` | Import |
-| `./function/algebra/sylvester.ts` | `sylvesterDocs` | Import |
-| `./function/algebra/schur.ts` | `schurDocs` | Import |
-| `./function/algebra/lyap.ts` | `lyapDocs` | Import |
-| `./function/arithmetic/square.ts` | `squareDocs` | Import |
-| `./function/arithmetic/subtract.ts` | `subtractDocs` | Import |
-| `./function/arithmetic/unaryMinus.ts` | `unaryMinusDocs` | Import |
-| `./function/arithmetic/unaryPlus.ts` | `unaryPlusDocs` | Import |
-| `./function/arithmetic/xgcd.ts` | `xgcdDocs` | Import |
-| `./function/bitwise/bitAnd.ts` | `bitAndDocs` | Import |
-| `./function/bitwise/bitNot.ts` | `bitNotDocs` | Import |
-| `./function/bitwise/bitOr.ts` | `bitOrDocs` | Import |
-| `./function/bitwise/bitXor.ts` | `bitXorDocs` | Import |
-| `./function/bitwise/leftShift.ts` | `leftShiftDocs` | Import |
-| `./function/bitwise/rightArithShift.ts` | `rightArithShiftDocs` | Import |
-| `./function/bitwise/rightLogShift.ts` | `rightLogShiftDocs` | Import |
-| `./function/combinatorics/bellNumbers.ts` | `bellNumbersDocs` | Import |
-| `./function/combinatorics/catalan.ts` | `catalanDocs` | Import |
-| `./function/combinatorics/composition.ts` | `compositionDocs` | Import |
-| `./function/combinatorics/stirlingS2.ts` | `stirlingS2Docs` | Import |
-| `./function/complex/arg.ts` | `argDocs` | Import |
-| `./function/complex/conj.ts` | `conjDocs` | Import |
-| `./function/complex/im.ts` | `imDocs` | Import |
-| `./function/complex/re.ts` | `reDocs` | Import |
-| `./function/expression/evaluate.ts` | `evaluateDocs` | Import |
-| `./function/expression/parser.ts` | `parserDocs` | Import |
-| `./function/expression/parse.ts` | `parseDocs` | Import |
-| `./function/expression/compile.ts` | `compileDocs` | Import |
-| `./function/expression/help.ts` | `helpDocs` | Import |
-| `./function/geometry/distance.ts` | `distanceDocs` | Import |
-| `./function/geometry/intersect.ts` | `intersectDocs` | Import |
-| `./function/logical/and.ts` | `andDocs` | Import |
-| `./function/logical/not.ts` | `notDocs` | Import |
-| `./function/logical/nullish.ts` | `nullishDocs` | Import |
-| `./function/logical/or.ts` | `orDocs` | Import |
-| `./function/logical/xor.ts` | `xorDocs` | Import |
-| `./function/matrix/mapSlices.ts` | `mapSlicesDocs` | Import |
-| `./function/matrix/column.ts` | `columnDocs` | Import |
-| `./function/matrix/concat.ts` | `concatDocs` | Import |
-| `./function/matrix/count.ts` | `countDocs` | Import |
-| `./function/matrix/cross.ts` | `crossDocs` | Import |
-| `./function/matrix/ctranspose.ts` | `ctransposeDocs` | Import |
-| `./function/matrix/det.ts` | `detDocs` | Import |
-| `./function/matrix/diag.ts` | `diagDocs` | Import |
-| `./function/matrix/diff.ts` | `diffDocs` | Import |
-| `./function/matrix/dot.ts` | `dotDocs` | Import |
-| `./function/matrix/eigs.ts` | `eigsDocs` | Import |
-| `./function/matrix/filter.ts` | `filterDocs` | Import |
-| `./function/matrix/flatten.ts` | `flattenDocs` | Import |
-| `./function/matrix/forEach.ts` | `forEachDocs` | Import |
-| `./function/matrix/getMatrixDataType.ts` | `getMatrixDataTypeDocs` | Import |
-| `./function/matrix/identity.ts` | `identityDocs` | Import |
-| `./function/matrix/inv.ts` | `invDocs` | Import |
-| `./function/matrix/pinv.ts` | `pinvDocs` | Import |
-| `./function/matrix/kron.ts` | `kronDocs` | Import |
-| `./function/matrix/map.ts` | `mapDocs` | Import |
-| `./function/matrix/matrixFromColumns.ts` | `matrixFromColumnsDocs` | Import |
-| `./function/matrix/matrixFromFunction.ts` | `matrixFromFunctionDocs` | Import |
-| `./function/matrix/matrixFromRows.ts` | `matrixFromRowsDocs` | Import |
-| `./function/matrix/ones.ts` | `onesDocs` | Import |
-| `./function/matrix/partitionSelect.ts` | `partitionSelectDocs` | Import |
-| `./function/matrix/range.ts` | `rangeDocs` | Import |
-| `./function/matrix/reshape.ts` | `reshapeDocs` | Import |
-| `./function/matrix/resize.ts` | `resizeDocs` | Import |
-| `./function/matrix/rotate.ts` | `rotateDocs` | Import |
-| `./function/matrix/rotationMatrix.ts` | `rotationMatrixDocs` | Import |
-| `./function/matrix/row.ts` | `rowDocs` | Import |
-| `./function/matrix/size.ts` | `sizeDocs` | Import |
-| `./function/matrix/sort.ts` | `sortDocs` | Import |
-| `./function/matrix/squeeze.ts` | `squeezeDocs` | Import |
-| `./function/matrix/subset.ts` | `subsetDocs` | Import |
-| `./function/matrix/trace.ts` | `traceDocs` | Import |
-| `./function/matrix/transpose.ts` | `transposeDocs` | Import |
-| `./function/matrix/zeros.ts` | `zerosDocs` | Import |
-| `./function/matrix/fft.ts` | `fftDocs` | Import |
-| `./function/matrix/ifft.ts` | `ifftDocs` | Import |
-| `./function/probability/bernoulli.ts` | `bernoulliDocs` | Import |
-| `./function/probability/combinations.ts` | `combinationsDocs` | Import |
-| `./function/probability/combinationsWithRep.ts` | `combinationsWithRepDocs` | Import |
-| `./function/probability/factorial.ts` | `factorialDocs` | Import |
-| `./function/probability/gamma.ts` | `gammaDocs` | Import |
-| `./function/probability/lgamma.ts` | `lgammaDocs` | Import |
-| `./function/probability/kldivergence.ts` | `kldivergenceDocs` | Import |
-| `./function/probability/multinomial.ts` | `multinomialDocs` | Import |
-| `./function/probability/permutations.ts` | `permutationsDocs` | Import |
-| `./function/probability/pickRandom.ts` | `pickRandomDocs` | Import |
-| `./function/probability/random.ts` | `randomDocs` | Import |
-| `./function/probability/randomInt.ts` | `randomIntDocs` | Import |
-| `./function/relational/compare.ts` | `compareDocs` | Import |
-| `./function/relational/compareNatural.ts` | `compareNaturalDocs` | Import |
-| `./function/relational/compareText.ts` | `compareTextDocs` | Import |
-| `./function/relational/deepEqual.ts` | `deepEqualDocs` | Import |
-| `./function/relational/equal.ts` | `equalDocs` | Import |
-| `./function/relational/equalText.ts` | `equalTextDocs` | Import |
-| `./function/relational/larger.ts` | `largerDocs` | Import |
-| `./function/relational/largerEq.ts` | `largerEqDocs` | Import |
-| `./function/relational/smaller.ts` | `smallerDocs` | Import |
-| `./function/relational/smallerEq.ts` | `smallerEqDocs` | Import |
-| `./function/relational/unequal.ts` | `unequalDocs` | Import |
-| `./function/set/setCartesian.ts` | `setCartesianDocs` | Import |
-| `./function/set/setDifference.ts` | `setDifferenceDocs` | Import |
-| `./function/set/setDistinct.ts` | `setDistinctDocs` | Import |
-| `./function/set/setIntersect.ts` | `setIntersectDocs` | Import |
-| `./function/set/setIsSubset.ts` | `setIsSubsetDocs` | Import |
-| `./function/set/setMultiplicity.ts` | `setMultiplicityDocs` | Import |
-| `./function/set/setPowerset.ts` | `setPowersetDocs` | Import |
-| `./function/set/setSize.ts` | `setSizeDocs` | Import |
-| `./function/set/setSymDifference.ts` | `setSymDifferenceDocs` | Import |
-| `./function/set/setUnion.ts` | `setUnionDocs` | Import |
-| `./function/signal/zpk2tf.ts` | `zpk2tfDocs` | Import |
-| `./function/signal/freqz.ts` | `freqzDocs` | Import |
-| `./function/special/erf.ts` | `erfDocs` | Import |
-| `./function/special/zeta.ts` | `zetaDocs` | Import |
-| `./function/statistics/mad.ts` | `madDocs` | Import |
-| `./function/statistics/max.ts` | `maxDocs` | Import |
-| `./function/statistics/mean.ts` | `meanDocs` | Import |
-| `./function/statistics/median.ts` | `medianDocs` | Import |
-| `./function/statistics/min.ts` | `minDocs` | Import |
-| `./function/statistics/mode.ts` | `modeDocs` | Import |
-| `./function/statistics/prod.ts` | `prodDocs` | Import |
-| `./function/statistics/quantileSeq.ts` | `quantileSeqDocs` | Import |
-| `./function/statistics/std.ts` | `stdDocs` | Import |
-| `./function/statistics/cumsum.ts` | `cumSumDocs` | Import |
-| `./function/statistics/sum.ts` | `sumDocs` | Import |
-| `./function/statistics/variance.ts` | `varianceDocs` | Import |
-| `./function/statistics/corr.ts` | `corrDocs` | Import |
-| `./function/trigonometry/acos.ts` | `acosDocs` | Import |
-| `./function/trigonometry/acosh.ts` | `acoshDocs` | Import |
-| `./function/trigonometry/acot.ts` | `acotDocs` | Import |
-| `./function/trigonometry/acoth.ts` | `acothDocs` | Import |
-| `./function/trigonometry/acsc.ts` | `acscDocs` | Import |
-| `./function/trigonometry/acsch.ts` | `acschDocs` | Import |
-| `./function/trigonometry/asec.ts` | `asecDocs` | Import |
-| `./function/trigonometry/asech.ts` | `asechDocs` | Import |
-| `./function/trigonometry/asin.ts` | `asinDocs` | Import |
-| `./function/trigonometry/asinh.ts` | `asinhDocs` | Import |
-| `./function/trigonometry/atan.ts` | `atanDocs` | Import |
-| `./function/trigonometry/atan2.ts` | `atan2Docs` | Import |
-| `./function/trigonometry/atanh.ts` | `atanhDocs` | Import |
-| `./function/trigonometry/cos.ts` | `cosDocs` | Import |
-| `./function/trigonometry/cosh.ts` | `coshDocs` | Import |
-| `./function/trigonometry/cot.ts` | `cotDocs` | Import |
-| `./function/trigonometry/coth.ts` | `cothDocs` | Import |
-| `./function/trigonometry/csc.ts` | `cscDocs` | Import |
-| `./function/trigonometry/csch.ts` | `cschDocs` | Import |
-| `./function/trigonometry/sec.ts` | `secDocs` | Import |
-| `./function/trigonometry/sech.ts` | `sechDocs` | Import |
-| `./function/trigonometry/sin.ts` | `sinDocs` | Import |
-| `./function/trigonometry/sinh.ts` | `sinhDocs` | Import |
-| `./function/trigonometry/tan.ts` | `tanDocs` | Import |
-| `./function/trigonometry/tanh.ts` | `tanhDocs` | Import |
-| `./function/units/to.ts` | `toDocs` | Import |
-| `./function/units/toBest.ts` | `toBestDocs` | Import |
-| `./function/utils/bin.ts` | `binDocs` | Import |
-| `./function/utils/clone.ts` | `cloneDocs` | Import |
-| `./function/utils/format.ts` | `formatDocs` | Import |
-| `./function/utils/hasNumericValue.ts` | `hasNumericValueDocs` | Import |
-| `./function/utils/hex.ts` | `hexDocs` | Import |
-| `./function/utils/isInteger.ts` | `isIntegerDocs` | Import |
-| `./function/utils/isNaN.ts` | `isNaNDocs` | Import |
-| `./function/utils/isBounded.ts` | `isBoundedDocs` | Import |
-| `./function/utils/isFinite.ts` | `isFiniteDocs` | Import |
-| `./function/utils/isNegative.ts` | `isNegativeDocs` | Import |
-| `./function/utils/isNumeric.ts` | `isNumericDocs` | Import |
-| `./function/utils/isPositive.ts` | `isPositiveDocs` | Import |
-| `./function/utils/isPrime.ts` | `isPrimeDocs` | Import |
-| `./function/utils/isZero.ts` | `isZeroDocs` | Import |
-| `./function/utils/numeric.ts` | `numericDocs` | Import |
-| `./function/utils/oct.ts` | `octDocs` | Import |
-| `./function/utils/print.ts` | `printDocs` | Import |
-| `./function/utils/typeOf.ts` | `typeOfDocs` | Import |
-| `./function/numeric/solveODE.ts` | `solveODEDocs` | Import |
+| `./constants/e.js` | `eDocs` | Import |
+| `./constants/false.js` | `falseDocs` | Import |
+| `./constants/i.js` | `iDocs` | Import |
+| `./constants/Infinity.js` | `InfinityDocs` | Import |
+| `./constants/LN10.js` | `LN10Docs` | Import |
+| `./constants/LN2.js` | `LN2Docs` | Import |
+| `./constants/LOG10E.js` | `LOG10EDocs` | Import |
+| `./constants/LOG2E.js` | `LOG2EDocs` | Import |
+| `./constants/NaN.js` | `NaNDocs` | Import |
+| `./constants/null.js` | `nullDocs` | Import |
+| `./constants/phi.js` | `phiDocs` | Import |
+| `./constants/pi.js` | `piDocs` | Import |
+| `./constants/SQRT1_2.js` | `SQRT12Docs` | Import |
+| `./constants/SQRT2.js` | `SQRT2Docs` | Import |
+| `./constants/tau.js` | `tauDocs` | Import |
+| `./constants/true.js` | `trueDocs` | Import |
+| `./constants/version.js` | `versionDocs` | Import |
+| `./construction/bignumber.js` | `bignumberDocs` | Import |
+| `./construction/bigint.js` | `bigintDocs` | Import |
+| `./construction/boolean.js` | `booleanDocs` | Import |
+| `./construction/complex.js` | `complexDocs` | Import |
+| `./construction/createUnit.js` | `createUnitDocs` | Import |
+| `./construction/fraction.js` | `fractionDocs` | Import |
+| `./construction/index.js` | `indexDocs` | Import |
+| `./construction/matrix.js` | `matrixDocs` | Import |
+| `./construction/number.js` | `numberDocs` | Import |
+| `./construction/sparse.js` | `sparseDocs` | Import |
+| `./construction/splitUnit.js` | `splitUnitDocs` | Import |
+| `./construction/string.js` | `stringDocs` | Import |
+| `./construction/unit.js` | `unitDocs` | Import |
+| `./core/config.js` | `configDocs` | Import |
+| `./core/import.js` | `importDocs` | Import |
+| `./core/typed.js` | `typedDocs` | Import |
+| `./algebra/derivative.js` | `derivativeDocs` | Import |
+| `./algebra/leafCount.js` | `leafCountDocs` | Import |
+| `./algebra/lsolve.js` | `lsolveDocs` | Import |
+| `./algebra/lsolveAll.js` | `lsolveAllDocs` | Import |
+| `./algebra/lup.js` | `lupDocs` | Import |
+| `./algebra/lusolve.js` | `lusolveDocs` | Import |
+| `./algebra/polynomialRoot.js` | `polynomialRootDocs` | Import |
+| `./algebra/qr.js` | `qrDocs` | Import |
+| `./algebra/rationalize.js` | `rationalizeDocs` | Import |
+| `./algebra/resolve.js` | `resolveDocs` | Import |
+| `./algebra/simplify.js` | `simplifyDocs` | Import |
+| `./algebra/simplifyConstant.js` | `simplifyConstantDocs` | Import |
+| `./algebra/simplifyCore.js` | `simplifyCoreDocs` | Import |
+| `./algebra/slu.js` | `sluDocs` | Import |
+| `./algebra/symbolicEqual.js` | `symbolicEqualDocs` | Import |
+| `./algebra/usolve.js` | `usolveDocs` | Import |
+| `./algebra/usolveAll.js` | `usolveAllDocs` | Import |
+| `./arithmetic/abs.js` | `absDocs` | Import |
+| `./arithmetic/add.js` | `addDocs` | Import |
+| `./arithmetic/cbrt.js` | `cbrtDocs` | Import |
+| `./arithmetic/ceil.js` | `ceilDocs` | Import |
+| `./arithmetic/cube.js` | `cubeDocs` | Import |
+| `./arithmetic/divide.js` | `divideDocs` | Import |
+| `./arithmetic/dotDivide.js` | `dotDivideDocs` | Import |
+| `./arithmetic/dotMultiply.js` | `dotMultiplyDocs` | Import |
+| `./arithmetic/dotPow.js` | `dotPowDocs` | Import |
+| `./arithmetic/exp.js` | `expDocs` | Import |
+| `./arithmetic/expm.js` | `expmDocs` | Import |
+| `./arithmetic/expm1.js` | `expm1Docs` | Import |
+| `./arithmetic/fix.js` | `fixDocs` | Import |
+| `./arithmetic/floor.js` | `floorDocs` | Import |
+| `./arithmetic/gcd.js` | `gcdDocs` | Import |
+| `./arithmetic/hypot.js` | `hypotDocs` | Import |
+| `./arithmetic/invmod.js` | `invmodDocs` | Import |
+| `./arithmetic/lcm.js` | `lcmDocs` | Import |
+| `./arithmetic/log.js` | `logDocs` | Import |
+| `./arithmetic/log10.js` | `log10Docs` | Import |
+| `./arithmetic/log1p.js` | `log1pDocs` | Import |
+| `./arithmetic/log2.js` | `log2Docs` | Import |
+| `./arithmetic/mod.js` | `modDocs` | Import |
+| `./arithmetic/multiply.js` | `multiplyDocs` | Import |
+| `./arithmetic/norm.js` | `normDocs` | Import |
+| `./arithmetic/nthRoot.js` | `nthRootDocs` | Import |
+| `./arithmetic/nthRoots.js` | `nthRootsDocs` | Import |
+| `./arithmetic/pow.js` | `powDocs` | Import |
+| `./arithmetic/round.js` | `roundDocs` | Import |
+| `./arithmetic/sign.js` | `signDocs` | Import |
+| `./arithmetic/sqrt.js` | `sqrtDocs` | Import |
+| `./arithmetic/sqrtm.js` | `sqrtmDocs` | Import |
+| `./algebra/sylvester.js` | `sylvesterDocs` | Import |
+| `./algebra/schur.js` | `schurDocs` | Import |
+| `./algebra/lyap.js` | `lyapDocs` | Import |
+| `./arithmetic/square.js` | `squareDocs` | Import |
+| `./arithmetic/subtract.js` | `subtractDocs` | Import |
+| `./arithmetic/unaryMinus.js` | `unaryMinusDocs` | Import |
+| `./arithmetic/unaryPlus.js` | `unaryPlusDocs` | Import |
+| `./arithmetic/xgcd.js` | `xgcdDocs` | Import |
+| `./bitwise/bitAnd.js` | `bitAndDocs` | Import |
+| `./bitwise/bitNot.js` | `bitNotDocs` | Import |
+| `./bitwise/bitOr.js` | `bitOrDocs` | Import |
+| `./bitwise/bitXor.js` | `bitXorDocs` | Import |
+| `./bitwise/leftShift.js` | `leftShiftDocs` | Import |
+| `./bitwise/rightArithShift.js` | `rightArithShiftDocs` | Import |
+| `./bitwise/rightLogShift.js` | `rightLogShiftDocs` | Import |
+| `./combinatorics/bellNumbers.js` | `bellNumbersDocs` | Import |
+| `./combinatorics/catalan.js` | `catalanDocs` | Import |
+| `./combinatorics/composition.js` | `compositionDocs` | Import |
+| `./combinatorics/stirlingS2.js` | `stirlingS2Docs` | Import |
+| `./complex/arg.js` | `argDocs` | Import |
+| `./complex/conj.js` | `conjDocs` | Import |
+| `./complex/im.js` | `imDocs` | Import |
+| `./complex/re.js` | `reDocs` | Import |
+| `./expression/evaluate.js` | `evaluateDocs` | Import |
+| `./expression/parser.js` | `parserDocs` | Import |
+| `./expression/parse.js` | `parseDocs` | Import |
+| `./expression/compile.js` | `compileDocs` | Import |
+| `./expression/help.js` | `helpDocs` | Import |
+| `./geometry/distance.js` | `distanceDocs` | Import |
+| `./geometry/intersect.js` | `intersectDocs` | Import |
+| `./logical/and.js` | `andDocs` | Import |
+| `./logical/not.js` | `notDocs` | Import |
+| `./logical/nullish.js` | `nullishDocs` | Import |
+| `./logical/or.js` | `orDocs` | Import |
+| `./logical/xor.js` | `xorDocs` | Import |
+| `./matrix/mapSlices.js` | `mapSlicesDocs` | Import |
+| `./matrix/column.js` | `columnDocs` | Import |
+| `./matrix/concat.js` | `concatDocs` | Import |
+| `./matrix/count.js` | `countDocs` | Import |
+| `./matrix/cross.js` | `crossDocs` | Import |
+| `./matrix/ctranspose.js` | `ctransposeDocs` | Import |
+| `./matrix/det.js` | `detDocs` | Import |
+| `./matrix/diag.js` | `diagDocs` | Import |
+| `./matrix/diff.js` | `diffDocs` | Import |
+| `./matrix/dot.js` | `dotDocs` | Import |
+| `./matrix/eigs.js` | `eigsDocs` | Import |
+| `./matrix/filter.js` | `filterDocs` | Import |
+| `./matrix/flatten.js` | `flattenDocs` | Import |
+| `./matrix/forEach.js` | `forEachDocs` | Import |
+| `./matrix/getMatrixDataType.js` | `getMatrixDataTypeDocs` | Import |
+| `./matrix/identity.js` | `identityDocs` | Import |
+| `./matrix/inv.js` | `invDocs` | Import |
+| `./matrix/pinv.js` | `pinvDocs` | Import |
+| `./matrix/kron.js` | `kronDocs` | Import |
+| `./matrix/map.js` | `mapDocs` | Import |
+| `./matrix/matrixFromColumns.js` | `matrixFromColumnsDocs` | Import |
+| `./matrix/matrixFromFunction.js` | `matrixFromFunctionDocs` | Import |
+| `./matrix/matrixFromRows.js` | `matrixFromRowsDocs` | Import |
+| `./matrix/ones.js` | `onesDocs` | Import |
+| `./matrix/partitionSelect.js` | `partitionSelectDocs` | Import |
+| `./matrix/range.js` | `rangeDocs` | Import |
+| `./matrix/reshape.js` | `reshapeDocs` | Import |
+| `./matrix/resize.js` | `resizeDocs` | Import |
+| `./matrix/rotate.js` | `rotateDocs` | Import |
+| `./matrix/rotationMatrix.js` | `rotationMatrixDocs` | Import |
+| `./matrix/row.js` | `rowDocs` | Import |
+| `./matrix/size.js` | `sizeDocs` | Import |
+| `./matrix/sort.js` | `sortDocs` | Import |
+| `./matrix/squeeze.js` | `squeezeDocs` | Import |
+| `./matrix/subset.js` | `subsetDocs` | Import |
+| `./matrix/trace.js` | `traceDocs` | Import |
+| `./matrix/transpose.js` | `transposeDocs` | Import |
+| `./matrix/zeros.js` | `zerosDocs` | Import |
+| `./matrix/fft.js` | `fftDocs` | Import |
+| `./matrix/ifft.js` | `ifftDocs` | Import |
+| `./probability/bernoulli.js` | `bernoulliDocs` | Import |
+| `./probability/combinations.js` | `combinationsDocs` | Import |
+| `./probability/combinationsWithRep.js` | `combinationsWithRepDocs` | Import |
+| `./probability/factorial.js` | `factorialDocs` | Import |
+| `./probability/gamma.js` | `gammaDocs` | Import |
+| `./probability/lgamma.js` | `lgammaDocs` | Import |
+| `./probability/kldivergence.js` | `kldivergenceDocs` | Import |
+| `./probability/multinomial.js` | `multinomialDocs` | Import |
+| `./probability/permutations.js` | `permutationsDocs` | Import |
+| `./probability/pickRandom.js` | `pickRandomDocs` | Import |
+| `./probability/random.js` | `randomDocs` | Import |
+| `./probability/randomInt.js` | `randomIntDocs` | Import |
+| `./relational/compare.js` | `compareDocs` | Import |
+| `./relational/compareNatural.js` | `compareNaturalDocs` | Import |
+| `./relational/compareText.js` | `compareTextDocs` | Import |
+| `./relational/deepEqual.js` | `deepEqualDocs` | Import |
+| `./relational/equal.js` | `equalDocs` | Import |
+| `./relational/equalText.js` | `equalTextDocs` | Import |
+| `./relational/larger.js` | `largerDocs` | Import |
+| `./relational/largerEq.js` | `largerEqDocs` | Import |
+| `./relational/smaller.js` | `smallerDocs` | Import |
+| `./relational/smallerEq.js` | `smallerEqDocs` | Import |
+| `./relational/unequal.js` | `unequalDocs` | Import |
+| `./set/setCartesian.js` | `setCartesianDocs` | Import |
+| `./set/setDifference.js` | `setDifferenceDocs` | Import |
+| `./set/setDistinct.js` | `setDistinctDocs` | Import |
+| `./set/setIntersect.js` | `setIntersectDocs` | Import |
+| `./set/setIsSubset.js` | `setIsSubsetDocs` | Import |
+| `./set/setMultiplicity.js` | `setMultiplicityDocs` | Import |
+| `./set/setPowerset.js` | `setPowersetDocs` | Import |
+| `./set/setSize.js` | `setSizeDocs` | Import |
+| `./set/setSymDifference.js` | `setSymDifferenceDocs` | Import |
+| `./set/setUnion.js` | `setUnionDocs` | Import |
+| `./signal/zpk2tf.js` | `zpk2tfDocs` | Import |
+| `./signal/freqz.js` | `freqzDocs` | Import |
+| `./special/erf.js` | `erfDocs` | Import |
+| `./special/zeta.js` | `zetaDocs` | Import |
+| `./statistics/mad.js` | `madDocs` | Import |
+| `./statistics/max.js` | `maxDocs` | Import |
+| `./statistics/mean.js` | `meanDocs` | Import |
+| `./statistics/median.js` | `medianDocs` | Import |
+| `./statistics/min.js` | `minDocs` | Import |
+| `./statistics/mode.js` | `modeDocs` | Import |
+| `./statistics/prod.js` | `prodDocs` | Import |
+| `./statistics/quantileSeq.js` | `quantileSeqDocs` | Import |
+| `./statistics/std.js` | `stdDocs` | Import |
+| `./statistics/cumsum.js` | `cumSumDocs` | Import |
+| `./statistics/sum.js` | `sumDocs` | Import |
+| `./statistics/variance.js` | `varianceDocs` | Import |
+| `./statistics/corr.js` | `corrDocs` | Import |
+| `./trigonometry/acos.js` | `acosDocs` | Import |
+| `./trigonometry/acosh.js` | `acoshDocs` | Import |
+| `./trigonometry/acot.js` | `acotDocs` | Import |
+| `./trigonometry/acoth.js` | `acothDocs` | Import |
+| `./trigonometry/acsc.js` | `acscDocs` | Import |
+| `./trigonometry/acsch.js` | `acschDocs` | Import |
+| `./trigonometry/asec.js` | `asecDocs` | Import |
+| `./trigonometry/asech.js` | `asechDocs` | Import |
+| `./trigonometry/asin.js` | `asinDocs` | Import |
+| `./trigonometry/asinh.js` | `asinhDocs` | Import |
+| `./trigonometry/atan.js` | `atanDocs` | Import |
+| `./trigonometry/atan2.js` | `atan2Docs` | Import |
+| `./trigonometry/atanh.js` | `atanhDocs` | Import |
+| `./trigonometry/cos.js` | `cosDocs` | Import |
+| `./trigonometry/cosh.js` | `coshDocs` | Import |
+| `./trigonometry/cot.js` | `cotDocs` | Import |
+| `./trigonometry/coth.js` | `cothDocs` | Import |
+| `./trigonometry/csc.js` | `cscDocs` | Import |
+| `./trigonometry/csch.js` | `cschDocs` | Import |
+| `./trigonometry/sec.js` | `secDocs` | Import |
+| `./trigonometry/sech.js` | `sechDocs` | Import |
+| `./trigonometry/sin.js` | `sinDocs` | Import |
+| `./trigonometry/sinh.js` | `sinhDocs` | Import |
+| `./trigonometry/tan.js` | `tanDocs` | Import |
+| `./trigonometry/tanh.js` | `tanhDocs` | Import |
+| `./units/to.js` | `toDocs` | Import |
+| `./units/toBest.js` | `toBestDocs` | Import |
+| `./utils/bin.js` | `binDocs` | Import |
+| `./utils/clone.js` | `cloneDocs` | Import |
+| `./utils/format.js` | `formatDocs` | Import |
+| `./utils/hasNumericValue.js` | `hasNumericValueDocs` | Import |
+| `./utils/hex.js` | `hexDocs` | Import |
+| `./utils/isInteger.js` | `isIntegerDocs` | Import |
+| `./utils/isNaN.js` | `isNaNDocs` | Import |
+| `./utils/isBounded.js` | `isBoundedDocs` | Import |
+| `./utils/isFinite.js` | `isFiniteDocs` | Import |
+| `./utils/isNegative.js` | `isNegativeDocs` | Import |
+| `./utils/isNumeric.js` | `isNumericDocs` | Import |
+| `./utils/isPositive.js` | `isPositiveDocs` | Import |
+| `./utils/isPrime.js` | `isPrimeDocs` | Import |
+| `./utils/isZero.js` | `isZeroDocs` | Import |
+| `./utils/numeric.js` | `numericDocs` | Import |
+| `./utils/oct.js` | `octDocs` | Import |
+| `./utils/print.js` | `printDocs` | Import |
+| `./utils/typeOf.js` | `typeOfDocs` | Import |
+| `./numeric/solveODE.js` | `solveODEDocs` | Import |
 
 **Exports:**
 - Constants: `embeddedDocs`
@@ -3770,9 +4280,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/collection.ts` | `deepMap` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../../types/index.ts` | `MathArray, Matrix` | Import (type-only) |
+| `../../utils/collection.js` | `deepMap` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
 
 **Exports:**
 - Constants: `createCompile`
@@ -3784,10 +4294,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/collection.ts` | `deepMap` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/map.ts` | `createEmptyMap` | Import |
-| `../../../types/index.ts` | `MathArray, Matrix` | Import (type-only) |
+| `../../utils/collection.js` | `deepMap` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/map.js` | `createEmptyMap` | Import |
+| `../../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
 
 **Exports:**
 - Constants: `createEvaluate`
@@ -3799,23 +4309,23 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/customs.ts` | `getSafeProperty` | Import |
-| `../embeddedDocs/embeddedDocs.ts` | `embeddedDocs` | Import |
-| `../../utils/object.ts` | `hasOwnProperty` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/customs.js` | `getSafeProperty` | Import |
+| `../embeddedDocs/embeddedDocs.js` | `embeddedDocs` | Import |
+| `../../utils/object.js` | `hasOwnProperty` | Import |
 
 **Exports:**
 - Constants: `createHelp`
 
 ---
 
-### `src/expression/function/parser.ts` - Create a `math.Parser` object that keeps a context of variables and their values, allowing the evaluation of expressions in that context.
+### `src/expression/function/parser.ts` - Create a `math.Parser` object that keeps a context of variables and their values, allowing the evaluation of expressions
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createParser`
@@ -3827,10 +4337,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/is.ts` | `isHelp` | Import |
-| `../utils/object.ts` | `clone` | Import |
-| `../utils/string.ts` | `format` | Import |
-| `../utils/factory.ts` | `factory` | Import |
+| `../utils/is.js` | `isHelp` | Import |
+| `../utils/object.js` | `clone` | Import |
+| `../utils/string.js` | `format` | Import |
+| `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Constants: `createHelpClass`
@@ -3849,11 +4359,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isAccessorNode, isArrayNode, isConstantNode, isFunctionNode, isIndexNode, isNode, isObjectNode, isParenthesisNode, isSymbolNode` | Import |
-| `../../utils/customs.ts` | `getSafeProperty` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/access.ts` | `accessFactory` | Import |
-| `./Node.ts` | `MathNode` | Import (type-only) |
+| `../../utils/is.js` | `isAccessorNode, isArrayNode, isConstantNode, isFunctionNode, isIndexNode, isNode, isObjectNode, isParenthesisNode, isSymbolNode` | Import |
+| `../../utils/customs.js` | `getSafeProperty` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/access.js` | `accessFactory` | Import |
+| `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
 - Constants: `createAccessorNode`
@@ -3865,10 +4375,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isArrayNode, isNode` | Import |
-| `../../utils/array.ts` | `map` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./Node.ts` | `MathNode` | Import (type-only) |
+| `../../utils/is.js` | `isArrayNode, isNode` | Import |
+| `../../utils/array.js` | `map` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
 - Constants: `createArrayNode`
@@ -3880,13 +4390,13 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isAccessorNode, isIndexNode, isNode, isSymbolNode` | Import |
-| `../../utils/customs.ts` | `getSafeProperty, setSafeProperty` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/access.ts` | `accessFactory` | Import |
-| `./utils/assign.ts` | `assignFactory` | Import |
-| `../operators.ts` | `getPrecedence` | Import |
-| `./Node.ts` | `MathNode, Scope, CompileFunction, StringOptions` | Import (type-only) |
+| `../../utils/is.js` | `isAccessorNode, isIndexNode, isNode, isSymbolNode` | Import |
+| `../../utils/customs.js` | `getSafeProperty, setSafeProperty` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/access.js` | `accessFactory` | Import |
+| `./utils/assign.js` | `assignFactory` | Import |
+| `../operators.js` | `getPrecedence` | Import |
+| `./Node.js` | `MathNode, Scope, CompileFunction, StringOptions` | Import (type-only) |
 
 **Exports:**
 - Constants: `createAssignmentNode`
@@ -3898,10 +4408,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isNode` | Import |
-| `../../utils/array.ts` | `forEach, map` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./Node.ts` | `MathNode` | Import (type-only) |
+| `../../utils/is.js` | `isNode` | Import |
+| `../../utils/array.js` | `forEach, map` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
 - Constants: `createBlockNode`
@@ -3913,10 +4423,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isBigNumber, isComplex, isNode, isUnit, typeOf` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../operators.ts` | `getPrecedence` | Import |
-| `./Node.ts` | `MathNode` | Import (type-only) |
+| `../../utils/is.js` | `isBigNumber, isComplex, isNode, isUnit, typeOf` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../operators.js` | `getPrecedence` | Import |
+| `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
 - Constants: `createConditionalNode`
@@ -3928,11 +4438,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/string.ts` | `format` | Import |
-| `../../utils/is.ts` | `typeOf` | Import |
-| `../../utils/latex.ts` | `escapeLatex` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./Node.ts` | `MathNode` | Import (type-only) |
+| `../../utils/string.js` | `format` | Import |
+| `../../utils/is.js` | `typeOf` | Import |
+| `../../utils/latex.js` | `escapeLatex` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
 - Constants: `createConstantNode`
@@ -3944,15 +4454,15 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isNode` | Import |
-| `../keywords.ts` | `keywords` | Import |
-| `../../utils/string.ts` | `escape` | Import |
-| `../../utils/array.ts` | `forEach, join` | Import |
-| `../../utils/latex.ts` | `toSymbol` | Import |
-| `../operators.ts` | `getPrecedence` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./Node.ts` | `MathNode` | Import (type-only) |
-| `../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../utils/is.js` | `isNode` | Import |
+| `../keywords.js` | `keywords` | Import |
+| `../../utils/string.js` | `escape` | Import |
+| `../../utils/array.js` | `forEach, join` | Import |
+| `../../utils/latex.js` | `toSymbol` | Import |
+| `../operators.js` | `getPrecedence` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./Node.js` | `MathNode` | Import (type-only) |
+| `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createFunctionAssignmentNode`
@@ -3964,14 +4474,14 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isAccessorNode, isFunctionAssignmentNode, isIndexNode, isNode, isSymbolNode` | Import |
-| `../../utils/string.ts` | `escape, format` | Import |
-| `../../utils/object.ts` | `hasOwnProperty` | Import |
-| `../../utils/customs.ts` | `getSafeProperty, getSafeMethod` | Import |
-| `../../utils/scope.ts` | `createSubScope` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/latex.ts` | `defaultTemplate, latexFunctions` | Import |
-| `./Node.ts` | `MathNode, Scope, CompileFunction, StringOptions` | Import (type-only) |
+| `../../utils/is.js` | `isAccessorNode, isFunctionAssignmentNode, isIndexNode, isNode, isSymbolNode` | Import |
+| `../../utils/string.js` | `escape, format` | Import |
+| `../../utils/object.js` | `hasOwnProperty` | Import |
+| `../../utils/customs.js` | `getSafeProperty, getSafeMethod` | Import |
+| `../../utils/scope.js` | `createSubScope` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/latex.js` | `defaultTemplate, latexFunctions` | Import |
+| `./Node.js` | `MathNode, Scope, CompileFunction, StringOptions` | Import (type-only) |
 
 **Exports:**
 - Constants: `createFunctionNode`
@@ -3983,11 +4493,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/array.ts` | `map` | Import |
-| `../../utils/customs.ts` | `getSafeProperty` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isArray, isConstantNode, isMatrix, isNode, isString, typeOf` | Import |
-| `../../utils/string.ts` | `escape` | Import |
+| `../../utils/array.js` | `map` | Import |
+| `../../utils/customs.js` | `getSafeProperty` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isArray, isConstantNode, isMatrix, isNode, isString, typeOf` | Import |
+| `../../utils/string.js` | `escape` | Import |
 
 **Exports:**
 - Constants: `createIndexNode`
@@ -3999,14 +4509,15 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isNode` | Import |
-| `../keywords.ts` | `keywords` | Import |
-| `../../utils/object.ts` | `deepStrictEqual` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/map.ts` | `createMap` | Import |
+| `../../utils/is.js` | `isNode` | Import |
+| `../keywords.js` | `keywords` | Import |
+| `../../utils/object.js` | `deepStrictEqual` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/map.js` | `createMap` | Import |
 
 **Exports:**
 - Interfaces: `CompiledExpression`, `StringOptions`
+- Types: `Scope`, `CompileFunction`, `MathNode`
 - Constants: `createNode`
 
 ---
@@ -4016,11 +4527,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/customs.ts` | `getSafeProperty` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isNode` | Import |
-| `../../utils/object.ts` | `hasOwnProperty` | Import |
-| `../../utils/string.ts` | `escape, stringify` | Import |
+| `../../utils/customs.js` | `getSafeProperty` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isNode` | Import |
+| `../../utils/object.js` | `hasOwnProperty` | Import |
+| `../../utils/string.js` | `escape, stringify` | Import |
 
 **Exports:**
 - Constants: `createObjectNode`
@@ -4032,14 +4543,14 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isNode, isConstantNode, isOperatorNode, isParenthesisNode` | Import |
-| `../../utils/array.ts` | `map` | Import |
-| `../../utils/scope.ts` | `createSubScope` | Import |
-| `../../utils/string.ts` | `escape` | Import |
-| `../../utils/customs.ts` | `getSafeProperty, isSafeMethod` | Import |
-| `../operators.ts` | `getAssociativity, getPrecedence, isAssociativeWith, properties` | Import |
-| `../../utils/latex.ts` | `latexOperators` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
+| `../../utils/is.js` | `isNode, isConstantNode, isOperatorNode, isParenthesisNode` | Import |
+| `../../utils/array.js` | `map` | Import |
+| `../../utils/scope.js` | `createSubScope` | Import |
+| `../../utils/string.js` | `escape` | Import |
+| `../../utils/customs.js` | `getSafeProperty, isSafeMethod` | Import |
+| `../operators.js` | `getAssociativity, getPrecedence, isAssociativeWith, properties` | Import |
+| `../../utils/latex.js` | `latexOperators` | Import |
+| `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Constants: `createOperatorNode`
@@ -4051,8 +4562,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isNode` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
+| `../../utils/is.js` | `isNode` | Import |
+| `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Constants: `createParenthesisNode`
@@ -4064,9 +4575,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isNode, isSymbolNode` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../operators.ts` | `getPrecedence` | Import |
+| `../../utils/is.js` | `isNode, isSymbolNode` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../operators.js` | `getPrecedence` | Import |
 
 **Exports:**
 - Constants: `createRangeNode`
@@ -4078,11 +4589,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../operators.ts` | `getPrecedence` | Import |
-| `../../utils/string.ts` | `escape` | Import |
-| `../../utils/customs.ts` | `getSafeProperty` | Import |
-| `../../utils/latex.ts` | `latexOperators` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
+| `../operators.js` | `getPrecedence` | Import |
+| `../../utils/string.js` | `escape` | Import |
+| `../../utils/customs.js` | `getSafeProperty` | Import |
+| `../../utils/latex.js` | `latexOperators` | Import |
+| `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Constants: `createRelationalNode`
@@ -4094,10 +4605,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/string.ts` | `escape` | Import |
-| `../../utils/customs.ts` | `getSafeProperty` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/latex.ts` | `toSymbol` | Import |
+| `../../utils/string.js` | `escape` | Import |
+| `../../utils/customs.js` | `getSafeProperty` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/latex.js` | `toSymbol` | Import |
 
 **Exports:**
 - Constants: `createSymbolNode`
@@ -4109,9 +4620,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../transform/utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../../utils/customs.ts` | `getSafeProperty` | Import |
-| `../../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../transform/utils/errorTransform.js` | `errorTransform` | Import |
+| `../../../utils/customs.js` | `getSafeProperty` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Functions: `accessFactory`
@@ -4123,8 +4634,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../transform/utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../../utils/customs.ts` | `setSafeProperty` | Import |
+| `../../transform/utils/errorTransform.js` | `errorTransform` | Import |
+| `../../../utils/customs.js` | `setSafeProperty` | Import |
 
 **Exports:**
 - Functions: `assignFactory`
@@ -4136,8 +4647,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/object.ts` | `hasOwnProperty` | Import |
-| `../utils/is.ts` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
+| `../utils/object.js` | `hasOwnProperty` | Import |
+| `../utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
 
 **Exports:**
 - Functions: `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
@@ -4150,12 +4661,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/factory.ts` | `factory` | Import |
-| `../utils/is.ts` | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import |
-| `../utils/collection.ts` | `deepMap` | Import |
-| `../utils/number.ts` | `safeNumberType` | Import |
-| `../utils/object.ts` | `hasOwnProperty` | Import |
-| `./node/Node.ts` | `MathNode` | Import (type-only) |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import |
+| `../utils/collection.js` | `deepMap` | Import |
+| `../utils/number.js` | `safeNumberType` | Import |
+| `../utils/object.js` | `hasOwnProperty` | Import |
+| `./node/Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
 - Constants: `createParse`
@@ -4167,10 +4678,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/factory.ts` | `factory` | Import |
-| `../utils/is.ts` | `isFunction` | Import |
-| `../utils/map.ts` | `createEmptyMap, toObject` | Import |
-| `../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/is.js` | `isFunction` | Import |
+| `../utils/map.js` | `createEmptyMap, toObject` | Import |
+| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createParserClass`
@@ -4182,10 +4693,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../function/logical/and.ts` | `createAnd` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isCollection` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, RawArgsTransformFunction` | Import (type-only) |
+| `../../logical/and.js` | `createAnd` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isCollection` | Import |
+| `./types.js` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, RawArgsTransformFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createAndTransform`
@@ -4197,10 +4708,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../function/bitwise/bitAnd.ts` | `createBitAnd` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isCollection` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, RawArgsTransformFunction` | Import (type-only) |
+| `../../bitwise/bitAnd.js` | `createBitAnd` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isCollection` | Import |
+| `./types.js` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, RawArgsTransformFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createBitAndTransform`
@@ -4212,10 +4723,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../function/bitwise/bitOr.ts` | `createBitOr` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isCollection` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, DenseMatrixConstructor, RawArgsTransformFunction` | Import (type-only) |
+| `../../bitwise/bitOr.js` | `createBitOr` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isCollection` | Import |
+| `./types.js` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, DenseMatrixConstructor, RawArgsTransformFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createBitOrTransform`
@@ -4227,11 +4738,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../function/matrix/column.ts` | `createColumn` | Import |
-| `../../utils/is.ts` | `isNumber` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, IndexConstructor, VariadicArgs` | Import (type-only) |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../matrix/column.js` | `createColumn` | Import |
+| `../../utils/is.js` | `isNumber` | Import |
+| `./types.js` | `TypedFunction, MathFunction, IndexConstructor, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createColumnTransform`
@@ -4243,11 +4754,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isBigNumber, isNumber` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../function/matrix/concat.ts` | `createConcat` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, BigNumberLike, VariadicArgs` | Import (type-only) |
+| `../../utils/is.js` | `isBigNumber, isNumber` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../matrix/concat.js` | `createConcat` | Import |
+| `./types.js` | `TypedFunction, MathFunction, BigNumberLike, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createConcatTransform`
@@ -4259,11 +4770,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isBigNumber, isCollection, isNumber` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../function/statistics/cumsum.ts` | `createCumSum` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, BigNumberLike, VariadicArgs` | Import (type-only) |
+| `../../utils/is.js` | `isBigNumber, isCollection, isNumber` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../statistics/cumsum.js` | `createCumSum` | Import |
+| `./types.js` | `TypedFunction, MathFunction, BigNumberLike, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createCumSumTransform`
@@ -4275,11 +4786,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../function/matrix/diff.ts` | `createDiff` | Import |
-| `./utils/lastDimToZeroBase.ts` | `lastDimToZeroBase` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../matrix/diff.js` | `createDiff` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+| `./types.js` | `TypedFunction, MathFunction, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createDiffTransform`
@@ -4291,12 +4802,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../function/matrix/filter.ts` | `createFilter` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isFunctionAssignmentNode, isSymbolNode` | Import |
-| `./utils/compileInlineExpression.ts` | `compileInlineExpression` | Import |
-| `./utils/transformCallback.ts` | `createTransformCallback` | Import |
-| `./types.ts` | `TypedFunction, ExpressionNode, EvaluationScope, MathJsLike, CallbackFunction, RawArgsTransformFunction` | Import (type-only) |
+| `../../matrix/filter.js` | `createFilter` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isFunctionAssignmentNode, isSymbolNode` | Import |
+| `./utils/compileInlineExpression.js` | `compileInlineExpression` | Import |
+| `./utils/transformCallback.js` | `createTransformCallback` | Import |
+| `./types.js` | `TypedFunction, ExpressionNode, EvaluationScope, MathJsLike, CallbackFunction, RawArgsTransformFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createFilterTransform`
@@ -4308,12 +4819,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../function/matrix/forEach.ts` | `createForEach` | Import |
-| `./utils/transformCallback.ts` | `createTransformCallback` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isFunctionAssignmentNode, isSymbolNode` | Import |
-| `./utils/compileInlineExpression.ts` | `compileInlineExpression` | Import |
-| `./types.ts` | `TypedFunction, ExpressionNode, EvaluationScope, MathJsLike, CallbackFunction, RawArgsTransformFunction` | Import (type-only) |
+| `../../matrix/forEach.js` | `createForEach` | Import |
+| `./utils/transformCallback.js` | `createTransformCallback` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isFunctionAssignmentNode, isSymbolNode` | Import |
+| `./utils/compileInlineExpression.js` | `compileInlineExpression` | Import |
+| `./types.js` | `TypedFunction, ExpressionNode, EvaluationScope, MathJsLike, CallbackFunction, RawArgsTransformFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createForEachTransform`
@@ -4325,9 +4836,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isArray, isBigInt, isBigNumber, isMatrix, isNumber, isRange` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./types.ts` | `IndexConstructor, IndexInstance, BigNumberLike, RangeLike, SetLike, MatrixLike` | Import (type-only) |
+| `../../utils/is.js` | `isArray, isBigInt, isBigNumber, isMatrix, isNumber, isRange` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./types.js` | `IndexConstructor, IndexInstance, BigNumberLike, RangeLike, SetLike, MatrixLike` | Import (type-only) |
 
 **Exports:**
 - Constants: `createIndexTransform`
@@ -4339,12 +4850,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isFunctionAssignmentNode, isSymbolNode` | Import |
-| `../../function/matrix/map.ts` | `createMap` | Import |
-| `./utils/compileInlineExpression.ts` | `compileInlineExpression` | Import |
-| `./utils/transformCallback.ts` | `createTransformCallback` | Import |
-| `./types.ts` | `TypedFunction, ExpressionNode, EvaluationScope, MathJsLike, CallbackFunction, RawArgsTransformFunction` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isFunctionAssignmentNode, isSymbolNode` | Import |
+| `../../matrix/map.js` | `createMap` | Import |
+| `./utils/compileInlineExpression.js` | `compileInlineExpression` | Import |
+| `./utils/transformCallback.js` | `createTransformCallback` | Import |
+| `./types.js` | `TypedFunction, ExpressionNode, EvaluationScope, MathJsLike, CallbackFunction, RawArgsTransformFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMapTransform`
@@ -4356,11 +4867,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../function/matrix/mapSlices.ts` | `createMapSlices` | Import |
-| `../../utils/is.ts` | `isBigNumber, isNumber` | Import |
-| `./types.ts` | `TypedFunction, BigNumberLike, VariadicArgs` | Import (type-only) |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../matrix/mapSlices.js` | `createMapSlices` | Import |
+| `../../utils/is.js` | `isBigNumber, isNumber` | Import |
+| `./types.js` | `TypedFunction, BigNumberLike, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMapSlicesTransform`
@@ -4372,11 +4883,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../function/statistics/max.ts` | `createMax` | Import |
-| `./utils/lastDimToZeroBase.ts` | `lastDimToZeroBase` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, MathJsConfig, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../statistics/max.js` | `createMax` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+| `./types.js` | `TypedFunction, MathFunction, MathJsConfig, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMaxTransform`
@@ -4388,11 +4899,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../function/statistics/mean.ts` | `createMean` | Import |
-| `./utils/lastDimToZeroBase.ts` | `lastDimToZeroBase` | Import |
-| `./types.ts` | `TypedFunction, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../statistics/mean.js` | `createMean` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+| `./types.js` | `TypedFunction, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMeanTransform`
@@ -4404,11 +4915,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../function/statistics/min.ts` | `createMin` | Import |
-| `./utils/lastDimToZeroBase.ts` | `lastDimToZeroBase` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, MathJsConfig, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../statistics/min.js` | `createMin` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+| `./types.js` | `TypedFunction, MathFunction, MathJsConfig, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMinTransform`
@@ -4420,10 +4931,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../function/logical/nullish.ts` | `createNullish` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isCollection` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, RawArgsTransformFunction` | Import (type-only) |
+| `../../logical/nullish.js` | `createNullish` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isCollection` | Import |
+| `./types.js` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, RawArgsTransformFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createNullishTransform`
@@ -4435,10 +4946,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../function/logical/or.ts` | `createOr` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/is.ts` | `isCollection` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, DenseMatrixConstructor, RawArgsTransformFunction` | Import (type-only) |
+| `../../logical/or.js` | `createOr` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/is.js` | `isCollection` | Import |
+| `./types.js` | `TypedFunction, MathFunction, ExpressionNode, EvaluationScope, MathJsLike, DenseMatrixConstructor, RawArgsTransformFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createOrTransform`
@@ -4450,10 +4961,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../function/string/print.ts` | `createPrint` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/print.ts` | `printTemplate` | Import |
-| `./types.ts` | `TypedFunction, MathFunction` | Import (type-only) |
+| `../../string/print.js` | `createPrint` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/print.js` | `printTemplate` | Import |
+| `./types.js` | `TypedFunction, MathFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createPrintTransform`
@@ -4465,10 +4976,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../function/statistics/quantileSeq.ts` | `createQuantileSeq` | Import |
-| `./utils/lastDimToZeroBase.ts` | `lastDimToZeroBase` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../statistics/quantileSeq.js` | `createQuantileSeq` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+| `./types.js` | `TypedFunction, MathFunction, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createQuantileSeqTransform`
@@ -4480,9 +4991,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../function/matrix/range.ts` | `createRange` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, MathJsConfig, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../matrix/range.js` | `createRange` | Import |
+| `./types.js` | `TypedFunction, MathFunction, MathJsConfig, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createRangeTransform`
@@ -4494,11 +5005,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../function/matrix/row.ts` | `createRow` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../utils/is.ts` | `isNumber` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, IndexConstructor, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../matrix/row.js` | `createRow` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../utils/is.js` | `isNumber` | Import |
+| `./types.js` | `TypedFunction, MathFunction, IndexConstructor, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createRowTransform`
@@ -4510,11 +5021,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../function/statistics/std.ts` | `createStd` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `./utils/lastDimToZeroBase.ts` | `lastDimToZeroBase` | Import |
-| `./types.ts` | `TypedFunction, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../statistics/std.js` | `createStd` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+| `./types.js` | `TypedFunction, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createStdTransform`
@@ -4526,10 +5037,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../function/matrix/subset.ts` | `createSubset` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../matrix/subset.js` | `createSubset` | Import |
+| `./types.js` | `TypedFunction, MathFunction, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSubsetTransform`
@@ -4541,11 +5052,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../function/statistics/sum.ts` | `createSum` | Import |
-| `./utils/lastDimToZeroBase.ts` | `lastDimToZeroBase` | Import |
-| `./types.ts` | `TypedFunction, MathFunction, MathJsConfig, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../statistics/sum.js` | `createSum` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+| `./types.js` | `TypedFunction, MathFunction, MathJsConfig, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSumTransform`
@@ -4557,7 +5068,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `BigNumberLike`, `ComplexLike`, `FractionLike`, `EvaluationScope`, `CompiledExpression`, `ExpressionNode`, `RawArgsTransformFunction`, `MathJsLike`, `IndexConstructor`, `IndexInstance`, `DenseMatrixConstructor`, `MatrixLike`, `RangeLike`, `SetLike`, `MathJsConfig`, `IndexError`
+- Types: `MathValue`, `MathFunction`, `PredicateFunction`, `CallbackFunction`, `TypedCallback`, `VariadicArgs`, `DimensionValue`
 
 ---
 
@@ -4566,9 +5081,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/is.ts` | `isSymbolNode` | Import |
-| `../../../utils/map.ts` | `PartitionedMap` | Import |
-| `../types.ts` | `ExpressionNode, EvaluationScope, MathJsLike` | Import (type-only) |
+| `../../../utils/is.js` | `isSymbolNode` | Import |
+| `../../../utils/map.js` | `PartitionedMap` | Import |
+| `../types.js` | `ExpressionNode, EvaluationScope, MathJsLike` | Import (type-only) |
 
 **Exports:**
 - Functions: `compileInlineExpression`
@@ -4580,8 +5095,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/is.ts` | `isNumber, isBigNumber` | Import |
-| `../types.ts` | `BigNumberLike, DimensionValue` | Import (type-only) |
+| `../../../utils/is.js` | `isNumber, isBigNumber` | Import |
+| `../types.js` | `BigNumberLike, DimensionValue` | Import (type-only) |
 
 **Exports:**
 - Functions: `dimToZeroBase`, `isNumberOrBigNumber`
@@ -4593,8 +5108,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../error/IndexError.ts` | `IndexError` | Import |
-| `../types.ts` | `IndexError` | Import (type-only) |
+| `../../../error/IndexError.js` | `IndexError` | Import |
+| `../types.js` | `IndexError` | Import (type-only) |
 
 **Exports:**
 - Functions: `errorTransform`
@@ -4606,9 +5121,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/is.ts` | `isCollection` | Import |
-| `./dimToZeroBase.ts` | `dimToZeroBase, isNumberOrBigNumber` | Import |
-| `../types.ts` | `VariadicArgs` | Import (type-only) |
+| `../../../utils/is.js` | `isCollection` | Import |
+| `./dimToZeroBase.js` | `dimToZeroBase, isNumberOrBigNumber` | Import |
+| `../types.js` | `VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Functions: `lastDimToZeroBase`
@@ -4620,8 +5135,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../types.ts` | `TypedFunction, CallbackFunction` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../types.js` | `TypedFunction, CallbackFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createTransformCallback`
@@ -4633,11 +5148,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./utils/errorTransform.ts` | `errorTransform` | Import |
-| `../../function/statistics/variance.ts` | `createVariance` | Import |
-| `./utils/lastDimToZeroBase.ts` | `lastDimToZeroBase` | Import |
-| `./types.ts` | `TypedFunction, VariadicArgs` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./utils/errorTransform.js` | `errorTransform` | Import |
+| `../../statistics/variance.js` | `createVariance` | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
+| `./types.js` | `TypedFunction, VariadicArgs` | Import (type-only) |
 
 **Exports:**
 - Constants: `createVarianceTransform`
@@ -4646,7 +5161,12 @@ The codebase is organized into the following modules:
 
 ### `src/expression/types.ts` - Type definitions for expression module
 
+**Exports:**
+- Types: `TypedFunctionConstructor`
+
 ---
+
+<a id="geometry-dependencies"></a>
 
 ## Geometry Dependencies
 
@@ -4657,7 +5177,8 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/is.js` | `isBigNumber` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `MathNumericType` | Import (type-only) |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| `../types.js` | `MathNumericType` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -4671,7 +5192,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `MathNumericType` | Import (type-only) |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| `../types.js` | `MathNumericType` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
@@ -4679,6 +5201,8 @@ The codebase is organized into the following modules:
 - Constants: `createIntersect`
 
 ---
+
+<a id="entry-dependencies"></a>
 
 ## Entry Dependencies
 
@@ -4693,6 +5217,8 @@ The codebase is organized into the following modules:
 - Re-exports: `* from ./typed/index.js`
 
 ---
+
+<a id="logical-dependencies"></a>
 
 ## Logical Dependencies
 
@@ -4740,7 +5266,7 @@ The codebase is organized into the following modules:
 | `../type/matrix/utils/matAlgo14xDs.js` | `createMatAlgo14xDs` | Import |
 | `../type/matrix/utils/matAlgo13xDD.js` | `createMatAlgo13xDD` | Import |
 | `../error/DimensionError.js` | `DimensionError` | Import |
-| `../../types.js` | `TypedFunction, Matrix, SparseMatrix, MatrixConstructor, Complex, BigNumber, Fraction, Unit` | Import |
+| `../types.js` | `TypedFunction, Matrix, SparseMatrix, MatrixConstructor, Complex, BigNumber, Fraction, Unit` | Import |
 
 **Exports:**
 - Constants: `createNullish`
@@ -4782,6 +5308,8 @@ The codebase is organized into the following modules:
 - Constants: `createXor`
 
 ---
+
+<a id="matrix-dependencies"></a>
 
 ## Matrix Dependencies
 
@@ -4902,7 +5430,7 @@ The codebase is organized into the following modules:
 | `../utils/factory.js` | `factory` | Import |
 | `../utils/number.js` | `isInteger` | Import |
 | `../utils/is.js` | `isMatrix` | Import |
-| `../../types.js` | `TypedFunction, Matrix, MatrixConstructor` | Import |
+| `../types.js` | `TypedFunction, Matrix, MatrixConstructor` | Import |
 
 **Exports:**
 - Constants: `createDiff`
@@ -4995,6 +5523,7 @@ The codebase is organized into the following modules:
 | `../utils/is.js` | `isSparseMatrix` | Import |
 | `../utils/string.js` | `format` | Import |
 | `../utils/factory.js` | `factory` | Import |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
 - Constants: `createExpm`
@@ -5164,7 +5693,7 @@ The codebase is organized into the following modules:
 | `../utils/array.js` | `arraySize` | Import |
 | `../utils/is.js` | `isMatrix` | Import |
 | `../error/IndexError.js` | `IndexError` | Import |
-| `../../types.js` | `TypedFunction, Matrix, BigNumber` | Import |
+| `../types.js` | `TypedFunction, Matrix, BigNumber` | Import |
 
 **Exports:**
 - Constants: `createMapSlices`
@@ -5189,7 +5718,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `TypedFunction, Matrix` | Import |
+| `../types.js` | `TypedFunction, Matrix` | Import |
 
 **Exports:**
 - Constants: `createMatrixFromFunction`
@@ -5316,7 +5845,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
 | `../utils/array.js` | `arraySize` | Import |
-| `../../types.js` | `TypedFunction, Matrix, BigNumber, Complex, Unit` | Import |
+| `../types.js` | `TypedFunction, Matrix, BigNumber, Complex, Unit` | Import |
 
 **Exports:**
 - Constants: `createRotate`
@@ -5330,7 +5859,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/is.js` | `isBigNumber` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `TypedFunction, Matrix, MatrixConstructor, BigNumber, Complex, Unit` | Import |
+| `../types.js` | `TypedFunction, Matrix, MatrixConstructor, BigNumber, Complex, Unit` | Import |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
@@ -5373,14 +5902,14 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `arraySize` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `TypedFunction, Matrix` | Import |
+| `../types.js` | `TypedFunction, Matrix` | Import |
 
 **Exports:**
 - Constants: `createSort`
 
 ---
 
-### `src/matrix/sqrtm.ts` - Calculate the principal square root matrix using the Denman-Beavers iterative method
+### `src/matrix/sqrtm.ts` - Try WASM-accelerated matrix square root for plain number matrices
 
 **External Dependencies:**
 | Package | Import |
@@ -5395,6 +5924,7 @@ The codebase is organized into the following modules:
 | `../utils/string.js` | `format` | Import |
 | `../utils/array.js` | `arraySize` | Import |
 | `../utils/factory.js` | `factory` | Import |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
 - Constants: `createSqrtm`
@@ -5479,6 +6009,8 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="numeric-dependencies"></a>
+
 ## Numeric Dependencies
 
 ### `src/numeric/solveODE.ts` - Butcher Tableau structure for Runge-Kutta methods
@@ -5488,12 +6020,15 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/is.js` | `isUnit, isNumber, isBigNumber` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `MathNumericType, MathArray, Matrix, Unit, BigNumber` | Import (type-only) |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| `../types.js` | `MathNumericType, MathArray, Matrix, Unit, BigNumber` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSolveODE`
 
 ---
+
+<a id="plain-dependencies"></a>
 
 ## Plain Dependencies
 
@@ -5519,12 +6054,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./arithmetic.ts` | `*` | Re-export |
+| `./arithmetic.js` | `*` | Re-export |
 
 **Exports:**
 - Interfaces: `PlainBigNumber`, `PlainBigNumberConstructor`
 - Functions: `bignumber`
-- Re-exports: `* from ./arithmetic.ts`
+- Re-exports: `* from ./arithmetic.js`
 
 ---
 
@@ -5533,7 +6068,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/number.ts` | `cbrt, expm1, isInteger, log10, log1p, log2, sign, toFixed` | Import |
+| `../../utils/number.js` | `cbrt, expm1, isInteger, log10, log1p, log2, sign, toFixed` | Import |
 
 **Exports:**
 - Functions: `absNumber`, `addNumber`, `subtractNumber`, `multiplyNumber`, `divideNumber`, `unaryMinusNumber`, `unaryPlusNumber`, `cbrtNumber`, `cubeNumber`, `expNumber`, `expm1Number`, `gcdNumber`, `lcmNumber`, `logNumber`, `log10Number`, `log2Number`, `log1pNumber`, `modNumber`, `nthRootNumber`, `signNumber`, `sqrtNumber`, `squareNumber`, `xgcdNumber`, `powNumber`, `roundNumber`, `normNumber`
@@ -5545,7 +6080,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/number.ts` | `isInteger` | Import |
+| `../../utils/number.js` | `isInteger` | Import |
 
 **Exports:**
 - Functions: `bitAndNumber`, `bitNotNumber`, `bitOrNumber`, `bitXorNumber`, `leftShiftNumber`, `rightArithShiftNumber`, `rightLogShiftNumber`
@@ -5557,8 +6092,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/number.ts` | `isInteger` | Import |
-| `../../utils/product.ts` | `product` | Import |
+| `../../utils/number.js` | `isInteger` | Import |
+| `../../utils/product.js` | `product` | Import |
 
 **Exports:**
 - Functions: `combinationsNumber`
@@ -5572,23 +6107,23 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/plain/number/index.ts` - index module
+### `src/plain/number/index.ts` - Package entry point for number (re-exports 9 symbols)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./arithmetic.ts` | `*` | Re-export |
-| `./bitwise.ts` | `*` | Re-export |
-| `./combinations.ts` | `*` | Re-export |
-| `./constants.ts` | `*` | Re-export |
-| `./logical.ts` | `*` | Re-export |
-| `./relational.ts` | `*` | Re-export |
-| `./probability.ts` | `*` | Re-export |
-| `./trigonometry.ts` | `*` | Re-export |
-| `./utils.ts` | `*` | Re-export |
+| `./arithmetic.js` | `*` | Re-export |
+| `./bitwise.js` | `*` | Re-export |
+| `./combinations.js` | `*` | Re-export |
+| `./constants.js` | `*` | Re-export |
+| `./logical.js` | `*` | Re-export |
+| `./relational.js` | `*` | Re-export |
+| `./probability.js` | `*` | Re-export |
+| `./trigonometry.js` | `*` | Re-export |
+| `./utils.js` | `*` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./arithmetic.ts`, `* from ./bitwise.ts`, `* from ./combinations.ts`, `* from ./constants.ts`, `* from ./logical.ts`, `* from ./relational.ts`, `* from ./probability.ts`, `* from ./trigonometry.ts`, `* from ./utils.ts`
+- Re-exports: `* from ./arithmetic.js`, `* from ./bitwise.js`, `* from ./combinations.js`, `* from ./constants.js`, `* from ./logical.js`, `* from ./relational.js`, `* from ./probability.js`, `* from ./trigonometry.js`, `* from ./utils.js`
 
 ---
 
@@ -5604,8 +6139,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/number.ts` | `isInteger` | Import |
-| `../../utils/product.ts` | `product` | Import |
+| `../../utils/number.js` | `isInteger` | Import |
+| `../../utils/product.js` | `product` | Import |
 
 **Exports:**
 - Functions: `gammaNumber`, `lgammaNumber`
@@ -5625,7 +6160,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/number.ts` | `acosh, asinh, atanh, cosh, sign, sinh, tanh` | Import |
+| `../../utils/number.js` | `acosh, asinh, atanh, cosh, sign, sinh, tanh` | Import |
 
 **Exports:**
 - Functions: `acosNumber`, `acoshNumber`, `acotNumber`, `acothNumber`, `acscNumber`, `acschNumber`, `asecNumber`, `asechNumber`, `asinNumber`, `asinhNumber`, `atanNumber`, `atan2Number`, `atanhNumber`, `cosNumber`, `coshNumber`, `cotNumber`, `cothNumber`, `cscNumber`, `cschNumber`, `secNumber`, `sechNumber`, `sinNumber`, `sinhNumber`, `tanNumber`, `tanhNumber`
@@ -5637,12 +6172,14 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/number.ts` | `isInteger` | Import |
+| `../../utils/number.js` | `isInteger` | Import |
 
 **Exports:**
 - Functions: `isIntegerNumber`, `isNegativeNumber`, `isPositiveNumber`, `isZeroNumber`, `isNaNNumber`
 
 ---
+
+<a id="probability-dependencies"></a>
 
 ## Probability Dependencies
 
@@ -5711,6 +6248,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
 | `../plain/number/index.js` | `gammaG, gammaNumber, gammaP` | Import |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
@@ -5739,6 +6277,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../plain/number/index.js` | `lgammaNumber, lnSqrt2PI` | Import |
 | `../utils/factory.js` | `factory` | Import |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../utils/number.js` | `copysign` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
@@ -5747,7 +6286,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/probability/multinomial.ts` - Multinomial Coefficients compute the number of ways of picking a1, a2, ..., ai unordered outcomes from `n` possibilities.
+### `src/probability/multinomial.ts` - Multinomial Coefficients compute the number of ways of picking a1, a2, ..., ai unordered outcomes from `n` possibilities
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -5845,6 +6384,8 @@ The codebase is organized into the following modules:
 - Functions: `createRng`
 
 ---
+
+<a id="relational-dependencies"></a>
 
 ## Relational Dependencies
 
@@ -5956,7 +6497,7 @@ The codebase is organized into the following modules:
 | `../utils/factory.js` | `factory` | Import |
 | `../utils/complex.js` | `complexEquals` | Import |
 | `./compareUnits.js` | `createCompareUnits` | Import |
-| `../../types.js` | `TypedFunction, BigNumber, Complex, Fraction` | Import |
+| `../types.js` | `TypedFunction, BigNumber, Complex, Fraction` | Import |
 | `../core/config.js` | `ConfigOptions` | Import |
 
 **Exports:**
@@ -6079,6 +6620,8 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="set-dependencies"></a>
+
 ## Set Dependencies
 
 ### `src/set/setCartesian.ts` - Create the cartesian product of two (multi)sets.
@@ -6088,7 +6631,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -6103,7 +6646,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten, generalize, identify` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -6118,7 +6661,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSetDistinct`
@@ -6132,7 +6675,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten, generalize, identify` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -6147,7 +6690,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten, identify` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSetIsSubset`
@@ -6161,7 +6704,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSetMultiplicity`
@@ -6175,7 +6718,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSetPowerset`
@@ -6189,7 +6732,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSetSize`
@@ -6203,7 +6746,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -6218,13 +6761,27 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/array.js` | `flatten` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
+| `../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSetUnion`
 
 ---
+
+<a id="shared-dependencies"></a>
+
+## Shared Dependencies
+
+### `src/shared/types.ts` - Re-exports relevant types from the matrix types module and adds function-specific
+
+**Exports:**
+- Interfaces: `MatrixData`, `DenseMatrix`, `SparseMatrix`, `MatrixConstructor`, `NodeOperations`
+- Types: `Matrix`
+
+---
+
+<a id="signal-dependencies"></a>
 
 ## Signal Dependencies
 
@@ -6236,6 +6793,7 @@ The codebase is organized into the following modules:
 | `./fft.js` | `fft, ifft, fft2, ifft2, complex, ComplexNumber` | Import |
 
 **Exports:**
+- Types: `ConvMode`
 - Functions: `convDirect`, `convFFT`, `conv`, `xcorr`, `autocorr`, `conv2Direct`, `conv2FFT`, `conv2`
 
 ---
@@ -6254,7 +6812,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `Matrix, Complex` | Import (type-only) |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| `../types.js` | `Matrix, Complex` | Import (type-only) |
 
 **Exports:**
 - Constants: `createFreqz`
@@ -6268,11 +6827,11 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `./freqz.js` | `*` | Re-export |
 | `./zpk2tf.js` | `*` | Re-export |
-| `./fft.js` | `fft, ifft, ifftReal, fftMagnitude, fftPower, fftPhase, fftFrequencies, fft2, ifft2, fftshift, ifftshift, complex, complexConj, complexAbs, complexArg, type FFTResult, type ComplexNumber` | Re-export |
-| `./conv.js` | `conv, convDirect, convFFT, conv2, conv2Direct, conv2FFT, xcorr, autocorr, type ConvMode` | Re-export |
+| `./fft.js` | `fft, ifft, ifftReal, fftMagnitude, fftPower, fftPhase, fftFrequencies, fft2, ifft2, fftshift, ifftshift, complex, complexConj, complexAbs, complexArg, FFTResult, ComplexNumber` | Re-export |
+| `./conv.js` | `conv, convDirect, convFFT, conv2, conv2Direct, conv2FFT, xcorr, autocorr, ConvMode` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./freqz.js`, `* from ./zpk2tf.js`, `fft`, `ifft`, `ifftReal`, `fftMagnitude`, `fftPower`, `fftPhase`, `fftFrequencies`, `fft2`, `ifft2`, `fftshift`, `ifftshift`, `complex`, `complexConj`, `complexAbs`, `complexArg`, `type FFTResult`, `type ComplexNumber`, `conv`, `convDirect`, `convFFT`, `conv2`, `conv2Direct`, `conv2FFT`, `xcorr`, `autocorr`, `type ConvMode`
+- Re-exports: `* from ./freqz.js`, `* from ./zpk2tf.js`, `fft`, `ifft`, `ifftReal`, `fftMagnitude`, `fftPower`, `fftPhase`, `fftFrequencies`, `fft2`, `ifft2`, `fftshift`, `ifftshift`, `complex`, `complexConj`, `complexAbs`, `complexArg`, `FFTResult`, `ComplexNumber`, `conv`, `convDirect`, `convFFT`, `conv2`, `conv2Direct`, `conv2FFT`, `xcorr`, `autocorr`, `ConvMode`
 
 ---
 
@@ -6282,12 +6841,14 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `Matrix, Complex` | Import (type-only) |
+| `../types.js` | `Matrix, Complex` | Import (type-only) |
 
 **Exports:**
 - Constants: `createZpk2tf`
 
 ---
+
+<a id="special-dependencies"></a>
 
 ## Special Dependencies
 
@@ -6299,6 +6860,7 @@ The codebase is organized into the following modules:
 | `../utils/collection.js` | `deepMap` | Import |
 | `../utils/number.js` | `sign` | Import |
 | `../utils/factory.js` | `factory` | Import |
+| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -6319,6 +6881,8 @@ The codebase is organized into the following modules:
 - Constants: `createZeta`
 
 ---
+
+<a id="statistics-dependencies"></a>
 
 ## Statistics Dependencies
 
@@ -6547,6 +7111,8 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="string-dependencies"></a>
+
 ## String Dependencies
 
 ### `src/string/bin.ts` - Format a number as binary.
@@ -6617,6 +7183,8 @@ The codebase is organized into the following modules:
 - Constants: `createPrint`
 
 ---
+
+<a id="trigonometry-dependencies"></a>
 
 ## Trigonometry Dependencies
 
@@ -7026,6 +7594,8 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="type-dependencies"></a>
+
 ## Type Dependencies
 
 ### `src/type/bigint.ts` - Create a bigint or convert a string, boolean, or unit to a bigint.
@@ -7033,9 +7603,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/factory.ts` | `factory` | Import |
-| `../utils/collection.ts` | `deepMap` | Import |
-| `../types.ts` | `TypedFunction, BigNumber, Fraction` | Import |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/collection.js` | `deepMap` | Import |
+| `../types.js` | `TypedFunction, BigNumber, Fraction` | Import |
 
 **Exports:**
 - Constants: `createBigint`
@@ -7052,10 +7622,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
+| `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Interfaces: `BigNumberJSON`, `ConfigChangeEvent`, `BigNumberClass`, `BigNumberInstance`
+- Types: `BigNumber`
 - Constants: `createBigNumberClass`
 
 ---
@@ -7070,9 +7641,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../utils/collection.ts` | `deepMap` | Import |
-| `../../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../utils/collection.js` | `deepMap` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createBignumber`
@@ -7089,9 +7660,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/factory.ts` | `factory` | Import |
-| `../utils/collection.ts` | `deepMap` | Import |
-| `../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/collection.js` | `deepMap` | Import |
+| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createBoolean`
@@ -7103,11 +7674,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isChain` | Import |
-| `../../utils/string.ts` | `format` | Import |
-| `../../utils/object.ts` | `hasOwnProperty, lazy` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../utils/is.js` | `isChain` | Import |
+| `../../utils/string.js` | `format` | Import |
+| `../../utils/object.js` | `hasOwnProperty, lazy` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Interfaces: `ChainJSON`, `ChainInstance`, `ChainConstructor`
@@ -7120,8 +7691,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../types.ts` | `TypedFunction` | Import |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../types.js` | `TypedFunction` | Import |
 
 **Exports:**
 - Constants: `createChain`
@@ -7138,9 +7709,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/number.ts` | `format` | Import |
-| `../../utils/is.ts` | `isNumber, isUnit` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
+| `../../utils/number.js` | `format` | Import |
+| `../../utils/is.js` | `isNumber, isUnit` | Import |
+| `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Interfaces: `ComplexJSON`, `PolarCoordinates`, `ComplexFormatOptions`, `Complex`, `PolarInput`, `AbsArgInput`, `ComplexConstructor`
@@ -7153,11 +7724,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../utils/collection.ts` | `deepMap` | Import |
-| `../../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
-| `../Complex.ts` | `Complex, ComplexConstructor, ComplexJSON, PolarInput, AbsArgInput` | Import (type-only) |
-| `../../../types.ts` | `MathCollection` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../utils/collection.js` | `deepMap` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| `../Complex.js` | `Complex, ComplexConstructor, ComplexJSON, PolarInput, AbsArgInput` | Import (type-only) |
+| `../../../types.js` | `MathCollection` | Import (type-only) |
 
 **Exports:**
 - Constants: `createComplex`
@@ -7174,10 +7745,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
+| `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Interfaces: `FractionJSON`, `Fraction`, `FractionConstructor`
+- Types: `FractionValue`
 - Constants: `createFractionClass`
 
 ---
@@ -7187,11 +7759,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../utils/collection.ts` | `deepMap` | Import |
-| `../../../types.ts` | `MathCollection` | Import (type-only) |
-| `../Fraction.ts` | `Fraction` | Import (type-only) |
-| `../../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../utils/collection.js` | `deepMap` | Import |
+| `../../../types.js` | `MathCollection` | Import (type-only) |
+| `../Fraction.js` | `Fraction` | Import (type-only) |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createFraction`
@@ -7231,13 +7803,13 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./Decimal.ts` | `Decimal, type DecimalConfig` | Re-export |
-| `./Complex.ts` | `Complex, type ComplexJSON, type PolarForm, type ComplexLike` | Re-export |
-| `./Fraction.ts` | `Fraction, type FractionJSON, type FractionLike` | Re-export |
-| `./Decimal.ts` | `Decimal` | Re-export |
+| `./Decimal.js` | `Decimal, DecimalConfig` | Re-export |
+| `./Complex.js` | `Complex, ComplexJSON, PolarForm, ComplexLike` | Re-export |
+| `./Fraction.js` | `Fraction, FractionJSON, FractionLike` | Re-export |
+| `./Decimal.js` | `Decimal` | Re-export |
 
 **Exports:**
-- Re-exports: `Decimal`, `type DecimalConfig`, `Complex`, `type ComplexJSON`, `type PolarForm`, `type ComplexLike`, `Fraction`, `type FractionJSON`, `type FractionLike`
+- Re-exports: `Decimal`, `DecimalConfig`, `Complex`, `ComplexJSON`, `PolarForm`, `ComplexLike`, `Fraction`, `FractionJSON`, `FractionLike`
 
 ---
 
@@ -7246,16 +7818,16 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isArray, isBigNumber, isCollection, isIndex, isMatrix, isNumber, isString, typeOf` | Import |
-| `../../utils/array.ts` | `arraySize, getArrayDataType, processSizesWildcard, reshape, resize, unsqueeze, validate, validateIndex, broadcastTo, get` | Import |
-| `../../utils/string.ts` | `format` | Import |
-| `../../utils/number.ts` | `isInteger` | Import |
-| `../../utils/object.ts` | `clone, deepStrictEqual` | Import |
-| `../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/optimizeCallback.ts` | `optimizeCallback` | Import |
-| `../../core/config.ts` | `MathJsConfig` | Import (type-only) |
-| `./types.ts` | `DenseMatrixData, DataType, MatrixValue, IndexInterface, MatrixFormatOptions, DenseMatrixJSON, DenseMatrixConstructorData, MatrixEntry, BigNumberLike` | Import (type-only) |
+| `../../utils/is.js` | `isArray, isBigNumber, isCollection, isIndex, isMatrix, isNumber, isString, typeOf` | Import |
+| `../../utils/array.js` | `arraySize, getArrayDataType, processSizesWildcard, reshape, resize, unsqueeze, validate, validateIndex, broadcastTo, get` | Import |
+| `../../utils/string.js` | `format` | Import |
+| `../../utils/number.js` | `isInteger` | Import |
+| `../../utils/object.js` | `clone, deepStrictEqual` | Import |
+| `../../error/DimensionError.js` | `DimensionError` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/optimizeCallback.js` | `optimizeCallback` | Import |
+| `../../core/config.js` | `MathJsConfig` | Import (type-only) |
+| `./types.js` | `DenseMatrixData, DataType, MatrixValue, IndexInterface, MatrixFormatOptions, DenseMatrixJSON, DenseMatrixConstructorData, MatrixEntry, BigNumberLike` | Import (type-only) |
 
 **Exports:**
 - Constants: `createDenseMatrixClass`
@@ -7267,8 +7839,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./types.ts` | `FibonacciHeapNode, MatrixValue` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./types.js` | `FibonacciHeapNode, MatrixValue` | Import (type-only) |
 
 **Exports:**
 - Constants: `createFibonacciHeapClass`
@@ -7280,9 +7852,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/is.ts` | `isBigNumber, isMatrix, isArray` | Import |
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../../utils/is.js` | `isBigNumber, isMatrix, isArray` | Import |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createIndex`
@@ -7294,7 +7866,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
+| `../../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Constants: `createMatrix`
@@ -7306,8 +7878,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSparse`
@@ -7319,10 +7891,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isArray, isMatrix, isString, typeOf` | Import |
-| `../../utils/object.ts` | `clone` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./types.ts` | `DenseMatrixData, DataType, MatrixValue, IndexInterface, ImmutableDenseMatrixJSON, ImmutableDenseMatrixConstructorData` | Import (type-only) |
+| `../../utils/is.js` | `isArray, isMatrix, isString, typeOf` | Import |
+| `../../utils/object.js` | `clone` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./types.js` | `DenseMatrixData, DataType, MatrixValue, IndexInterface, ImmutableDenseMatrixJSON, ImmutableDenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createImmutableDenseMatrixClass`
@@ -7334,10 +7906,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./types.ts` | `MatrixFormatOptions, ForEachCallback, MapCallback, IndexInterface, NestedArray, DataType, MatrixValue` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./types.js` | `MatrixFormatOptions, ForEachCallback, MapCallback, IndexInterface, NestedArray, DataType, MatrixValue` | Import (type-only) |
 
 **Exports:**
+- Types: `MatrixForEachCallback`, `MatrixMapCallback`, `Index`, `MatrixData`
 - Constants: `createMatrixClass`
 
 ---
@@ -7347,13 +7920,14 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isArray, isMatrix, isRange, isNumber, isString` | Import |
-| `../../utils/object.ts` | `clone` | Import |
-| `../../utils/number.ts` | `isInteger` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./types.ts` | `IndexJSON, RangeInterface, MatrixValue` | Import (type-only) |
+| `../../utils/is.js` | `isArray, isMatrix, isRange, isNumber, isString` | Import |
+| `../../utils/object.js` | `clone` | Import |
+| `../../utils/number.js` | `isInteger` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./types.js` | `IndexJSON, RangeInterface, MatrixValue` | Import (type-only) |
 
 **Exports:**
+- Types: `IndexDimension`, `IndexForEachCallback`
 - Constants: `createIndexClass`
 
 ---
@@ -7363,10 +7937,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isBigInt, isBigNumber` | Import |
-| `../../utils/number.ts` | `format, sign, nearlyEqual` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `./types.ts` | `BigNumberLike, RangeForEachCallback, RangeMapCallback, RangeFormatOptions, RangeJSON` | Import (type-only) |
+| `../../utils/is.js` | `isBigInt, isBigNumber` | Import |
+| `../../utils/number.js` | `format, sign, nearlyEqual` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `./types.js` | `BigNumberLike, RangeForEachCallback, RangeMapCallback, RangeFormatOptions, RangeJSON` | Import (type-only) |
 
 **Exports:**
 - Constants: `createRangeClass`
@@ -7378,8 +7952,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `./types.ts` | `FibonacciHeapNode, FibonacciHeapInterface, MatrixValue, EqualScalarFunction` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `./types.js` | `FibonacciHeapNode, FibonacciHeapInterface, MatrixValue, EqualScalarFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSpaClass`
@@ -7391,15 +7965,15 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isArray, isBigNumber, isCollection, isIndex, isMatrix, isNumber, isString, typeOf` | Import |
-| `../../utils/number.ts` | `isInteger` | Import |
-| `../../utils/string.ts` | `format` | Import |
-| `../../utils/object.ts` | `clone, deepStrictEqual` | Import |
-| `../../utils/array.ts` | `arraySize, getArrayDataType, processSizesWildcard, unsqueeze, validateIndex` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../../utils/optimizeCallback.ts` | `optimizeCallback` | Import |
-| `./types.ts` | `DataType, MatrixValue, MatrixArray, TypedFunction, EqualScalarFunction, SparseMatrixConstructorData, SparseMatrixJSON, MatrixFormatOptions, BigNumberLike` | Import (type-only) |
+| `../../utils/is.js` | `isArray, isBigNumber, isCollection, isIndex, isMatrix, isNumber, isString, typeOf` | Import |
+| `../../utils/number.js` | `isInteger` | Import |
+| `../../utils/string.js` | `format` | Import |
+| `../../utils/object.js` | `clone, deepStrictEqual` | Import |
+| `../../utils/array.js` | `arraySize, getArrayDataType, processSizesWildcard, unsqueeze, validateIndex` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../error/DimensionError.js` | `DimensionError` | Import |
+| `../../utils/optimizeCallback.js` | `optimizeCallback` | Import |
+| `./types.js` | `DataType, MatrixValue, MatrixArray, TypedFunction, EqualScalarFunction, SparseMatrixConstructorData, SparseMatrixJSON, MatrixFormatOptions, BigNumberLike` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSparseMatrixClass`
@@ -7408,6 +7982,10 @@ The codebase is organized into the following modules:
 
 ### `src/type/matrix/types.ts` - Type Philosophy:
 
+**Exports:**
+- Interfaces: `BigNumberLike`, `ComplexLike`, `FractionLike`, `TypedFunction`, `IndexInterface`, `MatrixInterface`, `DenseMatrixInterface`, `SparseMatrixInterface`, `MatrixFormatOptions`, `DenseMatrixJSON`, `SparseMatrixJSON`, `ImmutableDenseMatrixJSON`, `RangeJSON`, `IndexJSON`, `MatrixEntry`, `DenseMatrixConstructorData`, `SparseMatrixConstructorData`, `ImmutableDenseMatrixConstructorData`, `MatrixAlgorithmSuiteOptions`, `FibonacciHeapNode`, `FibonacciHeapInterface`, `RangeFormatOptions`, `RangeInterface`
+- Types: `MathNumericValue`, `MatrixValue`, `DataType`, `NestedArray`, `DenseMatrixData`, `MatrixArray`, `MatrixCallback`, `EqualScalarFunction`, `MapCallback`, `ForEachCallback`, `ElementwiseOperation`, `AlgorithmFunction`, `MatrixSignatures`, `RangeForEachCallback`, `RangeMapCallback`
+
 ---
 
 ### `src/type/matrix/utils/broadcast.ts` - Broadcasts two matrices, and return both in an array
@@ -7415,8 +7993,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/array.ts` | `broadcastSizes, broadcastTo` | Import |
-| `../../../utils/object.ts` | `deepStrictEqual` | Import |
+| `../../../utils/array.js` | `broadcastSizes, broadcastTo` | Import |
+| `../../../utils/object.js` | `deepStrictEqual` | Import |
 
 **Exports:**
 - Functions: `broadcast`
@@ -7428,9 +8006,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo01xDSid`
@@ -7442,9 +8020,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo02xDS0`
@@ -7456,9 +8034,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo03xDSf`
@@ -7470,9 +8048,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo04xSidSid`
@@ -7484,9 +8062,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo05xSfSf`
@@ -7498,10 +8076,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../../../utils/collection.ts` | `scatter` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../../../utils/collection.js` | `scatter` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo06xS0S0`
@@ -7513,9 +8091,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo07xSSf`
@@ -7527,9 +8105,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo08xS0Sid`
@@ -7541,9 +8119,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo09xS0Sf`
@@ -7555,8 +8133,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo10xSids`
@@ -7568,8 +8146,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo11xS0s`
@@ -7581,8 +8159,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../types.ts` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo12xSfs`
@@ -7594,9 +8172,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../error/DimensionError.ts` | `DimensionError` | Import |
-| `../types.ts` | `DataType, DenseMatrixData, MatrixCallback, TypedFunction, DenseMatrixConstructorData, MatrixValue` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../error/DimensionError.js` | `DimensionError` | Import |
+| `../types.js` | `DataType, DenseMatrixData, MatrixCallback, TypedFunction, DenseMatrixConstructorData, MatrixValue` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo13xDD`
@@ -7608,9 +8186,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../utils/object.ts` | `clone` | Import |
-| `../types.ts` | `DataType, DenseMatrixData, MatrixCallback, TypedFunction, DenseMatrixConstructorData, MatrixValue` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../utils/object.js` | `clone` | Import |
+| `../types.js` | `DataType, DenseMatrixData, MatrixCallback, TypedFunction, DenseMatrixConstructorData, MatrixValue` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatAlgo14xDs`
@@ -7622,12 +8200,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../utils/object.ts` | `extend` | Import |
-| `./matAlgo13xDD.ts` | `createMatAlgo13xDD` | Import |
-| `./matAlgo14xDs.ts` | `createMatAlgo14xDs` | Import |
-| `./broadcast.ts` | `broadcast` | Import |
-| `../types.ts` | `TypedFunction, MatrixAlgorithmSuiteOptions, MatrixSignatures, MatrixInterface, DenseMatrixData` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../utils/object.js` | `extend` | Import |
+| `./matAlgo13xDD.js` | `createMatAlgo13xDD` | Import |
+| `./matAlgo14xDs.js` | `createMatAlgo14xDs` | Import |
+| `./broadcast.js` | `broadcast` | Import |
+| `../types.js` | `TypedFunction, MatrixAlgorithmSuiteOptions, MatrixSignatures, MatrixInterface, DenseMatrixData` | Import (type-only) |
 
 **Exports:**
 - Constants: `createMatrixAlgorithmSuite`
@@ -7639,9 +8217,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/factory.ts` | `factory` | Import |
-| `../utils/collection.ts` | `deepMap` | Import |
-| `../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/collection.js` | `deepMap` | Import |
+| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createNumber`
@@ -7653,7 +8231,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
+| `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
 - Interfaces: `ResultSetJSON`, `ResultSetInstance`, `ResultSetConstructor`
@@ -7666,10 +8244,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/factory.ts` | `factory` | Import |
-| `../utils/collection.ts` | `deepMap` | Import |
-| `../utils/number.ts` | `format` | Import |
-| `../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../utils/factory.js` | `factory` | Import |
+| `../utils/collection.js` | `deepMap` | Import |
+| `../utils/number.js` | `format` | Import |
+| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createString`
@@ -7681,8 +8259,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createCreateUnit`
@@ -7694,8 +8272,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSplitUnit`
@@ -7707,10 +8285,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../utils/factory.ts` | `factory` | Import |
-| `../../../utils/collection.ts` | `deepMap` | Import |
-| `../../../core/function/typed.ts` | `TypedFunction` | Import (type-only) |
-| `../../../types.ts` | `MathCollection` | Import (type-only) |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../utils/collection.js` | `deepMap` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| `../../../types.js` | `MathCollection` | Import (type-only) |
 
 **Exports:**
 - Constants: `createUnitFunction`
@@ -7727,8 +8305,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../core/config.ts` | `MathJsConfig` | Import (type-only) |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../core/config.js` | `MathJsConfig` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSpeedOfLight`, `createGravitationConstant`, `createPlanckConstant`, `createReducedPlanckConstant`, `createMagneticConstant`, `createElectricConstant`, `createVacuumImpedance`, `createCoulomb`, `createCoulombConstant`, `createElementaryCharge`, `createBohrMagneton`, `createConductanceQuantum`, `createInverseConductanceQuantum`, `createMagneticFluxQuantum`, `createNuclearMagneton`, `createKlitzing`, `createJosephson`, `createBohrRadius`, `createClassicalElectronRadius`, `createElectronMass`, `createFermiCoupling`, `createFineStructure`, `createHartreeEnergy`, `createProtonMass`, `createDeuteronMass`, `createNeutronMass`, `createQuantumOfCirculation`, `createRydberg`, `createThomsonCrossSection`, `createWeakMixingAngle`, `createEfimovFactor`, `createAtomicMass`, `createAvogadro`, `createBoltzmann`, `createFaraday`, `createFirstRadiation`, `createLoschmidt`, `createGasConstant`, `createMolarPlanckConstant`, `createMolarVolume`, `createSackurTetrode`, `createSecondRadiation`, `createStefanBoltzmann`, `createWienDisplacement`, `createMolarMass`, `createMolarMassC12`, `createGravity`, `createPlanckLength`, `createPlanckMass`, `createPlanckTime`, `createPlanckCharge`, `createPlanckTemperature`
@@ -7740,17 +8318,19 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/is.ts` | `isComplex, isUnit, typeOf` | Import |
-| `../../utils/factory.ts` | `factory` | Import |
-| `../../utils/function.ts` | `memoize` | Import |
-| `../../utils/string.ts` | `endsWith` | Import |
-| `../../utils/object.ts` | `clone, hasOwnProperty` | Import |
-| `../../utils/bignumber/constants.ts` | `createBigNumberPi` | Import |
+| `../../utils/is.js` | `isComplex, isUnit, typeOf` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/function.js` | `memoize` | Import |
+| `../../utils/string.js` | `endsWith` | Import |
+| `../../utils/object.js` | `clone, hasOwnProperty` | Import |
+| `../../utils/bignumber/constants.js` | `createBigNumberPi` | Import |
 
 **Exports:**
 - Constants: `createUnitClass`
 
 ---
+
+<a id="typed-dependencies"></a>
 
 ## Typed Dependencies
 
@@ -7759,8 +8339,8 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped, Complex, Fraction, BigNumber` |
-| `@mathts/parallel` | `computePool, ComputePool` |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber` |
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool` |
 
 **Exports:**
 - Functions: `matmul`, `transpose`, `matvec`, `outer`, `initializePool`, `terminatePool`, `shouldParallelize`, `getComputePool`
@@ -7797,8 +8377,8 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped, Complex` |
-| `@mathts/parallel` | `computePool` |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Exports:**
 - Functions: `initializeSignal`, `terminateSignal`
@@ -7811,10 +8391,11 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped, Complex, Fraction, BigNumber` |
-| `@mathts/parallel` | `computePool` |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Exports:**
+- Types: `NormalizationType`
 - Functions: `initializeStatistics`, `terminateStatistics`
 - Constants: `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatHistogram`, `typedStatistics`
 
@@ -7825,13 +8406,27 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped, Complex, BigNumber` |
-| `@mathts/parallel` | `computePool` |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber` |
+| `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Exports:**
 - Constants: `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `atan2`, `acsc`, `asec`, `acot`, `asinh`, `acosh`, `atanh`, `toRadians`, `toDegrees`, `hypot`, `typedTrigonometry`
 
 ---
+
+### `src/typed/typed-bridge.ts` - Initialize the type bridge for mathjs factory compatibility.
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `registerNativeTypes` |
+
+**Exports:**
+- Functions: `initTypeBridge`
+
+---
+
+<a id="unit-dependencies"></a>
 
 ## Unit Dependencies
 
@@ -7862,6 +8457,8 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="utils-dependencies"></a>
+
 ## Utils Dependencies
 
 ### `src/utils/array.ts` - Calculate the size of a multi dimensional array.
@@ -7869,15 +8466,16 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./number.ts` | `isInteger` | Import |
-| `./is.ts` | `isNumber, isBigNumber, isArray, isString, Index, Matrix, IndexDimension` | Import |
-| `./string.ts` | `format` | Import |
-| `../error/DimensionError.ts` | `DimensionError` | Import |
-| `../error/IndexError.ts` | `IndexError` | Import |
-| `./object.ts` | `deepStrictEqual` | Import |
+| `./number.js` | `isInteger` | Import |
+| `./is.js` | `isNumber, isBigNumber, isArray, isString, Index, Matrix, IndexDimension` | Import |
+| `./string.js` | `format` | Import |
+| `../error/DimensionError.js` | `DimensionError` | Import |
+| `../error/IndexError.js` | `IndexError` | Import |
+| `./object.js` | `deepStrictEqual` | Import |
 
 **Exports:**
 - Interfaces: `IdentifiedValue`
+- Types: `NestedArray`, `ArrayOrScalar`
 - Functions: `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`
 
 ---
@@ -7901,7 +8499,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../function.ts` | `memoize` | Import |
+| `../function.js` | `memoize` | Import |
 
 **Exports:**
 - Constants: `createBigNumberE`, `createBigNumberPhi`, `createBigNumberPi`, `createBigNumberTau`
@@ -7913,8 +8511,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../is.ts` | `isBigNumber, isNumber` | Import |
-| `../number.ts` | `isInteger, normalizeFormatOptions` | Import |
+| `../is.js` | `isBigNumber, isNumber` | Import |
+| `../number.js` | `isInteger, normalizeFormatOptions` | Import |
 
 **Exports:**
 - Functions: `format`, `toEngineering`, `toExponential`, `toFixed`
@@ -7947,10 +8545,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./is.ts` | `isCollection, isMatrix` | Import |
-| `../error/IndexError.ts` | `IndexError` | Import |
-| `./array.ts` | `arraySize, deepMap, deepForEach` | Import |
-| `./switch.ts` | `_switch` | Import |
+| `./is.js` | `isCollection, isMatrix` | Import |
+| `../error/IndexError.js` | `IndexError` | Import |
+| `./array.js` | `arraySize, deepMap, deepForEach` | Import |
+| `./switch.js` | `_switch` | Import |
 
 **Exports:**
 - Functions: `containsCollections`, `deepForEach`, `deepMap`, `reduce`, `scatter`
@@ -7962,10 +8560,17 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./number.ts` | `nearlyEqual` | Import |
+| `./number.js` | `nearlyEqual` | Import |
 
 **Exports:**
 - Functions: `complexEquals`
+
+---
+
+### `src/utils/customs.d.ts` - Type definitions for customs utility functions
+
+**Exports:**
+- Functions: `getSafeProperty`, `setSafeProperty`, `isSafeProperty`, `getSafeMethod`, `isSafeMethod`, `isPlainObject`
 
 ---
 
@@ -7974,7 +8579,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./shared.ts` | `hasOwnProperty` | Import |
+| `./object.js` | `hasOwnProperty` | Import |
 
 **Exports:**
 
@@ -7998,12 +8603,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./object.ts` | `pickShallow` | Import |
+| `./object.js` | `pickShallow` | Import |
 
 **Exports:**
 - Interfaces: `FactoryFunction`, `LegacyFactory`, `FactoryMeta`
+- Types: `DependencyName`, `CreateFunction`
 - Functions: `factory`, `sortFactories`, `create`, `isFactory`, `assertDependencies`, `isOptionalDependency`, `stripOptionalNotation`
-- Constants: `createLog`
 
 ---
 
@@ -8012,7 +8617,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./lruQueue.ts` | `lruQueue` | Import |
+| `./lruQueue.js` | `lruQueue` | Import |
 
 **Exports:**
 - Interfaces: `MemoizeCache`, `MemoizedFunction`
@@ -8035,6 +8640,11 @@ The codebase is organized into the following modules:
 
 ### `src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
 
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./map.js` | `ObjectWrappingMap` | Import |
+
 **Exports:**
 - Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
 - Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isObjectWrappingMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
@@ -8048,7 +8658,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `TypedFunction, BigNumber, Complex` | Import (type-only) |
+| `../types.js` | `TypedFunction, BigNumber, Complex` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -8062,7 +8672,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `TypedFunction, Matrix` | Import (type-only) |
+| `../types.js` | `TypedFunction, Matrix` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -8124,7 +8734,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../utils/collection.js` | `deepMap` | Import |
 | `../utils/factory.js` | `factory` | Import |
-| `../../types.js` | `TypedFunction` | Import (type-only) |
+| `../types.js` | `TypedFunction` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -8178,6 +8788,14 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/utils/latex.d.ts` - Type definitions for latex utility functions
+
+**Exports:**
+- Functions: `escapeLatex`, `toSymbol`
+- Constants: `latexSymbols`, `latexOperators`, `latexFunctions`, `defaultTemplate`
+
+---
+
 ### `src/utils/latex.ts` - @ts-ignore - escape-latex may not have type declarations
 
 **External Dependencies:**
@@ -8188,7 +8806,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./object.ts` | `hasOwnProperty` | Import |
+| `./object.js` | `hasOwnProperty` | Import |
 
 **Exports:**
 - Functions: `escapeLatex`, `toSymbol`
@@ -8215,8 +8833,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./customs.ts` | `getSafeProperty, isSafeProperty, setSafeProperty` | Import |
-| `./is.ts` | `isMap, isObject` | Import |
+| `./customs.js` | `getSafeProperty, isSafeProperty, setSafeProperty` | Import |
+| `./is.js` | `isMap, isObject` | Import |
 
 **Exports:**
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
@@ -8240,7 +8858,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./is.ts` | `isBigNumber, isNumber, isObject` | Import |
+| `./is.js` | `isBigNumber, isNumber, isObject` | Import |
 
 **Exports:**
 - Interfaces: `SplitValue`, `NumberTypeConfig`, `FormatOptions`, `NormalizedFormatOptions`
@@ -8268,11 +8886,10 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./is.ts` | `isBigNumber, isObject` | Import |
-| `./shared.ts` | `hasOwnProperty` | Import |
+| `./is.js` | `isBigNumber, isObject` | Import |
 
 **Exports:**
-- Functions: `clone`, `mapObject`, `extend`, `deepExtend`, `deepStrictEqual`, `deepFlatten`, `canDefineProperty`, `lazy`, `traverse`, `isLegacyFactory`, `get`, `set`, `pick`, `pickShallow`
+- Functions: `clone`, `mapObject`, `extend`, `deepExtend`, `deepStrictEqual`, `deepFlatten`, `canDefineProperty`, `lazy`, `traverse`, `hasOwnProperty`, `isLegacyFactory`, `get`, `set`, `pick`, `pickShallow`
 
 ---
 
@@ -8281,13 +8898,13 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@danielsimonjr/typed-function` | `typed` |
+| `typed-function` | `typed` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./array.ts` | `get, arraySize` | Import |
-| `./is.ts` | `typeOf` | Import |
+| `./array.js` | `get, arraySize` | Import |
+| `./is.js` | `typeOf` | Import |
 
 **Exports:**
 - Functions: `optimizeCallback`
@@ -8299,7 +8916,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./factory.ts` | `factory` | Import |
+| `./factory.js` | `factory` | Import |
 
 **Exports:**
 - Constants: `createParseNumberWithConfig`
@@ -8325,7 +8942,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./map.ts` | `ObjectWrappingMap, PartitionedMap` | Import |
+| `./map.js` | `ObjectWrappingMap, PartitionedMap` | Import |
 
 **Exports:**
 - Functions: `createSubScope`
@@ -8349,13 +8966,20 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./is.ts` | `* as allIsFunctions` | Import |
-| `../core/create.ts` | `create` | Import |
-| `./string.ts` | `endsWith` | Import |
+| `./is.js` | `* as allIsFunctions` | Import |
+| `../core/create.js` | `create` | Import |
+| `./string.js` | `endsWith` | Import |
 
 **Exports:**
 - Functions: `validateBundle`, `createSnapshotFromFactories`
 - Constants: `validateTypeOf`
+
+---
+
+### `src/utils/string.d.ts` - Type definitions for string utility functions
+
+**Exports:**
+- Functions: `endsWith`, `format`, `stringify`, `escape`, `compareText`
 
 ---
 
@@ -8364,9 +8988,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./is.ts` | `isBigNumber, isString, typeOf` | Import |
-| `./number.ts` | `format` | Import |
-| `./bignumber/formatter.ts` | `format` | Import |
+| `./is.js` | `isBigNumber, isString, typeOf` | Import |
+| `./number.js` | `format` | Import |
+| `./bignumber/formatter.js` | `format` | Import |
 
 **Exports:**
 - Functions: `endsWith`, `format`, `stringify`, `escape`, `compareText`
@@ -8393,6 +9017,8 @@ The codebase is organized into the following modules:
 - Constants: `createTypeOf`
 
 ---
+
+<a id="wasm-dependencies"></a>
 
 ## Wasm Dependencies
 
@@ -8443,7 +9069,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./utilities` | `csFlip, csUnflip, csMarked, csMark, csCumsum, csEtree, csDfs` | Import |
+| `./utilities.js` | `csFlip, csUnflip, csMarked, csMark, csCumsum, csEtree, csDfs` | Import |
 
 **Exports:**
 - Functions: `sparseMatVec`, `sparseTranspose`, `symbolicCholesky`, `sparseCholesky`, `sparseLU`, `sparseLsolve`, `sparseUsolve`, `sparseQR`, `sparseSolve`
@@ -8525,56 +9151,34 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./matrix/multiply` | `multiplyDense, multiplyDenseSIMD, multiplyVector, transpose, add, subtract, scalarMultiply, dotProduct, // SIMD and cache-optimized versions
-  multiplyBlockedSIMD, addSIMD, subtractSIMD, scalarMultiplySIMD, dotProductSIMD, multiplyVectorSIMD, transposeSIMD` | Re-export |
-| `./algebra/decomposition` | `luDecomposition, qrDecomposition, choleskyDecomposition, luSolve, luDeterminant, // SIMD-accelerated decompositions
-  luDecompositionSIMD, qrDecompositionSIMD, choleskyDecompositionSIMD` | Re-export |
-| `./algebra/schur` | `schur, getSchurQ, getSchurT, schurEigenvalues, schurResidual, schurOrthogonalityError` | Re-export |
-| `./signal/fft` | `fft, fft2d, convolve, rfft, irfft, isPowerOf2, // SIMD-accelerated signal processing
-  fftSIMD, convolveSIMD, powerSpectrumSIMD, crossCorrelationSIMD` | Re-export |
-| `./signal/processing` | `freqz, freqzUniform, polyMultiply, zpk2tf, magnitude, magnitudeDb, phase, unwrapPhase, groupDelay` | Re-export |
-| `./numeric/ode` | `rk45Step, rk23Step, maxError, computeStepAdjustment, interpolate, vectorCopy, vectorScale, vectorAdd, wouldOvershoot, trimStep` | Re-export |
-| `./complex/operations` | `arg, argArray, conj, conjArray, re, reArray, im, imArray, abs, absArray, addComplex, subComplex, mulComplex, divComplex, sqrtComplex, expComplex, logComplex, sinComplex, cosComplex, tanComplex, powComplexReal` | Re-export |
-| `./geometry/operations` | `distance2D, distance3D, distanceND, manhattanDistance2D, manhattanDistanceND, intersect2DLines, intersect2DInfiniteLines, intersectLinePlane, cross3D, dotND, angle2D, angle3D, triangleArea2D, pointInTriangle2D, normalizeND` | Re-export |
-| `./logical/operations` | `and, or, not, xor, nand, nor, xnor, all, any, countTrue, findFirst, findLast, findAll, select, selectArray, andArray, orArray, notArray, xorArray` | Re-export |
-| `./relational/operations` | `compare, compareArray, equal, nearlyEqual, equalArray, unequal, unequalArray, larger, largerArray, largerEq, largerEqArray, smaller, smallerArray, smallerEq, smallerEqArray, min, max, argmin, argmax, clamp, clampArray, inRange, inRangeArray, isPositive, isNegative, isZero, isNaN, isFinite, isInteger, sign, signArray` | Re-export |
-| `./set/operations` | `createSet, setUnion, setIntersect, setDifference, setSymDifference, setIsSubset, setIsProperSubset, setIsSuperset, setIsProperSuperset, setEquals, setIsDisjoint, setSize, setContains, setAdd, setRemove, setCartesian, setPowerSetSize, setGetSubset` | Re-export |
-| `./special/functions` | `erf, erfArray, erfc, erfcArray, gamma, gammaArray, lgamma, lgammaArray, zeta, zetaArray, beta, gammainc, digamma, digammaArray, besselJ0, besselJ1, besselY0, besselY1` | Re-export |
-| `./string/operations` | `isDigit, isLetter, isAlphanumeric, isWhitespace, toLowerCode, toUpperCode, parseIntFromCodes, parseFloatFromCodes, countDigits, formatIntToCodes, formatFloatToCodes, compareCodeArrays, hashCodes, findPattern, countPattern, utf8ByteLength, isNumericString` | Re-export |
-| `./simd/operations` | `// Vector operations (f64x2)
-  simdAddF64, simdSubF64, simdMulF64, simdDivF64, simdScaleF64, simdDotF64, simdSumF64, simdSumSquaresF64, simdNormF64, simdMinF64, simdMaxF64, simdAbsF64, simdSqrtF64, simdNegF64, // Matrix operations (SIMD)
-  simdMatVecMulF64, simdMatAddF64, simdMatSubF64, simdMatDotMulF64, simdMatScaleF64, simdMatMulF64, simdMatTransposeF64, // Statistical operations (SIMD)
-  simdMeanF64, simdVarianceF64, simdStdF64, // f32x4 operations (4-wide SIMD)
-  simdAddF32, simdMulF32, simdDotF32, simdSumF32, // i32x4 operations
-  simdAddI32, simdMulI32, // Complex operations (SIMD)
-  simdComplexMulF64, simdComplexAddF64, // Utilities
-  simdSupported, simdVectorSizeF64, simdVectorSizeF32` | Re-export |
-| `./statistics/select` | `partitionSelect, selectMedian, selectMin, selectMax` | Re-export |
-| `./statistics/basic` | `mean, median, medianUnsorted, variance, std, sum, prod, min, max, mad, kurtosis, skewness, coefficientOfVariation, correlation, covariance, geometricMean, harmonicMean, rms, quantile, percentile, interquartileRange, range, cumsum, zscore` | Re-export |
-| `./matrix/linalg` | `det, inv, inv2x2, inv3x3, norm1, norm2, normP, normInf, normFro, matrixNorm1, matrixNormInf, normalize, kron, cross, dot, outer, cond1, condInf, rank, solve, lsolve, usolve` | Re-export |
-| `./matrix/eigs` | `eigsSymmetric, powerIteration, spectralRadius, inverseIteration, // SIMD-accelerated eigenvalue operations
-  eigsSymmetricSIMD, powerIterationSIMD` | Re-export |
-| `./matrix/complexEigs` | `balanceMatrix, reduceToHessenberg, eigenvalues2x2, qrIterationStep, qrAlgorithm, hessenbergQRStep` | Re-export |
-| `./matrix/expm` | `expm, expmSmall, expmv` | Re-export |
-| `./matrix/sqrtm` | `sqrtm, sqrtmNewtonSchulz, sqrtmCholesky` | Re-export |
-| `./algebra/sparseLu` | `sparseLu, sparseForwardSolve, sparseBackwardSolve, sparseLuSolve` | Re-export |
-| `./algebra/sparseChol` | `sparseChol, sparseCholSolve, eliminationTree, columnCounts` | Re-export |
-| `./plain/operations` | `abs, add, subtract, multiply, divide, unaryMinus, unaryPlus, cbrt, cube, exp, expm1, gcd, lcm, log, log2, log10, log1p, mod, nthRoot, sign, sqrt, square, pow, norm, bitAnd, bitNot, bitOr, bitXor, leftShift, rightArithShift, rightLogShift, combinations, PI, TAU, E, PHI, not, or, xor, and, equal, unequal, smaller, smallerEq, larger, largerEq, compare, gamma, lgamma, acos, acosh, acot, acoth, acsc, acsch, asec, asech, asin, asinh, atan, atan2, atanh, cos, cosh, cot, coth, csc, csch, sec, sech, sin, sinh, tan, tanh, isIntegerValue, isNegative, isPositive, isZero, isNaN` | Re-export |
-| `./utils/workPtrValidation` | `WORK_EIGS_SYMMETRIC, WORK_POWER_ITERATION, WORK_INVERSE_ITERATION_VECTOR, WORK_INVERSE_ITERATION_MATRIX, WORK_QR_ALGORITHM_VECTOR, WORK_QR_ALGORITHM_MATRIX, WORK_BALANCE_MATRIX, WORK_EXPM, WORK_EXPMV, WORK_SQRTM, WORK_SQRTM_NEWTON_SCHULZ, WORK_SPARSE_LU_VECTOR, WORK_SPARSE_LU_INT, WORK_SPARSE_CHOL_VECTOR, WORK_SPARSE_CHOL_INT, WORK_COLUMN_COUNTS, WORK_LU_DECOMPOSITION, WORK_QR_DECOMPOSITION, WORK_CHOLESKY_DECOMPOSITION, WORK_FFT_2D, WORK_IRFFT, WORK_BLOCKED_MULTIPLY, eigsSymmetricWorkSize, powerIterationWorkSize, inverseIterationWorkSize, qrAlgorithmWorkSize, expmWorkSize, sqrtmWorkSize, sqrtmNewtonSchulzWorkSize, sparseLuWorkSize, sparseCholWorkSize, columnCountsWorkSize, fft2dWorkSize, irfftWorkSize, blockedMultiplyWorkSize, condWorkSize, validateWorkPtrSize, getWorkPtrRequirement` | Re-export |
+| `./matrix/multiply.js` | `multiplyDense, multiplyDenseSIMD, multiplyVector, transpose, add, subtract, scalarMultiply, dotProduct, multiplyBlockedSIMD, addSIMD, subtractSIMD, scalarMultiplySIMD, dotProductSIMD, multiplyVectorSIMD, transposeSIMD` | Re-export |
+| `./algebra/decomposition.js` | `luDecomposition, qrDecomposition, choleskyDecomposition, luSolve, luDeterminant, luDecompositionSIMD, qrDecompositionSIMD, choleskyDecompositionSIMD` | Re-export |
+| `./algebra/schur.js` | `schur, getSchurQ, getSchurT, schurEigenvalues, schurResidual, schurOrthogonalityError` | Re-export |
+| `./signal/fft.js` | `fft, fft2d, convolve, rfft, irfft, isPowerOf2, fftSIMD, convolveSIMD, powerSpectrumSIMD, crossCorrelationSIMD` | Re-export |
+| `./signal/processing.js` | `freqz, freqzUniform, polyMultiply, zpk2tf, magnitude, magnitudeDb, phase, unwrapPhase, groupDelay` | Re-export |
+| `./numeric/ode.js` | `rk45Step, rk23Step, maxError, computeStepAdjustment, interpolate, vectorCopy, vectorScale, vectorAdd, wouldOvershoot, trimStep` | Re-export |
+| `./complex/operations.js` | `arg, argArray, conj, conjArray, re, reArray, im, imArray, abs, absArray, addComplex, subComplex, mulComplex, divComplex, sqrtComplex, expComplex, logComplex, sinComplex, cosComplex, tanComplex, powComplexReal` | Re-export |
+| `./geometry/operations.js` | `distance2D, distance3D, distanceND, manhattanDistance2D, manhattanDistanceND, intersect2DLines, intersect2DInfiniteLines, intersectLinePlane, cross3D, dotND, angle2D, angle3D, triangleArea2D, pointInTriangle2D, normalizeND` | Re-export |
+| `./logical/operations.js` | `and, or, not, xor, nand, nor, xnor, all, any, countTrue, findFirst, findLast, findAll, select, selectArray, andArray, orArray, notArray, xorArray` | Re-export |
+| `./relational/operations.js` | `compare, compareArray, equal, nearlyEqual, equalArray, unequal, unequalArray, larger, largerArray, largerEq, largerEqArray, smaller, smallerArray, smallerEq, smallerEqArray, min, max, argmin, argmax, clamp, clampArray, inRange, inRangeArray, isPositive, isNegative, isZero, isNaN, isFinite, isInteger, sign, signArray` | Re-export |
+| `./set/operations.js` | `createSet, setUnion, setIntersect, setDifference, setSymDifference, setIsSubset, setIsProperSubset, setIsSuperset, setIsProperSuperset, setEquals, setIsDisjoint, setSize, setContains, setAdd, setRemove, setCartesian, setPowerSetSize, setGetSubset` | Re-export |
+| `./special/functions.js` | `erf, erfArray, erfc, erfcArray, gamma, gammaArray, lgamma, lgammaArray, zeta, zetaArray, beta, gammainc, digamma, digammaArray, besselJ0, besselJ1, besselY0, besselY1` | Re-export |
+| `./string/operations.js` | `isDigit, isLetter, isAlphanumeric, isWhitespace, toLowerCode, toUpperCode, parseIntFromCodes, parseFloatFromCodes, countDigits, formatIntToCodes, formatFloatToCodes, compareCodeArrays, hashCodes, findPattern, countPattern, utf8ByteLength, isNumericString` | Re-export |
+| `./simd/operations.js` | `simdAddF64, simdSubF64, simdMulF64, simdDivF64, simdScaleF64, simdDotF64, simdSumF64, simdSumSquaresF64, simdNormF64, simdMinF64, simdMaxF64, simdAbsF64, simdSqrtF64, simdNegF64, simdMatVecMulF64, simdMatAddF64, simdMatSubF64, simdMatDotMulF64, simdMatScaleF64, simdMatMulF64, simdMatTransposeF64, simdMeanF64, simdVarianceF64, simdStdF64, simdAddF32, simdMulF32, simdDotF32, simdSumF32, simdAddI32, simdMulI32, simdComplexMulF64, simdComplexAddF64, simdSupported, simdVectorSizeF64, simdVectorSizeF32` | Re-export |
+| `./statistics/select.js` | `partitionSelect, selectMedian, selectMin, selectMax` | Re-export |
+| `./statistics/basic.js` | `mean, median, medianUnsorted, variance, std, sum, prod, min, max, mad, kurtosis, skewness, coefficientOfVariation, correlation, covariance, geometricMean, harmonicMean, rms, quantile, percentile, interquartileRange, range, cumsum, zscore` | Re-export |
+| `./matrix/linalg.js` | `det, inv, inv2x2, inv3x3, norm1, norm2, normP, normInf, normFro, matrixNorm1, matrixNormInf, normalize, kron, cross, dot, outer, cond1, condInf, rank, solve, lsolve, usolve` | Re-export |
+| `./matrix/eigs.js` | `eigsSymmetric, powerIteration, spectralRadius, inverseIteration, eigsSymmetricSIMD, powerIterationSIMD` | Re-export |
+| `./matrix/complexEigs.js` | `balanceMatrix, reduceToHessenberg, eigenvalues2x2, qrIterationStep, qrAlgorithm, hessenbergQRStep` | Re-export |
+| `./matrix/expm.js` | `expm, expmSmall, expmv` | Re-export |
+| `./matrix/sqrtm.js` | `sqrtm, sqrtmNewtonSchulz, sqrtmCholesky` | Re-export |
+| `./algebra/sparseLu.js` | `sparseLu, sparseForwardSolve, sparseBackwardSolve, sparseLuSolve` | Re-export |
+| `./algebra/sparseChol.js` | `sparseChol, sparseCholSolve, eliminationTree, columnCounts` | Re-export |
+| `./plain/operations.js` | `abs, add, subtract, multiply, divide, unaryMinus, unaryPlus, cbrt, cube, exp, expm1, gcd, lcm, log, log2, log10, log1p, mod, nthRoot, sign, sqrt, square, pow, norm, bitAnd, bitNot, bitOr, bitXor, leftShift, rightArithShift, rightLogShift, combinations, PI, TAU, E, PHI, not, or, xor, and, equal, unequal, smaller, smallerEq, larger, largerEq, compare, gamma, lgamma, acos, acosh, acot, acoth, acsc, acsch, asec, asech, asin, asinh, atan, atan2, atanh, cos, cosh, cot, coth, csc, csch, sec, sech, sin, sinh, tan, tanh, isIntegerValue, isNegative, isPositive, isZero, isNaN` | Re-export |
+| `./utils/workPtrValidation.js` | `WORK_EIGS_SYMMETRIC, WORK_POWER_ITERATION, WORK_INVERSE_ITERATION_VECTOR, WORK_INVERSE_ITERATION_MATRIX, WORK_QR_ALGORITHM_VECTOR, WORK_QR_ALGORITHM_MATRIX, WORK_BALANCE_MATRIX, WORK_EXPM, WORK_EXPMV, WORK_SQRTM, WORK_SQRTM_NEWTON_SCHULZ, WORK_SPARSE_LU_VECTOR, WORK_SPARSE_LU_INT, WORK_SPARSE_CHOL_VECTOR, WORK_SPARSE_CHOL_INT, WORK_COLUMN_COUNTS, WORK_LU_DECOMPOSITION, WORK_QR_DECOMPOSITION, WORK_CHOLESKY_DECOMPOSITION, WORK_FFT_2D, WORK_IRFFT, WORK_BLOCKED_MULTIPLY, eigsSymmetricWorkSize, powerIterationWorkSize, inverseIterationWorkSize, qrAlgorithmWorkSize, expmWorkSize, sqrtmWorkSize, sqrtmNewtonSchulzWorkSize, sparseLuWorkSize, sparseCholWorkSize, columnCountsWorkSize, fft2dWorkSize, irfftWorkSize, blockedMultiplyWorkSize, condWorkSize, validateWorkPtrSize, getWorkPtrRequirement` | Re-export |
 
 **Exports:**
-- Re-exports: `multiplyDense`, `multiplyDenseSIMD`, `multiplyVector`, `transpose`, `add`, `subtract`, `scalarMultiply`, `dotProduct`, `// SIMD and cache-optimized versions
-  multiplyBlockedSIMD`, `addSIMD`, `subtractSIMD`, `scalarMultiplySIMD`, `dotProductSIMD`, `multiplyVectorSIMD`, `transposeSIMD`, `luDecomposition`, `qrDecomposition`, `choleskyDecomposition`, `luSolve`, `luDeterminant`, `// SIMD-accelerated decompositions
-  luDecompositionSIMD`, `qrDecompositionSIMD`, `choleskyDecompositionSIMD`, `schur`, `getSchurQ`, `getSchurT`, `schurEigenvalues`, `schurResidual`, `schurOrthogonalityError`, `fft`, `fft2d`, `convolve`, `rfft`, `irfft`, `isPowerOf2`, `// SIMD-accelerated signal processing
-  fftSIMD`, `convolveSIMD`, `powerSpectrumSIMD`, `crossCorrelationSIMD`, `freqz`, `freqzUniform`, `polyMultiply`, `zpk2tf`, `magnitude`, `magnitudeDb`, `phase`, `unwrapPhase`, `groupDelay`, `rk45Step`, `rk23Step`, `maxError`, `computeStepAdjustment`, `interpolate`, `vectorCopy`, `vectorScale`, `vectorAdd`, `wouldOvershoot`, `trimStep`, `arg`, `argArray`, `conj`, `conjArray`, `re`, `reArray`, `im`, `imArray`, `abs`, `absArray`, `addComplex`, `subComplex`, `mulComplex`, `divComplex`, `sqrtComplex`, `expComplex`, `logComplex`, `sinComplex`, `cosComplex`, `tanComplex`, `powComplexReal`, `distance2D`, `distance3D`, `distanceND`, `manhattanDistance2D`, `manhattanDistanceND`, `intersect2DLines`, `intersect2DInfiniteLines`, `intersectLinePlane`, `cross3D`, `dotND`, `angle2D`, `angle3D`, `triangleArea2D`, `pointInTriangle2D`, `normalizeND`, `and`, `or`, `not`, `xor`, `nand`, `nor`, `xnor`, `all`, `any`, `countTrue`, `findFirst`, `findLast`, `findAll`, `select`, `selectArray`, `andArray`, `orArray`, `notArray`, `xorArray`, `compare`, `compareArray`, `equal`, `nearlyEqual`, `equalArray`, `unequal`, `unequalArray`, `larger`, `largerArray`, `largerEq`, `largerEqArray`, `smaller`, `smallerArray`, `smallerEq`, `smallerEqArray`, `min`, `max`, `argmin`, `argmax`, `clamp`, `clampArray`, `inRange`, `inRangeArray`, `isPositive`, `isNegative`, `isZero`, `isNaN`, `isFinite`, `isInteger`, `sign`, `signArray`, `createSet`, `setUnion`, `setIntersect`, `setDifference`, `setSymDifference`, `setIsSubset`, `setIsProperSubset`, `setIsSuperset`, `setIsProperSuperset`, `setEquals`, `setIsDisjoint`, `setSize`, `setContains`, `setAdd`, `setRemove`, `setCartesian`, `setPowerSetSize`, `setGetSubset`, `erf`, `erfArray`, `erfc`, `erfcArray`, `gamma`, `gammaArray`, `lgamma`, `lgammaArray`, `zeta`, `zetaArray`, `beta`, `gammainc`, `digamma`, `digammaArray`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `isDigit`, `isLetter`, `isAlphanumeric`, `isWhitespace`, `toLowerCode`, `toUpperCode`, `parseIntFromCodes`, `parseFloatFromCodes`, `countDigits`, `formatIntToCodes`, `formatFloatToCodes`, `compareCodeArrays`, `hashCodes`, `findPattern`, `countPattern`, `utf8ByteLength`, `isNumericString`, `// Vector operations (f64x2)
-  simdAddF64`, `simdSubF64`, `simdMulF64`, `simdDivF64`, `simdScaleF64`, `simdDotF64`, `simdSumF64`, `simdSumSquaresF64`, `simdNormF64`, `simdMinF64`, `simdMaxF64`, `simdAbsF64`, `simdSqrtF64`, `simdNegF64`, `// Matrix operations (SIMD)
-  simdMatVecMulF64`, `simdMatAddF64`, `simdMatSubF64`, `simdMatDotMulF64`, `simdMatScaleF64`, `simdMatMulF64`, `simdMatTransposeF64`, `// Statistical operations (SIMD)
-  simdMeanF64`, `simdVarianceF64`, `simdStdF64`, `// f32x4 operations (4-wide SIMD)
-  simdAddF32`, `simdMulF32`, `simdDotF32`, `simdSumF32`, `// i32x4 operations
-  simdAddI32`, `simdMulI32`, `// Complex operations (SIMD)
-  simdComplexMulF64`, `simdComplexAddF64`, `// Utilities
-  simdSupported`, `simdVectorSizeF64`, `simdVectorSizeF32`, `partitionSelect`, `selectMedian`, `selectMin`, `selectMax`, `mean`, `median`, `medianUnsorted`, `variance`, `std`, `sum`, `prod`, `mad`, `kurtosis`, `skewness`, `coefficientOfVariation`, `correlation`, `covariance`, `geometricMean`, `harmonicMean`, `rms`, `quantile`, `percentile`, `interquartileRange`, `range`, `cumsum`, `zscore`, `det`, `inv`, `inv2x2`, `inv3x3`, `norm1`, `norm2`, `normP`, `normInf`, `normFro`, `matrixNorm1`, `matrixNormInf`, `normalize`, `kron`, `cross`, `dot`, `outer`, `cond1`, `condInf`, `rank`, `solve`, `lsolve`, `usolve`, `eigsSymmetric`, `powerIteration`, `spectralRadius`, `inverseIteration`, `// SIMD-accelerated eigenvalue operations
-  eigsSymmetricSIMD`, `powerIterationSIMD`, `balanceMatrix`, `reduceToHessenberg`, `eigenvalues2x2`, `qrIterationStep`, `qrAlgorithm`, `hessenbergQRStep`, `expm`, `expmSmall`, `expmv`, `sqrtm`, `sqrtmNewtonSchulz`, `sqrtmCholesky`, `sparseLu`, `sparseForwardSolve`, `sparseBackwardSolve`, `sparseLuSolve`, `sparseChol`, `sparseCholSolve`, `eliminationTree`, `columnCounts`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `cbrt`, `cube`, `exp`, `expm1`, `gcd`, `lcm`, `log`, `log2`, `log10`, `log1p`, `mod`, `nthRoot`, `sqrt`, `square`, `pow`, `norm`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `rightArithShift`, `rightLogShift`, `combinations`, `PI`, `TAU`, `E`, `PHI`, `acos`, `acosh`, `acot`, `acoth`, `acsc`, `acsch`, `asec`, `asech`, `asin`, `asinh`, `atan`, `atan2`, `atanh`, `cos`, `cosh`, `cot`, `coth`, `csc`, `csch`, `sec`, `sech`, `sin`, `sinh`, `tan`, `tanh`, `isIntegerValue`, `WORK_EIGS_SYMMETRIC`, `WORK_POWER_ITERATION`, `WORK_INVERSE_ITERATION_VECTOR`, `WORK_INVERSE_ITERATION_MATRIX`, `WORK_QR_ALGORITHM_VECTOR`, `WORK_QR_ALGORITHM_MATRIX`, `WORK_BALANCE_MATRIX`, `WORK_EXPM`, `WORK_EXPMV`, `WORK_SQRTM`, `WORK_SQRTM_NEWTON_SCHULZ`, `WORK_SPARSE_LU_VECTOR`, `WORK_SPARSE_LU_INT`, `WORK_SPARSE_CHOL_VECTOR`, `WORK_SPARSE_CHOL_INT`, `WORK_COLUMN_COUNTS`, `WORK_LU_DECOMPOSITION`, `WORK_QR_DECOMPOSITION`, `WORK_CHOLESKY_DECOMPOSITION`, `WORK_FFT_2D`, `WORK_IRFFT`, `WORK_BLOCKED_MULTIPLY`, `eigsSymmetricWorkSize`, `powerIterationWorkSize`, `inverseIterationWorkSize`, `qrAlgorithmWorkSize`, `expmWorkSize`, `sqrtmWorkSize`, `sqrtmNewtonSchulzWorkSize`, `sparseLuWorkSize`, `sparseCholWorkSize`, `columnCountsWorkSize`, `fft2dWorkSize`, `irfftWorkSize`, `blockedMultiplyWorkSize`, `condWorkSize`, `validateWorkPtrSize`, `getWorkPtrRequirement`
+- Re-exports: `multiplyDense`, `multiplyDenseSIMD`, `multiplyVector`, `transpose`, `add`, `subtract`, `scalarMultiply`, `dotProduct`, `multiplyBlockedSIMD`, `addSIMD`, `subtractSIMD`, `scalarMultiplySIMD`, `dotProductSIMD`, `multiplyVectorSIMD`, `transposeSIMD`, `luDecomposition`, `qrDecomposition`, `choleskyDecomposition`, `luSolve`, `luDeterminant`, `luDecompositionSIMD`, `qrDecompositionSIMD`, `choleskyDecompositionSIMD`, `schur`, `getSchurQ`, `getSchurT`, `schurEigenvalues`, `schurResidual`, `schurOrthogonalityError`, `fft`, `fft2d`, `convolve`, `rfft`, `irfft`, `isPowerOf2`, `fftSIMD`, `convolveSIMD`, `powerSpectrumSIMD`, `crossCorrelationSIMD`, `freqz`, `freqzUniform`, `polyMultiply`, `zpk2tf`, `magnitude`, `magnitudeDb`, `phase`, `unwrapPhase`, `groupDelay`, `rk45Step`, `rk23Step`, `maxError`, `computeStepAdjustment`, `interpolate`, `vectorCopy`, `vectorScale`, `vectorAdd`, `wouldOvershoot`, `trimStep`, `arg`, `argArray`, `conj`, `conjArray`, `re`, `reArray`, `im`, `imArray`, `abs`, `absArray`, `addComplex`, `subComplex`, `mulComplex`, `divComplex`, `sqrtComplex`, `expComplex`, `logComplex`, `sinComplex`, `cosComplex`, `tanComplex`, `powComplexReal`, `distance2D`, `distance3D`, `distanceND`, `manhattanDistance2D`, `manhattanDistanceND`, `intersect2DLines`, `intersect2DInfiniteLines`, `intersectLinePlane`, `cross3D`, `dotND`, `angle2D`, `angle3D`, `triangleArea2D`, `pointInTriangle2D`, `normalizeND`, `and`, `or`, `not`, `xor`, `nand`, `nor`, `xnor`, `all`, `any`, `countTrue`, `findFirst`, `findLast`, `findAll`, `select`, `selectArray`, `andArray`, `orArray`, `notArray`, `xorArray`, `compare`, `compareArray`, `equal`, `nearlyEqual`, `equalArray`, `unequal`, `unequalArray`, `larger`, `largerArray`, `largerEq`, `largerEqArray`, `smaller`, `smallerArray`, `smallerEq`, `smallerEqArray`, `min`, `max`, `argmin`, `argmax`, `clamp`, `clampArray`, `inRange`, `inRangeArray`, `isPositive`, `isNegative`, `isZero`, `isNaN`, `isFinite`, `isInteger`, `sign`, `signArray`, `createSet`, `setUnion`, `setIntersect`, `setDifference`, `setSymDifference`, `setIsSubset`, `setIsProperSubset`, `setIsSuperset`, `setIsProperSuperset`, `setEquals`, `setIsDisjoint`, `setSize`, `setContains`, `setAdd`, `setRemove`, `setCartesian`, `setPowerSetSize`, `setGetSubset`, `erf`, `erfArray`, `erfc`, `erfcArray`, `gamma`, `gammaArray`, `lgamma`, `lgammaArray`, `zeta`, `zetaArray`, `beta`, `gammainc`, `digamma`, `digammaArray`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `isDigit`, `isLetter`, `isAlphanumeric`, `isWhitespace`, `toLowerCode`, `toUpperCode`, `parseIntFromCodes`, `parseFloatFromCodes`, `countDigits`, `formatIntToCodes`, `formatFloatToCodes`, `compareCodeArrays`, `hashCodes`, `findPattern`, `countPattern`, `utf8ByteLength`, `isNumericString`, `simdAddF64`, `simdSubF64`, `simdMulF64`, `simdDivF64`, `simdScaleF64`, `simdDotF64`, `simdSumF64`, `simdSumSquaresF64`, `simdNormF64`, `simdMinF64`, `simdMaxF64`, `simdAbsF64`, `simdSqrtF64`, `simdNegF64`, `simdMatVecMulF64`, `simdMatAddF64`, `simdMatSubF64`, `simdMatDotMulF64`, `simdMatScaleF64`, `simdMatMulF64`, `simdMatTransposeF64`, `simdMeanF64`, `simdVarianceF64`, `simdStdF64`, `simdAddF32`, `simdMulF32`, `simdDotF32`, `simdSumF32`, `simdAddI32`, `simdMulI32`, `simdComplexMulF64`, `simdComplexAddF64`, `simdSupported`, `simdVectorSizeF64`, `simdVectorSizeF32`, `partitionSelect`, `selectMedian`, `selectMin`, `selectMax`, `mean`, `median`, `medianUnsorted`, `variance`, `std`, `sum`, `prod`, `mad`, `kurtosis`, `skewness`, `coefficientOfVariation`, `correlation`, `covariance`, `geometricMean`, `harmonicMean`, `rms`, `quantile`, `percentile`, `interquartileRange`, `range`, `cumsum`, `zscore`, `det`, `inv`, `inv2x2`, `inv3x3`, `norm1`, `norm2`, `normP`, `normInf`, `normFro`, `matrixNorm1`, `matrixNormInf`, `normalize`, `kron`, `cross`, `dot`, `outer`, `cond1`, `condInf`, `rank`, `solve`, `lsolve`, `usolve`, `eigsSymmetric`, `powerIteration`, `spectralRadius`, `inverseIteration`, `eigsSymmetricSIMD`, `powerIterationSIMD`, `balanceMatrix`, `reduceToHessenberg`, `eigenvalues2x2`, `qrIterationStep`, `qrAlgorithm`, `hessenbergQRStep`, `expm`, `expmSmall`, `expmv`, `sqrtm`, `sqrtmNewtonSchulz`, `sqrtmCholesky`, `sparseLu`, `sparseForwardSolve`, `sparseBackwardSolve`, `sparseLuSolve`, `sparseChol`, `sparseCholSolve`, `eliminationTree`, `columnCounts`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `cbrt`, `cube`, `exp`, `expm1`, `gcd`, `lcm`, `log`, `log2`, `log10`, `log1p`, `mod`, `nthRoot`, `sqrt`, `square`, `pow`, `norm`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `rightArithShift`, `rightLogShift`, `combinations`, `PI`, `TAU`, `E`, `PHI`, `acos`, `acosh`, `acot`, `acoth`, `acsc`, `acsch`, `asec`, `asech`, `asin`, `asinh`, `atan`, `atan2`, `atanh`, `cos`, `cosh`, `cot`, `coth`, `csc`, `csch`, `sec`, `sech`, `sin`, `sinh`, `tan`, `tanh`, `isIntegerValue`, `WORK_EIGS_SYMMETRIC`, `WORK_POWER_ITERATION`, `WORK_INVERSE_ITERATION_VECTOR`, `WORK_INVERSE_ITERATION_MATRIX`, `WORK_QR_ALGORITHM_VECTOR`, `WORK_QR_ALGORITHM_MATRIX`, `WORK_BALANCE_MATRIX`, `WORK_EXPM`, `WORK_EXPMV`, `WORK_SQRTM`, `WORK_SQRTM_NEWTON_SCHULZ`, `WORK_SPARSE_LU_VECTOR`, `WORK_SPARSE_LU_INT`, `WORK_SPARSE_CHOL_VECTOR`, `WORK_SPARSE_CHOL_INT`, `WORK_COLUMN_COUNTS`, `WORK_LU_DECOMPOSITION`, `WORK_QR_DECOMPOSITION`, `WORK_CHOLESKY_DECOMPOSITION`, `WORK_FFT_2D`, `WORK_IRFFT`, `WORK_BLOCKED_MULTIPLY`, `eigsSymmetricWorkSize`, `powerIterationWorkSize`, `inverseIterationWorkSize`, `qrAlgorithmWorkSize`, `expmWorkSize`, `sqrtmWorkSize`, `sqrtmNewtonSchulzWorkSize`, `sparseLuWorkSize`, `sparseCholWorkSize`, `columnCountsWorkSize`, `fft2dWorkSize`, `irfftWorkSize`, `blockedMultiplyWorkSize`, `condWorkSize`, `validateWorkPtrSize`, `getWorkPtrRequirement`
 
 ---
 
@@ -8674,8 +9278,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./WasmLoader.ts` | `wasmLoader, WasmModule` | Import |
-| `../parallel/ParallelMatrix.ts` | `ParallelMatrix` | Import |
+| `./WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+| `../parallel/ParallelMatrix.js` | `ParallelMatrix` | Import |
 
 **Exports:**
 - Classes: `MatrixWasmBridge`
@@ -8752,17 +9356,17 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./arithmetic` | `*` | Re-export |
-| `./bitwise` | `*` | Re-export |
-| `./combinations` | `*` | Re-export |
-| `./constants` | `*` | Re-export |
-| `./logical` | `*` | Re-export |
-| `./probability` | `*` | Re-export |
-| `./trigonometry` | `*` | Re-export |
-| `./utils` | `*` | Re-export |
+| `./arithmetic.js` | `*` | Re-export |
+| `./bitwise.js` | `*` | Re-export |
+| `./combinations.js` | `*` | Re-export |
+| `./constants.js` | `*` | Re-export |
+| `./logical.js` | `*` | Re-export |
+| `./probability.js` | `*` | Re-export |
+| `./trigonometry.js` | `*` | Re-export |
+| `./utils.js` | `*` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./arithmetic`, `* from ./bitwise`, `* from ./combinations`, `* from ./constants`, `* from ./logical`, `* from ./probability`, `* from ./trigonometry`, `* from ./utils`
+- Re-exports: `* from ./arithmetic.js`, `* from ./bitwise.js`, `* from ./combinations.js`, `* from ./constants.js`, `* from ./logical.js`, `* from ./probability.js`, `* from ./trigonometry.js`, `* from ./utils.js`
 
 ---
 
@@ -8895,6 +9499,13 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/wasm/utils/constants.ts` - Shared constants for WASM modules
+
+**Exports:**
+- Constants: `F64_SIZE`, `I32_SIZE`, `EPSILON`, `F64_EPSILON`, `PI`, `TWO_PI`, `LN2`, `LN10`
+
+---
+
 ### `src/wasm/utils/workPtrValidation.ts` - WorkPtr Size Validation Utilities
 
 **Exports:**
@@ -8913,50 +9524,74 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="dependency-matrix"></a>
 ## Dependency Matrix
 
 ### File Import/Export Matrix
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `lup` | 3 files | 0 files |
-| `qr` | 2 files | 0 files |
-| `schur` | 2 files | 0 files |
-| `slu` | 4 files | 0 files |
-| `derivative` | 6 files | 0 files |
-| `leafCount` | 3 files | 0 files |
-| `lyap` | 2 files | 0 files |
-| `polynomialRoot` | 2 files | 0 files |
-| `rationalize` | 5 files | 0 files |
-| `resolve` | 5 files | 0 files |
-| `util` | 4 files | 3 files |
-| `wildcards` | 2 files | 1 files |
-| `simplify` | 8 files | 0 files |
-| `simplifyConstant` | 6 files | 0 files |
-| `simplifyCore` | 5 files | 0 files |
-| `lsolve` | 3 files | 0 files |
-| `lsolveAll` | 2 files | 0 files |
-| `lusolve` | 5 files | 0 files |
-| `usolve` | 3 files | 0 files |
-| `usolveAll` | 2 files | 0 files |
-| `solveValidation` | 3 files | 5 files |
-| `csAmd` | 5 files | 1 files |
-| `csChol` | 4 files | 0 files |
-| `csCounts` | 3 files | 1 files |
-| `csCumsum` | 0 files | 1 files |
-| `csDfs` | 3 files | 1 files |
-| `csEreach` | 2 files | 1 files |
-| `csEtree` | 0 files | 1 files |
-| `csFkeep` | 0 files | 1 files |
-| `csFlip` | 0 files | 3 files |
+| `src/utils/factory` | 1 file | 331 files |
+| `src/factoriesAny` | 303 files | 1 file |
+| `src/expression/embeddedDocs/embeddedDocs` | 253 files | 1 file |
+| `src/core/function/typed` | 3 files | 196 files |
+| `src/factoriesNumber` | 117 files | 0 files |
+| `src/utils/is` | 1 file | 106 files |
+| `src/utils/array` | 6 files | 58 files |
+| `src/plain/number/index` | 9 files | 54 files |
+| `src/core/config` | 0 files | 55 files |
+| `src/utils/number` | 1 file | 53 files |
+| `src/utils/collection` | 4 files | 47 files |
+| `src/utils/object` | 1 file | 40 files |
+| `src/wasm/WasmLoader` | 0 files | 40 files |
+| `src/type/matrix/utils/matrixAlgorithmSuite` | 6 files | 28 files |
+| `src/expression/transform/types` | 1 file | 30 files |
+| `src/utils/string` | 3 files | 28 files |
+| `src/wasm/index` | 25 files | 0 files |
+| `src/type/matrix/types` | 0 files | 23 files |
+| `src/type/matrix/utils/matAlgo12xSfs` | 2 files | 19 files |
+| `src/types` | 0 files | 21 files |
+| `src/type/bignumber/BigNumber` | 1 file | 19 files |
+| `src/type/complex/Complex` | 3 files | 17 files |
+| `src/type/matrix/utils/matAlgo03xDSf` | 3 files | 16 files |
+| `src/type/matrix/utils/matAlgo11xS0s` | 2 files | 17 files |
+| `src/error/DimensionError` | 0 files | 18 files |
+| `src/expression/transform/utils/errorTransform` | 2 files | 15 files |
+| `src/expression/node/Node` | 5 files | 11 files |
+| `src/type/matrix/utils/matAlgo14xDs` | 3 files | 12 files |
+| `src/bitwise/leftShift` | 13 files | 1 file |
+| `src/bitwise/rightArithShift` | 13 files | 1 file |
+| `src/type/matrix/utils/matAlgo02xDS0` | 3 files | 11 files |
+| `src/utils/customs` | 1 file | 13 files |
+| `src/bitwise/rightLogShift` | 12 files | 1 file |
+| `src/type/matrix/utils/matAlgo07xSSf` | 3 files | 10 files |
+| `src/arithmetic/floor` | 9 files | 3 files |
+| `src/arithmetic/gcd` | 11 files | 1 file |
+| `src/arithmetic/mod` | 10 files | 2 files |
+| `src/relational/compare` | 10 files | 2 files |
+| `src/relational/larger` | 10 files | 2 files |
+| `src/relational/largerEq` | 10 files | 2 files |
 
 ---
 
+<a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
-**No circular dependencies detected.**
+**2 circular dependencies detected:**
+
+- **Runtime cycles**: 2 (require attention)
+- **Type-only cycles**: 0 (safe, no runtime impact)
+
+### Runtime Circular Dependencies
+
+These cycles involve runtime imports and may cause issues:
+
+- src/utils/object.ts -> src/utils/is.ts -> src/utils/map.ts -> src/utils/customs.ts -> src/utils/object.ts
+- src/utils/is.ts -> src/utils/map.ts -> src/utils/is.ts
+
 ---
 
+<a id="visual-dependency-graph"></a>
 ## Visual Dependency Graph
 
 ```mermaid
@@ -8967,262 +9602,387 @@ graph TD
         N2[schur]
         N3[slu]
         N4[derivative]
-        N5[...40 more]
+        N5[leafCount]
+        N6[lyap]
+        N7[polynomialRoot]
+        N8[rationalize]
+        N9[resolve]
+        N10[...35 more]
     end
 
     subgraph Arithmetic
-        N6[abs]
-        N7[add]
-        N8[addScalar]
-        N9[cbrt]
-        N10[ceil]
-        N11[...35 more]
+        N11[abs]
+        N12[add]
+        N13[addScalar]
+        N14[cbrt]
+        N15[ceil]
+        N16[cube]
+        N17[divide]
+        N18[divideScalar]
+        N19[dotDivide]
+        N20[dotMultiply]
+        N21[...30 more]
     end
 
     subgraph Bitwise
-        N12[bitAnd]
-        N13[bitNot]
-        N14[bitOr]
-        N15[bitXor]
-        N16[leftShift]
-        N17[...3 more]
+        N22[bitAnd]
+        N23[bitNot]
+        N24[bitOr]
+        N25[bitXor]
+        N26[leftShift]
+        N27[rightArithShift]
+        N28[rightLogShift]
+        N29[useMatrixForArrayScalar]
     end
 
     subgraph Combinatorics
-        N18[bellNumbers]
-        N19[catalan]
-        N20[composition]
-        N21[stirlingS2]
+        N30[bellNumbers]
+        N31[catalan]
+        N32[composition]
+        N33[stirlingS2]
     end
 
     subgraph Complex
-        N22[arg]
-        N23[conj]
-        N24[im]
-        N25[re]
+        N34[arg]
+        N35[conj]
+        N36[im]
+        N37[re]
+    end
+
+    subgraph Root
+        N38[constants]
+        N39[defaultInstance]
+        N40[factoriesAny]
+        N41[factoriesNumber]
+        N42[types]
     end
 
     subgraph Core
-        N26[config]
-        N27[create]
-        N28[config]
-        N29[import]
-        N30[typed]
+        N43[config]
+        N44[create]
+        N45[config]
+        N46[import]
+        N47[typed]
     end
 
     subgraph Error
-        N31[ArgumentsError]
-        N32[DimensionError]
-        N33[IndexError]
+        N48[ArgumentsError]
+        N49[DimensionError]
+        N50[IndexError]
     end
 
     subgraph Expression
-        N34[e]
-        N35[false]
-        N36[i]
-        N37[Infinity]
-        N38[LN10]
-        N39[...309 more]
+        N51[e]
+        N52[false]
+        N53[i]
+        N54[Infinity]
+        N55[LN10]
+        N56[LN2]
+        N57[LOG10E]
+        N58[LOG2E]
+        N59[NaN]
+        N60[null]
+        N61[...304 more]
     end
 
     subgraph Geometry
-        N40[distance]
-        N41[intersect]
+        N62[distance]
+        N63[intersect]
     end
 
     subgraph Entry
-        N42[index]
+        N64[index]
     end
 
     subgraph Logical
-        N43[and]
-        N44[not]
-        N45[nullish]
-        N46[or]
-        N47[xor]
+        N65[and]
+        N66[not]
+        N67[nullish]
+        N68[or]
+        N69[xor]
     end
 
     subgraph Matrix
-        N48[column]
-        N49[concat]
-        N50[count]
-        N51[cross]
-        N52[ctranspose]
-        N53[...39 more]
+        N70[column]
+        N71[concat]
+        N72[count]
+        N73[cross]
+        N74[ctranspose]
+        N75[det]
+        N76[diag]
+        N77[diff]
+        N78[dot]
+        N79[complexEigs]
+        N80[...34 more]
     end
 
     subgraph Numeric
-        N54[solveODE]
+        N81[solveODE]
     end
 
     subgraph Plain
-        N55[arithmetic]
-        N56[index]
-        N57[arithmetic]
-        N58[bitwise]
-        N59[combinations]
-        N60[...7 more]
+        N82[arithmetic]
+        N83[index]
+        N84[arithmetic]
+        N85[bitwise]
+        N86[combinations]
+        N87[constants]
+        N88[index]
+        N89[logical]
+        N90[probability]
+        N91[relational]
+        N92[...2 more]
     end
 
     subgraph Probability
-        N61[bernoulli]
-        N62[combinations]
-        N63[combinationsWithRep]
-        N64[factorial]
-        N65[gamma]
-        N66[...9 more]
+        N93[bernoulli]
+        N94[combinations]
+        N95[combinationsWithRep]
+        N96[factorial]
+        N97[gamma]
+        N98[kldivergence]
+        N99[lgamma]
+        N100[multinomial]
+        N101[permutations]
+        N102[pickRandom]
+        N103[...4 more]
     end
 
     subgraph Relational
-        N67[compare]
-        N68[compareNatural]
-        N69[compareText]
-        N70[compareUnits]
-        N71[deepEqual]
-        N72[...8 more]
+        N104[compare]
+        N105[compareNatural]
+        N106[compareText]
+        N107[compareUnits]
+        N108[deepEqual]
+        N109[equal]
+        N110[equalScalar]
+        N111[equalText]
+        N112[larger]
+        N113[largerEq]
+        N114[...3 more]
     end
 
     subgraph Set
-        N73[setCartesian]
-        N74[setDifference]
-        N75[setDistinct]
-        N76[setIntersect]
-        N77[setIsSubset]
-        N78[...5 more]
+        N115[setCartesian]
+        N116[setDifference]
+        N117[setDistinct]
+        N118[setIntersect]
+        N119[setIsSubset]
+        N120[setMultiplicity]
+        N121[setPowerset]
+        N122[setSize]
+        N123[setSymDifference]
+        N124[setUnion]
+    end
+
+    subgraph Shared
+        N125[types]
     end
 
     subgraph Signal
-        N79[conv]
-        N80[fft]
-        N81[freqz]
-        N82[index]
-        N83[zpk2tf]
+        N126[conv]
+        N127[fft]
+        N128[freqz]
+        N129[index]
+        N130[zpk2tf]
     end
 
     subgraph Special
-        N84[erf]
-        N85[zeta]
+        N131[erf]
+        N132[zeta]
     end
 
     subgraph Statistics
-        N86[corr]
-        N87[cumsum]
-        N88[mad]
-        N89[max]
-        N90[mean]
-        N91[...9 more]
+        N133[corr]
+        N134[cumsum]
+        N135[mad]
+        N136[max]
+        N137[mean]
+        N138[median]
+        N139[min]
+        N140[mode]
+        N141[prod]
+        N142[quantileSeq]
+        N143[...4 more]
     end
 
     subgraph String
-        N92[bin]
-        N93[format]
-        N94[hex]
-        N95[oct]
-        N96[print]
+        N144[bin]
+        N145[format]
+        N146[hex]
+        N147[oct]
+        N148[print]
     end
 
     subgraph Trigonometry
-        N97[acos]
-        N98[acosh]
-        N99[acot]
-        N100[acoth]
-        N101[acsc]
-        N102[...21 more]
+        N149[acos]
+        N150[acosh]
+        N151[acot]
+        N152[acoth]
+        N153[acsc]
+        N154[acsch]
+        N155[asec]
+        N156[asech]
+        N157[asin]
+        N158[asinh]
+        N159[...16 more]
     end
 
     subgraph Type
-        N103[bigint]
-        N104[BigNumber]
-        N105[bignumber]
-        N106[boolean]
-        N107[Chain]
-        N108[...45 more]
+        N160[bigint]
+        N161[BigNumber]
+        N162[bignumber]
+        N163[boolean]
+        N164[Chain]
+        N165[chain]
+        N166[Complex]
+        N167[complex]
+        N168[Fraction]
+        N169[fraction]
+        N170[...40 more]
     end
 
     subgraph Typed
-        N109[arithmetic]
-        N110[index]
-        N111[signal]
-        N112[statistics]
-        N113[trigonometry]
+        N171[arithmetic]
+        N172[index]
+        N173[signal]
+        N174[statistics]
+        N175[trigonometry]
+        N176[typed-bridge]
     end
 
     subgraph Unit
-        N114[to]
-        N115[toBest]
+        N177[to]
+        N178[toBest]
     end
 
     subgraph Utils
-        N116[array]
-        N117[bigint]
-        N118[bitwise]
-        N119[constants]
-        N120[formatter]
-        N121[...38 more]
+        N179[array]
+        N180[bigint]
+        N181[bitwise]
+        N182[constants]
+        N183[formatter]
+        N184[nearlyEqual]
+        N185[clone]
+        N186[collection]
+        N187[complex]
+        N188[customs.d]
+        N189[...36 more]
     end
 
     subgraph Wasm
-        N122[decomposition]
-        N123[equations]
-        N124[polynomial]
-        N125[schur]
-        N126[solver]
-        N127[...57 more]
+        N190[decomposition]
+        N191[equations]
+        N192[polynomial]
+        N193[schur]
+        N194[solver]
+        N195[amd]
+        N196[operations]
+        N197[utilities]
+        N198[sparseChol]
+        N199[sparseLu]
+        N200[...53 more]
     end
 
-    N4 --> N30
-    N4 --> N26
-    N6 --> N30
-    N8 --> N30
-    N9 --> N30
-    N9 --> N26
-    N10 --> N30
-    N10 --> N26
-    N12 --> N118
-    N12 --> N30
-    N13 --> N118
-    N13 --> N30
-    N14 --> N118
-    N14 --> N30
-    N15 --> N118
-    N15 --> N30
-    N16 --> N118
-    N16 --> N104
-    N16 --> N30
-    N18 --> N30
-    N19 --> N30
-    N20 --> N30
-    N21 --> N30
-    N22 --> N30
-    N23 --> N30
-    N24 --> N30
-    N25 --> N30
-    N27 --> N31
-    N27 --> N32
-    N27 --> N33
+    N4 --> N47
+    N4 --> N43
+    N5 --> N47
+    N6 --> N47
+    N7 --> N47
+    N8 --> N47
+    N8 --> N43
+    N9 --> N47
+    N11 --> N186
+    N11 --> N88
+    N11 --> N47
+    N13 --> N88
+    N13 --> N47
+    N14 --> N88
+    N14 --> N47
+    N14 --> N43
+    N15 --> N186
+    N15 --> N184
+    N15 --> N47
+    N15 --> N43
+    N16 --> N88
+    N16 --> N47
+    N18 --> N47
+    N19 --> N47
+    N20 --> N47
+    N22 --> N181
+    N22 --> N88
+    N22 --> N47
+    N23 --> N181
+    N23 --> N186
+    N23 --> N88
+    N23 --> N47
+    N24 --> N181
+    N24 --> N88
+    N24 --> N47
+    N25 --> N181
+    N25 --> N88
+    N25 --> N47
+    N26 --> N29
+    N26 --> N88
+    N26 --> N181
+    N26 --> N161
+    N26 --> N47
+    N27 --> N181
+    N27 --> N29
+    N27 --> N88
+    N27 --> N161
+    N27 --> N47
+    N28 --> N88
+    N28 --> N29
+    N28 --> N161
+    N28 --> N47
+    N29 --> N47
+    N30 --> N47
+    N31 --> N47
+    N32 --> N47
+    N33 --> N47
+    N34 --> N186
+    N34 --> N47
+    N35 --> N186
+    N35 --> N47
+    N36 --> N186
+    N36 --> N47
+    N37 --> N186
+    N37 --> N47
+    N38 --> N182
+    N38 --> N88
+    N38 --> N43
+    N44 --> N48
+    N44 --> N49
+    N44 --> N50
+    N44 --> N43
+    N45 --> N43
+    N46 --> N48
+    N46 --> N47
 ```
 
 ---
 
+<a id="summary-statistics"></a>
 ## Summary Statistics
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 739 |
-| Total Modules | 27 |
-| Total Lines of Code | 122907 |
-| Total Exports | 2742 |
-| Total Re-exports | 468 |
+| Total TypeScript Files | 750 |
+| Total Modules | 29 |
+| Total Lines of Code | 125273 |
+| Total Exports | 3366 |
+| Total Re-exports | 970 |
 | Total Classes | 10 |
-| Total Interfaces | 121 |
-| Total Functions | 1285 |
-| Total Type Guards | 102 |
+| Total Interfaces | 129 |
+| Total Functions | 1300 |
+| Total Type Guards | 105 |
 | Total Enums | 0 |
-| Type-only Imports | 377 |
-| Runtime Circular Deps | 0 |
+| Type-only Imports | 379 |
+| Runtime Circular Deps | 2 |
 | Type-only Circular Deps | 0 |
 
 ---
 
-*Last Updated*: 2026-02-06
+*Last Updated*: 2026-04-04
 *Version*: 0.1.0

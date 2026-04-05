@@ -1,6 +1,6 @@
-# @mathts/matrix - Dependency Graph
+# @danielsimonjr/mathts-matrix - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-02-06
+**Version**: 0.1.0 | **Last Updated**: 2026-04-04
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -9,18 +9,20 @@ This document provides a comprehensive dependency graph of all files, components
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Backends Dependencies](#backends-dependencies)
-3. [Root Dependencies](#root-dependencies)
-4. [Entry Dependencies](#entry-dependencies)
-5. [Operations Dependencies](#operations-dependencies)
-6. [Types Dependencies](#types-dependencies)
-7. [Dependency Matrix](#dependency-matrix)
-8. [Circular Dependency Analysis](#circular-dependency-analysis)
-9. [Visual Dependency Graph](#visual-dependency-graph)
-10. [Summary Statistics](#summary-statistics)
+2. [Package Dependencies](#package-dependencies)
+3. [Backends Dependencies](#backends-dependencies)
+4. [Root Dependencies](#root-dependencies)
+5. [Entry Dependencies](#entry-dependencies)
+6. [Operations Dependencies](#operations-dependencies)
+7. [Types Dependencies](#types-dependencies)
+8. [Dependency Matrix](#dependency-matrix)
+9. [Circular Dependency Analysis](#circular-dependency-analysis)
+10. [Visual Dependency Graph](#visual-dependency-graph)
+11. [Summary Statistics](#summary-statistics)
 
 ---
 
+<a id="overview"></a>
 ## Overview
 
 The codebase is organized into the following modules:
@@ -32,6 +34,8 @@ The codebase is organized into the following modules:
 - **types**: 5 files
 
 ---
+
+<a id="backends-dependencies"></a>
 
 ## Backends Dependencies
 
@@ -45,6 +49,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `BackendRegistry`
 - Interfaces: `BackendHints`, `MatrixBackend`
+- Types: `BackendType`
 - Constants: `DEFAULT_BACKEND_HINTS`, `backendRegistry`
 
 ---
@@ -63,6 +68,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `BackendManager`
 - Interfaces: `ExtendedBackendHints`
+- Types: `OperationType`
 - Functions: `createBackendManager`
 - Constants: `DEFAULT_EXTENDED_HINTS`, `backendManager`
 
@@ -80,6 +86,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `BatchExecutor`
 - Interfaces: `BatchOperation`, `BatchResult`, `BatchOptions`
+- Types: `BatchOperationType`
 
 ---
 
@@ -114,6 +121,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `GPUContext`
 - Interfaces: `GPUContextOptions`, `DeviceLostEvent`
+- Types: `GPUContextStatus`
 - Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
 
 ---
@@ -123,15 +131,15 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, type GPUAdapterInfo, type GPUCapabilities` | Re-export |
-| `./GPUContext.js` | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, type GPUContextOptions, type GPUContextStatus, type DeviceLostEvent` | Re-export |
-| `./BufferPool.js` | `BufferPool, type BufferPoolOptions` | Re-export |
-| `./ShaderManager.js` | `ShaderManager, BUILTIN_SHADERS, type ShaderSource, type PipelineConfig` | Re-export |
-| `./BatchExecutor.js` | `BatchExecutor, type BatchOperation, type BatchOperationType, type BatchResult, type BatchOptions` | Re-export |
-| `./Sync.js` | `SyncManager, createSyncManager, type SyncStrategy, type TransferDirection, type TransferRequest, type TransferResult, type SyncConfig` | Re-export |
+| `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
+| `./GPUContext.js` | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent` | Re-export |
+| `./BufferPool.js` | `BufferPool, BufferPoolOptions` | Re-export |
+| `./ShaderManager.js` | `ShaderManager, BUILTIN_SHADERS, ShaderSource, PipelineConfig` | Re-export |
+| `./BatchExecutor.js` | `BatchExecutor, BatchOperation, BatchOperationType, BatchResult, BatchOptions` | Re-export |
+| `./Sync.js` | `SyncManager, createSyncManager, SyncStrategy, TransferDirection, TransferRequest, TransferResult, SyncConfig` | Re-export |
 
 **Exports:**
-- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `type GPUAdapterInfo`, `type GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `type GPUContextOptions`, `type GPUContextStatus`, `type DeviceLostEvent`, `BufferPool`, `type BufferPoolOptions`, `ShaderManager`, `BUILTIN_SHADERS`, `type ShaderSource`, `type PipelineConfig`, `BatchExecutor`, `type BatchOperation`, `type BatchOperationType`, `type BatchResult`, `type BatchOptions`, `SyncManager`, `createSyncManager`, `type SyncStrategy`, `type TransferDirection`, `type TransferRequest`, `type TransferResult`, `type SyncConfig`
+- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `BUILTIN_SHADERS`, `ShaderSource`, `PipelineConfig`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
 
 ---
 
@@ -160,6 +168,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `SyncManager`
 - Interfaces: `TransferRequest`, `TransferResult`, `SyncConfig`
+- Types: `SyncStrategy`, `TransferDirection`
 - Functions: `createSyncManager`
 
 ---
@@ -174,6 +183,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `GPUBackend`
 - Interfaces: `GPUBackendOptions`
+- Types: `GPUBackendStatus`
 - Functions: `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`
 
 ---
@@ -206,16 +216,16 @@ The codebase is organized into the following modules:
 | `./JSBackend.js` | `jsBackend` | Import |
 | `./Backend.js` | `BackendRegistry, backendRegistry, DEFAULT_BACKEND_HINTS` | Re-export |
 | `./JSBackend.js` | `JSBackend, jsBackend` | Re-export |
-| `./ParallelBackend.js` | `ParallelBackend, parallelBackend, createParallelBackend, type ParallelBackendConfig` | Re-export |
-| `./WASMBackend.js` | `WASMBackend, wasmBackend, createWASMBackend, type WASMBackendConfig` | Re-export |
-| `./GPUMatrixBackend.js` | `GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, type GPUMatrixBackendConfig` | Re-export |
-| `./GPUBackend.js` | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, type GPUBackendOptions, type GPUBackendStatus` | Re-export |
-| `./BackendManager.js` | `BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, type ExtendedBackendHints, type OperationType` | Re-export |
+| `./ParallelBackend.js` | `ParallelBackend, parallelBackend, createParallelBackend, ParallelBackendConfig` | Re-export |
+| `./WASMBackend.js` | `WASMBackend, wasmBackend, createWASMBackend, WASMBackendConfig` | Re-export |
+| `./GPUMatrixBackend.js` | `GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, GPUMatrixBackendConfig` | Re-export |
+| `./GPUBackend.js` | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, GPUBackendOptions, GPUBackendStatus` | Re-export |
+| `./BackendManager.js` | `BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, ExtendedBackendHints, OperationType` | Re-export |
 | `./wasm/index.js` | `detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures` | Re-export |
 | `./gpu/index.js` | `hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager` | Re-export |
 
 **Exports:**
-- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `type ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `type WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `type GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `type GPUBackendOptions`, `type GPUBackendStatus`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `type ExtendedBackendHints`, `type OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`
+- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`
 
 ---
 
@@ -233,12 +243,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/backends/MatrixWasmBridge.ts` - Matrix WASM Bridge - Integrates WASM operations with mathjs Matrix types
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `@mathts/parallel` | `ParallelMatrix` |
+### `src/backends/MatrixWasmBridge.ts` - Matrix WASM Bridge - Integrates WASM operations with mathts Matrix types
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -248,6 +253,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `MatrixWasmBridge`
 - Interfaces: `MatrixOptions`
+- Constants: `WasmThresholds`
 
 ---
 
@@ -256,7 +262,7 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/parallel` | `computePool, ComputePool, ComputePoolConfig` |
+| `@danielsimonjr/mathts-parallel` | `computePool, ComputePool, ComputePoolConfig` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -315,11 +321,13 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `WasmLoader`
-- Interfaces: `WasmModule`
+- Interfaces: `WasmModule`, `LoadingMetrics`
 - Functions: `initWasm`
 - Constants: `wasmLoader`
 
 ---
+
+<a id="root-dependencies"></a>
 
 ## Root Dependencies
 
@@ -333,6 +341,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `BackendConfig`, `AdaptiveTuningConfig`, `ProfilingConfig`, `MatrixConfig`
+- Types: `BackendPreference`
 - Functions: `getConfig`, `setConfig`, `resetConfig`, `onConfigChange`, `setBackendPreference`, `setBackendThreshold`, `setBackendEnabled`, `getRecommendedBackend`, `forceBackend`, `enableProfiling`, `disableProfiling`, `enableAdaptiveTuning`, `disableAdaptiveTuning`, `configureAdaptiveTuning`
 - Constants: `DEFAULT_CONFIG`
 
@@ -352,9 +361,9 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped` |
-| `@mathts/parallel` | `computePool, ParallelResult` |
-| `@mathts/core` | `SignatureFunction` |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-parallel` | `computePool, ParallelResult` |
+| `@danielsimonjr/mathts-core` | `SignatureFunction` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -372,8 +381,8 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `mathTyped` |
-| `@mathts/core` | `SignatureFunction` |
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+| `@danielsimonjr/mathts-core` | `SignatureFunction` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -390,9 +399,15 @@ The codebase is organized into the following modules:
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@mathts/core` | `BackendType` |
+| `@danielsimonjr/mathts-core` | `BackendType` |
+
+**Exports:**
+- Interfaces: `MatrixOptions`
+- Types: `MatrixLike`, `StorageFormat`
 
 ---
+
+<a id="entry-dependencies"></a>
 
 ## Entry Dependencies
 
@@ -411,6 +426,8 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="operations-dependencies"></a>
+
 ## Operations Dependencies
 
 ### `src/operations/eig.ts` - Eigenvalue and Eigenvector Decomposition
@@ -426,11 +443,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./eig.js` | `eig, eigvals, powerIteration, type EigResult, type EigOptions` | Re-export |
-| `./svd.js` | `svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, type SVDResult, type SVDOptions` | Re-export |
+| `./eig.js` | `eig, eigvals, powerIteration, EigResult, EigOptions` | Re-export |
+| `./svd.js` | `svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, SVDResult, SVDOptions` | Re-export |
 
 **Exports:**
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `type EigResult`, `type EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `type SVDResult`, `type SVDOptions`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`
 
 ---
 
@@ -441,6 +458,8 @@ The codebase is organized into the following modules:
 - Functions: `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`
 
 ---
+
+<a id="types-dependencies"></a>
 
 ## Types Dependencies
 
@@ -476,11 +495,12 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `MatrixDimensions`, `MatrixIndex`, `SliceSpec`, `MatrixEntry`
+- Types: `MatrixType`
 - Functions: `isMatrix`
 
 ---
 
-### `src/types/parallel.d.ts` - Type declarations for @mathts/parallel package
+### `src/types/parallel.d.ts` - Type declarations for @danielsimonjr/mathts-parallel package
 
 **Exports:**
 - Classes: `ComputePool`
@@ -503,45 +523,50 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="dependency-matrix"></a>
 ## Dependency Matrix
 
 ### File Import/Export Matrix
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `Backend` | 1 files | 7 files |
-| `BackendManager` | 4 files | 2 files |
-| `BatchExecutor` | 3 files | 1 files |
-| `BufferPool` | 1 files | 3 files |
-| `detect` | 0 files | 2 files |
-| `GPUContext` | 1 files | 5 files |
-| `index` | 6 files | 3 files |
-| `ShaderManager` | 1 files | 2 files |
-| `Sync` | 2 files | 1 files |
-| `GPUBackend` | 1 files | 2 files |
-| `GPUMatrixBackend` | 5 files | 1 files |
-| `index` | 9 files | 1 files |
-| `JSBackend` | 2 files | 4 files |
-| `MatrixWasmBridge` | 1 files | 0 files |
-| `ParallelBackend` | 2 files | 1 files |
-| `detect` | 0 files | 2 files |
-| `index` | 1 files | 1 files |
-| `WASMBackend` | 5 files | 1 files |
-| `WasmLoader` | 0 files | 2 files |
-| `config` | 2 files | 1 files |
-| `index` | 4 files | 0 files |
-| `matrix` | 1 files | 0 files |
-| `eig` | 0 files | 1 files |
-| `index` | 2 files | 0 files |
-| `svd` | 0 files | 1 files |
-| `parallel-matrix` | 1 files | 1 files |
-| `typed-operations` | 1 files | 1 files |
-| `DenseMatrix` | 2 files | 10 files |
-| `index` | 3 files | 1 files |
-| `Matrix` | 0 files | 3 files |
+| `src/types/DenseMatrix` | 2 files | 10 files |
+| `src/backends/index` | 9 files | 1 file |
+| `src/backends/gpu/index` | 6 files | 3 files |
+| `src/backends/Backend` | 1 file | 7 files |
+| `src/backends/BackendManager` | 4 files | 2 files |
+| `src/backends/gpu/GPUContext` | 1 file | 5 files |
+| `src/backends/GPUMatrixBackend` | 5 files | 1 file |
+| `src/backends/JSBackend` | 2 files | 4 files |
+| `src/backends/WASMBackend` | 5 files | 1 file |
+| `src/backends/gpu/BatchExecutor` | 3 files | 1 file |
+| `src/backends/gpu/BufferPool` | 1 file | 3 files |
+| `src/index` | 4 files | 0 files |
+| `src/types/index` | 3 files | 1 file |
+| `src/types/SparseMatrix` | 2 files | 2 files |
+| `src/backends/gpu/ShaderManager` | 1 file | 2 files |
+| `src/backends/gpu/Sync` | 2 files | 1 file |
+| `src/backends/GPUBackend` | 1 file | 2 files |
+| `src/backends/ParallelBackend` | 2 files | 1 file |
+| `src/config` | 2 files | 1 file |
+| `src/types/Matrix` | 0 files | 3 files |
+| `src/backends/gpu/detect` | 0 files | 2 files |
+| `src/backends/wasm/detect` | 0 files | 2 files |
+| `src/backends/wasm/index` | 1 file | 1 file |
+| `src/backends/WasmLoader` | 0 files | 2 files |
+| `src/operations/index` | 2 files | 0 files |
+| `src/parallel-matrix` | 1 file | 1 file |
+| `src/typed-operations` | 1 file | 1 file |
+| `src/backends/MatrixWasmBridge` | 1 file | 0 files |
+| `src/matrix` | 1 file | 0 files |
+| `src/operations/eig` | 0 files | 1 file |
+| `src/operations/svd` | 0 files | 1 file |
+| `src/types` | 0 files | 1 file |
+| `src/types/parallel.d` | 0 files | 0 files |
 
 ---
 
+<a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
 **2 circular dependencies detected:**
@@ -558,6 +583,7 @@ These cycles only involve type imports and are safe (erased at runtime):
 
 ---
 
+<a id="visual-dependency-graph"></a>
 ## Visual Dependency Graph
 
 ```mermaid
@@ -568,72 +594,92 @@ graph TD
         N2[BatchExecutor]
         N3[BufferPool]
         N4[detect]
-        N5[...14 more]
+        N5[GPUContext]
+        N6[index]
+        N7[ShaderManager]
+        N8[Sync]
+        N9[GPUBackend]
+        N10[...9 more]
     end
 
     subgraph Root
-        N6[config]
-        N7[matrix]
-        N8[parallel-matrix]
-        N9[typed-operations]
-        N10[types]
+        N11[config]
+        N12[matrix]
+        N13[parallel-matrix]
+        N14[typed-operations]
+        N15[types]
     end
 
     subgraph Entry
-        N11[index]
+        N16[index]
     end
 
     subgraph Operations
-        N12[eig]
-        N13[index]
-        N14[svd]
+        N17[eig]
+        N18[index]
+        N19[svd]
     end
 
     subgraph Types
-        N15[DenseMatrix]
-        N16[index]
-        N17[Matrix]
-        N18[parallel.d]
-        N19[SparseMatrix]
+        N20[DenseMatrix]
+        N21[index]
+        N22[Matrix]
+        N23[parallel.d]
+        N24[SparseMatrix]
     end
 
-    N0 --> N15
-    N1 --> N15
+    N0 --> N20
+    N1 --> N20
     N1 --> N0
-    N1 --> N6
+    N1 --> N11
+    N2 --> N5
+    N2 --> N7
     N2 --> N3
-    N6 --> N0
-    N6 --> N1
-    N11 --> N16
-    N11 --> N9
-    N11 --> N8
-    N7 --> N10
-    N13 --> N12
-    N13 --> N14
-    N8 --> N15
-    N9 --> N15
-    N15 --> N17
-    N15 --> N19
-    N16 --> N17
-    N16 --> N15
-    N16 --> N19
-    N19 --> N17
-    N19 --> N15
+    N3 --> N5
+    N5 --> N4
+    N6 --> N4
+    N6 --> N5
+    N6 --> N3
+    N6 --> N7
+    N6 --> N2
+    N6 --> N8
+    N7 --> N5
+    N8 --> N5
+    N8 --> N3
+    N9 --> N6
+    N11 --> N0
+    N11 --> N1
+    N16 --> N21
+    N16 --> N14
+    N16 --> N13
+    N12 --> N15
+    N18 --> N17
+    N18 --> N19
+    N13 --> N20
+    N14 --> N20
+    N20 --> N22
+    N20 --> N24
+    N21 --> N22
+    N21 --> N20
+    N21 --> N24
+    N24 --> N22
+    N24 --> N20
 ```
 
 ---
 
+<a id="summary-statistics"></a>
 ## Summary Statistics
 
 | Category | Count |
 |----------|-------|
 | Total TypeScript Files | 33 |
 | Total Modules | 5 |
-| Total Lines of Code | 12031 |
-| Total Exports | 261 |
+| Total Lines of Code | 13378 |
+| Total Exports | 262 |
 | Total Re-exports | 111 |
 | Total Classes | 17 |
-| Total Interfaces | 39 |
+| Total Interfaces | 40 |
 | Total Functions | 54 |
 | Total Type Guards | 8 |
 | Total Enums | 0 |
@@ -643,5 +689,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-02-06
+*Last Updated*: 2026-04-04
 *Version*: 0.1.0

@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-workbook",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Scientific workbook runtime for MathTS (.mtsw format)",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
