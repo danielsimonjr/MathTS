@@ -9,6 +9,7 @@
  */
 
 import { factoryScope } from './scope.js';
+import { add, multiply } from '../typed/arithmetic.js';
 
 // ---------------------------------------------------------------------------
 // Tier 1: all imports
@@ -305,7 +306,6 @@ factoryScope.asech = asech;
 factoryScope.coth = coth;
 factoryScope.csch = csch;
 factoryScope.sech = sech;
-factoryScope.map = map;
 
 // ---------------------------------------------------------------------------
 // Tier 2: activate factories
@@ -353,7 +353,6 @@ factoryScope.isFinite = isFinite;
 factoryScope.isZero = isZero;
 factoryScope.prod = prod;
 factoryScope.dot = factory_dot;
-factoryScope.conj = conj;
 factoryScope.squeeze = squeeze;
 factoryScope.forEach = forEach;
 factoryScope.filter = filter;
@@ -1053,6 +1052,10 @@ factoryScope.subtract = factory_subtract;
 
 export const factory_divide = createDivide(factoryScope as any);
 factoryScope.divide = factory_divide;
+
+// Upgrade add/multiply from scalar stubs to full typed implementations
+factoryScope.add = add;
+factoryScope.multiply = multiply;
 
 export const ifft = createIfft(factoryScope as any);
 factoryScope.ifft = ifft;

@@ -129,7 +129,7 @@ export class WASMBackend implements MatrixBackend {
     try {
       // Use SIMD-optimized version if available
       if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdAddF64(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+        this.wasmModule!.simdAddF64(aAlloc.ptr, bAlloc.ptr, resultAlloc.ptr, elementCount);
       } else {
         this.wasmModule!.add(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
       }
@@ -159,7 +159,7 @@ export class WASMBackend implements MatrixBackend {
     try {
       // Use SIMD-optimized version if available
       if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdSubF64(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+        this.wasmModule!.simdSubF64(aAlloc.ptr, bAlloc.ptr, resultAlloc.ptr, elementCount);
       } else {
         this.wasmModule!.subtract(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
       }
@@ -189,9 +189,9 @@ export class WASMBackend implements MatrixBackend {
     try {
       // Use SIMD-optimized version if available
       if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdMulF64(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+        this.wasmModule!.simdMulF64(aAlloc.ptr, bAlloc.ptr, resultAlloc.ptr, elementCount);
       } else {
-        this.wasmModule!.simdMulF64(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
+        this.wasmModule!.simdMulF64(aAlloc.ptr, bAlloc.ptr, resultAlloc.ptr, elementCount);
       }
       const resultData = Array.from(new Float64Array(resultAlloc.array));
       return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
@@ -203,33 +203,7 @@ export class WASMBackend implements MatrixBackend {
   }
 
   divideElementwise(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
-    const elementCount = a.rows * a.cols;
-
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.divideElementwise(a, b);
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const bAlloc = wasmLoader.allocateFloat64Array(bData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
-
-    try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdMulF64(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
-      } else {
-        this.wasmModule!.simdMulF64(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
-      }
-      const resultData = Array.from(new Float64Array(resultAlloc.array));
-      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
-    } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(bAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
-    }
+    return jsBackend.divideElementwise(a, b);
   }
 
   scale(a: DenseMatrix, scalar: number): DenseMatrix {
@@ -246,7 +220,7 @@ export class WASMBackend implements MatrixBackend {
     try {
       // Use SIMD-optimized version if available
       if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdScaleF64(aAlloc.ptr, scalar, elementCount, resultAlloc.ptr);
+        this.wasmModule!.simdScaleF64(aAlloc.ptr, scalar, resultAlloc.ptr, elementCount);
       } else {
         this.wasmModule!.scalarMultiply(aAlloc.ptr, scalar, elementCount, resultAlloc.ptr);
       }
@@ -272,9 +246,9 @@ export class WASMBackend implements MatrixBackend {
     try {
       // Use SIMD-optimized version if available
       if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdAbsF64(aAlloc.ptr, elementCount, resultAlloc.ptr);
+        this.wasmModule!.simdAbsF64(aAlloc.ptr, resultAlloc.ptr, elementCount);
       } else {
-        this.wasmModule!.simdAbsF64(aAlloc.ptr, elementCount, resultAlloc.ptr);
+        this.wasmModule!.simdAbsF64(aAlloc.ptr, resultAlloc.ptr, elementCount);
       }
       const resultData = Array.from(new Float64Array(resultAlloc.array));
       return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
@@ -298,9 +272,9 @@ export class WASMBackend implements MatrixBackend {
     try {
       // Use SIMD-optimized version if available
       if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdScaleF64(aAlloc.ptr, -1, elementCount, resultAlloc.ptr);
+        this.wasmModule!.simdScaleF64(aAlloc.ptr, -1, resultAlloc.ptr, elementCount);
       } else {
-        this.wasmModule!.simdScaleF64(aAlloc.ptr, -1, elementCount, resultAlloc.ptr);
+        this.wasmModule!.simdScaleF64(aAlloc.ptr, -1, resultAlloc.ptr, elementCount);
       }
       const resultData = Array.from(new Float64Array(resultAlloc.array));
       return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
@@ -568,19 +542,17 @@ export class WASMBackend implements MatrixBackend {
     const aData = a.toFloat64Array();
     const aAlloc = wasmLoader.allocateFloat64Array(aData);
     const qAlloc = wasmLoader.allocateFloat64Array(new Float64Array(m * m));
-    const rAlloc = wasmLoader.allocateFloat64Array(new Float64Array(m * n));
 
     try {
       this.wasmModule!.qrDecomposition(aAlloc.ptr, m, n, qAlloc.ptr);
 
       return {
         q: DenseMatrix.fromFlat(m, m, Array.from(new Float64Array(qAlloc.array))),
-        r: DenseMatrix.fromFlat(m, n, Array.from(new Float64Array(rAlloc.array))),
+        r: DenseMatrix.fromFlat(m, n, Array.from(new Float64Array(aAlloc.array))),
       };
     } finally {
       wasmLoader.free(aAlloc.ptr);
       wasmLoader.free(qAlloc.ptr);
-      wasmLoader.free(rAlloc.ptr);
     }
   }
 

@@ -334,22 +334,15 @@ export async function parallelIFFT(
     };
   }
 
-  // Use the forward FFT, then normalize
-  const fwdResult = await parallelFFT(real, imag, {
-    ...options,
-    threshold: 0, // force parallel since we already checked
-  });
-
-  // The forward FFT used direction = -1. For inverse we need direction = +1
-  // and scaling by 1/n. Since we can't easily redo the direction, do a
-  // proper inverse here.
+  // Sequential IFFT — the parallel forward FFT cannot be reused for inverse
+  // since the twiddle factor direction differs.
   const result = sequentialFFT(real, imag, true);
 
   return {
     result,
     duration: performance.now() - start,
-    chunks: fwdResult.chunks,
-    parallelized: fwdResult.parallelized,
+    chunks: 1,
+    parallelized: false,
   };
 }
 

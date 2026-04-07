@@ -97,18 +97,18 @@ export async function eigWasm(
   const tolerance = options?.tolerance ?? 1e-12;
   const computeVectors = options?.computeVectors ?? true;
 
+  // Flatten matrix to row-major order
+  const flatMatrix = flattenMatrix(matrix);
+
+  // Allocate WASM memory
+  const matrixAlloc = wasmLoader.allocateFloat64Array(Array.from(flatMatrix));
+  const eigenvaluesAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+  const eigenvectorsAlloc = computeVectors
+    ? wasmLoader.allocateFloat64ArrayEmpty(n * n)
+    : { ptr: 0, array: new Float64Array(0) };
+  const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(2 * n);
+
   try {
-    // Flatten matrix to row-major order
-    const flatMatrix = flattenMatrix(matrix);
-
-    // Allocate WASM memory
-    const matrixAlloc = wasmLoader.allocateFloat64Array(Array.from(flatMatrix));
-    const eigenvaluesAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-    const eigenvectorsAlloc = computeVectors
-      ? wasmLoader.allocateFloat64ArrayEmpty(n * n)
-      : { ptr: 0, array: new Float64Array(0) };
-    const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(2 * n);
-
     // Call WASM eigsSymmetric
     const iterations = wasmModule.eigsSymmetric(
       matrixAlloc.ptr,
@@ -167,6 +167,13 @@ export async function eigWasm(
   } catch {
     // If WASM call fails for any reason, fall back to JS
     return eig(matrix, options);
+  } finally {
+    wasmLoader.free(matrixAlloc.ptr);
+    wasmLoader.free(eigenvaluesAlloc.ptr);
+    if (computeVectors && eigenvectorsAlloc.ptr !== 0) {
+      wasmLoader.free(eigenvectorsAlloc.ptr);
+    }
+    wasmLoader.free(workAlloc.ptr);
   }
 }
 
@@ -211,11 +218,11 @@ export async function spectralRadiusWasm(
   const maxIterations = options?.maxIterations ?? 1000;
   const tolerance = options?.tolerance ?? 1e-12;
 
-  try {
-    const flatMatrix = flattenMatrix(matrix);
-    const matrixAlloc = wasmLoader.allocateFloat64Array(Array.from(flatMatrix));
-    const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(2 * n);
+  const flatMatrix = flattenMatrix(matrix);
+  const matrixAlloc = wasmLoader.allocateFloat64Array(Array.from(flatMatrix));
+  const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(2 * n);
 
+  try {
     const radius = wasmModule.spectralRadius(
       matrixAlloc.ptr,
       n,
@@ -229,5 +236,8 @@ export async function spectralRadiusWasm(
     const { powerIteration } = await import('./eig.js');
     const result = powerIteration(matrix, options);
     return Math.abs(result.value);
+  } finally {
+    wasmLoader.free(matrixAlloc.ptr);
+    wasmLoader.free(workAlloc.ptr);
   }
 }

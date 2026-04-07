@@ -114,7 +114,7 @@ describe('type guard functions', () => {
       expect(isFraction(0.5)).toBe(false);
     });
     it('should detect BigNumber', () => {
-      expect(isBigNumber(new BigNumber('42'))).toBe(true);
+      expect(isBigNumber(BigNumber.fromNumber(42))).toBe(true);
       expect(isBigNumber(42)).toBe(false);
     });
     it('should return false for isMatrix on primitives', () => {

@@ -49,7 +49,7 @@ core/                      # @danielsimonjr/mathts-core - types, typed-function 
 matrix/                    # @danielsimonjr/mathts-matrix - DenseMatrix, SparseMatrix, backends (JS/WASM/GPU)
 functions/                 # @danielsimonjr/mathts-functions - math functions via typed dispatch
 parallel/                  # @danielsimonjr/mathts-parallel - ComputePool, WebWorker operations
-expression/                # @danielsimonjr/mathts-expression - parser/evaluator (build skipped, incomplete)
+expression/                # @danielsimonjr/mathts-expression - parser/evaluator
 workbook/                  # @danielsimonjr/mathts-workbook - .mtsw notebook runtime + CLI
 assembly/                  # WASM source (AssemblyScript, build broken)
 compat/                    # @danielsimonjr/mathts-compat - mathjs API compatibility shim

@@ -64,7 +64,11 @@ export function canUseSharedMemory(): boolean {
     return _canUseSharedMemory();
   }
   // Fallback: check SharedArrayBuffer global
-  return typeof SharedArrayBuffer !== 'undefined';
+  if (typeof SharedArrayBuffer === 'undefined') return false;
+  // In browsers without COOP/COEP headers, SharedArrayBuffer exists but
+  // instantiation throws. crossOriginIsolated must be true to use it safely.
+  if (typeof crossOriginIsolated !== 'undefined' && !crossOriginIsolated) return false;
+  return true;
 }
 
 // =============================================================================
@@ -643,7 +647,8 @@ export class MathWorkerPool {
     }
     this._totalTasksExecuted++;
     this._executionTimes.push(durationMs);
-    this._completionTimestamps.push(performance.now());
+    const now = performance.now();
+    this._completionTimestamps.push(now);
 
     // Trim execution times to max samples
     if (this._executionTimes.length > this._maxExecutionTimeSamples) {
@@ -651,7 +656,7 @@ export class MathWorkerPool {
     }
 
     // Trim completion timestamps outside window
-    const windowStart = performance.now() - this._metricsWindowMs;
+    const windowStart = now - this._metricsWindowMs;
     this._completionTimestamps = this._completionTimestamps.filter(
       (t) => t >= windowStart
     );

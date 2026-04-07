@@ -790,11 +790,25 @@ export class MathJSSparseMatrix {
         }
         // Row indices stay the same since both exist
       } else if (jPos !== -1) {
-        // Only row j has an entry — move it to row pi
-        index[jPos] = pi;
+        const vj = values ? values[jPos] : undefined;
+        // Remove old entry first
+        index.splice(jPos, 1);
+        if (values) values.splice(jPos, 1);
+        // Insert at sorted position for row pi
+        let insertPos = ptr[c];
+        const endPos = ptr[c + 1] - 1; // adjusted after removal
+        while (insertPos <= endPos && index[insertPos] < pi) insertPos++;
+        index.splice(insertPos, 0, pi);
+        if (values) values.splice(insertPos, 0, vj!);
       } else if (piPos !== -1) {
-        // Only row pi has an entry — move it to row j
-        index[piPos] = j;
+        const vpi = values ? values[piPos] : undefined;
+        index.splice(piPos, 1);
+        if (values) values.splice(piPos, 1);
+        let insertPos = ptr[c];
+        const endPos = ptr[c + 1] - 1;
+        while (insertPos <= endPos && index[insertPos] < j) insertPos++;
+        index.splice(insertPos, 0, j);
+        if (values) values.splice(insertPos, 0, vpi!);
       }
       // Neither row has entry — nothing to do
     }

@@ -1007,7 +1007,7 @@ export class BigNumber implements MathTSValue {
       k = Math.ceil(Math.log2(val * 2));
     }
 
-    const divisor = BigNumber.fromNumber(2 ** k);
+    const divisor = BigNumber.fromNumber(2).pow(k);
     const reduced = this.divide(divisor);
 
     // Taylor series for small argument

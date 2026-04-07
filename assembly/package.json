@@ -45,11 +45,11 @@
     "linear-algebra",
     "simd"
   ],
-  "author": "MathTS Contributors",
+  "author": "Daniel Simon Jr.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/danielsimonjr/MathTS.git",
+    "url": "https://github.com/danielsimonjr/mathts",
     "directory": "assembly"
   },
   "bugs": {

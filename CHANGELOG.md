@@ -120,6 +120,21 @@ First public release of all 10 @danielsimonjr/mathts-* packages to npm.
 - N/A
 
 ### Fixed
+- BigNumber.exp() overflow: `2**k` → `BigNumber.fromNumber(2).pow(k)` for large inputs
+- WASMBackend SIMD argument order: swapped resultPtr/length in 7 operations (add, subtract, mul, scale, abs, negate)
+- WASMBackend divideElementwise: was calling multiply — now delegates to JS backend
+- WASMBackend QR decomposition: was reading R from unwritten buffer — now reads from in-place aAlloc
+- eig-wasm memory leak: added try/finally to free WASM allocations in eigWasm and spectralRadiusWasm
+- parallelIFFT: removed wasteful forward FFT call, reports honest metadata
+- SparseMatrix _swapRows: splice-insert at sorted position instead of overwriting index (maintains CSC invariant)
+- factoryScope.add/multiply: upgraded from scalar stubs to full typed implementations after tier 12
+- workerpool canUseSharedMemory(): added crossOriginIsolated check for browser environments
+- workerpool _recordExecution(): single performance.now() snapshot prevents timestamp inconsistency
+- typed-function dep in functions/package.json: npm registry → github fork
+- turbo.json test tasks: `"dependsOn": ["build"]` → `["^build"]` for correct upstream ordering
+- Package.json fixes: workbook directory path, assembly author/URL, compat author/URL/dev deps
+- Tests using BigNumber private constructor → public fromNumber/parse
+- Removed duplicate factoryScope injections (map, conj)
 - All 10 packages now build (was 9/10 — assembly WASM was broken)
 - All 14 typecheck tasks now pass (was 9/14 — parallel, matrix, compat, expression, functions failed)
 - Test count: 54 files, 1,445 tests passing (was 51 files, 1,342 tests)

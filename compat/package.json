@@ -30,9 +30,9 @@
   },
   "devDependencies": {
     "@types/node": "^25.5.2",
-    "tsup": "^8.5.1",
-    "typescript": "^5.8.3",
-    "vitest": "^2.1.9"
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
   },
   "keywords": [
     "math",
@@ -41,11 +41,11 @@
     "compatibility",
     "migration"
   ],
-  "author": "",
+  "author": "Daniel Simon Jr.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/danielsimonjr/Mathts.git",
+    "url": "https://github.com/danielsimonjr/mathts",
     "directory": "compat"
   },
   "module": "./dist/index.js",

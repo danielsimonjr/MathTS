@@ -43,11 +43,11 @@ describe('Type Bridge', () => {
 
   describe('BigNumber duck-typing', () => {
     it('should have isBigNumber marker', () => {
-      const b = new BigNumber(42);
+      const b = BigNumber.fromNumber(42);
       expect((b as any).isBigNumber).toBe(true);
     });
     it('should have type property', () => {
-      const b = new BigNumber('3.14');
+      const b = BigNumber.parse('3.14');
       expect((b as any).type).toBe('BigNumber');
     });
   });
