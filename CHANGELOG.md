@@ -50,6 +50,9 @@ First public release of all 10 @danielsimonjr/mathts-* packages to npm.
 - WASM-accelerated SVD (`matrix/src/operations/svd-wasm.ts`) — derives SVD from eigendecomposition for symmetric matrices, Golub-Reinsch JS fallback
 - Parallel eigendecomposition (`parallel/src/operations/eig.ts`) — inlined QR algorithm (avoids circular deps), ParallelResult wrapper
 - Package scope rename: `@mathts/*` → `@danielsimonjr/mathts-*` for npm publishing under personal scope
+- typed-function: Symbol-based type identification (`TYPED_FUNCTION_TYPE`), safe conversions (`createSafeConversion`), robust multi-strategy type tests (`createRobustTypeTest`) — survives esbuild/minification
+- workerpool: SharedArrayBuffer helpers, Transferable support, eager worker init (`warmup()`), enhanced metrics (`enhancedStats()` with p95, throughput, utilization)
+- Rust WASM backend integration: `RustWasmLoader` singleton with bump allocator, `RustWASMBackend` implementing MatrixBackend, BackendManager routing heavy ops (FFT, eig, SVD) to Rust WASM
 - Initial project structure with monorepo setup
 - @danielsimonjr/mathts-core package with type definitions and utilities
 - GitHub Actions CI/CD workflows

@@ -48,6 +48,21 @@ export {
 } from './GPUBackend.js';
 
 export {
+  RustWASMBackend,
+  rustWasmBackend,
+  createRustWASMBackend,
+  type RustWASMBackendConfig,
+} from './RustWASMBackend.js';
+
+export {
+  RustWasmLoader,
+  rustWasmLoader,
+  initRustWasm,
+  type RustWasmExports,
+  type RustLoadingMetrics,
+} from './RustWasmLoader.js';
+
+export {
   BackendManager,
   backendManager,
   createBackendManager,

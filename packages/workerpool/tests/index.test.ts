@@ -6,6 +6,17 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   MathWorkerPool,
   DEFAULT_WORKER_CONFIG,
+  canUseSharedMemory,
+  createSharedFloat64Array,
+  createSharedBuffer,
+  isSharedBuffer,
+  getCapabilities,
+  transferFloat64,
+  transferArrayBuffer,
+  transferTypedArray,
+  type EnhancedPoolStats,
+  type PoolMetrics,
+  type WorkerpoolCapabilities,
 } from '../src/index.js';
 
 describe('@danielsimonjr/mathts-workerpool', () => {
@@ -345,6 +356,256 @@ describe('@danielsimonjr/mathts-workerpool', () => {
       expect(result.chunks).toBeGreaterThanOrEqual(1);
 
       await pool.terminate();
+    });
+  });
+
+  // ===========================================================================
+  // Issue 1: SharedArrayBuffer + Transferable Support
+  // ===========================================================================
+
+  describe('SharedArrayBuffer support', () => {
+    it('canUseSharedMemory should return a boolean', () => {
+      const result = canUseSharedMemory();
+      expect(typeof result).toBe('boolean');
+    });
+
+    it('should create SharedArrayBuffer-backed Float64Array', () => {
+      if (!canUseSharedMemory()) return;
+      const arr = createSharedFloat64Array(100);
+      expect(arr).toBeInstanceOf(Float64Array);
+      expect(arr.length).toBe(100);
+      expect(arr.buffer).toBeInstanceOf(SharedArrayBuffer);
+    });
+
+    it('should create SharedArrayBuffer of given byte length', () => {
+      if (!canUseSharedMemory()) return;
+      const sab = createSharedBuffer(1024);
+      expect(sab).toBeInstanceOf(SharedArrayBuffer);
+      expect(sab.byteLength).toBe(1024);
+    });
+
+    it('isSharedBuffer should detect SharedArrayBuffer', () => {
+      if (!canUseSharedMemory()) return;
+
+      const sab = new SharedArrayBuffer(64);
+      expect(isSharedBuffer(sab)).toBe(true);
+
+      const sabView = new Float64Array(sab);
+      expect(isSharedBuffer(sabView)).toBe(true);
+
+      // Regular ArrayBuffer should not match
+      const regular = new ArrayBuffer(64);
+      expect(isSharedBuffer(regular)).toBe(false);
+      expect(isSharedBuffer(new Float64Array(regular))).toBe(false);
+
+      // Non-buffer values
+      expect(isSharedBuffer(null)).toBe(false);
+      expect(isSharedBuffer(42)).toBe(false);
+      expect(isSharedBuffer('string')).toBe(false);
+    });
+  });
+
+  describe('Transferable support', () => {
+    it('transferFloat64 should wrap Float64Array', () => {
+      const arr = new Float64Array([1, 2, 3]);
+      const transfer = transferFloat64(arr);
+      expect(transfer).toBeDefined();
+    });
+
+    it('transferArrayBuffer should wrap ArrayBuffer', () => {
+      const buf = new ArrayBuffer(24);
+      const transfer = transferArrayBuffer(buf);
+      expect(transfer).toBeDefined();
+    });
+
+    it('transferTypedArray should wrap any TypedArray', () => {
+      const int32 = new Int32Array([1, 2, 3]);
+      const transfer = transferTypedArray(int32);
+      expect(transfer).toBeDefined();
+
+      const uint8 = new Uint8Array([10, 20, 30]);
+      const transfer2 = transferTypedArray(uint8);
+      expect(transfer2).toBeDefined();
+    });
+  });
+
+  // ===========================================================================
+  // Capabilities Detection
+  // ===========================================================================
+
+  describe('Capabilities detection', () => {
+    it('getCapabilities should return complete capability report', () => {
+      const caps: WorkerpoolCapabilities = getCapabilities();
+
+      expect(typeof caps.sharedArrayBuffer).toBe('boolean');
+      expect(typeof caps.transferable).toBe('boolean');
+      expect(typeof caps.atomics).toBe('boolean');
+      expect(typeof caps.crossOriginIsolated).toBe('boolean');
+      expect(typeof caps.maxWorkers).toBe('number');
+      expect(caps.maxWorkers).toBeGreaterThan(0);
+    });
+
+    it('transferable should be true in Node.js', () => {
+      const caps = getCapabilities();
+      expect(caps.transferable).toBe(true);
+    });
+  });
+
+  // ===========================================================================
+  // Issue 2: Worker Warmup / Eager Initialization
+  // ===========================================================================
+
+  describe('Worker warmup', () => {
+    it('warmup should pre-spawn workers', async () => {
+      const pool = new MathWorkerPool({ maxWorkers: 2 });
+      await pool.initialize();
+      await pool.warmup();
+
+      const stats = pool.stats();
+      expect(stats.totalWorkers).toBeGreaterThan(0);
+
+      await pool.terminate();
+    });
+
+    it('warmup with count should spawn specified workers', async () => {
+      const pool = new MathWorkerPool({ maxWorkers: 4 });
+      await pool.initialize();
+      await pool.warmup(2);
+
+      const stats = pool.stats();
+      expect(stats.totalWorkers).toBeGreaterThanOrEqual(1);
+
+      await pool.terminate();
+    });
+
+    it('warmup should work even if called before initialize', async () => {
+      const pool = new MathWorkerPool({ maxWorkers: 2 });
+      await pool.warmup();
+
+      expect(pool.isReady()).toBe(true);
+      const stats = pool.stats();
+      expect(stats.totalWorkers).toBeGreaterThan(0);
+
+      await pool.terminate();
+    });
+
+    it('eagerInit config should pre-spawn workers', async () => {
+      const pool = new MathWorkerPool({
+        maxWorkers: 2,
+        eagerInit: true,
+      });
+      await pool.initialize();
+      await pool.ready;
+
+      const stats = pool.stats();
+      expect(stats.totalWorkers).toBeGreaterThan(0);
+
+      await pool.terminate();
+    });
+
+    it('ready promise should resolve after eager init', async () => {
+      const pool = new MathWorkerPool({
+        maxWorkers: 2,
+        eagerInit: true,
+      });
+      await pool.initialize();
+
+      expect(pool.ready).toBeInstanceOf(Promise);
+      await pool.ready;
+
+      await pool.terminate();
+    });
+
+    it('default eagerInit should be false', () => {
+      expect(DEFAULT_WORKER_CONFIG.eagerInit).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // Issue 5: Enhanced Statistics
+  // ===========================================================================
+
+  describe('Enhanced statistics', () => {
+    it('enhancedStats should return base stats plus metrics', async () => {
+      const pool = new MathWorkerPool({ maxWorkers: 2 });
+      await pool.initialize();
+
+      const stats: EnhancedPoolStats = pool.enhancedStats();
+
+      // Base stats
+      expect(stats).toHaveProperty('totalWorkers');
+      expect(stats).toHaveProperty('busyWorkers');
+      expect(stats).toHaveProperty('idleWorkers');
+      expect(stats).toHaveProperty('pendingTasks');
+      expect(stats).toHaveProperty('activeTasks');
+
+      // Metrics
+      expect(stats.metrics).toBeDefined();
+      expect(typeof stats.metrics.totalTasksExecuted).toBe('number');
+      expect(typeof stats.metrics.totalTasksFailed).toBe('number');
+      expect(typeof stats.metrics.averageExecutionTime).toBe('number');
+      expect(typeof stats.metrics.p95ExecutionTime).toBe('number');
+      expect(typeof stats.metrics.throughput).toBe('number');
+      expect(typeof stats.metrics.taskQueueDepth).toBe('number');
+      expect(typeof stats.metrics.workerUtilization).toBe('number');
+
+      await pool.terminate();
+    });
+
+    it('metrics should start at zero', async () => {
+      const pool = new MathWorkerPool({ maxWorkers: 2 });
+      await pool.initialize();
+
+      const stats = pool.enhancedStats();
+      expect(stats.metrics.totalTasksExecuted).toBe(0);
+      expect(stats.metrics.totalTasksFailed).toBe(0);
+      expect(stats.metrics.averageExecutionTime).toBe(0);
+      expect(stats.metrics.p95ExecutionTime).toBe(0);
+
+      await pool.terminate();
+    });
+
+    it('metrics should track sequential task data', async () => {
+      const pool = new MathWorkerPool({
+        maxWorkers: 2,
+        parallelThreshold: 1000000,
+      });
+      await pool.initialize();
+
+      await pool.sum(new Float64Array([1, 2, 3]));
+      await pool.sum(new Float64Array([4, 5, 6]));
+      await pool.dot(new Float64Array([1, 2]), new Float64Array([3, 4]));
+
+      const stats = pool.enhancedStats();
+      expect(stats.metrics.totalTasksExecuted).toBeGreaterThanOrEqual(0);
+      expect(stats.metrics.workerUtilization).toBeGreaterThanOrEqual(0);
+      expect(stats.metrics.workerUtilization).toBeLessThanOrEqual(1);
+
+      await pool.terminate();
+    });
+
+    it('resetMetrics should clear all metrics', async () => {
+      const pool = new MathWorkerPool({ maxWorkers: 2 });
+      await pool.initialize();
+      await pool.warmup();
+
+      pool.resetMetrics();
+
+      const afterReset = pool.enhancedStats();
+      expect(afterReset.metrics.totalTasksExecuted).toBe(0);
+      expect(afterReset.metrics.totalTasksFailed).toBe(0);
+      expect(afterReset.metrics.averageExecutionTime).toBe(0);
+
+      await pool.terminate();
+    });
+
+    it('enhancedStats should work when pool is not initialized', () => {
+      const pool = new MathWorkerPool();
+      const stats = pool.enhancedStats();
+
+      expect(stats.totalWorkers).toBe(0);
+      expect(stats.metrics.totalTasksExecuted).toBe(0);
+      expect(stats.metrics.workerUtilization).toBe(0);
     });
   });
 });

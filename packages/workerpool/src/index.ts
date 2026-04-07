@@ -93,6 +93,137 @@ export function transferArrayBuffer(buffer: ArrayBuffer): Transfer {
   return new Transfer(buffer, [buffer]);
 }
 
+/**
+ * Mark a TypedArray for zero-copy transfer to worker.
+ * Works with any TypedArray type (Float32Array, Int32Array, Uint8Array, etc.)
+ *
+ * @param typedArray - The TypedArray to transfer
+ * @returns Transfer-wrapped typed array
+ */
+export function transferTypedArray(
+  typedArray: ArrayBufferView & { buffer: ArrayBuffer }
+): Transfer {
+  return new Transfer(typedArray, [typedArray.buffer]);
+}
+
+// =============================================================================
+// SharedArrayBuffer Helpers
+// =============================================================================
+
+/**
+ * Create a SharedArrayBuffer-backed Float64Array for zero-copy shared memory.
+ *
+ * SharedArrayBuffer allows multiple workers to read/write the same memory
+ * without any serialization or transfer overhead. Requires Cross-Origin-Isolation
+ * headers in browsers (`Cross-Origin-Opener-Policy: same-origin` and
+ * `Cross-Origin-Embedder-Policy: require-corp`).
+ *
+ * @param length - Number of Float64 elements
+ * @returns Float64Array backed by SharedArrayBuffer
+ * @throws Error if SharedArrayBuffer is not available
+ */
+export function createSharedFloat64Array(length: number): Float64Array {
+  if (!canUseSharedMemory()) {
+    throw new Error(
+      'SharedArrayBuffer is not available. ' +
+      'In browsers, Cross-Origin-Isolation headers are required.'
+    );
+  }
+  const sab = new SharedArrayBuffer(length * Float64Array.BYTES_PER_ELEMENT);
+  return new Float64Array(sab);
+}
+
+/**
+ * Create a SharedArrayBuffer of the specified byte length.
+ *
+ * @param byteLength - Size in bytes
+ * @returns SharedArrayBuffer
+ * @throws Error if SharedArrayBuffer is not available
+ */
+export function createSharedBuffer(byteLength: number): SharedArrayBuffer {
+  if (!canUseSharedMemory()) {
+    throw new Error(
+      'SharedArrayBuffer is not available. ' +
+      'In browsers, Cross-Origin-Isolation headers are required.'
+    );
+  }
+  return new SharedArrayBuffer(byteLength);
+}
+
+/**
+ * Check if a value is backed by SharedArrayBuffer
+ */
+export function isSharedBuffer(
+  value: unknown
+): value is SharedArrayBuffer | ArrayBufferView {
+  if (value instanceof SharedArrayBuffer) return true;
+  if (
+    value !== null &&
+    typeof value === 'object' &&
+    'buffer' in value &&
+    (value as ArrayBufferView).buffer instanceof SharedArrayBuffer
+  ) {
+    return true;
+  }
+  return false;
+}
+
+// =============================================================================
+// Capabilities Detection
+// =============================================================================
+
+/**
+ * Runtime capability information for the current environment
+ */
+export interface WorkerpoolCapabilities {
+  /** SharedArrayBuffer is available (zero-copy shared memory) */
+  sharedArrayBuffer: boolean;
+  /** Transferable objects are supported (zero-copy ownership transfer) */
+  transferable: boolean;
+  /** Atomics API is available (for SharedArrayBuffer synchronization) */
+  atomics: boolean;
+  /** Cross-Origin-Isolated context (browsers only, required for SAB) */
+  crossOriginIsolated: boolean;
+  /** Maximum recommended worker count */
+  maxWorkers: number;
+}
+
+/**
+ * Detect runtime capabilities for data transfer optimization.
+ *
+ * Use this to decide which transfer strategy to employ:
+ * - SharedArrayBuffer (best): zero-copy shared memory, requires Cross-Origin-Isolation in browsers
+ * - Transferable (good): zero-copy ownership transfer, works in all modern environments
+ * - JSON (fallback): always works but slow for large data
+ *
+ * @returns Capability report for the current environment
+ */
+export function getCapabilities(): WorkerpoolCapabilities {
+  const maxWorkers =
+    typeof navigator !== 'undefined'
+      ? navigator.hardwareConcurrency || 4
+      : (() => {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const os = require('os');
+            return os.cpus?.()?.length ?? 4;
+          } catch {
+            return 4;
+          }
+        })();
+
+  return {
+    sharedArrayBuffer: canUseSharedMemory(),
+    transferable: typeof ArrayBuffer !== 'undefined',
+    atomics: typeof Atomics !== 'undefined',
+    crossOriginIsolated:
+      typeof globalThis !== 'undefined' &&
+      'crossOriginIsolated' in globalThis &&
+      !!(globalThis as unknown as { crossOriginIsolated: boolean }).crossOriginIsolated,
+    maxWorkers,
+  };
+}
+
 // =============================================================================
 // WASM Support (Async)
 // =============================================================================
@@ -171,6 +302,13 @@ export interface WorkerPoolConfig {
   taskTimeout: number;
   /** Worker script path (optional) */
   workerScript?: string;
+  /**
+   * Eagerly spawn workers on pool creation instead of lazily on first task.
+   * When true, workers are pre-spawned during initialize() to eliminate
+   * cold-start latency on the first task.
+   * @default false
+   */
+  eagerInit?: boolean;
 }
 
 /**
@@ -187,6 +325,7 @@ export const DEFAULT_WORKER_CONFIG: WorkerPoolConfig = {
   workerType: 'auto',
   idleTimeout: 60000,
   taskTimeout: 300000, // 5 minutes
+  eagerInit: false,
 };
 
 /**
@@ -203,6 +342,34 @@ export interface ParallelResult<T> {
   parallelized: boolean;
   /** Number of workers used */
   workersUsed: number;
+}
+
+/**
+ * Performance metrics collected by the pool
+ */
+export interface PoolMetrics {
+  /** Total number of tasks executed since pool creation */
+  totalTasksExecuted: number;
+  /** Total number of tasks that failed */
+  totalTasksFailed: number;
+  /** Average task execution time in milliseconds */
+  averageExecutionTime: number;
+  /** P95 task execution time in milliseconds */
+  p95ExecutionTime: number;
+  /** Tasks completed per second (rolling 60s window) */
+  throughput: number;
+  /** Current task queue depth */
+  taskQueueDepth: number;
+  /** Worker utilization ratio (0-1): busyWorkers / totalWorkers */
+  workerUtilization: number;
+}
+
+/**
+ * Extended pool statistics including performance metrics
+ */
+export interface EnhancedPoolStats extends PoolStats {
+  /** Performance metrics (when metrics tracking is enabled) */
+  metrics: PoolMetrics;
 }
 
 /**
@@ -251,6 +418,20 @@ export class MathWorkerPool {
   private initialized = false;
   private initPromise: Promise<void> | null = null;
 
+  // Metrics tracking
+  private _totalTasksExecuted = 0;
+  private _totalTasksFailed = 0;
+  private _executionTimes: number[] = [];
+  private _completionTimestamps: number[] = [];
+  private _metricsWindowMs = 60_000; // 60s rolling window for throughput
+  private _maxExecutionTimeSamples = 1000; // Keep last 1000 samples for percentiles
+
+  /**
+   * Promise that resolves when the pool is fully ready (workers spawned).
+   * Particularly useful with `eagerInit: true`.
+   */
+  public ready: Promise<void> = Promise.resolve();
+
   constructor(config: Partial<WorkerPoolConfig> = {}) {
     this.config = { ...DEFAULT_WORKER_CONFIG, ...config };
   }
@@ -276,7 +457,9 @@ export class MathWorkerPool {
     }
 
     const options: PoolOptions = {
-      minWorkers: this.config.minWorkers,
+      minWorkers: this.config.eagerInit
+        ? (this.config.minWorkers === 0 ? this.config.maxWorkers : this.config.minWorkers)
+        : this.config.minWorkers,
       maxWorkers: this.config.maxWorkers,
       workerType: this.config.workerType,
       workerTerminateTimeout: this.config.idleTimeout,
@@ -290,6 +473,11 @@ export class MathWorkerPool {
     }
 
     this.initialized = true;
+
+    // If eager init, warm up workers by running a no-op on each
+    if (this.config.eagerInit && this.pool) {
+      this.ready = this._warmupWorkers(this.config.maxWorkers);
+    }
   }
 
   /**
@@ -297,6 +485,43 @@ export class MathWorkerPool {
    */
   isReady(): boolean {
     return this.initialized && (this.pool !== null || !this.config.enabled);
+  }
+
+  /**
+   * Pre-spawn and warm up workers to eliminate cold-start latency.
+   *
+   * Each worker is forced to execute a trivial task, ensuring the worker
+   * process/thread is fully initialized and ready to accept real work.
+   *
+   * @param count - Number of workers to warm up (defaults to maxWorkers)
+   * @returns Promise that resolves when all workers are warmed up
+   */
+  async warmup(count?: number): Promise<void> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+    if (!this.pool) return;
+
+    const workerCount = count ?? this.config.maxWorkers;
+    await this._warmupWorkers(workerCount);
+  }
+
+  private async _warmupWorkers(count: number): Promise<void> {
+    if (!this.pool) return;
+
+    // Fire `count` concurrent no-op tasks to force worker spawning
+    const tasks: Promise<unknown>[] = [];
+    for (let i = 0; i < count; i++) {
+      tasks.push(
+        this.pool
+          .exec(() => true, [])
+          .timeout(this.config.taskTimeout)
+          .catch(() => {
+            // Warmup failure is non-fatal
+          })
+      );
+    }
+    await Promise.all(tasks);
   }
 
   /**
@@ -344,6 +569,95 @@ export class MathWorkerPool {
   }
 
   /**
+   * Get enhanced pool statistics including performance metrics.
+   *
+   * Tracks task execution times, throughput, error rates, and worker utilization.
+   * Metrics are collected automatically for every task executed via exec().
+   *
+   * @returns Enhanced stats with metrics
+   */
+  enhancedStats(): EnhancedPoolStats {
+    const baseStats = this.stats();
+    const now = performance.now();
+
+    // Calculate average execution time
+    const avgExecTime =
+      this._executionTimes.length > 0
+        ? this._executionTimes.reduce((a, b) => a + b, 0) / this._executionTimes.length
+        : 0;
+
+    // Calculate p95 execution time
+    let p95ExecTime = 0;
+    if (this._executionTimes.length > 0) {
+      const sorted = [...this._executionTimes].sort((a, b) => a - b);
+      const idx = Math.ceil(sorted.length * 0.95) - 1;
+      p95ExecTime = sorted[Math.max(0, idx)];
+    }
+
+    // Calculate throughput (tasks/sec in rolling window)
+    const windowStart = now - this._metricsWindowMs;
+    const recentCompletions = this._completionTimestamps.filter(
+      (t) => t >= windowStart
+    );
+    const throughput =
+      recentCompletions.length > 0
+        ? recentCompletions.length / (this._metricsWindowMs / 1000)
+        : 0;
+
+    // Worker utilization
+    const utilization =
+      baseStats.totalWorkers > 0
+        ? baseStats.busyWorkers / baseStats.totalWorkers
+        : 0;
+
+    return {
+      ...baseStats,
+      metrics: {
+        totalTasksExecuted: this._totalTasksExecuted,
+        totalTasksFailed: this._totalTasksFailed,
+        averageExecutionTime: Math.round(avgExecTime * 100) / 100,
+        p95ExecutionTime: Math.round(p95ExecTime * 100) / 100,
+        throughput: Math.round(throughput * 100) / 100,
+        taskQueueDepth: baseStats.pendingTasks,
+        workerUtilization: Math.round(utilization * 1000) / 1000,
+      },
+    };
+  }
+
+  /**
+   * Reset collected performance metrics
+   */
+  resetMetrics(): void {
+    this._totalTasksExecuted = 0;
+    this._totalTasksFailed = 0;
+    this._executionTimes = [];
+    this._completionTimestamps = [];
+  }
+
+  /**
+   * Record a task execution for metrics tracking (called internally)
+   */
+  private _recordExecution(durationMs: number, failed: boolean): void {
+    if (failed) {
+      this._totalTasksFailed++;
+    }
+    this._totalTasksExecuted++;
+    this._executionTimes.push(durationMs);
+    this._completionTimestamps.push(performance.now());
+
+    // Trim execution times to max samples
+    if (this._executionTimes.length > this._maxExecutionTimeSamples) {
+      this._executionTimes = this._executionTimes.slice(-this._maxExecutionTimeSamples);
+    }
+
+    // Trim completion timestamps outside window
+    const windowStart = performance.now() - this._metricsWindowMs;
+    this._completionTimestamps = this._completionTimestamps.filter(
+      (t) => t >= windowStart
+    );
+  }
+
+  /**
    * Execute a method in the worker pool
    */
   async exec<T>(
@@ -361,7 +675,16 @@ export class MathWorkerPool {
     };
 
     const timeout = options?.taskTimeout ?? this.config.taskTimeout;
-    return this.pool.exec<T>(method, params, execOptions).timeout(timeout) as Promise<T>;
+    const execStart = performance.now();
+
+    try {
+      const result = await (this.pool.exec<T>(method, params, execOptions).timeout(timeout) as Promise<T>);
+      this._recordExecution(performance.now() - execStart, false);
+      return result;
+    } catch (err) {
+      this._recordExecution(performance.now() - execStart, true);
+      throw err;
+    }
   }
 
   /**
@@ -377,8 +700,17 @@ export class MathWorkerPool {
     }
 
     const timeout = options?.taskTimeout ?? this.config.taskTimeout;
-    // Use workerpool's ability to execute functions directly
-    return this.pool.exec<R>(fn as unknown as string, [arg]).timeout(timeout) as Promise<R>;
+    const execStart = performance.now();
+
+    try {
+      // Use workerpool's ability to execute functions directly
+      const result = await (this.pool.exec<R>(fn as unknown as string, [arg]).timeout(timeout) as Promise<R>);
+      this._recordExecution(performance.now() - execStart, false);
+      return result;
+    } catch (err) {
+      this._recordExecution(performance.now() - execStart, true);
+      throw err;
+    }
   }
 
   // =========================================================================
@@ -1548,6 +1880,7 @@ export class MathWorkerPool {
     }
     this.initialized = false;
     this.initPromise = null;
+    this.ready = Promise.resolve();
   }
 
   /**
