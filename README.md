@@ -7,15 +7,30 @@
 
 A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acceleration, featuring reactive scientific workbooks for computational physics and tensor mathematics.
 
+## What's New in v0.1.2
+
+All 10 packages are live on npm under the `@danielsimonjr/mathts-*` scope.
+
+- **242 mathjs factory functions activated** across 18 dependency tiers (89% of the mathjs function surface)
+- **String expression evaluation** — `evaluate('sin(pi/2)')` works end-to-end
+- **Expression compiler** — full 16-node AST interpreter with `parse()` and `compileExpr()`
+- **Dual WASM strategy** — AssemblyScript (SIMD) + Rust WASM (FFT, eigendecomposition, SVD)
+- **Symbol-based typed dispatch** — survives minification/esbuild
+- **workerpool improvements** — SharedArrayBuffer, eager warmup, p95/throughput metrics
+- **Bundle optimization** — 662 KB production total (57% reduction from 1524 KB dev)
+
 ## Features
 
-- **Native TypeScript** - Full type safety with compile-time type checking
-- **Parallel-First** - WebWorker-based parallelization via ComputePool
-- **Multi-Backend Acceleration** - Automatic selection between JS, WASM (SIMD), and WebGPU
-- **mathjs Compatible** - Drop-in replacement with `@danielsimonjr/mathts-compat`
-- **Scientific Workbooks** - YAML-based reactive notebooks (`.mtsw` format)
-- **Tree-Shakeable** - Full ESM support for minimal bundle sizes
-- **Physics-First** - Built for tensor mathematics and the Universal Physics Tensor Framework (UPTF)
+- **Native TypeScript** — Full type safety with compile-time type checking
+- **Expression Evaluation** — Parse and evaluate math strings (`evaluate('sin(pi/2)')`)
+- **242+ Math Functions** — Full mathjs function surface via factory activation
+- **Parallel-First** — WebWorker-based parallelization via ComputePool
+- **Dual WASM Acceleration** — AssemblyScript SIMD + Rust WASM for FFT, eig, SVD
+- **WebGPU Backend** — Compute shaders for matrices >100K elements
+- **mathjs Compatible** — Drop-in replacement with `@danielsimonjr/mathts-compat`
+- **Scientific Workbooks** — YAML-based reactive notebooks (`.mtsw` format)
+- **Tree-Shakeable** — Full ESM support, 662 KB production bundle
+- **Physics-First** — Built for tensor mathematics and the Universal Physics Tensor Framework (UPTF)
 
 ## Installation
 
@@ -44,12 +59,32 @@ npm install @danielsimonjr/mathts-core @danielsimonjr/mathts-functions @danielsi
 
 ```typescript
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
-import { add, multiply, sin, cos } from '@danielsimonjr/mathts-functions';
+import { add, multiply, sin, cos, evaluate } from '@danielsimonjr/mathts-functions';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 ```
 
 ## Quick Start
+
+### Expression Evaluation
+
+```typescript
+import { evaluate } from '@danielsimonjr/mathts-functions';
+
+// Evaluate math strings directly
+evaluate('sin(pi/2)');           // 1
+evaluate('sqrt(2)');             // 1.4142...
+evaluate('2^10');                // 1024
+evaluate('1 + 2i');             // Complex(1, 2)
+
+// Scoped evaluation
+evaluate('x^2 + y', { x: 3, y: 4 });  // 13
+
+// Reusable compiled expressions
+import { compileExpr } from '@danielsimonjr/mathts-functions';
+const expr = compileExpr('a * b + c');
+expr.evaluate({ a: 2, b: 3, c: 1 });  // 7
+```
 
 ### Complex Numbers
 
@@ -151,32 +186,98 @@ sin(new Complex(0, 1));   // Complex sinh(1)
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `@danielsimonjr/mathts-core` | Core types: Complex, Fraction, BigNumber, mathTyped |
-| `@danielsimonjr/mathts-functions` | Mathematical functions with typed dispatch |
-| `@danielsimonjr/mathts-matrix` | Dense and sparse matrices with backend selection |
-| `@danielsimonjr/mathts-parallel` | Parallel execution via ComputePool (Web Workers) |
-| `@danielsimonjr/mathts-compat` | mathjs compatibility layer |
-| `@danielsimonjr/mathts-workbook` | Scientific workbook runtime (.mtsw) |
+| Package | Version | Description |
+|---------|---------|-------------|
+| `@danielsimonjr/mathts-core` | 0.1.2 | Core types: Complex, Fraction, BigNumber, mathTyped |
+| `@danielsimonjr/mathts-functions` | 0.1.2 | 242+ math functions, typed dispatch, `evaluate()` |
+| `@danielsimonjr/mathts-matrix` | 0.1.2 | Dense/sparse matrices, JS/WASM/GPU backends, FFT, eig, SVD |
+| `@danielsimonjr/mathts-parallel` | 0.1.2 | ComputePool, parallel FFT/eig, Web Workers |
+| `@danielsimonjr/mathts-compat` | 0.1.2 | mathjs compatibility layer |
+| `@danielsimonjr/mathts-workbook` | 0.1.2 | Scientific workbook runtime (.mtsw) |
+| `@danielsimonjr/mathts-typed-function` | 0.1.2 | Symbol-based typed dispatch (forked, improved) |
+| `@danielsimonjr/mathts-workerpool` | 0.1.2 | Worker pool with SharedArrayBuffer, warmup, metrics |
 
 ## Architecture
 
-### Parallel-First Design
+### Factory Activation System
 
-MathTS uses Web Workers for all large computations:
+MathTS uses a tiered factory activation system that mirrors mathjs's factory pattern while layering on native TypeScript types:
+
+```
+mathjs factory functions (242 activated across 18 tiers)
+         ↓
+Factory scope injection (typed-function bridge, expression nodes)
+         ↓
+@danielsimonjr/mathts-core types (Complex, Fraction, BigNumber)
+         ↓
+evaluate('sin(pi/2)') → 1
+```
+
+The `evaluate()` function walks the activated scope, so all 242 factory functions (arithmetic, trigonometry, algebra, matrix operations, statistics, set operations, signal processing, and more) are available as named identifiers in expressions.
+
+### Expression Compiler
+
+The expression package provides a full math expression compiler with 16 AST node types:
+
+| Node Types | | |
+|-----------|---|---|
+| `ConstantNode` | `SymbolNode` | `OperatorNode` |
+| `FunctionNode` | `AssignmentNode` | `FunctionAssignmentNode` |
+| `ArrayNode` | `ObjectNode` | `IndexNode` |
+| `AccessorNode` | `RangeNode` | `BlockNode` |
+| `ConditionalNode` | `ParenthesisNode` | `RelationalNode` |
+
+The compiler (`compileExpr`) produces reusable compiled expressions. The evaluator (`evaluate`) wraps compile + evaluate in a single call with optional scope injection.
+
+### Dual WASM Strategy
+
+| Backend | Technology | Trigger | Operations |
+|---------|-----------|---------|------------|
+| **AssemblyScript WASM** | SIMD vectors | >1,000 elements | Element-wise, matrix multiply |
+| **Rust WASM** | Bump allocator | FFT/eig/SVD | FFT, eigendecomposition, SVD |
+| **WebGPU** | Compute shaders | >100,000 elements | Large matrix ops |
+| **JavaScript** | Default fallback | Always available | All operations |
+
+The `BackendManager` selects the optimal backend automatically. Both WASM backends fall back gracefully to JavaScript if unavailable.
+
+### Parallel-First Design
 
 ```
 User Code → ComputePool (workers) → WASM/GPU Backend → Result
 ```
 
-### Backend Selection
+All large computations dispatch to Web Workers via `ComputePool`. The workerpool package adds:
+- **SharedArrayBuffer** — zero-copy transfers for large arrays
+- **Eager warmup** — `pool.ready` promise, `warmup()` for pre-initialized workers
+- **Enhanced metrics** — `enhancedStats()` with p95 latency, throughput, worker utilization
 
-| Backend | Trigger | Use Case |
-|---------|---------|----------|
-| **JS** | Default | Small matrices, maximum compatibility |
-| **WASM** | >1,000 elements | Medium matrices, SIMD acceleration |
-| **WebGPU** | >100,000 elements | Large matrices, GPU compute shaders |
+### Symbol-Based Typed Dispatch
+
+The `typed-function` package uses `Symbol`-based type identification (`TYPED_FUNCTION_TYPE`) that survives minification and esbuild tree-shaking. A multi-strategy fallback (symbol → property → prototype) ensures type tests work across bundlers.
+
+## Performance
+
+Production bundle sizes (662 KB total, minified + tree-shaken):
+
+| Package | Size |
+|---------|------|
+| mathts-core | ~85 KB |
+| mathts-functions | ~180 KB |
+| mathts-matrix | ~220 KB |
+| mathts-parallel | ~95 KB |
+| mathts-compat | ~82 KB |
+
+Benchmark highlights (modern developer machine):
+
+| Operation | Performance |
+|-----------|------------|
+| Complex construction | ~500K ops/sec |
+| Typed dispatch (add) | ~200K ops/sec |
+| DenseMatrix 100×100 multiply | ~5K ops/sec |
+| FFT (1024 elements, WASM) | ~50K ops/sec |
+| Parallel sum (100K elements) | <5ms |
+
+See [Performance Guide](./docs/performance.md) for backend selection thresholds and tuning.
 
 ## Scientific Workbook
 
@@ -248,13 +349,20 @@ See the [Migration Guide](./docs/migration/guide.md) for detailed instructions.
 | `math.bignumber('123')` | `BigNumber.parse('123')` |
 | `bn.toNumber()` | `bn.valueOf()` |
 | `m.get([row, col])` | `m.get(row, col)` |
+| `math.evaluate('...')` | `evaluate('...')` |
 
 ## Documentation
 
+- [Getting Started](./docs/getting-started.md)
+- [Data Types](./docs/datatypes/) — Complex, Fraction, BigNumber, matrices
+- [Expression Syntax](./docs/expressions/) — parsing, compilation, security
+- [Core Reference](./docs/core/) — configuration, serialization, extension
+- [Function Reference](./docs/reference/) — all 242+ functions
+- [Performance Guide](./docs/performance.md)
+- [Backends](./docs/backends.md)
 - [API Differences](./docs/migration/api-diff.md)
 - [Migration Guide](./docs/migration/guide.md)
 - [Workbook Specification](./docs/Architecture/MATHTS_WORKBOOK_SPECIFICATION.md)
-- [Architecture Guide](./docs/Architecture/)
 
 ## Development
 
@@ -270,6 +378,9 @@ npm test
 
 # Type check
 npm run typecheck
+
+# Production build (minified + tree-shaken)
+npm run build:prod
 ```
 
 ## Contributing

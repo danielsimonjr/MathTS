@@ -73,6 +73,12 @@ First public release of all 10 @danielsimonjr/mathts-* packages to npm.
 - Integration plan and priority status tracker
 - Architecture docs updated (ARCHITECTURE.md, API.md, DATAFLOW.md, OVERVIEW.md)
 - Per-package dependency graphs regenerated for all 9 packages (+ new: expression, assembly)
+- User-facing documentation modeled after mathjs:
+  - `docs/datatypes/` (7 files): numbers, complex, fractions, bignumbers, matrices, bigints
+  - `docs/expressions/` (6 files): syntax, parsing, algebra, security, expression trees
+  - `docs/core/` (4 files): configuration, extension, serialization
+  - `docs/reference/` (4 files): classes, constants, functions
+- README.md updated with v0.1.2 capabilities: evaluate(), 242 factories, dual WASM, bundle sizes
 
 ### Changed
 - Synced mathjs factory code uses correct import paths (./function/ prefix stripped, depth-agnostic ../ reduction)
