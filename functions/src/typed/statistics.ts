@@ -698,6 +698,116 @@ export const parallelStatHistogram = mathTyped('parallelStatHistogram', {
 });
 
 // =============================================================================
+// Selection Algorithms
+// =============================================================================
+
+/**
+ * Select the k-th smallest element from an array using Hoare's quickselect algorithm.
+ * Average O(n) time complexity.
+ *
+ * @param arr - Input array (not modified)
+ * @param k - Zero-based index of the desired order statistic
+ * @returns The k-th smallest element
+ */
+export function quickSelect(arr: number[], k: i32): f64 {
+  if (k < 0 || k >= arr.length) {
+    throw new RangeError(`k=${k} is out of range for array of length ${arr.length}`);
+  }
+  const a = arr.slice(); // work on a copy
+  return _quickSelect(a, 0, a.length - 1, k);
+}
+
+function _quickSelect(a: number[], lo: i32, hi: i32, k: i32): f64 {
+  while (lo < hi) {
+    // Median-of-three pivot selection
+    const mid: i32 = (lo + hi) >>> 1;
+    if (a[mid] < a[lo]) { const t = a[lo]; a[lo] = a[mid]; a[mid] = t; }
+    if (a[hi] < a[lo]) { const t = a[lo]; a[lo] = a[hi]; a[hi] = t; }
+    if (a[mid] < a[hi]) { const t = a[mid]; a[mid] = a[hi]; a[hi] = t; }
+    const pivot: f64 = a[hi];
+
+    let i: i32 = lo;
+    let j: i32 = hi - 1;
+    while (true) {
+      while (a[i] < pivot) i++;
+      while (j > lo && a[j] > pivot) j--;
+      if (i >= j) break;
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+      i++;
+      j--;
+    }
+    const t = a[i]; a[i] = a[hi]; a[hi] = t;
+
+    if (k === i) return a[i];
+    if (k < i) hi = i - 1;
+    else lo = i + 1;
+  }
+  return a[lo];
+}
+
+/**
+ * Find the median of an array in O(n) average time using quickselect.
+ *
+ * @param arr - Input array (not modified)
+ * @returns The median value
+ */
+export function medianSelect(arr: number[]): f64 {
+  const n: i32 = arr.length;
+  if (n === 0) return NaN;
+  if (n === 1) return arr[0];
+
+  const mid: i32 = Math.floor(n / 2);
+  if (n % 2 === 1) {
+    return quickSelect(arr, mid);
+  }
+  // For even length, average of two middle elements
+  const a = arr.slice();
+  const lower = _quickSelect(a, 0, a.length - 1, mid - 1);
+  const upper = _quickSelect(a, 0, a.length - 1, mid);
+  return (lower + upper) / 2;
+}
+
+/**
+ * Find the k smallest elements from an array.
+ *
+ * @param arr - Input array (not modified)
+ * @param k - Number of smallest elements to return
+ * @returns Array of k smallest elements, sorted ascending
+ */
+export function minSelect(arr: number[], k: i32): number[] {
+  if (k <= 0) return [];
+  if (k >= arr.length) return arr.slice().sort((a, b) => a - b);
+
+  const a = arr.slice();
+  // Partition around the k-th smallest
+  _quickSelect(a, 0, a.length - 1, k - 1);
+  // Everything in a[0..k-1] is <= a[k-1], just sort that portion
+  const result = a.slice(0, k);
+  result.sort((x, y) => x - y);
+  return result;
+}
+
+/**
+ * Find the k largest elements from an array.
+ *
+ * @param arr - Input array (not modified)
+ * @param k - Number of largest elements to return
+ * @returns Array of k largest elements, sorted descending
+ */
+export function maxSelect(arr: number[], k: i32): number[] {
+  if (k <= 0) return [];
+  if (k >= arr.length) return arr.slice().sort((a, b) => b - a);
+
+  const a = arr.slice();
+  // Partition around (n-k)-th smallest to get k largest at the end
+  const pivot: i32 = a.length - k;
+  _quickSelect(a, 0, a.length - 1, pivot);
+  const result = a.slice(pivot);
+  result.sort((x, y) => y - x);
+  return result;
+}
+
+// =============================================================================
 // Export All Parallel Statistics Functions
 // =============================================================================
 
@@ -722,6 +832,10 @@ export const typedStatistics = {
   cumsum: parallelStatCumsum,
   quantile: parallelStatQuantile,
   histogram: parallelStatHistogram,
+  quickSelect,
+  medianSelect,
+  minSelect,
+  maxSelect,
 };
 
 /**

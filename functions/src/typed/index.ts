@@ -33,6 +33,27 @@ export { typedStatistics } from './statistics.js';
 export * from './signal.js';
 export { typedSignal } from './signal.js';
 
+// Special functions (erf, beta, bessel, etc.)
+export * from './special.js';
+export { typedSpecial } from './special.js';
+
+// Probability distribution functions
+export * from './distributions.js';
+export { typedDistributions } from './distributions.js';
+
+// Geometry functions (pure math)
+export * from './geometry.js';
+
+
+// Numerical integration functions (plain exports - callback arguments)
+export * from './integration.js';
+
+// Interpolation functions (plain exports - return functions)
+export * from './interpolation.js';
+
+// Extended combinatorics functions (mathTyped dispatch)
+export * from './combinatorics.js';
+
 // =============================================================================
 // Combined Exports
 // =============================================================================
@@ -41,16 +62,27 @@ import { typedArithmetic } from './arithmetic.js';
 import { typedTrigonometry } from './trigonometry.js';
 import { typedStatistics } from './statistics.js';
 import { typedSignal } from './signal.js';
+import { fibonacci, lucas, doubleFactorial, risingFactorial, fallingFactorial, subfactorial } from './combinatorics.js';
+import { typedSpecial } from './special.js';
+import { typedDistributions } from './distributions.js';
 
 /**
  * All typed functions combined (parallel-first)
  *
- * This includes all arithmetic, trigonometric, statistics, and signal
- * processing functions with automatic parallel execution for Float64Array.
+ * This includes all arithmetic, trigonometric, statistics, signal
+ * processing, special, and probability distribution functions.
  */
 export const typedFunctions = {
   ...typedArithmetic,
   ...typedTrigonometry,
   ...typedStatistics,
   ...typedSignal,
+  fibonacci,
+  lucas,
+  doubleFactorial,
+  risingFactorial,
+  fallingFactorial,
+  subfactorial,
+  ...typedSpecial,
+  ...typedDistributions,
 };

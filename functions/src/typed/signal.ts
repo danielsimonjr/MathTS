@@ -380,6 +380,151 @@ export const parallelAutoCorr = mathTyped('parallelAutoCorr', {
 });
 
 // =============================================================================
+// Cross-Correlation (sequential, pure function)
+// =============================================================================
+
+/**
+ * Cross-correlation of two real signals via sliding dot product.
+ * Returns array of length (a.length + b.length - 1).
+ *
+ * @param a - First signal
+ * @param b - Second signal
+ * @returns Cross-correlation array
+ */
+export function crossCorrelation(a: number[], b: number[]): number[] {
+  const na: i32 = a.length;
+  const nb: i32 = b.length;
+  if (na === 0 || nb === 0) return [];
+  const len: i32 = na + nb - 1;
+  const result: number[] = new Array(len).fill(0);
+  // Output index k corresponds to lag = k - (nb - 1)
+  // R[k] = sum_j a[j] * b[j - lag] = sum_j a[j] * b[j - k + nb - 1]
+  for (let k: i32 = 0; k < len; k++) {
+    let sum: f64 = 0;
+    const lag: i32 = k - (nb - 1);
+    for (let j: i32 = 0; j < na; j++) {
+      const bi: i32 = j - lag;
+      if (bi >= 0 && bi < nb) {
+        sum += a[j] * b[bi];
+      }
+    }
+    result[k] = sum;
+  }
+  return result;
+}
+
+/**
+ * Auto-correlation of a signal (cross-correlation with itself).
+ *
+ * @param a - Input signal
+ * @returns Auto-correlation array
+ */
+export function autoCorrelation(a: number[]): number[] {
+  return crossCorrelation(a, a);
+}
+
+// =============================================================================
+// Group Delay
+// =============================================================================
+
+/**
+ * Compute the group delay of a digital filter defined by numerator and
+ * denominator polynomial coefficients.
+ *
+ * Group delay is the negative derivative of the phase response with
+ * respect to angular frequency.
+ *
+ * @param b - Numerator coefficients (FIR for IIR: b/a)
+ * @param a - Denominator coefficients (use [1] for FIR)
+ * @param w - Optional array of angular frequencies; defaults to 512 points in [0, pi]
+ * @returns Object with { w: number[], delay: number[] }
+ */
+export function groupDelay(
+  b: number[],
+  a: number[],
+  w?: number[]
+): { w: number[]; delay: number[] } {
+  const nFreqs: i32 = w ? w.length : 512;
+  const freqs: number[] = w
+    ? w
+    : Array.from({ length: nFreqs }, (_, i) => (i * Math.PI) / (nFreqs - 1));
+
+  const delay: number[] = new Array(nFreqs);
+
+  for (let fi: i32 = 0; fi < nFreqs; fi++) {
+    const omega: f64 = freqs[fi];
+
+    // Evaluate B(e^jw) and its derivative
+    let bRe: f64 = 0,
+      bIm: f64 = 0,
+      dbRe: f64 = 0,
+      dbIm: f64 = 0;
+    for (let k: i32 = 0; k < b.length; k++) {
+      const c: f64 = Math.cos(k * omega);
+      const s: f64 = Math.sin(k * omega);
+      bRe += b[k] * c;
+      bIm -= b[k] * s;
+      dbRe -= k * b[k] * s;
+      dbIm -= k * b[k] * c;
+    }
+
+    // Evaluate A(e^jw) and its derivative
+    let aRe: f64 = 0,
+      aIm: f64 = 0,
+      daRe: f64 = 0,
+      daIm: f64 = 0;
+    for (let k: i32 = 0; k < a.length; k++) {
+      const c: f64 = Math.cos(k * omega);
+      const s: f64 = Math.sin(k * omega);
+      aRe += a[k] * c;
+      aIm -= a[k] * s;
+      daRe -= k * a[k] * s;
+      daIm -= k * a[k] * c;
+    }
+
+    // H = B/A, group delay = -d(angle(H))/dw
+    // Using: gd = Re{ (B'*A - B*A') / (B*A) } where ' = d/dw (complex)
+    // Simplification: gd = Re{B'/B} - Re{A'/A}
+    const bMagSq: f64 = bRe * bRe + bIm * bIm;
+    const aMagSq: f64 = aRe * aRe + aIm * aIm;
+
+    if (bMagSq < 1e-30 || aMagSq < 1e-30) {
+      delay[fi] = 0;
+    } else {
+      // gd = -Im{H'/H} = Im{A'/A} - Im{B'/B}
+      // Im{X'/X} = (X'_im * X_re - X'_re * X_im) / |X|^2
+      const imBB: f64 = (dbIm * bRe - dbRe * bIm) / bMagSq;
+      const imAA: f64 = (daIm * aRe - daRe * aIm) / aMagSq;
+      delay[fi] = imAA - imBB;
+    }
+  }
+
+  return { w: freqs, delay };
+}
+
+// =============================================================================
+// Unwrap Phase
+// =============================================================================
+
+/**
+ * Unwrap phase angles by adding +/-2*pi to remove discontinuities.
+ *
+ * @param phase - Array of phase values in radians
+ * @returns Unwrapped phase array
+ */
+export function unwrapPhase(phase: number[]): number[] {
+  if (phase.length === 0) return [];
+  const result = [...phase];
+  for (let i: i32 = 1; i < result.length; i++) {
+    let diff: f64 = result[i] - result[i - 1];
+    while (diff > Math.PI) diff -= 2 * Math.PI;
+    while (diff < -Math.PI) diff += 2 * Math.PI;
+    result[i] = result[i - 1] + diff;
+  }
+  return result;
+}
+
+// =============================================================================
 // Export All Signal Functions
 // =============================================================================
 
@@ -394,6 +539,10 @@ export const typedSignal = {
   conv: parallelConv,
   xcorr: parallelXCorr,
   autocorr: parallelAutoCorr,
+  crossCorrelation,
+  autoCorrelation,
+  groupDelay,
+  unwrapPhase,
 };
 
 /**

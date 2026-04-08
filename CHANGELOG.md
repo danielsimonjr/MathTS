@@ -11,6 +11,18 @@ First public release of all 10 @danielsimonjr/mathts-* packages to npm.
 
 ### Added
 
+#### New Math Functions (60 — beyond mathjs)
+- Special functions (8): erfc, beta, gammainc (incomplete gamma), digamma, besselJ0, besselJ1, besselY0, besselY1
+- Probability distributions (10): normalPDF, normalCDF, exponentialPDF, exponentialCDF, poissonPMF, binomialPMF, geometricPMF, bernoulliPMF, entropy, jsDivergence
+- Numerical integration (4): trapz, simpson, gaussQuad (Gauss-Legendre), romberg (adaptive)
+- Interpolation (6): linearInterp, lagrangeInterp, cubicSpline, hermiteInterp, pchipInterp, polyFit
+- Extended combinatorics (6): fibonacci (fast doubling), lucas, doubleFactorial, risingFactorial, fallingFactorial, subfactorial
+- Geometry (18): angle2D/3D, cross3D, dot3D, triangleArea, polygonArea, convexHull (Andrew's monotone chain), pointInPolygon (ray casting), rotateVector2D/3D (Rodrigues), reflectVector, projectVector, distance2D/3D/ND, distancePointToLine2D, intersectLines2D, intersectSegments2D
+- Signal processing (4): crossCorrelation, autoCorrelation, groupDelay, unwrapPhase
+- Statistics selection (4): quickSelect (Hoare's O(n)), medianSelect, minSelect, maxSelect
+- 56 embedded doc files for all new functions
+- 260 new tests covering all functions against known reference values
+
 #### Core Types & Type System
 - 22 math methods on BigNumber: trig (sin, cos, tan, asin, acos, atan), hyperbolic (sinh, cosh, tanh, asinh, acosh, atanh), transcendental (exp, ln, log10, log2, cbrt, expm1), other (mod, log1p, atan2, hypot) — all pure BigNumber arithmetic with Taylor series
 - Instance `compare()` method on BigNumber and Fraction (delegates to `compareTo()`)
