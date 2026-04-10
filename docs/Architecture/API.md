@@ -319,7 +319,7 @@ WASM bindings: `loadWasm()`, `loadWasmSync()`, `MathTSWasm` (instance type)
 
 ### Rust WASM (`wasm-rust/`) — Primary
 
-826 exported functions compiled from 63 Rust source files (~18,500 lines). Binary: `lib/wasm/mathjs.wasm` (669 KB). Crates: **faer** (linear algebra), **rustfft** (FFT), **statrs** (statistics/special functions), **libm** (portable math).
+**1,017 exported functions** — 826 core compiled from 63 Rust source files (~18,500 lines) + 192 AssemblyScript compat wrappers (`src/compat/`) providing full AS parity. Binary: `lib/wasm/mathjs.wasm` (669 KB). Crates: **faer** (linear algebra), **rustfft** (FFT), **statrs** (statistics/special functions), **libm** (portable math).
 
 WASM bindings (same interface as AssemblyScript): `loadWasm()`, `loadWasmSync()`, `MathTSWasm`
 

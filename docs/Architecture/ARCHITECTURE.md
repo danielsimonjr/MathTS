@@ -117,7 +117,9 @@ AssemblyScript compiles to WebAssembly with 432 exports across 10 source files:
 
 #### 6b. Rust WASM (Primary — `wasm-rust/`)
 
-A Cargo workspace with the `mathts-wasm` crate. 63 Rust source files, ~18,500 lines, 826 wasm-bindgen exports. Compiled output: `lib/wasm/mathjs.wasm` (669 KB).
+A Cargo workspace with the `mathts-wasm` crate. 63 Rust source files, ~18,500 lines, **1,017 wasm-bindgen exports** (826 core + 192 AssemblyScript compat wrappers in `wasm-rust/crates/mathts-wasm/src/compat/`). Compiled output: `lib/wasm/mathjs.wasm` (669 KB).
+
+The `compat/` module provides full AssemblyScript API parity — every function previously exported by the AssemblyScript backend is now available through the Rust backend, making the dual-backend strategy complete.
 
 Key crate dependencies:
 

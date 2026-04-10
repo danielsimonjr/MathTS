@@ -97,7 +97,7 @@ Three main systems:
 
 `@danielsimonjr/mathts-matrix` supports three backends with automatic selection via `BackendManager`:
 - **JSBackend** - Pure TypeScript (default, always available)
-- **WASMBackend** - AssemblyScript with SIMD (>1K elements)
+- **WASMBackend** - Rust WASM primary (1,017 exports, full AS parity) or AssemblyScript legacy (>1K elements)
 - **GPUBackend** - WebGPU compute shaders (>100K elements)
 
 ### `@danielsimonjr/mathts-compat` Pattern

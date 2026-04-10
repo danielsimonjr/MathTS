@@ -65,7 +65,14 @@
 - **BackendManager** — adaptive threshold tuning at runtime
 - **Decompositions** — SVD, LU, QR, Cholesky, eigendecomposition
 
-### WASM (432 exported operations)
+### WASM
+
+**Rust WASM (primary) — 1,017 exports**:
+- 826 core Rust exports (arithmetic, linear algebra, FFT, statistics, special functions)
+- 192 AssemblyScript compat wrappers (`wasm-rust/crates/mathts-wasm/src/compat/`) — full AS parity achieved
+- Dual-backend migration is complete; Rust backend supersedes AssemblyScript for all operations
+
+**AssemblyScript WASM (legacy, benchmarking) — 432 exports**:
 - Scalar: 52 ops (arithmetic, trig, transcendental)
 - Array: 36 ops (element-wise, norms, dot products)
 - Matrix: 41 ops (multiply, transpose, LU, QR, determinant)
@@ -95,7 +102,8 @@
 | expression | 391 | 20,993 | 2 | 608 |
 | workbook | 6 | 690 | 3 | 29 |
 | compat | 3 | 883 | 2 | 132 |
-| assembly (WASM) | 10 | 3,324 | 0 | 432 |
+| assembly (WASM-AS) | 10 | 3,324 | 0 | 432 |
+| wasm-rust | 63 | ~18,500 | — | 1,017 |
 | typed-function | 2 | 692 | 2 | 62 |
 | workerpool | 3 | 2,637 | 1 | 37 |
 

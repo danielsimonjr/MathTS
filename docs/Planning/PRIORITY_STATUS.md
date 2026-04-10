@@ -37,7 +37,7 @@ All integration tasks complete:
 | Plan | Status | Depends On |
 |------|--------|-----------|
 | Workbook ↔ expression integration | Deferred | Independent |
-| Rust WASM migration | 75 .rs files exist | Independent |
+| Rust WASM migration | **COMPLETE** — 1,017 exports, full AS parity via 192 compat wrappers | Independent |
 | Scientific calculator (Electron) | Not started | Factory activation (done) |
 | ISE Workbench (3-zone layout) | Not started (0/16) | Expression evaluator (done) |
 | Deno notebook | Not started | Workbook + Expression |

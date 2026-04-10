@@ -8,8 +8,9 @@ MathTS provides a three-tier backend system for matrix operations that automatic
 - **Status**: Production — primary backend as of April 2026
 - **Best for:** Medium and large matrices (>500 elements); replaces AssemblyScript as the default
 - **Binary**: `lib/wasm/mathjs.wasm` — 669 KB release build
-- **Source**: `src/wasm-rust/` (workspace) → `src/wasm-rust/crates/mathjs-wasm/` (63 `.rs` files, ~18,500 lines)
-- **Exports**: 826 functions via `wasm-bindgen`
+- **Source**: `src/wasm-rust/` (workspace) → `src/wasm-rust/crates/mathts-wasm/` (63 `.rs` files, ~18,500 lines)
+- **Exports**: **1,017 functions** via `wasm-bindgen` — 826 core + 192 AssemblyScript compat wrappers (`src/compat/`)
+- **AS Parity**: Full AssemblyScript parity achieved. All 432 AS exports are replicated via the compat module, making the Rust backend a complete drop-in replacement
 - **Advantages:** LLVM-optimized, aggressive autovectorization, mature crate ecosystem
 - **Crate dependencies**:
   - `faer` — dense linear algebra (LU, QR, SVD, eigenvalues)
@@ -242,7 +243,7 @@ const result = backendManager.multiply(a, b); // Never throws
 | Parallel execution | No | Limited | Limited | Yes |
 | Memory efficiency | Good | Good | Good | Best |
 | Browser support | 100% | 95%+ | 95%+ | 60%+ |
-| Status | Fallback | Benchmark | **Primary** | Planned |
+| Status | Fallback | Benchmark | **Primary (complete)** | Planned |
 | Binary location | — | `lib/wasm/mathjs-as.wasm` | `lib/wasm/mathjs.wasm` | — |
 
 ## Troubleshooting

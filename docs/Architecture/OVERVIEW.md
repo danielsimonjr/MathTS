@@ -43,6 +43,7 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 | `@danielsimonjr/mathts-workbook` | .mtsw notebook runtime + CLI | 6 | 3 | 29 |
 | `@danielsimonjr/mathts-compat` | mathjs compatibility shim | 3 | 2 | 132 |
 | `assembly` | WASM source (AssemblyScript) | 10 | 0 | 432 |
+| `wasm-rust` | Rust WASM (primary backend) | 63 | — | 1,017 |
 
 ## Two-Layer Code Architecture
 
@@ -55,7 +56,7 @@ These are exported, tested, and built. Includes:
 - **158 typed function exports** across 11 modules: arithmetic (48), trigonometry (20), statistics (23), signal (12), special (9), distributions (11), integration (4), interpolation (6), combinatorics (6), geometry (18), bridge (1)
 - **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM/GPU backends
 - **Parallel**: ComputePool with 40+ parallel operations
-- **WASM**: 432 exports (scalar, array, matrix, complex operations)
+- **WASM**: 432 AssemblyScript exports (legacy) + **1,017 Rust WASM exports** (primary, full AS parity via compat module)
 
 ### Beyond mathjs — 60 New Functions
 
@@ -85,7 +86,7 @@ MathTS has three computation backends selected automatically based on operation 
 |---------|--------|--------|-------------|
 | JavaScript | `matrix/src/backends/JSBackend.ts` | Always available | Pure TypeScript fallback |
 | AssemblyScript WASM | `assembly/` | Legacy (benchmarking) | 432 exports, SIMD-optimized |
-| Rust WASM | `wasm-rust/` | **Primary** | 63 source files, 826 exports, 669 KB binary |
+| Rust WASM | `wasm-rust/` | **Primary** | 63 source files, **1,017 exports** (826 core + 192 AS compat), 669 KB binary |
 
 The Rust WASM backend is a Cargo workspace rooted at `wasm-rust/` with the `mathts-wasm` crate. It uses:
 - **faer** — high-performance linear algebra (LU, QR, SVD, eigendecomposition)
@@ -135,7 +136,7 @@ math.add(1, 2);
 | Expression | Builds | Parser ported (16 node types), compiler/evaluator are stubs |
 | Compat | Active | 54 shims wired to real implementations, 87 test cases |
 | Assembly | Legacy | 432 WASM exports, kept for benchmarking against Rust backend |
-| Rust WASM | Active | 826 exports, 669 KB binary, primary WASM backend |
+| Rust WASM | **Complete** | **1,017 exports** (826 core + 192 AS compat), 669 KB binary, primary WASM backend with full AS parity |
 
 ## Integration Progress
 

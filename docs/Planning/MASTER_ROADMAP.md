@@ -11,11 +11,10 @@
 |---|------|--------|--------|-----------|
 | 1 | Sync 207 mathjs functions (Phase 1: 54 sync, Phase 2: 74 TS, Phase 3: 79 Rust) | Not started | 1 day → 6 weeks | None |
 | 2 | Workbook ↔ Expression wiring | Deferred | 2-3 days | None |
-| 3 | Rust WASM full migration (AS → Rust) | Partial (integrated, not migrated) | 2-4 weeks | None |
-| 4 | Scientific Calculator (Electron, 5 panels) | Not started | 3-4 weeks | Factory activation (done) |
-| 5 | Deno Notebook (live documents) | Not started | 1-2 weeks | Workbook + Expression |
-| 6 | ISE Workbench (3-zone split, LaTeX, graphing) | Not started (0/16 tasks) | 6-8 weeks | Scientific Calculator |
-| 7 | ISE Guided Discovery & Education | Not started | 2-3 weeks | ISE Workbench |
+| 3 | Scientific Calculator (Electron, 5 panels) | Not started | 3-4 weeks | Factory activation (done) |
+| 4 | Deno Notebook (live documents) | Not started | 1-2 weeks | Workbook + Expression |
+| 5 | ISE Workbench (3-zone split, LaTeX, graphing) | Not started (0/16 tasks) | 6-8 weeks | Scientific Calculator |
+| 6 | ISE Guided Discovery & Education | Not started | 2-3 weeks | ISE Workbench |
 
 ## Completed Items
 
@@ -27,6 +26,7 @@
 | 60 new functions beyond mathjs | Done | 2026-04-05 |
 | typed-function improvements (Symbol-based type ID, safe conversions) | Done | 2026-04-05 |
 | workerpool improvements (SharedArrayBuffer, warmup, metrics) | Done | 2026-04-05 |
+| Rust WASM full migration (AS → Rust, 1,017 exports, full AS parity) | Done | 2026-04-10 |
 | Rust WASM integration (RustWasmLoader, BackendManager routing) | Done | 2026-04-05 |
 | Expression compiler/evaluator (16 node types, evaluate()) | Done | 2026-04-03 |
 | Matrix bridge (MathJSDenseMatrix, MathJSSparseMatrix CSC) | Done | 2026-04-03 |

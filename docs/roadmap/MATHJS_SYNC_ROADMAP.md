@@ -11,7 +11,7 @@ The mathjs fork added 216 new mathematical functions across versions 15.4.0–15
 |----------|-----------|--------|----------|
 | **Sync from mathjs JS** | 54 | Low (copy + factory activate) | 1 — quickest wins |
 | **New TypeScript** | 74 | Medium (implement from spec) | 2 — CAS, graph theory, distributions |
-| **Rust WASM** | 79 | High (implement in Rust + TS wrapper) | 3 — numerical methods, signal processing |
+| **Rust WASM** | 79 | High (implement in Rust + TS wrapper) | 3 — numerical methods, signal processing (**infrastructure complete**) |
 | **Total** | **207** | | |
 
 ---
@@ -192,6 +192,8 @@ These need native TypeScript implementations. They're symbolic/CAS functions, gr
 ---
 
 ## Phase 3: Rust WASM Implementations (79 functions)
+
+> **Infrastructure complete as of 2026-04-10.** The Rust WASM crate now has 1,017 exports with full AssemblyScript parity (192 compat wrappers in `wasm-rust/crates/mathts-wasm/src/compat/`). New Phase 3 functions can be added directly to the existing Rust crate — no setup needed.
 
 These are computation-heavy functions that benefit from WASM acceleration. Implement in Rust with TypeScript wrappers and JS fallbacks.
 
