@@ -505,7 +505,11 @@ pub unsafe extern "C" fn rational_mod(
 
 /// Sum array of rationals (stored as f64 pairs).
 #[export_name = "rationalSumArray"]
-pub unsafe extern "C" fn rational_sum_array(rationals_ptr: *const f64, count: i32, result_ptr: *mut i64) {
+pub unsafe extern "C" fn rational_sum_array(
+    rationals_ptr: *const f64,
+    count: i32,
+    result_ptr: *mut i64,
+) {
     if count == 0 {
         *result_ptr = 0;
         *result_ptr.add(1) = 1;
@@ -772,7 +776,13 @@ pub unsafe extern "C" fn rational_reduce_f64(mut num: f64, mut den: f64, result_
 
 /// Add (f64 version).
 #[export_name = "rationalAddF64"]
-pub unsafe extern "C" fn rational_add_f64(num1: f64, den1: f64, num2: f64, den2: f64, result_ptr: *mut f64) {
+pub unsafe extern "C" fn rational_add_f64(
+    num1: f64,
+    den1: f64,
+    num2: f64,
+    den2: f64,
+    result_ptr: *mut f64,
+) {
     let g = rational_gcd_f64(den1, den2);
     let d1 = den1 / g;
     let d2 = den2 / g;
@@ -799,7 +809,12 @@ pub unsafe extern "C" fn rational_multiply_f64(
 
 /// Compare (f64 version).
 #[export_name = "rationalCompareF64"]
-pub extern "C" fn rational_compare_f64(mut num1: f64, mut den1: f64, mut num2: f64, mut den2: f64) -> i32 {
+pub extern "C" fn rational_compare_f64(
+    mut num1: f64,
+    mut den1: f64,
+    mut num2: f64,
+    mut den2: f64,
+) -> i32 {
     if den1 == 0.0 && den2 == 0.0 {
         return if num1 == num2 {
             0
@@ -836,7 +851,11 @@ pub extern "C" fn rational_compare_f64(mut num1: f64, mut den1: f64, mut num2: f
 
 /// fromFloat (f64 version via Stern-Brocot).
 #[export_name = "rationalFromFloatF64"]
-pub unsafe extern "C" fn rational_from_float_f64(mut value: f64, max_denom: f64, result_ptr: *mut f64) {
+pub unsafe extern "C" fn rational_from_float_f64(
+    mut value: f64,
+    max_denom: f64,
+    result_ptr: *mut f64,
+) {
     if !value.is_finite() {
         *result_ptr = if value > 0.0 {
             1.0
