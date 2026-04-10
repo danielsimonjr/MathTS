@@ -403,3 +403,426 @@ export function intersectSegments2D(
 
   return null; // no intersection within segments
 }
+
+// =============================================================================
+// Extended Geometry Functions
+// =============================================================================
+
+/**
+ * Shape type for area calculation.
+ */
+export type Shape =
+  | { type: 'circle'; radius: f64 }
+  | { type: 'triangle'; vertices: [number[], number[], number[]] }
+  | { type: 'polygon'; vertices: number[][] }
+  | { type: 'rectangle'; width: f64; height: f64 };
+
+/**
+ * Compute the area of a shape.
+ *
+ * @param shape - Shape descriptor
+ * @returns Area
+ *
+ * @example
+ * area({ type: 'circle', radius: 1 }) // => pi
+ * area({ type: 'rectangle', width: 3, height: 4 }) // => 12
+ */
+export function area(shape: Shape): f64 {
+  switch (shape.type) {
+    case 'circle':
+      return Math.PI * shape.radius * shape.radius;
+    case 'triangle':
+      return triangleArea(shape.vertices[0], shape.vertices[1], shape.vertices[2]);
+    case 'polygon':
+      return polygonArea(shape.vertices);
+    case 'rectangle':
+      return shape.width * shape.height;
+    default:
+      throw new Error('area: unsupported shape type');
+  }
+}
+
+/**
+ * Compute the centroid of a polygon.
+ *
+ * @param vertices - Array of [x, y] vertices in order
+ * @returns Centroid [x, y]
+ *
+ * @example
+ * centroid([[0,0], [4,0], [4,3], [0,3]]) // => [2, 1.5]
+ */
+export function centroid(vertices: number[][]): number[] {
+  const n: i32 = vertices.length;
+  if (n === 0) throw new Error('centroid: empty polygon');
+  if (n <= 2) {
+    // Average of points
+    const cx = vertices.reduce((s, v) => s + v[0], 0) / n;
+    const cy = vertices.reduce((s, v) => s + v[1], 0) / n;
+    return [cx, cy];
+  }
+
+  let signedArea: f64 = 0;
+  let cx: f64 = 0;
+  let cy: f64 = 0;
+
+  for (let i: i32 = 0; i < n; i++) {
+    const j: i32 = (i + 1) % n;
+    const cross: f64 = vertices[i][0] * vertices[j][1] - vertices[j][0] * vertices[i][1];
+    signedArea += cross;
+    cx += (vertices[i][0] + vertices[j][0]) * cross;
+    cy += (vertices[i][1] + vertices[j][1]) * cross;
+  }
+
+  signedArea /= 2;
+  cx /= (6 * signedArea);
+  cy /= (6 * signedArea);
+
+  return [cx, cy];
+}
+
+/**
+ * Convert between coordinate systems.
+ *
+ * @param point - Input coordinates
+ * @param from - Source system: 'cartesian' | 'polar' | 'spherical' | 'cylindrical'
+ * @param to - Target system
+ * @returns Converted coordinates
+ */
+export function coordinateTransform(
+  point: number[],
+  from: 'cartesian' | 'polar' | 'spherical' | 'cylindrical',
+  to: 'cartesian' | 'polar' | 'spherical' | 'cylindrical',
+): number[] {
+  // Convert to cartesian first
+  let x: f64, y: f64, z: f64;
+
+  switch (from) {
+    case 'cartesian':
+      x = point[0]; y = point[1]; z = point[2] ?? 0;
+      break;
+    case 'polar': {
+      const [r, theta] = point;
+      x = r * Math.cos(theta);
+      y = r * Math.sin(theta);
+      z = 0;
+      break;
+    }
+    case 'spherical': {
+      const [rho, theta, phi] = point;
+      x = rho * Math.sin(phi) * Math.cos(theta);
+      y = rho * Math.sin(phi) * Math.sin(theta);
+      z = rho * Math.cos(phi);
+      break;
+    }
+    case 'cylindrical': {
+      const [r, theta2, zc] = point;
+      x = r * Math.cos(theta2);
+      y = r * Math.sin(theta2);
+      z = zc;
+      break;
+    }
+    default:
+      throw new Error(`coordinateTransform: unknown source "${from}"`);
+  }
+
+  // Convert from cartesian to target
+  switch (to) {
+    case 'cartesian':
+      return z === 0 ? [x, y] : [x, y, z];
+    case 'polar':
+      return [Math.sqrt(x * x + y * y), Math.atan2(y, x)];
+    case 'spherical': {
+      const rho = Math.sqrt(x * x + y * y + z * z);
+      return [rho, Math.atan2(y, x), rho === 0 ? 0 : Math.acos(z / rho)];
+    }
+    case 'cylindrical':
+      return [Math.sqrt(x * x + y * y), Math.atan2(y, x), z];
+    default:
+      throw new Error(`coordinateTransform: unknown target "${to}"`);
+  }
+}
+
+/**
+ * Perimeter of a polygon.
+ *
+ * @param vertices - Array of [x, y] vertices in order
+ * @returns Perimeter length
+ */
+export function polygonPerimeter(vertices: number[][]): f64 {
+  const n: i32 = vertices.length;
+  if (n < 2) return 0;
+  let perimeter: f64 = 0;
+  for (let i: i32 = 0; i < n; i++) {
+    const j: i32 = (i + 1) % n;
+    perimeter += distance2D(vertices[i], vertices[j]);
+  }
+  return perimeter;
+}
+
+/**
+ * Manhattan (L1) distance between two points.
+ *
+ * @param a - First point
+ * @param b - Second point
+ * @returns L1 distance
+ */
+export function manhattanDistance(a: number[], b: number[]): f64 {
+  let sum: f64 = 0;
+  const n: i32 = Math.min(a.length, b.length);
+  for (let i: i32 = 0; i < n; i++) sum += Math.abs(a[i] - b[i]);
+  return sum;
+}
+
+/**
+ * Chebyshev (L-infinity) distance between two points.
+ *
+ * @param a - First point
+ * @param b - Second point
+ * @returns L-infinity distance
+ */
+export function chebyshevDistance(a: number[], b: number[]): f64 {
+  let maxD: f64 = 0;
+  const n: i32 = Math.min(a.length, b.length);
+  for (let i: i32 = 0; i < n; i++) maxD = Math.max(maxD, Math.abs(a[i] - b[i]));
+  return maxD;
+}
+
+/**
+ * Minkowski (Lp) distance between two points.
+ *
+ * @param a - First point
+ * @param b - Second point
+ * @param p - Distance order (p >= 1)
+ * @returns Lp distance
+ */
+export function minkowskiDistance(a: number[], b: number[], p: f64): f64 {
+  if (p < 1) throw new Error('minkowskiDistance: p must be >= 1');
+  if (p === Infinity) return chebyshevDistance(a, b);
+
+  let sum: f64 = 0;
+  const n: i32 = Math.min(a.length, b.length);
+  for (let i: i32 = 0; i < n; i++) sum += Math.pow(Math.abs(a[i] - b[i]), p);
+  return Math.pow(sum, 1 / p);
+}
+
+/**
+ * Delaunay triangulation using Bowyer-Watson algorithm.
+ *
+ * @param points - Array of [x, y] points
+ * @returns Array of triangles, each an array of 3 point indices
+ */
+export function delaunayTriangulation(points: number[][]): number[][] {
+  const n: i32 = points.length;
+  if (n < 3) return [];
+
+  // Create super-triangle that contains all points
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const p of points) {
+    minX = Math.min(minX, p[0]); minY = Math.min(minY, p[1]);
+    maxX = Math.max(maxX, p[0]); maxY = Math.max(maxY, p[1]);
+  }
+  const dx: f64 = maxX - minX;
+  const dy: f64 = maxY - minY;
+  const dmax: f64 = Math.max(dx, dy) * 10;
+
+  const superTri: number[][] = [
+    [minX - dmax, minY - dmax],
+    [minX + 2 * dmax, minY - dmax],
+    [minX + dx / 2, minY + 2 * dmax],
+  ];
+
+  const allPoints = [...points, ...superTri];
+  const st0: i32 = n, st1: i32 = n + 1, st2: i32 = n + 2;
+
+  type Tri = [i32, i32, i32];
+  let triangles: Tri[] = [[st0, st1, st2]];
+
+  function circumcircleContains(tri: Tri, px: f64, py: f64): boolean {
+    const [a, b, c] = tri.map((i) => allPoints[i]);
+    const ax = a[0] - px, ay = a[1] - py;
+    const bx = b[0] - px, by = b[1] - py;
+    const cx = c[0] - px, cy = c[1] - py;
+    const det = (ax * ax + ay * ay) * (bx * cy - cx * by) -
+                (bx * bx + by * by) * (ax * cy - cx * ay) +
+                (cx * cx + cy * cy) * (ax * by - bx * ay);
+    return det > 0;
+  }
+
+  for (let i: i32 = 0; i < n; i++) {
+    const badTris: Tri[] = [];
+    for (const tri of triangles) {
+      if (circumcircleContains(tri, points[i][0], points[i][1])) {
+        badTris.push(tri);
+      }
+    }
+
+    // Find boundary polygon of bad triangles
+    const edges: [i32, i32][] = [];
+    for (const tri of badTris) {
+      const triEdges: [i32, i32][] = [
+        [tri[0], tri[1]], [tri[1], tri[2]], [tri[2], tri[0]],
+      ];
+      for (const edge of triEdges) {
+        const shared = badTris.some(
+          (other) =>
+            other !== tri &&
+            other.includes(edge[0]) &&
+            other.includes(edge[1]),
+        );
+        if (!shared) edges.push(edge);
+      }
+    }
+
+    // Remove bad triangles
+    triangles = triangles.filter((t) => !badTris.includes(t));
+
+    // Create new triangles
+    for (const [a, b] of edges) {
+      triangles.push([a, b, i]);
+    }
+  }
+
+  // Remove triangles that share vertices with super-triangle
+  return triangles
+    .filter((t) => !t.some((v) => v >= n))
+    .map((t) => [...t]);
+}
+
+/**
+ * Voronoi diagram from Delaunay triangulation (dual graph).
+ * Returns Voronoi vertices and regions.
+ *
+ * @param points - Array of [x, y] points
+ * @param bounds - Clipping bounds [minX, minY, maxX, maxY]
+ * @returns { vertices: number[][], regions: number[][] }
+ */
+export function voronoiDiagram(
+  points: number[][],
+  bounds: [f64, f64, f64, f64],
+): { vertices: number[][]; regions: number[][] } {
+  const triangles = delaunayTriangulation(points);
+  const vertices: number[][] = [];
+  const triCircumcenters: Map<string, i32> = new Map();
+
+  // Compute circumcenter of each triangle
+  for (const tri of triangles) {
+    const [a, b, c] = tri.map((i) => points[i]);
+    const D: f64 = 2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]));
+    if (Math.abs(D) < 1e-15) continue;
+    const ux: f64 = ((a[0] * a[0] + a[1] * a[1]) * (b[1] - c[1]) +
+      (b[0] * b[0] + b[1] * b[1]) * (c[1] - a[1]) +
+      (c[0] * c[0] + c[1] * c[1]) * (a[1] - b[1])) / D;
+    const uy: f64 = ((a[0] * a[0] + a[1] * a[1]) * (c[0] - b[0]) +
+      (b[0] * b[0] + b[1] * b[1]) * (a[0] - c[0]) +
+      (c[0] * c[0] + c[1] * c[1]) * (b[0] - a[0])) / D;
+
+    // Clip to bounds
+    const cx = Math.max(bounds[0], Math.min(bounds[2], ux));
+    const cy = Math.max(bounds[1], Math.min(bounds[3], uy));
+
+    const key = tri.slice().sort().join(',');
+    triCircumcenters.set(key, vertices.length);
+    vertices.push([cx, cy]);
+  }
+
+  // Build regions for each point
+  const regions: number[][] = Array.from({ length: points.length }, () => []);
+  for (const tri of triangles) {
+    const key = tri.slice().sort().join(',');
+    const vIdx = triCircumcenters.get(key);
+    if (vIdx !== undefined) {
+      for (const pIdx of tri) {
+        if (!regions[pIdx].includes(vIdx)) {
+          regions[pIdx].push(vIdx);
+        }
+      }
+    }
+  }
+
+  return { vertices, regions };
+}
+
+/**
+ * K-d tree node.
+ */
+export interface KDTreeNode {
+  point: number[];
+  index: i32;
+  left: KDTreeNode | null;
+  right: KDTreeNode | null;
+  axis: i32;
+}
+
+/**
+ * Build a k-d tree for spatial queries.
+ *
+ * @param points - Array of points (each same dimensionality)
+ * @returns Root node of the k-d tree
+ */
+export function kdTree(points: number[][]): KDTreeNode | null {
+  if (points.length === 0) return null;
+  const dim: i32 = points[0].length;
+
+  const indexed = points.map((p, i) => ({ point: p, index: i }));
+
+  function build(items: { point: number[]; index: i32 }[], depth: i32): KDTreeNode | null {
+    if (items.length === 0) return null;
+
+    const axis: i32 = depth % dim;
+    items.sort((a, b) => a.point[axis] - b.point[axis]);
+    const mid: i32 = Math.floor(items.length / 2);
+
+    return {
+      point: items[mid].point,
+      index: items[mid].index,
+      axis,
+      left: build(items.slice(0, mid), depth + 1),
+      right: build(items.slice(mid + 1), depth + 1),
+    };
+  }
+
+  return build(indexed, 0);
+}
+
+/**
+ * Find the nearest neighbor in a k-d tree.
+ *
+ * @param root - K-d tree root
+ * @param target - Query point
+ * @returns { point, index, distance }
+ */
+export function kdTreeNearest(
+  root: KDTreeNode | null,
+  target: number[],
+): { point: number[]; index: i32; distance: f64 } | null {
+  if (!root) return null;
+
+  let best = { point: root.point, index: root.index, distance: distanceNDSq(root.point, target) };
+
+  function search(node: KDTreeNode | null): void {
+    if (!node) return;
+    const d = distanceNDSq(node.point, target);
+    if (d < best.distance) {
+      best = { point: node.point, index: node.index, distance: d };
+    }
+
+    const diff: f64 = target[node.axis] - node.point[node.axis];
+    const first = diff < 0 ? node.left : node.right;
+    const second = diff < 0 ? node.right : node.left;
+
+    search(first);
+    if (diff * diff < best.distance) {
+      search(second);
+    }
+  }
+
+  search(root);
+  best.distance = Math.sqrt(best.distance);
+  return best;
+}
+
+function distanceNDSq(a: number[], b: number[]): f64 {
+  let sum: f64 = 0;
+  for (let i: i32 = 0; i < a.length; i++) sum += (a[i] - b[i]) ** 2;
+  return sum;
+}

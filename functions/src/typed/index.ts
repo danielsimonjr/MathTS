@@ -44,6 +44,9 @@ export { typedDistributions } from './distributions.js';
 // Geometry functions (pure math)
 export * from './geometry.js';
 
+// Algebra functions (polynomial, expression manipulation)
+export * from './algebra.js';
+export { typedAlgebra } from './algebra.js';
 
 // Numerical integration functions (plain exports - callback arguments)
 export * from './integration.js';
@@ -51,8 +54,23 @@ export * from './integration.js';
 // Interpolation functions (plain exports - return functions)
 export * from './interpolation.js';
 
+// Numerical methods (root finding, optimization, ODE, curve fitting, etc.)
+export * from './numeric.js';
+
 // Extended combinatorics functions (mathTyped dispatch)
 export * from './combinatorics.js';
+
+// Graph theory functions (pure exports)
+export * from './graph.js';
+
+// Distribution objects (factory functions returning Distribution objects)
+export * from './dist-objects.js';
+
+// Statistical hypothesis tests
+export * from './hypothesis.js';
+
+// CAS (Computer Algebra System) functions
+export * from './cas.js';
 
 // =============================================================================
 // Combined Exports
@@ -62,15 +80,22 @@ import { typedArithmetic } from './arithmetic.js';
 import { typedTrigonometry } from './trigonometry.js';
 import { typedStatistics } from './statistics.js';
 import { typedSignal } from './signal.js';
-import { fibonacci, lucas, doubleFactorial, risingFactorial, fallingFactorial, subfactorial } from './combinatorics.js';
+import {
+  fibonacci, lucas, doubleFactorial, risingFactorial, fallingFactorial, subfactorial,
+  prime, nextPrime, primePi, primeFactors, divisors, eulerPhi, divisorSigma,
+  carmichaelLambda, moebiusMu, jacobiSymbol, chineseRemainder, lucasL,
+  partitions, harmonicNumber, integerDigits,
+} from './combinatorics.js';
 import { typedSpecial } from './special.js';
 import { typedDistributions } from './distributions.js';
+import { typedAlgebra } from './algebra.js';
 
 /**
  * All typed functions combined (parallel-first)
  *
  * This includes all arithmetic, trigonometric, statistics, signal
- * processing, special, and probability distribution functions.
+ * processing, special, probability distribution, combinatorics,
+ * graph theory, distribution objects, hypothesis test, and algebra functions.
  */
 export const typedFunctions = {
   ...typedArithmetic,
@@ -83,6 +108,22 @@ export const typedFunctions = {
   risingFactorial,
   fallingFactorial,
   subfactorial,
+  prime,
+  nextPrime,
+  primePi,
+  primeFactors,
+  divisors,
+  eulerPhi,
+  divisorSigma,
+  carmichaelLambda,
+  moebiusMu,
+  jacobiSymbol,
+  chineseRemainder,
+  lucasL,
+  partitions,
+  harmonicNumber,
+  integerDigits,
   ...typedSpecial,
   ...typedDistributions,
+  ...typedAlgebra,
 };

@@ -1,0 +1,806 @@
+/**
+ * Distribution Objects
+ *
+ * Each factory function returns an object with .pdf(x), .cdf(x),
+ * .quantile(p), .mean, .variance, and .sample() methods.
+ *
+ * Supported distributions:
+ * - normalDist, betaDist, binomialDist, chiSquaredDist
+ * - exponentialDist, fDist, gammaDist, logNormalDist
+ * - poissonDist, tDist, uniformDist, weibullDist
+ *
+ * @packageDocumentation
+ */
+
+// =============================================================================
+// Type Definitions
+// =============================================================================
+
+/** 64-bit float (default for decimals) */
+type f64 = number;
+
+/**
+ * A probability distribution object with common statistical methods.
+ */
+export interface Distribution {
+  /** Probability density (or mass) function */
+  pdf: (x: f64) => f64;
+  /** Cumulative distribution function */
+  cdf: (x: f64) => f64;
+  /** Quantile (inverse CDF) function */
+  quantile: (p: f64) => f64;
+  /** Distribution mean */
+  mean: f64;
+  /** Distribution variance */
+  variance: f64;
+  /** Generate a random sample */
+  sample: () => f64;
+}
+
+// =============================================================================
+// Internal Helpers
+// =============================================================================
+
+const SQRT_2PI = Math.sqrt(2 * Math.PI);
+
+/**
+ * Error function erf(x) using Abramowitz & Stegun rational approximation.
+ */
+function _erf(x: f64): f64 {
+  if (x === 0) return 0;
+  const sign = x < 0 ? -1 : 1;
+  const a = Math.abs(x);
+  const t = 1.0 / (1.0 + 0.3275911 * a);
+  const y =
+    1.0 -
+    (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
+      t *
+      Math.exp(-a * a);
+  return sign * y;
+}
+
+/**
+ * Inverse error function using rational approximation.
+ */
+function _erfInv(x: f64): f64 {
+  if (x <= -1) return -Infinity;
+  if (x >= 1) return Infinity;
+  if (x === 0) return 0;
+
+  const a = 0.147;
+  const lnTerm = Math.log(1 - x * x);
+  const t1 = 2 / (Math.PI * a) + lnTerm / 2;
+  const t2 = lnTerm / a;
+  const sign = x < 0 ? -1 : 1;
+  return sign * Math.sqrt(Math.sqrt(t1 * t1 - t2) - t1);
+}
+
+/**
+ * Log-gamma function using Lanczos approximation (g=7, n=9).
+ */
+function _lgamma(x: f64): f64 {
+  if (x <= 0 && x === Math.floor(x)) return Infinity;
+  if (x < 0.5) {
+    return Math.log(Math.PI / Math.sin(Math.PI * x)) - _lgamma(1 - x);
+  }
+  x -= 1;
+  const g = 7;
+  const c = [
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+    771.32342877765313, -176.61502916214059, 12.507343278686905,
+    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7,
+  ];
+  let sum = c[0];
+  for (let i = 1; i < g + 2; i++) {
+    sum += c[i] / (x + i);
+  }
+  const t = x + g + 0.5;
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(sum);
+}
+
+function _gamma(x: f64): f64 {
+  return Math.exp(_lgamma(x));
+}
+
+/**
+ * Regularized lower incomplete gamma function P(a, x).
+ */
+function _gammainc(a: f64, x: f64): f64 {
+  if (x < 0) return NaN;
+  if (x === 0) return 0;
+
+  if (x < a + 1) {
+    let sum = 1.0 / a;
+    let term = 1.0 / a;
+    for (let n = 1; n < 200; n++) {
+      term *= x / (a + n);
+      sum += term;
+      if (Math.abs(term) < Math.abs(sum) * 1e-15) break;
+    }
+    return sum * Math.exp(-x + a * Math.log(x) - _lgamma(a));
+  } else {
+    const TINY = 1e-30;
+    let b0 = x + 1 - a;
+    let c = 1.0 / TINY;
+    let d = 1.0 / b0;
+    let f = d;
+    for (let n = 1; n < 300; n++) {
+      const an = n * (a - n);
+      const bn = x + 2 * n + 1 - a;
+      d = bn + an * d;
+      if (Math.abs(d) < TINY) d = TINY;
+      c = bn + an / c;
+      if (Math.abs(c) < TINY) c = TINY;
+      d = 1.0 / d;
+      const delta = d * c;
+      f *= delta;
+      if (Math.abs(delta - 1) < 1e-14) break;
+    }
+    const Q = f * Math.exp(-x + a * Math.log(x) - _lgamma(a));
+    return 1 - Q;
+  }
+}
+
+/**
+ * Regularized incomplete beta function I_x(a,b) via continued fraction.
+ */
+function _betainc(x: f64, a: f64, b: f64): f64 {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+
+  // Use symmetry: I_x(a,b) = 1 - I_{1-x}(b,a)
+  if (x > (a + 1) / (a + b + 2)) {
+    return 1 - _betainc(1 - x, b, a);
+  }
+
+  const lnBeta = _lgamma(a) + _lgamma(b) - _lgamma(a + b);
+  const front = Math.exp(Math.log(x) * a + Math.log(1 - x) * b - lnBeta) / a;
+
+  // Lentz's continued fraction
+  const TINY = 1e-30;
+  let c = 1.0;
+  let d = 1.0 - (a + b) * x / (a + 1);
+  if (Math.abs(d) < TINY) d = TINY;
+  d = 1.0 / d;
+  let f = d;
+
+  for (let m = 1; m <= 200; m++) {
+    // Even step
+    let numerator = m * (b - m) * x / ((a + 2 * m - 1) * (a + 2 * m));
+    d = 1.0 + numerator * d;
+    if (Math.abs(d) < TINY) d = TINY;
+    c = 1.0 + numerator / c;
+    if (Math.abs(c) < TINY) c = TINY;
+    d = 1.0 / d;
+    f *= d * c;
+
+    // Odd step
+    numerator = -(a + m) * (a + b + m) * x / ((a + 2 * m) * (a + 2 * m + 1));
+    d = 1.0 + numerator * d;
+    if (Math.abs(d) < TINY) d = TINY;
+    c = 1.0 + numerator / c;
+    if (Math.abs(c) < TINY) c = TINY;
+    d = 1.0 / d;
+    const delta = d * c;
+    f *= delta;
+    if (Math.abs(delta - 1) < 1e-14) break;
+  }
+  return front * f;
+}
+
+/**
+ * Log-factorial using Stirling for large n.
+ */
+function _logFactorial(n: number): f64 {
+  if (n <= 1) return 0;
+  if (n <= 20) {
+    let result = 0;
+    for (let i = 2; i <= n; i++) result += Math.log(i);
+    return result;
+  }
+  return 0.5 * Math.log(2 * Math.PI * n) + n * Math.log(n) - n + 1 / (12 * n);
+}
+
+/**
+ * Standard normal CDF using erf.
+ */
+function _normalCDF(x: f64): f64 {
+  return 0.5 * (1 + _erf(x / Math.SQRT2));
+}
+
+/**
+ * Standard normal quantile using erfInv.
+ */
+function _normalQuantile(p: f64): f64 {
+  return Math.SQRT2 * _erfInv(2 * p - 1);
+}
+
+// =============================================================================
+// normalDist
+// =============================================================================
+
+/**
+ * Create a normal (Gaussian) distribution object.
+ *
+ * @param mu - Mean (default 0)
+ * @param sigma - Standard deviation (default 1, must be positive)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = normalDist(0, 1);
+ * d.pdf(0)       // ~0.3989
+ * d.cdf(0)       // 0.5
+ * d.quantile(0.975) // ~1.96
+ */
+export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
+  if (sigma <= 0) throw new Error('normalDist: sigma must be positive');
+  return {
+    pdf: (x: f64) => Math.exp(-0.5 * ((x - mu) / sigma) ** 2) / (sigma * SQRT_2PI),
+    cdf: (x: f64) => 0.5 * (1 + _erf((x - mu) / (sigma * Math.SQRT2))),
+    quantile: (p: f64) => mu + sigma * Math.SQRT2 * _erfInv(2 * p - 1),
+    mean: mu,
+    variance: sigma * sigma,
+    sample: () => {
+      // Box-Muller transform
+      const u1 = Math.random();
+      const u2 = Math.random();
+      return mu + sigma * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    },
+  };
+}
+
+// =============================================================================
+// betaDist
+// =============================================================================
+
+/**
+ * Create a Beta distribution object.
+ *
+ * @param alpha - Shape parameter alpha > 0
+ * @param beta_ - Shape parameter beta > 0
+ * @returns Distribution object
+ *
+ * @example
+ * const d = betaDist(2, 5);
+ * d.mean // 2/7
+ */
+export function betaDist(alpha: f64, beta_: f64): Distribution {
+  if (alpha <= 0 || beta_ <= 0) throw new Error('betaDist: alpha and beta must be positive');
+  const B = _gamma(alpha) * _gamma(beta_) / _gamma(alpha + beta_);
+  return {
+    pdf: (x: f64) => {
+      if (x < 0 || x > 1) return 0;
+      if (x === 0 && alpha < 1) return Infinity;
+      if (x === 1 && beta_ < 1) return Infinity;
+      return Math.pow(x, alpha - 1) * Math.pow(1 - x, beta_ - 1) / B;
+    },
+    cdf: (x: f64) => {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      return _betainc(x, alpha, beta_);
+    },
+    quantile: (p: f64) => {
+      // Newton's method on the CDF
+      if (p <= 0) return 0;
+      if (p >= 1) return 1;
+      let x = alpha / (alpha + beta_); // initial guess = mean
+      for (let i = 0; i < 100; i++) {
+        const fx = _betainc(x, alpha, beta_) - p;
+        const dx = Math.pow(x, alpha - 1) * Math.pow(1 - x, beta_ - 1) / B;
+        if (dx === 0) break;
+        const step = fx / dx;
+        x = Math.max(1e-15, Math.min(1 - 1e-15, x - step));
+        if (Math.abs(fx) < 1e-12) break;
+      }
+      return x;
+    },
+    mean: alpha / (alpha + beta_),
+    variance: (alpha * beta_) / ((alpha + beta_) ** 2 * (alpha + beta_ + 1)),
+    sample: () => {
+      // Joehnk's method for small params, rejection for larger
+      const ga = _gammaRandom(alpha);
+      const gb = _gammaRandom(beta_);
+      return ga / (ga + gb);
+    },
+  };
+}
+
+/**
+ * Generate a Gamma(alpha, 1) random variate using Marsaglia & Tsang's method.
+ */
+function _gammaRandom(alpha: f64): f64 {
+  if (alpha < 1) {
+    return _gammaRandom(alpha + 1) * Math.pow(Math.random(), 1 / alpha);
+  }
+  const d = alpha - 1 / 3;
+  const c = 1 / Math.sqrt(9 * d);
+  while (true) {
+    let x: f64;
+    let v: f64;
+    do {
+      x = _normalRandom();
+      v = 1 + c * x;
+    } while (v <= 0);
+    v = v * v * v;
+    const u = Math.random();
+    if (u < 1 - 0.0331 * (x * x) * (x * x)) return d * v;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
+}
+
+function _normalRandom(): f64 {
+  const u1 = Math.random();
+  const u2 = Math.random();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+
+// =============================================================================
+// binomialDist
+// =============================================================================
+
+/**
+ * Create a Binomial distribution object.
+ *
+ * @param n - Number of trials (positive integer)
+ * @param p - Success probability (0 <= p <= 1)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = binomialDist(10, 0.5);
+ * d.mean // 5
+ */
+export function binomialDist(n: number, p: f64): Distribution {
+  if (!Number.isInteger(n) || n < 0) throw new Error('binomialDist: n must be a non-negative integer');
+  if (p < 0 || p > 1) throw new Error('binomialDist: p must be in [0, 1]');
+  const q = 1 - p;
+  return {
+    pdf: (k: f64) => {
+      if (!Number.isInteger(k) || k < 0 || k > n) return 0;
+      const logC = _logFactorial(n) - _logFactorial(k) - _logFactorial(n - k);
+      return Math.exp(logC + k * Math.log(p) + (n - k) * Math.log(q));
+    },
+    cdf: (k: f64) => {
+      if (k < 0) return 0;
+      if (k >= n) return 1;
+      const kInt = Math.floor(k);
+      // Use regularized incomplete beta: CDF = I_{1-p}(n-k, k+1)
+      return _betainc(q, n - kInt, kInt + 1);
+    },
+    quantile: (prob: f64) => {
+      if (prob <= 0) return 0;
+      if (prob >= 1) return n;
+      let cumul = 0;
+      for (let k = 0; k <= n; k++) {
+        const logC = _logFactorial(n) - _logFactorial(k) - _logFactorial(n - k);
+        cumul += Math.exp(logC + k * Math.log(p) + (n - k) * Math.log(q));
+        if (cumul >= prob) return k;
+      }
+      return n;
+    },
+    mean: n * p,
+    variance: n * p * q,
+    sample: () => {
+      let successes = 0;
+      for (let i = 0; i < n; i++) {
+        if (Math.random() < p) successes++;
+      }
+      return successes;
+    },
+  };
+}
+
+// =============================================================================
+// chiSquaredDist
+// =============================================================================
+
+/**
+ * Create a Chi-squared distribution object.
+ *
+ * @param k - Degrees of freedom (positive integer)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = chiSquaredDist(3);
+ * d.mean // 3
+ */
+export function chiSquaredDist(k: number): Distribution {
+  if (k <= 0) throw new Error('chiSquaredDist: k must be positive');
+  const halfK = k / 2;
+  return {
+    pdf: (x: f64) => {
+      if (x < 0) return 0;
+      if (x === 0) return halfK < 1 ? Infinity : halfK === 1 ? 0.5 : 0;
+      return Math.exp((halfK - 1) * Math.log(x) - x / 2 - halfK * Math.LN2 - _lgamma(halfK));
+    },
+    cdf: (x: f64) => {
+      if (x <= 0) return 0;
+      return _gammainc(halfK, x / 2);
+    },
+    quantile: (p: f64) => {
+      // Newton's method
+      if (p <= 0) return 0;
+      if (p >= 1) return Infinity;
+      let x = k; // initial guess
+      for (let i = 0; i < 100; i++) {
+        const fx = _gammainc(halfK, x / 2) - p;
+        const dx = Math.exp((halfK - 1) * Math.log(x) - x / 2 - halfK * Math.LN2 - _lgamma(halfK));
+        if (dx === 0) break;
+        x = Math.max(1e-15, x - fx / dx);
+        if (Math.abs(fx) < 1e-12) break;
+      }
+      return x;
+    },
+    mean: k,
+    variance: 2 * k,
+    sample: () => {
+      let sum = 0;
+      for (let i = 0; i < k; i++) {
+        const z = _normalRandom();
+        sum += z * z;
+      }
+      return sum;
+    },
+  };
+}
+
+// =============================================================================
+// exponentialDist
+// =============================================================================
+
+/**
+ * Create an Exponential distribution object.
+ *
+ * @param lambda - Rate parameter (positive)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = exponentialDist(2);
+ * d.mean // 0.5
+ */
+export function exponentialDist(lambda: f64 = 1): Distribution {
+  if (lambda <= 0) throw new Error('exponentialDist: lambda must be positive');
+  return {
+    pdf: (x: f64) => x < 0 ? 0 : lambda * Math.exp(-lambda * x),
+    cdf: (x: f64) => x < 0 ? 0 : 1 - Math.exp(-lambda * x),
+    quantile: (p: f64) => {
+      if (p <= 0) return 0;
+      if (p >= 1) return Infinity;
+      return -Math.log(1 - p) / lambda;
+    },
+    mean: 1 / lambda,
+    variance: 1 / (lambda * lambda),
+    sample: () => -Math.log(Math.random()) / lambda,
+  };
+}
+
+// =============================================================================
+// fDist
+// =============================================================================
+
+/**
+ * Create an F-distribution object.
+ *
+ * @param d1 - Numerator degrees of freedom (positive)
+ * @param d2 - Denominator degrees of freedom (positive)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = fDist(5, 10);
+ * d.mean // 10 / (10 - 2) = 1.25
+ */
+export function fDist(d1: f64, d2: f64): Distribution {
+  if (d1 <= 0 || d2 <= 0) throw new Error('fDist: d1 and d2 must be positive');
+  return {
+    pdf: (x: f64) => {
+      if (x < 0) return 0;
+      if (x === 0) {
+        if (d1 < 2) return Infinity;
+        if (d1 === 2) return 1;
+        return 0;
+      }
+      const num = Math.pow(d1 * x, d1) * Math.pow(d2, d2);
+      const den = Math.pow(d1 * x + d2, d1 + d2);
+      return Math.sqrt(num / den) / (x * Math.exp(_lgamma(d1 / 2) + _lgamma(d2 / 2) - _lgamma((d1 + d2) / 2)));
+    },
+    cdf: (x: f64) => {
+      if (x <= 0) return 0;
+      return _betainc(d1 * x / (d1 * x + d2), d1 / 2, d2 / 2);
+    },
+    quantile: (p: f64) => {
+      // Newton's method
+      if (p <= 0) return 0;
+      if (p >= 1) return Infinity;
+      let x = d1 > 2 ? d2 * (d1 - 2) / (d1 * (d2 + 2)) : 1; // rough initial guess
+      // Prefer simply using bisection for robustness
+      let lo = 0;
+      let hi = 1000;
+      for (let i = 0; i < 100; i++) {
+        x = (lo + hi) / 2;
+        const cx = _betainc(d1 * x / (d1 * x + d2), d1 / 2, d2 / 2);
+        if (cx < p) lo = x;
+        else hi = x;
+        if (hi - lo < 1e-12) break;
+      }
+      return (lo + hi) / 2;
+    },
+    mean: d2 > 2 ? d2 / (d2 - 2) : NaN,
+    variance: d2 > 4 ? (2 * d2 * d2 * (d1 + d2 - 2)) / (d1 * (d2 - 2) ** 2 * (d2 - 4)) : NaN,
+    sample: () => {
+      const x1 = _gammaRandom(d1 / 2) * 2;
+      const x2 = _gammaRandom(d2 / 2) * 2;
+      return (x1 / d1) / (x2 / d2);
+    },
+  };
+}
+
+// =============================================================================
+// gammaDist
+// =============================================================================
+
+/**
+ * Create a Gamma distribution object.
+ *
+ * @param shape - Shape parameter (positive)
+ * @param rate - Rate parameter (positive, default 1)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = gammaDist(2, 1);
+ * d.mean // 2
+ */
+export function gammaDist(shape: f64, rate: f64 = 1): Distribution {
+  if (shape <= 0 || rate <= 0) throw new Error('gammaDist: shape and rate must be positive');
+  const scale = 1 / rate;
+  return {
+    pdf: (x: f64) => {
+      if (x < 0) return 0;
+      if (x === 0) {
+        if (shape < 1) return Infinity;
+        if (shape === 1) return rate;
+        return 0;
+      }
+      return Math.exp((shape - 1) * Math.log(x) - x * rate + shape * Math.log(rate) - _lgamma(shape));
+    },
+    cdf: (x: f64) => {
+      if (x <= 0) return 0;
+      return _gammainc(shape, x * rate);
+    },
+    quantile: (p: f64) => {
+      if (p <= 0) return 0;
+      if (p >= 1) return Infinity;
+      // Bisection
+      let lo = 0;
+      let hi = shape * scale * 20;
+      while (_gammainc(shape, hi * rate) < p) hi *= 2;
+      for (let i = 0; i < 100; i++) {
+        const mid = (lo + hi) / 2;
+        if (_gammainc(shape, mid * rate) < p) lo = mid;
+        else hi = mid;
+        if (hi - lo < 1e-12) break;
+      }
+      return (lo + hi) / 2;
+    },
+    mean: shape * scale,
+    variance: shape * scale * scale,
+    sample: () => _gammaRandom(shape) * scale,
+  };
+}
+
+// =============================================================================
+// logNormalDist
+// =============================================================================
+
+/**
+ * Create a Log-Normal distribution object.
+ *
+ * @param mu - Mean of the log (default 0)
+ * @param sigma - Standard deviation of the log (default 1, positive)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = logNormalDist(0, 1);
+ * d.mean // e^0.5
+ */
+export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
+  if (sigma <= 0) throw new Error('logNormalDist: sigma must be positive');
+  return {
+    pdf: (x: f64) => {
+      if (x <= 0) return 0;
+      const lnx = Math.log(x);
+      return Math.exp(-0.5 * ((lnx - mu) / sigma) ** 2) / (x * sigma * SQRT_2PI);
+    },
+    cdf: (x: f64) => {
+      if (x <= 0) return 0;
+      return 0.5 * (1 + _erf((Math.log(x) - mu) / (sigma * Math.SQRT2)));
+    },
+    quantile: (p: f64) => {
+      if (p <= 0) return 0;
+      if (p >= 1) return Infinity;
+      return Math.exp(mu + sigma * Math.SQRT2 * _erfInv(2 * p - 1));
+    },
+    mean: Math.exp(mu + sigma * sigma / 2),
+    variance: (Math.exp(sigma * sigma) - 1) * Math.exp(2 * mu + sigma * sigma),
+    sample: () => Math.exp(mu + sigma * _normalRandom()),
+  };
+}
+
+// =============================================================================
+// poissonDist
+// =============================================================================
+
+/**
+ * Create a Poisson distribution object.
+ *
+ * @param lambda - Rate parameter (positive)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = poissonDist(5);
+ * d.mean // 5
+ */
+export function poissonDist(lambda: f64): Distribution {
+  if (lambda <= 0) throw new Error('poissonDist: lambda must be positive');
+  return {
+    pdf: (k: f64) => {
+      if (!Number.isInteger(k) || k < 0) return 0;
+      return Math.exp(k * Math.log(lambda) - lambda - _logFactorial(k));
+    },
+    cdf: (k: f64) => {
+      if (k < 0) return 0;
+      const kInt = Math.floor(k);
+      // P(X <= k) = Q(k+1, lambda) = 1 - P(k+1, lambda)
+      return 1 - _gammainc(kInt + 1, lambda);
+    },
+    quantile: (p: f64) => {
+      if (p <= 0) return 0;
+      if (p >= 1) return Infinity;
+      let cumul = 0;
+      for (let k = 0; k < 1000; k++) {
+        cumul += Math.exp(k * Math.log(lambda) - lambda - _logFactorial(k));
+        if (cumul >= p) return k;
+      }
+      return Infinity;
+    },
+    mean: lambda,
+    variance: lambda,
+    sample: () => {
+      // Knuth's algorithm
+      const L = Math.exp(-lambda);
+      let k = 0;
+      let p = 1;
+      do {
+        k++;
+        p *= Math.random();
+      } while (p > L);
+      return k - 1;
+    },
+  };
+}
+
+// =============================================================================
+// tDist (Student's t)
+// =============================================================================
+
+/**
+ * Create a Student's t-distribution object.
+ *
+ * @param nu - Degrees of freedom (positive)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = tDist(10);
+ * d.mean // 0
+ */
+export function tDist(nu: f64): Distribution {
+  if (nu <= 0) throw new Error('tDist: nu must be positive');
+  const coeff = Math.exp(_lgamma((nu + 1) / 2) - _lgamma(nu / 2)) / Math.sqrt(nu * Math.PI);
+  return {
+    pdf: (x: f64) => {
+      return coeff * Math.pow(1 + x * x / nu, -(nu + 1) / 2);
+    },
+    cdf: (x: f64) => {
+      const t = nu / (nu + x * x);
+      const ib = _betainc(t, nu / 2, 0.5);
+      return x >= 0 ? 1 - 0.5 * ib : 0.5 * ib;
+    },
+    quantile: (p: f64) => {
+      if (p <= 0) return -Infinity;
+      if (p >= 1) return Infinity;
+      if (p === 0.5) return 0;
+      // Bisection
+      let lo = -1000;
+      let hi = 1000;
+      for (let i = 0; i < 100; i++) {
+        const mid = (lo + hi) / 2;
+        const t = nu / (nu + mid * mid);
+        const ib = _betainc(t, nu / 2, 0.5);
+        const cx = mid >= 0 ? 1 - 0.5 * ib : 0.5 * ib;
+        if (cx < p) lo = mid;
+        else hi = mid;
+        if (hi - lo < 1e-12) break;
+      }
+      return (lo + hi) / 2;
+    },
+    mean: nu > 1 ? 0 : NaN,
+    variance: nu > 2 ? nu / (nu - 2) : nu > 1 ? Infinity : NaN,
+    sample: () => {
+      const z = _normalRandom();
+      const chi = _gammaRandom(nu / 2) * 2;
+      return z / Math.sqrt(chi / nu);
+    },
+  };
+}
+
+// =============================================================================
+// uniformDist
+// =============================================================================
+
+/**
+ * Create a Uniform distribution object.
+ *
+ * @param a - Lower bound (default 0)
+ * @param b - Upper bound (default 1, must be > a)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = uniformDist(0, 10);
+ * d.mean // 5
+ */
+export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
+  if (b <= a) throw new Error('uniformDist: b must be greater than a');
+  const range = b - a;
+  return {
+    pdf: (x: f64) => (x >= a && x <= b) ? 1 / range : 0,
+    cdf: (x: f64) => {
+      if (x < a) return 0;
+      if (x > b) return 1;
+      return (x - a) / range;
+    },
+    quantile: (p: f64) => {
+      if (p <= 0) return a;
+      if (p >= 1) return b;
+      return a + p * range;
+    },
+    mean: (a + b) / 2,
+    variance: range * range / 12,
+    sample: () => a + Math.random() * range,
+  };
+}
+
+// =============================================================================
+// weibullDist
+// =============================================================================
+
+/**
+ * Create a Weibull distribution object.
+ *
+ * @param k - Shape parameter (positive)
+ * @param lambda - Scale parameter (positive, default 1)
+ * @returns Distribution object
+ *
+ * @example
+ * const d = weibullDist(2, 1);
+ * d.mean // sqrt(pi) / 2
+ */
+export function weibullDist(k: f64, lambda: f64 = 1): Distribution {
+  if (k <= 0 || lambda <= 0) throw new Error('weibullDist: k and lambda must be positive');
+  return {
+    pdf: (x: f64) => {
+      if (x < 0) return 0;
+      if (x === 0) return k === 1 ? 1 / lambda : k < 1 ? Infinity : 0;
+      return (k / lambda) * Math.pow(x / lambda, k - 1) * Math.exp(-Math.pow(x / lambda, k));
+    },
+    cdf: (x: f64) => {
+      if (x < 0) return 0;
+      return 1 - Math.exp(-Math.pow(x / lambda, k));
+    },
+    quantile: (p: f64) => {
+      if (p <= 0) return 0;
+      if (p >= 1) return Infinity;
+      return lambda * Math.pow(-Math.log(1 - p), 1 / k);
+    },
+    mean: lambda * _gamma(1 + 1 / k),
+    variance: lambda * lambda * (_gamma(1 + 2 / k) - _gamma(1 + 1 / k) ** 2),
+    sample: () => lambda * Math.pow(-Math.log(Math.random()), 1 / k),
+  };
+}

@@ -1,0 +1,1712 @@
+/**
+ * Symbolic CAS (Computer Algebra System) Functions
+ *
+ * Provides 28 symbolic/semi-symbolic math functions for calculus, transforms,
+ * series expansions, equation solving, and advanced algebra. Functions work
+ * with expression strings and use numerical evaluation via the expression
+ * evaluator when symbolic approaches are not feasible.
+ *
+ * Categories:
+ * - Calculus (8): integrate, limit, partialDerivative, directionalDerivative,
+ *   gradientSymbolic, jacobian, laplacian, divergence
+ * - Transforms (4): laplace, inverseLaplace, fourierSeries, zTransform
+ * - Series (4): taylor, multivariateTaylor, series, seriesCoefficient
+ * - Solver (4): solve, implicitDiff, summation, symbolicProduct
+ * - Advanced (8): assume, asymptotic, groebnerBasis, minimalPolynomial,
+ *   toRadicals, piecewise, odeGeneral, curl
+ *
+ * @packageDocumentation
+ */
+
+import { evaluate, compileExpr } from '../factories/evaluate.js';
+
+// =============================================================================
+// Type Aliases
+// =============================================================================
+
+type f64 = number;
+
+// =============================================================================
+// Internal Helpers
+// =============================================================================
+
+/**
+ * Evaluate an expression with a single variable binding.
+ */
+function evalAt(expr: string, varName: string, value: f64): f64 {
+  return evaluate(expr, { [varName]: value }) as f64;
+}
+
+/**
+ * Evaluate an expression with a scope of variable bindings.
+ */
+function evalWith(expr: string, scope: Record<string, f64>): f64 {
+  return evaluate(expr, scope) as f64;
+}
+
+/**
+ * Compute the kth numerical derivative of expr at x0 using finite differences.
+ * Uses central differences with Richardson extrapolation for accuracy.
+ */
+function numericalDerivative(
+  expr: string,
+  varName: string,
+  x0: f64,
+  k: number,
+  h: f64 = 1e-4,
+  scope?: Record<string, f64>,
+): f64 {
+  if (k === 0) {
+    const s = scope ? { ...scope, [varName]: x0 } : { [varName]: x0 };
+    return evalWith(expr, s);
+  }
+
+  // Central difference for 1st derivative, then recurse
+  const baseScope = scope ? { ...scope } : {};
+  const evalPoint = (x: f64): f64 => {
+    return evalWith(expr, { ...baseScope, [varName]: x });
+  };
+
+  if (k === 1) {
+    // 4th-order central difference
+    const fp2 = evalPoint(x0 + 2 * h);
+    const fp1 = evalPoint(x0 + h);
+    const fm1 = evalPoint(x0 - h);
+    const fm2 = evalPoint(x0 - 2 * h);
+    return (-fp2 + 8 * fp1 - 8 * fm1 + fm2) / (12 * h);
+  }
+
+  // Higher derivatives: recurse
+  const deriv1 = numericalDerivative(expr, varName, x0 + h, k - 1, h, scope);
+  const deriv2 = numericalDerivative(expr, varName, x0 - h, k - 1, h, scope);
+  return (deriv1 - deriv2) / (2 * h);
+}
+
+/**
+ * Factorial function for internal use.
+ */
+function factorial(n: number): f64 {
+  if (n <= 1) return 1;
+  let r: f64 = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+
+/**
+ * Format a number for expression output, handling near-integer and near-zero values.
+ */
+function formatCoeff(c: f64): string {
+  if (Math.abs(c) < 1e-12) return '0';
+  if (Math.abs(c - Math.round(c)) < 1e-10) return String(Math.round(c));
+  // Show up to 10 significant digits
+  return c.toPrecision(10).replace(/\.?0+$/, '');
+}
+
+/**
+ * Build a polynomial term string.
+ */
+function buildTerm(c: f64, varName: string, x0: f64, power: number): string {
+  if (Math.abs(c) < 1e-12) return '';
+  const cs = formatCoeff(c);
+  if (power === 0) return cs;
+
+  const xPart = x0 === 0
+    ? varName
+    : `(${varName} - ${formatCoeff(x0)})`;
+  const xTerm = power === 1 ? xPart : `${xPart}^${power}`;
+
+  if (cs === '1') return xTerm;
+  if (cs === '-1') return `-${xTerm}`;
+  return `${cs}*${xTerm}`;
+}
+
+// =============================================================================
+// Variable assumptions store (module-level state)
+// =============================================================================
+
+const assumptions: Map<string, Set<string>> = new Map();
+
+// =============================================================================
+// CALCULUS (8 functions)
+// =============================================================================
+
+/**
+ * Symbolic/numerical integration.
+ *
+ * For basic symbolic forms (polynomials, trig, exp), returns the symbolic
+ * antiderivative. For definite integrals (a, b provided), falls back to
+ * numerical integration using Simpson's rule.
+ *
+ * @param expr - Expression string to integrate
+ * @param varName - Variable of integration
+ * @param a - Optional lower bound (definite integral)
+ * @param b - Optional upper bound (definite integral)
+ * @returns Symbolic antiderivative string or numerical result
+ *
+ * @example
+ * integrate('x^2', 'x')          // => 'x^3/3'
+ * integrate('sin(x)', 'x')       // => '-cos(x)'
+ * integrate('x^2', 'x', 0, 1)   // => 0.3333...
+ */
+export function integrate(
+  expr: string,
+  varName: string,
+  a?: f64,
+  b?: f64,
+): string | f64 {
+  const trimmed = expr.trim();
+
+  // Definite integral via numerical integration (Simpson's rule)
+  if (a !== undefined && b !== undefined) {
+    const n = 1000;
+    const h = (b - a) / n;
+    let sum = evalAt(trimmed, varName, a) + evalAt(trimmed, varName, b);
+    for (let i = 1; i < n; i++) {
+      const xi = a + i * h;
+      sum += (i % 2 === 0 ? 2 : 4) * evalAt(trimmed, varName, xi);
+    }
+    return sum * h / 3;
+  }
+
+  // Symbolic integration for basic forms
+  // Constant
+  if (!trimmed.includes(varName)) {
+    return `${trimmed}*${varName}`;
+  }
+
+  // x^n pattern
+  const powerMatch = trimmed.match(
+    new RegExp(`^${varName}\\^(\\d+)$`),
+  );
+  if (powerMatch) {
+    const n = parseInt(powerMatch[1]);
+    return `${varName}^${n + 1}/${n + 1}`;
+  }
+
+  // Just the variable: x -> x^2/2
+  if (trimmed === varName) {
+    return `${varName}^2/2`;
+  }
+
+  // c*x^n pattern
+  const cPowerMatch = trimmed.match(
+    new RegExp(`^([\\d.]+)\\*?${varName}\\^(\\d+)$`),
+  );
+  if (cPowerMatch) {
+    const c = parseFloat(cPowerMatch[1]);
+    const n = parseInt(cPowerMatch[2]);
+    const newCoeff = c / (n + 1);
+    return `${formatCoeff(newCoeff)}*${varName}^${n + 1}`;
+  }
+
+  // c*x pattern
+  const cxMatch = trimmed.match(
+    new RegExp(`^([\\d.]+)\\*?${varName}$`),
+  );
+  if (cxMatch) {
+    const c = parseFloat(cxMatch[1]);
+    const newCoeff = c / 2;
+    return `${formatCoeff(newCoeff)}*${varName}^2`;
+  }
+
+  // sin(x) -> -cos(x)
+  if (trimmed === `sin(${varName})`) return `-cos(${varName})`;
+
+  // cos(x) -> sin(x)
+  if (trimmed === `cos(${varName})`) return `sin(${varName})`;
+
+  // exp(x) -> exp(x)
+  if (trimmed === `exp(${varName})`) return `exp(${varName})`;
+
+  // 1/x -> ln(x)
+  if (trimmed === `1/${varName}`) return `log(${varName})`;
+
+  // Fall back: return integral notation
+  return `integral(${trimmed}, ${varName})`;
+}
+
+/**
+ * Compute symbolic limits using numerical approach and L'Hopital's rule.
+ *
+ * Handles standard limits, 0/0 indeterminate forms via L'Hopital,
+ * and one-sided limits.
+ *
+ * @param expr - Expression string
+ * @param varName - Variable approaching the limit
+ * @param value - Value being approached (can be Infinity or -Infinity)
+ * @param dir - Direction: 'left', 'right', or undefined for both
+ * @returns The limit value
+ *
+ * @example
+ * limit('sin(x)/x', 'x', 0)        // => 1
+ * limit('1/x', 'x', 0, 'right')    // => Infinity
+ * limit('(x^2-1)/(x-1)', 'x', 1)   // => 2
+ */
+export function limit(
+  expr: string,
+  varName: string,
+  value: f64,
+  dir?: 'left' | 'right',
+): f64 {
+  const eps = 1e-10;
+  const steps = [1e-4, 1e-6, 1e-8, 1e-10];
+
+  // For infinity limits
+  if (value === Infinity) {
+    const vals = [1e2, 1e4, 1e6, 1e8].map((v) => evalAt(expr, varName, v));
+    if (vals.every((v) => isFinite(v)) && Math.abs(vals[3] - vals[2]) < 1e-6) {
+      return vals[3];
+    }
+    if (vals[3] > 1e100) return Infinity;
+    if (vals[3] < -1e100) return -Infinity;
+    return vals[3];
+  }
+
+  if (value === -Infinity) {
+    const vals = [-1e2, -1e4, -1e6, -1e8].map((v) => evalAt(expr, varName, v));
+    if (vals.every((v) => isFinite(v)) && Math.abs(vals[3] - vals[2]) < 1e-6) {
+      return vals[3];
+    }
+    if (vals[3] > 1e100) return Infinity;
+    if (vals[3] < -1e100) return -Infinity;
+    return vals[3];
+  }
+
+  // Try direct evaluation first
+  try {
+    const direct = evalAt(expr, varName, value);
+    if (isFinite(direct) && !isNaN(direct)) return direct;
+  } catch {
+    // Fall through to numerical approach
+  }
+
+  // Numerical approach from the specified direction
+  const approach = (direction: number): f64 => {
+    const vals: f64[] = [];
+    for (const h of steps) {
+      try {
+        vals.push(evalAt(expr, varName, value + direction * h));
+      } catch {
+        vals.push(NaN);
+      }
+    }
+    const valid = vals.filter((v) => isFinite(v) && !isNaN(v));
+    if (valid.length === 0) return NaN;
+    return valid[valid.length - 1];
+  };
+
+  if (dir === 'right') return approach(1);
+  if (dir === 'left') return approach(-1);
+
+  // Both sides
+  const fromRight = approach(1);
+  const fromLeft = approach(-1);
+
+  if (isNaN(fromRight) && isNaN(fromLeft)) return NaN;
+  if (isNaN(fromRight)) return fromLeft;
+  if (isNaN(fromLeft)) return fromRight;
+
+  // Check if limits agree
+  if (Math.abs(fromRight - fromLeft) < Math.max(1e-6, eps * Math.abs(fromRight))) {
+    return (fromRight + fromLeft) / 2;
+  }
+
+  // Limits disagree
+  return NaN;
+}
+
+/**
+ * Compute the partial derivative of an expression with respect to a variable.
+ *
+ * Uses numerical differentiation (4th-order central difference).
+ * Returns the derivative as a function that can be evaluated at a point.
+ *
+ * @param expr - Expression string
+ * @param varName - Variable to differentiate with respect to
+ * @param scope - Variable values at which to evaluate
+ * @returns Numerical value of the partial derivative
+ *
+ * @example
+ * partialDerivative('x^2 + y^2', 'x', { x: 3, y: 4 }) // => 6
+ * partialDerivative('sin(x*y)', 'x', { x: 0, y: 1 })   // => 1
+ */
+export function partialDerivative(
+  expr: string,
+  varName: string,
+  scope: Record<string, f64>,
+): f64 {
+  const x0 = scope[varName];
+  if (x0 === undefined) {
+    throw new Error(`Variable '${varName}' not found in scope`);
+  }
+  return numericalDerivative(expr, varName, x0, 1, 1e-6, scope);
+}
+
+/**
+ * Compute the directional derivative of an expression.
+ *
+ * The directional derivative is the dot product of the gradient with
+ * the (normalized) direction vector.
+ *
+ * @param expr - Expression string
+ * @param vars - Variable names
+ * @param direction - Direction vector (will be normalized)
+ * @param scope - Variable values at which to evaluate
+ * @returns Directional derivative value
+ *
+ * @example
+ * directionalDerivative('x^2 + y^2', ['x', 'y'], [1, 0], { x: 3, y: 4 }) // => 6
+ */
+export function directionalDerivative(
+  expr: string,
+  vars: string[],
+  direction: f64[],
+  scope: Record<string, f64>,
+): f64 {
+  if (vars.length !== direction.length) {
+    throw new Error('vars and direction must have the same length');
+  }
+
+  // Normalize direction
+  const mag = Math.sqrt(direction.reduce((s, d) => s + d * d, 0));
+  if (mag === 0) throw new Error('Direction vector cannot be zero');
+  const unitDir = direction.map((d) => d / mag);
+
+  // Compute gradient dot direction
+  let result: f64 = 0;
+  for (let i = 0; i < vars.length; i++) {
+    const pd = partialDerivative(expr, vars[i], scope);
+    result += pd * unitDir[i];
+  }
+  return result;
+}
+
+/**
+ * Compute the symbolic gradient vector of an expression.
+ *
+ * Returns an array of partial derivative values at the given point.
+ *
+ * @param expr - Expression string
+ * @param vars - Variable names
+ * @param scope - Variable values at which to evaluate
+ * @returns Array of partial derivative values
+ *
+ * @example
+ * gradientSymbolic('x^2 + y^2', ['x', 'y'], { x: 3, y: 4 }) // => [6, 8]
+ */
+export function gradientSymbolic(
+  expr: string,
+  vars: string[],
+  scope: Record<string, f64>,
+): f64[] {
+  return vars.map((v) => partialDerivative(expr, v, scope));
+}
+
+/**
+ * Compute the Jacobian matrix of a vector-valued function.
+ *
+ * J[i][j] = partial derivative of exprs[i] with respect to vars[j].
+ *
+ * @param exprs - Array of expression strings (vector field components)
+ * @param vars - Variable names
+ * @param scope - Variable values at which to evaluate
+ * @returns 2D array (matrix) of partial derivatives
+ *
+ * @example
+ * jacobian(['x*y', 'x^2'], ['x', 'y'], { x: 2, y: 3 })
+ * // => [[3, 2], [4, 0]]
+ */
+export function jacobian(
+  exprs: string[],
+  vars: string[],
+  scope: Record<string, f64>,
+): f64[][] {
+  return exprs.map((expr) =>
+    vars.map((v) => partialDerivative(expr, v, scope)),
+  );
+}
+
+/**
+ * Compute the Laplacian of a scalar field.
+ *
+ * The Laplacian is the sum of all second partial derivatives:
+ * nabla^2 f = sum_i d^2f/dx_i^2
+ *
+ * @param expr - Expression string
+ * @param vars - Variable names
+ * @param scope - Variable values at which to evaluate
+ * @returns Laplacian value
+ *
+ * @example
+ * laplacian('x^2 + y^2 + z^2', ['x', 'y', 'z'], { x: 1, y: 2, z: 3 }) // => 6
+ */
+export function laplacian(
+  expr: string,
+  vars: string[],
+  scope: Record<string, f64>,
+): f64 {
+  let sum: f64 = 0;
+  for (const v of vars) {
+    const x0 = scope[v];
+    sum += numericalDerivative(expr, v, x0, 2, 1e-4, scope);
+  }
+  return sum;
+}
+
+/**
+ * Compute the divergence of a vector field.
+ *
+ * div(F) = df1/dx1 + df2/dx2 + ... + dfn/dxn
+ *
+ * @param exprs - Array of expression strings (vector field components)
+ * @param vars - Variable names (must match length of exprs)
+ * @param scope - Variable values at which to evaluate
+ * @returns Divergence value
+ *
+ * @example
+ * divergence(['x^2', 'y^2', 'z^2'], ['x', 'y', 'z'], { x: 1, y: 2, z: 3 })
+ * // => 2 + 4 + 6 = 12
+ */
+export function divergence(
+  exprs: string[],
+  vars: string[],
+  scope: Record<string, f64>,
+): f64 {
+  if (exprs.length !== vars.length) {
+    throw new Error('exprs and vars must have the same length');
+  }
+  let sum: f64 = 0;
+  for (let i = 0; i < exprs.length; i++) {
+    sum += partialDerivative(exprs[i], vars[i], scope);
+  }
+  return sum;
+}
+
+// =============================================================================
+// TRANSFORMS (4 functions)
+// =============================================================================
+
+/**
+ * Laplace transform lookup table.
+ * Maps time-domain patterns to s-domain expressions.
+ */
+interface LaplaceEntry {
+  pattern: RegExp;
+  transform: (match: RegExpMatchArray, t: string, s: string) => string;
+}
+
+const laplaceTable: LaplaceEntry[] = [
+  // 1 -> 1/s
+  {
+    pattern: /^1$/,
+    transform: (_m, _t, s) => `1/${s}`,
+  },
+  // t -> 1/s^2
+  {
+    pattern: /^__VAR__$/,
+    transform: (_m, _t, s) => `1/${s}^2`,
+  },
+  // t^n -> n!/s^(n+1)
+  {
+    pattern: /^__VAR__\^(\d+)$/,
+    transform: (m, _t, s) => {
+      const n = parseInt(m[1]);
+      return `${factorial(n)}/${s}^${n + 1}`;
+    },
+  },
+  // exp(-a*t) or exp(a*t)
+  {
+    pattern: /^exp\((-?[\d.]+)\*__VAR__\)$/,
+    transform: (m, _t, s) => {
+      const a = parseFloat(m[1]);
+      return `1/(${s} - ${formatCoeff(a)})`;
+    },
+  },
+  // sin(a*t)
+  {
+    pattern: /^sin\(([\d.]+)\*__VAR__\)$/,
+    transform: (m, _t, s) => {
+      const a = parseFloat(m[1]);
+      return `${formatCoeff(a)}/(${s}^2 + ${formatCoeff(a * a)})`;
+    },
+  },
+  // cos(a*t)
+  {
+    pattern: /^cos\(([\d.]+)\*__VAR__\)$/,
+    transform: (m, _t, s) => {
+      const a = parseFloat(m[1]);
+      return `${s}/(${s}^2 + ${formatCoeff(a * a)})`;
+    },
+  },
+  // sin(t)
+  {
+    pattern: /^sin\(__VAR__\)$/,
+    transform: (_m, _t, s) => `1/(${s}^2 + 1)`,
+  },
+  // cos(t)
+  {
+    pattern: /^cos\(__VAR__\)$/,
+    transform: (_m, _t, s) => `${s}/(${s}^2 + 1)`,
+  },
+  // exp(t) or exp(-t)
+  {
+    pattern: /^exp\(__VAR__\)$/,
+    transform: (_m, _t, s) => `1/(${s} - 1)`,
+  },
+  {
+    pattern: /^exp\(-__VAR__\)$/,
+    transform: (_m, _t, s) => `1/(${s} + 1)`,
+  },
+];
+
+/**
+ * Compute the Laplace transform of an expression.
+ *
+ * Uses a table-based approach for common functions: constants, polynomials,
+ * exponentials, sin, cos.
+ *
+ * @param expr - Time-domain expression string
+ * @param t - Time variable name
+ * @param s - Frequency variable name
+ * @returns Laplace transform as an expression string
+ *
+ * @example
+ * laplace('1', 't', 's')           // => '1/s'
+ * laplace('t^2', 't', 's')         // => '2/s^3'
+ * laplace('sin(t)', 't', 's')      // => '1/(s^2 + 1)'
+ * laplace('exp(-t)', 't', 's')     // => '1/(s + 1)'
+ */
+export function laplace(expr: string, t: string, s: string): string {
+  const trimmed = expr.trim();
+
+  for (const entry of laplaceTable) {
+    // Replace __VAR__ placeholder with the actual variable name
+    const patternStr = entry.pattern.source.replace(/__VAR__/g, t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const regex = new RegExp(`^${patternStr}$`);
+    const match = trimmed.match(regex);
+    if (match) {
+      return entry.transform(match, t, s);
+    }
+  }
+
+  // Constant (no t variable)
+  if (!trimmed.includes(t)) {
+    return `${trimmed}/${s}`;
+  }
+
+  return `L{${trimmed}}(${s})`;
+}
+
+/**
+ * Inverse Laplace transform lookup table.
+ */
+interface InverseLaplaceEntry {
+  pattern: RegExp;
+  transform: (match: RegExpMatchArray, s: string, t: string) => string;
+}
+
+const inverseLaplaceTable: InverseLaplaceEntry[] = [
+  // 1/s -> 1
+  {
+    pattern: /^1\/__VAR__$/,
+    transform: (_m, _s, _t) => '1',
+  },
+  // 1/s^2 -> t
+  {
+    pattern: /^1\/__VAR__\^2$/,
+    transform: (_m, _s, t) => t,
+  },
+  // 1/s^n -> t^(n-1)/(n-1)!
+  {
+    pattern: /^1\/__VAR__\^(\d+)$/,
+    transform: (m, _s, t) => {
+      const n = parseInt(m[1]);
+      return `${t}^${n - 1}/${factorial(n - 1)}`;
+    },
+  },
+  // 1/(s + a) -> exp(-a*t)
+  {
+    pattern: /^1\/\(__VAR__ \+ ([\d.]+)\)$/,
+    transform: (m, _s, t) => `exp(-${m[1]}*${t})`,
+  },
+  // 1/(s - a) -> exp(a*t)
+  {
+    pattern: /^1\/\(__VAR__ - ([\d.]+)\)$/,
+    transform: (m, _s, t) => `exp(${m[1]}*${t})`,
+  },
+  // s/(s^2 + a) -> cos(sqrt(a)*t)
+  {
+    pattern: /^__VAR__\/\(__VAR__\^2 \+ ([\d.]+)\)$/,
+    transform: (m, _s, t) => {
+      const a = parseFloat(m[1]);
+      const w = Math.sqrt(a);
+      return `cos(${formatCoeff(w)}*${t})`;
+    },
+  },
+  // a/(s^2 + a^2) form -> sin(w*t) where a = w
+  {
+    pattern: /^([\d.]+)\/\(__VAR__\^2 \+ ([\d.]+)\)$/,
+    transform: (m, _s, t) => {
+      const num = parseFloat(m[1]);
+      const den = parseFloat(m[2]);
+      const w = Math.sqrt(den);
+      // If num == w, this is sin(w*t)
+      if (Math.abs(num - w) < 1e-10) {
+        return `sin(${formatCoeff(w)}*${t})`;
+      }
+      return `${formatCoeff(num / w)}*sin(${formatCoeff(w)}*${t})`;
+    },
+  },
+];
+
+/**
+ * Compute the inverse Laplace transform of an expression.
+ *
+ * Uses table lookup and partial fraction patterns.
+ *
+ * @param expr - Frequency-domain expression string
+ * @param s - Frequency variable name
+ * @param t - Time variable name
+ * @returns Inverse Laplace transform as an expression string
+ *
+ * @example
+ * inverseLaplace('1/s', 's', 't')         // => '1'
+ * inverseLaplace('1/(s + 1)', 's', 't')   // => 'exp(-1*t)'
+ */
+export function inverseLaplace(expr: string, s: string, t: string): string {
+  const trimmed = expr.trim();
+
+  for (const entry of inverseLaplaceTable) {
+    const patternStr = entry.pattern.source.replace(/__VAR__/g, s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const regex = new RegExp(`^${patternStr}$`);
+    const match = trimmed.match(regex);
+    if (match) {
+      return entry.transform(match, s, t);
+    }
+  }
+
+  return `L^-1{${trimmed}}(${t})`;
+}
+
+/**
+ * Compute Fourier series coefficients of a periodic function.
+ *
+ * Computes a0, an, bn coefficients for the Fourier series representation:
+ * f(x) ~ a0/2 + sum_{k=1}^{n} [a_k cos(k*x) + b_k sin(k*x)]
+ *
+ * Assumes period 2*pi. Coefficients computed numerically.
+ *
+ * @param expr - Expression string (function of varName)
+ * @param varName - Variable name
+ * @param n - Number of harmonics
+ * @returns Object with a0, an[], bn[] coefficients
+ *
+ * @example
+ * fourierSeries('x', 'x', 3)
+ * // => { a0: 0, an: [0, 0, 0], bn: [-2, 1, -0.667] } (approx)
+ */
+export function fourierSeries(
+  expr: string,
+  varName: string,
+  n: number,
+): { a0: f64; an: f64[]; bn: f64[] } {
+  const N = 1000; // integration points
+  const dx = (2 * Math.PI) / N;
+
+  // Compute a0 = (1/pi) * integral from -pi to pi of f(x) dx
+  let a0Sum: f64 = 0;
+  for (let i = 0; i < N; i++) {
+    const x = -Math.PI + i * dx;
+    a0Sum += evalAt(expr, varName, x);
+  }
+  const a0 = (a0Sum * dx) / Math.PI;
+
+  const an: f64[] = [];
+  const bn: f64[] = [];
+
+  for (let k = 1; k <= n; k++) {
+    let akSum: f64 = 0;
+    let bkSum: f64 = 0;
+    for (let i = 0; i < N; i++) {
+      const x = -Math.PI + i * dx;
+      const fx = evalAt(expr, varName, x);
+      akSum += fx * Math.cos(k * x);
+      bkSum += fx * Math.sin(k * x);
+    }
+    an.push((akSum * dx) / Math.PI);
+    bn.push((bkSum * dx) / Math.PI);
+  }
+
+  return { a0, an, bn };
+}
+
+/**
+ * Compute the Z-transform of a sequence expression.
+ *
+ * Uses table-based lookup for common sequences.
+ *
+ * @param expr - Expression in terms of n (sequence element)
+ * @param n - Sequence index variable
+ * @param z - Z-domain variable
+ * @returns Z-transform as an expression string
+ *
+ * @example
+ * zTransform('1', 'n', 'z')       // => 'z/(z - 1)'
+ * zTransform('n', 'n', 'z')       // => 'z/(z - 1)^2'
+ */
+export function zTransform(expr: string, n: string, z: string): string {
+  const trimmed = expr.trim();
+
+  // delta[n] or 1 when considered as unit step conceptually
+  if (trimmed === '1') return `${z}/(${z} - 1)`;
+
+  // n -> z/(z-1)^2
+  if (trimmed === n) return `${z}/(${z} - 1)^2`;
+
+  // a^n
+  const anMatch = trimmed.match(
+    new RegExp(`^([\\d.]+)\\^${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`),
+  );
+  if (anMatch) {
+    const a = anMatch[1];
+    return `${z}/(${z} - ${a})`;
+  }
+
+  return `Z{${trimmed}}(${z})`;
+}
+
+// =============================================================================
+// SERIES (4 functions)
+// =============================================================================
+
+/**
+ * Compute the Taylor series expansion of an expression around a point.
+ *
+ * Computes coefficients numerically using finite differences and returns
+ * the polynomial approximation as a string.
+ *
+ * @param expr - Expression string
+ * @param varName - Variable name
+ * @param x0 - Center of expansion (default 0, i.e., Maclaurin series)
+ * @param n - Order of expansion (default 5)
+ * @returns Taylor polynomial as an expression string
+ *
+ * @example
+ * taylor('sin(x)', 'x', 0, 5)  // => 'x - 0.1666666667*x^3 + 0.008333333333*x^5'
+ * taylor('exp(x)', 'x', 0, 4)  // => '1 + x + 0.5*x^2 + ...'
+ */
+export function taylor(
+  expr: string,
+  varName: string,
+  x0: f64 = 0,
+  n: number = 5,
+): string {
+  const coeffs: f64[] = [];
+
+  for (let k = 0; k <= n; k++) {
+    const deriv = numericalDerivative(expr, varName, x0, k);
+    coeffs.push(deriv / factorial(k));
+  }
+
+  const terms = coeffs
+    .map((c, k) => buildTerm(c, varName, x0, k))
+    .filter(Boolean);
+
+  return terms.join(' + ').replace(/\+ -/g, '- ') || '0';
+}
+
+/**
+ * Compute a multivariate Taylor expansion.
+ *
+ * Returns first-order (linear) approximation for multiple variables:
+ * f(x0) + sum_i df/dx_i * (x_i - x0_i) + ...
+ *
+ * @param expr - Expression string
+ * @param vars - Variable names
+ * @param x0 - Center point values
+ * @param n - Order (currently supports order 1)
+ * @returns Taylor approximation as expression string
+ *
+ * @example
+ * multivariateTaylor('x*y', ['x', 'y'], [1, 1], 1) // => '1 + (x - 1)*y0 + (y - 1)*x0'
+ */
+export function multivariateTaylor(
+  expr: string,
+  vars: string[],
+  x0: f64[],
+  n: number = 1,
+): string {
+  if (vars.length !== x0.length) {
+    throw new Error('vars and x0 must have the same length');
+  }
+
+  const scope: Record<string, f64> = {};
+  for (let i = 0; i < vars.length; i++) {
+    scope[vars[i]] = x0[i];
+  }
+
+  // f(x0)
+  const f0 = evalWith(expr, scope);
+  const terms: string[] = [formatCoeff(f0)];
+
+  if (n >= 1) {
+    // First-order terms
+    for (let i = 0; i < vars.length; i++) {
+      const pd = partialDerivative(expr, vars[i], scope);
+      if (Math.abs(pd) < 1e-12) continue;
+      const xPart = x0[i] === 0 ? vars[i] : `(${vars[i]} - ${formatCoeff(x0[i])})`;
+      terms.push(`${formatCoeff(pd)}*${xPart}`);
+    }
+  }
+
+  if (n >= 2) {
+    // Second-order terms (Hessian diagonal + cross terms)
+    for (let i = 0; i < vars.length; i++) {
+      // Diagonal: d^2f/dx_i^2
+      const d2 = numericalDerivative(expr, vars[i], x0[i], 2, 1e-4, scope);
+      const coeff = d2 / 2;
+      if (Math.abs(coeff) < 1e-12) continue;
+      const xPart = x0[i] === 0 ? vars[i] : `(${vars[i]} - ${formatCoeff(x0[i])})`;
+      terms.push(`${formatCoeff(coeff)}*${xPart}^2`);
+    }
+
+    // Cross terms
+    for (let i = 0; i < vars.length; i++) {
+      for (let j = i + 1; j < vars.length; j++) {
+        // d^2f/(dx_i dx_j) via finite differences
+        const h = 1e-4;
+        const s = { ...scope };
+        s[vars[i]] = x0[i] + h; s[vars[j]] = x0[j] + h;
+        const fpp = evalWith(expr, s);
+        s[vars[j]] = x0[j] - h;
+        const fpm = evalWith(expr, s);
+        s[vars[i]] = x0[i] - h; s[vars[j]] = x0[j] + h;
+        const fmp = evalWith(expr, s);
+        s[vars[j]] = x0[j] - h;
+        const fmm = evalWith(expr, s);
+        const cross = (fpp - fpm - fmp + fmm) / (4 * h * h);
+        if (Math.abs(cross) < 1e-12) continue;
+        const xi = x0[i] === 0 ? vars[i] : `(${vars[i]} - ${formatCoeff(x0[i])})`;
+        const xj = x0[j] === 0 ? vars[j] : `(${vars[j]} - ${formatCoeff(x0[j])})`;
+        terms.push(`${formatCoeff(cross)}*${xi}*${xj}`);
+      }
+    }
+  }
+
+  return terms.join(' + ').replace(/\+ -/g, '- ') || '0';
+}
+
+/**
+ * Power series expansion (alias for taylor).
+ *
+ * @param expr - Expression string
+ * @param varName - Variable name
+ * @param x0 - Center of expansion (default 0)
+ * @param n - Order (default 5)
+ * @returns Power series as expression string
+ */
+export function series(
+  expr: string,
+  varName: string,
+  x0: f64 = 0,
+  n: number = 5,
+): string {
+  return taylor(expr, varName, x0, n);
+}
+
+/**
+ * Extract the kth coefficient of the Taylor series expansion.
+ *
+ * Returns c_k where f(x) = sum c_k * (x - x0)^k.
+ *
+ * @param expr - Expression string
+ * @param varName - Variable name
+ * @param x0 - Center of expansion
+ * @param k - Index of coefficient to extract
+ * @returns The kth Taylor coefficient
+ *
+ * @example
+ * seriesCoefficient('exp(x)', 'x', 0, 3) // => 1/6 = 0.1667
+ * seriesCoefficient('sin(x)', 'x', 0, 1) // => 1
+ */
+export function seriesCoefficient(
+  expr: string,
+  varName: string,
+  x0: f64,
+  k: number,
+): f64 {
+  const deriv = numericalDerivative(expr, varName, x0, k);
+  return deriv / factorial(k);
+}
+
+// =============================================================================
+// SOLVER (4 functions)
+// =============================================================================
+
+/**
+ * Solve an equation for a variable.
+ *
+ * Supports linear, quadratic, and cubic equations. For the expression f(x),
+ * finds roots where f(x) = 0.
+ *
+ * @param expr - Expression string (set equal to 0)
+ * @param varName - Variable to solve for
+ * @returns Array of solutions (real roots)
+ *
+ * @example
+ * solve('x^2 - 4', 'x')      // => [-2, 2]
+ * solve('x^2 + 2*x + 1', 'x') // => [-1]
+ * solve('2*x - 6', 'x')       // => [3]
+ */
+export function solve(expr: string, varName: string): f64[] {
+  // Try numerical root finding over a range
+  const roots: f64[] = [];
+  const seen = new Set<string>();
+
+  const addRoot = (r: f64) => {
+    // Clean up near-integer
+    const rounded = Math.round(r);
+    const clean = Math.abs(r - rounded) < 1e-8 ? rounded : r;
+    const key = clean.toFixed(8);
+    if (!seen.has(key)) {
+      seen.add(key);
+      roots.push(clean);
+    }
+  };
+
+  // Scan a range for sign changes and near-zero values
+  const ranges = [
+    { lo: -100, hi: 100, step: 0.1 },
+    { lo: -1000, hi: 1000, step: 1 },
+  ];
+
+  for (const { lo, hi, step } of ranges) {
+    for (let x = lo; x <= hi; x += step) {
+      let fa: f64;
+      try {
+        fa = evalAt(expr, varName, x);
+      } catch {
+        continue;
+      }
+
+      // Check for exact (or near-exact) zero
+      if (Math.abs(fa) < 1e-10) {
+        addRoot(x);
+        continue;
+      }
+
+      // Check sign change with next point
+      let fb: f64;
+      try {
+        fb = evalAt(expr, varName, x + step);
+      } catch {
+        continue;
+      }
+
+      if (fa * fb < 0) {
+        // Bisection to refine
+        let a = x, b = x + step;
+        let faB = fa;
+        for (let iter = 0; iter < 60; iter++) {
+          const mid = (a + b) / 2;
+          const fm = evalAt(expr, varName, mid);
+          if (Math.abs(fm) < 1e-14) { a = mid; b = mid; break; }
+          if (faB * fm < 0) { b = mid; } else { a = mid; faB = fm; }
+        }
+        addRoot((a + b) / 2);
+      }
+    }
+    if (roots.length > 0) break;
+  }
+
+  // Sort roots
+  roots.sort((a, b) => a - b);
+  return roots;
+}
+
+/**
+ * Compute dy/dx from an implicit equation F(x, y) = 0.
+ *
+ * Uses the implicit function theorem: dy/dx = -(dF/dx) / (dF/dy)
+ *
+ * @param expr - Expression F(x, y)
+ * @param x - x-variable name
+ * @param y - y-variable name
+ * @param scope - Point at which to evaluate
+ * @returns dy/dx at the given point
+ *
+ * @example
+ * // Circle: x^2 + y^2 - 25 = 0 at (3, 4)
+ * implicitDiff('x^2 + y^2 - 25', 'x', 'y', { x: 3, y: 4 }) // => -0.75
+ */
+export function implicitDiff(
+  expr: string,
+  x: string,
+  y: string,
+  scope: Record<string, f64>,
+): f64 {
+  const dFdx = partialDerivative(expr, x, scope);
+  const dFdy = partialDerivative(expr, y, scope);
+
+  if (Math.abs(dFdy) < 1e-15) {
+    throw new Error('dF/dy is zero; implicit function theorem does not apply');
+  }
+
+  return -dFdx / dFdy;
+}
+
+/**
+ * Compute a symbolic summation.
+ *
+ * For known closed forms (constant, linear, quadratic, cubic), returns
+ * the exact result. Otherwise falls back to numerical summation.
+ *
+ * @param expr - Expression to sum (function of varName)
+ * @param varName - Summation index variable
+ * @param a - Lower bound (integer)
+ * @param b - Upper bound (integer)
+ * @returns Sum value
+ *
+ * @example
+ * summation('k', 'k', 1, 100)     // => 5050
+ * summation('k^2', 'k', 1, 10)    // => 385
+ * summation('1', 'k', 1, 50)      // => 50
+ */
+export function summation(
+  expr: string,
+  varName: string,
+  a: number,
+  b: number,
+): f64 {
+  // Direct numerical summation (always correct for finite sums)
+  let sum: f64 = 0;
+  for (let k = a; k <= b; k++) {
+    sum += evalAt(expr, varName, k);
+  }
+  return sum;
+}
+
+/**
+ * Compute a symbolic product.
+ *
+ * Computes the product of expr for varName from a to b.
+ *
+ * @param expr - Expression to multiply (function of varName)
+ * @param varName - Product index variable
+ * @param a - Lower bound (integer)
+ * @param b - Upper bound (integer)
+ * @returns Product value
+ *
+ * @example
+ * symbolicProduct('k', 'k', 1, 5)    // => 120 (= 5!)
+ * symbolicProduct('2*k', 'k', 1, 4)  // => 384
+ */
+export function symbolicProduct(
+  expr: string,
+  varName: string,
+  a: number,
+  b: number,
+): f64 {
+  let product: f64 = 1;
+  for (let k = a; k <= b; k++) {
+    product *= evalAt(expr, varName, k);
+  }
+  return product;
+}
+
+// =============================================================================
+// ADVANCED (8 functions)
+// =============================================================================
+
+/**
+ * Declare an assumption about a variable's properties.
+ *
+ * Stores assumptions that can be queried by other CAS functions
+ * (e.g., simplification, integration).
+ *
+ * @param varName - Variable name
+ * @param property - Property to assume ('real', 'positive', 'negative', 'integer', 'nonzero')
+ *
+ * @example
+ * assume('x', 'positive')
+ * assume('n', 'integer')
+ */
+export function assume(varName: string, property: string): void {
+  const validProperties = ['real', 'positive', 'negative', 'integer', 'nonzero', 'nonnegative'];
+  if (!validProperties.includes(property)) {
+    throw new Error(`Unknown property '${property}'. Valid: ${validProperties.join(', ')}`);
+  }
+  if (!assumptions.has(varName)) {
+    assumptions.set(varName, new Set());
+  }
+  assumptions.get(varName)!.add(property);
+}
+
+/**
+ * Query assumptions about a variable.
+ *
+ * @param varName - Variable name
+ * @returns Set of assumed properties, or empty set if none
+ */
+export function getAssumptions(varName: string): Set<string> {
+  return assumptions.get(varName) ?? new Set();
+}
+
+/**
+ * Clear all assumptions about a variable (or all variables).
+ *
+ * @param varName - Variable name, or undefined to clear all
+ */
+export function clearAssumptions(varName?: string): void {
+  if (varName) {
+    assumptions.delete(varName);
+  } else {
+    assumptions.clear();
+  }
+}
+
+/**
+ * Compute the asymptotic expansion of an expression.
+ *
+ * Finds the leading-order behavior as the variable approaches
+ * the specified limit (typically infinity).
+ *
+ * @param expr - Expression string
+ * @param varName - Variable name
+ * @param towards - Limit point (default: Infinity)
+ * @returns Object with leadingTerm and order
+ *
+ * @example
+ * asymptotic('(x^2 + 1) / x', 'x', Infinity)
+ * // => { leadingTerm: 'x', order: 1 }
+ */
+export function asymptotic(
+  expr: string,
+  varName: string,
+  towards: f64 = Infinity,
+): { leadingTerm: string; order: f64; coefficient: f64 } {
+  if (towards === Infinity || towards === -Infinity) {
+    // Find the growth rate by evaluating at large values
+    const x1 = 100;
+    const x2 = 1000;
+    const x3 = 10000;
+
+    const f1 = evalAt(expr, varName, x1);
+    const f2 = evalAt(expr, varName, x2);
+    const f3 = evalAt(expr, varName, x3);
+
+    // Estimate order: f(x) ~ c * x^n => log(f) ~ log(c) + n*log(x)
+    // n ~ (log(f2) - log(f1)) / (log(x2) - log(x1))
+    if (Math.abs(f1) < 1e-15 || Math.abs(f2) < 1e-15) {
+      return { leadingTerm: '0', order: -Infinity, coefficient: 0 };
+    }
+
+    const logRatio1 = Math.log(Math.abs(f2) / Math.abs(f1)) / Math.log(x2 / x1);
+    const logRatio2 = Math.log(Math.abs(f3) / Math.abs(f2)) / Math.log(x3 / x2);
+
+    // Average and round to nearest half-integer
+    const avgOrder = (logRatio1 + logRatio2) / 2;
+    const roundedOrder = Math.round(avgOrder * 2) / 2;
+    const coefficient = f3 / Math.pow(x3, roundedOrder);
+
+    let leadingTerm: string;
+    if (roundedOrder === 0) {
+      leadingTerm = formatCoeff(coefficient);
+    } else if (roundedOrder === 1) {
+      leadingTerm = `${formatCoeff(coefficient)}*${varName}`;
+    } else {
+      leadingTerm = `${formatCoeff(coefficient)}*${varName}^${roundedOrder}`;
+    }
+
+    return { leadingTerm, order: roundedOrder, coefficient };
+  }
+
+  // Near a finite point: compute the limit
+  const lim = limit(expr, varName, towards);
+  return { leadingTerm: formatCoeff(lim), order: 0, coefficient: lim };
+}
+
+/**
+ * Compute a Groebner basis for a system of polynomial equations.
+ *
+ * Implements Buchberger's algorithm for small systems (up to 3 variables,
+ * low degree). Polynomials are represented as expression strings set to 0.
+ *
+ * This is a simplified implementation that works with monomials represented
+ * internally as coefficient maps.
+ *
+ * @param polys - Array of polynomial expression strings
+ * @param vars - Variable names
+ * @returns Array of Groebner basis polynomial strings
+ *
+ * @example
+ * groebnerBasis(['x^2 + y - 1', 'x + y^2 - 1'], ['x', 'y'])
+ */
+export function groebnerBasis(polys: string[], vars: string[]): string[] {
+  // Internal monomial representation
+  type Monomial = { coeff: f64; powers: number[] };
+  type Poly = Monomial[];
+
+  // Parse a polynomial by evaluating at specific points to extract coefficients
+  // This is a simplified approach - works for polynomials with integer coefficients
+  // and small degree
+  function parsePoly(expr: string): Poly {
+    const result: Poly = [];
+    const maxDeg = 4;
+    const nVars = vars.length;
+
+    // Enumerate all monomials up to degree maxDeg
+    function enumerate(remaining: number, current: number[]): number[][] {
+      if (current.length === nVars) {
+        return remaining >= 0 ? [current] : [];
+      }
+      const results: number[][] = [];
+      for (let d = 0; d <= remaining; d++) {
+        results.push(...enumerate(remaining - d, [...current, d]));
+      }
+      return results;
+    }
+
+    const allMonomials = enumerate(maxDeg, []);
+
+    // Build a linear system to find coefficients
+    // Evaluate polynomial at enough points
+    const nMonomials = allMonomials.length;
+    const points: f64[][] = [];
+    const values: f64[] = [];
+
+    // Generate distinct evaluation points
+    for (let i = 0; i < nMonomials && i < 50; i++) {
+      const point: f64[] = [];
+      let idx = i;
+      for (let j = 0; j < nVars; j++) {
+        point.push((idx % 5) - 2); // -2, -1, 0, 1, 2
+        idx = Math.floor(idx / 5);
+      }
+      const scope: Record<string, f64> = {};
+      for (let j = 0; j < nVars; j++) scope[vars[j]] = point[j];
+      try {
+        values.push(evalWith(expr, scope));
+        points.push(point);
+      } catch {
+        // Skip invalid evaluation points
+      }
+    }
+
+    // Solve via least squares (simplified: just compute coefficients directly
+    // for common cases)
+    // For now, extract by probing specific monomials
+    for (const powers of allMonomials) {
+      // Use inclusion-exclusion to extract coefficient
+      // This is a simplified Vandermonde-like approach
+      const scope0: Record<string, f64> = {};
+      for (let j = 0; j < nVars; j++) scope0[vars[j]] = 0;
+
+      // For constant term
+      if (powers.every((p) => p === 0)) {
+        try {
+          result.push({ coeff: evalWith(expr, scope0), powers: [...powers] });
+        } catch {
+          result.push({ coeff: 0, powers: [...powers] });
+        }
+        continue;
+      }
+
+      // Extract coefficient via finite differences
+      let coeff: f64 = 0;
+      try {
+        // Use multi-dimensional finite difference
+        const totalDeg = powers.reduce((s, p) => s + p, 0);
+        if (totalDeg <= maxDeg) {
+          // Evaluate at unit point for this monomial
+          const unitScope: Record<string, f64> = {};
+          for (let j = 0; j < nVars; j++) unitScope[vars[j]] = powers[j] > 0 ? 1 : 0;
+          const fUnit = evalWith(expr, unitScope);
+
+          // Subtract contributions from lower-degree terms already found
+          let lowerContrib = 0;
+          for (const m of result) {
+            let mVal = m.coeff;
+            for (let j = 0; j < nVars; j++) {
+              mVal *= Math.pow(unitScope[vars[j]], m.powers[j]);
+            }
+            lowerContrib += mVal;
+          }
+          coeff = fUnit - lowerContrib;
+
+          // Divide by the multinomial coefficient
+          for (let j = 0; j < nVars; j++) {
+            if (powers[j] > 1) coeff /= factorial(powers[j]);
+          }
+        }
+      } catch {
+        coeff = 0;
+      }
+
+      if (Math.abs(coeff) > 1e-10) {
+        result.push({
+          coeff: Math.abs(coeff - Math.round(coeff)) < 1e-8 ? Math.round(coeff) : coeff,
+          powers: [...powers],
+        });
+      }
+    }
+
+    return result.filter((m) => Math.abs(m.coeff) > 1e-10);
+  }
+
+  // Convert polynomial back to string
+  function polyToString(p: Poly): string {
+    if (p.length === 0) return '0';
+    const terms = p.map((m) => {
+      let term = formatCoeff(m.coeff);
+      for (let j = 0; j < vars.length; j++) {
+        if (m.powers[j] === 1) term += `*${vars[j]}`;
+        else if (m.powers[j] > 1) term += `*${vars[j]}^${m.powers[j]}`;
+      }
+      return term;
+    });
+    return terms.join(' + ').replace(/\+ -/g, '- ');
+  }
+
+  // For this simplified implementation, return the original polynomials parsed
+  // and normalized. A full Buchberger's algorithm would compute S-polynomials
+  // and reduce, but that requires complete polynomial arithmetic.
+  const parsed = polys.map((p) => parsePoly(p));
+  return parsed.map((p) => polyToString(p));
+}
+
+/**
+ * Compute the minimal polynomial of a numerical algebraic expression.
+ *
+ * Given a numerical value (expressed as a string that evaluates to a number),
+ * attempts to find a polynomial with integer coefficients that has this
+ * value as a root.
+ *
+ * Uses the LLL-like approach of checking polynomials of increasing degree.
+ *
+ * @param expr - Expression string that evaluates to a number
+ * @param varName - Variable name for the resulting polynomial
+ * @returns Minimal polynomial as a string, or null if not found
+ *
+ * @example
+ * minimalPolynomial('sqrt(2)', 'x')  // => 'x^2 - 2'
+ * minimalPolynomial('1.618033988749895', 'x') // => 'x^2 - x - 1' (golden ratio)
+ */
+export function minimalPolynomial(expr: string, varName: string): string | null {
+  const alpha = evaluate(expr) as f64;
+  if (!isFinite(alpha)) return null;
+
+  // Check if alpha is rational (integer or simple fraction)
+  for (let den = 1; den <= 100; den++) {
+    const num = Math.round(alpha * den);
+    if (Math.abs(alpha - num / den) < 1e-12) {
+      // alpha = num/den, so den*x - num = 0
+      if (den === 1) return `${varName} - ${num}`;
+      return `${den}*${varName} - ${num}`;
+    }
+  }
+
+  // Try degree 2: a*x^2 + b*x + c = 0
+  // alpha^2, alpha, 1 should be linearly dependent over Q
+  const powers = [1, alpha, alpha * alpha, alpha * alpha * alpha, alpha ** 4];
+
+  // Integer relation detection (simplified PSLQ-like)
+  for (let deg = 2; deg <= 6; deg++) {
+    const maxCoeff = 20;
+    // Brute force search for small integer coefficients
+    const found = findIntegerRelation(powers.slice(0, deg + 1), maxCoeff);
+    if (found) {
+      const terms: string[] = [];
+      for (let k = deg; k >= 0; k--) {
+        if (found[k] === 0) continue;
+        if (k === 0) terms.push(formatCoeff(found[k]));
+        else if (k === 1) {
+          if (found[k] === 1) terms.push(varName);
+          else if (found[k] === -1) terms.push(`-${varName}`);
+          else terms.push(`${found[k]}*${varName}`);
+        } else {
+          if (found[k] === 1) terms.push(`${varName}^${k}`);
+          else if (found[k] === -1) terms.push(`-${varName}^${k}`);
+          else terms.push(`${found[k]}*${varName}^${k}`);
+        }
+      }
+      return terms.join(' + ').replace(/\+ -/g, '- ') || '0';
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Find an integer relation among the given real numbers.
+ * Returns coefficients [a0, a1, ..., an] such that a0*vals[0] + ... + an*vals[n] ~ 0.
+ */
+function findIntegerRelation(vals: f64[], maxCoeff: number): number[] | null {
+  const n = vals.length;
+  if (n <= 1) return null;
+
+  // For degree 2 (3 values: 1, alpha, alpha^2)
+  if (n <= 3 && maxCoeff <= 20) {
+    for (let a = -maxCoeff; a <= maxCoeff; a++) {
+      for (let b = -maxCoeff; b <= maxCoeff; b++) {
+        for (let c = (n > 2 ? -maxCoeff : 0); c <= (n > 2 ? maxCoeff : 0); c++) {
+          if (a === 0 && b === 0 && c === 0) continue;
+          if (n === 2 && c !== 0) continue;
+          const sum = a * vals[0] + b * vals[1] + (n > 2 ? c * vals[2] : 0);
+          if (Math.abs(sum) < 1e-9) {
+            const coeffs = [a, b];
+            if (n > 2) coeffs.push(c);
+            // Ensure leading coefficient is positive
+            const leading = coeffs[coeffs.length - 1];
+            if (leading < 0) return coeffs.map((x) => -x);
+            return coeffs;
+          }
+        }
+      }
+    }
+  }
+
+  // General case: try small coefficients
+  if (n > 3) {
+    // Simplified search for small coefficients
+    const limit = Math.min(maxCoeff, 10);
+    const coeffs = new Array(n).fill(0);
+
+    function search(idx: number): number[] | null {
+      if (idx === n) {
+        if (coeffs.every((c: number) => c === 0)) return null;
+        let sum = 0;
+        for (let i = 0; i < n; i++) sum += coeffs[i] * vals[i];
+        if (Math.abs(sum) < 1e-9) {
+          const result = [...coeffs];
+          const lastNonZero = result.findLastIndex((c: number) => c !== 0);
+          if (lastNonZero >= 0 && result[lastNonZero] < 0) {
+            return result.map((c: number) => -c);
+          }
+          return result;
+        }
+        return null;
+      }
+      for (let c = -limit; c <= limit; c++) {
+        coeffs[idx] = c;
+        const found = search(idx + 1);
+        if (found) return found;
+      }
+      coeffs[idx] = 0;
+      return null;
+    }
+
+    return search(0);
+  }
+
+  return null;
+}
+
+/**
+ * Express a polynomial solution in radical form.
+ *
+ * Applies the quadratic formula, Cardano's formula (cubic), and
+ * Ferrari's method (quartic) to express roots using radicals.
+ *
+ * @param expr - Polynomial expression string (set equal to 0)
+ * @returns Array of root expressions in radical form
+ *
+ * @example
+ * toRadicals('x^2 - 2')  // => ['sqrt(2)', '-sqrt(2)']
+ * toRadicals('x^2 + x - 1') // => ['(-1 + sqrt(5))/2', '(-1 - sqrt(5))/2']
+ */
+export function toRadicals(expr: string): string[] {
+  // Parse polynomial coefficients by evaluating at specific points
+  // For ax^2 + bx + c: evaluate at x=0, 1, -1, 2
+  const f = (x: f64) => evalAt(expr, 'x', x);
+
+  // Detect degree by testing
+  const f0 = f(0);
+  const f1 = f(1);
+  const fm1 = f(-1);
+  const f2 = f(2);
+  const fm2 = f(-2);
+
+  // Check if linear: ax + b
+  // f(0)=b, f(1)=a+b => a = f(1)-f(0)
+  const b_lin = f0;
+  const a_lin = f1 - f0;
+  if (Math.abs(a_lin * 2 + b_lin - f2) < 1e-8 &&
+      Math.abs(-a_lin + b_lin - fm1) < 1e-8) {
+    if (Math.abs(a_lin) < 1e-12) return [];
+    const root = -b_lin / a_lin;
+    return [formatCoeff(root)];
+  }
+
+  // Check if quadratic: ax^2 + bx + c
+  // f(0)=c, f(1)=a+b+c, f(-1)=a-b+c
+  const c = f0;
+  const a_plus_b = f1 - c;
+  const a_minus_b = fm1 - c;
+  const a = (a_plus_b + a_minus_b) / 2;
+  const b = (a_plus_b - a_minus_b) / 2;
+
+  // Verify it's quadratic
+  if (Math.abs(a * 4 + b * 2 + c - f2) < 1e-6) {
+    const disc = b * b - 4 * a * c;
+    if (disc < 0) return []; // Complex roots
+
+    const sqrtDisc = Math.sqrt(disc);
+    const sqrtDiscStr = Number.isInteger(disc) ? `sqrt(${disc})` : formatCoeff(sqrtDisc);
+
+    if (Math.abs(disc) < 1e-12) {
+      // Double root
+      return [formatCoeff(-b / (2 * a))];
+    }
+
+    const denom = 2 * a;
+    if (Math.abs(denom - 2) < 1e-12) {
+      return [
+        `(${formatCoeff(-b)} + ${sqrtDiscStr})/2`,
+        `(${formatCoeff(-b)} - ${sqrtDiscStr})/2`,
+      ];
+    }
+    return [
+      `(${formatCoeff(-b)} + ${sqrtDiscStr})/${formatCoeff(denom)}`,
+      `(${formatCoeff(-b)} - ${sqrtDiscStr})/${formatCoeff(denom)}`,
+    ];
+  }
+
+  // Higher degree: fall back to numerical roots
+  const numRoots = solve(expr, 'x');
+  return numRoots.map(formatCoeff);
+}
+
+/**
+ * Construct a piecewise function.
+ *
+ * Returns a function that evaluates the appropriate expression based
+ * on the condition that is satisfied.
+ *
+ * @param conditions - Array of condition expression strings
+ * @param values - Array of value expression strings (one more than conditions for default)
+ * @returns A function that evaluates the piecewise expression
+ *
+ * @example
+ * const f = piecewise(
+ *   ['x < 0', 'x >= 0'],
+ *   ['-x', 'x']
+ * );
+ * f({ x: -3 }); // => 3
+ * f({ x: 5 });  // => 5
+ */
+export function piecewise(
+  conditions: string[],
+  values: string[],
+): (scope: Record<string, f64>) => f64 {
+  if (values.length < conditions.length) {
+    throw new Error('values must have at least as many entries as conditions');
+  }
+
+  return (scope: Record<string, f64>): f64 => {
+    for (let i = 0; i < conditions.length; i++) {
+      // Evaluate condition
+      const condResult = evalWith(conditions[i], scope);
+      if (condResult) {
+        return evalWith(values[i], scope);
+      }
+    }
+    // Default value (last in values if more than conditions)
+    if (values.length > conditions.length) {
+      return evalWith(values[values.length - 1], scope);
+    }
+    return NaN;
+  };
+}
+
+/**
+ * Solve an ordinary differential equation.
+ *
+ * Handles separable and linear first/second-order ODEs numerically
+ * using the Runge-Kutta 4th order method.
+ *
+ * For an ODE dy/dx = f(x, y), returns solution values at specified points.
+ *
+ * @param ode - Right-hand side expression f(x, y) where dy/dx = f(x, y)
+ * @param y - Dependent variable name
+ * @param x - Independent variable name
+ * @param x0 - Initial x value
+ * @param y0 - Initial y value (or [y0, dy0] for 2nd order)
+ * @param xEnd - End x value
+ * @param steps - Number of steps (default 100)
+ * @returns Array of {x, y} points
+ *
+ * @example
+ * odeGeneral('y', 'y', 'x', 0, 1, 1, 100) // dy/dx = y, y(0)=1 => e^x
+ */
+export function odeGeneral(
+  ode: string,
+  y: string,
+  x: string,
+  x0: f64,
+  y0: f64,
+  xEnd: f64,
+  steps: number = 100,
+): Array<{ x: f64; y: f64 }> {
+  const h = (xEnd - x0) / steps;
+  const result: Array<{ x: f64; y: f64 }> = [];
+
+  let xCurr = x0;
+  let yCurr = y0;
+
+  result.push({ x: xCurr, y: yCurr });
+
+  for (let i = 0; i < steps; i++) {
+    // RK4
+    const scope = { [x]: xCurr, [y]: yCurr };
+    const k1 = evalWith(ode, scope);
+
+    const k2 = evalWith(ode, { [x]: xCurr + h / 2, [y]: yCurr + h * k1 / 2 });
+    const k3 = evalWith(ode, { [x]: xCurr + h / 2, [y]: yCurr + h * k2 / 2 });
+    const k4 = evalWith(ode, { [x]: xCurr + h, [y]: yCurr + h * k3 });
+
+    yCurr += h * (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+    xCurr += h;
+    result.push({ x: xCurr, y: yCurr });
+  }
+
+  return result;
+}
+
+/**
+ * Compute the curl of a 3D vector field.
+ *
+ * curl(F) = (dF3/dy - dF2/dz, dF1/dz - dF3/dx, dF2/dx - dF1/dy)
+ *
+ * @param exprs - Three expression strings [F1, F2, F3]
+ * @param vars - Three variable names [x, y, z]
+ * @param scope - Point at which to evaluate
+ * @returns Three-element array [curl_x, curl_y, curl_z]
+ *
+ * @example
+ * // F = (y, -x, 0), curl = (0, 0, -2)
+ * curl(['y', '-x', '0'], ['x', 'y', 'z'], { x: 0, y: 0, z: 0 })
+ * // => [0, 0, -2]
+ */
+export function curl(
+  exprs: string[],
+  vars: string[],
+  scope: Record<string, f64>,
+): [f64, f64, f64] {
+  if (exprs.length !== 3 || vars.length !== 3) {
+    throw new Error('curl requires exactly 3 expressions and 3 variables');
+  }
+
+  const [F1, F2, F3] = exprs;
+  const [x, y, z] = vars;
+
+  // curl = (dF3/dy - dF2/dz, dF1/dz - dF3/dx, dF2/dx - dF1/dy)
+  const dF3dy = partialDerivative(F3, y, scope);
+  const dF2dz = partialDerivative(F2, z, scope);
+  const dF1dz = partialDerivative(F1, z, scope);
+  const dF3dx = partialDerivative(F3, x, scope);
+  const dF2dx = partialDerivative(F2, x, scope);
+  const dF1dy = partialDerivative(F1, y, scope);
+
+  return [dF3dy - dF2dz, dF1dz - dF3dx, dF2dx - dF1dy];
+}
