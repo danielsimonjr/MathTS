@@ -1,6 +1,6 @@
 # @danielsimonjr/mathts-matrix - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-04-04
+**Version**: 0.1.2 | **Last Updated**: 2026-04-10
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -27,10 +27,10 @@ This document provides a comprehensive dependency graph of all files, components
 
 The codebase is organized into the following modules:
 
-- **backends**: 19 files
+- **backends**: 22 files
 - **root**: 5 files
 - **entry**: 1 file
-- **operations**: 3 files
+- **operations**: 5 files
 - **types**: 5 files
 
 ---
@@ -220,12 +220,14 @@ The codebase is organized into the following modules:
 | `./WASMBackend.js` | `WASMBackend, wasmBackend, createWASMBackend, WASMBackendConfig` | Re-export |
 | `./GPUMatrixBackend.js` | `GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, GPUMatrixBackendConfig` | Re-export |
 | `./GPUBackend.js` | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, GPUBackendOptions, GPUBackendStatus` | Re-export |
+| `./RustWASMBackend.js` | `RustWASMBackend, rustWasmBackend, createRustWASMBackend, RustWASMBackendConfig` | Re-export |
+| `./RustWasmLoader.js` | `RustWasmLoader, rustWasmLoader, initRustWasm, RustWasmExports, RustLoadingMetrics` | Re-export |
 | `./BackendManager.js` | `BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, ExtendedBackendHints, OperationType` | Re-export |
 | `./wasm/index.js` | `detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures` | Re-export |
 | `./gpu/index.js` | `hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager` | Re-export |
 
 **Exports:**
-- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`
+- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `RustWASMBackend`, `rustWasmBackend`, `createRustWASMBackend`, `RustWASMBackendConfig`, `RustWasmLoader`, `rustWasmLoader`, `initRustWasm`, `RustWasmExports`, `RustLoadingMetrics`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`
 
 ---
 
@@ -278,11 +280,53 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/backends/RustWASMBackend.ts` - Rust WASM Matrix Backend
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./JSBackend.js` | `jsBackend` | Import |
+| `./RustWasmLoader.js` | `rustWasmLoader, RustWasmExports` | Import |
+
+**Exports:**
+- Classes: `RustWASMBackend`
+- Interfaces: `RustWASMBackendConfig`
+- Functions: `createRustWASMBackend`
+- Constants: `rustWasmBackend`
+
+---
+
+### `src/backends/RustWasmLoader.ts` - Rust WASM Loader
+
+**Exports:**
+- Classes: `RustWasmLoader`
+- Interfaces: `RustWasmExports`, `RustLoadingMetrics`
+- Functions: `initRustWasm`
+- Constants: `rustWasmLoader`
+
+---
+
 ### `src/backends/wasm/detect.ts` - WASM Feature Detection
 
 **Exports:**
 - Interfaces: `WasmFeatures`
 - Functions: `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`
+
+---
+
+### `src/backends/wasm/fft-wasm.ts` - WASM-Accelerated FFT Operations
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../WasmLoader.js` | `wasmLoader` | Import |
+
+**Exports:**
+- Interfaces: `FFTResult`, `FFTConfig`
+- Types: `FFTBackend`
+- Functions: `isPowerOf2`, `nextPowerOf2`, `fftJS`, `isWasmFFTAvailable`, `fft`, `ifft`, `rfft`, `powerSpectrum`, `magnitudeSpectrum`, `phaseSpectrum`, `convolve`
 
 ---
 
@@ -292,9 +336,10 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./detect.js` | `detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures` | Re-export |
+| `./fft-wasm.js` | `fft, ifft, rfft, fftJS, convolve, powerSpectrum, magnitudeSpectrum, phaseSpectrum, isPowerOf2, nextPowerOf2, isWasmFFTAvailable` | Re-export |
 
 **Exports:**
-- Re-exports: `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`
+- Re-exports: `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `fft`, `ifft`, `rfft`, `fftJS`, `convolve`, `powerSpectrum`, `magnitudeSpectrum`, `phaseSpectrum`, `isPowerOf2`, `nextPowerOf2`, `isWasmFFTAvailable`
 
 ---
 
@@ -418,17 +463,31 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `./types/index.js` | `*` | Re-export |
 | `./backends/index.js` | `*` | Re-export |
+| `./operations/index.js` | `*` | Re-export |
 | `./typed-operations.js` | `*` | Re-export |
 | `./parallel-matrix.js` | `*` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./types/index.js`, `* from ./backends/index.js`, `* from ./typed-operations.js`, `* from ./parallel-matrix.js`
+- Re-exports: `* from ./types/index.js`, `* from ./backends/index.js`, `* from ./operations/index.js`, `* from ./typed-operations.js`, `* from ./parallel-matrix.js`
 
 ---
 
 <a id="operations-dependencies"></a>
 
 ## Operations Dependencies
+
+### `src/operations/eig-wasm.ts` - WASM-accelerated Eigendecomposition
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./eig.js` | `eig, EigResult, EigOptions` | Import |
+| `../backends/WasmLoader.js` | `wasmLoader` | Import |
+
+**Exports:**
+- Functions: `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`
+
+---
 
 ### `src/operations/eig.ts` - Eigenvalue and Eigenvector Decomposition
 
@@ -445,9 +504,24 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `./eig.js` | `eig, eigvals, powerIteration, EigResult, EigOptions` | Re-export |
 | `./svd.js` | `svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, SVDResult, SVDOptions` | Re-export |
+| `./eig-wasm.js` | `eigWasm, eigvalsWasm, spectralRadiusWasm` | Re-export |
+| `./svd-wasm.js` | `svdWasm` | Re-export |
 
 **Exports:**
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`
+
+---
+
+### `src/operations/svd-wasm.ts` - WASM-accelerated Singular Value Decomposition
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./svd.js` | `svd, SVDResult, SVDOptions` | Import |
+| `./eig-wasm.js` | `eigWasm` | Import |
+
+**Exports:**
+- Functions: `svdWasm`
 
 ---
 
@@ -530,37 +604,42 @@ The codebase is organized into the following modules:
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `src/types/DenseMatrix` | 2 files | 10 files |
-| `src/backends/index` | 9 files | 1 file |
+| `src/types/DenseMatrix` | 2 files | 11 files |
+| `src/backends/index` | 11 files | 1 file |
+| `src/backends/Backend` | 1 file | 8 files |
 | `src/backends/gpu/index` | 6 files | 3 files |
-| `src/backends/Backend` | 1 file | 7 files |
+| `src/backends/JSBackend` | 2 files | 5 files |
 | `src/backends/BackendManager` | 4 files | 2 files |
 | `src/backends/gpu/GPUContext` | 1 file | 5 files |
 | `src/backends/GPUMatrixBackend` | 5 files | 1 file |
-| `src/backends/JSBackend` | 2 files | 4 files |
 | `src/backends/WASMBackend` | 5 files | 1 file |
+| `src/backends/RustWASMBackend` | 4 files | 1 file |
+| `src/index` | 5 files | 0 files |
+| `src/operations/index` | 4 files | 1 file |
 | `src/backends/gpu/BatchExecutor` | 3 files | 1 file |
 | `src/backends/gpu/BufferPool` | 1 file | 3 files |
-| `src/index` | 4 files | 0 files |
+| `src/backends/WasmLoader` | 0 files | 4 files |
+| `src/operations/eig-wasm` | 2 files | 2 files |
 | `src/types/index` | 3 files | 1 file |
 | `src/types/SparseMatrix` | 2 files | 2 files |
 | `src/backends/gpu/ShaderManager` | 1 file | 2 files |
 | `src/backends/gpu/Sync` | 2 files | 1 file |
 | `src/backends/GPUBackend` | 1 file | 2 files |
 | `src/backends/ParallelBackend` | 2 files | 1 file |
+| `src/backends/wasm/index` | 2 files | 1 file |
 | `src/config` | 2 files | 1 file |
+| `src/operations/svd-wasm` | 2 files | 1 file |
 | `src/types/Matrix` | 0 files | 3 files |
 | `src/backends/gpu/detect` | 0 files | 2 files |
+| `src/backends/RustWasmLoader` | 0 files | 2 files |
 | `src/backends/wasm/detect` | 0 files | 2 files |
-| `src/backends/wasm/index` | 1 file | 1 file |
-| `src/backends/WasmLoader` | 0 files | 2 files |
-| `src/operations/index` | 2 files | 0 files |
+| `src/backends/wasm/fft-wasm` | 1 file | 1 file |
+| `src/operations/eig` | 0 files | 2 files |
+| `src/operations/svd` | 0 files | 2 files |
 | `src/parallel-matrix` | 1 file | 1 file |
 | `src/typed-operations` | 1 file | 1 file |
 | `src/backends/MatrixWasmBridge` | 1 file | 0 files |
 | `src/matrix` | 1 file | 0 files |
-| `src/operations/eig` | 0 files | 1 file |
-| `src/operations/svd` | 0 files | 1 file |
 | `src/types` | 0 files | 1 file |
 | `src/types/parallel.d` | 0 files | 0 files |
 
@@ -599,7 +678,7 @@ graph TD
         N7[ShaderManager]
         N8[Sync]
         N9[GPUBackend]
-        N10[...9 more]
+        N10[...12 more]
     end
 
     subgraph Root
@@ -615,21 +694,23 @@ graph TD
     end
 
     subgraph Operations
-        N17[eig]
-        N18[index]
-        N19[svd]
+        N17[eig-wasm]
+        N18[eig]
+        N19[index]
+        N20[svd-wasm]
+        N21[svd]
     end
 
     subgraph Types
-        N20[DenseMatrix]
-        N21[index]
-        N22[Matrix]
-        N23[parallel.d]
-        N24[SparseMatrix]
+        N22[DenseMatrix]
+        N23[index]
+        N24[Matrix]
+        N25[parallel.d]
+        N26[SparseMatrix]
     end
 
-    N0 --> N20
-    N1 --> N20
+    N0 --> N22
+    N1 --> N22
     N1 --> N0
     N1 --> N11
     N2 --> N5
@@ -649,21 +730,27 @@ graph TD
     N9 --> N6
     N11 --> N0
     N11 --> N1
-    N16 --> N21
+    N16 --> N23
+    N16 --> N19
     N16 --> N14
     N16 --> N13
     N12 --> N15
-    N18 --> N17
-    N18 --> N19
-    N13 --> N20
-    N14 --> N20
-    N20 --> N22
-    N20 --> N24
-    N21 --> N22
-    N21 --> N20
-    N21 --> N24
-    N24 --> N22
-    N24 --> N20
+    N17 --> N18
+    N19 --> N18
+    N19 --> N21
+    N19 --> N17
+    N19 --> N20
+    N20 --> N21
+    N20 --> N17
+    N13 --> N22
+    N14 --> N22
+    N22 --> N24
+    N22 --> N26
+    N23 --> N24
+    N23 --> N22
+    N23 --> N26
+    N26 --> N24
+    N26 --> N22
 ```
 
 ---
@@ -673,21 +760,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 33 |
+| Total TypeScript Files | 38 |
 | Total Modules | 5 |
-| Total Lines of Code | 13378 |
-| Total Exports | 262 |
-| Total Re-exports | 111 |
-| Total Classes | 17 |
-| Total Interfaces | 40 |
-| Total Functions | 54 |
-| Total Type Guards | 8 |
+| Total Lines of Code | 15250 |
+| Total Exports | 307 |
+| Total Re-exports | 136 |
+| Total Classes | 19 |
+| Total Interfaces | 45 |
+| Total Functions | 71 |
+| Total Type Guards | 10 |
 | Total Enums | 0 |
-| Type-only Imports | 14 |
+| Type-only Imports | 15 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 2 |
 
 ---
 
-*Last Updated*: 2026-04-04
-*Version*: 0.1.0
+*Last Updated*: 2026-04-10
+*Version*: 0.1.2

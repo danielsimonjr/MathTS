@@ -1,7 +1,7 @@
 metadata:
-  name: "@mathts/core"
-  version: 0.1.0
-  lastUpdated: "2026-04-04"
+  name: "@danielsimonjr/mathts-core"
+  version: 0.1.2
+  lastUpdated: "2026-04-10"
   totalFiles: 95
   totalModules: 8
   totalExports: 512

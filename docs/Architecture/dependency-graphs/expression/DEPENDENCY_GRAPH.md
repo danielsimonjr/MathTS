@@ -1,6 +1,6 @@
 # @danielsimonjr/mathts-expression - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-04-04
+**Version**: 0.1.2 | **Last Updated**: 2026-04-10
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -10,18 +10,20 @@ This document provides a comprehensive dependency graph of all files, components
 
 1. [Overview](#overview)
 2. [Package Dependencies](#package-dependencies)
-3. [EmbeddedDocs Dependencies](#embeddeddocs-dependencies)
-4. [Error Dependencies](#error-dependencies)
-5. [Function Dependencies](#function-dependencies)
-6. [Root Dependencies](#root-dependencies)
-7. [Entry Dependencies](#entry-dependencies)
-8. [Node Dependencies](#node-dependencies)
-9. [Transform Dependencies](#transform-dependencies)
-10. [Utils Dependencies](#utils-dependencies)
-11. [Dependency Matrix](#dependency-matrix)
-12. [Circular Dependency Analysis](#circular-dependency-analysis)
-13. [Visual Dependency Graph](#visual-dependency-graph)
-14. [Summary Statistics](#summary-statistics)
+3. [Compiler Dependencies](#compiler-dependencies)
+4. [EmbeddedDocs Dependencies](#embeddeddocs-dependencies)
+5. [Error Dependencies](#error-dependencies)
+6. [Evaluator Dependencies](#evaluator-dependencies)
+7. [Function Dependencies](#function-dependencies)
+8. [Root Dependencies](#root-dependencies)
+9. [Entry Dependencies](#entry-dependencies)
+10. [Node Dependencies](#node-dependencies)
+11. [Transform Dependencies](#transform-dependencies)
+12. [Utils Dependencies](#utils-dependencies)
+13. [Dependency Matrix](#dependency-matrix)
+14. [Circular Dependency Analysis](#circular-dependency-analysis)
+15. [Visual Dependency Graph](#visual-dependency-graph)
+16. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -30,14 +32,46 @@ This document provides a comprehensive dependency graph of all files, components
 
 The codebase is organized into the following modules:
 
-- **embeddedDocs**: 255 files
+- **compiler**: 2 files
+- **embeddedDocs**: 311 files
 - **error**: 3 files
+- **evaluator**: 2 files
 - **function**: 4 files
 - **root**: 6 files
 - **entry**: 1 file
 - **node**: 18 files
 - **transform**: 30 files
 - **utils**: 14 files
+
+---
+
+<a id="compiler-dependencies"></a>
+
+## Compiler Dependencies
+
+### `src/compiler/compile.ts` - Tree-walking AST compiler/evaluator for MathTS expressions.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/map.js` | `ObjectWrappingMap` | Import |
+| `../utils/scope.js` | `createSubScope` | Import |
+
+**Exports:**
+- Interfaces: `Scope`, `CompiledExpression`
+- Functions: `compile`
+
+---
+
+### `src/compiler/index.ts` - Package entry point for compiler (re-exports 1 symbols)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./compile.js` | `compile` | Re-export |
+
+**Exports:**
+- Re-exports: `compile`
 
 ---
 
@@ -1009,10 +1043,52 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/embeddedDocs/function/combinatorics/doubleFactorial.ts` - doubleFactorial module
+
+**Exports:**
+- Constants: `doubleFactorialDocs`
+
+---
+
+### `src/embeddedDocs/function/combinatorics/fallingFactorial.ts` - fallingFactorial module
+
+**Exports:**
+- Constants: `fallingFactorialDocs`
+
+---
+
+### `src/embeddedDocs/function/combinatorics/fibonacci.ts` - fibonacci module
+
+**Exports:**
+- Constants: `fibonacciDocs`
+
+---
+
+### `src/embeddedDocs/function/combinatorics/lucas.ts` - lucas module
+
+**Exports:**
+- Constants: `lucasDocs`
+
+---
+
+### `src/embeddedDocs/function/combinatorics/risingFactorial.ts` - risingFactorial module
+
+**Exports:**
+- Constants: `risingFactorialDocs`
+
+---
+
 ### `src/embeddedDocs/function/combinatorics/stirlingS2.ts` - stirlingS2 module
 
 **Exports:**
 - Constants: `stirlingS2Docs`
+
+---
+
+### `src/embeddedDocs/function/combinatorics/subfactorial.ts` - subfactorial module
+
+**Exports:**
+- Constants: `subfactorialDocs`
 
 ---
 
@@ -1079,6 +1155,34 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/embeddedDocs/function/geometry/angle2D.ts` - angle2D module
+
+**Exports:**
+- Constants: `angle2DDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/angle3D.ts` - angle3D module
+
+**Exports:**
+- Constants: `angle3DDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/convexHull.ts` - convexHull module
+
+**Exports:**
+- Constants: `convexHullDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/cross3D.ts` - cross3D module
+
+**Exports:**
+- Constants: `cross3DDocs`
+
+---
+
 ### `src/embeddedDocs/function/geometry/distance.ts` - distance module
 
 **Exports:**
@@ -1086,10 +1190,108 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/embeddedDocs/function/geometry/distance2D.ts` - distance2D module
+
+**Exports:**
+- Constants: `distance2DDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/distance3D.ts` - distance3D module
+
+**Exports:**
+- Constants: `distance3DDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/distanceND.ts` - distanceND module
+
+**Exports:**
+- Constants: `distanceNDDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/distancePointToLine2D.ts` - distancePointToLine2D module
+
+**Exports:**
+- Constants: `distancePointToLine2DDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/dot3D.ts` - dot3D module
+
+**Exports:**
+- Constants: `dot3DDocs`
+
+---
+
 ### `src/embeddedDocs/function/geometry/intersect.ts` - intersect module
 
 **Exports:**
 - Constants: `intersectDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/intersectLines2D.ts` - intersectLines2D module
+
+**Exports:**
+- Constants: `intersectLines2DDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/intersectSegments2D.ts` - intersectSegments2D module
+
+**Exports:**
+- Constants: `intersectSegments2DDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/pointInPolygon.ts` - pointInPolygon module
+
+**Exports:**
+- Constants: `pointInPolygonDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/polygonArea.ts` - polygonArea module
+
+**Exports:**
+- Constants: `polygonAreaDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/projectVector.ts` - projectVector module
+
+**Exports:**
+- Constants: `projectVectorDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/reflectVector.ts` - reflectVector module
+
+**Exports:**
+- Constants: `reflectVectorDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/rotateVector2D.ts` - rotateVector2D module
+
+**Exports:**
+- Constants: `rotateVector2DDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/rotateVector3D.ts` - rotateVector3D module
+
+**Exports:**
+- Constants: `rotateVector3DDocs`
+
+---
+
+### `src/embeddedDocs/function/geometry/triangleArea.ts` - triangleArea module
+
+**Exports:**
+- Constants: `triangleAreaDocs`
 
 ---
 
@@ -1408,6 +1610,69 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/embeddedDocs/function/numeric/cubicSpline.ts` - cubicSpline module
+
+**Exports:**
+- Constants: `cubicSplineDocs`
+
+---
+
+### `src/embeddedDocs/function/numeric/gaussQuad.ts` - gaussQuad module
+
+**Exports:**
+- Constants: `gaussQuadDocs`
+
+---
+
+### `src/embeddedDocs/function/numeric/hermiteInterp.ts` - hermiteInterp module
+
+**Exports:**
+- Constants: `hermiteInterpDocs`
+
+---
+
+### `src/embeddedDocs/function/numeric/lagrangeInterp.ts` - lagrangeInterp module
+
+**Exports:**
+- Constants: `lagrangeInterpDocs`
+
+---
+
+### `src/embeddedDocs/function/numeric/linearInterp.ts` - linearInterp module
+
+**Exports:**
+- Constants: `linearInterpDocs`
+
+---
+
+### `src/embeddedDocs/function/numeric/pchipInterp.ts` - pchipInterp module
+
+**Exports:**
+- Constants: `pchipInterpDocs`
+
+---
+
+### `src/embeddedDocs/function/numeric/polyFit.ts` - polyFit module
+
+**Exports:**
+- Constants: `polyFitDocs`
+
+---
+
+### `src/embeddedDocs/function/numeric/romberg.ts` - romberg module
+
+**Exports:**
+- Constants: `rombergDocs`
+
+---
+
+### `src/embeddedDocs/function/numeric/simpson.ts` - simpson module
+
+**Exports:**
+- Constants: `simpsonDocs`
+
+---
+
 ### `src/embeddedDocs/function/numeric/solveODE.ts` - solveODE module
 
 **Exports:**
@@ -1415,10 +1680,31 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/embeddedDocs/function/numeric/trapz.ts` - trapz module
+
+**Exports:**
+- Constants: `trapzDocs`
+
+---
+
 ### `src/embeddedDocs/function/probability/bernoulli.ts` - bernoulli module
 
 **Exports:**
 - Constants: `bernoulliDocs`
+
+---
+
+### `src/embeddedDocs/function/probability/bernoulliPMF.ts` - bernoulliPMF module
+
+**Exports:**
+- Constants: `bernoulliPMFDocs`
+
+---
+
+### `src/embeddedDocs/function/probability/binomialPMF.ts` - binomialPMF module
+
+**Exports:**
+- Constants: `binomialPMFDocs`
 
 ---
 
@@ -1443,6 +1729,27 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/embeddedDocs/function/probability/entropy.ts` - entropy module
+
+**Exports:**
+- Constants: `entropyDocs`
+
+---
+
+### `src/embeddedDocs/function/probability/exponentialCDF.ts` - exponentialCDF module
+
+**Exports:**
+- Constants: `exponentialCDFDocs`
+
+---
+
+### `src/embeddedDocs/function/probability/exponentialPDF.ts` - exponentialPDF module
+
+**Exports:**
+- Constants: `exponentialPDFDocs`
+
+---
+
 ### `src/embeddedDocs/function/probability/factorial.ts` - factorial module
 
 **Exports:**
@@ -1454,6 +1761,20 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Constants: `gammaDocs`
+
+---
+
+### `src/embeddedDocs/function/probability/geometricPMF.ts` - geometricPMF module
+
+**Exports:**
+- Constants: `geometricPMFDocs`
+
+---
+
+### `src/embeddedDocs/function/probability/jsDivergence.ts` - jsDivergence module
+
+**Exports:**
+- Constants: `jsDivergenceDocs`
 
 ---
 
@@ -1478,6 +1799,20 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/embeddedDocs/function/probability/normalCDF.ts` - normalCDF module
+
+**Exports:**
+- Constants: `normalCDFDocs`
+
+---
+
+### `src/embeddedDocs/function/probability/normalPDF.ts` - normalPDF module
+
+**Exports:**
+- Constants: `normalPDFDocs`
+
+---
+
 ### `src/embeddedDocs/function/probability/permutations.ts` - permutations module
 
 **Exports:**
@@ -1489,6 +1824,13 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Constants: `pickRandomDocs`
+
+---
+
+### `src/embeddedDocs/function/probability/poissonPMF.ts` - poissonPMF module
+
+**Exports:**
+- Constants: `poissonPMFDocs`
 
 ---
 
@@ -1653,10 +1995,38 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/embeddedDocs/function/signal/autoCorrelation.ts` - autoCorrelation module
+
+**Exports:**
+- Constants: `autoCorrelationDocs`
+
+---
+
+### `src/embeddedDocs/function/signal/crossCorrelation.ts` - crossCorrelation module
+
+**Exports:**
+- Constants: `crossCorrelationDocs`
+
+---
+
 ### `src/embeddedDocs/function/signal/freqz.ts` - freqz module
 
 **Exports:**
 - Constants: `freqzDocs`
+
+---
+
+### `src/embeddedDocs/function/signal/groupDelay.ts` - groupDelay module
+
+**Exports:**
+- Constants: `groupDelayDocs`
+
+---
+
+### `src/embeddedDocs/function/signal/unwrapPhase.ts` - unwrapPhase module
+
+**Exports:**
+- Constants: `unwrapPhaseDocs`
 
 ---
 
@@ -1667,10 +2037,66 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/embeddedDocs/function/special/besselJ0.ts` - besselJ0 module
+
+**Exports:**
+- Constants: `besselJ0Docs`
+
+---
+
+### `src/embeddedDocs/function/special/besselJ1.ts` - besselJ1 module
+
+**Exports:**
+- Constants: `besselJ1Docs`
+
+---
+
+### `src/embeddedDocs/function/special/besselY0.ts` - besselY0 module
+
+**Exports:**
+- Constants: `besselY0Docs`
+
+---
+
+### `src/embeddedDocs/function/special/besselY1.ts` - besselY1 module
+
+**Exports:**
+- Constants: `besselY1Docs`
+
+---
+
+### `src/embeddedDocs/function/special/beta.ts` - beta module
+
+**Exports:**
+- Constants: `betaDocs`
+
+---
+
+### `src/embeddedDocs/function/special/digamma.ts` - digamma module
+
+**Exports:**
+- Constants: `digammaDocs`
+
+---
+
 ### `src/embeddedDocs/function/special/erf.ts` - erf module
 
 **Exports:**
 - Constants: `erfDocs`
+
+---
+
+### `src/embeddedDocs/function/special/erfc.ts` - erfc module
+
+**Exports:**
+- Constants: `erfcDocs`
+
+---
+
+### `src/embeddedDocs/function/special/gammainc.ts` - gammainc module
+
+**Exports:**
+- Constants: `gammaincDocs`
 
 ---
 
@@ -2114,6 +2540,35 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="evaluator-dependencies"></a>
+
+## Evaluator Dependencies
+
+### `src/evaluator/evaluate.ts` - Expression evaluator for MathTS.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../compiler/compile.js` | `compile` | Import |
+| `../compiler/compile.js` | `CompiledExpression, Scope` | Import (type-only) |
+
+**Exports:**
+- Functions: `createEvaluate`, `compileExpression`
+
+---
+
+### `src/evaluator/index.ts` - Package entry point for evaluator (re-exports 2 symbols)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./evaluate.js` | `createEvaluate, compileExpression` | Re-export |
+
+**Exports:**
+- Re-exports: `createEvaluate`, `compileExpression`
+
+---
+
 <a id="function-dependencies"></a>
 
 ## Function Dependencies
@@ -2265,9 +2720,27 @@ The codebase is organized into the following modules:
 | `./parse.js` | `*` | Re-export |
 | `./Parser.js` | `*` | Re-export |
 | `./Help.js` | `*` | Re-export |
+| `./compiler/index.js` | `*` | Re-export |
+| `./evaluator/index.js` | `*` | Re-export |
+| `./node/Node.js` | `createNode` | Re-export |
+| `./node/AccessorNode.js` | `createAccessorNode` | Re-export |
+| `./node/ArrayNode.js` | `createArrayNode` | Re-export |
+| `./node/AssignmentNode.js` | `createAssignmentNode` | Re-export |
+| `./node/BlockNode.js` | `createBlockNode` | Re-export |
+| `./node/ConditionalNode.js` | `createConditionalNode` | Re-export |
+| `./node/ConstantNode.js` | `createConstantNode` | Re-export |
+| `./node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode` | Re-export |
+| `./node/FunctionNode.js` | `createFunctionNode` | Re-export |
+| `./node/IndexNode.js` | `createIndexNode` | Re-export |
+| `./node/ObjectNode.js` | `createObjectNode` | Re-export |
+| `./node/OperatorNode.js` | `createOperatorNode` | Re-export |
+| `./node/ParenthesisNode.js` | `createParenthesisNode` | Re-export |
+| `./node/RangeNode.js` | `createRangeNode` | Re-export |
+| `./node/RelationalNode.js` | `createRelationalNode` | Re-export |
+| `./node/SymbolNode.js` | `createSymbolNode` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`
+- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
 
 ---
 
@@ -3192,60 +3665,59 @@ The codebase is organized into the following modules:
 | `src/embeddedDocs/embeddedDocs` | 253 files | 1 file |
 | `src/utils/factory` | 1 file | 49 files |
 | `src/utils/is` | 1 file | 42 files |
+| `src/index` | 24 files | 0 files |
 | `src/transform/utils/errorTransform` | 1 file | 15 files |
-| `src/node/Node` | 5 files | 9 files |
+| `src/node/Node` | 5 files | 10 files |
 | `src/utils/customs` | 1 file | 12 files |
 | `src/utils/string` | 3 files | 10 files |
 | `src/utils/array` | 6 files | 6 files |
 | `src/utils/object` | 1 file | 11 files |
 | `src/transform/utils/lastDimToZeroBase` | 2 files | 8 files |
+| `src/node/FunctionAssignmentNode` | 8 files | 1 file |
+| `src/node/FunctionNode` | 8 files | 1 file |
+| `src/node/OperatorNode` | 8 files | 1 file |
 | `src/operators` | 2 files | 7 files |
-| `src/node/FunctionAssignmentNode` | 8 files | 0 files |
-| `src/node/FunctionNode` | 8 files | 0 files |
-| `src/node/OperatorNode` | 8 files | 0 files |
-| `src/utils/map` | 2 files | 6 files |
-| `src/node/AssignmentNode` | 7 files | 0 files |
+| `src/utils/map` | 2 files | 7 files |
+| `src/node/AssignmentNode` | 7 files | 1 file |
 | `src/parse` | 6 files | 1 file |
 | `src/utils/collection` | 4 files | 3 files |
 | `src/utils/latex` | 1 file | 6 files |
-| `src/index` | 6 files | 0 files |
+| `src/node/AccessorNode` | 5 files | 1 file |
+| `src/node/ConstantNode` | 5 files | 1 file |
+| `src/node/IndexNode` | 5 files | 1 file |
+| `src/node/ObjectNode` | 5 files | 1 file |
+| `src/node/RelationalNode` | 5 files | 1 file |
 | `src/Help` | 4 files | 1 file |
-| `src/node/AccessorNode` | 5 files | 0 files |
-| `src/node/ConstantNode` | 5 files | 0 files |
-| `src/node/IndexNode` | 5 files | 0 files |
-| `src/node/ObjectNode` | 5 files | 0 files |
-| `src/node/RelationalNode` | 5 files | 0 files |
+| `src/node/ArrayNode` | 4 files | 1 file |
+| `src/node/BlockNode` | 4 files | 1 file |
+| `src/node/ConditionalNode` | 4 files | 1 file |
+| `src/node/SymbolNode` | 4 files | 1 file |
 | `src/transform/filter.transform` | 5 files | 0 files |
 | `src/transform/forEach.transform` | 5 files | 0 files |
 | `src/transform/map.transform` | 5 files | 0 files |
 | `src/transform/utils/compileInlineExpression` | 2 files | 3 files |
 | `src/transform/utils/transformCallback` | 2 files | 3 files |
 | `src/utils/number` | 1 file | 4 files |
+| `src/compiler/compile` | 2 files | 2 files |
 | `src/function/help` | 4 files | 0 files |
-| `src/node/ArrayNode` | 4 files | 0 files |
-| `src/node/BlockNode` | 4 files | 0 files |
-| `src/node/ConditionalNode` | 4 files | 0 files |
-| `src/node/SymbolNode` | 4 files | 0 files |
+| `src/node/RangeNode` | 3 files | 1 file |
 | `src/node/utils/access` | 2 files | 2 files |
-| `src/Parser` | 3 files | 1 file |
-| `src/transform/column.transform` | 4 files | 0 files |
 
 ---
 
 <a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
-**2 circular dependencies detected:**
+**1 circular dependencies detected:**
 
-- **Runtime cycles**: 2 (require attention)
+- **Runtime cycles**: 1 (require attention)
 - **Type-only cycles**: 0 (safe, no runtime impact)
 
 ### Runtime Circular Dependencies
 
 These cycles involve runtime imports and may cause issues:
 
-- src/utils/is.ts -> src/utils/map.ts -> src/utils/customs.ts -> src/utils/object.ts -> src/utils/is.ts
-- src/utils/is.ts -> src/utils/map.ts -> src/utils/is.ts
+- src/utils/map.ts -> src/utils/customs.ts -> src/utils/object.ts -> src/utils/is.ts -> src/utils/map.ts
 
 ---
 
@@ -3254,163 +3726,173 @@ These cycles involve runtime imports and may cause issues:
 
 ```mermaid
 graph TD
+    subgraph Compiler
+        N0[compile]
+        N1[index]
+    end
+
     subgraph EmbeddedDocs
-        N0[e]
-        N1[false]
-        N2[i]
-        N3[Infinity]
-        N4[LN10]
-        N5[LN2]
-        N6[LOG10E]
-        N7[LOG2E]
-        N8[NaN]
-        N9[null]
-        N10[...245 more]
+        N2[e]
+        N3[false]
+        N4[i]
+        N5[Infinity]
+        N6[LN10]
+        N7[LN2]
+        N8[LOG10E]
+        N9[LOG2E]
+        N10[NaN]
+        N11[null]
+        N12[...301 more]
     end
 
     subgraph Error
-        N11[ArgumentsError]
-        N12[DimensionError]
-        N13[IndexError]
+        N13[ArgumentsError]
+        N14[DimensionError]
+        N15[IndexError]
+    end
+
+    subgraph Evaluator
+        N16[evaluate]
+        N17[index]
     end
 
     subgraph Function
-        N14[compile]
-        N15[evaluate]
-        N16[help]
-        N17[parser]
+        N18[compile]
+        N19[evaluate]
+        N20[help]
+        N21[parser]
     end
 
     subgraph Root
-        N18[Help]
-        N19[keywords]
-        N20[operators]
-        N21[parse]
-        N22[Parser]
-        N23[types]
+        N22[Help]
+        N23[keywords]
+        N24[operators]
+        N25[parse]
+        N26[Parser]
+        N27[types]
     end
 
     subgraph Entry
-        N24[index]
+        N28[index]
     end
 
     subgraph Node
-        N25[AccessorNode]
-        N26[ArrayNode]
-        N27[AssignmentNode]
-        N28[BlockNode]
-        N29[ConditionalNode]
-        N30[ConstantNode]
-        N31[FunctionAssignmentNode]
-        N32[FunctionNode]
-        N33[IndexNode]
-        N34[Node]
-        N35[...8 more]
+        N29[AccessorNode]
+        N30[ArrayNode]
+        N31[AssignmentNode]
+        N32[BlockNode]
+        N33[ConditionalNode]
+        N34[ConstantNode]
+        N35[FunctionAssignmentNode]
+        N36[FunctionNode]
+        N37[IndexNode]
+        N38[Node]
+        N39[...8 more]
     end
 
     subgraph Transform
-        N36[and.transform]
-        N37[bitAnd.transform]
-        N38[bitOr.transform]
-        N39[column.transform]
-        N40[concat.transform]
-        N41[cumsum.transform]
-        N42[diff.transform]
-        N43[filter.transform]
-        N44[forEach.transform]
-        N45[index.transform]
-        N46[...20 more]
+        N40[and.transform]
+        N41[bitAnd.transform]
+        N42[bitOr.transform]
+        N43[column.transform]
+        N44[concat.transform]
+        N45[cumsum.transform]
+        N46[diff.transform]
+        N47[filter.transform]
+        N48[forEach.transform]
+        N49[index.transform]
+        N50[...20 more]
     end
 
     subgraph Utils
-        N47[array]
-        N48[formatter]
-        N49[collection]
-        N50[customs]
-        N51[factory]
-        N52[is]
-        N53[latex]
-        N54[map]
-        N55[number]
-        N56[object]
-        N57[...4 more]
+        N51[array]
+        N52[formatter]
+        N53[collection]
+        N54[customs]
+        N55[factory]
+        N56[is]
+        N57[latex]
+        N58[map]
+        N59[number]
+        N60[object]
+        N61[...4 more]
     end
 
-    N14 --> N49
-    N14 --> N51
-    N15 --> N49
-    N15 --> N51
-    N15 --> N54
-    N16 --> N51
-    N16 --> N50
-    N16 --> N56
-    N17 --> N51
-    N18 --> N52
-    N18 --> N56
-    N18 --> N51
-    N24 --> N23
-    N24 --> N19
-    N24 --> N20
-    N24 --> N21
-    N24 --> N22
-    N24 --> N18
-    N25 --> N52
-    N25 --> N50
-    N25 --> N51
-    N25 --> N34
-    N26 --> N52
-    N26 --> N47
-    N26 --> N51
-    N26 --> N34
-    N27 --> N52
-    N27 --> N50
-    N27 --> N51
-    N27 --> N20
-    N27 --> N34
-    N28 --> N52
-    N28 --> N47
-    N28 --> N51
-    N28 --> N34
-    N29 --> N52
-    N29 --> N51
-    N29 --> N20
-    N29 --> N34
-    N30 --> N52
-    N30 --> N53
-    N30 --> N51
-    N30 --> N34
-    N31 --> N52
-    N31 --> N19
-    N31 --> N47
-    N31 --> N53
-    N31 --> N20
-    N31 --> N51
-    N31 --> N34
-    N32 --> N52
-    N32 --> N56
-    N32 --> N50
-    N32 --> N51
-    N32 --> N53
-    N32 --> N34
-    N33 --> N47
-    N33 --> N50
-    N33 --> N51
-    N33 --> N52
-    N34 --> N52
-    N34 --> N19
-    N34 --> N56
-    N34 --> N51
-    N34 --> N54
-    N20 --> N56
-    N20 --> N52
-    N21 --> N51
-    N21 --> N52
-    N21 --> N49
+    N0 --> N58
+    N1 --> N0
+    N16 --> N0
+    N17 --> N16
+    N18 --> N53
+    N18 --> N55
+    N19 --> N53
+    N19 --> N55
+    N19 --> N58
+    N20 --> N55
+    N20 --> N54
+    N20 --> N60
     N21 --> N55
-    N21 --> N56
-    N21 --> N34
-    N22 --> N51
-    N22 --> N52
+    N22 --> N56
+    N22 --> N60
+    N22 --> N55
+    N28 --> N27
+    N28 --> N23
+    N28 --> N24
+    N28 --> N25
+    N28 --> N26
+    N28 --> N22
+    N28 --> N1
+    N28 --> N17
+    N28 --> N38
+    N28 --> N29
+    N28 --> N30
+    N28 --> N31
+    N28 --> N32
+    N28 --> N33
+    N28 --> N34
+    N28 --> N35
+    N28 --> N36
+    N28 --> N37
+    N29 --> N56
+    N29 --> N54
+    N29 --> N55
+    N29 --> N38
+    N30 --> N56
+    N30 --> N51
+    N30 --> N55
+    N30 --> N38
+    N31 --> N56
+    N31 --> N54
+    N31 --> N55
+    N31 --> N24
+    N31 --> N38
+    N32 --> N56
+    N32 --> N51
+    N32 --> N55
+    N32 --> N38
+    N33 --> N56
+    N33 --> N55
+    N33 --> N24
+    N33 --> N38
+    N34 --> N56
+    N34 --> N57
+    N34 --> N55
+    N34 --> N38
+    N35 --> N56
+    N35 --> N23
+    N35 --> N51
+    N35 --> N57
+    N35 --> N24
+    N35 --> N55
+    N35 --> N38
+    N36 --> N56
+    N36 --> N60
+    N36 --> N54
+    N36 --> N55
+    N36 --> N57
+    N36 --> N38
+    N37 --> N51
+    N37 --> N54
+    N37 --> N55
 ```
 
 ---
@@ -3420,21 +3902,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 331 |
-| Total Modules | 8 |
-| Total Lines of Code | 19874 |
-| Total Exports | 480 |
-| Total Re-exports | 6 |
+| Total TypeScript Files | 391 |
+| Total Modules | 10 |
+| Total Lines of Code | 20993 |
+| Total Exports | 558 |
+| Total Re-exports | 27 |
 | Total Classes | 5 |
-| Total Interfaces | 40 |
-| Total Functions | 145 |
+| Total Interfaces | 42 |
+| Total Functions | 148 |
 | Total Type Guards | 49 |
 | Total Enums | 0 |
-| Type-only Imports | 9 |
-| Runtime Circular Deps | 2 |
+| Type-only Imports | 10 |
+| Runtime Circular Deps | 1 |
 | Type-only Circular Deps | 0 |
 
 ---
 
-*Last Updated*: 2026-04-04
-*Version*: 0.1.0
+*Last Updated*: 2026-04-10
+*Version*: 0.1.2

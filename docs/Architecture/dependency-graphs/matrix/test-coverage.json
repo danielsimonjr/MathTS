@@ -1,17 +1,16 @@
 {
   "metadata": {
-    "generatedAt": "2026-04-04T00:27:02.640Z",
-    "totalSourceFiles": 33,
-    "totalTestFiles": 14,
-    "testedCount": 27,
-    "untestedCount": 6,
-    "coveragePercent": "81.8"
+    "generatedAt": "2026-04-10T16:14:46.148Z",
+    "totalSourceFiles": 38,
+    "totalTestFiles": 17,
+    "testedCount": 33,
+    "untestedCount": 5,
+    "coveragePercent": "86.8"
   },
   "untestedFiles": [
     "src/backends/MatrixWasmBridge.ts",
     "src/backends/WasmLoader.ts",
     "src/matrix.ts",
-    "src/operations/index.ts",
     "src/types.ts",
     "src/types/parallel.d.ts"
   ],
@@ -22,6 +21,8 @@
     "src/backends/GPUMatrixBackend.ts",
     "src/backends/JSBackend.ts",
     "src/backends/ParallelBackend.ts",
+    "src/backends/RustWASMBackend.ts",
+    "src/backends/RustWasmLoader.ts",
     "src/backends/WASMBackend.ts",
     "src/backends/gpu/BatchExecutor.ts",
     "src/backends/gpu/BufferPool.ts",
@@ -32,10 +33,14 @@
     "src/backends/gpu/index.ts",
     "src/backends/index.ts",
     "src/backends/wasm/detect.ts",
+    "src/backends/wasm/fft-wasm.ts",
     "src/backends/wasm/index.ts",
     "src/config.ts",
     "src/index.ts",
+    "src/operations/eig-wasm.ts",
     "src/operations/eig.ts",
+    "src/operations/index.ts",
+    "src/operations/svd-wasm.ts",
     "src/operations/svd.ts",
     "src/parallel-matrix.ts",
     "src/typed-operations.ts",
@@ -48,11 +53,13 @@
     "src/backends/Backend.ts": [
       "tests/JSBackend.test.ts",
       "tests/typed-operations.test.ts",
-      "tests/wasm/loading.test.ts"
+      "tests/wasm/loading.test.ts",
+      "tests/wasm/rust-wasm.test.ts"
     ],
     "src/backends/BackendManager.ts": [
       "tests/typed-operations.test.ts",
-      "tests/wasm/loading.test.ts"
+      "tests/wasm/loading.test.ts",
+      "tests/wasm/rust-wasm.test.ts"
     ],
     "src/backends/gpu/BatchExecutor.ts": [
       "tests/gpu/integration.test.ts",
@@ -116,8 +123,23 @@
       "tests/typed-operations.test.ts",
       "tests/wasm/loading.test.ts"
     ],
+    "src/backends/RustWASMBackend.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts",
+      "tests/wasm/rust-wasm.test.ts"
+    ],
+    "src/backends/RustWasmLoader.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts",
+      "tests/wasm/rust-wasm.test.ts"
+    ],
     "src/backends/wasm/detect.ts": [
       "tests/typed-operations.test.ts",
+      "tests/wasm/loading.test.ts"
+    ],
+    "src/backends/wasm/fft-wasm.ts": [
+      "tests/typed-operations.test.ts",
+      "tests/wasm/fft-wasm.test.ts",
       "tests/wasm/loading.test.ts"
     ],
     "src/backends/wasm/index.ts": [
@@ -138,12 +160,23 @@
       "tests/typed-operations.test.ts"
     ],
     "src/matrix.ts": [],
-    "src/operations/eig.ts": [
-      "tests/decomposition/eig.test.ts"
+    "src/operations/eig-wasm.ts": [
+      "tests/decomposition/eig-wasm.test.ts",
+      "tests/typed-operations.test.ts"
     ],
-    "src/operations/index.ts": [],
+    "src/operations/eig.ts": [
+      "tests/decomposition/eig.test.ts",
+      "tests/typed-operations.test.ts"
+    ],
+    "src/operations/index.ts": [
+      "tests/typed-operations.test.ts"
+    ],
+    "src/operations/svd-wasm.ts": [
+      "tests/typed-operations.test.ts"
+    ],
     "src/operations/svd.ts": [
-      "tests/decomposition/svd.test.ts"
+      "tests/decomposition/svd.test.ts",
+      "tests/typed-operations.test.ts"
     ],
     "src/parallel-matrix.ts": [
       "tests/typed-operations.test.ts"
@@ -158,7 +191,8 @@
       "tests/sparse/SparseMatrix.test.ts",
       "tests/typed-operations.test.ts",
       "tests/wasm/accuracy.test.ts",
-      "tests/wasm/operations.test.ts"
+      "tests/wasm/operations.test.ts",
+      "tests/wasm/rust-wasm.test.ts"
     ],
     "src/types/index.ts": [
       "tests/typed-operations.test.ts"
@@ -177,6 +211,9 @@
   "testToSourceMap": {
     "tests/config.test.ts": [
       "src/config.ts"
+    ],
+    "tests/decomposition/eig-wasm.test.ts": [
+      "src/operations/eig-wasm.ts"
     ],
     "tests/decomposition/eig.test.ts": [
       "src/operations/eig.ts"
@@ -221,6 +258,7 @@
       "src/index.ts",
       "src/types/index.ts",
       "src/backends/index.ts",
+      "src/operations/index.ts",
       "src/typed-operations.ts",
       "src/parallel-matrix.ts",
       "src/types/Matrix.ts",
@@ -232,20 +270,30 @@
       "src/backends/WASMBackend.ts",
       "src/backends/GPUMatrixBackend.ts",
       "src/backends/GPUBackend.ts",
+      "src/backends/RustWASMBackend.ts",
+      "src/backends/RustWasmLoader.ts",
       "src/backends/BackendManager.ts",
       "src/backends/wasm/index.ts",
       "src/backends/gpu/index.ts",
       "src/backends/wasm/detect.ts",
+      "src/backends/wasm/fft-wasm.ts",
       "src/backends/gpu/detect.ts",
       "src/backends/gpu/GPUContext.ts",
       "src/backends/gpu/BufferPool.ts",
       "src/backends/gpu/ShaderManager.ts",
       "src/backends/gpu/BatchExecutor.ts",
-      "src/backends/gpu/Sync.ts"
+      "src/backends/gpu/Sync.ts",
+      "src/operations/eig.ts",
+      "src/operations/svd.ts",
+      "src/operations/eig-wasm.ts",
+      "src/operations/svd-wasm.ts"
     ],
     "tests/wasm/accuracy.test.ts": [
       "src/types/DenseMatrix.ts",
       "src/backends/WASMBackend.ts"
+    ],
+    "tests/wasm/fft-wasm.test.ts": [
+      "src/backends/wasm/fft-wasm.ts"
     ],
     "tests/wasm/loading.test.ts": [
       "src/backends/index.ts",
@@ -255,10 +303,13 @@
       "src/backends/WASMBackend.ts",
       "src/backends/GPUMatrixBackend.ts",
       "src/backends/GPUBackend.ts",
+      "src/backends/RustWASMBackend.ts",
+      "src/backends/RustWasmLoader.ts",
       "src/backends/BackendManager.ts",
       "src/backends/wasm/index.ts",
       "src/backends/gpu/index.ts",
       "src/backends/wasm/detect.ts",
+      "src/backends/wasm/fft-wasm.ts",
       "src/backends/gpu/detect.ts",
       "src/backends/gpu/GPUContext.ts",
       "src/backends/gpu/BufferPool.ts",
@@ -270,6 +321,13 @@
       "src/types/DenseMatrix.ts",
       "src/backends/JSBackend.ts",
       "src/backends/WASMBackend.ts"
+    ],
+    "tests/wasm/rust-wasm.test.ts": [
+      "src/backends/RustWasmLoader.ts",
+      "src/backends/RustWASMBackend.ts",
+      "src/backends/BackendManager.ts",
+      "src/backends/Backend.ts",
+      "src/types/DenseMatrix.ts"
     ]
   }
 }

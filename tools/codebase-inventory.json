@@ -1,33 +1,34 @@
 {
   "metadata": {
-    "generated": "2026-04-03T18:48:24.351906",
+    "generated": "2026-04-10T11:13:29.317730",
     "project": "mathts",
     "version": "0.1.0",
     "description": "A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acceleration",
     "generator": "tools/build-mathts-inventory.py"
   },
   "summary": {
-    "total_files": 2103,
-    "source": 1275,
-    "source_ts": 1275,
+    "total_files": 2316,
+    "source": 1353,
+    "source_ts": 1353,
     "wasm_as": 16,
-    "tests": 59,
-    "docs": 90,
+    "tests": 84,
+    "docs": 153,
     "declarations": 14,
-    "config": 178,
-    "other": 471,
-    "total_lines": 232707,
+    "config": 221,
+    "other": 475,
+    "total_lines": 249214,
     "extensions": {
-      ".ts": 1363,
-      ".json": 178,
-      "": 142,
-      ".md": 90,
+      ".ts": 1466,
+      ".json": 221,
+      ".md": 153,
+      "": 144,
       ".rs": 71,
       ".timestamp": 60,
       ".d": 51,
       ".rlib": 44,
       ".rmeta": 44,
-      ".yaml": 14,
+      ".yaml": 13,
+      ".py": 6,
       ".dll": 5,
       ".exp": 5,
       ".lib": 5,
@@ -35,7 +36,6 @@
       ".wgsl": 5,
       ".js": 3,
       ".mtsw": 3,
-      ".py": 3,
       ".toml": 3,
       ".txt": 2,
       ".TAG": 2,
@@ -49,7 +49,7 @@
     "core": {
       "package": {
         "name": "@danielsimonjr/mathts-core",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [
           "typed-function"
         ],
@@ -62,7 +62,8 @@
           "typecheck",
           "lint",
           "lint:fix",
-          "clean"
+          "clean",
+          "build:prod"
         ]
       },
       "source_files": 95,
@@ -74,7 +75,7 @@
     "matrix": {
       "package": {
         "name": "@danielsimonjr/mathts-matrix",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [
           "@danielsimonjr/mathts-core",
           "@danielsimonjr/mathts-parallel"
@@ -88,21 +89,23 @@
           "typecheck",
           "lint",
           "lint:fix",
-          "clean"
+          "clean",
+          "build:prod"
         ]
       },
-      "source_files": 33,
-      "source_lines": 13378,
-      "test_files": 14,
-      "test_lines": 5429,
-      "total_exports": 305
+      "source_files": 38,
+      "source_lines": 15250,
+      "test_files": 17,
+      "test_lines": 6292,
+      "total_exports": 351
     },
     "functions": {
       "package": {
         "name": "@danielsimonjr/mathts-functions",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [
           "@danielsimonjr/mathts-core",
+          "@danielsimonjr/mathts-expression",
           "@danielsimonjr/mathts-matrix",
           "@danielsimonjr/mathts-parallel",
           "bignumber.js",
@@ -124,19 +127,20 @@
           "typecheck",
           "lint",
           "lint:fix",
-          "clean"
+          "clean",
+          "build:prod"
         ]
       },
-      "source_files": 750,
-      "source_lines": 125273,
-      "test_files": 9,
-      "test_lines": 2170,
-      "total_exports": 3564
+      "source_files": 760,
+      "source_lines": 130146,
+      "test_files": 24,
+      "test_lines": 5983,
+      "total_exports": 3871
     },
     "parallel": {
       "package": {
         "name": "@danielsimonjr/mathts-parallel",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [
           "@danielsimonjr/mathts-workerpool"
         ],
@@ -149,19 +153,20 @@
           "typecheck",
           "lint",
           "lint:fix",
-          "clean"
+          "clean",
+          "build:prod"
         ]
       },
-      "source_files": 14,
-      "source_lines": 3115,
-      "test_files": 10,
-      "test_lines": 2116,
-      "total_exports": 162
+      "source_files": 16,
+      "source_lines": 4156,
+      "test_files": 13,
+      "test_lines": 2839,
+      "total_exports": 176
     },
     "expression": {
       "package": {
         "name": "@danielsimonjr/mathts-expression",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [
           "@danielsimonjr/mathts-core",
           "typed-function"
@@ -175,19 +180,20 @@
           "typecheck",
           "lint",
           "lint:fix",
-          "clean"
+          "clean",
+          "build:prod"
         ]
       },
-      "source_files": 331,
-      "source_lines": 19874,
-      "test_files": 0,
-      "test_lines": 0,
-      "total_exports": 528
+      "source_files": 391,
+      "source_lines": 20993,
+      "test_files": 2,
+      "test_lines": 677,
+      "total_exports": 608
     },
     "workbook": {
       "package": {
         "name": "@danielsimonjr/mathts-workbook",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [
           "@danielsimonjr/mathts-core",
           "yaml"
@@ -201,7 +207,8 @@
           "typecheck",
           "lint",
           "lint:fix",
-          "clean"
+          "clean",
+          "build:prod"
         ]
       },
       "source_files": 6,
@@ -213,7 +220,7 @@
     "compat": {
       "package": {
         "name": "@danielsimonjr/mathts-compat",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [
           "@danielsimonjr/mathts-core",
           "@danielsimonjr/mathts-functions",
@@ -224,7 +231,8 @@
           "build",
           "dev",
           "typecheck",
-          "test"
+          "test",
+          "build:prod"
         ]
       },
       "source_files": 3,
@@ -236,7 +244,7 @@
     "assembly": {
       "package": {
         "name": "@danielsimonjr/mathts-wasm",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [],
         "scripts": [
           "asbuild:debug",
@@ -258,7 +266,7 @@
     "packages/typed-function": {
       "package": {
         "name": "@danielsimonjr/mathts-typed-function",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [
           "typed-function"
         ],
@@ -271,19 +279,20 @@
           "typecheck",
           "lint",
           "lint:fix",
-          "clean"
+          "clean",
+          "build:prod"
         ]
       },
       "source_files": 2,
-      "source_lines": 457,
-      "test_files": 1,
-      "test_lines": 194,
-      "total_exports": 53
+      "source_lines": 692,
+      "test_files": 2,
+      "test_lines": 622,
+      "total_exports": 62
     },
     "packages/workerpool": {
       "package": {
         "name": "@danielsimonjr/mathts-workerpool",
-        "version": "0.1.0",
+        "version": "0.1.2",
         "dependencies": [
           "workerpool"
         ],
@@ -296,14 +305,15 @@
           "typecheck",
           "lint",
           "lint:fix",
-          "clean"
+          "clean",
+          "build:prod"
         ]
       },
       "source_files": 3,
-      "source_lines": 2299,
+      "source_lines": 2637,
       "test_files": 1,
-      "test_lines": 351,
-      "total_exports": 29
+      "test_lines": 612,
+      "total_exports": 37
     }
   },
   "core_types": {
@@ -650,9 +660,89 @@
       ],
       "export_count": 48
     },
+    "combinatorics": {
+      "file": "functions/src/typed/combinatorics.ts",
+      "lines": 291,
+      "exports": [
+        "fibonacci",
+        "lucas",
+        "doubleFactorial",
+        "risingFactorial",
+        "fallingFactorial",
+        "subfactorial"
+      ],
+      "export_count": 6
+    },
+    "distributions": {
+      "file": "functions/src/typed/distributions.ts",
+      "lines": 370,
+      "exports": [
+        "normalPDF",
+        "normalCDF",
+        "exponentialPDF",
+        "exponentialCDF",
+        "poissonPMF",
+        "binomialPMF",
+        "geometricPMF",
+        "bernoulliPMF",
+        "entropy",
+        "jsDivergence",
+        "typedDistributions"
+      ],
+      "export_count": 11
+    },
+    "geometry": {
+      "file": "functions/src/typed/geometry.ts",
+      "lines": 406,
+      "exports": [
+        "angle2D",
+        "angle3D",
+        "cross3D",
+        "dot3D",
+        "triangleArea",
+        "polygonArea",
+        "convexHull",
+        "pointInPolygon",
+        "rotateVector2D",
+        "rotateVector3D",
+        "reflectVector",
+        "projectVector",
+        "distance2D",
+        "distance3D",
+        "distanceND",
+        "distancePointToLine2D",
+        "intersectLines2D",
+        "intersectSegments2D"
+      ],
+      "export_count": 18
+    },
+    "integration": {
+      "file": "functions/src/typed/integration.ts",
+      "lines": 206,
+      "exports": [
+        "trapz",
+        "simpson",
+        "gaussQuad",
+        "romberg"
+      ],
+      "export_count": 4
+    },
+    "interpolation": {
+      "file": "functions/src/typed/interpolation.ts",
+      "lines": 433,
+      "exports": [
+        "linearInterp",
+        "lagrangeInterp",
+        "cubicSpline",
+        "hermiteInterp",
+        "pchipInterp",
+        "polyFit"
+      ],
+      "export_count": 6
+    },
     "signal": {
       "file": "functions/src/typed/signal.ts",
-      "lines": 412,
+      "lines": 561,
       "exports": [
         "parallelFFT",
         "parallelIFFT",
@@ -661,13 +751,33 @@
         "parallelConv",
         "parallelXCorr",
         "parallelAutoCorr",
+        "crossCorrelation",
+        "autoCorrelation",
+        "groupDelay",
+        "unwrapPhase",
         "typedSignal"
       ],
-      "export_count": 8
+      "export_count": 12
+    },
+    "special": {
+      "file": "functions/src/typed/special.ts",
+      "lines": 462,
+      "exports": [
+        "erfc",
+        "beta",
+        "gammainc",
+        "digamma",
+        "besselJ0",
+        "besselJ1",
+        "besselY0",
+        "besselY1",
+        "typedSpecial"
+      ],
+      "export_count": 9
     },
     "statistics": {
       "file": "functions/src/typed/statistics.ts",
-      "lines": 740,
+      "lines": 854,
       "exports": [
         "NormalizationType",
         "parallelStatSum",
@@ -687,9 +797,13 @@
         "parallelStatCumsum",
         "parallelStatQuantile",
         "parallelStatHistogram",
+        "quickSelect",
+        "medianSelect",
+        "minSelect",
+        "maxSelect",
         "typedStatistics"
       ],
-      "export_count": 19
+      "export_count": 23
     },
     "trigonometry": {
       "file": "functions/src/typed/trigonometry.ts",
@@ -3423,13 +3537,16 @@
       "method_count": 17
     },
     "BackendManager": {
-      "lines": 641,
+      "lines": 680,
       "methods": [
+        "GPU",
         "Map",
+        "WASM",
         "abs",
         "add",
         "all",
         "available",
+        "backend",
         "catch",
         "configUnsubscribe",
         "destroy",
@@ -3459,6 +3576,7 @@
         "now",
         "onConfigChange",
         "operation",
+        "operations",
         "push",
         "recordSample",
         "reduce",
@@ -3477,7 +3595,7 @@
         "transpose",
         "warn"
       ],
-      "method_count": 51
+      "method_count": 55
     },
     "GPUBackend": {
       "lines": 511,
@@ -3568,7 +3686,7 @@
       "method_count": 40
     },
     "index": {
-      "lines": 99,
+      "lines": 114,
       "methods": [],
       "method_count": 0
     },
@@ -3715,8 +3833,113 @@
       ],
       "method_count": 35
     },
+    "RustWASMBackend": {
+      "lines": 475,
+      "methods": [
+        "Error",
+        "Operations",
+        "WASM",
+        "abs",
+        "add",
+        "allocF64",
+        "allocI32",
+        "divideElementwise",
+        "doInitialize",
+        "dot",
+        "eigsSymmetric",
+        "fft",
+        "fromFlat",
+        "getConfig",
+        "getExports",
+        "initialize",
+        "inverse",
+        "isAvailable",
+        "isRustLoaded",
+        "laInv",
+        "load",
+        "luDecomposition",
+        "multiply",
+        "multiplyDenseSIMD",
+        "multiplyElementwise",
+        "negate",
+        "norm",
+        "readF64",
+        "readI32",
+        "resetAllocator",
+        "scale",
+        "shouldUseRustWasm",
+        "simdAbsF64",
+        "simdAddF64",
+        "simdDotF64",
+        "simdMulF64",
+        "simdNormF64",
+        "simdScaleF64",
+        "simdSubF64",
+        "simdSumF64",
+        "subtract",
+        "sum",
+        "sumAxis",
+        "transpose",
+        "updateConfig",
+        "warn",
+        "writeF64"
+      ],
+      "method_count": 47
+    },
+    "RustWasmLoader": {
+      "lines": 475,
+      "methods": [
+        "BumpAllocator",
+        "Error",
+        "Float64Array",
+        "Int32Array",
+        "Management",
+        "RustWasmLoader",
+        "alloc",
+        "allocF64",
+        "allocI32",
+        "arrayBuffer",
+        "catch",
+        "compile",
+        "default",
+        "doLoad",
+        "fetch",
+        "findWasmPath",
+        "getExports",
+        "getImports",
+        "getInstance",
+        "getLoadingMetrics",
+        "getMemory",
+        "import",
+        "instantiate",
+        "instantiateStreaming",
+        "isArray",
+        "isLoaded",
+        "load",
+        "loader",
+        "location",
+        "memory",
+        "now",
+        "readF64",
+        "readFileSync",
+        "readI32",
+        "require",
+        "reset",
+        "resetAllocator",
+        "resetInstance",
+        "resolve",
+        "set",
+        "singleton",
+        "statics",
+        "times",
+        "warn",
+        "writeF64",
+        "writeI32"
+      ],
+      "method_count": 46
+    },
     "WASMBackend": {
-      "lines": 890,
+      "lines": 862,
       "methods": [
         "Decomposition",
         "Determinant",
@@ -4339,36 +4562,7 @@
       "export_count": 9
     }
   },
-  "cross_package_deps": {
-    "core": {
-      "@danielsimonjr/mathts-core": 1
-    },
-    "matrix": {
-      "@danielsimonjr/mathts-core": 5,
-      "@danielsimonjr/mathts-parallel": 3
-    },
-    "functions": {
-      "@danielsimonjr/mathts-core": 5,
-      "@danielsimonjr/mathts-parallel": 4
-    },
-    "parallel": {
-      "@danielsimonjr/mathts-workerpool": 1,
-      "@danielsimonjr/mathts-parallel": 1
-    },
-    "compat": {
-      "@danielsimonjr/mathts-core": 3,
-      "@danielsimonjr/mathts-compat": 2,
-      "@danielsimonjr/mathts-matrix": 2,
-      "@danielsimonjr/mathts-parallel": 1,
-      "@danielsimonjr/mathts-functions": 1
-    },
-    "packages/typed-function": {
-      "@danielsimonjr/mathts-core": 1
-    },
-    "packages/workerpool": {
-      "@danielsimonjr/mathts-workerpool": 1
-    }
-  },
+  "cross_package_deps": {},
   "dependency_graph": {
     "total_factories": 230,
     "leaf_count": 81,

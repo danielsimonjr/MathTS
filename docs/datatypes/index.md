@@ -29,7 +29,7 @@ Matrix types are in `@danielsimonjr/mathts-matrix`:
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 ```
 
-Math functions (arithmetic, trig, statistics, FFT) are in `@danielsimonjr/mathts-functions`:
+Math functions (arithmetic, trig, statistics, FFT, special functions, probability distributions, numerical integration, interpolation, geometry, and more — 302+ total) are in `@danielsimonjr/mathts-functions`:
 
 ```ts
 import { add, multiply, sin, fft } from '@danielsimonjr/mathts-functions';

@@ -1,7 +1,7 @@
 metadata:
-  name: "@mathts/compat"
-  version: 0.1.0
-  lastUpdated: "2026-04-04"
+  name: "@danielsimonjr/mathts-compat"
+  version: 0.1.2
+  lastUpdated: "2026-04-10"
   totalFiles: 3
   totalModules: 2
   totalExports: 97
@@ -12,9 +12,9 @@ entryPoints:
 modules:
   root:
     src/functions.d.ts:
-      description: Type declarations for @mathts/functions
+      description: Type declarations for @danielsimonjr/mathts-functions
       externalDependencies:
-        - package: "@mathts/core"
+        - package: "@danielsimonjr/mathts-core"
           imports:
             - Complex
             - Fraction
@@ -101,7 +101,7 @@ modules:
     src/shims.ts:
       description: mathjs Compatibility Shims
       externalDependencies:
-        - package: "@mathts/core"
+        - package: "@danielsimonjr/mathts-core"
           imports:
             - Complex
             - Fraction
@@ -112,7 +112,7 @@ modules:
             - isFraction
             - isBigNumber
             - isNumber
-        - package: "@mathts/functions"
+        - package: "@danielsimonjr/mathts-functions"
           imports:
             - add
             - subtract
@@ -135,7 +135,7 @@ modules:
             - round
             - floor
             - ceil
-        - package: "@mathts/matrix"
+        - package: "@danielsimonjr/mathts-matrix"
           imports:
             - DenseMatrix
             - SparseMatrix
@@ -275,7 +275,7 @@ modules:
           imports:
             - "*"
           reExport: true
-        - file: "@mathts/core"
+        - file: "@danielsimonjr/mathts-core"
           imports:
             - Complex
             - Fraction
@@ -290,12 +290,12 @@ modules:
             - BIGNUMBER_PI
             - BIGNUMBER_E
           reExport: true
-        - file: "@mathts/matrix"
+        - file: "@danielsimonjr/mathts-matrix"
           imports:
             - DenseMatrix
             - SparseMatrix
           reExport: true
-        - file: "@mathts/parallel"
+        - file: "@danielsimonjr/mathts-parallel"
           imports:
             - computePool
           reExport: true

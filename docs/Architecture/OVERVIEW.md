@@ -1,6 +1,6 @@
 # MathTS Project Overview
 
-**Generated**: 2026-04-03
+**Generated**: 2026-04-10
 
 ## What is MathTS?
 
@@ -21,29 +21,25 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 
 | Metric | Value |
 |--------|-------|
-| Total Source Files | 1,247 |
-| Lines of Code | 193,073 |
-| Total Exports | 5,399 |
-| Reachable Exports | 1,562 |
-| Classes | 53 |
-| Interfaces | 345 |
-| Functions | 2,047 |
-| Type Guards | 230 |
-| Constants | 1,781 |
-| Test Files | 54 |
-| Total Tests | 1,445 |
+| Total Source Files | 1,324 |
+| Lines of Code | 202,551 |
+| Total Exports | 6,323 |
+| Test Files | 79 |
+| Total Tests | 2,304 |
+| Typed Function Exports | 158 (11 modules) |
+| Synced Factory Functions | 242 (19 categories) |
 
 ## Packages
 
 | Package | Description | Source Files | Tests | Exports |
 |---------|-------------|-------------|-------|---------|
-| `@danielsimonjr/mathts-typed-function` | Type dispatch system (forked) | 2 | 1 | 53 |
-| `@danielsimonjr/mathts-workerpool` | Worker pool management (forked) | 3 | 1 | 29 |
+| `@danielsimonjr/mathts-typed-function` | Type dispatch system (forked) | 2 | 2 | 62 |
+| `@danielsimonjr/mathts-workerpool` | Worker pool management (forked) | 3 | 1 | 37 |
 | `@danielsimonjr/mathts-core` | Types, typed-function, factory | 95 | 12 | 625 |
-| `@danielsimonjr/mathts-matrix` | DenseMatrix, SparseMatrix, backends | 33 | 14 | 305 |
-| `@danielsimonjr/mathts-functions` | Math functions via typed dispatch | 750 | 9 | 3,564 |
-| `@danielsimonjr/mathts-parallel` | ComputePool, WebWorker operations | 14 | 10 | 162 |
-| `@danielsimonjr/mathts-expression` | Parser/evaluator (stubs for compiler) | 331 | 0 | 528 |
+| `@danielsimonjr/mathts-matrix` | DenseMatrix, SparseMatrix, backends | 38 | 17 | 351 |
+| `@danielsimonjr/mathts-functions` | Math functions via typed dispatch | 760 | 24 | 3,871 |
+| `@danielsimonjr/mathts-parallel` | ComputePool, WebWorker operations | 16 | 13 | 176 |
+| `@danielsimonjr/mathts-expression` | Parser/evaluator (stubs for compiler) | 391 | 2 | 608 |
 | `@danielsimonjr/mathts-workbook` | .mtsw notebook runtime + CLI | 6 | 3 | 29 |
 | `@danielsimonjr/mathts-compat` | mathjs compatibility shim | 3 | 2 | 132 |
 | `assembly` | WASM source (AssemblyScript) | 10 | 0 | 432 |
@@ -56,14 +52,29 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 These are exported, tested, and built. Includes:
 
 - **3 numeric types**: Complex (83 methods), Fraction (61 methods), BigNumber (96 methods including 22 math functions)
-- **96 typed function exports**: arithmetic (48), trigonometry (20), statistics (19), signal (8), bridge (1)
+- **158 typed function exports** across 11 modules: arithmetic (48), trigonometry (20), statistics (23), signal (12), special (9), distributions (11), integration (4), interpolation (6), combinatorics (6), geometry (18), bridge (1)
 - **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM/GPU backends
 - **Parallel**: ComputePool with 40+ parallel operations
 - **WASM**: 432 exports (scalar, array, matrix, complex operations)
 
+### Beyond mathjs — 60 New Functions
+
+The following function categories go beyond the mathjs API surface, available as native typed exports:
+
+| Module | Count | Functions |
+|--------|-------|-----------|
+| Special | 9 | `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1` |
+| Distributions | 11 | `normalPDF/CDF`, `exponentialPDF/CDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`, `jsDivergence` |
+| Integration | 4 | `trapz`, `simpson`, `gaussQuad`, `romberg` |
+| Interpolation | 6 | `linearInterp`, `lagrangeInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit` |
+| Combinatorics | 6 | `fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial` |
+| Geometry | 18 | `angle2D/3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`, `pointInPolygon`, `rotateVector2D/3D`, and 8 more |
+
+Total: **54 new exports** in these 6 modules (plus 4 new signal exports) = **~60 functions beyond mathjs**.
+
 ### Dormant Layer (synced from mathjs)
 
-~1,173 files synced from the mathjs fork. 19 categories, 231 factory-pattern functions.
+~1,225 files synced from the mathjs fork. 19 categories, 242 factory-pattern functions.
 Not exported from package entry points. Support files in `functions/src/{utils,core,plain,type,expression,error,wasm}/`.
 
 ## Computation Backends
@@ -118,7 +129,7 @@ math.add(1, 2);
 |---------|--------|-------|
 | Core | Stable | Types with full method sets, factory, typed dispatch |
 | Matrix | Stable | Dense/Sparse with JS backend; WASM/GPU backends available |
-| Functions | Active | 96 typed exports across arithmetic, trig, statistics, signal |
+| Functions | Active | 158 typed exports across 11 modules (arithmetic, trig, stats, signal, special, distributions, integration, interpolation, combinatorics, geometry, bridge) |
 | Parallel | Active | ComputePool, 40+ operations, 7 threshold categories |
 | Workbook | Active | YAML parsing, dep graphs, executor via Function constructor |
 | Expression | Builds | Parser ported (16 node types), compiler/evaluator are stubs |
@@ -137,11 +148,10 @@ math.add(1, 2);
 
 | Metric | Value |
 |--------|-------|
-| Leaf factories (no unresolved deps) | 81 |
-| Total synced factories | 231 |
+| Total synced factories | 242 |
 | Synced categories | 19 |
-| Dormant files | ~1,158 |
-| Reachable files | ~89 |
+| Dormant files | ~1,225 |
+| Reachable files | ~99 |
 
 ### Remaining Barriers
 

@@ -145,12 +145,30 @@ async function main() {
 main();
 ```
 
+## Function Categories
+
+`@danielsimonjr/mathts-functions` provides 302+ math functions across 10 categories:
+
+| Category | Examples |
+|----------|---------|
+| **Arithmetic** | `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `log`, `mod`, `gcd` |
+| **Trigonometry** | `sin`, `cos`, `tan`, `atan2`, `sinh`, `cosh`, `hypot`, `toRadians` |
+| **Statistics** | `parallelStatMean`, `parallelStatStd`, `parallelStatCorr`, `parallelStatQuantile` |
+| **Signal Processing** | `parallelFFT`, `parallelIFFT`, `parallelConv`, `crossCorrelation`, `unwrapPhase` |
+| **Special Functions** | `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1` |
+| **Probability Distributions** | `normalPDF`, `normalCDF`, `poissonPMF`, `binomialPMF`, `entropy`, `jsDivergence` |
+| **Numerical Integration** | `trapz`, `simpson`, `gaussQuad`, `romberg` |
+| **Interpolation** | `linearInterp`, `cubicSpline`, `pchipInterp`, `lagrangeInterp`, `polyFit` |
+| **Combinatorics** | `fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `subfactorial` |
+| **Geometry** | `angle2D`, `cross3D`, `convexHull`, `distance2D`, `distanceND`, `intersectLines2D` |
+| **Statistics Selection** | `quickSelect`, `medianSelect`, `minSelect`, `maxSelect` |
+
 ## Package Overview
 
 | Package | Purpose |
 |---------|---------|
 | `@danielsimonjr/mathts-core` | Core types: Complex, Fraction, BigNumber |
-| `@danielsimonjr/mathts-functions` | Math functions with type dispatch |
+| `@danielsimonjr/mathts-functions` | 302+ math functions with type dispatch |
 | `@danielsimonjr/mathts-matrix` | Dense and sparse matrices |
 | `@danielsimonjr/mathts-parallel` | Parallel computing via ComputePool |
 | `@danielsimonjr/mathts-compat` | mathjs compatibility layer |

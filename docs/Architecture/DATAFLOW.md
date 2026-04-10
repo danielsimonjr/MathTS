@@ -1,6 +1,6 @@
 # MathTS Data Flow
 
-**Generated**: 2026-04-03
+**Generated**: 2026-04-10
 
 ## Overview
 
@@ -127,6 +127,117 @@ Backend selected by `MATHTS_WASM_BACKEND` environment variable:
 
 ---
 
+## 3c. New Function Category Data Flows
+
+### Integration Functions
+
+Integration functions (`trapz`, `simpson`, `gaussQuad`, `romberg`) accept a callback and numeric bounds:
+
+```text
+gaussQuad(f, a, b, n)   // f: (x: number) => number
+  1. Validate bounds [a, b] and sample count n
+  2. Compute Gauss-Legendre nodes and weights for n-point rule
+  3. Transform [a, b] -> [-1, 1] via linear map
+  4. Evaluate callback f at each node (synchronous, no parallelization)
+  5. Accumulate weighted sum
+  6. Returns number (definite integral approximation)
+
+romberg(f, a, b, tol)  // adaptive, recursive refinement
+  1. Build Richardson extrapolation table via trapz calls at increasing resolution
+  2. Terminate when successive estimates converge within tol
+  3. Returns number
+```
+
+Key difference from array functions: **no parallel execution** — callback evaluation is inherently sequential.
+
+### Interpolation Functions
+
+Interpolation functions return **interpolant functions** rather than single values:
+
+```text
+cubicSpline(xs, ys)      // xs: number[], ys: number[]
+  1. Validate: xs must be sorted, xs.length === ys.length
+  2. Build tridiagonal system for natural cubic spline coefficients
+  3. Solve for second derivatives (Thomas algorithm)
+  4. Returns (x: number) => number  // callable interpolant
+```
+
+```text
+const interp = cubicSpline([0, 1, 2], [0, 1, 4]);
+const y = interp(1.5);  // evaluates spline at x=1.5
+```
+
+`lagrangeInterp` and `hermiteInterp` follow the same factory pattern (input points → output function).
+`polyFit` returns a polynomial coefficient array, not a function.
+
+### Distribution Functions
+
+Distribution functions take distribution parameters and return a single numeric value:
+
+```text
+normalPDF(x, mu, sigma)
+  1. Validate sigma > 0
+  2. Compute (1 / (sigma * sqrt(2*pi))) * exp(-0.5 * ((x - mu) / sigma)^2)
+  3. Returns number
+
+normalCDF(x, mu, sigma)
+  1. Normalize: z = (x - mu) / sigma
+  2. Compute 0.5 * (1 + erf(z / sqrt(2)))  [uses erfc internally]
+  3. Returns number in [0, 1]
+```
+
+All distribution functions are **purely synchronous** — no array chunking, no worker dispatch.
+They are suitable as building blocks for Monte Carlo sampling loops.
+
+### Special Functions
+
+Special functions (`erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1`) follow
+the same synchronous scalar flow as distribution functions:
+
+```text
+besselJ0(x)             // Bessel function of the first kind, order 0
+  1. Uses rational polynomial approximation for |x| < 8
+  2. Uses asymptotic expansion for |x| >= 8
+  3. Returns number (always finite for finite input)
+```
+
+No side effects, no shared state, no async dispatch. All accept `number` and return `number`.
+
+### Combinatorics Functions
+
+Combinatorics functions (`fibonacci`, `lucas`, etc.) operate on non-negative integers:
+
+```text
+fibonacci(n)
+  1. Validate: n must be a non-negative integer
+  2. For n <= 70: lookup table or iterative O(n)
+  3. Returns number (or BigInt for large n if configured)
+
+subfactorial(n)
+  1. Compute D(n) = (n-1) * (D(n-1) + D(n-2))  with D(0)=1, D(1)=0
+  2. Returns number
+```
+
+### Geometry Functions
+
+Geometry functions operate on `number[]` tuples (2D or 3D vectors):
+
+```text
+convexHull(points)       // points: [number, number][]
+  1. Sort points lexicographically
+  2. Graham scan to build lower and upper hulls
+  3. Returns [number, number][] (hull vertices in CCW order)
+
+pointInPolygon(pt, polygon)
+  1. Ray casting algorithm: count crossings of horizontal ray from pt
+  2. Returns boolean
+```
+
+Vector operations (`angle2D`, `cross3D`, `dot3D`, `rotateVector2D`, etc.) are
+**O(1) synchronous scalar/vector functions** with no backend selection or parallelization.
+
+---
+
 ## 4. Factory Activation Flow
 
 ```text
@@ -199,8 +310,15 @@ typed-function (@danielsimonjr/mathts-core)
     |         +---> [>100K elements] ComputePool (@danielsimonjr/mathts-parallel)
     |
     +---> Parallel Functions (@danielsimonjr/mathts-functions)
+    |         |
+    |         +---> ComputePool (@danielsimonjr/mathts-parallel)
+    |
+    +---> Scalar Functions (@danielsimonjr/mathts-functions)
               |
-              +---> ComputePool (@danielsimonjr/mathts-parallel)
+              +---> special / distributions / combinatorics: synchronous scalar ops
+              +---> integration: callback evaluation (synchronous)
+              +---> interpolation: returns interpolant function (lazy evaluation)
+              +---> geometry: synchronous vector/polygon ops
 
 @danielsimonjr/mathts-compat --> typed-function
 

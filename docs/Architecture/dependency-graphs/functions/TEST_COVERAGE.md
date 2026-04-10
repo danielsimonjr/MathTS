@@ -1,22 +1,22 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-04-04
+**Generated**: 2026-04-10
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 750 |
-| Total Test Files | 9 |
-| Source Files with Tests | 9 |
-| Source Files without Tests | 741 |
-| Coverage | 1.2% |
+| Total Source Files | 760 |
+| Total Test Files | 24 |
+| Source Files with Tests | 18 |
+| Source Files without Tests | 742 |
+| Coverage | 2.4% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 741 source files are not directly imported by any test file:
+The following 742 source files are not directly imported by any test file:
 
 ### algebra/
 
@@ -473,6 +473,10 @@ The following 741 source files are not directly imported by any test file:
 - `src/expression/transform/variance.transform.ts` → Expected test: `tests/unit/expression/variance.transform.test.ts`
 - `src/expression/types.ts` → Expected test: `tests/unit/expression/types.test.ts`
 
+### factories/
+
+- `src/factories/scope.ts` → Expected test: `tests/unit/factories/scope.test.ts`
+
 ### geometry/
 
 - `src/geometry/distance.ts` → Expected test: `tests/unit/geometry/distance.test.ts`
@@ -846,13 +850,22 @@ The following 741 source files are not directly imported by any test file:
 
 | Source File | Test Files |
 |-------------|------------|
+| `factories/evaluate.ts` | `evaluate.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `factories/index.ts` | `factories-final.test.ts`, `factories-leaf.test.ts`, `factories-matrix.test.ts`, `factories-tier2.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `factories/matrix-bridge.ts` | `factories-matrix.test.ts`, `sparse-bridge.test.ts` |
 | `src/index.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `signal/conv.ts` | `conv.test.ts` |
 | `signal/fft.ts` | `fft.test.ts` |
 | `typed/arithmetic.ts` | `arithmetic-extended.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/combinatorics.ts` | `combinatorics.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/distributions.ts` | `distributions.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/geometry.ts` | `geometry.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/index.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/signal.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/statistics.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/integration.ts` | `integration.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/interpolation.ts` | `interpolation.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/signal.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `signal-extended.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/special.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `special.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/statistics.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `statistics-selection.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/trigonometry.ts` | `arithmetic-extended.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/typed-bridge.ts` | `typed-bridge.test.ts` |
 
@@ -863,11 +876,26 @@ The following 741 source files are not directly imported by any test file:
 | Test File | Imports from Source |
 |-----------|---------------------|
 | `tests/arithmetic-extended.test.ts` | 2 files |
-| `tests/parallel-arithmetic.test.ts` | 6 files |
-| `tests/parallel-signal.test.ts` | 6 files |
+| `tests/combinatorics.test.ts` | 1 files |
+| `tests/distributions.test.ts` | 1 files |
+| `tests/evaluate.test.ts` | 1 files |
+| `tests/factories-final.test.ts` | 1 files |
+| `tests/factories-leaf.test.ts` | 1 files |
+| `tests/factories-matrix.test.ts` | 2 files |
+| `tests/factories-tier2.test.ts` | 1 files |
+| `tests/factories-tier4.test.ts` | 1 files |
+| `tests/geometry.test.ts` | 1 files |
+| `tests/integration.test.ts` | 1 files |
+| `tests/interpolation.test.ts` | 1 files |
+| `tests/parallel-arithmetic.test.ts` | 14 files |
+| `tests/parallel-signal.test.ts` | 14 files |
 | `signal/conv.test.ts` | 1 files |
 | `signal/fft.test.ts` | 1 files |
+| `tests/signal-extended.test.ts` | 1 files |
+| `tests/sparse-bridge.test.ts` | 1 files |
+| `tests/special.test.ts` | 1 files |
 | `tests/statistics-extended.test.ts` | 1 files |
 | `tests/statistics-extended2.test.ts` | 1 files |
-| `tests/typed-arithmetic.test.ts` | 6 files |
+| `tests/statistics-selection.test.ts` | 1 files |
+| `tests/typed-arithmetic.test.ts` | 14 files |
 | `tests/typed-bridge.test.ts` | 1 files |

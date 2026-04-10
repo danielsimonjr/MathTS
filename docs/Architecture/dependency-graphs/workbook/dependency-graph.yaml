@@ -1,7 +1,7 @@
 metadata:
-  name: "@mathts/workbook"
-  version: 0.1.0
-  lastUpdated: "2026-04-04"
+  name: "@danielsimonjr/mathts-workbook"
+  version: 0.1.2
+  lastUpdated: "2026-04-10"
   totalFiles: 6
   totalModules: 2
   totalExports: 19

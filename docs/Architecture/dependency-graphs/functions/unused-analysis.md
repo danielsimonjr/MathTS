@@ -1,17 +1,16 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-04-04
+**Generated**: 2026-04-10
 
 ## Summary
 
-- **Potentially unused files**: 261
+- **Potentially unused files**: 259
 - **Potentially unused exports**: 152
 
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
 
-- `src/algebra/sparse/csChol.ts`
 - `src/core/function/config.ts`
 - `src/core/function/import.ts`
 - `src/defaultInstance.ts`
@@ -239,7 +238,6 @@ These files are not imported by any other file in the codebase:
 - `src/expression/types.ts`
 - `src/factoriesNumber.ts`
 - `src/shared/types.ts`
-- `src/typed/typed-bridge.ts`
 - `src/utils/customs.d.ts`
 - `src/utils/latex.d.ts`
 - `src/utils/log.ts`

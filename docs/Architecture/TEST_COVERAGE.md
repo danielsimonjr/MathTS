@@ -1,25 +1,37 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-04-04
+**Generated**: 2026-04-10
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 89 |
-| Total Test Files | 57 |
-| Source Files with Tests | 55 |
-| Source Files without Tests | 34 |
-| Coverage | 61.8% |
+| Total Source Files | 1324 |
+| Total Test Files | 82 |
+| Source Files with Tests | 83 |
+| Source Files without Tests | 1241 |
+| Coverage | 6.3% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 34 source files are not directly imported by any test file:
+The following 1241 source files are not directly imported by any test file:
+
+### typed-function/
+
+- `packages/typed-function/src/typed-function.d.ts` → Expected test: `tests/unit/typed-function/typed-function.d.test.ts`
+
+### workerpool/
+
+- `packages/workerpool/src/worker.ts` → Expected test: `tests/unit/workerpool/worker.test.ts`
+- `packages/workerpool/src/workerpool.d.ts` → Expected test: `tests/unit/workerpool/workerpool.d.test.ts`
 
 ### src/
 
+- `assembly/src/bindings/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `assembly/src/bindings/wasm-loader.ts` → Expected test: `tests/unit/src/wasm-loader.test.ts`
+- `assembly/src/env/abort.ts` → Expected test: `tests/unit/src/abort.test.ts`
 - `assembly/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 - `assembly/src/ops/array.ts` → Expected test: `tests/unit/src/array.test.ts`
 - `assembly/src/ops/complex-array.ts` → Expected test: `tests/unit/src/complex-array.test.ts`
@@ -27,16 +39,464 @@ The following 34 source files are not directly imported by any test file:
 - `assembly/src/ops/matrix.ts` → Expected test: `tests/unit/src/matrix.test.ts`
 - `assembly/src/ops/scalar.ts` → Expected test: `tests/unit/src/scalar.test.ts`
 - `assembly/src/types/complex.ts` → Expected test: `tests/unit/src/complex.test.ts`
+- `compat/src/functions.d.ts` → Expected test: `tests/unit/src/functions.d.test.ts`
+- `core/src/array.ts` → Expected test: `tests/unit/src/array.test.ts`
+- `core/src/bigint.ts` → Expected test: `tests/unit/src/bigint.test.ts`
+- `core/src/bignumber/bitwise.ts` → Expected test: `tests/unit/src/bitwise.test.ts`
+- `core/src/bignumber/constants.ts` → Expected test: `tests/unit/src/constants.test.ts`
+- `core/src/bignumber/formatter.ts` → Expected test: `tests/unit/src/formatter.test.ts`
+- `core/src/bignumber/nearlyEqual.ts` → Expected test: `tests/unit/src/nearlyEqual.test.ts`
+- `core/src/collection.ts` → Expected test: `tests/unit/src/collection.test.ts`
+- `core/src/complex.ts` → Expected test: `tests/unit/src/complex.test.ts`
+- `core/src/constants.ts` → Expected test: `tests/unit/src/constants.test.ts`
+- `core/src/create.ts` → Expected test: `tests/unit/src/create.test.ts`
+- `core/src/customs.d.ts` → Expected test: `tests/unit/src/customs.d.test.ts`
+- `core/src/customs.ts` → Expected test: `tests/unit/src/customs.test.ts`
+- `core/src/emitter.ts` → Expected test: `tests/unit/src/emitter.test.ts`
+- `core/src/error/ArgumentsError.ts` → Expected test: `tests/unit/src/ArgumentsError.test.ts`
+- `core/src/error/DimensionError.ts` → Expected test: `tests/unit/src/DimensionError.test.ts`
+- `core/src/error/IndexError.ts` → Expected test: `tests/unit/src/IndexError.test.ts`
+- `core/src/factory.ts` → Expected test: `tests/unit/src/factory.test.ts`
+- `core/src/function.ts` → Expected test: `tests/unit/src/function.test.ts`
+- `core/src/function/config.ts` → Expected test: `tests/unit/src/config.test.ts`
+- `core/src/function/import.ts` → Expected test: `tests/unit/src/import.test.ts`
+- `core/src/function/typed.ts` → Expected test: `tests/unit/src/typed.test.ts`
+- `core/src/is.ts` → Expected test: `tests/unit/src/is.test.ts`
+- `core/src/latex.d.ts` → Expected test: `tests/unit/src/latex.d.test.ts`
+- `core/src/latex.ts` → Expected test: `tests/unit/src/latex.test.ts`
+- `core/src/log.ts` → Expected test: `tests/unit/src/log.test.ts`
+- `core/src/lruQueue.ts` → Expected test: `tests/unit/src/lruQueue.test.ts`
+- `core/src/map.ts` → Expected test: `tests/unit/src/map.test.ts`
+- `core/src/node.ts` → Expected test: `tests/unit/src/node.test.ts`
+- `core/src/noop.ts` → Expected test: `tests/unit/src/noop.test.ts`
+- `core/src/number.ts` → Expected test: `tests/unit/src/number.test.ts`
+- `core/src/object.ts` → Expected test: `tests/unit/src/object.test.ts`
+- `core/src/optimizeCallback.ts` → Expected test: `tests/unit/src/optimizeCallback.test.ts`
+- `core/src/print.ts` → Expected test: `tests/unit/src/print.test.ts`
+- `core/src/product.ts` → Expected test: `tests/unit/src/product.test.ts`
+- `core/src/scope.ts` → Expected test: `tests/unit/src/scope.test.ts`
+- `core/src/snapshot.ts` → Expected test: `tests/unit/src/snapshot.test.ts`
+- `core/src/string.d.ts` → Expected test: `tests/unit/src/string.d.test.ts`
+- `core/src/string.ts` → Expected test: `tests/unit/src/string.test.ts`
+- `core/src/switch.ts` → Expected test: `tests/unit/src/switch.test.ts`
+- `core/src/typed-function.d.ts` → Expected test: `tests/unit/src/typed-function.d.test.ts`
+- `core/src/types.ts` → Expected test: `tests/unit/src/types.test.ts`
+- `core/src/types/bigint.ts` → Expected test: `tests/unit/src/bigint.test.ts`
+- `core/src/types/boolean.ts` → Expected test: `tests/unit/src/boolean.test.ts`
+- `core/src/types/chain/Chain.ts` → Expected test: `tests/unit/src/Chain.test.ts`
+- `core/src/types/chain/function/chain.ts` → Expected test: `tests/unit/src/chain.test.ts`
+- `core/src/types/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 - `core/src/types/interfaces.ts` → Expected test: `tests/unit/src/interfaces.test.ts`
+- `core/src/types/matrix/DenseMatrix.ts` → Expected test: `tests/unit/src/DenseMatrix.test.ts`
+- `core/src/types/matrix/FibonacciHeap.ts` → Expected test: `tests/unit/src/FibonacciHeap.test.ts`
+- `core/src/types/matrix/ImmutableDenseMatrix.ts` → Expected test: `tests/unit/src/ImmutableDenseMatrix.test.ts`
+- `core/src/types/matrix/Matrix.ts` → Expected test: `tests/unit/src/Matrix.test.ts`
+- `core/src/types/matrix/MatrixIndex.ts` → Expected test: `tests/unit/src/MatrixIndex.test.ts`
+- `core/src/types/matrix/Range.ts` → Expected test: `tests/unit/src/Range.test.ts`
+- `core/src/types/matrix/Spa.ts` → Expected test: `tests/unit/src/Spa.test.ts`
+- `core/src/types/matrix/SparseMatrix.ts` → Expected test: `tests/unit/src/SparseMatrix.test.ts`
+- `core/src/types/matrix/function/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `core/src/types/matrix/function/matrix.ts` → Expected test: `tests/unit/src/matrix.test.ts`
+- `core/src/types/matrix/function/sparse.ts` → Expected test: `tests/unit/src/sparse.test.ts`
+- `core/src/types/matrix/utils/broadcast.ts` → Expected test: `tests/unit/src/broadcast.test.ts`
+- `core/src/types/matrix/utils/matAlgo01xDSid.ts` → Expected test: `tests/unit/src/matAlgo01xDSid.test.ts`
+- `core/src/types/matrix/utils/matAlgo02xDS0.ts` → Expected test: `tests/unit/src/matAlgo02xDS0.test.ts`
+- `core/src/types/matrix/utils/matAlgo03xDSf.ts` → Expected test: `tests/unit/src/matAlgo03xDSf.test.ts`
+- `core/src/types/matrix/utils/matAlgo04xSidSid.ts` → Expected test: `tests/unit/src/matAlgo04xSidSid.test.ts`
+- `core/src/types/matrix/utils/matAlgo05xSfSf.ts` → Expected test: `tests/unit/src/matAlgo05xSfSf.test.ts`
+- `core/src/types/matrix/utils/matAlgo06xS0S0.ts` → Expected test: `tests/unit/src/matAlgo06xS0S0.test.ts`
+- `core/src/types/matrix/utils/matAlgo07xSSf.ts` → Expected test: `tests/unit/src/matAlgo07xSSf.test.ts`
+- `core/src/types/matrix/utils/matAlgo08xS0Sid.ts` → Expected test: `tests/unit/src/matAlgo08xS0Sid.test.ts`
+- `core/src/types/matrix/utils/matAlgo09xS0Sf.ts` → Expected test: `tests/unit/src/matAlgo09xS0Sf.test.ts`
+- `core/src/types/matrix/utils/matAlgo10xSids.ts` → Expected test: `tests/unit/src/matAlgo10xSids.test.ts`
+- `core/src/types/matrix/utils/matAlgo11xS0s.ts` → Expected test: `tests/unit/src/matAlgo11xS0s.test.ts`
+- `core/src/types/matrix/utils/matAlgo12xSfs.ts` → Expected test: `tests/unit/src/matAlgo12xSfs.test.ts`
+- `core/src/types/matrix/utils/matAlgo13xDD.ts` → Expected test: `tests/unit/src/matAlgo13xDD.test.ts`
+- `core/src/types/matrix/utils/matAlgo14xDs.ts` → Expected test: `tests/unit/src/matAlgo14xDs.test.ts`
+- `core/src/types/matrix/utils/matrixAlgorithmSuite.ts` → Expected test: `tests/unit/src/matrixAlgorithmSuite.test.ts`
+- `core/src/types/number.ts` → Expected test: `tests/unit/src/number.test.ts`
+- `core/src/types/resultset/ResultSet.ts` → Expected test: `tests/unit/src/ResultSet.test.ts`
+- `core/src/types/string.ts` → Expected test: `tests/unit/src/string.test.ts`
+- `core/src/types/unit/Unit.ts` → Expected test: `tests/unit/src/Unit.test.ts`
+- `core/src/types/unit/function/createUnit.ts` → Expected test: `tests/unit/src/createUnit.test.ts`
+- `core/src/types/unit/function/splitUnit.ts` → Expected test: `tests/unit/src/splitUnit.test.ts`
+- `core/src/types/unit/function/unit.ts` → Expected test: `tests/unit/src/unit.test.ts`
+- `core/src/types/unit/physicalConstants.ts` → Expected test: `tests/unit/src/physicalConstants.test.ts`
+- `core/src/version.ts` → Expected test: `tests/unit/src/version.test.ts`
 - `expression/src/Help.ts` → Expected test: `tests/unit/src/Help.test.ts`
 - `expression/src/Parser.ts` → Expected test: `tests/unit/src/Parser.test.ts`
+- `expression/src/compiler/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `expression/src/embeddedDocs/constants/Infinity.ts` → Expected test: `tests/unit/src/Infinity.test.ts`
+- `expression/src/embeddedDocs/constants/LN10.ts` → Expected test: `tests/unit/src/LN10.test.ts`
+- `expression/src/embeddedDocs/constants/LN2.ts` → Expected test: `tests/unit/src/LN2.test.ts`
+- `expression/src/embeddedDocs/constants/LOG10E.ts` → Expected test: `tests/unit/src/LOG10E.test.ts`
+- `expression/src/embeddedDocs/constants/LOG2E.ts` → Expected test: `tests/unit/src/LOG2E.test.ts`
+- `expression/src/embeddedDocs/constants/NaN.ts` → Expected test: `tests/unit/src/NaN.test.ts`
+- `expression/src/embeddedDocs/constants/SQRT1_2.ts` → Expected test: `tests/unit/src/SQRT1_2.test.ts`
+- `expression/src/embeddedDocs/constants/SQRT2.ts` → Expected test: `tests/unit/src/SQRT2.test.ts`
+- `expression/src/embeddedDocs/constants/e.ts` → Expected test: `tests/unit/src/e.test.ts`
+- `expression/src/embeddedDocs/constants/false.ts` → Expected test: `tests/unit/src/false.test.ts`
+- `expression/src/embeddedDocs/constants/i.ts` → Expected test: `tests/unit/src/i.test.ts`
+- `expression/src/embeddedDocs/constants/null.ts` → Expected test: `tests/unit/src/null.test.ts`
+- `expression/src/embeddedDocs/constants/phi.ts` → Expected test: `tests/unit/src/phi.test.ts`
+- `expression/src/embeddedDocs/constants/pi.ts` → Expected test: `tests/unit/src/pi.test.ts`
+- `expression/src/embeddedDocs/constants/tau.ts` → Expected test: `tests/unit/src/tau.test.ts`
+- `expression/src/embeddedDocs/constants/true.ts` → Expected test: `tests/unit/src/true.test.ts`
+- `expression/src/embeddedDocs/constants/version.ts` → Expected test: `tests/unit/src/version.test.ts`
+- `expression/src/embeddedDocs/construction/bigint.ts` → Expected test: `tests/unit/src/bigint.test.ts`
+- `expression/src/embeddedDocs/construction/bignumber.ts` → Expected test: `tests/unit/src/bignumber.test.ts`
+- `expression/src/embeddedDocs/construction/boolean.ts` → Expected test: `tests/unit/src/boolean.test.ts`
+- `expression/src/embeddedDocs/construction/complex.ts` → Expected test: `tests/unit/src/complex.test.ts`
+- `expression/src/embeddedDocs/construction/createUnit.ts` → Expected test: `tests/unit/src/createUnit.test.ts`
+- `expression/src/embeddedDocs/construction/fraction.ts` → Expected test: `tests/unit/src/fraction.test.ts`
+- `expression/src/embeddedDocs/construction/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `expression/src/embeddedDocs/construction/matrix.ts` → Expected test: `tests/unit/src/matrix.test.ts`
+- `expression/src/embeddedDocs/construction/number.ts` → Expected test: `tests/unit/src/number.test.ts`
+- `expression/src/embeddedDocs/construction/sparse.ts` → Expected test: `tests/unit/src/sparse.test.ts`
+- `expression/src/embeddedDocs/construction/splitUnit.ts` → Expected test: `tests/unit/src/splitUnit.test.ts`
+- `expression/src/embeddedDocs/construction/string.ts` → Expected test: `tests/unit/src/string.test.ts`
+- `expression/src/embeddedDocs/construction/unit.ts` → Expected test: `tests/unit/src/unit.test.ts`
+- `expression/src/embeddedDocs/core/config.ts` → Expected test: `tests/unit/src/config.test.ts`
+- `expression/src/embeddedDocs/core/import.ts` → Expected test: `tests/unit/src/import.test.ts`
+- `expression/src/embeddedDocs/core/typed.ts` → Expected test: `tests/unit/src/typed.test.ts`
+- `expression/src/embeddedDocs/embeddedDocs.ts` → Expected test: `tests/unit/src/embeddedDocs.test.ts`
+- `expression/src/embeddedDocs/function/algebra/derivative.ts` → Expected test: `tests/unit/src/derivative.test.ts`
+- `expression/src/embeddedDocs/function/algebra/leafCount.ts` → Expected test: `tests/unit/src/leafCount.test.ts`
+- `expression/src/embeddedDocs/function/algebra/lsolve.ts` → Expected test: `tests/unit/src/lsolve.test.ts`
+- `expression/src/embeddedDocs/function/algebra/lsolveAll.ts` → Expected test: `tests/unit/src/lsolveAll.test.ts`
+- `expression/src/embeddedDocs/function/algebra/lup.ts` → Expected test: `tests/unit/src/lup.test.ts`
+- `expression/src/embeddedDocs/function/algebra/lusolve.ts` → Expected test: `tests/unit/src/lusolve.test.ts`
+- `expression/src/embeddedDocs/function/algebra/lyap.ts` → Expected test: `tests/unit/src/lyap.test.ts`
+- `expression/src/embeddedDocs/function/algebra/polynomialRoot.ts` → Expected test: `tests/unit/src/polynomialRoot.test.ts`
+- `expression/src/embeddedDocs/function/algebra/qr.ts` → Expected test: `tests/unit/src/qr.test.ts`
+- `expression/src/embeddedDocs/function/algebra/rationalize.ts` → Expected test: `tests/unit/src/rationalize.test.ts`
+- `expression/src/embeddedDocs/function/algebra/resolve.ts` → Expected test: `tests/unit/src/resolve.test.ts`
+- `expression/src/embeddedDocs/function/algebra/schur.ts` → Expected test: `tests/unit/src/schur.test.ts`
+- `expression/src/embeddedDocs/function/algebra/simplify.ts` → Expected test: `tests/unit/src/simplify.test.ts`
+- `expression/src/embeddedDocs/function/algebra/simplifyConstant.ts` → Expected test: `tests/unit/src/simplifyConstant.test.ts`
+- `expression/src/embeddedDocs/function/algebra/simplifyCore.ts` → Expected test: `tests/unit/src/simplifyCore.test.ts`
+- `expression/src/embeddedDocs/function/algebra/slu.ts` → Expected test: `tests/unit/src/slu.test.ts`
+- `expression/src/embeddedDocs/function/algebra/sylvester.ts` → Expected test: `tests/unit/src/sylvester.test.ts`
+- `expression/src/embeddedDocs/function/algebra/symbolicEqual.ts` → Expected test: `tests/unit/src/symbolicEqual.test.ts`
+- `expression/src/embeddedDocs/function/algebra/usolve.ts` → Expected test: `tests/unit/src/usolve.test.ts`
+- `expression/src/embeddedDocs/function/algebra/usolveAll.ts` → Expected test: `tests/unit/src/usolveAll.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/abs.ts` → Expected test: `tests/unit/src/abs.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/add.ts` → Expected test: `tests/unit/src/add.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/cbrt.ts` → Expected test: `tests/unit/src/cbrt.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/ceil.ts` → Expected test: `tests/unit/src/ceil.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/cube.ts` → Expected test: `tests/unit/src/cube.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/divide.ts` → Expected test: `tests/unit/src/divide.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/dotDivide.ts` → Expected test: `tests/unit/src/dotDivide.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/dotMultiply.ts` → Expected test: `tests/unit/src/dotMultiply.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/dotPow.ts` → Expected test: `tests/unit/src/dotPow.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/exp.ts` → Expected test: `tests/unit/src/exp.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/expm.ts` → Expected test: `tests/unit/src/expm.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/expm1.ts` → Expected test: `tests/unit/src/expm1.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/fix.ts` → Expected test: `tests/unit/src/fix.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/floor.ts` → Expected test: `tests/unit/src/floor.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/gcd.ts` → Expected test: `tests/unit/src/gcd.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/hypot.ts` → Expected test: `tests/unit/src/hypot.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/invmod.ts` → Expected test: `tests/unit/src/invmod.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/lcm.ts` → Expected test: `tests/unit/src/lcm.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/log.ts` → Expected test: `tests/unit/src/log.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/log10.ts` → Expected test: `tests/unit/src/log10.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/log1p.ts` → Expected test: `tests/unit/src/log1p.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/log2.ts` → Expected test: `tests/unit/src/log2.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/mod.ts` → Expected test: `tests/unit/src/mod.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/multiply.ts` → Expected test: `tests/unit/src/multiply.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/norm.ts` → Expected test: `tests/unit/src/norm.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/nthRoot.ts` → Expected test: `tests/unit/src/nthRoot.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/nthRoots.ts` → Expected test: `tests/unit/src/nthRoots.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/pow.ts` → Expected test: `tests/unit/src/pow.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/round.ts` → Expected test: `tests/unit/src/round.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/sign.ts` → Expected test: `tests/unit/src/sign.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/sqrt.ts` → Expected test: `tests/unit/src/sqrt.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/sqrtm.ts` → Expected test: `tests/unit/src/sqrtm.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/square.ts` → Expected test: `tests/unit/src/square.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/subtract.ts` → Expected test: `tests/unit/src/subtract.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/unaryMinus.ts` → Expected test: `tests/unit/src/unaryMinus.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/unaryPlus.ts` → Expected test: `tests/unit/src/unaryPlus.test.ts`
+- `expression/src/embeddedDocs/function/arithmetic/xgcd.ts` → Expected test: `tests/unit/src/xgcd.test.ts`
+- `expression/src/embeddedDocs/function/bitwise/bitAnd.ts` → Expected test: `tests/unit/src/bitAnd.test.ts`
+- `expression/src/embeddedDocs/function/bitwise/bitNot.ts` → Expected test: `tests/unit/src/bitNot.test.ts`
+- `expression/src/embeddedDocs/function/bitwise/bitOr.ts` → Expected test: `tests/unit/src/bitOr.test.ts`
+- `expression/src/embeddedDocs/function/bitwise/bitXor.ts` → Expected test: `tests/unit/src/bitXor.test.ts`
+- `expression/src/embeddedDocs/function/bitwise/leftShift.ts` → Expected test: `tests/unit/src/leftShift.test.ts`
+- `expression/src/embeddedDocs/function/bitwise/rightArithShift.ts` → Expected test: `tests/unit/src/rightArithShift.test.ts`
+- `expression/src/embeddedDocs/function/bitwise/rightLogShift.ts` → Expected test: `tests/unit/src/rightLogShift.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/bellNumbers.ts` → Expected test: `tests/unit/src/bellNumbers.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/catalan.ts` → Expected test: `tests/unit/src/catalan.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/composition.ts` → Expected test: `tests/unit/src/composition.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/doubleFactorial.ts` → Expected test: `tests/unit/src/doubleFactorial.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/fallingFactorial.ts` → Expected test: `tests/unit/src/fallingFactorial.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/fibonacci.ts` → Expected test: `tests/unit/src/fibonacci.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/lucas.ts` → Expected test: `tests/unit/src/lucas.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/risingFactorial.ts` → Expected test: `tests/unit/src/risingFactorial.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/stirlingS2.ts` → Expected test: `tests/unit/src/stirlingS2.test.ts`
+- `expression/src/embeddedDocs/function/combinatorics/subfactorial.ts` → Expected test: `tests/unit/src/subfactorial.test.ts`
+- `expression/src/embeddedDocs/function/complex/arg.ts` → Expected test: `tests/unit/src/arg.test.ts`
+- `expression/src/embeddedDocs/function/complex/conj.ts` → Expected test: `tests/unit/src/conj.test.ts`
+- `expression/src/embeddedDocs/function/complex/im.ts` → Expected test: `tests/unit/src/im.test.ts`
+- `expression/src/embeddedDocs/function/complex/re.ts` → Expected test: `tests/unit/src/re.test.ts`
+- `expression/src/embeddedDocs/function/expression/compile.ts` → Expected test: `tests/unit/src/compile.test.ts`
+- `expression/src/embeddedDocs/function/expression/evaluate.ts` → Expected test: `tests/unit/src/evaluate.test.ts`
+- `expression/src/embeddedDocs/function/expression/help.ts` → Expected test: `tests/unit/src/help.test.ts`
+- `expression/src/embeddedDocs/function/expression/parse.ts` → Expected test: `tests/unit/src/parse.test.ts`
+- `expression/src/embeddedDocs/function/expression/parser.ts` → Expected test: `tests/unit/src/parser.test.ts`
+- `expression/src/embeddedDocs/function/geometry/angle2D.ts` → Expected test: `tests/unit/src/angle2D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/angle3D.ts` → Expected test: `tests/unit/src/angle3D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/convexHull.ts` → Expected test: `tests/unit/src/convexHull.test.ts`
+- `expression/src/embeddedDocs/function/geometry/cross3D.ts` → Expected test: `tests/unit/src/cross3D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/distance.ts` → Expected test: `tests/unit/src/distance.test.ts`
+- `expression/src/embeddedDocs/function/geometry/distance2D.ts` → Expected test: `tests/unit/src/distance2D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/distance3D.ts` → Expected test: `tests/unit/src/distance3D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/distanceND.ts` → Expected test: `tests/unit/src/distanceND.test.ts`
+- `expression/src/embeddedDocs/function/geometry/distancePointToLine2D.ts` → Expected test: `tests/unit/src/distancePointToLine2D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/dot3D.ts` → Expected test: `tests/unit/src/dot3D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/intersect.ts` → Expected test: `tests/unit/src/intersect.test.ts`
+- `expression/src/embeddedDocs/function/geometry/intersectLines2D.ts` → Expected test: `tests/unit/src/intersectLines2D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/intersectSegments2D.ts` → Expected test: `tests/unit/src/intersectSegments2D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/pointInPolygon.ts` → Expected test: `tests/unit/src/pointInPolygon.test.ts`
+- `expression/src/embeddedDocs/function/geometry/polygonArea.ts` → Expected test: `tests/unit/src/polygonArea.test.ts`
+- `expression/src/embeddedDocs/function/geometry/projectVector.ts` → Expected test: `tests/unit/src/projectVector.test.ts`
+- `expression/src/embeddedDocs/function/geometry/reflectVector.ts` → Expected test: `tests/unit/src/reflectVector.test.ts`
+- `expression/src/embeddedDocs/function/geometry/rotateVector2D.ts` → Expected test: `tests/unit/src/rotateVector2D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/rotateVector3D.ts` → Expected test: `tests/unit/src/rotateVector3D.test.ts`
+- `expression/src/embeddedDocs/function/geometry/triangleArea.ts` → Expected test: `tests/unit/src/triangleArea.test.ts`
+- `expression/src/embeddedDocs/function/logical/and.ts` → Expected test: `tests/unit/src/and.test.ts`
+- `expression/src/embeddedDocs/function/logical/not.ts` → Expected test: `tests/unit/src/not.test.ts`
+- `expression/src/embeddedDocs/function/logical/nullish.ts` → Expected test: `tests/unit/src/nullish.test.ts`
+- `expression/src/embeddedDocs/function/logical/or.ts` → Expected test: `tests/unit/src/or.test.ts`
+- `expression/src/embeddedDocs/function/logical/xor.ts` → Expected test: `tests/unit/src/xor.test.ts`
+- `expression/src/embeddedDocs/function/matrix/column.ts` → Expected test: `tests/unit/src/column.test.ts`
+- `expression/src/embeddedDocs/function/matrix/concat.ts` → Expected test: `tests/unit/src/concat.test.ts`
+- `expression/src/embeddedDocs/function/matrix/count.ts` → Expected test: `tests/unit/src/count.test.ts`
+- `expression/src/embeddedDocs/function/matrix/cross.ts` → Expected test: `tests/unit/src/cross.test.ts`
+- `expression/src/embeddedDocs/function/matrix/ctranspose.ts` → Expected test: `tests/unit/src/ctranspose.test.ts`
+- `expression/src/embeddedDocs/function/matrix/det.ts` → Expected test: `tests/unit/src/det.test.ts`
+- `expression/src/embeddedDocs/function/matrix/diag.ts` → Expected test: `tests/unit/src/diag.test.ts`
+- `expression/src/embeddedDocs/function/matrix/diff.ts` → Expected test: `tests/unit/src/diff.test.ts`
+- `expression/src/embeddedDocs/function/matrix/dot.ts` → Expected test: `tests/unit/src/dot.test.ts`
+- `expression/src/embeddedDocs/function/matrix/eigs.ts` → Expected test: `tests/unit/src/eigs.test.ts`
+- `expression/src/embeddedDocs/function/matrix/fft.ts` → Expected test: `tests/unit/src/fft.test.ts`
+- `expression/src/embeddedDocs/function/matrix/filter.ts` → Expected test: `tests/unit/src/filter.test.ts`
+- `expression/src/embeddedDocs/function/matrix/flatten.ts` → Expected test: `tests/unit/src/flatten.test.ts`
+- `expression/src/embeddedDocs/function/matrix/forEach.ts` → Expected test: `tests/unit/src/forEach.test.ts`
+- `expression/src/embeddedDocs/function/matrix/getMatrixDataType.ts` → Expected test: `tests/unit/src/getMatrixDataType.test.ts`
+- `expression/src/embeddedDocs/function/matrix/identity.ts` → Expected test: `tests/unit/src/identity.test.ts`
+- `expression/src/embeddedDocs/function/matrix/ifft.ts` → Expected test: `tests/unit/src/ifft.test.ts`
+- `expression/src/embeddedDocs/function/matrix/inv.ts` → Expected test: `tests/unit/src/inv.test.ts`
+- `expression/src/embeddedDocs/function/matrix/kron.ts` → Expected test: `tests/unit/src/kron.test.ts`
+- `expression/src/embeddedDocs/function/matrix/map.ts` → Expected test: `tests/unit/src/map.test.ts`
+- `expression/src/embeddedDocs/function/matrix/mapSlices.ts` → Expected test: `tests/unit/src/mapSlices.test.ts`
+- `expression/src/embeddedDocs/function/matrix/matrixFromColumns.ts` → Expected test: `tests/unit/src/matrixFromColumns.test.ts`
+- `expression/src/embeddedDocs/function/matrix/matrixFromFunction.ts` → Expected test: `tests/unit/src/matrixFromFunction.test.ts`
+- `expression/src/embeddedDocs/function/matrix/matrixFromRows.ts` → Expected test: `tests/unit/src/matrixFromRows.test.ts`
+- `expression/src/embeddedDocs/function/matrix/ones.ts` → Expected test: `tests/unit/src/ones.test.ts`
+- `expression/src/embeddedDocs/function/matrix/partitionSelect.ts` → Expected test: `tests/unit/src/partitionSelect.test.ts`
+- `expression/src/embeddedDocs/function/matrix/pinv.ts` → Expected test: `tests/unit/src/pinv.test.ts`
+- `expression/src/embeddedDocs/function/matrix/range.ts` → Expected test: `tests/unit/src/range.test.ts`
+- `expression/src/embeddedDocs/function/matrix/reshape.ts` → Expected test: `tests/unit/src/reshape.test.ts`
+- `expression/src/embeddedDocs/function/matrix/resize.ts` → Expected test: `tests/unit/src/resize.test.ts`
+- `expression/src/embeddedDocs/function/matrix/rotate.ts` → Expected test: `tests/unit/src/rotate.test.ts`
+- `expression/src/embeddedDocs/function/matrix/rotationMatrix.ts` → Expected test: `tests/unit/src/rotationMatrix.test.ts`
+- `expression/src/embeddedDocs/function/matrix/row.ts` → Expected test: `tests/unit/src/row.test.ts`
+- `expression/src/embeddedDocs/function/matrix/size.ts` → Expected test: `tests/unit/src/size.test.ts`
+- `expression/src/embeddedDocs/function/matrix/sort.ts` → Expected test: `tests/unit/src/sort.test.ts`
+- `expression/src/embeddedDocs/function/matrix/squeeze.ts` → Expected test: `tests/unit/src/squeeze.test.ts`
+- `expression/src/embeddedDocs/function/matrix/subset.ts` → Expected test: `tests/unit/src/subset.test.ts`
+- `expression/src/embeddedDocs/function/matrix/trace.ts` → Expected test: `tests/unit/src/trace.test.ts`
+- `expression/src/embeddedDocs/function/matrix/transpose.ts` → Expected test: `tests/unit/src/transpose.test.ts`
+- `expression/src/embeddedDocs/function/matrix/zeros.ts` → Expected test: `tests/unit/src/zeros.test.ts`
+- `expression/src/embeddedDocs/function/numeric/cubicSpline.ts` → Expected test: `tests/unit/src/cubicSpline.test.ts`
+- `expression/src/embeddedDocs/function/numeric/gaussQuad.ts` → Expected test: `tests/unit/src/gaussQuad.test.ts`
+- `expression/src/embeddedDocs/function/numeric/hermiteInterp.ts` → Expected test: `tests/unit/src/hermiteInterp.test.ts`
+- `expression/src/embeddedDocs/function/numeric/lagrangeInterp.ts` → Expected test: `tests/unit/src/lagrangeInterp.test.ts`
+- `expression/src/embeddedDocs/function/numeric/linearInterp.ts` → Expected test: `tests/unit/src/linearInterp.test.ts`
+- `expression/src/embeddedDocs/function/numeric/pchipInterp.ts` → Expected test: `tests/unit/src/pchipInterp.test.ts`
+- `expression/src/embeddedDocs/function/numeric/polyFit.ts` → Expected test: `tests/unit/src/polyFit.test.ts`
+- `expression/src/embeddedDocs/function/numeric/romberg.ts` → Expected test: `tests/unit/src/romberg.test.ts`
+- `expression/src/embeddedDocs/function/numeric/simpson.ts` → Expected test: `tests/unit/src/simpson.test.ts`
+- `expression/src/embeddedDocs/function/numeric/solveODE.ts` → Expected test: `tests/unit/src/solveODE.test.ts`
+- `expression/src/embeddedDocs/function/numeric/trapz.ts` → Expected test: `tests/unit/src/trapz.test.ts`
+- `expression/src/embeddedDocs/function/probability/bernoulli.ts` → Expected test: `tests/unit/src/bernoulli.test.ts`
+- `expression/src/embeddedDocs/function/probability/bernoulliPMF.ts` → Expected test: `tests/unit/src/bernoulliPMF.test.ts`
+- `expression/src/embeddedDocs/function/probability/binomialPMF.ts` → Expected test: `tests/unit/src/binomialPMF.test.ts`
+- `expression/src/embeddedDocs/function/probability/combinations.ts` → Expected test: `tests/unit/src/combinations.test.ts`
+- `expression/src/embeddedDocs/function/probability/combinationsWithRep.ts` → Expected test: `tests/unit/src/combinationsWithRep.test.ts`
+- `expression/src/embeddedDocs/function/probability/distribution.ts` → Expected test: `tests/unit/src/distribution.test.ts`
+- `expression/src/embeddedDocs/function/probability/entropy.ts` → Expected test: `tests/unit/src/entropy.test.ts`
+- `expression/src/embeddedDocs/function/probability/exponentialCDF.ts` → Expected test: `tests/unit/src/exponentialCDF.test.ts`
+- `expression/src/embeddedDocs/function/probability/exponentialPDF.ts` → Expected test: `tests/unit/src/exponentialPDF.test.ts`
+- `expression/src/embeddedDocs/function/probability/factorial.ts` → Expected test: `tests/unit/src/factorial.test.ts`
+- `expression/src/embeddedDocs/function/probability/gamma.ts` → Expected test: `tests/unit/src/gamma.test.ts`
+- `expression/src/embeddedDocs/function/probability/geometricPMF.ts` → Expected test: `tests/unit/src/geometricPMF.test.ts`
+- `expression/src/embeddedDocs/function/probability/jsDivergence.ts` → Expected test: `tests/unit/src/jsDivergence.test.ts`
+- `expression/src/embeddedDocs/function/probability/kldivergence.ts` → Expected test: `tests/unit/src/kldivergence.test.ts`
+- `expression/src/embeddedDocs/function/probability/lgamma.ts` → Expected test: `tests/unit/src/lgamma.test.ts`
+- `expression/src/embeddedDocs/function/probability/multinomial.ts` → Expected test: `tests/unit/src/multinomial.test.ts`
+- `expression/src/embeddedDocs/function/probability/normalCDF.ts` → Expected test: `tests/unit/src/normalCDF.test.ts`
+- `expression/src/embeddedDocs/function/probability/normalPDF.ts` → Expected test: `tests/unit/src/normalPDF.test.ts`
+- `expression/src/embeddedDocs/function/probability/permutations.ts` → Expected test: `tests/unit/src/permutations.test.ts`
+- `expression/src/embeddedDocs/function/probability/pickRandom.ts` → Expected test: `tests/unit/src/pickRandom.test.ts`
+- `expression/src/embeddedDocs/function/probability/poissonPMF.ts` → Expected test: `tests/unit/src/poissonPMF.test.ts`
+- `expression/src/embeddedDocs/function/probability/random.ts` → Expected test: `tests/unit/src/random.test.ts`
+- `expression/src/embeddedDocs/function/probability/randomInt.ts` → Expected test: `tests/unit/src/randomInt.test.ts`
+- `expression/src/embeddedDocs/function/relational/compare.ts` → Expected test: `tests/unit/src/compare.test.ts`
+- `expression/src/embeddedDocs/function/relational/compareNatural.ts` → Expected test: `tests/unit/src/compareNatural.test.ts`
+- `expression/src/embeddedDocs/function/relational/compareText.ts` → Expected test: `tests/unit/src/compareText.test.ts`
+- `expression/src/embeddedDocs/function/relational/deepEqual.ts` → Expected test: `tests/unit/src/deepEqual.test.ts`
+- `expression/src/embeddedDocs/function/relational/equal.ts` → Expected test: `tests/unit/src/equal.test.ts`
+- `expression/src/embeddedDocs/function/relational/equalText.ts` → Expected test: `tests/unit/src/equalText.test.ts`
+- `expression/src/embeddedDocs/function/relational/larger.ts` → Expected test: `tests/unit/src/larger.test.ts`
+- `expression/src/embeddedDocs/function/relational/largerEq.ts` → Expected test: `tests/unit/src/largerEq.test.ts`
+- `expression/src/embeddedDocs/function/relational/smaller.ts` → Expected test: `tests/unit/src/smaller.test.ts`
+- `expression/src/embeddedDocs/function/relational/smallerEq.ts` → Expected test: `tests/unit/src/smallerEq.test.ts`
+- `expression/src/embeddedDocs/function/relational/unequal.ts` → Expected test: `tests/unit/src/unequal.test.ts`
+- `expression/src/embeddedDocs/function/set/setCartesian.ts` → Expected test: `tests/unit/src/setCartesian.test.ts`
+- `expression/src/embeddedDocs/function/set/setDifference.ts` → Expected test: `tests/unit/src/setDifference.test.ts`
+- `expression/src/embeddedDocs/function/set/setDistinct.ts` → Expected test: `tests/unit/src/setDistinct.test.ts`
+- `expression/src/embeddedDocs/function/set/setIntersect.ts` → Expected test: `tests/unit/src/setIntersect.test.ts`
+- `expression/src/embeddedDocs/function/set/setIsSubset.ts` → Expected test: `tests/unit/src/setIsSubset.test.ts`
+- `expression/src/embeddedDocs/function/set/setMultiplicity.ts` → Expected test: `tests/unit/src/setMultiplicity.test.ts`
+- `expression/src/embeddedDocs/function/set/setPowerset.ts` → Expected test: `tests/unit/src/setPowerset.test.ts`
+- `expression/src/embeddedDocs/function/set/setSize.ts` → Expected test: `tests/unit/src/setSize.test.ts`
+- `expression/src/embeddedDocs/function/set/setSymDifference.ts` → Expected test: `tests/unit/src/setSymDifference.test.ts`
+- `expression/src/embeddedDocs/function/set/setUnion.ts` → Expected test: `tests/unit/src/setUnion.test.ts`
+- `expression/src/embeddedDocs/function/signal/autoCorrelation.ts` → Expected test: `tests/unit/src/autoCorrelation.test.ts`
+- `expression/src/embeddedDocs/function/signal/crossCorrelation.ts` → Expected test: `tests/unit/src/crossCorrelation.test.ts`
+- `expression/src/embeddedDocs/function/signal/freqz.ts` → Expected test: `tests/unit/src/freqz.test.ts`
+- `expression/src/embeddedDocs/function/signal/groupDelay.ts` → Expected test: `tests/unit/src/groupDelay.test.ts`
+- `expression/src/embeddedDocs/function/signal/unwrapPhase.ts` → Expected test: `tests/unit/src/unwrapPhase.test.ts`
+- `expression/src/embeddedDocs/function/signal/zpk2tf.ts` → Expected test: `tests/unit/src/zpk2tf.test.ts`
+- `expression/src/embeddedDocs/function/special/besselJ0.ts` → Expected test: `tests/unit/src/besselJ0.test.ts`
+- `expression/src/embeddedDocs/function/special/besselJ1.ts` → Expected test: `tests/unit/src/besselJ1.test.ts`
+- `expression/src/embeddedDocs/function/special/besselY0.ts` → Expected test: `tests/unit/src/besselY0.test.ts`
+- `expression/src/embeddedDocs/function/special/besselY1.ts` → Expected test: `tests/unit/src/besselY1.test.ts`
+- `expression/src/embeddedDocs/function/special/beta.ts` → Expected test: `tests/unit/src/beta.test.ts`
+- `expression/src/embeddedDocs/function/special/digamma.ts` → Expected test: `tests/unit/src/digamma.test.ts`
+- `expression/src/embeddedDocs/function/special/erf.ts` → Expected test: `tests/unit/src/erf.test.ts`
+- `expression/src/embeddedDocs/function/special/erfc.ts` → Expected test: `tests/unit/src/erfc.test.ts`
+- `expression/src/embeddedDocs/function/special/gammainc.ts` → Expected test: `tests/unit/src/gammainc.test.ts`
+- `expression/src/embeddedDocs/function/special/zeta.ts` → Expected test: `tests/unit/src/zeta.test.ts`
+- `expression/src/embeddedDocs/function/statistics/corr.ts` → Expected test: `tests/unit/src/corr.test.ts`
+- `expression/src/embeddedDocs/function/statistics/cumsum.ts` → Expected test: `tests/unit/src/cumsum.test.ts`
+- `expression/src/embeddedDocs/function/statistics/mad.ts` → Expected test: `tests/unit/src/mad.test.ts`
+- `expression/src/embeddedDocs/function/statistics/max.ts` → Expected test: `tests/unit/src/max.test.ts`
+- `expression/src/embeddedDocs/function/statistics/mean.ts` → Expected test: `tests/unit/src/mean.test.ts`
+- `expression/src/embeddedDocs/function/statistics/median.ts` → Expected test: `tests/unit/src/median.test.ts`
+- `expression/src/embeddedDocs/function/statistics/min.ts` → Expected test: `tests/unit/src/min.test.ts`
+- `expression/src/embeddedDocs/function/statistics/mode.ts` → Expected test: `tests/unit/src/mode.test.ts`
+- `expression/src/embeddedDocs/function/statistics/prod.ts` → Expected test: `tests/unit/src/prod.test.ts`
+- `expression/src/embeddedDocs/function/statistics/quantileSeq.ts` → Expected test: `tests/unit/src/quantileSeq.test.ts`
+- `expression/src/embeddedDocs/function/statistics/std.ts` → Expected test: `tests/unit/src/std.test.ts`
+- `expression/src/embeddedDocs/function/statistics/sum.ts` → Expected test: `tests/unit/src/sum.test.ts`
+- `expression/src/embeddedDocs/function/statistics/variance.ts` → Expected test: `tests/unit/src/variance.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/acos.ts` → Expected test: `tests/unit/src/acos.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/acosh.ts` → Expected test: `tests/unit/src/acosh.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/acot.ts` → Expected test: `tests/unit/src/acot.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/acoth.ts` → Expected test: `tests/unit/src/acoth.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/acsc.ts` → Expected test: `tests/unit/src/acsc.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/acsch.ts` → Expected test: `tests/unit/src/acsch.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/asec.ts` → Expected test: `tests/unit/src/asec.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/asech.ts` → Expected test: `tests/unit/src/asech.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/asin.ts` → Expected test: `tests/unit/src/asin.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/asinh.ts` → Expected test: `tests/unit/src/asinh.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/atan.ts` → Expected test: `tests/unit/src/atan.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/atan2.ts` → Expected test: `tests/unit/src/atan2.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/atanh.ts` → Expected test: `tests/unit/src/atanh.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/cos.ts` → Expected test: `tests/unit/src/cos.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/cosh.ts` → Expected test: `tests/unit/src/cosh.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/cot.ts` → Expected test: `tests/unit/src/cot.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/coth.ts` → Expected test: `tests/unit/src/coth.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/csc.ts` → Expected test: `tests/unit/src/csc.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/csch.ts` → Expected test: `tests/unit/src/csch.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/sec.ts` → Expected test: `tests/unit/src/sec.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/sech.ts` → Expected test: `tests/unit/src/sech.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/sin.ts` → Expected test: `tests/unit/src/sin.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/sinh.ts` → Expected test: `tests/unit/src/sinh.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/tan.ts` → Expected test: `tests/unit/src/tan.test.ts`
+- `expression/src/embeddedDocs/function/trigonometry/tanh.ts` → Expected test: `tests/unit/src/tanh.test.ts`
+- `expression/src/embeddedDocs/function/units/to.ts` → Expected test: `tests/unit/src/to.test.ts`
+- `expression/src/embeddedDocs/function/units/toBest.ts` → Expected test: `tests/unit/src/toBest.test.ts`
+- `expression/src/embeddedDocs/function/utils/bin.ts` → Expected test: `tests/unit/src/bin.test.ts`
+- `expression/src/embeddedDocs/function/utils/clone.ts` → Expected test: `tests/unit/src/clone.test.ts`
+- `expression/src/embeddedDocs/function/utils/format.ts` → Expected test: `tests/unit/src/format.test.ts`
+- `expression/src/embeddedDocs/function/utils/hasNumericValue.ts` → Expected test: `tests/unit/src/hasNumericValue.test.ts`
+- `expression/src/embeddedDocs/function/utils/hex.ts` → Expected test: `tests/unit/src/hex.test.ts`
+- `expression/src/embeddedDocs/function/utils/isBounded.ts` → Expected test: `tests/unit/src/isBounded.test.ts`
+- `expression/src/embeddedDocs/function/utils/isFinite.ts` → Expected test: `tests/unit/src/isFinite.test.ts`
+- `expression/src/embeddedDocs/function/utils/isInteger.ts` → Expected test: `tests/unit/src/isInteger.test.ts`
+- `expression/src/embeddedDocs/function/utils/isNaN.ts` → Expected test: `tests/unit/src/isNaN.test.ts`
+- `expression/src/embeddedDocs/function/utils/isNegative.ts` → Expected test: `tests/unit/src/isNegative.test.ts`
+- `expression/src/embeddedDocs/function/utils/isNumeric.ts` → Expected test: `tests/unit/src/isNumeric.test.ts`
+- `expression/src/embeddedDocs/function/utils/isPositive.ts` → Expected test: `tests/unit/src/isPositive.test.ts`
+- `expression/src/embeddedDocs/function/utils/isPrime.ts` → Expected test: `tests/unit/src/isPrime.test.ts`
+- `expression/src/embeddedDocs/function/utils/isZero.ts` → Expected test: `tests/unit/src/isZero.test.ts`
+- `expression/src/embeddedDocs/function/utils/numeric.ts` → Expected test: `tests/unit/src/numeric.test.ts`
+- `expression/src/embeddedDocs/function/utils/oct.ts` → Expected test: `tests/unit/src/oct.test.ts`
+- `expression/src/embeddedDocs/function/utils/print.ts` → Expected test: `tests/unit/src/print.test.ts`
+- `expression/src/embeddedDocs/function/utils/typeOf.ts` → Expected test: `tests/unit/src/typeOf.test.ts`
+- `expression/src/error/ArgumentsError.ts` → Expected test: `tests/unit/src/ArgumentsError.test.ts`
 - `expression/src/error/DimensionError.ts` → Expected test: `tests/unit/src/DimensionError.test.ts`
 - `expression/src/error/IndexError.ts` → Expected test: `tests/unit/src/IndexError.test.ts`
+- `expression/src/evaluator/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `expression/src/function/compile.ts` → Expected test: `tests/unit/src/compile.test.ts`
+- `expression/src/function/evaluate.ts` → Expected test: `tests/unit/src/evaluate.test.ts`
+- `expression/src/function/help.ts` → Expected test: `tests/unit/src/help.test.ts`
+- `expression/src/function/parser.ts` → Expected test: `tests/unit/src/parser.test.ts`
 - `expression/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 - `expression/src/keywords.ts` → Expected test: `tests/unit/src/keywords.test.ts`
+- `expression/src/node/AccessorNode.ts` → Expected test: `tests/unit/src/AccessorNode.test.ts`
+- `expression/src/node/ArrayNode.ts` → Expected test: `tests/unit/src/ArrayNode.test.ts`
+- `expression/src/node/AssignmentNode.ts` → Expected test: `tests/unit/src/AssignmentNode.test.ts`
+- `expression/src/node/BlockNode.ts` → Expected test: `tests/unit/src/BlockNode.test.ts`
+- `expression/src/node/ConditionalNode.ts` → Expected test: `tests/unit/src/ConditionalNode.test.ts`
+- `expression/src/node/ConstantNode.ts` → Expected test: `tests/unit/src/ConstantNode.test.ts`
+- `expression/src/node/FunctionAssignmentNode.ts` → Expected test: `tests/unit/src/FunctionAssignmentNode.test.ts`
+- `expression/src/node/FunctionNode.ts` → Expected test: `tests/unit/src/FunctionNode.test.ts`
+- `expression/src/node/IndexNode.ts` → Expected test: `tests/unit/src/IndexNode.test.ts`
 - `expression/src/node/Node.ts` → Expected test: `tests/unit/src/Node.test.ts`
+- `expression/src/node/ObjectNode.ts` → Expected test: `tests/unit/src/ObjectNode.test.ts`
+- `expression/src/node/OperatorNode.ts` → Expected test: `tests/unit/src/OperatorNode.test.ts`
+- `expression/src/node/ParenthesisNode.ts` → Expected test: `tests/unit/src/ParenthesisNode.test.ts`
+- `expression/src/node/RangeNode.ts` → Expected test: `tests/unit/src/RangeNode.test.ts`
+- `expression/src/node/RelationalNode.ts` → Expected test: `tests/unit/src/RelationalNode.test.ts`
+- `expression/src/node/SymbolNode.ts` → Expected test: `tests/unit/src/SymbolNode.test.ts`
+- `expression/src/node/utils/access.ts` → Expected test: `tests/unit/src/access.test.ts`
+- `expression/src/node/utils/assign.ts` → Expected test: `tests/unit/src/assign.test.ts`
 - `expression/src/operators.ts` → Expected test: `tests/unit/src/operators.test.ts`
 - `expression/src/parse.ts` → Expected test: `tests/unit/src/parse.test.ts`
+- `expression/src/transform/and.transform.ts` → Expected test: `tests/unit/src/and.transform.test.ts`
+- `expression/src/transform/bitAnd.transform.ts` → Expected test: `tests/unit/src/bitAnd.transform.test.ts`
+- `expression/src/transform/bitOr.transform.ts` → Expected test: `tests/unit/src/bitOr.transform.test.ts`
+- `expression/src/transform/column.transform.ts` → Expected test: `tests/unit/src/column.transform.test.ts`
+- `expression/src/transform/concat.transform.ts` → Expected test: `tests/unit/src/concat.transform.test.ts`
+- `expression/src/transform/cumsum.transform.ts` → Expected test: `tests/unit/src/cumsum.transform.test.ts`
+- `expression/src/transform/diff.transform.ts` → Expected test: `tests/unit/src/diff.transform.test.ts`
+- `expression/src/transform/filter.transform.ts` → Expected test: `tests/unit/src/filter.transform.test.ts`
+- `expression/src/transform/forEach.transform.ts` → Expected test: `tests/unit/src/forEach.transform.test.ts`
+- `expression/src/transform/index.transform.ts` → Expected test: `tests/unit/src/index.transform.test.ts`
+- `expression/src/transform/map.transform.ts` → Expected test: `tests/unit/src/map.transform.test.ts`
+- `expression/src/transform/mapSlices.transform.ts` → Expected test: `tests/unit/src/mapSlices.transform.test.ts`
+- `expression/src/transform/max.transform.ts` → Expected test: `tests/unit/src/max.transform.test.ts`
+- `expression/src/transform/mean.transform.ts` → Expected test: `tests/unit/src/mean.transform.test.ts`
+- `expression/src/transform/min.transform.ts` → Expected test: `tests/unit/src/min.transform.test.ts`
+- `expression/src/transform/nullish.transform.ts` → Expected test: `tests/unit/src/nullish.transform.test.ts`
+- `expression/src/transform/or.transform.ts` → Expected test: `tests/unit/src/or.transform.test.ts`
+- `expression/src/transform/print.transform.ts` → Expected test: `tests/unit/src/print.transform.test.ts`
+- `expression/src/transform/quantileSeq.transform.ts` → Expected test: `tests/unit/src/quantileSeq.transform.test.ts`
+- `expression/src/transform/range.transform.ts` → Expected test: `tests/unit/src/range.transform.test.ts`
+- `expression/src/transform/row.transform.ts` → Expected test: `tests/unit/src/row.transform.test.ts`
+- `expression/src/transform/std.transform.ts` → Expected test: `tests/unit/src/std.transform.test.ts`
+- `expression/src/transform/subset.transform.ts` → Expected test: `tests/unit/src/subset.transform.test.ts`
+- `expression/src/transform/sum.transform.ts` → Expected test: `tests/unit/src/sum.transform.test.ts`
+- `expression/src/transform/utils/compileInlineExpression.ts` → Expected test: `tests/unit/src/compileInlineExpression.test.ts`
+- `expression/src/transform/utils/dimToZeroBase.ts` → Expected test: `tests/unit/src/dimToZeroBase.test.ts`
+- `expression/src/transform/utils/errorTransform.ts` → Expected test: `tests/unit/src/errorTransform.test.ts`
+- `expression/src/transform/utils/lastDimToZeroBase.ts` → Expected test: `tests/unit/src/lastDimToZeroBase.test.ts`
+- `expression/src/transform/utils/transformCallback.ts` → Expected test: `tests/unit/src/transformCallback.test.ts`
+- `expression/src/transform/variance.transform.ts` → Expected test: `tests/unit/src/variance.transform.test.ts`
 - `expression/src/types.ts` → Expected test: `tests/unit/src/types.test.ts`
 - `expression/src/utils/array.ts` → Expected test: `tests/unit/src/array.test.ts`
 - `expression/src/utils/bignumber/formatter.ts` → Expected test: `tests/unit/src/formatter.test.ts`
@@ -44,15 +504,768 @@ The following 34 source files are not directly imported by any test file:
 - `expression/src/utils/customs.ts` → Expected test: `tests/unit/src/customs.test.ts`
 - `expression/src/utils/factory.ts` → Expected test: `tests/unit/src/factory.test.ts`
 - `expression/src/utils/is.ts` → Expected test: `tests/unit/src/is.test.ts`
+- `expression/src/utils/latex.ts` → Expected test: `tests/unit/src/latex.test.ts`
 - `expression/src/utils/map.ts` → Expected test: `tests/unit/src/map.test.ts`
 - `expression/src/utils/number.ts` → Expected test: `tests/unit/src/number.test.ts`
 - `expression/src/utils/object.ts` → Expected test: `tests/unit/src/object.test.ts`
+- `expression/src/utils/print.ts` → Expected test: `tests/unit/src/print.test.ts`
+- `expression/src/utils/scope.ts` → Expected test: `tests/unit/src/scope.test.ts`
 - `expression/src/utils/string.ts` → Expected test: `tests/unit/src/string.test.ts`
 - `expression/src/utils/switch.ts` → Expected test: `tests/unit/src/switch.test.ts`
+- `functions/src/algebra/decomposition/lup.ts` → Expected test: `tests/unit/src/lup.test.ts`
+- `functions/src/algebra/decomposition/qr.ts` → Expected test: `tests/unit/src/qr.test.ts`
+- `functions/src/algebra/decomposition/schur.ts` → Expected test: `tests/unit/src/schur.test.ts`
+- `functions/src/algebra/decomposition/slu.ts` → Expected test: `tests/unit/src/slu.test.ts`
+- `functions/src/algebra/derivative.ts` → Expected test: `tests/unit/src/derivative.test.ts`
+- `functions/src/algebra/leafCount.ts` → Expected test: `tests/unit/src/leafCount.test.ts`
+- `functions/src/algebra/lyap.ts` → Expected test: `tests/unit/src/lyap.test.ts`
+- `functions/src/algebra/polynomialRoot.ts` → Expected test: `tests/unit/src/polynomialRoot.test.ts`
+- `functions/src/algebra/rationalize.ts` → Expected test: `tests/unit/src/rationalize.test.ts`
+- `functions/src/algebra/resolve.ts` → Expected test: `tests/unit/src/resolve.test.ts`
+- `functions/src/algebra/simplify.ts` → Expected test: `tests/unit/src/simplify.test.ts`
+- `functions/src/algebra/simplify/util.ts` → Expected test: `tests/unit/src/util.test.ts`
+- `functions/src/algebra/simplify/wildcards.ts` → Expected test: `tests/unit/src/wildcards.test.ts`
+- `functions/src/algebra/simplifyConstant.ts` → Expected test: `tests/unit/src/simplifyConstant.test.ts`
+- `functions/src/algebra/simplifyCore.ts` → Expected test: `tests/unit/src/simplifyCore.test.ts`
+- `functions/src/algebra/solver/lsolve.ts` → Expected test: `tests/unit/src/lsolve.test.ts`
+- `functions/src/algebra/solver/lsolveAll.ts` → Expected test: `tests/unit/src/lsolveAll.test.ts`
+- `functions/src/algebra/solver/lusolve.ts` → Expected test: `tests/unit/src/lusolve.test.ts`
+- `functions/src/algebra/solver/usolve.ts` → Expected test: `tests/unit/src/usolve.test.ts`
+- `functions/src/algebra/solver/usolveAll.ts` → Expected test: `tests/unit/src/usolveAll.test.ts`
+- `functions/src/algebra/solver/utils/solveValidation.ts` → Expected test: `tests/unit/src/solveValidation.test.ts`
+- `functions/src/algebra/sparse/csAmd.ts` → Expected test: `tests/unit/src/csAmd.test.ts`
+- `functions/src/algebra/sparse/csChol.ts` → Expected test: `tests/unit/src/csChol.test.ts`
+- `functions/src/algebra/sparse/csCounts.ts` → Expected test: `tests/unit/src/csCounts.test.ts`
+- `functions/src/algebra/sparse/csCumsum.ts` → Expected test: `tests/unit/src/csCumsum.test.ts`
+- `functions/src/algebra/sparse/csDfs.ts` → Expected test: `tests/unit/src/csDfs.test.ts`
+- `functions/src/algebra/sparse/csEreach.ts` → Expected test: `tests/unit/src/csEreach.test.ts`
+- `functions/src/algebra/sparse/csEtree.ts` → Expected test: `tests/unit/src/csEtree.test.ts`
+- `functions/src/algebra/sparse/csFkeep.ts` → Expected test: `tests/unit/src/csFkeep.test.ts`
+- `functions/src/algebra/sparse/csFlip.ts` → Expected test: `tests/unit/src/csFlip.test.ts`
+- `functions/src/algebra/sparse/csIpvec.ts` → Expected test: `tests/unit/src/csIpvec.test.ts`
+- `functions/src/algebra/sparse/csLeaf.ts` → Expected test: `tests/unit/src/csLeaf.test.ts`
+- `functions/src/algebra/sparse/csLu.ts` → Expected test: `tests/unit/src/csLu.test.ts`
+- `functions/src/algebra/sparse/csMark.ts` → Expected test: `tests/unit/src/csMark.test.ts`
+- `functions/src/algebra/sparse/csMarked.ts` → Expected test: `tests/unit/src/csMarked.test.ts`
+- `functions/src/algebra/sparse/csPermute.ts` → Expected test: `tests/unit/src/csPermute.test.ts`
+- `functions/src/algebra/sparse/csPost.ts` → Expected test: `tests/unit/src/csPost.test.ts`
+- `functions/src/algebra/sparse/csReach.ts` → Expected test: `tests/unit/src/csReach.test.ts`
+- `functions/src/algebra/sparse/csSpsolve.ts` → Expected test: `tests/unit/src/csSpsolve.test.ts`
+- `functions/src/algebra/sparse/csSqr.ts` → Expected test: `tests/unit/src/csSqr.test.ts`
+- `functions/src/algebra/sparse/csSymperm.ts` → Expected test: `tests/unit/src/csSymperm.test.ts`
+- `functions/src/algebra/sparse/csTdfs.ts` → Expected test: `tests/unit/src/csTdfs.test.ts`
+- `functions/src/algebra/sparse/csUnflip.ts` → Expected test: `tests/unit/src/csUnflip.test.ts`
+- `functions/src/algebra/sylvester.ts` → Expected test: `tests/unit/src/sylvester.test.ts`
+- `functions/src/algebra/symbolicEqual.ts` → Expected test: `tests/unit/src/symbolicEqual.test.ts`
+- `functions/src/arithmetic/abs.ts` → Expected test: `tests/unit/src/abs.test.ts`
+- `functions/src/arithmetic/add.ts` → Expected test: `tests/unit/src/add.test.ts`
+- `functions/src/arithmetic/addScalar.ts` → Expected test: `tests/unit/src/addScalar.test.ts`
+- `functions/src/arithmetic/cbrt.ts` → Expected test: `tests/unit/src/cbrt.test.ts`
+- `functions/src/arithmetic/ceil.ts` → Expected test: `tests/unit/src/ceil.test.ts`
+- `functions/src/arithmetic/cube.ts` → Expected test: `tests/unit/src/cube.test.ts`
+- `functions/src/arithmetic/divide.ts` → Expected test: `tests/unit/src/divide.test.ts`
+- `functions/src/arithmetic/divideScalar.ts` → Expected test: `tests/unit/src/divideScalar.test.ts`
+- `functions/src/arithmetic/dotDivide.ts` → Expected test: `tests/unit/src/dotDivide.test.ts`
+- `functions/src/arithmetic/dotMultiply.ts` → Expected test: `tests/unit/src/dotMultiply.test.ts`
+- `functions/src/arithmetic/dotPow.ts` → Expected test: `tests/unit/src/dotPow.test.ts`
+- `functions/src/arithmetic/exp.ts` → Expected test: `tests/unit/src/exp.test.ts`
+- `functions/src/arithmetic/expm1.ts` → Expected test: `tests/unit/src/expm1.test.ts`
+- `functions/src/arithmetic/fix.ts` → Expected test: `tests/unit/src/fix.test.ts`
+- `functions/src/arithmetic/floor.ts` → Expected test: `tests/unit/src/floor.test.ts`
+- `functions/src/arithmetic/gcd.ts` → Expected test: `tests/unit/src/gcd.test.ts`
+- `functions/src/arithmetic/hypot.ts` → Expected test: `tests/unit/src/hypot.test.ts`
+- `functions/src/arithmetic/invmod.ts` → Expected test: `tests/unit/src/invmod.test.ts`
+- `functions/src/arithmetic/lcm.ts` → Expected test: `tests/unit/src/lcm.test.ts`
+- `functions/src/arithmetic/log.ts` → Expected test: `tests/unit/src/log.test.ts`
+- `functions/src/arithmetic/log10.ts` → Expected test: `tests/unit/src/log10.test.ts`
+- `functions/src/arithmetic/log1p.ts` → Expected test: `tests/unit/src/log1p.test.ts`
+- `functions/src/arithmetic/log2.ts` → Expected test: `tests/unit/src/log2.test.ts`
+- `functions/src/arithmetic/mod.ts` → Expected test: `tests/unit/src/mod.test.ts`
+- `functions/src/arithmetic/multiply.ts` → Expected test: `tests/unit/src/multiply.test.ts`
+- `functions/src/arithmetic/multiplyScalar.ts` → Expected test: `tests/unit/src/multiplyScalar.test.ts`
+- `functions/src/arithmetic/norm.ts` → Expected test: `tests/unit/src/norm.test.ts`
+- `functions/src/arithmetic/nthRoot.ts` → Expected test: `tests/unit/src/nthRoot.test.ts`
+- `functions/src/arithmetic/nthRoots.ts` → Expected test: `tests/unit/src/nthRoots.test.ts`
+- `functions/src/arithmetic/pow.ts` → Expected test: `tests/unit/src/pow.test.ts`
+- `functions/src/arithmetic/round.ts` → Expected test: `tests/unit/src/round.test.ts`
+- `functions/src/arithmetic/sign.ts` → Expected test: `tests/unit/src/sign.test.ts`
+- `functions/src/arithmetic/sqrt.ts` → Expected test: `tests/unit/src/sqrt.test.ts`
+- `functions/src/arithmetic/square.ts` → Expected test: `tests/unit/src/square.test.ts`
+- `functions/src/arithmetic/subtract.ts` → Expected test: `tests/unit/src/subtract.test.ts`
+- `functions/src/arithmetic/subtractScalar.ts` → Expected test: `tests/unit/src/subtractScalar.test.ts`
+- `functions/src/arithmetic/unaryMinus.ts` → Expected test: `tests/unit/src/unaryMinus.test.ts`
+- `functions/src/arithmetic/unaryPlus.ts` → Expected test: `tests/unit/src/unaryPlus.test.ts`
+- `functions/src/arithmetic/utils/nodeOperations.ts` → Expected test: `tests/unit/src/nodeOperations.test.ts`
+- `functions/src/arithmetic/xgcd.ts` → Expected test: `tests/unit/src/xgcd.test.ts`
+- `functions/src/bitwise/bitAnd.ts` → Expected test: `tests/unit/src/bitAnd.test.ts`
+- `functions/src/bitwise/bitNot.ts` → Expected test: `tests/unit/src/bitNot.test.ts`
+- `functions/src/bitwise/bitOr.ts` → Expected test: `tests/unit/src/bitOr.test.ts`
+- `functions/src/bitwise/bitXor.ts` → Expected test: `tests/unit/src/bitXor.test.ts`
+- `functions/src/bitwise/leftShift.ts` → Expected test: `tests/unit/src/leftShift.test.ts`
+- `functions/src/bitwise/rightArithShift.ts` → Expected test: `tests/unit/src/rightArithShift.test.ts`
+- `functions/src/bitwise/rightLogShift.ts` → Expected test: `tests/unit/src/rightLogShift.test.ts`
+- `functions/src/bitwise/useMatrixForArrayScalar.ts` → Expected test: `tests/unit/src/useMatrixForArrayScalar.test.ts`
+- `functions/src/combinatorics/bellNumbers.ts` → Expected test: `tests/unit/src/bellNumbers.test.ts`
+- `functions/src/combinatorics/catalan.ts` → Expected test: `tests/unit/src/catalan.test.ts`
+- `functions/src/combinatorics/composition.ts` → Expected test: `tests/unit/src/composition.test.ts`
+- `functions/src/combinatorics/stirlingS2.ts` → Expected test: `tests/unit/src/stirlingS2.test.ts`
+- `functions/src/complex/arg.ts` → Expected test: `tests/unit/src/arg.test.ts`
+- `functions/src/complex/conj.ts` → Expected test: `tests/unit/src/conj.test.ts`
+- `functions/src/complex/im.ts` → Expected test: `tests/unit/src/im.test.ts`
+- `functions/src/complex/re.ts` → Expected test: `tests/unit/src/re.test.ts`
+- `functions/src/constants.ts` → Expected test: `tests/unit/src/constants.test.ts`
+- `functions/src/core/config.ts` → Expected test: `tests/unit/src/config.test.ts`
+- `functions/src/core/create.ts` → Expected test: `tests/unit/src/create.test.ts`
+- `functions/src/core/function/config.ts` → Expected test: `tests/unit/src/config.test.ts`
+- `functions/src/core/function/import.ts` → Expected test: `tests/unit/src/import.test.ts`
+- `functions/src/core/function/typed.ts` → Expected test: `tests/unit/src/typed.test.ts`
+- `functions/src/defaultInstance.ts` → Expected test: `tests/unit/src/defaultInstance.test.ts`
+- `functions/src/error/ArgumentsError.ts` → Expected test: `tests/unit/src/ArgumentsError.test.ts`
+- `functions/src/error/DimensionError.ts` → Expected test: `tests/unit/src/DimensionError.test.ts`
+- `functions/src/error/IndexError.ts` → Expected test: `tests/unit/src/IndexError.test.ts`
+- `functions/src/expression/Help.ts` → Expected test: `tests/unit/src/Help.test.ts`
+- `functions/src/expression/Parser.ts` → Expected test: `tests/unit/src/Parser.test.ts`
+- `functions/src/expression/embeddedDocs/constants/Infinity.ts` → Expected test: `tests/unit/src/Infinity.test.ts`
+- `functions/src/expression/embeddedDocs/constants/LN10.ts` → Expected test: `tests/unit/src/LN10.test.ts`
+- `functions/src/expression/embeddedDocs/constants/LN2.ts` → Expected test: `tests/unit/src/LN2.test.ts`
+- `functions/src/expression/embeddedDocs/constants/LOG10E.ts` → Expected test: `tests/unit/src/LOG10E.test.ts`
+- `functions/src/expression/embeddedDocs/constants/LOG2E.ts` → Expected test: `tests/unit/src/LOG2E.test.ts`
+- `functions/src/expression/embeddedDocs/constants/NaN.ts` → Expected test: `tests/unit/src/NaN.test.ts`
+- `functions/src/expression/embeddedDocs/constants/SQRT1_2.ts` → Expected test: `tests/unit/src/SQRT1_2.test.ts`
+- `functions/src/expression/embeddedDocs/constants/SQRT2.ts` → Expected test: `tests/unit/src/SQRT2.test.ts`
+- `functions/src/expression/embeddedDocs/constants/e.ts` → Expected test: `tests/unit/src/e.test.ts`
+- `functions/src/expression/embeddedDocs/constants/false.ts` → Expected test: `tests/unit/src/false.test.ts`
+- `functions/src/expression/embeddedDocs/constants/i.ts` → Expected test: `tests/unit/src/i.test.ts`
+- `functions/src/expression/embeddedDocs/constants/null.ts` → Expected test: `tests/unit/src/null.test.ts`
+- `functions/src/expression/embeddedDocs/constants/phi.ts` → Expected test: `tests/unit/src/phi.test.ts`
+- `functions/src/expression/embeddedDocs/constants/pi.ts` → Expected test: `tests/unit/src/pi.test.ts`
+- `functions/src/expression/embeddedDocs/constants/tau.ts` → Expected test: `tests/unit/src/tau.test.ts`
+- `functions/src/expression/embeddedDocs/constants/true.ts` → Expected test: `tests/unit/src/true.test.ts`
+- `functions/src/expression/embeddedDocs/constants/version.ts` → Expected test: `tests/unit/src/version.test.ts`
+- `functions/src/expression/embeddedDocs/construction/bigint.ts` → Expected test: `tests/unit/src/bigint.test.ts`
+- `functions/src/expression/embeddedDocs/construction/bignumber.ts` → Expected test: `tests/unit/src/bignumber.test.ts`
+- `functions/src/expression/embeddedDocs/construction/boolean.ts` → Expected test: `tests/unit/src/boolean.test.ts`
+- `functions/src/expression/embeddedDocs/construction/complex.ts` → Expected test: `tests/unit/src/complex.test.ts`
+- `functions/src/expression/embeddedDocs/construction/createUnit.ts` → Expected test: `tests/unit/src/createUnit.test.ts`
+- `functions/src/expression/embeddedDocs/construction/fraction.ts` → Expected test: `tests/unit/src/fraction.test.ts`
+- `functions/src/expression/embeddedDocs/construction/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `functions/src/expression/embeddedDocs/construction/matrix.ts` → Expected test: `tests/unit/src/matrix.test.ts`
+- `functions/src/expression/embeddedDocs/construction/number.ts` → Expected test: `tests/unit/src/number.test.ts`
+- `functions/src/expression/embeddedDocs/construction/sparse.ts` → Expected test: `tests/unit/src/sparse.test.ts`
+- `functions/src/expression/embeddedDocs/construction/splitUnit.ts` → Expected test: `tests/unit/src/splitUnit.test.ts`
+- `functions/src/expression/embeddedDocs/construction/string.ts` → Expected test: `tests/unit/src/string.test.ts`
+- `functions/src/expression/embeddedDocs/construction/unit.ts` → Expected test: `tests/unit/src/unit.test.ts`
+- `functions/src/expression/embeddedDocs/core/config.ts` → Expected test: `tests/unit/src/config.test.ts`
+- `functions/src/expression/embeddedDocs/core/import.ts` → Expected test: `tests/unit/src/import.test.ts`
+- `functions/src/expression/embeddedDocs/core/typed.ts` → Expected test: `tests/unit/src/typed.test.ts`
+- `functions/src/expression/embeddedDocs/embeddedDocs.ts` → Expected test: `tests/unit/src/embeddedDocs.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/derivative.ts` → Expected test: `tests/unit/src/derivative.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/leafCount.ts` → Expected test: `tests/unit/src/leafCount.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/lsolve.ts` → Expected test: `tests/unit/src/lsolve.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/lsolveAll.ts` → Expected test: `tests/unit/src/lsolveAll.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/lup.ts` → Expected test: `tests/unit/src/lup.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/lusolve.ts` → Expected test: `tests/unit/src/lusolve.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/lyap.ts` → Expected test: `tests/unit/src/lyap.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/polynomialRoot.ts` → Expected test: `tests/unit/src/polynomialRoot.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/qr.ts` → Expected test: `tests/unit/src/qr.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/rationalize.ts` → Expected test: `tests/unit/src/rationalize.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/resolve.ts` → Expected test: `tests/unit/src/resolve.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/schur.ts` → Expected test: `tests/unit/src/schur.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/simplify.ts` → Expected test: `tests/unit/src/simplify.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/simplifyConstant.ts` → Expected test: `tests/unit/src/simplifyConstant.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/simplifyCore.ts` → Expected test: `tests/unit/src/simplifyCore.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/slu.ts` → Expected test: `tests/unit/src/slu.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/sylvester.ts` → Expected test: `tests/unit/src/sylvester.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/symbolicEqual.ts` → Expected test: `tests/unit/src/symbolicEqual.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/usolve.ts` → Expected test: `tests/unit/src/usolve.test.ts`
+- `functions/src/expression/embeddedDocs/function/algebra/usolveAll.ts` → Expected test: `tests/unit/src/usolveAll.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/abs.ts` → Expected test: `tests/unit/src/abs.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/add.ts` → Expected test: `tests/unit/src/add.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/cbrt.ts` → Expected test: `tests/unit/src/cbrt.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/ceil.ts` → Expected test: `tests/unit/src/ceil.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/cube.ts` → Expected test: `tests/unit/src/cube.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/divide.ts` → Expected test: `tests/unit/src/divide.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/dotDivide.ts` → Expected test: `tests/unit/src/dotDivide.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/dotMultiply.ts` → Expected test: `tests/unit/src/dotMultiply.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/dotPow.ts` → Expected test: `tests/unit/src/dotPow.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/exp.ts` → Expected test: `tests/unit/src/exp.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/expm.ts` → Expected test: `tests/unit/src/expm.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/expm1.ts` → Expected test: `tests/unit/src/expm1.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/fix.ts` → Expected test: `tests/unit/src/fix.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/floor.ts` → Expected test: `tests/unit/src/floor.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/gcd.ts` → Expected test: `tests/unit/src/gcd.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/hypot.ts` → Expected test: `tests/unit/src/hypot.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/invmod.ts` → Expected test: `tests/unit/src/invmod.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/lcm.ts` → Expected test: `tests/unit/src/lcm.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/log.ts` → Expected test: `tests/unit/src/log.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/log10.ts` → Expected test: `tests/unit/src/log10.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/log1p.ts` → Expected test: `tests/unit/src/log1p.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/log2.ts` → Expected test: `tests/unit/src/log2.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/mod.ts` → Expected test: `tests/unit/src/mod.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/multiply.ts` → Expected test: `tests/unit/src/multiply.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/norm.ts` → Expected test: `tests/unit/src/norm.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/nthRoot.ts` → Expected test: `tests/unit/src/nthRoot.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/nthRoots.ts` → Expected test: `tests/unit/src/nthRoots.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/pow.ts` → Expected test: `tests/unit/src/pow.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/round.ts` → Expected test: `tests/unit/src/round.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/sign.ts` → Expected test: `tests/unit/src/sign.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/sqrt.ts` → Expected test: `tests/unit/src/sqrt.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/sqrtm.ts` → Expected test: `tests/unit/src/sqrtm.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/square.ts` → Expected test: `tests/unit/src/square.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/subtract.ts` → Expected test: `tests/unit/src/subtract.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/unaryMinus.ts` → Expected test: `tests/unit/src/unaryMinus.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/unaryPlus.ts` → Expected test: `tests/unit/src/unaryPlus.test.ts`
+- `functions/src/expression/embeddedDocs/function/arithmetic/xgcd.ts` → Expected test: `tests/unit/src/xgcd.test.ts`
+- `functions/src/expression/embeddedDocs/function/bitwise/bitAnd.ts` → Expected test: `tests/unit/src/bitAnd.test.ts`
+- `functions/src/expression/embeddedDocs/function/bitwise/bitNot.ts` → Expected test: `tests/unit/src/bitNot.test.ts`
+- `functions/src/expression/embeddedDocs/function/bitwise/bitOr.ts` → Expected test: `tests/unit/src/bitOr.test.ts`
+- `functions/src/expression/embeddedDocs/function/bitwise/bitXor.ts` → Expected test: `tests/unit/src/bitXor.test.ts`
+- `functions/src/expression/embeddedDocs/function/bitwise/leftShift.ts` → Expected test: `tests/unit/src/leftShift.test.ts`
+- `functions/src/expression/embeddedDocs/function/bitwise/rightArithShift.ts` → Expected test: `tests/unit/src/rightArithShift.test.ts`
+- `functions/src/expression/embeddedDocs/function/bitwise/rightLogShift.ts` → Expected test: `tests/unit/src/rightLogShift.test.ts`
+- `functions/src/expression/embeddedDocs/function/combinatorics/bellNumbers.ts` → Expected test: `tests/unit/src/bellNumbers.test.ts`
+- `functions/src/expression/embeddedDocs/function/combinatorics/catalan.ts` → Expected test: `tests/unit/src/catalan.test.ts`
+- `functions/src/expression/embeddedDocs/function/combinatorics/composition.ts` → Expected test: `tests/unit/src/composition.test.ts`
+- `functions/src/expression/embeddedDocs/function/combinatorics/stirlingS2.ts` → Expected test: `tests/unit/src/stirlingS2.test.ts`
+- `functions/src/expression/embeddedDocs/function/complex/arg.ts` → Expected test: `tests/unit/src/arg.test.ts`
+- `functions/src/expression/embeddedDocs/function/complex/conj.ts` → Expected test: `tests/unit/src/conj.test.ts`
+- `functions/src/expression/embeddedDocs/function/complex/im.ts` → Expected test: `tests/unit/src/im.test.ts`
+- `functions/src/expression/embeddedDocs/function/complex/re.ts` → Expected test: `tests/unit/src/re.test.ts`
+- `functions/src/expression/embeddedDocs/function/expression/compile.ts` → Expected test: `tests/unit/src/compile.test.ts`
+- `functions/src/expression/embeddedDocs/function/expression/evaluate.ts` → Expected test: `tests/unit/src/evaluate.test.ts`
+- `functions/src/expression/embeddedDocs/function/expression/help.ts` → Expected test: `tests/unit/src/help.test.ts`
+- `functions/src/expression/embeddedDocs/function/expression/parse.ts` → Expected test: `tests/unit/src/parse.test.ts`
+- `functions/src/expression/embeddedDocs/function/expression/parser.ts` → Expected test: `tests/unit/src/parser.test.ts`
+- `functions/src/expression/embeddedDocs/function/geometry/distance.ts` → Expected test: `tests/unit/src/distance.test.ts`
+- `functions/src/expression/embeddedDocs/function/geometry/intersect.ts` → Expected test: `tests/unit/src/intersect.test.ts`
+- `functions/src/expression/embeddedDocs/function/logical/and.ts` → Expected test: `tests/unit/src/and.test.ts`
+- `functions/src/expression/embeddedDocs/function/logical/not.ts` → Expected test: `tests/unit/src/not.test.ts`
+- `functions/src/expression/embeddedDocs/function/logical/nullish.ts` → Expected test: `tests/unit/src/nullish.test.ts`
+- `functions/src/expression/embeddedDocs/function/logical/or.ts` → Expected test: `tests/unit/src/or.test.ts`
+- `functions/src/expression/embeddedDocs/function/logical/xor.ts` → Expected test: `tests/unit/src/xor.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/column.ts` → Expected test: `tests/unit/src/column.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/concat.ts` → Expected test: `tests/unit/src/concat.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/count.ts` → Expected test: `tests/unit/src/count.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/cross.ts` → Expected test: `tests/unit/src/cross.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/ctranspose.ts` → Expected test: `tests/unit/src/ctranspose.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/det.ts` → Expected test: `tests/unit/src/det.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/diag.ts` → Expected test: `tests/unit/src/diag.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/diff.ts` → Expected test: `tests/unit/src/diff.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/dot.ts` → Expected test: `tests/unit/src/dot.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/eigs.ts` → Expected test: `tests/unit/src/eigs.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/fft.ts` → Expected test: `tests/unit/src/fft.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/filter.ts` → Expected test: `tests/unit/src/filter.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/flatten.ts` → Expected test: `tests/unit/src/flatten.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/forEach.ts` → Expected test: `tests/unit/src/forEach.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/getMatrixDataType.ts` → Expected test: `tests/unit/src/getMatrixDataType.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/identity.ts` → Expected test: `tests/unit/src/identity.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/ifft.ts` → Expected test: `tests/unit/src/ifft.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/inv.ts` → Expected test: `tests/unit/src/inv.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/kron.ts` → Expected test: `tests/unit/src/kron.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/map.ts` → Expected test: `tests/unit/src/map.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/mapSlices.ts` → Expected test: `tests/unit/src/mapSlices.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/matrixFromColumns.ts` → Expected test: `tests/unit/src/matrixFromColumns.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/matrixFromFunction.ts` → Expected test: `tests/unit/src/matrixFromFunction.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/matrixFromRows.ts` → Expected test: `tests/unit/src/matrixFromRows.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/ones.ts` → Expected test: `tests/unit/src/ones.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/partitionSelect.ts` → Expected test: `tests/unit/src/partitionSelect.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/pinv.ts` → Expected test: `tests/unit/src/pinv.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/range.ts` → Expected test: `tests/unit/src/range.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/reshape.ts` → Expected test: `tests/unit/src/reshape.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/resize.ts` → Expected test: `tests/unit/src/resize.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/rotate.ts` → Expected test: `tests/unit/src/rotate.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/rotationMatrix.ts` → Expected test: `tests/unit/src/rotationMatrix.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/row.ts` → Expected test: `tests/unit/src/row.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/size.ts` → Expected test: `tests/unit/src/size.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/sort.ts` → Expected test: `tests/unit/src/sort.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/squeeze.ts` → Expected test: `tests/unit/src/squeeze.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/subset.ts` → Expected test: `tests/unit/src/subset.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/trace.ts` → Expected test: `tests/unit/src/trace.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/transpose.ts` → Expected test: `tests/unit/src/transpose.test.ts`
+- `functions/src/expression/embeddedDocs/function/matrix/zeros.ts` → Expected test: `tests/unit/src/zeros.test.ts`
+- `functions/src/expression/embeddedDocs/function/numeric/solveODE.ts` → Expected test: `tests/unit/src/solveODE.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/bernoulli.ts` → Expected test: `tests/unit/src/bernoulli.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/combinations.ts` → Expected test: `tests/unit/src/combinations.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/combinationsWithRep.ts` → Expected test: `tests/unit/src/combinationsWithRep.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/distribution.ts` → Expected test: `tests/unit/src/distribution.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/factorial.ts` → Expected test: `tests/unit/src/factorial.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/gamma.ts` → Expected test: `tests/unit/src/gamma.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/kldivergence.ts` → Expected test: `tests/unit/src/kldivergence.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/lgamma.ts` → Expected test: `tests/unit/src/lgamma.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/multinomial.ts` → Expected test: `tests/unit/src/multinomial.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/permutations.ts` → Expected test: `tests/unit/src/permutations.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/pickRandom.ts` → Expected test: `tests/unit/src/pickRandom.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/random.ts` → Expected test: `tests/unit/src/random.test.ts`
+- `functions/src/expression/embeddedDocs/function/probability/randomInt.ts` → Expected test: `tests/unit/src/randomInt.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/compare.ts` → Expected test: `tests/unit/src/compare.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/compareNatural.ts` → Expected test: `tests/unit/src/compareNatural.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/compareText.ts` → Expected test: `tests/unit/src/compareText.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/deepEqual.ts` → Expected test: `tests/unit/src/deepEqual.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/equal.ts` → Expected test: `tests/unit/src/equal.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/equalText.ts` → Expected test: `tests/unit/src/equalText.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/larger.ts` → Expected test: `tests/unit/src/larger.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/largerEq.ts` → Expected test: `tests/unit/src/largerEq.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/smaller.ts` → Expected test: `tests/unit/src/smaller.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/smallerEq.ts` → Expected test: `tests/unit/src/smallerEq.test.ts`
+- `functions/src/expression/embeddedDocs/function/relational/unequal.ts` → Expected test: `tests/unit/src/unequal.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setCartesian.ts` → Expected test: `tests/unit/src/setCartesian.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setDifference.ts` → Expected test: `tests/unit/src/setDifference.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setDistinct.ts` → Expected test: `tests/unit/src/setDistinct.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setIntersect.ts` → Expected test: `tests/unit/src/setIntersect.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setIsSubset.ts` → Expected test: `tests/unit/src/setIsSubset.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setMultiplicity.ts` → Expected test: `tests/unit/src/setMultiplicity.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setPowerset.ts` → Expected test: `tests/unit/src/setPowerset.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setSize.ts` → Expected test: `tests/unit/src/setSize.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setSymDifference.ts` → Expected test: `tests/unit/src/setSymDifference.test.ts`
+- `functions/src/expression/embeddedDocs/function/set/setUnion.ts` → Expected test: `tests/unit/src/setUnion.test.ts`
+- `functions/src/expression/embeddedDocs/function/signal/freqz.ts` → Expected test: `tests/unit/src/freqz.test.ts`
+- `functions/src/expression/embeddedDocs/function/signal/zpk2tf.ts` → Expected test: `tests/unit/src/zpk2tf.test.ts`
+- `functions/src/expression/embeddedDocs/function/special/erf.ts` → Expected test: `tests/unit/src/erf.test.ts`
+- `functions/src/expression/embeddedDocs/function/special/zeta.ts` → Expected test: `tests/unit/src/zeta.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/corr.ts` → Expected test: `tests/unit/src/corr.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/cumsum.ts` → Expected test: `tests/unit/src/cumsum.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/mad.ts` → Expected test: `tests/unit/src/mad.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/max.ts` → Expected test: `tests/unit/src/max.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/mean.ts` → Expected test: `tests/unit/src/mean.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/median.ts` → Expected test: `tests/unit/src/median.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/min.ts` → Expected test: `tests/unit/src/min.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/mode.ts` → Expected test: `tests/unit/src/mode.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/prod.ts` → Expected test: `tests/unit/src/prod.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/quantileSeq.ts` → Expected test: `tests/unit/src/quantileSeq.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/std.ts` → Expected test: `tests/unit/src/std.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/sum.ts` → Expected test: `tests/unit/src/sum.test.ts`
+- `functions/src/expression/embeddedDocs/function/statistics/variance.ts` → Expected test: `tests/unit/src/variance.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/acos.ts` → Expected test: `tests/unit/src/acos.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/acosh.ts` → Expected test: `tests/unit/src/acosh.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/acot.ts` → Expected test: `tests/unit/src/acot.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/acoth.ts` → Expected test: `tests/unit/src/acoth.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/acsc.ts` → Expected test: `tests/unit/src/acsc.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/acsch.ts` → Expected test: `tests/unit/src/acsch.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/asec.ts` → Expected test: `tests/unit/src/asec.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/asech.ts` → Expected test: `tests/unit/src/asech.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/asin.ts` → Expected test: `tests/unit/src/asin.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/asinh.ts` → Expected test: `tests/unit/src/asinh.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/atan.ts` → Expected test: `tests/unit/src/atan.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/atan2.ts` → Expected test: `tests/unit/src/atan2.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/atanh.ts` → Expected test: `tests/unit/src/atanh.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/cos.ts` → Expected test: `tests/unit/src/cos.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/cosh.ts` → Expected test: `tests/unit/src/cosh.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/cot.ts` → Expected test: `tests/unit/src/cot.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/coth.ts` → Expected test: `tests/unit/src/coth.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/csc.ts` → Expected test: `tests/unit/src/csc.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/csch.ts` → Expected test: `tests/unit/src/csch.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/sec.ts` → Expected test: `tests/unit/src/sec.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/sech.ts` → Expected test: `tests/unit/src/sech.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/sin.ts` → Expected test: `tests/unit/src/sin.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/sinh.ts` → Expected test: `tests/unit/src/sinh.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/tan.ts` → Expected test: `tests/unit/src/tan.test.ts`
+- `functions/src/expression/embeddedDocs/function/trigonometry/tanh.ts` → Expected test: `tests/unit/src/tanh.test.ts`
+- `functions/src/expression/embeddedDocs/function/units/to.ts` → Expected test: `tests/unit/src/to.test.ts`
+- `functions/src/expression/embeddedDocs/function/units/toBest.ts` → Expected test: `tests/unit/src/toBest.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/bin.ts` → Expected test: `tests/unit/src/bin.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/clone.ts` → Expected test: `tests/unit/src/clone.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/format.ts` → Expected test: `tests/unit/src/format.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/hasNumericValue.ts` → Expected test: `tests/unit/src/hasNumericValue.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/hex.ts` → Expected test: `tests/unit/src/hex.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/isBounded.ts` → Expected test: `tests/unit/src/isBounded.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/isFinite.ts` → Expected test: `tests/unit/src/isFinite.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/isInteger.ts` → Expected test: `tests/unit/src/isInteger.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/isNaN.ts` → Expected test: `tests/unit/src/isNaN.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/isNegative.ts` → Expected test: `tests/unit/src/isNegative.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/isNumeric.ts` → Expected test: `tests/unit/src/isNumeric.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/isPositive.ts` → Expected test: `tests/unit/src/isPositive.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/isPrime.ts` → Expected test: `tests/unit/src/isPrime.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/isZero.ts` → Expected test: `tests/unit/src/isZero.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/numeric.ts` → Expected test: `tests/unit/src/numeric.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/oct.ts` → Expected test: `tests/unit/src/oct.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/print.ts` → Expected test: `tests/unit/src/print.test.ts`
+- `functions/src/expression/embeddedDocs/function/utils/typeOf.ts` → Expected test: `tests/unit/src/typeOf.test.ts`
+- `functions/src/expression/function/compile.ts` → Expected test: `tests/unit/src/compile.test.ts`
+- `functions/src/expression/function/evaluate.ts` → Expected test: `tests/unit/src/evaluate.test.ts`
+- `functions/src/expression/function/help.ts` → Expected test: `tests/unit/src/help.test.ts`
+- `functions/src/expression/function/parser.ts` → Expected test: `tests/unit/src/parser.test.ts`
+- `functions/src/expression/keywords.ts` → Expected test: `tests/unit/src/keywords.test.ts`
+- `functions/src/expression/node/AccessorNode.ts` → Expected test: `tests/unit/src/AccessorNode.test.ts`
+- `functions/src/expression/node/ArrayNode.ts` → Expected test: `tests/unit/src/ArrayNode.test.ts`
+- `functions/src/expression/node/AssignmentNode.ts` → Expected test: `tests/unit/src/AssignmentNode.test.ts`
+- `functions/src/expression/node/BlockNode.ts` → Expected test: `tests/unit/src/BlockNode.test.ts`
+- `functions/src/expression/node/ConditionalNode.ts` → Expected test: `tests/unit/src/ConditionalNode.test.ts`
+- `functions/src/expression/node/ConstantNode.ts` → Expected test: `tests/unit/src/ConstantNode.test.ts`
+- `functions/src/expression/node/FunctionAssignmentNode.ts` → Expected test: `tests/unit/src/FunctionAssignmentNode.test.ts`
+- `functions/src/expression/node/FunctionNode.ts` → Expected test: `tests/unit/src/FunctionNode.test.ts`
+- `functions/src/expression/node/IndexNode.ts` → Expected test: `tests/unit/src/IndexNode.test.ts`
+- `functions/src/expression/node/Node.ts` → Expected test: `tests/unit/src/Node.test.ts`
+- `functions/src/expression/node/ObjectNode.ts` → Expected test: `tests/unit/src/ObjectNode.test.ts`
+- `functions/src/expression/node/OperatorNode.ts` → Expected test: `tests/unit/src/OperatorNode.test.ts`
+- `functions/src/expression/node/ParenthesisNode.ts` → Expected test: `tests/unit/src/ParenthesisNode.test.ts`
+- `functions/src/expression/node/RangeNode.ts` → Expected test: `tests/unit/src/RangeNode.test.ts`
+- `functions/src/expression/node/RelationalNode.ts` → Expected test: `tests/unit/src/RelationalNode.test.ts`
+- `functions/src/expression/node/SymbolNode.ts` → Expected test: `tests/unit/src/SymbolNode.test.ts`
+- `functions/src/expression/node/utils/access.ts` → Expected test: `tests/unit/src/access.test.ts`
+- `functions/src/expression/node/utils/assign.ts` → Expected test: `tests/unit/src/assign.test.ts`
+- `functions/src/expression/operators.ts` → Expected test: `tests/unit/src/operators.test.ts`
+- `functions/src/expression/parse.ts` → Expected test: `tests/unit/src/parse.test.ts`
+- `functions/src/expression/transform/and.transform.ts` → Expected test: `tests/unit/src/and.transform.test.ts`
+- `functions/src/expression/transform/bitAnd.transform.ts` → Expected test: `tests/unit/src/bitAnd.transform.test.ts`
+- `functions/src/expression/transform/bitOr.transform.ts` → Expected test: `tests/unit/src/bitOr.transform.test.ts`
+- `functions/src/expression/transform/column.transform.ts` → Expected test: `tests/unit/src/column.transform.test.ts`
+- `functions/src/expression/transform/concat.transform.ts` → Expected test: `tests/unit/src/concat.transform.test.ts`
+- `functions/src/expression/transform/cumsum.transform.ts` → Expected test: `tests/unit/src/cumsum.transform.test.ts`
+- `functions/src/expression/transform/diff.transform.ts` → Expected test: `tests/unit/src/diff.transform.test.ts`
+- `functions/src/expression/transform/filter.transform.ts` → Expected test: `tests/unit/src/filter.transform.test.ts`
+- `functions/src/expression/transform/forEach.transform.ts` → Expected test: `tests/unit/src/forEach.transform.test.ts`
+- `functions/src/expression/transform/index.transform.ts` → Expected test: `tests/unit/src/index.transform.test.ts`
+- `functions/src/expression/transform/map.transform.ts` → Expected test: `tests/unit/src/map.transform.test.ts`
+- `functions/src/expression/transform/mapSlices.transform.ts` → Expected test: `tests/unit/src/mapSlices.transform.test.ts`
+- `functions/src/expression/transform/max.transform.ts` → Expected test: `tests/unit/src/max.transform.test.ts`
+- `functions/src/expression/transform/mean.transform.ts` → Expected test: `tests/unit/src/mean.transform.test.ts`
+- `functions/src/expression/transform/min.transform.ts` → Expected test: `tests/unit/src/min.transform.test.ts`
+- `functions/src/expression/transform/nullish.transform.ts` → Expected test: `tests/unit/src/nullish.transform.test.ts`
+- `functions/src/expression/transform/or.transform.ts` → Expected test: `tests/unit/src/or.transform.test.ts`
+- `functions/src/expression/transform/print.transform.ts` → Expected test: `tests/unit/src/print.transform.test.ts`
+- `functions/src/expression/transform/quantileSeq.transform.ts` → Expected test: `tests/unit/src/quantileSeq.transform.test.ts`
+- `functions/src/expression/transform/range.transform.ts` → Expected test: `tests/unit/src/range.transform.test.ts`
+- `functions/src/expression/transform/row.transform.ts` → Expected test: `tests/unit/src/row.transform.test.ts`
+- `functions/src/expression/transform/std.transform.ts` → Expected test: `tests/unit/src/std.transform.test.ts`
+- `functions/src/expression/transform/subset.transform.ts` → Expected test: `tests/unit/src/subset.transform.test.ts`
+- `functions/src/expression/transform/sum.transform.ts` → Expected test: `tests/unit/src/sum.transform.test.ts`
+- `functions/src/expression/transform/types.ts` → Expected test: `tests/unit/src/types.test.ts`
+- `functions/src/expression/transform/utils/compileInlineExpression.ts` → Expected test: `tests/unit/src/compileInlineExpression.test.ts`
+- `functions/src/expression/transform/utils/dimToZeroBase.ts` → Expected test: `tests/unit/src/dimToZeroBase.test.ts`
+- `functions/src/expression/transform/utils/errorTransform.ts` → Expected test: `tests/unit/src/errorTransform.test.ts`
+- `functions/src/expression/transform/utils/lastDimToZeroBase.ts` → Expected test: `tests/unit/src/lastDimToZeroBase.test.ts`
+- `functions/src/expression/transform/utils/transformCallback.ts` → Expected test: `tests/unit/src/transformCallback.test.ts`
+- `functions/src/expression/transform/variance.transform.ts` → Expected test: `tests/unit/src/variance.transform.test.ts`
+- `functions/src/expression/types.ts` → Expected test: `tests/unit/src/types.test.ts`
+- `functions/src/factories/scope.ts` → Expected test: `tests/unit/src/scope.test.ts`
+- `functions/src/factoriesAny.ts` → Expected test: `tests/unit/src/factoriesAny.test.ts`
+- `functions/src/factoriesNumber.ts` → Expected test: `tests/unit/src/factoriesNumber.test.ts`
+- `functions/src/geometry/distance.ts` → Expected test: `tests/unit/src/distance.test.ts`
+- `functions/src/geometry/intersect.ts` → Expected test: `tests/unit/src/intersect.test.ts`
+- `functions/src/logical/and.ts` → Expected test: `tests/unit/src/and.test.ts`
+- `functions/src/logical/not.ts` → Expected test: `tests/unit/src/not.test.ts`
+- `functions/src/logical/nullish.ts` → Expected test: `tests/unit/src/nullish.test.ts`
+- `functions/src/logical/or.ts` → Expected test: `tests/unit/src/or.test.ts`
+- `functions/src/logical/xor.ts` → Expected test: `tests/unit/src/xor.test.ts`
+- `functions/src/matrix/column.ts` → Expected test: `tests/unit/src/column.test.ts`
+- `functions/src/matrix/concat.ts` → Expected test: `tests/unit/src/concat.test.ts`
+- `functions/src/matrix/count.ts` → Expected test: `tests/unit/src/count.test.ts`
+- `functions/src/matrix/cross.ts` → Expected test: `tests/unit/src/cross.test.ts`
+- `functions/src/matrix/ctranspose.ts` → Expected test: `tests/unit/src/ctranspose.test.ts`
+- `functions/src/matrix/det.ts` → Expected test: `tests/unit/src/det.test.ts`
+- `functions/src/matrix/diag.ts` → Expected test: `tests/unit/src/diag.test.ts`
+- `functions/src/matrix/diff.ts` → Expected test: `tests/unit/src/diff.test.ts`
+- `functions/src/matrix/dot.ts` → Expected test: `tests/unit/src/dot.test.ts`
+- `functions/src/matrix/eigs.ts` → Expected test: `tests/unit/src/eigs.test.ts`
+- `functions/src/matrix/eigs/complexEigs.ts` → Expected test: `tests/unit/src/complexEigs.test.ts`
+- `functions/src/matrix/eigs/realSymmetric.ts` → Expected test: `tests/unit/src/realSymmetric.test.ts`
+- `functions/src/matrix/expm.ts` → Expected test: `tests/unit/src/expm.test.ts`
+- `functions/src/matrix/fft.ts` → Expected test: `tests/unit/src/fft.test.ts`
+- `functions/src/matrix/filter.ts` → Expected test: `tests/unit/src/filter.test.ts`
+- `functions/src/matrix/flatten.ts` → Expected test: `tests/unit/src/flatten.test.ts`
+- `functions/src/matrix/forEach.ts` → Expected test: `tests/unit/src/forEach.test.ts`
+- `functions/src/matrix/getMatrixDataType.ts` → Expected test: `tests/unit/src/getMatrixDataType.test.ts`
+- `functions/src/matrix/identity.ts` → Expected test: `tests/unit/src/identity.test.ts`
+- `functions/src/matrix/ifft.ts` → Expected test: `tests/unit/src/ifft.test.ts`
+- `functions/src/matrix/inv.ts` → Expected test: `tests/unit/src/inv.test.ts`
+- `functions/src/matrix/kron.ts` → Expected test: `tests/unit/src/kron.test.ts`
+- `functions/src/matrix/map.ts` → Expected test: `tests/unit/src/map.test.ts`
+- `functions/src/matrix/mapSlices.ts` → Expected test: `tests/unit/src/mapSlices.test.ts`
+- `functions/src/matrix/matrixFromColumns.ts` → Expected test: `tests/unit/src/matrixFromColumns.test.ts`
+- `functions/src/matrix/matrixFromFunction.ts` → Expected test: `tests/unit/src/matrixFromFunction.test.ts`
+- `functions/src/matrix/matrixFromRows.ts` → Expected test: `tests/unit/src/matrixFromRows.test.ts`
+- `functions/src/matrix/ones.ts` → Expected test: `tests/unit/src/ones.test.ts`
+- `functions/src/matrix/partitionSelect.ts` → Expected test: `tests/unit/src/partitionSelect.test.ts`
+- `functions/src/matrix/pinv.ts` → Expected test: `tests/unit/src/pinv.test.ts`
+- `functions/src/matrix/range.ts` → Expected test: `tests/unit/src/range.test.ts`
+- `functions/src/matrix/reshape.ts` → Expected test: `tests/unit/src/reshape.test.ts`
+- `functions/src/matrix/resize.ts` → Expected test: `tests/unit/src/resize.test.ts`
+- `functions/src/matrix/rotate.ts` → Expected test: `tests/unit/src/rotate.test.ts`
+- `functions/src/matrix/rotationMatrix.ts` → Expected test: `tests/unit/src/rotationMatrix.test.ts`
+- `functions/src/matrix/row.ts` → Expected test: `tests/unit/src/row.test.ts`
+- `functions/src/matrix/size.ts` → Expected test: `tests/unit/src/size.test.ts`
+- `functions/src/matrix/sort.ts` → Expected test: `tests/unit/src/sort.test.ts`
+- `functions/src/matrix/sqrtm.ts` → Expected test: `tests/unit/src/sqrtm.test.ts`
+- `functions/src/matrix/squeeze.ts` → Expected test: `tests/unit/src/squeeze.test.ts`
+- `functions/src/matrix/subset.ts` → Expected test: `tests/unit/src/subset.test.ts`
+- `functions/src/matrix/trace.ts` → Expected test: `tests/unit/src/trace.test.ts`
+- `functions/src/matrix/transpose.ts` → Expected test: `tests/unit/src/transpose.test.ts`
+- `functions/src/matrix/zeros.ts` → Expected test: `tests/unit/src/zeros.test.ts`
+- `functions/src/numeric/solveODE.ts` → Expected test: `tests/unit/src/solveODE.test.ts`
+- `functions/src/plain/bignumber/arithmetic.ts` → Expected test: `tests/unit/src/arithmetic.test.ts`
+- `functions/src/plain/bignumber/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `functions/src/plain/number/arithmetic.ts` → Expected test: `tests/unit/src/arithmetic.test.ts`
+- `functions/src/plain/number/bitwise.ts` → Expected test: `tests/unit/src/bitwise.test.ts`
+- `functions/src/plain/number/combinations.ts` → Expected test: `tests/unit/src/combinations.test.ts`
+- `functions/src/plain/number/constants.ts` → Expected test: `tests/unit/src/constants.test.ts`
+- `functions/src/plain/number/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `functions/src/plain/number/logical.ts` → Expected test: `tests/unit/src/logical.test.ts`
+- `functions/src/plain/number/probability.ts` → Expected test: `tests/unit/src/probability.test.ts`
+- `functions/src/plain/number/relational.ts` → Expected test: `tests/unit/src/relational.test.ts`
+- `functions/src/plain/number/trigonometry.ts` → Expected test: `tests/unit/src/trigonometry.test.ts`
+- `functions/src/plain/number/utils.ts` → Expected test: `tests/unit/src/utils.test.ts`
+- `functions/src/probability/bernoulli.ts` → Expected test: `tests/unit/src/bernoulli.test.ts`
+- `functions/src/probability/combinations.ts` → Expected test: `tests/unit/src/combinations.test.ts`
+- `functions/src/probability/combinationsWithRep.ts` → Expected test: `tests/unit/src/combinationsWithRep.test.ts`
+- `functions/src/probability/factorial.ts` → Expected test: `tests/unit/src/factorial.test.ts`
+- `functions/src/probability/gamma.ts` → Expected test: `tests/unit/src/gamma.test.ts`
+- `functions/src/probability/kldivergence.ts` → Expected test: `tests/unit/src/kldivergence.test.ts`
+- `functions/src/probability/lgamma.ts` → Expected test: `tests/unit/src/lgamma.test.ts`
+- `functions/src/probability/multinomial.ts` → Expected test: `tests/unit/src/multinomial.test.ts`
+- `functions/src/probability/permutations.ts` → Expected test: `tests/unit/src/permutations.test.ts`
+- `functions/src/probability/pickRandom.ts` → Expected test: `tests/unit/src/pickRandom.test.ts`
+- `functions/src/probability/random.ts` → Expected test: `tests/unit/src/random.test.ts`
+- `functions/src/probability/randomInt.ts` → Expected test: `tests/unit/src/randomInt.test.ts`
+- `functions/src/probability/util/randomMatrix.ts` → Expected test: `tests/unit/src/randomMatrix.test.ts`
+- `functions/src/probability/util/seededRNG.ts` → Expected test: `tests/unit/src/seededRNG.test.ts`
+- `functions/src/relational/compare.ts` → Expected test: `tests/unit/src/compare.test.ts`
+- `functions/src/relational/compareNatural.ts` → Expected test: `tests/unit/src/compareNatural.test.ts`
+- `functions/src/relational/compareText.ts` → Expected test: `tests/unit/src/compareText.test.ts`
+- `functions/src/relational/compareUnits.ts` → Expected test: `tests/unit/src/compareUnits.test.ts`
+- `functions/src/relational/deepEqual.ts` → Expected test: `tests/unit/src/deepEqual.test.ts`
+- `functions/src/relational/equal.ts` → Expected test: `tests/unit/src/equal.test.ts`
+- `functions/src/relational/equalScalar.ts` → Expected test: `tests/unit/src/equalScalar.test.ts`
+- `functions/src/relational/equalText.ts` → Expected test: `tests/unit/src/equalText.test.ts`
+- `functions/src/relational/larger.ts` → Expected test: `tests/unit/src/larger.test.ts`
+- `functions/src/relational/largerEq.ts` → Expected test: `tests/unit/src/largerEq.test.ts`
+- `functions/src/relational/smaller.ts` → Expected test: `tests/unit/src/smaller.test.ts`
+- `functions/src/relational/smallerEq.ts` → Expected test: `tests/unit/src/smallerEq.test.ts`
+- `functions/src/relational/unequal.ts` → Expected test: `tests/unit/src/unequal.test.ts`
+- `functions/src/set/setCartesian.ts` → Expected test: `tests/unit/src/setCartesian.test.ts`
+- `functions/src/set/setDifference.ts` → Expected test: `tests/unit/src/setDifference.test.ts`
+- `functions/src/set/setDistinct.ts` → Expected test: `tests/unit/src/setDistinct.test.ts`
+- `functions/src/set/setIntersect.ts` → Expected test: `tests/unit/src/setIntersect.test.ts`
+- `functions/src/set/setIsSubset.ts` → Expected test: `tests/unit/src/setIsSubset.test.ts`
+- `functions/src/set/setMultiplicity.ts` → Expected test: `tests/unit/src/setMultiplicity.test.ts`
+- `functions/src/set/setPowerset.ts` → Expected test: `tests/unit/src/setPowerset.test.ts`
+- `functions/src/set/setSize.ts` → Expected test: `tests/unit/src/setSize.test.ts`
+- `functions/src/set/setSymDifference.ts` → Expected test: `tests/unit/src/setSymDifference.test.ts`
+- `functions/src/set/setUnion.ts` → Expected test: `tests/unit/src/setUnion.test.ts`
+- `functions/src/shared/types.ts` → Expected test: `tests/unit/src/types.test.ts`
+- `functions/src/signal/freqz.ts` → Expected test: `tests/unit/src/freqz.test.ts`
+- `functions/src/signal/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `functions/src/signal/zpk2tf.ts` → Expected test: `tests/unit/src/zpk2tf.test.ts`
+- `functions/src/special/erf.ts` → Expected test: `tests/unit/src/erf.test.ts`
+- `functions/src/special/zeta.ts` → Expected test: `tests/unit/src/zeta.test.ts`
+- `functions/src/statistics/corr.ts` → Expected test: `tests/unit/src/corr.test.ts`
+- `functions/src/statistics/cumsum.ts` → Expected test: `tests/unit/src/cumsum.test.ts`
+- `functions/src/statistics/mad.ts` → Expected test: `tests/unit/src/mad.test.ts`
+- `functions/src/statistics/max.ts` → Expected test: `tests/unit/src/max.test.ts`
+- `functions/src/statistics/mean.ts` → Expected test: `tests/unit/src/mean.test.ts`
+- `functions/src/statistics/median.ts` → Expected test: `tests/unit/src/median.test.ts`
+- `functions/src/statistics/min.ts` → Expected test: `tests/unit/src/min.test.ts`
+- `functions/src/statistics/mode.ts` → Expected test: `tests/unit/src/mode.test.ts`
+- `functions/src/statistics/prod.ts` → Expected test: `tests/unit/src/prod.test.ts`
+- `functions/src/statistics/quantileSeq.ts` → Expected test: `tests/unit/src/quantileSeq.test.ts`
+- `functions/src/statistics/std.ts` → Expected test: `tests/unit/src/std.test.ts`
+- `functions/src/statistics/sum.ts` → Expected test: `tests/unit/src/sum.test.ts`
+- `functions/src/statistics/utils/improveErrorMessage.ts` → Expected test: `tests/unit/src/improveErrorMessage.test.ts`
+- `functions/src/statistics/variance.ts` → Expected test: `tests/unit/src/variance.test.ts`
+- `functions/src/string/bin.ts` → Expected test: `tests/unit/src/bin.test.ts`
+- `functions/src/string/format.ts` → Expected test: `tests/unit/src/format.test.ts`
+- `functions/src/string/hex.ts` → Expected test: `tests/unit/src/hex.test.ts`
+- `functions/src/string/oct.ts` → Expected test: `tests/unit/src/oct.test.ts`
+- `functions/src/string/print.ts` → Expected test: `tests/unit/src/print.test.ts`
+- `functions/src/trigonometry/acos.ts` → Expected test: `tests/unit/src/acos.test.ts`
+- `functions/src/trigonometry/acosh.ts` → Expected test: `tests/unit/src/acosh.test.ts`
+- `functions/src/trigonometry/acot.ts` → Expected test: `tests/unit/src/acot.test.ts`
+- `functions/src/trigonometry/acoth.ts` → Expected test: `tests/unit/src/acoth.test.ts`
+- `functions/src/trigonometry/acsc.ts` → Expected test: `tests/unit/src/acsc.test.ts`
+- `functions/src/trigonometry/acsch.ts` → Expected test: `tests/unit/src/acsch.test.ts`
+- `functions/src/trigonometry/asec.ts` → Expected test: `tests/unit/src/asec.test.ts`
+- `functions/src/trigonometry/asech.ts` → Expected test: `tests/unit/src/asech.test.ts`
+- `functions/src/trigonometry/asin.ts` → Expected test: `tests/unit/src/asin.test.ts`
+- `functions/src/trigonometry/asinh.ts` → Expected test: `tests/unit/src/asinh.test.ts`
+- `functions/src/trigonometry/atan.ts` → Expected test: `tests/unit/src/atan.test.ts`
+- `functions/src/trigonometry/atan2.ts` → Expected test: `tests/unit/src/atan2.test.ts`
+- `functions/src/trigonometry/atanh.ts` → Expected test: `tests/unit/src/atanh.test.ts`
+- `functions/src/trigonometry/cos.ts` → Expected test: `tests/unit/src/cos.test.ts`
+- `functions/src/trigonometry/cosh.ts` → Expected test: `tests/unit/src/cosh.test.ts`
+- `functions/src/trigonometry/cot.ts` → Expected test: `tests/unit/src/cot.test.ts`
+- `functions/src/trigonometry/coth.ts` → Expected test: `tests/unit/src/coth.test.ts`
+- `functions/src/trigonometry/csc.ts` → Expected test: `tests/unit/src/csc.test.ts`
+- `functions/src/trigonometry/csch.ts` → Expected test: `tests/unit/src/csch.test.ts`
+- `functions/src/trigonometry/sec.ts` → Expected test: `tests/unit/src/sec.test.ts`
+- `functions/src/trigonometry/sech.ts` → Expected test: `tests/unit/src/sech.test.ts`
+- `functions/src/trigonometry/sin.ts` → Expected test: `tests/unit/src/sin.test.ts`
+- `functions/src/trigonometry/sinh.ts` → Expected test: `tests/unit/src/sinh.test.ts`
+- `functions/src/trigonometry/tan.ts` → Expected test: `tests/unit/src/tan.test.ts`
+- `functions/src/trigonometry/tanh.ts` → Expected test: `tests/unit/src/tanh.test.ts`
+- `functions/src/trigonometry/trigUnit.ts` → Expected test: `tests/unit/src/trigUnit.test.ts`
+- `functions/src/type/bigint.ts` → Expected test: `tests/unit/src/bigint.test.ts`
+- `functions/src/type/bignumber/BigNumber.ts` → Expected test: `tests/unit/src/BigNumber.test.ts`
+- `functions/src/type/bignumber/function/bignumber.ts` → Expected test: `tests/unit/src/bignumber.test.ts`
+- `functions/src/type/boolean.ts` → Expected test: `tests/unit/src/boolean.test.ts`
+- `functions/src/type/chain/Chain.ts` → Expected test: `tests/unit/src/Chain.test.ts`
+- `functions/src/type/chain/function/chain.ts` → Expected test: `tests/unit/src/chain.test.ts`
+- `functions/src/type/complex/Complex.ts` → Expected test: `tests/unit/src/Complex.test.ts`
+- `functions/src/type/complex/function/complex.ts` → Expected test: `tests/unit/src/complex.test.ts`
+- `functions/src/type/fraction/Fraction.ts` → Expected test: `tests/unit/src/Fraction.test.ts`
+- `functions/src/type/fraction/function/fraction.ts` → Expected test: `tests/unit/src/fraction.test.ts`
+- `functions/src/type/local/Complex.ts` → Expected test: `tests/unit/src/Complex.test.ts`
+- `functions/src/type/local/Decimal.ts` → Expected test: `tests/unit/src/Decimal.test.ts`
+- `functions/src/type/local/Fraction.ts` → Expected test: `tests/unit/src/Fraction.test.ts`
+- `functions/src/type/local/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `functions/src/type/matrix/DenseMatrix.ts` → Expected test: `tests/unit/src/DenseMatrix.test.ts`
+- `functions/src/type/matrix/FibonacciHeap.ts` → Expected test: `tests/unit/src/FibonacciHeap.test.ts`
+- `functions/src/type/matrix/ImmutableDenseMatrix.ts` → Expected test: `tests/unit/src/ImmutableDenseMatrix.test.ts`
+- `functions/src/type/matrix/Matrix.ts` → Expected test: `tests/unit/src/Matrix.test.ts`
+- `functions/src/type/matrix/MatrixIndex.ts` → Expected test: `tests/unit/src/MatrixIndex.test.ts`
+- `functions/src/type/matrix/Range.ts` → Expected test: `tests/unit/src/Range.test.ts`
+- `functions/src/type/matrix/Spa.ts` → Expected test: `tests/unit/src/Spa.test.ts`
+- `functions/src/type/matrix/SparseMatrix.ts` → Expected test: `tests/unit/src/SparseMatrix.test.ts`
+- `functions/src/type/matrix/function/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `functions/src/type/matrix/function/matrix.ts` → Expected test: `tests/unit/src/matrix.test.ts`
+- `functions/src/type/matrix/function/sparse.ts` → Expected test: `tests/unit/src/sparse.test.ts`
+- `functions/src/type/matrix/types.ts` → Expected test: `tests/unit/src/types.test.ts`
+- `functions/src/type/matrix/utils/broadcast.ts` → Expected test: `tests/unit/src/broadcast.test.ts`
+- `functions/src/type/matrix/utils/matAlgo01xDSid.ts` → Expected test: `tests/unit/src/matAlgo01xDSid.test.ts`
+- `functions/src/type/matrix/utils/matAlgo02xDS0.ts` → Expected test: `tests/unit/src/matAlgo02xDS0.test.ts`
+- `functions/src/type/matrix/utils/matAlgo03xDSf.ts` → Expected test: `tests/unit/src/matAlgo03xDSf.test.ts`
+- `functions/src/type/matrix/utils/matAlgo04xSidSid.ts` → Expected test: `tests/unit/src/matAlgo04xSidSid.test.ts`
+- `functions/src/type/matrix/utils/matAlgo05xSfSf.ts` → Expected test: `tests/unit/src/matAlgo05xSfSf.test.ts`
+- `functions/src/type/matrix/utils/matAlgo06xS0S0.ts` → Expected test: `tests/unit/src/matAlgo06xS0S0.test.ts`
+- `functions/src/type/matrix/utils/matAlgo07xSSf.ts` → Expected test: `tests/unit/src/matAlgo07xSSf.test.ts`
+- `functions/src/type/matrix/utils/matAlgo08xS0Sid.ts` → Expected test: `tests/unit/src/matAlgo08xS0Sid.test.ts`
+- `functions/src/type/matrix/utils/matAlgo09xS0Sf.ts` → Expected test: `tests/unit/src/matAlgo09xS0Sf.test.ts`
+- `functions/src/type/matrix/utils/matAlgo10xSids.ts` → Expected test: `tests/unit/src/matAlgo10xSids.test.ts`
+- `functions/src/type/matrix/utils/matAlgo11xS0s.ts` → Expected test: `tests/unit/src/matAlgo11xS0s.test.ts`
+- `functions/src/type/matrix/utils/matAlgo12xSfs.ts` → Expected test: `tests/unit/src/matAlgo12xSfs.test.ts`
+- `functions/src/type/matrix/utils/matAlgo13xDD.ts` → Expected test: `tests/unit/src/matAlgo13xDD.test.ts`
+- `functions/src/type/matrix/utils/matAlgo14xDs.ts` → Expected test: `tests/unit/src/matAlgo14xDs.test.ts`
+- `functions/src/type/matrix/utils/matrixAlgorithmSuite.ts` → Expected test: `tests/unit/src/matrixAlgorithmSuite.test.ts`
+- `functions/src/type/number.ts` → Expected test: `tests/unit/src/number.test.ts`
+- `functions/src/type/resultset/ResultSet.ts` → Expected test: `tests/unit/src/ResultSet.test.ts`
+- `functions/src/type/string.ts` → Expected test: `tests/unit/src/string.test.ts`
+- `functions/src/type/unit/Unit.ts` → Expected test: `tests/unit/src/Unit.test.ts`
+- `functions/src/type/unit/function/createUnit.ts` → Expected test: `tests/unit/src/createUnit.test.ts`
+- `functions/src/type/unit/function/splitUnit.ts` → Expected test: `tests/unit/src/splitUnit.test.ts`
+- `functions/src/type/unit/function/unit.ts` → Expected test: `tests/unit/src/unit.test.ts`
+- `functions/src/type/unit/physicalConstants.ts` → Expected test: `tests/unit/src/physicalConstants.test.ts`
+- `functions/src/types.ts` → Expected test: `tests/unit/src/types.test.ts`
+- `functions/src/unit/to.ts` → Expected test: `tests/unit/src/to.test.ts`
+- `functions/src/unit/toBest.ts` → Expected test: `tests/unit/src/toBest.test.ts`
+- `functions/src/utils/array.ts` → Expected test: `tests/unit/src/array.test.ts`
+- `functions/src/utils/bigint.ts` → Expected test: `tests/unit/src/bigint.test.ts`
+- `functions/src/utils/bignumber/bitwise.ts` → Expected test: `tests/unit/src/bitwise.test.ts`
+- `functions/src/utils/bignumber/constants.ts` → Expected test: `tests/unit/src/constants.test.ts`
+- `functions/src/utils/bignumber/formatter.ts` → Expected test: `tests/unit/src/formatter.test.ts`
+- `functions/src/utils/bignumber/nearlyEqual.ts` → Expected test: `tests/unit/src/nearlyEqual.test.ts`
+- `functions/src/utils/clone.ts` → Expected test: `tests/unit/src/clone.test.ts`
+- `functions/src/utils/collection.ts` → Expected test: `tests/unit/src/collection.test.ts`
+- `functions/src/utils/complex.ts` → Expected test: `tests/unit/src/complex.test.ts`
+- `functions/src/utils/customs.d.ts` → Expected test: `tests/unit/src/customs.d.test.ts`
+- `functions/src/utils/customs.ts` → Expected test: `tests/unit/src/customs.test.ts`
+- `functions/src/utils/emitter.ts` → Expected test: `tests/unit/src/emitter.test.ts`
+- `functions/src/utils/factory.ts` → Expected test: `tests/unit/src/factory.test.ts`
+- `functions/src/utils/function.ts` → Expected test: `tests/unit/src/function.test.ts`
+- `functions/src/utils/hasNumericValue.ts` → Expected test: `tests/unit/src/hasNumericValue.test.ts`
+- `functions/src/utils/is.ts` → Expected test: `tests/unit/src/is.test.ts`
+- `functions/src/utils/isBounded.ts` → Expected test: `tests/unit/src/isBounded.test.ts`
+- `functions/src/utils/isFinite.ts` → Expected test: `tests/unit/src/isFinite.test.ts`
+- `functions/src/utils/isInteger.ts` → Expected test: `tests/unit/src/isInteger.test.ts`
+- `functions/src/utils/isNaN.ts` → Expected test: `tests/unit/src/isNaN.test.ts`
+- `functions/src/utils/isNegative.ts` → Expected test: `tests/unit/src/isNegative.test.ts`
+- `functions/src/utils/isNumeric.ts` → Expected test: `tests/unit/src/isNumeric.test.ts`
+- `functions/src/utils/isPositive.ts` → Expected test: `tests/unit/src/isPositive.test.ts`
+- `functions/src/utils/isPrime.ts` → Expected test: `tests/unit/src/isPrime.test.ts`
+- `functions/src/utils/isZero.ts` → Expected test: `tests/unit/src/isZero.test.ts`
+- `functions/src/utils/latex.d.ts` → Expected test: `tests/unit/src/latex.d.test.ts`
+- `functions/src/utils/latex.ts` → Expected test: `tests/unit/src/latex.test.ts`
+- `functions/src/utils/log.ts` → Expected test: `tests/unit/src/log.test.ts`
+- `functions/src/utils/lruQueue.ts` → Expected test: `tests/unit/src/lruQueue.test.ts`
+- `functions/src/utils/map.ts` → Expected test: `tests/unit/src/map.test.ts`
+- `functions/src/utils/node.ts` → Expected test: `tests/unit/src/node.test.ts`
+- `functions/src/utils/noop.ts` → Expected test: `tests/unit/src/noop.test.ts`
+- `functions/src/utils/number.ts` → Expected test: `tests/unit/src/number.test.ts`
+- `functions/src/utils/numeric.ts` → Expected test: `tests/unit/src/numeric.test.ts`
+- `functions/src/utils/object.ts` → Expected test: `tests/unit/src/object.test.ts`
+- `functions/src/utils/optimizeCallback.ts` → Expected test: `tests/unit/src/optimizeCallback.test.ts`
+- `functions/src/utils/parseNumber.ts` → Expected test: `tests/unit/src/parseNumber.test.ts`
+- `functions/src/utils/print.ts` → Expected test: `tests/unit/src/print.test.ts`
+- `functions/src/utils/product.ts` → Expected test: `tests/unit/src/product.test.ts`
+- `functions/src/utils/scope.ts` → Expected test: `tests/unit/src/scope.test.ts`
+- `functions/src/utils/shared.ts` → Expected test: `tests/unit/src/shared.test.ts`
+- `functions/src/utils/snapshot.ts` → Expected test: `tests/unit/src/snapshot.test.ts`
+- `functions/src/utils/string.d.ts` → Expected test: `tests/unit/src/string.d.test.ts`
+- `functions/src/utils/string.ts` → Expected test: `tests/unit/src/string.test.ts`
+- `functions/src/utils/switch.ts` → Expected test: `tests/unit/src/switch.test.ts`
+- `functions/src/utils/typeOf.ts` → Expected test: `tests/unit/src/typeOf.test.ts`
+- `functions/src/wasm/MatrixWasmBridge.ts` → Expected test: `tests/unit/src/MatrixWasmBridge.test.ts`
+- `functions/src/wasm/WasmLoader.ts` → Expected test: `tests/unit/src/WasmLoader.test.ts`
+- `functions/src/wasm/algebra/decomposition.ts` → Expected test: `tests/unit/src/decomposition.test.ts`
+- `functions/src/wasm/algebra/equations.ts` → Expected test: `tests/unit/src/equations.test.ts`
+- `functions/src/wasm/algebra/polynomial.ts` → Expected test: `tests/unit/src/polynomial.test.ts`
+- `functions/src/wasm/algebra/schur.ts` → Expected test: `tests/unit/src/schur.test.ts`
+- `functions/src/wasm/algebra/solver.ts` → Expected test: `tests/unit/src/solver.test.ts`
+- `functions/src/wasm/algebra/sparse/amd.ts` → Expected test: `tests/unit/src/amd.test.ts`
+- `functions/src/wasm/algebra/sparse/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/algebra/sparse/utilities.ts` → Expected test: `tests/unit/src/utilities.test.ts`
+- `functions/src/wasm/algebra/sparseChol.ts` → Expected test: `tests/unit/src/sparseChol.test.ts`
+- `functions/src/wasm/algebra/sparseLu.ts` → Expected test: `tests/unit/src/sparseLu.test.ts`
+- `functions/src/wasm/arithmetic/advanced.ts` → Expected test: `tests/unit/src/advanced.test.ts`
+- `functions/src/wasm/arithmetic/basic.ts` → Expected test: `tests/unit/src/basic.test.ts`
+- `functions/src/wasm/arithmetic/logarithmic.ts` → Expected test: `tests/unit/src/logarithmic.test.ts`
+- `functions/src/wasm/bitwise/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/combinatorics/basic.ts` → Expected test: `tests/unit/src/basic.test.ts`
+- `functions/src/wasm/complex/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/geometry/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `functions/src/wasm/logical/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/matrix/algorithms.ts` → Expected test: `tests/unit/src/algorithms.test.ts`
+- `functions/src/wasm/matrix/basic.ts` → Expected test: `tests/unit/src/basic.test.ts`
+- `functions/src/wasm/matrix/broadcast.ts` → Expected test: `tests/unit/src/broadcast.test.ts`
+- `functions/src/wasm/matrix/complexEigs.ts` → Expected test: `tests/unit/src/complexEigs.test.ts`
+- `functions/src/wasm/matrix/eigs.ts` → Expected test: `tests/unit/src/eigs.test.ts`
+- `functions/src/wasm/matrix/expm.ts` → Expected test: `tests/unit/src/expm.test.ts`
+- `functions/src/wasm/matrix/functions.ts` → Expected test: `tests/unit/src/functions.test.ts`
+- `functions/src/wasm/matrix/linalg.ts` → Expected test: `tests/unit/src/linalg.test.ts`
+- `functions/src/wasm/matrix/multiply.ts` → Expected test: `tests/unit/src/multiply.test.ts`
+- `functions/src/wasm/matrix/rotation.ts` → Expected test: `tests/unit/src/rotation.test.ts`
+- `functions/src/wasm/matrix/sparse.ts` → Expected test: `tests/unit/src/sparse.test.ts`
+- `functions/src/wasm/matrix/sqrtm.ts` → Expected test: `tests/unit/src/sqrtm.test.ts`
+- `functions/src/wasm/numeric/calculus.ts` → Expected test: `tests/unit/src/calculus.test.ts`
+- `functions/src/wasm/numeric/interpolation.ts` → Expected test: `tests/unit/src/interpolation.test.ts`
+- `functions/src/wasm/numeric/ode.ts` → Expected test: `tests/unit/src/ode.test.ts`
+- `functions/src/wasm/numeric/rational.ts` → Expected test: `tests/unit/src/rational.test.ts`
+- `functions/src/wasm/numeric/rootfinding.ts` → Expected test: `tests/unit/src/rootfinding.test.ts`
+- `functions/src/wasm/plain/arithmetic.ts` → Expected test: `tests/unit/src/arithmetic.test.ts`
+- `functions/src/wasm/plain/bitwise.ts` → Expected test: `tests/unit/src/bitwise.test.ts`
+- `functions/src/wasm/plain/combinations.ts` → Expected test: `tests/unit/src/combinations.test.ts`
+- `functions/src/wasm/plain/constants.ts` → Expected test: `tests/unit/src/constants.test.ts`
+- `functions/src/wasm/plain/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `functions/src/wasm/plain/logical.ts` → Expected test: `tests/unit/src/logical.test.ts`
+- `functions/src/wasm/plain/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/plain/probability.ts` → Expected test: `tests/unit/src/probability.test.ts`
+- `functions/src/wasm/plain/trigonometry.ts` → Expected test: `tests/unit/src/trigonometry.test.ts`
+- `functions/src/wasm/plain/utils.ts` → Expected test: `tests/unit/src/utils.test.ts`
+- `functions/src/wasm/probability/distributions.ts` → Expected test: `tests/unit/src/distributions.test.ts`
+- `functions/src/wasm/relational/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/set/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/signal/fft.ts` → Expected test: `tests/unit/src/fft.test.ts`
+- `functions/src/wasm/signal/processing.ts` → Expected test: `tests/unit/src/processing.test.ts`
+- `functions/src/wasm/simd/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/special/functions.ts` → Expected test: `tests/unit/src/functions.test.ts`
+- `functions/src/wasm/statistics/basic.ts` → Expected test: `tests/unit/src/basic.test.ts`
+- `functions/src/wasm/statistics/select.ts` → Expected test: `tests/unit/src/select.test.ts`
+- `functions/src/wasm/string/operations.ts` → Expected test: `tests/unit/src/operations.test.ts`
+- `functions/src/wasm/trigonometry/basic.ts` → Expected test: `tests/unit/src/basic.test.ts`
+- `functions/src/wasm/unit/conversion.ts` → Expected test: `tests/unit/src/conversion.test.ts`
+- `functions/src/wasm/utils/checks.ts` → Expected test: `tests/unit/src/checks.test.ts`
+- `functions/src/wasm/utils/constants.ts` → Expected test: `tests/unit/src/constants.test.ts`
+- `functions/src/wasm/utils/workPtrValidation.ts` → Expected test: `tests/unit/src/workPtrValidation.test.ts`
+- `matrix/src/backends/MatrixWasmBridge.ts` → Expected test: `tests/unit/src/MatrixWasmBridge.test.ts`
 - `matrix/src/backends/WasmLoader.ts` → Expected test: `tests/unit/src/WasmLoader.test.ts`
+- `matrix/src/matrix.ts` → Expected test: `tests/unit/src/matrix.test.ts`
+- `matrix/src/types.ts` → Expected test: `tests/unit/src/types.test.ts`
+- `matrix/src/types/parallel.d.ts` → Expected test: `tests/unit/src/parallel.d.test.ts`
+- `parallel/src/WorkerPool.ts` → Expected test: `tests/unit/src/WorkerPool.test.ts`
 - `parallel/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `parallel/src/matrix.worker.ts` → Expected test: `tests/unit/src/matrix.worker.test.ts`
 - `parallel/src/operations/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 - `parallel/src/strategies/index.ts` → Expected test: `tests/unit/src/index.test.ts`
+- `parallel/src/workers/compute.worker.ts` → Expected test: `tests/unit/src/compute.worker.test.ts`
+- `workbook/src/cli.ts` → Expected test: `tests/unit/src/cli.test.ts`
 - `workbook/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 
 ---
@@ -63,27 +1276,46 @@ The following 34 source files are not directly imported by any test file:
 |-------------|------------|
 | `src/index.ts` | `compat.test.ts` |
 | `src/shims.ts` | `compat.test.ts`, `shims.test.ts` |
+| `src/config.ts` | `config.test.ts` |
 | `factory/factory.ts` | `factory.test.ts`, `version.test.ts` |
 | `factory/index.ts` | `factory.test.ts`, `version.test.ts` |
 | `src/index.ts` | `version.test.ts` |
+| `src/shared.ts` | `shared.test.ts` |
 | `typed/index.ts` | `version.test.ts` |
 | `typed/mathts-typed.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `version.test.ts` |
 | `typed/type-bridge.ts` | `type-bridge.test.ts`, `version.test.ts` |
 | `types/bignumber.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `bignumber-math.test.ts`, `bignumber.test.ts`, `version.test.ts` |
 | `types/complex.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `complex.test.ts`, `version.test.ts` |
 | `types/fraction.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `fraction.test.ts`, `version.test.ts` |
+| `src/utils.ts` | `utils.test.ts` |
+| `compiler/compile.ts` | `compile.test.ts` |
+| `evaluator/evaluate.ts` | `evaluate.test.ts` |
+| `factories/evaluate.ts` | `evaluate.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `factories/index.ts` | `factories-final.test.ts`, `factories-leaf.test.ts`, `factories-matrix.test.ts`, `factories-tier2.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `factories/matrix-bridge.ts` | `factories-matrix.test.ts`, `sparse-bridge.test.ts` |
 | `src/index.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `signal/conv.ts` | `conv.test.ts` |
+| `signal/fft.ts` | `fft.test.ts` |
 | `typed/arithmetic.ts` | `arithmetic-extended.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/combinatorics.ts` | `combinatorics.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/distributions.ts` | `distributions.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/geometry.ts` | `geometry.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/index.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/signal.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/statistics.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/integration.ts` | `integration.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/interpolation.ts` | `interpolation.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/signal.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `signal-extended.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/special.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `special.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/statistics.ts` | `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `statistics-selection.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/trigonometry.ts` | `arithmetic-extended.test.ts`, `parallel-arithmetic.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `backends/Backend.ts` | `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
-| `backends/BackendManager.ts` | `typed-operations.test.ts`, `loading.test.ts` |
+| `typed/typed-bridge.ts` | `typed-bridge.test.ts` |
+| `backends/Backend.ts` | `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
+| `backends/BackendManager.ts` | `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
 | `backends/GPUBackend.ts` | `initialization.test.ts`, `operations.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
 | `backends/GPUMatrixBackend.ts` | `typed-operations.test.ts`, `loading.test.ts` |
 | `backends/JSBackend.ts` | `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `operations.test.ts` |
 | `backends/ParallelBackend.ts` | `typed-operations.test.ts`, `loading.test.ts` |
+| `backends/RustWASMBackend.ts` | `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
+| `backends/RustWasmLoader.ts` | `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
 | `backends/WASMBackend.ts` | `typed-operations.test.ts`, `accuracy.test.ts`, `loading.test.ts`, `operations.test.ts` |
 | `gpu/BatchExecutor.ts` | `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
 | `gpu/BufferPool.ts` | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
@@ -94,22 +1326,31 @@ The following 34 source files are not directly imported by any test file:
 | `gpu/index.ts` | `typed-operations.test.ts`, `loading.test.ts` |
 | `backends/index.ts` | `typed-operations.test.ts`, `loading.test.ts` |
 | `wasm/detect.ts` | `typed-operations.test.ts`, `loading.test.ts` |
+| `wasm/fft-wasm.ts` | `typed-operations.test.ts`, `fft-wasm.test.ts`, `loading.test.ts` |
 | `wasm/index.ts` | `typed-operations.test.ts`, `loading.test.ts` |
 | `src/config.ts` | `config.test.ts` |
 | `src/index.ts` | `typed-operations.test.ts` |
+| `operations/eig-wasm.ts` | `eig-wasm.test.ts`, `typed-operations.test.ts` |
+| `operations/eig.ts` | `eig.test.ts`, `typed-operations.test.ts` |
+| `operations/index.ts` | `typed-operations.test.ts` |
+| `operations/svd-wasm.ts` | `typed-operations.test.ts` |
+| `operations/svd.ts` | `svd.test.ts`, `typed-operations.test.ts` |
 | `src/parallel-matrix.ts` | `typed-operations.test.ts` |
 | `src/typed-operations.ts` | `typed-operations.test.ts` |
-| `types/DenseMatrix.ts` | `DenseMatrix.test.ts`, `JSBackend.test.ts`, `operations.test.ts`, `SparseMatrix.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `operations.test.ts` |
+| `types/DenseMatrix.ts` | `DenseMatrix.test.ts`, `JSBackend.test.ts`, `operations.test.ts`, `SparseMatrix.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `operations.test.ts`, `rust-wasm.test.ts` |
 | `types/Matrix.ts` | `typed-operations.test.ts` |
 | `types/SparseMatrix.ts` | `operations.test.ts`, `SparseMatrix.test.ts`, `typed-operations.test.ts` |
 | `types/index.ts` | `typed-operations.test.ts` |
+| `src/index.ts` | `index.test.ts`, `robust-types.test.ts` |
 | `src/index.ts` | `index.test.ts` |
-| `src/index.ts` | `index.test.ts` |
-| `src/ComputePool.ts` | `ComputePool.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts` |
-| `operations/elementwise.ts` | `elementwise.test.ts` |
+| `src/ComputePool.ts` | `benchmark.test.ts`, `ComputePool.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts` |
+| `src/ParallelMatrix.ts` | `ParallelMatrix.test.ts` |
+| `operations/eig.ts` | `parallel-eig.test.ts` |
+| `operations/elementwise.ts` | `benchmark.test.ts`, `elementwise.test.ts` |
+| `operations/fft.ts` | `fft.test.ts` |
 | `operations/map.ts` | `map-extended.test.ts`, `map.test.ts` |
-| `operations/matmul.ts` | `matmul.test.ts` |
-| `operations/reduce.ts` | `reduce.test.ts` |
+| `operations/matmul.ts` | `benchmark.test.ts`, `matmul.test.ts` |
+| `operations/reduce.ts` | `benchmark.test.ts`, `reduce.test.ts` |
 | `strategies/chunk.ts` | `chunk.test.ts`, `chunk-extended.test.ts` |
 | `strategies/threshold.ts` | `threshold.test.ts` |
 | `src/executor.ts` | `executor.test.ts` |
@@ -124,10 +1365,11 @@ The following 34 source files are not directly imported by any test file:
 | Test File | Imports from Source |
 |-----------|---------------------|
 | `tests/index.test.ts` | 1 files |
+| `tests/robust-types.test.ts` | 1 files |
 | `tests/index.test.ts` | 1 files |
-| `tests/config.test.ts` | 0 files |
+| `tests/config.test.ts` | 1 files |
 | `factory/factory.test.ts` | 2 files |
-| `tests/shared.test.ts` | 0 files |
+| `tests/shared.test.ts` | 1 files |
 | `typed/mathts-typed-extended.test.ts` | 4 files |
 | `typed/mathts-typed.test.ts` | 4 files |
 | `typed/type-bridge.test.ts` | 4 files |
@@ -135,11 +1377,12 @@ The following 34 source files are not directly imported by any test file:
 | `types/bignumber.test.ts` | 1 files |
 | `types/complex.test.ts` | 1 files |
 | `types/fraction.test.ts` | 1 files |
-| `tests/utils.test.ts` | 0 files |
+| `tests/utils.test.ts` | 1 files |
 | `tests/version.test.ts` | 9 files |
 | `tests/config.test.ts` | 1 files |
-| `decomposition/eig.test.ts` | 0 files |
-| `decomposition/svd.test.ts` | 0 files |
+| `decomposition/eig-wasm.test.ts` | 1 files |
+| `decomposition/eig.test.ts` | 1 files |
+| `decomposition/svd.test.ts` | 1 files |
 | `tests/DenseMatrix.test.ts` | 1 files |
 | `gpu/initialization.test.ts` | 5 files |
 | `gpu/integration.test.ts` | 5 files |
@@ -147,76 +1390,59 @@ The following 34 source files are not directly imported by any test file:
 | `tests/JSBackend.test.ts` | 3 files |
 | `sparse/operations.test.ts` | 2 files |
 | `sparse/SparseMatrix.test.ts` | 2 files |
-| `tests/typed-operations.test.ts` | 24 files |
+| `tests/typed-operations.test.ts` | 32 files |
 | `wasm/accuracy.test.ts` | 2 files |
-| `wasm/loading.test.ts` | 17 files |
+| `wasm/fft-wasm.test.ts` | 1 files |
+| `wasm/loading.test.ts` | 20 files |
 | `wasm/operations.test.ts` | 3 files |
+| `wasm/rust-wasm.test.ts` | 5 files |
 | `tests/arithmetic-extended.test.ts` | 2 files |
-| `tests/parallel-arithmetic.test.ts` | 6 files |
-| `tests/parallel-signal.test.ts` | 6 files |
-| `signal/conv.test.ts` | 0 files |
-| `signal/fft.test.ts` | 0 files |
+| `tests/combinatorics.test.ts` | 1 files |
+| `tests/distributions.test.ts` | 1 files |
+| `tests/evaluate.test.ts` | 1 files |
+| `tests/factories-final.test.ts` | 1 files |
+| `tests/factories-leaf.test.ts` | 1 files |
+| `tests/factories-matrix.test.ts` | 2 files |
+| `tests/factories-tier2.test.ts` | 1 files |
+| `tests/factories-tier4.test.ts` | 1 files |
+| `tests/geometry.test.ts` | 1 files |
+| `tests/integration.test.ts` | 1 files |
+| `tests/interpolation.test.ts` | 1 files |
+| `tests/parallel-arithmetic.test.ts` | 14 files |
+| `tests/parallel-signal.test.ts` | 14 files |
+| `signal/conv.test.ts` | 1 files |
+| `signal/fft.test.ts` | 1 files |
+| `tests/signal-extended.test.ts` | 1 files |
+| `tests/sparse-bridge.test.ts` | 1 files |
+| `tests/special.test.ts` | 1 files |
 | `tests/statistics-extended.test.ts` | 1 files |
 | `tests/statistics-extended2.test.ts` | 1 files |
-| `tests/typed-arithmetic.test.ts` | 6 files |
-| `tests/typed-bridge.test.ts` | 0 files |
+| `tests/statistics-selection.test.ts` | 1 files |
+| `tests/typed-arithmetic.test.ts` | 14 files |
+| `tests/typed-bridge.test.ts` | 1 files |
+| `tests/compile.test.ts` | 1 files |
+| `tests/evaluate.test.ts` | 1 files |
+| `tests/benchmark.test.ts` | 4 files |
 | `tests/chunk.test.ts` | 1 files |
 | `tests/ComputePool.test.ts` | 1 files |
 | `operations/elementwise.test.ts` | 2 files |
+| `operations/fft.test.ts` | 1 files |
 | `operations/map-extended.test.ts` | 1 files |
 | `operations/map.test.ts` | 1 files |
 | `operations/matmul.test.ts` | 2 files |
+| `operations/parallel-eig.test.ts` | 1 files |
 | `operations/reduce.test.ts` | 1 files |
 | `operations/threshold.test.ts` | 2 files |
-| `tests/ParallelMatrix.test.ts` | 0 files |
+| `tests/ParallelMatrix.test.ts` | 1 files |
 | `strategies/chunk-extended.test.ts` | 1 files |
 | `tests/executor.test.ts` | 2 files |
 | `tests/graph.test.ts` | 2 files |
 | `tests/parser.test.ts` | 2 files |
 | `tests/compat.test.ts` | 2 files |
 | `tests/shims.test.ts` | 1 files |
+| `benchmark/performance.test.ts` | 0 files |
 | `integration/functions.test.ts` | 0 files |
 | `integration/instance.test.ts` | 0 files |
 | `wasm/parallel-processing.test.ts` | 0 files |
 | `wasm/typescript-integration.test.ts` | 0 files |
 | `wasm/wasm-loader.test.ts` | 0 files |
-
----
-
-## Rust WASM Backend Tests (`wasm-rust/`)
-
-The Rust WASM backend has its own test layer, separate from the Vitest suite.
-
-### Native Rust Tests
-
-```bash
-cargo test                      # Run all Rust unit tests in wasm-rust/
-cargo test --release            # Run with release optimizations
-cargo test -p mathts-wasm       # Run only the mathts-wasm crate tests
-```
-
-Rust tests live alongside source files (`#[cfg(test)]` modules inside each `.rs` file). They test Rust-level correctness for faer, rustfft, statrs, and libm integrations before WASM compilation.
-
-### JavaScript Integration Tests (Vitest)
-
-After `npm run build:wasm:rust`, the compiled binary is tested through the existing `matrix/` Vitest suite:
-
-| Test File | What It Covers |
-|-----------|---------------|
-| `wasm/loading.test.ts` | `WasmLoader` loads Rust binary, memory pool init |
-| `wasm/accuracy.test.ts` | Numerical accuracy vs JS reference implementation |
-| `wasm/operations.test.ts` | Rust-backed matrix multiply, LU, QR, SVD |
-| `wasm/typescript-integration.test.ts` | `MatrixWasmBridge` threshold dispatch |
-
-### Three-Way Benchmark
-
-```bash
-npm run bench:wasm              # Run full three-way benchmark
-```
-
-Compares Rust WASM vs AssemblyScript WASM vs pure JavaScript for a standard set of matrix operations at sizes 64×64, 256×256, 512×512, and 1024×1024. Results written to `test/benchmark/wasm-results.json`.
-
-Typical results (1024×1024 matrix multiply):
-- JavaScript: baseline
-- AssemblyScript WASM: ~2-5x faster
-- Rust WASM: ~5-25x faster

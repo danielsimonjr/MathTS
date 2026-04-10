@@ -39,6 +39,8 @@ new Complex(re: number, im: number)
 | `re` | `number` | Real part |
 | `im` | `number` | Imaginary part |
 
+Complex has **83 methods** including full trig, hyperbolic, and transcendental operations.
+
 #### Instance Methods
 
 | Method | Signature | Description |
@@ -175,7 +177,9 @@ import { BigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_PI, BIGNUMBER_E } f
 | `parse` | `(str: string) => BigNumber` | Parse decimal string |
 | `config` | `(opts: { precision?: number }) => void` | Configure precision |
 
-#### Instance Methods
+BigNumber has **96 methods** including full trig and transcendental support via decimal.js.
+
+#### Instance Methods — Arithmetic
 
 | Method | Signature | Description |
 |--------|-----------|-------------|
@@ -187,6 +191,39 @@ import { BigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_PI, BIGNUMBER_E } f
 | `abs` | `() => BigNumber` | Absolute value |
 | `pow` | `(n: number) => BigNumber` | Power |
 | `sqrt` | `() => BigNumber` | Square root |
+| `mod` | `(other: BigNumber) => BigNumber` | Modulo |
+
+#### Instance Methods — Trigonometric
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `sin` | `() => BigNumber` | Sine |
+| `cos` | `() => BigNumber` | Cosine |
+| `tan` | `() => BigNumber` | Tangent |
+| `asin` | `() => BigNumber` | Arc sine |
+| `acos` | `() => BigNumber` | Arc cosine |
+| `atan` | `() => BigNumber` | Arc tangent |
+| `sinh` | `() => BigNumber` | Hyperbolic sine |
+| `cosh` | `() => BigNumber` | Hyperbolic cosine |
+| `tanh` | `() => BigNumber` | Hyperbolic tangent |
+| `asinh` | `() => BigNumber` | Inverse hyperbolic sine |
+| `acosh` | `() => BigNumber` | Inverse hyperbolic cosine |
+| `atanh` | `() => BigNumber` | Inverse hyperbolic tangent |
+
+#### Instance Methods — Transcendental
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `exp` | `() => BigNumber` | e^x |
+| `ln` | `() => BigNumber` | Natural logarithm |
+| `log10` | `() => BigNumber` | Base-10 logarithm |
+| `log2` | `() => BigNumber` | Base-2 logarithm |
+| `cbrt` | `() => BigNumber` | Cube root |
+
+#### Instance Methods — Utility
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
 | `valueOf` | `() => number` | Convert to number |
 | `toString` | `() => string` | String representation |
 | `equals` | `(other: BigNumber) => boolean` | Equality |

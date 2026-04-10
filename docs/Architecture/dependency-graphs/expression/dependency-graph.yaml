@@ -1,15 +1,47 @@
 metadata:
-  name: "@mathts/expression"
-  version: 0.1.0
-  lastUpdated: "2026-04-04"
-  totalFiles: 331
-  totalModules: 8
-  totalExports: 480
+  name: "@danielsimonjr/mathts-expression"
+  version: 0.1.2
+  lastUpdated: "2026-04-10"
+  totalFiles: 391
+  totalModules: 10
+  totalExports: 558
 entryPoints:
   - file: src/index.ts
     type: main
     description: Expression parsing and evaluation for MathTS.
 modules:
+  compiler:
+    src/compiler/compile.ts:
+      description: Tree-walking AST compiler/evaluator for MathTS expressions.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/map.js
+          imports:
+            - ObjectWrappingMap
+        - file: ../utils/scope.js
+          imports:
+            - createSubScope
+      exports:
+        - compile
+      interfaces:
+        - Scope
+        - CompiledExpression
+      functions:
+        - compile
+    src/compiler/index.ts:
+      description: Package entry point for compiler (re-exports 1 symbols)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./compile.js
+          imports:
+            - compile
+          reExport: true
+      exports:
+        - compile
+      reExported:
+        - compile
   embeddedDocs:
     src/embeddedDocs/constants/e.ts:
       description: e module
@@ -1679,6 +1711,51 @@ modules:
         - compositionDocs
       constants:
         - compositionDocs
+    src/embeddedDocs/function/combinatorics/doubleFactorial.ts:
+      description: doubleFactorial module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - doubleFactorialDocs
+      constants:
+        - doubleFactorialDocs
+    src/embeddedDocs/function/combinatorics/fallingFactorial.ts:
+      description: fallingFactorial module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - fallingFactorialDocs
+      constants:
+        - fallingFactorialDocs
+    src/embeddedDocs/function/combinatorics/fibonacci.ts:
+      description: fibonacci module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - fibonacciDocs
+      constants:
+        - fibonacciDocs
+    src/embeddedDocs/function/combinatorics/lucas.ts:
+      description: lucas module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - lucasDocs
+      constants:
+        - lucasDocs
+    src/embeddedDocs/function/combinatorics/risingFactorial.ts:
+      description: risingFactorial module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - risingFactorialDocs
+      constants:
+        - risingFactorialDocs
     src/embeddedDocs/function/combinatorics/stirlingS2.ts:
       description: stirlingS2 module
       externalDependencies: []
@@ -1688,6 +1765,15 @@ modules:
         - stirlingS2Docs
       constants:
         - stirlingS2Docs
+    src/embeddedDocs/function/combinatorics/subfactorial.ts:
+      description: subfactorial module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - subfactorialDocs
+      constants:
+        - subfactorialDocs
     src/embeddedDocs/function/complex/arg.ts:
       description: arg module
       externalDependencies: []
@@ -1769,6 +1855,42 @@ modules:
         - parserDocs
       constants:
         - parserDocs
+    src/embeddedDocs/function/geometry/angle2D.ts:
+      description: angle2D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - angle2DDocs
+      constants:
+        - angle2DDocs
+    src/embeddedDocs/function/geometry/angle3D.ts:
+      description: angle3D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - angle3DDocs
+      constants:
+        - angle3DDocs
+    src/embeddedDocs/function/geometry/convexHull.ts:
+      description: convexHull module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - convexHullDocs
+      constants:
+        - convexHullDocs
+    src/embeddedDocs/function/geometry/cross3D.ts:
+      description: cross3D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - cross3DDocs
+      constants:
+        - cross3DDocs
     src/embeddedDocs/function/geometry/distance.ts:
       description: distance module
       externalDependencies: []
@@ -1778,6 +1900,51 @@ modules:
         - distanceDocs
       constants:
         - distanceDocs
+    src/embeddedDocs/function/geometry/distance2D.ts:
+      description: distance2D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - distance2DDocs
+      constants:
+        - distance2DDocs
+    src/embeddedDocs/function/geometry/distance3D.ts:
+      description: distance3D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - distance3DDocs
+      constants:
+        - distance3DDocs
+    src/embeddedDocs/function/geometry/distanceND.ts:
+      description: distanceND module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - distanceNDDocs
+      constants:
+        - distanceNDDocs
+    src/embeddedDocs/function/geometry/distancePointToLine2D.ts:
+      description: distancePointToLine2D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - distancePointToLine2DDocs
+      constants:
+        - distancePointToLine2DDocs
+    src/embeddedDocs/function/geometry/dot3D.ts:
+      description: dot3D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - dot3DDocs
+      constants:
+        - dot3DDocs
     src/embeddedDocs/function/geometry/intersect.ts:
       description: intersect module
       externalDependencies: []
@@ -1787,6 +1954,87 @@ modules:
         - intersectDocs
       constants:
         - intersectDocs
+    src/embeddedDocs/function/geometry/intersectLines2D.ts:
+      description: intersectLines2D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - intersectLines2DDocs
+      constants:
+        - intersectLines2DDocs
+    src/embeddedDocs/function/geometry/intersectSegments2D.ts:
+      description: intersectSegments2D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - intersectSegments2DDocs
+      constants:
+        - intersectSegments2DDocs
+    src/embeddedDocs/function/geometry/pointInPolygon.ts:
+      description: pointInPolygon module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - pointInPolygonDocs
+      constants:
+        - pointInPolygonDocs
+    src/embeddedDocs/function/geometry/polygonArea.ts:
+      description: polygonArea module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - polygonAreaDocs
+      constants:
+        - polygonAreaDocs
+    src/embeddedDocs/function/geometry/projectVector.ts:
+      description: projectVector module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - projectVectorDocs
+      constants:
+        - projectVectorDocs
+    src/embeddedDocs/function/geometry/reflectVector.ts:
+      description: reflectVector module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - reflectVectorDocs
+      constants:
+        - reflectVectorDocs
+    src/embeddedDocs/function/geometry/rotateVector2D.ts:
+      description: rotateVector2D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - rotateVector2DDocs
+      constants:
+        - rotateVector2DDocs
+    src/embeddedDocs/function/geometry/rotateVector3D.ts:
+      description: rotateVector3D module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - rotateVector3DDocs
+      constants:
+        - rotateVector3DDocs
+    src/embeddedDocs/function/geometry/triangleArea.ts:
+      description: triangleArea module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - triangleAreaDocs
+      constants:
+        - triangleAreaDocs
     src/embeddedDocs/function/logical/and.ts:
       description: and module
       externalDependencies: []
@@ -2192,6 +2440,87 @@ modules:
         - zerosDocs
       constants:
         - zerosDocs
+    src/embeddedDocs/function/numeric/cubicSpline.ts:
+      description: cubicSpline module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - cubicSplineDocs
+      constants:
+        - cubicSplineDocs
+    src/embeddedDocs/function/numeric/gaussQuad.ts:
+      description: gaussQuad module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - gaussQuadDocs
+      constants:
+        - gaussQuadDocs
+    src/embeddedDocs/function/numeric/hermiteInterp.ts:
+      description: hermiteInterp module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - hermiteInterpDocs
+      constants:
+        - hermiteInterpDocs
+    src/embeddedDocs/function/numeric/lagrangeInterp.ts:
+      description: lagrangeInterp module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - lagrangeInterpDocs
+      constants:
+        - lagrangeInterpDocs
+    src/embeddedDocs/function/numeric/linearInterp.ts:
+      description: linearInterp module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - linearInterpDocs
+      constants:
+        - linearInterpDocs
+    src/embeddedDocs/function/numeric/pchipInterp.ts:
+      description: pchipInterp module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - pchipInterpDocs
+      constants:
+        - pchipInterpDocs
+    src/embeddedDocs/function/numeric/polyFit.ts:
+      description: polyFit module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - polyFitDocs
+      constants:
+        - polyFitDocs
+    src/embeddedDocs/function/numeric/romberg.ts:
+      description: romberg module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - rombergDocs
+      constants:
+        - rombergDocs
+    src/embeddedDocs/function/numeric/simpson.ts:
+      description: simpson module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - simpsonDocs
+      constants:
+        - simpsonDocs
     src/embeddedDocs/function/numeric/solveODE.ts:
       description: solveODE module
       externalDependencies: []
@@ -2201,6 +2530,15 @@ modules:
         - solveODEDocs
       constants:
         - solveODEDocs
+    src/embeddedDocs/function/numeric/trapz.ts:
+      description: trapz module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - trapzDocs
+      constants:
+        - trapzDocs
     src/embeddedDocs/function/probability/bernoulli.ts:
       description: bernoulli module
       externalDependencies: []
@@ -2210,6 +2548,24 @@ modules:
         - bernoulliDocs
       constants:
         - bernoulliDocs
+    src/embeddedDocs/function/probability/bernoulliPMF.ts:
+      description: bernoulliPMF module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - bernoulliPMFDocs
+      constants:
+        - bernoulliPMFDocs
+    src/embeddedDocs/function/probability/binomialPMF.ts:
+      description: binomialPMF module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - binomialPMFDocs
+      constants:
+        - binomialPMFDocs
     src/embeddedDocs/function/probability/combinations.ts:
       description: combinations module
       externalDependencies: []
@@ -2237,6 +2593,33 @@ modules:
         - distributionDocs
       constants:
         - distributionDocs
+    src/embeddedDocs/function/probability/entropy.ts:
+      description: entropy module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - entropyDocs
+      constants:
+        - entropyDocs
+    src/embeddedDocs/function/probability/exponentialCDF.ts:
+      description: exponentialCDF module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - exponentialCDFDocs
+      constants:
+        - exponentialCDFDocs
+    src/embeddedDocs/function/probability/exponentialPDF.ts:
+      description: exponentialPDF module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - exponentialPDFDocs
+      constants:
+        - exponentialPDFDocs
     src/embeddedDocs/function/probability/factorial.ts:
       description: factorial module
       externalDependencies: []
@@ -2255,6 +2638,24 @@ modules:
         - gammaDocs
       constants:
         - gammaDocs
+    src/embeddedDocs/function/probability/geometricPMF.ts:
+      description: geometricPMF module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - geometricPMFDocs
+      constants:
+        - geometricPMFDocs
+    src/embeddedDocs/function/probability/jsDivergence.ts:
+      description: jsDivergence module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - jsDivergenceDocs
+      constants:
+        - jsDivergenceDocs
     src/embeddedDocs/function/probability/kldivergence.ts:
       description: kldivergence module
       externalDependencies: []
@@ -2282,6 +2683,24 @@ modules:
         - multinomialDocs
       constants:
         - multinomialDocs
+    src/embeddedDocs/function/probability/normalCDF.ts:
+      description: normalCDF module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - normalCDFDocs
+      constants:
+        - normalCDFDocs
+    src/embeddedDocs/function/probability/normalPDF.ts:
+      description: normalPDF module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - normalPDFDocs
+      constants:
+        - normalPDFDocs
     src/embeddedDocs/function/probability/permutations.ts:
       description: permutations module
       externalDependencies: []
@@ -2300,6 +2719,15 @@ modules:
         - pickRandomDocs
       constants:
         - pickRandomDocs
+    src/embeddedDocs/function/probability/poissonPMF.ts:
+      description: poissonPMF module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - poissonPMFDocs
+      constants:
+        - poissonPMFDocs
     src/embeddedDocs/function/probability/random.ts:
       description: random module
       externalDependencies: []
@@ -2507,6 +2935,24 @@ modules:
         - setUnionDocs
       constants:
         - setUnionDocs
+    src/embeddedDocs/function/signal/autoCorrelation.ts:
+      description: autoCorrelation module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - autoCorrelationDocs
+      constants:
+        - autoCorrelationDocs
+    src/embeddedDocs/function/signal/crossCorrelation.ts:
+      description: crossCorrelation module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - crossCorrelationDocs
+      constants:
+        - crossCorrelationDocs
     src/embeddedDocs/function/signal/freqz.ts:
       description: freqz module
       externalDependencies: []
@@ -2516,6 +2962,24 @@ modules:
         - freqzDocs
       constants:
         - freqzDocs
+    src/embeddedDocs/function/signal/groupDelay.ts:
+      description: groupDelay module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - groupDelayDocs
+      constants:
+        - groupDelayDocs
+    src/embeddedDocs/function/signal/unwrapPhase.ts:
+      description: unwrapPhase module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - unwrapPhaseDocs
+      constants:
+        - unwrapPhaseDocs
     src/embeddedDocs/function/signal/zpk2tf.ts:
       description: zpk2tf module
       externalDependencies: []
@@ -2525,6 +2989,60 @@ modules:
         - zpk2tfDocs
       constants:
         - zpk2tfDocs
+    src/embeddedDocs/function/special/besselJ0.ts:
+      description: besselJ0 module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - besselJ0Docs
+      constants:
+        - besselJ0Docs
+    src/embeddedDocs/function/special/besselJ1.ts:
+      description: besselJ1 module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - besselJ1Docs
+      constants:
+        - besselJ1Docs
+    src/embeddedDocs/function/special/besselY0.ts:
+      description: besselY0 module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - besselY0Docs
+      constants:
+        - besselY0Docs
+    src/embeddedDocs/function/special/besselY1.ts:
+      description: besselY1 module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - besselY1Docs
+      constants:
+        - besselY1Docs
+    src/embeddedDocs/function/special/beta.ts:
+      description: beta module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - betaDocs
+      constants:
+        - betaDocs
+    src/embeddedDocs/function/special/digamma.ts:
+      description: digamma module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - digammaDocs
+      constants:
+        - digammaDocs
     src/embeddedDocs/function/special/erf.ts:
       description: erf module
       externalDependencies: []
@@ -2534,6 +3052,24 @@ modules:
         - erfDocs
       constants:
         - erfDocs
+    src/embeddedDocs/function/special/erfc.ts:
+      description: erfc module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - erfcDocs
+      constants:
+        - erfcDocs
+    src/embeddedDocs/function/special/gammainc.ts:
+      description: gammainc module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - gammaincDocs
+      constants:
+        - gammaincDocs
     src/embeddedDocs/function/special/zeta.ts:
       description: zeta module
       externalDependencies: []
@@ -3099,6 +3635,42 @@ modules:
         - IndexError
       functions:
         - createIndexError
+  evaluator:
+    src/evaluator/evaluate.ts:
+      description: Expression evaluator for MathTS.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../compiler/compile.js
+          imports:
+            - compile
+        - file: ../compiler/compile.js
+          imports:
+            - CompiledExpression
+            - Scope
+          typeOnly: true
+      exports:
+        - createEvaluate
+        - compileExpression
+      functions:
+        - createEvaluate
+        - compileExpression
+    src/evaluator/index.ts:
+      description: Package entry point for evaluator (re-exports 2 symbols)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./evaluate.js
+          imports:
+            - createEvaluate
+            - compileExpression
+          reExport: true
+      exports:
+        - createEvaluate
+        - compileExpression
+      reExported:
+        - createEvaluate
+        - compileExpression
   function:
     src/function/compile.ts:
       description: Parse and compile an expression.
@@ -3313,7 +3885,95 @@ modules:
           imports:
             - "*"
           reExport: true
-      exports: []
+        - file: ./compiler/index.js
+          imports:
+            - "*"
+          reExport: true
+        - file: ./evaluator/index.js
+          imports:
+            - "*"
+          reExport: true
+        - file: ./node/Node.js
+          imports:
+            - createNode
+          reExport: true
+        - file: ./node/AccessorNode.js
+          imports:
+            - createAccessorNode
+          reExport: true
+        - file: ./node/ArrayNode.js
+          imports:
+            - createArrayNode
+          reExport: true
+        - file: ./node/AssignmentNode.js
+          imports:
+            - createAssignmentNode
+          reExport: true
+        - file: ./node/BlockNode.js
+          imports:
+            - createBlockNode
+          reExport: true
+        - file: ./node/ConditionalNode.js
+          imports:
+            - createConditionalNode
+          reExport: true
+        - file: ./node/ConstantNode.js
+          imports:
+            - createConstantNode
+          reExport: true
+        - file: ./node/FunctionAssignmentNode.js
+          imports:
+            - createFunctionAssignmentNode
+          reExport: true
+        - file: ./node/FunctionNode.js
+          imports:
+            - createFunctionNode
+          reExport: true
+        - file: ./node/IndexNode.js
+          imports:
+            - createIndexNode
+          reExport: true
+        - file: ./node/ObjectNode.js
+          imports:
+            - createObjectNode
+          reExport: true
+        - file: ./node/OperatorNode.js
+          imports:
+            - createOperatorNode
+          reExport: true
+        - file: ./node/ParenthesisNode.js
+          imports:
+            - createParenthesisNode
+          reExport: true
+        - file: ./node/RangeNode.js
+          imports:
+            - createRangeNode
+          reExport: true
+        - file: ./node/RelationalNode.js
+          imports:
+            - createRelationalNode
+          reExport: true
+        - file: ./node/SymbolNode.js
+          imports:
+            - createSymbolNode
+          reExport: true
+      exports:
+        - createNode
+        - createAccessorNode
+        - createArrayNode
+        - createAssignmentNode
+        - createBlockNode
+        - createConditionalNode
+        - createConstantNode
+        - createFunctionAssignmentNode
+        - createFunctionNode
+        - createIndexNode
+        - createObjectNode
+        - createOperatorNode
+        - createParenthesisNode
+        - createRangeNode
+        - createRelationalNode
+        - createSymbolNode
       reExported:
         - "* from ./types.js"
         - "* from ./keywords.js"
@@ -3321,6 +3981,24 @@ modules:
         - "* from ./parse.js"
         - "* from ./Parser.js"
         - "* from ./Help.js"
+        - "* from ./compiler/index.js"
+        - "* from ./evaluator/index.js"
+        - createNode
+        - createAccessorNode
+        - createArrayNode
+        - createAssignmentNode
+        - createBlockNode
+        - createConditionalNode
+        - createConstantNode
+        - createFunctionAssignmentNode
+        - createFunctionNode
+        - createIndexNode
+        - createObjectNode
+        - createOperatorNode
+        - createParenthesisNode
+        - createRangeNode
+        - createRelationalNode
+        - createSymbolNode
   node:
     src/node/AccessorNode.ts:
       description: Are parenthesis needed?
@@ -4929,19 +5607,20 @@ modules:
 dependencyGraph:
   circularDependencies:
     runtime:
-      - - src/utils/is.ts
-        - src/utils/map.ts
+      - - src/utils/map.ts
         - src/utils/customs.ts
         - src/utils/object.ts
         - src/utils/is.ts
-      - - src/utils/is.ts
         - src/utils/map.ts
-        - src/utils/is.ts
     typeOnly: []
-    total: 2
-    runtimeCount: 2
+    total: 1
+    runtimeCount: 1
     typeOnlyCount: 0
   layers:
+    - name: Compiler
+      files:
+        - src/compiler/compile.ts
+        - src/compiler/index.ts
     - name: EmbeddedDocs
       files:
         - src/embeddedDocs/constants/e.ts
@@ -5045,7 +5724,13 @@ dependencyGraph:
         - src/embeddedDocs/function/combinatorics/bellNumbers.ts
         - src/embeddedDocs/function/combinatorics/catalan.ts
         - src/embeddedDocs/function/combinatorics/composition.ts
+        - src/embeddedDocs/function/combinatorics/doubleFactorial.ts
+        - src/embeddedDocs/function/combinatorics/fallingFactorial.ts
+        - src/embeddedDocs/function/combinatorics/fibonacci.ts
+        - src/embeddedDocs/function/combinatorics/lucas.ts
+        - src/embeddedDocs/function/combinatorics/risingFactorial.ts
         - src/embeddedDocs/function/combinatorics/stirlingS2.ts
+        - src/embeddedDocs/function/combinatorics/subfactorial.ts
         - src/embeddedDocs/function/complex/arg.ts
         - src/embeddedDocs/function/complex/conj.ts
         - src/embeddedDocs/function/complex/im.ts
@@ -5055,8 +5740,26 @@ dependencyGraph:
         - src/embeddedDocs/function/expression/help.ts
         - src/embeddedDocs/function/expression/parse.ts
         - src/embeddedDocs/function/expression/parser.ts
+        - src/embeddedDocs/function/geometry/angle2D.ts
+        - src/embeddedDocs/function/geometry/angle3D.ts
+        - src/embeddedDocs/function/geometry/convexHull.ts
+        - src/embeddedDocs/function/geometry/cross3D.ts
         - src/embeddedDocs/function/geometry/distance.ts
+        - src/embeddedDocs/function/geometry/distance2D.ts
+        - src/embeddedDocs/function/geometry/distance3D.ts
+        - src/embeddedDocs/function/geometry/distanceND.ts
+        - src/embeddedDocs/function/geometry/distancePointToLine2D.ts
+        - src/embeddedDocs/function/geometry/dot3D.ts
         - src/embeddedDocs/function/geometry/intersect.ts
+        - src/embeddedDocs/function/geometry/intersectLines2D.ts
+        - src/embeddedDocs/function/geometry/intersectSegments2D.ts
+        - src/embeddedDocs/function/geometry/pointInPolygon.ts
+        - src/embeddedDocs/function/geometry/polygonArea.ts
+        - src/embeddedDocs/function/geometry/projectVector.ts
+        - src/embeddedDocs/function/geometry/reflectVector.ts
+        - src/embeddedDocs/function/geometry/rotateVector2D.ts
+        - src/embeddedDocs/function/geometry/rotateVector3D.ts
+        - src/embeddedDocs/function/geometry/triangleArea.ts
         - src/embeddedDocs/function/logical/and.ts
         - src/embeddedDocs/function/logical/not.ts
         - src/embeddedDocs/function/logical/nullish.ts
@@ -5102,18 +5805,38 @@ dependencyGraph:
         - src/embeddedDocs/function/matrix/trace.ts
         - src/embeddedDocs/function/matrix/transpose.ts
         - src/embeddedDocs/function/matrix/zeros.ts
+        - src/embeddedDocs/function/numeric/cubicSpline.ts
+        - src/embeddedDocs/function/numeric/gaussQuad.ts
+        - src/embeddedDocs/function/numeric/hermiteInterp.ts
+        - src/embeddedDocs/function/numeric/lagrangeInterp.ts
+        - src/embeddedDocs/function/numeric/linearInterp.ts
+        - src/embeddedDocs/function/numeric/pchipInterp.ts
+        - src/embeddedDocs/function/numeric/polyFit.ts
+        - src/embeddedDocs/function/numeric/romberg.ts
+        - src/embeddedDocs/function/numeric/simpson.ts
         - src/embeddedDocs/function/numeric/solveODE.ts
+        - src/embeddedDocs/function/numeric/trapz.ts
         - src/embeddedDocs/function/probability/bernoulli.ts
+        - src/embeddedDocs/function/probability/bernoulliPMF.ts
+        - src/embeddedDocs/function/probability/binomialPMF.ts
         - src/embeddedDocs/function/probability/combinations.ts
         - src/embeddedDocs/function/probability/combinationsWithRep.ts
         - src/embeddedDocs/function/probability/distribution.ts
+        - src/embeddedDocs/function/probability/entropy.ts
+        - src/embeddedDocs/function/probability/exponentialCDF.ts
+        - src/embeddedDocs/function/probability/exponentialPDF.ts
         - src/embeddedDocs/function/probability/factorial.ts
         - src/embeddedDocs/function/probability/gamma.ts
+        - src/embeddedDocs/function/probability/geometricPMF.ts
+        - src/embeddedDocs/function/probability/jsDivergence.ts
         - src/embeddedDocs/function/probability/kldivergence.ts
         - src/embeddedDocs/function/probability/lgamma.ts
         - src/embeddedDocs/function/probability/multinomial.ts
+        - src/embeddedDocs/function/probability/normalCDF.ts
+        - src/embeddedDocs/function/probability/normalPDF.ts
         - src/embeddedDocs/function/probability/permutations.ts
         - src/embeddedDocs/function/probability/pickRandom.ts
+        - src/embeddedDocs/function/probability/poissonPMF.ts
         - src/embeddedDocs/function/probability/random.ts
         - src/embeddedDocs/function/probability/randomInt.ts
         - src/embeddedDocs/function/relational/compare.ts
@@ -5137,9 +5860,21 @@ dependencyGraph:
         - src/embeddedDocs/function/set/setSize.ts
         - src/embeddedDocs/function/set/setSymDifference.ts
         - src/embeddedDocs/function/set/setUnion.ts
+        - src/embeddedDocs/function/signal/autoCorrelation.ts
+        - src/embeddedDocs/function/signal/crossCorrelation.ts
         - src/embeddedDocs/function/signal/freqz.ts
+        - src/embeddedDocs/function/signal/groupDelay.ts
+        - src/embeddedDocs/function/signal/unwrapPhase.ts
         - src/embeddedDocs/function/signal/zpk2tf.ts
+        - src/embeddedDocs/function/special/besselJ0.ts
+        - src/embeddedDocs/function/special/besselJ1.ts
+        - src/embeddedDocs/function/special/besselY0.ts
+        - src/embeddedDocs/function/special/besselY1.ts
+        - src/embeddedDocs/function/special/beta.ts
+        - src/embeddedDocs/function/special/digamma.ts
         - src/embeddedDocs/function/special/erf.ts
+        - src/embeddedDocs/function/special/erfc.ts
+        - src/embeddedDocs/function/special/gammainc.ts
         - src/embeddedDocs/function/special/zeta.ts
         - src/embeddedDocs/function/statistics/corr.ts
         - src/embeddedDocs/function/statistics/cumsum.ts
@@ -5204,6 +5939,10 @@ dependencyGraph:
         - src/error/ArgumentsError.ts
         - src/error/DimensionError.ts
         - src/error/IndexError.ts
+    - name: Evaluator
+      files:
+        - src/evaluator/evaluate.ts
+        - src/evaluator/index.ts
     - name: Function
       files:
         - src/function/compile.ts
@@ -5290,19 +6029,19 @@ dependencyGraph:
         - src/utils/string.ts
         - src/utils/switch.ts
 statistics:
-  totalTypeScriptFiles: 331
-  totalModules: 8
-  totalLinesOfCode: 19874
-  totalExports: 480
+  totalTypeScriptFiles: 391
+  totalModules: 10
+  totalLinesOfCode: 20993
+  totalExports: 558
   totalClasses: 5
-  totalInterfaces: 40
-  totalFunctions: 145
+  totalInterfaces: 42
+  totalFunctions: 148
   totalTypeGuards: 49
   totalEnums: 0
-  totalConstants: 324
-  totalReExports: 6
-  totalTypeOnlyImports: 9
-  runtimeCircularDeps: 2
+  totalConstants: 380
+  totalReExports: 27
+  totalTypeOnlyImports: 10
+  runtimeCircularDeps: 1
   typeOnlyCircularDeps: 0
-  unusedFilesCount: 46
-  unusedExportsCount: 135
+  unusedFilesCount: 87
+  unusedExportsCount: 134

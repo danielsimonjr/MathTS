@@ -1,6 +1,6 @@
 # @danielsimonjr/mathts-functions - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-04-04
+**Version**: 0.1.2 | **Last Updated**: 2026-04-10
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -19,30 +19,31 @@ This document provides a comprehensive dependency graph of all files, components
 9. [Core Dependencies](#core-dependencies)
 10. [Error Dependencies](#error-dependencies)
 11. [Expression Dependencies](#expression-dependencies)
-12. [Geometry Dependencies](#geometry-dependencies)
-13. [Entry Dependencies](#entry-dependencies)
-14. [Logical Dependencies](#logical-dependencies)
-15. [Matrix Dependencies](#matrix-dependencies)
-16. [Numeric Dependencies](#numeric-dependencies)
-17. [Plain Dependencies](#plain-dependencies)
-18. [Probability Dependencies](#probability-dependencies)
-19. [Relational Dependencies](#relational-dependencies)
-20. [Set Dependencies](#set-dependencies)
-21. [Shared Dependencies](#shared-dependencies)
-22. [Signal Dependencies](#signal-dependencies)
-23. [Special Dependencies](#special-dependencies)
-24. [Statistics Dependencies](#statistics-dependencies)
-25. [String Dependencies](#string-dependencies)
-26. [Trigonometry Dependencies](#trigonometry-dependencies)
-27. [Type Dependencies](#type-dependencies)
-28. [Typed Dependencies](#typed-dependencies)
-29. [Unit Dependencies](#unit-dependencies)
-30. [Utils Dependencies](#utils-dependencies)
-31. [Wasm Dependencies](#wasm-dependencies)
-32. [Dependency Matrix](#dependency-matrix)
-33. [Circular Dependency Analysis](#circular-dependency-analysis)
-34. [Visual Dependency Graph](#visual-dependency-graph)
-35. [Summary Statistics](#summary-statistics)
+12. [Factories Dependencies](#factories-dependencies)
+13. [Geometry Dependencies](#geometry-dependencies)
+14. [Entry Dependencies](#entry-dependencies)
+15. [Logical Dependencies](#logical-dependencies)
+16. [Matrix Dependencies](#matrix-dependencies)
+17. [Numeric Dependencies](#numeric-dependencies)
+18. [Plain Dependencies](#plain-dependencies)
+19. [Probability Dependencies](#probability-dependencies)
+20. [Relational Dependencies](#relational-dependencies)
+21. [Set Dependencies](#set-dependencies)
+22. [Shared Dependencies](#shared-dependencies)
+23. [Signal Dependencies](#signal-dependencies)
+24. [Special Dependencies](#special-dependencies)
+25. [Statistics Dependencies](#statistics-dependencies)
+26. [String Dependencies](#string-dependencies)
+27. [Trigonometry Dependencies](#trigonometry-dependencies)
+28. [Type Dependencies](#type-dependencies)
+29. [Typed Dependencies](#typed-dependencies)
+30. [Unit Dependencies](#unit-dependencies)
+31. [Utils Dependencies](#utils-dependencies)
+32. [Wasm Dependencies](#wasm-dependencies)
+33. [Dependency Matrix](#dependency-matrix)
+34. [Circular Dependency Analysis](#circular-dependency-analysis)
+35. [Visual Dependency Graph](#visual-dependency-graph)
+36. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -60,6 +61,7 @@ The codebase is organized into the following modules:
 - **core**: 5 files
 - **error**: 3 files
 - **expression**: 314 files
+- **factories**: 4 files
 - **geometry**: 2 files
 - **entry**: 1 file
 - **logical**: 5 files
@@ -76,7 +78,7 @@ The codebase is organized into the following modules:
 - **string**: 5 files
 - **trigonometry**: 26 files
 - **type**: 50 files
-- **typed**: 6 files
+- **typed**: 12 files
 - **unit**: 2 files
 - **utils**: 46 files
 - **wasm**: 63 files
@@ -5166,6 +5168,319 @@ The codebase is organized into the following modules:
 
 ---
 
+<a id="factories-dependencies"></a>
+
+## Factories Dependencies
+
+### `src/factories/evaluate.ts` - Expression evaluator wired to the activated factory scope.
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-expression` | `createEvaluate, compileExpression` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./scope.js` | `factoryScope` | Import |
+| `./index.js` | `* as activatedFactories` | Import |
+| `../typed/index.js` | `* as typedFns` | Import |
+
+**Exports:**
+- Functions: `compileExpr`
+- Constants: `parse`, `evaluate`
+
+---
+
+### `src/factories/index.ts` - Activated mathjs leaf factory functions.
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-expression` | `createNode, createAccessorNode, createArrayNode, createAssignmentNode, createBlockNode, createConditionalNode, createConstantNode, createFunctionAssignmentNode, createFunctionNode, createIndexNode, createObjectNode, createOperatorNode, createParenthesisNode, createRangeNode, createRelationalNode, createSymbolNode, createParse` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./scope.js` | `factoryScope` | Import |
+| `../typed/arithmetic.js` | `add, multiply` | Import |
+| `../arithmetic/abs.js` | `createAbs` | Import |
+| `../arithmetic/addScalar.js` | `createAddScalar` | Import |
+| `../arithmetic/cube.js` | `createCube` | Import |
+| `../arithmetic/exp.js` | `createExp` | Import |
+| `../arithmetic/expm1.js` | `createExpm1` | Import |
+| `../arithmetic/log10.js` | `createLog10` | Import |
+| `../arithmetic/log2.js` | `createLog2` | Import |
+| `../arithmetic/multiplyScalar.js` | `createMultiplyScalar` | Import |
+| `../arithmetic/sign.js` | `createSign` | Import |
+| `../arithmetic/sqrt.js` | `createSqrt` | Import |
+| `../arithmetic/square.js` | `createSquare` | Import |
+| `../arithmetic/subtractScalar.js` | `createSubtractScalar` | Import |
+| `../arithmetic/unaryMinus.js` | `createUnaryMinus` | Import |
+| `../bitwise/bitNot.js` | `createBitNot` | Import |
+| `../complex/arg.js` | `createArg` | Import |
+| `../complex/conj.js` | `createConj` | Import |
+| `../complex/im.js` | `createIm` | Import |
+| `../complex/re.js` | `createRe` | Import |
+| `../logical/not.js` | `createNot` | Import |
+| `../matrix/filter.js` | `createFilter` | Import |
+| `../matrix/flatten.js` | `createFlatten` | Import |
+| `../matrix/forEach.js` | `createForEach` | Import |
+| `../matrix/getMatrixDataType.js` | `createGetMatrixDataType` | Import |
+| `../matrix/map.js` | `createMap` | Import |
+| `../matrix/size.js` | `createSize` | Import |
+| `../matrix/squeeze.js` | `createSqueeze` | Import |
+| `../probability/combinations.js` | `createCombinations` | Import |
+| `../probability/combinationsWithRep.js` | `createCombinationsWithRep` | Import |
+| `../probability/lgamma.js` | `createLgamma` | Import |
+| `../probability/pickRandom.js` | `createPickRandom` | Import |
+| `../probability/random.js` | `createRandom` | Import |
+| `../relational/equalScalar.js` | `createEqualScalar` | Import |
+| `../special/erf.js` | `createErf` | Import |
+| `../string/format.js` | `createFormat` | Import |
+| `../string/print.js` | `createPrint` | Import |
+| `../trigonometry/acos.js` | `createAcos` | Import |
+| `../trigonometry/acosh.js` | `createAcosh` | Import |
+| `../trigonometry/acot.js` | `createAcot` | Import |
+| `../trigonometry/acoth.js` | `createAcoth` | Import |
+| `../trigonometry/acsc.js` | `createAcsc` | Import |
+| `../trigonometry/acsch.js` | `createAcsch` | Import |
+| `../trigonometry/asec.js` | `createAsec` | Import |
+| `../trigonometry/asech.js` | `createAsech` | Import |
+| `../trigonometry/asin.js` | `createAsin` | Import |
+| `../trigonometry/asinh.js` | `createAsinh` | Import |
+| `../trigonometry/atan.js` | `createAtan` | Import |
+| `../trigonometry/atanh.js` | `createAtanh` | Import |
+| `../trigonometry/cos.js` | `createCos` | Import |
+| `../trigonometry/cosh.js` | `createCosh` | Import |
+| `../trigonometry/cot.js` | `createCot` | Import |
+| `../trigonometry/coth.js` | `createCoth` | Import |
+| `../trigonometry/csc.js` | `createCsc` | Import |
+| `../trigonometry/csch.js` | `createCsch` | Import |
+| `../trigonometry/sec.js` | `createSec` | Import |
+| `../trigonometry/sech.js` | `createSech` | Import |
+| `../trigonometry/sin.js` | `createSin` | Import |
+| `../trigonometry/sinh.js` | `createSinh` | Import |
+| `../trigonometry/tan.js` | `createTan` | Import |
+| `../trigonometry/tanh.js` | `createTanh` | Import |
+| `../unit/toBest.js` | `createToBest` | Import |
+| `../utils/clone.js` | `createClone` | Import |
+| `../utils/isBounded.js` | `createIsBounded` | Import |
+| `../utils/isNaN.js` | `createIsNaN` | Import |
+| `../utils/isNegative.js` | `createIsNegative` | Import |
+| `../utils/isNumeric.js` | `createIsNumeric` | Import |
+| `../utils/isPositive.js` | `createIsPositive` | Import |
+| `../utils/isPrime.js` | `createIsPrime` | Import |
+| `../utils/numeric.js` | `createNumeric` | Import |
+| `../utils/typeOf.js` | `createTypeOf` | Import |
+| `../arithmetic/divideScalar.js` | `createDivideScalar` | Import |
+| `../arithmetic/unaryPlus.js` | `createUnaryPlus` | Import |
+| `../matrix/dot.js` | `createDot` | Import |
+| `../probability/randomInt.js` | `createRandomInt` | Import |
+| `../statistics/mode.js` | `createMode` | Import |
+| `../statistics/prod.js` | `createProd` | Import |
+| `../string/bin.js` | `createBin` | Import |
+| `../string/hex.js` | `createHex` | Import |
+| `../string/oct.js` | `createOct` | Import |
+| `../utils/hasNumericValue.js` | `createHasNumericValue` | Import |
+| `../utils/isFinite.js` | `createIsFinite` | Import |
+| `../utils/isZero.js` | `createIsZero` | Import |
+| `../utils/parseNumber.js` | `createParseNumberWithConfig` | Import |
+| `../matrix/transpose.js` | `createTranspose` | Import |
+| `../matrix/ctranspose.js` | `createCtranspose` | Import |
+| `../matrix/identity.js` | `createIdentity` | Import |
+| `../matrix/zeros.js` | `createZeros` | Import |
+| `../matrix/ones.js` | `createOnes` | Import |
+| `../matrix/diag.js` | `createDiag` | Import |
+| `../matrix/kron.js` | `createKron` | Import |
+| `../matrix/matrixFromFunction.js` | `createMatrixFromFunction` | Import |
+| `../matrix/matrixFromColumns.js` | `createMatrixFromColumns` | Import |
+| `../matrix/matrixFromRows.js` | `createMatrixFromRows` | Import |
+| `../matrix/count.js` | `createCount` | Import |
+| `../matrix/trace.js` | `createTrace` | Import |
+| `../matrix/det.js` | `createDet` | Import |
+| `../matrix/reshape.js` | `createReshape` | Import |
+| `../algebra/sparse/csAmd.js` | `createCsAmd` | Import |
+| `../algebra/sparse/csCounts.js` | `createCsCounts` | Import |
+| `../algebra/sparse/csSqr.js` | `createCsSqr` | Import |
+| `../algebra/sparse/csSymperm.js` | `createCsSymperm` | Import |
+| `../algebra/solver/lsolve.js` | `createLsolve` | Import |
+| `../algebra/solver/lsolveAll.js` | `createLsolveAll` | Import |
+| `../algebra/solver/usolve.js` | `createUsolve` | Import |
+| `../algebra/solver/usolveAll.js` | `createUsolveAll` | Import |
+| `../arithmetic/cbrt.js` | `createCbrt` | Import |
+| `../arithmetic/nthRoots.js` | `createNthRoots` | Import |
+| `../arithmetic/round.js` | `createRound` | Import |
+| `../arithmetic/xgcd.js` | `createXgcd` | Import |
+| `../arithmetic/log.js` | `createLog` | Import |
+| `../combinatorics/catalan.js` | `createCatalan` | Import |
+| `../matrix/concat.js` | `createConcat` | Import |
+| `../matrix/inv.js` | `createInv` | Import |
+| `../matrix/mapSlices.js` | `createMapSlices` | Import |
+| `../matrix/resize.js` | `createResize` | Import |
+| `../matrix/subset.js` | `createSubset` | Import |
+| `../probability/bernoulli.js` | `createBernoulli` | Import |
+| `../relational/equal.js` | `createEqual` | Import |
+| `../signal/zpk2tf.js` | `createZpk2tf` | Import |
+| `../statistics/cumsum.js` | `createCumSum` | Import |
+| `../statistics/sum.js` | `createSum` | Import |
+| `../arithmetic/dotDivide.js` | `createDotDivide` | Import |
+| `../arithmetic/dotMultiply.js` | `createDotMultiply` | Import |
+| `../arithmetic/gcd.js` | `createGcd` | Import |
+| `../arithmetic/lcm.js` | `createLcm` | Import |
+| `../arithmetic/log1p.js` | `createLog1p` | Import |
+| `../arithmetic/mod.js` | `createMod` | Import |
+| `../arithmetic/nthRoot.js` | `createNthRoot` | Import |
+| `../arithmetic/pow.js` | `createPow` | Import |
+| `../arithmetic/ceil.js` | `createCeil` | Import |
+| `../arithmetic/floor.js` | `createFloor` | Import |
+| `../bitwise/bitAnd.js` | `createBitAnd` | Import |
+| `../bitwise/bitOr.js` | `createBitOr` | Import |
+| `../bitwise/bitXor.js` | `createBitXor` | Import |
+| `../bitwise/leftShift.js` | `createLeftShift` | Import |
+| `../bitwise/rightArithShift.js` | `createRightArithShift` | Import |
+| `../bitwise/rightLogShift.js` | `createRightLogShift` | Import |
+| `../logical/or.js` | `createOr` | Import |
+| `../logical/xor.js` | `createXor` | Import |
+| `../matrix/expm.js` | `createExpm` | Import |
+| `../relational/compare.js` | `createCompare` | Import |
+| `../relational/compareText.js` | `createCompareText` | Import |
+| `../relational/deepEqual.js` | `createDeepEqual` | Import |
+| `../relational/larger.js` | `createLarger` | Import |
+| `../relational/largerEq.js` | `createLargerEq` | Import |
+| `../relational/smaller.js` | `createSmaller` | Import |
+| `../relational/smallerEq.js` | `createSmallerEq` | Import |
+| `../relational/unequal.js` | `createUnequal` | Import |
+| `../trigonometry/atan2.js` | `createAtan2` | Import |
+| `../unit/to.js` | `createTo` | Import |
+| `../arithmetic/dotPow.js` | `createDotPow` | Import |
+| `../arithmetic/fix.js` | `createFix` | Import |
+| `../arithmetic/invmod.js` | `createInvmod` | Import |
+| `../logical/and.js` | `createAnd` | Import |
+| `../combinatorics/composition.js` | `createComposition` | Import |
+| `../matrix/partitionSelect.js` | `createPartitionSelect` | Import |
+| `../matrix/pinv.js` | `createPinv` | Import |
+| `../algebra/decomposition/qr.js` | `createQr` | Import |
+| `../matrix/range.js` | `createRange` | Import |
+| `../probability/gamma.js` | `createGamma` | Import |
+| `../relational/compareNatural.js` | `createCompareNatural` | Import |
+| `../relational/equalText.js` | `createEqualText` | Import |
+| `../statistics/max.js` | `createMax` | Import |
+| `../statistics/min.js` | `createMin` | Import |
+| `../logical/nullish.js` | `createNullish` | Import |
+| `../arithmetic/hypot.js` | `createHypot` | Import |
+| `../geometry/distance.js` | `createDistance` | Import |
+| `../probability/factorial.js` | `createFactorial` | Import |
+| `../set/setSize.js` | `createSetSize` | Import |
+| `../matrix/sort.js` | `createSort` | Import |
+| `../combinatorics/stirlingS2.js` | `createStirlingS2` | Import |
+| `../probability/permutations.js` | `createPermutations` | Import |
+| `../combinatorics/bellNumbers.js` | `createBellNumbers` | Import |
+| `../type/resultset/ResultSet.js` | `createResultSet` | Import |
+| `../arithmetic/utils/nodeOperations.js` | `createNodeOperations` | Import |
+| `../algebra/leafCount.js` | `createLeafCount` | Import |
+| `../algebra/resolve.js` | `createResolve` | Import |
+| `../algebra/simplifyConstant.js` | `createSimplifyConstant` | Import |
+| `../algebra/simplify/util.js` | `createUtil` | Import |
+| `../type/unit/function/splitUnit.js` | `createSplitUnit` | Import |
+| `../matrix/fft.js` | `createFft` | Import |
+| `../type/chain/Chain.js` | `createChainClass` | Import |
+| `../arithmetic/subtract.js` | `createSubtract` | Import |
+| `../arithmetic/divide.js` | `createDivide` | Import |
+| `../matrix/ifft.js` | `createIfft` | Import |
+| `../type/matrix/MatrixIndex.js` | `createIndexClass` | Import |
+| `../type/chain/function/chain.js` | `createChain` | Import |
+| `../type/unit/function/createUnit.js` | `createCreateUnit` | Import |
+| `../type/unit/function/unit.js` | `createUnitFunction` | Import |
+| `../type/unit/Unit.js` | `createUnitClass` | Import |
+| `../type/matrix/FibonacciHeap.js` | `createFibonacciHeapClass` | Import |
+| `../type/matrix/ImmutableDenseMatrix.js` | `createImmutableDenseMatrixClass` | Import |
+| `../matrix/column.js` | `createColumn` | Import |
+| `../matrix/row.js` | `createRow` | Import |
+| `../matrix/cross.js` | `createCross` | Import |
+| `../matrix/diff.js` | `createDiff` | Import |
+| `../matrix/sqrtm.js` | `createSqrtm` | Import |
+| `../algebra/decomposition/lup.js` | `createLup` | Import |
+| `../algebra/decomposition/slu.js` | `createSlu` | Import |
+| `../algebra/sparse/csChol.js` | `createCsChol` | Import |
+| `../algebra/sparse/csLu.js` | `createCsLu` | Import |
+| `../algebra/sparse/csSpsolve.js` | `createCsSpsolve` | Import |
+| `../type/matrix/Spa.js` | `createSpaClass` | Import |
+| `../geometry/intersect.js` | `createIntersect` | Import |
+| `../statistics/mean.js` | `createMean` | Import |
+| `../statistics/median.js` | `createMedian` | Import |
+| `../statistics/variance.js` | `createVariance` | Import |
+| `../statistics/quantileSeq.js` | `createQuantileSeq` | Import |
+| `../probability/kldivergence.js` | `createKldivergence` | Import |
+| `../probability/multinomial.js` | `createMultinomial` | Import |
+| `../signal/freqz.js` | `createFreqz` | Import |
+| `../set/setCartesian.js` | `createSetCartesian` | Import |
+| `../set/setDifference.js` | `createSetDifference` | Import |
+| `../set/setDistinct.js` | `createSetDistinct` | Import |
+| `../set/setIntersect.js` | `createSetIntersect` | Import |
+| `../set/setIsSubset.js` | `createSetIsSubset` | Import |
+| `../set/setMultiplicity.js` | `createSetMultiplicity` | Import |
+| `../set/setPowerset.js` | `createSetPowerset` | Import |
+| `../algebra/simplifyCore.js` | `createSimplifyCore` | Import |
+| `../algebra/polynomialRoot.js` | `createPolynomialRoot` | Import |
+| `../numeric/solveODE.js` | `createSolveODE` | Import |
+| `../special/zeta.js` | `createZeta` | Import |
+| `../type/matrix/function/index.js` | `createIndex` | Import |
+| `../matrix/eigs.js` | `createEigs` | Import |
+| `../algebra/solver/lusolve.js` | `createLusolve` | Import |
+| `../statistics/corr.js` | `createCorr` | Import |
+| `../statistics/mad.js` | `createMad` | Import |
+| `../statistics/std.js` | `createStd` | Import |
+| `../set/setSymDifference.js` | `createSetSymDifference` | Import |
+| `../algebra/simplify.js` | `createSimplify` | Import |
+| `../algebra/derivative.js` | `createDerivative` | Import |
+| `../arithmetic/norm.js` | `createNorm` | Import |
+| `../algebra/rationalize.js` | `createRationalize` | Import |
+| `../set/setUnion.js` | `createSetUnion` | Import |
+| `../algebra/symbolicEqual.js` | `createSymbolicEqual` | Import |
+| `../matrix/rotationMatrix.js` | `createRotationMatrix` | Import |
+| `../algebra/decomposition/schur.js` | `createSchur` | Import |
+| `../matrix/rotate.js` | `createRotate` | Import |
+| `../algebra/sylvester.js` | `createSylvester` | Import |
+| `../algebra/lyap.js` | `createLyap` | Import |
+
+**Exports:**
+- Constants: `addScalar`, `multiplyScalar`, `subtractScalar`, `bitNot`, `arg`, `conj`, `im`, `re`, `not`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `map`, `size`, `squeeze`, `combinations`, `combinationsWithRep`, `lgamma`, `pickRandom`, `random`, `equalScalar`, `erf`, `format`, `print`, `acoth`, `acsch`, `asech`, `coth`, `csch`, `sech`, `toBest`, `clone`, `isBounded`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `numeric`, `typeOf`, `factory_abs`, `factory_cube`, `factory_exp`, `factory_expm1`, `factory_log10`, `factory_log2`, `factory_sign`, `factory_sqrt`, `factory_square`, `factory_unaryMinus`, `factory_acos`, `factory_acosh`, `factory_acot`, `factory_acsc`, `factory_asec`, `factory_asin`, `factory_asinh`, `factory_atan`, `factory_atanh`, `factory_cos`, `factory_cosh`, `factory_cot`, `factory_csc`, `factory_sec`, `factory_sin`, `factory_sinh`, `factory_tan`, `factory_tanh`, `parseNumberWithConfig`, `divideScalar`, `randomInt`, `mode`, `prod`, `bin`, `hex`, `oct`, `hasNumericValue`, `isFinite`, `isZero`, `factory_unaryPlus`, `factory_dot`, `factory_transpose`, `factory_ctranspose`, `identity`, `zeros`, `ones`, `diag`, `kron`, `matrixFromFunction`, `matrixFromColumns`, `matrixFromRows`, `count`, `trace`, `det`, `reshape`, `factory_equal`, `concat`, `mapSlices`, `resize`, `subset`, `inv`, `factory_cbrt`, `nthRoots`, `factory_round`, `factory_xgcd`, `factory_log`, `catalan`, `bernoulli`, `zpk2tf`, `factory_cumsum`, `factory_sum`, `csCounts`, `csSymperm`, `csAmd`, `csSqr`, `lsolve`, `lsolveAll`, `usolve`, `usolveAll`, `factory_compare`, `compareText`, `deepEqual`, `factory_larger`, `factory_largerEq`, `factory_smaller`, `factory_smallerEq`, `unequal`, `dotDivide`, `dotMultiply`, `factory_gcd`, `factory_lcm`, `factory_log1p`, `factory_mod`, `factory_nthRoot`, `factory_pow`, `factory_ceil`, `factory_floor`, `bitAnd`, `bitOr`, `bitXor`, `leftShift`, `rightArithShift`, `rightLogShift`, `or`, `xor`, `expm`, `factory_atan2`, `to`, `compareNatural`, `equalText`, `dotPow`, `factory_fix`, `invmod`, `and`, `nullish`, `composition`, `partitionSelect`, `pinv`, `qr`, `range`, `distance`, `gamma`, `factory_max`, `factory_min`, `factory_hypot`, `factorial`, `setSize`, `sort`, `stirlingS2`, `permutations`, `bellNumbers`, `nodeOperations`, `leafCount`, `resolve`, `simplifyConstant`, `simplifyUtil`, `splitUnit`, `fft`, `Chain`, `factory_subtract`, `factory_divide`, `ifft`, `chain`, `factory_createUnit`, `unit`, `column`, `row`, `cross`, `diff`, `sqrtm`, `lup`, `slu`, `csChol`, `csLu`, `csSpsolve`, `intersect`, `factory_mean`, `median`, `factory_variance`, `quantileSeq`, `kldivergence`, `multinomial`, `freqz`, `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `simplifyCore`, `polynomialRoot`, `solveODE`, `zeta`, `indexFn`, `eigs`, `lusolve`, `corr`, `mad`, `factory_std`, `setSymDifference`, `simplify`, `derivative`, `factory_norm`, `rationalize`, `setUnion`, `symbolicEqual`, `rotationMatrix`, `schur`, `rotate`, `sylvester`, `lyap`
+
+---
+
+### `src/factories/matrix-bridge.ts` - Matrix Compatibility Bridge
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix` |
+
+**Exports:**
+- Classes: `MathJSDenseMatrix`, `MathJSSparseMatrix`
+- Functions: `createMatrixBridge`
+
+---
+
+### `src/factories/scope.ts` - Shared factory scope for activating synced mathjs factory functions.
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, Fraction, BigNumber` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../typed/typed-bridge.js` | `initTypeBridge` | Import |
+| `../core/config.js` | `DEFAULT_CONFIG` | Import |
+| `./matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix, createMatrixBridge` | Import |
+
+**Exports:**
+- Constants: `factoryScope`
+
+---
+
 <a id="geometry-dependencies"></a>
 
 ## Geometry Dependencies
@@ -5212,9 +5527,11 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./typed/index.js` | `*` | Re-export |
+| `./factories/index.js` | `*` | Re-export |
+| `./factories/evaluate.js` | `evaluate, compileExpr, parse` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./typed/index.js`
+- Re-exports: `* from ./typed/index.js`, `* from ./factories/index.js`, `evaluate`, `compileExpr`, `parse`
 
 ---
 
@@ -8348,6 +8665,37 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/typed/combinatorics.ts` - Extended Combinatorics Functions
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
+**Exports:**
+- Constants: `fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`
+
+---
+
+### `src/typed/distributions.ts` - Typed Probability Distribution Functions
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
+**Exports:**
+- Constants: `normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`, `jsDivergence`, `typedDistributions`
+
+---
+
+### `src/typed/geometry.ts` - Typed Geometry Functions
+
+**Exports:**
+- Functions: `angle2D`, `angle3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`, `pointInPolygon`, `rotateVector2D`, `rotateVector3D`, `reflectVector`, `projectVector`, `distance2D`, `distance3D`, `distanceND`, `distancePointToLine2D`, `intersectLines2D`, `intersectSegments2D`
+
+---
+
 ### `src/typed/index.ts` - Typed Functions Index (Parallel-First)
 
 **Internal Dependencies:**
@@ -8357,18 +8705,43 @@ The codebase is organized into the following modules:
 | `./trigonometry.js` | `typedTrigonometry` | Import |
 | `./statistics.js` | `typedStatistics` | Import |
 | `./signal.js` | `typedSignal` | Import |
+| `./combinatorics.js` | `fibonacci, lucas, doubleFactorial, risingFactorial, fallingFactorial, subfactorial` | Import |
+| `./special.js` | `typedSpecial` | Import |
+| `./distributions.js` | `typedDistributions` | Import |
 | `./arithmetic.js` | `*` | Re-export |
 | `./trigonometry.js` | `*` | Re-export |
 | `./statistics.js` | `*` | Re-export |
 | `./signal.js` | `*` | Re-export |
+| `./special.js` | `*` | Re-export |
+| `./distributions.js` | `*` | Re-export |
+| `./geometry.js` | `*` | Re-export |
+| `./integration.js` | `*` | Re-export |
+| `./interpolation.js` | `*` | Re-export |
+| `./combinatorics.js` | `*` | Re-export |
 | `./arithmetic.js` | `typedArithmetic` | Re-export |
 | `./trigonometry.js` | `typedTrigonometry` | Re-export |
 | `./statistics.js` | `typedStatistics` | Re-export |
 | `./signal.js` | `typedSignal` | Re-export |
+| `./special.js` | `typedSpecial` | Re-export |
+| `./distributions.js` | `typedDistributions` | Re-export |
 
 **Exports:**
 - Constants: `typedFunctions`
-- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`
+- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./special.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./combinatorics.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedSpecial`, `typedDistributions`
+
+---
+
+### `src/typed/integration.ts` - Numerical Integration Functions
+
+**Exports:**
+- Functions: `trapz`, `simpson`, `gaussQuad`, `romberg`
+
+---
+
+### `src/typed/interpolation.ts` - Interpolation Functions
+
+**Exports:**
+- Functions: `linearInterp`, `lagrangeInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit`
 
 ---
 
@@ -8381,8 +8754,20 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-parallel` | `computePool` |
 
 **Exports:**
-- Functions: `initializeSignal`, `terminateSignal`
+- Functions: `crossCorrelation`, `autoCorrelation`, `groupDelay`, `unwrapPhase`, `initializeSignal`, `terminateSignal`
 - Constants: `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `typedSignal`
+
+---
+
+### `src/typed/special.ts` - Typed Special Functions
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@danielsimonjr/mathts-core` | `mathTyped` |
+
+**Exports:**
+- Constants: `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `typedSpecial`
 
 ---
 
@@ -8396,7 +8781,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Types: `NormalizationType`
-- Functions: `initializeStatistics`, `terminateStatistics`
+- Functions: `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `initializeStatistics`, `terminateStatistics`
 - Constants: `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatHistogram`, `typedStatistics`
 
 ---
@@ -9534,12 +9919,13 @@ The codebase is organized into the following modules:
 | `src/utils/factory` | 1 file | 331 files |
 | `src/factoriesAny` | 303 files | 1 file |
 | `src/expression/embeddedDocs/embeddedDocs` | 253 files | 1 file |
+| `src/factories/index` | 241 files | 2 files |
 | `src/core/function/typed` | 3 files | 196 files |
 | `src/factoriesNumber` | 117 files | 0 files |
 | `src/utils/is` | 1 file | 106 files |
 | `src/utils/array` | 6 files | 58 files |
 | `src/plain/number/index` | 9 files | 54 files |
-| `src/core/config` | 0 files | 55 files |
+| `src/core/config` | 0 files | 56 files |
 | `src/utils/number` | 1 file | 53 files |
 | `src/utils/collection` | 4 files | 47 files |
 | `src/utils/object` | 1 file | 40 files |
@@ -9558,19 +9944,18 @@ The codebase is organized into the following modules:
 | `src/error/DimensionError` | 0 files | 18 files |
 | `src/expression/transform/utils/errorTransform` | 2 files | 15 files |
 | `src/expression/node/Node` | 5 files | 11 files |
+| `src/bitwise/leftShift` | 13 files | 2 files |
+| `src/bitwise/rightArithShift` | 13 files | 2 files |
 | `src/type/matrix/utils/matAlgo14xDs` | 3 files | 12 files |
-| `src/bitwise/leftShift` | 13 files | 1 file |
-| `src/bitwise/rightArithShift` | 13 files | 1 file |
+| `src/bitwise/rightLogShift` | 12 files | 2 files |
 | `src/type/matrix/utils/matAlgo02xDS0` | 3 files | 11 files |
 | `src/utils/customs` | 1 file | 13 files |
-| `src/bitwise/rightLogShift` | 12 files | 1 file |
-| `src/type/matrix/utils/matAlgo07xSSf` | 3 files | 10 files |
-| `src/arithmetic/floor` | 9 files | 3 files |
-| `src/arithmetic/gcd` | 11 files | 1 file |
-| `src/arithmetic/mod` | 10 files | 2 files |
-| `src/relational/compare` | 10 files | 2 files |
-| `src/relational/larger` | 10 files | 2 files |
-| `src/relational/largerEq` | 10 files | 2 files |
+| `src/arithmetic/floor` | 9 files | 4 files |
+| `src/arithmetic/gcd` | 11 files | 2 files |
+| `src/arithmetic/mod` | 10 files | 3 files |
+| `src/relational/compare` | 10 files | 3 files |
+| `src/relational/larger` | 10 files | 3 files |
+| `src/relational/largerEq` | 10 files | 3 files |
 
 ---
 
@@ -9685,203 +10070,215 @@ graph TD
         N61[...304 more]
     end
 
+    subgraph Factories
+        N62[evaluate]
+        N63[index]
+        N64[matrix-bridge]
+        N65[scope]
+    end
+
     subgraph Geometry
-        N62[distance]
-        N63[intersect]
+        N66[distance]
+        N67[intersect]
     end
 
     subgraph Entry
-        N64[index]
+        N68[index]
     end
 
     subgraph Logical
-        N65[and]
-        N66[not]
-        N67[nullish]
-        N68[or]
-        N69[xor]
+        N69[and]
+        N70[not]
+        N71[nullish]
+        N72[or]
+        N73[xor]
     end
 
     subgraph Matrix
-        N70[column]
-        N71[concat]
-        N72[count]
-        N73[cross]
-        N74[ctranspose]
-        N75[det]
-        N76[diag]
-        N77[diff]
-        N78[dot]
-        N79[complexEigs]
-        N80[...34 more]
+        N74[column]
+        N75[concat]
+        N76[count]
+        N77[cross]
+        N78[ctranspose]
+        N79[det]
+        N80[diag]
+        N81[diff]
+        N82[dot]
+        N83[complexEigs]
+        N84[...34 more]
     end
 
     subgraph Numeric
-        N81[solveODE]
+        N85[solveODE]
     end
 
     subgraph Plain
-        N82[arithmetic]
-        N83[index]
-        N84[arithmetic]
-        N85[bitwise]
-        N86[combinations]
-        N87[constants]
-        N88[index]
-        N89[logical]
-        N90[probability]
-        N91[relational]
-        N92[...2 more]
+        N86[arithmetic]
+        N87[index]
+        N88[arithmetic]
+        N89[bitwise]
+        N90[combinations]
+        N91[constants]
+        N92[index]
+        N93[logical]
+        N94[probability]
+        N95[relational]
+        N96[...2 more]
     end
 
     subgraph Probability
-        N93[bernoulli]
-        N94[combinations]
-        N95[combinationsWithRep]
-        N96[factorial]
-        N97[gamma]
-        N98[kldivergence]
-        N99[lgamma]
-        N100[multinomial]
-        N101[permutations]
-        N102[pickRandom]
-        N103[...4 more]
+        N97[bernoulli]
+        N98[combinations]
+        N99[combinationsWithRep]
+        N100[factorial]
+        N101[gamma]
+        N102[kldivergence]
+        N103[lgamma]
+        N104[multinomial]
+        N105[permutations]
+        N106[pickRandom]
+        N107[...4 more]
     end
 
     subgraph Relational
-        N104[compare]
-        N105[compareNatural]
-        N106[compareText]
-        N107[compareUnits]
-        N108[deepEqual]
-        N109[equal]
-        N110[equalScalar]
-        N111[equalText]
-        N112[larger]
-        N113[largerEq]
-        N114[...3 more]
+        N108[compare]
+        N109[compareNatural]
+        N110[compareText]
+        N111[compareUnits]
+        N112[deepEqual]
+        N113[equal]
+        N114[equalScalar]
+        N115[equalText]
+        N116[larger]
+        N117[largerEq]
+        N118[...3 more]
     end
 
     subgraph Set
-        N115[setCartesian]
-        N116[setDifference]
-        N117[setDistinct]
-        N118[setIntersect]
-        N119[setIsSubset]
-        N120[setMultiplicity]
-        N121[setPowerset]
-        N122[setSize]
-        N123[setSymDifference]
-        N124[setUnion]
+        N119[setCartesian]
+        N120[setDifference]
+        N121[setDistinct]
+        N122[setIntersect]
+        N123[setIsSubset]
+        N124[setMultiplicity]
+        N125[setPowerset]
+        N126[setSize]
+        N127[setSymDifference]
+        N128[setUnion]
     end
 
     subgraph Shared
-        N125[types]
+        N129[types]
     end
 
     subgraph Signal
-        N126[conv]
-        N127[fft]
-        N128[freqz]
-        N129[index]
-        N130[zpk2tf]
+        N130[conv]
+        N131[fft]
+        N132[freqz]
+        N133[index]
+        N134[zpk2tf]
     end
 
     subgraph Special
-        N131[erf]
-        N132[zeta]
+        N135[erf]
+        N136[zeta]
     end
 
     subgraph Statistics
-        N133[corr]
-        N134[cumsum]
-        N135[mad]
-        N136[max]
-        N137[mean]
-        N138[median]
-        N139[min]
-        N140[mode]
-        N141[prod]
-        N142[quantileSeq]
-        N143[...4 more]
+        N137[corr]
+        N138[cumsum]
+        N139[mad]
+        N140[max]
+        N141[mean]
+        N142[median]
+        N143[min]
+        N144[mode]
+        N145[prod]
+        N146[quantileSeq]
+        N147[...4 more]
     end
 
     subgraph String
-        N144[bin]
-        N145[format]
-        N146[hex]
-        N147[oct]
-        N148[print]
+        N148[bin]
+        N149[format]
+        N150[hex]
+        N151[oct]
+        N152[print]
     end
 
     subgraph Trigonometry
-        N149[acos]
-        N150[acosh]
-        N151[acot]
-        N152[acoth]
-        N153[acsc]
-        N154[acsch]
-        N155[asec]
-        N156[asech]
-        N157[asin]
-        N158[asinh]
-        N159[...16 more]
+        N153[acos]
+        N154[acosh]
+        N155[acot]
+        N156[acoth]
+        N157[acsc]
+        N158[acsch]
+        N159[asec]
+        N160[asech]
+        N161[asin]
+        N162[asinh]
+        N163[...16 more]
     end
 
     subgraph Type
-        N160[bigint]
-        N161[BigNumber]
-        N162[bignumber]
-        N163[boolean]
-        N164[Chain]
-        N165[chain]
-        N166[Complex]
-        N167[complex]
-        N168[Fraction]
-        N169[fraction]
-        N170[...40 more]
+        N164[bigint]
+        N165[BigNumber]
+        N166[bignumber]
+        N167[boolean]
+        N168[Chain]
+        N169[chain]
+        N170[Complex]
+        N171[complex]
+        N172[Fraction]
+        N173[fraction]
+        N174[...40 more]
     end
 
     subgraph Typed
-        N171[arithmetic]
-        N172[index]
-        N173[signal]
-        N174[statistics]
-        N175[trigonometry]
-        N176[typed-bridge]
+        N175[arithmetic]
+        N176[combinatorics]
+        N177[distributions]
+        N178[geometry]
+        N179[index]
+        N180[integration]
+        N181[interpolation]
+        N182[signal]
+        N183[special]
+        N184[statistics]
+        N185[...2 more]
     end
 
     subgraph Unit
-        N177[to]
-        N178[toBest]
+        N186[to]
+        N187[toBest]
     end
 
     subgraph Utils
-        N179[array]
-        N180[bigint]
-        N181[bitwise]
-        N182[constants]
-        N183[formatter]
-        N184[nearlyEqual]
-        N185[clone]
-        N186[collection]
-        N187[complex]
-        N188[customs.d]
-        N189[...36 more]
+        N188[array]
+        N189[bigint]
+        N190[bitwise]
+        N191[constants]
+        N192[formatter]
+        N193[nearlyEqual]
+        N194[clone]
+        N195[collection]
+        N196[complex]
+        N197[customs.d]
+        N198[...36 more]
     end
 
     subgraph Wasm
-        N190[decomposition]
-        N191[equations]
-        N192[polynomial]
-        N193[schur]
-        N194[solver]
-        N195[amd]
-        N196[operations]
-        N197[utilities]
-        N198[sparseChol]
-        N199[sparseLu]
-        N200[...53 more]
+        N199[decomposition]
+        N200[equations]
+        N201[polynomial]
+        N202[schur]
+        N203[solver]
+        N204[amd]
+        N205[operations]
+        N206[utilities]
+        N207[sparseChol]
+        N208[sparseLu]
+        N209[...53 more]
     end
 
     N4 --> N47
@@ -9892,65 +10289,65 @@ graph TD
     N8 --> N47
     N8 --> N43
     N9 --> N47
-    N11 --> N186
-    N11 --> N88
+    N11 --> N195
+    N11 --> N92
     N11 --> N47
-    N13 --> N88
+    N13 --> N92
     N13 --> N47
-    N14 --> N88
+    N14 --> N92
     N14 --> N47
     N14 --> N43
-    N15 --> N186
-    N15 --> N184
+    N15 --> N195
+    N15 --> N193
     N15 --> N47
     N15 --> N43
-    N16 --> N88
+    N16 --> N92
     N16 --> N47
     N18 --> N47
     N19 --> N47
     N20 --> N47
-    N22 --> N181
-    N22 --> N88
+    N22 --> N190
+    N22 --> N92
     N22 --> N47
-    N23 --> N181
-    N23 --> N186
-    N23 --> N88
+    N23 --> N190
+    N23 --> N195
+    N23 --> N92
     N23 --> N47
-    N24 --> N181
-    N24 --> N88
+    N24 --> N190
+    N24 --> N92
     N24 --> N47
-    N25 --> N181
-    N25 --> N88
+    N25 --> N190
+    N25 --> N92
     N25 --> N47
     N26 --> N29
-    N26 --> N88
-    N26 --> N181
-    N26 --> N161
+    N26 --> N92
+    N26 --> N190
+    N26 --> N165
     N26 --> N47
-    N27 --> N181
+    N27 --> N190
     N27 --> N29
-    N27 --> N88
-    N27 --> N161
+    N27 --> N92
+    N27 --> N165
     N27 --> N47
-    N28 --> N88
+    N28 --> N92
     N28 --> N29
-    N28 --> N161
+    N28 --> N165
     N28 --> N47
     N29 --> N47
     N30 --> N47
     N31 --> N47
     N32 --> N47
     N33 --> N47
-    N34 --> N186
+    N34 --> N195
     N34 --> N47
-    N35 --> N186
+    N35 --> N195
     N35 --> N47
-    N36 --> N186
+    N36 --> N195
     N36 --> N47
-    N37 --> N186
+    N37 --> N195
     N37 --> N47
-    N38 --> N182
-    N38 --> N88
+    N38 --> N191
+    N38 --> N92
     N38 --> N43
     N44 --> N48
     N44 --> N49
@@ -9968,14 +10365,14 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 750 |
-| Total Modules | 29 |
-| Total Lines of Code | 125273 |
-| Total Exports | 3366 |
-| Total Re-exports | 970 |
-| Total Classes | 10 |
+| Total TypeScript Files | 760 |
+| Total Modules | 30 |
+| Total Lines of Code | 130146 |
+| Total Exports | 3673 |
+| Total Re-exports | 982 |
+| Total Classes | 12 |
 | Total Interfaces | 129 |
-| Total Functions | 1300 |
+| Total Functions | 1338 |
 | Total Type Guards | 105 |
 | Total Enums | 0 |
 | Type-only Imports | 379 |
@@ -9984,5 +10381,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-04-04
-*Version*: 0.1.0
+*Last Updated*: 2026-04-10
+*Version*: 0.1.2

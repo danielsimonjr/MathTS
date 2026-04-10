@@ -1,6 +1,6 @@
 # @danielsimonjr/mathts-workbook - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-04-04
+**Version**: 0.1.2 | **Last Updated**: 2026-04-10
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -179,5 +179,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-04-04
-*Version*: 0.1.0
+*Last Updated*: 2026-04-10
+*Version*: 0.1.2

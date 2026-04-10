@@ -25,6 +25,8 @@ The simplest entry point. Parses and evaluates an expression in one call.
 evaluate(expr: string, scope?: Record<string, any>): any
 ```
 
+All registered math functions are available in expression strings, including the full function library: arithmetic, trigonometry, statistics, signal processing, special functions (`erfc`, `beta`, `gammainc`, `digamma`, Bessel functions), probability distributions (`normalPDF`, `normalCDF`, `poissonPMF`, etc.), combinatorics (`fibonacci`, `lucas`, `subfactorial`, etc.), and geometry functions.
+
 Examples:
 
 ```typescript
@@ -32,6 +34,10 @@ evaluate('2 + 3');                        // 5
 evaluate('sin(pi / 2)');                  // 1
 evaluate('sqrt(-4)');                     // Complex { re: 0, im: 2 }
 evaluate('a * b', { a: 3, b: 4 });        // 12
+evaluate('erfc(1)');                      // ~0.1573
+evaluate('normalPDF(0)');                 // ~0.3989
+evaluate('fibonacci(10)');               // 55
+evaluate('beta(2, 3)');                   // ~0.0833
 ```
 
 ### Scope

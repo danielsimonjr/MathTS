@@ -1,6 +1,6 @@
 # MathTS API Reference
 
-**Generated**: 2026-04-03
+**Generated**: 2026-04-10
 
 ---
 
@@ -62,7 +62,7 @@ isObject(x)     isNull(x)        isUndefined(x)    isMatrix(x)
 
 ## @danielsimonjr/mathts-functions
 
-All exports come from `functions/src/typed/`. 95 total exports across 4 modules.
+All exports come from `functions/src/typed/`. 158 total exports across 11 modules.
 
 ### Arithmetic (48 exports)
 
@@ -83,7 +83,7 @@ All exports come from `functions/src/typed/`. 95 total exports across 4 modules.
 `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `atan2`,
 `acsc`, `asec`, `acot`, `asinh`, `acosh`, `atanh`, `toRadians`, `toDegrees`, `hypot`, `typedTrigonometry`
 
-### Statistics (19 exports)
+### Statistics (23 exports)
 
 All stat functions are parallel-first and return `Promise<ParallelResult<T>>` for array inputs.
 Variadic overloads (2–4 numbers) are synchronous.
@@ -94,10 +94,57 @@ Variadic overloads (2–4 numbers) are synchronous.
 `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`,
 `parallelStatHistogram`, `NormalizationType`, `typedStatistics`
 
-### Signal Processing (8 exports)
+(4 additional exports in v0.1.3+)
+
+### Signal Processing (12 exports)
 
 `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`,
-`parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `typedSignal`
+`parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `crossCorrelation`,
+`autoCorrelation`, `groupDelay`, `typedSignal`
+
+(2 additional exports in v0.1.3+)
+
+### Special Functions (9 exports)
+
+Higher-order mathematical functions not in standard mathjs.
+
+`erfc`, `beta`, `gammainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `typedSpecial`
+
+### Distributions (11 exports)
+
+Probability distribution functions (PDF, CDF, PMF).
+
+`normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`,
+`binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`, `jsDivergence`
+
+(1 additional export in module)
+
+### Integration (4 exports)
+
+Numerical integration methods. All accept a callback `f: (x: number) => number`.
+
+`trapz`, `simpson`, `gaussQuad`, `romberg`
+
+### Interpolation (6 exports)
+
+Curve fitting and interpolation. Functions that return interpolant functions or fitted values.
+
+`linearInterp`, `lagrangeInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit`
+
+### Combinatorics (6 exports)
+
+Integer sequence and combinatorial functions.
+
+`fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`
+
+### Geometry (18 exports)
+
+2D and 3D geometric operations on number arrays.
+
+`angle2D`, `angle3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`,
+`pointInPolygon`, `rotateVector2D`, `rotateVector3D`
+
+(8 additional exports in module)
 
 ---
 
@@ -202,7 +249,7 @@ Re-exports all core types: `Complex`, `Fraction`, `BigNumber`, `DenseMatrix`, `S
 
 ## @danielsimonjr/mathts-expression
 
-> **Status**: Parser is ported and builds. Compiler and evaluator are empty stubs. Zero tests. Not connected to `@danielsimonjr/mathts-core`.
+> **Status**: Parser is ported and builds. Compiler and evaluator are empty stubs. 2 test files. Not connected to `@danielsimonjr/mathts-core`.
 
 | Symbol | Description |
 |--------|-------------|

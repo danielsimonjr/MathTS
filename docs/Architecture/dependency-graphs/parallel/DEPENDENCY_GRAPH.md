@@ -1,6 +1,6 @@
 # @danielsimonjr/mathts-parallel - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-04-04
+**Version**: 0.1.2 | **Last Updated**: 2026-04-10
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -29,7 +29,7 @@ The codebase is organized into the following modules:
 
 - **root**: 4 files
 - **entry**: 1 file
-- **operations**: 5 files
+- **operations**: 7 files
 - **strategies**: 3 files
 - **workers**: 1 file
 
@@ -100,6 +100,20 @@ The codebase is organized into the following modules:
 
 ## Operations Dependencies
 
+### `src/operations/eig.ts` - Parallel Eigendecomposition
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../ComputePool.js` | `computePool, ComputePool` | Import |
+| `../ComputePool.js` | `ParallelResult` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `EigResult`, `ParallelEigOptions`
+- Functions: `parallelEig`, `parallelEigvals`
+
+---
+
 ### `src/operations/elementwise.ts` - Parallel Element-wise Operations
 
 **Internal Dependencies:**
@@ -114,6 +128,20 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/operations/fft.ts` - Parallel FFT Operations
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../ComputePool.js` | `computePool, ComputePool` | Import |
+| `../ComputePool.js` | `ParallelResult` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `FFTResult`, `ParallelFFTOptions`
+- Functions: `parallelFFT`, `parallelIFFT`, `parallelFFTAuto`, `parallelConvolve`
+
+---
+
 ### `src/operations/index.ts` - Parallel Operations
 
 **Internal Dependencies:**
@@ -122,10 +150,12 @@ The codebase is organized into the following modules:
 | `./matmul.js` | `parallelMatmul, parallelMatvec, parallelTranspose, parallelOuter, parallelDot, MatmulOptions` | Re-export |
 | `./elementwise.js` | `parallelAdd, parallelSubtract, parallelMultiply, parallelDivide, parallelScale, parallelAbs, parallelNegate, parallelSquare, parallelSqrt, parallelExp, parallelLog, parallelSin, parallelCos, parallelTan, parallelElementwise, parallelUnary, ElementwiseOptions` | Re-export |
 | `./reduce.js` | `parallelSum, parallelMean, parallelMin, parallelMax, parallelMinMax, parallelVariance, parallelStd, parallelNorm, parallelDistance, parallelHistogram, parallelReduce, ReduceOptions` | Re-export |
+| `./fft.js` | `parallelFFT, parallelIFFT, parallelFFTAuto, parallelConvolve, ParallelFFTOptions, FFTResult` | Re-export |
+| `./eig.js` | `parallelEig, parallelEigvals, EigResult, ParallelEigOptions` | Re-export |
 | `./map.js` | `parallelMap, parallelFilter, parallelFind, parallelSort, parallelForEach, parallelSome, parallelEvery, parallelCount, MapOptions` | Re-export |
 
 **Exports:**
-- Re-exports: `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `MatmulOptions`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `ElementwiseOptions`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `ReduceOptions`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `MapOptions`
+- Re-exports: `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `MatmulOptions`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `ElementwiseOptions`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `ReduceOptions`, `parallelFFT`, `parallelIFFT`, `parallelFFTAuto`, `parallelConvolve`, `ParallelFFTOptions`, `FFTResult`, `parallelEig`, `parallelEigvals`, `EigResult`, `ParallelEigOptions`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `MapOptions`
 
 ---
 
@@ -232,11 +262,13 @@ The codebase is organized into the following modules:
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `src/ComputePool` | 0 files | 6 files |
-| `src/operations/index` | 4 files | 1 file |
+| `src/ComputePool` | 0 files | 8 files |
+| `src/operations/index` | 6 files | 1 file |
 | `src/index` | 3 files | 0 files |
 | `src/strategies/index` | 2 files | 1 file |
+| `src/operations/eig` | 1 file | 1 file |
 | `src/operations/elementwise` | 1 file | 1 file |
+| `src/operations/fft` | 1 file | 1 file |
 | `src/operations/map` | 1 file | 1 file |
 | `src/operations/matmul` | 1 file | 1 file |
 | `src/operations/reduce` | 1 file | 1 file |
@@ -272,38 +304,44 @@ graph TD
     end
 
     subgraph Operations
-        N5[elementwise]
-        N6[index]
-        N7[map]
-        N8[matmul]
-        N9[reduce]
+        N5[eig]
+        N6[elementwise]
+        N7[fft]
+        N8[index]
+        N9[map]
+        N10[matmul]
+        N11[reduce]
     end
 
     subgraph Strategies
-        N10[chunk]
-        N11[index]
-        N12[threshold]
+        N12[chunk]
+        N13[index]
+        N14[threshold]
     end
 
     subgraph Workers
-        N13[compute.worker]
+        N15[compute.worker]
     end
 
     N4 --> N0
-    N4 --> N6
-    N4 --> N11
+    N4 --> N8
+    N4 --> N13
     N5 --> N0
-    N6 --> N8
-    N6 --> N5
-    N6 --> N9
-    N6 --> N7
+    N6 --> N0
     N7 --> N0
-    N8 --> N0
+    N8 --> N10
+    N8 --> N6
+    N8 --> N11
+    N8 --> N7
+    N8 --> N5
+    N8 --> N9
     N9 --> N0
+    N10 --> N0
+    N11 --> N0
     N2 --> N3
-    N11 --> N10
-    N11 --> N12
-    N12 --> N0
+    N13 --> N12
+    N13 --> N14
+    N14 --> N0
 ```
 
 ---
@@ -313,21 +351,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 14 |
+| Total TypeScript Files | 16 |
 | Total Modules | 5 |
-| Total Lines of Code | 3115 |
-| Total Exports | 183 |
-| Total Re-exports | 122 |
+| Total Lines of Code | 4156 |
+| Total Exports | 199 |
+| Total Re-exports | 132 |
 | Total Classes | 4 |
-| Total Interfaces | 16 |
-| Total Functions | 52 |
+| Total Interfaces | 20 |
+| Total Functions | 58 |
 | Total Type Guards | 0 |
 | Total Enums | 0 |
-| Type-only Imports | 4 |
+| Type-only Imports | 6 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 0 |
 
 ---
 
-*Last Updated*: 2026-04-04
-*Version*: 0.1.0
+*Last Updated*: 2026-04-10
+*Version*: 0.1.2

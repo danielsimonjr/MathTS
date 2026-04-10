@@ -1,37 +1,78 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-04-04
+**Generated**: 2026-04-10
 
 ## Summary
 
-- **Potentially unused files**: 46
-- **Potentially unused exports**: 135
+- **Potentially unused files**: 87
+- **Potentially unused exports**: 134
 
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
 
+- `src/embeddedDocs/function/combinatorics/doubleFactorial.ts`
+- `src/embeddedDocs/function/combinatorics/fallingFactorial.ts`
+- `src/embeddedDocs/function/combinatorics/fibonacci.ts`
+- `src/embeddedDocs/function/combinatorics/lucas.ts`
+- `src/embeddedDocs/function/combinatorics/risingFactorial.ts`
+- `src/embeddedDocs/function/combinatorics/subfactorial.ts`
+- `src/embeddedDocs/function/geometry/angle2D.ts`
+- `src/embeddedDocs/function/geometry/angle3D.ts`
+- `src/embeddedDocs/function/geometry/convexHull.ts`
+- `src/embeddedDocs/function/geometry/cross3D.ts`
+- `src/embeddedDocs/function/geometry/distance2D.ts`
+- `src/embeddedDocs/function/geometry/distance3D.ts`
+- `src/embeddedDocs/function/geometry/distanceND.ts`
+- `src/embeddedDocs/function/geometry/distancePointToLine2D.ts`
+- `src/embeddedDocs/function/geometry/dot3D.ts`
+- `src/embeddedDocs/function/geometry/intersectLines2D.ts`
+- `src/embeddedDocs/function/geometry/intersectSegments2D.ts`
+- `src/embeddedDocs/function/geometry/pointInPolygon.ts`
+- `src/embeddedDocs/function/geometry/polygonArea.ts`
+- `src/embeddedDocs/function/geometry/projectVector.ts`
+- `src/embeddedDocs/function/geometry/reflectVector.ts`
+- `src/embeddedDocs/function/geometry/rotateVector2D.ts`
+- `src/embeddedDocs/function/geometry/rotateVector3D.ts`
+- `src/embeddedDocs/function/geometry/triangleArea.ts`
+- `src/embeddedDocs/function/numeric/cubicSpline.ts`
+- `src/embeddedDocs/function/numeric/gaussQuad.ts`
+- `src/embeddedDocs/function/numeric/hermiteInterp.ts`
+- `src/embeddedDocs/function/numeric/lagrangeInterp.ts`
+- `src/embeddedDocs/function/numeric/linearInterp.ts`
+- `src/embeddedDocs/function/numeric/pchipInterp.ts`
+- `src/embeddedDocs/function/numeric/polyFit.ts`
+- `src/embeddedDocs/function/numeric/romberg.ts`
+- `src/embeddedDocs/function/numeric/simpson.ts`
+- `src/embeddedDocs/function/numeric/trapz.ts`
+- `src/embeddedDocs/function/probability/bernoulliPMF.ts`
+- `src/embeddedDocs/function/probability/binomialPMF.ts`
 - `src/embeddedDocs/function/probability/distribution.ts`
+- `src/embeddedDocs/function/probability/entropy.ts`
+- `src/embeddedDocs/function/probability/exponentialCDF.ts`
+- `src/embeddedDocs/function/probability/exponentialPDF.ts`
+- `src/embeddedDocs/function/probability/geometricPMF.ts`
+- `src/embeddedDocs/function/probability/jsDivergence.ts`
+- `src/embeddedDocs/function/probability/normalCDF.ts`
+- `src/embeddedDocs/function/probability/normalPDF.ts`
+- `src/embeddedDocs/function/probability/poissonPMF.ts`
+- `src/embeddedDocs/function/signal/autoCorrelation.ts`
+- `src/embeddedDocs/function/signal/crossCorrelation.ts`
+- `src/embeddedDocs/function/signal/groupDelay.ts`
+- `src/embeddedDocs/function/signal/unwrapPhase.ts`
+- `src/embeddedDocs/function/special/besselJ0.ts`
+- `src/embeddedDocs/function/special/besselJ1.ts`
+- `src/embeddedDocs/function/special/besselY0.ts`
+- `src/embeddedDocs/function/special/besselY1.ts`
+- `src/embeddedDocs/function/special/beta.ts`
+- `src/embeddedDocs/function/special/digamma.ts`
+- `src/embeddedDocs/function/special/erfc.ts`
+- `src/embeddedDocs/function/special/gammainc.ts`
 - `src/error/ArgumentsError.ts`
 - `src/function/compile.ts`
 - `src/function/evaluate.ts`
 - `src/function/help.ts`
 - `src/function/parser.ts`
-- `src/node/AccessorNode.ts`
-- `src/node/ArrayNode.ts`
-- `src/node/AssignmentNode.ts`
-- `src/node/BlockNode.ts`
-- `src/node/ConditionalNode.ts`
-- `src/node/ConstantNode.ts`
-- `src/node/FunctionAssignmentNode.ts`
-- `src/node/FunctionNode.ts`
-- `src/node/IndexNode.ts`
-- `src/node/ObjectNode.ts`
-- `src/node/OperatorNode.ts`
-- `src/node/ParenthesisNode.ts`
-- `src/node/RangeNode.ts`
-- `src/node/RelationalNode.ts`
-- `src/node/SymbolNode.ts`
 - `src/transform/and.transform.ts`
 - `src/transform/bitAnd.transform.ts`
 - `src/transform/bitOr.transform.ts`
@@ -70,7 +111,6 @@ These exports are not imported by any other file in the codebase:
 
 - `CompiledExpression` (interface)
 - `StringOptions` (interface)
-- `createNode` (constant)
 
 ### `src/utils/array.ts`
 

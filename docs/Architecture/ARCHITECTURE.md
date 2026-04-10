@@ -1,16 +1,16 @@
 # MathTS Architecture
 
-**Generated**: 2026-04-03
+**Generated**: 2026-04-10
 
 ## System Overview
 
 MathTS is an npm workspaces monorepo with **10 packages**, all ESM-only (ES2022).
 Turborepo orchestrates builds across the workspace. tsup bundles each package.
 
-- **1,247 source files** (99 native, ~1,173 synced from mathjs)
-- **193,073 lines of code** across all packages
-- **5,399 total exports** (1,562 reachable from entry points)
-- **54 test files**, **1,445 tests passing**
+- **1,324 source files** (99 native, ~1,225 synced from mathjs)
+- **202,551 lines of code** across all packages
+- **6,323 total exports** across all packages
+- **79 test files**, **2,304 tests passing**
 - **All 10 packages build**, 14/14 typecheck
 
 ## Package Dependency Graph
@@ -64,13 +64,13 @@ Two factory layers exist in the codebase:
 
 | Layer | Location | Count | Status |
 |-------|----------|-------|--------|
-| Native typed functions | `functions/src/typed/` | 5 files, 96 exports | Active, exported |
-| Synced mathjs factories | `functions/src/<category>/` | 19 categories, 231 factories | Dormant, not exported |
+| Native typed functions | `functions/src/typed/` | 11 files, 158 exports | Active, exported |
+| Synced mathjs factories | `functions/src/<category>/` | 19 categories, 242 factories | Dormant, not exported |
 
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
 dependencies, and the `math` singleton provides the fully configured instance.
 
-**Leaf factories**: 81 factories with no unresolved dependencies (ready to activate).
+**Leaf factories**: Subset of 242 synced factories with no unresolved dependencies (ready to activate).
 
 ### 4. Matrix Backends
 
@@ -146,7 +146,7 @@ JS fallback (always)
 ### 7. Expression Package
 
 Parser ported from mathjs (16 node types, 1,885-line `parse.ts`). The package now
-builds successfully. Compiler and evaluator are stubs. 331 source files, 528 exports.
+builds successfully. Compiler and evaluator are stubs. 391 source files, 608 exports.
 
 ### 8. Workbook Runtime
 
@@ -173,10 +173,10 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 
 | Metric | Value |
 |--------|-------|
-| Reachable files (from entry points) | ~89 |
-| Dormant files (synced, not exported) | ~1,158 |
-| Leaf factories (activatable) | 81 |
-| Total synced factories | 231 |
+| Reachable files (from entry points) | ~99 |
+| Dormant files (synced, not exported) | ~1,225 |
+| Total synced factories | 242 |
+| Synced categories | 19 |
 | Type bridge | In place |
 | Factory bridge | In place |
 
@@ -203,13 +203,13 @@ Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build 
 | Package | Source Files | Test Files | Exports |
 |---------|-------------|-----------|---------|
 | core | 95 | 12 | 625 |
-| matrix | 33 | 14 | 305 |
-| functions | 750 | 9 | 3,564 |
-| parallel | 14 | 10 | 162 |
-| expression | 331 | 0 | 528 |
+| matrix | 38 | 17 | 351 |
+| functions | 760 | 24 | 3,871 |
+| parallel | 16 | 13 | 176 |
+| expression | 391 | 2 | 608 |
 | workbook | 6 | 3 | 29 |
 | compat | 3 | 2 | 132 |
 | assembly | 10 | 0 | 432 |
-| typed-function | 2 | 1 | 53 |
-| workerpool | 3 | 1 | 29 |
-| **Total** | **1,247** | **52** | **5,859** |
+| typed-function | 2 | 2 | 62 |
+| workerpool | 3 | 1 | 37 |
+| **Total** | **1,324** | **76** | **6,323** |

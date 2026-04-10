@@ -326,8 +326,106 @@ console.log(`Internal duration: ${result.duration.toFixed(2)}ms`);
 console.log(`Overhead: ${(duration - result.duration).toFixed(2)}ms`);
 ```
 
+## Special Functions
+
+MathTS provides high-accuracy special function implementations using polynomial approximations from Hart (1968) and the Abramowitz & Stegun handbook.
+
+```typescript
+import { erfc, beta, gammainc, digamma, besselJ0, besselJ1 } from '@danielsimonjr/mathts-functions';
+
+// Complementary error function (useful in statistics and signal processing)
+erfc(1);           // ~0.1573 — P(|Z| > sqrt(2)) for standard normal
+erfc(0);           // 1.0
+
+// Beta function (used in probability theory and combinatorics)
+beta(0.5, 0.5);    // pi (exact closed form)
+beta(2, 3);        // 1/12
+
+// Regularized incomplete gamma (chi-squared CDF, Poisson CDF)
+gammainc(1, 1);    // ~0.6321
+
+// Digamma (log-derivative of Gamma, used in Bayesian statistics)
+digamma(1);        // ~-0.5772 (Euler–Mascheroni constant)
+digamma(0.5);      // ~-1.9635
+
+// Bessel functions (wave equations, cylindrical symmetry)
+besselJ0(0);       // 1.0
+besselJ1(2.4048);  // ~0 (first zero of J0 is a zero crossing for J1 derivative)
+```
+
+## Numerical Integration
+
+For integrating functions that have no closed-form antiderivative, MathTS provides four quadrature methods:
+
+```typescript
+import { trapz, simpson, gaussQuad, romberg } from '@danielsimonjr/mathts-functions';
+
+const f = (x: number) => Math.exp(-x * x);  // Gaussian integrand
+
+// Trapezoidal rule: simple, works on sampled data
+const xs = Array.from({ length: 101 }, (_, i) => -5 + i * 0.1);
+const ys = xs.map(f);
+trapz(ys, xs);  // ~sqrt(pi) ≈ 1.7725
+
+// Simpson's rule: higher order, callable with function
+simpson(f, -5, 5, 100);   // ~1.7725
+
+// Gauss-Legendre: optimal for smooth functions (n=2..5 points)
+gaussQuad(f, -5, 5, 5);   // ~1.7725
+
+// Romberg: adaptive accuracy via Richardson extrapolation
+romberg(f, -5, 5, 1e-10); // ~1.7725 with high precision
+```
+
+**Choosing a method:**
+
+| Method | Best For | Notes |
+|--------|----------|-------|
+| `trapz` | Pre-sampled data (sensor readings, CSV) | O(n) with uniform or non-uniform x |
+| `simpson` | Smooth analytic functions | n must be even; faster than trapz for same accuracy |
+| `gaussQuad` | Very smooth functions on fixed interval | Exact for polynomials up to degree 2n-1 |
+| `romberg` | High-accuracy requirements | Adaptive; converges until `tol` is met |
+
+## Interpolation
+
+When you have discrete data points and need smooth values between them:
+
+```typescript
+import { linearInterp, cubicSpline, pchipInterp, polyFit } from '@danielsimonjr/mathts-functions';
+
+const xs = [0, 1, 2, 3, 4, 5];
+const ys = [0, 0.8, 0.9, 0.1, -0.8, -1.0];
+
+// Linear: fast, no overshoot, piecewise
+linearInterp(xs, ys, 1.5);  // 0.85
+
+// Natural cubic spline: smooth C² curve (can overshoot)
+const spline = cubicSpline(xs, ys);
+spline(2.5);   // smooth interpolated value
+
+// PCHIP: monotonicity-preserving (no spurious oscillations)
+const pchip = pchipInterp(xs, ys);
+pchip(2.5);    // shape-preserving value
+
+// Polynomial least-squares fit
+const coeffs = polyFit(xs, ys, 3);  // degree-3 polynomial coefficients
+// coeffs[0]*x^3 + coeffs[1]*x^2 + coeffs[2]*x + coeffs[3]
+```
+
+**Choosing an interpolation method:**
+
+| Method | Best For | Notes |
+|--------|----------|-------|
+| `linearInterp` | Monotone data, fast lookup | No smoothness between points |
+| `lagrangeInterp` | Small datasets, exact fit | Prone to Runge's phenomenon for n > 10 |
+| `cubicSpline` | Smooth curves through all data points | May oscillate if data is not smooth |
+| `hermiteInterp` | When derivatives are known | Requires `dy/dx` at each point |
+| `pchipInterp` | Non-oscillating smooth curves | Best for data with local monotonicity |
+| `polyFit` | Trend fitting, noisy data | Returns polynomial coefficients |
+
 ## See Also
 
 - [API Reference](./api/README.md) - Complete API documentation
+- [Function Reference](./reference/functions.md) - All 302+ math functions
 - [Getting Started](./getting-started.md) - Basic usage guide
 - [Migration Guide](./migration/guide.md) - Migrating from mathjs

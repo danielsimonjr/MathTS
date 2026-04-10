@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generatedAt": "2026-04-04T00:27:27.227Z",
-    "totalSourceFiles": 14,
-    "totalTestFiles": 10,
-    "testedCount": 8,
+    "generatedAt": "2026-04-10T16:14:58.280Z",
+    "totalSourceFiles": 16,
+    "totalTestFiles": 13,
+    "testedCount": 10,
     "untestedCount": 6,
-    "coveragePercent": "57.1"
+    "coveragePercent": "62.5"
   },
   "untestedFiles": [
     "src/WorkerPool.ts",
@@ -18,7 +18,9 @@
   "testedFiles": [
     "src/ComputePool.ts",
     "src/ParallelMatrix.ts",
+    "src/operations/eig.ts",
     "src/operations/elementwise.ts",
+    "src/operations/fft.ts",
     "src/operations/map.ts",
     "src/operations/matmul.ts",
     "src/operations/reduce.ts",
@@ -27,6 +29,7 @@
   ],
   "coverageMap": {
     "src/ComputePool.ts": [
+      "tests/benchmark.test.ts",
       "tests/ComputePool.test.ts",
       "tests/operations/elementwise.test.ts",
       "tests/operations/matmul.test.ts",
@@ -34,8 +37,15 @@
     ],
     "src/index.ts": [],
     "src/matrix.worker.ts": [],
+    "src/operations/eig.ts": [
+      "tests/operations/parallel-eig.test.ts"
+    ],
     "src/operations/elementwise.ts": [
+      "tests/benchmark.test.ts",
       "tests/operations/elementwise.test.ts"
+    ],
+    "src/operations/fft.ts": [
+      "tests/operations/fft.test.ts"
     ],
     "src/operations/index.ts": [],
     "src/operations/map.ts": [
@@ -43,9 +53,11 @@
       "tests/operations/map.test.ts"
     ],
     "src/operations/matmul.ts": [
+      "tests/benchmark.test.ts",
       "tests/operations/matmul.test.ts"
     ],
     "src/operations/reduce.ts": [
+      "tests/benchmark.test.ts",
       "tests/operations/reduce.test.ts"
     ],
     "src/ParallelMatrix.ts": [
@@ -63,6 +75,12 @@
     "src/workers/compute.worker.ts": []
   },
   "testToSourceMap": {
+    "tests/benchmark.test.ts": [
+      "src/operations/elementwise.ts",
+      "src/operations/reduce.ts",
+      "src/operations/matmul.ts",
+      "src/ComputePool.ts"
+    ],
     "tests/chunk.test.ts": [
       "src/strategies/chunk.ts"
     ],
@@ -73,6 +91,9 @@
       "src/operations/elementwise.ts",
       "src/ComputePool.ts"
     ],
+    "tests/operations/fft.test.ts": [
+      "src/operations/fft.ts"
+    ],
     "tests/operations/map-extended.test.ts": [
       "src/operations/map.ts"
     ],
@@ -82,6 +103,9 @@
     "tests/operations/matmul.test.ts": [
       "src/operations/matmul.ts",
       "src/ComputePool.ts"
+    ],
+    "tests/operations/parallel-eig.test.ts": [
+      "src/operations/eig.ts"
     ],
     "tests/operations/reduce.test.ts": [
       "src/operations/reduce.ts"

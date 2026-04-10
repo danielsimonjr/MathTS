@@ -1,16 +1,16 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-04-04
+**Generated**: 2026-04-10
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 14 |
-| Total Test Files | 10 |
-| Source Files with Tests | 8 |
+| Total Source Files | 16 |
+| Total Test Files | 13 |
+| Source Files with Tests | 10 |
 | Source Files without Tests | 6 |
-| Coverage | 57.1% |
+| Coverage | 62.5% |
 
 ---
 
@@ -42,12 +42,14 @@ The following 6 source files are not directly imported by any test file:
 
 | Source File | Test Files |
 |-------------|------------|
-| `src/ComputePool.ts` | `ComputePool.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts` |
+| `src/ComputePool.ts` | `benchmark.test.ts`, `ComputePool.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts` |
 | `src/ParallelMatrix.ts` | `ParallelMatrix.test.ts` |
-| `operations/elementwise.ts` | `elementwise.test.ts` |
+| `operations/eig.ts` | `parallel-eig.test.ts` |
+| `operations/elementwise.ts` | `benchmark.test.ts`, `elementwise.test.ts` |
+| `operations/fft.ts` | `fft.test.ts` |
 | `operations/map.ts` | `map-extended.test.ts`, `map.test.ts` |
-| `operations/matmul.ts` | `matmul.test.ts` |
-| `operations/reduce.ts` | `reduce.test.ts` |
+| `operations/matmul.ts` | `benchmark.test.ts`, `matmul.test.ts` |
+| `operations/reduce.ts` | `benchmark.test.ts`, `reduce.test.ts` |
 | `strategies/chunk.ts` | `chunk.test.ts`, `chunk-extended.test.ts` |
 | `strategies/threshold.ts` | `threshold.test.ts` |
 
@@ -57,12 +59,15 @@ The following 6 source files are not directly imported by any test file:
 
 | Test File | Imports from Source |
 |-----------|---------------------|
+| `tests/benchmark.test.ts` | 4 files |
 | `tests/chunk.test.ts` | 1 files |
 | `tests/ComputePool.test.ts` | 1 files |
 | `operations/elementwise.test.ts` | 2 files |
+| `operations/fft.test.ts` | 1 files |
 | `operations/map-extended.test.ts` | 1 files |
 | `operations/map.test.ts` | 1 files |
 | `operations/matmul.test.ts` | 2 files |
+| `operations/parallel-eig.test.ts` | 1 files |
 | `operations/reduce.test.ts` | 1 files |
 | `operations/threshold.test.ts` | 2 files |
 | `tests/ParallelMatrix.test.ts` | 1 files |

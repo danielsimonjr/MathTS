@@ -1,22 +1,26 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-04-04
+**Generated**: 2026-04-10
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 331 |
-| Total Test Files | 0 |
-| Source Files with Tests | 0 |
-| Source Files without Tests | 331 |
-| Coverage | 0.0% |
+| Total Source Files | 391 |
+| Total Test Files | 2 |
+| Source Files with Tests | 2 |
+| Source Files without Tests | 389 |
+| Coverage | 0.5% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 331 source files are not directly imported by any test file:
+The following 389 source files are not directly imported by any test file:
+
+### compiler/
+
+- `src/compiler/index.ts` → Expected test: `tests/unit/compiler/index.test.ts`
 
 ### embeddedDocs/
 
@@ -121,7 +125,13 @@ The following 331 source files are not directly imported by any test file:
 - `src/embeddedDocs/function/combinatorics/bellNumbers.ts` → Expected test: `tests/unit/embeddedDocs/bellNumbers.test.ts`
 - `src/embeddedDocs/function/combinatorics/catalan.ts` → Expected test: `tests/unit/embeddedDocs/catalan.test.ts`
 - `src/embeddedDocs/function/combinatorics/composition.ts` → Expected test: `tests/unit/embeddedDocs/composition.test.ts`
+- `src/embeddedDocs/function/combinatorics/doubleFactorial.ts` → Expected test: `tests/unit/embeddedDocs/doubleFactorial.test.ts`
+- `src/embeddedDocs/function/combinatorics/fallingFactorial.ts` → Expected test: `tests/unit/embeddedDocs/fallingFactorial.test.ts`
+- `src/embeddedDocs/function/combinatorics/fibonacci.ts` → Expected test: `tests/unit/embeddedDocs/fibonacci.test.ts`
+- `src/embeddedDocs/function/combinatorics/lucas.ts` → Expected test: `tests/unit/embeddedDocs/lucas.test.ts`
+- `src/embeddedDocs/function/combinatorics/risingFactorial.ts` → Expected test: `tests/unit/embeddedDocs/risingFactorial.test.ts`
 - `src/embeddedDocs/function/combinatorics/stirlingS2.ts` → Expected test: `tests/unit/embeddedDocs/stirlingS2.test.ts`
+- `src/embeddedDocs/function/combinatorics/subfactorial.ts` → Expected test: `tests/unit/embeddedDocs/subfactorial.test.ts`
 - `src/embeddedDocs/function/complex/arg.ts` → Expected test: `tests/unit/embeddedDocs/arg.test.ts`
 - `src/embeddedDocs/function/complex/conj.ts` → Expected test: `tests/unit/embeddedDocs/conj.test.ts`
 - `src/embeddedDocs/function/complex/im.ts` → Expected test: `tests/unit/embeddedDocs/im.test.ts`
@@ -131,8 +141,26 @@ The following 331 source files are not directly imported by any test file:
 - `src/embeddedDocs/function/expression/help.ts` → Expected test: `tests/unit/embeddedDocs/help.test.ts`
 - `src/embeddedDocs/function/expression/parse.ts` → Expected test: `tests/unit/embeddedDocs/parse.test.ts`
 - `src/embeddedDocs/function/expression/parser.ts` → Expected test: `tests/unit/embeddedDocs/parser.test.ts`
+- `src/embeddedDocs/function/geometry/angle2D.ts` → Expected test: `tests/unit/embeddedDocs/angle2D.test.ts`
+- `src/embeddedDocs/function/geometry/angle3D.ts` → Expected test: `tests/unit/embeddedDocs/angle3D.test.ts`
+- `src/embeddedDocs/function/geometry/convexHull.ts` → Expected test: `tests/unit/embeddedDocs/convexHull.test.ts`
+- `src/embeddedDocs/function/geometry/cross3D.ts` → Expected test: `tests/unit/embeddedDocs/cross3D.test.ts`
 - `src/embeddedDocs/function/geometry/distance.ts` → Expected test: `tests/unit/embeddedDocs/distance.test.ts`
+- `src/embeddedDocs/function/geometry/distance2D.ts` → Expected test: `tests/unit/embeddedDocs/distance2D.test.ts`
+- `src/embeddedDocs/function/geometry/distance3D.ts` → Expected test: `tests/unit/embeddedDocs/distance3D.test.ts`
+- `src/embeddedDocs/function/geometry/distanceND.ts` → Expected test: `tests/unit/embeddedDocs/distanceND.test.ts`
+- `src/embeddedDocs/function/geometry/distancePointToLine2D.ts` → Expected test: `tests/unit/embeddedDocs/distancePointToLine2D.test.ts`
+- `src/embeddedDocs/function/geometry/dot3D.ts` → Expected test: `tests/unit/embeddedDocs/dot3D.test.ts`
 - `src/embeddedDocs/function/geometry/intersect.ts` → Expected test: `tests/unit/embeddedDocs/intersect.test.ts`
+- `src/embeddedDocs/function/geometry/intersectLines2D.ts` → Expected test: `tests/unit/embeddedDocs/intersectLines2D.test.ts`
+- `src/embeddedDocs/function/geometry/intersectSegments2D.ts` → Expected test: `tests/unit/embeddedDocs/intersectSegments2D.test.ts`
+- `src/embeddedDocs/function/geometry/pointInPolygon.ts` → Expected test: `tests/unit/embeddedDocs/pointInPolygon.test.ts`
+- `src/embeddedDocs/function/geometry/polygonArea.ts` → Expected test: `tests/unit/embeddedDocs/polygonArea.test.ts`
+- `src/embeddedDocs/function/geometry/projectVector.ts` → Expected test: `tests/unit/embeddedDocs/projectVector.test.ts`
+- `src/embeddedDocs/function/geometry/reflectVector.ts` → Expected test: `tests/unit/embeddedDocs/reflectVector.test.ts`
+- `src/embeddedDocs/function/geometry/rotateVector2D.ts` → Expected test: `tests/unit/embeddedDocs/rotateVector2D.test.ts`
+- `src/embeddedDocs/function/geometry/rotateVector3D.ts` → Expected test: `tests/unit/embeddedDocs/rotateVector3D.test.ts`
+- `src/embeddedDocs/function/geometry/triangleArea.ts` → Expected test: `tests/unit/embeddedDocs/triangleArea.test.ts`
 - `src/embeddedDocs/function/logical/and.ts` → Expected test: `tests/unit/embeddedDocs/and.test.ts`
 - `src/embeddedDocs/function/logical/not.ts` → Expected test: `tests/unit/embeddedDocs/not.test.ts`
 - `src/embeddedDocs/function/logical/nullish.ts` → Expected test: `tests/unit/embeddedDocs/nullish.test.ts`
@@ -178,18 +206,38 @@ The following 331 source files are not directly imported by any test file:
 - `src/embeddedDocs/function/matrix/trace.ts` → Expected test: `tests/unit/embeddedDocs/trace.test.ts`
 - `src/embeddedDocs/function/matrix/transpose.ts` → Expected test: `tests/unit/embeddedDocs/transpose.test.ts`
 - `src/embeddedDocs/function/matrix/zeros.ts` → Expected test: `tests/unit/embeddedDocs/zeros.test.ts`
+- `src/embeddedDocs/function/numeric/cubicSpline.ts` → Expected test: `tests/unit/embeddedDocs/cubicSpline.test.ts`
+- `src/embeddedDocs/function/numeric/gaussQuad.ts` → Expected test: `tests/unit/embeddedDocs/gaussQuad.test.ts`
+- `src/embeddedDocs/function/numeric/hermiteInterp.ts` → Expected test: `tests/unit/embeddedDocs/hermiteInterp.test.ts`
+- `src/embeddedDocs/function/numeric/lagrangeInterp.ts` → Expected test: `tests/unit/embeddedDocs/lagrangeInterp.test.ts`
+- `src/embeddedDocs/function/numeric/linearInterp.ts` → Expected test: `tests/unit/embeddedDocs/linearInterp.test.ts`
+- `src/embeddedDocs/function/numeric/pchipInterp.ts` → Expected test: `tests/unit/embeddedDocs/pchipInterp.test.ts`
+- `src/embeddedDocs/function/numeric/polyFit.ts` → Expected test: `tests/unit/embeddedDocs/polyFit.test.ts`
+- `src/embeddedDocs/function/numeric/romberg.ts` → Expected test: `tests/unit/embeddedDocs/romberg.test.ts`
+- `src/embeddedDocs/function/numeric/simpson.ts` → Expected test: `tests/unit/embeddedDocs/simpson.test.ts`
 - `src/embeddedDocs/function/numeric/solveODE.ts` → Expected test: `tests/unit/embeddedDocs/solveODE.test.ts`
+- `src/embeddedDocs/function/numeric/trapz.ts` → Expected test: `tests/unit/embeddedDocs/trapz.test.ts`
 - `src/embeddedDocs/function/probability/bernoulli.ts` → Expected test: `tests/unit/embeddedDocs/bernoulli.test.ts`
+- `src/embeddedDocs/function/probability/bernoulliPMF.ts` → Expected test: `tests/unit/embeddedDocs/bernoulliPMF.test.ts`
+- `src/embeddedDocs/function/probability/binomialPMF.ts` → Expected test: `tests/unit/embeddedDocs/binomialPMF.test.ts`
 - `src/embeddedDocs/function/probability/combinations.ts` → Expected test: `tests/unit/embeddedDocs/combinations.test.ts`
 - `src/embeddedDocs/function/probability/combinationsWithRep.ts` → Expected test: `tests/unit/embeddedDocs/combinationsWithRep.test.ts`
 - `src/embeddedDocs/function/probability/distribution.ts` → Expected test: `tests/unit/embeddedDocs/distribution.test.ts`
+- `src/embeddedDocs/function/probability/entropy.ts` → Expected test: `tests/unit/embeddedDocs/entropy.test.ts`
+- `src/embeddedDocs/function/probability/exponentialCDF.ts` → Expected test: `tests/unit/embeddedDocs/exponentialCDF.test.ts`
+- `src/embeddedDocs/function/probability/exponentialPDF.ts` → Expected test: `tests/unit/embeddedDocs/exponentialPDF.test.ts`
 - `src/embeddedDocs/function/probability/factorial.ts` → Expected test: `tests/unit/embeddedDocs/factorial.test.ts`
 - `src/embeddedDocs/function/probability/gamma.ts` → Expected test: `tests/unit/embeddedDocs/gamma.test.ts`
+- `src/embeddedDocs/function/probability/geometricPMF.ts` → Expected test: `tests/unit/embeddedDocs/geometricPMF.test.ts`
+- `src/embeddedDocs/function/probability/jsDivergence.ts` → Expected test: `tests/unit/embeddedDocs/jsDivergence.test.ts`
 - `src/embeddedDocs/function/probability/kldivergence.ts` → Expected test: `tests/unit/embeddedDocs/kldivergence.test.ts`
 - `src/embeddedDocs/function/probability/lgamma.ts` → Expected test: `tests/unit/embeddedDocs/lgamma.test.ts`
 - `src/embeddedDocs/function/probability/multinomial.ts` → Expected test: `tests/unit/embeddedDocs/multinomial.test.ts`
+- `src/embeddedDocs/function/probability/normalCDF.ts` → Expected test: `tests/unit/embeddedDocs/normalCDF.test.ts`
+- `src/embeddedDocs/function/probability/normalPDF.ts` → Expected test: `tests/unit/embeddedDocs/normalPDF.test.ts`
 - `src/embeddedDocs/function/probability/permutations.ts` → Expected test: `tests/unit/embeddedDocs/permutations.test.ts`
 - `src/embeddedDocs/function/probability/pickRandom.ts` → Expected test: `tests/unit/embeddedDocs/pickRandom.test.ts`
+- `src/embeddedDocs/function/probability/poissonPMF.ts` → Expected test: `tests/unit/embeddedDocs/poissonPMF.test.ts`
 - `src/embeddedDocs/function/probability/random.ts` → Expected test: `tests/unit/embeddedDocs/random.test.ts`
 - `src/embeddedDocs/function/probability/randomInt.ts` → Expected test: `tests/unit/embeddedDocs/randomInt.test.ts`
 - `src/embeddedDocs/function/relational/compare.ts` → Expected test: `tests/unit/embeddedDocs/compare.test.ts`
@@ -213,9 +261,21 @@ The following 331 source files are not directly imported by any test file:
 - `src/embeddedDocs/function/set/setSize.ts` → Expected test: `tests/unit/embeddedDocs/setSize.test.ts`
 - `src/embeddedDocs/function/set/setSymDifference.ts` → Expected test: `tests/unit/embeddedDocs/setSymDifference.test.ts`
 - `src/embeddedDocs/function/set/setUnion.ts` → Expected test: `tests/unit/embeddedDocs/setUnion.test.ts`
+- `src/embeddedDocs/function/signal/autoCorrelation.ts` → Expected test: `tests/unit/embeddedDocs/autoCorrelation.test.ts`
+- `src/embeddedDocs/function/signal/crossCorrelation.ts` → Expected test: `tests/unit/embeddedDocs/crossCorrelation.test.ts`
 - `src/embeddedDocs/function/signal/freqz.ts` → Expected test: `tests/unit/embeddedDocs/freqz.test.ts`
+- `src/embeddedDocs/function/signal/groupDelay.ts` → Expected test: `tests/unit/embeddedDocs/groupDelay.test.ts`
+- `src/embeddedDocs/function/signal/unwrapPhase.ts` → Expected test: `tests/unit/embeddedDocs/unwrapPhase.test.ts`
 - `src/embeddedDocs/function/signal/zpk2tf.ts` → Expected test: `tests/unit/embeddedDocs/zpk2tf.test.ts`
+- `src/embeddedDocs/function/special/besselJ0.ts` → Expected test: `tests/unit/embeddedDocs/besselJ0.test.ts`
+- `src/embeddedDocs/function/special/besselJ1.ts` → Expected test: `tests/unit/embeddedDocs/besselJ1.test.ts`
+- `src/embeddedDocs/function/special/besselY0.ts` → Expected test: `tests/unit/embeddedDocs/besselY0.test.ts`
+- `src/embeddedDocs/function/special/besselY1.ts` → Expected test: `tests/unit/embeddedDocs/besselY1.test.ts`
+- `src/embeddedDocs/function/special/beta.ts` → Expected test: `tests/unit/embeddedDocs/beta.test.ts`
+- `src/embeddedDocs/function/special/digamma.ts` → Expected test: `tests/unit/embeddedDocs/digamma.test.ts`
 - `src/embeddedDocs/function/special/erf.ts` → Expected test: `tests/unit/embeddedDocs/erf.test.ts`
+- `src/embeddedDocs/function/special/erfc.ts` → Expected test: `tests/unit/embeddedDocs/erfc.test.ts`
+- `src/embeddedDocs/function/special/gammainc.ts` → Expected test: `tests/unit/embeddedDocs/gammainc.test.ts`
 - `src/embeddedDocs/function/special/zeta.ts` → Expected test: `tests/unit/embeddedDocs/zeta.test.ts`
 - `src/embeddedDocs/function/statistics/corr.ts` → Expected test: `tests/unit/embeddedDocs/corr.test.ts`
 - `src/embeddedDocs/function/statistics/cumsum.ts` → Expected test: `tests/unit/embeddedDocs/cumsum.test.ts`
@@ -281,6 +341,10 @@ The following 331 source files are not directly imported by any test file:
 - `src/error/ArgumentsError.ts` → Expected test: `tests/unit/error/ArgumentsError.test.ts`
 - `src/error/DimensionError.ts` → Expected test: `tests/unit/error/DimensionError.test.ts`
 - `src/error/IndexError.ts` → Expected test: `tests/unit/error/IndexError.test.ts`
+
+### evaluator/
+
+- `src/evaluator/index.ts` → Expected test: `tests/unit/evaluator/index.test.ts`
 
 ### function/
 
@@ -376,6 +440,8 @@ The following 331 source files are not directly imported by any test file:
 
 | Source File | Test Files |
 |-------------|------------|
+| `compiler/compile.ts` | `compile.test.ts` |
+| `evaluator/evaluate.ts` | `evaluate.test.ts` |
 
 ---
 
@@ -383,3 +449,5 @@ The following 331 source files are not directly imported by any test file:
 
 | Test File | Imports from Source |
 |-----------|---------------------|
+| `tests/compile.test.ts` | 1 files |
+| `tests/evaluate.test.ts` | 1 files |

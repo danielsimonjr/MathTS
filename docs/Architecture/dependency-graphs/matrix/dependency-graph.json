@@ -1,11 +1,11 @@
 {
   "metadata": {
     "name": "@danielsimonjr/mathts-matrix",
-    "version": "0.1.0",
-    "lastUpdated": "2026-04-04",
-    "totalFiles": 33,
+    "version": "0.1.2",
+    "lastUpdated": "2026-04-10",
+    "totalFiles": 38,
     "totalModules": 5,
-    "totalExports": 262
+    "totalExports": 307
   },
   "entryPoints": [
     {
@@ -618,6 +618,27 @@
             "reExport": true
           },
           {
+            "file": "./RustWASMBackend.js",
+            "imports": [
+              "RustWASMBackend",
+              "rustWasmBackend",
+              "createRustWASMBackend",
+              "RustWASMBackendConfig"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./RustWasmLoader.js",
+            "imports": [
+              "RustWasmLoader",
+              "rustWasmLoader",
+              "initRustWasm",
+              "RustWasmExports",
+              "RustLoadingMetrics"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./BackendManager.js",
             "imports": [
               "BackendManager",
@@ -684,6 +705,15 @@
           "destroyGlobalGPUBackend",
           "GPUBackendOptions",
           "GPUBackendStatus",
+          "RustWASMBackend",
+          "rustWasmBackend",
+          "createRustWASMBackend",
+          "RustWASMBackendConfig",
+          "RustWasmLoader",
+          "rustWasmLoader",
+          "initRustWasm",
+          "RustWasmExports",
+          "RustLoadingMetrics",
           "BackendManager",
           "backendManager",
           "createBackendManager",
@@ -733,6 +763,15 @@
           "destroyGlobalGPUBackend",
           "GPUBackendOptions",
           "GPUBackendStatus",
+          "RustWASMBackend",
+          "rustWasmBackend",
+          "createRustWASMBackend",
+          "RustWASMBackendConfig",
+          "RustWasmLoader",
+          "rustWasmLoader",
+          "initRustWasm",
+          "RustWasmExports",
+          "RustLoadingMetrics",
           "BackendManager",
           "backendManager",
           "createBackendManager",
@@ -863,6 +902,81 @@
           "parallelBackend"
         ]
       },
+      "src/backends/RustWASMBackend.ts": {
+        "description": "Rust WASM Matrix Backend",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./Backend.js",
+            "imports": [
+              "MatrixBackend",
+              "BackendType"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": [
+              "DenseMatrix"
+            ]
+          },
+          {
+            "file": "./JSBackend.js",
+            "imports": [
+              "jsBackend"
+            ]
+          },
+          {
+            "file": "./RustWasmLoader.js",
+            "imports": [
+              "rustWasmLoader",
+              "RustWasmExports"
+            ]
+          }
+        ],
+        "exports": [
+          "rustWasmBackend",
+          "createRustWASMBackend",
+          "RustWASMBackend"
+        ],
+        "classes": [
+          "RustWASMBackend"
+        ],
+        "interfaces": [
+          "RustWASMBackendConfig"
+        ],
+        "functions": [
+          "createRustWASMBackend"
+        ],
+        "constants": [
+          "rustWasmBackend"
+        ]
+      },
+      "src/backends/RustWasmLoader.ts": {
+        "description": "Rust WASM Loader",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "rustWasmLoader",
+          "initRustWasm",
+          "RustWasmLoader"
+        ],
+        "classes": [
+          "RustWasmLoader"
+        ],
+        "interfaces": [
+          "RustWasmExports",
+          "RustLoadingMetrics"
+        ],
+        "functions": [
+          "initRustWasm"
+        ],
+        "constants": [
+          "rustWasmLoader"
+        ]
+      },
       "src/backends/wasm/detect.ts": {
         "description": "WASM Feature Detection",
         "externalDependencies": [],
@@ -888,6 +1002,49 @@
           "getCachedFeatures"
         ]
       },
+      "src/backends/wasm/fft-wasm.ts": {
+        "description": "WASM-Accelerated FFT Operations",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../WasmLoader.js",
+            "imports": [
+              "wasmLoader"
+            ]
+          }
+        ],
+        "exports": [
+          "isPowerOf2",
+          "nextPowerOf2",
+          "fftJS",
+          "isWasmFFTAvailable",
+          "fft",
+          "ifft",
+          "rfft",
+          "powerSpectrum",
+          "magnitudeSpectrum",
+          "phaseSpectrum",
+          "convolve"
+        ],
+        "interfaces": [
+          "FFTResult",
+          "FFTConfig"
+        ],
+        "functions": [
+          "isPowerOf2",
+          "nextPowerOf2",
+          "fftJS",
+          "isWasmFFTAvailable",
+          "fft",
+          "ifft",
+          "rfft",
+          "powerSpectrum",
+          "magnitudeSpectrum",
+          "phaseSpectrum",
+          "convolve"
+        ]
+      },
       "src/backends/wasm/index.ts": {
         "description": "WASM Utilities Index",
         "externalDependencies": [],
@@ -904,6 +1061,23 @@
               "getCachedFeatures"
             ],
             "reExport": true
+          },
+          {
+            "file": "./fft-wasm.js",
+            "imports": [
+              "fft",
+              "ifft",
+              "rfft",
+              "fftJS",
+              "convolve",
+              "powerSpectrum",
+              "magnitudeSpectrum",
+              "phaseSpectrum",
+              "isPowerOf2",
+              "nextPowerOf2",
+              "isWasmFFTAvailable"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -912,7 +1086,18 @@
           "isSharedMemoryAvailable",
           "isAtomicsAvailable",
           "clearFeatureCache",
-          "getCachedFeatures"
+          "getCachedFeatures",
+          "fft",
+          "ifft",
+          "rfft",
+          "fftJS",
+          "convolve",
+          "powerSpectrum",
+          "magnitudeSpectrum",
+          "phaseSpectrum",
+          "isPowerOf2",
+          "nextPowerOf2",
+          "isWasmFFTAvailable"
         ],
         "reExported": [
           "detectWasmFeatures",
@@ -920,7 +1105,18 @@
           "isSharedMemoryAvailable",
           "isAtomicsAvailable",
           "clearFeatureCache",
-          "getCachedFeatures"
+          "getCachedFeatures",
+          "fft",
+          "ifft",
+          "rfft",
+          "fftJS",
+          "convolve",
+          "powerSpectrum",
+          "magnitudeSpectrum",
+          "phaseSpectrum",
+          "isPowerOf2",
+          "nextPowerOf2",
+          "isWasmFFTAvailable"
         ]
       },
       "src/backends/WASMBackend.ts": {
@@ -1340,6 +1536,13 @@
             "reExport": true
           },
           {
+            "file": "./operations/index.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./typed-operations.js",
             "imports": [
               "*"
@@ -1358,12 +1561,44 @@
         "reExported": [
           "* from ./types/index.js",
           "* from ./backends/index.js",
+          "* from ./operations/index.js",
           "* from ./typed-operations.js",
           "* from ./parallel-matrix.js"
         ]
       }
     },
     "operations": {
+      "src/operations/eig-wasm.ts": {
+        "description": "WASM-accelerated Eigendecomposition",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./eig.js",
+            "imports": [
+              "eig",
+              "EigResult",
+              "EigOptions"
+            ]
+          },
+          {
+            "file": "../backends/WasmLoader.js",
+            "imports": [
+              "wasmLoader"
+            ]
+          }
+        ],
+        "exports": [
+          "eigWasm",
+          "eigvalsWasm",
+          "spectralRadiusWasm"
+        ],
+        "functions": [
+          "eigWasm",
+          "eigvalsWasm",
+          "spectralRadiusWasm"
+        ]
+      },
       "src/operations/eig.ts": {
         "description": "Eigenvalue and Eigenvector Decomposition",
         "externalDependencies": [],
@@ -1414,6 +1649,22 @@
               "SVDOptions"
             ],
             "reExport": true
+          },
+          {
+            "file": "./eig-wasm.js",
+            "imports": [
+              "eigWasm",
+              "eigvalsWasm",
+              "spectralRadiusWasm"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./svd-wasm.js",
+            "imports": [
+              "svdWasm"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -1430,7 +1681,11 @@
           "norm2",
           "normFro",
           "SVDResult",
-          "SVDOptions"
+          "SVDOptions",
+          "eigWasm",
+          "eigvalsWasm",
+          "spectralRadiusWasm",
+          "svdWasm"
         ],
         "reExported": [
           "eig",
@@ -1446,7 +1701,38 @@
           "norm2",
           "normFro",
           "SVDResult",
-          "SVDOptions"
+          "SVDOptions",
+          "eigWasm",
+          "eigvalsWasm",
+          "spectralRadiusWasm",
+          "svdWasm"
+        ]
+      },
+      "src/operations/svd-wasm.ts": {
+        "description": "WASM-accelerated Singular Value Decomposition",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./svd.js",
+            "imports": [
+              "svd",
+              "SVDResult",
+              "SVDOptions"
+            ]
+          },
+          {
+            "file": "./eig-wasm.js",
+            "imports": [
+              "eigWasm"
+            ]
+          }
+        ],
+        "exports": [
+          "svdWasm"
+        ],
+        "functions": [
+          "svdWasm"
         ]
       },
       "src/operations/svd.ts": {
@@ -1668,7 +1954,10 @@
           "src/backends/JSBackend.ts",
           "src/backends/MatrixWasmBridge.ts",
           "src/backends/ParallelBackend.ts",
+          "src/backends/RustWASMBackend.ts",
+          "src/backends/RustWasmLoader.ts",
           "src/backends/wasm/detect.ts",
+          "src/backends/wasm/fft-wasm.ts",
           "src/backends/wasm/index.ts",
           "src/backends/WASMBackend.ts",
           "src/backends/WasmLoader.ts"
@@ -1693,8 +1982,10 @@
       {
         "name": "Operations",
         "files": [
+          "src/operations/eig-wasm.ts",
           "src/operations/eig.ts",
           "src/operations/index.ts",
+          "src/operations/svd-wasm.ts",
           "src/operations/svd.ts"
         ]
       },
@@ -1711,21 +2002,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 33,
+    "totalTypeScriptFiles": 38,
     "totalModules": 5,
-    "totalLinesOfCode": 13378,
-    "totalExports": 262,
-    "totalClasses": 17,
-    "totalInterfaces": 40,
-    "totalFunctions": 54,
-    "totalTypeGuards": 8,
+    "totalLinesOfCode": 15250,
+    "totalExports": 307,
+    "totalClasses": 19,
+    "totalInterfaces": 45,
+    "totalFunctions": 71,
+    "totalTypeGuards": 10,
     "totalEnums": 0,
-    "totalConstants": 84,
-    "totalReExports": 111,
-    "totalTypeOnlyImports": 14,
+    "totalConstants": 86,
+    "totalReExports": 136,
+    "totalTypeOnlyImports": 15,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 2,
     "unusedFilesCount": 3,
-    "unusedExportsCount": 24
+    "unusedExportsCount": 27
   }
 }

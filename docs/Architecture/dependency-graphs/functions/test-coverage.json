@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generatedAt": "2026-04-04T00:27:26.459Z",
-    "totalSourceFiles": 750,
-    "totalTestFiles": 9,
-    "testedCount": 9,
-    "untestedCount": 741,
-    "coveragePercent": "1.2"
+    "generatedAt": "2026-04-10T16:14:57.567Z",
+    "totalSourceFiles": 760,
+    "totalTestFiles": 24,
+    "testedCount": 18,
+    "untestedCount": 742,
+    "coveragePercent": "2.4"
   },
   "untestedFiles": [
     "src/algebra/decomposition/lup.ts",
@@ -433,6 +433,7 @@
     "src/expression/transform/utils/transformCallback.ts",
     "src/expression/transform/variance.transform.ts",
     "src/expression/types.ts",
+    "src/factories/scope.ts",
     "src/factoriesAny.ts",
     "src/factoriesNumber.ts",
     "src/geometry/distance.ts",
@@ -751,12 +752,21 @@
     "src/wasm/utils/workPtrValidation.ts"
   ],
   "testedFiles": [
+    "src/factories/evaluate.ts",
+    "src/factories/index.ts",
+    "src/factories/matrix-bridge.ts",
     "src/index.ts",
     "src/signal/conv.ts",
     "src/signal/fft.ts",
     "src/typed/arithmetic.ts",
+    "src/typed/combinatorics.ts",
+    "src/typed/distributions.ts",
+    "src/typed/geometry.ts",
     "src/typed/index.ts",
+    "src/typed/integration.ts",
+    "src/typed/interpolation.ts",
     "src/typed/signal.ts",
+    "src/typed/special.ts",
     "src/typed/statistics.ts",
     "src/typed/trigonometry.ts",
     "src/typed/typed-bridge.ts"
@@ -1187,6 +1197,27 @@
     "src/expression/transform/utils/transformCallback.ts": [],
     "src/expression/transform/variance.transform.ts": [],
     "src/expression/types.ts": [],
+    "src/factories/evaluate.ts": [
+      "tests/evaluate.test.ts",
+      "tests/parallel-arithmetic.test.ts",
+      "tests/parallel-signal.test.ts",
+      "tests/typed-arithmetic.test.ts"
+    ],
+    "src/factories/index.ts": [
+      "tests/factories-final.test.ts",
+      "tests/factories-leaf.test.ts",
+      "tests/factories-matrix.test.ts",
+      "tests/factories-tier2.test.ts",
+      "tests/factories-tier4.test.ts",
+      "tests/parallel-arithmetic.test.ts",
+      "tests/parallel-signal.test.ts",
+      "tests/typed-arithmetic.test.ts"
+    ],
+    "src/factories/matrix-bridge.ts": [
+      "tests/factories-matrix.test.ts",
+      "tests/sparse-bridge.test.ts"
+    ],
+    "src/factories/scope.ts": [],
     "src/factoriesAny.ts": [],
     "src/factoriesNumber.ts": [],
     "src/geometry/distance.ts": [],
@@ -1408,7 +1439,37 @@
       "tests/parallel-signal.test.ts",
       "tests/typed-arithmetic.test.ts"
     ],
+    "src/typed/combinatorics.ts": [
+      "tests/combinatorics.test.ts",
+      "tests/parallel-arithmetic.test.ts",
+      "tests/parallel-signal.test.ts",
+      "tests/typed-arithmetic.test.ts"
+    ],
+    "src/typed/distributions.ts": [
+      "tests/distributions.test.ts",
+      "tests/parallel-arithmetic.test.ts",
+      "tests/parallel-signal.test.ts",
+      "tests/typed-arithmetic.test.ts"
+    ],
+    "src/typed/geometry.ts": [
+      "tests/geometry.test.ts",
+      "tests/parallel-arithmetic.test.ts",
+      "tests/parallel-signal.test.ts",
+      "tests/typed-arithmetic.test.ts"
+    ],
     "src/typed/index.ts": [
+      "tests/parallel-arithmetic.test.ts",
+      "tests/parallel-signal.test.ts",
+      "tests/typed-arithmetic.test.ts"
+    ],
+    "src/typed/integration.ts": [
+      "tests/integration.test.ts",
+      "tests/parallel-arithmetic.test.ts",
+      "tests/parallel-signal.test.ts",
+      "tests/typed-arithmetic.test.ts"
+    ],
+    "src/typed/interpolation.ts": [
+      "tests/interpolation.test.ts",
       "tests/parallel-arithmetic.test.ts",
       "tests/parallel-signal.test.ts",
       "tests/typed-arithmetic.test.ts"
@@ -1416,6 +1477,13 @@
     "src/typed/signal.ts": [
       "tests/parallel-arithmetic.test.ts",
       "tests/parallel-signal.test.ts",
+      "tests/signal-extended.test.ts",
+      "tests/typed-arithmetic.test.ts"
+    ],
+    "src/typed/special.ts": [
+      "tests/parallel-arithmetic.test.ts",
+      "tests/parallel-signal.test.ts",
+      "tests/special.test.ts",
       "tests/typed-arithmetic.test.ts"
     ],
     "src/typed/statistics.ts": [
@@ -1423,6 +1491,7 @@
       "tests/parallel-signal.test.ts",
       "tests/statistics-extended.test.ts",
       "tests/statistics-extended2.test.ts",
+      "tests/statistics-selection.test.ts",
       "tests/typed-arithmetic.test.ts"
     ],
     "src/typed/trigonometry.ts": [
@@ -1552,21 +1621,71 @@
       "src/typed/arithmetic.ts",
       "src/typed/trigonometry.ts"
     ],
+    "tests/combinatorics.test.ts": [
+      "src/typed/combinatorics.ts"
+    ],
+    "tests/distributions.test.ts": [
+      "src/typed/distributions.ts"
+    ],
+    "tests/evaluate.test.ts": [
+      "src/factories/evaluate.ts"
+    ],
+    "tests/factories-final.test.ts": [
+      "src/factories/index.ts"
+    ],
+    "tests/factories-leaf.test.ts": [
+      "src/factories/index.ts"
+    ],
+    "tests/factories-matrix.test.ts": [
+      "src/factories/matrix-bridge.ts",
+      "src/factories/index.ts"
+    ],
+    "tests/factories-tier2.test.ts": [
+      "src/factories/index.ts"
+    ],
+    "tests/factories-tier4.test.ts": [
+      "src/factories/index.ts"
+    ],
+    "tests/geometry.test.ts": [
+      "src/typed/geometry.ts"
+    ],
+    "tests/integration.test.ts": [
+      "src/typed/integration.ts"
+    ],
+    "tests/interpolation.test.ts": [
+      "src/typed/interpolation.ts"
+    ],
     "tests/parallel-arithmetic.test.ts": [
       "src/index.ts",
       "src/typed/index.ts",
+      "src/factories/index.ts",
+      "src/factories/evaluate.ts",
       "src/typed/arithmetic.ts",
       "src/typed/trigonometry.ts",
       "src/typed/statistics.ts",
-      "src/typed/signal.ts"
+      "src/typed/signal.ts",
+      "src/typed/special.ts",
+      "src/typed/distributions.ts",
+      "src/typed/geometry.ts",
+      "src/typed/integration.ts",
+      "src/typed/interpolation.ts",
+      "src/typed/combinatorics.ts"
     ],
     "tests/parallel-signal.test.ts": [
       "src/index.ts",
       "src/typed/index.ts",
+      "src/factories/index.ts",
+      "src/factories/evaluate.ts",
       "src/typed/arithmetic.ts",
       "src/typed/trigonometry.ts",
       "src/typed/statistics.ts",
-      "src/typed/signal.ts"
+      "src/typed/signal.ts",
+      "src/typed/special.ts",
+      "src/typed/distributions.ts",
+      "src/typed/geometry.ts",
+      "src/typed/integration.ts",
+      "src/typed/interpolation.ts",
+      "src/typed/combinatorics.ts"
     ],
     "tests/signal/conv.test.ts": [
       "src/signal/conv.ts"
@@ -1574,19 +1693,39 @@
     "tests/signal/fft.test.ts": [
       "src/signal/fft.ts"
     ],
+    "tests/signal-extended.test.ts": [
+      "src/typed/signal.ts"
+    ],
+    "tests/sparse-bridge.test.ts": [
+      "src/factories/matrix-bridge.ts"
+    ],
+    "tests/special.test.ts": [
+      "src/typed/special.ts"
+    ],
     "tests/statistics-extended.test.ts": [
       "src/typed/statistics.ts"
     ],
     "tests/statistics-extended2.test.ts": [
       "src/typed/statistics.ts"
     ],
+    "tests/statistics-selection.test.ts": [
+      "src/typed/statistics.ts"
+    ],
     "tests/typed-arithmetic.test.ts": [
       "src/index.ts",
       "src/typed/index.ts",
+      "src/factories/index.ts",
+      "src/factories/evaluate.ts",
       "src/typed/arithmetic.ts",
       "src/typed/trigonometry.ts",
       "src/typed/statistics.ts",
-      "src/typed/signal.ts"
+      "src/typed/signal.ts",
+      "src/typed/special.ts",
+      "src/typed/distributions.ts",
+      "src/typed/geometry.ts",
+      "src/typed/integration.ts",
+      "src/typed/interpolation.ts",
+      "src/typed/combinatorics.ts"
     ],
     "tests/typed-bridge.test.ts": [
       "src/typed/typed-bridge.ts"

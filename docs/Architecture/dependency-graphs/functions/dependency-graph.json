@@ -1,11 +1,11 @@
 {
   "metadata": {
     "name": "@danielsimonjr/mathts-functions",
-    "version": "0.1.0",
-    "lastUpdated": "2026-04-04",
-    "totalFiles": 750,
-    "totalModules": 29,
-    "totalExports": 3366
+    "version": "0.1.2",
+    "lastUpdated": "2026-04-10",
+    "totalFiles": 760,
+    "totalModules": 30,
+    "totalExports": 3673
   },
   "entryPoints": [
     {
@@ -15924,6 +15924,2068 @@
         "exports": []
       }
     },
+    "factories": {
+      "src/factories/evaluate.ts": {
+        "description": "Expression evaluator wired to the activated factory scope.",
+        "externalDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "imports": [
+              "createEvaluate",
+              "compileExpression"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scope.js",
+            "imports": [
+              "factoryScope"
+            ]
+          },
+          {
+            "file": "./index.js",
+            "imports": [
+              "* as activatedFactories"
+            ]
+          },
+          {
+            "file": "../typed/index.js",
+            "imports": [
+              "* as typedFns"
+            ]
+          }
+        ],
+        "exports": [
+          "parse",
+          "evaluate",
+          "compileExpr"
+        ],
+        "functions": [
+          "compileExpr"
+        ],
+        "constants": [
+          "parse",
+          "evaluate"
+        ]
+      },
+      "src/factories/index.ts": {
+        "description": "Activated mathjs leaf factory functions.",
+        "externalDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "imports": [
+              "createNode",
+              "createAccessorNode",
+              "createArrayNode",
+              "createAssignmentNode",
+              "createBlockNode",
+              "createConditionalNode",
+              "createConstantNode",
+              "createFunctionAssignmentNode",
+              "createFunctionNode",
+              "createIndexNode",
+              "createObjectNode",
+              "createOperatorNode",
+              "createParenthesisNode",
+              "createRangeNode",
+              "createRelationalNode",
+              "createSymbolNode",
+              "createParse"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scope.js",
+            "imports": [
+              "factoryScope"
+            ]
+          },
+          {
+            "file": "../typed/arithmetic.js",
+            "imports": [
+              "add",
+              "multiply"
+            ]
+          },
+          {
+            "file": "../arithmetic/abs.js",
+            "imports": [
+              "createAbs"
+            ]
+          },
+          {
+            "file": "../arithmetic/addScalar.js",
+            "imports": [
+              "createAddScalar"
+            ]
+          },
+          {
+            "file": "../arithmetic/cube.js",
+            "imports": [
+              "createCube"
+            ]
+          },
+          {
+            "file": "../arithmetic/exp.js",
+            "imports": [
+              "createExp"
+            ]
+          },
+          {
+            "file": "../arithmetic/expm1.js",
+            "imports": [
+              "createExpm1"
+            ]
+          },
+          {
+            "file": "../arithmetic/log10.js",
+            "imports": [
+              "createLog10"
+            ]
+          },
+          {
+            "file": "../arithmetic/log2.js",
+            "imports": [
+              "createLog2"
+            ]
+          },
+          {
+            "file": "../arithmetic/multiplyScalar.js",
+            "imports": [
+              "createMultiplyScalar"
+            ]
+          },
+          {
+            "file": "../arithmetic/sign.js",
+            "imports": [
+              "createSign"
+            ]
+          },
+          {
+            "file": "../arithmetic/sqrt.js",
+            "imports": [
+              "createSqrt"
+            ]
+          },
+          {
+            "file": "../arithmetic/square.js",
+            "imports": [
+              "createSquare"
+            ]
+          },
+          {
+            "file": "../arithmetic/subtractScalar.js",
+            "imports": [
+              "createSubtractScalar"
+            ]
+          },
+          {
+            "file": "../arithmetic/unaryMinus.js",
+            "imports": [
+              "createUnaryMinus"
+            ]
+          },
+          {
+            "file": "../bitwise/bitNot.js",
+            "imports": [
+              "createBitNot"
+            ]
+          },
+          {
+            "file": "../complex/arg.js",
+            "imports": [
+              "createArg"
+            ]
+          },
+          {
+            "file": "../complex/conj.js",
+            "imports": [
+              "createConj"
+            ]
+          },
+          {
+            "file": "../complex/im.js",
+            "imports": [
+              "createIm"
+            ]
+          },
+          {
+            "file": "../complex/re.js",
+            "imports": [
+              "createRe"
+            ]
+          },
+          {
+            "file": "../logical/not.js",
+            "imports": [
+              "createNot"
+            ]
+          },
+          {
+            "file": "../matrix/filter.js",
+            "imports": [
+              "createFilter"
+            ]
+          },
+          {
+            "file": "../matrix/flatten.js",
+            "imports": [
+              "createFlatten"
+            ]
+          },
+          {
+            "file": "../matrix/forEach.js",
+            "imports": [
+              "createForEach"
+            ]
+          },
+          {
+            "file": "../matrix/getMatrixDataType.js",
+            "imports": [
+              "createGetMatrixDataType"
+            ]
+          },
+          {
+            "file": "../matrix/map.js",
+            "imports": [
+              "createMap"
+            ]
+          },
+          {
+            "file": "../matrix/size.js",
+            "imports": [
+              "createSize"
+            ]
+          },
+          {
+            "file": "../matrix/squeeze.js",
+            "imports": [
+              "createSqueeze"
+            ]
+          },
+          {
+            "file": "../probability/combinations.js",
+            "imports": [
+              "createCombinations"
+            ]
+          },
+          {
+            "file": "../probability/combinationsWithRep.js",
+            "imports": [
+              "createCombinationsWithRep"
+            ]
+          },
+          {
+            "file": "../probability/lgamma.js",
+            "imports": [
+              "createLgamma"
+            ]
+          },
+          {
+            "file": "../probability/pickRandom.js",
+            "imports": [
+              "createPickRandom"
+            ]
+          },
+          {
+            "file": "../probability/random.js",
+            "imports": [
+              "createRandom"
+            ]
+          },
+          {
+            "file": "../relational/equalScalar.js",
+            "imports": [
+              "createEqualScalar"
+            ]
+          },
+          {
+            "file": "../special/erf.js",
+            "imports": [
+              "createErf"
+            ]
+          },
+          {
+            "file": "../string/format.js",
+            "imports": [
+              "createFormat"
+            ]
+          },
+          {
+            "file": "../string/print.js",
+            "imports": [
+              "createPrint"
+            ]
+          },
+          {
+            "file": "../trigonometry/acos.js",
+            "imports": [
+              "createAcos"
+            ]
+          },
+          {
+            "file": "../trigonometry/acosh.js",
+            "imports": [
+              "createAcosh"
+            ]
+          },
+          {
+            "file": "../trigonometry/acot.js",
+            "imports": [
+              "createAcot"
+            ]
+          },
+          {
+            "file": "../trigonometry/acoth.js",
+            "imports": [
+              "createAcoth"
+            ]
+          },
+          {
+            "file": "../trigonometry/acsc.js",
+            "imports": [
+              "createAcsc"
+            ]
+          },
+          {
+            "file": "../trigonometry/acsch.js",
+            "imports": [
+              "createAcsch"
+            ]
+          },
+          {
+            "file": "../trigonometry/asec.js",
+            "imports": [
+              "createAsec"
+            ]
+          },
+          {
+            "file": "../trigonometry/asech.js",
+            "imports": [
+              "createAsech"
+            ]
+          },
+          {
+            "file": "../trigonometry/asin.js",
+            "imports": [
+              "createAsin"
+            ]
+          },
+          {
+            "file": "../trigonometry/asinh.js",
+            "imports": [
+              "createAsinh"
+            ]
+          },
+          {
+            "file": "../trigonometry/atan.js",
+            "imports": [
+              "createAtan"
+            ]
+          },
+          {
+            "file": "../trigonometry/atanh.js",
+            "imports": [
+              "createAtanh"
+            ]
+          },
+          {
+            "file": "../trigonometry/cos.js",
+            "imports": [
+              "createCos"
+            ]
+          },
+          {
+            "file": "../trigonometry/cosh.js",
+            "imports": [
+              "createCosh"
+            ]
+          },
+          {
+            "file": "../trigonometry/cot.js",
+            "imports": [
+              "createCot"
+            ]
+          },
+          {
+            "file": "../trigonometry/coth.js",
+            "imports": [
+              "createCoth"
+            ]
+          },
+          {
+            "file": "../trigonometry/csc.js",
+            "imports": [
+              "createCsc"
+            ]
+          },
+          {
+            "file": "../trigonometry/csch.js",
+            "imports": [
+              "createCsch"
+            ]
+          },
+          {
+            "file": "../trigonometry/sec.js",
+            "imports": [
+              "createSec"
+            ]
+          },
+          {
+            "file": "../trigonometry/sech.js",
+            "imports": [
+              "createSech"
+            ]
+          },
+          {
+            "file": "../trigonometry/sin.js",
+            "imports": [
+              "createSin"
+            ]
+          },
+          {
+            "file": "../trigonometry/sinh.js",
+            "imports": [
+              "createSinh"
+            ]
+          },
+          {
+            "file": "../trigonometry/tan.js",
+            "imports": [
+              "createTan"
+            ]
+          },
+          {
+            "file": "../trigonometry/tanh.js",
+            "imports": [
+              "createTanh"
+            ]
+          },
+          {
+            "file": "../unit/toBest.js",
+            "imports": [
+              "createToBest"
+            ]
+          },
+          {
+            "file": "../utils/clone.js",
+            "imports": [
+              "createClone"
+            ]
+          },
+          {
+            "file": "../utils/isBounded.js",
+            "imports": [
+              "createIsBounded"
+            ]
+          },
+          {
+            "file": "../utils/isNaN.js",
+            "imports": [
+              "createIsNaN"
+            ]
+          },
+          {
+            "file": "../utils/isNegative.js",
+            "imports": [
+              "createIsNegative"
+            ]
+          },
+          {
+            "file": "../utils/isNumeric.js",
+            "imports": [
+              "createIsNumeric"
+            ]
+          },
+          {
+            "file": "../utils/isPositive.js",
+            "imports": [
+              "createIsPositive"
+            ]
+          },
+          {
+            "file": "../utils/isPrime.js",
+            "imports": [
+              "createIsPrime"
+            ]
+          },
+          {
+            "file": "../utils/numeric.js",
+            "imports": [
+              "createNumeric"
+            ]
+          },
+          {
+            "file": "../utils/typeOf.js",
+            "imports": [
+              "createTypeOf"
+            ]
+          },
+          {
+            "file": "../arithmetic/divideScalar.js",
+            "imports": [
+              "createDivideScalar"
+            ]
+          },
+          {
+            "file": "../arithmetic/unaryPlus.js",
+            "imports": [
+              "createUnaryPlus"
+            ]
+          },
+          {
+            "file": "../matrix/dot.js",
+            "imports": [
+              "createDot"
+            ]
+          },
+          {
+            "file": "../probability/randomInt.js",
+            "imports": [
+              "createRandomInt"
+            ]
+          },
+          {
+            "file": "../statistics/mode.js",
+            "imports": [
+              "createMode"
+            ]
+          },
+          {
+            "file": "../statistics/prod.js",
+            "imports": [
+              "createProd"
+            ]
+          },
+          {
+            "file": "../string/bin.js",
+            "imports": [
+              "createBin"
+            ]
+          },
+          {
+            "file": "../string/hex.js",
+            "imports": [
+              "createHex"
+            ]
+          },
+          {
+            "file": "../string/oct.js",
+            "imports": [
+              "createOct"
+            ]
+          },
+          {
+            "file": "../utils/hasNumericValue.js",
+            "imports": [
+              "createHasNumericValue"
+            ]
+          },
+          {
+            "file": "../utils/isFinite.js",
+            "imports": [
+              "createIsFinite"
+            ]
+          },
+          {
+            "file": "../utils/isZero.js",
+            "imports": [
+              "createIsZero"
+            ]
+          },
+          {
+            "file": "../utils/parseNumber.js",
+            "imports": [
+              "createParseNumberWithConfig"
+            ]
+          },
+          {
+            "file": "../matrix/transpose.js",
+            "imports": [
+              "createTranspose"
+            ]
+          },
+          {
+            "file": "../matrix/ctranspose.js",
+            "imports": [
+              "createCtranspose"
+            ]
+          },
+          {
+            "file": "../matrix/identity.js",
+            "imports": [
+              "createIdentity"
+            ]
+          },
+          {
+            "file": "../matrix/zeros.js",
+            "imports": [
+              "createZeros"
+            ]
+          },
+          {
+            "file": "../matrix/ones.js",
+            "imports": [
+              "createOnes"
+            ]
+          },
+          {
+            "file": "../matrix/diag.js",
+            "imports": [
+              "createDiag"
+            ]
+          },
+          {
+            "file": "../matrix/kron.js",
+            "imports": [
+              "createKron"
+            ]
+          },
+          {
+            "file": "../matrix/matrixFromFunction.js",
+            "imports": [
+              "createMatrixFromFunction"
+            ]
+          },
+          {
+            "file": "../matrix/matrixFromColumns.js",
+            "imports": [
+              "createMatrixFromColumns"
+            ]
+          },
+          {
+            "file": "../matrix/matrixFromRows.js",
+            "imports": [
+              "createMatrixFromRows"
+            ]
+          },
+          {
+            "file": "../matrix/count.js",
+            "imports": [
+              "createCount"
+            ]
+          },
+          {
+            "file": "../matrix/trace.js",
+            "imports": [
+              "createTrace"
+            ]
+          },
+          {
+            "file": "../matrix/det.js",
+            "imports": [
+              "createDet"
+            ]
+          },
+          {
+            "file": "../matrix/reshape.js",
+            "imports": [
+              "createReshape"
+            ]
+          },
+          {
+            "file": "../algebra/sparse/csAmd.js",
+            "imports": [
+              "createCsAmd"
+            ]
+          },
+          {
+            "file": "../algebra/sparse/csCounts.js",
+            "imports": [
+              "createCsCounts"
+            ]
+          },
+          {
+            "file": "../algebra/sparse/csSqr.js",
+            "imports": [
+              "createCsSqr"
+            ]
+          },
+          {
+            "file": "../algebra/sparse/csSymperm.js",
+            "imports": [
+              "createCsSymperm"
+            ]
+          },
+          {
+            "file": "../algebra/solver/lsolve.js",
+            "imports": [
+              "createLsolve"
+            ]
+          },
+          {
+            "file": "../algebra/solver/lsolveAll.js",
+            "imports": [
+              "createLsolveAll"
+            ]
+          },
+          {
+            "file": "../algebra/solver/usolve.js",
+            "imports": [
+              "createUsolve"
+            ]
+          },
+          {
+            "file": "../algebra/solver/usolveAll.js",
+            "imports": [
+              "createUsolveAll"
+            ]
+          },
+          {
+            "file": "../arithmetic/cbrt.js",
+            "imports": [
+              "createCbrt"
+            ]
+          },
+          {
+            "file": "../arithmetic/nthRoots.js",
+            "imports": [
+              "createNthRoots"
+            ]
+          },
+          {
+            "file": "../arithmetic/round.js",
+            "imports": [
+              "createRound"
+            ]
+          },
+          {
+            "file": "../arithmetic/xgcd.js",
+            "imports": [
+              "createXgcd"
+            ]
+          },
+          {
+            "file": "../arithmetic/log.js",
+            "imports": [
+              "createLog"
+            ]
+          },
+          {
+            "file": "../combinatorics/catalan.js",
+            "imports": [
+              "createCatalan"
+            ]
+          },
+          {
+            "file": "../matrix/concat.js",
+            "imports": [
+              "createConcat"
+            ]
+          },
+          {
+            "file": "../matrix/inv.js",
+            "imports": [
+              "createInv"
+            ]
+          },
+          {
+            "file": "../matrix/mapSlices.js",
+            "imports": [
+              "createMapSlices"
+            ]
+          },
+          {
+            "file": "../matrix/resize.js",
+            "imports": [
+              "createResize"
+            ]
+          },
+          {
+            "file": "../matrix/subset.js",
+            "imports": [
+              "createSubset"
+            ]
+          },
+          {
+            "file": "../probability/bernoulli.js",
+            "imports": [
+              "createBernoulli"
+            ]
+          },
+          {
+            "file": "../relational/equal.js",
+            "imports": [
+              "createEqual"
+            ]
+          },
+          {
+            "file": "../signal/zpk2tf.js",
+            "imports": [
+              "createZpk2tf"
+            ]
+          },
+          {
+            "file": "../statistics/cumsum.js",
+            "imports": [
+              "createCumSum"
+            ]
+          },
+          {
+            "file": "../statistics/sum.js",
+            "imports": [
+              "createSum"
+            ]
+          },
+          {
+            "file": "../arithmetic/dotDivide.js",
+            "imports": [
+              "createDotDivide"
+            ]
+          },
+          {
+            "file": "../arithmetic/dotMultiply.js",
+            "imports": [
+              "createDotMultiply"
+            ]
+          },
+          {
+            "file": "../arithmetic/gcd.js",
+            "imports": [
+              "createGcd"
+            ]
+          },
+          {
+            "file": "../arithmetic/lcm.js",
+            "imports": [
+              "createLcm"
+            ]
+          },
+          {
+            "file": "../arithmetic/log1p.js",
+            "imports": [
+              "createLog1p"
+            ]
+          },
+          {
+            "file": "../arithmetic/mod.js",
+            "imports": [
+              "createMod"
+            ]
+          },
+          {
+            "file": "../arithmetic/nthRoot.js",
+            "imports": [
+              "createNthRoot"
+            ]
+          },
+          {
+            "file": "../arithmetic/pow.js",
+            "imports": [
+              "createPow"
+            ]
+          },
+          {
+            "file": "../arithmetic/ceil.js",
+            "imports": [
+              "createCeil"
+            ]
+          },
+          {
+            "file": "../arithmetic/floor.js",
+            "imports": [
+              "createFloor"
+            ]
+          },
+          {
+            "file": "../bitwise/bitAnd.js",
+            "imports": [
+              "createBitAnd"
+            ]
+          },
+          {
+            "file": "../bitwise/bitOr.js",
+            "imports": [
+              "createBitOr"
+            ]
+          },
+          {
+            "file": "../bitwise/bitXor.js",
+            "imports": [
+              "createBitXor"
+            ]
+          },
+          {
+            "file": "../bitwise/leftShift.js",
+            "imports": [
+              "createLeftShift"
+            ]
+          },
+          {
+            "file": "../bitwise/rightArithShift.js",
+            "imports": [
+              "createRightArithShift"
+            ]
+          },
+          {
+            "file": "../bitwise/rightLogShift.js",
+            "imports": [
+              "createRightLogShift"
+            ]
+          },
+          {
+            "file": "../logical/or.js",
+            "imports": [
+              "createOr"
+            ]
+          },
+          {
+            "file": "../logical/xor.js",
+            "imports": [
+              "createXor"
+            ]
+          },
+          {
+            "file": "../matrix/expm.js",
+            "imports": [
+              "createExpm"
+            ]
+          },
+          {
+            "file": "../relational/compare.js",
+            "imports": [
+              "createCompare"
+            ]
+          },
+          {
+            "file": "../relational/compareText.js",
+            "imports": [
+              "createCompareText"
+            ]
+          },
+          {
+            "file": "../relational/deepEqual.js",
+            "imports": [
+              "createDeepEqual"
+            ]
+          },
+          {
+            "file": "../relational/larger.js",
+            "imports": [
+              "createLarger"
+            ]
+          },
+          {
+            "file": "../relational/largerEq.js",
+            "imports": [
+              "createLargerEq"
+            ]
+          },
+          {
+            "file": "../relational/smaller.js",
+            "imports": [
+              "createSmaller"
+            ]
+          },
+          {
+            "file": "../relational/smallerEq.js",
+            "imports": [
+              "createSmallerEq"
+            ]
+          },
+          {
+            "file": "../relational/unequal.js",
+            "imports": [
+              "createUnequal"
+            ]
+          },
+          {
+            "file": "../trigonometry/atan2.js",
+            "imports": [
+              "createAtan2"
+            ]
+          },
+          {
+            "file": "../unit/to.js",
+            "imports": [
+              "createTo"
+            ]
+          },
+          {
+            "file": "../arithmetic/dotPow.js",
+            "imports": [
+              "createDotPow"
+            ]
+          },
+          {
+            "file": "../arithmetic/fix.js",
+            "imports": [
+              "createFix"
+            ]
+          },
+          {
+            "file": "../arithmetic/invmod.js",
+            "imports": [
+              "createInvmod"
+            ]
+          },
+          {
+            "file": "../logical/and.js",
+            "imports": [
+              "createAnd"
+            ]
+          },
+          {
+            "file": "../combinatorics/composition.js",
+            "imports": [
+              "createComposition"
+            ]
+          },
+          {
+            "file": "../matrix/partitionSelect.js",
+            "imports": [
+              "createPartitionSelect"
+            ]
+          },
+          {
+            "file": "../matrix/pinv.js",
+            "imports": [
+              "createPinv"
+            ]
+          },
+          {
+            "file": "../algebra/decomposition/qr.js",
+            "imports": [
+              "createQr"
+            ]
+          },
+          {
+            "file": "../matrix/range.js",
+            "imports": [
+              "createRange"
+            ]
+          },
+          {
+            "file": "../probability/gamma.js",
+            "imports": [
+              "createGamma"
+            ]
+          },
+          {
+            "file": "../relational/compareNatural.js",
+            "imports": [
+              "createCompareNatural"
+            ]
+          },
+          {
+            "file": "../relational/equalText.js",
+            "imports": [
+              "createEqualText"
+            ]
+          },
+          {
+            "file": "../statistics/max.js",
+            "imports": [
+              "createMax"
+            ]
+          },
+          {
+            "file": "../statistics/min.js",
+            "imports": [
+              "createMin"
+            ]
+          },
+          {
+            "file": "../logical/nullish.js",
+            "imports": [
+              "createNullish"
+            ]
+          },
+          {
+            "file": "../arithmetic/hypot.js",
+            "imports": [
+              "createHypot"
+            ]
+          },
+          {
+            "file": "../geometry/distance.js",
+            "imports": [
+              "createDistance"
+            ]
+          },
+          {
+            "file": "../probability/factorial.js",
+            "imports": [
+              "createFactorial"
+            ]
+          },
+          {
+            "file": "../set/setSize.js",
+            "imports": [
+              "createSetSize"
+            ]
+          },
+          {
+            "file": "../matrix/sort.js",
+            "imports": [
+              "createSort"
+            ]
+          },
+          {
+            "file": "../combinatorics/stirlingS2.js",
+            "imports": [
+              "createStirlingS2"
+            ]
+          },
+          {
+            "file": "../probability/permutations.js",
+            "imports": [
+              "createPermutations"
+            ]
+          },
+          {
+            "file": "../combinatorics/bellNumbers.js",
+            "imports": [
+              "createBellNumbers"
+            ]
+          },
+          {
+            "file": "../type/resultset/ResultSet.js",
+            "imports": [
+              "createResultSet"
+            ]
+          },
+          {
+            "file": "../arithmetic/utils/nodeOperations.js",
+            "imports": [
+              "createNodeOperations"
+            ]
+          },
+          {
+            "file": "../algebra/leafCount.js",
+            "imports": [
+              "createLeafCount"
+            ]
+          },
+          {
+            "file": "../algebra/resolve.js",
+            "imports": [
+              "createResolve"
+            ]
+          },
+          {
+            "file": "../algebra/simplifyConstant.js",
+            "imports": [
+              "createSimplifyConstant"
+            ]
+          },
+          {
+            "file": "../algebra/simplify/util.js",
+            "imports": [
+              "createUtil"
+            ]
+          },
+          {
+            "file": "../type/unit/function/splitUnit.js",
+            "imports": [
+              "createSplitUnit"
+            ]
+          },
+          {
+            "file": "../matrix/fft.js",
+            "imports": [
+              "createFft"
+            ]
+          },
+          {
+            "file": "../type/chain/Chain.js",
+            "imports": [
+              "createChainClass"
+            ]
+          },
+          {
+            "file": "../arithmetic/subtract.js",
+            "imports": [
+              "createSubtract"
+            ]
+          },
+          {
+            "file": "../arithmetic/divide.js",
+            "imports": [
+              "createDivide"
+            ]
+          },
+          {
+            "file": "../matrix/ifft.js",
+            "imports": [
+              "createIfft"
+            ]
+          },
+          {
+            "file": "../type/matrix/MatrixIndex.js",
+            "imports": [
+              "createIndexClass"
+            ]
+          },
+          {
+            "file": "../type/chain/function/chain.js",
+            "imports": [
+              "createChain"
+            ]
+          },
+          {
+            "file": "../type/unit/function/createUnit.js",
+            "imports": [
+              "createCreateUnit"
+            ]
+          },
+          {
+            "file": "../type/unit/function/unit.js",
+            "imports": [
+              "createUnitFunction"
+            ]
+          },
+          {
+            "file": "../type/unit/Unit.js",
+            "imports": [
+              "createUnitClass"
+            ]
+          },
+          {
+            "file": "../type/matrix/FibonacciHeap.js",
+            "imports": [
+              "createFibonacciHeapClass"
+            ]
+          },
+          {
+            "file": "../type/matrix/ImmutableDenseMatrix.js",
+            "imports": [
+              "createImmutableDenseMatrixClass"
+            ]
+          },
+          {
+            "file": "../matrix/column.js",
+            "imports": [
+              "createColumn"
+            ]
+          },
+          {
+            "file": "../matrix/row.js",
+            "imports": [
+              "createRow"
+            ]
+          },
+          {
+            "file": "../matrix/cross.js",
+            "imports": [
+              "createCross"
+            ]
+          },
+          {
+            "file": "../matrix/diff.js",
+            "imports": [
+              "createDiff"
+            ]
+          },
+          {
+            "file": "../matrix/sqrtm.js",
+            "imports": [
+              "createSqrtm"
+            ]
+          },
+          {
+            "file": "../algebra/decomposition/lup.js",
+            "imports": [
+              "createLup"
+            ]
+          },
+          {
+            "file": "../algebra/decomposition/slu.js",
+            "imports": [
+              "createSlu"
+            ]
+          },
+          {
+            "file": "../algebra/sparse/csChol.js",
+            "imports": [
+              "createCsChol"
+            ]
+          },
+          {
+            "file": "../algebra/sparse/csLu.js",
+            "imports": [
+              "createCsLu"
+            ]
+          },
+          {
+            "file": "../algebra/sparse/csSpsolve.js",
+            "imports": [
+              "createCsSpsolve"
+            ]
+          },
+          {
+            "file": "../type/matrix/Spa.js",
+            "imports": [
+              "createSpaClass"
+            ]
+          },
+          {
+            "file": "../geometry/intersect.js",
+            "imports": [
+              "createIntersect"
+            ]
+          },
+          {
+            "file": "../statistics/mean.js",
+            "imports": [
+              "createMean"
+            ]
+          },
+          {
+            "file": "../statistics/median.js",
+            "imports": [
+              "createMedian"
+            ]
+          },
+          {
+            "file": "../statistics/variance.js",
+            "imports": [
+              "createVariance"
+            ]
+          },
+          {
+            "file": "../statistics/quantileSeq.js",
+            "imports": [
+              "createQuantileSeq"
+            ]
+          },
+          {
+            "file": "../probability/kldivergence.js",
+            "imports": [
+              "createKldivergence"
+            ]
+          },
+          {
+            "file": "../probability/multinomial.js",
+            "imports": [
+              "createMultinomial"
+            ]
+          },
+          {
+            "file": "../signal/freqz.js",
+            "imports": [
+              "createFreqz"
+            ]
+          },
+          {
+            "file": "../set/setCartesian.js",
+            "imports": [
+              "createSetCartesian"
+            ]
+          },
+          {
+            "file": "../set/setDifference.js",
+            "imports": [
+              "createSetDifference"
+            ]
+          },
+          {
+            "file": "../set/setDistinct.js",
+            "imports": [
+              "createSetDistinct"
+            ]
+          },
+          {
+            "file": "../set/setIntersect.js",
+            "imports": [
+              "createSetIntersect"
+            ]
+          },
+          {
+            "file": "../set/setIsSubset.js",
+            "imports": [
+              "createSetIsSubset"
+            ]
+          },
+          {
+            "file": "../set/setMultiplicity.js",
+            "imports": [
+              "createSetMultiplicity"
+            ]
+          },
+          {
+            "file": "../set/setPowerset.js",
+            "imports": [
+              "createSetPowerset"
+            ]
+          },
+          {
+            "file": "../algebra/simplifyCore.js",
+            "imports": [
+              "createSimplifyCore"
+            ]
+          },
+          {
+            "file": "../algebra/polynomialRoot.js",
+            "imports": [
+              "createPolynomialRoot"
+            ]
+          },
+          {
+            "file": "../numeric/solveODE.js",
+            "imports": [
+              "createSolveODE"
+            ]
+          },
+          {
+            "file": "../special/zeta.js",
+            "imports": [
+              "createZeta"
+            ]
+          },
+          {
+            "file": "../type/matrix/function/index.js",
+            "imports": [
+              "createIndex"
+            ]
+          },
+          {
+            "file": "../matrix/eigs.js",
+            "imports": [
+              "createEigs"
+            ]
+          },
+          {
+            "file": "../algebra/solver/lusolve.js",
+            "imports": [
+              "createLusolve"
+            ]
+          },
+          {
+            "file": "../statistics/corr.js",
+            "imports": [
+              "createCorr"
+            ]
+          },
+          {
+            "file": "../statistics/mad.js",
+            "imports": [
+              "createMad"
+            ]
+          },
+          {
+            "file": "../statistics/std.js",
+            "imports": [
+              "createStd"
+            ]
+          },
+          {
+            "file": "../set/setSymDifference.js",
+            "imports": [
+              "createSetSymDifference"
+            ]
+          },
+          {
+            "file": "../algebra/simplify.js",
+            "imports": [
+              "createSimplify"
+            ]
+          },
+          {
+            "file": "../algebra/derivative.js",
+            "imports": [
+              "createDerivative"
+            ]
+          },
+          {
+            "file": "../arithmetic/norm.js",
+            "imports": [
+              "createNorm"
+            ]
+          },
+          {
+            "file": "../algebra/rationalize.js",
+            "imports": [
+              "createRationalize"
+            ]
+          },
+          {
+            "file": "../set/setUnion.js",
+            "imports": [
+              "createSetUnion"
+            ]
+          },
+          {
+            "file": "../algebra/symbolicEqual.js",
+            "imports": [
+              "createSymbolicEqual"
+            ]
+          },
+          {
+            "file": "../matrix/rotationMatrix.js",
+            "imports": [
+              "createRotationMatrix"
+            ]
+          },
+          {
+            "file": "../algebra/decomposition/schur.js",
+            "imports": [
+              "createSchur"
+            ]
+          },
+          {
+            "file": "../matrix/rotate.js",
+            "imports": [
+              "createRotate"
+            ]
+          },
+          {
+            "file": "../algebra/sylvester.js",
+            "imports": [
+              "createSylvester"
+            ]
+          },
+          {
+            "file": "../algebra/lyap.js",
+            "imports": [
+              "createLyap"
+            ]
+          }
+        ],
+        "exports": [
+          "addScalar",
+          "multiplyScalar",
+          "subtractScalar",
+          "bitNot",
+          "arg",
+          "conj",
+          "im",
+          "re",
+          "not",
+          "filter",
+          "flatten",
+          "forEach",
+          "getMatrixDataType",
+          "map",
+          "size",
+          "squeeze",
+          "combinations",
+          "combinationsWithRep",
+          "lgamma",
+          "pickRandom",
+          "random",
+          "equalScalar",
+          "erf",
+          "format",
+          "print",
+          "acoth",
+          "acsch",
+          "asech",
+          "coth",
+          "csch",
+          "sech",
+          "toBest",
+          "clone",
+          "isBounded",
+          "isNaN",
+          "isNegative",
+          "isNumeric",
+          "isPositive",
+          "isPrime",
+          "numeric",
+          "typeOf",
+          "factory_abs",
+          "factory_cube",
+          "factory_exp",
+          "factory_expm1",
+          "factory_log10",
+          "factory_log2",
+          "factory_sign",
+          "factory_sqrt",
+          "factory_square",
+          "factory_unaryMinus",
+          "factory_acos",
+          "factory_acosh",
+          "factory_acot",
+          "factory_acsc",
+          "factory_asec",
+          "factory_asin",
+          "factory_asinh",
+          "factory_atan",
+          "factory_atanh",
+          "factory_cos",
+          "factory_cosh",
+          "factory_cot",
+          "factory_csc",
+          "factory_sec",
+          "factory_sin",
+          "factory_sinh",
+          "factory_tan",
+          "factory_tanh",
+          "parseNumberWithConfig",
+          "divideScalar",
+          "randomInt",
+          "mode",
+          "prod",
+          "bin",
+          "hex",
+          "oct",
+          "hasNumericValue",
+          "isFinite",
+          "isZero",
+          "factory_unaryPlus",
+          "factory_dot",
+          "factory_transpose",
+          "factory_ctranspose",
+          "identity",
+          "zeros",
+          "ones",
+          "diag",
+          "kron",
+          "matrixFromFunction",
+          "matrixFromColumns",
+          "matrixFromRows",
+          "count",
+          "trace",
+          "det",
+          "reshape",
+          "factory_equal",
+          "concat",
+          "mapSlices",
+          "resize",
+          "subset",
+          "inv",
+          "factory_cbrt",
+          "nthRoots",
+          "factory_round",
+          "factory_xgcd",
+          "factory_log",
+          "catalan",
+          "bernoulli",
+          "zpk2tf",
+          "factory_cumsum",
+          "factory_sum",
+          "csCounts",
+          "csSymperm",
+          "csAmd",
+          "csSqr",
+          "lsolve",
+          "lsolveAll",
+          "usolve",
+          "usolveAll",
+          "factory_compare",
+          "compareText",
+          "deepEqual",
+          "factory_larger",
+          "factory_largerEq",
+          "factory_smaller",
+          "factory_smallerEq",
+          "unequal",
+          "dotDivide",
+          "dotMultiply",
+          "factory_gcd",
+          "factory_lcm",
+          "factory_log1p",
+          "factory_mod",
+          "factory_nthRoot",
+          "factory_pow",
+          "factory_ceil",
+          "factory_floor",
+          "bitAnd",
+          "bitOr",
+          "bitXor",
+          "leftShift",
+          "rightArithShift",
+          "rightLogShift",
+          "or",
+          "xor",
+          "expm",
+          "factory_atan2",
+          "to",
+          "compareNatural",
+          "equalText",
+          "dotPow",
+          "factory_fix",
+          "invmod",
+          "and",
+          "nullish",
+          "composition",
+          "partitionSelect",
+          "pinv",
+          "qr",
+          "range",
+          "distance",
+          "gamma",
+          "factory_max",
+          "factory_min",
+          "factory_hypot",
+          "factorial",
+          "setSize",
+          "sort",
+          "stirlingS2",
+          "permutations",
+          "bellNumbers",
+          "nodeOperations",
+          "leafCount",
+          "resolve",
+          "simplifyConstant",
+          "simplifyUtil",
+          "splitUnit",
+          "fft",
+          "Chain",
+          "factory_subtract",
+          "factory_divide",
+          "ifft",
+          "chain",
+          "factory_createUnit",
+          "unit",
+          "column",
+          "row",
+          "cross",
+          "diff",
+          "sqrtm",
+          "lup",
+          "slu",
+          "csChol",
+          "csLu",
+          "csSpsolve",
+          "intersect",
+          "factory_mean",
+          "median",
+          "factory_variance",
+          "quantileSeq",
+          "kldivergence",
+          "multinomial",
+          "freqz",
+          "setCartesian",
+          "setDifference",
+          "setDistinct",
+          "setIntersect",
+          "setIsSubset",
+          "setMultiplicity",
+          "setPowerset",
+          "simplifyCore",
+          "polynomialRoot",
+          "solveODE",
+          "zeta",
+          "indexFn",
+          "eigs",
+          "lusolve",
+          "corr",
+          "mad",
+          "factory_std",
+          "setSymDifference",
+          "simplify",
+          "derivative",
+          "factory_norm",
+          "rationalize",
+          "setUnion",
+          "symbolicEqual",
+          "rotationMatrix",
+          "schur",
+          "rotate",
+          "sylvester",
+          "lyap"
+        ],
+        "constants": [
+          "addScalar",
+          "multiplyScalar",
+          "subtractScalar",
+          "bitNot",
+          "arg",
+          "conj",
+          "im",
+          "re",
+          "not",
+          "filter",
+          "flatten",
+          "forEach",
+          "getMatrixDataType",
+          "map",
+          "size",
+          "squeeze",
+          "combinations",
+          "combinationsWithRep",
+          "lgamma",
+          "pickRandom",
+          "random",
+          "equalScalar",
+          "erf",
+          "format",
+          "print",
+          "acoth",
+          "acsch",
+          "asech",
+          "coth",
+          "csch",
+          "sech",
+          "toBest",
+          "clone",
+          "isBounded",
+          "isNaN",
+          "isNegative",
+          "isNumeric",
+          "isPositive",
+          "isPrime",
+          "numeric",
+          "typeOf",
+          "factory_abs",
+          "factory_cube",
+          "factory_exp",
+          "factory_expm1",
+          "factory_log10",
+          "factory_log2",
+          "factory_sign",
+          "factory_sqrt",
+          "factory_square",
+          "factory_unaryMinus",
+          "factory_acos",
+          "factory_acosh",
+          "factory_acot",
+          "factory_acsc",
+          "factory_asec",
+          "factory_asin",
+          "factory_asinh",
+          "factory_atan",
+          "factory_atanh",
+          "factory_cos",
+          "factory_cosh",
+          "factory_cot",
+          "factory_csc",
+          "factory_sec",
+          "factory_sin",
+          "factory_sinh",
+          "factory_tan",
+          "factory_tanh",
+          "parseNumberWithConfig",
+          "divideScalar",
+          "randomInt",
+          "mode",
+          "prod",
+          "bin",
+          "hex",
+          "oct",
+          "hasNumericValue",
+          "isFinite",
+          "isZero",
+          "factory_unaryPlus",
+          "factory_dot",
+          "factory_transpose",
+          "factory_ctranspose",
+          "identity",
+          "zeros",
+          "ones",
+          "diag",
+          "kron",
+          "matrixFromFunction",
+          "matrixFromColumns",
+          "matrixFromRows",
+          "count",
+          "trace",
+          "det",
+          "reshape",
+          "factory_equal",
+          "concat",
+          "mapSlices",
+          "resize",
+          "subset",
+          "inv",
+          "factory_cbrt",
+          "nthRoots",
+          "factory_round",
+          "factory_xgcd",
+          "factory_log",
+          "catalan",
+          "bernoulli",
+          "zpk2tf",
+          "factory_cumsum",
+          "factory_sum",
+          "csCounts",
+          "csSymperm",
+          "csAmd",
+          "csSqr",
+          "lsolve",
+          "lsolveAll",
+          "usolve",
+          "usolveAll",
+          "factory_compare",
+          "compareText",
+          "deepEqual",
+          "factory_larger",
+          "factory_largerEq",
+          "factory_smaller",
+          "factory_smallerEq",
+          "unequal",
+          "dotDivide",
+          "dotMultiply",
+          "factory_gcd",
+          "factory_lcm",
+          "factory_log1p",
+          "factory_mod",
+          "factory_nthRoot",
+          "factory_pow",
+          "factory_ceil",
+          "factory_floor",
+          "bitAnd",
+          "bitOr",
+          "bitXor",
+          "leftShift",
+          "rightArithShift",
+          "rightLogShift",
+          "or",
+          "xor",
+          "expm",
+          "factory_atan2",
+          "to",
+          "compareNatural",
+          "equalText",
+          "dotPow",
+          "factory_fix",
+          "invmod",
+          "and",
+          "nullish",
+          "composition",
+          "partitionSelect",
+          "pinv",
+          "qr",
+          "range",
+          "distance",
+          "gamma",
+          "factory_max",
+          "factory_min",
+          "factory_hypot",
+          "factorial",
+          "setSize",
+          "sort",
+          "stirlingS2",
+          "permutations",
+          "bellNumbers",
+          "nodeOperations",
+          "leafCount",
+          "resolve",
+          "simplifyConstant",
+          "simplifyUtil",
+          "splitUnit",
+          "fft",
+          "Chain",
+          "factory_subtract",
+          "factory_divide",
+          "ifft",
+          "chain",
+          "factory_createUnit",
+          "unit",
+          "column",
+          "row",
+          "cross",
+          "diff",
+          "sqrtm",
+          "lup",
+          "slu",
+          "csChol",
+          "csLu",
+          "csSpsolve",
+          "intersect",
+          "factory_mean",
+          "median",
+          "factory_variance",
+          "quantileSeq",
+          "kldivergence",
+          "multinomial",
+          "freqz",
+          "setCartesian",
+          "setDifference",
+          "setDistinct",
+          "setIntersect",
+          "setIsSubset",
+          "setMultiplicity",
+          "setPowerset",
+          "simplifyCore",
+          "polynomialRoot",
+          "solveODE",
+          "zeta",
+          "indexFn",
+          "eigs",
+          "lusolve",
+          "corr",
+          "mad",
+          "factory_std",
+          "setSymDifference",
+          "simplify",
+          "derivative",
+          "factory_norm",
+          "rationalize",
+          "setUnion",
+          "symbolicEqual",
+          "rotationMatrix",
+          "schur",
+          "rotate",
+          "sylvester",
+          "lyap"
+        ]
+      },
+      "src/factories/matrix-bridge.ts": {
+        "description": "Matrix Compatibility Bridge",
+        "externalDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "imports": [
+              "DenseMatrix"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "createMatrixBridge",
+          "MathJSDenseMatrix",
+          "MathJSSparseMatrix"
+        ],
+        "classes": [
+          "MathJSDenseMatrix",
+          "MathJSSparseMatrix"
+        ],
+        "functions": [
+          "createMatrixBridge"
+        ]
+      },
+      "src/factories/scope.ts": {
+        "description": "Shared factory scope for activating synced mathjs factory functions.",
+        "externalDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "imports": [
+              "mathTyped",
+              "Complex",
+              "Fraction",
+              "BigNumber"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../typed/typed-bridge.js",
+            "imports": [
+              "initTypeBridge"
+            ]
+          },
+          {
+            "file": "../core/config.js",
+            "imports": [
+              "DEFAULT_CONFIG"
+            ]
+          },
+          {
+            "file": "./matrix-bridge.js",
+            "imports": [
+              "MathJSDenseMatrix",
+              "MathJSSparseMatrix",
+              "createMatrixBridge"
+            ]
+          }
+        ],
+        "exports": [
+          "factoryScope"
+        ],
+        "constants": [
+          "factoryScope"
+        ]
+      }
+    },
     "geometry": {
       "src/geometry/distance.ts": {
         "description": "Calculates:",
@@ -16029,11 +18091,35 @@
               "*"
             ],
             "reExport": true
+          },
+          {
+            "file": "./factories/index.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./factories/evaluate.js",
+            "imports": [
+              "evaluate",
+              "compileExpr",
+              "parse"
+            ],
+            "reExport": true
           }
         ],
-        "exports": [],
+        "exports": [
+          "evaluate",
+          "compileExpr",
+          "parse"
+        ],
         "reExported": [
-          "* from ./typed/index.js"
+          "* from ./typed/index.js",
+          "* from ./factories/index.js",
+          "evaluate",
+          "compileExpr",
+          "parse"
         ]
       }
     },
@@ -24588,6 +26674,120 @@
           "typedArithmetic"
         ]
       },
+      "src/typed/combinatorics.ts": {
+        "description": "Extended Combinatorics Functions",
+        "externalDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "imports": [
+              "mathTyped"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "fibonacci",
+          "lucas",
+          "doubleFactorial",
+          "risingFactorial",
+          "fallingFactorial",
+          "subfactorial"
+        ],
+        "constants": [
+          "fibonacci",
+          "lucas",
+          "doubleFactorial",
+          "risingFactorial",
+          "fallingFactorial",
+          "subfactorial"
+        ]
+      },
+      "src/typed/distributions.ts": {
+        "description": "Typed Probability Distribution Functions",
+        "externalDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "imports": [
+              "mathTyped"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "normalPDF",
+          "normalCDF",
+          "exponentialPDF",
+          "exponentialCDF",
+          "poissonPMF",
+          "binomialPMF",
+          "geometricPMF",
+          "bernoulliPMF",
+          "entropy",
+          "jsDivergence",
+          "typedDistributions"
+        ],
+        "constants": [
+          "normalPDF",
+          "normalCDF",
+          "exponentialPDF",
+          "exponentialCDF",
+          "poissonPMF",
+          "binomialPMF",
+          "geometricPMF",
+          "bernoulliPMF",
+          "entropy",
+          "jsDivergence",
+          "typedDistributions"
+        ]
+      },
+      "src/typed/geometry.ts": {
+        "description": "Typed Geometry Functions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "angle2D",
+          "angle3D",
+          "cross3D",
+          "dot3D",
+          "triangleArea",
+          "polygonArea",
+          "convexHull",
+          "pointInPolygon",
+          "rotateVector2D",
+          "rotateVector3D",
+          "reflectVector",
+          "projectVector",
+          "distance2D",
+          "distance3D",
+          "distanceND",
+          "distancePointToLine2D",
+          "intersectLines2D",
+          "intersectSegments2D"
+        ],
+        "functions": [
+          "angle2D",
+          "angle3D",
+          "cross3D",
+          "dot3D",
+          "triangleArea",
+          "polygonArea",
+          "convexHull",
+          "pointInPolygon",
+          "rotateVector2D",
+          "rotateVector3D",
+          "reflectVector",
+          "projectVector",
+          "distance2D",
+          "distance3D",
+          "distanceND",
+          "distancePointToLine2D",
+          "intersectLines2D",
+          "intersectSegments2D"
+        ]
+      },
       "src/typed/index.ts": {
         "description": "Typed Functions Index (Parallel-First)",
         "externalDependencies": [],
@@ -24618,6 +26818,29 @@
             ]
           },
           {
+            "file": "./combinatorics.js",
+            "imports": [
+              "fibonacci",
+              "lucas",
+              "doubleFactorial",
+              "risingFactorial",
+              "fallingFactorial",
+              "subfactorial"
+            ]
+          },
+          {
+            "file": "./special.js",
+            "imports": [
+              "typedSpecial"
+            ]
+          },
+          {
+            "file": "./distributions.js",
+            "imports": [
+              "typedDistributions"
+            ]
+          },
+          {
             "file": "./arithmetic.js",
             "imports": [
               "*"
@@ -24640,6 +26863,48 @@
           },
           {
             "file": "./signal.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./special.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./distributions.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./geometry.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./integration.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./interpolation.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./combinatorics.js",
             "imports": [
               "*"
             ],
@@ -24672,6 +26937,20 @@
               "typedSignal"
             ],
             "reExport": true
+          },
+          {
+            "file": "./special.js",
+            "imports": [
+              "typedSpecial"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./distributions.js",
+            "imports": [
+              "typedDistributions"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -24679,6 +26958,8 @@
           "typedTrigonometry",
           "typedStatistics",
           "typedSignal",
+          "typedSpecial",
+          "typedDistributions",
           "typedFunctions"
         ],
         "reExported": [
@@ -24686,13 +26967,61 @@
           "* from ./trigonometry.js",
           "* from ./statistics.js",
           "* from ./signal.js",
+          "* from ./special.js",
+          "* from ./distributions.js",
+          "* from ./geometry.js",
+          "* from ./integration.js",
+          "* from ./interpolation.js",
+          "* from ./combinatorics.js",
           "typedArithmetic",
           "typedTrigonometry",
           "typedStatistics",
-          "typedSignal"
+          "typedSignal",
+          "typedSpecial",
+          "typedDistributions"
         ],
         "constants": [
           "typedFunctions"
+        ]
+      },
+      "src/typed/integration.ts": {
+        "description": "Numerical Integration Functions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "trapz",
+          "simpson",
+          "gaussQuad",
+          "romberg"
+        ],
+        "functions": [
+          "trapz",
+          "simpson",
+          "gaussQuad",
+          "romberg"
+        ]
+      },
+      "src/typed/interpolation.ts": {
+        "description": "Interpolation Functions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "linearInterp",
+          "lagrangeInterp",
+          "cubicSpline",
+          "hermiteInterp",
+          "pchipInterp",
+          "polyFit"
+        ],
+        "functions": [
+          "linearInterp",
+          "lagrangeInterp",
+          "cubicSpline",
+          "hermiteInterp",
+          "pchipInterp",
+          "polyFit"
         ]
       },
       "src/typed/signal.ts": {
@@ -24723,10 +27052,18 @@
           "parallelXCorr",
           "parallelAutoCorr",
           "typedSignal",
+          "crossCorrelation",
+          "autoCorrelation",
+          "groupDelay",
+          "unwrapPhase",
           "initializeSignal",
           "terminateSignal"
         ],
         "functions": [
+          "crossCorrelation",
+          "autoCorrelation",
+          "groupDelay",
+          "unwrapPhase",
           "initializeSignal",
           "terminateSignal"
         ],
@@ -24739,6 +27076,41 @@
           "parallelXCorr",
           "parallelAutoCorr",
           "typedSignal"
+        ]
+      },
+      "src/typed/special.ts": {
+        "description": "Typed Special Functions",
+        "externalDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "imports": [
+              "mathTyped"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "erfc",
+          "beta",
+          "gammainc",
+          "digamma",
+          "besselJ0",
+          "besselJ1",
+          "besselY0",
+          "besselY1",
+          "typedSpecial"
+        ],
+        "constants": [
+          "erfc",
+          "beta",
+          "gammainc",
+          "digamma",
+          "besselJ0",
+          "besselJ1",
+          "besselY0",
+          "besselY1",
+          "typedSpecial"
         ]
       },
       "src/typed/statistics.ts": {
@@ -24781,10 +27153,18 @@
           "parallelStatQuantile",
           "parallelStatHistogram",
           "typedStatistics",
+          "quickSelect",
+          "medianSelect",
+          "minSelect",
+          "maxSelect",
           "initializeStatistics",
           "terminateStatistics"
         ],
         "functions": [
+          "quickSelect",
+          "medianSelect",
+          "minSelect",
+          "maxSelect",
           "initializeStatistics",
           "terminateStatistics"
         ],
@@ -31488,6 +33868,15 @@
         ]
       },
       {
+        "name": "Factories",
+        "files": [
+          "src/factories/evaluate.ts",
+          "src/factories/index.ts",
+          "src/factories/matrix-bridge.ts",
+          "src/factories/scope.ts"
+        ]
+      },
+      {
         "name": "Geometry",
         "files": [
           "src/geometry/distance.ts",
@@ -31776,8 +34165,14 @@
         "name": "Typed",
         "files": [
           "src/typed/arithmetic.ts",
+          "src/typed/combinatorics.ts",
+          "src/typed/distributions.ts",
+          "src/typed/geometry.ts",
           "src/typed/index.ts",
+          "src/typed/integration.ts",
+          "src/typed/interpolation.ts",
           "src/typed/signal.ts",
+          "src/typed/special.ts",
           "src/typed/statistics.ts",
           "src/typed/trigonometry.ts",
           "src/typed/typed-bridge.ts"
@@ -31912,21 +34307,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 750,
-    "totalModules": 29,
-    "totalLinesOfCode": 125273,
-    "totalExports": 3366,
-    "totalClasses": 10,
+    "totalTypeScriptFiles": 760,
+    "totalModules": 30,
+    "totalLinesOfCode": 130146,
+    "totalExports": 3673,
+    "totalClasses": 12,
     "totalInterfaces": 129,
-    "totalFunctions": 1300,
+    "totalFunctions": 1338,
     "totalTypeGuards": 105,
     "totalEnums": 0,
-    "totalConstants": 1105,
-    "totalReExports": 970,
+    "totalConstants": 1367,
+    "totalReExports": 982,
     "totalTypeOnlyImports": 379,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 0,
-    "unusedFilesCount": 261,
+    "unusedFilesCount": 259,
     "unusedExportsCount": 152
   }
 }

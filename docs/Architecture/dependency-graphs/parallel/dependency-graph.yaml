@@ -1,10 +1,10 @@
 metadata:
-  name: "@mathts/parallel"
-  version: 0.1.0
-  lastUpdated: "2026-04-04"
-  totalFiles: 14
+  name: "@danielsimonjr/mathts-parallel"
+  version: 0.1.2
+  lastUpdated: "2026-04-10"
+  totalFiles: 16
   totalModules: 5
-  totalExports: 183
+  totalExports: 199
 entryPoints:
   - file: src/index.ts
     type: main
@@ -14,7 +14,7 @@ modules:
     src/ComputePool.ts:
       description: MathTS Compute Pool
       externalDependencies:
-        - package: "@mathts/workerpool"
+        - package: "@danielsimonjr/mathts-workerpool"
           imports:
             - MathWorkerPool
             - Transfer
@@ -263,6 +263,28 @@ modules:
         - ExecOptions
         - PoolStats
   operations:
+    src/operations/eig.ts:
+      description: Parallel Eigendecomposition
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../ComputePool.js
+          imports:
+            - computePool
+            - ComputePool
+        - file: ../ComputePool.js
+          imports:
+            - ParallelResult
+          typeOnly: true
+      exports:
+        - parallelEig
+        - parallelEigvals
+      interfaces:
+        - EigResult
+        - ParallelEigOptions
+      functions:
+        - parallelEig
+        - parallelEigvals
     src/operations/elementwise.ts:
       description: Parallel Element-wise Operations
       externalDependencies: []
@@ -312,6 +334,32 @@ modules:
         - parallelTan
         - parallelElementwise
         - parallelUnary
+    src/operations/fft.ts:
+      description: Parallel FFT Operations
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../ComputePool.js
+          imports:
+            - computePool
+            - ComputePool
+        - file: ../ComputePool.js
+          imports:
+            - ParallelResult
+          typeOnly: true
+      exports:
+        - parallelFFT
+        - parallelIFFT
+        - parallelFFTAuto
+        - parallelConvolve
+      interfaces:
+        - FFTResult
+        - ParallelFFTOptions
+      functions:
+        - parallelFFT
+        - parallelIFFT
+        - parallelFFTAuto
+        - parallelConvolve
     src/operations/index.ts:
       description: Parallel Operations
       externalDependencies: []
@@ -361,6 +409,22 @@ modules:
             - parallelReduce
             - ReduceOptions
           reExport: true
+        - file: ./fft.js
+          imports:
+            - parallelFFT
+            - parallelIFFT
+            - parallelFFTAuto
+            - parallelConvolve
+            - ParallelFFTOptions
+            - FFTResult
+          reExport: true
+        - file: ./eig.js
+          imports:
+            - parallelEig
+            - parallelEigvals
+            - EigResult
+            - ParallelEigOptions
+          reExport: true
         - file: ./map.js
           imports:
             - parallelMap
@@ -409,6 +473,16 @@ modules:
         - parallelHistogram
         - parallelReduce
         - ReduceOptions
+        - parallelFFT
+        - parallelIFFT
+        - parallelFFTAuto
+        - parallelConvolve
+        - ParallelFFTOptions
+        - FFTResult
+        - parallelEig
+        - parallelEigvals
+        - EigResult
+        - ParallelEigOptions
         - parallelMap
         - parallelFilter
         - parallelFind
@@ -454,6 +528,16 @@ modules:
         - parallelHistogram
         - parallelReduce
         - ReduceOptions
+        - parallelFFT
+        - parallelIFFT
+        - parallelFFTAuto
+        - parallelConvolve
+        - ParallelFFTOptions
+        - FFTResult
+        - parallelEig
+        - parallelEigvals
+        - EigResult
+        - ParallelEigOptions
         - parallelMap
         - parallelFilter
         - parallelFind
@@ -723,7 +807,9 @@ dependencyGraph:
         - src/index.ts
     - name: Operations
       files:
+        - src/operations/eig.ts
         - src/operations/elementwise.ts
+        - src/operations/fft.ts
         - src/operations/index.ts
         - src/operations/map.ts
         - src/operations/matmul.ts
@@ -737,18 +823,18 @@ dependencyGraph:
       files:
         - src/workers/compute.worker.ts
 statistics:
-  totalTypeScriptFiles: 14
+  totalTypeScriptFiles: 16
   totalModules: 5
-  totalLinesOfCode: 3115
-  totalExports: 183
+  totalLinesOfCode: 4156
+  totalExports: 199
   totalClasses: 4
-  totalInterfaces: 16
-  totalFunctions: 52
+  totalInterfaces: 20
+  totalFunctions: 58
   totalTypeGuards: 0
   totalEnums: 0
   totalConstants: 4
-  totalReExports: 122
-  totalTypeOnlyImports: 4
+  totalReExports: 132
+  totalTypeOnlyImports: 6
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 3
