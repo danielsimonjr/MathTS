@@ -110,6 +110,11 @@ pub use unit::conversion::*;
 pub use utils::checks::*;
 
 // ============================================================
+// AssemblyScript-compatible wrappers (scalar + array ops)
+// ============================================================
+pub mod compat;
+
+// ============================================================
 // Spike probes (temporary -- kept for compatibility)
 // ============================================================
 

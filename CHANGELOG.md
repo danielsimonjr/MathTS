@@ -11,6 +11,17 @@ First public release of all 10 @danielsimonjr/mathts-* packages to npm.
 
 ### Added
 
+#### Rust WASM Migration
+- 192 AS-compatible wrapper functions added to Rust WASM crate (`wasm-rust/crates/mathts-wasm/src/compat/`):
+  - `scalar.rs`: 42 scalar ops (add_f64, sin_f64, sqrt_f64, etc.)
+  - `array.rs`: 36 array ops (array_add, array_dot, array_norm, etc.)
+  - `complex.rs`: 75 complex ops (complex_add, complex_sin, complex_array_fft, etc.)
+  - `matrix.rs`: 39 matrix ops (matrix_multiply, matrix_transpose, matrix_trace, etc.)
+- Rust WASM binary now exports 1,017 functions (was 741) — full AS parity
+- BackendManager already prefers Rust WASM for heavy ops (FFT, eig, SVD)
+- Build script: `wasm-rust/scripts/build-for-mathts.sh`
+- WASM backend comparison benchmark (`tests/benchmark/wasm-comparison.test.ts`)
+
 #### New Math Functions (60 — beyond mathjs)
 - Special functions (8): erfc, beta, gammainc (incomplete gamma), digamma, besselJ0, besselJ1, besselY0, besselY1
 - Probability distributions (10): normalPDF, normalCDF, exponentialPDF, exponentialCDF, poissonPMF, binomialPMF, geometricPMF, bernoulliPMF, entropy, jsDivergence

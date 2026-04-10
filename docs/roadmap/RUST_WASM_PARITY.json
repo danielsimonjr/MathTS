@@ -1,0 +1,1223 @@
+{
+  "summary": {
+    "as_total": 202,
+    "rust_total": 741,
+    "matched": 0,
+    "fuzzy": 0,
+    "needs_port": 202
+  },
+  "parity": [
+    {
+      "as": "abort",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "env"
+    },
+    {
+      "as": "abs_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "acos_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "acosh_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "add_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_abs",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_add",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_add_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_add_scalar",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_add_scalar_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_argmax",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_argmin",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_axpby",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_clamp_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_copy",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_cos",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_cosine_similarity",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_distance",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_div",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_dot",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_exp",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_fill",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_log",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_max",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_mean",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_min",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_mul",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_neg",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_norm",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_norm_l1",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_norm_linf",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_product",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_scale",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_scale_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_sin",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_sqrt",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_square",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_stddev",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_sub",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_sum",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "array_variance",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "asin_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "asinh_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "atan2_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "atan_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "atanh_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "cbrt_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "ceil_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "clamp_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "types"
+    },
+    {
+      "as": "complexFromImaginary",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "types"
+    },
+    {
+      "as": "complexFromPolar",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "types"
+    },
+    {
+      "as": "complexFromReal",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "types"
+    },
+    {
+      "as": "complex_abs",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_abs_squared",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_acos",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_acosh",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_add",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_approx_equals",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_arg",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_abs",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_abs_squared",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_add",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_add_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_arg",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_conj",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_conj_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_copy",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_div",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_dot",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_exp",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_fill",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_get",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_get_im",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_get_re",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_imag",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_length",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_log",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_mean",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_mul",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_neg",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_norm",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_ones",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_real",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_scale_complex",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_scale_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_scale_real",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_set",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_set_parts",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_sqrt",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_sub",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_sum",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_array_zeros",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_asin",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_asinh",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_atan",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_atanh",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_axpby",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_conj",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_cos",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_cosh",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_cpow",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_cube",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_distance",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_div",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_equals",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_exp",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_from_imag",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_from_polar",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_from_real",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_is_finite",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_is_imaginary",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_is_nan",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_is_real",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_is_zero",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_log",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_log10",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_log2",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_mul",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_neg",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_pow",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_reciprocal",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_sin",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_sinh",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_sqrt",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_square",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_sub",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_tan",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_tanh",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "complex_to_polar",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "cos_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "cosh_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "cube_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "div_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "exp_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "expm1_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "floor_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "isFinite_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "isNaN_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "loadWasmSync",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "bindings"
+    },
+    {
+      "as": "log10_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "log1p_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "log2_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "log_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_add",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_add_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_add_scalar",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_add_scalar_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_axpy",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_copy",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_diag",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_div_elementwise",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_fill",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_gemm",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_gemv",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_get",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_get_col",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_get_diag",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_get_row",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_identity",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_is_diagonal",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_is_identity",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_is_square",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_is_symmetric",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_max",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_mean",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_min",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_mul_elementwise",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_multiply",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_neg",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_norm_frobenius",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_ones",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_outer",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_scale",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_scale_inplace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_set",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_sub",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_sum",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_sum_cols",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_sum_rows",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_trace",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_transpose",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_vector_multiply",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "matrix_zeros",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "max_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "min_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "mod_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "mul_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "neg_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "nthRoot_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "pow_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "round_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "sign_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "sin_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "sinh_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "sqrt_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "square_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "sub_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "tan_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "tanh_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "trunc_f64",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    },
+    {
+      "as": "vector_matrix_multiply",
+      "rust": null,
+      "status": "NEEDS_PORT",
+      "as_cat": "ops"
+    }
+  ]
+}
