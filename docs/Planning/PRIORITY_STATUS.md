@@ -1,7 +1,8 @@
 # MathTS Priority Status
 
 **Updated**: 2026-04-10
-**Build**: 10/10 | **Typecheck**: 14/14 | **Tests**: 76 files, 2,304 pass
+**Build**: 10/10 | **Typecheck**: 14/14 | **Tests**: 90 files, 2,864 pass
+**Typed Functions**: 374 exports across 17 modules (~492 math functions total)
 **Factories**: 242/273 active (89%) — remaining 31 are infrastructure types in @danielsimonjr/mathts-core
 **Sprint Completion**: 166/166 (100%) — all sprints complete, published to npm at v0.1.2
 
@@ -27,8 +28,9 @@ All integration tasks complete:
 - Performance regression tests: COMPLETE (23 benchmarks)
 - All packages build, typecheck, and test
 - 60 new functions beyond mathjs (special, distributions, geometry, interpolation, integration, combinatorics)
+- 190 additional functions: algebra (37), CAS (30), graph theory (8), distribution objects (13), hypothesis tests (14), numerical methods (37), plus extended signal/geometry/special/combinatorics (+51)
 - BigNumber trig/transcendental methods: COMPLETE (96 methods total)
-- Typed functions: 11 modules, 158 exports
+- Typed functions: 17 modules, 374 exports (~492 math functions total including factory layer)
 
 ---
 

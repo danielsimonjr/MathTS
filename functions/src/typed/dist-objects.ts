@@ -356,6 +356,9 @@ export function binomialDist(n: number, p: f64): Distribution {
   return {
     pdf: (k: f64) => {
       if (!Number.isInteger(k) || k < 0 || k > n) return 0;
+      // Special cases: avoid 0 * log(0) = NaN
+      if (p === 0) return k === 0 ? 1 : 0;
+      if (p === 1) return k === n ? 1 : 0;
       const logC = _logFactorial(n) - _logFactorial(k) - _logFactorial(n - k);
       return Math.exp(logC + k * Math.log(p) + (n - k) * Math.log(q));
     },

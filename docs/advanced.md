@@ -423,9 +423,155 @@ const coeffs = polyFit(xs, ys, 3);  // degree-3 polynomial coefficients
 | `pchipInterp` | Non-oscillating smooth curves | Best for data with local monotonicity |
 | `polyFit` | Trend fitting, noisy data | Returns polynomial coefficients |
 
+## Algebra and Polynomial Operations
+
+MathTS provides a complete algebra module for polynomial arithmetic and symbolic manipulation.
+
+```typescript
+import { polyval, polyadd, polymul, polyder, factor, expand, substitute } from '@danielsimonjr/mathts-functions';
+
+// Polynomial evaluation using Horner's method
+polyval([1, -3, 2], 4);       // 1*16 - 3*4 + 2 = 6
+
+// Polynomial arithmetic
+polyadd([1, 2, 3], [4, 5]);   // [1, 6, 8]   (x^2 + 6x + 8)
+polymul([1, 1], [1, -1]);      // [1, 0, -1]  (x+1)(x-1) = x^2-1
+polyder([1, 2, 3], 1);         // [2, 2]      d/dx (x^2+2x+3) = 2x+2
+
+// Symbolic manipulation (expression strings)
+factor('x^2 - 4');             // '(x - 2)(x + 2)'
+expand('(a + b)^3');           // 'a^3 + 3*a^2*b + 3*a*b^2 + b^3'
+substitute('x^2 + y', 'y', '2*x');  // 'x^2 + 2*x'
+```
+
+## Computer Algebra System (CAS)
+
+Symbolic calculus and equation solving.
+
+```typescript
+import { integrate, limit, partialDerivative, taylor, solve, laplace } from '@danielsimonjr/mathts-functions';
+
+// Symbolic integration
+integrate('x^2', 'x');              // 'x^3/3 + C'
+integrate('sin(x)', 'x', 0, 3.14159);  // ~2.0
+
+// Limits
+limit('sin(x)/x', 'x', 0);         // '1'
+limit('(1 + 1/n)^n', 'n', Infinity); // 'E'
+
+// Partial derivatives
+partialDerivative('x^2*y + y^3', 'y');  // '2*y^2 + x^2'
+
+// Taylor series
+taylor('exp(x)', 'x', 0, 4);       // '1 + x + x^2/2 + x^3/6 + x^4/24'
+
+// Solve equations
+solve('x^2 - 5*x + 6', 'x');       // [2, 3]
+
+// Laplace transform
+laplace('exp(-a*t)', 't', 's');     // '1/(s + a)'
+```
+
+## Graph Theory
+
+Graph algorithms on adjacency matrix representations.
+
+```typescript
+import { shortestPath, minimumSpanningTree, connectedComponents, topologicalSort } from '@danielsimonjr/mathts-functions';
+
+// Weighted graph as adjacency matrix (0 = no edge)
+const adj = [
+  [0, 1, 4, 0],
+  [1, 0, 2, 5],
+  [4, 2, 0, 1],
+  [0, 5, 1, 0]
+];
+
+// Dijkstra shortest path
+shortestPath(adj, 0, 3);           // [0, 2, 3]  (via node 2, cost 5)
+
+// Minimum spanning tree (Prim's)
+minimumSpanningTree(adj);          // edge list of MST
+
+// Find connected components
+const disconnected = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]];
+connectedComponents(disconnected); // [[0, 1], [2, 3]]
+
+// Topological sort for DAG
+const dag = [[0, 1, 1, 0], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 0]];
+topologicalSort(dag);              // [0, 1, 2, 3] or [0, 2, 1, 3]
+```
+
+## Distribution Objects
+
+Distribution object constructors return objects with `pdf`, `cdf`, `ppf` (quantile), and `sample` methods — a higher-level API than the standalone distribution functions.
+
+```typescript
+import { normalDist, tDist, gammaDist, binomialDist } from '@danielsimonjr/mathts-functions';
+
+// Create distribution instances
+const normal = normalDist(0, 1);       // standard normal
+normal.pdf(0);          // ~0.3989
+normal.cdf(1.96);       // ~0.975  (95th percentile)
+normal.ppf(0.975);      // ~1.96   (inverse CDF)
+normal.sample(100);     // Float64Array of 100 samples
+
+// t-distribution for small samples
+const t10 = tDist(10);
+t10.cdf(2.228);         // ~0.975  (two-tailed, df=10)
+
+// Gamma distribution
+const gamma = gammaDist(2, 1);
+gamma.pdf(1);           // ~0.368
+gamma.cdf(2);           // ~0.594
+
+// Binomial for discrete data
+const binom = binomialDist(20, 0.5);
+binom.pdf(10);          // P(X=10) for n=20, p=0.5 ≈ 0.176
+```
+
+## Hypothesis Tests
+
+Statistical hypothesis tests return structured result objects with test statistics, p-values, and a `significant` flag.
+
+```typescript
+import { studentTTest, anova, chiSquareTest, shapiroWilkTest, principalComponentAnalysis } from '@danielsimonjr/mathts-functions';
+
+// Two-sample t-test
+const control = [2.1, 2.5, 2.3, 2.8, 2.4];
+const treatment = [3.1, 3.5, 2.9, 3.2, 3.4];
+
+const tResult = studentTTest(control, treatment);
+// { t: -3.2, pValue: 0.012, degreesOfFreedom: 8, significant: true }
+
+// One-way ANOVA (multiple groups)
+const groups = [
+  [2.1, 2.3, 2.5],
+  [3.1, 3.4, 3.2],
+  [1.8, 2.0, 1.9]
+];
+const anovaResult = anova(groups);
+// { F: 28.4, pValue: 0.0003, significant: true }
+
+// Test for normality
+const shapiro = shapiroWilkTest(control);
+// { W: 0.98, pValue: 0.89, isNormal: true }
+
+// Chi-square goodness of fit
+const observed = [18, 22, 20, 25, 15];
+const expected = [20, 20, 20, 20, 20];
+chiSquareTest(observed, expected);
+// { statistic: 2.3, pValue: 0.68, significant: false }
+
+// PCA dimensionality reduction
+const data = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [2, 4, 6]];
+const pca = principalComponentAnalysis(data, 2);  // reduce to 2 components
+// { components: [...], scores: [...], explainedVariance: [...] }
+```
+
 ## See Also
 
 - [API Reference](./api/README.md) - Complete API documentation
-- [Function Reference](./reference/functions.md) - All 302+ math functions
+- [Function Reference](./reference/functions.md) - All ~492 math functions
 - [Getting Started](./getting-started.md) - Basic usage guide
 - [Migration Guide](./migration/guide.md) - Migrating from mathjs

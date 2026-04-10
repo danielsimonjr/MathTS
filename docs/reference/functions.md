@@ -506,6 +506,228 @@ maxSelect([5, 3, 1, 4, 2], 2);            // [5, 4]
 
 ---
 
+## Algebra
+
+Polynomial arithmetic and symbolic algebraic manipulation.
+
+| Function | Description |
+|---|---|
+| `polyval(coeffs, x)` | Evaluate polynomial at x (Horner's method) |
+| `polyadd(a, b)` | Add two polynomials |
+| `polymul(a, b)` | Multiply two polynomials |
+| `polyder(coeffs[, n])` | nth derivative of polynomial |
+| `polynomialGCD(a, b)` | Greatest common divisor of two polynomials |
+| `polynomialLCM(a, b)` | Least common multiple of two polynomials |
+| `polynomialQuotient(a, b)` | Polynomial quotient (integer division) |
+| `polynomialRemainder(a, b)` | Polynomial remainder |
+| `degree(coeffs)` | Degree of polynomial |
+| `discriminant(coeffs)` | Discriminant of polynomial |
+| `differences(arr[, n])` | nth finite differences |
+| `variables(expr)` | Extract variable names from expression string |
+| `substitute(expr, var, val)` | Substitute value for variable in expression |
+| `expand(expr)` | Expand expression (distribute multiplication) |
+| `factor(expr)` | Factor expression into irreducibles |
+| `collect(expr, var)` | Collect terms by variable |
+| `cancel(expr)` | Cancel common factors in rational expression |
+| `apart(expr)` | Partial fraction decomposition |
+| `trigExpand(expr)` | Expand trigonometric functions |
+| `trigReduce(expr)` | Reduce products of trig functions |
+| `fullSimplify(expr)` | Full algebraic simplification |
+| `eliminate(system, var)` | Eliminate variable from system of equations |
+| `resultant(p, q)` | Resultant of two polynomials |
+
+```typescript
+import { polyval, polyadd, polymul, factor, expand } from '@danielsimonjr/mathts-functions';
+
+polyval([1, 0, -1], 3);          // 8  (x^2 - 1 at x=3)
+polyadd([1, 2], [3, 4, 5]);      // [3, 5, 7]
+polymul([1, 1], [1, -1]);        // [1, 0, -1]  (x+1)(x-1) = x^2 - 1
+factor('x^2 - 1');               // '(x - 1)(x + 1)'
+expand('(x + 1)^3');             // 'x^3 + 3*x^2 + 3*x + 1'
+```
+
+---
+
+## Computer Algebra System (CAS)
+
+Symbolic calculus, transforms, and equation solving.
+
+| Function | Description |
+|---|---|
+| `integrate(expr, var[, a, b])` | Symbolic integration (definite or indefinite) |
+| `limit(expr, var, point[, dir])` | Symbolic limit |
+| `partialDerivative(expr, var)` | Partial derivative of expression |
+| `gradientSymbolic(expr, vars)` | Gradient vector of multivariate expression |
+| `jacobian(exprs, vars)` | Jacobian matrix |
+| `laplacian(expr, vars)` | Laplacian operator |
+| `divergence(field, vars)` | Divergence of vector field |
+| `curl(field, vars)` | Curl of 3D vector field |
+| `laplace(expr, t, s)` | Laplace transform |
+| `inverseLaplace(expr, s, t)` | Inverse Laplace transform |
+| `fourierSeries(expr, var, n)` | Fourier series coefficients |
+| `zTransform(expr, n, z)` | Z-transform |
+| `taylor(expr, var, point, n)` | Taylor series expansion |
+| `series(expr, var, n)` | General series expansion |
+| `solve(expr, var)` | Solve equation for variable |
+| `summation(expr, var, from, to)` | Symbolic summation |
+| `groebnerBasis(polys, vars)` | Gröbner basis of polynomial system |
+| `odeGeneral(ode, y, x)` | Solve ordinary differential equation |
+
+```typescript
+import { integrate, limit, taylor, solve } from '@danielsimonjr/mathts-functions';
+
+integrate('x^2', 'x');           // 'x^3/3'
+integrate('x^2', 'x', 0, 1);    // '1/3'
+limit('sin(x)/x', 'x', 0);      // '1'
+taylor('exp(x)', 'x', 0, 4);    // '1 + x + x^2/2 + x^3/6 + x^4/24'
+solve('x^2 - 4', 'x');          // [-2, 2]
+```
+
+---
+
+## Graph Theory
+
+Graph algorithms operating on adjacency matrix representations.
+
+| Function | Description |
+|---|---|
+| `adjacencyMatrix(edges, n)` | Build adjacency matrix from edge list |
+| `shortestPath(adj, start, end)` | Shortest path via Dijkstra (returns node sequence) |
+| `minimumSpanningTree(adj)` | MST via Prim's algorithm (returns edge list) |
+| `connectedComponents(adj)` | List of connected component node sets |
+| `stronglyConnectedComponents(adj)` | SCCs via Kosaraju's algorithm |
+| `topologicalSort(adj)` | Topological order (DAGs only) |
+| `isConnected(adj)` | `true` if graph is connected |
+| `graphDistance(adj, start, end)` | Shortest path length |
+
+```typescript
+import { shortestPath, minimumSpanningTree, topologicalSort } from '@danielsimonjr/mathts-functions';
+
+const adj = [
+  [0, 1, 4, 0],
+  [1, 0, 2, 5],
+  [4, 2, 0, 1],
+  [0, 5, 1, 0]
+];
+
+shortestPath(adj, 0, 3);         // [0, 2, 3]  (via nodes 0→2→3, distance 5)
+minimumSpanningTree(adj);        // edge list of MST
+topologicalSort([[0,1],[0,2],[1,3],[2,3]]);  // [0, 1, 2, 3]
+```
+
+---
+
+## Distribution Objects
+
+Statistical distribution constructors that return objects with `pdf`, `cdf`, `ppf` (quantile), and `sample` methods.
+
+| Function | Description |
+|---|---|
+| `normalDist([mu, sigma])` | Normal distribution (default μ=0, σ=1) |
+| `betaDist(alpha, beta)` | Beta distribution |
+| `binomialDist(n, p)` | Binomial distribution |
+| `chiSquaredDist(k)` | Chi-squared distribution |
+| `exponentialDist([lambda])` | Exponential distribution |
+| `fDist(d1, d2)` | F-distribution |
+| `gammaDist(shape[, rate])` | Gamma distribution |
+| `logNormalDist([mu, sigma])` | Log-normal distribution |
+| `poissonDist(lambda)` | Poisson distribution |
+| `tDist(nu)` | Student's t-distribution |
+| `uniformDist([a, b])` | Uniform distribution (default [0, 1]) |
+| `weibullDist(k[, lambda])` | Weibull distribution |
+
+```typescript
+import { normalDist, tDist, poissonDist } from '@danielsimonjr/mathts-functions';
+
+const N = normalDist(0, 1);
+N.pdf(0);          // ~0.3989
+N.cdf(1.96);       // ~0.975
+N.ppf(0.975);      // ~1.96
+N.sample(5);       // [random samples]
+
+const t = tDist(10);
+t.cdf(2.228);      // ~0.975  (two-tailed critical value for df=10)
+
+const p = poissonDist(3);
+p.pdf(2);          // P(X=2) when λ=3
+```
+
+---
+
+## Hypothesis Tests
+
+Statistical hypothesis testing and multivariate analysis. All return structured result objects.
+
+| Function | Returns | Description |
+|---|---|---|
+| `studentTTest(sample1[, sample2])` | `TTestResult` | One-sample or two-sample t-test |
+| `chiSquareTest(observed, expected)` | `ChiSquareResult` | Chi-square goodness-of-fit test |
+| `anova(groups)` | `AnovaResult` | One-way analysis of variance |
+| `kolmogorovSmirnovTest(sample[, sample2])` | `KSTestResult` | KS test for distribution fit or two-sample comparison |
+| `mannWhitneyTest(sample1, sample2)` | `MannWhitneyResult` | Non-parametric two-sample test |
+| `shapiroWilkTest(sample)` | `ShapiroWilkResult` | Test for normality |
+| `principalComponentAnalysis(data[, k])` | `PCAResult` | PCA dimensionality reduction |
+
+```typescript
+import { studentTTest, anova, shapiroWilkTest } from '@danielsimonjr/mathts-functions';
+
+const group1 = [2.1, 2.5, 2.3, 2.8, 2.4];
+const group2 = [3.1, 3.5, 2.9, 3.2, 3.4];
+
+const tResult = studentTTest(group1, group2);
+// { t: ..., pValue: ..., degreesOfFreedom: ..., significant: true/false }
+
+const normResult = shapiroWilkTest(group1);
+// { W: ..., pValue: ..., isNormal: true/false }
+
+const groups = [[2.1, 2.3, 2.5], [3.1, 3.4, 3.2], [1.8, 2.0, 1.9]];
+const anovaResult = anova(groups);
+// { F: ..., pValue: ..., significant: true/false }
+```
+
+---
+
+## Numerical Methods
+
+Root-finding, optimization, and advanced numerical computation.
+
+| Function | Description |
+|---|---|
+| `findRoot(f, a, b[, opts])` | Bracketed root-finding (bisection/Brent's method) |
+| `linsolve(A, b)` | Solve linear system Ax = b |
+| `minimize(f, x0[, opts])` | Local minimization (gradient descent / Nelder-Mead) |
+| `maximize(f, x0[, opts])` | Local maximization |
+| `globalMinimize(f, bounds[, opts])` | Global minimization (simulated annealing / differential evolution) |
+| `leastSquares(A, b)` | Least-squares solution to overdetermined system |
+| `nintegrate(f, a, b[, tol])` | Adaptive numerical integration |
+| `bezierCurve(controlPoints, t)` | Evaluate Bezier curve at parameter t |
+| `bspline(controlPoints, degree, t)` | B-spline curve evaluation |
+| `loess(xs, ys, x[, bandwidth])` | LOESS local regression |
+| `griddata(xs, ys, values, xi, yi)` | Scattered data interpolation to grid |
+| `rbfInterpolate(centers, values, query)` | Radial basis function interpolation |
+| `curvefit(xs, ys, model, p0)` | Nonlinear curve fitting |
+| `expfit(xs, ys)` | Exponential curve fit: returns `[a, b]` for `a*exp(b*x)` |
+
+```typescript
+import { findRoot, minimize, leastSquares, bezierCurve } from '@danielsimonjr/mathts-functions';
+
+// Find root of f(x) = x^3 - x - 2 in [1, 2]
+findRoot(x => x**3 - x - 2, 1, 2);     // ~1.5214
+
+// Minimize f(x) = (x - 3)^2
+minimize(x => (x - 3)**2, 0);           // ~3.0
+
+// Least squares fit
+const A = [[1, 0], [1, 1], [1, 2]];
+const b = [1, 2, 3];
+leastSquares(A, b);                      // [1, 1] (a + b*x fit)
+
+// Cubic Bezier curve at t=0.5
+bezierCurve([[0,0],[1,2],[3,2],[4,0]], 0.5);  // midpoint on curve
+```
+
+---
+
 ## Parallel Return Type
 
 `Float64Array` inputs to arithmetic and trig functions return a `ParallelResult<Float64Array>`. The statistics and signal functions return the value type directly as a `Promise`. Use `.result` to unwrap arithmetic/trig parallel results:

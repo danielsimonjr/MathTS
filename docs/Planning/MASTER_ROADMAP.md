@@ -1,7 +1,7 @@
 # MathTS Master Roadmap
 
 **Updated**: 2026-04-10
-**Current State**: v0.1.2 published, 79 test files, 2304 tests, 302+ functions
+**Current State**: v0.1.2 published, 90 test files, 2864 tests, ~492 functions
 
 ---
 
@@ -9,7 +9,7 @@
 
 | # | Item | Status | Effort | Dependency |
 |---|------|--------|--------|-----------|
-| 1 | Sync 207 mathjs functions (Phase 1: 54 sync, Phase 2: 74 TS, Phase 3: 79 Rust) | Not started | 1 day → 6 weeks | None |
+| 1 | Sync remaining 17 mathjs matrix ops (Phase 3 deferred) | Deferred | 1-2 weeks | None |
 | 2 | Workbook ↔ Expression wiring | Deferred | 2-3 days | None |
 | 3 | Scientific Calculator (Electron, 5 panels) | Not started | 3-4 weeks | Factory activation (done) |
 | 4 | Deno Notebook (live documents) | Not started | 1-2 weeks | Workbook + Expression |
@@ -23,7 +23,9 @@
 | 166/166 sprint tasks | 100% | 2026-04-05 |
 | 242/273 factory activation (89%) | Done — 31 are infrastructure | 2026-04-05 |
 | Fix all pre-existing issues | Done (18 bugs from code review) | 2026-04-05 |
-| 60 new functions beyond mathjs | Done | 2026-04-05 |
+| 60 new functions beyond mathjs (v0.1.2) | Done | 2026-04-05 |
+| 190 additional functions (algebra, CAS, graph, dist-objects, hypothesis, numeric, +extensions) | Done | 2026-04-10 |
+| Sync 190/207 mathjs functions (17 matrix ops deferred) | Done — 190 of 207 | 2026-04-10 |
 | typed-function improvements (Symbol-based type ID, safe conversions) | Done | 2026-04-05 |
 | workerpool improvements (SharedArrayBuffer, warmup, metrics) | Done | 2026-04-05 |
 | Rust WASM full migration (AS → Rust, 1,017 exports, full AS parity) | Done | 2026-04-10 |

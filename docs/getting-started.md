@@ -147,28 +147,34 @@ main();
 
 ## Function Categories
 
-`@danielsimonjr/mathts-functions` provides 302+ math functions across 10 categories:
+`@danielsimonjr/mathts-functions` provides ~492 math functions across 17 categories:
 
 | Category | Examples |
 |----------|---------|
 | **Arithmetic** | `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `log`, `mod`, `gcd` |
 | **Trigonometry** | `sin`, `cos`, `tan`, `atan2`, `sinh`, `cosh`, `hypot`, `toRadians` |
 | **Statistics** | `parallelStatMean`, `parallelStatStd`, `parallelStatCorr`, `parallelStatQuantile` |
-| **Signal Processing** | `parallelFFT`, `parallelIFFT`, `parallelConv`, `crossCorrelation`, `unwrapPhase` |
-| **Special Functions** | `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1` |
+| **Signal Processing** | `parallelFFT`, `parallelIFFT`, `parallelConv`, `crossCorrelation`, `unwrapPhase`, `stft` |
+| **Special Functions** | `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1`, Legendre, Chebyshev, zeta |
 | **Probability Distributions** | `normalPDF`, `normalCDF`, `poissonPMF`, `binomialPMF`, `entropy`, `jsDivergence` |
 | **Numerical Integration** | `trapz`, `simpson`, `gaussQuad`, `romberg` |
 | **Interpolation** | `linearInterp`, `cubicSpline`, `pchipInterp`, `lagrangeInterp`, `polyFit` |
-| **Combinatorics** | `fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `subfactorial` |
-| **Geometry** | `angle2D`, `cross3D`, `convexHull`, `distance2D`, `distanceND`, `intersectLines2D` |
+| **Combinatorics** | `fibonacci`, `lucas`, `doubleFactorial`, `subfactorial`, `partition`, Stirling numbers |
+| **Geometry** | `angle2D`, `cross3D`, `convexHull`, `distance2D`, `distanceND`, `intersectLines2D`, Bezier |
 | **Statistics Selection** | `quickSelect`, `medianSelect`, `minSelect`, `maxSelect` |
+| **Algebra** | `polyval`, `polyadd`, `polymul`, `factor`, `expand`, `substitute`, `discriminant` |
+| **CAS** | `integrate`, `limit`, `partialDerivative`, `jacobian`, `laplace`, `taylor`, `solve` |
+| **Graph Theory** | `shortestPath`, `minimumSpanningTree`, `connectedComponents`, `topologicalSort` |
+| **Distribution Objects** | `normalDist`, `tDist`, `gammaDist`, `poissonDist` (objects with pdf/cdf/sample) |
+| **Hypothesis Tests** | `studentTTest`, `chiSquareTest`, `anova`, `mannWhitneyTest`, `shapiroWilkTest` |
+| **Numerical Methods** | `findRoot`, `minimize`, `leastSquares`, `rbfInterpolate`, `bezierCurve`, `loess` |
 
 ## Package Overview
 
 | Package | Purpose |
 |---------|---------|
 | `@danielsimonjr/mathts-core` | Core types: Complex, Fraction, BigNumber |
-| `@danielsimonjr/mathts-functions` | 302+ math functions with type dispatch |
+| `@danielsimonjr/mathts-functions` | ~492 math functions with type dispatch |
 | `@danielsimonjr/mathts-matrix` | Dense and sparse matrices |
 | `@danielsimonjr/mathts-parallel` | Parallel computing via ComputePool |
 | `@danielsimonjr/mathts-compat` | mathjs compatibility layer |

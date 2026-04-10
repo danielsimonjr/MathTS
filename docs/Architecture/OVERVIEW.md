@@ -24,9 +24,9 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 | Total Source Files | 1,324 |
 | Lines of Code | 202,551 |
 | Total Exports | 6,323 |
-| Test Files | 79 |
-| Total Tests | 2,304 |
-| Typed Function Exports | 158 (11 modules) |
+| Test Files | 90 |
+| Total Tests | 2,864 |
+| Typed Function Exports | 374 (17 modules) |
 | Synced Factory Functions | 242 (19 categories) |
 
 ## Packages
@@ -53,25 +53,30 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 These are exported, tested, and built. Includes:
 
 - **3 numeric types**: Complex (83 methods), Fraction (61 methods), BigNumber (96 methods including 22 math functions)
-- **158 typed function exports** across 11 modules: arithmetic (48), trigonometry (20), statistics (23), signal (12), special (9), distributions (11), integration (4), interpolation (6), combinatorics (6), geometry (18), bridge (1)
+- **374 typed function exports** across 17 modules: arithmetic (54), trigonometry (20), statistics (25), signal (33), special (29), distributions (11), integration (4), interpolation (6), combinatorics (21), geometry (31), algebra (37), cas (30), graph (8), dist-objects (13), hypothesis (14), numeric (37), bridge (1)
 - **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM/GPU backends
 - **Parallel**: ComputePool with 40+ parallel operations
 - **WASM**: 432 AssemblyScript exports (legacy) + **1,017 Rust WASM exports** (primary, full AS parity via compat module)
 
-### Beyond mathjs — 60 New Functions
+### Beyond mathjs — ~250 New Functions
 
 The following function categories go beyond the mathjs API surface, available as native typed exports:
 
 | Module | Count | Functions |
 |--------|-------|-----------|
-| Special | 9 | `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1` |
+| Special | 29 | `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1`, Legendre, Chebyshev, Laguerre, zeta, etc. |
 | Distributions | 11 | `normalPDF/CDF`, `exponentialPDF/CDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`, `jsDivergence` |
 | Integration | 4 | `trapz`, `simpson`, `gaussQuad`, `romberg` |
 | Interpolation | 6 | `linearInterp`, `lagrangeInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit` |
-| Combinatorics | 6 | `fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial` |
-| Geometry | 18 | `angle2D/3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`, `pointInPolygon`, `rotateVector2D/3D`, and 8 more |
-
-Total: **54 new exports** in these 6 modules (plus 4 new signal exports) = **~60 functions beyond mathjs**.
+| Combinatorics | 21 | `fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`, `partition`, Stirling/Bell numbers, etc. |
+| Geometry | 31 | `angle2D/3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`, `pointInPolygon`, `rotateVector2D/3D`, Bezier, splines, Voronoi, and more |
+| Signal | 33 | `parallelFFT/IFFT`, convolution, correlation, `groupDelay`, `unwrapPhase`, STFT, window functions (+21 new) |
+| **Algebra** | **37** | `polyval`, `polyadd`, `polymul`, `polyder`, `polynomialGCD`, `factor`, `expand`, `substitute`, `discriminant`, etc. |
+| **CAS** | **30** | `integrate`, `limit`, `partialDerivative`, `jacobian`, `laplacian`, `laplace`, `taylor`, `solve`, `groebnerBasis`, etc. |
+| **Graph Theory** | **8** | `adjacencyMatrix`, `shortestPath`, `minimumSpanningTree`, `connectedComponents`, `topologicalSort`, `isConnected`, etc. |
+| **Distribution Objects** | **13** | `normalDist`, `betaDist`, `binomialDist`, `gammaDist`, `tDist`, `uniformDist`, `poissonDist`, etc. (objects with pdf/cdf/sample) |
+| **Hypothesis Tests** | **14** | `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `PCA`, etc. |
+| **Numerical Methods** | **37** | `findRoot`, `linsolve`, `minimize`, `maximize`, `leastSquares`, `nintegrate`, `bezierCurve`, `rbfInterpolate`, etc. |
 
 ### Dormant Layer (synced from mathjs)
 
@@ -130,7 +135,7 @@ math.add(1, 2);
 |---------|--------|-------|
 | Core | Stable | Types with full method sets, factory, typed dispatch |
 | Matrix | Stable | Dense/Sparse with JS backend; WASM/GPU backends available |
-| Functions | Active | 158 typed exports across 11 modules (arithmetic, trig, stats, signal, special, distributions, integration, interpolation, combinatorics, geometry, bridge) |
+| Functions | Active | 374 typed exports across 17 modules (arithmetic, trig, stats, signal, special, distributions, integration, interpolation, combinatorics, geometry, algebra, CAS, graph theory, distribution objects, hypothesis tests, numerical methods, bridge) |
 | Parallel | Active | ComputePool, 40+ operations, 7 threshold categories |
 | Workbook | Active | YAML parsing, dep graphs, executor via Function constructor |
 | Expression | Builds | Parser ported (16 node types), compiler/evaluator are stubs |

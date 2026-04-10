@@ -62,9 +62,9 @@ isObject(x)     isNull(x)        isUndefined(x)    isMatrix(x)
 
 ## @danielsimonjr/mathts-functions
 
-All exports come from `functions/src/typed/`. 158 total exports across 11 modules.
+All exports come from `functions/src/typed/`. 374 total exports across 17 modules.
 
-### Arithmetic (48 exports)
+### Arithmetic (54 exports)
 
 | Group | Functions |
 |-------|-----------|
@@ -83,7 +83,7 @@ All exports come from `functions/src/typed/`. 158 total exports across 11 module
 `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `atan2`,
 `acsc`, `asec`, `acot`, `asinh`, `acosh`, `atanh`, `toRadians`, `toDegrees`, `hypot`, `typedTrigonometry`
 
-### Statistics (23 exports)
+### Statistics (25 exports)
 
 All stat functions are parallel-first and return `Promise<ParallelResult<T>>` for array inputs.
 Variadic overloads (2–4 numbers) are synchronous.
@@ -96,19 +96,20 @@ Variadic overloads (2–4 numbers) are synchronous.
 
 (4 additional exports in v0.1.3+)
 
-### Signal Processing (12 exports)
+### Signal Processing (33 exports)
 
 `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`,
 `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `crossCorrelation`,
-`autoCorrelation`, `groupDelay`, `typedSignal`
+`autoCorrelation`, `groupDelay`, `unwrapPhase`, `stft`, window functions,
+and 20+ additional signal processing utilities. `typedSignal`
 
-(2 additional exports in v0.1.3+)
-
-### Special Functions (9 exports)
+### Special Functions (29 exports)
 
 Higher-order mathematical functions not in standard mathjs.
 
-`erfc`, `beta`, `gammainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `typedSpecial`
+`erfc`, `beta`, `gammainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`,
+Legendre polynomials, Chebyshev polynomials, Laguerre polynomials, Riemann zeta,
+hypergeometric functions, and more. `typedSpecial`
 
 ### Distributions (11 exports)
 
@@ -131,20 +132,77 @@ Curve fitting and interpolation. Functions that return interpolant functions or 
 
 `linearInterp`, `lagrangeInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit`
 
-### Combinatorics (6 exports)
+### Combinatorics (21 exports)
 
 Integer sequence and combinatorial functions.
 
-`fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`
+`fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`,
+`partition`, Stirling numbers (first/second kind), Bell numbers, Catalan numbers,
+derangements, and more.
 
-### Geometry (18 exports)
+### Geometry (31 exports)
 
 2D and 3D geometric operations on number arrays.
 
 `angle2D`, `angle3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`,
-`pointInPolygon`, `rotateVector2D`, `rotateVector3D`
+`pointInPolygon`, `rotateVector2D`, `rotateVector3D`, `reflectVector`, `projectVector`,
+`distance2D`, `distance3D`, `distanceND`, `distancePointToLine2D`,
+`intersectLines2D`, `intersectSegments2D`, Bezier curves, B-splines, Voronoi diagrams, and more.
 
-(8 additional exports in module)
+### Algebra (37 exports)
+
+Polynomial and algebraic manipulation.
+
+`polyval`, `polyadd`, `polymul`, `polyder`, `polynomialGCD`, `polynomialLCM`,
+`polynomialQuotient`, `polynomialRemainder`, `degree`, `coefficientList`,
+`discriminant`, `differences`, `variables`, `substitute`, `expand`, `factor`,
+`collect`, `cancel`, `together`, `apart`, `trigExpand`, `trigReduce`,
+`trigToExp`, `expToTrig`, `reduce`, `combine`, `complexExpand`, `normalForm`,
+`powerExpand`, `fullSimplify`, `eliminate`, `functionExpand`, `resultant`, `typedAlgebra`
+
+### CAS — Computer Algebra System (30 exports)
+
+Symbolic calculus and computer algebra operations.
+
+`integrate`, `limit`, `partialDerivative`, `directionalDerivative`, `gradientSymbolic`,
+`jacobian`, `laplacian`, `divergence`, `curl`, `laplace`, `inverseLaplace`,
+`fourierSeries`, `zTransform`, `taylor`, `multivariateTaylor`, `series`,
+`seriesCoefficient`, `solve`, `implicitDiff`, `summation`, `symbolicProduct`,
+`assume`, `getAssumptions`, `clearAssumptions`, `asymptotic`, `groebnerBasis`,
+`minimalPolynomial`, `toRadicals`, `piecewise`, `odeGeneral`
+
+### Graph Theory (8 exports)
+
+Graph algorithms on adjacency matrix representations.
+
+`adjacencyMatrix`, `shortestPath`, `minimumSpanningTree`, `connectedComponents`,
+`stronglyConnectedComponents`, `topologicalSort`, `isConnected`, `graphDistance`
+
+### Distribution Objects (13 exports)
+
+Statistical distribution factory functions returning objects with `pdf`, `cdf`, `ppf`, and `sample` methods.
+
+`normalDist`, `betaDist`, `binomialDist`, `chiSquaredDist`, `exponentialDist`,
+`fDist`, `gammaDist`, `logNormalDist`, `poissonDist`, `tDist`, `uniformDist`,
+`weibullDist`, `Distribution` (interface)
+
+### Hypothesis Tests (14 exports)
+
+Statistical hypothesis tests and multivariate analysis.
+
+`studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`,
+`shapiroWilkTest`, `principalComponentAnalysis`, plus result interfaces:
+`TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`,
+`ShapiroWilkResult`, `PCAResult`
+
+### Numerical Methods (37 exports)
+
+Root-finding, optimization, linear systems, advanced interpolation, and curve fitting.
+
+`findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `leastSquares`,
+`nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`, `bezierCurve`,
+`bspline`, `loess`, `griddata`, `rbfInterpolate`, `curvefit`, `expfit`,
+plus option interfaces: `FindRootOptions`, `MinimizeOptions`
 
 ---
 

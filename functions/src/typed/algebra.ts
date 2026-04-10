@@ -507,7 +507,9 @@ export function expand(expr: string): string {
  * @returns Factored expression string
  */
 export function factor(expr: string): string {
-  const terms = expr.split(/\s*\+\s*/);
+  // Normalize subtraction so negative terms are handled as "+ -coeff*var"
+  const normalized = expr.replace(/\s*-\s*/g, ' + -');
+  const terms = normalized.split(/\s*\+\s*/).filter((t) => t.trim() !== '');
   if (terms.length < 2) return expr;
 
   const coeffs: number[] = [];
@@ -551,7 +553,9 @@ export function factor(expr: string): string {
  * @returns Expression with collected terms
  */
 export function collect(expr: string, variable: string): string {
-  const terms = expr.split(/\s*\+\s*/);
+  // Normalize subtraction so negative terms are handled as "+ -coeff*var"
+  const normalized = expr.replace(/\s*-\s*/g, ' + -');
+  const terms = normalized.split(/\s*\+\s*/).filter((t) => t.trim() !== '');
   const byPower = new Map<number, number>();
 
   for (const term of terms) {
@@ -977,7 +981,7 @@ export function eliminate(system: string[], variable: string): string[] {
  * @param variable - Variable to differentiate with respect to
  * @returns Derivative expression string
  */
-export function partialDerivative(expr: string, variable: string): string {
+export function symbolicPartialDerivative(expr: string, variable: string): string {
   const terms = expr.split(/\s*\+\s*/);
   const derivedTerms: string[] = [];
 
@@ -1164,7 +1168,7 @@ export const typedAlgebra = {
   fullSimplify,
   element,
   eliminate,
-  partialDerivative,
+  symbolicPartialDerivative,
   functionExpand,
   resultant,
 };

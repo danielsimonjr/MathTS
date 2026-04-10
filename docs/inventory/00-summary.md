@@ -12,7 +12,7 @@
 | **Native MathTS** | | | |
 | core/src (native) | 95 | 23,780 | Active, tested |
 | matrix/src | 38 | 15,250 | Active, tested |
-| functions/src/typed | 11 | ~4,600 | Active, tested |
+| functions/src/typed | 17 | ~13,860 | Active, tested |
 | parallel/src | 16 | 4,156 | Active, tested |
 | assembly/src (WASM) | 10 | 3,324 | Active, builds |
 | workbook/src | 6 | 690 | Partial (executeCode stubbed) |
@@ -26,7 +26,7 @@
 | core/src (synced utils) | ~60 | ~7,600 | Dormant |
 | **Synced subtotal** | **~1,211** | **~158,700** | |
 | | | | |
-| **Tests** | 76 | ~20,500 | 2,304 pass |
+| **Tests** | 90 | ~24,000 | 2,864 pass |
 
 ---
 
@@ -40,23 +40,29 @@
 | **Fraction** | 61 | Arithmetic, comparison, rounding |
 | **BigNumber** | 96 | Arithmetic + trig + transcendental (decimal.js) |
 
-### Active Typed Functions (158 exports, 11 modules)
+### Active Typed Functions (374 exports, 17 modules)
 
 | Module | Exports | Description |
 |--------|---------|-------------|
-| **arithmetic** | 48 | add, subtract, multiply, divide, pow, sqrt, abs, gcd, lcm, etc. |
+| **arithmetic** | 54 | add, subtract, multiply, divide, pow, sqrt, abs, gcd, lcm, etc. |
 | **trigonometry** | 20 | sin, cos, tan, inverses, hyperbolic, hypot |
-| **statistics** | 23 | mean, median, std, variance, quantile, histogram (parallel-first) |
-| **signal** | 12 | parallelFFT, parallelIFFT, convolution, correlation, groupDelay |
-| **special** | 9 | erfc, beta, gammainc, digamma, Bessel functions |
+| **statistics** | 25 | mean, median, std, variance, quantile, histogram, quickSelect, medianSelect (parallel-first) |
+| **signal** | 33 | parallelFFT, parallelIFFT, convolution, correlation, groupDelay, unwrapPhase, stft, windowFunctions |
+| **special** | 29 | erfc, beta, gammainc, digamma, Bessel functions, Legendre, Chebyshev, Laguerre, zeta, etc. |
 | **distributions** | 11 | normalPDF/CDF, exponential, Poisson, binomial, entropy |
-| **geometry** | 18 | distance, angle, cross/dot product, convex hull, polygon ops |
+| **geometry** | 31 | distance, angle, cross/dot product, convex hull, polygon ops, Bezier, splines, voronoi |
 | **interpolation** | 6 | linearInterp, lagrangeInterp, cubicSpline, hermiteInterp, pchipInterp, polyFit |
 | **integration** | 4 | trapz, simpson, gaussQuad, romberg |
-| **combinatorics** | 6 | fibonacci, lucas, doubleFactorial, risingFactorial, fallingFactorial, subfactorial |
+| **combinatorics** | 21 | fibonacci, lucas, doubleFactorial, risingFactorial, partition, Stirling, Bell numbers, etc. |
+| **algebra** | 37 | polyval, polyadd, polymul, polyder, polynomialGCD, factor, expand, substitute, etc. |
+| **cas** | 30 | integrate, limit, partialDerivative, jacobian, laplacian, laplace, taylor, solve, etc. |
+| **graph** | 8 | adjacencyMatrix, shortestPath, MST, connectedComponents, topologicalSort, etc. |
+| **dist-objects** | 13 | normalDist, betaDist, binomialDist, gammaDist, tDist, uniformDist, etc. |
+| **hypothesis** | 14 | studentTTest, chiSquareTest, anova, kolmogorovSmirnov, mannWhitneyTest, PCA, etc. |
+| **numeric** | 37 | findRoot, linsolve, minimize, leastSquares, nintegrate, interpolate, bezierCurve, rbfInterpolate, etc. |
 | **typed-bridge** | 1 | initTypeBridge |
 
-**60 functions beyond mathjs** (special, distributions, geometry, interpolation, integration, combinatorics)
+**~250 functions beyond mathjs** (algebra, CAS, graph theory, hypothesis tests, distribution objects, numerical methods, plus extended signal/geometry/special/combinatorics)
 
 ### Matrix System
 - **DenseMatrix** — Float64Array-backed, numbers-only, full operation set

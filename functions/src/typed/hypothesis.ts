@@ -704,8 +704,10 @@ export function principalComponentAnalysis(data: f64[][], k?: number): PCAResult
     }
   }
 
-  // Explained variance ratios
-  const totalVar = eigenvalues.reduce((a, b) => a + Math.abs(b), 0);
+  // Explained variance ratios — use trace of full covariance matrix so that
+  // ratios are correct even when k < p (partial extraction).
+  let totalVar = 0;
+  for (let i = 0; i < p; i++) totalVar += cov[i][i];
   const explained = eigenvalues.map((ev) => totalVar > 0 ? Math.abs(ev) / totalVar : 0);
 
   // Project data onto components (scores)

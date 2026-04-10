@@ -925,6 +925,7 @@ export function curvefit(
       const newParams = params.map((p, i) => p + dp[i]);
       const newCost = sumSqResiduals(newParams);
 
+      const costChange = Math.abs(newCost - prevCost);
       if (newCost < prevCost) {
         params = newParams;
         prevCost = newCost;
@@ -933,7 +934,7 @@ export function curvefit(
         lambda *= 10;
       }
 
-      if (Math.abs(newCost - prevCost) < 1e-15) break;
+      if (costChange < 1e-15) break;
     } catch {
       lambda *= 10;
     }

@@ -11,7 +11,8 @@ A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acc
 
 All 10 packages are live on npm under the `@danielsimonjr/mathts-*` scope.
 
-- **242 mathjs factory functions activated** across 18 dependency tiers (89% of the mathjs function surface)
+- **~492 math functions** — 374 typed exports across 17 modules + 242 factory functions
+- **190 new functions** — Algebra, CAS, Graph Theory, Distribution Objects, Hypothesis Tests, Numerical Methods
 - **String expression evaluation** — `evaluate('sin(pi/2)')` works end-to-end
 - **Expression compiler** — full 16-node AST interpreter with `parse()` and `compileExpr()`
 - **Dual WASM strategy** — AssemblyScript (SIMD) + Rust WASM (FFT, eigendecomposition, SVD)
@@ -23,7 +24,11 @@ All 10 packages are live on npm under the `@danielsimonjr/mathts-*` scope.
 
 - **Native TypeScript** — Full type safety with compile-time type checking
 - **Expression Evaluation** — Parse and evaluate math strings (`evaluate('sin(pi/2)')`)
-- **242+ Math Functions** — Full mathjs function surface via factory activation
+- **~492 Math Functions** — 374 typed exports + 242 mathjs factory functions across 17 categories
+- **Computer Algebra** — Symbolic integration, limits, Taylor series, Laplace transforms, Gröbner bases
+- **Graph Theory** — Shortest paths, MST, connected components, topological sort
+- **Statistical Testing** — t-tests, ANOVA, KS test, Shapiro-Wilk, PCA
+- **Distribution Objects** — 12 statistical distributions with pdf/cdf/ppf/sample methods
 - **Parallel-First** — WebWorker-based parallelization via ComputePool
 - **Dual WASM Acceleration** — AssemblyScript SIMD + Rust WASM for FFT, eig, SVD
 - **WebGPU Backend** — Compute shaders for matrices >100K elements
@@ -189,7 +194,7 @@ sin(new Complex(0, 1));   // Complex sinh(1)
 | Package | Version | Description |
 |---------|---------|-------------|
 | `@danielsimonjr/mathts-core` | 0.1.2 | Core types: Complex, Fraction, BigNumber, mathTyped |
-| `@danielsimonjr/mathts-functions` | 0.1.2 | 242+ math functions, typed dispatch, `evaluate()` |
+| `@danielsimonjr/mathts-functions` | 0.1.2 | ~492 math functions, typed dispatch, `evaluate()` |
 | `@danielsimonjr/mathts-matrix` | 0.1.2 | Dense/sparse matrices, JS/WASM/GPU backends, FFT, eig, SVD |
 | `@danielsimonjr/mathts-parallel` | 0.1.2 | ComputePool, parallel FFT/eig, Web Workers |
 | `@danielsimonjr/mathts-compat` | 0.1.2 | mathjs compatibility layer |
@@ -357,7 +362,7 @@ See the [Migration Guide](./docs/migration/guide.md) for detailed instructions.
 - [Data Types](./docs/datatypes/) — Complex, Fraction, BigNumber, matrices
 - [Expression Syntax](./docs/expressions/) — parsing, compilation, security
 - [Core Reference](./docs/core/) — configuration, serialization, extension
-- [Function Reference](./docs/reference/) — all 242+ functions
+- [Function Reference](./docs/reference/) — all ~492 functions
 - [Performance Guide](./docs/performance.md)
 - [Backends](./docs/backends.md)
 - [API Differences](./docs/migration/api-diff.md)

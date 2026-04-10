@@ -33,7 +33,7 @@ import {
   fullSimplify,
   element,
   eliminate,
-  partialDerivative,
+  symbolicPartialDerivative,
   functionExpand,
   resultant,
 } from '../src/typed/algebra.js';
@@ -511,35 +511,35 @@ describe('eliminate', () => {
   });
 });
 
-describe('partialDerivative', () => {
+describe('symbolicPartialDerivative', () => {
   it('should differentiate x^2', () => {
-    expect(partialDerivative('x^2', 'x')).toBe('2*x^1');
+    expect(symbolicPartialDerivative('x^2', 'x')).toBe('2*x^1');
   });
 
   it('should differentiate 3*x^2 + 2*y with respect to x', () => {
-    expect(partialDerivative('3*x^2 + 2*y', 'x')).toBe(
+    expect(symbolicPartialDerivative('3*x^2 + 2*y', 'x')).toBe(
       '6*x^1 + 0',
     );
   });
 
   it('should differentiate sin(x)', () => {
-    expect(partialDerivative('sin(x)', 'x')).toBe('cos(x)');
+    expect(symbolicPartialDerivative('sin(x)', 'x')).toBe('cos(x)');
   });
 
   it('should differentiate cos(x)', () => {
-    expect(partialDerivative('cos(x)', 'x')).toBe('-sin(x)');
+    expect(symbolicPartialDerivative('cos(x)', 'x')).toBe('-sin(x)');
   });
 
   it('should differentiate exp(x)', () => {
-    expect(partialDerivative('exp(x)', 'x')).toBe('exp(x)');
+    expect(symbolicPartialDerivative('exp(x)', 'x')).toBe('exp(x)');
   });
 
   it('should differentiate ln(x)', () => {
-    expect(partialDerivative('ln(x)', 'x')).toBe('1/x');
+    expect(symbolicPartialDerivative('ln(x)', 'x')).toBe('1/x');
   });
 
   it('should handle bare variable', () => {
-    expect(partialDerivative('x', 'x')).toBe('1');
+    expect(symbolicPartialDerivative('x', 'x')).toBe('1');
   });
 });
 
