@@ -1,5 +1,9 @@
+pub mod advanced_interp;
+pub mod advanced_ode;
+pub mod analysis;
 pub mod calculus;
 pub mod interpolation;
 pub mod ode;
+pub mod optimization;
 pub mod rational;
 pub mod rootfinding;

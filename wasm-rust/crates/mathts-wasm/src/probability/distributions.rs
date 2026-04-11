@@ -253,3 +253,104 @@ pub unsafe extern "C" fn sampleWithReplacement(
         *output_ptr.add(i) = *arr_ptr.add(j);
     }
 }
+
+// ============================================================
+// _wasm-suffixed distribution API
+// ============================================================
+
+/// Fast erf approximation (Abramowitz & Stegun 7.1.26, max error < 1.5e-7).
+/// Used internally to avoid a cross-module call into special::functions.
+#[inline(always)]
+fn erf_approx(x: f64) -> f64 {
+    let sign = if x < 0.0 { -1.0 } else { 1.0 };
+    let t = 1.0 / (1.0 + 0.3275911 * libm::fabs(x));
+    let poly = t
+        * (0.254829592
+            + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+    sign * (1.0 - poly * libm::exp(-x * x))
+}
+
+/// Normal PDF: (1 / (sigma * sqrt(2π))) * exp(-0.5 * ((x-mu)/sigma)^2).
+#[no_mangle]
+pub unsafe extern "C" fn normal_pdf_wasm(x: f64, mu: f64, sigma: f64) -> f64 {
+    let z = (x - mu) / sigma;
+    libm::exp(-0.5 * z * z) / (sigma * libm::sqrt(2.0 * core::f64::consts::PI))
+}
+
+/// Normal CDF using erf: 0.5 * (1 + erf((x-mu) / (sigma*sqrt(2)))).
+#[no_mangle]
+pub unsafe extern "C" fn normal_cdf_wasm(x: f64, mu: f64, sigma: f64) -> f64 {
+    0.5 * (1.0 + erf_approx((x - mu) / (sigma * core::f64::consts::SQRT_2)))
+}
+
+/// Binomial PMF computed in log-space to avoid overflow.
+/// Returns P(X = k) for X ~ Binomial(n, p).
+#[no_mangle]
+pub unsafe extern "C" fn binomial_pmf_wasm(k: i32, n: i32, p: f64) -> f64 {
+    if k < 0 || k > n || p < 0.0 || p > 1.0 {
+        return 0.0;
+    }
+    if p == 0.0 {
+        return if k == 0 { 1.0 } else { 0.0 };
+    }
+    if p == 1.0 {
+        return if k == n { 1.0 } else { 0.0 };
+    }
+    // log C(n,k) = log_gamma(n+1) - log_gamma(k+1) - log_gamma(n-k+1)
+    let log_binom = log_gamma_approx((n + 1) as f64)
+        - log_gamma_approx((k + 1) as f64)
+        - log_gamma_approx((n - k + 1) as f64);
+    let log_pmf = log_binom + k as f64 * libm::log(p) + (n - k) as f64 * libm::log(1.0 - p);
+    libm::exp(log_pmf)
+}
+
+/// Poisson PMF computed in log-space.
+/// Returns P(X = k) for X ~ Poisson(lambda).
+#[no_mangle]
+pub unsafe extern "C" fn poisson_pmf_wasm(k: i32, lambda: f64) -> f64 {
+    if k < 0 || lambda < 0.0 {
+        return 0.0;
+    }
+    if lambda == 0.0 {
+        return if k == 0 { 1.0 } else { 0.0 };
+    }
+    let log_pmf = k as f64 * libm::log(lambda) - lambda - log_gamma_approx((k + 1) as f64);
+    libm::exp(log_pmf)
+}
+
+/// Gamma PDF: rate^shape / Gamma(shape) * x^(shape-1) * exp(-rate*x) for x > 0.
+#[no_mangle]
+pub unsafe extern "C" fn gamma_pdf_wasm(x: f64, shape: f64, rate: f64) -> f64 {
+    if x <= 0.0 || shape <= 0.0 || rate <= 0.0 {
+        return 0.0;
+    }
+    let log_pdf =
+        shape * libm::log(rate) - log_gamma_approx(shape) + (shape - 1.0) * libm::log(x) - rate * x;
+    libm::exp(log_pdf)
+}
+
+/// Stirling-series log-gamma approximation (accurate for x > 0).
+/// log Γ(x) ≈ 0.5*log(2π) + (x-0.5)*log(x) - x  for large x;
+/// uses Lanczos g=5 for small x.
+#[inline]
+fn log_gamma_approx(x: f64) -> f64 {
+    // Lanczos approximation with g=5, n=6 coefficients
+    const G: f64 = 5.0;
+    const C: [f64; 6] = [
+        76.18009172947146,
+        -86.50532032941677,
+        24.01409824083091,
+        -1.231739572450155,
+        0.1208650973866179e-2,
+        -0.5395239384953e-5,
+    ];
+    let z = x - 1.0;
+    let mut ser = 1.000000000190015;
+    let mut t = z;
+    for &c in &C {
+        t += 1.0;
+        ser += c / t;
+    }
+    let tmp = z + G + 0.5;
+    0.5 * libm::log(2.0 * core::f64::consts::PI) + (z + 0.5) * libm::log(tmp) - tmp + libm::log(ser)
+}

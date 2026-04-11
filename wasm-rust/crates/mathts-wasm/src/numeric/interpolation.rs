@@ -741,6 +741,80 @@ pub unsafe extern "C" fn polyFit(
     }
 }
 
+// ============================================================
+// _wasm-suffixed API: self-contained, no external work buffer
+// ============================================================
+
+/// Linear interpolation in a sorted table (binary search).
+/// Equivalent to `linearInterpTable` but follows the `_wasm` naming convention.
+#[no_mangle]
+pub unsafe extern "C" fn linear_interp_wasm(xs: *const f64, ys: *const f64, n: i32, x: f64) -> f64 {
+    linearInterpTable(xs, ys, x, n)
+}
+
+/// Evaluate a pre-computed cubic spline at point `x`.
+/// `coeffs` must be the output of `cubic_spline_coeffs_wasm` (4*(n-1) f64 values).
+#[no_mangle]
+pub unsafe extern "C" fn cubic_spline_eval_wasm(
+    xs: *const f64,
+    _ys: *const f64,
+    coeffs: *const f64,
+    n: i32,
+    x: f64,
+) -> f64 {
+    cubicSplineEval(xs, coeffs, x, n)
+}
+
+/// Compute natural cubic spline coefficients into `coeffs` (must be 4*(n-1) f64s).
+/// Allocates a temporary work buffer internally.
+#[no_mangle]
+pub unsafe extern "C" fn cubic_spline_coeffs_wasm(
+    xs: *const f64,
+    ys: *const f64,
+    n: i32,
+    coeffs: *mut f64,
+) {
+    let nu = n as usize;
+    let mut work = alloc::vec![0.0f64; nu * 6];
+    naturalCubicSplineCoeffs(xs, ys, n, coeffs, work.as_mut_ptr());
+}
+
+/// PCHIP interpolation at point `x` using Fritsch-Carlson slopes.
+/// Allocates a temporary slope buffer internally.
+#[no_mangle]
+pub unsafe extern "C" fn pchip_eval_wasm(xs: *const f64, ys: *const f64, n: i32, x: f64) -> f64 {
+    let nu = n as usize;
+    let mut work = alloc::vec![0.0f64; nu];
+    pchipInterp(xs, ys, x, n, work.as_mut_ptr())
+}
+
+/// Lagrange polynomial interpolation at point `x`.
+#[no_mangle]
+pub unsafe extern "C" fn lagrange_interp_wasm(
+    xs: *const f64,
+    ys: *const f64,
+    n: i32,
+    x: f64,
+) -> f64 {
+    lagrangeInterp(xs, ys, x, n)
+}
+
+/// Least-squares polynomial fit of given `degree`.
+/// Writes `degree+1` coefficients (ascending powers) into `coeffs`.
+/// Allocates internal work buffer.
+#[no_mangle]
+pub unsafe extern "C" fn poly_fit_wasm(
+    xs: *const f64,
+    ys: *const f64,
+    n: i32,
+    degree: i32,
+    coeffs: *mut f64,
+) {
+    let m = (degree + 1) as usize;
+    let mut work = alloc::vec![0.0f64; m * m + m];
+    polyFit(xs, ys, n, degree, coeffs, work.as_mut_ptr());
+}
+
 /// Batch interpolation.
 #[no_mangle]
 pub unsafe extern "C" fn batchInterpolate(

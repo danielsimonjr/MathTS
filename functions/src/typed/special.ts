@@ -18,6 +18,24 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 type f64 = number;
 
 // =============================================================================
+// Rust WASM Lazy Loader
+// =============================================================================
+
+let _rustWasm: any = null;
+function getRustWasm(): any {
+  if (_rustWasm === null) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const matrixPkg = require('@danielsimonjr/mathts-matrix');
+      _rustWasm = matrixPkg.RustWasmLoader?.getInstance();
+    } catch {
+      _rustWasm = false;
+    }
+  }
+  return _rustWasm && _rustWasm.isLoaded ? _rustWasm : null;
+}
+
+// =============================================================================
 // Internal Helpers
 // =============================================================================
 
@@ -464,6 +482,10 @@ export const besselY1 = mathTyped('besselY1', {
  */
 export const besselJ = mathTyped('besselJ', {
   'number, number': (n: f64, x: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.besselJ_wasm(Math.round(n), x); } catch { /* fallback */ }
+    }
     const ni = Math.round(n);
     if (ni < 0) return (ni % 2 === 0 ? 1 : -1) * (besselJ(-ni, x) as f64);
     if (ni === 0) return besselJ0(x) as f64;
@@ -512,6 +534,10 @@ export const besselJ = mathTyped('besselJ', {
  */
 export const besselY = mathTyped('besselY', {
   'number, number': (n: f64, x: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.besselY_wasm(Math.round(n), x); } catch { /* fallback */ }
+    }
     const ni = Math.round(n);
     if (x <= 0) return NaN;
     if (ni === 0) return besselY0(x) as f64;
@@ -539,6 +565,10 @@ export const besselY = mathTyped('besselY', {
  */
 export const besselI = mathTyped('besselI', {
   'number, number': (n: f64, x: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.besselI_wasm(Math.round(n), x); } catch { /* fallback */ }
+    }
     const ni = Math.round(Math.abs(n));
     if (Math.abs(x) < 1e-15) return ni === 0 ? 1 : 0;
 
@@ -564,6 +594,10 @@ export const besselI = mathTyped('besselI', {
  */
 export const besselK = mathTyped('besselK', {
   'number, number': (n: f64, x: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.besselK_wasm(Math.round(n), x); } catch { /* fallback */ }
+    }
     const ni = Math.round(Math.abs(n));
     if (x <= 0) return NaN;
 
@@ -627,6 +661,10 @@ function factorial(n: number): number {
  */
 export const betainc = mathTyped('betainc', {
   'number, number, number': (a: f64, b: f64, x: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.betainc_wasm(a, b, x); } catch { /* fallback */ }
+    }
     if (x < 0 || x > 1) return NaN;
     if (x === 0) return 0;
     if (x === 1) return 1;
@@ -704,6 +742,10 @@ export const gammaincp = mathTyped('gammaincp', {
  */
 export const ellipticK = mathTyped('ellipticK', {
   number: (m: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.ellipticK_wasm(m); } catch { /* fallback */ }
+    }
     if (m < 0 || m >= 1) return NaN;
     if (m === 0) return Math.PI / 2;
 
@@ -729,6 +771,10 @@ export const ellipticK = mathTyped('ellipticK', {
  */
 export const ellipticE = mathTyped('ellipticE', {
   'number, number': (phi: f64, m: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.ellipticE_wasm(phi, m); } catch { /* fallback */ }
+    }
     // Numerical integration using Simpson's rule
     const n = 100;
     const h = phi / n;
@@ -853,6 +899,10 @@ export const legendreP = mathTyped('legendreP', {
  */
 export const lambertW = mathTyped('lambertW', {
   number: (x: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.lambertW_wasm(x); } catch { /* fallback */ }
+    }
     if (x < -1 / Math.E) return NaN;
     if (x === 0) return 0;
     if (x === Math.E) return 1;
@@ -1037,6 +1087,10 @@ export const expIntegralEi = mathTyped('expIntegralEi', {
  */
 export const fresnelC = mathTyped('fresnelC', {
   number: (x: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.fresnelC_wasm(x); } catch { /* fallback */ }
+    }
     const ax = Math.abs(x);
     const sign = x < 0 ? -1 : 1;
 
@@ -1066,6 +1120,10 @@ export const fresnelC = mathTyped('fresnelC', {
  */
 export const fresnelS = mathTyped('fresnelS', {
   number: (x: f64): f64 => {
+    const wasm = getRustWasm();
+    if (wasm) {
+      try { return wasm.exports.fresnelS_wasm(x); } catch { /* fallback */ }
+    }
     const ax = Math.abs(x);
     const sign = x < 0 ? -1 : 1;
 

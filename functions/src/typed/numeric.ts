@@ -11,12 +11,17 @@
  * @packageDocumentation
  */
 
+import { wasmLoader } from '../wasm/WasmLoader.js';
+
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
 // =============================================================================
 
 type f64 = number;
 type i32 = number;
+
+// Threshold: use WASM for arrays larger than this
+const NUMERIC_WASM_THRESHOLD = 16;
 
 // =============================================================================
 // Root Finding
@@ -371,6 +376,29 @@ export function leastSquares(A: number[][], b: number[]): number[] {
   const m = A.length;
   const n = A[0].length;
 
+  // WASM-accelerated path
+  if (m >= NUMERIC_WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const flatA = new Float64Array(m * n);
+        for (let i = 0; i < m; i++)
+          for (let j = 0; j < n; j++) flatA[i * n + j] = A[i][j];
+        const aAlloc = wasmLoader.allocateFloat64Array(flatA);
+        const bAlloc = wasmLoader.allocateFloat64Array(new Float64Array(b));
+        const xAlloc = wasmLoader.allocateFloat64Array(new Float64Array(n));
+        try {
+          wasm.least_squares_wasm(aAlloc.ptr, bAlloc.ptr, m, n, xAlloc.ptr);
+          return Array.from(xAlloc.array);
+        } finally {
+          wasmLoader.free(aAlloc.ptr);
+          wasmLoader.free(bAlloc.ptr);
+          wasmLoader.free(xAlloc.ptr);
+        }
+      } catch { /* fall through to JS */ }
+    }
+  }
+
   // A^T * A
   const AtA: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
   for (let i = 0; i < n; i++) {
@@ -620,6 +648,30 @@ export function pchip(xs: number[], ys: number[], x: f64): f64 {
 export function bezierCurve(controlPoints: number[][], t: f64): number[] {
   if (controlPoints.length === 0) throw new Error('bezierCurve: need at least 1 control point');
 
+  const nPts = controlPoints.length;
+  const dims = controlPoints[0].length;
+
+  // WASM-accelerated path
+  if (nPts >= NUMERIC_WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const flat = new Float64Array(nPts * dims);
+        for (let i = 0; i < nPts; i++)
+          for (let d = 0; d < dims; d++) flat[i * dims + d] = controlPoints[i][d];
+        const ctrlAlloc = wasmLoader.allocateFloat64Array(flat);
+        const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(dims));
+        try {
+          wasm.bezier_eval_wasm(ctrlAlloc.ptr, nPts, dims, t, resultAlloc.ptr);
+          return Array.from(resultAlloc.array);
+        } finally {
+          wasmLoader.free(ctrlAlloc.ptr);
+          wasmLoader.free(resultAlloc.ptr);
+        }
+      } catch { /* fall through to JS */ }
+    }
+  }
+
   // De Casteljau's algorithm
   let points = controlPoints.map((p) => p.slice());
   while (points.length > 1) {
@@ -697,6 +749,25 @@ export function bspline(controlPoints: number[][], degree: i32, t: f64): number[
  */
 export function loess(xs: number[], ys: number[], x: f64, bandwidth: f64 = 0.3): f64 {
   const n = xs.length;
+
+  // WASM-accelerated path
+  if (n >= NUMERIC_WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const xsAlloc = wasmLoader.allocateFloat64Array(new Float64Array(xs));
+        const ysAlloc = wasmLoader.allocateFloat64Array(new Float64Array(ys));
+        try {
+          const result = wasm.loess_wasm(xsAlloc.ptr, ysAlloc.ptr, n, x, bandwidth);
+          return result as f64;
+        } finally {
+          wasmLoader.free(xsAlloc.ptr);
+          wasmLoader.free(ysAlloc.ptr);
+        }
+      } catch { /* fall through to JS */ }
+    }
+  }
+
   const k = Math.max(2, Math.ceil(bandwidth * n));
 
   // Find k nearest neighbors
@@ -746,6 +817,58 @@ export function griddata(
   xi: number[],
   yi: number[],
 ): number[][] {
+  const n = points.length;
+
+  // WASM-accelerated path (flatten grid to 1D, then reshape)
+  if (n >= NUMERIC_WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const flatPts = new Float64Array(n * 2);
+        for (let i = 0; i < n; i++) {
+          flatPts[i * 2] = points[i][0];
+          flatPts[i * 2 + 1] = points[i][1];
+        }
+        // Flatten xi/yi into all grid point pairs
+        const ni = xi.length * yi.length;
+        const flatXi = new Float64Array(ni);
+        const flatYi = new Float64Array(ni);
+        let idx = 0;
+        for (let j = 0; j < yi.length; j++) {
+          for (let i = 0; i < xi.length; i++) {
+            flatXi[idx] = xi[i];
+            flatYi[idx] = yi[j];
+            idx++;
+          }
+        }
+        const ptsAlloc = wasmLoader.allocateFloat64Array(flatPts);
+        const valsAlloc = wasmLoader.allocateFloat64Array(new Float64Array(values));
+        const xiAlloc = wasmLoader.allocateFloat64Array(flatXi);
+        const yiAlloc = wasmLoader.allocateFloat64Array(flatYi);
+        const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(ni));
+        try {
+          wasm.griddata_wasm(ptsAlloc.ptr, valsAlloc.ptr, n, xiAlloc.ptr, yiAlloc.ptr, ni, resultAlloc.ptr);
+          const result2d: number[][] = [];
+          let k = 0;
+          for (let j = 0; j < yi.length; j++) {
+            const row: number[] = [];
+            for (let i = 0; i < xi.length; i++) {
+              row.push(resultAlloc.array[k++]);
+            }
+            result2d.push(row);
+          }
+          return result2d;
+        } finally {
+          wasmLoader.free(ptsAlloc.ptr);
+          wasmLoader.free(valsAlloc.ptr);
+          wasmLoader.free(xiAlloc.ptr);
+          wasmLoader.free(yiAlloc.ptr);
+          wasmLoader.free(resultAlloc.ptr);
+        }
+      } catch { /* fall through to JS */ }
+    }
+  }
+
   const result: number[][] = [];
   const p = 2; // IDW power
 
@@ -792,6 +915,35 @@ export function rbfInterpolate(
 ): number[] {
   const n = points.length;
   const dim = points[0].length;
+
+  // WASM-accelerated path (Gaussian kernel only)
+  if (kernel === 'gaussian' && n >= NUMERIC_WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const ni = xi.length;
+        const flatPts = new Float64Array(n * dim);
+        for (let i = 0; i < n; i++)
+          for (let d = 0; d < dim; d++) flatPts[i * dim + d] = points[i][d];
+        const flatXi = new Float64Array(ni * dim);
+        for (let i = 0; i < ni; i++)
+          for (let d = 0; d < dim; d++) flatXi[i * dim + d] = xi[i][d];
+        const ptsAlloc = wasmLoader.allocateFloat64Array(flatPts);
+        const valsAlloc = wasmLoader.allocateFloat64Array(new Float64Array(values));
+        const xiAlloc = wasmLoader.allocateFloat64Array(flatXi);
+        const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(ni));
+        try {
+          wasm.rbf_interp_wasm(ptsAlloc.ptr, valsAlloc.ptr, n, dim, xiAlloc.ptr, ni, resultAlloc.ptr);
+          return Array.from(resultAlloc.array);
+        } finally {
+          wasmLoader.free(ptsAlloc.ptr);
+          wasmLoader.free(valsAlloc.ptr);
+          wasmLoader.free(xiAlloc.ptr);
+          wasmLoader.free(resultAlloc.ptr);
+        }
+      } catch { /* fall through to JS */ }
+    }
+  }
 
   // Compute average distance for epsilon
   let sumDist = 0;
@@ -1054,9 +1206,41 @@ export function solveODESystem(
     const k3 = f(t + h / 2, vadd(y, k2, h / 2));
     const k4 = f(t + h, vadd(y, k3, h));
 
-    const yNew: number[] = new Array(n);
-    for (let i = 0; i < n; i++) {
-      yNew[i] = y[i] + (h / 6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+    // WASM-accelerated RK4 combination step
+    let yNew: number[];
+    const wasmMod = n >= 4 ? wasmLoader.getModule() : null;
+    if (wasmMod) {
+      try {
+        const yArr = new Float64Array(y);
+        const kPacked = new Float64Array(4 * n);
+        for (let i = 0; i < n; i++) {
+          kPacked[i] = k1[i];
+          kPacked[n + i] = k2[i];
+          kPacked[2 * n + i] = k3[i];
+          kPacked[3 * n + i] = k4[i];
+        }
+        const yAlloc = wasmLoader.allocateFloat64Array(yArr);
+        const kAlloc = wasmLoader.allocateFloat64Array(kPacked);
+        const rAlloc = wasmLoader.allocateFloat64Array(new Float64Array(n));
+        try {
+          wasmMod.ode_system_rk4_step_wasm(yAlloc.ptr, kAlloc.ptr, h, n, rAlloc.ptr);
+          yNew = Array.from(rAlloc.array);
+        } finally {
+          wasmLoader.free(yAlloc.ptr);
+          wasmLoader.free(kAlloc.ptr);
+          wasmLoader.free(rAlloc.ptr);
+        }
+      } catch {
+        yNew = new Array(n);
+        for (let i = 0; i < n; i++) {
+          yNew[i] = y[i] + (h / 6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+        }
+      }
+    } else {
+      yNew = new Array(n);
+      for (let i = 0; i < n; i++) {
+        yNew[i] = y[i] + (h / 6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+      }
     }
 
     t += h;
@@ -1325,6 +1509,25 @@ export function cond(A: number[][]): f64 {
   const n = A.length;
   if (n === 0) return 0;
 
+  // WASM-accelerated path (SVD-based condition number)
+  if (n >= NUMERIC_WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const flat = new Float64Array(n * n);
+        for (let i = 0; i < n; i++)
+          for (let j = 0; j < n; j++) flat[i * n + j] = A[i][j];
+        const aAlloc = wasmLoader.allocateFloat64Array(flat);
+        try {
+          const result = wasm.condition_number_wasm(aAlloc.ptr, n);
+          return result as f64;
+        } finally {
+          wasmLoader.free(aAlloc.ptr);
+        }
+      } catch { /* fall through to JS */ }
+    }
+  }
+
   // A^T A
   const AtA: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
   for (let i = 0; i < n; i++) {
@@ -1382,6 +1585,25 @@ export function rank(A: number[][], tol: f64 = 1e-10): i32 {
   const m = A.length;
   if (m === 0) return 0;
   const n = A[0].length;
+
+  // WASM-accelerated path (SVD-based rank)
+  if (m >= NUMERIC_WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const flat = new Float64Array(m * n);
+        for (let i = 0; i < m; i++)
+          for (let j = 0; j < n; j++) flat[i * n + j] = A[i][j];
+        const aAlloc = wasmLoader.allocateFloat64Array(flat);
+        try {
+          const result = wasm.matrix_rank_wasm(aAlloc.ptr, m, n, tol);
+          return result as i32;
+        } finally {
+          wasmLoader.free(aAlloc.ptr);
+        }
+      } catch { /* fall through to JS */ }
+    }
+  }
 
   // Use Gaussian elimination to count pivots
   const M = A.map((row) => row.slice());

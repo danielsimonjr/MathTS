@@ -347,3 +347,398 @@ pub extern "C" fn besselY1(x: f64) -> f64 {
         libm::sqrt(0.636619772 / x) * (libm::sin(xx) * ans1 + z * libm::cos(xx) * ans2)
     }
 }
+
+// =============================================================================
+// General Order Bessel Functions
+// =============================================================================
+
+/// Bessel J_n(x) — general integer order using forward/backward recurrence.
+#[no_mangle]
+pub unsafe extern "C" fn besselJ_wasm(n: i32, x: f64) -> f64 {
+    let ni = if n < 0 { -n } else { n };
+    let sign = if n < 0 && ni % 2 != 0 { -1.0 } else { 1.0 };
+
+    if ni == 0 {
+        return sign * besselJ0(x);
+    }
+    if ni == 1 {
+        return sign * besselJ1(x);
+    }
+    if libm::fabs(x) < 1e-15 {
+        return 0.0;
+    }
+
+    let result = if ni <= 20 || libm::fabs(x) > ni as f64 {
+        // Forward recurrence: J_{k+1}(x) = (2k/x) J_k(x) - J_{k-1}(x)
+        let mut j_prev = besselJ0(x);
+        let mut j_curr = besselJ1(x);
+        for k in 1..ni {
+            let j_next = (2.0 * k as f64 / x) * j_curr - j_prev;
+            j_prev = j_curr;
+            j_curr = j_next;
+        }
+        j_curr
+    } else {
+        // Miller's backward recurrence
+        let isqrt = libm::sqrt(40.0 * ni as f64) as i32;
+        let extra = if 10 > isqrt { 10 } else { isqrt };
+        let n_start = ni + 2 * extra;
+        let mut j_next = 0.0_f64;
+        let mut j_curr = 1.0_f64;
+        let mut result_val = 0.0_f64;
+        let mut sum = 0.0_f64;
+        for k in (0..=n_start).rev() {
+            let j_prev = (2.0 * (k + 1) as f64 / x) * j_curr - j_next;
+            j_next = j_curr;
+            j_curr = j_prev;
+            if k == ni {
+                result_val = j_next;
+            }
+            if k % 2 == 0 {
+                sum += j_curr;
+            }
+        }
+        // Normalize: J_0 + 2*(J_2 + J_4 + ...) = 1
+        sum = 2.0 * sum - j_curr;
+        result_val / sum
+    };
+    sign * result
+}
+
+/// Bessel Y_n(x) — general integer order using forward recurrence.
+#[no_mangle]
+pub unsafe extern "C" fn besselY_wasm(n: i32, x: f64) -> f64 {
+    if x <= 0.0 {
+        return f64::NAN;
+    }
+    let ni = if n < 0 { -n } else { n };
+    let sign = if n < 0 && ni % 2 != 0 { -1.0 } else { 1.0 };
+
+    if ni == 0 {
+        return sign * besselY0(x);
+    }
+    if ni == 1 {
+        return sign * besselY1(x);
+    }
+
+    // Forward recurrence: Y_{k+1}(x) = (2k/x) Y_k(x) - Y_{k-1}(x)
+    let mut y_prev = besselY0(x);
+    let mut y_curr = besselY1(x);
+    for k in 1..ni {
+        let y_next = (2.0 * k as f64 / x) * y_curr - y_prev;
+        y_prev = y_curr;
+        y_curr = y_next;
+    }
+    sign * y_curr
+}
+
+/// Modified Bessel I_n(x) — series expansion.
+#[no_mangle]
+pub unsafe extern "C" fn besselI_wasm(n: i32, x: f64) -> f64 {
+    let ni = if n < 0 { -n } else { n };
+    if libm::fabs(x) < 1e-15 {
+        return if ni == 0 { 1.0 } else { 0.0 };
+    }
+
+    // Series: I_n(x) = sum_{m=0}^inf (x/2)^{n+2m} / (m! * Gamma(n+m+1))
+    let half_x = libm::fabs(x) / 2.0;
+    let mut sum = 0.0_f64;
+    let mut m_fact = 1.0_f64; // m!
+    for m in 0..100 {
+        if m > 0 {
+            m_fact *= m as f64;
+        }
+        let lg = lgamma(ni as f64 + m as f64 + 1.0);
+        let term = libm::pow(half_x, ni as f64 + 2.0 * m as f64) / (m_fact * libm::exp(lg));
+        sum += term;
+        if libm::fabs(term) < libm::fabs(sum) * 1e-15 {
+            break;
+        }
+    }
+    sum
+}
+
+/// Modified Bessel K_n(x) — K_0/K_1 + forward recurrence.
+#[no_mangle]
+pub unsafe extern "C" fn besselK_wasm(n: i32, x: f64) -> f64 {
+    let ni = if n < 0 { -n } else { n };
+    if x <= 0.0 {
+        return f64::NAN;
+    }
+
+    // K_0(x)
+    fn k0(x: f64) -> f64 {
+        if x <= 2.0 {
+            let y = x * x / 4.0;
+            let i0 = unsafe { besselI_wasm(0, x) };
+            -libm::log(x / 2.0) * i0
+                + (-0.57721566
+                    + y * (0.42278420
+                        + y * (0.23069756 + y * (0.03488590 + y * (0.00262698 + y * 0.00010750)))))
+        } else {
+            let y = 2.0 / x;
+            (libm::exp(-x) / libm::sqrt(x))
+                * (1.25331414
+                    + y * (-0.07832358
+                        + y * (0.02189568
+                            + y * (-0.01062446
+                                + y * (0.00587872 + y * (-0.00251540 + y * 0.00053208))))))
+        }
+    }
+
+    // K_1(x)
+    fn k1(x: f64) -> f64 {
+        if x <= 2.0 {
+            let y = x * x / 4.0;
+            let i1 = unsafe { besselI_wasm(1, x) };
+            libm::log(x / 2.0) * i1
+                + (1.0 / x)
+                    * (1.0
+                        + y * (0.15443144
+                            + y * (-0.67278579
+                                + y * (-0.18156897
+                                    + y * (-0.01919402 + y * (-0.00110404 + y * -0.00004686))))))
+        } else {
+            let y = 2.0 / x;
+            (libm::exp(-x) / libm::sqrt(x))
+                * (1.25331414
+                    + y * (0.23498619
+                        + y * (-0.03655620
+                            + y * (0.01504268
+                                + y * (-0.00780353 + y * (0.00325614 + y * -0.00068245))))))
+        }
+    }
+
+    if ni == 0 {
+        return k0(x);
+    }
+    if ni == 1 {
+        return k1(x);
+    }
+
+    // Forward recurrence: K_{k+1}(x) = (2k/x) K_k(x) + K_{k-1}(x)
+    let mut k_prev = k0(x);
+    let mut k_curr = k1(x);
+    for k in 1..ni {
+        let k_next = (2.0 * k as f64 / x) * k_curr + k_prev;
+        k_prev = k_curr;
+        k_curr = k_next;
+    }
+    k_curr
+}
+
+// =============================================================================
+// Incomplete Beta Function
+// =============================================================================
+
+/// Regularized incomplete beta I_x(a, b) using continued fraction (Lentz's method).
+#[no_mangle]
+pub unsafe extern "C" fn betainc_wasm(a: f64, b: f64, x: f64) -> f64 {
+    if x < 0.0 || x > 1.0 {
+        return f64::NAN;
+    }
+    if x == 0.0 {
+        return 0.0;
+    }
+    if x == 1.0 {
+        return 1.0;
+    }
+
+    // Use symmetry if x > (a+1)/(a+b+2)
+    if x > (a + 1.0) / (a + b + 2.0) {
+        return 1.0 - betainc_wasm(b, a, 1.0 - x);
+    }
+
+    let ln_beta = lgamma(a) + lgamma(b) - lgamma(a + b);
+    let front = libm::exp(libm::log(x) * a + libm::log(1.0 - x) * b - ln_beta) / a;
+
+    let tiny = 1e-30_f64;
+    let mut c = 1.0_f64;
+    let mut d = 1.0 - (a + b) * x / (a + 1.0);
+    if libm::fabs(d) < tiny {
+        d = tiny;
+    }
+    d = 1.0 / d;
+    let mut f = d;
+
+    for m in 1..=200i32 {
+        let mf = m as f64;
+        // Even step: a_2m = m(b-m)x / ((a+2m-1)(a+2m))
+        let num = mf * (b - mf) * x / ((a + 2.0 * mf - 1.0) * (a + 2.0 * mf));
+        d = 1.0 + num * d;
+        if libm::fabs(d) < tiny {
+            d = tiny;
+        }
+        c = 1.0 + num / c;
+        if libm::fabs(c) < tiny {
+            c = tiny;
+        }
+        d = 1.0 / d;
+        f *= d * c;
+
+        // Odd step: a_{2m+1} = -(a+m)(a+b+m)x / ((a+2m)(a+2m+1))
+        let num2 = -(a + mf) * (a + b + mf) * x / ((a + 2.0 * mf) * (a + 2.0 * mf + 1.0));
+        d = 1.0 + num2 * d;
+        if libm::fabs(d) < tiny {
+            d = tiny;
+        }
+        c = 1.0 + num2 / c;
+        if libm::fabs(c) < tiny {
+            c = tiny;
+        }
+        d = 1.0 / d;
+        let delta = d * c;
+        f *= delta;
+
+        if libm::fabs(delta - 1.0) < 1e-14 {
+            break;
+        }
+    }
+
+    front * f
+}
+
+// =============================================================================
+// Elliptic Integrals
+// =============================================================================
+
+/// Complete elliptic integral of the first kind K(m) via AGM.
+#[no_mangle]
+pub unsafe extern "C" fn ellipticK_wasm(m: f64) -> f64 {
+    if m < 0.0 || m >= 1.0 {
+        return f64::NAN;
+    }
+    if m == 0.0 {
+        return PI / 2.0;
+    }
+
+    let mut a = 1.0_f64;
+    let mut b = libm::sqrt(1.0 - m);
+    for _ in 0..50 {
+        let a_new = (a + b) / 2.0;
+        let b_new = libm::sqrt(a * b);
+        if libm::fabs(a_new - b_new) < 1e-15 {
+            a = a_new;
+            break;
+        }
+        a = a_new;
+        b = b_new;
+    }
+    PI / (2.0 * a)
+}
+
+/// Incomplete elliptic integral of the second kind E(phi, m) via Simpson's rule.
+#[no_mangle]
+pub unsafe extern "C" fn ellipticE_wasm(phi: f64, m: f64) -> f64 {
+    let n = 100_i32;
+    let h = phi / n as f64;
+
+    let sin_sq = |v: f64| -> f64 {
+        let s = libm::sin(v);
+        s * s
+    };
+
+    let mut sum = libm::sqrt(1.0 - m * sin_sq(0.0)) + libm::sqrt(1.0 - m * sin_sq(phi));
+    for i in 1..n {
+        let t = i as f64 * h;
+        let weight = if i % 2 == 0 { 2.0 } else { 4.0 };
+        sum += weight * libm::sqrt(1.0 - m * sin_sq(t));
+    }
+    (h / 3.0) * sum
+}
+
+// =============================================================================
+// Lambert W Function
+// =============================================================================
+
+/// Lambert W principal branch via Halley's method.
+#[no_mangle]
+pub unsafe extern "C" fn lambertW_wasm(x: f64) -> f64 {
+    let neg_inv_e = -1.0 / core::f64::consts::E;
+    if x < neg_inv_e {
+        return f64::NAN;
+    }
+    if x == 0.0 {
+        return 0.0;
+    }
+    if libm::fabs(x - core::f64::consts::E) < 1e-15 {
+        return 1.0;
+    }
+
+    // Initial guess
+    let mut w = if x < 1.0 {
+        x
+    } else if x < core::f64::consts::E {
+        libm::log(x)
+    } else {
+        libm::log(x) - libm::log(libm::log(x))
+    };
+
+    // Halley's iteration
+    for _ in 0..100 {
+        let ew = libm::exp(w);
+        let wew = w * ew;
+        let f = wew - x;
+        let fp = ew * (w + 1.0);
+        let fpp = ew * (w + 2.0);
+        let dw = f / (fp - f * fpp / (2.0 * fp));
+        w -= dw;
+        if libm::fabs(dw) < 1e-15 {
+            break;
+        }
+    }
+    w
+}
+
+// =============================================================================
+// Fresnel Integrals
+// =============================================================================
+
+/// Fresnel cosine integral C(x) = integral_0^x cos(pi*t^2/2) dt.
+#[no_mangle]
+pub unsafe extern "C" fn fresnelC_wasm(x: f64) -> f64 {
+    let ax = libm::fabs(x);
+    let sign = if x < 0.0 { -1.0 } else { 1.0 };
+
+    // Series: C(x) = sum_{n=0}^inf (-1)^n (pi/2)^{2n} x^{4n+1} / ((4n+1)(2n)!)
+    let pi_half = PI / 2.0;
+    let x4 = ax * ax * ax * ax;
+    let mut term = ax; // n=0 term
+    let mut sum = ax;
+
+    for n in 1..50 {
+        let nf = n as f64;
+        term *= -pi_half * pi_half * x4 / ((2.0 * nf) * (2.0 * nf - 1.0)) * (4.0 * nf - 3.0)
+            / (4.0 * nf + 1.0);
+        sum += term;
+        if libm::fabs(term) < libm::fabs(sum) * 1e-15 {
+            break;
+        }
+    }
+    sign * sum
+}
+
+/// Fresnel sine integral S(x) = integral_0^x sin(pi*t^2/2) dt.
+#[no_mangle]
+pub unsafe extern "C" fn fresnelS_wasm(x: f64) -> f64 {
+    let ax = libm::fabs(x);
+    let sign = if x < 0.0 { -1.0 } else { 1.0 };
+
+    // Series: S(x) = sum_{n=0}^inf (-1)^n (pi/2)^{2n+1} x^{4n+3} / ((4n+3)(2n+1)!)
+    let pi_half = PI / 2.0;
+    let x4 = ax * ax * ax * ax;
+    // n=0 term: (pi/2) * x^3 / 3
+    let mut term = pi_half * ax * ax * ax / 3.0;
+    let mut sum = term;
+
+    for n in 1..50 {
+        let nf = n as f64;
+        term *= -pi_half * pi_half * x4 / ((2.0 * nf + 1.0) * (2.0 * nf)) * (4.0 * nf - 1.0)
+            / (4.0 * nf + 3.0);
+        sum += term;
+        if libm::fabs(term) < libm::fabs(sum) * 1e-15 {
+            break;
+        }
+    }
+    sign * sum
+}

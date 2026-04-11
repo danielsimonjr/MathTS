@@ -489,6 +489,40 @@ export interface WasmModule {
     ddof: number
   ) => number
 
+  // Signal processing — extended (processing_ext.rs)
+  dct_wasm: (inPtr: number, outPtr: number, n: number) => void
+  idct_wasm: (inPtr: number, outPtr: number, n: number) => void
+  dst_wasm: (inPtr: number, outPtr: number, n: number) => void
+  idst_wasm: (inPtr: number, outPtr: number, n: number) => void
+  dwt_wasm: (
+    inPtr: number,
+    approxPtr: number,
+    detailPtr: number,
+    n: number
+  ) => void
+  hilbert_wasm: (
+    inRe: number,
+    inIm: number,
+    outRe: number,
+    outIm: number,
+    n: number
+  ) => void
+  spectrogram_wasm: (
+    inPtr: number,
+    outPtr: number,
+    n: number,
+    windowSize: number,
+    hop: number
+  ) => number
+  periodogram_wasm: (inPtr: number, outPtr: number, n: number) => void
+  fir_filter_wasm: (
+    inPtr: number,
+    coeffsPtr: number,
+    outPtr: number,
+    n: number,
+    numCoeffs: number
+  ) => void
+
   // Signal processing
   freqz: (
     bPtr: number,
@@ -521,6 +555,26 @@ export interface WasmModule {
   computeStepAdjustment: (maxErr: number, tol: number, order: number, minDelta: number, maxDelta: number) => number
   rk45Step: (yPtr: number, t: number, h: number, n: number, kPtr: number, yNextPtr: number, yErrorPtr: number) => void
   rk23Step: (yPtr: number, t: number, h: number, n: number, kPtr: number, yNextPtr: number, yErrorPtr: number) => void
+
+  // Optimization
+  minimize_quadratic_wasm: (hPtr: number, fPtr: number, n: number, xPtr: number) => number
+  least_squares_wasm: (aPtr: number, bPtr: number, m: number, n: number, xPtr: number) => number
+  levenberg_marquardt_wasm: (jPtr: number, rPtr: number, m: number, n: number, dpPtr: number, lambda: number) => void
+
+  // Matrix analysis (SVD-based)
+  condition_number_wasm: (aPtr: number, n: number) => number
+  matrix_rank_wasm: (aPtr: number, m: number, n: number, tol: number) => number
+
+  // Advanced interpolation
+  bezier_eval_wasm: (ctrlPtr: number, nPoints: number, dims: number, t: number, resultPtr: number) => void
+  bspline_eval_wasm: (ctrlPtr: number, nPoints: number, degree: number, t: number, resultPtr: number) => void
+  loess_wasm: (xsPtr: number, ysPtr: number, n: number, x: number, bandwidth: number) => number
+  rbf_interp_wasm: (pointsPtr: number, valuesPtr: number, n: number, dims: number, xiPtr: number, ni: number, resultPtr: number) => void
+  griddata_wasm: (pointsPtr: number, valuesPtr: number, n: number, xiPtr: number, yiPtr: number, ni: number, resultPtr: number) => void
+
+  // Advanced ODE
+  implicit_euler_step_wasm: (yPtr: number, fPtr: number, jPtr: number, h: number, n: number, resultPtr: number) => void
+  ode_system_rk4_step_wasm: (yPtr: number, kPtrs: number, h: number, n: number, resultPtr: number) => void
 
   // Memory management
   __new: (size: number, id: number) => number

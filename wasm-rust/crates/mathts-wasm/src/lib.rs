@@ -35,6 +35,7 @@ pub mod simd;
 // Re-export Phase 3 functions
 pub use signal::fft::*;
 pub use signal::processing::*;
+pub use signal::processing_ext::*;
 pub use simd::operations::*;
 
 // ============================================================
@@ -45,9 +46,13 @@ pub mod special;
 pub mod statistics;
 
 // Re-export Phase 4 functions
+pub use numeric::advanced_interp::*;
+pub use numeric::advanced_ode::*;
+pub use numeric::analysis::*;
 pub use numeric::calculus::*;
 pub use numeric::interpolation::*;
 pub use numeric::ode::*;
+pub use numeric::optimization::*;
 pub use numeric::rational::*;
 pub use numeric::rootfinding::*;
 pub use special::functions::*;
@@ -100,6 +105,7 @@ pub use arithmetic::logarithmic::*;
 pub use bitwise::operations::*;
 pub use combinatorics::basic::*;
 pub use complex::operations::*;
+pub use geometry::advanced::*;
 pub use geometry::operations::*;
 pub use logical::operations::*;
 pub use probability::distributions::*;
@@ -113,6 +119,7 @@ pub use utils::checks::*;
 // AssemblyScript-compatible wrappers (scalar + array ops)
 // ============================================================
 pub mod compat;
+pub use compat::simd_array::*;
 
 // ============================================================
 // Spike probes (temporary -- kept for compatibility)

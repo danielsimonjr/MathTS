@@ -18,6 +18,7 @@ import {
   voronoiDiagram,
   kdTree,
   kdTreeNearest,
+  nearestNeighbor,
 } from '../src/typed/geometry.js';
 
 const EPSILON = 1e-6;
@@ -231,5 +232,54 @@ describe('kdTreeNearest', () => {
     const result = kdTreeNearest(tree, [1, 1]);
     expect(result!.point).toEqual([1, 1]);
     expectClose(result!.distance, 0);
+  });
+});
+
+// =============================================================================
+// nearestNeighbor (one-shot convenience, WASM-accelerated)
+// =============================================================================
+
+describe('nearestNeighbor', () => {
+  it('should find nearest neighbor in small set', () => {
+    const result = nearestNeighbor(
+      [[0, 0], [3, 3], [1, 1], [5, 5]],
+      [0.9, 0.9],
+    );
+    expect(result).not.toBeNull();
+    expect(result!.point).toEqual([1, 1]);
+    expect(result!.distance).toBeLessThan(0.2);
+  });
+
+  it('should find exact match', () => {
+    const result = nearestNeighbor(
+      [[0, 0], [1, 1], [2, 2]],
+      [1, 1],
+    );
+    expect(result!.index).toBe(1);
+    expectClose(result!.distance, 0);
+  });
+
+  it('should return null for empty input', () => {
+    expect(nearestNeighbor([], [1, 2])).toBeNull();
+  });
+
+  it('should work with 3D points', () => {
+    const points = [[0, 0, 0], [1, 1, 1], [2, 2, 2], [10, 10, 10]];
+    const result = nearestNeighbor(points, [1.1, 1.1, 1.1]);
+    expect(result).not.toBeNull();
+    expect(result!.point).toEqual([1, 1, 1]);
+  });
+
+  it('should handle larger point sets (>= 32 points)', () => {
+    // Generate a grid of 64 points
+    const points: number[][] = [];
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        points.push([i, j]);
+      }
+    }
+    const result = nearestNeighbor(points, [3.1, 4.9]);
+    expect(result).not.toBeNull();
+    expect(result!.point).toEqual([3, 5]);
   });
 });

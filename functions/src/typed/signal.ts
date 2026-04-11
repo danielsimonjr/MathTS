@@ -17,6 +17,12 @@
 
 import { mathTyped, Complex } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+
+// =============================================================================
+// WASM dispatch threshold — signals shorter than this use pure-TS fallback
+// =============================================================================
+const WASM_THRESHOLD = 64;
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -543,6 +549,27 @@ export function unwrapPhase(phase: number[]): number[] {
  */
 export function dct(x: number[]): number[] {
   const N: i32 = x.length;
+
+  // WASM-accelerated path
+  if (N >= WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const inAlloc = wasmLoader.allocateFloat64Array(x);
+        const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(N);
+        try {
+          wasm.dct_wasm(inAlloc.ptr, outAlloc.ptr, N);
+          return Array.from(outAlloc.array);
+        } finally {
+          wasmLoader.free(inAlloc.ptr);
+          wasmLoader.free(outAlloc.ptr);
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
+
   const result = new Array(N);
   for (let k: i32 = 0; k < N; k++) {
     let sum: f64 = 0;
@@ -562,6 +589,27 @@ export function dct(x: number[]): number[] {
  */
 export function idct(X: number[]): number[] {
   const N: i32 = X.length;
+
+  // WASM-accelerated path
+  if (N >= WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const inAlloc = wasmLoader.allocateFloat64Array(X);
+        const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(N);
+        try {
+          wasm.idct_wasm(inAlloc.ptr, outAlloc.ptr, N);
+          return Array.from(outAlloc.array);
+        } finally {
+          wasmLoader.free(inAlloc.ptr);
+          wasmLoader.free(outAlloc.ptr);
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
+
   const result = new Array(N);
   for (let n: i32 = 0; n < N; n++) {
     let sum: f64 = X[0] * Math.sqrt(1 / N);
@@ -585,6 +633,27 @@ export function idct(X: number[]): number[] {
  */
 export function dst(x: number[]): number[] {
   const N: i32 = x.length;
+
+  // WASM-accelerated path
+  if (N >= WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const inAlloc = wasmLoader.allocateFloat64Array(x);
+        const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(N);
+        try {
+          wasm.dst_wasm(inAlloc.ptr, outAlloc.ptr, N);
+          return Array.from(outAlloc.array);
+        } finally {
+          wasmLoader.free(inAlloc.ptr);
+          wasmLoader.free(outAlloc.ptr);
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
+
   const result = new Array(N);
   for (let k: i32 = 0; k < N; k++) {
     let sum: f64 = 0;
@@ -604,6 +673,27 @@ export function dst(x: number[]): number[] {
  */
 export function idst(X: number[]): number[] {
   const N: i32 = X.length;
+
+  // WASM-accelerated path
+  if (N >= WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const inAlloc = wasmLoader.allocateFloat64Array(X);
+        const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(N);
+        try {
+          wasm.idst_wasm(inAlloc.ptr, outAlloc.ptr, N);
+          return Array.from(outAlloc.array);
+        } finally {
+          wasmLoader.free(inAlloc.ptr);
+          wasmLoader.free(outAlloc.ptr);
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
+
   const result = new Array(N);
   for (let n: i32 = 0; n < N; n++) {
     let sum: f64 = 0;
@@ -635,20 +725,44 @@ export function dwt(
   if (n < 2) throw new Error('dwt: signal must have at least 2 samples');
 
   const half: i32 = Math.floor(n / 2);
-  const approx = new Array(half);
-  const detail = new Array(half);
 
   if (wavelet === 'haar' || wavelet === 'db1') {
+    // WASM-accelerated path
+    if (n >= WASM_THRESHOLD && n % 2 === 0) {
+      const wasm = wasmLoader.getModule();
+      if (wasm) {
+        try {
+          const inAlloc = wasmLoader.allocateFloat64Array(x);
+          const approxAlloc = wasmLoader.allocateFloat64ArrayEmpty(half);
+          const detailAlloc = wasmLoader.allocateFloat64ArrayEmpty(half);
+          try {
+            wasm.dwt_wasm(inAlloc.ptr, approxAlloc.ptr, detailAlloc.ptr, n);
+            return {
+              approx: Array.from(approxAlloc.array),
+              detail: Array.from(detailAlloc.array),
+            };
+          } finally {
+            wasmLoader.free(inAlloc.ptr);
+            wasmLoader.free(approxAlloc.ptr);
+            wasmLoader.free(detailAlloc.ptr);
+          }
+        } catch {
+          // Fall through to JS
+        }
+      }
+    }
+
+    const approx = new Array(half);
+    const detail = new Array(half);
     const s: f64 = 1 / Math.SQRT2;
     for (let i: i32 = 0; i < half; i++) {
       approx[i] = s * (x[2 * i] + x[2 * i + 1]);
       detail[i] = s * (x[2 * i] - x[2 * i + 1]);
     }
+    return { approx, detail };
   } else {
     throw new Error(`dwt: unsupported wavelet "${wavelet}"`);
   }
-
-  return { approx, detail };
 }
 
 // =============================================================================
@@ -775,6 +889,37 @@ export function invFourier(
 export function hilbertTransform(x: number[]): number[] {
   const n: i32 = x.length;
   const N: i32 = nextPowerOf2(n);
+
+  // WASM-accelerated path (requires power-of-2 length)
+  if (N >= WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        // Pad input to power of 2
+        const paddedInput = new Array(N).fill(0);
+        for (let i = 0; i < n; i++) paddedInput[i] = x[i];
+        const zeros = new Array(N).fill(0);
+
+        const inReAlloc = wasmLoader.allocateFloat64Array(paddedInput);
+        const inImAlloc = wasmLoader.allocateFloat64Array(zeros);
+        const outReAlloc = wasmLoader.allocateFloat64ArrayEmpty(N);
+        const outImAlloc = wasmLoader.allocateFloat64ArrayEmpty(N);
+        try {
+          wasm.hilbert_wasm(inReAlloc.ptr, inImAlloc.ptr, outReAlloc.ptr, outImAlloc.ptr, N);
+          // Return imaginary part (the Hilbert transform) trimmed to original length
+          return Array.from(outImAlloc.array.slice(0, n));
+        } finally {
+          wasmLoader.free(inReAlloc.ptr);
+          wasmLoader.free(inImAlloc.ptr);
+          wasmLoader.free(outReAlloc.ptr);
+          wasmLoader.free(outImAlloc.ptr);
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
+
   const real = new Float64Array(N);
   const imag = new Float64Array(N);
   for (let i: i32 = 0; i < n; i++) real[i] = x[i];
@@ -821,10 +966,40 @@ export function spectrogram(
   const windowSize: i32 = opts?.windowSize ?? 256;
   const hopSize: i32 = opts?.hopSize ?? Math.floor(windowSize / 2);
   const winType = opts?.window ?? 'hann';
-
-  const win = windowFunction(windowSize, winType);
   const nfft: i32 = nextPowerOf2(windowSize);
   const nFreqs: i32 = nfft / 2 + 1;
+
+  // WASM-accelerated path (uses built-in Hann window)
+  if (x.length >= WASM_THRESHOLD && (winType === 'hann' || winType === 'hanning')) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const numFrames = Math.floor((x.length - windowSize) / hopSize) + 1;
+        if (numFrames > 0) {
+          const inAlloc = wasmLoader.allocateFloat64Array(x);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(numFrames * nFreqs);
+          try {
+            const frames = wasm.spectrogram_wasm(inAlloc.ptr, outAlloc.ptr, x.length, windowSize, hopSize);
+            const magnitude: number[][] = [];
+            const times: number[] = [];
+            const frequencies: number[] = Array.from({ length: nFreqs }, (_, i) => i / nfft);
+            for (let f = 0; f < frames; f++) {
+              magnitude.push(Array.from(outAlloc.array.slice(f * nFreqs, (f + 1) * nFreqs)));
+              times.push(f * hopSize + windowSize / 2);
+            }
+            return { magnitude, frequencies, times };
+          } finally {
+            wasmLoader.free(inAlloc.ptr);
+            wasmLoader.free(outAlloc.ptr);
+          }
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
+
+  const win = windowFunction(windowSize, winType);
 
   const magnitude: number[][] = [];
   const times: number[] = [];
@@ -867,6 +1042,29 @@ export function periodogram(
 ): { psd: number[]; frequencies: number[] } {
   const nfft: i32 = opts?.nfft ?? nextPowerOf2(x.length);
   const winType = opts?.window ?? 'hann';
+
+  // WASM-accelerated path (uses built-in Hann window, nfft = next power of 2)
+  if (x.length >= WASM_THRESHOLD && (winType === 'hann' || winType === 'hanning') && nfft === nextPowerOf2(x.length)) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const nFreqs: i32 = nfft / 2 + 1;
+        const inAlloc = wasmLoader.allocateFloat64Array(x);
+        const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(nFreqs);
+        try {
+          wasm.periodogram_wasm(inAlloc.ptr, outAlloc.ptr, x.length);
+          const psd = Array.from(outAlloc.array);
+          const frequencies = Array.from({ length: nFreqs }, (_, i) => i / nfft);
+          return { psd, frequencies };
+        } finally {
+          wasmLoader.free(inAlloc.ptr);
+          wasmLoader.free(outAlloc.ptr);
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
 
   const win = windowFunction(x.length, winType);
   let winPower: f64 = 0;
@@ -972,6 +1170,29 @@ function _sincFilter(order: i32, cutoff: f64, type: 'lowpass' | 'highpass'): num
 function _convolve(x: number[], h: number[]): number[] {
   const n: i32 = x.length;
   const m: i32 = h.length;
+
+  // WASM-accelerated path via fir_filter_wasm
+  if (n >= WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const inAlloc = wasmLoader.allocateFloat64Array(x);
+        const coeffAlloc = wasmLoader.allocateFloat64Array(h);
+        const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+        try {
+          wasm.fir_filter_wasm(inAlloc.ptr, coeffAlloc.ptr, outAlloc.ptr, n, m);
+          return Array.from(outAlloc.array);
+        } finally {
+          wasmLoader.free(inAlloc.ptr);
+          wasmLoader.free(coeffAlloc.ptr);
+          wasmLoader.free(outAlloc.ptr);
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
+
   const offset: i32 = Math.floor(m / 2);
   const result: number[] = new Array(n).fill(0);
 
