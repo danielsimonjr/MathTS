@@ -57,6 +57,11 @@ fn in_circumcircle(points: &[(f64, f64)], tri: &Triangle, px: f64, py: f64) -> b
         - (dbx * dbx + dby * dby) * (dax * dcy - dcx * day)
         + (dcx * dcx + dcy * dcy) * (dax * dby - dbx * day);
 
+    // Check triangle winding: if CW (orient < 0), flip the test
+    let orient = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
+    if orient < 0.0 {
+        return det < 0.0;
+    }
     det > 0.0
 }
 

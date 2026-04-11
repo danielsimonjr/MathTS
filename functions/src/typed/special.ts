@@ -23,16 +23,12 @@ type f64 = number;
 
 let _rustWasm: any = null;
 function getRustWasm(): any {
-  if (_rustWasm === null) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const matrixPkg = require('@danielsimonjr/mathts-matrix');
-      _rustWasm = matrixPkg.RustWasmLoader?.getInstance();
-    } catch {
-      _rustWasm = false;
-    }
-  }
-  return _rustWasm && _rustWasm.isLoaded ? _rustWasm : null;
+  // RustWasm lazy-loading requires async import() in ESM packages.
+  // require() is not available in ESM and wasm.exports.xxx doesn't match
+  // the RustWasmLoader API (should be getExports()?.xxx).
+  // Currently disabled — JS fallbacks handle all operations.
+  void _rustWasm; // suppress unused lint
+  return null;
 }
 
 // =============================================================================

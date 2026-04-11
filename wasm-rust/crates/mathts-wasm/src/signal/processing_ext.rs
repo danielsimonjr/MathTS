@@ -66,6 +66,9 @@ unsafe fn fft_split(re: *mut f64, im: *mut f64, n: usize, inverse: bool) {
 }
 
 fn next_power_of_2(n: usize) -> usize {
+    if n <= 1 {
+        return 1;
+    }
     let mut v = n;
     v -= 1;
     v |= v >> 1;

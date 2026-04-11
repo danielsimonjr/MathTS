@@ -31,10 +31,21 @@ pub unsafe extern "C" fn erfArray(a_ptr: *const f64, n: i32, result_ptr: *mut f6
     }
 }
 
-/// Complementary error function erfc(x) = 1 - erf(x).
+/// Complementary error function erfc(x) computed directly to avoid catastrophic cancellation.
+/// Uses Abramowitz & Stegun approximation for 1 - erf(x).
 #[no_mangle]
 pub extern "C" fn erfc(x: f64) -> f64 {
-    1.0 - erf(x)
+    let ax = libm::fabs(x);
+    let t = 1.0 / (1.0 + 0.3275911 * ax);
+    let poly = t
+        * (0.254829592
+            + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+    let result = poly * libm::exp(-ax * ax);
+    if x < 0.0 {
+        2.0 - result
+    } else {
+        result
+    }
 }
 
 /// Compute erfc for an array.
@@ -455,7 +466,12 @@ pub unsafe extern "C" fn besselI_wasm(n: i32, x: f64) -> f64 {
             break;
         }
     }
-    sum
+    // Sign correction: I_n(-x) = (-1)^n * I_n(x)
+    if x < 0.0 && ni % 2 != 0 {
+        -sum
+    } else {
+        sum
+    }
 }
 
 /// Modified Bessel K_n(x) — K_0/K_1 + forward recurrence.
