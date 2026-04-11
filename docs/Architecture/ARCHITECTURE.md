@@ -10,7 +10,7 @@ Turborepo orchestrates builds across the workspace. tsup bundles each package.
 - **1,324 source files** (99 native, ~1,225 synced from mathjs)
 - **202,551 lines of code** across all packages
 - **6,323 total exports** across all packages
-- **90 test files**, **2,864 tests passing**
+- **90 test files**, **2,869 tests passing**
 - **All 10 packages build**, 14/14 typecheck
 
 ## Package Dependency Graph

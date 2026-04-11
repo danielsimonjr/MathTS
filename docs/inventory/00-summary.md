@@ -26,7 +26,7 @@
 | core/src (synced utils) | ~60 | ~7,600 | Dormant |
 | **Synced subtotal** | **~1,211** | **~158,700** | |
 | | | | |
-| **Tests** | 90 | ~24,000 | 2,864 pass |
+| **Tests** | 90 | ~24,000 | 2,869 pass |
 
 ---
 

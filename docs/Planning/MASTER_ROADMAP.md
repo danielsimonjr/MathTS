@@ -1,7 +1,7 @@
 # MathTS Master Roadmap
 
 **Updated**: 2026-04-10
-**Current State**: v0.1.2 published, 90 test files, 2864 tests, ~492 functions
+**Current State**: v0.1.2 published, 90 test files, 2869 tests, ~492 functions
 
 ---
 
@@ -29,6 +29,7 @@
 | typed-function improvements (Symbol-based type ID, safe conversions) | Done | 2026-04-05 |
 | workerpool improvements (SharedArrayBuffer, warmup, metrics) | Done | 2026-04-05 |
 | Rust WASM full migration (AS → Rust, 1,017 exports, full AS parity) | Done | 2026-04-10 |
+| WASM optimization (75 high+medium functions) | Done | 2026-04-10 |
 | Rust WASM integration (RustWasmLoader, BackendManager routing) | Done | 2026-04-05 |
 | Expression compiler/evaluator (16 node types, evaluate()) | Done | 2026-04-03 |
 | Matrix bridge (MathJSDenseMatrix, MathJSSparseMatrix CSC) | Done | 2026-04-03 |

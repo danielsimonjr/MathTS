@@ -135,6 +135,19 @@ First public release of all 10 @danielsimonjr/mathts-* packages to npm.
 - matrix/tsconfig, compat/tsconfig: added workerpool path override
 
 ### Fixed
+- besselI_wasm: sign correction `(-1)^n` for negative x with odd order n
+- erfc Rust WASM: replaced `1-erf(x)` with direct Abramowitz & Stegun computation (catastrophic cancellation for large x)
+- standardNormalCDF: divide x by √2 before erf (was computing Φ(x√2) instead of Φ(x))
+- Delaunay in_circumcircle: orientation-independent determinant test (was assuming CCW winding, Edge::new destroys winding order)
+- special.ts WASM dispatch: disabled getRustWasm() — was using `.exports` (doesn't exist on RustWasmLoader) and `require()` in ESM package
+- next_power_of_2(0): guard against usize underflow in signal processing WASM
+- exponential() Rust WASM: guard against lambda≤0 division by zero
+- partialDerivative export collision: renamed algebra.ts version to symbolicPartialDerivative
+- curvefit LM convergence: compute cost change before updating prevCost
+- PCA explained variance: uses trace(cov) instead of sum of extracted eigenvalues when k < p
+- factor/collect: normalize subtraction before splitting on +
+- binomialDist PDF: handle degenerate p=0 and p=1 (was NaN from 0*log(0))
+- adjacencyMatrix docstring: fixed example matrix
 - BigNumber.exp() overflow: `2**k` → `BigNumber.fromNumber(2).pow(k)` for large inputs
 - WASMBackend SIMD argument order: swapped resultPtr/length in 7 operations (add, subtract, mul, scale, abs, negate)
 - WASMBackend divideElementwise: was calling multiply — now delegates to JS backend
