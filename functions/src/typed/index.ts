@@ -72,6 +72,9 @@ export * from './hypothesis.js';
 // CAS (Computer Algebra System) functions
 export * from './cas.js';
 
+// Matrix operations (characteristic polynomial, RREF, Cholesky, etc.)
+export * from './matrix-ops.js';
+
 // =============================================================================
 // Combined Exports
 // =============================================================================

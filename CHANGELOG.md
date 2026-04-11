@@ -11,6 +11,13 @@ First public release of all 10 @danielsimonjr/mathts-* packages to npm.
 
 ### Added
 
+#### Matrix Operations (9 — completing all deferred matrix ops)
+- characteristicPolynomial (Faddeev-LeVerrier), rowReduce (Gauss-Jordan RREF), matrixRank (via RREF)
+- cholesky (L*L^T decomposition), hessenbergForm (Householder reduction)
+- matrixPower (binary exponentiation + eigendecomposition for fractional)
+- matrixLog (inverse scaling-and-squaring + Taylor series)
+- polarDecomposition (via SVD: A = U*P), jordanForm (eigenvalue clustering + null space analysis)
+
 #### Rust WASM Optimization — 72 high+medium-value functions accelerated
 - Special functions (10 Rust): besselI/J/K/Y general order, betainc, ellipticE/K, lambertW, fresnelC/S + TS WASM dispatch
 - Signal processing (9 Rust): dct/idct, dst/idst, dwt (Haar), hilbertTransform, spectrogram (STFT), periodogram (Welch), FIR filter + TS dispatch

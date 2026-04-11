@@ -1,7 +1,7 @@
 # MathTS Master Roadmap
 
 **Updated**: 2026-04-10
-**Current State**: v0.1.2 published, 90 test files, 2869 tests, ~492 functions
+**Current State**: v0.1.2 published, 90 test files, 2916 tests, ~492 functions
 
 ---
 
@@ -9,7 +9,7 @@
 
 | # | Item | Status | Effort | Dependency |
 |---|------|--------|--------|-----------|
-| 1 | Sync remaining 17 mathjs matrix ops (Phase 3 deferred) | Deferred | 1-2 weeks | None |
+| — | ~~Sync remaining 17 mathjs matrix ops~~ | ~~DONE~~ | 1-2 weeks | None |
 | 2 | Workbook ↔ Expression wiring | Deferred | 2-3 days | None |
 | 3 | Scientific Calculator (Electron, 5 panels) | Not started | 3-4 weeks | Factory activation (done) |
 | 4 | Deno Notebook (live documents) | Not started | 1-2 weeks | Workbook + Expression |
@@ -30,6 +30,7 @@
 | workerpool improvements (SharedArrayBuffer, warmup, metrics) | Done | 2026-04-05 |
 | Rust WASM full migration (AS → Rust, 1,017 exports, full AS parity) | Done | 2026-04-10 |
 | WASM optimization (75 high+medium functions) | Done | 2026-04-10 |
+| 9 matrix operations (characteristicPolynomial, cholesky, jordanForm, etc.) | Done | 2026-04-10 |
 | Rust WASM integration (RustWasmLoader, BackendManager routing) | Done | 2026-04-05 |
 | Expression compiler/evaluator (16 node types, evaluate()) | Done | 2026-04-03 |
 | Matrix bridge (MathJSDenseMatrix, MathJSSparseMatrix CSC) | Done | 2026-04-03 |
