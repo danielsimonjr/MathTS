@@ -88,5 +88,8 @@
   "dependencies": {
     "typed-function": "github:danielsimonjr/typed-function",
     "workerpool": "github:danielsimonjr/workerpool"
+  },
+  "overrides": {
+    "esbuild": "^0.25.0"
   }
 }
