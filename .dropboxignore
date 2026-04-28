@@ -1,1 +1,98 @@
-﻿.git
+# Git internals — keeps Dropbox out of .git so git operations don't get blocked
+.git/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# WASM build artifacts
+assembly/build/
+*.wasm
+!packages/*/src/**/*.wasm
+
+# Test & coverage
+coverage/
+.nyc_output/
+
+# IDE & editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.local
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.tscache
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Package manager locks (keep one)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Workbook outputs (optional - can be tracked)
+*.mtsw.outputs.yaml
+.mtsw-cache/
+
+# Benchmark results (generated)
+benchmark-results/
+
+# Documentation build
+docs/_site/
+docs/.docusaurus/
+
+# Release artifacts
+*.tgz
+*.tar.gz
+
+# Claude Code
+.claude/
+.mcp.json
+
+# Turbo
+.turbo/
+
+# Note: packages/typed-function/ and packages/workerpool/ are now included in this repo
+.mcp.txt
+CUsersdanieAppDataLocalTempclaudecoverage.txt
+.npmrc
+
