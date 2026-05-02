@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+- **expression**: Restored sandbox in the tree-walking compiler
+  (`expression/src/compiler/compile.ts`). All five bypass sites now route
+  through the existing `getSafeProperty` / `setSafeProperty` /
+  `getSafeMethod` helpers in `expression/src/utils/customs.ts`:
+  - `compileAccessorNode` — both property-name and computed-index forms
+  - `compileAssignmentNode` — `obj.prop = …` lvalue writes
+  - `compileObjectNode` — object-literal key assignment
+  - `compileSymbolNode` / `compileFunctionNode` — math-namespace lookups
+    use `Object.prototype.hasOwnProperty.call(math, name)` to skip
+    prototype-chain names; method calls of shape `obj.method(…)` route
+    through `getSafeMethod`.
+- **expression**: Added pre-compile AST validator in
+  `expression/src/evaluator/evaluate.ts`. By default `evaluate()` and
+  `compileExpression()` reject `AssignmentNode`, `FunctionAssignmentNode`,
+  and `FunctionNode` calls to forbidden builtins (`import`, `createUnit`,
+  `evaluate`, `parse`, `compile`, `simplify`, `derivative`, `help`,
+  `chain`). Hosts that need the legacy permissive behaviour can opt out
+  with `{ unsafe: true }`. Blocklist mirrors `math-mcp/src/validation.ts`.
+- **expression**: Added regression suite at
+  `expression/tests/security/sandbox.test.ts` (13 tests) covering
+  RCE chains (`arr.constructor.constructor("…")()`), prototype pollution
+  (`__proto__` writes via assignment and ObjectNode literal), forbidden
+  function calls, FunctionAssignmentNode rejection, and confirms safe
+  paths still work (`2 + 3`, `arr.length`, etc.).
+
 ## [0.1.2] - 2026-04-05
 
 First public release of all 10 @danielsimonjr/mathts-* packages to npm.

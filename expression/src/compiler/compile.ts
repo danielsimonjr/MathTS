@@ -14,6 +14,7 @@
 
 import { ObjectWrappingMap } from '../utils/map.js'
 import { createSubScope } from '../utils/scope.js'
+import { getSafeProperty, setSafeProperty, getSafeMethod } from '../utils/customs.js'
 
 /**
  * A Map-like scope with has/get/set methods.
@@ -147,9 +148,17 @@ function compileSymbolNode(node: any, math: Record<string, any>, argNames: Recor
     }
   }
 
-  if (name in math) {
+  // Use Object.prototype.hasOwnProperty to avoid resolving prototype-chain
+  // names (e.g. "constructor", "toString") against the math namespace.
+  // getSafeProperty enforces the safe-property whitelist on access.
+  if (Object.prototype.hasOwnProperty.call(math, name)) {
     return function evalSymbolNode(scope: Scope) {
-      return scope.has(name) ? scope.get(name) : math[name]
+      if (scope.has(name)) {
+        return scope.get(name)
+      }
+      // math namespace lookup — direct read is safe because we already
+      // verified `name` is an own property of the trusted math object.
+      return math[name]
     }
   }
 
@@ -208,7 +217,7 @@ function compileFunctionNode(node: any, math: Record<string, any>, argNames: Rec
         if (typeof value === 'function') return value
         throw new TypeError(`'${name}' is not a function; its value is:\n  ${value}`)
       }
-      if (name in math) {
+      if (Object.prototype.hasOwnProperty.call(math, name)) {
         const value = math[name]
         if (typeof value === 'function') return value
         throw new TypeError(`'${name}' is not a function; its value is:\n  ${value}`)
@@ -243,7 +252,26 @@ function compileFunctionNode(node: any, math: Record<string, any>, argNames: Rec
     }
   }
 
-  // Fallback: fn is an expression (e.g., accessor like obj.method())
+  // Fallback: fn is an expression (e.g., accessor like obj.method()).
+  // For AccessorNode-with-property-name we route through getSafeMethod so
+  // method calls like ({}).constructor() and arr.constructor() are blocked.
+  if (fnNode && fnNode.isAccessorNode &&
+      fnNode.index && fnNode.index.isObjectProperty &&
+      fnNode.index.isObjectProperty()) {
+    const evalObject = compileNode(fnNode.object, math, argNames)
+    const methodName: string = fnNode.index.getObjectProperty()
+    return function evalFunctionNode(scope: Scope, args: Record<string, any>, context: any) {
+      const obj = evalObject(scope, args, context)
+      const fn = getSafeMethod(obj, methodName)
+      if (typeof fn !== 'function') {
+        throw new TypeError('Expression does not evaluate to a function')
+      }
+      const values = evalArgs.map(e => e(scope, args, context))
+      return fn.apply(obj, values)
+    }
+  }
+
+  // General fallback (computed accessor, etc.)
   const evalFn = compileNode(fnNode, math, argNames)
   return function evalFunctionNode(scope: Scope, args: Record<string, any>, context: any) {
     const fn = evalFn(scope, args, context)
@@ -283,8 +311,8 @@ function compileAssignmentNode(node: any, math: Record<string, any>, argNames: R
       return function evalAssignmentNode(scope: Scope, args: Record<string, any>, context: any) {
         const obj = evalObject(scope, args, context)
         const value = evalValue(scope, args, context)
-        obj[prop] = value
-        return value
+        // Sandbox: refuse writes to constructor / __proto__ / etc.
+        return setSafeProperty(obj, prop, value)
       }
     }
   }
@@ -346,7 +374,9 @@ function compileObjectNode(node: any, math: Record<string, any>, argNames: Recor
   return function evalObjectNode(scope: Scope, args: Record<string, any>, context: any) {
     const result: Record<string, any> = {}
     for (const prop of evalProps) {
-      result[prop.key] = prop.evaluate(scope, args, context)
+      // Sandbox: object-literal keys go through setSafeProperty so
+      // payloads like `{__proto__: {polluted: 1}}` are rejected.
+      setSafeProperty(result, prop.key, prop.evaluate(scope, args, context))
     }
     return result
   }
@@ -435,7 +465,9 @@ function compileAccessorNode(node: any, math: Record<string, any>, argNames: Rec
     return function evalAccessorNode(scope: Scope, args: Record<string, any>, context: any) {
       const object = evalObject(scope, args, context)
       if (node.optionalChaining && object == null) return undefined
-      return object[prop]
+      // Sandbox: only whitelisted/own properties readable; constructor /
+      // __proto__ / call / apply etc. are rejected.
+      return getSafeProperty(object, prop)
     }
   }
 
@@ -449,7 +481,12 @@ function compileAccessorNode(node: any, math: Record<string, any>, argNames: Rec
     if (math.subset) {
       return math.subset(object, index)
     }
-    return object[index]
+    // Numeric (typed) array index is safe; for arbitrary keys defer to
+    // getSafeProperty to keep the sandbox closed.
+    if (typeof index === 'number') {
+      return object[index]
+    }
+    return getSafeProperty(object, index)
   }
 }
 
