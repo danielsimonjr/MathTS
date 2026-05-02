@@ -5,12 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Security Release 2026-05-01] — expression@0.2.0, parallel@0.1.3, functions@0.1.3, wasm@0.1.3
 
-> Suggested security release tag once these three commits land:
-> `v0.1.3-security` (or `v0.2.0-security` if the breaking change in
-> `createEvaluate` warrants a minor bump). Author: tag manually with
-> `git tag -a v0.1.3-security -m "Security: WASM SRI + worker timeout + sandbox"`.
+> Repo-level tag: `security-2026-05-01` (HEAD `3ef899c`).
+> Per-package tags follow the existing `@danielsimonjr/mathts-<pkg>@<version>` convention.
+> Driving commits: `6e76d62` (expression sandbox — BREAKING),
+> `862ae30` (parallel timeout — additive), `3ef899c` (WASM SHA-384 — additive).
 
 ### Security
 

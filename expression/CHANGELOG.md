@@ -1,5 +1,20 @@
 # @danielsimonjr/mathts-expression
 
+## 0.2.0
+
+### Minor Changes (Security — BREAKING)
+
+- 6e76d62: Restore RCE sandbox in tree-walking compiler. `evaluate()` and
+  `compileExpression()` now default-reject `AssignmentNode`,
+  `FunctionAssignmentNode`, and `FunctionNode` calls to denylisted builtins
+  (`import`, `createUnit`, `evaluate`, `parse`, `compile`, `simplify`,
+  `derivative`, `help`, `chain`). All five compile sites
+  (`compileAccessorNode`, `compileAssignmentNode`, `compileObjectNode`,
+  `compileSymbolNode`, `compileFunctionNode`) route through
+  `getSafeProperty` / `setSafeProperty` / `getSafeMethod`. Hosts that need
+  the legacy permissive behaviour can opt out with `{ unsafe: true }`.
+  Adds `expression/tests/security/sandbox.test.ts` (13 tests).
+
 ## 0.1.1
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # @danielsimonjr/mathts-functions
 
+## 0.1.3
+
+### Patch Changes (Security — additive)
+
+- 3ef899c: WASM modules now verify a SHA-384 manifest before instantiation.
+  At load time the runtime hashes the freshly read buffer
+  (`crypto.createHash('sha384')` in Node, `crypto.subtle.digest` in
+  browsers) and compares against `wasm-manifest.json` written by
+  `tools/generate-wasm-manifest.mjs`. A mismatch throws before any module
+  is compiled, blocking silent code-injection via tampered .wasm payloads.
+  Manifest defaults to soft-fail when absent for legacy compat;
+  `{ required: true }` makes it fail-closed. Affected files:
+  `functions/src/wasm/integrity.ts` (new), `functions/src/wasm/WasmLoader.ts`
+  (Node + browser load paths). Adds
+  `functions/tests/security/wasm-integrity.test.ts` (5 tests).
+
 ## 0.1.1
 
 ### Patch Changes

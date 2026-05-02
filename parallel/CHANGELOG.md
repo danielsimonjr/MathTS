@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.1.3
+
+### Patch Changes (Security — additive)
+
+- 862ae30: `WorkerPool.execute()` now accepts an optional `timeoutMs`
+  argument. When the worker does not reply within `timeoutMs` the pool
+  calls `worker.terminate()`, evicts the dead worker from its rosters,
+  spawns a replacement so capacity is preserved, and rejects with
+  `"Worker task timed out after Nms"`. Pass `0` or omit to keep legacy
+  untimed behaviour. Closes a DoS vector where a hung worker could block
+  the queue indefinitely. Adds `parallel/tests/WorkerPool.timeout.test.ts`
+  (2 tests).
+
 ## 0.1.1
 
 ### Patch Changes

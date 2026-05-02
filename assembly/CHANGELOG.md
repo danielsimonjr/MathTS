@@ -1,5 +1,14 @@
 # @danielsimonjr/mathts-wasm
 
+## 0.1.3
+
+### Patch Changes (Security — additive)
+
+- 3ef899c: `loadWasm()` in `assembly/src/bindings/wasm-loader.ts` now
+  verifies a SHA-384 manifest before compile in both `fetch` and
+  `fs.readFileSync` paths. Mismatch throws before instantiation. Manifest
+  defaults to soft-fail when absent for legacy compat.
+
 ## 0.1.1
 
 ### Patch Changes
