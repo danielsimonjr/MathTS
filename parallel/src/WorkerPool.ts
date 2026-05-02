@@ -9,6 +9,16 @@ interface WorkerTask<T = any, R = any> {
   resolve: (value: R) => void
   reject: (error: Error) => void
   transferables?: Transferable[]
+  /**
+   * Timer handle used to enforce execute()'s timeoutMs parameter.
+   * Cleared on resolve/reject.
+   */
+  timeoutHandle?: ReturnType<typeof setTimeout>
+  /**
+   * The worker currently executing this task. Set by executeTask so the
+   * timeout handler can terminate the right worker.
+   */
+  worker?: Worker
 }
 
 interface WorkerMessage<T = any> {
@@ -49,7 +59,7 @@ export class WorkerPool {
     }
   }
 
-  private async createWorker(): Promise<Worker> {
+  protected async createWorker(): Promise<Worker> {
     let worker: Worker
 
     if (this.isNode) {
@@ -77,6 +87,10 @@ export class WorkerPool {
     if (!task) return
 
     this.activeTasks.delete(message.id)
+    if (task.timeoutHandle) {
+      clearTimeout(task.timeoutHandle)
+      task.timeoutHandle = undefined
+    }
 
     if (message.type === 'result') {
       task.resolve(message.data)
@@ -110,6 +124,7 @@ export class WorkerPool {
 
   private executeTask(worker: Worker, task: WorkerTask): void {
     this.activeTasks.set(task.id, task)
+    task.worker = worker
 
     const message: WorkerMessage = {
       id: task.id,
@@ -124,9 +139,55 @@ export class WorkerPool {
     }
   }
 
+  /**
+   * Handle a timed-out task: terminate the offending worker, evict it from
+   * the pool, spawn a replacement so subsequent calls still find a free
+   * worker, and reject the task.
+   */
+  private async handleTaskTimeout(task: WorkerTask, timeoutMs: number): Promise<void> {
+    if (!this.activeTasks.has(task.id)) return // already resolved
+    this.activeTasks.delete(task.id)
+
+    const dead = task.worker
+    if (dead) {
+      try {
+        dead.terminate()
+      } catch {
+        /* swallow — replacement is what matters */
+      }
+      // Evict from pool roster.
+      this.workers = this.workers.filter(w => w !== dead)
+      this.availableWorkers = this.availableWorkers.filter(w => w !== dead)
+
+      // Spawn a replacement so the pool keeps its capacity.
+      try {
+        const replacement = await this.createWorker()
+        this.workers.push(replacement)
+        this.availableWorkers.push(replacement)
+        this.processQueue()
+      } catch (err) {
+        // Best effort — log only; do not mask the timeout error below.
+        console.error('WorkerPool: failed to spawn replacement worker:', err)
+      }
+    }
+
+    task.reject(new Error(`Worker task timed out after ${timeoutMs}ms`))
+  }
+
+  /**
+   * Submit work to the pool.
+   *
+   * @param data Payload sent to the worker.
+   * @param transferables Optional transferables for zero-copy postMessage.
+   * @param timeoutMs Optional timeout in milliseconds. When the worker does
+   *   not reply within `timeoutMs` the worker is `terminate()`d, a fresh
+   *   replacement is spawned, and the returned promise rejects. Pass `0`
+   *   or omit to disable the timeout (legacy behaviour).
+   */
   public async execute<T = any, R = any>(
     data: T,
-    transferables?: Transferable[]
+    transferables?: Transferable[],
+    timeoutMs?: number
   ): Promise<R> {
     return new Promise<R>((resolve, reject) => {
       const task: WorkerTask<T, R> = {
@@ -135,6 +196,13 @@ export class WorkerPool {
         resolve,
         reject,
         transferables
+      }
+
+      if (typeof timeoutMs === 'number' && timeoutMs > 0) {
+        task.timeoutHandle = setTimeout(() => {
+          // Fire-and-forget; handleTaskTimeout itself rejects the task.
+          void this.handleTaskTimeout(task, timeoutMs)
+        }, timeoutMs)
       }
 
       if (this.availableWorkers.length > 0) {

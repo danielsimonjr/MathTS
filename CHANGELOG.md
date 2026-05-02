@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **parallel**: `WorkerPool.execute()` now accepts an optional
+  `timeoutMs` argument (`parallel/src/WorkerPool.ts`). When the worker
+  does not reply within `timeoutMs` the pool calls `worker.terminate()`,
+  evicts the dead worker from its rosters, spawns a replacement so the
+  pool's capacity is preserved, and rejects the returned promise with a
+  `"Worker task timed out after Nms"` error. Pass `0` or omit the
+  argument to keep the legacy untimed behaviour. Closes a DoS vector
+  where a hung worker (e.g. infinite loop in user-supplied math code)
+  would block the queue indefinitely. Adds
+  `parallel/tests/WorkerPool.timeout.test.ts` (2 tests) covering
+  timeout rejection and pool replacement.
 - **expression**: Restored sandbox in the tree-walking compiler
   (`expression/src/compiler/compile.ts`). All five bypass sites now route
   through the existing `getSafeProperty` / `setSafeProperty` /
