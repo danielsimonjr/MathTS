@@ -8,7 +8,14 @@
  * - Memory pooling for frequent allocations
  * - Compiled module caching for faster re-instantiation
  * - Configurable size thresholds for JS fallback
+ *
+ * Security:
+ * - Optional SHA-384 integrity verification against a sibling
+ *   `wasm-manifest.json`. See `./integrity.ts`. When the manifest is
+ *   present any tampered .wasm payload is rejected before instantiation.
  */
+
+import { verifyWasmIntegrity, loadWasmManifest } from './integrity.js'
 
 export interface WasmModule {
   // Matrix operations
@@ -662,14 +669,16 @@ export class WasmLoader {
       const { promisify } = await import('util')
       const readFile = promisify(fs.readFile)
       const buffer = await readFile(path)
+      await verifyWasmIntegrity(buffer, path)
       this.compiledModule = await WebAssembly.compile(buffer)
     } else {
-      const response = await fetch(path)
-      // Use streaming compilation in browser for better performance
-      if (typeof WebAssembly.compileStreaming === 'function') {
+      const manifest = await loadWasmManifest(path)
+      if (!manifest && typeof WebAssembly.compileStreaming === 'function') {
         this.compiledModule = await WebAssembly.compileStreaming(fetch(path))
       } else {
+        const response = await fetch(path)
         const buffer = await response.arrayBuffer()
+        await verifyWasmIntegrity(buffer, path, { manifest })
         this.compiledModule = await WebAssembly.compile(buffer)
       }
     }
@@ -740,6 +749,10 @@ export class WasmLoader {
     const buffer = await readFile(path)
     const readEnd = performance.now()
 
+    // SHA-384 integrity check against sibling wasm-manifest.json.
+    // Throws on tamper; warns and continues when manifest is absent.
+    await verifyWasmIntegrity(buffer, path)
+
     const compileStart = performance.now()
     this.compiledModule = await WebAssembly.compile(buffer)
     const compileEnd = performance.now()
@@ -766,9 +779,14 @@ export class WasmLoader {
     path: string,
     totalStart: number
   ): Promise<WasmModule> {
-    // Use streaming instantiation in browser for best performance
-    // This allows compilation to start while bytes are still downloading
-    if (typeof WebAssembly.instantiateStreaming === 'function') {
+    // Look for the manifest *before* deciding whether to stream. If a
+    // manifest exists we must materialize the buffer to compute its hash
+    // before compilation — streaming would let an attacker race the
+    // bytes past WebAssembly.compile without being checked.
+    const manifest = await loadWasmManifest(path)
+
+    if (!manifest && typeof WebAssembly.instantiateStreaming === 'function') {
+      // No manifest -> preserve fast streaming path (legacy compat).
       const instStart = performance.now()
       const result = await WebAssembly.instantiateStreaming(
         fetch(path),
@@ -785,11 +803,13 @@ export class WasmLoader {
       return result.instance.exports as any as WasmModule
     }
 
-    // Fallback for older browsers
+    // Manifest-present (or older browser): fetch buffer, verify, compile.
     const readStart = performance.now()
     const response = await fetch(path)
     const buffer = await response.arrayBuffer()
     const readEnd = performance.now()
+
+    await verifyWasmIntegrity(buffer, path, { manifest })
 
     const compileStart = performance.now()
     this.compiledModule = await WebAssembly.compile(buffer)

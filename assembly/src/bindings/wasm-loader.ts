@@ -3,7 +3,86 @@
  *
  * TypeScript bindings for loading and using the MathTS WASM module.
  * This provides a clean interface for JavaScript/TypeScript consumers.
+ *
+ * Security: optional SHA-384 integrity check via a sibling
+ * `wasm-manifest.json`. See verifyWasm() / loadManifest() below — kept
+ * inline rather than imported because the assembly package ships
+ * standalone (no functions/ dependency).
  */
+
+interface WasmManifest {
+  [fileName: string]: string
+}
+
+async function sha384Base64(buffer: ArrayBuffer | Uint8Array): Promise<string> {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)
+  const isNode =
+    typeof process !== 'undefined' && (process as any).versions?.node !== undefined
+  let digest: Uint8Array
+  if (isNode) {
+    const { createHash } = await import('crypto')
+    const h = createHash('sha384')
+    h.update(bytes)
+    digest = new Uint8Array(h.digest())
+  } else {
+    // Copy into a fresh ArrayBuffer so SubtleCrypto.digest accepts the
+    // bytes regardless of the source backing (ArrayBuffer or SharedArrayBuffer).
+    const copy = new ArrayBuffer(bytes.byteLength)
+    new Uint8Array(copy).set(bytes)
+    const out = await crypto.subtle.digest('SHA-384', copy)
+    digest = new Uint8Array(out)
+  }
+  let bin = ''
+  for (let i = 0; i < digest.length; i++) bin += String.fromCharCode(digest[i])
+  const b64 =
+    typeof btoa === 'function'
+      ? btoa(bin)
+      : (globalThis as any).Buffer.from(digest).toString('base64')
+  return `sha384-${b64}`
+}
+
+async function loadManifest(wasmPath: string): Promise<WasmManifest | null> {
+  const manifestPath = wasmPath.replace(/[^/\\]+$/, 'wasm-manifest.json')
+  const isNode =
+    typeof process !== 'undefined' && (process as any).versions?.node !== undefined
+  try {
+    if (isNode) {
+      const fs = await import('fs')
+      const text = fs.readFileSync(manifestPath, 'utf8')
+      return JSON.parse(text) as WasmManifest
+    } else {
+      const res = await fetch(manifestPath)
+      if (!res.ok) return null
+      return (await res.json()) as WasmManifest
+    }
+  } catch {
+    return null
+  }
+}
+
+async function verifyWasm(
+  buffer: ArrayBuffer | Uint8Array,
+  wasmPath: string
+): Promise<void> {
+  const manifest = await loadManifest(wasmPath)
+  if (!manifest) {
+    if (typeof console !== 'undefined') {
+      console.warn(
+        `[wasm-integrity] no manifest found beside "${wasmPath}"; skipping SHA-384 verification`
+      )
+    }
+    return
+  }
+  const fileName = wasmPath.split(/[/\\]/).pop() || wasmPath
+  const expected = manifest[fileName]
+  if (!expected) return
+  const actual = await sha384Base64(buffer)
+  if (actual !== expected) {
+    throw new Error(
+      `WASM integrity check failed for "${fileName}": expected ${expected}, got ${actual}`
+    )
+  }
+}
 
 // Type definitions for the WASM module exports
 export interface MathTSWasmExports {
@@ -58,16 +137,20 @@ export async function loadWasm(source: string | BufferSource): Promise<MathTSWas
     if (typeof fetch !== 'undefined') {
       const response = await fetch(source);
       const buffer = await response.arrayBuffer();
+      await verifyWasm(buffer, source);
       wasmModule = await WebAssembly.compile(buffer);
     } else {
       // Node.js environment
       const fs = await import('fs');
       const path = await import('path');
-      const buffer = fs.readFileSync(path.resolve(source));
+      const resolved = path.resolve(source);
+      const buffer = fs.readFileSync(resolved);
+      await verifyWasm(buffer, resolved);
       wasmModule = await WebAssembly.compile(buffer);
     }
   } else {
-    // Load from buffer
+    // Load from buffer — caller is responsible for verifying integrity
+    // since we have no path to locate a sibling manifest.
     wasmModule = await WebAssembly.compile(source);
   }
 

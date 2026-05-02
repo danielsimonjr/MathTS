@@ -7,8 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> Suggested security release tag once these three commits land:
+> `v0.1.3-security` (or `v0.2.0-security` if the breaking change in
+> `createEvaluate` warrants a minor bump). Author: tag manually with
+> `git tag -a v0.1.3-security -m "Security: WASM SRI + worker timeout + sandbox"`.
+
 ### Security
 
+- **functions, assembly**: WASM modules now verify a SHA-384 manifest
+  before instantiation. The build step writes `wasm-manifest.json`
+  beside the `.wasm` artefact (see `tools/generate-wasm-manifest.mjs`),
+  and at load time the runtime hashes the freshly read buffer
+  (`crypto.createHash('sha384')` in Node, `crypto.subtle.digest` in
+  browsers) and compares against the manifest. A mismatch throws
+  before any module is compiled or instantiated, blocking silent
+  code-injection via tampered .wasm payloads. Affected files:
+  - `functions/src/wasm/integrity.ts` (new helper module)
+  - `functions/src/wasm/WasmLoader.ts:744,748,773,795,799` — both Node
+    and browser load paths now verify; streaming compilation is bypassed
+    when a manifest is present
+  - `assembly/src/bindings/wasm-loader.ts:75,87,89` — `loadWasm()`
+    verifies before compile in both fetch and `fs.readFileSync` paths
+  - `tools/generate-wasm-manifest.mjs` (new build-time hashing script)
+  - `functions/tests/security/wasm-integrity.test.ts` (5 tests)
+    covering manifest load, untampered accept, tampered reject,
+    soft-warn on missing manifest, and `{required: true}` fail-closed
 - **parallel**: `WorkerPool.execute()` now accepts an optional
   `timeoutMs` argument (`parallel/src/WorkerPool.ts`). When the worker
   does not reply within `timeoutMs` the pool calls `worker.terminate()`,
