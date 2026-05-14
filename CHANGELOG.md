@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [tensor 0.1.0] - 2026-05-14
+
+> First release of the `@danielsimonjr/mathts-tensor` package — a rank-N,
+> `Float64Array`-backed dense tensor type with einsum/contraction. Built as
+> the second `TensorEngine` implementation for the UPT v0.3.5
+> numerical-contraction backend. Repo tag: `mathts-tensor-v0.1.0`.
+> Not yet published to npm (publish requires 2FA — deferred to a manual
+> `npm publish` / `changeset publish`).
+
 ### Added
 
 - `@danielsimonjr/mathts-tensor` package: rank-N `Tensor` (storage, construction, elementwise, identity, normInf).
