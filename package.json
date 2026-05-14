@@ -11,6 +11,7 @@
     "packages/*",
     "core",
     "matrix",
+    "tensor",
     "functions",
     "expression",
     "parallel",
