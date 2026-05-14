@@ -17,6 +17,9 @@ export class Tensor {
   readonly data: Float64Array;
 
   constructor(shape: ReadonlyArray<number>, data: Float64Array) {
+    if (data.length !== Tensor.sizeOf(shape)) {
+      throw new Error(`Tensor: data length ${data.length} does not match shape [${shape}] (size ${Tensor.sizeOf(shape)})`);
+    }
     this.shape = shape;
     this.data = data;
   }

@@ -40,4 +40,8 @@ describe('Tensor — construction + elementwise', () => {
     const b = Tensor.fromNested([1, 2, 3], [3]);
     expect(() => a.add(b)).toThrow(/shape mismatch/);
   });
+
+  it('constructor throws when data length does not match the shape', () => {
+    expect(() => new Tensor([2, 2], new Float64Array(3))).toThrow(/data length/);
+  });
 });
