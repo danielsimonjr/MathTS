@@ -11,4 +11,5 @@
  *
  * @packageDocumentation
  */
-export {};
+export { DualTensor } from './dual-tensor.js';
+export { forwardGrad } from './forward-grad.js';
