@@ -34,7 +34,7 @@ import { DualTensor } from './dual-tensor.js';
  *   compatible with Tensor) and must return a DualTensor.
  * @param x - Input tensor at which to differentiate.
  * @returns `{ value, jacobian }` where:
- *   - `value` has shape `x.shape` (or the output shape of fn)
+ *   - `value` has the output shape of fn applied to x
  *   - `jacobian` has shape `[...value.shape, ...x.shape]` row-major.
  *     `jacobian.data[kY * xSize + kX]` = ∂y[kY] / ∂x[kX].
  *     Verified by Adam+Eve review 2026-05-15 (E13): kY outer, kX inner,
@@ -47,9 +47,15 @@ export function forwardGrad(
   // First call: compute the value with zero tangent to learn the output shape.
   // (We need to know the output shape to allocate the Jacobian.)
   const xDualZero = DualTensor.fromTensor(x);
-  const yProbe = fn(xDualZero as unknown as Tensor);
-  // yProbe is structurally a DualTensor (we passed one in); cast back.
-  const yPrimal = (yProbe as unknown as DualTensor).toPrimalTensor();
+  const yProbeRaw = fn(xDualZero as unknown as Tensor);
+  if (!(yProbeRaw instanceof DualTensor)) {
+    throw new Error(
+      'forwardGrad: fn must be AD-traceable — its return must propagate through ' +
+        'DualTensor arithmetic (use add/sub/mul/scale on the argument). A fresh ' +
+        'Tensor return loses the tangent and silently corrupts the Jacobian.',
+    );
+  }
+  const yPrimal = yProbeRaw.toPrimalTensor();
 
   const jacobianShape = [...yPrimal.shape, ...x.shape];
   const jacobianSize = jacobianShape.reduce((a, b) => a * b, 1);
@@ -71,7 +77,11 @@ export function forwardGrad(
   // = ∂y[kY] / ∂x[kX]. Verified by Adam+Eve review 2026-05-15 (E13).
   for (let kX = 0; kX < xSize; kX++) {
     const xDualUnit = DualTensor.unitAt(x, kX);
-    const yDual = fn(xDualUnit as unknown as Tensor) as unknown as DualTensor;
+    const yDualRaw = fn(xDualUnit as unknown as Tensor);
+    if (!(yDualRaw instanceof DualTensor)) {
+      throw new Error('forwardGrad: fn lost AD trace mid-sweep (returned non-DualTensor)');
+    }
+    const yDual = yDualRaw;
     for (let kY = 0; kY < ySize; kY++) {
       jacobianData[kY * xSize + kX] = yDual.tangent[kY];
     }

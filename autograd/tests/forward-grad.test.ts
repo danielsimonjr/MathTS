@@ -41,6 +41,13 @@ describe('forwardGrad (forward-mode AD via dual numbers)', () => {
     expect(J[0][1]).toBeCloseTo(0, 12);
   });
 
+  it('throws a clear error when fn breaks the AD trace (returns plain Tensor)', () => {
+    const x = Tensor.fromNested([1, 2, 3], [3]);
+    // fn that returns a fresh Tensor instead of routing through DualTensor ops:
+    const fnBroken = (_t: Tensor) => Tensor.fromNested([1, 2, 3], [3]);
+    expect(() => forwardGrad(fnBroken, x)).toThrow(/AD-traceable|non-DualTensor/);
+  });
+
   it('rank-2 → rank-2 (linear map) returns the correct Jacobian shape', () => {
     // fn: 2x2 matrix → 2x2 matrix, fn(A) = 2*A. Jacobian shape: [2,2,2,2]; J[i,j,k,l] = 2 if (i,j)=(k,l) else 0.
     const A = Tensor.fromNested([[1, 2], [3, 4]], [2, 2]);
