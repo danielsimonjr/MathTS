@@ -13,3 +13,5 @@
  */
 export { DualTensor } from './dual-tensor.js';
 export { forwardGrad } from './forward-grad.js';
+export { Tape, TapedTensor } from './tape.js';
+export { reverseGrad } from './reverse-grad.js';
