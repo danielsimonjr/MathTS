@@ -10,6 +10,7 @@ export default defineConfig({
       'core/tests/**/*.test.ts',
       'matrix/tests/**/*.test.ts',
       'tensor/tests/**/*.test.ts',
+      'autograd/tests/**/*.test.ts',
       'functions/tests/**/*.test.ts',
       'parallel/tests/**/*.test.ts',
       'expression/tests/**/*.test.ts',

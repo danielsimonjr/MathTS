@@ -12,6 +12,7 @@
     "core",
     "matrix",
     "tensor",
+    "autograd",
     "functions",
     "expression",
     "parallel",

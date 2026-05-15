@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `@danielsimonjr/mathts-autograd` package scaffold: forward + reverse-mode AD (Tasks 6/7 populate the implementation).
+
 ## [tensor 0.1.0] - 2026-05-14
 
 > First release of the `@danielsimonjr/mathts-tensor` package — a rank-N,
