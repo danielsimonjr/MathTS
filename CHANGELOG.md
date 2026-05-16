@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [autograd 0.1.0] - 2026-05-15
+
+> First release of the `@danielsimonjr/mathts-autograd` package — forward
+> and reverse-mode automatic differentiation on rank-N Tensors. Built as
+> the AD adapter for the UPT v0.4.0 connection-layer + AD backend. Repo
+> tag: `mathts-autograd-v0.1.0`. Not yet published to npm (publish
+> requires 2FA — deferred to a manual `npm publish`).
+
 ### Added
 
 - `@danielsimonjr/mathts-autograd` package scaffold: forward + reverse-mode AD (Tasks 6/7 populate the implementation).
