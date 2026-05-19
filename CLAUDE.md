@@ -195,7 +195,7 @@ The script:
 7. Skips Dropbox conflict files
 8. Only writes files that actually changed
 
-**Last sync**: 2026-04-03 (mathjs v15.3.4, 0 module resolution errors)
+**Last sync**: mathjs commit `55dea0d71` (2026-04-02; commit message marks `[15.3.4]` but the tag was never pushed — `package.json` version was `15.2.0`). Upstream then performed a TS-split at `e62bcd749` (2026-04-10) removing all `.ts` files from mathjs. Post-split, the sync script's `.ts → .ts` model cannot pull mathjs's new work; further upstream additions require JS→TS porting (see `tools/mathjs-port/`).
 
 **Important**: Synced files are dormant — they are NOT exported from `functions/src/index.ts`. Only `functions/src/typed/` contains active implementations. The synced code has ~700 upstream type errors (missing casts, AssemblyScript types) that exist in mathjs itself — `functions/tsconfig.json` uses `strict: false` to allow compilation.
 
