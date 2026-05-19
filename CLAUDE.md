@@ -13,11 +13,21 @@ It also includes a Scientific Workbook system (`.mtsw` files) for reactive YAML-
 ```bash
 # From repo root:
 npm run build               # turbo run build (all packages)
+npm run dev                 # turbo run dev (watch mode, all packages)
 npm run test                # turbo run test (all packages)
+npm run test:coverage       # turbo run test:coverage (with whitelist for dormant code)
 npm run typecheck           # turbo run typecheck (all packages)
 npm run lint                # turbo run lint (all packages)
 npm run format              # prettier --write all files
 npm run format:check        # prettier --check (CI)
+
+# WASM builds (Rust primary, AssemblyScript legacy):
+npm run build:wasm          # AssemblyScript build (assembly/ package)
+npm run build:wasm:rust     # Rust build via wasm-rust/scripts/build.sh
+npm run build:wasm:all      # Both WASM toolchains
+npm run test:wasm           # AssemblyScript WASM tests
+npm run test:wasm:integration  # Cross-package WASM integration tests (tests/wasm/)
+npm run bench:wasm          # Rust-vs-AssemblyScript benchmark
 
 # Single package:
 npx turbo build --filter=@danielsimonjr/mathts-core
@@ -34,8 +44,9 @@ cd matrix && npx vitest run
 # Typecheck a single package:
 cd functions && npx tsc --noEmit
 
-# Coverage (uses whitelist in root vitest.config.ts to exclude dormant code):
-npx vitest run --coverage
+# Coverage (uses whitelist in root vitest.config.ts to exclude dormant code).
+# Prefer the npm script — it goes through Turbo for caching:
+npm run test:coverage
 ```
 
 ## Monorepo Structure
@@ -47,11 +58,14 @@ packages/typed-function/   # @danielsimonjr/mathts-typed-function - forked type 
 packages/workerpool/       # @danielsimonjr/mathts-workerpool - forked worker pool management
 core/                      # @danielsimonjr/mathts-core - types, typed-function integration, factory
 matrix/                    # @danielsimonjr/mathts-matrix - DenseMatrix, SparseMatrix, backends (JS/WASM/GPU)
+tensor/                    # @danielsimonjr/mathts-tensor - rank-N dense Tensor (Float64Array-backed)
+autograd/                  # @danielsimonjr/mathts-autograd - forward + reverse-mode autodiff over Tensor
 functions/                 # @danielsimonjr/mathts-functions - math functions via typed dispatch
 parallel/                  # @danielsimonjr/mathts-parallel - ComputePool, WebWorker operations
 expression/                # @danielsimonjr/mathts-expression - parser/evaluator
 workbook/                  # @danielsimonjr/mathts-workbook - .mtsw notebook runtime + CLI
-assembly/                  # WASM source (AssemblyScript, build broken)
+assembly/                  # @danielsimonjr/mathts-wasm - AssemblyScript WASM (build: asbuild:debug/release)
+wasm-rust/                 # Rust WASM workspace (Cargo, not an npm workspace) — built via build:wasm:rust
 compat/                    # @danielsimonjr/mathts-compat - mathjs API compatibility shim
 ```
 
@@ -63,6 +77,7 @@ typed-function ← core ← matrix ← functions
 workerpool ← parallel ─────┘         │
                    ↑                  │
                    └──────────────────┘
+core ← tensor ← autograd
 core ← workbook
 core, matrix, functions, parallel ← compat
 ```
@@ -97,7 +112,7 @@ Three main systems:
 
 `@danielsimonjr/mathts-matrix` supports three backends with automatic selection via `BackendManager`:
 - **JSBackend** - Pure TypeScript (default, always available)
-- **WASMBackend** - Rust WASM primary (1,017 exports, full AS parity) or AssemblyScript legacy (>1K elements)
+- **WASMBackend** - Rust WASM primary (source: `wasm-rust/crates/`, 1,017 exports, full AS parity) or AssemblyScript legacy (source: `assembly/`, >1K elements)
 - **GPUBackend** - WebGPU compute shaders (>100K elements)
 
 ### `@danielsimonjr/mathts-compat` Pattern
@@ -124,21 +139,33 @@ YAML-based reactive notebook (`.mtsw` files). Key source files in `workbook/src/
 **Test file locations** (all use `*.test.ts` convention):
 - `core/tests/` - type system, factory, typed-function
 - `matrix/tests/` - DenseMatrix, SparseMatrix, backends (JS, WASM, GPU), SVD/eig decompositions
-- `functions/tests/` - typed arithmetic, signal processing (FFT, convolution), parallel ops
-- `parallel/tests/` - ComputePool, chunking, threshold strategies, elementwise/matmul operations
+- `tensor/tests/` - rank-N Tensor construction and ops
+- `autograd/tests/` - forward-mode DualTensor, reverse-mode Tape/TapedTensor
+- `functions/tests/` - typed arithmetic, signal processing (FFT, convolution), parallel ops, WASM SHA-384 integrity
+- `parallel/tests/` - ComputePool, chunking, threshold strategies, elementwise/matmul, WorkerPool timeout
 - `compat/tests/` - compatibility layer
+- `expression/tests/` - compile, evaluate, `security/sandbox.test.ts` (regression guard for safe-access)
+- `workbook/tests/` - executor, graph, parser
+- `assembly/tests/run.js` - node + `--experimental-wasm-simd` runner (not vitest)
 - `packages/typed-function/tests/`, `packages/workerpool/tests/`
 - `tests/integration/` - cross-package instance and function tests
-
-**Packages without tests**: `expression/`, `workbook/`, `assembly/`
+- `tests/wasm/` - cross-package WASM integration tests (run via `npm run test:wasm:integration`)
 
 **Gotcha**: Always `import { describe, it, expect } from 'vitest'` explicitly in test files. The `globals` setting is inconsistent across package configs.
+
+## Security Invariants (do not regress)
+
+Three hard rules from the 2026-05-01 security release. Future edits must preserve them.
+
+- **WASM SHA-384 manifest verification.** `functions/src/wasm/WasmLoader.ts` (Node + browser load paths) and `assembly/src/bindings/wasm-loader.ts` both hash the `.wasm` buffer and compare to `wasm-manifest.json` (generated by `tools/generate-wasm-manifest.mjs`) before compile/instantiate. Do not bypass, weaken to a non-cryptographic check, or skip on streaming compile paths. Regression covered by `functions/tests/security/wasm-integrity.test.ts`.
+- **Expression sandbox helpers are mandatory.** Any property/method access in `expression/src/` must route through `getSafeProperty` / `setSafeProperty` / `getSafeMethod` from `expression/src/utils/customs.ts`. ~14 call sites today (compiler, nodes, accessors). Direct `obj[name]` access is a sandbox bypass — see `expression/tests/security/sandbox.test.ts`.
+- **WorkerPool timeout is opt-in but supported.** `parallel/src/WorkerPool.ts#execute()` accepts `timeoutMs` and terminates + replaces hung workers. Don't remove the timeout/replacement plumbing when refactoring pool code.
 
 ## TypeScript Configuration
 
 - `tsconfig.base.json`: strict mode, ES2022 target, ESNext modules, bundler resolution
 - Each package extends the base config
-- Import extensions must be `.js` (ESM resolution)
+- Import extensions must be `.js` (ESM resolution) — **exception**: `tensor/src/` uses bare relative imports (`from './Tensor'`); tsup bundles it before runtime so the rule isn't enforced there. Match existing style per package.
 
 ## Code Style
 
@@ -159,7 +186,7 @@ The script:
 3. Copies support dirs from `~/Dropbox/Github/Mathjs/src/{utils,core,plain,type,expression,error,wasm}/` → `functions/src/`
 4. Copies standalone files: `types.ts`, `constants.ts`, `factoriesAny.ts`, `factoriesNumber.ts`, `defaultInstance.ts`
 5. Copies `types/` definition directory
-4. Transforms imports:
+6. Transforms imports:
    - Relative depth reduction: `../../utils/` → `../utils/` (removes one `../` for any depth)
    - Standalone file: `../../types.js` → `../types.js`
    - Function segment strip: `../../function/<category>/` → `../../<category>/` (for support dir cross-refs)
