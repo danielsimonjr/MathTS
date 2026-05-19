@@ -281,35 +281,87 @@ export function studentTTest(sample1: f64[], sample2?: f64[]): TTestResult {
 // =============================================================================
 
 /**
- * Chi-square goodness-of-fit test.
+ * Chi-square goodness-of-fit test (1D) or independence test (2D contingency table).
  *
- * Tests whether observed frequencies match expected frequencies.
+ * 1D form: tests whether observed frequencies match expected frequencies.
+ *   chi2 = sum((O_i - E_i)^2 / E_i), df = length - 1.
  *
- * @param observed - Array of observed counts
- * @param expected - Array of expected counts
+ * 2D form: when called with a single 2D `observed` array (rows x cols),
+ *   tests independence of two categorical variables. Expected cell counts
+ *   are auto-computed from row totals * col totals / grand total.
+ *   chi2 = sum_{i,j} ((O_ij - E_ij)^2 / E_ij), df = (rows-1) * (cols-1).
+ *
+ * @param observed - 1D observed counts, OR 2D contingency table (rows x cols)
+ * @param expected - 1D expected counts (required for 1D form; omit for 2D)
  * @returns Chi-square test result
  *
  * @example
- * chiSquareTest([10, 20, 30], [20, 20, 20])
+ * chiSquareTest([10, 20, 30], [20, 20, 20])     // 1D goodness-of-fit
+ * chiSquareTest([[10, 20], [30, 40]])           // 2D independence test
  */
-export function chiSquareTest(observed: f64[], expected: f64[]): ChiSquareResult {
-  if (observed.length !== expected.length) {
+export function chiSquareTest(
+  observed: f64[] | f64[][],
+  expected?: f64[],
+): ChiSquareResult {
+  // 2D contingency table form
+  if (Array.isArray(observed[0])) {
+    const obs2d = observed as f64[][];
+    const rows = obs2d.length;
+    if (rows < 2) throw new Error('chiSquareTest: contingency table needs >= 2 rows');
+    const cols = obs2d[0].length;
+    if (cols < 2) throw new Error('chiSquareTest: contingency table needs >= 2 cols');
+    for (let i = 0; i < rows; i++) {
+      if (obs2d[i].length !== cols) {
+        throw new Error('chiSquareTest: contingency table must be rectangular');
+      }
+    }
+
+    const rowTotals = new Array<f64>(rows).fill(0);
+    const colTotals = new Array<f64>(cols).fill(0);
+    let grand = 0;
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        const v = obs2d[i][j];
+        rowTotals[i] += v;
+        colTotals[j] += v;
+        grand += v;
+      }
+    }
+    if (grand <= 0) throw new Error('chiSquareTest: contingency table sum must be positive');
+
+    let statistic = 0;
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        const e = (rowTotals[i] * colTotals[j]) / grand;
+        if (e <= 0) continue; // skip zero-expected cells
+        const o = obs2d[i][j];
+        statistic += ((o - e) * (o - e)) / e;
+      }
+    }
+    const df = (rows - 1) * (cols - 1);
+    return { statistic, pValue: _chiSquaredPValue(statistic, df), degreesOfFreedom: df };
+  }
+
+  // 1D goodness-of-fit form
+  const obs1d = observed as f64[];
+  if (!expected) {
+    throw new Error('chiSquareTest: 1D form requires expected array');
+  }
+  if (obs1d.length !== expected.length) {
     throw new Error('chiSquareTest: observed and expected must have the same length');
   }
-  if (observed.length < 2) {
+  if (obs1d.length < 2) {
     throw new Error('chiSquareTest: need at least 2 categories');
   }
 
   let statistic = 0;
-  for (let i = 0; i < observed.length; i++) {
+  for (let i = 0; i < obs1d.length; i++) {
     if (expected[i] <= 0) throw new Error('chiSquareTest: expected values must be positive');
-    statistic += (observed[i] - expected[i]) ** 2 / expected[i];
+    statistic += (obs1d[i] - expected[i]) ** 2 / expected[i];
   }
 
-  const df = observed.length - 1;
-  const pValue = _chiSquaredPValue(statistic, df);
-
-  return { statistic, pValue, degreesOfFreedom: df };
+  const df = obs1d.length - 1;
+  return { statistic, pValue: _chiSquaredPValue(statistic, df), degreesOfFreedom: df };
 }
 
 // =============================================================================

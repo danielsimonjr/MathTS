@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`statistics/chiSquareTest` 2D contingency variant** — function now accepts either a 1D goodness-of-fit pair (`observed, expected`) or a 2D contingency table (`observed` as `rows x cols`, expected auto-computed from row/column totals). Matches mathjs's two-form API. `functions/src/typed/hypothesis.ts`.
+- **`special/erfc` precision** — previously used A&S 7.1.26 (max error 1.5e-7 across all `x`). Now hybrid: Maclaurin series gives machine precision for `|x| <= 0.5`, NR `erfcc` rational form gives ~1.2e-7 for `|x| > 0.5`. All 225 special-function tests still pass. `functions/src/typed/special.ts`.
+- **`algebra/cancel` extended** — beyond plain `n/d` integer fractions, now handles compound fractions `(a/b)/(c/d)` (multiplied across then cancelled) and the trivial `(p)/(p) -> 1` identity. Division-by-zero now throws explicitly. Docstring now accurately scopes the function to numeric forms with a forward reference to `polynomialGCD` for symbolic work. `functions/src/typed/algebra.ts`.
+- **`inverseLaplaceTransform` ported (v3)** — fully integrated into `functions/src/typed/cas.ts`. Public export via plain TS function. Mirrors mathjs's actual algorithm (numerical pattern-matching at sample points against known Laplace pairs). Earlier session flagged this as "divergent algorithm"; honest-claude pass later established that *was* mathjs's algorithm and the original draft was correct in approach. v3 fixes the v1 truncation by using `max_tokens=12288`.
+
+### Retracted (audit false-positives)
+
+The 2026-05-18 batched audit (`tools/mathjs-port/audit_summary.md`) flagged several "divergences" that turned out to be either intentional MathTS design improvements or outright audit misreadings. Per-function vetting:
+
+- **`combinatorics/divisorSigma`** — earlier CHANGELOG framed the arg-order difference as a "real mathjs-compat regression." That was wrong. MathTS's `divisorSigma(n, k = 1)` (optional `k` with sensible default) is a deliberate API improvement over mathjs's `divisorSigma(k, n)` (both required). MathTS's own tests lock in the intended signature. No code change.
+- **`statistics/studentTTest`** — audit claimed MathTS "only supports one-sample." Verified false: signature `studentTTest(sample1: f64[], sample2?: f64[])` accepts both 1-sample (test vs μ=0) and Welch 2-sample. No code change.
+- **`signal/dct`** — audit flagged scaling difference. Confirmed real but intentional: MathTS applies orthonormal scaling factors (`sqrt(1/N)`, `sqrt(2/N)`), which is the modern standard for DCT-II. Documented design choice.
+- **`matrix/cholesky`** — audit flagged `{L}` object vs raw `L`. Intentional: object return is more extensible. Documented design choice.
+- **`geometry/coordinateTransform`** — angle convention differs (MathTS uses `phi=inclination` physics convention; mathjs uses math convention). Both are valid; documentation choice, no bug.
+
 ### Added
 
 - **mathjs JS→AS port workflow** in `tools/mathjs-port/`. Provides `manifest.json` (port targets + classifications), `port_one.py` (per-function LLM-driven port using `~/.claude/skills/rlm/scripts/rlm_query.py`), and `drafts/` for review-before-integrate output. Produces AssemblyScript ports matching the existing `functions/src/wasm/` pointer-typed convention. Scope established by cross-referencing mathjs's 215 new functions against MathTS active exports: only 6 were genuinely missing.

@@ -18,13 +18,14 @@
  * @packageDocumentation
  */
 
-import { evaluate, compileExpr } from '../factories/evaluate.js';
+import { parse, evaluate, compileExpr } from '../factories/evaluate.js';
 
 // =============================================================================
 // Type Aliases
 // =============================================================================
 
 type f64 = number;
+type MathNode = ReturnType<typeof parse>;
 
 // =============================================================================
 // Internal Helpers
@@ -1709,4 +1710,337 @@ export function curl(
   const dF1dy = partialDerivative(F1, y, scope);
 
   return [dF3dy - dF2dz, dF1dz - dF3dx, dF2dx - dF1dy];
+}
+
+// =============================================================================
+// inverseLaplaceTransform — ported from mathjs v15.2.0 (commit 6f4171662)
+// Numerical pattern-matching against known Laplace transform pairs.
+// =============================================================================
+
+function iltEvalAt(node: MathNode, sVar: string, val: f64): f64 | null {
+  try {
+    const result = (node as any).evaluate({ [sVar]: val });
+    if (typeof result === 'number' && isFinite(result)) return result;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function iltMatchPattern(node: MathNode, sVar: string, pattern: string): boolean {
+  const checkNode = parse(pattern.replace(/s/g, sVar));
+  const testPoints = [2, 3, 5, 7, 11];
+  for (const p of testPoints) {
+    const v1 = iltEvalAt(node, sVar, p);
+    const v2 = iltEvalAt(checkNode, sVar, p);
+    if (v1 === null || v2 === null) return false;
+    if (Math.abs(v1 - v2) > 1e-9) return false;
+  }
+  return true;
+}
+
+function iltGcd(a: number, b: number): number {
+  a = Math.abs(Math.round(a));
+  b = Math.abs(Math.round(b));
+  while (b !== 0) {
+    const tmp = b;
+    b = a % b;
+    a = tmp;
+  }
+  return a;
+}
+
+function iltNiceNumber(val: f64): string {
+  const rounded = Math.round(val);
+  if (Math.abs(val - rounded) < 1e-8) return String(rounded);
+  for (let den = 2; den <= 12; den++) {
+    const num = Math.round(val * den);
+    if (Math.abs(val - num / den) < 1e-8) {
+      const g = iltGcd(Math.abs(num), den);
+      const n = num / g;
+      const d = den / g;
+      return d === 1 ? String(n) : n + '/' + d;
+    }
+  }
+  return val.toPrecision(6);
+}
+
+function iltFactorial(n: number): f64 {
+  if (n <= 1) return 1;
+  let result: f64 = 1;
+  for (let i = 2; i <= n; i++) result *= i;
+  return result;
+}
+
+function iltMatchQuadratic(node: MathNode, sVar: string, tVar: string): string | null {
+  const v2 = iltEvalAt(node, sVar, 2);
+  const v3 = iltEvalAt(node, sVar, 3);
+  const v5 = iltEvalAt(node, sVar, 5);
+  if (v2 === null || v3 === null || v5 === null) return null;
+
+  if (Math.abs(v2) > 1e-12 && Math.abs(v3) > 1e-12) {
+    const b2fromV2 = 2 / v2 - 4;
+    const b2fromV3 = 3 / v3 - 9;
+
+    if (b2fromV2 > 0 && Math.abs(b2fromV2 - b2fromV3) < 1e-6) {
+      const b = Math.sqrt(b2fromV2);
+      const expected = 5 / (25 + b2fromV2);
+      if (Math.abs(v5 - expected) < 1e-8) {
+        const bStr = iltNiceNumber(b);
+        return 'cos(' + bStr + ' * ' + tVar + ')';
+      }
+    }
+
+    const a2fromV2 = 4 - 2 / v2;
+    const a2fromV3 = 9 - 3 / v3;
+    if (a2fromV2 > 0 && Math.abs(a2fromV2 - a2fromV3) < 1e-6) {
+      const a = Math.sqrt(a2fromV2);
+      const expected = 5 / (25 - a2fromV2);
+      if (isFinite(expected) && Math.abs(v5 - expected) < 1e-8) {
+        const aStr = iltNiceNumber(a);
+        return 'cosh(' + aStr + ' * ' + tVar + ')';
+      }
+    }
+  }
+
+  if (Math.abs(v2 - v3) > 1e-12) {
+    const b2 = (9 * v3 - 4 * v2) / (v2 - v3);
+    if (b2 > 0) {
+      const c = v2 * (4 + b2);
+      const b = Math.sqrt(b2);
+      const expected = c / (25 + b2);
+      if (Math.abs(v5 - expected) < 1e-8) {
+        const coeff = c / b;
+        const bStr = iltNiceNumber(b);
+        const coeffStr = iltNiceNumber(coeff);
+        if (Math.abs(coeff - 1) < 1e-8) {
+          return 'sin(' + bStr + ' * ' + tVar + ')';
+        }
+        return coeffStr + ' * sin(' + bStr + ' * ' + tVar + ')';
+      }
+    }
+
+    const a2sinh = (9 * v3 - 4 * v2) / (v3 - v2);
+    if (a2sinh > 0) {
+      const c2 = v2 * (4 - a2sinh);
+      const a = Math.sqrt(a2sinh);
+      const expected2 = c2 / (25 - a2sinh);
+      if (isFinite(expected2) && Math.abs(v5 - expected2) < 1e-8) {
+        const coeff = c2 / a;
+        const aStr = iltNiceNumber(a);
+        const coeffStr = iltNiceNumber(coeff);
+        if (Math.abs(coeff - 1) < 1e-8) {
+          return 'sinh(' + aStr + ' * ' + tVar + ')';
+        }
+        return coeffStr + ' * sinh(' + aStr + ' * ' + tVar + ')';
+      }
+    }
+  }
+
+  return null;
+}
+
+function iltMatchPower(node: MathNode, sVar: string, tVar: string): string | null {
+  const v2 = iltEvalAt(node, sVar, 2);
+  if (v2 === null || Math.abs(v2) < 1e-15) return null;
+
+  for (let n = 1; n <= 10; n++) {
+    const testVal = Math.pow(2, n) * v2;
+    const v3 = iltEvalAt(node, sVar, 3);
+    const v5 = iltEvalAt(node, sVar, 5);
+    if (v3 === null || v5 === null) return null;
+
+    const c3 = Math.pow(3, n) * v3;
+    const c5 = Math.pow(5, n) * v5;
+
+    if (Math.abs(testVal - c3) < 1e-8 && Math.abs(testVal - c5) < 1e-8) {
+      const c = testVal;
+      const fact = iltFactorial(n - 1);
+      const coeff = c / fact;
+      if (n === 1) {
+        const coeffStr = iltNiceNumber(coeff);
+        return Math.abs(coeff - 1) < 1e-8 ? '1' : coeffStr;
+      }
+      if (n === 2) {
+        const coeffStr = iltNiceNumber(coeff);
+        return Math.abs(coeff - 1) < 1e-8 ? tVar : coeffStr + ' * ' + tVar;
+      }
+      const power = n - 1;
+      const coeffStr = iltNiceNumber(coeff);
+      const term = tVar + '^' + power;
+      return Math.abs(coeff - 1) < 1e-8 ? term : coeffStr + ' * ' + term;
+    }
+  }
+
+  return null;
+}
+
+function iltMatchExponential(node: MathNode, sVar: string, tVar: string): string | null {
+  const v3 = iltEvalAt(node, sVar, 3);
+  const v5 = iltEvalAt(node, sVar, 5);
+  const v7 = iltEvalAt(node, sVar, 7);
+  if (v3 === null || v5 === null || v7 === null) return null;
+  if (Math.abs(v3) < 1e-15) return null;
+
+  const aFromV3 = 3 - 1 / v3;
+  const aFromV5 = 5 - 1 / v5;
+  const aFromV7 = 7 - 1 / v7;
+
+  if (Math.abs(aFromV3 - aFromV5) < 1e-8 && Math.abs(aFromV3 - aFromV7) < 1e-8) {
+    const a = aFromV3;
+    const aStr = iltNiceNumber(a);
+    if (Math.abs(a) < 1e-8) {
+      return 'e^(0)';
+    }
+    if (a > 0) {
+      return 'e^(' + aStr + ' * ' + tVar + ')';
+    } else {
+      const absA = iltNiceNumber(-a);
+      return 'e^(-' + absA + ' * ' + tVar + ')';
+    }
+  }
+
+  return null;
+}
+
+function iltMatchScaledExponential(node: MathNode, sVar: string, tVar: string): string | null {
+  const s1 = 3; const s2 = 5; const s3 = 7;
+  const v1 = iltEvalAt(node, sVar, s1);
+  const v2 = iltEvalAt(node, sVar, s2);
+  const v3 = iltEvalAt(node, sVar, s3);
+  if (v1 === null || v2 === null || v3 === null) return null;
+  if (Math.abs(v2 - v1) < 1e-12) return null;
+
+  const a = (s2 * v2 - s1 * v1) / (v2 - v1);
+  const c = v1 * (s1 - a);
+
+  const expected = c / (s3 - a);
+  if (!isFinite(expected) || Math.abs(v3 - expected) > 1e-8) return null;
+  if (Math.abs(c) < 1e-12) return null;
+
+  const aStr = iltNiceNumber(a);
+  const cStr = iltNiceNumber(c);
+
+  let expPart: string;
+  if (Math.abs(a) < 1e-8) {
+    expPart = '1';
+  } else if (a > 0) {
+    expPart = 'e^(' + aStr + ' * ' + tVar + ')';
+  } else {
+    const absA = iltNiceNumber(-a);
+    expPart = 'e^(-' + absA + ' * ' + tVar + ')';
+  }
+
+  if (Math.abs(c - 1) < 1e-8) {
+    return expPart;
+  }
+  if (Math.abs(a) < 1e-8) {
+    return cStr;
+  }
+  return cStr + ' * ' + expPart;
+}
+
+function iltTableLookup(node: MathNode, sVar: string, tVar: string): string | null {
+  if (iltMatchPattern(node, sVar, '1/s')) return '1';
+  if (iltMatchPattern(node, sVar, '1/s^2')) return tVar;
+
+  const quadResult = iltMatchQuadratic(node, sVar, tVar);
+  if (quadResult !== null) return quadResult;
+
+  const powerResult = iltMatchPower(node, sVar, tVar);
+  if (powerResult !== null) return powerResult;
+
+  const expResult = iltMatchExponential(node, sVar, tVar);
+  if (expResult !== null) return expResult;
+
+  const scaledExpResult = iltMatchScaledExponential(node, sVar, tVar);
+  if (scaledExpResult !== null) return scaledExpResult;
+
+  return null;
+}
+
+function iltSimplifyNode(node: MathNode): MathNode {
+  return node;
+}
+
+function _inverseLaplaceNode(node: MathNode, sVar: string, tVar: string): string {
+  let simplified: MathNode = node;
+  try {
+    simplified = iltSimplifyNode(node);
+  } catch {
+    simplified = node;
+  }
+
+  const nodeAny = simplified as any;
+
+  if (nodeAny.type === 'OperatorNode' && nodeAny.op === '+') {
+    const left = _inverseLaplaceNode(nodeAny.args[0], sVar, tVar);
+    const right = _inverseLaplaceNode(nodeAny.args[1], sVar, tVar);
+    return left + ' + ' + right;
+  }
+
+  if (
+    nodeAny.type === 'OperatorNode' &&
+    nodeAny.op === '-' &&
+    nodeAny.args.length === 2
+  ) {
+    const left = _inverseLaplaceNode(nodeAny.args[0], sVar, tVar);
+    const right = _inverseLaplaceNode(nodeAny.args[1], sVar, tVar);
+    return left + ' - ' + right;
+  }
+
+  const result = iltTableLookup(simplified, sVar, tVar);
+  if (result !== null) return result;
+
+  const exprStr = simplified.toString();
+  throw new Error(
+    'inverseLaplaceTransform: could not find inverse Laplace transform for "' +
+      exprStr +
+      '". Pattern not recognized in lookup table.'
+  );
+}
+
+/**
+ * Compute the inverse Laplace transform using a lookup table of known transform pairs.
+ *
+ * Given an expression F(s) in the s-domain, returns the time-domain
+ * function f(t) by matching known Laplace transform pairs numerically.
+ *
+ * Supported patterns:
+ *   - 1/s               → 1          (unit step)
+ *   - 1/s^2             → t          (ramp)
+ *   - c/s^n             → c * t^(n-1) / (n-1)!  (power)
+ *   - 1/(s - a)         → e^(at)     (exponential)
+ *   - c/(s - a)         → c * e^(at) (scaled exponential)
+ *   - s/(s^2 + b^2)     → cos(b*t)
+ *   - b/(s^2 + b^2)     → sin(b*t)
+ *   - s/(s^2 - a^2)     → cosh(a*t)
+ *   - a/(s^2 - a^2)     → sinh(a*t)
+ *
+ * For sums/differences, each term is transformed independently.
+ *
+ * @param expr - Expression in the s-domain (string or parsed Node)
+ * @param sVar - Name of the s-domain variable (default: 's')
+ * @param tVar - Name of the time variable (default: 't')
+ * @returns Time-domain expression as a string
+ *
+ * @example
+ * inverseLaplaceTransform('1/s', 's', 't')          // => '1'
+ * inverseLaplaceTransform('1/s^2', 's', 't')        // => 't'
+ * inverseLaplaceTransform('1/(s - 2)', 's', 't')    // => 'e^(2 * t)'
+ * inverseLaplaceTransform('s/(s^2 + 4)', 's', 't')  // => 'cos(2 * t)'
+ * inverseLaplaceTransform('2/(s^2 + 4)', 's', 't')  // => 'sin(2 * t)'
+ */
+export function inverseLaplaceTransform(
+  expr: string | MathNode,
+  sVar: string = 's',
+  tVar: string = 't',
+): string {
+  let node: MathNode;
+  if (typeof expr === 'string') {
+    node = parse(expr);
+  } else {
+    node = expr;
+  }
+  return _inverseLaplaceNode(node, sVar, tVar);
 }

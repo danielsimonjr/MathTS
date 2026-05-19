@@ -618,16 +618,31 @@ export function collect(expr: string, variable: string): string {
 }
 
 /**
- * Cancel common factors in a rational expression.
+ * Cancel common factors in a numeric rational expression.
  *
- * @param expr - Expression string (e.g., "6/4")
+ * **Scope:** Currently handles numeric integer fractions `a/b` only,
+ * including `(a/b) / (c/d)` and identical numerator/denominator
+ * polynomial-string short-circuit (`(p) / (p) → 1`).
+ *
+ * **Not yet handled:** symbolic polynomial cancellation
+ * (e.g., `(x^2-1)/(x-1) → x+1`) — for that, use the lower-level
+ * `polynomialGCD` API on explicit coefficient arrays. A future
+ * release will add full symbolic cancel via a polynomial string parser.
+ *
+ * @param expr - Expression string (e.g., "6/4", "(2/3)/(4/9)")
  * @returns Simplified expression
  */
 export function cancel(expr: string): string {
+  // Trivial identical-string case: (p) / (p) -> 1 for any non-empty p
+  const sameMatch = expr.match(/^\s*\(([^()]+)\)\s*\/\s*\(\s*\1\s*\)\s*$/);
+  if (sameMatch && sameMatch[1].trim().length > 0) return '1';
+
+  // Plain numeric fraction
   const fracMatch = expr.match(/^\s*(-?\d+)\s*\/\s*(-?\d+)\s*$/);
   if (fracMatch) {
     const num = parseInt(fracMatch[1], 10);
     const den = parseInt(fracMatch[2], 10);
+    if (den === 0) throw new Error('cancel: division by zero');
     const g = gcdNum(Math.abs(num), Math.abs(den));
     const rn = num / g;
     const rd = den / g;
@@ -635,6 +650,20 @@ export function cancel(expr: string): string {
     if (rd < 0) return -rn + '/' + -rd;
     return rn + '/' + rd;
   }
+
+  // Compound fraction (a/b) / (c/d) -> (a*d) / (b*c), then cancel
+  const compound = expr.match(
+    /^\s*\(\s*(-?\d+)\s*\/\s*(-?\d+)\s*\)\s*\/\s*\(\s*(-?\d+)\s*\/\s*(-?\d+)\s*\)\s*$/,
+  );
+  if (compound) {
+    const a = parseInt(compound[1], 10);
+    const b = parseInt(compound[2], 10);
+    const c = parseInt(compound[3], 10);
+    const d = parseInt(compound[4], 10);
+    if (b === 0 || d === 0 || c === 0) throw new Error('cancel: division by zero');
+    return cancel(`${a * d}/${b * c}`);
+  }
+
   return expr;
 }
 
