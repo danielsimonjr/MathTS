@@ -1,0 +1,79 @@
+[
+  {
+    "name": "characteristicPolynomial",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS computes det(A - λI) sign convention; mathjs computes det(λI - A); coefficients differ in sign for odd-degree terms."
+  },
+  {
+    "name": "cholesky",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS returns {L} object and checks symmetry; mathjs returns L directly without symmetry check."
+  },
+  {
+    "name": "hessenbergForm",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "Both use Householder reflections; MathTS uses beta=2/normV formulation, mathjs normalizes v explicitly; results equivalent."
+  },
+  {
+    "name": "jordanForm",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No jordanForm implementation found in the MathTS file."
+  },
+  {
+    "name": "matrixLog",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses inverse scaling-and-squaring with Taylor series; mathjs uses eigendecomposition directly."
+  },
+  {
+    "name": "matrixPower",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS additionally supports fractional powers via eigendecomposition; mathjs only handles integer exponents."
+  },
+  {
+    "name": "matrixRank",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS computes rank via RREF; mathjs uses SVD singular value thresholding."
+  },
+  {
+    "name": "nullSpace",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No nullSpace implementation found in the MathTS file."
+  },
+  {
+    "name": "polarDecomposition",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No polarDecomposition implementation found in the MathTS file."
+  },
+  {
+    "name": "rowReduce",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "Both use Gauss-Jordan with partial pivoting; MathTS exposes tol parameter, mathjs hardcodes 1e-10."
+  },
+  {
+    "name": "svd",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "MathTS delegates to external @danielsimonjr/mathts-matrix svd; no internal SVD implementation present."
+  }
+]

@@ -1,0 +1,70 @@
+/**
+ * Perform simple linear regression on two datasets (ordinary least squares).
+ * Fits the model: y = slope * x + intercept
+ *
+ * Results are written to resultPtr as [slope, intercept, r, r2] (4 x f64 values).
+ *
+ * @param xPtr Pointer to Float64Array of independent variable (predictor)
+ * @param yPtr Pointer to Float64Array of dependent variable (response)
+ * @param length Length of both arrays (must be >= 2 and equal)
+ * @param resultPtr Pointer to output Float64Array of length 4: [slope, intercept, r, r2]
+ * @returns 0 on success, -1 if length < 2, -2 if all x values are identical
+ */
+export function linreg(xPtr: usize, yPtr: usize, length: i32, resultPtr: usize): i32 {
+  if (length < 2) return -1
+
+  let sumX: f64 = 0
+  let sumY: f64 = 0
+  let sumXY: f64 = 0
+  let sumX2: f64 = 0
+  let sumY2: f64 = 0
+
+  for (let i: i32 = 0; i < length; i++) {
+    const xi = load<f64>(xPtr + (<usize>i << 3))
+    const yi = load<f64>(yPtr + (<usize>i << 3))
+    sumX += xi
+    sumY += yi
+    sumXY += xi * yi
+    sumX2 += xi * xi
+    sumY2 += yi * yi
+  }
+
+  const n = f64(length)
+  const meanX = sumX / n
+  const meanY = sumY / n
+
+  const ssXX = sumX2 - n * meanX * meanX
+  const ssYY = sumY2 - n * meanY * meanY
+  const ssXY = sumXY - n * meanX * meanY
+
+  if (ssXX === 0) return -2
+
+  const slope = ssXY / ssXX
+  const intercept = meanY - slope * meanX
+
+  let r: f64 = 0
+  if (ssXX !== 0 && ssYY !== 0) {
+    r = ssXY / Math.sqrt(ssXX * ssYY)
+  }
+  const r2 = r * r
+
+  store<f64>(resultPtr + (<usize>0 << 3), slope)
+  store<f64>(resultPtr + (<usize>1 << 3), intercept)
+  store<f64>(resultPtr + (<usize>2 << 3), r)
+  store<f64>(resultPtr + (<usize>3 << 3), r2)
+
+  return 0
+}
+
+/**
+ * Predict y value from a fitted linear regression model.
+ * Uses slope and intercept previously computed by linreg.
+ *
+ * @param slope Regression slope
+ * @param intercept Regression intercept
+ * @param xVal Input x value to predict
+ * @returns Predicted y value: slope * xVal + intercept
+ */
+export function linregPredict(slope: f64, intercept: f64, xVal: f64): f64 {
+  return slope * xVal + intercept
+}

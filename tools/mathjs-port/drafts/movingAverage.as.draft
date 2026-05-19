@@ -1,0 +1,29 @@
+/**
+ * Calculate simple moving average of an array
+ * @param dataPtr Pointer to input Float64Array data
+ * @param length Length of input array
+ * @param window Window size (must be >= 1 and <= length)
+ * @param resultPtr Pointer to output Float64Array (must hold length - window + 1 elements)
+ * @returns Number of elements written to resultPtr, or -1 on error
+ */
+export function movingAverage(dataPtr: usize, length: i32, window: i32, resultPtr: usize): i32 {
+  if (window < 1) return -1
+  if (window > length) return -1
+
+  const resultLength: i32 = length - window + 1
+
+  // Compute initial window sum
+  let windowSum: f64 = 0
+  for (let i: i32 = 0; i < window; i++) {
+    windowSum += load<f64>(dataPtr + (<usize>i << 3))
+  }
+  store<f64>(resultPtr, windowSum / f64(window))
+
+  // Slide the window
+  for (let i: i32 = window; i < length; i++) {
+    windowSum += load<f64>(dataPtr + (<usize>i << 3)) - load<f64>(dataPtr + (<usize>(i - window) << 3))
+    store<f64>(resultPtr + (<usize>(i - window + 1) << 3), windowSum / f64(window))
+  }
+
+  return resultLength
+}

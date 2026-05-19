@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **mathjs JS→AS port workflow** in `tools/mathjs-port/`. Provides `manifest.json` (port targets + classifications), `port_one.py` (per-function LLM-driven port using `~/.claude/skills/rlm/scripts/rlm_query.py`), and `drafts/` for review-before-integrate output. Produces AssemblyScript ports matching the existing `functions/src/wasm/` pointer-typed convention. Scope established by cross-referencing mathjs's 215 new functions against MathTS active exports: only 6 were genuinely missing.
+- **5 AS ports** of the standalone numerical kernels missing from MathTS, integrated into `functions/src/wasm/`:
+  - `movingAverage` — O(n) sliding-window mean, `functions/src/wasm/statistics/basic.ts`.
+  - `histogramNumBins` + `histogramEdges` — equal-width or explicit-edges binning with binary-search assignment, `functions/src/wasm/statistics/basic.ts`.
+  - `linreg` + `linregPredict` — single-pass OLS returning `[slope, intercept, r, r²]`, `functions/src/wasm/statistics/basic.ts`.
+  - `polyfit` — least-squares polynomial fitting via Vandermonde normal equations + Gaussian elimination with partial pivoting, `functions/src/wasm/numeric/regression.ts` (new file).
+  - `nullSpace` — SVD-based orthonormal null-space basis with Gram-Schmidt completion when n > k, `functions/src/wasm/matrix/linalg.ts`.
+- All ports use raw memory pointers (`usize` + `i32` length) matching the existing wasm/ convention. Typecheck adds zero new errors. Files remain dormant (not yet exported from `functions/src/index.ts`); exposing via typed-function bindings is a follow-on task.
+
+### Audit
+
+- **Behavioral-parity audit** run across all 9 mathjs categories (`tools/mathjs-port/audit_category.py` + `aggregate_audit.py`). Output: `tools/mathjs-port/audits/<cat>.json` + aggregated `audit_summary.md`. ⚠️ Quantitative summary unreliable due to source truncation in prompts; per-function divergence notes generally accurate when spot-checked.
+- **Real divergence confirmed by verification**: `combinatorics/divisorSigma` has reversed argument order — MathTS `divisorSigma(n, k)` vs mathjs `divisorSigma(k, n)`. Users expecting mathjs compatibility will get wrong results. Recommend either renaming or adding a compat shim.
+- **Other candidate divergences worth investigating** (per audit notes; not yet verified): `algebra/cancel` (numeric-only vs symbolic), `geometry/coordinateTransform` (different angle convention — silent wrong answers), `signal/dct` (different scaling — orthonormal vs unnormalized), `matrix/cholesky` (returns `{L}` object vs raw `L`), `statistics/chiSquareTest` (missing 2D contingency variant), `statistics/studentTTest` (missing two-sample variant), `special/erfc` (lower precision than mathjs's Cody/Chebyshev).
+
+### Flagged for review
+
+- `inverseLaplaceTransform` (TS, symbolic) — **two drafts generated, neither integrated**:
+  - v1 (`drafts/inverseLaplaceTransform.ts.draft`): faithfully mirrors mathjs's algorithm (numerical pattern-matching via repeated evaluation at sample points — `_matchQuadratic`, `_matchPower`, etc.) but uses string-level operations where mathjs uses node-level, **and was truncated at the LLM's max_tokens boundary** (incomplete `iltSplitTopLevel`). Also missing the public `mathTyped` export and the `evaluate` import.
+  - v2 (`drafts/inverseLaplaceTransform.ts.v2.draft`): produced `// PORT BLOCKED` after I incorrectly demanded parse-tree substitution. The LLM correctly identified that mathjs's actual implementation IS numerical pattern-matching and refused contradictory constraints — caught my misreading of mathjs's source.
+  - Recommended path: re-prompt with `max_tokens=12288` and the corrected algorithmic understanding (numerical pattern-matching is the right approach), or hand-port.
+
 ## [autograd 0.1.0] - 2026-05-15
 
 > First release of the `@danielsimonjr/mathts-autograd` package — forward

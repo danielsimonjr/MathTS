@@ -1,0 +1,177 @@
+[
+  {
+    "name": "anova",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS returns fStatistic/dfBetween/dfWithin; mathjs returns F/dfBetween/dfWithin. MSW=0 edge case differs slightly."
+  },
+  {
+    "name": "betaDist",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS dist-objects adds quantile and sample methods; mathjs returns icdf instead of quantile."
+  },
+  {
+    "name": "binomialDist",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses regularized incomplete beta for CDF and adds quantile/sample; mathjs uses direct summation for CDF."
+  },
+  {
+    "name": "chiSquareTest",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS only supports 1D goodness-of-fit; mathjs also supports 2D contingency table independence test."
+  },
+  {
+    "name": "chiSquaredDist",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS adds quantile and sample methods; mathjs returns only pdf/cdf/mean/variance."
+  },
+  {
+    "name": "covariance",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No covariance function found in MathTS files; only correlation is present in statistics.ts."
+  },
+  {
+    "name": "exponentialDist",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS adds sample method and uses quantile instead of icdf naming."
+  },
+  {
+    "name": "fDist",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS adds quantile/sample methods; uses bisection for quantile; mathjs has no quantile."
+  },
+  {
+    "name": "gammaDist",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS adds quantile/sample; parameter named rate vs beta but same semantics."
+  },
+  {
+    "name": "histogram",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No histogram function found in any MathTS file provided."
+  },
+  {
+    "name": "kolmogorovSmirnovTest",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS only supports one-sample test with CDF function; two-sample variant is missing. p-value formula differs."
+  },
+  {
+    "name": "kurtosis",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No kurtosis function found in any MathTS file provided."
+  },
+  {
+    "name": "linreg",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No linreg function found in any MathTS file provided."
+  },
+  {
+    "name": "logNormalDist",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS adds quantile/sample methods; uses quantile instead of icdf naming."
+  },
+  {
+    "name": "mannWhitneyTest",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS returns uStatistic; mathjs returns U. MathTS lacks tie correction in variance; mathjs includes it."
+  },
+  {
+    "name": "movingAverage",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No movingAverage function found in any MathTS file provided."
+  },
+  {
+    "name": "normalDist",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS adds sample method and uses quantile instead of icdf naming."
+  },
+  {
+    "name": "poissonDist",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS distributions.ts has poissonPMF only; dist-objects.ts is truncated but likely has full object."
+  },
+  {
+    "name": "principalComponentAnalysis",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS returns components/explained/scores; mathjs returns components/eigenvalues/scores/explainedVariance."
+  },
+  {
+    "name": "shapiroWilkTest",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses Blom's approximation for all n; mathjs uses exact tabulated coefficients for n<=11."
+  },
+  {
+    "name": "skewness",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No skewness function found in any MathTS file provided."
+  },
+  {
+    "name": "studentTTest",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS supports one-sample test (vs mu=0); mathjs only supports two-sample. Return field named statistic vs t."
+  },
+  {
+    "name": "tDist",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "tDist not found in dist-objects.ts visible portion; file is truncated so may exist but cannot confirm."
+  },
+  {
+    "name": "uniformDist",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "uniformDist not found in visible dist-objects.ts portion; file truncated so cannot confirm presence."
+  },
+  {
+    "name": "weibullDist",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "weibullDist not found in visible dist-objects.ts portion; file truncated so cannot confirm presence."
+  }
+]

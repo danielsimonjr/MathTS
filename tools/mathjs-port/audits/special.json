@@ -1,0 +1,170 @@
+[
+  {
+    "name": "besselI",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses direct series expansion with factorial helper; mathjs uses A&S polynomial approximations with backward recurrence."
+  },
+  {
+    "name": "besselJ",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses forward recurrence for small orders and Miller's backward recurrence differently; mathjs uses ACC=160 backward recurrence with normalization."
+  },
+  {
+    "name": "besselK",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses inline k0/k1 helpers with slightly different polynomial coefficients; mathjs uses A&S 9.8 polynomial approximations."
+  },
+  {
+    "name": "besselY",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses forward recurrence same as mathjs but negative-order sign handling is absent in MathTS."
+  },
+  {
+    "name": "beta",
+    "found_in_mathts": true,
+    "signature_match": "match",
+    "algorithm_match": "compatible",
+    "notes": "MathTS lgamma uses abs(sin) in reflection but mathjs also does; MathTS missing edge-case Infinity return for non-positive integer inputs."
+  },
+  {
+    "name": "betainc",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No betainc implementation found in MathTS files."
+  },
+  {
+    "name": "chebyshevT",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No chebyshevT implementation found in MathTS files."
+  },
+  {
+    "name": "cosIntegral",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No cosIntegral implementation found in MathTS files."
+  },
+  {
+    "name": "digamma",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses 7 Bernoulli coefficients vs mathjs 5; MathTS reflection formula uses -x instead of 1-x, giving different behavior for negative x."
+  },
+  {
+    "name": "ellipticE",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No ellipticE implementation found in MathTS files."
+  },
+  {
+    "name": "ellipticK",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No ellipticK implementation found in MathTS files."
+  },
+  {
+    "name": "erfc",
+    "found_in_mathts": true,
+    "signature_match": "match",
+    "algorithm_match": "diverged",
+    "notes": "MathTS computes erfc as 1-erf using A&S 7.1.26 with max error 1.5e-7; mathjs uses Cody's rational Chebyshev with much higher precision."
+  },
+  {
+    "name": "erfi",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No erfi implementation found in MathTS files."
+  },
+  {
+    "name": "expIntegralEi",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No expIntegralEi implementation found in MathTS files."
+  },
+  {
+    "name": "fresnelC",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No fresnelC implementation found in MathTS files."
+  },
+  {
+    "name": "fresnelS",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No fresnelS implementation found in MathTS files."
+  },
+  {
+    "name": "gammainc",
+    "found_in_mathts": true,
+    "signature_match": "match",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses slightly different CF formulation (an = n*(a-n) vs mathjs an = -i*(i-a)) but mathematically equivalent; missing positive-a validation."
+  },
+  {
+    "name": "gammaincp",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No gammaincp implementation found in MathTS files."
+  },
+  {
+    "name": "hermiteH",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No hermiteH implementation found in MathTS files."
+  },
+  {
+    "name": "laguerreL",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No laguerreL implementation found in MathTS files."
+  },
+  {
+    "name": "lambertW",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No lambertW implementation found in MathTS files."
+  },
+  {
+    "name": "legendreP",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No legendreP implementation found in MathTS files."
+  },
+  {
+    "name": "logIntegral",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No logIntegral implementation found in MathTS files."
+  },
+  {
+    "name": "sinIntegral",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No sinIntegral implementation found in MathTS files."
+  }
+]

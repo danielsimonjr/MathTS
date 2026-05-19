@@ -1,0 +1,114 @@
+[
+  {
+    "name": "carmichaelLambda",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS tracks prime power pk differently (accumulates pk) vs mathjs tracking exponent k; both yield same result."
+  },
+  {
+    "name": "chineseRemainder",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No chineseRemainder implementation found in the MathTS combinatorics file."
+  },
+  {
+    "name": "divisorSigma",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS signature is (n, k) with k defaulting to 1; mathjs signature is (k, n) — argument order is reversed."
+  },
+  {
+    "name": "divisors",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "Implementations are functionally identical; only error message text differs slightly."
+  },
+  {
+    "name": "eulerPhi",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "Both use the product formula via trial division; only error message text differs."
+  },
+  {
+    "name": "fibonacci",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS lacks the n>70 overflow guard and BigInt overload present in mathjs."
+  },
+  {
+    "name": "harmonicNumber",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No harmonicNumber implementation found in the MathTS combinatorics file."
+  },
+  {
+    "name": "integerDigits",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No integerDigits implementation found in the MathTS combinatorics file."
+  },
+  {
+    "name": "jacobiSymbol",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No jacobiSymbol implementation found in the MathTS combinatorics file."
+  },
+  {
+    "name": "lucasL",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS exports it as 'lucas' (not 'lucasL') and uses fast-doubling via Fibonacci relation; mathjs uses simple iteration."
+  },
+  {
+    "name": "moebiusMu",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "Source is truncated but visible logic matches mathjs; only error message text differs."
+  },
+  {
+    "name": "nextPrime",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS _isPrime uses 6k±1 optimisation; mathjs uses simple odd-trial-division; both correct but differ in primality check."
+  },
+  {
+    "name": "partitions",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No partitions implementation found in the MathTS combinatorics file."
+  },
+  {
+    "name": "prime",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses a 1.3x safety multiplier on the upper bound estimate; mathjs adds a flat +10 offset instead."
+  },
+  {
+    "name": "primeFactors",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS rejects n<2 (throws for n=1); mathjs accepts n=1 and returns empty array."
+  },
+  {
+    "name": "primePi",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS builds full sieve array and returns its length; mathjs counts inline — same result but MathTS rejects non-integer inputs differently."
+  }
+]

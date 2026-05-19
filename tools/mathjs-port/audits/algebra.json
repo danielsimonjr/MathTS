@@ -1,0 +1,450 @@
+[
+  {
+    "name": "apart",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No apart implementation found in MathTS files."
+  },
+  {
+    "name": "assume",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses a Map of Sets per variable; mathjs uses a flat Map with single string property."
+  },
+  {
+    "name": "asymptotic",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No asymptotic implementation found in MathTS files."
+  },
+  {
+    "name": "cancel",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS cancel only handles numeric fractions; mathjs cancel handles symbolic polynomial expressions."
+  },
+  {
+    "name": "coefficientList",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS coefficientList just trims a coefficient array; mathjs extracts coefficients from an expression string."
+  },
+  {
+    "name": "collect",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses regex-based term parsing; mathjs uses numerical Vandermonde evaluation for coefficient extraction."
+  },
+  {
+    "name": "combine",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No combine implementation found in MathTS files."
+  },
+  {
+    "name": "complexExpand",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No complexExpand implementation found in MathTS files."
+  },
+  {
+    "name": "curl",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS curl is not found as a standalone export; cas.ts has no curl function visible in truncated source."
+  },
+  {
+    "name": "degree",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS degree takes a coefficient array; mathjs degree takes an expression string and variable name."
+  },
+  {
+    "name": "differences",
+    "found_in_mathts": true,
+    "signature_match": "match",
+    "algorithm_match": "match",
+    "notes": ""
+  },
+  {
+    "name": "directionalDerivative",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS returns a numeric value with a scope; mathjs returns a symbolic string expression."
+  },
+  {
+    "name": "discriminant",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes a coefficient array; mathjs takes an expression string and variable name."
+  },
+  {
+    "name": "divergence",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS returns a numeric value with scope; mathjs returns a symbolic string expression."
+  },
+  {
+    "name": "element",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No element implementation found in MathTS files."
+  },
+  {
+    "name": "eliminate",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No eliminate implementation found in MathTS files."
+  },
+  {
+    "name": "expToTrig",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No expToTrig implementation found in MathTS files."
+  },
+  {
+    "name": "expand",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses regex-based string manipulation; mathjs uses AST simplify rules for expansion."
+  },
+  {
+    "name": "factor",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS only factors out numeric GCDs from terms; mathjs uses rational roots theorem for polynomial factoring."
+  },
+  {
+    "name": "fourierSeries",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No fourierSeries implementation found in MathTS files."
+  },
+  {
+    "name": "fullSimplify",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No fullSimplify implementation found in MathTS files."
+  },
+  {
+    "name": "functionExpand",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No functionExpand implementation found in MathTS files."
+  },
+  {
+    "name": "gradientSymbolic",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS returns numeric values with scope; mathjs returns symbolic string expressions per variable."
+  },
+  {
+    "name": "groebnerBasis",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No groebnerBasis implementation found in MathTS files."
+  },
+  {
+    "name": "implicitDiff",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No implicitDiff implementation found in MathTS files."
+  },
+  {
+    "name": "integrate",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS supports definite integrals numerically and returns string/number; mathjs returns only symbolic string."
+  },
+  {
+    "name": "inverseLaplace",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS inverseLaplace is part of cas.ts table lookup; mathjs has a dedicated alias module."
+  },
+  {
+    "name": "inverseLaplaceTransform",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses regex pattern table; mathjs uses AST node matching with more patterns supported."
+  },
+  {
+    "name": "jacobian",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS returns numeric matrix with scope; mathjs returns symbolic string matrix."
+  },
+  {
+    "name": "laplace",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "Both use table-based lookup; MathTS uses regex patterns, mathjs uses AST node traversal."
+  },
+  {
+    "name": "laplacian",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS returns numeric value with scope; mathjs returns symbolic string expression."
+  },
+  {
+    "name": "limit",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS adds direction parameter and uses multi-step numerical approach; mathjs uses L'Hopital symbolically."
+  },
+  {
+    "name": "minimalPolynomial",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No minimalPolynomial implementation found in MathTS files."
+  },
+  {
+    "name": "multivariateTaylor",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses numerical derivatives; mathjs uses symbolic derivative function for multivariate Taylor."
+  },
+  {
+    "name": "normalForm",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No normalForm implementation found in MathTS files."
+  },
+  {
+    "name": "odeGeneral",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No odeGeneral implementation found in MathTS files."
+  },
+  {
+    "name": "partialDerivative",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS returns numeric value with scope; mathjs returns symbolic string expression."
+  },
+  {
+    "name": "piecewise",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No piecewise implementation found in MathTS files."
+  },
+  {
+    "name": "polyadd",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS trims trailing zeros from result; mathjs does not trim."
+  },
+  {
+    "name": "polyder",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS polyder accepts an order parameter n; mathjs polyder only computes first derivative."
+  },
+  {
+    "name": "polymul",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS returns [0] for empty inputs; mathjs returns []."
+  },
+  {
+    "name": "polynomialGCD",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes coefficient arrays directly; mathjs takes expression strings and a variable name."
+  },
+  {
+    "name": "polynomialLCM",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes coefficient arrays directly; mathjs takes expression strings and a variable name."
+  },
+  {
+    "name": "polynomialQuotient",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes coefficient arrays directly; mathjs takes expression strings and a variable name."
+  },
+  {
+    "name": "polynomialRemainder",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes coefficient arrays directly; mathjs takes expression strings and a variable name."
+  },
+  {
+    "name": "polyval",
+    "found_in_mathts": true,
+    "signature_match": "match",
+    "algorithm_match": "match",
+    "notes": ""
+  },
+  {
+    "name": "powerExpand",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No powerExpand implementation found in MathTS files."
+  },
+  {
+    "name": "reduce",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No reduce implementation found in MathTS files."
+  },
+  {
+    "name": "resultant",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No resultant implementation found in MathTS files."
+  },
+  {
+    "name": "series",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS series uses numerical derivatives; mathjs series uses symbolic derivative function iteratively."
+  },
+  {
+    "name": "seriesCoefficient",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses numerical differentiation; mathjs uses symbolic derivative function for coefficient extraction."
+  },
+  {
+    "name": "solve",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No solve implementation found in MathTS files."
+  },
+  {
+    "name": "substitute",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS substitute uses regex string replacement; mathjs uses AST node transformation."
+  },
+  {
+    "name": "summation",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No summation implementation found in MathTS files."
+  },
+  {
+    "name": "symbolicProduct",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No symbolicProduct implementation found in MathTS files."
+  },
+  {
+    "name": "tangentLine",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No tangentLine implementation found in MathTS files."
+  },
+  {
+    "name": "taylor",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses numerical derivatives; mathjs uses symbolic derivative function iteratively."
+  },
+  {
+    "name": "toRadicals",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No toRadicals implementation found in MathTS files."
+  },
+  {
+    "name": "together",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No together implementation found in MathTS files."
+  },
+  {
+    "name": "trigExpand",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No trigExpand implementation found in MathTS files."
+  },
+  {
+    "name": "trigReduce",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No trigReduce implementation found in MathTS files."
+  },
+  {
+    "name": "trigToExp",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No trigToExp implementation found in MathTS files."
+  },
+  {
+    "name": "variables",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses regex on string; mathjs walks AST nodes. Both filter known constants and return sorted array."
+  },
+  {
+    "name": "zTransform",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No zTransform implementation found in MathTS files."
+  }
+]

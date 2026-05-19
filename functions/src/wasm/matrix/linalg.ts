@@ -1038,3 +1038,166 @@ export function condInf(aPtr: usize, n: i32, workPtr: usize): f64 {
 
   return normA * normAinv
 }
+
+// nullSpace: Compute an orthonormal basis for the null space of a matrix A.
+// Uses SVD: null space vectors are right singular vectors for near-zero singular values.
+// When n > min(m,n), additional vectors are found via Gram-Schmidt on standard basis.
+//
+// Memory layout (all f64, row-major):
+//   A:      m * n  f64 values  (input)
+//   S:      k      f64 values  (singular values, k = min(m,n))
+//   V:      n * k  f64 values  (right singular vectors, column-major: V[i][j] = V[i*k+j])
+//   outPtr: null space vectors written row-major, each of length n
+//           caller must allocate n * n * 8 bytes (worst case)
+//
+// Returns: number of null space vectors written into outPtr
+
+/**
+ * Compute an orthonormal basis for the null space (kernel) of matrix A.
+ *
+ * The null space vectors are extracted from the right singular vectors (V)
+ * corresponding to singular values <= threshold, plus any additional vectors
+ * found via Gram-Schmidt when n > min(m, n).
+ *
+ * @param sPtr   - pointer to singular values array S (length k = min(m,n))
+ * @param k      - number of singular values (min(m, n))
+ * @param vPtr   - pointer to V matrix (n x k, row-major: V[i*k + j])
+ * @param n      - number of columns of A (= rows of V)
+ * @param m      - number of rows of A
+ * @param tol    - tolerance; if < 0, auto-compute as max(m,n)*sqrtEps*S[0]
+ * @param outPtr - pointer to output buffer (n * n f64 values, caller-allocated)
+ * @returns        number of null space vectors written
+ */
+export function nullSpace(
+  sPtr: usize,
+  k: i32,
+  vPtr: usize,
+  n: i32,
+  m: i32,
+  tol: f64,
+  outPtr: usize
+): i32 {
+  if (m == 0 || n == 0 || k == 0) return 0;
+
+  const sqrtEps: f64 = 1.4901161193847656e-8;
+
+  // Determine threshold
+  let threshold: f64;
+  if (tol < 0.0) {
+    const s0: f64 = load<f64>(sPtr);
+    const maxMN: f64 = m > n ? <f64>m : <f64>n;
+    threshold = maxMN * sqrtEps * s0;
+  } else {
+    threshold = tol;
+  }
+
+  // We will build an orthonormal basis incrementally.
+  // basisPtr holds all basis vectors (both from V columns and from Gram-Schmidt).
+  // We allocate a working buffer on the heap: up to n vectors of length n.
+  // basisCount tracks how many basis vectors we have so far (including V columns).
+
+  // Allocate working buffer for full basis (n vectors x n f64)
+  const basisBufSize: usize = <usize>(n * n) << 3;
+  const basisPtr: usize = heap.alloc(basisBufSize);
+  // Zero it out
+  memory.fill(basisPtr, 0, basisBufSize);
+
+  let basisCount: i32 = 0;  // total orthonormal vectors accumulated (V cols + new)
+  let nullCount: i32 = 0;   // how many are null space vectors
+
+  // We need to track which basis vectors are null space vectors.
+  // Use a separate flag buffer (i32 per basis vector).
+  const flagBufSize: usize = <usize>n << 2;
+  const flagPtr: usize = heap.alloc(flagBufSize);
+  memory.fill(flagPtr, 0, flagBufSize);
+
+  // Step 1: Copy all k columns of V into basisPtr (they are already orthonormal).
+  // For each column j of V (0..k-1), copy V[:,j] into basisPtr[basisCount].
+  // V is stored row-major: V[i][j] = load<f64>(vPtr + (i*k + j)*8)
+  for (let j: i32 = 0; j < k; j++) {
+    const vecOff: usize = basisPtr + (<usize>basisCount * <usize>n) * 8;
+    for (let i: i32 = 0; i < n; i++) {
+      const val: f64 = load<f64>(vPtr + (<usize>(i * k + j) << 3));
+      store<f64>(vecOff + (<usize>i << 3), val);
+    }
+    // Check if this is a null space vector
+    const sv: f64 = load<f64>(sPtr + (<usize>j << 3));
+    if (sv <= threshold) {
+      store<i32>(flagPtr + (<usize>basisCount << 2), 1);
+      nullCount++;
+    } else {
+      store<i32>(flagPtr + (<usize>basisCount << 2), 0);
+    }
+    basisCount++;
+  }
+
+  // Step 2: If n > k, find (n - k) additional null space vectors via Gram-Schmidt
+  // on standard basis vectors e_0, e_1, ..., e_{n-1}.
+  if (n > k) {
+    const needed: i32 = n - k;
+    let found: i32 = 0;
+
+    // Temporary vector for Gram-Schmidt
+    const tmpSize: usize = <usize>n << 3;
+    const tmpPtr: usize = heap.alloc(tmpSize);
+
+    for (let ei: i32 = 0; ei < n && found < needed; ei++) {
+      // Initialize tmp = e_ei
+      memory.fill(tmpPtr, 0, tmpSize);
+      store<f64>(tmpPtr + (<usize>ei << 3), 1.0);
+
+      // Project out all current basis vectors
+      for (let bi: i32 = 0; bi < basisCount; bi++) {
+        const bvOff: usize = basisPtr + (<usize>bi * <usize>n) * 8;
+        // dot = tmp . b
+        let dot: f64 = 0.0;
+        for (let i: i32 = 0; i < n; i++) {
+          dot += load<f64>(tmpPtr + (<usize>i << 3)) * load<f64>(bvOff + (<usize>i << 3));
+        }
+        // tmp -= dot * b
+        for (let i: i32 = 0; i < n; i++) {
+          const cur: f64 = load<f64>(tmpPtr + (<usize>i << 3));
+          store<f64>(tmpPtr + (<usize>i << 3), cur - dot * load<f64>(bvOff + (<usize>i << 3)));
+        }
+      }
+
+      // Compute norm
+      let norm2: f64 = 0.0;
+      for (let i: i32 = 0; i < n; i++) {
+        const x: f64 = load<f64>(tmpPtr + (<usize>i << 3));
+        norm2 += x * x;
+      }
+      const norm: f64 = Math.sqrt(norm2);
+
+      if (norm > 1e-12) {
+        // Normalize and add to basis as a null space vector
+        const vecOff: usize = basisPtr + (<usize>basisCount * <usize>n) * 8;
+        for (let i: i32 = 0; i < n; i++) {
+          store<f64>(vecOff + (<usize>i << 3), load<f64>(tmpPtr + (<usize>i << 3)) / norm);
+        }
+        store<i32>(flagPtr + (<usize>basisCount << 2), 1);
+        basisCount++;
+        nullCount++;
+        found++;
+      }
+    }
+
+    heap.free(tmpPtr);
+  }
+
+  // Step 3: Write null space vectors to outPtr
+  let outIdx: i32 = 0;
+  for (let bi: i32 = 0; bi < basisCount; bi++) {
+    if (load<i32>(flagPtr + (<usize>bi << 2)) == 1) {
+      const srcOff: usize = basisPtr + (<usize>bi * <usize>n) * 8;
+      const dstOff: usize = outPtr + (<usize>outIdx * <usize>n) * 8;
+      memory.copy(dstOff, srcOff, <usize>n << 3);
+      outIdx++;
+    }
+  }
+
+  heap.free(basisPtr);
+  heap.free(flagPtr);
+
+  return nullCount;
+}

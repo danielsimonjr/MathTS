@@ -1,0 +1,51 @@
+[
+  {
+    "name": "adjacencyMatrix",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS requires explicit n and uses boolean directed param; mathjs auto-detects n and accepts options object with undirected flag."
+  },
+  {
+    "name": "connectedComponents",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes adjacency matrix (number[][]); mathjs takes adjacency list object, so input format is fundamentally different."
+  },
+  {
+    "name": "graphDistance",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes adjacency matrix with numeric node indices; mathjs takes weighted adjacency list object supporting string or number nodes."
+  },
+  {
+    "name": "isConnected",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes adjacency matrix (number[][]); mathjs takes adjacency list object, so input format is fundamentally different."
+  },
+  {
+    "name": "minimumSpanningTree",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses Prim's algorithm on adjacency matrix; mathjs uses Kruskal's algorithm on an edge list with explicit n parameter."
+  },
+  {
+    "name": "stronglyConnectedComponents",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes adjacency matrix with integer node indices; mathjs takes adjacency list object supporting string or number node keys."
+  },
+  {
+    "name": "topologicalSort",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS takes adjacency matrix returning integer indices; mathjs takes adjacency list object and preserves original node types in output."
+  }
+]

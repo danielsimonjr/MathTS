@@ -1,0 +1,128 @@
+[
+  {
+    "name": "bandpassFilter",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No bandpassFilter implementation found in MathTS signal.ts file."
+  },
+  {
+    "name": "convolve",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses FFT-based convolution returning Float64Array; mathjs uses direct O(N²) returning plain Array."
+  },
+  {
+    "name": "correlate",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS exposes parallelXCorr/crossCorrelation returning Float64Array; mathjs correlate returns plain Array with Matrix overloads."
+  },
+  {
+    "name": "dct",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS DCT-II applies orthonormal scaling factors (sqrt(1/N), sqrt(2/N)); mathjs DCT-II has no scaling."
+  },
+  {
+    "name": "dst",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No dst implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "dwt",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No dwt implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "fft2d",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No fft2d implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "fourier",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No fourier wrapper implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "highpassFilter",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No highpassFilter implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "hilbertTransform",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No hilbertTransform implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "idst",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No idst implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "invFourier",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No invFourier implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "lowpassFilter",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No lowpassFilter implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "medfilt",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No medfilt implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "periodogram",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No periodogram implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "resample",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No resample implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "spectrogram",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No spectrogram implementation found in the MathTS signal.ts file."
+  },
+  {
+    "name": "windowFunction",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No windowFunction implementation found in the MathTS signal.ts file."
+  }
+]

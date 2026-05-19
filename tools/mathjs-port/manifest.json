@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-18",
+  "baseline_commit": "55dea0d71",
+  "baseline_marker": "[15.3.4] (never tagged; package.json version 15.2.0)",
+  "mathjs_head_commit": "9e1a24a88",
+  "ts_split_commit": "e62bcd749",
+  "ts_split_date": "2026-04-10",
+  "rationale": "Mathjs upstream removed all .ts files in the TS-split. Of the 215 new functions added between baseline and HEAD, 209 are already implemented in MathTS (functions/src/typed/ or functions/src/wasm/). The 6 below are the genuine port gap.",
+  "ports": [
+    {
+      "name": "inverseLaplaceTransform",
+      "category": "algebra",
+      "mathjs_source": "src/function/algebra/inverseLaplaceTransform.js",
+      "mathjs_test": "test/unit-tests/function/algebra/inverseLaplaceTransform.test.js",
+      "lines": 476,
+      "target_lang": "ts",
+      "target_path": "functions/src/typed/cas.ts",
+      "target_mode": "append",
+      "reason": "Symbolic CAS function: manipulates AST nodes, calls parse(), uses substitution. AS-incompatible. Append to existing CAS module."
+    },
+    {
+      "name": "nullSpace",
+      "category": "matrix",
+      "mathjs_source": "src/function/matrix/nullSpace.js",
+      "mathjs_test": "test/unit-tests/function/matrix/nullSpace.test.js",
+      "lines": 168,
+      "target_lang": "as",
+      "target_path": "functions/src/wasm/matrix/decomp.ts",
+      "target_mode": "append",
+      "reason": "Pure numerical: SVD-based null space. AS-feasible (Float64 pointers, fixed dims). Matrix decomp lives in wasm/matrix/."
+    },
+    {
+      "name": "polyfit",
+      "category": "numeric",
+      "mathjs_source": "src/function/numeric/polyfit.js",
+      "mathjs_test": "test/unit-tests/function/numeric/polyfit.test.js",
+      "lines": 123,
+      "target_lang": "as",
+      "target_path": "functions/src/wasm/numeric/regression.ts",
+      "target_mode": "new",
+      "reason": "Pure numerical: least-squares polynomial fitting via Vandermonde. AS-feasible. New regression.ts module."
+    },
+    {
+      "name": "histogram",
+      "category": "statistics",
+      "mathjs_source": "src/function/statistics/histogram.js",
+      "mathjs_test": "test/unit-tests/function/statistics/histogram.test.js",
+      "lines": 122,
+      "target_lang": "as",
+      "target_path": "functions/src/wasm/statistics/basic.ts",
+      "target_mode": "append",
+      "reason": "Pure numerical: bin counting on Float64 array. AS-feasible. Append to existing basic.ts."
+    },
+    {
+      "name": "linreg",
+      "category": "statistics",
+      "mathjs_source": "src/function/statistics/linreg.js",
+      "mathjs_test": "test/unit-tests/function/statistics/linreg.test.js",
+      "lines": 99,
+      "target_lang": "as",
+      "target_path": "functions/src/wasm/statistics/basic.ts",
+      "target_mode": "append",
+      "reason": "Pure numerical: simple linear regression returning [slope, intercept, r2]. AS-feasible."
+    },
+    {
+      "name": "movingAverage",
+      "category": "statistics",
+      "mathjs_source": "src/function/statistics/movingAverage.js",
+      "mathjs_test": "test/unit-tests/function/statistics/movingAverage.test.js",
+      "lines": 64,
+      "target_lang": "as",
+      "target_path": "functions/src/wasm/statistics/basic.ts",
+      "target_mode": "append",
+      "reason": "Pure numerical: rolling window mean. AS-feasible."
+    }
+  ]
+}

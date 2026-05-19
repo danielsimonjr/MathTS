@@ -1,0 +1,86 @@
+[
+  {
+    "name": "area",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS takes a Shape object (circle/rectangle/triangle/polygon); mathjs takes a raw vertices array only."
+  },
+  {
+    "name": "centroid",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS lacks the degenerate collinear fallback to arithmetic mean that mathjs implements."
+  },
+  {
+    "name": "chebyshevDistance",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses Math.min(a.length,b.length) silently; mathjs throws on unequal or empty lengths."
+  },
+  {
+    "name": "convexHull",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS skips input validation (type/coordinate checks) that mathjs performs."
+  },
+  {
+    "name": "coordinateTransform",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS spherical uses different angle convention (phi=inclination vs mathjs theta=inclination), producing different output."
+  },
+  {
+    "name": "delaunayTriangulation",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "unknown",
+    "notes": "MathTS implementation is truncated; WASM dispatch path and full Bowyer-Watson details cannot be fully verified."
+  },
+  {
+    "name": "kdTree",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "unknown",
+    "notes": "MathTS implementation is truncated; WASM threshold dispatch and full nearest/rangeSearch logic cannot be fully verified."
+  },
+  {
+    "name": "manhattanDistance",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses Math.min(a.length,b.length) silently; mathjs throws on unequal or empty lengths."
+  },
+  {
+    "name": "minkowskiDistance",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "compatible",
+    "notes": "MathTS uses Math.min(a.length,b.length) silently; mathjs throws on unequal or empty lengths."
+  },
+  {
+    "name": "pointInPolygon",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS skips input validation checks that mathjs performs; core ray-casting algorithm is identical."
+  },
+  {
+    "name": "polygonPerimeter",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS returns 0 for fewer than 2 vertices; mathjs throws a TypeError for fewer than 2 vertices."
+  },
+  {
+    "name": "voronoiDiagram",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "unknown",
+    "notes": "MathTS implementation is truncated; full Voronoi cell construction and bounds handling cannot be fully verified."
+  }
+]

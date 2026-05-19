@@ -493,3 +493,255 @@ export function coefficientOfVariation(dataPtr: usize, length: i32): f64 {
   if (m === 0) return NaN
   return std(dataPtr, length, 1) / Math.abs(m)
 }
+
+/**
+ * Calculate simple moving average of an array
+ * @param dataPtr Pointer to input Float64Array data
+ * @param length Length of input array
+ * @param window Window size (must be >= 1 and <= length)
+ * @param resultPtr Pointer to output Float64Array (must hold length - window + 1 elements)
+ * @returns Number of elements written to resultPtr, or -1 on error
+ */
+export function movingAverage(dataPtr: usize, length: i32, window: i32, resultPtr: usize): i32 {
+  if (window < 1) return -1
+  if (window > length) return -1
+
+  const resultLength: i32 = length - window + 1
+
+  // Compute initial window sum
+  let windowSum: f64 = 0
+  for (let i: i32 = 0; i < window; i++) {
+    windowSum += load<f64>(dataPtr + (<usize>i << 3))
+  }
+  store<f64>(resultPtr, windowSum / f64(window))
+
+  // Slide the window
+  for (let i: i32 = window; i < length; i++) {
+    windowSum += load<f64>(dataPtr + (<usize>i << 3)) - load<f64>(dataPtr + (<usize>(i - window) << 3))
+    store<f64>(resultPtr + (<usize>(i - window + 1) << 3), windowSum / f64(window))
+  }
+
+  return resultLength
+}
+/**
+ * Compute histogram counts given data and pre-computed bin edges
+ * Internal helper: bins data into [edge[i], edge[i+1]) intervals,
+ * with the last bin being [edge[n-1], edge[n]].
+ * @param dataPtr Pointer to Float64Array of data values
+ * @param dataLen Length of data array
+ * @param edgesPtr Pointer to Float64Array of bin edges (length = numBins + 1)
+ * @param numBins Number of bins (edgesPtr has numBins + 1 elements)
+ * @param countsPtr Pointer to output i32 array of length numBins (zeroed by caller)
+ */
+function histogramComputeCounts(
+  dataPtr: usize,
+  dataLen: i32,
+  edgesPtr: usize,
+  numBins: i32,
+  countsPtr: usize
+): void {
+  const lastEdge = load<f64>(edgesPtr + (<usize>numBins << 3))
+  const firstEdge = load<f64>(edgesPtr)
+
+  for (let j: i32 = 0; j < dataLen; j++) {
+    const val = load<f64>(dataPtr + (<usize>j << 3))
+
+    if (val < firstEdge || val > lastEdge) {
+      continue
+    }
+
+    if (val === lastEdge) {
+      // Include max value in last bin
+      const idx = numBins - 1
+      store<i32>(countsPtr + (<usize>idx << 2), load<i32>(countsPtr + (<usize>idx << 2)) + 1)
+      continue
+    }
+
+    // Binary search for bin index
+    let lo: i32 = 0
+    let hi: i32 = numBins - 1
+    while (lo < hi) {
+      const mid: i32 = (lo + hi) >> 1
+      if (val < load<f64>(edgesPtr + (<usize>(mid + 1) << 3))) {
+        hi = mid
+      } else {
+        lo = mid + 1
+      }
+    }
+    store<i32>(countsPtr + (<usize>lo << 2), load<i32>(countsPtr + (<usize>lo << 2)) + 1)
+  }
+}
+
+/**
+ * Compute histogram with a specified number of equal-width bins.
+ * Bin edges are written to edgesPtr (numBins + 1 values).
+ * Bin centers are written to centersPtr (numBins values).
+ * Counts are written to countsPtr (numBins i32 values).
+ *
+ * @param dataPtr Pointer to Float64Array of data values
+ * @param dataLen Length of data array (must be > 0)
+ * @param numBins Number of equal-width bins (must be >= 1)
+ * @param edgesPtr Pointer to output Float64Array for bin edges (size: numBins + 1)
+ * @param centersPtr Pointer to output Float64Array for bin centers (size: numBins)
+ * @param countsPtr Pointer to output i32 array for counts (size: numBins, must be zeroed)
+ * @returns 0 on success, -1 if dataLen == 0, -2 if numBins < 1
+ */
+export function histogramNumBins(
+  dataPtr: usize,
+  dataLen: i32,
+  numBins: i32,
+  edgesPtr: usize,
+  centersPtr: usize,
+  countsPtr: usize
+): i32 {
+  if (dataLen === 0) return -1
+  if (numBins < 1) return -2
+
+  // Find min and max
+  let minVal = load<f64>(dataPtr)
+  let maxVal = load<f64>(dataPtr)
+  for (let i: i32 = 1; i < dataLen; i++) {
+    const v = load<f64>(dataPtr + (<usize>i << 3))
+    if (v < minVal) minVal = v
+    if (v > maxVal) maxVal = v
+  }
+
+  const rng = maxVal - minVal
+  const step: f64 = rng === 0.0 ? 1.0 : rng / f64(numBins)
+
+  // Write bin edges
+  for (let i: i32 = 0; i <= numBins; i++) {
+    store<f64>(edgesPtr + (<usize>i << 3), minVal + f64(i) * step)
+  }
+  // Last edge: if range == 0, maxVal + 1; else exactly maxVal
+  if (rng === 0.0) {
+    store<f64>(edgesPtr + (<usize>numBins << 3), maxVal + 1.0)
+  } else {
+    store<f64>(edgesPtr + (<usize>numBins << 3), maxVal)
+  }
+
+  // Write bin centers
+  for (let i: i32 = 0; i < numBins; i++) {
+    const lo = load<f64>(edgesPtr + (<usize>i << 3))
+    const hi = load<f64>(edgesPtr + (<usize>(i + 1) << 3))
+    store<f64>(centersPtr + (<usize>i << 3), (lo + hi) / 2.0)
+  }
+
+  // Compute counts
+  histogramComputeCounts(dataPtr, dataLen, edgesPtr, numBins, countsPtr)
+
+  return 0
+}
+
+/**
+ * Compute histogram with explicit bin edges provided by caller.
+ * Bin centers are written to centersPtr (numBins values).
+ * Counts are written to countsPtr (numBins i32 values).
+ *
+ * @param dataPtr Pointer to Float64Array of data values
+ * @param dataLen Length of data array
+ * @param edgesPtr Pointer to Float64Array of bin edges (strictly increasing, length = numBins + 1)
+ * @param numBins Number of bins (edgesPtr has numBins + 1 elements; must be >= 1)
+ * @param centersPtr Pointer to output Float64Array for bin centers (size: numBins)
+ * @param countsPtr Pointer to output i32 array for counts (size: numBins, must be zeroed)
+ * @returns 0 on success, -3 if numBins < 1, -4 if edges are not strictly increasing
+ */
+export function histogramEdges(
+  dataPtr: usize,
+  dataLen: i32,
+  edgesPtr: usize,
+  numBins: i32,
+  centersPtr: usize,
+  countsPtr: usize
+): i32 {
+  if (numBins < 1) return -3
+
+  // Validate strictly increasing edges
+  for (let i: i32 = 1; i <= numBins; i++) {
+    const prev = load<f64>(edgesPtr + (<usize>(i - 1) << 3))
+    const curr = load<f64>(edgesPtr + (<usize>i << 3))
+    if (curr <= prev) return -4
+  }
+
+  // Write bin centers
+  for (let i: i32 = 0; i < numBins; i++) {
+    const lo = load<f64>(edgesPtr + (<usize>i << 3))
+    const hi = load<f64>(edgesPtr + (<usize>(i + 1) << 3))
+    store<f64>(centersPtr + (<usize>i << 3), (lo + hi) / 2.0)
+  }
+
+  // Compute counts
+  histogramComputeCounts(dataPtr, dataLen, edgesPtr, numBins, countsPtr)
+
+  return 0
+}
+/**
+ * Perform simple linear regression on two datasets (ordinary least squares).
+ * Fits the model: y = slope * x + intercept
+ *
+ * Results are written to resultPtr as [slope, intercept, r, r2] (4 x f64 values).
+ *
+ * @param xPtr Pointer to Float64Array of independent variable (predictor)
+ * @param yPtr Pointer to Float64Array of dependent variable (response)
+ * @param length Length of both arrays (must be >= 2 and equal)
+ * @param resultPtr Pointer to output Float64Array of length 4: [slope, intercept, r, r2]
+ * @returns 0 on success, -1 if length < 2, -2 if all x values are identical
+ */
+export function linreg(xPtr: usize, yPtr: usize, length: i32, resultPtr: usize): i32 {
+  if (length < 2) return -1
+
+  let sumX: f64 = 0
+  let sumY: f64 = 0
+  let sumXY: f64 = 0
+  let sumX2: f64 = 0
+  let sumY2: f64 = 0
+
+  for (let i: i32 = 0; i < length; i++) {
+    const xi = load<f64>(xPtr + (<usize>i << 3))
+    const yi = load<f64>(yPtr + (<usize>i << 3))
+    sumX += xi
+    sumY += yi
+    sumXY += xi * yi
+    sumX2 += xi * xi
+    sumY2 += yi * yi
+  }
+
+  const n = f64(length)
+  const meanX = sumX / n
+  const meanY = sumY / n
+
+  const ssXX = sumX2 - n * meanX * meanX
+  const ssYY = sumY2 - n * meanY * meanY
+  const ssXY = sumXY - n * meanX * meanY
+
+  if (ssXX === 0) return -2
+
+  const slope = ssXY / ssXX
+  const intercept = meanY - slope * meanX
+
+  let r: f64 = 0
+  if (ssXX !== 0 && ssYY !== 0) {
+    r = ssXY / Math.sqrt(ssXX * ssYY)
+  }
+  const r2 = r * r
+
+  store<f64>(resultPtr + (<usize>0 << 3), slope)
+  store<f64>(resultPtr + (<usize>1 << 3), intercept)
+  store<f64>(resultPtr + (<usize>2 << 3), r)
+  store<f64>(resultPtr + (<usize>3 << 3), r2)
+
+  return 0
+}
+
+/**
+ * Predict y value from a fitted linear regression model.
+ * Uses slope and intercept previously computed by linreg.
+ *
+ * @param slope Regression slope
+ * @param intercept Regression intercept
+ * @param xVal Input x value to predict
+ * @returns Predicted y value: slope * xVal + intercept
+ */
+export function linregPredict(slope: f64, intercept: f64, xVal: f64): f64 {
+  return slope * xVal + intercept
+}

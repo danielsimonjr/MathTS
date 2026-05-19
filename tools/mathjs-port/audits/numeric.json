@@ -1,0 +1,268 @@
+[
+  {
+    "name": "bezierCurve",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS signature takes (controlPoints, t) returning number[]; same De Casteljau algorithm."
+  },
+  {
+    "name": "bspline",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No bspline implementation found in MathTS files."
+  },
+  {
+    "name": "chebyshevApprox",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No chebyshevApprox implementation found in MathTS files."
+  },
+  {
+    "name": "cond",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No cond implementation found in MathTS files."
+  },
+  {
+    "name": "cspline",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS cspline returns a function directly; mathjs returns an object with evaluate() and coefficients."
+  },
+  {
+    "name": "curvefit",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No curvefit implementation found in MathTS files."
+  },
+  {
+    "name": "eventDetection",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No eventDetection implementation found in MathTS files."
+  },
+  {
+    "name": "expfit",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No expfit implementation found in MathTS files."
+  },
+  {
+    "name": "findRoot",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS findRoot requires bracket [a,b] only (Brent); mathjs also supports Newton with single x0."
+  },
+  {
+    "name": "globalMinimize",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses basin-hopping; mathjs uses differential evolution. Output is array vs object with fval/iterations."
+  },
+  {
+    "name": "gradient",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No gradient implementation found in MathTS files."
+  },
+  {
+    "name": "griddata",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No griddata implementation found in MathTS files."
+  },
+  {
+    "name": "hessian",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No hessian implementation found in MathTS files."
+  },
+  {
+    "name": "interpolate",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS interpolate returns a function; mathjs returns a scalar value directly."
+  },
+  {
+    "name": "leastSquares",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "diverged",
+    "notes": "MathTS leastSquares solves linear least squares (Ax=b); mathjs uses Gauss-Newton for nonlinear residuals."
+  },
+  {
+    "name": "linprog",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No linprog implementation found in MathTS files."
+  },
+  {
+    "name": "linsolve",
+    "found_in_mathts": true,
+    "signature_match": "match",
+    "algorithm_match": "match",
+    "notes": "Both use Gaussian elimination with partial pivoting; identical signatures and behavior."
+  },
+  {
+    "name": "loess",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No loess implementation found in MathTS files."
+  },
+  {
+    "name": "logfit",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No logfit implementation found in MathTS files."
+  },
+  {
+    "name": "maximize",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS maximize returns array; mathjs returns object with x, fval, iterations, converged."
+  },
+  {
+    "name": "minimize",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS minimize returns array; mathjs returns object with x, fval, iterations, converged."
+  },
+  {
+    "name": "nintegrate",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "diverged",
+    "notes": "MathTS uses 5-point Gauss-Legendre with Richardson extrapolation; mathjs uses Gauss-Kronrod 7-15 point."
+  },
+  {
+    "name": "nullspace",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No nullspace implementation found in MathTS files."
+  },
+  {
+    "name": "odeAdaptiveStep",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No odeAdaptiveStep implementation found in MathTS files."
+  },
+  {
+    "name": "padeApproximant",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No padeApproximant implementation found in MathTS files."
+  },
+  {
+    "name": "pchip",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS pchip takes (xs, ys, x) returning scalar; mathjs pchip returns object with evaluate()."
+  },
+  {
+    "name": "polyfit",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS polyFit matches mathjs polyfit; both use normal equations with Vandermonde matrix."
+  },
+  {
+    "name": "powerfit",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No powerfit implementation found in MathTS files."
+  },
+  {
+    "name": "quadprog",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No quadprog implementation found in MathTS files."
+  },
+  {
+    "name": "rank",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No rank implementation found in MathTS files."
+  },
+  {
+    "name": "rbfInterpolate",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No rbfInterpolate implementation found in MathTS files."
+  },
+  {
+    "name": "residue",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No residue implementation found in MathTS files."
+  },
+  {
+    "name": "simpsons",
+    "found_in_mathts": true,
+    "signature_match": "compatible",
+    "algorithm_match": "match",
+    "notes": "MathTS simpsons auto-increments odd n; mathjs throws error for odd n. Algorithm identical."
+  },
+  {
+    "name": "solveBVP",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No solveBVP implementation found in MathTS files."
+  },
+  {
+    "name": "solveODESystem",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No solveODESystem implementation found in MathTS files."
+  },
+  {
+    "name": "solvePDE",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No solvePDE implementation found in MathTS files."
+  },
+  {
+    "name": "stiffODESolver",
+    "found_in_mathts": false,
+    "signature_match": "unknown",
+    "algorithm_match": "unknown",
+    "notes": "No stiffODESolver implementation found in MathTS files."
+  },
+  {
+    "name": "trapz",
+    "found_in_mathts": true,
+    "signature_match": "diverged",
+    "algorithm_match": "compatible",
+    "notes": "MathTS trapz takes optional x (defaults to uniform h=1); mathjs requires explicit x array or scalar dx."
+  }
+]
