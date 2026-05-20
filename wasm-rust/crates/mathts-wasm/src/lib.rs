@@ -55,6 +55,7 @@ pub use numeric::advanced_interp::*;
 pub use numeric::advanced_ode::*;
 pub use numeric::analysis::*;
 pub use numeric::calculus::*;
+pub use numeric::curvefit::*;
 pub use numeric::interpolation::*;
 pub use numeric::ode::*;
 pub use numeric::optimization::*;

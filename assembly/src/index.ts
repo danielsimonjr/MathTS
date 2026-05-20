@@ -275,6 +275,12 @@ export { resample, medfilt, windowFunction } from './ops/signal';
 export { rowReduce, characteristicPolynomial } from './ops/linalg';
 
 // =============================================================================
+// Curve Fitting
+// =============================================================================
+
+export { expfit, logfit, powerfit } from './ops/curvefit';
+
+// =============================================================================
 // Complex Operations (standalone functions)
 // =============================================================================
 
