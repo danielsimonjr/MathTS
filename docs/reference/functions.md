@@ -20,8 +20,9 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export; the factory version is also exported under
 a `factory_` prefix (`factory_add`, …).
 
-**Coverage**: ~350 typed functions + 161 activated factory functions. Known
-gaps (physical constants, `compat` bridge, workbook integration) are tracked in
+**Coverage**: over 500 callable functions across the typed and factory layers,
+plus 52 CODATA physical constants (see [Physical Constants](#physical-constants))
+and 9 type-conversion functions. Remaining coverage gaps are tracked in
 [`docs/roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md`](../roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md).
 
 ---
@@ -201,6 +202,7 @@ lambertW(1);      // ~0.5671 (omega constant)
 | `catalan(n)` | nth Catalan number |
 | `stirlingS2(n, k)` | Stirling number of the second kind |
 | `bellNumbers(n)` | nth Bell number |
+| `bernoulli(n)` | nth Bernoulli number |
 | `fibonacci(n)` | nth Fibonacci number (O(log n) fast doubling) |
 | `lucas(n)` `lucasL(n)` | nth Lucas number |
 | `doubleFactorial(n)` | Double factorial `n!!` |
@@ -351,6 +353,7 @@ operations are eligible for WASM/GPU acceleration via the matrix package.
 | `inv(A)` | Matrix inverse |
 | `pinv(A)` | Moore–Penrose pseudoinverse |
 | `transpose(A)` | Transpose |
+| `ctranspose(A)` | Conjugate (Hermitian) transpose |
 | `eigs(A)` | Eigenvalues and eigenvectors |
 | `lup(A)` | LU decomposition with partial pivoting |
 | `qr(A)` | QR decomposition |
@@ -624,6 +627,7 @@ return a `Promise`.
 | `parallelConv(a, b)` | Convolution |
 | `parallelXCorr(a, b)` | Cross-correlation |
 | `parallelAutoCorr(a)` | Auto-correlation |
+| `fft(x)` / `ifft(X)` | Discrete Fourier transform / inverse (factory layer) |
 | `fft2d(matrix)` | 2D FFT |
 | `fourier(f)` / `invFourier(F)` | Continuous Fourier transform |
 | `dct(x)` / `idct(X)` | Discrete cosine transform / inverse |
@@ -766,6 +770,28 @@ studentTTest([2.1,2.5,2.3], [3.1,3.5,2.9]);
 
 ---
 
+## Physical Constants
+
+52 CODATA physical constants are exported as **values** (not callable
+functions). Full values and units are listed in
+[`constants.md`](./constants.md). Exported names:
+
+`atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`,
+`classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`,
+`deuteronMass`, `efimovFactor`, `electricConstant`, `electronMass`,
+`elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`,
+`firstRadiation`, `gasConstant`, `gravitationConstant`, `gravity`,
+`hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`,
+`loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`,
+`molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`,
+`nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`,
+`planckMass`, `planckTemperature`, `planckTime`, `protonMass`,
+`quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`,
+`secondRadiation`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`,
+`vacuumImpedance`, `weakMixingAngle`, `wienDisplacement`.
+
+---
+
 ## Complex Number Utilities
 
 | Function | Description |
@@ -774,6 +800,27 @@ studentTTest([2.1,2.5,2.3], [3.1,3.5,2.9]);
 | `conj(z)` | Complex conjugate |
 | `re(z)` | Real part |
 | `im(z)` | Imaginary part |
+
+---
+
+## Type Conversion
+
+Convert a value into a specific numeric or container type.
+
+| Function | Description |
+|---|---|
+| `number(x)` | Convert to a primitive `number` |
+| `bigint(x)` | Convert to a `bigint` |
+| `bignumber(x)` | Convert to an arbitrary-precision `BigNumber` |
+| `fraction(x)` | Convert to an exact `Fraction` |
+| `complex(re[, im])` | Convert to / construct a `Complex` |
+| `matrix(data)` | Convert to a dense `DenseMatrix` |
+| `sparse(data)` | Convert to a `SparseMatrix` (CSC storage) |
+| `string(x)` | Convert to a `string` |
+| `boolean(x)` | Convert to a `boolean` |
+
+The factory-layer `numeric(x, type)` (see below) is a single-entry dispatcher
+over the same conversions.
 
 ---
 
@@ -787,6 +834,7 @@ studentTTest([2.1,2.5,2.3], [3.1,3.5,2.9]);
 | `isNumeric(x)` / `hasNumericValue(x)` | Numeric tests |
 | `isNaN(x)` / `isFinite(x)` / `isBounded(x)` | Value tests |
 | `isZero(x)` / `isPositive(x)` / `isNegative(x)` | Sign tests |
+| `isInteger(x)` | Integer test |
 | `isPrime(x)` | Primality test |
 | `format(x[, opts])` | Format a value as a string |
 | `print(template, values)` | Interpolate values into a template |
@@ -802,6 +850,9 @@ studentTTest([2.1,2.5,2.3], [3.1,3.5,2.9]);
 | `evaluate(expr[, scope])` | Evaluate an expression string |
 | `compileExpr(expr)` | Compile once, evaluate many |
 | `parse(expr)` | Parse an expression into an AST node |
+| `parser()` | Create a stateful parser with a scope retained across calls |
+| `reviver(key, value)` | `JSON.parse` reviver — restores `Complex`, `Fraction`, non-finite numbers |
+| `replacer(key, value)` | `JSON.stringify` replacer — serialises `Complex`, `Fraction`, non-finite numbers |
 
 ```typescript
 import { evaluate, compileExpr } from '@danielsimonjr/mathts-functions';
@@ -821,6 +872,11 @@ fn.evaluate({ x: 3 });          // 16
 `ParallelResult<Float64Array>`. Statistics and signal functions return the
 value type directly as a `Promise`. Unwrap arithmetic/trig results with
 `.result`.
+
+The worker pool is created lazily on first use. `initializePool()`,
+`getComputePool()`, and `terminatePool()` provide explicit lifecycle control —
+call `terminatePool()` to release worker threads (for example, before process
+exit).
 
 ```typescript
 import { add } from '@danielsimonjr/mathts-functions';

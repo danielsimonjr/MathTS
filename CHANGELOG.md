@@ -7,12 +7,139 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> Two strands of work since the autograd 0.1.0 release:
+> 1. **WASM gap-analysis sprint** (`EXPANSION_PLAN` W1–W11, PRs #25–#35) — extends
+>    both WASM toolchains (Rust crate primary, AssemblyScript parity) with the
+>    kernels the gap analysis flagged as missing, and wires the cross-package
+>    bridges (compat ↔ functions, tensor ↔ matrix, workbook ↔ expression).
+> 2. **mathjs JS→AS port workflow** — a reusable LLM-driven porting pipeline in
+>    `tools/mathjs-port/`, plus a behavioral-parity audit of synced functions.
+
+### Added
+
+#### WASM kernels — Rust crate + AssemblyScript parity
+
+Each kernel below was added to the Rust crate (`wasm-rust/crates/mathts-wasm/`)
+and mirrored into the AssemblyScript toolchain (`assembly/src/ops/`) so the WASM
+fallback keeps parity. All are allocation-free — Rust takes caller-provided
+scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
+
+- **SVD** — `svd` (thin U/S/V) and `singularValues` via one-sided Jacobi, for
+  any real m×n matrix. The crate previously had only an internal Jacobi
+  eigen-routine for condition number / rank. `matrix/src/operations/svd-wasm.ts`
+  now routes `svdWasm` through the crate's direct `svd` export (was: square
+  symmetric matrices only, via eig).
+- **RREF + characteristic polynomial** — `rowReduce` (Gauss-Jordan RREF) and
+  `characteristicPolynomial` (Faddeev-LeVerrier).
+- **Polynomial algebra** — `polyadd`, `polynomialGCD`, `polynomialLCM`,
+  `polynomialQuotient`, `polynomialRemainder`, `discriminant`, `resultant`.
+- **Signal windowing** — `windowFunction` (Hamming/Hann/Blackman/Bartlett/
+  rectangular, window type as an integer ABI code), `resample` (linear
+  interpolation), `medfilt` (median filter).
+- **Curve fitting** — `expfit`, `logfit`, `powerfit` (log-linearized
+  least-squares fits).
+- **Optimization** — `linprog` (simplex), `quadprog` (projected-gradient QP),
+  `nullspace` (RREF-based null-space basis).
+- **Rational approximation** — `residue` (partial-fraction residues via
+  Durand-Kerner real roots), `padeApproximant` (Padé [m/n] from Taylor
+  coefficients).
+- **Rank-N tensor transpose** — `tensorTranspose` (arbitrary-rank axis
+  permutation, rank capped at 16); the crate previously transposed rank-2 only.
+- **Number theory (11)** — `eulerPhi`, `divisorSigma`, `moebiusMu`,
+  `carmichaelLambda`, `jacobiSymbol`, `harmonicNumber`, `partitions`,
+  `primeFactors`, `divisors`, `integerDigits`, `chineseRemainder`.
+- **Orthogonal polynomials + integral functions (9)** — `chebyshevT`,
+  `hermiteH`, `laguerreL`, `legendreP`, `erfi`, `expIntegralEi`, `sinIntegral`,
+  `cosIntegral`, `logIntegral`.
+
+#### `functions` package
+
+- **52 physical constants** activated (factory tier 19, default number config):
+  `speedOfLight`, `planckConstant`, `avogadro`, etc. — documented in
+  `docs/reference/constants.md`.
+- **Real `isInteger`** — the `createIsInteger` factory is activated after tier 4
+  (it needs the `equal` dependency), replacing the inline numeric-only stub.
+- **Type-conversion exports** — `complex`, `fraction`, `bignumber`, `matrix`,
+  `sparse`, `number`, `string`, `boolean`, `bigint` exported as named converter
+  functions.
+- **Stateful `parser()`** — returns a parser with a retained scope across
+  `evaluate` calls.
+- **JSON round-tripping** — `reviver` / `replacer` for `JSON.parse`/`stringify`
+  of `Complex`, `Fraction`, and non-finite numbers.
+
+#### Cross-package bridges
+
+- **compat `create(all)`** — `all` is now the real `@danielsimonjr/mathts-functions`
+  namespace (was an empty placeholder); `create()` honours its `factories`
+  argument. `create(all)` surfaces `det`, `integrate`, `eigs`, `simplify`, etc.
+- **Tensor ↔ DenseMatrix** — `Tensor.fromDenseMatrix()` and
+  `Tensor.prototype.toDenseMatrix()` bridge the tensor and matrix packages.
+- **MatrixWasmBridge JS FFT fallback** — replaces a "not implemented" throw with
+  a synchronous radix-2 Cooley-Tukey FFT (power-of-two lengths).
+
+#### mathjs JS→AS port workflow
+
+- **Port workflow** in `tools/mathjs-port/`: `manifest.json` (port targets +
+  classifications), `port_one.py` (per-function LLM-driven port using
+  `~/.claude/skills/rlm/scripts/rlm_query.py`), `drafts/` for review-before-integrate
+  output. Produces AssemblyScript ports matching the `functions/src/wasm/`
+  pointer-typed convention. Scope established by cross-referencing mathjs's 215
+  new functions against MathTS active exports: only 6 were genuinely missing.
+- **5 AS ports** of the standalone numerical kernels missing from MathTS,
+  integrated into `functions/src/wasm/` (dormant — not yet exported from
+  `functions/src/index.ts`; exposing via typed-function bindings is a follow-on
+  task):
+  - `movingAverage` — O(n) sliding-window mean.
+  - `histogramNumBins` + `histogramEdges` — equal-width or explicit-edges
+    binning with binary-search assignment.
+  - `linreg` + `linregPredict` — single-pass OLS returning `[slope, intercept, r, r²]`.
+  - `polyfit` — least-squares polynomial fit via Vandermonde normal equations +
+    Gaussian elimination with partial pivoting (`numeric/regression.ts`, new).
+  - `nullSpace` — SVD-based orthonormal null-space basis with Gram-Schmidt
+    completion when n > k.
+- All ports use raw memory pointers (`usize` + `i32` length) matching the
+  existing `wasm/` convention. Typecheck adds zero new errors.
+
+### Changed
+
+- **workbook cell evaluation** — cells are evaluated via `evaluate()` from
+  `@danielsimonjr/mathts-functions` instead of a raw `new Function()`. Cells can
+  now use the full math library and property access routes through the
+  expression sandbox rather than unrestricted code execution. Data cells parse
+  their content as YAML/JSON via `executeData()`.
+- **matrix bridge acceleration** — `MathJSDenseMatrix` gains `multiply()` /
+  `transpose()` instance methods that route through the native matrix
+  `BackendManager` (JS/WASM/GPU by size); the shared backend manager is
+  pre-initialised at module load.
+- **`wasm-rust` SVD is allocation-free** — `svd` / `singularValues` take a
+  caller-provided `work` buffer (sized via `svdWorkSize` / `singularValuesWorkSize`),
+  matching the crate's other matrix kernels, so the JS-side bump allocator owns
+  all WASM linear memory. The crate is now `cfg_attr(not(test), no_std)` so its
+  algorithms can be unit-tested natively with `cargo test`.
+- **`RustWasmLoader` heap base** — the bump allocator now anchors at the
+  module's `__heap_base` global instead of a hardcoded 64 KB. This crate's
+  static-data section spans ~1 MB of lookup tables; the old base wrote into Rust
+  statics, so the loader previously could not safely call any
+  internally-allocating export.
+
 ### Fixed
 
 - **`statistics/chiSquareTest` 2D contingency variant** — function now accepts either a 1D goodness-of-fit pair (`observed, expected`) or a 2D contingency table (`observed` as `rows x cols`, expected auto-computed from row/column totals). Matches mathjs's two-form API. `functions/src/typed/hypothesis.ts`.
 - **`special/erfc` precision** — previously used A&S 7.1.26 (max error 1.5e-7 across all `x`). Now hybrid: Maclaurin series gives machine precision for `|x| <= 0.5`, NR `erfcc` rational form gives ~1.2e-7 for `|x| > 0.5`. All 225 special-function tests still pass. `functions/src/typed/special.ts`.
 - **`algebra/cancel` extended** — beyond plain `n/d` integer fractions, now handles compound fractions `(a/b)/(c/d)` (multiplied across then cancelled) and the trivial `(p)/(p) -> 1` identity. Division-by-zero now throws explicitly. Docstring now accurately scopes the function to numeric forms with a forward reference to `polynomialGCD` for symbolic work. `functions/src/typed/algebra.ts`.
 - **`inverseLaplaceTransform` ported (v3)** — fully integrated into `functions/src/typed/cas.ts`. Public export via plain TS function. Mirrors mathjs's actual algorithm (numerical pattern-matching at sample points against known Laplace pairs). Earlier session flagged this as "divergent algorithm"; honest-claude pass later established that *was* mathjs's algorithm and the original draft was correct in approach. v3 fixes the v1 truncation by using `max_tokens=12288`.
+- **JSON reviver type cast** — the W9 JSON reviver cast a tagged record directly to the `Complex`/`Fraction` `fromJSON` shapes; the cast now routes through `unknown` to satisfy `tsc`.
+
+### Documentation
+
+- **`docs/roadmap/EXPANSION_PLAN.md`** — codebase expansion plan; revised to v2
+  after adversarial review, with a v3 execution log.
+- **Gap analyses** — `GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md` (cross-package
+  bridges + math-function coverage) and `GAP_ANALYSIS_WASM_CANDIDATES.md`
+  (WASM-conversion candidates).
+- **`docs/reference/functions.md`** — rebuilt to match the real export surface;
+  guarded against drift by `functions/tests/docs-sync.test.ts` (W11), which
+  asserts every documented `` `name(` `` token resolves to a real export.
 
 ### Retracted (audit false-positives)
 
@@ -24,29 +151,16 @@ The 2026-05-18 batched audit (`tools/mathjs-port/audit_summary.md`) flagged seve
 - **`matrix/cholesky`** — audit flagged `{L}` object vs raw `L`. Intentional: object return is more extensible. Documented design choice.
 - **`geometry/coordinateTransform`** — angle convention differs (MathTS uses `phi=inclination` physics convention; mathjs uses math convention). Both are valid; documentation choice, no bug.
 
-### Added
-
-- **mathjs JS→AS port workflow** in `tools/mathjs-port/`. Provides `manifest.json` (port targets + classifications), `port_one.py` (per-function LLM-driven port using `~/.claude/skills/rlm/scripts/rlm_query.py`), and `drafts/` for review-before-integrate output. Produces AssemblyScript ports matching the existing `functions/src/wasm/` pointer-typed convention. Scope established by cross-referencing mathjs's 215 new functions against MathTS active exports: only 6 were genuinely missing.
-- **5 AS ports** of the standalone numerical kernels missing from MathTS, integrated into `functions/src/wasm/`:
-  - `movingAverage` — O(n) sliding-window mean, `functions/src/wasm/statistics/basic.ts`.
-  - `histogramNumBins` + `histogramEdges` — equal-width or explicit-edges binning with binary-search assignment, `functions/src/wasm/statistics/basic.ts`.
-  - `linreg` + `linregPredict` — single-pass OLS returning `[slope, intercept, r, r²]`, `functions/src/wasm/statistics/basic.ts`.
-  - `polyfit` — least-squares polynomial fitting via Vandermonde normal equations + Gaussian elimination with partial pivoting, `functions/src/wasm/numeric/regression.ts` (new file).
-  - `nullSpace` — SVD-based orthonormal null-space basis with Gram-Schmidt completion when n > k, `functions/src/wasm/matrix/linalg.ts`.
-- All ports use raw memory pointers (`usize` + `i32` length) matching the existing wasm/ convention. Typecheck adds zero new errors. Files remain dormant (not yet exported from `functions/src/index.ts`); exposing via typed-function bindings is a follow-on task.
-
 ### Audit
 
 - **Behavioral-parity audit** run across all 9 mathjs categories (`tools/mathjs-port/audit_category.py` + `aggregate_audit.py`). Output: `tools/mathjs-port/audits/<cat>.json` + aggregated `audit_summary.md`. ⚠️ Quantitative summary unreliable due to source truncation in prompts; per-function divergence notes generally accurate when spot-checked.
 - **Real divergence confirmed by verification**: `combinatorics/divisorSigma` has reversed argument order — MathTS `divisorSigma(n, k)` vs mathjs `divisorSigma(k, n)`. Users expecting mathjs compatibility will get wrong results. Recommend either renaming or adding a compat shim.
-- **Other candidate divergences worth investigating** (per audit notes; not yet verified): `algebra/cancel` (numeric-only vs symbolic), `geometry/coordinateTransform` (different angle convention — silent wrong answers), `signal/dct` (different scaling — orthonormal vs unnormalized), `matrix/cholesky` (returns `{L}` object vs raw `L`), `statistics/chiSquareTest` (missing 2D contingency variant), `statistics/studentTTest` (missing two-sample variant), `special/erfc` (lower precision than mathjs's Cody/Chebyshev).
+- **All other candidate divergences resolved** — `chiSquareTest` (2D variant) and `erfc` (precision) were real and are fixed above; `cancel` (numeric scope) is fixed above; `studentTTest`, `dct`, `cholesky`, `coordinateTransform` were audit false-positives, retracted above.
 
-### Flagged for review
+### Dependencies
 
-- `inverseLaplaceTransform` (TS, symbolic) — **two drafts generated, neither integrated**:
-  - v1 (`drafts/inverseLaplaceTransform.ts.draft`): faithfully mirrors mathjs's algorithm (numerical pattern-matching via repeated evaluation at sample points — `_matchQuadratic`, `_matchPower`, etc.) but uses string-level operations where mathjs uses node-level, **and was truncated at the LLM's max_tokens boundary** (incomplete `iltSplitTopLevel`). Also missing the public `mathTyped` export and the `evaluate` import.
-  - v2 (`drafts/inverseLaplaceTransform.ts.v2.draft`): produced `// PORT BLOCKED` after I incorrectly demanded parse-tree substitution. The LLM correctly identified that mathjs's actual implementation IS numerical pattern-matching and refused contradictory constraints — caught my misreading of mathjs's source.
-  - Recommended path: re-prompt with `max_tokens=12288` and the corrected algorithmic understanding (numerical pattern-matching is the right approach), or hand-port.
+- Bumped `tar` (7.5.2 → 7.5.15) and `picomatch` (4.0.3 → 4.0.4) in the
+  `tools/*` utility packages; bumped `codecov/codecov-action` 5 → 6 in CI.
 
 ## [autograd 0.1.0] - 2026-05-15
 
