@@ -170,9 +170,13 @@ export function reviver(_key: string, value: unknown): unknown {
     const tagged = value as { mathjs: string; [k: string]: unknown };
     switch (tagged.mathjs) {
       case 'Complex':
-        return Complex.fromJSON(tagged as { re: number; im: number });
+        return Complex.fromJSON(
+          tagged as unknown as { re: number; im: number }
+        );
       case 'Fraction':
-        return Fraction.fromJSON(tagged as { n: string; d: string });
+        return Fraction.fromJSON(
+          tagged as unknown as { n: string; d: string }
+        );
       case 'number':
         if (tagged.value === 'Infinity') return Infinity;
         if (tagged.value === '-Infinity') return -Infinity;
