@@ -54,6 +54,7 @@ pub mod statistics;
 pub use numeric::advanced_interp::*;
 pub use numeric::advanced_ode::*;
 pub use numeric::analysis::*;
+pub use numeric::approx_ext::*;
 pub use numeric::calculus::*;
 pub use numeric::curvefit::*;
 pub use numeric::interpolation::*;

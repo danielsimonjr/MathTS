@@ -1,6 +1,7 @@
 pub mod advanced_interp;
 pub mod advanced_ode;
 pub mod analysis;
+pub mod approx_ext;
 pub mod calculus;
 pub mod curvefit;
 pub mod interpolation;

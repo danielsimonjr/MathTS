@@ -287,6 +287,12 @@ export { expfit, logfit, powerfit } from './ops/curvefit';
 export { quadprog, linprog, nullspace } from './ops/optimization';
 
 // =============================================================================
+// Rational Approximation (residues, Padé)
+// =============================================================================
+
+export { residue, padeApproximant } from './ops/approx';
+
+// =============================================================================
 // Complex Operations (standalone functions)
 // =============================================================================
 
