@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "*",
+    "@danielsimonjr/mathts-functions": "*",
     "yaml": "^2.3.0"
   },
   "devDependencies": {

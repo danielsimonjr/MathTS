@@ -31,7 +31,8 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-core": "*"
+    "@danielsimonjr/mathts-core": "*",
+    "@danielsimonjr/mathts-matrix": "*"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",

@@ -4,6 +4,8 @@
 
 import type { Workbook, Cell, WorkbookEvent, DependencyGraph } from './types';
 import { buildDependencyGraph, getDependents } from './graph';
+import { evaluate } from '@danielsimonjr/mathts-functions';
+import { parse as parseYaml } from 'yaml';
 
 /**
  * Event handler type
@@ -130,14 +132,16 @@ export class WorkbookExecutor {
   }
 
   /**
-   * Execute a code cell by evaluating its content with scope from dependency outputs.
+   * Execute a code cell by evaluating its content as a MathTS expression.
    *
-   * Uses the Function constructor to evaluate expressions. Cell dependencies
-   * are injected as named variables in the evaluation scope, allowing cells
-   * to reference outputs of earlier cells by their id.
+   * Dependency outputs are injected as named variables in the evaluation
+   * scope, so a cell can reference the result of an earlier cell by its id.
+   * Evaluation goes through the MathTS expression engine — property and
+   * method access route through the expression sandbox, so this does not
+   * have the arbitrary-code-execution exposure of the `Function` constructor.
    */
   private async executeCode(cell: Cell): Promise<unknown> {
-    // Build scope from dependency outputs
+    // Build the evaluation scope from dependency outputs.
     const scope: Record<string, unknown> = {};
     if (cell.dependsOn) {
       for (const depId of cell.dependsOn) {
@@ -148,28 +152,14 @@ export class WorkbookExecutor {
       }
     }
 
-    const scopeKeys = Object.keys(scope);
-    const scopeValues = scopeKeys.map((k) => scope[k]);
-
-    try {
-      // Evaluate as an expression first (e.g. "2 + 3", "x * 2")
-      // eslint-disable-next-line no-new-func
-      const fn = new Function(...scopeKeys, `return (${cell.content});`);
-      return fn(...scopeValues);
-    } catch {
-      // If expression evaluation fails, try as statements (e.g. "const x = 1; x + 2")
-      // eslint-disable-next-line no-new-func
-      const fn = new Function(...scopeKeys, cell.content);
-      return fn(...scopeValues);
-    }
+    return evaluate(cell.content, scope);
   }
 
   /**
-   * Execute a data cell
+   * Execute a data cell — parse its content as YAML (a superset of JSON).
    */
   private async executeData(cell: Cell): Promise<unknown> {
-    // TODO: Parse YAML/JSON data
-    return cell.content;
+    return parseYaml(cell.content);
   }
 
   /**

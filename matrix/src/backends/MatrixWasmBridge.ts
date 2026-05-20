@@ -346,9 +346,88 @@ export class MatrixWasmBridge {
     if (opts.useWasm && this.wasmModule && n >= WasmThresholds.fft) {
       return this.fftWasm(data, n, inverse)
     } else {
-      // Fallback to JavaScript implementation
-      throw new Error('JavaScript FFT fallback not implemented in bridge')
+      return this.fftJS(data, n, inverse)
     }
+  }
+
+  /**
+   * Pure-JS radix-2 Cooley-Tukey FFT fallback.
+   *
+   * `data` is interleaved complex (real, imag pairs), length `2n`. The result
+   * uses the same layout. Forward transform is unscaled; the inverse transform
+   * scales by `1/n` (standard convention). Requires `n` to be a power of two.
+   */
+  private static fftJS(
+    data: Float64Array,
+    n: number,
+    inverse: boolean
+  ): Float64Array {
+    if (n === 0) return new Float64Array(0)
+    if ((n & (n - 1)) !== 0) {
+      throw new Error(
+        `JavaScript FFT fallback requires a power-of-two length (got ${n})`
+      )
+    }
+
+    const re = new Float64Array(n)
+    const im = new Float64Array(n)
+    for (let i = 0; i < n; i++) {
+      re[i] = data[2 * i]
+      im[i] = data[2 * i + 1]
+    }
+
+    // Bit-reversal permutation.
+    for (let i = 1, j = 0; i < n; i++) {
+      let bit = n >> 1
+      for (; j & bit; bit >>= 1) {
+        j ^= bit
+      }
+      j ^= bit
+      if (i < j) {
+        let t = re[i]
+        re[i] = re[j]
+        re[j] = t
+        t = im[i]
+        im[i] = im[j]
+        im[j] = t
+      }
+    }
+
+    // Iterative Cooley-Tukey butterflies.
+    const sign = inverse ? 1 : -1
+    for (let len = 2; len <= n; len <<= 1) {
+      const half = len >> 1
+      const ang = (sign * 2 * Math.PI) / len
+      const wRe = Math.cos(ang)
+      const wIm = Math.sin(ang)
+      for (let i = 0; i < n; i += len) {
+        let curRe = 1
+        let curIm = 0
+        for (let k = 0; k < half; k++) {
+          const bRe = re[i + k + half]
+          const bIm = im[i + k + half]
+          const tRe = bRe * curRe - bIm * curIm
+          const tIm = bRe * curIm + bIm * curRe
+          const aRe = re[i + k]
+          const aIm = im[i + k]
+          re[i + k] = aRe + tRe
+          im[i + k] = aIm + tIm
+          re[i + k + half] = aRe - tRe
+          im[i + k + half] = aIm - tIm
+          const nextRe = curRe * wRe - curIm * wIm
+          curIm = curRe * wIm + curIm * wRe
+          curRe = nextRe
+        }
+      }
+    }
+
+    const result = new Float64Array(2 * n)
+    const scale = inverse ? 1 / n : 1
+    for (let i = 0; i < n; i++) {
+      result[2 * i] = re[i] * scale
+      result[2 * i + 1] = im[i] * scale
+    }
+    return result
   }
 
   private static async fftWasm(

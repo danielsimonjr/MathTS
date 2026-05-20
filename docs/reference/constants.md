@@ -39,6 +39,32 @@ evaluate('e ^ 2');         // 7.38905609893065
 | NaN | `NaN` | Not a Number | `NaN` |
 | null | `null` | Null value | `null` |
 
+## Physical Constants
+
+CODATA physical constants are exported from `@danielsimonjr/mathts-functions`.
+Unit-valued constants are `Unit` instances (use `.toNumeric(targetUnit?)` to read
+a number); dimensionless constants (`fineStructure`, `weakMixingAngle`,
+`efimovFactor`, `sackurTetrode`) are plain numbers.
+
+```typescript
+import { speedOfLight, planckConstant, avogadro } from '@danielsimonjr/mathts-functions';
+
+speedOfLight.toNumeric();        // 299792458
+planckConstant.toNumeric();      // 6.62607015e-34
+avogadro.toNumeric();            // 6.02214076e23
+```
+
+| Group | Constants |
+|---|---|
+| Universal | `speedOfLight`, `gravitationConstant`, `planckConstant`, `reducedPlanckConstant` |
+| Electromagnetic | `magneticConstant`, `electricConstant`, `vacuumImpedance`, `coulomb`, `coulombConstant`, `elementaryCharge`, `bohrMagneton`, `conductanceQuantum`, `inverseConductanceQuantum`, `magneticFluxQuantum`, `nuclearMagneton`, `klitzing`, `josephson` |
+| Atomic & nuclear | `electronMass`, `protonMass`, `neutronMass`, `deuteronMass`, `atomicMass`, `bohrRadius`, `classicalElectronRadius`, `hartreeEnergy`, `rydberg`, `thomsonCrossSection`, `quantumOfCirculation`, `fineStructure` |
+| Physico-chemical | `faraday`, `boltzmann`, `gasConstant`, `molarVolume`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `avogadro`, `loschmidt`, `sackurTetrode`, `stefanBoltzmann`, `firstRadiation`, `secondRadiation`, `wienDisplacement` |
+| Other | `gravity`, `planckLength`, `planckMass`, `planckTime`, `planckCharge`, `planckTemperature`, `weakMixingAngle`, `efimovFactor`, `fermiCoupling` |
+
+> Activated under the default `number` configuration. BigNumber-precision
+> physical constants are not yet wired (see `docs/roadmap/EXPANSION_PLAN.md`).
+
 ## BigNumber Constants
 
 For arbitrary-precision constants, use `BigNumber` arithmetic:

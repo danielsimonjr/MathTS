@@ -418,8 +418,10 @@ factoryScope.add = factoryScope.addScalar;
 export const trace = createTrace(factoryScope as any);
 factoryScope.trace = trace;
 
-// det needs multiply — provide multiplyScalar as a stub for scalar operations.
-// Note: det will only work on numeric (non-symbolic) matrices with this stub.
+// det is created here (tier 3) because `inv` (tier 4) depends on it. det's
+// internal use of `multiply` is scalar-only (Bareiss/LU over scalar elements),
+// so binding `multiply` to `multiplyScalar` is correct for scalar-element
+// matrices — full `multiply` would only add block-matrix support.
 factoryScope.multiply = factoryScope.multiplyScalar;
 export const det = createDet(factoryScope as any);
 factoryScope.det = det;
@@ -469,6 +471,9 @@ import { createBernoulli } from '../probability/bernoulli.js';
 // relational
 import { createEqual } from '../relational/equal.js';
 
+// utils
+import { createIsInteger } from '../utils/isInteger.js';
+
 // signal
 import { createZpk2tf } from '../signal/zpk2tf.js';
 
@@ -481,6 +486,10 @@ import { createSum } from '../statistics/sum.js';
 // relational (needed by others)
 export const factory_equal = createEqual(factoryScope as any);
 factoryScope.equal = factory_equal;
+
+// isInteger needs `equal` — the real factory replaces the tier-3 inline stub
+export const isInteger = createIsInteger(factoryScope as any);
+factoryScope.isInteger = isInteger;
 
 // matrix
 export const concat = createConcat(factoryScope as any);
@@ -1294,6 +1303,114 @@ import { createLyap } from '../algebra/lyap.js';
 
 export const lyap = createLyap(factoryScope as any);
 factoryScope.lyap = lyap;
+
+// ---------------------------------------------------------------------------
+// Tier 19: physical constants — leaf factories that need `config`, `Unit`
+// (tier 12), and `BigNumber`. Activated under the default `number` config;
+// each produces a `Unit` (or a dimensionless number) — see EXPANSION_PLAN W1.
+// ---------------------------------------------------------------------------
+
+import {
+  createSpeedOfLight, createGravitationConstant, createPlanckConstant,
+  createReducedPlanckConstant, createMagneticConstant, createElectricConstant,
+  createVacuumImpedance, createCoulomb, createCoulombConstant,
+  createElementaryCharge, createBohrMagneton, createConductanceQuantum,
+  createInverseConductanceQuantum, createMagneticFluxQuantum, createNuclearMagneton,
+  createKlitzing, createJosephson, createFaraday, createFineStructure,
+  createBoltzmann, createGasConstant, createMolarVolume, createMolarMass,
+  createMolarMassC12, createMolarPlanckConstant, createAvogadro, createLoschmidt,
+  createSackurTetrode, createStefanBoltzmann, createFirstRadiation,
+  createSecondRadiation, createWienDisplacement, createElectronMass,
+  createProtonMass, createNeutronMass, createDeuteronMass, createAtomicMass,
+  createBohrRadius, createClassicalElectronRadius,
+} from '../type/unit/physicalConstants.js';
+import {
+  createGravity, createPlanckLength, createPlanckMass, createPlanckTime,
+  createPlanckCharge, createPlanckTemperature, createHartreeEnergy,
+  createQuantumOfCirculation, createRydberg, createThomsonCrossSection,
+  createWeakMixingAngle, createEfimovFactor, createFermiCoupling,
+} from '../type/unit/physicalConstants.js';
+
+export const speedOfLight = createSpeedOfLight(factoryScope as any);
+export const gravitationConstant = createGravitationConstant(factoryScope as any);
+export const planckConstant = createPlanckConstant(factoryScope as any);
+export const reducedPlanckConstant = createReducedPlanckConstant(factoryScope as any);
+export const magneticConstant = createMagneticConstant(factoryScope as any);
+export const electricConstant = createElectricConstant(factoryScope as any);
+export const vacuumImpedance = createVacuumImpedance(factoryScope as any);
+export const coulomb = createCoulomb(factoryScope as any);
+export const coulombConstant = createCoulombConstant(factoryScope as any);
+export const elementaryCharge = createElementaryCharge(factoryScope as any);
+export const bohrMagneton = createBohrMagneton(factoryScope as any);
+export const conductanceQuantum = createConductanceQuantum(factoryScope as any);
+export const inverseConductanceQuantum = createInverseConductanceQuantum(factoryScope as any);
+export const magneticFluxQuantum = createMagneticFluxQuantum(factoryScope as any);
+export const nuclearMagneton = createNuclearMagneton(factoryScope as any);
+export const klitzing = createKlitzing(factoryScope as any);
+export const josephson = createJosephson(factoryScope as any);
+export const faraday = createFaraday(factoryScope as any);
+export const fineStructure = createFineStructure(factoryScope as any);
+export const boltzmann = createBoltzmann(factoryScope as any);
+export const gasConstant = createGasConstant(factoryScope as any);
+export const molarVolume = createMolarVolume(factoryScope as any);
+export const molarMass = createMolarMass(factoryScope as any);
+export const molarMassC12 = createMolarMassC12(factoryScope as any);
+export const molarPlanckConstant = createMolarPlanckConstant(factoryScope as any);
+export const avogadro = createAvogadro(factoryScope as any);
+export const loschmidt = createLoschmidt(factoryScope as any);
+export const sackurTetrode = createSackurTetrode(factoryScope as any);
+export const stefanBoltzmann = createStefanBoltzmann(factoryScope as any);
+export const firstRadiation = createFirstRadiation(factoryScope as any);
+export const secondRadiation = createSecondRadiation(factoryScope as any);
+export const wienDisplacement = createWienDisplacement(factoryScope as any);
+export const electronMass = createElectronMass(factoryScope as any);
+export const protonMass = createProtonMass(factoryScope as any);
+export const neutronMass = createNeutronMass(factoryScope as any);
+export const deuteronMass = createDeuteronMass(factoryScope as any);
+export const atomicMass = createAtomicMass(factoryScope as any);
+export const bohrRadius = createBohrRadius(factoryScope as any);
+export const classicalElectronRadius = createClassicalElectronRadius(factoryScope as any);
+export const gravity = createGravity(factoryScope as any);
+export const planckLength = createPlanckLength(factoryScope as any);
+export const planckMass = createPlanckMass(factoryScope as any);
+export const planckTime = createPlanckTime(factoryScope as any);
+export const planckCharge = createPlanckCharge(factoryScope as any);
+export const planckTemperature = createPlanckTemperature(factoryScope as any);
+export const hartreeEnergy = createHartreeEnergy(factoryScope as any);
+export const quantumOfCirculation = createQuantumOfCirculation(factoryScope as any);
+export const rydberg = createRydberg(factoryScope as any);
+export const thomsonCrossSection = createThomsonCrossSection(factoryScope as any);
+export const weakMixingAngle = createWeakMixingAngle(factoryScope as any);
+export const efimovFactor = createEfimovFactor(factoryScope as any);
+export const fermiCoupling = createFermiCoupling(factoryScope as any);
+
+// ---------------------------------------------------------------------------
+// Type-conversion functions (EXPANSION_PLAN W9)
+// Collision-free named exports — the scope already holds the constructors.
+// ---------------------------------------------------------------------------
+
+export const complex = factoryScope.complex as (
+  re?: number,
+  im?: number
+) => unknown;
+export const fraction = factoryScope.fraction as (
+  n: number,
+  d?: number
+) => unknown;
+export const bignumber = factoryScope.bignumber as (
+  x: number | string
+) => unknown;
+export const matrix = factoryScope.matrix as (
+  data?: unknown,
+  format?: string
+) => unknown;
+export const sparse = factoryScope.createSparseMatrix as (
+  data?: unknown
+) => unknown;
+export const number = (x?: unknown): number => Number(x ?? 0);
+export const string = (x?: unknown): string => (x === undefined ? '' : String(x));
+export const boolean = (x?: unknown): boolean => Boolean(x);
+export const bigint = (x?: unknown): bigint => BigInt((x ?? 0) as never);
 
 // ---------------------------------------------------------------------------
 // Update mathWithTransform with all activated factories

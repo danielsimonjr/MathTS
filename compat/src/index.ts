@@ -18,6 +18,7 @@
  */
 
 import { shims } from './shims.js';
+import * as mathFunctions from '@danielsimonjr/mathts-functions';
 
 // =============================================================================
 // Configuration
@@ -58,6 +59,14 @@ const defaultConfig: MathJSConfig = {
  * MathTS instance with mathjs-compatible API
  */
 export interface MathInstance {
+  /**
+   * Index signature for the full functions namespace surfaced by
+   * `create(all)`. Members declared explicitly below keep their precise
+   * types; everything else (det, integrate, eigs, …) is reachable as
+   * `unknown` and can be narrowed by the caller.
+   */
+  [name: string]: unknown;
+
   // Configuration
   config: (newConfig?: Partial<MathJSConfig>) => MathJSConfig;
 
@@ -143,7 +152,8 @@ export interface MathInstance {
 /**
  * Create a MathTS instance with mathjs-compatible API
  *
- * @param _factories - Factory functions to include (use `all` for all functions)
+ * @param factories - Factory functions to include (use `all` for the full
+ *   `@danielsimonjr/mathts-functions` surface; defaults to `all`)
  * @param config - Configuration options
  * @returns MathTS instance with mathjs-compatible API
  *
@@ -152,18 +162,23 @@ export interface MathInstance {
  * import { create, all } from '@danielsimonjr/mathts-compat';
  * const math = create(all);
  *
- * math.add(1, 2);           // 3
- * math.complex(3, 4);       // Complex(3, 4)
+ * math.add(1, 2);             // 3
+ * math.complex(3, 4);         // Complex(3, 4)
  * math.matrix([[1,2],[3,4]]); // DenseMatrix
+ * math.det([[1,2],[3,4]]);    // -2  (full functions surface)
  * ```
  */
 export function create(
-  _factories: Record<string, unknown> = {},
+  factories: Record<string, unknown> = all,
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
   const currentConfig: MathJSConfig = { ...defaultConfig, ...config };
 
   return {
+    // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
+    // simplify, and the rest. The compat-specific shims below overlay it.
+    ...factories,
+
     // Configuration
     config: (newConfig?: Partial<MathJSConfig>) => {
       if (newConfig) {
@@ -258,8 +273,7 @@ export function create(
  * Use with `create(all)` to get a fully-featured math instance.
  */
 export const all: Record<string, unknown> = {
-  // Placeholder - in mathjs this contains all factory functions
-  // For MathTS compat, we include everything by default in create()
+  ...(mathFunctions as unknown as Record<string, unknown>),
 };
 
 // =============================================================================
