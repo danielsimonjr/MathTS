@@ -46,6 +46,21 @@ export interface RustWasmExports {
     dataPtr: number, rows: number, cols: number, resultPtr: number
   ) => void;
 
+  // --- Decompositions ---
+  /** Thin SVD: writes U (m*k), S (k), V (n*k); k = min(m,n). */
+  svd: (
+    aPtr: number, m: number, n: number,
+    uPtr: number, sPtr: number, vPtr: number, workPtr: number
+  ) => number;
+  /** Singular values only: writes S (k); k = min(m,n). */
+  singularValues: (
+    aPtr: number, m: number, n: number, sPtr: number, workPtr: number
+  ) => number;
+  /** Scratch length (in f64s) required by `svd`. */
+  svdWorkSize: (m: number, n: number) => number;
+  /** Scratch length (in f64s) required by `singularValues`. */
+  singularValuesWorkSize: (m: number, n: number) => number;
+
   // --- Element-wise (SIMD-accelerated) ---
   simdAddF64: (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
   simdSubF64: (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
@@ -273,8 +288,18 @@ export class RustWasmLoader {
 
       this.wasmMemory = this.wasmInstance.exports.memory as WebAssembly.Memory;
 
-      // Initialize bump allocator after Rust statics (64 KB headroom)
-      this.allocator = new BumpAllocator(65536);
+      // Anchor the bump allocator at the module's `__heap_base` global so
+      // caller buffers sit above the Rust static-data section. This crate's
+      // statics span ~1 MB of lookup tables; a fixed 64 KB base would write
+      // straight into them. Falls back to 64 KB if the global is absent.
+      const heapBaseGlobal = this.wasmInstance.exports.__heap_base as
+        | WebAssembly.Global
+        | undefined;
+      const heapBase =
+        heapBaseGlobal && typeof heapBaseGlobal.value === 'number'
+          ? (heapBaseGlobal.value as number)
+          : 65536;
+      this.allocator = new BumpAllocator(heapBase);
 
       this._isLoaded = true;
       return true;
