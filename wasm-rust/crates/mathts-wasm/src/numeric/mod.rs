@@ -6,5 +6,6 @@ pub mod curvefit;
 pub mod interpolation;
 pub mod ode;
 pub mod optimization;
+pub mod optimization_ext;
 pub mod rational;
 pub mod rootfinding;

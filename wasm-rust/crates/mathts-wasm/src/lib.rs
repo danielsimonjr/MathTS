@@ -59,6 +59,7 @@ pub use numeric::curvefit::*;
 pub use numeric::interpolation::*;
 pub use numeric::ode::*;
 pub use numeric::optimization::*;
+pub use numeric::optimization_ext::*;
 pub use numeric::rational::*;
 pub use numeric::rootfinding::*;
 pub use special::functions::*;

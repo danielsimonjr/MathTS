@@ -281,6 +281,12 @@ export { rowReduce, characteristicPolynomial } from './ops/linalg';
 export { expfit, logfit, powerfit } from './ops/curvefit';
 
 // =============================================================================
+// Optimization (linear / quadratic programming, null space)
+// =============================================================================
+
+export { quadprog, linprog, nullspace } from './ops/optimization';
+
+// =============================================================================
 // Complex Operations (standalone functions)
 // =============================================================================
 
