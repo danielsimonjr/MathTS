@@ -4,7 +4,9 @@
 //! All exported functions use `#[no_mangle] extern "C"` with camelCase names
 //! to match the JavaScript calling convention.
 
-#![no_std]
+// `no_std` for every real build (notably the wasm32 target); `cargo test`
+// builds against `std` so the crate's algorithms can be unit-tested natively.
+#![cfg_attr(not(test), no_std)]
 
 extern crate alloc;
 
@@ -25,6 +27,7 @@ pub use matrix::multiply::*;
 pub use matrix::rotation::*;
 pub use matrix::sparse::*;
 pub use matrix::sqrtm::*;
+pub use matrix::svd::*;
 
 // ============================================================
 // Phase 3: Signal + SIMD modules

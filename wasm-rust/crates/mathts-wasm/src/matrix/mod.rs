@@ -9,3 +9,4 @@ pub mod multiply;
 pub mod rotation;
 pub mod sparse;
 pub mod sqrtm;
+pub mod svd;
