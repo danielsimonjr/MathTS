@@ -59,6 +59,8 @@ pub use numeric::optimization::*;
 pub use numeric::rational::*;
 pub use numeric::rootfinding::*;
 pub use special::functions::*;
+pub use special::integral::*;
+pub use special::orthogonal::*;
 pub use statistics::basic::*;
 pub use statistics::select::*;
 
