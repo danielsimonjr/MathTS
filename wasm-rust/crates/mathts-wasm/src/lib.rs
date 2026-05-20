@@ -109,6 +109,7 @@ pub use arithmetic::logarithmic::*;
 
 pub use bitwise::operations::*;
 pub use combinatorics::basic::*;
+pub use combinatorics::number_theory::*;
 pub use complex::operations::*;
 pub use geometry::advanced::*;
 pub use geometry::operations::*;
