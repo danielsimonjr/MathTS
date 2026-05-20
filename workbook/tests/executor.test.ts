@@ -79,13 +79,22 @@ describe('WorkbookExecutor', () => {
       expect(result).toBe(20);
     });
 
-    it('should execute code cell with statement block', async () => {
+    it('should execute code cell with a compound expression', async () => {
       const wb = makeWorkbook([
-        { id: 'a', type: 'code', content: 'const v = 3; return v * v;' },
+        { id: 'a', type: 'code', content: '3^2' },
       ]);
       const exec = new WorkbookExecutor(wb);
       const result = await exec.runCell('a');
       expect(result).toBe(9);
+    });
+
+    it('should execute code cell using math functions', async () => {
+      const wb = makeWorkbook([
+        { id: 'a', type: 'code', content: 'sin(pi / 2)' },
+      ]);
+      const exec = new WorkbookExecutor(wb);
+      const result = await exec.runCell('a');
+      expect(result).toBeCloseTo(1, 10);
     });
 
     it('should throw for unknown cell id', async () => {
@@ -102,7 +111,7 @@ describe('WorkbookExecutor', () => {
 
     it('should emit error event on failure', async () => {
       const wb = makeWorkbook([
-        { id: 'a', type: 'code', content: 'throw new Error("deliberate")' },
+        { id: 'a', type: 'code', content: 'nonexistentSymbol' },
       ]);
       const exec = new WorkbookExecutor(wb);
       const events: WorkbookEvent[] = [];
@@ -110,7 +119,7 @@ describe('WorkbookExecutor', () => {
       await exec.runCell('a').catch(() => {});
       const errorEvent = events.find((e) => e.type === 'cell:error');
       expect(errorEvent).toBeDefined();
-      expect(errorEvent!.error).toContain('deliberate');
+      expect(errorEvent!.error).toContain('nonexistentSymbol');
     });
 
     it('should mark dependents as stale in reactive mode', async () => {
