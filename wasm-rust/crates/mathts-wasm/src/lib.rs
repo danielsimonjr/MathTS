@@ -23,6 +23,7 @@ pub use matrix::complex_eigs::*;
 pub use matrix::eigs::*;
 pub use matrix::expm::*;
 pub use matrix::linalg::*;
+pub use matrix::linalg_ext::*;
 pub use matrix::multiply::*;
 pub use matrix::rotation::*;
 pub use matrix::sparse::*;
@@ -39,6 +40,7 @@ pub mod simd;
 pub use signal::fft::*;
 pub use signal::processing::*;
 pub use signal::processing_ext::*;
+pub use signal::windowing::*;
 pub use simd::operations::*;
 
 // ============================================================
@@ -53,12 +55,15 @@ pub use numeric::advanced_interp::*;
 pub use numeric::advanced_ode::*;
 pub use numeric::analysis::*;
 pub use numeric::calculus::*;
+pub use numeric::curvefit::*;
 pub use numeric::interpolation::*;
 pub use numeric::ode::*;
 pub use numeric::optimization::*;
 pub use numeric::rational::*;
 pub use numeric::rootfinding::*;
 pub use special::functions::*;
+pub use special::integral::*;
+pub use special::orthogonal::*;
 pub use statistics::basic::*;
 pub use statistics::select::*;
 
@@ -71,6 +76,7 @@ pub mod algebra;
 pub use algebra::decomposition::*;
 pub use algebra::equations::*;
 pub use algebra::polynomial::*;
+pub use algebra::polynomial_ext::*;
 pub use algebra::schur::*;
 pub use algebra::solver::*;
 pub use algebra::sparse::amd::*;
@@ -107,6 +113,7 @@ pub use arithmetic::logarithmic::*;
 
 pub use bitwise::operations::*;
 pub use combinatorics::basic::*;
+pub use combinatorics::number_theory::*;
 pub use complex::operations::*;
 pub use geometry::advanced::*;
 pub use geometry::operations::*;

@@ -5,6 +5,7 @@ pub mod complex_eigs;
 pub mod eigs;
 pub mod expm;
 pub mod linalg;
+pub mod linalg_ext;
 pub mod multiply;
 pub mod rotation;
 pub mod sparse;
