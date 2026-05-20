@@ -281,6 +281,24 @@ export { rowReduce, characteristicPolynomial } from './ops/linalg';
 export { expfit, logfit, powerfit } from './ops/curvefit';
 
 // =============================================================================
+// Optimization (linear / quadratic programming, null space)
+// =============================================================================
+
+export { quadprog, linprog, nullspace } from './ops/optimization';
+
+// =============================================================================
+// Rational Approximation (residues, Padé)
+// =============================================================================
+
+export { residue, padeApproximant } from './ops/approx';
+
+// =============================================================================
+// Rank-N Tensor Operations
+// =============================================================================
+
+export { tensorTranspose } from './ops/tensor';
+
+// =============================================================================
 // Complex Operations (standalone functions)
 // =============================================================================
 

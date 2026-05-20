@@ -29,6 +29,7 @@ pub use matrix::rotation::*;
 pub use matrix::sparse::*;
 pub use matrix::sqrtm::*;
 pub use matrix::svd::*;
+pub use matrix::tensor_ops::*;
 
 // ============================================================
 // Phase 3: Signal + SIMD modules
@@ -54,11 +55,13 @@ pub mod statistics;
 pub use numeric::advanced_interp::*;
 pub use numeric::advanced_ode::*;
 pub use numeric::analysis::*;
+pub use numeric::approx_ext::*;
 pub use numeric::calculus::*;
 pub use numeric::curvefit::*;
 pub use numeric::interpolation::*;
 pub use numeric::ode::*;
 pub use numeric::optimization::*;
+pub use numeric::optimization_ext::*;
 pub use numeric::rational::*;
 pub use numeric::rootfinding::*;
 pub use special::functions::*;
