@@ -269,6 +269,12 @@ export {
 export { resample, medfilt, windowFunction } from './ops/signal';
 
 // =============================================================================
+// Extra Linear Algebra (RREF, characteristic polynomial)
+// =============================================================================
+
+export { rowReduce, characteristicPolynomial } from './ops/linalg';
+
+// =============================================================================
 // Complex Operations (standalone functions)
 // =============================================================================
 

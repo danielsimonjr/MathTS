@@ -23,6 +23,7 @@ pub use matrix::complex_eigs::*;
 pub use matrix::eigs::*;
 pub use matrix::expm::*;
 pub use matrix::linalg::*;
+pub use matrix::linalg_ext::*;
 pub use matrix::multiply::*;
 pub use matrix::rotation::*;
 pub use matrix::sparse::*;
