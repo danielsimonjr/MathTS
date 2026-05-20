@@ -10,6 +10,8 @@
  * "generic template for future rank-N support".
  */
 
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
 export type NestedArray = number | NestedArray[];
 
 export interface EinsumSpec {
@@ -89,6 +91,29 @@ export class Tensor {
       return out;
     };
     return build(0, 0);
+  }
+
+  /**
+   * Build a rank-2 Tensor from a native DenseMatrix. Bridges the tensor and
+   * matrix packages so matrix data can flow into rank-N / autodiff code.
+   */
+  static fromDenseMatrix(m: DenseMatrix): Tensor {
+    const nested = m.toArray() as number[][];
+    const rows = nested.length;
+    const cols = rows > 0 ? nested[0].length : 0;
+    return Tensor.fromNested(nested, [rows, cols]);
+  }
+
+  /**
+   * Convert a rank-2 Tensor to a native DenseMatrix. Throws for any other rank.
+   */
+  toDenseMatrix(): DenseMatrix {
+    if (this.shape.length !== 2) {
+      throw new Error(
+        `Tensor.toDenseMatrix: expected a rank-2 tensor, got rank ${this.shape.length}`
+      );
+    }
+    return DenseMatrix.fromArray(this.toNested() as number[][]);
   }
 
   private sameShape(other: Tensor): boolean {
