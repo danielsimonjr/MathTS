@@ -215,6 +215,40 @@ export {
 export { matrix_svd, matrix_singular_values } from './ops/svd';
 
 // =============================================================================
+// Special Functions (orthogonal polynomials, integral functions)
+// =============================================================================
+
+export {
+  chebyshevT,
+  hermiteH,
+  laguerreL,
+  legendreP,
+  erfi,
+  expIntegralEi,
+  sinIntegral,
+  cosIntegral,
+  logIntegral,
+} from './ops/special';
+
+// =============================================================================
+// Number Theory
+// =============================================================================
+
+export {
+  eulerPhi,
+  divisorSigma,
+  moebiusMu,
+  carmichaelLambda,
+  jacobiSymbol,
+  harmonicNumber,
+  partitions,
+  primeFactors,
+  divisors,
+  integerDigits,
+  chineseRemainder,
+} from './ops/number-theory';
+
+// =============================================================================
 // Complex Operations (standalone functions)
 // =============================================================================
 
