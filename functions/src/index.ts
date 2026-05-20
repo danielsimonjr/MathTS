@@ -16,4 +16,11 @@ export * from './typed/index.js';
 export * from './factories/index.js';
 
 // Expression evaluator (wired to full math scope)
-export { evaluate, compileExpr, parse } from './factories/evaluate.js';
+export {
+  evaluate,
+  compileExpr,
+  parse,
+  parser,
+  reviver,
+  replacer,
+} from './factories/evaluate.js';

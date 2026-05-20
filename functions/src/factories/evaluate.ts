@@ -12,6 +12,7 @@ import {
   createEvaluate,
   compileExpression as _compileExpression,
 } from '@danielsimonjr/mathts-expression';
+import { Complex, Fraction } from '@danielsimonjr/mathts-core';
 
 import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';
@@ -93,4 +94,91 @@ export const evaluate = createEvaluate(parse, mathScope);
  */
 export function compileExpr(expr: string) {
   return _compileExpression(parse, mathScope, expr);
+}
+
+// ---------------------------------------------------------------------------
+// Stateful parser (EXPANSION_PLAN W9)
+// ---------------------------------------------------------------------------
+
+/**
+ * A stateful parser with a retained scope. Variables persist across
+ * `evaluate` calls.
+ *
+ * Assignment expressions (`x = 5`) are rejected by the expression security
+ * validator — manage retained state with `set` / `get` instead.
+ *
+ * @example
+ * ```ts
+ * const p = parser();
+ * p.set('x', 3);
+ * p.evaluate('x^2');               // 9
+ * p.set('y', p.evaluate('x + 1')); // retain a computed value
+ * p.get('y');                      // 4
+ * ```
+ */
+export function parser() {
+  const scope: Record<string, unknown> = {};
+  return {
+    /** The live scope object — assignments during `evaluate` land here. */
+    scope,
+    /** Evaluate an expression against the retained scope. */
+    evaluate(expr: string): unknown {
+      return evaluate(expr, scope);
+    },
+    /** Read a retained variable. */
+    get(name: string): unknown {
+      return scope[name];
+    },
+    /** Set a retained variable. */
+    set(name: string, value: unknown): void {
+      scope[name] = value;
+    },
+    /** Remove a retained variable. */
+    remove(name: string): void {
+      delete scope[name];
+    },
+    /** Clear all retained variables. */
+    clear(): void {
+      for (const key of Object.keys(scope)) delete scope[key];
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// JSON reviver / replacer (EXPANSION_PLAN W9)
+// ---------------------------------------------------------------------------
+
+/**
+ * `JSON.stringify` replacer that preserves non-finite numbers. `Complex` and
+ * `Fraction` already serialize via their own `toJSON()`.
+ */
+export function replacer(_key: string, value: unknown): unknown {
+  if (typeof value === 'number') {
+    if (value === Infinity) return { mathjs: 'number', value: 'Infinity' };
+    if (value === -Infinity) return { mathjs: 'number', value: '-Infinity' };
+    if (Number.isNaN(value)) return { mathjs: 'number', value: 'NaN' };
+  }
+  return value;
+}
+
+/**
+ * `JSON.parse` reviver that reconstructs `Complex`, `Fraction`, and
+ * non-finite numbers tagged by {@link replacer} / the types' own `toJSON()`.
+ */
+export function reviver(_key: string, value: unknown): unknown {
+  if (value && typeof value === 'object' && 'mathjs' in value) {
+    const tagged = value as { mathjs: string; [k: string]: unknown };
+    switch (tagged.mathjs) {
+      case 'Complex':
+        return Complex.fromJSON(tagged as { re: number; im: number });
+      case 'Fraction':
+        return Fraction.fromJSON(tagged as { n: string; d: string });
+      case 'number':
+        if (tagged.value === 'Infinity') return Infinity;
+        if (tagged.value === '-Infinity') return -Infinity;
+        if (tagged.value === 'NaN') return NaN;
+        return Number(tagged.value);
+    }
+  }
+  return value;
 }
