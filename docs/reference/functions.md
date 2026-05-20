@@ -121,16 +121,16 @@ Functions support `number`, `Complex`, `BigNumber`, and parallel `Float64Array`.
 | `hypot(a, b, …)` | Hypotenuse `sqrt(Σ xᵢ²)` |
 
 ```typescript
-import { sin, cos, atan2, toRadians } from '@danielsimonjr/mathts-functions';
-import { PI } from '@danielsimonjr/mathts-core';
+import { sin, cos, toDegrees } from '@danielsimonjr/mathts-functions';
+import { Complex } from '@danielsimonjr/mathts-core';
 
-sin(PI / 6);              // 0.5
+sin(Math.PI / 6);         // 0.5
 cos(new Complex(0, 1));   // Complex(cosh(1), 0) ≈ Complex(1.543, 0)
 
-const angles = new Float64Array([0, PI/6, PI/4, PI/3, PI/2]);
+const angles = new Float64Array([0, Math.PI/6, Math.PI/4, Math.PI/3, Math.PI/2]);
 const sines = await sin(angles);   // parallel → Float64Array
 
-toDegrees(PI);            // 180
+toDegrees(Math.PI);       // 180
 ```
 
 ---

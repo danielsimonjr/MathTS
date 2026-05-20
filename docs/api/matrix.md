@@ -197,24 +197,6 @@ const { U, S, V } = svd(A);
 // A ≈ U * diag(S) * V^T
 ```
 
-### LU Decomposition
-
-```typescript
-import { lu } from '@danielsimonjr/mathts-matrix';
-
-const { L, U, P } = lu(A);
-// P * A = L * U
-```
-
-### QR Decomposition
-
-```typescript
-import { qr } from '@danielsimonjr/mathts-matrix';
-
-const { Q, R } = qr(A);
-// A = Q * R
-```
-
 ---
 
 ## Type Guards

@@ -147,7 +147,7 @@ main();
 
 ## Function Categories
 
-`@danielsimonjr/mathts-functions` provides ~492 math functions across 17 categories:
+`@danielsimonjr/mathts-functions` provides over 500 callable functions (672 total exports, including 52 CODATA physical constants) across 17 categories:
 
 | Category | Examples |
 |----------|---------|
@@ -174,9 +174,13 @@ main();
 | Package | Purpose |
 |---------|---------|
 | `@danielsimonjr/mathts-core` | Core types: Complex, Fraction, BigNumber |
-| `@danielsimonjr/mathts-functions` | ~492 math functions with type dispatch |
+| `@danielsimonjr/mathts-functions` | 500+ math functions with type dispatch |
 | `@danielsimonjr/mathts-matrix` | Dense and sparse matrices |
+| `@danielsimonjr/mathts-tensor` | Rank-N dense Tensor (Float64Array-backed) |
+| `@danielsimonjr/mathts-autograd` | Forward + reverse-mode autodiff over Tensor |
 | `@danielsimonjr/mathts-parallel` | Parallel computing via ComputePool |
+| `@danielsimonjr/mathts-expression` | Expression parser/evaluator |
+| `@danielsimonjr/mathts-workbook` | `.mtsw` reactive notebook runtime |
 | `@danielsimonjr/mathts-compat` | mathjs compatibility layer |
 
 ## Next Steps

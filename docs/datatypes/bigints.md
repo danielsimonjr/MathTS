@@ -16,8 +16,8 @@ BigInt('9007199254740993')   // one above Number.MAX_SAFE_INTEGER
 ```ts
 import { add, multiply, gcd } from '@danielsimonjr/mathts-functions';
 
-await add(300000000000000000n, 1n)          // 300000000000000001n
-await multiply(1000000000n, 1000000000n)   // 1000000000000000000n
+add(300000000000000000n, 1n)          // 300000000000000001n
+multiply(1000000000n, 1000000000n)   // 1000000000000000000n
 ```
 
 ## When to Use BigInt
@@ -60,8 +60,8 @@ BigNumber.fromNumber(Number(42n))   // BigNumber 42
 ```ts
 import { sqrt, sin } from '@danielsimonjr/mathts-functions';
 
-await sqrt(4n)       // 2 (number, not bigint)
-await sin(2n)        // 0.9092974268256817 (number)
+sqrt(4n)       // 2 (number, not bigint)
+sin(2n)        // 0.9092974268256817 (number)
 ```
 
 Basic arithmetic (`add`, `subtract`, `multiply`, `mod`, `gcd`, `pow` with positive integer exponents) supports `bigint` input and returns `bigint` output.

@@ -7,8 +7,8 @@ MathTS provides a three-tier backend system for matrix operations that automatic
 ### 0. Rust WASM Backend (Primary)
 - **Status**: Production — primary backend as of April 2026
 - **Best for:** Medium and large matrices (>500 elements); replaces AssemblyScript as the default
-- **Binary**: `lib/wasm/mathjs.wasm` — 669 KB release build
-- **Source**: `src/wasm-rust/` (workspace) → `src/wasm-rust/crates/mathts-wasm/` (63 `.rs` files, ~18,500 lines)
+- **Binary**: `wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm`
+- **Source**: `wasm-rust/` (Cargo workspace) → `wasm-rust/crates/mathts-wasm/` (94 `.rs` files across 20 category modules)
 - **Exports**: **1,017 functions** via `wasm-bindgen` — 826 core + 192 AssemblyScript compat wrappers (`src/compat/`)
 - **AS Parity**: Full AssemblyScript parity achieved. All 432 AS exports are replicated via the compat module, making the Rust backend a complete drop-in replacement
 - **Advantages:** LLVM-optimized, aggressive autovectorization, mature crate ecosystem
@@ -42,8 +42,8 @@ MATHTS_WASM_BACKEND=rust npx mathts serve
 ### 2. AssemblyScript WASM Backend (Legacy / Benchmark)
 - **Status**: Retained for benchmarking comparison only — superseded by Rust WASM backend
 - **Best for:** Medium matrices (1,000 - 100,000 elements) when Rust WASM is unavailable
-- **Binary**: `lib/wasm/mathjs-as.wasm`
-- **Source**: `src/wasm/` (57 AssemblyScript modules across 20 categories)
+- **Binary**: `assembly/build/mathts.wasm`
+- **Source**: `assembly/src/` (AssemblyScript modules: `ops`, `types`, `bindings`, `env`)
 - **Advantages:** SIMD optimizations, near-native performance
 - **Requirements:** WebAssembly support (available in all modern browsers)
 - **Features:**
@@ -244,7 +244,7 @@ const result = backendManager.multiply(a, b); // Never throws
 | Memory efficiency | Good | Good | Good | Best |
 | Browser support | 100% | 95%+ | 95%+ | 60%+ |
 | Status | Fallback | Benchmark | **Primary (complete)** | Planned |
-| Binary location | — | `lib/wasm/mathjs-as.wasm` | `lib/wasm/mathjs.wasm` | — |
+| Binary location | — | `assembly/build/mathts.wasm` | `wasm-rust/target/.../mathts_wasm.wasm` | — |
 
 ## Troubleshooting
 

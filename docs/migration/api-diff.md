@@ -62,10 +62,10 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 
 | Feature | mathjs | MathTS |
 |---------|--------|--------|
-| Dense creation | `math.matrix([[1,2],[3,4]])` | `DenseMatrix.from([[1,2],[3,4]])` |
-| Sparse creation | `math.sparse([[1,0],[0,4]])` | `SparseMatrix.from(...)` |
+| Dense creation | `math.matrix([[1,2],[3,4]])` | `DenseMatrix.fromArray([[1,2],[3,4]])` |
+| Sparse creation | `math.sparse([[1,0],[0,4]])` | `SparseMatrix.fromDense(...)` |
 | Element access | `m.get([0,1])` | `m.get(0, 1)` |
-| Dimensions | `m.size()` | `m.shape` (property) |
+| Dimensions | `m.size()` | `m.rows`, `m.cols` (properties) |
 | Transpose | `math.transpose(m)` | `m.transpose()` |
 
 ## Function API Differences

@@ -337,7 +337,7 @@ setBackendThreshold('wasm', actualCrossover);
 
 ## Rust WASM Benchmark Results
 
-The following measurements were recorded using the three-way benchmark suite (`npm run bench:wasm`) with the Rust WASM backend (`lib/wasm/mathjs.wasm`, 669 KB release build) compared against AssemblyScript WASM and JavaScript fallback. All timings are median over 50 runs, Node.js 22 on AMD Ryzen 9 5900X.
+The following measurements were recorded using the three-way benchmark suite (`npm run bench:wasm`) with the Rust WASM backend (`wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm`) compared against AssemblyScript WASM and JavaScript fallback. All timings are median over 50 runs, Node.js 22 on AMD Ryzen 9 5900X.
 
 ### Matrix Multiplication
 

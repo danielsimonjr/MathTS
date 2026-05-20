@@ -7,12 +7,15 @@
 
 A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acceleration, featuring reactive scientific workbooks for computational physics and tensor mathematics.
 
-## What's New in v0.1.2
+## What's New
 
-All 10 packages are live on npm under the `@danielsimonjr/mathts-*` scope.
+All 12 packages are published on npm under the `@danielsimonjr/mathts-*` scope
+(independently versioned).
 
-- **~492 math functions** — 374 typed exports across 17 modules + 242 factory functions
-- **190 new functions** — Algebra, CAS, Graph Theory, Distribution Objects, Hypothesis Tests, Numerical Methods
+- **500+ math functions** — typed-dispatch + factory layers, plus 52 CODATA physical constants
+- **`tensor` + `autograd` packages** — rank-N dense tensors with forward & reverse-mode automatic differentiation
+- **Security hardening** — WASM SHA-384 manifest verification, sandboxed expression evaluation, opt-in WorkerPool timeouts
+- **Algebra, CAS, Graph Theory, Distribution Objects, Hypothesis Tests, Numerical Methods**
 - **String expression evaluation** — `evaluate('sin(pi/2)')` works end-to-end
 - **Expression compiler** — full 16-node AST interpreter with `parse()` and `compileExpr()`
 - **Dual WASM strategy** — AssemblyScript (SIMD) + Rust WASM (FFT, eigendecomposition, SVD)
@@ -24,7 +27,7 @@ All 10 packages are live on npm under the `@danielsimonjr/mathts-*` scope.
 
 - **Native TypeScript** — Full type safety with compile-time type checking
 - **Expression Evaluation** — Parse and evaluate math strings (`evaluate('sin(pi/2)')`)
-- **~492 Math Functions** — 374 typed exports + 242 mathjs factory functions across 17 categories
+- **500+ Math Functions** — typed-dispatch exports + mathjs factory functions across 17 categories
 - **Computer Algebra** — Symbolic integration, limits, Taylor series, Laplace transforms, Gröbner bases
 - **Graph Theory** — Shortest paths, MST, connected components, topological sort
 - **Statistical Testing** — t-tests, ANOVA, KS test, Shapiro-Wilk, PCA
@@ -194,11 +197,15 @@ sin(new Complex(0, 1));   // Complex sinh(1)
 | Package | Version | Description |
 |---------|---------|-------------|
 | `@danielsimonjr/mathts-core` | 0.1.2 | Core types: Complex, Fraction, BigNumber, mathTyped |
-| `@danielsimonjr/mathts-functions` | 0.1.2 | ~492 math functions, typed dispatch, `evaluate()` |
+| `@danielsimonjr/mathts-functions` | 0.1.3 | 500+ math functions, typed dispatch, `evaluate()` |
 | `@danielsimonjr/mathts-matrix` | 0.1.2 | Dense/sparse matrices, JS/WASM/GPU backends, FFT, eig, SVD |
-| `@danielsimonjr/mathts-parallel` | 0.1.2 | ComputePool, parallel FFT/eig, Web Workers |
+| `@danielsimonjr/mathts-tensor` | 0.1.0 | Rank-N Float64Array-backed dense tensor, einsum/contraction |
+| `@danielsimonjr/mathts-autograd` | 0.1.0 | Forward + reverse-mode automatic differentiation over Tensor |
+| `@danielsimonjr/mathts-parallel` | 0.1.3 | ComputePool, parallel FFT/eig, Web Workers |
+| `@danielsimonjr/mathts-expression` | 0.2.0 | Expression parser, compiler, sandboxed evaluator |
 | `@danielsimonjr/mathts-compat` | 0.1.2 | mathjs compatibility layer |
 | `@danielsimonjr/mathts-workbook` | 0.1.2 | Scientific workbook runtime (.mtsw) |
+| `@danielsimonjr/mathts-wasm` | 0.1.3 | AssemblyScript WASM kernels (SIMD) |
 | `@danielsimonjr/mathts-typed-function` | 0.1.2 | Symbol-based typed dispatch (forked, improved) |
 | `@danielsimonjr/mathts-workerpool` | 0.1.2 | Worker pool with SharedArrayBuffer, warmup, metrics |
 
@@ -209,7 +216,7 @@ sin(new Complex(0, 1));   // Complex sinh(1)
 MathTS uses a tiered factory activation system that mirrors mathjs's factory pattern while layering on native TypeScript types:
 
 ```
-mathjs factory functions (242 activated across 18 tiers)
+mathjs factory functions (activated across 19 tiers)
          ↓
 Factory scope injection (typed-function bridge, expression nodes)
          ↓
@@ -218,7 +225,7 @@ Factory scope injection (typed-function bridge, expression nodes)
 evaluate('sin(pi/2)') → 1
 ```
 
-The `evaluate()` function walks the activated scope, so all 242 factory functions (arithmetic, trigonometry, algebra, matrix operations, statistics, set operations, signal processing, and more) are available as named identifiers in expressions.
+The `evaluate()` function walks the activated scope, so all activated factory functions (arithmetic, trigonometry, algebra, matrix operations, statistics, set operations, signal processing, and more) are available as named identifiers in expressions.
 
 ### Expression Compiler
 
@@ -326,13 +333,10 @@ npx mtsw run example.mtsw
 ## Workbook CLI
 
 ```bash
-mtsw run <file>              # Execute workbook
-mtsw run <file> -c <cell>    # Run specific cell
-mtsw watch <file>            # Watch and re-run on changes
-mtsw validate <file>         # Validate structure
-mtsw graph <file>            # Show dependency graph
-mtsw export <file> -f html   # Export to HTML/PDF/LaTeX
-mtsw new <name> -t physics   # Create from template
+mtsw run <file>        # Execute a workbook
+mtsw validate <file>   # Validate workbook structure
+mtsw graph <file>      # Show the dependency graph
+mtsw new <name>        # Create a workbook from a template
 ```
 
 ## Migration from mathjs
@@ -362,12 +366,12 @@ See the [Migration Guide](./docs/migration/guide.md) for detailed instructions.
 - [Data Types](./docs/datatypes/) — Complex, Fraction, BigNumber, matrices
 - [Expression Syntax](./docs/expressions/) — parsing, compilation, security
 - [Core Reference](./docs/core/) — configuration, serialization, extension
-- [Function Reference](./docs/reference/) — all ~492 functions
+- [Function Reference](./docs/reference/) — 500+ functions
 - [Performance Guide](./docs/performance.md)
 - [Backends](./docs/backends.md)
 - [API Differences](./docs/migration/api-diff.md)
 - [Migration Guide](./docs/migration/guide.md)
-- [Workbook Specification](./docs/Architecture/MATHTS_WORKBOOK_SPECIFICATION.md)
+- [Workbook Specification](./docs/Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md)
 
 ## Development
 

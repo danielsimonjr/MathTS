@@ -33,7 +33,7 @@ User code cannot reach:
 - Node.js built-ins (`process`, `require`, `Buffer`)
 - The host application's variables
 
-A user expression can only read and write variables that are explicitly placed in the
+A user expression can only read variables that are explicitly placed in the
 scope you provide:
 
 ```typescript
@@ -41,12 +41,19 @@ import { evaluate } from '@danielsimonjr/mathts-functions';
 
 const scope = { x: 3 };
 evaluate('x * 2', scope);    // 6 — reads x from scope
-evaluate('y = 99', scope);   // 99 — writes y to scope
-scope.y;                     // 99
 
 // Cannot escape scope:
 evaluate('process.exit(1)'); // throws: Undefined symbol 'process'
 evaluate('globalThis');      // throws: Undefined symbol 'globalThis'
+```
+
+By default `evaluate()` rejects scope-mutating expressions. Assignment (`y = 99`)
+and function definitions (`f(x) = x^2`) throw a `Security:` error unless you opt
+in with `{ unsafe: true }`:
+
+```typescript
+evaluate('y = 99', scope);                  // throws: Security: assignment expressions are disabled
+evaluate('y = 99', scope, { unsafe: true }); // 99 — writes y to scope
 ```
 
 ---
@@ -58,11 +65,11 @@ evaluate('globalThis');      // throws: Undefined symbol 'globalThis'
 | Arithmetic | Yes | All operators |
 | Call math functions | Yes | Functions in the math scope only |
 | Read scope variables | Yes | Only variables you placed there |
-| Write scope variables | Yes | Only to the scope you passed |
-| Define functions | Yes | Stored in scope, pure closures |
+| Write scope variables | Opt-in | Rejected by default; requires `{ unsafe: true }` |
+| Define functions | Opt-in | Rejected by default; requires `{ unsafe: true }` |
 | Access JavaScript globals | No | Not in scope |
 | Call arbitrary JS code | No | No code generation |
-| Import modules | No | `import` is not an operator |
+| Import modules | No | `import` is a forbidden function |
 | Access the file system | No | Not in scope |
 | Infinite loops | Partially | `for`/`while` don't exist; recursion can stack-overflow |
 
@@ -71,17 +78,23 @@ evaluate('globalThis');      // throws: Undefined symbol 'globalThis'
 ## High-risk expression functions
 
 Certain math functions accept expressions as arguments and re-parse them internally.
-Be especially careful when exposing these to untrusted users:
+For this reason, `evaluate()` and `compileExpression()` reject calls to a set of
+forbidden builtins by default — `import`, `createUnit`, `evaluate`, `parse`,
+`compile`, `simplify`, `derivative`, `help`, and `chain`. Calling any of them from
+inside an untrusted expression throws a `Security:` error unless `{ unsafe: true }`
+is passed.
+
+If you call these functions directly from TypeScript (outside the evaluator), be
+especially careful when feeding them untrusted input:
 
 - `simplify(expr)` — parses arbitrary input into a manipulable AST
 - `derivative(expr, variable)` — same
 - `rationalize(expr)` — same
 - `parse(expr)` — direct AST construction from user input
 
-These functions are no less safe than `evaluate` from a sandbox perspective — they
-use the same tree-walking evaluator. However, they expose more attack surface because
-they accept expression strings and can be used to construct large ASTs that consume
-memory or CPU.
+From a sandbox perspective these functions use the same tree-walking evaluator. They
+expose more attack surface because they accept expression strings and can be used to
+construct large ASTs that consume memory or CPU.
 
 ### Mitigating expression DoS
 

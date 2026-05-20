@@ -19,21 +19,17 @@ mtsw run example.mtsw
 # Run specific cell
 mtsw run example.mtsw -c compute
 
-# Watch for changes
-mtsw watch example.mtsw
-
 # Validate structure
 mtsw validate example.mtsw
 
 # Show dependency graph
 mtsw graph example.mtsw
 
-# Create from template
+# Create from template (basic | tensor-physics | data-science)
 mtsw new my-workbook -t tensor-physics
-
-# Export
-mtsw export example.mtsw -f html
 ```
+
+> Note: `mtsw watch` and `mtsw export` appear in the CLI help text but are not yet implemented.
 
 ### Programmatic API
 

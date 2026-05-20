@@ -38,7 +38,7 @@ BigNumber.parse('1').divide('3').toString()
 Precision is a global setting on the `BigNumber` class:
 
 ```ts
-BigNumber.setConfig({ precision: 100 })  // 100 significant digits
+BigNumber.config({ precision: 100 })  // 100 significant digits
 ```
 
 ## Arithmetic
@@ -99,7 +99,7 @@ a.sign()              // 1 (positive)
 BigNumber.parse('2.5').round()    // BigNumber 3  (halfUp, default)
 BigNumber.parse('2.5').ceil()     // BigNumber 3
 BigNumber.parse('2.5').floor()    // BigNumber 2
-BigNumber.parse('2.567').toDecimalPlaces(2)  // BigNumber 2.57
+BigNumber.parse('2.567').round(2)  // BigNumber 2.57  (round to 2 decimal places)
 ```
 
 Rounding modes: `'up'`, `'down'`, `'ceil'`, `'floor'`, `'halfUp'` (default), `'halfDown'`, `'halfEven'`, `'halfCeil'`, `'halfFloor'`.
@@ -109,10 +109,11 @@ Rounding modes: `'up'`, `'down'`, `'ceil'`, `'floor'`, `'halfUp'` (default), `'h
 ```ts
 const n = BigNumber.parse('3.14')
 
-n.toNumber()      // 3.14  (JS number, may lose precision)
+n.valueOf()       // 3.14  (JS number, may lose precision)
 n.toString()      // '3.14'
 n.toFixed(6)      // '3.140000'
 n.toExponential() // '3.14e+0'
+n.toBigInt()      // 3n    (truncates toward zero)
 ```
 
 ## Constants

@@ -68,8 +68,9 @@ console.log(math.i);
 For better performance and tree-shaking, use the native API:
 
 ```typescript
-import { add, multiply, pow, sqrt, sin, cos, PI, E, I } from '@danielsimonjr/mathts-functions';
+import { add, multiply, pow, sqrt, sin, cos } from '@danielsimonjr/mathts-functions';
 import { gcd, lcm, round, floor, ceil } from '@danielsimonjr/mathts-functions';
+import { I } from '@danielsimonjr/mathts-core';
 
 // Direct function calls (better tree-shaking)
 const sum = add(1, 2);
@@ -77,7 +78,7 @@ const product = multiply(3, 4);
 const power = pow(2, 8);
 const root = sqrt(16);
 
-const sinVal = sin(PI / 2);
+const sinVal = sin(Math.PI / 2);
 const cosVal = cos(0);
 
 const rounded = round(2.567, 2);
@@ -87,9 +88,9 @@ const ceiled = ceil(2.1);
 const gcdVal = gcd(12, 18);
 const lcmVal = lcm(4, 6);
 
-console.log(PI);
-console.log(E);
-console.log(I);
+console.log(Math.PI);
+console.log(Math.E);
+console.log(I);  // imaginary unit (from mathts-core)
 ```
 
 ## Key Differences
@@ -97,9 +98,9 @@ console.log(I);
 | mathjs | MathTS Compat | MathTS Native |
 |--------|---------------|---------------|
 | `math.add(a, b)` | `math.add(a, b)` | `add(a, b)` |
-| `math.pi` | `math.pi` | `PI` |
-| `math.e` | `math.e` | `E` |
-| `math.i` | `math.i` | `I` |
+| `math.pi` | `math.pi` | `Math.PI` |
+| `math.e` | `math.e` | `Math.E` |
+| `math.i` | `math.i` | `I` (from mathts-core) |
 
 ## Migration Steps
 

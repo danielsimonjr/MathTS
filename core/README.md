@@ -11,16 +11,13 @@ npm install @danielsimonjr/mathts-core
 ## Usage
 
 ```typescript
-import { createConfig, isNumeric, isMatrix, VERSION } from '@danielsimonjr/mathts-core';
+import { DEFAULT_CONFIG, isNumber, isMatrix, VERSION } from '@danielsimonjr/mathts-core';
 
-// Create custom configuration
-const config = createConfig({
-  backend: 'wasm',
-  autoBackend: true,
-});
+// Default configuration
+const config = { ...DEFAULT_CONFIG, backend: 'wasm' };
 
 // Type guards
-console.log(isNumeric(42));        // true
+console.log(isNumber(42));        // true
 console.log(isMatrix([[1, 2], [3, 4]])); // true
 ```
 
@@ -34,8 +31,8 @@ console.log(isMatrix([[1, 2], [3, 4]])); // true
 
 ### Functions
 
-- `createConfig(overrides?)` - Create configuration with defaults
-- `isNumeric(value)` - Type guard for numbers
+- `DEFAULT_CONFIG` - Default configuration object
+- `isNumber(value)` - Type guard for numbers
 - `isComplex(value)` - Type guard for complex numbers
 - `isMatrix(value)` - Type guard for matrices
 

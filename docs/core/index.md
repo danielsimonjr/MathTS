@@ -4,14 +4,21 @@ MathTS is a parallel-first TypeScript math library. It exposes numeric types, ty
 
 ## Packages
 
+MathTS ships as 12 npm packages. The most commonly used:
+
 | Package | Description |
 |---|---|
 | `@danielsimonjr/mathts-core` | Types, typed-function integration, factory registry |
 | `@danielsimonjr/mathts-matrix` | DenseMatrix, SparseMatrix, JS/WASM/GPU backends |
+| `@danielsimonjr/mathts-tensor` | Rank-N dense Tensor (Float64Array-backed) |
+| `@danielsimonjr/mathts-autograd` | Forward + reverse-mode autodiff over Tensor |
 | `@danielsimonjr/mathts-functions` | Math functions via typed dispatch |
+| `@danielsimonjr/mathts-expression` | Expression parser, AST, compiler |
 | `@danielsimonjr/mathts-parallel` | ComputePool, parallel array operations |
 | `@danielsimonjr/mathts-workbook` | `.mtsw` reactive notebook runtime + CLI |
 | `@danielsimonjr/mathts-compat` | mathjs-compatible `create(all)` shim |
+
+The remaining packages — `@danielsimonjr/mathts-wasm`, `@danielsimonjr/mathts-typed-function`, and `@danielsimonjr/mathts-workerpool` — are lower-level building blocks consumed by the packages above.
 
 ## Usage Patterns
 
@@ -57,7 +64,7 @@ const sines  = await sin(a);      // parallel sin over array
 
 - **[Configuration](configuration.md)** — `DEFAULT_CONFIG`, number types, precision, matrix defaults
 - **[Extension](extension.md)** — Add custom types and functions via `TypeRegistry` and `mathTyped`
-- **[Serialization](serialization.md)** — JSON round-trip for Complex, Fraction, BigNumber, DenseMatrix
+- **[Serialization](serialization.md)** — JSON round-trip for Complex, Fraction, BigNumber
 
 ## Key Differences from mathjs
 

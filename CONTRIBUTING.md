@@ -7,7 +7,7 @@ Thank you for your interest in contributing to MathTS! This document provides gu
 ### Prerequisites
 
 - Node.js >= 18.0.0
-- pnpm (recommended) or npm
+- npm (the repo uses npm workspaces + Turborepo)
 - Git
 
 ### Setup
@@ -18,13 +18,13 @@ git clone https://github.com/danielsimonjr/mathts.git
 cd mathts
 
 # Install dependencies
-pnpm install
+npm install
 
 # Build all packages
-pnpm build
+npm run build
 
 # Run tests
-pnpm test
+npm test
 ```
 
 ## Development Workflow
@@ -65,9 +65,9 @@ docs(readme): add WebGPU backend examples
 1. Fork the repository
 2. Create a feature branch from `main`
 3. Make your changes
-4. Ensure all tests pass: `pnpm test`
-5. Ensure linting passes: `pnpm lint`
-6. Ensure type checking passes: `pnpm typecheck`
+4. Ensure all tests pass: `npm test`
+5. Ensure linting passes: `npm run lint`
+6. Ensure type checking passes: `npm run typecheck`
 7. Submit a pull request
 
 ### PR Checklist
@@ -112,7 +112,7 @@ const config: any = { rows: 3, cols: 3 };
 ```typescript
 /**
  * Module description
- * @module @mathts/package/file
+ * @module @danielsimonjr/mathts-package/file
  */
 
 // 1. External imports
@@ -147,16 +147,16 @@ function helperFunction() {
 
 ```bash
 # All tests
-pnpm test
+npm test
 
 # Specific package
-pnpm --filter @danielsimonjr/mathts-matrix test
+npx turbo test --filter=@danielsimonjr/mathts-matrix
 
-# Watch mode
-pnpm test -- --watch
+# Watch mode (from a package directory)
+cd matrix && npx vitest
 
 # Coverage
-pnpm test -- --coverage
+npm run test:coverage
 ```
 
 ### Writing Tests
@@ -206,9 +206,13 @@ When adding new functionality, place it in the appropriate package:
 |---------|---------|
 | `@danielsimonjr/mathts-core` | Base types, config, typed-function integration |
 | `@danielsimonjr/mathts-matrix` | Matrix types and operations |
+| `@danielsimonjr/mathts-tensor` | Rank-N dense tensors |
+| `@danielsimonjr/mathts-autograd` | Forward + reverse-mode automatic differentiation |
 | `@danielsimonjr/mathts-functions` | Mathematical functions |
 | `@danielsimonjr/mathts-parallel` | Worker pool and parallelization |
+| `@danielsimonjr/mathts-expression` | Expression parser / compiler / evaluator |
 | `@danielsimonjr/mathts-workbook` | Scientific workbook runtime |
+| `@danielsimonjr/mathts-compat` | mathjs compatibility layer |
 
 ## Performance Considerations
 

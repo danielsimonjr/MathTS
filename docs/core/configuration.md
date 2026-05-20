@@ -58,7 +58,7 @@ Number of significant digits for `BigNumber` operations. Default: `64`.
 import { BigNumber } from '@danielsimonjr/mathts-core';
 
 BigNumber.config({ precision: 128 });  // configure globally
-const x = new BigNumber('1.23456789012345678901234567890');
+const x = BigNumber.parse('1.23456789012345678901234567890');
 ```
 
 ### `relTol` / `absTol`

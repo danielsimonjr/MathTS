@@ -1,8 +1,10 @@
-# Math.js Performance Benchmark Results
+# MathTS Performance Benchmark Results
 
 ## Overview
 
-This document presents the performance comparison between JavaScript, WebAssembly (WASM), and WASM+SIMD implementations of various mathematical operations in Math.js.
+This document presents the performance comparison between JavaScript, WebAssembly (WASM), and WASM+SIMD implementations of various mathematical operations in MathTS.
+
+> **Note**: These results predate the Rust WASM backend and cover only the AssemblyScript WASM toolchain. For the current Rust-vs-AssemblyScript-vs-JS comparison, see [performance.md](./performance.md#rust-wasm-benchmark-results).
 
 **Test Environment:**
 - Node.js with AssemblyScript-compiled WASM modules
@@ -135,12 +137,12 @@ The implementation includes WebWorker support for parallel execution:
 ## Running Benchmarks
 
 ```bash
-# Run the full benchmark suite
-npx tsx test/benchmark/performance-benchmark.ts
+# Run the Rust-vs-AssemblyScript WASM benchmark
+npm run bench:wasm
 
-# Run WASM tests
+# Run AssemblyScript WASM tests
 npm run test:wasm
 
-# Run pre-compile tests (150 tests)
-npx vitest run test/wasm/unit-tests/wasm/pre-compile.test.ts
+# Run cross-package WASM integration tests
+npm run test:wasm:integration
 ```

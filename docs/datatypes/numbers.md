@@ -37,13 +37,13 @@ Functions in `@danielsimonjr/mathts-functions` accept plain numbers directly:
 ```ts
 import { add, multiply, sqrt, sin } from '@danielsimonjr/mathts-functions';
 
-await add(1, 2)          // 3
-await multiply(3, 4)     // 12
-await sqrt(9)            // 3
-await sin(Math.PI / 2)   // 1
+add(1, 2)          // 3
+multiply(3, 4)     // 12
+sqrt(9)            // 3
+sin(Math.PI / 2)   // 1
 ```
 
-Note: MathTS typed functions are async and return `Promise<T>`.
+Note: scalar calls are synchronous. Only array inputs (`Float64Array`) dispatch to worker threads and return `Promise<T>`.
 
 ## Choosing the Right Type
 

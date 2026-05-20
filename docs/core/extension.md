@@ -55,8 +55,8 @@ registry.registerConversion<number, Quaternion>(
   (n) => new Quaternion(n, 0, 0, 0)
 );
 
-// Create a typed instance with the new type
-const myTyped = registry.createInstance();
+// Build a typed instance with the new type
+const myTyped = registry.build();
 
 // Define functions for the new type
 export const addQ = myTyped('addQ', {
@@ -69,7 +69,8 @@ export const addQ = myTyped('addQ', {
 Add new signatures to an existing typed function by wrapping it:
 
 ```typescript
-import { mathTyped, add } from '@danielsimonjr/mathts-functions';
+import { mathTyped } from '@danielsimonjr/mathts-core';
+import { add } from '@danielsimonjr/mathts-functions';
 import type { Quaternion } from './quaternion.js';
 
 // Extend add() with Quaternion support
@@ -120,7 +121,7 @@ export const reciprocal = mathTyped('reciprocal', {
 |---|---|
 | `registerType(name, testFn)` | Register a new type with its type-test predicate |
 | `registerConversion(from, to, convertFn)` | Register an automatic type coercion |
-| `createInstance()` | Return a new typed-function instance with all registered types |
+| `build()` | Build a typed-function instance with all registered types |
 
 ## Key Rules
 

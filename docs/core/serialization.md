@@ -11,7 +11,8 @@ Every MathTS type serializes to a plain object with a `mathjs` discriminant fiel
 | `Complex` | `{ mathjs: "Complex", re: number, im: number }` |
 | `Fraction` | `{ mathjs: "Fraction", n: string, d: string }` |
 | `BigNumber` | `{ mathjs: "BigNumber", value: string }` |
-| `DenseMatrix` | `{ mathjs: "DenseMatrix", data: any[], size: number[], datatype?: string }` |
+
+`DenseMatrix` does not implement `toJSON()` / `fromJSON()`. To persist a matrix, serialize its array form (`m.toArray()`) and rebuild with `DenseMatrix.fromArray(...)`.
 
 ## Serializing with `JSON.stringify`
 
@@ -64,13 +65,11 @@ When mixing types in a single JSON payload, write a reviver that dispatches on t
 
 ```typescript
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
-import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 const revivers: Record<string, (json: any) => unknown> = {
-  Complex:     Complex.fromJSON.bind(Complex),
-  Fraction:    Fraction.fromJSON.bind(Fraction),
-  BigNumber:   BigNumber.fromJSON.bind(BigNumber),
-  DenseMatrix: DenseMatrix.fromJSON.bind(DenseMatrix),
+  Complex:   Complex.fromJSON.bind(Complex),
+  Fraction:  Fraction.fromJSON.bind(Fraction),
+  BigNumber: BigNumber.fromJSON.bind(BigNumber),
 };
 
 function mathtsReviver(_key: string, value: unknown): unknown {
@@ -115,15 +114,18 @@ JSON.stringify({ x: Infinity }, mathtsReplacer);
 
 ## DenseMatrix Serialization
 
+`DenseMatrix` has no built-in `toJSON()` / `fromJSON()`. Serialize the array form
+and rebuild with `DenseMatrix.fromArray(...)`:
+
 ```typescript
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
-const m = new DenseMatrix([[1, 2], [3, 4]]);
-const json = JSON.stringify(m.toJSON());
-// '{"mathjs":"DenseMatrix","data":[[1,2],[3,4]],"size":[2,2]}'
+const m = DenseMatrix.fromArray([[1, 2], [3, 4]]);
+const json = JSON.stringify(m.toArray());
+// '[[1,2],[3,4]]'
 
-const restored = DenseMatrix.fromJSON(JSON.parse(json));
-console.log(restored.size());   // [2, 2]
+const restored = DenseMatrix.fromArray(JSON.parse(json));
+console.log(restored.size);   // { rows: 2, cols: 2 }
 ```
 
 ## Fraction Compatibility

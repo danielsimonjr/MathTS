@@ -64,20 +64,20 @@ assembly/
 │   ├── index.ts          # Main entry point
 │   ├── types/
 │   │   └── complex.ts    # Complex number type
-│   ├── ops/
-│   │   ├── scalar.ts     # Scalar operations
-│   │   ├── array.ts      # Array operations
-│   │   ├── matrix.ts     # Matrix operations
-│   │   ├── complex-ops.ts    # Complex operations
-│   │   └── complex-array.ts  # Complex array operations
+│   ├── ops/              # scalar, array, matrix, complex-ops,
+│   │   │                 # complex-array, linalg, svd, signal,
+│   │   │                 # special, polynomial, number-theory,
+│   │   └── ...           # optimization, curvefit, approx, tensor
 │   ├── env/
 │   │   └── abort.ts      # Error handling
 │   └── bindings/
-│       └── wasm-loader.ts  # JS/TS bindings
+│       ├── index.ts        # Bindings entry point
+│       └── wasm-loader.ts  # JS/TS bindings (SHA-384 verified)
 ├── build/                # WASM output
 ├── tests/
 │   └── run.js           # Test runner
-├── asconfig.json        # AssemblyScript config
+├── asconfig.json          # AssemblyScript config
+├── tsconfig.bindings.json # TypeScript bindings config
 └── package.json
 ```
 

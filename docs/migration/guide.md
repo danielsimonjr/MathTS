@@ -306,9 +306,9 @@ const arr = new Float64Array([1, 2, 3, 4, 5]);
 | Tree-shaking | Limited | Full |
 | Web Workers | No | Yes |
 | WASM acceleration | No | Yes |
-| WebGPU | No | Planned |
-| Expression parser | Yes | Planned |
-| Units | Yes | Planned |
+| WebGPU | No | Yes |
+| Expression parser | Yes | Yes |
+| Units | Yes | Partial |
 | Matrix operations | Yes | Yes |
 | Complex numbers | Yes | Yes |
 | Fractions | Yes | Yes |

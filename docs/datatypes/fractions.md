@@ -53,7 +53,7 @@ a.multiply(b)   // Fraction 1/18
 a.divide(b)     // Fraction 2/1 = 2
 a.negate()      // Fraction -1/3
 a.abs()         // Fraction 1/3
-a.reciprocal()  // Fraction 3/1 = 3
+a.inverse()     // Fraction 3/1 = 3
 ```
 
 ## Comparison
@@ -75,7 +75,7 @@ const f = new Fraction(1n, 3n)
 
 f.toNumber()     // 0.3333333333333333  (JS number)
 f.toString()     // '1/3'
-f.toJSON()       // { mathjs: 'Fraction', n: 1, d: 3 }
+f.toJSON()       // { mathjs: 'Fraction', n: '1', d: '3' }
 ```
 
 ## Why Fractions?

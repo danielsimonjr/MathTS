@@ -11,27 +11,23 @@ npm install @danielsimonjr/mathts-matrix
 ## Usage
 
 ```typescript
-import { Matrix, DenseMatrix, backends } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // Create a matrix from a 2D array
-const A = Matrix.from([
+const A = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
   [7, 8, 9]
 ]);
 
-// Basic operations (coming soon)
-const det = A.determinant();
-const inv = A.inverse();
-const eig = A.eigenvalues();
+// Basic operations
+const sum = A.add(A);
+const product = A.multiply(A);
+const transposed = A.transpose();
 
-// Configure backend
-backends.configure({
-  backend: 'wasm',      // Force WASM backend
-  autoBackend: true,    // Or let it auto-select
-  wasmThreshold: 1000,  // Switch to WASM above 1000 elements
-  gpuThreshold: 100000, // Switch to GPU above 100K elements
-});
+// Decompositions (operate on number[][])
+import { svd, eig } from '@danielsimonjr/mathts-matrix';
+const { U, S, V } = svd(A.toArray());
 ```
 
 ## Backends
@@ -55,11 +51,11 @@ This package is under active development. Currently implemented:
 - [x] Backend infrastructure
 - [x] Dense matrix structure
 - [x] Sparse matrix (CSR) structure
-- [ ] Matrix operations (add, multiply, etc.)
-- [ ] WASM backend
-- [ ] GPU backend
-- [ ] LU/QR/SVD decompositions
-- [ ] Eigenvalue solvers
+- [x] Matrix operations (add, multiply, transpose, etc.)
+- [x] WASM backend (Rust primary, AssemblyScript legacy)
+- [x] GPU backend (WebGPU)
+- [x] SVD decomposition
+- [x] Eigenvalue solvers
 
 ## License
 

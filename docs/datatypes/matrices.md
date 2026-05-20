@@ -118,7 +118,7 @@ MathTS dispatches matrix operations to one of three backends based on matrix siz
 | Backend | Threshold (elements) | Technology |
 |---|---|---|
 | **JSBackend** | Always available (default) | Pure TypeScript / `Float64Array` |
-| **WASMBackend** | > 1,000 elements | AssemblyScript WASM with SIMD |
+| **WASMBackend** | > 1,000 elements | Rust WASM (primary) / AssemblyScript WASM (legacy) with SIMD |
 | **GPUBackend** | > 100,000 elements | WebGPU compute shaders |
 
 Operation-specific thresholds override the general rule:
@@ -135,27 +135,26 @@ Backend selection is transparent — you write the same code regardless:
 
 ```ts
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
-import { matMul } from '@danielsimonjr/mathts-functions';
 
 const a = DenseMatrix.random(512, 512)   // 262,144 elements
 const b = DenseMatrix.random(512, 512)
 
 // Automatically dispatched to GPU if available, then WASM, then JS
-const result = await matMul(a, b)
+const result = a.multiply(b)
 ```
 
 ### Manual Backend Control
 
-You can override the automatic selection via the `BackendManager`:
+You can override the automatic selection via the `backendManager` singleton:
 
 ```ts
-import { BackendManager } from '@danielsimonjr/mathts-matrix';
+import { backendManager } from '@danielsimonjr/mathts-matrix';
 
 // Force WASM for all operations
-BackendManager.setHints({ preferredBackend: 'wasm' })
+backendManager.setHints({ preferredBackend: 'wasm' })
 
 // Adjust thresholds
-BackendManager.setHints({ wasmThreshold: 500, gpuThreshold: 50000 })
+backendManager.setHints({ wasmThreshold: 500, gpuThreshold: 50000 })
 ```
 
 ### Fallback Behavior
@@ -171,10 +170,10 @@ The `MatrixWasmBridge` provides interoperability between the TypeScript matrix l
 `@danielsimonjr/mathts-matrix` includes WASM-accelerated decompositions:
 
 ```ts
-import { eig, svd } from '@danielsimonjr/mathts-functions';
+import { eig, svd } from '@danielsimonjr/mathts-matrix';
 
-const { values, vectors } = await eig(m)   // eigenvalues and eigenvectors
-const { U, S, V } = await svd(m)           // singular value decomposition
+const { values, vectors } = eig(m.toArray())   // eigenvalues and eigenvectors
+const { U, S, V, rank } = svd(m.toArray())     // singular value decomposition
 ```
 
 ## Related

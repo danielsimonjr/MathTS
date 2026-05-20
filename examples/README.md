@@ -6,13 +6,15 @@ This directory contains example code demonstrating MathTS features.
 
 ### Basic Examples
 
+- [`basic-arithmetic.ts`](./basic-arithmetic.ts) - Basic arithmetic operations
 - [`basic-matrix.ts`](./basic-matrix.ts) - Basic matrix operations
 - [`basic-workbook.mtsw`](./basic-workbook.mtsw) - Simple workbook example
 
 ### Advanced Examples
 
-- [`tensor-physics.mtsw`](./tensor-physics.mtsw) - Tensor mathematics for physics
-- [`eigenvalue-analysis.ts`](./eigenvalue-analysis.ts) - Eigenvalue decomposition
+- [`matrix-operations.ts`](./matrix-operations.ts) - Matrix operations
+- [`parallel-computing.ts`](./parallel-computing.ts) - Parallel compute pool
+- [`mathjs-migration.ts`](./mathjs-migration.ts) - Migrating from mathjs
 
 ## Running Examples
 
@@ -32,9 +34,6 @@ node examples/basic-matrix.js
 ```bash
 # Run a workbook
 npx mtsw run examples/basic-workbook.mtsw
-
-# Watch mode
-npx mtsw watch examples/basic-workbook.mtsw
 ```
 
 ## Prerequisites

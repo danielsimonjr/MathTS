@@ -186,15 +186,15 @@ Operations automatically use the fastest available backend:
 ### Serialization
 
 ```typescript
-m.toJSON()                   // { mathjs: 'DenseMatrix', data, size }
-DenseMatrix.fromJSON(json)   // reconstruct
+m.toArray()                          // number[][] — plain nested array
+DenseMatrix.fromArray(m.toArray())   // reconstruct from a nested array
 ```
 
 ---
 
 ## SparseMatrix
 
-Compressed Sparse Column (CSC) format. Efficient for matrices where most elements are zero.
+Compressed Sparse Row (CSR) format. Efficient for matrices where most elements are zero.
 
 ```typescript
 import { SparseMatrix } from '@danielsimonjr/mathts-matrix';

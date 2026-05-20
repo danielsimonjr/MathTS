@@ -108,9 +108,9 @@ const B = DenseMatrix.fromArray([
 const sum = A.add(B);
 const product = A.multiply(B);
 const transposed = A.transpose();
-// Note: determinant requires import from operations
-import { det } from '@danielsimonjr/mathts-matrix';
-const determinant = det(A.toArray());
+// Note: decompositions like svd/eig operate on number[][]
+import { svd } from '@danielsimonjr/mathts-matrix';
+const { U, S, V } = svd(A.toArray());
 
 // Factory methods for special matrices
 const I3 = DenseMatrix.identity(3);
