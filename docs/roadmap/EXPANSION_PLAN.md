@@ -1,6 +1,6 @@
 # MathTS Expansion Plan
 
-**Status**: v2 — revised after adversarial review
+**Status**: v3 — executed (all workstreams complete; see Execution Log)
 **Derived from**: `docs/roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md`
 **Goal**: Execute the 11 roadmap items — close the bridge gaps and the
 physical-constants function gap.
@@ -216,3 +216,30 @@ W5  → compat: rebuild (LAST — sees W1/W6/W9 additions)
 - Reverse-mode autodiff *through* arbitrary `functions` calls — W7 ships
   converters only.
 - Changesets / version bumps / publish.
+
+---
+
+## Execution Log (v3)
+
+All 11 workstreams implemented, each in its own commit, verified by tests.
+
+| WS | Status | Notes |
+|----|--------|-------|
+| W0 | Done | Audit clean — **zero** collisions between the typed and factory barrels. |
+| W1 | Done | 52 physical constants activated as "tier 19" of `factories/index.ts`; `functions/tests/physical-constants.test.ts`. |
+| W2 | Done (adjusted) | Real `createIsInteger` activated after tier 4. **Deviation**: the `det` relocation was reverted — `inv` (tier 4) depends on `det`, so `det` stays at tier 3; its internal `multiply` use is scalar-only, so the `multiplyScalar` binding is correct, not a bug. |
+| W3 | Done | Workbook `executeCode()` now calls `evaluate()`; raw `new Function` removed; ambient `workbook/src/functions.d.ts` added; two JS-syntax tests rewritten as math expressions. |
+| W4 | Done | `executeData()` parses cell content as YAML/JSON. |
+| W5 | Done | `compat` `all` = full functions namespace; `create()` honours it; `MathInstance` keeps precise members + index signature. |
+| W6 | Done | `MathJSDenseMatrix.multiply/transpose()` route through `BackendManager`; manager pre-initialised at module load. |
+| W7 | Done | `Tensor.fromDenseMatrix` / `toDenseMatrix`; `tensor → matrix` dependency declared. |
+| W8 | Done (verify-only) | Confirmed `sum`/`mean` already auto-dispatch `Float64Array` to the pool; no return-type change (that would be breaking). Test added. |
+| W9 | Done (adjusted) | Conversion exports, `parser()`, `reviver`/`replacer`. **Deviation**: `parser()` does not support assignment expressions inside `evaluate` — the expression security validator rejects `AssignmentNode`; retained state is managed via `set`/`get`. |
+| W10 | Done | Radix-2 Cooley-Tukey JS FFT fallback in `MatrixWasmBridge`. |
+| W11 | Done | `functions/tests/docs-sync.test.ts` guards `functions.md` against export drift. |
+
+**Verification**: `functions` 1469 tests / 41 files green; `matrix` + `tensor` +
+`workbook` + `compat` 612 passing / 7 skipped / 27 files green. No regressions.
+Touched packages build cleanly; `compat`/`workbook`/`tensor`/`matrix` typecheck
+clean; the new `functions` code adds no `tsc` errors beyond the package's
+pre-existing synced-code baseline.
