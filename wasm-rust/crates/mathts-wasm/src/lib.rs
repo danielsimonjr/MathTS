@@ -73,6 +73,7 @@ pub mod algebra;
 pub use algebra::decomposition::*;
 pub use algebra::equations::*;
 pub use algebra::polynomial::*;
+pub use algebra::polynomial_ext::*;
 pub use algebra::schur::*;
 pub use algebra::solver::*;
 pub use algebra::sparse::amd::*;

@@ -249,6 +249,20 @@ export {
 } from './ops/number-theory';
 
 // =============================================================================
+// Polynomial Algebra
+// =============================================================================
+
+export {
+  polyadd,
+  polynomialQuotient,
+  polynomialRemainder,
+  polynomialGCD,
+  polynomialLCM,
+  discriminant,
+  resultant,
+} from './ops/polynomial';
+
+// =============================================================================
 // Complex Operations (standalone functions)
 // =============================================================================
 

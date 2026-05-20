@@ -1,6 +1,7 @@
 pub mod decomposition;
 pub mod equations;
 pub mod polynomial;
+pub mod polynomial_ext;
 pub mod schur;
 pub mod solver;
 pub mod sparse;
