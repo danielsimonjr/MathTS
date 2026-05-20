@@ -10,7 +10,15 @@
  * rewriting each one.
  */
 
-import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
+
+// Pre-initialise the shared backend manager so the accelerated `multiply` /
+// `transpose` instance methods can reach WASM/GPU once init resolves. Until
+// then they route to the synchronous JS backend — correct, just not yet
+// accelerated. Fire-and-forget: failures fall back to JS silently.
+void backendManager.initialize().catch(() => {
+  /* JS backend remains available */
+});
 
 /**
  * mathjs-compatible dense matrix adapter.
@@ -263,6 +271,28 @@ export class MathJSDenseMatrix {
    */
   getDataType(): string {
     return this._datatype ?? 'number';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Accelerated operations — routed through the native matrix BackendManager
+  // (JS / WASM / GPU selected by size). Additive: the synced factory
+  // `multiply`/`transpose` functions are unaffected.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Matrix product `this · other` via the native backend.
+   */
+  multiply(other: MathJSDenseMatrix): MathJSDenseMatrix {
+    const result = backendManager.multiply(this.toNative(), other.toNative());
+    return MathJSDenseMatrix.fromNative(result);
+  }
+
+  /**
+   * Matrix transpose via the native backend.
+   */
+  transpose(): MathJSDenseMatrix {
+    const result = backendManager.transpose(this.toNative());
+    return MathJSDenseMatrix.fromNative(result);
   }
 
   // ---------------------------------------------------------------------------
