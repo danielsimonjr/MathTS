@@ -39,6 +39,7 @@ pub mod simd;
 pub use signal::fft::*;
 pub use signal::processing::*;
 pub use signal::processing_ext::*;
+pub use signal::windowing::*;
 pub use simd::operations::*;
 
 // ============================================================
