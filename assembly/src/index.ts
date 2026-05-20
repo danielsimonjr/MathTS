@@ -293,6 +293,12 @@ export { quadprog, linprog, nullspace } from './ops/optimization';
 export { residue, padeApproximant } from './ops/approx';
 
 // =============================================================================
+// Rank-N Tensor Operations
+// =============================================================================
+
+export { tensorTranspose } from './ops/tensor';
+
+// =============================================================================
 // Complex Operations (standalone functions)
 // =============================================================================
 

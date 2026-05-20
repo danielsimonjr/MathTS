@@ -11,3 +11,4 @@ pub mod rotation;
 pub mod sparse;
 pub mod sqrtm;
 pub mod svd;
+pub mod tensor_ops;

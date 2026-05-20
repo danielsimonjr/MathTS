@@ -29,6 +29,7 @@ pub use matrix::rotation::*;
 pub use matrix::sparse::*;
 pub use matrix::sqrtm::*;
 pub use matrix::svd::*;
+pub use matrix::tensor_ops::*;
 
 // ============================================================
 // Phase 3: Signal + SIMD modules

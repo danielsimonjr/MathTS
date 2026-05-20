@@ -28,7 +28,7 @@
     "build:bindings": "tsc -p tsconfig.bindings.json",
     "build": "npm run asbuild && npm run build:bindings",
     "clean": "rm -rf build/",
-    "test": "node tests/run.js && node tests/svd.test.mjs && node tests/special-numtheory.test.mjs && node tests/polynomial.test.mjs && node tests/signal.test.mjs && node tests/linalg.test.mjs && node tests/curvefit.test.mjs && node tests/optimization.test.mjs && node tests/approx.test.mjs",
+    "test": "node tests/run.js && node tests/svd.test.mjs && node tests/special-numtheory.test.mjs && node tests/polynomial.test.mjs && node tests/signal.test.mjs && node tests/linalg.test.mjs && node tests/curvefit.test.mjs && node tests/optimization.test.mjs && node tests/approx.test.mjs && node tests/tensor.test.mjs",
     "benchmark": "node --experimental-wasm-simd benchmarks/run.js"
   },
   "devDependencies": {
