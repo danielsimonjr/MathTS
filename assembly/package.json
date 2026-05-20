@@ -28,10 +28,11 @@
     "build:bindings": "tsc -p tsconfig.bindings.json",
     "build": "npm run asbuild && npm run build:bindings",
     "clean": "rm -rf build/",
-    "test": "node --experimental-wasm-simd tests/run.js",
+    "test": "node tests/run.js && node tests/svd.test.mjs",
     "benchmark": "node --experimental-wasm-simd benchmarks/run.js"
   },
   "devDependencies": {
+    "@assemblyscript/loader": "^0.28.17",
     "assemblyscript": "^0.27.27",
     "typescript": "^5.3.0"
   },
