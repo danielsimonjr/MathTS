@@ -27,6 +27,19 @@ function sumChunk(buffer: ArrayBuffer, start: number, length: number): number {
 }
 
 /**
+ * Compute product of elements in a chunk of Float64Array
+ */
+function prodChunk(buffer: ArrayBuffer, start: number, length: number): number {
+  const data = new Float64Array(buffer);
+  let total = 1;
+  const end = start + length;
+  for (let i = start; i < end; i++) {
+    total *= data[i];
+  }
+  return total;
+}
+
+/**
  * Compute dot product for a chunk
  */
 function dotChunk(
@@ -719,6 +732,7 @@ function quantileChunk(
 const workerMethods: Record<string, (...args: any[]) => any> = {
   // Array reductions
   sumChunk,
+  prodChunk,
   dotChunk,
   varianceChunk,
   minMaxChunk,

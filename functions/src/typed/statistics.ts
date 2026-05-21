@@ -409,9 +409,12 @@ export const parallelStatProd = mathTyped('parallelStatProd', {
     return prod;
   },
 
-  // Float64Array
-  'Float64Array': (data: Float64Array): f64 => {
+  // Float64Array - parallel execution
+  'Float64Array': async (data: Float64Array): Promise<f64> => {
     if (data.length === 0) return 1;
+    if (computePool.shouldParallelize(data.length)) {
+      return (await computePool.prod(data)).result;
+    }
     let prod: f64 = 1;
     for (let i: i32 = 0; i < data.length; i++) {
       prod *= data[i];
