@@ -105,9 +105,12 @@ below are limited to operations that genuinely clear that bar.
 
 - [x] Worker-distributed FFT — `parallelFFT` / `parallelIFFT` use a four-step
   (transpose) decomposition built on `fftBatch`.
-- [ ] Unified f32 WebGPU path — **not pursued.** Would require writing new WGSL
-  compute shaders for FFT / distance / etc.; a separate research effort beyond
-  the existing matrix-op `gpu*` functions.
+- [ ] Unified f32 WebGPU path — **not pursued; design spec written.** A
+  coherent GPU path (shared WGSL shader library, GPU-resident `GpuArray`
+  handles for operation fusion, Stockham FFT shaders, a generalized backend
+  router) is scoped in
+  [`docs/roadmap/UNIFIED_WEBGPU_PATH.md`](../roadmap/UNIFIED_WEBGPU_PATH.md) —
+  a separate research effort beyond the existing matrix-op `gpu*` functions.
 
 ## 📋 Next Steps
 

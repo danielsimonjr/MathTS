@@ -215,6 +215,11 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
 - **`docs/reference/functions.md`** — rebuilt to match the real export surface;
   guarded against drift by `functions/tests/docs-sync.test.ts` (W11), which
   asserts every documented `` `name(` `` token resolves to a real export.
+- **`docs/roadmap/UNIFIED_WEBGPU_PATH.md`** — design spec for a unified WebGPU
+  compute path (shared WGSL shader library, GPU-resident array handles for
+  operation fusion, Stockham FFT shaders, a generalized backend router), with
+  the f32/transfer/availability constraints and an honest build-or-not
+  recommendation. Scopes the high-effort acceleration-roadmap item.
 - **`docs/reference/functions.{md,html}` — Accel column** — function tables in
   hardware-accelerated categories (Arithmetic, Trigonometry, Statistics, Special
   Functions, Probability Distributions, the typed matrix-ops decompositions,
