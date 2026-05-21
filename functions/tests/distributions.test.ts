@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   normalPDF,
   normalCDF,
@@ -11,6 +11,7 @@ import {
   entropy,
   jsDivergence,
 } from '../src/typed/distributions.js';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 describe('Probability Distribution Functions', () => {
   // ===========================================================================
@@ -291,5 +292,72 @@ describe('Probability Distribution Functions', () => {
     it('jsDivergence with different lengths returns NaN', () => {
       expect(jsDivergence([0.5, 0.5], [0.33, 0.33, 0.34])).toBeNaN();
     });
+  });
+});
+
+// =============================================================================
+// Parallel Float64Array overloads
+// =============================================================================
+
+describe('Distribution parallel array overloads', () => {
+  beforeAll(async () => {
+    await computePool.initialize();
+    // Lower the threshold so the worker path is actually exercised.
+    computePool.updateConfig({ thresholdElements: 64, chunkSize: 256 });
+  });
+
+  afterAll(async () => {
+    computePool.updateConfig({ thresholdElements: 50000, chunkSize: 10000 });
+    await computePool.terminate();
+  });
+
+  it('normalPDF over a Float64Array matches the scalar implementation', async () => {
+    const xs = Float64Array.from({ length: 1000 }, (_, i) => (i - 500) / 100);
+    const std = await normalPDF(xs);
+    const params = await normalPDF(xs, 1, 2);
+    expect(std.length).toBe(1000);
+    for (let i = 0; i < xs.length; i += 37) {
+      expect(std[i]).toBeCloseTo(normalPDF(xs[i]) as number, 12);
+      expect(params[i]).toBeCloseTo(normalPDF(xs[i], 1, 2) as number, 12);
+    }
+  });
+
+  it('normalCDF over a Float64Array matches the scalar implementation', async () => {
+    const xs = Float64Array.from({ length: 1000 }, (_, i) => (i - 500) / 100);
+    const arr = await normalCDF(xs, 0, 1);
+    expect(arr[500]).toBeCloseTo(0.5, 12);
+    for (let i = 0; i < xs.length; i += 37) {
+      expect(arr[i]).toBeCloseTo(normalCDF(xs[i], 0, 1) as number, 12);
+    }
+  });
+
+  it('exponential PDF/CDF over a Float64Array match the scalar implementations', async () => {
+    const xs = Float64Array.from({ length: 800 }, (_, i) => i / 100);
+    const pdf = await exponentialPDF(xs, 1.5);
+    const cdf = await exponentialCDF(xs, 1.5);
+    for (let i = 0; i < xs.length; i += 29) {
+      expect(pdf[i]).toBeCloseTo(exponentialPDF(xs[i], 1.5) as number, 12);
+      expect(cdf[i]).toBeCloseTo(exponentialCDF(xs[i], 1.5) as number, 12);
+    }
+  });
+
+  it('discrete PMFs over a Float64Array match the scalar implementations', async () => {
+    const ks = Float64Array.from({ length: 600 }, (_, i) => i % 30);
+    const pois = await poissonPMF(ks, 5);
+    const binom = await binomialPMF(ks, 40, 0.3);
+    const geom = await geometricPMF(
+      Float64Array.from({ length: 600 }, (_, i) => (i % 20) + 1),
+      0.25
+    );
+    const bern = await bernoulliPMF(
+      Float64Array.from({ length: 600 }, (_, i) => i % 2),
+      0.7
+    );
+    for (let i = 0; i < ks.length; i += 17) {
+      expect(pois[i]).toBeCloseTo(poissonPMF(ks[i], 5) as number, 12);
+      expect(binom[i]).toBeCloseTo(binomialPMF(ks[i], 40, 0.3) as number, 12);
+    }
+    expect(geom[0]).toBeCloseTo(geometricPMF(1, 0.25) as number, 12);
+    expect(bern[1]).toBeCloseTo(0.7, 12);
   });
 });
