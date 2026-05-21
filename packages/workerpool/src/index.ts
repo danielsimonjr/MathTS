@@ -1564,6 +1564,178 @@ export class MathWorkerPool {
   }
 
   /**
+   * Compute a batch of independent radix-2 FFTs in parallel.
+   *
+   * `real` and `imag` each hold `frameCount` concatenated frames of
+   * `frameLength` samples (`frameLength` must be a power of two). Every frame
+   * is FFT'd independently — the frames are distributed across workers as
+   * contiguous groups, each group dispatched to the `fftBatchChunk` kernel.
+   *
+   * This parallelizes the embarrassingly-parallel FFT batches that drive
+   * `spectrogram` (one FFT per windowed frame) and `fft2d` (one FFT per
+   * row, then one per column).
+   *
+   * @param real - Concatenated real parts (`frameCount * frameLength` values)
+   * @param imag - Concatenated imaginary parts (same layout as `real`)
+   * @param frameCount - Number of independent frames
+   * @param frameLength - Samples per frame (power of two)
+   * @param inverse - Compute the inverse FFT when true
+   * @returns Concatenated transformed real and imaginary parts, each laid out
+   *          as `frameCount` frames of `frameLength` samples
+   */
+  async fftBatch(
+    real: Float64Array,
+    imag: Float64Array,
+    frameCount: number,
+    frameLength: number,
+    inverse = false,
+    options?: TaskOptions
+  ): Promise<ParallelResult<{ real: Float64Array; imag: Float64Array }>> {
+    const start = performance.now();
+    const total = frameCount * frameLength;
+
+    if (real.length !== total || imag.length !== total) {
+      throw new Error(
+        `fftBatch buffer length mismatch: expected ${total}, ` +
+          `got real=${real.length}, imag=${imag.length}`
+      );
+    }
+
+    // Each FFT frame costs ~frameLength * log2(frameLength) work; gate the
+    // worker dispatch on the total element count like every other kernel.
+    if (frameCount === 0 || !this.shouldParallelize(total, options)) {
+      const r = real.slice();
+      const im = imag.slice();
+      for (let f = 0; f < frameCount; f++) {
+        this._fftFrameInPlace(r, im, f * frameLength, frameLength, inverse);
+      }
+      return {
+        result: { real: r, imag: im },
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    // Distribute whole frames across workers as contiguous groups.
+    const stats = this.stats();
+    const numWorkers = Math.max(1, stats.totalWorkers);
+    const framesPerWorker = Math.max(1, Math.ceil(frameCount / numWorkers));
+    const tasks: Promise<{ buffer: ArrayBuffer; frameStart: number; groupFrames: number }>[] = [];
+
+    for (let frameStart = 0; frameStart < frameCount; frameStart += framesPerWorker) {
+      const groupFrames = Math.min(framesPerWorker, frameCount - frameStart);
+      const elemStart = frameStart * frameLength;
+      const elemCount = groupFrames * frameLength;
+      // slice() so each chunk owns a standalone buffer (the established
+      // chunking invariant — see chunkFloat64Array).
+      const realChunk = real.slice(elemStart, elemStart + elemCount);
+      const imagChunk = imag.slice(elemStart, elemStart + elemCount);
+      tasks.push(
+        this.exec<ArrayBuffer>('fftBatchChunk', [
+          realChunk.buffer,
+          imagChunk.buffer,
+          groupFrames,
+          frameLength,
+          inverse,
+        ]).then((buffer) => ({ buffer, frameStart, groupFrames }))
+      );
+    }
+
+    const results = await Promise.all(tasks);
+
+    const outReal = new Float64Array(total);
+    const outImag = new Float64Array(total);
+    for (const { buffer, frameStart, groupFrames } of results) {
+      const flat = new Float64Array(buffer);
+      const elemCount = groupFrames * frameLength;
+      outReal.set(flat.subarray(0, elemCount), frameStart * frameLength);
+      outImag.set(flat.subarray(elemCount, elemCount * 2), frameStart * frameLength);
+    }
+
+    return {
+      result: { real: outReal, imag: outImag },
+      duration: performance.now() - start,
+      chunks: tasks.length,
+      parallelized: true,
+      workersUsed: Math.min(tasks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * In-place radix-2 FFT of a single frame — sequential fallback for fftBatch.
+   * Mirrors the `fftBatchChunk` worker kernel exactly.
+   */
+  private _fftFrameInPlace(
+    real: Float64Array,
+    imag: Float64Array,
+    offset: number,
+    n: number,
+    inverse: boolean
+  ): void {
+    const bits = Math.log2(n) | 0;
+
+    for (let i = 0; i < n; i++) {
+      let x = i;
+      let j = 0;
+      for (let b = 0; b < bits; b++) {
+        j = (j << 1) | (x & 1);
+        x >>= 1;
+      }
+      if (j > i) {
+        const tr = real[offset + i];
+        real[offset + i] = real[offset + j];
+        real[offset + j] = tr;
+        const ti = imag[offset + i];
+        imag[offset + i] = imag[offset + j];
+        imag[offset + j] = ti;
+      }
+    }
+
+    const direction = inverse ? 1.0 : -1.0;
+
+    for (let size = 2; size <= n; size *= 2) {
+      const halfSize = size / 2;
+      const angle = (direction * 2.0 * Math.PI) / size;
+      const wRe = Math.cos(angle);
+      const wIm = Math.sin(angle);
+
+      for (let start = 0; start < n; start += size) {
+        let tRe = 1.0;
+        let tIm = 0.0;
+        for (let j = 0; j < halfSize; j++) {
+          const evenIdx = offset + start + j;
+          const oddIdx = offset + start + j + halfSize;
+
+          const uRe = real[oddIdx] * tRe - imag[oddIdx] * tIm;
+          const uIm = real[oddIdx] * tIm + imag[oddIdx] * tRe;
+
+          const eRe = real[evenIdx];
+          const eIm = imag[evenIdx];
+
+          real[evenIdx] = eRe + uRe;
+          imag[evenIdx] = eIm + uIm;
+          real[oddIdx] = eRe - uRe;
+          imag[oddIdx] = eIm - uIm;
+
+          const nextTRe = tRe * wRe - tIm * wIm;
+          const nextTIm = tRe * wIm + tIm * wRe;
+          tRe = nextTRe;
+          tIm = nextTIm;
+        }
+      }
+    }
+
+    if (inverse) {
+      for (let i = 0; i < n; i++) {
+        real[offset + i] /= n;
+        imag[offset + i] /= n;
+      }
+    }
+  }
+
+  /**
    * Compute histogram in parallel
    */
   async histogram(

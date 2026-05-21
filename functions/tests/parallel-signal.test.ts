@@ -311,4 +311,73 @@ describe('Parallel Signal Processing Functions', () => {
       }
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Parallel forward-FFT dispatch in parallelConv
+  //
+  // The two forward FFTs (FFT(x) and FFT(h)) are now dispatched together via
+  // computePool.fftBatch when the pool is initialized and the signal is large
+  // enough. These tests confirm:
+  //   1. The parallel path produces the same result as the sequential fallback
+  //      (within floating-point tolerance).
+  //   2. parallelXCorr and parallelAutoCorr inherit the improvement correctly
+  //      (they delegate to parallelConv).
+  // ---------------------------------------------------------------------------
+  describe('parallel forward-FFT dispatch in parallelConv', () => {
+    // Use a deterministic test signal large enough that fftBatch is dispatched.
+    const N = 512;
+    const M = 128;
+    const x = Float64Array.from({ length: N }, (_, i) =>
+      Math.sin(2 * Math.PI * 7 * i / N) + 0.4 * Math.cos(2 * Math.PI * 23 * i / N),
+    );
+    const h = Float64Array.from({ length: M }, (_, i) =>
+      Math.exp(-i / 32) * Math.cos(2 * Math.PI * 5 * i / M),
+    );
+
+    it('parallelConv: parallel result matches sequential result within 1e-9', async () => {
+      // Sequential reference: force threshold above total element count.
+      computePool.updateConfig({ thresholdElements: 1_000_000 });
+      const seq = await parallelConv(x, h) as Float64Array;
+
+      // Parallel path: lower threshold so fftBatch fires for 2 * paddedLength frames.
+      computePool.updateConfig({ thresholdElements: 4 });
+      const par = await parallelConv(x, h) as Float64Array;
+      computePool.updateConfig({ thresholdElements: 1_000_000 });
+
+      expect(par.length).toBe(seq.length);
+      for (let i = 0; i < seq.length; i++) {
+        expect(Math.abs(par[i] - seq[i])).toBeLessThan(1e-9);
+      }
+    });
+
+    it('parallelXCorr: parallel result matches sequential result within 1e-9', async () => {
+      computePool.updateConfig({ thresholdElements: 1_000_000 });
+      const seq = await parallelXCorr(x, h) as Float64Array;
+
+      computePool.updateConfig({ thresholdElements: 4 });
+      const par = await parallelXCorr(x, h) as Float64Array;
+      computePool.updateConfig({ thresholdElements: 1_000_000 });
+
+      expect(par.length).toBe(seq.length);
+      for (let i = 0; i < seq.length; i++) {
+        expect(Math.abs(par[i] - seq[i])).toBeLessThan(1e-9);
+      }
+    });
+
+    it('parallelAutoCorr: parallel result matches sequential result within 1e-9', async () => {
+      const sig = x.slice(0, 256);
+
+      computePool.updateConfig({ thresholdElements: 1_000_000 });
+      const seq = await parallelAutoCorr(sig) as Float64Array;
+
+      computePool.updateConfig({ thresholdElements: 4 });
+      const par = await parallelAutoCorr(sig) as Float64Array;
+      computePool.updateConfig({ thresholdElements: 1_000_000 });
+
+      expect(par.length).toBe(seq.length);
+      for (let i = 0; i < seq.length; i++) {
+        expect(Math.abs(par[i] - seq[i])).toBeLessThan(1e-9);
+      }
+    });
+  });
 });

@@ -1075,10 +1075,13 @@ leastSquares([[1,0],[1,1],[1,2]], [1,2,3]); // [1, 1]
 
 ## Signal Processing
 
-The `parallel*` transforms return a `Promise`. `parallelFFTMagnitude` and
-`parallelFFTPower` dispatch large inputs to worker threads; the FFT and
-convolution transforms run their core algorithm on the calling thread (the
-radix-2 butterfly has data dependencies a chunked dispatch cannot exploit).
+Several transforms dispatch their independent FFT work to worker threads:
+`parallelFFTMagnitude` / `parallelFFTPower` (element-wise spectra),
+`parallelConv` / `parallelXCorr` / `parallelAutoCorr` (the two forward FFTs run
+concurrently), and `spectrogram` / `fft2d` (batches of independent FFTs). A lone
+`parallelFFT` / `parallelIFFT` still runs its radix-2 butterfly on the calling
+thread — its stages have data dependencies a chunked dispatch cannot exploit.
+All of these return a `Promise`.
 
 | Function | Description | Accel |
 |---|---|---|
@@ -1086,11 +1089,11 @@ radix-2 butterfly has data dependencies a chunked dispatch cannot exploit).
 | `parallelIFFT(X)` | Inverse FFT → `Float64Array` | — |
 | `parallelFFTMagnitude(x)` | FFT magnitude spectrum | parallel |
 | `parallelFFTPower(x)` | FFT power spectrum | parallel |
-| `parallelConv(a, b)` | Convolution | — |
-| `parallelXCorr(a, b)` | Cross-correlation | — |
-| `parallelAutoCorr(a)` | Auto-correlation | — |
+| `parallelConv(a, b)` | Convolution | parallel |
+| `parallelXCorr(a, b)` | Cross-correlation | parallel |
+| `parallelAutoCorr(a)` | Auto-correlation | parallel |
 | `fft(x)` / `ifft(X)` | Discrete Fourier transform / inverse (factory layer) | — |
-| `fft2d(matrix)` | 2D FFT | — |
+| `fft2d(matrix)` | 2D FFT | parallel |
 | `fourier(f)` / `invFourier(F)` | Continuous Fourier transform | — |
 | `dct(x)` / `idct(X)` | Discrete cosine transform / inverse | WASM |
 | `dst(x)` / `idst(X)` | Discrete sine transform / inverse | WASM |
@@ -1104,7 +1107,7 @@ radix-2 butterfly has data dependencies a chunked dispatch cannot exploit).
 | `medfilt(x[, window])` | Median filter | — |
 | `windowFunction(n, type)` | Window functions (Hamming, Hann, …) | — |
 | `resample(x, ratio)` | Signal resampling | — |
-| `spectrogram(x[, opts])` | Spectrogram | WASM |
+| `spectrogram(x[, opts])` | Spectrogram | parallel, WASM |
 | `periodogram(x)` | Power spectral density estimate | WASM |
 | `groupDelay(b, a, w)` | Filter group delay | — |
 | `unwrapPhase(phase)` | Remove 2π phase discontinuities | — |
@@ -1113,9 +1116,13 @@ radix-2 butterfly has data dependencies a chunked dispatch cannot exploit).
 
 ### Details
 
-- The `parallel*` transforms take a `Float64Array` and return a `Promise`.
-  `parallelFFTMagnitude` / `parallelFFTPower` run their element-wise spectrum
-  pass on worker threads; the FFT, IFFT, and convolution transforms compute on
+- The `parallel`-marked transforms return a `Promise` and dispatch their
+  independent FFT work to the worker pool above the parallel threshold:
+  `parallelFFTMagnitude` / `parallelFFTPower` parallelize the element-wise
+  spectrum pass; `parallelConv` / `parallelXCorr` / `parallelAutoCorr` run the
+  two forward FFTs concurrently; `spectrogram` and `fft2d` dispatch their
+  batches of independent FFTs. `spectrogram` and `fft2d` became `async` for
+  this. A single `parallelFFT` / `parallelIFFT` runs its radix-2 butterfly on
   the calling thread.
 - FFT routines are fastest at power-of-two lengths; other lengths use a
   mixed-radix path.

@@ -60,6 +60,48 @@ ever actually ran in a worker.
   calling thread (its stages have tight data dependencies). A genuine parallel
   FFT needs a six-step / four-step decomposition — future work.
 
+## 🚀 Acceleration Roadmap (2026-05-21)
+
+Acceleration only pays off for **compute-bound** operations — where arithmetic
+dominates data movement. Most functions are transfer-bound or cheap, and adding
+a worker / WASM / WebGPU path to them is net-neutral or slower. The candidates
+below are limited to operations that genuinely clear that bar.
+
+**Selection criteria**
+
+- **Worth it** — compute grows faster than data (O(n³), O(n² log n), or many
+  independent sub-problems), and the input is large enough to amortize dispatch.
+- **Not worth it** — element-wise O(n) maps and cheap scalar functions: data
+  transfer (and, for GPU, f32 conversion) dominates the runtime.
+- **WebGPU is f32-only** (WGSL has no f64) — expose it as opt-in functions; do
+  not silently substitute it for an f64 path.
+- **async blast radius** — parallelizing a sync function makes it, and its
+  callers, async. Acceptable for niche functions; avoid it for hot, widely-used
+  scalar paths (`add`, `multiply`, …).
+
+**Low effort**
+
+- [x] `spectrogram`, `fft2d` — parallelized via a batched-FFT worker kernel
+  (`fftBatchChunk` + `MathWorkerPool.fftBatch` / `ComputePool.fftBatch`); both
+  dispatch their independent FFTs to the worker pool and are now `async`.
+- [x] FFT-based `convolve` / `correlate` — `parallelConv` runs its two forward
+  FFTs concurrently through `fftBatch`; `parallelXCorr` / `parallelAutoCorr`
+  inherit it by delegation.
+
+**Medium effort**
+
+- [ ] `eigs` / SVD and the sparse factorizations — large dense decompositions.
+- [ ] `polyFit` / `leastSquares` — parallelize the normal-equations matmul for
+  tall systems.
+- [ ] `nearestNeighbor` / distance-matrix geometry — pairwise distances are
+  O(n²) and embarrassingly parallel.
+
+**High effort**
+
+- [ ] Worker-distributed FFT butterfly — a six-step / four-step decomposition so
+  a single large FFT fans out across workers (the open item above).
+- [ ] Unified f32 WebGPU path covering the operations above.
+
 ## 📋 Next Steps
 
 ### WASM Test Files (46 files, sorted by complexity) ✅ ALL COMPLETE

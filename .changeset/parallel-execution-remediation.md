@@ -12,14 +12,17 @@ Fix and extend parallel execution.
   now resolved and loaded, so the parallel layer runs in workers for the first
   time. Float64Array chunking is fixed (`subarray` shared the whole buffer →
   `slice`). Adds the generic `applyKernel` (unary) and `applyKernel2` (binary)
-  worker kernels.
-- **parallel** — `ComputePool` exposes `applyKernel` / `applyKernel2`.
+  worker kernels and a batched-FFT kernel (`fftBatchChunk` / `fftBatch`).
+- **parallel** — `ComputePool` exposes `applyKernel` / `applyKernel2` / `fftBatch`.
 - **functions** — parallel `Float64Array` overloads for all 10 distribution
   functions and all 28 special functions; `parallelFFTMagnitude` /
-  `parallelFFTPower` now dispatch to worker threads. Adds WebGPU-accelerated
-  matrix operations `gpuMatmul`, `gpuAdd`, `gpuTranspose`, and `gpuScale` (new
-  async exports, transparent CPU fallback, f32 GPU path).
+  `parallelFFTPower` now dispatch to worker threads; `spectrogram`, `fft2d`, and
+  `parallelConv` (with `parallelXCorr` / `parallelAutoCorr`) dispatch their
+  independent FFTs to the worker pool. Adds WebGPU-accelerated matrix operations
+  `gpuMatmul`, `gpuAdd`, `gpuTranspose`, and `gpuScale` (new async exports,
+  transparent CPU fallback, f32 GPU path).
 
   **Breaking:** `characteristicPolynomial`, `matrixPower`, `matrixLog`,
-  `polarDecomposition`, and `jordanForm` are now async — their O(n^3) matrix
-  products are offloaded to the worker pool.
+  `polarDecomposition`, `jordanForm`, `spectrogram`, and `fft2d` are now async —
+  their O(n^3) products / independent FFT batches are offloaded to the worker
+  pool.

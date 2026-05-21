@@ -128,6 +128,13 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   dispatch large `Float64Array` inputs to worker threads via the new binary
   kernel; they previously ran on the calling thread despite the `parallel`
   prefix. `functions/src/typed/signal.ts`.
+- **Batched-FFT parallelism** — a new `fftBatchChunk` worker kernel (a
+  self-contained radix-2 FFT, since the worker sits below the `functions`
+  package) plus `MathWorkerPool.fftBatch` / `ComputePool.fftBatch` distribute a
+  batch of independent FFTs across workers. `spectrogram` dispatches its
+  per-frame FFTs through it, `fft2d` dispatches its per-row then per-column
+  FFTs, and `parallelConv` (and thus `parallelXCorr` / `parallelAutoCorr`) runs
+  its two forward FFTs concurrently. `functions/src/typed/signal.ts`.
 
 #### WebGPU acceleration
 
@@ -169,6 +176,10 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   `cholesky`, and `hessenbergForm` are unchanged (they do not multiply
   matrices). Also removes the dead `matLogEig` helper.
   `functions/src/typed/matrix-ops.ts`.
+- **`spectrogram` and `fft2d` are async (breaking)** — both now return a
+  `Promise`; they dispatch their batches of independent FFTs to the worker pool
+  above the parallel threshold and fall back to the sequential loop otherwise.
+  `functions/src/typed/signal.ts`.
 
 ### Fixed
 
