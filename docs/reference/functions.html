@@ -264,10 +264,12 @@ Function tables in hardware-accelerated categories carry an **Accel** column:
 - **`parallel`** — the function's `Float64Array` (or large-matrix) path is
   dispatched across worker threads by the compute pool.
 - **`WASM`** — the function has a WebAssembly fast path for large inputs.
+- **`WebGPU`** — the function runs on the GPU via WebGPU compute shaders for
+  large inputs (32-bit float precision).
 
-Both accelerations fall back automatically to a pure-TypeScript implementation
-when the input is small, the worker pool is not initialized, or the WASM module
-is unavailable.
+Each acceleration falls back automatically to a pure-TypeScript implementation
+when the input is small, the worker pool is not initialized, or the WASM /
+WebGPU device is unavailable.
 
 Every category below is documented in three parts: **Details** — supported
 types, return semantics, and numerical caveats; **Background & History** — the
@@ -866,6 +868,21 @@ operations are eligible for WASM/GPU acceleration via the matrix package.
 
 The `parallel`-marked decompositions route their O(n³) matrix products through
 the worker pool and therefore return a `Promise`.
+
+### WebGPU-accelerated operations
+
+GPU compute-shader implementations of the core matrix operations. Each runs on
+the GPU when a WebGPU device is present and the matrix is large enough to
+amortize the dispatch, and falls back transparently to the CPU implementation
+otherwise. All four are `async`. The GPU path computes in 32-bit float — use
+the standard `multiply` / `transpose` when full f64 precision is required.
+
+| Function | Description | Accel |
+|---|---|---|
+| `gpuMatmul(a, b)` | Matrix multiplication | WebGPU |
+| `gpuAdd(a, b)` | Matrix addition | WebGPU |
+| `gpuTranspose(a)` | Matrix transpose | WebGPU |
+| `gpuScale(a, s)` | Scalar multiplication | WebGPU |
 
 ### Sparse (CSC) routines
 

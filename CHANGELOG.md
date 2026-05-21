@@ -129,6 +129,17 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   kernel; they previously ran on the calling thread despite the `parallel`
   prefix. `functions/src/typed/signal.ts`.
 
+#### WebGPU acceleration
+
+- **GPU matrix operations** — `gpuMatmul`, `gpuAdd`, `gpuTranspose`, and
+  `gpuScale` (`functions/src/typed/gpu.ts`, new) run the core matrix operations
+  on the GPU through the matrix package's WebGPU compute-shader backend
+  (`gpuMatrixBackend`). Each is `async` and falls back transparently to the CPU
+  implementation when no WebGPU device is present or the matrix is below the
+  dispatch threshold. The GPU path computes in 32-bit float (WGSL has no f64);
+  these are additive new exports, so the f64 `multiply` / `transpose` are
+  unaffected.
+
 ### Changed
 
 - **workbook cell evaluation** — cells are evaluated via `evaluate()` from
@@ -183,11 +194,12 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   hardware-accelerated categories (Arithmetic, Trigonometry, Statistics, Special
   Functions, Probability Distributions, the typed matrix-ops decompositions,
   Numerical Methods, Interpolation, Signal Processing, Geometry) gained an
-  **Accel** column marking each function `parallel` (worker pool) or `WASM`. The
-  Signal Processing and Parallel Execution Model sections were corrected to
-  describe the real behaviour — the FFT butterfly runs on the calling thread,
-  and the typed `Float64Array` overloads resolve to the value directly, not to a
-  `ParallelResult` wrapper.
+  **Accel** column marking each function `parallel` (worker pool), `WASM`, or
+  `WebGPU`. The Linear Algebra section gained a "WebGPU-accelerated operations"
+  subsection for the new `gpu*` functions. The Signal Processing and Parallel
+  Execution Model sections were corrected to describe the real behaviour — the
+  FFT butterfly runs on the calling thread, and the typed `Float64Array`
+  overloads resolve to the value directly, not to a `ParallelResult` wrapper.
 
 ### Retracted (audit false-positives)
 
