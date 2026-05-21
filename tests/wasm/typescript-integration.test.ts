@@ -12,6 +12,16 @@
  */
 import assert from 'assert'
 import { describe, it } from 'vitest'
+import { wasmArtifactAvailable, warnWasmArtifactsMissing } from './wasm-artifact-check.js'
+
+// Most tests here either exercise `MatrixWasmBridge` (which has a JS fallback)
+// or guard their dynamic imports with `shouldSkip`. The `WASM Module Types`
+// block, however, calls `WasmLoader.load()` directly — and a missing `.wasm`
+// artifact surfaces as an `ENOENT` that `shouldSkip` does not (and should not)
+// match. Skip that block loudly when the artifact is absent.
+const hasWasm = wasmArtifactAvailable()
+if (!hasWasm) warnWasmArtifactsMissing(1)
+const describeWasm = hasWasm ? describe : describe.skip
 
 const EPSILON = 1e-10
 
@@ -270,7 +280,7 @@ describe('TypeScript + WASM Integration Tests', { timeout: 15000 }, () => {
     })
   })
 
-  describe('WASM Module Types', () => {
+  describeWasm('WASM Module Types', () => {
     it('should have proper WasmLoader interface', async () => {
       try {
         const { WasmLoader } = await import('../../matrix/src/backends/WasmLoader.js')

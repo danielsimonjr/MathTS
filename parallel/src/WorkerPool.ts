@@ -65,7 +65,13 @@ export class WorkerPool {
     if (this.isNode) {
       // Node.js worker_threads
       const { Worker: NodeWorker } = await import('worker_threads')
-      worker = new NodeWorker(this.workerScript) as any
+      // Node's worker_threads Worker rejects raw file:// strings — it requires
+      // either an absolute/relative path or a URL object. Wrap file:// URLs in
+      // `new URL`; pass plain paths through unchanged.
+      const script = this.workerScript.startsWith('file://')
+        ? new URL(this.workerScript)
+        : this.workerScript
+      worker = new NodeWorker(script) as any
     } else {
       // Browser Web Worker
       worker = new Worker(this.workerScript, { type: 'module' })

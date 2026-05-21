@@ -12,8 +12,18 @@
  */
 import assert from 'assert'
 import { describe, it } from 'vitest'
+import { wasmArtifactAvailable, warnWasmArtifactsMissing } from './wasm-artifact-check.js'
 
-describe('WASM Loader Tests', { timeout: 15000 }, () => {
+// `WasmLoader.load()` reads a compiled `.wasm` binary from `lib/wasm/`. That
+// artifact is not committed; on a fresh checkout (no `npm run build:wasm`)
+// every test here would fail with an opaque `ENOENT ... mathts.wasm`. Skip the
+// whole suite — loudly — when the artifact is absent so environmental skips
+// are distinguishable from real failures.
+const hasWasm = wasmArtifactAvailable()
+if (!hasWasm) warnWasmArtifactsMissing(1)
+const describeWasm = hasWasm ? describe : describe.skip
+
+describeWasm('WASM Loader Tests', { timeout: 15000 }, () => {
   describe('Module Loading', () => {
     it('should load WASM module successfully', async () => {
       const { WasmLoader } = await import('../../matrix/src/backends/WasmLoader.js')
