@@ -188,6 +188,121 @@ function fftCoreFloat64(
 }
 
 // =============================================================================
+// Four-Step (Cooley-Tukey transpose) FFT
+// =============================================================================
+
+/**
+ * Genuinely parallel single-FFT via the four-step (transpose) algorithm.
+ *
+ * For an N-point DFT with N = N1 * N2 (both powers of two), the transform
+ * decomposes into two batches of independent smaller FFTs which are dispatched
+ * to the worker pool via `computePool.fftBatch`:
+ *
+ *  - Index the input  `n = N2 * n1 + n2`  (n1 in [0,N1), n2 in [0,N2))
+ *  - Index the output `k = N1 * k2 + k1`  (k1 in [0,N1), k2 in [0,N2))
+ *
+ *    X[N1*k2 + k1]
+ *      = sum_{n2} [ e^(s*2*pi*i*n2*k1/N)
+ *                   * ( sum_{n1} x[N2*n1+n2] * e^(s*2*pi*i*n1*k1/N1) ) ]
+ *                 * e^(s*2*pi*i*n2*k2/N2)
+ *
+ *  with s = -1 for the forward transform and s = +1 for the inverse.
+ *
+ *  Step A — for each n2, an N1-point DFT over n1  (N2 frames of size N1).
+ *  Step B — twiddle: multiply element (k1,n2) by e^(s*2*pi*i*n2*k1/N).
+ *  Step C — for each k1, an N2-point DFT over n2  (N1 frames of size N2).
+ *  Step D — read step-C output into natural order X[N1*k2 + k1].
+ *
+ * `fftBatch` already scales the inverse transform by 1/frameLength per frame,
+ * so for the inverse path: step A divides by N1 and step C divides by N2,
+ * yielding the required total 1/N scaling with no extra work.
+ *
+ * Falls back to `fftCoreFloat64` when N < 4 (too small to split sensibly).
+ *
+ * @param real - Real part, length N (power of two)
+ * @param imag - Imaginary part, length N
+ * @param inverse - Compute the inverse transform when true
+ */
+async function fourStepFFT(
+  real: Float64Array,
+  imag: Float64Array,
+  inverse: boolean,
+): Promise<{ real: Float64Array; imag: Float64Array }> {
+  const N: i32 = real.length;
+
+  // Degenerate / too-small case — split would be trivial, just go sequential.
+  if (N < 4 || !isPowerOf2(N)) {
+    return fftCoreFloat64(real, imag, inverse);
+  }
+
+  // Factor N = N1 * N2, both powers of two. For a perfect square split N1
+  // equals N2; for a non-square power of two (e.g. 2048) N2 = 2 * N1.
+  const bits: i32 = Math.round(Math.log2(N));
+  const bits1: i32 = bits >> 1;
+  const N1: i32 = 1 << bits1;
+  const N2: i32 = N / N1;
+
+  const sign: f64 = inverse ? 1.0 : -1.0;
+
+  // ---- Step A: N2 frames, each an N1-point DFT over n1 --------------------
+  // Frame n2 holds { x[N2*0 + n2], x[N2*1 + n2], ... , x[N2*(N1-1) + n2] }.
+  const aReal = new Float64Array(N2 * N1);
+  const aImag = new Float64Array(N2 * N1);
+  for (let n2: i32 = 0; n2 < N2; n2++) {
+    const base: i32 = n2 * N1;
+    for (let n1: i32 = 0; n1 < N1; n1++) {
+      const src: i32 = N2 * n1 + n2;
+      aReal[base + n1] = real[src];
+      aImag[base + n1] = imag[src];
+    }
+  }
+
+  const stepA = await computePool.fftBatch(aReal, aImag, N2, N1, inverse);
+  // stepA.result frame n2 holds A[k1, n2] for k1 in [0,N1).
+  const aOutReal = stepA.result.real;
+  const aOutImag = stepA.result.imag;
+
+  // ---- Step B + repack into step-C frames ---------------------------------
+  // Twiddle element (k1, n2) by e^(sign*2*pi*i*n2*k1/N), then lay out as N1
+  // frames of size N2: frame k1 holds B[k1, n2] for n2 in [0,N2).
+  const cReal = new Float64Array(N1 * N2);
+  const cImag = new Float64Array(N1 * N2);
+  const twN: f64 = (sign * 2.0 * Math.PI) / N;
+  for (let n2: i32 = 0; n2 < N2; n2++) {
+    const aBase: i32 = n2 * N1;
+    for (let k1: i32 = 0; k1 < N1; k1++) {
+      const ar: f64 = aOutReal[aBase + k1];
+      const ai: f64 = aOutImag[aBase + k1];
+      const ang: f64 = twN * n2 * k1;
+      const wr: f64 = Math.cos(ang);
+      const wi: f64 = Math.sin(ang);
+      const dst: i32 = k1 * N2 + n2;
+      cReal[dst] = ar * wr - ai * wi;
+      cImag[dst] = ar * wi + ai * wr;
+    }
+  }
+
+  // ---- Step C: N1 frames, each an N2-point DFT over n2 --------------------
+  const stepC = await computePool.fftBatch(cReal, cImag, N1, N2, inverse);
+  const cOutReal = stepC.result.real;
+  const cOutImag = stepC.result.imag;
+
+  // ---- Step D: read into natural order X[N1*k2 + k1] ----------------------
+  const outReal = new Float64Array(N);
+  const outImag = new Float64Array(N);
+  for (let k1: i32 = 0; k1 < N1; k1++) {
+    const cBase: i32 = k1 * N2;
+    for (let k2: i32 = 0; k2 < N2; k2++) {
+      const dst: i32 = N1 * k2 + k1;
+      outReal[dst] = cOutReal[cBase + k2];
+      outImag[dst] = cOutImag[cBase + k2];
+    }
+  }
+
+  return { real: outReal, imag: outImag };
+}
+
+// =============================================================================
 // Typed FFT Functions
 // =============================================================================
 
@@ -226,23 +341,34 @@ export const parallelFFT = mathTyped('parallelFFT', {
     // Copy input with zero-padding
     real.set(signal);
 
-    const result = fftCoreFloat64(real, imag, false);
+    // Large transforms are parallelized across worker threads via the
+    // four-step (transpose) decomposition; small ones run on this thread.
+    const result = computePool.shouldParallelize(paddedLength)
+      ? await fourStepFFT(real, imag, false)
+      : fftCoreFloat64(real, imag, false);
     return { ...result, originalLength: n };
   },
 });
 
 /**
- * Parallel IFFT with typed-function dispatch
+ * Parallel IFFT with typed-function dispatch.
+ *
+ * Async: large inverse transforms are parallelized across worker threads via
+ * the four-step (transpose) decomposition; small ones run on this thread.
  */
 export const parallelIFFT = mathTyped('parallelIFFT', {
   // IFFT from real/imag arrays
-  'Float64Array, Float64Array': (real: Float64Array, imag: Float64Array) => {
-    return fftCoreFloat64(real, imag, true);
+  'Float64Array, Float64Array': async (real: Float64Array, imag: Float64Array) => {
+    return computePool.shouldParallelize(real.length)
+      ? fourStepFFT(real, imag, true)
+      : fftCoreFloat64(real, imag, true);
   },
 
   // IFFT from object with real/imag
-  'Object': (spectrum: { real: Float64Array; imag: Float64Array }) => {
-    return fftCoreFloat64(spectrum.real, spectrum.imag, true);
+  'Object': async (spectrum: { real: Float64Array; imag: Float64Array }) => {
+    return computePool.shouldParallelize(spectrum.real.length)
+      ? fourStepFFT(spectrum.real, spectrum.imag, true)
+      : fftCoreFloat64(spectrum.real, spectrum.imag, true);
   },
 });
 

@@ -74,27 +74,27 @@ describe('Parallel Signal Processing Functions', () => {
   });
 
   describe('IFFT', () => {
-    it('should recover original signal', () => {
+    it('should recover original signal', async () => {
       const signal = [1, 2, 3, 4];
       const fftResult = parallelFFT(signal);
-      const recovered = parallelIFFT(fftResult.real, fftResult.imag);
+      const recovered = await parallelIFFT(fftResult.real, fftResult.imag);
 
       for (let i = 0; i < signal.length; i++) {
         expect(recovered.real[i]).toBeCloseTo(signal[i], 10);
       }
     });
 
-    it('should work with object input', () => {
+    it('should work with object input', async () => {
       const signal = [1, 2, 3, 4];
       const fftResult = parallelFFT(signal);
-      const recovered = parallelIFFT({ real: fftResult.real, imag: fftResult.imag });
+      const recovered = await parallelIFFT({ real: fftResult.real, imag: fftResult.imag });
 
       for (let i = 0; i < signal.length; i++) {
         expect(recovered.real[i]).toBeCloseTo(signal[i], 10);
       }
     });
 
-    it('should round-trip a cosine wave', () => {
+    it('should round-trip a cosine wave', async () => {
       const n = 8;
       const signal = new Array(n);
       for (let i = 0; i < n; i++) {
@@ -102,7 +102,7 @@ describe('Parallel Signal Processing Functions', () => {
       }
 
       const fftResult = parallelFFT(signal);
-      const recovered = parallelIFFT(fftResult.real, fftResult.imag);
+      const recovered = await parallelIFFT(fftResult.real, fftResult.imag);
 
       for (let i = 0; i < n; i++) {
         expect(recovered.real[i]).toBeCloseTo(signal[i], 10);
@@ -379,5 +379,95 @@ describe('Parallel Signal Processing Functions', () => {
         expect(Math.abs(par[i] - seq[i])).toBeLessThan(1e-9);
       }
     });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Four-step (Cooley-Tukey transpose) single-FFT parallelization
+  //
+  // parallelFFT / parallelIFFT on a Float64Array now decompose one large FFT
+  // into two batches of independent smaller FFTs dispatched to the worker pool
+  // via computePool.fftBatch. These tests force the four-step path by lowering
+  // the parallel threshold and confirm:
+  //   1. The parallel transform matches the sequential reference within 1e-9
+  //      for every power-of-two size (including a non-square split, N = 2048).
+  //   2. parallelIFFT(parallelFFT(x)) round-trips back to x.
+  // ---------------------------------------------------------------------------
+  describe('four-step parallel single FFT', () => {
+    const sizes = [16, 64, 256, 1024, 2048, 4096];
+
+    for (const N of sizes) {
+      it(`parallelFFT N=${N}: four-step result matches sequential within 1e-9`, async () => {
+        const signal = Float64Array.from({ length: N }, (_, i) =>
+          Math.sin((2 * Math.PI * 7 * i) / N) +
+          0.3 * Math.cos((2 * Math.PI * 31 * i) / N) +
+          0.1 * (i % 5),
+        );
+
+        // Sequential reference: threshold above N so fftCoreFloat64 runs.
+        computePool.updateConfig({ thresholdElements: 1_000_000 });
+        const seq = await parallelFFT(signal);
+
+        // Parallel path: threshold below N so fourStepFFT (fftBatch) runs.
+        computePool.updateConfig({ thresholdElements: 4 });
+        const par = await parallelFFT(signal);
+        computePool.updateConfig({ thresholdElements: 1_000_000 });
+
+        expect(par.real.length).toBe(seq.real.length);
+        let maxErr = 0;
+        for (let i = 0; i < N; i++) {
+          maxErr = Math.max(
+            maxErr,
+            Math.abs(par.real[i] - seq.real[i]),
+            Math.abs(par.imag[i] - seq.imag[i]),
+          );
+        }
+        expect(maxErr).toBeLessThan(1e-9);
+      });
+
+      it(`parallelIFFT N=${N}: four-step result matches sequential within 1e-9`, async () => {
+        const re = Float64Array.from({ length: N }, (_, i) =>
+          Math.cos((2 * Math.PI * 11 * i) / N) + 0.2 * (i % 3),
+        );
+        const im = Float64Array.from({ length: N }, (_, i) =>
+          Math.sin((2 * Math.PI * 5 * i) / N),
+        );
+
+        computePool.updateConfig({ thresholdElements: 1_000_000 });
+        const seq = await parallelIFFT(re, im);
+
+        computePool.updateConfig({ thresholdElements: 4 });
+        const par = await parallelIFFT(re, im);
+        computePool.updateConfig({ thresholdElements: 1_000_000 });
+
+        let maxErr = 0;
+        for (let i = 0; i < N; i++) {
+          maxErr = Math.max(
+            maxErr,
+            Math.abs(par.real[i] - seq.real[i]),
+            Math.abs(par.imag[i] - seq.imag[i]),
+          );
+        }
+        expect(maxErr).toBeLessThan(1e-9);
+      });
+
+      it(`round-trip N=${N}: parallelIFFT(parallelFFT(x)) recovers x`, async () => {
+        const signal = Float64Array.from({ length: N }, (_, i) =>
+          Math.sin((2 * Math.PI * 13 * i) / N) +
+          0.5 * Math.cos((2 * Math.PI * 41 * i) / N),
+        );
+
+        // Force the four-step path for both transforms.
+        computePool.updateConfig({ thresholdElements: 4 });
+        const spectrum = await parallelFFT(signal);
+        const recovered = await parallelIFFT(spectrum.real, spectrum.imag);
+        computePool.updateConfig({ thresholdElements: 1_000_000 });
+
+        let maxErr = 0;
+        for (let i = 0; i < N; i++) {
+          maxErr = Math.max(maxErr, Math.abs(recovered.real[i] - signal[i]));
+        }
+        expect(maxErr).toBeLessThan(1e-9);
+      });
+    }
   });
 });
