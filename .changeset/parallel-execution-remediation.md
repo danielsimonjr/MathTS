@@ -16,7 +16,9 @@ Fix and extend parallel execution.
 - **parallel** — `ComputePool` exposes `applyKernel` / `applyKernel2`.
 - **functions** — parallel `Float64Array` overloads for all 10 distribution
   functions and all 28 special functions; `parallelFFTMagnitude` /
-  `parallelFFTPower` now dispatch to worker threads.
+  `parallelFFTPower` now dispatch to worker threads. Adds WebGPU-accelerated
+  matrix operations `gpuMatmul`, `gpuAdd`, `gpuTranspose`, and `gpuScale` (new
+  async exports, transparent CPU fallback, f32 GPU path).
 
   **Breaking:** `characteristicPolynomial`, `matrixPower`, `matrixLog`,
   `polarDecomposition`, and `jordanForm` are now async — their O(n^3) matrix

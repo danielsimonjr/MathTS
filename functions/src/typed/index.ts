@@ -75,6 +75,9 @@ export * from './cas.js';
 // Matrix operations (characteristic polynomial, RREF, Cholesky, etc.)
 export * from './matrix-ops.js';
 
+// WebGPU-accelerated matrix operations (gpuMatmul, gpuAdd, gpuTranspose, gpuScale)
+export * from './gpu.js';
+
 // =============================================================================
 // Combined Exports
 // =============================================================================

@@ -49,8 +49,13 @@ ever actually ran in a worker.
   O(n³) products through the worker pool (now `async` — breaking).
 - [x] **Signal spectra** — `parallelFFTMagnitude` / `parallelFFTPower` now
   genuinely dispatch to worker threads.
+- [x] **WebGPU matrix operations** — `gpuMatmul`, `gpuAdd`, `gpuTranspose`, and
+  `gpuScale` (`functions/src/typed/gpu.ts`) run on the matrix package's WebGPU
+  compute-shader backend (`gpuMatrixBackend`), with transparent CPU fallback.
+  Added as new async exports rather than rerouting the existing f64 functions —
+  WGSL is f32-only, so silent substitution would lose precision.
 - [x] **Function reference** — `docs/reference/functions.{md,html}` mark each
-  function's `parallel` / `WASM` acceleration in an Accel column.
+  function's `parallel` / `WASM` / `WebGPU` acceleration in an Accel column.
 - [ ] **Worker-distributed FFT** — the radix-2 FFT butterfly still runs on the
   calling thread (its stages have tight data dependencies). A genuine parallel
   FFT needs a six-step / four-step decomposition — future work.
