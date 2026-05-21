@@ -372,6 +372,39 @@ export class ComputePool {
   }
 
   /**
+   * Compute a batch of independent radix-2 FFTs in parallel.
+   *
+   * `real` and `imag` each hold `frameCount` concatenated frames of
+   * `frameLength` samples (`frameLength` must be a power of two). Each frame
+   * is FFT'd independently and the frames are distributed across workers.
+   *
+   * Used to parallelize the embarrassingly-parallel FFT batches in
+   * `spectrogram` (one FFT per windowed frame) and `fft2d` (rows then columns).
+   *
+   * @param real - Concatenated real parts (`frameCount * frameLength` values)
+   * @param imag - Concatenated imaginary parts (same layout as `real`)
+   * @param frameCount - Number of independent frames
+   * @param frameLength - Samples per frame (power of two)
+   * @param inverse - Compute the inverse FFT when true
+   */
+  async fftBatch(
+    real: Float64Array,
+    imag: Float64Array,
+    frameCount: number,
+    frameLength: number,
+    inverse = false
+  ): Promise<ParallelResult<{ real: Float64Array; imag: Float64Array }>> {
+    const result = await this.workerPool.fftBatch(
+      real,
+      imag,
+      frameCount,
+      frameLength,
+      inverse
+    );
+    return toParallelResult(result);
+  }
+
+  /**
    * Parallel absolute value
    */
   async abs(data: Float64Array): Promise<ParallelResult<Float64Array>> {

@@ -5,7 +5,8 @@
  * 2D FFT, Hilbert, spectrogram, periodogram, filters, etc.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 import {
   dct,
   idct,
@@ -33,6 +34,18 @@ const EPSILON = 1e-6;
 function expectClose(actual: number, expected: number, tol = EPSILON) {
   expect(Math.abs(actual - expected)).toBeLessThan(tol);
 }
+
+// The async fft2d / spectrogram paths dispatch their independent FFT batches
+// to the worker pool — initialize it once for the suite, restore the default
+// (high) threshold afterwards so other tests are unaffected.
+beforeAll(async () => {
+  await computePool.initialize();
+});
+
+afterAll(async () => {
+  computePool.updateConfig({ thresholdElements: 1_000_000 });
+  await computePool.terminate();
+});
 
 // =============================================================================
 // DCT / IDCT
@@ -93,13 +106,38 @@ describe('dwt', () => {
 // =============================================================================
 
 describe('fft2d', () => {
-  it('should compute 2D FFT', () => {
+  it('should compute 2D FFT', async () => {
     const x = [[1, 2], [3, 4]];
-    const result = fft2d(x);
+    const result = await fft2d(x);
     expect(result.real.length).toBe(2);
     expect(result.imag.length).toBe(2);
     // DC component should be sum of all elements
     expectClose(result.real[0][0], 10, 1e-6);
+  });
+
+  it('parallel result matches sequential result', async () => {
+    // Build a deterministic 16x16 real matrix.
+    const n = 16;
+    const x: number[][] = Array.from({ length: n }, (_, r) =>
+      Array.from({ length: n }, (_, c) => Math.sin((r + 1) * 0.3 + (c + 1) * 0.17)),
+    );
+
+    // Sequential reference: thresholds high enough that the pool path is skipped.
+    computePool.updateConfig({ thresholdElements: 1_000_000 });
+    const seq = await fft2d(x);
+
+    // Parallel: lower the threshold so fftBatch dispatches to workers.
+    computePool.updateConfig({ thresholdElements: 16 });
+    const par = await fft2d(x);
+    computePool.updateConfig({ thresholdElements: 1_000_000 });
+
+    expect(par.real.length).toBe(seq.real.length);
+    for (let r = 0; r < seq.real.length; r++) {
+      for (let c = 0; c < seq.real[r].length; c++) {
+        expectClose(par.real[r][c], seq.real[r][c], 1e-9);
+        expectClose(par.imag[r][c], seq.imag[r][c], 1e-9);
+      }
+    }
   });
 });
 
@@ -151,12 +189,38 @@ describe('hilbertTransform', () => {
 // =============================================================================
 
 describe('spectrogram', () => {
-  it('should produce magnitude matrix', () => {
+  it('should produce magnitude matrix', async () => {
     const x = Array.from({ length: 512 }, (_, i) => Math.sin(2 * Math.PI * 10 * i / 512));
-    const result = spectrogram(x, { windowSize: 64 });
+    const result = await spectrogram(x, { windowSize: 64 });
     expect(result.magnitude.length).toBeGreaterThan(0);
     expect(result.frequencies.length).toBeGreaterThan(0);
     expect(result.times.length).toBe(result.magnitude.length);
+  });
+
+  it('parallel result matches sequential result', async () => {
+    // Rectangular window keeps the WASM fast-path out of the picture so the
+    // comparison isolates the pure-TS sequential vs. worker-batch paths.
+    const x = Array.from({ length: 1024 }, (_, i) =>
+      Math.sin(2 * Math.PI * 7 * i / 1024) + 0.3 * Math.cos(2 * Math.PI * 23 * i / 1024),
+    );
+    const opts = { windowSize: 64, hopSize: 16, window: 'rectangular' };
+
+    // Sequential reference.
+    computePool.updateConfig({ thresholdElements: 1_000_000 });
+    const seq = await spectrogram(x, opts);
+
+    // Parallel: lower the threshold so the windowed frames batch to workers.
+    computePool.updateConfig({ thresholdElements: 64 });
+    const par = await spectrogram(x, opts);
+    computePool.updateConfig({ thresholdElements: 1_000_000 });
+
+    expect(par.magnitude.length).toBe(seq.magnitude.length);
+    expect(par.times).toEqual(seq.times);
+    for (let f = 0; f < seq.magnitude.length; f++) {
+      for (let i = 0; i < seq.magnitude[f].length; i++) {
+        expectClose(par.magnitude[f][i], seq.magnitude[f][i], 1e-9);
+      }
+    }
   });
 });
 
