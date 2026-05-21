@@ -13,6 +13,7 @@
  */
 
 import { eig, svd } from '@danielsimonjr/mathts-matrix';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -37,11 +38,50 @@ function eye(n: i32): number[][] {
   );
 }
 
-/** Multiply two matrices A (m x p) and B (p x n) -> (m x n). */
-function matMul(A: number[][], B: number[][]): number[][] {
+/** Flatten a row-major matrix into a Float64Array. */
+function flatten(A: number[][], rows: number, cols: number): Float64Array {
+  const flat = new Float64Array(rows * cols);
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) flat[i * cols + j] = A[i][j];
+  }
+  return flat;
+}
+
+/** Rebuild a row-major matrix from a flat Float64Array. */
+function unflatten(flat: Float64Array, rows: number, cols: number): number[][] {
+  const M: number[][] = [];
+  for (let i = 0; i < rows; i++) {
+    const row = new Array(cols);
+    for (let j = 0; j < cols; j++) row[j] = flat[i * cols + j];
+    M.push(row);
+  }
+  return M;
+}
+
+/**
+ * Multiply two matrices A (m x p) and B (p x n) -> (m x n).
+ *
+ * Large products are offloaded to the worker pool; small ones use the inline
+ * loop (which also skips zero multiplier rows). The worker dispatch threshold
+ * is decided by ComputePool, so this is sequential until the result is large
+ * enough — and until the pool is initialized — to be worth parallelizing.
+ */
+async function matMul(A: number[][], B: number[][]): Promise<number[][]> {
   const m = A.length;
   const p = A[0].length;
   const n = B[0].length;
+
+  if (computePool.shouldParallelize(m * n)) {
+    const r = await computePool.matmul(
+      flatten(A, m, p),
+      m,
+      p,
+      flatten(B, p, n),
+      n
+    );
+    return unflatten(r.result, m, n);
+  }
+
   const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
   for (let i = 0; i < m; i++) {
     for (let k = 0; k < p; k++) {
@@ -100,7 +140,7 @@ function assertSquare(A: number[][], name: string): i32 {
  * // Matrix [[2,1],[1,2]] has char poly lambda^2 - 4*lambda + 3
  * characteristicPolynomial([[2,1],[1,2]]) // => [3, -4, 1]
  */
-export function characteristicPolynomial(A: number[][]): number[] {
+export async function characteristicPolynomial(A: number[][]): Promise<number[]> {
   const n = assertSquare(A, 'characteristicPolynomial');
 
   // coeffs[k] is the coefficient of lambda^k
@@ -120,7 +160,7 @@ export function characteristicPolynomial(A: number[][]): number[] {
       for (let i = 0; i < n; i++) {
         shifted[i][i] += coeffs[n - k];
       }
-      M = matMul(A, shifted);
+      M = await matMul(A, shifted);
     }
   }
 
@@ -417,7 +457,7 @@ export function hessenbergForm(A: number[][]): HessenbergResult {
  * matrixPower([[1,1],[0,1]], 3) // => [[1,3],[0,1]]
  * matrixPower([[4,0],[0,9]], 0.5) // => [[2,0],[0,3]]
  */
-export function matrixPower(A: number[][], p: f64): number[][] {
+export async function matrixPower(A: number[][], p: f64): Promise<number[][]> {
   const n = assertSquare(A, 'matrixPower');
 
   // p = 0 -> identity
@@ -444,7 +484,7 @@ export function matrixPower(A: number[][], p: f64): number[][] {
 }
 
 /** Binary exponentiation for positive integer power. */
-function matPowBySquaring(A: number[][], p: i32): number[][] {
+async function matPowBySquaring(A: number[][], p: i32): Promise<number[][]> {
   const n = A.length;
   let result = eye(n);
   let base = cloneMatrix(A);
@@ -452,9 +492,9 @@ function matPowBySquaring(A: number[][], p: i32): number[][] {
 
   while (exp > 0) {
     if (exp & 1) {
-      result = matMul(result, base);
+      result = await matMul(result, base);
     }
-    base = matMul(base, base);
+    base = await matMul(base, base);
     exp >>= 1;
   }
 
@@ -501,7 +541,7 @@ function matrixInverse(A: number[][]): number[][] {
 }
 
 /** Fractional power via eigendecomposition. */
-function matPowFractional(A: number[][], p: f64): number[][] {
+async function matPowFractional(A: number[][], p: f64): Promise<number[][]> {
   const n = A.length;
   const { values, vectors } = eig(A, { computeVectors: true });
 
@@ -526,7 +566,7 @@ function matPowFractional(A: number[][], p: f64): number[][] {
   }
 
   // A^p = V * D^p * V^{-1}
-  return matMul(matMul(V, Dp), Vinv);
+  return matMul(await matMul(V, Dp), Vinv);
 }
 
 // =============================================================================
@@ -547,7 +587,7 @@ function matPowFractional(A: number[][], p: f64): number[][] {
  * // log(exp([[0,1],[0,0]])) should recover [[0,1],[0,0]]
  * matrixLog([[1,1],[0,1]]) // => [[0,1],[0,0]]
  */
-export function matrixLog(A: number[][]): number[][] {
+export async function matrixLog(A: number[][]): Promise<number[][]> {
   const n = assertSquare(A, 'matrixLog');
 
   // Use inverse scaling and squaring: repeatedly take square roots
@@ -556,7 +596,7 @@ export function matrixLog(A: number[][]): number[][] {
 }
 
 /** Matrix logarithm via inverse scaling and squaring + Taylor series. */
-function matLogScalingSquaring(A: number[][]): number[][] {
+async function matLogScalingSquaring(A: number[][]): Promise<number[][]> {
   const n = A.length;
 
   // Inverse scaling: repeatedly take square roots until A^(1/2^s) is close to I
@@ -573,7 +613,7 @@ function matLogScalingSquaring(A: number[][]): number[][] {
       }
     }
     if (normDiff < 0.25) break;
-    M = matrixSqrtNewton(M);
+    M = await matrixSqrtNewton(M);
     numSquares++;
   }
 
@@ -585,7 +625,7 @@ function matLogScalingSquaring(A: number[][]): number[][] {
   let Xk = cloneMatrix(X);
   const terms = 20;
   for (let k = 2; k <= terms; k++) {
-    Xk = matMul(Xk, X);
+    Xk = await matMul(Xk, X);
     const sign = (k % 2 === 0) ? -1 : 1;
     // Check if Xk is negligible
     let normXk = 0;
@@ -618,7 +658,7 @@ function matLogScalingSquaring(A: number[][]): number[][] {
  * Uses Y_{k+1} = 0.5 * (Y_k + A * Y_k^{-1}) starting from Y_0 = A.
  * Falls back to eigendecomposition-based sqrt if Newton fails.
  */
-function matrixSqrtNewton(A: number[][]): number[][] {
+async function matrixSqrtNewton(A: number[][]): Promise<number[][]> {
   const n = A.length;
 
   // Try Newton iteration: Y_{k+1} = 0.5 * (Y_k + A * Y_k^{-1})
@@ -633,7 +673,7 @@ function matrixSqrtNewton(A: number[][]): number[][] {
       return matrixSqrtEig(A);
     }
 
-    const AYinv = matMul(A, Yinv);
+    const AYinv = await matMul(A, Yinv);
     const Ynew = Array.from({ length: n }, () => new Array(n).fill(0));
 
     for (let i = 0; i < n; i++) {
@@ -657,7 +697,7 @@ function matrixSqrtNewton(A: number[][]): number[][] {
 }
 
 /** Square root via eigendecomposition (fallback for singular/defective matrices). */
-function matrixSqrtEig(A: number[][]): number[][] {
+async function matrixSqrtEig(A: number[][]): Promise<number[][]> {
   const n = A.length;
   const { values, vectors } = eig(A, { computeVectors: true });
 
@@ -680,7 +720,7 @@ function matrixSqrtEig(A: number[][]): number[][] {
     let Xk = eye(n);
     const coeffs = [1, 0.5, -1/8, 1/16, -5/128, 7/256, -21/1024];
     for (let k = 1; k < coeffs.length; k++) {
-      Xk = matMul(Xk, X);
+      Xk = await matMul(Xk, X);
       for (let i = 0; i < n; i++) {
         for (let j = 0; j < n; j++) {
           result[i][j] += coeffs[k] * Xk[i][j];
@@ -695,32 +735,7 @@ function matrixSqrtEig(A: number[][]): number[][] {
     D[i][i] = Math.sqrt(values[i].re);
   }
 
-  return matMul(matMul(V, D), Vinv);
-}
-
-/** Matrix logarithm via eigendecomposition. */
-function matLogEig(A: number[][]): number[][] {
-  const n = A.length;
-  const { values, vectors } = eig(A, { computeVectors: true });
-
-  for (const v of values) {
-    if (Math.abs(v.im) > 1e-10) {
-      throw new Error('matrixLog: complex eigenvalues not supported');
-    }
-    if (v.re <= 0) {
-      throw new Error('matrixLog: eigenvalues must be positive');
-    }
-  }
-
-  const V = vectors;
-  const Vinv = matrixInverse(V);
-
-  const D = eye(n);
-  for (let i = 0; i < n; i++) {
-    D[i][i] = Math.log(values[i].re);
-  }
-
-  return matMul(matMul(V, D), Vinv);
+  return matMul(await matMul(V, D), Vinv);
 }
 
 // =============================================================================
@@ -750,21 +765,21 @@ export interface PolarResult {
  * const { U, P } = polarDecomposition([[1,0],[0,2]]);
  * // U is identity (or close), P = [[1,0],[0,2]]
  */
-export function polarDecomposition(A: number[][]): PolarResult {
+export async function polarDecomposition(A: number[][]): Promise<PolarResult> {
   const n = assertSquare(A, 'polarDecomposition');
 
   const { U: W, S, V } = svd(A);
 
   // U_polar = W * V^T
   const Vt = transpose(V);
-  const Upolar = matMul(W, Vt);
+  const Upolar = await matMul(W, Vt);
 
   // P = V * S * V^T
   const Smat = eye(n);
   for (let i = 0; i < Math.min(S.length, n); i++) {
     Smat[i][i] = S[i];
   }
-  const P = matMul(matMul(V, Smat), Vt);
+  const P = await matMul(await matMul(V, Smat), Vt);
 
   return { U: Upolar, P };
 }
@@ -801,7 +816,7 @@ export interface JordanResult {
  * // Diagonal matrix with distinct eigenvalues
  * jordanForm([[2,0],[0,3]]) // => { J: [[2,0],[0,3]], P: ... }
  */
-export function jordanForm(A: number[][]): JordanResult {
+export async function jordanForm(A: number[][]): Promise<JordanResult> {
   const n = assertSquare(A, 'jordanForm');
   const { values, vectors } = eig(A, { computeVectors: true });
 
@@ -850,7 +865,7 @@ export function jordanForm(A: number[][]): JordanResult {
       }
     } else {
       // Need Jordan blocks — find generalized eigenvectors
-      const blocks = buildJordanBlocks(A, lambda, algebraicMult, geoMult, n, tol);
+      const blocks = await buildJordanBlocks(A, lambda, algebraicMult, geoMult, n, tol);
       for (const block of blocks) {
         for (let k = 0; k < block.size; k++) {
           J[pos + k][pos + k] = lambda;
@@ -888,14 +903,14 @@ function matrixRankInternal(A: number[][], tol: f64): i32 {
 }
 
 /** Build Jordan blocks for a repeated eigenvalue. */
-function buildJordanBlocks(
+async function buildJordanBlocks(
   A: number[][],
   lambda: f64,
   algebraicMult: i32,
   geoMult: i32,
   n: i32,
   tol: f64
-): Array<{ size: i32; vectors: number[][] }> {
+): Promise<Array<{ size: i32; vectors: number[][] }>> {
   // Compute null spaces of (A - lambda*I)^k for increasing k
   const AminusLI = cloneMatrix(A);
   for (let i = 0; i < n; i++) AminusLI[i][i] -= lambda;
@@ -903,7 +918,7 @@ function buildJordanBlocks(
   const nullDims: i32[] = [];
   let power = eye(n);
   for (let k = 1; k <= algebraicMult; k++) {
-    power = matMul(power, AminusLI);
+    power = await matMul(power, AminusLI);
     const nullDim = n - matrixRankInternal(power, tol);
     nullDims.push(nullDim);
     if (nullDim >= algebraicMult) break;
@@ -954,7 +969,7 @@ function buildJordanBlocks(
 
     // Chain: solve (A - lambda*I) * v_{k+1} = v_k
     for (let k = 1; k < size; k++) {
-      const v = solveApprox(AminusLI, vecs[k - 1], n);
+      const v = await solveApprox(AminusLI, vecs[k - 1], n);
       vecs.push(v);
     }
 
@@ -1019,10 +1034,10 @@ function findKernelVector(A: number[][], n: i32, tol: f64): number[] {
 }
 
 /** Least-squares approximate solve for A*x = b. */
-function solveApprox(A: number[][], b: number[], n: i32): number[] {
+async function solveApprox(A: number[][], b: number[], n: i32): Promise<number[]> {
   // Solve via A^T * A * x = A^T * b (normal equations)
   const At = transpose(A);
-  const AtA = matMul(At, A);
+  const AtA = await matMul(At, A);
   const Atb: number[] = new Array(n).fill(0);
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
