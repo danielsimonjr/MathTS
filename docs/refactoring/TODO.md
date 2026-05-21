@@ -81,9 +81,12 @@ below are limited to operations that genuinely clear that bar.
 
 **Low effort**
 
-- [ ] `spectrogram`, `fft2d` — many *independent* FFTs; embarrassingly parallel.
-- [ ] FFT-based `convolve` / `correlate` (`parallelConv` family) — the forward
-  FFTs are independent and can run concurrently.
+- [x] `spectrogram`, `fft2d` — parallelized via a batched-FFT worker kernel
+  (`fftBatchChunk` + `MathWorkerPool.fftBatch` / `ComputePool.fftBatch`); both
+  dispatch their independent FFTs to the worker pool and are now `async`.
+- [x] FFT-based `convolve` / `correlate` — `parallelConv` runs its two forward
+  FFTs concurrently through `fftBatch`; `parallelXCorr` / `parallelAutoCorr`
+  inherit it by delegation.
 
 **Medium effort**
 
