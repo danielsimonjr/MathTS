@@ -10,6 +10,7 @@
  */
 
 import { wasmLoader } from '../wasm/WasmLoader.js';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
 // Type Aliases
@@ -968,4 +969,51 @@ export function nearestNeighbor(
   // Pure JS fallback via kdTree + kdTreeNearest
   const root = kdTree(points);
   return kdTreeNearest(root, query);
+}
+
+// =============================================================================
+// All-Pairs Distance Matrix
+// =============================================================================
+
+/**
+ * Compute the all-pairs Euclidean distance matrix for a set of points.
+ *
+ * Returns the symmetric `n x n` matrix whose entry `(i, j)` is the Euclidean
+ * distance between point `i` and point `j`. Every output row is independent, so
+ * large point sets are computed across the worker pool; small sets — or an
+ * uninitialized pool — fall back to a sequential computation.
+ *
+ * @param points - Array of `n` points, each a coordinate array of equal length
+ * @returns `n x n` distance matrix
+ *
+ * @example
+ * await distanceMatrix([[0, 0], [3, 0], [0, 4]])
+ * // [[0, 3, 4], [3, 0, 5], [4, 5, 0]]
+ */
+export async function distanceMatrix(points: number[][]): Promise<number[][]> {
+  const n: i32 = points.length;
+  if (n === 0) return [];
+  const dim: i32 = points[0].length;
+
+  // Flatten to a row-major Float64Array for the worker pool.
+  const flat = new Float64Array(n * dim);
+  for (let i: i32 = 0; i < n; i++) {
+    const row = points[i];
+    for (let d: i32 = 0; d < dim; d++) {
+      flat[i * dim + d] = row[d];
+    }
+  }
+
+  const { result } = await computePool.distanceMatrix(flat, n, dim);
+
+  // Unflatten the flat n x n result into nested arrays.
+  const out: number[][] = new Array(n);
+  for (let i: i32 = 0; i < n; i++) {
+    const outRow: number[] = new Array(n);
+    for (let j: i32 = 0; j < n; j++) {
+      outRow[j] = result[i * n + j];
+    }
+    out[i] = outRow;
+  }
+  return out;
 }
