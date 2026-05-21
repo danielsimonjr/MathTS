@@ -56,9 +56,10 @@ ever actually ran in a worker.
   WGSL is f32-only, so silent substitution would lose precision.
 - [x] **Function reference** — `docs/reference/functions.{md,html}` mark each
   function's `parallel` / `WASM` / `WebGPU` acceleration in an Accel column.
-- [ ] **Worker-distributed FFT** — the radix-2 FFT butterfly still runs on the
-  calling thread (its stages have tight data dependencies). A genuine parallel
-  FFT needs a six-step / four-step decomposition — future work.
+- [x] **Worker-distributed FFT** — `parallelFFT` / `parallelIFFT` now use a
+  four-step (transpose) decomposition: one transform is split into two batches
+  of independent smaller FFTs dispatched via `fftBatch`, with a twiddle pass
+  between. `parallelIFFT` became `async` for this.
 
 ## 🚀 Acceleration Roadmap (2026-05-21)
 
@@ -90,17 +91,23 @@ below are limited to operations that genuinely clear that bar.
 
 **Medium effort**
 
-- [ ] `eigs` / SVD and the sparse factorizations — large dense decompositions.
-- [ ] `polyFit` / `leastSquares` — parallelize the normal-equations matmul for
-  tall systems.
-- [ ] `nearestNeighbor` / distance-matrix geometry — pairwise distances are
-  O(n²) and embarrassingly parallel.
+- [x] `distanceMatrix` — new function computing the all-pairs Euclidean distance
+  matrix; rows are distributed across workers (`distanceMatrixRowsChunk`).
+- [ ] `eigs` / SVD — **not pursued.** Eigendecomposition via QR iteration is
+  fundamentally sequential (each step depends on the previous), so worker
+  dispatch inside the loop is net-negative; SVD already has a WASM path.
+- [ ] `polyFit` / `leastSquares` — **deferred.** `polyFit` has few parameters so
+  `AᵀA` is tiny; `leastSquares` would need a custom contraction-dimension
+  reduction (`computePool.matmul`'s threshold keys on result size, not the
+  O(n²·m) cost), genuine only for unusually wide systems.
 
 **High effort**
 
-- [ ] Worker-distributed FFT butterfly — a six-step / four-step decomposition so
-  a single large FFT fans out across workers (the open item above).
-- [ ] Unified f32 WebGPU path covering the operations above.
+- [x] Worker-distributed FFT — `parallelFFT` / `parallelIFFT` use a four-step
+  (transpose) decomposition built on `fftBatch`.
+- [ ] Unified f32 WebGPU path — **not pursued.** Would require writing new WGSL
+  compute shaders for FFT / distance / etc.; a separate research effort beyond
+  the existing matrix-op `gpu*` functions.
 
 ## 📋 Next Steps
 
