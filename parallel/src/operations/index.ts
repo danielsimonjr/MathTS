@@ -53,24 +53,6 @@ export {
   type ReduceOptions,
 } from './reduce.js';
 
-// FFT operations
-export {
-  parallelFFT,
-  parallelIFFT,
-  parallelFFTAuto,
-  parallelConvolve,
-  type ParallelFFTOptions,
-  type FFTResult as ParallelFFTResult,
-} from './fft.js';
-
-// Eigendecomposition
-export {
-  parallelEig,
-  parallelEigvals,
-  type EigResult,
-  type ParallelEigOptions,
-} from './eig.js';
-
 // Map and transform operations
 export {
   parallelMap,
