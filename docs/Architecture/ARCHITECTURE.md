@@ -1,17 +1,18 @@
 # MathTS Architecture
 
-**Generated**: 2026-04-10
+**Generated**: 2026-05-20
 
 ## System Overview
 
-MathTS is an npm workspaces monorepo with **10 packages**, all ESM-only (ES2022).
+MathTS is an npm workspaces monorepo with **12 packages**, all ESM-only (ES2022).
 Turborepo orchestrates builds across the workspace. tsup bundles each package.
+A Cargo crate (`wasm-rust`) provides the primary WASM backend but is not an npm package.
 
-- **1,324 source files** (99 native, ~1,225 synced from mathjs)
-- **202,551 lines of code** across all packages
-- **6,323 total exports** across all packages
-- **90 test files**, **2,869 tests passing**
-- **All 10 packages build**, 14/14 typecheck
+- **485 reachable TypeScript files** (out of 1,387 total; 902 dormant synced from mathjs)
+- **124,662 lines of code** (reachable scope)
+- **2,859 total exports** (713 re-exports)
+- **111 test files**
+- **All 12 packages build**, all typecheck
 
 ## Package Dependency Graph
 
@@ -21,6 +22,7 @@ typed-function --> core --> matrix --> functions
 workerpool --> parallel ------+           |
                     ^                     |
                     +---------------------+
+               matrix --> tensor --> autograd
                core --> workbook
                core, matrix, functions, parallel --> compat
 ```
@@ -117,7 +119,7 @@ AssemblyScript compiles to WebAssembly with 432 exports across 10 source files:
 
 #### 6b. Rust WASM (Primary — `wasm-rust/`)
 
-A Cargo workspace with the `mathts-wasm` crate. 63 Rust source files, ~18,500 lines, **1,017 wasm-bindgen exports** (826 core + 192 AssemblyScript compat wrappers in `wasm-rust/crates/mathts-wasm/src/compat/`). Compiled output: `lib/wasm/mathjs.wasm` (669 KB).
+A Cargo workspace with the `mathts-wasm` crate. 63 Rust source files, ~18,500 lines, **1,017 wasm-bindgen exports** (826 core + 192 AssemblyScript compat wrappers in `wasm-rust/crates/mathts-wasm/src/compat/`). Compiled output lives under `wasm-rust/target/wasm32-unknown-unknown/release/`.
 
 The `compat/` module provides full AssemblyScript API parity — every function previously exported by the AssemblyScript backend is now available through the Rust backend, making the dual-backend strategy complete.
 
@@ -147,8 +149,11 @@ JS fallback (always)
 
 ### 7. Expression Package
 
-Parser ported from mathjs (16 node types, 1,885-line `parse.ts`). The package now
-builds successfully. Compiler and evaluator are stubs. 391 source files, 608 exports.
+Parser ported from mathjs (16 node types, 1,885-line `parse.ts`). The package
+builds successfully and is **fully functional end-to-end**: the compiler (a
+16-node-type AST interpreter) and evaluator (`evaluate()`, `compileExpression()`)
+work. A 2026-05-01 security release hardened the evaluator with a sandbox
+(safe-access helpers in `expression/src/utils/customs.ts`).
 
 ### 8. Workbook Runtime
 
@@ -156,7 +161,7 @@ YAML-based reactive notebooks (.mtsw files):
 
 - **Parser**: YAML to Workbook with typed cells
 - **Graph**: Dependency resolution via topological sort with cycle detection
-- **Executor**: Three modes (reactive, sequential, manual). `executeCode()` implemented via Function constructor.
+- **Executor**: Three modes (reactive, sequential, manual). `executeCode()` is implemented — cells are evaluated through `evaluate()` from the functions package.
 
 ## Integration Architecture
 
@@ -175,8 +180,8 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 
 | Metric | Value |
 |--------|-------|
-| Reachable files (from entry points) | ~99 |
-| Dormant files (synced, not exported) | ~1,225 |
+| Reachable files (from entry points) | 485 |
+| Dormant files (synced, not exported) | 902 |
 | Total synced factories | 242 |
 | Synced categories | 19 |
 | Type bridge | In place |
@@ -202,16 +207,22 @@ Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build 
 
 ## Module Summary
 
-| Package | Source Files | Test Files | Exports |
-|---------|-------------|-----------|---------|
-| core | 95 | 12 | 625 |
-| matrix | 38 | 17 | 351 |
-| functions | 760 | 24 | 3,871 |
-| parallel | 16 | 13 | 176 |
-| expression | 391 | 2 | 608 |
-| workbook | 6 | 3 | 29 |
-| compat | 3 | 2 | 132 |
-| assembly | 10 | 0 | 432 |
-| typed-function | 2 | 2 | 62 |
-| workerpool | 3 | 1 | 37 |
-| **Total** | **1,324** | **76** | **6,323** |
+Source-file counts below are reachable (active) files; dormant synced files are
+excluded. The report counts 485 reachable TypeScript files total across all
+packages, 902 dormant, and 2,859 exports.
+
+| Package | Active Files | Dormant Files |
+|---------|-------------|---------------|
+| core | 10 | 85 |
+| matrix | 34 | 4 |
+| tensor | 2 | 0 |
+| autograd | 5 | 0 |
+| functions | 351 | 418 |
+| parallel | 12 | 4 |
+| expression | 45 | 382 |
+| workbook | 5 | 2 |
+| compat | 2 | 1 |
+| assembly (wasm) | 17 | 3 |
+| typed-function | 1 | 1 |
+| workerpool | 1 | 2 |
+| **Total** | **485** | **902** |

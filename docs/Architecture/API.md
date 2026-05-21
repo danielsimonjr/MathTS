@@ -1,6 +1,6 @@
 # MathTS API Reference
 
-**Generated**: 2026-04-10
+**Generated**: 2026-05-20
 
 ---
 
@@ -62,7 +62,9 @@ isObject(x)     isNull(x)        isUndefined(x)    isMatrix(x)
 
 ## @danielsimonjr/mathts-functions
 
-All exports come from `functions/src/typed/`. 374 total exports across 17 modules.
+`functions/src/index.ts` exports the typed layer (`functions/src/typed/`, 374
+exports across 17 modules), the factory layer (`functions/src/factories/`), and
+the expression evaluator — roughly 672 exports total.
 
 ### Arithmetic (54 exports)
 
@@ -307,18 +309,20 @@ Re-exports all core types: `Complex`, `Fraction`, `BigNumber`, `DenseMatrix`, `S
 
 ## @danielsimonjr/mathts-expression
 
-> **Status**: Parser is ported and builds. Compiler and evaluator are empty stubs. 2 test files. Not connected to `@danielsimonjr/mathts-core`.
+> **Status**: Fully functional (v0.2.0). Parser, compiler (16-node-type AST interpreter), and evaluator all work end-to-end. The evaluator is sandbox-hardened (2026-05-01 security release).
 
 | Symbol | Description |
 |--------|-------------|
 | `parse(expr)` | Parse expression string to AST |
+| `compileExpression(expr)` | Compile an expression to a reusable evaluable form |
+| `evaluate(expr, scope?)` | Evaluate an expression string and return the result |
 | Node types | 16 node types (AssignmentNode, BlockNode, ConstantNode, FunctionNode, OperatorNode, SymbolNode, etc.) |
 
 ---
 
 ## @danielsimonjr/mathts-workbook
 
-> **Status**: Infrastructure works (dep graph, topological sort, reactive engine). `executeCode()` throws "not yet implemented". No integration with expression parser.
+> **Status**: Fully functional. Infrastructure works (dep graph, topological sort, reactive engine), and `executeCode()` is implemented — cells are evaluated through `evaluate()` from the functions package.
 
 ### Parsing
 
@@ -349,6 +353,17 @@ Execution modes: `reactive` (re-run downstream on change), `sequential` (all cel
 
 ---
 
+## @danielsimonjr/mathts-tensor (package)
+
+Rank-N, Float64Array-backed, row-major dense `Tensor` (v0.1.0). Supports einsum
+and tensor contraction. Built on `@danielsimonjr/mathts-core`.
+
+## @danielsimonjr/mathts-autograd (package)
+
+Automatic differentiation over `Tensor` (v0.1.0). Provides forward-mode AD
+(`DualTensor`, `forwardGrad`) and reverse-mode AD (`Tape`, `reverseGrad`).
+Built on `@danielsimonjr/mathts-tensor`.
+
 ## @danielsimonjr/mathts-typed-function (package)
 
 Forked type dispatch system. Provides the `typed()` function used by `@danielsimonjr/mathts-core`.
@@ -377,7 +392,7 @@ WASM bindings: `loadWasm()`, `loadWasmSync()`, `MathTSWasm` (instance type)
 
 ### Rust WASM (`wasm-rust/`) — Primary
 
-**1,017 exported functions** — 826 core compiled from 63 Rust source files (~18,500 lines) + 192 AssemblyScript compat wrappers (`src/compat/`) providing full AS parity. Binary: `lib/wasm/mathjs.wasm` (669 KB). Crates: **faer** (linear algebra), **rustfft** (FFT), **statrs** (statistics/special functions), **libm** (portable math).
+**1,017 exported functions** — 826 core compiled from 63 Rust source files (~18,500 lines) + 192 AssemblyScript compat wrappers (`src/compat/`) providing full AS parity. The `mathts-wasm` crate's build output lives under `wasm-rust/target/wasm32-unknown-unknown/release/`. Crates: **faer** (linear algebra), **rustfft** (FFT), **statrs** (statistics/special functions), **libm** (portable math).
 
 WASM bindings (same interface as AssemblyScript): `loadWasm()`, `loadWasmSync()`, `MathTSWasm`
 

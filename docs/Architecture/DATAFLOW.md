@@ -1,6 +1,6 @@
 # MathTS Data Flow
 
-**Generated**: 2026-04-10
+**Generated**: 2026-05-20
 
 ## Overview
 
@@ -280,12 +280,14 @@ workbook.mtsw  (YAML file)
        sequential: execute all cells once in topological order
        manual:     execute only on explicit trigger
   6. Per cell: executeCode(cell.code, context)
-       -> STUB: throws "not yet implemented"
-       -> Planned: calls expression parser -> evaluator -> result
+       -> calls evaluate() from @danielsimonjr/mathts-functions
+       -> expression parser -> compiler -> evaluator -> result
   7. Results written to cell.output fields
 ```
 
-**Blocked on**: expression parser evaluator (`compiler/` and `evaluator/` in `@danielsimonjr/mathts-expression` are empty stubs).
+The expression evaluator (`compiler/` and `evaluator/` in
+`@danielsimonjr/mathts-expression`) is fully functional, so workbook cell
+execution works end-to-end.
 
 ---
 
@@ -298,6 +300,11 @@ User Input
 typed-function (@danielsimonjr/mathts-core)
     |
     +---> Core Types (Complex / Fraction / BigNumber)
+    |
+    +---> Tensor (@danielsimonjr/mathts-tensor)
+    |         |
+    |         +---> Autograd (@danielsimonjr/mathts-autograd)
+    |                   forward-mode (DualTensor) + reverse-mode (Tape)
     |
     +---> Matrix (@danielsimonjr/mathts-matrix)
     |         |
@@ -322,11 +329,10 @@ typed-function (@danielsimonjr/mathts-core)
 
 @danielsimonjr/mathts-compat --> typed-function
 
-@danielsimonjr/mathts-workbook --(executeCode stub)--> @danielsimonjr/mathts-expression
+@danielsimonjr/mathts-workbook --(executeCode -> evaluate)--> @danielsimonjr/mathts-functions
                                                |
-                                         (not yet wired)
-                                               |
-                                         typed-function
+                                  @danielsimonjr/mathts-expression
+                                  (parser -> compiler -> evaluator)
 ```
 
 ---
