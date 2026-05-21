@@ -176,6 +176,14 @@ export class ComputePool {
   }
 
   /**
+   * Parallel product of array elements
+   */
+  async prod(data: Float64Array): Promise<ParallelResult<number>> {
+    const result = await this.workerPool.prod(data);
+    return toParallelResult(result);
+  }
+
+  /**
    * Parallel dot product
    */
   async dot(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {

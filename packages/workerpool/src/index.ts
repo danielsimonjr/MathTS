@@ -814,6 +814,46 @@ export class MathWorkerPool {
   }
 
   /**
+   * Parallel product of array elements
+   */
+  async prod(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(data.length, options)) {
+      let total = 1;
+      for (let i = 0; i < data.length; i++) {
+        total *= data[i];
+      }
+      return {
+        result: total,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const stats = this.stats();
+
+    const partialProds = await Promise.all(
+      chunks.map((chunk) =>
+        this.exec<number>('prodChunk', [chunk.buffer, 0, chunk.length])
+      )
+    );
+
+    const result = partialProds.reduce((a, b) => a * b, 1);
+
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
    * Parallel dot product
    */
   async dot(

@@ -42,6 +42,16 @@ describe('parallel kernel dispatch (real workers)', () => {
     expect(r.result).toBe(5050);
   });
 
+  it('dispatches prodChunk to a real worker', async () => {
+    // Use values near 1 to avoid overflow; sequential reference for comparison.
+    const data = Float64Array.from({ length: 100 }, (_, i) => 1 + (i % 5 - 2) * 0.001);
+    const expected = data.reduce((acc, v) => acc * v, 1);
+    const r = await pool.prod(data, { forceParallel: true });
+    expect(r.parallelized).toBe(true);
+    const relErr = Math.abs(r.result - expected) / Math.abs(expected);
+    expect(relErr).toBeLessThan(1e-10);
+  });
+
   it('chunks non-uniform Float64Array data correctly', async () => {
     const data = Float64Array.from({ length: 100 }, (_, i) => i + 1);
     const v = await pool.variance(data, { forceParallel: true });
