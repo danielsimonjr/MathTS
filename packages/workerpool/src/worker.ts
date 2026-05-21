@@ -222,6 +222,54 @@ function unaryChunk(
   return result.buffer;
 }
 
+/**
+ * Apply a caller-supplied unary numeric function to a chunk.
+ *
+ * `fnSource` is the source of a self-contained `(x: number) => number`
+ * expression, eval'd in the worker. Used to parallelize element-wise math
+ * (special functions, distribution PDFs/CDFs) that the worker cannot import
+ * directly because it sits below those packages in the dependency graph.
+ */
+function applyKernelChunk(
+  buffer: ArrayBuffer,
+  start: number,
+  length: number,
+  fnSource: string
+): ArrayBuffer {
+  const data = new Float64Array(buffer);
+  const result = new Float64Array(length);
+  // eslint-disable-next-line no-eval
+  const fn = eval(`(${fnSource})`) as (x: number) => number;
+  for (let i = 0; i < length; i++) {
+    result[i] = fn(data[start + i]);
+  }
+  return result.buffer;
+}
+
+/**
+ * Apply a caller-supplied binary numeric function to a pair of chunks.
+ *
+ * `fnSource` is the source of a self-contained `(a: number, b: number) =>
+ * number` expression, eval'd in the worker.
+ */
+function applyKernel2Chunk(
+  aBuffer: ArrayBuffer,
+  bBuffer: ArrayBuffer,
+  start: number,
+  length: number,
+  fnSource: string
+): ArrayBuffer {
+  const a = new Float64Array(aBuffer);
+  const b = new Float64Array(bBuffer);
+  const result = new Float64Array(length);
+  // eslint-disable-next-line no-eval
+  const fn = eval(`(${fnSource})`) as (a: number, b: number) => number;
+  for (let i = 0; i < length; i++) {
+    result[i] = fn(a[start + i], b[start + i]);
+  }
+  return result.buffer;
+}
+
 // =============================================================================
 // Matrix Operations
 // =============================================================================
@@ -524,6 +572,8 @@ const workerMethods: Record<string, (...args: any[]) => any> = {
   elementwiseChunk,
   scaleChunk,
   unaryChunk,
+  applyKernelChunk,
+  applyKernel2Chunk,
 
   // Matrix operations
   matmulRows,

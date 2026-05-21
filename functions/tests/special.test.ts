@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   erfc,
   beta,
@@ -8,7 +8,18 @@ import {
   besselJ1,
   besselY0,
   besselY1,
+  besselJ,
+  besselK,
+  betainc,
+  lambertW,
+  erfi,
+  expIntegralEi,
+  fresnelC,
+  legendreP,
+  ellipticK,
+  ellipticE,
 } from '../src/typed/special.js';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 describe('Special Functions', () => {
   // ===========================================================================
@@ -207,5 +218,70 @@ describe('Special Functions', () => {
     it('Y1(2.1971) ~ 0 (first zero)', () => {
       expect(besselY1(2.19714133)).toBeCloseTo(0, 1);
     });
+  });
+});
+
+// =============================================================================
+// Parallel Float64Array overloads
+// =============================================================================
+
+describe('Special function parallel array overloads', () => {
+  beforeAll(async () => {
+    await computePool.initialize();
+    // Lower the threshold so the worker path is actually exercised.
+    computePool.updateConfig({ thresholdElements: 64, chunkSize: 256 });
+  });
+
+  afterAll(async () => {
+    computePool.updateConfig({ thresholdElements: 50000, chunkSize: 10000 });
+    await computePool.terminate();
+  });
+
+  const sample = [0, 1, 7, 99, 173, 255];
+
+  it('single-argument overloads match the scalar implementation', async () => {
+    const xs = Float64Array.from({ length: 300 }, (_, i) => 0.05 + i * 0.03);
+    const cases: Array<[Promise<Float64Array>, (v: number) => number]> = [
+      [erfc(xs) as Promise<Float64Array>, (v) => erfc(v) as number],
+      [digamma(xs) as Promise<Float64Array>, (v) => digamma(v) as number],
+      [besselJ0(xs) as Promise<Float64Array>, (v) => besselJ0(v) as number],
+      [besselY1(xs) as Promise<Float64Array>, (v) => besselY1(v) as number],
+      [lambertW(xs) as Promise<Float64Array>, (v) => lambertW(v) as number],
+      [erfi(xs) as Promise<Float64Array>, (v) => erfi(v) as number],
+      [expIntegralEi(xs) as Promise<Float64Array>, (v) => expIntegralEi(v) as number],
+      [fresnelC(xs) as Promise<Float64Array>, (v) => fresnelC(v) as number],
+    ];
+    for (const [arrPromise, scalar] of cases) {
+      const arr = await arrPromise;
+      expect(arr.length).toBe(300);
+      for (const i of sample) {
+        expect(arr[i]).toBeCloseTo(scalar(xs[i]), 9);
+      }
+    }
+  });
+
+  it('multi-argument overloads match the scalar implementation', async () => {
+    const xs = Float64Array.from({ length: 300 }, (_, i) => 0.1 + i * 0.03);
+    const ms = Float64Array.from({ length: 300 }, (_, i) => (i / 300) * 0.98);
+
+    const jn = await (besselJ(3, xs) as Promise<Float64Array>);
+    const kn = await (besselK(2, xs) as Promise<Float64Array>);
+    const gi = await (gammainc(2, xs) as Promise<Float64Array>);
+    const bi = await (betainc(2, 3, ms) as Promise<Float64Array>);
+    const lp = await (legendreP(5, ms) as Promise<Float64Array>);
+    const ek = await (ellipticK(ms) as Promise<Float64Array>);
+    const ee = await (ellipticE(ms) as Promise<Float64Array>);
+    const bt = await (beta(xs, 3) as Promise<Float64Array>);
+
+    for (const i of sample) {
+      expect(jn[i]).toBeCloseTo(besselJ(3, xs[i]) as number, 9);
+      expect(kn[i]).toBeCloseTo(besselK(2, xs[i]) as number, 9);
+      expect(gi[i]).toBeCloseTo(gammainc(2, xs[i]) as number, 9);
+      expect(bi[i]).toBeCloseTo(betainc(2, 3, ms[i]) as number, 9);
+      expect(lp[i]).toBeCloseTo(legendreP(5, ms[i]) as number, 9);
+      expect(ek[i]).toBeCloseTo(ellipticK(ms[i]) as number, 9);
+      expect(ee[i]).toBeCloseTo(ellipticE(ms[i]) as number, 9);
+      expect(bt[i]).toBeCloseTo(beta(xs[i], 3) as number, 9);
+    }
   });
 });

@@ -278,4 +278,37 @@ describe('Parallel Signal Processing Functions', () => {
       expect(result.length).toBe(128 + 32 - 1);
     });
   });
+
+  describe('parallel element-wise spectrum', () => {
+    beforeAll(() => {
+      // Lower the threshold so magnitude/power offload to the worker pool.
+      computePool.updateConfig({ thresholdElements: 64, chunkSize: 256 });
+    });
+
+    afterAll(() => {
+      computePool.updateConfig({ thresholdElements: 50000, chunkSize: 10000 });
+    });
+
+    it('parallelFFTMagnitude matches the sequential formula', async () => {
+      const n = 2048;
+      const re = Float64Array.from({ length: n }, (_, i) => Math.sin(i * 0.1));
+      const im = Float64Array.from({ length: n }, (_, i) => Math.cos(i * 0.07));
+      const mag = (await parallelFFTMagnitude(re, im)) as Float64Array;
+      expect(mag.length).toBe(n);
+      for (let i = 0; i < n; i += 53) {
+        expect(mag[i]).toBeCloseTo(Math.sqrt(re[i] * re[i] + im[i] * im[i]), 12);
+      }
+    });
+
+    it('parallelFFTPower matches the sequential formula', async () => {
+      const n = 2048;
+      const re = Float64Array.from({ length: n }, (_, i) => Math.sin(i * 0.1));
+      const im = Float64Array.from({ length: n }, (_, i) => Math.cos(i * 0.07));
+      const pow = (await parallelFFTPower(re, im)) as Float64Array;
+      expect(pow.length).toBe(n);
+      for (let i = 0; i < n; i += 53) {
+        expect(pow[i]).toBeCloseTo(re[i] * re[i] + im[i] * im[i], 12);
+      }
+    });
+  });
 });
