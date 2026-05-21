@@ -146,6 +146,15 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   plus `MathWorkerPool.distanceMatrix` / `ComputePool.distanceMatrix` compute
   the (independent) rows distributed across workers.
   `functions/src/typed/geometry.ts`.
+- **Element-wise consistency overloads** — parallel `Float64Array` overloads
+  added to the remaining element-wise unary functions so the element-wise API
+  is uniform: `sign`, `cube`, `cbrt`, `expm1`, `log2`, `log10`, `log1p`,
+  `round`, `floor`, `ceil`, `fix`, `sinh`, `cosh`, `tanh` (arithmetic) and
+  `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `asinh`, `acosh`, `atanh`
+  (trigonometry), each dispatching large arrays via `computePool.applyKernel`.
+- **Parallel product reduction** — a new `prodChunk` worker kernel plus
+  `MathWorkerPool.prod` / `ComputePool.prod`; `parallelStatProd`'s
+  `Float64Array` overload now runs the product reduction on the worker pool.
 
 #### WebGPU acceleration
 
@@ -194,6 +203,10 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
 - **`parallelIFFT` is async (breaking)** — it now returns a `Promise`; large
   inverse transforms use the four-step worker-distributed FFT. (`parallelFFT`'s
   `Float64Array` overload was already async.) `functions/src/typed/signal.ts`.
+- **`parallelStatProd`'s `Float64Array` overload is async (breaking)** — it now
+  returns a `Promise<number>`, dispatching the product reduction to the worker
+  pool, consistent with the rest of the `parallelStat*` family.
+  `functions/src/typed/statistics.ts`.
 
 ### Fixed
 

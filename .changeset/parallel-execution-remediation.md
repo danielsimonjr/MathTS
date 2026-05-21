@@ -19,12 +19,14 @@ Fix and extend parallel execution.
   `parallelFFTPower` now dispatch to worker threads; `spectrogram`, `fft2d`, and
   `parallelConv` (with `parallelXCorr` / `parallelAutoCorr`) dispatch their
   independent FFTs to the worker pool; `parallelFFT` / `parallelIFFT` run a
-  genuinely parallel single transform via a four-step decomposition. Adds the
-  parallel all-pairs `distanceMatrix` geometry function and the WebGPU-accelerated
-  matrix operations `gpuMatmul`, `gpuAdd`, `gpuTranspose`, and `gpuScale` (new
-  async exports, transparent CPU fallback, f32 GPU path).
+  genuinely parallel single transform via a four-step decomposition. Completes
+  the element-wise `Float64Array` overloads across arithmetic and trigonometry,
+  and adds a parallel `parallelStatProd` reduction. Adds the parallel all-pairs
+  `distanceMatrix` geometry function and the WebGPU-accelerated matrix
+  operations `gpuMatmul`, `gpuAdd`, `gpuTranspose`, and `gpuScale` (new async
+  exports, transparent CPU fallback, f32 GPU path).
 
   **Breaking:** `characteristicPolynomial`, `matrixPower`, `matrixLog`,
-  `polarDecomposition`, `jordanForm`, `spectrogram`, `fft2d`, and `parallelIFFT`
-  are now async — their O(n^3) products / independent FFT batches are offloaded
-  to the worker pool.
+  `polarDecomposition`, `jordanForm`, `spectrogram`, `fft2d`, `parallelIFFT`,
+  and `parallelStatProd`'s `Float64Array` overload are now async — their
+  O(n^3) products / FFT batches / reductions are offloaded to the worker pool.

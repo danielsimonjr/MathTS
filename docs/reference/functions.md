@@ -56,23 +56,23 @@ code. A browsable HTML edition of this page is available at
 | `unaryMinus(x)` | Negation `-x` | number, bigint, Complex, Fraction, Float64Array | parallel |
 | `unaryPlus(x)` | Identity `+x` | number, bigint, Complex, Fraction | — |
 | `abs(x)` | Absolute value | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `sign(x)` | Sign of x: -1, 0, or 1 | number, bigint, Complex, Fraction | — |
+| `sign(x)` | Sign of x: -1, 0, or 1 | number, bigint, Complex, Fraction, Float64Array | parallel |
 | `pow(x, y)` | Power `x^y` | number, bigint, Complex, Fraction | — |
 | `sqrt(x)` | Square root | number, Complex, BigNumber, Float64Array | parallel |
 | `square(x)` | `x²` | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `cube(x)` | `x³` | number, bigint, Complex, Fraction | — |
-| `cbrt(x)` | Cube root | number, Complex, BigNumber | — |
+| `cube(x)` | `x³` | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `cbrt(x)` | Cube root | number, Complex, BigNumber, Float64Array | parallel |
 | `nthRoot(x, n)` | nth root | number, Complex | — |
 | `exp(x)` | `e^x` | number, Complex, BigNumber, Float64Array | parallel |
-| `expm1(x)` | `e^x - 1` (stable near 0) | number, Complex | — |
+| `expm1(x)` | `e^x - 1` (stable near 0) | number, Complex, Float64Array | parallel |
 | `log(x[, base])` | Natural log (or log base) | number, Complex, BigNumber, Float64Array | parallel |
-| `log2(x)` | Base-2 logarithm | number, Complex, BigNumber | — |
-| `log10(x)` | Base-10 logarithm | number, Complex, BigNumber | — |
-| `log1p(x)` | `ln(1 + x)` (stable near 0) | number, Complex | — |
-| `round(x[, n])` | Round to n digits | number, bigint, Complex, Fraction | — |
-| `floor(x)` | Round down | number, Complex, Fraction | — |
-| `ceil(x)` | Round up | number, Complex, Fraction | — |
-| `fix(x)` | Round toward zero | number, Complex, Fraction | — |
+| `log2(x)` | Base-2 logarithm | number, Complex, BigNumber, Float64Array | parallel |
+| `log10(x)` | Base-10 logarithm | number, Complex, BigNumber, Float64Array | parallel |
+| `log1p(x)` | `ln(1 + x)` (stable near 0) | number, Complex, Float64Array | parallel |
+| `round(x[, n])` | Round to n digits | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `floor(x)` | Round down | number, Complex, Fraction, Float64Array | parallel |
+| `ceil(x)` | Round up | number, Complex, Fraction, Float64Array | parallel |
+| `fix(x)` | Round toward zero | number, Complex, Fraction, Float64Array | parallel |
 | `mod(a, b)` | Modulo `a % b` | number, bigint | — |
 | `gcd(a, b)` | Greatest common divisor | number, bigint | — |
 | `lcm(a, b)` | Least common multiple | number, bigint | — |
@@ -193,12 +193,12 @@ Functions support `number`, `Complex`, `BigNumber`, and parallel `Float64Array`.
 | Function | Description | Accel |
 |---|---|---|
 | `sin(x)` `cos(x)` `tan(x)` | Sine, cosine, tangent | parallel |
-| `csc(x)` `sec(x)` `cot(x)` | Cosecant, secant, cotangent | — |
-| `asin(x)` `acos(x)` `atan(x)` | Inverse sine, cosine, tangent | — |
+| `csc(x)` `sec(x)` `cot(x)` | Cosecant, secant, cotangent | parallel |
+| `asin(x)` `acos(x)` `atan(x)` | Inverse sine, cosine, tangent | parallel |
 | `atan2(y, x)` | Two-argument arctangent | — |
 | `acsc(x)` `asec(x)` `acot(x)` | Inverse cosecant, secant, cotangent | — |
-| `sinh(x)` `cosh(x)` `tanh(x)` | Hyperbolic sine, cosine, tangent | — |
-| `asinh(x)` `acosh(x)` `atanh(x)` | Inverse hyperbolic sine, cosine, tangent | — |
+| `sinh(x)` `cosh(x)` `tanh(x)` | Hyperbolic sine, cosine, tangent | parallel |
+| `asinh(x)` `acosh(x)` `atanh(x)` | Inverse hyperbolic sine, cosine, tangent | parallel |
 | `csch(x)` `sech(x)` `coth(x)` | Hyperbolic cosecant, secant, cotangent (factory) | — |
 | `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory) | — |
 | `toRadians(deg)` | Convert degrees to radians | — |
@@ -453,7 +453,7 @@ returns a `Promise`. Scalar overloads (2–4 numbers) are synchronous.
 | `parallelStatMinMax(a)` | `{ min, max }` in one pass | parallel |
 | `parallelStatMedian(a)` | Median | parallel |
 | `parallelStatMode(a)` | Mode | — |
-| `parallelStatProd(a)` | Product | — |
+| `parallelStatProd(a)` | Product | parallel |
 | `parallelStatNorm(a[, p])` | p-norm | parallel |
 | `parallelStatDistance(a, b)` | Euclidean distance | parallel |
 | `parallelStatCorr(a, b)` | Pearson correlation | parallel |

@@ -65,16 +65,19 @@ left.
 
 ## 3. Implementation plan
 
-### Tier 1 — Build now (clean, verifiable in Node CI)
+### Tier 1 — Done ✅
 
-| Item | Change | Effort |
+Implemented and merged on `claude/create-function-reference-html-NcTOS`.
+
+| Item | Change | Status |
 |---|---|---|
-| Element-wise arithmetic overloads | Add `Float64Array` overloads to `sign`, `cube`, `cbrt`, `expm1`, `log2`, `log10`, `log1p`, `round`, `floor`, `ceil`, `fix` in `functions/src/typed/arithmetic.ts`, dispatching to `computePool.applyKernel` with a self-contained `(x) => number` source; sequential fallback below threshold. Pattern: `distributions.ts` / `special.ts`. | Low (mechanical) |
-| Element-wise trig overloads | Same for `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, `atanh` in `functions/src/typed/trigonometry.ts`. | Low (mechanical) |
-| `parallelStatProd` | Add a `prodChunk` worker kernel + `MathWorkerPool.prod` + `ComputePool.prod`; wire `parallelStatProd`'s `Float64Array` overload (currently sequential). | Low |
+| Element-wise arithmetic overloads | `Float64Array` overloads added to `sign`, `cube`, `cbrt`, `expm1`, `log2`, `log10`, `log1p`, `round`, `floor`, `ceil`, `fix`, `sinh`, `cosh`, `tanh` in `functions/src/typed/arithmetic.ts`, dispatching to `computePool.applyKernel`; sequential fallback below threshold. | ✅ Done |
+| Element-wise trig overloads | `Float64Array` overloads added to `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `asinh`, `acosh`, `atanh` in `functions/src/typed/trigonometry.ts`. (`asin`/`acos` return `NaN` for out-of-domain values — the scalar overloads promote to `Complex` there, which a `Float64Array` cannot hold.) | ✅ Done |
+| `parallelStatProd` | `prodChunk` worker kernel + `MathWorkerPool.prod` + `ComputePool.prod` added; `parallelStatProd`'s `Float64Array` overload now dispatches to the worker pool (now `async`, matching the `parallelStat*` family). | ✅ Done |
 
-Each is fully verifiable in Node — no WASM build, no browser needed — against
-the sequential reference, exactly as the prior acceleration work was tested.
+Each was verified in Node against the sequential reference — no WASM build,
+no browser needed. `acsc` / `asec` / `acot` were left out of scope (rarely
+used; can be added later by the same pattern).
 
 ### Tier 2 — Blocked (needs a prerequisite)
 
@@ -108,10 +111,10 @@ shapes (element-wise maps, tree reductions) are already scoped in
 
 ## 4. Recommendation
 
-Build **Tier 1** — it completes the element-wise `Float64Array` surface
-consistently and adds the one genuine missing reduction. It is mechanical, low
-risk, and fully testable. Be clear-eyed that its runtime value is modest;
-the reason to do it is a coherent, predictable API, not speed.
+**Tier 1 is done** — the element-wise `Float64Array` surface is now consistent
+and the one genuine missing reduction (`parallelStatProd`) is parallel. As
+predicted, its runtime value is modest — the win is a coherent, predictable
+API, not speed.
 
 **Tier 2** should not start until its WASM-build prerequisite is met — handing
 it to an implementer who cannot verify the result would just produce unverified
