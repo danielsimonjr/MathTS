@@ -259,6 +259,17 @@ export const sign = mathTyped('sign', {
   'bigint': (a: i64): i64 => (a > 0n ? 1n : a < 0n ? -1n : 0n),
   'Fraction': (a: Fraction): Fraction => new Fraction(BigInt(a.sign()), 1n),
   'BigNumber': (a: BigNumber): BigNumber => BigNumber.fromNumber(a.sign()),
+
+  // Parallel array sign
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.sign(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.sign(a[i]);
+    return out;
+  },
 });
 
 // =============================================================================
@@ -324,6 +335,17 @@ export const cube = mathTyped('cube', {
   'Complex': (a: Complex): Complex => a.multiply(a).multiply(a),
   'Fraction': (a: Fraction): Fraction => a.multiply(a).multiply(a),
   'BigNumber': (a: BigNumber): BigNumber => a.multiply(a).multiply(a),
+
+  // Parallel array cube
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => x * x * x');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = a[i] * a[i] * a[i];
+    return out;
+  },
 });
 
 /**
@@ -333,6 +355,17 @@ export const cbrt = mathTyped('cbrt', {
   'number': (a: f64): f64 => Math.cbrt(a),
   'Complex': (a: Complex): Complex => a.pow(1 / 3),
   'BigNumber': (a: BigNumber): BigNumber => a.cbrt(),
+
+  // Parallel array cbrt
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.cbrt(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.cbrt(a[i]);
+    return out;
+  },
 });
 
 /**
@@ -386,6 +419,17 @@ export const log10 = mathTyped('log10', {
   'number': (a: f64): f64 => Math.log10(a),
   'Complex': (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN10)),
   'BigNumber': (a: BigNumber): BigNumber => a.log10(),
+
+  // Parallel array log10
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.log10(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.log10(a[i]);
+    return out;
+  },
 });
 
 /**
@@ -395,6 +439,17 @@ export const log2 = mathTyped('log2', {
   'number': (a: f64): f64 => Math.log2(a),
   'Complex': (a: Complex): Complex => a.log().divide(Complex.fromNumber(Math.LN2)),
   'BigNumber': (a: BigNumber): BigNumber => a.log2(),
+
+  // Parallel array log2
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.log2(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.log2(a[i]);
+    return out;
+  },
 });
 
 /**
@@ -402,6 +457,17 @@ export const log2 = mathTyped('log2', {
  */
 export const log1p = mathTyped('log1p', {
   'number': (a: f64): f64 => Math.log1p(a),
+
+  // Parallel array log1p
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.log1p(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.log1p(a[i]);
+    return out;
+  },
 });
 
 /**
@@ -409,6 +475,17 @@ export const log1p = mathTyped('log1p', {
  */
 export const expm1 = mathTyped('expm1', {
   'number': (a: f64): f64 => Math.expm1(a),
+
+  // Parallel array expm1
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.expm1(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.expm1(a[i]);
+    return out;
+  },
 });
 
 // =============================================================================
@@ -426,6 +503,17 @@ export const round = mathTyped('round', {
     const factor = Math.pow(10, decimals);
     return Math.round(a * factor) / factor;
   },
+
+  // Parallel array round (round to nearest integer, matching the 'number' overload)
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.round(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.round(a[i]);
+    return out;
+  },
 });
 
 /**
@@ -435,6 +523,17 @@ export const floor = mathTyped('floor', {
   'number': (a: f64): f64 => Math.floor(a),
   'Fraction': (a: Fraction): Fraction => a.floor(),
   'BigNumber': (a: BigNumber): BigNumber => a.floor(),
+
+  // Parallel array floor
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.floor(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.floor(a[i]);
+    return out;
+  },
 });
 
 /**
@@ -444,6 +543,17 @@ export const ceil = mathTyped('ceil', {
   'number': (a: f64): f64 => Math.ceil(a),
   'Fraction': (a: Fraction): Fraction => a.ceil(),
   'BigNumber': (a: BigNumber): BigNumber => a.ceil(),
+
+  // Parallel array ceil
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.ceil(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.ceil(a[i]);
+    return out;
+  },
 });
 
 /**
@@ -453,6 +563,17 @@ export const fix = mathTyped('fix', {
   'number': (a: f64): f64 => Math.trunc(a),
   'Fraction': (a: Fraction): Fraction => a.trunc(),
   'BigNumber': (a: BigNumber): BigNumber => a.trunc(),
+
+  // Parallel array fix (truncate toward zero, matching the 'number' overload)
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.trunc(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.trunc(a[i]);
+    return out;
+  },
 });
 
 // =============================================================================
@@ -575,6 +696,17 @@ export const sinh = mathTyped('sinh', {
   'number': (a: f64): f64 => Math.sinh(a),
   'Complex': (a: Complex): Complex => a.sinh(),
   'BigNumber': (a: BigNumber): BigNumber => a.sinh(),
+
+  // Parallel array sinh
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.sinh(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.sinh(a[i]);
+    return out;
+  },
 });
 
 /**
@@ -584,6 +716,17 @@ export const cosh = mathTyped('cosh', {
   'number': (a: f64): f64 => Math.cosh(a),
   'Complex': (a: Complex): Complex => a.cosh(),
   'BigNumber': (a: BigNumber): BigNumber => a.cosh(),
+
+  // Parallel array cosh
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.cosh(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.cosh(a[i]);
+    return out;
+  },
 });
 
 /**
@@ -593,6 +736,17 @@ export const tanh = mathTyped('tanh', {
   'number': (a: f64): f64 => Math.tanh(a),
   'Complex': (a: Complex): Complex => a.tanh(),
   'BigNumber': (a: BigNumber): BigNumber => a.tanh(),
+
+  // Parallel array tanh
+  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+    if (computePool.shouldParallelize(a.length)) {
+      const r = await computePool.applyKernel(a, '(x) => Math.tanh(x)');
+      return r.result;
+    }
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = Math.tanh(a[i]);
+    return out;
+  },
 });
 
 // =============================================================================
