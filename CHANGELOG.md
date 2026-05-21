@@ -167,7 +167,26 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   these are additive new exports, so the f64 `multiply` / `transpose` are
   unaffected.
 
+#### Benchmarking
+
+- **Parallel acceleration benchmark suite** — `tools/benchmark/parallel/` adds a
+  reusable harness timing the worker-pool parallel path against the sequential
+  baseline across geometric size ladders, with break-even detection and
+  per-operation `thresholdElements` recommendations (`npm run bench:parallel`).
+  First measured findings in `docs/roadmap/ACCELERATION_BENCHMARKS.md`:
+  compute-bound operations (`matmul`, the matrix decompositions) win clearly;
+  transfer-bound element-wise and reduction operations never beat sequential at
+  any tested size — the flat `ComputePool` `thresholdElements = 50000` is wrong
+  for almost every operation.
+
 ### Changed
+
+- **Removed the fake-parallel FFT/eig stubs** — `parallel/src/operations/fft.ts`
+  and `eig.ts` (`parallelFFT`, `parallelEig`, …) ran entirely on the calling
+  thread while reporting `parallelized: true`; they were reachable only via
+  `operations/index.ts` and referenced only by their own tests. Deleted, with
+  those tests. Also de-duplicated the radix-2 FFT core within the workerpool
+  package — `worker.ts` and `index.ts` now share an internal `fft-core.ts`.
 
 - **workbook cell evaluation** — cells are evaluated via `evaluate()` from
   `@danielsimonjr/mathts-functions` instead of a raw `new Function()`. Cells can
@@ -217,6 +236,9 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
 - **JSON reviver type cast** — the W9 JSON reviver cast a tagged record directly to the `Complex`/`Fraction` `fromJSON` shapes; the cast now routes through `unknown` to satisfy `tsc`.
 - **Worker pool never ran its kernels** — `MathWorkerPool` created its pool with `createPool(null)`, so workerpool loaded its built-in generic worker (only `run`/`methods`) instead of the MathTS kernels. Every named-kernel dispatch (`sumChunk`, `matmulRows`, `elementwiseChunk`, …) threw `Unknown method "..."`, so the entire parallel layer — every arithmetic, statistics, and trigonometry `Float64Array` overload — was non-functional at runtime. The built `dist/worker.js` is now resolved (Node path or browser URL) and loaded. `packages/workerpool/src/index.ts`.
 - **Float64Array chunking read the wrong data** — `MathWorkerPool` cut chunks with `subarray()`, whose `.buffer` is the entire backing `ArrayBuffer`; passing `chunk.buffer` with `start: 0` made every chunk past the first re-read the start of the array. Now uses `slice()` so each chunk owns a correctly-sized buffer. Adds `packages/workerpool/tests/parallel-dispatch.test.ts` — the prior suite only ever exercised the sequential fallback (every test asserted `parallelized: false`).
+- **`npm run lint` broken repo-wide** — the root `eslint.config.js` imported `typescript-eslint`, but that package was missing from `package.json` `devDependencies` (only `@typescript-eslint/eslint-plugin` and `parser` were present), so ESLint failed to load its config everywhere. Added the dependency.
+- **`parallel/src/WorkerPool.ts` worker path** — the Node branch passed a raw `file://` string to `worker_threads`' `Worker`, which rejects it (`ERR_WORKER_PATH`). `file://` strings are now wrapped in `new URL()`; plain paths pass through. (Same defect previously fixed in `MathWorkerPool`.)
+- **WASM test suites fail opaquely on a fresh checkout** — `tests/wasm/wasm-loader.test.ts` and the `WASM Module Types` block of `typescript-integration.test.ts` call `WasmLoader.load()`, which needs a built `.wasm` artifact (`npm run build:wasm`). When the artifact is absent they now `describe.skip` with a loud one-time `console.warn` (via a new `tests/wasm/wasm-artifact-check.ts`) instead of failing with an opaque `ENOENT`.
 
 ### Documentation
 

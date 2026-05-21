@@ -112,6 +112,24 @@ below are limited to operations that genuinely clear that bar.
   [`docs/roadmap/UNIFIED_WEBGPU_PATH.md`](../roadmap/UNIFIED_WEBGPU_PATH.md) —
   a separate research effort beyond the existing matrix-op `gpu*` functions.
 
+## 🐞 Known Defects (discovered 2026-05-21)
+
+Surfaced while fixing the fresh-checkout test failures; both are pre-existing,
+unrelated to the parallelism work, and left for a dedicated fix.
+
+- [ ] **`parallel` package never builds `matrix.worker.js`** — `parallel`'s
+  build is `tsup src/index.ts` only, so `src/matrix.worker.ts` is never emitted
+  to `dist/`. `ParallelMatrix` resolves its worker as `./matrix.worker.js` at
+  runtime, which does not exist — the worker compute paths silently return
+  all-zeros. Causes the 9 `tests/wasm/parallel-processing.test.ts` failures.
+  Fix: add `src/matrix.worker.ts` to the `parallel` build entry points (as
+  `packages/workerpool` already does for `src/worker.ts`).
+- [ ] **JS SVD fallback is wrong for non-square matrices** — when the WASM
+  artifact is absent, `svdWasm` falls back to the JS Golub-Reinsch `svd` in
+  `matrix/src/operations/svd.ts`; for a 5×3 general matrix it produces a
+  decomposition with reconstruction error ~8.28 (≫ 1e-8). A genuine algorithm
+  bug in the JS SVD, independent of WASM.
+
 ## 📋 Next Steps
 
 ### WASM Test Files (46 files, sorted by complexity) ✅ ALL COMPLETE
