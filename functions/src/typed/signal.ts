@@ -327,19 +327,43 @@ export const parallelConv = mathTyped('parallelConv', {
     xPadded.set(x);
     hPadded.set(h);
 
-    const xImag = new Float64Array(paddedLength);
-    const hImag = new Float64Array(paddedLength);
+    // Forward FFTs — x and h are independent, so we can run them concurrently.
+    let XReal: Float64Array;
+    let XImag: Float64Array;
+    let HReal: Float64Array;
+    let HImag: Float64Array;
 
-    // Compute FFTs
-    const X = fftCoreFloat64(xPadded, xImag, false);
-    const H = fftCoreFloat64(hPadded, hImag, false);
+    if (computePool.shouldParallelize(2 * paddedLength)) {
+      // Pack both zero-padded frames into a single 2-frame batch so the worker
+      // pool runs FFT(xPadded) and FFT(hPadded) concurrently on two workers.
+      const batchReal = new Float64Array(2 * paddedLength);
+      const batchImag = new Float64Array(2 * paddedLength);
+      batchReal.set(xPadded, 0);
+      batchReal.set(hPadded, paddedLength);
 
-    // Element-wise complex multiplication
+      const batch = await computePool.fftBatch(batchReal, batchImag, 2, paddedLength, false);
+      XReal = batch.result.real.subarray(0, paddedLength);
+      XImag = batch.result.imag.subarray(0, paddedLength);
+      HReal = batch.result.real.subarray(paddedLength);
+      HImag = batch.result.imag.subarray(paddedLength);
+    } else {
+      // Sequential fallback: below threshold or pool not initialized.
+      const xImag = new Float64Array(paddedLength);
+      const hImag = new Float64Array(paddedLength);
+      const X = fftCoreFloat64(xPadded, xImag, false);
+      const H = fftCoreFloat64(hPadded, hImag, false);
+      XReal = X.real;
+      XImag = X.imag;
+      HReal = H.real;
+      HImag = H.imag;
+    }
+
+    // Element-wise complex multiplication (sequential — O(N) scalar ops)
     const yReal = new Float64Array(paddedLength);
     const yImag = new Float64Array(paddedLength);
     for (let i: i32 = 0; i < paddedLength; i++) {
-      yReal[i] = X.real[i] * H.real[i] - X.imag[i] * H.imag[i];
-      yImag[i] = X.real[i] * H.imag[i] + X.imag[i] * H.real[i];
+      yReal[i] = XReal[i] * HReal[i] - XImag[i] * HImag[i];
+      yImag[i] = XReal[i] * HImag[i] + XImag[i] * HReal[i];
     }
 
     // IFFT
