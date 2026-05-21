@@ -5,12 +5,12 @@
  * integration and workerpool parallel execution.
  *
  * Includes FFT, IFFT, convolution, and correlation functions optimized
- * for Float64Array with parallel execution support.
+ * for Float64Array.
  *
- * Following the parallel-first philosophy per CLAUDE.md:
- * - Use workers for ALL array transformations (Float64Array)
- * - Use workers for ALL numerical computations that can be batched
- * - Only fall back to sequential for trivial scalar operations
+ * Parallelism note: the element-wise spectrum operations (magnitude, power)
+ * offload large Float64Array inputs to the worker pool. The radix-2 FFT
+ * butterfly itself runs on the calling thread — its stages have tight
+ * data dependencies that a chunked worker dispatch cannot exploit.
  *
  * @packageDocumentation
  */
@@ -251,21 +251,17 @@ export const parallelIFFT = mathTyped('parallelIFFT', {
  */
 export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
   'Float64Array, Float64Array': async (real: Float64Array, imag: Float64Array): Promise<Float64Array> => {
-    const n: i32 = real.length;
-
-    // For small arrays, compute sequentially
-    if (n < 10000) {
-      const result = new Float64Array(n);
-      for (let i: i32 = 0; i < n; i++) {
-        result[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]);
-      }
-      return result;
+    if (computePool.shouldParallelize(real.length)) {
+      const r = await computePool.applyKernel2(
+        real,
+        imag,
+        '(re, im) => Math.sqrt(re * re + im * im)'
+      );
+      return r.result;
     }
 
-    // For large arrays, could use parallel map
-    // For now, sequential with SIMD-friendly pattern
-    const result = new Float64Array(n);
-    for (let i: i32 = 0; i < n; i++) {
+    const result = new Float64Array(real.length);
+    for (let i: i32 = 0; i < real.length; i++) {
       result[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]);
     }
     return result;
@@ -281,9 +277,17 @@ export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
  */
 export const parallelFFTPower = mathTyped('parallelFFTPower', {
   'Float64Array, Float64Array': async (real: Float64Array, imag: Float64Array): Promise<Float64Array> => {
-    const n: i32 = real.length;
-    const result = new Float64Array(n);
-    for (let i: i32 = 0; i < n; i++) {
+    if (computePool.shouldParallelize(real.length)) {
+      const r = await computePool.applyKernel2(
+        real,
+        imag,
+        '(re, im) => re * re + im * im'
+      );
+      return r.result;
+    }
+
+    const result = new Float64Array(real.length);
+    for (let i: i32 = 0; i < real.length; i++) {
       result[i] = real[i] * real[i] + imag[i] * imag[i];
     }
     return result;

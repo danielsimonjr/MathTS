@@ -355,6 +355,23 @@ export class ComputePool {
   }
 
   /**
+   * Apply a caller-supplied binary numeric function in parallel.
+   *
+   * @param a - First operand array
+   * @param b - Second operand array (must match the length of `a`)
+   * @param fnSource - Source of a self-contained `(a: number, b: number) =>
+   *   number` expression (no free variables / closures).
+   */
+  async applyKernel2(
+    a: Float64Array,
+    b: Float64Array,
+    fnSource: string
+  ): Promise<ParallelResult<Float64Array>> {
+    const result = await this.workerPool.applyKernel2(a, b, fnSource);
+    return toParallelResult(result);
+  }
+
+  /**
    * Parallel absolute value
    */
   async abs(data: Float64Array): Promise<ParallelResult<Float64Array>> {

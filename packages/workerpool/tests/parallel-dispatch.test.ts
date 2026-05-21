@@ -96,4 +96,19 @@ describe('parallel kernel dispatch (real workers)', () => {
     );
     expect(withHelper.result[10]).toBe(21);
   });
+
+  it('applies a caller-supplied binary kernel in parallel', async () => {
+    const a = Float64Array.from({ length: 100 }, (_, i) => i);
+    const b = Float64Array.from({ length: 100 }, (_, i) => i + 1);
+
+    const hyp = await pool.applyKernel2(
+      a,
+      b,
+      '(a, b) => Math.sqrt(a * a + b * b)',
+      { forceParallel: true }
+    );
+    expect(hyp.parallelized).toBe(true);
+    expect(hyp.result[3]).toBeCloseTo(Math.sqrt(9 + 16), 12);
+    expect(hyp.result[99]).toBeCloseTo(Math.sqrt(99 * 99 + 100 * 100), 12);
+  });
 });

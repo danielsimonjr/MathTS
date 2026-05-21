@@ -246,6 +246,30 @@ function applyKernelChunk(
   return result.buffer;
 }
 
+/**
+ * Apply a caller-supplied binary numeric function to a pair of chunks.
+ *
+ * `fnSource` is the source of a self-contained `(a: number, b: number) =>
+ * number` expression, eval'd in the worker.
+ */
+function applyKernel2Chunk(
+  aBuffer: ArrayBuffer,
+  bBuffer: ArrayBuffer,
+  start: number,
+  length: number,
+  fnSource: string
+): ArrayBuffer {
+  const a = new Float64Array(aBuffer);
+  const b = new Float64Array(bBuffer);
+  const result = new Float64Array(length);
+  // eslint-disable-next-line no-eval
+  const fn = eval(`(${fnSource})`) as (a: number, b: number) => number;
+  for (let i = 0; i < length; i++) {
+    result[i] = fn(a[start + i], b[start + i]);
+  }
+  return result.buffer;
+}
+
 // =============================================================================
 // Matrix Operations
 // =============================================================================
@@ -549,6 +573,7 @@ const workerMethods: Record<string, (...args: any[]) => any> = {
   scaleChunk,
   unaryChunk,
   applyKernelChunk,
+  applyKernel2Chunk,
 
   // Matrix operations
   matmulRows,

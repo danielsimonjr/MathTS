@@ -1502,6 +1502,68 @@ export class MathWorkerPool {
   }
 
   /**
+   * Apply a caller-supplied binary numeric function in parallel.
+   *
+   * @param a - First operand array
+   * @param b - Second operand array (must match the length of `a`)
+   * @param fnSource - Source of a self-contained `(a: number, b: number) =>
+   *   number` expression. It must not reference free variables / closures.
+   */
+  async applyKernel2(
+    a: Float64Array,
+    b: Float64Array,
+    fnSource: string,
+    options?: TaskOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    if (a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+
+    const start = performance.now();
+
+    if (!this.shouldParallelize(a.length, options)) {
+      // eslint-disable-next-line no-eval
+      const fn = (0, eval)(`(${fnSource})`) as (a: number, b: number) => number;
+      const result = new Float64Array(a.length);
+      for (let i = 0; i < a.length; i++) {
+        result[i] = fn(a[i], b[i]);
+      }
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunkPairs = this.chunkPairFloat64Array(a, b, options?.chunkSize);
+    const stats = this.stats();
+
+    const results = await Promise.all(
+      chunkPairs.map(([chunkA, chunkB]) =>
+        this.exec<ArrayBuffer>('applyKernel2Chunk', [
+          chunkA.buffer,
+          chunkB.buffer,
+          0,
+          chunkA.length,
+          fnSource,
+        ])
+      )
+    );
+
+    const combined = this.combineArrayBuffers(results, a.length);
+
+    return {
+      result: combined,
+      duration: performance.now() - start,
+      chunks: chunkPairs.length,
+      parallelized: true,
+      workersUsed: Math.min(chunkPairs.length, stats.totalWorkers),
+    };
+  }
+
+  /**
    * Compute histogram in parallel
    */
   async histogram(
