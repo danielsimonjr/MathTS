@@ -1,7 +1,7 @@
 # Math.js Refactoring TODO
 
 Generated: 2026-01-13
-Updated: 2026-04-10 (v15.6.0)
+Updated: 2026-05-21
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
 
@@ -21,6 +21,39 @@ Updated: 2026-04-10 (v15.6.0)
 - [x] Status report updated - Accurate breakdown
 - [x] Refactoring docs organized - Moved to docs/refactoring/
 - [x] WASM test files (46 files) - All tiers complete (6621 tests passing)
+
+## 🔧 Parallel Execution Remediation (2026-05-21)
+
+The worker-pool infrastructure was found to be **non-functional at runtime** and
+has been fixed; genuine worker parallelism was then extended across the typed
+layer. This supersedes the earlier "Optimize parallel processing ✅ COMPLETE"
+claim below — the prewarming/singleton/metrics plumbing existed, but no kernel
+ever actually ran in a worker.
+
+- [x] **Fix worker dispatch** — `MathWorkerPool` created its pool without a
+  worker script, so every named-kernel call (`sumChunk`, `matmulRows`, …) threw
+  `Unknown method`. The built `dist/worker.js` is now resolved and loaded; the
+  arithmetic/statistics/trigonometry `Float64Array` overloads run in workers for
+  the first time.
+- [x] **Fix Float64Array chunking** — chunks were cut with `subarray()` (a view
+  over the full buffer), so every chunk past the first read the wrong region.
+  Now uses `slice()`.
+- [x] **Generic kernels** — added `applyKernel` (unary) and `applyKernel2`
+  (binary) so packages above `workerpool` can parallelize element-wise math.
+- [x] **Distributions** — parallel `Float64Array` overloads for all 10 PDF/CDF/
+  PMF functions.
+- [x] **Special functions** — parallel `Float64Array` overloads for all 28
+  special functions.
+- [x] **Matrix decompositions** — `matrixPower`, `matrixLog`,
+  `polarDecomposition`, `jordanForm`, and `characteristicPolynomial` route their
+  O(n³) products through the worker pool (now `async` — breaking).
+- [x] **Signal spectra** — `parallelFFTMagnitude` / `parallelFFTPower` now
+  genuinely dispatch to worker threads.
+- [x] **Function reference** — `docs/reference/functions.{md,html}` mark each
+  function's `parallel` / `WASM` acceleration in an Accel column.
+- [ ] **Worker-distributed FFT** — the radix-2 FFT butterfly still runs on the
+  calling thread (its stages have tight data dependencies). A genuine parallel
+  FFT needs a six-step / four-step decomposition — future work.
 
 ## 📋 Next Steps
 

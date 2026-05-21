@@ -25,6 +25,16 @@ plus 52 CODATA physical constants (see [Physical Constants](#physical-constants)
 and 9 type-conversion functions. Remaining coverage gaps are tracked in
 [`docs/roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md`](../roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md).
 
+Function tables in hardware-accelerated categories carry an **Accel** column:
+
+- **`parallel`** — the function's `Float64Array` (or large-matrix) path is
+  dispatched across worker threads by the compute pool.
+- **`WASM`** — the function has a WebAssembly fast path for large inputs.
+
+Both accelerations fall back automatically to a pure-TypeScript implementation
+when the input is small, the worker pool is not initialized, or the WASM module
+is unavailable.
+
 Every category below is documented in three parts: **Details** — supported
 types, return semantics, and numerical caveats; **Background & History** — the
 underlying mathematics and where it originates; and **Examples** — runnable
@@ -35,41 +45,41 @@ code. A browsable HTML edition of this page is available at
 
 ## Arithmetic
 
-| Function | Description | Types |
-|---|---|---|
-| `add(a, b)` | Addition | number, bigint, Complex, Fraction, Float64Array |
-| `subtract(a, b)` | Subtraction | number, bigint, Complex, Fraction, Float64Array |
-| `multiply(a, b)` | Multiplication / matrix product | number, bigint, Complex, Fraction, Float64Array |
-| `divide(a, b)` | Division | number, bigint, Complex, Fraction, Float64Array |
-| `unaryMinus(x)` | Negation `-x` | number, bigint, Complex, Fraction |
-| `unaryPlus(x)` | Identity `+x` | number, bigint, Complex, Fraction |
-| `abs(x)` | Absolute value | number, bigint, Complex, Fraction, Float64Array |
-| `sign(x)` | Sign of x: -1, 0, or 1 | number, bigint, Complex, Fraction |
-| `pow(x, y)` | Power `x^y` | number, bigint, Complex, Fraction |
-| `sqrt(x)` | Square root | number, Complex, BigNumber, Float64Array |
-| `square(x)` | `x²` | number, bigint, Complex, Fraction |
-| `cube(x)` | `x³` | number, bigint, Complex, Fraction |
-| `cbrt(x)` | Cube root | number, Complex, BigNumber |
-| `nthRoot(x, n)` | nth root | number, Complex |
-| `exp(x)` | `e^x` | number, Complex, BigNumber |
-| `expm1(x)` | `e^x - 1` (stable near 0) | number, Complex |
-| `log(x[, base])` | Natural log (or log base) | number, Complex, BigNumber |
-| `log2(x)` | Base-2 logarithm | number, Complex, BigNumber |
-| `log10(x)` | Base-10 logarithm | number, Complex, BigNumber |
-| `log1p(x)` | `ln(1 + x)` (stable near 0) | number, Complex |
-| `round(x[, n])` | Round to n digits | number, bigint, Complex, Fraction |
-| `floor(x)` | Round down | number, Complex, Fraction |
-| `ceil(x)` | Round up | number, Complex, Fraction |
-| `fix(x)` | Round toward zero | number, Complex, Fraction |
-| `mod(a, b)` | Modulo `a % b` | number, bigint |
-| `gcd(a, b)` | Greatest common divisor | number, bigint |
-| `lcm(a, b)` | Least common multiple | number, bigint |
-| `xgcd(a, b)` | Extended GCD: `{gcd, x, y}` | number |
-| `norm(x[, p])` | p-norm | number, Float64Array, DenseMatrix |
-| `dot(a, b)` | Vector dot product | Float64Array, array |
-| `outer(a, b)` | Vector outer product | Float64Array, array |
-| `matmul(A, B)` | Matrix multiplication (parallel-capable) | Float64Array, DenseMatrix |
-| `matvec(A, x)` | Matrix–vector product | Float64Array, DenseMatrix |
+| Function | Description | Types | Accel |
+|---|---|---|---|
+| `add(a, b)` | Addition | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `subtract(a, b)` | Subtraction | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `multiply(a, b)` | Multiplication / matrix product | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `divide(a, b)` | Division | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `unaryMinus(x)` | Negation `-x` | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `unaryPlus(x)` | Identity `+x` | number, bigint, Complex, Fraction | — |
+| `abs(x)` | Absolute value | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `sign(x)` | Sign of x: -1, 0, or 1 | number, bigint, Complex, Fraction | — |
+| `pow(x, y)` | Power `x^y` | number, bigint, Complex, Fraction | — |
+| `sqrt(x)` | Square root | number, Complex, BigNumber, Float64Array | parallel |
+| `square(x)` | `x²` | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `cube(x)` | `x³` | number, bigint, Complex, Fraction | — |
+| `cbrt(x)` | Cube root | number, Complex, BigNumber | — |
+| `nthRoot(x, n)` | nth root | number, Complex | — |
+| `exp(x)` | `e^x` | number, Complex, BigNumber, Float64Array | parallel |
+| `expm1(x)` | `e^x - 1` (stable near 0) | number, Complex | — |
+| `log(x[, base])` | Natural log (or log base) | number, Complex, BigNumber, Float64Array | parallel |
+| `log2(x)` | Base-2 logarithm | number, Complex, BigNumber | — |
+| `log10(x)` | Base-10 logarithm | number, Complex, BigNumber | — |
+| `log1p(x)` | `ln(1 + x)` (stable near 0) | number, Complex | — |
+| `round(x[, n])` | Round to n digits | number, bigint, Complex, Fraction | — |
+| `floor(x)` | Round down | number, Complex, Fraction | — |
+| `ceil(x)` | Round up | number, Complex, Fraction | — |
+| `fix(x)` | Round toward zero | number, Complex, Fraction | — |
+| `mod(a, b)` | Modulo `a % b` | number, bigint | — |
+| `gcd(a, b)` | Greatest common divisor | number, bigint | — |
+| `lcm(a, b)` | Least common multiple | number, bigint | — |
+| `xgcd(a, b)` | Extended GCD: `{gcd, x, y}` | number | — |
+| `norm(x[, p])` | p-norm | number, Float64Array, DenseMatrix | parallel |
+| `dot(a, b)` | Vector dot product | Float64Array, array | parallel |
+| `outer(a, b)` | Vector outer product | Float64Array, array | parallel |
+| `matmul(A, B)` | Matrix multiplication | Float64Array, DenseMatrix | parallel |
+| `matvec(A, x)` | Matrix–vector product | Float64Array, DenseMatrix | parallel |
 
 The factory layer additionally provides scalar variants used internally and by
 the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,
@@ -178,20 +188,20 @@ deepEqual([1, 2, 3], [1, 2, 3]); // true
 
 Functions support `number`, `Complex`, `BigNumber`, and parallel `Float64Array`.
 
-| Function | Description |
-|---|---|
-| `sin(x)` `cos(x)` `tan(x)` | Sine, cosine, tangent |
-| `csc(x)` `sec(x)` `cot(x)` | Cosecant, secant, cotangent |
-| `asin(x)` `acos(x)` `atan(x)` | Inverse sine, cosine, tangent |
-| `atan2(y, x)` | Two-argument arctangent |
-| `acsc(x)` `asec(x)` `acot(x)` | Inverse cosecant, secant, cotangent |
-| `sinh(x)` `cosh(x)` `tanh(x)` | Hyperbolic sine, cosine, tangent |
-| `asinh(x)` `acosh(x)` `atanh(x)` | Inverse hyperbolic sine, cosine, tangent |
-| `csch(x)` `sech(x)` `coth(x)` | Hyperbolic cosecant, secant, cotangent (factory) |
-| `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory) |
-| `toRadians(deg)` | Convert degrees to radians |
-| `toDegrees(rad)` | Convert radians to degrees |
-| `hypot(a, b, …)` | Hypotenuse `sqrt(Σ xᵢ²)` |
+| Function | Description | Accel |
+|---|---|---|
+| `sin(x)` `cos(x)` `tan(x)` | Sine, cosine, tangent | parallel |
+| `csc(x)` `sec(x)` `cot(x)` | Cosecant, secant, cotangent | — |
+| `asin(x)` `acos(x)` `atan(x)` | Inverse sine, cosine, tangent | — |
+| `atan2(y, x)` | Two-argument arctangent | — |
+| `acsc(x)` `asec(x)` `acot(x)` | Inverse cosecant, secant, cotangent | — |
+| `sinh(x)` `cosh(x)` `tanh(x)` | Hyperbolic sine, cosine, tangent | — |
+| `asinh(x)` `acosh(x)` `atanh(x)` | Inverse hyperbolic sine, cosine, tangent | — |
+| `csch(x)` `sech(x)` `coth(x)` | Hyperbolic cosecant, secant, cotangent (factory) | — |
+| `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory) | — |
+| `toRadians(deg)` | Convert degrees to radians | — |
+| `toDegrees(rad)` | Convert radians to degrees | — |
+| `hypot(a, b, …)` | Hypotenuse `sqrt(Σ xᵢ²)` | — |
 
 ### Details
 
@@ -279,32 +289,32 @@ leftShift(1, 4);    // 16
 
 ## Special Functions
 
-| Function | Description |
-|---|---|
-| `erfc(x)` | Complementary error function `1 - erf(x)` |
-| `erf(x)` | Error function (factory layer) |
-| `erfi(x)` | Imaginary error function |
-| `beta(a, b)` | Beta function `Γ(a)·Γ(b)/Γ(a+b)` |
-| `betainc(x, a, b)` | Incomplete beta function |
-| `gammainc(a, x)` | Regularized lower incomplete gamma `P(a, x)` |
-| `gammaincp(a, x)` | Regularized upper incomplete gamma `Q(a, x)` |
-| `digamma(x)` | Digamma `d/dx ln Γ(x)` |
-| `gamma(x)` | Gamma function (factory layer) |
-| `lgamma(x)` | Log-gamma (factory layer) |
-| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind |
-| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`) |
-| `besselI(n, x)` `besselK(n, x)` | Modified Bessel functions |
-| `ellipticK(m)` `ellipticE(m)` | Complete elliptic integrals |
-| `fresnelC(x)` `fresnelS(x)` | Fresnel integrals |
-| `sinIntegral(x)` `cosIntegral(x)` | Sine / cosine integrals |
-| `expIntegralEi(x)` | Exponential integral `Ei(x)` |
-| `logIntegral(x)` | Logarithmic integral `li(x)` |
-| `lambertW(x[, branch])` | Lambert W function |
-| `chebyshevT(n, x)` | Chebyshev polynomial (first kind) |
-| `hermiteH(n, x)` | Hermite polynomial |
-| `laguerreL(n, x)` | Laguerre polynomial |
-| `legendreP(n, x)` | Legendre polynomial |
-| `zeta(s)` | Riemann zeta function (factory layer) |
+| Function | Description | Accel |
+|---|---|---|
+| `erfc(x)` | Complementary error function `1 - erf(x)` | parallel |
+| `erf(x)` | Error function (factory layer) | — |
+| `erfi(x)` | Imaginary error function | parallel |
+| `beta(a, b)` | Beta function `Γ(a)·Γ(b)/Γ(a+b)` | parallel |
+| `betainc(x, a, b)` | Incomplete beta function | parallel |
+| `gammainc(a, x)` | Regularized lower incomplete gamma `P(a, x)` | parallel |
+| `gammaincp(a, x)` | Regularized upper incomplete gamma `Q(a, x)` | parallel |
+| `digamma(x)` | Digamma `d/dx ln Γ(x)` | parallel |
+| `gamma(x)` | Gamma function (factory layer) | — |
+| `lgamma(x)` | Log-gamma (factory layer) | — |
+| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind | parallel |
+| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`) | parallel |
+| `besselI(n, x)` `besselK(n, x)` | Modified Bessel functions | parallel |
+| `ellipticK(m)` `ellipticE(m)` | Complete elliptic integrals | parallel |
+| `fresnelC(x)` `fresnelS(x)` | Fresnel integrals | parallel |
+| `sinIntegral(x)` `cosIntegral(x)` | Sine / cosine integrals | parallel |
+| `expIntegralEi(x)` | Exponential integral `Ei(x)` | parallel |
+| `logIntegral(x)` | Logarithmic integral `li(x)` | parallel |
+| `lambertW(x[, branch])` | Lambert W function | parallel |
+| `chebyshevT(n, x)` | Chebyshev polynomial (first kind) | parallel |
+| `hermiteH(n, x)` | Hermite polynomial | parallel |
+| `laguerreL(n, x)` | Laguerre polynomial | parallel |
+| `legendreP(n, x)` | Legendre polynomial | parallel |
+| `zeta(s)` | Riemann zeta function (factory layer) | — |
 
 ### Details
 
@@ -431,24 +441,24 @@ The typed arithmetic layer provides scalar/array aggregations: `sum`, `mean`,
 For `Float64Array` data, the `parallelStat*` family runs in worker threads and
 returns a `Promise`. Scalar overloads (2–4 numbers) are synchronous.
 
-| Function | Description |
-|---|---|
-| `parallelStatSum(a)` | Sum of all elements |
-| `parallelStatMean(a)` | Arithmetic mean |
-| `parallelStatVariance(a[, type])` | Variance (`unbiased`/`uncorrected`/`biased`) |
-| `parallelStatStd(a[, type])` | Standard deviation |
-| `parallelStatMin(a)` `parallelStatMax(a)` | Min / max |
-| `parallelStatMinMax(a)` | `{ min, max }` in one pass |
-| `parallelStatMedian(a)` | Median |
-| `parallelStatMode(a)` | Mode |
-| `parallelStatProd(a)` | Product |
-| `parallelStatNorm(a[, p])` | p-norm |
-| `parallelStatDistance(a, b)` | Euclidean distance |
-| `parallelStatCorr(a, b)` | Pearson correlation |
-| `parallelStatMAD(a)` | Median absolute deviation |
-| `parallelStatCumsum(a)` | Cumulative sum |
-| `parallelStatQuantile(a, q)` | q-th quantile (0–1) |
-| `parallelStatHistogram(a, bins)` | Histogram bin counts |
+| Function | Description | Accel |
+|---|---|---|
+| `parallelStatSum(a)` | Sum of all elements | parallel |
+| `parallelStatMean(a)` | Arithmetic mean | parallel |
+| `parallelStatVariance(a[, type])` | Variance (`unbiased`/`uncorrected`/`biased`) | parallel |
+| `parallelStatStd(a[, type])` | Standard deviation | parallel |
+| `parallelStatMin(a)` `parallelStatMax(a)` | Min / max | parallel |
+| `parallelStatMinMax(a)` | `{ min, max }` in one pass | parallel |
+| `parallelStatMedian(a)` | Median | parallel |
+| `parallelStatMode(a)` | Mode | — |
+| `parallelStatProd(a)` | Product | — |
+| `parallelStatNorm(a[, p])` | p-norm | parallel |
+| `parallelStatDistance(a, b)` | Euclidean distance | parallel |
+| `parallelStatCorr(a, b)` | Pearson correlation | parallel |
+| `parallelStatMAD(a)` | Median absolute deviation | parallel |
+| `parallelStatCumsum(a)` | Cumulative sum | — |
+| `parallelStatQuantile(a, q)` | q-th quantile (0–1) | — |
+| `parallelStatHistogram(a, bins)` | Histogram bin counts | parallel |
 
 ### Selection (O(n), no full sort)
 
@@ -497,19 +507,19 @@ quickSelect([3, 1, 4, 1, 5, 9, 2], 3); // 3 (4th smallest)
 
 ### Density / mass functions
 
-| Function | Description |
-|---|---|
-| `normalPDF(x[, mu, sigma])` | Normal PDF |
-| `normalCDF(x[, mu, sigma])` | Normal CDF |
-| `exponentialPDF(x, lambda)` | Exponential PDF |
-| `exponentialCDF(x, lambda)` | Exponential CDF |
-| `poissonPMF(k, lambda)` | Poisson PMF |
-| `binomialPMF(k, n, p)` | Binomial PMF |
-| `geometricPMF(k, p)` | Geometric PMF |
-| `bernoulliPMF(k, p)` | Bernoulli PMF |
-| `entropy(probs)` | Shannon entropy (bits) |
-| `jsDivergence(p, q)` | Jensen–Shannon divergence |
-| `kldivergence(p, q)` | Kullback–Leibler divergence (factory layer) |
+| Function | Description | Accel |
+|---|---|---|
+| `normalPDF(x[, mu, sigma])` | Normal PDF | parallel |
+| `normalCDF(x[, mu, sigma])` | Normal CDF | parallel |
+| `exponentialPDF(x, lambda)` | Exponential PDF | parallel |
+| `exponentialCDF(x, lambda)` | Exponential CDF | parallel |
+| `poissonPMF(k, lambda)` | Poisson PMF | parallel |
+| `binomialPMF(k, n, p)` | Binomial PMF | parallel |
+| `geometricPMF(k, p)` | Geometric PMF | parallel |
+| `bernoulliPMF(k, p)` | Bernoulli PMF | parallel |
+| `entropy(probs)` | Shannon entropy (bits) | — |
+| `jsDivergence(p, q)` | Jensen–Shannon divergence | — |
+| `kldivergence(p, q)` | Kullback–Leibler divergence (factory layer) | — |
 
 ### Distribution objects
 
@@ -608,17 +618,20 @@ operations are eligible for WASM/GPU acceleration via the matrix package.
 
 ### Decompositions & analysis (typed `matrix-ops`)
 
-| Function | Description |
-|---|---|
-| `cholesky(A)` | Cholesky decomposition |
-| `hessenbergForm(A)` | Hessenberg reduction |
-| `jordanForm(A)` | Jordan normal form |
-| `characteristicPolynomial(A)` | Characteristic polynomial |
-| `matrixRank(A)` | Rank |
-| `matrixPower(A, p)` | Matrix power (non-integer) |
-| `matrixLog(A)` | Matrix logarithm |
-| `polarDecomposition(A)` | Polar decomposition |
-| `rowReduce(A)` | Reduced row echelon form |
+| Function | Description | Accel |
+|---|---|---|
+| `cholesky(A)` | Cholesky decomposition | — |
+| `hessenbergForm(A)` | Hessenberg reduction | — |
+| `jordanForm(A)` | Jordan normal form | parallel |
+| `characteristicPolynomial(A)` | Characteristic polynomial | parallel |
+| `matrixRank(A)` | Rank | — |
+| `matrixPower(A, p)` | Matrix power (non-integer) | parallel |
+| `matrixLog(A)` | Matrix logarithm | parallel |
+| `polarDecomposition(A)` | Polar decomposition | parallel |
+| `rowReduce(A)` | Reduced row echelon form | — |
+
+The `parallel`-marked decompositions route their O(n³) matrix products through
+the worker pool and therefore return a `Promise`.
 
 ### Sparse (CSC) routines
 
@@ -923,27 +936,27 @@ romberg(Math.sin, 0, Math.PI);      // ~2.0
 
 ## Interpolation & Curve Fitting
 
-| Function | Description |
-|---|---|
-| `linearInterp(xs, ys, x)` | Piecewise linear interpolation |
-| `lagrangeInterp(xs, ys, x)` | Lagrange polynomial interpolation |
-| `cubicSpline(xs, ys)` | Natural cubic spline → evaluator |
-| `cspline(xs, ys)` | Cubic spline (numeric layer) |
-| `hermiteInterp(xs, ys, dys, x)` | Hermite interpolation |
-| `pchipInterp(xs, ys)` / `pchip(xs, ys)` | Shape-preserving PCHIP spline |
-| `polyFit(xs, ys, degree)` | Least-squares polynomial fit |
-| `interpolate(xs, ys, x[, method])` | General interpolation dispatcher |
-| `griddata(xs, ys, values, xi, yi)` | Scattered-data interpolation to a grid |
-| `rbfInterpolate(centers, values, query)` | Radial basis function interpolation |
-| `loess(xs, ys, x[, bandwidth])` | LOESS local regression |
-| `chebyshevApprox(f, a, b, n)` | Chebyshev polynomial approximation |
-| `padeApproximant(coeffs, m, n)` | Padé approximant |
-| `bezierCurve(controlPoints, t)` | Bézier curve evaluation |
-| `bspline(controlPoints, degree, t)` | B-spline curve evaluation |
-| `curvefit(xs, ys, model, p0)` | Nonlinear curve fitting |
-| `expfit(xs, ys)` | Exponential fit `a·exp(b·x)` |
-| `logfit(xs, ys)` | Logarithmic fit |
-| `powerfit(xs, ys)` | Power-law fit |
+| Function | Description | Accel |
+|---|---|---|
+| `linearInterp(xs, ys, x)` | Piecewise linear interpolation | — |
+| `lagrangeInterp(xs, ys, x)` | Lagrange polynomial interpolation | — |
+| `cubicSpline(xs, ys)` | Natural cubic spline → evaluator | — |
+| `cspline(xs, ys)` | Cubic spline (numeric layer) | — |
+| `hermiteInterp(xs, ys, dys, x)` | Hermite interpolation | — |
+| `pchipInterp(xs, ys)` / `pchip(xs, ys)` | Shape-preserving PCHIP spline | — |
+| `polyFit(xs, ys, degree)` | Least-squares polynomial fit | — |
+| `interpolate(xs, ys, x[, method])` | General interpolation dispatcher | — |
+| `griddata(xs, ys, values, xi, yi)` | Scattered-data interpolation to a grid | WASM |
+| `rbfInterpolate(centers, values, query)` | Radial basis function interpolation | WASM |
+| `loess(xs, ys, x[, bandwidth])` | LOESS local regression | WASM |
+| `chebyshevApprox(f, a, b, n)` | Chebyshev polynomial approximation | — |
+| `padeApproximant(coeffs, m, n)` | Padé approximant | — |
+| `bezierCurve(controlPoints, t)` | Bézier curve evaluation | WASM |
+| `bspline(controlPoints, degree, t)` | B-spline curve evaluation | — |
+| `curvefit(xs, ys, model, p0)` | Nonlinear curve fitting | — |
+| `expfit(xs, ys)` | Exponential fit `a·exp(b·x)` | — |
+| `logfit(xs, ys)` | Logarithmic fit | — |
+| `powerfit(xs, ys)` | Power-law fit | — |
 
 ### Details
 
@@ -986,27 +999,27 @@ lagrangeInterp(xs, ys, 2.5);     // ~6.25
 
 Root-finding, optimization, linear systems, and differential equations.
 
-| Function | Description |
-|---|---|
-| `findRoot(f, a, b[, opts])` | Bracketed root-finding (bisection/Brent) |
-| `linsolve(A, b)` | Solve a linear system `Ax = b` |
-| `leastSquares(A, b)` | Least-squares solution (overdetermined) |
-| `minimize(f, x0[, opts])` | Local minimization |
-| `maximize(f, x0[, opts])` | Local maximization |
-| `globalMinimize(f, bounds[, opts])` | Global minimization |
-| `linprog(c, A, b[, opts])` | Linear programming |
-| `quadprog(Q, c, A, b[, opts])` | Quadratic programming |
-| `solveODE(f, tspan, y0[, opts])` | ODE solver (factory layer) |
-| `solveODESystem(fs, tspan, y0)` | System of ODEs |
-| `solveBVP(...)` | Boundary value problem solver |
-| `solvePDE(...)` | PDE solver |
-| `stiffODESolver(...)` | Stiff-ODE solver |
-| `odeAdaptiveStep(...)` | Adaptive-step ODE integration |
-| `eventDetection(...)` | ODE event detection |
-| `cond(A)` | Condition number |
-| `rank(A)` | Numerical rank |
-| `nullspace(A)` | Null-space basis |
-| `residue(b, a)` | Partial-fraction residues |
+| Function | Description | Accel |
+|---|---|---|
+| `findRoot(f, a, b[, opts])` | Bracketed root-finding (bisection/Brent) | — |
+| `linsolve(A, b)` | Solve a linear system `Ax = b` | — |
+| `leastSquares(A, b)` | Least-squares solution (overdetermined) | WASM |
+| `minimize(f, x0[, opts])` | Local minimization | — |
+| `maximize(f, x0[, opts])` | Local maximization | — |
+| `globalMinimize(f, bounds[, opts])` | Global minimization | — |
+| `linprog(c, A, b[, opts])` | Linear programming | — |
+| `quadprog(Q, c, A, b[, opts])` | Quadratic programming | — |
+| `solveODE(f, tspan, y0[, opts])` | ODE solver (factory layer) | — |
+| `solveODESystem(fs, tspan, y0)` | System of ODEs | WASM |
+| `solveBVP(...)` | Boundary value problem solver | — |
+| `solvePDE(...)` | PDE solver | — |
+| `stiffODESolver(...)` | Stiff-ODE solver | — |
+| `odeAdaptiveStep(...)` | Adaptive-step ODE integration | — |
+| `eventDetection(...)` | ODE event detection | — |
+| `cond(A)` | Condition number | WASM |
+| `rank(A)` | Numerical rank | WASM |
+| `nullspace(A)` | Null-space basis | — |
+| `residue(b, a)` | Partial-fraction residues | — |
 
 ### Details
 
@@ -1045,46 +1058,53 @@ leastSquares([[1,0],[1,1],[1,2]], [1,2,3]); // [1, 1]
 
 ## Signal Processing
 
-Parallel `Float64Array` transforms (`parallel*`) run in worker threads and
-return a `Promise`.
+The `parallel*` transforms return a `Promise`. `parallelFFTMagnitude` and
+`parallelFFTPower` dispatch large inputs to worker threads; the FFT and
+convolution transforms run their core algorithm on the calling thread (the
+radix-2 butterfly has data dependencies a chunked dispatch cannot exploit).
 
-| Function | Description |
-|---|---|
-| `parallelFFT(x)` | FFT → `Complex[]` |
-| `parallelIFFT(X)` | Inverse FFT → `Float64Array` |
-| `parallelFFTMagnitude(x)` | FFT magnitude spectrum |
-| `parallelFFTPower(x)` | FFT power spectrum |
-| `parallelConv(a, b)` | Convolution |
-| `parallelXCorr(a, b)` | Cross-correlation |
-| `parallelAutoCorr(a)` | Auto-correlation |
-| `fft(x)` / `ifft(X)` | Discrete Fourier transform / inverse (factory layer) |
-| `fft2d(matrix)` | 2D FFT |
-| `fourier(f)` / `invFourier(F)` | Continuous Fourier transform |
-| `dct(x)` / `idct(X)` | Discrete cosine transform / inverse |
-| `dst(x)` / `idst(X)` | Discrete sine transform / inverse |
-| `dwt(x[, wavelet])` | Discrete wavelet transform |
-| `hilbertTransform(x)` | Hilbert transform |
-| `convolve(a, b)` / `correlate(a, b)` | Convolution / correlation |
-| `crossCorrelation(a, b)` / `autoCorrelation(a)` | Cross / auto-correlation |
-| `lowpassFilter(x, fc)` | Low-pass filter |
-| `highpassFilter(x, fc)` | High-pass filter |
-| `bandpassFilter(x, f1, f2)` | Band-pass filter |
-| `medfilt(x[, window])` | Median filter |
-| `windowFunction(n, type)` | Window functions (Hamming, Hann, …) |
-| `resample(x, ratio)` | Signal resampling |
-| `spectrogram(x[, opts])` | Spectrogram |
-| `periodogram(x)` | Power spectral density estimate |
-| `groupDelay(b, a, w)` | Filter group delay |
-| `unwrapPhase(phase)` | Remove 2π phase discontinuities |
-| `freqz(b, a)` | Digital filter frequency response (factory layer) |
-| `zpk2tf(z, p, k)` | Zero-pole-gain → transfer function (factory layer) |
+| Function | Description | Accel |
+|---|---|---|
+| `parallelFFT(x)` | FFT → `Complex[]` | — |
+| `parallelIFFT(X)` | Inverse FFT → `Float64Array` | — |
+| `parallelFFTMagnitude(x)` | FFT magnitude spectrum | parallel |
+| `parallelFFTPower(x)` | FFT power spectrum | parallel |
+| `parallelConv(a, b)` | Convolution | — |
+| `parallelXCorr(a, b)` | Cross-correlation | — |
+| `parallelAutoCorr(a)` | Auto-correlation | — |
+| `fft(x)` / `ifft(X)` | Discrete Fourier transform / inverse (factory layer) | — |
+| `fft2d(matrix)` | 2D FFT | — |
+| `fourier(f)` / `invFourier(F)` | Continuous Fourier transform | — |
+| `dct(x)` / `idct(X)` | Discrete cosine transform / inverse | WASM |
+| `dst(x)` / `idst(X)` | Discrete sine transform / inverse | WASM |
+| `dwt(x[, wavelet])` | Discrete wavelet transform | WASM |
+| `hilbertTransform(x)` | Hilbert transform | WASM |
+| `convolve(a, b)` / `correlate(a, b)` | Convolution / correlation | — |
+| `crossCorrelation(a, b)` / `autoCorrelation(a)` | Cross / auto-correlation | — |
+| `lowpassFilter(x, fc)` | Low-pass filter | WASM |
+| `highpassFilter(x, fc)` | High-pass filter | WASM |
+| `bandpassFilter(x, f1, f2)` | Band-pass filter | WASM |
+| `medfilt(x[, window])` | Median filter | — |
+| `windowFunction(n, type)` | Window functions (Hamming, Hann, …) | — |
+| `resample(x, ratio)` | Signal resampling | — |
+| `spectrogram(x[, opts])` | Spectrogram | WASM |
+| `periodogram(x)` | Power spectral density estimate | WASM |
+| `groupDelay(b, a, w)` | Filter group delay | — |
+| `unwrapPhase(phase)` | Remove 2π phase discontinuities | — |
+| `freqz(b, a)` | Digital filter frequency response (factory layer) | — |
+| `zpk2tf(z, p, k)` | Zero-pole-gain → transfer function (factory layer) | — |
 
 ### Details
 
-- The `parallel*` transforms take a `Float64Array`, run across worker threads,
-  and return a `Promise`.
+- The `parallel*` transforms take a `Float64Array` and return a `Promise`.
+  `parallelFFTMagnitude` / `parallelFFTPower` run their element-wise spectrum
+  pass on worker threads; the FFT, IFFT, and convolution transforms compute on
+  the calling thread.
 - FFT routines are fastest at power-of-two lengths; other lengths use a
   mixed-radix path.
+- WASM-marked transforms (`dct`, `dwt`, `spectrogram`, the FIR filters, …) use a
+  WebAssembly kernel for inputs above an internal size threshold and fall back
+  to the TypeScript implementation otherwise.
 - Apply a `windowFunction` (Hamming, Hann, Blackman, …) before an FFT to reduce
   spectral leakage from finite-length signals.
 - `spectrogram` gives a time–frequency picture; `periodogram` estimates the
@@ -1119,34 +1139,34 @@ const filtered = await parallelConv(signal, new Float64Array([0.25, 0.5, 0.25]))
 
 Geometric operations on 2D/3D/nD coordinate arrays.
 
-| Function | Description |
-|---|---|
-| `angle2D(v1, v2)` / `angle3D(v1, v2)` | Angle between vectors |
-| `cross3D(a, b)` / `dot3D(a, b)` | 3D cross / dot product |
-| `triangleArea(a, b, c)` | Triangle area |
-| `polygonArea(vertices)` | Polygon area (shoelace) |
-| `polygonPerimeter(vertices)` | Polygon perimeter |
-| `area(shape)` | Area of a shape |
-| `centroid(polygon)` | Centroid of a polygon |
-| `convexHull(points)` | Convex hull (Graham scan) |
-| `pointInPolygon(point, polygon)` | Ray-casting containment test |
-| `rotateVector2D(v, angle)` / `rotateVector3D(v, axis, angle)` | Vector rotation |
-| `reflectVector(v, normal)` | Reflection across a plane |
-| `projectVector(v, onto)` | Vector projection |
-| `distance2D(a, b)` / `distance3D(a, b)` / `distanceND(a, b)` | Euclidean distance |
-| `distancePointToLine2D(point, lineA, lineB)` | Point-to-line distance |
-| `manhattanDistance(a, b)` | L1 distance |
-| `chebyshevDistance(a, b)` | L∞ distance |
-| `minkowskiDistance(a, b, p)` | Lp distance |
-| `distance(...)` | mathjs-style distance (factory layer) |
-| `intersectLines2D(p1, d1, p2, d2)` | Line intersection |
-| `intersectSegments2D(a1, a2, b1, b2)` | Segment intersection |
-| `intersect(...)` | mathjs-style intersection (factory layer) |
-| `coordinateTransform(point, from, to)` | Coordinate-system conversion |
-| `delaunayTriangulation(points)` | Delaunay triangulation |
-| `voronoiDiagram(points)` | Voronoi diagram |
-| `kdTree(points)` / `kdTreeNearest(tree, query)` | k-d tree + nearest query |
-| `nearestNeighbor(points, query)` | Nearest-neighbour search |
+| Function | Description | Accel |
+|---|---|---|
+| `angle2D(v1, v2)` / `angle3D(v1, v2)` | Angle between vectors | — |
+| `cross3D(a, b)` / `dot3D(a, b)` | 3D cross / dot product | — |
+| `triangleArea(a, b, c)` | Triangle area | — |
+| `polygonArea(vertices)` | Polygon area (shoelace) | — |
+| `polygonPerimeter(vertices)` | Polygon perimeter | — |
+| `area(shape)` | Area of a shape | — |
+| `centroid(polygon)` | Centroid of a polygon | — |
+| `convexHull(points)` | Convex hull (Graham scan) | — |
+| `pointInPolygon(point, polygon)` | Ray-casting containment test | — |
+| `rotateVector2D(v, angle)` / `rotateVector3D(v, axis, angle)` | Vector rotation | — |
+| `reflectVector(v, normal)` | Reflection across a plane | — |
+| `projectVector(v, onto)` | Vector projection | — |
+| `distance2D(a, b)` / `distance3D(a, b)` / `distanceND(a, b)` | Euclidean distance | — |
+| `distancePointToLine2D(point, lineA, lineB)` | Point-to-line distance | — |
+| `manhattanDistance(a, b)` | L1 distance | — |
+| `chebyshevDistance(a, b)` | L∞ distance | — |
+| `minkowskiDistance(a, b, p)` | Lp distance | — |
+| `distance(...)` | mathjs-style distance (factory layer) | — |
+| `intersectLines2D(p1, d1, p2, d2)` | Line intersection | — |
+| `intersectSegments2D(a1, a2, b1, b2)` | Segment intersection | — |
+| `intersect(...)` | mathjs-style intersection (factory layer) | — |
+| `coordinateTransform(point, from, to)` | Coordinate-system conversion | — |
+| `delaunayTriangulation(points)` | Delaunay triangulation | WASM |
+| `voronoiDiagram(points)` | Voronoi diagram | WASM |
+| `kdTree(points)` / `kdTreeNearest(tree, query)` | k-d tree + nearest query | — |
+| `nearestNeighbor(points, query)` | Nearest-neighbour search | WASM |
 
 ### Details
 
@@ -1607,19 +1627,21 @@ fn.evaluate({ x: 3 });          // 16
 
 ### Details
 
-- `Float64Array` inputs to arithmetic and trigonometric functions return a
-  `ParallelResult<Float64Array>`; statistics and signal functions return the
-  value type directly as a `Promise`.
-- Unwrap an arithmetic/trig result with `.result`. A `ParallelResult` also
-  carries `.duration` (elapsed milliseconds), `.chunks` (number of work
-  chunks), and `.parallelized` (whether worker threads were actually used).
+- `Float64Array` (and large-matrix) inputs to the typed functions return a
+  `Promise` of the result value directly — `Promise<Float64Array>` for
+  element-wise transforms, `Promise<number>` for reductions. Await the call.
 - The worker pool is created lazily on first use. `initializePool()`,
   `getComputePool()`, and `terminatePool()` give explicit lifecycle control —
   call `terminatePool()` to release worker threads, for example before process
   exit.
-- Small inputs may run sequentially even on a "parallel" function; the library
-  parallelises only when the array is large enough for the work to outweigh the
-  dispatch overhead.
+- Small inputs run sequentially even on a `parallel`-marked function; the
+  library dispatches to workers only when the array is large enough for the
+  work to outweigh the dispatch overhead, and only once the pool has been
+  initialized — otherwise it falls back to a synchronous in-thread path.
+- The lower-level `ComputePool` API (`computePool.add`, `.matmul`,
+  `.applyKernel`, …) returns a `ParallelResult` wrapper that carries `.result`,
+  `.duration` (elapsed milliseconds), `.chunks` (number of work chunks), and
+  `.parallelized` (whether worker threads were actually used).
 
 ### Background & History
 
@@ -1634,11 +1656,10 @@ thread-creation costs on every call.
 ### Examples
 
 ```typescript
-import { add } from '@danielsimonjr/mathts-functions';
+import { add, initializePool, terminatePool } from '@danielsimonjr/mathts-functions';
 
-const pr = await add(new Float64Array([1,2,3]), new Float64Array([4,5,6]));
-// pr.result       → Float64Array([5, 7, 9])
-// pr.duration     → elapsed ms
-// pr.chunks       → number of work chunks
-// pr.parallelized → true
+await initializePool();
+const sum = await add(new Float64Array([1, 2, 3]), new Float64Array([4, 5, 6]));
+// sum → Float64Array([5, 7, 9])
+await terminatePool();
 ```

@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 >    bridges (compat ↔ functions, tensor ↔ matrix, workbook ↔ expression).
 > 2. **mathjs JS→AS port workflow** — a reusable LLM-driven porting pipeline in
 >    `tools/mathjs-port/`, plus a behavioral-parity audit of synced functions.
+> 3. **Parallel-execution remediation** — the worker pool never loaded its
+>    kernel script, so every parallel dispatch failed at runtime; this fixes the
+>    dispatch and the Float64Array chunking, then extends genuine worker
+>    parallelism across the distribution, special-function, signal-spectrum, and
+>    matrix-decomposition layers.
 
 ### Added
 
@@ -100,6 +105,30 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
 - All ports use raw memory pointers (`usize` + `i32` length) matching the
   existing `wasm/` convention. Typecheck adds zero new errors.
 
+#### Parallel execution
+
+- **Generic worker kernels** — `applyKernel` (unary) and `applyKernel2` (binary)
+  evaluate a caller-supplied, self-contained numeric function over a
+  `Float64Array` on the worker pool, exposed on both `MathWorkerPool` and
+  `ComputePool`. This lets packages above `workerpool` parallelize element-wise
+  math without the worker needing to import their code.
+  `packages/workerpool/src/worker.ts`, `packages/workerpool/src/index.ts`,
+  `parallel/src/ComputePool.ts`.
+- **Distribution array overloads** — `normalPDF`, `normalCDF`, `exponentialPDF`,
+  `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, and
+  `bernoulliPMF` gain `Float64Array` overloads that evaluate a whole sample
+  array, dispatching large inputs to the worker pool. The scalar logic is
+  extracted into standalone declarations reused both for dispatch and as the
+  serialized worker-kernel source. `functions/src/typed/distributions.ts`.
+- **Special-function array overloads** — all 28 functions in
+  `functions/src/typed/special.ts` gain `Float64Array` overloads (single-argument
+  functions take the array directly; multi-argument functions take it for the
+  varying argument with the rest fixed).
+- **Parallel FFT spectra** — `parallelFFTMagnitude` / `parallelFFTPower` now
+  dispatch large `Float64Array` inputs to worker threads via the new binary
+  kernel; they previously ran on the calling thread despite the `parallel`
+  prefix. `functions/src/typed/signal.ts`.
+
 ### Changed
 
 - **workbook cell evaluation** — cells are evaluated via `evaluate()` from
@@ -121,6 +150,14 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   static-data section spans ~1 MB of lookup tables; the old base wrote into Rust
   statics, so the loader previously could not safely call any
   internally-allocating export.
+- **`matrix-ops` decompositions are async (breaking)** — `characteristicPolynomial`,
+  `matrixPower`, `matrixLog`, `polarDecomposition`, and `jordanForm` now return a
+  `Promise`. Their internal O(n³) matrix products are offloaded to the worker
+  pool once the product is large enough to be worth it (`ComputePool` decides),
+  keeping the inline loop for small matrices. `rowReduce`, `matrixRank`,
+  `cholesky`, and `hessenbergForm` are unchanged (they do not multiply
+  matrices). Also removes the dead `matLogEig` helper.
+  `functions/src/typed/matrix-ops.ts`.
 
 ### Fixed
 
@@ -129,6 +166,8 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
 - **`algebra/cancel` extended** — beyond plain `n/d` integer fractions, now handles compound fractions `(a/b)/(c/d)` (multiplied across then cancelled) and the trivial `(p)/(p) -> 1` identity. Division-by-zero now throws explicitly. Docstring now accurately scopes the function to numeric forms with a forward reference to `polynomialGCD` for symbolic work. `functions/src/typed/algebra.ts`.
 - **`inverseLaplaceTransform` ported (v3)** — fully integrated into `functions/src/typed/cas.ts`. Public export via plain TS function. Mirrors mathjs's actual algorithm (numerical pattern-matching at sample points against known Laplace pairs). Earlier session flagged this as "divergent algorithm"; honest-claude pass later established that *was* mathjs's algorithm and the original draft was correct in approach. v3 fixes the v1 truncation by using `max_tokens=12288`.
 - **JSON reviver type cast** — the W9 JSON reviver cast a tagged record directly to the `Complex`/`Fraction` `fromJSON` shapes; the cast now routes through `unknown` to satisfy `tsc`.
+- **Worker pool never ran its kernels** — `MathWorkerPool` created its pool with `createPool(null)`, so workerpool loaded its built-in generic worker (only `run`/`methods`) instead of the MathTS kernels. Every named-kernel dispatch (`sumChunk`, `matmulRows`, `elementwiseChunk`, …) threw `Unknown method "..."`, so the entire parallel layer — every arithmetic, statistics, and trigonometry `Float64Array` overload — was non-functional at runtime. The built `dist/worker.js` is now resolved (Node path or browser URL) and loaded. `packages/workerpool/src/index.ts`.
+- **Float64Array chunking read the wrong data** — `MathWorkerPool` cut chunks with `subarray()`, whose `.buffer` is the entire backing `ArrayBuffer`; passing `chunk.buffer` with `start: 0` made every chunk past the first re-read the start of the array. Now uses `slice()` so each chunk owns a correctly-sized buffer. Adds `packages/workerpool/tests/parallel-dispatch.test.ts` — the prior suite only ever exercised the sequential fallback (every test asserted `parallelized: false`).
 
 ### Documentation
 
@@ -140,6 +179,15 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
 - **`docs/reference/functions.md`** — rebuilt to match the real export surface;
   guarded against drift by `functions/tests/docs-sync.test.ts` (W11), which
   asserts every documented `` `name(` `` token resolves to a real export.
+- **`docs/reference/functions.{md,html}` — Accel column** — function tables in
+  hardware-accelerated categories (Arithmetic, Trigonometry, Statistics, Special
+  Functions, Probability Distributions, the typed matrix-ops decompositions,
+  Numerical Methods, Interpolation, Signal Processing, Geometry) gained an
+  **Accel** column marking each function `parallel` (worker pool) or `WASM`. The
+  Signal Processing and Parallel Execution Model sections were corrected to
+  describe the real behaviour — the FFT butterfly runs on the calling thread,
+  and the typed `Float64Array` overloads resolve to the value directly, not to a
+  `ParallelResult` wrapper.
 
 ### Retracted (audit false-positives)
 
