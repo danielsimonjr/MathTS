@@ -1,3 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MathTS — Function Reference</title>
+<style>
+:root{
+  --red:#d72b1f;
+  --red-dark:#a81e16;
+  --ink:#222;
+  --muted:#666;
+  --line:#e4e4e4;
+  --bg:#ffffff;
+  --panel:#f5f5f3;
+  --code-bg:#f4f4f2;
+  --sidebar-bg:#fafafa;
+  --accent-soft:#fcecea;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+  line-height:1.62;
+  font-size:16px;
+  -webkit-font-smoothing:antialiased;
+}
+code,pre,kbd{font-family:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace;}
+
+/* ---- top bar ---- */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:#fff;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:18px;
+  padding:10px 22px;
+}
+.brand{display:flex;align-items:baseline;gap:10px;text-decoration:none;white-space:nowrap;}
+.brand .logo{font-weight:800;color:var(--red);font-size:20px;letter-spacing:.4px;}
+.brand .sub{color:var(--muted);font-size:13.5px;}
+.search{
+  margin-left:auto;flex:0 1 380px;display:flex;align-items:center;
+  border:1px solid var(--line);border-radius:7px;padding:6px 11px;background:#fff;
+}
+.search:focus-within{border-color:var(--red);box-shadow:0 0 0 3px var(--accent-soft);}
+.search input{border:0;outline:0;font-size:14px;width:100%;background:transparent;color:var(--ink);}
+.search .icon{color:var(--muted);margin-right:8px;font-size:14px;}
+.search kbd{
+  border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:11px;
+  color:var(--muted);background:#fafafa;
+}
+
+/* ---- layout ---- */
+.layout{display:flex;align-items:flex-start;max-width:1320px;margin:0 auto;}
+.sidebar{
+  position:sticky;top:54px;
+  width:272px;flex:0 0 272px;
+  height:calc(100vh - 54px);overflow-y:auto;
+  background:var(--sidebar-bg);border-right:1px solid var(--line);
+  padding:18px 0;
+}
+.sidebar h3{
+  font-size:11px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin:4px 20px 8px;font-weight:700;
+}
+.sidebar a{
+  display:flex;justify-content:space-between;gap:8px;align-items:center;
+  padding:5px 20px;text-decoration:none;color:#3a3a3a;font-size:13.5px;
+  border-left:3px solid transparent;
+}
+.sidebar a:hover{background:#f0f0ef;color:var(--red-dark);}
+.sidebar a.active{
+  border-left-color:var(--red);color:var(--red-dark);
+  background:var(--accent-soft);font-weight:600;
+}
+.sidebar a .count{
+  color:#a3a3a3;font-size:11px;font-variant-numeric:tabular-nums;
+  background:#efefef;border-radius:9px;padding:1px 7px;
+}
+.sidebar a.active .count{color:#fff;background:var(--red);}
+
+/* ---- main ---- */
+.main{flex:1 1 auto;min-width:0;padding:30px 48px 120px;}
+.page-title{font-size:31px;font-weight:800;margin:0 0 6px;line-height:1.2;}
+.kicker{
+  display:block;font-size:12px;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--red);margin-bottom:8px;
+}
+.intro{color:#333;font-size:15.5px;}
+.intro p{margin:.62em 0;}
+.intro ul{padding-left:22px;}
+.intro li{margin:5px 0;}
+.toolbar{display:flex;gap:10px;margin:22px 0 2px;flex-wrap:wrap;}
+.toolbar button{
+  font:inherit;font-size:12.5px;cursor:pointer;
+  border:1px solid var(--line);background:#fff;color:#444;
+  padding:5px 13px;border-radius:6px;
+}
+.toolbar button:hover{border-color:var(--red);color:var(--red-dark);}
+
+/* ---- category section ---- */
+.category{
+  margin-top:40px;padding-top:8px;
+  border-top:1px solid var(--line);scroll-margin-top:70px;
+}
+.category > h2{
+  font-size:23px;font-weight:700;margin:16px 0 8px;
+  display:flex;align-items:center;gap:11px;
+}
+.category > h2::before{
+  content:"";width:6px;height:23px;background:var(--red);
+  border-radius:3px;display:inline-block;flex:0 0 auto;
+}
+.overview > p{color:#383838;}
+.category h3{font-size:14px;font-weight:700;color:#444;margin:20px 0 4px;}
+
+/* ---- tables ---- */
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px;}
+th,td{
+  border:1px solid var(--line);padding:7px 11px;text-align:left;vertical-align:top;
+}
+thead th{
+  background:var(--panel);font-weight:700;font-size:11.5px;
+  text-transform:uppercase;letter-spacing:.05em;color:#555;
+}
+tbody tr:nth-child(even){background:#fafafa;}
+tbody tr:hover{background:var(--accent-soft);}
+td code,p code,li code,h3 code,summary code{
+  background:var(--code-bg);border:1px solid #e7e7e3;
+  border-radius:4px;padding:.5px 5px;font-size:12.7px;color:#7a1f17;
+}
+td:first-child code{
+  color:var(--red-dark);font-weight:600;background:transparent;border:0;padding:0;
+}
+
+/* ---- collapsible panels ---- */
+details.panel{
+  border:1px solid var(--line);border-radius:8px;margin:12px 0;
+  overflow:hidden;background:#fff;
+}
+details.panel > summary{
+  list-style:none;cursor:pointer;
+  padding:9px 14px;font-size:13.5px;
+  background:var(--panel);color:#333;
+  display:flex;align-items:center;gap:10px;
+}
+details.panel > summary::-webkit-details-marker{display:none;}
+details.panel > summary::before{
+  content:"";width:7px;height:7px;
+  border-right:2px solid var(--red);border-bottom:2px solid var(--red);
+  transform:rotate(-45deg);transition:transform .15s ease;
+  display:inline-block;margin-bottom:2px;flex:0 0 auto;
+}
+details.panel[open] > summary::before{transform:rotate(45deg);}
+.panel-tag{
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:#fff;background:var(--red);border-radius:3px;padding:2px 7px;
+}
+.panel-body{padding:6px 17px 13px;}
+.panel-body ul{padding-left:21px;margin:8px 0;}
+.panel-body li{margin:4px 0;}
+.panel-body p{margin:9px 0;}
+
+/* ---- code blocks ---- */
+pre.code{
+  background:#f8f8f6;border:1px solid var(--line);border-radius:8px;
+  padding:13px 16px;overflow-x:auto;font-size:13px;line-height:1.6;margin:11px 0;
+}
+pre.code code{background:none;border:0;padding:0;color:#2b2b2b;}
+pre.code .c{color:#8c8c8c;font-style:italic;}
+pre.code .s{color:#1a7a3c;}
+pre.code .k{color:#9b1bb3;}
+pre.code .n{color:#1c5fb0;}
+
+a{color:var(--red-dark);}
+a:hover{color:var(--red);}
+hr{display:none;}
+.no-results{padding:48px 4px;color:var(--muted);font-size:15px;}
+
+footer{
+  border-top:1px solid var(--line);max-width:1320px;margin:0 auto;
+  padding:20px 48px;color:var(--muted);font-size:12.5px;
+}
+
+@media (max-width:880px){
+  .layout{flex-direction:column;}
+  .sidebar{
+    position:static;width:100%;flex-basis:auto;height:auto;
+    border-right:0;border-bottom:1px solid var(--line);max-height:46vh;
+  }
+  .main{padding:24px 20px 80px;}
+  .search{flex-basis:150px;}
+  .search kbd{display:none;}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#top">
+    <span class="logo">MathTS</span>
+    <span class="sub">Function Reference</span>
+  </a>
+  <label class="search">
+    <span class="icon">&#9906;</span>
+    <input id="search" type="search" placeholder="Filter functions and categories…" autocomplete="off" aria-label="Search functions">
+    <kbd>/</kbd>
+  </label>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Categories"></nav>
+  <main class="main" id="content"><span id="top"></span></main>
+</div>
+<footer>
+  MathTS function reference — a user guide for scientists and engineers.
+  Generated from <code>docs/reference/functions.md</code>.
+</footer>
+<script id="md" type="text/markdown">
 # Function Reference
 
 All functions are exported from `@danielsimonjr/mathts-functions`.
@@ -1642,3 +1861,287 @@ const pr = await add(new Float64Array([1,2,3]), new Float64Array([4,5,6]));
 // pr.chunks       → number of work chunks
 // pr.parallelized → true
 ```
+
+</script>
+<script>
+(function(){
+  "use strict";
+
+  var mdSource = document.getElementById("md").textContent;
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;");
+  }
+  function slug(s){
+    return String(s).toLowerCase()
+      .replace(/&/g," and ")
+      .replace(/[^\w]+/g,"-")
+      .replace(/^-+|-+$/g,"");
+  }
+
+  /* ---- TypeScript/JS syntax highlighting (operates on raw code) ---- */
+  var tokenRe = /(\/\/[^\n]*)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|\b(import|from|export|const|let|var|await|async|new|return|function|if|else|of|in|true|false|null|undefined)\b|(\b\d[\w.]*\b)/g;
+  function highlightCode(code){
+    var out = "", last = 0, m;
+    tokenRe.lastIndex = 0;
+    while((m = tokenRe.exec(code))){
+      if(m.index > last) out += escapeHtml(code.slice(last, m.index));
+      if(m[1])      out += '<span class="c">' + escapeHtml(m[0]) + '</span>';
+      else if(m[2]) out += '<span class="s">' + escapeHtml(m[0]) + '</span>';
+      else if(m[3]) out += '<span class="k">' + escapeHtml(m[0]) + '</span>';
+      else          out += '<span class="n">' + escapeHtml(m[0]) + '</span>';
+      last = tokenRe.lastIndex;
+      if(tokenRe.lastIndex === m.index) tokenRe.lastIndex++;
+    }
+    out += escapeHtml(code.slice(last));
+    return out;
+  }
+
+  /* ---- inline markdown ---- */
+  function inline(text){
+    var t = escapeHtml(text);
+    t = t.replace(/`([^`]+)`/g, function(_, c){ return "<code>" + c + "</code>"; });
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, tx, url){
+      return '<a href="' + url + '">' + tx + "</a>";
+    });
+    t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    t = t.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    return t;
+  }
+
+  function splitRow(line){
+    var parts = line.split("|");
+    if(parts.length && parts[0].trim() === "") parts.shift();
+    if(parts.length && parts[parts.length - 1].trim() === "") parts.pop();
+    return parts.map(function(c){ return c.trim(); });
+  }
+
+  /* ---- block-level markdown renderer ---- */
+  function renderMarkdown(src){
+    var lines = src.replace(/\r\n/g, "\n").split("\n");
+    var html = "", i = 0;
+    function blank(l){ return /^\s*$/.test(l); }
+
+    while(i < lines.length){
+      var line = lines[i];
+
+      if(/^```/.test(line)){
+        var lang = line.slice(3).trim().toLowerCase();
+        var buf = []; i++;
+        while(i < lines.length && !/^```/.test(lines[i])){ buf.push(lines[i]); i++; }
+        i++;
+        var raw = buf.join("\n");
+        var prog = (lang === "ts" || lang === "typescript" || lang === "js" || lang === "javascript");
+        html += '<pre class="code"><code>' + (prog ? highlightCode(raw) : escapeHtml(raw)) + "</code></pre>";
+        continue;
+      }
+
+      var hm = /^(#{1,6})\s+(.*)$/.exec(line);
+      if(hm){
+        var lvl = hm[1].length, txt = hm[2];
+        html += "<h" + lvl + ' data-text="' + escapeHtml(txt) + '">' + inline(txt) + "</h" + lvl + ">";
+        i++; continue;
+      }
+
+      if(/^---+\s*$/.test(line)){ html += "<hr>"; i++; continue; }
+
+      if(/^\|/.test(line) && i + 1 < lines.length && /^\|[\s:\-|]+\|?\s*$/.test(lines[i + 1])){
+        var head = splitRow(line); i += 2;
+        var rows = [];
+        while(i < lines.length && /^\|/.test(lines[i])){ rows.push(splitRow(lines[i])); i++; }
+        var t = "<table><thead><tr>";
+        head.forEach(function(c){ t += "<th>" + inline(c) + "</th>"; });
+        t += "</tr></thead><tbody>";
+        rows.forEach(function(r){
+          t += "<tr>";
+          for(var c = 0; c < head.length; c++){ t += "<td>" + inline(r[c] || "") + "</td>"; }
+          t += "</tr>";
+        });
+        html += t + "</tbody></table>";
+        continue;
+      }
+
+      if(/^[-*]\s+/.test(line)){
+        var items = [];
+        while(i < lines.length){
+          if(/^[-*]\s+/.test(lines[i])){
+            items.push(lines[i].replace(/^[-*]\s+/, ""));
+          } else if(items.length && /^\s+\S/.test(lines[i])){
+            items[items.length - 1] += " " + lines[i].trim();
+          } else { break; }
+          i++;
+        }
+        html += "<ul>" + items.map(function(x){ return "<li>" + inline(x) + "</li>"; }).join("") + "</ul>";
+        continue;
+      }
+
+      if(blank(line)){ i++; continue; }
+
+      var pbuf = [line]; i++;
+      while(i < lines.length && !blank(lines[i])
+            && !/^(#{1,6})\s/.test(lines[i]) && !/^```/.test(lines[i])
+            && !/^\|/.test(lines[i]) && !/^[-*]\s+/.test(lines[i])
+            && !/^---+\s*$/.test(lines[i])){
+        pbuf.push(lines[i]); i++;
+      }
+      html += "<p>" + inline(pbuf.join(" ")) + "</p>";
+    }
+    return html;
+  }
+
+  /* ---- restructure the flat render into a guide page ---- */
+  var raw = document.createElement("div");
+  raw.innerHTML = renderMarkdown(mdSource);
+
+  var content = document.getElementById("content");
+  var sidebar = document.getElementById("sidebar");
+  var PANELS = {
+    "details": "Details",
+    "background & history": "Background & History",
+    "examples": "Examples"
+  };
+
+  function textOf(el){ return (el.getAttribute("data-text") || el.textContent || "").trim(); }
+
+  var pageTitle = "Function Reference";
+  var introBox = document.createElement("div");
+  introBox.className = "intro";
+  var sections = [];
+  var cur = null, panelBody = null;
+
+  Array.prototype.slice.call(raw.children).forEach(function(el){
+    var tag = el.tagName;
+    if(tag === "H1"){ pageTitle = textOf(el); return; }
+    if(tag === "HR"){ return; }
+    if(tag === "H2"){
+      var sec = document.createElement("section");
+      sec.className = "category";
+      sec.id = slug(textOf(el));
+      var h2 = document.createElement("h2");
+      h2.innerHTML = el.innerHTML;
+      sec.appendChild(h2);
+      var ov = document.createElement("div");
+      ov.className = "overview";
+      sec.appendChild(ov);
+      cur = { id: sec.id, title: textOf(el), el: sec, overview: ov };
+      sections.push(cur);
+      panelBody = null;
+      return;
+    }
+    if(!cur){ introBox.appendChild(el); return; }
+    if(tag === "H3"){
+      var key = textOf(el).toLowerCase();
+      if(PANELS[key]){
+        var d = document.createElement("details");
+        d.className = "panel";
+        d.open = true;
+        var sm = document.createElement("summary");
+        sm.innerHTML = '<span class="panel-tag">' + PANELS[key] + "</span>";
+        d.appendChild(sm);
+        panelBody = document.createElement("div");
+        panelBody.className = "panel-body";
+        d.appendChild(panelBody);
+        cur.el.appendChild(d);
+        return;
+      }
+    }
+    (panelBody || cur.overview).appendChild(el);
+  });
+
+  /* ---- title + intro + toolbar ---- */
+  var titleEl = document.createElement("h1");
+  titleEl.className = "page-title";
+  titleEl.innerHTML = '<span class="kicker">MathTS Reference</span>' + escapeHtml(pageTitle);
+  content.appendChild(titleEl);
+  content.appendChild(introBox);
+
+  var toolbar = document.createElement("div");
+  toolbar.className = "toolbar";
+  toolbar.innerHTML =
+    '<button id="expandAll">Expand all sections</button>' +
+    '<button id="collapseAll">Collapse all sections</button>';
+  content.appendChild(toolbar);
+
+  sections.forEach(function(s){ content.appendChild(s.el); });
+
+  var noRes = document.createElement("div");
+  noRes.className = "no-results";
+  noRes.style.display = "none";
+  noRes.textContent = "No functions or categories match your search.";
+  content.appendChild(noRes);
+
+  /* ---- sidebar ---- */
+  var sideHtml = "<h3>Categories</h3>";
+  sections.forEach(function(s){
+    var n = s.el.querySelectorAll("tbody tr").length;
+    sideHtml += '<a href="#' + s.id + '" data-target="' + s.id + '">' +
+      "<span>" + escapeHtml(s.title) + "</span>" +
+      (n > 0 ? '<span class="count">' + n + "</span>" : "") + "</a>";
+  });
+  sidebar.innerHTML = sideHtml;
+  var links = Array.prototype.slice.call(sidebar.querySelectorAll("a"));
+
+  /* ---- expand / collapse ---- */
+  function setAll(open){
+    Array.prototype.slice.call(document.querySelectorAll("details.panel"))
+      .forEach(function(d){ d.open = open; });
+  }
+  document.getElementById("expandAll").addEventListener("click", function(){ setAll(true); });
+  document.getElementById("collapseAll").addEventListener("click", function(){ setAll(false); });
+
+  /* ---- search / filter ---- */
+  var search = document.getElementById("search");
+  function applyFilter(){
+    var q = search.value.trim().toLowerCase();
+    var anyVisible = false;
+    sections.forEach(function(s){
+      var secMatch = !q || s.title.toLowerCase().indexOf(q) >= 0;
+      var shown = 0;
+      var trs = Array.prototype.slice.call(s.el.querySelectorAll("tbody tr"));
+      trs.forEach(function(tr){
+        var show = !q || secMatch || tr.textContent.toLowerCase().indexOf(q) >= 0;
+        tr.style.display = show ? "" : "none";
+        if(show) shown++;
+      });
+      var visible = !q || secMatch || shown > 0;
+      s.el.style.display = visible ? "" : "none";
+      if(visible) anyVisible = true;
+      var link = sidebar.querySelector('a[data-target="' + s.id + '"]');
+      if(link) link.style.display = visible ? "" : "none";
+    });
+    noRes.style.display = anyVisible ? "none" : "";
+  }
+  search.addEventListener("input", applyFilter);
+
+  /* ---- scroll-spy ---- */
+  function onScroll(){
+    var active = null;
+    sections.forEach(function(s){
+      if(s.el.style.display === "none") return;
+      if(s.el.getBoundingClientRect().top <= 110) active = s;
+    });
+    if(!active){
+      for(var k = 0; k < sections.length; k++){
+        if(sections[k].el.style.display !== "none"){ active = sections[k]; break; }
+      }
+    }
+    links.forEach(function(a){
+      a.classList.toggle("active", !!active && a.getAttribute("data-target") === active.id);
+    });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  /* ---- "/" focuses the search box ---- */
+  document.addEventListener("keydown", function(e){
+    if(e.key === "/" && document.activeElement !== search){
+      e.preventDefault();
+      search.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>
