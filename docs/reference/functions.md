@@ -1075,18 +1075,19 @@ leastSquares([[1,0],[1,1],[1,2]], [1,2,3]); // [1, 1]
 
 ## Signal Processing
 
-Several transforms dispatch their independent FFT work to worker threads:
-`parallelFFTMagnitude` / `parallelFFTPower` (element-wise spectra),
-`parallelConv` / `parallelXCorr` / `parallelAutoCorr` (the two forward FFTs run
-concurrently), and `spectrogram` / `fft2d` (batches of independent FFTs). A lone
-`parallelFFT` / `parallelIFFT` still runs its radix-2 butterfly on the calling
-thread — its stages have data dependencies a chunked dispatch cannot exploit.
-All of these return a `Promise`.
+Every `parallel*` transform dispatches its FFT work to worker threads and
+returns a `Promise`: `parallelFFT` / `parallelIFFT` decompose a single large
+transform via the four-step (transpose) algorithm into two batches of
+independent smaller FFTs; `parallelFFTMagnitude` / `parallelFFTPower`
+parallelize the element-wise spectra; `parallelConv` / `parallelXCorr` /
+`parallelAutoCorr` run the two forward FFTs concurrently. `spectrogram` and
+`fft2d` likewise dispatch their batches of independent FFTs. Small inputs fall
+back to the sequential radix-2 implementation on the calling thread.
 
 | Function | Description | Accel |
 |---|---|---|
-| `parallelFFT(x)` | FFT → `Complex[]` | — |
-| `parallelIFFT(X)` | Inverse FFT → `Float64Array` | — |
+| `parallelFFT(x)` | FFT → `Complex[]` | parallel |
+| `parallelIFFT(X)` | Inverse FFT → `Float64Array` | parallel |
 | `parallelFFTMagnitude(x)` | FFT magnitude spectrum | parallel |
 | `parallelFFTPower(x)` | FFT power spectrum | parallel |
 | `parallelConv(a, b)` | Convolution | parallel |
@@ -1116,14 +1117,15 @@ All of these return a `Promise`.
 
 ### Details
 
-- The `parallel`-marked transforms return a `Promise` and dispatch their
-  independent FFT work to the worker pool above the parallel threshold:
-  `parallelFFTMagnitude` / `parallelFFTPower` parallelize the element-wise
-  spectrum pass; `parallelConv` / `parallelXCorr` / `parallelAutoCorr` run the
-  two forward FFTs concurrently; `spectrogram` and `fft2d` dispatch their
-  batches of independent FFTs. `spectrogram` and `fft2d` became `async` for
-  this. A single `parallelFFT` / `parallelIFFT` runs its radix-2 butterfly on
-  the calling thread.
+- The `parallel`-marked transforms return a `Promise` and dispatch their FFT
+  work to the worker pool above the parallel threshold: `parallelFFT` /
+  `parallelIFFT` use a four-step decomposition that splits one transform into
+  two batches of independent smaller FFTs; `parallelFFTMagnitude` /
+  `parallelFFTPower` parallelize the element-wise spectrum pass; `parallelConv`
+  / `parallelXCorr` / `parallelAutoCorr` run the two forward FFTs concurrently;
+  `spectrogram` and `fft2d` dispatch their batches of independent FFTs. Below
+  the threshold all of them fall back to the sequential radix-2 core.
+  `parallelIFFT`, `spectrogram`, and `fft2d` became `async` for this.
 - FFT routines are fastest at power-of-two lengths; other lengths use a
   mixed-radix path.
 - WASM-marked transforms (`dct`, `dwt`, `spectrogram`, the FIR filters, …) use a
@@ -1191,6 +1193,7 @@ Geometric operations on 2D/3D/nD coordinate arrays.
 | `voronoiDiagram(points)` | Voronoi diagram | WASM |
 | `kdTree(points)` / `kdTreeNearest(tree, query)` | k-d tree + nearest query | — |
 | `nearestNeighbor(points, query)` | Nearest-neighbour search | WASM |
+| `distanceMatrix(points)` | All-pairs Euclidean distance matrix | parallel |
 
 ### Details
 

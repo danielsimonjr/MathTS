@@ -5,7 +5,7 @@
  * polygon perimeter, distance metrics, Delaunay, Voronoi, k-d tree.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   area,
   centroid,
@@ -19,7 +19,9 @@ import {
   kdTree,
   kdTreeNearest,
   nearestNeighbor,
+  distanceMatrix,
 } from '../src/typed/geometry.js';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 const EPSILON = 1e-6;
 
@@ -281,5 +283,62 @@ describe('nearestNeighbor', () => {
     const result = nearestNeighbor(points, [3.1, 4.9]);
     expect(result).not.toBeNull();
     expect(result!.point).toEqual([3, 5]);
+  });
+});
+
+describe('distanceMatrix', () => {
+  beforeAll(async () => {
+    await computePool.initialize();
+  });
+
+  afterAll(async () => {
+    computePool.updateConfig({ thresholdElements: 50000 });
+    await computePool.terminate();
+  });
+
+  it('computes the all-pairs Euclidean distance matrix', async () => {
+    // 3-4-5 right triangle.
+    const dm = await distanceMatrix([[0, 0], [3, 0], [0, 4]]);
+    expect(dm).toEqual([
+      [0, 3, 4],
+      [3, 0, 5],
+      [4, 5, 0],
+    ]);
+  });
+
+  it('returns an empty result for no points', async () => {
+    expect(await distanceMatrix([])).toEqual([]);
+  });
+
+  it('is symmetric with a zero diagonal', async () => {
+    const pts = Array.from({ length: 20 }, (_, i) => [i, i * 0.5, -i]);
+    const dm = await distanceMatrix(pts);
+    for (let i = 0; i < pts.length; i++) {
+      expect(dm[i][i]).toBe(0);
+      for (let j = 0; j < pts.length; j++) {
+        expect(dm[i][j]).toBeCloseTo(dm[j][i], 12);
+      }
+    }
+  });
+
+  it('parallel result matches the sequential result', async () => {
+    const n = 256;
+    const dim = 5;
+    const pts = Array.from({ length: n }, (_, i) =>
+      Array.from({ length: dim }, (_, k) => Math.sin(i * 0.3 + k * 1.7)),
+    );
+
+    computePool.updateConfig({ thresholdElements: 1_000_000 });
+    const seq = await distanceMatrix(pts);
+
+    computePool.updateConfig({ thresholdElements: 64 });
+    const par = await distanceMatrix(pts);
+    computePool.updateConfig({ thresholdElements: 1_000_000 });
+
+    for (let i = 0; i < n; i += 31) {
+      for (let j = 0; j < n; j += 17) {
+        expect(par[i][j]).toBeCloseTo(seq[i][j], 12);
+      }
+    }
   });
 });

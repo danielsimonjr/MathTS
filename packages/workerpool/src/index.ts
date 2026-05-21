@@ -1736,6 +1736,85 @@ export class MathWorkerPool {
   }
 
   /**
+   * Compute an all-pairs Euclidean distance matrix in parallel.
+   *
+   * Each output row is independent, so the rows are distributed across workers.
+   *
+   * @param points - Flattened `n * dim` coordinate array (row-major: point `i`
+   *   occupies `[i*dim, i*dim + dim)`)
+   * @param n - Number of points
+   * @param dim - Coordinate dimension
+   * @returns Flat row-major `n * n` distance matrix
+   */
+  async distanceMatrix(
+    points: Float64Array,
+    n: number,
+    dim: number,
+    options?: TaskOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    const start = performance.now();
+    const resultSize = n * n;
+
+    if (!this.shouldParallelize(resultSize, options)) {
+      const result = new Float64Array(resultSize);
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          let sum = 0;
+          for (let d = 0; d < dim; d++) {
+            const diff = points[i * dim + d] - points[j * dim + d];
+            sum += diff * diff;
+          }
+          result[i * n + j] = Math.sqrt(sum);
+        }
+      }
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const stats = this.stats();
+    const numWorkers = Math.max(1, stats.totalWorkers);
+    const rowsPerWorker = Math.ceil(n / numWorkers);
+    const tasks: Promise<ArrayBuffer>[] = [];
+
+    for (let w = 0; w < numWorkers; w++) {
+      const rowStart = w * rowsPerWorker;
+      const rowEnd = Math.min(rowStart + rowsPerWorker, n);
+      if (rowStart >= n) break;
+      tasks.push(
+        this.exec<ArrayBuffer>('distanceMatrixRowsChunk', [
+          points.buffer,
+          n,
+          dim,
+          rowStart,
+          rowEnd,
+        ])
+      );
+    }
+
+    const results = await Promise.all(tasks);
+    const result = new Float64Array(resultSize);
+    let offset = 0;
+    for (const buf of results) {
+      const chunk = new Float64Array(buf);
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: tasks.length,
+      parallelized: true,
+      workersUsed: tasks.length,
+    };
+  }
+
+  /**
    * Compute histogram in parallel
    */
   async histogram(

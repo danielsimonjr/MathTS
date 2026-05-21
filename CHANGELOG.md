@@ -135,6 +135,17 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   per-frame FFTs through it, `fft2d` dispatches its per-row then per-column
   FFTs, and `parallelConv` (and thus `parallelXCorr` / `parallelAutoCorr`) runs
   its two forward FFTs concurrently. `functions/src/typed/signal.ts`.
+- **Worker-distributed single FFT** — `parallelFFT` / `parallelIFFT` now run a
+  genuinely parallel transform via a four-step (Cooley-Tukey transpose)
+  decomposition: one N-point FFT (N = N1·N2) is split into two batches of
+  independent smaller FFTs dispatched through `fftBatch`, with a twiddle pass
+  between. They previously ran the whole radix-2 butterfly on the calling
+  thread despite the `parallel` prefix.
+- **Parallel `distanceMatrix`** — a new geometry function computing the
+  all-pairs Euclidean distance matrix; a `distanceMatrixRowsChunk` worker kernel
+  plus `MathWorkerPool.distanceMatrix` / `ComputePool.distanceMatrix` compute
+  the (independent) rows distributed across workers.
+  `functions/src/typed/geometry.ts`.
 
 #### WebGPU acceleration
 
@@ -180,6 +191,9 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   `Promise`; they dispatch their batches of independent FFTs to the worker pool
   above the parallel threshold and fall back to the sequential loop otherwise.
   `functions/src/typed/signal.ts`.
+- **`parallelIFFT` is async (breaking)** — it now returns a `Promise`; large
+  inverse transforms use the four-step worker-distributed FFT. (`parallelFFT`'s
+  `Float64Array` overload was already async.) `functions/src/typed/signal.ts`.
 
 ### Fixed
 

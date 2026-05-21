@@ -623,6 +623,40 @@ function cosineSimilarityChunk(
   return { dotProduct, normA, normB };
 }
 
+/**
+ * Compute a block of rows of an all-pairs Euclidean distance matrix.
+ *
+ * `pointsBuffer` is the flattened `n * dim` coordinate array (row-major: point
+ * i occupies `[i*dim, i*dim + dim)`). Returns rows `[rowStart, rowEnd)` of the
+ * `n x n` distance matrix as a flat `(rowEnd - rowStart) * n` buffer.
+ */
+function distanceMatrixRowsChunk(
+  pointsBuffer: ArrayBuffer,
+  n: number,
+  dim: number,
+  rowStart: number,
+  rowEnd: number
+): ArrayBuffer {
+  const pts = new Float64Array(pointsBuffer);
+  const result = new Float64Array((rowEnd - rowStart) * n);
+
+  for (let i = rowStart; i < rowEnd; i++) {
+    const iBase = i * dim;
+    const outBase = (i - rowStart) * n;
+    for (let j = 0; j < n; j++) {
+      const jBase = j * dim;
+      let sum = 0;
+      for (let d = 0; d < dim; d++) {
+        const diff = pts[iBase + d] - pts[jBase + d];
+        sum += diff * diff;
+      }
+      result[outBase + j] = Math.sqrt(sum);
+    }
+  }
+
+  return result.buffer;
+}
+
 // =============================================================================
 // Statistical Operations
 // =============================================================================
@@ -716,6 +750,7 @@ const workerMethods: Record<string, (...args: any[]) => any> = {
   // Distance/similarity
   distanceChunk,
   cosineSimilarityChunk,
+  distanceMatrixRowsChunk,
 
   // Statistics
   histogramChunk,

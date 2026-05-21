@@ -405,6 +405,23 @@ export class ComputePool {
   }
 
   /**
+   * Compute an all-pairs Euclidean distance matrix in parallel.
+   *
+   * @param points - Flattened `n * dim` coordinate array (row-major)
+   * @param n - Number of points
+   * @param dim - Coordinate dimension
+   * @returns Flat row-major `n * n` distance matrix
+   */
+  async distanceMatrix(
+    points: Float64Array,
+    n: number,
+    dim: number
+  ): Promise<ParallelResult<Float64Array>> {
+    const result = await this.workerPool.distanceMatrix(points, n, dim);
+    return toParallelResult(result);
+  }
+
+  /**
    * Parallel absolute value
    */
   async abs(data: Float64Array): Promise<ParallelResult<Float64Array>> {
