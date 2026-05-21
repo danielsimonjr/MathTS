@@ -316,6 +316,53 @@ export interface WorkerPoolConfig {
 }
 
 /**
+ * Resolve the path to the built worker script (`dist/worker.js`).
+ *
+ * The worker thread must run the registered MathTS kernels (`sumChunk`,
+ * `matmulRows`, ...). If the pool is created without this script, workerpool
+ * falls back to its generic worker which only supports `run`/`methods`, and
+ * every named-method dispatch throws `Unknown method "..."`.
+ *
+ * @returns Worker script path (Node) or URL (browser), or undefined if it
+ *          cannot be located (callers then fall back to the generic worker).
+ */
+async function resolveDefaultWorkerScript(): Promise<string | undefined> {
+  const isNode =
+    typeof process !== 'undefined' &&
+    !!process.versions &&
+    !!process.versions.node;
+
+  // Browser: let the consuming bundler rewrite the worker URL.
+  if (!isNode) {
+    try {
+      return new URL('./worker.js', import.meta.url).href;
+    } catch {
+      return undefined;
+    }
+  }
+
+  // Node: workerpool's worker_threads / process-fork paths need a real file.
+  try {
+    const { fileURLToPath } = await import('node:url');
+    const { existsSync } = await import('node:fs');
+
+    // When consumed as a built package this module is dist/index.js, so the
+    // worker is a sibling. When running from src/ (tests) it lives in dist/.
+    const candidates = [
+      new URL('./worker.js', import.meta.url),
+      new URL('../dist/worker.js', import.meta.url),
+    ];
+    for (const url of candidates) {
+      const filePath = fileURLToPath(url);
+      if (existsSync(filePath)) return filePath;
+    }
+  } catch {
+    // Resolution failed — caller falls back to the generic worker.
+  }
+  return undefined;
+}
+
+/**
  * Default pool configuration
  */
 export const DEFAULT_WORKER_CONFIG: WorkerPoolConfig = {
@@ -469,9 +516,13 @@ export class MathWorkerPool {
       workerTerminateTimeout: this.config.idleTimeout,
     };
 
-    // Use custom worker script if provided
-    if (this.config.workerScript) {
-      this.pool = createPool(this.config.workerScript, options);
+    // Use the explicit worker script if provided, otherwise resolve the
+    // built kernel worker so named-method dispatch (sumChunk, ...) works.
+    const workerScript =
+      this.config.workerScript ?? (await resolveDefaultWorkerScript());
+
+    if (workerScript) {
+      this.pool = createPool(workerScript, options);
     } else {
       this.pool = createPool(null, options);
     }
@@ -1902,12 +1953,15 @@ export class MathWorkerPool {
   // Helper Methods
   // =========================================================================
 
+  // Chunks are produced with slice() (not subarray()): a subarray shares the
+  // full underlying ArrayBuffer, so passing `chunk.buffer` with `start: 0` to
+  // a worker kernel would read the wrong region for every chunk past the first.
   private chunkFloat64Array(data: Float64Array, customChunkSize?: number): Float64Array[] {
     const chunkSize = customChunkSize ?? this.config.chunkSize;
     const chunks: Float64Array[] = [];
     for (let i = 0; i < data.length; i += chunkSize) {
       const end = Math.min(i + chunkSize, data.length);
-      chunks.push(data.subarray(i, end));
+      chunks.push(data.slice(i, end));
     }
     return chunks;
   }
@@ -1921,7 +1975,7 @@ export class MathWorkerPool {
     const pairs: [Float64Array, Float64Array][] = [];
     for (let i = 0; i < a.length; i += chunkSize) {
       const end = Math.min(i + chunkSize, a.length);
-      pairs.push([a.subarray(i, end), b.subarray(i, end)]);
+      pairs.push([a.slice(i, end), b.slice(i, end)]);
     }
     return pairs;
   }
