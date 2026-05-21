@@ -338,6 +338,23 @@ export class ComputePool {
   }
 
   /**
+   * Apply a caller-supplied unary numeric function in parallel.
+   *
+   * @param data - Input values
+   * @param fnSource - Source of a self-contained `(x: number) => number`
+   *   expression. It must not reference free variables / closures, since it
+   *   is eval'd in an isolated worker context. Used to parallelize element-wise
+   *   math (special functions, distribution PDFs/CDFs).
+   */
+  async applyKernel(
+    data: Float64Array,
+    fnSource: string
+  ): Promise<ParallelResult<Float64Array>> {
+    const result = await this.workerPool.applyKernel(data, fnSource);
+    return toParallelResult(result);
+  }
+
+  /**
    * Parallel absolute value
    */
   async abs(data: Float64Array): Promise<ParallelResult<Float64Array>> {

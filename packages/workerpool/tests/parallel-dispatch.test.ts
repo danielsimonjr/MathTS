@@ -77,4 +77,23 @@ describe('parallel kernel dispatch (real workers)', () => {
     expect(r.parallelized).toBe(true);
     expect(Array.from(r.result)).toEqual([4, 5, 10, 11, 16, 17, 22, 23]);
   });
+
+  it('applies a caller-supplied kernel in parallel', async () => {
+    const data = Float64Array.from({ length: 100 }, (_, i) => i);
+
+    const cubed = await pool.applyKernel(data, '(x) => x * x * x', {
+      forceParallel: true,
+    });
+    expect(cubed.parallelized).toBe(true);
+    expect(cubed.result[4]).toBe(64);
+    expect(cubed.result[99]).toBe(99 * 99 * 99);
+
+    // Self-contained source with a nested helper (IIFE pattern).
+    const withHelper = await pool.applyKernel(
+      data,
+      '(() => { function dbl(v) { return v * 2; } return (x) => dbl(x) + 1; })()',
+      { forceParallel: true }
+    );
+    expect(withHelper.result[10]).toBe(21);
+  });
 });

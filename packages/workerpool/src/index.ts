@@ -1446,6 +1446,62 @@ export class MathWorkerPool {
   }
 
   /**
+   * Apply a caller-supplied unary numeric function in parallel.
+   *
+   * @param data - Input values
+   * @param fnSource - Source of a self-contained `(x: number) => number`
+   *   expression. It must not reference any free variables / closures, since
+   *   it is eval'd in an isolated worker context.
+   */
+  async applyKernel(
+    data: Float64Array,
+    fnSource: string,
+    options?: TaskOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(data.length, options)) {
+      // eslint-disable-next-line no-eval
+      const fn = (0, eval)(`(${fnSource})`) as (x: number) => number;
+      const result = new Float64Array(data.length);
+      for (let i = 0; i < data.length; i++) {
+        result[i] = fn(data[i]);
+      }
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
+    const stats = this.stats();
+
+    const results = await Promise.all(
+      chunks.map((chunk) =>
+        this.exec<ArrayBuffer>('applyKernelChunk', [
+          chunk.buffer,
+          0,
+          chunk.length,
+          fnSource,
+        ])
+      )
+    );
+
+    const combined = this.combineArrayBuffers(results, data.length);
+
+    return {
+      result: combined,
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
    * Compute histogram in parallel
    */
   async histogram(
