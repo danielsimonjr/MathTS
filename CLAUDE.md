@@ -77,7 +77,7 @@ typed-function ← core ← matrix ← functions
 workerpool ← parallel ─────┘         │
                    ↑                  │
                    └──────────────────┘
-core ← tensor ← autograd
+matrix ← tensor ← autograd
 core ← workbook
 core, matrix, functions, parallel ← compat
 ```
