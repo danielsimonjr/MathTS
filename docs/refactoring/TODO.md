@@ -116,8 +116,9 @@ below are limited to operations that genuinely clear that bar.
 
 ### Fixed (2026-05-22)
 
-Both defects below were surfaced while fixing the fresh-checkout test failures,
-were pre-existing and unrelated to the parallelism work, and are now resolved.
+The defects below were all pre-existing; each is now resolved. The first two
+were surfaced while fixing the fresh-checkout test failures, the rest during
+the dependency-graph / architecture-docs audit.
 
 - [x] **`parallel` package never built `matrix.worker.js`** — `parallel`'s
   build was `tsup src/index.ts` only, so `src/matrix.worker.ts` was never
@@ -152,9 +153,7 @@ were pre-existing and unrelated to the parallelism work, and are now resolved.
   - `BackendManager ↔ config`: `OperationType` moved from `BackendManager.ts`
     to `config.ts`; `config.ts` no longer imports `BackendManager`.
 
-### Open
-
-- [ ] **`tensor` and `autograd` fail `tsc --noEmit` — missing `workerpool`
+- [x] **`tensor` and `autograd` failed `tsc --noEmit` — missing `workerpool`
   path redirect** — surfaced 2026-05-22 while auditing the architecture docs.
 
   **Symptom.** `npx tsc --noEmit` run in `tensor/` and in `autograd/` each
@@ -201,11 +200,12 @@ were pre-existing and unrelated to the parallelism work, and are now resolved.
   `tensor/tsconfig.json` and `autograd/tsconfig.json` have no `paths` section
   at all, so they were simply missed.
 
-  **Fix (verified).** Add the same `paths` entry to `tensor/tsconfig.json` and
-  `autograd/tsconfig.json` — the stub sits at `../parallel/types/workerpool.d.ts`
-  relative to each, the exact form `matrix/tsconfig.json` already uses.
-  Confirmed by experiment: with the redirect added to `tensor/tsconfig.json`,
-  `tensor` typechecks with **0 errors** (change reverted, not committed).
+  **Fixed.** Added the `paths` entry —
+  `"workerpool": ["../parallel/types/workerpool.d.ts"]` — to
+  `tensor/tsconfig.json` and `autograd/tsconfig.json` (the exact form
+  `matrix/tsconfig.json` already uses). Both packages now typecheck with
+  **0 errors**, and their builds and test suites (tensor 16, autograd 9)
+  still pass.
 
   **Longer-term option.** The stub is now referenced by six tsconfigs via a
   hand-copied relative path. Consider either (a) hoisting the redirect into
