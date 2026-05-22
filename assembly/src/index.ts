@@ -367,6 +367,20 @@ export {
 } from './ops/complex-ops';
 
 // =============================================================================
+// Bitwise Operations (Int32Array, elementwise)
+// =============================================================================
+
+export {
+  bitAnd_i32_array,
+  bitOr_i32_array,
+  bitXor_i32_array,
+  bitNot_i32_array,
+  leftShift_i32_array,
+  rightArithShift_i32_array,
+  rightLogShift_i32_array,
+} from './ops/bitwise';
+
+// =============================================================================
 // Complex Array Operations
 // =============================================================================
 

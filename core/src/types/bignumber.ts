@@ -57,6 +57,13 @@ let globalConfig: BigNumberConfig = { ...defaultConfig };
 export class BigNumber implements MathTSValue {
   readonly type = 'BigNumber';
 
+  /**
+   * Duck-typing marker for Decimal.js / mathjs formatter compatibility.
+   * Allows external code that checks `obj.isBigNumber === true` to identify
+   * this class without an `instanceof` check.
+   */
+  readonly isBigNumber = true;
+
   // Internal representation: sign * coefficient * 10^exponent
   private readonly _sign: 1 | -1 | 0;
   private readonly _coefficient: bigint;  // Absolute value, normalized
@@ -284,6 +291,15 @@ export class BigNumber implements MathTSValue {
     return parseFloat(str);
   }
 
+  /**
+   * Convert to a JS number.
+   * Alias for `valueOf()` — provided for Decimal.js / mathjs formatter
+   * duck-typing compatibility.
+   */
+  toNumber(): number {
+    return this.valueOf();
+  }
+
   toString(): string {
     if (this._isNaN) return 'NaN';
     if (this._isInfinite) return this._sign === 1 ? 'Infinity' : '-Infinity';
@@ -313,39 +329,64 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
-   * Convert to fixed-point notation
+   * Convert to fixed-point notation.
+   *
+   * When called with no argument (or `undefined`) returns the full fixed-point
+   * string representation without rounding — matching Decimal.js semantics where
+   * `toFixed()` is equivalent to a lossless fixed-point stringify.
+   * When called with a non-negative integer `decimalPlaces`, rounds and formats
+   * to exactly that many digits after the decimal point.
    */
-  toFixed(decimalPlaces: number = 0): string {
+  toFixed(decimalPlaces?: number): string {
+    if (decimalPlaces === undefined) {
+      // No rounding: return full fixed-point string (same as toString() but
+      // always uses decimal notation rather than scientific notation).
+      return this.toFixedInternal(undefined);
+    }
     return this.round(decimalPlaces).toFixedInternal(decimalPlaces);
   }
 
-  private toFixedInternal(decimalPlaces: number): string {
+  private toFixedInternal(decimalPlaces: number | undefined): string {
     if (this._isNaN) return 'NaN';
     if (this._isInfinite) return this._sign === 1 ? 'Infinity' : '-Infinity';
-    if (this._sign === 0) return decimalPlaces > 0 ? '0.' + '0'.repeat(decimalPlaces) : '0';
+
+    // When decimalPlaces is undefined we return the full value.
+    const dp = decimalPlaces ?? -1; // -1 signals "all digits"
+    const allDigits = dp < 0;
+
+    if (this._sign === 0) return allDigits ? '0' : (dp > 0 ? '0.' + '0'.repeat(dp) : '0');
 
     const sign = this._sign === -1 ? '-' : '';
     const digits = this._coefficient.toString();
 
     if (this._exponent >= 0) {
-      // No decimal places needed in internal representation
+      // Integer or large number — no fractional part in the internal rep
       const intPart = digits + '0'.repeat(this._exponent);
-      return sign + intPart + (decimalPlaces > 0 ? '.' + '0'.repeat(decimalPlaces) : '');
+      if (allDigits) return sign + intPart;
+      return sign + intPart + (dp > 0 ? '.' + '0'.repeat(dp) : '');
     } else if (-this._exponent <= digits.length) {
       const insertPos = digits.length + this._exponent;
       const intPart = digits.slice(0, insertPos) || '0';
-      let decPart = digits.slice(insertPos);
-      if (decPart.length < decimalPlaces) {
-        decPart += '0'.repeat(decimalPlaces - decPart.length);
+      const decPart = digits.slice(insertPos);
+      if (allDigits) {
+        return sign + intPart + (decPart.length > 0 ? '.' + decPart : '');
       }
-      return sign + intPart + (decimalPlaces > 0 ? '.' + decPart.slice(0, decimalPlaces) : '');
+      let paddedDec = decPart;
+      if (paddedDec.length < dp) {
+        paddedDec += '0'.repeat(dp - paddedDec.length);
+      }
+      return sign + intPart + (dp > 0 ? '.' + paddedDec.slice(0, dp) : '');
     } else {
       const leadingZeros = -this._exponent - digits.length;
-      let decPart = '0'.repeat(leadingZeros) + digits;
-      if (decPart.length < decimalPlaces) {
-        decPart += '0'.repeat(decimalPlaces - decPart.length);
+      const decPart = '0'.repeat(leadingZeros) + digits;
+      if (allDigits) {
+        return sign + '0.' + decPart;
       }
-      return sign + '0' + (decimalPlaces > 0 ? '.' + decPart.slice(0, decimalPlaces) : '');
+      let paddedDec = decPart;
+      if (paddedDec.length < dp) {
+        paddedDec += '0'.repeat(dp - paddedDec.length);
+      }
+      return sign + '0' + (dp > 0 ? '.' + paddedDec.slice(0, dp) : '');
     }
   }
 
@@ -475,6 +516,13 @@ export class BigNumber implements MathTSValue {
   }
 
   /**
+   * Alias for subtract — mathjs / Decimal.js compatibility.
+   */
+  sub(other: Scalar | BigNumber | number | string): BigNumber {
+    return this.subtract(other);
+  }
+
+  /**
    * Multiplication
    */
   multiply(other: Scalar | BigNumber | number | string): BigNumber {
@@ -493,6 +541,13 @@ export class BigNumber implements MathTSValue {
     const exponent = this._exponent + b._exponent;
 
     return this.normalize(sign, coefficient, exponent);
+  }
+
+  /**
+   * Alias for multiply — mathjs / Decimal.js compatibility.
+   */
+  mul(other: Scalar | BigNumber | number | string): BigNumber {
+    return this.multiply(other);
   }
 
   /**
@@ -633,6 +688,15 @@ export class BigNumber implements MathTSValue {
     return this.compareTo(other);
   }
 
+  /**
+   * Returns true iff this > other.
+   * Accepts the same argument types as `add`/`multiply` (BigNumber, number, or string).
+   * Named `gt` for Decimal.js / mathjs formatter compatibility.
+   */
+  gt(other: BigNumber | number | string): boolean {
+    return this.greaterThan(this.ensureBigNumber(other));
+  }
+
   // ============================================================
   // Rounding Methods
   // ============================================================
@@ -724,6 +788,42 @@ export class BigNumber implements MathTSValue {
 
   trunc(): BigNumber {
     return this.round(0, 'down');
+  }
+
+  /**
+   * Round to `n` significant decimal digits and return a new BigNumber.
+   * Delegates to `roundToPrecision`, using the global rounding mode unless
+   * an explicit `roundingMode` is supplied.
+   *
+   * Named `toSignificantDigits` for Decimal.js / mathjs formatter compatibility.
+   * When `n` is undefined the value is returned unchanged (no rounding).
+   */
+  toSignificantDigits(n?: number, roundingMode?: RoundingMode): BigNumber {
+    if (n === undefined) return this.clone();
+    return this.roundToPrecision(n, roundingMode ?? globalConfig.rounding);
+  }
+
+  /**
+   * The decimal exponent of this number: `floor(log10(|x|))`.
+   *
+   * Matches Decimal.js semantics:
+   *   - `12345` → `4`   (5 digits → the most-significant place is 10^4)
+   *   - `0.0123` → `-2`  (first significant digit is at 10^-2)
+   *   - `100` → `2`
+   *   - `0.01` → `-2`
+   *   - `0` → `0`        (by convention; `isZero()` can be used to distinguish)
+   *
+   * For special values (NaN, ±Infinity) returns 0 — callers check
+   * `isFinite()` / `isNaN()` before using `.e`.
+   */
+  get e(): number {
+    if (this._isNaN || this._isInfinite || this._sign === 0) return 0;
+    // coefficient has `d` digits; the top digit lives at position d-1+exponent
+    // e.g. coefficient=12345 (5 digits), exponent=0 → e = 4
+    //      coefficient=123,   exponent=2 → value=12300 → e = 4
+    //      coefficient=123,   exponent=-5 → value=0.00123 → e = -3
+    const d = this._coefficient.toString().length;
+    return d - 1 + this._exponent;
   }
 
   // ============================================================

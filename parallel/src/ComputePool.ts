@@ -633,17 +633,22 @@ export class ComputePool {
   // Bitwise Operations (Int32Array)
   // =========================================================================
   //
-  // Bitwise ops are evaluated in-process rather than via the shared
-  // workerpool kernel registry: that registry is keyed on `Float64Array`
-  // buffers, and bitwise math on doubles would silently lose the upper
-  // bits. The ops still chunk their work to match the call shape of the
-  // Float64Array elementwise ops, so the typed-function dispatch layer
-  // can treat both buffer types uniformly.
+  // Above the elementwise threshold these dispatch to the `Int32Array`-keyed
+  // worker kernels in `@danielsimonjr/mathts-workerpool` (`bitwiseChunk`,
+  // `bitwiseScalarChunk`, `bitwiseNotChunk`). Below threshold they fall back
+  // to the pure in-process drivers in `./ops/bitwise.ts`. The fallback path
+  // uses those drivers verbatim so the algorithm lives in one place.
 
   /**
    * Element-wise bitwise AND on two `Int32Array`s.
    */
   async bitAnd(a: Int32Array, b: Int32Array): Promise<ParallelResult<Int32Array>> {
+    if (a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+    if (this.workerPool.shouldParallelize(a.length)) {
+      return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitAnd'));
+    }
     const start = performance.now();
     const result = bitAndOp(a, b);
     return {
@@ -658,6 +663,12 @@ export class ComputePool {
    * Element-wise bitwise OR on two `Int32Array`s.
    */
   async bitOr(a: Int32Array, b: Int32Array): Promise<ParallelResult<Int32Array>> {
+    if (a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+    if (this.workerPool.shouldParallelize(a.length)) {
+      return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitOr'));
+    }
     const start = performance.now();
     const result = bitOrOp(a, b);
     return {
@@ -672,6 +683,12 @@ export class ComputePool {
    * Element-wise bitwise XOR on two `Int32Array`s.
    */
   async bitXor(a: Int32Array, b: Int32Array): Promise<ParallelResult<Int32Array>> {
+    if (a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+    if (this.workerPool.shouldParallelize(a.length)) {
+      return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitXor'));
+    }
     const start = performance.now();
     const result = bitXorOp(a, b);
     return {
@@ -686,6 +703,9 @@ export class ComputePool {
    * Unary bitwise NOT on an `Int32Array`.
    */
   async bitNot(a: Int32Array): Promise<ParallelResult<Int32Array>> {
+    if (this.workerPool.shouldParallelize(a.length)) {
+      return toParallelResult(await this.workerPool.bitwiseNot(a));
+    }
     const start = performance.now();
     const result = bitNotOp(a);
     return {
@@ -704,6 +724,16 @@ export class ComputePool {
     a: Int32Array,
     b: Int32Array | number
   ): Promise<ParallelResult<Int32Array>> {
+    if (typeof b !== 'number' && a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+    if (this.workerPool.shouldParallelize(a.length)) {
+      const result =
+        typeof b === 'number'
+          ? await this.workerPool.bitwiseScalar(a, b, 'leftShift')
+          : await this.workerPool.bitwiseBinary(a, b, 'leftShift');
+      return toParallelResult(result);
+    }
     const start = performance.now();
     const result = leftShiftOp(a, b);
     return {
@@ -721,6 +751,16 @@ export class ComputePool {
     a: Int32Array,
     b: Int32Array | number
   ): Promise<ParallelResult<Int32Array>> {
+    if (typeof b !== 'number' && a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+    if (this.workerPool.shouldParallelize(a.length)) {
+      const result =
+        typeof b === 'number'
+          ? await this.workerPool.bitwiseScalar(a, b, 'rightArithShift')
+          : await this.workerPool.bitwiseBinary(a, b, 'rightArithShift');
+      return toParallelResult(result);
+    }
     const start = performance.now();
     const result = rightArithShiftOp(a, b);
     return {
@@ -740,6 +780,16 @@ export class ComputePool {
     a: Int32Array,
     b: Int32Array | number
   ): Promise<ParallelResult<Int32Array>> {
+    if (typeof b !== 'number' && a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+    if (this.workerPool.shouldParallelize(a.length)) {
+      const result =
+        typeof b === 'number'
+          ? await this.workerPool.bitwiseScalar(a, b, 'rightLogShift')
+          : await this.workerPool.bitwiseBinary(a, b, 'rightLogShift');
+      return toParallelResult(result);
+    }
     const start = performance.now();
     const result = rightLogShiftOp(a, b);
     return {

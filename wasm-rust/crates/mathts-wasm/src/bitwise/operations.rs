@@ -116,6 +116,52 @@ pub unsafe extern "C" fn rightLogShiftArray(
     }
 }
 
+// =============================================================================
+// Per-element shift variants — match `Int32Array, Int32Array` dispatch where
+// each element has its own shift count. Mirrors JS semantics:
+//   `(a[i] << (b[i] & 31))` etc.; the JS shift operators mask the count to
+//   the low 5 bits and Rust's `wrapping_shl/shr` do the same on i32/u32.
+// =============================================================================
+
+#[no_mangle]
+pub unsafe extern "C" fn leftShiftArrayPerElement(
+    a_ptr: *const i32,
+    b_ptr: *const i32,
+    result_ptr: *mut i32,
+    length: i32,
+) {
+    for i in 0..length as usize {
+        let n = (*b_ptr.add(i)) as u32 & 31;
+        *result_ptr.add(i) = (*a_ptr.add(i)).wrapping_shl(n);
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn rightArithShiftArrayPerElement(
+    a_ptr: *const i32,
+    b_ptr: *const i32,
+    result_ptr: *mut i32,
+    length: i32,
+) {
+    for i in 0..length as usize {
+        let n = (*b_ptr.add(i)) as u32 & 31;
+        *result_ptr.add(i) = (*a_ptr.add(i)).wrapping_shr(n);
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn rightLogShiftArrayPerElement(
+    a_ptr: *const i32,
+    b_ptr: *const i32,
+    result_ptr: *mut i32,
+    length: i32,
+) {
+    for i in 0..length as usize {
+        let n = (*b_ptr.add(i)) as u32 & 31;
+        *result_ptr.add(i) = ((*a_ptr.add(i) as u32).wrapping_shr(n)) as i32;
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn popcount(x: i32) -> i32 {
     (x as u32).count_ones() as i32

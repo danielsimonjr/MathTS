@@ -285,6 +285,126 @@ function applyKernel2Chunk(
 }
 
 // =============================================================================
+// Bitwise Operations (Int32Array)
+// =============================================================================
+
+/**
+ * Binary bitwise op code shared by the worker-side kernel and the
+ * `parallel/src/ops/bitwise.ts` in-process driver.
+ */
+type BitwiseBinaryOpCode =
+  | 'bitAnd'
+  | 'bitOr'
+  | 'bitXor'
+  | 'leftShift'
+  | 'rightArithShift'
+  | 'rightLogShift';
+
+/**
+ * Element-wise bitwise binary op on two `Int32Array`-backed chunks.
+ *
+ * Mirrors the `elementwiseChunk` shape: takes both operand buffers, the
+ * shared start offset (always 0 from `MathWorkerPool` since each chunk owns
+ * its own buffer — see `chunkInt32Array`), a length, and the op code.
+ *
+ * The pure semantics live in `parallel/src/ops/bitwise.ts` (`applyBinaryChunk`),
+ * but that file isn't reachable from this worker (workerpool sits below
+ * parallel in the dep graph). The op switch is inlined here verbatim so the
+ * worker has zero non-worker imports.
+ */
+function bitwiseChunk(
+  aBuffer: ArrayBuffer,
+  bBuffer: ArrayBuffer,
+  start: number,
+  length: number,
+  op: BitwiseBinaryOpCode
+): ArrayBuffer {
+  const a = new Int32Array(aBuffer);
+  const b = new Int32Array(bBuffer);
+  const result = new Int32Array(length);
+
+  switch (op) {
+    case 'bitAnd':
+      for (let i = 0; i < length; i++) result[i] = a[start + i] & b[start + i];
+      break;
+    case 'bitOr':
+      for (let i = 0; i < length; i++) result[i] = a[start + i] | b[start + i];
+      break;
+    case 'bitXor':
+      for (let i = 0; i < length; i++) result[i] = a[start + i] ^ b[start + i];
+      break;
+    case 'leftShift':
+      for (let i = 0; i < length; i++) result[i] = a[start + i] << b[start + i];
+      break;
+    case 'rightArithShift':
+      for (let i = 0; i < length; i++) result[i] = a[start + i] >> b[start + i];
+      break;
+    case 'rightLogShift':
+      // `>>>` yields a Uint32 — Int32Array assignment wraps it back into the
+      // signed range, matching the `(x >>> n) | 0` idiom.
+      for (let i = 0; i < length; i++) result[i] = a[start + i] >>> b[start + i];
+      break;
+  }
+
+  return result.buffer;
+}
+
+/**
+ * Element-wise bitwise op on an `Int32Array` chunk with a scalar second
+ * operand. Used by the `Int32Array, number` shift overloads from
+ * `ComputePool.leftShift / rightArithShift / rightLogShift`.
+ */
+function bitwiseScalarChunk(
+  buffer: ArrayBuffer,
+  start: number,
+  length: number,
+  scalar: number,
+  op: BitwiseBinaryOpCode
+): ArrayBuffer {
+  const data = new Int32Array(buffer);
+  const result = new Int32Array(length);
+
+  switch (op) {
+    case 'bitAnd':
+      for (let i = 0; i < length; i++) result[i] = data[start + i] & scalar;
+      break;
+    case 'bitOr':
+      for (let i = 0; i < length; i++) result[i] = data[start + i] | scalar;
+      break;
+    case 'bitXor':
+      for (let i = 0; i < length; i++) result[i] = data[start + i] ^ scalar;
+      break;
+    case 'leftShift':
+      for (let i = 0; i < length; i++) result[i] = data[start + i] << scalar;
+      break;
+    case 'rightArithShift':
+      for (let i = 0; i < length; i++) result[i] = data[start + i] >> scalar;
+      break;
+    case 'rightLogShift':
+      for (let i = 0; i < length; i++) result[i] = data[start + i] >>> scalar;
+      break;
+  }
+
+  return result.buffer;
+}
+
+/**
+ * Unary bitwise NOT (`~a[i]`) on an `Int32Array` chunk.
+ */
+function bitwiseNotChunk(
+  buffer: ArrayBuffer,
+  start: number,
+  length: number
+): ArrayBuffer {
+  const data = new Int32Array(buffer);
+  const result = new Int32Array(length);
+  for (let i = 0; i < length; i++) {
+    result[i] = ~data[start + i];
+  }
+  return result.buffer;
+}
+
+// =============================================================================
 // FFT Operations
 // =============================================================================
 
@@ -660,6 +780,11 @@ const workerMethods: Record<string, (...args: any[]) => any> = {
   unaryChunk,
   applyKernelChunk,
   applyKernel2Chunk,
+
+  // Bitwise (Int32Array) operations
+  bitwiseChunk,
+  bitwiseScalarChunk,
+  bitwiseNotChunk,
 
   // FFT operations
   fftBatchChunk,

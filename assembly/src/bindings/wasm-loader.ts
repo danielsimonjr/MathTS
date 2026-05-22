@@ -114,6 +114,27 @@ export interface MathTSWasmExports {
   matrix_trace(dataPtr: number, rows: number, cols: number): number;
   matrix_norm_frobenius(dataPtr: number): number;
 
+  // Bitwise operations (Int32Array, elementwise) — AS-backend kernels.
+  // The Rust backend ships an equivalent set under the `*Array` /
+  // `*ArrayPerElement` naming (declared in
+  // functions/src/wasm/WasmLoader.ts's interface); the AS kernels keep
+  // the `_i32_array` suffix to match AS export-name discoverability.
+  bitAnd_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
+  bitOr_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
+  bitXor_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
+  bitNot_i32_array?(a: Int32Array, result: Int32Array): void;
+  leftShift_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
+  rightArithShift_i32_array?(
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ): void;
+  rightLogShift_i32_array?(
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ): void;
+
   // Memory management
   __new(size: number, id: number): number;
   __pin(ptr: number): number;
