@@ -217,6 +217,126 @@ the dependency-graph / architecture-docs audit.
   through the scoped fork so the upstream raw-`.ts` package never enters the
   type graph.
 
+## 🔧 Typed-Layer Expansion (2026-05-22)
+
+The active `functions/src/typed/` dispatch layer has been expanded and several
+pre-existing correctness defects fixed.
+
+### Done
+
+- [x] **`functions` typecheck — 599 → 0 errors.** Three-part fix:
+  (1) config — `functions/tsconfig.json` gained `"types": ["@webgpu/types",
+  "node"]` (its typecheck pulls in `matrix/src/backends/gpu/*` source) and
+  `"lib": ["ES2023", "DOM"]`, and the `WasmModule` interface gained the four
+  computational-geometry exports — cleared ≈100; (2) ≈499 mechanical
+  type-level fixes (`as` casts, generic args, narrowed `unknown`) across the
+  13 synced category directories — no runtime change; (3) 18 previously
+  internal interfaces exported from algebra/matrix/arithmetic/type so
+  `factories/index.ts` re-exports can name them, resolving the resulting
+  `TS4023` errors. All 11 TypeScript packages now typecheck at 0 errors.
+
+- [x] **Source-file test coverage 18.6 % → 27.0 %.** 42 new unit-test files
+  (+≈1,294 assertions) brought the suite from 114 → 156 files and tested
+  files from 90/485 → 131/485. Coverage focused on the genuinely active
+  hand-written code (every AST node class in `expression`, the parser core,
+  `Help`, the two error classes, `errorTransform`, the 13 utility modules
+  including the sandbox-critical `customs` and all 40+ type guards in `is`),
+  plus `packages/workerpool/src/fft-core.ts`, `functions/src/factories/scope.ts`,
+  and `matrix/src/backends/WasmLoader.ts`.
+
+- [x] **Variadic typed-function dispatch bug.** This repo's typed-function
+  fork delivers `'...T'` rest args as a *single packed array* (`fn(a, b,
+  [c, d])`), not as JS spread. Impls declared with `(a, b, ...rest)` got
+  `rest = [[c, d]]` and produced wrong results — e.g. `add(1, 2, 3)`
+  returned the string `'33'` (number+array stringification), `multiply` /
+  `min` / `max` / `hypot` identically broken. Fixed at the five sites in
+  `typed/arithmetic.ts` and `typed/trigonometry.ts` by declaring `rest` as
+  a plain array parameter; 17 regression tests pinned in
+  `functions/tests/typed-variadic.test.ts` so the bug can't silently come
+  back.
+
+- [x] **Bitwise category ported to the active `typed/` layer.** Seven ops —
+  `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`,
+  `rightLogShift` — now dispatched via `mathTyped()` over `number /
+  BigNumber / bigint / Int32Array`. BigNumber bitwise reimplemented through
+  native `bigint` (the synced helper depends on decimal.js internals
+  mathts-core does not expose); non-integer / NaN / Infinity throws
+  `'Integers expected'` to match mathjs. `ComputePool` gained
+  `bitAnd / bitOr / bitXor / bitNot / leftShift / rightArithShift /
+  rightLogShift` methods returning `ParallelResult<Int32Array>`. New
+  `parallel/src/ops/bitwise.ts` carries pure elementwise impls and chunking.
+  `parallel/src/workers/compute.worker.ts` got `bitwiseBinaryChunk` /
+  `bitwiseNotChunk` handlers ready for when an Int32-aware kernel registry
+  lands. 41 tests.
+
+- [x] **Logical category ported to the active `typed/` layer.** Five ops —
+  `and`, `or`, `xor`, `not`, `nullish` — over `number / bigint / BigNumber /
+  Complex / any`. `nullish` carries explicit `boolean,any` / `string,any` /
+  `BigNumber,any` / `Complex,any` / `bigint,any` short-circuit signatures
+  so typed-function does not coerce `false` or `''` through a different
+  signature before the catch-all. 130 tests.
+
+- [x] **`factories/index.ts` collision resolved.** Twelve names that the
+  new typed/ modules now export (`bitAnd`, `bitOr`, `bitXor`, `bitNot`,
+  `leftShift`, `rightArithShift`, `rightLogShift`, `and`, `or`, `xor`,
+  `not`, `nullish`) also existed as synced-factory exports — `export *`
+  through `src/index.ts` produced `TS2308` ambiguous re-export errors. The
+  superseded factory entries are now module-private `const` declarations
+  (factoryScope wiring preserved). `factories-leaf.test.ts` and
+  `factories-tier4.test.ts` were repointed to the typed/ versions.
+
+- [x] **`matrix/tests/WasmLoader.test.ts` skipped-test cleanup.** The two
+  `.skip`-ped tests asserted Rust-WASM-shaped exports (`multiplyDense`)
+  that this environment does not ship — only the AssemblyScript artifact
+  at `assembly/build/mathts.wasm` is present, and it uses suffixed
+  snake_case names. Replaced with one real conditional test that loads
+  the AS artifact and asserts the universals (`mod.memory` is a
+  `WebAssembly.Memory`, non-empty function table); skips dynamically if
+  the artifact is missing so CI without `npm run build:wasm` is not
+  broken. 48 → 49 pass, 0 skipped.
+
+### Open follow-ups (deferred from this session — real but out of scope of the bug-fix slice)
+
+These are the three items I deliberately did not touch in the typed-layer
+expansion. They are listed least → most complex, which is the order the
+follow-up subagent team should tackle them.
+
+- [ ] **(Sonnet, low) BigNumber API gap.** `expression/tests/utils-bignumber-formatter.test.ts`
+  currently uses a `MockBigNumber` because the synced
+  `expression/src/utils/bignumber/formatter.ts` duck-types against
+  `.gt()`, `.toSignificantDigits()`, and the `.e` (exponent) field on
+  Decimal.js-shaped numbers, and `@danielsimonjr/mathts-core`'s BigNumber
+  exposes none of them. **Goal:** add `.gt(other)`,
+  `.toSignificantDigits(n, roundingMode?)`, and `.e` (or an equivalent
+  exponent getter) to `core/src/numeric/BigNumber` so the formatter works
+  on the real type. Backwards-compatible — these are new methods/fields.
+  Then rewrite the bignumber-formatter test to drop the mock.
+
+- [ ] **(Opus, medium) Int32Array-aware workerpool kernel slot.** The
+  `packages/workerpool/src/worker.ts` kernel registry is keyed on
+  `Float64Array` — running bitwise math on doubles would silently corrupt
+  the upper bits, so the new `ComputePool.bit*` methods currently chunk
+  in-process. **Goal:** add an Int32-aware kernel path (a sibling family
+  to the Float64 elementwise kernels), wire the seven worker handlers
+  already drafted in `parallel/src/workers/compute.worker.ts`
+  (`bitwiseBinaryChunk` / `bitwiseNotChunk`) into the active
+  `MathWorkerPool`, and switch the seven `ComputePool.bit*` methods over
+  so they actually move off-thread for arrays above the elementwise
+  threshold. Update / extend `parallel/tests/ComputePool.test.ts` to
+  exercise the worker path.
+
+- [ ] **(Opus, high) Rust + AssemblyScript WASM ports of bitwise (and
+  logical) ops, plus manifest regeneration.** Add bitwise kernels to both
+  the Rust workspace (`wasm-rust/crates/`) and the AssemblyScript module
+  (`assembly/src/`), expose them through the existing WasmModule
+  interfaces in `functions/src/wasm/WasmLoader.ts` and
+  `matrix/src/backends/WasmLoader.ts`, run `npm run build:wasm:all`,
+  regenerate `wasm-manifest.json` via `tools/generate-wasm-manifest.mjs`,
+  and confirm the SHA-384 verification path in
+  `functions/tests/security/wasm-integrity.test.ts` still pins the new
+  hashes. Wire the WASM path into `typed/bitwise.ts` as a third dispatch
+  tier (WASM for large `Int32Array` inputs once available).
+
 ## 📋 Next Steps
 
 ### WASM Test Files (46 files, sorted by complexity) ✅ ALL COMPLETE
