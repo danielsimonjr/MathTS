@@ -47,12 +47,14 @@
 ```
 
 ### Resizing Behavior
+
 - **Vertical divider** (calculator | graph): draggable, min 300px each side
 - **Horizontal divider** (panels | expression bar): draggable, expression bar min 80px, max 40% height
 - **Graph collapse**: double-click divider or button to collapse graph, giving calculator full width
 - **Graph expand**: same gesture to restore
 
 ### Visual Style
+
 - Modern dashboard: dark theme (gray-950 base), glassmorphism subtle borders
 - Icon-heavy toolbar with grouped sections and visual separators
 - Clean typography: monospace for expressions, sans-serif for labels
@@ -66,15 +68,15 @@
 
 Horizontal toolbar at top of calculator panel. Icons grouped with vertical separators between groups. Each icon has a tooltip. Icons use a consistent 20x20 size with 4px padding.
 
-| Group | Icons | Action on Click |
-|-------|-------|-----------------|
-| **Algebra** | simplify, expand, factor, solve, rationalize | Inserts template: `simplify("")`, `expand("")`, etc. |
-| **Calculus** | d/dx (derivative), ∫ (integral), lim (limit), Σ (sum), taylor | Inserts: `derivative("","x")`, `integrate("","x")`, etc. |
-| **Matrix** | det, inv, A^T, λ (eigenvalues), [grid] (matrix editor) | Inserts: `det()`, `inv()`, `transpose()`, `eigs()`, opens matrix editor |
-| **Trig** | sin, cos, tan, sin⁻¹, cos⁻¹, tan⁻¹, hyp toggle | Inserts: `sin()`, etc. Hyp toggle switches to sinh/cosh/tanh |
-| **Stats** | x̄ (mean), σ (std), med, hist, reg (regression) | Inserts: `mean()`, `std()`, `median()`, opens histogram, `polyfit()` |
-| **Plot** | 📈 y=f(x), ⟳ parametric, ◎ polar, 🏔 3D, 🗑 clear | Inserts: `plot()`, `plotParametric()`, `plotPolar()`, `plot3d()`, clears graph |
-| **Settings** | DEG/RAD, number type, precision, JS/WASM engine | Opens dropdown menus for each setting |
+| Group        | Icons                                                         | Action on Click                                                                |
+| ------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Algebra**  | simplify, expand, factor, solve, rationalize                  | Inserts template: `simplify("")`, `expand("")`, etc.                           |
+| **Calculus** | d/dx (derivative), ∫ (integral), lim (limit), Σ (sum), taylor | Inserts: `derivative("","x")`, `integrate("","x")`, etc.                       |
+| **Matrix**   | det, inv, A^T, λ (eigenvalues), [grid] (matrix editor)        | Inserts: `det()`, `inv()`, `transpose()`, `eigs()`, opens matrix editor        |
+| **Trig**     | sin, cos, tan, sin⁻¹, cos⁻¹, tan⁻¹, hyp toggle                | Inserts: `sin()`, etc. Hyp toggle switches to sinh/cosh/tanh                   |
+| **Stats**    | x̄ (mean), σ (std), med, hist, reg (regression)                | Inserts: `mean()`, `std()`, `median()`, opens histogram, `polyfit()`           |
+| **Plot**     | 📈 y=f(x), ⟳ parametric, ◎ polar, 🏔 3D, 🗑 clear             | Inserts: `plot()`, `plotParametric()`, `plotPolar()`, `plot3d()`, clears graph |
+| **Settings** | DEG/RAD, number type, precision, JS/WASM engine               | Opens dropdown menus for each setting                                          |
 
 **Template insertion behavior**: Clicking an icon inserts the function template into the expression bar with the cursor positioned at the first argument. If text is selected in the expression bar, it wraps the selection. Example: select `x^3`, click d/dx → `derivative("x^3", "x")`.
 
@@ -125,6 +127,7 @@ Row 8: 0      .     π     e     i     EXP
 ### 3.1 Rendering Engine
 
 **Plotly.js** for all graphing:
+
 - WebGL-accelerated 2D and 3D rendering
 - Built-in zoom, pan, trace, hover tooltips
 - Export to PNG/SVG
@@ -134,10 +137,12 @@ Row 8: 0      .     π     e     i     EXP
 ### 3.2 2D Graphing
 
 **Entry methods** (both work):
+
 1. Expression bar: `plot(sin(x))` or `plot(x^2, x, -10, 10)`
 2. Calculator toolbar: click 📈 icon → inserts `plot("")` template
 
 **Supported plot types**:
+
 - `plot(expr)` — y=f(x) with auto-detected range
 - `plot(expr, x, xmin, xmax)` — explicit x range
 - `plot(expr, x, xmin, xmax, options)` — with styling: `{color: "red", style: "dashed"}`
@@ -146,11 +151,13 @@ Row 8: 0      .     π     e     i     EXP
 - `plotImplicit(expr, x, y, range)` — implicit curves (x² + y² = 1)
 
 **Multi-function overlay**:
+
 - Each `plot()` call adds a trace (doesn't replace)
 - Auto-assigned colors from a palette (blue, orange, green, red, purple, cyan...)
 - `clearPlot()` or toolbar 🗑 icon removes all traces
 
 **Interactive features**:
+
 - Scroll wheel: zoom in/out centered on cursor
 - Click+drag: pan
 - Hover: shows (x, y) coordinates on nearest point
@@ -158,6 +165,7 @@ Row 8: 0      .     π     e     i     EXP
 - Shift+click: place a marker/annotation
 
 **Function list overlay** (top-right of graph):
+
 - Shows each plotted function with color swatch
 - Toggle visibility (eye icon)
 - Delete individual functions (x icon)
@@ -175,6 +183,7 @@ Row 8: 0      .     π     e     i     EXP
 ### 3.4 Graph Toolbar
 
 Small toolbar at top of graph canvas:
+
 - Zoom in / Zoom out / Reset view
 - Toggle grid / Toggle axes
 - 2D / 3D mode switch
@@ -213,17 +222,17 @@ Small toolbar at top of graph canvas:
 
 ### 4.4 Special Commands
 
-| Command | Action |
-|---------|--------|
-| `plot(expr)` | Plot 2D function |
-| `plot3d(expr)` | Plot 3D surface |
-| `plotParametric(...)` | Parametric curve |
-| `plotPolar(...)` | Polar plot |
-| `clearPlot()` | Clear all plots |
-| `vars` | List all variables |
-| `clear` | Clear all variables |
-| `help(fn)` | Show function documentation |
-| `table(expr, x, start, end, step)` | Generate value table |
+| Command                            | Action                      |
+| ---------------------------------- | --------------------------- |
+| `plot(expr)`                       | Plot 2D function            |
+| `plot3d(expr)`                     | Plot 3D surface             |
+| `plotParametric(...)`              | Parametric curve            |
+| `plotPolar(...)`                   | Polar plot                  |
+| `clearPlot()`                      | Clear all plots             |
+| `vars`                             | List all variables          |
+| `clear`                            | Clear all variables         |
+| `help(fn)`                         | Show function documentation |
+| `table(expr, x, start, end, step)` | Generate value table        |
 
 ---
 
@@ -231,13 +240,13 @@ Small toolbar at top of graph canvas:
 
 ### math.js Symbolic Functions (already available)
 
-| Function | Example | Output |
-|----------|---------|--------|
-| `simplify(expr)` | `simplify("2x + 3x")` | `5 x` |
-| `derivative(expr, var)` | `derivative("x^3", "x")` | `3 x^2` |
-| `rationalize(expr)` | `rationalize("x/y + y/x")` | `(x^2 + y^2) / (x y)` |
-| `solve(expr, var)` | `solve("x^2 - 4", "x")` | `[2, -2]` |
-| `expand(expr)` | `expand("(x+1)^3")` | `x^3 + 3x^2 + 3x + 1` |
+| Function                | Example                    | Output                |
+| ----------------------- | -------------------------- | --------------------- |
+| `simplify(expr)`        | `simplify("2x + 3x")`      | `5 x`                 |
+| `derivative(expr, var)` | `derivative("x^3", "x")`   | `3 x^2`               |
+| `rationalize(expr)`     | `rationalize("x/y + y/x")` | `(x^2 + y^2) / (x y)` |
+| `solve(expr, var)`      | `solve("x^2 - 4", "x")`    | `[2, -2]`             |
+| `expand(expr)`          | `expand("(x+1)^3")`        | `x^3 + 3x^2 + 3x + 1` |
 
 ### LaTeX Conversion Pipeline
 
@@ -254,11 +263,13 @@ math.js nodes already have `.toTex()` methods, so the conversion is built-in.
 ### Symbolic Output Formatting
 
 All symbolic results display as:
+
 1. **Input** rendered in LaTeX notation (top)
 2. **Equals sign** or arrow separator
 3. **Output** rendered in LaTeX notation (bottom)
 
 Example for `derivative("sin(x^2)", "x")`:
+
 ```
   d
  ── [sin(x²)]
@@ -276,31 +287,31 @@ Example for `derivative("sin(x^2)", "x")`:
 ```typescript
 interface ISEState {
   // Layout
-  calcWidth: number          // percentage, default 40
-  expressionHeight: number   // pixels, default 120
-  graphCollapsed: boolean
+  calcWidth: number; // percentage, default 40
+  expressionHeight: number; // pixels, default 120
+  graphCollapsed: boolean;
 
   // Parser
   // (math instance and parser live as refs, not in store)
 
   // Variables
-  variables: Map<string, { value: unknown, type: string }>
+  variables: Map<string, { value: unknown; type: string }>;
 
   // Plots
-  plotTraces: PlotTrace[]    // { id, expression, type, color, visible, data }
-  plotMode: '2d' | '3d'
-  plotConfig: { showGrid, showAxes, xRange, yRange }
+  plotTraces: PlotTrace[]; // { id, expression, type, color, visible, data }
+  plotMode: '2d' | '3d';
+  plotConfig: { showGrid; showAxes; xRange; yRange };
 
   // Symbolic
-  symbolicHistory: SymbolicResult[]  // { input, output, latexIn, latexOut }
+  symbolicHistory: SymbolicResult[]; // { input, output, latexIn, latexOut }
 
   // Expression bar
-  expressionHistory: string[]
-  historyIndex: number
+  expressionHistory: string[];
+  historyIndex: number;
 
   // Config (from existing)
-  config: AppConfig
-  wasmCapabilities: WasmCapabilities | null
+  config: AppConfig;
+  wasmCapabilities: WasmCapabilities | null;
 }
 ```
 
@@ -333,12 +344,12 @@ plot(expr) called
 
 ## 7. New Dependencies
 
-| Package | Purpose | Size |
-|---------|---------|------|
-| `plotly.js-dist-min` | 2D/3D graphing | ~1 MB |
-| `katex` | LaTeX rendering | ~300 KB |
-| `react-plotly.js` | React wrapper for Plotly | ~5 KB |
-| `allotment` | Resizable split panes | ~50 KB |
+| Package              | Purpose                  | Size    |
+| -------------------- | ------------------------ | ------- |
+| `plotly.js-dist-min` | 2D/3D graphing           | ~1 MB   |
+| `katex`              | LaTeX rendering          | ~300 KB |
+| `react-plotly.js`    | React wrapper for Plotly | ~5 KB   |
+| `allotment`          | Resizable split panes    | ~50 KB  |
 
 All existing dependencies (React 19, Zustand, Tailwind, Recharts) remain. Recharts is still used for the Performance Dashboard and Statistics panels. Plotly is used for the main graph canvas.
 
@@ -347,6 +358,7 @@ All existing dependencies (React 19, Zustand, Tailwind, Recharts) remain. Rechar
 ## 8. Migration from Current Calculator
 
 ### What stays
+
 - Performance Dashboard panel (Task 10)
 - Statistics Dashboard panel (Task 9)
 - Zustand store pattern (expanded)
@@ -355,6 +367,7 @@ All existing dependencies (React 19, Zustand, Tailwind, Recharts) remain. Rechar
 - Dark theme base
 
 ### What changes
+
 - **App.tsx**: Completely new layout (three-zone split replaces tabbed panels)
 - **Calculator panel**: Rebuilt with toolbar ribbon, symbolic output, variable explorer, enhanced button grid
 - **Graph canvas**: New (replaces Signal Studio's simple charts)
@@ -362,6 +375,7 @@ All existing dependencies (React 19, Zustand, Tailwind, Recharts) remain. Rechar
 - **Tab navigation**: Removed as primary navigation. Performance and Statistics become accessible via a secondary menu or toolbar dropdown.
 
 ### What's new
+
 - Graph canvas with Plotly.js
 - KaTeX symbolic rendering
 - Resizable split panes
@@ -375,12 +389,12 @@ All existing dependencies (React 19, Zustand, Tailwind, Recharts) remain. Rechar
 
 ## 9. Summary
 
-| Component | Technology | Key Feature |
-|-----------|-----------|-------------|
-| Layout | allotment (split panes) | Three-zone resizable layout |
-| Calculator | React + Tailwind | Icon toolbar, enhanced button grid |
-| Symbolic | math.js + KaTeX | LaTeX-rendered input/output |
-| Graphing | Plotly.js | 2D/3D interactive plots |
-| Expression | Custom input | Syntax highlighting, autocomplete, LaTeX preview |
-| State | Zustand | Shared variables, plot traces, config |
-| Performance | WASM bridge | Engine toggle (JS/WASM/Auto) |
+| Component   | Technology              | Key Feature                                      |
+| ----------- | ----------------------- | ------------------------------------------------ |
+| Layout      | allotment (split panes) | Three-zone resizable layout                      |
+| Calculator  | React + Tailwind        | Icon toolbar, enhanced button grid               |
+| Symbolic    | math.js + KaTeX         | LaTeX-rendered input/output                      |
+| Graphing    | Plotly.js               | 2D/3D interactive plots                          |
+| Expression  | Custom input            | Syntax highlighting, autocomplete, LaTeX preview |
+| State       | Zustand                 | Shared variables, plot traces, config            |
+| Performance | WASM bridge             | Engine toggle (JS/WASM/Auto)                     |

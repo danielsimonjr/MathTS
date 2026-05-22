@@ -15,22 +15,17 @@
  * @param n2 - Length of second shape
  * @returns true if shapes are broadcast-compatible
  */
-export function canBroadcast(
-  shape1Ptr: usize,
-  n1: i32,
-  shape2Ptr: usize,
-  n2: i32
-): bool {
-  const maxLen: i32 = n1 > n2 ? n1 : n2
+export function canBroadcast(shape1Ptr: usize, n1: i32, shape2Ptr: usize, n2: i32): bool {
+  const maxLen: i32 = n1 > n2 ? n1 : n2;
 
   for (let i: i32 = 0; i < maxLen; i++) {
-    const d1: i32 = i < n1 ? load<i32>(shape1Ptr + (<usize>(n1 - 1 - i) << 2)) : 1
-    const d2: i32 = i < n2 ? load<i32>(shape2Ptr + (<usize>(n2 - 1 - i) << 2)) : 1
+    const d1: i32 = i < n1 ? load<i32>(shape1Ptr + ((<usize>(n1 - 1 - i)) << 2)) : 1;
+    const d2: i32 = i < n2 ? load<i32>(shape2Ptr + ((<usize>(n2 - 1 - i)) << 2)) : 1;
     if (d1 !== d2 && d1 !== 1 && d2 !== 1) {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 /**
@@ -49,43 +44,37 @@ export function broadcastShape(
   n2: i32,
   resultPtr: usize
 ): i32 {
-  const maxLen: i32 = n1 > n2 ? n1 : n2
+  const maxLen: i32 = n1 > n2 ? n1 : n2;
 
   for (let i: i32 = 0; i < maxLen; i++) {
-    const d1: i32 = i < n1 ? load<i32>(shape1Ptr + (<usize>(n1 - 1 - i) << 2)) : 1
-    const d2: i32 = i < n2 ? load<i32>(shape2Ptr + (<usize>(n2 - 1 - i) << 2)) : 1
+    const d1: i32 = i < n1 ? load<i32>(shape1Ptr + ((<usize>(n1 - 1 - i)) << 2)) : 1;
+    const d2: i32 = i < n2 ? load<i32>(shape2Ptr + ((<usize>(n2 - 1 - i)) << 2)) : 1;
 
     if (d1 === d2) {
-      store<i32>(resultPtr + (<usize>(maxLen - 1 - i) << 2), d1)
+      store<i32>(resultPtr + ((<usize>(maxLen - 1 - i)) << 2), d1);
     } else if (d1 === 1) {
-      store<i32>(resultPtr + (<usize>(maxLen - 1 - i) << 2), d2)
+      store<i32>(resultPtr + ((<usize>(maxLen - 1 - i)) << 2), d2);
     } else if (d2 === 1) {
-      store<i32>(resultPtr + (<usize>(maxLen - 1 - i) << 2), d1)
+      store<i32>(resultPtr + ((<usize>(maxLen - 1 - i)) << 2), d1);
     } else {
-      return 0 // Incompatible
+      return 0; // Incompatible
     }
   }
 
-  return maxLen
+  return maxLen;
 }
 
 /**
  * Get broadcasted index for a matrix
  */
-function getBroadcastIndex(
-  outIdx: i32,
-  outRows: i32,
-  outCols: i32,
-  inRows: i32,
-  inCols: i32
-): i32 {
-  const outRow: i32 = outIdx / outCols
-  const outCol: i32 = outIdx % outCols
+function getBroadcastIndex(outIdx: i32, outRows: i32, outCols: i32, inRows: i32, inCols: i32): i32 {
+  const outRow: i32 = outIdx / outCols;
+  const outCol: i32 = outIdx % outCols;
 
-  const inRow: i32 = inRows === 1 ? 0 : outRow
-  const inCol: i32 = inCols === 1 ? 0 : outCol
+  const inRow: i32 = inRows === 1 ? 0 : outRow;
+  const inCol: i32 = inCols === 1 ? 0 : outCol;
 
-  return inRow * inCols + inCol
+  return inRow * inCols + inCol;
 }
 
 /**
@@ -112,27 +101,30 @@ export function broadcastMultiply(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   // Check compatibility
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    store<f64>(resultPtr + (<usize>i << 3), load<f64>(aPtr + (<usize>idxA << 3)) * load<f64>(bPtr + (<usize>idxB << 3)))
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    store<f64>(
+      resultPtr + ((<usize>i) << 3),
+      load<f64>(aPtr + ((<usize>idxA) << 3)) * load<f64>(bPtr + ((<usize>idxB) << 3))
+    );
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -149,26 +141,29 @@ export function broadcastDivide(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    store<f64>(resultPtr + (<usize>i << 3), load<f64>(aPtr + (<usize>idxA << 3)) / load<f64>(bPtr + (<usize>idxB << 3)))
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    store<f64>(
+      resultPtr + ((<usize>i) << 3),
+      load<f64>(aPtr + ((<usize>idxA) << 3)) / load<f64>(bPtr + ((<usize>idxB) << 3))
+    );
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -185,26 +180,29 @@ export function broadcastAdd(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    store<f64>(resultPtr + (<usize>i << 3), load<f64>(aPtr + (<usize>idxA << 3)) + load<f64>(bPtr + (<usize>idxB << 3)))
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    store<f64>(
+      resultPtr + ((<usize>i) << 3),
+      load<f64>(aPtr + ((<usize>idxA) << 3)) + load<f64>(bPtr + ((<usize>idxB) << 3))
+    );
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -221,26 +219,29 @@ export function broadcastSubtract(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    store<f64>(resultPtr + (<usize>i << 3), load<f64>(aPtr + (<usize>idxA << 3)) - load<f64>(bPtr + (<usize>idxB << 3)))
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    store<f64>(
+      resultPtr + ((<usize>i) << 3),
+      load<f64>(aPtr + ((<usize>idxA) << 3)) - load<f64>(bPtr + ((<usize>idxB) << 3))
+    );
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -257,26 +258,29 @@ export function broadcastPow(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    store<f64>(resultPtr + (<usize>i << 3), Math.pow(load<f64>(aPtr + (<usize>idxA << 3)), load<f64>(bPtr + (<usize>idxB << 3))))
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    store<f64>(
+      resultPtr + ((<usize>i) << 3),
+      Math.pow(load<f64>(aPtr + ((<usize>idxA) << 3)), load<f64>(bPtr + ((<usize>idxB) << 3)))
+    );
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -293,28 +297,28 @@ export function broadcastMin(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    const a: f64 = load<f64>(aPtr + (<usize>idxA << 3))
-    const b: f64 = load<f64>(bPtr + (<usize>idxB << 3))
-    store<f64>(resultPtr + (<usize>i << 3), a < b ? a : b)
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    const a: f64 = load<f64>(aPtr + ((<usize>idxA) << 3));
+    const b: f64 = load<f64>(bPtr + ((<usize>idxB) << 3));
+    store<f64>(resultPtr + ((<usize>i) << 3), a < b ? a : b);
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -331,28 +335,28 @@ export function broadcastMax(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    const a: f64 = load<f64>(aPtr + (<usize>idxA << 3))
-    const b: f64 = load<f64>(bPtr + (<usize>idxB << 3))
-    store<f64>(resultPtr + (<usize>i << 3), a > b ? a : b)
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    const a: f64 = load<f64>(aPtr + ((<usize>idxA) << 3));
+    const b: f64 = load<f64>(bPtr + ((<usize>idxB) << 3));
+    store<f64>(resultPtr + ((<usize>i) << 3), a > b ? a : b);
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -369,26 +373,29 @@ export function broadcastMod(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    store<f64>(resultPtr + (<usize>i << 3), load<f64>(aPtr + (<usize>idxA << 3)) % load<f64>(bPtr + (<usize>idxB << 3)))
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    store<f64>(
+      resultPtr + ((<usize>i) << 3),
+      load<f64>(aPtr + ((<usize>idxA) << 3)) % load<f64>(bPtr + ((<usize>idxB) << 3))
+    );
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -406,26 +413,32 @@ export function broadcastEqual(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    store<f64>(resultPtr + (<usize>i << 3), Math.abs(load<f64>(aPtr + (<usize>idxA << 3)) - load<f64>(bPtr + (<usize>idxB << 3))) < tol ? 1.0 : 0.0)
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    store<f64>(
+      resultPtr + ((<usize>i) << 3),
+      Math.abs(load<f64>(aPtr + ((<usize>idxA) << 3)) - load<f64>(bPtr + ((<usize>idxB) << 3))) <
+        tol
+        ? 1.0
+        : 0.0
+    );
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -442,26 +455,29 @@ export function broadcastLess(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    store<f64>(resultPtr + (<usize>i << 3), load<f64>(aPtr + (<usize>idxA << 3)) < load<f64>(bPtr + (<usize>idxB << 3)) ? 1.0 : 0.0)
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    store<f64>(
+      resultPtr + ((<usize>i) << 3),
+      load<f64>(aPtr + ((<usize>idxA) << 3)) < load<f64>(bPtr + ((<usize>idxB) << 3)) ? 1.0 : 0.0
+    );
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -478,26 +494,29 @@ export function broadcastGreater(
   outRowsPtr: usize,
   outColsPtr: usize
 ): i32 {
-  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1
-  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1
+  const outRows: i32 = rows1 > rows2 ? rows1 : rows2 > 1 ? rows2 : rows1;
+  const outCols: i32 = cols1 > cols2 ? cols1 : cols2 > 1 ? cols2 : cols1;
 
   if (
     (rows1 !== rows2 && rows1 !== 1 && rows2 !== 1) ||
     (cols1 !== cols2 && cols1 !== 1 && cols2 !== 1)
   ) {
-    return 0
+    return 0;
   }
 
-  store<i32>(outRowsPtr, outRows)
-  store<i32>(outColsPtr, outCols)
+  store<i32>(outRowsPtr, outRows);
+  store<i32>(outColsPtr, outCols);
 
   for (let i: i32 = 0; i < outRows * outCols; i++) {
-    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1)
-    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2)
-    store<f64>(resultPtr + (<usize>i << 3), load<f64>(aPtr + (<usize>idxA << 3)) > load<f64>(bPtr + (<usize>idxB << 3)) ? 1.0 : 0.0)
+    const idxA: i32 = getBroadcastIndex(i, outRows, outCols, rows1, cols1);
+    const idxB: i32 = getBroadcastIndex(i, outRows, outCols, rows2, cols2);
+    store<f64>(
+      resultPtr + ((<usize>i) << 3),
+      load<f64>(aPtr + ((<usize>idxA) << 3)) > load<f64>(bPtr + ((<usize>idxB) << 3)) ? 1.0 : 0.0
+    );
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -507,14 +526,9 @@ export function broadcastGreater(
  * @param scalar - Scalar value
  * @param resultPtr - Pointer to output matrix (f64)
  */
-export function broadcastScalarMultiply(
-  aPtr: usize,
-  n: i32,
-  scalar: f64,
-  resultPtr: usize
-): void {
+export function broadcastScalarMultiply(aPtr: usize, n: i32, scalar: f64, resultPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    store<f64>(resultPtr + (<usize>i << 3), load<f64>(aPtr + (<usize>i << 3)) * scalar)
+    store<f64>(resultPtr + ((<usize>i) << 3), load<f64>(aPtr + ((<usize>i) << 3)) * scalar);
   }
 }
 
@@ -525,14 +539,9 @@ export function broadcastScalarMultiply(
  * @param scalar - Scalar value
  * @param resultPtr - Pointer to output matrix (f64)
  */
-export function broadcastScalarAdd(
-  aPtr: usize,
-  n: i32,
-  scalar: f64,
-  resultPtr: usize
-): void {
+export function broadcastScalarAdd(aPtr: usize, n: i32, scalar: f64, resultPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    store<f64>(resultPtr + (<usize>i << 3), load<f64>(aPtr + (<usize>i << 3)) + scalar)
+    store<f64>(resultPtr + ((<usize>i) << 3), load<f64>(aPtr + ((<usize>i) << 3)) + scalar);
   }
 }
 
@@ -546,40 +555,34 @@ export function broadcastScalarAdd(
  * @param resultPtr - Pointer to output matrix (f64)
  * @returns 1 on success, 0 if lengths don't match
  */
-export function broadcastApply(
-  aPtr: usize,
-  bPtr: usize,
-  n: i32,
-  op: i32,
-  resultPtr: usize
-): i32 {
+export function broadcastApply(aPtr: usize, bPtr: usize, n: i32, op: i32, resultPtr: usize): i32 {
   for (let i: i32 = 0; i < n; i++) {
-    const a: f64 = load<f64>(aPtr + (<usize>i << 3))
-    const b: f64 = load<f64>(bPtr + (<usize>i << 3))
-    let result: f64
+    const a: f64 = load<f64>(aPtr + ((<usize>i) << 3));
+    const b: f64 = load<f64>(bPtr + ((<usize>i) << 3));
+    let result: f64;
 
     if (op === 0) {
-      result = a + b
+      result = a + b;
     } else if (op === 1) {
-      result = a - b
+      result = a - b;
     } else if (op === 2) {
-      result = a * b
+      result = a * b;
     } else if (op === 3) {
-      result = a / b
+      result = a / b;
     } else if (op === 4) {
-      result = Math.pow(a, b)
+      result = Math.pow(a, b);
     } else if (op === 5) {
-      result = a < b ? a : b
+      result = a < b ? a : b;
     } else if (op === 6) {
-      result = a > b ? a : b
+      result = a > b ? a : b;
     } else if (op === 7) {
-      result = a % b
+      result = a % b;
     } else {
-      result = 0.0
+      result = 0.0;
     }
 
-    store<f64>(resultPtr + (<usize>i << 3), result)
+    store<f64>(resultPtr + ((<usize>i) << 3), result);
   }
 
-  return 1
+  return 1;
 }

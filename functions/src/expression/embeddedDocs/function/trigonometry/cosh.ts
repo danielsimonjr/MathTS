@@ -4,5 +4,5 @@ export const coshDocs = {
   syntax: ['cosh(x)'],
   description: 'Compute the hyperbolic cosine of x in radians.',
   examples: ['cosh(0.5)'],
-  seealso: ['sinh', 'tanh', 'coth']
-}
+  seealso: ['sinh', 'tanh', 'coth'],
+};

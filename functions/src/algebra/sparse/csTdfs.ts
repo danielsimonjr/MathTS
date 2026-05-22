@@ -23,28 +23,28 @@ export function csTdfs(
   stack: number
 ): number {
   // variables
-  let top = 0
+  let top = 0;
   // place j on the stack
-  w[stack] = j
+  w[stack] = j;
   // while (stack is not empty)
   while (top >= 0) {
     // p = top of stack
-    const p = w[stack + top]
+    const p = w[stack + top];
     // i = youngest child of p
-    const i = w[head + p]
+    const i = w[head + p];
     if (i === -1) {
       // p has no unordered children left
-      top--
+      top--;
       // node p is the kth postordered node
-      post[k++] = p
+      post[k++] = p;
     } else {
       // remove i from children of p
-      w[head + p] = w[next + i]
+      w[head + p] = w[next + i];
       // increment top
-      ++top
+      ++top;
       // start dfs on child node i
-      w[stack + top] = i
+      w[stack + top] = i;
     }
   }
-  return k
+  return k;
 }

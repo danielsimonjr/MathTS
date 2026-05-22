@@ -1,38 +1,38 @@
-import { isNumber, isBigNumber } from '../utils/is.js'
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { isNumber, isBigNumber } from '../utils/is.js';
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for quantileSeq
 interface MatrixType {
-  valueOf(): unknown[] | unknown[][]
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface BigNumberType {
-  times(n: number): BigNumberType
-  floor(): BigNumberType
-  toNumber(): number
-  minus(n: number | BigNumberType): BigNumberType
-  valueOf(): number
+  times(n: number): BigNumberType;
+  floor(): BigNumberType;
+  toNumber(): number;
+  minus(n: number | BigNumberType): BigNumberType;
+  valueOf(): number;
 }
 
 interface QuantileSeqDependencies {
-  typed: TypedFunction
-  bignumber?: (value: unknown) => BigNumberType
-  add: TypedFunction
-  subtract: TypedFunction
-  divide: (a: unknown, b: unknown) => number | BigNumberType
-  multiply: TypedFunction
-  partitionSelect: TypedFunction
-  compare: (a: unknown, b: unknown) => number
-  isInteger: TypedFunction
-  smaller: (a: unknown, b: unknown) => boolean
-  smallerEq: (a: unknown, b: unknown) => boolean
-  larger: (a: unknown, b: unknown) => boolean
-  mapSlices: TypedFunction
+  typed: TypedFunction;
+  bignumber?: (value: unknown) => BigNumberType;
+  add: TypedFunction;
+  subtract: TypedFunction;
+  divide: (a: unknown, b: unknown) => number | BigNumberType;
+  multiply: TypedFunction;
+  partitionSelect: TypedFunction;
+  compare: (a: unknown, b: unknown) => number;
+  isInteger: TypedFunction;
+  smaller: (a: unknown, b: unknown) => boolean;
+  smallerEq: (a: unknown, b: unknown) => boolean;
+  larger: (a: unknown, b: unknown) => boolean;
+  mapSlices: TypedFunction;
 }
 
-const name = 'quantileSeq'
+const name = 'quantileSeq';
 const dependencies = [
   'typed',
   '?bignumber',
@@ -46,8 +46,8 @@ const dependencies = [
   'smaller',
   'smallerEq',
   'larger',
-  'mapSlices'
-]
+  'mapSlices',
+];
 
 export const createQuantileSeq = /* #__PURE__ */ factory(
   name,
@@ -65,7 +65,7 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
     smaller,
     smallerEq,
     larger,
-    mapSlices
+    mapSlices,
   }: QuantileSeqDependencies) => {
     /**
      * Compute the prob order quantile of a matrix or a list with values.
@@ -110,16 +110,14 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         data: unknown[] | MatrixType,
         prob: number | BigNumberType,
         dim: number
-      ): unknown =>
-        _quantileSeqDim(data, prob, false, dim, _quantileSeqProbNumber),
+      ): unknown => _quantileSeqDim(data, prob, false, dim, _quantileSeqProbNumber),
       'Array | Matrix, number | BigNumber, boolean': _quantileSeqProbNumber,
       'Array | Matrix, number | BigNumber, boolean, number': (
         data: unknown[] | MatrixType,
         prob: number | BigNumberType,
         sorted: boolean,
         dim: number
-      ): unknown =>
-        _quantileSeqDim(data, prob, sorted, dim, _quantileSeqProbNumber),
+      ): unknown => _quantileSeqDim(data, prob, sorted, dim, _quantileSeqProbNumber),
       'Array | Matrix, Array | Matrix': (
         data: unknown[] | MatrixType,
         p: unknown[] | MatrixType
@@ -128,17 +126,15 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         data: unknown[] | MatrixType,
         prob: unknown[] | MatrixType,
         dim: number
-      ): unknown =>
-        _quantileSeqDim(data, prob, false, dim, _quantileSeqProbCollection),
+      ): unknown => _quantileSeqDim(data, prob, false, dim, _quantileSeqProbCollection),
       'Array | Matrix, Array | Matrix, boolean': _quantileSeqProbCollection,
       'Array | Matrix, Array | Matrix, boolean, number': (
         data: unknown[] | MatrixType,
         prob: unknown[] | MatrixType,
         sorted: boolean,
         dim: number
-      ): unknown =>
-        _quantileSeqDim(data, prob, sorted, dim, _quantileSeqProbCollection)
-    })
+      ): unknown => _quantileSeqDim(data, prob, sorted, dim, _quantileSeqProbCollection),
+    });
 
     function _quantileSeqDim<T>(
       data: unknown[] | MatrixType,
@@ -147,9 +143,7 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       dim: number,
       fn: (data: unknown[] | MatrixType, prob: T, sorted: boolean) => unknown
     ): unknown {
-      return mapSlices(data, dim, (x: unknown) =>
-        fn(x as unknown[] | MatrixType, prob, sorted)
-      )
+      return mapSlices(data, dim, (x: unknown) => fn(x as unknown[] | MatrixType, prob, sorted));
     }
 
     function _quantileSeqProbNumber(
@@ -157,21 +151,21 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       probOrN: number | BigNumberType,
       sorted: boolean
     ): unknown {
-      let probArr: unknown[]
-      const dataArr = (data as MatrixType).valueOf() as unknown[]
+      let probArr: unknown[];
+      const dataArr = (data as MatrixType).valueOf() as unknown[];
       if (smaller(probOrN, 0)) {
-        throw new Error('N/prob must be non-negative')
+        throw new Error('N/prob must be non-negative');
       }
       if (smallerEq(probOrN, 1)) {
         // quantileSeq([a, b, c, d, ...], prob[,sorted])
         return isNumber(probOrN)
           ? _quantileSeq(dataArr, probOrN, sorted)
-          : bignumber!(_quantileSeq(dataArr, probOrN, sorted))
+          : bignumber!(_quantileSeq(dataArr, probOrN, sorted));
       }
       if (larger(probOrN, 1)) {
         // quantileSeq([a, b, c, d, ...], N[,sorted])
         if (!isInteger(probOrN)) {
-          throw new Error('N must be a positive integer')
+          throw new Error('N must be a positive integer');
         }
 
         // largest possible Array length is 2^32-1
@@ -179,18 +173,18 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         if (larger(probOrN, 4294967295)) {
           throw new Error(
             'N must be less than or equal to 2^32-1, as that is the maximum length of an Array'
-          )
+          );
         }
 
-        const nPlusOne = add(probOrN, 1)
-        probArr = []
+        const nPlusOne = add(probOrN, 1);
+        probArr = [];
 
         for (let i = 0; smaller(i, probOrN); i++) {
-          const prob = divide(i + 1, nPlusOne)
-          probArr.push(_quantileSeq(dataArr, prob, sorted))
+          const prob = divide(i + 1, nPlusOne);
+          probArr.push(_quantileSeq(dataArr, prob, sorted));
         }
 
-        return isNumber(probOrN) ? probArr : bignumber!(probArr)
+        return isNumber(probOrN) ? probArr : bignumber!(probArr);
       }
     }
 
@@ -209,16 +203,14 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       probOrN: unknown[] | MatrixType,
       sorted: boolean
     ): unknown {
-      const dataArr = (data as MatrixType).valueOf() as unknown[]
+      const dataArr = (data as MatrixType).valueOf() as unknown[];
       // quantileSeq([a, b, c, d, ...], [prob1, prob2, ...][,sorted])
-      const probOrNArr = (probOrN as MatrixType).valueOf() as unknown[]
-      const probArr: unknown[] = []
+      const probOrNArr = (probOrN as MatrixType).valueOf() as unknown[];
+      const probArr: unknown[] = [];
       for (let i = 0; i < probOrNArr.length; ++i) {
-        probArr.push(
-          _quantileSeq(dataArr, probOrNArr[i] as number | BigNumberType, sorted)
-        )
+        probArr.push(_quantileSeq(dataArr, probOrNArr[i] as number | BigNumberType, sorted));
       }
-      return probArr
+      return probArr;
     }
 
     /**
@@ -235,43 +227,38 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       prob: number | BigNumberType,
       sorted: boolean
     ): unknown {
-      const flat = flatten(array) as unknown[]
-      const len = flat.length
+      const flat = flatten(array) as unknown[];
+      const len = flat.length;
       if (len === 0) {
-        throw new Error('Cannot calculate quantile of an empty sequence')
+        throw new Error('Cannot calculate quantile of an empty sequence');
       }
 
-      const index = isNumber(prob)
-        ? prob * (len - 1)
-        : (prob as BigNumberType).times(len - 1)
+      const index = isNumber(prob) ? prob * (len - 1) : (prob as BigNumberType).times(len - 1);
       const integerPart = isNumber(prob)
         ? Math.floor(index as number)
-        : (index as BigNumberType).floor().toNumber()
+        : (index as BigNumberType).floor().toNumber();
       const fracPart = isNumber(prob)
         ? (index as number) % 1
-        : (index as BigNumberType).minus(integerPart)
+        : (index as BigNumberType).minus(integerPart);
 
       if (isInteger(index)) {
         return sorted
           ? flat[index as number]
-          : partitionSelect(
-              flat,
-              isNumber(prob) ? index : (index as BigNumberType).valueOf()
-            )
+          : partitionSelect(flat, isNumber(prob) ? index : (index as BigNumberType).valueOf());
       }
-      let left: unknown
-      let right: unknown
+      let left: unknown;
+      let right: unknown;
       if (sorted) {
-        left = flat[integerPart]
-        right = flat[integerPart + 1]
+        left = flat[integerPart];
+        right = flat[integerPart + 1];
       } else {
-        right = partitionSelect(flat, integerPart + 1)
+        right = partitionSelect(flat, integerPart + 1);
 
         // max of partition is kth largest
-        left = flat[integerPart]
+        left = flat[integerPart];
         for (let i = 0; i < integerPart; ++i) {
           if (compare(flat[i], left) > 0) {
-            left = flat[i]
+            left = flat[i];
           }
         }
       }
@@ -279,13 +266,11 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       // If left/right are BigNumbers but fracPart is a number, convert to BigNumber
       // to avoid floating-point precision errors
       const fracPartConverted =
-        isBigNumber(left) && isNumber(fracPart)
-          ? bignumber!(fracPart)
-          : fracPart
+        isBigNumber(left) && isNumber(fracPart) ? bignumber!(fracPart) : fracPart;
       return add(
         multiply(left, subtract(1, fracPartConverted)),
         multiply(right, fracPartConverted)
-      )
+      );
     }
   }
-)
+);

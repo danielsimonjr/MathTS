@@ -125,20 +125,13 @@ export class GPUMatrixBackend implements MatrixBackend {
    * Check if operation should use GPU
    */
   private shouldUseGPU(elementCount: number): boolean {
-    return (
-      this.backend !== null &&
-      this.backend.isReady &&
-      elementCount >= this.config.minElements
-    );
+    return this.backend !== null && this.backend.isReady && elementCount >= this.config.minElements;
   }
 
   /**
    * Execute GPU operation with fallback
    */
-  private async executeWithFallback<T>(
-    gpuOp: () => Promise<T>,
-    fallback: () => T
-  ): Promise<T> {
+  private async executeWithFallback<T>(gpuOp: () => Promise<T>, fallback: () => T): Promise<T> {
     if (!this.config.fallbackOnError) {
       return gpuOp();
     }

@@ -1,23 +1,23 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import { unaryPlusNumber } from '../plain/number/index.js'
-import { safeNumberType } from '../utils/number.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import { unaryPlusNumber } from '../plain/number/index.js';
+import { safeNumberType } from '../utils/number.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for unaryPlus
 interface HasCloneMethod {
-  clone(): unknown
+  clone(): unknown;
 }
 
 interface UnaryPlusDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  numeric: (value: number | string, type: string) => unknown
+  typed: TypedFunction;
+  config: ConfigOptions;
+  numeric: (value: number | string, type: string) => unknown;
 }
 
-const name = 'unaryPlus'
-const dependencies = ['typed', 'config', 'numeric']
+const name = 'unaryPlus';
+const dependencies = ['typed', 'config', 'numeric'];
 
 export const createUnaryPlus = /* #__PURE__ */ factory(
   name,
@@ -51,23 +51,23 @@ export const createUnaryPlus = /* #__PURE__ */ factory(
       number: unaryPlusNumber,
 
       Complex: function <T>(x: T): T {
-        return x // complex numbers are immutable
+        return x; // complex numbers are immutable
       },
 
       BigNumber: function <T>(x: T): T {
-        return x // bignumbers are immutable
+        return x; // bignumbers are immutable
       },
 
       bigint: function (x: bigint): bigint {
-        return x
+        return x;
       },
 
       Fraction: function <T>(x: T): T {
-        return x // fractions are immutable
+        return x; // fractions are immutable
       },
 
       Unit: function (x: HasCloneMethod): unknown {
-        return x.clone()
+        return x.clone();
       },
 
       // deep map collection, skip zeros since unaryPlus(0) = 0
@@ -78,12 +78,12 @@ export const createUnaryPlus = /* #__PURE__ */ factory(
       ),
 
       boolean: function (x: boolean): unknown {
-        return numeric(x ? 1 : 0, config.number)
+        return numeric(x ? 1 : 0, config.number);
       },
 
       string: function (x: string): unknown {
-        return numeric(x, safeNumberType(x, config))
-      }
-    })
+        return numeric(x, safeNumberType(x, config));
+      },
+    });
   }
-)
+);

@@ -4,78 +4,78 @@
  */
 
 interface WorkerTask<T = any, R = any> {
-  id: string
-  data: T
-  resolve: (value: R) => void
-  reject: (error: Error) => void
-  transferables?: Transferable[]
+  id: string;
+  data: T;
+  resolve: (value: R) => void;
+  reject: (error: Error) => void;
+  transferables?: Transferable[];
   /**
    * Timer handle used to enforce execute()'s timeoutMs parameter.
    * Cleared on resolve/reject.
    */
-  timeoutHandle?: ReturnType<typeof setTimeout>
+  timeoutHandle?: ReturnType<typeof setTimeout>;
   /**
    * The worker currently executing this task. Set by executeTask so the
    * timeout handler can terminate the right worker.
    */
-  worker?: Worker
+  worker?: Worker;
 }
 
 interface WorkerMessage<T = any> {
-  id: string
-  type: 'task' | 'result' | 'error'
-  data?: T
-  error?: string
+  id: string;
+  type: 'task' | 'result' | 'error';
+  data?: T;
+  error?: string;
 }
 
 export class WorkerPool {
-  private workers: Worker[] = []
-  private availableWorkers: Worker[] = []
-  private taskQueue: WorkerTask[] = []
-  private activeTasks: Map<string, WorkerTask> = new Map()
-  private maxWorkers: number
-  private workerScript: string
-  private isNode: boolean
+  private workers: Worker[] = [];
+  private availableWorkers: Worker[] = [];
+  private taskQueue: WorkerTask[] = [];
+  private activeTasks: Map<string, WorkerTask> = new Map();
+  private maxWorkers: number;
+  private workerScript: string;
+  private isNode: boolean;
 
   constructor(workerScript: string, maxWorkers?: number) {
-    this.workerScript = workerScript
-    this.maxWorkers = maxWorkers || this.getOptimalWorkerCount()
-    this.isNode = typeof process !== 'undefined' && process.versions?.node !== undefined
-    this.initialize()
+    this.workerScript = workerScript;
+    this.maxWorkers = maxWorkers || this.getOptimalWorkerCount();
+    this.isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
+    this.initialize();
   }
 
   private getOptimalWorkerCount(): number {
     if (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) {
-      return Math.max(2, navigator.hardwareConcurrency - 1)
+      return Math.max(2, navigator.hardwareConcurrency - 1);
     }
-    return 4 // fallback
+    return 4; // fallback
   }
 
   private async initialize(): Promise<void> {
     for (let i = 0; i < this.maxWorkers; i++) {
-      const worker = await this.createWorker()
-      this.workers.push(worker)
-      this.availableWorkers.push(worker)
+      const worker = await this.createWorker();
+      this.workers.push(worker);
+      this.availableWorkers.push(worker);
       // A task may have been submitted (and queued) before this worker
       // finished spawning — initialize() is fire-and-forget from the
       // constructor. Drain the queue now that a worker is available.
-      this.processQueue()
+      this.processQueue();
     }
   }
 
   protected async createWorker(): Promise<Worker> {
-    let worker: Worker
+    let worker: Worker;
 
     if (this.isNode) {
       // Node.js worker_threads
-      const { Worker: NodeWorker } = await import('worker_threads')
+      const { Worker: NodeWorker } = await import('worker_threads');
       // Node's worker_threads Worker rejects raw file:// strings — it requires
       // either an absolute/relative path or a URL object. Wrap file:// URLs in
       // `new URL`; pass plain paths through unchanged.
       const script = this.workerScript.startsWith('file://')
         ? new URL(this.workerScript)
-        : this.workerScript
-      const nodeWorker = new NodeWorker(script)
+        : this.workerScript;
+      const nodeWorker = new NodeWorker(script);
 
       // Node's worker_threads.Worker is an EventEmitter — it does NOT support
       // the browser-style `worker.onmessage = fn` / `worker.onerror = fn`
@@ -83,83 +83,83 @@ export class WorkerPool {
       // registered via `.on(...)`, and the 'message' event delivers the
       // posted value directly (not wrapped in a MessageEvent).
       nodeWorker.on('message', (data: WorkerMessage) => {
-        this.handleWorkerMessage(worker, data)
-      })
+        this.handleWorkerMessage(worker, data);
+      });
       nodeWorker.on('error', (error: Error) => {
-        this.handleWorkerError(worker, { message: error.message } as ErrorEvent)
-      })
+        this.handleWorkerError(worker, { message: error.message } as ErrorEvent);
+      });
 
-      worker = nodeWorker as unknown as Worker
+      worker = nodeWorker as unknown as Worker;
     } else {
       // Browser Web Worker
-      worker = new Worker(this.workerScript, { type: 'module' })
+      worker = new Worker(this.workerScript, { type: 'module' });
 
       worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
-        this.handleWorkerMessage(worker, event.data)
-      }
+        this.handleWorkerMessage(worker, event.data);
+      };
 
       worker.onerror = (error: ErrorEvent) => {
-        this.handleWorkerError(worker, error)
-      }
+        this.handleWorkerError(worker, error);
+      };
     }
 
-    return worker
+    return worker;
   }
 
   private handleWorkerMessage(worker: Worker, message: WorkerMessage): void {
-    const task = this.activeTasks.get(message.id)
-    if (!task) return
+    const task = this.activeTasks.get(message.id);
+    if (!task) return;
 
-    this.activeTasks.delete(message.id)
+    this.activeTasks.delete(message.id);
     if (task.timeoutHandle) {
-      clearTimeout(task.timeoutHandle)
-      task.timeoutHandle = undefined
+      clearTimeout(task.timeoutHandle);
+      task.timeoutHandle = undefined;
     }
 
     if (message.type === 'result') {
-      task.resolve(message.data)
+      task.resolve(message.data);
     } else if (message.type === 'error') {
-      task.reject(new Error(message.error || 'Worker error'))
+      task.reject(new Error(message.error || 'Worker error'));
     }
 
     // Return worker to pool and process next task
-    this.availableWorkers.push(worker)
-    this.processQueue()
+    this.availableWorkers.push(worker);
+    this.processQueue();
   }
 
   private handleWorkerError(worker: Worker, error: ErrorEvent): void {
-    console.error('Worker error:', error)
+    console.error('Worker error:', error);
     // Find and reject all tasks for this worker
     for (const [id, task] of this.activeTasks) {
       if (this.workers.includes(worker)) {
-        this.activeTasks.delete(id)
-        task.reject(new Error(`Worker error: ${error.message}`))
+        this.activeTasks.delete(id);
+        task.reject(new Error(`Worker error: ${error.message}`));
       }
     }
   }
 
   private processQueue(): void {
     while (this.taskQueue.length > 0 && this.availableWorkers.length > 0) {
-      const task = this.taskQueue.shift()!
-      const worker = this.availableWorkers.shift()!
-      this.executeTask(worker, task)
+      const task = this.taskQueue.shift()!;
+      const worker = this.availableWorkers.shift()!;
+      this.executeTask(worker, task);
     }
   }
 
   private executeTask(worker: Worker, task: WorkerTask): void {
-    this.activeTasks.set(task.id, task)
-    task.worker = worker
+    this.activeTasks.set(task.id, task);
+    task.worker = worker;
 
     const message: WorkerMessage = {
       id: task.id,
       type: 'task',
-      data: task.data
-    }
+      data: task.data,
+    };
 
     if (task.transferables && task.transferables.length > 0) {
-      worker.postMessage(message, task.transferables)
+      worker.postMessage(message, task.transferables);
     } else {
-      worker.postMessage(message)
+      worker.postMessage(message);
     }
   }
 
@@ -169,33 +169,33 @@ export class WorkerPool {
    * worker, and reject the task.
    */
   private async handleTaskTimeout(task: WorkerTask, timeoutMs: number): Promise<void> {
-    if (!this.activeTasks.has(task.id)) return // already resolved
-    this.activeTasks.delete(task.id)
+    if (!this.activeTasks.has(task.id)) return; // already resolved
+    this.activeTasks.delete(task.id);
 
-    const dead = task.worker
+    const dead = task.worker;
     if (dead) {
       try {
-        dead.terminate()
+        dead.terminate();
       } catch {
         /* swallow — replacement is what matters */
       }
       // Evict from pool roster.
-      this.workers = this.workers.filter(w => w !== dead)
-      this.availableWorkers = this.availableWorkers.filter(w => w !== dead)
+      this.workers = this.workers.filter((w) => w !== dead);
+      this.availableWorkers = this.availableWorkers.filter((w) => w !== dead);
 
       // Spawn a replacement so the pool keeps its capacity.
       try {
-        const replacement = await this.createWorker()
-        this.workers.push(replacement)
-        this.availableWorkers.push(replacement)
-        this.processQueue()
+        const replacement = await this.createWorker();
+        this.workers.push(replacement);
+        this.availableWorkers.push(replacement);
+        this.processQueue();
       } catch (err) {
         // Best effort — log only; do not mask the timeout error below.
-        console.error('WorkerPool: failed to spawn replacement worker:', err)
+        console.error('WorkerPool: failed to spawn replacement worker:', err);
       }
     }
 
-    task.reject(new Error(`Worker task timed out after ${timeoutMs}ms`))
+    task.reject(new Error(`Worker task timed out after ${timeoutMs}ms`));
   }
 
   /**
@@ -219,59 +219,59 @@ export class WorkerPool {
         data,
         resolve,
         reject,
-        transferables
-      }
+        transferables,
+      };
 
       if (typeof timeoutMs === 'number' && timeoutMs > 0) {
         task.timeoutHandle = setTimeout(() => {
           // Fire-and-forget; handleTaskTimeout itself rejects the task.
-          void this.handleTaskTimeout(task, timeoutMs)
-        }, timeoutMs)
+          void this.handleTaskTimeout(task, timeoutMs);
+        }, timeoutMs);
       }
 
       if (this.availableWorkers.length > 0) {
-        const worker = this.availableWorkers.shift()!
-        this.executeTask(worker, task)
+        const worker = this.availableWorkers.shift()!;
+        this.executeTask(worker, task);
       } else {
-        this.taskQueue.push(task)
+        this.taskQueue.push(task);
       }
-    })
+    });
   }
 
   private generateTaskId(): string {
-    return `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   public async terminate(): Promise<void> {
     // Cancel all pending tasks
     for (const task of this.taskQueue) {
-      task.reject(new Error('WorkerPool terminated'))
+      task.reject(new Error('WorkerPool terminated'));
     }
-    this.taskQueue = []
+    this.taskQueue = [];
 
     // Cancel all active tasks
     for (const task of this.activeTasks.values()) {
-      task.reject(new Error('WorkerPool terminated'))
+      task.reject(new Error('WorkerPool terminated'));
     }
-    this.activeTasks.clear()
+    this.activeTasks.clear();
 
     // Terminate all workers
     for (const worker of this.workers) {
-      worker.terminate()
+      worker.terminate();
     }
-    this.workers = []
-    this.availableWorkers = []
+    this.workers = [];
+    this.availableWorkers = [];
   }
 
   public get activeTaskCount(): number {
-    return this.activeTasks.size
+    return this.activeTasks.size;
   }
 
   public get queuedTaskCount(): number {
-    return this.taskQueue.length
+    return this.taskQueue.length;
   }
 
   public get workerCount(): number {
-    return this.workers.length
+    return this.workers.length;
   }
 }

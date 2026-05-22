@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import { createTrigUnit } from './trigUnit.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { createTrigUnit } from './trigUnit.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for cos
 interface BigNumberType {
-  cos(): BigNumberType
+  cos(): BigNumberType;
 }
 
 interface ComplexType {
-  cos(): ComplexType
+  cos(): ComplexType;
 }
 
 interface CosDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'cos'
-const dependencies = ['typed']
+const name = 'cos';
+const dependencies = ['typed'];
 
 export const createCos = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed }: CosDependencies) => {
-    const trigUnit = createTrigUnit({ typed })
+    const trigUnit = createTrigUnit({ typed });
 
     /**
      * Calculate the cosine of a value.
@@ -55,11 +55,10 @@ export const createCos = /* #__PURE__ */ factory(
       name,
       {
         number: Math.cos,
-        'Complex | BigNumber': (
-          x: ComplexType | BigNumberType
-        ): ComplexType | BigNumberType => x.cos()
+        'Complex | BigNumber': (x: ComplexType | BigNumberType): ComplexType | BigNumberType =>
+          x.cos(),
       },
       trigUnit
-    )
+    );
   }
-)
+);

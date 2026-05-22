@@ -121,7 +121,12 @@ describe('Leaf factories', () => {
 
   describe('matrix', () => {
     it('flatten([[1,2],[3,4]]) = [1,2,3,4]', () => {
-      expect(flatten([[1, 2], [3, 4]])).toEqual([1, 2, 3, 4]);
+      expect(
+        flatten([
+          [1, 2],
+          [3, 4],
+        ])
+      ).toEqual([1, 2, 3, 4]);
     });
 
     it('size([1,2,3]) = [3]', () => {

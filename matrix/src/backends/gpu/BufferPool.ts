@@ -82,11 +82,7 @@ export class BufferPool {
   /**
    * Acquire a buffer from the pool or create a new one
    */
-  acquire(
-    size: number,
-    usage: GPUBufferUsageFlags,
-    label?: string
-  ): GPUBuffer {
+  acquire(size: number, usage: GPUBufferUsageFlags, label?: string): GPUBuffer {
     const key = this.getBufferKey(size, usage);
     const entries = this.buffers.get(key);
 
@@ -168,22 +164,14 @@ export class BufferPool {
    * Create a staging buffer from the pool
    */
   acquireStagingBuffer(size: number, label?: string): GPUBuffer {
-    return this.acquire(
-      size,
-      GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
-      label
-    );
+    return this.acquire(size, GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST, label);
   }
 
   /**
    * Create a uniform buffer from the pool
    */
   acquireUniformBuffer(size: number, label?: string): GPUBuffer {
-    return this.acquire(
-      size,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      label
-    );
+    return this.acquire(size, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST, label);
   }
 
   /**

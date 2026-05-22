@@ -1,67 +1,67 @@
-import { isInteger } from '../../utils/number.js'
+import { isInteger } from '../../utils/number.js';
 
-const n1 = 'number'
-const n2 = 'number, number'
+const n1 = 'number';
+const n2 = 'number, number';
 
 export function bitAndNumber(x: number, y: number): number {
   if (!isInteger(x) || !isInteger(y)) {
-    throw new Error('Integers expected in function bitAnd')
+    throw new Error('Integers expected in function bitAnd');
   }
 
-  return x & y
+  return x & y;
 }
-bitAndNumber.signature = n2
+bitAndNumber.signature = n2;
 
 export function bitNotNumber(x: number): number {
   if (!isInteger(x)) {
-    throw new Error('Integer expected in function bitNot')
+    throw new Error('Integer expected in function bitNot');
   }
 
-  return ~x
+  return ~x;
 }
-bitNotNumber.signature = n1
+bitNotNumber.signature = n1;
 
 export function bitOrNumber(x: number, y: number): number {
   if (!isInteger(x) || !isInteger(y)) {
-    throw new Error('Integers expected in function bitOr')
+    throw new Error('Integers expected in function bitOr');
   }
 
-  return x | y
+  return x | y;
 }
-bitOrNumber.signature = n2
+bitOrNumber.signature = n2;
 
 export function bitXorNumber(x: number, y: number): number {
   if (!isInteger(x) || !isInteger(y)) {
-    throw new Error('Integers expected in function bitXor')
+    throw new Error('Integers expected in function bitXor');
   }
 
-  return x ^ y
+  return x ^ y;
 }
-bitXorNumber.signature = n2
+bitXorNumber.signature = n2;
 
 export function leftShiftNumber(x: number, y: number): number {
   if (!isInteger(x) || !isInteger(y)) {
-    throw new Error('Integers expected in function leftShift')
+    throw new Error('Integers expected in function leftShift');
   }
 
-  return x << y
+  return x << y;
 }
-leftShiftNumber.signature = n2
+leftShiftNumber.signature = n2;
 
 export function rightArithShiftNumber(x: number, y: number): number {
   if (!isInteger(x) || !isInteger(y)) {
-    throw new Error('Integers expected in function rightArithShift')
+    throw new Error('Integers expected in function rightArithShift');
   }
 
-  return x >> y
+  return x >> y;
 }
-rightArithShiftNumber.signature = n2
+rightArithShiftNumber.signature = n2;
 
 export function rightLogShiftNumber(x: number, y: number): number {
   if (!isInteger(x) || !isInteger(y)) {
-    throw new Error('Integers expected in function rightLogShift')
+    throw new Error('Integers expected in function rightLogShift');
   }
 
-  return x >>> y
+  return x >>> y;
 }
-rightLogShiftNumber.signature = n2
+rightLogShiftNumber.signature = n2;

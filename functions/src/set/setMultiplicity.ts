@@ -1,13 +1,9 @@
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type {
-  MathArray,
-  Matrix,
-  MathNumericType
-} from '../../types/index.js'
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathArray, Matrix, MathNumericType } from '../../types/index.js';
 
-const name = 'setMultiplicity'
-const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index']
+const name = 'setMultiplicity';
+const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index'];
 
 export const createSetMultiplicity = /* #__PURE__ */ factory(
   name,
@@ -41,17 +37,17 @@ export const createSetMultiplicity = /* #__PURE__ */ factory(
       ): number {
         if (subset(size(a), new Index(0)) === 0) {
           // if empty, return 0
-          return 0
+          return 0;
         }
-        const b = flatten(Array.isArray(a) ? a : a.toArray())
-        let count = 0
+        const b = flatten(Array.isArray(a) ? a : a.toArray());
+        let count = 0;
         for (let i = 0; i < b.length; i++) {
           if (compareNatural(b[i], e) === 0) {
-            count++
+            count++;
           }
         }
-        return count
-      }
-    })
+        return count;
+      },
+    });
   }
-)
+);

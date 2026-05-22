@@ -4,5 +4,5 @@ export const falseDocs = {
   syntax: ['false'],
   description: 'Boolean value false',
   examples: ['false'],
-  seealso: ['true']
-}
+  seealso: ['true'],
+};

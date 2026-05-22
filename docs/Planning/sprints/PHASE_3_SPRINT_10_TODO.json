@@ -65,7 +65,10 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4],
-      "files": ["tools/benchmark/parallel/matmul.bench.ts", "tools/benchmark/parallel/elementwise.bench.ts"]
+      "files": [
+        "tools/benchmark/parallel/matmul.bench.ts",
+        "tools/benchmark/parallel/elementwise.bench.ts"
+      ]
     },
     {
       "id": 7,
@@ -75,7 +78,10 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4],
-      "files": ["parallel/tests/operations/matmul.test.ts", "parallel/tests/operations/elementwise.test.ts"]
+      "files": [
+        "parallel/tests/operations/matmul.test.ts",
+        "parallel/tests/operations/elementwise.test.ts"
+      ]
     }
   ],
   "successCriteria": [
@@ -97,9 +103,7 @@
     "parallel/tests/operations/elementwise.test.ts",
     "parallel/tests/operations/threshold.test.ts"
   ],
-  "filesModified": [
-    "parallel/src/index.ts"
-  ],
+  "filesModified": ["parallel/src/index.ts"],
   "totalEstimatedHours": 29,
   "completedAt": "2025-12-12",
   "notes": "Sprint 10 completes the parallel matrix operations layer. Features include: dedicated operation modules (matmul, elementwise, reduce, map) with clean APIs, threshold-based dispatch strategy for automatic parallel vs sequential decision, and comprehensive tests (155 total parallel tests). Operations include parallelMatmul, parallelMatvec, parallelTranspose, parallelOuter, parallelDot, parallelAdd/Subtract/Multiply/Divide, parallelScale, unary math functions (abs, sqrt, exp, log, sin, cos, tan), statistical operations (sum, mean, min, max, variance, std, norm, distance, histogram), and generic map/filter/find/sort/reduce. Benchmarks deferred to a later sprint."

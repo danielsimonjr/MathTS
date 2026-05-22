@@ -1,33 +1,33 @@
-import { factory } from '../../../utils/factory.js'
-import { DimensionError } from '../../../error/DimensionError.js'
+import { factory } from '../../../utils/factory.js';
+import { DimensionError } from '../../../error/DimensionError.js';
 import type {
   DataType,
   DenseMatrixData,
   MatrixCallback,
   TypedFunction,
   DenseMatrixConstructorData,
-  MatrixValue
-} from '../types.js'
+  MatrixValue,
+} from '../types.js';
 
 /**
  * Interface for DenseMatrix in algorithm context.
  * Uses types from shared types.ts.
  */
 interface DenseMatrix {
-  _data: DenseMatrixData
-  _size: number[]
-  _datatype?: DataType
-  createDenseMatrix(data: DenseMatrixConstructorData): DenseMatrix
+  _data: DenseMatrixData;
+  _size: number[];
+  _datatype?: DataType;
+  createDenseMatrix(data: DenseMatrixConstructorData): DenseMatrix;
 }
 
-const name = 'matAlgo13xDD'
-const dependencies = ['typed']
+const name = 'matAlgo13xDD';
+const dependencies = ['typed'];
 
 /**
  * Dependencies for matAlgo13xDD factory
  */
 interface MatAlgo13xDDDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
 export const createMatAlgo13xDD = /* #__PURE__ */ factory(
@@ -54,19 +54,19 @@ export const createMatAlgo13xDD = /* #__PURE__ */ factory(
       callback: MatrixCallback
     ): DenseMatrix {
       // a arrays
-      const adata = a._data
-      const asize = a._size
-      const adt: DataType = a._datatype
+      const adata = a._data;
+      const asize = a._size;
+      const adt: DataType = a._datatype;
       // b arrays
-      const bdata = b._data
-      const bsize = b._size
-      const bdt: DataType = b._datatype
+      const bdata = b._data;
+      const bsize = b._size;
+      const bdt: DataType = b._datatype;
       // c arrays
-      const csize: number[] = []
+      const csize: number[] = [];
 
       // validate dimensions
       if (asize.length !== bsize.length) {
-        throw new DimensionError(asize.length, bsize.length)
+        throw new DimensionError(asize.length, bsize.length);
       }
 
       // validate each one of the dimension sizes
@@ -74,41 +74,37 @@ export const createMatAlgo13xDD = /* #__PURE__ */ factory(
         // must match
         if (asize[s] !== bsize[s]) {
           throw new RangeError(
-            'Dimension mismatch. Matrix A (' +
-              asize +
-              ') must match Matrix B (' +
-              bsize +
-              ')'
-          )
+            'Dimension mismatch. Matrix A (' + asize + ') must match Matrix B (' + bsize + ')'
+          );
         }
         // update dimension in c
-        csize[s] = asize[s]
+        csize[s] = asize[s];
       }
 
       // datatype
-      let dt: DataType
+      let dt: DataType;
       // callback signature to use
-      let cf: MatrixCallback = callback
+      let cf: MatrixCallback = callback;
 
       // process data types
       if (typeof adt === 'string' && adt === bdt) {
         // datatype
-        dt = adt
+        dt = adt;
         // callback - typed.find returns the specialized function for the given types
-        cf = (typed.find(callback, [dt, dt]) as MatrixCallback) || callback
+        cf = (typed.find(callback, [dt, dt]) as MatrixCallback) || callback;
       }
 
       // populate cdata, iterate through dimensions
       const cdata: DenseMatrixData =
-        csize.length > 0 ? _iterate(cf, 0, csize, csize[0], adata, bdata) : []
+        csize.length > 0 ? _iterate(cf, 0, csize, csize[0], adata, bdata) : [];
 
       // c matrix
       return a.createDenseMatrix({
         data: cdata,
         size: csize,
-        datatype: dt
-      })
-    }
+        datatype: dt,
+      });
+    };
 
     /**
      * Recursive function to iterate through matrix dimensions.
@@ -130,13 +126,13 @@ export const createMatAlgo13xDD = /* #__PURE__ */ factory(
       bv: DenseMatrixData
     ): MatrixValue[] {
       // initialize array for this level
-      const cv: MatrixValue[] = []
+      const cv: MatrixValue[] = [];
       // check we reach the last level
       if (level === s.length - 1) {
         // loop arrays in last level
         for (let i = 0; i < n; i++) {
           // invoke callback and store value
-          cv[i] = f((av as MatrixValue[])[i], (bv as MatrixValue[])[i])
+          cv[i] = f((av as MatrixValue[])[i], (bv as MatrixValue[])[i]);
         }
       } else {
         // iterate current level
@@ -149,10 +145,10 @@ export const createMatAlgo13xDD = /* #__PURE__ */ factory(
             s[level + 1],
             (av as DenseMatrixData[])[j],
             (bv as DenseMatrixData[])[j]
-          )
+          );
         }
       }
-      return cv
+      return cv;
     }
   }
-)
+);

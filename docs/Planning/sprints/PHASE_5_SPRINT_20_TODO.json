@@ -15,7 +15,12 @@
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": ["Sprint 19"],
-      "files": ["functions/src/matrix/concat.ts", "functions/src/matrix/reshape.ts", "functions/src/matrix/flatten.ts", "functions/src/matrix/squeeze.ts"]
+      "files": [
+        "functions/src/matrix/concat.ts",
+        "functions/src/matrix/reshape.ts",
+        "functions/src/matrix/flatten.ts",
+        "functions/src/matrix/squeeze.ts"
+      ]
     },
     {
       "id": 2,
@@ -25,7 +30,12 @@
       "estimatedHours": 4,
       "complexity": "Low",
       "dependencies": ["Sprint 19"],
-      "files": ["functions/src/matrix/diag.ts", "functions/src/matrix/identity.ts", "functions/src/matrix/ones.ts", "functions/src/matrix/zeros.ts"]
+      "files": [
+        "functions/src/matrix/diag.ts",
+        "functions/src/matrix/identity.ts",
+        "functions/src/matrix/ones.ts",
+        "functions/src/matrix/zeros.ts"
+      ]
     },
     {
       "id": 3,
@@ -45,7 +55,11 @@
       "estimatedHours": 6,
       "complexity": "High",
       "dependencies": ["Sprint 19"],
-      "files": ["functions/src/matrix/kron.ts", "functions/src/matrix/expm.ts", "functions/src/matrix/sqrtm.ts"]
+      "files": [
+        "functions/src/matrix/kron.ts",
+        "functions/src/matrix/expm.ts",
+        "functions/src/matrix/sqrtm.ts"
+      ]
     },
     {
       "id": 5,
@@ -55,7 +69,11 @@
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4],
-      "files": ["functions/tests/matrix/shape.test.ts", "functions/tests/matrix/creation.test.ts", "functions/tests/matrix/products.test.ts"]
+      "files": [
+        "functions/tests/matrix/shape.test.ts",
+        "functions/tests/matrix/creation.test.ts",
+        "functions/tests/matrix/products.test.ts"
+      ]
     }
   ],
   "successCriteria": [
@@ -83,10 +101,7 @@
     "functions/tests/matrix/creation.test.ts",
     "functions/tests/matrix/products.test.ts"
   ],
-  "filesModified": [
-    "functions/src/matrix/index.ts",
-    "functions/src/index.ts"
-  ],
+  "filesModified": ["functions/src/matrix/index.ts", "functions/src/index.ts"],
   "totalEstimatedHours": 26,
   "notes": "Sprint 20 completes matrix functions with shape manipulation, creation utilities, and advanced matrix operations."
 }

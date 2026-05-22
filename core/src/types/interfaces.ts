@@ -22,7 +22,7 @@ export interface Scalar extends MathTSValue {
   multiply(other: Scalar): Scalar;
   divide(other: Scalar): Scalar;
   negate(): Scalar;
-  abs(): Scalar | number;  // Complex.abs() returns number (magnitude)
+  abs(): Scalar | number; // Complex.abs() returns number (magnitude)
 }
 
 /**
@@ -52,7 +52,11 @@ export interface MatrixBackend {
   // Advanced operations
   lu(data: Float64Array, n: number): { L: Float64Array; U: Float64Array; P: Int32Array };
   qr(data: Float64Array, m: number, n: number): { Q: Float64Array; R: Float64Array };
-  svd(data: Float64Array, m: number, n: number): { U: Float64Array; S: Float64Array; V: Float64Array };
+  svd(
+    data: Float64Array,
+    m: number,
+    n: number
+  ): { U: Float64Array; S: Float64Array; V: Float64Array };
   eig(data: Float64Array, n: number): { values: Float64Array; vectors: Float64Array };
 }
 

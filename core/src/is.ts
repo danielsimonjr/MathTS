@@ -310,7 +310,7 @@ export function isPartitionedMap(object: unknown): object is PartitionedMap {
 }
 
 export function isObjectWrappingMap(object: unknown): boolean {
-  if (\!isMap(object)) return false
+  if (!isMap(object)) return false
   const wrapper = object as { wrappedObject?: unknown, [Symbol.toStringTag]?: string }
   return wrapper[Symbol.toStringTag] === 'ObjectWrappingMap' && isObject(wrapper.wrappedObject)
 }

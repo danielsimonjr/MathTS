@@ -1,6 +1,6 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for complex conjugate operation
 interface BigNumberType {
@@ -12,15 +12,15 @@ interface FractionType {
 }
 
 interface ComplexType {
-  conjugate(): ComplexType
+  conjugate(): ComplexType;
 }
 
 interface ConjDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'conj'
-const dependencies = ['typed']
+const name = 'conj';
+const dependencies = ['typed'];
 
 export const createConj = /* #__PURE__ */ factory(
   name,
@@ -63,7 +63,7 @@ export const createConj = /* #__PURE__ */ factory(
       ),
       'Array | Matrix': typed.referToSelf(
         (self: (value: any) => any) => (x: any) => deepMap(x, self)
-      )
-    })
+      ),
+    });
   }
-)
+);

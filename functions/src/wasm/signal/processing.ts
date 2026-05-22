@@ -37,43 +37,43 @@ export function freqz(
 ): void {
   // For each frequency point
   for (let i: i32 = 0; i < wLen; i++) {
-    const iOffset: usize = <usize>i << 3
-    const omega: f64 = load<f64>(wPtr + iOffset)
+    const iOffset: usize = (<usize>i) << 3;
+    const omega: f64 = load<f64>(wPtr + iOffset);
 
     // Compute numerator B(e^jw)
-    let numReal: f64 = 0.0
-    let numImag: f64 = 0.0
+    let numReal: f64 = 0.0;
+    let numImag: f64 = 0.0;
 
     for (let k: i32 = 0; k < bLen; k++) {
-      const angle: f64 = -(<f64>k) * omega
-      const cosAngle: f64 = Math.cos(angle)
-      const sinAngle: f64 = Math.sin(angle)
-      const bk: f64 = load<f64>(bPtr + (<usize>k << 3))
+      const angle: f64 = -(<f64>k) * omega;
+      const cosAngle: f64 = Math.cos(angle);
+      const sinAngle: f64 = Math.sin(angle);
+      const bk: f64 = load<f64>(bPtr + ((<usize>k) << 3));
 
-      numReal += bk * cosAngle
-      numImag += bk * sinAngle
+      numReal += bk * cosAngle;
+      numImag += bk * sinAngle;
     }
 
     // Compute denominator A(e^jw)
-    let denReal: f64 = 0.0
-    let denImag: f64 = 0.0
+    let denReal: f64 = 0.0;
+    let denImag: f64 = 0.0;
 
     for (let k: i32 = 0; k < aLen; k++) {
-      const angle: f64 = -(<f64>k) * omega
-      const cosAngle: f64 = Math.cos(angle)
-      const sinAngle: f64 = Math.sin(angle)
-      const ak: f64 = load<f64>(aPtr + (<usize>k << 3))
+      const angle: f64 = -(<f64>k) * omega;
+      const cosAngle: f64 = Math.cos(angle);
+      const sinAngle: f64 = Math.sin(angle);
+      const ak: f64 = load<f64>(aPtr + ((<usize>k) << 3));
 
-      denReal += ak * cosAngle
-      denImag += ak * sinAngle
+      denReal += ak * cosAngle;
+      denImag += ak * sinAngle;
     }
 
     // Complex division: H = Num / Den
     // (a + bi) / (c + di) = ((ac + bd) + (bc - ad)i) / (c^2 + d^2)
-    const denMagSq: f64 = denReal * denReal + denImag * denImag
+    const denMagSq: f64 = denReal * denReal + denImag * denImag;
 
-    store<f64>(hRealPtr + iOffset, (numReal * denReal + numImag * denImag) / denMagSq)
-    store<f64>(hImagPtr + iOffset, (numImag * denReal - numReal * denImag) / denMagSq)
+    store<f64>(hRealPtr + iOffset, (numReal * denReal + numImag * denImag) / denMagSq);
+    store<f64>(hImagPtr + iOffset, (numImag * denReal - numReal * denImag) / denMagSq);
   }
 }
 
@@ -96,38 +96,38 @@ export function freqzUniform(
   hRealPtr: usize,
   hImagPtr: usize
 ): void {
-  const dw: f64 = Math.PI / <f64>n
+  const dw: f64 = Math.PI / <f64>n;
 
   for (let i: i32 = 0; i < n; i++) {
-    const iOffset: usize = <usize>i << 3
-    const omega: f64 = <f64>i * dw
+    const iOffset: usize = (<usize>i) << 3;
+    const omega: f64 = <f64>i * dw;
 
     // Compute numerator
-    let numReal: f64 = 0.0
-    let numImag: f64 = 0.0
+    let numReal: f64 = 0.0;
+    let numImag: f64 = 0.0;
 
     for (let k: i32 = 0; k < bLen; k++) {
-      const angle: f64 = -(<f64>k) * omega
-      const bk: f64 = load<f64>(bPtr + (<usize>k << 3))
-      numReal += bk * Math.cos(angle)
-      numImag += bk * Math.sin(angle)
+      const angle: f64 = -(<f64>k) * omega;
+      const bk: f64 = load<f64>(bPtr + ((<usize>k) << 3));
+      numReal += bk * Math.cos(angle);
+      numImag += bk * Math.sin(angle);
     }
 
     // Compute denominator
-    let denReal: f64 = 0.0
-    let denImag: f64 = 0.0
+    let denReal: f64 = 0.0;
+    let denImag: f64 = 0.0;
 
     for (let k: i32 = 0; k < aLen; k++) {
-      const angle: f64 = -(<f64>k) * omega
-      const ak: f64 = load<f64>(aPtr + (<usize>k << 3))
-      denReal += ak * Math.cos(angle)
-      denImag += ak * Math.sin(angle)
+      const angle: f64 = -(<f64>k) * omega;
+      const ak: f64 = load<f64>(aPtr + ((<usize>k) << 3));
+      denReal += ak * Math.cos(angle);
+      denImag += ak * Math.sin(angle);
     }
 
     // Complex division
-    const denMagSq: f64 = denReal * denReal + denImag * denImag
-    store<f64>(hRealPtr + iOffset, (numReal * denReal + numImag * denImag) / denMagSq)
-    store<f64>(hImagPtr + iOffset, (numImag * denReal - numReal * denImag) / denMagSq)
+    const denMagSq: f64 = denReal * denReal + denImag * denImag;
+    store<f64>(hRealPtr + iOffset, (numReal * denReal + numImag * denImag) / denMagSq);
+    store<f64>(hImagPtr + iOffset, (numImag * denReal - numReal * denImag) / denMagSq);
   }
 }
 
@@ -158,34 +158,34 @@ export function polyMultiply(
   cRealPtr: usize,
   cImagPtr: usize
 ): void {
-  const cLen: i32 = aLen + bLen - 1
+  const cLen: i32 = aLen + bLen - 1;
 
   // Initialize output to zero
   for (let i: i32 = 0; i < cLen; i++) {
-    const offset: usize = <usize>i << 3
-    store<f64>(cRealPtr + offset, 0.0)
-    store<f64>(cImagPtr + offset, 0.0)
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(cRealPtr + offset, 0.0);
+    store<f64>(cImagPtr + offset, 0.0);
   }
 
   // Convolution with complex multiplication
   for (let i: i32 = 0; i < cLen; i++) {
-    const iOffset: usize = <usize>i << 3
+    const iOffset: usize = (<usize>i) << 3;
     for (let j: i32 = 0; j < aLen; j++) {
-      const k: i32 = i - j
+      const k: i32 = i - j;
       if (k >= 0 && k < bLen) {
         // Complex multiplication: (ar + ai*i) * (br + bi*i)
-        const jOffset: usize = <usize>j << 3
-        const kOffset: usize = <usize>k << 3
-        const ar: f64 = load<f64>(aRealPtr + jOffset)
-        const ai: f64 = load<f64>(aImagPtr + jOffset)
-        const br: f64 = load<f64>(bRealPtr + kOffset)
-        const bi: f64 = load<f64>(bImagPtr + kOffset)
+        const jOffset: usize = (<usize>j) << 3;
+        const kOffset: usize = (<usize>k) << 3;
+        const ar: f64 = load<f64>(aRealPtr + jOffset);
+        const ai: f64 = load<f64>(aImagPtr + jOffset);
+        const br: f64 = load<f64>(bRealPtr + kOffset);
+        const bi: f64 = load<f64>(bImagPtr + kOffset);
 
-        const currReal: f64 = load<f64>(cRealPtr + iOffset)
-        const currImag: f64 = load<f64>(cImagPtr + iOffset)
+        const currReal: f64 = load<f64>(cRealPtr + iOffset);
+        const currImag: f64 = load<f64>(cImagPtr + iOffset);
 
-        store<f64>(cRealPtr + iOffset, currReal + ar * br - ai * bi)
-        store<f64>(cImagPtr + iOffset, currImag + ar * bi + ai * br)
+        store<f64>(cRealPtr + iOffset, currReal + ar * br - ai * bi);
+        store<f64>(cImagPtr + iOffset, currImag + ar * bi + ai * br);
       }
     }
   }
@@ -228,128 +228,128 @@ export function zpk2tf(
   denImagPtr: usize,
   workPtr: usize
 ): void {
-  const maxLen: i32 = zLen > pLen ? zLen : pLen
-  const tempSize: usize = <usize>(maxLen + 2) << 3
+  const maxLen: i32 = zLen > pLen ? zLen : pLen;
+  const tempSize: usize = (<usize>(maxLen + 2)) << 3;
 
   // Working memory layout:
   // tempReal1: workPtr
   // tempImag1: workPtr + tempSize
   // tempReal2: workPtr + 2*tempSize
   // tempImag2: workPtr + 3*tempSize
-  const tempReal1Ptr: usize = workPtr
-  const tempImag1Ptr: usize = workPtr + tempSize
-  const tempReal2Ptr: usize = workPtr + 2 * tempSize
-  const tempImag2Ptr: usize = workPtr + 3 * tempSize
+  const tempReal1Ptr: usize = workPtr;
+  const tempImag1Ptr: usize = workPtr + tempSize;
+  const tempReal2Ptr: usize = workPtr + 2 * tempSize;
+  const tempImag2Ptr: usize = workPtr + 3 * tempSize;
 
   // Build numerator from zeros
   // Start with polynomial "1"
-  store<f64>(tempReal1Ptr, 1.0)
-  store<f64>(tempImag1Ptr, 0.0)
-  let numLen: i32 = 1
+  store<f64>(tempReal1Ptr, 1.0);
+  store<f64>(tempImag1Ptr, 0.0);
+  let numLen: i32 = 1;
 
   for (let i: i32 = 0; i < zLen; i++) {
-    const iOffset: usize = <usize>i << 3
-    const zr: f64 = load<f64>(zRealPtr + iOffset)
-    const zi: f64 = load<f64>(zImagPtr + iOffset)
+    const iOffset: usize = (<usize>i) << 3;
+    const zr: f64 = load<f64>(zRealPtr + iOffset);
+    const zi: f64 = load<f64>(zImagPtr + iOffset);
 
     // Factor is [1, -zero[i]]
     // Multiply current polynomial by this factor
-    const newLen: i32 = numLen + 1
+    const newLen: i32 = numLen + 1;
 
     // Initialize new polynomial to zero
     for (let j: i32 = 0; j < newLen; j++) {
-      const jOffset: usize = <usize>j << 3
-      store<f64>(tempReal2Ptr + jOffset, 0.0)
-      store<f64>(tempImag2Ptr + jOffset, 0.0)
+      const jOffset: usize = (<usize>j) << 3;
+      store<f64>(tempReal2Ptr + jOffset, 0.0);
+      store<f64>(tempImag2Ptr + jOffset, 0.0);
     }
 
     // Convolution: c[m] = sum over j of a[j] * factor[m-j]
     // factor[0] = 1+0i, factor[1] = -zr - zi*i
     for (let j: i32 = 0; j < numLen; j++) {
-      const jOffset: usize = <usize>j << 3
-      const ar: f64 = load<f64>(tempReal1Ptr + jOffset)
-      const ai: f64 = load<f64>(tempImag1Ptr + jOffset)
+      const jOffset: usize = (<usize>j) << 3;
+      const ar: f64 = load<f64>(tempReal1Ptr + jOffset);
+      const ai: f64 = load<f64>(tempImag1Ptr + jOffset);
 
       // Multiply by factor[0] = 1+0i, add to c[j]
-      const jOut: usize = <usize>j << 3
-      store<f64>(tempReal2Ptr + jOut, load<f64>(tempReal2Ptr + jOut) + ar)
-      store<f64>(tempImag2Ptr + jOut, load<f64>(tempImag2Ptr + jOut) + ai)
+      const jOut: usize = (<usize>j) << 3;
+      store<f64>(tempReal2Ptr + jOut, load<f64>(tempReal2Ptr + jOut) + ar);
+      store<f64>(tempImag2Ptr + jOut, load<f64>(tempImag2Ptr + jOut) + ai);
 
       // Multiply by factor[1] = -zr - zi*i, add to c[j+1]
       // (ar + ai*i) * (-zr - zi*i) = -ar*zr + ai*zi + (-ar*zi - ai*zr)*i
-      const j1Out: usize = <usize>(j + 1) << 3
-      store<f64>(tempReal2Ptr + j1Out, load<f64>(tempReal2Ptr + j1Out) + (-ar * zr + ai * zi))
-      store<f64>(tempImag2Ptr + j1Out, load<f64>(tempImag2Ptr + j1Out) + (-ar * zi - ai * zr))
+      const j1Out: usize = (<usize>(j + 1)) << 3;
+      store<f64>(tempReal2Ptr + j1Out, load<f64>(tempReal2Ptr + j1Out) + (-ar * zr + ai * zi));
+      store<f64>(tempImag2Ptr + j1Out, load<f64>(tempImag2Ptr + j1Out) + (-ar * zi - ai * zr));
     }
 
     // Copy result back to temp1
     for (let j: i32 = 0; j < newLen; j++) {
-      const jOffset: usize = <usize>j << 3
-      store<f64>(tempReal1Ptr + jOffset, load<f64>(tempReal2Ptr + jOffset))
-      store<f64>(tempImag1Ptr + jOffset, load<f64>(tempImag2Ptr + jOffset))
+      const jOffset: usize = (<usize>j) << 3;
+      store<f64>(tempReal1Ptr + jOffset, load<f64>(tempReal2Ptr + jOffset));
+      store<f64>(tempImag1Ptr + jOffset, load<f64>(tempImag2Ptr + jOffset));
     }
-    numLen = newLen
+    numLen = newLen;
   }
 
   // Apply gain and copy to output
   for (let i: i32 = 0; i < numLen; i++) {
-    const iOffset: usize = <usize>i << 3
-    store<f64>(numRealPtr + iOffset, load<f64>(tempReal1Ptr + iOffset) * k)
-    store<f64>(numImagPtr + iOffset, load<f64>(tempImag1Ptr + iOffset) * k)
+    const iOffset: usize = (<usize>i) << 3;
+    store<f64>(numRealPtr + iOffset, load<f64>(tempReal1Ptr + iOffset) * k);
+    store<f64>(numImagPtr + iOffset, load<f64>(tempImag1Ptr + iOffset) * k);
   }
 
   // Build denominator from poles
   // Start with polynomial "1"
-  store<f64>(tempReal1Ptr, 1.0)
-  store<f64>(tempImag1Ptr, 0.0)
-  let denLen: i32 = 1
+  store<f64>(tempReal1Ptr, 1.0);
+  store<f64>(tempImag1Ptr, 0.0);
+  let denLen: i32 = 1;
 
   for (let i: i32 = 0; i < pLen; i++) {
-    const iOffset: usize = <usize>i << 3
-    const pr: f64 = load<f64>(pRealPtr + iOffset)
-    const pi: f64 = load<f64>(pImagPtr + iOffset)
+    const iOffset: usize = (<usize>i) << 3;
+    const pr: f64 = load<f64>(pRealPtr + iOffset);
+    const pi: f64 = load<f64>(pImagPtr + iOffset);
 
     // Factor is [1, -pole[i]]
-    const newLen: i32 = denLen + 1
+    const newLen: i32 = denLen + 1;
 
     // Initialize new polynomial to zero
     for (let j: i32 = 0; j < newLen; j++) {
-      const jOffset: usize = <usize>j << 3
-      store<f64>(tempReal2Ptr + jOffset, 0.0)
-      store<f64>(tempImag2Ptr + jOffset, 0.0)
+      const jOffset: usize = (<usize>j) << 3;
+      store<f64>(tempReal2Ptr + jOffset, 0.0);
+      store<f64>(tempImag2Ptr + jOffset, 0.0);
     }
 
     // Convolution
     for (let j: i32 = 0; j < denLen; j++) {
-      const jOffset: usize = <usize>j << 3
-      const ar: f64 = load<f64>(tempReal1Ptr + jOffset)
-      const ai: f64 = load<f64>(tempImag1Ptr + jOffset)
+      const jOffset: usize = (<usize>j) << 3;
+      const ar: f64 = load<f64>(tempReal1Ptr + jOffset);
+      const ai: f64 = load<f64>(tempImag1Ptr + jOffset);
 
       // Multiply by factor[0] = 1+0i, add to c[j]
-      const jOut: usize = <usize>j << 3
-      store<f64>(tempReal2Ptr + jOut, load<f64>(tempReal2Ptr + jOut) + ar)
-      store<f64>(tempImag2Ptr + jOut, load<f64>(tempImag2Ptr + jOut) + ai)
+      const jOut: usize = (<usize>j) << 3;
+      store<f64>(tempReal2Ptr + jOut, load<f64>(tempReal2Ptr + jOut) + ar);
+      store<f64>(tempImag2Ptr + jOut, load<f64>(tempImag2Ptr + jOut) + ai);
 
       // Multiply by factor[1] = -pr - pi*i, add to c[j+1]
-      const j1Out: usize = <usize>(j + 1) << 3
-      store<f64>(tempReal2Ptr + j1Out, load<f64>(tempReal2Ptr + j1Out) + (-ar * pr + ai * pi))
-      store<f64>(tempImag2Ptr + j1Out, load<f64>(tempImag2Ptr + j1Out) + (-ar * pi - ai * pr))
+      const j1Out: usize = (<usize>(j + 1)) << 3;
+      store<f64>(tempReal2Ptr + j1Out, load<f64>(tempReal2Ptr + j1Out) + (-ar * pr + ai * pi));
+      store<f64>(tempImag2Ptr + j1Out, load<f64>(tempImag2Ptr + j1Out) + (-ar * pi - ai * pr));
     }
 
     // Copy result back to temp1
     for (let j: i32 = 0; j < newLen; j++) {
-      const jOffset: usize = <usize>j << 3
-      store<f64>(tempReal1Ptr + jOffset, load<f64>(tempReal2Ptr + jOffset))
-      store<f64>(tempImag1Ptr + jOffset, load<f64>(tempImag2Ptr + jOffset))
+      const jOffset: usize = (<usize>j) << 3;
+      store<f64>(tempReal1Ptr + jOffset, load<f64>(tempReal2Ptr + jOffset));
+      store<f64>(tempImag1Ptr + jOffset, load<f64>(tempImag2Ptr + jOffset));
     }
-    denLen = newLen
+    denLen = newLen;
   }
 
   // Copy to output
   for (let i: i32 = 0; i < denLen; i++) {
-    const iOffset: usize = <usize>i << 3
-    store<f64>(denRealPtr + iOffset, load<f64>(tempReal1Ptr + iOffset))
-    store<f64>(denImagPtr + iOffset, load<f64>(tempImag1Ptr + iOffset))
+    const iOffset: usize = (<usize>i) << 3;
+    store<f64>(denRealPtr + iOffset, load<f64>(tempReal1Ptr + iOffset));
+    store<f64>(denImagPtr + iOffset, load<f64>(tempImag1Ptr + iOffset));
   }
 }
 
@@ -360,17 +360,12 @@ export function zpk2tf(
  * @param n - Length
  * @param resultPtr - Pointer to output |H| (f64)
  */
-export function magnitude(
-  hRealPtr: usize,
-  hImagPtr: usize,
-  n: i32,
-  resultPtr: usize
-): void {
+export function magnitude(hRealPtr: usize, hImagPtr: usize, n: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    const offset: usize = <usize>i << 3
-    const re: f64 = load<f64>(hRealPtr + offset)
-    const im: f64 = load<f64>(hImagPtr + offset)
-    store<f64>(resultPtr + offset, Math.sqrt(re * re + im * im))
+    const offset: usize = (<usize>i) << 3;
+    const re: f64 = load<f64>(hRealPtr + offset);
+    const im: f64 = load<f64>(hImagPtr + offset);
+    store<f64>(resultPtr + offset, Math.sqrt(re * re + im * im));
   }
 }
 
@@ -381,25 +376,20 @@ export function magnitude(
  * @param n - Length
  * @param resultPtr - Pointer to output |H| in dB (f64)
  */
-export function magnitudeDb(
-  hRealPtr: usize,
-  hImagPtr: usize,
-  n: i32,
-  resultPtr: usize
-): void {
-  const log10Factor: f64 = 20.0 / Math.LN10
+export function magnitudeDb(hRealPtr: usize, hImagPtr: usize, n: i32, resultPtr: usize): void {
+  const log10Factor: f64 = 20.0 / Math.LN10;
 
   for (let i: i32 = 0; i < n; i++) {
-    const offset: usize = <usize>i << 3
-    const re: f64 = load<f64>(hRealPtr + offset)
-    const im: f64 = load<f64>(hImagPtr + offset)
-    const mag: f64 = Math.sqrt(re * re + im * im)
+    const offset: usize = (<usize>i) << 3;
+    const re: f64 = load<f64>(hRealPtr + offset);
+    const im: f64 = load<f64>(hImagPtr + offset);
+    const mag: f64 = Math.sqrt(re * re + im * im);
 
     // Avoid log(0)
     if (mag > 1e-300) {
-      store<f64>(resultPtr + offset, log10Factor * Math.log(mag))
+      store<f64>(resultPtr + offset, log10Factor * Math.log(mag));
     } else {
-      store<f64>(resultPtr + offset, -300.0) // Very small number in dB
+      store<f64>(resultPtr + offset, -300.0); // Very small number in dB
     }
   }
 }
@@ -411,18 +401,13 @@ export function magnitudeDb(
  * @param n - Length
  * @param resultPtr - Pointer to output angle(H) in radians (f64)
  */
-export function phase(
-  hRealPtr: usize,
-  hImagPtr: usize,
-  n: i32,
-  resultPtr: usize
-): void {
+export function phase(hRealPtr: usize, hImagPtr: usize, n: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    const offset: usize = <usize>i << 3
+    const offset: usize = (<usize>i) << 3;
     store<f64>(
       resultPtr + offset,
       Math.atan2(load<f64>(hImagPtr + offset), load<f64>(hRealPtr + offset))
-    )
+    );
   }
 }
 
@@ -433,33 +418,33 @@ export function phase(
  * @param resultPtr - Pointer to output unwrapped phase (f64)
  */
 export function unwrapPhase(phaseInPtr: usize, n: i32, resultPtr: usize): void {
-  if (n < 1) return
+  if (n < 1) return;
 
-  store<f64>(resultPtr, load<f64>(phaseInPtr))
+  store<f64>(resultPtr, load<f64>(phaseInPtr));
 
-  if (n < 2) return
+  if (n < 2) return;
 
-  const twoPi: f64 = 2.0 * Math.PI
+  const twoPi: f64 = 2.0 * Math.PI;
 
   for (let i: i32 = 1; i < n; i++) {
-    const iOffset: usize = <usize>i << 3
-    const prevOffset: usize = <usize>(i - 1) << 3
+    const iOffset: usize = (<usize>i) << 3;
+    const prevOffset: usize = (<usize>(i - 1)) << 3;
 
-    let current: f64 = load<f64>(phaseInPtr + iOffset)
-    const prev: f64 = load<f64>(resultPtr + prevOffset)
-    let diff: f64 = current - prev
+    let current: f64 = load<f64>(phaseInPtr + iOffset);
+    const prev: f64 = load<f64>(resultPtr + prevOffset);
+    let diff: f64 = current - prev;
 
     // Wrap difference to [-pi, pi]
     while (diff > Math.PI) {
-      current -= twoPi
-      diff -= twoPi
+      current -= twoPi;
+      diff -= twoPi;
     }
     while (diff < -Math.PI) {
-      current += twoPi
-      diff += twoPi
+      current += twoPi;
+      diff += twoPi;
     }
 
-    store<f64>(resultPtr + iOffset, current)
+    store<f64>(resultPtr + iOffset, current);
   }
 }
 
@@ -484,45 +469,45 @@ export function groupDelay(
 ): void {
   if (n < 2) {
     for (let i: i32 = 0; i < n; i++) {
-      store<f64>(resultPtr + (<usize>i << 3), 0.0)
+      store<f64>(resultPtr + ((<usize>i) << 3), 0.0);
     }
-    return
+    return;
   }
 
   // Working memory layout:
   // phaseArray: workPtr (n elements)
   // unwrappedPhase: workPtr + n*8 (n elements)
-  const phasePtr: usize = workPtr
-  const unwrappedPtr: usize = workPtr + (<usize>n << 3)
+  const phasePtr: usize = workPtr;
+  const unwrappedPtr: usize = workPtr + ((<usize>n) << 3);
 
   // Compute phase
-  phase(hRealPtr, hImagPtr, n, phasePtr)
+  phase(hRealPtr, hImagPtr, n, phasePtr);
 
   // Unwrap phase
-  unwrapPhase(phasePtr, n, unwrappedPtr)
+  unwrapPhase(phasePtr, n, unwrappedPtr);
 
   // Compute negative derivative
   for (let i: i32 = 1; i < n - 1; i++) {
-    const iOffset: usize = <usize>i << 3
-    const prevOffset: usize = <usize>(i - 1) << 3
-    const nextOffset: usize = <usize>(i + 1) << 3
+    const iOffset: usize = (<usize>i) << 3;
+    const prevOffset: usize = (<usize>(i - 1)) << 3;
+    const nextOffset: usize = (<usize>(i + 1)) << 3;
 
-    const dPhase: f64 = load<f64>(unwrappedPtr + nextOffset) - load<f64>(unwrappedPtr + prevOffset)
-    const dw: f64 = load<f64>(wPtr + nextOffset) - load<f64>(wPtr + prevOffset)
+    const dPhase: f64 = load<f64>(unwrappedPtr + nextOffset) - load<f64>(unwrappedPtr + prevOffset);
+    const dw: f64 = load<f64>(wPtr + nextOffset) - load<f64>(wPtr + prevOffset);
 
-    store<f64>(resultPtr + iOffset, -dPhase / dw)
+    store<f64>(resultPtr + iOffset, -dPhase / dw);
   }
 
   // Endpoints use one-sided differences
-  const phase0: f64 = load<f64>(unwrappedPtr)
-  const phase1: f64 = load<f64>(unwrappedPtr + 8)
-  const w0: f64 = load<f64>(wPtr)
-  const w1: f64 = load<f64>(wPtr + 8)
-  store<f64>(resultPtr, -(phase1 - phase0) / (w1 - w0))
+  const phase0: f64 = load<f64>(unwrappedPtr);
+  const phase1: f64 = load<f64>(unwrappedPtr + 8);
+  const w0: f64 = load<f64>(wPtr);
+  const w1: f64 = load<f64>(wPtr + 8);
+  store<f64>(resultPtr, -(phase1 - phase0) / (w1 - w0));
 
-  const phaseNm1: f64 = load<f64>(unwrappedPtr + (<usize>(n - 1) << 3))
-  const phaseNm2: f64 = load<f64>(unwrappedPtr + (<usize>(n - 2) << 3))
-  const wNm1: f64 = load<f64>(wPtr + (<usize>(n - 1) << 3))
-  const wNm2: f64 = load<f64>(wPtr + (<usize>(n - 2) << 3))
-  store<f64>(resultPtr + (<usize>(n - 1) << 3), -(phaseNm1 - phaseNm2) / (wNm1 - wNm2))
+  const phaseNm1: f64 = load<f64>(unwrappedPtr + ((<usize>(n - 1)) << 3));
+  const phaseNm2: f64 = load<f64>(unwrappedPtr + ((<usize>(n - 2)) << 3));
+  const wNm1: f64 = load<f64>(wPtr + ((<usize>(n - 1)) << 3));
+  const wNm2: f64 = load<f64>(wPtr + ((<usize>(n - 2)) << 3));
+  store<f64>(resultPtr + ((<usize>(n - 1)) << 3), -(phaseNm1 - phaseNm2) / (wNm1 - wNm2));
 }

@@ -9,7 +9,7 @@ export const equalTextDocs = {
     'equalText("a", "A")',
     'equal("2e3", "2000")',
     'equalText("2e3", "2000")',
-    'equalText("B", ["A", "B", "C"])'
+    'equalText("B", ["A", "B", "C"])',
   ],
-  seealso: ['compare', 'compareNatural', 'compareText', 'equal']
-}
+  seealso: ['compare', 'compareNatural', 'compareText', 'equal'],
+};

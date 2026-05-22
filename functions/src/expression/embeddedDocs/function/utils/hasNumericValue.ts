@@ -13,14 +13,7 @@ export const hasNumericValueDocs = {
     'hasNumericValue(bignumber(500))',
     'hasNumericValue(fraction(0.125))',
     'hasNumericValue(2 + 3i)',
-    'hasNumericValue([2.3, "foo", false])'
+    'hasNumericValue([2.3, "foo", false])',
   ],
-  seealso: [
-    'isInteger',
-    'isZero',
-    'isNegative',
-    'isPositive',
-    'isNaN',
-    'isNumeric'
-  ]
-}
+  seealso: ['isInteger', 'isZero', 'isNegative', 'isPositive', 'isNaN', 'isNumeric'],
+};

@@ -1,12 +1,12 @@
-import { broadcastSizes, broadcastTo } from '../../../utils/array.js'
-import { deepStrictEqual } from '../../../utils/object.js'
+import { broadcastSizes, broadcastTo } from '../../../utils/array.js';
+import { deepStrictEqual } from '../../../utils/object.js';
 
 // Type definitions for Matrix interface
 interface Matrix {
-  size(): number[]
-  create(data: any, datatype?: string): Matrix
-  valueOf(): any
-  datatype(): string | undefined
+  size(): number[];
+  create(data: any, datatype?: string): Matrix;
+  valueOf(): any;
+  datatype(): string | undefined;
 }
 
 /**
@@ -21,14 +21,14 @@ interface Matrix {
 export function broadcast(A: Matrix, B: Matrix): [Matrix, Matrix] {
   if (deepStrictEqual(A.size(), B.size())) {
     // If matrices have the same size return them
-    return [A, B]
+    return [A, B];
   }
 
   // calculate the broadcasted sizes
-  const newSize = broadcastSizes(A.size(), B.size())
+  const newSize = broadcastSizes(A.size(), B.size());
 
   // return the array with the two broadcasted matrices
-  return [A, B].map((M) => _broadcastTo(M, newSize)) as [Matrix, Matrix]
+  return [A, B].map((M) => _broadcastTo(M, newSize)) as [Matrix, Matrix];
 }
 
 /**
@@ -41,7 +41,7 @@ export function broadcast(A: Matrix, B: Matrix): [Matrix, Matrix] {
  */
 function _broadcastTo(M: Matrix, size: number[]): Matrix {
   if (deepStrictEqual(M.size(), size)) {
-    return M
+    return M;
   }
-  return M.create(broadcastTo(M.valueOf(), size), M.datatype())
+  return M.create(broadcastTo(M.valueOf(), size), M.datatype());
 }

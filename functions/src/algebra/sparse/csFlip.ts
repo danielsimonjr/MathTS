@@ -9,5 +9,5 @@
  */
 export function csFlip(i: number): number {
   // flip the value
-  return -i - 2
+  return -i - 2;
 }

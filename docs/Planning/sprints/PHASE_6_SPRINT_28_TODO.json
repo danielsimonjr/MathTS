@@ -25,7 +25,13 @@
       "estimatedHours": 4,
       "complexity": "Low",
       "dependencies": [1],
-      "files": ["core/package.json", "matrix/package.json", "functions/package.json", "parallel/package.json", "expression/package.json"]
+      "files": [
+        "core/package.json",
+        "matrix/package.json",
+        "functions/package.json",
+        "parallel/package.json",
+        "expression/package.json"
+      ]
     },
     {
       "id": 3,
@@ -45,7 +51,11 @@
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": [1],
-      "files": ["tools/benchmark/regression/matmul.bench.ts", "tools/benchmark/regression/fft.bench.ts", ".github/workflows/benchmark.yml"]
+      "files": [
+        "tools/benchmark/regression/matmul.bench.ts",
+        "tools/benchmark/regression/fft.bench.ts",
+        ".github/workflows/benchmark.yml"
+      ]
     },
     {
       "id": 5,

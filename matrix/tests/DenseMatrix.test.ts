@@ -420,9 +420,7 @@ describe('DenseMatrix', () => {
     });
 
     it('should compute Frobenius norm', () => {
-      const m = DenseMatrix.fromArray([
-        [3, 4],
-      ]);
+      const m = DenseMatrix.fromArray([[3, 4]]);
       expect(m.norm()).toBe(5); // sqrt(9 + 16) = 5
     });
 

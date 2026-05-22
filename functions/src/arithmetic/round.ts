@@ -1,57 +1,57 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import { nearlyEqual, splitNumber } from '../utils/number.js'
-import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js'
-import { roundNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import { nearlyEqual, splitNumber } from '../utils/number.js';
+import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
+import { roundNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for dependency injection
 interface Matrix {
-  size(): number[]
-  storage(): string
-  valueOf(): unknown[] | unknown[][]
+  size(): number[];
+  storage(): string;
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface BigNumberType {
-  isInteger(): boolean
-  toNumber(): number
-  toDecimalPlaces(n: number): BigNumberType
+  isInteger(): boolean;
+  toNumber(): number;
+  toDecimalPlaces(n: number): BigNumberType;
 }
 
 interface BigNumberConstructor {
-  new (value: number | BigNumberType): BigNumberType
+  new (value: number | BigNumberType): BigNumberType;
 }
 
 interface ComplexType {
-  round(n?: number): ComplexType
+  round(n?: number): ComplexType;
 }
 
 interface FractionType {
-  round(n?: number): FractionType
+  round(n?: number): FractionType;
 }
 
 interface UnitType {
-  toNumeric(unit: UnitType): number | BigNumberType
-  multiply(value: number | BigNumberType): UnitType
+  toNumeric(unit: UnitType): number | BigNumberType;
+  multiply(value: number | BigNumberType): UnitType;
 }
 
 interface RoundDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  matrix: (data: unknown) => Matrix
-  equalScalar: TypedFunction
-  zeros: (size: number[], storage?: string) => Matrix
-  BigNumber: BigNumberConstructor
-  DenseMatrix: unknown
+  typed: TypedFunction;
+  config: ConfigOptions;
+  matrix: (data: unknown) => Matrix;
+  equalScalar: TypedFunction;
+  zeros: (size: number[], storage?: string) => Matrix;
+  BigNumber: BigNumberConstructor;
+  DenseMatrix: unknown;
 }
 
-const NO_INT = 'Number of decimals in function round must be an integer'
+const NO_INT = 'Number of decimals in function round must be an integer';
 
-const name = 'round'
+const name = 'round';
 const dependencies = [
   'typed',
   'config',
@@ -59,27 +59,19 @@ const dependencies = [
   'equalScalar',
   'zeros',
   'BigNumber',
-  'DenseMatrix'
-]
+  'DenseMatrix',
+];
 
 export const createRound = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    config,
-    matrix,
-    equalScalar,
-    zeros,
-    BigNumber,
-    DenseMatrix
-  }: RoundDependencies) => {
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
-    const matAlgo14xDs = createMatAlgo14xDs({ typed })
+  ({ typed, config, matrix, equalScalar, zeros, BigNumber, DenseMatrix }: RoundDependencies) => {
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
+    const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
     function toExponent(epsilon: number): number {
-      return Math.abs(splitNumber(epsilon).exponent)
+      return Math.abs(splitNumber(epsilon).exponent);
     }
 
     /**
@@ -129,102 +121,73 @@ export const createRound = /* #__PURE__ */ factory(
     return typed(name, {
       number: function (x: number): number {
         // Handle round off errors by first rounding to relTol precision
-        const xEpsilon = roundNumber(x, toExponent(config.relTol))
-        const xSelected = nearlyEqual(x, xEpsilon, config.relTol, config.absTol)
-          ? xEpsilon
-          : x
-        return roundNumber(xSelected)
+        const xEpsilon = roundNumber(x, toExponent(config.relTol));
+        const xSelected = nearlyEqual(x, xEpsilon, config.relTol, config.absTol) ? xEpsilon : x;
+        return roundNumber(xSelected);
       },
 
       'number, number': function (x: number, n: number): number {
         // Same as number: unless user specifies more decimals than relTol
-        const epsilonExponent = toExponent(config.relTol)
+        const epsilonExponent = toExponent(config.relTol);
         if (n >= epsilonExponent) {
-          return roundNumber(x, n)
+          return roundNumber(x, n);
         }
 
-        const xEpsilon = roundNumber(x, epsilonExponent)
-        const xSelected = nearlyEqual(x, xEpsilon, config.relTol, config.absTol)
-          ? xEpsilon
-          : x
-        return roundNumber(xSelected, n)
+        const xEpsilon = roundNumber(x, epsilonExponent);
+        const xSelected = nearlyEqual(x, xEpsilon, config.relTol, config.absTol) ? xEpsilon : x;
+        return roundNumber(xSelected, n);
       },
 
-      'number, BigNumber': function (
-        x: number,
-        n: BigNumberType
-      ): BigNumberType {
+      'number, BigNumber': function (x: number, n: BigNumberType): BigNumberType {
         if (!n.isInteger()) {
-          throw new TypeError(NO_INT)
+          throw new TypeError(NO_INT);
         }
 
-        return new BigNumber(x).toDecimalPlaces(n.toNumber())
+        return new BigNumber(x).toDecimalPlaces(n.toNumber());
       },
 
       Complex: function (x: ComplexType): ComplexType {
-        return x.round()
+        return x.round();
       },
 
       'Complex, number': function (x: ComplexType, n: number): ComplexType {
         if (n % 1) {
-          throw new TypeError(NO_INT)
+          throw new TypeError(NO_INT);
         }
 
-        return x.round(n)
+        return x.round(n);
       },
 
-      'Complex, BigNumber': function (
-        x: ComplexType,
-        n: BigNumberType
-      ): ComplexType {
+      'Complex, BigNumber': function (x: ComplexType, n: BigNumberType): ComplexType {
         if (!n.isInteger()) {
-          throw new TypeError(NO_INT)
+          throw new TypeError(NO_INT);
         }
 
-        const _n = n.toNumber()
-        return x.round(_n)
+        const _n = n.toNumber();
+        return x.round(_n);
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
         // Handle round off errors by first rounding to relTol precision
-        const xEpsilon = new BigNumber(x).toDecimalPlaces(
-          toExponent(config.relTol)
-        )
-        const xSelected = bigNearlyEqual(
-          x,
-          xEpsilon,
-          config.relTol,
-          config.absTol
-        )
-          ? xEpsilon
-          : x
-        return xSelected.toDecimalPlaces(0)
+        const xEpsilon = new BigNumber(x).toDecimalPlaces(toExponent(config.relTol));
+        const xSelected = bigNearlyEqual(x, xEpsilon, config.relTol, config.absTol) ? xEpsilon : x;
+        return xSelected.toDecimalPlaces(0);
       },
 
-      'BigNumber, BigNumber': function (
-        x: BigNumberType,
-        n: BigNumberType
-      ): BigNumberType {
+      'BigNumber, BigNumber': function (x: BigNumberType, n: BigNumberType): BigNumberType {
         if (!n.isInteger()) {
-          throw new TypeError(NO_INT)
+          throw new TypeError(NO_INT);
         }
 
         // Same as BigNumber: unless user specifies more decimals than relTol
-        const epsilonExponent = toExponent(config.relTol)
+        const epsilonExponent = toExponent(config.relTol);
         if ((n as unknown as number) >= epsilonExponent) {
-          return x.toDecimalPlaces(n.toNumber())
+          return x.toDecimalPlaces(n.toNumber());
         }
 
-        const xEpsilon = x.toDecimalPlaces(epsilonExponent)
-        const xSelected = bigNearlyEqual(
-          x,
-          xEpsilon,
-          config.relTol,
-          config.absTol
-        )
-          ? xEpsilon
-          : x
-        return xSelected.toDecimalPlaces(n.toNumber())
+        const xEpsilon = x.toDecimalPlaces(epsilonExponent);
+        const xSelected = bigNearlyEqual(x, xEpsilon, config.relTol, config.absTol) ? xEpsilon : x;
+        return xSelected.toDecimalPlaces(n.toNumber());
       },
 
       // bigints can't be rounded
@@ -233,31 +196,28 @@ export const createRound = /* #__PURE__ */ factory(
       'bigint, BigNumber': (b: bigint, _dummy: BigNumberType): bigint => b,
 
       Fraction: function (x: FractionType): FractionType {
-        return x.round()
+        return x.round();
       },
 
       'Fraction, number': function (x: FractionType, n: number): FractionType {
         if (n % 1) {
-          throw new TypeError(NO_INT)
+          throw new TypeError(NO_INT);
         }
-        return x.round(n)
+        return x.round(n);
       },
 
-      'Fraction, BigNumber': function (
-        x: FractionType,
-        n: BigNumberType
-      ): FractionType {
+      'Fraction, BigNumber': function (x: FractionType, n: BigNumberType): FractionType {
         if (!n.isInteger()) {
-          throw new TypeError(NO_INT)
+          throw new TypeError(NO_INT);
         }
-        return x.round(n.toNumber())
+        return x.round(n.toNumber());
       },
 
       'Unit, number, Unit': typed.referToSelf(
         (self: TypedFunction) =>
           function (x: UnitType, n: number, unit: UnitType): UnitType {
-            const valueless = x.toNumeric(unit)
-            return unit.multiply(self(valueless, n) as number | BigNumberType)
+            const valueless = x.toNumeric(unit);
+            return unit.multiply(self(valueless, n) as number | BigNumberType);
           }
       ),
 
@@ -275,16 +235,15 @@ export const createRound = /* #__PURE__ */ factory(
             unit: UnitType
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since round(0) = 0
-            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as unknown[] | Matrix
+            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as
+              | unknown[]
+              | Matrix;
           }
       ),
 
       'Array | Matrix | Unit, Unit': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            x: unknown[] | Matrix | UnitType,
-            unit: UnitType
-          ): unknown[] | Matrix | UnitType =>
+          (x: unknown[] | Matrix | UnitType, unit: UnitType): unknown[] | Matrix | UnitType =>
             self(x, 0, unit) as unknown[] | Matrix | UnitType
       ),
 
@@ -292,21 +251,21 @@ export const createRound = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix => {
             // deep map collection, skip zeros since round(0) = 0
-            return deepMap(x as unknown[], self, true) as unknown[] | Matrix
+            return deepMap(x as unknown[], self, true) as unknown[] | Matrix;
           }
       ),
 
       'SparseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, n: number | BigNumberType): Matrix => {
-            return matAlgo11xS0s(x as any, n, self, false) as any as Matrix
+            return matAlgo11xS0s(x as any, n, self, false) as any as Matrix;
           }
       ),
 
       'DenseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, n: number | BigNumberType): Matrix => {
-            return matAlgo14xDs(x as any, n, self, false) as any as Matrix
+            return matAlgo14xDs(x as any, n, self, false) as any as Matrix;
           }
       ),
 
@@ -314,56 +273,41 @@ export const createRound = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[], n: number | BigNumberType): unknown[] => {
             // use matrix implementation
-            return (matAlgo14xDs(
-              matrix(x) as any,
-              n,
-              self,
-              false
-            ) as any).valueOf() as unknown[]
+            return (matAlgo14xDs(matrix(x) as any, n, self, false) as any).valueOf() as unknown[];
           }
       ),
 
-      'number | Complex | BigNumber | Fraction, SparseMatrix':
-        typed.referToSelf(
-          (self: TypedFunction) =>
-            (
-              x: number | ComplexType | BigNumberType | FractionType,
-              n: Matrix
-            ): Matrix => {
-              // check scalar is zero
-              if (equalScalar(x, 0)) {
-                // do not execute algorithm, result will be a zero matrix
-                return zeros(n.size(), n.storage())
-              }
-              return matAlgo12xSfs(n as any, x, self, true) as any as Matrix
-            }
-        ),
-
-      'number | Complex | BigNumber | Fraction, DenseMatrix': typed.referToSelf(
+      'number | Complex | BigNumber | Fraction, SparseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            x: number | ComplexType | BigNumberType | FractionType,
-            n: Matrix
-          ): Matrix => {
+          (x: number | ComplexType | BigNumberType | FractionType, n: Matrix): Matrix => {
             // check scalar is zero
             if (equalScalar(x, 0)) {
               // do not execute algorithm, result will be a zero matrix
-              return zeros(n.size(), n.storage())
+              return zeros(n.size(), n.storage());
             }
-            return matAlgo14xDs(n as any, x, self, true) as any as Matrix
+            return matAlgo12xSfs(n as any, x, self, true) as any as Matrix;
+          }
+      ),
+
+      'number | Complex | BigNumber | Fraction, DenseMatrix': typed.referToSelf(
+        (self: TypedFunction) =>
+          (x: number | ComplexType | BigNumberType | FractionType, n: Matrix): Matrix => {
+            // check scalar is zero
+            if (equalScalar(x, 0)) {
+              // do not execute algorithm, result will be a zero matrix
+              return zeros(n.size(), n.storage());
+            }
+            return matAlgo14xDs(n as any, x, self, true) as any as Matrix;
           }
       ),
 
       'number | Complex | BigNumber | Fraction, Array': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            x: number | ComplexType | BigNumberType | FractionType,
-            n: unknown[]
-          ): unknown[] => {
+          (x: number | ComplexType | BigNumberType | FractionType, n: unknown[]): unknown[] => {
             // use matrix implementation
-            return (matAlgo14xDs(matrix(n) as any, x, self, true) as any).valueOf() as unknown[]
+            return (matAlgo14xDs(matrix(n) as any, x, self, true) as any).valueOf() as unknown[];
           }
-      )
-    })
+      ),
+    });
   }
-)
+);

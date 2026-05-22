@@ -296,9 +296,7 @@ describe('JSBackend', () => {
     });
 
     it('should compute Frobenius norm', () => {
-      const a = DenseMatrix.fromArray([
-        [3, 4],
-      ]);
+      const a = DenseMatrix.fromArray([[3, 4]]);
       expect(backend.norm(a)).toBe(5); // sqrt(9 + 16)
     });
 

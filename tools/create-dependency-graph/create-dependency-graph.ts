@@ -23,7 +23,7 @@ interface Dependency {
   file: string;
   imports: string[];
   reExport?: boolean;
-  typeOnly?: boolean;  // Track type-only imports
+  typeOnly?: boolean; // Track type-only imports
 }
 
 interface ExternalDependency {
@@ -45,7 +45,7 @@ interface FileExports {
   classes: string[];
   functions: string[];
   constants: string[];
-  reExported: string[];  // Track re-exported symbols
+  reExported: string[]; // Track re-exported symbols
 }
 
 interface ParsedFile {
@@ -80,7 +80,7 @@ interface Statistics {
   totalConstants: number;
   totalReExports: number;
   totalTypeOnlyImports: number;
-  runtimeCircularDeps: number;  // Excludes type-only cycles
+  runtimeCircularDeps: number; // Excludes type-only cycles
   typeOnlyCircularDeps: number; // Type-only cycles (not runtime issues)
   unusedFilesCount: number;
   unusedExportsCount: number;
@@ -109,15 +109,15 @@ interface PackageJson {
 }
 
 interface WorkspacePackage {
-  name: string;       // npm name, e.g., "@danielsimonjr/mathts-core"
-  directory: string;  // relative dir, e.g., "core"
-  srcDir: string;     // relative src dir, e.g., "core/src"
+  name: string; // npm name, e.g., "@danielsimonjr/mathts-core"
+  directory: string; // relative dir, e.g., "core"
+  srcDir: string; // relative src dir, e.g., "core/src"
 }
 
 interface WorkspaceDependency {
-  package: string;     // workspace package name
-  directory: string;   // workspace package directory
-  imports: string[];   // imported symbols
+  package: string; // workspace package name
+  directory: string; // workspace package directory
+  imports: string[]; // imported symbols
 }
 
 // CLI options interface
@@ -234,7 +234,9 @@ function detectWorkspaces(rootDir: string): Map<string, WorkspacePackage> {
                   srcDir: srcDir.replace(/\\/g, '/'),
                 });
               }
-            } catch { /* skip invalid package.json */ }
+            } catch {
+              /* skip invalid package.json */
+            }
           }
         }
       } else {
@@ -251,11 +253,15 @@ function detectWorkspaces(rootDir: string): Map<string, WorkspacePackage> {
                 srcDir: srcDir.replace(/\\/g, '/'),
               });
             }
-          } catch { /* skip invalid package.json */ }
+          } catch {
+            /* skip invalid package.json */
+          }
         }
       }
     }
-  } catch { /* no package.json or no workspaces field */ }
+  } catch {
+    /* no package.json or no workspaces field */
+  }
 
   return workspaces;
 }
@@ -281,7 +287,11 @@ function getAllTsFiles(dir: string, files: string[] = []): string[] {
 
     if (stat.isDirectory()) {
       getAllTsFiles(fullPath, files);
-    } else if (entry.endsWith('.ts') && !entry.endsWith('.test.ts') && !entry.endsWith('.spec.ts')) {
+    } else if (
+      entry.endsWith('.ts') &&
+      !entry.endsWith('.test.ts') &&
+      !entry.endsWith('.spec.ts')
+    ) {
       files.push(fullPath);
     }
   }
@@ -338,7 +348,7 @@ type ReExportMap = Map<string, Set<string>>;
  */
 function buildReExportMap(sourceFiles: ParsedFile[]): ReExportMap {
   const reExportMap: ReExportMap = new Map();
-  const sourceFilePaths = new Set(sourceFiles.map(f => f.path));
+  const sourceFilePaths = new Set(sourceFiles.map((f) => f.path));
 
   // Find all barrel files (files with re-exports)
   for (const file of sourceFiles) {
@@ -407,8 +417,11 @@ function traceReExports(importedPath: string, reExportMap: ReExportMap): Set<str
  * Traces imports through barrel files (index.ts) to find all source files
  * that are indirectly tested through re-exports.
  */
-function analyzeTestCoverage(sourceFiles: ParsedFile[], testFiles: ParsedFile[]): TestCoverageAnalysis {
-  const sourceFilePaths = new Set(sourceFiles.map(f => f.path));
+function analyzeTestCoverage(
+  sourceFiles: ParsedFile[],
+  testFiles: ParsedFile[]
+): TestCoverageAnalysis {
+  const sourceFilePaths = new Set(sourceFiles.map((f) => f.path));
   const coverageMap = new Map<string, string[]>();
   const testToSourceMap = new Map<string, string[]>();
 
@@ -486,7 +499,7 @@ function analyzeTestCoverage(sourceFiles: ParsedFile[], testFiles: ParsedFile[])
   }
 
   return {
-    sourceFiles: sourceFiles.map(f => f.path),
+    sourceFiles: sourceFiles.map((f) => f.path),
     testFiles,
     coverageMap,
     testedFiles,
@@ -513,8 +526,8 @@ function parseFile(filePath: string): ParsedFile {
 
   // Strip comments for import/export parsing (prevents picking up imports in JSDoc examples)
   const code = content
-    .replace(/\/\*[\s\S]*?\*\//g, '')   // Remove block comments (/** ... */ and /* ... */)
-    .replace(/\/\/.*$/gm, '');          // Remove single-line comments
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments (/** ... */ and /* ... */)
+    .replace(/\/\/.*$/gm, ''); // Remove single-line comments
 
   const result: ParsedFile = {
     path: relativePath,
@@ -533,17 +546,53 @@ function parseFile(filePath: string): ParsedFile {
       classes: [],
       functions: [],
       constants: [],
-      reExported: []
+      reExported: [],
     },
-    description: extractDescription(content)
+    description: extractDescription(content),
   };
 
   // Parse imports - enhanced to detect type-only imports
   // Matches: import type { ... }, import { type X, Y }, import X from, import * as X from
-  const importRegex = /import\s+(type\s+)?(?:(?:{([^}]+)}|(\w+)|\*\s+as\s+(\w+))(?:\s*,\s*(?:{([^}]+)}|(\w+)))?)\s+from\s+['"]([^'"]+)['"]/g;
+  const importRegex =
+    /import\s+(type\s+)?(?:(?:{([^}]+)}|(\w+)|\*\s+as\s+(\w+))(?:\s*,\s*(?:{([^}]+)}|(\w+)))?)\s+from\s+['"]([^'"]+)['"]/g;
   let match: RegExpExecArray | null;
 
-  const nodeBuiltins = ['fs', 'path', 'url', 'crypto', 'util', 'stream', 'events', 'buffer', 'os', 'child_process', 'http', 'https', 'net', 'dns', 'tls', 'zlib', 'readline', 'assert', 'cluster', 'dgram', 'domain', 'inspector', 'module', 'perf_hooks', 'process', 'punycode', 'querystring', 'repl', 'string_decoder', 'timers', 'tty', 'v8', 'vm', 'worker_threads'];
+  const nodeBuiltins = [
+    'fs',
+    'path',
+    'url',
+    'crypto',
+    'util',
+    'stream',
+    'events',
+    'buffer',
+    'os',
+    'child_process',
+    'http',
+    'https',
+    'net',
+    'dns',
+    'tls',
+    'zlib',
+    'readline',
+    'assert',
+    'cluster',
+    'dgram',
+    'domain',
+    'inspector',
+    'module',
+    'perf_hooks',
+    'process',
+    'punycode',
+    'querystring',
+    'repl',
+    'string_decoder',
+    'timers',
+    'tty',
+    'v8',
+    'vm',
+    'worker_threads',
+  ];
 
   while ((match = importRegex.exec(code)) !== null) {
     const isTypeOnlyImport = !!match[1]; // "import type" prefix
@@ -556,11 +605,14 @@ function parseFile(filePath: string): ParsedFile {
     let hasRuntimeImport = !isTypeOnlyImport;
 
     if (namedImports) {
-      const importItems = namedImports.split(',').map(s => s.trim());
+      const importItems = namedImports.split(',').map((s) => s.trim());
       for (const item of importItems) {
         // Check for inline type imports: import { type Foo, Bar }
         const isInlineType = item.startsWith('type ');
-        const name = item.replace(/^type\s+/, '').split(' as ')[0].trim();
+        const name = item
+          .replace(/^type\s+/, '')
+          .split(' as ')[0]
+          .trim();
         if (name) {
           imports.push(name);
           // If any import is NOT a type, it's a runtime import
@@ -582,23 +634,23 @@ function parseFile(filePath: string): ParsedFile {
       result.internalDependencies.push({
         file: source,
         imports: imports,
-        typeOnly: typeOnly
+        typeOnly: typeOnly,
       });
     } else if (wsPackage) {
       result.workspaceDependencies.push({
         package: wsPackage.name,
         directory: wsPackage.directory,
-        imports: imports
+        imports: imports,
       });
     } else if (source.startsWith('node:') || nodeBuiltins.includes(source.split('/')[0])) {
       result.nodeDependencies.push({
         module: source.replace('node:', ''),
-        imports: imports
+        imports: imports,
       });
     } else {
       result.externalDependencies.push({
         package: source,
-        imports: imports
+        imports: imports,
       });
     }
   }
@@ -607,7 +659,10 @@ function parseFile(filePath: string): ParsedFile {
   // Named exports: export { foo, bar }
   const namedExportRegex = /export\s*{\s*([^}]+)\s*}/g;
   while ((match = namedExportRegex.exec(code)) !== null) {
-    const exports = match[1].split(',').map(s => cleanExportName(s.split(' as ')[0])).filter(Boolean);
+    const exports = match[1]
+      .split(',')
+      .map((s) => cleanExportName(s.split(' as ')[0]))
+      .filter(Boolean);
     result.exports.named.push(...exports);
   }
 
@@ -669,13 +724,13 @@ function parseFile(filePath: string): ParsedFile {
       result.workspaceDependencies.push({
         package: reWs.name,
         directory: reWs.directory,
-        imports: ['*']
+        imports: ['*'],
       });
     } else {
       result.internalDependencies.push({
         file: reSource,
         imports: ['*'],
-        reExport: true
+        reExport: true,
       });
     }
     result.exports.reExported.push(`* from ${reSource}`);
@@ -684,20 +739,23 @@ function parseFile(filePath: string): ParsedFile {
   // Re-exports: export { foo } from
   const reExportNamedRegex = /export\s*{\s*([^}]+)\s*}\s*from\s+['"]([^'"]+)['"]/g;
   while ((match = reExportNamedRegex.exec(code)) !== null) {
-    const exports = match[1].split(',').map(s => cleanExportName(s.split(' as ')[0])).filter(Boolean);
+    const exports = match[1]
+      .split(',')
+      .map((s) => cleanExportName(s.split(' as ')[0]))
+      .filter(Boolean);
     const reSource = match[2];
     const reWs = workspaceMap.get(reSource);
     if (reWs) {
       result.workspaceDependencies.push({
         package: reWs.name,
         directory: reWs.directory,
-        imports: exports
+        imports: exports,
       });
     } else {
       result.internalDependencies.push({
         file: reSource,
         imports: exports,
-        reExport: true
+        reExport: true,
       });
     }
     result.exports.named.push(...exports);
@@ -713,14 +771,14 @@ function parseFile(filePath: string): ParsedFile {
       result.workspaceDependencies.push({
         package: reWs.name,
         directory: reWs.directory,
-        imports: ['*']
+        imports: ['*'],
       });
     } else {
       result.internalDependencies.push({
         file: reSource,
         imports: ['*'],
         reExport: true,
-        typeOnly: true
+        typeOnly: true,
       });
     }
     result.exports.reExported.push(`type * from ${match[1]}`);
@@ -738,13 +796,12 @@ function parseFile(filePath: string): ParsedFile {
  * Extract file description from comments
  */
 
-
 /**
  * Generate a meaningful fallback description from file metadata
  */
 function generateFallbackDescription(file: ParsedFile): string {
   const fileName = basename(file.path, '.ts');
-  
+
   // For index files, describe what they re-export
   if (fileName === 'index') {
     if (file.exports.reExported.length > 0) {
@@ -758,11 +815,12 @@ function generateFallbackDescription(file: ParsedFile): string {
   }
 
   // For type-only files
-  const hasOnlyTypes = file.exports.named.length === 0 && 
+  const hasOnlyTypes =
+    file.exports.named.length === 0 &&
     !file.exports.default &&
     (file.exports.interfaces.length > 0 || file.exports.types.length > 0);
   if (hasOnlyTypes) {
-    return `Type definitions (${file.exports.interfaces.length} interfaces, ${file.exports.types.filter(t => !file.exports.interfaces.includes(t)).length} type aliases)`;
+    return `Type definitions (${file.exports.interfaces.length} interfaces, ${file.exports.types.filter((t) => !file.exports.interfaces.includes(t)).length} type aliases)`;
   }
 
   return `${fileName} module`;
@@ -772,17 +830,18 @@ function extractDescription(content: string): string | null {
   // Try to find JSDoc comment at the top
   const jsdocMatch = content.match(/\/\*\*\s*\n([^*]*(?:\*(?!\/)[^*]*)*)\*\//);
   if (jsdocMatch) {
-    const lines = jsdocMatch[1].split('\n')
-      .map(line => line.replace(/^\s*\*\s?/, '').trim())
-      .map(line => {
+    const lines = jsdocMatch[1]
+      .split('\n')
+      .map((line) => line.replace(/^\s*\*\s?/, '').trim())
+      .map((line) => {
         // Extract description from @scope/package - description lines
         if (line.startsWith('@') && line.includes(' - ')) {
           return line.split(' - ').slice(1).join(' - ').trim();
         }
         return line;
       })
-      .filter(line => !line.startsWith('@') && line.length > 0)
-      .filter(line => !/^[=\-*~#_]{3,}$/.test(line));
+      .filter((line) => !line.startsWith('@') && line.length > 0)
+      .filter((line) => !/^[=\-*~#_]{3,}$/.test(line));
     if (lines.length > 0) {
       return lines[0].slice(0, 120);
     }
@@ -922,7 +981,7 @@ function buildDependencyMatrix(files: ParsedFile[]): DependencyMatrix {
 
     matrix[file.path] = {
       importsFrom: [...importedFrom],
-      exportsTo: [...exportsTo]
+      exportsTo: [...exportsTo],
     };
   }
 
@@ -982,15 +1041,15 @@ function findReachableFiles(entryPoints: string[], allFiles: ParsedFile[]): Set<
 
 interface CircularDependencyResult {
   all: string[][];
-  runtime: string[][];   // Non-type-only cycles (real runtime issues)
-  typeOnly: string[][];  // Type-only cycles (safe, no runtime impact)
+  runtime: string[][]; // Non-type-only cycles (real runtime issues)
+  typeOnly: string[][]; // Type-only cycles (safe, no runtime impact)
 }
 
 /**
  * Detect circular dependencies, distinguishing runtime from type-only cycles
  */
 function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResult {
-  const filePaths = new Set(files.map(f => f.path));
+  const filePaths = new Set(files.map((f) => f.path));
 
   // Build both runtime-only and all-dependencies graphs
   const runtimeGraph = new Map<string, string[]>();
@@ -1026,7 +1085,7 @@ function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResu
           const cycle = path.slice(cycleStart);
           cycle.push(node);
           const cycleKey = [...cycle].sort().join('->');
-          if (!cycles.some(c => [...c].sort().join('->') === cycleKey)) {
+          if (!cycles.some((c) => [...c].sort().join('->') === cycleKey)) {
             cycles.push(cycle);
           }
         }
@@ -1061,13 +1120,13 @@ function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResu
   const runtimeCycles = findCycles(runtimeGraph);
 
   // Type-only cycles = cycles in all but not in runtime
-  const runtimeCycleKeys = new Set(runtimeCycles.map(c => [...c].sort().join('->')));
-  const typeOnlyCycles = allCycles.filter(c => !runtimeCycleKeys.has([...c].sort().join('->')));
+  const runtimeCycleKeys = new Set(runtimeCycles.map((c) => [...c].sort().join('->')));
+  const typeOnlyCycles = allCycles.filter((c) => !runtimeCycleKeys.has([...c].sort().join('->')));
 
   return {
     all: allCycles,
     runtime: runtimeCycles,
-    typeOnly: typeOnlyCycles
+    typeOnly: typeOnlyCycles,
   };
 }
 
@@ -1075,7 +1134,7 @@ function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResu
  * Detect unused files and exports
  */
 function detectUnused(files: ParsedFile[]): UnusedAnalysis {
-  const filePaths = new Set(files.map(f => f.path));
+  const filePaths = new Set(files.map((f) => f.path));
 
   // Build a set of all imported files
   const importedFiles = new Set<string>();
@@ -1164,7 +1223,12 @@ function detectUnused(files: ParsedFile[]): UnusedAnalysis {
 /**
  * Generate statistics from parsed files
  */
-function generateStatistics(files: ParsedFile[], modules: ModuleMap, circularDeps: CircularDependencyResult, unusedAnalysis: UnusedAnalysis): Statistics {
+function generateStatistics(
+  files: ParsedFile[],
+  modules: ModuleMap,
+  circularDeps: CircularDependencyResult,
+  unusedAnalysis: UnusedAnalysis
+): Statistics {
   let totalExports = 0;
   let totalClasses = 0;
   let totalInterfaces = 0;
@@ -1186,10 +1250,10 @@ function generateStatistics(files: ParsedFile[], modules: ModuleMap, circularDep
     totalReExports += file.exports.reExported.length;
 
     // Count type-only imports
-    totalTypeOnlyImports += file.internalDependencies.filter(d => d.typeOnly).length;
+    totalTypeOnlyImports += file.internalDependencies.filter((d) => d.typeOnly).length;
 
     // Count type guards (functions starting with 'is')
-    totalTypeGuards += file.exports.functions.filter(f => f.startsWith('is')).length;
+    totalTypeGuards += file.exports.functions.filter((f) => f.startsWith('is')).length;
 
     // Count lines
     try {
@@ -1216,14 +1280,19 @@ function generateStatistics(files: ParsedFile[], modules: ModuleMap, circularDep
     runtimeCircularDeps: circularDeps.runtime.length,
     typeOnlyCircularDeps: circularDeps.typeOnly.length,
     unusedFilesCount: unusedAnalysis.unusedFiles.length,
-    unusedExportsCount: unusedAnalysis.unusedExports.length
+    unusedExportsCount: unusedAnalysis.unusedExports.length,
   };
 }
 
 /**
  * Generate JSON output
  */
-function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: CircularDependencyResult): object {
+function generateJSON(
+  files: ParsedFile[],
+  modules: ModuleMap,
+  stats: Statistics,
+  circularDeps: CircularDependencyResult
+): object {
   const today = new Date().toISOString().split('T')[0];
 
   // Convert modules to JSON-friendly format
@@ -1235,11 +1304,11 @@ function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics
         description: file.description || generateFallbackDescription(file),
         externalDependencies: file.externalDependencies,
         nodeDependencies: file.nodeDependencies,
-        internalDependencies: file.internalDependencies.map(d => ({
+        internalDependencies: file.internalDependencies.map((d) => ({
           file: d.file,
           imports: d.imports,
           ...(d.reExport ? { reExport: true } : {}),
-          ...(d.typeOnly ? { typeOnly: true } : {})
+          ...(d.typeOnly ? { typeOnly: true } : {}),
         })),
         exports: file.exports.named,
         reExported: file.exports.reExported.length > 0 ? file.exports.reExported : undefined,
@@ -1247,11 +1316,11 @@ function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics
         interfaces: file.exports.interfaces.length > 0 ? file.exports.interfaces : undefined,
         functions: file.exports.functions.length > 0 ? file.exports.functions : undefined,
         enums: file.exports.enums.length > 0 ? file.exports.enums : undefined,
-        constants: file.exports.constants.length > 0 ? file.exports.constants : undefined
+        constants: file.exports.constants.length > 0 ? file.exports.constants : undefined,
       };
 
       // Clean up undefined values
-      Object.keys(fileData).forEach(key => {
+      Object.keys(fileData).forEach((key) => {
         if (fileData[key] === undefined) {
           delete fileData[key];
         }
@@ -1262,10 +1331,12 @@ function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics
   }
 
   // Build layers from modules
-  const layers = Object.keys(modules).map(name => ({
-    name: name.charAt(0).toUpperCase() + name.slice(1),
-    files: Object.keys(modules[name])
-  })).filter(l => l.files.length > 0);
+  const layers = Object.keys(modules)
+    .map((name) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      files: Object.keys(modules[name]),
+    }))
+    .filter((l) => l.files.length > 0);
 
   return {
     metadata: {
@@ -1274,14 +1345,14 @@ function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics
       lastUpdated: today,
       totalFiles: stats.totalTypeScriptFiles,
       totalModules: stats.totalModules,
-      totalExports: stats.totalExports
+      totalExports: stats.totalExports,
     },
     entryPoints: files
-      .filter(f => f.path.endsWith('src/index.ts'))
-      .map(f => ({
+      .filter((f) => f.path.endsWith('src/index.ts'))
+      .map((f) => ({
         file: f.path,
         type: 'main',
-        description: f.description || 'Entry Point'
+        description: f.description || 'Entry Point',
       })),
     modules: modulesJson,
     dependencyGraph: {
@@ -1290,11 +1361,11 @@ function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics
         typeOnly: circularDeps.typeOnly,
         total: circularDeps.all.length,
         runtimeCount: circularDeps.runtime.length,
-        typeOnlyCount: circularDeps.typeOnly.length
+        typeOnlyCount: circularDeps.typeOnly.length,
       },
-      layers
+      layers,
     },
-    statistics: stats
+    statistics: stats,
   };
 }
 
@@ -1316,7 +1387,8 @@ function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]): string
     lines.push(`    subgraph ${title}`);
 
     const moduleFiles = Object.keys(modules[moduleName]);
-    for (const filePath of moduleFiles.slice(0, 10)) { // Limit to 10 files per module
+    for (const filePath of moduleFiles.slice(0, 10)) {
+      // Limit to 10 files per module
       const name = basename(filePath, '.ts');
       const nodeId = `N${nodeCounter++}`;
       nodeIds.set(filePath, nodeId);
@@ -1365,7 +1437,13 @@ function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]): string
 /**
  * Generate Markdown output
  */
-function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: CircularDependencyResult, matrix: DependencyMatrix): string {
+function generateMarkdown(
+  files: ParsedFile[],
+  modules: ModuleMap,
+  stats: Statistics,
+  circularDeps: CircularDependencyResult,
+  matrix: DependencyMatrix
+): string {
   const today = new Date().toISOString().split('T')[0];
   const lines: string[] = [];
   const projectName = packageJson.name || 'Project';
@@ -1374,7 +1452,9 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   lines.push('');
   lines.push(`**Version**: ${packageJson.version} | **Last Updated**: ${today}`);
   lines.push('');
-  lines.push('This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.');
+  lines.push(
+    'This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.'
+  );
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -1387,7 +1467,10 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   let tocIndex = 3;
   for (const category of Object.keys(modules)) {
     const title = category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ');
-    const slug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const slug = category
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
     lines.push(`${tocIndex}. [${title} Dependencies](#${slug}-dependencies)`);
     tocIndex++;
   }
@@ -1416,7 +1499,10 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   // Generate sections for each module category
   for (const [category, categoryFiles] of Object.entries(modules)) {
     const title = category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ');
-    const sectionSlug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const sectionSlug = category
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
     lines.push(`<a id="${sectionSlug}-dependencies"></a>`);
     lines.push('');
     lines.push(`## ${title} Dependencies`);
@@ -1462,7 +1548,13 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
       }
 
       // Exports
-      if (file.exports.named.length > 0 || file.exports.default || file.exports.reExported.length > 0 || file.exports.interfaces.length > 0 || file.exports.types.length > 0) {
+      if (
+        file.exports.named.length > 0 ||
+        file.exports.default ||
+        file.exports.reExported.length > 0 ||
+        file.exports.interfaces.length > 0 ||
+        file.exports.types.length > 0
+      ) {
         lines.push('**Exports:**');
         if (file.exports.classes.length > 0) {
           lines.push(`- Classes: \`${file.exports.classes.join('`, `')}\``);
@@ -1470,7 +1562,7 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
         if (file.exports.interfaces.length > 0) {
           lines.push(`- Interfaces: \`${file.exports.interfaces.join('`, `')}\``);
         }
-        const typeAliases = file.exports.types.filter(t => !file.exports.interfaces.includes(t));
+        const typeAliases = file.exports.types.filter((t) => !file.exports.interfaces.includes(t));
         if (typeAliases.length > 0) {
           lines.push(`- Types: \`${typeAliases.join('`, `')}\``);
         }
@@ -1507,14 +1599,21 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   lines.push('|------|--------------|------------|');
 
   const matrixEntries = Object.entries(matrix)
-    .sort((a, b) => (b[1].importsFrom.length + b[1].exportsTo.length) - (a[1].importsFrom.length + a[1].exportsTo.length))
+    .sort(
+      (a, b) =>
+        b[1].importsFrom.length +
+        b[1].exportsTo.length -
+        (a[1].importsFrom.length + a[1].exportsTo.length)
+    )
     .slice(0, 40); // Top 40 by connectivity
   for (const [filePath, deps] of matrixEntries) {
     // Use relative path (e.g., "core/src/typed/mathts-typed") instead of just basename
     const shortPath = filePath.replace(/\.ts$/, '');
     const importsCount = deps.importsFrom.length;
     const exportsCount = deps.exportsTo.length;
-    lines.push(`| \`${shortPath}\` | ${importsCount} file${importsCount !== 1 ? 's' : ''} | ${exportsCount} file${exportsCount !== 1 ? 's' : ''} |`);
+    lines.push(
+      `| \`${shortPath}\` | ${importsCount} file${importsCount !== 1 ? 's' : ''} | ${exportsCount} file${exportsCount !== 1 ? 's' : ''} |`
+    );
   }
   lines.push('');
   lines.push('---');
@@ -1606,18 +1705,25 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
  * Generate compact summary for LLM consumption (~10KB target)
  * Uses CTON-style compression: no whitespace, abbreviated keys
  */
-function generateCompactSummary(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: CircularDependencyResult): string {
+function generateCompactSummary(
+  files: ParsedFile[],
+  modules: ModuleMap,
+  stats: Statistics,
+  circularDeps: CircularDependencyResult
+): string {
   // Abbreviate module names and create compact structure
   const summary = {
-    m: { // metadata
+    m: {
+      // metadata
       n: packageJson.name,
       v: packageJson.version,
       d: new Date().toISOString().split('T')[0],
       f: stats.totalTypeScriptFiles,
       e: stats.totalExports,
-      re: stats.totalReExports
+      re: stats.totalReExports,
     },
-    s: { // statistics
+    s: {
+      // statistics
       loc: stats.totalLinesOfCode,
       cls: stats.totalClasses,
       int: stats.totalInterfaces,
@@ -1625,45 +1731,54 @@ function generateCompactSummary(files: ParsedFile[], modules: ModuleMap, stats: 
       tg: stats.totalTypeGuards,
       en: stats.totalEnums,
       co: stats.totalConstants,
-      toi: stats.totalTypeOnlyImports
+      toi: stats.totalTypeOnlyImports,
     },
-    c: { // circular deps
+    c: {
+      // circular deps
       rt: circularDeps.runtime.length,
       to: circularDeps.typeOnly.length,
       // Only include first 5 runtime cycles (if any) for context
-      rtp: circularDeps.runtime.slice(0, 5).map(c => c.map(p => p.split('/').pop()?.replace('.ts', '')).join('→'))
+      rtp: circularDeps.runtime
+        .slice(0, 5)
+        .map((c) => c.map((p) => p.split('/').pop()?.replace('.ts', '')).join('→')),
     },
     mod: {} as Record<string, { f: number; exp: string[]; cls?: string[]; int?: string[] }>,
     // Hot paths: files with most dependencies
-    hp: [] as { p: string; i: number; o: number }[]
+    hp: [] as { p: string; i: number; o: number }[],
   };
 
   // Compact module summary
   for (const [modName, modFiles] of Object.entries(modules)) {
     const fileList = Object.values(modFiles);
-    const exports = fileList.flatMap(f => f.exports.named).map(cleanExportName).filter(Boolean).slice(0, 20);
-    const classes = fileList.flatMap(f => f.exports.classes);
-    const interfaces = fileList.flatMap(f => f.exports.interfaces).slice(0, 10);
+    const exports = fileList
+      .flatMap((f) => f.exports.named)
+      .map(cleanExportName)
+      .filter(Boolean)
+      .slice(0, 20);
+    const classes = fileList.flatMap((f) => f.exports.classes);
+    const interfaces = fileList.flatMap((f) => f.exports.interfaces).slice(0, 10);
 
     summary.mod[modName] = {
       f: Object.keys(modFiles).length,
-      exp: [...new Set(exports)]
+      exp: [...new Set(exports)],
     };
     if (classes.length > 0) summary.mod[modName].cls = [...new Set(classes)];
     if (interfaces.length > 0) summary.mod[modName].int = [...new Set(interfaces)];
   }
 
   // Find hot paths (files with highest connectivity)
-  const connectivity = files.map(f => ({
-    p: f.path.split('/').slice(-2).join('/'),
-    i: f.internalDependencies.length,
-    o: files.filter(other =>
-      other.internalDependencies.some(d => {
-        const resolved = resolvePath(other.path, d.file);
-        return resolved === f.path;
-      })
-    ).length
-  })).sort((a, b) => (b.i + b.o) - (a.i + a.o));
+  const connectivity = files
+    .map((f) => ({
+      p: f.path.split('/').slice(-2).join('/'),
+      i: f.internalDependencies.length,
+      o: files.filter((other) =>
+        other.internalDependencies.some((d) => {
+          const resolved = resolvePath(other.path, d.file);
+          return resolved === f.path;
+        })
+      ).length,
+    }))
+    .sort((a, b) => b.i + b.o - (a.i + a.o));
 
   summary.hp = connectivity.slice(0, 15);
 
@@ -1708,7 +1823,9 @@ function generateTestCoverageMarkdown(coverage: TestCoverageAnalysis): string {
   if (coverage.untestedFiles.length === 0) {
     lines.push('**All source files have test coverage!** 🎉');
   } else {
-    lines.push(`The following ${coverage.untestedFiles.length} source files are not directly imported by any test file:`);
+    lines.push(
+      `The following ${coverage.untestedFiles.length} source files are not directly imported by any test file:`
+    );
     lines.push('');
 
     // Group by module
@@ -1743,7 +1860,7 @@ function generateTestCoverageMarkdown(coverage: TestCoverageAnalysis): string {
   for (const sourcePath of sortedTested) {
     const tests = coverage.coverageMap.get(sourcePath) || [];
     const shortSource = sourcePath.split('/').slice(-2).join('/');
-    const shortTests = tests.map(t => `\`${basename(t)}\``).join(', ');
+    const shortTests = tests.map((t) => `\`${basename(t)}\``).join(', ');
     lines.push(`| \`${shortSource}\` | ${shortTests} |`);
   }
   lines.push('');
@@ -1787,9 +1904,10 @@ function generateTestCoverageJson(coverage: TestCoverageAnalysis): object {
       totalTestFiles: coverage.testFiles.length,
       testedCount: coverage.testedFiles.length,
       untestedCount: coverage.untestedFiles.length,
-      coveragePercent: coverage.sourceFiles.length > 0
-        ? ((coverage.testedFiles.length / coverage.sourceFiles.length) * 100).toFixed(1)
-        : '0',
+      coveragePercent:
+        coverage.sourceFiles.length > 0
+          ? ((coverage.testedFiles.length / coverage.sourceFiles.length) * 100).toFixed(1)
+          : '0',
     },
     untestedFiles: coverage.untestedFiles.sort(),
     testedFiles: coverage.testedFiles.sort(),
@@ -1835,17 +1953,17 @@ function generatePackageDependencySection(
 
   for (const [name, ws] of workspaces) {
     const deps = pkgDeps.get(name);
-    const depStr = deps && deps.size > 0 ? [...deps].map(d => `\`${d}\``).join(', ') : '(none)';
+    const depStr = deps && deps.size > 0 ? [...deps].map((d) => `\`${d}\``).join(', ') : '(none)';
 
-    const pkgFiles = parsedFiles.filter(f => f.packageName === name);
+    const pkgFiles = parsedFiles.filter((f) => f.packageName === name);
     const activeCount = reachableFiles
-      ? pkgFiles.filter(f => reachableFiles.has(f.path)).length
+      ? pkgFiles.filter((f) => reachableFiles.has(f.path)).length
       : pkgFiles.length;
-    const dormantCount = dormantFiles
-      ? pkgFiles.filter(f => dormantFiles.has(f.path)).length
-      : 0;
+    const dormantCount = dormantFiles ? pkgFiles.filter((f) => dormantFiles.has(f.path)).length : 0;
 
-    lines.push(`| \`${name}\` (\`${ws.directory}/\`) | ${depStr} | ${activeCount} | ${dormantCount} |`);
+    lines.push(
+      `| \`${name}\` (\`${ws.directory}/\`) | ${depStr} | ${activeCount} | ${dormantCount} |`
+    );
   }
 
   lines.push('');
@@ -1951,7 +2069,7 @@ async function main(): Promise<void> {
     const entryPoints: string[] = [];
     for (const [, ws] of workspaceMap) {
       const entryPath = `${ws.srcDir}/index.ts`.replace(/\\/g, '/');
-      const found = parsedFiles.find(f => f.path === entryPath);
+      const found = parsedFiles.find((f) => f.path === entryPath);
       if (found) {
         entryPoints.push(found.path);
       }
@@ -1959,13 +2077,15 @@ async function main(): Promise<void> {
 
     console.log(`Entry points: ${entryPoints.length}`);
     reachableSet = findReachableFiles(entryPoints, parsedFiles);
-    dormantSet = new Set(parsedFiles.filter(f => !reachableSet!.has(f.path)).map(f => f.path));
+    dormantSet = new Set(parsedFiles.filter((f) => !reachableSet!.has(f.path)).map((f) => f.path));
     console.log(`Reachable files: ${reachableSet.size}`);
     console.log(`Dormant files: ${dormantSet.size}`);
 
     if (!cliOptions.all) {
-      activeParsedFiles = parsedFiles.filter(f => reachableSet!.has(f.path));
-      console.log(`Analyzing ${activeParsedFiles.length} reachable files (use --all to include dormant)`);
+      activeParsedFiles = parsedFiles.filter((f) => reachableSet!.has(f.path));
+      console.log(
+        `Analyzing ${activeParsedFiles.length} reachable files (use --all to include dormant)`
+      );
     } else {
       activeParsedFiles = parsedFiles;
       console.log(`Analyzing all ${activeParsedFiles.length} files (including dormant)`);
@@ -1978,7 +2098,9 @@ async function main(): Promise<void> {
 
   // Detect circular dependencies
   const circularDeps = detectCircularDependencies(activeParsedFiles);
-  console.log(`Found ${circularDeps.all.length} circular dependencies (${circularDeps.runtime.length} runtime, ${circularDeps.typeOnly.length} type-only)`);
+  console.log(
+    `Found ${circularDeps.all.length} circular dependencies (${circularDeps.runtime.length} runtime, ${circularDeps.typeOnly.length} type-only)`
+  );
 
   // Detect unused files and exports
   const unusedAnalysis = detectUnused(activeParsedFiles);
@@ -1997,7 +2119,12 @@ async function main(): Promise<void> {
 
   // Insert package-level section for monorepo mode
   if (isMonorepo) {
-    const pkgSection = generatePackageDependencySection(parsedFiles, workspaceMap, reachableSet, dormantSet);
+    const pkgSection = generatePackageDependencySection(
+      parsedFiles,
+      workspaceMap,
+      reachableSet,
+      dormantSet
+    );
     // Insert after the Overview section
     const overviewMarker = '## Overview';
     const overviewIdx = markdown.indexOf(overviewMarker);
@@ -2034,7 +2161,9 @@ async function main(): Promise<void> {
   const compactSummary = generateCompactSummary(activeParsedFiles, modules, stats, circularDeps);
   writeFileSync(join(OUTPUT_DIR, 'dependency-summary.compact.json'), compactSummary);
   const compactSize = Buffer.byteLength(compactSummary, 'utf8');
-  console.log(`Written: docs/Architecture/dependency-summary.compact.json (${(compactSize / 1024).toFixed(1)}KB)`);
+  console.log(
+    `Written: docs/Architecture/dependency-summary.compact.json (${(compactSize / 1024).toFixed(1)}KB)`
+  );
 
   // Test coverage analysis (when --include-tests is specified)
   let testCoverage: TestCoverageAnalysis | null = null;
@@ -2056,10 +2185,7 @@ async function main(): Promise<void> {
       testFilePaths.push(...getAllTestFiles(rootTestDir));
     } else {
       const testDir = join(ROOT_DIR, 'tests');
-      testFilePaths = [
-        ...getAllTestFiles(testDir),
-        ...getAllTestFiles(SRC_DIR),
-      ];
+      testFilePaths = [...getAllTestFiles(testDir), ...getAllTestFiles(SRC_DIR)];
     }
     console.log(`Found ${testFilePaths.length} test files`);
 
@@ -2078,7 +2204,10 @@ async function main(): Promise<void> {
     writeFileSync(join(OUTPUT_DIR, 'TEST_COVERAGE.md'), testCoverageMarkdown);
     console.log('Written: docs/Architecture/TEST_COVERAGE.md');
 
-    writeFileSync(join(OUTPUT_DIR, 'test-coverage.json'), JSON.stringify(testCoverageJson, null, 2));
+    writeFileSync(
+      join(OUTPUT_DIR, 'test-coverage.json'),
+      JSON.stringify(testCoverageJson, null, 2)
+    );
     console.log('Written: docs/Architecture/test-coverage.json');
   }
 
@@ -2086,7 +2215,9 @@ async function main(): Promise<void> {
   if (isMonorepo) {
     console.log(`  - ${workspaceMap.size} workspace packages scanned`);
     if (reachableSet) {
-      console.log(`  - ${reachableSet.size} reachable files, ${dormantSet?.size || 0} dormant files`);
+      console.log(
+        `  - ${reachableSet.size} reachable files, ${dormantSet?.size || 0} dormant files`
+      );
     }
   }
   console.log(`  - ${stats.totalTypeScriptFiles} files analyzed`);
@@ -2168,13 +2299,16 @@ async function main(): Promise<void> {
 
   // Print test coverage summary if enabled
   if (testCoverage) {
-    const coveragePercent = testCoverage.sourceFiles.length > 0
-      ? ((testCoverage.testedFiles.length / testCoverage.sourceFiles.length) * 100).toFixed(1)
-      : '0';
+    const coveragePercent =
+      testCoverage.sourceFiles.length > 0
+        ? ((testCoverage.testedFiles.length / testCoverage.sourceFiles.length) * 100).toFixed(1)
+        : '0';
 
     console.log('\n=== Test Coverage Analysis ===');
     console.log(`  - ${testCoverage.testFiles.length} test files analyzed`);
-    console.log(`  - ${testCoverage.testedFiles.length}/${testCoverage.sourceFiles.length} source files have tests (${coveragePercent}%)`);
+    console.log(
+      `  - ${testCoverage.testedFiles.length}/${testCoverage.sourceFiles.length} source files have tests (${coveragePercent}%)`
+    );
     console.log(`  - ${testCoverage.untestedFiles.length} source files without tests`);
 
     if (testCoverage.untestedFiles.length > 0) {
@@ -2183,7 +2317,9 @@ async function main(): Promise<void> {
         console.log(`  - ${file}`);
       }
       if (testCoverage.untestedFiles.length > 15) {
-        console.log(`  ... and ${testCoverage.untestedFiles.length - 15} more (see TEST_COVERAGE.md for full list)`);
+        console.log(
+          `  ... and ${testCoverage.untestedFiles.length - 15} more (see TEST_COVERAGE.md for full list)`
+        );
       }
     }
   }

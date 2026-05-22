@@ -36,12 +36,10 @@ import {
 /** Build an Int32Array of length 16 with both signs and a couple of edge values. */
 function buildIntPair(): { a: Int32Array; b: Int32Array } {
   const a = Int32Array.from([
-    0,  1,  2,  3,  4,  5,  6,  7,
-    -1, -2, -3, -4,  0xffff,  0x7fffffff,  -0x80000000,  0b10101010,
+    0, 1, 2, 3, 4, 5, 6, 7, -1, -2, -3, -4, 0xffff, 0x7fffffff, -0x80000000, 0b10101010,
   ]);
   const b = Int32Array.from([
-    0,  1, -1,  2, -2,  3, -3,  4,
-    -4,  5, -5,  6,  0xff00,  0x00000001,   1,            0b01010101,
+    0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, 0xff00, 0x00000001, 1, 0b01010101,
   ]);
   return { a, b };
 }
@@ -145,7 +143,7 @@ describe('Typed Bitwise Functions', () => {
       expect(rightLogShift(0xff, 32)).toBe(0xff);
     });
 
-    it('handles two\'s-complement boundaries', () => {
+    it("handles two's-complement boundaries", () => {
       expect(bitNot(0x7fffffff)).toBe(-0x80000000);
       expect(bitAnd(-0x80000000, -1)).toBe(-0x80000000);
       expect(bitOr(-0x80000000, 0x7fffffff)).toBe(-1);
@@ -186,7 +184,7 @@ describe('Typed Bitwise Functions', () => {
     });
 
     it('rightLogShift chains shifts', () => {
-      expect(rightLogShift(0xff, 1, 1)).toBe(0xff >>> 1 >>> 1);
+      expect(rightLogShift(0xff, 1, 1)).toBe((0xff >>> 1) >>> 1);
     });
   });
 

@@ -12,7 +12,7 @@
  * @returns 1 if both true, 0 otherwise
  */
 export function and(a: i32, b: i32): i32 {
-  return a !== 0 && b !== 0 ? 1 : 0
+  return a !== 0 && b !== 0 ? 1 : 0;
 }
 
 /**
@@ -22,17 +22,12 @@ export function and(a: i32, b: i32): i32 {
  * @param n - Array length
  * @param resultPtr - Pointer to output array (i32)
  */
-export function andArray(
-  aPtr: usize,
-  bPtr: usize,
-  n: i32,
-  resultPtr: usize
-): void {
+export function andArray(aPtr: usize, bPtr: usize, n: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    const offset: usize = (<usize>i) << 2
-    const a: i32 = load<i32>(aPtr + offset)
-    const b: i32 = load<i32>(bPtr + offset)
-    store<i32>(resultPtr + offset, a !== 0 && b !== 0 ? 1 : 0)
+    const offset: usize = (<usize>i) << 2;
+    const a: i32 = load<i32>(aPtr + offset);
+    const b: i32 = load<i32>(bPtr + offset);
+    store<i32>(resultPtr + offset, a !== 0 && b !== 0 ? 1 : 0);
   }
 }
 
@@ -43,7 +38,7 @@ export function andArray(
  * @returns 1 if either true, 0 otherwise
  */
 export function or(a: i32, b: i32): i32 {
-  return a !== 0 || b !== 0 ? 1 : 0
+  return a !== 0 || b !== 0 ? 1 : 0;
 }
 
 /**
@@ -53,17 +48,12 @@ export function or(a: i32, b: i32): i32 {
  * @param n - Array length
  * @param resultPtr - Pointer to output array (i32)
  */
-export function orArray(
-  aPtr: usize,
-  bPtr: usize,
-  n: i32,
-  resultPtr: usize
-): void {
+export function orArray(aPtr: usize, bPtr: usize, n: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    const offset: usize = (<usize>i) << 2
-    const a: i32 = load<i32>(aPtr + offset)
-    const b: i32 = load<i32>(bPtr + offset)
-    store<i32>(resultPtr + offset, a !== 0 || b !== 0 ? 1 : 0)
+    const offset: usize = (<usize>i) << 2;
+    const a: i32 = load<i32>(aPtr + offset);
+    const b: i32 = load<i32>(bPtr + offset);
+    store<i32>(resultPtr + offset, a !== 0 || b !== 0 ? 1 : 0);
   }
 }
 
@@ -73,7 +63,7 @@ export function orArray(
  * @returns 1 if input is false, 0 if input is true
  */
 export function not(a: i32): i32 {
-  return a === 0 ? 1 : 0
+  return a === 0 ? 1 : 0;
 }
 
 /**
@@ -84,8 +74,8 @@ export function not(a: i32): i32 {
  */
 export function notArray(aPtr: usize, n: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    const offset: usize = (<usize>i) << 2
-    store<i32>(resultPtr + offset, load<i32>(aPtr + offset) === 0 ? 1 : 0)
+    const offset: usize = (<usize>i) << 2;
+    store<i32>(resultPtr + offset, load<i32>(aPtr + offset) === 0 ? 1 : 0);
   }
 }
 
@@ -96,9 +86,9 @@ export function notArray(aPtr: usize, n: i32, resultPtr: usize): void {
  * @returns 1 if exactly one is true, 0 otherwise
  */
 export function xor(a: i32, b: i32): i32 {
-  const aBool: bool = a !== 0
-  const bBool: bool = b !== 0
-  return (aBool && !bBool) || (!aBool && bBool) ? 1 : 0
+  const aBool: bool = a !== 0;
+  const bBool: bool = b !== 0;
+  return (aBool && !bBool) || (!aBool && bBool) ? 1 : 0;
 }
 
 /**
@@ -108,20 +98,12 @@ export function xor(a: i32, b: i32): i32 {
  * @param n - Array length
  * @param resultPtr - Pointer to output array (i32)
  */
-export function xorArray(
-  aPtr: usize,
-  bPtr: usize,
-  n: i32,
-  resultPtr: usize
-): void {
+export function xorArray(aPtr: usize, bPtr: usize, n: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    const offset: usize = (<usize>i) << 2
-    const aBool: bool = load<i32>(aPtr + offset) !== 0
-    const bBool: bool = load<i32>(bPtr + offset) !== 0
-    store<i32>(
-      resultPtr + offset,
-      (aBool && !bBool) || (!aBool && bBool) ? 1 : 0
-    )
+    const offset: usize = (<usize>i) << 2;
+    const aBool: bool = load<i32>(aPtr + offset) !== 0;
+    const bBool: bool = load<i32>(bPtr + offset) !== 0;
+    store<i32>(resultPtr + offset, (aBool && !bBool) || (!aBool && bBool) ? 1 : 0);
   }
 }
 
@@ -132,7 +114,7 @@ export function xorArray(
  * @returns 0 if both true, 1 otherwise
  */
 export function nand(a: i32, b: i32): i32 {
-  return a !== 0 && b !== 0 ? 0 : 1
+  return a !== 0 && b !== 0 ? 0 : 1;
 }
 
 /**
@@ -142,7 +124,7 @@ export function nand(a: i32, b: i32): i32 {
  * @returns 1 if both false, 0 otherwise
  */
 export function nor(a: i32, b: i32): i32 {
-  return a === 0 && b === 0 ? 1 : 0
+  return a === 0 && b === 0 ? 1 : 0;
 }
 
 /**
@@ -152,9 +134,9 @@ export function nor(a: i32, b: i32): i32 {
  * @returns 1 if both same, 0 otherwise
  */
 export function xnor(a: i32, b: i32): i32 {
-  const aBool: bool = a !== 0
-  const bBool: bool = b !== 0
-  return aBool === bBool ? 1 : 0
+  const aBool: bool = a !== 0;
+  const bBool: bool = b !== 0;
+  return aBool === bBool ? 1 : 0;
 }
 
 /**
@@ -164,11 +146,11 @@ export function xnor(a: i32, b: i32): i32 {
  * @returns Count of non-zero values
  */
 export function countTrue(aPtr: usize, n: i32): i32 {
-  let count: i32 = 0
+  let count: i32 = 0;
   for (let i: i32 = 0; i < n; i++) {
-    if (load<i32>(aPtr + ((<usize>i) << 2)) !== 0) count++
+    if (load<i32>(aPtr + ((<usize>i) << 2)) !== 0) count++;
   }
-  return count
+  return count;
 }
 
 /**
@@ -179,9 +161,9 @@ export function countTrue(aPtr: usize, n: i32): i32 {
  */
 export function all(aPtr: usize, n: i32): i32 {
   for (let i: i32 = 0; i < n; i++) {
-    if (load<i32>(aPtr + ((<usize>i) << 2)) === 0) return 0
+    if (load<i32>(aPtr + ((<usize>i) << 2)) === 0) return 0;
   }
-  return 1
+  return 1;
 }
 
 /**
@@ -192,9 +174,9 @@ export function all(aPtr: usize, n: i32): i32 {
  */
 export function any(aPtr: usize, n: i32): i32 {
   for (let i: i32 = 0; i < n; i++) {
-    if (load<i32>(aPtr + ((<usize>i) << 2)) !== 0) return 1
+    if (load<i32>(aPtr + ((<usize>i) << 2)) !== 0) return 1;
   }
-  return 0
+  return 0;
 }
 
 /**
@@ -205,9 +187,9 @@ export function any(aPtr: usize, n: i32): i32 {
  */
 export function findFirst(aPtr: usize, n: i32): i32 {
   for (let i: i32 = 0; i < n; i++) {
-    if (load<i32>(aPtr + ((<usize>i) << 2)) !== 0) return i
+    if (load<i32>(aPtr + ((<usize>i) << 2)) !== 0) return i;
   }
-  return -1
+  return -1;
 }
 
 /**
@@ -218,9 +200,9 @@ export function findFirst(aPtr: usize, n: i32): i32 {
  */
 export function findLast(aPtr: usize, n: i32): i32 {
   for (let i: i32 = n - 1; i >= 0; i--) {
-    if (load<i32>(aPtr + ((<usize>i) << 2)) !== 0) return i
+    if (load<i32>(aPtr + ((<usize>i) << 2)) !== 0) return i;
   }
-  return -1
+  return -1;
 }
 
 /**
@@ -231,14 +213,14 @@ export function findLast(aPtr: usize, n: i32): i32 {
  * @returns Number of true values found
  */
 export function findAll(aPtr: usize, n: i32, resultPtr: usize): i32 {
-  let j: i32 = 0
+  let j: i32 = 0;
   for (let i: i32 = 0; i < n; i++) {
     if (load<i32>(aPtr + ((<usize>i) << 2)) !== 0) {
-      store<i32>(resultPtr + ((<usize>j) << 2), i)
-      j++
+      store<i32>(resultPtr + ((<usize>j) << 2), i);
+      j++;
     }
   }
-  return j
+  return j;
 }
 
 /**
@@ -249,7 +231,7 @@ export function findAll(aPtr: usize, n: i32, resultPtr: usize): i32 {
  * @returns Selected value
  */
 export function select(condition: i32, a: f64, b: f64): f64 {
-  return condition !== 0 ? a : b
+  return condition !== 0 ? a : b;
 }
 
 /**
@@ -268,11 +250,11 @@ export function selectArray(
   resultPtr: usize
 ): void {
   for (let i: i32 = 0; i < n; i++) {
-    const condOffset: usize = (<usize>i) << 2
-    const valOffset: usize = (<usize>i) << 3
-    const condition: i32 = load<i32>(conditionPtr + condOffset)
-    const aVal: f64 = load<f64>(aPtr + valOffset)
-    const bVal: f64 = load<f64>(bPtr + valOffset)
-    store<f64>(resultPtr + valOffset, condition !== 0 ? aVal : bVal)
+    const condOffset: usize = (<usize>i) << 2;
+    const valOffset: usize = (<usize>i) << 3;
+    const condition: i32 = load<i32>(conditionPtr + condOffset);
+    const aVal: f64 = load<f64>(aPtr + valOffset);
+    const bVal: f64 = load<f64>(bPtr + valOffset);
+    store<f64>(resultPtr + valOffset, condition !== 0 ? aVal : bVal);
   }
 }

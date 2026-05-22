@@ -1,25 +1,25 @@
-import { isNode } from '../../utils/is.js'
+import { isNode } from '../../utils/is.js';
 
-import { keywords } from '../keywords.js'
-import { escape } from '../../utils/string.js'
-import { forEach, join } from '../../utils/array.js'
-import { toSymbol } from '../../utils/latex.js'
-import { getPrecedence } from '../operators.js'
-import { factory } from '../../utils/factory.js'
-import type { MathNode } from './Node.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { keywords } from '../keywords.js';
+import { escape } from '../../utils/string.js';
+import { forEach, join } from '../../utils/array.js';
+import { toSymbol } from '../../utils/latex.js';
+import { getPrecedence } from '../operators.js';
+import { factory } from '../../utils/factory.js';
+import type { MathNode } from './Node.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
-const name = 'FunctionAssignmentNode'
-const dependencies = ['typed', 'Node']
+const name = 'FunctionAssignmentNode';
+const dependencies = ['typed', 'Node'];
 
 interface ParamWithType {
-  name: string
-  type: string
+  name: string;
+  type: string;
 }
 
 interface FunctionAssignmentNodeDependencies {
-  typed: TypedFunction
-  Node: new (...args: any[]) => MathNode
+  typed: TypedFunction;
+  Node: new (...args: any[]) => MathNode;
 }
 
 export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
@@ -38,25 +38,17 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
       parenthesis?: string,
       implicit?: string
     ): boolean {
-      const precedence = getPrecedence(node, parenthesis, implicit, undefined)
-      const exprPrecedence = getPrecedence(
-        node.expr,
-        parenthesis,
-        implicit,
-        undefined
-      )
+      const precedence = getPrecedence(node, parenthesis, implicit, undefined);
+      const exprPrecedence = getPrecedence(node.expr, parenthesis, implicit, undefined);
 
-      return (
-        parenthesis === 'all' ||
-        (exprPrecedence !== null && exprPrecedence <= precedence)
-      )
+      return parenthesis === 'all' || (exprPrecedence !== null && exprPrecedence <= precedence);
     }
 
     class FunctionAssignmentNode extends Node {
-      name: string
-      params: string[]
-      types: string[]
-      expr: MathNode
+      name: string;
+      params: string[];
+      types: string[];
+      expr: MathNode;
 
       /**
        * @constructor FunctionAssignmentNode
@@ -70,55 +62,49 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        *                                and type of the parameter
        * @param {Node} expr             The function expression
        */
-      constructor(
-        name: string,
-        params: string[] | ParamWithType[],
-        expr: MathNode
-      ) {
-        super()
+      constructor(name: string, params: string[] | ParamWithType[], expr: MathNode) {
+        super();
         // validate input
         if (typeof name !== 'string') {
-          throw new TypeError('String expected for parameter "name"')
+          throw new TypeError('String expected for parameter "name"');
         }
         if (!Array.isArray(params)) {
           throw new TypeError(
             'Array containing strings or objects expected for parameter "params"'
-          )
+          );
         }
         if (!isNode(expr)) {
-          throw new TypeError('Node expected for parameter "expr"')
+          throw new TypeError('Node expected for parameter "expr"');
         }
         if (keywords.has(name)) {
-          throw new Error(
-            'Illegal function name, "' + name + '" is a reserved keyword'
-          )
+          throw new Error('Illegal function name, "' + name + '" is a reserved keyword');
         }
 
-        const paramNames = new Set<string>()
+        const paramNames = new Set<string>();
         for (const param of params) {
-          const paramName = typeof param === 'string' ? param : param.name
+          const paramName = typeof param === 'string' ? param : param.name;
           if (paramNames.has(paramName)) {
-            throw new Error(`Duplicate parameter name "${paramName}"`)
+            throw new Error(`Duplicate parameter name "${paramName}"`);
           } else {
-            paramNames.add(paramName)
+            paramNames.add(paramName);
           }
         }
 
-        this.name = name
+        this.name = name;
         this.params = params.map(function (param) {
-          return (param && (param as ParamWithType).name) || (param as string)
-        })
+          return (param && (param as ParamWithType).name) || (param as string);
+        });
         this.types = params.map(function (param) {
-          return (param && (param as ParamWithType).type) || 'any'
-        })
-        this.expr = expr
+          return (param && (param as ParamWithType).type) || 'any';
+        });
+        this.expr = expr;
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isFunctionAssignmentNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -138,52 +124,46 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
         math: any,
         argNames: Record<string, boolean>
       ): (scope: any, args: any, context: any) => any {
-        const childArgNames = Object.create(argNames)
+        const childArgNames = Object.create(argNames);
         forEach(this.params, function (param) {
-          childArgNames[param] = true
-        })
+          childArgNames[param] = true;
+        });
 
         // compile the function expression with the child args
-        const expr = this.expr
-        const evalExpr = expr._compile(math, childArgNames)
-        const name = this.name
-        const params = this.params
-        const signature = join(this.types, ',')
-        const syntax = name + '(' + join(this.params, ', ') + ')'
+        const expr = this.expr;
+        const evalExpr = expr._compile(math, childArgNames);
+        const name = this.name;
+        const params = this.params;
+        const signature = join(this.types, ',');
+        const syntax = name + '(' + join(this.params, ', ') + ')';
 
-        return function evalFunctionAssignmentNode(
-          scope: any,
-          args: any,
-          context: any
-        ) {
-          const signatures: Record<string, Function> = {}
+        return function evalFunctionAssignmentNode(scope: any, args: any, context: any) {
+          const signatures: Record<string, Function> = {};
           signatures[signature] = function (...fnArgs: any[]) {
-            const childArgs = Object.create(args)
+            const childArgs = Object.create(args);
 
             for (let i = 0; i < params.length; i++) {
-              childArgs[params[i]] = fnArgs[i]
+              childArgs[params[i]] = fnArgs[i];
             }
 
-            return evalExpr(scope, childArgs, context)
-          }
-          const fn: any = typed(name, signatures)
-          fn.syntax = syntax
-          fn.expr = expr.toString()
+            return evalExpr(scope, childArgs, context);
+          };
+          const fn: any = typed(name, signatures);
+          fn.syntax = syntax;
+          fn.expr = expr.toString();
 
-          scope.set(name, fn)
+          scope.set(name, fn);
 
-          return fn
-        }
+          return fn;
+        };
       }
 
       /**
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: MathNode, path: string, parent: MathNode) => void
-      ): void {
-        callback(this.expr, 'expr', this as any)
+      forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
+        callback(this.expr, 'expr', this as any);
       }
 
       /**
@@ -196,9 +176,9 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
       map(
         callback: (child: MathNode, path: string, parent: MathNode) => MathNode
       ): FunctionAssignmentNode {
-        const expr = this._ifNode(callback(this.expr, 'expr', this as any))
+        const expr = this._ifNode(callback(this.expr, 'expr', this as any));
 
-        return new FunctionAssignmentNode(this.name, this.params.slice(0), expr)
+        return new FunctionAssignmentNode(this.name, this.params.slice(0), expr);
       }
 
       /**
@@ -206,11 +186,7 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @return {FunctionAssignmentNode}
        */
       clone(): FunctionAssignmentNode {
-        return new FunctionAssignmentNode(
-          this.name,
-          this.params.slice(0),
-          this.expr
-        )
+        return new FunctionAssignmentNode(this.name, this.params.slice(0), this.expr);
       }
 
       /**
@@ -219,13 +195,12 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toString(options?: any): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
-        let expr = this.expr.toString(options)
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        let expr = this.expr.toString(options);
         if (needParenthesis(this, parenthesis, options && options.implicit)) {
-          expr = '(' + expr + ')'
+          expr = '(' + expr + ')';
         }
-        return this.name + '(' + this.params.join(', ') + ') = ' + expr
+        return this.name + '(' + this.params.join(', ') + ') = ' + expr;
       }
 
       /**
@@ -233,12 +208,12 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @returns {Object}
        */
       toJSON(): {
-        mathjs: string
-        name: string
-        params: ParamWithType[]
-        expr: MathNode
+        mathjs: string;
+        name: string;
+        params: ParamWithType[];
+        expr: MathNode;
       } {
-        const types = this.types
+        const types = this.types;
 
         return {
           mathjs: name,
@@ -246,11 +221,11 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
           params: this.params.map(function (param, index) {
             return {
               name: param,
-              type: types[index]
-            }
+              type: types[index],
+            };
           }),
-          expr: this.expr
-        }
+          expr: this.expr,
+        };
       }
 
       /**
@@ -265,11 +240,11 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @returns {FunctionAssignmentNode}
        */
       static fromJSON(json: {
-        name: string
-        params: ParamWithType[]
-        expr: MathNode
+        name: string;
+        params: ParamWithType[];
+        expr: MathNode;
       }): FunctionAssignmentNode {
-        return new FunctionAssignmentNode(json.name, json.params, json.expr)
+        return new FunctionAssignmentNode(json.name, json.params, json.expr);
       }
 
       /**
@@ -278,22 +253,19 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toHTML(options?: any): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
-        const params: string[] = []
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        const params: string[] = [];
         for (let i = 0; i < this.params.length; i++) {
           params.push(
-            '<span class="math-symbol math-parameter">' +
-              escape(this.params[i]) +
-              '</span>'
-          )
+            '<span class="math-symbol math-parameter">' + escape(this.params[i]) + '</span>'
+          );
         }
-        let expr = this.expr.toHTML(options)
+        let expr = this.expr.toHTML(options);
         if (needParenthesis(this, parenthesis, options && options.implicit)) {
           expr =
             '<span class="math-parenthesis math-round-parenthesis">(</span>' +
             expr +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>'
+            '<span class="math-parenthesis math-round-parenthesis">)</span>';
         }
         return (
           '<span class="math-function">' +
@@ -305,7 +277,7 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
           '<span class="math-operator math-assignment-operator ' +
           'math-variable-assignment-operator math-binary-operator">=</span>' +
           expr
-        )
+        );
       }
 
       /**
@@ -314,11 +286,10 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toTex(options?: any): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
-        let expr = this.expr.toTex(options)
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        let expr = this.expr.toTex(options);
         if (needParenthesis(this, parenthesis, options && options.implicit)) {
-          expr = `\\left(${expr}\\right)`
+          expr = `\\left(${expr}\\right)`;
         }
 
         return (
@@ -328,7 +299,7 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
           this.params.map(toSymbol).join(',') +
           '\\right)=' +
           expr
-        )
+        );
       }
     }
 
@@ -336,10 +307,10 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(FunctionAssignmentNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return FunctionAssignmentNode
+    return FunctionAssignmentNode;
   },
   { isClass: true, isNode: true }
-)
+);

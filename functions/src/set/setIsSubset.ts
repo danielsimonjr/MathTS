@@ -1,9 +1,9 @@
-import { flatten, identify } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { MathArray, Matrix } from '../../types/index.js'
+import { flatten, identify } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathArray, Matrix } from '../../types/index.js';
 
-const name = 'setIsSubset'
-const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index']
+const name = 'setIsSubset';
+const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index'];
 
 export const createSetIsSubset = /* #__PURE__ */ factory(
   name,
@@ -37,36 +37,32 @@ export const createSetIsSubset = /* #__PURE__ */ factory(
       ): boolean {
         if (subset(size(a1), new Index(0)) === 0) {
           // empty is a subset of anything
-          return true
+          return true;
         } else if (subset(size(a2), new Index(0)) === 0) {
           // anything is not a subset of empty
-          return false
+          return false;
         }
-        const b1 = identify(
-          flatten(Array.isArray(a1) ? a1 : a1.toArray()).sort(compareNatural)
-        )
-        const b2 = identify(
-          flatten(Array.isArray(a2) ? a2 : a2.toArray()).sort(compareNatural)
-        )
-        let inb2
+        const b1 = identify(flatten(Array.isArray(a1) ? a1 : a1.toArray()).sort(compareNatural));
+        const b2 = identify(flatten(Array.isArray(a2) ? a2 : a2.toArray()).sort(compareNatural));
+        let inb2;
         for (let i = 0; i < b1.length; i++) {
-          inb2 = false
+          inb2 = false;
           for (let j = 0; j < b2.length; j++) {
             if (
               compareNatural(b1[i].value, b2[j].value) === 0 &&
               b1[i].identifier === b2[j].identifier
             ) {
               // the identifier is always a decimal int
-              inb2 = true
-              break
+              inb2 = true;
+              break;
             }
           }
           if (inb2 === false) {
-            return false
+            return false;
           }
         }
-        return true
-      }
-    })
+        return true;
+      },
+    });
   }
-)
+);

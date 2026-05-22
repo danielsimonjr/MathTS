@@ -1,87 +1,80 @@
-import { clone } from '../../utils/object.js'
-import { wasmLoader } from '../../wasm/WasmLoader.js'
-import type { BigNumber } from 'bignumber.js'
-import type Complex from 'complex.js'
+import { clone } from '../../utils/object.js';
+import { wasmLoader } from '../../wasm/WasmLoader.js';
+import type { BigNumber } from 'bignumber.js';
+import type Complex from 'complex.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
-const WASM_EIGS_THRESHOLD = 16 // 4x4 matrix
+const WASM_EIGS_THRESHOLD = 16; // 4x4 matrix
 
 /** Scalar types supported by complex eigenvalue computation */
-type Scalar = number | BigNumber | Complex
+type Scalar = number | BigNumber | Complex;
 
 /**
  * Flatten a 2D array to a Float64Array in row-major order
  */
-function flattenToFloat64(
-  matrix: number[][],
-  rows: number,
-  cols: number
-): Float64Array {
-  const result = new Float64Array(rows * cols)
+function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
+  const result = new Float64Array(rows * cols);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j]
+      result[i * cols + j] = matrix[i][j];
     }
   }
-  return result
+  return result;
 }
 
 // Type definitions
 /** Result for a single eigenvector with its corresponding eigenvalue */
 interface EigenvectorResult {
-  value: Scalar
-  vector: Scalar[]
+  value: Scalar;
+  vector: Scalar[];
 }
 
 /** Result of complex eigenvalue computation */
 interface ComplexEigsResult {
-  values: Scalar[]
-  eigenvectors?: EigenvectorResult[]
+  values: Scalar[];
+  eigenvectors?: EigenvectorResult[];
 }
 
 /** Result of triangularization with optional column transformation matrix */
 interface TriangularResult {
-  values: Scalar[]
-  C: Scalar[][] | undefined
+  values: Scalar[];
+  C: Scalar[][] | undefined;
 }
 
 /** Result of QR decomposition */
 interface QRResult {
-  Q: Scalar[][]
-  R: Scalar[][]
+  Q: Scalar[][];
+  R: Scalar[][];
 }
 
 /** Dependencies for createComplexEigs */
 interface Dependencies {
-  addScalar: (a: Scalar, b: Scalar) => Scalar
-  subtract: (a: Scalar | Scalar[], b: Scalar | Scalar[]) => Scalar | Scalar[]
-  flatten: <T>(arr: T[][] | T[]) => T[]
-  multiply: (
-    a: Scalar | Scalar[][],
-    b: Scalar | Scalar[][]
-  ) => Scalar | Scalar[][]
-  multiplyScalar: (a: Scalar, b: Scalar) => Scalar
-  divideScalar: (a: Scalar, b: Scalar) => Scalar
-  sqrt: (x: Scalar) => Scalar
-  abs: (x: Scalar) => number | BigNumber
-  bignumber: (x: number | string) => BigNumber
-  diag: (arr: Scalar[]) => Scalar[][]
-  size: (arr: Scalar[]) => number[]
-  reshape: (arr: Scalar[], shape: number[]) => Scalar[]
-  inv: (x: Scalar[][]) => Scalar[][]
-  qr: (x: Scalar[][]) => QRResult
-  usolve: (A: Scalar[][], b: Scalar[]) => Scalar[]
-  usolveAll: (A: Scalar[][], b: Scalar[]) => Scalar[][]
-  equal: (a: Scalar, b: Scalar) => boolean
-  complex: (re: number | Scalar, im?: number) => Complex
-  larger: (a: Scalar, b: Scalar) => boolean
-  smaller: (a: Scalar, b: Scalar) => boolean
-  matrixFromColumns: (...cols: Scalar[][]) => Scalar[][]
-  dot: (a: Scalar[], b: Scalar[]) => Scalar
+  addScalar: (a: Scalar, b: Scalar) => Scalar;
+  subtract: (a: Scalar | Scalar[], b: Scalar | Scalar[]) => Scalar | Scalar[];
+  flatten: <T>(arr: T[][] | T[]) => T[];
+  multiply: (a: Scalar | Scalar[][], b: Scalar | Scalar[][]) => Scalar | Scalar[][];
+  multiplyScalar: (a: Scalar, b: Scalar) => Scalar;
+  divideScalar: (a: Scalar, b: Scalar) => Scalar;
+  sqrt: (x: Scalar) => Scalar;
+  abs: (x: Scalar) => number | BigNumber;
+  bignumber: (x: number | string) => BigNumber;
+  diag: (arr: Scalar[]) => Scalar[][];
+  size: (arr: Scalar[]) => number[];
+  reshape: (arr: Scalar[], shape: number[]) => Scalar[];
+  inv: (x: Scalar[][]) => Scalar[][];
+  qr: (x: Scalar[][]) => QRResult;
+  usolve: (A: Scalar[][], b: Scalar[]) => Scalar[];
+  usolveAll: (A: Scalar[][], b: Scalar[]) => Scalar[][];
+  equal: (a: Scalar, b: Scalar) => boolean;
+  complex: (re: number | Scalar, im?: number) => Complex;
+  larger: (a: Scalar, b: Scalar) => boolean;
+  smaller: (a: Scalar, b: Scalar) => boolean;
+  matrixFromColumns: (...cols: Scalar[][]) => Scalar[][];
+  dot: (a: Scalar[], b: Scalar[]) => Scalar;
 }
 
 /** Supported data types for eigenvalue computation */
-type DataType = 'number' | 'BigNumber' | 'Complex'
+type DataType = 'number' | 'BigNumber' | 'Complex';
 
 export function createComplexEigs({
   addScalar,
@@ -105,7 +98,7 @@ export function createComplexEigs({
   larger,
   smaller,
   matrixFromColumns: _matrixFromColumns,
-  dot
+  dot,
 }: Dependencies) {
   /**
    * Compute eigenvalues and optionally eigenvectors of a general matrix
@@ -126,14 +119,14 @@ export function createComplexEigs({
     // WASM fast path for eigenvalues-only computation of plain number matrices
     // Note: WASM qrAlgorithm only computes eigenvalues, not eigenvectors
     if (!findVectors && type === 'number' && N * N >= WASM_EIGS_THRESHOLD) {
-      const wasm = wasmLoader.getModule()
+      const wasm = wasmLoader.getModule();
       if (wasm) {
         try {
-          const flat = flattenToFloat64(arr as number[][], N, N)
-          const matrixAlloc = wasmLoader.allocateFloat64Array(flat)
-          const eigenvaluesRealAlloc = wasmLoader.allocateFloat64ArrayEmpty(N)
-          const eigenvaluesImagAlloc = wasmLoader.allocateFloat64ArrayEmpty(N)
-          const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(N * N)
+          const flat = flattenToFloat64(arr as number[][], N, N);
+          const matrixAlloc = wasmLoader.allocateFloat64Array(flat);
+          const eigenvaluesRealAlloc = wasmLoader.allocateFloat64ArrayEmpty(N);
+          const eigenvaluesImagAlloc = wasmLoader.allocateFloat64ArrayEmpty(N);
+          const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(N * N);
 
           try {
             const iterations = wasm.qrAlgorithm(
@@ -144,18 +137,18 @@ export function createComplexEigs({
               workAlloc.ptr,
               1000, // maxIterations
               typeof prec === 'number' ? prec : 1e-12
-            )
+            );
 
             if (iterations >= 0) {
               // Extract eigenvalues as complex numbers
-              const values: Scalar[] = []
+              const values: Scalar[] = [];
               for (let i = 0; i < N; i++) {
-                const re = eigenvaluesRealAlloc.array[i]
-                const im = eigenvaluesImagAlloc.array[i]
+                const re = eigenvaluesRealAlloc.array[i];
+                const im = eigenvaluesImagAlloc.array[i];
                 if (Math.abs(im) < 1e-14) {
-                  values.push(re)
+                  values.push(re);
                 } else {
-                  values.push(complex(re, im))
+                  values.push(complex(re, im));
                 }
               }
 
@@ -164,22 +157,22 @@ export function createComplexEigs({
                 const absA =
                   typeof a === 'number'
                     ? Math.abs(a)
-                    : Math.sqrt((a as Complex).re ** 2 + (a as Complex).im ** 2)
+                    : Math.sqrt((a as Complex).re ** 2 + (a as Complex).im ** 2);
                 const absB =
                   typeof b === 'number'
                     ? Math.abs(b)
-                    : Math.sqrt((b as Complex).re ** 2 + (b as Complex).im ** 2)
-                return absA - absB
-              })
+                    : Math.sqrt((b as Complex).re ** 2 + (b as Complex).im ** 2);
+                return absA - absB;
+              });
 
-              return { values }
+              return { values };
             }
             // Fall through to JS implementation if WASM failed
           } finally {
-            wasmLoader.free(matrixAlloc.ptr)
-            wasmLoader.free(eigenvaluesRealAlloc.ptr)
-            wasmLoader.free(eigenvaluesImagAlloc.ptr)
-            wasmLoader.free(workAlloc.ptr)
+            wasmLoader.free(matrixAlloc.ptr);
+            wasmLoader.free(eigenvaluesRealAlloc.ptr);
+            wasmLoader.free(eigenvaluesImagAlloc.ptr);
+            wasmLoader.free(workAlloc.ptr);
           }
         } catch {
           // Fall back to JS implementation on WASM error
@@ -193,7 +186,7 @@ export function createComplexEigs({
     // make sure corresponding rows and columns have similar magnitude
     // important because of numerical stability
     // MODIFIES arr by side effect!
-    const R = balance(arr, N, prec, type, findVectors)
+    const R = balance(arr, N, prec, type, findVectors);
 
     // R is the row transformation matrix
     // arr = A' = R A R^-1, A is the original matrix
@@ -207,17 +200,11 @@ export function createComplexEigs({
     // to Hessenberg form (upper triangular plus one subdiagonal row)
     // updates the transformation matrix R with new row operations
     // MODIFIES arr by side effect!
-    reduceToHessenberg(arr, N, prec, type, findVectors, R)
+    reduceToHessenberg(arr, N, prec, type, findVectors, R);
     // still true that original A = R^-1 arr R)
 
     // find eigenvalues
-    const { values, C } = iterateUntilTriangular(
-      arr,
-      N,
-      prec,
-      type,
-      findVectors
-    )
+    const { values, C } = iterateUntilTriangular(arr, N, prec, type, findVectors);
 
     // values is the list of eigenvalues, C is the column
     // transformation matrix that transforms arr, the hessenberg
@@ -226,11 +213,11 @@ export function createComplexEigs({
     // and original A is unchanged.)
 
     if (findVectors) {
-      const eigenvectors = findEigenvectors(arr, N, C!, R, values, prec, type)
-      return { values, eigenvectors }
+      const eigenvectors = findEigenvectors(arr, N, C!, R, values, prec, type);
+      return { values, eigenvectors };
     }
 
-    return { values }
+    return { values };
   }
 
   /**
@@ -249,40 +236,40 @@ export function createComplexEigs({
     type: DataType,
     findVectors: boolean
   ): Scalar[][] | null {
-    const big = type === 'BigNumber'
-    const cplx = type === 'Complex'
+    const big = type === 'BigNumber';
+    const cplx = type === 'Complex';
 
-    const realzero: Scalar = big ? bignumber(0) : 0
-    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1
-    const realone: Scalar = big ? bignumber(1) : 1
+    const realzero: Scalar = big ? bignumber(0) : 0;
+    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1;
+    const realone: Scalar = big ? bignumber(1) : 1;
 
     // base of the floating-point arithmetic
-    const radix: Scalar = big ? bignumber(10) : 2
-    const radixSq = multiplyScalar(radix, radix)
+    const radix: Scalar = big ? bignumber(10) : 2;
+    const radixSq = multiplyScalar(radix, radix);
 
     // the diagonal transformation matrix R
-    let Rdiag: Scalar[] | undefined
+    let Rdiag: Scalar[] | undefined;
     if (findVectors) {
-      Rdiag = Array(N).fill(one)
+      Rdiag = Array(N).fill(one);
     }
 
     // this isn't the only time we loop thru the matrix...
-    let last = false
+    let last = false;
 
     while (!last) {
       // ...haha I'm joking! unless...
-      last = true
+      last = true;
 
       for (let i = 0; i < N; i++) {
         // compute the taxicab norm of i-th column and row
         // TODO optimize for complex numbers
-        let colNorm: Scalar = realzero
-        let rowNorm: Scalar = realzero
+        let colNorm: Scalar = realzero;
+        let rowNorm: Scalar = realzero;
 
         for (let j = 0; j < N; j++) {
-          if (i === j) continue
-          colNorm = addScalar(colNorm, abs(arr[j][i]) as Scalar)
-          rowNorm = addScalar(rowNorm, abs(arr[i][j]) as Scalar)
+          if (i === j) continue;
+          colNorm = addScalar(colNorm, abs(arr[j][i]) as Scalar);
+          rowNorm = addScalar(rowNorm, abs(arr[i][j]) as Scalar);
         }
 
         if (!equal(colNorm, 0) && !equal(rowNorm, 0)) {
@@ -290,19 +277,19 @@ export function createComplexEigs({
           // (we want to scale only by integer powers of radix,
           // so that we don't lose any precision due to round-off)
 
-          let f: Scalar = realone
-          let c: Scalar = colNorm
+          let f: Scalar = realone;
+          let c: Scalar = colNorm;
 
-          const rowDivRadix = divideScalar(rowNorm, radix)
-          const rowMulRadix = multiplyScalar(rowNorm, radix)
+          const rowDivRadix = divideScalar(rowNorm, radix);
+          const rowMulRadix = multiplyScalar(rowNorm, radix);
 
           while (smaller(c, rowDivRadix)) {
-            c = multiplyScalar(c, radixSq)
-            f = multiplyScalar(f, radix)
+            c = multiplyScalar(c, radixSq);
+            f = multiplyScalar(f, radix);
           }
           while (larger(c, rowMulRadix)) {
-            c = divideScalar(c, radixSq)
-            f = divideScalar(f, radix)
+            c = divideScalar(c, radixSq);
+            f = divideScalar(f, radix);
           }
 
           // check whether balancing is needed
@@ -310,27 +297,27 @@ export function createComplexEigs({
           const condition = smaller(
             divideScalar(addScalar(c, rowNorm), f),
             multiplyScalar(addScalar(colNorm, rowNorm), 0.95)
-          )
+          );
 
           // apply balancing similarity transformation
           if (condition) {
             // we should loop once again to check whether
             // another rebalancing is needed
-            last = false
+            last = false;
 
-            const g = divideScalar(1, f)
+            const g = divideScalar(1, f);
 
             for (let j = 0; j < N; j++) {
               if (i === j) {
-                continue
+                continue;
               }
-              arr[i][j] = multiplyScalar(arr[i][j], g)
-              arr[j][i] = multiplyScalar(arr[j][i], f)
+              arr[i][j] = multiplyScalar(arr[i][j], g);
+              arr[j][i] = multiplyScalar(arr[j][i], f);
             }
 
             // keep track of transformations
             if (findVectors) {
-              Rdiag![i] = multiplyScalar(Rdiag![i], g)
+              Rdiag![i] = multiplyScalar(Rdiag![i], g);
             }
           }
         }
@@ -338,7 +325,7 @@ export function createComplexEigs({
     }
 
     // return the diagonal row transformation matrix
-    return findVectors ? diag(Rdiag) : null
+    return findVectors ? diag(Rdiag) : null;
   }
 
   /**
@@ -358,77 +345,77 @@ export function createComplexEigs({
     findVectors: boolean,
     R: Scalar[][] | null
   ): void {
-    const big = type === 'BigNumber'
-    const cplx = type === 'Complex'
+    const big = type === 'BigNumber';
+    const cplx = type === 'Complex';
 
-    const zero: Scalar = big ? bignumber(0) : cplx ? complex(0) : 0
+    const zero: Scalar = big ? bignumber(0) : cplx ? complex(0) : 0;
 
     if (big) {
-      prec = bignumber(prec as number)
+      prec = bignumber(prec as number);
     }
 
     for (let i = 0; i < N - 2; i++) {
       // Find the largest subdiag element in the i-th col
 
-      let maxIndex = 0
-      let max: Scalar = zero
+      let maxIndex = 0;
+      let max: Scalar = zero;
 
       for (let j = i + 1; j < N; j++) {
-        const el = arr[j][i]
+        const el = arr[j][i];
         if (smaller(abs(max), abs(el))) {
-          max = el
-          maxIndex = j
+          max = el;
+          maxIndex = j;
         }
       }
 
       // This col is pivoted, no need to do anything
       if (smaller(abs(max), prec)) {
-        continue
+        continue;
       }
 
       if (maxIndex !== i + 1) {
         // Interchange maxIndex-th and (i+1)-th row
-        const tmp1 = arr[maxIndex]
-        arr[maxIndex] = arr[i + 1]
-        arr[i + 1] = tmp1
+        const tmp1 = arr[maxIndex];
+        arr[maxIndex] = arr[i + 1];
+        arr[i + 1] = tmp1;
 
         // Interchange maxIndex-th and (i+1)-th column
         for (let j = 0; j < N; j++) {
-          const tmp2 = arr[j][maxIndex]
-          arr[j][maxIndex] = arr[j][i + 1]
-          arr[j][i + 1] = tmp2
+          const tmp2 = arr[j][maxIndex];
+          arr[j][maxIndex] = arr[j][i + 1];
+          arr[j][i + 1] = tmp2;
         }
 
         // keep track of transformations
         if (findVectors) {
-          const tmp3 = R![maxIndex]
-          R![maxIndex] = R![i + 1]
-          R![i + 1] = tmp3
+          const tmp3 = R![maxIndex];
+          R![maxIndex] = R![i + 1];
+          R![i + 1] = tmp3;
         }
       }
 
       // Reduce following rows and columns
       for (let j = i + 2; j < N; j++) {
-        const n = divideScalar(arr[j][i], max)
+        const n = divideScalar(arr[j][i], max);
 
         if (n === 0) {
-          continue
+          continue;
         }
 
         // from j-th row subtract n-times (i+1)th row
         for (let k = 0; k < N; k++) {
-          arr[j][k] = subtract(arr[j][k], multiplyScalar(n, arr[i + 1][k])) as Scalar
+          arr[j][k] = subtract(arr[j][k], multiplyScalar(n, arr[i + 1][k])) as Scalar;
         }
 
         // to (i+1)th column add n-times j-th column
         for (let k = 0; k < N; k++) {
-          arr[k][i + 1] = addScalar(arr[k][i + 1], multiplyScalar(n, arr[k][j]))
+          arr[k][i + 1] = addScalar(arr[k][i + 1], multiplyScalar(n, arr[k][j]));
         }
 
         // keep track of transformations
         if (findVectors) {
           for (let k = 0; k < N; k++) {
-            R![j][k] = subtract(R![j][k], multiplyScalar(n, R![i + 1][k])) as Scalar
+            R![j][k] = subtract(R![j][k], multiplyScalar(n, R![i + 1][k])) as Scalar;
           }
         }
       }
@@ -447,13 +434,13 @@ export function createComplexEigs({
     type: DataType,
     findVectors: boolean
   ): TriangularResult {
-    const big = type === 'BigNumber'
-    const cplx = type === 'Complex'
+    const big = type === 'BigNumber';
+    const cplx = type === 'Complex';
 
-    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1
+    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1;
 
     if (big) {
-      prec = bignumber(prec as number)
+      prec = bignumber(prec as number);
     }
 
     // The Francis Algorithm
@@ -465,39 +452,35 @@ export function createComplexEigs({
     // the eigenvalues of its diagonal blocks and we know how to find
     // eigenvalues of a 2x2 matrix, we know the eigenvalues of A.
 
-    let arr = clone(A) as Scalar[][]
+    let arr = clone(A) as Scalar[][];
 
     // the list of converged eigenvalues
-    const lambdas: Scalar[] = []
+    const lambdas: Scalar[] = [];
 
     // size of arr, which will get smaller as eigenvalues converge
-    let n = N
+    let n = N;
 
     // the diagonal of the block-diagonal matrix that turns
     // converged 2x2 matrices into upper triangular matrices
-    const Sdiag: Scalar[][][] = []
+    const Sdiag: Scalar[][][] = [];
 
     // N*N matrix describing the overall transformation done during the QR algorithm
-    let Qtotal: Scalar[][] | undefined = findVectors
-      ? diag(Array(N).fill(one))
-      : undefined
+    let Qtotal: Scalar[][] | undefined = findVectors ? diag(Array(N).fill(one)) : undefined;
 
     // nxn matrix describing the QR transformations done since last convergence
-    let Qpartial: Scalar[][] | undefined = findVectors
-      ? diag(Array(n).fill(one))
-      : undefined
+    let Qpartial: Scalar[][] | undefined = findVectors ? diag(Array(n).fill(one)) : undefined;
 
     // last eigenvalue converged before this many steps
-    let lastConvergenceBefore = 0
+    let lastConvergenceBefore = 0;
 
     while (lastConvergenceBefore <= 100) {
-      lastConvergenceBefore += 1
+      lastConvergenceBefore += 1;
 
       // TODO if the convergence is slow, do something clever
 
       // Perform the factorization
 
-      const k = arr[n - 1][n - 1] // TODO this is apparently a somewhat
+      const k = arr[n - 1][n - 1]; // TODO this is apparently a somewhat
       // old-fashioned choice; ideally set close to an eigenvalue, or
       // perhaps better yet switch to the implicit QR version that is sometimes
       // specifically called the "Francis algorithm" that is alluded to
@@ -505,55 +488,55 @@ export function createComplexEigs({
       // optimized third-party package for the linear algebra operations...)
 
       for (let i = 0; i < n; i++) {
-        arr[i][i] = subtract(arr[i][i], k) as Scalar
+        arr[i][i] = subtract(arr[i][i], k) as Scalar;
       }
 
       // TODO do an implicit QR transformation
-      const { Q, R }: QRResult = qr(arr)
-      arr = multiply(R, Q) as Scalar[][]
+      const { Q, R }: QRResult = qr(arr);
+      arr = multiply(R, Q) as Scalar[][];
 
       for (let i = 0; i < n; i++) {
-        arr[i][i] = addScalar(arr[i][i], k)
+        arr[i][i] = addScalar(arr[i][i], k);
       }
 
       // keep track of transformations
       if (findVectors) {
-        Qpartial = multiply(Qpartial!, Q) as Scalar[][]
+        Qpartial = multiply(Qpartial!, Q) as Scalar[][];
       }
 
       // The rightmost diagonal element converged to an eigenvalue
       if (n === 1 || smaller(abs(arr[n - 1][n - 2]), prec)) {
-        lastConvergenceBefore = 0
-        lambdas.push(arr[n - 1][n - 1])
+        lastConvergenceBefore = 0;
+        lambdas.push(arr[n - 1][n - 1]);
 
         // keep track of transformations
         if (findVectors) {
-          Sdiag.unshift([[1]])
-          inflateMatrix(Qpartial!, N)
-          Qtotal = multiply(Qtotal!, Qpartial!) as Scalar[][]
+          Sdiag.unshift([[1]]);
+          inflateMatrix(Qpartial!, N);
+          Qtotal = multiply(Qtotal!, Qpartial!) as Scalar[][];
 
           if (n > 1) {
-            Qpartial = diag(Array(n - 1).fill(one))
+            Qpartial = diag(Array(n - 1).fill(one));
           }
         }
 
         // reduce the matrix size
-        n -= 1
-        arr.pop()
+        n -= 1;
+        arr.pop();
         for (let i = 0; i < n; i++) {
-          arr[i].pop()
+          arr[i].pop();
         }
 
         // The rightmost diagonal 2x2 block converged
       } else if (n === 2 || smaller(abs(arr[n - 2][n - 3]), prec)) {
-        lastConvergenceBefore = 0
+        lastConvergenceBefore = 0;
         const ll = eigenvalues2x2(
           arr[n - 2][n - 2],
           arr[n - 2][n - 1],
           arr[n - 1][n - 2],
           arr[n - 1][n - 1]
-        )
-        lambdas.push(...ll)
+        );
+        lambdas.push(...ll);
 
         // keep track of transformations
         if (findVectors) {
@@ -568,50 +551,47 @@ export function createComplexEigs({
               prec,
               type
             )
-          )
-          inflateMatrix(Qpartial!, N)
-          Qtotal = multiply(Qtotal!, Qpartial!) as Scalar[][]
+          );
+          inflateMatrix(Qpartial!, N);
+          Qtotal = multiply(Qtotal!, Qpartial!) as Scalar[][];
           if (n > 2) {
-            Qpartial = diag(Array(n - 2).fill(one))
+            Qpartial = diag(Array(n - 2).fill(one));
           }
         }
 
         // reduce the matrix size
-        n -= 2
-        arr.pop()
-        arr.pop()
+        n -= 2;
+        arr.pop();
+        arr.pop();
         for (let i = 0; i < n; i++) {
-          arr[i].pop()
-          arr[i].pop()
+          arr[i].pop();
+          arr[i].pop();
         }
       }
 
       if (n === 0) {
-        break
+        break;
       }
     }
 
     // standard sorting
-    lambdas.sort((a, b) => +(subtract(abs(a), abs(b)) as number))
+    lambdas.sort((a, b) => +(subtract(abs(a), abs(b)) as number));
 
     // the algorithm didn't converge
     if (lastConvergenceBefore > 100) {
       const err = new Error(
-        'The eigenvalues failed to converge. Only found these eigenvalues: ' +
-          lambdas.join(', ')
-      ) as Error & { values: Scalar[]; vectors: Scalar[][] }
-      err.values = lambdas
-      err.vectors = []
-      throw err
+        'The eigenvalues failed to converge. Only found these eigenvalues: ' + lambdas.join(', ')
+      ) as Error & { values: Scalar[]; vectors: Scalar[][] };
+      err.values = lambdas;
+      err.vectors = [];
+      throw err;
     }
 
     // combine the overall QR transformation Qtotal with the subsequent
     // transformation S that turns the diagonal 2x2 blocks to upper triangular
-    const C = findVectors
-      ? (multiply(Qtotal!, blockDiag(Sdiag, N)) as Scalar[][])
-      : undefined
+    const C = findVectors ? (multiply(Qtotal!, blockDiag(Sdiag, N)) as Scalar[][]) : undefined;
 
-    return { values: lambdas, C }
+    return { values: lambdas, C };
   }
 
   /**
@@ -634,28 +614,28 @@ export function createComplexEigs({
     prec: number | BigNumber,
     type: DataType
   ): EigenvectorResult[] {
-    const Cinv = inv(C)
-    const U = multiply(multiply(Cinv, A) as Scalar[][], C) as Scalar[][]
+    const Cinv = inv(C);
+    const U = multiply(multiply(Cinv, A) as Scalar[][], C) as Scalar[][];
 
-    const big = type === 'BigNumber'
-    const cplx = type === 'Complex'
+    const big = type === 'BigNumber';
+    const cplx = type === 'Complex';
 
-    const zero: Scalar = big ? bignumber(0) : cplx ? complex(0) : 0
-    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1
+    const zero: Scalar = big ? bignumber(0) : cplx ? complex(0) : 0;
+    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1;
 
     // turn values into a kind of "multiset"
     // this way it is easier to find eigenvectors
-    const uniqueValues: Scalar[] = []
-    const multiplicities: number[] = []
+    const uniqueValues: Scalar[] = [];
+    const multiplicities: number[] = [];
 
     for (const lambda of values) {
-      const i = indexOf(uniqueValues, lambda, equal)
+      const i = indexOf(uniqueValues, lambda, equal);
 
       if (i === -1) {
-        uniqueValues.push(lambda)
-        multiplicities.push(1)
+        uniqueValues.push(lambda);
+        multiplicities.push(1);
       } else {
-        multiplicities[i] += 1
+        multiplicities[i] += 1;
       }
     }
 
@@ -663,60 +643,58 @@ export function createComplexEigs({
     // TODO replace with an iterative eigenvector algorithm
     // (this one might fail for imprecise eigenvalues)
 
-    const vectors: EigenvectorResult[] = []
-    const len = uniqueValues.length
-    const b: Scalar[] = Array(N).fill(zero)
-    const E = diag(Array(N).fill(one))
+    const vectors: EigenvectorResult[] = [];
+    const len = uniqueValues.length;
+    const b: Scalar[] = Array(N).fill(zero);
+    const E = diag(Array(N).fill(one));
 
     for (let i = 0; i < len; i++) {
-      const lambda = uniqueValues[i]
-      const S = subtract(U as unknown as Scalar[], multiply(lambda, E) as unknown as Scalar[]) as unknown as Scalar[][] // the characteristic matrix
+      const lambda = uniqueValues[i];
+      const S = subtract(
+        U as unknown as Scalar[],
+        multiply(lambda, E) as unknown as Scalar[]
+      ) as unknown as Scalar[][]; // the characteristic matrix
 
-      let solutions = usolveAll(S, b)
-      solutions.shift() // ignore the null vector
+      let solutions = usolveAll(S, b);
+      solutions.shift(); // ignore the null vector
 
       // looks like we missed something, try inverse iteration
       // But if that fails, just presume that the original matrix truly
       // was defective.
       while (solutions.length < multiplicities[i]) {
-        const approxVec = inverseIterate(S, N, solutions, prec, type)
+        const approxVec = inverseIterate(S, N, solutions, prec, type);
         if (approxVec === null) {
-          break
+          break;
         } // no more vectors were found
-        solutions.push(approxVec)
+        solutions.push(approxVec);
       }
 
       // Transform back into original array coordinates
-      const correction = multiply(inv(R!), C) as Scalar[][]
-      solutions = solutions.map((v) => multiply(correction, v as unknown as Scalar[][]) as unknown as Scalar[])
+      const correction = multiply(inv(R!), C) as Scalar[][];
+      solutions = solutions.map(
+        (v) => multiply(correction, v as unknown as Scalar[][]) as unknown as Scalar[]
+      );
 
-      vectors.push(
-        ...solutions.map((v) => ({ value: lambda, vector: flatten(v) }))
-      )
+      vectors.push(...solutions.map((v) => ({ value: lambda, vector: flatten(v) })));
     }
 
-    return vectors
+    return vectors;
   }
 
   /**
    * Compute the eigenvalues of a 2x2 matrix
    */
-  function eigenvalues2x2(
-    a: Scalar,
-    b: Scalar,
-    c: Scalar,
-    d: Scalar
-  ): [Scalar, Scalar] {
+  function eigenvalues2x2(a: Scalar, b: Scalar, c: Scalar, d: Scalar): [Scalar, Scalar] {
     // lambda_+- = 1/2 trA +- 1/2 sqrt( tr^2 A - 4 detA )
-    const trA = addScalar(a, d)
-    const detA = subtract(multiplyScalar(a, d), multiplyScalar(b, c)) as Scalar
-    const x = multiplyScalar(trA, 0.5)
+    const trA = addScalar(a, d);
+    const detA = subtract(multiplyScalar(a, d), multiplyScalar(b, c)) as Scalar;
+    const x = multiplyScalar(trA, 0.5);
     const y = multiplyScalar(
       sqrt(subtract(multiplyScalar(trA, trA), multiplyScalar(4, detA)) as Scalar),
       0.5
-    )
+    );
 
-    return [addScalar(x, y), subtract(x, y) as Scalar]
+    return [addScalar(x, y), subtract(x, y) as Scalar];
   }
 
   /**
@@ -735,19 +713,19 @@ export function createComplexEigs({
     prec: number | BigNumber,
     type: DataType
   ): [[Scalar, Scalar], [Scalar, Scalar]] {
-    const big = type === 'BigNumber'
-    const cplx = type === 'Complex'
+    const big = type === 'BigNumber';
+    const cplx = type === 'Complex';
 
-    const zero: Scalar = big ? bignumber(0) : cplx ? complex(0) : 0
-    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1
+    const zero: Scalar = big ? bignumber(0) : cplx ? complex(0) : 0;
+    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1;
 
     // matrix is already upper triangular
     // return an identity matrix
     if (smaller(abs(c), prec)) {
       return [
         [one, zero],
-        [zero, one]
-      ]
+        [zero, one],
+      ];
     }
 
     // matrix is diagonalizable
@@ -755,14 +733,14 @@ export function createComplexEigs({
     if (larger(abs(subtract(l1, l2) as Scalar), prec)) {
       return [
         [subtract(l1, d) as Scalar, subtract(l2, d) as Scalar],
-        [c, c]
-      ]
+        [c, c],
+      ];
     }
 
     // matrix is not diagonalizable
     // compute diagonal elements of N = A - lambdaI
-    const na = subtract(a, l1) as Scalar
-    const nd = subtract(d, l1) as Scalar
+    const na = subtract(a, l1) as Scalar;
+    const nd = subtract(d, l1) as Scalar;
 
     // col(N,2) = 0  implies  S = ( col(N,1), e_1 )
     // col(N,2) != 0 implies  S = ( col(N,2), e_2 )
@@ -770,13 +748,13 @@ export function createComplexEigs({
     if (smaller(abs(b), prec) && smaller(abs(nd), prec)) {
       return [
         [na, one],
-        [c, zero]
-      ]
+        [c, zero],
+      ];
     } else {
       return [
         [b, zero],
-        [nd, one]
-      ]
+        [nd, one],
+      ];
     }
   }
 
@@ -787,16 +765,16 @@ export function createComplexEigs({
   function inflateMatrix(arr: Scalar[][], N: number): Scalar[][] {
     // add columns
     for (let i = 0; i < arr.length; i++) {
-      arr[i].push(...Array(N - arr[i].length).fill(0))
+      arr[i].push(...Array(N - arr[i].length).fill(0));
     }
 
     // add rows
     for (let i = arr.length; i < N; i++) {
-      arr.push(Array(N).fill(0))
-      arr[i][i] = 1
+      arr.push(Array(N).fill(0));
+      arr[i][i] = 1;
     }
 
-    return arr
+    return arr;
   }
 
   /**
@@ -805,25 +783,25 @@ export function createComplexEigs({
    * @param N the size of the resulting matrix
    */
   function blockDiag(arr: Scalar[][][], N: number): Scalar[][] {
-    const M: Scalar[][] = []
+    const M: Scalar[][] = [];
     for (let i = 0; i < N; i++) {
-      M[i] = Array(N).fill(0)
+      M[i] = Array(N).fill(0);
     }
 
-    let I = 0
+    let I = 0;
     for (const sub of arr) {
-      const n = sub.length
+      const n = sub.length;
 
       for (let i = 0; i < n; i++) {
         for (let j = 0; j < n; j++) {
-          M[I + i][I + j] = sub[i][j]
+          M[I + i][I + j] = sub[i][j];
         }
       }
 
-      I += n
+      I += n;
     }
 
-    return M
+    return M;
   }
 
   /**
@@ -836,10 +814,10 @@ export function createComplexEigs({
   function indexOf<T>(arr: T[], el: T, fn: (a: T, b: T) => boolean): number {
     for (let i = 0; i < arr.length; i++) {
       if (fn(arr[i], el)) {
-        return i
+        return i;
       }
     }
-    return -1
+    return -1;
   }
 
   /**
@@ -862,45 +840,45 @@ export function createComplexEigs({
     prec: number | BigNumber,
     type: DataType
   ): Scalar[] | null {
-    const largeNum: Scalar = type === 'BigNumber' ? bignumber(1000) : 1000
+    const largeNum: Scalar = type === 'BigNumber' ? bignumber(1000) : 1000;
 
-    let b: Scalar[] // the vector
+    let b: Scalar[]; // the vector
 
     // you better choose a random vector before I count to five
-    let i = 0
+    let i = 0;
     for (; i < 5; ++i) {
-      b = randomOrthogonalVector(N, orthog, type)
+      b = randomOrthogonalVector(N, orthog, type);
       try {
-        b = usolve(A, b)
+        b = usolve(A, b);
       } catch {
         // That direction didn't work, likely because the original matrix
         // was defective. But still make the full number of tries...
-        continue
+        continue;
       }
       if (larger(norm(b), largeNum)) {
-        break
+        break;
       }
     }
     if (i >= 5) {
-      return null // couldn't find any orthogonal vector in the image
+      return null; // couldn't find any orthogonal vector in the image
     }
 
     // you better converge before I count to ten
-    i = 0
+    i = 0;
     while (true) {
-      const c = usolve(A, b)
+      const c = usolve(A, b);
 
       if (smaller(norm(orthogonalComplement(b, [c])), prec)) {
-        break
+        break;
       }
       if (++i >= 10) {
-        return null
+        return null;
       }
 
-      b = normalize(c, type)
+      b = normalize(c, type);
     }
 
-    return b
+    return b;
   }
 
   /**
@@ -910,47 +888,46 @@ export function createComplexEigs({
    * @param type data type
    * @returns random vector
    */
-  function randomOrthogonalVector(
-    N: number,
-    orthog: Scalar[][],
-    type: DataType
-  ): Scalar[] {
-    const big = type === 'BigNumber'
-    const cplx = type === 'Complex'
+  function randomOrthogonalVector(N: number, orthog: Scalar[][], type: DataType): Scalar[] {
+    const big = type === 'BigNumber';
+    const cplx = type === 'Complex';
 
     // generate random vector with the correct type
     let v: Scalar[] = Array(N)
       .fill(0)
-      .map(() => 2 * Math.random() - 1)
+      .map(() => 2 * Math.random() - 1);
     if (big) {
-      v = v.map((n) => bignumber(n as number))
+      v = v.map((n) => bignumber(n as number));
     }
     if (cplx) {
-      v = v.map((n) => complex(n))
+      v = v.map((n) => complex(n));
     }
 
     // project to orthogonal complement
-    v = orthogonalComplement(v, orthog)
+    v = orthogonalComplement(v, orthog);
 
     // normalize
-    return normalize(v, type)
+    return normalize(v, type);
   }
 
   /**
    * Project vector v to the orthogonal complement of an array of vectors
    */
   function orthogonalComplement(v: Scalar[], orthog: Scalar[][]): Scalar[] {
-    const vectorShape = size(v)
+    const vectorShape = size(v);
     for (let w of orthog) {
-      w = reshape(w, vectorShape) // make sure this is just a vector computation
+      w = reshape(w, vectorShape); // make sure this is just a vector computation
       // v := v - (w, v)/|w|^2 w
       v = subtract(
         v as unknown as Scalar[],
-        multiply(divideScalar(dot(w, v), dot(w, w)), w as unknown as Scalar[][]) as unknown as Scalar[]
-      ) as unknown as Scalar[]
+        multiply(
+          divideScalar(dot(w, v), dot(w, w)),
+          w as unknown as Scalar[][]
+        ) as unknown as Scalar[]
+      ) as unknown as Scalar[];
     }
 
-    return v
+    return v;
   }
 
   /**
@@ -958,7 +935,7 @@ export function createComplexEigs({
    * We can't use math.norm because factory can't handle circular dependency.
    */
   function norm(v: Scalar[]): Scalar {
-    return abs(sqrt(dot(v, v))) as Scalar
+    return abs(sqrt(dot(v, v))) as Scalar;
   }
 
   /**
@@ -968,12 +945,12 @@ export function createComplexEigs({
    * @returns normalized vector
    */
   function normalize(v: Scalar[], type: DataType): Scalar[] {
-    const big = type === 'BigNumber'
-    const cplx = type === 'Complex'
-    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1
+    const big = type === 'BigNumber';
+    const cplx = type === 'Complex';
+    const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1;
 
-    return multiply(divideScalar(one, norm(v)), v as unknown as Scalar[][]) as unknown as Scalar[]
+    return multiply(divideScalar(one, norm(v)), v as unknown as Scalar[][]) as unknown as Scalar[];
   }
 
-  return complexEigs
+  return complexEigs;
 }

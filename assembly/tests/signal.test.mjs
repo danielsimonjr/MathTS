@@ -42,8 +42,7 @@ function check(name, cond, detail) {
     console.log(`✗ ${name} ${detail ?? ''}`);
   }
 }
-const arrEq = (a, b) =>
-  a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
+const arrEq = (a, b) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
 
 console.log('AssemblyScript signal windowing\n===============================');
 
@@ -51,30 +50,18 @@ check(
   'windowFunction(5, rectangular)',
   arrEq(readArr(exports.windowFunction(5, 0)), [1, 1, 1, 1, 1])
 );
-check(
-  'windowFunction(3, hamming)',
-  arrEq(readArr(exports.windowFunction(3, 1)), [0.08, 1, 0.08])
-);
-check(
-  'windowFunction(3, hann)',
-  arrEq(readArr(exports.windowFunction(3, 2)), [0, 1, 0])
-);
+check('windowFunction(3, hamming)', arrEq(readArr(exports.windowFunction(3, 1)), [0.08, 1, 0.08]));
+check('windowFunction(3, hann)', arrEq(readArr(exports.windowFunction(3, 2)), [0, 1, 0]));
 
 {
   const x = makeArray([1, 5, 2, 8, 3]);
-  check(
-    'medfilt([1,5,2,8,3], 3)',
-    arrEq(readArr(exports.medfilt(x, 3)), [5, 2, 5, 3, 8])
-  );
+  check('medfilt([1,5,2,8,3], 3)', arrEq(readArr(exports.medfilt(x, 3)), [5, 2, 5, 3, 8]));
   exports.__unpin(x);
 }
 
 {
   const x = makeArray([0, 1, 2, 3]);
-  check(
-    'resample down by 2',
-    arrEq(readArr(exports.resample(x, 2, 4)), [0, 2])
-  );
+  check('resample down by 2', arrEq(readArr(exports.resample(x, 2, 4)), [0, 2]));
   exports.__unpin(x);
 }
 {

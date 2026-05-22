@@ -82,10 +82,7 @@
     "docs/backends.md",
     "docs/performance.md"
   ],
-  "filesModified": [
-    "matrix/src/backends/BackendManager.ts",
-    "matrix/src/backends/index.ts"
-  ],
+  "filesModified": ["matrix/src/backends/BackendManager.ts", "matrix/src/backends/index.ts"],
   "totalEstimatedHours": 22,
   "notes": "Sprint 16 completes Phase 4 by unifying backend selection. The three-tier system (JS → WASM → GPU) automatically selects optimal backend based on operation and data size.",
   "completedAt": "2025-12-12"

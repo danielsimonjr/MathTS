@@ -10,7 +10,11 @@ import { DenseMatrix } from '../../src/types/DenseMatrix.js';
 
 describe('Sparse Matrix Operations', () => {
   // Helper to compare sparse matrices
-  function expectSparseEqual(actual: SparseMatrix, expected: SparseMatrix, tolerance = 1e-10): void {
+  function expectSparseEqual(
+    actual: SparseMatrix,
+    expected: SparseMatrix,
+    tolerance = 1e-10
+  ): void {
     expect(actual.rows).toBe(expected.rows);
     expect(actual.cols).toBe(expected.cols);
 
@@ -53,13 +57,9 @@ describe('Sparse Matrix Operations', () => {
     });
 
     it('should handle cancellation in addition', () => {
-      const a = SparseMatrix.fromCOO(2, 2, [
-        { row: 0, col: 0, value: 5 },
-      ]);
+      const a = SparseMatrix.fromCOO(2, 2, [{ row: 0, col: 0, value: 5 }]);
 
-      const b = SparseMatrix.fromCOO(2, 2, [
-        { row: 0, col: 0, value: -5 },
-      ]);
+      const b = SparseMatrix.fromCOO(2, 2, [{ row: 0, col: 0, value: -5 }]);
 
       const result = a.add(b);
 
@@ -73,7 +73,10 @@ describe('Sparse Matrix Operations', () => {
         { row: 1, col: 1, value: 2 },
       ]);
 
-      const dense = new DenseMatrix(2, 2, [[1, 2], [3, 4]]);
+      const dense = new DenseMatrix(2, 2, [
+        [1, 2],
+        [3, 4],
+      ]);
 
       const result = sparse.add(dense);
 
@@ -105,9 +108,9 @@ describe('Sparse Matrix Operations', () => {
 
       const result = a.subtract(b);
 
-      expect(result.get(0, 0)).toBe(3);  // 5 - 2
+      expect(result.get(0, 0)).toBe(3); // 5 - 2
       expect(result.get(0, 1)).toBe(-1); // 0 - 1
-      expect(result.get(1, 1)).toBe(3);  // 3 - 0
+      expect(result.get(1, 1)).toBe(3); // 3 - 0
     });
   });
 
@@ -166,9 +169,9 @@ describe('Sparse Matrix Operations', () => {
       const result = a.multiplyElementwise(b);
 
       expect(result.get(0, 0)).toBe(10); // 2 * 5
-      expect(result.get(0, 1)).toBe(0);  // 3 * 0
-      expect(result.get(1, 0)).toBe(8);  // 4 * 2
-      expect(result.get(1, 1)).toBe(0);  // 0 * 3
+      expect(result.get(0, 1)).toBe(0); // 3 * 0
+      expect(result.get(1, 0)).toBe(8); // 4 * 2
+      expect(result.get(1, 1)).toBe(0); // 0 * 3
     });
 
     it('should maintain sparsity in element-wise multiplication', () => {
@@ -229,7 +232,11 @@ describe('Sparse Matrix Operations', () => {
         { row: 1, col: 1, value: 3 },
       ]);
 
-      const dense = new DenseMatrix(3, 2, [[1, 2], [3, 4], [5, 6]]);
+      const dense = new DenseMatrix(3, 2, [
+        [1, 2],
+        [3, 4],
+        [5, 6],
+      ]);
 
       const result = sparse.multiply(dense);
 
@@ -258,10 +265,10 @@ describe('Sparse Matrix Operations', () => {
 
       expect(result.rows).toBe(2);
       expect(result.cols).toBe(2);
-      expect(result.get(0, 0)).toBe(1);  // 1*1 + 2*0 + 0*3
-      expect(result.get(0, 1)).toBe(4);  // 1*0 + 2*2 + 0*0
-      expect(result.get(1, 0)).toBe(9);  // 0*1 + 0*0 + 3*3
-      expect(result.get(1, 1)).toBe(0);  // 0*0 + 0*2 + 3*0
+      expect(result.get(0, 0)).toBe(1); // 1*1 + 2*0 + 0*3
+      expect(result.get(0, 1)).toBe(4); // 1*0 + 2*2 + 0*0
+      expect(result.get(1, 0)).toBe(9); // 0*1 + 0*0 + 3*3
+      expect(result.get(1, 1)).toBe(0); // 0*0 + 0*2 + 3*0
     });
 
     it('should throw on incompatible dimensions', () => {
@@ -355,7 +362,7 @@ describe('Sparse Matrix Operations', () => {
         { row: 1, col: 1, value: 2 },
       ]);
 
-      const result = sparse.mapNonZeros((v) => v > 1 ? v : 0);
+      const result = sparse.mapNonZeros((v) => (v > 1 ? v : 0));
 
       expect(result.nnz).toBe(1);
       expect(result.get(0, 0)).toBe(0);

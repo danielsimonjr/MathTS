@@ -66,41 +66,43 @@ Generated: 2026-04-03
 
 These are method calls found in `functions/src/typed/` that reference methods that do not exist on the targeted core type. They will cause runtime errors or TypeScript errors for those overloads.
 
-| Method Called | Called On | File:Line(s) | Exists on Type? | Closest Existing Method |
-|---|---|---|---|---|
-| `neg()` | `Complex` | arithmetic.ts:214 | NO | `negate()` |
-| `neg()` | `Fraction` | arithmetic.ts:215 | NO | `negate()` |
-| `neg()` | `BigNumber` | arithmetic.ts:216 | NO | `negate()` |
-| `cbrt()` | `BigNumber` | arithmetic.ts:335 | NO | none — not implemented |
-| `ln()` | `BigNumber` | arithmetic.ts:372 | NO | none — not implemented |
-| `reciprocal()` | `Complex` | trigonometry.ts:84,93,102,160,168,176 | NO | `inverse()` |
-| `div()` | `BigNumber` | trigonometry.ts:85,94,103 | NO | `divide()` |
-| `sin()` | `BigNumber` | trigonometry.ts:40,85,94,103 | NO | none — not implemented |
-| `cos()` | `BigNumber` | trigonometry.ts:55,94 | NO | none — not implemented |
-| `tan()` | `BigNumber` | trigonometry.ts:70,103 | NO | none — not implemented |
-| `asin()` | `BigNumber` | trigonometry.ts:122 | NO | none — not implemented |
-| `acos()` | `BigNumber` | trigonometry.ts:136 | NO | none — not implemented |
-| `atan()` | `BigNumber` | trigonometry.ts:145 | NO | none — not implemented |
-| `asinh()` | `BigNumber` | trigonometry.ts:189 | NO | none — not implemented |
-| `acosh()` | `BigNumber` | trigonometry.ts:198 | NO | none — not implemented |
-| `atanh()` | `BigNumber` | trigonometry.ts:207 | NO | none — not implemented |
-| `exp()` | `BigNumber` | arithmetic.ts:357 | NO | none — not implemented |
-| `log10()` | `BigNumber` | arithmetic.ts:388 | NO | none — not implemented |
-| `log2()` | `BigNumber` | arithmetic.ts:397 | NO | none — not implemented |
-| `sinh()` | `BigNumber` | arithmetic.ts:577 | NO | none — not implemented |
-| `cosh()` | `BigNumber` | arithmetic.ts:586 | NO | none — not implemented |
-| `tanh()` | `BigNumber` | arithmetic.ts:595 | NO | none — not implemented |
-| `mod()` | `BigNumber` | arithmetic.ts:469 | NO | none — not implemented |
+| Method Called  | Called On   | File:Line(s)                          | Exists on Type? | Closest Existing Method |
+| -------------- | ----------- | ------------------------------------- | --------------- | ----------------------- |
+| `neg()`        | `Complex`   | arithmetic.ts:214                     | NO              | `negate()`              |
+| `neg()`        | `Fraction`  | arithmetic.ts:215                     | NO              | `negate()`              |
+| `neg()`        | `BigNumber` | arithmetic.ts:216                     | NO              | `negate()`              |
+| `cbrt()`       | `BigNumber` | arithmetic.ts:335                     | NO              | none — not implemented  |
+| `ln()`         | `BigNumber` | arithmetic.ts:372                     | NO              | none — not implemented  |
+| `reciprocal()` | `Complex`   | trigonometry.ts:84,93,102,160,168,176 | NO              | `inverse()`             |
+| `div()`        | `BigNumber` | trigonometry.ts:85,94,103             | NO              | `divide()`              |
+| `sin()`        | `BigNumber` | trigonometry.ts:40,85,94,103          | NO              | none — not implemented  |
+| `cos()`        | `BigNumber` | trigonometry.ts:55,94                 | NO              | none — not implemented  |
+| `tan()`        | `BigNumber` | trigonometry.ts:70,103                | NO              | none — not implemented  |
+| `asin()`       | `BigNumber` | trigonometry.ts:122                   | NO              | none — not implemented  |
+| `acos()`       | `BigNumber` | trigonometry.ts:136                   | NO              | none — not implemented  |
+| `atan()`       | `BigNumber` | trigonometry.ts:145                   | NO              | none — not implemented  |
+| `asinh()`      | `BigNumber` | trigonometry.ts:189                   | NO              | none — not implemented  |
+| `acosh()`      | `BigNumber` | trigonometry.ts:198                   | NO              | none — not implemented  |
+| `atanh()`      | `BigNumber` | trigonometry.ts:207                   | NO              | none — not implemented  |
+| `exp()`        | `BigNumber` | arithmetic.ts:357                     | NO              | none — not implemented  |
+| `log10()`      | `BigNumber` | arithmetic.ts:388                     | NO              | none — not implemented  |
+| `log2()`       | `BigNumber` | arithmetic.ts:397                     | NO              | none — not implemented  |
+| `sinh()`       | `BigNumber` | arithmetic.ts:577                     | NO              | none — not implemented  |
+| `cosh()`       | `BigNumber` | arithmetic.ts:586                     | NO              | none — not implemented  |
+| `tanh()`       | `BigNumber` | arithmetic.ts:595                     | NO              | none — not implemented  |
+| `mod()`        | `BigNumber` | arithmetic.ts:469                     | NO              | none — not implemented  |
 
 ### Summary by gap type
 
 **Wrong method name (rename fix):**
+
 - `neg()` → should be `negate()` on Complex, Fraction, BigNumber (arithmetic.ts:214-216)
 - `reciprocal()` → should be `inverse()` on Complex (trigonometry.ts:84,93,102,160,168,176)
 - `div()` → should be `divide()` on BigNumber (trigonometry.ts:85,94,103)
 
 **Missing BigNumber transcendental methods (implementation needed):**
 BigNumber covers only basic arithmetic. All transcendental and trigonometric operations are unimplemented. Affected functions and the methods they require:
+
 - `exp` function → `BigNumber.exp()`
 - `log` function → `BigNumber.ln()`
 - `log10` function → `BigNumber.log10()`

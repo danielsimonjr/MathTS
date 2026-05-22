@@ -1,13 +1,13 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for unit toBest
 interface Unit {
-  toBest(unitList?: string[] | (string | Unit)[], options?: object): Unit
+  toBest(unitList?: string[] | (string | Unit)[], options?: object): Unit;
 }
 
-const name = 'toBest'
-const dependencies = ['typed']
+const name = 'toBest';
+const dependencies = ['typed'];
 
 export const createToBest = /* #__PURE__ */ factory(
   name,
@@ -47,20 +47,12 @@ export const createToBest = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Unit: (x: Unit): Unit => x.toBest(),
-      'Unit, string': (x: Unit, unitList: string): Unit =>
-        x.toBest(unitList.split(',')),
-      'Unit, string, Object': (
-        x: Unit,
-        unitList: string,
-        options: object
-      ): Unit => x.toBest(unitList.split(','), options),
-      'Unit, Array': (x: Unit, unitList: (string | Unit)[]): Unit =>
-        x.toBest(unitList),
-      'Unit, Array, Object': (
-        x: Unit,
-        unitList: (string | Unit)[],
-        options: object
-      ): Unit => x.toBest(unitList, options)
-    })
+      'Unit, string': (x: Unit, unitList: string): Unit => x.toBest(unitList.split(',')),
+      'Unit, string, Object': (x: Unit, unitList: string, options: object): Unit =>
+        x.toBest(unitList.split(','), options),
+      'Unit, Array': (x: Unit, unitList: (string | Unit)[]): Unit => x.toBest(unitList),
+      'Unit, Array, Object': (x: Unit, unitList: (string | Unit)[], options: object): Unit =>
+        x.toBest(unitList, options),
+    });
   }
-)
+);

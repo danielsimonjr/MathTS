@@ -1,25 +1,25 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for invmod
 interface BigNumberConstructor {
-  (value: number): unknown
+  (value: number): unknown;
 }
 
 interface InvmodDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  BigNumber: BigNumberConstructor
-  xgcd: TypedFunction
-  equal: TypedFunction
-  smaller: TypedFunction
-  mod: TypedFunction
-  add: TypedFunction
-  isInteger: (x: unknown) => boolean
+  typed: TypedFunction;
+  config: ConfigOptions;
+  BigNumber: BigNumberConstructor;
+  xgcd: TypedFunction;
+  equal: TypedFunction;
+  smaller: TypedFunction;
+  mod: TypedFunction;
+  add: TypedFunction;
+  isInteger: (x: unknown) => boolean;
 }
 
-const name = 'invmod'
+const name = 'invmod';
 const dependencies = [
   'typed',
   'config',
@@ -29,8 +29,8 @@ const dependencies = [
   'smaller',
   'mod',
   'add',
-  'isInteger'
-]
+  'isInteger',
+];
 
 export const createInvmod = /* #__PURE__ */ factory(
   name,
@@ -44,7 +44,7 @@ export const createInvmod = /* #__PURE__ */ factory(
     smaller,
     mod,
     add,
-    isInteger
+    isInteger,
   }: InvmodDependencies): TypedFunction => {
     /**
      * Calculate the (modular) multiplicative inverse of a modulo b. Solution to the equation `ax ≣ 1 (mod b)`
@@ -71,21 +71,21 @@ export const createInvmod = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'number, number': invmod,
-      'BigNumber, BigNumber': invmod
-    }) as TypedFunction
+      'BigNumber, BigNumber': invmod,
+    }) as TypedFunction;
 
     function invmod(a: unknown, b: unknown): unknown {
       if (!isInteger(a) || !isInteger(b))
-        throw new Error('Parameters in function invmod must be integer numbers')
-      a = mod(a, b)
-      if (equal(b, 0)) throw new Error('Divisor must be non zero')
-      const res = xgcd(a, b) as { valueOf(): unknown[] }
-      const resVal = res.valueOf()
-      const [gcd, invValue] = resVal
-      if (!equal(gcd, BigNumber(1))) return NaN
-      let inv = mod(invValue, b)
-      if (smaller(inv, BigNumber(0))) inv = add(inv, b)
-      return inv
+        throw new Error('Parameters in function invmod must be integer numbers');
+      a = mod(a, b);
+      if (equal(b, 0)) throw new Error('Divisor must be non zero');
+      const res = xgcd(a, b) as { valueOf(): unknown[] };
+      const resVal = res.valueOf();
+      const [gcd, invValue] = resVal;
+      if (!equal(gcd, BigNumber(1))) return NaN;
+      let inv = mod(invValue, b);
+      if (smaller(inv, BigNumber(0))) inv = add(inv, b);
+      return inv;
     }
   }
-)
+);

@@ -15,10 +15,10 @@ import type { BufferPool } from './BufferPool.js';
  * Synchronization strategy type
  */
 export type SyncStrategy =
-  | 'immediate'    // Sync immediately after each operation
-  | 'lazy'         // Sync only when data is needed on CPU
+  | 'immediate' // Sync immediately after each operation
+  | 'lazy' // Sync only when data is needed on CPU
   | 'double-buffer' // Use two buffers to overlap transfer and compute
-  | 'streaming';    // Stream data in chunks
+  | 'streaming'; // Stream data in chunks
 
 /**
  * Transfer direction
@@ -139,11 +139,7 @@ export class SyncManager {
       const size = options.size ?? cpuData.byteLength;
 
       // Write data to GPU buffer
-      this.context.writeBuffer(
-        gpuBuffer,
-        cpuData,
-        offset
-      );
+      this.context.writeBuffer(gpuBuffer, cpuData, offset);
 
       // Wait for queue to complete (for immediate strategy)
       if (this.config.strategy === 'immediate') {
@@ -190,10 +186,7 @@ export class SyncManager {
   /**
    * Download data using double-buffering for overlap
    */
-  async downloadDoubleBuffered(
-    gpuBuffer: GPUBuffer,
-    size: number
-  ): Promise<Float32Array> {
+  async downloadDoubleBuffered(gpuBuffer: GPUBuffer, size: number): Promise<Float32Array> {
     // Acquire two staging buffers (second is for double buffering future use)
     const staging1 = this.getOrCreateStagingBuffer(size);
     // Reserved for true double buffering: const _staging2 = this.getOrCreateStagingBuffer(size);
@@ -246,7 +239,7 @@ export class SyncManager {
         }
 
         // Yield to allow other work
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
 
       // Wait for all transfers to complete
@@ -318,8 +311,8 @@ export class SyncManager {
     const start = performance.now();
 
     // Group by direction for efficiency
-    const uploads = requests.filter(r => r.direction === 'cpu-to-gpu');
-    const downloads = requests.filter(r => r.direction === 'gpu-to-cpu');
+    const uploads = requests.filter((r) => r.direction === 'cpu-to-gpu');
+    const downloads = requests.filter((r) => r.direction === 'gpu-to-cpu');
 
     // Process uploads first (they can be queued quickly)
     for (const req of uploads) {

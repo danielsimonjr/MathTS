@@ -5,5 +5,5 @@ export const InfinityDocs = {
   description:
     'Infinity, a number which is larger than the maximum number that can be handled by a floating point number.',
   examples: ['Infinity', '1 / 0'],
-  seealso: [] as any[]
-}
+  seealso: [] as any[],
+};

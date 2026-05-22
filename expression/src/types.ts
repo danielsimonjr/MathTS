@@ -8,7 +8,7 @@ export type TypedFunction = ((...args: any[]) => any) & {
 
 // TypedFunctionConstructor can be defined inline if needed
 export type TypedFunctionConstructor = {
-  (...args: any[]): any
-  create: () => TypedFunctionConstructor
-  isTypedFunction: (fn: unknown) => boolean
-}
+  (...args: any[]): any;
+  create: () => TypedFunctionConstructor;
+  isTypedFunction: (fn: unknown) => boolean;
+};

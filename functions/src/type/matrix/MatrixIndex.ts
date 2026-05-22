@@ -1,17 +1,11 @@
-import {
-  isArray,
-  isMatrix,
-  isRange,
-  isNumber,
-  isString
-} from '../../utils/is.js'
-import { clone } from '../../utils/object.js'
-import { isInteger } from '../../utils/number.js'
-import { factory } from '../../utils/factory.js'
-import type { IndexJSON, RangeInterface, MatrixValue } from './types.js'
+import { isArray, isMatrix, isRange, isNumber, isString } from '../../utils/is.js';
+import { clone } from '../../utils/object.js';
+import { isInteger } from '../../utils/number.js';
+import { factory } from '../../utils/factory.js';
+import type { IndexJSON, RangeInterface, MatrixValue } from './types.js';
 
-const name = 'Index'
-const dependencies = ['ImmutableDenseMatrix', 'getMatrixDataType']
+const name = 'Index';
+const dependencies = ['ImmutableDenseMatrix', 'getMatrixDataType'];
 
 /**
  * Type representing a single dimension in an Index.
@@ -26,19 +20,19 @@ export type IndexDimension =
   | string
   | ImmutableDenseMatrix
   | {
-      size(): number[]
-      min(): number | undefined
-      max(): number | undefined
-      toArray(): number[]
-      toString(): string
-    }
+      size(): number[];
+      min(): number | undefined;
+      max(): number | undefined;
+      toArray(): number[];
+      toString(): string;
+    };
 
 // Forward declaration for Index class (used in callback type)
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface IndexClass {
-  _dimensions: IndexDimension[]
-  _sourceSize: (number | null)[]
-  _isScalar: boolean
+  _dimensions: IndexDimension[];
+  _sourceSize: (number | null)[];
+  _isScalar: boolean;
 }
 
 /**
@@ -48,20 +42,20 @@ export type IndexForEachCallback = (
   dimension: IndexDimension,
   index: number,
   indexObject: IndexClass
-) => void
+) => void;
 
 // Re-export types for backward compatibility
-export type { IndexJSON }
+export type { IndexJSON };
 
 /**
  * Interface for ImmutableDenseMatrix (used internally)
  */
 interface ImmutableDenseMatrix {
-  _data: MatrixValue[]
-  _size: number[]
-  valueOf(): MatrixValue[]
-  size(): number[]
-  toArray(): MatrixValue[]
+  _data: MatrixValue[];
+  _size: number[];
+  valueOf(): MatrixValue[];
+  size(): number[];
+  toArray(): MatrixValue[];
 }
 
 export const createIndexClass = /* #__PURE__ */ factory(
@@ -75,16 +69,14 @@ export const createIndexClass = /* #__PURE__ */ factory(
       // loop array elements
       for (let i = 0, l = arg.length; i < l; i++) {
         if (!isNumber(arg[i]) || !isInteger(arg[i])) {
-          throw new TypeError(
-            'Index parameters must be positive integer numbers'
-          )
+          throw new TypeError('Index parameters must be positive integer numbers');
         }
       }
       // create matrix
-      const matrix = new ImmutableDenseMatrix() as ImmutableDenseMatrix
-      matrix._data = arg
-      matrix._size = [arg.length]
-      return matrix
+      const matrix = new ImmutableDenseMatrix() as ImmutableDenseMatrix;
+      matrix._data = arg;
+      matrix._size = [arg.length];
+      return matrix;
     }
 
     /**
@@ -113,85 +105,79 @@ export const createIndexClass = /* #__PURE__ */ factory(
       /**
        * Type identifier
        */
-      readonly type: string = 'Index'
+      readonly type: string = 'Index';
 
       /**
        * Index type flag
        */
-      readonly isIndex: boolean = true
+      readonly isIndex: boolean = true;
 
       /**
        * Internal array of dimensions
        * @internal
        */
-      _dimensions: IndexDimension[]
+      _dimensions: IndexDimension[];
 
       /**
        * Source sizes for boolean array conversions
        * @internal
        */
-      _sourceSize: (number | null)[]
+      _sourceSize: (number | null)[];
 
       /**
        * Flag indicating if this index represents a scalar value
        * @internal
        */
-      _isScalar: boolean
+      _isScalar: boolean;
 
       constructor(...ranges: any[]) {
         if (!(this instanceof Index)) {
-          throw new SyntaxError(
-            'Constructor must be called with the new operator'
-          )
+          throw new SyntaxError('Constructor must be called with the new operator');
         }
 
-        this._dimensions = []
-        this._sourceSize = []
-        this._isScalar = true
+        this._dimensions = [];
+        this._sourceSize = [];
+        this._isScalar = true;
 
         for (let i = 0, ii = ranges.length; i < ii; i++) {
-          const arg = ranges[i]
-          const argIsArray = isArray(arg)
-          const argIsMatrix = isMatrix(arg)
-          const argType = typeof arg
-          let sourceSize: number | null = null
+          const arg = ranges[i];
+          const argIsArray = isArray(arg);
+          const argIsMatrix = isMatrix(arg);
+          const argType = typeof arg;
+          let sourceSize: number | null = null;
           if (isRange(arg)) {
             // Cast to IndexDimension since isRange confirms it has the required properties
-            this._dimensions.push(arg as unknown as IndexDimension)
-            this._isScalar = false
+            this._dimensions.push(arg as unknown as IndexDimension);
+            this._isScalar = false;
           } else if (argIsArray || argIsMatrix) {
             // create matrix
-            let m: ImmutableDenseMatrix
-            this._isScalar = false
+            let m: ImmutableDenseMatrix;
+            this._isScalar = false;
 
             if (getMatrixDataType(arg) === 'boolean') {
               if (argIsArray)
-                m = _createImmutableMatrix(
-                  _booleansArrayToNumbersForIndex(arg as any)
-                )
+                m = _createImmutableMatrix(_booleansArrayToNumbersForIndex(arg as any));
               if (argIsMatrix)
-                m = _createImmutableMatrix(
-                  _booleansArrayToNumbersForIndex((arg as any)._data)
-                )
-              sourceSize = (arg.valueOf() as any).length
+                m = _createImmutableMatrix(_booleansArrayToNumbersForIndex((arg as any)._data));
+              sourceSize = (arg.valueOf() as any).length;
             } else {
-              m = _createImmutableMatrix(arg.valueOf() as any)
+              m = _createImmutableMatrix(arg.valueOf() as any);
             }
 
-            this._dimensions.push(m!)
+            this._dimensions.push(m!);
           } else if (argType === 'number') {
-            this._dimensions.push(arg as number)
+            this._dimensions.push(arg as number);
           } else if (argType === 'bigint') {
-            this._dimensions.push(Number(arg))
+            this._dimensions.push(Number(arg));
           } else if (argType === 'string') {
             // object property (arguments.count should be 1)
-            this._dimensions.push(arg as string)
+            this._dimensions.push(arg as string);
           } else {
             throw new TypeError(
               'Dimension must be an Array, Matrix, number, bigint, string, or Range'
-            )
+            );
           }
-          this._sourceSize.push(sourceSize)
+          this._sourceSize.push(sourceSize);
           // TODO: implement support for wildcard '*'
         }
       }
@@ -202,11 +188,11 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @return {Index} clone
        */
       clone(): Index {
-        const index = new Index()
-        index._dimensions = clone(this._dimensions)
-        index._isScalar = this._isScalar
-        index._sourceSize = this._sourceSize
-        return index
+        const index = new Index();
+        index._dimensions = clone(this._dimensions);
+        index._isScalar = this._isScalar;
+        index._sourceSize = this._sourceSize;
+        return index;
       }
 
       /**
@@ -217,7 +203,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @private
        */
       static create(ranges: any[]): Index {
-        return new Index(...ranges)
+        return new Index(...ranges);
       }
 
       /**
@@ -226,17 +212,15 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {number[]} size
        */
       size(): number[] {
-        const size: number[] = []
+        const size: number[] = [];
 
         for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
-          const d = this._dimensions[i]
+          const d = this._dimensions[i];
           size[i] =
-            isString(d) || isNumber(d)
-              ? 1
-              : (d as RangeInterface | ImmutableDenseMatrix).size()[0]
+            isString(d) || isNumber(d) ? 1 : (d as RangeInterface | ImmutableDenseMatrix).size()[0];
         }
 
-        return size
+        return size;
       }
 
       /**
@@ -245,17 +229,17 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {number[]} max
        */
       max(): (number | string | undefined)[] {
-        const values: (number | string | undefined)[] = []
+        const values: (number | string | undefined)[] = [];
 
         for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
-          const range = this._dimensions[i]
+          const range = this._dimensions[i];
           values[i] =
             isString(range) || isNumber(range)
               ? (range as number | string)
-              : (range as RangeInterface).max()
+              : (range as RangeInterface).max();
         }
 
-        return values
+        return values;
       }
 
       /**
@@ -264,17 +248,17 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {number[]} min
        */
       min(): (number | string | undefined)[] {
-        const values: (number | string | undefined)[] = []
+        const values: (number | string | undefined)[] = [];
 
         for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
-          const range = this._dimensions[i]
+          const range = this._dimensions[i];
           values[i] =
             isString(range) || isNumber(range)
               ? (range as number | string)
-              : (range as RangeInterface).min()
+              : (range as RangeInterface).min();
         }
 
-        return values
+        return values;
       }
 
       /**
@@ -286,7 +270,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        */
       forEach(callback: IndexForEachCallback): void {
         for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
-          callback(this._dimensions[i], i, this)
+          callback(this._dimensions[i], i, this);
         }
       }
 
@@ -298,10 +282,10 @@ export const createIndexClass = /* #__PURE__ */ factory(
        */
       dimension(dim: number): IndexDimension | null {
         if (!isNumber(dim)) {
-          return null
+          return null;
         }
 
-        return this._dimensions[dim] ?? null
+        return this._dimensions[dim] ?? null;
       }
 
       /**
@@ -309,7 +293,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {boolean} Returns true if the index is an object property
        */
       isObjectProperty(): boolean {
-        return this._dimensions.length === 1 && isString(this._dimensions[0])
+        return this._dimensions.length === 1 && isString(this._dimensions[0]);
       }
 
       /**
@@ -318,7 +302,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {string | null}
        */
       getObjectProperty(): string | null {
-        return this.isObjectProperty() ? (this._dimensions[0] as string) : null
+        return this.isObjectProperty() ? (this._dimensions[0] as string) : null;
       }
 
       /**
@@ -330,7 +314,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @return {boolean} isScalar
        */
       isScalar(): boolean {
-        return this._isScalar
+        return this._isScalar;
       }
 
       /**
@@ -340,16 +324,16 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {Array} array
        */
       toArray(): any[] {
-        const array: any[] = []
+        const array: any[] = [];
         for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
-          const dimension = this._dimensions[i]
+          const dimension = this._dimensions[i];
           array.push(
             isString(dimension) || isNumber(dimension)
               ? dimension
               : (dimension as RangeInterface | ImmutableDenseMatrix).toArray()
-          )
+          );
         }
-        return array
+        return array;
       }
 
       /**
@@ -359,7 +343,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {Array} array
        */
       valueOf(): any[] {
-        return this.toArray()
+        return this.toArray();
       }
 
       /**
@@ -368,18 +352,18 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {String} str
        */
       toString(): string {
-        const strings: string[] = []
+        const strings: string[] = [];
 
         for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
-          const dimension = this._dimensions[i]
+          const dimension = this._dimensions[i];
           if (isString(dimension)) {
-            strings.push(JSON.stringify(dimension))
+            strings.push(JSON.stringify(dimension));
           } else {
-            strings.push((dimension as any).toString())
+            strings.push((dimension as any).toString());
           }
         }
 
-        return '[' + strings.join(', ') + ']'
+        return '[' + strings.join(', ') + ']';
       }
 
       /**
@@ -391,8 +375,8 @@ export const createIndexClass = /* #__PURE__ */ factory(
       toJSON(): IndexJSON {
         return {
           mathjs: 'Index',
-          dimensions: this._dimensions
-        }
+          dimensions: this._dimensions,
+        };
       }
 
       /**
@@ -403,34 +387,32 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @return {Index}
        */
       static fromJSON(json: IndexJSON): Index {
-        return Index.create(json.dimensions)
+        return Index.create(json.dimensions);
       }
     }
 
     // Set prototype properties for type checking (duck typing)
     // These are needed because is.ts checks constructor.prototype.isIndex
-    ;(Index.prototype as any).type = 'Index'
-    ;(Index.prototype as any).isIndex = true
+    (Index.prototype as any).type = 'Index';
+    (Index.prototype as any).isIndex = true;
 
-    return Index
+    return Index;
   },
   { isClass: true }
-)
+);
 
 /**
  * Receives an array of booleans and returns an array of Numbers for Index
  * @param {Array} booleanArrayIndex An array of booleans
  * @return {Array} A set of numbers ready for index
  */
-function _booleansArrayToNumbersForIndex(
-  booleanArrayIndex: boolean[]
-): number[] {
+function _booleansArrayToNumbersForIndex(booleanArrayIndex: boolean[]): number[] {
   // gets an array of booleans and returns an array of numbers
-  const indexOfNumbers: number[] = []
+  const indexOfNumbers: number[] = [];
   booleanArrayIndex.forEach((bool, idx) => {
     if (bool) {
-      indexOfNumbers.push(idx)
+      indexOfNumbers.push(idx);
     }
-  })
-  return indexOfNumbers
+  });
+  return indexOfNumbers;
 }

@@ -14,7 +14,7 @@
  * @returns -x
  */
 export function unaryMinus(x: f64): f64 {
-  return -x
+  return -x;
 }
 
 /**
@@ -23,7 +23,7 @@ export function unaryMinus(x: f64): f64 {
  * @returns x unchanged
  */
 export function unaryPlus(x: f64): f64 {
-  return x
+  return x;
 }
 
 /**
@@ -34,9 +34,9 @@ export function unaryPlus(x: f64): f64 {
 export function cbrt(x: f64): f64 {
   // For negative numbers, compute cbrt of absolute value and negate
   if (x < 0) {
-    return -Math.pow(-x, 1.0 / 3.0)
+    return -Math.pow(-x, 1.0 / 3.0);
   }
-  return Math.pow(x, 1.0 / 3.0)
+  return Math.pow(x, 1.0 / 3.0);
 }
 
 /**
@@ -45,7 +45,7 @@ export function cbrt(x: f64): f64 {
  * @returns x * x * x
  */
 export function cube(x: f64): f64 {
-  return x * x * x
+  return x * x * x;
 }
 
 /**
@@ -54,7 +54,7 @@ export function cube(x: f64): f64 {
  * @returns x * x
  */
 export function square(x: f64): f64 {
-  return x * x
+  return x * x;
 }
 
 /**
@@ -63,7 +63,7 @@ export function square(x: f64): f64 {
  * @returns x rounded towards zero
  */
 export function fix(x: f64): f64 {
-  return x > 0 ? Math.floor(x) : Math.ceil(x)
+  return x > 0 ? Math.floor(x) : Math.ceil(x);
 }
 
 /**
@@ -73,8 +73,8 @@ export function fix(x: f64): f64 {
  * @returns x rounded towards zero to n decimal places
  */
 export function fixDecimals(x: f64, n: i32): f64 {
-  const shift = Math.pow(10, n)
-  return fix(x * shift) / shift
+  const shift = Math.pow(10, n);
+  return fix(x * shift) / shift;
 }
 
 /**
@@ -83,7 +83,7 @@ export function fixDecimals(x: f64, n: i32): f64 {
  * @returns Smallest integer >= x
  */
 export function ceil(x: f64): f64 {
-  return Math.ceil(x)
+  return Math.ceil(x);
 }
 
 /**
@@ -93,8 +93,8 @@ export function ceil(x: f64): f64 {
  * @returns x rounded up to n decimal places
  */
 export function ceilDecimals(x: f64, n: i32): f64 {
-  const shift = Math.pow(10, n)
-  return Math.ceil(x * shift) / shift
+  const shift = Math.pow(10, n);
+  return Math.ceil(x * shift) / shift;
 }
 
 /**
@@ -103,7 +103,7 @@ export function ceilDecimals(x: f64, n: i32): f64 {
  * @returns Largest integer <= x
  */
 export function floor(x: f64): f64 {
-  return Math.floor(x)
+  return Math.floor(x);
 }
 
 /**
@@ -113,8 +113,8 @@ export function floor(x: f64): f64 {
  * @returns x rounded down to n decimal places
  */
 export function floorDecimals(x: f64, n: i32): f64 {
-  const shift = Math.pow(10, n)
-  return Math.floor(x * shift) / shift
+  const shift = Math.pow(10, n);
+  return Math.floor(x * shift) / shift;
 }
 
 /**
@@ -123,7 +123,7 @@ export function floorDecimals(x: f64, n: i32): f64 {
  * @returns x rounded to nearest integer
  */
 export function round(x: f64): f64 {
-  return Math.round(x)
+  return Math.round(x);
 }
 
 /**
@@ -133,8 +133,8 @@ export function round(x: f64): f64 {
  * @returns x rounded to n decimal places
  */
 export function roundDecimals(x: f64, n: i32): f64 {
-  const shift = Math.pow(10, n)
-  return Math.round(x * shift) / shift
+  const shift = Math.pow(10, n);
+  return Math.round(x * shift) / shift;
 }
 
 /**
@@ -143,7 +143,7 @@ export function roundDecimals(x: f64, n: i32): f64 {
  * @returns |x|
  */
 export function abs(x: f64): f64 {
-  return Math.abs(x)
+  return Math.abs(x);
 }
 
 /**
@@ -152,9 +152,9 @@ export function abs(x: f64): f64 {
  * @returns -1, 0, or 1 depending on sign of x
  */
 export function sign(x: f64): f64 {
-  if (x > 0) return 1.0
-  if (x < 0) return -1.0
-  return 0.0
+  if (x > 0) return 1.0;
+  if (x < 0) return -1.0;
+  return 0.0;
 }
 
 /**
@@ -165,7 +165,7 @@ export function sign(x: f64): f64 {
  */
 export function unaryMinusArray(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    unchecked(output[i] = -unchecked(input[i]))
+    unchecked((output[i] = -unchecked(input[i])));
   }
 }
 
@@ -177,8 +177,8 @@ export function unaryMinusArray(input: Float64Array, output: Float64Array, lengt
  */
 export function squareArray(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const x = unchecked(input[i])
-    unchecked(output[i] = x * x)
+    const x = unchecked(input[i]);
+    unchecked((output[i] = x * x));
   }
 }
 
@@ -190,8 +190,8 @@ export function squareArray(input: Float64Array, output: Float64Array, length: i
  */
 export function cubeArray(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const x = unchecked(input[i])
-    unchecked(output[i] = x * x * x)
+    const x = unchecked(input[i]);
+    unchecked((output[i] = x * x * x));
   }
 }
 
@@ -203,7 +203,7 @@ export function cubeArray(input: Float64Array, output: Float64Array, length: i32
  */
 export function absArray(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    unchecked(output[i] = Math.abs(unchecked(input[i])))
+    unchecked((output[i] = Math.abs(unchecked(input[i]))));
   }
 }
 
@@ -215,7 +215,7 @@ export function absArray(input: Float64Array, output: Float64Array, length: i32)
  */
 export function signArray(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const x = unchecked(input[i])
-    unchecked(output[i] = x > 0 ? 1.0 : (x < 0 ? -1.0 : 0.0))
+    const x = unchecked(input[i]);
+    unchecked((output[i] = x > 0 ? 1.0 : x < 0 ? -1.0 : 0.0));
   }
 }

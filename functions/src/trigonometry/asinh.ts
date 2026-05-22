@@ -1,11 +1,11 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { Complex } from '../type/complex/Complex.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import { asinhNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { Complex } from '../type/complex/Complex.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import { asinhNumber } from '../plain/number/index.js';
 
-const name = 'asinh'
-const dependencies = ['typed']
+const name = 'asinh';
+const dependencies = ['typed'];
 
 export const createAsinh = /* #__PURE__ */ factory(
   name,
@@ -37,12 +37,12 @@ export const createAsinh = /* #__PURE__ */ factory(
       number: asinhNumber,
 
       Complex: function (x: Complex) {
-        return x.asinh()
+        return x.asinh();
       },
 
       BigNumber: function (x: BigNumber) {
-        return (x as any).asinh()
-      }
-    }) as TypedFunction
+        return (x as any).asinh();
+      },
+    }) as TypedFunction;
   }
-)
+);

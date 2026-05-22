@@ -1,23 +1,23 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
-import type { Complex } from '../type/complex/Complex.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import { atanhNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
+import type { Complex } from '../type/complex/Complex.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import { atanhNumber } from '../plain/number/index.js';
 
 // Type definitions for atanh
 interface ComplexConstructor {
-  new (re: number, im: number): Complex
+  new (re: number, im: number): Complex;
 }
 
 interface AtanhDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  Complex: ComplexConstructor;
 }
 
-const name = 'atanh'
-const dependencies = ['typed', 'config', 'Complex']
+const name = 'atanh';
+const dependencies = ['typed', 'config', 'Complex'];
 
 export const createAtanh = /* #__PURE__ */ factory(
   name,
@@ -48,18 +48,18 @@ export const createAtanh = /* #__PURE__ */ factory(
     return typed(name, {
       number: function (x: number) {
         if ((x <= 1 && x >= -1) || config.predictable) {
-          return atanhNumber(x)
+          return atanhNumber(x);
         }
-        return new Complex(x, 0).atanh()
+        return new Complex(x, 0).atanh();
       },
 
       Complex: function (x: Complex) {
-        return x.atanh()
+        return x.atanh();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
-        return (x as unknown as { atanh(): BigNumber }).atanh()
-      }
-    }) as TypedFunction
+        return (x as unknown as { atanh(): BigNumber }).atanh();
+      },
+    }) as TypedFunction;
   }
-)
+);

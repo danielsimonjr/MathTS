@@ -288,12 +288,10 @@ describe('Issue 2: Safe Conversions (Explicit new)', () => {
 
   describe('createSafeConversionDef', () => {
     it('should create a valid ConversionDef', () => {
-      const def = createSafeConversionDef(
-        'number',
-        'Complex',
-        StrictComplex,
-        (x) => [x as number, 0]
-      );
+      const def = createSafeConversionDef('number', 'Complex', StrictComplex, (x) => [
+        x as number,
+        0,
+      ]);
 
       expect(def.from).toBe('number');
       expect(def.to).toBe('Complex');

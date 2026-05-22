@@ -1,11 +1,11 @@
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { createEmptyMap } from '../utils/map.js'
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { createEmptyMap } from '../utils/map.js';
 type MathArray = any[] | number[][];
 type Matrix = any;
 
-const name = 'evaluate'
-const dependencies = ['typed', 'parse']
+const name = 'evaluate';
+const dependencies = ['typed', 'parse'];
 
 export const createEvaluate = /* #__PURE__ */ factory(name, dependencies, ({ typed, parse }) => {
   /**
@@ -47,25 +47,28 @@ export const createEvaluate = /* #__PURE__ */ factory(name, dependencies, ({ typ
    */
   return typed(name, {
     string: function (expr: string) {
-      const scope = createEmptyMap()
-      return parse(expr).compile().evaluate(scope)
+      const scope = createEmptyMap();
+      return parse(expr).compile().evaluate(scope);
     },
 
     'string, Map | Object': function (expr: string, scope: Map<string, any> | Record<string, any>) {
-      return parse(expr).compile().evaluate(scope)
+      return parse(expr).compile().evaluate(scope);
     },
 
     'Array | Matrix': function (expr: MathArray | Matrix) {
-      const scope = createEmptyMap()
+      const scope = createEmptyMap();
       return deepMap(expr as any, function (entry: any) {
-        return parse(entry).compile().evaluate(scope)
-      })
+        return parse(entry).compile().evaluate(scope);
+      });
     },
 
-    'Array | Matrix, Map | Object': function (expr: MathArray | Matrix, scope: Map<string, any> | Record<string, any>) {
+    'Array | Matrix, Map | Object': function (
+      expr: MathArray | Matrix,
+      scope: Map<string, any> | Record<string, any>
+    ) {
       return deepMap(expr as any, function (entry: any) {
-        return parse(entry).compile().evaluate(scope)
-      })
-    }
-  })
-})
+        return parse(entry).compile().evaluate(scope);
+      });
+    },
+  });
+});

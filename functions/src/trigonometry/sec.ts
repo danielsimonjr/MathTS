@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import type { Complex } from '../type/complex/Complex.js'
-import { secNumber } from '../plain/number/index.js'
-import { createTrigUnit } from './trigUnit.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import type { Complex } from '../type/complex/Complex.js';
+import { secNumber } from '../plain/number/index.js';
+import { createTrigUnit } from './trigUnit.js';
 
 // Type definitions for sec
 interface BigNumberConstructor {
-  new (value: number): BigNumber
+  new (value: number): BigNumber;
 }
 
 interface SecDependencies {
-  typed: TypedFunction
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'sec'
-const dependencies = ['typed', 'BigNumber']
+const name = 'sec';
+const dependencies = ['typed', 'BigNumber'];
 
 export const createSec = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, BigNumber }: SecDependencies) => {
-    const trigUnit = createTrigUnit({ typed })
+    const trigUnit = createTrigUnit({ typed });
 
     /**
      * Calculate the secant of a value, defined as `sec(x) = 1/cos(x)`.
@@ -52,9 +52,11 @@ export const createSec = /* #__PURE__ */ factory(
         number: secNumber,
         Complex: (x: Complex) => x.sec(),
         BigNumber: (x: BigNumber): BigNumber =>
-          new BigNumber(1).div((x as unknown as { cos(): unknown }).cos() as any) as unknown as BigNumber
+          new BigNumber(1).div(
+            (x as unknown as { cos(): unknown }).cos() as any
+          ) as unknown as BigNumber,
       },
       trigUnit
-    ) as TypedFunction
+    ) as TypedFunction;
   }
-)
+);

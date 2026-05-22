@@ -7,7 +7,7 @@ export const freqzDocs = {
   examples: [
     'freqz([1, 2], [1, 2, 3])',
     'freqz([1, 2], [1, 2, 3], [0, 1])',
-    'freqz([1, 2], [1, 2, 3], 512)'
+    'freqz([1, 2], [1, 2, 3], 512)',
   ],
-  seealso: [] as any[]
-}
+  seealso: [] as any[],
+};

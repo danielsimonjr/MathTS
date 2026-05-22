@@ -22,12 +22,40 @@ type f64 = number;
 
 /** Reserved math identifiers that are not variables */
 const MATH_KEYWORDS = new Set([
-  'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2',
-  'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
-  'log', 'ln', 'log2', 'log10', 'exp', 'sqrt', 'cbrt',
-  'abs', 'ceil', 'floor', 'round', 'sign',
-  'pi', 'e', 'i', 'Infinity', 'NaN',
-  'true', 'false', 'null', 'undefined',
+  'sin',
+  'cos',
+  'tan',
+  'asin',
+  'acos',
+  'atan',
+  'atan2',
+  'sinh',
+  'cosh',
+  'tanh',
+  'asinh',
+  'acosh',
+  'atanh',
+  'log',
+  'ln',
+  'log2',
+  'log10',
+  'exp',
+  'sqrt',
+  'cbrt',
+  'abs',
+  'ceil',
+  'floor',
+  'round',
+  'sign',
+  'pi',
+  'e',
+  'i',
+  'Infinity',
+  'NaN',
+  'true',
+  'false',
+  'null',
+  'undefined',
 ]);
 
 /**
@@ -85,7 +113,7 @@ function gcdNum(a: number, b: number): number {
  */
 function determinant(matrix: number[][]): f64 {
   const n = matrix.length;
-  const m = matrix.map(row => [...row]); // clone
+  const m = matrix.map((row) => [...row]); // clone
   let det: f64 = 1;
 
   for (let col = 0; col < n; col++) {
@@ -244,7 +272,7 @@ export function polynomialGCD(a: number[], b: number[]): number[] {
   // Make monic
   const leading = r0[r0.length - 1];
   if (leading !== 0 && leading !== 1) {
-    return r0.map(c => c / leading);
+    return r0.map((c) => c / leading);
   }
   return r0;
 }
@@ -262,7 +290,7 @@ export function polynomialLCM(a: number[], b: number[]): number[] {
   // Make monic
   const leading = quotient[quotient.length - 1];
   if (leading !== 0 && leading !== 1) {
-    return quotient.map(c => c / leading);
+    return quotient.map((c) => c / leading);
   }
   return quotient;
 }
@@ -365,7 +393,7 @@ export function discriminant(coeffs: number[]): f64 {
   const res = resultant(t, fp);
   const an = t[t.length - 1];
   const sign = ((deg * (deg - 1)) / 2) % 2 === 0 ? 1 : -1;
-  return sign * res / an;
+  return (sign * res) / an;
 }
 
 /**
@@ -443,10 +471,7 @@ export function variables(expr: string): string[] {
  * substitute('a*b + c', { a: '(x+1)' }); // '(x+1)*b + c'
  * ```
  */
-export function substitute(
-  expr: string,
-  vars: Record<string, string>,
-): string {
+export function substitute(expr: string, vars: Record<string, string>): string {
   let result = expr;
   // Sort by length descending to avoid partial replacements
   const keys = Object.keys(vars).sort((a, b) => b.length - a.length);
@@ -560,12 +585,8 @@ export function collect(expr: string, variable: string): string {
 
   for (const term of terms) {
     const trimmed = term.trim();
-    const powerRe = new RegExp(
-      '(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)',
-    );
-    const linearRe = new RegExp(
-      '(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '(?!\\^)(?!\\w)',
-    );
+    const powerRe = new RegExp('(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)');
+    const linearRe = new RegExp('(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '(?!\\^)(?!\\w)');
     const powerMatch = trimmed.match(powerRe);
     const linearMatch = trimmed.match(linearRe);
 
@@ -653,7 +674,7 @@ export function cancel(expr: string): string {
 
   // Compound fraction (a/b) / (c/d) -> (a*d) / (b*c), then cancel
   const compound = expr.match(
-    /^\s*\(\s*(-?\d+)\s*\/\s*(-?\d+)\s*\)\s*\/\s*\(\s*(-?\d+)\s*\/\s*(-?\d+)\s*\)\s*$/,
+    /^\s*\(\s*(-?\d+)\s*\/\s*(-?\d+)\s*\)\s*\/\s*\(\s*(-?\d+)\s*\/\s*(-?\d+)\s*\)\s*$/
   );
   if (compound) {
     const a = parseInt(compound[1], 10);
@@ -674,9 +695,7 @@ export function cancel(expr: string): string {
  * @returns Combined expression
  */
 export function together(expr: string): string {
-  const match = expr.match(
-    /^\s*(-?\d+)\s*\/\s*(-?\d+)\s*\+\s*(-?\d+)\s*\/\s*(-?\d+)\s*$/,
-  );
+  const match = expr.match(/^\s*(-?\d+)\s*\/\s*(-?\d+)\s*\+\s*(-?\d+)\s*\/\s*(-?\d+)\s*$/);
   if (match) {
     const a = parseInt(match[1], 10);
     const b = parseInt(match[2], 10);
@@ -717,22 +736,10 @@ export function apart(expr: string): string {
  */
 export function trigExpand(expr: string): string {
   let result = expr;
-  result = result.replace(
-    /sin\(2\s*\*?\s*([a-zA-Z_]\w*)\)/g,
-    '2*sin($1)*cos($1)',
-  );
-  result = result.replace(
-    /cos\(2\s*\*?\s*([a-zA-Z_]\w*)\)/g,
-    'cos($1)^2 - sin($1)^2',
-  );
-  result = result.replace(
-    /sin\((\w+)\s*\+\s*(\w+)\)/g,
-    'sin($1)*cos($2) + cos($1)*sin($2)',
-  );
-  result = result.replace(
-    /cos\((\w+)\s*\+\s*(\w+)\)/g,
-    'cos($1)*cos($2) - sin($1)*sin($2)',
-  );
+  result = result.replace(/sin\(2\s*\*?\s*([a-zA-Z_]\w*)\)/g, '2*sin($1)*cos($1)');
+  result = result.replace(/cos\(2\s*\*?\s*([a-zA-Z_]\w*)\)/g, 'cos($1)^2 - sin($1)^2');
+  result = result.replace(/sin\((\w+)\s*\+\s*(\w+)\)/g, 'sin($1)*cos($2) + cos($1)*sin($2)');
+  result = result.replace(/cos\((\w+)\s*\+\s*(\w+)\)/g, 'cos($1)*cos($2) - sin($1)*sin($2)');
   return result;
 }
 
@@ -744,26 +751,11 @@ export function trigExpand(expr: string): string {
  */
 export function trigReduce(expr: string): string {
   let result = expr;
-  result = result.replace(
-    /sin\((\w+)\)\s*\*\s*cos\(\1\)/g,
-    'sin(2*$1)/2',
-  );
-  result = result.replace(
-    /cos\((\w+)\)\s*\*\s*sin\(\1\)/g,
-    'sin(2*$1)/2',
-  );
-  result = result.replace(
-    /cos\((\w+)\)\^2\s*-\s*sin\(\1\)\^2/g,
-    'cos(2*$1)',
-  );
-  result = result.replace(
-    /sin\((\w+)\)\^2\s*\+\s*cos\(\1\)\^2/g,
-    '1',
-  );
-  result = result.replace(
-    /cos\((\w+)\)\^2\s*\+\s*sin\(\1\)\^2/g,
-    '1',
-  );
+  result = result.replace(/sin\((\w+)\)\s*\*\s*cos\(\1\)/g, 'sin(2*$1)/2');
+  result = result.replace(/cos\((\w+)\)\s*\*\s*sin\(\1\)/g, 'sin(2*$1)/2');
+  result = result.replace(/cos\((\w+)\)\^2\s*-\s*sin\(\1\)\^2/g, 'cos(2*$1)');
+  result = result.replace(/sin\((\w+)\)\^2\s*\+\s*cos\(\1\)\^2/g, '1');
+  result = result.replace(/cos\((\w+)\)\^2\s*\+\s*sin\(\1\)\^2/g, '1');
   return result;
 }
 
@@ -775,17 +767,11 @@ export function trigReduce(expr: string): string {
  */
 export function trigToExp(expr: string): string {
   let result = expr;
-  result = result.replace(
-    /sin\(([^)]+)\)/g,
-    '(exp(i*$1) - exp(-i*$1))/(2*i)',
-  );
-  result = result.replace(
-    /cos\(([^)]+)\)/g,
-    '(exp(i*$1) + exp(-i*$1))/2',
-  );
+  result = result.replace(/sin\(([^)]+)\)/g, '(exp(i*$1) - exp(-i*$1))/(2*i)');
+  result = result.replace(/cos\(([^)]+)\)/g, '(exp(i*$1) + exp(-i*$1))/2');
   result = result.replace(
     /tan\(([^)]+)\)/g,
-    '(exp(i*$1) - exp(-i*$1))/(i*(exp(i*$1) + exp(-i*$1)))',
+    '(exp(i*$1) - exp(-i*$1))/(i*(exp(i*$1) + exp(-i*$1)))'
   );
   return result;
 }
@@ -798,14 +784,8 @@ export function trigToExp(expr: string): string {
  */
 export function expToTrig(expr: string): string {
   let result = expr;
-  result = result.replace(
-    /exp\(i\s*\*\s*([^)]+)\)/g,
-    '(cos($1) + i*sin($1))',
-  );
-  result = result.replace(
-    /exp\(-i\s*\*\s*([^)]+)\)/g,
-    '(cos($1) - i*sin($1))',
-  );
+  result = result.replace(/exp\(i\s*\*\s*([^)]+)\)/g, '(cos($1) + i*sin($1))');
+  result = result.replace(/exp\(-i\s*\*\s*([^)]+)\)/g, '(cos($1) - i*sin($1))');
   return result;
 }
 
@@ -825,10 +805,7 @@ export function expToTrig(expr: string): string {
  * tangentLine(x => x**2, 3); // [6, -9] => y = 6x - 9
  * ```
  */
-export function tangentLine(
-  f: (x: number) => number,
-  x0: f64,
-): [f64, f64] {
+export function tangentLine(f: (x: number) => number, x0: f64): [f64, f64] {
   const h = 1e-8;
   const slope: f64 = (f(x0 + h) - f(x0 - h)) / (2 * h);
   const y0: f64 = f(x0);
@@ -906,14 +883,10 @@ export function normalForm(expr: string): string {
  */
 export function powerExpand(expr: string): string {
   let result = expr;
-  result = result.replace(
-    /\((\w+)\s*\*\s*(\w+)\)\^(\d+)/g,
-    '$1^$3 * $2^$3',
-  );
+  result = result.replace(/\((\w+)\s*\*\s*(\w+)\)\^(\d+)/g, '$1^$3 * $2^$3');
   result = result.replace(
     /\((\w+)\^(\d+)\)\^(\d+)/g,
-    (_: string, base: string, m: string, n: string) =>
-      base + '^' + parseInt(m) * parseInt(n),
+    (_: string, base: string, m: string, n: string) => base + '^' + parseInt(m) * parseInt(n)
   );
   return result;
 }
@@ -942,7 +915,7 @@ export function fullSimplify(expr: string): string {
   result = result.replace(/(\w+)\^1\b/g, '$1');
 
   // 0*anything => 0
-  result = result.replace(/\b0\s*\*\s*[^+\-]*/g, '0');
+  result = result.replace(/\b0\s*\*\s*[^+-]*/g, '0');
 
   // Try numeric reduction
   result = reduce(result);
@@ -959,9 +932,7 @@ export function fullSimplify(expr: string): string {
  */
 export function element<T>(arr: T[], index: number): T {
   if (index < 0 || index >= arr.length) {
-    throw new Error(
-      'Index ' + index + ' out of bounds for array of length ' + arr.length,
-    );
+    throw new Error('Index ' + index + ' out of bounds for array of length ' + arr.length);
   }
   return arr[index];
 }
@@ -989,15 +960,7 @@ export function eliminate(system: string[], variable: string): string[] {
 
   const result = [...withoutVar];
   for (let i = 1; i < withVar.length; i++) {
-    result.push(
-      '(' +
-        withVar[i] +
-        ') - (' +
-        withVar[0] +
-        ') [' +
-        variable +
-        ' eliminated]',
-    );
+    result.push('(' + withVar[i] + ') - (' + withVar[0] + ') [' + variable + ' eliminated]');
   }
   return result;
 }
@@ -1023,36 +986,27 @@ export function symbolicPartialDerivative(expr: string, variable: string): strin
     }
 
     // c*var^n pattern
-    const powerRe = new RegExp(
-      '^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)$',
-    );
+    const powerRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)$');
     const powerMatch = t.match(powerRe);
     if (powerMatch) {
       const coeff =
-        powerMatch[1] === '' || powerMatch[1] === undefined
-          ? 1
-          : parseFloat(powerMatch[1]);
+        powerMatch[1] === '' || powerMatch[1] === undefined ? 1 : parseFloat(powerMatch[1]);
       const n = parseInt(powerMatch[2], 10);
       if (n === 0) {
         derivedTerms.push('0');
       } else if (n === 1) {
         derivedTerms.push(String(coeff));
       } else {
-        derivedTerms.push(
-          coeff * n + '*' + variable + '^' + (n - 1),
-        );
+        derivedTerms.push(coeff * n + '*' + variable + '^' + (n - 1));
       }
       continue;
     }
 
     // c*var pattern (linear)
-    const linearRe = new RegExp(
-      '^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '$',
-    );
+    const linearRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '$');
     const linearMatch = t.match(linearRe);
     if (linearMatch) {
-      const coeff =
-        linearMatch[1] === '' ? 1 : parseFloat(linearMatch[1]);
+      const coeff = linearMatch[1] === '' ? 1 : parseFloat(linearMatch[1]);
       derivedTerms.push(String(coeff));
       continue;
     }
@@ -1096,18 +1050,9 @@ export function symbolicPartialDerivative(expr: string, variable: string): strin
  */
 export function functionExpand(expr: string): string {
   let result = expr;
-  result = result.replace(
-    /exp\((\w+)\s*\+\s*(\w+)\)/g,
-    'exp($1)*exp($2)',
-  );
-  result = result.replace(
-    /ln\((\w+)\s*\*\s*(\w+)\)/g,
-    'ln($1) + ln($2)',
-  );
-  result = result.replace(
-    /ln\((\w+)\s*\/\s*(\w+)\)/g,
-    'ln($1) - ln($2)',
-  );
+  result = result.replace(/exp\((\w+)\s*\+\s*(\w+)\)/g, 'exp($1)*exp($2)');
+  result = result.replace(/ln\((\w+)\s*\*\s*(\w+)\)/g, 'ln($1) + ln($2)');
+  result = result.replace(/ln\((\w+)\s*\/\s*(\w+)\)/g, 'ln($1) - ln($2)');
   result = result.replace(/ln\((\w+)\^(\d+)\)/g, '$2*ln($1)');
   return result;
 }
@@ -1132,9 +1077,7 @@ export function resultant(p: number[], q: number[]): f64 {
 
   // Build Sylvester matrix (n+m) x (n+m)
   const size = m + n;
-  const matrix: number[][] = Array.from({ length: size }, () =>
-    new Array(size).fill(0),
-  );
+  const matrix: number[][] = Array.from({ length: size }, () => new Array(size).fill(0));
 
   for (let i = 0; i < n; i++) {
     for (let j = 0; j <= m; j++) {

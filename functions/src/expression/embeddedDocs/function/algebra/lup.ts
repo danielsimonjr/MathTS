@@ -7,7 +7,7 @@ export const lupDocs = {
   examples: [
     'lup([[2, 1], [1, 4]])',
     'lup(matrix([[2, 1], [1, 4]]))',
-    'lup(sparse([[2, 1], [1, 4]]))'
+    'lup(sparse([[2, 1], [1, 4]]))',
   ],
-  seealso: ['lusolve', 'lsolve', 'usolve', 'matrix', 'sparse', 'slu', 'qr']
-}
+  seealso: ['lusolve', 'lsolve', 'usolve', 'matrix', 'sparse', 'slu', 'qr'],
+};

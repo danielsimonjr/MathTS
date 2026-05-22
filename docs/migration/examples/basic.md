@@ -90,17 +90,17 @@ const lcmVal = lcm(4, 6);
 
 console.log(Math.PI);
 console.log(Math.E);
-console.log(I);  // imaginary unit (from mathts-core)
+console.log(I); // imaginary unit (from mathts-core)
 ```
 
 ## Key Differences
 
-| mathjs | MathTS Compat | MathTS Native |
-|--------|---------------|---------------|
-| `math.add(a, b)` | `math.add(a, b)` | `add(a, b)` |
-| `math.pi` | `math.pi` | `Math.PI` |
-| `math.e` | `math.e` | `Math.E` |
-| `math.i` | `math.i` | `I` (from mathts-core) |
+| mathjs           | MathTS Compat    | MathTS Native          |
+| ---------------- | ---------------- | ---------------------- |
+| `math.add(a, b)` | `math.add(a, b)` | `add(a, b)`            |
+| `math.pi`        | `math.pi`        | `Math.PI`              |
+| `math.e`         | `math.e`         | `Math.E`               |
+| `math.i`         | `math.i`         | `I` (from mathts-core) |
 
 ## Migration Steps
 

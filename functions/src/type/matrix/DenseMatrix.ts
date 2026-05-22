@@ -7,8 +7,8 @@ import {
   isMatrix,
   isNumber,
   isString,
-  typeOf
-} from '../../utils/is.js'
+  typeOf,
+} from '../../utils/is.js';
 import {
   arraySize,
   getArrayDataType,
@@ -19,15 +19,15 @@ import {
   validate,
   validateIndex,
   broadcastTo,
-  get
-} from '../../utils/array.js'
-import { format } from '../../utils/string.js'
-import { isInteger } from '../../utils/number.js'
-import { clone, deepStrictEqual } from '../../utils/object.js'
-import { DimensionError } from '../../error/DimensionError.js'
-import { factory } from '../../utils/factory.js'
-import { optimizeCallback } from '../../utils/optimizeCallback.js'
-import type { MathJsConfig } from '../../core/config.js'
+  get,
+} from '../../utils/array.js';
+import { format } from '../../utils/string.js';
+import { isInteger } from '../../utils/number.js';
+import { clone, deepStrictEqual } from '../../utils/object.js';
+import { DimensionError } from '../../error/DimensionError.js';
+import { factory } from '../../utils/factory.js';
+import { optimizeCallback } from '../../utils/optimizeCallback.js';
+import type { MathJsConfig } from '../../core/config.js';
 import type {
   DenseMatrixData,
   DataType,
@@ -37,15 +37,15 @@ import type {
   DenseMatrixJSON,
   DenseMatrixConstructorData,
   MatrixEntry,
-  BigNumberLike
-} from './types.js'
+  BigNumberLike,
+} from './types.js';
 
 /**
  * Local Index interface for DenseMatrix operations.
  * Extends the base IndexInterface with map capability.
  */
 interface Index extends IndexInterface {
-  map(callback: (value: number) => number): { valueOf(): number[] }
+  map(callback: (value: number) => number): { valueOf(): number[] };
 }
 
 /**
@@ -53,45 +53,37 @@ interface Index extends IndexInterface {
  * Uses MatrixValue for element types.
  */
 interface Matrix {
-  type: string
-  storage(): string
-  datatype(): DataType
-  create(data: DenseMatrixData, datatype?: string): Matrix
-  size(): number[]
-  clone(): Matrix
-  toArray(): DenseMatrixData
-  valueOf(): DenseMatrixData
-  _data?: DenseMatrixData
-  _size?: number[]
-  _datatype?: DataType
-  isDenseMatrix?: boolean
-  get(index: number[]): MatrixValue
-  set(index: number[], value: MatrixValue, defaultValue?: MatrixValue): Matrix
+  type: string;
+  storage(): string;
+  datatype(): DataType;
+  create(data: DenseMatrixData, datatype?: string): Matrix;
+  size(): number[];
+  clone(): Matrix;
+  toArray(): DenseMatrixData;
+  valueOf(): DenseMatrixData;
+  _data?: DenseMatrixData;
+  _size?: number[];
+  _datatype?: DataType;
+  isDenseMatrix?: boolean;
+  get(index: number[]): MatrixValue;
+  set(index: number[], value: MatrixValue, defaultValue?: MatrixValue): Matrix;
   subset(
     index: Index,
     replacement?: DenseMatrixData | Matrix | MatrixValue,
     defaultValue?: MatrixValue
-  ): Matrix | MatrixValue
-  resize(
-    size: number[] | Matrix,
-    defaultValue?: MatrixValue,
-    copy?: boolean
-  ): Matrix
-  reshape(size: number[], copy?: boolean): Matrix
-  map(callback: MapCallback, skipZeros?: boolean, isUnary?: boolean): Matrix
-  forEach(
-    callback: ForEachCallback,
-    skipZeros?: boolean,
-    isUnary?: boolean
-  ): void
-  rows?(): Matrix[]
-  columns?(): Matrix[]
-  format?(options?: MatrixFormatOptions): string
-  toString?(): string
-  toJSON?(): DenseMatrixJSON
-  diagonal?(k?: number | BigNumberLike): Matrix
-  swapRows?(i: number, j: number): Matrix
-  [Symbol.iterator]?(): IterableIterator<MatrixEntry>
+  ): Matrix | MatrixValue;
+  resize(size: number[] | Matrix, defaultValue?: MatrixValue, copy?: boolean): Matrix;
+  reshape(size: number[], copy?: boolean): Matrix;
+  map(callback: MapCallback, skipZeros?: boolean, isUnary?: boolean): Matrix;
+  forEach(callback: ForEachCallback, skipZeros?: boolean, isUnary?: boolean): void;
+  rows?(): Matrix[];
+  columns?(): Matrix[];
+  format?(options?: MatrixFormatOptions): string;
+  toString?(): string;
+  toJSON?(): DenseMatrixJSON;
+  diagonal?(k?: number | BigNumberLike): Matrix;
+  swapRows?(i: number, j: number): Matrix;
+  [Symbol.iterator]?(): IterableIterator<MatrixEntry>;
 }
 
 /**
@@ -100,39 +92,31 @@ interface Matrix {
  * INTENTIONAL ANY: The value and return types are determined at runtime
  * by typed-function based on matrix._datatype.
  */
-type MapCallback = (
-  value: MatrixValue,
-  index?: number[],
-  matrix?: Matrix
-) => MatrixValue
+type MapCallback = (value: MatrixValue, index?: number[], matrix?: Matrix) => MatrixValue;
 
 /**
  * ForEach callback signature for DenseMatrix.forEach()
  */
-type ForEachCallback = (
-  value: MatrixValue,
-  index?: number[],
-  matrix?: Matrix
-) => void
+type ForEachCallback = (value: MatrixValue, index?: number[], matrix?: Matrix) => void;
 
 /**
  * Result of optimizeCallback utility
  */
 interface OptimizedCallback {
-  fn: Function
-  isUnary: boolean
+  fn: Function;
+  isUnary: boolean;
 }
 
 /**
  * Dependencies for DenseMatrix factory
  */
 interface DenseMatrixDependencies {
-  Matrix: new (...args: unknown[]) => Matrix
-  config: MathJsConfig
+  Matrix: new (...args: unknown[]) => Matrix;
+  config: MathJsConfig;
 }
 
-const name = 'DenseMatrix'
-const dependencies = ['Matrix', 'config']
+const name = 'DenseMatrix';
+const dependencies = ['Matrix', 'config'];
 
 export const createDenseMatrixClass = /* #__PURE__ */ factory(
   name,
@@ -144,38 +128,36 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
      * @enum {{ value, index: number[] }}
      */
     class DenseMatrix extends Matrix implements Matrix {
-      type: string = 'DenseMatrix'
-      isDenseMatrix: boolean = true
-      _data: DenseMatrixData
-      _size: number[]
-      _datatype?: DataType
+      type: string = 'DenseMatrix';
+      isDenseMatrix: boolean = true;
+      _data: DenseMatrixData;
+      _size: number[];
+      _datatype?: DataType;
 
       constructor(
         data?: DenseMatrixData | Matrix | DenseMatrixConstructorData | null,
         datatype?: DataType
       ) {
-        super()
+        super();
         if (!(this instanceof DenseMatrix)) {
-          throw new SyntaxError(
-            'Constructor must be called with the new operator'
-          )
+          throw new SyntaxError('Constructor must be called with the new operator');
         }
         if (datatype && !isString(datatype)) {
-          throw new Error('Invalid datatype: ' + datatype)
+          throw new Error('Invalid datatype: ' + datatype);
         }
 
         if (isMatrix(data)) {
           // check data is a DenseMatrix
           if ((data as any).type === 'DenseMatrix') {
             // clone data & size
-            this._data = clone((data as any)._data!)
-            this._size = clone((data as any)._size!)
-            this._datatype = datatype || (data as any)._datatype
+            this._data = clone((data as any)._data!);
+            this._size = clone((data as any)._size!);
+            this._datatype = datatype || (data as any)._datatype;
           } else {
             // build data from existing matrix
-            this._data = (data as any).toArray()
-            this._size = (data as any).size()
-            this._datatype = datatype || (data as any)._datatype
+            this._data = (data as any).toArray();
+            this._size = (data as any).size();
+            this._datatype = datatype || (data as any)._datatype;
           }
         } else if (
           data &&
@@ -183,41 +165,38 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
           isArray((data as DenseMatrixConstructorData).size)
         ) {
           // initialize fields from JSON representation
-          const constructorData = data as DenseMatrixConstructorData
-          this._data = constructorData.data
-          this._size = constructorData.size
+          const constructorData = data as DenseMatrixConstructorData;
+          this._data = constructorData.data;
+          this._size = constructorData.size;
           // verify the dimensions of the array
-          validate(this._data, this._size)
-          this._datatype = datatype || constructorData.datatype
+          validate(this._data, this._size);
+          this._datatype = datatype || constructorData.datatype;
         } else if (isArray(data)) {
           // replace nested Matrices with Arrays
-          this._data = preprocess(data as DenseMatrixData)
+          this._data = preprocess(data as DenseMatrixData);
           // get the dimensions of the array
-          this._size = arraySize(this._data)
+          this._size = arraySize(this._data);
 
           // verify the dimensions of the array, TODO: compute size while processing array
-          validate(this._data, this._size)
+          validate(this._data, this._size);
           // data type unknown
-          this._datatype = datatype
+          this._datatype = datatype;
         } else if (data) {
           // unsupported type
-          throw new TypeError('Unsupported type of data (' + typeOf(data) + ')')
+          throw new TypeError('Unsupported type of data (' + typeOf(data) + ')');
         } else {
           // nothing provided
-          this._data = []
-          this._size = [0]
-          this._datatype = datatype
+          this._data = [];
+          this._size = [0];
+          this._datatype = datatype;
         }
       }
 
       /**
        * Create a new DenseMatrix
        */
-      createDenseMatrix(
-        data?: DenseMatrixData,
-        datatype?: DataType
-      ): DenseMatrix {
-        return new DenseMatrix(data, datatype)
+      createDenseMatrix(data?: DenseMatrixData, datatype?: DataType): DenseMatrix {
+        return new DenseMatrix(data, datatype);
       }
 
       /**
@@ -230,7 +209,7 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @return {string}   type information; if multiple types are found from the Matrix, it will return "mixed"
        */
       getDataType(): string {
-        return getArrayDataType(this._data, typeOf)
+        return getArrayDataType(this._data, typeOf);
       }
 
       /**
@@ -243,7 +222,7 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @return {string}           The storage format.
        */
       storage(): string {
-        return 'dense'
+        return 'dense';
       }
 
       /**
@@ -256,7 +235,7 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @return {DataType}           The datatype.
        */
       datatype(): DataType {
-        return this._datatype
+        return this._datatype;
       }
 
       /**
@@ -266,7 +245,7 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @param {DataType} [datatype]
        */
       create(data?: DenseMatrixData, datatype?: DataType): DenseMatrix {
-        return new DenseMatrix(data, datatype)
+        return new DenseMatrix(data, datatype);
       }
 
       /**
@@ -290,15 +269,15 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
       ): DenseMatrix | MatrixValue {
         switch (arguments.length) {
           case 1:
-            return _get(this, index)
+            return _get(this, index);
 
           // intentional fall through
           case 2:
           case 3:
-            return _set(this, index, replacement, defaultValue)
+            return _set(this, index, replacement, defaultValue);
 
           default:
-            throw new SyntaxError('Wrong number of arguments')
+            throw new SyntaxError('Wrong number of arguments');
         }
       }
 
@@ -309,7 +288,7 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @return {MatrixValue} value
        */
       get(index: number[]): MatrixValue {
-        return get(this._data, index)
+        return get(this._data, index);
       }
 
       /**
@@ -322,40 +301,36 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        *                                  new matrix elements will be left undefined.
        * @return {DenseMatrix} self
        */
-      set(
-        index: number[],
-        value: MatrixValue,
-        defaultValue?: MatrixValue
-      ): DenseMatrix {
+      set(index: number[], value: MatrixValue, defaultValue?: MatrixValue): DenseMatrix {
         if (!isArray(index)) {
-          throw new TypeError('Array expected')
+          throw new TypeError('Array expected');
         }
         if (index.length < this._size.length) {
-          throw new DimensionError(index.length, this._size.length, '<')
+          throw new DimensionError(index.length, this._size.length, '<');
         }
 
-        let i: number, ii: number, indexI: number
+        let i: number, ii: number, indexI: number;
 
         // enlarge matrix when needed
         const size = index.map(function (i) {
-          return i + 1
-        })
-        _fit(this, size, defaultValue)
+          return i + 1;
+        });
+        _fit(this, size, defaultValue);
 
         // traverse over the dimensions
-        let data: any = this._data
+        let data: any = this._data;
         for (i = 0, ii = index.length - 1; i < ii; i++) {
-          indexI = index[i]
-          validateIndex(indexI, data.length)
-          data = data[indexI]
+          indexI = index[i];
+          validateIndex(indexI, data.length);
+          data = data[indexI];
         }
 
         // set new value
-        indexI = index[index.length - 1]
-        validateIndex(indexI, data.length)
-        data[indexI] = value
+        indexI = index[index.length - 1];
+        validateIndex(indexI, data.length);
+        data[indexI] = value;
 
-        return this
+        return this;
       }
 
       /**
@@ -378,18 +353,18 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
       ): DenseMatrix | MatrixValue {
         // validate arguments
         if (!isCollection(size)) {
-          throw new TypeError('Array or Matrix expected')
+          throw new TypeError('Array or Matrix expected');
         }
 
         // SparseMatrix input is always 2d, flatten this into 1d if it's indeed a vector
         const sizeArray = (size as any).valueOf().map((value: any) => {
-          return Array.isArray(value) && value.length === 1 ? value[0] : value
-        })
+          return Array.isArray(value) && value.length === 1 ? value[0] : value;
+        });
 
         // matrix to resize
-        const m = copy ? this.clone() : this
+        const m = copy ? this.clone() : this;
         // resize matrix
-        return _resize(m, sizeArray, defaultValue)
+        return _resize(m, sizeArray, defaultValue);
       }
 
       /**
@@ -407,12 +382,12 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @return {Matrix}                 The reshaped matrix
        */
       reshape(size: number[], copy?: boolean): DenseMatrix {
-        const m = copy ? this.clone() : this
+        const m = copy ? this.clone() : this;
 
-        m._data = reshape(m._data, size)
-        const currentLength = m._size.reduce((length, size) => length * size)
-        m._size = processSizesWildcard(size, currentLength)
-        return m
+        m._data = reshape(m._data, size);
+        const currentLength = m._size.reduce((length, size) => length * size);
+        m._size = processSizesWildcard(size, currentLength);
+        return m;
       }
 
       /**
@@ -424,9 +399,9 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
         const m = new DenseMatrix({
           data: clone(this._data),
           size: clone(this._size),
-          datatype: this._datatype
-        })
-        return m
+          datatype: this._datatype,
+        });
+        return m;
       }
 
       /**
@@ -435,7 +410,7 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @returns {number[]} size
        */
       size(): number[] {
-        return this._size.slice(0) // return a clone of _size
+        return this._size.slice(0); // return a clone of _size
       }
 
       /**
@@ -455,67 +430,67 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
         _skipZeros: boolean = false,
         isUnary: boolean = false
       ): DenseMatrix {
-        const me = this
-        const maxDepth = me._size.length - 1
+        const me = this;
+        const maxDepth = me._size.length - 1;
 
-        if (maxDepth < 0) return me.clone()
+        if (maxDepth < 0) return me.clone();
 
         const fastCallback: OptimizedCallback = optimizeCallback(
           callback,
           me as any,
           'map',
           isUnary
-        ) as OptimizedCallback
-        const fastCallbackFn = fastCallback.fn
+        ) as OptimizedCallback;
+        const fastCallbackFn = fastCallback.fn;
 
-        const result = me.create(undefined, me._datatype)
-        result._size = me._size
+        const result = me.create(undefined, me._datatype);
+        result._size = me._size;
         if (isUnary || fastCallback.isUnary) {
-          result._data = iterateUnary(me._data)
-          return result
+          result._data = iterateUnary(me._data);
+          return result;
         }
         if (maxDepth === 0) {
-          const inputData: any[] = me.valueOf() as any[]
-          const data = Array(inputData.length)
+          const inputData: any[] = me.valueOf() as any[];
+          const data = Array(inputData.length);
           for (let i = 0; i < inputData.length; i++) {
-            data[i] = fastCallbackFn(inputData[i], [i], me)
+            data[i] = fastCallbackFn(inputData[i], [i], me);
           }
-          result._data = data
-          return result
+          result._data = data;
+          return result;
         }
 
-        const index: number[] = []
-        result._data = iterate(me._data)
-        return result
+        const index: number[] = [];
+        result._data = iterate(me._data);
+        return result;
 
         function iterate(data: any, depth: number = 0): any[] {
-          const result = Array(data.length)
+          const result = Array(data.length);
           if (depth < maxDepth) {
             for (let i = 0; i < data.length; i++) {
-              index[depth] = i
-              result[i] = iterate(data[i], depth + 1)
+              index[depth] = i;
+              result[i] = iterate(data[i], depth + 1);
             }
           } else {
             for (let i = 0; i < data.length; i++) {
-              index[depth] = i
-              result[i] = fastCallbackFn(data[i], index.slice(), me)
+              index[depth] = i;
+              result[i] = fastCallbackFn(data[i], index.slice(), me);
             }
           }
-          return result
+          return result;
         }
 
         function iterateUnary(data: any, depth: number = 0): any[] {
-          const result = Array(data.length)
+          const result = Array(data.length);
           if (depth < maxDepth) {
             for (let i = 0; i < data.length; i++) {
-              result[i] = iterateUnary(data[i], depth + 1)
+              result[i] = iterateUnary(data[i], depth + 1);
             }
           } else {
             for (let i = 0; i < data.length; i++) {
-              result[i] = fastCallbackFn(data[i])
+              result[i] = fastCallbackFn(data[i]);
             }
           }
-          return result
+          return result;
         }
       }
 
@@ -533,41 +508,41 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
         _skipZeros: boolean = false,
         isUnary: boolean = false
       ): void {
-        const me = this
-        const maxDepth = me._size.length - 1
+        const me = this;
+        const maxDepth = me._size.length - 1;
 
-        if (maxDepth < 0) return
+        if (maxDepth < 0) return;
 
         const fastCallback: OptimizedCallback = optimizeCallback(
           callback,
           me as any,
           'map',
           isUnary
-        ) as OptimizedCallback
-        const fastCallbackFn = fastCallback.fn
+        ) as OptimizedCallback;
+        const fastCallbackFn = fastCallback.fn;
         if (isUnary || fastCallback.isUnary) {
-          iterateUnary(me._data)
-          return
+          iterateUnary(me._data);
+          return;
         }
         if (maxDepth === 0) {
           for (let i = 0; i < (me._data as any[]).length; i++) {
-            fastCallbackFn((me._data as any[])[i], [i], me)
+            fastCallbackFn((me._data as any[])[i], [i], me);
           }
-          return
+          return;
         }
-        const index: number[] = []
-        iterate(me._data)
+        const index: number[] = [];
+        iterate(me._data);
 
         function iterate(data: any, depth: number = 0): void {
           if (depth < maxDepth) {
             for (let i = 0; i < data.length; i++) {
-              index[depth] = i
-              iterate(data[i], depth + 1)
+              index[depth] = i;
+              iterate(data[i], depth + 1);
             }
           } else {
             for (let i = 0; i < data.length; i++) {
-              index[depth] = i
-              fastCallbackFn(data[i], index.slice(), me)
+              index[depth] = i;
+              fastCallbackFn(data[i], index.slice(), me);
             }
           }
         }
@@ -575,11 +550,11 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
         function iterateUnary(data: any, depth: number = 0): void {
           if (depth < maxDepth) {
             for (let i = 0; i < data.length; i++) {
-              iterateUnary(data[i], depth + 1)
+              iterateUnary(data[i], depth + 1);
             }
           } else {
             for (let i = 0; i < data.length; i++) {
-              fastCallbackFn(data[i])
+              fastCallbackFn(data[i]);
             }
           }
         }
@@ -590,37 +565,34 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @return {Iterable<{ value, index: number[] }>}
        */
       *[Symbol.iterator](): IterableIterator<MatrixEntry> {
-        const maxDepth = this._size.length - 1
+        const maxDepth = this._size.length - 1;
 
         if (maxDepth < 0) {
-          return
+          return;
         }
 
         if (maxDepth === 0) {
           for (let i = 0; i < (this._data as any[]).length; i++) {
-            yield { value: (this._data as any[])[i], index: [i] }
+            yield { value: (this._data as any[])[i], index: [i] };
           }
-          return
+          return;
         }
 
-        const index: number[] = []
-        const recurse = function* (
-          value: any,
-          depth: number
-        ): IterableIterator<MatrixEntry> {
+        const index: number[] = [];
+        const recurse = function* (value: any, depth: number): IterableIterator<MatrixEntry> {
           if (depth < maxDepth) {
             for (let i = 0; i < value.length; i++) {
-              index[depth] = i
-              yield* recurse(value[i], depth + 1)
+              index[depth] = i;
+              yield* recurse(value[i], depth + 1);
             }
           } else {
             for (let i = 0; i < value.length; i++) {
-              index[depth] = i
-              yield { value: value[i], index: index.slice() }
+              index[depth] = i;
+              yield { value: value[i], index: index.slice() };
             }
           }
-        }
-        yield* recurse(this._data, 0)
+        };
+        yield* recurse(this._data, 0);
       }
 
       /**
@@ -628,19 +600,19 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @returns {Array<Matrix>}
        */
       rows(): DenseMatrix[] {
-        const result: DenseMatrix[] = []
+        const result: DenseMatrix[] = [];
 
-        const s = this.size()
+        const s = this.size();
         if (s.length !== 2) {
-          throw new TypeError('Rows can only be returned for a 2D matrix.')
+          throw new TypeError('Rows can only be returned for a 2D matrix.');
         }
 
-        const data = this._data as any[][]
+        const data = this._data as any[][];
         for (const row of data) {
-          result.push(new DenseMatrix([row], this._datatype))
+          result.push(new DenseMatrix([row], this._datatype));
         }
 
-        return result
+        return result;
       }
 
       /**
@@ -648,20 +620,20 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @returns {Array<Matrix>}
        */
       columns(): DenseMatrix[] {
-        const result: DenseMatrix[] = []
+        const result: DenseMatrix[] = [];
 
-        const s = this.size()
+        const s = this.size();
         if (s.length !== 2) {
-          throw new TypeError('Columns can only be returned for a 2D matrix.')
+          throw new TypeError('Columns can only be returned for a 2D matrix.');
         }
 
-        const data = this._data as any[][]
+        const data = this._data as any[][];
         for (let i = 0; i < s[1]; i++) {
-          const col = data.map((row) => [row[i]])
-          result.push(new DenseMatrix(col, this._datatype))
+          const col = data.map((row) => [row[i]]);
+          result.push(new DenseMatrix(col, this._datatype));
         }
 
-        return result
+        return result;
       }
 
       /**
@@ -670,7 +642,7 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @returns {DenseMatrixData} array
        */
       toArray(): DenseMatrixData {
-        return clone(this._data)
+        return clone(this._data);
       }
 
       /**
@@ -679,7 +651,7 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @returns {DenseMatrixData} array
        */
       valueOf(): DenseMatrixData {
-        return this._data
+        return this._data;
       }
 
       /**
@@ -691,13 +663,8 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        *                                                options.
        * @returns {string} str
        */
-      format(
-        options?:
-          | MatrixFormatOptions
-          | number
-          | ((value: MatrixValue) => string)
-      ): string {
-        return format(this._data, options)
+      format(options?: MatrixFormatOptions | number | ((value: MatrixValue) => string)): string {
+        return format(this._data, options);
       }
 
       /**
@@ -706,7 +673,7 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        * @returns {string} str
        */
       toString(): string {
-        return format(this._data, {})
+        return format(this._data, {});
       }
 
       /**
@@ -719,8 +686,8 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
           mathjs: 'DenseMatrix',
           data: this._data,
           size: this._size,
-          datatype: this._datatype
-        }
+          datatype: this._datatype,
+        };
       }
 
       /**
@@ -736,41 +703,41 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
         if (k) {
           // convert BigNumber to a number
           if (isBigNumber(k)) {
-            k = (k as any).toNumber()
+            k = (k as any).toNumber();
           }
           // is must be an integer
           if (!isNumber(k) || !isInteger(k)) {
-            throw new TypeError('The parameter k must be an integer number')
+            throw new TypeError('The parameter k must be an integer number');
           }
         } else {
           // default value
-          k = 0
+          k = 0;
         }
 
-        const kSuper = k > 0 ? k : 0
-        const kSub = k < 0 ? -k : 0
+        const kSuper = k > 0 ? k : 0;
+        const kSub = k < 0 ? -k : 0;
 
         // rows & columns
-        const rows = this._size[0]
-        const columns = this._size[1]
+        const rows = this._size[0];
+        const columns = this._size[1];
 
         // number diagonal values
-        const n = Math.min(rows - kSub, columns - kSuper)
+        const n = Math.min(rows - kSub, columns - kSuper);
 
         // x is a matrix get diagonal from matrix
-        const data: any[] = []
+        const data: any[] = [];
 
         // loop rows
         for (let i = 0; i < n; i++) {
-          data[i] = (this._data as any[][])[i + kSub][i + kSuper]
+          data[i] = (this._data as any[][])[i + kSub][i + kSuper];
         }
 
         // create DenseMatrix
         return new DenseMatrix({
           data,
           size: [n],
-          datatype: this._datatype
-        })
+          datatype: this._datatype,
+        });
       }
 
       /**
@@ -785,20 +752,20 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
       swapRows(i: number, j: number): DenseMatrix {
         // check index
         if (!isNumber(i) || !isInteger(i) || !isNumber(j) || !isInteger(j)) {
-          throw new Error('Row index must be positive integers')
+          throw new Error('Row index must be positive integers');
         }
         // check dimensions
         if (this._size.length !== 2) {
-          throw new Error('Only two dimensional matrix is supported')
+          throw new Error('Only two dimensional matrix is supported');
         }
         // validate index
-        validateIndex(i, this._size[0])
-        validateIndex(j, this._size[0])
+        validateIndex(i, this._size[0]);
+        validateIndex(j, this._size[0]);
 
         // swap rows
-        DenseMatrix._swapRows(i, j, this._data as any[][])
+        DenseMatrix._swapRows(i, j, this._data as any[][]);
         // return current instance
-        return this
+        return this;
       }
 
       /**
@@ -819,10 +786,10 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
         defaultValue?: MatrixValue
       ): DenseMatrix {
         if (!isArray(size)) {
-          throw new TypeError('Array expected, size parameter')
+          throw new TypeError('Array expected, size parameter');
         }
         if (size.length !== 2) {
-          throw new Error('Only two dimensions matrix are supported')
+          throw new Error('Only two dimensions matrix are supported');
         }
 
         // map size & validate
@@ -830,74 +797,74 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
           // check it is a big number
           if (isBigNumber(s)) {
             // convert it
-            s = (s as any).toNumber()
+            s = (s as any).toNumber();
           }
           // validate arguments
           if (!isNumber(s) || !isInteger(s) || s < 1) {
-            throw new Error('Size values must be positive integers')
+            throw new Error('Size values must be positive integers');
           }
-          return s
-        })
+          return s;
+        });
 
         // validate k if any
         if (k) {
           // convert BigNumber to a number
           if (isBigNumber(k)) {
-            k = (k as any).toNumber()
+            k = (k as any).toNumber();
           }
           // is must be an integer
           if (!isNumber(k) || !isInteger(k)) {
-            throw new TypeError('The parameter k must be an integer number')
+            throw new TypeError('The parameter k must be an integer number');
           }
         } else {
           // default value
-          k = 0
+          k = 0;
         }
 
-        const kSuper = k > 0 ? k : 0
-        const kSub = k < 0 ? -k : 0
+        const kSuper = k > 0 ? k : 0;
+        const kSub = k < 0 ? -k : 0;
 
         // rows and columns
-        const rows = mappedSize[0]
-        const columns = mappedSize[1]
+        const rows = mappedSize[0];
+        const columns = mappedSize[1];
 
         // number of non-zero items
-        const n = Math.min(rows - kSub, columns - kSuper)
+        const n = Math.min(rows - kSub, columns - kSuper);
 
         // value extraction function
-        let _value: (i: number) => any
+        let _value: (i: number) => any;
 
         // check value
         if (isArray(value)) {
           // validate array
           if ((value as any[]).length !== n) {
             // number of values in array must be n
-            throw new Error('Invalid value array length')
+            throw new Error('Invalid value array length');
           }
           // define function
           _value = function (i: number) {
             // return value @ i
-            return (value as any[])[i]
-          }
+            return (value as any[])[i];
+          };
         } else if (isMatrix(value)) {
           // matrix size
-          const ms = (value as any).size()
+          const ms = (value as any).size();
           // validate matrix
           if (ms.length !== 1 || ms[0] !== n) {
             // number of values in array must be n
-            throw new Error('Invalid matrix length')
+            throw new Error('Invalid matrix length');
           }
           // define function
           _value = function (i: number) {
             // return value @ i
-            return (value as any).get([i])
-          }
+            return (value as any).get([i]);
+          };
         } else {
           // define function
           _value = function () {
             // return value
-            return value
-          }
+            return value;
+          };
         }
 
         // discover default value if needed
@@ -905,27 +872,27 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
           // check first value in array
           defaultValue = isBigNumber(_value(0))
             ? _value(0).mul(0) // trick to create a BigNumber with value zero
-            : 0
+            : 0;
         }
 
         // empty array
-        let data: any[] = []
+        let data: any[] = [];
 
         // check we need to resize array
         if (mappedSize.length > 0) {
           // resize array
-          data = resize(data, mappedSize, defaultValue)
+          data = resize(data, mappedSize, defaultValue);
           // fill diagonal
           for (let d = 0; d < n; d++) {
-            data[d + kSub][d + kSuper] = _value(d)
+            data[d + kSub][d + kSuper] = _value(d);
           }
         }
 
         // create DenseMatrix
         return new DenseMatrix({
           data,
-          size: [rows, columns]
-        })
+          size: [rows, columns],
+        });
       }
 
       /**
@@ -936,10 +903,8 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        *                       where mathjs is optional
        * @returns {DenseMatrix}
        */
-      static fromJSON(
-        json: DenseMatrixJSON | DenseMatrixConstructorData
-      ): DenseMatrix {
-        return new DenseMatrix(json)
+      static fromJSON(json: DenseMatrixJSON | DenseMatrixConstructorData): DenseMatrix {
+        return new DenseMatrix(json);
       }
 
       /**
@@ -951,25 +916,25 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
        */
       static _swapRows(i: number, j: number, data: any[][]): void {
         // swap values i <-> j
-        const vi = data[i]
-        data[i] = data[j]
-        data[j] = vi
+        const vi = data[i];
+        data[i] = data[j];
+        data[j] = vi;
       }
     }
 
     // Set up prototype inheritance
-    const MatrixPrototype = Matrix.prototype || Matrix
-    Object.setPrototypeOf(DenseMatrix.prototype, MatrixPrototype)
+    const MatrixPrototype = Matrix.prototype || Matrix;
+    Object.setPrototypeOf(DenseMatrix.prototype, MatrixPrototype);
 
     /**
      * Attach type information
      */
-    Object.defineProperty(DenseMatrix, 'name', { value: 'DenseMatrix' })
+    Object.defineProperty(DenseMatrix, 'name', { value: 'DenseMatrix' });
     Object.defineProperty(DenseMatrix.prototype, 'constructor', {
       value: DenseMatrix,
       writable: true,
-      configurable: true
-    })
+      configurable: true,
+    });
 
     /**
      * Get a submatrix of this matrix
@@ -978,45 +943,40 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
      * @param {Index} index   Zero-based index
      * @private
      */
-    function _get(
-      matrix: DenseMatrix,
-      index: Index
-    ): DenseMatrix | MatrixValue {
+    function _get(matrix: DenseMatrix, index: Index): DenseMatrix | MatrixValue {
       if (!isIndex(index)) {
-        throw new TypeError('Invalid index')
+        throw new TypeError('Invalid index');
       }
 
       const isScalar = config.legacySubset
         ? index.size().every((idx: number) => idx === 1)
-        : index.isScalar()
+        : index.isScalar();
       if (isScalar) {
         // return a scalar - min() returns numbers for scalar indices
-        return matrix.get(index.min() as number[])
+        return matrix.get(index.min() as number[]);
       } else {
         // validate dimensions
-        const size = index.size()
+        const size = index.size();
         if (size.length !== matrix._size.length) {
-          throw new DimensionError(size.length, matrix._size.length)
+          throw new DimensionError(size.length, matrix._size.length);
         }
 
         // validate if any of the ranges in the index is out of range
         // min() and max() return numbers for numeric indices
-        const min = index.min() as number[]
-        const max = index.max() as number[]
+        const min = index.min() as number[];
+        const max = index.max() as number[];
         for (let i = 0, ii = matrix._size.length; i < ii; i++) {
-          validateIndex(min[i], matrix._size[i])
-          validateIndex(max[i], matrix._size[i])
+          validateIndex(min[i], matrix._size[i]);
+          validateIndex(max[i], matrix._size[i]);
         }
 
         // retrieve submatrix
-        const returnMatrix = new DenseMatrix()
-        const submatrix = _getSubmatrix(matrix._data, index)
-        returnMatrix._size = submatrix.size
-        returnMatrix._datatype = matrix._datatype
-        returnMatrix._data = submatrix.data
-        return config.legacySubset
-          ? returnMatrix.reshape(index.size())
-          : returnMatrix
+        const returnMatrix = new DenseMatrix();
+        const submatrix = _getSubmatrix(matrix._data, index);
+        returnMatrix._size = submatrix.size;
+        returnMatrix._datatype = matrix._datatype;
+        returnMatrix._data = submatrix.data;
+        return config.legacySubset ? returnMatrix.reshape(index.size()) : returnMatrix;
       }
     }
 
@@ -1033,36 +993,36 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
       data: DenseMatrixData,
       index: Index
     ): { data: DenseMatrixData; size: number[] } {
-      const maxDepth = index.size().length - 1
-      const size: (number | null)[] = Array(maxDepth)
+      const maxDepth = index.size().length - 1;
+      const size: (number | null)[] = Array(maxDepth);
       return {
         data: getSubmatrixRecursive(data),
-        size: size.filter((x) => x !== null) as number[]
-      }
+        size: size.filter((x) => x !== null) as number[],
+      };
 
       function getSubmatrixRecursive(data: any, depth: number = 0): any {
-        const dims = index.dimension(depth)
+        const dims = index.dimension(depth);
         function _mapIndex(dim: any, callback: (d: number) => any): any {
           // applies a callback for when the index is a Number or a Matrix
-          if (isNumber(dim)) return callback(dim)
-          else return dim.map(callback).valueOf()
+          if (isNumber(dim)) return callback(dim);
+          else return dim.map(callback).valueOf();
         }
 
         if (isNumber(dims)) {
-          size[depth] = null
+          size[depth] = null;
         } else {
-          size[depth] = dims.size()[0]
+          size[depth] = dims.size()[0];
         }
         if (depth < maxDepth) {
           return _mapIndex(dims, (dimIndex: number) => {
-            validateIndex(dimIndex, data.length)
-            return getSubmatrixRecursive(data[dimIndex], depth + 1)
-          })
+            validateIndex(dimIndex, data.length);
+            return getSubmatrixRecursive(data[dimIndex], depth + 1);
+          });
         } else {
           return _mapIndex(dims, (dimIndex: number) => {
-            validateIndex(dimIndex, data.length)
-            return data[dimIndex]
-          })
+            validateIndex(dimIndex, data.length);
+            return data[dimIndex];
+          });
         }
       }
     }
@@ -1086,20 +1046,20 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
       defaultValue?: MatrixValue
     ): DenseMatrix {
       if (!index || index.isIndex !== true) {
-        throw new TypeError('Invalid index')
+        throw new TypeError('Invalid index');
       }
 
       // get index size and check whether the index contains a single value
-      const iSize = index.size()
-      const isScalar = index.isScalar()
+      const iSize = index.size();
+      const isScalar = index.isScalar();
 
       // calculate the size of the submatrix, and convert it into an Array if needed
-      let sSize: number[]
+      let sSize: number[];
       if (isMatrix(submatrix)) {
-        sSize = (submatrix as any).size()
-        submatrix = (submatrix as any).valueOf()
+        sSize = (submatrix as any).size();
+        submatrix = (submatrix as any).valueOf();
       } else {
-        sSize = arraySize(submatrix)
+        sSize = arraySize(submatrix);
       }
 
       if (isScalar) {
@@ -1107,13 +1067,9 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
 
         // check whether submatrix is a scalar
         if (sSize.length !== 0) {
-          throw new TypeError('Scalar expected')
+          throw new TypeError('Scalar expected');
         }
-        matrix.set(
-          index.min() as number[],
-          submatrix as MatrixValue,
-          defaultValue
-        )
+        matrix.set(index.min() as number[], submatrix as MatrixValue, defaultValue);
       } else {
         // set a submatrix
 
@@ -1121,52 +1077,52 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
         if (!deepStrictEqual(sSize, iSize)) {
           try {
             if (sSize.length === 0) {
-              submatrix = broadcastTo([submatrix], iSize)
+              submatrix = broadcastTo([submatrix], iSize);
             } else {
-              submatrix = broadcastTo(submatrix, iSize)
+              submatrix = broadcastTo(submatrix, iSize);
             }
-            sSize = arraySize(submatrix)
+            sSize = arraySize(submatrix);
           } catch {}
         }
 
         // validate dimensions
         if (iSize.length < matrix._size.length) {
-          throw new DimensionError(iSize.length, matrix._size.length, '<')
+          throw new DimensionError(iSize.length, matrix._size.length, '<');
         }
 
         if (sSize.length < iSize.length) {
           // calculate number of missing outer dimensions
-          let i = 0
-          let outer = 0
+          let i = 0;
+          let outer = 0;
           while (iSize[i] === 1 && sSize[i] === 1) {
-            i++
+            i++;
           }
           while (iSize[i] === 1) {
-            outer++
-            i++
+            outer++;
+            i++;
           }
 
           // unsqueeze both outer and inner dimensions
-          submatrix = unsqueeze(submatrix, iSize.length, outer, sSize)
+          submatrix = unsqueeze(submatrix, iSize.length, outer, sSize);
         }
 
         // check whether the size of the submatrix matches the index size
         if (!deepStrictEqual(iSize, sSize)) {
-          throw new DimensionError(iSize, sSize, '>')
+          throw new DimensionError(iSize, sSize, '>');
         }
 
         // enlarge matrix when needed
         // max() returns numbers for numeric indices, cast to allow arithmetic
         const size = (index.max() as number[]).map(function (i: number) {
-          return i + 1
-        })
-        _fit(matrix, size, defaultValue)
+          return i + 1;
+        });
+        _fit(matrix, size, defaultValue);
 
         // insert the sub matrix
-        _setSubmatrix(matrix._data, index, submatrix)
+        _setSubmatrix(matrix._data, index, submatrix);
       }
 
-      return matrix
+      return matrix;
     }
 
     /**
@@ -1177,36 +1133,28 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
      * @param {DenseMatrixData} submatrix
      * @private
      */
-    function _setSubmatrix(
-      data: DenseMatrixData,
-      index: Index,
-      submatrix: DenseMatrixData
-    ): void {
-      const maxDepth = index.size().length - 1
+    function _setSubmatrix(data: DenseMatrixData, index: Index, submatrix: DenseMatrixData): void {
+      const maxDepth = index.size().length - 1;
 
-      setSubmatrixRecursive(data, submatrix)
+      setSubmatrixRecursive(data, submatrix);
 
-      function setSubmatrixRecursive(
-        data: any,
-        submatrix: any,
-        depth: number = 0
-      ): void {
-        const range = index.dimension(depth)
+      function setSubmatrixRecursive(data: any, submatrix: any, depth: number = 0): void {
+        const range = index.dimension(depth);
         const recursiveCallback = (rangeIndex: number, i: number[]) => {
-          validateIndex(rangeIndex, data.length)
-          setSubmatrixRecursive(data[rangeIndex], submatrix[i[0]], depth + 1)
-        }
+          validateIndex(rangeIndex, data.length);
+          setSubmatrixRecursive(data[rangeIndex], submatrix[i[0]], depth + 1);
+        };
         const finalCallback = (rangeIndex: number, i: number[]) => {
-          validateIndex(rangeIndex, data.length)
-          data[rangeIndex] = submatrix[i[0]]
-        }
+          validateIndex(rangeIndex, data.length);
+          data[rangeIndex] = submatrix[i[0]];
+        };
 
         if (depth < maxDepth) {
-          if (isNumber(range)) recursiveCallback(range, [0])
-          else range.forEach(recursiveCallback)
+          if (isNumber(range)) recursiveCallback(range, [0]);
+          else range.forEach(recursiveCallback);
         } else {
-          if (isNumber(range)) finalCallback(range, [0])
-          else range.forEach(finalCallback)
+          if (isNumber(range)) finalCallback(range, [0]);
+          else range.forEach(finalCallback);
         }
       }
     }
@@ -1228,18 +1176,18 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
       // check size
       if (size.length === 0) {
         // first value in matrix
-        let v: any = matrix._data
+        let v: any = matrix._data;
         // go deep
         while (isArray(v)) {
-          v = v[0]
+          v = v[0];
         }
-        return v
+        return v;
       }
       // resize matrix
-      matrix._size = size.slice(0) // copy the array
-      matrix._data = resize(matrix._data, matrix._size, defaultValue)
+      matrix._size = size.slice(0); // copy the array
+      matrix._data = resize(matrix._data, matrix._size, defaultValue);
       // return matrix
-      return matrix
+      return matrix;
     }
 
     /**
@@ -1251,33 +1199,29 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
      * @param {MatrixValue} defaultValue          Default value, filled in on new entries.
      * @private
      */
-    function _fit(
-      matrix: DenseMatrix,
-      size: number[],
-      defaultValue?: MatrixValue
-    ): void {
+    function _fit(matrix: DenseMatrix, size: number[], defaultValue?: MatrixValue): void {
       const // copy the array
-        newSize = matrix._size.slice(0)
+        newSize = matrix._size.slice(0);
 
-      let changed = false
+      let changed = false;
 
       // add dimensions when needed
       while (newSize.length < size.length) {
-        newSize.push(0)
-        changed = true
+        newSize.push(0);
+        changed = true;
       }
 
       // enlarge size when needed
       for (let i = 0, ii = size.length; i < ii; i++) {
         if (size[i] > newSize[i]) {
-          newSize[i] = size[i]
-          changed = true
+          newSize[i] = size[i];
+          changed = true;
         }
       }
 
       if (changed) {
         // resize only when size is changed
-        _resize(matrix, newSize, defaultValue)
+        _resize(matrix, newSize, defaultValue);
       }
     }
 
@@ -1290,17 +1234,17 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
      */
     function preprocess(data: DenseMatrixData | Matrix): DenseMatrixData {
       if (isMatrix(data)) {
-        return preprocess(data.valueOf())
+        return preprocess(data.valueOf());
       }
 
       if (isArray(data)) {
-        return (data as any[]).map(preprocess)
+        return (data as any[]).map(preprocess);
       }
 
-      return data
+      return data;
     }
 
-    return DenseMatrix
+    return DenseMatrix;
   },
   { isClass: true }
-)
+);

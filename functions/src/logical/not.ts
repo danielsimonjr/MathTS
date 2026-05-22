@@ -1,34 +1,34 @@
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { notNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { notNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for logical not operation
 interface Complex {
-  re: number
-  im: number
+  re: number;
+  im: number;
 }
 
 interface BigNumber {
-  isZero(): boolean
-  isNaN(): boolean
+  isZero(): boolean;
+  isNaN(): boolean;
 }
 
 interface Unit {
-  value: number | BigNumber | Complex | null
-  valueType(): string
+  value: number | BigNumber | Complex | null;
+  valueType(): string;
 }
 
 interface Matrix {
-  valueOf(): unknown[][]
+  valueOf(): unknown[][];
 }
 
 interface NotDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'not'
-const dependencies = ['typed']
+const name = 'not';
+const dependencies = ['typed'];
 
 export const createNot = /* #__PURE__ */ factory(
   name,
@@ -65,11 +65,11 @@ export const createNot = /* #__PURE__ */ factory(
       number: notNumber,
 
       Complex: function (x: Complex): boolean {
-        return x.re === 0 && x.im === 0
+        return x.re === 0 && x.im === 0;
       },
 
       BigNumber: function (x: BigNumber): boolean {
-        return x.isZero() || x.isNaN()
+        return x.isZero() || x.isNaN();
       },
 
       bigint: (x: bigint): boolean => !x,
@@ -84,7 +84,7 @@ export const createNot = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix =>
             deepMap(x as any, self) as unknown[] | Matrix
-      )
-    })
+      ),
+    });
   }
-)
+);

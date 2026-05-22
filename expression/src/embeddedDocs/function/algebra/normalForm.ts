@@ -3,6 +3,6 @@ export const normalFormDocs = {
   category: 'Algebra',
   syntax: ['normalForm(expr)'],
   description: 'Convert expression to canonical normal form by sorting terms alphabetically.',
-  examples: ['normalForm(\'c + a + b\')'],
+  examples: ["normalForm('c + a + b')"],
   seealso: ['collect', 'fullSimplify'],
 };

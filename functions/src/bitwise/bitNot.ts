@@ -1,20 +1,20 @@
-import { bitNotBigNumber } from '../utils/bignumber/bitwise.js'
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { bitNotNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { bitNotBigNumber } from '../utils/bignumber/bitwise.js';
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { bitNotNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for bitNot
 interface Matrix {
-  valueOf(): unknown[][]
+  valueOf(): unknown[][];
 }
 
 interface BitNotDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'bitNot'
-const dependencies = ['typed']
+const name = 'bitNot';
+const dependencies = ['typed'];
 
 export const createBitNot = /* #__PURE__ */ factory(
   name,
@@ -50,7 +50,7 @@ export const createBitNot = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix =>
             deepMap(x as any, self) as unknown[] | Matrix
-      )
-    })
+      ),
+    });
   }
-)
+);

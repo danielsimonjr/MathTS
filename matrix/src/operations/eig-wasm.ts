@@ -67,10 +67,7 @@ function flattenMatrix(matrix: number[][]): Float64Array {
  * @param options - Computation options
  * @returns Eigenvalues and eigenvectors
  */
-export async function eigWasm(
-  matrix: number[][],
-  options?: EigOptions
-): Promise<EigResult> {
+export async function eigWasm(matrix: number[][], options?: EigOptions): Promise<EigResult> {
   const n = matrix.length;
 
   // Validate
@@ -126,11 +123,7 @@ export async function eigWasm(
 
     // Read results from WASM memory - re-create views since buffer may have moved
     const module = wasmLoader.getModule()!;
-    const eigenvaluesResult = new Float64Array(
-      module.memory.buffer,
-      eigenvaluesAlloc.ptr,
-      n
-    );
+    const eigenvaluesResult = new Float64Array(module.memory.buffer, eigenvaluesAlloc.ptr, n);
     const values: Array<{ re: number; im: number }> = [];
     for (let i = 0; i < n; i++) {
       values.push({ re: eigenvaluesResult[i], im: 0 });

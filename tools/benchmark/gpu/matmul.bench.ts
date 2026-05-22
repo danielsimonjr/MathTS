@@ -85,7 +85,13 @@ async function benchmark(
 /**
  * Format benchmark result
  */
-function formatResult(result: { name: string; mean: number; std: number; min: number; max: number }): string {
+function formatResult(result: {
+  name: string;
+  mean: number;
+  std: number;
+  min: number;
+  max: number;
+}): string {
   return `${result.name}: ${result.mean.toFixed(2)}ms ± ${result.std.toFixed(2)}ms (min: ${result.min.toFixed(2)}, max: ${result.max.toFixed(2)})`;
 }
 
@@ -177,22 +183,14 @@ async function main() {
       const a = randomMatrix(M, K);
       const b = randomMatrix(K, N);
 
-      const cpuResult = await benchmark(
-        'CPU',
-        () => cpuMatmul(a, b, M, K, N),
-        5
-      );
+      const cpuResult = await benchmark('CPU', () => cpuMatmul(a, b, M, K, N), 5);
 
-      const gpuResult = await benchmark(
-        'GPU',
-        () => backend.matmul(a, b, M, K, N),
-        5
-      );
+      const gpuResult = await benchmark('GPU', () => backend.matmul(a, b, M, K, N), 5);
 
       const speedup = cpuResult.mean / gpuResult.mean;
       console.log(
         `${M}x${M}: CPU ${cpuResult.mean.toFixed(2)}ms, GPU ${gpuResult.mean.toFixed(2)}ms, ` +
-        `Speedup: ${speedup.toFixed(2)}x`
+          `Speedup: ${speedup.toFixed(2)}x`
       );
     }
   }

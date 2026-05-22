@@ -28,11 +28,7 @@ export function matrix_svd(a: Float64Array, m: i32, n: i32): Float64Array {
 /**
  * Singular values only — a `Float64Array` of length `min(m, n)`, descending.
  */
-export function matrix_singular_values(
-  a: Float64Array,
-  m: i32,
-  n: i32
-): Float64Array {
+export function matrix_singular_values(a: Float64Array, m: i32, n: i32): Float64Array {
   const k: i32 = m < n ? m : n;
   const s = new Float64Array(k);
   if (m <= 0 || n <= 0) return s;

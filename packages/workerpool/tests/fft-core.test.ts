@@ -26,10 +26,7 @@ function makeFrames(size: number): { real: Float64Array; imag: Float64Array } {
 }
 
 // Compute a reference DFT (O(n²)) for small n to validate the FFT.
-function referenceDFT(
-  real: number[],
-  imag: number[]
-): { real: number[]; imag: number[] } {
+function referenceDFT(real: number[], imag: number[]): { real: number[]; imag: number[] } {
   const n = real.length;
   const outRe: number[] = new Array(n).fill(0);
   const outIm: number[] = new Array(n).fill(0);
@@ -213,7 +210,7 @@ describe('fftFrameInPlace (inverse)', () => {
     const imag = new Float64Array(n);
 
     fftFrameInPlace(real, imag, 0, n, false); // forward
-    fftFrameInPlace(real, imag, 0, n, true);  // inverse
+    fftFrameInPlace(real, imag, 0, n, true); // inverse
 
     for (let i = 0; i < n; i++) {
       expect(nearlyEqual(real[i], input[i], 1e-9)).toBe(true);

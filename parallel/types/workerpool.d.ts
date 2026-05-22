@@ -50,7 +50,11 @@ declare module 'workerpool' {
 
   export class Pool {
     constructor(script?: string | PoolOptions, options?: PoolOptions);
-    exec<T>(method: string | ((...args: unknown[]) => T), params?: unknown[], options?: ExecOptions): WorkerpoolPromise<T>;
+    exec<T>(
+      method: string | ((...args: unknown[]) => T),
+      params?: unknown[],
+      options?: ExecOptions
+    ): WorkerpoolPromise<T>;
     proxy<T extends Record<string, (...args: unknown[]) => unknown>>(): Promise<WorkerProxy<T>>;
     stats(): PoolStats;
     terminate(force?: boolean, timeout?: number): Promise<void>;
@@ -73,10 +77,13 @@ declare module 'workerpool' {
 
   export function pool(script?: string | PoolOptions, options?: PoolOptions): Pool;
 
-  export function worker(methods?: Record<string, (...args: unknown[]) => unknown>, options?: {
-    onTerminate?: (code: number | undefined) => void | PromiseLike<void>;
-    abortListenerTimeout?: number;
-  }): void;
+  export function worker(
+    methods?: Record<string, (...args: unknown[]) => unknown>,
+    options?: {
+      onTerminate?: (code: number | undefined) => void | PromiseLike<void>;
+      abortListenerTimeout?: number;
+    }
+  ): void;
 
   export function workerEmit(payload: unknown): void;
 }

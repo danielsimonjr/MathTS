@@ -1,5 +1,5 @@
-import { getSafeProperty, isSafeProperty, setSafeProperty } from './customs.js'
-import { isMap, isObject } from './is.js'
+import { getSafeProperty, isSafeProperty, setSafeProperty } from './customs.js';
+import { isMap, isObject } from './is.js';
 
 /**
  * A map facade on a bare object.
@@ -10,68 +10,70 @@ import { isMap, isObject } from './is.js'
  * more security prone objects.
  */
 export class ObjectWrappingMap<K = string, V = any> implements Map<K, V> {
-  wrappedObject: Record<string, V>
-  readonly [Symbol.toStringTag]: string = 'ObjectWrappingMap'
+  wrappedObject: Record<string, V>;
+  readonly [Symbol.toStringTag]: string = 'ObjectWrappingMap';
 
   constructor(object: Record<string, V>) {
-    this.wrappedObject = object
-    ;(this as any)[Symbol.iterator] = this.entries
+    this.wrappedObject = object;
+    (this as any)[Symbol.iterator] = this.entries;
   }
 
   // @ts-expect-error: Implementation is compatible but TS can't infer it
   keys(): IterableIterator<K> {
     return Object.keys(this.wrappedObject)
-      .filter(key => this.has(key as K))
-      .values() as IterableIterator<K>
+      .filter((key) => this.has(key as K))
+      .values() as IterableIterator<K>;
   }
 
   get(key: K): V | undefined {
-    return getSafeProperty(this.wrappedObject, key as string)
+    return getSafeProperty(this.wrappedObject, key as string);
   }
 
   set(key: K, value: V): this {
-    setSafeProperty(this.wrappedObject, key as string, value)
-    return this
+    setSafeProperty(this.wrappedObject, key as string, value);
+    return this;
   }
 
   has(key: K): boolean {
-    return isSafeProperty(this.wrappedObject, key as string) && (key as string) in this.wrappedObject
+    return (
+      isSafeProperty(this.wrappedObject, key as string) && (key as string) in this.wrappedObject
+    );
   }
 
   // @ts-expect-error: Implementation is compatible but TS can't infer it
   entries(): IterableIterator<[K, V]> {
-    return mapIterator(this.keys(), key => [key, this.get(key)!]) as IterableIterator<[K, V]>
+    return mapIterator(this.keys(), (key) => [key, this.get(key)!]) as IterableIterator<[K, V]>;
   }
 
   // @ts-expect-error: Implementation is compatible but TS can't infer it
   *values(): IterableIterator<V> {
     for (const key of this.keys()) {
-      yield this.get(key)!
+      yield this.get(key)!;
     }
   }
 
   forEach(callback: (value: V, key: K, map: Map<K, V>) => void): void {
     for (const key of this.keys()) {
-      callback(this.get(key)!, key, this as any)
+      callback(this.get(key)!, key, this as any);
     }
   }
 
   delete(key: K): boolean {
     if (isSafeProperty(this.wrappedObject, key as string)) {
-      delete this.wrappedObject[key as string]
-      return true
+      delete this.wrappedObject[key as string];
+      return true;
     }
-    return false
+    return false;
   }
 
   clear(): void {
     for (const key of this.keys()) {
-      this.delete(key)
+      this.delete(key);
     }
   }
 
   get size(): number {
-    return Object.keys(this.wrappedObject).length
+    return Object.keys(this.wrappedObject).length;
   }
 }
 
@@ -90,10 +92,10 @@ export class ObjectWrappingMap<K = string, V = any> implements Map<K, V> {
  * all other values are read/written to map `a`.
  */
 export class PartitionedMap<K = any, V = any> implements Map<K, V> {
-  a: Map<K, V>
-  b: Map<K, V>
-  bKeys: Set<K>
-  readonly [Symbol.toStringTag]: string = 'PartitionedMap'
+  a: Map<K, V>;
+  b: Map<K, V>;
+  bKeys: Set<K>;
+  readonly [Symbol.toStringTag]: string = 'PartitionedMap';
 
   /**
    * @param a - Primary map
@@ -101,71 +103,63 @@ export class PartitionedMap<K = any, V = any> implements Map<K, V> {
    * @param bKeys - Set of keys that should be read/written to map b
    */
   constructor(a: Map<K, V>, b: Map<K, V>, bKeys: Set<K>) {
-    this.a = a
-    this.b = b
-    this.bKeys = bKeys
-
-    ;(this as any)[Symbol.iterator] = this.entries
+    this.a = a;
+    this.b = b;
+    this.bKeys = bKeys;
+    (this as any)[Symbol.iterator] = this.entries;
   }
 
   get(key: K): V | undefined {
-    return this.bKeys.has(key)
-      ? this.b.get(key)
-      : this.a.get(key)
+    return this.bKeys.has(key) ? this.b.get(key) : this.a.get(key);
   }
 
   set(key: K, value: V): this {
     if (this.bKeys.has(key)) {
-      this.b.set(key, value)
+      this.b.set(key, value);
     } else {
-      this.a.set(key, value)
+      this.a.set(key, value);
     }
-    return this
+    return this;
   }
 
   has(key: K): boolean {
-    return this.b.has(key) || this.a.has(key)
+    return this.b.has(key) || this.a.has(key);
   }
 
   // @ts-expect-error: Implementation is compatible but TS can't infer it
   keys(): IterableIterator<K> {
-    return new Set([
-      ...this.a.keys(),
-      ...this.b.keys()
-    ])[Symbol.iterator]()
+    return new Set([...this.a.keys(), ...this.b.keys()])[Symbol.iterator]();
   }
 
   // @ts-expect-error: Implementation is compatible but TS can't infer it
   *values(): IterableIterator<V> {
     for (const key of this.keys()) {
-      yield this.get(key)!
+      yield this.get(key)!;
     }
   }
 
   // @ts-expect-error: Implementation is compatible but TS can't infer it
   entries(): IterableIterator<[K, V]> {
-    return mapIterator(this.keys(), key => [key, this.get(key)!]) as IterableIterator<[K, V]>
+    return mapIterator(this.keys(), (key) => [key, this.get(key)!]) as IterableIterator<[K, V]>;
   }
 
   forEach(callback: (value: V, key: K, map: Map<K, V>) => void): void {
     for (const key of this.keys()) {
-      callback(this.get(key)!, key, this as any)
+      callback(this.get(key)!, key, this as any);
     }
   }
 
   delete(key: K): boolean {
-    return this.bKeys.has(key)
-      ? this.b.delete(key)
-      : this.a.delete(key)
+    return this.bKeys.has(key) ? this.b.delete(key) : this.a.delete(key);
   }
 
   clear(): void {
-    this.a.clear()
-    this.b.clear()
+    this.a.clear();
+    this.b.clear();
   }
 
   get size(): number {
-    return [...this.keys()].length
+    return [...this.keys()].length;
   }
 }
 
@@ -175,15 +169,15 @@ export class PartitionedMap<K = any, V = any> implements Map<K, V> {
 function mapIterator<T, U>(it: Iterator<T>, callback: (value: T) => U): Iterator<U> {
   return {
     next: (): IteratorResult<U> => {
-      const n = it.next()
+      const n = it.next();
       return n.done
-        ? n as IteratorResult<U>
+        ? (n as IteratorResult<U>)
         : {
             value: callback(n.value),
-            done: false
-          }
-    }
-  }
+            done: false,
+          };
+    },
+  };
 }
 
 /**
@@ -192,7 +186,7 @@ function mapIterator<T, U>(it: Iterator<T>, callback: (value: T) => U): Iterator
  * @returns an empty Map or Map like object.
  */
 export function createEmptyMap<K = any, V = any>(): Map<K, V> {
-  return new Map<K, V>()
+  return new Map<K, V>();
 }
 
 /**
@@ -201,18 +195,20 @@ export function createEmptyMap<K = any, V = any>(): Map<K, V> {
  * @param mapOrObject - Map or object to convert
  * @returns Map instance
  */
-export function createMap<K = any, V = any>(mapOrObject?: Map<K, V> | Record<string, V> | null): Map<K, V> {
+export function createMap<K = any, V = any>(
+  mapOrObject?: Map<K, V> | Record<string, V> | null
+): Map<K, V> {
   if (!mapOrObject) {
-    return createEmptyMap<K, V>()
+    return createEmptyMap<K, V>();
   }
   if (isMap(mapOrObject)) {
-    return mapOrObject as Map<K, V>
+    return mapOrObject as Map<K, V>;
   }
   if (isObject(mapOrObject)) {
-    return new ObjectWrappingMap(mapOrObject as Record<string, V>) as unknown as Map<K, V>
+    return new ObjectWrappingMap(mapOrObject as Record<string, V>) as unknown as Map<K, V>;
   }
 
-  throw new Error('createMap can create maps from objects or Maps')
+  throw new Error('createMap can create maps from objects or Maps');
 }
 
 /**
@@ -223,14 +219,14 @@ export function createMap<K = any, V = any>(mapOrObject?: Map<K, V> | Record<str
  */
 export function toObject<V = any>(map: Map<any, V>): Record<string, V> {
   if (map instanceof ObjectWrappingMap) {
-    return map.wrappedObject
+    return map.wrappedObject;
   }
-  const object: Record<string, V> = {}
+  const object: Record<string, V> = {};
   for (const key of map.keys()) {
-    const value = map.get(key)!
-    setSafeProperty(object, key, value)
+    const value = map.get(key)!;
+    setSafeProperty(object, key, value);
   }
-  return object
+  return object;
 }
 
 /**
@@ -246,17 +242,17 @@ export function assign<K = any, V = any>(
 ): Map<K, V> {
   for (const args of objects) {
     if (!args) {
-      continue
+      continue;
     }
     if (isMap(args)) {
       for (const key of (args as Map<K, V>).keys()) {
-        map.set(key, (args as Map<K, V>).get(key)!)
+        map.set(key, (args as Map<K, V>).get(key)!);
       }
     } else if (isObject(args)) {
       for (const key of Object.keys(args)) {
-        map.set(key as K, (args as Record<string, V>)[key])
+        map.set(key as K, (args as Record<string, V>)[key]);
       }
     }
   }
-  return map
+  return map;
 }

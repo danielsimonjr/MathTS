@@ -40,7 +40,7 @@ function _erf(x: f64): f64 {
   const t = 1.0 / (1.0 + 0.3275911 * a);
   const y =
     1.0 -
-    (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
+    ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
       t *
       Math.exp(-a * a);
   return sign * y;
@@ -63,11 +63,7 @@ function _logFactorial(n: i32): f64 {
   }
   // Stirling's approximation
   return (
-    0.5 * Math.log(2 * Math.PI * n) +
-    n * Math.log(n) -
-    n +
-    1 / (12 * n) -
-    1 / (360 * n * n * n)
+    0.5 * Math.log(2 * Math.PI * n) + n * Math.log(n) - n + 1 / (12 * n) - 1 / (360 * n * n * n)
   );
 }
 
@@ -152,10 +148,7 @@ function bernoulliPMFScalar(k: i32, p: f64): f64 {
  * Build a self-contained kernel source string: dependency function
  * declarations followed by an expression that evaluates to `(x) => number`.
  */
-function kernelSource(
-  deps: Array<(...args: never[]) => unknown>,
-  body: string
-): string {
+function kernelSource(deps: Array<(...args: never[]) => unknown>, body: string): string {
   return `(() => {\n${deps.map((d) => d.toString()).join('\n')}\nreturn (${body});\n})()`;
 }
 
@@ -199,27 +192,18 @@ async function mapArray(
  */
 export const normalPDF = mathTyped('normalPDF', {
   number: (x: f64): f64 => normalPDFScalar(x, 0, 1),
-  'number, number, number': (x: f64, mu: f64, sigma: f64): f64 =>
-    normalPDFScalar(x, mu, sigma),
+  'number, number, number': (x: f64, mu: f64, sigma: f64): f64 => normalPDFScalar(x, mu, sigma),
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
     mapArray(
       x,
       (v) => normalPDFScalar(v, 0, 1),
       () => kernelSource([normalPDFScalar], '(x) => normalPDFScalar(x, 0, 1)')
     ),
-  'Float64Array, number, number': (
-    x: Float64Array,
-    mu: f64,
-    sigma: f64
-  ): Promise<Float64Array> =>
+  'Float64Array, number, number': (x: Float64Array, mu: f64, sigma: f64): Promise<Float64Array> =>
     mapArray(
       x,
       (v) => normalPDFScalar(v, mu, sigma),
-      () =>
-        kernelSource(
-          [normalPDFScalar],
-          `(x) => normalPDFScalar(x, ${mu}, ${sigma})`
-        )
+      () => kernelSource([normalPDFScalar], `(x) => normalPDFScalar(x, ${mu}, ${sigma})`)
     ),
 });
 
@@ -239,27 +223,18 @@ export const normalPDF = mathTyped('normalPDF', {
  */
 export const normalCDF = mathTyped('normalCDF', {
   number: (x: f64): f64 => normalCDFScalar(x, 0, 1),
-  'number, number, number': (x: f64, mu: f64, sigma: f64): f64 =>
-    normalCDFScalar(x, mu, sigma),
+  'number, number, number': (x: f64, mu: f64, sigma: f64): f64 => normalCDFScalar(x, mu, sigma),
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
     mapArray(
       x,
       (v) => normalCDFScalar(v, 0, 1),
       () => kernelSource([_erf, normalCDFScalar], '(x) => normalCDFScalar(x, 0, 1)')
     ),
-  'Float64Array, number, number': (
-    x: Float64Array,
-    mu: f64,
-    sigma: f64
-  ): Promise<Float64Array> =>
+  'Float64Array, number, number': (x: Float64Array, mu: f64, sigma: f64): Promise<Float64Array> =>
     mapArray(
       x,
       (v) => normalCDFScalar(v, mu, sigma),
-      () =>
-        kernelSource(
-          [_erf, normalCDFScalar],
-          `(x) => normalCDFScalar(x, ${mu}, ${sigma})`
-        )
+      () => kernelSource([_erf, normalCDFScalar], `(x) => normalCDFScalar(x, ${mu}, ${sigma})`)
     ),
 });
 
@@ -285,11 +260,7 @@ export const exponentialPDF = mathTyped('exponentialPDF', {
     mapArray(
       x,
       (v) => exponentialPDFScalar(v, lambda),
-      () =>
-        kernelSource(
-          [exponentialPDFScalar],
-          `(x) => exponentialPDFScalar(x, ${lambda})`
-        )
+      () => kernelSource([exponentialPDFScalar], `(x) => exponentialPDFScalar(x, ${lambda})`)
     ),
 });
 
@@ -311,11 +282,7 @@ export const exponentialCDF = mathTyped('exponentialCDF', {
     mapArray(
       x,
       (v) => exponentialCDFScalar(v, lambda),
-      () =>
-        kernelSource(
-          [exponentialCDFScalar],
-          `(x) => exponentialCDFScalar(x, ${lambda})`
-        )
+      () => kernelSource([exponentialCDFScalar], `(x) => exponentialCDFScalar(x, ${lambda})`)
     ),
 });
 
@@ -343,11 +310,7 @@ export const poissonPMF = mathTyped('poissonPMF', {
     mapArray(
       k,
       (v) => poissonPMFScalar(v, lambda),
-      () =>
-        kernelSource(
-          [_logFactorial, poissonPMFScalar],
-          `(k) => poissonPMFScalar(k, ${lambda})`
-        )
+      () => kernelSource([_logFactorial, poissonPMFScalar], `(k) => poissonPMFScalar(k, ${lambda})`)
     ),
 });
 
@@ -371,13 +334,8 @@ export const poissonPMF = mathTyped('poissonPMF', {
  * binomialPMF(3, 10, 0.5) // ~0.1172
  */
 export const binomialPMF = mathTyped('binomialPMF', {
-  'number, number, number': (k: i32, n: i32, p: f64): f64 =>
-    binomialPMFScalar(k, n, p),
-  'Float64Array, number, number': (
-    k: Float64Array,
-    n: i32,
-    p: f64
-  ): Promise<Float64Array> =>
+  'number, number, number': (k: i32, n: i32, p: f64): f64 => binomialPMFScalar(k, n, p),
+  'Float64Array, number, number': (k: Float64Array, n: i32, p: f64): Promise<Float64Array> =>
     mapArray(
       k,
       (v) => binomialPMFScalar(v, n, p),
@@ -411,8 +369,7 @@ export const geometricPMF = mathTyped('geometricPMF', {
     mapArray(
       k,
       (v) => geometricPMFScalar(v, p),
-      () =>
-        kernelSource([geometricPMFScalar], `(k) => geometricPMFScalar(k, ${p})`)
+      () => kernelSource([geometricPMFScalar], `(k) => geometricPMFScalar(k, ${p})`)
     ),
 });
 
@@ -438,8 +395,7 @@ export const bernoulliPMF = mathTyped('bernoulliPMF', {
     mapArray(
       k,
       (v) => bernoulliPMFScalar(v, p),
-      () =>
-        kernelSource([bernoulliPMFScalar], `(k) => bernoulliPMFScalar(k, ${p})`)
+      () => kernelSource([bernoulliPMFScalar], `(k) => bernoulliPMFScalar(k, ${p})`)
     ),
 });
 
@@ -460,12 +416,12 @@ export const bernoulliPMF = mathTyped('bernoulliPMF', {
  * entropy([0.25, 0.25, 0.25, 0.25]) // 2.0
  */
 export const entropy = mathTyped('entropy', {
-  'Array': (probs: f64[]): f64 => {
+  Array: (probs: f64[]): f64 => {
     let h = 0;
     for (const p of probs) {
       if (p < 0) return NaN;
       if (p > 0) {
-        h -= p * Math.log(p) / LN2;
+        h -= (p * Math.log(p)) / LN2;
       }
     }
     return h;
@@ -499,8 +455,8 @@ export const jsDivergence = mathTyped('jsDivergence', {
       if (p[i] < 0 || q[i] < 0) return NaN;
       const m = 0.5 * (p[i] + q[i]);
       if (m > 0) {
-        if (p[i] > 0) jsd += 0.5 * p[i] * Math.log(p[i] / m) / LN2;
-        if (q[i] > 0) jsd += 0.5 * q[i] * Math.log(q[i] / m) / LN2;
+        if (p[i] > 0) jsd += (0.5 * p[i] * Math.log(p[i] / m)) / LN2;
+        if (q[i] > 0) jsd += (0.5 * q[i] * Math.log(q[i] / m)) / LN2;
       }
     }
     return jsd;

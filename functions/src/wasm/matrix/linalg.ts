@@ -21,27 +21,24 @@
  */
 export function det(aPtr: usize, n: i32, workPtr: usize): f64 {
   if (n === 1) {
-    return load<f64>(aPtr)
+    return load<f64>(aPtr);
   }
 
   if (n === 2) {
-    return (
-      load<f64>(aPtr) * load<f64>(aPtr + 24) -
-      load<f64>(aPtr + 8) * load<f64>(aPtr + 16)
-    )
+    return load<f64>(aPtr) * load<f64>(aPtr + 24) - load<f64>(aPtr + 8) * load<f64>(aPtr + 16);
   }
 
   if (n === 3) {
     // Sarrus' rule for 3x3
-    const a00 = load<f64>(aPtr)
-    const a01 = load<f64>(aPtr + 8)
-    const a02 = load<f64>(aPtr + 16)
-    const a10 = load<f64>(aPtr + 24)
-    const a11 = load<f64>(aPtr + 32)
-    const a12 = load<f64>(aPtr + 40)
-    const a20 = load<f64>(aPtr + 48)
-    const a21 = load<f64>(aPtr + 56)
-    const a22 = load<f64>(aPtr + 64)
+    const a00 = load<f64>(aPtr);
+    const a01 = load<f64>(aPtr + 8);
+    const a02 = load<f64>(aPtr + 16);
+    const a10 = load<f64>(aPtr + 24);
+    const a11 = load<f64>(aPtr + 32);
+    const a12 = load<f64>(aPtr + 40);
+    const a20 = load<f64>(aPtr + 48);
+    const a21 = load<f64>(aPtr + 56);
+    const a22 = load<f64>(aPtr + 64);
     return (
       a00 * a11 * a22 +
       a01 * a12 * a20 +
@@ -49,74 +46,70 @@ export function det(aPtr: usize, n: i32, workPtr: usize): f64 {
       a02 * a11 * a20 -
       a01 * a10 * a22 -
       a00 * a12 * a21
-    )
+    );
   }
 
   // Copy to work buffer for LU decomposition
-  const nn = n * n
+  const nn = n * n;
   for (let i: i32 = 0; i < nn; i++) {
-    store<f64>(workPtr + ((<usize>i) << 3), load<f64>(aPtr + ((<usize>i) << 3)))
+    store<f64>(workPtr + ((<usize>i) << 3), load<f64>(aPtr + ((<usize>i) << 3)));
   }
 
-  let sign: f64 = 1.0
+  let sign: f64 = 1.0;
 
   // Gaussian elimination with partial pivoting
   for (let k: i32 = 0; k < n - 1; k++) {
     // Find pivot
-    let maxVal: f64 = Math.abs(load<f64>(workPtr + ((<usize>(k * n + k)) << 3)))
-    let pivotRow: i32 = k
+    let maxVal: f64 = Math.abs(load<f64>(workPtr + ((<usize>(k * n + k)) << 3)));
+    let pivotRow: i32 = k;
 
     for (let i: i32 = k + 1; i < n; i++) {
-      const val: f64 = Math.abs(
-        load<f64>(workPtr + ((<usize>(i * n + k)) << 3))
-      )
+      const val: f64 = Math.abs(load<f64>(workPtr + ((<usize>(i * n + k)) << 3)));
       if (val > maxVal) {
-        maxVal = val
-        pivotRow = i
+        maxVal = val;
+        pivotRow = i;
       }
     }
 
     // Check for singularity
     if (maxVal < 1e-14) {
-      return 0.0
+      return 0.0;
     }
 
     // Swap rows if necessary
     if (pivotRow !== k) {
       for (let j: i32 = 0; j < n; j++) {
-        const kIdx = (<usize>(k * n + j)) << 3
-        const pIdx = (<usize>(pivotRow * n + j)) << 3
-        const temp: f64 = load<f64>(workPtr + kIdx)
-        store<f64>(workPtr + kIdx, load<f64>(workPtr + pIdx))
-        store<f64>(workPtr + pIdx, temp)
+        const kIdx = (<usize>(k * n + j)) << 3;
+        const pIdx = (<usize>(pivotRow * n + j)) << 3;
+        const temp: f64 = load<f64>(workPtr + kIdx);
+        store<f64>(workPtr + kIdx, load<f64>(workPtr + pIdx));
+        store<f64>(workPtr + pIdx, temp);
       }
-      sign = -sign
+      sign = -sign;
     }
 
     // Eliminate column
-    const pivot: f64 = load<f64>(workPtr + ((<usize>(k * n + k)) << 3))
+    const pivot: f64 = load<f64>(workPtr + ((<usize>(k * n + k)) << 3));
     for (let i: i32 = k + 1; i < n; i++) {
-      const factor: f64 =
-        load<f64>(workPtr + ((<usize>(i * n + k)) << 3)) / pivot
+      const factor: f64 = load<f64>(workPtr + ((<usize>(i * n + k)) << 3)) / pivot;
 
       for (let j: i32 = k + 1; j < n; j++) {
-        const idx = (<usize>(i * n + j)) << 3
+        const idx = (<usize>(i * n + j)) << 3;
         store<f64>(
           workPtr + idx,
-          load<f64>(workPtr + idx) -
-            factor * load<f64>(workPtr + ((<usize>(k * n + j)) << 3))
-        )
+          load<f64>(workPtr + idx) - factor * load<f64>(workPtr + ((<usize>(k * n + j)) << 3))
+        );
       }
     }
   }
 
   // Product of diagonal
-  let result: f64 = sign
+  let result: f64 = sign;
   for (let i: i32 = 0; i < n; i++) {
-    result *= load<f64>(workPtr + ((<usize>(i * n + i)) << 3))
+    result *= load<f64>(workPtr + ((<usize>(i * n + i)) << 3));
   }
 
-  return result
+  return result;
 }
 
 // ============================================
@@ -131,13 +124,8 @@ export function det(aPtr: usize, n: i32, workPtr: usize): f64 {
  * @param workPtr - Pointer to work buffer (n * 2n f64 values for augmented matrix)
  * @returns 1 if successful, 0 if singular
  */
-export function inv(
-  aPtr: usize,
-  n: i32,
-  resultPtr: usize,
-  workPtr: usize
-): i32 {
-  const width: i32 = 2 * n
+export function inv(aPtr: usize, n: i32, resultPtr: usize, workPtr: usize): i32 {
+  const width: i32 = 2 * n;
 
   // Create augmented matrix [A | I] in work buffer
   for (let i: i32 = 0; i < n; i++) {
@@ -145,66 +133,58 @@ export function inv(
       store<f64>(
         workPtr + ((<usize>(i * width + j)) << 3),
         load<f64>(aPtr + ((<usize>(i * n + j)) << 3))
-      )
-      store<f64>(
-        workPtr + ((<usize>(i * width + n + j)) << 3),
-        i === j ? 1.0 : 0.0
-      )
+      );
+      store<f64>(workPtr + ((<usize>(i * width + n + j)) << 3), i === j ? 1.0 : 0.0);
     }
   }
 
   // Forward elimination with partial pivoting
   for (let k: i32 = 0; k < n; k++) {
     // Find pivot
-    let maxVal: f64 = Math.abs(
-      load<f64>(workPtr + ((<usize>(k * width + k)) << 3))
-    )
-    let pivotRow: i32 = k
+    let maxVal: f64 = Math.abs(load<f64>(workPtr + ((<usize>(k * width + k)) << 3)));
+    let pivotRow: i32 = k;
 
     for (let i: i32 = k + 1; i < n; i++) {
-      const val: f64 = Math.abs(
-        load<f64>(workPtr + ((<usize>(i * width + k)) << 3))
-      )
+      const val: f64 = Math.abs(load<f64>(workPtr + ((<usize>(i * width + k)) << 3)));
       if (val > maxVal) {
-        maxVal = val
-        pivotRow = i
+        maxVal = val;
+        pivotRow = i;
       }
     }
 
     // Check for singularity
     if (maxVal < 1e-14) {
-      return 0 // Singular matrix
+      return 0; // Singular matrix
     }
 
     // Swap rows if necessary
     if (pivotRow !== k) {
       for (let j: i32 = 0; j < width; j++) {
-        const kIdx = (<usize>(k * width + j)) << 3
-        const pIdx = (<usize>(pivotRow * width + j)) << 3
-        const temp: f64 = load<f64>(workPtr + kIdx)
-        store<f64>(workPtr + kIdx, load<f64>(workPtr + pIdx))
-        store<f64>(workPtr + pIdx, temp)
+        const kIdx = (<usize>(k * width + j)) << 3;
+        const pIdx = (<usize>(pivotRow * width + j)) << 3;
+        const temp: f64 = load<f64>(workPtr + kIdx);
+        store<f64>(workPtr + kIdx, load<f64>(workPtr + pIdx));
+        store<f64>(workPtr + pIdx, temp);
       }
     }
 
     // Scale pivot row
-    const pivot: f64 = load<f64>(workPtr + ((<usize>(k * width + k)) << 3))
+    const pivot: f64 = load<f64>(workPtr + ((<usize>(k * width + k)) << 3));
     for (let j: i32 = 0; j < width; j++) {
-      const idx = (<usize>(k * width + j)) << 3
-      store<f64>(workPtr + idx, load<f64>(workPtr + idx) / pivot)
+      const idx = (<usize>(k * width + j)) << 3;
+      store<f64>(workPtr + idx, load<f64>(workPtr + idx) / pivot);
     }
 
     // Eliminate column
     for (let i: i32 = 0; i < n; i++) {
       if (i !== k) {
-        const factor: f64 = load<f64>(workPtr + ((<usize>(i * width + k)) << 3))
+        const factor: f64 = load<f64>(workPtr + ((<usize>(i * width + k)) << 3));
         for (let j: i32 = 0; j < width; j++) {
-          const idx = (<usize>(i * width + j)) << 3
+          const idx = (<usize>(i * width + j)) << 3;
           store<f64>(
             workPtr + idx,
-            load<f64>(workPtr + idx) -
-              factor * load<f64>(workPtr + ((<usize>(k * width + j)) << 3))
-          )
+            load<f64>(workPtr + idx) - factor * load<f64>(workPtr + ((<usize>(k * width + j)) << 3))
+          );
         }
       }
     }
@@ -216,11 +196,11 @@ export function inv(
       store<f64>(
         resultPtr + ((<usize>(i * n + j)) << 3),
         load<f64>(workPtr + ((<usize>(i * width + n + j)) << 3))
-      )
+      );
     }
   }
 
-  return 1
+  return 1;
 }
 
 // ============================================
@@ -234,13 +214,13 @@ export function inv(
  * @returns L1 norm
  */
 export function norm1(xPtr: usize, n: i32): f64 {
-  let sum: f64 = 0.0
+  let sum: f64 = 0.0;
 
   for (let i: i32 = 0; i < n; i++) {
-    sum += Math.abs(load<f64>(xPtr + ((<usize>i) << 3)))
+    sum += Math.abs(load<f64>(xPtr + ((<usize>i) << 3)));
   }
 
-  return sum
+  return sum;
 }
 
 /**
@@ -250,14 +230,14 @@ export function norm1(xPtr: usize, n: i32): f64 {
  * @returns L2 norm
  */
 export function norm2(xPtr: usize, n: i32): f64 {
-  let sum: f64 = 0.0
+  let sum: f64 = 0.0;
 
   for (let i: i32 = 0; i < n; i++) {
-    const val = load<f64>(xPtr + ((<usize>i) << 3))
-    sum += val * val
+    const val = load<f64>(xPtr + ((<usize>i) << 3));
+    sum += val * val;
   }
 
-  return Math.sqrt(sum)
+  return Math.sqrt(sum);
 }
 
 /**
@@ -269,20 +249,20 @@ export function norm2(xPtr: usize, n: i32): f64 {
  */
 export function normP(xPtr: usize, n: i32, p: f64): f64 {
   if (p === 1.0) {
-    return norm1(xPtr, n)
+    return norm1(xPtr, n);
   }
 
   if (p === 2.0) {
-    return norm2(xPtr, n)
+    return norm2(xPtr, n);
   }
 
-  let sum: f64 = 0.0
+  let sum: f64 = 0.0;
 
   for (let i: i32 = 0; i < n; i++) {
-    sum += Math.pow(Math.abs(load<f64>(xPtr + ((<usize>i) << 3))), p)
+    sum += Math.pow(Math.abs(load<f64>(xPtr + ((<usize>i) << 3))), p);
   }
 
-  return Math.pow(sum, 1.0 / p)
+  return Math.pow(sum, 1.0 / p);
 }
 
 /**
@@ -292,16 +272,16 @@ export function normP(xPtr: usize, n: i32, p: f64): f64 {
  * @returns Infinity norm
  */
 export function normInf(xPtr: usize, n: i32): f64 {
-  let maxVal: f64 = 0.0
+  let maxVal: f64 = 0.0;
 
   for (let i: i32 = 0; i < n; i++) {
-    const absVal: f64 = Math.abs(load<f64>(xPtr + ((<usize>i) << 3)))
+    const absVal: f64 = Math.abs(load<f64>(xPtr + ((<usize>i) << 3)));
     if (absVal > maxVal) {
-      maxVal = absVal
+      maxVal = absVal;
     }
   }
 
-  return maxVal
+  return maxVal;
 }
 
 /**
@@ -311,7 +291,7 @@ export function normInf(xPtr: usize, n: i32): f64 {
  * @returns Frobenius norm
  */
 export function normFro(aPtr: usize, size: i32): f64 {
-  return norm2(aPtr, size)
+  return norm2(aPtr, size);
 }
 
 /**
@@ -322,21 +302,21 @@ export function normFro(aPtr: usize, size: i32): f64 {
  * @returns Matrix 1-norm
  */
 export function matrixNorm1(aPtr: usize, rows: i32, cols: i32): f64 {
-  let maxColSum: f64 = 0.0
+  let maxColSum: f64 = 0.0;
 
   for (let j: i32 = 0; j < cols; j++) {
-    let colSum: f64 = 0.0
+    let colSum: f64 = 0.0;
 
     for (let i: i32 = 0; i < rows; i++) {
-      colSum += Math.abs(load<f64>(aPtr + ((<usize>(i * cols + j)) << 3)))
+      colSum += Math.abs(load<f64>(aPtr + ((<usize>(i * cols + j)) << 3)));
     }
 
     if (colSum > maxColSum) {
-      maxColSum = colSum
+      maxColSum = colSum;
     }
   }
 
-  return maxColSum
+  return maxColSum;
 }
 
 /**
@@ -347,21 +327,21 @@ export function matrixNorm1(aPtr: usize, rows: i32, cols: i32): f64 {
  * @returns Matrix infinity-norm
  */
 export function matrixNormInf(aPtr: usize, rows: i32, cols: i32): f64 {
-  let maxRowSum: f64 = 0.0
+  let maxRowSum: f64 = 0.0;
 
   for (let i: i32 = 0; i < rows; i++) {
-    let rowSum: f64 = 0.0
+    let rowSum: f64 = 0.0;
 
     for (let j: i32 = 0; j < cols; j++) {
-      rowSum += Math.abs(load<f64>(aPtr + ((<usize>(i * cols + j)) << 3)))
+      rowSum += Math.abs(load<f64>(aPtr + ((<usize>(i * cols + j)) << 3)));
     }
 
     if (rowSum > maxRowSum) {
-      maxRowSum = rowSum
+      maxRowSum = rowSum;
     }
   }
 
-  return maxRowSum
+  return maxRowSum;
 }
 
 /**
@@ -371,18 +351,18 @@ export function matrixNormInf(aPtr: usize, rows: i32, cols: i32): f64 {
  * @returns The original norm (0 if vector was zero)
  */
 export function normalize(xPtr: usize, n: i32): f64 {
-  const norm: f64 = norm2(xPtr, n)
+  const norm: f64 = norm2(xPtr, n);
 
   if (norm < 1e-14) {
-    return 0.0 // Vector is essentially zero
+    return 0.0; // Vector is essentially zero
   }
 
   for (let i: i32 = 0; i < n; i++) {
-    const idx = (<usize>i) << 3
-    store<f64>(xPtr + idx, load<f64>(xPtr + idx) / norm)
+    const idx = (<usize>i) << 3;
+    store<f64>(xPtr + idx, load<f64>(xPtr + idx) / norm);
   }
 
-  return norm
+  return norm;
 }
 
 // ============================================
@@ -408,21 +388,18 @@ export function kron(
   bCols: i32,
   resultPtr: usize
 ): void {
-  const resultCols: i32 = aCols * bCols
+  const resultCols: i32 = aCols * bCols;
 
   for (let i: i32 = 0; i < aRows; i++) {
     for (let j: i32 = 0; j < aCols; j++) {
-      const aVal: f64 = load<f64>(aPtr + ((<usize>(i * aCols + j)) << 3))
+      const aVal: f64 = load<f64>(aPtr + ((<usize>(i * aCols + j)) << 3));
 
       for (let k: i32 = 0; k < bRows; k++) {
         for (let l: i32 = 0; l < bCols; l++) {
-          const row: i32 = i * bRows + k
-          const col: i32 = j * bCols + l
-          const bVal: f64 = load<f64>(bPtr + ((<usize>(k * bCols + l)) << 3))
-          store<f64>(
-            resultPtr + ((<usize>(row * resultCols + col)) << 3),
-            aVal * bVal
-          )
+          const row: i32 = i * bRows + k;
+          const col: i32 = j * bCols + l;
+          const bVal: f64 = load<f64>(bPtr + ((<usize>(k * bCols + l)) << 3));
+          store<f64>(resultPtr + ((<usize>(row * resultCols + col)) << 3), aVal * bVal);
         }
       }
     }
@@ -440,16 +417,16 @@ export function kron(
  * @param resultPtr - Pointer to result vector (length 3)
  */
 export function cross(aPtr: usize, bPtr: usize, resultPtr: usize): void {
-  const a0 = load<f64>(aPtr)
-  const a1 = load<f64>(aPtr + 8)
-  const a2 = load<f64>(aPtr + 16)
-  const b0 = load<f64>(bPtr)
-  const b1 = load<f64>(bPtr + 8)
-  const b2 = load<f64>(bPtr + 16)
+  const a0 = load<f64>(aPtr);
+  const a1 = load<f64>(aPtr + 8);
+  const a2 = load<f64>(aPtr + 16);
+  const b0 = load<f64>(bPtr);
+  const b1 = load<f64>(bPtr + 8);
+  const b2 = load<f64>(bPtr + 16);
 
-  store<f64>(resultPtr, a1 * b2 - a2 * b1)
-  store<f64>(resultPtr + 8, a2 * b0 - a0 * b2)
-  store<f64>(resultPtr + 16, a0 * b1 - a1 * b0)
+  store<f64>(resultPtr, a1 * b2 - a2 * b1);
+  store<f64>(resultPtr + 8, a2 * b0 - a0 * b2);
+  store<f64>(resultPtr + 16, a0 * b1 - a1 * b0);
 }
 
 /**
@@ -460,14 +437,13 @@ export function cross(aPtr: usize, bPtr: usize, resultPtr: usize): void {
  * @returns Dot product
  */
 export function dot(aPtr: usize, bPtr: usize, n: i32): f64 {
-  let sum: f64 = 0.0
+  let sum: f64 = 0.0;
 
   for (let i: i32 = 0; i < n; i++) {
-    sum +=
-      load<f64>(aPtr + ((<usize>i) << 3)) * load<f64>(bPtr + ((<usize>i) << 3))
+    sum += load<f64>(aPtr + ((<usize>i) << 3)) * load<f64>(bPtr + ((<usize>i) << 3));
   }
 
-  return sum
+  return sum;
 }
 
 // ============================================
@@ -482,20 +458,14 @@ export function dot(aPtr: usize, bPtr: usize, n: i32): f64 {
  * @param n - Length of b
  * @param resultPtr - Pointer to result matrix (m x n)
  */
-export function outer(
-  aPtr: usize,
-  m: i32,
-  bPtr: usize,
-  n: i32,
-  resultPtr: usize
-): void {
+export function outer(aPtr: usize, m: i32, bPtr: usize, n: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < m; i++) {
-    const aVal = load<f64>(aPtr + ((<usize>i) << 3))
+    const aVal = load<f64>(aPtr + ((<usize>i) << 3));
     for (let j: i32 = 0; j < n; j++) {
       store<f64>(
         resultPtr + ((<usize>(i * n + j)) << 3),
         aVal * load<f64>(bPtr + ((<usize>j) << 3))
-      )
+      );
     }
   }
 }
@@ -513,71 +483,61 @@ export function outer(
  * @param workPtr - Pointer to work buffer (rows * cols f64 values)
  * @returns Estimated rank
  */
-export function rank(
-  aPtr: usize,
-  rows: i32,
-  cols: i32,
-  tol: f64,
-  workPtr: usize
-): i32 {
+export function rank(aPtr: usize, rows: i32, cols: i32, tol: f64, workPtr: usize): i32 {
   // Copy matrix to work buffer
-  const size = rows * cols
+  const size = rows * cols;
   for (let i: i32 = 0; i < size; i++) {
-    store<f64>(workPtr + ((<usize>i) << 3), load<f64>(aPtr + ((<usize>i) << 3)))
+    store<f64>(workPtr + ((<usize>i) << 3), load<f64>(aPtr + ((<usize>i) << 3)));
   }
 
-  let r: i32 = 0
-  const minDim: i32 = rows < cols ? rows : cols
+  let r: i32 = 0;
+  const minDim: i32 = rows < cols ? rows : cols;
 
   for (let k: i32 = 0; k < minDim; k++) {
     // Find pivot
-    let maxVal: f64 = 0.0
-    let pivotRow: i32 = -1
+    let maxVal: f64 = 0.0;
+    let pivotRow: i32 = -1;
 
     for (let i: i32 = r; i < rows; i++) {
-      const val: f64 = Math.abs(
-        load<f64>(workPtr + ((<usize>(i * cols + k)) << 3))
-      )
+      const val: f64 = Math.abs(load<f64>(workPtr + ((<usize>(i * cols + k)) << 3)));
       if (val > maxVal) {
-        maxVal = val
-        pivotRow = i
+        maxVal = val;
+        pivotRow = i;
       }
     }
 
     if (maxVal <= tol) {
-      continue // Skip this column
+      continue; // Skip this column
     }
 
     // Swap rows
     if (pivotRow !== r) {
       for (let j: i32 = 0; j < cols; j++) {
-        const rIdx = (<usize>(r * cols + j)) << 3
-        const pIdx = (<usize>(pivotRow * cols + j)) << 3
-        const temp: f64 = load<f64>(workPtr + rIdx)
-        store<f64>(workPtr + rIdx, load<f64>(workPtr + pIdx))
-        store<f64>(workPtr + pIdx, temp)
+        const rIdx = (<usize>(r * cols + j)) << 3;
+        const pIdx = (<usize>(pivotRow * cols + j)) << 3;
+        const temp: f64 = load<f64>(workPtr + rIdx);
+        store<f64>(workPtr + rIdx, load<f64>(workPtr + pIdx));
+        store<f64>(workPtr + pIdx, temp);
       }
     }
 
     // Eliminate
-    const pivot: f64 = load<f64>(workPtr + ((<usize>(r * cols + k)) << 3))
+    const pivot: f64 = load<f64>(workPtr + ((<usize>(r * cols + k)) << 3));
     for (let i: i32 = r + 1; i < rows; i++) {
-      const factor: f64 =
-        load<f64>(workPtr + ((<usize>(i * cols + k)) << 3)) / pivot
+      const factor: f64 = load<f64>(workPtr + ((<usize>(i * cols + k)) << 3)) / pivot;
       for (let j: i32 = k; j < cols; j++) {
-        const idx = (<usize>(i * cols + j)) << 3
+        const idx = (<usize>(i * cols + j)) << 3;
         store<f64>(
           workPtr + idx,
-          load<f64>(workPtr + idx) -
-            factor * load<f64>(workPtr + ((<usize>(r * cols + j)) << 3))
-        )
+          load<f64>(workPtr + idx) - factor * load<f64>(workPtr + ((<usize>(r * cols + j)) << 3))
+        );
       }
     }
 
-    r++
+    r++;
   }
 
-  return r
+  return r;
 }
 
 // ============================================
@@ -593,119 +553,103 @@ export function rank(
  * @param workPtr - Pointer to work buffer (n*n + n for LU and perm)
  * @returns 1 if successful, 0 if singular
  */
-export function solve(
-  aPtr: usize,
-  bPtr: usize,
-  n: i32,
-  resultPtr: usize,
-  workPtr: usize
-): i32 {
-  const luPtr = workPtr
-  const permPtr = workPtr + ((<usize>(n * n)) << 3)
+export function solve(aPtr: usize, bPtr: usize, n: i32, resultPtr: usize, workPtr: usize): i32 {
+  const luPtr = workPtr;
+  const permPtr = workPtr + ((<usize>(n * n)) << 3);
 
   // Copy A to LU
   for (let i: i32 = 0; i < n * n; i++) {
-    store<f64>(luPtr + ((<usize>i) << 3), load<f64>(aPtr + ((<usize>i) << 3)))
+    store<f64>(luPtr + ((<usize>i) << 3), load<f64>(aPtr + ((<usize>i) << 3)));
   }
 
   // Initialize permutation
   for (let i: i32 = 0; i < n; i++) {
-    store<i32>(permPtr + ((<usize>i) << 2), i)
+    store<i32>(permPtr + ((<usize>i) << 2), i);
   }
 
   // LU decomposition with partial pivoting
   for (let k: i32 = 0; k < n - 1; k++) {
     // Find pivot
-    let maxVal: f64 = Math.abs(load<f64>(luPtr + ((<usize>(k * n + k)) << 3)))
-    let pivotRow: i32 = k
+    let maxVal: f64 = Math.abs(load<f64>(luPtr + ((<usize>(k * n + k)) << 3)));
+    let pivotRow: i32 = k;
 
     for (let i: i32 = k + 1; i < n; i++) {
-      const val: f64 = Math.abs(load<f64>(luPtr + ((<usize>(i * n + k)) << 3)))
+      const val: f64 = Math.abs(load<f64>(luPtr + ((<usize>(i * n + k)) << 3)));
       if (val > maxVal) {
-        maxVal = val
-        pivotRow = i
+        maxVal = val;
+        pivotRow = i;
       }
     }
 
     if (maxVal < 1e-14) {
-      return 0 // Singular
+      return 0; // Singular
     }
 
     if (pivotRow !== k) {
       // Swap rows in LU
       for (let j: i32 = 0; j < n; j++) {
-        const kIdx = (<usize>(k * n + j)) << 3
-        const pIdx = (<usize>(pivotRow * n + j)) << 3
-        const temp: f64 = load<f64>(luPtr + kIdx)
-        store<f64>(luPtr + kIdx, load<f64>(luPtr + pIdx))
-        store<f64>(luPtr + pIdx, temp)
+        const kIdx = (<usize>(k * n + j)) << 3;
+        const pIdx = (<usize>(pivotRow * n + j)) << 3;
+        const temp: f64 = load<f64>(luPtr + kIdx);
+        store<f64>(luPtr + kIdx, load<f64>(luPtr + pIdx));
+        store<f64>(luPtr + pIdx, temp);
       }
 
       // Swap in permutation
-      const kPermIdx = (<usize>k) << 2
-      const pPermIdx = (<usize>pivotRow) << 2
-      const tempP: i32 = load<i32>(permPtr + kPermIdx)
-      store<i32>(permPtr + kPermIdx, load<i32>(permPtr + pPermIdx))
-      store<i32>(permPtr + pPermIdx, tempP)
+      const kPermIdx = (<usize>k) << 2;
+      const pPermIdx = (<usize>pivotRow) << 2;
+      const tempP: i32 = load<i32>(permPtr + kPermIdx);
+      store<i32>(permPtr + kPermIdx, load<i32>(permPtr + pPermIdx));
+      store<i32>(permPtr + pPermIdx, tempP);
     }
 
     // Eliminate
-    const pivot: f64 = load<f64>(luPtr + ((<usize>(k * n + k)) << 3))
+    const pivot: f64 = load<f64>(luPtr + ((<usize>(k * n + k)) << 3));
     for (let i: i32 = k + 1; i < n; i++) {
-      const factorIdx = (<usize>(i * n + k)) << 3
-      const factor: f64 = load<f64>(luPtr + factorIdx) / pivot
-      store<f64>(luPtr + factorIdx, factor)
+      const factorIdx = (<usize>(i * n + k)) << 3;
+      const factor: f64 = load<f64>(luPtr + factorIdx) / pivot;
+      store<f64>(luPtr + factorIdx, factor);
 
       for (let j: i32 = k + 1; j < n; j++) {
-        const idx = (<usize>(i * n + j)) << 3
+        const idx = (<usize>(i * n + j)) << 3;
         store<f64>(
           luPtr + idx,
-          load<f64>(luPtr + idx) -
-            factor * load<f64>(luPtr + ((<usize>(k * n + j)) << 3))
-        )
+          load<f64>(luPtr + idx) - factor * load<f64>(luPtr + ((<usize>(k * n + j)) << 3))
+        );
       }
     }
   }
 
   // Check last pivot for singularity
-  if (
-    Math.abs(load<f64>(luPtr + ((<usize>((n - 1) * n + (n - 1))) << 3))) < 1e-14
-  ) {
-    return 0 // Singular
+  if (Math.abs(load<f64>(luPtr + ((<usize>((n - 1) * n + (n - 1))) << 3))) < 1e-14) {
+    return 0; // Singular
   }
 
   // Forward substitution: Ly = Pb
   for (let i: i32 = 0; i < n; i++) {
-    let sum: f64 = load<f64>(
-      bPtr + ((<usize>load<i32>(permPtr + ((<usize>i) << 2))) << 3)
-    )
+    let sum: f64 = load<f64>(bPtr + ((<usize>load<i32>(permPtr + ((<usize>i) << 2))) << 3));
 
     for (let j: i32 = 0; j < i; j++) {
       sum -=
-        load<f64>(luPtr + ((<usize>(i * n + j)) << 3)) *
-        load<f64>(resultPtr + ((<usize>j) << 3))
+        load<f64>(luPtr + ((<usize>(i * n + j)) << 3)) * load<f64>(resultPtr + ((<usize>j) << 3));
     }
 
-    store<f64>(resultPtr + ((<usize>i) << 3), sum)
+    store<f64>(resultPtr + ((<usize>i) << 3), sum);
   }
 
   // Backward substitution: Ux = y
   for (let i: i32 = n - 1; i >= 0; i--) {
-    let sum: f64 = load<f64>(resultPtr + ((<usize>i) << 3))
+    let sum: f64 = load<f64>(resultPtr + ((<usize>i) << 3));
 
     for (let j: i32 = i + 1; j < n; j++) {
       sum -=
-        load<f64>(luPtr + ((<usize>(i * n + j)) << 3)) *
-        load<f64>(resultPtr + ((<usize>j) << 3))
+        load<f64>(luPtr + ((<usize>(i * n + j)) << 3)) * load<f64>(resultPtr + ((<usize>j) << 3));
     }
 
-    store<f64>(
-      resultPtr + ((<usize>i) << 3),
-      sum / load<f64>(luPtr + ((<usize>(i * n + i)) << 3))
-    )
+    store<f64>(resultPtr + ((<usize>i) << 3), sum / load<f64>(luPtr + ((<usize>(i * n + i)) << 3)));
   }
 
-  return 1
+  return 1;
 }
 
 // ============================================
@@ -721,34 +665,28 @@ export function solve(
  * @param resultPtr - Pointer to solution vector (n)
  * @returns 1 if successful, 0 if singular (zero diagonal)
  */
-export function lsolve(
-  lPtr: usize,
-  bPtr: usize,
-  n: i32,
-  resultPtr: usize
-): i32 {
+export function lsolve(lPtr: usize, bPtr: usize, n: i32, resultPtr: usize): i32 {
   // Forward substitution: x[j] = (b[j] - sum(L[j][k]*x[k] for k<j)) / L[j][j]
   for (let j: i32 = 0; j < n; j++) {
     // Get diagonal element L[j][j]
-    const ljj: f64 = load<f64>(lPtr + ((<usize>(j * n + j)) << 3))
+    const ljj: f64 = load<f64>(lPtr + ((<usize>(j * n + j)) << 3));
 
     // Check for singularity
     if (Math.abs(ljj) < 1e-14) {
-      return 0 // Singular matrix
+      return 0; // Singular matrix
     }
 
     // Compute x[j] = (b[j] - sum) / L[j][j]
-    let sum: f64 = load<f64>(bPtr + ((<usize>j) << 3))
+    let sum: f64 = load<f64>(bPtr + ((<usize>j) << 3));
     for (let k: i32 = 0; k < j; k++) {
       sum -=
-        load<f64>(lPtr + ((<usize>(j * n + k)) << 3)) *
-        load<f64>(resultPtr + ((<usize>k) << 3))
+        load<f64>(lPtr + ((<usize>(j * n + k)) << 3)) * load<f64>(resultPtr + ((<usize>k) << 3));
     }
 
-    store<f64>(resultPtr + ((<usize>j) << 3), sum / ljj)
+    store<f64>(resultPtr + ((<usize>j) << 3), sum / ljj);
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -760,34 +698,28 @@ export function lsolve(
  * @param resultPtr - Pointer to solution vector (n)
  * @returns 1 if successful, 0 if singular (zero diagonal)
  */
-export function usolve(
-  uPtr: usize,
-  bPtr: usize,
-  n: i32,
-  resultPtr: usize
-): i32 {
+export function usolve(uPtr: usize, bPtr: usize, n: i32, resultPtr: usize): i32 {
   // Backward substitution: x[j] = (b[j] - sum(U[j][k]*x[k] for k>j)) / U[j][j]
   for (let j: i32 = n - 1; j >= 0; j--) {
     // Get diagonal element U[j][j]
-    const ujj: f64 = load<f64>(uPtr + ((<usize>(j * n + j)) << 3))
+    const ujj: f64 = load<f64>(uPtr + ((<usize>(j * n + j)) << 3));
 
     // Check for singularity
     if (Math.abs(ujj) < 1e-14) {
-      return 0 // Singular matrix
+      return 0; // Singular matrix
     }
 
     // Compute x[j] = (b[j] - sum) / U[j][j]
-    let sum: f64 = load<f64>(bPtr + ((<usize>j) << 3))
+    let sum: f64 = load<f64>(bPtr + ((<usize>j) << 3));
     for (let k: i32 = j + 1; k < n; k++) {
       sum -=
-        load<f64>(uPtr + ((<usize>(j * n + k)) << 3)) *
-        load<f64>(resultPtr + ((<usize>k) << 3))
+        load<f64>(uPtr + ((<usize>(j * n + k)) << 3)) * load<f64>(resultPtr + ((<usize>k) << 3));
     }
 
-    store<f64>(resultPtr + ((<usize>j) << 3), sum / ujj)
+    store<f64>(resultPtr + ((<usize>j) << 3), sum / ujj);
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -798,21 +730,15 @@ export function usolve(
  * @param n - Size of the system
  * @param resultPtr - Pointer to solution vector (n)
  */
-export function lsolveUnit(
-  lPtr: usize,
-  bPtr: usize,
-  n: i32,
-  resultPtr: usize
-): void {
+export function lsolveUnit(lPtr: usize, bPtr: usize, n: i32, resultPtr: usize): void {
   // Forward substitution with L[j][j] = 1
   for (let j: i32 = 0; j < n; j++) {
-    let sum: f64 = load<f64>(bPtr + ((<usize>j) << 3))
+    let sum: f64 = load<f64>(bPtr + ((<usize>j) << 3));
     for (let k: i32 = 0; k < j; k++) {
       sum -=
-        load<f64>(lPtr + ((<usize>(j * n + k)) << 3)) *
-        load<f64>(resultPtr + ((<usize>k) << 3))
+        load<f64>(lPtr + ((<usize>(j * n + k)) << 3)) * load<f64>(resultPtr + ((<usize>k) << 3));
     }
-    store<f64>(resultPtr + ((<usize>j) << 3), sum)
+    store<f64>(resultPtr + ((<usize>j) << 3), sum);
   }
 }
 
@@ -825,34 +751,28 @@ export function lsolveUnit(
  * @param resultPtr - Pointer to solution matrix (n x m)
  * @returns 1 if successful, 0 if singular
  */
-export function lsolveMultiple(
-  lPtr: usize,
-  bPtr: usize,
-  n: i32,
-  m: i32,
-  resultPtr: usize
-): i32 {
+export function lsolveMultiple(lPtr: usize, bPtr: usize, n: i32, m: i32, resultPtr: usize): i32 {
   // Solve for each right-hand side
   for (let col: i32 = 0; col < m; col++) {
     for (let j: i32 = 0; j < n; j++) {
-      const ljj: f64 = load<f64>(lPtr + ((<usize>(j * n + j)) << 3))
+      const ljj: f64 = load<f64>(lPtr + ((<usize>(j * n + j)) << 3));
 
       if (Math.abs(ljj) < 1e-14) {
-        return 0
+        return 0;
       }
 
-      let sum: f64 = load<f64>(bPtr + ((<usize>(j * m + col)) << 3))
+      let sum: f64 = load<f64>(bPtr + ((<usize>(j * m + col)) << 3));
       for (let k: i32 = 0; k < j; k++) {
         sum -=
           load<f64>(lPtr + ((<usize>(j * n + k)) << 3)) *
-          load<f64>(resultPtr + ((<usize>(k * m + col)) << 3))
+          load<f64>(resultPtr + ((<usize>(k * m + col)) << 3));
       }
 
-      store<f64>(resultPtr + ((<usize>(j * m + col)) << 3), sum / ljj)
+      store<f64>(resultPtr + ((<usize>(j * m + col)) << 3), sum / ljj);
     }
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -864,34 +784,28 @@ export function lsolveMultiple(
  * @param resultPtr - Pointer to solution matrix (n x m)
  * @returns 1 if successful, 0 if singular
  */
-export function usolveMultiple(
-  uPtr: usize,
-  bPtr: usize,
-  n: i32,
-  m: i32,
-  resultPtr: usize
-): i32 {
+export function usolveMultiple(uPtr: usize, bPtr: usize, n: i32, m: i32, resultPtr: usize): i32 {
   // Solve for each right-hand side
   for (let col: i32 = 0; col < m; col++) {
     for (let j: i32 = n - 1; j >= 0; j--) {
-      const ujj: f64 = load<f64>(uPtr + ((<usize>(j * n + j)) << 3))
+      const ujj: f64 = load<f64>(uPtr + ((<usize>(j * n + j)) << 3));
 
       if (Math.abs(ujj) < 1e-14) {
-        return 0
+        return 0;
       }
 
-      let sum: f64 = load<f64>(bPtr + ((<usize>(j * m + col)) << 3))
+      let sum: f64 = load<f64>(bPtr + ((<usize>(j * m + col)) << 3));
       for (let k: i32 = j + 1; k < n; k++) {
         sum -=
           load<f64>(uPtr + ((<usize>(j * n + k)) << 3)) *
-          load<f64>(resultPtr + ((<usize>(k * m + col)) << 3))
+          load<f64>(resultPtr + ((<usize>(k * m + col)) << 3));
       }
 
-      store<f64>(resultPtr + ((<usize>(j * m + col)) << 3), sum / ujj)
+      store<f64>(resultPtr + ((<usize>(j * m + col)) << 3), sum / ujj);
     }
   }
 
-  return 1
+  return 1;
 }
 
 // ============================================
@@ -905,25 +819,25 @@ export function usolveMultiple(
  * @returns 1 if successful, 0 if singular
  */
 export function inv2x2(aPtr: usize, resultPtr: usize): i32 {
-  const a = load<f64>(aPtr)
-  const b = load<f64>(aPtr + 8)
-  const c = load<f64>(aPtr + 16)
-  const d = load<f64>(aPtr + 24)
+  const a = load<f64>(aPtr);
+  const b = load<f64>(aPtr + 8);
+  const c = load<f64>(aPtr + 16);
+  const d = load<f64>(aPtr + 24);
 
-  const det = a * d - b * c
+  const det = a * d - b * c;
 
   if (Math.abs(det) < 1e-14) {
-    return 0 // Singular
+    return 0; // Singular
   }
 
-  const invDet = 1.0 / det
+  const invDet = 1.0 / det;
 
-  store<f64>(resultPtr, d * invDet)
-  store<f64>(resultPtr + 8, -b * invDet)
-  store<f64>(resultPtr + 16, -c * invDet)
-  store<f64>(resultPtr + 24, a * invDet)
+  store<f64>(resultPtr, d * invDet);
+  store<f64>(resultPtr + 8, -b * invDet);
+  store<f64>(resultPtr + 16, -c * invDet);
+  store<f64>(resultPtr + 24, a * invDet);
 
-  return 1
+  return 1;
 }
 
 // ============================================
@@ -937,48 +851,48 @@ export function inv2x2(aPtr: usize, resultPtr: usize): i32 {
  * @returns 1 if successful, 0 if singular
  */
 export function inv3x3(aPtr: usize, resultPtr: usize): i32 {
-  const a00 = load<f64>(aPtr)
-  const a01 = load<f64>(aPtr + 8)
-  const a02 = load<f64>(aPtr + 16)
-  const a10 = load<f64>(aPtr + 24)
-  const a11 = load<f64>(aPtr + 32)
-  const a12 = load<f64>(aPtr + 40)
-  const a20 = load<f64>(aPtr + 48)
-  const a21 = load<f64>(aPtr + 56)
-  const a22 = load<f64>(aPtr + 64)
+  const a00 = load<f64>(aPtr);
+  const a01 = load<f64>(aPtr + 8);
+  const a02 = load<f64>(aPtr + 16);
+  const a10 = load<f64>(aPtr + 24);
+  const a11 = load<f64>(aPtr + 32);
+  const a12 = load<f64>(aPtr + 40);
+  const a20 = load<f64>(aPtr + 48);
+  const a21 = load<f64>(aPtr + 56);
+  const a22 = load<f64>(aPtr + 64);
 
   // Compute cofactors
-  const c00 = a11 * a22 - a12 * a21
-  const c01 = a12 * a20 - a10 * a22
-  const c02 = a10 * a21 - a11 * a20
-  const c10 = a02 * a21 - a01 * a22
-  const c11 = a00 * a22 - a02 * a20
-  const c12 = a01 * a20 - a00 * a21
-  const c20 = a01 * a12 - a02 * a11
-  const c21 = a02 * a10 - a00 * a12
-  const c22 = a00 * a11 - a01 * a10
+  const c00 = a11 * a22 - a12 * a21;
+  const c01 = a12 * a20 - a10 * a22;
+  const c02 = a10 * a21 - a11 * a20;
+  const c10 = a02 * a21 - a01 * a22;
+  const c11 = a00 * a22 - a02 * a20;
+  const c12 = a01 * a20 - a00 * a21;
+  const c20 = a01 * a12 - a02 * a11;
+  const c21 = a02 * a10 - a00 * a12;
+  const c22 = a00 * a11 - a01 * a10;
 
   // Determinant via first row expansion
-  const det = a00 * c00 + a01 * c01 + a02 * c02
+  const det = a00 * c00 + a01 * c01 + a02 * c02;
 
   if (Math.abs(det) < 1e-14) {
-    return 0 // Singular
+    return 0; // Singular
   }
 
-  const invDet = 1.0 / det
+  const invDet = 1.0 / det;
 
   // Inverse is adjugate (transpose of cofactor) divided by determinant
-  store<f64>(resultPtr, c00 * invDet)
-  store<f64>(resultPtr + 8, c10 * invDet)
-  store<f64>(resultPtr + 16, c20 * invDet)
-  store<f64>(resultPtr + 24, c01 * invDet)
-  store<f64>(resultPtr + 32, c11 * invDet)
-  store<f64>(resultPtr + 40, c21 * invDet)
-  store<f64>(resultPtr + 48, c02 * invDet)
-  store<f64>(resultPtr + 56, c12 * invDet)
-  store<f64>(resultPtr + 64, c22 * invDet)
+  store<f64>(resultPtr, c00 * invDet);
+  store<f64>(resultPtr + 8, c10 * invDet);
+  store<f64>(resultPtr + 16, c20 * invDet);
+  store<f64>(resultPtr + 24, c01 * invDet);
+  store<f64>(resultPtr + 32, c11 * invDet);
+  store<f64>(resultPtr + 40, c21 * invDet);
+  store<f64>(resultPtr + 48, c02 * invDet);
+  store<f64>(resultPtr + 56, c12 * invDet);
+  store<f64>(resultPtr + 64, c22 * invDet);
 
-  return 1
+  return 1;
 }
 
 // ============================================
@@ -994,22 +908,22 @@ export function inv3x3(aPtr: usize, resultPtr: usize): i32 {
  * @returns Condition number (Infinity if singular)
  */
 export function cond1(aPtr: usize, n: i32, workPtr: usize): f64 {
-  const invAPtr = workPtr
-  const invWorkPtr = workPtr + ((<usize>(n * n)) << 3)
+  const invAPtr = workPtr;
+  const invWorkPtr = workPtr + ((<usize>(n * n)) << 3);
 
   // Compute ||A||_1
-  const normA = matrixNorm1(aPtr, n, n)
+  const normA = matrixNorm1(aPtr, n, n);
 
   // Compute inverse
-  const success = inv(aPtr, n, invAPtr, invWorkPtr)
+  const success = inv(aPtr, n, invAPtr, invWorkPtr);
   if (success === 0) {
-    return f64.POSITIVE_INFINITY
+    return f64.POSITIVE_INFINITY;
   }
 
   // Compute ||A^(-1)||_1
-  const normAinv = matrixNorm1(invAPtr, n, n)
+  const normAinv = matrixNorm1(invAPtr, n, n);
 
-  return normA * normAinv
+  return normA * normAinv;
 }
 
 /**
@@ -1021,22 +935,22 @@ export function cond1(aPtr: usize, n: i32, workPtr: usize): f64 {
  * @returns Condition number (Infinity if singular)
  */
 export function condInf(aPtr: usize, n: i32, workPtr: usize): f64 {
-  const invAPtr = workPtr
-  const invWorkPtr = workPtr + ((<usize>(n * n)) << 3)
+  const invAPtr = workPtr;
+  const invWorkPtr = workPtr + ((<usize>(n * n)) << 3);
 
   // Compute ||A||_inf
-  const normA = matrixNormInf(aPtr, n, n)
+  const normA = matrixNormInf(aPtr, n, n);
 
   // Compute inverse
-  const success = inv(aPtr, n, invAPtr, invWorkPtr)
+  const success = inv(aPtr, n, invAPtr, invWorkPtr);
   if (success === 0) {
-    return f64.POSITIVE_INFINITY
+    return f64.POSITIVE_INFINITY;
   }
 
   // Compute ||A^(-1)||_inf
-  const normAinv = matrixNormInf(invAPtr, n, n)
+  const normAinv = matrixNormInf(invAPtr, n, n);
 
-  return normA * normAinv
+  return normA * normAinv;
 }
 
 // nullSpace: Compute an orthonormal basis for the null space of a matrix A.
@@ -1097,17 +1011,17 @@ export function nullSpace(
   // basisCount tracks how many basis vectors we have so far (including V columns).
 
   // Allocate working buffer for full basis (n vectors x n f64)
-  const basisBufSize: usize = <usize>(n * n) << 3;
+  const basisBufSize: usize = (<usize>(n * n)) << 3;
   const basisPtr: usize = heap.alloc(basisBufSize);
   // Zero it out
   memory.fill(basisPtr, 0, basisBufSize);
 
-  let basisCount: i32 = 0;  // total orthonormal vectors accumulated (V cols + new)
-  let nullCount: i32 = 0;   // how many are null space vectors
+  let basisCount: i32 = 0; // total orthonormal vectors accumulated (V cols + new)
+  let nullCount: i32 = 0; // how many are null space vectors
 
   // We need to track which basis vectors are null space vectors.
   // Use a separate flag buffer (i32 per basis vector).
-  const flagBufSize: usize = <usize>n << 2;
+  const flagBufSize: usize = (<usize>n) << 2;
   const flagPtr: usize = heap.alloc(flagBufSize);
   memory.fill(flagPtr, 0, flagBufSize);
 
@@ -1115,18 +1029,18 @@ export function nullSpace(
   // For each column j of V (0..k-1), copy V[:,j] into basisPtr[basisCount].
   // V is stored row-major: V[i][j] = load<f64>(vPtr + (i*k + j)*8)
   for (let j: i32 = 0; j < k; j++) {
-    const vecOff: usize = basisPtr + (<usize>basisCount * <usize>n) * 8;
+    const vecOff: usize = basisPtr + <usize>basisCount * <usize>n * 8;
     for (let i: i32 = 0; i < n; i++) {
-      const val: f64 = load<f64>(vPtr + (<usize>(i * k + j) << 3));
-      store<f64>(vecOff + (<usize>i << 3), val);
+      const val: f64 = load<f64>(vPtr + ((<usize>(i * k + j)) << 3));
+      store<f64>(vecOff + ((<usize>i) << 3), val);
     }
     // Check if this is a null space vector
-    const sv: f64 = load<f64>(sPtr + (<usize>j << 3));
+    const sv: f64 = load<f64>(sPtr + ((<usize>j) << 3));
     if (sv <= threshold) {
-      store<i32>(flagPtr + (<usize>basisCount << 2), 1);
+      store<i32>(flagPtr + ((<usize>basisCount) << 2), 1);
       nullCount++;
     } else {
-      store<i32>(flagPtr + (<usize>basisCount << 2), 0);
+      store<i32>(flagPtr + ((<usize>basisCount) << 2), 0);
     }
     basisCount++;
   }
@@ -1138,44 +1052,44 @@ export function nullSpace(
     let found: i32 = 0;
 
     // Temporary vector for Gram-Schmidt
-    const tmpSize: usize = <usize>n << 3;
+    const tmpSize: usize = (<usize>n) << 3;
     const tmpPtr: usize = heap.alloc(tmpSize);
 
     for (let ei: i32 = 0; ei < n && found < needed; ei++) {
       // Initialize tmp = e_ei
       memory.fill(tmpPtr, 0, tmpSize);
-      store<f64>(tmpPtr + (<usize>ei << 3), 1.0);
+      store<f64>(tmpPtr + ((<usize>ei) << 3), 1.0);
 
       // Project out all current basis vectors
       for (let bi: i32 = 0; bi < basisCount; bi++) {
-        const bvOff: usize = basisPtr + (<usize>bi * <usize>n) * 8;
+        const bvOff: usize = basisPtr + <usize>bi * <usize>n * 8;
         // dot = tmp . b
         let dot: f64 = 0.0;
         for (let i: i32 = 0; i < n; i++) {
-          dot += load<f64>(tmpPtr + (<usize>i << 3)) * load<f64>(bvOff + (<usize>i << 3));
+          dot += load<f64>(tmpPtr + ((<usize>i) << 3)) * load<f64>(bvOff + ((<usize>i) << 3));
         }
         // tmp -= dot * b
         for (let i: i32 = 0; i < n; i++) {
-          const cur: f64 = load<f64>(tmpPtr + (<usize>i << 3));
-          store<f64>(tmpPtr + (<usize>i << 3), cur - dot * load<f64>(bvOff + (<usize>i << 3)));
+          const cur: f64 = load<f64>(tmpPtr + ((<usize>i) << 3));
+          store<f64>(tmpPtr + ((<usize>i) << 3), cur - dot * load<f64>(bvOff + ((<usize>i) << 3)));
         }
       }
 
       // Compute norm
       let norm2: f64 = 0.0;
       for (let i: i32 = 0; i < n; i++) {
-        const x: f64 = load<f64>(tmpPtr + (<usize>i << 3));
+        const x: f64 = load<f64>(tmpPtr + ((<usize>i) << 3));
         norm2 += x * x;
       }
       const norm: f64 = Math.sqrt(norm2);
 
       if (norm > 1e-12) {
         // Normalize and add to basis as a null space vector
-        const vecOff: usize = basisPtr + (<usize>basisCount * <usize>n) * 8;
+        const vecOff: usize = basisPtr + <usize>basisCount * <usize>n * 8;
         for (let i: i32 = 0; i < n; i++) {
-          store<f64>(vecOff + (<usize>i << 3), load<f64>(tmpPtr + (<usize>i << 3)) / norm);
+          store<f64>(vecOff + ((<usize>i) << 3), load<f64>(tmpPtr + ((<usize>i) << 3)) / norm);
         }
-        store<i32>(flagPtr + (<usize>basisCount << 2), 1);
+        store<i32>(flagPtr + ((<usize>basisCount) << 2), 1);
         basisCount++;
         nullCount++;
         found++;
@@ -1188,10 +1102,10 @@ export function nullSpace(
   // Step 3: Write null space vectors to outPtr
   let outIdx: i32 = 0;
   for (let bi: i32 = 0; bi < basisCount; bi++) {
-    if (load<i32>(flagPtr + (<usize>bi << 2)) == 1) {
-      const srcOff: usize = basisPtr + (<usize>bi * <usize>n) * 8;
-      const dstOff: usize = outPtr + (<usize>outIdx * <usize>n) * 8;
-      memory.copy(dstOff, srcOff, <usize>n << 3);
+    if (load<i32>(flagPtr + ((<usize>bi) << 2)) == 1) {
+      const srcOff: usize = basisPtr + <usize>bi * <usize>n * 8;
+      const dstOff: usize = outPtr + <usize>outIdx * <usize>n * 8;
+      memory.copy(dstOff, srcOff, (<usize>n) << 3);
       outIdx++;
     }
   }

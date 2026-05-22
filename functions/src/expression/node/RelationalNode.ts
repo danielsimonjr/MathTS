@@ -1,39 +1,32 @@
-import { getPrecedence } from '../operators.js'
-import { escape } from '../../utils/string.js'
-import { getSafeProperty } from '../../utils/customs.js'
-import { latexOperators } from '../../utils/latex.js'
-import { factory } from '../../utils/factory.js'
+import { getPrecedence } from '../operators.js';
+import { escape } from '../../utils/string.js';
+import { getSafeProperty } from '../../utils/customs.js';
+import { latexOperators } from '../../utils/latex.js';
+import { factory } from '../../utils/factory.js';
 
 // Type definitions
 interface Node {
-  _compile: (
-    math: Record<string, any>,
-    argNames: Record<string, boolean>
-  ) => CompileFunction
-  _ifNode: (node: any) => Node
-  toString: (options?: StringOptions) => string
-  toHTML: (options?: StringOptions) => string
-  toTex: (options?: StringOptions) => string
+  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
+  _ifNode: (node: any) => Node;
+  toString: (options?: StringOptions) => string;
+  toHTML: (options?: StringOptions) => string;
+  toTex: (options?: StringOptions) => string;
 }
 
-type CompileFunction = (
-  scope: any,
-  args: Record<string, any>,
-  context: any
-) => any
+type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
 
 interface StringOptions {
-  parenthesis?: 'keep' | 'auto' | 'all'
-  implicit?: 'hide' | 'show'
-  [key: string]: any
+  parenthesis?: 'keep' | 'auto' | 'all';
+  implicit?: 'hide' | 'show';
+  [key: string]: any;
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node
+  Node: new (...args: any[]) => Node;
 }
 
-const name = 'RelationalNode'
-const dependencies = ['Node']
+const name = 'RelationalNode';
+const dependencies = ['Node'];
 
 export const createRelationalNode = /* #__PURE__ */ factory(
   name,
@@ -45,12 +38,12 @@ export const createRelationalNode = /* #__PURE__ */ factory(
       smaller: '<',
       larger: '>',
       smallerEq: '<=',
-      largerEq: '>='
-    }
+      largerEq: '>=',
+    };
 
     class RelationalNode extends Node {
-      conditionals: string[]
-      params: Node[]
+      conditionals: string[];
+      params: Node[];
 
       /**
        * A node representing a chained conditional expression, such as 'x > y > z'
@@ -64,29 +57,29 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * @extends {Node}
        */
       constructor(conditionals: string[], params: Node[]) {
-        super()
+        super();
         if (!Array.isArray(conditionals)) {
-          throw new TypeError('Parameter conditionals must be an array')
+          throw new TypeError('Parameter conditionals must be an array');
         }
         if (!Array.isArray(params)) {
-          throw new TypeError('Parameter params must be an array')
+          throw new TypeError('Parameter params must be an array');
         }
         if (conditionals.length !== params.length - 1) {
           throw new TypeError(
             'Parameter params must contain exactly one more element ' +
               'than parameter conditionals'
-          )
+          );
         }
 
-        this.conditionals = conditionals
-        this.params = params
+        this.conditionals = conditionals;
+        this.params = params;
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isRelationalNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -103,47 +96,37 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error: method signature matches MathNode interface
-      _compile(
-        math: Record<string, any>,
-        argNames: Record<string, boolean>
-      ): CompileFunction {
-        const self = this
+      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+        const self = this;
 
-        const compiled = this.params.map(
-          (p: Node): CompileFunction => p._compile(math, argNames)
-        )
+        const compiled = this.params.map((p: Node): CompileFunction => p._compile(math, argNames));
 
         return function evalRelationalNode(
           scope: any,
           args: Record<string, any>,
           context: any
         ): boolean {
-          let evalLhs: any
-          let evalRhs = compiled[0](scope, args, context)
+          let evalLhs: any;
+          let evalRhs = compiled[0](scope, args, context);
 
           for (let i = 0; i < self.conditionals.length; i++) {
-            evalLhs = evalRhs
-            evalRhs = compiled[i + 1](scope, args, context)
-            const condFn = getSafeProperty(math, self.conditionals[i])
+            evalLhs = evalRhs;
+            evalRhs = compiled[i + 1](scope, args, context);
+            const condFn = getSafeProperty(math, self.conditionals[i]);
             if (!condFn(evalLhs, evalRhs)) {
-              return false
+              return false;
             }
           }
-          return true
-        }
+          return true;
+        };
       }
 
       /**
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: Node, path: string, parent: RelationalNode) => void
-      ): void {
-        this.params.forEach(
-          (n: Node, i: number) => callback(n, 'params[' + i + ']', this),
-          this
-        )
+      forEach(callback: (child: Node, path: string, parent: RelationalNode) => void): void {
+        this.params.forEach((n: Node, i: number) => callback(n, 'params[' + i + ']', this), this);
       }
 
       /**
@@ -152,17 +135,14 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node): Node} callback
        * @returns {RelationalNode} Returns a transformed copy of the node
        */
-      map(
-        callback: (child: Node, path: string, parent: RelationalNode) => Node
-      ): RelationalNode {
+      map(callback: (child: Node, path: string, parent: RelationalNode) => Node): RelationalNode {
         return new RelationalNode(
           this.conditionals.slice(),
           this.params.map(
-            (n: Node, i: number) =>
-              this._ifNode(callback(n, 'params[' + i + ']', this)),
+            (n: Node, i: number) => this._ifNode(callback(n, 'params[' + i + ']', this)),
             this
           )
-        )
+        );
       }
 
       /**
@@ -170,7 +150,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * @return {RelationalNode}
        */
       clone(): RelationalNode {
-        return new RelationalNode(this.conditionals, this.params)
+        return new RelationalNode(this.conditionals, this.params);
       }
 
       /**
@@ -179,38 +159,34 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toString(options?: StringOptions): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         const precedence = getPrecedence(
           this as any,
           parenthesis,
           (options && options.implicit) || 'hide',
           undefined
-        )
+        );
 
-        const paramStrings = this.params.map(function (
-          p: Node,
-          _index: number
-        ): string {
+        const paramStrings = this.params.map(function (p: Node, _index: number): string {
           const paramPrecedence = getPrecedence(
             p as any,
             parenthesis,
             (options && options.implicit) || 'hide',
             undefined
-          )
+          );
           return parenthesis === 'all' ||
             (paramPrecedence !== null && paramPrecedence <= precedence)
             ? '(' + p.toString(options) + ')'
-            : p.toString(options)
-        })
+            : p.toString(options);
+        });
 
-        let ret = paramStrings[0]
+        let ret = paramStrings[0];
         for (let i = 0; i < this.conditionals.length; i++) {
-          ret += ' ' + operatorMap[this.conditionals[i]]
-          ret += ' ' + paramStrings[i + 1]
+          ret += ' ' + operatorMap[this.conditionals[i]];
+          ret += ' ' + paramStrings[i + 1];
         }
 
-        return ret
+        return ret;
       }
 
       /**
@@ -221,8 +197,8 @@ export const createRelationalNode = /* #__PURE__ */ factory(
         return {
           mathjs: name,
           conditionals: this.conditionals,
-          params: this.params
-        }
+          params: this.params,
+        };
       }
 
       /**
@@ -233,11 +209,8 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        *     where mathjs is optional
        * @returns {RelationalNode}
        */
-      static fromJSON(json: {
-        conditionals: string[]
-        params: Node[]
-      }): RelationalNode {
-        return new RelationalNode(json.conditionals, json.params)
+      static fromJSON(json: { conditionals: string[]; params: Node[] }): RelationalNode {
+        return new RelationalNode(json.conditionals, json.params);
       }
 
       /**
@@ -246,44 +219,40 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toHTML(options?: StringOptions): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         const precedence = getPrecedence(
           this as any,
           parenthesis,
           (options && options.implicit) || 'hide',
           undefined
-        )
+        );
 
-        const paramStrings = this.params.map(function (
-          p: Node,
-          _index: number
-        ): string {
+        const paramStrings = this.params.map(function (p: Node, _index: number): string {
           const paramPrecedence = getPrecedence(
             p as any,
             parenthesis,
             (options && options.implicit) || 'hide',
             undefined
-          )
+          );
           return parenthesis === 'all' ||
             (paramPrecedence !== null && paramPrecedence <= precedence)
             ? '<span class="math-parenthesis math-round-parenthesis">(</span>' +
                 p.toHTML(options) +
                 '<span class="math-parenthesis math-round-parenthesis">)</span>'
-            : p.toHTML(options)
-        })
+            : p.toHTML(options);
+        });
 
-        let ret = paramStrings[0]
+        let ret = paramStrings[0];
         for (let i = 0; i < this.conditionals.length; i++) {
           ret +=
             '<span class="math-operator math-binary-operator ' +
             'math-explicit-binary-operator">' +
             escape(operatorMap[this.conditionals[i]]) +
             '</span>' +
-            paramStrings[i + 1]
+            paramStrings[i + 1];
         }
 
-        return ret
+        return ret;
       }
 
       /**
@@ -292,39 +261,34 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toTex(options?: StringOptions): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         const precedence = getPrecedence(
           this as any,
           parenthesis,
           (options && options.implicit) || 'hide',
           undefined
-        )
+        );
 
-        const paramStrings = this.params.map(function (
-          p: Node,
-          _index: number
-        ): string {
+        const paramStrings = this.params.map(function (p: Node, _index: number): string {
           const paramPrecedence = getPrecedence(
             p as any,
             parenthesis,
             (options && options.implicit) || 'hide',
             undefined
-          )
+          );
           return parenthesis === 'all' ||
             (paramPrecedence !== null && paramPrecedence <= precedence)
             ? '\\left(' + p.toTex(options) + '\\right)'
-            : p.toTex(options)
-        })
+            : p.toTex(options);
+        });
 
-        let ret = paramStrings[0]
+        let ret = paramStrings[0];
         for (let i = 0; i < this.conditionals.length; i++) {
           ret +=
-            (latexOperators as Record<string, string>)[this.conditionals[i]] +
-            paramStrings[i + 1]
+            (latexOperators as Record<string, string>)[this.conditionals[i]] + paramStrings[i + 1];
         }
 
-        return ret
+        return ret;
       }
     }
 
@@ -332,10 +296,10 @@ export const createRelationalNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(RelationalNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return RelationalNode
+    return RelationalNode;
   },
   { isClass: true, isNode: true }
-)
+);

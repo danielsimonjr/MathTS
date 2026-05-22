@@ -1,34 +1,34 @@
-import { log2Number } from '../plain/number/index.js'
-import { promoteLogarithm } from '../utils/bigint.js'
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { MathJsConfig } from '../core/config.js'
+import { log2Number } from '../plain/number/index.js';
+import { promoteLogarithm } from '../utils/bigint.js';
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { MathJsConfig } from '../core/config.js';
 
 // Type definitions for log2
 interface ComplexType {
-  re: number
-  im: number
+  re: number;
+  im: number;
 }
 
 interface ComplexConstructor {
-  new (re: number, im: number): ComplexType
+  new (re: number, im: number): ComplexType;
 }
 
 interface BigNumberType {
-  isNegative(): boolean
-  log(base: number): BigNumberType
-  toNumber(): number
+  isNegative(): boolean;
+  log(base: number): BigNumberType;
+  toNumber(): number;
 }
 
 interface Log2Dependencies {
-  typed: TypedFunction
-  config: MathJsConfig
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  config: MathJsConfig;
+  Complex: ComplexConstructor;
 }
 
-const name = 'log2'
-const dependencies = ['typed', 'config', 'Complex']
+const name = 'log2';
+const dependencies = ['typed', 'config', 'Complex'];
 
 export const createLog2 = /* #__PURE__ */ factory(
   name,
@@ -60,16 +60,16 @@ export const createLog2 = /* #__PURE__ */ factory(
      *            Returns the 2-base logarithm of `x`
      */
     function complexLog2Number(x: number): ComplexType {
-      return _log2Complex(new Complex(x, 0))
+      return _log2Complex(new Complex(x, 0));
     }
 
     return typed(name, {
       number: function (x: number): number | ComplexType {
         if (x >= 0 || config.predictable) {
-          return log2Number(x)
+          return log2Number(x);
         } else {
           // negative value -> complex value computation
-          return complexLog2Number(x)
+          return complexLog2Number(x);
         }
       },
 
@@ -79,10 +79,10 @@ export const createLog2 = /* #__PURE__ */ factory(
 
       BigNumber: function (x: BigNumberType): BigNumberType | ComplexType {
         if (!x.isNegative() || config.predictable) {
-          return x.log(2)
+          return x.log(2);
         } else {
           // downgrade to number, return Complex valued result
-          return complexLog2Number(x.toNumber())
+          return complexLog2Number(x.toNumber());
         }
       },
 
@@ -90,8 +90,8 @@ export const createLog2 = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
             deepMap(x as unknown[], self)
-      )
-    })
+      ),
+    });
 
     /**
      * Calculate log2 for a complex value
@@ -100,11 +100,11 @@ export const createLog2 = /* #__PURE__ */ factory(
      * @private
      */
     function _log2Complex(x: ComplexType): ComplexType {
-      const newX = Math.sqrt(x.re * x.re + x.im * x.im)
+      const newX = Math.sqrt(x.re * x.re + x.im * x.im);
       return new Complex(
         Math.log2 ? Math.log2(newX) : Math.log(newX) / Math.LN2,
         Math.atan2(x.im, x.re) / Math.LN2
-      )
+      );
     }
   }
-)
+);

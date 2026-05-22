@@ -17,35 +17,35 @@
  */
 export function factorial(n: i32): f64 {
   // Lookup table for small factorials (stored as constants)
-  if (n < 0) return f64.NaN
-  if (n === 0) return 1
-  if (n === 1) return 1
-  if (n === 2) return 2
-  if (n === 3) return 6
-  if (n === 4) return 24
-  if (n === 5) return 120
-  if (n === 6) return 720
-  if (n === 7) return 5040
-  if (n === 8) return 40320
-  if (n === 9) return 362880
-  if (n === 10) return 3628800
-  if (n === 11) return 39916800
-  if (n === 12) return 479001600
-  if (n === 13) return 6227020800
-  if (n === 14) return 87178291200
-  if (n === 15) return 1307674368000
-  if (n === 16) return 20922789888000
-  if (n === 17) return 355687428096000
-  if (n === 18) return 6402373705728000
-  if (n === 19) return 121645100408832000
-  if (n === 20) return 2432902008176640000
+  if (n < 0) return f64.NaN;
+  if (n === 0) return 1;
+  if (n === 1) return 1;
+  if (n === 2) return 2;
+  if (n === 3) return 6;
+  if (n === 4) return 24;
+  if (n === 5) return 120;
+  if (n === 6) return 720;
+  if (n === 7) return 5040;
+  if (n === 8) return 40320;
+  if (n === 9) return 362880;
+  if (n === 10) return 3628800;
+  if (n === 11) return 39916800;
+  if (n === 12) return 479001600;
+  if (n === 13) return 6227020800;
+  if (n === 14) return 87178291200;
+  if (n === 15) return 1307674368000;
+  if (n === 16) return 20922789888000;
+  if (n === 17) return 355687428096000;
+  if (n === 18) return 6402373705728000;
+  if (n === 19) return 121645100408832000;
+  if (n === 20) return 2432902008176640000;
 
   // For larger values, compute iteratively
-  let result: f64 = 2432902008176640000 // 20!
+  let result: f64 = 2432902008176640000; // 20!
   for (let i: i32 = 21; i <= n; i++) {
-    result *= f64(i)
+    result *= f64(i);
   }
-  return result
+  return result;
 }
 
 /**
@@ -56,21 +56,21 @@ export function factorial(n: i32): f64 {
  * @returns C(n, k) = n! / (k! * (n-k)!)
  */
 export function combinations(n: i32, k: i32): f64 {
-  if (k < 0 || k > n) return 0
-  if (k === 0 || k === n) return 1
+  if (k < 0 || k > n) return 0;
+  if (k === 0 || k === n) return 1;
 
   // Use symmetry: C(n,k) = C(n, n-k)
   if (k > n - k) {
-    k = n - k
+    k = n - k;
   }
 
-  let result: f64 = 1
+  let result: f64 = 1;
   for (let i: i32 = 0; i < k; i++) {
-    result *= f64(n - i)
-    result /= f64(i + 1)
+    result *= f64(n - i);
+    result /= f64(i + 1);
   }
 
-  return result
+  return result;
 }
 
 /**
@@ -80,7 +80,7 @@ export function combinations(n: i32, k: i32): f64 {
  * @returns C(n+k-1, k)
  */
 export function combinationsWithRep(n: i32, k: i32): f64 {
-  return combinations(n + k - 1, k)
+  return combinations(n + k - 1, k);
 }
 
 /**
@@ -90,15 +90,15 @@ export function combinationsWithRep(n: i32, k: i32): f64 {
  * @returns P(n, k) = n! / (n-k)!
  */
 export function permutations(n: i32, k: i32): f64 {
-  if (k < 0 || k > n) return 0
-  if (k === 0) return 1
+  if (k < 0 || k > n) return 0;
+  if (k === 0) return 1;
 
-  let result: f64 = 1
+  let result: f64 = 1;
   for (let i: i32 = 0; i < k; i++) {
-    result *= f64(n - i)
+    result *= f64(n - i);
   }
 
-  return result
+  return result;
 }
 
 /**
@@ -111,36 +111,36 @@ export function permutations(n: i32, k: i32): f64 {
  * @returns S(n, k)
  */
 export function stirlingS2(n: i32, k: i32, workPtr: usize): f64 {
-  if (n < 0 || k < 0) return 0
-  if (n === 0 && k === 0) return 1
-  if (n === 0 || k === 0) return 0
-  if (k > n) return 0
-  if (k === 1 || k === n) return 1
+  if (n < 0 || k < 0) return 0;
+  if (n === 0 && k === 0) return 1;
+  if (n === 0 || k === 0) return 0;
+  if (k > n) return 0;
+  if (k === 1 || k === n) return 1;
 
-  const kp1: i32 = k + 1
+  const kp1: i32 = k + 1;
 
   // Initialize dp table
   for (let i: i32 = 0; i <= n; i++) {
     for (let j: i32 = 0; j <= k; j++) {
-      store<f64>(workPtr + (<usize>(i * kp1 + j) << 3), 0.0)
+      store<f64>(workPtr + ((<usize>(i * kp1 + j)) << 3), 0.0);
     }
   }
-  store<f64>(workPtr, 1.0) // dp[0][0] = 1
+  store<f64>(workPtr, 1.0); // dp[0][0] = 1
 
   // Fill using recurrence: S(n,k) = k*S(n-1,k) + S(n-1,k-1)
   for (let i: i32 = 1; i <= n; i++) {
     for (let j: i32 = 1; j <= (i < k ? i : k); j++) {
       if (j === 1 || j === i) {
-        store<f64>(workPtr + (<usize>(i * kp1 + j) << 3), 1.0)
+        store<f64>(workPtr + ((<usize>(i * kp1 + j)) << 3), 1.0);
       } else {
-        const val1: f64 = load<f64>(workPtr + (<usize>((i - 1) * kp1 + j) << 3))
-        const val2: f64 = load<f64>(workPtr + (<usize>((i - 1) * kp1 + (j - 1)) << 3))
-        store<f64>(workPtr + (<usize>(i * kp1 + j) << 3), f64(j) * val1 + val2)
+        const val1: f64 = load<f64>(workPtr + ((<usize>((i - 1) * kp1 + j)) << 3));
+        const val2: f64 = load<f64>(workPtr + ((<usize>((i - 1) * kp1 + (j - 1))) << 3));
+        store<f64>(workPtr + ((<usize>(i * kp1 + j)) << 3), f64(j) * val1 + val2);
       }
     }
   }
 
-  return load<f64>(workPtr + (<usize>(n * kp1 + k) << 3))
+  return load<f64>(workPtr + ((<usize>(n * kp1 + k)) << 3));
 }
 
 /**
@@ -152,14 +152,14 @@ export function stirlingS2(n: i32, k: i32, workPtr: usize): f64 {
  * @returns B(n)
  */
 export function bellNumbers(n: i32, workPtr: usize): f64 {
-  if (n < 0) return 0
-  if (n === 0) return 1
+  if (n < 0) return 0;
+  if (n === 0) return 1;
 
-  let sum: f64 = 0
+  let sum: f64 = 0;
   for (let k: i32 = 0; k <= n; k++) {
-    sum += stirlingS2(n, k, workPtr)
+    sum += stirlingS2(n, k, workPtr);
   }
-  return sum
+  return sum;
 }
 
 /**
@@ -169,11 +169,11 @@ export function bellNumbers(n: i32, workPtr: usize): f64 {
  * @returns C(n)
  */
 export function catalan(n: i32): f64 {
-  if (n < 0) return 0
-  if (n === 0) return 1
+  if (n < 0) return 0;
+  if (n === 0) return 1;
 
   // Use formula: C(n) = C(2n, n) / (n+1)
-  return combinations(2 * n, n) / f64(n + 1)
+  return combinations(2 * n, n) / f64(n + 1);
 }
 
 /**
@@ -184,11 +184,11 @@ export function catalan(n: i32): f64 {
  * @returns Composition count
  */
 export function composition(n: i32, k: i32): f64 {
-  if (k < 0 || n < k) return 0
-  if (k === 0) return n === 0 ? 1 : 0
+  if (k < 0 || n < k) return 0;
+  if (k === 0) return n === 0 ? 1 : 0;
 
   // C(n, k) = C(n-1, k-1) for compositions
-  return combinations(n - 1, k - 1)
+  return combinations(n - 1, k - 1);
 }
 
 /**
@@ -200,16 +200,16 @@ export function composition(n: i32, k: i32): f64 {
  * @returns Multinomial coefficient
  */
 export function multinomial(n: i32, kPtr: usize, m: i32): f64 {
-  let result: f64 = 1
-  let sum: i32 = 0
+  let result: f64 = 1;
+  let sum: i32 = 0;
 
   for (let i: i32 = 0; i < m; i++) {
-    const ki: i32 = load<i32>(kPtr + (<usize>i << 2))
-    result *= combinations(n - sum, ki)
-    sum += ki
+    const ki: i32 = load<i32>(kPtr + ((<usize>i) << 2));
+    result *= combinations(n - sum, ki);
+    sum += ki;
   }
 
-  return result
+  return result;
 }
 
 /**
@@ -218,15 +218,11 @@ export function multinomial(n: i32, kPtr: usize, m: i32): f64 {
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function factorialArray(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function factorialArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const inOffset: usize = <usize>i << 2
-    const outOffset: usize = <usize>i << 3
-    store<f64>(outputPtr + outOffset, factorial(load<i32>(inputPtr + inOffset)))
+    const inOffset: usize = (<usize>i) << 2;
+    const outOffset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + outOffset, factorial(load<i32>(inputPtr + inOffset)));
   }
 }
 
@@ -244,11 +240,11 @@ export function combinationsArray(
   length: i32
 ): void {
   for (let i: i32 = 0; i < length; i++) {
-    const inOffset: usize = <usize>i << 2
-    const outOffset: usize = <usize>i << 3
-    const nVal: i32 = load<i32>(nArrayPtr + inOffset)
-    const kVal: i32 = load<i32>(kArrayPtr + inOffset)
-    store<f64>(outputPtr + outOffset, combinations(nVal, kVal))
+    const inOffset: usize = (<usize>i) << 2;
+    const outOffset: usize = (<usize>i) << 3;
+    const nVal: i32 = load<i32>(nArrayPtr + inOffset);
+    const kVal: i32 = load<i32>(kArrayPtr + inOffset);
+    store<f64>(outputPtr + outOffset, combinations(nVal, kVal));
   }
 }
 
@@ -266,11 +262,11 @@ export function permutationsArray(
   length: i32
 ): void {
   for (let i: i32 = 0; i < length; i++) {
-    const inOffset: usize = <usize>i << 2
-    const outOffset: usize = <usize>i << 3
-    const nVal: i32 = load<i32>(nArrayPtr + inOffset)
-    const kVal: i32 = load<i32>(kArrayPtr + inOffset)
-    store<f64>(outputPtr + outOffset, permutations(nVal, kVal))
+    const inOffset: usize = (<usize>i) << 2;
+    const outOffset: usize = (<usize>i) << 3;
+    const nVal: i32 = load<i32>(nArrayPtr + inOffset);
+    const kVal: i32 = load<i32>(kArrayPtr + inOffset);
+    store<f64>(outputPtr + outOffset, permutations(nVal, kVal));
   }
 }
 
@@ -281,14 +277,14 @@ export function permutationsArray(
  * @returns n!!
  */
 export function doubleFactorial(n: i32): f64 {
-  if (n < 0) return f64.NaN
-  if (n <= 1) return 1
+  if (n < 0) return f64.NaN;
+  if (n <= 1) return 1;
 
-  let result: f64 = 1
+  let result: f64 = 1;
   for (let i: i32 = n; i > 1; i -= 2) {
-    result *= f64(i)
+    result *= f64(i);
   }
-  return result
+  return result;
 }
 
 /**
@@ -298,20 +294,20 @@ export function doubleFactorial(n: i32): f64 {
  * @returns !n
  */
 export function subfactorial(n: i32): f64 {
-  if (n < 0) return f64.NaN
-  if (n === 0) return 1
-  if (n === 1) return 0
+  if (n < 0) return f64.NaN;
+  if (n === 0) return 1;
+  if (n === 1) return 0;
 
   // Use recurrence: !n = (n-1)(!(n-1) + !(n-2))
-  let prev2: f64 = 1 // !0
-  let prev1: f64 = 0 // !1
+  let prev2: f64 = 1; // !0
+  let prev1: f64 = 0; // !1
 
   for (let i: i32 = 2; i <= n; i++) {
-    const curr = f64(i - 1) * (prev1 + prev2)
-    prev2 = prev1
-    prev1 = curr
+    const curr = f64(i - 1) * (prev1 + prev2);
+    prev2 = prev1;
+    prev1 = curr;
   }
-  return prev1
+  return prev1;
 }
 
 /**
@@ -322,14 +318,14 @@ export function subfactorial(n: i32): f64 {
  * @returns Falling factorial
  */
 export function fallingFactorial(x: f64, n: i32): f64 {
-  if (n < 0) return f64.NaN
-  if (n === 0) return 1
+  if (n < 0) return f64.NaN;
+  if (n === 0) return 1;
 
-  let result: f64 = 1
+  let result: f64 = 1;
   for (let i: i32 = 0; i < n; i++) {
-    result *= x - f64(i)
+    result *= x - f64(i);
   }
-  return result
+  return result;
 }
 
 /**
@@ -340,14 +336,14 @@ export function fallingFactorial(x: f64, n: i32): f64 {
  * @returns Rising factorial
  */
 export function risingFactorial(x: f64, n: i32): f64 {
-  if (n < 0) return f64.NaN
-  if (n === 0) return 1
+  if (n < 0) return f64.NaN;
+  if (n === 0) return 1;
 
-  let result: f64 = 1
+  let result: f64 = 1;
   for (let i: i32 = 0; i < n; i++) {
-    result *= x + f64(i)
+    result *= x + f64(i);
   }
-  return result
+  return result;
 }
 
 /**
@@ -356,18 +352,18 @@ export function risingFactorial(x: f64, n: i32): f64 {
  * @returns F(n)
  */
 export function fibonacci(n: i32): f64 {
-  if (n < 0) return f64.NaN
-  if (n <= 1) return f64(n)
+  if (n < 0) return f64.NaN;
+  if (n <= 1) return f64(n);
 
-  let prev2: f64 = 0
-  let prev1: f64 = 1
+  let prev2: f64 = 0;
+  let prev1: f64 = 1;
 
   for (let i: i32 = 2; i <= n; i++) {
-    const curr = prev1 + prev2
-    prev2 = prev1
-    prev1 = curr
+    const curr = prev1 + prev2;
+    prev2 = prev1;
+    prev1 = curr;
   }
-  return prev1
+  return prev1;
 }
 
 /**
@@ -376,17 +372,17 @@ export function fibonacci(n: i32): f64 {
  * @returns L(n)
  */
 export function lucas(n: i32): f64 {
-  if (n < 0) return f64.NaN
-  if (n === 0) return 2
-  if (n === 1) return 1
+  if (n < 0) return f64.NaN;
+  if (n === 0) return 2;
+  if (n === 1) return 1;
 
-  let prev2: f64 = 2
-  let prev1: f64 = 1
+  let prev2: f64 = 2;
+  let prev1: f64 = 1;
 
   for (let i: i32 = 2; i <= n; i++) {
-    const curr = prev1 + prev2
-    prev2 = prev1
-    prev1 = curr
+    const curr = prev1 + prev2;
+    prev2 = prev1;
+    prev1 = curr;
   }
-  return prev1
+  return prev1;
 }

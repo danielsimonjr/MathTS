@@ -1,24 +1,19 @@
-import { isBigInt, isBigNumber } from '../../utils/is.js'
-import { format, sign, nearlyEqual } from '../../utils/number.js'
-import { factory } from '../../utils/factory.js'
+import { isBigInt, isBigNumber } from '../../utils/is.js';
+import { format, sign, nearlyEqual } from '../../utils/number.js';
+import { factory } from '../../utils/factory.js';
 import type {
   BigNumberLike,
   RangeForEachCallback,
   RangeMapCallback,
   RangeFormatOptions,
-  RangeJSON
-} from './types.js'
+  RangeJSON,
+} from './types.js';
 
-const name = 'Range'
-const dependencies: string[] = []
+const name = 'Range';
+const dependencies: string[] = [];
 
 // Re-export types for backward compatibility
-export type {
-  RangeForEachCallback,
-  RangeMapCallback,
-  RangeFormatOptions,
-  RangeJSON
-}
+export type { RangeForEachCallback, RangeMapCallback, RangeFormatOptions, RangeJSON };
 
 export const createRangeClass = /* #__PURE__ */ factory(
   name,
@@ -66,27 +61,27 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Type identifier
        */
-      readonly type: string = 'Range'
+      readonly type: string = 'Range';
 
       /**
        * Range type flag
        */
-      readonly isRange: boolean = true
+      readonly isRange: boolean = true;
 
       /**
        * Start value of the range (inclusive)
        */
-      start: number
+      start: number;
 
       /**
        * End value of the range (exclusive)
        */
-      end: number
+      end: number;
 
       /**
        * Step size for the range
        */
-      step: number
+      step: number;
 
       constructor(
         start?: number | bigint | BigNumberLike | null,
@@ -94,52 +89,50 @@ export const createRangeClass = /* #__PURE__ */ factory(
         step?: number | bigint | BigNumberLike | null
       ) {
         if (!(this instanceof Range)) {
-          throw new SyntaxError(
-            'Constructor must be called with the new operator'
-          )
+          throw new SyntaxError('Constructor must be called with the new operator');
         }
 
-        const hasStart = start !== null && start !== undefined
-        const hasEnd = end !== null && end !== undefined
-        const hasStep = step !== null && step !== undefined
+        const hasStart = start !== null && start !== undefined;
+        const hasEnd = end !== null && end !== undefined;
+        const hasStep = step !== null && step !== undefined;
 
-        let startValue: number | bigint = 0
-        let endValue: number | bigint = 0
-        let stepValue: number | bigint = 1
+        let startValue: number | bigint = 0;
+        let endValue: number | bigint = 0;
+        let stepValue: number | bigint = 1;
 
         if (hasStart) {
           if (isBigNumber(start)) {
-            startValue = (start as BigNumberLike).toNumber()
+            startValue = (start as BigNumberLike).toNumber();
           } else if (typeof start !== 'number' && !isBigInt(start)) {
-            throw new TypeError('Parameter start must be a number or bigint')
+            throw new TypeError('Parameter start must be a number or bigint');
           } else {
-            startValue = start as number | bigint
+            startValue = start as number | bigint;
           }
         }
         if (hasEnd) {
           if (isBigNumber(end)) {
-            endValue = (end as BigNumberLike).toNumber()
+            endValue = (end as BigNumberLike).toNumber();
           } else if (typeof end !== 'number' && !isBigInt(end)) {
-            throw new TypeError('Parameter end must be a number or bigint')
+            throw new TypeError('Parameter end must be a number or bigint');
           } else {
-            endValue = end as number | bigint
+            endValue = end as number | bigint;
           }
         }
         if (hasStep) {
           if (isBigNumber(step)) {
-            stepValue = (step as BigNumberLike).toNumber()
+            stepValue = (step as BigNumberLike).toNumber();
           } else if (typeof step !== 'number' && !isBigInt(step)) {
-            throw new TypeError('Parameter step must be a number or bigint')
+            throw new TypeError('Parameter step must be a number or bigint');
           } else {
-            stepValue = step as number | bigint
+            stepValue = step as number | bigint;
           }
         }
 
-        this.start = hasStart ? parseFloat(startValue.toString()) : 0
-        this.end = hasEnd ? parseFloat(endValue.toString()) : 0
-        this.step = hasStep ? parseFloat(stepValue.toString()) : 1
+        this.start = hasStart ? parseFloat(startValue.toString()) : 0;
+        this.end = hasEnd ? parseFloat(endValue.toString()) : 0;
+        this.step = hasStep ? parseFloat(stepValue.toString()) : 1;
         if (hasStep && nearlyEqual(this.step, 0)) {
-          throw new Error('Step must not be zero')
+          throw new Error('Step must not be zero');
         }
       }
 
@@ -154,28 +147,28 @@ export const createRangeClass = /* #__PURE__ */ factory(
        */
       static parse(str: string): Range | null {
         if (typeof str !== 'string') {
-          return null
+          return null;
         }
 
-        const args = str.split(':')
+        const args = str.split(':');
         const nums = args.map(function (arg) {
-          return parseFloat(arg)
-        })
+          return parseFloat(arg);
+        });
 
         const invalid = nums.some(function (num) {
-          return isNaN(num)
-        })
+          return isNaN(num);
+        });
         if (invalid) {
-          return null
+          return null;
         }
 
         switch (nums.length) {
           case 2:
-            return new Range(nums[0], nums[1])
+            return new Range(nums[0], nums[1]);
           case 3:
-            return new Range(nums[0], nums[2], nums[1])
+            return new Range(nums[0], nums[2], nums[1]);
           default:
-            return null
+            return null;
         }
       }
 
@@ -184,7 +177,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @return {Range} clone
        */
       clone(): Range {
-        return new Range(this.start, this.end, this.step)
+        return new Range(this.start, this.end, this.step);
       }
 
       /**
@@ -194,22 +187,22 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @returns {[number]} size
        */
       size(): [number] {
-        let len = 0
-        const start = this.start
-        const step = this.step
-        const end = this.end
-        const diff = end - start
+        let len = 0;
+        const start = this.start;
+        const step = this.step;
+        const end = this.end;
+        const diff = end - start;
 
         if (sign(step) === sign(diff)) {
-          len = Math.ceil(diff / step)
+          len = Math.ceil(diff / step);
         } else if (diff === 0) {
-          len = 0
+          len = 0;
         }
 
         if (isNaN(len)) {
-          len = 0
+          len = 0;
         }
-        return [len]
+        return [len];
       }
 
       /**
@@ -218,18 +211,18 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @return {number | undefined} min
        */
       min(): number | undefined {
-        const size = this.size()[0]
+        const size = this.size()[0];
 
         if (size > 0) {
           if (this.step > 0) {
             // positive step
-            return this.start
+            return this.start;
           } else {
             // negative step
-            return this.start + (size - 1) * this.step
+            return this.start + (size - 1) * this.step;
           }
         } else {
-          return undefined
+          return undefined;
         }
       }
 
@@ -239,18 +232,18 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @return {number | undefined} max
        */
       max(): number | undefined {
-        const size = this.size()[0]
+        const size = this.size()[0];
 
         if (size > 0) {
           if (this.step > 0) {
             // positive step
-            return this.start + (size - 1) * this.step
+            return this.start + (size - 1) * this.step;
           } else {
             // negative step
-            return this.start
+            return this.start;
           }
         } else {
-          return undefined
+          return undefined;
         }
       }
 
@@ -262,22 +255,22 @@ export const createRangeClass = /* #__PURE__ */ factory(
        *                            of the element, and the Range being traversed.
        */
       forEach(callback: RangeForEachCallback): void {
-        let x = this.start
-        const step = this.step
-        const end = this.end
-        let i = 0
+        let x = this.start;
+        const step = this.step;
+        const end = this.end;
+        let i = 0;
 
         if (step > 0) {
           while (x < end) {
-            callback(x, [i] as [number], this)
-            x += step
-            i++
+            callback(x, [i] as [number], this);
+            x += step;
+            i++;
           }
         } else if (step < 0) {
           while (x > end) {
-            callback(x, [i] as [number], this)
-            x += step
-            i++
+            callback(x, [i] as [number], this);
+            x += step;
+            i++;
           }
         }
       }
@@ -292,12 +285,12 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @returns {Array} array
        */
       map<T>(callback: RangeMapCallback<T>): T[] {
-        const array: T[] = []
-        const self = this
+        const array: T[] = [];
+        const self = this;
         this.forEach(function (value, index, _obj) {
-          array[index[0]] = callback(value, index, self)
-        })
-        return array
+          array[index[0]] = callback(value, index, self);
+        });
+        return array;
       }
 
       /**
@@ -306,11 +299,11 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @returns {Array} array
        */
       toArray(): number[] {
-        const array: number[] = []
+        const array: number[] = [];
         this.forEach(function (value, index) {
-          array[index[0]] = value
-        })
-        return array
+          array[index[0]] = value;
+        });
+        return array;
       }
 
       /**
@@ -320,7 +313,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        */
       valueOf(): number[] {
         // TODO: implement a caching mechanism for range.valueOf()
-        return this.toArray()
+        return this.toArray();
       }
 
       /**
@@ -333,16 +326,14 @@ export const createRangeClass = /* #__PURE__ */ factory(
        *                                               options.
        * @returns {string} str
        */
-      format(
-        options?: RangeFormatOptions | number | ((value: number) => string)
-      ): string {
-        let str = format(this.start, options)
+      format(options?: RangeFormatOptions | number | ((value: number) => string)): string {
+        let str = format(this.start, options);
 
         if (this.step !== 1) {
-          str += ':' + format(this.step, options)
+          str += ':' + format(this.step, options);
         }
-        str += ':' + format(this.end, options)
-        return str
+        str += ':' + format(this.end, options);
+        return str;
       }
 
       /**
@@ -351,7 +342,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @returns {string}
        */
       toString(): string {
-        return this.format()
+        return this.format();
       }
 
       /**
@@ -365,8 +356,8 @@ export const createRangeClass = /* #__PURE__ */ factory(
           mathjs: 'Range',
           start: this.start,
           end: this.end,
-          step: this.step
-        }
+          step: this.step,
+        };
       }
 
       /**
@@ -377,16 +368,16 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @return {Range}
        */
       static fromJSON(json: RangeJSON): Range {
-        return new Range(json.start, json.end, json.step)
+        return new Range(json.start, json.end, json.step);
       }
     }
 
     // Set prototype properties for type checking (duck typing)
     // These are needed because is.ts checks constructor.prototype.isRange
-    ;(Range.prototype as any).type = 'Range'
-    ;(Range.prototype as any).isRange = true
+    (Range.prototype as any).type = 'Range';
+    (Range.prototype as any).isRange = true;
 
-    return Range
+    return Range;
   },
   { isClass: true }
-)
+);

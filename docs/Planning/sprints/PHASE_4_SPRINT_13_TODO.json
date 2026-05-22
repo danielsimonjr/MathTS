@@ -84,9 +84,7 @@
     "matrix/src/backends/GPUBackend.ts",
     "matrix/tests/gpu/initialization.test.ts"
   ],
-  "filesModified": [
-    "matrix/src/backends/index.ts"
-  ],
+  "filesModified": ["matrix/src/backends/index.ts"],
   "totalEstimatedHours": 24,
   "notes": "Sprint 13 establishes WebGPU infrastructure. The GPUContext and BufferPool provide the foundation for GPU-accelerated matrix operations.",
   "completedAt": "2025-12-12"

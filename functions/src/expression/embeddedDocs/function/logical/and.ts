@@ -5,5 +5,5 @@ export const andDocs = {
   description:
     'Logical and. Test whether two values are both defined with a nonzero/nonempty value.',
   examples: ['true and false', 'true and true', '2 and 4'],
-  seealso: ['not', 'or', 'xor']
-}
+  seealso: ['not', 'or', 'xor'],
+};

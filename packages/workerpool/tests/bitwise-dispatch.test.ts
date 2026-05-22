@@ -54,7 +54,14 @@ describe('Int32Array bitwise worker dispatch', () => {
   });
 
   describe('bitwiseBinary (Int32 × Int32 → Int32)', () => {
-    const ops = ['bitAnd', 'bitOr', 'bitXor', 'leftShift', 'rightArithShift', 'rightLogShift'] as const;
+    const ops = [
+      'bitAnd',
+      'bitOr',
+      'bitXor',
+      'leftShift',
+      'rightArithShift',
+      'rightLogShift',
+    ] as const;
 
     for (const op of ops) {
       it(`dispatches ${op} to a real worker and matches the JS oracle`, async () => {
@@ -71,12 +78,24 @@ describe('Int32Array bitwise worker dispatch', () => {
         const expected = new Int32Array(100);
         for (let i = 0; i < 100; i++) {
           switch (op) {
-            case 'bitAnd': expected[i] = a[i] & b[i]; break;
-            case 'bitOr': expected[i] = a[i] | b[i]; break;
-            case 'bitXor': expected[i] = a[i] ^ b[i]; break;
-            case 'leftShift': expected[i] = a[i] << b[i]; break;
-            case 'rightArithShift': expected[i] = a[i] >> b[i]; break;
-            case 'rightLogShift': expected[i] = a[i] >>> b[i]; break;
+            case 'bitAnd':
+              expected[i] = a[i] & b[i];
+              break;
+            case 'bitOr':
+              expected[i] = a[i] | b[i];
+              break;
+            case 'bitXor':
+              expected[i] = a[i] ^ b[i];
+              break;
+            case 'leftShift':
+              expected[i] = a[i] << b[i];
+              break;
+            case 'rightArithShift':
+              expected[i] = a[i] >> b[i];
+              break;
+            case 'rightLogShift':
+              expected[i] = a[i] >>> b[i];
+              break;
           }
         }
         expect(Array.from(r.result)).toEqual(Array.from(expected));
@@ -99,9 +118,15 @@ describe('Int32Array bitwise worker dispatch', () => {
         const expected = new Int32Array(100);
         for (let i = 0; i < 100; i++) {
           switch (op) {
-            case 'leftShift': expected[i] = a[i] << scalar; break;
-            case 'rightArithShift': expected[i] = a[i] >> scalar; break;
-            case 'rightLogShift': expected[i] = a[i] >>> scalar; break;
+            case 'leftShift':
+              expected[i] = a[i] << scalar;
+              break;
+            case 'rightArithShift':
+              expected[i] = a[i] >> scalar;
+              break;
+            case 'rightLogShift':
+              expected[i] = a[i] >>> scalar;
+              break;
           }
         }
         expect(Array.from(r.result)).toEqual(Array.from(expected));

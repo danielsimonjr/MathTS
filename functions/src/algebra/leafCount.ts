@@ -1,15 +1,15 @@
-import { factory } from '../utils/factory.js'
-import type { MathNode } from '../utils/node.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { MathNode } from '../utils/node.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for leafCount
 interface LeafCountDependencies {
-  parse: (expr: string) => MathNode
-  typed: TypedFunction
+  parse: (expr: string) => MathNode;
+  typed: TypedFunction;
 }
 
-const name = 'leafCount'
-const dependencies = ['parse', 'typed']
+const name = 'leafCount';
+const dependencies = ['parse', 'typed'];
 
 export const createLeafCount = /* #__PURE__ */ factory(
   name,
@@ -18,11 +18,11 @@ export const createLeafCount = /* #__PURE__ */ factory(
     // This does the real work, but we don't have to recurse through
     // a typed call if we separate it out
     function countLeaves(node: MathNode): number {
-      let count = 0
+      let count = 0;
       node.forEach((n: MathNode) => {
-        count += countLeaves(n)
-      })
-      return count || 1
+        count += countLeaves(n);
+      });
+      return count || 1;
     }
 
     /**
@@ -57,8 +57,8 @@ export const createLeafCount = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Node: function (expr: MathNode): number {
-        return countLeaves(expr)
-      }
-    })
+        return countLeaves(expr);
+      },
+    });
   }
-)
+);

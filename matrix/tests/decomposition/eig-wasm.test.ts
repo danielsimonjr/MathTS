@@ -9,11 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  eigWasm,
-  eigvalsWasm,
-  spectralRadiusWasm,
-} from '../../src/operations/eig-wasm.js';
+import { eigWasm, eigvalsWasm, spectralRadiusWasm } from '../../src/operations/eig-wasm.js';
 
 /**
  * Helper: matrix-vector multiply

@@ -108,9 +108,7 @@ export class GPUBackend {
       }
 
       // Detect capabilities
-      this._capabilities = await detectGPUCapabilities(
-        options.preferHighPerformance ?? true
-      );
+      this._capabilities = await detectGPUCapabilities(options.preferHighPerformance ?? true);
 
       if (!this._capabilities.supported) {
         this._status = 'unsupported';
@@ -167,16 +165,9 @@ export class GPUBackend {
   /**
    * Calculate workgroup counts for a matrix
    */
-  calculateWorkgroups(
-    rows: number,
-    cols: number
-  ): [number, number, number] {
+  calculateWorkgroups(rows: number, cols: number): [number, number, number] {
     const [wgX, wgY] = this.workgroupSize;
-    return [
-      Math.ceil(cols / wgX),
-      Math.ceil(rows / wgY),
-      1,
-    ];
+    return [Math.ceil(cols / wgX), Math.ceil(rows / wgY), 1];
   }
 
   /**
@@ -212,12 +203,7 @@ export class GPUBackend {
   /**
    * Add two matrices element-wise
    */
-  async add(
-    a: Float32Array,
-    b: Float32Array,
-    rows: number,
-    cols: number
-  ): Promise<Float32Array> {
+  async add(a: Float32Array, b: Float32Array, rows: number, cols: number): Promise<Float32Array> {
     const ctx = this.getContext();
     const pool = this.getBufferPool();
     const shaders = this.getShaderManager();
@@ -239,22 +225,15 @@ export class GPUBackend {
     const pipeline = shaders.getBuiltinPipeline('matrixAdd');
 
     // Create bind group
-    const bindGroup = ctx.createBindGroup(
-      pipeline.getBindGroupLayout(0),
-      [
-        { binding: 0, resource: { buffer: bufferA } },
-        { binding: 1, resource: { buffer: bufferB } },
-        { binding: 2, resource: { buffer: bufferResult } },
-        { binding: 3, resource: { buffer: bufferParams } },
-      ]
-    );
+    const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
+      { binding: 0, resource: { buffer: bufferA } },
+      { binding: 1, resource: { buffer: bufferB } },
+      { binding: 2, resource: { buffer: bufferResult } },
+      { binding: 3, resource: { buffer: bufferParams } },
+    ]);
 
     // Dispatch
-    ctx.dispatchCompute(
-      pipeline,
-      [bindGroup],
-      this.calculateWorkgroups(rows, cols)
-    );
+    ctx.dispatchCompute(pipeline, [bindGroup], this.calculateWorkgroups(rows, cols));
 
     // Read result
     const resultData = await ctx.readBuffer(bufferResult);
@@ -301,22 +280,15 @@ export class GPUBackend {
     const pipeline = shaders.getBuiltinPipeline('matmul');
 
     // Create bind group
-    const bindGroup = ctx.createBindGroup(
-      pipeline.getBindGroupLayout(0),
-      [
-        { binding: 0, resource: { buffer: bufferA } },
-        { binding: 1, resource: { buffer: bufferB } },
-        { binding: 2, resource: { buffer: bufferResult } },
-        { binding: 3, resource: { buffer: bufferParams } },
-      ]
-    );
+    const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
+      { binding: 0, resource: { buffer: bufferA } },
+      { binding: 1, resource: { buffer: bufferB } },
+      { binding: 2, resource: { buffer: bufferResult } },
+      { binding: 3, resource: { buffer: bufferParams } },
+    ]);
 
     // Dispatch
-    ctx.dispatchCompute(
-      pipeline,
-      [bindGroup],
-      this.calculateWorkgroups(M, N)
-    );
+    ctx.dispatchCompute(pipeline, [bindGroup], this.calculateWorkgroups(M, N));
 
     // Read result
     const resultData = await ctx.readBuffer(bufferResult);
@@ -333,11 +305,7 @@ export class GPUBackend {
   /**
    * Transpose a matrix
    */
-  async transpose(
-    a: Float32Array,
-    rows: number,
-    cols: number
-  ): Promise<Float32Array> {
+  async transpose(a: Float32Array, rows: number, cols: number): Promise<Float32Array> {
     const ctx = this.getContext();
     const pool = this.getBufferPool();
     const shaders = this.getShaderManager();
@@ -357,21 +325,14 @@ export class GPUBackend {
     const pipeline = shaders.getBuiltinPipeline('transpose');
 
     // Create bind group
-    const bindGroup = ctx.createBindGroup(
-      pipeline.getBindGroupLayout(0),
-      [
-        { binding: 0, resource: { buffer: bufferA } },
-        { binding: 1, resource: { buffer: bufferResult } },
-        { binding: 2, resource: { buffer: bufferParams } },
-      ]
-    );
+    const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
+      { binding: 0, resource: { buffer: bufferA } },
+      { binding: 1, resource: { buffer: bufferResult } },
+      { binding: 2, resource: { buffer: bufferParams } },
+    ]);
 
     // Dispatch
-    ctx.dispatchCompute(
-      pipeline,
-      [bindGroup],
-      this.calculateWorkgroups(rows, cols)
-    );
+    ctx.dispatchCompute(pipeline, [bindGroup], this.calculateWorkgroups(rows, cols));
 
     // Read result
     const resultData = await ctx.readBuffer(bufferResult);
@@ -387,10 +348,7 @@ export class GPUBackend {
   /**
    * Scale a matrix by a scalar
    */
-  async scale(
-    a: Float32Array,
-    scalar: number
-  ): Promise<Float32Array> {
+  async scale(a: Float32Array, scalar: number): Promise<Float32Array> {
     const ctx = this.getContext();
     const pool = this.getBufferPool();
     const shaders = this.getShaderManager();
@@ -410,14 +368,11 @@ export class GPUBackend {
     const pipeline = shaders.getBuiltinPipeline('scalarMul');
 
     // Create bind group
-    const bindGroup = ctx.createBindGroup(
-      pipeline.getBindGroupLayout(0),
-      [
-        { binding: 0, resource: { buffer: bufferA } },
-        { binding: 1, resource: { buffer: bufferResult } },
-        { binding: 2, resource: { buffer: bufferParams } },
-      ]
-    );
+    const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
+      { binding: 0, resource: { buffer: bufferA } },
+      { binding: 1, resource: { buffer: bufferResult } },
+      { binding: 2, resource: { buffer: bufferParams } },
+    ]);
 
     // Dispatch
     const workgroups = Math.ceil(a.length / 256);
@@ -492,9 +447,7 @@ export function getGlobalGPUBackend(): GPUBackend {
 /**
  * Initialize the global GPU backend
  */
-export async function initializeGlobalGPUBackend(
-  options?: GPUBackendOptions
-): Promise<boolean> {
+export async function initializeGlobalGPUBackend(options?: GPUBackendOptions): Promise<boolean> {
   const backend = getGlobalGPUBackend();
   return backend.initialize(options);
 }

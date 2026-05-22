@@ -6,7 +6,7 @@ export const typedDocs = {
   examples: [
     'double = typed({ "number": f(x)=x+x, "string": f(x)=concat(x,x) })',
     'double(2)',
-    'double("hello")'
+    'double("hello")',
   ],
-  seealso: [] as any[]
-}
+  seealso: [] as any[],
+};

@@ -1,1 +1,1 @@
-export const printTemplate = /\$([\w.]+)/g
+export const printTemplate = /\$([\w.]+)/g;

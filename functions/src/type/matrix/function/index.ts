@@ -1,18 +1,18 @@
-import { isBigNumber, isMatrix, isArray } from '../../../utils/is.js'
-import { factory } from '../../../utils/factory.js'
-import type { TypedFunction } from '../../../core/function/typed.js'
+import { isBigNumber, isMatrix, isArray } from '../../../utils/is.js';
+import { factory } from '../../../utils/factory.js';
+import type { TypedFunction } from '../../../core/function/typed.js';
 
 interface IndexConstructor {
-  new (...ranges: any[]): any
+  new (...ranges: any[]): any;
 }
 
 interface IndexDependencies {
-  typed: TypedFunction
-  Index: IndexConstructor
+  typed: TypedFunction;
+  Index: IndexConstructor;
 }
 
-const name = 'index'
-const dependencies = ['typed', 'Index']
+const name = 'index';
+const dependencies = ['typed', 'Index'];
 
 export const createIndex = /* #__PURE__ */ factory(
   name,
@@ -54,24 +54,22 @@ export const createIndex = /* #__PURE__ */ factory(
      * @return {Index}        Returns the created index
      */
     return typed(name, {
-      '...number | string | BigNumber | Range | Array | Matrix': function (
-        args: any[]
-      ): any {
+      '...number | string | BigNumber | Range | Array | Matrix': function (args: any[]): any {
         const ranges = args.map(function (arg: any) {
           if (isBigNumber(arg)) {
-            return (arg as any).toNumber() // convert BigNumber to Number
+            return (arg as any).toNumber(); // convert BigNumber to Number
           } else if (isArray(arg) || isMatrix(arg)) {
             return (arg as any).map(function (elem: any) {
               // convert BigNumber to Number
-              return isBigNumber(elem) ? (elem as any).toNumber() : elem
-            })
+              return isBigNumber(elem) ? (elem as any).toNumber() : elem;
+            });
           } else {
-            return arg
+            return arg;
           }
-        })
+        });
 
-        return new Index(...ranges)
-      }
-    })
+        return new Index(...ranges);
+      },
+    });
   }
-)
+);

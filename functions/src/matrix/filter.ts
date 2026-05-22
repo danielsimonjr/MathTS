@@ -1,14 +1,14 @@
-import { optimizeCallback } from '../utils/optimizeCallback.js'
-import { filter, filterRegExp } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { optimizeCallback } from '../utils/optimizeCallback.js';
+import { filter, filterRegExp } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface FilterDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'filter'
-const dependencies = ['typed']
+const name = 'filter';
+const dependencies = ['typed'];
 
 export const createFilter = /* #__PURE__ */ factory(
   name,
@@ -54,17 +54,17 @@ export const createFilter = /* #__PURE__ */ factory(
       'Array, function': _filterCallback,
 
       'Matrix, function': function (x: any, test: Function): any {
-        return x.create(_filterCallback(x.valueOf(), test), x.datatype())
+        return x.create(_filterCallback(x.valueOf(), test), x.datatype());
       },
 
       'Array, RegExp': filterRegExp,
 
       'Matrix, RegExp': function (x: any, test: RegExp): any {
-        return x.create(filterRegExp(x.valueOf(), test), x.datatype())
-      }
-    })
+        return x.create(filterRegExp(x.valueOf(), test), x.datatype());
+      },
+    });
   }
-)
+);
 
 /**
  * Filter values in a callback given a callback function
@@ -74,12 +74,12 @@ export const createFilter = /* #__PURE__ */ factory(
  * @private
  */
 function _filterCallback(x: any[], callback: Function): any[] {
-  const fastCallback = optimizeCallback(callback, x, 'filter')
+  const fastCallback = optimizeCallback(callback, x, 'filter');
   if (fastCallback.isUnary) {
-    return filter(x, fastCallback.fn as (value: any, index: number, array: any[]) => boolean)
+    return filter(x, fastCallback.fn as (value: any, index: number, array: any[]) => boolean);
   }
   return filter(x, function (value: any, index: number, array: any[]): boolean {
     // invoke the callback function with the right number of arguments
-    return fastCallback.fn(value, [index], array) as boolean
-  })
+    return fastCallback.fn(value, [index], array) as boolean;
+  });
 }

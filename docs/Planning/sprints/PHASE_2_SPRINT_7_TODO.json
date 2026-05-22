@@ -77,9 +77,7 @@
     "Determinant matches expected values for test matrices",
     "WASM results match JS within 1e-10 relative tolerance"
   ],
-  "filesCreated": [
-    "matrix/tests/wasm/accuracy.test.ts"
-  ],
+  "filesCreated": ["matrix/tests/wasm/accuracy.test.ts"],
   "filesModified": [
     "matrix/src/backends/WASMBackend.ts",
     "matrix/src/backends/WasmLoader.ts",

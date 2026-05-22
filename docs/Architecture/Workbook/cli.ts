@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * MathTS Scientific Workbook CLI
- * 
+ *
  * Command-line interface for .mtsw workbook files
  */
 
@@ -23,10 +23,7 @@ import type { Workbook, WorkbookEvent, Cell } from './types';
 
 const program = new Command();
 
-program
-  .name('mtsw')
-  .description('MathTS Scientific Workbook CLI')
-  .version('1.0.0');
+program.name('mtsw').description('MathTS Scientific Workbook CLI').version('1.0.0');
 
 // ============================================================================
 // Commands
@@ -48,12 +45,12 @@ program
 
       if (!result.success || !result.workbook) {
         console.error(chalk.red('Parse errors:'));
-        result.errors?.forEach(e => console.error(`  - ${e.message}`));
+        result.errors?.forEach((e) => console.error(`  - ${e.message}`));
         process.exit(1);
       }
 
       if (result.warnings) {
-        result.warnings.forEach(w => console.warn(chalk.yellow(`Warning: ${w.message}`)));
+        result.warnings.forEach((w) => console.warn(chalk.yellow(`Warning: ${w.message}`)));
       }
 
       const executor = createExecutor(result.workbook);
@@ -69,8 +66,10 @@ program
             }
             break;
           case 'cell:success':
-            console.log(chalk.green(`✓ ${event.cellId}`) + 
-              (options.verbose ? ` (${event.output.execution_time_ms}ms)` : ''));
+            console.log(
+              chalk.green(`✓ ${event.cellId}`) +
+                (options.verbose ? ` (${event.output.execution_time_ms}ms)` : '')
+            );
             if (options.verbose && event.output.stdout) {
               console.log(chalk.gray(`  ${event.output.stdout}`));
             }
@@ -89,7 +88,6 @@ program
       } else {
         await executor.runAll();
       }
-
     } catch (e) {
       console.error(chalk.red(`Error: ${e instanceof Error ? e.message : e}`));
       process.exit(1);
@@ -118,7 +116,7 @@ program
         }
 
         const executor = createExecutor(result.workbook);
-        
+
         executor.on((event: WorkbookEvent) => {
           if (event.type === 'cell:success') {
             console.log(chalk.green(`✓ ${event.cellId}`));
@@ -129,7 +127,6 @@ program
 
         await executor.runAll();
         console.log(chalk.gray(`\n[${new Date().toLocaleTimeString()}] Complete\n`));
-
       } catch (e) {
         console.error(chalk.red(`Error: ${e instanceof Error ? e.message : e}`));
       }
@@ -158,7 +155,7 @@ program
 
       if (!result.success) {
         console.error(chalk.red('Parse errors:'));
-        result.errors?.forEach(e => console.error(`  - ${e.message}`));
+        result.errors?.forEach((e) => console.error(`  - ${e.message}`));
         process.exit(1);
       }
 
@@ -171,18 +168,17 @@ program
       const refErrors = validateReferences(result.workbook);
       if (refErrors.length > 0) {
         console.error(chalk.red('Reference errors:'));
-        refErrors.forEach(e => console.error(`  - ${e.message}`));
+        refErrors.forEach((e) => console.error(`  - ${e.message}`));
         process.exit(1);
       }
 
       if (result.warnings) {
-        result.warnings.forEach(w => console.warn(chalk.yellow(`Warning: ${w.message}`)));
+        result.warnings.forEach((w) => console.warn(chalk.yellow(`Warning: ${w.message}`)));
       }
 
       console.log(chalk.green('✓ Workbook is valid'));
       console.log(`  Cells: ${result.workbook.cells.length}`);
       console.log(`  Version: ${result.workbook.version}`);
-
     } catch (e) {
       console.error(chalk.red(`Error: ${e instanceof Error ? e.message : e}`));
       process.exit(1);
@@ -215,7 +211,6 @@ program
       } else {
         console.log(output);
       }
-
     } catch (e) {
       console.error(chalk.red(`Error: ${e instanceof Error ? e.message : e}`));
       process.exit(1);
@@ -249,13 +244,11 @@ program
         console.log(chalk.bold('Execution Order:'));
         order.forEach((id, i) => {
           const node = graph.nodes.get(id)!;
-          const deps = node.dependencies.length > 0 
-            ? chalk.gray(` ← [${node.dependencies.join(', ')}]`)
-            : '';
+          const deps =
+            node.dependencies.length > 0 ? chalk.gray(` ← [${node.dependencies.join(', ')}]`) : '';
           console.log(`  ${i + 1}. ${chalk.cyan(id)} (${node.cell.type})${deps}`);
         });
       }
-
     } catch (e) {
       console.error(chalk.red(`Error: ${e instanceof Error ? e.message : e}`));
       process.exit(1);
@@ -271,7 +264,7 @@ program
   .option('-t, --template <template>', 'Template (basic|tensor-physics|data-science)', 'basic')
   .action((name: string, options) => {
     const filename = name.endsWith('.mtsw') ? name : `${name}.mtsw`;
-    
+
     if (existsSync(filename)) {
       console.error(chalk.red(`File already exists: ${filename}`));
       process.exit(1);
@@ -279,7 +272,7 @@ program
 
     const workbook = createTemplate(options.template, basename(name, extname(name)));
     const content = serializeWorkbook(workbook);
-    
+
     writeFileSync(filename, content, 'utf-8');
     console.log(chalk.green(`✓ Created ${filename}`));
   });
@@ -303,15 +296,14 @@ program
       }
 
       const format = options.format;
-      const outputFile = options.output || 
-        basename(file, extname(file)) + getExtension(format);
+      const outputFile = options.output || basename(file, extname(file)) + getExtension(format);
 
       switch (format) {
         case 'html':
           const html = exportToHTML(result.workbook);
           writeFileSync(outputFile, html, 'utf-8');
           break;
-        
+
         case 'ipynb':
           const ipynb = exportToJupyter(result.workbook);
           writeFileSync(outputFile, JSON.stringify(ipynb, null, 2), 'utf-8');
@@ -336,7 +328,6 @@ program
       }
 
       console.log(chalk.green(`✓ Exported to ${outputFile}`));
-
     } catch (e) {
       console.error(chalk.red(`Error: ${e instanceof Error ? e.message : e}`));
       process.exit(1);
@@ -358,7 +349,7 @@ program
     console.log(chalk.gray('  - KaTeX/MathJax for equations'));
     console.log(chalk.gray('  - Three.js for 3D visualizations'));
     console.log(chalk.gray('  - Reactive execution'));
-    
+
     // TODO: Implement server with express + socket.io
     console.log(chalk.red('\nServer not yet implemented'));
   });
@@ -481,31 +472,38 @@ function createTemplate(template: string, title: string): Workbook {
 
 function getExtension(format: string): string {
   switch (format) {
-    case 'html': return '.html';
-    case 'pdf': return '.pdf';
-    case 'ipynb': return '.ipynb';
-    case 'latex': return '.tex';
-    default: return '.txt';
+    case 'html':
+      return '.html';
+    case 'pdf':
+      return '.pdf';
+    case 'ipynb':
+      return '.ipynb';
+    case 'latex':
+      return '.tex';
+    default:
+      return '.txt';
   }
 }
 
 function exportToHTML(workbook: Workbook): string {
   const title = workbook.metadata?.title || 'MathTS Workbook';
-  
-  const cellsHTML = workbook.cells.map(cell => {
-    switch (cell.type) {
-      case 'markdown':
-        return `<div class="cell cell-markdown">${escapeHtml(cell.markdown)}</div>`;
-      case 'code':
-        return `<div class="cell cell-code"><pre><code class="language-typescript">${escapeHtml(cell.code)}</code></pre></div>`;
-      case 'tensor':
-        return `<div class="cell cell-tensor"><pre>${escapeHtml(cell.tensor)}</pre></div>`;
-      case 'equation':
-        return `<div class="cell cell-equation">$$${cell.equation}$$</div>`;
-      default:
-        return `<div class="cell cell-${cell.type}"><!-- ${cell.type} cell --></div>`;
-    }
-  }).join('\n\n');
+
+  const cellsHTML = workbook.cells
+    .map((cell) => {
+      switch (cell.type) {
+        case 'markdown':
+          return `<div class="cell cell-markdown">${escapeHtml(cell.markdown)}</div>`;
+        case 'code':
+          return `<div class="cell cell-code"><pre><code class="language-typescript">${escapeHtml(cell.code)}</code></pre></div>`;
+        case 'tensor':
+          return `<div class="cell cell-tensor"><pre>${escapeHtml(cell.tensor)}</pre></div>`;
+        case 'equation':
+          return `<div class="cell cell-equation">$$${cell.equation}$$</div>`;
+        default:
+          return `<div class="cell cell-${cell.type}"><!-- ${cell.type} cell --></div>`;
+      }
+    })
+    .join('\n\n');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -546,7 +544,7 @@ function exportToHTML(workbook: Workbook): string {
 }
 
 function exportToJupyter(workbook: Workbook): object {
-  const cells = workbook.cells.map(cell => {
+  const cells = workbook.cells.map((cell) => {
     switch (cell.type) {
       case 'markdown':
         return {
@@ -560,9 +558,7 @@ function exportToJupyter(workbook: Workbook): object {
           execution_count: null,
           metadata: {},
           outputs: [],
-          source: cell.code.split('\n').map((l, i, arr) => 
-            i < arr.length - 1 ? l + '\n' : l
-          ),
+          source: cell.code.split('\n').map((l, i, arr) => (i < arr.length - 1 ? l + '\n' : l)),
         };
       case 'equation':
         return {
@@ -608,33 +604,35 @@ function exportToLaTeX(workbook: Workbook): string {
   const title = workbook.metadata?.title || 'MathTS Workbook';
   const author = workbook.metadata?.author || '';
 
-  const content = workbook.cells.map(cell => {
-    switch (cell.type) {
-      case 'markdown':
-        // Simple markdown to LaTeX conversion
-        return cell.markdown
-          .replace(/^# (.+)$/gm, '\\section{$1}')
-          .replace(/^## (.+)$/gm, '\\subsection{$1}')
-          .replace(/^### (.+)$/gm, '\\subsubsection{$1}')
-          .replace(/\*\*(.+?)\*\*/g, '\\textbf{$1}')
-          .replace(/\*(.+?)\*/g, '\\textit{$1}')
-          .replace(/\$\$([^$]+)\$\$/g, '\\begin{equation}\n$1\n\\end{equation}')
-          .replace(/\$([^$]+)\$/g, '$$$1$$');
-      
-      case 'code':
-        return `\\begin{lstlisting}[language=TypeScript]\n${cell.code}\n\\end{lstlisting}`;
-      
-      case 'equation':
-        const label = cell.label ? `\\label{${cell.label}}` : '';
-        return `\\begin{equation}${label}\n${cell.equation}\n\\end{equation}`;
-      
-      case 'tensor':
-        return `\\begin{verbatim}\n${cell.tensor}\n\\end{verbatim}`;
-      
-      default:
-        return `% ${cell.type} cell: ${cell.id}`;
-    }
-  }).join('\n\n');
+  const content = workbook.cells
+    .map((cell) => {
+      switch (cell.type) {
+        case 'markdown':
+          // Simple markdown to LaTeX conversion
+          return cell.markdown
+            .replace(/^# (.+)$/gm, '\\section{$1}')
+            .replace(/^## (.+)$/gm, '\\subsection{$1}')
+            .replace(/^### (.+)$/gm, '\\subsubsection{$1}')
+            .replace(/\*\*(.+?)\*\*/g, '\\textbf{$1}')
+            .replace(/\*(.+?)\*/g, '\\textit{$1}')
+            .replace(/\$\$([^$]+)\$\$/g, '\\begin{equation}\n$1\n\\end{equation}')
+            .replace(/\$([^$]+)\$/g, '$$$1$$');
+
+        case 'code':
+          return `\\begin{lstlisting}[language=TypeScript]\n${cell.code}\n\\end{lstlisting}`;
+
+        case 'equation':
+          const label = cell.label ? `\\label{${cell.label}}` : '';
+          return `\\begin{equation}${label}\n${cell.equation}\n\\end{equation}`;
+
+        case 'tensor':
+          return `\\begin{verbatim}\n${cell.tensor}\n\\end{verbatim}`;
+
+        default:
+          return `% ${cell.type} cell: ${cell.id}`;
+      }
+    })
+    .join('\n\n');
 
   return `\\documentclass[11pt]{article}
 \\usepackage{amsmath,amssymb,amsfonts}

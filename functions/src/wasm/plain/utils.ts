@@ -16,7 +16,7 @@
  * @returns 1 if x is an integer, 0 otherwise
  */
 export function isIntegerNumber(x: f64): f64 {
-  return x === Math.floor(x) && isFinite(x) ? 1 : 0
+  return x === Math.floor(x) && isFinite(x) ? 1 : 0;
 }
 
 /**
@@ -25,7 +25,7 @@ export function isIntegerNumber(x: f64): f64 {
  * @returns 1 if x < 0, 0 otherwise
  */
 export function isNegativeNumber(x: f64): f64 {
-  return x < 0 ? 1 : 0
+  return x < 0 ? 1 : 0;
 }
 
 /**
@@ -34,7 +34,7 @@ export function isNegativeNumber(x: f64): f64 {
  * @returns 1 if x > 0, 0 otherwise
  */
 export function isPositiveNumber(x: f64): f64 {
-  return x > 0 ? 1 : 0
+  return x > 0 ? 1 : 0;
 }
 
 /**
@@ -43,7 +43,7 @@ export function isPositiveNumber(x: f64): f64 {
  * @returns 1 if x === 0, 0 otherwise
  */
 export function isZeroNumber(x: f64): f64 {
-  return x === 0 ? 1 : 0
+  return x === 0 ? 1 : 0;
 }
 
 /**
@@ -52,5 +52,5 @@ export function isZeroNumber(x: f64): f64 {
  * @returns 1 if x is NaN, 0 otherwise
  */
 export function isNaNNumber(x: f64): f64 {
-  return isNaN(x) ? 1 : 0
+  return isNaN(x) ? 1 : 0;
 }

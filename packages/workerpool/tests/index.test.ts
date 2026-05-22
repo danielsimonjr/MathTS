@@ -170,16 +170,9 @@ describe('@danielsimonjr/mathts-workerpool', () => {
 
     it('should perform matrix multiplication sequentially', async () => {
       // 2x3 matrix
-      const a = new Float64Array([
-        1, 2, 3,
-        4, 5, 6,
-      ]);
+      const a = new Float64Array([1, 2, 3, 4, 5, 6]);
       // 3x2 matrix
-      const b = new Float64Array([
-        7, 8,
-        9, 10,
-        11, 12,
-      ]);
+      const b = new Float64Array([7, 8, 9, 10, 11, 12]);
 
       const result = await pool.matmul(a, 2, 3, b, 2);
 
@@ -194,10 +187,7 @@ describe('@danielsimonjr/mathts-workerpool', () => {
 
     it('should transpose matrix sequentially', async () => {
       // 2x3 matrix
-      const data = new Float64Array([
-        1, 2, 3,
-        4, 5, 6,
-      ]);
+      const data = new Float64Array([1, 2, 3, 4, 5, 6]);
 
       const result = await pool.transpose(data, 2, 3);
 

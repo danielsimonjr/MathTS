@@ -1,44 +1,37 @@
-import { getSafeProperty } from '../../utils/customs.js'
-import { factory } from '../../utils/factory.js'
-import { isNode } from '../../utils/is.js'
-import { hasOwnProperty } from '../../utils/object.js'
-import { escape, stringify } from '../../utils/string.js'
+import { getSafeProperty } from '../../utils/customs.js';
+import { factory } from '../../utils/factory.js';
+import { isNode } from '../../utils/is.js';
+import { hasOwnProperty } from '../../utils/object.js';
+import { escape, stringify } from '../../utils/string.js';
 
 // Type definitions
 interface Node {
-  _compile: (
-    math: Record<string, any>,
-    argNames: Record<string, boolean>
-  ) => CompileFunction
-  _ifNode: (node: any) => Node
-  toString: (options?: StringOptions) => string
-  toHTML: (options?: StringOptions) => string
-  toTex: (options?: StringOptions) => string
+  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
+  _ifNode: (node: any) => Node;
+  toString: (options?: StringOptions) => string;
+  toHTML: (options?: StringOptions) => string;
+  toTex: (options?: StringOptions) => string;
 }
 
-type CompileFunction = (
-  scope: any,
-  args: Record<string, any>,
-  context: any
-) => any
+type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
 
 interface StringOptions {
-  [key: string]: any
+  [key: string]: any;
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node
+  Node: new (...args: any[]) => Node;
 }
 
-const name = 'ObjectNode'
-const dependencies = ['Node']
+const name = 'ObjectNode';
+const dependencies = ['Node'];
 
 export const createObjectNode = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ Node }: Dependencies) => {
     class ObjectNode extends Node {
-      properties: Record<string, Node>
+      properties: Record<string, Node>;
 
       /**
        * @constructor ObjectNode
@@ -47,27 +40,27 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @param {Object.<string, Node>} [properties]   object with key/value pairs
        */
       constructor(properties?: Record<string, Node>) {
-        super()
-        this.properties = properties || {}
+        super();
+        this.properties = properties || {};
 
         // validate input
         if (properties) {
           if (
             !(typeof properties === 'object') ||
             !Object.keys(properties).every(function (key: string): boolean {
-              return isNode(properties[key])
+              return isNode(properties[key]);
             })
           ) {
-            throw new TypeError('Object containing Nodes expected')
+            throw new TypeError('Object containing Nodes expected');
           }
         }
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isObjectNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -84,21 +77,18 @@ export const createObjectNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error: method signature matches MathNode interface
-      _compile(
-        math: Record<string, any>,
-        argNames: Record<string, boolean>
-      ): CompileFunction {
-        const evalEntries: Record<string, CompileFunction> = {}
+      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+        const evalEntries: Record<string, CompileFunction> = {};
 
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
             // we stringify/parse the key here to resolve unicode characters,
             // so you cannot create a key like {"co\\u006Estructor": null}
-            const stringifiedKey = stringify(key)
-            const parsedKey = JSON.parse(stringifiedKey)
-            const prop = getSafeProperty(this.properties, key)
+            const stringifiedKey = stringify(key);
+            const parsedKey = JSON.parse(stringifiedKey);
+            const prop = getSafeProperty(this.properties, key);
 
-            evalEntries[parsedKey] = prop._compile(math, argNames)
+            evalEntries[parsedKey] = prop._compile(math, argNames);
           }
         }
 
@@ -107,32 +97,26 @@ export const createObjectNode = /* #__PURE__ */ factory(
           args: Record<string, any>,
           context: any
         ): Record<string, any> {
-          const obj: Record<string, any> = {}
+          const obj: Record<string, any> = {};
 
           for (const key in evalEntries) {
             if (hasOwnProperty(evalEntries, key)) {
-              obj[key] = evalEntries[key](scope, args, context)
+              obj[key] = evalEntries[key](scope, args, context);
             }
           }
 
-          return obj
-        }
+          return obj;
+        };
       }
 
       /**
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: Node, path: string, parent: ObjectNode) => void
-      ): void {
+      forEach(callback: (child: Node, path: string, parent: ObjectNode) => void): void {
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
-            callback(
-              this.properties[key],
-              'properties[' + stringify(key) + ']',
-              this
-            )
+            callback(this.properties[key], 'properties[' + stringify(key) + ']', this);
           }
         }
       }
@@ -143,22 +127,16 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node): Node} callback
        * @returns {ObjectNode} Returns a transformed copy of the node
        */
-      map(
-        callback: (child: Node, path: string, parent: ObjectNode) => Node
-      ): ObjectNode {
-        const properties: Record<string, Node> = {}
+      map(callback: (child: Node, path: string, parent: ObjectNode) => Node): ObjectNode {
+        const properties: Record<string, Node> = {};
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
             properties[key] = this._ifNode(
-              callback(
-                this.properties[key],
-                'properties[' + stringify(key) + ']',
-                this
-              )
-            )
+              callback(this.properties[key], 'properties[' + stringify(key) + ']', this)
+            );
           }
         }
-        return new ObjectNode(properties)
+        return new ObjectNode(properties);
       }
 
       /**
@@ -166,13 +144,13 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @return {ObjectNode}
        */
       clone(): ObjectNode {
-        const properties: Record<string, Node> = {}
+        const properties: Record<string, Node> = {};
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
-            properties[key] = this.properties[key]
+            properties[key] = this.properties[key];
           }
         }
-        return new ObjectNode(properties)
+        return new ObjectNode(properties);
       }
 
       /**
@@ -182,15 +160,13 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @override
        */
       _toString(options?: StringOptions): string {
-        const entries: string[] = []
+        const entries: string[] = [];
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
-            entries.push(
-              stringify(key) + ': ' + this.properties[key].toString(options)
-            )
+            entries.push(stringify(key) + ': ' + this.properties[key].toString(options));
           }
         }
-        return '{' + entries.join(', ') + '}'
+        return '{' + entries.join(', ') + '}';
       }
 
       /**
@@ -200,8 +176,8 @@ export const createObjectNode = /* #__PURE__ */ factory(
       toJSON(): Record<string, any> {
         return {
           mathjs: name,
-          properties: this.properties
-        }
+          properties: this.properties,
+        };
       }
 
       /**
@@ -212,7 +188,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @returns {ObjectNode}
        */
       static fromJSON(json: { properties: Record<string, Node> }): ObjectNode {
-        return new ObjectNode(json.properties)
+        return new ObjectNode(json.properties);
       }
 
       /**
@@ -222,7 +198,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @override
        */
       _toHTML(options?: StringOptions): string {
-        const entries: string[] = []
+        const entries: string[] = [];
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
             entries.push(
@@ -233,14 +209,14 @@ export const createObjectNode = /* #__PURE__ */ factory(
                 'math-property-assignment-operator math-binary-operator">' +
                 ':</span>' +
                 this.properties[key].toHTML(options)
-            )
+            );
           }
         }
         return (
           '<span class="math-parenthesis math-curly-parenthesis">{</span>' +
           entries.join('<span class="math-separator">,</span>') +
           '<span class="math-parenthesis math-curly-parenthesis">}</span>'
-        )
+        );
       }
 
       /**
@@ -249,23 +225,16 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toTex(options?: StringOptions): string {
-        const entries: string[] = []
+        const entries: string[] = [];
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
             entries.push(
-              '\\mathbf{' +
-                key +
-                ':} & ' +
-                this.properties[key].toTex(options) +
-                '\\\\'
-            )
+              '\\mathbf{' + key + ':} & ' + this.properties[key].toTex(options) + '\\\\'
+            );
           }
         }
-        const tex =
-          '\\left\\{\\begin{array}{ll}' +
-          entries.join('\n') +
-          '\\end{array}\\right\\}'
-        return tex
+        const tex = '\\left\\{\\begin{array}{ll}' + entries.join('\n') + '\\end{array}\\right\\}';
+        return tex;
       }
     }
 
@@ -273,10 +242,10 @@ export const createObjectNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(ObjectNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return ObjectNode
+    return ObjectNode;
   },
   { isClass: true, isNode: true }
-)
+);

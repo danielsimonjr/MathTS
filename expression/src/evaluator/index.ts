@@ -1,1 +1,1 @@
-export { createEvaluate, compileExpression } from './evaluate.js'
+export { createEvaluate, compileExpression } from './evaluate.js';

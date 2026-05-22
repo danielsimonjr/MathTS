@@ -1,57 +1,57 @@
-import { clone } from '../utils/object.js'
-import { format } from '../utils/string.js'
-import { factory } from '../utils/factory.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { clone } from '../utils/object.js';
+import { format } from '../utils/string.js';
+import { factory } from '../utils/factory.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Minimum matrix size (rows * cols) for WASM to be beneficial
-const WASM_TRANSPOSE_THRESHOLD = 100
+const WASM_TRANSPOSE_THRESHOLD = 100;
 
 interface MatrixData {
-  data?: any[] | any[][]
-  values?: any[]
-  index?: number[]
-  ptr?: number[]
-  size: number[]
-  datatype?: string
+  data?: any[] | any[][];
+  values?: any[];
+  index?: number[];
+  ptr?: number[];
+  size: number[];
+  datatype?: string;
 }
 
 interface DenseMatrix {
-  _data: any[] | any[][]
-  _size: number[]
-  _datatype?: string
-  storage(): 'dense'
-  size(): number[]
-  getDataType(): string
-  createDenseMatrix(data: MatrixData): DenseMatrix
-  valueOf(): any[] | any[][]
-  clone(): DenseMatrix
+  _data: any[] | any[][];
+  _size: number[];
+  _datatype?: string;
+  storage(): 'dense';
+  size(): number[];
+  getDataType(): string;
+  createDenseMatrix(data: MatrixData): DenseMatrix;
+  valueOf(): any[] | any[][];
+  clone(): DenseMatrix;
 }
 
 interface SparseMatrix {
-  _values?: any[]
-  _index?: number[]
-  _ptr?: number[]
-  _size: number[]
-  _datatype?: string
-  _data?: any
-  storage(): 'sparse'
-  size(): number[]
-  getDataType(): string
-  createSparseMatrix(data: MatrixData): SparseMatrix
-  valueOf(): any[] | any[][]
-  clone(): SparseMatrix
+  _values?: any[];
+  _index?: number[];
+  _ptr?: number[];
+  _size: number[];
+  _datatype?: string;
+  _data?: any;
+  storage(): 'sparse';
+  size(): number[];
+  getDataType(): string;
+  createSparseMatrix(data: MatrixData): SparseMatrix;
+  valueOf(): any[] | any[][];
+  clone(): SparseMatrix;
 }
 
-type Matrix = DenseMatrix | SparseMatrix
+type Matrix = DenseMatrix | SparseMatrix;
 
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix
+  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
 }
 
 interface TransposeDependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
 }
 
 /**
@@ -59,35 +59,31 @@ interface TransposeDependencies {
  */
 function isPlainNumberMatrix(matrix: any[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
-    const row = matrix[i]
+    const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
       if (typeof row[j] !== 'number') {
-        return false
+        return false;
       }
     }
   }
-  return true
+  return true;
 }
 
 /**
  * Flatten a 2D array to a Float64Array in row-major order
  */
-function flattenToFloat64(
-  matrix: number[][],
-  rows: number,
-  cols: number
-): Float64Array {
-  const result = new Float64Array(rows * cols)
+function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
+  const result = new Float64Array(rows * cols);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j]
+      result[i * cols + j] = matrix[i][j];
     }
   }
-  return result
+  return result;
 }
 
-const name = 'transpose'
-const dependencies = ['typed', 'matrix']
+const name = 'transpose';
+const dependencies = ['typed', 'matrix'];
 
 export const createTranspose = /* #__PURE__ */ factory(
   name,
@@ -118,8 +114,8 @@ export const createTranspose = /* #__PURE__ */ factory(
     return typed(name, {
       Array: (x: any[]): any[] => transposeMatrix(matrix(x)).valueOf() as any[],
       Matrix: transposeMatrix,
-      any: clone // scalars
-    })
+      any: clone, // scalars
+    });
 
     /**
      * Transpose a matrix
@@ -128,55 +124,51 @@ export const createTranspose = /* #__PURE__ */ factory(
      */
     function transposeMatrix(x: Matrix): Matrix {
       // matrix size
-      const size = x.size()
+      const size = x.size();
 
       // result
-      let c: Matrix
+      let c: Matrix;
 
       // process dimensions
       switch (size.length) {
         case 1:
           // vector
-          c = x.clone()
-          break
+          c = x.clone();
+          break;
 
         case 2:
           {
             // rows and columns
-            const rows = size[0]
-            const columns = size[1]
+            const rows = size[0];
+            const columns = size[1];
 
             // check columns
             if (columns === 0) {
               // throw exception
               throw new RangeError(
-                'Cannot transpose a 2D matrix with no columns (size: ' +
-                  format(size, {}) +
-                  ')'
-              )
+                'Cannot transpose a 2D matrix with no columns (size: ' + format(size, {}) + ')'
+              );
             }
 
             // process storage format
             switch (x.storage()) {
               case 'dense':
-                c = _denseTranspose(x as DenseMatrix, rows, columns)
-                break
+                c = _denseTranspose(x as DenseMatrix, rows, columns);
+                break;
               case 'sparse':
-                c = _sparseTranspose(x as SparseMatrix, rows, columns)
-                break
+                c = _sparseTranspose(x as SparseMatrix, rows, columns);
+                break;
             }
           }
-          break
+          break;
 
         default:
           // multi dimensional
           throw new RangeError(
-            'Matrix must be a vector or two dimensional (size: ' +
-              format(size, {}) +
-              ')'
-          )
+            'Matrix must be a vector or two dimensional (size: ' + format(size, {}) + ')'
+          );
       }
-      return c
+      return c;
     }
 
     /**
@@ -186,44 +178,36 @@ export const createTranspose = /* #__PURE__ */ factory(
      * @param columns - Number of columns
      * @returns Transposed dense matrix
      */
-    function _denseTranspose(
-      m: DenseMatrix,
-      rows: number,
-      columns: number
-    ): DenseMatrix {
+    function _denseTranspose(m: DenseMatrix, rows: number, columns: number): DenseMatrix {
       // matrix array
-      const data = m._data as any[][]
+      const data = m._data as any[][];
 
       // Try WASM for large matrices with plain numbers
-      const wasm = wasmLoader.getModule()
-      if (
-        wasm &&
-        rows * columns >= WASM_TRANSPOSE_THRESHOLD &&
-        isPlainNumberMatrix(data)
-      ) {
+      const wasm = wasmLoader.getModule();
+      if (wasm && rows * columns >= WASM_TRANSPOSE_THRESHOLD && isPlainNumberMatrix(data)) {
         try {
-          const flat = flattenToFloat64(data, rows, columns)
-          const input = wasmLoader.allocateFloat64Array(flat)
-          const output = wasmLoader.allocateFloat64ArrayEmpty(rows * columns)
+          const flat = flattenToFloat64(data, rows, columns);
+          const input = wasmLoader.allocateFloat64Array(flat);
+          const output = wasmLoader.allocateFloat64ArrayEmpty(rows * columns);
           try {
-            wasm.transpose(input.ptr, rows, columns, output.ptr)
+            wasm.transpose(input.ptr, rows, columns, output.ptr);
             // Convert flat result back to 2D array
-            const transposed: number[][] = []
+            const transposed: number[][] = [];
             for (let j = 0; j < columns; j++) {
-              const row: number[] = []
+              const row: number[] = [];
               for (let i = 0; i < rows; i++) {
-                row[i] = output.array[j * rows + i]
+                row[i] = output.array[j * rows + i];
               }
-              transposed[j] = row
+              transposed[j] = row;
             }
             return m.createDenseMatrix({
               data: transposed,
               size: [columns, rows],
-              datatype: m._datatype
-            })
+              datatype: m._datatype,
+            });
           } finally {
-            wasmLoader.free(input.ptr)
-            wasmLoader.free(output.ptr)
+            wasmLoader.free(input.ptr);
+            wasmLoader.free(output.ptr);
           }
         } catch {
           // Fall back to JS implementation on WASM error
@@ -231,24 +215,24 @@ export const createTranspose = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback
-      const transposed: any[][] = []
-      let transposedRow: any[]
+      const transposed: any[][] = [];
+      let transposedRow: any[];
       // loop columns
       for (let j = 0; j < columns; j++) {
         // initialize row
-        transposedRow = transposed[j] = []
+        transposedRow = transposed[j] = [];
         // loop rows
         for (let i = 0; i < rows; i++) {
           // set data
-          transposedRow[i] = clone(data[i][j])
+          transposedRow[i] = clone(data[i][j]);
         }
       }
       // return matrix
       return m.createDenseMatrix({
         data: transposed,
         size: [columns, rows],
-        datatype: m._datatype
-      })
+        datatype: m._datatype,
+      });
     }
 
     /**
@@ -258,55 +242,51 @@ export const createTranspose = /* #__PURE__ */ factory(
      * @param columns - Number of columns
      * @returns Transposed sparse matrix
      */
-    function _sparseTranspose(
-      m: SparseMatrix,
-      rows: number,
-      columns: number
-    ): SparseMatrix {
+    function _sparseTranspose(m: SparseMatrix, rows: number, columns: number): SparseMatrix {
       // matrix arrays
-      const values = m._values
-      const index = m._index!
-      const ptr = m._ptr!
+      const values = m._values;
+      const index = m._index!;
+      const ptr = m._ptr!;
       // result matrices
-      const cvalues: any[] | undefined = values ? [] : undefined
-      const cindex: number[] = []
-      const cptr: number[] = []
+      const cvalues: any[] | undefined = values ? [] : undefined;
+      const cindex: number[] = [];
+      const cptr: number[] = [];
       // row counts
-      const w: number[] = []
+      const w: number[] = [];
       for (let x = 0; x < rows; x++) {
-        w[x] = 0
+        w[x] = 0;
       }
       // vars
-      let p: number, l: number, j: number
+      let p: number, l: number, j: number;
       // loop values in matrix
       for (p = 0, l = index.length; p < l; p++) {
         // number of values in row
-        w[index[p]]++
+        w[index[p]]++;
       }
       // cumulative sum
-      let sum = 0
+      let sum = 0;
       // initialize cptr with the cummulative sum of row counts
       for (let i = 0; i < rows; i++) {
         // update cptr
-        cptr.push(sum)
+        cptr.push(sum);
         // update sum
-        sum += w[i]
+        sum += w[i];
         // update w
-        w[i] = cptr[i]
+        w[i] = cptr[i];
       }
       // update cptr
-      cptr.push(sum)
+      cptr.push(sum);
       // loop columns
       for (j = 0; j < columns; j++) {
         // values & index in column
         for (let k0 = ptr[j], k1 = ptr[j + 1], k = k0; k < k1; k++) {
           // C values & index
-          const q = w[index[k]]++
+          const q = w[index[k]]++;
           // C[j, i] = A[i, j]
-          cindex[q] = j
+          cindex[q] = j;
           // check we need to process values (pattern matrix)
           if (values) {
-            cvalues![q] = clone(values[k])
+            cvalues![q] = clone(values[k]);
           }
         }
       }
@@ -316,8 +296,8 @@ export const createTranspose = /* #__PURE__ */ factory(
         index: cindex,
         ptr: cptr,
         size: [columns, rows],
-        datatype: m._datatype
-      })
+        datatype: m._datatype,
+      });
     }
   }
-)
+);

@@ -1,24 +1,18 @@
-import {
-  isBigNumber,
-  isComplex,
-  isNode,
-  isUnit,
-  typeOf
-} from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
-import { getPrecedence } from '../operators.js'
-import type { MathNode } from './Node.js'
+import { isBigNumber, isComplex, isNode, isUnit, typeOf } from '../../utils/is.js';
+import { factory } from '../../utils/factory.js';
+import { getPrecedence } from '../operators.js';
+import type { MathNode } from './Node.js';
 
 interface NodeConstructor {
-  new (...args: any[]): MathNode
+  new (...args: any[]): MathNode;
 }
 
 interface ConditionalNodeDependencies {
-  Node: NodeConstructor
+  Node: NodeConstructor;
 }
 
-const name = 'ConditionalNode'
-const dependencies = ['Node']
+const name = 'ConditionalNode';
+const dependencies = ['Node'];
 
 export const createConditionalNode = /* #__PURE__ */ factory(
   name,
@@ -35,36 +29,34 @@ export const createConditionalNode = /* #__PURE__ */ factory(
         typeof condition === 'boolean' ||
         typeof condition === 'string'
       ) {
-        return !!condition
+        return !!condition;
       }
 
       if (condition) {
         if (isBigNumber(condition)) {
-          return !(condition as any).isZero()
+          return !(condition as any).isZero();
         }
 
         if (isComplex(condition)) {
-          return !!(condition.re || condition.im)
+          return !!(condition.re || condition.im);
         }
 
         if (isUnit(condition)) {
-          return !!(condition as any).value
+          return !!(condition as any).value;
         }
       }
 
       if (condition === null || condition === undefined) {
-        return false
+        return false;
       }
 
-      throw new TypeError(
-        'Unsupported type of condition "' + typeOf(condition) + '"'
-      )
+      throw new TypeError('Unsupported type of condition "' + typeOf(condition) + '"');
     }
 
     class ConditionalNode extends Node {
-      condition: MathNode
-      trueExpr: MathNode
-      falseExpr: MathNode
+      condition: MathNode;
+      trueExpr: MathNode;
+      falseExpr: MathNode;
 
       /**
        * A lazy evaluating conditional operator: 'condition ? trueExpr : falseExpr'
@@ -76,32 +68,28 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @constructor ConditionalNode
        * @extends {Node}
        */
-      constructor(
-        condition: MathNode,
-        trueExpr: MathNode,
-        falseExpr: MathNode
-      ) {
-        super()
+      constructor(condition: MathNode, trueExpr: MathNode, falseExpr: MathNode) {
+        super();
         if (!isNode(condition)) {
-          throw new TypeError('Parameter condition must be a Node')
+          throw new TypeError('Parameter condition must be a Node');
         }
         if (!isNode(trueExpr)) {
-          throw new TypeError('Parameter trueExpr must be a Node')
+          throw new TypeError('Parameter trueExpr must be a Node');
         }
         if (!isNode(falseExpr)) {
-          throw new TypeError('Parameter falseExpr must be a Node')
+          throw new TypeError('Parameter falseExpr must be a Node');
         }
 
-        this.condition = condition
-        this.trueExpr = trueExpr
-        this.falseExpr = falseExpr
+        this.condition = condition;
+        this.trueExpr = trueExpr;
+        this.falseExpr = falseExpr;
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isConditionalNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -121,31 +109,25 @@ export const createConditionalNode = /* #__PURE__ */ factory(
         math: any,
         argNames: Record<string, boolean>
       ): (scope: any, args: any, context: any) => any {
-        const evalCondition = this.condition._compile(math, argNames)
-        const evalTrueExpr = this.trueExpr._compile(math, argNames)
-        const evalFalseExpr = this.falseExpr._compile(math, argNames)
+        const evalCondition = this.condition._compile(math, argNames);
+        const evalTrueExpr = this.trueExpr._compile(math, argNames);
+        const evalFalseExpr = this.falseExpr._compile(math, argNames);
 
-        return function evalConditionalNode(
-          scope: any,
-          args: any,
-          context: any
-        ) {
+        return function evalConditionalNode(scope: any, args: any, context: any) {
           return testCondition(evalCondition(scope, args, context))
             ? evalTrueExpr(scope, args, context)
-            : evalFalseExpr(scope, args, context)
-        }
+            : evalFalseExpr(scope, args, context);
+        };
       }
 
       /**
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: MathNode, path: string, parent: MathNode) => void
-      ): void {
-        callback(this.condition, 'condition', this as any)
-        callback(this.trueExpr, 'trueExpr', this as any)
-        callback(this.falseExpr, 'falseExpr', this as any)
+      forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
+        callback(this.condition, 'condition', this as any);
+        callback(this.trueExpr, 'trueExpr', this as any);
+        callback(this.falseExpr, 'falseExpr', this as any);
       }
 
       /**
@@ -161,7 +143,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
           this._ifNode(callback(this.condition, 'condition', this as any)),
           this._ifNode(callback(this.trueExpr, 'trueExpr', this as any)),
           this._ifNode(callback(this.falseExpr, 'falseExpr', this as any))
-        )
+        );
       }
 
       /**
@@ -169,11 +151,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @return {ConditionalNode}
        */
       clone(): ConditionalNode {
-        return new ConditionalNode(
-          this.condition,
-          this.trueExpr,
-          this.falseExpr
-        )
+        return new ConditionalNode(this.condition, this.trueExpr, this.falseExpr);
       }
 
       /**
@@ -182,64 +160,58 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toString(options?: any): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
-        const precedence = getPrecedence(
-          this,
-          parenthesis,
-          options && options.implicit,
-          undefined
-        )
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        const precedence = getPrecedence(this, parenthesis, options && options.implicit, undefined);
 
         // Enclose Arguments in parentheses if they are an OperatorNode
         // or have lower or equal precedence
         // NOTE: enclosing all OperatorNodes in parentheses is a decision
         // purely based on aesthetics and readability
-        let condition = this.condition.toString(options)
+        let condition = this.condition.toString(options);
         const conditionPrecedence = getPrecedence(
           this.condition,
           parenthesis,
           options && options.implicit,
           undefined
-        )
+        );
         if (
           parenthesis === 'all' ||
           this.condition.type === 'OperatorNode' ||
           (conditionPrecedence !== null && conditionPrecedence <= precedence)
         ) {
-          condition = '(' + condition + ')'
+          condition = '(' + condition + ')';
         }
 
-        let trueExpr = this.trueExpr.toString(options)
+        let trueExpr = this.trueExpr.toString(options);
         const truePrecedence = getPrecedence(
           this.trueExpr,
           parenthesis,
           options && options.implicit,
           undefined
-        )
+        );
         if (
           parenthesis === 'all' ||
           this.trueExpr.type === 'OperatorNode' ||
           (truePrecedence !== null && truePrecedence <= precedence)
         ) {
-          trueExpr = '(' + trueExpr + ')'
+          trueExpr = '(' + trueExpr + ')';
         }
 
-        let falseExpr = this.falseExpr.toString(options)
+        let falseExpr = this.falseExpr.toString(options);
         const falsePrecedence = getPrecedence(
           this.falseExpr,
           parenthesis,
           options && options.implicit,
           undefined
-        )
+        );
         if (
           parenthesis === 'all' ||
           this.falseExpr.type === 'OperatorNode' ||
           (falsePrecedence !== null && falsePrecedence <= precedence)
         ) {
-          falseExpr = '(' + falseExpr + ')'
+          falseExpr = '(' + falseExpr + ')';
         }
-        return condition + ' ? ' + trueExpr + ' : ' + falseExpr
+        return condition + ' ? ' + trueExpr + ' : ' + falseExpr;
       }
 
       /**
@@ -247,17 +219,17 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @returns {Object}
        */
       toJSON(): {
-        mathjs: string
-        condition: MathNode
-        trueExpr: MathNode
-        falseExpr: MathNode
+        mathjs: string;
+        condition: MathNode;
+        trueExpr: MathNode;
+        falseExpr: MathNode;
       } {
         return {
           mathjs: name,
           condition: this.condition,
           trueExpr: this.trueExpr,
-          falseExpr: this.falseExpr
-        }
+          falseExpr: this.falseExpr,
+        };
       }
 
       /**
@@ -274,15 +246,11 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @returns {ConditionalNode}
        */
       static fromJSON(json: {
-        condition: MathNode
-        trueExpr: MathNode
-        falseExpr: MathNode
+        condition: MathNode;
+        trueExpr: MathNode;
+        falseExpr: MathNode;
       }): ConditionalNode {
-        return new ConditionalNode(
-          json.condition,
-          json.trueExpr,
-          json.falseExpr
-        )
+        return new ConditionalNode(json.condition, json.trueExpr, json.falseExpr);
       }
 
       /**
@@ -291,26 +259,20 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toHTML(options?: any): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
-        const precedence = getPrecedence(
-          this,
-          parenthesis,
-          options && options.implicit,
-          undefined
-        )
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        const precedence = getPrecedence(this, parenthesis, options && options.implicit, undefined);
 
         // Enclose Arguments in parentheses if they are an OperatorNode
         // or have lower or equal precedence
         // NOTE: enclosing all OperatorNodes in parentheses is a decision
         // purely based on aesthetics and readability
-        let condition = this.condition.toHTML(options)
+        let condition = this.condition.toHTML(options);
         const conditionPrecedence = getPrecedence(
           this.condition,
           parenthesis,
           options && options.implicit,
           undefined
-        )
+        );
         if (
           parenthesis === 'all' ||
           this.condition.type === 'OperatorNode' ||
@@ -319,16 +281,16 @@ export const createConditionalNode = /* #__PURE__ */ factory(
           condition =
             '<span class="math-parenthesis math-round-parenthesis">(</span>' +
             condition +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>'
+            '<span class="math-parenthesis math-round-parenthesis">)</span>';
         }
 
-        let trueExpr = this.trueExpr.toHTML(options)
+        let trueExpr = this.trueExpr.toHTML(options);
         const truePrecedence = getPrecedence(
           this.trueExpr,
           parenthesis,
           options && options.implicit,
           undefined
-        )
+        );
         if (
           parenthesis === 'all' ||
           this.trueExpr.type === 'OperatorNode' ||
@@ -337,16 +299,16 @@ export const createConditionalNode = /* #__PURE__ */ factory(
           trueExpr =
             '<span class="math-parenthesis math-round-parenthesis">(</span>' +
             trueExpr +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>'
+            '<span class="math-parenthesis math-round-parenthesis">)</span>';
         }
 
-        let falseExpr = this.falseExpr.toHTML(options)
+        let falseExpr = this.falseExpr.toHTML(options);
         const falsePrecedence = getPrecedence(
           this.falseExpr,
           parenthesis,
           options && options.implicit,
           undefined
-        )
+        );
         if (
           parenthesis === 'all' ||
           this.falseExpr.type === 'OperatorNode' ||
@@ -355,7 +317,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
           falseExpr =
             '<span class="math-parenthesis math-round-parenthesis">(</span>' +
             falseExpr +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>'
+            '<span class="math-parenthesis math-round-parenthesis">)</span>';
         }
         return (
           condition +
@@ -363,7 +325,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
           trueExpr +
           '<span class="math-operator math-conditional-operator">:</span>' +
           falseExpr
-        )
+        );
       }
 
       /**
@@ -380,7 +342,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
           '}\\\\{' +
           this.falseExpr.toTex(options) +
           '}, &\\quad{\\text{otherwise}}\\end{cases}'
-        )
+        );
       }
     }
 
@@ -388,10 +350,10 @@ export const createConditionalNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(ConditionalNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return ConditionalNode
+    return ConditionalNode;
   },
   { isClass: true, isNode: true }
-)
+);

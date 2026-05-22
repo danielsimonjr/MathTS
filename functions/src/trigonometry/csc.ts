@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import type { Complex } from '../type/complex/Complex.js'
-import { cscNumber } from '../plain/number/index.js'
-import { createTrigUnit } from './trigUnit.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import type { Complex } from '../type/complex/Complex.js';
+import { cscNumber } from '../plain/number/index.js';
+import { createTrigUnit } from './trigUnit.js';
 
 // Type definitions for csc
 interface BigNumberConstructor {
-  new (value: number): BigNumber
+  new (value: number): BigNumber;
 }
 
 interface CscDependencies {
-  typed: TypedFunction
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'csc'
-const dependencies = ['typed', 'BigNumber']
+const name = 'csc';
+const dependencies = ['typed', 'BigNumber'];
 
 export const createCsc = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, BigNumber }: CscDependencies) => {
-    const trigUnit = createTrigUnit({ typed })
+    const trigUnit = createTrigUnit({ typed });
 
     /**
      * Calculate the cosecant of a value, defined as `csc(x) = 1/sin(x)`.
@@ -52,9 +52,11 @@ export const createCsc = /* #__PURE__ */ factory(
         number: cscNumber,
         Complex: (x: Complex) => x.csc(),
         BigNumber: (x: BigNumber): BigNumber =>
-          new BigNumber(1).div((x as unknown as { sin(): unknown }).sin() as any) as unknown as BigNumber
+          new BigNumber(1).div(
+            (x as unknown as { sin(): unknown }).sin() as any
+          ) as unknown as BigNumber,
       },
       trigUnit
-    ) as TypedFunction
+    ) as TypedFunction;
   }
-)
+);

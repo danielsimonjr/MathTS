@@ -1,81 +1,81 @@
-import { isInteger } from '../../utils/number.js'
-import { factory } from '../../utils/factory.js'
-import { createCsSqr } from '../sparse/csSqr.js'
-import { createCsLu } from '../sparse/csLu.js'
+import { isInteger } from '../../utils/number.js';
+import { factory } from '../../utils/factory.js';
+import { createCsSqr } from '../sparse/csSqr.js';
+import { createCsLu } from '../sparse/csLu.js';
 
 // Type definitions
 interface TypedFunction<T = any> {
-  (...args: any[]): T
+  (...args: any[]): T;
 }
 
 interface SparseMatrix {
-  type: 'SparseMatrix'
-  isSparseMatrix: true
-  _values?: any[]
-  _index: number[]
-  _ptr: number[]
-  _size: number[]
-  _datatype?: string
-  toString(): string
+  type: 'SparseMatrix';
+  isSparseMatrix: true;
+  _values?: any[];
+  _index: number[];
+  _ptr: number[];
+  _size: number[];
+  _datatype?: string;
+  toString(): string;
 }
 
 interface SparseMatrixConstructor {
   new (data: {
-    values?: any[]
-    index: number[]
-    ptr: number[]
-    size: number[]
-    datatype?: string
-  }): SparseMatrix
+    values?: any[];
+    index: number[];
+    ptr: number[];
+    size: number[];
+    datatype?: string;
+  }): SparseMatrix;
 }
 
 interface SymbolicAnalysis {
-  q: number[] | null
-  lnz: number
-  unz: number
-  parent: number[]
-  cp: number[]
-  leftmost: number[]
-  m2: number
-  pinv: number[]
+  q: number[] | null;
+  lnz: number;
+  unz: number;
+  parent: number[];
+  cp: number[];
+  leftmost: number[];
+  m2: number;
+  pinv: number[];
 }
 
 interface LUDecomposition {
-  L: SparseMatrix
-  U: SparseMatrix
-  pinv: number[]
+  L: SparseMatrix;
+  U: SparseMatrix;
+  pinv: number[];
 }
 
 interface SLUResult {
-  L: SparseMatrix
-  U: SparseMatrix
-  p: number[]
-  q: number[] | null
-  toString(): string
+  L: SparseMatrix;
+  U: SparseMatrix;
+  p: number[];
+  q: number[] | null;
+  toString(): string;
 }
 
 interface CsSqrFunction {
-  (order: number, A: SparseMatrix, qr: boolean): SymbolicAnalysis
+  (order: number, A: SparseMatrix, qr: boolean): SymbolicAnalysis;
 }
 
 interface CsLuFunction {
-  (A: SparseMatrix, S: SymbolicAnalysis, threshold: number): LUDecomposition
+  (A: SparseMatrix, S: SymbolicAnalysis, threshold: number): LUDecomposition;
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  abs: TypedFunction
-  add: TypedFunction
-  multiply: TypedFunction
-  transpose: TypedFunction
-  divideScalar: TypedFunction
-  subtract: TypedFunction
-  larger: TypedFunction<boolean>
-  largerEq: TypedFunction<boolean>
-  SparseMatrix: SparseMatrixConstructor
+  typed: TypedFunction;
+  abs: TypedFunction;
+  add: TypedFunction;
+  multiply: TypedFunction;
+  transpose: TypedFunction;
+  divideScalar: TypedFunction;
+  subtract: TypedFunction;
+  larger: TypedFunction<boolean>;
+  largerEq: TypedFunction<boolean>;
+  SparseMatrix: SparseMatrixConstructor;
 }
 
-const name = 'slu'
+const name = 'slu';
 const dependencies = [
   'typed',
   'abs',
@@ -86,8 +86,8 @@ const dependencies = [
   'subtract',
   'larger',
   'largerEq',
-  'SparseMatrix'
-]
+  'SparseMatrix',
+];
 
 export const createSlu = /* #__PURE__ */ factory(
   name,
@@ -102,9 +102,9 @@ export const createSlu = /* #__PURE__ */ factory(
     subtract,
     larger,
     largerEq,
-    SparseMatrix
+    SparseMatrix,
   }: Dependencies) => {
-    const csSqr = createCsSqr({ add, multiply, transpose }) as CsSqrFunction
+    const csSqr = createCsSqr({ add, multiply, transpose }) as CsSqrFunction;
     const csLu = createCsLu({
       abs,
       divideScalar,
@@ -112,8 +112,8 @@ export const createSlu = /* #__PURE__ */ factory(
       subtract,
       larger,
       largerEq,
-      SparseMatrix
-    }) as CsLuFunction
+      SparseMatrix,
+    }) as CsLuFunction;
 
     /**
      * Calculate the Sparse Matrix LU decomposition with full pivoting. Sparse Matrix `A` is decomposed in two matrices (`L`, `U`) and two permutation vectors (`pinv`, `q`) where
@@ -162,20 +162,18 @@ export const createSlu = /* #__PURE__ */ factory(
         if (!isInteger(order) || order < 0 || order > 3) {
           throw new Error(
             'Symbolic Ordering and Analysis order must be an integer number in the interval [0, 3]'
-          )
+          );
         }
         // verify threshold
         if (threshold < 0 || threshold > 1) {
-          throw new Error(
-            'Partial pivoting threshold must be a number from 0 to 1'
-          )
+          throw new Error('Partial pivoting threshold must be a number from 0 to 1');
         }
 
         // perform symbolic ordering and analysis
-        const s = csSqr(order, a, false)
+        const s = csSqr(order, a, false);
 
         // perform lu decomposition
-        const f = csLu(a, s, threshold)
+        const f = csLu(a, s, threshold);
 
         // return decomposition
         return {
@@ -193,10 +191,10 @@ export const createSlu = /* #__PURE__ */ factory(
               this.p.toString() +
               (this.q ? '\nq: ' + this.q.toString() : '') +
               '\n'
-            )
-          }
-        }
-      }
-    })
+            );
+          },
+        };
+      },
+    });
   }
-)
+);

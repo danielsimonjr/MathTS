@@ -1,71 +1,63 @@
-import Decimal from 'decimal.js'
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import { isInteger, nearlyEqual } from '../utils/number.js'
-import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import Decimal from 'decimal.js';
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import { isInteger, nearlyEqual } from '../utils/number.js';
+import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for dependency injection
 interface Matrix {
-  size(): number[]
-  storage(): string
-  valueOf(): unknown[] | unknown[][]
+  size(): number[];
+  storage(): string;
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface BigNumberType {
-  ceil(): BigNumberType
-  eq(other: BigNumberType): boolean
-  mul(other: BigNumberType): BigNumberType
-  div(other: BigNumberType): BigNumberType
-  isNegative(): boolean
+  ceil(): BigNumberType;
+  eq(other: BigNumberType): boolean;
+  mul(other: BigNumberType): BigNumberType;
+  div(other: BigNumberType): BigNumberType;
+  isNegative(): boolean;
 }
 
 interface ComplexType {
-  ceil(n?: number): ComplexType
-  re: number
-  im: number
+  ceil(n?: number): ComplexType;
+  re: number;
+  im: number;
 }
 
 interface FractionType {
-  ceil(n?: number): FractionType
-  floor(n?: number): FractionType
-  s: bigint
+  ceil(n?: number): FractionType;
+  floor(n?: number): FractionType;
+  s: bigint;
 }
 
 interface UnitType {
-  toNumeric(unit: UnitType): number | BigNumberType
-  multiply(value: number | BigNumberType): UnitType
+  toNumeric(unit: UnitType): number | BigNumberType;
+  multiply(value: number | BigNumberType): UnitType;
 }
 
 interface CeilNumberDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  round: TypedFunction
+  typed: TypedFunction;
+  config: ConfigOptions;
+  round: TypedFunction;
 }
 
 interface CeilDependencies extends CeilNumberDependencies {
-  matrix: (data: unknown[]) => Matrix
-  equalScalar: TypedFunction
-  zeros: (size: number[], storage?: string) => Matrix
-  DenseMatrix: new (data: unknown) => Matrix
+  matrix: (data: unknown[]) => Matrix;
+  equalScalar: TypedFunction;
+  zeros: (size: number[], storage?: string) => Matrix;
+  DenseMatrix: new (data: unknown) => Matrix;
 }
 
-const name = 'ceil'
-const dependencies = [
-  'typed',
-  'config',
-  'round',
-  'matrix',
-  'equalScalar',
-  'zeros',
-  'DenseMatrix'
-]
+const name = 'ceil';
+const dependencies = ['typed', 'config', 'round', 'matrix', 'equalScalar', 'zeros', 'DenseMatrix'];
 
-const bigTen = new Decimal(10)
+const bigTen = new Decimal(10);
 
 export const createCeilNumber = /* #__PURE__ */ factory(
   name,
@@ -73,64 +65,52 @@ export const createCeilNumber = /* #__PURE__ */ factory(
   ({ typed, config, round }: CeilNumberDependencies) => {
     function _ceilNumber(x: number): number {
       // See ./floor.js _floorNumber for rationale here
-      const c = Math.ceil(x)
-      const r = round(x) as number
-      if (c === r) return c
+      const c = Math.ceil(x);
+      const r = round(x) as number;
+      if (c === r) return c;
       if (
         nearlyEqual(x, r, config.relTol, config.absTol) &&
         !nearlyEqual(x, c, config.relTol, config.absTol)
       ) {
-        return r
+        return r;
       }
-      return c
+      return c;
     }
 
     return typed(name, {
       number: _ceilNumber,
       'number, number': function (x: number, n: number): number {
         if (!isInteger(n)) {
-          throw new RangeError(
-            'number of decimals in function ceil must be an integer'
-          )
+          throw new RangeError('number of decimals in function ceil must be an integer');
         }
         if (n < 0 || n > 15) {
-          throw new RangeError(
-            'number of decimals in ceil number must be in range 0-15'
-          )
+          throw new RangeError('number of decimals in ceil number must be in range 0-15');
         }
-        const shift = 10 ** n
-        return _ceilNumber(x * shift) / shift
-      }
-    })
+        const shift = 10 ** n;
+        return _ceilNumber(x * shift) / shift;
+      },
+    });
   }
-)
+);
 
 export const createCeil = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    config,
-    round,
-    matrix,
-    equalScalar,
-    zeros,
-    DenseMatrix
-  }: CeilDependencies) => {
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
-    const matAlgo14xDs = createMatAlgo14xDs({ typed })
+  ({ typed, config, round, matrix, equalScalar, zeros, DenseMatrix }: CeilDependencies) => {
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
+    const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
-    const ceilNumber = createCeilNumber({ typed, config, round }) as TypedFunction
+    const ceilNumber = createCeilNumber({ typed, config, round }) as TypedFunction;
     function _bigCeil(x: BigNumberType): BigNumberType {
       // see ./floor.js _floorNumber for rationale
       const bne = (a: BigNumberType, b: BigNumberType): boolean =>
-        bigNearlyEqual(a, b, config.relTol, config.absTol)
-      const c = x.ceil()
-      const r = round(x) as BigNumberType
-      if (c.eq(r)) return c
-      if (bne(x, r) && !bne(x, c)) return r
-      return c
+        bigNearlyEqual(a, b, config.relTol, config.absTol);
+      const c = x.ceil();
+      const r = round(x) as BigNumberType;
+      if (c.eq(r)) return c;
+      if (bne(x, r) && !bne(x, c)) return r;
+      return c;
     }
     /**
      * Round a value towards plus infinity
@@ -183,30 +163,24 @@ export const createCeil = /* #__PURE__ */ factory(
       'number,number': ceilNumber.signatures['number,number'],
 
       Complex: function (x: ComplexType): ComplexType {
-        return x.ceil()
+        return x.ceil();
       },
 
       'Complex, number': function (x: ComplexType, n: number): ComplexType {
-        return x.ceil(n)
+        return x.ceil(n);
       },
 
-      'Complex, BigNumber': function (
-        x: ComplexType,
-        n: BigNumberType
-      ): ComplexType {
-        return x.ceil((n as unknown as { toNumber(): number }).toNumber())
+      'Complex, BigNumber': function (x: ComplexType, n: BigNumberType): ComplexType {
+        return x.ceil((n as unknown as { toNumber(): number }).toNumber());
       },
 
       BigNumber: _bigCeil,
 
-      'BigNumber, BigNumber': function (
-        x: BigNumberType,
-        n: BigNumberType
-      ): BigNumberType {
-        const shift = bigTen.pow(n as unknown as Decimal)
+      'BigNumber, BigNumber': function (x: BigNumberType, n: BigNumberType): BigNumberType {
+        const shift = bigTen.pow(n as unknown as Decimal);
         return _bigCeil(x.mul(shift as unknown as BigNumberType)).div(
           shift as unknown as BigNumberType
-        )
+        );
       },
 
       bigint: (b: bigint): bigint => b,
@@ -214,25 +188,22 @@ export const createCeil = /* #__PURE__ */ factory(
       'bigint, BigNumber': (b: bigint, _dummy: BigNumberType): bigint => b,
 
       Fraction: function (x: FractionType): FractionType {
-        return x.ceil()
+        return x.ceil();
       },
 
       'Fraction, number': function (x: FractionType, n: number): FractionType {
-        return x.ceil(n)
+        return x.ceil(n);
       },
 
-      'Fraction, BigNumber': function (
-        x: FractionType,
-        n: BigNumberType
-      ): FractionType {
-        return x.ceil((n as unknown as { toNumber(): number }).toNumber())
+      'Fraction, BigNumber': function (x: FractionType, n: BigNumberType): FractionType {
+        return x.ceil((n as unknown as { toNumber(): number }).toNumber());
       },
 
       'Unit, number, Unit': typed.referToSelf(
         (self: TypedFunction) =>
           function (x: UnitType, n: number, unit: UnitType): UnitType {
-            const valueless = x.toNumeric(unit)
-            return unit.multiply(self(valueless, n) as number | BigNumberType)
+            const valueless = x.toNumeric(unit);
+            return unit.multiply(self(valueless, n) as number | BigNumberType);
           }
       ),
 
@@ -250,16 +221,15 @@ export const createCeil = /* #__PURE__ */ factory(
             unit: UnitType
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since ceil(0) = 0
-            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as unknown[] | Matrix
+            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as
+              | unknown[]
+              | Matrix;
           }
       ),
 
       'Array | Matrix | Unit, Unit': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            x: unknown[] | Matrix | UnitType,
-            unit: UnitType
-          ): unknown[] | Matrix | UnitType =>
+          (x: unknown[] | Matrix | UnitType, unit: UnitType): unknown[] | Matrix | UnitType =>
             self(x, 0, unit) as unknown[] | Matrix | UnitType
       ),
 
@@ -267,7 +237,7 @@ export const createCeil = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix => {
             // deep map collection, skip zeros since ceil(0) = 0
-            return deepMap(x as unknown[], self, true) as unknown[] | Matrix
+            return deepMap(x as unknown[], self, true) as unknown[] | Matrix;
           }
       ),
 
@@ -275,48 +245,42 @@ export const createCeil = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[], n: number | BigNumberType): unknown[] => {
             // deep map collection, skip zeros since ceil(0) = 0
-            return deepMap(x, (i) => self(i, n), true) as unknown[]
+            return deepMap(x, (i) => self(i, n), true) as unknown[];
           }
       ),
 
       'SparseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, y: number | BigNumberType): Matrix => {
-            return matAlgo11xS0s(x as any, y, self, false) as any as Matrix
+            return matAlgo11xS0s(x as any, y, self, false) as any as Matrix;
           }
       ),
 
       'DenseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, y: number | BigNumberType): Matrix => {
-            return matAlgo14xDs(x as any, y, self, false) as any as Matrix
+            return matAlgo14xDs(x as any, y, self, false) as any as Matrix;
           }
       ),
 
       'number | Complex | Fraction | BigNumber, Array': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            x: number | ComplexType | FractionType | BigNumberType,
-            y: unknown[]
-          ): unknown[] => {
+          (x: number | ComplexType | FractionType | BigNumberType, y: unknown[]): unknown[] => {
             // use matrix implementation
-            return (matAlgo14xDs(matrix(y) as any, x, self, true) as any).valueOf() as unknown[]
+            return (matAlgo14xDs(matrix(y) as any, x, self, true) as any).valueOf() as unknown[];
           }
       ),
 
       'number | Complex | Fraction | BigNumber, Matrix': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            x: number | ComplexType | FractionType | BigNumberType,
-            y: Matrix
-          ): Matrix => {
-            if (equalScalar(x, 0)) return zeros(y.size(), y.storage())
+          (x: number | ComplexType | FractionType | BigNumberType, y: Matrix): Matrix => {
+            if (equalScalar(x, 0)) return zeros(y.size(), y.storage());
             if (y.storage() === 'dense') {
-              return matAlgo14xDs(y as any, x, self, true) as any as Matrix
+              return matAlgo14xDs(y as any, x, self, true) as any as Matrix;
             }
-            return matAlgo12xSfs(y as any, x, self, true) as any as Matrix
+            return matAlgo12xSfs(y as any, x, self, true) as any as Matrix;
           }
-      )
-    })
+      ),
+    });
   }
-)
+);

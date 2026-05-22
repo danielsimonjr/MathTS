@@ -1,13 +1,7 @@
 export const matrixDocs = {
   name: 'matrix',
   category: 'Construction',
-  syntax: [
-    '[]',
-    '[a1, b1, ...; a2, b2, ...]',
-    'matrix()',
-    'matrix("dense")',
-    'matrix([...])'
-  ],
+  syntax: ['[]', '[a1, b1, ...; a2, b2, ...]', 'matrix()', 'matrix("dense")', 'matrix([...])'],
   description: 'Create a matrix.',
   examples: [
     '[]',
@@ -16,16 +10,7 @@ export const matrixDocs = {
     'matrix()',
     'matrix([3, 4])',
     'matrix([3, 4; 5, 6], "sparse")',
-    'matrix([3, 4; 5, 6], "sparse", "number")'
+    'matrix([3, 4; 5, 6], "sparse", "number")',
   ],
-  seealso: [
-    'bignumber',
-    'boolean',
-    'complex',
-    'index',
-    'number',
-    'string',
-    'unit',
-    'sparse'
-  ]
-}
+  seealso: ['bignumber', 'boolean', 'complex', 'index', 'number', 'string', 'unit', 'sparse'],
+};

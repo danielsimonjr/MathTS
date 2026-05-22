@@ -31,7 +31,10 @@ import {
 describe('Typed Matrix Operations', () => {
   describe('Matrix creation functions', () => {
     it('should create matrix from array', () => {
-      const m = matrix([[1, 2], [3, 4]]) as DenseMatrix;
+      const m = matrix([
+        [1, 2],
+        [3, 4],
+      ]) as DenseMatrix;
       expect(m.rows).toBe(2);
       expect(m.cols).toBe(2);
       expect(m.get(0, 0)).toBe(1);
@@ -73,8 +76,14 @@ describe('Typed Matrix Operations', () => {
   });
 
   describe('Matrix arithmetic', () => {
-    const m1 = DenseMatrix.fromArray([[1, 2], [3, 4]]);
-    const m2 = DenseMatrix.fromArray([[5, 6], [7, 8]]);
+    const m1 = DenseMatrix.fromArray([
+      [1, 2],
+      [3, 4],
+    ]);
+    const m2 = DenseMatrix.fromArray([
+      [5, 6],
+      [7, 8],
+    ]);
 
     it('should add matrices', () => {
       const result = add(m1, m2) as DenseMatrix;
@@ -120,7 +129,10 @@ describe('Typed Matrix Operations', () => {
     });
 
     it('should transpose matrix', () => {
-      const m = DenseMatrix.fromArray([[1, 2, 3], [4, 5, 6]]);
+      const m = DenseMatrix.fromArray([
+        [1, 2, 3],
+        [4, 5, 6],
+      ]);
       const result = transpose(m) as DenseMatrix;
       expect(result.rows).toBe(3);
       expect(result.cols).toBe(2);
@@ -131,7 +143,10 @@ describe('Typed Matrix Operations', () => {
   });
 
   describe('Matrix reductions', () => {
-    const m = DenseMatrix.fromArray([[1, 2], [3, 4]]);
+    const m = DenseMatrix.fromArray([
+      [1, 2],
+      [3, 4],
+    ]);
 
     it('should compute sum', () => {
       const result = sum(m);
@@ -156,7 +171,10 @@ describe('Typed Matrix Operations', () => {
   });
 
   describe('Element-wise operations', () => {
-    const m = DenseMatrix.fromArray([[-1, 2], [-3, 4]]);
+    const m = DenseMatrix.fromArray([
+      [-1, 2],
+      [-3, 4],
+    ]);
 
     it('should compute absolute value', () => {
       const result = abs(m) as DenseMatrix;
@@ -171,7 +189,10 @@ describe('Typed Matrix Operations', () => {
     });
 
     it('should compute square root', () => {
-      const m2 = DenseMatrix.fromArray([[1, 4], [9, 16]]);
+      const m2 = DenseMatrix.fromArray([
+        [1, 4],
+        [9, 16],
+      ]);
       const result = sqrt(m2) as DenseMatrix;
       expect(result.get(0, 0)).toBe(1);
       expect(result.get(0, 1)).toBe(2);
@@ -180,7 +201,10 @@ describe('Typed Matrix Operations', () => {
   });
 
   describe('Matrix query operations', () => {
-    const m = DenseMatrix.fromArray([[1, 2, 3], [4, 5, 6]]);
+    const m = DenseMatrix.fromArray([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
 
     it('should get matrix size', () => {
       const s = size(m) as number[];

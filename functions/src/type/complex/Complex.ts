@@ -1,99 +1,91 @@
-import ComplexJs, { Complex as ComplexClass } from 'complex.js'
-import { format } from '../../utils/number.js'
-import { isNumber, isUnit } from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
+import ComplexJs, { Complex as ComplexClass } from 'complex.js';
+import { format } from '../../utils/number.js';
+import { isNumber, isUnit } from '../../utils/is.js';
+import { factory } from '../../utils/factory.js';
 
 /**
  * JSON representation of a Complex number
  */
 export interface ComplexJSON {
-  mathjs: 'Complex'
-  re: number
-  im: number
+  mathjs: 'Complex';
+  re: number;
+  im: number;
 }
 
 /**
  * Polar representation of a Complex number
  */
 export interface PolarCoordinates {
-  r: number
-  phi: number
+  r: number;
+  phi: number;
 }
 
 /**
  * Formatting options for Complex numbers
  */
 export interface ComplexFormatOptions {
-  precision?: number
-  notation?: 'auto' | 'fixed' | 'exponential' | 'engineering'
-  lowerExp?: number
-  upperExp?: number
-  wordSize?: number
+  precision?: number;
+  notation?: 'auto' | 'fixed' | 'exponential' | 'engineering';
+  lowerExp?: number;
+  upperExp?: number;
+  wordSize?: number;
 }
 
 /**
  * Extended Complex type with mathjs additions
  */
 export interface Complex extends ComplexClass {
-  type: 'Complex'
-  isComplex: true
-  toJSON(): ComplexJSON
-  toPolar(): PolarCoordinates
-  format(
-    options?: number | ComplexFormatOptions | ((value: number) => string)
-  ): string
+  type: 'Complex';
+  isComplex: true;
+  toJSON(): ComplexJSON;
+  toPolar(): PolarCoordinates;
+  format(options?: number | ComplexFormatOptions | ((value: number) => string)): string;
 }
 
 /**
  * Input for creating a Complex from polar coordinates
  */
 export interface PolarInput {
-  r: number
-  phi: number
+  r: number;
+  phi: number;
 }
 
 /**
  * Input for creating a Complex from absolute value and argument
  */
 export interface AbsArgInput {
-  abs: number
-  arg: number
+  abs: number;
+  arg: number;
 }
 
 /**
  * Complex constructor interface with static methods
  */
 export interface ComplexConstructor {
-  new (
-    a?: number | string | ComplexJSON | PolarInput | AbsArgInput,
-    b?: number
-  ): Complex
-  (
-    a?: number | string | ComplexJSON | PolarInput | AbsArgInput,
-    b?: number
-  ): Complex
-  prototype: Complex
+  new (a?: number | string | ComplexJSON | PolarInput | AbsArgInput, b?: number): Complex;
+  (a?: number | string | ComplexJSON | PolarInput | AbsArgInput, b?: number): Complex;
+  prototype: Complex;
   fromPolar: {
-    (polar: PolarInput): Complex
-    (r: number, phi: number): Complex
-  }
-  fromJSON: (json: ComplexJSON) => Complex
-  compare: (a: Complex, b: Complex) => number
-  ZERO: Complex
-  ONE: Complex
-  I: Complex
-  PI: Complex
-  E: Complex
-  INFINITY: Complex
-  NAN: Complex
-  EPSILON: number
+    (polar: PolarInput): Complex;
+    (r: number, phi: number): Complex;
+  };
+  fromJSON: (json: ComplexJSON) => Complex;
+  compare: (a: Complex, b: Complex) => number;
+  ZERO: Complex;
+  ONE: Complex;
+  I: Complex;
+  PI: Complex;
+  E: Complex;
+  INFINITY: Complex;
+  NAN: Complex;
+  EPSILON: number;
 }
 
 // Cast to allow prototype access and static method additions
-const Complex = ComplexJs as unknown as ComplexConstructor
+const Complex = ComplexJs as unknown as ComplexConstructor;
 
-const name = 'Complex'
-const dependencies: string[] = []
+const name = 'Complex';
+const dependencies: string[] = [];
 
 export const createComplexClass = /* #__PURE__ */ factory(
   name,
@@ -102,10 +94,10 @@ export const createComplexClass = /* #__PURE__ */ factory(
     /**
      * Attach type information
      */
-    Object.defineProperty(Complex, 'name', { value: 'Complex' })
-    Complex.prototype.constructor = Complex as any
-    Complex.prototype.type = 'Complex'
-    Complex.prototype.isComplex = true
+    Object.defineProperty(Complex, 'name', { value: 'Complex' });
+    Complex.prototype.constructor = Complex as any;
+    Complex.prototype.type = 'Complex';
+    Complex.prototype.isComplex = true;
 
     /**
      * Get a JSON representation of the complex number
@@ -116,9 +108,9 @@ export const createComplexClass = /* #__PURE__ */ factory(
       return {
         mathjs: 'Complex',
         re: this.re,
-        im: this.im
-      }
-    }
+        im: this.im,
+      };
+    };
 
     /*
      * Return the value of the complex number in polar notation
@@ -128,9 +120,9 @@ export const createComplexClass = /* #__PURE__ */ factory(
     Complex.prototype.toPolar = function (this: Complex): PolarCoordinates {
       return {
         r: this.abs(),
-        phi: this.arg()
-      }
-    }
+        phi: this.arg(),
+      };
+    };
 
     /**
      * Get a string representation of the complex number,
@@ -145,58 +137,58 @@ export const createComplexClass = /* #__PURE__ */ factory(
       this: Complex,
       options?: number | ComplexFormatOptions | ((value: number) => string)
     ): string {
-      let str = ''
-      let im = this.im
-      let re = this.re
-      const strRe = format(this.re, options)
-      const strIm = format(this.im, options)
+      let str = '';
+      let im = this.im;
+      let re = this.re;
+      const strRe = format(this.re, options);
+      const strIm = format(this.im, options);
 
       // round either re or im when smaller than the configured precision
       const precision: number | null = isNumber(options)
         ? options
         : options && typeof options === 'object'
           ? ((options as ComplexFormatOptions).precision ?? null)
-          : null
+          : null;
       if (precision !== null) {
-        const epsilon = Math.pow(10, -precision)
+        const epsilon = Math.pow(10, -precision);
         if (Math.abs(re / im) < epsilon) {
-          re = 0
+          re = 0;
         }
         if (Math.abs(im / re) < epsilon) {
-          im = 0
+          im = 0;
         }
       }
 
       if (im === 0) {
         // real value
-        str = strRe
+        str = strRe;
       } else if (re === 0) {
         // purely complex value
         if (im === 1) {
-          str = 'i'
+          str = 'i';
         } else if (im === -1) {
-          str = '-i'
+          str = '-i';
         } else {
-          str = strIm + 'i'
+          str = strIm + 'i';
         }
       } else {
         // complex value
         if (im < 0) {
           if (im === -1) {
-            str = strRe + ' - i'
+            str = strRe + ' - i';
           } else {
-            str = strRe + ' - ' + strIm.substring(1) + 'i'
+            str = strRe + ' - ' + strIm.substring(1) + 'i';
           }
         } else {
           if (im === 1) {
-            str = strRe + ' + i'
+            str = strRe + ' + i';
           } else {
-            str = strRe + ' + ' + strIm + 'i'
+            str = strRe + ' + ' + strIm + 'i';
           }
         }
       }
-      return str
-    }
+      return str;
+    };
 
     /**
      * Create a complex number from polar coordinates
@@ -212,51 +204,42 @@ export const createComplexClass = /* #__PURE__ */ factory(
     Complex.fromPolar = function (_args: PolarInput | number): Complex {
       switch (arguments.length) {
         case 1: {
-          const arg = arguments[0] as PolarInput | number
+          const arg = arguments[0] as PolarInput | number;
           if (typeof arg === 'object') {
-            return Complex(arg)
+            return Complex(arg);
           } else {
-            throw new TypeError(
-              'Input has to be an object with r and phi keys.'
-            )
+            throw new TypeError('Input has to be an object with r and phi keys.');
           }
         }
         case 2: {
-          const r = arguments[0] as number
+          const r = arguments[0] as number;
           let phi = arguments[1] as
             | number
             | {
-                hasBase: (base: string) => boolean
-                toNumber: (unit: string) => number
-              }
+                hasBase: (base: string) => boolean;
+                toNumber: (unit: string) => number;
+              };
           if (isNumber(r)) {
-            if (
-              isUnit(phi) &&
-              (phi as { hasBase: (base: string) => boolean }).hasBase('ANGLE')
-            ) {
+            if (isUnit(phi) && (phi as { hasBase: (base: string) => boolean }).hasBase('ANGLE')) {
               // convert unit to a number in radians
-              phi = (phi as { toNumber: (unit: string) => number }).toNumber(
-                'rad'
-              )
+              phi = (phi as { toNumber: (unit: string) => number }).toNumber('rad');
             }
 
             if (isNumber(phi)) {
-              return new Complex({ r, phi })
+              return new Complex({ r, phi });
             }
 
-            throw new TypeError('Phi is not a number nor an angle unit.')
+            throw new TypeError('Phi is not a number nor an angle unit.');
           } else {
-            throw new TypeError('Radius r is not a number.')
+            throw new TypeError('Radius r is not a number.');
           }
         }
 
         default:
-          throw new SyntaxError(
-            'Wrong number of arguments in function fromPolar'
-          )
+          throw new SyntaxError('Wrong number of arguments in function fromPolar');
       }
-    }
-    ;(Complex.prototype as any).valueOf = Complex.prototype.toString
+    };
+    (Complex.prototype as any).valueOf = Complex.prototype.toString;
 
     /**
      * Create a Complex number from a JSON object
@@ -267,8 +250,8 @@ export const createComplexClass = /* #__PURE__ */ factory(
      * @return {Complex} Returns a new Complex number
      */
     Complex.fromJSON = function (json: ComplexJSON): Complex {
-      return new Complex(json)
-    }
+      return new Complex(json);
+    };
 
     /**
      * Compare two complex numbers, `a` and `b`:
@@ -287,23 +270,23 @@ export const createComplexClass = /* #__PURE__ */ factory(
      */
     Complex.compare = function (a: Complex, b: Complex): number {
       if (a.re > b.re) {
-        return 1
+        return 1;
       }
       if (a.re < b.re) {
-        return -1
+        return -1;
       }
 
       if (a.im > b.im) {
-        return 1
+        return 1;
       }
       if (a.im < b.im) {
-        return -1
+        return -1;
       }
 
-      return 0
-    }
+      return 0;
+    };
 
-    return Complex
+    return Complex;
   },
   { isClass: true }
-)
+);

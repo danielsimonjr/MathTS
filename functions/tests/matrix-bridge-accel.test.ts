@@ -36,15 +36,11 @@ describe('matrix-bridge accelerated operations', () => {
   it('matches a naive product on a 64x64 matrix', () => {
     const n = 64;
     const grid = (f: (i: number, j: number) => number): number[][] =>
-      Array.from({ length: n }, (_, i) =>
-        Array.from({ length: n }, (_, j) => f(i, j))
-      );
+      Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => f(i, j)));
     const A = grid((i, j) => (i * 7 + j) % 11);
     const B = grid((i, j) => (i + j * 3) % 13);
 
-    const got = new MathJSDenseMatrix(A)
-      .multiply(new MathJSDenseMatrix(B))
-      .valueOf();
+    const got = new MathJSDenseMatrix(A).multiply(new MathJSDenseMatrix(B)).valueOf();
 
     const expected = grid(() => 0);
     for (let i = 0; i < n; i++) {

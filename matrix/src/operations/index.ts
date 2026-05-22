@@ -5,13 +5,7 @@
  */
 
 // Eigenvalue decomposition
-export {
-  eig,
-  eigvals,
-  powerIteration,
-  type EigResult,
-  type EigOptions,
-} from './eig.js';
+export { eig, eigvals, powerIteration, type EigResult, type EigOptions } from './eig.js';
 
 // Singular Value Decomposition
 export {
@@ -27,11 +21,7 @@ export {
 } from './svd.js';
 
 // WASM-accelerated eigendecomposition
-export {
-  eigWasm,
-  eigvalsWasm,
-  spectralRadiusWasm,
-} from './eig-wasm.js';
+export { eigWasm, eigvalsWasm, spectralRadiusWasm } from './eig-wasm.js';
 
 // WASM-accelerated SVD
 export { svdWasm } from './svd-wasm.js';

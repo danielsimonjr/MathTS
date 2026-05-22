@@ -10,5 +10,5 @@
  */
 export function csMarked(w: number[], j: number): boolean {
   // check node is marked
-  return w[j] < 0
+  return w[j] < 0;
 }

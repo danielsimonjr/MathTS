@@ -1,57 +1,57 @@
-import { factory } from '../utils/factory.js'
-import { isInteger } from '../utils/number.js'
-import { arraySize as size } from '../utils/array.js'
-import { powNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import { isInteger } from '../utils/number.js';
+import { arraySize as size } from '../utils/array.js';
+import { powNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for pow
 interface BigNumberType {
-  isInteger(): boolean
-  toNumber(): number
-  gte(value: number): boolean
-  pow(value: BigNumberType): BigNumberType
+  isInteger(): boolean;
+  toNumber(): number;
+  gte(value: number): boolean;
+  pow(value: BigNumberType): BigNumberType;
 }
 
 interface FractionType {
-  valueOf(): number
-  pow(value: FractionType): FractionType | null
-  equals(value: number): boolean
-  d: bigint
-  n: bigint
+  valueOf(): number;
+  pow(value: FractionType): FractionType | null;
+  equals(value: number): boolean;
+  d: bigint;
+  n: bigint;
 }
 
 interface ComplexType {
-  re: number
-  im: number
-  pow(x: ComplexType | number, y?: number): ComplexType
+  re: number;
+  im: number;
+  pow(x: ComplexType | number, y?: number): ComplexType;
 }
 
 interface ComplexConstructor {
-  new (re: number, im: number): ComplexType
+  new (re: number, im: number): ComplexType;
 }
 
 interface UnitType {
-  pow(value: number | BigNumberType): UnitType
+  pow(value: number | BigNumberType): UnitType;
 }
 
 interface MatrixType {
-  valueOf(): unknown[][]
+  valueOf(): unknown[][];
 }
 
 interface PowDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  identity: TypedFunction
-  multiply: TypedFunction
-  matrix: (data: unknown[][] | unknown[]) => MatrixType
-  inv: TypedFunction
-  fraction: (value: number) => FractionType
-  number: (value: unknown) => number
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  identity: TypedFunction;
+  multiply: TypedFunction;
+  matrix: (data: unknown[][] | unknown[]) => MatrixType;
+  inv: TypedFunction;
+  fraction: (value: number) => FractionType;
+  number: (value: unknown) => number;
+  Complex: ComplexConstructor;
 }
 
-const name = 'pow'
+const name = 'pow';
 const dependencies = [
   'typed',
   'config',
@@ -61,8 +61,8 @@ const dependencies = [
   'inv',
   'fraction',
   'number',
-  'Complex'
-]
+  'Complex',
+];
 
 export const createPow = /* #__PURE__ */ factory(
   name,
@@ -76,7 +76,7 @@ export const createPow = /* #__PURE__ */ factory(
     inv,
     number,
     fraction,
-    Complex
+    Complex,
   }: PowDependencies) => {
     /**
      * Calculates the power of x to y, `x ^ y`.
@@ -119,11 +119,8 @@ export const createPow = /* #__PURE__ */ factory(
     return typed(name, {
       'number, number': _pow,
 
-      'Complex, Complex': function (
-        x: ComplexType,
-        y: ComplexType
-      ): ComplexType {
-        return x.pow(y)
+      'Complex, Complex': function (x: ComplexType, y: ComplexType): ComplexType {
+        return x.pow(y);
       },
 
       'BigNumber, BigNumber': function (
@@ -131,9 +128,9 @@ export const createPow = /* #__PURE__ */ factory(
         y: BigNumberType
       ): BigNumberType | ComplexType {
         if (y.isInteger() || x.gte(0) || config.predictable) {
-          return x.pow(y)
+          return x.pow(y);
         } else {
-          return new Complex(x.toNumber(), 0).pow(y.toNumber(), 0)
+          return new Complex(x.toNumber(), 0).pow(y.toNumber(), 0);
         }
       },
 
@@ -143,46 +140,35 @@ export const createPow = /* #__PURE__ */ factory(
         x: FractionType,
         y: FractionType
       ): FractionType | number | ComplexType {
-        const result = x.pow(y)
+        const result = x.pow(y);
 
         if (result != null) {
-          return result
+          return result;
         }
 
         if (config.predictable) {
-          throw new Error(
-            'Result of pow is non-rational and cannot be expressed as a fraction'
-          )
+          throw new Error('Result of pow is non-rational and cannot be expressed as a fraction');
         } else {
-          return _pow(x.valueOf(), y.valueOf())
+          return _pow(x.valueOf(), y.valueOf());
         }
       },
 
       'Array, number': _powArray,
 
-      'Array, BigNumber': function (
-        x: unknown[][],
-        y: BigNumberType
-      ): unknown[][] {
-        return _powArray(x, y.toNumber())
+      'Array, BigNumber': function (x: unknown[][], y: BigNumberType): unknown[][] {
+        return _powArray(x, y.toNumber());
       },
 
       'Matrix, number': _powMatrix,
 
-      'Matrix, BigNumber': function (
-        x: MatrixType,
-        y: BigNumberType
-      ): MatrixType {
-        return _powMatrix(x, y.toNumber())
+      'Matrix, BigNumber': function (x: MatrixType, y: BigNumberType): MatrixType {
+        return _powMatrix(x, y.toNumber());
       },
 
-      'Unit, number | BigNumber': function (
-        x: UnitType,
-        y: number | BigNumberType
-      ): UnitType {
-        return x.pow(y)
-      }
-    })
+      'Unit, number | BigNumber': function (x: UnitType, y: number | BigNumberType): UnitType {
+        return x.pow(y);
+      },
+    });
 
     /**
      * Calculates the power of x to y, x^y, for two numbers.
@@ -197,11 +183,11 @@ export const createPow = /* #__PURE__ */ factory(
       if (config.predictable && !isInteger(y) && x < 0) {
         // Check to see if y can be represented as a fraction
         try {
-          const yFrac = fraction(y)
-          const yNum = number(yFrac)
+          const yFrac = fraction(y);
+          const yNum = number(yFrac);
           if (y === yNum || Math.abs((y - yNum) / y) < 1e-14) {
             if (yFrac.d % 2n === 1n) {
-              return (yFrac.n % 2n === 0n ? 1 : -1) * Math.pow(-x, y)
+              return (yFrac.n % 2n === 0n ? 1 : -1) * Math.pow(-x, y);
             }
           }
         } catch {
@@ -218,21 +204,21 @@ export const createPow = /* #__PURE__ */ factory(
         config.predictable &&
         ((x < -1 && y === Infinity) || (x > -1 && x < 0 && y === -Infinity))
       ) {
-        return NaN
+        return NaN;
       }
 
       if (isInteger(y) || x >= 0 || config.predictable) {
-        return powNumber(x, y)
+        return powNumber(x, y);
       } else {
         // TODO: the following infinity checks are duplicated from powNumber. Deduplicate this somehow
 
         // x^Infinity === 0 if -1 < x < 1
         // A real number 0 is returned instead of complex(0)
         if ((x * x < 1 && y === Infinity) || (x * x > 1 && y === -Infinity)) {
-          return 0
+          return 0;
         }
 
-        return new Complex(x, 0).pow(y, 0)
+        return new Complex(x, 0).pow(y, 0);
       }
     }
 
@@ -245,50 +231,42 @@ export const createPow = /* #__PURE__ */ factory(
      */
     function _powArray(x: unknown[][], y: number): unknown[][] {
       if (!isInteger(y)) {
-        throw new TypeError(
-          'For A^b, b must be an integer (value is ' + y + ')'
-        )
+        throw new TypeError('For A^b, b must be an integer (value is ' + y + ')');
       }
       // verify that A is a 2 dimensional square matrix
-      const s = size(x)
+      const s = size(x);
       if (s.length !== 2) {
-        throw new Error(
-          'For A^b, A must be 2 dimensional (A has ' + s.length + ' dimensions)'
-        )
+        throw new Error('For A^b, A must be 2 dimensional (A has ' + s.length + ' dimensions)');
       }
       if (s[0] !== s[1]) {
-        throw new Error(
-          'For A^b, A must be square (size is ' + s[0] + 'x' + s[1] + ')'
-        )
+        throw new Error('For A^b, A must be square (size is ' + s[0] + 'x' + s[1] + ')');
       }
       if (y < 0) {
         try {
-          return _powArray(inv(x) as unknown[][], -y)
+          return _powArray(inv(x) as unknown[][], -y);
         } catch (error: unknown) {
           if (
             error instanceof Error &&
             error.message === 'Cannot calculate inverse, determinant is zero'
           ) {
             throw new TypeError(
-              'For A^b, when A is not invertible, b must be a positive integer (value is ' +
-                y +
-                ')'
-            )
+              'For A^b, when A is not invertible, b must be a positive integer (value is ' + y + ')'
+            );
           }
-          throw error
+          throw error;
         }
       }
 
-      let res = (identity(s[0]) as { valueOf(): unknown[][] }).valueOf()
-      let px = x
+      let res = (identity(s[0]) as { valueOf(): unknown[][] }).valueOf();
+      let px = x;
       while (y >= 1) {
         if ((y & 1) === 1) {
-          res = multiply(px, res) as unknown[][]
+          res = multiply(px, res) as unknown[][];
         }
-        y >>= 1
-        px = multiply(px, px) as unknown[][]
+        y >>= 1;
+        px = multiply(px, px) as unknown[][];
       }
-      return res
+      return res;
     }
 
     /**
@@ -299,7 +277,7 @@ export const createPow = /* #__PURE__ */ factory(
      * @private
      */
     function _powMatrix(x: MatrixType, y: number): MatrixType {
-      return matrix(_powArray(x.valueOf(), y))
+      return matrix(_powArray(x.valueOf(), y));
     }
   }
-)
+);

@@ -1,14 +1,14 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface CountDependencies {
-  typed: TypedFunction
-  size: TypedFunction
-  prod: TypedFunction
+  typed: TypedFunction;
+  size: TypedFunction;
+  prod: TypedFunction;
 }
 
-const name = 'count'
-const dependencies = ['typed', 'size', 'prod']
+const name = 'count';
+const dependencies = ['typed', 'size', 'prod'];
 
 export const createCount = /* #__PURE__ */ factory(
   name,
@@ -37,12 +37,12 @@ export const createCount = /* #__PURE__ */ factory(
      */
     return typed(name, {
       string: function (x: string): number {
-        return x.length
+        return x.length;
       },
 
       'Matrix | Array': function (x: any): number {
-        return prod(size(x)) as number
-      }
-    })
+        return prod(size(x)) as number;
+      },
+    });
   }
-)
+);

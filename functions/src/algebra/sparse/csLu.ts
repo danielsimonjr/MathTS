@@ -2,52 +2,47 @@
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
 
-import { factory } from '../../utils/factory.js'
-import { createCsSpsolve } from './csSpsolve.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { factory } from '../../utils/factory.js';
+import { createCsSpsolve } from './csSpsolve.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Sparse matrix internal structure
 export interface SparseMatrixData {
-  _size: number[]
-  _values: any[]
-  _index: number[]
-  _ptr: number[]
+  _size: number[];
+  _values: any[];
+  _index: number[];
+  _ptr: number[];
 }
 
 interface SparseMatrixConstructor {
-  new (data: {
-    values: any[]
-    index: number[]
-    ptr: number[]
-    size: number[]
-  }): SparseMatrixData
+  new (data: { values: any[]; index: number[]; ptr: number[]; size: number[] }): SparseMatrixData;
 }
 
 interface CsLuDependencies {
-  abs: TypedFunction
-  divideScalar: TypedFunction
-  multiply: TypedFunction
-  subtract: TypedFunction
-  larger: TypedFunction
-  largerEq: TypedFunction
-  SparseMatrix: SparseMatrixConstructor
+  abs: TypedFunction;
+  divideScalar: TypedFunction;
+  multiply: TypedFunction;
+  subtract: TypedFunction;
+  larger: TypedFunction;
+  largerEq: TypedFunction;
+  SparseMatrix: SparseMatrixConstructor;
 }
 
 // Symbolic analysis result from csSqr
 export interface SymbolicAnalysis {
-  q?: number[]
-  lnz?: number
-  unz?: number
+  q?: number[];
+  lnz?: number;
+  unz?: number;
 }
 
 // LU factorization result
 export interface LuResult {
-  L: SparseMatrixData
-  U: SparseMatrixData
-  pinv: number[]
+  L: SparseMatrixData;
+  U: SparseMatrixData;
+  pinv: number[];
 }
 
-const name = 'csLu'
+const name = 'csLu';
 const dependencies = [
   'abs',
   'divideScalar',
@@ -55,22 +50,14 @@ const dependencies = [
   'subtract',
   'larger',
   'largerEq',
-  'SparseMatrix'
-] as const
+  'SparseMatrix',
+] as const;
 
 export const createCsLu = /* #__PURE__ */ factory(
   name,
   dependencies as unknown as string[],
-  ({
-    abs,
-    divideScalar,
-    multiply,
-    subtract,
-    larger,
-    largerEq,
-    SparseMatrix
-  }: CsLuDependencies) => {
-    const csSpsolve = createCsSpsolve({ divideScalar, multiply, subtract })
+  ({ abs, divideScalar, multiply, subtract, larger, largerEq, SparseMatrix }: CsLuDependencies) => {
+    const csSpsolve = createCsSpsolve({ divideScalar, multiply, subtract });
 
     /**
      * Computes the numeric LU factorization of the sparse matrix A. Implements a Left-looking LU factorization
@@ -92,142 +79,142 @@ export const createCsLu = /* #__PURE__ */ factory(
     ): LuResult | null {
       // validate input
       if (!m) {
-        return null
+        return null;
       }
       // m arrays
-      const size = m._size
+      const size = m._size;
       // columns
-      const n = size[1]
+      const n = size[1];
       // symbolic analysis result
-      let q
-      let lnz = 100
-      let unz = 100
+      let q;
+      let lnz = 100;
+      let unz = 100;
       // update symbolic analysis parameters
       if (s) {
-        q = s.q
-        lnz = s.lnz || lnz
-        unz = s.unz || unz
+        q = s.q;
+        lnz = s.lnz || lnz;
+        unz = s.unz || unz;
       }
       // L arrays
-      const lvalues: any[] = [] // (lnz)
-      const lindex: number[] = [] // (lnz)
-      const lptr: number[] = [] // (n + 1)
+      const lvalues: any[] = []; // (lnz)
+      const lindex: number[] = []; // (lnz)
+      const lptr: number[] = []; // (n + 1)
       // L
       const L = new SparseMatrix({
         values: lvalues,
         index: lindex,
         ptr: lptr,
-        size: [n, n]
-      })
+        size: [n, n],
+      });
       // U arrays
-      const uvalues: any[] = [] // (unz)
-      const uindex: number[] = [] // (unz)
-      const uptr: number[] = [] // (n + 1)
+      const uvalues: any[] = []; // (unz)
+      const uindex: number[] = []; // (unz)
+      const uptr: number[] = []; // (n + 1)
       // U
       const U = new SparseMatrix({
         values: uvalues,
         index: uindex,
         ptr: uptr,
-        size: [n, n]
-      })
+        size: [n, n],
+      });
       // inverse of permutation vector
-      const pinv: number[] = [] // (n)
+      const pinv: number[] = []; // (n)
       // vars
-      let i: number, p: number
+      let i: number, p: number;
       // allocate arrays
-      const x: any[] = [] // (n)
-      const xi: number[] = [] // (2 * n)
+      const x: any[] = []; // (n)
+      const xi: number[] = []; // (2 * n)
       // initialize variables
       for (i = 0; i < n; i++) {
         // clear workspace
-        x[i] = 0
+        x[i] = 0;
         // no rows pivotal yet
-        pinv[i] = -1
+        pinv[i] = -1;
         // no cols of L yet
-        lptr[i + 1] = 0
+        lptr[i + 1] = 0;
       }
       // reset number of nonzero elements in L and U
-      lnz = 0
-      unz = 0
+      lnz = 0;
+      unz = 0;
       // compute L(:,k) and U(:,k)
       for (let k = 0; k < n; k++) {
         // update ptr
-        lptr[k] = lnz
-        uptr[k] = unz
+        lptr[k] = lnz;
+        uptr[k] = unz;
         // apply column permutations if needed
-        const col = q ? q[k] : k
+        const col = q ? q[k] : k;
         // solve triangular system, x = L\A(:,col)
-        const top = csSpsolve(L, m, col, xi, x, pinv, true)
+        const top = csSpsolve(L, m, col, xi, x, pinv, true);
         // find pivot
-        let ipiv = -1
-        let a = -1
+        let ipiv = -1;
+        let a = -1;
         // loop xi[] from top -> n
         for (p = top; p < n; p++) {
           // x[i] is nonzero
-          i = xi[p]
+          i = xi[p];
           // check row i is not yet pivotal
           if (pinv[i] < 0) {
             // absolute value of x[i]
-            const xabs = abs(x[i])
+            const xabs = abs(x[i]);
             // check absoulte value is greater than pivot value
             if (larger(xabs, a)) {
               // largest pivot candidate so far
-              a = xabs as number
-              ipiv = i
+              a = xabs as number;
+              ipiv = i;
             }
           } else {
             // x(i) is the entry U(pinv[i],k)
-            uindex[unz] = pinv[i]
-            uvalues[unz++] = x[i]
+            uindex[unz] = pinv[i];
+            uvalues[unz++] = x[i];
           }
         }
         // validate we found a valid pivot
         if (ipiv === -1 || a <= 0) {
-          return null
+          return null;
         }
         // update actual pivot column, give preference to diagonal value
         if (pinv[col] < 0 && largerEq(abs(x[col]), multiply(a, tol))) {
-          ipiv = col
+          ipiv = col;
         }
         // the chosen pivot
-        const pivot = x[ipiv]
+        const pivot = x[ipiv];
         // last entry in U(:,k) is U(k,k)
-        uindex[unz] = k
-        uvalues[unz++] = pivot
+        uindex[unz] = k;
+        uvalues[unz++] = pivot;
         // ipiv is the kth pivot row
-        pinv[ipiv] = k
+        pinv[ipiv] = k;
         // first entry in L(:,k) is L(k,k) = 1
-        lindex[lnz] = ipiv
-        lvalues[lnz++] = 1
+        lindex[lnz] = ipiv;
+        lvalues[lnz++] = 1;
         // L(k+1:n,k) = x / pivot
         for (p = top; p < n; p++) {
           // row
-          i = xi[p]
+          i = xi[p];
           // check x(i) is an entry in L(:,k)
           if (pinv[i] < 0) {
             // save unpermuted row in L
-            lindex[lnz] = i
+            lindex[lnz] = i;
             // scale pivot column
-            lvalues[lnz++] = divideScalar(x[i], pivot)
+            lvalues[lnz++] = divideScalar(x[i], pivot);
           }
           // x[0..n-1] = 0 for next k
-          x[i] = 0
+          x[i] = 0;
         }
       }
       // update ptr
-      lptr[n] = lnz
-      uptr[n] = unz
+      lptr[n] = lnz;
+      uptr[n] = unz;
       // fix row indices of L for final pinv
       for (p = 0; p < lnz; p++) {
-        lindex[p] = pinv[lindex[p]]
+        lindex[p] = pinv[lindex[p]];
       }
       // trim arrays
-      lvalues.splice(lnz, lvalues.length - lnz)
-      lindex.splice(lnz, lindex.length - lnz)
-      uvalues.splice(unz, uvalues.length - unz)
-      uindex.splice(unz, uindex.length - unz)
+      lvalues.splice(lnz, lvalues.length - lnz);
+      lindex.splice(lnz, lindex.length - lnz);
+      uvalues.splice(unz, uvalues.length - unz);
+      uindex.splice(unz, uindex.length - unz);
       // return LU factor
-      return { L, U, pinv }
-    }
+      return { L, U, pinv };
+    };
   }
-)
+);

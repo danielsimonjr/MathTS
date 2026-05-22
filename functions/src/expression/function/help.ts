@@ -1,10 +1,10 @@
-import { factory } from '../../utils/factory.js'
-import { getSafeProperty } from '../../utils/customs.js'
-import { embeddedDocs } from '../embeddedDocs/embeddedDocs.js'
-import { hasOwnProperty } from '../../utils/object.js'
+import { factory } from '../../utils/factory.js';
+import { getSafeProperty } from '../../utils/customs.js';
+import { embeddedDocs } from '../embeddedDocs/embeddedDocs.js';
+import { hasOwnProperty } from '../../utils/object.js';
 
-const name = 'help'
-const dependencies = ['typed', 'mathWithTransform', 'Help']
+const name = 'help';
+const dependencies = ['typed', 'mathWithTransform', 'Help'];
 
 export const createHelp = /* #__PURE__ */ factory(
   name,
@@ -12,11 +12,11 @@ export const createHelp = /* #__PURE__ */ factory(
   ({
     typed,
     mathWithTransform,
-    Help
+    Help,
   }: {
-    typed: any
-    mathWithTransform: Record<string, any>
-    Help: any
+    typed: any;
+    mathWithTransform: Record<string, any>;
+    Help: any;
   }) => {
     /**
      * Retrieve help on a function or data type.
@@ -38,18 +38,15 @@ export const createHelp = /* #__PURE__ */ factory(
      */
     return typed(name, {
       any: function (search: any): any {
-        let prop: string
-        let searchName: any = search
+        let prop: string;
+        let searchName: any = search;
 
         if (typeof search !== 'string') {
           for (prop in mathWithTransform) {
             // search in functions and constants
-            if (
-              hasOwnProperty(mathWithTransform, prop) &&
-              search === mathWithTransform[prop]
-            ) {
-              searchName = prop
-              break
+            if (hasOwnProperty(mathWithTransform, prop) && search === mathWithTransform[prop]) {
+              searchName = prop;
+              break;
             }
           }
 
@@ -68,14 +65,13 @@ export const createHelp = /* #__PURE__ */ factory(
          */
         }
 
-        const doc = getSafeProperty(embeddedDocs, searchName)
+        const doc = getSafeProperty(embeddedDocs, searchName);
         if (!doc) {
-          const searchText =
-            typeof searchName === 'function' ? searchName.name : searchName
-          throw new Error('No documentation found on "' + searchText + '"')
+          const searchText = typeof searchName === 'function' ? searchName.name : searchName;
+          throw new Error('No documentation found on "' + searchText + '"');
         }
-        return new Help(doc)
-      }
-    })
+        return new Help(doc);
+      },
+    });
   }
-)
+);

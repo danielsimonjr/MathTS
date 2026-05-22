@@ -6,7 +6,11 @@ echo "Building Rust WASM..."
 cargo build --target wasm32-unknown-unknown --release
 
 WASM_SRC="target/wasm32-unknown-unknown/release/mathts_wasm.wasm"
-WASM_DST="../../lib/wasm/mathts.wasm"
+# Destination is repo-root/lib/wasm/ (one level up from wasm-rust/).
+# Previously `../../lib/wasm/...` which resolved OUTSIDE the repo, so the
+# benchmark at tests/benchmark/wasm_rust_vs_as_benchmark.ts couldn't find
+# the artifact and reported empty Rust columns.
+WASM_DST="../lib/wasm/mathts.wasm"
 
 # Create output directory if needed
 mkdir -p "$(dirname "$WASM_DST")"

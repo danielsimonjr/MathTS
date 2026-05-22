@@ -15,17 +15,21 @@
 ## Remaining Sprint Tasks
 
 ### Sprint 3.10: Parallel benchmarks
+
 - [x] Parallel operation benchmarks — DONE (parallel/tests/benchmark.test.ts)
 
 ### Sprint 3.11: FFT WASM acceleration
+
 - [ ] FFT WASM acceleration — implement FFT in AssemblyScript with SIMD butterfly operations
 - [ ] Parallel FFT for large arrays — threshold-based dispatch to workers
 
 ### Sprint 3.12: Eigendecomposition WASM
+
 - [ ] WASM eig/svd — QR iteration and bidiagonalization in AssemblyScript
 - [ ] Parallel divide-and-conquer eigensolve for large matrices
 
 ### Sprint 6.28: Release Preparation
+
 - [ ] npm publishing setup — configure packages, CI publish workflow
 - [ ] Bundle size optimization — tree-shaking, minification, code splitting
 - [ ] Performance regression tests — benchmark suite for CI
@@ -77,20 +81,22 @@ subtractScalar (done) → subtract (needs matrix overload)
 ### Task 2: Wire expression evaluator to factory scope
 
 - [ ] **Step 1: Create `functions/src/factories/evaluate.ts`**
-  Import `createEvaluate` from `@danielsimonjr/mathts-expression`, pass it the parse function and a math scope built from all activated factories.
+      Import `createEvaluate` from `@danielsimonjr/mathts-expression`, pass it the parse function and a math scope built from all activated factories.
 
 - [ ] **Step 2: Export `evaluate` from functions package**
+
   ```typescript
   export { evaluate } from './factories/evaluate.js';
   ```
 
 - [ ] **Step 3: Write tests**
+
   ```typescript
-  evaluate('2 + 3')          // 5
-  evaluate('sin(pi/2)')      // 1
-  evaluate('sqrt(16)')       // 4
-  evaluate('x^2', {x: 3})   // 9
-  evaluate('det([[1,2],[3,4]])')  // -2
+  evaluate('2 + 3'); // 5
+  evaluate('sin(pi/2)'); // 1
+  evaluate('sqrt(16)'); // 4
+  evaluate('x^2', { x: 3 }); // 9
+  evaluate('det([[1,2],[3,4]])'); // -2
   ```
 
 - [ ] **Step 4: Verify build and tests**

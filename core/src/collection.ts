@@ -1,22 +1,22 @@
-import { isCollection, isMatrix } from './is.js'
-import { IndexError } from '../error/IndexError.js'
-import { arraySize, deepMap as arrayDeepMap, deepForEach as arrayDeepForEach } from './array.js'
-import { _switch } from './switch.js'
+import { isCollection, isMatrix } from './is.js';
+import { IndexError } from '../error/IndexError.js';
+import { arraySize, deepMap as arrayDeepMap, deepForEach as arrayDeepForEach } from './array.js';
+import { _switch } from './switch.js';
 
 // Type definitions for Matrix interface
 interface Matrix {
-  forEach(callback: (value: any) => void, skipZeros: boolean, recurse: boolean): void
-  map(callback: (value: any) => any, skipZeros: boolean, recurse: boolean): Matrix
-  size(): number[]
-  valueOf(): any[]
-  create(data: any[], datatype?: string): Matrix
-  datatype(): string | undefined
+  forEach(callback: (value: any) => void, skipZeros: boolean, recurse: boolean): void;
+  map(callback: (value: any) => any, skipZeros: boolean, recurse: boolean): Matrix;
+  size(): number[];
+  valueOf(): any[];
+  create(data: any[], datatype?: string): Matrix;
+  datatype(): string | undefined;
 }
 
 interface SparseMatrix {
-  _values: any[]
-  _index: number[]
-  _ptr: number[]
+  _values: any[];
+  _index: number[];
+  _ptr: number[];
 }
 
 /**
@@ -28,10 +28,10 @@ interface SparseMatrix {
 export function containsCollections(array: any[]): boolean {
   for (let i = 0; i < array.length; i++) {
     if (isCollection(array[i])) {
-      return true
+      return true;
     }
   }
-  return false
+  return false;
 }
 
 /**
@@ -42,9 +42,9 @@ export function containsCollections(array: any[]): boolean {
  */
 export function deepForEach(array: any[] | Matrix, callback: (value: any) => void): void {
   if (isMatrix(array)) {
-    (array as Matrix).forEach(x => callback(x), false, true)
+    (array as Matrix).forEach((x) => callback(x), false, true);
   } else {
-    arrayDeepForEach(array as any[], callback, true)
+    arrayDeepForEach(array as any[], callback, true);
   }
 }
 
@@ -67,16 +67,16 @@ export function deepMap(
 ): any[] | Matrix {
   if (!skipZeros) {
     if (isMatrix(array)) {
-      return (array as Matrix).map(x => callback(x), false, true)
+      return (array as Matrix).map((x) => callback(x), false, true);
     } else {
-      return arrayDeepMap(array as any[], callback, true)
+      return arrayDeepMap(array as any[], callback, true);
     }
   }
-  const skipZerosCallback = (x: any): any => x === 0 ? x : callback(x)
+  const skipZerosCallback = (x: any): any => (x === 0 ? x : callback(x));
   if (isMatrix(array)) {
-    return (array as Matrix).map(x => skipZerosCallback(x), false, true)
+    return (array as Matrix).map((x) => skipZerosCallback(x), false, true);
   } else {
-    return arrayDeepMap(array as any[], skipZerosCallback, true)
+    return arrayDeepMap(array as any[], skipZerosCallback, true);
   }
 }
 
@@ -94,16 +94,19 @@ export function reduce(
   dim: number,
   callback: (acc: any, val: any) => any
 ): any[] | Matrix {
-  const size = Array.isArray(mat) ? arraySize(mat) : (mat as Matrix).size()
-  if (dim < 0 || (dim >= size.length)) {
+  const size = Array.isArray(mat) ? arraySize(mat) : (mat as Matrix).size();
+  if (dim < 0 || dim >= size.length) {
     // TODO: would be more clear when throwing a DimensionError here
-    throw new IndexError(dim, 0, size.length) as any
+    throw new IndexError(dim, 0, size.length) as any;
   }
 
   if (isMatrix(mat)) {
-    return (mat as Matrix).create(_reduce((mat as Matrix).valueOf(), dim, callback), (mat as Matrix).datatype())
+    return (mat as Matrix).create(
+      _reduce((mat as Matrix).valueOf(), dim, callback),
+      (mat as Matrix).datatype()
+    );
   } else {
-    return _reduce(mat as any[], dim, callback)
+    return _reduce(mat as any[], dim, callback);
   }
 }
 
@@ -116,32 +119,32 @@ export function reduce(
  * @private
  */
 function _reduce(mat: any[], dim: number, callback: (acc: any, val: any) => any): any {
-  let i: number
-  let ret: any[]
-  let val: any
-  let tran: any[]
+  let i: number;
+  let ret: any[];
+  let val: any;
+  let tran: any[];
 
   if (dim <= 0) {
     if (!Array.isArray(mat[0])) {
-      val = mat[0]
+      val = mat[0];
       for (i = 1; i < mat.length; i++) {
-        val = callback(val, mat[i])
+        val = callback(val, mat[i]);
       }
-      return val
+      return val;
     } else {
-      tran = _switch(mat)
-      ret = []
+      tran = _switch(mat);
+      ret = [];
       for (i = 0; i < tran.length; i++) {
-        ret[i] = _reduce(tran[i], dim - 1, callback)
+        ret[i] = _reduce(tran[i], dim - 1, callback);
       }
-      return ret
+      return ret;
     }
   } else {
-    ret = []
+    ret = [];
     for (i = 0; i < mat.length; i++) {
-      ret[i] = _reduce(mat[i], dim - 1, callback)
+      ret[i] = _reduce(mat[i], dim - 1, callback);
     }
-    return ret
+    return ret;
   }
 }
 
@@ -173,61 +176,61 @@ export function scatter(
   value?: any
 ): void {
   // a arrays
-  const avalues = a._values
-  const aindex = a._index
-  const aptr = a._ptr
+  const avalues = a._values;
+  const aindex = a._index;
+  const aptr = a._ptr;
 
   // vars
-  let k: number
-  let k0: number
-  let k1: number
-  let i: number
+  let k: number;
+  let k0: number;
+  let k1: number;
+  let i: number;
 
   // check we need to process values (pattern matrix)
   if (x) {
     // values in j
     for (k0 = aptr[j], k1 = aptr[j + 1], k = k0; k < k1; k++) {
       // row
-      i = aindex[k]
+      i = aindex[k];
       // check value exists in current j
       if (w[i] !== mark) {
         // i is new entry in j
-        w[i] = mark
+        w[i] = mark;
         // add i to pattern of C
-        cindex.push(i)
+        cindex.push(i);
         // x(i) = A, check we need to call function this time
         if (update && f) {
           // copy value to workspace calling callback function
-          x[i] = inverse ? f(avalues[k], value) : f(value, avalues[k])
+          x[i] = inverse ? f(avalues[k], value) : f(value, avalues[k]);
           // function was called on current row
-          u[i] = mark
+          u[i] = mark;
         } else {
           // copy value to workspace
-          x[i] = avalues[k]
+          x[i] = avalues[k];
         }
       } else {
         // i exists in C already
         if (f) {
-          x[i] = inverse ? f(avalues[k], x[i]) : f(x[i], avalues[k])
+          x[i] = inverse ? f(avalues[k], x[i]) : f(x[i], avalues[k]);
         }
         // function was called on current row
-        u[i] = mark
+        u[i] = mark;
       }
     }
   } else {
     // values in j
     for (k0 = aptr[j], k1 = aptr[j + 1], k = k0; k < k1; k++) {
       // row
-      i = aindex[k]
+      i = aindex[k];
       // check value exists in current j
       if (w[i] !== mark) {
         // i is new entry in j
-        w[i] = mark
+        w[i] = mark;
         // add i to pattern of C
-        cindex.push(i)
+        cindex.push(i);
       } else {
         // indicate function was called on current row
-        u[i] = mark
+        u[i] = mark;
       }
     }
   }

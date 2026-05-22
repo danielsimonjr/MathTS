@@ -8,7 +8,7 @@ export const log1pDocs = {
     'exp(log1p(1.4))',
     'pow(10, 4)',
     'log1p(9999, 10)',
-    'log1p(9999) / log(10)'
+    'log1p(9999) / log(10)',
   ],
-  seealso: ['exp', 'log', 'log2', 'log10']
-}
+  seealso: ['exp', 'log', 'log2', 'log10'],
+};

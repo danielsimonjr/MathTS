@@ -17,8 +17,13 @@ import { DEFAULT_CONFIG, isNumber, isMatrix, VERSION } from '@danielsimonjr/math
 const config = { ...DEFAULT_CONFIG, backend: 'wasm' };
 
 // Type guards
-console.log(isNumber(42));        // true
-console.log(isMatrix([[1, 2], [3, 4]])); // true
+console.log(isNumber(42)); // true
+console.log(
+  isMatrix([
+    [1, 2],
+    [3, 4],
+  ])
+); // true
 ```
 
 ## API

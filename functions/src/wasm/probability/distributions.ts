@@ -6,14 +6,14 @@
  */
 
 // Linear Congruential Generator state (using f64 for JS compatibility)
-let lcgState: f64 = 12345
+let lcgState: f64 = 12345;
 
 /**
  * Set the seed for the random number generator
  * @param seed - The seed value
  */
 export function setSeed(seed: f64): void {
-  lcgState = seed
+  lcgState = seed;
 }
 
 /**
@@ -23,8 +23,8 @@ export function setSeed(seed: f64): void {
  */
 export function randomU32(): i32 {
   // LCG parameters (same as glibc), using f64 arithmetic
-  lcgState = (lcgState * 1103515245 + 12345) % 2147483648
-  return <i32>lcgState
+  lcgState = (lcgState * 1103515245 + 12345) % 2147483648;
+  return <i32>lcgState;
 }
 
 /**
@@ -32,7 +32,7 @@ export function randomU32(): i32 {
  * @returns Random f64 in [0, 1)
  */
 export function random(): f64 {
-  return <f64>randomU32() / 2147483648.0
+  return <f64>randomU32() / 2147483648.0;
 }
 
 /**
@@ -42,9 +42,9 @@ export function random(): f64 {
  * @returns Random integer in range
  */
 export function randomInt(min: i32, max: i32): i32 {
-  const range: i32 = max - min + 1
-  const r: i32 = randomU32()
-  return min + ((r < 0 ? -r : r) % range)
+  const range: i32 = max - min + 1;
+  const r: i32 = randomU32();
+  return min + ((r < 0 ? -r : r) % range);
 }
 
 /**
@@ -54,7 +54,7 @@ export function randomInt(min: i32, max: i32): i32 {
  * @returns Random f64 in range
  */
 export function randomRange(min: f64, max: f64): f64 {
-  return min + random() * (max - min)
+  return min + random() * (max - min);
 }
 
 /**
@@ -64,7 +64,7 @@ export function randomRange(min: f64, max: f64): f64 {
  * @returns Random value from U(a, b)
  */
 export function uniform(a: f64, b: f64): f64 {
-  return a + random() * (b - a)
+  return a + random() * (b - a);
 }
 
 /**
@@ -74,13 +74,13 @@ export function uniform(a: f64, b: f64): f64 {
  * @returns Random value from N(mu, sigma^2)
  */
 export function normal(mu: f64, sigma: f64): f64 {
-  const u1: f64 = random()
-  const u2: f64 = random()
+  const u1: f64 = random();
+  const u2: f64 = random();
 
   // Box-Muller transform
-  const z0: f64 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2)
+  const z0: f64 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
 
-  return mu + sigma * z0
+  return mu + sigma * z0;
 }
 
 /**
@@ -89,7 +89,7 @@ export function normal(mu: f64, sigma: f64): f64 {
  * @returns Random value from Exp(lambda)
  */
 export function exponential(lambda: f64): f64 {
-  return -Math.log(1.0 - random()) / lambda
+  return -Math.log(1.0 - random()) / lambda;
 }
 
 /**
@@ -98,7 +98,7 @@ export function exponential(lambda: f64): f64 {
  * @returns 1 with probability p, 0 otherwise
  */
 export function bernoulli(p: f64): i32 {
-  return random() < p ? 1 : 0
+  return random() < p ? 1 : 0;
 }
 
 /**
@@ -108,13 +108,13 @@ export function bernoulli(p: f64): i32 {
  * @returns Number of successes
  */
 export function binomial(n: i32, p: f64): i32 {
-  let successes: i32 = 0
+  let successes: i32 = 0;
   for (let i: i32 = 0; i < n; i++) {
     if (random() < p) {
-      successes++
+      successes++;
     }
   }
-  return successes
+  return successes;
 }
 
 /**
@@ -123,16 +123,16 @@ export function binomial(n: i32, p: f64): i32 {
  * @returns Number of events
  */
 export function poisson(lambda: f64): i32 {
-  const L: f64 = Math.exp(-lambda)
-  let k: i32 = 0
-  let p: f64 = 1.0
+  const L: f64 = Math.exp(-lambda);
+  let k: i32 = 0;
+  let p: f64 = 1.0;
 
   do {
-    k++
-    p *= random()
-  } while (p > L)
+    k++;
+    p *= random();
+  } while (p > L);
 
-  return k - 1
+  return k - 1;
 }
 
 /**
@@ -141,7 +141,7 @@ export function poisson(lambda: f64): i32 {
  * @returns Number of trials until first success
  */
 export function geometric(p: f64): i32 {
-  return <i32>Math.ceil(Math.log(1.0 - random()) / Math.log(1.0 - p))
+  return <i32>Math.ceil(Math.log(1.0 - random()) / Math.log(1.0 - p));
 }
 
 /**
@@ -151,15 +151,10 @@ export function geometric(p: f64): i32 {
  * @param min - Minimum value
  * @param max - Maximum value
  */
-export function fillUniform(
-  outputPtr: usize,
-  length: i32,
-  min: f64,
-  max: f64
-): void {
+export function fillUniform(outputPtr: usize, length: i32, min: f64, max: f64): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, uniform(min, max))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, uniform(min, max));
   }
 }
 
@@ -170,15 +165,10 @@ export function fillUniform(
  * @param mu - Mean
  * @param sigma - Standard deviation
  */
-export function fillNormal(
-  outputPtr: usize,
-  length: i32,
-  mu: f64,
-  sigma: f64
-): void {
+export function fillNormal(outputPtr: usize, length: i32, mu: f64, sigma: f64): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, normal(mu, sigma))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, normal(mu, sigma));
   }
 }
 
@@ -190,8 +180,8 @@ export function fillNormal(
  * @returns PDF value at x
  */
 export function normalPDF(x: f64, mu: f64, sigma: f64): f64 {
-  const z: f64 = (x - mu) / sigma
-  return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2.0 * Math.PI))
+  const z: f64 = (x - mu) / sigma;
+  return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2.0 * Math.PI));
 }
 
 /**
@@ -201,22 +191,20 @@ export function normalPDF(x: f64, mu: f64, sigma: f64): f64 {
  * @returns CDF value at x
  */
 export function standardNormalCDF(x: f64): f64 {
-  const a1: f64 = 0.254829592
-  const a2: f64 = -0.284496736
-  const a3: f64 = 1.421413741
-  const a4: f64 = -1.453152027
-  const a5: f64 = 1.061405429
-  const p: f64 = 0.3275911
+  const a1: f64 = 0.254829592;
+  const a2: f64 = -0.284496736;
+  const a3: f64 = 1.421413741;
+  const a4: f64 = -1.453152027;
+  const a5: f64 = 1.061405429;
+  const p: f64 = 0.3275911;
 
-  const sign: f64 = x < 0 ? -1.0 : 1.0
-  const absX: f64 = Math.abs(x)
+  const sign: f64 = x < 0 ? -1.0 : 1.0;
+  const absX: f64 = Math.abs(x);
 
-  const t: f64 = 1.0 / (1.0 + p * absX)
-  const y: f64 =
-    1.0 -
-    ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX)
+  const t: f64 = 1.0 / (1.0 + p * absX);
+  const y: f64 = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
 
-  return 0.5 * (1.0 + sign * y)
+  return 0.5 * (1.0 + sign * y);
 }
 
 /**
@@ -227,7 +215,7 @@ export function standardNormalCDF(x: f64): f64 {
  * @returns CDF value at x
  */
 export function normalCDF(x: f64, mu: f64, sigma: f64): f64 {
-  return standardNormalCDF((x - mu) / sigma)
+  return standardNormalCDF((x - mu) / sigma);
 }
 
 /**
@@ -237,8 +225,8 @@ export function normalCDF(x: f64, mu: f64, sigma: f64): f64 {
  * @returns PDF value at x
  */
 export function exponentialPDF(x: f64, lambda: f64): f64 {
-  if (x < 0) return 0.0
-  return lambda * Math.exp(-lambda * x)
+  if (x < 0) return 0.0;
+  return lambda * Math.exp(-lambda * x);
 }
 
 /**
@@ -248,8 +236,8 @@ export function exponentialPDF(x: f64, lambda: f64): f64 {
  * @returns CDF value at x
  */
 export function exponentialCDF(x: f64, lambda: f64): f64 {
-  if (x < 0) return 0.0
-  return 1.0 - Math.exp(-lambda * x)
+  if (x < 0) return 0.0;
+  return 1.0 - Math.exp(-lambda * x);
 }
 
 /**
@@ -260,18 +248,18 @@ export function exponentialCDF(x: f64, lambda: f64): f64 {
  * @returns KL divergence D_KL(P || Q)
  */
 export function klDivergence(pPtr: usize, qPtr: usize, length: i32): f64 {
-  let kl: f64 = 0.0
+  let kl: f64 = 0.0;
 
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    const pVal: f64 = load<f64>(pPtr + offset)
-    const qVal: f64 = load<f64>(qPtr + offset)
+    const offset: usize = (<usize>i) << 3;
+    const pVal: f64 = load<f64>(pPtr + offset);
+    const qVal: f64 = load<f64>(qPtr + offset);
     if (pVal > 0.0 && qVal > 0.0) {
-      kl += pVal * Math.log(pVal / qVal)
+      kl += pVal * Math.log(pVal / qVal);
     }
   }
 
-  return kl
+  return kl;
 }
 
 /**
@@ -282,24 +270,16 @@ export function klDivergence(pPtr: usize, qPtr: usize, length: i32): f64 {
  * @param workPtr - Pointer to working memory (f64, length elements)
  * @returns JS divergence
  */
-export function jsDivergence(
-  pPtr: usize,
-  qPtr: usize,
-  length: i32,
-  workPtr: usize
-): f64 {
+export function jsDivergence(pPtr: usize, qPtr: usize, length: i32, workPtr: usize): f64 {
   // Compute m = 0.5 * (p + q)
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    const pVal: f64 = load<f64>(pPtr + offset)
-    const qVal: f64 = load<f64>(qPtr + offset)
-    store<f64>(workPtr + offset, 0.5 * (pVal + qVal))
+    const offset: usize = (<usize>i) << 3;
+    const pVal: f64 = load<f64>(pPtr + offset);
+    const qVal: f64 = load<f64>(qPtr + offset);
+    store<f64>(workPtr + offset, 0.5 * (pVal + qVal));
   }
 
-  return (
-    0.5 * klDivergence(pPtr, workPtr, length) +
-    0.5 * klDivergence(qPtr, workPtr, length)
-  )
+  return 0.5 * klDivergence(pPtr, workPtr, length) + 0.5 * klDivergence(qPtr, workPtr, length);
 }
 
 /**
@@ -309,17 +289,17 @@ export function jsDivergence(
  * @returns Entropy in nats
  */
 export function entropy(pPtr: usize, length: i32): f64 {
-  let h: f64 = 0.0
+  let h: f64 = 0.0;
 
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    const pVal: f64 = load<f64>(pPtr + offset)
+    const offset: usize = (<usize>i) << 3;
+    const pVal: f64 = load<f64>(pPtr + offset);
     if (pVal > 0.0) {
-      h -= pVal * Math.log(pVal)
+      h -= pVal * Math.log(pVal);
     }
   }
 
-  return h
+  return h;
 }
 
 /**
@@ -329,12 +309,12 @@ export function entropy(pPtr: usize, length: i32): f64 {
  */
 export function shuffle(arrPtr: usize, length: i32): void {
   for (let i: i32 = length - 1; i > 0; i--) {
-    const j: i32 = randomInt(0, i)
-    const iOffset: usize = (<usize>i) << 3
-    const jOffset: usize = (<usize>j) << 3
-    const temp: f64 = load<f64>(arrPtr + iOffset)
-    store<f64>(arrPtr + iOffset, load<f64>(arrPtr + jOffset))
-    store<f64>(arrPtr + jOffset, temp)
+    const j: i32 = randomInt(0, i);
+    const iOffset: usize = (<usize>i) << 3;
+    const jOffset: usize = (<usize>j) << 3;
+    const temp: f64 = load<f64>(arrPtr + iOffset);
+    store<f64>(arrPtr + iOffset, load<f64>(arrPtr + jOffset));
+    store<f64>(arrPtr + jOffset, temp);
   }
 }
 
@@ -355,19 +335,19 @@ export function sampleWithoutReplacement(
 ): void {
   // Copy array to working memory
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(workPtr + offset, load<f64>(arrPtr + offset))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(workPtr + offset, load<f64>(arrPtr + offset));
   }
 
   // Partial Fisher-Yates
   for (let i: i32 = 0; i < k; i++) {
-    const j: i32 = randomInt(i, length - 1)
-    const iOffset: usize = (<usize>i) << 3
-    const jOffset: usize = (<usize>j) << 3
-    const temp: f64 = load<f64>(workPtr + iOffset)
-    store<f64>(workPtr + iOffset, load<f64>(workPtr + jOffset))
-    store<f64>(workPtr + jOffset, temp)
-    store<f64>(outputPtr + iOffset, load<f64>(workPtr + iOffset))
+    const j: i32 = randomInt(i, length - 1);
+    const iOffset: usize = (<usize>i) << 3;
+    const jOffset: usize = (<usize>j) << 3;
+    const temp: f64 = load<f64>(workPtr + iOffset);
+    store<f64>(workPtr + iOffset, load<f64>(workPtr + jOffset));
+    store<f64>(workPtr + jOffset, temp);
+    store<f64>(outputPtr + iOffset, load<f64>(workPtr + iOffset));
   }
 }
 
@@ -378,16 +358,11 @@ export function sampleWithoutReplacement(
  * @param k - Number of elements to sample
  * @param outputPtr - Pointer to output array (f64, length >= k)
  */
-export function sampleWithReplacement(
-  arrPtr: usize,
-  length: i32,
-  k: i32,
-  outputPtr: usize
-): void {
+export function sampleWithReplacement(arrPtr: usize, length: i32, k: i32, outputPtr: usize): void {
   for (let i: i32 = 0; i < k; i++) {
-    const j: i32 = randomInt(0, length - 1)
-    const iOffset: usize = (<usize>i) << 3
-    const jOffset: usize = (<usize>j) << 3
-    store<f64>(outputPtr + iOffset, load<f64>(arrPtr + jOffset))
+    const j: i32 = randomInt(0, length - 1);
+    const iOffset: usize = (<usize>i) << 3;
+    const jOffset: usize = (<usize>j) << 3;
+    store<f64>(outputPtr + iOffset, load<f64>(arrPtr + jOffset));
   }
 }

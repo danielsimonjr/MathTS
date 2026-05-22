@@ -22,7 +22,7 @@ type Signatures = Record<string, SignatureFunction>;
  * Create a matrix from various input types
  */
 export const matrix = mathTyped('matrix', {
-  'Array': (arr: number[][]) => DenseMatrix.fromArray(arr),
+  Array: (arr: number[][]) => DenseMatrix.fromArray(arr),
 
   'number, number': (rows: number, cols: number) => DenseMatrix.zeros(rows, cols),
 
@@ -37,7 +37,7 @@ export const matrix = mathTyped('matrix', {
  * Create an identity matrix
  */
 export const identity = mathTyped('identity', {
-  'number': (n: number) => DenseMatrix.identity(n),
+  number: (n: number) => DenseMatrix.identity(n),
 } as Signatures);
 
 /**
@@ -58,7 +58,7 @@ export const ones = mathTyped('ones', {
  * Create a diagonal matrix
  */
 export const diag = mathTyped('diag', {
-  'Array': (values: number[]) => DenseMatrix.diag(values),
+  Array: (values: number[]) => DenseMatrix.diag(values),
 } as Signatures);
 
 /**
@@ -80,12 +80,10 @@ export const add = mathTyped('add', {
   'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) => a.add(b),
 
   // Matrix + scalar
-  'DenseMatrix, number': (a: DenseMatrix, scalar: number) =>
-    a.map((v) => v + scalar),
+  'DenseMatrix, number': (a: DenseMatrix, scalar: number) => a.map((v) => v + scalar),
 
   // scalar + Matrix
-  'number, DenseMatrix': (scalar: number, a: DenseMatrix) =>
-    a.map((v) => v + scalar),
+  'number, DenseMatrix': (scalar: number, a: DenseMatrix) => a.map((v) => v + scalar),
 
   // Fallback for number + number (delegates to core)
   'number, number': (a: number, b: number) => a + b,
@@ -99,12 +97,10 @@ export const subtract = mathTyped('subtract', {
   'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) => a.subtract(b),
 
   // Matrix - scalar
-  'DenseMatrix, number': (a: DenseMatrix, scalar: number) =>
-    a.map((v) => v - scalar),
+  'DenseMatrix, number': (a: DenseMatrix, scalar: number) => a.map((v) => v - scalar),
 
   // scalar - Matrix
-  'number, DenseMatrix': (scalar: number, a: DenseMatrix) =>
-    a.map((v) => scalar - v),
+  'number, DenseMatrix': (scalar: number, a: DenseMatrix) => a.map((v) => scalar - v),
 
   // Fallback for number - number
   'number, number': (a: number, b: number) => a - b,
@@ -131,8 +127,7 @@ export const multiply = mathTyped('multiply', {
  * Element-wise multiplication (Hadamard product)
  */
 export const dotMultiply = mathTyped('dotMultiply', {
-  'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) =>
-    a.multiplyElementwise(b),
+  'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) => a.multiplyElementwise(b),
 
   'number, number': (a: number, b: number) => a * b,
 } as Signatures);
@@ -142,12 +137,10 @@ export const dotMultiply = mathTyped('dotMultiply', {
  */
 export const divide = mathTyped('divide', {
   // Matrix / scalar
-  'DenseMatrix, number': (a: DenseMatrix, scalar: number) =>
-    a.scale(1 / scalar),
+  'DenseMatrix, number': (a: DenseMatrix, scalar: number) => a.scale(1 / scalar),
 
   // scalar / Matrix (element-wise)
-  'number, DenseMatrix': (scalar: number, a: DenseMatrix) =>
-    a.map((v) => scalar / v),
+  'number, DenseMatrix': (scalar: number, a: DenseMatrix) => a.map((v) => scalar / v),
 
   // Fallback for number / number
   'number, number': (a: number, b: number) => a / b,
@@ -157,15 +150,15 @@ export const divide = mathTyped('divide', {
  * Matrix negation
  */
 export const unaryMinus = mathTyped('unaryMinus', {
-  'DenseMatrix': (a: DenseMatrix) => a.negate(),
-  'number': (a: number) => -a,
+  DenseMatrix: (a: DenseMatrix) => a.negate(),
+  number: (a: number) => -a,
 } as Signatures);
 
 /**
  * Matrix transpose
  */
 export const transpose = mathTyped('transpose', {
-  'DenseMatrix': (a: DenseMatrix) => a.transpose(),
+  DenseMatrix: (a: DenseMatrix) => a.transpose(),
 } as Signatures);
 
 // =============================================================================
@@ -176,24 +169,24 @@ export const transpose = mathTyped('transpose', {
  * Sum of all elements
  */
 export const sum = mathTyped('sum', {
-  'DenseMatrix': (a: DenseMatrix) => a.sum(),
-  'Array': (arr: number[]) => arr.reduce((acc, v) => acc + v, 0),
+  DenseMatrix: (a: DenseMatrix) => a.sum(),
+  Array: (arr: number[]) => arr.reduce((acc, v) => acc + v, 0),
 } as Signatures);
 
 /**
  * Mean of all elements
  */
 export const mean = mathTyped('mean', {
-  'DenseMatrix': (a: DenseMatrix) => a.mean(),
-  'Array': (arr: number[]) => arr.reduce((acc, v) => acc + v, 0) / arr.length,
+  DenseMatrix: (a: DenseMatrix) => a.mean(),
+  Array: (arr: number[]) => arr.reduce((acc, v) => acc + v, 0) / arr.length,
 } as Signatures);
 
 /**
  * Minimum element
  */
 export const min = mathTyped('min', {
-  'DenseMatrix': (a: DenseMatrix) => a.min(),
-  'Array': (arr: number[]) => Math.min(...arr),
+  DenseMatrix: (a: DenseMatrix) => a.min(),
+  Array: (arr: number[]) => Math.min(...arr),
   'number, number': (a: number, b: number) => Math.min(a, b),
 } as Signatures);
 
@@ -201,8 +194,8 @@ export const min = mathTyped('min', {
  * Maximum element
  */
 export const max = mathTyped('max', {
-  'DenseMatrix': (a: DenseMatrix) => a.max(),
-  'Array': (arr: number[]) => Math.max(...arr),
+  DenseMatrix: (a: DenseMatrix) => a.max(),
+  Array: (arr: number[]) => Math.max(...arr),
   'number, number': (a: number, b: number) => Math.max(a, b),
 } as Signatures);
 
@@ -210,15 +203,15 @@ export const max = mathTyped('max', {
  * Frobenius norm
  */
 export const norm = mathTyped('norm', {
-  'DenseMatrix': (a: DenseMatrix) => a.norm(),
-  'Array': (arr: number[]) => Math.sqrt(arr.reduce((acc, v) => acc + v * v, 0)),
+  DenseMatrix: (a: DenseMatrix) => a.norm(),
+  Array: (arr: number[]) => Math.sqrt(arr.reduce((acc, v) => acc + v * v, 0)),
 } as Signatures);
 
 /**
  * Matrix trace (sum of diagonal elements)
  */
 export const trace = mathTyped('trace', {
-  'DenseMatrix': (a: DenseMatrix) => a.trace(),
+  DenseMatrix: (a: DenseMatrix) => a.trace(),
 } as Signatures);
 
 // =============================================================================
@@ -229,48 +222,47 @@ export const trace = mathTyped('trace', {
  * Element-wise absolute value
  */
 export const abs = mathTyped('abs', {
-  'DenseMatrix': (a: DenseMatrix) => a.map((v) => Math.abs(v)),
-  'number': (a: number) => Math.abs(a),
+  DenseMatrix: (a: DenseMatrix) => a.map((v) => Math.abs(v)),
+  number: (a: number) => Math.abs(a),
 } as Signatures);
 
 /**
  * Element-wise square root
  */
 export const sqrt = mathTyped('sqrt', {
-  'DenseMatrix': (a: DenseMatrix) => a.map((v) => Math.sqrt(v)),
-  'number': (a: number) => Math.sqrt(a),
+  DenseMatrix: (a: DenseMatrix) => a.map((v) => Math.sqrt(v)),
+  number: (a: number) => Math.sqrt(a),
 } as Signatures);
 
 /**
  * Element-wise square
  */
 export const square = mathTyped('square', {
-  'DenseMatrix': (a: DenseMatrix) => a.map((v) => v * v),
-  'number': (a: number) => a * a,
+  DenseMatrix: (a: DenseMatrix) => a.map((v) => v * v),
+  number: (a: number) => a * a,
 } as Signatures);
 
 /**
  * Element-wise exponential
  */
 export const exp = mathTyped('exp', {
-  'DenseMatrix': (a: DenseMatrix) => a.map((v) => Math.exp(v)),
-  'number': (a: number) => Math.exp(a),
+  DenseMatrix: (a: DenseMatrix) => a.map((v) => Math.exp(v)),
+  number: (a: number) => Math.exp(a),
 } as Signatures);
 
 /**
  * Element-wise natural logarithm
  */
 export const log = mathTyped('log', {
-  'DenseMatrix': (a: DenseMatrix) => a.map((v) => Math.log(v)),
-  'number': (a: number) => Math.log(a),
+  DenseMatrix: (a: DenseMatrix) => a.map((v) => Math.log(v)),
+  number: (a: number) => Math.log(a),
 } as Signatures);
 
 /**
  * Element-wise power
  */
 export const pow = mathTyped('pow', {
-  'DenseMatrix, number': (a: DenseMatrix, n: number) =>
-    a.map((v) => Math.pow(v, n)),
+  'DenseMatrix, number': (a: DenseMatrix, n: number) => a.map((v) => Math.pow(v, n)),
   'number, number': (a: number, b: number) => Math.pow(a, b),
 } as Signatures);
 
@@ -282,8 +274,8 @@ export const pow = mathTyped('pow', {
  * Get matrix dimensions
  */
 export const size = mathTyped('size', {
-  'DenseMatrix': (a: DenseMatrix) => [a.rows, a.cols],
-  'Array': (arr: unknown[]) => {
+  DenseMatrix: (a: DenseMatrix) => [a.rows, a.cols],
+  Array: (arr: unknown[]) => {
     if (Array.isArray(arr[0])) {
       return [arr.length, (arr[0] as unknown[]).length];
     }
@@ -295,8 +287,7 @@ export const size = mathTyped('size', {
  * Get element at position
  */
 export const subset = mathTyped('subset', {
-  'DenseMatrix, number, number': (a: DenseMatrix, row: number, col: number) =>
-    a.get(row, col),
+  'DenseMatrix, number, number': (a: DenseMatrix, row: number, col: number) => a.get(row, col),
 } as Signatures);
 
 /**
@@ -317,7 +308,7 @@ export const column = mathTyped('column', {
  * Get diagonal from matrix
  */
 export const diagonal = mathTyped('diagonal', {
-  'DenseMatrix': (a: DenseMatrix) => a.diagonal(),
+  DenseMatrix: (a: DenseMatrix) => a.diagonal(),
   'DenseMatrix, number': (a: DenseMatrix, k: number) => a.diagonal(k),
 } as Signatures);
 

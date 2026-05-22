@@ -589,7 +589,7 @@ export const carmichaelLambda = mathTyped('carmichaelLambda', {
           pk *= p;
           m /= p;
         }
-        let lam = _carmichaelPrimePower(p, pk);
+        const lam = _carmichaelPrimePower(p, pk);
         result = _lcm(result, lam);
       }
     }

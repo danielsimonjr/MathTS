@@ -1,9 +1,9 @@
-import { factory } from '../../../utils/factory.js'
+import { factory } from '../../../utils/factory.js';
 
-import { TypedFunction } from '../../../types.js'
+import { TypedFunction } from '../../../types.js';
 
-const name = 'chain'
-const dependencies = ['typed', 'Chain']
+const name = 'chain';
+const dependencies = ['typed', 'Chain'];
 
 export const createChain = /* #__PURE__ */ factory(
   name,
@@ -46,12 +46,12 @@ export const createChain = /* #__PURE__ */ factory(
      */
     return typed(name, {
       '': function () {
-        return new Chain()
+        return new Chain();
       },
 
       any: function (value: any) {
-        return new Chain(value)
-      }
-    }) as unknown as TypedFunction
+        return new Chain(value);
+      },
+    }) as unknown as TypedFunction;
   }
-)
+);

@@ -5,12 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  crossCorrelation,
-  autoCorrelation,
-  groupDelay,
-  unwrapPhase,
-} from '../src/typed/signal.js';
+import { crossCorrelation, autoCorrelation, groupDelay, unwrapPhase } from '../src/typed/signal.js';
 
 const EPSILON = 1e-10;
 

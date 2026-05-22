@@ -1,31 +1,17 @@
-import { isIndex } from '../utils/is.js'
-import { clone } from '../utils/object.js'
-import {
-  isEmptyIndex,
-  validateIndex,
-  validateIndexSourceSize
-} from '../utils/array.js'
-import { getSafeProperty, setSafeProperty } from '../utils/customs.js'
-import { DimensionError } from '../error/DimensionError.js'
-import { factory } from '../utils/factory.js'
+import { isIndex } from '../utils/is.js';
+import { clone } from '../utils/object.js';
+import { isEmptyIndex, validateIndex, validateIndexSourceSize } from '../utils/array.js';
+import { getSafeProperty, setSafeProperty } from '../utils/customs.js';
+import { DimensionError } from '../error/DimensionError.js';
+import { factory } from '../utils/factory.js';
 
-const name = 'subset'
-const dependencies = ['typed', 'matrix', 'zeros', 'add']
+const name = 'subset';
+const dependencies = ['typed', 'matrix', 'zeros', 'add'];
 
 export const createSubset = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    zeros,
-    add
-  }: {
-    typed: any
-    matrix: any
-    zeros: any
-    add: any
-  }) => {
+  ({ typed, matrix, zeros, add }: { typed: any; matrix: any; zeros: any; add: any }) => {
     /**
      * Get or set a subset of a matrix or string.
      *
@@ -77,17 +63,17 @@ export const createSubset = /* #__PURE__ */ factory(
       // get subset
       'Matrix, Index': function (value: any, index: any): any {
         if (isEmptyIndex(index)) {
-          return matrix()
+          return matrix();
         }
-        validateIndexSourceSize(value, index)
-        return value.subset(index)
+        validateIndexSourceSize(value, index);
+        return value.subset(index);
       },
 
       'Array, Index': typed.referTo('Matrix, Index', function (subsetRef: any) {
         return function (value: any[], index: any): any {
-          const subsetResult = subsetRef(matrix(value), index)
-          return index.isScalar() ? subsetResult : subsetResult.valueOf()
-        }
+          const subsetResult = subsetRef(matrix(value), index);
+          return index.isScalar() ? subsetResult : subsetResult.valueOf();
+        };
       }),
 
       'Object, Index': _getObjectProperty,
@@ -102,65 +88,35 @@ export const createSubset = /* #__PURE__ */ factory(
         defaultValue: any
       ): any {
         if (isEmptyIndex(index)) {
-          return value
+          return value;
         }
-        validateIndexSourceSize(value, index)
-        return value
-          .clone()
-          .subset(
-            index,
-            _broadcastReplacement(replacement, index),
-            defaultValue
-          )
+        validateIndexSourceSize(value, index);
+        return value.clone().subset(index, _broadcastReplacement(replacement, index), defaultValue);
       },
 
-      'Array, Index, any, any': typed.referTo(
-        'Matrix, Index, any, any',
-        function (subsetRef: any) {
-          return function (
-            value: any[],
-            index: any,
-            replacement: any,
-            defaultValue: any
-          ): any {
-            const subsetResult = subsetRef(
-              matrix(value),
-              index,
-              replacement,
-              defaultValue
-            )
-            return subsetResult.isMatrix ? subsetResult.valueOf() : subsetResult
-          }
-        }
-      ),
+      'Array, Index, any, any': typed.referTo('Matrix, Index, any, any', function (subsetRef: any) {
+        return function (value: any[], index: any, replacement: any, defaultValue: any): any {
+          const subsetResult = subsetRef(matrix(value), index, replacement, defaultValue);
+          return subsetResult.isMatrix ? subsetResult.valueOf() : subsetResult;
+        };
+      }),
 
-      'Array, Index, any': typed.referTo(
-        'Matrix, Index, any, any',
-        function (subsetRef: any) {
-          return function (value: any[], index: any, replacement: any): any {
-            return subsetRef(
-              matrix(value),
-              index,
-              replacement,
-              undefined
-            ).valueOf()
-          }
-        }
-      ),
+      'Array, Index, any': typed.referTo('Matrix, Index, any, any', function (subsetRef: any) {
+        return function (value: any[], index: any, replacement: any): any {
+          return subsetRef(matrix(value), index, replacement, undefined).valueOf();
+        };
+      }),
 
-      'Matrix, Index, any': typed.referTo(
-        'Matrix, Index, any, any',
-        function (subsetRef: any) {
-          return function (value: any, index: any, replacement: any): any {
-            return subsetRef(value, index, replacement, undefined)
-          }
-        }
-      ),
+      'Matrix, Index, any': typed.referTo('Matrix, Index, any, any', function (subsetRef: any) {
+        return function (value: any, index: any, replacement: any): any {
+          return subsetRef(value, index, replacement, undefined);
+        };
+      }),
 
       'string, Index, string': _setSubstring,
       'string, Index, string, string': _setSubstring,
-      'Object, Index, any': _setObjectProperty
-    })
+      'Object, Index, any': _setObjectProperty,
+    });
 
     /**
      * Broadcasts a replacment value to be the same size as index
@@ -171,25 +127,25 @@ export const createSubset = /* #__PURE__ */ factory(
 
     function _broadcastReplacement(replacement: any, index: any): any {
       if (typeof replacement === 'string') {
-        throw new Error("can't boradcast a string")
+        throw new Error("can't boradcast a string");
       }
       if (index.isScalar()) {
-        return replacement
+        return replacement;
       }
 
-      const indexSize = index.size()
+      const indexSize = index.size();
       if (indexSize.every((d: number) => d > 0)) {
         try {
-          return add(replacement, zeros(indexSize))
+          return add(replacement, zeros(indexSize));
         } catch {
-          return replacement
+          return replacement;
         }
       } else {
-        return replacement
+        return replacement;
       }
     }
   }
-)
+);
 
 /**
  * Retrieve a subset of a string
@@ -201,36 +157,36 @@ export const createSubset = /* #__PURE__ */ factory(
 function _getSubstring(str: string, index: any): string {
   if (!isIndex(index)) {
     // TODO: better error message
-    throw new TypeError('Index expected')
+    throw new TypeError('Index expected');
   }
 
   if (isEmptyIndex(index)) {
-    return ''
+    return '';
   }
-  validateIndexSourceSize(Array.from(str), index)
+  validateIndexSourceSize(Array.from(str), index);
 
   if ((index as any).size().length !== 1) {
-    throw new DimensionError((index as any).size().length, 1)
+    throw new DimensionError((index as any).size().length, 1);
   }
 
   // validate whether the range is out of range
-  const strLen = str.length
-  validateIndex((index as any).min()[0], strLen)
-  validateIndex((index as any).max()[0], strLen)
+  const strLen = str.length;
+  validateIndex((index as any).min()[0], strLen);
+  validateIndex((index as any).max()[0], strLen);
 
-  const range = (index as any).dimension(0)
+  const range = (index as any).dimension(0);
 
-  let substr = ''
+  let substr = '';
   function callback(v: number): void {
-    substr += str.charAt(v)
+    substr += str.charAt(v);
   }
   if (Number.isInteger(range)) {
-    callback(range)
+    callback(range);
   } else {
-    range.forEach(callback)
+    range.forEach(callback);
   }
 
-  return substr
+  return substr;
 }
 
 /**
@@ -251,61 +207,61 @@ function _setSubstring(
 ): string {
   if (!index || index.isIndex !== true) {
     // TODO: better error message
-    throw new TypeError('Index expected')
+    throw new TypeError('Index expected');
   }
   if (isEmptyIndex(index)) {
-    return str
+    return str;
   }
-  validateIndexSourceSize(Array.from(str), index)
+  validateIndexSourceSize(Array.from(str), index);
   if (index.size().length !== 1) {
-    throw new DimensionError(index.size().length, 1)
+    throw new DimensionError(index.size().length, 1);
   }
   if (defaultValue !== undefined) {
     if (typeof defaultValue !== 'string' || defaultValue.length !== 1) {
-      throw new TypeError('Single character expected as defaultValue')
+      throw new TypeError('Single character expected as defaultValue');
     }
   } else {
-    defaultValue = ' '
+    defaultValue = ' ';
   }
 
-  const range = index.dimension(0)
-  const len = Number.isInteger(range) ? 1 : range.size()[0]
+  const range = index.dimension(0);
+  const len = Number.isInteger(range) ? 1 : range.size()[0];
 
   if (len !== replacement.length) {
-    throw new DimensionError(range.size()[0], replacement.length)
+    throw new DimensionError(range.size()[0], replacement.length);
   }
 
   // validate whether the range is out of range
-  const strLen = str.length
-  validateIndex(index.min()[0])
-  validateIndex(index.max()[0])
+  const strLen = str.length;
+  validateIndex(index.min()[0]);
+  validateIndex(index.max()[0]);
 
   // copy the string into an array with characters
-  const chars: string[] = []
+  const chars: string[] = [];
   for (let i = 0; i < strLen; i++) {
-    chars[i] = str.charAt(i)
+    chars[i] = str.charAt(i);
   }
 
   function callback(v: number, i: number[]): void {
-    chars[v] = replacement.charAt(i[0])
+    chars[v] = replacement.charAt(i[0]);
   }
 
   if (Number.isInteger(range)) {
-    callback(range, [0])
+    callback(range, [0]);
   } else {
-    range.forEach(callback)
+    range.forEach(callback);
   }
 
   // initialize undefined characters with a space
   if (chars.length > strLen) {
     for (let i = strLen - 1, len = chars.length; i < len; i++) {
       if (!chars[i]) {
-        chars[i] = defaultValue
+        chars[i] = defaultValue;
       }
     }
   }
 
-  return chars.join('')
+  return chars.join('');
 }
 
 /**
@@ -317,21 +273,19 @@ function _setSubstring(
  */
 function _getObjectProperty(object: any, index: any): any {
   if (isEmptyIndex(index)) {
-    return undefined
+    return undefined;
   }
 
   if (index.size().length !== 1) {
-    throw new DimensionError(index.size(), 1)
+    throw new DimensionError(index.size(), 1);
   }
 
-  const key = index.dimension(0)
+  const key = index.dimension(0);
   if (typeof key !== 'string') {
-    throw new TypeError(
-      'String expected as index to retrieve an object property'
-    )
+    throw new TypeError('String expected as index to retrieve an object property');
   }
 
-  return getSafeProperty(object, key)
+  return getSafeProperty(object, key);
 }
 
 /**
@@ -344,22 +298,20 @@ function _getObjectProperty(object: any, index: any): any {
  */
 function _setObjectProperty(object: any, index: any, replacement: any): any {
   if (isEmptyIndex(index)) {
-    return object
+    return object;
   }
   if (index.size().length !== 1) {
-    throw new DimensionError(index.size(), 1)
+    throw new DimensionError(index.size(), 1);
   }
 
-  const key = index.dimension(0)
+  const key = index.dimension(0);
   if (typeof key !== 'string') {
-    throw new TypeError(
-      'String expected as index to retrieve an object property'
-    )
+    throw new TypeError('String expected as index to retrieve an object property');
   }
 
   // clone the object, and apply the property to the clone
-  const updated = clone(object)
-  setSafeProperty(updated, key, replacement)
+  const updated = clone(object);
+  setSafeProperty(updated, key, replacement);
 
-  return updated
+  return updated;
 }

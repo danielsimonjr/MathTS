@@ -5,5 +5,5 @@ export const invmodDocs = {
   description:
     'Calculate the (modular) multiplicative inverse of a modulo b. Solution to the equation ax ≣ 1 (mod b)',
   examples: ['invmod(8, 12)', 'invmod(7, 13)', 'invmod(15151, 15122)'],
-  seealso: ['gcd', 'xgcd']
-}
+  seealso: ['gcd', 'xgcd'],
+};

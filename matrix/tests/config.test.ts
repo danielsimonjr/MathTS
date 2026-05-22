@@ -71,7 +71,9 @@ describe('matrix config', () => {
   describe('onConfigChange', () => {
     it('should notify listeners on change', () => {
       let called = false;
-      const unsub = onConfigChange(() => { called = true; });
+      const unsub = onConfigChange(() => {
+        called = true;
+      });
       setConfig({ debug: true });
       expect(called).toBe(true);
       unsub();
@@ -79,7 +81,9 @@ describe('matrix config', () => {
 
     it('should unsubscribe correctly', () => {
       let count = 0;
-      const unsub = onConfigChange(() => { count++; });
+      const unsub = onConfigChange(() => {
+        count++;
+      });
       setConfig({ debug: true });
       unsub();
       setConfig({ debug: false });

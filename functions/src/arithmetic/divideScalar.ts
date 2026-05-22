@@ -1,26 +1,26 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for divideScalar
 interface HasDivMethod {
-  div(other: unknown): unknown
+  div(other: unknown): unknown;
 }
 
 interface HasDivideMethod {
-  divide(other: unknown): unknown
+  divide(other: unknown): unknown;
 }
 
 interface HasDivideIntoMethod {
-  divideInto(other: unknown): unknown
+  divideInto(other: unknown): unknown;
 }
 
 interface DivideScalarDependencies {
-  typed: TypedFunction
-  numeric: (value: unknown, type: string) => unknown
+  typed: TypedFunction;
+  numeric: (value: unknown, type: string) => unknown;
 }
 
-const name = 'divideScalar'
-const dependencies = ['typed', 'numeric']
+const name = 'divideScalar';
+const dependencies = ['typed', 'numeric'];
 
 export const createDivideScalar = /* #__PURE__ */ factory(
   name,
@@ -40,29 +40,23 @@ export const createDivideScalar = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'number, number': function (x: number, y: number): number {
-        return x / y
+        return x / y;
       },
 
       'Complex, Complex': function (x: HasDivMethod, y: HasDivMethod): unknown {
-        return x.div(y)
+        return x.div(y);
       },
 
-      'BigNumber, BigNumber': function (
-        x: HasDivMethod,
-        y: HasDivMethod
-      ): unknown {
-        return x.div(y)
+      'BigNumber, BigNumber': function (x: HasDivMethod, y: HasDivMethod): unknown {
+        return x.div(y);
       },
 
       'bigint, bigint': function (x: bigint, y: bigint): bigint {
-        return x / y
+        return x / y;
       },
 
-      'Fraction, Fraction': function (
-        x: HasDivMethod,
-        y: HasDivMethod
-      ): unknown {
-        return x.div(y)
+      'Fraction, Fraction': function (x: HasDivMethod, y: HasDivMethod): unknown {
+        return x.div(y);
       },
 
       'Unit, number | Complex | Fraction | BigNumber | Unit': (
@@ -73,7 +67,7 @@ export const createDivideScalar = /* #__PURE__ */ factory(
       'number | Fraction | Complex | BigNumber, Unit': (
         x: unknown,
         y: HasDivideIntoMethod
-      ): unknown => y.divideInto(x)
-    })
+      ): unknown => y.divideInto(x),
+    });
   }
-)
+);

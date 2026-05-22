@@ -18,7 +18,7 @@
  * @packageDocumentation
  */
 
-import { parse, evaluate, compileExpr } from '../factories/evaluate.js';
+import { parse, evaluate } from '../factories/evaluate.js';
 
 // =============================================================================
 // Type Aliases
@@ -55,7 +55,7 @@ function numericalDerivative(
   x0: f64,
   k: number,
   h: f64 = 1e-4,
-  scope?: Record<string, f64>,
+  scope?: Record<string, f64>
 ): f64 {
   if (k === 0) {
     const s = scope ? { ...scope, [varName]: x0 } : { [varName]: x0 };
@@ -111,9 +111,7 @@ function buildTerm(c: f64, varName: string, x0: f64, power: number): string {
   const cs = formatCoeff(c);
   if (power === 0) return cs;
 
-  const xPart = x0 === 0
-    ? varName
-    : `(${varName} - ${formatCoeff(x0)})`;
+  const xPart = x0 === 0 ? varName : `(${varName} - ${formatCoeff(x0)})`;
   const xTerm = power === 1 ? xPart : `${xPart}^${power}`;
 
   if (cs === '1') return xTerm;
@@ -149,12 +147,7 @@ const assumptions: Map<string, Set<string>> = new Map();
  * integrate('sin(x)', 'x')       // => '-cos(x)'
  * integrate('x^2', 'x', 0, 1)   // => 0.3333...
  */
-export function integrate(
-  expr: string,
-  varName: string,
-  a?: f64,
-  b?: f64,
-): string | f64 {
+export function integrate(expr: string, varName: string, a?: f64, b?: f64): string | f64 {
   const trimmed = expr.trim();
 
   // Definite integral via numerical integration (Simpson's rule)
@@ -166,7 +159,7 @@ export function integrate(
       const xi = a + i * h;
       sum += (i % 2 === 0 ? 2 : 4) * evalAt(trimmed, varName, xi);
     }
-    return sum * h / 3;
+    return (sum * h) / 3;
   }
 
   // Symbolic integration for basic forms
@@ -176,9 +169,7 @@ export function integrate(
   }
 
   // x^n pattern
-  const powerMatch = trimmed.match(
-    new RegExp(`^${varName}\\^(\\d+)$`),
-  );
+  const powerMatch = trimmed.match(new RegExp(`^${varName}\\^(\\d+)$`));
   if (powerMatch) {
     const n = parseInt(powerMatch[1]);
     return `${varName}^${n + 1}/${n + 1}`;
@@ -190,9 +181,7 @@ export function integrate(
   }
 
   // c*x^n pattern
-  const cPowerMatch = trimmed.match(
-    new RegExp(`^([\\d.]+)\\*?${varName}\\^(\\d+)$`),
-  );
+  const cPowerMatch = trimmed.match(new RegExp(`^([\\d.]+)\\*?${varName}\\^(\\d+)$`));
   if (cPowerMatch) {
     const c = parseFloat(cPowerMatch[1]);
     const n = parseInt(cPowerMatch[2]);
@@ -201,9 +190,7 @@ export function integrate(
   }
 
   // c*x pattern
-  const cxMatch = trimmed.match(
-    new RegExp(`^([\\d.]+)\\*?${varName}$`),
-  );
+  const cxMatch = trimmed.match(new RegExp(`^([\\d.]+)\\*?${varName}$`));
   if (cxMatch) {
     const c = parseFloat(cxMatch[1]);
     const newCoeff = c / 2;
@@ -243,12 +230,7 @@ export function integrate(
  * limit('1/x', 'x', 0, 'right')    // => Infinity
  * limit('(x^2-1)/(x-1)', 'x', 1)   // => 2
  */
-export function limit(
-  expr: string,
-  varName: string,
-  value: f64,
-  dir?: 'left' | 'right',
-): f64 {
+export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 'right'): f64 {
   const eps = 1e-10;
   const steps = [1e-4, 1e-6, 1e-8, 1e-10];
 
@@ -331,11 +313,7 @@ export function limit(
  * partialDerivative('x^2 + y^2', 'x', { x: 3, y: 4 }) // => 6
  * partialDerivative('sin(x*y)', 'x', { x: 0, y: 1 })   // => 1
  */
-export function partialDerivative(
-  expr: string,
-  varName: string,
-  scope: Record<string, f64>,
-): f64 {
+export function partialDerivative(expr: string, varName: string, scope: Record<string, f64>): f64 {
   const x0 = scope[varName];
   if (x0 === undefined) {
     throw new Error(`Variable '${varName}' not found in scope`);
@@ -362,7 +340,7 @@ export function directionalDerivative(
   expr: string,
   vars: string[],
   direction: f64[],
-  scope: Record<string, f64>,
+  scope: Record<string, f64>
 ): f64 {
   if (vars.length !== direction.length) {
     throw new Error('vars and direction must have the same length');
@@ -395,11 +373,7 @@ export function directionalDerivative(
  * @example
  * gradientSymbolic('x^2 + y^2', ['x', 'y'], { x: 3, y: 4 }) // => [6, 8]
  */
-export function gradientSymbolic(
-  expr: string,
-  vars: string[],
-  scope: Record<string, f64>,
-): f64[] {
+export function gradientSymbolic(expr: string, vars: string[], scope: Record<string, f64>): f64[] {
   return vars.map((v) => partialDerivative(expr, v, scope));
 }
 
@@ -417,14 +391,8 @@ export function gradientSymbolic(
  * jacobian(['x*y', 'x^2'], ['x', 'y'], { x: 2, y: 3 })
  * // => [[3, 2], [4, 0]]
  */
-export function jacobian(
-  exprs: string[],
-  vars: string[],
-  scope: Record<string, f64>,
-): f64[][] {
-  return exprs.map((expr) =>
-    vars.map((v) => partialDerivative(expr, v, scope)),
-  );
+export function jacobian(exprs: string[], vars: string[], scope: Record<string, f64>): f64[][] {
+  return exprs.map((expr) => vars.map((v) => partialDerivative(expr, v, scope)));
 }
 
 /**
@@ -441,11 +409,7 @@ export function jacobian(
  * @example
  * laplacian('x^2 + y^2 + z^2', ['x', 'y', 'z'], { x: 1, y: 2, z: 3 }) // => 6
  */
-export function laplacian(
-  expr: string,
-  vars: string[],
-  scope: Record<string, f64>,
-): f64 {
+export function laplacian(expr: string, vars: string[], scope: Record<string, f64>): f64 {
   let sum: f64 = 0;
   for (const v of vars) {
     const x0 = scope[v];
@@ -468,11 +432,7 @@ export function laplacian(
  * divergence(['x^2', 'y^2', 'z^2'], ['x', 'y', 'z'], { x: 1, y: 2, z: 3 })
  * // => 2 + 4 + 6 = 12
  */
-export function divergence(
-  exprs: string[],
-  vars: string[],
-  scope: Record<string, f64>,
-): f64 {
+export function divergence(exprs: string[], vars: string[], scope: Record<string, f64>): f64 {
   if (exprs.length !== vars.length) {
     throw new Error('exprs and vars must have the same length');
   }
@@ -582,7 +542,10 @@ export function laplace(expr: string, t: string, s: string): string {
 
   for (const entry of laplaceTable) {
     // Replace __VAR__ placeholder with the actual variable name
-    const patternStr = entry.pattern.source.replace(/__VAR__/g, t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const patternStr = entry.pattern.source.replace(
+      /__VAR__/g,
+      t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
     const regex = new RegExp(`^${patternStr}$`);
     const match = trimmed.match(regex);
     if (match) {
@@ -678,7 +641,10 @@ export function inverseLaplace(expr: string, s: string, t: string): string {
   const trimmed = expr.trim();
 
   for (const entry of inverseLaplaceTable) {
-    const patternStr = entry.pattern.source.replace(/__VAR__/g, s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const patternStr = entry.pattern.source.replace(
+      /__VAR__/g,
+      s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
     const regex = new RegExp(`^${patternStr}$`);
     const match = trimmed.match(regex);
     if (match) {
@@ -709,7 +675,7 @@ export function inverseLaplace(expr: string, s: string, t: string): string {
 export function fourierSeries(
   expr: string,
   varName: string,
-  n: number,
+  n: number
 ): { a0: f64; an: f64[]; bn: f64[] } {
   const N = 1000; // integration points
   const dx = (2 * Math.PI) / N;
@@ -766,7 +732,7 @@ export function zTransform(expr: string, n: string, z: string): string {
 
   // a^n
   const anMatch = trimmed.match(
-    new RegExp(`^([\\d.]+)\\^${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`),
+    new RegExp(`^([\\d.]+)\\^${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)
   );
   if (anMatch) {
     const a = anMatch[1];
@@ -796,12 +762,7 @@ export function zTransform(expr: string, n: string, z: string): string {
  * taylor('sin(x)', 'x', 0, 5)  // => 'x - 0.1666666667*x^3 + 0.008333333333*x^5'
  * taylor('exp(x)', 'x', 0, 4)  // => '1 + x + 0.5*x^2 + ...'
  */
-export function taylor(
-  expr: string,
-  varName: string,
-  x0: f64 = 0,
-  n: number = 5,
-): string {
+export function taylor(expr: string, varName: string, x0: f64 = 0, n: number = 5): string {
   const coeffs: f64[] = [];
 
   for (let k = 0; k <= n; k++) {
@@ -809,9 +770,7 @@ export function taylor(
     coeffs.push(deriv / factorial(k));
   }
 
-  const terms = coeffs
-    .map((c, k) => buildTerm(c, varName, x0, k))
-    .filter(Boolean);
+  const terms = coeffs.map((c, k) => buildTerm(c, varName, x0, k)).filter(Boolean);
 
   return terms.join(' + ').replace(/\+ -/g, '- ') || '0';
 }
@@ -831,12 +790,7 @@ export function taylor(
  * @example
  * multivariateTaylor('x*y', ['x', 'y'], [1, 1], 1) // => '1 + (x - 1)*y0 + (y - 1)*x0'
  */
-export function multivariateTaylor(
-  expr: string,
-  vars: string[],
-  x0: f64[],
-  n: number = 1,
-): string {
+export function multivariateTaylor(expr: string, vars: string[], x0: f64[], n: number = 1): string {
   if (vars.length !== x0.length) {
     throw new Error('vars and x0 must have the same length');
   }
@@ -877,11 +831,13 @@ export function multivariateTaylor(
         // d^2f/(dx_i dx_j) via finite differences
         const h = 1e-4;
         const s = { ...scope };
-        s[vars[i]] = x0[i] + h; s[vars[j]] = x0[j] + h;
+        s[vars[i]] = x0[i] + h;
+        s[vars[j]] = x0[j] + h;
         const fpp = evalWith(expr, s);
         s[vars[j]] = x0[j] - h;
         const fpm = evalWith(expr, s);
-        s[vars[i]] = x0[i] - h; s[vars[j]] = x0[j] + h;
+        s[vars[i]] = x0[i] - h;
+        s[vars[j]] = x0[j] + h;
         const fmp = evalWith(expr, s);
         s[vars[j]] = x0[j] - h;
         const fmm = evalWith(expr, s);
@@ -906,12 +862,7 @@ export function multivariateTaylor(
  * @param n - Order (default 5)
  * @returns Power series as expression string
  */
-export function series(
-  expr: string,
-  varName: string,
-  x0: f64 = 0,
-  n: number = 5,
-): string {
+export function series(expr: string, varName: string, x0: f64 = 0, n: number = 5): string {
   return taylor(expr, varName, x0, n);
 }
 
@@ -930,12 +881,7 @@ export function series(
  * seriesCoefficient('exp(x)', 'x', 0, 3) // => 1/6 = 0.1667
  * seriesCoefficient('sin(x)', 'x', 0, 1) // => 1
  */
-export function seriesCoefficient(
-  expr: string,
-  varName: string,
-  x0: f64,
-  k: number,
-): f64 {
+export function seriesCoefficient(expr: string, varName: string, x0: f64, k: number): f64 {
   const deriv = numericalDerivative(expr, varName, x0, k);
   return deriv / factorial(k);
 }
@@ -1006,13 +952,23 @@ export function solve(expr: string, varName: string): f64[] {
 
       if (fa * fb < 0) {
         // Bisection to refine
-        let a = x, b = x + step;
+        let a = x,
+          b = x + step;
         let faB = fa;
         for (let iter = 0; iter < 60; iter++) {
           const mid = (a + b) / 2;
           const fm = evalAt(expr, varName, mid);
-          if (Math.abs(fm) < 1e-14) { a = mid; b = mid; break; }
-          if (faB * fm < 0) { b = mid; } else { a = mid; faB = fm; }
+          if (Math.abs(fm) < 1e-14) {
+            a = mid;
+            b = mid;
+            break;
+          }
+          if (faB * fm < 0) {
+            b = mid;
+          } else {
+            a = mid;
+            faB = fm;
+          }
         }
         addRoot((a + b) / 2);
       }
@@ -1040,12 +996,7 @@ export function solve(expr: string, varName: string): f64[] {
  * // Circle: x^2 + y^2 - 25 = 0 at (3, 4)
  * implicitDiff('x^2 + y^2 - 25', 'x', 'y', { x: 3, y: 4 }) // => -0.75
  */
-export function implicitDiff(
-  expr: string,
-  x: string,
-  y: string,
-  scope: Record<string, f64>,
-): f64 {
+export function implicitDiff(expr: string, x: string, y: string, scope: Record<string, f64>): f64 {
   const dFdx = partialDerivative(expr, x, scope);
   const dFdy = partialDerivative(expr, y, scope);
 
@@ -1073,12 +1024,7 @@ export function implicitDiff(
  * summation('k^2', 'k', 1, 10)    // => 385
  * summation('1', 'k', 1, 50)      // => 50
  */
-export function summation(
-  expr: string,
-  varName: string,
-  a: number,
-  b: number,
-): f64 {
+export function summation(expr: string, varName: string, a: number, b: number): f64 {
   // Direct numerical summation (always correct for finite sums)
   let sum: f64 = 0;
   for (let k = a; k <= b; k++) {
@@ -1102,12 +1048,7 @@ export function summation(
  * symbolicProduct('k', 'k', 1, 5)    // => 120 (= 5!)
  * symbolicProduct('2*k', 'k', 1, 4)  // => 384
  */
-export function symbolicProduct(
-  expr: string,
-  varName: string,
-  a: number,
-  b: number,
-): f64 {
+export function symbolicProduct(expr: string, varName: string, a: number, b: number): f64 {
   let product: f64 = 1;
   for (let k = a; k <= b; k++) {
     product *= evalAt(expr, varName, k);
@@ -1184,7 +1125,7 @@ export function clearAssumptions(varName?: string): void {
 export function asymptotic(
   expr: string,
   varName: string,
-  towards: f64 = Infinity,
+  towards: f64 = Infinity
 ): { leadingTerm: string; order: f64; coefficient: f64 } {
   if (towards === Infinity || towards === -Infinity) {
     // Find the growth rate by evaluating at large values
@@ -1450,7 +1391,7 @@ function findIntegerRelation(vals: f64[], maxCoeff: number): number[] | null {
   if (n <= 3 && maxCoeff <= 20) {
     for (let a = -maxCoeff; a <= maxCoeff; a++) {
       for (let b = -maxCoeff; b <= maxCoeff; b++) {
-        for (let c = (n > 2 ? -maxCoeff : 0); c <= (n > 2 ? maxCoeff : 0); c++) {
+        for (let c = n > 2 ? -maxCoeff : 0; c <= (n > 2 ? maxCoeff : 0); c++) {
           if (a === 0 && b === 0 && c === 0) continue;
           if (n === 2 && c !== 0) continue;
           const sum = a * vals[0] + b * vals[1] + (n > 2 ? c * vals[2] : 0);
@@ -1526,14 +1467,13 @@ export function toRadicals(expr: string): string[] {
   const f1 = f(1);
   const fm1 = f(-1);
   const f2 = f(2);
-  const fm2 = f(-2);
+  const _fm2 = f(-2);
 
   // Check if linear: ax + b
   // f(0)=b, f(1)=a+b => a = f(1)-f(0)
   const b_lin = f0;
   const a_lin = f1 - f0;
-  if (Math.abs(a_lin * 2 + b_lin - f2) < 1e-8 &&
-      Math.abs(-a_lin + b_lin - fm1) < 1e-8) {
+  if (Math.abs(a_lin * 2 + b_lin - f2) < 1e-8 && Math.abs(-a_lin + b_lin - fm1) < 1e-8) {
     if (Math.abs(a_lin) < 1e-12) return [];
     const root = -b_lin / a_lin;
     return [formatCoeff(root)];
@@ -1562,10 +1502,7 @@ export function toRadicals(expr: string): string[] {
 
     const denom = 2 * a;
     if (Math.abs(denom - 2) < 1e-12) {
-      return [
-        `(${formatCoeff(-b)} + ${sqrtDiscStr})/2`,
-        `(${formatCoeff(-b)} - ${sqrtDiscStr})/2`,
-      ];
+      return [`(${formatCoeff(-b)} + ${sqrtDiscStr})/2`, `(${formatCoeff(-b)} - ${sqrtDiscStr})/2`];
     }
     return [
       `(${formatCoeff(-b)} + ${sqrtDiscStr})/${formatCoeff(denom)}`,
@@ -1598,7 +1535,7 @@ export function toRadicals(expr: string): string[] {
  */
 export function piecewise(
   conditions: string[],
-  values: string[],
+  values: string[]
 ): (scope: Record<string, f64>) => f64 {
   if (values.length < conditions.length) {
     throw new Error('values must have at least as many entries as conditions');
@@ -1647,7 +1584,7 @@ export function odeGeneral(
   x0: f64,
   y0: f64,
   xEnd: f64,
-  steps: number = 100,
+  steps: number = 100
 ): Array<{ x: f64; y: f64 }> {
   const h = (xEnd - x0) / steps;
   const result: Array<{ x: f64; y: f64 }> = [];
@@ -1662,11 +1599,11 @@ export function odeGeneral(
     const scope = { [x]: xCurr, [y]: yCurr };
     const k1 = evalWith(ode, scope);
 
-    const k2 = evalWith(ode, { [x]: xCurr + h / 2, [y]: yCurr + h * k1 / 2 });
-    const k3 = evalWith(ode, { [x]: xCurr + h / 2, [y]: yCurr + h * k2 / 2 });
+    const k2 = evalWith(ode, { [x]: xCurr + h / 2, [y]: yCurr + (h * k1) / 2 });
+    const k3 = evalWith(ode, { [x]: xCurr + h / 2, [y]: yCurr + (h * k2) / 2 });
     const k4 = evalWith(ode, { [x]: xCurr + h, [y]: yCurr + h * k3 });
 
-    yCurr += h * (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+    yCurr += (h * (k1 + 2 * k2 + 2 * k3 + k4)) / 6;
     xCurr += h;
     result.push({ x: xCurr, y: yCurr });
   }
@@ -1689,11 +1626,7 @@ export function odeGeneral(
  * curl(['y', '-x', '0'], ['x', 'y', 'z'], { x: 0, y: 0, z: 0 })
  * // => [0, 0, -2]
  */
-export function curl(
-  exprs: string[],
-  vars: string[],
-  scope: Record<string, f64>,
-): [f64, f64, f64] {
+export function curl(exprs: string[], vars: string[], scope: Record<string, f64>): [f64, f64, f64] {
   if (exprs.length !== 3 || vars.length !== 3) {
     throw new Error('curl requires exactly 3 expressions and 3 variables');
   }
@@ -1904,7 +1837,9 @@ function iltMatchExponential(node: MathNode, sVar: string, tVar: string): string
 }
 
 function iltMatchScaledExponential(node: MathNode, sVar: string, tVar: string): string | null {
-  const s1 = 3; const s2 = 5; const s3 = 7;
+  const s1 = 3;
+  const s2 = 5;
+  const s3 = 7;
   const v1 = iltEvalAt(node, sVar, s1);
   const v2 = iltEvalAt(node, sVar, s2);
   const v3 = iltEvalAt(node, sVar, s3);
@@ -1979,11 +1914,7 @@ function _inverseLaplaceNode(node: MathNode, sVar: string, tVar: string): string
     return left + ' + ' + right;
   }
 
-  if (
-    nodeAny.type === 'OperatorNode' &&
-    nodeAny.op === '-' &&
-    nodeAny.args.length === 2
-  ) {
+  if (nodeAny.type === 'OperatorNode' && nodeAny.op === '-' && nodeAny.args.length === 2) {
     const left = _inverseLaplaceNode(nodeAny.args[0], sVar, tVar);
     const right = _inverseLaplaceNode(nodeAny.args[1], sVar, tVar);
     return left + ' - ' + right;
@@ -2034,7 +1965,7 @@ function _inverseLaplaceNode(node: MathNode, sVar: string, tVar: string): string
 export function inverseLaplaceTransform(
   expr: string | MathNode,
   sVar: string = 's',
-  tVar: string = 't',
+  tVar: string = 't'
 ): string {
   let node: MathNode;
   if (typeof expr === 'string') {

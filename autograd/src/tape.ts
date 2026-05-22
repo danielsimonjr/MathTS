@@ -27,7 +27,7 @@ export class Tape {
   // non-negative IDs. Eliminates the v0.4.0-review collision where
   // id = nodes.length + 1000 would collide with op ids past 1000 entries.
   private nextOpId = 0;
-  private nextInputId = -1;  // negatives = inputs; non-negatives = ops
+  private nextInputId = -1; // negatives = inputs; non-negatives = ops
 
   /** Allocate a fresh id for an input or intermediate. */
   allocate(size: number): { id: number; gradSlot: Float64Array } {
@@ -40,7 +40,7 @@ export class Tape {
   record(
     inputIds: ReadonlyArray<number>,
     outputSize: number,
-    backward: BackwardFn,
+    backward: BackwardFn
   ): { id: number; gradSlot: Float64Array } {
     const outputGradSlot = new Float64Array(outputSize);
     const id = this.nextOpId++;
@@ -71,7 +71,7 @@ export class TapedTensor {
     readonly shape: ReadonlyArray<number>,
     readonly primal: Float64Array,
     readonly tape: Tape,
-    readonly id: number,
+    readonly id: number
   ) {}
 
   /**
@@ -80,7 +80,9 @@ export class TapedTensor {
    * TapedTensor flows through them as a structurally-compatible Tensor.
    * (AD-aware ops branch on `'tape' in arg` before reaching here.)
    */
-  get data(): Float64Array { return this.primal; }
+  get data(): Float64Array {
+    return this.primal;
+  }
 
   static fromTensorAsInput(t: Tensor, tape: Tape): TapedTensor {
     const { id } = tape.allocate(t.data.length);
@@ -125,7 +127,7 @@ export class TapedTensor {
     this.checkSameShape(other, 'mul');
     const out = new Float64Array(this.primal.length);
     for (let i = 0; i < out.length; i++) out[i] = this.primal[i] * other.primal[i];
-    const thisPrimal = this.primal;  // capture for closure
+    const thisPrimal = this.primal; // capture for closure
     const otherPrimal = other.primal;
     const thisGradSlot = this.tape.getInputGrad(this.id)!;
     const otherGradSlot = this.tape.getInputGrad(other.id)!;
@@ -162,8 +164,10 @@ export class TapedTensor {
   }
 
   private checkSameShape(other: TapedTensor, op: string): void {
-    if (this.shape.length !== other.shape.length ||
-        !this.shape.every((v, i) => v === other.shape[i])) {
+    if (
+      this.shape.length !== other.shape.length ||
+      !this.shape.every((v, i) => v === other.shape[i])
+    ) {
       throw new Error(`TapedTensor.${op}: shape mismatch [${this.shape}] vs [${other.shape}]`);
     }
   }

@@ -3,11 +3,11 @@
  * @extends Error
  */
 export class ArgumentsError extends Error {
-  fn: string
-  count: number
-  min: number
-  max: number | undefined
-  isArgumentsError: true = true
+  fn: string;
+  count: number;
+  min: number;
+  max: number | undefined;
+  isArgumentsError = true as const;
 
   /**
    * Create an ArgumentsError
@@ -17,26 +17,37 @@ export class ArgumentsError extends Error {
    * @param max    Maximum required argument count (optional)
    */
   constructor(fn: string, count: number, min: number, max?: number) {
-    const message = 'Wrong number of arguments in function ' + fn +
-      ' (' + count + ' provided, ' +
-      min + ((max !== undefined && max !== null) ? ('-' + max) : '') + ' expected)'
+    const message =
+      'Wrong number of arguments in function ' +
+      fn +
+      ' (' +
+      count +
+      ' provided, ' +
+      min +
+      (max !== undefined && max !== null ? '-' + max : '') +
+      ' expected)';
 
-    super(message)
+    super(message);
 
-    this.fn = fn
-    this.count = count
-    this.min = min
-    this.max = max
-    this.name = 'ArgumentsError'
+    this.fn = fn;
+    this.count = count;
+    this.min = min;
+    this.max = max;
+    this.name = 'ArgumentsError';
 
     // Maintains proper stack trace for where error was thrown (V8)
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ArgumentsError)
+      Error.captureStackTrace(this, ArgumentsError);
     }
   }
 }
 
 // Backward compatibility - allow calling as a function (with new operator)
-export function createArgumentsError(fn: string, count: number, min: number, max?: number): ArgumentsError {
-  return new ArgumentsError(fn, count, min, max)
+export function createArgumentsError(
+  fn: string,
+  count: number,
+  min: number,
+  max?: number
+): ArgumentsError {
+  return new ArgumentsError(fn, count, min, max);
 }

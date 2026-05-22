@@ -1,7 +1,7 @@
 metadata:
-  name: "@mathts/functions"
+  name: '@mathts/functions'
   version: 0.1.0
-  lastUpdated: "2026-04-04"
+  lastUpdated: '2026-04-04'
   totalFiles: 750
   totalModules: 29
   totalExports: 3366
@@ -1335,7 +1335,7 @@ modules:
       constants:
         - createGcd
     src/arithmetic/hypot.ts:
-      description: "Calculate the hypotenuse of a list with values. The hypotenuse is defined as:"
+      description: 'Calculate the hypotenuse of a list with values. The hypotenuse is defined as:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -1751,7 +1751,7 @@ modules:
       constants:
         - createRound
     src/arithmetic/sign.ts:
-      description: "Compute the sign of a value. The sign of a value x is:"
+      description: 'Compute the sign of a value. The sign of a value x is:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -2256,7 +2256,7 @@ modules:
     src/combinatorics/bellNumbers.ts:
       description: >-
         The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose
-        union is 
+        union is
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -2477,7 +2477,7 @@ modules:
       internalDependencies:
         - file: ./factoriesAny.js
           imports:
-            - "* as all"
+            - '* as all'
         - file: ./core/create.js
           imports:
             - create
@@ -5593,7 +5593,7 @@ modules:
             - isLegacyFactory
         - file: ./../utils/emitter.js
           imports:
-            - "* as emitter"
+            - '* as emitter'
         - file: ./config.js
           imports:
             - DEFAULT_CONFIG
@@ -5755,7 +5755,7 @@ modules:
       functions:
         - createArgumentsError
     src/error/DimensionError.ts:
-      description: "Create a range error with the message:"
+      description: 'Create a range error with the message:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -9394,7 +9394,7 @@ modules:
       constants:
         - createSymbolNode
     src/expression/node/utils/access.ts:
-      description: "Retrieve part of an object:"
+      description: 'Retrieve part of an object:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9413,7 +9413,7 @@ modules:
       functions:
         - accessFactory
     src/expression/node/utils/assign.ts:
-      description: "Replace part of an object:"
+      description: 'Replace part of an object:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10331,7 +10331,7 @@ modules:
       exports: []
   geometry:
     src/geometry/distance.ts:
-      description: "Calculates:"
+      description: 'Calculates:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10391,11 +10391,11 @@ modules:
       internalDependencies:
         - file: ./typed/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
       exports: []
       reExported:
-        - "* from ./typed/index.js"
+        - '* from ./typed/index.js'
   logical:
     src/logical/and.ts:
       description: Logical `and`. Test whether two values are both defined with a nonzero/nonempty value.
@@ -11468,7 +11468,7 @@ modules:
       constants:
         - createSubset
     src/matrix/trace.ts:
-      description: "Calculate the trace of a matrix: the sum of the elements on the main"
+      description: 'Calculate the trace of a matrix: the sum of the elements on the main'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -11595,12 +11595,12 @@ modules:
       internalDependencies:
         - file: ./arithmetic.js
           imports:
-            - "*"
+            - '*'
           reExport: true
       exports:
         - bignumber
       reExported:
-        - "* from ./arithmetic.js"
+        - '* from ./arithmetic.js'
       interfaces:
         - PlainBigNumber
         - PlainBigNumberConstructor
@@ -11736,51 +11736,51 @@ modules:
       internalDependencies:
         - file: ./arithmetic.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./bitwise.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./combinations.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./constants.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./logical.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./relational.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./probability.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./utils.js
           imports:
-            - "*"
+            - '*'
           reExport: true
       exports: []
       reExported:
-        - "* from ./arithmetic.js"
-        - "* from ./bitwise.js"
-        - "* from ./combinations.js"
-        - "* from ./constants.js"
-        - "* from ./logical.js"
-        - "* from ./relational.js"
-        - "* from ./probability.js"
-        - "* from ./trigonometry.js"
-        - "* from ./utils.js"
+        - '* from ./arithmetic.js'
+        - '* from ./bitwise.js'
+        - '* from ./combinations.js'
+        - '* from ./constants.js'
+        - '* from ./logical.js'
+        - '* from ./relational.js'
+        - '* from ./probability.js'
+        - '* from ./trigonometry.js'
+        - '* from ./utils.js'
     src/plain/number/logical.ts:
       description: logical module
       externalDependencies: []
@@ -11797,7 +11797,7 @@ modules:
         - xorNumber
         - andNumber
     src/plain/number/probability.ts:
-      description: "TODO: comment on the variables g and p"
+      description: 'TODO: comment on the variables g and p'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -12230,7 +12230,7 @@ modules:
       functions:
         - randomMatrix
     src/probability/util/seededRNG.ts:
-      description: "@ts-ignore - seedrandom may not have type declarations"
+      description: '@ts-ignore - seedrandom may not have type declarations'
       externalDependencies:
         - package: seedrandom
           imports:
@@ -12679,7 +12679,7 @@ modules:
       constants:
         - createSetCartesian
     src/set/setDifference.ts:
-      description: "Create the difference of two (multi)sets: every element of set1, that is not the element of set2."
+      description: 'Create the difference of two (multi)sets: every element of set1, that is not the element of set2.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -12996,11 +12996,11 @@ modules:
       internalDependencies:
         - file: ./freqz.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./zpk2tf.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./fft.js
           imports:
@@ -13062,8 +13062,8 @@ modules:
         - autocorr
         - ConvMode
       reExported:
-        - "* from ./freqz.js"
-        - "* from ./zpk2tf.js"
+        - '* from ./freqz.js'
+        - '* from ./zpk2tf.js'
         - fft
         - ifft
         - ifftReal
@@ -14936,7 +14936,7 @@ modules:
       constants:
         - createSparseMatrixClass
     src/type/matrix/types.ts:
-      description: "Type Philosophy:"
+      description: 'Type Philosophy:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -15583,7 +15583,7 @@ modules:
         - createPlanckCharge
         - createPlanckTemperature
     src/type/unit/Unit.ts:
-      description: "A unit can be constructed in the following ways:"
+      description: 'A unit can be constructed in the following ways:'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -15616,13 +15616,13 @@ modules:
     src/typed/arithmetic.ts:
       description: Typed Arithmetic Functions (Parallel-First)
       externalDependencies:
-        - package: "@mathts/core"
+        - package: '@mathts/core'
           imports:
             - mathTyped
             - Complex
             - Fraction
             - BigNumber
-        - package: "@mathts/parallel"
+        - package: '@mathts/parallel'
           imports:
             - computePool
             - ComputePool
@@ -15758,19 +15758,19 @@ modules:
             - typedSignal
         - file: ./arithmetic.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./statistics.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./signal.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./arithmetic.js
           imports:
@@ -15795,10 +15795,10 @@ modules:
         - typedSignal
         - typedFunctions
       reExported:
-        - "* from ./arithmetic.js"
-        - "* from ./trigonometry.js"
-        - "* from ./statistics.js"
-        - "* from ./signal.js"
+        - '* from ./arithmetic.js'
+        - '* from ./trigonometry.js'
+        - '* from ./statistics.js'
+        - '* from ./signal.js'
         - typedArithmetic
         - typedTrigonometry
         - typedStatistics
@@ -15808,11 +15808,11 @@ modules:
     src/typed/signal.ts:
       description: Typed Signal Processing Functions (Parallel-First)
       externalDependencies:
-        - package: "@mathts/core"
+        - package: '@mathts/core'
           imports:
             - mathTyped
             - Complex
-        - package: "@mathts/parallel"
+        - package: '@mathts/parallel'
           imports:
             - computePool
       nodeDependencies: []
@@ -15843,13 +15843,13 @@ modules:
     src/typed/statistics.ts:
       description: Typed Statistics Functions (Parallel-First)
       externalDependencies:
-        - package: "@mathts/core"
+        - package: '@mathts/core'
           imports:
             - mathTyped
             - Complex
             - Fraction
             - BigNumber
-        - package: "@mathts/parallel"
+        - package: '@mathts/parallel'
           imports:
             - computePool
       nodeDependencies: []
@@ -15900,12 +15900,12 @@ modules:
     src/typed/trigonometry.ts:
       description: Typed Trigonometric Functions (Parallel-First)
       externalDependencies:
-        - package: "@mathts/core"
+        - package: '@mathts/core'
           imports:
             - mathTyped
             - Complex
             - BigNumber
-        - package: "@mathts/parallel"
+        - package: '@mathts/parallel'
           imports:
             - computePool
       nodeDependencies: []
@@ -15955,7 +15955,7 @@ modules:
     src/typed/typed-bridge.ts:
       description: Initialize the type bridge for mathjs factory compatibility.
       externalDependencies:
-        - package: "@mathts/core"
+        - package: '@mathts/core'
           imports:
             - registerNativeTypes
       nodeDependencies: []
@@ -16349,7 +16349,7 @@ modules:
       constants:
         - createHasNumericValue
     src/utils/is.ts:
-      description: "Test whether a value is a collection: an Array or Matrix"
+      description: 'Test whether a value is a collection: an Array or Matrix'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -16565,7 +16565,7 @@ modules:
       constants:
         - createIsNaN
     src/utils/isNegative.ts:
-      description: "Test whether a value is negative: smaller than zero."
+      description: 'Test whether a value is negative: smaller than zero.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -16620,7 +16620,7 @@ modules:
       constants:
         - createIsNumeric
     src/utils/isPositive.ts:
-      description: "Test whether a value is positive: larger than zero."
+      description: 'Test whether a value is positive: larger than zero.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -16652,7 +16652,7 @@ modules:
       constants:
         - createIsPositive
     src/utils/isPrime.ts:
-      description: "Test whether a value is prime: has no divisors other than itself and one."
+      description: 'Test whether a value is prime: has no divisors other than itself and one.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -16710,7 +16710,7 @@ modules:
         - latexFunctions
         - defaultTemplate
     src/utils/latex.ts:
-      description: "@ts-ignore - escape-latex may not have type declarations"
+      description: '@ts-ignore - escape-latex may not have type declarations'
       externalDependencies:
         - package: escape-latex
           imports:
@@ -16874,7 +16874,7 @@ modules:
         - sinh
         - tanh
     src/utils/numeric.ts:
-      description: "Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction."
+      description: 'Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction.'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -17014,7 +17014,7 @@ modules:
       internalDependencies:
         - file: ./is.js
           imports:
-            - "* as allIsFunctions"
+            - '* as allIsFunctions'
         - file: ../core/create.js
           imports:
             - create
@@ -19875,46 +19875,46 @@ modules:
       internalDependencies:
         - file: ./arithmetic.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./bitwise.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./combinations.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./constants.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./logical.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./probability.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./utils.js
           imports:
-            - "*"
+            - '*'
           reExport: true
       exports: []
       reExported:
-        - "* from ./arithmetic.js"
-        - "* from ./bitwise.js"
-        - "* from ./combinations.js"
-        - "* from ./constants.js"
-        - "* from ./logical.js"
-        - "* from ./probability.js"
-        - "* from ./trigonometry.js"
-        - "* from ./utils.js"
+        - '* from ./arithmetic.js'
+        - '* from ./bitwise.js'
+        - '* from ./combinations.js'
+        - '* from ./constants.js'
+        - '* from ./logical.js'
+        - '* from ./probability.js'
+        - '* from ./trigonometry.js'
+        - '* from ./utils.js'
     src/wasm/plain/logical.ts:
       description: Plain Number Logical Operations - AssemblyScript
       externalDependencies: []

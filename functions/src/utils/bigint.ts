@@ -14,19 +14,14 @@
  * @param {(number) -> Complex} cplx  the associated Complex log
  * @returns {(bigint) -> number}   the corresponding logarithm for bigints
  */
-export function promoteLogarithm(
-  log16: any,
-  numberLog: any,
-  config: any,
-  cplx: any
-) {
+export function promoteLogarithm(log16: any, numberLog: any, config: any, cplx: any) {
   return function (b: any) {
     if (b > 0 || config.predictable) {
-      if (b <= 0) return NaN
-      const s = b.toString(16)
-      const s15 = s.substring(0, 15)
-      return log16 * (s.length - s15.length) + numberLog(Number('0x' + s15))
+      if (b <= 0) return NaN;
+      const s = b.toString(16);
+      const s15 = s.substring(0, 15);
+      return log16 * (s.length - s15.length) + numberLog(Number('0x' + s15));
     }
-    return cplx((b as any).toNumber())
-  }
+    return cplx((b as any).toNumber());
+  };
 }

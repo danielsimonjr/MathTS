@@ -34,16 +34,13 @@ function randomMatrix(rows: number, cols: number): DenseMatrix {
     }
     data.push(row);
   }
-  return new DenseMatrix(data);
+  return new DenseMatrix(rows, cols, data);
 }
 
 /**
  * Measure average execution time
  */
-async function measureTime(
-  fn: () => void | Promise<void>,
-  iterations: number
-): Promise<number> {
+async function measureTime(fn: () => void | Promise<void>, iterations: number): Promise<number> {
   // Warmup
   for (let i = 0; i < Math.min(5, iterations); i++) {
     await fn();
@@ -168,10 +165,7 @@ async function main(): Promise<void> {
 
   for (const size of sizes) {
     console.log(`Benchmarking ${size}x${size} matrices...`);
-    const result = await benchmarkMatmul(
-      size,
-      iterations[size as keyof typeof iterations]
-    );
+    const result = await benchmarkMatmul(size, iterations[size as keyof typeof iterations]);
     results.push(result);
   }
 

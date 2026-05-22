@@ -5,7 +5,7 @@ export const subsetDocs = {
     'value(index)',
     'value(index) = replacement',
     'subset(value, [index])',
-    'subset(value, [index], replacement)'
+    'subset(value, [index], replacement)',
   ],
   description:
     'Get or set a subset of the entries of a matrix or ' +
@@ -26,7 +26,7 @@ export const subsetDocs = {
     'f[2, 1]',
     'f[:, 1]',
     'f[[1,2], [1,3]] = [9, 10; 11, 12]',
-    'f'
+    'f',
   ],
   seealso: [
     'concat',
@@ -40,6 +40,6 @@ export const subsetDocs = {
     'squeeze',
     'trace',
     'transpose',
-    'zeros'
-  ]
-}
+    'zeros',
+  ],
+};

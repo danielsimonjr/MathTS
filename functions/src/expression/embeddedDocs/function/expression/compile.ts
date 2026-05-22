@@ -8,7 +8,7 @@ export const compileDocs = {
     'code1 = compile("sqrt(3^2 + 4^2)")',
     'code1.evaluate() ',
     'code2 = compile("a * b")',
-    'code2.evaluate({a: 3, b: 4})'
+    'code2.evaluate({a: 3, b: 4})',
   ],
-  seealso: ['parser', 'parse', 'evaluate']
-}
+  seealso: ['parser', 'parse', 'evaluate'],
+};

@@ -176,34 +176,22 @@ export function polyadd(a: Float64Array, b: Float64Array): Float64Array {
 }
 
 /** Quotient of polynomial division `a / b`. */
-export function polynomialQuotient(
-  a: Float64Array,
-  b: Float64Array
-): Float64Array {
+export function polynomialQuotient(a: Float64Array, b: Float64Array): Float64Array {
   return toF64(polyDivmod(toArr(a), toArr(b))[0]);
 }
 
 /** Remainder of polynomial division `a / b`. */
-export function polynomialRemainder(
-  a: Float64Array,
-  b: Float64Array
-): Float64Array {
+export function polynomialRemainder(a: Float64Array, b: Float64Array): Float64Array {
   return toF64(polyDivmod(toArr(a), toArr(b))[1]);
 }
 
 /** Monic GCD of polynomials `a` and `b`. */
-export function polynomialGCD(
-  a: Float64Array,
-  b: Float64Array
-): Float64Array {
+export function polynomialGCD(a: Float64Array, b: Float64Array): Float64Array {
   return toF64(polyGcd(toArr(a), toArr(b)));
 }
 
 /** Monic LCM of polynomials `a` and `b`. */
-export function polynomialLCM(
-  a: Float64Array,
-  b: Float64Array
-): Float64Array {
+export function polynomialLCM(a: Float64Array, b: Float64Array): Float64Array {
   const aa = toArr(a);
   const bb = toArr(b);
   const g = polyGcd(aa, bb);

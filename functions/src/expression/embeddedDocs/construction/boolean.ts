@@ -9,15 +9,7 @@ export const booleanDocs = {
     'boolean(3)',
     'boolean("true")',
     'boolean("false")',
-    'boolean([1, 0, 1, 1])'
+    'boolean([1, 0, 1, 1])',
   ],
-  seealso: [
-    'bignumber',
-    'complex',
-    'index',
-    'matrix',
-    'number',
-    'string',
-    'unit'
-  ]
-}
+  seealso: ['bignumber', 'complex', 'index', 'matrix', 'number', 'string', 'unit'],
+};

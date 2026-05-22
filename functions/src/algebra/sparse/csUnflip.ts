@@ -1,7 +1,7 @@
 // Copyright (c) 2006-2024, Timothy A. Davis, All Rights Reserved.
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
-import { csFlip } from './csFlip.js'
+import { csFlip } from './csFlip.js';
 
 /**
  * Flips the value if it is negative of returns the same value otherwise.
@@ -10,5 +10,5 @@ import { csFlip } from './csFlip.js'
  */
 export function csUnflip(i: number): number {
   // flip the value if it is negative
-  return i < 0 ? csFlip(i) : i
+  return i < 0 ? csFlip(i) : i;
 }

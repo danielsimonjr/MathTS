@@ -76,8 +76,10 @@ export class Fraction implements IFraction {
     const sign = n < 0 ? -1n : 1n;
     n = Math.abs(n);
 
-    let h1 = 1n, h2 = 0n;
-    let k1 = 0n, k2 = 1n;
+    let h1 = 1n,
+      h2 = 0n;
+    let k1 = 0n,
+      k2 = 1n;
     let b = n;
 
     do {
@@ -160,7 +162,9 @@ export class Fraction implements IFraction {
   /**
    * Create a Fraction from a JSON object
    */
-  static fromJSON(json: { n: string; d: string } | { numerator: string; denominator: string }): Fraction {
+  static fromJSON(
+    json: { n: string; d: string } | { numerator: string; denominator: string }
+  ): Fraction {
     if ('n' in json) {
       return new Fraction(BigInt(json.n), BigInt(json.d));
     }
@@ -197,7 +201,7 @@ export class Fraction implements IFraction {
     return {
       mathjs: 'Fraction',
       n: this.numerator.toString(),
-      d: this.denominator.toString()
+      d: this.denominator.toString(),
     };
   }
 
@@ -256,7 +260,7 @@ export class Fraction implements IFraction {
     return {
       whole,
       numerator: remainder,
-      denominator: this.denominator
+      denominator: this.denominator,
     };
   }
 
@@ -293,10 +297,7 @@ export class Fraction implements IFraction {
    */
   multiply(other: Scalar): Fraction {
     if (other instanceof Fraction) {
-      return new Fraction(
-        this.numerator * other.numerator,
-        this.denominator * other.denominator
-      );
+      return new Fraction(this.numerator * other.numerator, this.denominator * other.denominator);
     }
     return this.multiply(Fraction.fromNumber(Number(other.valueOf())));
   }
@@ -309,10 +310,7 @@ export class Fraction implements IFraction {
       if (other.numerator === 0n) {
         throw new Error('Division by zero');
       }
-      return new Fraction(
-        this.numerator * other.denominator,
-        this.denominator * other.numerator
-      );
+      return new Fraction(this.numerator * other.denominator, this.denominator * other.numerator);
     }
     return this.divide(Fraction.fromNumber(Number(other.valueOf())));
   }
@@ -328,10 +326,7 @@ export class Fraction implements IFraction {
    * Absolute value: |a/b|
    */
   abs(): Fraction {
-    return new Fraction(
-      this.numerator < 0n ? -this.numerator : this.numerator,
-      this.denominator
-    );
+    return new Fraction(this.numerator < 0n ? -this.numerator : this.numerator, this.denominator);
   }
 
   /**
@@ -594,10 +589,7 @@ export class Fraction implements IFraction {
    * Used in Stern-Brocot tree and Farey sequences
    */
   mediant(other: Fraction): Fraction {
-    return new Fraction(
-      this.numerator + other.numerator,
-      this.denominator + other.denominator
-    );
+    return new Fraction(this.numerator + other.numerator, this.denominator + other.denominator);
   }
 }
 

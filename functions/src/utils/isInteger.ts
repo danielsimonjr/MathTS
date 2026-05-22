@@ -1,24 +1,24 @@
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for isInteger
 interface BigNumberType {
-  isFinite(): boolean
-  round(): BigNumberType
+  isFinite(): boolean;
+  round(): BigNumberType;
 }
 
 interface FractionType {
-  d: bigint
+  d: bigint;
 }
 
 interface IsIntegerDependencies {
-  typed: TypedFunction
-  equal: (a: unknown, b: unknown) => boolean
+  typed: TypedFunction;
+  equal: (a: unknown, b: unknown) => boolean;
 }
 
-const name = 'isInteger'
-const dependencies = ['typed', 'equal']
+const name = 'isInteger';
+const dependencies = ['typed', 'equal'];
 
 export const createIsInteger = /* #__PURE__ */ factory(
   name,
@@ -54,11 +54,9 @@ export const createIsInteger = /* #__PURE__ */ factory(
      *                    Throws an error in case of an unknown data type.
      */
     return typed(name, {
-      number: (n: number): boolean =>
-        Number.isFinite(n) ? equal(n, Math.round(n)) : false,
+      number: (n: number): boolean => (Number.isFinite(n) ? equal(n, Math.round(n)) : false),
 
-      BigNumber: (b: BigNumberType): boolean =>
-        b.isFinite() ? equal(b.round(), b) : false,
+      BigNumber: (b: BigNumberType): boolean => (b.isFinite() ? equal(b.round(), b) : false),
 
       bigint: (_b: bigint): boolean => true,
 
@@ -68,7 +66,7 @@ export const createIsInteger = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
             deepMap(x as unknown[], self)
-      )
-    })
+      ),
+    });
   }
-)
+);

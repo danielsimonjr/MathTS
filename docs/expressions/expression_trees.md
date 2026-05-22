@@ -24,24 +24,24 @@ OperatorNode    +
 
 MathTS has 16 node types. Each node sets `is<Type>Node = true` as a boolean property:
 
-| Node type | `node.type` | What it represents |
-|---|---|---|
-| `ConstantNode` | `'ConstantNode'` | A literal value: `2`, `"hello"`, `true` |
-| `SymbolNode` | `'SymbolNode'` | A named variable or function: `x`, `pi` |
-| `OperatorNode` | `'OperatorNode'` | An operator: `+`, `*`, `^`, unary `-` |
-| `FunctionNode` | `'FunctionNode'` | A function call: `sin(x)`, `max(a, b)` |
-| `FunctionAssignmentNode` | `'FunctionAssignmentNode'` | Function definition: `f(x) = x^2` |
-| `AssignmentNode` | `'AssignmentNode'` | Variable assignment: `a = 5` |
-| `BlockNode` | `'BlockNode'` | Multiple statements: `a = 1; b = 2` |
-| `ConditionalNode` | `'ConditionalNode'` | Ternary: `x > 0 ? x : -x` |
-| `RangeNode` | `'RangeNode'` | Range: `1:10`, `0:2:10` |
-| `ArrayNode` | `'ArrayNode'` | Matrix/array literal: `[1, 2, 3]` |
-| `IndexNode` | `'IndexNode'` | Index access dimensions |
-| `AccessorNode` | `'AccessorNode'` | Indexed access: `A[1,2]`, `obj.prop` |
-| `ObjectNode` | `'ObjectNode'` | Object literal: `{a: 1, b: 2}` |
-| `RelationalNode` | `'RelationalNode'` | Chained comparison: `1 < x < 10` |
-| `ParenthesisNode` | `'ParenthesisNode'` | Parenthesized sub-expression |
-| `Node` | `'Node'` | Base class; not directly instantiated |
+| Node type                | `node.type`                | What it represents                      |
+| ------------------------ | -------------------------- | --------------------------------------- |
+| `ConstantNode`           | `'ConstantNode'`           | A literal value: `2`, `"hello"`, `true` |
+| `SymbolNode`             | `'SymbolNode'`             | A named variable or function: `x`, `pi` |
+| `OperatorNode`           | `'OperatorNode'`           | An operator: `+`, `*`, `^`, unary `-`   |
+| `FunctionNode`           | `'FunctionNode'`           | A function call: `sin(x)`, `max(a, b)`  |
+| `FunctionAssignmentNode` | `'FunctionAssignmentNode'` | Function definition: `f(x) = x^2`       |
+| `AssignmentNode`         | `'AssignmentNode'`         | Variable assignment: `a = 5`            |
+| `BlockNode`              | `'BlockNode'`              | Multiple statements: `a = 1; b = 2`     |
+| `ConditionalNode`        | `'ConditionalNode'`        | Ternary: `x > 0 ? x : -x`               |
+| `RangeNode`              | `'RangeNode'`              | Range: `1:10`, `0:2:10`                 |
+| `ArrayNode`              | `'ArrayNode'`              | Matrix/array literal: `[1, 2, 3]`       |
+| `IndexNode`              | `'IndexNode'`              | Index access dimensions                 |
+| `AccessorNode`           | `'AccessorNode'`           | Indexed access: `A[1,2]`, `obj.prop`    |
+| `ObjectNode`             | `'ObjectNode'`             | Object literal: `{a: 1, b: 2}`          |
+| `RelationalNode`         | `'RelationalNode'`         | Chained comparison: `1 < x < 10`        |
+| `ParenthesisNode`        | `'ParenthesisNode'`        | Parenthesized sub-expression            |
+| `Node`                   | `'Node'`                   | Base class; not directly instantiated   |
 
 ---
 
@@ -79,17 +79,17 @@ const constants = node.filter((n: Node) => n.isConstantNode);
 // Transform the tree by replacing nodes
 const doubled = node.transform((n: Node) => {
   if (n.isConstantNode && typeof n.value === 'number') {
-    return parse(String(n.value * 2));  // replace
+    return parse(String(n.value * 2)); // replace
   }
-  return n;  // keep
+  return n; // keep
 });
 ```
 
 ### Cloning
 
 ```typescript
-node.clone()      // shallow clone (children not cloned)
-node.cloneDeep()  // deep clone
+node.clone(); // shallow clone (children not cloned)
+node.cloneDeep(); // deep clone
 ```
 
 ---
@@ -103,11 +103,11 @@ full math scope:
 import { parse } from '@danielsimonjr/mathts-functions';
 
 const node = parse('x^2 + 1');
-node.evaluate({ x: 3 });          // 10
+node.evaluate({ x: 3 }); // 10
 
 // Or compile once and reuse with different scopes
 const compiled = node.compile();
-compiled.evaluate({ x: 3 });      // 10
+compiled.evaluate({ x: 3 }); // 10
 ```
 
 For most use cases, `evaluate()` and `compileExpr()` (see [parsing.md](parsing.md)) are
@@ -169,8 +169,8 @@ function countOps(expr: string): number {
   return count;
 }
 
-countOps('2 + 3');             // 1
-countOps('sin(x) + cos(x)');   // 3
+countOps('2 + 3'); // 1
+countOps('sin(x) + cos(x)'); // 3
 ```
 
 ## Substituting variables symbolically
@@ -190,7 +190,7 @@ const substituted = f.transform((node) => {
   return node;
 });
 
-substituted.toString();   // '(y + 1) ^ 2 + (y + 1) + 1'
+substituted.toString(); // '(y + 1) ^ 2 + (y + 1) + 1'
 ```
 
 ---
@@ -209,7 +209,7 @@ import { parse } from '@danielsimonjr/mathts-functions';
 // Build sqrt(2 + x)
 const root = parse('sqrt(2 + x)');
 
-root.toString();   // 'sqrt(2 + x)'
+root.toString(); // 'sqrt(2 + x)'
 ```
 
 In practice, use `parse('sqrt(2 + x)')` — it produces the same tree in one step.

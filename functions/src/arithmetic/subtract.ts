@@ -1,35 +1,30 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js'
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js'
-import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js';
+import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 
 // Type definitions for subtract
 interface NodeOperations {
-  createBinaryNode: (
-    op: string,
-    fn: string,
-    left: unknown,
-    right: unknown
-  ) => unknown
-  hasNodeArg: (...args: unknown[]) => boolean
+  createBinaryNode: (op: string, fn: string, left: unknown, right: unknown) => unknown;
+  hasNodeArg: (...args: unknown[]) => boolean;
 }
 
 interface SubtractDependencies {
-  typed: TypedFunction
-  matrix: TypedFunction
-  equalScalar: TypedFunction
-  subtractScalar: TypedFunction
-  unaryMinus: TypedFunction
-  DenseMatrix: unknown
-  concat: TypedFunction
-  nodeOperations: NodeOperations
+  typed: TypedFunction;
+  matrix: TypedFunction;
+  equalScalar: TypedFunction;
+  subtractScalar: TypedFunction;
+  unaryMinus: TypedFunction;
+  DenseMatrix: unknown;
+  concat: TypedFunction;
+  nodeOperations: NodeOperations;
 }
 
-const name = 'subtract'
+const name = 'subtract';
 const dependencies = [
   'typed',
   'matrix',
@@ -38,8 +33,8 @@ const dependencies = [
   'unaryMinus',
   'DenseMatrix',
   'concat',
-  'nodeOperations'
-]
+  'nodeOperations',
+];
 
 export const createSubtract = /* #__PURE__ */ factory(
   name,
@@ -52,20 +47,20 @@ export const createSubtract = /* #__PURE__ */ factory(
     unaryMinus: _unaryMinus,
     DenseMatrix,
     concat,
-    nodeOperations
+    nodeOperations,
   }: SubtractDependencies) => {
     // TODO: split function subtract in two: subtract and subtractScalar
 
-    const matAlgo01xDSid = createMatAlgo01xDSid({ typed })
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar })
-    const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
+    const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
+    const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Subtract two values, `x - y`.
@@ -137,7 +132,7 @@ export const createSubtract = /* #__PURE__ */ factory(
         // EXISTING SIGNATURES - Keep after Node signatures
         // =========================================================================
 
-        'any, any': subtractScalar
+        'any, any': subtractScalar,
       },
       matrixAlgorithmSuite({
         elop: subtractScalar,
@@ -145,8 +140,8 @@ export const createSubtract = /* #__PURE__ */ factory(
         DS: matAlgo01xDSid as any,
         SD: matAlgo03xDSf as any,
         Ss: matAlgo12xSfs as any,
-        sS: matAlgo10xSids as any
+        sS: matAlgo10xSids as any,
       })
-    )
+    );
   }
-)
+);

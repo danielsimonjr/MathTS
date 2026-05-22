@@ -11,7 +11,7 @@
  * @returns 1 if NaN, 0 otherwise
  */
 export function isNaN(x: f64): i32 {
-  return x !== x ? 1 : 0
+  return x !== x ? 1 : 0;
 }
 
 /**
@@ -21,9 +21,9 @@ export function isNaN(x: f64): i32 {
  */
 export function isFinite(x: f64): i32 {
   // In JavaScript, use Number.isFinite behavior
-  if (x !== x) return 0 // NaN
-  if (!Number.isFinite(x)) return 0
-  return 1
+  if (x !== x) return 0; // NaN
+  if (!Number.isFinite(x)) return 0;
+  return 1;
 }
 
 /**
@@ -32,8 +32,8 @@ export function isFinite(x: f64): i32 {
  * @returns 1 if integer, 0 otherwise
  */
 export function isInteger(x: f64): i32 {
-  if (x !== x) return 0 // NaN check
-  return Math.floor(x) === x ? 1 : 0
+  if (x !== x) return 0; // NaN check
+  return Math.floor(x) === x ? 1 : 0;
 }
 
 /**
@@ -42,7 +42,7 @@ export function isInteger(x: f64): i32 {
  * @returns 1 if positive, 0 otherwise
  */
 export function isPositive(x: f64): i32 {
-  return x > 0.0 ? 1 : 0
+  return x > 0.0 ? 1 : 0;
 }
 
 /**
@@ -51,7 +51,7 @@ export function isPositive(x: f64): i32 {
  * @returns 1 if negative, 0 otherwise
  */
 export function isNegative(x: f64): i32 {
-  return x < 0.0 ? 1 : 0
+  return x < 0.0 ? 1 : 0;
 }
 
 /**
@@ -60,7 +60,7 @@ export function isNegative(x: f64): i32 {
  * @returns 1 if zero, 0 otherwise
  */
 export function isZero(x: f64): i32 {
-  return x === 0.0 ? 1 : 0
+  return x === 0.0 ? 1 : 0;
 }
 
 /**
@@ -69,7 +69,7 @@ export function isZero(x: f64): i32 {
  * @returns 1 if non-negative, 0 otherwise
  */
 export function isNonNegative(x: f64): i32 {
-  return x >= 0.0 ? 1 : 0
+  return x >= 0.0 ? 1 : 0;
 }
 
 /**
@@ -78,7 +78,7 @@ export function isNonNegative(x: f64): i32 {
  * @returns 1 if non-positive, 0 otherwise
  */
 export function isNonPositive(x: f64): i32 {
-  return x <= 0.0 ? 1 : 0
+  return x <= 0.0 ? 1 : 0;
 }
 
 /**
@@ -87,22 +87,22 @@ export function isNonPositive(x: f64): i32 {
  * @returns 1 if prime, 0 otherwise
  */
 export function isPrime(n: i64): i32 {
-  if (n < 2) return 0
-  if (n === 2) return 1
-  if (n % 2 === 0) return 0
-  if (n === 3) return 1
-  if (n % 3 === 0) return 0
+  if (n < 2) return 0;
+  if (n === 2) return 1;
+  if (n % 2 === 0) return 0;
+  if (n === 3) return 1;
+  if (n % 3 === 0) return 0;
 
   // Check divisibility by 6k +/- 1 up to sqrt(n)
-  let i: i64 = 5
+  let i: i64 = 5;
   while (i * i <= n) {
     if (n % i === 0 || n % (i + 2) === 0) {
-      return 0
+      return 0;
     }
-    i += 6
+    i += 6;
   }
 
-  return 1
+  return 1;
 }
 
 /**
@@ -111,9 +111,9 @@ export function isPrime(n: i64): i32 {
  * @returns 1 if prime, 0 otherwise
  */
 export function isPrimeF64(x: f64): i32 {
-  if (x !== x || x < 2.0) return 0 // NaN or < 2
-  if (Math.floor(x) !== x) return 0 // Not an integer
-  return isPrime(<i64>x)
+  if (x !== x || x < 2.0) return 0; // NaN or < 2
+  if (Math.floor(x) !== x) return 0; // Not an integer
+  return isPrime(<i64>x);
 }
 
 /**
@@ -122,8 +122,8 @@ export function isPrimeF64(x: f64): i32 {
  * @returns 1 if even integer, 0 otherwise
  */
 export function isEven(x: f64): i32 {
-  if (Math.floor(x) !== x) return 0
-  return <i64>x % 2 === 0 ? 1 : 0
+  if (Math.floor(x) !== x) return 0;
+  return <i64>x % 2 === 0 ? 1 : 0;
 }
 
 /**
@@ -132,8 +132,8 @@ export function isEven(x: f64): i32 {
  * @returns 1 if odd integer, 0 otherwise
  */
 export function isOdd(x: f64): i32 {
-  if (Math.floor(x) !== x) return 0
-  return <i64>x % 2 !== 0 ? 1 : 0
+  if (Math.floor(x) !== x) return 0;
+  return <i64>x % 2 !== 0 ? 1 : 0;
 }
 
 /**
@@ -144,7 +144,7 @@ export function isOdd(x: f64): i32 {
  * @returns 1 if within bounds, 0 otherwise
  */
 export function isBounded(x: f64, min: f64, max: f64): i32 {
-  return x >= min && x <= max ? 1 : 0
+  return x >= min && x <= max ? 1 : 0;
 }
 
 /**
@@ -153,11 +153,11 @@ export function isBounded(x: f64, min: f64, max: f64): i32 {
  * @returns 1 if perfect square, 0 otherwise
  */
 export function isPerfectSquare(n: i64): i32 {
-  if (n < 0) return 0
-  if (n === 0) return 1
+  if (n < 0) return 0;
+  if (n === 0) return 1;
 
-  const root: i64 = <i64>Math.sqrt(<f64>n)
-  return root * root === n ? 1 : 0
+  const root: i64 = <i64>Math.sqrt(<f64>n);
+  return root * root === n ? 1 : 0;
 }
 
 /**
@@ -166,8 +166,8 @@ export function isPerfectSquare(n: i64): i32 {
  * @returns 1 if power of two, 0 otherwise
  */
 export function isPowerOfTwo(n: i64): i32 {
-  if (n <= 0) return 0
-  return (n & (n - 1)) === 0 ? 1 : 0
+  if (n <= 0) return 0;
+  return (n & (n - 1)) === 0 ? 1 : 0;
 }
 
 /**
@@ -177,33 +177,29 @@ export function isPowerOfTwo(n: i64): i32 {
  * @param condition - 0=isZero, 1=isPositive, 2=isNegative, 3=isNaN, 4=isFinite
  * @returns Count of elements satisfying condition
  */
-export function countCondition(
-  arrPtr: usize,
-  length: i32,
-  condition: i32
-): i32 {
-  let count: i32 = 0
+export function countCondition(arrPtr: usize, length: i32, condition: i32): i32 {
+  let count: i32 = 0;
 
   for (let i: i32 = 0; i < length; i++) {
-    const x: f64 = load<f64>(arrPtr + ((<usize>i) << 3))
-    let match: i32 = 0
+    const x: f64 = load<f64>(arrPtr + ((<usize>i) << 3));
+    let match: i32 = 0;
 
     if (condition === 0) {
-      match = isZero(x)
+      match = isZero(x);
     } else if (condition === 1) {
-      match = isPositive(x)
+      match = isPositive(x);
     } else if (condition === 2) {
-      match = isNegative(x)
+      match = isNegative(x);
     } else if (condition === 3) {
-      match = isNaN(x)
+      match = isNaN(x);
     } else if (condition === 4) {
-      match = isFinite(x)
+      match = isFinite(x);
     }
 
-    count += match
+    count += match;
   }
 
-  return count
+  return count;
 }
 
 /**
@@ -215,10 +211,10 @@ export function countCondition(
 export function allFinite(arrPtr: usize, length: i32): i32 {
   for (let i: i32 = 0; i < length; i++) {
     if (isFinite(load<f64>(arrPtr + ((<usize>i) << 3))) === 0) {
-      return 0
+      return 0;
     }
   }
-  return 1
+  return 1;
 }
 
 /**
@@ -230,10 +226,10 @@ export function allFinite(arrPtr: usize, length: i32): i32 {
 export function anyNaN(arrPtr: usize, length: i32): i32 {
   for (let i: i32 = 0; i < length; i++) {
     if (isNaN(load<f64>(arrPtr + ((<usize>i) << 3))) === 1) {
-      return 1
+      return 1;
     }
   }
-  return 0
+  return 0;
 }
 
 /**
@@ -245,10 +241,10 @@ export function anyNaN(arrPtr: usize, length: i32): i32 {
 export function allPositive(arrPtr: usize, length: i32): i32 {
   for (let i: i32 = 0; i < length; i++) {
     if (load<f64>(arrPtr + ((<usize>i) << 3)) <= 0.0) {
-      return 0
+      return 0;
     }
   }
-  return 1
+  return 1;
 }
 
 /**
@@ -260,10 +256,10 @@ export function allPositive(arrPtr: usize, length: i32): i32 {
 export function allNonNegative(arrPtr: usize, length: i32): i32 {
   for (let i: i32 = 0; i < length; i++) {
     if (load<f64>(arrPtr + ((<usize>i) << 3)) < 0.0) {
-      return 0
+      return 0;
     }
   }
-  return 1
+  return 1;
 }
 
 /**
@@ -275,10 +271,10 @@ export function allNonNegative(arrPtr: usize, length: i32): i32 {
 export function allIntegers(arrPtr: usize, length: i32): i32 {
   for (let i: i32 = 0; i < length; i++) {
     if (isInteger(load<f64>(arrPtr + ((<usize>i) << 3))) === 0) {
-      return 0
+      return 0;
     }
   }
-  return 1
+  return 1;
 }
 
 /**
@@ -290,25 +286,25 @@ export function allIntegers(arrPtr: usize, length: i32): i32 {
  */
 export function findFirst(arrPtr: usize, length: i32, condition: i32): i32 {
   for (let i: i32 = 0; i < length; i++) {
-    const x: f64 = load<f64>(arrPtr + ((<usize>i) << 3))
-    let match: i32 = 0
+    const x: f64 = load<f64>(arrPtr + ((<usize>i) << 3));
+    let match: i32 = 0;
 
     if (condition === 0) {
-      match = isZero(x)
+      match = isZero(x);
     } else if (condition === 1) {
-      match = isPositive(x)
+      match = isPositive(x);
     } else if (condition === 2) {
-      match = isNegative(x)
+      match = isNegative(x);
     } else if (condition === 3) {
-      match = isNaN(x)
+      match = isNaN(x);
     }
 
     if (match === 1) {
-      return i
+      return i;
     }
   }
 
-  return -1
+  return -1;
 }
 
 /**
@@ -317,10 +313,10 @@ export function findFirst(arrPtr: usize, length: i32, condition: i32): i32 {
  * @returns -1 if negative, 0 if zero, 1 if positive, NaN if NaN
  */
 export function sign(x: f64): f64 {
-  if (x !== x) return f64.NaN
-  if (x > 0.0) return 1.0
-  if (x < 0.0) return -1.0
-  return 0.0
+  if (x !== x) return f64.NaN;
+  if (x > 0.0) return 1.0;
+  if (x < 0.0) return -1.0;
+  return 0.0;
 }
 
 /**
@@ -331,8 +327,8 @@ export function sign(x: f64): f64 {
  */
 export function signArray(arrPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, sign(load<f64>(arrPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, sign(load<f64>(arrPtr + offset)));
   }
 }
 
@@ -343,29 +339,29 @@ export function signArray(arrPtr: usize, outputPtr: usize, length: i32): void {
  * @returns Count of primes <= n
  */
 export function countPrimesUpTo(n: i32, workPtr: usize): i32 {
-  if (n < 2) return 0
+  if (n < 2) return 0;
 
   // Initialize all as potentially prime (1 byte per number)
   for (let i: i32 = 0; i <= n; i++) {
-    store<u8>(workPtr + <usize>i, i >= 2 ? 1 : 0)
+    store<u8>(workPtr + <usize>i, i >= 2 ? 1 : 0);
   }
 
   // Mark composites
   for (let i: i32 = 2; i * i <= n; i++) {
     if (load<u8>(workPtr + <usize>i) === 1) {
       for (let j: i32 = i * i; j <= n; j += i) {
-        store<u8>(workPtr + <usize>j, 0)
+        store<u8>(workPtr + <usize>j, 0);
       }
     }
   }
 
   // Count primes
-  let count: i32 = 0
+  let count: i32 = 0;
   for (let i: i32 = 2; i <= n; i++) {
-    count += <i32>load<u8>(workPtr + <usize>i)
+    count += <i32>load<u8>(workPtr + <usize>i);
   }
 
-  return count
+  return count;
 }
 
 /**
@@ -374,19 +370,19 @@ export function countPrimesUpTo(n: i32, workPtr: usize): i32 {
  * @returns The nth prime
  */
 export function nthPrime(n: i32): i64 {
-  if (n < 1) return 0
+  if (n < 1) return 0;
 
-  let count: i32 = 0
-  let candidate: i64 = 1
+  let count: i32 = 0;
+  let candidate: i64 = 1;
 
   while (count < n) {
-    candidate++
+    candidate++;
     if (isPrime(candidate) === 1) {
-      count++
+      count++;
     }
   }
 
-  return candidate
+  return candidate;
 }
 
 /**
@@ -396,16 +392,16 @@ export function nthPrime(n: i32): i64 {
  * @returns GCD of a and b
  */
 export function gcd(a: i64, b: i64): i64 {
-  if (a < 0) a = -a
-  if (b < 0) b = -b
+  if (a < 0) a = -a;
+  if (b < 0) b = -b;
 
   while (b !== 0) {
-    const temp: i64 = b
-    b = a % b
-    a = temp
+    const temp: i64 = b;
+    b = a % b;
+    a = temp;
   }
 
-  return a
+  return a;
 }
 
 /**
@@ -415,11 +411,11 @@ export function gcd(a: i64, b: i64): i64 {
  * @returns LCM of a and b
  */
 export function lcm(a: i64, b: i64): i64 {
-  if (a === 0 || b === 0) return 0
-  if (a < 0) a = -a
-  if (b < 0) b = -b
+  if (a === 0 || b === 0) return 0;
+  if (a < 0) a = -a;
+  if (b < 0) b = -b;
 
-  return (a / gcd(a, b)) * b
+  return (a / gcd(a, b)) * b;
 }
 
 /**
@@ -429,5 +425,5 @@ export function lcm(a: i64, b: i64): i64 {
  * @returns 1 if coprime, 0 otherwise
  */
 export function areCoprime(a: i64, b: i64): i32 {
-  return gcd(a, b) === 1 ? 1 : 0
+  return gcd(a, b) === 1 ? 1 : 0;
 }

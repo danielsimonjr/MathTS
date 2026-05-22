@@ -16,7 +16,7 @@
  * @returns -x
  */
 export function unaryMinus(x: f64): f64 {
-  return -x
+  return -x;
 }
 
 /**
@@ -25,7 +25,7 @@ export function unaryMinus(x: f64): f64 {
  * @returns x unchanged
  */
 export function unaryPlus(x: f64): f64 {
-  return x
+  return x;
 }
 
 /**
@@ -36,9 +36,9 @@ export function unaryPlus(x: f64): f64 {
 export function cbrt(x: f64): f64 {
   // For negative numbers, compute cbrt of absolute value and negate
   if (x < 0) {
-    return -Math.pow(-x, 1.0 / 3.0)
+    return -Math.pow(-x, 1.0 / 3.0);
   }
-  return Math.pow(x, 1.0 / 3.0)
+  return Math.pow(x, 1.0 / 3.0);
 }
 
 /**
@@ -47,7 +47,7 @@ export function cbrt(x: f64): f64 {
  * @returns x * x * x
  */
 export function cube(x: f64): f64 {
-  return x * x * x
+  return x * x * x;
 }
 
 /**
@@ -56,7 +56,7 @@ export function cube(x: f64): f64 {
  * @returns x * x
  */
 export function square(x: f64): f64 {
-  return x * x
+  return x * x;
 }
 
 /**
@@ -65,7 +65,7 @@ export function square(x: f64): f64 {
  * @returns x rounded towards zero
  */
 export function fix(x: f64): f64 {
-  return x > 0 ? Math.floor(x) : Math.ceil(x)
+  return x > 0 ? Math.floor(x) : Math.ceil(x);
 }
 
 /**
@@ -75,8 +75,8 @@ export function fix(x: f64): f64 {
  * @returns x rounded towards zero to n decimal places
  */
 export function fixDecimals(x: f64, n: i32): f64 {
-  const shift = Math.pow(10, n)
-  return fix(x * shift) / shift
+  const shift = Math.pow(10, n);
+  return fix(x * shift) / shift;
 }
 
 /**
@@ -85,7 +85,7 @@ export function fixDecimals(x: f64, n: i32): f64 {
  * @returns Smallest integer >= x
  */
 export function ceil(x: f64): f64 {
-  return Math.ceil(x)
+  return Math.ceil(x);
 }
 
 /**
@@ -95,8 +95,8 @@ export function ceil(x: f64): f64 {
  * @returns x rounded up to n decimal places
  */
 export function ceilDecimals(x: f64, n: i32): f64 {
-  const shift = Math.pow(10, n)
-  return Math.ceil(x * shift) / shift
+  const shift = Math.pow(10, n);
+  return Math.ceil(x * shift) / shift;
 }
 
 /**
@@ -105,7 +105,7 @@ export function ceilDecimals(x: f64, n: i32): f64 {
  * @returns Largest integer <= x
  */
 export function floor(x: f64): f64 {
-  return Math.floor(x)
+  return Math.floor(x);
 }
 
 /**
@@ -115,8 +115,8 @@ export function floor(x: f64): f64 {
  * @returns x rounded down to n decimal places
  */
 export function floorDecimals(x: f64, n: i32): f64 {
-  const shift = Math.pow(10, n)
-  return Math.floor(x * shift) / shift
+  const shift = Math.pow(10, n);
+  return Math.floor(x * shift) / shift;
 }
 
 /**
@@ -125,7 +125,7 @@ export function floorDecimals(x: f64, n: i32): f64 {
  * @returns x rounded to nearest integer
  */
 export function round(x: f64): f64 {
-  return Math.round(x)
+  return Math.round(x);
 }
 
 /**
@@ -135,8 +135,8 @@ export function round(x: f64): f64 {
  * @returns x rounded to n decimal places
  */
 export function roundDecimals(x: f64, n: i32): f64 {
-  const shift = Math.pow(10, n)
-  return Math.round(x * shift) / shift
+  const shift = Math.pow(10, n);
+  return Math.round(x * shift) / shift;
 }
 
 /**
@@ -145,7 +145,7 @@ export function roundDecimals(x: f64, n: i32): f64 {
  * @returns |x|
  */
 export function abs(x: f64): f64 {
-  return Math.abs(x)
+  return Math.abs(x);
 }
 
 /**
@@ -154,9 +154,9 @@ export function abs(x: f64): f64 {
  * @returns -1, 0, or 1 depending on sign of x
  */
 export function sign(x: f64): f64 {
-  if (x > 0) return 1.0
-  if (x < 0) return -1.0
-  return 0.0
+  if (x > 0) return 1.0;
+  if (x < 0) return -1.0;
+  return 0.0;
 }
 
 /**
@@ -166,7 +166,7 @@ export function sign(x: f64): f64 {
  * @returns x + y
  */
 export function add(x: f64, y: f64): f64 {
-  return x + y
+  return x + y;
 }
 
 /**
@@ -176,7 +176,7 @@ export function add(x: f64, y: f64): f64 {
  * @returns x - y
  */
 export function subtract(x: f64, y: f64): f64 {
-  return x - y
+  return x - y;
 }
 
 /**
@@ -186,7 +186,7 @@ export function subtract(x: f64, y: f64): f64 {
  * @returns x * y
  */
 export function multiply(x: f64, y: f64): f64 {
-  return x * y
+  return x * y;
 }
 
 /**
@@ -196,35 +196,35 @@ export function multiply(x: f64, y: f64): f64 {
  * @returns x / y
  */
 export function divide(x: f64, y: f64): f64 {
-  return x / y
+  return x / y;
 }
 
 /**
  * Integer addition
  */
 export function addInt(x: i32, y: i32): i32 {
-  return x + y
+  return x + y;
 }
 
 /**
  * Integer subtraction
  */
 export function subtractInt(x: i32, y: i32): i32 {
-  return x - y
+  return x - y;
 }
 
 /**
  * Integer multiplication
  */
 export function multiplyInt(x: i32, y: i32): i32 {
-  return x * y
+  return x * y;
 }
 
 /**
  * Integer division
  */
 export function divideInt(x: i32, y: i32): i32 {
-  return x / y
+  return x / y;
 }
 
 /**
@@ -233,14 +233,10 @@ export function divideInt(x: i32, y: i32): i32 {
  * @param outputPtr Pointer to output array (f64, must be same length as input)
  * @param length Length of arrays
  */
-export function unaryMinusArray(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function unaryMinusArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, -load<f64>(inputPtr + offset))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, -load<f64>(inputPtr + offset));
   }
 }
 
@@ -250,15 +246,11 @@ export function unaryMinusArray(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function squareArray(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function squareArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    const x: f64 = load<f64>(inputPtr + offset)
-    store<f64>(outputPtr + offset, x * x)
+    const offset: usize = (<usize>i) << 3;
+    const x: f64 = load<f64>(inputPtr + offset);
+    store<f64>(outputPtr + offset, x * x);
   }
 }
 
@@ -268,15 +260,11 @@ export function squareArray(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function cubeArray(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function cubeArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    const x: f64 = load<f64>(inputPtr + offset)
-    store<f64>(outputPtr + offset, x * x * x)
+    const offset: usize = (<usize>i) << 3;
+    const x: f64 = load<f64>(inputPtr + offset);
+    store<f64>(outputPtr + offset, x * x * x);
   }
 }
 
@@ -288,8 +276,8 @@ export function cubeArray(
  */
 export function absArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.abs(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.abs(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -299,15 +287,11 @@ export function absArray(inputPtr: usize, outputPtr: usize, length: i32): void {
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function signArray(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function signArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    const x: f64 = load<f64>(inputPtr + offset)
-    store<f64>(outputPtr + offset, x > 0 ? 1.0 : x < 0 ? -1.0 : 0.0)
+    const offset: usize = (<usize>i) << 3;
+    const x: f64 = load<f64>(inputPtr + offset);
+    store<f64>(outputPtr + offset, x > 0 ? 1.0 : x < 0 ? -1.0 : 0.0);
   }
 }
 
@@ -318,18 +302,10 @@ export function signArray(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function addArray(
-  aPtr: usize,
-  bPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function addArray(aPtr: usize, bPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(
-      outputPtr + offset,
-      load<f64>(aPtr + offset) + load<f64>(bPtr + offset)
-    )
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, load<f64>(aPtr + offset) + load<f64>(bPtr + offset));
   }
 }
 
@@ -340,18 +316,10 @@ export function addArray(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function subtractArray(
-  aPtr: usize,
-  bPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function subtractArray(aPtr: usize, bPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(
-      outputPtr + offset,
-      load<f64>(aPtr + offset) - load<f64>(bPtr + offset)
-    )
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, load<f64>(aPtr + offset) - load<f64>(bPtr + offset));
   }
 }
 
@@ -362,18 +330,10 @@ export function subtractArray(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function multiplyArray(
-  aPtr: usize,
-  bPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function multiplyArray(aPtr: usize, bPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(
-      outputPtr + offset,
-      load<f64>(aPtr + offset) * load<f64>(bPtr + offset)
-    )
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, load<f64>(aPtr + offset) * load<f64>(bPtr + offset));
   }
 }
 
@@ -384,18 +344,10 @@ export function multiplyArray(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function divideArray(
-  aPtr: usize,
-  bPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function divideArray(aPtr: usize, bPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(
-      outputPtr + offset,
-      load<f64>(aPtr + offset) / load<f64>(bPtr + offset)
-    )
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, load<f64>(aPtr + offset) / load<f64>(bPtr + offset));
   }
 }
 
@@ -406,15 +358,10 @@ export function divideArray(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function addScalarArray(
-  inputPtr: usize,
-  scalar: f64,
-  outputPtr: usize,
-  length: i32
-): void {
+export function addScalarArray(inputPtr: usize, scalar: f64, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, load<f64>(inputPtr + offset) + scalar)
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, load<f64>(inputPtr + offset) + scalar);
   }
 }
 
@@ -432,7 +379,7 @@ export function multiplyScalarArray(
   length: i32
 ): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, load<f64>(inputPtr + offset) * scalar)
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, load<f64>(inputPtr + offset) * scalar);
   }
 }

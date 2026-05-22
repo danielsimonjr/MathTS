@@ -1,22 +1,22 @@
 /* eslint-disable no-loss-of-precision */
 
-import { deepMap } from '../utils/collection.js'
-import { sign } from '../utils/number.js'
-import { factory } from '../utils/factory.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { deepMap } from '../utils/collection.js';
+import { sign } from '../utils/number.js';
+import { factory } from '../utils/factory.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for erf
 interface Matrix {
-  valueOf(): unknown[][]
+  valueOf(): unknown[][];
 }
 
 interface ErfDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'erf'
-const dependencies = ['typed']
+const name = 'erf';
+const dependencies = ['typed'];
 
 export const createErf = /* #__PURE__ */ factory(
   name,
@@ -50,18 +50,18 @@ export const createErf = /* #__PURE__ */ factory(
      * @return {number | Array | Matrix}    The erf of `x`
      */
     function erfNumber(x: number): number {
-      const y = Math.abs(x)
+      const y = Math.abs(x);
 
       if (y >= MAX_NUM) {
-        return sign(x)
+        return sign(x);
       }
       if (y <= THRESH) {
-        return sign(x) * erf1(y)
+        return sign(x) * erf1(y);
       }
       if (y <= 4.0) {
-        return sign(x) * (1 - erfc2(y))
+        return sign(x) * (1 - erfc2(y));
       }
-      return sign(x) * (1 - erfc3(y))
+      return sign(x) * (1 - erfc3(y));
     }
 
     return typed('name', {
@@ -71,38 +71,32 @@ export const createErf = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (n: unknown[] | Matrix): unknown[] | Matrix => {
             // WASM-accelerated path for plain number arrays of sufficient size
-            if (
-              Array.isArray(n) &&
-              n.length >= 100 &&
-              n.every((x) => typeof x === 'number')
-            ) {
-              const wasm = wasmLoader.getModule()
+            if (Array.isArray(n) && n.length >= 100 && n.every((x) => typeof x === 'number')) {
+              const wasm = wasmLoader.getModule();
               if (wasm) {
                 try {
-                  const input = new Float64Array(n as number[])
-                  const inputAlloc = wasmLoader.allocateFloat64Array(input)
-                  const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(
-                    n.length
-                  )
+                  const input = new Float64Array(n as number[]);
+                  const inputAlloc = wasmLoader.allocateFloat64Array(input);
+                  const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(n.length);
                   try {
-                    wasm.erfArray(inputAlloc.ptr, n.length, resultAlloc.ptr)
-                    return Array.from(resultAlloc.array)
+                    wasm.erfArray(inputAlloc.ptr, n.length, resultAlloc.ptr);
+                    return Array.from(resultAlloc.array);
                   } finally {
-                    wasmLoader.free(inputAlloc.ptr)
-                    wasmLoader.free(resultAlloc.ptr)
+                    wasmLoader.free(inputAlloc.ptr);
+                    wasmLoader.free(resultAlloc.ptr);
                   }
                 } catch {
                   // Fall through to element-wise JS
                 }
               }
             }
-            return deepMap(n as any, self) as unknown[] | Matrix
+            return deepMap(n as any, self) as unknown[] | Matrix;
           }
-      )
+      ),
 
       // TODO: For complex numbers, use the approximation for the Faddeeva function
       //  from "More Efficient Computation of the Complex Error Function" (AMS)
-    })
+    });
 
     /**
      * Approximates the error function erf() for x <= 0.46875 using this function:
@@ -111,16 +105,16 @@ export const createErf = /* #__PURE__ */ factory(
      *              j=0
      */
     function erf1(y: number): number {
-      const ysq = y * y
-      let xnum = P[0][4] * ysq
-      let xden = ysq
-      let i: number
+      const ysq = y * y;
+      let xnum = P[0][4] * ysq;
+      let xden = ysq;
+      let i: number;
 
       for (i = 0; i < 3; i += 1) {
-        xnum = (xnum + P[0][i]) * ysq
-        xden = (xden + Q[0][i]) * ysq
+        xnum = (xnum + P[0][i]) * ysq;
+        xden = (xden + Q[0][i]) * ysq;
       }
-      return (y * (xnum + P[0][3])) / (xden + Q[0][3])
+      return (y * (xnum + P[0][3])) / (xden + Q[0][3]);
     }
 
     /**
@@ -131,18 +125,18 @@ export const createErf = /* #__PURE__ */ factory(
      *                      j=0
      */
     function erfc2(y: number): number {
-      let xnum = P[1][8] * y
-      let xden = y
-      let i: number
+      let xnum = P[1][8] * y;
+      let xden = y;
+      let i: number;
 
       for (i = 0; i < 7; i += 1) {
-        xnum = (xnum + P[1][i]) * y
-        xden = (xden + Q[1][i]) * y
+        xnum = (xnum + P[1][i]) * y;
+        xden = (xden + Q[1][i]) * y;
       }
-      const result = (xnum + P[1][7]) / (xden + Q[1][7])
-      const ysq = parseInt(String(y * 16)) / 16
-      const del = (y - ysq) * (y + ysq)
-      return Math.exp(-ysq * ysq) * Math.exp(-del) * result
+      const result = (xnum + P[1][7]) / (xden + Q[1][7]);
+      const ysq = parseInt(String(y * 16)) / 16;
+      const del = (y - ysq) * (y + ysq);
+      return Math.exp(-ysq * ysq) * Math.exp(-del) * result;
     }
 
     /**
@@ -155,35 +149,35 @@ export const createErf = /* #__PURE__ */ factory(
      *              j=0
      */
     function erfc3(y: number): number {
-      let ysq = 1 / (y * y)
-      let xnum = P[2][5] * ysq
-      let xden = ysq
-      let i: number
+      let ysq = 1 / (y * y);
+      let xnum = P[2][5] * ysq;
+      let xden = ysq;
+      let i: number;
 
       for (i = 0; i < 4; i += 1) {
-        xnum = (xnum + P[2][i]) * ysq
-        xden = (xden + Q[2][i]) * ysq
+        xnum = (xnum + P[2][i]) * ysq;
+        xden = (xden + Q[2][i]) * ysq;
       }
-      let result = (ysq * (xnum + P[2][4])) / (xden + Q[2][4])
-      result = (SQRPI - result) / y
-      ysq = parseInt(String(y * 16)) / 16
-      const del = (y - ysq) * (y + ysq)
-      return Math.exp(-ysq * ysq) * Math.exp(-del) * result
+      let result = (ysq * (xnum + P[2][4])) / (xden + Q[2][4]);
+      result = (SQRPI - result) / y;
+      ysq = parseInt(String(y * 16)) / 16;
+      const del = (y - ysq) * (y + ysq);
+      return Math.exp(-ysq * ysq) * Math.exp(-del) * result;
     }
   }
-)
+);
 
 /**
  * Upper bound for the first approximation interval, 0 <= x <= THRESH
  * @constant
  */
-const THRESH = 0.46875
+const THRESH = 0.46875;
 
 /**
  * Constant used by W. J. Cody's Fortran77 implementation to denote sqrt(pi)
  * @constant
  */
-const SQRPI = 5.6418958354775628695e-1
+const SQRPI = 5.6418958354775628695e-1;
 
 /**
  * Coefficients for each term of the numerator sum (p_j) for each approximation
@@ -192,19 +186,19 @@ const SQRPI = 5.6418958354775628695e-1
  */
 const P: number[][] = [
   [
-    3.1611237438705656, 1.13864154151050156e2, 3.77485237685302021e2,
-    3.20937758913846947e3, 1.85777706184603153e-1
+    3.1611237438705656, 1.13864154151050156e2, 3.77485237685302021e2, 3.20937758913846947e3,
+    1.85777706184603153e-1,
   ],
   [
-    5.64188496988670089e-1, 8.88314979438837594, 6.61191906371416295e1,
-    2.98635138197400131e2, 8.8195222124176909e2, 1.71204761263407058e3,
-    2.05107837782607147e3, 1.23033935479799725e3, 2.15311535474403846e-8
+    5.64188496988670089e-1, 8.88314979438837594, 6.61191906371416295e1, 2.98635138197400131e2,
+    8.8195222124176909e2, 1.71204761263407058e3, 2.05107837782607147e3, 1.23033935479799725e3,
+    2.15311535474403846e-8,
   ],
   [
-    3.05326634961232344e-1, 3.60344899949804439e-1, 1.25781726111229246e-1,
-    1.60837851487422766e-2, 6.58749161529837803e-4, 1.63153871373020978e-2
-  ]
-]
+    3.05326634961232344e-1, 3.60344899949804439e-1, 1.25781726111229246e-1, 1.60837851487422766e-2,
+    6.58749161529837803e-4, 1.63153871373020978e-2,
+  ],
+];
 
 /**
  * Coefficients for each term of the denominator sum (q_j) for each approximation
@@ -212,24 +206,20 @@ const P: number[][] = [
  * @constant
  */
 const Q: number[][] = [
+  [2.36012909523441209e1, 2.44024637934444173e2, 1.28261652607737228e3, 2.84423683343917062e3],
   [
-    2.36012909523441209e1, 2.44024637934444173e2, 1.28261652607737228e3,
-    2.84423683343917062e3
+    1.57449261107098347e1, 1.17693950891312499e2, 5.37181101862009858e2, 1.62138957456669019e3,
+    3.29079923573345963e3, 4.36261909014324716e3, 3.43936767414372164e3, 1.23033935480374942e3,
   ],
   [
-    1.57449261107098347e1, 1.17693950891312499e2, 5.37181101862009858e2,
-    1.62138957456669019e3, 3.29079923573345963e3, 4.36261909014324716e3,
-    3.43936767414372164e3, 1.23033935480374942e3
+    2.56852019228982242, 1.87295284992346047, 5.27905102951428412e-1, 6.05183413124413191e-2,
+    2.33520497626869185e-3,
   ],
-  [
-    2.56852019228982242, 1.87295284992346047, 5.27905102951428412e-1,
-    6.05183413124413191e-2, 2.33520497626869185e-3
-  ]
-]
+];
 
 /**
  * Maximum/minimum safe numbers to input to erf() (in ES6+, this number is
  * Number.[MAX|MIN]_SAFE_INTEGER). erf() for all numbers beyond this limit will
  * return 1
  */
-const MAX_NUM = Math.pow(2, 53)
+const MAX_NUM = Math.pow(2, 53);

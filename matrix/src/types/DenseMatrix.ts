@@ -78,9 +78,7 @@ export class DenseMatrix extends Matrix<number> {
         this.data = new Float64Array(rows * cols);
       } else if (data instanceof Float64Array) {
         if (data.length !== rows * cols) {
-          throw new Error(
-            `Data length ${data.length} does not match dimensions ${rows}×${cols}`
-          );
+          throw new Error(`Data length ${data.length} does not match dimensions ${rows}×${cols}`);
         }
         this.data = data;
       } else if (Array.isArray(data)) {
@@ -93,9 +91,7 @@ export class DenseMatrix extends Matrix<number> {
           this.data = new Float64Array(rows * cols);
           for (let i = 0; i < rows; i++) {
             if (nested[i].length !== cols) {
-              throw new Error(
-                `Row ${i} has ${nested[i].length} elements, expected ${cols}`
-              );
+              throw new Error(`Row ${i} has ${nested[i].length} elements, expected ${cols}`);
             }
             for (let j = 0; j < cols; j++) {
               this.data[i * cols + j] = nested[i][j];
@@ -105,9 +101,7 @@ export class DenseMatrix extends Matrix<number> {
           // Flat array
           const flat = data as number[];
           if (flat.length !== rows * cols) {
-            throw new Error(
-              `Data length ${flat.length} does not match dimensions ${rows}×${cols}`
-            );
+            throw new Error(`Data length ${flat.length} does not match dimensions ${rows}×${cols}`);
           }
           this.data = new Float64Array(flat);
         }
@@ -256,7 +250,9 @@ export class DenseMatrix extends Matrix<number> {
    */
   column(index: number): DenseMatrix {
     if (index < 0 || index >= this.cols) {
-      throw new RangeError(`Column index ${index} out of bounds for matrix with ${this.cols} columns`);
+      throw new RangeError(
+        `Column index ${index} out of bounds for matrix with ${this.cols} columns`
+      );
     }
     const data = new Float64Array(this.rows);
     for (let i = 0; i < this.rows; i++) {
@@ -307,10 +303,7 @@ export class DenseMatrix extends Matrix<number> {
    * Get the diagonal elements
    */
   diagonal(k: number = 0): DenseMatrix {
-    const diagLength = Math.min(
-      this.rows - Math.max(0, k),
-      this.cols - Math.max(0, -k)
-    );
+    const diagLength = Math.min(this.rows - Math.max(0, k), this.cols - Math.max(0, -k));
 
     if (diagLength <= 0) {
       return new DenseMatrix(0, 1);
@@ -572,8 +565,12 @@ export class DenseMatrix extends Matrix<number> {
       rowPointers.push(values.length);
     }
 
-    // Use dynamic import pattern for ES modules
-    // The SparseMatrix class will be loaded when this method is called
+    // Synchronous lazy require to break the DenseMatrix ↔ SparseMatrix cycle
+    // — `toSparse()` is sync, so dynamic `import()` (which is async) can't be
+    // used here. The static `import type { SparseMatrix }` was already dropped
+    // per the cycle-elimination work in 2026-05-22; this require materialises
+    // the runtime value only when the method is actually called.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const SparseMatrixModule = require('./SparseMatrix.js');
     return new SparseMatrixModule.SparseMatrix(
       this.rows,

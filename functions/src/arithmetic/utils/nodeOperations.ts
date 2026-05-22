@@ -9,31 +9,31 @@
  * symbolic computation.
  */
 
-import { factory } from '../../utils/factory.js'
-import { isNode } from '../../utils/is.js'
+import { factory } from '../../utils/factory.js';
+import { isNode } from '../../utils/is.js';
 
 // Type definitions
 export interface MathNode {
-  type: string
-  isNode: boolean
-  toString: () => string
+  type: string;
+  isNode: boolean;
+  toString: () => string;
 }
 
 interface ConstantNodeConstructor {
-  new (value: unknown): MathNode
+  new (value: unknown): MathNode;
 }
 
 interface OperatorNodeConstructor {
-  new (op: string, fn: string, args: MathNode[], implicit?: boolean): MathNode
+  new (op: string, fn: string, args: MathNode[], implicit?: boolean): MathNode;
 }
 
 interface Dependencies {
-  ConstantNode: ConstantNodeConstructor
-  OperatorNode: OperatorNodeConstructor
+  ConstantNode: ConstantNodeConstructor;
+  OperatorNode: OperatorNodeConstructor;
 }
 
-export const name = 'nodeOperations'
-export const dependencies = ['ConstantNode', 'OperatorNode']
+export const name = 'nodeOperations';
+export const dependencies = ['ConstantNode', 'OperatorNode'];
 
 export const createNodeOperations = /* #__PURE__ */ factory(
   name,
@@ -48,8 +48,8 @@ export const createNodeOperations = /* #__PURE__ */ factory(
       multiply: '*',
       divide: '/',
       pow: '^',
-      mod: '%'
-    }
+      mod: '%',
+    };
 
     /**
      * Gets the operator symbol for a function name.
@@ -57,7 +57,7 @@ export const createNodeOperations = /* #__PURE__ */ factory(
      * @returns The operator symbol (e.g., '+', '*')
      */
     function getOperator(fn: string): string {
-      return OPERATOR_MAP[fn] || fn
+      return OPERATOR_MAP[fn] || fn;
     }
 
     /**
@@ -67,9 +67,9 @@ export const createNodeOperations = /* #__PURE__ */ factory(
      */
     function wrapInNode(value: unknown): MathNode {
       if (isNode(value)) {
-        return value as MathNode
+        return value as MathNode;
       }
-      return new ConstantNode(value)
+      return new ConstantNode(value);
     }
 
     /**
@@ -80,15 +80,10 @@ export const createNodeOperations = /* #__PURE__ */ factory(
      * @param right - Right operand (will be wrapped if not a Node)
      * @returns The resulting OperatorNode
      */
-    function createBinaryNode(
-      op: string,
-      fn: string,
-      left: unknown,
-      right: unknown
-    ): MathNode {
-      const leftNode = wrapInNode(left)
-      const rightNode = wrapInNode(right)
-      return new OperatorNode(op, fn, [leftNode, rightNode])
+    function createBinaryNode(op: string, fn: string, left: unknown, right: unknown): MathNode {
+      const leftNode = wrapInNode(left);
+      const rightNode = wrapInNode(right);
+      return new OperatorNode(op, fn, [leftNode, rightNode]);
     }
 
     /**
@@ -101,13 +96,13 @@ export const createNodeOperations = /* #__PURE__ */ factory(
      */
     function createNaryNode(op: string, fn: string, args: unknown[]): MathNode {
       if (args.length < 2) {
-        throw new Error(`${fn} requires at least 2 arguments`)
+        throw new Error(`${fn} requires at least 2 arguments`);
       }
-      let result = createBinaryNode(op, fn, args[0], args[1])
+      let result = createBinaryNode(op, fn, args[0], args[1]);
       for (let i = 2; i < args.length; i++) {
-        result = createBinaryNode(op, fn, result, args[i])
+        result = createBinaryNode(op, fn, result, args[i]);
       }
-      return result
+      return result;
     }
 
     /**
@@ -116,7 +111,7 @@ export const createNodeOperations = /* #__PURE__ */ factory(
      * @returns True if any argument is a Node
      */
     function hasNodeArg(...args: unknown[]): boolean {
-      return args.some((arg) => isNode(arg))
+      return args.some((arg) => isNode(arg));
     }
 
     return {
@@ -125,7 +120,7 @@ export const createNodeOperations = /* #__PURE__ */ factory(
       createNaryNode,
       hasNodeArg,
       getOperator,
-      OPERATOR_MAP
-    }
+      OPERATOR_MAP,
+    };
   }
-)
+);

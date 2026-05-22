@@ -31,13 +31,7 @@ const cpuOps = {
   /**
    * Matrix multiplication (row-major)
    */
-  matmul(
-    a: Float32Array,
-    b: Float32Array,
-    M: number,
-    K: number,
-    N: number
-  ): Float32Array {
+  matmul(a: Float32Array, b: Float32Array, M: number, K: number, N: number): Float32Array {
     const result = new Float32Array(M * N);
     for (let i = 0; i < M; i++) {
       for (let j = 0; j < N; j++) {
@@ -54,11 +48,7 @@ const cpuOps = {
   /**
    * Matrix transpose
    */
-  transpose(
-    a: Float32Array,
-    rows: number,
-    cols: number
-  ): Float32Array {
+  transpose(a: Float32Array, rows: number, cols: number): Float32Array {
     const result = new Float32Array(rows * cols);
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
@@ -127,11 +117,7 @@ function randomMatrix(rows: number, cols: number): Float32Array {
 /**
  * Check if two arrays are equal within tolerance
  */
-function arraysClose(
-  a: Float32Array,
-  b: Float32Array,
-  tolerance: number = 1e-5
-): boolean {
+function arraysClose(a: Float32Array, b: Float32Array, tolerance: number = 1e-5): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
     if (Math.abs(a[i] - b[i]) > tolerance) {
@@ -167,18 +153,22 @@ describe('GPU Matrix Operations', () => {
 
   describe('Workgroup calculations', () => {
     it('should calculate correct workgroups for square matrices', () => {
-      const calculateWorkgroups = (backend as unknown as {
-        calculateWorkgroups: (rows: number, cols: number) => [number, number, number];
-      }).calculateWorkgroups.bind(backend);
+      const calculateWorkgroups = (
+        backend as unknown as {
+          calculateWorkgroups: (rows: number, cols: number) => [number, number, number];
+        }
+      ).calculateWorkgroups.bind(backend);
 
       // 32x32 matrix with 16x16 workgroups = 2x2 workgroups
       expect(calculateWorkgroups(32, 32)).toEqual([2, 2, 1]);
     });
 
     it('should ceil workgroups for non-divisible sizes', () => {
-      const calculateWorkgroups = (backend as unknown as {
-        calculateWorkgroups: (rows: number, cols: number) => [number, number, number];
-      }).calculateWorkgroups.bind(backend);
+      const calculateWorkgroups = (
+        backend as unknown as {
+          calculateWorkgroups: (rows: number, cols: number) => [number, number, number];
+        }
+      ).calculateWorkgroups.bind(backend);
 
       // 17x17 matrix needs ceil(17/16) = 2 workgroups per dimension
       expect(calculateWorkgroups(17, 17)).toEqual([2, 2, 1]);
@@ -188,9 +178,11 @@ describe('GPU Matrix Operations', () => {
     });
 
     it('should handle rectangular matrices', () => {
-      const calculateWorkgroups = (backend as unknown as {
-        calculateWorkgroups: (rows: number, cols: number) => [number, number, number];
-      }).calculateWorkgroups.bind(backend);
+      const calculateWorkgroups = (
+        backend as unknown as {
+          calculateWorkgroups: (rows: number, cols: number) => [number, number, number];
+        }
+      ).calculateWorkgroups.bind(backend);
 
       // 256x128 matrix
       expect(calculateWorkgroups(256, 128)).toEqual([8, 16, 1]);

@@ -24,9 +24,7 @@ describe('Tensor ↔ DenseMatrix bridge', () => {
       [1.5, -2],
       [0, 4.25],
     ];
-    const back = Tensor.fromDenseMatrix(
-      DenseMatrix.fromArray(original)
-    ).toDenseMatrix();
+    const back = Tensor.fromDenseMatrix(DenseMatrix.fromArray(original)).toDenseMatrix();
     expect(back.toArray()).toEqual(original);
   });
 

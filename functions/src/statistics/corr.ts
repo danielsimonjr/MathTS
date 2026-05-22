@@ -1,14 +1,14 @@
-import { factory } from '../utils/factory.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for corr
 interface MatrixType {
-  toArray(): unknown[]
+  toArray(): unknown[];
 }
 
 // Minimum array length for WASM to be beneficial
-const WASM_CORR_THRESHOLD = 200
+const WASM_CORR_THRESHOLD = 200;
 
 /**
  * Check if an array contains only plain numbers
@@ -16,13 +16,13 @@ const WASM_CORR_THRESHOLD = 200
 function isPlainNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
-const name = 'corr'
+const name = 'corr';
 const dependencies = [
   'typed',
   'matrix',
@@ -33,35 +33,25 @@ const dependencies = [
   'subtract',
   'multiply',
   'pow',
-  'divide'
-]
+  'divide',
+];
 
 interface CorrDependencies {
-  typed: TypedFunction
-  matrix: (arr: unknown[]) => MatrixType
-  sqrt: TypedFunction
-  sum: TypedFunction
-  add: TypedFunction
-  subtract: TypedFunction
-  multiply: TypedFunction
-  pow: TypedFunction
-  divide: TypedFunction
+  typed: TypedFunction;
+  matrix: (arr: unknown[]) => MatrixType;
+  sqrt: TypedFunction;
+  sum: TypedFunction;
+  add: TypedFunction;
+  subtract: TypedFunction;
+  multiply: TypedFunction;
+  pow: TypedFunction;
+  divide: TypedFunction;
 }
 
 export const createCorr = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    sqrt,
-    sum,
-    add,
-    subtract,
-    multiply,
-    pow,
-    divide
-  }: CorrDependencies) => {
+  ({ typed, matrix, sqrt, sum, add, subtract, multiply, pow, divide }: CorrDependencies) => {
     /**
      * Compute the correlation coefficient of a two list with values, For matrices, the matrix correlation coefficient is calculated.
      *
@@ -85,13 +75,13 @@ export const createCorr = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array, Array': function (A: unknown[], B: unknown[]): unknown {
-        return _corr(A, B)
+        return _corr(A, B);
       },
       'Matrix, Matrix': function (A: MatrixType, B: MatrixType): unknown {
-        const res = _corr(A.toArray(), B.toArray())
-        return Array.isArray(res) ? matrix(res) : res
-      }
-    })
+        const res = _corr(A.toArray(), B.toArray());
+        return Array.isArray(res) ? matrix(res) : res;
+      },
+    });
     /**
      * Calculate the correlation coefficient between two arrays or matrices.
      * @param {Array | Matrix} A
@@ -100,52 +90,45 @@ export const createCorr = /* #__PURE__ */ factory(
      * @private
      */
     function _corr(A: unknown[], B: unknown[]): unknown {
-      const correlations: unknown[] = []
+      const correlations: unknown[] = [];
       if (Array.isArray(A[0]) && Array.isArray(B[0])) {
         if (A.length !== B.length) {
-          throw new SyntaxError(
-            'Dimension mismatch. Array A and B must have the same length.'
-          )
+          throw new SyntaxError('Dimension mismatch. Array A and B must have the same length.');
         }
         for (let i = 0; i < A.length; i++) {
           if ((A[i] as unknown[]).length !== (B[i] as unknown[]).length) {
             throw new SyntaxError(
               'Dimension mismatch. Array A and B must have the same number of elements.'
-            )
+            );
           }
-          correlations.push(correlation(A[i] as unknown[], B[i] as unknown[]))
+          correlations.push(correlation(A[i] as unknown[], B[i] as unknown[]));
         }
-        return correlations
+        return correlations;
       } else {
         if (A.length !== B.length) {
           throw new SyntaxError(
             'Dimension mismatch. Array A and B must have the same number of elements.'
-          )
+          );
         }
-        return correlation(A, B)
+        return correlation(A, B);
       }
     }
     function correlation(A: unknown[], B: unknown[]): unknown {
-      const n = A.length
+      const n = A.length;
 
       // Try WASM for large arrays with plain numbers
-      const wasm = wasmLoader.getModule()
-      if (
-        wasm &&
-        n >= WASM_CORR_THRESHOLD &&
-        isPlainNumberArray(A) &&
-        isPlainNumberArray(B)
-      ) {
+      const wasm = wasmLoader.getModule();
+      if (wasm && n >= WASM_CORR_THRESHOLD && isPlainNumberArray(A) && isPlainNumberArray(B)) {
         try {
-          const aAlloc = wasmLoader.allocateFloat64Array(A)
-          const bAlloc = wasmLoader.allocateFloat64Array(B)
+          const aAlloc = wasmLoader.allocateFloat64Array(A);
+          const bAlloc = wasmLoader.allocateFloat64Array(B);
 
           try {
-            const result = wasm.statsCorrelation(aAlloc.ptr, bAlloc.ptr, n)
-            return result
+            const result = wasm.statsCorrelation(aAlloc.ptr, bAlloc.ptr, n);
+            return result;
           } finally {
-            wasmLoader.free(aAlloc.ptr)
-            wasmLoader.free(bAlloc.ptr)
+            wasmLoader.free(aAlloc.ptr);
+            wasmLoader.free(bAlloc.ptr);
           }
         } catch {
           // Fall back to JS implementation on WASM error
@@ -153,23 +136,22 @@ export const createCorr = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback
-      const sumX = sum(A)
-      const sumY = sum(B)
+      const sumX = sum(A);
+      const sumY = sum(B);
       const sumXY = A.reduce(
-        (acc: unknown, x: unknown, index: number) =>
-          add(acc, multiply(x, B[index])),
+        (acc: unknown, x: unknown, index: number) => add(acc, multiply(x, B[index])),
         0
-      )
-      const sumXSquare = sum(A.map((x: unknown) => pow(x, 2)))
-      const sumYSquare = sum(B.map((y: unknown) => pow(y, 2)))
-      const numerator = subtract(multiply(n, sumXY), multiply(sumX, sumY))
+      );
+      const sumXSquare = sum(A.map((x: unknown) => pow(x, 2)));
+      const sumYSquare = sum(B.map((y: unknown) => pow(y, 2)));
+      const numerator = subtract(multiply(n, sumXY), multiply(sumX, sumY));
       const denominator = sqrt(
         multiply(
           subtract(multiply(n, sumXSquare), pow(sumX, 2)),
           subtract(multiply(n, sumYSquare), pow(sumY, 2))
         )
-      )
-      return divide(numerator, denominator)
+      );
+      return divide(numerator, denominator);
     }
   }
-)
+);

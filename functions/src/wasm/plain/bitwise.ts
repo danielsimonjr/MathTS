@@ -14,7 +14,7 @@
  * Helper: Check if a number is an integer
  */
 function isIntegerNumber(x: f64): bool {
-  return x === Math.floor(x) && isFinite(x)
+  return x === Math.floor(x) && isFinite(x);
 }
 
 /**
@@ -25,10 +25,10 @@ function isIntegerNumber(x: f64): bool {
  */
 export function bitAndNumber(x: f64, y: f64): f64 {
   if (!isIntegerNumber(x) || !isIntegerNumber(y)) {
-    return f64.NaN
+    return f64.NaN;
   }
 
-  return f64(i32(x) & i32(y))
+  return f64(i32(x) & i32(y));
 }
 
 /**
@@ -38,10 +38,10 @@ export function bitAndNumber(x: f64, y: f64): f64 {
  */
 export function bitNotNumber(x: f64): f64 {
   if (!isIntegerNumber(x)) {
-    return f64.NaN
+    return f64.NaN;
   }
 
-  return f64(~i32(x))
+  return f64(~i32(x));
 }
 
 /**
@@ -52,10 +52,10 @@ export function bitNotNumber(x: f64): f64 {
  */
 export function bitOrNumber(x: f64, y: f64): f64 {
   if (!isIntegerNumber(x) || !isIntegerNumber(y)) {
-    return f64.NaN
+    return f64.NaN;
   }
 
-  return f64(i32(x) | i32(y))
+  return f64(i32(x) | i32(y));
 }
 
 /**
@@ -66,10 +66,10 @@ export function bitOrNumber(x: f64, y: f64): f64 {
  */
 export function bitXorNumber(x: f64, y: f64): f64 {
   if (!isIntegerNumber(x) || !isIntegerNumber(y)) {
-    return f64.NaN
+    return f64.NaN;
   }
 
-  return f64(i32(x) ^ i32(y))
+  return f64(i32(x) ^ i32(y));
 }
 
 /**
@@ -80,10 +80,10 @@ export function bitXorNumber(x: f64, y: f64): f64 {
  */
 export function leftShiftNumber(x: f64, y: f64): f64 {
   if (!isIntegerNumber(x) || !isIntegerNumber(y)) {
-    return f64.NaN
+    return f64.NaN;
   }
 
-  return f64(i32(x) << i32(y))
+  return f64(i32(x) << i32(y));
 }
 
 /**
@@ -94,10 +94,10 @@ export function leftShiftNumber(x: f64, y: f64): f64 {
  */
 export function rightArithShiftNumber(x: f64, y: f64): f64 {
   if (!isIntegerNumber(x) || !isIntegerNumber(y)) {
-    return f64.NaN
+    return f64.NaN;
   }
 
-  return f64(i32(x) >> i32(y))
+  return f64(i32(x) >> i32(y));
 }
 
 /**
@@ -108,8 +108,8 @@ export function rightArithShiftNumber(x: f64, y: f64): f64 {
  */
 export function rightLogShiftNumber(x: f64, y: f64): f64 {
   if (!isIntegerNumber(x) || !isIntegerNumber(y)) {
-    return f64.NaN
+    return f64.NaN;
   }
 
-  return f64(i32(x) >>> i32(y))
+  return f64(i32(x) >>> i32(y));
 }

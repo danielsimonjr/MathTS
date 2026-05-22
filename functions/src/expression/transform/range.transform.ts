@@ -1,28 +1,23 @@
-import { factory } from '../../utils/factory.js'
-import { createRange } from '../../matrix/range.js'
-import type {
-  TypedFunction,
-  MathFunction,
-  MathJsConfig,
-  VariadicArgs
-} from './types.js'
+import { factory } from '../../utils/factory.js';
+import { createRange } from '../../matrix/range.js';
+import type { TypedFunction, MathFunction, MathJsConfig, VariadicArgs } from './types.js';
 
 interface RangeDependencies {
-  typed: TypedFunction
-  config: MathJsConfig
-  matrix?: MathFunction
-  bignumber?: MathFunction
-  equal: TypedFunction
-  smaller: TypedFunction
-  smallerEq: TypedFunction
-  larger: TypedFunction
-  largerEq: TypedFunction
-  add: TypedFunction
-  isZero: (x: unknown) => boolean
-  isPositive: (x: unknown) => boolean
+  typed: TypedFunction;
+  config: MathJsConfig;
+  matrix?: MathFunction;
+  bignumber?: MathFunction;
+  equal: TypedFunction;
+  smaller: TypedFunction;
+  smallerEq: TypedFunction;
+  larger: TypedFunction;
+  largerEq: TypedFunction;
+  add: TypedFunction;
+  isZero: (x: unknown) => boolean;
+  isPositive: (x: unknown) => boolean;
 }
 
-const name = 'range'
+const name = 'range';
 const dependencies = [
   'typed',
   'config',
@@ -35,8 +30,8 @@ const dependencies = [
   'largerEq',
   'add',
   'isZero',
-  'isPositive'
-]
+  'isPositive',
+];
 
 export const createRangeTransform = /* #__PURE__ */ factory(
   name,
@@ -53,7 +48,7 @@ export const createRangeTransform = /* #__PURE__ */ factory(
     largerEq,
     add,
     isZero,
-    isPositive
+    isPositive,
   }: RangeDependencies) => {
     const range = createRange({
       typed,
@@ -67,8 +62,8 @@ export const createRangeTransform = /* #__PURE__ */ factory(
       largerEq,
       add,
       isZero,
-      isPositive
-    })
+      isPositive,
+    });
 
     /**
      * Attach a transform function to math.range
@@ -78,16 +73,16 @@ export const createRangeTransform = /* #__PURE__ */ factory(
      */
     return typed('range', {
       '...any': function (args: VariadicArgs): unknown {
-        const lastIndex = args.length - 1
-        const last = args[lastIndex]
+        const lastIndex = args.length - 1;
+        const last = args[lastIndex];
         if (typeof last !== 'boolean') {
           // append a parameter includeEnd=true
-          args.push(true)
+          args.push(true);
         }
 
-        return range.apply(null, args)
-      }
-    })
+        return range.apply(null, args);
+      },
+    });
   },
   { isTransformFunction: true }
-)
+);

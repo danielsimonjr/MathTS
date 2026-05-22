@@ -106,7 +106,12 @@ describe('mergeArrayChunks', () => {
   });
 
   it('should merge multiple chunks', () => {
-    expect(mergeArrayChunks([[1, 2], [3, 4]])).toEqual([1, 2, 3, 4]);
+    expect(
+      mergeArrayChunks([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toEqual([1, 2, 3, 4]);
   });
 });
 

@@ -3,11 +3,11 @@
  * @extends Error
  */
 export class ArgumentsError extends Error {
-  fn: string
-  count: number
-  min: number
-  max: number | undefined
-  isArgumentsError = true as const
+  fn: string;
+  count: number;
+  min: number;
+  max: number | undefined;
+  isArgumentsError = true as const;
 
   /**
    * Create an ArgumentsError
@@ -25,19 +25,19 @@ export class ArgumentsError extends Error {
       ' provided, ' +
       min +
       (max !== undefined && max !== null ? '-' + max : '') +
-      ' expected)'
+      ' expected)';
 
-    super(message)
+    super(message);
 
-    this.fn = fn
-    this.count = count
-    this.min = min
-    this.max = max
-    this.name = 'ArgumentsError'
+    this.fn = fn;
+    this.count = count;
+    this.min = min;
+    this.max = max;
+    this.name = 'ArgumentsError';
 
     // Maintains proper stack trace for where error was thrown (V8)
     if ((Error as any).captureStackTrace) {
-      ;(Error as any).captureStackTrace(this, ArgumentsError)
+      (Error as any).captureStackTrace(this, ArgumentsError);
     }
   }
 }
@@ -49,5 +49,5 @@ export function createArgumentsError(
   min: number,
   max?: number
 ): ArgumentsError {
-  return new ArgumentsError(fn, count, min, max)
+  return new ArgumentsError(fn, count, min, max);
 }

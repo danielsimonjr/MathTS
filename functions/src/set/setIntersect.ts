@@ -1,43 +1,29 @@
-import { flatten, generalize, identify } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { MathArray, Matrix } from '../../types/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { flatten, generalize, identify } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathArray, Matrix } from '../../types/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for setIntersect
 interface SetIntersectDependencies {
-  typed: TypedFunction
-  size: (arr: MathArray | Matrix) => number[]
-  subset: (arr: number[], index: Index) => number
-  compareNatural: (a: unknown, b: unknown) => number
-  Index: new (i: number) => Index
-  DenseMatrix: new (data: unknown[]) => Matrix
+  typed: TypedFunction;
+  size: (arr: MathArray | Matrix) => number[];
+  subset: (arr: number[], index: Index) => number;
+  compareNatural: (a: unknown, b: unknown) => number;
+  Index: new (i: number) => Index;
+  DenseMatrix: new (data: unknown[]) => Matrix;
 }
 
 interface Index {
   // Index placeholder
 }
 
-const name = 'setIntersect'
-const dependencies = [
-  'typed',
-  'size',
-  'subset',
-  'compareNatural',
-  'Index',
-  'DenseMatrix'
-]
+const name = 'setIntersect';
+const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index', 'DenseMatrix'];
 
 export const createSetIntersect = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    size,
-    subset,
-    compareNatural,
-    Index,
-    DenseMatrix
-  }: SetIntersectDependencies) => {
+  ({ typed, size, subset, compareNatural, Index, DenseMatrix }: SetIntersectDependencies) => {
     /**
      * Create the intersection of two (multi)sets.
      * Multi-dimension arrays will be converted to single-dimension arrays before the operation.
@@ -64,21 +50,14 @@ export const createSetIntersect = /* #__PURE__ */ factory(
         a1: MathArray | Matrix,
         a2: MathArray | Matrix
       ): MathArray | Matrix {
-        let result
-        if (
-          subset(size(a1), new Index(0)) === 0 ||
-          subset(size(a2), new Index(0)) === 0
-        ) {
+        let result;
+        if (subset(size(a1), new Index(0)) === 0 || subset(size(a2), new Index(0)) === 0) {
           // of any of them is empty, return empty
-          result = []
+          result = [];
         } else {
-          const b1 = identify(
-            flatten(Array.isArray(a1) ? a1 : a1.toArray()).sort(compareNatural)
-          )
-          const b2 = identify(
-            flatten(Array.isArray(a2) ? a2 : a2.toArray()).sort(compareNatural)
-          )
-          result = []
+          const b1 = identify(flatten(Array.isArray(a1) ? a1 : a1.toArray()).sort(compareNatural));
+          const b2 = identify(flatten(Array.isArray(a2) ? a2 : a2.toArray()).sort(compareNatural));
+          result = [];
           for (let i = 0; i < b1.length; i++) {
             for (let j = 0; j < b2.length; j++) {
               if (
@@ -86,19 +65,19 @@ export const createSetIntersect = /* #__PURE__ */ factory(
                 b1[i].identifier === b2[j].identifier
               ) {
                 // the identifier is always a decimal int
-                result.push(b1[i])
-                break
+                result.push(b1[i]);
+                break;
               }
             }
           }
         }
         // return an array, if both inputs were arrays
         if (Array.isArray(a1) && Array.isArray(a2)) {
-          return generalize(result) as unknown as MathArray
+          return generalize(result) as unknown as MathArray;
         }
         // return a matrix otherwise
-        return new DenseMatrix(generalize(result)) as unknown as Matrix
-      }
-    })
+        return new DenseMatrix(generalize(result)) as unknown as Matrix;
+      },
+    });
   }
-)
+);

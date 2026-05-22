@@ -1,18 +1,18 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { cosh as coshNumber } from '../utils/number.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { cosh as coshNumber } from '../utils/number.js';
 
 // Type definitions for cosh
 interface CoshableType {
-  cosh(): CoshableType
+  cosh(): CoshableType;
 }
 
 interface CoshDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'cosh'
-const dependencies = ['typed']
+const name = 'cosh';
+const dependencies = ['typed'];
 
 export const createCosh = /* #__PURE__ */ factory(
   name,
@@ -42,7 +42,7 @@ export const createCosh = /* #__PURE__ */ factory(
      */
     return typed(name, {
       number: coshNumber,
-      'Complex | BigNumber': (x: CoshableType): CoshableType => x.cosh()
-    }) as TypedFunction
+      'Complex | BigNumber': (x: CoshableType): CoshableType => x.cosh(),
+    }) as TypedFunction;
   }
-)
+);

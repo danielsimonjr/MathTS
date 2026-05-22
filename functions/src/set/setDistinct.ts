@@ -1,20 +1,9 @@
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type {
-  MathArray,
-  Matrix,
-  MathNumericType
-} from '../../types/index.js'
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathArray, Matrix, MathNumericType } from '../../types/index.js';
 
-const name = 'setDistinct'
-const dependencies = [
-  'typed',
-  'size',
-  'subset',
-  'compareNatural',
-  'Index',
-  'DenseMatrix'
-]
+const name = 'setDistinct';
+const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index', 'DenseMatrix'];
 
 export const createSetDistinct = /* #__PURE__ */ factory(
   name,
@@ -41,29 +30,27 @@ export const createSetDistinct = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array | Matrix': function (a: MathArray | Matrix): MathArray | Matrix {
-        let result: MathNumericType[]
+        let result: MathNumericType[];
         if (subset(size(a), new Index(0)) === 0) {
           // if empty, return empty
-          result = []
+          result = [];
         } else {
-          const b = flatten(Array.isArray(a) ? a : a.toArray()).sort(
-            compareNatural
-          )
-          result = []
-          result.push(b[0])
+          const b = flatten(Array.isArray(a) ? a : a.toArray()).sort(compareNatural);
+          result = [];
+          result.push(b[0]);
           for (let i = 1; i < b.length; i++) {
             if (compareNatural(b[i], b[i - 1]) !== 0) {
-              result.push(b[i])
+              result.push(b[i]);
             }
           }
         }
         // return an array, if the input was an array
         if (Array.isArray(a)) {
-          return result
+          return result;
         }
         // return a matrix otherwise
-        return new DenseMatrix(result)
-      }
-    })
+        return new DenseMatrix(result);
+      },
+    });
   }
-)
+);

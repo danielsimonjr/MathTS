@@ -1,57 +1,57 @@
-import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js'
-import { nearlyEqual } from '../utils/number.js'
-import { factory } from '../utils/factory.js'
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import { createCompareUnits } from './compareUnits.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
-import type { AlgorithmFunction } from '../type/matrix/types.js'
+import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { nearlyEqual } from '../utils/number.js';
+import { factory } from '../utils/factory.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import { createCompareUnits } from './compareUnits.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for compare
 interface BigNumberType {
-  cmp(n: BigNumberType): number
+  cmp(n: BigNumberType): number;
 }
 
 interface BigNumberConstructor {
-  new (value: number | string | BigNumberType): BigNumberType
+  new (value: number | string | BigNumberType): BigNumberType;
 }
 
 interface FractionType {
-  compare(n: FractionType): number
+  compare(n: FractionType): number;
 }
 
 interface FractionConstructor {
-  new (value: number | string | FractionType): FractionType
+  new (value: number | string | FractionType): FractionType;
 }
 
 interface MatrixFactory {
-  (...args: unknown[]): unknown
+  (...args: unknown[]): unknown;
 }
 
 interface DenseMatrixConstructor {
-  new (...args: unknown[]): unknown
+  new (...args: unknown[]): unknown;
 }
 
 interface CompareDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  matrix: MatrixFactory
-  equalScalar: TypedFunction
-  BigNumber: BigNumberConstructor
-  Fraction: FractionConstructor
-  DenseMatrix: DenseMatrixConstructor
-  concat: TypedFunction
+  typed: TypedFunction;
+  config: ConfigOptions;
+  matrix: MatrixFactory;
+  equalScalar: TypedFunction;
+  BigNumber: BigNumberConstructor;
+  Fraction: FractionConstructor;
+  DenseMatrix: DenseMatrixConstructor;
+  concat: TypedFunction;
 }
 
 interface CompareNumberDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
+  typed: TypedFunction;
+  config: ConfigOptions;
 }
 
-const name = 'compare'
+const name = 'compare';
 const dependencies = [
   'typed',
   'config',
@@ -60,8 +60,8 @@ const dependencies = [
   'BigNumber',
   'Fraction',
   'DenseMatrix',
-  'concat'
-]
+  'concat',
+];
 
 export const createCompare = /* #__PURE__ */ factory(
   name,
@@ -74,17 +74,17 @@ export const createCompare = /* #__PURE__ */ factory(
     BigNumber,
     Fraction,
     DenseMatrix,
-    concat
+    concat,
   }: CompareDependencies) => {
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
-    const compareUnits = createCompareUnits({ typed })
+      concat,
+    });
+    const compareUnits = createCompareUnits({ typed });
 
     /**
      * Compare two values. Returns 1 when x > y, -1 when x < y, and 0 when x == y.
@@ -128,44 +128,36 @@ export const createCompare = /* #__PURE__ */ factory(
       createCompareNumber({ typed, config }),
       {
         'boolean, boolean': function (x: boolean, y: boolean): number {
-          return x === y ? 0 : x > y ? 1 : -1
+          return x === y ? 0 : x > y ? 1 : -1;
         },
 
-        'BigNumber, BigNumber': function (
-          x: BigNumberType,
-          y: BigNumberType
-        ): BigNumberType {
+        'BigNumber, BigNumber': function (x: BigNumberType, y: BigNumberType): BigNumberType {
           return bigNearlyEqual(x, y, config.relTol, config.absTol)
             ? new BigNumber(0)
-            : new BigNumber(x.cmp(y))
+            : new BigNumber(x.cmp(y));
         },
 
         'bigint, bigint': function (x: bigint, y: bigint): bigint {
-          return x === y ? 0n : x > y ? 1n : -1n
+          return x === y ? 0n : x > y ? 1n : -1n;
         },
 
-        'Fraction, Fraction': function (
-          x: FractionType,
-          y: FractionType
-        ): FractionType {
-          return new Fraction(x.compare(y))
+        'Fraction, Fraction': function (x: FractionType, y: FractionType): FractionType {
+          return new Fraction(x.compare(y));
         },
 
         'Complex, Complex': function (): never {
-          throw new TypeError(
-            'No ordering relation is defined for complex numbers'
-          )
-        }
+          throw new TypeError('No ordering relation is defined for complex numbers');
+        },
       },
       compareUnits,
       matrixAlgorithmSuite({
         SS: matAlgo05xSfSf as unknown as AlgorithmFunction,
         DS: matAlgo03xDSf as unknown as AlgorithmFunction,
-        Ss: matAlgo12xSfs as unknown as AlgorithmFunction
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction,
       })
-    )
+    );
   }
-)
+);
 
 export const createCompareNumber = /* #__PURE__ */ factory(
   name,
@@ -173,12 +165,8 @@ export const createCompareNumber = /* #__PURE__ */ factory(
   ({ typed, config }: CompareNumberDependencies) => {
     return typed(name, {
       'number, number': function (x: number, y: number): number {
-        return nearlyEqual(x, y, config.relTol, config.absTol)
-          ? 0
-          : x > y
-            ? 1
-            : -1
-      }
-    })
+        return nearlyEqual(x, y, config.relTol, config.absTol) ? 0 : x > y ? 1 : -1;
+      },
+    });
   }
-)
+);

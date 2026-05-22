@@ -1,16 +1,12 @@
-import {
-  containsCollections,
-  deepForEach,
-  reduce
-} from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { improveErrorMessage } from './utils/improveErrorMessage.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { containsCollections, deepForEach, reduce } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_SUM_THRESHOLD = 100
+const WASM_SUM_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -18,46 +14,32 @@ const WASM_SUM_THRESHOLD = 100
 function isFlatNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 // Type definitions for sum
 interface MatrixType {
-  forEach(
-    callback: (value: unknown) => void,
-    skipZeros: boolean,
-    recurse: boolean
-  ): void
-  map(
-    callback: (value: unknown) => unknown,
-    skipZeros: boolean,
-    recurse: boolean
-  ): MatrixType
-  size(): number[]
-  valueOf(): unknown[] | unknown[][]
-  create(data: unknown[], datatype?: string): MatrixType
-  datatype(): string | undefined
+  forEach(callback: (value: unknown) => void, skipZeros: boolean, recurse: boolean): void;
+  map(callback: (value: unknown) => unknown, skipZeros: boolean, recurse: boolean): MatrixType;
+  size(): number[];
+  valueOf(): unknown[] | unknown[][];
+  create(data: unknown[], datatype?: string): MatrixType;
+  datatype(): string | undefined;
 }
 
 interface SumDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  add: TypedFunction
-  numeric: TypedFunction
-  parseNumberWithConfig: (value: string) => unknown
+  typed: TypedFunction;
+  config: ConfigOptions;
+  add: TypedFunction;
+  numeric: TypedFunction;
+  parseNumberWithConfig: (value: string) => unknown;
 }
 
-const name = 'sum'
-const dependencies = [
-  'typed',
-  'config',
-  'add',
-  'numeric',
-  'parseNumberWithConfig'
-]
+const name = 'sum';
+const dependencies = ['typed', 'config', 'add', 'numeric', 'parseNumberWithConfig'];
 
 export const createSum = /* #__PURE__ */ factory(
   name,
@@ -90,7 +72,7 @@ export const createSum = /* #__PURE__ */ factory(
     return typed(name, {
       // sum(string) - single string input
       string: function (x: string): unknown {
-        return parseNumberWithConfig(x)
+        return parseNumberWithConfig(x);
       },
 
       // sum([a, b, c, d, ...])
@@ -102,12 +84,12 @@ export const createSum = /* #__PURE__ */ factory(
       // sum(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
         if (containsCollections(args)) {
-          throw new TypeError('Scalar values expected in function sum')
+          throw new TypeError('Scalar values expected in function sum');
         }
 
-        return _sum(args)
-      }
-    })
+        return _sum(args);
+      },
+    });
 
     /**
      * Recursively calculate the sum of an n-dimensional array
@@ -119,14 +101,14 @@ export const createSum = /* #__PURE__ */ factory(
       // WASM fast path for flat arrays of plain numbers
       if (Array.isArray(array) && array.length >= WASM_SUM_THRESHOLD) {
         if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule()
+          const wasm = wasmLoader.getModule();
           if (wasm) {
             try {
-              const alloc = wasmLoader.allocateFloat64Array(array)
+              const alloc = wasmLoader.allocateFloat64Array(array);
               try {
-                return wasm.statsSum(alloc.ptr, array.length)
+                return wasm.statsSum(alloc.ptr, array.length);
               } finally {
-                wasmLoader.free(alloc.ptr)
+                wasmLoader.free(alloc.ptr);
               }
             } catch {
               // Fall back to JS implementation on WASM error
@@ -136,26 +118,25 @@ export const createSum = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback for mixed types, BigNumber, Complex, etc.
-      let sum: unknown
+      let sum: unknown;
 
       deepForEach(array as any, function (value: unknown) {
         try {
           // Pre-convert string inputs BEFORE addition
-          const converted =
-            typeof value === 'string' ? parseNumberWithConfig(value) : value
+          const converted = typeof value === 'string' ? parseNumberWithConfig(value) : value;
 
-          sum = sum === undefined ? converted : add(sum, converted)
+          sum = sum === undefined ? converted : add(sum, converted);
         } catch (err) {
-          throw improveErrorMessage(err, 'sum', value)
+          throw improveErrorMessage(err, 'sum', value);
         }
-      })
+      });
 
       // Return 0 (in configured type) for empty arrays
       if (sum === undefined) {
-        sum = numeric(0, config.number)
+        sum = numeric(0, config.number);
       }
 
-      return sum
+      return sum;
     }
 
     /**
@@ -165,17 +146,14 @@ export const createSum = /* #__PURE__ */ factory(
      * @return {number | BigNumber | Complex | Unit | Array | Matrix} sum
      * @private
      */
-    function _nsumDim(
-      array: unknown[] | MatrixType,
-      dim: number | { valueOf(): number }
-    ): unknown {
+    function _nsumDim(array: unknown[] | MatrixType, dim: number | { valueOf(): number }): unknown {
       try {
-        const dimValue = typeof dim === 'number' ? dim : dim.valueOf()
-        const sum = reduce(array as any, dimValue, add)
-        return sum
+        const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
+        const sum = reduce(array as any, dimValue, add);
+        return sum;
       } catch (err) {
-        throw improveErrorMessage(err, 'sum', undefined)
+        throw improveErrorMessage(err, 'sum', undefined);
       }
     }
   }
-)
+);

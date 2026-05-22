@@ -22,7 +22,9 @@ export class DualTensor {
 
   constructor(shape: ReadonlyArray<number>, primal: Float64Array, tangent: Float64Array) {
     if (primal.length !== tangent.length) {
-      throw new Error(`DualTensor: primal length ${primal.length} != tangent length ${tangent.length}`);
+      throw new Error(
+        `DualTensor: primal length ${primal.length} != tangent length ${tangent.length}`
+      );
     }
     this.shape = shape;
     this.primal = primal;
@@ -35,7 +37,9 @@ export class DualTensor {
    * DualTensor flows through them as a structurally-compatible Tensor.
    * (AD-aware ops branch on `'tangent' in arg` before reaching here.)
    */
-  get data(): Float64Array { return this.primal; }
+  get data(): Float64Array {
+    return this.primal;
+  }
 
   /** Lift a Tensor to a DualTensor with zero tangent. */
   static fromTensor(t: Tensor): DualTensor {
@@ -123,8 +127,10 @@ export class DualTensor {
   }
 
   private checkSameShape(other: DualTensor, op: string): void {
-    if (this.shape.length !== other.shape.length ||
-        !this.shape.every((v, i) => v === other.shape[i])) {
+    if (
+      this.shape.length !== other.shape.length ||
+      !this.shape.every((v, i) => v === other.shape[i])
+    ) {
       throw new Error(`DualTensor.${op}: shape mismatch [${this.shape}] vs [${other.shape}]`);
     }
   }

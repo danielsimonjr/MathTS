@@ -91,20 +91,15 @@ export type TypeConverter<From, To> = (value: From) => To;
 // Primitive Type Tests
 // =============================================================================
 
-export const isNumber = (x: unknown): x is number =>
-  typeof x === 'number';
+export const isNumber = (x: unknown): x is number => typeof x === 'number';
 
-export const isBoolean = (x: unknown): x is boolean =>
-  typeof x === 'boolean';
+export const isBoolean = (x: unknown): x is boolean => typeof x === 'boolean';
 
-export const isString = (x: unknown): x is string =>
-  typeof x === 'string';
+export const isString = (x: unknown): x is string => typeof x === 'string';
 
-export const isBigInt = (x: unknown): x is bigint =>
-  typeof x === 'bigint';
+export const isBigInt = (x: unknown): x is bigint => typeof x === 'bigint';
 
-export const isArray = (x: unknown): x is unknown[] =>
-  Array.isArray(x);
+export const isArray = (x: unknown): x is unknown[] => Array.isArray(x);
 
 export const isFunction = (x: unknown): x is (...args: unknown[]) => unknown =>
   typeof x === 'function';
@@ -112,11 +107,9 @@ export const isFunction = (x: unknown): x is (...args: unknown[]) => unknown =>
 export const isObject = (x: unknown): x is object =>
   typeof x === 'object' && x !== null && !Array.isArray(x);
 
-export const isNull = (x: unknown): x is null =>
-  x === null;
+export const isNull = (x: unknown): x is null => x === null;
 
-export const isUndefined = (x: unknown): x is undefined =>
-  x === undefined;
+export const isUndefined = (x: unknown): x is undefined => x === undefined;
 
 export const isNullOrUndefined = (x: unknown): x is null | undefined =>
   x === null || x === undefined;
@@ -125,11 +118,9 @@ export const isNullOrUndefined = (x: unknown): x is null | undefined =>
 // Numeric Type Tests
 // =============================================================================
 
-export const isFiniteNumber = (x: unknown): x is number =>
-  typeof x === 'number' && isFinite(x);
+export const isFiniteNumber = (x: unknown): x is number => typeof x === 'number' && isFinite(x);
 
-export const isInteger = (x: unknown): x is number =>
-  typeof x === 'number' && Number.isInteger(x);
+export const isInteger = (x: unknown): x is number => typeof x === 'number' && Number.isInteger(x);
 
 export const isPositiveInteger = (x: unknown): x is number =>
   typeof x === 'number' && Number.isInteger(x) && x > 0;
@@ -137,8 +128,7 @@ export const isPositiveInteger = (x: unknown): x is number =>
 export const isNonNegativeInteger = (x: unknown): x is number =>
   typeof x === 'number' && Number.isInteger(x) && x >= 0;
 
-export const isNaN = (x: unknown): x is number =>
-  typeof x === 'number' && Number.isNaN(x);
+export const isNaN = (x: unknown): x is number => typeof x === 'number' && Number.isNaN(x);
 
 // =============================================================================
 // Collection Type Tests
@@ -147,20 +137,15 @@ export const isNaN = (x: unknown): x is number =>
 export const isTypedArray = (x: unknown): x is ArrayBufferView =>
   ArrayBuffer.isView(x) && !(x instanceof DataView);
 
-export const isFloat64Array = (x: unknown): x is Float64Array =>
-  x instanceof Float64Array;
+export const isFloat64Array = (x: unknown): x is Float64Array => x instanceof Float64Array;
 
-export const isFloat32Array = (x: unknown): x is Float32Array =>
-  x instanceof Float32Array;
+export const isFloat32Array = (x: unknown): x is Float32Array => x instanceof Float32Array;
 
-export const isInt32Array = (x: unknown): x is Int32Array =>
-  x instanceof Int32Array;
+export const isInt32Array = (x: unknown): x is Int32Array => x instanceof Int32Array;
 
-export const isUint32Array = (x: unknown): x is Uint32Array =>
-  x instanceof Uint32Array;
+export const isUint32Array = (x: unknown): x is Uint32Array => x instanceof Uint32Array;
 
-export const isArrayBuffer = (x: unknown): x is ArrayBuffer =>
-  x instanceof ArrayBuffer;
+export const isArrayBuffer = (x: unknown): x is ArrayBuffer => x instanceof ArrayBuffer;
 
 // =============================================================================
 // Signature Utilities
@@ -175,8 +160,8 @@ export const isArrayBuffer = (x: unknown): x is ArrayBuffer =>
 export function parseSignature(signature: string): string[] {
   return signature
     .split(',')
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 }
 
 /**
@@ -298,12 +283,14 @@ export function createRobustSubtypeTest(
 ): (x: unknown) => boolean {
   const subtypeTest = createRobustTypeTest(typeName, instanceProp);
   const parentTest = createRobustTypeTest(typeName, parentProp);
-  return (x: unknown): boolean => subtypeTest(x) || (
+  return (x: unknown): boolean =>
+    subtypeTest(x) ||
     // Check instance prop + parent via any strategy
-    x !== null && x !== undefined && typeof x === 'object' &&
-    (x as Record<string, unknown>)[instanceProp] === true &&
-    parentTest(x)
-  );
+    (x !== null &&
+      x !== undefined &&
+      typeof x === 'object' &&
+      (x as Record<string, unknown>)[instanceProp] === true &&
+      parentTest(x));
 }
 
 // =============================================================================
@@ -414,7 +401,7 @@ export class NoMatchingSignatureError extends Error {
   ) {
     super(
       `No matching signature found for ${functionName}(${actualTypes.join(', ')}). ` +
-      `Available signatures: ${availableSignatures.join('; ')}`
+        `Available signatures: ${availableSignatures.join('; ')}`
     );
     this.name = 'NoMatchingSignatureError';
   }
@@ -431,7 +418,7 @@ export class TypeConversionError extends Error {
   ) {
     super(
       `Cannot convert from ${fromType} to ${toType}` +
-      (originalError ? `: ${originalError.message}` : '')
+        (originalError ? `: ${originalError.message}` : '')
     );
     this.name = 'TypeConversionError';
   }

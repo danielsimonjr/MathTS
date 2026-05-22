@@ -1,28 +1,28 @@
-import { factory } from '../../../utils/factory.js'
+import { factory } from '../../../utils/factory.js';
 import type {
   DataType,
   MatrixValue,
   MatrixArray,
   MatrixCallback,
   TypedFunction,
-  DenseMatrixConstructorData
-} from '../types.js'
+  DenseMatrixConstructorData,
+} from '../types.js';
 
 /**
  * DenseMatrix interface for algorithm operations.
  * Note: This algorithm only operates on 2D matrices, so we use MatrixArray (T[][]).
  */
 interface DenseMatrix {
-  _data: MatrixArray
-  _size: [number, number]
-  _datatype?: DataType
+  _data: MatrixArray;
+  _size: [number, number];
+  _datatype?: DataType;
 }
 
 /**
  * DenseMatrix constructor interface for creating new dense matrices.
  */
 interface DenseMatrixConstructor {
-  new (data: DenseMatrixConstructorData): DenseMatrix
+  new (data: DenseMatrixConstructorData): DenseMatrix;
 }
 
 /**
@@ -30,26 +30,20 @@ interface DenseMatrixConstructor {
  * Note: SparseMatrix is always 2D.
  */
 interface SparseMatrix {
-  _values?: MatrixValue[]
-  _index: number[]
-  _ptr: number[]
-  _size: [number, number]
-  _datatype?: DataType
+  _values?: MatrixValue[];
+  _index: number[];
+  _ptr: number[];
+  _size: [number, number];
+  _datatype?: DataType;
 }
 
-const name = 'matAlgo10xSids'
-const dependencies = ['typed', 'DenseMatrix']
+const name = 'matAlgo10xSids';
+const dependencies = ['typed', 'DenseMatrix'];
 
 export const createMatAlgo10xSids = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    DenseMatrix
-  }: {
-    typed: TypedFunction
-    DenseMatrix: DenseMatrixConstructor
-  }) => {
+  ({ typed, DenseMatrix }: { typed: TypedFunction; DenseMatrix: DenseMatrixConstructor }) => {
     /**
      * Iterates over SparseMatrix S nonzero items and invokes the callback function f(Sij, b).
      * Callback function invoked NZ times (number of nonzero items in S).
@@ -76,72 +70,70 @@ export const createMatAlgo10xSids = /* #__PURE__ */ factory(
       inverse: boolean
     ): DenseMatrix {
       // sparse matrix arrays
-      const avalues = s._values
-      const aindex = s._index
-      const aptr = s._ptr
-      const asize = s._size
-      const adt: DataType = s._datatype
+      const avalues = s._values;
+      const aindex = s._index;
+      const aptr = s._ptr;
+      const asize = s._size;
+      const adt: DataType = s._datatype;
 
       // sparse matrix cannot be a Pattern matrix
       if (!avalues) {
-        throw new Error(
-          'Cannot perform operation on Pattern Sparse Matrix and Scalar value'
-        )
+        throw new Error('Cannot perform operation on Pattern Sparse Matrix and Scalar value');
       }
 
       // rows & columns
-      const rows = asize[0]
-      const columns = asize[1]
+      const rows = asize[0];
+      const columns = asize[1];
 
       // datatype
-      let dt: DataType
+      let dt: DataType;
       // callback signature to use
-      let cf: MatrixCallback = callback
+      let cf: MatrixCallback = callback;
 
       // process data types
       if (typeof adt === 'string') {
         // datatype
-        dt = adt
+        dt = adt;
         // convert b to the same datatype
-        b = typed.convert(b, dt)
+        b = typed.convert(b, dt);
         // callback
-        cf = typed.find(callback, [dt, dt]) as any as any as MatrixCallback
+        cf = typed.find(callback, [dt, dt]) as any as any as MatrixCallback;
       }
 
       // result arrays
-      const cdata: MatrixArray = []
+      const cdata: MatrixArray = [];
 
       // workspaces
-      const x: MatrixValue[] = []
+      const x: MatrixValue[] = [];
       // marks indicating we have a value in x for a given column
-      const w: number[] = []
+      const w: number[] = [];
 
       // loop columns
       for (let j = 0; j < columns; j++) {
         // columns mark
-        const mark = j + 1
+        const mark = j + 1;
         // values in j
         for (let k0 = aptr[j], k1 = aptr[j + 1], k = k0; k < k1; k++) {
           // row
-          const r = aindex[k]
+          const r = aindex[k];
           // update workspace
-          x[r] = avalues[k]
-          w[r] = mark
+          x[r] = avalues[k];
+          w[r] = mark;
         }
         // loop rows
         for (let i = 0; i < rows; i++) {
           // initialize C on first column
           if (j === 0) {
             // create row array
-            cdata[i] = []
+            cdata[i] = [];
           }
           // check sparse matrix has a value @ i,j
           if (w[i] === mark) {
             // invoke callback, update C
-            cdata[i][j] = inverse ? cf(b, x[i]) : cf(x[i], b)
+            cdata[i][j] = inverse ? cf(b, x[i]) : cf(x[i], b);
           } else {
             // dense matrix value @ i, j
-            cdata[i][j] = b
+            cdata[i][j] = b;
           }
         }
       }
@@ -150,8 +142,8 @@ export const createMatAlgo10xSids = /* #__PURE__ */ factory(
       return new DenseMatrix({
         data: cdata,
         size: [rows, columns],
-        datatype: dt
-      })
-    }
+        datatype: dt,
+      });
+    };
   }
-)
+);

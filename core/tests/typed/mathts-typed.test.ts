@@ -52,7 +52,7 @@ describe('typed-function integration', () => {
   describe('type definitions', () => {
     it('should include all MathTS-specific types', () => {
       // Note: primitive types like 'number' are built into typed-function
-      const typeNames = MATHTS_TYPES.map(t => t.name);
+      const typeNames = MATHTS_TYPES.map((t) => t.name);
       expect(typeNames).toContain('bigint'); // Not built into typed-function
       expect(typeNames).toContain('Complex');
       expect(typeNames).toContain('Fraction');
@@ -61,10 +61,10 @@ describe('typed-function integration', () => {
     });
 
     it('should have working test functions for each type', () => {
-      const bigintType = MATHTS_TYPES.find(t => t.name === 'bigint');
-      const complexType = MATHTS_TYPES.find(t => t.name === 'Complex');
-      const fractionType = MATHTS_TYPES.find(t => t.name === 'Fraction');
-      const bigNumberType = MATHTS_TYPES.find(t => t.name === 'BigNumber');
+      const bigintType = MATHTS_TYPES.find((t) => t.name === 'bigint');
+      const complexType = MATHTS_TYPES.find((t) => t.name === 'Complex');
+      const fractionType = MATHTS_TYPES.find((t) => t.name === 'Fraction');
+      const bigNumberType = MATHTS_TYPES.find((t) => t.name === 'BigNumber');
 
       expect(bigintType?.test(42n)).toBe(true);
       expect(complexType?.test(new Complex(1, 2))).toBe(true);
@@ -75,8 +75,8 @@ describe('typed-function integration', () => {
 
   describe('type conversions', () => {
     it('should include conversions to Complex', () => {
-      const toComplexConversions = MATHTS_CONVERSIONS.filter(c => c.to === 'Complex');
-      const fromTypes = toComplexConversions.map(c => c.from);
+      const toComplexConversions = MATHTS_CONVERSIONS.filter((c) => c.to === 'Complex');
+      const fromTypes = toComplexConversions.map((c) => c.from);
       expect(fromTypes).toContain('number');
       expect(fromTypes).toContain('Fraction');
       expect(fromTypes).toContain('BigNumber');
@@ -84,7 +84,7 @@ describe('typed-function integration', () => {
     });
 
     it('should convert number to Complex', () => {
-      const conversion = MATHTS_CONVERSIONS.find(c => c.from === 'number' && c.to === 'Complex');
+      const conversion = MATHTS_CONVERSIONS.find((c) => c.from === 'number' && c.to === 'Complex');
       const result = conversion?.convert(42);
       expect(result).toBeInstanceOf(Complex);
       expect((result as Complex).re).toBe(42);
@@ -92,7 +92,9 @@ describe('typed-function integration', () => {
     });
 
     it('should convert Fraction to Complex', () => {
-      const conversion = MATHTS_CONVERSIONS.find(c => c.from === 'Fraction' && c.to === 'Complex');
+      const conversion = MATHTS_CONVERSIONS.find(
+        (c) => c.from === 'Fraction' && c.to === 'Complex'
+      );
       const fraction = new Fraction(1n, 2n);
       const result = conversion?.convert(fraction);
       expect(result).toBeInstanceOf(Complex);
@@ -100,28 +102,32 @@ describe('typed-function integration', () => {
     });
 
     it('should convert number to Fraction', () => {
-      const conversion = MATHTS_CONVERSIONS.find(c => c.from === 'number' && c.to === 'Fraction');
+      const conversion = MATHTS_CONVERSIONS.find((c) => c.from === 'number' && c.to === 'Fraction');
       const result = conversion?.convert(0.5);
       expect(result).toBeInstanceOf(Fraction);
       expect((result as Fraction).toNumber()).toBeCloseTo(0.5);
     });
 
     it('should convert number to BigNumber', () => {
-      const conversion = MATHTS_CONVERSIONS.find(c => c.from === 'number' && c.to === 'BigNumber');
+      const conversion = MATHTS_CONVERSIONS.find(
+        (c) => c.from === 'number' && c.to === 'BigNumber'
+      );
       const result = conversion?.convert(123.456);
       expect(result).toBeInstanceOf(BigNumber);
       expect((result as BigNumber).valueOf()).toBeCloseTo(123.456);
     });
 
     it('should convert Fraction to number', () => {
-      const conversion = MATHTS_CONVERSIONS.find(c => c.from === 'Fraction' && c.to === 'number');
+      const conversion = MATHTS_CONVERSIONS.find((c) => c.from === 'Fraction' && c.to === 'number');
       const fraction = new Fraction(3n, 4n);
       const result = conversion?.convert(fraction);
       expect(result).toBe(0.75);
     });
 
     it('should convert BigNumber to number', () => {
-      const conversion = MATHTS_CONVERSIONS.find(c => c.from === 'BigNumber' && c.to === 'number');
+      const conversion = MATHTS_CONVERSIONS.find(
+        (c) => c.from === 'BigNumber' && c.to === 'number'
+      );
       const bn = BigNumber.fromNumber(123.456);
       const result = conversion?.convert(bn);
       expect(result).toBeCloseTo(123.456);
@@ -172,13 +178,13 @@ describe('typed-function integration', () => {
       // Mixed types: number is auto-converted to Complex
       const result = multiply(new Complex(2, 3), 4);
       expect(result).toBeInstanceOf(Complex);
-      expect(result.re).toBe(8);  // (2+3i) * 4 = 8 + 12i
+      expect(result.re).toBe(8); // (2+3i) * 4 = 8 + 12i
       expect(result.im).toBe(12);
     });
 
     it('should handle string to number conversion', () => {
       const parse = mathTyped('parse', {
-        'number': (n: number) => n,
+        number: (n: number) => n,
       });
 
       // String is auto-converted to number
@@ -188,7 +194,7 @@ describe('typed-function integration', () => {
 
     it('should throw on invalid conversion', () => {
       const parse = mathTyped('parse', {
-        'number': (n: number) => n,
+        number: (n: number) => n,
       });
 
       expect(() => parse('not a number')).toThrow();
@@ -200,8 +206,8 @@ describe('typed-function integration', () => {
       const typed1 = createMathTSTyped();
       const typed2 = createMathTSTyped();
 
-      const fn1 = typed1('test', { 'number': () => 'fn1' });
-      const fn2 = typed2('test', { 'number': () => 'fn2' });
+      const fn1 = typed1('test', { number: () => 'fn1' });
+      const fn2 = typed2('test', { number: () => 'fn2' });
 
       expect(fn1(1)).toBe('fn1');
       expect(fn2(1)).toBe('fn2');
@@ -211,10 +217,10 @@ describe('typed-function integration', () => {
       const myTyped = createMathTSTyped();
 
       const identify = myTyped('identify', {
-        'number': () => 'number',
-        'Complex': () => 'Complex',
-        'Fraction': () => 'Fraction',
-        'BigNumber': () => 'BigNumber',
+        number: () => 'number',
+        Complex: () => 'Complex',
+        Fraction: () => 'Fraction',
+        BigNumber: () => 'BigNumber',
       });
 
       expect(identify(42)).toBe('number');

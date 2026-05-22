@@ -1,14 +1,14 @@
-import { clone as objectClone } from '../utils/object.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { clone as objectClone } from '../utils/object.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for clone
 interface CloneDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'clone'
-const dependencies = ['typed']
+const name = 'clone';
+const dependencies = ['typed'];
 
 export const createClone = /* #__PURE__ */ factory(
   name,
@@ -33,7 +33,7 @@ export const createClone = /* #__PURE__ */ factory(
      * @return {*} A clone of object x
      */
     return typed(name, {
-      any: objectClone
-    })
+      any: objectClone,
+    });
   }
-)
+);

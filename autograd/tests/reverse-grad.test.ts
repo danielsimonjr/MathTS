@@ -5,7 +5,7 @@ import { reverseGrad } from '../src/reverse-grad';
 describe('reverseGrad (reverse-mode AD via tape)', () => {
   it('fn(x) = x · x, scalar cotangent — gradient = 2·x·cotangent (per-element)', () => {
     const x = Tensor.fromNested([2, 3, 4], [3]);
-    const fn = (t: Tensor) => t.mul(t);  // value: [4, 9, 16]
+    const fn = (t: Tensor) => t.mul(t); // value: [4, 9, 16]
     // cotangent = [1, 1, 1] (sum-of-outputs gradient), expected gradient = 2x = [4, 6, 8].
     const cotangent = Tensor.fromNested([1, 1, 1], [3]);
     const { value, gradient } = reverseGrad(fn, x, cotangent);
@@ -18,8 +18,8 @@ describe('reverseGrad (reverse-mode AD via tape)', () => {
   });
 
   it('default cotangent (ones) for scalar value', () => {
-    const x = Tensor.fromNested(5, []);  // scalar input
-    const fn = (t: Tensor) => t.mul(t);   // scalar output: 25
+    const x = Tensor.fromNested(5, []); // scalar input
+    const fn = (t: Tensor) => t.mul(t); // scalar output: 25
     // No cotangent — defaults to ones-like(value); for scalar, that's 1.
     // d(x^2)/dx = 2x = 10.
     const { value, gradient } = reverseGrad(fn, x);
@@ -29,14 +29,32 @@ describe('reverseGrad (reverse-mode AD via tape)', () => {
   });
 
   it('VJP shape check: rank-2 input → rank-2 output → rank-2 gradient', () => {
-    const A = Tensor.fromNested([[1, 2], [3, 4]], [2, 2]);
+    const A = Tensor.fromNested(
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      [2, 2]
+    );
     const fn = (t: Tensor) => t.scale(2);
-    const cotangent = Tensor.fromNested([[1, 0], [0, 1]], [2, 2]);
+    const cotangent = Tensor.fromNested(
+      [
+        [1, 0],
+        [0, 1],
+      ],
+      [2, 2]
+    );
     const { value, gradient } = reverseGrad(fn, A, cotangent);
-    expect(value.toNested()).toEqual([[2, 4], [6, 8]]);
+    expect(value.toNested()).toEqual([
+      [2, 4],
+      [6, 8],
+    ]);
     expect(gradient.shape).toEqual([2, 2]);
     // d(2A)/dA = 2 elementwise; gradient = 2·cotangent = [[2,0],[0,2]].
-    expect(gradient.toNested()).toEqual([[2, 0], [0, 2]]);
+    expect(gradient.toNested()).toEqual([
+      [2, 0],
+      [0, 2],
+    ]);
   });
 
   it('throws a clear error when fn breaks the AD trace (returns plain Tensor)', () => {

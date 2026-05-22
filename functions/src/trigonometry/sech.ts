@@ -1,21 +1,21 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import type { Complex } from '../type/complex/Complex.js'
-import { sechNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import type { Complex } from '../type/complex/Complex.js';
+import { sechNumber } from '../plain/number/index.js';
 
 // Type definitions for sech
 interface BigNumberConstructor {
-  new (value: number): BigNumber
+  new (value: number): BigNumber;
 }
 
 interface SechDependencies {
-  typed: TypedFunction
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'sech'
-const dependencies = ['typed', 'BigNumber']
+const name = 'sech';
+const dependencies = ['typed', 'BigNumber'];
 
 export const createSech = /* #__PURE__ */ factory(
   name,
@@ -49,7 +49,9 @@ export const createSech = /* #__PURE__ */ factory(
       number: sechNumber,
       Complex: (x: Complex) => x.sech(),
       BigNumber: (x: BigNumber): BigNumber =>
-        new BigNumber(1).div((x as unknown as { cosh(): unknown }).cosh() as any) as unknown as BigNumber
-    }) as TypedFunction
+        new BigNumber(1).div(
+          (x as unknown as { cosh(): unknown }).cosh() as any
+        ) as unknown as BigNumber,
+    }) as TypedFunction;
   }
-)
+);

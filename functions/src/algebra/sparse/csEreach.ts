@@ -1,15 +1,15 @@
 // Copyright (c) 2006-2024, Timothy A. Davis, All Rights Reserved.
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
-import { csMark } from './csMark.js'
-import { csMarked } from './csMarked.js'
+import { csMark } from './csMark.js';
+import { csMarked } from './csMarked.js';
 
 // Sparse matrix internal structure
 interface SparseMatrixData {
-  _size: number[]
-  _values?: any[]
-  _index: number[]
-  _ptr: number[]
+  _size: number[];
+  _values?: any[];
+  _index: number[];
+  _ptr: number[];
 }
 
 /**
@@ -23,54 +23,49 @@ interface SparseMatrixData {
  *
  * @return {Number}                 The index for the nonzero pattern
  */
-export function csEreach(
-  a: SparseMatrixData,
-  k: number,
-  parent: number[],
-  w: number[]
-): number {
+export function csEreach(a: SparseMatrixData, k: number, parent: number[], w: number[]): number {
   // a arrays
-  const aindex = a._index
-  const aptr = a._ptr
-  const asize = a._size
+  const aindex = a._index;
+  const aptr = a._ptr;
+  const asize = a._size;
   // columns
-  const n = asize[1]
+  const n = asize[1];
   // initialize top
-  let top = n
+  let top = n;
   // vars
-  let p: number, p0: number, p1: number, len: number
+  let p: number, p0: number, p1: number, len: number;
   // mark node k as visited
-  csMark(w, k)
+  csMark(w, k);
   // loop values & index for column k
   for (p0 = aptr[k], p1 = aptr[k + 1], p = p0; p < p1; p++) {
     // A(i,k) is nonzero
-    let i = aindex[p]
+    let i = aindex[p];
     // only use upper triangular part of A
     if (i > k) {
-      continue
+      continue;
     }
     // traverse up etree
     for (len = 0; !csMarked(w, i); i = parent[i]) {
       // L(k,i) is nonzero, last n entries in w
-      w[n + len++] = i
+      w[n + len++] = i;
       // mark i as visited
-      csMark(w, i)
+      csMark(w, i);
     }
     while (len > 0) {
       // decrement top & len
-      --top
-      --len
+      --top;
+      --len;
       // push path onto stack, last n entries in w
-      w[n + top] = w[n + len]
+      w[n + top] = w[n + len];
     }
   }
   // unmark all nodes
   for (p = top; p < n; p++) {
     // use stack value, last n entries in w
-    csMark(w, w[n + p])
+    csMark(w, w[n + p]);
   }
   // unmark node k
-  csMark(w, k)
+  csMark(w, k);
   // s[top..n-1] contains pattern of L(k,:)
-  return top
+  return top;
 }

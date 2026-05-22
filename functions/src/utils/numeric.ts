@@ -1,19 +1,19 @@
-import { typeOf } from '../utils/is.js'
-import { factory } from '../utils/factory.js'
-import { noBignumber, noFraction } from '../utils/noop.js'
+import { typeOf } from '../utils/is.js';
+import { factory } from '../utils/factory.js';
+import { noBignumber, noFraction } from '../utils/noop.js';
 
 // Type definitions for numeric
-type NumericValue = string | number | bigint | unknown
-type NumericOutput = number | bigint | unknown
+type NumericValue = string | number | bigint | unknown;
+type NumericOutput = number | bigint | unknown;
 
 interface NumericDependencies {
-  number: (x: NumericValue) => number
-  bignumber?: (x: NumericValue) => unknown
-  fraction?: (x: NumericValue) => unknown
+  number: (x: NumericValue) => number;
+  bignumber?: (x: NumericValue) => unknown;
+  fraction?: (x: NumericValue) => unknown;
 }
 
-const name = 'numeric'
-const dependencies = ['number', '?bignumber', '?fraction']
+const name = 'numeric';
+const dependencies = ['number', '?bignumber', '?fraction'];
 
 export const createNumeric = /* #__PURE__ */ factory(
   name,
@@ -23,17 +23,16 @@ export const createNumeric = /* #__PURE__ */ factory(
       string: true,
       number: true,
       BigNumber: true,
-      Fraction: true
-    }
+      Fraction: true,
+    };
 
     // Load the conversion functions for each output type
-    const validOutputTypes: Record<string, (x: NumericValue) => NumericOutput> =
-      {
-        number: (x: NumericValue) => number(x),
-        BigNumber: bignumber ? (x: NumericValue) => bignumber(x) : noBignumber,
-        bigint: (x: NumericValue) => BigInt(x as string | number | bigint),
-        Fraction: fraction ? (x: NumericValue) => fraction(x) : noFraction
-      }
+    const validOutputTypes: Record<string, (x: NumericValue) => NumericOutput> = {
+      number: (x: NumericValue) => number(x),
+      BigNumber: bignumber ? (x: NumericValue) => bignumber(x) : noBignumber,
+      bigint: (x: NumericValue) => BigInt(x as string | number | bigint),
+      Fraction: fraction ? (x: NumericValue) => fraction(x) : noFraction,
+    };
 
     /**
      * Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction.
@@ -71,9 +70,9 @@ export const createNumeric = /* #__PURE__ */ factory(
       check?: unknown
     ): NumericOutput {
       if (check !== undefined) {
-        throw new SyntaxError('numeric() takes one or two arguments')
+        throw new SyntaxError('numeric() takes one or two arguments');
       }
-      const inputType = typeOf(value)
+      const inputType = typeOf(value);
 
       if (!(inputType in validInputTypes)) {
         throw new TypeError(
@@ -83,7 +82,7 @@ export const createNumeric = /* #__PURE__ */ factory(
             inputType +
             '"; valid input types are ' +
             Object.keys(validInputTypes).join(', ')
-        )
+        );
       }
       if (!(outputType in validOutputTypes)) {
         throw new TypeError(
@@ -93,14 +92,14 @@ export const createNumeric = /* #__PURE__ */ factory(
             outputType +
             '"; valid output types are ' +
             Object.keys(validOutputTypes).join(', ')
-        )
+        );
       }
 
       if (outputType === inputType) {
-        return value
+        return value;
       } else {
-        return validOutputTypes[outputType](value)
+        return validOutputTypes[outputType](value);
       }
-    }
+    };
   }
-)
+);

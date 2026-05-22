@@ -15,7 +15,7 @@
  * @returns e^x
  */
 export function exp(x: f64): f64 {
-  return Math.exp(x)
+  return Math.exp(x);
 }
 
 /**
@@ -24,7 +24,7 @@ export function exp(x: f64): f64 {
  * @returns e^x - 1
  */
 export function expm1(x: f64): f64 {
-  return Math.expm1(x)
+  return Math.expm1(x);
 }
 
 /**
@@ -33,7 +33,7 @@ export function expm1(x: f64): f64 {
  * @returns ln(x)
  */
 export function log(x: f64): f64 {
-  return Math.log(x)
+  return Math.log(x);
 }
 
 /**
@@ -42,7 +42,7 @@ export function log(x: f64): f64 {
  * @returns log10(x)
  */
 export function log10(x: f64): f64 {
-  return Math.log10(x)
+  return Math.log10(x);
 }
 
 /**
@@ -51,7 +51,7 @@ export function log10(x: f64): f64 {
  * @returns log2(x)
  */
 export function log2(x: f64): f64 {
-  return Math.log2(x)
+  return Math.log2(x);
 }
 
 /**
@@ -60,7 +60,7 @@ export function log2(x: f64): f64 {
  * @returns ln(1 + x)
  */
 export function log1p(x: f64): f64 {
-  return Math.log1p(x)
+  return Math.log1p(x);
 }
 
 /**
@@ -70,7 +70,7 @@ export function log1p(x: f64): f64 {
  * @returns log_base(x)
  */
 export function logBase(x: f64, base: f64): f64 {
-  return Math.log(x) / Math.log(base)
+  return Math.log(x) / Math.log(base);
 }
 
 /**
@@ -82,9 +82,9 @@ export function logBase(x: f64, base: f64): f64 {
 export function nthRoot(x: f64, n: f64): f64 {
   // Handle negative x for odd roots
   if (x < 0 && n % 2 !== 0) {
-    return -Math.pow(-x, 1.0 / n)
+    return -Math.pow(-x, 1.0 / n);
   }
-  return Math.pow(x, 1.0 / n)
+  return Math.pow(x, 1.0 / n);
 }
 
 /**
@@ -93,7 +93,7 @@ export function nthRoot(x: f64, n: f64): f64 {
  * @returns sqrt(x)
  */
 export function sqrt(x: f64): f64 {
-  return Math.sqrt(x)
+  return Math.sqrt(x);
 }
 
 /**
@@ -103,7 +103,7 @@ export function sqrt(x: f64): f64 {
  * @returns x^y
  */
 export function pow(x: f64, y: f64): f64 {
-  return Math.pow(x, y)
+  return Math.pow(x, y);
 }
 
 /**
@@ -114,8 +114,8 @@ export function pow(x: f64, y: f64): f64 {
  */
 export function expArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.exp(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.exp(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -127,8 +127,8 @@ export function expArray(inputPtr: usize, outputPtr: usize, length: i32): void {
  */
 export function logArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.log(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.log(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -138,14 +138,10 @@ export function logArray(inputPtr: usize, outputPtr: usize, length: i32): void {
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function log10Array(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function log10Array(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.log10(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.log10(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -155,14 +151,10 @@ export function log10Array(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function log2Array(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function log2Array(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.log2(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.log2(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -172,14 +164,10 @@ export function log2Array(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function sqrtArray(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function sqrtArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.sqrt(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.sqrt(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -197,10 +185,7 @@ export function powConstantArray(
   length: i32
 ): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(
-      outputPtr + offset,
-      Math.pow(load<f64>(inputPtr + offset), exponent)
-    )
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.pow(load<f64>(inputPtr + offset), exponent));
   }
 }

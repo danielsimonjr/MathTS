@@ -1,16 +1,12 @@
-import {
-  containsCollections,
-  deepForEach,
-  reduce
-} from '../utils/collection.js'
-import { arraySize } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import { improveErrorMessage } from './utils/improveErrorMessage.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { containsCollections, deepForEach, reduce } from '../utils/collection.js';
+import { arraySize } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_MEAN_THRESHOLD = 100
+const WASM_MEAN_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -18,38 +14,30 @@ const WASM_MEAN_THRESHOLD = 100
 function isFlatNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 // Type definitions for mean
 interface MatrixType {
-  forEach(
-    callback: (value: unknown) => void,
-    skipZeros: boolean,
-    recurse: boolean
-  ): void
-  map(
-    callback: (value: unknown) => unknown,
-    skipZeros: boolean,
-    recurse: boolean
-  ): MatrixType
-  size(): number[]
-  valueOf(): unknown[] | unknown[][]
-  create(data: unknown[], datatype?: string): MatrixType
-  datatype(): string | undefined
+  forEach(callback: (value: unknown) => void, skipZeros: boolean, recurse: boolean): void;
+  map(callback: (value: unknown) => unknown, skipZeros: boolean, recurse: boolean): MatrixType;
+  size(): number[];
+  valueOf(): unknown[] | unknown[][];
+  create(data: unknown[], datatype?: string): MatrixType;
+  datatype(): string | undefined;
 }
 
 interface MeanDependencies {
-  typed: TypedFunction
-  add: TypedFunction
-  divide: TypedFunction
+  typed: TypedFunction;
+  add: TypedFunction;
+  divide: TypedFunction;
 }
 
-const name = 'mean'
-const dependencies = ['typed', 'add', 'divide']
+const name = 'mean';
+const dependencies = ['typed', 'add', 'divide'];
 
 export const createMean = /* #__PURE__ */ factory(
   name,
@@ -92,12 +80,12 @@ export const createMean = /* #__PURE__ */ factory(
       // mean(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
         if (containsCollections(args)) {
-          throw new TypeError('Scalar values expected in function mean')
+          throw new TypeError('Scalar values expected in function mean');
         }
 
-        return _mean(args)
-      }
-    })
+        return _mean(args);
+      },
+    });
 
     /**
      * Calculate the mean value in an n-dimensional array, returning a
@@ -112,14 +100,12 @@ export const createMean = /* #__PURE__ */ factory(
       dim: number | { valueOf(): number }
     ): unknown {
       try {
-        const dimValue = typeof dim === 'number' ? dim : dim.valueOf()
-        const sum = reduce(array as any, dimValue, add)
-        const s = Array.isArray(array)
-          ? arraySize(array)
-          : (array as MatrixType).size()
-        return divide(sum, s[dimValue])
+        const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
+        const sum = reduce(array as any, dimValue, add);
+        const s = Array.isArray(array) ? arraySize(array) : (array as MatrixType).size();
+        return divide(sum, s[dimValue]);
       } catch (err) {
-        throw improveErrorMessage(err, 'mean', undefined)
+        throw improveErrorMessage(err, 'mean', undefined);
       }
     }
 
@@ -133,14 +119,14 @@ export const createMean = /* #__PURE__ */ factory(
       // WASM fast path for flat arrays of plain numbers
       if (Array.isArray(array) && array.length >= WASM_MEAN_THRESHOLD) {
         if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule()
+          const wasm = wasmLoader.getModule();
           if (wasm) {
             try {
-              const alloc = wasmLoader.allocateFloat64Array(array)
+              const alloc = wasmLoader.allocateFloat64Array(array);
               try {
-                return wasm.statsMean(alloc.ptr, array.length)
+                return wasm.statsMean(alloc.ptr, array.length);
               } finally {
-                wasmLoader.free(alloc.ptr)
+                wasmLoader.free(alloc.ptr);
               }
             } catch {
               // Fall back to JS implementation on WASM error
@@ -150,22 +136,22 @@ export const createMean = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback for mixed types, BigNumber, Complex, etc.
-      let sum: unknown
-      let num = 0
+      let sum: unknown;
+      let num = 0;
 
       deepForEach(array as any, function (value: unknown) {
         try {
-          sum = sum === undefined ? value : add(sum, value)
-          num++
+          sum = sum === undefined ? value : add(sum, value);
+          num++;
         } catch (err) {
-          throw improveErrorMessage(err, 'mean', value)
+          throw improveErrorMessage(err, 'mean', value);
         }
-      })
+      });
 
       if (num === 0) {
-        throw new Error('Cannot calculate the mean of an empty array')
+        throw new Error('Cannot calculate the mean of an empty array');
       }
-      return divide(sum, num)
+      return divide(sum, num);
     }
   }
-)
+);

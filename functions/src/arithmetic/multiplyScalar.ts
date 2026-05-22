@@ -1,26 +1,26 @@
-import { factory } from '../utils/factory.js'
-import { multiplyNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { multiplyNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for multiplyScalar
 interface HasMulMethod {
-  mul(other: unknown): unknown
+  mul(other: unknown): unknown;
 }
 
 interface HasTimesMethod {
-  times(other: unknown): unknown
+  times(other: unknown): unknown;
 }
 
 interface HasMultiplyMethod {
-  multiply(other: unknown): unknown
+  multiply(other: unknown): unknown;
 }
 
 interface MultiplyScalarDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'multiplyScalar'
-const dependencies = ['typed']
+const name = 'multiplyScalar';
+const dependencies = ['typed'];
 
 export const createMultiplyScalar = /* #__PURE__ */ factory(
   name,
@@ -42,36 +42,26 @@ export const createMultiplyScalar = /* #__PURE__ */ factory(
       'number, number': multiplyNumber,
 
       'Complex, Complex': function (x: HasMulMethod, y: HasMulMethod): unknown {
-        return x.mul(y)
+        return x.mul(y);
       },
 
-      'BigNumber, BigNumber': function (
-        x: HasTimesMethod,
-        y: HasTimesMethod
-      ): unknown {
-        return x.times(y)
+      'BigNumber, BigNumber': function (x: HasTimesMethod, y: HasTimesMethod): unknown {
+        return x.times(y);
       },
 
       'bigint, bigint': function (x: bigint, y: bigint): bigint {
-        return x * y
+        return x * y;
       },
 
-      'Fraction, Fraction': function (
-        x: HasMulMethod,
-        y: HasMulMethod
-      ): unknown {
-        return x.mul(y)
+      'Fraction, Fraction': function (x: HasMulMethod, y: HasMulMethod): unknown {
+        return x.mul(y);
       },
 
-      'number | Fraction | Complex, Unit': (
-        x: unknown,
-        y: HasMultiplyMethod
-      ): unknown => y.multiply(x),
+      'number | Fraction | Complex, Unit': (x: unknown, y: HasMultiplyMethod): unknown =>
+        y.multiply(x),
 
-      'Unit, number | Fraction | Complex | Unit': (
-        x: HasMultiplyMethod,
-        y: unknown
-      ): unknown => x.multiply(y)
-    })
+      'Unit, number | Fraction | Complex | Unit': (x: HasMultiplyMethod, y: unknown): unknown =>
+        x.multiply(y),
+    });
   }
-)
+);

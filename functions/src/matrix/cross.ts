@@ -1,8 +1,8 @@
-import { arraySize, squeeze } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
+import { arraySize, squeeze } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
 
-const name = 'cross'
-const dependencies = ['typed', 'matrix', 'subtract', 'multiply']
+const name = 'cross';
+const dependencies = ['typed', 'matrix', 'subtract', 'multiply'];
 
 export const createCross = /* #__PURE__ */ factory(
   name,
@@ -11,12 +11,12 @@ export const createCross = /* #__PURE__ */ factory(
     typed,
     matrix,
     subtract,
-    multiply
+    multiply,
   }: {
-    typed: any
-    matrix: any
-    subtract: any
-    multiply: any
+    typed: any;
+    matrix: any;
+    subtract: any;
+    multiply: any;
   }) => {
     /**
      * Calculate the cross product for two vectors in three dimensional space.
@@ -53,19 +53,19 @@ export const createCross = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Matrix, Matrix': function (x: any, y: any): any {
-        return matrix(_cross(x.toArray(), y.toArray()))
+        return matrix(_cross(x.toArray(), y.toArray()));
       },
 
       'Matrix, Array': function (x: any, y: any[]): any {
-        return matrix(_cross(x.toArray(), y))
+        return matrix(_cross(x.toArray(), y));
       },
 
       'Array, Matrix': function (x: any[], y: any): any {
-        return matrix(_cross(x, y.toArray()))
+        return matrix(_cross(x, y.toArray()));
       },
 
-      'Array, Array': _cross
-    })
+      'Array, Array': _cross,
+    });
 
     /**
      * Calculate the cross product for two arrays
@@ -75,23 +75,15 @@ export const createCross = /* #__PURE__ */ factory(
      * @private
      */
     function _cross(x: any[], y: any[]): any[] {
-      const highestDimension = Math.max(
-        arraySize(x).length,
-        arraySize(y).length
-      )
+      const highestDimension = Math.max(arraySize(x).length, arraySize(y).length);
 
-      x = squeeze(x)
-      y = squeeze(y)
+      x = squeeze(x);
+      y = squeeze(y);
 
-      const xSize = arraySize(x)
-      const ySize = arraySize(y)
+      const xSize = arraySize(x);
+      const ySize = arraySize(y);
 
-      if (
-        xSize.length !== 1 ||
-        ySize.length !== 1 ||
-        xSize[0] !== 3 ||
-        ySize[0] !== 3
-      ) {
+      if (xSize.length !== 1 || ySize.length !== 1 || xSize[0] !== 3 || ySize[0] !== 3) {
         throw new RangeError(
           'Vectors with length 3 expected ' +
             '(Size A = [' +
@@ -99,20 +91,20 @@ export const createCross = /* #__PURE__ */ factory(
             '], B = [' +
             ySize.join(', ') +
             '])'
-        )
+        );
       }
 
       const product = [
         subtract(multiply(x[1], y[2]), multiply(x[2], y[1])),
         subtract(multiply(x[2], y[0]), multiply(x[0], y[2])),
-        subtract(multiply(x[0], y[1]), multiply(x[1], y[0]))
-      ]
+        subtract(multiply(x[0], y[1]), multiply(x[1], y[0])),
+      ];
 
       if (highestDimension > 1) {
-        return [product]
+        return [product];
       } else {
-        return product
+        return product;
       }
     }
   }
-)
+);

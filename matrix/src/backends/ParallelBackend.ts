@@ -218,13 +218,7 @@ export class ParallelBackend {
     const aData = a.toFloat64Array();
     const bData = b.toFloat64Array();
 
-    const result = await this.pool.matmul(
-      aData,
-      a.rows,
-      a.cols,
-      bData,
-      b.cols
-    );
+    const result = await this.pool.matmul(aData, a.rows, a.cols, bData, b.cols);
 
     return new DenseMatrix(a.rows, b.cols, result.result);
   }
@@ -352,17 +346,13 @@ export class ParallelBackend {
 
   private checkDimensionsMatch(a: DenseMatrix, b: DenseMatrix): void {
     if (a.rows !== b.rows || a.cols !== b.cols) {
-      throw new Error(
-        `Matrix dimensions must match: ${a.rows}×${a.cols} vs ${b.rows}×${b.cols}`
-      );
+      throw new Error(`Matrix dimensions must match: ${a.rows}×${a.cols} vs ${b.rows}×${b.cols}`);
     }
   }
 
   private checkMultiplyDimensions(a: DenseMatrix, b: DenseMatrix): void {
     if (a.cols !== b.rows) {
-      throw new Error(
-        `Cannot multiply ${a.rows}×${a.cols} matrix with ${b.rows}×${b.cols} matrix`
-      );
+      throw new Error(`Cannot multiply ${a.rows}×${a.cols} matrix with ${b.rows}×${b.cols} matrix`);
     }
   }
 }

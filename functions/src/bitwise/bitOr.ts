@@ -1,36 +1,36 @@
-import { bitOrBigNumber } from '../utils/bignumber/bitwise.js'
-import { factory } from '../utils/factory.js'
-import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js'
-import { createMatAlgo04xSidSid } from '../type/matrix/utils/matAlgo04xSidSid.js'
-import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import { bitOrNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { bitOrBigNumber } from '../utils/bignumber/bitwise.js';
+import { factory } from '../utils/factory.js';
+import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js';
+import { createMatAlgo04xSidSid } from '../type/matrix/utils/matAlgo04xSidSid.js';
+import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import { bitOrNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for bitOr
 interface BitOrDependencies {
-  typed: TypedFunction
-  matrix: (data: unknown[]) => unknown
-  equalScalar: TypedFunction
-  DenseMatrix: new (data: unknown) => unknown
-  concat: TypedFunction
+  typed: TypedFunction;
+  matrix: (data: unknown[]) => unknown;
+  equalScalar: TypedFunction;
+  DenseMatrix: new (data: unknown) => unknown;
+  concat: TypedFunction;
 }
 
-const name = 'bitOr'
-const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat']
+const name = 'bitOr';
+const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat'];
 
 export const createBitOr = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, matrix, equalScalar, DenseMatrix, concat }: BitOrDependencies) => {
-    const matAlgo01xDSid = createMatAlgo01xDSid({ typed })
-    const matAlgo04xSidSid = createMatAlgo04xSidSid({ typed, equalScalar })
-    const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix })
+    const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
+    const matAlgo04xSidSid = createMatAlgo04xSidSid({ typed, equalScalar });
+    const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Bitwise OR two values, `x | y`.
@@ -60,13 +60,13 @@ export const createBitOr = /* #__PURE__ */ factory(
       {
         'number, number': bitOrNumber,
         'BigNumber, BigNumber': bitOrBigNumber,
-        'bigint, bigint': (x: bigint, y: bigint): bigint => x | y
+        'bigint, bigint': (x: bigint, y: bigint): bigint => x | y,
       },
       matrixAlgorithmSuite({
         SS: matAlgo04xSidSid as any,
         DS: matAlgo01xDSid as any,
-        Ss: matAlgo10xSids as any
+        Ss: matAlgo10xSids as any,
       })
-    )
+    );
   }
-)
+);

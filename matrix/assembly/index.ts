@@ -32,8 +32,8 @@ export {
   abs,
   absSIMD,
   negate,
-  negateSIMD
-} from './matrix/multiply'
+  negateSIMD,
+} from './matrix/multiply';
 
 // Linear algebra decompositions
 export {
@@ -43,18 +43,11 @@ export {
   luSolve,
   luDeterminant,
   luInverse,
-  determinant
-} from './algebra/decomposition'
+  determinant,
+} from './algebra/decomposition';
 
 // Signal processing
-export {
-  fft,
-  fft2d,
-  convolve,
-  rfft,
-  irfft,
-  isPowerOf2
-} from './signal/fft'
+export { fft, fft2d, convolve, rfft, irfft, isPowerOf2 } from './signal/fft';
 
 export {
   freqz,
@@ -65,8 +58,8 @@ export {
   magnitudeDb,
   phase,
   unwrapPhase,
-  groupDelay
-} from './signal/processing'
+  groupDelay,
+} from './signal/processing';
 
 // Numeric solvers
 export {
@@ -79,5 +72,5 @@ export {
   vectorScale,
   vectorAdd,
   wouldOvershoot,
-  trimStep
-} from './numeric/ode'
+  trimStep,
+} from './numeric/ode';

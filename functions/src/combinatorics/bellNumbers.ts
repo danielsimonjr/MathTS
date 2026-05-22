@@ -1,40 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for combinatorics
 interface BigNumberType {
   // BigNumber placeholder for type compatibility
 }
 
-type NumericValue = number | BigNumberType
+type NumericValue = number | BigNumberType;
 
 interface BellNumbersDependencies {
-  typed: TypedFunction
-  addScalar: (x: NumericValue, y: NumericValue) => NumericValue
-  isNegative: (x: NumericValue) => boolean
-  isInteger: (x: NumericValue) => boolean
-  stirlingS2: (n: NumericValue, k: NumericValue) => NumericValue
+  typed: TypedFunction;
+  addScalar: (x: NumericValue, y: NumericValue) => NumericValue;
+  isNegative: (x: NumericValue) => boolean;
+  isInteger: (x: NumericValue) => boolean;
+  stirlingS2: (n: NumericValue, k: NumericValue) => NumericValue;
 }
 
-const name = 'bellNumbers'
-const dependencies = [
-  'typed',
-  'addScalar',
-  'isNegative',
-  'isInteger',
-  'stirlingS2'
-]
+const name = 'bellNumbers';
+const dependencies = ['typed', 'addScalar', 'isNegative', 'isInteger', 'stirlingS2'];
 
 export const createBellNumbers = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    addScalar,
-    isNegative,
-    isInteger,
-    stirlingS2
-  }: BellNumbersDependencies) => {
+  ({ typed, addScalar, isNegative, isInteger, stirlingS2 }: BellNumbersDependencies) => {
     /**
      * The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose union is S.
      * bellNumbers only takes integer arguments.
@@ -59,19 +47,17 @@ export const createBellNumbers = /* #__PURE__ */ factory(
     return typed(name, {
       'number | BigNumber': function (n: NumericValue): NumericValue {
         if (!isInteger(n) || isNegative(n)) {
-          throw new TypeError(
-            'Non-negative integer value expected in function bellNumbers'
-          )
+          throw new TypeError('Non-negative integer value expected in function bellNumbers');
         }
 
         // Sum (k=0, n) S(n,k).
-        let result: NumericValue = 0
+        let result: NumericValue = 0;
         for (let i = 0; i <= (n as number); i++) {
-          result = addScalar(result, stirlingS2(n, i))
+          result = addScalar(result, stirlingS2(n, i));
         }
 
-        return result
-      }
-    })
+        return result;
+      },
+    });
   }
-)
+);

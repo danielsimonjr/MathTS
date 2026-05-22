@@ -161,7 +161,7 @@ describe('SyncManager', () => {
         readBuffer: () => Promise.resolve(new Float32Array(0)),
         createCommandEncoder: () => ({}),
         submitCommands: () => {},
-        createStagingBuffer: () => ({} as GPUBuffer),
+        createStagingBuffer: () => ({}) as GPUBuffer,
       } as unknown as GPUContext;
       const mockPool = {} as BufferPool;
 
@@ -180,7 +180,7 @@ describe('SyncManager', () => {
         readBuffer: () => Promise.resolve(new Float32Array(0)),
         createCommandEncoder: () => ({}),
         submitCommands: () => {},
-        createStagingBuffer: () => ({} as GPUBuffer),
+        createStagingBuffer: () => ({}) as GPUBuffer,
       } as unknown as GPUContext;
       const mockPool = {} as BufferPool;
 
@@ -200,11 +200,13 @@ describe('SyncManager', () => {
 
       const mockContext = {
         getDevice: () => ({ queue: { onSubmittedWorkDone: () => Promise.resolve() } }),
-        writeBuffer: () => { writeBufferCalled = true; },
+        writeBuffer: () => {
+          writeBufferCalled = true;
+        },
         readBuffer: () => Promise.resolve(new Float32Array(0)),
         createCommandEncoder: () => ({}),
         submitCommands: () => {},
-        createStagingBuffer: () => ({} as GPUBuffer),
+        createStagingBuffer: () => ({}) as GPUBuffer,
       } as unknown as GPUContext;
       const mockPool = {} as BufferPool;
 
@@ -228,7 +230,7 @@ describe('SyncManager', () => {
         readBuffer: () => Promise.resolve(new Float32Array(25)),
         createCommandEncoder: () => ({}),
         submitCommands: () => {},
-        createStagingBuffer: () => ({} as GPUBuffer),
+        createStagingBuffer: () => ({}) as GPUBuffer,
       } as unknown as GPUContext;
       const mockPool = {} as BufferPool;
 
@@ -252,7 +254,7 @@ describe('SyncManager', () => {
         readBuffer: () => Promise.resolve(new Float32Array(0)),
         createCommandEncoder: () => ({}),
         submitCommands: () => {},
-        createStagingBuffer: () => ({} as GPUBuffer),
+        createStagingBuffer: () => ({}) as GPUBuffer,
       } as unknown as GPUContext;
       const mockPool = {} as BufferPool;
 
@@ -272,18 +274,22 @@ describe('SyncManager', () => {
         readBuffer: () => Promise.resolve(new Float32Array(0)),
         createCommandEncoder: () => ({}),
         submitCommands: () => {},
-        createStagingBuffer: () => ({
-          size: 1024,
-          destroy: function() { destroyedBuffers.push(this as unknown as GPUBuffer); },
-        } as unknown as GPUBuffer),
+        createStagingBuffer: () =>
+          ({
+            size: 1024,
+            destroy: function () {
+              destroyedBuffers.push(this as unknown as GPUBuffer);
+            },
+          }) as unknown as GPUBuffer,
       } as unknown as GPUContext;
       const mockPool = {} as BufferPool;
 
       const sync = new SyncManager(mockContext, mockPool);
 
       // Force creation of staging buffer
-      (sync as unknown as { getOrCreateStagingBuffer: (size: number) => GPUBuffer })
-        .getOrCreateStagingBuffer(1024);
+      (
+        sync as unknown as { getOrCreateStagingBuffer: (size: number) => GPUBuffer }
+      ).getOrCreateStagingBuffer(1024);
 
       sync.destroy();
 
@@ -330,8 +336,7 @@ describe('WGSL Shader Files', () => {
     it('should support partial pivoting conceptually', () => {
       // In real LU, we find max in column and swap rows
       const column = [2, 5, 1, 8, 3];
-      const maxIdx = column.reduce((maxI, val, i, arr) =>
-        val > arr[maxI] ? i : maxI, 0);
+      const maxIdx = column.reduce((maxI, val, i, arr) => (val > arr[maxI] ? i : maxI), 0);
 
       expect(maxIdx).toBe(3); // Index of 8
     });
@@ -384,7 +389,7 @@ describe('Batch Operations Integration', () => {
       const wgY = Math.ceil(rows / workgroupSize);
 
       expect(wgX).toBe(10); // ceil(150/16) = 10
-      expect(wgY).toBe(7);  // ceil(100/16) = 7
+      expect(wgY).toBe(7); // ceil(100/16) = 7
     });
 
     it('should calculate workgroups for reductions', () => {

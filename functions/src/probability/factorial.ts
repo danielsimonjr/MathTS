@@ -1,20 +1,20 @@
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for factorial
 interface BigNumberType {
-  plus(n: number): BigNumberType
-  isNegative(): boolean
+  plus(n: number): BigNumberType;
+  isNegative(): boolean;
 }
 
 interface FactorialDependencies {
-  typed: TypedFunction
-  gamma: TypedFunction
+  typed: TypedFunction;
+  gamma: TypedFunction;
 }
 
-const name = 'factorial'
-const dependencies = ['typed', 'gamma']
+const name = 'factorial';
+const dependencies = ['typed', 'gamma'];
 
 export const createFactorial = /* #__PURE__ */ factory(
   name,
@@ -45,25 +45,25 @@ export const createFactorial = /* #__PURE__ */ factory(
     return typed(name, {
       number: function (n: number): number {
         if (n < 0) {
-          throw new Error('Value must be non-negative')
+          throw new Error('Value must be non-negative');
         }
 
-        return gamma(n + 1) as number
+        return gamma(n + 1) as number;
       },
 
       BigNumber: function (n: BigNumberType): unknown {
         if (n.isNegative()) {
-          throw new Error('Value must be non-negative')
+          throw new Error('Value must be non-negative');
         }
 
-        return gamma(n.plus(1))
+        return gamma(n.plus(1));
       },
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction): ((n: unknown) => unknown) =>
           (n: unknown): unknown =>
             deepMap(n as unknown[], self)
-      )
-    })
+      ),
+    });
   }
-)
+);

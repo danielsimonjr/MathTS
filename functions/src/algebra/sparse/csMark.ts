@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
 
-import { csFlip } from './csFlip.js'
+import { csFlip } from './csFlip.js';
 
 /**
  * Marks the node at w[j]
@@ -12,5 +12,5 @@ import { csFlip } from './csFlip.js'
  */
 export function csMark(w: number[], j: number): void {
   // mark w[j]
-  w[j] = csFlip(w[j])
+  w[j] = csFlip(w[j]);
 }

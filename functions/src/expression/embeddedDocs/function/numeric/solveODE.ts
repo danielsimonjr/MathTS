@@ -8,7 +8,7 @@ export const solveODEDocs = {
     'tspan = [0, 4]',
     'solveODE(f, tspan, 1)',
     'solveODE(f, tspan, [1, 2])',
-    'solveODE(f, tspan, 1, { method:"RK23", maxStep:0.1 })'
+    'solveODE(f, tspan, 1, { method:"RK23", maxStep:0.1 })',
   ],
-  seealso: ['derivative', 'simplifyCore']
-}
+  seealso: ['derivative', 'simplifyCore'],
+};

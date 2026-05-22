@@ -1,14 +1,14 @@
-import { factory } from '../utils/factory.js'
-import { typeOf as _typeOf } from '../utils/is.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { typeOf as _typeOf } from '../utils/is.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for typeOf
 interface TypeOfDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'typeOf'
-const dependencies = ['typed']
+const name = 'typeOf';
+const dependencies = ['typed'];
 
 export const createTypeOf = /* #__PURE__ */ factory(
   name,
@@ -68,7 +68,7 @@ export const createTypeOf = /* #__PURE__ */ factory(
      *                  For example 'number', 'string', 'Array', 'Date'.
      */
     return typed(name, {
-      any: _typeOf
-    })
+      any: _typeOf,
+    });
   }
-)
+);

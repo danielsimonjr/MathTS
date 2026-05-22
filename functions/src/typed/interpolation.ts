@@ -149,7 +149,7 @@ export function cubicSpline(xs: number[], ys: number[]): (x: number) => number {
 
   for (let j = n - 1; j >= 0; j--) {
     c[j] = z[j] - mu[j] * c[j + 1];
-    b[j] = (ys[j + 1] - ys[j]) / h[j] - h[j] * (c[j + 1] + 2 * c[j]) / 3;
+    b[j] = (ys[j + 1] - ys[j]) / h[j] - (h[j] * (c[j + 1] + 2 * c[j])) / 3;
     d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
   }
 
@@ -205,12 +205,7 @@ export function cubicSpline(xs: number[], ys: number[]): (x: number) => number {
  * @example
  * hermiteInterp([0, 1], [0, 1], [1, 1], 0.5) // => 0.5 (linear)
  */
-export function hermiteInterp(
-  xs: number[],
-  ys: number[],
-  dys: number[],
-  x: number,
-): number {
+export function hermiteInterp(xs: number[], ys: number[], dys: number[], x: number): number {
   if (xs.length !== ys.length || xs.length !== dys.length || xs.length < 1) {
     throw new Error('hermiteInterp requires matching non-empty arrays');
   }
@@ -301,9 +296,14 @@ export function pchipInterp(xs: number[], ys: number[], x: number): number {
     // Endpoint slopes
     m[0] = pchipEndSlope(xs[0], xs[1], xs[2], ys[0], ys[1], ys[2], delta[0], delta[1]);
     m[n - 1] = pchipEndSlope(
-      xs[n - 1], xs[n - 2], xs[n - 3],
-      ys[n - 1], ys[n - 2], ys[n - 3],
-      delta[n - 2], delta[n - 3],
+      xs[n - 1],
+      xs[n - 2],
+      xs[n - 3],
+      ys[n - 1],
+      ys[n - 2],
+      ys[n - 3],
+      delta[n - 2],
+      delta[n - 3]
     );
   }
 
@@ -334,9 +334,14 @@ export function pchipInterp(xs: number[], ys: number[], x: number): number {
 
 /** Helper: compute shape-preserving endpoint slope */
 function pchipEndSlope(
-  x0: number, x1: number, _x2: number,
-  _y0: number, _y1: number, _y2: number,
-  d0: number, d1: number,
+  x0: number,
+  x1: number,
+  _x2: number,
+  _y0: number,
+  _y1: number,
+  _y2: number,
+  d0: number,
+  d1: number
 ): number {
   const h0 = x1 - x0;
   const h1 = _x2 - x1;

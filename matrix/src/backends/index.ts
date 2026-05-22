@@ -3,17 +3,9 @@
  * @packageDocumentation
  */
 
-export {
-  BackendRegistry,
-  backendRegistry,
-  DEFAULT_BACKEND_HINTS,
-} from './Backend.js';
+export { BackendRegistry, backendRegistry, DEFAULT_BACKEND_HINTS } from './Backend.js';
 
-export type {
-  MatrixBackend,
-  BackendType,
-  BackendHints,
-} from './Backend.js';
+export type { MatrixBackend, BackendType, BackendHints } from './Backend.js';
 
 export { JSBackend, jsBackend } from './JSBackend.js';
 
@@ -99,12 +91,7 @@ export {
   createSyncManager,
 } from './gpu/index.js';
 
-export type {
-  GPUCapabilities,
-  GPUContextOptions,
-  SyncStrategy,
-  SyncConfig,
-} from './gpu/index.js';
+export type { GPUCapabilities, GPUContextOptions, SyncStrategy, SyncConfig } from './gpu/index.js';
 
 // Register JS backend by default
 import { backendRegistry } from './Backend.js';

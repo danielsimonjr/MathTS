@@ -5,16 +5,16 @@
  * @private
  */
 export function _switch(mat: any) {
-  const I = mat.length
-  const J = mat[0].length
-  let i, j
-  const ret = []
+  const I = mat.length;
+  const J = mat[0].length;
+  let i, j;
+  const ret = [];
   for (j = 0; j < J; j++) {
-    const tmp = []
+    const tmp = [];
     for (i = 0; i < I; i++) {
-      tmp.push(mat[i][j])
+      tmp.push(mat[i][j]);
     }
-    ret.push(tmp)
+    ret.push(tmp);
   }
-  return ret
+  return ret;
 }

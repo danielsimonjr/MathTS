@@ -8,7 +8,7 @@ export const expDocs = {
     'e ^ 1.3',
     'log(exp(1.3))',
     'x = 2.4',
-    "(exp(i*x) == cos(x) + i*sin(x))   # Euler's formula"
+    "(exp(i*x) == cos(x) + i*sin(x))   # Euler's formula",
   ],
-  seealso: ['expm', 'expm1', 'pow', 'log']
-}
+  seealso: ['expm', 'expm1', 'pow', 'log'],
+};

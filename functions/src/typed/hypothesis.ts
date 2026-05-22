@@ -87,7 +87,7 @@ function _erf(x: f64): f64 {
   const t = 1.0 / (1.0 + 0.3275911 * a);
   const y =
     1.0 -
-    (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
+    ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
       t *
       Math.exp(-a * a);
   return sign * y;
@@ -103,9 +103,9 @@ function _lgamma(x: f64): f64 {
   }
   x -= 1;
   const c = [
-    0.99999999999980993, 676.5203681218851, -1259.1392167224028,
-    771.32342877765313, -176.61502916214059, 12.507343278686905,
-    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7,
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
+    1.5056327351493116e-7,
   ];
   let sum = c[0];
   for (let i = 1; i < 9; i++) sum += c[i] / (x + i);
@@ -131,7 +131,7 @@ function _gammainc(a: f64, x: f64): f64 {
     return sum * Math.exp(-x + a * Math.log(x) - _lgamma(a));
   } else {
     const TINY = 1e-30;
-    let b0 = x + 1 - a;
+    const b0 = x + 1 - a;
     let c = 1.0 / TINY;
     let d = 1.0 / b0;
     let f = d;
@@ -168,13 +168,13 @@ function _betainc(x: f64, a: f64, b: f64): f64 {
 
   const TINY = 1e-30;
   let c = 1.0;
-  let d = 1.0 - (a + b) * x / (a + 1);
+  let d = 1.0 - ((a + b) * x) / (a + 1);
   if (Math.abs(d) < TINY) d = TINY;
   d = 1.0 / d;
   let f = d;
 
   for (let m = 1; m <= 200; m++) {
-    let numerator = m * (b - m) * x / ((a + 2 * m - 1) * (a + 2 * m));
+    let numerator = (m * (b - m) * x) / ((a + 2 * m - 1) * (a + 2 * m));
     d = 1.0 + numerator * d;
     if (Math.abs(d) < TINY) d = TINY;
     c = 1.0 + numerator / c;
@@ -182,7 +182,7 @@ function _betainc(x: f64, a: f64, b: f64): f64 {
     d = 1.0 / d;
     f *= d * c;
 
-    numerator = -(a + m) * (a + b + m) * x / ((a + 2 * m) * (a + 2 * m + 1));
+    numerator = (-(a + m) * (a + b + m) * x) / ((a + 2 * m) * (a + 2 * m + 1));
     d = 1.0 + numerator * d;
     if (Math.abs(d) < TINY) d = TINY;
     c = 1.0 + numerator / c;
@@ -222,7 +222,7 @@ function _chiSquaredPValue(x: f64, df: f64): f64 {
  * Upper-tail p-value from F-distribution.
  */
 function _fPValue(f: f64, d1: f64, d2: f64): f64 {
-  return 1 - _betainc(d1 * f / (d1 * f + d2), d1 / 2, d2 / 2);
+  return 1 - _betainc((d1 * f) / (d1 * f + d2), d1 / 2, d2 / 2);
 }
 
 // =============================================================================
@@ -299,10 +299,7 @@ export function studentTTest(sample1: f64[], sample2?: f64[]): TTestResult {
  * chiSquareTest([10, 20, 30], [20, 20, 20])     // 1D goodness-of-fit
  * chiSquareTest([[10, 20], [30, 40]])           // 2D independence test
  */
-export function chiSquareTest(
-  observed: f64[] | f64[][],
-  expected?: f64[],
-): ChiSquareResult {
+export function chiSquareTest(observed: f64[] | f64[][], expected?: f64[]): ChiSquareResult {
   // 2D contingency table form
   if (Array.isArray(observed[0])) {
     const obs2d = observed as f64[][];
@@ -445,10 +442,7 @@ export function anova(groups: f64[][]): AnovaResult {
  * @example
  * kolmogorovSmirnovTest([0.1, 0.5, 0.9], (x) => x) // test against uniform(0,1)
  */
-export function kolmogorovSmirnovTest(
-  sample: f64[],
-  cdfFn?: (x: f64) => f64,
-): KSTestResult {
+export function kolmogorovSmirnovTest(sample: f64[], cdfFn?: (x: f64) => f64): KSTestResult {
   if (sample.length < 1) throw new Error('kolmogorovSmirnovTest: sample must be non-empty');
 
   const cdf = cdfFn || _normalCDF;
@@ -526,13 +520,13 @@ export function mannWhitneyTest(sample1: f64[], sample2: f64[]): MannWhitneyResu
     if (combined[k].group === 1) R1 += ranks[k];
   }
 
-  const U1 = R1 - n1 * (n1 + 1) / 2;
+  const U1 = R1 - (n1 * (n1 + 1)) / 2;
   const U2 = n1 * n2 - U1;
   const U = Math.min(U1, U2);
 
   // Normal approximation for p-value
-  const mu = n1 * n2 / 2;
-  const sigma = Math.sqrt(n1 * n2 * (n1 + n2 + 1) / 12);
+  const mu = (n1 * n2) / 2;
+  const sigma = Math.sqrt((n1 * n2 * (n1 + n2 + 1)) / 12);
   const z = sigma === 0 ? 0 : (U - mu) / sigma;
   const pValue = 2 * _normalCDF(z); // two-tailed
 
@@ -617,24 +611,18 @@ function _approxProbit(p: f64): f64 {
   if (p === 0.5) return 0;
 
   const a = [
-    -3.969683028665376e1, 2.209460984245205e2,
-    -2.759285104469687e2, 1.383577518672690e2,
-    -3.066479806614716e1, 2.506628277459239e0,
+    -3.969683028665376e1, 2.209460984245205e2, -2.759285104469687e2, 1.38357751867269e2,
+    -3.066479806614716e1, 2.506628277459239,
   ];
   const b = [
-    -5.447609879822406e1, 1.615858368580409e2,
-    -1.556989798598866e2, 6.680131188771972e1,
+    -5.447609879822406e1, 1.615858368580409e2, -1.556989798598866e2, 6.680131188771972e1,
     -1.328068155288572e1,
   ];
   const c = [
-    -7.784894002430293e-3, -3.223964580411365e-1,
-    -2.400758277161838e0, -2.549732539343734e0,
-    4.374664141464968e0, 2.938163982698783e0,
+    -7.784894002430293e-3, -3.223964580411365e-1, -2.400758277161838, -2.549732539343734,
+    4.374664141464968, 2.938163982698783,
   ];
-  const d = [
-    7.784695709041462e-3, 3.224671290700398e-1,
-    2.445134137142996e0, 3.754408661907416e0,
-  ];
+  const d = [7.784695709041462e-3, 3.224671290700398e-1, 2.445134137142996, 3.754408661907416];
 
   const pLow = 0.02425;
   const pHigh = 1 - pLow;
@@ -644,17 +632,23 @@ function _approxProbit(p: f64): f64 {
 
   if (p < pLow) {
     q = Math.sqrt(-2 * Math.log(p));
-    return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
-      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    return (
+      (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    );
   } else if (p <= pHigh) {
     q = p - 0.5;
     r = q * q;
-    return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
-      (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+    return (
+      ((((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q) /
+      (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1)
+    );
   } else {
     q = Math.sqrt(-2 * Math.log(1 - p));
-    return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
-      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    return (
+      -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    );
   }
 }
 
@@ -760,7 +754,7 @@ export function principalComponentAnalysis(data: f64[][], k?: number): PCAResult
   // ratios are correct even when k < p (partial extraction).
   let totalVar = 0;
   for (let i = 0; i < p; i++) totalVar += cov[i][i];
-  const explained = eigenvalues.map((ev) => totalVar > 0 ? Math.abs(ev) / totalVar : 0);
+  const explained = eigenvalues.map((ev) => (totalVar > 0 ? Math.abs(ev) / totalVar : 0));
 
   // Project data onto components (scores)
   const scores: f64[][] = centered.map((row) => {

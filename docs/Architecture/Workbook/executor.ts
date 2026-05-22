@@ -1,6 +1,6 @@
 /**
  * MathTS Scientific Workbook - Cell Executor
- * 
+ *
  * Executes cells and manages the execution context
  */
 
@@ -38,7 +38,7 @@ export class WorkbookExecutor {
 
   constructor(workbook: Workbook) {
     const graph = buildDependencyGraph(workbook);
-    
+
     this.context = {
       workbook,
       graph,
@@ -76,7 +76,7 @@ export class WorkbookExecutor {
    */
   async runAll(): Promise<Map<string, CellOutput>> {
     const order = topologicalSort(this.context.graph);
-    
+
     for (const cellId of order) {
       await this.runCell(cellId);
     }
@@ -110,7 +110,7 @@ export class WorkbookExecutor {
     updateStatus(this.context.graph, cellId, 'running');
 
     const startTime = performance.now();
-    
+
     try {
       const output = await this.executeCell(cell);
       const executionTime = performance.now() - startTime;
@@ -127,7 +127,7 @@ export class WorkbookExecutor {
         const stale = markStale(this.context.graph, cellId);
         if (stale.length > 1) {
           this.emit({ type: 'cell:stale', cellIds: stale.slice(1) });
-          
+
           // Auto-run stale cells
           for (const staleId of stale.slice(1)) {
             await this.runCell(staleId);
@@ -136,7 +136,6 @@ export class WorkbookExecutor {
       }
 
       return output;
-
     } catch (e) {
       const error: ErrorOutput = {
         name: e instanceof Error ? e.name : 'Error',
@@ -198,7 +197,7 @@ export class WorkbookExecutor {
 
     // Create a sandboxed execution environment
     const code = this.wrapCode(cell.code, scope);
-    
+
     // Capture stdout
     const stdout: string[] = [];
     const mockConsole = {
@@ -209,7 +208,7 @@ export class WorkbookExecutor {
 
     try {
       // Execute in async context
-      const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+      const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
       const fn = new AsyncFunction('console', '__scope__', code);
       const result = await fn(mockConsole, scope);
 
@@ -225,7 +224,6 @@ export class WorkbookExecutor {
         },
         stdout: stdout.length > 0 ? stdout.join('\n') : undefined,
       };
-
     } catch (e) {
       throw e;
     }
@@ -234,9 +232,9 @@ export class WorkbookExecutor {
   private async executeTensorCell(cell: TensorCell): Promise<CellOutput> {
     // TODO: Integrate with MathTS tensor engine
     // For now, parse and validate the tensor notation
-    
+
     const tensorDef = cell.tensor;
-    
+
     // Simple parser for tensor notation
     // Full implementation would use MathTS symbolic engine
     const result = {
@@ -283,9 +281,9 @@ export class WorkbookExecutor {
   private async executeVisualizationCell(cell: VisualizationCell): Promise<CellOutput> {
     // TODO: Integrate with Three.js / D3 / Plotly
     // For now, just validate the code
-    
+
     const scope = this.buildScope(cell.id);
-    
+
     return {
       result: {
         type: 'object',
@@ -326,15 +324,13 @@ export class WorkbookExecutor {
     const code = this.wrapCode(cell.test, { ...scope, assert: testUtils });
 
     try {
-      const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+      const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
       const fn = new AsyncFunction('assert', 'almostEqual', '__scope__', code);
-      
+
       const timeoutMs = cell.timeout ?? 5000;
       await Promise.race([
         fn(testUtils.assert, testUtils.almostEqual, scope),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Test timeout')), timeoutMs)
-        ),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Test timeout')), timeoutMs)),
       ]);
 
       return {
@@ -346,7 +342,6 @@ export class WorkbookExecutor {
           },
         },
       };
-
     } catch (e) {
       if (cell.critical) {
         throw e;
@@ -411,18 +406,18 @@ export class WorkbookExecutor {
   private wrapCode(code: string, scope: Record<string, unknown>): string {
     // Inject scope variables
     const scopeVars = Object.keys(scope)
-      .map(k => `const ${k} = __scope__["${k}"];`)
+      .map((k) => `const ${k} = __scope__["${k}"];`)
       .join('\n');
 
     // Handle exports
     const hasExport = /\bexport\s+/.test(code);
-    
+
     if (hasExport) {
       // Transform exports to return statement
       const transformed = code
         .replace(/export\s+\{([^}]+)\};?/g, 'return { $1 };')
         .replace(/export\s+(const|let|var)\s+/g, '$1 ');
-      
+
       return `${scopeVars}\n${transformed}`;
     }
 
@@ -449,13 +444,16 @@ export class WorkbookExecutor {
   }
 
   private parseCSV(csv: string): unknown[][] {
-    return csv.trim().split('\n').map(line => 
-      line.split(',').map(cell => {
-        const trimmed = cell.trim();
-        const num = Number(trimmed);
-        return isNaN(num) ? trimmed : num;
-      })
-    );
+    return csv
+      .trim()
+      .split('\n')
+      .map((line) =>
+        line.split(',').map((cell) => {
+          const trimmed = cell.trim();
+          const num = Number(trimmed);
+          return isNaN(num) ? trimmed : num;
+        })
+      );
   }
 
   // --------------------------------------------------------------------------

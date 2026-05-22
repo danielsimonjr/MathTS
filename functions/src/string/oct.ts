@@ -1,25 +1,25 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for oct formatting
 interface BigNumberType {
   // BigNumber placeholder
 }
 
-type NumericValue = number | bigint | BigNumberType
+type NumericValue = number | bigint | BigNumberType;
 
 interface FormatOptions {
-  notation: string
-  wordSize?: number | bigint
+  notation: string;
+  wordSize?: number | bigint;
 }
 
 interface OctDependencies {
-  typed: TypedFunction
-  format: (value: NumericValue, options: FormatOptions) => string
+  typed: TypedFunction;
+  format: (value: NumericValue, options: FormatOptions) => string;
 }
 
-const name = 'oct'
-const dependencies = ['typed', 'format']
+const name = 'oct';
+const dependencies = ['typed', 'format'];
 
 /**
  * Format a number as octal.
@@ -49,14 +49,14 @@ export const createOct = /* #__PURE__ */ factory(
   ({ typed, format }: OctDependencies) => {
     return typed(name, {
       'number | BigNumber': function (n: number | bigint): string {
-        return format(n, { notation: 'oct' })
+        return format(n, { notation: 'oct' });
       },
       'number | BigNumber, number | BigNumber': function (
         n: number | bigint,
         wordSize: number | bigint
       ): string {
-        return format(n, { notation: 'oct', wordSize })
-      }
-    })
+        return format(n, { notation: 'oct', wordSize });
+      },
+    });
   }
-)
+);

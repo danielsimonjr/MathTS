@@ -6,14 +6,7 @@
  * @packageDocumentation
  */
 
-import {
-  fft,
-  ifft,
-  fft2,
-  ifft2,
-  complex,
-  type ComplexNumber,
-} from './fft.js';
+import { fft, ifft, fft2, ifft2, complex, type ComplexNumber } from './fft.js';
 
 /**
  * Convolution mode - determines output size
@@ -224,10 +217,7 @@ export function xcorr(
  * @param mode - Output mode
  * @returns Auto-correlation result
  */
-export function autocorr(
-  x: number[] | Float64Array,
-  mode: ConvMode = 'full'
-): number[] {
+export function autocorr(x: number[] | Float64Array, mode: ConvMode = 'full'): number[] {
   return xcorr(x, x, mode);
 }
 
@@ -249,7 +239,7 @@ export function conv2Direct(
 
   const imageCols = image[0].length;
   const kernelRows = kernel.length;
-  if (kernelRows === 0) return image.map(row => [...row]);
+  if (kernelRows === 0) return image.map((row) => [...row]);
 
   const kernelCols = kernel[0].length;
 
@@ -297,9 +287,7 @@ export function conv2Direct(
       const validCols = imageCols - kernelCols + 1;
       const output: number[][] = [];
       for (let i = 0; i < validRows; i++) {
-        output.push(
-          result[kernelRows - 1 + i].slice(kernelCols - 1, kernelCols - 1 + validCols)
-        );
+        output.push(result[kernelRows - 1 + i].slice(kernelCols - 1, kernelCols - 1 + validCols));
       }
       return output;
     }
@@ -327,7 +315,7 @@ export function conv2FFT(
 
   const imageCols = image[0].length;
   const kernelRows = kernel.length;
-  if (kernelRows === 0) return image.map(row => [...row]);
+  if (kernelRows === 0) return image.map((row) => [...row]);
 
   const kernelCols = kernel[0].length;
 
@@ -369,10 +357,7 @@ export function conv2FFT(
     resultFFT.push([]);
     for (let j = 0; j < imageFFT[i].length; j++) {
       resultFFT[i].push(
-        complexMul(
-          imageFFT[i][j] || complex(0, 0),
-          kernelFFT[i]?.[j] || complex(0, 0)
-        )
+        complexMul(imageFFT[i][j] || complex(0, 0), kernelFFT[i]?.[j] || complex(0, 0))
       );
     }
   }
@@ -413,9 +398,7 @@ export function conv2FFT(
       const validCols = imageCols - kernelCols + 1;
       const output: number[][] = [];
       for (let i = 0; i < validRows; i++) {
-        output.push(
-          result[kernelRows - 1 + i].slice(kernelCols - 1, kernelCols - 1 + validCols)
-        );
+        output.push(result[kernelRows - 1 + i].slice(kernelCols - 1, kernelCols - 1 + validCols));
       }
       return output;
     }
@@ -449,11 +432,7 @@ export function conv2FFT(
  * const edges = conv2(image, sobelX, 'same');
  * ```
  */
-export function conv2(
-  image: number[][],
-  kernel: number[][],
-  mode: ConvMode = 'full'
-): number[][] {
+export function conv2(image: number[][], kernel: number[][], mode: ConvMode = 'full'): number[][] {
   const imageRows = image.length;
   const imageCols = image[0]?.length ?? 0;
   const kernelRows = kernel.length;

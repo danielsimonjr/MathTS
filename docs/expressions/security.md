@@ -14,6 +14,7 @@ The evaluator is a **tree-walking interpreter**. When you call `evaluate('expr')
 3. The closure is called with a scope that contains only the math namespace.
 
 At no point does the evaluator call:
+
 - `eval()`
 - `new Function()`
 - `setTimeout` / `setInterval`
@@ -40,11 +41,11 @@ scope you provide:
 import { evaluate } from '@danielsimonjr/mathts-functions';
 
 const scope = { x: 3 };
-evaluate('x * 2', scope);    // 6 — reads x from scope
+evaluate('x * 2', scope); // 6 — reads x from scope
 
 // Cannot escape scope:
 evaluate('process.exit(1)'); // throws: Undefined symbol 'process'
-evaluate('globalThis');      // throws: Undefined symbol 'globalThis'
+evaluate('globalThis'); // throws: Undefined symbol 'globalThis'
 ```
 
 By default `evaluate()` rejects scope-mutating expressions. Assignment (`y = 99`)
@@ -52,7 +53,7 @@ and function definitions (`f(x) = x^2`) throw a `Security:` error unless you opt
 in with `{ unsafe: true }`:
 
 ```typescript
-evaluate('y = 99', scope);                  // throws: Security: assignment expressions are disabled
+evaluate('y = 99', scope); // throws: Security: assignment expressions are disabled
 evaluate('y = 99', scope, { unsafe: true }); // 99 — writes y to scope
 ```
 
@@ -60,18 +61,18 @@ evaluate('y = 99', scope, { unsafe: true }); // 99 — writes y to scope
 
 ## What expressions can do
 
-| Action | Allowed | Notes |
-|---|---|---|
-| Arithmetic | Yes | All operators |
-| Call math functions | Yes | Functions in the math scope only |
-| Read scope variables | Yes | Only variables you placed there |
-| Write scope variables | Opt-in | Rejected by default; requires `{ unsafe: true }` |
-| Define functions | Opt-in | Rejected by default; requires `{ unsafe: true }` |
-| Access JavaScript globals | No | Not in scope |
-| Call arbitrary JS code | No | No code generation |
-| Import modules | No | `import` is a forbidden function |
-| Access the file system | No | Not in scope |
-| Infinite loops | Partially | `for`/`while` don't exist; recursion can stack-overflow |
+| Action                    | Allowed   | Notes                                                   |
+| ------------------------- | --------- | ------------------------------------------------------- |
+| Arithmetic                | Yes       | All operators                                           |
+| Call math functions       | Yes       | Functions in the math scope only                        |
+| Read scope variables      | Yes       | Only variables you placed there                         |
+| Write scope variables     | Opt-in    | Rejected by default; requires `{ unsafe: true }`        |
+| Define functions          | Opt-in    | Rejected by default; requires `{ unsafe: true }`        |
+| Access JavaScript globals | No        | Not in scope                                            |
+| Call arbitrary JS code    | No        | No code generation                                      |
+| Import modules            | No        | `import` is a forbidden function                        |
+| Access the file system    | No        | Not in scope                                            |
+| Infinite loops            | Partially | `for`/`while` don't exist; recursion can stack-overflow |
 
 ---
 

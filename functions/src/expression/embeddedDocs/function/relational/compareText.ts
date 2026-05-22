@@ -13,7 +13,7 @@ export const compareTextDocs = {
     'compare("2", "10")',
     'compare(2, 10)',
     'compareNatural("2", "10")',
-    'compareText("B", ["A", "B", "C"])'
+    'compareText("B", ["A", "B", "C"])',
   ],
-  seealso: ['compare', 'compareNatural']
-}
+  seealso: ['compare', 'compareNatural'],
+};

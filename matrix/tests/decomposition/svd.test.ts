@@ -48,9 +48,7 @@ function matmul(A: number[][], B: number[][]): number[][] {
 function transpose(A: number[][]): number[][] {
   const m = A.length;
   const n = A[0]?.length || 0;
-  return Array.from({ length: n }, (_, j) =>
-    Array.from({ length: m }, (_, i) => A[i][j])
-  );
+  return Array.from({ length: n }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
 }
 
 /**
@@ -158,8 +156,8 @@ describe('Singular Value Decomposition', () => {
     });
   });
 
-  describe('SVD factorization A = U*S*V\'', () => {
-    it('should satisfy A = U*S*V\' for square matrix', () => {
+  describe("SVD factorization A = U*S*V'", () => {
+    it("should satisfy A = U*S*V' for square matrix", () => {
       const A = [
         [1, 2],
         [3, 4],
@@ -179,7 +177,7 @@ describe('Singular Value Decomposition', () => {
     // Known limitation: SVD returns reduced matrices (U: m x min(m,n) instead of m x m).
     // The sorting code only keeps columns corresponding to singular values.
     // Full matrix reconstruction requires fullMatrices option implementation.
-    it.skip('should satisfy A = U*S*V\' for tall matrix (requires full matrix support)', () => {
+    it.skip("should satisfy A = U*S*V' for tall matrix (requires full matrix support)", () => {
       const A = [
         [1, 2],
         [3, 4],
@@ -198,7 +196,7 @@ describe('Singular Value Decomposition', () => {
       expect(matDiff(A, USV)).toBeLessThan(1e-6 * aNorm);
     });
 
-    it('should satisfy A = U*S*V\' for wide matrix', () => {
+    it("should satisfy A = U*S*V' for wide matrix", () => {
       const A = [
         [1, 2, 3],
         [4, 5, 6],

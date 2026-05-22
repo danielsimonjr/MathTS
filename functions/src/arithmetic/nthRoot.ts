@@ -1,68 +1,62 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js'
-import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js'
-import { createMatAlgo06xS0S0 } from '../type/matrix/utils/matAlgo06xS0S0.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import { nthRootNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
+import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
+import { createMatAlgo06xS0S0 } from '../type/matrix/utils/matAlgo06xS0S0.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import { nthRootNumber } from '../plain/number/index.js';
 
 // Type definitions for nthRoot
 interface BigNumberType {
-  isNegative(): boolean
-  isZero(): boolean
-  isFinite(): boolean
-  isNeg(): boolean
-  neg(): BigNumberType
-  abs(): BigNumberType
-  pow(exp: BigNumberType): BigNumberType
-  div(other: BigNumberType): BigNumberType
-  mod(n: number): BigNumberType
-  equals(n: number): boolean
-  toPrecision(digits: number): string
+  isNegative(): boolean;
+  isZero(): boolean;
+  isFinite(): boolean;
+  isNeg(): boolean;
+  neg(): BigNumberType;
+  abs(): BigNumberType;
+  pow(exp: BigNumberType): BigNumberType;
+  div(other: BigNumberType): BigNumberType;
+  mod(n: number): BigNumberType;
+  equals(n: number): boolean;
+  toPrecision(digits: number): string;
 }
 
 interface BigNumberConstructor {
-  new (value: number | string | BigNumberType): BigNumberType
-  precision: number
-  clone(config: { precision: number }): BigNumberConstructor
+  new (value: number | string | BigNumberType): BigNumberType;
+  precision: number;
+  clone(config: { precision: number }): BigNumberConstructor;
 }
 
 interface MatrixType {
-  density(): number
-  valueOf(): unknown[]
+  density(): number;
+  valueOf(): unknown[];
 }
 
 interface NthRootDependencies {
-  typed: TypedFunction
-  matrix: (data: unknown) => MatrixType
-  equalScalar: TypedFunction
-  BigNumber: BigNumberConstructor
-  concat: TypedFunction
+  typed: TypedFunction;
+  matrix: (data: unknown) => MatrixType;
+  equalScalar: TypedFunction;
+  BigNumber: BigNumberConstructor;
+  concat: TypedFunction;
 }
 
-const name = 'nthRoot'
-const dependencies = ['typed', 'matrix', 'equalScalar', 'BigNumber', 'concat']
+const name = 'nthRoot';
+const dependencies = ['typed', 'matrix', 'equalScalar', 'BigNumber', 'concat'];
 
 export const createNthRoot = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    equalScalar,
-    BigNumber,
-    concat
-  }: NthRootDependencies): TypedFunction => {
-    const matAlgo01xDSid = createMatAlgo01xDSid({ typed })
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar })
-    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed, equalScalar })
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
+  ({ typed, matrix, equalScalar, BigNumber, concat }: NthRootDependencies): TypedFunction => {
+    const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
+    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed, equalScalar });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Calculate the nth root of a value.
@@ -94,9 +88,7 @@ export const createNthRoot = /* #__PURE__ */ factory(
      * @return {number | Complex | Array | Matrix} Returns the nth root of `a`
      */
     function complexErr(): never {
-      throw new Error(
-        'Complex number not supported in function nthRoot. Use nthRoots instead.'
-      )
+      throw new Error('Complex number not supported in function nthRoot. Use nthRoots instead.');
     }
 
     return typed(
@@ -130,33 +122,27 @@ export const createNthRoot = /* #__PURE__ */ factory(
               selfSn(x, 2)
         ),
 
-        'SparseMatrix, SparseMatrix': typed.referToSelf(
-          (self: any) =>
-            (x: any, y: any): any => {
-              // density must be one (no zeros in matrix)
-              if (y.density() === 1) {
-                // sparse + sparse
-                return matAlgo06xS0S0(x, y, self)
-              } else {
-                // throw exception
-                throw new Error('Root must be non-zero')
-              }
-            }
-        ),
+        'SparseMatrix, SparseMatrix': typed.referToSelf((self: any) => (x: any, y: any): any => {
+          // density must be one (no zeros in matrix)
+          if (y.density() === 1) {
+            // sparse + sparse
+            return matAlgo06xS0S0(x, y, self);
+          } else {
+            // throw exception
+            throw new Error('Root must be non-zero');
+          }
+        }),
 
-        'DenseMatrix, SparseMatrix': typed.referToSelf(
-          (self: any) =>
-            (x: any, y: any): any => {
-              // density must be one (no zeros in matrix)
-              if (y.density() === 1) {
-                // dense + sparse
-                return matAlgo01xDSid(x, y, self, false)
-              } else {
-                // throw exception
-                throw new Error('Root must be non-zero')
-              }
-            }
-        ),
+        'DenseMatrix, SparseMatrix': typed.referToSelf((self: any) => (x: any, y: any): any => {
+          // density must be one (no zeros in matrix)
+          if (y.density() === 1) {
+            // dense + sparse
+            return matAlgo01xDSid(x, y, self, false);
+          } else {
+            // throw exception
+            throw new Error('Root must be non-zero');
+          }
+        }),
 
         'Array, SparseMatrix': (typed as any).referTo(
           'DenseMatrix,SparseMatrix',
@@ -171,21 +157,21 @@ export const createNthRoot = /* #__PURE__ */ factory(
               // density must be one (no zeros in matrix)
               if (y.density() === 1) {
                 // sparse - scalar
-                return matAlgo11xS0s(y, x, self, true)
+                return matAlgo11xS0s(y, x, self, true);
               } else {
                 // throw exception
-                throw new Error('Root must be non-zero')
+                throw new Error('Root must be non-zero');
               }
             }
-        )
+        ),
       },
       matrixAlgorithmSuite({
         scalar: 'number | BigNumber',
         SD: matAlgo02xDS0 as any,
         Ss: matAlgo11xS0s as any,
-        sS: false
+        sS: false,
       })
-    ) as TypedFunction
+    ) as TypedFunction;
 
     /**
      * Calculate the nth root of a for BigNumbers, solve x^root == a
@@ -194,43 +180,40 @@ export const createNthRoot = /* #__PURE__ */ factory(
      * @param {BigNumber} root
      * @private
      */
-    function _bigNthRoot(
-      a: BigNumberType,
-      root: BigNumberType
-    ): BigNumberType | number {
-      const precision = BigNumber.precision
-      const Big = BigNumber.clone({ precision: precision + 2 })
-      const zero = new BigNumber(0)
+    function _bigNthRoot(a: BigNumberType, root: BigNumberType): BigNumberType | number {
+      const precision = BigNumber.precision;
+      const Big = BigNumber.clone({ precision: precision + 2 });
+      const zero = new BigNumber(0);
 
-      const one = new Big(1)
-      const inv = root.isNegative()
+      const one = new Big(1);
+      const inv = root.isNegative();
       if (inv) {
-        root = root.neg()
+        root = root.neg();
       }
 
       if (root.isZero()) {
-        throw new Error('Root must be non-zero')
+        throw new Error('Root must be non-zero');
       }
       if (a.isNegative() && !root.abs().mod(2).equals(1)) {
-        throw new Error('Root must be odd when a is negative.')
+        throw new Error('Root must be odd when a is negative.');
       }
 
       // edge cases zero and infinity
       if (a.isZero()) {
-        return inv ? new Big(Infinity) : 0
+        return inv ? new Big(Infinity) : 0;
       }
       if (!a.isFinite()) {
-        return inv ? zero : a
+        return inv ? zero : a;
       }
 
-      let x = a.abs().pow(one.div(root))
+      let x = a.abs().pow(one.div(root));
       // If a < 0, we require that root is an odd integer,
       // so (-1) ^ (1/root) = -1
-      x = a.isNeg() ? x.neg() : x
-      return new BigNumber((inv ? one.div(x) : x).toPrecision(precision))
+      x = a.isNeg() ? x.neg() : x;
+      return new BigNumber((inv ? one.div(x) : x).toPrecision(precision));
     }
   }
-)
+);
 
 export const createNthRootNumber = /* #__PURE__ */ factory(
   name,
@@ -238,7 +221,7 @@ export const createNthRootNumber = /* #__PURE__ */ factory(
   ({ typed }: { typed: TypedFunction }): TypedFunction => {
     return typed(name, {
       number: nthRootNumber,
-      'number, number': nthRootNumber
-    }) as TypedFunction
+      'number, number': nthRootNumber,
+    }) as TypedFunction;
   }
-)
+);

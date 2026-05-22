@@ -197,7 +197,7 @@ export function array_dot(a: Float64Array, b: Float64Array): f64 {
 export function array_add(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) + unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) + unchecked(b[i])));
   }
 }
 
@@ -207,7 +207,7 @@ export function array_add(a: Float64Array, b: Float64Array, result: Float64Array
 export function array_sub(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) - unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) - unchecked(b[i])));
   }
 }
 
@@ -217,7 +217,7 @@ export function array_sub(a: Float64Array, b: Float64Array, result: Float64Array
 export function array_mul(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) * unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) * unchecked(b[i])));
   }
 }
 
@@ -227,7 +227,7 @@ export function array_mul(a: Float64Array, b: Float64Array, result: Float64Array
 export function array_div(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) / unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) / unchecked(b[i])));
   }
 }
 
@@ -237,7 +237,7 @@ export function array_div(a: Float64Array, b: Float64Array, result: Float64Array
 export function array_scale(a: Float64Array, scalar: f64, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) * scalar);
+    unchecked((result[i] = unchecked(a[i]) * scalar));
   }
 }
 
@@ -247,7 +247,7 @@ export function array_scale(a: Float64Array, scalar: f64, result: Float64Array):
 export function array_add_scalar(a: Float64Array, scalar: f64, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) + scalar);
+    unchecked((result[i] = unchecked(a[i]) + scalar));
   }
 }
 
@@ -257,7 +257,7 @@ export function array_add_scalar(a: Float64Array, scalar: f64, result: Float64Ar
 export function array_neg(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = -unchecked(a[i]));
+    unchecked((result[i] = -unchecked(a[i])));
   }
 }
 
@@ -267,7 +267,7 @@ export function array_neg(a: Float64Array, result: Float64Array): void {
 export function array_abs(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = abs(unchecked(a[i])));
+    unchecked((result[i] = abs(unchecked(a[i]))));
   }
 }
 
@@ -277,7 +277,7 @@ export function array_abs(a: Float64Array, result: Float64Array): void {
 export function array_sqrt(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = sqrt(unchecked(a[i])));
+    unchecked((result[i] = sqrt(unchecked(a[i]))));
   }
 }
 
@@ -288,7 +288,7 @@ export function array_square(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
     const val = unchecked(a[i]);
-    unchecked(result[i] = val * val);
+    unchecked((result[i] = val * val));
   }
 }
 
@@ -298,7 +298,7 @@ export function array_square(a: Float64Array, result: Float64Array): void {
 export function array_exp(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = Math.exp(unchecked(a[i])));
+    unchecked((result[i] = Math.exp(unchecked(a[i]))));
   }
 }
 
@@ -308,7 +308,7 @@ export function array_exp(a: Float64Array, result: Float64Array): void {
 export function array_log(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = Math.log(unchecked(a[i])));
+    unchecked((result[i] = Math.log(unchecked(a[i]))));
   }
 }
 
@@ -318,7 +318,7 @@ export function array_log(a: Float64Array, result: Float64Array): void {
 export function array_sin(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = Math.sin(unchecked(a[i])));
+    unchecked((result[i] = Math.sin(unchecked(a[i]))));
   }
 }
 
@@ -328,7 +328,7 @@ export function array_sin(a: Float64Array, result: Float64Array): void {
 export function array_cos(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = Math.cos(unchecked(a[i])));
+    unchecked((result[i] = Math.cos(unchecked(a[i]))));
   }
 }
 
@@ -340,13 +340,15 @@ export function array_cos(a: Float64Array, result: Float64Array): void {
  * Linear combination: result = alpha*a + beta*b (AXPBY)
  */
 export function array_axpby(
-  alpha: f64, a: Float64Array,
-  beta: f64, b: Float64Array,
+  alpha: f64,
+  a: Float64Array,
+  beta: f64,
+  b: Float64Array,
   result: Float64Array
 ): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = alpha * unchecked(a[i]) + beta * unchecked(b[i]));
+    unchecked((result[i] = alpha * unchecked(a[i]) + beta * unchecked(b[i])));
   }
 }
 
@@ -384,7 +386,7 @@ export function array_cosine_similarity(a: Float64Array, b: Float64Array): f64 {
 export function array_scale_inplace(a: Float64Array, scalar: f64): void {
   const len = a.length;
   for (let i = 0; i < len; i++) {
-    unchecked(a[i] = unchecked(a[i]) * scalar);
+    unchecked((a[i] = unchecked(a[i]) * scalar));
   }
 }
 
@@ -394,7 +396,7 @@ export function array_scale_inplace(a: Float64Array, scalar: f64): void {
 export function array_add_scalar_inplace(a: Float64Array, scalar: f64): void {
   const len = a.length;
   for (let i = 0; i < len; i++) {
-    unchecked(a[i] = unchecked(a[i]) + scalar);
+    unchecked((a[i] = unchecked(a[i]) + scalar));
   }
 }
 
@@ -404,7 +406,7 @@ export function array_add_scalar_inplace(a: Float64Array, scalar: f64): void {
 export function array_add_inplace(a: Float64Array, b: Float64Array): void {
   const len = min(a.length, b.length);
   for (let i = 0; i < len; i++) {
-    unchecked(a[i] = unchecked(a[i]) + unchecked(b[i]));
+    unchecked((a[i] = unchecked(a[i]) + unchecked(b[i])));
   }
 }
 
@@ -415,7 +417,7 @@ export function array_clamp_inplace(a: Float64Array, lo: f64, hi: f64): void {
   const len = a.length;
   for (let i = 0; i < len; i++) {
     const val = unchecked(a[i]);
-    unchecked(a[i] = max(lo, min(hi, val)));
+    unchecked((a[i] = max(lo, min(hi, val))));
   }
 }
 
@@ -425,7 +427,7 @@ export function array_clamp_inplace(a: Float64Array, lo: f64, hi: f64): void {
 export function array_fill(a: Float64Array, value: f64): void {
   const len = a.length;
   for (let i = 0; i < len; i++) {
-    unchecked(a[i] = value);
+    unchecked((a[i] = value));
   }
 }
 
@@ -435,6 +437,6 @@ export function array_fill(a: Float64Array, value: f64): void {
 export function array_copy(src: Float64Array, dst: Float64Array): void {
   const len = min(src.length, dst.length);
   for (let i = 0; i < len; i++) {
-    unchecked(dst[i] = unchecked(src[i]));
+    unchecked((dst[i] = unchecked(src[i])));
   }
 }

@@ -50,9 +50,7 @@
       "package": {
         "name": "@danielsimonjr/mathts-core",
         "version": "0.1.2",
-        "dependencies": [
-          "typed-function"
-        ],
+        "dependencies": ["typed-function"],
         "scripts": [
           "build",
           "dev",
@@ -76,10 +74,7 @@
       "package": {
         "name": "@danielsimonjr/mathts-matrix",
         "version": "0.1.2",
-        "dependencies": [
-          "@danielsimonjr/mathts-core",
-          "@danielsimonjr/mathts-parallel"
-        ],
+        "dependencies": ["@danielsimonjr/mathts-core", "@danielsimonjr/mathts-parallel"],
         "scripts": [
           "build",
           "dev",
@@ -141,9 +136,7 @@
       "package": {
         "name": "@danielsimonjr/mathts-parallel",
         "version": "0.1.2",
-        "dependencies": [
-          "@danielsimonjr/mathts-workerpool"
-        ],
+        "dependencies": ["@danielsimonjr/mathts-workerpool"],
         "scripts": [
           "build",
           "dev",
@@ -167,10 +160,7 @@
       "package": {
         "name": "@danielsimonjr/mathts-expression",
         "version": "0.1.2",
-        "dependencies": [
-          "@danielsimonjr/mathts-core",
-          "typed-function"
-        ],
+        "dependencies": ["@danielsimonjr/mathts-core", "typed-function"],
         "scripts": [
           "build",
           "dev",
@@ -194,10 +184,7 @@
       "package": {
         "name": "@danielsimonjr/mathts-workbook",
         "version": "0.1.2",
-        "dependencies": [
-          "@danielsimonjr/mathts-core",
-          "yaml"
-        ],
+        "dependencies": ["@danielsimonjr/mathts-core", "yaml"],
         "scripts": [
           "build",
           "dev",
@@ -227,13 +214,7 @@
           "@danielsimonjr/mathts-matrix",
           "@danielsimonjr/mathts-parallel"
         ],
-        "scripts": [
-          "build",
-          "dev",
-          "typecheck",
-          "test",
-          "build:prod"
-        ]
+        "scripts": ["build", "dev", "typecheck", "test", "build:prod"]
       },
       "source_files": 3,
       "source_lines": 883,
@@ -267,9 +248,7 @@
       "package": {
         "name": "@danielsimonjr/mathts-typed-function",
         "version": "0.1.2",
-        "dependencies": [
-          "typed-function"
-        ],
+        "dependencies": ["typed-function"],
         "scripts": [
           "build",
           "dev",
@@ -293,9 +272,7 @@
       "package": {
         "name": "@danielsimonjr/mathts-workerpool",
         "version": "0.1.2",
-        "dependencies": [
-          "workerpool"
-        ],
+        "dependencies": ["workerpool"],
         "scripts": [
           "build",
           "dev",
@@ -405,13 +382,7 @@
         "toString",
         "valueOf"
       ],
-      "static_methods": [
-        "compare",
-        "fromJSON",
-        "fromNumber",
-        "fromPolar",
-        "parse"
-      ],
+      "static_methods": ["compare", "fromJSON", "fromNumber", "fromPolar", "parse"],
       "method_count": 83
     },
     "Fraction": {
@@ -719,12 +690,7 @@
     "integration": {
       "file": "functions/src/typed/integration.ts",
       "lines": 206,
-      "exports": [
-        "trapz",
-        "simpson",
-        "gaussQuad",
-        "romberg"
-      ],
+      "exports": ["trapz", "simpson", "gaussQuad", "romberg"],
       "export_count": 4
     },
     "interpolation": {
@@ -835,9 +801,7 @@
     "typed-bridge": {
       "file": "functions/src/typed/typed-bridge.ts",
       "lines": 14,
-      "exports": [
-        "initTypeBridge"
-      ],
+      "exports": ["initTypeBridge"],
       "export_count": 1
     }
   },
@@ -868,21 +832,12 @@
         {
           "name": "leafCount",
           "creator": "createLeafCount",
-          "deps": [
-            "parse",
-            "typed"
-          ]
+          "deps": ["parse", "typed"]
         },
         {
           "name": "lyap",
           "creator": "createLyap",
-          "deps": [
-            "typed",
-            "matrix",
-            "sylvester",
-            "multiply",
-            "transpose"
-          ]
+          "deps": ["typed", "matrix", "sylvester", "multiply", "transpose"]
         },
         {
           "name": "polynomialRoot",
@@ -1039,12 +994,7 @@
         {
           "name": "symbolicEqual",
           "creator": "createSymbolicEqual",
-          "deps": [
-            "parse",
-            "simplify",
-            "typed",
-            "OperatorNode"
-          ]
+          "deps": ["parse", "simplify", "typed", "OperatorNode"]
         },
         {
           "name": "lup",
@@ -1089,15 +1039,7 @@
         {
           "name": "schur",
           "creator": "createSchur",
-          "deps": [
-            "typed",
-            "matrix",
-            "identity",
-            "multiply",
-            "qr",
-            "norm",
-            "subtract"
-          ]
+          "deps": ["typed", "matrix", "identity", "multiply", "qr", "norm", "subtract"]
         },
         {
           "name": "slu",
@@ -1118,11 +1060,7 @@
         {
           "name": "simplifyUtil",
           "creator": "createUtil",
-          "deps": [
-            "FunctionNode",
-            "OperatorNode",
-            "SymbolNode"
-          ]
+          "deps": ["FunctionNode", "OperatorNode", "SymbolNode"]
         },
         {
           "name": "lsolve",
@@ -1153,15 +1091,7 @@
         {
           "name": "lusolve",
           "creator": "createLusolve",
-          "deps": [
-            "typed",
-            "matrix",
-            "lup",
-            "slu",
-            "usolve",
-            "lsolve",
-            "DenseMatrix"
-          ]
+          "deps": ["typed", "matrix", "lup", "slu", "usolve", "lsolve", "DenseMatrix"]
         },
         {
           "name": "usolve",
@@ -1192,11 +1122,7 @@
         {
           "name": "csAmd",
           "creator": "createCsAmd",
-          "deps": [
-            "add",
-            "multiply",
-            "transpose"
-          ]
+          "deps": ["add", "multiply", "transpose"]
         },
         {
           "name": "csChol",
@@ -1217,9 +1143,7 @@
         {
           "name": "csCounts",
           "creator": "createCsCounts",
-          "deps": [
-            "transpose"
-          ]
+          "deps": ["transpose"]
         },
         {
           "name": "csLu",
@@ -1237,28 +1161,17 @@
         {
           "name": "csSpsolve",
           "creator": "createCsSpsolve",
-          "deps": [
-            "divideScalar",
-            "multiply",
-            "subtract"
-          ]
+          "deps": ["divideScalar", "multiply", "subtract"]
         },
         {
           "name": "csSqr",
           "creator": "createCsSqr",
-          "deps": [
-            "add",
-            "multiply",
-            "transpose"
-          ]
+          "deps": ["add", "multiply", "transpose"]
         },
         {
           "name": "csSymperm",
           "creator": "createCsSymperm",
-          "deps": [
-            "conj",
-            "SparseMatrix"
-          ]
+          "deps": ["conj", "SparseMatrix"]
         }
       ]
     },
@@ -1270,9 +1183,7 @@
         {
           "name": "abs",
           "creator": "createAbs",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "add",
@@ -1291,9 +1202,7 @@
         {
           "name": "addScalar",
           "creator": "createAddScalar",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "cbrt",
@@ -1312,22 +1221,12 @@
         {
           "name": "ceil",
           "creator": "createCeilNumber",
-          "deps": [
-            "typed",
-            "config",
-            "round",
-            "matrix",
-            "equalScalar",
-            "zeros",
-            "DenseMatrix"
-          ]
+          "deps": ["typed", "config", "round", "matrix", "equalScalar", "zeros", "DenseMatrix"]
         },
         {
           "name": "cube",
           "creator": "createCube",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "divide",
@@ -1345,10 +1244,7 @@
         {
           "name": "divideScalar",
           "creator": "createDivideScalar",
-          "deps": [
-            "typed",
-            "numeric"
-          ]
+          "deps": ["typed", "numeric"]
         },
         {
           "name": "dotDivide",
@@ -1366,41 +1262,22 @@
         {
           "name": "dotMultiply",
           "creator": "createDotMultiply",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "multiplyScalar",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "multiplyScalar", "concat"]
         },
         {
           "name": "dotPow",
           "creator": "createDotPow",
-          "deps": [
-            "typed",
-            "equalScalar",
-            "matrix",
-            "pow",
-            "DenseMatrix",
-            "concat",
-            "SparseMatrix"
-          ]
+          "deps": ["typed", "equalScalar", "matrix", "pow", "DenseMatrix", "concat", "SparseMatrix"]
         },
         {
           "name": "exp",
           "creator": "createExp",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "expm1",
           "creator": "createExpm1",
-          "deps": [
-            "typed",
-            "Complex"
-          ]
+          "deps": ["typed", "Complex"]
         },
         {
           "name": "fix",
@@ -1419,15 +1296,7 @@
         {
           "name": "floor",
           "creator": "createFloorNumber",
-          "deps": [
-            "typed",
-            "config",
-            "round",
-            "matrix",
-            "equalScalar",
-            "zeros",
-            "DenseMatrix"
-          ]
+          "deps": ["typed", "config", "round", "matrix", "equalScalar", "zeros", "DenseMatrix"]
         },
         {
           "name": "gcd",
@@ -1476,52 +1345,27 @@
         {
           "name": "lcm",
           "creator": "createLcm",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "concat"]
         },
         {
           "name": "log",
           "creator": "createLog",
-          "deps": [
-            "config",
-            "typed",
-            "typeOf",
-            "divideScalar",
-            "Complex"
-          ]
+          "deps": ["config", "typed", "typeOf", "divideScalar", "Complex"]
         },
         {
           "name": "log10",
           "creator": "createLog10",
-          "deps": [
-            "typed",
-            "config",
-            "Complex"
-          ]
+          "deps": ["typed", "config", "Complex"]
         },
         {
           "name": "log1p",
           "creator": "createLog1p",
-          "deps": [
-            "typed",
-            "config",
-            "divideScalar",
-            "log",
-            "Complex"
-          ]
+          "deps": ["typed", "config", "divideScalar", "log", "Complex"]
         },
         {
           "name": "log2",
           "creator": "createLog2",
-          "deps": [
-            "typed",
-            "config",
-            "Complex"
-          ]
+          "deps": ["typed", "config", "Complex"]
         },
         {
           "name": "mod",
@@ -1553,9 +1397,7 @@
         {
           "name": "multiplyScalar",
           "creator": "createMultiplyScalar",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "norm",
@@ -1579,23 +1421,12 @@
         {
           "name": "nthRoot",
           "creator": "createNthRoot",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "BigNumber",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "BigNumber", "concat"]
         },
         {
           "name": "nthRoots",
           "creator": "createNthRoots",
-          "deps": [
-            "config",
-            "typed",
-            "divideScalar",
-            "Complex"
-          ]
+          "deps": ["config", "typed", "divideScalar", "Complex"]
         },
         {
           "name": "pow",
@@ -1615,41 +1446,22 @@
         {
           "name": "round",
           "creator": "createRound",
-          "deps": [
-            "typed",
-            "config",
-            "matrix",
-            "equalScalar",
-            "zeros",
-            "BigNumber",
-            "DenseMatrix"
-          ]
+          "deps": ["typed", "config", "matrix", "equalScalar", "zeros", "BigNumber", "DenseMatrix"]
         },
         {
           "name": "sign",
           "creator": "createSign",
-          "deps": [
-            "typed",
-            "BigNumber",
-            "complex",
-            "Fraction"
-          ]
+          "deps": ["typed", "BigNumber", "complex", "Fraction"]
         },
         {
           "name": "sqrt",
           "creator": "createSqrt",
-          "deps": [
-            "config",
-            "typed",
-            "Complex"
-          ]
+          "deps": ["config", "typed", "Complex"]
         },
         {
           "name": "square",
           "creator": "createSquare",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "subtract",
@@ -1668,45 +1480,27 @@
         {
           "name": "subtractScalar",
           "creator": "createSubtractScalar",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "unaryMinus",
           "creator": "createUnaryMinus",
-          "deps": [
-            "typed",
-            "config",
-            "?bignumber"
-          ]
+          "deps": ["typed", "config", "?bignumber"]
         },
         {
           "name": "unaryPlus",
           "creator": "createUnaryPlus",
-          "deps": [
-            "typed",
-            "config",
-            "numeric"
-          ]
+          "deps": ["typed", "config", "numeric"]
         },
         {
           "name": "xgcd",
           "creator": "createXgcd",
-          "deps": [
-            "typed",
-            "config",
-            "matrix",
-            "BigNumber"
-          ]
+          "deps": ["typed", "config", "matrix", "BigNumber"]
         },
         {
           "name": "nodeOperations",
           "creator": "createNodeOperations",
-          "deps": [
-            "ConstantNode",
-            "OperatorNode"
-          ]
+          "deps": ["ConstantNode", "OperatorNode"]
         }
       ]
     },
@@ -1718,77 +1512,37 @@
         {
           "name": "bitAnd",
           "creator": "createBitAnd",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "concat"]
         },
         {
           "name": "bitNot",
           "creator": "createBitNot",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "bitOr",
           "creator": "createBitOr",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "DenseMatrix",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "DenseMatrix", "concat"]
         },
         {
           "name": "bitXor",
           "creator": "createBitXor",
-          "deps": [
-            "typed",
-            "matrix",
-            "DenseMatrix",
-            "concat",
-            "SparseMatrix"
-          ]
+          "deps": ["typed", "matrix", "DenseMatrix", "concat", "SparseMatrix"]
         },
         {
           "name": "leftShift",
           "creator": "createLeftShift",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "zeros",
-            "DenseMatrix",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "zeros", "DenseMatrix", "concat"]
         },
         {
           "name": "rightArithShift",
           "creator": "createRightArithShift",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "zeros",
-            "DenseMatrix",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "zeros", "DenseMatrix", "concat"]
         },
         {
           "name": "rightLogShift",
           "creator": "createRightLogShift",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "zeros",
-            "DenseMatrix",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "zeros", "DenseMatrix", "concat"]
         }
       ]
     },
@@ -1800,13 +1554,7 @@
         {
           "name": "bellNumbers",
           "creator": "createBellNumbers",
-          "deps": [
-            "typed",
-            "addScalar",
-            "isNegative",
-            "isInteger",
-            "stirlingS2"
-          ]
+          "deps": ["typed", "addScalar", "isNegative", "isInteger", "stirlingS2"]
         },
         {
           "name": "catalan",
@@ -1863,30 +1611,22 @@
         {
           "name": "arg",
           "creator": "createArg",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "conj",
           "creator": "createConj",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "im",
           "creator": "createIm",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "re",
           "creator": "createRe",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         }
       ]
     },
@@ -1940,54 +1680,27 @@
         {
           "name": "and",
           "creator": "createAnd",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "zeros",
-            "not",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "zeros", "not", "concat"]
         },
         {
           "name": "not",
           "creator": "createNot",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "nullish",
           "creator": "createNullish",
-          "deps": [
-            "typed",
-            "matrix",
-            "size",
-            "flatten",
-            "deepEqual"
-          ]
+          "deps": ["typed", "matrix", "size", "flatten", "deepEqual"]
         },
         {
           "name": "or",
           "creator": "createOr",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "DenseMatrix",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "DenseMatrix", "concat"]
         },
         {
           "name": "xor",
           "creator": "createXor",
-          "deps": [
-            "typed",
-            "matrix",
-            "DenseMatrix",
-            "concat",
-            "SparseMatrix"
-          ]
+          "deps": ["typed", "matrix", "DenseMatrix", "concat", "SparseMatrix"]
         }
       ]
     },
@@ -1999,49 +1712,27 @@
         {
           "name": "column",
           "creator": "createColumn",
-          "deps": [
-            "typed",
-            "Index",
-            "matrix",
-            "range"
-          ]
+          "deps": ["typed", "Index", "matrix", "range"]
         },
         {
           "name": "concat",
           "creator": "createConcat",
-          "deps": [
-            "typed",
-            "matrix",
-            "isInteger"
-          ]
+          "deps": ["typed", "matrix", "isInteger"]
         },
         {
           "name": "count",
           "creator": "createCount",
-          "deps": [
-            "typed",
-            "size",
-            "prod"
-          ]
+          "deps": ["typed", "size", "prod"]
         },
         {
           "name": "cross",
           "creator": "createCross",
-          "deps": [
-            "typed",
-            "matrix",
-            "subtract",
-            "multiply"
-          ]
+          "deps": ["typed", "matrix", "subtract", "multiply"]
         },
         {
           "name": "ctranspose",
           "creator": "createCtranspose",
-          "deps": [
-            "typed",
-            "transpose",
-            "conj"
-          ]
+          "deps": ["typed", "transpose", "conj"]
         },
         {
           "name": "det",
@@ -2059,33 +1750,17 @@
         {
           "name": "diag",
           "creator": "createDiag",
-          "deps": [
-            "typed",
-            "matrix",
-            "DenseMatrix",
-            "SparseMatrix"
-          ]
+          "deps": ["typed", "matrix", "DenseMatrix", "SparseMatrix"]
         },
         {
           "name": "diff",
           "creator": "createDiff",
-          "deps": [
-            "typed",
-            "matrix",
-            "subtract",
-            "number"
-          ]
+          "deps": ["typed", "matrix", "subtract", "number"]
         },
         {
           "name": "dot",
           "creator": "createDot",
-          "deps": [
-            "typed",
-            "addScalar",
-            "multiplyScalar",
-            "conj",
-            "size"
-          ]
+          "deps": ["typed", "addScalar", "multiplyScalar", "conj", "size"]
         },
         {
           "name": "eigs",
@@ -2129,14 +1804,7 @@
         {
           "name": "expm",
           "creator": "createExpm",
-          "deps": [
-            "typed",
-            "abs",
-            "add",
-            "identity",
-            "inv",
-            "multiply"
-          ]
+          "deps": ["typed", "abs", "add", "identity", "inv", "multiply"]
         },
         {
           "name": "fft",
@@ -2161,53 +1829,32 @@
         {
           "name": "filter",
           "creator": "createFilter",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "flatten",
           "creator": "createFlatten",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "forEach",
           "creator": "createForEach",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "getMatrixDataType",
           "creator": "createGetMatrixDataType",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "identity",
           "creator": "createIdentity",
-          "deps": [
-            "typed",
-            "config",
-            "matrix",
-            "BigNumber",
-            "DenseMatrix",
-            "SparseMatrix"
-          ]
+          "deps": ["typed", "config", "matrix", "BigNumber", "DenseMatrix", "SparseMatrix"]
         },
         {
           "name": "ifft",
           "creator": "createIfft",
-          "deps": [
-            "typed",
-            "fft",
-            "dotDivide",
-            "conj",
-            "complex"
-          ]
+          "deps": ["typed", "fft", "dotDivide", "conj", "complex"]
         },
         {
           "name": "inv",
@@ -2227,75 +1874,42 @@
         {
           "name": "kron",
           "creator": "createKron",
-          "deps": [
-            "typed",
-            "matrix",
-            "multiplyScalar"
-          ]
+          "deps": ["typed", "matrix", "multiplyScalar"]
         },
         {
           "name": "map",
           "creator": "createMap",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "mapSlices",
           "creator": "createMapSlices",
-          "deps": [
-            "typed",
-            "isInteger"
-          ]
+          "deps": ["typed", "isInteger"]
         },
         {
           "name": "matrixFromColumns",
           "creator": "createMatrixFromColumns",
-          "deps": [
-            "typed",
-            "matrix",
-            "flatten",
-            "size"
-          ]
+          "deps": ["typed", "matrix", "flatten", "size"]
         },
         {
           "name": "matrixFromFunction",
           "creator": "createMatrixFromFunction",
-          "deps": [
-            "typed",
-            "matrix",
-            "isZero"
-          ]
+          "deps": ["typed", "matrix", "isZero"]
         },
         {
           "name": "matrixFromRows",
           "creator": "createMatrixFromRows",
-          "deps": [
-            "typed",
-            "matrix",
-            "flatten",
-            "size"
-          ]
+          "deps": ["typed", "matrix", "flatten", "size"]
         },
         {
           "name": "ones",
           "creator": "createOnes",
-          "deps": [
-            "typed",
-            "config",
-            "matrix",
-            "BigNumber"
-          ]
+          "deps": ["typed", "config", "matrix", "BigNumber"]
         },
         {
           "name": "partitionSelect",
           "creator": "createPartitionSelect",
-          "deps": [
-            "typed",
-            "isNumeric",
-            "isNaN",
-            "compare"
-          ]
+          "deps": ["typed", "isNumeric", "isNaN", "compare"]
         },
         {
           "name": "pinv",
@@ -2336,28 +1950,17 @@
         {
           "name": "reshape",
           "creator": "createReshape",
-          "deps": [
-            "typed",
-            "isInteger",
-            "matrix"
-          ]
+          "deps": ["typed", "isInteger", "matrix"]
         },
         {
           "name": "resize",
           "creator": "createResize",
-          "deps": [
-            "config",
-            "matrix"
-          ]
+          "deps": ["config", "matrix"]
         },
         {
           "name": "rotate",
           "creator": "createRotate",
-          "deps": [
-            "typed",
-            "multiply",
-            "rotationMatrix"
-          ]
+          "deps": ["typed", "multiply", "rotationMatrix"]
         },
         {
           "name": "rotationMatrix",
@@ -2380,29 +1983,17 @@
         {
           "name": "row",
           "creator": "createRow",
-          "deps": [
-            "typed",
-            "Index",
-            "matrix",
-            "range"
-          ]
+          "deps": ["typed", "Index", "matrix", "range"]
         },
         {
           "name": "size",
           "creator": "createSize",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "sort",
           "creator": "createSort",
-          "deps": [
-            "typed",
-            "matrix",
-            "compare",
-            "compareNatural"
-          ]
+          "deps": ["typed", "matrix", "compare", "compareNatural"]
         },
         {
           "name": "sqrtm",
@@ -2424,46 +2015,27 @@
         {
           "name": "squeeze",
           "creator": "createSqueeze",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "subset",
           "creator": "createSubset",
-          "deps": [
-            "typed",
-            "matrix",
-            "zeros",
-            "add"
-          ]
+          "deps": ["typed", "matrix", "zeros", "add"]
         },
         {
           "name": "trace",
           "creator": "createTrace",
-          "deps": [
-            "typed",
-            "matrix",
-            "add"
-          ]
+          "deps": ["typed", "matrix", "add"]
         },
         {
           "name": "transpose",
           "creator": "createTranspose",
-          "deps": [
-            "typed",
-            "matrix"
-          ]
+          "deps": ["typed", "matrix"]
         },
         {
           "name": "zeros",
           "creator": "createZeros",
-          "deps": [
-            "typed",
-            "config",
-            "matrix",
-            "BigNumber"
-          ]
+          "deps": ["typed", "config", "matrix", "BigNumber"]
         }
       ]
     },
@@ -2503,48 +2075,27 @@
         {
           "name": "bernoulli",
           "creator": "createBernoulli",
-          "deps": [
-            "typed",
-            "config",
-            "isInteger",
-            "number",
-            "?BigNumber",
-            "?Fraction"
-          ]
+          "deps": ["typed", "config", "isInteger", "number", "?BigNumber", "?Fraction"]
         },
         {
           "name": "combinations",
           "creator": "createCombinations",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "combinationsWithRep",
           "creator": "createCombinationsWithRep",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "factorial",
           "creator": "createFactorial",
-          "deps": [
-            "typed",
-            "gamma"
-          ]
+          "deps": ["typed", "gamma"]
         },
         {
           "name": "gamma",
           "creator": "createGamma",
-          "deps": [
-            "typed",
-            "config",
-            "multiplyScalar",
-            "pow",
-            "BigNumber",
-            "Complex"
-          ]
+          "deps": ["typed", "config", "multiplyScalar", "pow", "BigNumber", "Complex"]
         },
         {
           "name": "kldivergence",
@@ -2564,59 +2115,32 @@
         {
           "name": "lgamma",
           "creator": "createLgamma",
-          "deps": [
-            "Complex",
-            "typed"
-          ]
+          "deps": ["Complex", "typed"]
         },
         {
           "name": "multinomial",
           "creator": "createMultinomial",
-          "deps": [
-            "typed",
-            "add",
-            "divide",
-            "multiply",
-            "factorial",
-            "isInteger",
-            "isPositive"
-          ]
+          "deps": ["typed", "add", "divide", "multiply", "factorial", "isInteger", "isPositive"]
         },
         {
           "name": "permutations",
           "creator": "createPermutations",
-          "deps": [
-            "typed",
-            "factorial"
-          ]
+          "deps": ["typed", "factorial"]
         },
         {
           "name": "pickRandom",
           "creator": "createPickRandom",
-          "deps": [
-            "typed",
-            "config",
-            "?on"
-          ]
+          "deps": ["typed", "config", "?on"]
         },
         {
           "name": "random",
           "creator": "createRandom",
-          "deps": [
-            "typed",
-            "config",
-            "?on"
-          ]
+          "deps": ["typed", "config", "?on"]
         },
         {
           "name": "randomInt",
           "creator": "createRandomInt",
-          "deps": [
-            "typed",
-            "config",
-            "log2",
-            "?on"
-          ]
+          "deps": ["typed", "config", "log2", "?on"]
         }
       ]
     },
@@ -2642,55 +2166,32 @@
         {
           "name": "compareNatural",
           "creator": "createCompareNatural",
-          "deps": [
-            "typed",
-            "compare"
-          ]
+          "deps": ["typed", "compare"]
         },
         {
           "name": "compareText",
           "creator": "createCompareText",
-          "deps": [
-            "typed",
-            "matrix",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "concat"]
         },
         {
           "name": "deepEqual",
           "creator": "createDeepEqual",
-          "deps": [
-            "typed",
-            "equal"
-          ]
+          "deps": ["typed", "equal"]
         },
         {
           "name": "equal",
           "creator": "createEqual",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "DenseMatrix",
-            "SparseMatrix"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "DenseMatrix", "SparseMatrix"]
         },
         {
           "name": "equalScalar",
           "creator": "createEqualScalar",
-          "deps": [
-            "typed",
-            "config"
-          ]
+          "deps": ["typed", "config"]
         },
         {
           "name": "equalText",
           "creator": "createEqualText",
-          "deps": [
-            "typed",
-            "compareText",
-            "isZero"
-          ]
+          "deps": ["typed", "compareText", "isZero"]
         },
         {
           "name": "larger",
@@ -2708,14 +2209,7 @@
         {
           "name": "largerEq",
           "creator": "createLargerEq",
-          "deps": [
-            "typed",
-            "config",
-            "matrix",
-            "DenseMatrix",
-            "concat",
-            "SparseMatrix"
-          ]
+          "deps": ["typed", "config", "matrix", "DenseMatrix", "concat", "SparseMatrix"]
         },
         {
           "name": "smaller",
@@ -2733,14 +2227,7 @@
         {
           "name": "smallerEq",
           "creator": "createSmallerEq",
-          "deps": [
-            "typed",
-            "config",
-            "matrix",
-            "DenseMatrix",
-            "concat",
-            "SparseMatrix"
-          ]
+          "deps": ["typed", "config", "matrix", "DenseMatrix", "concat", "SparseMatrix"]
         },
         {
           "name": "unequal",
@@ -2765,116 +2252,52 @@
         {
           "name": "setCartesian",
           "creator": "createSetCartesian",
-          "deps": [
-            "typed",
-            "size",
-            "subset",
-            "compareNatural",
-            "Index",
-            "DenseMatrix"
-          ]
+          "deps": ["typed", "size", "subset", "compareNatural", "Index", "DenseMatrix"]
         },
         {
           "name": "setDifference",
           "creator": "createSetDifference",
-          "deps": [
-            "typed",
-            "size",
-            "subset",
-            "compareNatural",
-            "Index",
-            "DenseMatrix"
-          ]
+          "deps": ["typed", "size", "subset", "compareNatural", "Index", "DenseMatrix"]
         },
         {
           "name": "setDistinct",
           "creator": "createSetDistinct",
-          "deps": [
-            "typed",
-            "size",
-            "subset",
-            "compareNatural",
-            "Index",
-            "DenseMatrix"
-          ]
+          "deps": ["typed", "size", "subset", "compareNatural", "Index", "DenseMatrix"]
         },
         {
           "name": "setIntersect",
           "creator": "createSetIntersect",
-          "deps": [
-            "typed",
-            "size",
-            "subset",
-            "compareNatural",
-            "Index",
-            "DenseMatrix"
-          ]
+          "deps": ["typed", "size", "subset", "compareNatural", "Index", "DenseMatrix"]
         },
         {
           "name": "setIsSubset",
           "creator": "createSetIsSubset",
-          "deps": [
-            "typed",
-            "size",
-            "subset",
-            "compareNatural",
-            "Index"
-          ]
+          "deps": ["typed", "size", "subset", "compareNatural", "Index"]
         },
         {
           "name": "setMultiplicity",
           "creator": "createSetMultiplicity",
-          "deps": [
-            "typed",
-            "size",
-            "subset",
-            "compareNatural",
-            "Index"
-          ]
+          "deps": ["typed", "size", "subset", "compareNatural", "Index"]
         },
         {
           "name": "setPowerset",
           "creator": "createSetPowerset",
-          "deps": [
-            "typed",
-            "size",
-            "subset",
-            "compareNatural",
-            "Index"
-          ]
+          "deps": ["typed", "size", "subset", "compareNatural", "Index"]
         },
         {
           "name": "setSize",
           "creator": "createSetSize",
-          "deps": [
-            "typed",
-            "compareNatural"
-          ]
+          "deps": ["typed", "compareNatural"]
         },
         {
           "name": "setSymDifference",
           "creator": "createSetSymDifference",
-          "deps": [
-            "typed",
-            "size",
-            "concat",
-            "subset",
-            "setDifference",
-            "Index"
-          ]
+          "deps": ["typed", "size", "concat", "subset", "setDifference", "Index"]
         },
         {
           "name": "setUnion",
           "creator": "createSetUnion",
-          "deps": [
-            "typed",
-            "size",
-            "concat",
-            "subset",
-            "setIntersect",
-            "setSymDifference",
-            "Index"
-          ]
+          "deps": ["typed", "size", "concat", "subset", "setIntersect", "setSymDifference", "Index"]
         }
       ]
     },
@@ -2886,25 +2309,12 @@
         {
           "name": "freqz",
           "creator": "createFreqz",
-          "deps": [
-            "typed",
-            "add",
-            "multiply",
-            "Complex",
-            "divide",
-            "matrix"
-          ]
+          "deps": ["typed", "add", "multiply", "Complex", "divide", "matrix"]
         },
         {
           "name": "zpk2tf",
           "creator": "createZpk2tf",
-          "deps": [
-            "typed",
-            "add",
-            "multiply",
-            "Complex",
-            "number"
-          ]
+          "deps": ["typed", "add", "multiply", "Complex", "number"]
         }
       ]
     },
@@ -2916,9 +2326,7 @@
         {
           "name": "erf",
           "creator": "createErf",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "zeta",
@@ -2969,84 +2377,42 @@
         {
           "name": "cumsum",
           "creator": "createCumSum",
-          "deps": [
-            "typed",
-            "add",
-            "unaryPlus"
-          ]
+          "deps": ["typed", "add", "unaryPlus"]
         },
         {
           "name": "mad",
           "creator": "createMad",
-          "deps": [
-            "typed",
-            "abs",
-            "map",
-            "median",
-            "subtract"
-          ]
+          "deps": ["typed", "abs", "map", "median", "subtract"]
         },
         {
           "name": "max",
           "creator": "createMax",
-          "deps": [
-            "typed",
-            "config",
-            "numeric",
-            "larger",
-            "isNaN"
-          ]
+          "deps": ["typed", "config", "numeric", "larger", "isNaN"]
         },
         {
           "name": "mean",
           "creator": "createMean",
-          "deps": [
-            "typed",
-            "add",
-            "divide"
-          ]
+          "deps": ["typed", "add", "divide"]
         },
         {
           "name": "median",
           "creator": "createMedian",
-          "deps": [
-            "typed",
-            "add",
-            "divide",
-            "compare",
-            "partitionSelect"
-          ]
+          "deps": ["typed", "add", "divide", "compare", "partitionSelect"]
         },
         {
           "name": "min",
           "creator": "createMin",
-          "deps": [
-            "typed",
-            "config",
-            "numeric",
-            "smaller",
-            "isNaN"
-          ]
+          "deps": ["typed", "config", "numeric", "smaller", "isNaN"]
         },
         {
           "name": "mode",
           "creator": "createMode",
-          "deps": [
-            "typed",
-            "isNaN",
-            "isNumeric"
-          ]
+          "deps": ["typed", "isNaN", "isNumeric"]
         },
         {
           "name": "prod",
           "creator": "createProd",
-          "deps": [
-            "typed",
-            "config",
-            "multiplyScalar",
-            "numeric",
-            "parseNumberWithConfig"
-          ]
+          "deps": ["typed", "config", "multiplyScalar", "numeric", "parseNumberWithConfig"]
         },
         {
           "name": "quantileSeq",
@@ -3070,36 +2436,17 @@
         {
           "name": "std",
           "creator": "createStd",
-          "deps": [
-            "typed",
-            "map",
-            "sqrt",
-            "variance"
-          ]
+          "deps": ["typed", "map", "sqrt", "variance"]
         },
         {
           "name": "sum",
           "creator": "createSum",
-          "deps": [
-            "typed",
-            "config",
-            "add",
-            "numeric",
-            "parseNumberWithConfig"
-          ]
+          "deps": ["typed", "config", "add", "numeric", "parseNumberWithConfig"]
         },
         {
           "name": "variance",
           "creator": "createVariance",
-          "deps": [
-            "typed",
-            "add",
-            "subtract",
-            "multiply",
-            "divide",
-            "mapSlices",
-            "isNaN"
-          ]
+          "deps": ["typed", "add", "subtract", "multiply", "divide", "mapSlices", "isNaN"]
         }
       ]
     },
@@ -3111,40 +2458,27 @@
         {
           "name": "bin",
           "creator": "createBin",
-          "deps": [
-            "typed",
-            "format"
-          ]
+          "deps": ["typed", "format"]
         },
         {
           "name": "format",
           "creator": "createFormat",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "hex",
           "creator": "createHex",
-          "deps": [
-            "typed",
-            "format"
-          ]
+          "deps": ["typed", "format"]
         },
         {
           "name": "oct",
           "creator": "createOct",
-          "deps": [
-            "typed",
-            "format"
-          ]
+          "deps": ["typed", "format"]
         },
         {
           "name": "print",
           "creator": "createPrint",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         }
       ]
     },
@@ -3156,210 +2490,127 @@
         {
           "name": "acos",
           "creator": "createAcos",
-          "deps": [
-            "typed",
-            "config",
-            "Complex"
-          ]
+          "deps": ["typed", "config", "Complex"]
         },
         {
           "name": "acosh",
           "creator": "createAcosh",
-          "deps": [
-            "typed",
-            "config",
-            "Complex"
-          ]
+          "deps": ["typed", "config", "Complex"]
         },
         {
           "name": "acot",
           "creator": "createAcot",
-          "deps": [
-            "typed",
-            "BigNumber"
-          ]
+          "deps": ["typed", "BigNumber"]
         },
         {
           "name": "acoth",
           "creator": "createAcoth",
-          "deps": [
-            "typed",
-            "config",
-            "Complex",
-            "BigNumber"
-          ]
+          "deps": ["typed", "config", "Complex", "BigNumber"]
         },
         {
           "name": "acsc",
           "creator": "createAcsc",
-          "deps": [
-            "typed",
-            "config",
-            "Complex",
-            "BigNumber"
-          ]
+          "deps": ["typed", "config", "Complex", "BigNumber"]
         },
         {
           "name": "acsch",
           "creator": "createAcsch",
-          "deps": [
-            "typed",
-            "BigNumber"
-          ]
+          "deps": ["typed", "BigNumber"]
         },
         {
           "name": "asec",
           "creator": "createAsec",
-          "deps": [
-            "typed",
-            "config",
-            "Complex",
-            "BigNumber"
-          ]
+          "deps": ["typed", "config", "Complex", "BigNumber"]
         },
         {
           "name": "asech",
           "creator": "createAsech",
-          "deps": [
-            "typed",
-            "config",
-            "Complex",
-            "BigNumber"
-          ]
+          "deps": ["typed", "config", "Complex", "BigNumber"]
         },
         {
           "name": "asin",
           "creator": "createAsin",
-          "deps": [
-            "typed",
-            "config",
-            "Complex"
-          ]
+          "deps": ["typed", "config", "Complex"]
         },
         {
           "name": "asinh",
           "creator": "createAsinh",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "atan",
           "creator": "createAtan",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "atan2",
           "creator": "createAtan2",
-          "deps": [
-            "typed",
-            "matrix",
-            "equalScalar",
-            "BigNumber",
-            "DenseMatrix",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "equalScalar", "BigNumber", "DenseMatrix", "concat"]
         },
         {
           "name": "atanh",
           "creator": "createAtanh",
-          "deps": [
-            "typed",
-            "config",
-            "Complex"
-          ]
+          "deps": ["typed", "config", "Complex"]
         },
         {
           "name": "cos",
           "creator": "createCos",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "cosh",
           "creator": "createCosh",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "cot",
           "creator": "createCot",
-          "deps": [
-            "typed",
-            "BigNumber"
-          ]
+          "deps": ["typed", "BigNumber"]
         },
         {
           "name": "coth",
           "creator": "createCoth",
-          "deps": [
-            "typed",
-            "BigNumber"
-          ]
+          "deps": ["typed", "BigNumber"]
         },
         {
           "name": "csc",
           "creator": "createCsc",
-          "deps": [
-            "typed",
-            "BigNumber"
-          ]
+          "deps": ["typed", "BigNumber"]
         },
         {
           "name": "csch",
           "creator": "createCsch",
-          "deps": [
-            "typed",
-            "BigNumber"
-          ]
+          "deps": ["typed", "BigNumber"]
         },
         {
           "name": "sec",
           "creator": "createSec",
-          "deps": [
-            "typed",
-            "BigNumber"
-          ]
+          "deps": ["typed", "BigNumber"]
         },
         {
           "name": "sech",
           "creator": "createSech",
-          "deps": [
-            "typed",
-            "BigNumber"
-          ]
+          "deps": ["typed", "BigNumber"]
         },
         {
           "name": "sin",
           "creator": "createSin",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "sinh",
           "creator": "createSinh",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "tan",
           "creator": "createTan",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "tanh",
           "creator": "createTanh",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         }
       ]
     },
@@ -3371,18 +2622,12 @@
         {
           "name": "to",
           "creator": "createTo",
-          "deps": [
-            "typed",
-            "matrix",
-            "concat"
-          ]
+          "deps": ["typed", "matrix", "concat"]
         },
         {
           "name": "toBest",
           "creator": "createToBest",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         }
       ]
     },
@@ -3394,120 +2639,77 @@
         {
           "name": "clone",
           "creator": "createClone",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "log",
           "creator": "createLog",
-          "deps": [
-            "config",
-            "typed",
-            "divideScalar",
-            "Complex"
-          ]
+          "deps": ["config", "typed", "divideScalar", "Complex"]
         },
         {
           "name": "hasNumericValue",
           "creator": "createHasNumericValue",
-          "deps": [
-            "typed",
-            "isNumeric"
-          ]
+          "deps": ["typed", "isNumeric"]
         },
         {
           "name": "isBounded",
           "creator": "createIsBounded",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "isFinite",
           "creator": "createIsFinite",
-          "deps": [
-            "typed",
-            "isBounded",
-            "map"
-          ]
+          "deps": ["typed", "isBounded", "map"]
         },
         {
           "name": "isInteger",
           "creator": "createIsInteger",
-          "deps": [
-            "typed",
-            "equal"
-          ]
+          "deps": ["typed", "equal"]
         },
         {
           "name": "isNaN",
           "creator": "createIsNaN",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "isNegative",
           "creator": "createIsNegative",
-          "deps": [
-            "typed",
-            "config"
-          ]
+          "deps": ["typed", "config"]
         },
         {
           "name": "isNumeric",
           "creator": "createIsNumeric",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "isPositive",
           "creator": "createIsPositive",
-          "deps": [
-            "typed",
-            "config"
-          ]
+          "deps": ["typed", "config"]
         },
         {
           "name": "isPrime",
           "creator": "createIsPrime",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         },
         {
           "name": "isZero",
           "creator": "createIsZero",
-          "deps": [
-            "typed",
-            "equalScalar"
-          ]
+          "deps": ["typed", "equalScalar"]
         },
         {
           "name": "numeric",
           "creator": "createNumeric",
-          "deps": [
-            "number",
-            "?bignumber",
-            "?fraction"
-          ]
+          "deps": ["number", "?bignumber", "?fraction"]
         },
         {
           "name": "parseNumberWithConfig",
           "creator": "createParseNumberWithConfig",
-          "deps": [
-            "config",
-            "?bignumber"
-          ]
+          "deps": ["config", "?bignumber"]
         },
         {
           "name": "typeOf",
           "creator": "createTypeOf",
-          "deps": [
-            "typed"
-          ]
+          "deps": ["typed"]
         }
       ]
     }
@@ -4071,28 +3273,17 @@
   "wasm_operations": {
     "bindings/index.ts": {
       "lines": 10,
-      "exports": [
-        "MathTSWasm",
-        "loadWasm",
-        "loadWasmSync"
-      ],
+      "exports": ["MathTSWasm", "loadWasm", "loadWasmSync"],
       "export_count": 3
     },
     "bindings/wasm-loader.ts": {
       "lines": 262,
-      "exports": [
-        "MathTSWasmExports",
-        "MathTSWasmInstance",
-        "loadWasmSync",
-        "MathTSWasm"
-      ],
+      "exports": ["MathTSWasmExports", "MathTSWasmInstance", "loadWasmSync", "MathTSWasm"],
       "export_count": 4
     },
     "env/abort.ts": {
       "lines": 21,
-      "exports": [
-        "abort"
-      ],
+      "exports": ["abort"],
       "export_count": 1
     },
     "index.ts": {

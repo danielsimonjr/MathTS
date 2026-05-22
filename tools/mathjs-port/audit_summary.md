@@ -18,6 +18,7 @@ verdicts. The "Not found in MathTS active layer" section is the least trustworth
 and likely contains many false negatives caused by truncation.
 
 Spot-check verified:
+
 - ✅ `combinatorics/divisorSigma` arg-order reversal (MathTS `(n, k)` vs mathjs `(k, n)`) — REAL DIVERGENCE
 - ❌ `combinatorics/chineseRemainder` "not found" — FALSE NEGATIVE (exists in `typed/combinatorics.ts`)
 
@@ -34,17 +35,17 @@ Spot-check verified:
 
 ## By category
 
-| Category | n | found | sig-match | alg-match | sig-div | alg-div | unknown | not-found |
-|----------|---|-------|-----------|-----------|---------|---------|---------|-----------|
-| algebra | 64 | 35 | 2 | 4 | 21 | 18 | 29 | 29 |
-| combinatorics | 16 | 11 | 0 | 3 | 1 | 1 | 5 | 5 |
-| geometry | 12 | 12 | 0 | 3 | 1 | 2 | 3 | 0 |
-| graph | 7 | 7 | 0 | 0 | 7 | 1 | 0 | 0 |
-| matrix | 11 | 7 | 0 | 2 | 1 | 2 | 4 | 4 |
-| numeric | 38 | 14 | 1 | 4 | 9 | 3 | 24 | 24 |
-| signal | 18 | 3 | 0 | 0 | 2 | 1 | 15 | 15 |
-| special | 24 | 8 | 3 | 0 | 0 | 4 | 16 | 16 |
-| statistics | 25 | 16 | 0 | 2 | 3 | 2 | 9 | 9 |
+| Category      | n   | found | sig-match | alg-match | sig-div | alg-div | unknown | not-found |
+| ------------- | --- | ----- | --------- | --------- | ------- | ------- | ------- | --------- |
+| algebra       | 64  | 35    | 2         | 4         | 21      | 18      | 29      | 29        |
+| combinatorics | 16  | 11    | 0         | 3         | 1       | 1       | 5       | 5         |
+| geometry      | 12  | 12    | 0         | 3         | 1       | 2       | 3       | 0         |
+| graph         | 7   | 7     | 0         | 0         | 7       | 1       | 0       | 0         |
+| matrix        | 11  | 7     | 0         | 2         | 1       | 2       | 4       | 4         |
+| numeric       | 38  | 14    | 1         | 4         | 9       | 3       | 24      | 24        |
+| signal        | 18  | 3     | 0         | 0         | 2       | 1       | 15      | 15        |
+| special       | 24  | 8     | 3         | 0         | 0       | 4       | 16      | 16        |
+| statistics    | 25  | 16    | 0         | 2         | 3       | 2       | 9       | 9         |
 
 ## Divergences (signature or algorithm)
 

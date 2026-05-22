@@ -5,6 +5,7 @@
 All 14 tasks completed successfully. Additional follow-up work (test separation) also completed in v15.3.1.
 
 **Results:**
+
 - Tasks 1-3: Shared types module created, duplicates eliminated across arithmetic + other categories
 - Tasks 4-5: WASM constants and scalar operations consolidated
 - Tasks 6-7: workPtr validation added, offset style standardized
@@ -34,6 +35,7 @@ All 14 tasks completed successfully. Additional follow-up work (test separation)
 ### Task 1: Create shared TS function types module
 
 **Files:**
+
 - Create: `src/function/shared/types.ts`
 - Reference: `src/type/matrix/types.ts` (existing central types, 608 lines)
 - Reference: `src/function/arithmetic/add.ts:8-79` (duplicate pattern to eliminate)
@@ -57,28 +59,28 @@ export type {
   AlgorithmFunction,
   BigNumberLike,
   ComplexLike,
-  FractionLike
-} from '../../type/matrix/types.ts'
+  FractionLike,
+} from '../../type/matrix/types.ts';
 
 /** Matrix data for construction */
 export interface MatrixData {
-  data?: any[] | any[][]
-  values?: any[]
-  index?: number[]
-  ptr?: number[]
-  size: number[]
-  datatype?: string
+  data?: any[] | any[][];
+  values?: any[];
+  index?: number[];
+  ptr?: number[];
+  size: number[];
+  datatype?: string;
 }
 
 /** Matrix constructor callable */
 export interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): any
+  (data: any[] | any[][], storage?: 'dense' | 'sparse'): any;
 }
 
 /** Node operations for symbolic math */
 export interface NodeOperations {
-  createBinaryNode: (op: string, fn: string, left: unknown, right: unknown) => unknown
-  hasNodeArg: (...args: unknown[]) => boolean
+  createBinaryNode: (op: string, fn: string, left: unknown, right: unknown) => unknown;
+  hasNodeArg: (...args: unknown[]) => boolean;
 }
 ```
 
@@ -99,6 +101,7 @@ git commit -m "feat: add shared function types module to reduce duplication"
 ### Task 2: Replace duplicate type definitions in arithmetic files
 
 **Files:**
+
 - Modify: `src/function/arithmetic/add.ts:8-79` (remove local interfaces, add import)
 - Modify: `src/function/arithmetic/subtract.ts` (same pattern)
 - Modify: `src/function/arithmetic/multiply.ts` (same pattern)
@@ -113,8 +116,8 @@ import type {
   TypedFunction,
   MatrixConstructor,
   NodeOperations,
-  MatrixData
-} from '../shared/types.ts'
+  MatrixData,
+} from '../shared/types.ts';
 ```
 
 Keep the file-specific `Dependencies` interface (it varies per file) but remove all duplicated `TypedFunction`, `DenseMatrix`, `SparseMatrix`, `MatrixData`, `MatrixConstructor`, `NodeOperations` interfaces.
@@ -150,6 +153,7 @@ git commit -m "refactor: replace duplicate type definitions in arithmetic with s
 ### Task 3: Replace duplicate type definitions across remaining function categories
 
 **Files:**
+
 - Modify: `src/function/matrix/*.ts` — eigs.ts, det.ts, inv.ts, etc.
 - Modify: `src/function/algebra/*.ts` — simplify.ts, derivative.ts, etc.
 - Modify: `src/function/statistics/*.ts`, `src/function/relational/*.ts`, etc.
@@ -185,6 +189,7 @@ git commit -m "refactor: eliminate ~2000 lines of duplicate type definitions acr
 ### Task 4: Create WASM shared constants module
 
 **Files:**
+
 - Create: `src/wasm/utils/constants.ts`
 - Reference: `src/wasm/statistics/basic.ts:14` (`F64_SIZE = 8`)
 - Reference: `src/wasm/utils/checks.ts` (hardcoded tolerances)
@@ -200,35 +205,36 @@ Create `src/wasm/utils/constants.ts`:
  */
 
 /** Size of f64 in bytes */
-export const F64_SIZE: usize = 8
+export const F64_SIZE: usize = 8;
 
 /** Size of i32 in bytes */
-export const I32_SIZE: usize = 4
+export const I32_SIZE: usize = 4;
 
 /** Default floating point tolerance */
-export const EPSILON: f64 = 1e-12
+export const EPSILON: f64 = 1e-12;
 
 /** Machine epsilon for f64 */
-export const F64_EPSILON: f64 = 2.220446049250313e-16
+export const F64_EPSILON: f64 = 2.220446049250313e-16;
 
 /** Pi */
-export const PI: f64 = 3.141592653589793
+export const PI: f64 = 3.141592653589793;
 
 /** Two Pi */
-export const TWO_PI: f64 = 6.283185307179586
+export const TWO_PI: f64 = 6.283185307179586;
 
 /** Natural log of 2 */
-export const LN2: f64 = 0.6931471805599453
+export const LN2: f64 = 0.6931471805599453;
 
 /** Natural log of 10 */
-export const LN10: f64 = 2.302585092994046
+export const LN10: f64 = 2.302585092994046;
 ```
 
 **Step 2: Update importers**
 
 Replace hardcoded `F64_SIZE` in `src/wasm/statistics/basic.ts:14` with import:
+
 ```typescript
-import { F64_SIZE } from '../utils/constants.ts'
+import { F64_SIZE } from '../utils/constants.ts';
 ```
 
 Search for other hardcoded `1e-12`, `F64_SIZE = 8`, etc. across `src/wasm/` and replace with imports.
@@ -255,6 +261,7 @@ git commit -m "refactor: centralize WASM constants into shared module"
 ### Task 5: Consolidate WASM scalar operations
 
 **Files:**
+
 - Create: `src/wasm/utils/scalars.ts`
 - Modify: `src/wasm/arithmetic/basic.ts` (remove duplicates, import)
 - Modify: `src/wasm/plain/operations.ts` (remove duplicates, import)
@@ -271,60 +278,60 @@ Create `src/wasm/utils/scalars.ts`:
  */
 
 export function abs(x: f64): f64 {
-  return Math.abs(x)
+  return Math.abs(x);
 }
 
 export function sign(x: f64): f64 {
-  if (x !== x) return x  // NaN passthrough
-  if (x > 0) return 1.0
-  if (x < 0) return -1.0
-  return 0.0
+  if (x !== x) return x; // NaN passthrough
+  if (x > 0) return 1.0;
+  if (x < 0) return -1.0;
+  return 0.0;
 }
 
 export function add(a: f64, b: f64): f64 {
-  return a + b
+  return a + b;
 }
 
 export function subtract(a: f64, b: f64): f64 {
-  return a - b
+  return a - b;
 }
 
 export function multiply(a: f64, b: f64): f64 {
-  return a * b
+  return a * b;
 }
 
 export function divide(a: f64, b: f64): f64 {
-  return a / b
+  return a / b;
 }
 
 export function unaryMinus(x: f64): f64 {
-  return -x
+  return -x;
 }
 
 export function unaryPlus(x: f64): f64 {
-  return x
+  return x;
 }
 
 export function cbrt(x: f64): f64 {
-  if (x === 0) return x
-  const negate = x < 0
-  if (negate) x = -x
-  let result: f64
+  if (x === 0) return x;
+  const negate = x < 0;
+  if (negate) x = -x;
+  let result: f64;
   if (isFinite(x)) {
-    result = Math.exp(Math.log(x) / 3)
-    result = (x / (result * result) + 2 * result) / 3
+    result = Math.exp(Math.log(x) / 3);
+    result = (x / (result * result) + 2 * result) / 3;
   } else {
-    result = x
+    result = x;
   }
-  return negate ? -result : result
+  return negate ? -result : result;
 }
 
 export function square(x: f64): f64 {
-  return x * x
+  return x * x;
 }
 
 export function cube(x: f64): f64 {
-  return x * x * x
+  return x * x * x;
 }
 ```
 
@@ -333,7 +340,18 @@ export function cube(x: f64): f64 {
 Remove duplicated scalar functions from `src/wasm/arithmetic/basic.ts`. Import from scalars:
 
 ```typescript
-export { abs, add, subtract, multiply, divide, unaryMinus, unaryPlus, cbrt, square, cube } from '../utils/scalars.ts'
+export {
+  abs,
+  add,
+  subtract,
+  multiply,
+  divide,
+  unaryMinus,
+  unaryPlus,
+  cbrt,
+  square,
+  cube,
+} from '../utils/scalars.ts';
 ```
 
 Keep any array-level functions that are unique to arithmetic/basic.ts.
@@ -361,6 +379,7 @@ git commit -m "refactor: consolidate duplicate WASM scalar operations into share
 ### Task 6: Add workPtr validation to unprotected modules
 
 **Files:**
+
 - Modify: `src/wasm/utils/workPtrValidation.ts` (add new size calculators)
 - Modify: `src/wasm/numeric/rational.ts` (add validation)
 - Modify: `src/wasm/statistics/basic.ts` (add validation)
@@ -371,17 +390,17 @@ git commit -m "refactor: consolidate duplicate WASM scalar operations into share
 Create test file `test/wasm/unit-tests/utils/workPtrValidation.test.ts`:
 
 ```typescript
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest';
 
 describe('workPtr validation', () => {
   it('should return error code 0 when workPtr is undersized', () => {
     // Test will be filled after identifying exact function signatures
-  })
+  });
 
   it('should succeed with correctly sized workPtr', () => {
     // Test will be filled after identifying exact function signatures
-  })
-})
+  });
+});
 ```
 
 **Step 2: Identify all workPtr-using functions without validation**
@@ -415,6 +434,7 @@ git commit -m "fix: add workPtr size validation to 10 unprotected WASM modules"
 ### Task 7: Standardize WASM offset calculation style
 
 **Files:**
+
 - Modify: All files in `src/wasm/` that use the alternate `(<usize>i << 3)` vs `(<usize>i) << 3` pattern
 
 **Step 1: Identify the two patterns**
@@ -445,6 +465,7 @@ git commit -m "style: standardize WASM offset calculation to (<usize>i) << 3 pat
 ### Task 8: Reduce mechanical `as any` casts in TS files
 
 **Files:**
+
 - Modify: `src/function/matrix/eigs.ts` (3 casts)
 - Modify: `src/type/matrix/utils/matAlgo*.ts` (14 files)
 - Modify: Other files where casts can be replaced with proper types
@@ -454,6 +475,7 @@ git commit -m "style: standardize WASM offset calculation to (<usize>i) << 3 pat
 Run: `grep -rn "as any" src/function/ src/type/ --include="*.ts" | grep -v "node_modules"`
 
 Focus on casts that can be replaced by:
+
 - Using the proper interface from `src/type/matrix/types.ts`
 - Using generics
 - Using discriminated unions
@@ -483,6 +505,7 @@ git commit -m "refactor: replace mechanical 'as any' casts with proper types in 
 ### Task 9: Triage and resolve TODO/FIXME comments
 
 **Files:**
+
 - Multiple files across `src/` with TODO/FIXME comments
 
 **Step 1: Catalog all TODOs**
@@ -526,6 +549,7 @@ git commit -m "chore: triage TODO/FIXME comments — fix 12, remove 8 stale, def
 ### Task 10: Add SIMD-accelerated statistics functions
 
 **Files:**
+
 - Modify: `src/wasm/simd/operations.ts` (add new SIMD functions)
 - Modify: `src/wasm/statistics/basic.ts` (dispatch to SIMD for large arrays)
 - Create: `test/wasm/unit-tests/simd/statistics.test.ts`
@@ -536,26 +560,26 @@ git commit -m "chore: triage TODO/FIXME comments — fix 12, remove 8 stale, def
 Create `test/wasm/unit-tests/simd/statistics.test.ts`:
 
 ```typescript
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest';
 // Import will resolve after WASM build
 
 describe('SIMD statistics', () => {
   it('simdMean produces correct result for even-length arrays', () => {
     // Test: mean of [1, 2, 3, 4, 5, 6] = 3.5
-  })
+  });
 
   it('simdMean produces correct result for odd-length arrays', () => {
     // Test: mean of [1, 2, 3, 4, 5] = 3.0
-  })
+  });
 
   it('simdVariance produces correct result', () => {
     // Test: variance of [2, 4, 4, 4, 5, 5, 7, 9] ddof=1 = 4.571...
-  })
+  });
 
   it('simdMean matches scalar mean for large arrays', () => {
     // Test: random 10000-element array, compare SIMD vs scalar result within epsilon
-  })
-})
+  });
+});
 ```
 
 **Step 2: Implement SIMD mean**
@@ -571,25 +595,25 @@ Add to `src/wasm/simd/operations.ts`:
  * @returns Mean value
  */
 export function simdMean(dataPtr: usize, length: i32): f64 {
-  if (length === 0) return 0
+  if (length === 0) return 0;
 
-  const simdLength = length & ~1
-  let vsum = f64x2.splat(0.0)
+  const simdLength = length & ~1;
+  let vsum = f64x2.splat(0.0);
 
   for (let i: i32 = 0; i < simdLength; i += 2) {
-    const offset: usize = (<usize>i) << 3
-    vsum = f64x2.add(vsum, v128.load(dataPtr + offset))
+    const offset: usize = (<usize>i) << 3;
+    vsum = f64x2.add(vsum, v128.load(dataPtr + offset));
   }
 
   // Extract lanes and sum
-  let sum: f64 = f64x2.extract_lane(vsum, 0) + f64x2.extract_lane(vsum, 1)
+  let sum: f64 = f64x2.extract_lane(vsum, 0) + f64x2.extract_lane(vsum, 1);
 
   // Handle remaining odd element
   if (length & 1) {
-    sum += load<f64>(dataPtr + ((<usize>simdLength) << 3))
+    sum += load<f64>(dataPtr + ((<usize>simdLength) << 3));
   }
 
-  return sum / f64(length)
+  return sum / f64(length);
 }
 ```
 
@@ -605,28 +629,28 @@ export function simdMean(dataPtr: usize, length: i32): f64 {
  * @returns Variance
  */
 export function simdVariance(dataPtr: usize, length: i32, ddof: i32): f64 {
-  if (length === 0) return 0
-  if (length <= ddof) return NaN
+  if (length === 0) return 0;
+  if (length <= ddof) return NaN;
 
-  const m = simdMean(dataPtr, length)
-  const vmean = f64x2.splat(m)
-  const simdLength = length & ~1
-  let vsum = f64x2.splat(0.0)
+  const m = simdMean(dataPtr, length);
+  const vmean = f64x2.splat(m);
+  const simdLength = length & ~1;
+  let vsum = f64x2.splat(0.0);
 
   for (let i: i32 = 0; i < simdLength; i += 2) {
-    const offset: usize = (<usize>i) << 3
-    const vdiff = f64x2.sub(v128.load(dataPtr + offset), vmean)
-    vsum = f64x2.add(vsum, f64x2.mul(vdiff, vdiff))
+    const offset: usize = (<usize>i) << 3;
+    const vdiff = f64x2.sub(v128.load(dataPtr + offset), vmean);
+    vsum = f64x2.add(vsum, f64x2.mul(vdiff, vdiff));
   }
 
-  let sumSquares: f64 = f64x2.extract_lane(vsum, 0) + f64x2.extract_lane(vsum, 1)
+  let sumSquares: f64 = f64x2.extract_lane(vsum, 0) + f64x2.extract_lane(vsum, 1);
 
   if (length & 1) {
-    const diff = load<f64>(dataPtr + ((<usize>simdLength) << 3)) - m
-    sumSquares += diff * diff
+    const diff = load<f64>(dataPtr + ((<usize>simdLength) << 3)) - m;
+    sumSquares += diff * diff;
   }
 
-  return sumSquares / f64(length - ddof)
+  return sumSquares / f64(length - ddof);
 }
 ```
 
@@ -634,7 +658,7 @@ export function simdVariance(dataPtr: usize, length: i32, ddof: i32): f64 {
 
 ```typescript
 export function simdStd(dataPtr: usize, length: i32, ddof: i32): f64 {
-  return Math.sqrt(simdVariance(dataPtr, length, ddof))
+  return Math.sqrt(simdVariance(dataPtr, length, ddof));
 }
 ```
 
@@ -643,13 +667,13 @@ export function simdStd(dataPtr: usize, length: i32, ddof: i32): f64 {
 Add threshold-based dispatch in `src/wasm/statistics/basic.ts`:
 
 ```typescript
-import { simdMean, simdVariance } from '../simd/operations.ts'
+import { simdMean, simdVariance } from '../simd/operations.ts';
 
-const SIMD_THRESHOLD: i32 = 128
+const SIMD_THRESHOLD: i32 = 128;
 
 export function mean(dataPtr: usize, length: i32): f64 {
   if (length >= SIMD_THRESHOLD) {
-    return simdMean(dataPtr, length)
+    return simdMean(dataPtr, length);
   }
   // ... existing scalar implementation
 }
@@ -658,8 +682,9 @@ export function mean(dataPtr: usize, length: i32): f64 {
 **Step 6: Export new functions in index.ts**
 
 Add exports to `src/wasm/index.ts`:
+
 ```typescript
-export { simdMean, simdVariance, simdStd } from './simd/operations.ts'
+export { simdMean, simdVariance, simdStd } from './simd/operations.ts';
 ```
 
 **Step 7: Build and test**
@@ -679,6 +704,7 @@ git commit -m "feat: add SIMD-accelerated mean/variance/std (2-3x speedup for la
 ### Task 11: Add SIMD-accelerated geometry (distanceND)
 
 **Files:**
+
 - Modify: `src/wasm/simd/operations.ts` (add SIMD dot product for differences)
 - Modify: `src/wasm/geometry/operations.ts` (dispatch to SIMD)
 - Create: `test/wasm/unit-tests/simd/geometry.test.ts`
@@ -689,8 +715,8 @@ git commit -m "feat: add SIMD-accelerated mean/variance/std (2-3x speedup for la
 describe('SIMD geometry', () => {
   it('simdDistanceND matches scalar for high dimensions', () => {
     // 1000-dimensional random points, compare SIMD vs scalar within epsilon
-  })
-})
+  });
+});
 ```
 
 **Step 2: Implement SIMD distance**
@@ -706,24 +732,24 @@ Add to `src/wasm/simd/operations.ts`:
  * @returns Euclidean distance
  */
 export function simdDistanceND(p1Ptr: usize, p2Ptr: usize, n: i32): f64 {
-  const simdLength = n & ~1
-  let vsum = f64x2.splat(0.0)
+  const simdLength = n & ~1;
+  let vsum = f64x2.splat(0.0);
 
   for (let i: i32 = 0; i < simdLength; i += 2) {
-    const offset: usize = (<usize>i) << 3
-    const vdiff = f64x2.sub(v128.load(p2Ptr + offset), v128.load(p1Ptr + offset))
-    vsum = f64x2.add(vsum, f64x2.mul(vdiff, vdiff))
+    const offset: usize = (<usize>i) << 3;
+    const vdiff = f64x2.sub(v128.load(p2Ptr + offset), v128.load(p1Ptr + offset));
+    vsum = f64x2.add(vsum, f64x2.mul(vdiff, vdiff));
   }
 
-  let sum: f64 = f64x2.extract_lane(vsum, 0) + f64x2.extract_lane(vsum, 1)
+  let sum: f64 = f64x2.extract_lane(vsum, 0) + f64x2.extract_lane(vsum, 1);
 
   if (n & 1) {
-    const offset: usize = (<usize>simdLength) << 3
-    const d: f64 = load<f64>(p2Ptr + offset) - load<f64>(p1Ptr + offset)
-    sum += d * d
+    const offset: usize = (<usize>simdLength) << 3;
+    const d: f64 = load<f64>(p2Ptr + offset) - load<f64>(p1Ptr + offset);
+    sum += d * d;
   }
 
-  return Math.sqrt(sum)
+  return Math.sqrt(sum);
 }
 ```
 
@@ -748,6 +774,7 @@ git commit -m "feat: add SIMD-accelerated N-dimensional distance (2-2.5x speedup
 ### Task 12: Unroll matrix multiply inner loop
 
 **Files:**
+
 - Modify: `src/wasm/matrix/multiply.ts:51-55` (inner k-loop)
 
 **Step 1: Write benchmark test**
@@ -758,8 +785,8 @@ Create `test/wasm/unit-tests/matrix/multiply-perf.test.ts`:
 describe('matrix multiply performance', () => {
   it('unrolled multiply produces same result as original', () => {
     // 128x128 random matrices, verify result within epsilon
-  })
-})
+  });
+});
 ```
 
 **Step 2: Unroll the inner k-loop by 4**
@@ -769,29 +796,31 @@ In `src/wasm/matrix/multiply.ts`, replace the inner k-loop (lines 51-55):
 ```typescript
 // Before: single-step inner loop
 for (let k: i32 = kk; k < kEnd; k++) {
-  const aVal = load<f64>(aPtr + ((<usize>(i * aCols + k)) << 3))
-  const bVal = load<f64>(bPtr + ((<usize>(k * bCols + j)) << 3))
-  sum += aVal * bVal
+  const aVal = load<f64>(aPtr + ((<usize>(i * aCols + k)) << 3));
+  const bVal = load<f64>(bPtr + ((<usize>(k * bCols + j)) << 3));
+  sum += aVal * bVal;
 }
 
 // After: unrolled by 4
-const kUnroll: i32 = kEnd - ((kEnd - kk) & 3)
-let k: i32 = kk
+const kUnroll: i32 = kEnd - ((kEnd - kk) & 3);
+let k: i32 = kk;
 for (; k < kUnroll; k += 4) {
-  const aBase: usize = (<usize>(i * aCols + k)) << 3
-  const bBase0: usize = (<usize>(k * bCols + j)) << 3
-  const bBase1: usize = (<usize>((k + 1) * bCols + j)) << 3
-  const bBase2: usize = (<usize>((k + 2) * bCols + j)) << 3
-  const bBase3: usize = (<usize>((k + 3) * bCols + j)) << 3
+  const aBase: usize = (<usize>(i * aCols + k)) << 3;
+  const bBase0: usize = (<usize>(k * bCols + j)) << 3;
+  const bBase1: usize = (<usize>((k + 1) * bCols + j)) << 3;
+  const bBase2: usize = (<usize>((k + 2) * bCols + j)) << 3;
+  const bBase3: usize = (<usize>((k + 3) * bCols + j)) << 3;
 
-  sum += load<f64>(aPtr + aBase) * load<f64>(bPtr + bBase0)
-  sum += load<f64>(aPtr + aBase + 8) * load<f64>(bPtr + bBase1)
-  sum += load<f64>(aPtr + aBase + 16) * load<f64>(bPtr + bBase2)
-  sum += load<f64>(aPtr + aBase + 24) * load<f64>(bPtr + bBase3)
+  sum += load<f64>(aPtr + aBase) * load<f64>(bPtr + bBase0);
+  sum += load<f64>(aPtr + aBase + 8) * load<f64>(bPtr + bBase1);
+  sum += load<f64>(aPtr + aBase + 16) * load<f64>(bPtr + bBase2);
+  sum += load<f64>(aPtr + aBase + 24) * load<f64>(bPtr + bBase3);
 }
 // Handle remainder
 for (; k < kEnd; k++) {
-  sum += load<f64>(aPtr + ((<usize>(i * aCols + k)) << 3)) * load<f64>(bPtr + ((<usize>(k * bCols + j)) << 3))
+  sum +=
+    load<f64>(aPtr + ((<usize>(i * aCols + k)) << 3)) *
+    load<f64>(bPtr + ((<usize>(k * bCols + j)) << 3));
 }
 ```
 
@@ -812,6 +841,7 @@ git commit -m "perf: unroll matrix multiply inner loop by 4 (8-12% speedup)"
 ### Task 13: Optimize JS hot paths (Object.keys caching, allocations)
 
 **Files:**
+
 - Modify: `src/function/geometry/distance.ts` (cache Object.keys())
 - Modify: `src/function/relational/compareNatural.ts` (cache Object.keys())
 

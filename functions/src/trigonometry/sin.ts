@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import { createTrigUnit } from './trigUnit.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { createTrigUnit } from './trigUnit.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for sin
 interface BigNumberType {
-  sin(): BigNumberType
+  sin(): BigNumberType;
 }
 
 interface ComplexType {
-  sin(): ComplexType
+  sin(): ComplexType;
 }
 
 interface SinDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'sin'
-const dependencies = ['typed']
+const name = 'sin';
+const dependencies = ['typed'];
 
 export const createSin = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed }: SinDependencies) => {
-    const trigUnit = createTrigUnit({ typed })
+    const trigUnit = createTrigUnit({ typed });
 
     /**
      * Calculate the sine of a value.
@@ -55,11 +55,10 @@ export const createSin = /* #__PURE__ */ factory(
       name,
       {
         number: Math.sin,
-        'Complex | BigNumber': (
-          x: ComplexType | BigNumberType
-        ): ComplexType | BigNumberType => x.sin()
+        'Complex | BigNumber': (x: ComplexType | BigNumberType): ComplexType | BigNumberType =>
+          x.sin(),
       },
       trigUnit
-    )
+    );
   }
-)
+);

@@ -1,30 +1,25 @@
-import { factory } from '../../utils/factory.js'
-import { errorTransform } from './utils/errorTransform.js'
-import { createMin } from '../../statistics/min.js'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
-import type {
-  TypedFunction,
-  MathFunction,
-  MathJsConfig,
-  VariadicArgs
-} from './types.js'
+import { factory } from '../../utils/factory.js';
+import { errorTransform } from './utils/errorTransform.js';
+import { createMin } from '../../statistics/min.js';
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
+import type { TypedFunction, MathFunction, MathJsConfig, VariadicArgs } from './types.js';
 
 interface MinDependencies {
-  typed: TypedFunction
-  config: MathJsConfig
-  numeric: MathFunction
-  smaller: MathFunction<boolean>
-  isNaN: (x: unknown) => boolean
+  typed: TypedFunction;
+  config: MathJsConfig;
+  numeric: MathFunction;
+  smaller: MathFunction<boolean>;
+  isNaN: (x: unknown) => boolean;
 }
 
-const name = 'min'
-const dependencies = ['typed', 'config', 'numeric', 'smaller', 'isNaN']
+const name = 'min';
+const dependencies = ['typed', 'config', 'numeric', 'smaller', 'isNaN'];
 
 export const createMinTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, numeric, smaller, isNaN: mathIsNaN }: MinDependencies) => {
-    const min = createMin({ typed, config, numeric, smaller, isNaN: mathIsNaN })
+    const min = createMin({ typed, config, numeric, smaller, isNaN: mathIsNaN });
 
     /**
      * Attach a transform function to math.min
@@ -35,15 +30,15 @@ export const createMinTransform = /* #__PURE__ */ factory(
      */
     return typed('min', {
       '...any': function (args: VariadicArgs): unknown {
-        args = lastDimToZeroBase(args)
+        args = lastDimToZeroBase(args);
 
         try {
-          return min.apply(null, args)
+          return min.apply(null, args);
         } catch (err) {
-          throw errorTransform(err as Error)
+          throw errorTransform(err as Error);
         }
-      }
-    })
+      },
+    });
   },
   { isTransformFunction: true }
-)
+);

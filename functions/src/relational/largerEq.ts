@@ -1,80 +1,66 @@
-import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js'
-import { nearlyEqual } from '../utils/number.js'
-import { factory } from '../utils/factory.js'
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import { createCompareUnits } from './compareUnits.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
-import type { AlgorithmFunction } from '../type/matrix/types.js'
+import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { nearlyEqual } from '../utils/number.js';
+import { factory } from '../utils/factory.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import { createCompareUnits } from './compareUnits.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for largerEq
 interface BigNumberType {
-  gte(n: BigNumberType): boolean
+  gte(n: BigNumberType): boolean;
 }
 
 interface FractionType {
-  compare(n: FractionType): number
+  compare(n: FractionType): number;
 }
 
 interface MatrixFactory {
-  (...args: unknown[]): unknown
+  (...args: unknown[]): unknown;
 }
 
 interface DenseMatrixConstructor {
-  new (...args: unknown[]): unknown
+  new (...args: unknown[]): unknown;
 }
 
 interface SparseMatrixConstructor {
-  new (...args: unknown[]): unknown
+  new (...args: unknown[]): unknown;
 }
 
 interface LargerEqDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  matrix: MatrixFactory
-  DenseMatrix: DenseMatrixConstructor
-  concat: TypedFunction
-  SparseMatrix: SparseMatrixConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  matrix: MatrixFactory;
+  DenseMatrix: DenseMatrixConstructor;
+  concat: TypedFunction;
+  SparseMatrix: SparseMatrixConstructor;
 }
 
 interface LargerEqNumberDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
+  typed: TypedFunction;
+  config: ConfigOptions;
 }
 
-const name = 'largerEq'
-const dependencies = [
-  'typed',
-  'config',
-  'matrix',
-  'DenseMatrix',
-  'concat',
-  'SparseMatrix'
-]
+const name = 'largerEq';
+const dependencies = ['typed', 'config', 'matrix', 'DenseMatrix', 'concat', 'SparseMatrix'];
 
 export const createLargerEq = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    config,
-    matrix,
-    DenseMatrix,
-    concat,
-    SparseMatrix
-  }: LargerEqDependencies) => {
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
+  ({ typed, config, matrix, DenseMatrix, concat, SparseMatrix }: LargerEqDependencies) => {
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
-    const compareUnits = createCompareUnits({ typed })
+      concat,
+    });
+    const compareUnits = createCompareUnits({ typed });
 
     /**
      * Test whether value x is larger or equal to y.
@@ -109,35 +95,29 @@ export const createLargerEq = /* #__PURE__ */ factory(
       {
         'boolean, boolean': (x: boolean, y: boolean): boolean => x >= y,
 
-        'BigNumber, BigNumber': function (
-          x: BigNumberType,
-          y: BigNumberType
-        ): boolean {
-          return x.gte(y) || bigNearlyEqual(x, y, config.relTol, config.absTol)
+        'BigNumber, BigNumber': function (x: BigNumberType, y: BigNumberType): boolean {
+          return x.gte(y) || bigNearlyEqual(x, y, config.relTol, config.absTol);
         },
 
         'bigint, bigint': function (x: bigint, y: bigint): boolean {
-          return x >= y
+          return x >= y;
         },
 
-        'Fraction, Fraction': (x: FractionType, y: FractionType): boolean =>
-          x.compare(y) !== -1,
+        'Fraction, Fraction': (x: FractionType, y: FractionType): boolean => x.compare(y) !== -1,
 
         'Complex, Complex': function (): never {
-          throw new TypeError(
-            'No ordering relation is defined for complex numbers'
-          )
-        }
+          throw new TypeError('No ordering relation is defined for complex numbers');
+        },
       },
       compareUnits,
       matrixAlgorithmSuite({
         SS: matAlgo07xSSf as unknown as AlgorithmFunction,
         DS: matAlgo03xDSf as unknown as AlgorithmFunction,
-        Ss: matAlgo12xSfs as unknown as AlgorithmFunction
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction,
       })
-    )
+    );
   }
-)
+);
 
 export const createLargerEqNumber = /* #__PURE__ */ factory(
   name,
@@ -145,8 +125,8 @@ export const createLargerEqNumber = /* #__PURE__ */ factory(
   ({ typed, config }: LargerEqNumberDependencies) => {
     return typed(name, {
       'number, number': function (x: number, y: number): boolean {
-        return x >= y || nearlyEqual(x, y, config.relTol, config.absTol)
-      }
-    })
+        return x >= y || nearlyEqual(x, y, config.relTol, config.absTol);
+      },
+    });
   }
-)
+);

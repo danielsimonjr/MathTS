@@ -12,7 +12,7 @@ export const logDocs = {
     'log(10000, 10)',
     'log(10000) / log(10)',
     'b = log(1024, 2)',
-    '2 ^ b'
+    '2 ^ b',
   ],
-  seealso: ['exp', 'log1p', 'log2', 'log10']
-}
+  seealso: ['exp', 'log1p', 'log2', 'log10'],
+};

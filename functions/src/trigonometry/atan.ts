@@ -1,21 +1,21 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for atan
 interface BigNumberType {
-  atan(): BigNumberType
+  atan(): BigNumberType;
 }
 
 interface ComplexType {
-  atan(): ComplexType
+  atan(): ComplexType;
 }
 
 interface AtanDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'atan'
-const dependencies = ['typed']
+const name = 'atan';
+const dependencies = ['typed'];
 
 export const createAtan = /* #__PURE__ */ factory(
   name,
@@ -46,16 +46,16 @@ export const createAtan = /* #__PURE__ */ factory(
      */
     return typed('atan', {
       number: function (x: number): number {
-        return Math.atan(x)
+        return Math.atan(x);
       },
 
       Complex: function (x: ComplexType): ComplexType {
-        return x.atan()
+        return x.atan();
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        return x.atan()
-      }
-    })
+        return x.atan();
+      },
+    });
   }
-)
+);

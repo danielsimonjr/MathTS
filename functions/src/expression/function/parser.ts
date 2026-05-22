@@ -1,17 +1,17 @@
-import { factory } from '../../utils/factory.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { factory } from '../../utils/factory.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 interface ParserConstructor {
-  new (): any
+  new (): any;
 }
 
 interface ParserDependencies {
-  typed: TypedFunction
-  Parser: ParserConstructor
+  typed: TypedFunction;
+  Parser: ParserConstructor;
 }
 
-const name = 'parser'
-const dependencies = ['typed', 'Parser']
+const name = 'parser';
+const dependencies = ['typed', 'Parser'];
 
 export const createParser = /* #__PURE__ */ factory(
   name,
@@ -62,8 +62,8 @@ export const createParser = /* #__PURE__ */ factory(
      */
     return typed(name, {
       '': function (): any {
-        return new Parser()
-      }
-    })
+        return new Parser();
+      },
+    });
   }
-)
+);

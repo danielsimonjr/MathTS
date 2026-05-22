@@ -98,7 +98,10 @@ describe('cross3D', () => {
     const b = [4, 5, 6];
     const ab = cross3D(a, b);
     const ba = cross3D(b, a);
-    expectVecClose(ab, ba.map((v) => -v));
+    expectVecClose(
+      ab,
+      ba.map((v) => -v)
+    );
   });
 });
 

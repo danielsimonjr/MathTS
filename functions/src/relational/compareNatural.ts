@@ -1,29 +1,29 @@
 // @ts-ignore - no type declarations available
-import naturalSort from 'javascript-natural-sort'
-import { isDenseMatrix, isSparseMatrix, typeOf } from '../utils/is.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import naturalSort from 'javascript-natural-sort';
+import { isDenseMatrix, isSparseMatrix, typeOf } from '../utils/is.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for compareNatural
 interface Complex {
-  re: number
-  im: number
+  re: number;
+  im: number;
 }
 
 interface Unit {
-  equalBase(other: Unit): boolean
-  value: unknown
-  valueType(): string
-  formatUnits(): unknown[]
+  equalBase(other: Unit): boolean;
+  value: unknown;
+  valueType(): string;
+  formatUnits(): unknown[];
 }
 
 interface CompareNaturalDependencies {
-  typed: TypedFunction
-  compare: TypedFunction
+  typed: TypedFunction;
+  compare: TypedFunction;
 }
 
-const name = 'compareNatural'
-const dependencies = ['typed', 'compare']
+const name = 'compareNatural';
+const dependencies = ['typed', 'compare'];
 
 export const createCompareNatural = /* #__PURE__ */ factory(
   name,
@@ -32,7 +32,7 @@ export const createCompareNatural = /* #__PURE__ */ factory(
     const compareBooleans = compare.signatures['boolean,boolean'] as (
       x: boolean,
       y: boolean
-    ) => number
+    ) => number;
 
     /**
      * Compare two values of any type in a deterministic, natural way.
@@ -102,68 +102,64 @@ export const createCompareNatural = /* #__PURE__ */ factory(
      * @return {number} Returns the result of the comparison:
      *                  1 when x > y, -1 when x < y, and 0 when x == y.
      */
-    return typed(name, { 'any, any': _compareNatural }) // just to check # args
+    return typed(name, { 'any, any': _compareNatural }); // just to check # args
 
     function _compareNatural(x: unknown, y: unknown): number {
-      const typeX = typeOf(x)
-      const typeY = typeOf(y)
-      let c
+      const typeX = typeOf(x);
+      const typeY = typeOf(y);
+      let c;
 
       // numeric types
       if (
         (typeX === 'number' || typeX === 'BigNumber' || typeX === 'Fraction') &&
         (typeY === 'number' || typeY === 'BigNumber' || typeY === 'Fraction')
       ) {
-        c = compare(x, y)
+        c = compare(x, y);
         if (c.toString() !== '0') {
           // c can be number, BigNumber, or Fraction
-          return (c as number) > 0 ? 1 : -1 // return a number
+          return (c as number) > 0 ? 1 : -1; // return a number
         } else {
-          return naturalSort(typeX, typeY)
+          return naturalSort(typeX, typeY);
         }
       }
 
       // matrix types
-      const matTypes = ['Array', 'DenseMatrix', 'SparseMatrix']
+      const matTypes = ['Array', 'DenseMatrix', 'SparseMatrix'];
       if (matTypes.includes(typeX) || matTypes.includes(typeY)) {
-        c = compareMatricesAndArrays(_compareNatural, x, y)
+        c = compareMatricesAndArrays(_compareNatural, x, y);
         if (c !== 0) {
-          return c
+          return c;
         } else {
-          return naturalSort(typeX, typeY)
+          return naturalSort(typeX, typeY);
         }
       }
 
       // in case of different types, order by name of type, i.e. 'BigNumber' < 'Complex'
       if (typeX !== typeY) {
-        return naturalSort(typeX, typeY)
+        return naturalSort(typeX, typeY);
       }
 
       if (typeX === 'Complex') {
-        return compareComplexNumbers(x as Complex, y as Complex)
+        return compareComplexNumbers(x as Complex, y as Complex);
       }
 
       if (typeX === 'Unit') {
-        const unitX = x as Unit
-        const unitY = y as Unit
+        const unitX = x as Unit;
+        const unitY = y as Unit;
         if (unitX.equalBase(unitY)) {
-          return _compareNatural(unitX.value, unitY.value)
+          return _compareNatural(unitX.value, unitY.value);
         }
 
         // compare by units
-        return compareArrays(
-          _compareNatural,
-          unitX.formatUnits(),
-          unitY.formatUnits()
-        )
+        return compareArrays(_compareNatural, unitX.formatUnits(), unitY.formatUnits());
       }
 
       if (typeX === 'boolean') {
-        return compareBooleans(x as boolean, y as boolean)
+        return compareBooleans(x as boolean, y as boolean);
       }
 
       if (typeX === 'string') {
-        return naturalSort(x as string, y as string)
+        return naturalSort(x as string, y as string);
       }
 
       if (typeX === 'Object') {
@@ -171,19 +167,19 @@ export const createCompareNatural = /* #__PURE__ */ factory(
           _compareNatural,
           x as Record<string, unknown>,
           y as Record<string, unknown>
-        )
+        );
       }
 
       if (typeX === 'null') {
-        return 0
+        return 0;
       }
 
       if (typeX === 'undefined') {
-        return 0
+        return 0;
       }
 
       // this should not occur...
-      throw new TypeError('Unsupported type of value "' + typeX + '"')
+      throw new TypeError('Unsupported type of value "' + typeX + '"');
     }
 
     /**
@@ -203,7 +199,7 @@ export const createCompareNatural = /* #__PURE__ */ factory(
           compareNatural,
           (x as unknown as { toJSON(): { values: unknown[] } }).toJSON().values,
           (y as unknown as { toJSON(): { values: unknown[] } }).toJSON().values
-        )
+        );
       }
       if (isSparseMatrix(x)) {
         // note: convert to array is expensive
@@ -211,7 +207,7 @@ export const createCompareNatural = /* #__PURE__ */ factory(
           compareNatural,
           (x as unknown as { toArray(): unknown[] }).toArray(),
           y
-        )
+        );
       }
       if (isSparseMatrix(y)) {
         // note: convert to array is expensive
@@ -219,7 +215,7 @@ export const createCompareNatural = /* #__PURE__ */ factory(
           compareNatural,
           x,
           (y as unknown as { toArray(): unknown[] }).toArray()
-        )
+        );
       }
 
       // convert DenseArray into Array
@@ -228,25 +224,25 @@ export const createCompareNatural = /* #__PURE__ */ factory(
           compareNatural,
           (x as unknown as { toJSON(): { data: unknown[] } }).toJSON().data,
           y
-        )
+        );
       }
       if (isDenseMatrix(y)) {
         return compareMatricesAndArrays(
           compareNatural,
           x,
           (y as unknown as { toJSON(): { data: unknown[] } }).toJSON().data
-        )
+        );
       }
 
       // convert scalars to array
       if (!Array.isArray(x)) {
-        return compareMatricesAndArrays(compareNatural, [x], y)
+        return compareMatricesAndArrays(compareNatural, [x], y);
       }
       if (!Array.isArray(y)) {
-        return compareMatricesAndArrays(compareNatural, x, [y])
+        return compareMatricesAndArrays(compareNatural, x, [y]);
       }
 
-      return compareArrays(compareNatural, x, y)
+      return compareArrays(compareNatural, x, y);
     }
 
     /**
@@ -267,22 +263,22 @@ export const createCompareNatural = /* #__PURE__ */ factory(
     ): number {
       // compare each value
       for (let i = 0, ii = Math.min(x.length, y.length); i < ii; i++) {
-        const v = compareNatural(x[i], y[i])
+        const v = compareNatural(x[i], y[i]);
         if (v !== 0) {
-          return v
+          return v;
         }
       }
 
       // compare the size of the arrays
       if (x.length > y.length) {
-        return 1
+        return 1;
       }
       if (x.length < y.length) {
-        return -1
+        return -1;
       }
 
       // both Arrays have equal size and content
-      return 0
+      return 0;
     }
 
     /**
@@ -300,29 +296,29 @@ export const createCompareNatural = /* #__PURE__ */ factory(
       x: Record<string, unknown>,
       y: Record<string, unknown>
     ): number {
-      const keysX = Object.keys(x)
-      const keysY = Object.keys(y)
+      const keysX = Object.keys(x);
+      const keysY = Object.keys(y);
 
       // compare keys
-      keysX.sort(naturalSort)
-      keysY.sort(naturalSort)
-      const c = compareArrays(compareNatural, keysX, keysY)
+      keysX.sort(naturalSort);
+      keysY.sort(naturalSort);
+      const c = compareArrays(compareNatural, keysX, keysY);
       if (c !== 0) {
-        return c
+        return c;
       }
 
       // compare values
       for (let i = 0; i < keysX.length; i++) {
-        const v = compareNatural(x[keysX[i]], y[keysY[i]])
+        const v = compareNatural(x[keysX[i]], y[keysY[i]]);
         if (v !== 0) {
-          return v
+          return v;
         }
       }
 
-      return 0
+      return 0;
     }
   }
-)
+);
 
 /**
  * Compare two complex numbers, `x` and `y`:
@@ -336,18 +332,18 @@ export const createCompareNatural = /* #__PURE__ */ factory(
  */
 function compareComplexNumbers(x: Complex, y: Complex): number {
   if (x.re > y.re) {
-    return 1
+    return 1;
   }
   if (x.re < y.re) {
-    return -1
+    return -1;
   }
 
   if (x.im > y.im) {
-    return 1
+    return 1;
   }
   if (x.im < y.im) {
-    return -1
+    return -1;
   }
 
-  return 0
+  return 0;
 }

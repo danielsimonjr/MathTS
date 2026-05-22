@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { expm1Number } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { expm1Number } from '../plain/number/index.js';
 
 // Type definitions for expm1
 interface ComplexType {
-  re: number
-  im: number
+  re: number;
+  im: number;
 }
 
 interface ComplexConstructor {
-  new (re: number, im: number): ComplexType
+  new (re: number, im: number): ComplexType;
 }
 
 interface BigNumberType {
-  exp(): { minus(n: number): BigNumberType }
+  exp(): { minus(n: number): BigNumberType };
 }
 
 interface Expm1Dependencies {
-  typed: TypedFunction
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  Complex: ComplexConstructor;
 }
 
-const name = 'expm1'
-const dependencies = ['typed', 'Complex']
+const name = 'expm1';
+const dependencies = ['typed', 'Complex'];
 
 export const createExpm1 = /* #__PURE__ */ factory(
   name,
@@ -65,13 +65,13 @@ export const createExpm1 = /* #__PURE__ */ factory(
       number: expm1Number,
 
       Complex: function (x: ComplexType): ComplexType {
-        const r = Math.exp(x.re)
-        return new Complex(r * Math.cos(x.im) - 1, r * Math.sin(x.im))
+        const r = Math.exp(x.re);
+        return new Complex(r * Math.cos(x.im) - 1, r * Math.sin(x.im));
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        return x.exp().minus(1)
-      }
-    })
+        return x.exp().minus(1);
+      },
+    });
   }
-)
+);

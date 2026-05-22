@@ -66,12 +66,12 @@ Expression evaluation performance suffers from similar issues, with **`math.eval
 
 ### Quantified Performance Gaps
 
-| Operation | Current Math.js | Optimized Alternative | Gap Factor |
-|-----------|----------------|----------------------|------------|
-| Matrix Multiply (1000×1000) | ~45 seconds | ~0.5 seconds (native) | 90x |
-| Determinant (500×500) | ~120 seconds | ~1.2 seconds (LAPACK) | 100x |
-| SVD Decomposition (500×500) | ~300 seconds | ~3 seconds (native) | 100x |
-| Element-wise Operations (10M) | ~800ms | ~50ms (SIMD) | 16x |
+| Operation                     | Current Math.js | Optimized Alternative | Gap Factor |
+| ----------------------------- | --------------- | --------------------- | ---------- |
+| Matrix Multiply (1000×1000)   | ~45 seconds     | ~0.5 seconds (native) | 90x        |
+| Determinant (500×500)         | ~120 seconds    | ~1.2 seconds (LAPACK) | 100x       |
+| SVD Decomposition (500×500)   | ~300 seconds    | ~3 seconds (native)   | 100x       |
+| Element-wise Operations (10M) | ~800ms          | ~50ms (SIMD)          | 16x        |
 
 ---
 
@@ -92,9 +92,9 @@ class MathWorkerPool {
       maxWorkers: config.maxWorkers || navigator.hardwareConcurrency || 4,
       minTaskSize: config.minTaskSize || { matrix: 100, array: 1000 },
       timeout: config.timeout || 30000,
-      useSharedMemory: config.useSharedMemory !== false
+      useSharedMemory: config.useSharedMemory !== false,
     };
-    
+
     this.workers = [];
     this.taskQueue = [];
     this.activeJobs = new Map();
@@ -104,13 +104,13 @@ class MathWorkerPool {
   async initialize() {
     // Detect environment capabilities
     this.capabilities = await this.detectCapabilities();
-    
+
     // Create worker pool based on available concurrency
     for (let i = 0; i < this.config.maxWorkers; i++) {
       const worker = await this.createMathWorker(i);
       this.workers.push(worker);
     }
-    
+
     return this;
   }
 
@@ -119,20 +119,19 @@ class MathWorkerPool {
       sharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined',
       atomics: typeof Atomics !== 'undefined',
       transferable: true,
-      crossOriginIsolated: typeof crossOriginIsolated !== 'undefined' 
-        && crossOriginIsolated
+      crossOriginIsolated: typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated,
     };
   }
 
   shouldUseParallel(operation, data) {
     if (!this.config.enabled) return false;
-    
+
     const size = this.getDataSize(data);
     const threshold = this.config.minTaskSize[this.getDataType(data)] || 1000;
     const complexity = this.getOperationComplexity(operation);
-    
+
     // Account for operation complexity in threshold calculation
-    return size >= (threshold / complexity);
+    return size >= threshold / complexity;
   }
 }
 ```
@@ -148,15 +147,15 @@ class SharedMatrixBuffer {
     this.rows = rows;
     this.cols = cols;
     this.bytesPerElement = Float64Array.BYTES_PER_ELEMENT;
-    
+
     // Allocate shared buffer for matrix data plus metadata
     const dataSize = rows * cols * this.bytesPerElement;
     const metadataSize = 3 * Int32Array.BYTES_PER_ELEMENT; // rows, cols, status
-    
+
     this.buffer = new SharedArrayBuffer(dataSize + metadataSize);
     this.metadata = new Int32Array(this.buffer, 0, 3);
     this.data = new Float64Array(this.buffer, metadataSize, rows * cols);
-    
+
     // Store dimensions in metadata
     Atomics.store(this.metadata, 0, rows);
     Atomics.store(this.metadata, 1, cols);
@@ -200,39 +199,45 @@ When these headers are not present, the parallel computing module automatically 
 async function parallelMatrixMultiply(A, B, workerPool) {
   const [m, k] = [A.rows, A.cols];
   const [_, n] = [B.rows, B.cols];
-  
+
   // Determine optimal block size based on worker count and cache efficiency
   const numWorkers = workerPool.workers.length;
   const blockSize = Math.ceil(m / numWorkers);
-  
+
   // Create shared buffers for input matrices
   const sharedA = new SharedMatrixBuffer(m, k);
   const sharedB = new SharedMatrixBuffer(k, n);
   const sharedC = new SharedMatrixBuffer(m, n);
-  
+
   // Copy input data to shared buffers (one-time cost)
   sharedA.data.set(A.flatten());
   sharedB.data.set(B.flatten());
-  
+
   // Dispatch row blocks to workers
   const tasks = [];
   for (let i = 0; i < numWorkers; i++) {
     const startRow = i * blockSize;
     const endRow = Math.min(startRow + blockSize, m);
-    
+
     if (startRow < m) {
-      tasks.push(workerPool.execute('multiplyBlock', {
-        sharedA: sharedA.buffer,
-        sharedB: sharedB.buffer,
-        sharedC: sharedC.buffer,
-        startRow, endRow, m, k, n
-      }));
+      tasks.push(
+        workerPool.execute('multiplyBlock', {
+          sharedA: sharedA.buffer,
+          sharedB: sharedB.buffer,
+          sharedC: sharedC.buffer,
+          startRow,
+          endRow,
+          m,
+          k,
+          n,
+        })
+      );
     }
   }
-  
+
   // Wait for all workers to complete
   await Promise.all(tasks);
-  
+
   // Result is already in sharedC due to shared memory
   return new DenseMatrix(sharedC.data, [m, n]);
 }
@@ -247,7 +252,7 @@ const math = create(all);
 
 self.addEventListener('message', async (event) => {
   const { type, taskId, operation, data } = event.data;
-  
+
   switch (operation) {
     case 'multiplyBlock':
       executeMatrixMultiplyBlock(taskId, data);
@@ -263,12 +268,12 @@ self.addEventListener('message', async (event) => {
 
 function executeMatrixMultiplyBlock(taskId, params) {
   const { sharedA, sharedB, sharedC, startRow, endRow, m, k, n } = params;
-  
+
   // Create views on shared memory
   const A = new Float64Array(sharedA);
   const B = new Float64Array(sharedB);
   const C = new Float64Array(sharedC);
-  
+
   // Compute assigned block with cache-friendly access pattern
   for (let i = startRow; i < endRow; i++) {
     for (let j = 0; j < n; j++) {
@@ -280,14 +285,14 @@ function executeMatrixMultiplyBlock(taskId, params) {
       C[i * n + j] = sum;
     }
   }
-  
+
   self.postMessage({ type: 'complete', taskId });
 }
 
 function executeStatisticalChunk(taskId, params) {
   const { sharedData, startIdx, endIdx, operation } = params;
   const data = new Float64Array(sharedData, startIdx * 8, endIdx - startIdx);
-  
+
   let result;
   switch (operation) {
     case 'sum':
@@ -300,17 +305,18 @@ function executeStatisticalChunk(taskId, params) {
       result = { sorted: quickSelect(data, Math.floor(data.length / 2)) };
       break;
   }
-  
+
   self.postMessage({ type: 'result', taskId, result });
 }
 
 // Numerically stable summation using Kahan algorithm
 function kahanSum(data) {
-  let sum = 0, c = 0;
+  let sum = 0,
+    c = 0;
   for (let i = 0; i < data.length; i++) {
     const y = data[i] - c;
     const t = sum + y;
-    c = (t - sum) - y;
+    c = t - sum - y;
     sum = t;
   }
   return sum;
@@ -319,12 +325,12 @@ function kahanSum(data) {
 
 ### Expected Performance Improvements from Web Workers
 
-| Operation | Data Size | Serial Time | Parallel Time (4 workers) | Speedup |
-|-----------|-----------|-------------|---------------------------|---------|
-| Matrix Multiply | 1000×1000 | 2500ms | 700ms | 3.6x |
-| Statistical Mean | 10M elements | 45ms | 15ms | 3.0x |
-| Element-wise Ops | 10M elements | 120ms | 35ms | 3.4x |
-| SVD (Power Method) | 500×500 | 800ms | 250ms | 3.2x |
+| Operation          | Data Size    | Serial Time | Parallel Time (4 workers) | Speedup |
+| ------------------ | ------------ | ----------- | ------------------------- | ------- |
+| Matrix Multiply    | 1000×1000    | 2500ms      | 700ms                     | 3.6x    |
+| Statistical Mean   | 10M elements | 45ms        | 15ms                      | 3.0x    |
+| Element-wise Ops   | 10M elements | 120ms       | 35ms                      | 3.4x    |
+| SVD (Power Method) | 500×500      | 800ms       | 250ms                     | 3.2x    |
 
 ---
 
@@ -341,8 +347,9 @@ Math.js adopts **AssemblyScript** as the WebAssembly source language due to its 
 ### SIMD-Accelerated Matrix Operations
 
 WebAssembly SIMD uses 128-bit registers that can process:
+
 - 4 × 32-bit floats simultaneously
-- 2 × 64-bit floats simultaneously  
+- 2 × 64-bit floats simultaneously
 - 16 × 8-bit integers simultaneously
 - 8 × 16-bit integers simultaneously
 
@@ -360,48 +367,46 @@ export function matrixMultiplySIMD(
   N: i32
 ): void {
   const TILE_SIZE: i32 = 64; // Optimized for L1 cache
-  
+
   // Clear result matrix
   memory.fill(cPtr, 0, M * N * sizeof<f64>());
-  
+
   // Tiled multiplication with SIMD inner loop
   for (let ii: i32 = 0; ii < M; ii += TILE_SIZE) {
     const iMax = min(ii + TILE_SIZE, M);
-    
+
     for (let kk: i32 = 0; kk < K; kk += TILE_SIZE) {
       const kMax = min(kk + TILE_SIZE, K);
-      
+
       for (let jj: i32 = 0; jj < N; jj += TILE_SIZE) {
         const jMax = min(jj + TILE_SIZE, N);
-        
+
         // Process tile with SIMD
         for (let i = ii; i < iMax; i++) {
           for (let k = kk; k < kMax; k++) {
             // Broadcast A[i,k] to all SIMD lanes
-            const aik = v128.splat<f64>(
-              load<f64>(aPtr + (i * K + k) * sizeof<f64>())
-            );
-            
+            const aik = v128.splat<f64>(load<f64>(aPtr + (i * K + k) * sizeof<f64>()));
+
             // Process 2 elements at a time (128-bit = 2 × f64)
             let j = jj;
             for (; j + 1 < jMax; j += 2) {
               const bOffset = (k * N + j) * sizeof<f64>();
               const cOffset = (i * N + j) * sizeof<f64>();
-              
+
               // Load B[k,j:j+2]
               const bkj = v128.load(bPtr + bOffset);
-              
+
               // Load current C[i,j:j+2]
               const cij = v128.load(cPtr + cOffset);
-              
+
               // C[i,j:j+2] += A[i,k] * B[k,j:j+2]
               const product = f64x2.mul(aik, bkj);
               const result = f64x2.add(cij, product);
-              
+
               // Store result
               v128.store(cPtr + cOffset, result);
             }
-            
+
             // Handle odd column
             if (j < jMax) {
               const bVal = load<f64>(bPtr + (k * N + j) * sizeof<f64>());
@@ -417,28 +422,23 @@ export function matrixMultiplySIMD(
 }
 
 // Strassen's Algorithm for Large Matrices
-export function strassenMultiply(
-  aPtr: usize,
-  bPtr: usize,
-  cPtr: usize,
-  n: i32
-): void {
+export function strassenMultiply(aPtr: usize, bPtr: usize, cPtr: usize, n: i32): void {
   const STRASSEN_THRESHOLD: i32 = 128;
-  
+
   if (n <= STRASSEN_THRESHOLD) {
     matrixMultiplySIMD(aPtr, bPtr, cPtr, n, n, n);
     return;
   }
-  
+
   // Recursive Strassen decomposition for O(n^2.807) complexity
   const halfN = n >> 1;
   const quadSize = halfN * halfN * sizeof<f64>();
-  
+
   // Allocate temporary matrices for Strassen products
   const m1 = heap.alloc(quadSize);
   const m2 = heap.alloc(quadSize);
   // ... (full Strassen implementation)
-  
+
   heap.free(m1);
   heap.free(m2);
 }
@@ -452,32 +452,29 @@ export function parallelSumSIMD(dataPtr: usize, length: i32): f64 {
   // Initialize SIMD accumulators
   let sum_vec = f64x2.splat(0.0);
   let comp_vec = f64x2.splat(0.0); // Kahan compensation
-  
+
   let i: i32 = 0;
-  
+
   // SIMD loop processing 2 elements at a time
   for (; i + 1 < length; i += 2) {
-    const y_vec = f64x2.sub(
-      v128.load(dataPtr + i * sizeof<f64>()),
-      comp_vec
-    );
+    const y_vec = f64x2.sub(v128.load(dataPtr + i * sizeof<f64>()), comp_vec);
     const t_vec = f64x2.add(sum_vec, y_vec);
     comp_vec = f64x2.sub(f64x2.sub(t_vec, sum_vec), y_vec);
     sum_vec = t_vec;
   }
-  
+
   // Horizontal reduction of SIMD vector
   let sum = f64x2.extract_lane(sum_vec, 0) + f64x2.extract_lane(sum_vec, 1);
   let comp = f64x2.extract_lane(comp_vec, 0) + f64x2.extract_lane(comp_vec, 1);
-  
+
   // Handle remaining element
   if (i < length) {
     const y = load<f64>(dataPtr + i * sizeof<f64>()) - comp;
     const t = sum + y;
-    comp = (t - sum) - y;
+    comp = t - sum - y;
     sum = t;
   }
-  
+
   return sum;
 }
 
@@ -486,7 +483,7 @@ export function welfordVarianceSIMD(dataPtr: usize, length: i32): f64 {
   let count: f64 = 0;
   let mean: f64 = 0;
   let m2: f64 = 0;
-  
+
   for (let i: i32 = 0; i < length; i++) {
     count += 1;
     const x = load<f64>(dataPtr + i * sizeof<f64>());
@@ -495,7 +492,7 @@ export function welfordVarianceSIMD(dataPtr: usize, length: i32): f64 {
     const delta2 = x - mean;
     m2 += delta * delta2;
   }
-  
+
   return m2 / (count - 1); // Sample variance
 }
 ```
@@ -518,26 +515,24 @@ export class WasmLoader {
       webassembly: typeof WebAssembly !== 'undefined',
       simd: false,
       threads: false,
-      relaxedSimd: false
+      relaxedSimd: false,
     };
-    
+
     if (capabilities.webassembly) {
       // Test SIMD support
       try {
         const simdTest = new Uint8Array([
-          0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
-          0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7b, 0x03,
-          0x02, 0x01, 0x00, 0x0a, 0x0a, 0x01, 0x08, 0x00,
-          0x41, 0x00, 0xfd, 0x0f, 0x0b
+          0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7b,
+          0x03, 0x02, 0x01, 0x00, 0x0a, 0x0a, 0x01, 0x08, 0x00, 0x41, 0x00, 0xfd, 0x0f, 0x0b,
         ]);
         new WebAssembly.Module(simdTest);
         capabilities.simd = true;
       } catch (e) {}
-      
+
       // Test threading support
       capabilities.threads = typeof SharedArrayBuffer !== 'undefined';
     }
-    
+
     return capabilities;
   }
 
@@ -559,9 +554,9 @@ export class WasmLoader {
 
       // Create shared memory for efficient data transfer
       this.memory = new WebAssembly.Memory({
-        initial: 256,  // 16MB initial
+        initial: 256, // 16MB initial
         maximum: 2048, // 128MB maximum
-        shared: this.capabilities.threads
+        shared: this.capabilities.threads,
       });
 
       // Compile and instantiate
@@ -571,9 +566,9 @@ export class WasmLoader {
           memory: this.memory,
           abort: (msg, file, line) => {
             console.error(`WASM abort at ${file}:${line}: ${msg}`);
-          }
+          },
         },
-        Math: Math
+        Math: Math,
       });
 
       this.initialized = true;
@@ -587,7 +582,7 @@ export class WasmLoader {
   // High-level API for matrix operations
   matrixMultiply(A, B) {
     if (!this.initialized) throw new Error('WASM not initialized');
-    
+
     const [m, k1] = A.size();
     const [k2, n] = B.size();
     if (k1 !== k2) throw new Error('Dimension mismatch');
@@ -680,14 +675,14 @@ export class WasmLoader {
 
 ### WebAssembly Performance Benchmarks
 
-| Operation | Pure JS | WASM | WASM+SIMD | Improvement |
-|-----------|---------|------|-----------|-------------|
-| Matrix Multiply 64×64 | 15ms | 8ms | 4ms | 3.75x |
-| Matrix Multiply 256×256 | 850ms | 280ms | 95ms | 8.9x |
-| Matrix Multiply 1024×1024 | 45000ms | 8500ms | 2800ms | 16x |
-| Vector Dot Product (1M) | 12ms | 4ms | 1.8ms | 6.7x |
-| Array Sum (10M) | 45ms | 15ms | 6ms | 7.5x |
-| Variance Calculation (1M) | 38ms | 12ms | 5ms | 7.6x |
+| Operation                 | Pure JS | WASM   | WASM+SIMD | Improvement |
+| ------------------------- | ------- | ------ | --------- | ----------- |
+| Matrix Multiply 64×64     | 15ms    | 8ms    | 4ms       | 3.75x       |
+| Matrix Multiply 256×256   | 850ms   | 280ms  | 95ms      | 8.9x        |
+| Matrix Multiply 1024×1024 | 45000ms | 8500ms | 2800ms    | 16x         |
+| Vector Dot Product (1M)   | 12ms    | 4ms    | 1.8ms     | 6.7x        |
+| Array Sum (10M)           | 45ms    | 15ms   | 6ms       | 7.5x        |
+| Variance Calculation (1M) | 38ms    | 12ms   | 5ms       | 7.6x        |
 
 ---
 
@@ -721,7 +716,7 @@ export class WebGPUCompute {
     try {
       // Request adapter with high-performance preference
       this.adapter = await navigator.gpu.requestAdapter({
-        powerPreference: 'high-performance'
+        powerPreference: 'high-performance',
       });
 
       if (!this.adapter) {
@@ -733,15 +728,14 @@ export class WebGPUCompute {
       this.device = await this.adapter.requestDevice({
         requiredFeatures: [],
         requiredLimits: {
-          maxStorageBufferBindingSize: 
-            this.adapter.limits.maxStorageBufferBindingSize,
-          maxComputeWorkgroupsPerDimension: 65535
-        }
+          maxStorageBufferBindingSize: this.adapter.limits.maxStorageBufferBindingSize,
+          maxComputeWorkgroupsPerDimension: 65535,
+        },
       });
 
       // Pre-compile common shader modules
       await this.compileShaders();
-      
+
       this.initialized = true;
       return true;
     } catch (error) {
@@ -752,23 +746,32 @@ export class WebGPUCompute {
 
   async compileShaders() {
     // Matrix multiplication shader
-    this.shaderModules.set('matmul', this.device.createShaderModule({
-      code: this.getMatrixMultiplyShader()
-    }));
+    this.shaderModules.set(
+      'matmul',
+      this.device.createShaderModule({
+        code: this.getMatrixMultiplyShader(),
+      })
+    );
 
     // Element-wise operations shader
-    this.shaderModules.set('elementwise', this.device.createShaderModule({
-      code: this.getElementWiseShader()
-    }));
+    this.shaderModules.set(
+      'elementwise',
+      this.device.createShaderModule({
+        code: this.getElementWiseShader(),
+      })
+    );
 
     // Statistical operations shader
-    this.shaderModules.set('statistics', this.device.createShaderModule({
-      code: this.getStatisticsShader()
-    }));
+    this.shaderModules.set(
+      'statistics',
+      this.device.createShaderModule({
+        code: this.getStatisticsShader(),
+      })
+    );
   }
 
   getMatrixMultiplyShader() {
-    return /* wgsl */`
+    return /* wgsl */ `
       struct Matrix {
         rows: u32,
         cols: u32,
@@ -842,7 +845,7 @@ export class WebGPUCompute {
   }
 
   getElementWiseShader() {
-    return /* wgsl */`
+    return /* wgsl */ `
       @group(0) @binding(0) var<storage, read> inputA: array<f32>;
       @group(0) @binding(1) var<storage, read> inputB: array<f32>;
       @group(0) @binding(2) var<storage, read_write> output: array<f32>;
@@ -876,7 +879,7 @@ export class WebGPUCompute {
   }
 
   getStatisticsShader() {
-    return /* wgsl */`
+    return /* wgsl */ `
       @group(0) @binding(0) var<storage, read> input: array<f32>;
       @group(0) @binding(1) var<storage, read_write> output: array<f32>;
       @group(0) @binding(2) var<uniform> params: vec4<u32>; // length, operation, 0, 0
@@ -936,7 +939,7 @@ export class WebGPUCompute {
     const bufferB = this.createBuffer(flatB, GPUBufferUsage.STORAGE);
     const bufferC = this.device.createBuffer({
       size: M * N * 4 + 8, // +8 for rows/cols header
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
     });
 
     // Create bind group
@@ -944,8 +947,8 @@ export class WebGPUCompute {
       entries: [
         { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },
         { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },
-        { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }
-      ]
+        { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
+      ],
     });
 
     const bindGroup = this.device.createBindGroup({
@@ -953,8 +956,8 @@ export class WebGPUCompute {
       entries: [
         { binding: 0, resource: { buffer: bufferA } },
         { binding: 1, resource: { buffer: bufferB } },
-        { binding: 2, resource: { buffer: bufferC } }
-      ]
+        { binding: 2, resource: { buffer: bufferC } },
+      ],
     });
 
     // Create compute pipeline
@@ -962,8 +965,8 @@ export class WebGPUCompute {
       layout: this.device.createPipelineLayout({ bindGroupLayouts: [bindGroupLayout] }),
       compute: {
         module: this.shaderModules.get('matmul'),
-        entryPoint: 'main'
-      }
+        entryPoint: 'main',
+      },
     });
 
     // Dispatch compute
@@ -971,7 +974,7 @@ export class WebGPUCompute {
     const computePass = commandEncoder.beginComputePass();
     computePass.setPipeline(pipeline);
     computePass.setBindGroup(0, bindGroup);
-    
+
     // Dispatch enough workgroups to cover entire output matrix
     const workgroupsX = Math.ceil(N / 16);
     const workgroupsY = Math.ceil(M / 16);
@@ -981,7 +984,7 @@ export class WebGPUCompute {
     // Copy result to readable buffer
     const readBuffer = this.device.createBuffer({
       size: M * N * 4,
-      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
     });
     commandEncoder.copyBufferToBuffer(bufferC, 8, readBuffer, 0, M * N * 4);
 
@@ -1011,13 +1014,13 @@ export class WebGPUCompute {
     const buffer = this.device.createBuffer({
       size: data.byteLength + 8,
       usage: usage | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: true
+      mappedAtCreation: true,
     });
-    
+
     const mapping = new Float32Array(buffer.getMappedRange());
     mapping.set(data, 2); // Offset for header
     buffer.unmap();
-    
+
     return buffer;
   }
 }
@@ -1034,17 +1037,17 @@ class ParallelComputeScheduler {
     // Size thresholds based on benchmarks
     const thresholds = {
       matrixMultiply: {
-        minDimension: 256,  // GPU efficient above 256×256
-        optimalDimension: 1024
+        minDimension: 256, // GPU efficient above 256×256
+        optimalDimension: 1024,
       },
       elementWise: {
         minElements: 100000, // 100K elements minimum
-        optimalElements: 1000000
+        optimalElements: 1000000,
       },
       reduction: {
         minElements: 50000,
-        optimalElements: 500000
-      }
+        optimalElements: 500000,
+      },
     };
 
     const config = thresholds[operation];
@@ -1071,15 +1074,15 @@ class ParallelComputeScheduler {
     if (this.shouldUseWebGPU(operation, size)) {
       return this.webgpu.execute(operation, data, options);
     }
-    
+
     if (this.shouldUseWasm(operation, size)) {
       return this.wasm.execute(operation, data, options);
     }
-    
+
     if (this.shouldUseWorkers(operation, size)) {
       return this.workerPool.execute(operation, data, options);
     }
-    
+
     // Fallback to serial JavaScript
     return this.executeSerial(operation, data, options);
   }
@@ -1089,15 +1092,15 @@ class ParallelComputeScheduler {
 ### WebGPU Performance Characteristics
 
 | Matrix Size | JavaScript | WASM+SIMD | WebGPU | WebGPU Speedup |
-|-------------|------------|-----------|--------|----------------|
-| 128×128 | 45ms | 8ms | 12ms* | -0.7x |
-| 256×256 | 350ms | 45ms | 18ms | 19x |
-| 512×512 | 2800ms | 280ms | 35ms | 80x |
-| 1024×1024 | 22000ms | 1800ms | 95ms | 232x |
-| 2048×2048 | 180000ms | 14000ms | 380ms | 474x |
-| 4096×4096 | N/A | 110000ms | 1500ms | 73x |
+| ----------- | ---------- | --------- | ------ | -------------- |
+| 128×128     | 45ms       | 8ms       | 12ms\* | -0.7x          |
+| 256×256     | 350ms      | 45ms      | 18ms   | 19x            |
+| 512×512     | 2800ms     | 280ms     | 35ms   | 80x            |
+| 1024×1024   | 22000ms    | 1800ms    | 95ms   | 232x           |
+| 2048×2048   | 180000ms   | 14000ms   | 380ms  | 474x           |
+| 4096×4096   | N/A        | 110000ms  | 1500ms | 73x            |
 
-*Note: WebGPU has initialization overhead that makes it slower for small matrices. The crossover point is around 200×200 matrices.
+\*Note: WebGPU has initialization overhead that makes it slower for small matrices. The crossover point is around 200×200 matrices.
 
 ---
 
@@ -1115,13 +1118,13 @@ export class ParallelDispatcher {
       autoSelect: config.autoSelect !== false,
       preferGPU: config.preferGPU !== false,
       fallbackToSerial: config.fallbackToSerial !== false,
-      ...config
+      ...config,
     };
 
     this.backends = {
       webgpu: null,
       wasm: null,
-      workers: null
+      workers: null,
     };
 
     this.initialized = false;
@@ -1135,8 +1138,9 @@ export class ParallelDispatcher {
     if (typeof navigator !== 'undefined' && navigator.gpu) {
       this.backends.webgpu = new WebGPUCompute();
       initPromises.push(
-        this.backends.webgpu.initialize()
-          .catch(e => { this.backends.webgpu = null; })
+        this.backends.webgpu.initialize().catch((e) => {
+          this.backends.webgpu = null;
+        })
       );
     }
 
@@ -1144,8 +1148,9 @@ export class ParallelDispatcher {
     if (typeof WebAssembly !== 'undefined') {
       this.backends.wasm = new WasmLoader();
       initPromises.push(
-        this.backends.wasm.initialize()
-          .catch(e => { this.backends.wasm = null; })
+        this.backends.wasm.initialize().catch((e) => {
+          this.backends.wasm = null;
+        })
       );
     }
 
@@ -1153,14 +1158,15 @@ export class ParallelDispatcher {
     if (typeof Worker !== 'undefined') {
       this.backends.workers = new MathWorkerPool(this.config.workers);
       initPromises.push(
-        this.backends.workers.initialize()
-          .catch(e => { this.backends.workers = null; })
+        this.backends.workers.initialize().catch((e) => {
+          this.backends.workers = null;
+        })
       );
     }
 
     await Promise.all(initPromises);
     this.initialized = true;
-    
+
     return this.getCapabilities();
   }
 
@@ -1170,7 +1176,7 @@ export class ParallelDispatcher {
       wasm: this.backends.wasm?.initialized ?? false,
       wasmSimd: this.backends.wasm?.capabilities?.simd ?? false,
       workers: this.backends.workers?.workers?.length ?? 0,
-      sharedMemory: typeof SharedArrayBuffer !== 'undefined'
+      sharedMemory: typeof SharedArrayBuffer !== 'undefined',
     };
   }
 
@@ -1210,35 +1216,35 @@ export class ParallelDispatcher {
     // Empirically determined thresholds
     const operationThresholds = {
       'matrix.multiply': {
-        webgpu: 65536,    // 256×256
-        wasmSimd: 10000,  // 100×100
-        wasm: 2500,       // 50×50
-        workers: 10000    // 100×100
+        webgpu: 65536, // 256×256
+        wasmSimd: 10000, // 100×100
+        wasm: 2500, // 50×50
+        workers: 10000, // 100×100
       },
       'matrix.det': {
-        webgpu: 160000,   // 400×400
-        wasmSimd: 22500,  // 150×150
-        wasm: 10000,      // 100×100
-        workers: 40000    // 200×200
+        webgpu: 160000, // 400×400
+        wasmSimd: 22500, // 150×150
+        wasm: 10000, // 100×100
+        workers: 40000, // 200×200
       },
       'matrix.eigs': {
-        webgpu: 90000,    // 300×300
-        wasmSimd: 10000,  // 100×100
-        wasm: 4900,       // 70×70
-        workers: 22500    // 150×150
+        webgpu: 90000, // 300×300
+        wasmSimd: 10000, // 100×100
+        wasm: 4900, // 70×70
+        workers: 22500, // 150×150
       },
       'statistics.mean': {
-        webgpu: 1000000,  // 1M elements
-        wasmSimd: 50000,  // 50K elements
-        wasm: 10000,      // 10K elements
-        workers: 100000   // 100K elements
+        webgpu: 1000000, // 1M elements
+        wasmSimd: 50000, // 50K elements
+        wasm: 10000, // 10K elements
+        workers: 100000, // 100K elements
       },
-      'default': {
+      default: {
         webgpu: 500000,
         wasmSimd: 50000,
         wasm: 10000,
-        workers: 100000
-      }
+        workers: 100000,
+      },
     };
 
     return operationThresholds[operation] || operationThresholds['default'];
@@ -1279,25 +1285,33 @@ const parallelConfig = {
   auto: async () => {
     const dispatcher = new ParallelDispatcher();
     const caps = await dispatcher.initialize();
-    
+
     return {
       enabled: caps.webgpu || caps.wasmSimd || caps.workers > 1,
-      primary: caps.webgpu ? 'webgpu' : 
-               caps.wasmSimd ? 'wasm-simd' :
-               caps.workers > 1 ? 'workers' : 'serial',
-      fallbackChain: ['webgpu', 'wasm-simd', 'wasm', 'workers', 'serial']
-        .filter(b => {
-          switch(b) {
-            case 'webgpu': return caps.webgpu;
-            case 'wasm-simd': return caps.wasmSimd;
-            case 'wasm': return caps.wasm;
-            case 'workers': return caps.workers > 0;
-            default: return true;
-          }
-        }),
-      capabilities: caps
+      primary: caps.webgpu
+        ? 'webgpu'
+        : caps.wasmSimd
+          ? 'wasm-simd'
+          : caps.workers > 1
+            ? 'workers'
+            : 'serial',
+      fallbackChain: ['webgpu', 'wasm-simd', 'wasm', 'workers', 'serial'].filter((b) => {
+        switch (b) {
+          case 'webgpu':
+            return caps.webgpu;
+          case 'wasm-simd':
+            return caps.wasmSimd;
+          case 'wasm':
+            return caps.wasm;
+          case 'workers':
+            return caps.workers > 0;
+          default:
+            return true;
+        }
+      }),
+      capabilities: caps,
     };
-  }
+  },
 };
 ```
 
@@ -1315,15 +1329,15 @@ math.config({
   // Existing configuration preserved
   number: 'number',
   precision: 64,
-  
+
   // New parallel computing configuration
   parallel: {
     // Master enable/disable switch
     enabled: true,
-    
+
     // Automatic backend selection based on operation and size
     autoSelect: true,
-    
+
     // Backend-specific configuration
     backends: {
       // Web Workers configuration
@@ -1331,38 +1345,50 @@ math.config({
         enabled: true,
         maxWorkers: navigator.hardwareConcurrency || 4,
         minTaskSize: {
-          matrix: 100,      // Minimum matrix dimension
-          array: 1000       // Minimum array length
-        }
+          matrix: 100, // Minimum matrix dimension
+          array: 1000, // Minimum array length
+        },
       },
-      
+
       // WebAssembly configuration
       wasm: {
         enabled: true,
-        simd: true,           // Enable SIMD when available
-        threads: true,        // Enable threading when available
-        relaxedSimd: false    // Relaxed SIMD (experimental)
+        simd: true, // Enable SIMD when available
+        threads: true, // Enable threading when available
+        relaxedSimd: false, // Relaxed SIMD (experimental)
       },
-      
+
       // WebGPU configuration
       webgpu: {
         enabled: true,
         powerPreference: 'high-performance', // or 'low-power'
-        minDimension: 256,    // Minimum matrix size for GPU
-        minElements: 100000   // Minimum array size for GPU
-      }
+        minDimension: 256, // Minimum matrix size for GPU
+        minElements: 100000, // Minimum array size for GPU
+      },
     },
-    
+
     // Operations to parallelize (or '*' for all supported)
-    operations: ['multiply', 'add', 'subtract', 'det', 'inv', 'eigs', 
-                 'mean', 'std', 'variance', 'median', 'map', 'filter'],
-    
+    operations: [
+      'multiply',
+      'add',
+      'subtract',
+      'det',
+      'inv',
+      'eigs',
+      'mean',
+      'std',
+      'variance',
+      'median',
+      'map',
+      'filter',
+    ],
+
     // Graceful degradation on errors
     fallbackToSerial: true,
-    
+
     // Performance monitoring
-    collectMetrics: false
-  }
+    collectMetrics: false,
+  },
 });
 ```
 
@@ -1372,60 +1398,66 @@ Matrix operations integrate parallel implementations through the factory pattern
 
 ```javascript
 // Modified factory for parallel-capable matrix multiplication
-export const createMultiply = factory(name, dependencies, ({
-  typed,
-  matrix,
-  config,
-  parallelDispatcher  // Injected parallel dispatcher
-}) => {
-  
-  const multiply = typed(name, {
-    // Original signatures preserved for backward compatibility
-    'number, number': (x, y) => x * y,
-    'Complex, Complex': multiplyComplex,
-    
-    // Enhanced Matrix signature with parallel dispatch
-    'Matrix, Matrix': function (x, y) {
-      const xSize = x.size();
-      const ySize = y.size();
-      
-      // Validate dimensions
-      if (xSize[1] !== ySize[0]) {
-        throw new DimensionError(xSize[1], ySize[0]);
-      }
-      
-      // Check if parallel processing should be used
-      if (parallelDispatcher && 
-          parallelDispatcher.shouldParallelize('matrix.multiply', x, y)) {
-        return parallelDispatcher.execute('matrix.multiply', { x, y });
-      }
-      
-      // Fallback to existing serial implementation
-      return _multiplyMatrixMatrix(x, y);
-    },
-    
-    // New explicit parallel API for direct control
-    'Matrix, Matrix, Object': function (x, y, options) {
-      if (options.parallel === false) {
+export const createMultiply = factory(
+  name,
+  dependencies,
+  ({
+    typed,
+    matrix,
+    config,
+    parallelDispatcher, // Injected parallel dispatcher
+  }) => {
+    const multiply = typed(name, {
+      // Original signatures preserved for backward compatibility
+      'number, number': (x, y) => x * y,
+      'Complex, Complex': multiplyComplex,
+
+      // Enhanced Matrix signature with parallel dispatch
+      'Matrix, Matrix': function (x, y) {
+        const xSize = x.size();
+        const ySize = y.size();
+
+        // Validate dimensions
+        if (xSize[1] !== ySize[0]) {
+          throw new DimensionError(xSize[1], ySize[0]);
+        }
+
+        // Check if parallel processing should be used
+        if (parallelDispatcher && parallelDispatcher.shouldParallelize('matrix.multiply', x, y)) {
+          return parallelDispatcher.execute('matrix.multiply', { x, y });
+        }
+
+        // Fallback to existing serial implementation
         return _multiplyMatrixMatrix(x, y);
-      }
-      
-      const backend = options.backend || 'auto';
-      return parallelDispatcher.execute('matrix.multiply', { x, y }, { 
-        forceBackend: backend 
-      });
-    }
-  });
+      },
 
-  // Attach metadata for introspection
-  multiply.parallel = {
-    supported: true,
-    backends: ['webgpu', 'wasm-simd', 'wasm', 'workers'],
-    minSize: { matrix: 50 }
-  };
+      // New explicit parallel API for direct control
+      'Matrix, Matrix, Object': function (x, y, options) {
+        if (options.parallel === false) {
+          return _multiplyMatrixMatrix(x, y);
+        }
 
-  return multiply;
-});
+        const backend = options.backend || 'auto';
+        return parallelDispatcher.execute(
+          'matrix.multiply',
+          { x, y },
+          {
+            forceBackend: backend,
+          }
+        );
+      },
+    });
+
+    // Attach metadata for introspection
+    multiply.parallel = {
+      supported: true,
+      backends: ['webgpu', 'wasm-simd', 'wasm', 'workers'],
+      minSize: { matrix: 50 },
+    };
+
+    return multiply;
+  }
+);
 ```
 
 ---
@@ -1437,6 +1469,7 @@ export const createMultiply = factory(name, dependencies, ({
 Phase 1 establishes the parallel processing infrastructure with Web Workers, targeting the most problematic operations like matrix multiplication and determinant calculation.
 
 **Deliverables:**
+
 - Worker pool management system in `src/core/parallel/WorkerPool.js`
 - SharedArrayBuffer support with Transferable fallback
 - Parallel matrix multiplication using block decomposition
@@ -1444,6 +1477,7 @@ Phase 1 establishes the parallel processing infrastructure with Web Workers, tar
 - Comprehensive test suite for parallel correctness
 
 **Target Performance:**
+
 - 2-4x speedup for matrix operations above 100×100
 - No regression for operations below parallel thresholds
 - All existing tests continue to pass
@@ -1453,6 +1487,7 @@ Phase 1 establishes the parallel processing infrastructure with Web Workers, tar
 Phase 2 introduces WebAssembly acceleration with SIMD for computationally intensive algorithms.
 
 **Deliverables:**
+
 - AssemblyScript kernel implementation in `src/core/wasm/kernels/`
 - SIMD-optimized matrix operations
 - Statistical functions (sum, mean, variance, std)
@@ -1460,6 +1495,7 @@ Phase 2 introduces WebAssembly acceleration with SIMD for computationally intens
 - Automatic feature detection and fallback
 
 **Target Performance:**
+
 - 5-10x speedup with SIMD for array operations
 - 8-15x speedup for matrix multiplication
 - Binary size under 50KB gzipped for WASM modules
@@ -1469,6 +1505,7 @@ Phase 2 introduces WebAssembly acceleration with SIMD for computationally intens
 Phase 3 adds WebGPU compute shader support for massive parallelism on GPU-capable systems.
 
 **Deliverables:**
+
 - WebGPU compute engine in `src/core/gpu/WebGPUCompute.js`
 - WGSL shader library for matrix and statistical operations
 - Pipeline caching for performance
@@ -1476,6 +1513,7 @@ Phase 3 adds WebGPU compute shader support for massive parallelism on GPU-capabl
 - Graceful degradation when WebGPU unavailable
 
 **Target Performance:**
+
 - 50-100x speedup for large matrices (1000×1000+)
 - 20-50x speedup for large array operations (1M+ elements)
 - Sub-100ms latency for most operations
@@ -1485,6 +1523,7 @@ Phase 3 adds WebGPU compute shader support for massive parallelism on GPU-capabl
 Phase 4 focuses on system optimization, comprehensive testing, and documentation.
 
 **Deliverables:**
+
 - Unified parallel dispatcher with intelligent backend selection
 - Performance benchmark suite
 - Memory optimization and pooling
@@ -1505,7 +1544,7 @@ class ParallelMemoryManager {
     this.pools = {
       shared: new SharedBufferPool(),
       gpu: new GPUBufferPool(),
-      wasm: new WasmMemoryPool()
+      wasm: new WasmMemoryPool(),
     };
   }
 
@@ -1536,7 +1575,8 @@ class ParallelMemoryManager {
 
 // SharedArrayBuffer pool for Web Worker data sharing
 class SharedBufferPool {
-  constructor(maxPoolSize = 100 * 1024 * 1024) { // 100MB pool
+  constructor(maxPoolSize = 100 * 1024 * 1024) {
+    // 100MB pool
     this.maxSize = maxPoolSize;
     this.currentSize = 0;
     this.available = new Map(); // size -> [buffers]
@@ -1546,7 +1586,7 @@ class SharedBufferPool {
   acquire(size) {
     // Round up to power of 2 for better pool utilization
     const bucketSize = this.nextPowerOf2(size);
-    
+
     if (this.available.has(bucketSize)) {
       const buffers = this.available.get(bucketSize);
       if (buffers.length > 0) {
@@ -1560,7 +1600,7 @@ class SharedBufferPool {
     const buffer = new SharedArrayBuffer(bucketSize);
     this.currentSize += bucketSize;
     this.inUse.add(buffer);
-    
+
     // Evict old buffers if pool is too large
     if (this.currentSize > this.maxSize) {
       this.evict(bucketSize);
@@ -1571,10 +1611,10 @@ class SharedBufferPool {
 
   release(buffer) {
     if (!this.inUse.has(buffer)) return;
-    
+
     this.inUse.delete(buffer);
     const size = buffer.byteLength;
-    
+
     if (!this.available.has(size)) {
       this.available.set(size, []);
     }
@@ -1589,13 +1629,13 @@ class SharedBufferPool {
 
 ### Memory Limits and Platform Considerations
 
-| Platform | SharedArrayBuffer | WebGPU Buffer | WASM Linear Memory |
-|----------|------------------|---------------|-------------------|
-| Desktop Chrome | 2GB | 2GB | 4GB |
-| Desktop Firefox | 2GB | 2GB | 4GB |
-| Desktop Safari | 2GB | 256MB-1GB | 4GB |
-| Mobile Chrome | 512MB | 128MB-256MB | 1GB |
-| Mobile Safari | 256MB | 128MB | 1GB |
+| Platform        | SharedArrayBuffer | WebGPU Buffer | WASM Linear Memory |
+| --------------- | ----------------- | ------------- | ------------------ |
+| Desktop Chrome  | 2GB               | 2GB           | 4GB                |
+| Desktop Firefox | 2GB               | 2GB           | 4GB                |
+| Desktop Safari  | 2GB               | 256MB-1GB     | 4GB                |
+| Mobile Chrome   | 512MB             | 128MB-256MB   | 1GB                |
+| Mobile Safari   | 256MB             | 128MB         | 1GB                |
 
 The parallel computing implementation respects these limits with conservative defaults and provides configuration options for tuning.
 
@@ -1605,15 +1645,15 @@ The parallel computing implementation respects these limits with conservative de
 
 ### Current Browser Support Matrix (November 2025)
 
-| Feature | Chrome | Firefox | Safari | Edge |
-|---------|--------|---------|--------|------|
-| Web Workers | ✅ All | ✅ All | ✅ All | ✅ All |
-| SharedArrayBuffer | ✅ 68+ | ✅ 79+ | ✅ 15.2+ | ✅ 79+ |
-| WebAssembly | ✅ 57+ | ✅ 52+ | ✅ 11+ | ✅ 16+ |
-| WASM SIMD | ✅ 91+ | ✅ 89+ | ✅ 16.4+ | ✅ 91+ |
-| WASM Threads | ✅ 74+ | ✅ 79+ | ✅ 14.1+ | ✅ 79+ |
-| Relaxed SIMD | ✅ 114+ | 🟡 Flag | 🟡 Flag | ✅ 114+ |
-| WebGPU | ✅ 113+ | ✅ 141+ | ✅ 26+ | ✅ 113+ |
+| Feature           | Chrome  | Firefox | Safari   | Edge    |
+| ----------------- | ------- | ------- | -------- | ------- |
+| Web Workers       | ✅ All  | ✅ All  | ✅ All   | ✅ All  |
+| SharedArrayBuffer | ✅ 68+  | ✅ 79+  | ✅ 15.2+ | ✅ 79+  |
+| WebAssembly       | ✅ 57+  | ✅ 52+  | ✅ 11+   | ✅ 16+  |
+| WASM SIMD         | ✅ 91+  | ✅ 89+  | ✅ 16.4+ | ✅ 91+  |
+| WASM Threads      | ✅ 74+  | ✅ 79+  | ✅ 14.1+ | ✅ 79+  |
+| Relaxed SIMD      | ✅ 114+ | 🟡 Flag | 🟡 Flag  | ✅ 114+ |
+| WebGPU            | ✅ 113+ | ✅ 141+ | ✅ 26+   | ✅ 113+ |
 
 ### Runtime Feature Detection
 
@@ -1624,17 +1664,16 @@ const detectParallelCapabilities = async () => {
     workers: typeof Worker !== 'undefined',
     sharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined',
     atomics: typeof Atomics !== 'undefined',
-    crossOriginIsolated: typeof crossOriginIsolated !== 'undefined' 
-      && crossOriginIsolated,
+    crossOriginIsolated: typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated,
     transferable: true,
-    
+
     webassembly: typeof WebAssembly !== 'undefined',
     wasmSimd: false,
     wasmThreads: false,
     wasmRelaxedSimd: false,
-    
+
     webgpu: false,
-    webgpuTimestampQuery: false
+    webgpuTimestampQuery: false,
   };
 
   // Test WASM SIMD
@@ -1642,10 +1681,8 @@ const detectParallelCapabilities = async () => {
     try {
       // Minimal SIMD test module
       const simdTest = new Uint8Array([
-        0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
-        0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7b, 0x03,
-        0x02, 0x01, 0x00, 0x0a, 0x0a, 0x01, 0x08, 0x00,
-        0x41, 0x00, 0xfd, 0x0f, 0x0b
+        0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7b,
+        0x03, 0x02, 0x01, 0x00, 0x0a, 0x0a, 0x01, 0x08, 0x00, 0x41, 0x00, 0xfd, 0x0f, 0x0b,
       ]);
       await WebAssembly.compile(simdTest);
       capabilities.wasmSimd = true;
@@ -1661,8 +1698,7 @@ const detectParallelCapabilities = async () => {
       const adapter = await navigator.gpu.requestAdapter();
       if (adapter) {
         capabilities.webgpu = true;
-        capabilities.webgpuTimestampQuery = 
-          adapter.features.has('timestamp-query');
+        capabilities.webgpuTimestampQuery = adapter.features.has('timestamp-query');
       }
     } catch (e) {}
   }
@@ -1677,17 +1713,17 @@ const detectParallelCapabilities = async () => {
 
 ### Target Performance Improvements
 
-| Operation | Current | Target (Workers) | Target (WASM+SIMD) | Target (WebGPU) |
-|-----------|---------|------------------|-------------------|-----------------|
-| Matrix Multiply 100×100 | 120ms | 45ms (2.7x) | 15ms (8x) | N/A* |
-| Matrix Multiply 500×500 | 15s | 4.5s (3.3x) | 1.2s (12.5x) | 80ms (187x) |
-| Matrix Multiply 1000×1000 | 120s | 35s (3.4x) | 8s (15x) | 200ms (600x) |
-| Determinant 200×200 | 8s | 2.5s (3.2x) | 800ms (10x) | 50ms (160x) |
-| Eigenvalues 300×300 | 45s | 14s (3.2x) | 4s (11x) | 400ms (112x) |
-| Mean (10M elements) | 80ms | 25ms (3.2x) | 8ms (10x) | 5ms (16x) |
-| Std Dev (10M elements) | 150ms | 45ms (3.3x) | 15ms (10x) | 8ms (19x) |
+| Operation                 | Current | Target (Workers) | Target (WASM+SIMD) | Target (WebGPU) |
+| ------------------------- | ------- | ---------------- | ------------------ | --------------- |
+| Matrix Multiply 100×100   | 120ms   | 45ms (2.7x)      | 15ms (8x)          | N/A\*           |
+| Matrix Multiply 500×500   | 15s     | 4.5s (3.3x)      | 1.2s (12.5x)       | 80ms (187x)     |
+| Matrix Multiply 1000×1000 | 120s    | 35s (3.4x)       | 8s (15x)           | 200ms (600x)    |
+| Determinant 200×200       | 8s      | 2.5s (3.2x)      | 800ms (10x)        | 50ms (160x)     |
+| Eigenvalues 300×300       | 45s     | 14s (3.2x)       | 4s (11x)           | 400ms (112x)    |
+| Mean (10M elements)       | 80ms    | 25ms (3.2x)      | 8ms (10x)          | 5ms (16x)       |
+| Std Dev (10M elements)    | 150ms   | 45ms (3.3x)      | 15ms (10x)         | 8ms (19x)       |
 
-*WebGPU not beneficial for small matrices due to transfer overhead
+\*WebGPU not beneficial for small matrices due to transfer overhead
 
 ### Benchmark Methodology
 
@@ -1702,24 +1738,28 @@ class ParallelBenchmark {
 
   async runMatrixMultiplyBenchmark(sizes = [100, 256, 500, 1000]) {
     const results = {};
-    
+
     for (const size of sizes) {
       // Generate random matrices
       const A = this.math.random([size, size]);
       const B = this.math.random([size, size]);
-      
+
       results[size] = {
-        serial: await this.benchmark(() => this.math.multiply(A, B), 
-          { parallel: { enabled: false } }),
-        workers: await this.benchmark(() => this.math.multiply(A, B),
-          { parallel: { backends: { workers: { enabled: true } } } }),
-        wasm: await this.benchmark(() => this.math.multiply(A, B),
-          { parallel: { backends: { wasm: { enabled: true } } } }),
-        webgpu: await this.benchmark(() => this.math.multiply(A, B),
-          { parallel: { backends: { webgpu: { enabled: true } } } })
+        serial: await this.benchmark(() => this.math.multiply(A, B), {
+          parallel: { enabled: false },
+        }),
+        workers: await this.benchmark(() => this.math.multiply(A, B), {
+          parallel: { backends: { workers: { enabled: true } } },
+        }),
+        wasm: await this.benchmark(() => this.math.multiply(A, B), {
+          parallel: { backends: { wasm: { enabled: true } } },
+        }),
+        webgpu: await this.benchmark(() => this.math.multiply(A, B), {
+          parallel: { backends: { webgpu: { enabled: true } } },
+        }),
       };
     }
-    
+
     return results;
   }
 
@@ -1727,10 +1767,10 @@ class ParallelBenchmark {
     // Configure math.js
     const originalConfig = this.math.config();
     this.math.config(config);
-    
+
     // Warmup
     for (let i = 0; i < 5; i++) await fn();
-    
+
     // Timed runs
     const times = [];
     for (let i = 0; i < this.iterations; i++) {
@@ -1738,19 +1778,17 @@ class ParallelBenchmark {
       await fn();
       times.push(performance.now() - start);
     }
-    
+
     // Restore config
     this.math.config(originalConfig);
-    
+
     // Calculate statistics
     return {
       mean: times.reduce((a, b) => a + b) / times.length,
       median: times.sort((a, b) => a - b)[Math.floor(times.length / 2)],
       min: Math.min(...times),
       max: Math.max(...times),
-      stdDev: Math.sqrt(
-        times.reduce((sq, t) => sq + Math.pow(t - mean, 2), 0) / times.length
-      )
+      stdDev: Math.sqrt(times.reduce((sq, t) => sq + Math.pow(t - mean, 2), 0) / times.length),
     };
   }
 }
@@ -1769,41 +1807,41 @@ The refactored Math.js produces multiple distribution bundles:
 module.exports = {
   entry: {
     // Standard bundle with all parallel features
-    'mathjs': './src/index.js',
-    
+    mathjs: './src/index.js',
+
     // Parallel-only entry for explicit parallel imports
     'mathjs.parallel': './src/core/parallel/index.js',
-    
+
     // Lightweight bundle without parallel features
-    'mathjs.lite': './src/index-lite.js'
+    'mathjs.lite': './src/index-lite.js',
   },
-  
+
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     library: {
       name: 'math',
       type: 'umd',
-      export: 'default'
-    }
+      export: 'default',
+    },
   },
-  
+
   // Separate WASM and worker files for lazy loading
   experiments: {
-    asyncWebAssembly: true
-  }
+    asyncWebAssembly: true,
+  },
 };
 ```
 
 ### Bundle Sizes
 
-| Bundle | Size (minified) | Size (gzipped) |
-|--------|-----------------|----------------|
-| mathjs.js | 180KB | 58KB |
-| mathjs.parallel.js | 45KB | 14KB |
-| mathjs.lite.js | 140KB | 45KB |
-| math-kernels.wasm | 35KB | 12KB |
-| math-kernels.simd.wasm | 42KB | 14KB |
+| Bundle                 | Size (minified) | Size (gzipped) |
+| ---------------------- | --------------- | -------------- |
+| mathjs.js              | 180KB           | 58KB           |
+| mathjs.parallel.js     | 45KB            | 14KB           |
+| mathjs.lite.js         | 140KB           | 45KB           |
+| math-kernels.wasm      | 35KB            | 12KB           |
+| math-kernels.simd.wasm | 42KB            | 14KB           |
 
 ### Lazy Loading Strategy
 
@@ -1819,10 +1857,10 @@ math.parallel = {
     this._dispatcher = new ParallelDispatcher();
     return this._dispatcher.initialize();
   },
-  
+
   get initialized() {
     return this._dispatcher?.initialized ?? false;
-  }
+  },
 };
 
 // WebAssembly loaded when first needed
@@ -1865,6 +1903,7 @@ The phased implementation approach ensures stability while delivering incrementa
 ### Backward Compatibility Guarantee
 
 The refactoring maintains complete backward compatibility through:
+
 - Preserved API surface with no breaking changes
 - Automatic parallel dispatch based on operation characteristics
 - Graceful degradation when parallel features unavailable
@@ -1872,12 +1911,12 @@ The refactoring maintains complete backward compatibility through:
 
 ### Performance Targets Summary
 
-| Scenario | Current Performance | Target Performance | Improvement |
-|----------|--------------------|--------------------|-------------|
-| Matrix Multiply 1000×1000 | ~120 seconds | ~200 milliseconds | 600x |
-| Large Array Statistics (10M) | ~150 milliseconds | ~8 milliseconds | 19x |
-| Complex Expression Evaluation | ~80 milliseconds | ~25 milliseconds | 3.2x |
-| Eigenvalue Computation 300×300 | ~45 seconds | ~400 milliseconds | 112x |
+| Scenario                       | Current Performance | Target Performance | Improvement |
+| ------------------------------ | ------------------- | ------------------ | ----------- |
+| Matrix Multiply 1000×1000      | ~120 seconds        | ~200 milliseconds  | 600x        |
+| Large Array Statistics (10M)   | ~150 milliseconds   | ~8 milliseconds    | 19x         |
+| Complex Expression Evaluation  | ~80 milliseconds    | ~25 milliseconds   | 3.2x        |
+| Eigenvalue Computation 300×300 | ~45 seconds         | ~400 milliseconds  | 112x        |
 
 The Math.js parallel computing refactoring transforms the library from a capable but slow mathematical toolkit into a high-performance computational engine suitable for demanding applications in data science, machine learning, scientific computing, and real-time visualization—all while maintaining the simplicity and accessibility that define the Math.js developer experience.
 

@@ -1,34 +1,26 @@
-import { createBitAnd } from '../../bitwise/bitAnd.js'
-import { factory } from '../../utils/factory.js'
-import { isCollection } from '../../utils/is.js'
+import { createBitAnd } from '../../bitwise/bitAnd.js';
+import { factory } from '../../utils/factory.js';
+import { isCollection } from '../../utils/is.js';
 import type {
   TypedFunction,
   MathFunction,
   ExpressionNode,
   EvaluationScope,
   MathJsLike,
-  RawArgsTransformFunction
-} from './types.js'
+  RawArgsTransformFunction,
+} from './types.js';
 
 interface BitAndDependencies {
-  typed: TypedFunction
-  matrix: MathFunction
-  equalScalar: MathFunction<boolean>
-  zeros: MathFunction
-  not: MathFunction<boolean>
-  concat: MathFunction
+  typed: TypedFunction;
+  matrix: MathFunction;
+  equalScalar: MathFunction<boolean>;
+  zeros: MathFunction;
+  not: MathFunction<boolean>;
+  concat: MathFunction;
 }
 
-const name = 'bitAnd'
-const dependencies = [
-  'typed',
-  'matrix',
-  'zeros',
-  'add',
-  'equalScalar',
-  'not',
-  'concat'
-]
+const name = 'bitAnd';
+const dependencies = ['typed', 'matrix', 'zeros', 'add', 'equalScalar', 'not', 'concat'];
 
 export const createBitAndTransform = /* #__PURE__ */ factory(
   name,
@@ -40,30 +32,30 @@ export const createBitAndTransform = /* #__PURE__ */ factory(
       equalScalar,
       zeros,
       not,
-      concat
-    })
+      concat,
+    });
 
     function bitAndTransform(
       args: ExpressionNode[],
       math: MathJsLike,
       scope: EvaluationScope | Map<string, unknown>
     ): unknown {
-      const condition1 = args[0].compile().evaluate(scope)
+      const condition1 = args[0].compile().evaluate(scope);
       if (!isCollection(condition1)) {
         if (isNaN(condition1 as number)) {
-          return NaN
+          return NaN;
         }
         if (condition1 === 0 || condition1 === false) {
-          return 0
+          return 0;
         }
       }
-      const condition2 = args[1].compile().evaluate(scope)
-      return bitAnd(condition1, condition2)
+      const condition2 = args[1].compile().evaluate(scope);
+      return bitAnd(condition1, condition2);
     }
 
-    bitAndTransform.rawArgs = true as const
+    bitAndTransform.rawArgs = true as const;
 
-    return bitAndTransform as RawArgsTransformFunction
+    return bitAndTransform as RawArgsTransformFunction;
   },
   { isTransformFunction: true }
-)
+);

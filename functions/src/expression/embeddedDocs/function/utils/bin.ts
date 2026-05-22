@@ -4,5 +4,5 @@ export const binDocs = {
   syntax: ['bin(value)'],
   description: 'Format a number as binary',
   examples: ['bin(2)'],
-  seealso: ['oct', 'hex']
-}
+  seealso: ['oct', 'hex'],
+};

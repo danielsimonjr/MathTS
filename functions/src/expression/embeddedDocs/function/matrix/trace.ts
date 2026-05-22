@@ -17,6 +17,6 @@ export const traceDocs = {
     'squeeze',
     'subset',
     'transpose',
-    'zeros'
-  ]
-}
+    'zeros',
+  ],
+};

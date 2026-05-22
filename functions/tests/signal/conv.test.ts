@@ -268,7 +268,10 @@ describe('Convolution', () => {
       });
 
       it('should return empty if kernel larger than image', () => {
-        const image = [[1, 2], [3, 4]];
+        const image = [
+          [1, 2],
+          [3, 4],
+        ];
         const kernel = [
           [1, 1, 1],
           [1, 1, 1],
@@ -317,9 +320,9 @@ describe('Convolution', () => {
           [0, 0, 0, 0, 0],
         ];
         const boxBlur = [
-          [1/9, 1/9, 1/9],
-          [1/9, 1/9, 1/9],
-          [1/9, 1/9, 1/9],
+          [1 / 9, 1 / 9, 1 / 9],
+          [1 / 9, 1 / 9, 1 / 9],
+          [1 / 9, 1 / 9, 1 / 9],
         ];
 
         const result = conv2(image, boxBlur, 'same');

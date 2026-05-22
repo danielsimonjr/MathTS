@@ -1,23 +1,23 @@
-import { createFilter } from '../../matrix/filter.js'
-import { factory } from '../../utils/factory.js'
-import { isFunctionAssignmentNode, isSymbolNode } from '../../utils/is.js'
-import { compileInlineExpression } from './utils/compileInlineExpression.js'
-import { createTransformCallback } from './utils/transformCallback.js'
+import { createFilter } from '../../matrix/filter.js';
+import { factory } from '../../utils/factory.js';
+import { isFunctionAssignmentNode, isSymbolNode } from '../../utils/is.js';
+import { compileInlineExpression } from './utils/compileInlineExpression.js';
+import { createTransformCallback } from './utils/transformCallback.js';
 import type {
   TypedFunction,
   ExpressionNode,
   EvaluationScope,
   MathJsLike,
   CallbackFunction,
-  RawArgsTransformFunction
-} from './types.js'
+  RawArgsTransformFunction,
+} from './types.js';
 
 interface FilterDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'filter'
-const dependencies = ['typed']
+const name = 'filter';
+const dependencies = ['typed'];
 
 export const createFilterTransform = /* #__PURE__ */ factory(
   name,
@@ -35,54 +35,47 @@ export const createFilterTransform = /* #__PURE__ */ factory(
       math: MathJsLike,
       scope: EvaluationScope | Map<string, unknown>
     ): unknown {
-      const filter = createFilter({ typed })
-      const transformCallback = createTransformCallback({ typed })
+      const filter = createFilter({ typed });
+      const transformCallback = createTransformCallback({ typed });
 
       if (args.length === 0) {
-        return filter()
+        return filter();
       }
-      let x: unknown = args[0]
+      let x: unknown = args[0];
 
       if (args.length === 1) {
-        return filter(x)
+        return filter(x);
       }
 
-      const N = args.length - 1
-      let callback: CallbackFunction | ExpressionNode = args[N]
+      const N = args.length - 1;
+      let callback: CallbackFunction | ExpressionNode = args[N];
 
       if (x) {
-        x = _compileAndEvaluate(x as ExpressionNode, scope)
+        x = _compileAndEvaluate(x as ExpressionNode, scope);
       }
 
       if (callback) {
         if (isSymbolNode(callback) || isFunctionAssignmentNode(callback)) {
           // a function pointer, like filter([3, -2, 5], myTestFunction)
-          callback = _compileAndEvaluate(
-            callback as ExpressionNode,
-            scope
-          ) as CallbackFunction
+          callback = _compileAndEvaluate(callback as ExpressionNode, scope) as CallbackFunction;
         } else {
           // an expression like filter([3, -2, 5], x > 0)
-          callback = compileInlineExpression(
-            callback as ExpressionNode,
-            math,
-            scope
-          )
+          callback = compileInlineExpression(callback as ExpressionNode, math, scope);
         }
       }
 
-      return filter(x, transformCallback(callback as CallbackFunction, N))
+      return filter(x, transformCallback(callback as CallbackFunction, N));
     }
-    filterTransform.rawArgs = true as const
+    filterTransform.rawArgs = true as const;
 
     function _compileAndEvaluate(
       arg: ExpressionNode,
       scope: EvaluationScope | Map<string, unknown>
     ): unknown {
-      return arg.compile().evaluate(scope)
+      return arg.compile().evaluate(scope);
     }
 
-    return filterTransform as RawArgsTransformFunction
+    return filterTransform as RawArgsTransformFunction;
   },
   { isTransformFunction: true }
-)
+);

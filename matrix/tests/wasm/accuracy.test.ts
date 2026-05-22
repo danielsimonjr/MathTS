@@ -13,7 +13,11 @@ describe('WASM Decomposition Accuracy', () => {
   let wasmBackend: WASMBackend;
 
   // Helper to create a test matrix
-  function createMatrix(rows: number, cols: number, fill: (i: number, j: number) => number): DenseMatrix {
+  function createMatrix(
+    rows: number,
+    cols: number,
+    fill: (i: number, j: number) => number
+  ): DenseMatrix {
     const data: number[][] = [];
     for (let i = 0; i < rows; i++) {
       const row: number[] = [];
@@ -163,7 +167,7 @@ describe('WASM Decomposition Accuracy', () => {
     it('should detect singular matrix', async () => {
       // Create a singular matrix (row 2 = row 1)
       const a = createMatrix(3, 3, (i, j) => {
-        if (i === 2) return (1) * (j + 1);
+        if (i === 2) return 1 * (j + 1);
         return (i + 1) * (j + 1);
       });
 
@@ -384,7 +388,10 @@ describe('WASM Decomposition Accuracy', () => {
     it('should compute correct determinant for 2x2 matrix', async () => {
       // Simple 2x2: [[2, 3], [1, 4]] => det = 2*4 - 3*1 = 5
       const a = createMatrix(2, 2, (i, j) => {
-        const data = [[2, 3], [1, 4]];
+        const data = [
+          [2, 3],
+          [1, 4],
+        ];
         return data[i][j];
       });
 

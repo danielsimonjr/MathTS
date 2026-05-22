@@ -8,7 +8,7 @@ export const toBestDocs = {
     'toBest(unit(3500000, "W"))',
     'toBest(unit(0.000000123, "A"))',
     'toBest(unit(10, "m"), "cm")',
-    'toBest(unit(10, "m"), "mm,km", {offset: 1.5})'
+    'toBest(unit(10, "m"), "mm,km", {offset: 1.5})',
   ],
-  seealso: [] as any[]
-}
+  seealso: [] as any[],
+};

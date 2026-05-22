@@ -36,10 +36,7 @@ async function ensureGpu(): Promise<void> {
  * @param b - Right matrix (k × n)
  * @returns Product matrix (m × n); f32 precision on the GPU path
  */
-export async function gpuMatmul(
-  a: DenseMatrix,
-  b: DenseMatrix
-): Promise<DenseMatrix> {
+export async function gpuMatmul(a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> {
   await ensureGpu();
   return gpuMatrixBackend.multiplyAsync(a, b);
 }
@@ -54,10 +51,7 @@ export async function gpuMatmul(
  * @param b - Second matrix (same shape as `a`)
  * @returns Element-wise sum; f32 precision on the GPU path
  */
-export async function gpuAdd(
-  a: DenseMatrix,
-  b: DenseMatrix
-): Promise<DenseMatrix> {
+export async function gpuAdd(a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> {
   await ensureGpu();
   return gpuMatrixBackend.addAsync(a, b);
 }
@@ -86,10 +80,7 @@ export async function gpuTranspose(a: DenseMatrix): Promise<DenseMatrix> {
  * @param scalar - Scalar multiplier
  * @returns Scaled matrix; f32 precision on the GPU path
  */
-export async function gpuScale(
-  a: DenseMatrix,
-  scalar: number
-): Promise<DenseMatrix> {
+export async function gpuScale(a: DenseMatrix, scalar: number): Promise<DenseMatrix> {
   await ensureGpu();
   return gpuMatrixBackend.scaleAsync(a, scalar);
 }

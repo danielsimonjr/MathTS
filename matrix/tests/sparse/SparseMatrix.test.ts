@@ -43,7 +43,8 @@ describe('SparseMatrix', () => {
       // Wrong rowPointers length
       expect(() => {
         new SparseMatrix(
-          3, 3,
+          3,
+          3,
           new Float64Array([1, 2]),
           new Int32Array([0, 1]),
           new Int32Array([0, 1]) // Should be length 4
@@ -53,7 +54,8 @@ describe('SparseMatrix', () => {
       // Mismatched values/colIndices
       expect(() => {
         new SparseMatrix(
-          3, 3,
+          3,
+          3,
           new Float64Array([1, 2, 3]),
           new Int32Array([0, 1]), // Should match values length
           new Int32Array([0, 1, 2, 3])
@@ -179,9 +181,7 @@ describe('SparseMatrix', () => {
     });
 
     it('should update existing element', () => {
-      const sparse = SparseMatrix.fromCOO(3, 3, [
-        { row: 0, col: 0, value: 1 },
-      ]);
+      const sparse = SparseMatrix.fromCOO(3, 3, [{ row: 0, col: 0, value: 1 }]);
       const sparse2 = sparse.set(0, 0, 5);
 
       expect(sparse2.get(0, 0)).toBe(5);
@@ -321,7 +321,10 @@ describe('SparseMatrix', () => {
 
       const arr = sparse.toArray();
 
-      expect(arr).toEqual([[1, 0], [0, 2]]);
+      expect(arr).toEqual([
+        [1, 0],
+        [0, 2],
+      ]);
     });
 
     it('should get CSR components', () => {

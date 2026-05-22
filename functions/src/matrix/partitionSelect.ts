@@ -1,28 +1,28 @@
-import { isMatrix } from '../utils/is.js'
-import { isInteger } from '../utils/number.js'
-import { factory } from '../utils/factory.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
+import { isMatrix } from '../utils/is.js';
+import { isInteger } from '../utils/number.js';
+import { factory } from '../utils/factory.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_PARTITION_SELECT_THRESHOLD = 100
+const WASM_PARTITION_SELECT_THRESHOLD = 100;
 
 // Type definitions
 interface Matrix {
-  size(): number[]
-  valueOf(): any[]
+  size(): number[];
+  valueOf(): any[];
 }
 
 interface TypedFunction<T = any> {
-  (...args: any[]): T
+  (...args: any[]): T;
 }
 
-type CompareFunction = (a: any, b: any) => number
+type CompareFunction = (a: any, b: any) => number;
 
 interface Dependencies {
-  typed: TypedFunction
-  isNumeric: TypedFunction<boolean>
-  isNaN: TypedFunction<boolean>
-  compare: CompareFunction
+  typed: TypedFunction;
+  isNumeric: TypedFunction<boolean>;
+  isNaN: TypedFunction<boolean>;
+  compare: CompareFunction;
 }
 
 /**
@@ -31,21 +31,21 @@ interface Dependencies {
 function isFlatNumberArray(arr: any[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
-const name = 'partitionSelect'
-const dependencies = ['typed', 'isNumeric', 'isNaN', 'compare']
+const name = 'partitionSelect';
+const dependencies = ['typed', 'isNumeric', 'isNaN', 'compare'];
 
 export const createPartitionSelect = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, isNumeric, isNaN: mathIsNaN, compare }: Dependencies) => {
-    const asc = compare
-    const desc = (a: any, b: any): number => -compare(a, b)
+    const asc = compare;
+    const desc = (a: any, b: any): number => -compare(a, b);
 
     /**
      * Partition-based selection of an array or 1D matrix.
@@ -86,7 +86,7 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array | Matrix, number': function (x: any[] | Matrix, k: number): any {
-        return _partitionSelect(x, k, asc)
+        return _partitionSelect(x, k, asc);
       },
 
       'Array | Matrix, number, string': function (
@@ -95,36 +95,32 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
         compare: string
       ): any {
         if (compare === 'asc') {
-          return _partitionSelect(x, k, asc)
+          return _partitionSelect(x, k, asc);
         } else if (compare === 'desc') {
-          return _partitionSelect(x, k, desc)
+          return _partitionSelect(x, k, desc);
         } else {
-          throw new Error('Compare string must be "asc" or "desc"')
+          throw new Error('Compare string must be "asc" or "desc"');
         }
       },
 
-      'Array | Matrix, number, function': _partitionSelect
-    })
+      'Array | Matrix, number, function': _partitionSelect,
+    });
 
-    function _partitionSelect(
-      x: any[] | Matrix,
-      k: number,
-      compare: CompareFunction
-    ): any {
+    function _partitionSelect(x: any[] | Matrix, k: number, compare: CompareFunction): any {
       if (!isInteger(k) || k < 0) {
-        throw new Error('k must be a non-negative integer')
+        throw new Error('k must be a non-negative integer');
       }
 
       if (isMatrix(x)) {
-        const size = (x as Matrix).size()
+        const size = (x as Matrix).size();
         if (size.length > 1) {
-          throw new Error('Only one dimensional matrices supported')
+          throw new Error('Only one dimensional matrices supported');
         }
-        return quickSelect((x as Matrix).valueOf(), k, compare)
+        return quickSelect((x as Matrix).valueOf(), k, compare);
       }
 
       if (Array.isArray(x)) {
-        return quickSelect(x, k, compare)
+        return quickSelect(x, k, compare);
       }
     }
 
@@ -140,47 +136,38 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
      */
     function quickSelect(arr: any[], k: number, compare: CompareFunction): any {
       if (k >= arr.length) {
-        throw new Error('k out of bounds')
+        throw new Error('k out of bounds');
       }
 
       // check for NaN values since these can cause an infinite while loop
       for (let i = 0; i < arr.length; i++) {
         if (isNumeric(arr[i]) && mathIsNaN(arr[i])) {
-          return arr[i] // return NaN
+          return arr[i]; // return NaN
         }
       }
 
       // WASM fast path for large flat number arrays with standard compare
-      const wasm = wasmLoader.getModule()
-      if (
-        wasm &&
-        arr.length >= WASM_PARTITION_SELECT_THRESHOLD &&
-        isFlatNumberArray(arr)
-      ) {
+      const wasm = wasmLoader.getModule();
+      if (wasm && arr.length >= WASM_PARTITION_SELECT_THRESHOLD && isFlatNumberArray(arr)) {
         // Check if compare is one of our standard comparators
-        const isAsc = compare === asc
-        const isDesc = compare === desc
+        const isAsc = compare === asc;
+        const isDesc = compare === desc;
 
         if (isAsc || isDesc) {
           try {
-            const effectiveK = isDesc ? arr.length - 1 - k : k
-            const data = wasmLoader.allocateFloat64Array(arr)
-            const work = wasmLoader.allocateFloat64ArrayEmpty(arr.length)
+            const effectiveK = isDesc ? arr.length - 1 - k : k;
+            const data = wasmLoader.allocateFloat64Array(arr);
+            const work = wasmLoader.allocateFloat64ArrayEmpty(arr.length);
             try {
-              const result = wasm.partitionSelect(
-                data.ptr,
-                arr.length,
-                effectiveK,
-                work.ptr
-              )
+              const result = wasm.partitionSelect(data.ptr, arr.length, effectiveK, work.ptr);
               // WASM modifies work array in-place, copy back to arr
               for (let i = 0; i < arr.length; i++) {
-                arr[i] = work.array[i]
+                arr[i] = work.array[i];
               }
-              return result
+              return result;
             } finally {
-              wasmLoader.free(data.ptr)
-              wasmLoader.free(work.ptr)
+              wasmLoader.free(data.ptr);
+              wasmLoader.free(work.ptr);
             }
           } catch {
             // Fall back to JS implementation on WASM error
@@ -188,44 +175,44 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
         }
       }
 
-      let from = 0
-      let to = arr.length - 1
+      let from = 0;
+      let to = arr.length - 1;
 
       // if from == to we reached the kth element
       while (from < to) {
-        let r = from
-        let w = to
-        const pivot = arr[Math.floor(Math.random() * (to - from + 1)) + from]
+        let r = from;
+        let w = to;
+        const pivot = arr[Math.floor(Math.random() * (to - from + 1)) + from];
 
         // stop if the reader and writer meets
         while (r < w) {
           // arr[r] >= pivot
           if (compare(arr[r], pivot) >= 0) {
             // put the large values at the end
-            const tmp = arr[w]
-            arr[w] = arr[r]
-            arr[r] = tmp
-            --w
+            const tmp = arr[w];
+            arr[w] = arr[r];
+            arr[r] = tmp;
+            --w;
           } else {
             // the value is smaller than the pivot, skip
-            ++r
+            ++r;
           }
         }
 
         // if we stepped up (r++) we need to step one down (arr[r] > pivot)
         if (compare(arr[r], pivot) > 0) {
-          --r
+          --r;
         }
 
         // the r pointer is on the end of the first k elements
         if (k <= r) {
-          to = r
+          to = r;
         } else {
-          from = r + 1
+          from = r + 1;
         }
       }
 
-      return arr[k]
+      return arr[k];
     }
   }
-)
+);

@@ -7,12 +7,14 @@
 This document records the comprehensive plan that was executed to convert JavaScript files to TypeScript with WASM compilation support.
 
 ### Completion Status
+
 - ✅ **Infrastructure**: Complete (WASM pipeline, parallel computing, build system)
 - ✅ **TypeScript Conversion**: 100% complete (1,331 files, 0 errors)
 - ✅ **WASM Integration**: Complete (Rust primary + AS legacy)
 - ✅ **All Phases**: Complete
 
 ### Goals
+
 1. **100% TypeScript codebase** - All source files in TypeScript
 2. **WASM compilation ready** - Critical paths compilable to WebAssembly
 3. **Performance optimized** - 2-25x speedup for computational operations
@@ -40,18 +42,18 @@ This document records the comprehensive plan that was executed to convert JavaSc
 
 ### Remaining Files by Category
 
-| Category | Files | Complexity | WASM Priority | Est. Effort |
-|----------|-------|------------|---------------|-------------|
-| **Expression System** | 312 | High | Medium | 8-10 weeks |
-| **Functions** | 253 | Medium | High | 6-8 weeks |
-| **Type System** | 45 | High | Low | 2-3 weeks |
-| **Utils** | 27 | Medium | Medium | 1-2 weeks |
-| **Plain** | 12 | Low | High | 1 week |
-| **Entry/Core** | 11 | High | Low | 2 weeks |
-| **Error** | 3 | Low | N/A | 2 days |
-| **JSON** | 2 | Low | N/A | 1 day |
-| **Root** | 4 | Low | N/A | 2 days |
-| **Total** | **612** | - | - | **20-26 weeks** |
+| Category              | Files   | Complexity | WASM Priority | Est. Effort     |
+| --------------------- | ------- | ---------- | ------------- | --------------- |
+| **Expression System** | 312     | High       | Medium        | 8-10 weeks      |
+| **Functions**         | 253     | Medium     | High          | 6-8 weeks       |
+| **Type System**       | 45      | High       | Low           | 2-3 weeks       |
+| **Utils**             | 27      | Medium     | Medium        | 1-2 weeks       |
+| **Plain**             | 12      | Low        | High          | 1 week          |
+| **Entry/Core**        | 11      | High       | Low           | 2 weeks         |
+| **Error**             | 3       | Low        | N/A           | 2 days          |
+| **JSON**              | 2       | Low        | N/A           | 1 day           |
+| **Root**              | 4       | Low        | N/A           | 2 days          |
+| **Total**             | **612** | -          | -             | **20-26 weeks** |
 
 ### Files Already Converted (50)
 
@@ -68,6 +70,7 @@ This document records the comprehensive plan that was executed to convert JavaSc
 ### Detailed Breakdown
 
 #### Expression System (312 files)
+
 - **Transform Functions** (28 files): Expression transformations
 - **AST Nodes** (43 files): Abstract syntax tree node types
 - **Parser** (15 files): Expression parsing
@@ -181,10 +184,11 @@ This document records the comprehensive plan that was executed to convert JavaSc
 #### Plain Number Implementations (12 files)
 
 High-performance number-only implementations for:
+
 - Arithmetic operations
 - Trigonometry
 - Matrix operations
-**WASM Priority**: Very High - Pure numeric code ideal for WASM
+  **WASM Priority**: Very High - Pure numeric code ideal for WASM
 
 #### Entry Points & Core (11 files)
 
@@ -213,6 +217,7 @@ High-performance number-only implementations for:
 ### Conversion Methodology
 
 #### Step 1: Prepare
+
 ```bash
 # Create feature branch
 git checkout -b refactor/phase-N-category
@@ -222,6 +227,7 @@ node tools/analyze-deps.js src/path/to/file.js
 ```
 
 #### Step 2: Convert
+
 ```bash
 # Use migration tool for basic conversion
 node tools/migrate-to-ts.js --file src/path/to/file.js
@@ -234,6 +240,7 @@ node tools/migrate-to-ts.js --file src/path/to/file.js
 ```
 
 #### Step 3: Validate
+
 ```bash
 # Type check
 npm run compile:ts
@@ -246,12 +253,14 @@ npm run lint
 ```
 
 #### Step 4: Review
+
 - Code review for type accuracy
 - Performance impact assessment
 - WASM compatibility check
 - Documentation completeness
 
 #### Step 5: Commit
+
 ```bash
 # Commit batch of related files
 git add src/path/to/*.ts
@@ -263,6 +272,7 @@ git commit -m "refactor: Convert [category] to TypeScript (Phase N)"
 #### Enhanced Migration Script
 
 Upgrade `tools/migrate-to-ts.js` to:
+
 1. **Analyze dependencies** automatically
 2. **Generate type interfaces** from usage patterns
 3. **Add JSDoc** from existing comments
@@ -272,6 +282,7 @@ Upgrade `tools/migrate-to-ts.js` to:
 #### Type Inference Tool
 
 Create `tools/infer-types.js` to:
+
 1. Analyze JavaScript usage patterns
 2. Suggest TypeScript types
 3. Identify union types
@@ -280,6 +291,7 @@ Create `tools/infer-types.js` to:
 #### Dependency Analyzer
 
 Create `tools/analyze-deps.js` to:
+
 1. Build dependency graph
 2. Identify conversion order
 3. Detect circular dependencies
@@ -298,6 +310,7 @@ Create `tools/analyze-deps.js` to:
 **Batches**:
 
 #### Batch 2.1: Remaining Arithmetic (2 weeks)
+
 - Files: 33 arithmetic operations
 - Priority: High (performance critical)
 - WASM Target: Yes
@@ -305,6 +318,7 @@ Create `tools/analyze-deps.js` to:
 - Files: unaryMinus, unaryPlus, gcd, lcm, xgcd, hypot, norm, cbrt, exp, expm1, log, log10, log2, log1p, round, floor, ceil, fix
 
 #### Batch 2.2: Remaining Trigonometry (1 week)
+
 - Files: 19 trigonometric functions
 - Priority: High (WASM candidates)
 - WASM Target: Yes
@@ -312,20 +326,23 @@ Create `tools/analyze-deps.js` to:
 - Files: sinh, cosh, tanh, asinh, acosh, atanh, sec, csc, cot, asec, acsc, acot, sech, csch, coth, asech, acsch, acoth
 
 #### Batch 2.3: Remaining Algebra (3 weeks)
+
 - Files: 33 algebra functions
 - Priority: High (linear algebra core)
 - WASM Target: Yes (sparse algorithms)
 - Dependencies: Matrix types, decompositions
-- Files: Sparse matrix algorithms (cs*.js), decomposition helpers, solver utilities
+- Files: Sparse matrix algorithms (cs\*.js), decomposition helpers, solver utilities
 
 #### Batch 2.4: Remaining Matrix Operations (2 weeks)
+
 - Files: 32 matrix functions
 - Priority: High (core functionality)
 - WASM Target: Partial
 - Dependencies: Matrix types
-- Files: Matrix algorithms (matAlgo*.js), cross, squeeze, flatten, etc.
+- Files: Matrix algorithms (matAlgo\*.js), cross, squeeze, flatten, etc.
 
 #### Batch 2.5: Remaining Statistics (1 week)
+
 - Files: 8 statistical functions
 - Priority: Medium
 - WASM Target: Partial
@@ -333,12 +350,14 @@ Create `tools/analyze-deps.js` to:
 - Files: mode, quantile, mad, prod, cumsum, etc.
 
 #### Batch 2.6: Probability & Combinatorics (1 week)
+
 - Files: 14 probability + 4 combinatorics
 - Priority: Medium
 - WASM Target: Yes (combinatorics)
 - Files: gamma, factorial, combinations, permutations, random generators, bellNumbers, catalan, stirling
 
 **Deliverables**:
+
 - 170 TypeScript files
 - Type-safe function implementations
 - WASM-ready numeric operations
@@ -354,6 +373,7 @@ Create `tools/analyze-deps.js` to:
 **Batches**:
 
 #### Batch 3.1: Core Types (1 week)
+
 - Files: Complex, Fraction, BigNumber, Unit
 - Priority: High
 - WASM Target: No (JavaScript types)
@@ -361,6 +381,7 @@ Create `tools/analyze-deps.js` to:
 - Files: Complex.js, complex.js, Fraction.js, fraction.js, BigNumber.js, bignumber.js, Unit.js, unit.js, createUnit.js, splitUnit.js, physicalConstants.js
 
 #### Batch 3.2: Matrix Utilities (1 week)
+
 - Files: Matrix base, Range, Spa, MatrixIndex, ImmutableDenseMatrix, FibonacciHeap
 - Priority: High
 - WASM Target: Partial (FibonacciHeap)
@@ -368,6 +389,7 @@ Create `tools/analyze-deps.js` to:
 - Files: Matrix.js, Range.js, Spa.js, MatrixIndex.js, ImmutableDenseMatrix.js, FibonacciHeap.js, matrix.js, sparse.js, index.js, broadcast.js
 
 #### Batch 3.3: Matrix Algorithms (1 week)
+
 - Files: 14 matrix algorithm suite files
 - Priority: High
 - WASM Target: Yes
@@ -375,12 +397,14 @@ Create `tools/analyze-deps.js` to:
 - Files: matAlgo01xDSid.js through matAlgo14xDs.js, matrixAlgorithmSuite.js
 
 #### Batch 3.4: Primitive Types (2 days)
+
 - Files: 7 primitive type files
 - Priority: Low
 - WASM Target: No
 - Files: number.js, string.js, boolean.js, bigint.js, Chain.js, chain.js, ResultSet.js
 
 **Deliverables**:
+
 - Complete TypeScript type system
 - Type-safe matrix algorithms
 - Generic type implementations
@@ -395,16 +419,19 @@ Create `tools/analyze-deps.js` to:
 **Batches**:
 
 #### Batch 4.1: Core Utilities (1 week)
+
 - Files: String, comparison, numeric utilities
 - Priority: Medium
 - Files: string.js utilities, latex.js, tex.js, compare.js, compareNatural.js, compareText.js, numeric.js, bignumber/\*, etc.
 
 #### Batch 4.2: Advanced Utilities (3 days)
+
 - Files: Map, set, scope utilities
 - Priority: Low
 - Files: PartitionedMap.js, DimensionError helpers, scope utilities
 
 **Deliverables**:
+
 - Complete utility library in TypeScript
 - Helper functions typed
 - Test coverage maintained
@@ -418,23 +445,27 @@ Create `tools/analyze-deps.js` to:
 **Batches**:
 
 #### Batch 5.1: Relational Operations (1 week)
+
 - Files: 13 comparison operators
 - Priority: Medium
 - WASM Target: Partial
 - Files: equal, unequal, larger, smaller, largerEq, smallerEq, deepEqual, compareNatural, compareText, equalText, equalScalar
 
 #### Batch 5.2: Logical & Bitwise (1 week)
+
 - Files: 5 logical + 8 bitwise
 - Priority: Medium
 - WASM Target: Yes (bitwise)
 - Files: and, or, not, xor, leftShift, rightShift, bitAnd, bitOr, bitXor, bitNot
 
 #### Batch 5.3: Set Operations (2 days)
+
 - Files: 10 set operations
 - Priority: Low
 - Files: setCartesian, setDifference, setDistinct, setIntersect, setIsSubset, setMultiplicity, setPowerset, setSize, setSymDifference, setUnion
 
 **Deliverables**:
+
 - Relational operations in TypeScript
 - Bitwise operations WASM-ready
 - Set operations typed
@@ -448,19 +479,23 @@ Create `tools/analyze-deps.js` to:
 **Batches**:
 
 #### Batch 6.1: String & Complex (2 days)
+
 - Files: 5 string + 4 complex
 - Files: format, print, hex, bin, oct, arg, conj, im, re
 
 #### Batch 6.2: Unit, Geometry, Special (2 days)
+
 - Files: 2 unit + 2 geometry + 2 special
 - Files: to, simplify, distance, intersect, erf, zeta
 
 #### Batch 6.3: Numeric Solvers (1 day)
+
 - Files: 1 numeric file
 - Priority: High (WASM candidate)
 - Files: solveODE.js
 
 **Deliverables**:
+
 - Specialized functions typed
 - Numeric solver WASM-ready
 
@@ -468,25 +503,29 @@ Create `tools/analyze-deps.js` to:
 
 **Goal**: Convert high-performance number-only implementations
 
-**Scope**: 12 plain/* files
+**Scope**: 12 plain/\* files
 
 **Priority**: Very High (WASM critical)
 
 **Batches**:
 
 #### Batch 7.1: Plain Arithmetic (2 days)
+
 - Files: Plain arithmetic operations
 - WASM Target: Yes (highest priority)
 
 #### Batch 7.2: Plain Trigonometry (2 days)
+
 - Files: Plain trig functions
 - WASM Target: Yes
 
 #### Batch 7.3: Plain Matrix (3 days)
+
 - Files: Plain matrix operations
 - WASM Target: Yes
 
 **Deliverables**:
+
 - Number-only implementations in TypeScript
 - WASM compilation targets
 - Benchmark comparisons
@@ -502,40 +541,47 @@ Create `tools/analyze-deps.js` to:
 **Batches**:
 
 #### Batch 8.1: AST Node Types (3 weeks)
+
 - Files: 43 node files
 - Priority: High
 - Dependencies: Core types
 - Files: Node.js, SymbolNode.js, ArrayNode.js, AssignmentNode.js, FunctionNode.js, AccessorNode.js, ConstantNode.js, OperatorNode.js, etc.
 
 **Sub-batches**:
+
 - Week 1: Core nodes (Node, SymbolNode, ConstantNode, ArrayNode)
 - Week 2: Operation nodes (OperatorNode, FunctionNode, AssignmentNode)
 - Week 3: Advanced nodes (ConditionalNode, RelationalNode, AccessorNode)
 
 #### Batch 8.2: Parser & Compilation (2 weeks)
+
 - Files: 23 parser/compiler files
 - Priority: High
 - Dependencies: AST nodes
 - Files: parse.js, compile.js, evaluate.js, Parser.js, etc.
 
 #### Batch 8.3: Transform Functions (2 weeks)
+
 - Files: 28 transform files
 - Priority: Medium
 - Dependencies: Parser, nodes
-- Files: *.transform.js files, transform utilities
+- Files: \*.transform.js files, transform utilities
 
 #### Batch 8.4: Expression Functions (1 week)
+
 - Files: 10 expression function files
 - Priority: Low
 - Files: help.js, parse.js, compile.js, evaluate.js, simplify.js, derivative.js, etc.
 
 #### Batch 8.5: Documentation Embedding (2 weeks)
+
 - Files: 200+ embedded doc files
 - Priority: Low
 - Strategy: Automated conversion
 - Generate TypeScript from embedded docs
 
 **Deliverables**:
+
 - Complete expression system in TypeScript
 - Type-safe AST manipulation
 - Runtime code generation typed
@@ -550,16 +596,19 @@ Create `tools/analyze-deps.js` to:
 **Batches**:
 
 #### Batch 9.1: Entry Points (1 week)
+
 - Files: 6 entry files
 - Priority: High
 - Files: mainAny.js, mainNumber.js, typeChecks.js, configReadonly.js, allFactoriesAny.js, allFactoriesNumber.js
 
 #### Batch 9.2: Final Core (1 week)
+
 - Files: 5 remaining core files
 - Priority: High
 - Files: import.js, config.js, function/\*.js
 
 **Deliverables**:
+
 - Entry points in TypeScript
 - Full build integration
 - All factories typed
@@ -605,6 +654,7 @@ Create `tools/analyze-deps.js` to:
    - Bundle size optimization
 
 **Deliverables**:
+
 - 100% TypeScript codebase
 - All tests passing
 - Documentation complete
@@ -617,6 +667,7 @@ Create `tools/analyze-deps.js` to:
 ### WASM-Compilable Code Characteristics
 
 **Ideal for WASM** ✅:
+
 - Pure numeric computations
 - No DOM/browser APIs
 - Deterministic algorithms
@@ -625,6 +676,7 @@ Create `tools/analyze-deps.js` to:
 - Mathematical functions
 
 **Not Suitable for WASM** ❌:
+
 - String manipulation
 - Dynamic typing
 - Object creation
@@ -639,11 +691,13 @@ Create `tools/analyze-deps.js` to:
 **Target**: `src/wasm/` (AssemblyScript)
 
 Already implemented:
+
 - ✅ Matrix operations (multiply, add, transpose)
 - ✅ Linear algebra (LU, QR, Cholesky)
 - ✅ Signal processing (FFT)
 
 **Add to WASM**:
+
 1. **Plain number implementations** (12 files)
    - Plain arithmetic
    - Plain trigonometry
@@ -668,7 +722,7 @@ Already implemented:
    - **Impact**: Medium
 
 5. **Sparse matrix algorithms** (24 files)
-   - cs*.js algorithms
+   - cs\*.js algorithms
    - **Effort**: 3-4 weeks
    - **Impact**: Very High
 
@@ -677,25 +731,28 @@ Already implemented:
 **Strategy**: TypeScript wrapper, WASM core
 
 **Candidates**:
-1. Matrix algorithms (matAlgo*.js)
+
+1. Matrix algorithms (matAlgo\*.js)
 2. Statistical functions
 3. Probability distributions
 4. Advanced trigonometry
 
 **Implementation**:
+
 ```typescript
 // TypeScript wrapper
 export function hybridOperation(data: Matrix): Matrix {
   if (useWasm && data.size > threshold) {
-    return wasmBridge.operation(data)
+    return wasmBridge.operation(data);
   }
-  return jsImplementation(data)
+  return jsImplementation(data);
 }
 ```
 
 #### Tier 3: TypeScript Only
 
 **Categories**:
+
 - Expression system (AST manipulation)
 - Type system (Complex, Fraction, Unit)
 - String operations
@@ -708,6 +765,7 @@ export function hybridOperation(data: Matrix): Matrix {
 ### WASM Build Process Integration
 
 #### Current Setup
+
 ```json
 {
   "scripts": {
@@ -719,6 +777,7 @@ export function hybridOperation(data: Matrix): Matrix {
 #### Enhanced Setup
 
 **Add to `package.json`**:
+
 ```json
 {
   "scripts": {
@@ -733,18 +792,17 @@ export function hybridOperation(data: Matrix): Matrix {
 ```
 
 **Add to `gulpfile.js`**:
+
 ```javascript
 function compileWasmModular(done) {
-  const modules = ['core', 'matrix', 'algebra', 'signal', 'plain']
+  const modules = ['core', 'matrix', 'algebra', 'signal', 'plain'];
 
-  const tasks = modules.map(module =>
-    () => exec(`npm run build:wasm:${module}`)
-  )
+  const tasks = modules.map((module) => () => exec(`npm run build:wasm:${module}`));
 
-  gulp.series(...tasks)(done)
+  gulp.series(...tasks)(done);
 }
 
-gulp.task('wasm', compileWasmModular)
+gulp.task('wasm', compileWasmModular);
 ```
 
 #### WASM Module Structure
@@ -843,14 +901,8 @@ Source Files
     "module": "ES2020",
     "target": "ES2020"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "src/**/*.js",
-    "src/wasm/**/*",
-    "test/**/*"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.js", "src/wasm/**/*", "test/**/*"]
 }
 ```
 
@@ -860,32 +912,28 @@ Source Files
 // Compile TypeScript in phases
 function compileTypeScriptPhase(phase) {
   const tsProject = gulpTypescript.createProject('tsconfig.build.json', {
-    include: PHASE_PATTERNS[phase]
-  })
+    include: PHASE_PATTERNS[phase],
+  });
 
-  return gulp.src(`src/**/*.ts`)
-    .pipe(tsProject())
-    .pipe(gulp.dest(COMPILE_TS))
+  return gulp.src(`src/**/*.ts`).pipe(tsProject()).pipe(gulp.dest(COMPILE_TS));
 }
 
 // Parallel compilation
 function compileAll() {
-  return gulp.parallel(
-    compileTypeScript,
-    compileCommonJs,
-    compileESModules,
-    compileWasm
-  )
+  return gulp.parallel(compileTypeScript, compileCommonJs, compileESModules, compileWasm);
 }
 
-gulp.task('build', gulp.series(
-  clean,
-  updateVersionFile,
-  generateEntryFilesCallback,
-  compileAll,
-  bundle,
-  generateDocs
-))
+gulp.task(
+  'build',
+  gulp.series(
+    clean,
+    updateVersionFile,
+    generateEntryFilesCallback,
+    compileAll,
+    bundle,
+    generateDocs
+  )
+);
 ```
 
 #### 3. Update `package.json`
@@ -924,16 +972,15 @@ gulp.task('build', gulp.series(
 // During transition, support both .js and .ts
 function compileHybrid() {
   // Compile .ts files
-  const tsFiles = gulp.src('src/**/*.ts')
-    .pipe(typescript())
-    .pipe(gulp.dest('lib/typescript'))
+  const tsFiles = gulp.src('src/**/*.ts').pipe(typescript()).pipe(gulp.dest('lib/typescript'));
 
   // Compile remaining .js files
-  const jsFiles = gulp.src(['src/**/*.js', '!src/**/*.ts'])
+  const jsFiles = gulp
+    .src(['src/**/*.js', '!src/**/*.ts'])
     .pipe(babel())
-    .pipe(gulp.dest('lib/cjs'))
+    .pipe(gulp.dest('lib/cjs'));
 
-  return merge(tsFiles, jsFiles)
+  return merge(tsFiles, jsFiles);
 }
 ```
 
@@ -942,11 +989,9 @@ function compileHybrid() {
 ```javascript
 // Pure TypeScript build
 function compileFinal() {
-  const tsProject = typescript.createProject('tsconfig.build.json')
+  const tsProject = typescript.createProject('tsconfig.build.json');
 
-  return gulp.src('src/**/*.ts')
-    .pipe(tsProject())
-    .js.pipe(gulp.dest('lib/esm'))
+  return gulp.src('src/**/*.ts').pipe(tsProject()).js.pipe(gulp.dest('lib/esm'));
 }
 ```
 
@@ -1063,6 +1108,7 @@ Phase 9-10: Finalization (sequential)
 ### High Risk Areas
 
 #### 1. Expression System Complexity
+
 - **Risk**: Complex AST manipulation, runtime code generation
 - **Impact**: High - Core functionality
 - **Mitigation**:
@@ -1072,6 +1118,7 @@ Phase 9-10: Finalization (sequential)
   - Comprehensive type definitions
 
 #### 2. Breaking Changes
+
 - **Risk**: Type changes breaking existing usage
 - **Impact**: Critical - User code breaks
 - **Mitigation**:
@@ -1081,6 +1128,7 @@ Phase 9-10: Finalization (sequential)
   - Migration guides
 
 #### 3. Performance Regression
+
 - **Risk**: TypeScript overhead, suboptimal types
 - **Impact**: High - Slower operations
 - **Mitigation**:
@@ -1090,6 +1138,7 @@ Phase 9-10: Finalization (sequential)
   - Optimization passes
 
 #### 4. Build System Fragility
+
 - **Risk**: Complex multi-language build breaks
 - **Impact**: High - Cannot ship
 - **Mitigation**:
@@ -1099,6 +1148,7 @@ Phase 9-10: Finalization (sequential)
   - CI/CD validation
 
 #### 5. Type System Complexity
+
 - **Risk**: Over-complicated types, hard to maintain
 - **Impact**: Medium - Developer experience
 - **Mitigation**:
@@ -1110,6 +1160,7 @@ Phase 9-10: Finalization (sequential)
 ### Medium Risk Areas
 
 #### 6. Test Coverage Gaps
+
 - **Risk**: Converted code not fully tested
 - **Impact**: Medium - Hidden bugs
 - **Mitigation**:
@@ -1119,6 +1170,7 @@ Phase 9-10: Finalization (sequential)
   - Mutation testing
 
 #### 7. Documentation Lag
+
 - **Risk**: Docs not updated with code
 - **Impact**: Medium - User confusion
 - **Mitigation**:
@@ -1127,6 +1179,7 @@ Phase 9-10: Finalization (sequential)
   - Review checklists
 
 #### 8. WASM Integration Issues
+
 - **Risk**: WASM modules fail to load/work
 - **Impact**: Medium - Performance not achieved
 - **Mitigation**:
@@ -1138,6 +1191,7 @@ Phase 9-10: Finalization (sequential)
 ### Low Risk Areas
 
 #### 9. Team Coordination
+
 - **Risk**: Multiple contributors conflict
 - **Impact**: Low - Merge conflicts
 - **Mitigation**:
@@ -1146,6 +1200,7 @@ Phase 9-10: Finalization (sequential)
   - Branch strategy
 
 #### 10. Tooling Updates
+
 - **Risk**: TypeScript/AssemblyScript version changes
 - **Impact**: Low - Build issues
 - **Mitigation**:
@@ -1155,18 +1210,18 @@ Phase 9-10: Finalization (sequential)
 
 ### Risk Matrix
 
-| Risk | Probability | Impact | Priority | Mitigation Cost |
-|------|------------|--------|----------|----------------|
-| Expression System | Medium | High | P0 | High |
-| Breaking Changes | Low | Critical | P0 | Medium |
-| Performance | Medium | High | P1 | High |
-| Build System | Low | High | P1 | Medium |
-| Type Complexity | Medium | Medium | P2 | Low |
-| Test Coverage | Medium | Medium | P2 | Medium |
-| Documentation | High | Medium | P2 | Low |
-| WASM Integration | Low | Medium | P3 | Medium |
-| Team Coordination | Low | Low | P3 | Low |
-| Tooling Updates | Low | Low | P4 | Low |
+| Risk              | Probability | Impact   | Priority | Mitigation Cost |
+| ----------------- | ----------- | -------- | -------- | --------------- |
+| Expression System | Medium      | High     | P0       | High            |
+| Breaking Changes  | Low         | Critical | P0       | Medium          |
+| Performance       | Medium      | High     | P1       | High            |
+| Build System      | Low         | High     | P1       | Medium          |
+| Type Complexity   | Medium      | Medium   | P2       | Low             |
+| Test Coverage     | Medium      | Medium   | P2       | Medium          |
+| Documentation     | High        | Medium   | P2       | Low             |
+| WASM Integration  | Low         | Medium   | P3       | Medium          |
+| Team Coordination | Low         | Low      | P3       | Low             |
+| Tooling Updates   | Low         | Low      | P4       | Low             |
 
 ---
 
@@ -1175,33 +1230,39 @@ Phase 9-10: Finalization (sequential)
 ### Test Categories
 
 #### 1. Unit Tests
+
 - **Existing**: 2000+ unit tests
 - **Strategy**: Run after each conversion
 - **Requirement**: 100% pass rate
 
 #### 2. Type Tests
+
 - **New**: TypeScript type checking tests
 - **Location**: `test/typescript-tests/`
 - **Coverage**: All public APIs
 
 #### 3. Integration Tests
+
 - **Existing**: Integration test suite
 - **Strategy**: Run after each phase
 - **Focus**: Cross-module interactions
 
 #### 4. Performance Tests
+
 - **New**: Benchmark suite
 - **Location**: `test/benchmarks/`
 - **Metrics**: Ops/sec, memory usage
 - **Requirement**: No regression > 5%
 
 #### 5. WASM Tests
+
 - **New**: WASM-specific tests
 - **Location**: `test/wasm-tests/`
 - **Coverage**: All WASM modules
 - **Platforms**: Node.js, Chrome, Firefox
 
 #### 6. Compatibility Tests
+
 - **New**: Backward compatibility suite
 - **Strategy**: Test against old API
 - **Requirement**: 100% compatible
@@ -1209,6 +1270,7 @@ Phase 9-10: Finalization (sequential)
 ### Testing Process
 
 #### Per-File Testing
+
 ```bash
 # 1. Convert file
 node tools/migrate-to-ts.js --file src/path/to/file.js
@@ -1224,6 +1286,7 @@ npm run lint src/path/to/file.ts
 ```
 
 #### Per-Batch Testing
+
 ```bash
 # 1. Convert batch
 npm run convert:batch -- phase-N batch-M
@@ -1242,6 +1305,7 @@ npm run benchmark:compare
 ```
 
 #### Per-Phase Testing
+
 ```bash
 # 1. Full build
 npm run build
@@ -1316,14 +1380,14 @@ jobs:
 
 ### Test Coverage Requirements
 
-| Phase | Unit Tests | Type Tests | Integration | WASM | Performance |
-|-------|-----------|------------|-------------|------|-------------|
-| Phase 2 | 100% | 100% | 95% | 80% | No regression |
-| Phase 3 | 100% | 100% | 95% | N/A | No regression |
-| Phase 4 | 100% | 100% | 95% | N/A | No regression |
-| Phase 5-7 | 100% | 100% | 95% | 60% | No regression |
-| Phase 8 | 100% | 100% | 100% | N/A | No regression |
-| Phase 9-10 | 100% | 100% | 100% | 100% | 5-25x improvement |
+| Phase      | Unit Tests | Type Tests | Integration | WASM | Performance       |
+| ---------- | ---------- | ---------- | ----------- | ---- | ----------------- |
+| Phase 2    | 100%       | 100%       | 95%         | 80%  | No regression     |
+| Phase 3    | 100%       | 100%       | 95%         | N/A  | No regression     |
+| Phase 4    | 100%       | 100%       | 95%         | N/A  | No regression     |
+| Phase 5-7  | 100%       | 100%       | 95%         | 60%  | No regression     |
+| Phase 8    | 100%       | 100%       | 100%        | N/A  | No regression     |
+| Phase 9-10 | 100%       | 100%       | 100%        | 100% | 5-25x improvement |
 
 ---
 
@@ -1338,33 +1402,36 @@ jobs:
 
 ### Phase Timeline
 
-| Phase | Duration | Start | End | Dependencies |
-|-------|----------|-------|-----|--------------|
-| Phase 2: Functions | 6-8 weeks | Week 1 | Week 8 | Infrastructure complete |
-| Phase 3: Types | 2-3 weeks | Week 9 | Week 11 | Phase 2 complete |
-| Phase 4: Utilities | 1-2 weeks | Week 12 | Week 13 | Phase 3 complete |
-| Phase 5-7: Specialized | 2 weeks | Week 14 | Week 15 | Phase 4 complete |
-| Phase 8: Expression | 8-10 weeks | Week 16 | Week 25 | Phases 2-7 complete |
-| Phase 9: Entry Points | 2 weeks | Week 26 | Week 27 | Phase 8 complete |
-| Phase 10: Finalization | 1-2 weeks | Week 28 | Week 29 | All phases complete |
-| **Total** | **22-29 weeks** | **Week 1** | **Week 29** | - |
+| Phase                  | Duration        | Start      | End         | Dependencies            |
+| ---------------------- | --------------- | ---------- | ----------- | ----------------------- |
+| Phase 2: Functions     | 6-8 weeks       | Week 1     | Week 8      | Infrastructure complete |
+| Phase 3: Types         | 2-3 weeks       | Week 9     | Week 11     | Phase 2 complete        |
+| Phase 4: Utilities     | 1-2 weeks       | Week 12    | Week 13     | Phase 3 complete        |
+| Phase 5-7: Specialized | 2 weeks         | Week 14    | Week 15     | Phase 4 complete        |
+| Phase 8: Expression    | 8-10 weeks      | Week 16    | Week 25     | Phases 2-7 complete     |
+| Phase 9: Entry Points  | 2 weeks         | Week 26    | Week 27     | Phase 8 complete        |
+| Phase 10: Finalization | 1-2 weeks       | Week 28    | Week 29     | All phases complete     |
+| **Total**              | **22-29 weeks** | **Week 1** | **Week 29** | -                       |
 
 ### Resource Requirements
 
 #### Team Structure
 
 **Minimum Team** (1-2 developers):
+
 - 1 Senior TypeScript developer
 - 1 Testing/QA engineer (part-time)
 - Duration: 6 months
 
 **Recommended Team** (3-4 developers):
+
 - 1 Senior TypeScript developer (lead)
 - 2 Mid-level TypeScript developers
 - 1 Testing/QA engineer
 - Duration: 4-5 months
 
 **Optimal Team** (5-6 developers):
+
 - 1 Senior TypeScript architect
 - 3 TypeScript developers
 - 1 WASM specialist
@@ -1374,12 +1441,14 @@ jobs:
 #### Skill Requirements
 
 **Essential**:
+
 - TypeScript expertise
 - JavaScript/ES6+ proficiency
 - Mathematical computing knowledge
 - Testing experience
 
 **Desirable**:
+
 - WebAssembly/AssemblyScript experience
 - Compiler/parser knowledge
 - Performance optimization
@@ -1388,16 +1457,19 @@ jobs:
 #### Time Allocation
 
 **Development**: 70%
+
 - Conversion: 40%
 - Type refinement: 15%
 - WASM implementation: 15%
 
 **Testing**: 20%
+
 - Unit testing: 10%
 - Integration testing: 5%
 - Performance testing: 5%
 
 **Documentation**: 10%
+
 - Code documentation: 5%
 - User guides: 3%
 - Migration guides: 2%
@@ -1405,21 +1477,25 @@ jobs:
 ### Milestones
 
 #### M1: Phase 2 Complete (Week 8)
+
 - 170 function files converted
 - All tests passing
 - Performance benchmarks established
 
 #### M2: Phase 3-7 Complete (Week 15)
+
 - All types, utilities, specialized functions converted
 - 85% of codebase in TypeScript
 - WASM modules for plain implementations
 
 #### M3: Phase 8 Complete (Week 25)
+
 - Expression system fully typed
 - Parser and compiler working
 - AST node types complete
 
 #### M4: Final Release (Week 29)
+
 - 100% TypeScript codebase
 - All WASM modules integrated
 - Documentation complete
@@ -1432,21 +1508,25 @@ jobs:
 ### Functional Requirements
 
 ✅ **100% Type Coverage**
+
 - All source files in TypeScript
 - No `any` types except where necessary
 - Full type inference
 
 ✅ **Zero Breaking Changes**
+
 - All existing tests pass
 - Public API unchanged
 - Backward compatibility maintained
 
 ✅ **WASM Integration**
+
 - Critical paths compilable to WASM
 - 2-25x performance improvement
 - Fallback to JavaScript always available
 
 ✅ **Build System**
+
 - TypeScript compilation working
 - WASM compilation working
 - All output formats generated
@@ -1454,16 +1534,19 @@ jobs:
 ### Performance Requirements
 
 ✅ **No Regression**
+
 - JavaScript performance maintained
 - No slowdown in non-WASM paths
 
 ✅ **WASM Performance**
+
 - Matrix multiply: 5-10x faster
 - FFT: 5-7x faster
 - Linear algebra: 3-5x faster
 - Parallel operations: 2-4x additional
 
 ✅ **Bundle Size**
+
 - No significant increase
 - Tree-shaking working
 - WASM modules loadable on demand
@@ -1471,18 +1554,21 @@ jobs:
 ### Quality Requirements
 
 ✅ **Test Coverage**
+
 - 100% unit test pass rate
 - 95%+ integration test pass
 - Type tests for all APIs
 - WASM tests for all modules
 
 ✅ **Code Quality**
+
 - ESLint passing
 - Prettier formatted
 - No TypeScript errors
 - Documentation complete
 
 ✅ **Developer Experience**
+
 - Full IDE autocomplete
 - Inline documentation
 - Type-safe refactoring
@@ -1491,18 +1577,21 @@ jobs:
 ### Documentation Requirements
 
 ✅ **User Documentation**
+
 - Migration guide complete
 - API reference updated
 - TypeScript examples
 - WASM usage guide
 
 ✅ **Developer Documentation**
+
 - Architecture documented
 - Build process documented
 - Contributing guide updated
 - Type system explained
 
 ✅ **Inline Documentation**
+
 - JSDoc for all public APIs
 - Type annotations explain intent
 - Complex algorithms documented
@@ -1540,6 +1629,7 @@ jobs:
 ## WASM Evaluation: [filename]
 
 **Criteria**:
+
 - [ ] Pure numeric computation
 - [ ] No DOM/Browser APIs
 - [ ] Deterministic algorithm
@@ -1547,15 +1637,17 @@ jobs:
 - [ ] Performance critical
 - [ ] Large data processing
 
-**Score**: __/6
+**Score**: \_\_/6
 
 **Recommendation**:
+
 - 6/6: High priority WASM
 - 4-5/6: Medium priority WASM
 - 2-3/6: Low priority WASM
 - 0-1/6: TypeScript only
 
 **Implementation Plan**:
+
 1. ...
 2. ...
 ```
@@ -1564,26 +1656,26 @@ jobs:
 
 ```javascript
 // benchmark/[category]/[function].bench.js
-import { Bench } from 'tinybench'
-import * as mathjs from '../../lib/esm/index.js'
-import * as mathjsWasm from '../../lib/typescript/wasm/index.js'
+import { Bench } from 'tinybench';
+import * as mathjs from '../../lib/esm/index.js';
+import * as mathjsWasm from '../../lib/typescript/wasm/index.js';
 
-const bench = new Bench({ time: 1000 })
+const bench = new Bench({ time: 1000 });
 
 bench
   .add('JavaScript: [operation]', () => {
-    mathjs.operation(data)
+    mathjs.operation(data);
   })
   .add('TypeScript: [operation]', () => {
     // Same operation, TypeScript compiled
   })
   .add('WASM: [operation]', async () => {
-    await mathjsWasm.operation(data)
-  })
+    await mathjsWasm.operation(data);
+  });
 
-await bench.run()
+await bench.run();
 
-console.table(bench.table())
+console.table(bench.table());
 ```
 
 ### D. Type Definition Template
@@ -1593,33 +1685,30 @@ console.table(bench.table())
 
 // Factory function
 interface Dependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
   // ... other deps
 }
 
-export const createFunction = factory(
-  name,
-  dependencies,
-  ({ typed, matrix }: Dependencies) => {
-    return typed('functionName', {
-      'number': (x: number): number => { /* impl */ },
-      'Matrix': (x: Matrix): Matrix => { /* impl */ }
-    })
-  }
-)
+export const createFunction = factory(name, dependencies, ({ typed, matrix }: Dependencies) => {
+  return typed('functionName', {
+    number: (x: number): number => {
+      /* impl */
+    },
+    Matrix: (x: Matrix): Matrix => {
+      /* impl */
+    },
+  });
+});
 
 // Generic function
-export function genericHelper<T>(
-  arr: NestedArray<T>,
-  callback: (value: T) => T
-): NestedArray<T> {
+export function genericHelper<T>(arr: NestedArray<T>, callback: (value: T) => T): NestedArray<T> {
   // impl
 }
 
 // Union types
-type MathValue = number | BigNumber | Complex | Fraction
-type MatrixType = DenseMatrix | SparseMatrix
+type MathValue = number | BigNumber | Complex | Fraction;
+type MatrixType = DenseMatrix | SparseMatrix;
 ```
 
 ---
@@ -1635,12 +1724,14 @@ This refactoring plan provides a comprehensive roadmap for converting the mathjs
 5. **Timeline**: Achievable 5-6 month schedule
 
 The plan is designed to be:
+
 - **Flexible**: Phases can be adjusted based on progress
 - **Parallel**: Multiple batches can proceed simultaneously
 - **Testable**: Continuous validation at every step
 - **Reversible**: Each phase can be rolled back if needed
 
 Success requires:
+
 - Dedicated team
 - Continuous testing
 - Community communication

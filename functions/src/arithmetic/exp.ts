@@ -1,18 +1,18 @@
-import { factory } from '../utils/factory.js'
-import { expNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { expNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for exp
 interface HasExpMethod {
-  exp(): unknown
+  exp(): unknown;
 }
 
 interface ExpDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'exp'
-const dependencies = ['typed']
+const name = 'exp';
+const dependencies = ['typed'];
 
 export const createExp = /* #__PURE__ */ factory(
   name,
@@ -52,12 +52,12 @@ export const createExp = /* #__PURE__ */ factory(
       number: expNumber,
 
       Complex: function (x: HasExpMethod): unknown {
-        return x.exp()
+        return x.exp();
       },
 
       BigNumber: function (x: HasExpMethod): unknown {
-        return x.exp()
-      }
-    })
+        return x.exp();
+      },
+    });
   }
-)
+);

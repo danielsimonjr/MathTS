@@ -31,18 +31,18 @@ are healthy; five carry material gaps, three of them severe.
 
 ### Scorecard
 
-| # | Bridge | Status | Completeness |
-|---|--------|--------|--------------|
-| B1 | typed-function type registration | Healthy | 100% |
-| B2 | Matrix factory bridge (`MathJSDenseMatrix`) | **Weak** | ~65% |
-| B3 | Matrix backend selection (`BackendManager`) | Healthy | ~95% |
-| B4 | WASM loaders (Rust + AssemblyScript) | Healthy | ~95% |
-| B5 | `compat` package (mathjs API shim) | **Severe gap** | ~25% |
-| B6 | expression ↔ functions scope | Healthy | 100% |
-| B7 | workbook ↔ expression/functions | **Severe gap** | ~10% |
-| B8 | tensor ↔ autograd ↔ matrix/functions | **Severe gap** | ~0% |
-| B9 | parallel ↔ typed functions | **Weak** | ~40% |
-| B10 | AssemblyScript ↔ Rust WASM toolchains | Healthy | ~95% |
+| #   | Bridge                                      | Status         | Completeness |
+| --- | ------------------------------------------- | -------------- | ------------ |
+| B1  | typed-function type registration            | Healthy        | 100%         |
+| B2  | Matrix factory bridge (`MathJSDenseMatrix`) | **Weak**       | ~65%         |
+| B3  | Matrix backend selection (`BackendManager`) | Healthy        | ~95%         |
+| B4  | WASM loaders (Rust + AssemblyScript)        | Healthy        | ~95%         |
+| B5  | `compat` package (mathjs API shim)          | **Severe gap** | ~25%         |
+| B6  | expression ↔ functions scope                | Healthy        | 100%         |
+| B7  | workbook ↔ expression/functions             | **Severe gap** | ~10%         |
+| B8  | tensor ↔ autograd ↔ matrix/functions        | **Severe gap** | ~0%          |
+| B9  | parallel ↔ typed functions                  | **Weak**       | ~40%         |
+| B10 | AssemblyScript ↔ Rust WASM toolchains       | Healthy        | ~95%         |
 
 ### Function surface
 
@@ -50,15 +50,15 @@ Counts below are derived from a precise extraction of every public `export` in
 `functions/src/typed/*.ts` and `functions/src/factories/index.ts` and are now
 mirrored 1:1 in `docs/reference/functions.md`.
 
-| Layer | Count | Notes |
-|-------|------:|-------|
-| Active typed functions | ~354 | `functions/src/typed/` (17 modules) |
-| Active factory functions (unique) | 161 | activated via `factories/index.ts` tiers 1–18 |
-| Expression functions | 3 | `evaluate`, `compileExpr`, `parse` |
-| **Total public function exports** | **~518** | the documented API surface |
-| Active factory functions (shadowed) | 72 | `factory_`-prefixed, typed impl takes precedence |
-| Dormant factory files | 102 | synced but never activated — see Part 3 |
-| Genuinely missing user-facing functions | ~52 | physical constants (entirely dormant) |
+| Layer                                   |    Count | Notes                                            |
+| --------------------------------------- | -------: | ------------------------------------------------ |
+| Active typed functions                  |     ~354 | `functions/src/typed/` (17 modules)              |
+| Active factory functions (unique)       |      161 | activated via `factories/index.ts` tiers 1–18    |
+| Expression functions                    |        3 | `evaluate`, `compileExpr`, `parse`               |
+| **Total public function exports**       | **~518** | the documented API surface                       |
+| Active factory functions (shadowed)     |       72 | `factory_`-prefixed, typed impl takes precedence |
+| Dormant factory files                   |      102 | synced but never activated — see Part 3          |
+| Genuinely missing user-facing functions |      ~52 | physical constants (entirely dormant)            |
 
 ---
 
@@ -91,26 +91,26 @@ The parallel-first native layer. All 17 modules are re-exported from
 (internal pool-management helpers such as `initializePool`/`terminateSignal`
 excluded). Every name is now catalogued in `docs/reference/functions.md`.
 
-| Module | Domain | Public fns |
-|--------|--------|-----------:|
-| `arithmetic.ts` | add/sub/mul/div, powers, logs, rounding, gcd/lcm, norm, matmul | 48 |
-| `trigonometry.ts` | sin/cos/tan + inverses + hyperbolic, hypot, deg/rad | 19 |
-| `combinatorics.ts` | fibonacci/lucas, factorials, primes, number theory | 21 |
-| `statistics.ts` | parallel sum/mean/var/std/…/quantile + O(n) selection | 21 |
-| `signal.ts` | FFT2D, DCT/DST, DWT, filters, convolution/correlation | 30 |
-| `special.ts` | Bessel, beta/gamma, elliptic, erf, Fresnel, orthogonal polys | 28 |
-| `distributions.ts` | normal/exp/bernoulli/binomial/poisson/geometric PDF/CDF/PMF | 10 |
-| `dist-objects.ts` | 12 distribution objects (`.pdf`/`.cdf`/`.ppf`/`.sample`) | 12 |
-| `algebra.ts` | polynomial ops, expand/factor/collect/substitute, trig CAS | 36 |
-| `cas.ts` | integrate, limit, solve, Laplace, Taylor, vector calculus | 31 |
-| `numeric.ts` | root finding, optimization, ODE, interpolation, curve fit | 34 |
-| `integration.ts` | trapz, simpson, romberg, gaussQuad | 4 |
-| `interpolation.ts` | linear/lagrange/cubic-spline/hermite/pchip, polyFit | 6 |
-| `hypothesis.ts` | t-test, chi-square, ANOVA, K-S, Mann-Whitney, PCA, Shapiro | 7 |
-| `graph.ts` | adjacency, shortest path, MST, components, topo sort | 8 |
-| `geometry.ts` | distances, areas, hulls, Delaunay/Voronoi, kd-tree | 30 |
-| `matrix-ops.ts` | char. polynomial, Cholesky, Hessenberg, Jordan, rank, RREF | 9 |
-| **Total** | | **354** |
+| Module             | Domain                                                         | Public fns |
+| ------------------ | -------------------------------------------------------------- | ---------: |
+| `arithmetic.ts`    | add/sub/mul/div, powers, logs, rounding, gcd/lcm, norm, matmul |         48 |
+| `trigonometry.ts`  | sin/cos/tan + inverses + hyperbolic, hypot, deg/rad            |         19 |
+| `combinatorics.ts` | fibonacci/lucas, factorials, primes, number theory             |         21 |
+| `statistics.ts`    | parallel sum/mean/var/std/…/quantile + O(n) selection          |         21 |
+| `signal.ts`        | FFT2D, DCT/DST, DWT, filters, convolution/correlation          |         30 |
+| `special.ts`       | Bessel, beta/gamma, elliptic, erf, Fresnel, orthogonal polys   |         28 |
+| `distributions.ts` | normal/exp/bernoulli/binomial/poisson/geometric PDF/CDF/PMF    |         10 |
+| `dist-objects.ts`  | 12 distribution objects (`.pdf`/`.cdf`/`.ppf`/`.sample`)       |         12 |
+| `algebra.ts`       | polynomial ops, expand/factor/collect/substitute, trig CAS     |         36 |
+| `cas.ts`           | integrate, limit, solve, Laplace, Taylor, vector calculus      |         31 |
+| `numeric.ts`       | root finding, optimization, ODE, interpolation, curve fit      |         34 |
+| `integration.ts`   | trapz, simpson, romberg, gaussQuad                             |          4 |
+| `interpolation.ts` | linear/lagrange/cubic-spline/hermite/pchip, polyFit            |          6 |
+| `hypothesis.ts`    | t-test, chi-square, ANOVA, K-S, Mann-Whitney, PCA, Shapiro     |          7 |
+| `graph.ts`         | adjacency, shortest path, MST, components, topo sort           |          8 |
+| `geometry.ts`      | distances, areas, hulls, Delaunay/Voronoi, kd-tree             |         30 |
+| `matrix-ops.ts`    | char. polynomial, Cholesky, Hessenberg, Jordan, rank, RREF     |          9 |
+| **Total**          |                                                                |    **354** |
 
 ### 1.2 Active factory functions (`functions/src/factories/index.ts`)
 
@@ -171,8 +171,8 @@ is genuine and well-built.
 `matrix/src/backends/BackendManager.ts` cleanly routes by element count and
 operation across `JSBackend`, `WASMBackend` (AssemblyScript), `RustWASMBackend`,
 and `GPUBackend`, with per-operation thresholds, adaptive threshold tuning, and
-fallback-on-error. Minor gap: `MatrixWasmBridge.ts:350` throws *"JavaScript FFT
-fallback not implemented in bridge"* — one un-covered fallback path.
+fallback-on-error. Minor gap: `MatrixWasmBridge.ts:350` throws _"JavaScript FFT
+fallback not implemented in bridge"_ — one un-covered fallback path.
 
 ### B4 — WASM loaders · Healthy (~95%)
 
@@ -192,7 +192,7 @@ promise**.
   is underscore-prefixed). `create(all)` and `create({})` behave identically.
 - `shims.ts` imports only **~22 functions** from `@danielsimonjr/mathts-functions`
   (`add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan,
-  sum, mean, min, max, gcd, lcm, round, floor, ceil` + matrix helpers). The
+sum, mean, min, max, gcd, lcm, round, floor, ceil` + matrix helpers). The
   `functions` package exports **500+**.
 - The returned `MathInstance` is a **hand-maintained list of ~50 properties**.
   Adding a function to `functions/` does not surface it in `compat`.
@@ -203,9 +203,10 @@ Net effect: a mathjs user migrating via `create(all)` gets ~50 of mathjs's
 ### B6 — expression ↔ functions scope · Healthy
 
 `evaluate.ts` composes `mathScope` from `factoryScope` + all activated factories
-+ all typed functions + constants, and feeds it to `createEvaluate`. The
-expression evaluator sees the full library. The sandbox helpers
-(`getSafeProperty`/`getSafeMethod`) are intact per the security invariants.
+
+- all typed functions + constants, and feeds it to `createEvaluate`. The
+  expression evaluator sees the full library. The sandbox helpers
+  (`getSafeProperty`/`getSafeMethod`) are intact per the security invariants.
 
 ### B7 — workbook ↔ expression/functions · Severe gap (~10%)
 
@@ -277,13 +278,13 @@ Two independent toolchains, independently built and independently selectable by
 Diff of 328 `create*` factory files against the 259 referenced in
 `factories/index.ts` yields 102 dormant factories, which break down as:
 
-| Group | Count | Assessment |
-|-------|------:|------------|
-| **Physical constants** | **52** | **Genuine gap — see 3.2** |
-| Internal matrix-algorithm suite (`MatAlgo01x…14x`, `matrixAlgorithmSuite`, `useMatrixForArrayScalar`) | 16 | Internal dispatch helpers; dormant because B2 uses the adapter instead. Required if B2 is fixed. |
-| Type-class constructors (`createComplexClass`, `createDenseMatrixClass`, `createMatrix`, `createSparse`, …) | 16 | By design — MathTS uses its own native types. |
-| `*Number` number-only variants (`createCeilNumber`, `createCompareNumber`, …) | 14 | By design — the `any`-typed versions are activated. |
-| Shadowed / unit-aware (`createAdd`, `createMultiply`, `createCompareUnits`, `createTrigUnit`) | 4 | Shadowed by typed implementations. |
+| Group                                                                                                       |  Count | Assessment                                                                                       |
+| ----------------------------------------------------------------------------------------------------------- | -----: | ------------------------------------------------------------------------------------------------ |
+| **Physical constants**                                                                                      | **52** | **Genuine gap — see 3.2**                                                                        |
+| Internal matrix-algorithm suite (`MatAlgo01x…14x`, `matrixAlgorithmSuite`, `useMatrixForArrayScalar`)       |     16 | Internal dispatch helpers; dormant because B2 uses the adapter instead. Required if B2 is fixed. |
+| Type-class constructors (`createComplexClass`, `createDenseMatrixClass`, `createMatrix`, `createSparse`, …) |     16 | By design — MathTS uses its own native types.                                                    |
+| `*Number` number-only variants (`createCeilNumber`, `createCompareNumber`, …)                               |     14 | By design — the `any`-typed versions are activated.                                              |
+| Shadowed / unit-aware (`createAdd`, `createMultiply`, `createCompareUnits`, `createTrigUnit`)               |      4 | Shadowed by typed implementations.                                                               |
 
 Only the physical-constants group is a real user-facing gap; the other 50 are
 internal-by-design or required only as a consequence of fixing B2.
@@ -306,13 +307,13 @@ built in tier 12).
 Comparing the now-complete `functions.md` surface against `factoriesAny.ts`:
 
 - **Type-conversion functions**: `complex`, `fraction`, `bignumber`, `number`,
-  `string`, `boolean`, `bigint`, `matrix`, `sparse` are *not* re-exported as
+  `string`, `boolean`, `bigint`, `matrix`, `sparse` are _not_ re-exported as
   named functions from the `functions` package. They exist inside `factoryScope`
   (so `evaluate('complex(1,2)')` works) and the underlying classes ship from
   `core`/`matrix`, but a direct `import { complex } from '…/functions'` fails.
 - **`isInteger`**: not exported — `factories/index.ts` wires only an inline
   `Number.isInteger` stub into the scope. The real `createIsInteger` factory is
-  dormant. (`isNumeric`, `isPrime`, `isFinite`, `isZero`, … *are* exported.)
+  dormant. (`isNumeric`, `isPrime`, `isFinite`, `isZero`, … _are_ exported.)
 - **Help/introspection**: `help`, `docs` — not present (low priority).
 - **Stateful `parser()`**: the one-shot `evaluate`/`compileExpr` exist; a
   persistent `Parser` object with retained scope does not.
@@ -350,19 +351,19 @@ not the source tree, as the API contract — and keep it in sync (roadmap item 1
 
 ## Part 4 — Prioritized Remediation Roadmap
 
-| # | Item | Bridge / Area | Effort | Priority |
-|---|------|---------------|--------|----------|
-| 1 | Wire `.mtsw` cells through `evaluate()` from `expression`/`functions`; restore the eval sandbox; remove `new Function` | B7 | M | **P0 — critical** |
-| 2 | Activate the 52 physical constants (tier-1 leaves, after `Unit`) | 3.2 | S | **P0 — quick win** |
-| 3 | Make `compat` real: implement `all`, honour `_factories`, generate `MathInstance` from the `functions` namespace | B5 | M | **P1** |
-| 4 | Route matrix factories through native `DenseMatrix` + `BackendManager` (use `toNative`/`fromNative`, or re-base the bridge on the native type) | B2 | L | **P1** |
-| 5 | Replace `det`/`reshape`/`isInteger` stubs in `factories/index.ts` with real deps | B2 | S | **P1** |
-| 6 | Add `Tensor ↔ DenseMatrix` converters; let `autograd` differentiate `functions` ops | B8 | L | **P2** |
-| 7 | Transparent size-based parallel dispatch inside default typed functions (retire the `parallel*`-named duplicates) | B9 | M | **P2** |
-| 8 | Implement `executeData()` YAML/JSON parsing in the workbook | B7 | S | **P2** |
-| 9 | Stateful `Parser` object + JSON `reviver`/`replacer`; export type-conversion fns (`complex`, `matrix`, …) | 3.3 | M | **P3** |
-| 10 | JS FFT fallback in `MatrixWasmBridge` | B3 | S | **P3** |
-| 11 | Generate/CI-check `docs/reference/functions.md` from the export surface so it cannot drift again | 3.5 | S | **P3** |
+| #   | Item                                                                                                                                           | Bridge / Area | Effort | Priority           |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------ | ------------------ |
+| 1   | Wire `.mtsw` cells through `evaluate()` from `expression`/`functions`; restore the eval sandbox; remove `new Function`                         | B7            | M      | **P0 — critical**  |
+| 2   | Activate the 52 physical constants (tier-1 leaves, after `Unit`)                                                                               | 3.2           | S      | **P0 — quick win** |
+| 3   | Make `compat` real: implement `all`, honour `_factories`, generate `MathInstance` from the `functions` namespace                               | B5            | M      | **P1**             |
+| 4   | Route matrix factories through native `DenseMatrix` + `BackendManager` (use `toNative`/`fromNative`, or re-base the bridge on the native type) | B2            | L      | **P1**             |
+| 5   | Replace `det`/`reshape`/`isInteger` stubs in `factories/index.ts` with real deps                                                               | B2            | S      | **P1**             |
+| 6   | Add `Tensor ↔ DenseMatrix` converters; let `autograd` differentiate `functions` ops                                                            | B8            | L      | **P2**             |
+| 7   | Transparent size-based parallel dispatch inside default typed functions (retire the `parallel*`-named duplicates)                              | B9            | M      | **P2**             |
+| 8   | Implement `executeData()` YAML/JSON parsing in the workbook                                                                                    | B7            | S      | **P2**             |
+| 9   | Stateful `Parser` object + JSON `reviver`/`replacer`; export type-conversion fns (`complex`, `matrix`, …)                                      | 3.3           | M      | **P3**             |
+| 10  | JS FFT fallback in `MatrixWasmBridge`                                                                                                          | B3            | S      | **P3**             |
+| 11  | Generate/CI-check `docs/reference/functions.md` from the export surface so it cannot drift again                                               | 3.5           | S      | **P3**             |
 
 **Effort key**: S ≤ 1 day · M ≈ 2–5 days · L ≈ 1–2 weeks.
 
@@ -380,18 +381,18 @@ not the source tree, as the API contract — and keep it in sync (roadmap item 1
 
 ## Appendix A — Bridge file reference
 
-| Bridge | Primary files |
-|--------|---------------|
-| B1 | `core/src/typed/type-bridge.ts`, `functions/src/typed/typed-bridge.ts` |
-| B2 | `functions/src/factories/matrix-bridge.ts`, `functions/src/factories/scope.ts` |
-| B3 | `matrix/src/backends/BackendManager.ts`, `MatrixWasmBridge.ts` |
-| B4 | `matrix/src/backends/{RustWasmLoader,WasmLoader}.ts`, `functions/src/wasm/WasmLoader.ts` |
-| B5 | `compat/src/index.ts`, `compat/src/shims.ts` |
-| B6 | `functions/src/factories/evaluate.ts` |
-| B7 | `workbook/src/executor.ts` |
-| B8 | `tensor/src/`, `autograd/src/` |
-| B9 | `parallel/src/`, `functions/src/typed/{statistics,signal,arithmetic}.ts` |
-| B10 | `assembly/`, `wasm-rust/` |
+| Bridge | Primary files                                                                            |
+| ------ | ---------------------------------------------------------------------------------------- |
+| B1     | `core/src/typed/type-bridge.ts`, `functions/src/typed/typed-bridge.ts`                   |
+| B2     | `functions/src/factories/matrix-bridge.ts`, `functions/src/factories/scope.ts`           |
+| B3     | `matrix/src/backends/BackendManager.ts`, `MatrixWasmBridge.ts`                           |
+| B4     | `matrix/src/backends/{RustWasmLoader,WasmLoader}.ts`, `functions/src/wasm/WasmLoader.ts` |
+| B5     | `compat/src/index.ts`, `compat/src/shims.ts`                                             |
+| B6     | `functions/src/factories/evaluate.ts`                                                    |
+| B7     | `workbook/src/executor.ts`                                                               |
+| B8     | `tensor/src/`, `autograd/src/`                                                           |
+| B9     | `parallel/src/`, `functions/src/typed/{statistics,signal,arithmetic}.ts`                 |
+| B10    | `assembly/`, `wasm-rust/`                                                                |
 
 ## Appendix B — The 52 dormant physical constants
 

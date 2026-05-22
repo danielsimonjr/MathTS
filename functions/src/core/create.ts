@@ -1,9 +1,9 @@
-import typedFunction from 'typed-function'
-import { ArgumentsError } from '../error/ArgumentsError.js'
-import { DimensionError } from '../error/DimensionError.js'
-import { IndexError } from '../error/IndexError.js'
-import { factory, isFactory } from '../utils/factory.js'
-import type { FactoryFunction, LegacyFactory } from '../utils/factory.js'
+import typedFunction from 'typed-function';
+import { ArgumentsError } from '../error/ArgumentsError.js';
+import { DimensionError } from '../error/DimensionError.js';
+import { IndexError } from '../error/IndexError.js';
+import { factory, isFactory } from '../utils/factory.js';
+import type { FactoryFunction, LegacyFactory } from '../utils/factory.js';
 import {
   isAccessorNode,
   isArray,
@@ -46,103 +46,100 @@ import {
   isString,
   isSymbolNode,
   isUndefined,
-  isUnit
-} from '../utils/is.js'
-import { deepFlatten, isLegacyFactory } from '../utils/object.js'
-import { isObjectWrappingMap } from '../utils/map.js'
-import * as emitter from './../utils/emitter.js'
-import { DEFAULT_CONFIG } from './config.js'
-import type { ConfigOptions, MathJsConfig } from './config.js'
+  isUnit,
+} from '../utils/is.js';
+import { deepFlatten, isLegacyFactory } from '../utils/object.js';
+import { isObjectWrappingMap } from '../utils/map.js';
+import * as emitter from './../utils/emitter.js';
+import { DEFAULT_CONFIG } from './config.js';
+import type { ConfigOptions, MathJsConfig } from './config.js';
 
 // Re-export MathJsConfig for backward compatibility
-export type { MathJsConfig }
-import { configFactory } from './function/config.js'
-import { importFactory } from './function/import.js'
+export type { MathJsConfig };
+import { configFactory } from './function/config.js';
+import { importFactory } from './function/import.js';
 
 /**
  * Type for the mathjs instance
  */
 export interface MathJsInstance {
   // Type checking functions
-  isNumber: typeof isNumber
-  isComplex: typeof isComplex
-  isBigNumber: typeof isBigNumber
-  isBigInt: typeof isBigInt
-  isFraction: typeof isFraction
-  isUnit: typeof isUnit
-  isString: typeof isString
-  isArray: typeof isArray
-  isMatrix: typeof isMatrix
-  isCollection: typeof isCollection
-  isDenseMatrix: typeof isDenseMatrix
-  isSparseMatrix: typeof isSparseMatrix
-  isRange: typeof isRange
-  isIndex: typeof isIndex
-  isBoolean: typeof isBoolean
-  isResultSet: typeof isResultSet
-  isHelp: typeof isHelp
-  isFunction: typeof isFunction
-  isDate: typeof isDate
-  isRegExp: typeof isRegExp
-  isObject: typeof isObject
-  isMap: typeof isMap
-  isPartitionedMap: typeof isPartitionedMap
-  isObjectWrappingMap: typeof isObjectWrappingMap
-  isNull: typeof isNull
-  isUndefined: typeof isUndefined
-  isAccessorNode: typeof isAccessorNode
-  isArrayNode: typeof isArrayNode
-  isAssignmentNode: typeof isAssignmentNode
-  isBlockNode: typeof isBlockNode
-  isConditionalNode: typeof isConditionalNode
-  isConstantNode: typeof isConstantNode
-  isFunctionAssignmentNode: typeof isFunctionAssignmentNode
-  isFunctionNode: typeof isFunctionNode
-  isIndexNode: typeof isIndexNode
-  isNode: typeof isNode
-  isObjectNode: typeof isObjectNode
-  isOperatorNode: typeof isOperatorNode
-  isParenthesisNode: typeof isParenthesisNode
-  isRangeNode: typeof isRangeNode
-  isRelationalNode: typeof isRelationalNode
-  isSymbolNode: typeof isSymbolNode
-  isChain: typeof isChain
+  isNumber: typeof isNumber;
+  isComplex: typeof isComplex;
+  isBigNumber: typeof isBigNumber;
+  isBigInt: typeof isBigInt;
+  isFraction: typeof isFraction;
+  isUnit: typeof isUnit;
+  isString: typeof isString;
+  isArray: typeof isArray;
+  isMatrix: typeof isMatrix;
+  isCollection: typeof isCollection;
+  isDenseMatrix: typeof isDenseMatrix;
+  isSparseMatrix: typeof isSparseMatrix;
+  isRange: typeof isRange;
+  isIndex: typeof isIndex;
+  isBoolean: typeof isBoolean;
+  isResultSet: typeof isResultSet;
+  isHelp: typeof isHelp;
+  isFunction: typeof isFunction;
+  isDate: typeof isDate;
+  isRegExp: typeof isRegExp;
+  isObject: typeof isObject;
+  isMap: typeof isMap;
+  isPartitionedMap: typeof isPartitionedMap;
+  isObjectWrappingMap: typeof isObjectWrappingMap;
+  isNull: typeof isNull;
+  isUndefined: typeof isUndefined;
+  isAccessorNode: typeof isAccessorNode;
+  isArrayNode: typeof isArrayNode;
+  isAssignmentNode: typeof isAssignmentNode;
+  isBlockNode: typeof isBlockNode;
+  isConditionalNode: typeof isConditionalNode;
+  isConstantNode: typeof isConstantNode;
+  isFunctionAssignmentNode: typeof isFunctionAssignmentNode;
+  isFunctionNode: typeof isFunctionNode;
+  isIndexNode: typeof isIndexNode;
+  isNode: typeof isNode;
+  isObjectNode: typeof isObjectNode;
+  isOperatorNode: typeof isOperatorNode;
+  isParenthesisNode: typeof isParenthesisNode;
+  isRangeNode: typeof isRangeNode;
+  isRelationalNode: typeof isRelationalNode;
+  isSymbolNode: typeof isSymbolNode;
+  isChain: typeof isChain;
 
   // Core functions
-  config: (config?: Partial<ConfigOptions>) => ConfigOptions
-  import: (factories: any, options?: ImportOptions) => void
-  create: (
-    factories?: FactoriesInput,
-    config?: Partial<ConfigOptions>
-  ) => MathJsInstance
-  factory: typeof factory
-  typed: typeof typedFunction & { isTypedFunction?: (value: any) => boolean }
+  config: (config?: Partial<ConfigOptions>) => ConfigOptions;
+  import: (factories: any, options?: ImportOptions) => void;
+  create: (factories?: FactoriesInput, config?: Partial<ConfigOptions>) => MathJsInstance;
+  factory: typeof factory;
+  typed: typeof typedFunction & { isTypedFunction?: (value: any) => boolean };
 
   // Error types
-  ArgumentsError: typeof ArgumentsError
-  DimensionError: typeof DimensionError
-  IndexError: typeof IndexError
+  ArgumentsError: typeof ArgumentsError;
+  DimensionError: typeof DimensionError;
+  IndexError: typeof IndexError;
 
   // Expression namespace
   expression: {
-    transform: Record<string, any>
+    transform: Record<string, any>;
     mathWithTransform: {
-      config: (config?: Partial<ConfigOptions>) => ConfigOptions
-      [key: string]: any
-    }
-  }
+      config: (config?: Partial<ConfigOptions>) => ConfigOptions;
+      [key: string]: any;
+    };
+  };
 
   // Type namespace
-  type?: Record<string, any>
+  type?: Record<string, any>;
 
   // Event emitter methods
-  on: (event: string, callback: (...args: any[]) => void) => MathJsInstance
-  off: (event: string, callback: (...args: any[]) => void) => MathJsInstance
-  once: (event: string, callback: (...args: any[]) => void) => MathJsInstance
-  emit: (event: string, ...args: any[]) => MathJsInstance
+  on: (event: string, callback: (...args: any[]) => void) => MathJsInstance;
+  off: (event: string, callback: (...args: any[]) => void) => MathJsInstance;
+  once: (event: string, callback: (...args: any[]) => void) => MathJsInstance;
+  emit: (event: string, ...args: any[]) => MathJsInstance;
 
   // Additional dynamically added functions
-  [key: string]: any
+  [key: string]: any;
 }
 
 /**
@@ -152,23 +149,23 @@ export type FactoriesInput =
   | Record<string, FactoryFunction | LegacyFactory>
   | Array<FactoryFunction | LegacyFactory>
   | FactoryFunction
-  | LegacyFactory
+  | LegacyFactory;
 
 /**
  * Options for the import function
  */
 export interface ImportOptions {
-  override?: boolean
-  silent?: boolean
-  wrap?: boolean
+  override?: boolean;
+  silent?: boolean;
+  wrap?: boolean;
 }
 
 /**
  * Type for lazy typed function
  */
-interface LazyTyped extends Function {
-  (...args: any[]): any
-  isTypedFunction?: (value: any) => boolean
+interface LazyTyped {
+  (...args: any[]): any;
+  isTypedFunction?: (value: any) => boolean;
 }
 
 /**
@@ -217,18 +214,14 @@ export function create(
   factories?: FactoriesInput,
   config?: Partial<ConfigOptions>
 ): MathJsInstance {
-  const configInternal: ConfigOptions = Object.assign(
-    {},
-    DEFAULT_CONFIG,
-    config
-  )
+  const configInternal: ConfigOptions = Object.assign({}, DEFAULT_CONFIG, config);
 
   // simple test for ES5 support
   if (typeof Object.create !== 'function') {
     throw new Error(
       'ES5 not supported by this JavaScript engine. ' +
         'Please load the es5-shim and es5-sham library for compatibility.'
-    )
+    );
   }
 
   // create the mathjs instance
@@ -278,22 +271,22 @@ export function create(
     isRelationalNode,
     isSymbolNode,
 
-    isChain
-  }) as MathJsInstance
+    isChain,
+  }) as MathJsInstance;
 
   // load config function and apply provided config
-  math.config = configFactory(configInternal, math.emit)
+  math.config = configFactory(configInternal, math.emit);
 
   math.expression = {
     transform: {},
     mathWithTransform: {
-      config: math.config
-    }
-  }
+      config: math.config,
+    },
+  };
 
   // cached factories and instances used by function load
-  const legacyFactories: LegacyFactory[] = []
-  const legacyInstances: any[] = []
+  const legacyFactories: LegacyFactory[] = [];
+  const legacyInstances: any[] = [];
 
   /**
    * Load a function or data type from a factory.
@@ -304,69 +297,59 @@ export function create(
    */
   function load(factory: FactoryFunction | LegacyFactory | any): any {
     if (isFactory(factory)) {
-      return factory(math)
+      return factory(math);
     }
 
-    const firstProperty = factory[Object.keys(factory)[0]]
+    const firstProperty = factory[Object.keys(factory)[0]];
     if (isFactory(firstProperty)) {
-      return firstProperty(math)
+      return firstProperty(math);
     }
 
     if (!isLegacyFactory(factory)) {
       console.warn(
         'Factory object with properties `type`, `name`, and `factory` expected',
         factory
-      )
-      throw new Error(
-        'Factory object with properties `type`, `name`, and `factory` expected'
-      )
+      );
+      throw new Error('Factory object with properties `type`, `name`, and `factory` expected');
     }
 
-    const index = legacyFactories.indexOf(factory)
-    let instance: any
+    const index = legacyFactories.indexOf(factory);
+    let instance: any;
     if (index === -1) {
       // doesn't yet exist
       if (factory.math === true) {
         // pass with math namespace
-        instance = factory.factory(
-          math.type,
-          configInternal,
-          load,
-          math.typed,
-          math
-        )
+        instance = factory.factory(math.type, configInternal, load, math.typed, math);
       } else {
-        instance = factory.factory(math.type, configInternal, load, math.typed)
+        instance = factory.factory(math.type, configInternal, load, math.typed);
       }
 
       // append to the cache
-      legacyFactories.push(factory)
-      legacyInstances.push(instance)
+      legacyFactories.push(factory);
+      legacyInstances.push(instance);
     } else {
       // already existing function, return the cached instance
-      instance = legacyInstances[index]
+      instance = legacyInstances[index];
     }
 
-    return instance
+    return instance;
   }
 
-  const importedFactories: Record<string, FactoryFunction | LegacyFactory> = {}
+  const importedFactories: Record<string, FactoryFunction | LegacyFactory> = {};
 
   // load the import function
   function lazyTyped(...args: any[]): any {
-    return math.typed.apply(math.typed, args)
+    return math.typed.apply(math.typed, args);
   }
-  ;(lazyTyped as LazyTyped).isTypedFunction = (
-    typedFunction as any
-  ).isTypedFunction
+  (lazyTyped as LazyTyped).isTypedFunction = (typedFunction as any).isTypedFunction;
 
   const internalImport = importFactory(
     lazyTyped as any,
     load,
     math,
     importedFactories as Record<string, FactoryFunction>
-  )
-  math.import = internalImport
+  );
+  math.import = internalImport;
 
   // listen for changes in config, import all functions again when changed
   // TODO: move this listener into the import function?
@@ -375,27 +358,27 @@ export function create(
       if (factory && factory.meta && factory.meta.recreateOnConfigChange) {
         // FIXME: only re-create when the current instance is the same as was initially created
         // FIXME: delete the functions/constants before importing them again?
-        internalImport(factory, { override: true })
+        internalImport(factory, { override: true });
       }
-    })
-  })
+    });
+  });
 
   // the create function exposed on the mathjs instance is bound to
   // the factory functions passed before
-  math.create = create.bind(null, factories)
+  math.create = create.bind(null, factories);
 
   // export factory function
-  math.factory = factory
+  math.factory = factory;
 
   // import the factory functions like createAdd as an array instead of object,
   // else they will get a different naming (`createAdd` instead of `add`).
   if (factories) {
-    math.import(Object.values(deepFlatten(factories as Record<string, unknown>)))
+    math.import(Object.values(deepFlatten(factories as Record<string, unknown>)));
   }
 
-  math.ArgumentsError = ArgumentsError
-  math.DimensionError = DimensionError
-  math.IndexError = IndexError
+  math.ArgumentsError = ArgumentsError;
+  math.DimensionError = DimensionError;
+  math.IndexError = IndexError;
 
-  return math
+  return math;
 }

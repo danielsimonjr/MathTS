@@ -1,18 +1,18 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { tanh as _tanh } from '../utils/number.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { tanh as _tanh } from '../utils/number.js';
 
 // Type definitions for tanh
 interface TanhableType {
-  tanh(): TanhableType
+  tanh(): TanhableType;
 }
 
 interface TanhDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'tanh'
-const dependencies = ['typed']
+const name = 'tanh';
+const dependencies = ['typed'];
 
 export const createTanh = /* #__PURE__ */ factory(
   name,
@@ -45,7 +45,7 @@ export const createTanh = /* #__PURE__ */ factory(
      */
     return typed('tanh', {
       number: _tanh,
-      'Complex | BigNumber': (x: TanhableType): TanhableType => x.tanh()
-    }) as TypedFunction
+      'Complex | BigNumber': (x: TanhableType): TanhableType => x.tanh(),
+    }) as TypedFunction;
   }
-)
+);

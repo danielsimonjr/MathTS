@@ -1,24 +1,24 @@
-import { containsCollections } from '../utils/collection.js'
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import { improveErrorMessage } from './utils/improveErrorMessage.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { containsCollections } from '../utils/collection.js';
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for median
 interface MatrixType {
-  valueOf(): unknown[] | unknown[][]
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface MedianDependencies {
-  typed: TypedFunction
-  add: TypedFunction
-  divide: TypedFunction
-  compare: (a: unknown, b: unknown) => number
-  partitionSelect: TypedFunction
+  typed: TypedFunction;
+  add: TypedFunction;
+  divide: TypedFunction;
+  compare: (a: unknown, b: unknown) => number;
+  partitionSelect: TypedFunction;
 }
 
-const name = 'median'
-const dependencies = ['typed', 'add', 'divide', 'compare', 'partitionSelect']
+const name = 'median';
+const dependencies = ['typed', 'add', 'divide', 'compare', 'partitionSelect'];
 
 export const createMedian = /* #__PURE__ */ factory(
   name,
@@ -32,54 +32,54 @@ export const createMedian = /* #__PURE__ */ factory(
      */
     function _median(array: unknown[] | MatrixType): unknown {
       try {
-        const flat = flatten((array as MatrixType).valueOf()) as unknown[]
+        const flat = flatten((array as MatrixType).valueOf()) as unknown[];
 
-        const num = flat.length
+        const num = flat.length;
         if (num === 0) {
-          throw new Error('Cannot calculate median of an empty array')
+          throw new Error('Cannot calculate median of an empty array');
         }
 
         if (num % 2 === 0) {
           // even: return the average of the two middle values
-          const mid = num / 2 - 1
-          const right = partitionSelect(flat, mid + 1)
+          const mid = num / 2 - 1;
+          const right = partitionSelect(flat, mid + 1);
 
           // array now partitioned at mid + 1, take max of left part
-          let left = flat[mid]
+          let left = flat[mid];
           for (let i = 0; i < mid; ++i) {
             if (compare(flat[i], left) > 0) {
-              left = flat[i]
+              left = flat[i];
             }
           }
 
-          return middle2(left, right)
+          return middle2(left, right);
         } else {
           // odd: return the middle value
-          const m = partitionSelect(flat, (num - 1) / 2)
+          const m = partitionSelect(flat, (num - 1) / 2);
 
-          return middle(m)
+          return middle(m);
         }
       } catch (err) {
-        throw improveErrorMessage(err, 'median', undefined)
+        throw improveErrorMessage(err, 'median', undefined);
       }
     }
 
     // helper function to type check the middle value of the array
     const middle = typed({
-      'number | BigNumber | Complex | Unit': function (
-        value: unknown
-      ): unknown {
-        return value
-      }
-    }) as (value: unknown) => unknown
+      'number | BigNumber | Complex | Unit': function (value: unknown): unknown {
+        return value;
+      },
+    }) as (value: unknown) => unknown;
 
     // helper function to type check the two middle value of the array
     const middle2 = typed({
-      'number | BigNumber | Complex | Unit, number | BigNumber | Complex | Unit':
-        function (left: unknown, right: unknown): unknown {
-          return divide(add(left, right), 2)
-        }
-    }) as (left: unknown, right: unknown) => unknown
+      'number | BigNumber | Complex | Unit, number | BigNumber | Complex | Unit': function (
+        left: unknown,
+        right: unknown
+      ): unknown {
+        return divide(add(left, right), 2);
+      },
+    }) as (left: unknown, right: unknown) => unknown;
 
     /**
      * Compute the median of a matrix or a list with values. The values are
@@ -117,18 +117,18 @@ export const createMedian = /* #__PURE__ */ factory(
         _dim: number | { valueOf(): number }
       ): unknown {
         // TODO: implement median(A, dim)
-        throw new Error('median(A, dim) is not yet supported')
+        throw new Error('median(A, dim) is not yet supported');
         // return reduce(arguments[0], arguments[1], ...)
       },
 
       // median(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
         if (containsCollections(args)) {
-          throw new TypeError('Scalar values expected in function median')
+          throw new TypeError('Scalar values expected in function median');
         }
 
-        return _median(args)
-      }
-    })
+        return _median(args);
+      },
+    });
   }
-)
+);

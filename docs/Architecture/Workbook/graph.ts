@@ -1,16 +1,10 @@
 /**
  * MathTS Scientific Workbook - Dependency Graph
- * 
+ *
  * Builds and manages the cell dependency graph for reactive execution
  */
 
-import type {
-  Workbook,
-  Cell,
-  DependencyGraph,
-  DependencyNode,
-  CellStatus,
-} from './types';
+import type { Workbook, Cell, DependencyGraph, DependencyNode, CellStatus } from './types';
 
 // ============================================================================
 // Graph Builder
@@ -35,7 +29,7 @@ export function buildDependencyGraph(workbook: Workbook): DependencyGraph {
   // Build edges from explicit depends_on
   for (const cell of workbook.cells) {
     const node = nodes.get(cell.id)!;
-    
+
     if (cell.depends_on) {
       for (const depId of cell.depends_on) {
         if (nodes.has(depId)) {
@@ -50,7 +44,7 @@ export function buildDependencyGraph(workbook: Workbook): DependencyGraph {
     if (cell.type === 'code' || cell.type === 'visualization' || cell.type === 'test') {
       const content = getCellContent(cell);
       const detected = detectDependencies(content, workbook);
-      
+
       for (const depId of detected) {
         if (depId !== cell.id && nodes.has(depId) && !node.dependencies.includes(depId)) {
           node.dependencies.push(depId);
@@ -66,17 +60,22 @@ export function buildDependencyGraph(workbook: Workbook): DependencyGraph {
 
 function getCellContent(cell: Cell): string {
   switch (cell.type) {
-    case 'code': return cell.code;
-    case 'visualization': return cell.visualization;
-    case 'test': return cell.test;
-    case 'export': return cell.export;
-    default: return '';
+    case 'code':
+      return cell.code;
+    case 'visualization':
+      return cell.visualization;
+    case 'test':
+      return cell.test;
+    case 'export':
+      return cell.export;
+    default:
+      return '';
   }
 }
 
 /**
  * Detect dependencies from import statements and cell references
- * 
+ *
  * Patterns:
  * - import { x } from '#cell-id'
  * - import x from '#cell-id'
@@ -84,7 +83,7 @@ function getCellContent(cell: Cell): string {
  */
 function detectDependencies(code: string, workbook: Workbook): string[] {
   const deps: string[] = [];
-  const cellIds = new Set(workbook.cells.map(c => c.id));
+  const cellIds = new Set(workbook.cells.map((c) => c.id));
 
   // Pattern: import ... from '#cell-id'
   const importPattern = /from\s+['"]#([^'"]+)['"]/g;
@@ -206,7 +205,7 @@ export function getDependencies(graph: DependencyGraph, cellId: string): string[
  */
 export function markStale(graph: DependencyGraph, cellId: string): string[] {
   const stale = [cellId, ...getDependents(graph, cellId)];
-  
+
   for (const id of stale) {
     const node = graph.nodes.get(id);
     if (node && node.status === 'success') {
@@ -238,7 +237,7 @@ export function getReadyCells(graph: DependencyGraph): string[] {
 
   for (const [id, node] of graph.nodes) {
     if (node.status === 'pending' || node.status === 'stale') {
-      const allDepsReady = node.dependencies.every(depId => {
+      const allDepsReady = node.dependencies.every((depId) => {
         const dep = graph.nodes.get(depId);
         return dep && dep.status === 'success';
       });
@@ -290,7 +289,7 @@ export function hasCycle(graph: DependencyGraph): { hasCycle: boolean; cycle?: s
 
   for (const id of graph.nodes.keys()) {
     if (dfs(id)) {
-      const cycleStart = path.findIndex(p => stack.has(p));
+      const cycleStart = path.findIndex((p) => stack.has(p));
       return {
         hasCycle: true,
         cycle: path.slice(cycleStart),
@@ -311,10 +310,18 @@ export function toMermaid(graph: DependencyGraph): string {
     // Node styling based on status
     let style = '';
     switch (node.status) {
-      case 'success': style = ':::success'; break;
-      case 'error': style = ':::error'; break;
-      case 'running': style = ':::running'; break;
-      case 'stale': style = ':::stale'; break;
+      case 'success':
+        style = ':::success';
+        break;
+      case 'error':
+        style = ':::error';
+        break;
+      case 'running':
+        style = ':::running';
+        break;
+      case 'stale':
+        style = ':::stale';
+        break;
     }
 
     const label = `${id}[${node.cell.type}: ${id}]${style}`;

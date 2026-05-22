@@ -13,7 +13,13 @@
  */
 
 import typed, { create } from 'typed-function';
-import type { TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToSelf } from 'typed-function';
+import type {
+  TypedFunction,
+  TypedInstance,
+  SignatureFunction,
+  ReferTo,
+  ReferToSelf,
+} from 'typed-function';
 
 // WASM initialization state
 let wasmInitialized = false;
@@ -85,20 +91,15 @@ export interface ConversionDef {
 // Primitive Type Test Functions
 // =============================================================================
 
-export const isNumber = (x: unknown): x is number =>
-  typeof x === 'number';
+export const isNumber = (x: unknown): x is number => typeof x === 'number';
 
-export const isBoolean = (x: unknown): x is boolean =>
-  typeof x === 'boolean';
+export const isBoolean = (x: unknown): x is boolean => typeof x === 'boolean';
 
-export const isString = (x: unknown): x is string =>
-  typeof x === 'string';
+export const isString = (x: unknown): x is string => typeof x === 'string';
 
-export const isBigInt = (x: unknown): x is bigint =>
-  typeof x === 'bigint';
+export const isBigInt = (x: unknown): x is bigint => typeof x === 'bigint';
 
-export const isArray = (x: unknown): x is unknown[] =>
-  Array.isArray(x);
+export const isArray = (x: unknown): x is unknown[] => Array.isArray(x);
 
 export const isFunction = (x: unknown): x is (...args: unknown[]) => unknown =>
   typeof x === 'function';
@@ -106,30 +107,23 @@ export const isFunction = (x: unknown): x is (...args: unknown[]) => unknown =>
 export const isObject = (x: unknown): x is object =>
   typeof x === 'object' && x !== null && !Array.isArray(x);
 
-export const isNull = (x: unknown): x is null =>
-  x === null;
+export const isNull = (x: unknown): x is null => x === null;
 
-export const isUndefined = (x: unknown): x is undefined =>
-  x === undefined;
+export const isUndefined = (x: unknown): x is undefined => x === undefined;
 
 // =============================================================================
 // TypedArray Test Functions
 // =============================================================================
 
-export const isFloat64Array = (x: unknown): x is Float64Array =>
-  x instanceof Float64Array;
+export const isFloat64Array = (x: unknown): x is Float64Array => x instanceof Float64Array;
 
-export const isFloat32Array = (x: unknown): x is Float32Array =>
-  x instanceof Float32Array;
+export const isFloat32Array = (x: unknown): x is Float32Array => x instanceof Float32Array;
 
-export const isInt32Array = (x: unknown): x is Int32Array =>
-  x instanceof Int32Array;
+export const isInt32Array = (x: unknown): x is Int32Array => x instanceof Int32Array;
 
-export const isUint32Array = (x: unknown): x is Uint32Array =>
-  x instanceof Uint32Array;
+export const isUint32Array = (x: unknown): x is Uint32Array => x instanceof Uint32Array;
 
-export const isUint8Array = (x: unknown): x is Uint8Array =>
-  x instanceof Uint8Array;
+export const isUint8Array = (x: unknown): x is Uint8Array => x instanceof Uint8Array;
 
 // =============================================================================
 // MathTS Type Test Functions (using actual class implementations)
@@ -138,26 +132,27 @@ export const isUint8Array = (x: unknown): x is Uint8Array =>
 /**
  * Check if value is a Complex number
  */
-export const isComplex = (x: unknown): x is Complex =>
-  _isComplex(x);
+export const isComplex = (x: unknown): x is Complex => _isComplex(x);
 
 /**
  * Check if value is a Fraction
  */
-export const isFraction = (x: unknown): x is Fraction =>
-  _isFraction(x);
+export const isFraction = (x: unknown): x is Fraction => _isFraction(x);
 
 /**
  * Check if value is a BigNumber
  */
-export const isBigNumber = (x: unknown): x is BigNumber =>
-  _isBigNumber(x);
+export const isBigNumber = (x: unknown): x is BigNumber => _isBigNumber(x);
 
 /**
  * Check if value is a Matrix (duck typing until Matrix class is implemented)
  */
 export const isMatrix = (x: unknown): boolean =>
-  isObject(x) && 'rows' in x && 'cols' in x && 'get' in x && typeof (x as { type?: string }).type === 'string';
+  isObject(x) &&
+  'rows' in x &&
+  'cols' in x &&
+  'get' in x &&
+  typeof (x as { type?: string }).type === 'string';
 
 /**
  * Check if value is a DenseMatrix
@@ -501,11 +496,7 @@ export class TypeRegistry {
   /**
    * Register a type conversion
    */
-  registerConversion<From, To>(
-    from: string,
-    to: string,
-    convert: (value: From) => To
-  ): this {
+  registerConversion<From, To>(from: string, to: string, convert: (value: From) => To): this {
     const key = `${from}->${to}`;
     this.conversions.set(key, {
       from,

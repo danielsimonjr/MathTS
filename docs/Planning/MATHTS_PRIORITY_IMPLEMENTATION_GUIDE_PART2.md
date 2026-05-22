@@ -8,17 +8,14 @@
 // src/symbolic/pattern/builder.ts (continued)
 
 // Constrained pattern variables
-export const _number = (name: string) => _(name, e => e instanceof NumberLiteral);
-export const _symbol = (name: string) => _(name, e => e instanceof SymbolNode);
-export const _positive = (name: string) => _(name, e => 
-  e instanceof NumberLiteral && e.evaluate({}) > 0
-);
-export const _integer = (name: string) => _(name, e => 
-  e instanceof NumberLiteral && e.isInteger()
-);
-export const _nonzero = (name: string) => _(name, e => 
-  !(e instanceof NumberLiteral && e.isZero())
-);
+export const _number = (name: string) => _(name, (e) => e instanceof NumberLiteral);
+export const _symbol = (name: string) => _(name, (e) => e instanceof SymbolNode);
+export const _positive = (name: string) =>
+  _(name, (e) => e instanceof NumberLiteral && e.evaluate({}) > 0);
+export const _integer = (name: string) =>
+  _(name, (e) => e instanceof NumberLiteral && e.isInteger());
+export const _nonzero = (name: string) =>
+  _(name, (e) => !(e instanceof NumberLiteral && e.isZero()));
 
 // Literal patterns
 export function lit(value: number | Expression): LiteralPattern {
@@ -66,98 +63,83 @@ export class CurvatureTensors {
   private metric: MetricTensor;
   private christoffel: Tensor;
   private simplifier: SimplificationEngine;
-  
+
   private _riemann?: Tensor;
   private _ricci?: Tensor;
   private _ricciScalar?: Expression;
   private _einstein?: Tensor;
   private _weyl?: Tensor;
-  
+
   constructor(metric: MetricTensor) {
     this.metric = metric;
     this.christoffel = metric.christoffelSecond();
     this.simplifier = SimplificationEngine.full();
   }
-  
+
   /**
    * Riemann curvature tensor
    * R^ρ_{σμν} = ∂_μ Γ^ρ_{νσ} - ∂_ν Γ^ρ_{μσ} + Γ^ρ_{μλ}Γ^λ_{νσ} - Γ^ρ_{νλ}Γ^λ_{μσ}
    */
   riemann(): Tensor {
     if (this._riemann) return this._riemann;
-    
+
     const n = this.metric.dimension;
     const coords = this.metric.coordinates;
     const Gamma = this.christoffel;
     const components = NDArray.create<Expression>([n, n, n, n], ZERO);
-    
+
     for (let rho = 0; rho < n; rho++) {
       for (let sigma = 0; sigma < n; sigma++) {
         for (let mu = 0; mu < n; mu++) {
           for (let nu = 0; nu < n; nu++) {
             // ∂_μ Γ^ρ_{νσ}
-            const term1 = differentiate(
-              Gamma.at(rho, nu, sigma),
-              coords[mu]
-            );
-            
+            const term1 = differentiate(Gamma.at(rho, nu, sigma), coords[mu]);
+
             // -∂_ν Γ^ρ_{μσ}
             const term2 = MultiplyNode.create(
               NEG_ONE,
               differentiate(Gamma.at(rho, mu, sigma), coords[nu])
             );
-            
+
             // Γ^ρ_{μλ}Γ^λ_{νσ} - Γ^ρ_{νλ}Γ^λ_{μσ}
             let term3: Expression = ZERO;
             let term4: Expression = ZERO;
-            
+
             for (let lambda = 0; lambda < n; lambda++) {
               term3 = AddNode.create(
                 term3,
-                MultiplyNode.create(
-                  Gamma.at(rho, mu, lambda),
-                  Gamma.at(lambda, nu, sigma)
-                )
+                MultiplyNode.create(Gamma.at(rho, mu, lambda), Gamma.at(lambda, nu, sigma))
               );
-              
+
               term4 = AddNode.create(
                 term4,
-                MultiplyNode.create(
-                  Gamma.at(rho, nu, lambda),
-                  Gamma.at(lambda, mu, sigma)
-                )
+                MultiplyNode.create(Gamma.at(rho, nu, lambda), Gamma.at(lambda, mu, sigma))
               );
             }
-            
-            const result = AddNode.create(
-              term1, term2, term3,
-              MultiplyNode.create(NEG_ONE, term4)
-            );
-            
-            components.set(
-              [rho, sigma, mu, nu],
-              this.simplifier.simplify(result)
-            );
+
+            const result = AddNode.create(term1, term2, term3, MultiplyNode.create(NEG_ONE, term4));
+
+            components.set([rho, sigma, mu, nu], this.simplifier.simplify(result));
           }
         }
       }
     }
-    
+
     this._riemann = new Tensor(components, '^ρ_σμν');
     return this._riemann;
   }
-  
+
   /**
    * Ricci tensor
    * R_{μν} = R^ρ_{μρν}
    */
   ricci(): Tensor {
     if (this._ricci) return this._ricci;
-    
+
     const n = this.metric.dimension;
     const R = this.riemann();
     const components = NDArray.create<Expression>([n, n], ZERO);
-    
+
     for (let mu = 0; mu < n; mu++) {
       for (let nu = 0; nu < n; nu++) {
         // Contract: R^ρ_{μρν}
@@ -168,68 +150,61 @@ export class CurvatureTensors {
         components.set([mu, nu], this.simplifier.simplify(sum));
       }
     }
-    
+
     this._ricci = new Tensor(components, 'μν');
     return this._ricci;
   }
-  
+
   /**
    * Ricci scalar
    * R = g^{μν} R_{μν}
    */
   ricciScalar(): Expression {
     if (this._ricciScalar) return this._ricciScalar;
-    
+
     const n = this.metric.dimension;
     const gInv = this.metric.inverse();
     const Ric = this.ricci();
-    
+
     let sum: Expression = ZERO;
     for (let mu = 0; mu < n; mu++) {
       for (let nu = 0; nu < n; nu++) {
-        sum = AddNode.create(
-          sum,
-          MultiplyNode.create(gInv.at(mu, nu), Ric.at(mu, nu))
-        );
+        sum = AddNode.create(sum, MultiplyNode.create(gInv.at(mu, nu), Ric.at(mu, nu)));
       }
     }
-    
+
     this._ricciScalar = this.simplifier.simplify(sum);
     return this._ricciScalar;
   }
-  
+
   /**
    * Einstein tensor
    * G_{μν} = R_{μν} - (1/2) g_{μν} R
    */
   einstein(): Tensor {
     if (this._einstein) return this._einstein;
-    
+
     const n = this.metric.dimension;
     const Ric = this.ricci();
     const R = this.ricciScalar();
     const g = this.metric;
     const components = NDArray.create<Expression>([n, n], ZERO);
-    
+
     for (let mu = 0; mu < n; mu++) {
       for (let nu = 0; nu < n; nu++) {
         // G_{μν} = R_{μν} - (1/2) g_{μν} R
         const result = AddNode.create(
           Ric.at(mu, nu),
-          MultiplyNode.create(
-            new NumberLiteral(new Fraction(-1, 2), true),
-            g.at(mu, nu),
-            R
-          )
+          MultiplyNode.create(new NumberLiteral(new Fraction(-1, 2), true), g.at(mu, nu), R)
         );
         components.set([mu, nu], this.simplifier.simplify(result));
       }
     }
-    
+
     this._einstein = new Tensor(components, 'μν');
     return this._einstein;
   }
-  
+
   /**
    * Weyl (conformal) tensor
    * For n=4:
@@ -238,29 +213,29 @@ export class CurvatureTensors {
    */
   weyl(): Tensor {
     if (this._weyl) return this._weyl;
-    
+
     const n = this.metric.dimension;
     if (n < 3) {
       throw new Error('Weyl tensor requires dimension ≥ 3');
     }
-    
+
     const R_tensor = this.riemannDown(); // R_{ρσμν}
     const Ric = this.ricci();
     const R = this.ricciScalar();
     const g = this.metric;
-    
+
     const factor1 = new NumberLiteral(new Fraction(1, n - 2), true);
     const factor2 = new NumberLiteral(new Fraction(1, (n - 1) * (n - 2)), true);
-    
+
     const components = NDArray.create<Expression>([n, n, n, n], ZERO);
-    
+
     for (let rho = 0; rho < n; rho++) {
       for (let sigma = 0; sigma < n; sigma++) {
         for (let mu = 0; mu < n; mu++) {
           for (let nu = 0; nu < n; nu++) {
             // First term: R_{ρσμν}
             let result = R_tensor.at(rho, sigma, mu, nu);
-            
+
             // Second term (Ricci contributions)
             const ricci_term = AddNode.create(
               MultiplyNode.create(g.at(rho, mu), Ric.at(sigma, nu)),
@@ -268,48 +243,39 @@ export class CurvatureTensors {
               MultiplyNode.create(NEG_ONE, g.at(sigma, mu), Ric.at(rho, nu)),
               MultiplyNode.create(g.at(sigma, nu), Ric.at(rho, mu))
             );
-            
-            result = AddNode.create(
-              result,
-              MultiplyNode.create(NEG_ONE, factor1, ricci_term)
-            );
-            
+
+            result = AddNode.create(result, MultiplyNode.create(NEG_ONE, factor1, ricci_term));
+
             // Third term (scalar curvature contribution)
             const metric_term = AddNode.create(
               MultiplyNode.create(g.at(rho, mu), g.at(sigma, nu)),
               MultiplyNode.create(NEG_ONE, g.at(rho, nu), g.at(sigma, mu))
             );
-            
-            result = AddNode.create(
-              result,
-              MultiplyNode.create(factor2, R, metric_term)
-            );
-            
-            components.set(
-              [rho, sigma, mu, nu],
-              this.simplifier.simplify(result)
-            );
+
+            result = AddNode.create(result, MultiplyNode.create(factor2, R, metric_term));
+
+            components.set([rho, sigma, mu, nu], this.simplifier.simplify(result));
           }
         }
       }
     }
-    
+
     this._weyl = new Tensor(components, 'ρσμν');
     return this._weyl;
   }
-  
+
   /**
    * Kretschmann scalar
    * K = R^{αβγδ} R_{αβγδ}
    */
   kretschmann(): Expression {
     const n = this.metric.dimension;
-    const R_up = this.riemann();      // R^ρ_{σμν}
+    const R_up = this.riemann(); // R^ρ_{σμν}
     const R_down = this.riemannDown(); // R_{ρσμν}
     const gInv = this.metric.inverse();
-    
+
     let sum: Expression = ZERO;
-    
+
     // K = g^{ρα} g^{σβ} g^{μγ} g^{νδ} R_{ρσμν} R_{αβγδ}
     // This is computationally expensive!
     for (let rho = 0; rho < n; rho++) {
@@ -337,10 +303,10 @@ export class CurvatureTensors {
         }
       }
     }
-    
+
     return this.simplifier.simplify(sum);
   }
-  
+
   /**
    * Riemann tensor with all indices down
    * R_{ρσμν} = g_{ρλ} R^λ_{σμν}
@@ -350,7 +316,7 @@ export class CurvatureTensors {
     const R_up = this.riemann();
     const g = this.metric;
     const components = NDArray.create<Expression>([n, n, n, n], ZERO);
-    
+
     for (let rho = 0; rho < n; rho++) {
       for (let sigma = 0; sigma < n; sigma++) {
         for (let mu = 0; mu < n; mu++) {
@@ -359,21 +325,15 @@ export class CurvatureTensors {
             for (let lambda = 0; lambda < n; lambda++) {
               sum = AddNode.create(
                 sum,
-                MultiplyNode.create(
-                  g.at(rho, lambda),
-                  R_up.at(lambda, sigma, mu, nu)
-                )
+                MultiplyNode.create(g.at(rho, lambda), R_up.at(lambda, sigma, mu, nu))
               );
             }
-            components.set(
-              [rho, sigma, mu, nu],
-              this.simplifier.simplify(sum)
-            );
+            components.set([rho, sigma, mu, nu], this.simplifier.simplify(sum));
           }
         }
       }
     }
-    
+
     return new Tensor(components, 'ρσμν');
   }
 }
@@ -393,13 +353,13 @@ export class CovariantDerivative {
   private metric: MetricTensor;
   private christoffel: Tensor;
   private simplifier: SimplificationEngine;
-  
+
   constructor(metric: MetricTensor) {
     this.metric = metric;
     this.christoffel = metric.christoffelSecond();
     this.simplifier = SimplificationEngine.algebraic();
   }
-  
+
   /**
    * Covariant derivative of a scalar field
    * ∇_μ φ = ∂_μ φ
@@ -408,34 +368,31 @@ export class CovariantDerivative {
     const n = this.metric.dimension;
     const coords = this.metric.coordinates;
     const components: Expression[] = [];
-    
+
     for (let mu = 0; mu < n; mu++) {
       components.push(differentiate(scalar, coords[mu]));
     }
-    
-    return new Tensor(
-      NDArray.from1D(components),
-      [{ name: indexName, position: 'down' }]
-    );
+
+    return new Tensor(NDArray.from1D(components), [{ name: indexName, position: 'down' }]);
   }
-  
+
   /**
    * Covariant derivative of a contravariant vector
    * ∇_μ V^ν = ∂_μ V^ν + Γ^ν_{μρ} V^ρ
    */
   ofContravariantVector(vector: Tensor, indexName: string = 'μ'): Tensor {
     this.validateRank(vector, [1, 0]);
-    
+
     const n = this.metric.dimension;
     const coords = this.metric.coordinates;
     const Gamma = this.christoffel;
     const components = NDArray.create<Expression>([n, n], ZERO);
-    
+
     for (let mu = 0; mu < n; mu++) {
       for (let nu = 0; nu < n; nu++) {
         // ∂_μ V^ν
         let result = differentiate(vector.at(nu), coords[mu]);
-        
+
         // + Γ^ν_{μρ} V^ρ
         for (let rho = 0; rho < n; rho++) {
           result = AddNode.create(
@@ -443,51 +400,47 @@ export class CovariantDerivative {
             MultiplyNode.create(Gamma.at(nu, mu, rho), vector.at(rho))
           );
         }
-        
+
         components.set([mu, nu], this.simplifier.simplify(result));
       }
     }
-    
+
     // Index structure: ∇_μ V^ν has indices (down, up)
     return new Tensor(components, `_${indexName}^${vector.indices[0].name}`);
   }
-  
+
   /**
    * Covariant derivative of a covariant vector
    * ∇_μ V_ν = ∂_μ V_ν - Γ^ρ_{μν} V_ρ
    */
   ofCovariantVector(vector: Tensor, indexName: string = 'μ'): Tensor {
     this.validateRank(vector, [0, 1]);
-    
+
     const n = this.metric.dimension;
     const coords = this.metric.coordinates;
     const Gamma = this.christoffel;
     const components = NDArray.create<Expression>([n, n], ZERO);
-    
+
     for (let mu = 0; mu < n; mu++) {
       for (let nu = 0; nu < n; nu++) {
         // ∂_μ V_ν
         let result = differentiate(vector.at(nu), coords[mu]);
-        
+
         // - Γ^ρ_{μν} V_ρ
         for (let rho = 0; rho < n; rho++) {
           result = AddNode.create(
             result,
-            MultiplyNode.create(
-              NEG_ONE,
-              Gamma.at(rho, mu, nu),
-              vector.at(rho)
-            )
+            MultiplyNode.create(NEG_ONE, Gamma.at(rho, mu, nu), vector.at(rho))
           );
         }
-        
+
         components.set([mu, nu], this.simplifier.simplify(result));
       }
     }
-    
+
     return new Tensor(components, `_${indexName}_${vector.indices[0].name}`);
   }
-  
+
   /**
    * Covariant derivative of a general tensor
    * Adds Γ term for each contravariant index
@@ -498,35 +451,32 @@ export class CovariantDerivative {
     const coords = this.metric.coordinates;
     const Gamma = this.christoffel;
     const totalRank = tensor.totalRank;
-    
+
     // New shape: add one dimension for derivative index
     const newShape = [n, ...Array(totalRank).fill(n)];
     const components = NDArray.create<Expression>(newShape, ZERO);
-    
+
     // Iterate over all index combinations
     const tensorIterator = new MultiIndexIterator(Array(totalRank).fill(n));
-    
+
     for (let mu = 0; mu < n; mu++) {
       for (const tensorIdx of tensorIterator) {
         // Start with partial derivative
         let result = differentiate(tensor.at(...tensorIdx), coords[mu]);
-        
+
         // Add/subtract Christoffel terms for each index
         for (let i = 0; i < totalRank; i++) {
           const idx = tensor.indices[i];
-          
+
           if (idx.position === 'up') {
             // Contravariant: + Γ^{idx}_{μρ} T^{...ρ...}
             for (let rho = 0; rho < n; rho++) {
               const newTensorIdx = [...tensorIdx];
               newTensorIdx[i] = rho;
-              
+
               result = AddNode.create(
                 result,
-                MultiplyNode.create(
-                  Gamma.at(tensorIdx[i], mu, rho),
-                  tensor.at(...newTensorIdx)
-                )
+                MultiplyNode.create(Gamma.at(tensorIdx[i], mu, rho), tensor.at(...newTensorIdx))
               );
             }
           } else {
@@ -534,7 +484,7 @@ export class CovariantDerivative {
             for (let rho = 0; rho < n; rho++) {
               const newTensorIdx = [...tensorIdx];
               newTensorIdx[i] = rho;
-              
+
               result = AddNode.create(
                 result,
                 MultiplyNode.create(
@@ -546,60 +496,54 @@ export class CovariantDerivative {
             }
           }
         }
-        
+
         components.set([mu, ...tensorIdx], this.simplifier.simplify(result));
       }
     }
-    
+
     // Build new index structure
-    const newIndices: TensorIndex[] = [
-      { name: indexName, position: 'down' },
-      ...tensor.indices
-    ];
-    
+    const newIndices: TensorIndex[] = [{ name: indexName, position: 'down' }, ...tensor.indices];
+
     return new Tensor(components, newIndices);
   }
-  
+
   /**
    * Lie derivative along a vector field
    * L_X T = X^μ ∇_μ T + (correction terms based on tensor type)
    */
   lie(tensor: Tensor, vectorField: Tensor): Tensor {
     this.validateRank(vectorField, [1, 0]);
-    
+
     const n = this.metric.dimension;
     const coords = this.metric.coordinates;
     const [upRank, downRank] = tensor.rank;
     const totalRank = tensor.totalRank;
-    
+
     const newShape = Array(totalRank).fill(n);
     const components = NDArray.create<Expression>(newShape, ZERO);
-    
+
     const iterator = new MultiIndexIterator(newShape);
-    
+
     for (const idx of iterator) {
       // First term: X^μ ∂_μ T
       let result: Expression = ZERO;
       for (let mu = 0; mu < n; mu++) {
         result = AddNode.create(
           result,
-          MultiplyNode.create(
-            vectorField.at(mu),
-            differentiate(tensor.at(...idx), coords[mu])
-          )
+          MultiplyNode.create(vectorField.at(mu), differentiate(tensor.at(...idx), coords[mu]))
         );
       }
-      
+
       // Correction terms for each index
       for (let i = 0; i < totalRank; i++) {
         const tensorIdx = tensor.indices[i];
-        
+
         if (tensorIdx.position === 'up') {
           // Contravariant: - (∂_ρ X^{idx}) T^{...ρ...}
           for (let rho = 0; rho < n; rho++) {
             const newIdx = [...idx];
             newIdx[i] = rho;
-            
+
             result = AddNode.create(
               result,
               MultiplyNode.create(
@@ -614,7 +558,7 @@ export class CovariantDerivative {
           for (let rho = 0; rho < n; rho++) {
             const newIdx = [...idx];
             newIdx[i] = rho;
-            
+
             result = AddNode.create(
               result,
               MultiplyNode.create(
@@ -625,13 +569,13 @@ export class CovariantDerivative {
           }
         }
       }
-      
+
       components.set(idx, this.simplifier.simplify(result));
     }
-    
+
     return new Tensor(components, tensor.indices);
   }
-  
+
   private validateRank(tensor: Tensor, expected: [number, number]): void {
     const [up, down] = tensor.rank;
     if (up !== expected[0] || down !== expected[1]) {
@@ -656,12 +600,12 @@ export class CovariantDerivative {
 export class GeodesicSolver {
   private metric: MetricTensor;
   private christoffel: Tensor;
-  
+
   constructor(metric: MetricTensor) {
     this.metric = metric;
     this.christoffel = metric.christoffelSecond();
   }
-  
+
   /**
    * Generate the geodesic equation symbolically
    * d²x^μ/dτ² + Γ^μ_{αβ} (dx^α/dτ)(dx^β/dτ) = 0
@@ -671,48 +615,41 @@ export class GeodesicSolver {
     const coords = this.metric.coordinates;
     const Gamma = this.christoffel;
     const tau = symbol('τ');
-    
+
     const equations: DifferentialEquation[] = [];
-    
+
     for (let mu = 0; mu < n; mu++) {
       const x_mu = coords[mu];
-      
+
       // d²x^μ/dτ²
-      const acceleration = new DerivativeNode(
-        new DerivativeNode(x_mu, tau),
-        tau
-      );
-      
+      const acceleration = new DerivativeNode(new DerivativeNode(x_mu, tau), tau);
+
       // Γ^μ_{αβ} (dx^α/dτ)(dx^β/dτ)
       let christoffelTerm: Expression = ZERO;
-      
+
       for (let alpha = 0; alpha < n; alpha++) {
         for (let beta = 0; beta < n; beta++) {
           const velocity_alpha = new DerivativeNode(coords[alpha], tau);
           const velocity_beta = new DerivativeNode(coords[beta], tau);
-          
+
           christoffelTerm = AddNode.create(
             christoffelTerm,
-            MultiplyNode.create(
-              Gamma.at(mu, alpha, beta),
-              velocity_alpha,
-              velocity_beta
-            )
+            MultiplyNode.create(Gamma.at(mu, alpha, beta), velocity_alpha, velocity_beta)
           );
         }
       }
-      
+
       // Full equation: d²x^μ/dτ² + Christoffel term = 0
       equations.push({
         lhs: AddNode.create(acceleration, christoffelTerm),
         rhs: ZERO,
-        type: 'second-order-ode'
+        type: 'second-order-ode',
       });
     }
-    
+
     return equations;
   }
-  
+
   /**
    * Solve geodesic numerically
    */
@@ -725,35 +662,35 @@ export class GeodesicSolver {
     const n = this.metric.dimension;
     const steps = options?.steps ?? 1000;
     const dtau = (tauRange[1] - tauRange[0]) / steps;
-    
+
     // State vector: [x^0, x^1, ..., x^{n-1}, v^0, v^1, ..., v^{n-1}]
     let state = [...initialPosition, ...initialVelocity];
-    
+
     const trajectory: number[][] = [initialPosition.slice()];
     const velocities: number[][] = [initialVelocity.slice()];
     const properTimes: number[] = [tauRange[0]];
-    
+
     // RK4 integration
     for (let i = 0; i < steps; i++) {
       const tau = tauRange[0] + i * dtau;
       state = this.rk4Step(state, tau, dtau);
-      
+
       const position = state.slice(0, n);
       const velocity = state.slice(n);
-      
+
       trajectory.push(position.slice());
       velocities.push(velocity.slice());
       properTimes.push(tau + dtau);
     }
-    
+
     return {
       trajectory,
       velocities,
       properTimes,
-      metric: this.metric
+      metric: this.metric,
     };
   }
-  
+
   /**
    * RK4 integration step for geodesic equation
    */
@@ -771,21 +708,16 @@ export class GeodesicSolver {
       this.addVectors(state, this.scaleVector(k3, dtau)),
       tau + dtau
     );
-    
+
     // state + (dtau/6)(k1 + 2*k2 + 2*k3 + k4)
     const update = this.scaleVector(
-      this.addVectors(
-        k1,
-        this.scaleVector(k2, 2),
-        this.scaleVector(k3, 2),
-        k4
-      ),
+      this.addVectors(k1, this.scaleVector(k2, 2), this.scaleVector(k3, 2), k4),
       dtau / 6
     );
-    
+
     return this.addVectors(state, update);
   }
-  
+
   /**
    * Compute derivative of state for geodesic equation
    * dx^μ/dτ = v^μ
@@ -795,19 +727,19 @@ export class GeodesicSolver {
     const n = this.metric.dimension;
     const x = state.slice(0, n);
     const v = state.slice(n);
-    
+
     // Create scope for evaluating Christoffel symbols
     const scope: Scope = {};
     for (let i = 0; i < n; i++) {
       scope[this.metric.coordinates[i].name] = x[i];
     }
-    
+
     const dx = [...v]; // dx^μ/dτ = v^μ
     const dv: number[] = [];
-    
+
     for (let mu = 0; mu < n; mu++) {
       let acceleration = 0;
-      
+
       for (let alpha = 0; alpha < n; alpha++) {
         for (let beta = 0; beta < n; beta++) {
           const gamma = this.christoffel.at(mu, alpha, beta).evaluate(scope);
@@ -816,13 +748,13 @@ export class GeodesicSolver {
           }
         }
       }
-      
+
       dv.push(acceleration);
     }
-    
+
     return [...dx, ...dv];
   }
-  
+
   private addVectors(...vectors: number[][]): number[] {
     const result = new Array(vectors[0].length).fill(0);
     for (const v of vectors) {
@@ -832,9 +764,9 @@ export class GeodesicSolver {
     }
     return result;
   }
-  
+
   private scaleVector(v: number[], s: number): number[] {
-    return v.map(x => x * s);
+    return v.map((x) => x * s);
   }
 }
 
@@ -859,6 +791,7 @@ interface GeodesicSolution {
 The complete MathTS enhancement requires creating these primary modules:
 
 ### Core Symbolic (`@mathts/symbolic`)
+
 1. `types.ts` - Expression type definitions
 2. `nodes/number.ts` - Number literals
 3. `nodes/symbol.ts` - Symbolic variables
@@ -872,6 +805,7 @@ The complete MathTS enhancement requires creating these primary modules:
 11. `simplify/engine.ts` - Simplification engine
 
 ### Tensor Algebra (`@mathts/tensor`)
+
 1. `index.ts` - Index system
 2. `tensor.ts` - Base tensor class
 3. `metric.ts` - Metric tensor
@@ -880,6 +814,7 @@ The complete MathTS enhancement requires creating these primary modules:
 6. `geodesic.ts` - Geodesic solver
 
 ### Calculus (`@mathts/calculus`)
+
 1. `differentiate.ts` - Symbolic differentiation
 2. `integrate.ts` - Symbolic integration
 3. `series.ts` - Series expansion
@@ -887,6 +822,7 @@ The complete MathTS enhancement requires creating these primary modules:
 5. `vector.ts` - Vector calculus
 
 ### Special Functions (`@mathts/special`)
+
 1. `bessel.ts` - Bessel functions
 2. `orthogonal.ts` - Orthogonal polynomials
 3. `elliptic.ts` - Elliptic functions

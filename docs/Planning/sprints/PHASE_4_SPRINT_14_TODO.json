@@ -93,9 +93,7 @@
     "tools/benchmark/gpu/elementwise.bench.ts",
     "matrix/tests/gpu/operations.test.ts"
   ],
-  "filesModified": [
-    "matrix/src/backends/GPUBackend.ts"
-  ],
+  "filesModified": ["matrix/src/backends/GPUBackend.ts"],
   "totalEstimatedHours": 32,
   "notes": "Sprint 14 implements core GPU matrix operations in WGSL. The tiled matmul is critical for achieving high performance on large matrices.",
   "completedAt": "2025-12-12"

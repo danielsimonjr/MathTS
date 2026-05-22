@@ -1,7 +1,9 @@
 ## Description
+
 Brief description of changes.
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change fixing an issue)
 - [ ] New feature (non-breaking change adding functionality)
 - [ ] Breaking change (fix or feature causing existing functionality to change)
@@ -10,9 +12,11 @@ Brief description of changes.
 - [ ] Code refactoring
 
 ## Related Issues
+
 Fixes #(issue number)
 
 ## Checklist
+
 - [ ] My code follows the project's style guidelines
 - [ ] I have performed a self-review of my code
 - [ ] I have added tests that prove my fix/feature works
@@ -21,6 +25,7 @@ Fixes #(issue number)
 - [ ] My changes generate no new warnings
 
 ## Testing
+
 Describe how you tested these changes.
 
 ## Screenshots (if applicable)

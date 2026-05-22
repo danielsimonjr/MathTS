@@ -65,14 +65,14 @@ if (result.success && result.workbook) {
 ## Workbook Format (.mtsw)
 
 ```yaml
-version: "1.0"
+version: '1.0'
 metadata:
-  title: "Matrix Analysis"
-  author: "Your Name"
+  title: 'Matrix Analysis'
+  author: 'Your Name'
 
 runtime:
   engine: mathts
-  execution: reactive  # reactive | sequential | manual
+  execution: reactive # reactive | sequential | manual
 
 cells:
   - markdown: |
@@ -95,16 +95,16 @@ cells:
 
 ## Cell Types
 
-| Type | Description |
-|------|-------------|
-| `markdown` | Documentation with LaTeX math |
-| `code` | TypeScript/JavaScript execution |
-| `tensor` | Einstein notation for tensor math |
-| `equation` | LaTeX equations with labels |
-| `visualization` | Three.js/D3/Plotly rendering |
-| `data` | YAML/JSON/CSV data |
-| `test` | Assertions with timeout |
-| `export` | Publication output |
+| Type            | Description                       |
+| --------------- | --------------------------------- |
+| `markdown`      | Documentation with LaTeX math     |
+| `code`          | TypeScript/JavaScript execution   |
+| `tensor`        | Einstein notation for tensor math |
+| `equation`      | LaTeX equations with labels       |
+| `visualization` | Three.js/D3/Plotly rendering      |
+| `data`          | YAML/JSON/CSV data                |
+| `test`          | Assertions with timeout           |
+| `export`        | Publication output                |
 
 ## Execution Modes
 

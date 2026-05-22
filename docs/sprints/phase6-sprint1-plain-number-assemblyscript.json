@@ -16,10 +16,7 @@
       "status": "completed",
       "wasmPriority": "Very High",
       "complexity": "Low",
-      "files": [
-        "src/plain/number/arithmetic.js",
-        "src/wasm/plain/arithmetic.ts"
-      ]
+      "files": ["src/plain/number/arithmetic.js", "src/wasm/plain/arithmetic.ts"]
     },
     {
       "id": "6.1.2",
@@ -49,10 +46,7 @@
       "status": "completed",
       "wasmPriority": "Very High",
       "complexity": "Medium",
-      "files": [
-        "src/plain/number/trigonometry.js",
-        "src/wasm/plain/trigonometry.ts"
-      ]
+      "files": ["src/plain/number/trigonometry.js", "src/wasm/plain/trigonometry.ts"]
     },
     {
       "id": "6.1.5",

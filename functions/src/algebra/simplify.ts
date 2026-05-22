@@ -1,14 +1,14 @@
-import { isParenthesisNode } from '../utils/is.js'
+import { isParenthesisNode } from '../utils/is.js';
 import {
   isConstantNode,
   isVariableNode,
   isNumericNode,
-  isConstantExpression
-} from './simplify/wildcards.js'
-import { factory } from '../utils/factory.js'
-import { createUtil } from './simplify/util.js'
-import { hasOwnProperty } from '../utils/object.js'
-import { createEmptyMap, createMap } from '../utils/map.js'
+  isConstantExpression,
+} from './simplify/wildcards.js';
+import { factory } from '../utils/factory.js';
+import { createUtil } from './simplify/util.js';
+import { hasOwnProperty } from '../utils/object.js';
+import { createEmptyMap, createMap } from '../utils/map.js';
 import type {
   MathNode,
   SymbolNode,
@@ -18,67 +18,67 @@ import type {
   ArrayNode,
   AccessorNode,
   IndexNode,
-  ObjectNode
-} from '../utils/node.js'
-import type { TypedFunction } from '../core/function/typed.js'
+  ObjectNode,
+} from '../utils/node.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for simplify
 interface AccessorNodeConstructor {
-  new (object: MathNode, index: IndexNode): MathNode
+  new (object: MathNode, index: IndexNode): MathNode;
 }
 
 interface ArrayNodeConstructor {
-  new (items: MathNode[]): MathNode
+  new (items: MathNode[]): MathNode;
 }
 
 interface ConstantNodeConstructor {
-  new (value: unknown): MathNode
+  new (value: unknown): MathNode;
 }
 
 interface FunctionNodeConstructor {
-  new (name: string, args: MathNode[]): MathNode
+  new (name: string, args: MathNode[]): MathNode;
 }
 
 interface IndexNodeConstructor {
-  new (dimensions: MathNode[]): MathNode
+  new (dimensions: MathNode[]): MathNode;
 }
 
 interface ObjectNodeConstructor {
-  new (properties: Record<string, MathNode>): MathNode
+  new (properties: Record<string, MathNode>): MathNode;
 }
 
 interface OperatorNodeConstructor {
-  new (op: string, fn: string, args: MathNode[]): MathNode
+  new (op: string, fn: string, args: MathNode[]): MathNode;
 }
 
 interface ParenthesisNodeConstructor {
-  new (content: MathNode): MathNode
+  new (content: MathNode): MathNode;
 }
 
 interface SymbolNodeConstructor {
-  new (name: string): SymbolNode
+  new (name: string): SymbolNode;
 }
 
 interface SimplifyDependencies {
-  typed: TypedFunction
-  parse: (expr: string) => MathNode
-  equal: (a: unknown, b: unknown) => boolean
-  resolve: (node: MathNode, scope?: Map<string, unknown> | null) => MathNode
-  simplifyConstant: (node: MathNode, options?: SimplifyOptions) => MathNode
-  simplifyCore: (node: MathNode, options?: SimplifyOptions) => MathNode
-  AccessorNode: AccessorNodeConstructor
-  ArrayNode: ArrayNodeConstructor
-  ConstantNode: ConstantNodeConstructor
-  FunctionNode: FunctionNodeConstructor
-  IndexNode: IndexNodeConstructor
-  ObjectNode: ObjectNodeConstructor
-  OperatorNode: OperatorNodeConstructor
-  ParenthesisNode: ParenthesisNodeConstructor
-  SymbolNode: SymbolNodeConstructor
-  replacer: (key: string, value: unknown) => unknown
+  typed: TypedFunction;
+  parse: (expr: string) => MathNode;
+  equal: (a: unknown, b: unknown) => boolean;
+  resolve: (node: MathNode, scope?: Map<string, unknown> | null) => MathNode;
+  simplifyConstant: (node: MathNode, options?: SimplifyOptions) => MathNode;
+  simplifyCore: (node: MathNode, options?: SimplifyOptions) => MathNode;
+  AccessorNode: AccessorNodeConstructor;
+  ArrayNode: ArrayNodeConstructor;
+  ConstantNode: ConstantNodeConstructor;
+  FunctionNode: FunctionNodeConstructor;
+  IndexNode: IndexNodeConstructor;
+  ObjectNode: ObjectNodeConstructor;
+  OperatorNode: OperatorNodeConstructor;
+  ParenthesisNode: ParenthesisNodeConstructor;
+  SymbolNode: SymbolNodeConstructor;
+  replacer: (key: string, value: unknown) => unknown;
 }
 
-const name = 'simplify'
+const name = 'simplify';
 const dependencies = [
   'typed',
   'parse',
@@ -95,63 +95,61 @@ const dependencies = [
   'OperatorNode',
   'ParenthesisNode',
   'SymbolNode',
-  'replacer'
-]
+  'replacer',
+];
 
 type SimplifyRule =
   | string
   | {
-      s?: string
-      l?: string
-      r?: string
-      repeat?: boolean
-      assuming?: Record<string, Record<string, boolean>>
-      imposeContext?: Record<string, Record<string, boolean>>
-      evaluate?: unknown
-      expanded?: unknown
-      expandedNC1?: unknown
-      expandedNC2?: unknown
+      s?: string;
+      l?: string;
+      r?: string;
+      repeat?: boolean;
+      assuming?: Record<string, Record<string, boolean>>;
+      imposeContext?: Record<string, Record<string, boolean>>;
+      evaluate?: unknown;
+      expanded?: unknown;
+      expandedNC1?: unknown;
+      expandedNC2?: unknown;
     }
-  | ((node: MathNode, options?: SimplifyOptions) => MathNode)
+  | ((node: MathNode, options?: SimplifyOptions) => MathNode);
 
 type SimplifyOptions = {
-  consoleDebug?: boolean
-  context?: SimplifyContext
-  exactFractions?: boolean
-  fractionsLimit?: number
-}
+  consoleDebug?: boolean;
+  context?: SimplifyContext;
+  exactFractions?: boolean;
+  fractionsLimit?: number;
+};
 
-type SimplifyContext = Record<string, Record<string, boolean>>
+type SimplifyContext = Record<string, Record<string, boolean>>;
 
 // Canonical rule after parsing
 interface CanonicalRule {
-  l: MathNode
-  r: MathNode
-  repeat?: boolean
-  assuming?: Record<string, Record<string, boolean>>
-  imposeContext?: Record<string, Record<string, boolean>>
-  evaluate?: MathNode
+  l: MathNode;
+  r: MathNode;
+  repeat?: boolean;
+  assuming?: Record<string, Record<string, boolean>>;
+  imposeContext?: Record<string, Record<string, boolean>>;
+  evaluate?: MathNode;
   expanded?: {
-    l: MathNode
-    r: MathNode
-  }
+    l: MathNode;
+    r: MathNode;
+  };
   expandedNC1?: {
-    l: MathNode
-    r: MathNode
-  }
+    l: MathNode;
+    r: MathNode;
+  };
   expandedNC2?: {
-    l: MathNode
-    r: MathNode
-  }
+    l: MathNode;
+    r: MathNode;
+  };
 }
 
-type ParsedRule =
-  | CanonicalRule
-  | ((node: MathNode, options?: SimplifyOptions) => MathNode)
+type ParsedRule = CanonicalRule | ((node: MathNode, options?: SimplifyOptions) => MathNode);
 
 // Match result with placeholders
 interface MatchResult {
-  placeholders: Record<string, MathNode>
+  placeholders: Record<string, MathNode>;
 }
 
 export const createSimplify = /* #__PURE__ */ factory(
@@ -173,7 +171,7 @@ export const createSimplify = /* #__PURE__ */ factory(
     OperatorNode,
     ParenthesisNode,
     SymbolNode,
-    replacer
+    replacer,
   }: SimplifyDependencies) => {
     const {
       hasProperty,
@@ -186,8 +184,8 @@ export const createSimplify = /* #__PURE__ */ factory(
       createMakeNodeFunction,
       defaultContext,
       realContext,
-      positiveContext
-    } = createUtil({ FunctionNode, OperatorNode, SymbolNode })
+      positiveContext,
+    } = createUtil({ FunctionNode, OperatorNode, SymbolNode });
 
     /**
      * Simplify an expression tree.
@@ -306,38 +304,32 @@ export const createSimplify = /* #__PURE__ */ factory(
     // Wrap in try-catch to handle case when both JS and TS versions are loaded
     // in the same process (they share the same typed-function singleton)
     try {
-      typed.addConversion({ from: 'Object', to: 'Map', convert: createMap })
+      typed.addConversion({ from: 'Object', to: 'Map', convert: createMap });
     } catch (e: any) {
       // Ignore "already exists" error when conversion was registered by another instance
       if (!e.message?.includes('already a conversion')) {
-        throw e
+        throw e;
       }
     }
     const simplify = typed('simplify', {
       Node: _simplify,
-      'Node, Map': (expr: MathNode, scope: Map<string, any>) =>
-        _simplify(expr, false, scope),
-      'Node, Map, Object': (
-        expr: MathNode,
-        scope: Map<string, any>,
-        options: SimplifyOptions
-      ) => _simplify(expr, false, scope, options),
+      'Node, Map': (expr: MathNode, scope: Map<string, any>) => _simplify(expr, false, scope),
+      'Node, Map, Object': (expr: MathNode, scope: Map<string, any>, options: SimplifyOptions) =>
+        _simplify(expr, false, scope, options),
       'Node, Array': _simplify,
       'Node, Array, Map': _simplify,
-      'Node, Array, Map, Object': _simplify
-    }) as any
-    ;(typed as any).removeConversion({ from: 'Object', to: 'Map', convert: createMap })
+      'Node, Array, Map, Object': _simplify,
+    }) as any;
+    (typed as any).removeConversion({ from: 'Object', to: 'Map', convert: createMap });
 
-    simplify.defaultContext = defaultContext
-    simplify.realContext = realContext
-    simplify.positiveContext = positiveContext
+    simplify.defaultContext = defaultContext;
+    simplify.realContext = realContext;
+    simplify.positiveContext = positiveContext;
 
     function removeParens(node: MathNode): MathNode {
       return node.transform(function (node: MathNode): MathNode {
-        return isParenthesisNode(node)
-          ? removeParens((node as ParenthesisNode).content)
-          : node
-      })
+        return isParenthesisNode(node) ? removeParens((node as ParenthesisNode).content) : node;
+      });
     }
 
     // All constants that are allowed in rules
@@ -356,11 +348,11 @@ export const createSimplify = /* #__PURE__ */ factory(
       pi: true,
       SQRT1_2: true,
       SQRT2: true,
-      tau: true
+      tau: true,
       // null: false,
       // undefined: false,
       // version: false,
-    }
+    };
 
     // Array of strings, used to build the ruleSet.
     // Each l (left side) and r (right side) are parsed by
@@ -387,29 +379,29 @@ export const createSimplify = /* #__PURE__ */ factory(
       // collection prefers the left, and we would rather collect nonconstants
       {
         s: 'n-n1 -> n+-n1', // temporarily replace 'subtract' so we can further flatten the 'add' operator
-        assuming: { subtract: { total: true } }
+        assuming: { subtract: { total: true } },
       },
       {
         s: 'n-n -> 0', // partial alternative when we can't always subtract
-        assuming: { subtract: { total: false } }
+        assuming: { subtract: { total: false } },
       },
       {
         s: '-(cl*v) -> v * (-cl)', // make non-constant terms positive
-        assuming: { multiply: { commutative: true }, subtract: { total: true } }
+        assuming: { multiply: { commutative: true }, subtract: { total: true } },
       },
       {
         s: '-(cl*v) -> (-cl) * v', // non-commutative version, part 1
         assuming: {
           multiply: { commutative: false },
-          subtract: { total: true }
-        }
+          subtract: { total: true },
+        },
       },
       {
         s: '-(v*cl) -> v * (-cl)', // non-commutative version, part 2
         assuming: {
           multiply: { commutative: false },
-          subtract: { total: true }
-        }
+          subtract: { total: true },
+        },
       },
       { l: '-(n1/n2)', r: '-n1/n2' },
       { l: '-v', r: 'v * (-1)' }, // finish making non-constant terms positive
@@ -418,41 +410,41 @@ export const createSimplify = /* #__PURE__ */ factory(
       { l: 'n/n1', r: 'n*n1^-1' },
       {
         s: '(n1*n2)^n3 -> n1^n3 * n2^n3',
-        assuming: { multiply: { commutative: true } }
+        assuming: { multiply: { commutative: true } },
       },
       {
         s: '(n1*n2)^(-1) -> n2^(-1) * n1^(-1)',
-        assuming: { multiply: { commutative: false } }
+        assuming: { multiply: { commutative: false } },
       },
 
       // expand nested exponentiation
       {
         s: '(n ^ n1) ^ n2 -> n ^ (n1 * n2)',
-        assuming: { divide: { total: true } } // 1/(1/n) = n needs 1/n to exist
+        assuming: { divide: { total: true } }, // 1/(1/n) = n needs 1/n to exist
       },
 
       // collect like factors; into a sum, only do this for nonconstants
       { l: ' vd   * ( vd   * n1 + n2)', r: 'vd^2       * n1 +  vd   * n2' },
       {
         s: ' vd   * (vd^n4 * n1 + n2)   ->  vd^(1+n4)  * n1 +  vd   * n2',
-        assuming: { divide: { total: true } } // v*1/v = v^(1+-1) needs 1/v
+        assuming: { divide: { total: true } }, // v*1/v = v^(1+-1) needs 1/v
       },
       {
         s: 'vd^n3 * ( vd   * n1 + n2)   ->  vd^(n3+1)  * n1 + vd^n3 * n2',
-        assuming: { divide: { total: true } }
+        assuming: { divide: { total: true } },
       },
       {
         s: 'vd^n3 * (vd^n4 * n1 + n2)   ->  vd^(n3+n4) * n1 + vd^n3 * n2',
-        assuming: { divide: { total: true } }
+        assuming: { divide: { total: true } },
       },
       { l: 'n*n', r: 'n^2' },
       {
         s: 'n * n^n1 -> n^(n1+1)',
-        assuming: { divide: { total: true } } // n*1/n = n^(-1+1) needs 1/n
+        assuming: { divide: { total: true } }, // n*1/n = n^(-1+1) needs 1/n
       },
       {
         s: 'n^n1 * n^n2 -> n^(n1+n2)',
-        assuming: { divide: { total: true } } // ditto for n^2*1/n^2
+        assuming: { divide: { total: true } }, // ditto for n^2*1/n^2
       },
 
       // Unfortunately, to deal with more complicated cancellations, it
@@ -464,7 +456,7 @@ export const createSimplify = /* #__PURE__ */ factory(
       // collect like terms
       {
         s: 'n+n -> 2*n',
-        assuming: { add: { total: true } } // 2 = 1 + 1 needs to exist
+        assuming: { add: { total: true } }, // 2 = 1 + 1 needs to exist
       },
       { l: 'n+-n', r: '0' },
       { l: 'vd*n + vd', r: 'vd*(n+1)' }, // NOTE: leftmost position is special:
@@ -474,62 +466,62 @@ export const createSimplify = /* #__PURE__ */ factory(
       // noncommutative additional cases (term collection & factoring)
       {
         s: 'n*vd + vd -> (n+1)*vd',
-        assuming: { multiply: { commutative: false } }
+        assuming: { multiply: { commutative: false } },
       },
       {
         s: 'vd + n*vd -> (1+n)*vd',
-        assuming: { multiply: { commutative: false } }
+        assuming: { multiply: { commutative: false } },
       },
       {
         s: 'n1*n3 + n2*n3 -> (n1+n2)*n3',
-        assuming: { multiply: { commutative: false } }
+        assuming: { multiply: { commutative: false } },
       },
       {
         s: 'n^n1 * n -> n^(n1+1)',
-        assuming: { divide: { total: true }, multiply: { commutative: false } }
+        assuming: { divide: { total: true }, multiply: { commutative: false } },
       },
       {
         s: 'n1*n3^(-n4) + n2 * n3    -> (n1 + n2*n3^(n4 +  1))*n3^(-n4)',
-        assuming: { multiply: { commutative: false } }
+        assuming: { multiply: { commutative: false } },
       },
       {
         s: 'n1*n3^(-n4) + n2 * n3^n5 -> (n1 + n2*n3^(n4 + n5))*n3^(-n4)',
-        assuming: { multiply: { commutative: false } }
+        assuming: { multiply: { commutative: false } },
       },
       { l: 'n*cd + cd', r: '(n+1)*cd' },
       {
         s: 'cd*n + cd -> cd*(n+1)',
-        assuming: { multiply: { commutative: false } }
+        assuming: { multiply: { commutative: false } },
       },
       {
         s: 'cd + cd*n -> cd*(1+n)',
-        assuming: { multiply: { commutative: false } }
+        assuming: { multiply: { commutative: false } },
       },
       simplifyConstant, // Second: before returning expressions to "standard form"
 
       // make factors positive (and undo 'make non-constant terms positive')
       {
         s: '(-n)*n1 -> -(n*n1)',
-        assuming: { subtract: { total: true } }
+        assuming: { subtract: { total: true } },
       },
       {
         s: 'n1*(-n) -> -(n1*n)', // in case * non-commutative
         assuming: {
           subtract: { total: true },
-          multiply: { commutative: false }
-        }
+          multiply: { commutative: false },
+        },
       },
 
       // final ordering of constants
       {
         s: 'ce+ve -> ve+ce',
         assuming: { add: { commutative: true } },
-        imposeContext: { add: { commutative: false } }
+        imposeContext: { add: { commutative: false } },
       },
       {
         s: 'vd*cd -> cd*vd',
         assuming: { multiply: { commutative: true } },
-        imposeContext: { multiply: { commutative: false } }
+        imposeContext: { multiply: { commutative: false } },
       },
 
       // undo temporary rules
@@ -538,24 +530,24 @@ export const createSimplify = /* #__PURE__ */ factory(
       { l: 'n+-(n1)', r: 'n-(n1)' },
       {
         s: 'n*(n1^-1) -> n/n1', // undo replace 'divide'; for * commutative
-        assuming: { multiply: { commutative: true } } // o.w. / not conventional
+        assuming: { multiply: { commutative: true } }, // o.w. / not conventional
       },
       {
         s: 'n*n1^-n2 -> n/n1^n2',
-        assuming: { multiply: { commutative: true } } // o.w. / not conventional
+        assuming: { multiply: { commutative: true } }, // o.w. / not conventional
       },
       {
         s: 'n^-1 -> 1/n',
-        assuming: { multiply: { commutative: true } } // o.w. / not conventional
+        assuming: { multiply: { commutative: true } }, // o.w. / not conventional
       },
       { l: 'n^1', r: 'n' }, // can be produced by power cancellation
       {
         s: 'n*(n1/n2) -> (n*n1)/n2', // '*' before '/'
-        assuming: { multiply: { associative: true } }
+        assuming: { multiply: { associative: true } },
       },
       {
         s: 'n-(n1+n2) -> n-n1-n2', // '-' before '+'
-        assuming: { addition: { associative: true, commutative: true } }
+        assuming: { addition: { associative: true, commutative: true } },
       },
       // { l: '(n1/n2)/n3', r: 'n1/(n2*n3)' },
       // { l: '(n*n1)/(n*n2)', r: 'n1/n2' },
@@ -566,11 +558,11 @@ export const createSimplify = /* #__PURE__ */ factory(
 
       {
         s: 'n1/(n2/n3) -> (n1*n3)/n2',
-        assuming: { multiply: { associative: true } }
+        assuming: { multiply: { associative: true } },
       },
 
-      { l: 'n1/(-n2)', r: '-n1/n2' }
-    ]
+      { l: 'n1/(-n2)', r: '-n1/n2' },
+    ];
 
     /**
      * Takes any rule object as allowed by the specification in simplify
@@ -580,51 +572,51 @@ export const createSimplify = /* #__PURE__ */ factory(
       ruleObject: Exclude<SimplifyRule, string | Function>,
       context: SimplifyContext | undefined
     ): CanonicalRule {
-      const newRule: Partial<CanonicalRule> = {}
+      const newRule: Partial<CanonicalRule> = {};
       if (ruleObject.s) {
-        const lr = ruleObject.s.split('->')
+        const lr = ruleObject.s.split('->');
         if (lr.length === 2) {
-          newRule.l = lr[0] as unknown as MathNode
-          newRule.r = lr[1] as unknown as MathNode
+          newRule.l = lr[0] as unknown as MathNode;
+          newRule.r = lr[1] as unknown as MathNode;
         } else {
-          throw SyntaxError('Could not parse rule: ' + ruleObject.s)
+          throw SyntaxError('Could not parse rule: ' + ruleObject.s);
         }
       } else {
-        newRule.l = ruleObject.l as unknown as MathNode
-        newRule.r = ruleObject.r as unknown as MathNode
+        newRule.l = ruleObject.l as unknown as MathNode;
+        newRule.r = ruleObject.r as unknown as MathNode;
       }
-      newRule.l = removeParens(parse(newRule.l as unknown as string))
-      newRule.r = removeParens(parse(newRule.r as unknown as string))
+      newRule.l = removeParens(parse(newRule.l as unknown as string));
+      newRule.r = removeParens(parse(newRule.r as unknown as string));
       if ('imposeContext' in ruleObject && ruleObject.imposeContext) {
-        newRule.imposeContext = ruleObject.imposeContext
+        newRule.imposeContext = ruleObject.imposeContext;
       }
       if ('repeat' in ruleObject && ruleObject.repeat !== undefined) {
-        newRule.repeat = ruleObject.repeat
+        newRule.repeat = ruleObject.repeat;
       }
       if ('assuming' in ruleObject && ruleObject.assuming) {
-        newRule.assuming = ruleObject.assuming
+        newRule.assuming = ruleObject.assuming;
       }
       if (ruleObject.evaluate) {
-        newRule.evaluate = parse(ruleObject.evaluate as string)
+        newRule.evaluate = parse(ruleObject.evaluate as string);
       }
 
       if (isAssociative(newRule.l!, context)) {
-        const nonCommutative = !isCommutative(newRule.l!, context)
-        let leftExpandsym: SymbolNode
+        const nonCommutative = !isCommutative(newRule.l!, context);
+        let leftExpandsym: SymbolNode;
         // Gen. the LHS placeholder used in this NC-context specific expansion rules
-        if (nonCommutative) leftExpandsym = _getExpandPlaceholderSymbol()
+        if (nonCommutative) leftExpandsym = _getExpandPlaceholderSymbol();
 
-        const makeNode = createMakeNodeFunction(newRule.l! as any)
-        const expandsym = _getExpandPlaceholderSymbol()
-        const expandedL = makeNode([newRule.l!, expandsym])
+        const makeNode = createMakeNodeFunction(newRule.l! as any);
+        const expandsym = _getExpandPlaceholderSymbol();
+        const expandedL = makeNode([newRule.l!, expandsym]);
         // Push the expandsym into the deepest possible branch.
         // This helps to match the newRule against nodes returned from getSplits() later on.
-        flatten(expandedL as OperatorNode, context)
-        unflattenr(expandedL as OperatorNode, context)
+        flatten(expandedL as OperatorNode, context);
+        unflattenr(expandedL as OperatorNode, context);
         newRule.expanded = {
           l: expandedL,
-          r: makeNode([newRule.r!, expandsym])
-        }
+          r: makeNode([newRule.r!, expandsym]),
+        };
 
         // In and for a non-commutative context, attempting with yet additional expansion rules makes
         // way for more matches cases of multi-arg expressions; such that associative rules (such as
@@ -633,17 +625,17 @@ export const createSimplify = /* #__PURE__ */ factory(
           // 'Non-commutative' 1: LHS (placeholder) only
           newRule.expandedNC1 = {
             l: makeNode([leftExpandsym!, newRule.l!]),
-            r: makeNode([leftExpandsym!, newRule.r!])
-          }
+            r: makeNode([leftExpandsym!, newRule.r!]),
+          };
           // 'Non-commutative' 2: farmost LHS and RHS placeholders
           newRule.expandedNC2 = {
             l: makeNode([leftExpandsym!, newRule.expanded.l]),
-            r: makeNode([leftExpandsym!, newRule.expanded.r])
-          }
+            r: makeNode([leftExpandsym!, newRule.expanded.r]),
+          };
         }
       }
 
-      return newRule as CanonicalRule
+      return newRule as CanonicalRule;
     }
 
     /**
@@ -667,40 +659,34 @@ export const createSimplify = /* #__PURE__ */ factory(
       context: SimplifyContext | undefined
     ): ParsedRule[] {
       // Array of rules to be used to simplify expressions
-      const ruleSet: ParsedRule[] = []
+      const ruleSet: ParsedRule[] = [];
       for (let i = 0; i < rules.length; i++) {
-        let rule: SimplifyRule = rules[i]
-        let newRule: ParsedRule
-        const ruleType = typeof rule
+        let rule: SimplifyRule = rules[i];
+        let newRule: ParsedRule;
+        const ruleType = typeof rule;
         switch (ruleType) {
           case 'string':
-            rule = { s: rule as string }
+            rule = { s: rule as string };
           /* falls through */
           case 'object':
-            newRule = _canonicalizeRule(
-              rule as Exclude<SimplifyRule, string | Function>,
-              context
-            )
-            break
+            newRule = _canonicalizeRule(rule as Exclude<SimplifyRule, string | Function>, context);
+            break;
           case 'function':
-            newRule = rule as (
-              node: MathNode,
-              options?: SimplifyOptions
-            ) => MathNode
-            break
+            newRule = rule as (node: MathNode, options?: SimplifyOptions) => MathNode;
+            break;
           default:
-            throw TypeError('Unsupported type of rule: ' + ruleType)
+            throw TypeError('Unsupported type of rule: ' + ruleType);
         }
         // console.log('Adding rule: ' + rules[i])
         // console.log(newRule)
-        ruleSet.push(newRule)
+        ruleSet.push(newRule);
       }
-      return ruleSet
+      return ruleSet;
     }
 
-    let _lastsym = 0
+    let _lastsym = 0;
     function _getExpandPlaceholderSymbol(): SymbolNode {
-      return new SymbolNode('_p' + _lastsym++)
+      return new SymbolNode('_p' + _lastsym++);
     }
 
     function _simplify(
@@ -709,47 +695,47 @@ export const createSimplify = /* #__PURE__ */ factory(
       scope: Map<string, any> = createEmptyMap(),
       options: SimplifyOptions = {}
     ): MathNode {
-      const debug = options.consoleDebug
+      const debug = options.consoleDebug;
       const builtRules: ParsedRule[] = _buildRules(
         (rules as SimplifyRule[]) || simplify.rules,
         options.context
-      )
-      let res = resolve(expr, scope)
-      res = removeParens(res)
-      const visited: Record<string, boolean> = {}
-      let str = res.toString({ parenthesis: 'all' })
+      );
+      let res = resolve(expr, scope);
+      res = removeParens(res);
+      const visited: Record<string, boolean> = {};
+      let str = res.toString({ parenthesis: 'all' });
       while (!visited[str]) {
-        visited[str] = true
-        _lastsym = 0 // counter for placeholder symbols
-        let laststr = str
-        if (debug) console.log('Working on: ', str)
+        visited[str] = true;
+        _lastsym = 0; // counter for placeholder symbols
+        let laststr = str;
+        if (debug) console.log('Working on: ', str);
         for (let i = 0; i < builtRules.length; i++) {
-          let rulestr = ''
+          let rulestr = '';
           if (typeof builtRules[i] === 'function') {
-            res = (builtRules[i] as Function)(res, options)
-            if (debug) rulestr = (builtRules[i] as Function).name
+            res = (builtRules[i] as Function)(res, options);
+            if (debug) rulestr = (builtRules[i] as Function).name;
           } else {
-            flatten(res as any, options.context)
-            res = applyRule(res, builtRules[i] as CanonicalRule, options.context)
+            flatten(res as any, options.context);
+            res = applyRule(res, builtRules[i] as CanonicalRule, options.context);
             if (debug) {
-              rulestr = `${(builtRules[i] as any).l.toString()} -> ${(builtRules[i] as any).r.toString()}`
+              rulestr = `${(builtRules[i] as any).l.toString()} -> ${(builtRules[i] as any).r.toString()}`;
             }
           }
           if (debug) {
-            const newstr = res.toString({ parenthesis: 'all' })
+            const newstr = res.toString({ parenthesis: 'all' });
             if (newstr !== laststr) {
-              console.log('Applying', rulestr, 'produced', newstr)
-              laststr = newstr
+              console.log('Applying', rulestr, 'produced', newstr);
+              laststr = newstr;
             }
           }
           /* Use left-heavy binary tree internally,
            * since custom rule functions may expect it
            */
-          unflattenl(res as any, options.context)
+          unflattenl(res as any, options.context);
         }
-        str = res.toString({ parenthesis: 'all' })
+        str = res.toString({ parenthesis: 'all' });
       }
-      return res
+      return res;
     }
 
     function mapRule(
@@ -757,19 +743,19 @@ export const createSimplify = /* #__PURE__ */ factory(
       rule: CanonicalRule,
       context: SimplifyContext | undefined
     ): MathNode[] | undefined {
-      let resNodes = nodes
+      let resNodes = nodes;
       if (nodes) {
         for (let i = 0; i < nodes.length; ++i) {
-          const newNode = applyRule(nodes[i], rule, context)
+          const newNode = applyRule(nodes[i], rule, context);
           if (newNode !== nodes[i]) {
             if (resNodes === nodes) {
-              resNodes = nodes.slice()
+              resNodes = nodes.slice();
             }
-            resNodes[i] = newNode
+            resNodes[i] = newNode;
           }
         }
       }
-      return resNodes
+      return resNodes;
     }
 
     /**
@@ -792,106 +778,88 @@ export const createSimplify = /* #__PURE__ */ factory(
       if (rule.assuming) {
         for (const symbol in rule.assuming) {
           for (const property in rule.assuming[symbol]) {
-            if (
-              hasProperty(symbol, property, context) !==
-              rule.assuming[symbol][property]
-            ) {
-              return node
+            if (hasProperty(symbol, property, context) !== rule.assuming[symbol][property]) {
+              return node;
             }
           }
         }
       }
 
-      const mergedContext = mergeContext(rule.imposeContext, context)
+      const mergedContext = mergeContext(rule.imposeContext, context);
 
       // Do not clone node unless we find a match
-      let res = node
+      let res = node;
 
       // First replace our child nodes with their simplified versions
       // If a child could not be simplified, applying the rule to it
       // will have no effect since the node is returned unchanged
       if (res instanceof (OperatorNode as any) || res instanceof (FunctionNode as any)) {
-        const newArgs = mapRule((res as any).args, rule, context)
+        const newArgs = mapRule((res as any).args, rule, context);
         if (newArgs !== (res as any).args) {
-          res = res.clone()
-          ;(res as any).args = newArgs
+          res = res.clone();
+          (res as any).args = newArgs;
         }
       } else if (res instanceof (ParenthesisNode as any)) {
         if ((res as ParenthesisNode).content) {
-          const newContent = applyRule(
-            (res as ParenthesisNode).content,
-            rule,
-            context
-          )
+          const newContent = applyRule((res as ParenthesisNode).content, rule, context);
           if (newContent !== (res as ParenthesisNode).content) {
-            res = new ParenthesisNode(newContent)
+            res = new ParenthesisNode(newContent);
           }
         }
       } else if (res instanceof (ArrayNode as any)) {
-        const newItems = mapRule((res as ArrayNode).items, rule, context)
+        const newItems = mapRule((res as ArrayNode).items, rule, context);
         if (newItems !== (res as ArrayNode).items) {
-          res = new ArrayNode(newItems!)
+          res = new ArrayNode(newItems!);
         }
       } else if (res instanceof (AccessorNode as any)) {
-        let newObj = (res as AccessorNode).object
+        let newObj = (res as AccessorNode).object;
         if ((res as AccessorNode).object) {
-          newObj = applyRule((res as AccessorNode).object, rule, context)
+          newObj = applyRule((res as AccessorNode).object, rule, context);
         }
-        let newIndex = (res as AccessorNode).index
+        let newIndex = (res as AccessorNode).index;
         if ((res as AccessorNode).index) {
-          newIndex = applyRule(
-            (res as AccessorNode).index,
-            rule,
-            context
-          ) as any
+          newIndex = applyRule((res as AccessorNode).index, rule, context) as any;
         }
-        if (
-          newObj !== (res as AccessorNode).object ||
-          newIndex !== (res as AccessorNode).index
-        ) {
-          res = new AccessorNode(newObj, newIndex)
+        if (newObj !== (res as AccessorNode).object || newIndex !== (res as AccessorNode).index) {
+          res = new AccessorNode(newObj, newIndex);
         }
       } else if (res instanceof (IndexNode as any)) {
-        const newDims = mapRule((res as IndexNode).dimensions, rule, context)
+        const newDims = mapRule((res as IndexNode).dimensions, rule, context);
         if (newDims !== (res as IndexNode).dimensions) {
-          res = new IndexNode(newDims!) as MathNode
+          res = new IndexNode(newDims!) as MathNode;
         }
       } else if (res instanceof (ObjectNode as any)) {
-        let changed = false
-        const newProps: Record<string, MathNode> = {}
+        let changed = false;
+        const newProps: Record<string, MathNode> = {};
         for (const prop in (res as ObjectNode).properties) {
-          newProps[prop] = applyRule(
-            (res as ObjectNode).properties[prop],
-            rule,
-            context
-          )
+          newProps[prop] = applyRule((res as ObjectNode).properties[prop], rule, context);
           if (newProps[prop] !== (res as ObjectNode).properties[prop]) {
-            changed = true
+            changed = true;
           }
         }
         if (changed) {
-          res = new ObjectNode(newProps)
+          res = new ObjectNode(newProps);
         }
       }
 
       // Try to match a rule against this node
-      let repl = rule.r
-      let matches = _ruleMatch(rule.l, res, mergedContext)[0]
+      let repl = rule.r;
+      let matches = _ruleMatch(rule.l, res, mergedContext)[0];
 
       // If the rule is associative operator, we can try matching it while allowing additional terms.
       // This allows us to match rules like 'n+n' to the expression '(1+x)+x' or even 'x+1+x' if the operator is commutative.
       if (!matches && rule.expanded) {
-        repl = rule.expanded.r
-        matches = _ruleMatch(rule.expanded.l, res, mergedContext)[0]
+        repl = rule.expanded.r;
+        matches = _ruleMatch(rule.expanded.l, res, mergedContext)[0];
       }
       // Additional, non-commutative context expansion-rules
       if (!matches && rule.expandedNC1) {
-        repl = rule.expandedNC1.r
-        matches = _ruleMatch(rule.expandedNC1.l, res, mergedContext)[0]
+        repl = rule.expandedNC1.r;
+        matches = _ruleMatch(rule.expandedNC1.l, res, mergedContext)[0];
         if (!matches) {
           // Existence of NC1 implies NC2
-          repl = rule.expandedNC2.r
-          matches = _ruleMatch(rule.expandedNC2.l, res, mergedContext)[0]
+          repl = rule.expandedNC2.r;
+          matches = _ruleMatch(rule.expandedNC2.l, res, mergedContext)[0];
         }
       }
 
@@ -900,10 +868,10 @@ export const createSimplify = /* #__PURE__ */ factory(
 
         // Create a new node by cloning the rhs of the matched rule
         // we keep any implicit multiplication state if relevant
-        const implicit = (res as any).implicit
-        res = repl.clone()
+        const implicit = (res as any).implicit;
+        res = repl.clone();
         if (implicit && 'implicit' in repl) {
-          ;(res as any).implicit = true
+          (res as any).implicit = true;
         }
 
         // Replace placeholders with their respective nodes without traversing deeper into the replaced nodes
@@ -912,21 +880,21 @@ export const createSimplify = /* #__PURE__ */ factory(
             (node as SymbolNode).isSymbolNode &&
             hasOwnProperty(matches.placeholders, (node as SymbolNode).name)
           ) {
-            return matches.placeholders[(node as SymbolNode).name].clone()
+            return matches.placeholders[(node as SymbolNode).name].clone();
           } else {
-            return node
+            return node;
           }
-        })
+        });
 
         // const after = res.toString({parenthesis: 'all'})
         // console.log('Simplified ' + before + ' to ' + after)
       }
 
       if (rule.repeat && res !== node) {
-        res = applyRule(res, rule, context)
+        res = applyRule(res, rule, context);
       }
 
-      return res
+      return res;
     }
 
     /**
@@ -937,64 +905,56 @@ export const createSimplify = /* #__PURE__ */ factory(
      *        +(node3,  +(node1, node2))]
      *
      */
-    function getSplits(
-      node: OperatorNode,
-      context: SimplifyContext | undefined
-    ): MathNode[] {
-      const res: MathNode[] = []
-      let right: MathNode
-      let rightArgs: MathNode[]
-      const makeNode = createMakeNodeFunction(node)
+    function getSplits(node: OperatorNode, context: SimplifyContext | undefined): MathNode[] {
+      const res: MathNode[] = [];
+      let right: MathNode;
+      let rightArgs: MathNode[];
+      const makeNode = createMakeNodeFunction(node);
       if (isCommutative(node, context)) {
         for (let i = 0; i < node.args.length; i++) {
-          rightArgs = node.args.slice(0)
-          rightArgs.splice(i, 1)
-          right = rightArgs.length === 1 ? rightArgs[0] : makeNode(rightArgs)
-          res.push(makeNode([node.args[i], right]))
+          rightArgs = node.args.slice(0);
+          rightArgs.splice(i, 1);
+          right = rightArgs.length === 1 ? rightArgs[0] : makeNode(rightArgs);
+          res.push(makeNode([node.args[i], right]));
         }
       } else {
         // Keep order, but try all parenthesizations
         for (let i = 1; i < node.args.length; i++) {
-          let left = node.args[0]
+          let left = node.args[0];
           if (i > 1) {
-            left = makeNode(node.args.slice(0, i))
+            left = makeNode(node.args.slice(0, i));
           }
-          rightArgs = node.args.slice(i)
-          right = rightArgs.length === 1 ? rightArgs[0] : makeNode(rightArgs)
-          res.push(makeNode([left, right]))
+          rightArgs = node.args.slice(i);
+          right = rightArgs.length === 1 ? rightArgs[0] : makeNode(rightArgs);
+          res.push(makeNode([left, right]));
         }
       }
-      return res
+      return res;
     }
 
     /**
      * Returns the set union of two match-placeholders or null if there is a conflict.
      */
-    function mergeMatch(
-      match1: MatchResult,
-      match2: MatchResult
-    ): MatchResult | null {
-      const res: MatchResult = { placeholders: {} }
+    function mergeMatch(match1: MatchResult, match2: MatchResult): MatchResult | null {
+      const res: MatchResult = { placeholders: {} };
 
       // Some matches may not have placeholders; this is OK
       if (!match1.placeholders && !match2.placeholders) {
-        return res
+        return res;
       } else if (!match1.placeholders) {
-        return match2
+        return match2;
       } else if (!match2.placeholders) {
-        return match1
+        return match1;
       }
 
       // Placeholders with the same key must match exactly
       for (const key in match1.placeholders) {
         if (hasOwnProperty(match1.placeholders, key)) {
-          res.placeholders[key] = match1.placeholders[key]
+          res.placeholders[key] = match1.placeholders[key];
 
           if (hasOwnProperty(match2.placeholders, key)) {
-            if (
-              !_exactMatch(match1.placeholders[key], match2.placeholders[key])
-            ) {
-              return null
+            if (!_exactMatch(match1.placeholders[key], match2.placeholders[key])) {
+              return null;
             }
           }
         }
@@ -1002,37 +962,34 @@ export const createSimplify = /* #__PURE__ */ factory(
 
       for (const key in match2.placeholders) {
         if (hasOwnProperty(match2.placeholders, key)) {
-          res.placeholders[key] = match2.placeholders[key]
+          res.placeholders[key] = match2.placeholders[key];
         }
       }
 
-      return res
+      return res;
     }
 
     /**
      * Combine two lists of matches by applying mergeMatch to the cartesian product of two lists of matches.
      * Each list represents matches found in one child of a node.
      */
-    function combineChildMatches(
-      list1: MatchResult[],
-      list2: MatchResult[]
-    ): MatchResult[] {
-      const res: MatchResult[] = []
+    function combineChildMatches(list1: MatchResult[], list2: MatchResult[]): MatchResult[] {
+      const res: MatchResult[] = [];
 
       if (list1.length === 0 || list2.length === 0) {
-        return res
+        return res;
       }
 
-      let merged: MatchResult | null
+      let merged: MatchResult | null;
       for (let i1 = 0; i1 < list1.length; i1++) {
         for (let i2 = 0; i2 < list2.length; i2++) {
-          merged = mergeMatch(list1[i1], list2[i2])
+          merged = mergeMatch(list1[i1], list2[i2]);
           if (merged) {
-            res.push(merged)
+            res.push(merged);
           }
         }
       }
-      return res
+      return res;
     }
 
     /**
@@ -1042,20 +999,20 @@ export const createSimplify = /* #__PURE__ */ factory(
      */
     function mergeChildMatches(childMatches: MatchResult[][]): MatchResult[] {
       if (childMatches.length === 0) {
-        return []
+        return [];
       }
 
-      const sets = childMatches.reduce(combineChildMatches)
-      const uniqueSets: MatchResult[] = []
-      const unique: Record<string, boolean> = {}
+      const sets = childMatches.reduce(combineChildMatches);
+      const uniqueSets: MatchResult[] = [];
+      const unique: Record<string, boolean> = {};
       for (let i = 0; i < sets.length; i++) {
-        const s = JSON.stringify(sets[i], replacer)
+        const s = JSON.stringify(sets[i], replacer);
         if (!unique[s]) {
-          unique[s] = true
-          uniqueSets.push(sets[i])
+          unique[s] = true;
+          uniqueSets.push(sets[i]);
         }
       }
-      return uniqueSets
+      return uniqueSets;
     }
 
     /**
@@ -1080,7 +1037,7 @@ export const createSimplify = /* #__PURE__ */ factory(
       //    console.log('node = ' + node)
 
       //    console.log('Entering _ruleMatch(', rule.toString({parenthesis:'all'}), ', ', node.toString({parenthesis:'all'}), ', ', context, ')')
-      let res: MatchResult[] = [{ placeholders: {} }]
+      let res: MatchResult[] = [{ placeholders: {} }];
 
       if (
         (rule instanceof (OperatorNode as any) && node instanceof (OperatorNode as any)) ||
@@ -1092,37 +1049,32 @@ export const createSimplify = /* #__PURE__ */ factory(
             (rule as any).op !== (node as OperatorNode).op ||
             (rule as any).fn !== (node as OperatorNode).fn
           ) {
-            return []
+            return [];
           }
         } else if (rule instanceof (FunctionNode as any)) {
           if ((rule as any).name !== (node as any).name) {
-            return []
+            return [];
           }
         }
 
         // rule and node match. Search the children of rule and node.
         if (
-          ((node as any).args.length === 1 &&
-            (rule as any).args.length === 1) ||
+          ((node as any).args.length === 1 && (rule as any).args.length === 1) ||
           (!isAssociative(node, context) &&
             (node as any).args.length === (rule as any).args.length) ||
           isSplit
         ) {
           // Expect non-associative operators to match exactly,
           // except in any order if operator is commutative
-          let childMatches: MatchResult[][] = []
+          let childMatches: MatchResult[][] = [];
           for (let i = 0; i < (rule as any).args.length; i++) {
-            const childMatch = _ruleMatch(
-              (rule as any).args[i],
-              (node as any).args[i],
-              context
-            )
+            const childMatch = _ruleMatch((rule as any).args[i], (node as any).args[i], context);
             if (childMatch.length === 0) {
               // Child did not match, so stop searching immediately
-              break
+              break;
             }
             // The child matched, so add the information returned from the child to our result
-            childMatches.push(childMatch)
+            childMatches.push(childMatch);
           }
           if (childMatches.length !== (rule as any).args.length) {
             if (
@@ -1130,7 +1082,7 @@ export const createSimplify = /* #__PURE__ */ factory(
               (rule as any).args.length === 1
             ) {
               // nothing to commute
-              return []
+              return [];
             }
             if ((rule as any).args.length > 2) {
               /* Need to generate all permutations and try them.
@@ -1139,67 +1091,53 @@ export const createSimplify = /* #__PURE__ */ factory(
                */
               throw new Error(
                 'permuting >2 commutative non-associative rule arguments not yet implemented'
-              )
+              );
             }
             /* Exactly two arguments, try them reversed */
-            const leftMatch = _ruleMatch(
-              (rule as any).args[0],
-              (node as any).args[1],
-              context
-            )
+            const leftMatch = _ruleMatch((rule as any).args[0], (node as any).args[1], context);
             if (leftMatch.length === 0) {
-              return []
+              return [];
             }
-            const rightMatch = _ruleMatch(
-              (rule as any).args[1],
-              (node as any).args[0],
-              context
-            )
+            const rightMatch = _ruleMatch((rule as any).args[1], (node as any).args[0], context);
             if (rightMatch.length === 0) {
-              return []
+              return [];
             }
-            childMatches = [leftMatch, rightMatch]
+            childMatches = [leftMatch, rightMatch];
           }
-          res = mergeChildMatches(childMatches)
-        } else if (
-          (node as any).args.length >= 2 &&
-          (rule as any).args.length === 2
-        ) {
+          res = mergeChildMatches(childMatches);
+        } else if ((node as any).args.length >= 2 && (rule as any).args.length === 2) {
           // node is flattened, rule is not
           // Associative operators/functions can be split in different ways so we check if the rule
           // matches for each of them and return their union.
-          const splits = getSplits(node as OperatorNode, context)
-          let splitMatches: MatchResult[] = []
+          const splits = getSplits(node as OperatorNode, context);
+          let splitMatches: MatchResult[] = [];
           for (let i = 0; i < splits.length; i++) {
-            const matchSet = _ruleMatch(rule, splits[i], context, true) // recursing at the same tree depth here
-            splitMatches = splitMatches.concat(matchSet)
+            const matchSet = _ruleMatch(rule, splits[i], context, true); // recursing at the same tree depth here
+            splitMatches = splitMatches.concat(matchSet);
           }
-          return splitMatches
+          return splitMatches;
         } else if ((rule as any).args.length > 2) {
-          throw Error(
-            'Unexpected non-binary associative function: ' + rule.toString()
-          )
+          throw Error('Unexpected non-binary associative function: ' + rule.toString());
         } else {
           // Incorrect number of arguments in rule and node, so no match
-          return []
+          return [];
         }
       } else if (rule instanceof (SymbolNode as any)) {
         // If the rule is a SymbolNode, then it carries a special meaning
         // according to the first one or two characters of the symbol node name.
         // These meanings are expalined in the documentation for simplify()
         if ((rule as SymbolNode).name.length === 0) {
-          throw new Error('Symbol in rule has 0 length...!?')
+          throw new Error('Symbol in rule has 0 length...!?');
         }
         if (SUPPORTED_CONSTANTS[(rule as SymbolNode).name]) {
           // built-in constant must match exactly
           if ((rule as SymbolNode).name !== (node as SymbolNode).name) {
-            return []
+            return [];
           }
         } else {
           // wildcards are composed of up to two alphabetic or underscore characters
           switch (
-            (rule as SymbolNode).name[1] >= 'a' &&
-            (rule as SymbolNode).name[1] <= 'z'
+            (rule as SymbolNode).name[1] >= 'a' && (rule as SymbolNode).name[1] <= 'z'
               ? (rule as SymbolNode).name.substring(0, 2)
               : (rule as SymbolNode).name[0]
           ) {
@@ -1208,94 +1146,90 @@ export const createSimplify = /* #__PURE__ */ factory(
               // rule matches _anything_, so assign this node to the rule.name placeholder
               // Assign node to the rule.name placeholder.
               // Our parent will check for matches among placeholders.
-              res[0].placeholders[(rule as SymbolNode).name] = node
-              break
+              res[0].placeholders[(rule as SymbolNode).name] = node;
+              break;
             case 'c':
             case 'cl':
               // rule matches a ConstantNode
               if (isConstantNode(node)) {
-                res[0].placeholders[(rule as SymbolNode).name] = node
+                res[0].placeholders[(rule as SymbolNode).name] = node;
               } else {
                 // mis-match: rule does not encompass current node
-                return []
+                return [];
               }
-              break
+              break;
             case 'v':
               // rule matches anything other than a ConstantNode
               if (!isConstantNode(node)) {
-                res[0].placeholders[(rule as SymbolNode).name] = node
+                res[0].placeholders[(rule as SymbolNode).name] = node;
               } else {
                 // mis-match: rule does not encompass current node
-                return []
+                return [];
               }
-              break
+              break;
             case 'vl':
               // rule matches VariableNode
               if (isVariableNode(node)) {
-                res[0].placeholders[(rule as SymbolNode).name] = node
+                res[0].placeholders[(rule as SymbolNode).name] = node;
               } else {
                 // mis-match: rule does not encompass current node
-                return []
+                return [];
               }
-              break
+              break;
             case 'cd':
               // rule matches a ConstantNode or unaryMinus-wrapped ConstantNode
               if (isNumericNode(node)) {
-                res[0].placeholders[(rule as SymbolNode).name] = node
+                res[0].placeholders[(rule as SymbolNode).name] = node;
               } else {
                 // mis-match: rule does not encompass current node
-                return []
+                return [];
               }
-              break
+              break;
             case 'vd':
               // rule matches anything other than a ConstantNode or unaryMinus-wrapped ConstantNode
               if (!isNumericNode(node)) {
-                res[0].placeholders[(rule as SymbolNode).name] = node
+                res[0].placeholders[(rule as SymbolNode).name] = node;
               } else {
                 // mis-match: rule does not encompass current node
-                return []
+                return [];
               }
-              break
+              break;
             case 'ce':
               // rule matches expressions that have a constant value
               if (isConstantExpression(node)) {
-                res[0].placeholders[(rule as SymbolNode).name] = node
+                res[0].placeholders[(rule as SymbolNode).name] = node;
               } else {
                 // mis-match: rule does not encompass current node
-                return []
+                return [];
               }
-              break
+              break;
             case 've':
               // rule matches expressions that do not have a constant value
               if (!isConstantExpression(node)) {
-                res[0].placeholders[(rule as SymbolNode).name] = node
+                res[0].placeholders[(rule as SymbolNode).name] = node;
               } else {
                 // mis-match: rule does not encompass current node
-                return []
+                return [];
               }
-              break
+              break;
             default:
-              throw new Error(
-                'Invalid symbol in rule: ' + (rule as SymbolNode).name
-              )
+              throw new Error('Invalid symbol in rule: ' + (rule as SymbolNode).name);
           }
         }
       } else if (rule instanceof (ConstantNode as any)) {
         // Literal constant must match exactly
-        if (
-          !equal((rule as ConstantNode).value, (node as ConstantNode).value)
-        ) {
-          return []
+        if (!equal((rule as ConstantNode).value, (node as ConstantNode).value)) {
+          return [];
         }
       } else {
         // Some other node was encountered which we aren't prepared for, so no match
-        return []
+        return [];
       }
 
       // It's a match!
 
       // console.log('_ruleMatch(' + rule.toString() + ', ' + node.toString() + ') found a match')
-      return res
+      return res;
     }
 
     /**
@@ -1308,11 +1242,11 @@ export const createSimplify = /* #__PURE__ */ factory(
     function _exactMatch(p: MathNode, q: MathNode): boolean {
       if (p instanceof (ConstantNode as any) && q instanceof (ConstantNode as any)) {
         if (!equal((p as ConstantNode).value, (q as ConstantNode).value)) {
-          return false
+          return false;
         }
       } else if (p instanceof (SymbolNode as any) && q instanceof (SymbolNode as any)) {
         if ((p as SymbolNode).name !== (q as SymbolNode).name) {
-          return false
+          return false;
         }
       } else if (
         (p instanceof (OperatorNode as any) && q instanceof (OperatorNode as any)) ||
@@ -1323,30 +1257,30 @@ export const createSimplify = /* #__PURE__ */ factory(
             (p as OperatorNode).op !== (q as OperatorNode).op ||
             (p as OperatorNode).fn !== (q as OperatorNode).fn
           ) {
-            return false
+            return false;
           }
         } else if (p instanceof (FunctionNode as any)) {
           if ((p as any).name !== (q as any).name) {
-            return false
+            return false;
           }
         }
 
         if ((p as any).args.length !== (q as any).args.length) {
-          return false
+          return false;
         }
 
         for (let i = 0; i < (p as any).args.length; i++) {
           if (!_exactMatch((p as any).args[i], (q as any).args[i])) {
-            return false
+            return false;
           }
         }
       } else {
-        return false
+        return false;
       }
 
-      return true
+      return true;
     }
 
-    return simplify
+    return simplify;
   }
-)
+);

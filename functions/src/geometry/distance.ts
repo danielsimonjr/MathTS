@@ -1,25 +1,25 @@
-import { isBigNumber } from '../utils/is.js'
-import { factory } from '../utils/factory.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { MathNumericType } from '../types.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { isBigNumber } from '../utils/is.js';
+import { factory } from '../utils/factory.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { MathNumericType } from '../types.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // N-dimensional distance only benefits from WASM for >= 4 dimensions
-const WASM_DISTANCE_THRESHOLD = 4
+const WASM_DISTANCE_THRESHOLD = 4;
 
 // Type definitions for distance
 interface DistanceDependencies {
-  typed: TypedFunction
-  addScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType
-  subtractScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType
-  multiplyScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType
-  divideScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType
-  deepEqual: (a: unknown, b: unknown) => boolean
-  sqrt: (x: MathNumericType) => MathNumericType
-  abs: (x: MathNumericType) => MathNumericType
+  typed: TypedFunction;
+  addScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType;
+  subtractScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType;
+  multiplyScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType;
+  divideScalar: (a: MathNumericType, b: MathNumericType) => MathNumericType;
+  deepEqual: (a: unknown, b: unknown) => boolean;
+  sqrt: (x: MathNumericType) => MathNumericType;
+  abs: (x: MathNumericType) => MathNumericType;
 }
 
-const name = 'distance'
+const name = 'distance';
 const dependencies = [
   'typed',
   'addScalar',
@@ -28,8 +28,8 @@ const dependencies = [
   'multiplyScalar',
   'deepEqual',
   'sqrt',
-  'abs'
-]
+  'abs',
+];
 
 export const createDistance = /* #__PURE__ */ factory(
   name,
@@ -42,7 +42,7 @@ export const createDistance = /* #__PURE__ */ factory(
     divideScalar,
     deepEqual,
     sqrt,
-    abs
+    abs,
   }: DistanceDependencies) => {
     /**
      * Calculates:
@@ -104,33 +104,24 @@ export const createDistance = /* #__PURE__ */ factory(
         // Point to Line 2D (x=Point, y=LinePoint1, z=LinePoint2)
         if (x.length === 2 && y.length === 2 && z.length === 2) {
           if (!_2d(x)) {
-            throw new TypeError(
-              'Array with 2 numbers or BigNumbers expected for first argument'
-            )
+            throw new TypeError('Array with 2 numbers or BigNumbers expected for first argument');
           }
           if (!_2d(y)) {
-            throw new TypeError(
-              'Array with 2 numbers or BigNumbers expected for second argument'
-            )
+            throw new TypeError('Array with 2 numbers or BigNumbers expected for second argument');
           }
           if (!_2d(z)) {
-            throw new TypeError(
-              'Array with 2 numbers or BigNumbers expected for third argument'
-            )
+            throw new TypeError('Array with 2 numbers or BigNumbers expected for third argument');
           }
           if (deepEqual(y, z)) {
-            throw new TypeError('LinePoint1 should not be same with LinePoint2')
+            throw new TypeError('LinePoint1 should not be same with LinePoint2');
           }
-          const xCoeff = subtractScalar(z[1], y[1])
-          const yCoeff = subtractScalar(y[0], z[0])
-          const constant = subtractScalar(
-            multiplyScalar(z[0], y[1]),
-            multiplyScalar(y[0], z[1])
-          )
+          const xCoeff = subtractScalar(z[1], y[1]);
+          const yCoeff = subtractScalar(y[0], z[0]);
+          const constant = subtractScalar(multiplyScalar(z[0], y[1]), multiplyScalar(y[0], z[1]));
 
-          return _distancePointLine2D(x[0], x[1], xCoeff, yCoeff, constant)
+          return _distancePointLine2D(x[0], x[1], xCoeff, yCoeff, constant);
         } else {
-          throw new TypeError('Invalid Arguments: Try again')
+          throw new TypeError('Invalid Arguments: Try again');
         }
       },
       'Object, Object, Object': function (
@@ -144,22 +135,20 @@ export const createDistance = /* #__PURE__ */ factory(
           Object.keys(z).length === 2
         ) {
           if (!_2d(x)) {
-            throw new TypeError(
-              'Values of pointX and pointY should be numbers or BigNumbers'
-            )
+            throw new TypeError('Values of pointX and pointY should be numbers or BigNumbers');
           }
           if (!_2d(y)) {
             throw new TypeError(
               'Values of lineOnePtX and lineOnePtY should be numbers or BigNumbers'
-            )
+            );
           }
           if (!_2d(z)) {
             throw new TypeError(
               'Values of lineTwoPtX and lineTwoPtY should be numbers or BigNumbers'
-            )
+            );
           }
           if (deepEqual(_objectToArray(y), _objectToArray(z))) {
-            throw new TypeError('LinePoint1 should not be same with LinePoint2')
+            throw new TypeError('LinePoint1 should not be same with LinePoint2');
           }
           if (
             'pointX' in x &&
@@ -169,84 +158,53 @@ export const createDistance = /* #__PURE__ */ factory(
             'lineTwoPtX' in z &&
             'lineTwoPtY' in z
           ) {
-            const xCoeff = subtractScalar(z.lineTwoPtY, y.lineOnePtY)
-            const yCoeff = subtractScalar(y.lineOnePtX, z.lineTwoPtX)
+            const xCoeff = subtractScalar(z.lineTwoPtY, y.lineOnePtY);
+            const yCoeff = subtractScalar(y.lineOnePtX, z.lineTwoPtX);
             const constant = subtractScalar(
               multiplyScalar(z.lineTwoPtX, y.lineOnePtY),
               multiplyScalar(y.lineOnePtX, z.lineTwoPtY)
-            )
-            return _distancePointLine2D(
-              x.pointX,
-              x.pointY,
-              xCoeff,
-              yCoeff,
-              constant
-            )
+            );
+            return _distancePointLine2D(x.pointX, x.pointY, xCoeff, yCoeff, constant);
           } else {
-            throw new TypeError('Key names do not match')
+            throw new TypeError('Key names do not match');
           }
         } else {
-          throw new TypeError('Invalid Arguments: Try again')
+          throw new TypeError('Invalid Arguments: Try again');
         }
       },
-      'Array, Array': function (
-        x: MathNumericType[],
-        y: MathNumericType[]
-      ): MathNumericType {
+      'Array, Array': function (x: MathNumericType[], y: MathNumericType[]): MathNumericType {
         // Point to Line 2D (x=[pointX, pointY], y=[x-coeff, y-coeff, const])
         if (x.length === 2 && y.length === 3) {
           if (!_2d(x)) {
-            throw new TypeError(
-              'Array with 2 numbers or BigNumbers expected for first argument'
-            )
+            throw new TypeError('Array with 2 numbers or BigNumbers expected for first argument');
           }
           if (!_3d(y)) {
-            throw new TypeError(
-              'Array with 3 numbers or BigNumbers expected for second argument'
-            )
+            throw new TypeError('Array with 3 numbers or BigNumbers expected for second argument');
           }
 
-          return _distancePointLine2D(x[0], x[1], y[0], y[1], y[2])
+          return _distancePointLine2D(x[0], x[1], y[0], y[1], y[2]);
         } else if (x.length === 3 && y.length === 6) {
           // Point to Line 3D
           if (!_3d(x)) {
-            throw new TypeError(
-              'Array with 3 numbers or BigNumbers expected for first argument'
-            )
+            throw new TypeError('Array with 3 numbers or BigNumbers expected for first argument');
           }
           if (!_parametricLine(y)) {
-            throw new TypeError(
-              'Array with 6 numbers or BigNumbers expected for second argument'
-            )
+            throw new TypeError('Array with 6 numbers or BigNumbers expected for second argument');
           }
 
-          return _distancePointLine3D(
-            x[0],
-            x[1],
-            x[2],
-            y[0],
-            y[1],
-            y[2],
-            y[3],
-            y[4],
-            y[5]
-          )
+          return _distancePointLine3D(x[0], x[1], x[2], y[0], y[1], y[2], y[3], y[4], y[5]);
         } else if (x.length === y.length && x.length > 0) {
           // Point to Point N-dimensions
           if (!_containsOnlyNumbers(x)) {
-            throw new TypeError(
-              'All values of an array should be numbers or BigNumbers'
-            )
+            throw new TypeError('All values of an array should be numbers or BigNumbers');
           }
           if (!_containsOnlyNumbers(y)) {
-            throw new TypeError(
-              'All values of an array should be numbers or BigNumbers'
-            )
+            throw new TypeError('All values of an array should be numbers or BigNumbers');
           }
 
-          return _euclideanDistance(x, y)
+          return _euclideanDistance(x, y);
         } else {
-          throw new TypeError('Invalid Arguments: Try again')
+          throw new TypeError('Invalid Arguments: Try again');
         }
       },
       'Object, Object': function (
@@ -255,14 +213,12 @@ export const createDistance = /* #__PURE__ */ factory(
       ): MathNumericType {
         if (Object.keys(x).length === 2 && Object.keys(y).length === 3) {
           if (!_2d(x)) {
-            throw new TypeError(
-              'Values of pointX and pointY should be numbers or BigNumbers'
-            )
+            throw new TypeError('Values of pointX and pointY should be numbers or BigNumbers');
           }
           if (!_3d(y)) {
             throw new TypeError(
               'Values of xCoeffLine, yCoeffLine and constant should be numbers or BigNumbers'
-            )
+            );
           }
           if (
             'pointX' in x &&
@@ -271,27 +227,19 @@ export const createDistance = /* #__PURE__ */ factory(
             'yCoeffLine' in y &&
             'constant' in y
           ) {
-            return _distancePointLine2D(
-              x.pointX,
-              x.pointY,
-              y.xCoeffLine,
-              y.yCoeffLine,
-              y.constant
-            )
+            return _distancePointLine2D(x.pointX, x.pointY, y.xCoeffLine, y.yCoeffLine, y.constant);
           } else {
-            throw new TypeError('Key names do not match')
+            throw new TypeError('Key names do not match');
           }
         } else if (Object.keys(x).length === 3 && Object.keys(y).length === 6) {
           // Point to Line 3D
           if (!_3d(x)) {
             throw new TypeError(
               'Values of pointX, pointY and pointZ should be numbers or BigNumbers'
-            )
+            );
           }
           if (!_parametricLine(y)) {
-            throw new TypeError(
-              'Values of x0, y0, z0, a, b and c should be numbers or BigNumbers'
-            )
+            throw new TypeError('Values of x0, y0, z0, a, b and c should be numbers or BigNumbers');
           }
           if (
             'pointX' in x &&
@@ -313,46 +261,38 @@ export const createDistance = /* #__PURE__ */ factory(
               y.a,
               y.b,
               y.c
-            )
+            );
           } else {
-            throw new TypeError('Key names do not match')
+            throw new TypeError('Key names do not match');
           }
         } else if (Object.keys(x).length === 2 && Object.keys(y).length === 2) {
           // Point to Point 2D
           if (!_2d(x)) {
             throw new TypeError(
               'Values of pointOneX and pointOneY should be numbers or BigNumbers'
-            )
+            );
           }
           if (!_2d(y)) {
             throw new TypeError(
               'Values of pointTwoX and pointTwoY should be numbers or BigNumbers'
-            )
+            );
           }
-          if (
-            'pointOneX' in x &&
-            'pointOneY' in x &&
-            'pointTwoX' in y &&
-            'pointTwoY' in y
-          ) {
-            return _euclideanDistance(
-              [x.pointOneX, x.pointOneY],
-              [y.pointTwoX, y.pointTwoY]
-            )
+          if ('pointOneX' in x && 'pointOneY' in x && 'pointTwoX' in y && 'pointTwoY' in y) {
+            return _euclideanDistance([x.pointOneX, x.pointOneY], [y.pointTwoX, y.pointTwoY]);
           } else {
-            throw new TypeError('Key names do not match')
+            throw new TypeError('Key names do not match');
           }
         } else if (Object.keys(x).length === 3 && Object.keys(y).length === 3) {
           // Point to Point 3D
           if (!_3d(x)) {
             throw new TypeError(
               'Values of pointOneX, pointOneY and pointOneZ should be numbers or BigNumbers'
-            )
+            );
           }
           if (!_3d(y)) {
             throw new TypeError(
               'Values of pointTwoX, pointTwoY and pointTwoZ should be numbers or BigNumbers'
-            )
+            );
           }
           if (
             'pointOneX' in x &&
@@ -365,69 +305,59 @@ export const createDistance = /* #__PURE__ */ factory(
             return _euclideanDistance(
               [x.pointOneX, x.pointOneY, x.pointOneZ],
               [y.pointTwoX, y.pointTwoY, y.pointTwoZ]
-            )
+            );
           } else {
-            throw new TypeError('Key names do not match')
+            throw new TypeError('Key names do not match');
           }
         } else {
-          throw new TypeError('Invalid Arguments: Try again')
+          throw new TypeError('Invalid Arguments: Try again');
         }
       },
       Array: function (arr: MathNumericType[][]): MathNumericType[] {
         if (!_pairwise(arr)) {
-          throw new TypeError(
-            'Incorrect array format entered for pairwise distance calculation'
-          )
+          throw new TypeError('Incorrect array format entered for pairwise distance calculation');
         }
 
-        return _distancePairwise(arr)
-      }
-    })
+        return _distancePairwise(arr);
+      },
+    });
 
     function _isNumber(a: unknown): boolean {
       // distance supports numbers and bignumbers
-      return typeof a === 'number' || isBigNumber(a)
+      return typeof a === 'number' || isBigNumber(a);
     }
 
-    function _2d(
-      a: MathNumericType[] | Record<string, MathNumericType>
-    ): boolean {
+    function _2d(a: MathNumericType[] | Record<string, MathNumericType>): boolean {
       // checks if the number of arguments are correct in count and are valid (should be numbers)
       if (!Array.isArray(a)) {
-        a = _objectToArray(a as Record<string, MathNumericType>)
+        a = _objectToArray(a as Record<string, MathNumericType>);
       }
-      const arr = a as MathNumericType[]
-      return _isNumber(arr[0]) && _isNumber(arr[1])
+      const arr = a as MathNumericType[];
+      return _isNumber(arr[0]) && _isNumber(arr[1]);
     }
 
-    function _3d(
-      a: MathNumericType[] | Record<string, MathNumericType>
-    ): boolean {
+    function _3d(a: MathNumericType[] | Record<string, MathNumericType>): boolean {
       // checks if the number of arguments are correct in count and are valid (should be numbers)
       if (!Array.isArray(a)) {
-        a = _objectToArray(a as Record<string, MathNumericType>)
+        a = _objectToArray(a as Record<string, MathNumericType>);
       }
-      const arr = a as MathNumericType[]
-      return _isNumber(arr[0]) && _isNumber(arr[1]) && _isNumber(arr[2])
+      const arr = a as MathNumericType[];
+      return _isNumber(arr[0]) && _isNumber(arr[1]) && _isNumber(arr[2]);
     }
 
-    function _containsOnlyNumbers(
-      a: MathNumericType[] | Record<string, MathNumericType>
-    ): boolean {
+    function _containsOnlyNumbers(a: MathNumericType[] | Record<string, MathNumericType>): boolean {
       // checks if the number of arguments are correct in count and are valid (should be numbers)
       if (!Array.isArray(a)) {
-        a = _objectToArray(a as Record<string, MathNumericType>)
+        a = _objectToArray(a as Record<string, MathNumericType>);
       }
-      return a.every(_isNumber)
+      return a.every(_isNumber);
     }
 
-    function _parametricLine(
-      a: MathNumericType[] | Record<string, MathNumericType>
-    ): boolean {
+    function _parametricLine(a: MathNumericType[] | Record<string, MathNumericType>): boolean {
       if (!Array.isArray(a)) {
-        a = _objectToArray(a as Record<string, MathNumericType>)
+        a = _objectToArray(a as Record<string, MathNumericType>);
       }
-      const arr = a as MathNumericType[]
+      const arr = a as MathNumericType[];
       return (
         _isNumber(arr[0]) &&
         _isNumber(arr[1]) &&
@@ -435,29 +365,23 @@ export const createDistance = /* #__PURE__ */ factory(
         _isNumber(arr[3]) &&
         _isNumber(arr[4]) &&
         _isNumber(arr[5])
-      )
+      );
     }
 
-    function _objectToArray(
-      o: Record<string, MathNumericType>
-    ): MathNumericType[] {
-      const keys = Object.keys(o)
-      const a: MathNumericType[] = []
+    function _objectToArray(o: Record<string, MathNumericType>): MathNumericType[] {
+      const keys = Object.keys(o);
+      const a: MathNumericType[] = [];
       for (let i = 0; i < keys.length; i++) {
-        a.push(o[keys[i]])
+        a.push(o[keys[i]]);
       }
-      return a
+      return a;
     }
 
     function _pairwise(a: MathNumericType[][]): boolean {
       // checks for valid arguments passed to _distancePairwise(Array)
       if (a[0].length === 2 && _isNumber(a[0][0]) && _isNumber(a[0][1])) {
-        if (
-          a.some(
-            (aI) => aI.length !== 2 || !_isNumber(aI[0]) || !_isNumber(aI[1])
-          )
-        ) {
-          return false
+        if (a.some((aI) => aI.length !== 2 || !_isNumber(aI[0]) || !_isNumber(aI[1]))) {
+          return false;
         }
       } else if (
         a[0].length === 3 &&
@@ -467,19 +391,15 @@ export const createDistance = /* #__PURE__ */ factory(
       ) {
         if (
           a.some(
-            (aI) =>
-              aI.length !== 3 ||
-              !_isNumber(aI[0]) ||
-              !_isNumber(aI[1]) ||
-              !_isNumber(aI[2])
+            (aI) => aI.length !== 3 || !_isNumber(aI[0]) || !_isNumber(aI[1]) || !_isNumber(aI[2])
           )
         ) {
-          return false
+          return false;
         }
       } else {
-        return false
+        return false;
       }
-      return true
+      return true;
     }
 
     function _distancePointLine2D(
@@ -489,11 +409,9 @@ export const createDistance = /* #__PURE__ */ factory(
       b: MathNumericType,
       c: MathNumericType
     ): MathNumericType {
-      const num = abs(
-        addScalar(addScalar(multiplyScalar(a, x), multiplyScalar(b, y)), c)
-      )
-      const den = sqrt(addScalar(multiplyScalar(a, a), multiplyScalar(b, b)))
-      return divideScalar(num, den)
+      const num = abs(addScalar(addScalar(multiplyScalar(a, x), multiplyScalar(b, y)), c));
+      const den = sqrt(addScalar(multiplyScalar(a, a), multiplyScalar(b, b)));
+      return divideScalar(num, den);
     }
 
     function _distancePointLine3D(
@@ -519,8 +437,8 @@ export const createDistance = /* #__PURE__ */ factory(
         subtractScalar(
           multiplyScalar(subtractScalar(x0, x), b),
           multiplyScalar(subtractScalar(y0, y), a)
-        )
-      ]
+        ),
+      ];
       const num = sqrt(
         addScalar(
           addScalar(
@@ -529,34 +447,28 @@ export const createDistance = /* #__PURE__ */ factory(
           ),
           multiplyScalar(numComponents[2], numComponents[2])
         )
-      )
+      );
       const den = sqrt(
-        addScalar(
-          addScalar(multiplyScalar(a, a), multiplyScalar(b, b)),
-          multiplyScalar(c, c)
-        )
-      )
-      return divideScalar(num, den)
+        addScalar(addScalar(multiplyScalar(a, a), multiplyScalar(b, b)), multiplyScalar(c, c))
+      );
+      return divideScalar(num, den);
     }
 
-    function _euclideanDistance(
-      x: MathNumericType[],
-      y: MathNumericType[]
-    ): MathNumericType {
-      const vectorSize = x.length
+    function _euclideanDistance(x: MathNumericType[], y: MathNumericType[]): MathNumericType {
+      const vectorSize = x.length;
 
       // WASM fast path for plain number arrays with >= WASM_DISTANCE_THRESHOLD dims
       if (vectorSize >= WASM_DISTANCE_THRESHOLD) {
-        const wasmResult = _tryWasmDistanceND(x, y, vectorSize)
-        if (wasmResult !== null) return wasmResult
+        const wasmResult = _tryWasmDistanceND(x, y, vectorSize);
+        if (wasmResult !== null) return wasmResult;
       }
 
-      let result: MathNumericType = 0
+      let result: MathNumericType = 0;
       for (let i = 0; i < vectorSize; i++) {
-        const diff = subtractScalar(x[i], y[i])
-        result = addScalar(multiplyScalar(diff, diff), result)
+        const diff = subtractScalar(x[i], y[i]);
+        result = addScalar(multiplyScalar(diff, diff), result);
       }
-      return sqrt(result)
+      return sqrt(result);
     }
 
     /**
@@ -568,45 +480,45 @@ export const createDistance = /* #__PURE__ */ factory(
       y: MathNumericType[],
       n: number
     ): number | null {
-      const wasm = wasmLoader.getModule()
-      if (!wasm) return null
+      const wasm = wasmLoader.getModule();
+      if (!wasm) return null;
 
       // Verify all values are plain numbers
       for (let i = 0; i < n; i++) {
-        if (typeof x[i] !== 'number' || typeof y[i] !== 'number') return null
+        if (typeof x[i] !== 'number' || typeof y[i] !== 'number') return null;
       }
 
-      const p1Alloc = wasmLoader.allocateFloat64Array(x as number[])
-      const p2Alloc = wasmLoader.allocateFloat64Array(y as number[])
+      const p1Alloc = wasmLoader.allocateFloat64Array(x as number[]);
+      const p2Alloc = wasmLoader.allocateFloat64Array(y as number[]);
       try {
-        return wasm.distanceND(p1Alloc.ptr, p2Alloc.ptr, n)
+        return wasm.distanceND(p1Alloc.ptr, p2Alloc.ptr, n);
       } finally {
-        wasmLoader.free(p1Alloc.ptr)
-        wasmLoader.free(p2Alloc.ptr)
+        wasmLoader.free(p1Alloc.ptr);
+        wasmLoader.free(p2Alloc.ptr);
       }
     }
 
     function _distancePairwise(a: MathNumericType[][]): MathNumericType[] {
       // Try WASM fast path for pairwise distance with plain number arrays
-      const wasmResult = _tryWasmPairwise(a)
-      if (wasmResult !== null) return wasmResult
+      const wasmResult = _tryWasmPairwise(a);
+      if (wasmResult !== null) return wasmResult;
 
-      const result: MathNumericType[] = []
-      let pointA: MathNumericType[] = []
-      let pointB: MathNumericType[] = []
+      const result: MathNumericType[] = [];
+      let pointA: MathNumericType[] = [];
+      let pointB: MathNumericType[] = [];
       for (let i = 0; i < a.length - 1; i++) {
         for (let j = i + 1; j < a.length; j++) {
           if (a[0].length === 2) {
-            pointA = [a[i][0], a[i][1]]
-            pointB = [a[j][0], a[j][1]]
+            pointA = [a[i][0], a[i][1]];
+            pointB = [a[j][0], a[j][1]];
           } else if (a[0].length === 3) {
-            pointA = [a[i][0], a[i][1], a[i][2]]
-            pointB = [a[j][0], a[j][1], a[j][2]]
+            pointA = [a[i][0], a[i][1], a[i][2]];
+            pointB = [a[j][0], a[j][1], a[j][2]];
           }
-          result.push(_euclideanDistance(pointA, pointB))
+          result.push(_euclideanDistance(pointA, pointB));
         }
       }
-      return result
+      return result;
     }
 
     /**
@@ -615,42 +527,42 @@ export const createDistance = /* #__PURE__ */ factory(
      * Returns null if WASM is unavailable or values are not plain numbers.
      */
     function _tryWasmPairwise(a: MathNumericType[][]): number[] | null {
-      const wasm = wasmLoader.getModule()
-      if (!wasm) return null
+      const wasm = wasmLoader.getModule();
+      if (!wasm) return null;
 
-      const numPoints = a.length
-      const dims = a[0].length
+      const numPoints = a.length;
+      const dims = a[0].length;
 
       // Verify all values are plain numbers
       for (let i = 0; i < numPoints; i++) {
         for (let d = 0; d < dims; d++) {
-          if (typeof a[i][d] !== 'number') return null
+          if (typeof a[i][d] !== 'number') return null;
         }
       }
 
       // Allocate two reusable buffers for point pairs
-      const p1Alloc = wasmLoader.allocateFloat64ArrayEmpty(dims)
-      const p2Alloc = wasmLoader.allocateFloat64ArrayEmpty(dims)
+      const p1Alloc = wasmLoader.allocateFloat64ArrayEmpty(dims);
+      const p2Alloc = wasmLoader.allocateFloat64ArrayEmpty(dims);
       try {
-        const result: number[] = []
+        const result: number[] = [];
         for (let i = 0; i < numPoints - 1; i++) {
           // Write point i into p1
           for (let d = 0; d < dims; d++) {
-            p1Alloc.array[d] = a[i][d] as number
+            p1Alloc.array[d] = a[i][d] as number;
           }
           for (let j = i + 1; j < numPoints; j++) {
             // Write point j into p2
             for (let d = 0; d < dims; d++) {
-              p2Alloc.array[d] = a[j][d] as number
+              p2Alloc.array[d] = a[j][d] as number;
             }
-            result.push(wasm.distanceND(p1Alloc.ptr, p2Alloc.ptr, dims))
+            result.push(wasm.distanceND(p1Alloc.ptr, p2Alloc.ptr, dims));
           }
         }
-        return result
+        return result;
       } finally {
-        wasmLoader.free(p1Alloc.ptr)
-        wasmLoader.free(p2Alloc.ptr)
+        wasmLoader.free(p1Alloc.ptr);
+        wasmLoader.free(p2Alloc.ptr);
       }
     }
   }
-)
+);

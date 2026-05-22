@@ -76,10 +76,7 @@ export function complex(re?: number | string | Complex, im?: number): Complex {
  * fraction('1/2')  // Fraction(1, 2)
  * fraction(0.5)    // Fraction(1, 2)
  */
-export function fraction(
-  numerator?: number | string | Fraction,
-  denominator?: number
-): Fraction {
+export function fraction(numerator?: number | string | Fraction, denominator?: number): Fraction {
   if (numerator === undefined) {
     return new Fraction(0, 1);
   }
@@ -291,9 +288,15 @@ export function det(m: DenseMatrix | number[][]): number {
     return matrix.get(0, 0) * matrix.get(1, 1) - matrix.get(0, 1) * matrix.get(1, 0);
   }
   if (n === 3) {
-    const a = matrix.get(0, 0), b = matrix.get(0, 1), c = matrix.get(0, 2);
-    const d = matrix.get(1, 0), e = matrix.get(1, 1), f = matrix.get(1, 2);
-    const g = matrix.get(2, 0), h = matrix.get(2, 1), i = matrix.get(2, 2);
+    const a = matrix.get(0, 0),
+      b = matrix.get(0, 1),
+      c = matrix.get(0, 2);
+    const d = matrix.get(1, 0),
+      e = matrix.get(1, 1),
+      f = matrix.get(1, 2);
+    const g = matrix.get(2, 0),
+      h = matrix.get(2, 1),
+      i = matrix.get(2, 2);
     return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
   }
 
@@ -408,7 +411,7 @@ export function isMatrix(x: unknown): x is DenseMatrix | SparseMatrix {
 export const i = I;
 export const pi = Math.PI;
 export const e = Math.E;
-export const phi = (1 + Math.sqrt(5)) / 2;  // Golden ratio
+export const phi = (1 + Math.sqrt(5)) / 2; // Golden ratio
 export const tau = 2 * Math.PI;
 export const LN2 = Math.LN2;
 export const LN10 = Math.LN10;

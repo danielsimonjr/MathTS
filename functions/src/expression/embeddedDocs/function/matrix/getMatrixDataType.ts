@@ -11,7 +11,7 @@ export const getMatrixDataTypeDocs = {
     'getMatrixDataType([1, 2, 3])',
     'getMatrixDataType([[5 cm], [2 inch]])',
     'getMatrixDataType([1, "text"])',
-    'getMatrixDataType([1, bignumber(4)])'
+    'getMatrixDataType([1, bignumber(4)])',
   ],
-  seealso: ['matrix', 'sparse', 'typeOf']
-}
+  seealso: ['matrix', 'sparse', 'typeOf'],
+};

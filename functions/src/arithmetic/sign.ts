@@ -1,52 +1,52 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import { signNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import { signNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for sign
 interface BigNumberType {
-  cmp(n: number): number
+  cmp(n: number): number;
 }
 
 interface BigNumberConstructor {
-  new (value: number): BigNumberType
+  new (value: number): BigNumberType;
 }
 
 interface ComplexType {
-  re: number
-  im: number
-  sign(): ComplexType
+  re: number;
+  im: number;
+  sign(): ComplexType;
 }
 
 interface ComplexFactory {
-  (value: number): ComplexType
+  (value: number): ComplexType;
 }
 
 interface FractionType {
-  n: bigint
-  s: number
+  n: bigint;
+  s: number;
 }
 
 interface FractionConstructor {
-  new (value: number): FractionType
+  new (value: number): FractionType;
 }
 
 interface UnitType {
-  _isDerived(): boolean
-  units: Array<{ unit: { offset: number } }>
-  valueType(): string
-  value: unknown
+  _isDerived(): boolean;
+  units: Array<{ unit: { offset: number } }>;
+  valueType(): string;
+  value: unknown;
 }
 
 interface SignDependencies {
-  typed: TypedFunction
-  BigNumber: BigNumberConstructor
-  complex: ComplexFactory
-  Fraction: FractionConstructor
+  typed: TypedFunction;
+  BigNumber: BigNumberConstructor;
+  complex: ComplexFactory;
+  Fraction: FractionConstructor;
 }
 
-const name = 'sign'
-const dependencies = ['typed', 'BigNumber', 'complex', 'Fraction']
+const name = 'sign';
+const dependencies = ['typed', 'BigNumber', 'complex', 'Fraction'];
 
 export const createSign = /* #__PURE__ */ factory(
   name,
@@ -86,19 +86,19 @@ export const createSign = /* #__PURE__ */ factory(
       number: signNumber,
 
       Complex: function (x: ComplexType): ComplexType {
-        return x.im === 0 ? complex(signNumber(x.re)) : x.sign()
+        return x.im === 0 ? complex(signNumber(x.re)) : x.sign();
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        return new BigNumber(x.cmp(0))
+        return new BigNumber(x.cmp(0));
       },
 
       bigint: function (x: bigint): bigint {
-        return x > 0n ? 1n : x < 0n ? -1n : 0n
+        return x > 0n ? 1n : x < 0n ? -1n : 0n;
       },
 
       Fraction: function (x: FractionType): FractionType {
-        return x.n === 0n ? new Fraction(0) : new Fraction(x.s)
+        return x.n === 0n ? new Fraction(0) : new Fraction(x.s);
       },
 
       // deep map collection, skip zeros since sign(0) = 0
@@ -108,15 +108,12 @@ export const createSign = /* #__PURE__ */ factory(
             deepMap(x as unknown[], self, true)
       ),
 
-      Unit: typed.referToSelf(
-        (self: TypedFunction) =>
-          (x: UnitType): unknown => {
-            if (!x._isDerived() && x.units[0].unit.offset !== 0) {
-              throw new TypeError('sign is ambiguous for units with offset')
-            }
-            return typed.find(self, x.valueType())(x.value)
-          }
-      )
-    })
+      Unit: typed.referToSelf((self: TypedFunction) => (x: UnitType): unknown => {
+        if (!x._isDerived() && x.units[0].unit.offset !== 0) {
+          throw new TypeError('sign is ambiguous for units with offset');
+        }
+        return typed.find(self, x.valueType())(x.value);
+      }),
+    });
   }
-)
+);

@@ -16,11 +16,7 @@
  * @packageDocumentation
  */
 
-import {
-  mathTyped,
-  Complex,
-  BigNumber,
-} from '@danielsimonjr/mathts-core';
+import { mathTyped, Complex, BigNumber } from '@danielsimonjr/mathts-core';
 
 // =============================================================================
 // Internal helpers
@@ -61,15 +57,15 @@ function isTruthy(x: unknown): boolean {
  * ```
  */
 export const not = mathTyped('not', {
-  'any': (x: unknown): boolean => !isTruthy(x),
+  any: (x: unknown): boolean => !isTruthy(x),
 
-  'number': (x: number): boolean => !isTruthyNumber(x),
+  number: (x: number): boolean => !isTruthyNumber(x),
 
-  'bigint': (x: bigint): boolean => x === 0n,
+  bigint: (x: bigint): boolean => x === 0n,
 
-  'BigNumber': (x: BigNumber): boolean => !isTruthyBigNumber(x),
+  BigNumber: (x: BigNumber): boolean => !isTruthyBigNumber(x),
 
-  'Complex': (x: Complex): boolean => !isTruthyComplex(x),
+  Complex: (x: Complex): boolean => !isTruthyComplex(x),
 });
 
 // =============================================================================
@@ -89,16 +85,14 @@ export const not = mathTyped('not', {
 export const and = mathTyped('and', {
   'any, any': (a: unknown, b: unknown): boolean => isTruthy(a) && isTruthy(b),
 
-  'number, number': (a: number, b: number): boolean =>
-    isTruthyNumber(a) && isTruthyNumber(b),
+  'number, number': (a: number, b: number): boolean => isTruthyNumber(a) && isTruthyNumber(b),
 
   'bigint, bigint': (a: bigint, b: bigint): boolean => a !== 0n && b !== 0n,
 
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean =>
     isTruthyBigNumber(a) && isTruthyBigNumber(b),
 
-  'Complex, Complex': (a: Complex, b: Complex): boolean =>
-    isTruthyComplex(a) && isTruthyComplex(b),
+  'Complex, Complex': (a: Complex, b: Complex): boolean => isTruthyComplex(a) && isTruthyComplex(b),
 
   // Variadic: reduce-and over three or more arbitrary values.
   // Note: typed-function passes rest args as [[val1, val2, ...]], so rest[0]
@@ -126,16 +120,14 @@ export const and = mathTyped('and', {
 export const or = mathTyped('or', {
   'any, any': (a: unknown, b: unknown): boolean => isTruthy(a) || isTruthy(b),
 
-  'number, number': (a: number, b: number): boolean =>
-    isTruthyNumber(a) || isTruthyNumber(b),
+  'number, number': (a: number, b: number): boolean => isTruthyNumber(a) || isTruthyNumber(b),
 
   'bigint, bigint': (a: bigint, b: bigint): boolean => a !== 0n || b !== 0n,
 
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean =>
     isTruthyBigNumber(a) || isTruthyBigNumber(b),
 
-  'Complex, Complex': (a: Complex, b: Complex): boolean =>
-    isTruthyComplex(a) || isTruthyComplex(b),
+  'Complex, Complex': (a: Complex, b: Complex): boolean => isTruthyComplex(a) || isTruthyComplex(b),
 
   // Variadic: reduce-or over three or more arbitrary values.
   // Note: typed-function passes rest args as [[val1, val2, ...]], so rest[0]
@@ -163,8 +155,7 @@ export const or = mathTyped('or', {
 export const xor = mathTyped('xor', {
   'any, any': (a: unknown, b: unknown): boolean => isTruthy(a) !== isTruthy(b),
 
-  'number, number': (a: number, b: number): boolean =>
-    isTruthyNumber(a) !== isTruthyNumber(b),
+  'number, number': (a: number, b: number): boolean => isTruthyNumber(a) !== isTruthyNumber(b),
 
   'bigint, bigint': (a: bigint, b: bigint): boolean => (a !== 0n) !== (b !== 0n),
 

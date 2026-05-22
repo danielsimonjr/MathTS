@@ -42,7 +42,7 @@ export interface BatchOperation {
   dimensions: {
     rows: number;
     cols: number;
-    k?: number;  // For matmul
+    k?: number; // For matmul
   };
   /** Scalar value (for scale operation) */
   scalar?: number;
@@ -230,11 +230,7 @@ export class BatchExecutor {
   /**
    * Queue a transpose operation
    */
-  transpose(
-    input: GPUBuffer,
-    output: GPUBuffer,
-    dimensions: { rows: number; cols: number }
-  ): void {
+  transpose(input: GPUBuffer, output: GPUBuffer, dimensions: { rows: number; cols: number }): void {
     this.queueOperation({
       type: 'transpose',
       inputA: input,
@@ -246,11 +242,7 @@ export class BatchExecutor {
   /**
    * Queue a sum reduction operation
    */
-  reduceSum(
-    input: GPUBuffer,
-    output: GPUBuffer,
-    dimensions: { rows: number; cols: number }
-  ): void {
+  reduceSum(input: GPUBuffer, output: GPUBuffer, dimensions: { rows: number; cols: number }): void {
     this.queueOperation({
       type: 'reduce_sum',
       inputA: input,
@@ -346,18 +338,15 @@ export class BatchExecutor {
   /**
    * Encode a single operation into the command encoder
    */
-  private encodeOperation(
-    encoder: GPUCommandEncoder,
-    op: BatchOperation
-  ): void {
+  private encodeOperation(encoder: GPUCommandEncoder, op: BatchOperation): void {
     // Get the appropriate pipeline
-    const pipelineName = this.getPipelineName(op.type) as Parameters<ShaderManager['getBuiltinPipeline']>[0];
+    const pipelineName = this.getPipelineName(op.type) as Parameters<
+      ShaderManager['getBuiltinPipeline']
+    >[0];
     const pipeline = this.shaders.getBuiltinPipeline(pipelineName);
 
     // Create bind group entries
-    const entries: GPUBindGroupEntry[] = [
-      { binding: 0, resource: { buffer: op.inputA } },
-    ];
+    const entries: GPUBindGroupEntry[] = [{ binding: 0, resource: { buffer: op.inputA } }];
 
     if (op.inputB) {
       entries.push({ binding: 1, resource: { buffer: op.inputB } });
@@ -447,11 +436,7 @@ export class BatchExecutor {
       return [Math.ceil(total / 256), 1, 1];
     }
 
-    return [
-      Math.ceil(cols / workgroupSize),
-      Math.ceil(rows / workgroupSize),
-      1,
-    ];
+    return [Math.ceil(cols / workgroupSize), Math.ceil(rows / workgroupSize), 1];
   }
 
   /**

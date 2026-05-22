@@ -68,11 +68,7 @@ export function angle3D(v1: number[], v2: number[]): f64 {
  * @returns Cross product vector
  */
 export function cross3D(a: number[], b: number[]): number[] {
-  return [
-    a[1] * b[2] - a[2] * b[1],
-    a[2] * b[0] - a[0] * b[2],
-    a[0] * b[1] - a[1] * b[0],
-  ];
+  return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 }
 
 /**
@@ -99,9 +95,7 @@ export function dot3D(a: number[], b: number[]): f64 {
  * @returns Unsigned area of the triangle
  */
 export function triangleArea(a: number[], b: number[], c: number[]): f64 {
-  return Math.abs(
-    (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1])) / 2
-  );
+  return Math.abs((a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1])) / 2);
 }
 
 /**
@@ -150,10 +144,7 @@ export function convexHull(points: number[][]): number[][] {
   // Build lower hull
   const lower: number[][] = [];
   for (const p of sorted) {
-    while (
-      lower.length >= 2 &&
-      cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0
-    ) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
       lower.pop();
     }
     lower.push(p);
@@ -163,10 +154,7 @@ export function convexHull(points: number[][]): number[][] {
   const upper: number[][] = [];
   for (let i = sorted.length - 1; i >= 0; i--) {
     const p = sorted[i];
-    while (
-      upper.length >= 2 &&
-      cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0
-    ) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
       upper.pop();
     }
     upper.push(p);
@@ -198,10 +186,7 @@ export function pointInPolygon(point: number[], polygon: number[][]): boolean {
     const xj: f64 = polygon[j][0];
     const yj: f64 = polygon[j][1];
 
-    if (
-      yi > y !== yj > y &&
-      x < ((xj - xi) * (y - yi)) / (yj - yi) + xi
-    ) {
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
       inside = !inside;
     }
   }
@@ -234,22 +219,14 @@ export function rotateVector2D(v: number[], angle: f64): number[] {
  * @param angle - Rotation angle in radians
  * @returns Rotated vector
  */
-export function rotateVector3D(
-  v: number[],
-  axis: number[],
-  angle: f64
-): number[] {
+export function rotateVector3D(v: number[], axis: number[], angle: f64): number[] {
   const mag: f64 = Math.sqrt(axis[0] ** 2 + axis[1] ** 2 + axis[2] ** 2);
   if (mag === 0) return v.slice();
   const k = [axis[0] / mag, axis[1] / mag, axis[2] / mag];
   const cos: f64 = Math.cos(angle);
   const sin: f64 = Math.sin(angle);
   const dotKV: f64 = k[0] * v[0] + k[1] * v[1] + k[2] * v[2];
-  const crossKV = [
-    k[1] * v[2] - k[2] * v[1],
-    k[2] * v[0] - k[0] * v[2],
-    k[0] * v[1] - k[1] * v[0],
-  ];
+  const crossKV = [k[1] * v[2] - k[2] * v[1], k[2] * v[0] - k[0] * v[2], k[0] * v[1] - k[1] * v[0]];
   return [
     v[0] * cos + crossKV[0] * sin + k[0] * dotKV * (1 - cos),
     v[1] * cos + crossKV[1] * sin + k[1] * dotKV * (1 - cos),
@@ -302,9 +279,7 @@ export function distance2D(a: number[], b: number[]): f64 {
  * Euclidean distance between two 3D points.
  */
 export function distance3D(a: number[], b: number[]): f64 {
-  return Math.sqrt(
-    (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2
-  );
+  return Math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2);
 }
 
 /**
@@ -372,8 +347,7 @@ export function intersectLines2D(
   const denom: f64 = d1[0] * d2[1] - d1[1] * d2[0];
   if (Math.abs(denom) < 1e-12) return null; // parallel or coincident
 
-  const t: f64 =
-    ((p2[0] - p1[0]) * d2[1] - (p2[1] - p1[1]) * d2[0]) / denom;
+  const t: f64 = ((p2[0] - p1[0]) * d2[1] - (p2[1] - p1[1]) * d2[0]) / denom;
 
   return [p1[0] + t * d1[0], p1[1] + t * d1[1]];
 }
@@ -481,8 +455,8 @@ export function centroid(vertices: number[][]): number[] {
   }
 
   signedArea /= 2;
-  cx /= (6 * signedArea);
-  cy /= (6 * signedArea);
+  cx /= 6 * signedArea;
+  cy /= 6 * signedArea;
 
   return [cx, cy];
 }
@@ -498,14 +472,16 @@ export function centroid(vertices: number[][]): number[] {
 export function coordinateTransform(
   point: number[],
   from: 'cartesian' | 'polar' | 'spherical' | 'cylindrical',
-  to: 'cartesian' | 'polar' | 'spherical' | 'cylindrical',
+  to: 'cartesian' | 'polar' | 'spherical' | 'cylindrical'
 ): number[] {
   // Convert to cartesian first
   let x: f64, y: f64, z: f64;
 
   switch (from) {
     case 'cartesian':
-      x = point[0]; y = point[1]; z = point[2] ?? 0;
+      x = point[0];
+      y = point[1];
+      z = point[2] ?? 0;
       break;
     case 'polar': {
       const [r, theta] = point;
@@ -641,7 +617,11 @@ export function delaunayTriangulation(points: number[][]): number[][] {
           const numTris = wasm.delaunay_wasm(ptsAlloc.ptr, n, trisAlloc.ptr);
           const result: number[][] = [];
           for (let i = 0; i < numTris; i++) {
-            result.push([trisAlloc.array[i * 3], trisAlloc.array[i * 3 + 1], trisAlloc.array[i * 3 + 2]]);
+            result.push([
+              trisAlloc.array[i * 3],
+              trisAlloc.array[i * 3 + 1],
+              trisAlloc.array[i * 3 + 2],
+            ]);
           }
           return result;
         } finally {
@@ -655,10 +635,15 @@ export function delaunayTriangulation(points: number[][]): number[][] {
   }
 
   // Create super-triangle that contains all points
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
   for (const p of points) {
-    minX = Math.min(minX, p[0]); minY = Math.min(minY, p[1]);
-    maxX = Math.max(maxX, p[0]); maxY = Math.max(maxY, p[1]);
+    minX = Math.min(minX, p[0]);
+    minY = Math.min(minY, p[1]);
+    maxX = Math.max(maxX, p[0]);
+    maxY = Math.max(maxY, p[1]);
   }
   const dx: f64 = maxX - minX;
   const dy: f64 = maxY - minY;
@@ -671,19 +656,25 @@ export function delaunayTriangulation(points: number[][]): number[][] {
   ];
 
   const allPoints = [...points, ...superTri];
-  const st0: i32 = n, st1: i32 = n + 1, st2: i32 = n + 2;
+  const st0: i32 = n,
+    st1: i32 = n + 1,
+    st2: i32 = n + 2;
 
   type Tri = [i32, i32, i32];
   let triangles: Tri[] = [[st0, st1, st2]];
 
   function circumcircleContains(tri: Tri, px: f64, py: f64): boolean {
     const [a, b, c] = tri.map((i) => allPoints[i]);
-    const ax = a[0] - px, ay = a[1] - py;
-    const bx = b[0] - px, by = b[1] - py;
-    const cx = c[0] - px, cy = c[1] - py;
-    const det = (ax * ax + ay * ay) * (bx * cy - cx * by) -
-                (bx * bx + by * by) * (ax * cy - cx * ay) +
-                (cx * cx + cy * cy) * (ax * by - bx * ay);
+    const ax = a[0] - px,
+      ay = a[1] - py;
+    const bx = b[0] - px,
+      by = b[1] - py;
+    const cx = c[0] - px,
+      cy = c[1] - py;
+    const det =
+      (ax * ax + ay * ay) * (bx * cy - cx * by) -
+      (bx * bx + by * by) * (ax * cy - cx * ay) +
+      (cx * cx + cy * cy) * (ax * by - bx * ay);
     return det > 0;
   }
 
@@ -699,14 +690,13 @@ export function delaunayTriangulation(points: number[][]): number[][] {
     const edges: [i32, i32][] = [];
     for (const tri of badTris) {
       const triEdges: [i32, i32][] = [
-        [tri[0], tri[1]], [tri[1], tri[2]], [tri[2], tri[0]],
+        [tri[0], tri[1]],
+        [tri[1], tri[2]],
+        [tri[2], tri[0]],
       ];
       for (const edge of triEdges) {
         const shared = badTris.some(
-          (other) =>
-            other !== tri &&
-            other.includes(edge[0]) &&
-            other.includes(edge[1]),
+          (other) => other !== tri && other.includes(edge[0]) && other.includes(edge[1])
         );
         if (!shared) edges.push(edge);
       }
@@ -722,9 +712,7 @@ export function delaunayTriangulation(points: number[][]): number[][] {
   }
 
   // Remove triangles that share vertices with super-triangle
-  return triangles
-    .filter((t) => !t.some((v) => v >= n))
-    .map((t) => [...t]);
+  return triangles.filter((t) => !t.some((v) => v >= n)).map((t) => [...t]);
 }
 
 /**
@@ -737,7 +725,7 @@ export function delaunayTriangulation(points: number[][]): number[][] {
  */
 export function voronoiDiagram(
   points: number[][],
-  bounds: [f64, f64, f64, f64],
+  bounds: [f64, f64, f64, f64]
 ): { vertices: number[][]; regions: number[][] } {
   const n: i32 = points.length;
 
@@ -759,10 +747,15 @@ export function voronoiDiagram(
         const edgesAlloc = wasmLoader.allocateInt32ArrayEmpty(maxEdges * 2);
         try {
           const packed = wasm.voronoi_wasm(
-            ptsAlloc.ptr, n, boundsAlloc.ptr,
-            vertsAlloc.ptr, edgesAlloc.ptr, maxVerts, maxEdges,
+            ptsAlloc.ptr,
+            n,
+            boundsAlloc.ptr,
+            vertsAlloc.ptr,
+            edgesAlloc.ptr,
+            maxVerts,
+            maxEdges
           );
-          const numVerts = packed & 0xFFFF;
+          const numVerts = packed & 0xffff;
           const vertices: number[][] = [];
           for (let i = 0; i < numVerts; i++) {
             vertices.push([vertsAlloc.array[i * 2], vertsAlloc.array[i * 2 + 1]]);
@@ -794,12 +787,16 @@ export function voronoiDiagram(
     const [a, b, c] = tri.map((i) => points[i]);
     const D: f64 = 2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]));
     if (Math.abs(D) < 1e-15) continue;
-    const ux: f64 = ((a[0] * a[0] + a[1] * a[1]) * (b[1] - c[1]) +
-      (b[0] * b[0] + b[1] * b[1]) * (c[1] - a[1]) +
-      (c[0] * c[0] + c[1] * c[1]) * (a[1] - b[1])) / D;
-    const uy: f64 = ((a[0] * a[0] + a[1] * a[1]) * (c[0] - b[0]) +
-      (b[0] * b[0] + b[1] * b[1]) * (a[0] - c[0]) +
-      (c[0] * c[0] + c[1] * c[1]) * (b[0] - a[0])) / D;
+    const ux: f64 =
+      ((a[0] * a[0] + a[1] * a[1]) * (b[1] - c[1]) +
+        (b[0] * b[0] + b[1] * b[1]) * (c[1] - a[1]) +
+        (c[0] * c[0] + c[1] * c[1]) * (a[1] - b[1])) /
+      D;
+    const uy: f64 =
+      ((a[0] * a[0] + a[1] * a[1]) * (c[0] - b[0]) +
+        (b[0] * b[0] + b[1] * b[1]) * (a[0] - c[0]) +
+        (c[0] * c[0] + c[1] * c[1]) * (b[0] - a[0])) /
+      D;
 
     // Clip to bounds
     const cx = Math.max(bounds[0], Math.min(bounds[2], ux));
@@ -878,7 +875,7 @@ export function kdTree(points: number[][]): KDTreeNode | null {
  */
 export function kdTreeNearest(
   root: KDTreeNode | null,
-  target: number[],
+  target: number[]
 ): { point: number[]; index: i32; distance: f64 } | null {
   if (!root) return null;
 
@@ -922,7 +919,7 @@ function distanceNDSq(a: number[], b: number[]): f64 {
  */
 export function nearestNeighbor(
   points: number[][],
-  query: number[],
+  query: number[]
 ): { point: number[]; index: i32; distance: f64 } | null {
   const n = points.length;
   if (n === 0) return null;
@@ -946,7 +943,12 @@ export function nearestNeighbor(
         const queryAlloc = wasmLoader.allocateFloat64Array(new Float64Array(query));
         try {
           const treeSize = wasm.kdtree_build_wasm(ptsAlloc.ptr, n, dims, treeAlloc.ptr);
-          const nearestIdx = wasm.kdtree_nearest_wasm(treeAlloc.ptr, queryAlloc.ptr, dims, treeSize);
+          const nearestIdx = wasm.kdtree_nearest_wasm(
+            treeAlloc.ptr,
+            queryAlloc.ptr,
+            dims,
+            treeSize
+          );
           if (nearestIdx >= 0 && nearestIdx < n) {
             const pt = points[nearestIdx];
             let distSq = 0;

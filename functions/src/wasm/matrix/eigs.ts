@@ -28,79 +28,79 @@ export function eigsSymmetric(
   eigenvectorsPtr: usize,
   workPtr: usize
 ): i32 {
-  const computeVectors: bool = eigenvectorsPtr !== 0
-  const e0: f64 = Math.abs(precision / <f64>n)
-  const maxIterations: i32 = n * n * 30 // Safety limit
+  const computeVectors: bool = eigenvectorsPtr !== 0;
+  const e0: f64 = Math.abs(precision / <f64>n);
+  const maxIterations: i32 = n * n * 30; // Safety limit
 
   // Work arrays: Aki at workPtr, Akj at workPtr + n*8
-  const AkiPtr: usize = workPtr
-  const AkjPtr: usize = workPtr + (<usize>n << 3)
+  const AkiPtr: usize = workPtr;
+  const AkjPtr: usize = workPtr + ((<usize>n) << 3);
 
   // Initialize eigenvectors to identity matrix if computing vectors
   if (computeVectors) {
     for (let i: i32 = 0; i < n; i++) {
       for (let j: i32 = 0; j < n; j++) {
-        const idx: usize = (<usize>(i * n + j)) << 3
-        store<f64>(eigenvectorsPtr + idx, i === j ? 1.0 : 0.0)
+        const idx: usize = (<usize>(i * n + j)) << 3;
+        store<f64>(eigenvectorsPtr + idx, i === j ? 1.0 : 0.0);
       }
     }
   }
 
   // Main Jacobi iteration loop
-  let iterations: i32 = 0
-  let maxOffDiag: f64 = getMaxOffDiagonal(matrixPtr, n)
+  let iterations: i32 = 0;
+  let maxOffDiag: f64 = getMaxOffDiagonal(matrixPtr, n);
 
   while (Math.abs(maxOffDiag) >= e0 && iterations < maxIterations) {
     // Find indices of max off-diagonal element
-    const ij: i64 = findMaxOffDiagonalIndices(matrixPtr, n)
-    const i: i32 = <i32>(ij >> 32)
-    const j: i32 = <i32>(ij & 0xFFFFFFFF)
+    const ij: i64 = findMaxOffDiagonalIndices(matrixPtr, n);
+    const i: i32 = <i32>(ij >> 32);
+    const j: i32 = <i32>(ij & 0xffffffff);
 
     // Compute rotation angle
-    const theta: f64 = getTheta(matrixPtr, n, i, j, precision)
+    const theta: f64 = getTheta(matrixPtr, n, i, j, precision);
 
     // Apply Jacobi rotation to matrix
-    applyJacobiRotation(matrixPtr, n, theta, i, j, AkiPtr, AkjPtr)
+    applyJacobiRotation(matrixPtr, n, theta, i, j, AkiPtr, AkjPtr);
 
     // Apply rotation to eigenvectors if computing them
     if (computeVectors) {
-      applyJacobiRotationToVectors(eigenvectorsPtr, n, theta, i, j, AkiPtr, AkjPtr)
+      applyJacobiRotationToVectors(eigenvectorsPtr, n, theta, i, j, AkiPtr, AkjPtr);
     }
 
     // Update max off-diagonal for convergence check
-    maxOffDiag = getMaxOffDiagonal(matrixPtr, n)
-    iterations++
+    maxOffDiag = getMaxOffDiagonal(matrixPtr, n);
+    iterations++;
   }
 
   // Extract eigenvalues from diagonal
   for (let i: i32 = 0; i < n; i++) {
-    const diagIdx: usize = (<usize>(i * n + i)) << 3
-    store<f64>(eigenvaluesPtr + (<usize>i << 3), load<f64>(matrixPtr + diagIdx))
+    const diagIdx: usize = (<usize>(i * n + i)) << 3;
+    store<f64>(eigenvaluesPtr + ((<usize>i) << 3), load<f64>(matrixPtr + diagIdx));
   }
 
   // Sort eigenvalues (and eigenvectors) by absolute value
-  sortEigenvalues(eigenvaluesPtr, eigenvectorsPtr, n, computeVectors)
+  sortEigenvalues(eigenvaluesPtr, eigenvectorsPtr, n, computeVectors);
 
-  return iterations < maxIterations ? iterations : -1
+  return iterations < maxIterations ? iterations : -1;
 }
 
 /**
  * Get the maximum absolute value of off-diagonal elements
  */
 function getMaxOffDiagonal(matrixPtr: usize, n: i32): f64 {
-  let maxVal: f64 = 0.0
+  let maxVal: f64 = 0.0;
 
   for (let i: i32 = 0; i < n; i++) {
     for (let j: i32 = i + 1; j < n; j++) {
-      const idx: usize = (<usize>(i * n + j)) << 3
-      const val: f64 = Math.abs(load<f64>(matrixPtr + idx))
+      const idx: usize = (<usize>(i * n + j)) << 3;
+      const val: f64 = Math.abs(load<f64>(matrixPtr + idx));
       if (val > maxVal) {
-        maxVal = val
+        maxVal = val;
       }
     }
   }
 
-  return maxVal
+  return maxVal;
 }
 
 /**
@@ -108,43 +108,43 @@ function getMaxOffDiagonal(matrixPtr: usize, n: i32): f64 {
  * Returns packed i64: high 32 bits = i, low 32 bits = j
  */
 function findMaxOffDiagonalIndices(matrixPtr: usize, n: i32): i64 {
-  let maxVal: f64 = 0.0
-  let maxI: i32 = 0
-  let maxJ: i32 = 1
+  let maxVal: f64 = 0.0;
+  let maxI: i32 = 0;
+  let maxJ: i32 = 1;
 
   for (let i: i32 = 0; i < n; i++) {
     for (let j: i32 = i + 1; j < n; j++) {
-      const idx: usize = (<usize>(i * n + j)) << 3
-      const val: f64 = Math.abs(load<f64>(matrixPtr + idx))
+      const idx: usize = (<usize>(i * n + j)) << 3;
+      const val: f64 = Math.abs(load<f64>(matrixPtr + idx));
       if (val > maxVal) {
-        maxVal = val
-        maxI = i
-        maxJ = j
+        maxVal = val;
+        maxI = i;
+        maxJ = j;
       }
     }
   }
 
-  return (<i64>maxI << 32) | <i64>maxJ
+  return ((<i64>maxI) << 32) | (<i64>maxJ);
 }
 
 /**
  * Compute Jacobi rotation angle theta
  */
 function getTheta(matrixPtr: usize, n: i32, i: i32, j: i32, tolerance: f64): f64 {
-  const iiIdx: usize = (<usize>(i * n + i)) << 3
-  const jjIdx: usize = (<usize>(j * n + j)) << 3
-  const ijIdx: usize = (<usize>(i * n + j)) << 3
+  const iiIdx: usize = (<usize>(i * n + i)) << 3;
+  const jjIdx: usize = (<usize>(j * n + j)) << 3;
+  const ijIdx: usize = (<usize>(i * n + j)) << 3;
 
-  const aii: f64 = load<f64>(matrixPtr + iiIdx)
-  const ajj: f64 = load<f64>(matrixPtr + jjIdx)
-  const aij: f64 = load<f64>(matrixPtr + ijIdx)
+  const aii: f64 = load<f64>(matrixPtr + iiIdx);
+  const ajj: f64 = load<f64>(matrixPtr + jjIdx);
+  const aij: f64 = load<f64>(matrixPtr + ijIdx);
 
-  const denom: f64 = ajj - aii
+  const denom: f64 = ajj - aii;
 
   if (Math.abs(denom) <= tolerance) {
-    return Math.PI / 4.0
+    return Math.PI / 4.0;
   } else {
-    return 0.5 * Math.atan((2.0 * aij) / denom)
+    return 0.5 * Math.atan((2.0 * aij) / denom);
   }
 }
 
@@ -161,56 +161,56 @@ function applyJacobiRotation(
   AkiPtr: usize,
   AkjPtr: usize
 ): void {
-  const c: f64 = Math.cos(theta)
-  const s: f64 = Math.sin(theta)
-  const c2: f64 = c * c
-  const s2: f64 = s * s
+  const c: f64 = Math.cos(theta);
+  const s: f64 = Math.sin(theta);
+  const c2: f64 = c * c;
+  const s2: f64 = s * s;
 
-  const iiIdx: usize = (<usize>(i * n + i)) << 3
-  const jjIdx: usize = (<usize>(j * n + j)) << 3
-  const ijIdx: usize = (<usize>(i * n + j)) << 3
-  const jiIdx: usize = (<usize>(j * n + i)) << 3
+  const iiIdx: usize = (<usize>(i * n + i)) << 3;
+  const jjIdx: usize = (<usize>(j * n + j)) << 3;
+  const ijIdx: usize = (<usize>(i * n + j)) << 3;
+  const jiIdx: usize = (<usize>(j * n + i)) << 3;
 
-  const Hii: f64 = load<f64>(matrixPtr + iiIdx)
-  const Hjj: f64 = load<f64>(matrixPtr + jjIdx)
-  const Hij: f64 = load<f64>(matrixPtr + ijIdx)
+  const Hii: f64 = load<f64>(matrixPtr + iiIdx);
+  const Hjj: f64 = load<f64>(matrixPtr + jjIdx);
+  const Hij: f64 = load<f64>(matrixPtr + ijIdx);
 
   // Compute new diagonal elements
-  const Aii: f64 = c2 * Hii - 2.0 * c * s * Hij + s2 * Hjj
-  const Ajj: f64 = s2 * Hii + 2.0 * c * s * Hij + c2 * Hjj
+  const Aii: f64 = c2 * Hii - 2.0 * c * s * Hij + s2 * Hjj;
+  const Ajj: f64 = s2 * Hii + 2.0 * c * s * Hij + c2 * Hjj;
 
   // Compute rotated row/column elements into work arrays
   for (let k: i32 = 0; k < n; k++) {
-    const ikIdx: usize = (<usize>(i * n + k)) << 3
-    const jkIdx: usize = (<usize>(j * n + k)) << 3
-    const Hik: f64 = load<f64>(matrixPtr + ikIdx)
-    const Hjk: f64 = load<f64>(matrixPtr + jkIdx)
+    const ikIdx: usize = (<usize>(i * n + k)) << 3;
+    const jkIdx: usize = (<usize>(j * n + k)) << 3;
+    const Hik: f64 = load<f64>(matrixPtr + ikIdx);
+    const Hjk: f64 = load<f64>(matrixPtr + jkIdx);
 
-    store<f64>(AkiPtr + (<usize>k << 3), c * Hik - s * Hjk)
-    store<f64>(AkjPtr + (<usize>k << 3), s * Hik + c * Hjk)
+    store<f64>(AkiPtr + ((<usize>k) << 3), c * Hik - s * Hjk);
+    store<f64>(AkjPtr + ((<usize>k) << 3), s * Hik + c * Hjk);
   }
 
   // Update matrix with new values
-  store<f64>(matrixPtr + iiIdx, Aii)
-  store<f64>(matrixPtr + jjIdx, Ajj)
-  store<f64>(matrixPtr + ijIdx, 0.0)
-  store<f64>(matrixPtr + jiIdx, 0.0)
+  store<f64>(matrixPtr + iiIdx, Aii);
+  store<f64>(matrixPtr + jjIdx, Ajj);
+  store<f64>(matrixPtr + ijIdx, 0.0);
+  store<f64>(matrixPtr + jiIdx, 0.0);
 
   // Update off-diagonal elements (symmetric)
   for (let k: i32 = 0; k < n; k++) {
     if (k !== i && k !== j) {
-      const Aki: f64 = load<f64>(AkiPtr + (<usize>k << 3))
-      const Akj: f64 = load<f64>(AkjPtr + (<usize>k << 3))
+      const Aki: f64 = load<f64>(AkiPtr + ((<usize>k) << 3));
+      const Akj: f64 = load<f64>(AkjPtr + ((<usize>k) << 3));
 
-      const ikIdx: usize = (<usize>(i * n + k)) << 3
-      const kiIdx: usize = (<usize>(k * n + i)) << 3
-      const jkIdx: usize = (<usize>(j * n + k)) << 3
-      const kjIdx: usize = (<usize>(k * n + j)) << 3
+      const ikIdx: usize = (<usize>(i * n + k)) << 3;
+      const kiIdx: usize = (<usize>(k * n + i)) << 3;
+      const jkIdx: usize = (<usize>(j * n + k)) << 3;
+      const kjIdx: usize = (<usize>(k * n + j)) << 3;
 
-      store<f64>(matrixPtr + ikIdx, Aki)
-      store<f64>(matrixPtr + kiIdx, Aki)
-      store<f64>(matrixPtr + jkIdx, Akj)
-      store<f64>(matrixPtr + kjIdx, Akj)
+      store<f64>(matrixPtr + ikIdx, Aki);
+      store<f64>(matrixPtr + kiIdx, Aki);
+      store<f64>(matrixPtr + jkIdx, Akj);
+      store<f64>(matrixPtr + kjIdx, Akj);
     }
   }
 }
@@ -227,26 +227,26 @@ function applyJacobiRotationToVectors(
   SkiPtr: usize,
   SkjPtr: usize
 ): void {
-  const c: f64 = Math.cos(theta)
-  const s: f64 = Math.sin(theta)
+  const c: f64 = Math.cos(theta);
+  const s: f64 = Math.sin(theta);
 
   // Compute rotated columns into work arrays
   for (let k: i32 = 0; k < n; k++) {
-    const kiIdx: usize = (<usize>(k * n + i)) << 3
-    const kjIdx: usize = (<usize>(k * n + j)) << 3
-    const Ski: f64 = load<f64>(vectorsPtr + kiIdx)
-    const Skj: f64 = load<f64>(vectorsPtr + kjIdx)
+    const kiIdx: usize = (<usize>(k * n + i)) << 3;
+    const kjIdx: usize = (<usize>(k * n + j)) << 3;
+    const Ski: f64 = load<f64>(vectorsPtr + kiIdx);
+    const Skj: f64 = load<f64>(vectorsPtr + kjIdx);
 
-    store<f64>(SkiPtr + (<usize>k << 3), c * Ski - s * Skj)
-    store<f64>(SkjPtr + (<usize>k << 3), s * Ski + c * Skj)
+    store<f64>(SkiPtr + ((<usize>k) << 3), c * Ski - s * Skj);
+    store<f64>(SkjPtr + ((<usize>k) << 3), s * Ski + c * Skj);
   }
 
   // Update eigenvector matrix
   for (let k: i32 = 0; k < n; k++) {
-    const kiIdx: usize = (<usize>(k * n + i)) << 3
-    const kjIdx: usize = (<usize>(k * n + j)) << 3
-    store<f64>(vectorsPtr + kiIdx, load<f64>(SkiPtr + (<usize>k << 3)))
-    store<f64>(vectorsPtr + kjIdx, load<f64>(SkjPtr + (<usize>k << 3)))
+    const kiIdx: usize = (<usize>(k * n + i)) << 3;
+    const kjIdx: usize = (<usize>(k * n + j)) << 3;
+    store<f64>(vectorsPtr + kiIdx, load<f64>(SkiPtr + ((<usize>k) << 3)));
+    store<f64>(vectorsPtr + kjIdx, load<f64>(SkjPtr + ((<usize>k) << 3)));
   }
 }
 
@@ -261,31 +261,34 @@ function sortEigenvalues(
   computeVectors: bool
 ): void {
   for (let i: i32 = 0; i < n - 1; i++) {
-    let minIdx: i32 = i
-    let minVal: f64 = Math.abs(load<f64>(eigenvaluesPtr + (<usize>i << 3)))
+    let minIdx: i32 = i;
+    let minVal: f64 = Math.abs(load<f64>(eigenvaluesPtr + ((<usize>i) << 3)));
 
     for (let j: i32 = i + 1; j < n; j++) {
-      const val: f64 = Math.abs(load<f64>(eigenvaluesPtr + (<usize>j << 3)))
+      const val: f64 = Math.abs(load<f64>(eigenvaluesPtr + ((<usize>j) << 3)));
       if (val < minVal) {
-        minVal = val
-        minIdx = j
+        minVal = val;
+        minIdx = j;
       }
     }
 
     if (minIdx !== i) {
       // Swap eigenvalues
-      const tmp: f64 = load<f64>(eigenvaluesPtr + (<usize>i << 3))
-      store<f64>(eigenvaluesPtr + (<usize>i << 3), load<f64>(eigenvaluesPtr + (<usize>minIdx << 3)))
-      store<f64>(eigenvaluesPtr + (<usize>minIdx << 3), tmp)
+      const tmp: f64 = load<f64>(eigenvaluesPtr + ((<usize>i) << 3));
+      store<f64>(
+        eigenvaluesPtr + ((<usize>i) << 3),
+        load<f64>(eigenvaluesPtr + ((<usize>minIdx) << 3))
+      );
+      store<f64>(eigenvaluesPtr + ((<usize>minIdx) << 3), tmp);
 
       // Swap eigenvector columns if computing vectors
       if (computeVectors) {
         for (let k: i32 = 0; k < n; k++) {
-          const kiIdx: usize = (<usize>(k * n + i)) << 3
-          const kMinIdx: usize = (<usize>(k * n + minIdx)) << 3
-          const tmpVec: f64 = load<f64>(eigenvectorsPtr + kiIdx)
-          store<f64>(eigenvectorsPtr + kiIdx, load<f64>(eigenvectorsPtr + kMinIdx))
-          store<f64>(eigenvectorsPtr + kMinIdx, tmpVec)
+          const kiIdx: usize = (<usize>(k * n + i)) << 3;
+          const kMinIdx: usize = (<usize>(k * n + minIdx)) << 3;
+          const tmpVec: f64 = load<f64>(eigenvectorsPtr + kiIdx);
+          store<f64>(eigenvectorsPtr + kiIdx, load<f64>(eigenvectorsPtr + kMinIdx));
+          store<f64>(eigenvectorsPtr + kMinIdx, tmpVec);
         }
       }
     }
@@ -315,56 +318,56 @@ export function powerIteration(
   workPtr: usize
 ): i32 {
   // Initialize eigenvector to [1, 1, ..., 1] / sqrt(n)
-  const initVal: f64 = 1.0 / Math.sqrt(<f64>n)
+  const initVal: f64 = 1.0 / Math.sqrt(<f64>n);
   for (let i: i32 = 0; i < n; i++) {
-    store<f64>(eigenvectorPtr + (<usize>i << 3), initVal)
+    store<f64>(eigenvectorPtr + ((<usize>i) << 3), initVal);
   }
 
-  let prevEigenvalue: f64 = 0.0
+  let prevEigenvalue: f64 = 0.0;
 
   for (let iter: i32 = 0; iter < maxIterations; iter++) {
     // Matrix-vector multiply: work = A * eigenvector
     for (let i: i32 = 0; i < n; i++) {
-      let sum: f64 = 0.0
+      let sum: f64 = 0.0;
       for (let j: i32 = 0; j < n; j++) {
-        const aij: f64 = load<f64>(matrixPtr + (<usize>(i * n + j) << 3))
-        const vj: f64 = load<f64>(eigenvectorPtr + (<usize>j << 3))
-        sum += aij * vj
+        const aij: f64 = load<f64>(matrixPtr + ((<usize>(i * n + j)) << 3));
+        const vj: f64 = load<f64>(eigenvectorPtr + ((<usize>j) << 3));
+        sum += aij * vj;
       }
-      store<f64>(workPtr + (<usize>i << 3), sum)
+      store<f64>(workPtr + ((<usize>i) << 3), sum);
     }
 
     // Compute norm of result
-    let norm: f64 = 0.0
+    let norm: f64 = 0.0;
     for (let i: i32 = 0; i < n; i++) {
-      const val: f64 = load<f64>(workPtr + (<usize>i << 3))
-      norm += val * val
+      const val: f64 = load<f64>(workPtr + ((<usize>i) << 3));
+      norm += val * val;
     }
-    norm = Math.sqrt(norm)
+    norm = Math.sqrt(norm);
 
     if (norm < 1e-15) {
       // Matrix is likely zero or nearly singular
-      store<f64>(eigenvaluePtr, 0.0)
-      return iter
+      store<f64>(eigenvaluePtr, 0.0);
+      return iter;
     }
 
     // Normalize and store as new eigenvector
-    const eigenvalue: f64 = norm
+    const eigenvalue: f64 = norm;
     for (let i: i32 = 0; i < n; i++) {
-      store<f64>(eigenvectorPtr + (<usize>i << 3), load<f64>(workPtr + (<usize>i << 3)) / norm)
+      store<f64>(eigenvectorPtr + ((<usize>i) << 3), load<f64>(workPtr + ((<usize>i) << 3)) / norm);
     }
 
     // Check convergence
     if (Math.abs(eigenvalue - prevEigenvalue) < tolerance) {
-      store<f64>(eigenvaluePtr, eigenvalue)
-      return iter + 1
+      store<f64>(eigenvaluePtr, eigenvalue);
+      return iter + 1;
     }
 
-    prevEigenvalue = eigenvalue
+    prevEigenvalue = eigenvalue;
   }
 
-  store<f64>(eigenvaluePtr, prevEigenvalue)
-  return -1 // Did not converge
+  store<f64>(eigenvaluePtr, prevEigenvalue);
+  return -1; // Did not converge
 }
 
 /**
@@ -384,57 +387,58 @@ export function spectralRadius(
   tolerance: f64,
   workPtr: usize
 ): f64 {
-  const eigenvectorPtr: usize = workPtr
-  const tempPtr: usize = workPtr + (<usize>n << 3)
+  const eigenvectorPtr: usize = workPtr;
+  const tempPtr: usize = workPtr + ((<usize>n) << 3);
 
   // Use in-place eigenvalue storage
-  let eigenvalue: f64 = 0.0
+  let eigenvalue: f64 = 0.0;
 
   // Initialize eigenvector
-  const initVal: f64 = 1.0 / Math.sqrt(<f64>n)
+  const initVal: f64 = 1.0 / Math.sqrt(<f64>n);
   for (let i: i32 = 0; i < n; i++) {
-    store<f64>(eigenvectorPtr + (<usize>i << 3), initVal)
+    store<f64>(eigenvectorPtr + ((<usize>i) << 3), initVal);
   }
 
   for (let iter: i32 = 0; iter < maxIterations; iter++) {
     // Matrix-vector multiply
     for (let i: i32 = 0; i < n; i++) {
-      let sum: f64 = 0.0
+      let sum: f64 = 0.0;
       for (let j: i32 = 0; j < n; j++) {
-        sum += load<f64>(matrixPtr + (<usize>(i * n + j) << 3)) *
-               load<f64>(eigenvectorPtr + (<usize>j << 3))
+        sum +=
+          load<f64>(matrixPtr + ((<usize>(i * n + j)) << 3)) *
+          load<f64>(eigenvectorPtr + ((<usize>j) << 3));
       }
-      store<f64>(tempPtr + (<usize>i << 3), sum)
+      store<f64>(tempPtr + ((<usize>i) << 3), sum);
     }
 
     // Compute norm
-    let norm: f64 = 0.0
+    let norm: f64 = 0.0;
     for (let i: i32 = 0; i < n; i++) {
-      const val: f64 = load<f64>(tempPtr + (<usize>i << 3))
-      norm += val * val
+      const val: f64 = load<f64>(tempPtr + ((<usize>i) << 3));
+      norm += val * val;
     }
-    norm = Math.sqrt(norm)
+    norm = Math.sqrt(norm);
 
     if (norm < 1e-15) {
-      return 0.0
+      return 0.0;
     }
 
-    const newEigenvalue: f64 = norm
+    const newEigenvalue: f64 = norm;
 
     // Normalize
     for (let i: i32 = 0; i < n; i++) {
-      store<f64>(eigenvectorPtr + (<usize>i << 3), load<f64>(tempPtr + (<usize>i << 3)) / norm)
+      store<f64>(eigenvectorPtr + ((<usize>i) << 3), load<f64>(tempPtr + ((<usize>i) << 3)) / norm);
     }
 
     // Check convergence
     if (Math.abs(newEigenvalue - eigenvalue) < tolerance) {
-      return newEigenvalue
+      return newEigenvalue;
     }
 
-    eigenvalue = newEigenvalue
+    eigenvalue = newEigenvalue;
   }
 
-  return eigenvalue
+  return eigenvalue;
 }
 
 /**
@@ -458,37 +462,37 @@ export function inverseIteration(
   eigenvectorPtr: usize,
   workPtr: usize
 ): i32 {
-  const shiftedMatrixPtr: usize = workPtr
-  const luPtr: usize = workPtr // Reuse for LU decomposition
-  const tempPtr: usize = workPtr + (<usize>(n * n) << 3)
+  const shiftedMatrixPtr: usize = workPtr;
+  const luPtr: usize = workPtr; // Reuse for LU decomposition
+  const tempPtr: usize = workPtr + ((<usize>(n * n)) << 3);
 
   // Create shifted matrix: A - lambda*I
   for (let i: i32 = 0; i < n; i++) {
     for (let j: i32 = 0; j < n; j++) {
-      const idx: usize = (<usize>(i * n + j)) << 3
-      let val: f64 = load<f64>(matrixPtr + idx)
+      const idx: usize = (<usize>(i * n + j)) << 3;
+      let val: f64 = load<f64>(matrixPtr + idx);
       if (i === j) {
-        val -= eigenvalue
+        val -= eigenvalue;
       }
-      store<f64>(shiftedMatrixPtr + idx, val)
+      store<f64>(shiftedMatrixPtr + idx, val);
     }
   }
 
   // Initialize eigenvector to random-ish values
   for (let i: i32 = 0; i < n; i++) {
-    store<f64>(eigenvectorPtr + (<usize>i << 3), 1.0 + <f64>i * 0.1)
+    store<f64>(eigenvectorPtr + ((<usize>i) << 3), 1.0 + <f64>i * 0.1);
   }
 
   // Normalize
-  let norm: f64 = 0.0
+  let norm: f64 = 0.0;
   for (let i: i32 = 0; i < n; i++) {
-    const val: f64 = load<f64>(eigenvectorPtr + (<usize>i << 3))
-    norm += val * val
+    const val: f64 = load<f64>(eigenvectorPtr + ((<usize>i) << 3));
+    norm += val * val;
   }
-  norm = Math.sqrt(norm)
+  norm = Math.sqrt(norm);
   for (let i: i32 = 0; i < n; i++) {
-    const idx: usize = (<usize>i) << 3
-    store<f64>(eigenvectorPtr + idx, load<f64>(eigenvectorPtr + idx) / norm)
+    const idx: usize = (<usize>i) << 3;
+    store<f64>(eigenvectorPtr + idx, load<f64>(eigenvectorPtr + idx) / norm);
   }
 
   // Simple Gaussian elimination solve (could use LU from decomposition.ts)
@@ -499,89 +503,91 @@ export function inverseIteration(
 
     // Copy shifted matrix for solving
     for (let i: i32 = 0; i < n * n; i++) {
-      store<f64>(luPtr + (<usize>i << 3), load<f64>(shiftedMatrixPtr + (<usize>i << 3)))
+      store<f64>(luPtr + ((<usize>i) << 3), load<f64>(shiftedMatrixPtr + ((<usize>i) << 3)));
     }
 
     // Copy eigenvector to temp as RHS
     for (let i: i32 = 0; i < n; i++) {
-      store<f64>(tempPtr + (<usize>i << 3), load<f64>(eigenvectorPtr + (<usize>i << 3)))
+      store<f64>(tempPtr + ((<usize>i) << 3), load<f64>(eigenvectorPtr + ((<usize>i) << 3)));
     }
 
     // Gaussian elimination with partial pivoting
     for (let k: i32 = 0; k < n - 1; k++) {
       // Find pivot
-      let maxVal: f64 = Math.abs(load<f64>(luPtr + (<usize>(k * n + k) << 3)))
-      let maxRow: i32 = k
+      let maxVal: f64 = Math.abs(load<f64>(luPtr + ((<usize>(k * n + k)) << 3)));
+      let maxRow: i32 = k;
       for (let i: i32 = k + 1; i < n; i++) {
-        const val: f64 = Math.abs(load<f64>(luPtr + (<usize>(i * n + k) << 3)))
+        const val: f64 = Math.abs(load<f64>(luPtr + ((<usize>(i * n + k)) << 3)));
         if (val > maxVal) {
-          maxVal = val
-          maxRow = i
+          maxVal = val;
+          maxRow = i;
         }
       }
 
       // Swap rows if needed
       if (maxRow !== k) {
         for (let j: i32 = 0; j < n; j++) {
-          const kIdx: usize = (<usize>(k * n + j)) << 3
-          const mIdx: usize = (<usize>(maxRow * n + j)) << 3
-          const tmp: f64 = load<f64>(luPtr + kIdx)
-          store<f64>(luPtr + kIdx, load<f64>(luPtr + mIdx))
-          store<f64>(luPtr + mIdx, tmp)
+          const kIdx: usize = (<usize>(k * n + j)) << 3;
+          const mIdx: usize = (<usize>(maxRow * n + j)) << 3;
+          const tmp: f64 = load<f64>(luPtr + kIdx);
+          store<f64>(luPtr + kIdx, load<f64>(luPtr + mIdx));
+          store<f64>(luPtr + mIdx, tmp);
         }
-        const tmpRhs: f64 = load<f64>(tempPtr + (<usize>k << 3))
-        store<f64>(tempPtr + (<usize>k << 3), load<f64>(tempPtr + (<usize>maxRow << 3)))
-        store<f64>(tempPtr + (<usize>maxRow << 3), tmpRhs)
+        const tmpRhs: f64 = load<f64>(tempPtr + ((<usize>k) << 3));
+        store<f64>(tempPtr + ((<usize>k) << 3), load<f64>(tempPtr + ((<usize>maxRow) << 3)));
+        store<f64>(tempPtr + ((<usize>maxRow) << 3), tmpRhs);
       }
 
       // Eliminate
-      const pivot: f64 = load<f64>(luPtr + (<usize>(k * n + k) << 3))
-      if (Math.abs(pivot) < 1e-15) continue
+      const pivot: f64 = load<f64>(luPtr + ((<usize>(k * n + k)) << 3));
+      if (Math.abs(pivot) < 1e-15) continue;
 
       for (let i: i32 = k + 1; i < n; i++) {
-        const factor: f64 = load<f64>(luPtr + (<usize>(i * n + k) << 3)) / pivot
+        const factor: f64 = load<f64>(luPtr + ((<usize>(i * n + k)) << 3)) / pivot;
         for (let j: i32 = k; j < n; j++) {
-          const ijIdx: usize = (<usize>(i * n + j)) << 3
-          const kjIdx: usize = (<usize>(k * n + j)) << 3
-          store<f64>(luPtr + ijIdx, load<f64>(luPtr + ijIdx) - factor * load<f64>(luPtr + kjIdx))
+          const ijIdx: usize = (<usize>(i * n + j)) << 3;
+          const kjIdx: usize = (<usize>(k * n + j)) << 3;
+          store<f64>(luPtr + ijIdx, load<f64>(luPtr + ijIdx) - factor * load<f64>(luPtr + kjIdx));
         }
-        const iIdx: usize = (<usize>i) << 3
-        const kIdx: usize = (<usize>k) << 3
-        store<f64>(tempPtr + iIdx, load<f64>(tempPtr + iIdx) - factor * load<f64>(tempPtr + kIdx))
+        const iIdx: usize = (<usize>i) << 3;
+        const kIdx: usize = (<usize>k) << 3;
+        store<f64>(tempPtr + iIdx, load<f64>(tempPtr + iIdx) - factor * load<f64>(tempPtr + kIdx));
       }
     }
 
     // Back substitution
     for (let i: i32 = n - 1; i >= 0; i--) {
-      let sum: f64 = load<f64>(tempPtr + (<usize>i << 3))
+      let sum: f64 = load<f64>(tempPtr + ((<usize>i) << 3));
       for (let j: i32 = i + 1; j < n; j++) {
-        sum -= load<f64>(luPtr + (<usize>(i * n + j) << 3)) * load<f64>(eigenvectorPtr + (<usize>j << 3))
+        sum -=
+          load<f64>(luPtr + ((<usize>(i * n + j)) << 3)) *
+          load<f64>(eigenvectorPtr + ((<usize>j) << 3));
       }
-      const diag: f64 = load<f64>(luPtr + (<usize>(i * n + i) << 3))
+      const diag: f64 = load<f64>(luPtr + ((<usize>(i * n + i)) << 3));
       if (Math.abs(diag) > 1e-15) {
-        store<f64>(eigenvectorPtr + (<usize>i << 3), sum / diag)
+        store<f64>(eigenvectorPtr + ((<usize>i) << 3), sum / diag);
       }
     }
 
     // Normalize
-    norm = 0.0
+    norm = 0.0;
     for (let i: i32 = 0; i < n; i++) {
-      const val: f64 = load<f64>(eigenvectorPtr + (<usize>i << 3))
-      norm += val * val
+      const val: f64 = load<f64>(eigenvectorPtr + ((<usize>i) << 3));
+      norm += val * val;
     }
-    norm = Math.sqrt(norm)
+    norm = Math.sqrt(norm);
 
     if (norm < 1e-15) {
-      return -1
+      return -1;
     }
 
     for (let i: i32 = 0; i < n; i++) {
-      const idx: usize = (<usize>i) << 3
-      store<f64>(eigenvectorPtr + idx, load<f64>(eigenvectorPtr + idx) / norm)
+      const idx: usize = (<usize>i) << 3;
+      store<f64>(eigenvectorPtr + idx, load<f64>(eigenvectorPtr + idx) / norm);
     }
   }
 
-  return maxIterations
+  return maxIterations;
 }
 
 // ============================================================================
@@ -608,53 +614,53 @@ export function eigsSymmetricSIMD(
   eigenvectorsPtr: usize,
   workPtr: usize
 ): i32 {
-  const computeVectors: bool = eigenvectorsPtr !== 0
-  const e0: f64 = Math.abs(precision / <f64>n)
-  const maxIterations: i32 = n * n * 30
+  const computeVectors: bool = eigenvectorsPtr !== 0;
+  const e0: f64 = Math.abs(precision / <f64>n);
+  const maxIterations: i32 = n * n * 30;
 
-  const AkiPtr: usize = workPtr
-  const AkjPtr: usize = workPtr + (<usize>n << 3)
+  const AkiPtr: usize = workPtr;
+  const AkjPtr: usize = workPtr + ((<usize>n) << 3);
 
   // Initialize eigenvectors to identity
   if (computeVectors) {
     for (let i: i32 = 0; i < n; i++) {
       for (let j: i32 = 0; j < n; j++) {
-        const idx: usize = (<usize>(i * n + j)) << 3
-        store<f64>(eigenvectorsPtr + idx, i === j ? 1.0 : 0.0)
+        const idx: usize = (<usize>(i * n + j)) << 3;
+        store<f64>(eigenvectorsPtr + idx, i === j ? 1.0 : 0.0);
       }
     }
   }
 
-  let iterations: i32 = 0
-  let maxOffDiag: f64 = getMaxOffDiagonal(matrixPtr, n)
+  let iterations: i32 = 0;
+  let maxOffDiag: f64 = getMaxOffDiagonal(matrixPtr, n);
 
   while (Math.abs(maxOffDiag) >= e0 && iterations < maxIterations) {
-    const ij: i64 = findMaxOffDiagonalIndices(matrixPtr, n)
-    const i: i32 = <i32>(ij >> 32)
-    const j: i32 = <i32>(ij & 0xFFFFFFFF)
+    const ij: i64 = findMaxOffDiagonalIndices(matrixPtr, n);
+    const i: i32 = <i32>(ij >> 32);
+    const j: i32 = <i32>(ij & 0xffffffff);
 
-    const theta: f64 = getTheta(matrixPtr, n, i, j, precision)
+    const theta: f64 = getTheta(matrixPtr, n, i, j, precision);
 
     // Apply SIMD-accelerated Jacobi rotation
-    applyJacobiRotationSIMD(matrixPtr, n, theta, i, j, AkiPtr, AkjPtr)
+    applyJacobiRotationSIMD(matrixPtr, n, theta, i, j, AkiPtr, AkjPtr);
 
     if (computeVectors) {
-      applyJacobiRotationToVectorsSIMD(eigenvectorsPtr, n, theta, i, j, AkiPtr, AkjPtr)
+      applyJacobiRotationToVectorsSIMD(eigenvectorsPtr, n, theta, i, j, AkiPtr, AkjPtr);
     }
 
-    maxOffDiag = getMaxOffDiagonal(matrixPtr, n)
-    iterations++
+    maxOffDiag = getMaxOffDiagonal(matrixPtr, n);
+    iterations++;
   }
 
   // Extract eigenvalues
   for (let ii: i32 = 0; ii < n; ii++) {
-    const diagIdx: usize = (<usize>(ii * n + ii)) << 3
-    store<f64>(eigenvaluesPtr + (<usize>ii << 3), load<f64>(matrixPtr + diagIdx))
+    const diagIdx: usize = (<usize>(ii * n + ii)) << 3;
+    store<f64>(eigenvaluesPtr + ((<usize>ii) << 3), load<f64>(matrixPtr + diagIdx));
   }
 
-  sortEigenvalues(eigenvaluesPtr, eigenvectorsPtr, n, computeVectors)
+  sortEigenvalues(eigenvaluesPtr, eigenvectorsPtr, n, computeVectors);
 
-  return iterations < maxIterations ? iterations : -1
+  return iterations < maxIterations ? iterations : -1;
 }
 
 /**
@@ -669,92 +675,94 @@ function applyJacobiRotationSIMD(
   AkiPtr: usize,
   AkjPtr: usize
 ): void {
-  const c: f64 = Math.cos(theta)
-  const s: f64 = Math.sin(theta)
-  const c2: f64 = c * c
-  const s2: f64 = s * s
+  const c: f64 = Math.cos(theta);
+  const s: f64 = Math.sin(theta);
+  const c2: f64 = c * c;
+  const s2: f64 = s * s;
 
-  const iiIdx: usize = (<usize>(i * n + i)) << 3
-  const jjIdx: usize = (<usize>(j * n + j)) << 3
-  const ijIdx: usize = (<usize>(i * n + j)) << 3
-  const jiIdx: usize = (<usize>(j * n + i)) << 3
+  const iiIdx: usize = (<usize>(i * n + i)) << 3;
+  const jjIdx: usize = (<usize>(j * n + j)) << 3;
+  const ijIdx: usize = (<usize>(i * n + j)) << 3;
+  const jiIdx: usize = (<usize>(j * n + i)) << 3;
 
-  const Hii: f64 = load<f64>(matrixPtr + iiIdx)
-  const Hjj: f64 = load<f64>(matrixPtr + jjIdx)
-  const Hij: f64 = load<f64>(matrixPtr + ijIdx)
+  const Hii: f64 = load<f64>(matrixPtr + iiIdx);
+  const Hjj: f64 = load<f64>(matrixPtr + jjIdx);
+  const Hij: f64 = load<f64>(matrixPtr + ijIdx);
 
-  const Aii: f64 = c2 * Hii - 2.0 * c * s * Hij + s2 * Hjj
-  const Ajj: f64 = s2 * Hii + 2.0 * c * s * Hij + c2 * Hjj
+  const Aii: f64 = c2 * Hii - 2.0 * c * s * Hij + s2 * Hjj;
+  const Ajj: f64 = s2 * Hii + 2.0 * c * s * Hij + c2 * Hjj;
 
   // SIMD rotation coefficients
-  const cVec: v128 = f64x2.splat(c)
-  const sVec: v128 = f64x2.splat(s)
+  const cVec: v128 = f64x2.splat(c);
+  const sVec: v128 = f64x2.splat(s);
 
   // Compute rotated rows/columns using SIMD where possible
-  let k: i32 = 0
-  const limit: i32 = n - 1
+  let k: i32 = 0;
+  const limit: i32 = n - 1;
 
   for (; k < limit; k += 2) {
-    const k0: i32 = k
-    const k1: i32 = k + 1
+    const k0: i32 = k;
+    const k1: i32 = k + 1;
 
-    const ik0Idx: usize = (<usize>(i * n + k0)) << 3
-    const jk0Idx: usize = (<usize>(j * n + k0)) << 3
-    const ik1Idx: usize = (<usize>(i * n + k1)) << 3
-    const jk1Idx: usize = (<usize>(j * n + k1)) << 3
+    const ik0Idx: usize = (<usize>(i * n + k0)) << 3;
+    const jk0Idx: usize = (<usize>(j * n + k0)) << 3;
+    const ik1Idx: usize = (<usize>(i * n + k1)) << 3;
+    const jk1Idx: usize = (<usize>(j * n + k1)) << 3;
 
     // Load pairs
     const Hik: v128 = f64x2.replace_lane(
       f64x2.replace_lane(f64x2.splat(0.0), 0, load<f64>(matrixPtr + ik0Idx)),
-      1, load<f64>(matrixPtr + ik1Idx)
-    )
+      1,
+      load<f64>(matrixPtr + ik1Idx)
+    );
     const Hjk: v128 = f64x2.replace_lane(
       f64x2.replace_lane(f64x2.splat(0.0), 0, load<f64>(matrixPtr + jk0Idx)),
-      1, load<f64>(matrixPtr + jk1Idx)
-    )
+      1,
+      load<f64>(matrixPtr + jk1Idx)
+    );
 
     // Aki = c * Hik - s * Hjk
-    const Aki: v128 = f64x2.sub(f64x2.mul(cVec, Hik), f64x2.mul(sVec, Hjk))
+    const Aki: v128 = f64x2.sub(f64x2.mul(cVec, Hik), f64x2.mul(sVec, Hjk));
     // Akj = s * Hik + c * Hjk
-    const Akj: v128 = f64x2.add(f64x2.mul(sVec, Hik), f64x2.mul(cVec, Hjk))
+    const Akj: v128 = f64x2.add(f64x2.mul(sVec, Hik), f64x2.mul(cVec, Hjk));
 
-    store<f64>(AkiPtr + (<usize>k0 << 3), f64x2.extract_lane(Aki, 0))
-    store<f64>(AkiPtr + (<usize>k1 << 3), f64x2.extract_lane(Aki, 1))
-    store<f64>(AkjPtr + (<usize>k0 << 3), f64x2.extract_lane(Akj, 0))
-    store<f64>(AkjPtr + (<usize>k1 << 3), f64x2.extract_lane(Akj, 1))
+    store<f64>(AkiPtr + ((<usize>k0) << 3), f64x2.extract_lane(Aki, 0));
+    store<f64>(AkiPtr + ((<usize>k1) << 3), f64x2.extract_lane(Aki, 1));
+    store<f64>(AkjPtr + ((<usize>k0) << 3), f64x2.extract_lane(Akj, 0));
+    store<f64>(AkjPtr + ((<usize>k1) << 3), f64x2.extract_lane(Akj, 1));
   }
 
   // Handle remaining element
   for (; k < n; k++) {
-    const ikIdx: usize = (<usize>(i * n + k)) << 3
-    const jkIdx: usize = (<usize>(j * n + k)) << 3
-    const Hik: f64 = load<f64>(matrixPtr + ikIdx)
-    const Hjk: f64 = load<f64>(matrixPtr + jkIdx)
+    const ikIdx: usize = (<usize>(i * n + k)) << 3;
+    const jkIdx: usize = (<usize>(j * n + k)) << 3;
+    const Hik: f64 = load<f64>(matrixPtr + ikIdx);
+    const Hjk: f64 = load<f64>(matrixPtr + jkIdx);
 
-    store<f64>(AkiPtr + (<usize>k << 3), c * Hik - s * Hjk)
-    store<f64>(AkjPtr + (<usize>k << 3), s * Hik + c * Hjk)
+    store<f64>(AkiPtr + ((<usize>k) << 3), c * Hik - s * Hjk);
+    store<f64>(AkjPtr + ((<usize>k) << 3), s * Hik + c * Hjk);
   }
 
   // Update matrix
-  store<f64>(matrixPtr + iiIdx, Aii)
-  store<f64>(matrixPtr + jjIdx, Ajj)
-  store<f64>(matrixPtr + ijIdx, 0.0)
-  store<f64>(matrixPtr + jiIdx, 0.0)
+  store<f64>(matrixPtr + iiIdx, Aii);
+  store<f64>(matrixPtr + jjIdx, Ajj);
+  store<f64>(matrixPtr + ijIdx, 0.0);
+  store<f64>(matrixPtr + jiIdx, 0.0);
 
   for (k = 0; k < n; k++) {
     if (k !== i && k !== j) {
-      const Aki: f64 = load<f64>(AkiPtr + (<usize>k << 3))
-      const Akj: f64 = load<f64>(AkjPtr + (<usize>k << 3))
+      const Aki: f64 = load<f64>(AkiPtr + ((<usize>k) << 3));
+      const Akj: f64 = load<f64>(AkjPtr + ((<usize>k) << 3));
 
-      const ikIdx: usize = (<usize>(i * n + k)) << 3
-      const kiIdx: usize = (<usize>(k * n + i)) << 3
-      const jkIdx: usize = (<usize>(j * n + k)) << 3
-      const kjIdx: usize = (<usize>(k * n + j)) << 3
+      const ikIdx: usize = (<usize>(i * n + k)) << 3;
+      const kiIdx: usize = (<usize>(k * n + i)) << 3;
+      const jkIdx: usize = (<usize>(j * n + k)) << 3;
+      const kjIdx: usize = (<usize>(k * n + j)) << 3;
 
-      store<f64>(matrixPtr + ikIdx, Aki)
-      store<f64>(matrixPtr + kiIdx, Aki)
-      store<f64>(matrixPtr + jkIdx, Akj)
-      store<f64>(matrixPtr + kjIdx, Akj)
+      store<f64>(matrixPtr + ikIdx, Aki);
+      store<f64>(matrixPtr + kiIdx, Aki);
+      store<f64>(matrixPtr + jkIdx, Akj);
+      store<f64>(matrixPtr + kjIdx, Akj);
     }
   }
 }
@@ -771,59 +779,61 @@ function applyJacobiRotationToVectorsSIMD(
   SkiPtr: usize,
   SkjPtr: usize
 ): void {
-  const c: f64 = Math.cos(theta)
-  const s: f64 = Math.sin(theta)
-  const cVec: v128 = f64x2.splat(c)
-  const sVec: v128 = f64x2.splat(s)
+  const c: f64 = Math.cos(theta);
+  const s: f64 = Math.sin(theta);
+  const cVec: v128 = f64x2.splat(c);
+  const sVec: v128 = f64x2.splat(s);
 
   // Compute rotated columns using SIMD
-  let k: i32 = 0
-  const limit: i32 = n - 1
+  let k: i32 = 0;
+  const limit: i32 = n - 1;
 
   for (; k < limit; k += 2) {
-    const k0: i32 = k
-    const k1: i32 = k + 1
+    const k0: i32 = k;
+    const k1: i32 = k + 1;
 
-    const ki0Idx: usize = (<usize>(k0 * n + i)) << 3
-    const kj0Idx: usize = (<usize>(k0 * n + j)) << 3
-    const ki1Idx: usize = (<usize>(k1 * n + i)) << 3
-    const kj1Idx: usize = (<usize>(k1 * n + j)) << 3
+    const ki0Idx: usize = (<usize>(k0 * n + i)) << 3;
+    const kj0Idx: usize = (<usize>(k0 * n + j)) << 3;
+    const ki1Idx: usize = (<usize>(k1 * n + i)) << 3;
+    const kj1Idx: usize = (<usize>(k1 * n + j)) << 3;
 
     const Ski: v128 = f64x2.replace_lane(
       f64x2.replace_lane(f64x2.splat(0.0), 0, load<f64>(vectorsPtr + ki0Idx)),
-      1, load<f64>(vectorsPtr + ki1Idx)
-    )
+      1,
+      load<f64>(vectorsPtr + ki1Idx)
+    );
     const Skj: v128 = f64x2.replace_lane(
       f64x2.replace_lane(f64x2.splat(0.0), 0, load<f64>(vectorsPtr + kj0Idx)),
-      1, load<f64>(vectorsPtr + kj1Idx)
-    )
+      1,
+      load<f64>(vectorsPtr + kj1Idx)
+    );
 
-    const newSki: v128 = f64x2.sub(f64x2.mul(cVec, Ski), f64x2.mul(sVec, Skj))
-    const newSkj: v128 = f64x2.add(f64x2.mul(sVec, Ski), f64x2.mul(cVec, Skj))
+    const newSki: v128 = f64x2.sub(f64x2.mul(cVec, Ski), f64x2.mul(sVec, Skj));
+    const newSkj: v128 = f64x2.add(f64x2.mul(sVec, Ski), f64x2.mul(cVec, Skj));
 
-    store<f64>(SkiPtr + (<usize>k0 << 3), f64x2.extract_lane(newSki, 0))
-    store<f64>(SkiPtr + (<usize>k1 << 3), f64x2.extract_lane(newSki, 1))
-    store<f64>(SkjPtr + (<usize>k0 << 3), f64x2.extract_lane(newSkj, 0))
-    store<f64>(SkjPtr + (<usize>k1 << 3), f64x2.extract_lane(newSkj, 1))
+    store<f64>(SkiPtr + ((<usize>k0) << 3), f64x2.extract_lane(newSki, 0));
+    store<f64>(SkiPtr + ((<usize>k1) << 3), f64x2.extract_lane(newSki, 1));
+    store<f64>(SkjPtr + ((<usize>k0) << 3), f64x2.extract_lane(newSkj, 0));
+    store<f64>(SkjPtr + ((<usize>k1) << 3), f64x2.extract_lane(newSkj, 1));
   }
 
   // Handle remaining
   for (; k < n; k++) {
-    const kiIdx: usize = (<usize>(k * n + i)) << 3
-    const kjIdx: usize = (<usize>(k * n + j)) << 3
-    const Ski: f64 = load<f64>(vectorsPtr + kiIdx)
-    const Skj: f64 = load<f64>(vectorsPtr + kjIdx)
+    const kiIdx: usize = (<usize>(k * n + i)) << 3;
+    const kjIdx: usize = (<usize>(k * n + j)) << 3;
+    const Ski: f64 = load<f64>(vectorsPtr + kiIdx);
+    const Skj: f64 = load<f64>(vectorsPtr + kjIdx);
 
-    store<f64>(SkiPtr + (<usize>k << 3), c * Ski - s * Skj)
-    store<f64>(SkjPtr + (<usize>k << 3), s * Ski + c * Skj)
+    store<f64>(SkiPtr + ((<usize>k) << 3), c * Ski - s * Skj);
+    store<f64>(SkjPtr + ((<usize>k) << 3), s * Ski + c * Skj);
   }
 
   // Update eigenvector matrix
   for (k = 0; k < n; k++) {
-    const kiIdx: usize = (<usize>(k * n + i)) << 3
-    const kjIdx: usize = (<usize>(k * n + j)) << 3
-    store<f64>(vectorsPtr + kiIdx, load<f64>(SkiPtr + (<usize>k << 3)))
-    store<f64>(vectorsPtr + kjIdx, load<f64>(SkjPtr + (<usize>k << 3)))
+    const kiIdx: usize = (<usize>(k * n + i)) << 3;
+    const kjIdx: usize = (<usize>(k * n + j)) << 3;
+    store<f64>(vectorsPtr + kiIdx, load<f64>(SkiPtr + ((<usize>k) << 3)));
+    store<f64>(vectorsPtr + kjIdx, load<f64>(SkjPtr + ((<usize>k) << 3)));
   }
 }
 
@@ -849,82 +859,86 @@ export function powerIterationSIMD(
   workPtr: usize
 ): i32 {
   // Initialize eigenvector
-  const initVal: f64 = 1.0 / Math.sqrt(<f64>n)
+  const initVal: f64 = 1.0 / Math.sqrt(<f64>n);
   for (let ii: i32 = 0; ii < n; ii++) {
-    store<f64>(eigenvectorPtr + (<usize>ii << 3), initVal)
+    store<f64>(eigenvectorPtr + ((<usize>ii) << 3), initVal);
   }
 
-  let prevEigenvalue: f64 = 0.0
+  let prevEigenvalue: f64 = 0.0;
 
   for (let iter: i32 = 0; iter < maxIterations; iter++) {
     // SIMD matrix-vector multiply
     for (let ii: i32 = 0; ii < n; ii++) {
-      const rowPtr: usize = matrixPtr + (<usize>(ii * n) << 3)
-      let sumVec: v128 = f64x2.splat(0.0)
-      let jj: i32 = 0
-      const limit: i32 = n - 1
+      const rowPtr: usize = matrixPtr + ((<usize>(ii * n)) << 3);
+      let sumVec: v128 = f64x2.splat(0.0);
+      let jj: i32 = 0;
+      const limit: i32 = n - 1;
 
       for (; jj < limit; jj += 2) {
-        const offset: usize = <usize>jj << 3
-        const aVec: v128 = v128.load(rowPtr + offset)
-        const vVec: v128 = v128.load(eigenvectorPtr + offset)
-        sumVec = f64x2.add(sumVec, f64x2.mul(aVec, vVec))
+        const offset: usize = (<usize>jj) << 3;
+        const aVec: v128 = v128.load(rowPtr + offset);
+        const vVec: v128 = v128.load(eigenvectorPtr + offset);
+        sumVec = f64x2.add(sumVec, f64x2.mul(aVec, vVec));
       }
 
-      let sum: f64 = f64x2.extract_lane(sumVec, 0) + f64x2.extract_lane(sumVec, 1)
+      let sum: f64 = f64x2.extract_lane(sumVec, 0) + f64x2.extract_lane(sumVec, 1);
 
       for (; jj < n; jj++) {
-        sum += load<f64>(rowPtr + (<usize>jj << 3)) * load<f64>(eigenvectorPtr + (<usize>jj << 3))
+        sum +=
+          load<f64>(rowPtr + ((<usize>jj) << 3)) * load<f64>(eigenvectorPtr + ((<usize>jj) << 3));
       }
 
-      store<f64>(workPtr + (<usize>ii << 3), sum)
+      store<f64>(workPtr + ((<usize>ii) << 3), sum);
     }
 
     // Compute norm using SIMD
-    let normVec: v128 = f64x2.splat(0.0)
-    let ii: i32 = 0
-    let limit: i32 = n - 1
+    let normVec: v128 = f64x2.splat(0.0);
+    let ii: i32 = 0;
+    const limit: i32 = n - 1;
 
     for (; ii < limit; ii += 2) {
-      const v: v128 = v128.load(workPtr + (<usize>ii << 3))
-      normVec = f64x2.add(normVec, f64x2.mul(v, v))
+      const v: v128 = v128.load(workPtr + ((<usize>ii) << 3));
+      normVec = f64x2.add(normVec, f64x2.mul(v, v));
     }
 
-    let norm: f64 = f64x2.extract_lane(normVec, 0) + f64x2.extract_lane(normVec, 1)
+    let norm: f64 = f64x2.extract_lane(normVec, 0) + f64x2.extract_lane(normVec, 1);
 
     for (; ii < n; ii++) {
-      const val: f64 = load<f64>(workPtr + (<usize>ii << 3))
-      norm += val * val
+      const val: f64 = load<f64>(workPtr + ((<usize>ii) << 3));
+      norm += val * val;
     }
-    norm = Math.sqrt(norm)
+    norm = Math.sqrt(norm);
 
     if (norm < 1e-15) {
-      store<f64>(eigenvaluePtr, 0.0)
-      return iter
+      store<f64>(eigenvaluePtr, 0.0);
+      return iter;
     }
 
-    const eigenvalue: f64 = norm
-    const invNorm: f64 = 1.0 / norm
-    const invNormVec: v128 = f64x2.splat(invNorm)
+    const eigenvalue: f64 = norm;
+    const invNorm: f64 = 1.0 / norm;
+    const invNormVec: v128 = f64x2.splat(invNorm);
 
     // Normalize using SIMD
-    ii = 0
+    ii = 0;
     for (; ii < limit; ii += 2) {
-      const offset: usize = <usize>ii << 3
-      v128.store(eigenvectorPtr + offset, f64x2.mul(v128.load(workPtr + offset), invNormVec))
+      const offset: usize = (<usize>ii) << 3;
+      v128.store(eigenvectorPtr + offset, f64x2.mul(v128.load(workPtr + offset), invNormVec));
     }
     for (; ii < n; ii++) {
-      store<f64>(eigenvectorPtr + (<usize>ii << 3), load<f64>(workPtr + (<usize>ii << 3)) * invNorm)
+      store<f64>(
+        eigenvectorPtr + ((<usize>ii) << 3),
+        load<f64>(workPtr + ((<usize>ii) << 3)) * invNorm
+      );
     }
 
     if (Math.abs(eigenvalue - prevEigenvalue) < tolerance) {
-      store<f64>(eigenvaluePtr, eigenvalue)
-      return iter + 1
+      store<f64>(eigenvaluePtr, eigenvalue);
+      return iter + 1;
     }
 
-    prevEigenvalue = eigenvalue
+    prevEigenvalue = eigenvalue;
   }
 
-  store<f64>(eigenvaluePtr, prevEigenvalue)
-  return -1
+  store<f64>(eigenvaluePtr, prevEigenvalue);
+  return -1;
 }

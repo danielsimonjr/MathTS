@@ -1,68 +1,54 @@
-import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js'
-import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js'
-import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js'
-import { createMatAlgo08xS0Sid } from '../type/matrix/utils/matAlgo08xS0Sid.js'
-import { factory } from '../utils/factory.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import { rightLogShiftNumber } from '../plain/number/index.js'
-import { createUseMatrixForArrayScalar } from './useMatrixForArrayScalar.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
+import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
+import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js';
+import { createMatAlgo08xS0Sid } from '../type/matrix/utils/matAlgo08xS0Sid.js';
+import { factory } from '../utils/factory.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import { rightLogShiftNumber } from '../plain/number/index.js';
+import { createUseMatrixForArrayScalar } from './useMatrixForArrayScalar.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for rightLogShift
 interface Matrix {
-  size(): number[]
-  storage(): string
-  clone(): Matrix
+  size(): number[];
+  storage(): string;
+  clone(): Matrix;
 }
 
 interface RightLogShiftDependencies {
-  typed: TypedFunction
-  matrix: (data: unknown[]) => Matrix
-  equalScalar: TypedFunction
-  zeros: (size: number[], storage?: string) => Matrix
-  DenseMatrix: new (data: unknown) => Matrix
-  concat: TypedFunction
+  typed: TypedFunction;
+  matrix: (data: unknown[]) => Matrix;
+  equalScalar: TypedFunction;
+  zeros: (size: number[], storage?: string) => Matrix;
+  DenseMatrix: new (data: unknown) => Matrix;
+  concat: TypedFunction;
 }
 
-const name = 'rightLogShift'
-const dependencies = [
-  'typed',
-  'matrix',
-  'equalScalar',
-  'zeros',
-  'DenseMatrix',
-  'concat'
-]
+const name = 'rightLogShift';
+const dependencies = ['typed', 'matrix', 'equalScalar', 'zeros', 'DenseMatrix', 'concat'];
 
 export const createRightLogShift = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    equalScalar,
-    zeros,
-    DenseMatrix,
-    concat
-  }: RightLogShiftDependencies) => {
-    const matAlgo01xDSid = createMatAlgo01xDSid({ typed })
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar })
-    const matAlgo08xS0Sid = createMatAlgo08xS0Sid({ typed, equalScalar })
-    const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix })
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
-    const matAlgo14xDs = createMatAlgo14xDs({ typed })
+  ({ typed, matrix, equalScalar, zeros, DenseMatrix, concat }: RightLogShiftDependencies) => {
+    const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
+    const matAlgo08xS0Sid = createMatAlgo08xS0Sid({ typed, equalScalar });
+    const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo14xDs = createMatAlgo14xDs({ typed });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
     const useMatrixForArrayScalar = createUseMatrixForArrayScalar({
       typed,
-      matrix
-    })
+      matrix,
+    });
 
     /**
      * Bitwise right logical shift of value x by y number of bits, `x >>> y`.
@@ -100,9 +86,9 @@ export const createRightLogShift = /* #__PURE__ */ factory(
             (x: Matrix, y: number | BigNumber): Matrix => {
               // check scalar
               if (equalScalar(y, 0)) {
-                return x.clone()
+                return x.clone();
               }
-              return matAlgo11xS0s(x as any, y, self, false) as unknown as Matrix
+              return matAlgo11xS0s(x as any, y, self, false) as unknown as Matrix;
             }
         ),
 
@@ -111,9 +97,9 @@ export const createRightLogShift = /* #__PURE__ */ factory(
             (x: Matrix, y: number | BigNumber): Matrix => {
               // check scalar
               if (equalScalar(y, 0)) {
-                return x.clone()
+                return x.clone();
               }
-              return matAlgo14xDs(x as any, y, self, false) as unknown as Matrix
+              return matAlgo14xDs(x as any, y, self, false) as unknown as Matrix;
             }
         ),
 
@@ -122,9 +108,9 @@ export const createRightLogShift = /* #__PURE__ */ factory(
             (x: number | BigNumber, y: Matrix): Matrix => {
               // check scalar
               if (equalScalar(x, 0)) {
-                return zeros(y.size(), y.storage())
+                return zeros(y.size(), y.storage());
               }
-              return matAlgo10xSids(y as any, x, self, true) as unknown as Matrix
+              return matAlgo10xSids(y as any, x, self, true) as unknown as Matrix;
             }
         ),
 
@@ -133,18 +119,18 @@ export const createRightLogShift = /* #__PURE__ */ factory(
             (x: number | BigNumber, y: Matrix): Matrix => {
               // check scalar
               if (equalScalar(x, 0)) {
-                return zeros(y.size(), y.storage())
+                return zeros(y.size(), y.storage());
               }
-              return matAlgo14xDs(y as any, x, self, true) as unknown as Matrix
+              return matAlgo14xDs(y as any, x, self, true) as unknown as Matrix;
             }
-        )
+        ),
       },
       useMatrixForArrayScalar,
       matrixAlgorithmSuite({
         SS: matAlgo08xS0Sid as any,
         DS: matAlgo01xDSid as any,
-        SD: matAlgo02xDS0 as any
+        SD: matAlgo02xDS0 as any,
       })
-    )
+    );
   }
-)
+);

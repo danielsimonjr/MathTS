@@ -1,15 +1,15 @@
-import { flatten as flattenArray } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { flatten as flattenArray } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions
 
 interface FlattenDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'flatten'
-const dependencies = ['typed']
+const name = 'flatten';
+const dependencies = ['typed'];
 
 export const createFlatten = /* #__PURE__ */ factory(
   name,
@@ -36,13 +36,13 @@ export const createFlatten = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Array: function (x: any[]): any[] {
-        return flattenArray(x)
+        return flattenArray(x);
       },
 
       DenseMatrix: function (x: any): any {
         // Return the same matrix type as x (Dense or Sparse Matrix)
         // Return the same data type as x
-        return x.create(flattenArray(x.valueOf(), true), x.datatype())
+        return x.create(flattenArray(x.valueOf(), true), x.datatype());
       },
 
       SparseMatrix: function (_x: any): never {
@@ -50,8 +50,8 @@ export const createFlatten = /* #__PURE__ */ factory(
           'SparseMatrix is not supported by function flatten ' +
             'because it does not support 1D vectors. ' +
             'Convert to a DenseMatrix or Array first. Example: flatten(x.toArray())'
-        )
-      }
-    })
+        );
+      },
+    });
   }
-)
+);

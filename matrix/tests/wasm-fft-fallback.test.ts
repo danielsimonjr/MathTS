@@ -17,9 +17,7 @@ describe('MatrixWasmBridge JS FFT fallback', () => {
   });
 
   it('round-trips forward then inverse FFT', async () => {
-    const signal = new Float64Array([
-      3, 0, -1, 0, 7, 0, 2, 0, 0, 0, 5, 0, -4, 0, 1, 0,
-    ]);
+    const signal = new Float64Array([3, 0, -1, 0, 7, 0, 2, 0, 0, 0, 5, 0, -4, 0, 1, 0]);
     const fwd = await MatrixWasmBridge.fft(signal, false, {
       useWasm: false,
     } as never);
@@ -33,8 +31,8 @@ describe('MatrixWasmBridge JS FFT fallback', () => {
 
   it('rejects non-power-of-two lengths', async () => {
     const data = new Float64Array([1, 0, 2, 0, 3, 0]); // n = 3
-    await expect(
-      MatrixWasmBridge.fft(data, false, { useWasm: false } as never)
-    ).rejects.toThrow('power-of-two');
+    await expect(MatrixWasmBridge.fft(data, false, { useWasm: false } as never)).rejects.toThrow(
+      'power-of-two'
+    );
   });
 });

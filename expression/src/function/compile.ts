@@ -1,10 +1,10 @@
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
 type MathArray = any[] | number[][];
 type Matrix = any;
 
-const name = 'compile'
-const dependencies = ['typed', 'parse']
+const name = 'compile';
+const dependencies = ['typed', 'parse'];
 
 export const createCompile = /* #__PURE__ */ factory(name, dependencies, ({ typed, parse }) => {
   /**
@@ -43,13 +43,13 @@ export const createCompile = /* #__PURE__ */ factory(name, dependencies, ({ type
    */
   return typed(name, {
     string: function (expr: string) {
-      return parse(expr).compile()
+      return parse(expr).compile();
     },
 
     'Array | Matrix': function (expr: MathArray | Matrix) {
       return deepMap(expr as any, function (entry: any) {
-        return parse(entry).compile()
-      })
-    }
-  })
-})
+        return parse(entry).compile();
+      });
+    },
+  });
+});

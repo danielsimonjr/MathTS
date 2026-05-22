@@ -1,58 +1,58 @@
-import { isInteger } from '../utils/number.js'
-import { factory } from '../utils/factory.js'
+import { isInteger } from '../utils/number.js';
+import { factory } from '../utils/factory.js';
 import type {
   MathNode,
   ConstantNode,
   SymbolNode,
   OperatorNode,
-  ParenthesisNode
-} from '../utils/node.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+  ParenthesisNode,
+} from '../utils/node.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for rationalize
 interface ConstantNodeConstructor {
-  new (value: unknown): ConstantNode
+  new (value: unknown): ConstantNode;
 }
 
 interface OperatorNodeConstructor {
-  new (op: string, fn: string, args: MathNode[]): OperatorNode
+  new (op: string, fn: string, args: MathNode[]): OperatorNode;
 }
 
 interface SymbolNodeConstructor {
-  new (name: string): SymbolNode
+  new (name: string): SymbolNode;
 }
 
 interface RationalizeDependencies {
-  config: ConfigOptions
-  typed: TypedFunction
-  equal: TypedFunction
-  isZero: (x: unknown) => boolean
-  add: TypedFunction
-  subtract: TypedFunction
-  multiply: TypedFunction
-  divide: TypedFunction
-  pow: TypedFunction
-  parse: (expr: string) => MathNode
-  simplifyConstant: TypedFunction
-  simplifyCore: TypedFunction
-  simplify: TypedFunction
-  fraction?: TypedFunction
-  bignumber?: TypedFunction
-  mathWithTransform: Record<string, TypedFunction>
-  matrix: TypedFunction
-  AccessorNode: unknown
-  ArrayNode: unknown
-  ConstantNode: ConstantNodeConstructor
-  FunctionNode: unknown
-  IndexNode: unknown
-  ObjectNode: unknown
-  OperatorNode: OperatorNodeConstructor
-  SymbolNode: SymbolNodeConstructor
-  ParenthesisNode: unknown
+  config: ConfigOptions;
+  typed: TypedFunction;
+  equal: TypedFunction;
+  isZero: (x: unknown) => boolean;
+  add: TypedFunction;
+  subtract: TypedFunction;
+  multiply: TypedFunction;
+  divide: TypedFunction;
+  pow: TypedFunction;
+  parse: (expr: string) => MathNode;
+  simplifyConstant: TypedFunction;
+  simplifyCore: TypedFunction;
+  simplify: TypedFunction;
+  fraction?: TypedFunction;
+  bignumber?: TypedFunction;
+  mathWithTransform: Record<string, TypedFunction>;
+  matrix: TypedFunction;
+  AccessorNode: unknown;
+  ArrayNode: unknown;
+  ConstantNode: ConstantNodeConstructor;
+  FunctionNode: unknown;
+  IndexNode: unknown;
+  ObjectNode: unknown;
+  OperatorNode: OperatorNodeConstructor;
+  SymbolNode: SymbolNodeConstructor;
+  ParenthesisNode: unknown;
 }
 
-const name = 'rationalize'
+const name = 'rationalize';
 const dependencies = [
   'config',
   'typed',
@@ -79,8 +79,8 @@ const dependencies = [
   'ObjectNode',
   'OperatorNode',
   'SymbolNode',
-  'ParenthesisNode'
-]
+  'ParenthesisNode',
+];
 
 export const createRationalize = /* #__PURE__ */ factory(
   name,
@@ -111,7 +111,7 @@ export const createRationalize = /* #__PURE__ */ factory(
     ObjectNode: _ObjectNode,
     OperatorNode,
     SymbolNode,
-    ParenthesisNode: _ParenthesisNode
+    ParenthesisNode: _ParenthesisNode,
   }: RationalizeDependencies) => {
     /**
      * Transform a rationalizable expression in a rational fraction.
@@ -166,54 +166,50 @@ export const createRationalize = /* #__PURE__ */ factory(
      *           {Expression Node}  node simplified expression
      *
      */
-    function _rationalize(
-      expr: MathNode,
-      scope: any = {},
-      detailed: boolean = false
-    ): any {
-      const setRules = rulesRationalize() // Rules for change polynomial in near canonical form
-      const polyRet = polynomial(expr, scope, true, setRules.firstRules) // Check if expression is a rationalizable polynomial
-      const nVars = polyRet.variables.length
-      const noExactFractions = { exactFractions: false }
-      const withExactFractions = { exactFractions: true }
-      expr = polyRet.expression
+    function _rationalize(expr: MathNode, scope: any = {}, detailed: boolean = false): any {
+      const setRules = rulesRationalize(); // Rules for change polynomial in near canonical form
+      const polyRet = polynomial(expr, scope, true, setRules.firstRules); // Check if expression is a rationalizable polynomial
+      const nVars = polyRet.variables.length;
+      const noExactFractions = { exactFractions: false };
+      const withExactFractions = { exactFractions: true };
+      expr = polyRet.expression;
 
       if (nVars >= 1) {
         // If expression in not a constant
-        expr = expandPower(expr) // First expand power of polynomials (cannot be made from rules!)
-        let sBefore: string // Previous expression
-        let rules: any[]
-        let eDistrDiv = true
-        let redoInic = false
+        expr = expandPower(expr); // First expand power of polynomials (cannot be made from rules!)
+        let sBefore: string; // Previous expression
+        let rules: any[];
+        let eDistrDiv = true;
+        let redoInic = false;
         // Apply the initial rules, including succ div rules:
-        expr = simplify(expr, setRules.firstRules, {}, noExactFractions) as MathNode
-        let s: string
+        expr = simplify(expr, setRules.firstRules, {}, noExactFractions) as MathNode;
+        let s: string;
         while (true) {
           // Alternate applying successive division rules and distr.div.rules
           // until there are no more changes:
-          rules = eDistrDiv ? setRules.distrDivRules : setRules.sucDivRules
-          expr = simplify(expr, rules, {}, withExactFractions) as MathNode
-          eDistrDiv = !eDistrDiv // Swap between Distr.Div and Succ. Div. Rules
+          rules = eDistrDiv ? setRules.distrDivRules : setRules.sucDivRules;
+          expr = simplify(expr, rules, {}, withExactFractions) as MathNode;
+          eDistrDiv = !eDistrDiv; // Swap between Distr.Div and Succ. Div. Rules
 
-          s = expr.toString()
+          s = expr.toString();
           if (s === sBefore!) {
-            break // No changes : end of the loop
+            break; // No changes : end of the loop
           }
 
-          redoInic = true
-          sBefore = s
+          redoInic = true;
+          sBefore = s;
         }
 
         if (redoInic) {
           // Apply first rules again without succ div rules (if there are changes)
-          expr = simplify(expr, setRules.firstRulesAgain, {}, noExactFractions) as MathNode
+          expr = simplify(expr, setRules.firstRulesAgain, {}, noExactFractions) as MathNode;
         }
         // Apply final rules:
-        expr = simplify(expr, setRules.finalRules, {}, noExactFractions) as MathNode
+        expr = simplify(expr, setRules.finalRules, {}, noExactFractions) as MathNode;
       } // NVars >= 1
 
-      const coefficients: number[] = []
-      const retRationalize: any = {}
+      const coefficients: number[] = [];
+      const retRationalize: any = {};
 
       if (
         expr.type === 'OperatorNode' &&
@@ -222,43 +218,40 @@ export const createRationalize = /* #__PURE__ */ factory(
       ) {
         // Separate numerator from denominator
         if (nVars === 1) {
-          ;(expr as OperatorNode).args[0] = polyToCanonical(
+          (expr as OperatorNode).args[0] = polyToCanonical(
             (expr as OperatorNode).args[0],
             coefficients
-          )
-          ;(expr as OperatorNode).args[1] = polyToCanonical(
-            (expr as OperatorNode).args[1]
-          )
+          );
+          (expr as OperatorNode).args[1] = polyToCanonical((expr as OperatorNode).args[1]);
         }
         if (detailed) {
-          retRationalize.numerator = (expr as OperatorNode).args[0]
-          retRationalize.denominator = (expr as OperatorNode).args[1]
+          retRationalize.numerator = (expr as OperatorNode).args[0];
+          retRationalize.denominator = (expr as OperatorNode).args[1];
         }
       } else {
         if (nVars === 1) {
-          expr = polyToCanonical(expr, coefficients)
+          expr = polyToCanonical(expr, coefficients);
         }
         if (detailed) {
-          retRationalize.numerator = expr
-          retRationalize.denominator = null
+          retRationalize.numerator = expr;
+          retRationalize.denominator = null;
         }
       }
       // nVars
 
-      if (!detailed) return expr
-      retRationalize.coefficients = coefficients
-      retRationalize.variables = polyRet.variables
-      retRationalize.expression = expr
-      return retRationalize
+      if (!detailed) return expr;
+      retRationalize.coefficients = coefficients;
+      retRationalize.variables = polyRet.variables;
+      retRationalize.expression = expr;
+      return retRationalize;
     }
 
     return typed(name, {
       Node: _rationalize,
-      'Node, boolean': (expr: MathNode, detailed: boolean) =>
-        _rationalize(expr, {}, detailed),
+      'Node, boolean': (expr: MathNode, detailed: boolean) => _rationalize(expr, {}, detailed),
       'Node, Object': _rationalize,
-      'Node, Object, boolean': _rationalize
-    }) // end of typed rationalize
+      'Node, Object, boolean': _rationalize,
+    }); // end of typed rationalize
 
     /**
      *  Function to simplify an expression using an optional scope and
@@ -286,16 +279,16 @@ export const createRationalize = /* #__PURE__ */ factory(
       extended?: boolean,
       rules?: any[]
     ): any {
-      const variables: string[] = []
-      const node = simplify(expr, rules, scope, { exactFractions: false }) as MathNode // Resolves any variables and functions with all defined parameters
-      extended = !!extended
+      const variables: string[] = [];
+      const node = simplify(expr, rules, scope, { exactFractions: false }) as MathNode; // Resolves any variables and functions with all defined parameters
+      extended = !!extended;
 
-      const oper = '+-*' + (extended ? '/' : '')
-      recPoly(node)
-      const retFunc: any = {}
-      retFunc.expression = node
-      retFunc.variables = variables
-      return retFunc
+      const oper = '+-*' + (extended ? '/' : '');
+      recPoly(node);
+      const retFunc: any = {};
+      retFunc.expression = node;
+      retFunc.variables = variables;
+      return retFunc;
 
       // -------------------------------------------------------------------------------------------------------
 
@@ -315,50 +308,42 @@ export const createRationalize = /* #__PURE__ */ factory(
        * @return                           nothing, throw an exception if error
        */
       function recPoly(node: MathNode): void {
-        const tp = node.type // node type
+        const tp = node.type; // node type
         if (tp === 'FunctionNode') {
           // No function call in polynomial expression
-          throw new Error('There is an unsolved function call')
+          throw new Error('There is an unsolved function call');
         } else if (tp === 'OperatorNode') {
           if ((node as OperatorNode).op === '^') {
             // TODO: handle negative exponents like in '1/x^(-2)'
             if (
               (node as OperatorNode).args[1].type !== 'ConstantNode' ||
-              !isInteger(
-                parseFloat(
-                  String(((node as OperatorNode).args[1] as ConstantNode).value)
-                )
-              )
+              !isInteger(parseFloat(String(((node as OperatorNode).args[1] as ConstantNode).value)))
             ) {
-              throw new Error('There is a non-integer exponent')
+              throw new Error('There is a non-integer exponent');
             } else {
-              recPoly((node as OperatorNode).args[0])
+              recPoly((node as OperatorNode).args[0]);
             }
           } else {
             if (!oper.includes((node as OperatorNode).op)) {
               throw new Error(
-                'Operator ' +
-                  (node as OperatorNode).op +
-                  ' invalid in polynomial expression'
-              )
+                'Operator ' + (node as OperatorNode).op + ' invalid in polynomial expression'
+              );
             }
             for (let i = 0; i < (node as OperatorNode).args.length; i++) {
-              recPoly((node as OperatorNode).args[i])
+              recPoly((node as OperatorNode).args[i]);
             }
           } // type of operator
         } else if (tp === 'SymbolNode') {
-          const name = (node as SymbolNode).name // variable name
-          const pos = variables.indexOf(name)
+          const name = (node as SymbolNode).name; // variable name
+          const pos = variables.indexOf(name);
           if (pos === -1) {
             // new variable in expression
-            variables.push(name)
+            variables.push(name);
           }
         } else if (tp === 'ParenthesisNode') {
-          recPoly((node as ParenthesisNode).content)
+          recPoly((node as ParenthesisNode).content);
         } else if (tp !== 'ConstantNode') {
-          throw new Error(
-            'type ' + tp + ' is not allowed in polynomial expression'
-          )
+          throw new Error('type ' + tp + ' is not allowed in polynomial expression');
         }
       } // end of recPoly
     } // end of polynomial
@@ -383,8 +368,8 @@ export const createRationalize = /* #__PURE__ */ factory(
         { l: 'n*n1^-n2', r: 'n/n1^n2' },
         { l: 'n1^-1', r: '1/n1' },
         { l: 'n*(n1/n2)', r: '(n*n1)/n2' },
-        { l: '1*n', r: 'n' }
-      ]
+        { l: '1*n', r: 'n' },
+      ];
 
       const rulesFirst = [
         { l: '(-n1)/(-n2)', r: 'n1/n2' }, // Unary division
@@ -409,29 +394,29 @@ export const createRationalize = /* #__PURE__ */ factory(
         { l: '-(n1+n2)', r: '(-n1-n2)' }, // Unary propagation
         { l: '(n1^n2)^n3', r: '(n1^(n2*n3))' }, // Power to Power
         { l: '-(-n1/n2)', r: '(n1/n2)' }, // Division and Unary
-        { l: '-(n1/n2)', r: '(-n1/n2)' }
-      ] // Division and Unary
+        { l: '-(n1/n2)', r: '(-n1/n2)' },
+      ]; // Division and Unary
 
       const rulesDistrDiv = [
         { l: '(n1/n2 + n3/n4)', r: '((n1*n4 + n3*n2)/(n2*n4))' }, // Sum of fractions
         { l: '(n1/n2 + n3)', r: '((n1 + n3*n2)/n2)' }, // Sum fraction with number 1
-        { l: '(n1 + n2/n3)', r: '((n1*n3 + n2)/n3)' }
-      ] // Sum fraction with number 1
+        { l: '(n1 + n2/n3)', r: '((n1*n3 + n2)/n3)' },
+      ]; // Sum fraction with number 1
 
       const rulesSucDiv = [
         { l: '(n1/(n2/n3))', r: '((n1*n3)/n2)' }, // Division simplification
-        { l: '(n1/n2/n3)', r: '(n1/(n2*n3))' }
-      ]
+        { l: '(n1/n2/n3)', r: '(n1/(n2*n3))' },
+      ];
 
-      const setRules: any = {} // rules set in 4 steps.
+      const setRules: any = {}; // rules set in 4 steps.
 
       // All rules => infinite loop
       // setRules.allRules =oldRules.concat(rulesFirst,rulesDistrDiv,rulesSucDiv)
 
-      setRules.firstRules = oldRules.concat(rulesFirst, rulesSucDiv) // First rule set
-      setRules.distrDivRules = rulesDistrDiv // Just distr. div. rules
-      setRules.sucDivRules = rulesSucDiv // Jus succ. div. rules
-      setRules.firstRulesAgain = oldRules.concat(rulesFirst) // Last rules set without succ. div.
+      setRules.firstRules = oldRules.concat(rulesFirst, rulesSucDiv); // First rule set
+      setRules.distrDivRules = rulesDistrDiv; // Just distr. div. rules
+      setRules.sucDivRules = rulesSucDiv; // Jus succ. div. rules
+      setRules.firstRulesAgain = oldRules.concat(rulesFirst); // Last rules set without succ. div.
 
       // Division simplification
 
@@ -458,9 +443,9 @@ export const createRationalize = /* #__PURE__ */ factory(
         { l: 'v*(-c)', r: '-c*v' }, // Solving useless unary 2
         { l: 'n1+-n2', r: 'n1-n2' }, // Solving +- together (new!)
         { l: 'v*c', r: 'c*v' }, // inversion constant with variable
-        { l: '(n1^n2)^n3', r: '(n1^(n2*n3))' } // Power to Power
-      ]
-      return setRules
+        { l: '(n1^n2)^n3', r: '(n1^(n2*n3))' }, // Power to Power
+      ];
+      return setRules;
     } // End rulesRationalize
 
     // ---------------------------------------------------------------------------------------
@@ -479,17 +464,13 @@ export const createRationalize = /* #__PURE__ */ factory(
      *
      * @return {node}        node expression with all powers expanded.
      */
-    function expandPower(
-      node: MathNode,
-      parent?: any,
-      indParent?: number | string
-    ): MathNode {
-      const tp = node.type
-      const internal = arguments.length > 1 // TRUE in internal calls
+    function expandPower(node: MathNode, parent?: any, indParent?: number | string): MathNode {
+      const tp = node.type;
+      const internal = arguments.length > 1; // TRUE in internal calls
 
       if (tp === 'OperatorNode' && (node as OperatorNode).isBinary()) {
-        let does = false
-        let val: number
+        let does = false;
+        let val: number;
         if ((node as OperatorNode).op === '^') {
           // First operator: Parenthesis or UnaryMinus
           if (
@@ -498,10 +479,8 @@ export const createRationalize = /* #__PURE__ */ factory(
             (node as OperatorNode).args[1].type === 'ConstantNode'
           ) {
             // Second operator: Constant
-            val = parseFloat(
-              String(((node as OperatorNode).args[1] as ConstantNode).value)
-            )
-            does = val >= 2 && isInteger(val)
+            val = parseFloat(String(((node as OperatorNode).args[1] as ConstantNode).value));
+            does = val >= 2 && isInteger(val);
           }
         }
 
@@ -521,12 +500,12 @@ export const createRationalize = /* #__PURE__ */ factory(
             //             pow
             //                 constant - 1
             //
-            const nEsqTopo = (node as OperatorNode).args[0]
+            const nEsqTopo = (node as OperatorNode).args[0];
             const nDirTopo = new OperatorNode('^', 'pow', [
               (node as OperatorNode).args[0].cloneDeep(),
-              new ConstantNode(val! - 1)
-            ])
-            node = new OperatorNode('*', 'multiply', [nEsqTopo, nDirTopo])
+              new ConstantNode(val! - 1),
+            ]);
+            node = new OperatorNode('*', 'multiply', [nEsqTopo, nDirTopo]);
           } else {
             // Expo = 2 - no power
             // AFTER:  (exponent =  2)
@@ -536,16 +515,16 @@ export const createRationalize = /* #__PURE__ */ factory(
             //
             node = new OperatorNode('*', 'multiply', [
               (node as OperatorNode).args[0],
-              (node as OperatorNode).args[0].cloneDeep()
-            ])
+              (node as OperatorNode).args[0].cloneDeep(),
+            ]);
           }
 
           if (internal) {
             // Change parent references in internal recursive calls
             if (indParent === 'content') {
-              parent.content = node
+              parent.content = node;
             } else {
-              parent.args[indParent!] = node
+              parent.args[indParent!] = node;
             }
           }
         } // does
@@ -553,18 +532,18 @@ export const createRationalize = /* #__PURE__ */ factory(
 
       if (tp === 'ParenthesisNode') {
         // Recursion
-        expandPower((node as ParenthesisNode).content, node, 'content')
+        expandPower((node as ParenthesisNode).content, node, 'content');
       } else if (tp !== 'ConstantNode' && tp !== 'SymbolNode') {
         for (let i = 0; i < (node as any).args.length; i++) {
-          expandPower((node as any).args[i], node, i)
+          expandPower((node as any).args[i], node, i);
         }
       }
 
       if (!internal) {
         // return the root node
-        return node
+        return node;
       }
-      return node
+      return node;
     } // End expandPower
 
     // ---------------------------------------------------------------------------------------
@@ -590,69 +569,64 @@ export const createRationalize = /* #__PURE__ */ factory(
      *
      * @return {node}        new node tree with one variable polynomial or string error.
      */
-    function polyToCanonical(
-      node: MathNode,
-      coefficients?: number[]
-    ): MathNode {
+    function polyToCanonical(node: MathNode, coefficients?: number[]): MathNode {
       if (coefficients === undefined) {
-        coefficients = []
+        coefficients = [];
       } // coefficients.
 
-      coefficients[0] = 0 // index is the exponent
-      const o: any = {}
-      o.cte = 1
-      o.oper = '+'
+      coefficients[0] = 0; // index is the exponent
+      const o: any = {};
+      o.cte = 1;
+      o.oper = '+';
 
       // fire: mark with * or ^ when finds * or ^ down tree, reset to "" with + and -.
       //       It is used to deduce the exponent: 1 for *, 0 for "".
-      o.fire = ''
+      o.fire = '';
 
-      let maxExpo = 0 // maximum exponent
-      let varname = '' // variable name
+      let maxExpo = 0; // maximum exponent
+      let varname = ''; // variable name
 
-      recurPol(node, null, o)
-      maxExpo = coefficients.length - 1
-      let first = true
-      let no: MathNode | undefined
+      recurPol(node, null, o);
+      maxExpo = coefficients.length - 1;
+      let first = true;
+      let no: MathNode | undefined;
 
       for (let i = maxExpo; i >= 0; i--) {
-        if (coefficients[i] === 0) continue
-        let n1: MathNode = new ConstantNode(
-          first ? coefficients[i] : Math.abs(coefficients[i])
-        )
-        const op = coefficients[i] < 0 ? '-' : '+'
+        if (coefficients[i] === 0) continue;
+        let n1: MathNode = new ConstantNode(first ? coefficients[i] : Math.abs(coefficients[i]));
+        const op = coefficients[i] < 0 ? '-' : '+';
 
         if (i > 0) {
           // Is not a constant without variable
-          let n2: MathNode = new SymbolNode(varname)
+          let n2: MathNode = new SymbolNode(varname);
           if (i > 1) {
-            const n3 = new ConstantNode(i)
-            n2 = new OperatorNode('^', 'pow', [n2, n3])
+            const n3 = new ConstantNode(i);
+            n2 = new OperatorNode('^', 'pow', [n2, n3]);
           }
           if (coefficients[i] === -1 && first) {
-            n1 = new OperatorNode('-', 'unaryMinus', [n2])
+            n1 = new OperatorNode('-', 'unaryMinus', [n2]);
           } else if (Math.abs(coefficients[i]) === 1) {
-            n1 = n2
+            n1 = n2;
           } else {
-            n1 = new OperatorNode('*', 'multiply', [n1, n2])
+            n1 = new OperatorNode('*', 'multiply', [n1, n2]);
           }
         }
 
         if (first) {
-          no = n1
+          no = n1;
         } else if (op === '+') {
-          no = new OperatorNode('+', 'add', [no!, n1])
+          no = new OperatorNode('+', 'add', [no!, n1]);
         } else {
-          no = new OperatorNode('-', 'subtract', [no!, n1])
+          no = new OperatorNode('-', 'subtract', [no!, n1]);
         }
 
-        first = false
+        first = false;
       } // for
 
       if (first) {
-        return new ConstantNode(0)
+        return new ConstantNode(0);
       } else {
-        return no!
+        return no!;
       }
 
       /**
@@ -670,30 +644,25 @@ export const createRationalize = /* #__PURE__ */ factory(
        * @return {}                    No return. If error, throws an exception
        */
       function recurPol(node: MathNode, noPai: MathNode | null, o: any): void {
-        const tp = node.type
+        const tp = node.type;
         if (tp === 'FunctionNode') {
           // ***** FunctionName *****
           // No function call in polynomial expression
-          throw new Error('There is an unsolved function call')
+          throw new Error('There is an unsolved function call');
         } else if (tp === 'OperatorNode') {
           // ***** OperatorName *****
           if (!'+-*^'.includes((node as OperatorNode).op))
-            throw new Error(
-              'Operator ' + (node as OperatorNode).op + ' invalid'
-            )
+            throw new Error('Operator ' + (node as OperatorNode).op + ' invalid');
 
           if (noPai !== null) {
             // -(unary),^  : children of *,+,-
             if (
-              ((node as OperatorNode).fn === 'unaryMinus' ||
-                (node as OperatorNode).fn === 'pow') &&
+              ((node as OperatorNode).fn === 'unaryMinus' || (node as OperatorNode).fn === 'pow') &&
               (noPai as OperatorNode).fn !== 'add' &&
               (noPai as OperatorNode).fn !== 'subtract' &&
               (noPai as OperatorNode).fn !== 'multiply'
             ) {
-              throw new Error(
-                'Invalid ' + (node as OperatorNode).op + ' placing'
-              )
+              throw new Error('Invalid ' + (node as OperatorNode).op + ' placing');
             }
 
             // -,+,* : children of +,-
@@ -704,9 +673,7 @@ export const createRationalize = /* #__PURE__ */ factory(
               (noPai as OperatorNode).fn !== 'add' &&
               (noPai as OperatorNode).fn !== 'subtract'
             ) {
-              throw new Error(
-                'Invalid ' + (node as OperatorNode).op + ' placing'
-              )
+              throw new Error('Invalid ' + (node as OperatorNode).op + ' placing');
             }
 
             // -,+ : first child
@@ -716,95 +683,83 @@ export const createRationalize = /* #__PURE__ */ factory(
                 (node as OperatorNode).fn === 'unaryMinus') &&
               o.noFil !== 0
             ) {
-              throw new Error(
-                'Invalid ' + (node as OperatorNode).op + ' placing'
-              )
+              throw new Error('Invalid ' + (node as OperatorNode).op + ' placing');
             }
           } // Has parent
 
           // Firers: ^,*       Old:   ^,&,-(unary): firers
-          if (
-            (node as OperatorNode).op === '^' ||
-            (node as OperatorNode).op === '*'
-          ) {
-            o.fire = (node as OperatorNode).op
+          if ((node as OperatorNode).op === '^' || (node as OperatorNode).op === '*') {
+            o.fire = (node as OperatorNode).op;
           }
 
           for (let i = 0; i < (node as OperatorNode).args.length; i++) {
             // +,-: reset fire
-            if ((node as OperatorNode).fn === 'unaryMinus') o.oper = '-'
-            if (
-              (node as OperatorNode).op === '+' ||
-              (node as OperatorNode).fn === 'subtract'
-            ) {
-              o.fire = ''
-              o.cte = 1 // default if there is no constant
-              o.oper = i === 0 ? '+' : (node as OperatorNode).op
+            if ((node as OperatorNode).fn === 'unaryMinus') o.oper = '-';
+            if ((node as OperatorNode).op === '+' || (node as OperatorNode).fn === 'subtract') {
+              o.fire = '';
+              o.cte = 1; // default if there is no constant
+              o.oper = i === 0 ? '+' : (node as OperatorNode).op;
             }
-            o.noFil = i // number of son
-            recurPol((node as OperatorNode).args[i], node, o)
+            o.noFil = i; // number of son
+            recurPol((node as OperatorNode).args[i], node, o);
           } // for in children
         } else if (tp === 'SymbolNode') {
           // ***** SymbolName *****
           if ((node as SymbolNode).name !== varname && varname !== '') {
-            throw new Error('There is more than one variable')
+            throw new Error('There is more than one variable');
           }
-          varname = (node as SymbolNode).name
+          varname = (node as SymbolNode).name;
           if (noPai === null) {
-            coefficients![1] = 1
-            return
+            coefficients![1] = 1;
+            return;
           }
 
           // ^: Symbol is First child
           if ((noPai as OperatorNode).op === '^' && o.noFil !== 0) {
-            throw new Error(
-              'In power the variable should be the first parameter'
-            )
+            throw new Error('In power the variable should be the first parameter');
           }
 
           // *: Symbol is Second child
           if ((noPai as OperatorNode).op === '*' && o.noFil !== 1) {
-            throw new Error(
-              'In multiply the variable should be the second parameter'
-            )
+            throw new Error('In multiply the variable should be the second parameter');
           }
 
           // Symbol: firers '',* => it means there is no exponent above, so it's 1 (cte * var)
           if (o.fire === '' || o.fire === '*') {
-            if (maxExpo < 1) coefficients![1] = 0
-            coefficients![1] += o.cte * (o.oper === '+' ? 1 : -1)
-            maxExpo = Math.max(1, maxExpo)
+            if (maxExpo < 1) coefficients![1] = 0;
+            coefficients![1] += o.cte * (o.oper === '+' ? 1 : -1);
+            maxExpo = Math.max(1, maxExpo);
           }
         } else if (tp === 'ConstantNode') {
-          const valor = parseFloat(String((node as ConstantNode).value))
+          const valor = parseFloat(String((node as ConstantNode).value));
           if (noPai === null) {
-            coefficients![0] = valor
-            return
+            coefficients![0] = valor;
+            return;
           }
           if ((noPai as OperatorNode).op === '^') {
             // cte: second  child of power
-            if (o.noFil !== 1) throw new Error('Constant cannot be powered')
+            if (o.noFil !== 1) throw new Error('Constant cannot be powered');
 
             if (!isInteger(valor) || valor <= 0) {
-              throw new Error('Non-integer exponent is not allowed')
+              throw new Error('Non-integer exponent is not allowed');
             }
 
-            for (let i = maxExpo + 1; i < valor; i++) coefficients![i] = 0
-            if (valor > maxExpo) coefficients![valor] = 0
-            coefficients![valor] += o.cte * (o.oper === '+' ? 1 : -1)
-            maxExpo = Math.max(valor, maxExpo)
-            return
+            for (let i = maxExpo + 1; i < valor; i++) coefficients![i] = 0;
+            if (valor > maxExpo) coefficients![valor] = 0;
+            coefficients![valor] += o.cte * (o.oper === '+' ? 1 : -1);
+            maxExpo = Math.max(valor, maxExpo);
+            return;
           }
-          o.cte = valor
+          o.cte = valor;
 
           // Cte: firer '' => There is no exponent and no multiplication, so the exponent is 0.
           if (o.fire === '') {
-            coefficients![0] += o.cte * (o.oper === '+' ? 1 : -1)
+            coefficients![0] += o.cte * (o.oper === '+' ? 1 : -1);
           }
         } else {
-          throw new Error('Type ' + tp + ' is not allowed')
+          throw new Error('Type ' + tp + ' is not allowed');
         }
       } // End of recurPol
     } // End of polyToCanonical
   }
-)
+);

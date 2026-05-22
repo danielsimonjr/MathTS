@@ -1,5 +1,5 @@
-import { isBigNumber, isObject, BigNumber } from './is.js'
-import { hasOwnProperty } from './shared.js'
+import { isBigNumber, isObject, BigNumber } from './is.js';
+import { hasOwnProperty } from './shared.js';
 
 /**
  * Clone an object
@@ -13,38 +13,44 @@ import { hasOwnProperty } from './shared.js'
  * @return {*} clone
  */
 export function clone<T>(x: T): T {
-  const type = typeof x
+  const type = typeof x;
 
   // immutable primitive types
-  if (type === 'number' || type === 'bigint' || type === 'string' || type === 'boolean' ||
-      x === null || x === undefined) {
-    return x
+  if (
+    type === 'number' ||
+    type === 'bigint' ||
+    type === 'string' ||
+    type === 'boolean' ||
+    x === null ||
+    x === undefined
+  ) {
+    return x;
   }
 
   // use clone function of the object when available
   if (typeof (x as any).clone === 'function') {
-    return (x as any).clone()
+    return (x as any).clone();
   }
 
   // array
   if (Array.isArray(x)) {
-    return x.map((value) => clone(value)) as T
+    return x.map((value) => clone(value)) as T;
   }
 
-  if (x instanceof Date) return new Date(x.valueOf()) as T
-  if (isBigNumber(x)) return x as T // bignumbers are immutable
+  if (x instanceof Date) return new Date(x.valueOf()) as T;
+  if (isBigNumber(x)) return x as T; // bignumbers are immutable
 
   // object
   if (isObject(x)) {
-    return mapObject(x as any, clone) as T
+    return mapObject(x as any, clone) as T;
   }
 
   if (type === 'function') {
     // we assume that the function is immutable
-    return x
+    return x;
   }
 
-  throw new TypeError(`Cannot clone: unknown type of value (value: ${x})`)
+  throw new TypeError(`Cannot clone: unknown type of value (value: ${x})`);
 }
 
 /**
@@ -57,15 +63,15 @@ export function mapObject<T, U>(
   object: Record<string, T>,
   callback: (value: T) => U
 ): Record<string, U> {
-  const clone: Record<string, U> = {}
+  const clone: Record<string, U> = {};
 
   for (const key in object) {
     if (hasOwnProperty(object, key)) {
-      clone[key] = callback(object[key])
+      clone[key] = callback(object[key]);
     }
   }
 
-  return clone
+  return clone;
 }
 
 /**
@@ -80,10 +86,10 @@ export function extend<T extends Record<string, any>, U extends Record<string, a
 ): T & U {
   for (const prop in b) {
     if (hasOwnProperty(b, prop)) {
-      (a as any)[prop] = b[prop]
+      (a as any)[prop] = b[prop];
     }
   }
-  return a as T & U
+  return a as T & U;
 }
 
 /**
@@ -95,7 +101,7 @@ export function extend<T extends Record<string, any>, U extends Record<string, a
 export function deepExtend<T extends Record<string, any>>(a: T, b: Record<string, any>): T {
   // TODO: add support for Arrays to deepExtend
   if (Array.isArray(b)) {
-    throw new TypeError('Arrays are not supported by deepExtend')
+    throw new TypeError('Arrays are not supported by deepExtend');
   }
 
   for (const prop in b) {
@@ -104,21 +110,21 @@ export function deepExtend<T extends Record<string, any>>(a: T, b: Record<string
     if (hasOwnProperty(b, prop) && !(prop in Object.prototype) && !(prop in Function.prototype)) {
       if (b[prop] && b[prop].constructor === Object) {
         if ((a as any)[prop] === undefined) {
-          (a as any)[prop] = {} as any
+          (a as any)[prop] = {} as any;
         }
         if ((a as any)[prop] && (a as any)[prop].constructor === Object) {
-          deepExtend((a as any)[prop], b[prop])
+          deepExtend((a as any)[prop], b[prop]);
         } else {
-          (a as any)[prop] = b[prop]
+          (a as any)[prop] = b[prop];
         }
       } else if (Array.isArray(b[prop])) {
-        throw new TypeError('Arrays are not supported by deepExtend')
+        throw new TypeError('Arrays are not supported by deepExtend');
       } else {
-        (a as any)[prop] = b[prop]
+        (a as any)[prop] = b[prop];
       }
     }
   }
-  return a
+  return a;
 }
 
 /**
@@ -129,47 +135,47 @@ export function deepExtend<T extends Record<string, any>>(a: T, b: Record<string
  * @returns {boolean}
  */
 export function deepStrictEqual(a: any, b: any): boolean {
-  let prop: string
-  let i: number
-  let len: number
+  let prop: string;
+  let i: number;
+  let len: number;
 
   if (Array.isArray(a)) {
     if (!Array.isArray(b)) {
-      return false
+      return false;
     }
 
     if (a.length !== b.length) {
-      return false
+      return false;
     }
 
     for (i = 0, len = a.length; i < len; i++) {
       if (!deepStrictEqual(a[i], b[i])) {
-        return false
+        return false;
       }
     }
-    return true
+    return true;
   } else if (typeof a === 'function') {
-    return (a === b)
+    return a === b;
   } else if (a instanceof Object) {
     if (Array.isArray(b) || !(b instanceof Object)) {
-      return false
+      return false;
     }
 
     for (prop in a) {
       // noinspection JSUnfilteredForInLoop
       if (!(prop in b) || !deepStrictEqual(a[prop], b[prop])) {
-        return false
+        return false;
       }
     }
     for (prop in b) {
       // noinspection JSUnfilteredForInLoop
       if (!(prop in a)) {
-        return false
+        return false;
       }
     }
-    return true
+    return true;
   } else {
-    return (a === b)
+    return a === b;
   }
 }
 
@@ -179,11 +185,11 @@ export function deepStrictEqual(a: any, b: any): boolean {
  * @return {Object} Returns the flattened object
  */
 export function deepFlatten(nestedObject: Record<string, any>): Record<string, any> {
-  const flattenedObject: Record<string, any> = {}
+  const flattenedObject: Record<string, any> = {};
 
-  _deepFlatten(nestedObject, flattenedObject)
+  _deepFlatten(nestedObject, flattenedObject);
 
-  return flattenedObject
+  return flattenedObject;
 }
 
 // helper function used by deepFlatten
@@ -193,11 +199,11 @@ function _deepFlatten(
 ): void {
   for (const prop in nestedObject) {
     if (hasOwnProperty(nestedObject, prop)) {
-      const value = nestedObject[prop]
+      const value = nestedObject[prop];
       if (typeof value === 'object' && value !== null) {
-        _deepFlatten(value, flattenedObject)
+        _deepFlatten(value, flattenedObject);
       } else {
-        flattenedObject[prop] = value
+        flattenedObject[prop] = value;
       }
     }
   }
@@ -211,12 +217,16 @@ export function canDefineProperty(): boolean {
   // test needed for broken IE8 implementation
   try {
     if (Object.defineProperty) {
-      Object.defineProperty({}, 'x', { get: function () { return null } })
-      return true
+      Object.defineProperty({}, 'x', {
+        get: function () {
+          return null;
+        },
+      });
+      return true;
     }
   } catch (e) {}
 
-  return false
+  return false;
 }
 
 /**
@@ -228,31 +238,27 @@ export function canDefineProperty(): boolean {
  * @param {Function} valueResolver Function returning the property value. Called
  *                                without arguments.
  */
-export function lazy<T>(
-  object: Record<string, any>,
-  prop: string,
-  valueResolver: () => T
-): void {
-  let _uninitialized = true
-  let _value: T
+export function lazy<T>(object: Record<string, any>, prop: string, valueResolver: () => T): void {
+  let _uninitialized = true;
+  let _value: T;
 
   Object.defineProperty(object, prop, {
     get: function () {
       if (_uninitialized) {
-        _value = valueResolver()
-        _uninitialized = false
+        _value = valueResolver();
+        _uninitialized = false;
       }
-      return _value
+      return _value;
     },
 
     set: function (value: T) {
-      _value = value
-      _uninitialized = false
+      _value = value;
+      _uninitialized = false;
     },
 
     configurable: true,
-    enumerable: true
-  })
+    enumerable: true,
+  });
 }
 
 /**
@@ -262,28 +268,31 @@ export function lazy<T>(
  * @param {string | string[]} path   A dot separated string like 'name.space'
  * @return {Object} Returns the object at the end of the path
  */
-export function traverse(object: Record<string, any>, path: string | string[]): Record<string, any> {
+export function traverse(
+  object: Record<string, any>,
+  path: string | string[]
+): Record<string, any> {
   if (path && typeof path === 'string') {
-    return traverse(object, path.split('.'))
+    return traverse(object, path.split('.'));
   }
 
-  let obj = object
+  let obj = object;
 
   if (path) {
     for (let i = 0; i < path.length; i++) {
-      const key = path[i]
+      const key = path[i];
       if (!(key in obj)) {
-        obj[key] = {}
+        obj[key] = {};
       }
-      obj = obj[key]
+      obj = obj[key];
     }
   }
 
-  return obj
+  return obj;
 }
 
 // Re-export hasOwnProperty for backward compatibility
-export { hasOwnProperty }
+export { hasOwnProperty };
 
 /**
  * Test whether an object is a factory. a factory has fields:
@@ -298,7 +307,7 @@ export { hasOwnProperty }
  * @returns {boolean}
  */
 export function isLegacyFactory(object: any): boolean {
-  return object && typeof object.factory === 'function'
+  return object && typeof object.factory === 'function';
 }
 
 /**
@@ -310,20 +319,20 @@ export function isLegacyFactory(object: any): boolean {
 export function get(object: Record<string, any>, path: string | string[]): any {
   if (typeof path === 'string') {
     if (isPath(path)) {
-      return get(object, path.split('.'))
+      return get(object, path.split('.'));
     } else {
-      return object[path]
+      return object[path];
     }
   }
 
-  let child: any = object
+  let child: any = object;
 
   for (let i = 0; i < path.length; i++) {
-    const key = path[i]
-    child = child ? child[key] : undefined
+    const key = path[i];
+    child = child ? child[key] : undefined;
   }
 
-  return child
+  return child;
 }
 
 /**
@@ -342,28 +351,28 @@ export function set<T extends Record<string, any>>(
 ): T {
   if (typeof path === 'string') {
     if (isPath(path)) {
-      return set(object, path.split('.'), value)
+      return set(object, path.split('.'), value);
     } else {
-      (object as any)[path] = value
-      return object
+      (object as any)[path] = value;
+      return object;
     }
   }
 
-  let child: any = object
+  let child: any = object;
   for (let i = 0; i < path.length - 1; i++) {
-    const key = path[i]
+    const key = path[i];
     if (child[key] === undefined) {
-      child[key] = {}
+      child[key] = {};
     }
-    child = child[key]
+    child = child[key];
   }
 
   if (path.length > 0) {
-    const lastKey = path[path.length - 1]
-    child[lastKey] = value
+    const lastKey = path[path.length - 1];
+    child[lastKey] = value;
   }
 
-  return object
+  return object;
 }
 
 /**
@@ -378,17 +387,17 @@ export function pick(
   properties: string[],
   transform?: (value: any, key: string) => any
 ): Record<string, any> {
-  const copy: Record<string, any> = {}
+  const copy: Record<string, any> = {};
 
   for (let i = 0; i < properties.length; i++) {
-    const key = properties[i]
-    const value = get(object, key)
+    const key = properties[i];
+    const value = get(object, key);
     if (value !== undefined) {
-      set(copy, key, transform ? transform(value, key) : value)
+      set(copy, key, transform ? transform(value, key) : value);
     }
   }
 
-  return copy
+  return copy;
 }
 
 /**
@@ -402,20 +411,20 @@ export function pickShallow(
   object: Record<string, any>,
   properties: string[]
 ): Record<string, any> {
-  const copy: Record<string, any> = {}
+  const copy: Record<string, any> = {};
 
   for (let i = 0; i < properties.length; i++) {
-    const key = properties[i]
-    const value = object[key]
+    const key = properties[i];
+    const value = object[key];
     if (value !== undefined) {
-      copy[key] = value
+      copy[key] = value;
     }
   }
 
-  return copy
+  return copy;
 }
 
 // helper function to test whether a string contains a path like 'user.name'
 function isPath(str: string): boolean {
-  return str.includes('.')
+  return str.includes('.');
 }

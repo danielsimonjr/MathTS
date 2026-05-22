@@ -98,10 +98,27 @@ import { typedTrigonometry } from './trigonometry.js';
 import { typedStatistics } from './statistics.js';
 import { typedSignal } from './signal.js';
 import {
-  fibonacci, lucas, doubleFactorial, risingFactorial, fallingFactorial, subfactorial,
-  prime, nextPrime, primePi, primeFactors, divisors, eulerPhi, divisorSigma,
-  carmichaelLambda, moebiusMu, jacobiSymbol, chineseRemainder, lucasL,
-  partitions, harmonicNumber, integerDigits,
+  fibonacci,
+  lucas,
+  doubleFactorial,
+  risingFactorial,
+  fallingFactorial,
+  subfactorial,
+  prime,
+  nextPrime,
+  primePi,
+  primeFactors,
+  divisors,
+  eulerPhi,
+  divisorSigma,
+  carmichaelLambda,
+  moebiusMu,
+  jacobiSymbol,
+  chineseRemainder,
+  lucasL,
+  partitions,
+  harmonicNumber,
+  integerDigits,
 } from './combinatorics.js';
 import { typedSpecial } from './special.js';
 import { typedDistributions } from './distributions.js';

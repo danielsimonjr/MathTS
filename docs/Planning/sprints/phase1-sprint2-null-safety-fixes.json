@@ -53,10 +53,7 @@
       "completedDate": "2026-01-18",
       "errorCode": "TS18047",
       "errorCount": 6,
-      "files": [
-        "src/expression/node/RangeNode.ts",
-        "src/expression/node/RelationalNode.ts"
-      ]
+      "files": ["src/expression/node/RangeNode.ts", "src/expression/node/RelationalNode.ts"]
     },
     {
       "id": "1.2.5",
@@ -67,10 +64,7 @@
       "completedDate": "2026-01-18",
       "errorCode": "TS18047",
       "errorCount": 2,
-      "files": [
-        "src/expression/node/FunctionNode.ts",
-        "src/expression/operators.ts"
-      ]
+      "files": ["src/expression/node/FunctionNode.ts", "src/expression/operators.ts"]
     }
   ],
   "acceptanceCriteria": [

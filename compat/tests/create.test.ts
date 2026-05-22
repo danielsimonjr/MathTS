@@ -41,6 +41,11 @@ describe('compat create(all)', () => {
   it('computes a determinant through the surfaced function', () => {
     const math = create(all);
     const det = math.det as (m: number[][]) => number;
-    expect(det([[1, 2], [3, 4]])).toBe(-2);
+    expect(
+      det([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toBe(-2);
   });
 });

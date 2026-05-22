@@ -33,8 +33,8 @@ export type {
   AlgorithmFunction,
   ElementwiseOperation,
   MatrixAlgorithmSuiteOptions,
-  MatrixSignatures
-} from '../type/matrix/types.js'
+  MatrixSignatures,
+} from '../type/matrix/types.js';
 
 // =============================================================================
 // Function-specific Types (duplicated across ~50 function files)
@@ -45,12 +45,12 @@ export type {
  * Covers both dense (data array) and sparse (values/index/ptr) representations.
  */
 export interface MatrixData {
-  data?: any[] | any[][]
-  values?: any[]
-  index?: number[]
-  ptr?: number[]
-  size: number[]
-  datatype?: string
+  data?: any[] | any[][];
+  values?: any[];
+  index?: number[];
+  ptr?: number[];
+  size: number[];
+  datatype?: string;
 }
 
 /**
@@ -58,14 +58,14 @@ export interface MatrixData {
  * A lightweight version of DenseMatrixInterface for factory function contexts.
  */
 export interface DenseMatrix {
-  _data: any[] | any[][]
-  _size: number[]
-  _datatype?: string
-  storage(): 'dense'
-  size(): number[]
-  getDataType(): string
-  createDenseMatrix(data: MatrixData): DenseMatrix
-  valueOf(): any[] | any[][]
+  _data: any[] | any[][];
+  _size: number[];
+  _datatype?: string;
+  storage(): 'dense';
+  size(): number[];
+  getDataType(): string;
+  createDenseMatrix(data: MatrixData): DenseMatrix;
+  valueOf(): any[] | any[][];
 }
 
 /**
@@ -73,30 +73,30 @@ export interface DenseMatrix {
  * A lightweight version of SparseMatrixInterface for factory function contexts.
  */
 export interface SparseMatrix {
-  _values?: any[]
-  _index?: number[]
-  _ptr?: number[]
-  _size: number[]
-  _datatype?: string
-  _data?: any
-  storage(): 'sparse'
-  size(): number[]
-  getDataType(): string
-  createSparseMatrix(data: MatrixData): SparseMatrix
-  valueOf(): any[] | any[][]
+  _values?: any[];
+  _index?: number[];
+  _ptr?: number[];
+  _size: number[];
+  _datatype?: string;
+  _data?: any;
+  storage(): 'sparse';
+  size(): number[];
+  getDataType(): string;
+  createSparseMatrix(data: MatrixData): SparseMatrix;
+  valueOf(): any[] | any[][];
 }
 
 /**
  * Union type for either dense or sparse matrix.
  */
-export type Matrix = DenseMatrix | SparseMatrix
+export type Matrix = DenseMatrix | SparseMatrix;
 
 /**
  * Matrix constructor function used by factory functions.
  * Creates a matrix from data with an optional storage format.
  */
 export interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix
+  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
 }
 
 /**
@@ -104,11 +104,6 @@ export interface MatrixConstructor {
  * Used by arithmetic functions that support symbolic computation.
  */
 export interface NodeOperations {
-  createBinaryNode: (
-    op: string,
-    fn: string,
-    left: unknown,
-    right: unknown
-  ) => unknown
-  hasNodeArg: (...args: unknown[]) => boolean
+  createBinaryNode: (op: string, fn: string, left: unknown, right: unknown) => unknown;
+  hasNodeArg: (...args: unknown[]) => boolean;
 }

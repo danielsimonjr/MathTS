@@ -8,7 +8,7 @@ export const cumSumDocs = {
     'cumsum([2, 3, 4, 1])',
     'cumsum([1, 2; 3, 4])',
     'cumsum([1, 2; 3, 4], 1)',
-    'cumsum([1, 2; 3, 4], 2)'
+    'cumsum([1, 2; 3, 4], 2)',
   ],
-  seealso: ['max', 'mean', 'median', 'min', 'prod', 'std', 'sum', 'variance']
-}
+  seealso: ['max', 'mean', 'median', 'min', 'prod', 'std', 'sum', 'variance'],
+};

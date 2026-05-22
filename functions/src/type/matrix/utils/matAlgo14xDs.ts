@@ -1,32 +1,32 @@
-import { factory } from '../../../utils/factory.js'
-import { clone } from '../../../utils/object.js'
+import { factory } from '../../../utils/factory.js';
+import { clone } from '../../../utils/object.js';
 import type {
   DataType,
   DenseMatrixData,
   MatrixCallback,
   TypedFunction,
   DenseMatrixConstructorData,
-  MatrixValue
-} from '../types.js'
+  MatrixValue,
+} from '../types.js';
 
 /**
  * DenseMatrix interface for algorithm operations.
  */
 interface DenseMatrix {
-  _data: DenseMatrixData
-  _size: number[]
-  _datatype?: DataType
-  createDenseMatrix(data: DenseMatrixConstructorData): DenseMatrix
+  _data: DenseMatrixData;
+  _size: number[];
+  _datatype?: DataType;
+  createDenseMatrix(data: DenseMatrixConstructorData): DenseMatrix;
 }
 
-const name = 'matAlgo14xDs'
-const dependencies = ['typed']
+const name = 'matAlgo14xDs';
+const dependencies = ['typed'];
 
 /**
  * Dependencies for matAlgo14xDs factory
  */
 interface MatAlgo14xDsDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
 export const createMatAlgo14xDs = /* #__PURE__ */ factory(
@@ -55,38 +55,36 @@ export const createMatAlgo14xDs = /* #__PURE__ */ factory(
       inverse: boolean
     ): DenseMatrix {
       // a arrays
-      const adata = a._data
-      const asize = a._size
-      const adt: DataType = a._datatype
+      const adata = a._data;
+      const asize = a._size;
+      const adt: DataType = a._datatype;
 
       // datatype
-      let dt: DataType
+      let dt: DataType;
       // callback signature to use
-      let cf: MatrixCallback = callback
+      let cf: MatrixCallback = callback;
 
       // process data types
       if (typeof adt === 'string') {
         // datatype
-        dt = adt
+        dt = adt;
         // convert b to the same datatype
-        b = typed.convert(b, dt)
+        b = typed.convert(b, dt);
         // callback - typed.find returns specialized implementation
-        cf = (typed.find(callback, [dt, dt]) as MatrixCallback) || callback
+        cf = (typed.find(callback, [dt, dt]) as MatrixCallback) || callback;
       }
 
       // populate cdata, iterate through dimensions
       const cdata: DenseMatrixData =
-        asize.length > 0
-          ? _iterate(cf, 0, asize, asize[0], adata, b, inverse)
-          : []
+        asize.length > 0 ? _iterate(cf, 0, asize, asize[0], adata, b, inverse) : [];
 
       // c matrix
       return a.createDenseMatrix({
         data: cdata,
         size: clone(asize),
-        datatype: dt
-      })
-    }
+        datatype: dt,
+      });
+    };
 
     /**
      * Recursive function to iterate through matrix dimensions.
@@ -110,15 +108,13 @@ export const createMatAlgo14xDs = /* #__PURE__ */ factory(
       inverse: boolean
     ): MatrixValue[] {
       // initialize array for this level
-      const cv: MatrixValue[] = []
+      const cv: MatrixValue[] = [];
       // check we reach the last level
       if (level === s.length - 1) {
         // loop arrays in last level
         for (let i = 0; i < n; i++) {
           // invoke callback and store value
-          cv[i] = inverse
-            ? f(bv, (av as MatrixValue[])[i])
-            : f((av as MatrixValue[])[i], bv)
+          cv[i] = inverse ? f(bv, (av as MatrixValue[])[i]) : f((av as MatrixValue[])[i], bv);
         }
       } else {
         // iterate current level
@@ -132,10 +128,10 @@ export const createMatAlgo14xDs = /* #__PURE__ */ factory(
             (av as DenseMatrixData[])[j],
             bv,
             inverse
-          )
+          );
         }
       }
-      return cv
+      return cv;
     }
   }
-)
+);

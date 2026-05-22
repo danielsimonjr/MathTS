@@ -1,27 +1,21 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js'
-import { createMatAlgo09xS0Sf } from '../type/matrix/utils/matAlgo09xS0Sf.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
+import { createMatAlgo09xS0Sf } from '../type/matrix/utils/matAlgo09xS0Sf.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 
 // Type definitions for dotMultiply
 interface DotMultiplyDependencies {
-  typed: TypedFunction
-  matrix: TypedFunction
-  equalScalar: TypedFunction
-  multiplyScalar: TypedFunction
-  concat: TypedFunction
+  typed: TypedFunction;
+  matrix: TypedFunction;
+  equalScalar: TypedFunction;
+  multiplyScalar: TypedFunction;
+  concat: TypedFunction;
 }
 
-const name = 'dotMultiply'
-const dependencies = [
-  'typed',
-  'matrix',
-  'equalScalar',
-  'multiplyScalar',
-  'concat'
-]
+const name = 'dotMultiply';
+const dependencies = ['typed', 'matrix', 'equalScalar', 'multiplyScalar', 'concat'];
 
 export const createDotMultiply = /* #__PURE__ */ factory(
   name,
@@ -31,16 +25,16 @@ export const createDotMultiply = /* #__PURE__ */ factory(
     matrix,
     equalScalar,
     multiplyScalar,
-    concat
+    concat,
   }: DotMultiplyDependencies): TypedFunction => {
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar })
-    const matAlgo09xS0Sf = createMatAlgo09xS0Sf({ typed, equalScalar })
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
+    const matAlgo09xS0Sf = createMatAlgo09xS0Sf({ typed, equalScalar });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Multiply two matrices element wise. The function accepts both matrices and
@@ -74,8 +68,8 @@ export const createDotMultiply = /* #__PURE__ */ factory(
         elop: multiplyScalar,
         SS: matAlgo09xS0Sf as any,
         DS: matAlgo02xDS0 as any,
-        Ss: matAlgo11xS0s as any
+        Ss: matAlgo11xS0s as any,
       })
-    ) as TypedFunction
+    ) as TypedFunction;
   }
-)
+);

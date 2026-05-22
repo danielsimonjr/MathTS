@@ -1,26 +1,26 @@
-import { factory } from '../utils/factory.js'
-import { squareNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { squareNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for square
 interface HasMulMethod {
-  mul(other: unknown): unknown
+  mul(other: unknown): unknown;
 }
 
 interface HasTimesMethod {
-  times(other: unknown): unknown
+  times(other: unknown): unknown;
 }
 
 interface HasPowMethod {
-  pow(n: number): unknown
+  pow(n: number): unknown;
 }
 
 interface SquareDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'square'
-const dependencies = ['typed']
+const name = 'square';
+const dependencies = ['typed'];
 
 export const createSquare = /* #__PURE__ */ factory(
   name,
@@ -58,24 +58,24 @@ export const createSquare = /* #__PURE__ */ factory(
       number: squareNumber,
 
       Complex: function (x: HasMulMethod): unknown {
-        return x.mul(x)
+        return x.mul(x);
       },
 
       BigNumber: function (x: HasTimesMethod): unknown {
-        return x.times(x)
+        return x.times(x);
       },
 
       bigint: function (x: bigint): bigint {
-        return x * x
+        return x * x;
       },
 
       Fraction: function (x: HasMulMethod): unknown {
-        return x.mul(x)
+        return x.mul(x);
       },
 
       Unit: function (x: HasPowMethod): unknown {
-        return x.pow(2)
-      }
-    })
+        return x.pow(2);
+      },
+    });
   }
-)
+);

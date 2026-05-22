@@ -85,6 +85,7 @@ core, matrix, functions, parallel ← compat
 ### Package Build Details
 
 All packages use `tsup src/index.ts --format esm --dts --clean` except:
+
 - **functions**: no `--dts` flag (build is `tsup src/index.ts --format esm --clean`)
 - **workbook**: builds two entry points (`src/index.ts` and `src/cli.ts`)
 - **assembly**: AssemblyScript build (`asc src/index.ts`) + TypeScript bindings (`tsc -p tsconfig.bindings.json`)
@@ -104,6 +105,7 @@ Import path difference from mathjs: mathjs uses `../../utils/` (extra `function/
 ### `@danielsimonjr/mathts-core` Exports
 
 Three main systems:
+
 - **Numeric types**: `Complex`, `Fraction`, `BigNumber` with type guards and constants
 - **typed-function integration**: `mathTyped` instance, `createMathTSTyped()`, `TypeRegistry`, type test functions (`isNumber`, `isComplex`, `isMatrix`, etc.)
 - **Factory pattern**: `FunctionRegistry`, `createFactory()`, `registry`, `math` singleton, `DEFAULT_CONFIG`
@@ -111,6 +113,7 @@ Three main systems:
 ### Matrix Backends
 
 `@danielsimonjr/mathts-matrix` supports three backends with automatic selection via `BackendManager`:
+
 - **JSBackend** - Pure TypeScript (default, always available)
 - **WASMBackend** - Rust WASM primary (source: `wasm-rust/crates/`, 1,000+ exports, full AS parity) or AssemblyScript legacy (source: `assembly/`, >1K elements)
 - **GPUBackend** - WebGPU compute shaders (>100K elements)
@@ -118,15 +121,17 @@ Three main systems:
 ### `@danielsimonjr/mathts-compat` Pattern
 
 Provides mathjs-compatible API via shims:
+
 ```typescript
 import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
-math.add(1, 2);  // delegates to @danielsimonjr/mathts-core types + operations
+math.add(1, 2); // delegates to @danielsimonjr/mathts-core types + operations
 ```
 
 ### Workbook Runtime
 
 YAML-based reactive notebook (`.mtsw` files). Key source files in `workbook/src/`:
+
 - `types.ts` - `Workbook`, `Cell`, `DependencyGraph`, `ExecutionContext`
 - `parser.ts` / `index.ts` - YAML parsing/serialization
 - `graph.ts` - dependency resolution with topological sort
@@ -137,6 +142,7 @@ YAML-based reactive notebook (`.mtsw` files). Key source files in `workbook/src/
 **Framework**: Vitest. Root `vitest.config.ts` aggregates all test paths. Individual packages also have their own `vitest.config.ts`.
 
 **Test file locations** (all use `*.test.ts` convention):
+
 - `core/tests/` - type system, factory, typed-function
 - `matrix/tests/` - DenseMatrix, SparseMatrix, backends (JS, WASM, GPU), SVD/eig decompositions
 - `tensor/tests/` - rank-N Tensor construction and ops
@@ -181,6 +187,7 @@ The `functions/` package contains synced factory-pattern functions from the math
 **Run with**: `python -X utf8 ~/.claude/scripts/sync_mathjs_to_mathts.py`
 
 The script:
+
 1. Copies `.ts` files from `~/Dropbox/Github/Mathjs/src/function/<category>/` → `functions/src/<category>/`
 2. Copies function subdirs: `src/function/shared/` → `functions/src/shared/`
 3. Copies support dirs from `~/Dropbox/Github/Mathjs/src/{utils,core,plain,type,expression,error,wasm}/` → `functions/src/`
@@ -206,6 +213,7 @@ The script:
 ## Tools
 
 `tools/` contains standalone utility packages (not workspace members):
+
 - `create-dependency-graph/` - generates package dependency graphs
 - `compress-for-context/` - compresses code for LLM context windows
 - `chunking-for-files/` - splits large files into chunks

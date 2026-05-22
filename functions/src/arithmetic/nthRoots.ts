@@ -1,31 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { MathJsConfig } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { MathJsConfig } from '../core/config.js';
 
 // Type definitions for nthRoots
 interface ComplexType {
-  re: number
-  im: number
-  abs(): number
-  arg(): number
+  re: number;
+  im: number;
+  abs(): number;
+  arg(): number;
 }
 
 interface ComplexConstructor {
-  new (
-    value: number | { r: number; phi: number },
-    imaginary?: number
-  ): ComplexType
+  new (value: number | { r: number; phi: number }, imaginary?: number): ComplexType;
 }
 
 interface NthRootsDependencies {
-  typed: TypedFunction
-  config: MathJsConfig
-  divideScalar: TypedFunction
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  config: MathJsConfig;
+  divideScalar: TypedFunction;
+  Complex: ComplexConstructor;
 }
 
-const name = 'nthRoots'
-const dependencies = ['config', 'typed', 'divideScalar', 'Complex']
+const name = 'nthRoots';
+const dependencies = ['config', 'typed', 'divideScalar', 'Complex'];
 
 export const createNthRoots = /* #__PURE__ */ factory(
   name,
@@ -34,7 +31,7 @@ export const createNthRoots = /* #__PURE__ */ factory(
     typed,
     config: _config,
     divideScalar: _divideScalar,
-    Complex
+    Complex,
   }: NthRootsDependencies): TypedFunction => {
     /**
      * Each function here returns a real multiple of i as a Complex value.
@@ -44,18 +41,18 @@ export const createNthRoots = /* #__PURE__ */ factory(
     // This is used to fix float artifacts for zero-valued components.
     const _calculateExactResult = [
       function realPos(val: any): any {
-        return new Complex(val, 0)
+        return new Complex(val, 0);
       },
       function imagPos(val: any): any {
-        return new Complex(0, val)
+        return new Complex(0, val);
       },
       function realNeg(val: any): any {
-        return new Complex(-val, 0)
+        return new Complex(-val, 0);
       },
       function imagNeg(val: any): any {
-        return new Complex(0, -val)
-      }
-    ]
+        return new Complex(0, -val);
+      },
+    ];
 
     /**
      * Calculate the nth root of a Complex Number a using De Movire's Theorem.
@@ -64,39 +61,39 @@ export const createNthRoots = /* #__PURE__ */ factory(
      * @return {Array} array of n Complex Roots
      */
     function _nthComplexRoots(a: any, root: any): any {
-      if (root < 0) throw new Error('Root must be greater than zero')
-      if (root === 0) throw new Error('Root must be non-zero')
-      if (root % 1 !== 0) throw new Error('Root must be an integer')
-      if (a === 0 || a.abs() === 0) return [new Complex(0, 0)]
-      const aIsNumeric = typeof a === 'number'
-      let offset
+      if (root < 0) throw new Error('Root must be greater than zero');
+      if (root === 0) throw new Error('Root must be non-zero');
+      if (root % 1 !== 0) throw new Error('Root must be an integer');
+      if (a === 0 || a.abs() === 0) return [new Complex(0, 0)];
+      const aIsNumeric = typeof a === 'number';
+      let offset;
       // determine the offset (argument of a)/(pi/2)
       if (aIsNumeric || a.re === 0 || a.im === 0) {
         if (aIsNumeric) {
-          offset = 2 * +(a < 0) // numeric value on the real axis
+          offset = 2 * +(a < 0); // numeric value on the real axis
         } else if (a.im === 0) {
-          offset = 2 * +(a.re < 0) // complex value on the real axis
+          offset = 2 * +(a.re < 0); // complex value on the real axis
         } else {
-          offset = 2 * +(a.im < 0) + 1 // complex value on the imaginary axis
+          offset = 2 * +(a.im < 0) + 1; // complex value on the imaginary axis
         }
       }
-      const arg = a.arg()
-      const abs = a.abs()
-      const roots = []
-      const r = Math.pow(abs, 1 / root)
+      const arg = a.arg();
+      const abs = a.abs();
+      const roots = [];
+      const r = Math.pow(abs, 1 / root);
       for (let k = 0; k < root; k++) {
-        const halfPiFactor = (offset + 4 * k) / root
+        const halfPiFactor = (offset + 4 * k) / root;
         /**
          * If (offset + 4*k)/root is an integral multiple of pi/2
          * then we can produce a more exact result.
          */
         if (halfPiFactor === Math.round(halfPiFactor)) {
-          roots.push(_calculateExactResult[halfPiFactor % 4](r))
-          continue
+          roots.push(_calculateExactResult[halfPiFactor % 4](r));
+          continue;
         }
-        roots.push(new Complex({ r, phi: (arg + 2 * Math.PI * k) / root }))
+        roots.push(new Complex({ r, phi: (arg + 2 * Math.PI * k) / root }));
       }
-      return roots
+      return roots;
     }
 
     /**
@@ -138,9 +135,9 @@ export const createNthRoots = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Complex: function (x: any): any {
-        return _nthComplexRoots(x, 2)
+        return _nthComplexRoots(x, 2);
       },
-      'Complex, number': _nthComplexRoots
-    }) as TypedFunction
+      'Complex, number': _nthComplexRoots,
+    }) as TypedFunction;
   }
-)
+);

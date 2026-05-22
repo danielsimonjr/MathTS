@@ -1,23 +1,23 @@
-import { compareText as _compareText } from '../utils/string.js'
-import { factory } from '../utils/factory.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { compareText as _compareText } from '../utils/string.js';
+import { factory } from '../utils/factory.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for compareText
 interface MatrixFactory {
-  (...args: unknown[]): unknown
+  (...args: unknown[]): unknown;
 }
 
 interface CompareTextDependencies {
-  typed: TypedFunction
-  matrix: MatrixFactory
-  concat: TypedFunction
+  typed: TypedFunction;
+  matrix: MatrixFactory;
+  concat: TypedFunction;
 }
 
-const name = 'compareText'
-const dependencies = ['typed', 'matrix', 'concat']
+const name = 'compareText';
+const dependencies = ['typed', 'matrix', 'concat'];
 
-;(_compareText as unknown as { signature: string }).signature = 'any, any'
+(_compareText as unknown as { signature: string }).signature = 'any, any';
 
 export const createCompareText = /* #__PURE__ */ factory(
   name,
@@ -26,8 +26,8 @@ export const createCompareText = /* #__PURE__ */ factory(
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Compare two strings lexically. Comparison is case sensitive.
@@ -61,19 +61,15 @@ export const createCompareText = /* #__PURE__ */ factory(
       name,
       _compareText,
       matrixAlgorithmSuite({
-        elop: _compareText as unknown as Parameters<
-          typeof matrixAlgorithmSuite
-        >[0]['elop'],
-        Ds: _compareText as unknown as Parameters<
-          typeof matrixAlgorithmSuite
-        >[0]['Ds']
+        elop: _compareText as unknown as Parameters<typeof matrixAlgorithmSuite>[0]['elop'],
+        Ds: _compareText as unknown as Parameters<typeof matrixAlgorithmSuite>[0]['Ds'],
       })
-    )
+    );
   }
-)
+);
 
 export const createCompareTextNumber = /* #__PURE__ */ factory(
   name,
   ['typed'],
   ({ typed }: { typed: TypedFunction }) => typed(name, _compareText)
-)
+);

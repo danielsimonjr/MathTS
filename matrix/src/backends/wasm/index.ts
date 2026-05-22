@@ -29,8 +29,4 @@ export {
   isWasmFFTAvailable,
 } from './fft-wasm.js';
 
-export type {
-  FFTResult,
-  FFTBackend,
-  FFTConfig,
-} from './fft-wasm.js';
+export type { FFTResult, FFTBackend, FFTConfig } from './fft-wasm.js';

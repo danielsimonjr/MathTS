@@ -1,23 +1,23 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
-import type { Complex } from '../type/complex/Complex.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import { acoshNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
+import type { Complex } from '../type/complex/Complex.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import { acoshNumber } from '../plain/number/index.js';
 
 // Type definitions for acosh
 interface ComplexConstructor {
-  new (re: number, im: number): Complex
+  new (re: number, im: number): Complex;
 }
 
 interface AcoshDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  Complex: ComplexConstructor;
 }
 
-const name = 'acosh'
-const dependencies = ['typed', 'config', 'Complex']
+const name = 'acosh';
+const dependencies = ['typed', 'config', 'Complex'];
 
 export const createAcosh = /* #__PURE__ */ factory(
   name,
@@ -47,21 +47,21 @@ export const createAcosh = /* #__PURE__ */ factory(
     return typed(name, {
       number: function (x: number) {
         if (x >= 1 || config.predictable) {
-          return acoshNumber(x)
+          return acoshNumber(x);
         }
         if (x <= -1) {
-          return new Complex(Math.log(Math.sqrt(x * x - 1) - x), Math.PI)
+          return new Complex(Math.log(Math.sqrt(x * x - 1) - x), Math.PI);
         }
-        return new Complex(x, 0).acosh()
+        return new Complex(x, 0).acosh();
       },
 
       Complex: function (x: Complex) {
-        return x.acosh()
+        return x.acosh();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
-        return (x as unknown as { acosh(): BigNumber }).acosh()
-      }
-    }) as TypedFunction
+        return (x as unknown as { acosh(): BigNumber }).acosh();
+      },
+    }) as TypedFunction;
   }
-)
+);

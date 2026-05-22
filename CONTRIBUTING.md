@@ -53,6 +53,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
 
 Examples:
+
 ```
 feat(matrix): add sparse matrix CSR format support
 fix(workbook): resolve circular dependency detection
@@ -170,7 +171,10 @@ import { Matrix } from '../src/matrix';
 describe('Matrix', () => {
   describe('determinant', () => {
     it('should return 0 for singular matrix', () => {
-      const m = Matrix.from([[1, 2], [2, 4]]);
+      const m = Matrix.from([
+        [1, 2],
+        [2, 4],
+      ]);
       expect(m.determinant()).toBe(0);
     });
 
@@ -178,7 +182,7 @@ describe('Matrix', () => {
       const m = Matrix.from([
         [1, 2, 3],
         [4, 5, 6],
-        [7, 8, 10]
+        [7, 8, 10],
       ]);
       expect(m.determinant()).toBeCloseTo(-3, 10);
     });
@@ -191,7 +195,7 @@ describe('Matrix', () => {
 For numerical computations, use appropriate tolerances:
 
 ```typescript
-expect(result).toBeCloseTo(expected, 10);  // 10 decimal places
+expect(result).toBeCloseTo(expected, 10); // 10 decimal places
 
 // Or with explicit epsilon
 const EPSILON = 1e-10;
@@ -202,17 +206,17 @@ expect(Math.abs(result - expected)).toBeLessThan(EPSILON);
 
 When adding new functionality, place it in the appropriate package:
 
-| Package | Purpose |
-|---------|---------|
-| `@danielsimonjr/mathts-core` | Base types, config, typed-function integration |
-| `@danielsimonjr/mathts-matrix` | Matrix types and operations |
-| `@danielsimonjr/mathts-tensor` | Rank-N dense tensors |
-| `@danielsimonjr/mathts-autograd` | Forward + reverse-mode automatic differentiation |
-| `@danielsimonjr/mathts-functions` | Mathematical functions |
-| `@danielsimonjr/mathts-parallel` | Worker pool and parallelization |
-| `@danielsimonjr/mathts-expression` | Expression parser / compiler / evaluator |
-| `@danielsimonjr/mathts-workbook` | Scientific workbook runtime |
-| `@danielsimonjr/mathts-compat` | mathjs compatibility layer |
+| Package                            | Purpose                                          |
+| ---------------------------------- | ------------------------------------------------ |
+| `@danielsimonjr/mathts-core`       | Base types, config, typed-function integration   |
+| `@danielsimonjr/mathts-matrix`     | Matrix types and operations                      |
+| `@danielsimonjr/mathts-tensor`     | Rank-N dense tensors                             |
+| `@danielsimonjr/mathts-autograd`   | Forward + reverse-mode automatic differentiation |
+| `@danielsimonjr/mathts-functions`  | Mathematical functions                           |
+| `@danielsimonjr/mathts-parallel`   | Worker pool and parallelization                  |
+| `@danielsimonjr/mathts-expression` | Expression parser / compiler / evaluator         |
+| `@danielsimonjr/mathts-workbook`   | Scientific workbook runtime                      |
+| `@danielsimonjr/mathts-compat`     | mathjs compatibility layer                       |
 
 ## Performance Considerations
 

@@ -1,31 +1,31 @@
-import { factory } from '../../utils/factory.js'
-import type { FibonacciHeapNode, MatrixValue } from './types.js'
+import { factory } from '../../utils/factory.js';
+import type { FibonacciHeapNode, MatrixValue } from './types.js';
 
-const name = 'FibonacciHeap'
-const dependencies = ['smaller', 'larger']
+const name = 'FibonacciHeap';
+const dependencies = ['smaller', 'larger'];
 
 // Re-export FibonacciHeapNode for backward compatibility
-export type { FibonacciHeapNode }
+export type { FibonacciHeapNode };
 
 /**
  * Comparison function type for heap operations.
  * INTENTIONAL ANY: typed-function resolves actual types at runtime.
  */
-type CompareFunction = (a: MatrixValue, b: MatrixValue) => boolean
+type CompareFunction = (a: MatrixValue, b: MatrixValue) => boolean;
 
 /**
  * Dependencies for FibonacciHeap factory
  */
 interface FibonacciHeapDependencies {
-  smaller: CompareFunction
-  larger: CompareFunction
+  smaller: CompareFunction;
+  larger: CompareFunction;
 }
 
 export const createFibonacciHeapClass = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ smaller, larger }: FibonacciHeapDependencies) => {
-    const oneOverLogPhi = 1.0 / Math.log((1.0 + Math.sqrt(5.0)) / 2.0)
+    const oneOverLogPhi = 1.0 / Math.log((1.0 + Math.sqrt(5.0)) / 2.0);
 
     /**
      * Fibonacci Heap implementation, used internally for Matrix math.
@@ -33,15 +33,15 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
      * @constructor FibonacciHeap
      */
     class FibonacciHeap<T = MatrixValue> {
-      type: string = 'FibonacciHeap'
-      isFibonacciHeap: boolean = true
-      _minimum: FibonacciHeapNode<T> | null
-      _size: number
+      type: string = 'FibonacciHeap';
+      isFibonacciHeap: boolean = true;
+      _minimum: FibonacciHeapNode<T> | null;
+      _size: number;
 
       constructor() {
         // initialize fields
-        this._minimum = null
-        this._size = 0
+        this._minimum = null;
+        this._size = 0;
       }
 
       /**
@@ -55,33 +55,33 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
         const node: FibonacciHeapNode<T> = {
           key,
           value,
-          degree: 0
-        }
+          degree: 0,
+        };
         // check we have a node in the minimum
         if (this._minimum) {
           // minimum node
-          const minimum = this._minimum
+          const minimum = this._minimum;
           // update left & right of node
-          node.left = minimum
-          node.right = minimum.right
-          minimum.right = node
-          node.right!.left = node
+          node.left = minimum;
+          node.right = minimum.right;
+          minimum.right = node;
+          node.right!.left = node;
           // update minimum node in heap if needed
           if (smaller(key, minimum.key)) {
             // node has a smaller key, use it as minimum
-            this._minimum = node
+            this._minimum = node;
           }
         } else {
           // set left & right
-          node.left = node
-          node.right = node
+          node.left = node;
+          node.right = node;
           // this is the first node
-          this._minimum = node
+          this._minimum = node;
         }
         // increment number of nodes in heap
-        this._size++
+        this._size++;
         // return node
-        return node
+        return node;
       }
 
       /**
@@ -89,7 +89,7 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
        * @memberof FibonacciHeap
        */
       size(): number {
-        return this._size
+        return this._size;
       }
 
       /**
@@ -97,8 +97,8 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
        * @memberof FibonacciHeap
        */
       clear(): void {
-        this._minimum = null
-        this._size = 0
+        this._minimum = null;
+        this._size = 0;
       }
 
       /**
@@ -106,7 +106,7 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
        * @memberof FibonacciHeap
        */
       isEmpty(): boolean {
-        return this._size === 0
+        return this._size === 0;
       }
 
       /**
@@ -116,53 +116,53 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
        */
       extractMinimum(): FibonacciHeapNode<T> | null {
         // node to remove
-        const node = this._minimum
+        const node = this._minimum;
         // check we have a minimum
         if (node === null) {
-          return node
+          return node;
         }
         // current minimum
-        let minimum = this._minimum
+        let minimum = this._minimum;
         // get number of children
-        let numberOfChildren = node.degree
+        let numberOfChildren = node.degree;
         // pointer to the first child
-        let x = node.child
+        let x = node.child;
         // for each child of node do...
         while (numberOfChildren > 0) {
           // store node in right side
-          const tempRight = x!.right
+          const tempRight = x!.right;
           // remove x from child list
-          x!.left!.right = x!.right
-          x!.right!.left = x!.left
+          x!.left!.right = x!.right;
+          x!.right!.left = x!.left;
           // add x to root list of heap
-          x!.left = minimum
-          x!.right = minimum!.right
-          minimum!.right = x
-          x!.right!.left = x
+          x!.left = minimum;
+          x!.right = minimum!.right;
+          minimum!.right = x;
+          x!.right!.left = x;
           // set Parent[x] to null
-          x!.parent = undefined
-          x = tempRight
-          numberOfChildren--
+          x!.parent = undefined;
+          x = tempRight;
+          numberOfChildren--;
         }
         // remove node from root list of heap
-        node.left!.right = node.right
-        node.right!.left = node.left
+        node.left!.right = node.right;
+        node.right!.left = node.left;
         // update minimum
         if (node === node.right) {
           // empty
-          minimum = null
+          minimum = null;
         } else {
           // update minimum
-          minimum = node.right!
+          minimum = node.right!;
           // we need to update the pointer to the root with minimum key
-          minimum = _findMinimumNode(minimum, this._size)
+          minimum = _findMinimumNode(minimum, this._size);
         }
         // decrement size of heap
-        this._size--
+        this._size--;
         // update minimum
-        this._minimum = minimum
+        this._minimum = minimum;
         // return node
-        return node
+        return node;
       }
 
       /**
@@ -174,9 +174,9 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
        */
       remove(node: FibonacciHeapNode<T>): void {
         // decrease key value
-        this._minimum = _decreaseKey(this._minimum!, node, -1)
+        this._minimum = _decreaseKey(this._minimum!, node, -1);
         // remove the smallest
-        this.extractMinimum()
+        this.extractMinimum();
       }
     }
 
@@ -192,21 +192,21 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
       key: number
     ): FibonacciHeapNode<T> {
       // set node key
-      node.key = key
+      node.key = key;
       // get parent node
-      const parent = node.parent
+      const parent = node.parent;
       if (parent && smaller(node.key, parent.key)) {
         // remove node from parent
-        _cut(minimum, node, parent)
+        _cut(minimum, node, parent);
         // remove all nodes from parent to the root parent
-        _cascadingCut(minimum, parent)
+        _cascadingCut(minimum, parent);
       }
       // update minimum node if needed
       if (smaller(node.key, minimum.key)) {
-        minimum = node
+        minimum = node;
       }
       // return minimum
-      return minimum
+      return minimum;
     }
 
     /**
@@ -220,26 +220,26 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
       parent: FibonacciHeapNode<T>
     ): void {
       // remove node from parent children and decrement Degree[parent]
-      node.left!.right = node.right
-      node.right!.left = node.left
-      parent.degree--
+      node.left!.right = node.right;
+      node.right!.left = node.left;
+      parent.degree--;
       // reset y.child if necessary
       if (parent.child === node) {
-        parent.child = node.right
+        parent.child = node.right;
       }
       // remove child if degree is 0
       if (parent.degree === 0) {
-        parent.child = undefined
+        parent.child = undefined;
       }
       // add node to root list of heap
-      node.left = minimum
-      node.right = minimum.right
-      minimum.right = node
-      node.right!.left = node
+      node.left = minimum;
+      node.right = minimum.right;
+      minimum.right = node;
+      node.right!.left = node;
       // set parent[node] to null
-      node.parent = undefined
+      node.parent = undefined;
       // set mark[node] to false
-      node.mark = false
+      node.mark = false;
     }
 
     /**
@@ -248,24 +248,21 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
      * Running time: O(log n); O(1) excluding the recursion.
      * @memberof FibonacciHeap
      */
-    function _cascadingCut<T>(
-      minimum: FibonacciHeapNode<T>,
-      node: FibonacciHeapNode<T>
-    ): void {
+    function _cascadingCut<T>(minimum: FibonacciHeapNode<T>, node: FibonacciHeapNode<T>): void {
       // store parent node
-      const parent = node.parent
+      const parent = node.parent;
       // if there's a parent...
       if (!parent) {
-        return
+        return;
       }
       // if node is unmarked, set it marked
       if (!node.mark) {
-        node.mark = true
+        node.mark = true;
       } else {
         // it's marked, cut it from parent
-        _cut(minimum, node, parent)
+        _cut(minimum, node, parent);
         // cut its parent as well
-        _cascadingCut(minimum, parent)
+        _cascadingCut(minimum, parent);
       }
     }
 
@@ -273,29 +270,26 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
      * Make the first node a child of the second one. Running time: O(1) actual.
      * @memberof FibonacciHeap
      */
-    function _linkNodes<T>(
-      node: FibonacciHeapNode<T>,
-      parent: FibonacciHeapNode<T>
-    ): void {
+    function _linkNodes<T>(node: FibonacciHeapNode<T>, parent: FibonacciHeapNode<T>): void {
       // remove node from root list of heap
-      node.left!.right = node.right
-      node.right!.left = node.left
+      node.left!.right = node.right;
+      node.right!.left = node.left;
       // make node a Child of parent
-      node.parent = parent
+      node.parent = parent;
       if (!parent.child) {
-        parent.child = node
-        node.right = node
-        node.left = node
+        parent.child = node;
+        node.right = node;
+        node.left = node;
       } else {
-        node.left = parent.child
-        node.right = parent.child.right
-        parent.child.right = node
-        node.right!.left = node
+        node.left = parent.child;
+        node.right = parent.child.right;
+        parent.child.right = node;
+        node.right!.left = node;
       }
       // increase degree[parent]
-      parent.degree++
+      parent.degree++;
       // set mark[node] false
-      node.mark = false
+      node.mark = false;
     }
 
     function _findMinimumNode<T>(
@@ -303,84 +297,84 @@ export const createFibonacciHeapClass = /* #__PURE__ */ factory(
       size: number
     ): FibonacciHeapNode<T> {
       // to find trees of the same degree efficiently we use an array of length O(log n) in which we keep a pointer to one root of each degree
-      const arraySize = Math.floor(Math.log(size) * oneOverLogPhi) + 1
+      const arraySize = Math.floor(Math.log(size) * oneOverLogPhi) + 1;
       // create list with initial capacity
-      const array: (FibonacciHeapNode<T> | undefined)[] = new Array(arraySize)
+      const array: (FibonacciHeapNode<T> | undefined)[] = new Array(arraySize);
       // find the number of root nodes.
-      let numRoots = 0
-      let x = minimum
+      let numRoots = 0;
+      let x = minimum;
       if (x) {
-        numRoots++
-        x = x.right!
+        numRoots++;
+        x = x.right!;
         while (x !== minimum) {
-          numRoots++
-          x = x.right!
+          numRoots++;
+          x = x.right!;
         }
       }
       // vars
-      let y: FibonacciHeapNode<T> | undefined
+      let y: FibonacciHeapNode<T> | undefined;
       // For each node in root list do...
       while (numRoots > 0) {
         // access this node's degree..
-        let d = x.degree
+        let d = x.degree;
         // get next node
-        const next = x.right!
+        const next = x.right!;
         // check if there is a node already in array with the same degree
         while (true) {
           // get node with the same degree is any
-          y = array[d]
+          y = array[d];
           if (!y) {
-            break
+            break;
           }
           // make one node with the same degree a child of the other, do this based on the key value.
           if (larger(x.key, y.key)) {
-            const temp = y
-            y = x
-            x = temp
+            const temp = y;
+            y = x;
+            x = temp;
           }
           // make y a child of x
-          _linkNodes(y, x)
+          _linkNodes(y, x);
           // we have handled this degree, go to next one.
-          array[d] = undefined
-          d++
+          array[d] = undefined;
+          d++;
         }
         // save this node for later when we might encounter another of the same degree.
-        array[d] = x
+        array[d] = x;
         // move forward through list.
-        x = next
-        numRoots--
+        x = next;
+        numRoots--;
       }
       // Set min to null (effectively losing the root list) and reconstruct the root list from the array entries in array[].
-      let newMinimum: FibonacciHeapNode<T> | null = null
+      let newMinimum: FibonacciHeapNode<T> | null = null;
       // loop nodes in array
       for (let i = 0; i < arraySize; i++) {
         // get current node
-        y = array[i]
+        y = array[i];
         if (!y) {
-          continue
+          continue;
         }
         // check if we have a linked list
         if (newMinimum) {
           // First remove node from root list.
-          y.left!.right = y.right
-          y.right!.left = y.left
+          y.left!.right = y.right;
+          y.right!.left = y.left;
           // now add to root list, again.
-          y.left = newMinimum
-          y.right = newMinimum.right
-          newMinimum.right = y
-          y.right!.left = y
+          y.left = newMinimum;
+          y.right = newMinimum.right;
+          newMinimum.right = y;
+          y.right!.left = y;
           // check if this is a new min.
           if (smaller(y.key, newMinimum.key)) {
-            newMinimum = y
+            newMinimum = y;
           }
         } else {
-          newMinimum = y
+          newMinimum = y;
         }
       }
-      return newMinimum!
+      return newMinimum!;
     }
 
-    return FibonacciHeap
+    return FibonacciHeap;
   },
   { isClass: true }
-)
+);

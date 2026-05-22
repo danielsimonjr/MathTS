@@ -1,30 +1,25 @@
-import { factory } from '../../utils/factory.js'
-import { errorTransform } from './utils/errorTransform.js'
-import { createMax } from '../../statistics/max.js'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
-import type {
-  TypedFunction,
-  MathFunction,
-  MathJsConfig,
-  VariadicArgs
-} from './types.js'
+import { factory } from '../../utils/factory.js';
+import { errorTransform } from './utils/errorTransform.js';
+import { createMax } from '../../statistics/max.js';
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
+import type { TypedFunction, MathFunction, MathJsConfig, VariadicArgs } from './types.js';
 
 interface MaxDependencies {
-  typed: TypedFunction
-  config: MathJsConfig
-  numeric: MathFunction
-  larger: MathFunction<boolean>
-  isNaN: (x: unknown) => boolean
+  typed: TypedFunction;
+  config: MathJsConfig;
+  numeric: MathFunction;
+  larger: MathFunction<boolean>;
+  isNaN: (x: unknown) => boolean;
 }
 
-const name = 'max'
-const dependencies = ['typed', 'config', 'numeric', 'larger', 'isNaN']
+const name = 'max';
+const dependencies = ['typed', 'config', 'numeric', 'larger', 'isNaN'];
 
 export const createMaxTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, numeric, larger, isNaN: mathIsNaN }: MaxDependencies) => {
-    const max = createMax({ typed, config, numeric, larger, isNaN: mathIsNaN })
+    const max = createMax({ typed, config, numeric, larger, isNaN: mathIsNaN });
 
     /**
      * Attach a transform function to math.max
@@ -35,15 +30,15 @@ export const createMaxTransform = /* #__PURE__ */ factory(
      */
     return typed('max', {
       '...any': function (args: VariadicArgs): unknown {
-        args = lastDimToZeroBase(args)
+        args = lastDimToZeroBase(args);
 
         try {
-          return max.apply(null, args)
+          return max.apply(null, args);
         } catch (err) {
-          throw errorTransform(err as Error)
+          throw errorTransform(err as Error);
         }
-      }
-    })
+      },
+    });
   },
   { isTransformFunction: true }
-)
+);

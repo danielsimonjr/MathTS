@@ -13,13 +13,13 @@ import { computePool, ComputePool } from '../ComputePool.js';
  * Operation categories for threshold selection
  */
 export type OperationCategory =
-  | 'matmul'       // O(n³) matrix multiplication
-  | 'elementwise'  // O(n) element-wise operations
-  | 'reduce'       // O(n) reduction operations
-  | 'map'          // O(n) map operations
-  | 'sort'         // O(n log n) sorting
+  | 'matmul' // O(n³) matrix multiplication
+  | 'elementwise' // O(n) element-wise operations
+  | 'reduce' // O(n) reduction operations
+  | 'map' // O(n) map operations
+  | 'sort' // O(n log n) sorting
   | 'decomposition' // O(n³) matrix decompositions
-  | 'general';     // General operations
+  | 'general'; // General operations
 
 /**
  * Threshold configuration for different operation types
@@ -49,13 +49,13 @@ export interface ThresholdConfig {
  * Larger thresholds for memory-bound operations (elementwise, reduce).
  */
 export const DEFAULT_THRESHOLDS: ThresholdConfig = {
-  matmul: 10000,        // ~100x100 matrix
-  elementwise: 50000,   // ~50K elements
-  reduce: 100000,       // ~100K elements
-  map: 10000,           // ~10K elements
-  sort: 5000,           // ~5K elements
-  decomposition: 2500,  // ~50x50 matrix
-  general: 50000,       // Default ~50K
+  matmul: 10000, // ~100x100 matrix
+  elementwise: 50000, // ~50K elements
+  reduce: 100000, // ~100K elements
+  map: 10000, // ~10K elements
+  sort: 5000, // ~5K elements
+  decomposition: 2500, // ~50x50 matrix
+  general: 50000, // Default ~50K
 };
 
 /**
@@ -87,10 +87,7 @@ export class ThresholdDispatcher {
   private thresholds: ThresholdConfig;
   private pool: ComputePool;
 
-  constructor(
-    thresholds: Partial<ThresholdConfig> = {},
-    pool?: ComputePool
-  ) {
+  constructor(thresholds: Partial<ThresholdConfig> = {}, pool?: ComputePool) {
     this.thresholds = { ...DEFAULT_THRESHOLDS, ...thresholds };
     this.pool = pool ?? computePool;
   }
@@ -119,10 +116,7 @@ export class ThresholdDispatcher {
   /**
    * Determine execution mode based on operation and data size
    */
-  dispatch(
-    elementCount: number,
-    category: OperationCategory = 'general'
-  ): DispatchResult {
+  dispatch(elementCount: number, category: OperationCategory = 'general'): DispatchResult {
     const threshold = this.thresholds[category];
     const poolReady = this.pool.isReady();
 
@@ -169,20 +163,14 @@ export class ThresholdDispatcher {
   /**
    * Simple boolean check for parallel execution
    */
-  shouldParallelize(
-    elementCount: number,
-    category: OperationCategory = 'general'
-  ): boolean {
+  shouldParallelize(elementCount: number, category: OperationCategory = 'general'): boolean {
     return this.dispatch(elementCount, category).mode === 'parallel';
   }
 
   /**
    * Calculate optimal chunk count based on operation and data size
    */
-  calculateChunks(
-    elementCount: number,
-    category: OperationCategory = 'general'
-  ): number {
+  calculateChunks(elementCount: number, category: OperationCategory = 'general'): number {
     const dispatch = this.dispatch(elementCount, category);
 
     if (dispatch.mode === 'sequential') {

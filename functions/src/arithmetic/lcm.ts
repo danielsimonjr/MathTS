@@ -1,60 +1,59 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js'
-import { createMatAlgo06xS0S0 } from '../type/matrix/utils/matAlgo06xS0S0.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import { lcmNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
+import { createMatAlgo06xS0S0 } from '../type/matrix/utils/matAlgo06xS0S0.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import { lcmNumber } from '../plain/number/index.js';
 
 // Type definitions for lcm
 interface BigNumberType {
-  isInt(): boolean
-  isZero(): boolean
-  times(other: BigNumberType): BigNumberType
-  mod(other: BigNumberType): BigNumberType
-  div(other: BigNumberType): BigNumberType
-  abs(): BigNumberType
+  isInt(): boolean;
+  isZero(): boolean;
+  times(other: BigNumberType): BigNumberType;
+  mod(other: BigNumberType): BigNumberType;
+  div(other: BigNumberType): BigNumberType;
+  abs(): BigNumberType;
 }
 
 interface FractionType {
-  lcm(other: FractionType): FractionType
+  lcm(other: FractionType): FractionType;
 }
 
 interface LcmDependencies {
-  typed: TypedFunction
-  matrix: TypedFunction
-  equalScalar: TypedFunction
-  concat: TypedFunction
+  typed: TypedFunction;
+  matrix: TypedFunction;
+  equalScalar: TypedFunction;
+  concat: TypedFunction;
 }
 
-const name = 'lcm'
-const dependencies = ['typed', 'matrix', 'equalScalar', 'concat']
+const name = 'lcm';
+const dependencies = ['typed', 'matrix', 'equalScalar', 'concat'];
 
 export const createLcm = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, matrix, equalScalar, concat }: LcmDependencies): TypedFunction => {
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar })
-    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed, equalScalar })
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
+    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed, equalScalar });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
-    const lcmTypes = 'number | BigNumber | Fraction | Matrix | Array'
-    const lcmManySignature: Record<string, (...args: unknown[]) => unknown> = {}
-    lcmManySignature[`${lcmTypes}, ${lcmTypes}, ...${lcmTypes}`] =
-      typed.referToSelf(
-        (self: TypedFunction) => (a: unknown, b: unknown, args: unknown[]) => {
-          let res = self(a, b)
-          for (let i = 0; i < args.length; i++) {
-            res = self(res, args[i])
-          }
-          return res
+    const lcmTypes = 'number | BigNumber | Fraction | Matrix | Array';
+    const lcmManySignature: Record<string, (...args: unknown[]) => unknown> = {};
+    lcmManySignature[`${lcmTypes}, ${lcmTypes}, ...${lcmTypes}`] = typed.referToSelf(
+      (self: TypedFunction) => (a: unknown, b: unknown, args: unknown[]) => {
+        let res = self(a, b);
+        for (let i = 0; i < args.length; i++) {
+          res = self(res, args[i]);
         }
-      )
+        return res;
+      }
+    );
 
     /**
      * Calculate the least common multiple for two or more values or arrays.
@@ -90,18 +89,15 @@ export const createLcm = /* #__PURE__ */ factory(
       {
         'number, number': lcmNumber,
         'BigNumber, BigNumber': _lcmBigNumber,
-        'Fraction, Fraction': (
-          x: FractionType,
-          y: FractionType
-        ): FractionType => x.lcm(y)
+        'Fraction, Fraction': (x: FractionType, y: FractionType): FractionType => x.lcm(y),
       },
       matrixAlgorithmSuite({
         SS: matAlgo06xS0S0 as any,
         DS: matAlgo02xDS0 as any,
-        Ss: matAlgo11xS0s as any
+        Ss: matAlgo11xS0s as any,
       }),
       lcmManySignature
-    ) as TypedFunction
+    ) as TypedFunction;
 
     /**
      * Calculate lcm for two BigNumbers
@@ -112,25 +108,25 @@ export const createLcm = /* #__PURE__ */ factory(
      */
     function _lcmBigNumber(a: BigNumberType, b: BigNumberType): BigNumberType {
       if (!a.isInt() || !b.isInt()) {
-        throw new Error('Parameters in function lcm must be integer numbers')
+        throw new Error('Parameters in function lcm must be integer numbers');
       }
 
       if (a.isZero()) {
-        return a
+        return a;
       }
       if (b.isZero()) {
-        return b
+        return b;
       }
 
       // https://en.wikipedia.org/wiki/Euclidean_algorithm
       // evaluate lcm here inline to reduce overhead
-      const prod = a.times(b)
+      const prod = a.times(b);
       while (!b.isZero()) {
-        const t = b
-        b = a.mod(t)
-        a = t
+        const t = b;
+        b = a.mod(t);
+        a = t;
       }
-      return prod.div(a).abs()
+      return prod.div(a).abs();
     }
   }
-)
+);

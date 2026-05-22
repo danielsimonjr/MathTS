@@ -1,17 +1,13 @@
-import {
-  deepForEach,
-  reduce,
-  containsCollections
-} from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { safeNumberType } from '../utils/number.js'
-import { improveErrorMessage } from './utils/improveErrorMessage.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { deepForEach, reduce, containsCollections } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { safeNumberType } from '../utils/number.js';
+import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_MAX_THRESHOLD = 100
+const WASM_MAX_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -19,40 +15,32 @@ const WASM_MAX_THRESHOLD = 100
 function isFlatNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 // Type definitions for max
 interface MatrixType {
-  forEach(
-    callback: (value: unknown) => void,
-    skipZeros: boolean,
-    recurse: boolean
-  ): void
-  map(
-    callback: (value: unknown) => unknown,
-    skipZeros: boolean,
-    recurse: boolean
-  ): MatrixType
-  size(): number[]
-  valueOf(): unknown[] | unknown[][]
-  create(data: unknown[], datatype?: string): MatrixType
-  datatype(): string | undefined
+  forEach(callback: (value: unknown) => void, skipZeros: boolean, recurse: boolean): void;
+  map(callback: (value: unknown) => unknown, skipZeros: boolean, recurse: boolean): MatrixType;
+  size(): number[];
+  valueOf(): unknown[] | unknown[][];
+  create(data: unknown[], datatype?: string): MatrixType;
+  datatype(): string | undefined;
 }
 
 interface MaxDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  numeric: TypedFunction
-  larger: TypedFunction
-  isNaN: TypedFunction
+  typed: TypedFunction;
+  config: ConfigOptions;
+  numeric: TypedFunction;
+  larger: TypedFunction;
+  isNaN: TypedFunction;
 }
 
-const name = 'max'
-const dependencies = ['typed', 'config', 'numeric', 'larger', 'isNaN']
+const name = 'max';
+const dependencies = ['typed', 'config', 'numeric', 'larger', 'isNaN'];
 
 export const createMax = /* #__PURE__ */ factory(
   name,
@@ -98,19 +86,19 @@ export const createMax = /* #__PURE__ */ factory(
         array: unknown[] | MatrixType,
         dim: number | { valueOf(): number }
       ): unknown {
-        const dimValue = typeof dim === 'number' ? dim : dim.valueOf()
-        return reduce(array as unknown[] | any, dimValue, _largest)
+        const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
+        return reduce(array as unknown[] | any, dimValue, _largest);
       },
 
       // max(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
         if (containsCollections(args)) {
-          throw new TypeError('Scalar values expected in function max')
+          throw new TypeError('Scalar values expected in function max');
         }
 
-        return _max(args)
-      }
-    })
+        return _max(args);
+      },
+    });
 
     /**
      * Return the largest of two values
@@ -121,9 +109,9 @@ export const createMax = /* #__PURE__ */ factory(
      */
     function _largest(x: unknown, y: unknown): unknown {
       try {
-        return larger(x, y) ? x : y
+        return larger(x, y) ? x : y;
       } catch (err) {
-        throw improveErrorMessage(err, 'max', y)
+        throw improveErrorMessage(err, 'max', y);
       }
     }
 
@@ -137,14 +125,14 @@ export const createMax = /* #__PURE__ */ factory(
       // WASM fast path for flat arrays of plain numbers
       if (Array.isArray(array) && array.length >= WASM_MAX_THRESHOLD) {
         if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule()
+          const wasm = wasmLoader.getModule();
           if (wasm) {
             try {
-              const alloc = wasmLoader.allocateFloat64Array(array)
+              const alloc = wasmLoader.allocateFloat64Array(array);
               try {
-                return wasm.statsMax(alloc.ptr, array.length)
+                return wasm.statsMax(alloc.ptr, array.length);
               } finally {
-                wasmLoader.free(alloc.ptr)
+                wasmLoader.free(alloc.ptr);
               }
             } catch {
               // Fall back to JS implementation on WASM error
@@ -154,30 +142,30 @@ export const createMax = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback for mixed types, BigNumber, Complex, etc.
-      let res: unknown
+      let res: unknown;
 
       deepForEach(array as any, function (value: unknown) {
         try {
           if (mathIsNaN(value)) {
-            res = value
+            res = value;
           } else if (res === undefined || larger(value, res)) {
-            res = value
+            res = value;
           }
         } catch (err) {
-          throw improveErrorMessage(err, 'max', value)
+          throw improveErrorMessage(err, 'max', value);
         }
-      })
+      });
 
       if (res === undefined) {
-        throw new Error('Cannot calculate max of an empty array')
+        throw new Error('Cannot calculate max of an empty array');
       }
 
       // make sure returning numeric value: parse a string into a numeric value
       if (typeof res === 'string') {
-        res = numeric(res, safeNumberType(res, config))
+        res = numeric(res, safeNumberType(res, config));
       }
 
-      return res
+      return res;
     }
   }
-)
+);

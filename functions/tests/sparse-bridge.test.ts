@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  MathJSSparseMatrix,
-  createMatrixBridge,
-} from '../src/factories/matrix-bridge.js';
+import { MathJSSparseMatrix, createMatrixBridge } from '../src/factories/matrix-bridge.js';
 
 describe('MathJSSparseMatrix', () => {
   // ---- Construction ----

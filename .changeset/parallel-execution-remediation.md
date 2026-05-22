@@ -1,7 +1,7 @@
 ---
-"@danielsimonjr/mathts-workerpool": minor
-"@danielsimonjr/mathts-parallel": minor
-"@danielsimonjr/mathts-functions": minor
+'@danielsimonjr/mathts-workerpool': minor
+'@danielsimonjr/mathts-parallel': minor
+'@danielsimonjr/mathts-functions': minor
 ---
 
 Fix and extend parallel execution.

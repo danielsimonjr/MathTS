@@ -11,7 +11,7 @@ export const maxDocs = {
     'max([2, 5; 4, 3], 1)',
     'max([2, 5; 4, 3], 2)',
     'max(2.7, 7.1, -4.5, 2.0, 4.1)',
-    'min(2.7, 7.1, -4.5, 2.0, 4.1)'
+    'min(2.7, 7.1, -4.5, 2.0, 4.1)',
   ],
-  seealso: ['mean', 'median', 'min', 'prod', 'std', 'sum', 'variance']
-}
+  seealso: ['mean', 'median', 'min', 'prod', 'std', 'sum', 'variance'],
+};

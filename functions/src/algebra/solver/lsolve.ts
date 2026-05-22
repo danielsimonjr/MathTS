@@ -1,44 +1,41 @@
-import { factory } from '../../utils/factory.js'
-import { createSolveValidation } from './utils/solveValidation.js'
-import { wasmLoader } from '../../wasm/WasmLoader.js'
+import { factory } from '../../utils/factory.js';
+import { createSolveValidation } from './utils/solveValidation.js';
+import { wasmLoader } from '../../wasm/WasmLoader.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
-const WASM_LSOLVE_THRESHOLD = 16 // 4x4 matrix
+const WASM_LSOLVE_THRESHOLD = 16; // 4x4 matrix
 
 // Type definitions
 interface TypedFunction<T = any> {
-  (...args: any[]): T
+  (...args: any[]): T;
 }
 
 interface MatrixConstructor {
-  (
-    data: any[] | any[][],
-    storage?: 'dense' | 'sparse'
-  ): DenseMatrix | SparseMatrix
+  (data: any[] | any[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
 }
 
 interface DenseMatrix {
-  type: 'DenseMatrix'
-  isDenseMatrix: true
-  _data: any[][]
-  _size: number[]
-  _datatype?: string
-  valueOf(): any[][]
+  type: 'DenseMatrix';
+  isDenseMatrix: true;
+  _data: any[][];
+  _size: number[];
+  _datatype?: string;
+  valueOf(): any[][];
 }
 
 interface SparseMatrix {
-  type: 'SparseMatrix'
-  isSparseMatrix: true
-  _values?: any[]
-  _index: number[]
-  _ptr: number[]
-  _size: number[]
-  _datatype?: string
-  valueOf(): any[][]
+  type: 'SparseMatrix';
+  isSparseMatrix: true;
+  _values?: any[];
+  _index: number[];
+  _ptr: number[];
+  _size: number[];
+  _datatype?: string;
+  valueOf(): any[][];
 }
 
 interface DenseMatrixConstructor {
-  new (data: { data: any[][]; size: number[]; datatype?: string }): DenseMatrix
+  new (data: { data: any[][]; size: number[]; datatype?: string }): DenseMatrix;
 }
 
 interface SolveValidationFunction {
@@ -46,21 +43,21 @@ interface SolveValidationFunction {
     matrix: DenseMatrix | SparseMatrix,
     b: any[][] | DenseMatrix | SparseMatrix,
     copy: boolean
-  ): DenseMatrix
+  ): DenseMatrix;
 }
 
 interface ScalarFunction {
-  (a: any, b: any): any
+  (a: any, b: any): any;
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  divideScalar: ScalarFunction
-  multiplyScalar: ScalarFunction
-  subtractScalar: ScalarFunction
-  equalScalar: ScalarFunction
-  DenseMatrix: DenseMatrixConstructor
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  divideScalar: ScalarFunction;
+  multiplyScalar: ScalarFunction;
+  subtractScalar: ScalarFunction;
+  equalScalar: ScalarFunction;
+  DenseMatrix: DenseMatrixConstructor;
 }
 
 /**
@@ -68,14 +65,14 @@ interface Dependencies {
  */
 function isPlainNumberMatrix(matrix: any[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
-    const row = matrix[i]
+    const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
       if (typeof row[j] !== 'number') {
-        return false
+        return false;
       }
     }
   }
-  return true
+  return true;
 }
 
 /**
@@ -84,41 +81,37 @@ function isPlainNumberMatrix(matrix: any[][]): boolean {
 function isPlainNumberVector(vec: any[][]): boolean {
   for (let i = 0; i < vec.length; i++) {
     if (typeof vec[i][0] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 /**
  * Flatten a 2D array to a Float64Array in row-major order
  */
-function flattenToFloat64(
-  matrix: number[][],
-  rows: number,
-  cols: number
-): Float64Array {
-  const result = new Float64Array(rows * cols)
+function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
+  const result = new Float64Array(rows * cols);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j]
+      result[i * cols + j] = matrix[i][j];
     }
   }
-  return result
+  return result;
 }
 
 /**
  * Extract column vector to Float64Array
  */
 function vectorToFloat64(vec: number[][]): Float64Array {
-  const result = new Float64Array(vec.length)
+  const result = new Float64Array(vec.length);
   for (let i = 0; i < vec.length; i++) {
-    result[i] = vec[i][0]
+    result[i] = vec[i][0];
   }
-  return result
+  return result;
 }
 
-const name = 'lsolve'
+const name = 'lsolve';
 const dependencies = [
   'typed',
   'matrix',
@@ -126,8 +119,8 @@ const dependencies = [
   'multiplyScalar',
   'subtractScalar',
   'equalScalar',
-  'DenseMatrix'
-]
+  'DenseMatrix',
+];
 
 export const createLsolve = /* #__PURE__ */ factory(
   name,
@@ -139,11 +132,11 @@ export const createLsolve = /* #__PURE__ */ factory(
     multiplyScalar,
     subtractScalar,
     equalScalar,
-    DenseMatrix
+    DenseMatrix,
   }: Dependencies) => {
     const solveValidation = createSolveValidation({
-      DenseMatrix: DenseMatrix as any
-    }) as unknown as SolveValidationFunction
+      DenseMatrix: DenseMatrix as any,
+    }) as unknown as SolveValidationFunction;
 
     /**
      * Finds one solution of a linear equation system by forwards substitution. Matrix must be a lower triangular matrix. Throws an error if there's no solution.
@@ -174,41 +167,41 @@ export const createLsolve = /* #__PURE__ */ factory(
         m: SparseMatrix,
         b: any[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
-        return _sparseForwardSubstitution(m, b)
+        return _sparseForwardSubstitution(m, b);
       },
 
       'DenseMatrix, Array | Matrix': function (
         m: DenseMatrix,
         b: any[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
-        return _denseForwardSubstitution(m, b)
+        return _denseForwardSubstitution(m, b);
       },
 
       'Array, Array | Matrix': function (
         a: any[][],
         b: any[][] | DenseMatrix | SparseMatrix
       ): any[][] {
-        const m = matrix(a) as DenseMatrix
-        const r = _denseForwardSubstitution(m, b)
-        return r.valueOf()
-      }
-    })
+        const m = matrix(a) as DenseMatrix;
+        const r = _denseForwardSubstitution(m, b);
+        return r.valueOf();
+      },
+    });
 
     function _denseForwardSubstitution(
       m: DenseMatrix,
       b: any[][] | DenseMatrix | SparseMatrix
     ): DenseMatrix {
       // validate matrix and vector, return copy of column vector b
-      const bVector = solveValidation(m, b, true)
-      const bdata = bVector._data
+      const bVector = solveValidation(m, b, true);
+      const bdata = bVector._data;
 
-      const rows = m._size[0]
-      const columns = m._size[1]
+      const rows = m._size[0];
+      const columns = m._size[1];
 
-      const mdata = m._data
+      const mdata = m._data;
 
       // WASM fast path for plain number matrices
-      const wasm = wasmLoader.getModule()
+      const wasm = wasmLoader.getModule();
       if (
         wasm &&
         rows === columns &&
@@ -217,43 +210,36 @@ export const createLsolve = /* #__PURE__ */ factory(
         isPlainNumberVector(bdata)
       ) {
         try {
-          const lFlat = flattenToFloat64(mdata, rows, columns)
-          const bFlat = vectorToFloat64(bdata as number[][])
+          const lFlat = flattenToFloat64(mdata, rows, columns);
+          const bFlat = vectorToFloat64(bdata as number[][]);
 
-          const lAlloc = wasmLoader.allocateFloat64Array(lFlat)
-          const bAlloc = wasmLoader.allocateFloat64Array(bFlat)
-          const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows)
+          const lAlloc = wasmLoader.allocateFloat64Array(lFlat);
+          const bAlloc = wasmLoader.allocateFloat64Array(bFlat);
+          const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows);
 
           try {
-            const success = wasm.laLsolve(
-              lAlloc.ptr,
-              bAlloc.ptr,
-              rows,
-              resultAlloc.ptr
-            )
+            const success = wasm.laLsolve(lAlloc.ptr, bAlloc.ptr, rows, resultAlloc.ptr);
             if (success === 0) {
-              throw new Error(
-                'Linear system cannot be solved since matrix is singular'
-              )
+              throw new Error('Linear system cannot be solved since matrix is singular');
             }
             // Convert result back to column vector
-            const x: number[][] = []
+            const x: number[][] = [];
             for (let i = 0; i < rows; i++) {
-              x[i] = [resultAlloc.array[i]]
+              x[i] = [resultAlloc.array[i]];
             }
             return new DenseMatrix({
               data: x,
-              size: [rows, 1]
-            })
+              size: [rows, 1],
+            });
           } finally {
-            wasmLoader.free(lAlloc.ptr)
-            wasmLoader.free(bAlloc.ptr)
-            wasmLoader.free(resultAlloc.ptr)
+            wasmLoader.free(lAlloc.ptr);
+            wasmLoader.free(bAlloc.ptr);
+            wasmLoader.free(resultAlloc.ptr);
           }
         } catch (e) {
           // If it's a singularity error, rethrow it
           if (e instanceof Error && e.message.includes('singular')) {
-            throw e
+            throw e;
           }
           // Otherwise fall back to JS implementation on WASM error
         }
@@ -261,44 +247,40 @@ export const createLsolve = /* #__PURE__ */ factory(
 
       // JavaScript fallback
       // result
-      const x: any[][] = []
+      const x: any[][] = [];
 
       // loop columns
       for (let j = 0; j < columns; j++) {
-        const bj = bdata[j][0] || 0
-        let xj: any
+        const bj = bdata[j][0] || 0;
+        let xj: any;
 
         if (!equalScalar(bj, 0)) {
           // non-degenerate row, find solution
 
-          const vjj = mdata[j][j]
+          const vjj = mdata[j][j];
 
           if (equalScalar(vjj, 0)) {
-            throw new Error(
-              'Linear system cannot be solved since matrix is singular'
-            )
+            throw new Error('Linear system cannot be solved since matrix is singular');
           }
 
-          xj = divideScalar(bj, vjj)
+          xj = divideScalar(bj, vjj);
 
           // loop rows
           for (let i = j + 1; i < rows; i++) {
-            bdata[i] = [
-              subtractScalar(bdata[i][0] || 0, multiplyScalar(xj, mdata[i][j]))
-            ]
+            bdata[i] = [subtractScalar(bdata[i][0] || 0, multiplyScalar(xj, mdata[i][j]))];
           }
         } else {
           // degenerate row, we can choose any value
-          xj = 0
+          xj = 0;
         }
 
-        x[j] = [xj]
+        x[j] = [xj];
       }
 
       return new DenseMatrix({
         data: x,
-        size: [rows, 1]
-      })
+        size: [rows, 1],
+      });
     }
 
     function _sparseForwardSubstitution(
@@ -306,77 +288,73 @@ export const createLsolve = /* #__PURE__ */ factory(
       b: any[][] | DenseMatrix | SparseMatrix
     ): DenseMatrix {
       // validate matrix and vector, return copy of column vector b
-      const bVector = solveValidation(m, b, true)
+      const bVector = solveValidation(m, b, true);
 
-      const bdata = bVector._data
+      const bdata = bVector._data;
 
-      const rows = m._size[0]
-      const columns = m._size[1]
+      const rows = m._size[0];
+      const columns = m._size[1];
 
-      const values = m._values
-      const index = m._index
-      const ptr = m._ptr
+      const values = m._values;
+      const index = m._index;
+      const ptr = m._ptr;
 
       // result
-      const x: any[][] = []
+      const x: any[][] = [];
 
       // loop columns
       for (let j = 0; j < columns; j++) {
-        const bj = bdata[j][0] || 0
+        const bj = bdata[j][0] || 0;
 
         if (!equalScalar(bj, 0)) {
           // non-degenerate row, find solution
 
-          let vjj: any = 0
+          let vjj: any = 0;
           // matrix values & indices (column j)
-          const jValues: any[] = []
-          const jIndices: number[] = []
+          const jValues: any[] = [];
+          const jIndices: number[] = [];
 
           // first and last index in the column
-          const firstIndex = ptr[j]
-          const lastIndex = ptr[j + 1]
+          const firstIndex = ptr[j];
+          const lastIndex = ptr[j + 1];
 
           // values in column, find value at [j, j]
           for (let k = firstIndex; k < lastIndex; k++) {
-            const i = index[k]
+            const i = index[k];
 
             // check row (rows are not sorted!)
             if (i === j) {
-              vjj = values![k]
+              vjj = values![k];
             } else if (i > j) {
               // store lower triangular
-              jValues.push(values![k])
-              jIndices.push(i)
+              jValues.push(values![k]);
+              jIndices.push(i);
             }
           }
 
           // at this point we must have a value in vjj
           if (equalScalar(vjj, 0)) {
-            throw new Error(
-              'Linear system cannot be solved since matrix is singular'
-            )
+            throw new Error('Linear system cannot be solved since matrix is singular');
           }
 
-          const xj = divideScalar(bj, vjj)
+          const xj = divideScalar(bj, vjj);
 
           for (let k = 0, l = jIndices.length; k < l; k++) {
-            const i = jIndices[k]
-            bdata[i] = [
-              subtractScalar(bdata[i][0] || 0, multiplyScalar(xj, jValues[k]))
-            ]
+            const i = jIndices[k];
+            bdata[i] = [subtractScalar(bdata[i][0] || 0, multiplyScalar(xj, jValues[k]))];
           }
 
-          x[j] = [xj]
+          x[j] = [xj];
         } else {
           // degenerate row, we can choose any value
-          x[j] = [0]
+          x[j] = [0];
         }
       }
 
       return new DenseMatrix({
         data: x,
-        size: [rows, 1]
-      })
+        size: [rows, 1],
+      });
     }
   }
-)
+);

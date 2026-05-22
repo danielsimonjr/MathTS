@@ -4,5 +4,5 @@ export const bernoulliDocs = {
   syntax: ['bernoulli(n)'],
   description: 'The nth Bernoulli number',
   examples: ['bernoulli(4)', 'bernoulli(fraction(12))'],
-  seealso: ['combinations', 'gamma', 'stirlingS2']
-}
+  seealso: ['combinations', 'gamma', 'stirlingS2'],
+};

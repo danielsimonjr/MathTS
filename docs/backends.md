@@ -5,6 +5,7 @@ MathTS provides a three-tier backend system for matrix operations that automatic
 ## Backend Types
 
 ### 0. Rust WASM Backend (Primary)
+
 - **Status**: Production — primary backend as of April 2026
 - **Best for:** Medium and large matrices (>500 elements); replaces AssemblyScript as the default
 - **Binary**: `wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm`
@@ -35,11 +36,13 @@ MATHTS_WASM_BACKEND=rust npx mathts serve
 ```
 
 ### 1. JavaScript Backend (JS)
+
 - **Best for:** Small matrices (< 1,000 elements)
 - **Advantages:** No initialization overhead, always available
 - **Implementation:** Pure TypeScript with standard JavaScript operations
 
 ### 2. AssemblyScript WASM Backend (Legacy / Benchmark)
+
 - **Status**: Retained for benchmarking comparison only — superseded by Rust WASM backend
 - **Best for:** Medium matrices (1,000 - 100,000 elements) when Rust WASM is unavailable
 - **Binary**: `assembly/build/mathts.wasm`
@@ -58,6 +61,7 @@ MATHTS_WASM_BACKEND=as npx mathts serve
 ```
 
 ### 3. WebGPU Backend (GPU)
+
 - **Best for:** Large matrices (> 100,000 elements)
 - **Advantages:** Massive parallelism, best for large data
 - **Requirements:** WebGPU support (Chrome 113+, Edge 113+, Firefox Nightly)
@@ -77,12 +81,12 @@ The `BackendManager` automatically selects the best backend based on:
 
 ### Default Thresholds
 
-| Operation | WASM Threshold | GPU Threshold |
-|-----------|---------------|---------------|
-| Add/Subtract | 1,000 | 100,000 |
-| Multiply (matmul) | 500 | 50,000 |
-| Transpose | 2,000 | 200,000 |
-| Decomposition | 100 | 10,000 |
+| Operation         | WASM Threshold | GPU Threshold |
+| ----------------- | -------------- | ------------- |
+| Add/Subtract      | 1,000          | 100,000       |
+| Multiply (matmul) | 500            | 50,000        |
+| Transpose         | 2,000          | 200,000       |
+| Decomposition     | 100            | 10,000        |
 
 ## Usage
 
@@ -115,10 +119,14 @@ const gpuResult = await gpuMatrixBackend.multiplyAsync(a, b);
 ### Configuring Backends
 
 ```typescript
-import { setBackendThreshold, setBackendPreference, forceBackend } from '@danielsimonjr/mathts-matrix';
+import {
+  setBackendThreshold,
+  setBackendPreference,
+  forceBackend,
+} from '@danielsimonjr/mathts-matrix';
 
 // Adjust thresholds
-setBackendThreshold('wasm', 500);  // Use WASM for > 500 elements
+setBackendThreshold('wasm', 500); // Use WASM for > 500 elements
 setBackendThreshold('gpu', 50000); // Use GPU for > 50,000 elements
 
 // Set preference level
@@ -127,7 +135,7 @@ setBackendPreference('gpu', 'require'); // Require GPU (error if unavailable)
 
 // Force a specific backend
 forceBackend('wasm'); // Only use WASM
-forceBackend(null);   // Reset to auto-selection
+forceBackend(null); // Reset to auto-selection
 ```
 
 ### Checking Availability
@@ -161,10 +169,10 @@ enableAdaptiveTuning();
 
 // Configure tuning parameters
 configureAdaptiveTuning({
-  sampleSize: 10,          // Samples before adjusting
-  minSpeedupRatio: 1.2,    // Minimum 20% improvement to switch
+  sampleSize: 10, // Samples before adjusting
+  minSpeedupRatio: 1.2, // Minimum 20% improvement to switch
   maxAdjustmentPercent: 25, // Max 25% threshold adjustment
-  cooldownMs: 5000,        // 5s between adjustments
+  cooldownMs: 5000, // 5s between adjustments
 });
 
 // View adaptive thresholds
@@ -233,22 +241,23 @@ const result = backendManager.multiply(a, b); // Never throws
 
 ## Backend Comparison
 
-| Feature | JS | WASM-AS | WASM-Rust | GPU |
-|---------|-----|---------|-----------|-----|
-| Initialization | Instant | ~10ms | ~15ms | ~100ms |
-| Small matrices | Fastest | Overhead | Overhead | Overhead |
-| Medium matrices | Slow | Fast | Faster | Overhead |
-| Large matrices | Slowest | Fast | Fastest (no GPU) | Fastest |
-| SIMD support | No | Yes | Yes (LLVM auto) | N/A |
-| Parallel execution | No | Limited | Limited | Yes |
-| Memory efficiency | Good | Good | Good | Best |
-| Browser support | 100% | 95%+ | 95%+ | 60%+ |
-| Status | Fallback | Benchmark | **Primary (complete)** | Planned |
-| Binary location | — | `assembly/build/mathts.wasm` | `wasm-rust/target/.../mathts_wasm.wasm` | — |
+| Feature            | JS       | WASM-AS                      | WASM-Rust                               | GPU      |
+| ------------------ | -------- | ---------------------------- | --------------------------------------- | -------- |
+| Initialization     | Instant  | ~10ms                        | ~15ms                                   | ~100ms   |
+| Small matrices     | Fastest  | Overhead                     | Overhead                                | Overhead |
+| Medium matrices    | Slow     | Fast                         | Faster                                  | Overhead |
+| Large matrices     | Slowest  | Fast                         | Fastest (no GPU)                        | Fastest  |
+| SIMD support       | No       | Yes                          | Yes (LLVM auto)                         | N/A      |
+| Parallel execution | No       | Limited                      | Limited                                 | Yes      |
+| Memory efficiency  | Good     | Good                         | Good                                    | Best     |
+| Browser support    | 100%     | 95%+                         | 95%+                                    | 60%+     |
+| Status             | Fallback | Benchmark                    | **Primary (complete)**                  | Planned  |
+| Binary location    | —        | `assembly/build/mathts.wasm` | `wasm-rust/target/.../mathts_wasm.wasm` | —        |
 
 ## Troubleshooting
 
 ### WASM Not Available
+
 ```typescript
 import { detectWasmFeatures } from '@danielsimonjr/mathts-matrix';
 
@@ -259,6 +268,7 @@ console.log('Threads:', features.threads);
 ```
 
 ### GPU Not Available
+
 ```typescript
 import { detectGPUCapabilities } from '@danielsimonjr/mathts-matrix';
 
@@ -269,6 +279,7 @@ console.log('Limits:', caps.limits);
 ```
 
 ### Performance Issues
+
 ```typescript
 import { enableProfiling, backendManager } from '@danielsimonjr/mathts-matrix';
 

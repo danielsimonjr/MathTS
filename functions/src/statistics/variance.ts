@@ -1,12 +1,12 @@
-import { deepForEach } from '../utils/collection.js'
-import { isBigNumber } from '../utils/is.js'
-import { factory } from '../utils/factory.js'
-import { improveErrorMessage } from './utils/improveErrorMessage.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { deepForEach } from '../utils/collection.js';
+import { isBigNumber } from '../utils/is.js';
+import { factory } from '../utils/factory.js';
+import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_VARIANCE_THRESHOLD = 100
+const WASM_VARIANCE_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -14,55 +14,39 @@ const WASM_VARIANCE_THRESHOLD = 100
 function isFlatNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 // Type definitions for variance
 interface MatrixType {
-  forEach(
-    callback: (value: unknown) => void,
-    skipZeros: boolean,
-    recurse: boolean
-  ): void
-  map(
-    callback: (value: unknown) => unknown,
-    skipZeros: boolean,
-    recurse: boolean
-  ): MatrixType
-  size(): number[]
-  valueOf(): unknown[] | unknown[][]
-  create(data: unknown[], datatype?: string): MatrixType
-  datatype(): string | undefined
-  length?: number
+  forEach(callback: (value: unknown) => void, skipZeros: boolean, recurse: boolean): void;
+  map(callback: (value: unknown) => unknown, skipZeros: boolean, recurse: boolean): MatrixType;
+  size(): number[];
+  valueOf(): unknown[] | unknown[][];
+  create(data: unknown[], datatype?: string): MatrixType;
+  datatype(): string | undefined;
+  length?: number;
 }
 
 interface VarianceDependencies {
-  typed: TypedFunction
-  add: TypedFunction
-  subtract: TypedFunction
-  multiply: TypedFunction
-  divide: TypedFunction
-  mapSlices: TypedFunction
-  isNaN: TypedFunction
+  typed: TypedFunction;
+  add: TypedFunction;
+  subtract: TypedFunction;
+  multiply: TypedFunction;
+  divide: TypedFunction;
+  mapSlices: TypedFunction;
+  isNaN: TypedFunction;
 }
 
-type NormalizationType = 'unbiased' | 'uncorrected' | 'biased'
+type NormalizationType = 'unbiased' | 'uncorrected' | 'biased';
 
-const DEFAULT_NORMALIZATION: NormalizationType = 'unbiased'
+const DEFAULT_NORMALIZATION: NormalizationType = 'unbiased';
 
-const name = 'variance'
-const dependencies = [
-  'typed',
-  'add',
-  'subtract',
-  'multiply',
-  'divide',
-  'mapSlices',
-  'isNaN'
-]
+const name = 'variance';
+const dependencies = ['typed', 'add', 'subtract', 'multiply', 'divide', 'mapSlices', 'isNaN'];
 
 export const createVariance = /* #__PURE__ */ factory(
   name,
@@ -74,7 +58,7 @@ export const createVariance = /* #__PURE__ */ factory(
     multiply,
     divide,
     mapSlices,
-    isNaN: mathIsNaN
+    isNaN: mathIsNaN,
   }: VarianceDependencies) => {
     /**
      * Compute the variance of a matrix or a  list with values.
@@ -132,7 +116,7 @@ export const createVariance = /* #__PURE__ */ factory(
     return typed(name, {
       // variance([a, b, c, d, ...])
       'Array | Matrix': function (array: unknown[] | MatrixType): unknown {
-        return _var(array, DEFAULT_NORMALIZATION)
+        return _var(array, DEFAULT_NORMALIZATION);
       },
 
       // variance([a, b, c, d, ...], normalization)
@@ -143,7 +127,7 @@ export const createVariance = /* #__PURE__ */ factory(
         array: unknown[] | MatrixType,
         dim: number | { valueOf(): number }
       ): unknown {
-        return _varDim(array, dim, DEFAULT_NORMALIZATION)
+        return _varDim(array, dim, DEFAULT_NORMALIZATION);
       },
 
       // variance([a, b, c, c, ...], dim, normalization)
@@ -151,9 +135,9 @@ export const createVariance = /* #__PURE__ */ factory(
 
       // variance(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
-        return _var(args, DEFAULT_NORMALIZATION)
-      }
-    })
+        return _var(args, DEFAULT_NORMALIZATION);
+      },
+    });
 
     /**
      * Recursively calculate the variance of an n-dimensional array
@@ -166,14 +150,9 @@ export const createVariance = /* #__PURE__ */ factory(
      * @return {number | BigNumber} variance
      * @private
      */
-    function _var(
-      array: unknown[] | MatrixType,
-      normalization: NormalizationType
-    ): unknown {
+    function _var(array: unknown[] | MatrixType, normalization: NormalizationType): unknown {
       if ((array as unknown[]).length === 0) {
-        throw new SyntaxError(
-          'Function variance requires one or more parameters (0 provided)'
-        )
+        throw new SyntaxError('Function variance requires one or more parameters (0 provided)');
       }
 
       // WASM fast path for flat arrays of plain numbers
@@ -184,15 +163,15 @@ export const createVariance = /* #__PURE__ */ factory(
         (normalization === 'unbiased' || normalization === 'uncorrected')
       ) {
         if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule()
+          const wasm = wasmLoader.getModule();
           if (wasm) {
             try {
-              const alloc = wasmLoader.allocateFloat64Array(array)
+              const alloc = wasmLoader.allocateFloat64Array(array);
               try {
-                const ddof = normalization === 'unbiased' ? 1 : 0
-                return wasm.statsVariance(alloc.ptr, array.length, ddof)
+                const ddof = normalization === 'unbiased' ? 1 : 0;
+                return wasm.statsVariance(alloc.ptr, array.length, ddof);
               } finally {
-                wasmLoader.free(alloc.ptr)
+                wasmLoader.free(alloc.ptr);
               }
             } catch {
               // Fall back to JS implementation on WASM error
@@ -202,49 +181,45 @@ export const createVariance = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback for mixed types, BigNumber, Complex, biased normalization, etc.
-      let sum: unknown
-      let num = 0
+      let sum: unknown;
+      let num = 0;
 
       // calculate the mean and number of elements
       deepForEach(array as any, function (value: unknown) {
         try {
-          sum = sum === undefined ? value : add(sum, value)
-          num++
+          sum = sum === undefined ? value : add(sum, value);
+          num++;
         } catch (err) {
-          throw improveErrorMessage(err, 'variance', value)
+          throw improveErrorMessage(err, 'variance', value);
         }
-      })
-      if (num === 0)
-        throw new Error('Cannot calculate variance of an empty array')
+      });
+      if (num === 0) throw new Error('Cannot calculate variance of an empty array');
 
-      const mean = divide(sum, num)
+      const mean = divide(sum, num);
 
       // calculate the variance
-      sum = undefined
+      sum = undefined;
       deepForEach(array as any, function (value: unknown) {
-        const diff = subtract(value, mean)
-        sum =
-          sum === undefined
-            ? multiply(diff, diff)
-            : add(sum, multiply(diff, diff))
-      })
+        const diff = subtract(value, mean);
+        sum = sum === undefined ? multiply(diff, diff) : add(sum, multiply(diff, diff));
+      });
 
       if (mathIsNaN(sum)) {
-        return sum
+        return sum;
       }
 
       switch (normalization) {
         case 'uncorrected':
-          return divide(sum, num)
+          return divide(sum, num);
 
         case 'biased':
-          return divide(sum, num + 1)
+          return divide(sum, num + 1);
 
         case 'unbiased': {
           const zero = isBigNumber(sum)
             ? (sum as unknown as { mul(n: number): unknown }).mul(0)
-            : 0
-          return num === 1 ? zero : divide(sum, num - 1)
+            : 0;
+          return num === 1 ? zero : divide(sum, num - 1);
         }
 
         default:
@@ -253,7 +228,7 @@ export const createVariance = /* #__PURE__ */ factory(
               normalization +
               '". ' +
               'Choose "unbiased" (default), "uncorrected", or "biased".'
-          )
+          );
       }
     }
 
@@ -272,16 +247,14 @@ export const createVariance = /* #__PURE__ */ factory(
     ): unknown {
       try {
         if ((array as unknown[]).length === 0) {
-          throw new SyntaxError(
-            'Function variance requires one or more parameters (0 provided)'
-          )
+          throw new SyntaxError('Function variance requires one or more parameters (0 provided)');
         }
         return mapSlices(array, dim, (x: unknown) =>
           _var(x as unknown[] | MatrixType, normalization)
-        )
+        );
       } catch (err) {
-        throw improveErrorMessage(err, 'variance', undefined)
+        throw improveErrorMessage(err, 'variance', undefined);
       }
     }
   }
-)
+);

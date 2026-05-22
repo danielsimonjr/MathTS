@@ -1,6 +1,6 @@
 // function utils
 
-import { lruQueue } from './lruQueue.js'
+import { lruQueue } from './lruQueue.js';
 
 /**
  * Memoize a given function by caching the computed result.
@@ -18,48 +18,48 @@ import { lruQueue } from './lruQueue.js'
  * @return {function}                       Returns the memoized function
  */
 export interface MemoizeCache {
-  values: Map<string, any>
-  lru: ReturnType<typeof lruQueue>
+  values: Map<string, any>;
+  lru: ReturnType<typeof lruQueue>;
 }
 
 export interface MemoizedFunction {
-  (...args: any[]): any
-  cache?: MemoizeCache
+  (...args: any[]): any;
+  cache?: MemoizeCache;
 }
 
 export function memoize(
   fn: any,
   { hasher, limit }: { hasher?: any; limit?: any } = {}
 ): MemoizedFunction {
-  limit = limit == null ? Number.POSITIVE_INFINITY : limit
-  hasher = hasher == null ? JSON.stringify : hasher
+  limit = limit == null ? Number.POSITIVE_INFINITY : limit;
+  hasher = hasher == null ? JSON.stringify : hasher;
 
   const memoized: MemoizedFunction = function () {
     if (typeof memoized.cache !== 'object') {
       memoized.cache = {
         values: new Map(),
-        lru: lruQueue(limit || Number.POSITIVE_INFINITY)
-      }
+        lru: lruQueue(limit || Number.POSITIVE_INFINITY),
+      };
     }
-    const args = []
+    const args = [];
     for (let i = 0; i < arguments.length; i++) {
-      args[i] = arguments[i]
+      args[i] = arguments[i];
     }
-    const hash = hasher(args)
+    const hash = hasher(args);
 
     if (memoized.cache.values.has(hash)) {
-      memoized.cache.lru.hit(hash)
-      return memoized.cache.values.get(hash)
+      memoized.cache.lru.hit(hash);
+      return memoized.cache.values.get(hash);
     }
 
-    const newVal = fn.apply(fn, args)
-    memoized.cache.values.set(hash, newVal)
-    memoized.cache.values.delete(memoized.cache.lru.hit(hash))
+    const newVal = fn.apply(fn, args);
+    memoized.cache.values.set(hash, newVal);
+    memoized.cache.values.delete(memoized.cache.lru.hit(hash));
 
-    return newVal
-  }
+    return newVal;
+  };
 
-  return memoized
+  return memoized;
 }
 
 /**
@@ -78,27 +78,27 @@ export function memoize(
  */
 export function memoizeCompare(fn: any, isEqual: any): any {
   const memoize: any = function memoize(): any {
-    const args: any[] = []
+    const args: any[] = [];
     for (let i = 0; i < arguments.length; i++) {
-      args[i] = arguments[i]
+      args[i] = arguments[i];
     }
 
     for (let c = 0; c < memoize.cache.length; c++) {
-      const cached: any = memoize.cache[c]
+      const cached: any = memoize.cache[c];
 
       if (isEqual(args, cached.args)) {
         // TODO: move this cache entry to the top so recently used entries move up?
-        return cached.res
+        return cached.res;
       }
     }
 
-    const res = fn.apply(fn, args)
-    memoize.cache.unshift({ args, res })
+    const res = fn.apply(fn, args);
+    memoize.cache.unshift({ args, res });
 
-    return res
-  }
+    return res;
+  };
 
-  memoize.cache = [] as any[]
+  memoize.cache = [] as any[];
 
-  return memoize
+  return memoize;
 }

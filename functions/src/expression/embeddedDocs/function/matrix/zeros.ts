@@ -7,15 +7,10 @@ export const zerosDocs = {
     'zeros(m, n, p, ...)',
     'zeros([m])',
     'zeros([m, n])',
-    'zeros([m, n, p, ...])'
+    'zeros([m, n, p, ...])',
   ],
   description: 'Create a matrix containing zeros.',
-  examples: [
-    'zeros(3)',
-    'zeros(3, 5)',
-    'a = [1, 2, 3; 4, 5, 6]',
-    'zeros(size(a))'
-  ],
+  examples: ['zeros(3)', 'zeros(3, 5)', 'a = [1, 2, 3; 4, 5, 6]', 'zeros(size(a))'],
   seealso: [
     'concat',
     'det',
@@ -28,6 +23,6 @@ export const zerosDocs = {
     'squeeze',
     'subset',
     'trace',
-    'transpose'
-  ]
-}
+    'transpose',
+  ],
+};

@@ -340,7 +340,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(name, dependencies, ({
         // pass unevaluated parameters (nodes) to the function
         // "raw" evaluation
         const rawArgs = this.args
-        return function evalOperatorNode (scope: any, args: Record<string, any>, context: any): any {
+        return function evalOperatorNode (scope: any, args: Record<string, any>, _context: any): any {
           return fn(rawArgs, math, createSubScope(scope, args))
         }
       } else if (evalArgs.length === 1) {
@@ -358,7 +358,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(name, dependencies, ({
         }
       } else {
         return function evalOperatorNode (scope: any, args: Record<string, any>, context: any): any {
-          return fn.apply(null, map(evalArgs, function (evalArg: CompileFunction): any {
+          return fn(...map(evalArgs, function (evalArg: CompileFunction): any {
             return evalArg(scope, args, context)
           }))
         }

@@ -2,16 +2,16 @@
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
 
-import { csMarked } from './csMarked.js'
-import { csMark } from './csMark.js'
-import { csDfs } from './csDfs.js'
+import { csMarked } from './csMarked.js';
+import { csMark } from './csMark.js';
+import { csDfs } from './csDfs.js';
 
 // Sparse matrix internal structure
 interface SparseMatrixData {
-  _size: number[]
-  _values?: any[]
-  _index: number[]
-  _ptr: number[]
+  _size: number[];
+  _values?: any[];
+  _index: number[];
+  _ptr: number[];
 }
 
 /**
@@ -36,31 +36,31 @@ export function csReach(
   pinv: number[] | null
 ): number {
   // g arrays
-  const gptr = g._ptr
-  const gsize = g._size
+  const gptr = g._ptr;
+  const gsize = g._size;
   // b arrays
-  const bindex = b._index
-  const bptr = b._ptr
+  const bindex = b._index;
+  const bptr = b._ptr;
   // columns
-  const n = gsize[1]
+  const n = gsize[1];
   // vars
-  let p: number, p0: number, p1: number
+  let p: number, p0: number, p1: number;
   // initialize top
-  let top = n
+  let top = n;
   // loop column indeces in B
   for (p0 = bptr[k], p1 = bptr[k + 1], p = p0; p < p1; p++) {
     // node i
-    const i = bindex[p]
+    const i = bindex[p];
     // check node i is marked
     if (!csMarked(gptr, i)) {
       // start a dfs at unmarked node i
-      top = csDfs(i, g, top, xi, pinv)
+      top = csDfs(i, g, top, xi, pinv);
     }
   }
   // loop columns from top -> n - 1
   for (p = top; p < n; p++) {
     // restore G
-    csMark(gptr, xi[p])
+    csMark(gptr, xi[p]);
   }
-  return top
+  return top;
 }

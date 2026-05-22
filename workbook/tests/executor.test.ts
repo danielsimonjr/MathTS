@@ -80,18 +80,14 @@ describe('WorkbookExecutor', () => {
     });
 
     it('should execute code cell with a compound expression', async () => {
-      const wb = makeWorkbook([
-        { id: 'a', type: 'code', content: '3^2' },
-      ]);
+      const wb = makeWorkbook([{ id: 'a', type: 'code', content: '3^2' }]);
       const exec = new WorkbookExecutor(wb);
       const result = await exec.runCell('a');
       expect(result).toBe(9);
     });
 
     it('should execute code cell using math functions', async () => {
-      const wb = makeWorkbook([
-        { id: 'a', type: 'code', content: 'sin(pi / 2)' },
-      ]);
+      const wb = makeWorkbook([{ id: 'a', type: 'code', content: 'sin(pi / 2)' }]);
       const exec = new WorkbookExecutor(wb);
       const result = await exec.runCell('a');
       expect(result).toBeCloseTo(1, 10);
@@ -110,9 +106,7 @@ describe('WorkbookExecutor', () => {
     });
 
     it('should emit error event on failure', async () => {
-      const wb = makeWorkbook([
-        { id: 'a', type: 'code', content: 'nonexistentSymbol' },
-      ]);
+      const wb = makeWorkbook([{ id: 'a', type: 'code', content: 'nonexistentSymbol' }]);
       const exec = new WorkbookExecutor(wb);
       const events: WorkbookEvent[] = [];
       exec.on((e) => events.push(e));

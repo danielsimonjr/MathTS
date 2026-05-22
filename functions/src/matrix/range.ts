@@ -1,36 +1,36 @@
-import { factory } from '../utils/factory.js'
-import { noBignumber, noMatrix } from '../utils/noop.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { MathJsConfig } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import { noBignumber, noMatrix } from '../utils/noop.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { MathJsConfig } from '../core/config.js';
 
 // Type definitions for range
 interface MatrixType {
-  valueOf(): unknown[]
+  valueOf(): unknown[];
 }
 
 interface MatrixConstructor {
-  (data: unknown[]): MatrixType
+  (data: unknown[]): MatrixType;
 }
 
 interface BigNumberConstructor {
-  (value: number | string): unknown
+  (value: number | string): unknown;
 }
 
 interface RangeDependencies {
-  typed: TypedFunction
-  config: MathJsConfig
-  matrix?: MatrixConstructor
-  bignumber?: BigNumberConstructor
-  smaller: (a: unknown, b: unknown) => boolean
-  smallerEq: (a: unknown, b: unknown) => boolean
-  larger: (a: unknown, b: unknown) => boolean
-  largerEq: (a: unknown, b: unknown) => boolean
-  add: TypedFunction
-  isZero: (x: unknown) => boolean
-  isPositive: (x: unknown) => boolean
+  typed: TypedFunction;
+  config: MathJsConfig;
+  matrix?: MatrixConstructor;
+  bignumber?: BigNumberConstructor;
+  smaller: (a: unknown, b: unknown) => boolean;
+  smallerEq: (a: unknown, b: unknown) => boolean;
+  larger: (a: unknown, b: unknown) => boolean;
+  largerEq: (a: unknown, b: unknown) => boolean;
+  add: TypedFunction;
+  isZero: (x: unknown) => boolean;
+  isPositive: (x: unknown) => boolean;
 }
 
-const name = 'range'
+const name = 'range';
 const dependencies = [
   'typed',
   'config',
@@ -43,8 +43,8 @@ const dependencies = [
   'largerEq',
   'add',
   'isZero',
-  'isPositive'
-]
+  'isPositive',
+];
 
 export const createRange = /* #__PURE__ */ factory(
   name,
@@ -60,7 +60,7 @@ export const createRange = /* #__PURE__ */ factory(
     largerEq,
     add,
     isZero,
-    isPositive
+    isPositive,
   }: RangeDependencies) => {
     /**
      * Create a matrix or array containing a range of values.
@@ -122,31 +122,23 @@ export const createRange = /* #__PURE__ */ factory(
       'string, boolean': _strRange,
 
       number: function (oops: number): never {
-        throw new TypeError(`Too few arguments to function range(): ${oops}`)
+        throw new TypeError(`Too few arguments to function range(): ${oops}`);
       },
 
       boolean: function (oops: boolean): never {
         throw new TypeError(
           `Unexpected type of argument 1 to function range(): ${oops}, number|bigint|BigNumber|Fraction`
-        )
+        );
       },
 
       'number, number': function (start: number, end: number): any {
-        return _out(_range(start, end, 1, false))
+        return _out(_range(start, end, 1, false));
       },
-      'number, number, number': function (
-        start: number,
-        end: number,
-        step: number
-      ): any {
-        return _out(_range(start, end, step, false))
+      'number, number, number': function (start: number, end: number, step: number): any {
+        return _out(_range(start, end, step, false));
       },
-      'number, number, boolean': function (
-        start: number,
-        end: number,
-        includeEnd: boolean
-      ): any {
-        return _out(_range(start, end, 1, includeEnd))
+      'number, number, boolean': function (start: number, end: number, includeEnd: boolean): any {
+        return _out(_range(start, end, 1, includeEnd));
       },
       'number, number, number, boolean': function (
         start: number,
@@ -154,46 +146,39 @@ export const createRange = /* #__PURE__ */ factory(
         step: number,
         includeEnd: boolean
       ): any {
-        return _out(_range(start, end, step, includeEnd))
+        return _out(_range(start, end, step, includeEnd));
       },
 
       // Handle bigints; if either limit is bigint, range should be too
-      'bigint, bigint|number': function (
-        start: bigint,
-        end: bigint | number
-      ): any {
-        return _out(_range(start, end, 1n, false))
+      'bigint, bigint|number': function (start: bigint, end: bigint | number): any {
+        return _out(_range(start, end, 1n, false));
       },
       'number, bigint': function (start: number, end: bigint): any {
-        return _out(_range(BigInt(start), end, 1n, false))
+        return _out(_range(BigInt(start), end, 1n, false));
       },
       'bigint, bigint|number, bigint|number': function (
         start: bigint,
         end: bigint | number,
         step: bigint | number
       ): any {
-        return _out(_range(start, end, BigInt(step), false))
+        return _out(_range(start, end, BigInt(step), false));
       },
       'number, bigint, bigint|number': function (
         start: number,
         end: bigint,
         step: bigint | number
       ): any {
-        return _out(_range(BigInt(start), end, BigInt(step), false))
+        return _out(_range(BigInt(start), end, BigInt(step), false));
       },
       'bigint, bigint|number, boolean': function (
         start: bigint,
         end: bigint | number,
         includeEnd: boolean
       ): any {
-        return _out(_range(start, end, 1n, includeEnd))
+        return _out(_range(start, end, 1n, includeEnd));
       },
-      'number, bigint, boolean': function (
-        start: number,
-        end: bigint,
-        includeEnd: boolean
-      ): any {
-        return _out(_range(BigInt(start), end, 1n, includeEnd))
+      'number, bigint, boolean': function (start: number, end: bigint, includeEnd: boolean): any {
+        return _out(_range(BigInt(start), end, 1n, includeEnd));
       },
       'bigint, bigint|number, bigint|number, boolean': function (
         start: bigint,
@@ -201,7 +186,7 @@ export const createRange = /* #__PURE__ */ factory(
         step: bigint | number,
         includeEnd: boolean
       ): any {
-        return _out(_range(start, end, BigInt(step), includeEnd))
+        return _out(_range(start, end, BigInt(step), includeEnd));
       },
       'number, bigint, bigint|number, boolean': function (
         start: number,
@@ -209,29 +194,21 @@ export const createRange = /* #__PURE__ */ factory(
         step: bigint | number,
         includeEnd: boolean
       ): any {
-        return _out(_range(BigInt(start), end, BigInt(step), includeEnd))
+        return _out(_range(BigInt(start), end, BigInt(step), includeEnd));
       },
 
       'BigNumber, BigNumber': function (start: any, end: any): any {
-        const BigNumber = start.constructor
+        const BigNumber = start.constructor;
 
-        return _out(_range(start, end, new BigNumber(1), false))
+        return _out(_range(start, end, new BigNumber(1), false));
       },
-      'BigNumber, BigNumber, BigNumber': function (
-        start: any,
-        end: any,
-        step: any
-      ): any {
-        return _out(_range(start, end, step, false))
+      'BigNumber, BigNumber, BigNumber': function (start: any, end: any, step: any): any {
+        return _out(_range(start, end, step, false));
       },
-      'BigNumber, BigNumber, boolean': function (
-        start: any,
-        end: any,
-        includeEnd: boolean
-      ): any {
-        const BigNumber = start.constructor
+      'BigNumber, BigNumber, boolean': function (start: any, end: any, includeEnd: boolean): any {
+        const BigNumber = start.constructor;
 
-        return _out(_range(start, end, new BigNumber(1), includeEnd))
+        return _out(_range(start, end, new BigNumber(1), includeEnd));
       },
       'BigNumber, BigNumber, BigNumber, boolean': function (
         start: any,
@@ -239,25 +216,17 @@ export const createRange = /* #__PURE__ */ factory(
         step: any,
         includeEnd: boolean
       ): any {
-        return _out(_range(start, end, step, includeEnd))
+        return _out(_range(start, end, step, includeEnd));
       },
 
       'Fraction, Fraction': function (start: any, end: any): any {
-        return _out(_range(start, end, 1, false))
+        return _out(_range(start, end, 1, false));
       },
-      'Fraction, Fraction, Fraction': function (
-        start: any,
-        end: any,
-        step: any
-      ): any {
-        return _out(_range(start, end, step, false))
+      'Fraction, Fraction, Fraction': function (start: any, end: any, step: any): any {
+        return _out(_range(start, end, step, false));
       },
-      'Fraction, Fraction, boolean': function (
-        start: any,
-        end: any,
-        includeEnd: boolean
-      ): any {
-        return _out(_range(start, end, 1, includeEnd))
+      'Fraction, Fraction, boolean': function (start: any, end: any, includeEnd: boolean): any {
+        return _out(_range(start, end, 1, includeEnd));
       },
       'Fraction, Fraction, Fraction, boolean': function (
         start: any,
@@ -265,11 +234,11 @@ export const createRange = /* #__PURE__ */ factory(
         step: any,
         includeEnd: boolean
       ): any {
-        return _out(_range(start, end, step, includeEnd))
+        return _out(_range(start, end, step, includeEnd));
       },
 
       'Unit, Unit, Unit': function (start: any, end: any, step: any): any {
-        return _out(_range(start, end, step, false))
+        return _out(_range(start, end, step, false));
       },
       'Unit, Unit, Unit, boolean': function (
         start: any,
@@ -277,39 +246,32 @@ export const createRange = /* #__PURE__ */ factory(
         step: any,
         includeEnd: boolean
       ): any {
-        return _out(_range(start, end, step, includeEnd))
-      }
-    })
+        return _out(_range(start, end, step, includeEnd));
+      },
+    });
 
     function _out(arr: any[]): any {
       if (config.matrix === 'Matrix') {
-        return matrix ? matrix(arr) : noMatrix()
+        return matrix ? matrix(arr) : noMatrix();
       }
 
-      return arr
+      return arr;
     }
 
     function _strRange(str: string, includeEnd?: boolean): any {
-      const r = _parse(str)
+      const r = _parse(str);
       if (!r) {
-        throw new SyntaxError('String "' + str + '" is no valid range')
+        throw new SyntaxError('String "' + str + '" is no valid range');
       }
 
       if (config.number === 'BigNumber') {
         if (bignumber === undefined) {
-          noBignumber()
+          noBignumber();
         }
 
-        return _out(
-          _range(
-            bignumber(r.start),
-            bignumber(r.end),
-            bignumber(r.step),
-            includeEnd
-          )
-        )
+        return _out(_range(bignumber(r.start), bignumber(r.end), bignumber(r.step), includeEnd));
       } else {
-        return _out(_range(r.start, r.end, r.step, includeEnd))
+        return _out(_range(r.start, r.end, r.step, includeEnd));
       }
     }
 
@@ -322,27 +284,22 @@ export const createRange = /* #__PURE__ */ factory(
      * @returns {Array} range
      * @private
      */
-    function _range(
-      start: any,
-      end: any,
-      step: any,
-      includeEnd?: boolean
-    ): any[] {
-      const array: any[] = []
-      if (isZero(step)) throw new Error('Step must be non-zero')
+    function _range(start: any, end: any, step: any, includeEnd?: boolean): any[] {
+      const array: any[] = [];
+      if (isZero(step)) throw new Error('Step must be non-zero');
       const ongoing = isPositive(step)
         ? includeEnd
           ? smallerEq
           : smaller
         : includeEnd
           ? largerEq
-          : larger
-      let x = start
+          : larger;
+      let x = start;
       while (ongoing(x, end)) {
-        array.push(x)
-        x = add(x, step)
+        array.push(x);
+        x = add(x, step);
       }
-      return array
+      return array;
     }
 
     /**
@@ -354,22 +311,20 @@ export const createRange = /* #__PURE__ */ factory(
      * @return {{start: number, end: number, step: number} | null} range Object containing properties start, end, step
      * @private
      */
-    function _parse(
-      str: string
-    ): { start: number; end: number; step: number } | null {
-      const args = str.split(':')
+    function _parse(str: string): { start: number; end: number; step: number } | null {
+      const args = str.split(':');
 
       // number
       const nums = args.map(function (arg) {
         // use Number and not parseFloat as Number returns NaN on invalid garbage in the string
-        return Number(arg)
-      })
+        return Number(arg);
+      });
 
       const invalid = nums.some(function (num) {
-        return isNaN(num)
-      })
+        return isNaN(num);
+      });
       if (invalid) {
-        return null
+        return null;
       }
 
       switch (nums.length) {
@@ -377,19 +332,19 @@ export const createRange = /* #__PURE__ */ factory(
           return {
             start: nums[0],
             end: nums[1],
-            step: 1
-          }
+            step: 1,
+          };
 
         case 3:
           return {
             start: nums[0],
             end: nums[2],
-            step: nums[1]
-          }
+            step: nums[1],
+          };
 
         default:
-          return null
+          return null;
       }
     }
   }
-)
+);

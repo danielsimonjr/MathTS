@@ -6,11 +6,11 @@ This guide covers advanced topics including backend selection, parallel computin
 
 MathTS supports multiple computation backends:
 
-| Backend | Best For | Availability |
-|---------|----------|--------------|
-| **JS** | Small operations, compatibility | Always available |
-| **WASM** | SIMD acceleration, medium data | Node.js and modern browsers |
-| **GPU** | Large matrices, massive parallelism | WebGPU-enabled browsers |
+| Backend  | Best For                            | Availability                |
+| -------- | ----------------------------------- | --------------------------- |
+| **JS**   | Small operations, compatibility     | Always available            |
+| **WASM** | SIMD acceleration, medium data      | Node.js and modern browsers |
+| **GPU**  | Large matrices, massive parallelism | WebGPU-enabled browsers     |
 
 ### Automatic Backend Selection
 
@@ -20,7 +20,10 @@ By default, MathTS automatically selects the best backend based on operation siz
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // Small matrix - uses JS backend
-const small = DenseMatrix.fromArray([[1, 2], [3, 4]]);
+const small = DenseMatrix.fromArray([
+  [1, 2],
+  [3, 4],
+]);
 
 // Large matrix - automatically uses WASM if available
 const large = DenseMatrix.zeros(1000, 1000);
@@ -34,7 +37,10 @@ For fine-grained control:
 import { DenseMatrix, JSBackend, WASMBackend, GPUBackend } from '@danielsimonjr/mathts-matrix';
 
 // Force specific backend
-const matrix = DenseMatrix.fromArray([[1, 2], [3, 4]]);
+const matrix = DenseMatrix.fromArray([
+  [1, 2],
+  [3, 4],
+]);
 
 // Use JS backend explicitly
 const jsResult = await JSBackend.multiply(matrix.data, matrix.data, 2, 2, 2);
@@ -64,8 +70,8 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 // Initialize with options
 await computePool.initialize({
   minWorkers: 2,
-  maxWorkers: 8,        // Default: number of CPU cores
-  workerType: 'auto'    // 'auto' | 'thread' | 'process'
+  maxWorkers: 8, // Default: number of CPU cores
+  workerType: 'auto', // 'auto' | 'thread' | 'process'
 });
 
 // Check status
@@ -106,7 +112,7 @@ const data3 = new Float64Array(50000).fill(3);
 const [sum1, sum2, sum3] = await Promise.all([
   computePool.sum(data1),
   computePool.sum(data2),
-  computePool.sum(data3)
+  computePool.sum(data3),
 ]);
 
 console.log(sum1.result, sum2.result, sum3.result);
@@ -118,11 +124,11 @@ console.log(sum1.result, sum2.result, sum3.result);
 // Statistical operations
 await computePool.sum(data);
 await computePool.mean(data);
-await computePool.variance(data);  // Returns { mean, variance, std }
+await computePool.variance(data); // Returns { mean, variance, std }
 await computePool.std(data);
 await computePool.min(data);
 await computePool.max(data);
-await computePool.minMax(data);    // Returns { min, max, minIdx, maxIdx }
+await computePool.minMax(data); // Returns { min, max, minIdx, maxIdx }
 
 // Element-wise operations
 await computePool.add(a, b);
@@ -159,7 +165,7 @@ await computePool.filter(data, predicate);
 const data = new Float64Array(10000);
 
 // Avoid: Regular arrays for large numeric data
-const slowData = new Array(10000);  // Slower, more memory
+const slowData = new Array(10000); // Slower, more memory
 ```
 
 ### Reuse Buffers
@@ -187,19 +193,21 @@ import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 const dense = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
-  [7, 8, 9]
+  [7, 8, 9],
 ]);
 
 // Sparse: Many zeros (>50% typically)
-const sparse = SparseMatrix.fromDense(DenseMatrix.fromArray([
-  [1, 0, 0, 0],
-  [0, 2, 0, 0],
-  [0, 0, 3, 0],
-  [0, 0, 0, 4]
-]));
+const sparse = SparseMatrix.fromDense(
+  DenseMatrix.fromArray([
+    [1, 0, 0, 0],
+    [0, 2, 0, 0],
+    [0, 0, 3, 0],
+    [0, 0, 0, 4],
+  ])
+);
 
-console.log('Sparse density:', sparse.density);  // 0.25
-console.log('Sparse nnz:', sparse.nnz);          // 4
+console.log('Sparse density:', sparse.density); // 0.25
+console.log('Sparse nnz:', sparse.nnz); // 4
 ```
 
 ### Minimize Data Transfer
@@ -224,13 +232,13 @@ import { add } from '@danielsimonjr/mathts-functions';
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
 // Same function, different types
-add(1, 2);                                      // number + number
-add(new Complex(1, 2), new Complex(3, 4));      // Complex + Complex
-add(new Fraction(1, 2), new Fraction(1, 3));    // Fraction + Fraction
-add(BigNumber.parse('0.1'), BigNumber.parse('0.2'));  // BigNumber + BigNumber
+add(1, 2); // number + number
+add(new Complex(1, 2), new Complex(3, 4)); // Complex + Complex
+add(new Fraction(1, 2), new Fraction(1, 3)); // Fraction + Fraction
+add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber + BigNumber
 
 // Automatic type coercion
-add(1, new Complex(2, 3));  // number coerced to Complex
+add(1, new Complex(2, 3)); // number coerced to Complex
 ```
 
 ### Custom Type Registration
@@ -240,14 +248,14 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 
 // Create a typed function
 const myFunction = mathTyped('myFunction', {
-  'number': (x) => x * 2,
-  'Complex': (z) => z.multiply(new Complex(2, 0)),
-  'number, number': (a, b) => a + b
+  number: (x) => x * 2,
+  Complex: (z) => z.multiply(new Complex(2, 0)),
+  'number, number': (a, b) => a + b,
 });
 
-myFunction(5);           // 10
-myFunction(z);           // Complex doubled
-myFunction(1, 2);        // 3
+myFunction(5); // 10
+myFunction(z); // Complex doubled
+myFunction(1, 2); // 3
 ```
 
 ## Memory Management
@@ -281,15 +289,12 @@ async function processLargeMatrix(rows: number, cols: number) {
   const chunkSize = 1000;
 
   for (let i = 0; i < rows; i += chunkSize) {
-    const chunk = DenseMatrix.zeros(
-      Math.min(chunkSize, rows - i),
-      cols
-    );
+    const chunk = DenseMatrix.zeros(Math.min(chunkSize, rows - i), cols);
 
     // Process chunk...
 
     // Allow GC between chunks
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
   }
 }
 ```
@@ -334,23 +339,23 @@ MathTS provides high-accuracy special function implementations using polynomial 
 import { erfc, beta, gammainc, digamma, besselJ0, besselJ1 } from '@danielsimonjr/mathts-functions';
 
 // Complementary error function (useful in statistics and signal processing)
-erfc(1);           // ~0.1573 — P(|Z| > sqrt(2)) for standard normal
-erfc(0);           // 1.0
+erfc(1); // ~0.1573 — P(|Z| > sqrt(2)) for standard normal
+erfc(0); // 1.0
 
 // Beta function (used in probability theory and combinatorics)
-beta(0.5, 0.5);    // pi (exact closed form)
-beta(2, 3);        // 1/12
+beta(0.5, 0.5); // pi (exact closed form)
+beta(2, 3); // 1/12
 
 // Regularized incomplete gamma (chi-squared CDF, Poisson CDF)
-gammainc(1, 1);    // ~0.6321
+gammainc(1, 1); // ~0.6321
 
 // Digamma (log-derivative of Gamma, used in Bayesian statistics)
-digamma(1);        // ~-0.5772 (Euler–Mascheroni constant)
-digamma(0.5);      // ~-1.9635
+digamma(1); // ~-0.5772 (Euler–Mascheroni constant)
+digamma(0.5); // ~-1.9635
 
 // Bessel functions (wave equations, cylindrical symmetry)
-besselJ0(0);       // 1.0
-besselJ1(2.4048);  // ~0 (first zero of J0 is a zero crossing for J1 derivative)
+besselJ0(0); // 1.0
+besselJ1(2.4048); // ~0 (first zero of J0 is a zero crossing for J1 derivative)
 ```
 
 ## Numerical Integration
@@ -360,18 +365,18 @@ For integrating functions that have no closed-form antiderivative, MathTS provid
 ```typescript
 import { trapz, simpson, gaussQuad, romberg } from '@danielsimonjr/mathts-functions';
 
-const f = (x: number) => Math.exp(-x * x);  // Gaussian integrand
+const f = (x: number) => Math.exp(-x * x); // Gaussian integrand
 
 // Trapezoidal rule: simple, works on sampled data
 const xs = Array.from({ length: 101 }, (_, i) => -5 + i * 0.1);
 const ys = xs.map(f);
-trapz(ys, xs);  // ~sqrt(pi) ≈ 1.7725
+trapz(ys, xs); // ~sqrt(pi) ≈ 1.7725
 
 // Simpson's rule: higher order, callable with function
-simpson(f, -5, 5, 100);   // ~1.7725
+simpson(f, -5, 5, 100); // ~1.7725
 
 // Gauss-Legendre: optimal for smooth functions (n=2..5 points)
-gaussQuad(f, -5, 5, 5);   // ~1.7725
+gaussQuad(f, -5, 5, 5); // ~1.7725
 
 // Romberg: adaptive accuracy via Richardson extrapolation
 romberg(f, -5, 5, 1e-10); // ~1.7725 with high precision
@@ -379,12 +384,12 @@ romberg(f, -5, 5, 1e-10); // ~1.7725 with high precision
 
 **Choosing a method:**
 
-| Method | Best For | Notes |
-|--------|----------|-------|
-| `trapz` | Pre-sampled data (sensor readings, CSV) | O(n) with uniform or non-uniform x |
-| `simpson` | Smooth analytic functions | n must be even; faster than trapz for same accuracy |
-| `gaussQuad` | Very smooth functions on fixed interval | Exact for polynomials up to degree 2n-1 |
-| `romberg` | High-accuracy requirements | Adaptive; converges until `tol` is met |
+| Method      | Best For                                | Notes                                               |
+| ----------- | --------------------------------------- | --------------------------------------------------- |
+| `trapz`     | Pre-sampled data (sensor readings, CSV) | O(n) with uniform or non-uniform x                  |
+| `simpson`   | Smooth analytic functions               | n must be even; faster than trapz for same accuracy |
+| `gaussQuad` | Very smooth functions on fixed interval | Exact for polynomials up to degree 2n-1             |
+| `romberg`   | High-accuracy requirements              | Adaptive; converges until `tol` is met              |
 
 ## Interpolation
 
@@ -397,51 +402,59 @@ const xs = [0, 1, 2, 3, 4, 5];
 const ys = [0, 0.8, 0.9, 0.1, -0.8, -1.0];
 
 // Linear: fast, no overshoot, piecewise
-linearInterp(xs, ys, 1.5);  // 0.85
+linearInterp(xs, ys, 1.5); // 0.85
 
 // Natural cubic spline: smooth C² curve (can overshoot)
 const spline = cubicSpline(xs, ys);
-spline(2.5);   // smooth interpolated value
+spline(2.5); // smooth interpolated value
 
 // PCHIP: monotonicity-preserving (no spurious oscillations)
 const pchip = pchipInterp(xs, ys);
-pchip(2.5);    // shape-preserving value
+pchip(2.5); // shape-preserving value
 
 // Polynomial least-squares fit
-const coeffs = polyFit(xs, ys, 3);  // degree-3 polynomial coefficients
+const coeffs = polyFit(xs, ys, 3); // degree-3 polynomial coefficients
 // coeffs[0]*x^3 + coeffs[1]*x^2 + coeffs[2]*x + coeffs[3]
 ```
 
 **Choosing an interpolation method:**
 
-| Method | Best For | Notes |
-|--------|----------|-------|
-| `linearInterp` | Monotone data, fast lookup | No smoothness between points |
-| `lagrangeInterp` | Small datasets, exact fit | Prone to Runge's phenomenon for n > 10 |
-| `cubicSpline` | Smooth curves through all data points | May oscillate if data is not smooth |
-| `hermiteInterp` | When derivatives are known | Requires `dy/dx` at each point |
-| `pchipInterp` | Non-oscillating smooth curves | Best for data with local monotonicity |
-| `polyFit` | Trend fitting, noisy data | Returns polynomial coefficients |
+| Method           | Best For                              | Notes                                  |
+| ---------------- | ------------------------------------- | -------------------------------------- |
+| `linearInterp`   | Monotone data, fast lookup            | No smoothness between points           |
+| `lagrangeInterp` | Small datasets, exact fit             | Prone to Runge's phenomenon for n > 10 |
+| `cubicSpline`    | Smooth curves through all data points | May oscillate if data is not smooth    |
+| `hermiteInterp`  | When derivatives are known            | Requires `dy/dx` at each point         |
+| `pchipInterp`    | Non-oscillating smooth curves         | Best for data with local monotonicity  |
+| `polyFit`        | Trend fitting, noisy data             | Returns polynomial coefficients        |
 
 ## Algebra and Polynomial Operations
 
 MathTS provides a complete algebra module for polynomial arithmetic and symbolic manipulation.
 
 ```typescript
-import { polyval, polyadd, polymul, polyder, factor, expand, substitute } from '@danielsimonjr/mathts-functions';
+import {
+  polyval,
+  polyadd,
+  polymul,
+  polyder,
+  factor,
+  expand,
+  substitute,
+} from '@danielsimonjr/mathts-functions';
 
 // Polynomial evaluation using Horner's method
-polyval([1, -3, 2], 4);       // 1*16 - 3*4 + 2 = 6
+polyval([1, -3, 2], 4); // 1*16 - 3*4 + 2 = 6
 
 // Polynomial arithmetic
-polyadd([1, 2, 3], [4, 5]);   // [1, 6, 8]   (x^2 + 6x + 8)
-polymul([1, 1], [1, -1]);      // [1, 0, -1]  (x+1)(x-1) = x^2-1
-polyder([1, 2, 3], 1);         // [2, 2]      d/dx (x^2+2x+3) = 2x+2
+polyadd([1, 2, 3], [4, 5]); // [1, 6, 8]   (x^2 + 6x + 8)
+polymul([1, 1], [1, -1]); // [1, 0, -1]  (x+1)(x-1) = x^2-1
+polyder([1, 2, 3], 1); // [2, 2]      d/dx (x^2+2x+3) = 2x+2
 
 // Symbolic manipulation (expression strings)
-factor('x^2 - 4');             // '(x - 2)(x + 2)'
-expand('(a + b)^3');           // 'a^3 + 3*a^2*b + 3*a*b^2 + b^3'
-substitute('x^2 + y', 'y', '2*x');  // 'x^2 + 2*x'
+factor('x^2 - 4'); // '(x - 2)(x + 2)'
+expand('(a + b)^3'); // 'a^3 + 3*a^2*b + 3*a*b^2 + b^3'
+substitute('x^2 + y', 'y', '2*x'); // 'x^2 + 2*x'
 ```
 
 ## Computer Algebra System (CAS)
@@ -449,27 +462,34 @@ substitute('x^2 + y', 'y', '2*x');  // 'x^2 + 2*x'
 Symbolic calculus and equation solving.
 
 ```typescript
-import { integrate, limit, partialDerivative, taylor, solve, laplace } from '@danielsimonjr/mathts-functions';
+import {
+  integrate,
+  limit,
+  partialDerivative,
+  taylor,
+  solve,
+  laplace,
+} from '@danielsimonjr/mathts-functions';
 
 // Symbolic integration
-integrate('x^2', 'x');              // 'x^3/3 + C'
-integrate('sin(x)', 'x', 0, 3.14159);  // ~2.0
+integrate('x^2', 'x'); // 'x^3/3 + C'
+integrate('sin(x)', 'x', 0, 3.14159); // ~2.0
 
 // Limits
-limit('sin(x)/x', 'x', 0);         // '1'
+limit('sin(x)/x', 'x', 0); // '1'
 limit('(1 + 1/n)^n', 'n', Infinity); // 'E'
 
 // Partial derivatives
-partialDerivative('x^2*y + y^3', 'y');  // '2*y^2 + x^2'
+partialDerivative('x^2*y + y^3', 'y'); // '2*y^2 + x^2'
 
 // Taylor series
-taylor('exp(x)', 'x', 0, 4);       // '1 + x + x^2/2 + x^3/6 + x^4/24'
+taylor('exp(x)', 'x', 0, 4); // '1 + x + x^2/2 + x^3/6 + x^4/24'
 
 // Solve equations
-solve('x^2 - 5*x + 6', 'x');       // [2, 3]
+solve('x^2 - 5*x + 6', 'x'); // [2, 3]
 
 // Laplace transform
-laplace('exp(-a*t)', 't', 's');     // '1/(s + a)'
+laplace('exp(-a*t)', 't', 's'); // '1/(s + a)'
 ```
 
 ## Graph Theory
@@ -477,29 +497,44 @@ laplace('exp(-a*t)', 't', 's');     // '1/(s + a)'
 Graph algorithms on adjacency matrix representations.
 
 ```typescript
-import { shortestPath, minimumSpanningTree, connectedComponents, topologicalSort } from '@danielsimonjr/mathts-functions';
+import {
+  shortestPath,
+  minimumSpanningTree,
+  connectedComponents,
+  topologicalSort,
+} from '@danielsimonjr/mathts-functions';
 
 // Weighted graph as adjacency matrix (0 = no edge)
 const adj = [
   [0, 1, 4, 0],
   [1, 0, 2, 5],
   [4, 2, 0, 1],
-  [0, 5, 1, 0]
+  [0, 5, 1, 0],
 ];
 
 // Dijkstra shortest path
-shortestPath(adj, 0, 3);           // [0, 2, 3]  (via node 2, cost 5)
+shortestPath(adj, 0, 3); // [0, 2, 3]  (via node 2, cost 5)
 
 // Minimum spanning tree (Prim's)
-minimumSpanningTree(adj);          // edge list of MST
+minimumSpanningTree(adj); // edge list of MST
 
 // Find connected components
-const disconnected = [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]];
+const disconnected = [
+  [0, 1, 0, 0],
+  [1, 0, 0, 0],
+  [0, 0, 0, 1],
+  [0, 0, 1, 0],
+];
 connectedComponents(disconnected); // [[0, 1], [2, 3]]
 
 // Topological sort for DAG
-const dag = [[0, 1, 1, 0], [0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 0]];
-topologicalSort(dag);              // [0, 1, 2, 3] or [0, 2, 1, 3]
+const dag = [
+  [0, 1, 1, 0],
+  [0, 0, 0, 1],
+  [0, 0, 0, 1],
+  [0, 0, 0, 0],
+];
+topologicalSort(dag); // [0, 1, 2, 3] or [0, 2, 1, 3]
 ```
 
 ## Distribution Objects
@@ -510,24 +545,24 @@ Distribution object constructors return objects with `pdf`, `cdf`, `ppf` (quanti
 import { normalDist, tDist, gammaDist, binomialDist } from '@danielsimonjr/mathts-functions';
 
 // Create distribution instances
-const normal = normalDist(0, 1);       // standard normal
-normal.pdf(0);          // ~0.3989
-normal.cdf(1.96);       // ~0.975  (95th percentile)
-normal.ppf(0.975);      // ~1.96   (inverse CDF)
-normal.sample(100);     // Float64Array of 100 samples
+const normal = normalDist(0, 1); // standard normal
+normal.pdf(0); // ~0.3989
+normal.cdf(1.96); // ~0.975  (95th percentile)
+normal.ppf(0.975); // ~1.96   (inverse CDF)
+normal.sample(100); // Float64Array of 100 samples
 
 // t-distribution for small samples
 const t10 = tDist(10);
-t10.cdf(2.228);         // ~0.975  (two-tailed, df=10)
+t10.cdf(2.228); // ~0.975  (two-tailed, df=10)
 
 // Gamma distribution
 const gamma = gammaDist(2, 1);
-gamma.pdf(1);           // ~0.368
-gamma.cdf(2);           // ~0.594
+gamma.pdf(1); // ~0.368
+gamma.cdf(2); // ~0.594
 
 // Binomial for discrete data
 const binom = binomialDist(20, 0.5);
-binom.pdf(10);          // P(X=10) for n=20, p=0.5 ≈ 0.176
+binom.pdf(10); // P(X=10) for n=20, p=0.5 ≈ 0.176
 ```
 
 ## Hypothesis Tests
@@ -535,7 +570,13 @@ binom.pdf(10);          // P(X=10) for n=20, p=0.5 ≈ 0.176
 Statistical hypothesis tests return structured result objects with test statistics, p-values, and a `significant` flag.
 
 ```typescript
-import { studentTTest, anova, chiSquareTest, shapiroWilkTest, principalComponentAnalysis } from '@danielsimonjr/mathts-functions';
+import {
+  studentTTest,
+  anova,
+  chiSquareTest,
+  shapiroWilkTest,
+  principalComponentAnalysis,
+} from '@danielsimonjr/mathts-functions';
 
 // Two-sample t-test
 const control = [2.1, 2.5, 2.3, 2.8, 2.4];
@@ -548,7 +589,7 @@ const tResult = studentTTest(control, treatment);
 const groups = [
   [2.1, 2.3, 2.5],
   [3.1, 3.4, 3.2],
-  [1.8, 2.0, 1.9]
+  [1.8, 2.0, 1.9],
 ];
 const anovaResult = anova(groups);
 // { F: 28.4, pValue: 0.0003, significant: true }
@@ -564,8 +605,13 @@ chiSquareTest(observed, expected);
 // { statistic: 2.3, pValue: 0.68, significant: false }
 
 // PCA dimensionality reduction
-const data = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [2, 4, 6]];
-const pca = principalComponentAnalysis(data, 2);  // reduce to 2 components
+const data = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+  [2, 4, 6],
+];
+const pca = principalComponentAnalysis(data, 2); // reduce to 2 components
 // { components: [...], scores: [...], explainedVariance: [...] }
 ```
 

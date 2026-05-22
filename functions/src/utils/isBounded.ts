@@ -1,18 +1,14 @@
-import { factory } from '../utils/factory.js'
-import type {
-  TypedFunction as TypedFn,
-  BigNumber,
-  Complex
-} from '../types.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction as TypedFn, BigNumber, Complex } from '../types.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for isBounded
 interface Unit {
-  value: unknown
+  value: unknown;
 }
 
-const name = 'isBounded'
-const dependencies = ['typed']
+const name = 'isBounded';
+const dependencies = ['typed'];
 
 export const createIsBounded = /* #__PURE__ */ factory(
   name,
@@ -60,10 +56,10 @@ export const createIsBounded = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (A: unknown[] | { valueOf: () => unknown[] }): boolean => {
-            const arr = Array.isArray(A) ? A : A.valueOf()
-            return arr.every((entry: unknown) => self(entry))
+            const arr = Array.isArray(A) ? A : A.valueOf();
+            return arr.every((entry: unknown) => self(entry));
           }
-      )
-    }) as unknown as TypedFn
+      ),
+    }) as unknown as TypedFn;
   }
-)
+);

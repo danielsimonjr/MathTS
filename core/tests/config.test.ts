@@ -17,8 +17,15 @@ describe('DEFAULT_CONFIG', () => {
 
   it('should have all required fields', () => {
     const keys: (keyof ConfigOptions)[] = [
-      'relTol', 'absTol', 'matrix', 'number', 'numberFallback',
-      'precision', 'predictable', 'randomSeed', 'legacySubset',
+      'relTol',
+      'absTol',
+      'matrix',
+      'number',
+      'numberFallback',
+      'precision',
+      'predictable',
+      'randomSeed',
+      'legacySubset',
     ];
     for (const key of keys) {
       expect(DEFAULT_CONFIG).toHaveProperty(key);

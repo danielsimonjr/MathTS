@@ -15,15 +15,7 @@ export const compareNaturalDocs = {
     'compareNatural([1, 2, 4], [1, 2, 3])',
     'compareNatural([1, 5], [1, 2, 3])',
     'compareNatural([1, 2], [1, 2])',
-    'compareNatural({a: 2}, {a: 4})'
+    'compareNatural({a: 2}, {a: 4})',
   ],
-  seealso: [
-    'equal',
-    'unequal',
-    'smaller',
-    'smallerEq',
-    'largerEq',
-    'compare',
-    'compareText'
-  ]
-}
+  seealso: ['equal', 'unequal', 'smaller', 'smallerEq', 'largerEq', 'compare', 'compareText'],
+};

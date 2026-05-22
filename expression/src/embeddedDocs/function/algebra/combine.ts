@@ -3,6 +3,6 @@ export const combineDocs = {
   category: 'Algebra',
   syntax: ['combine(a, b)'],
   description: 'Combine two expressions by addition.',
-  examples: ['combine(\'x^2\', \'2*y\')'],
+  examples: ["combine('x^2', '2*y')"],
   seealso: ['expand', 'collect'],
 };

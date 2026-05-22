@@ -1,14 +1,14 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for deepEqual
 interface DeepEqualDependencies {
-  typed: TypedFunction
-  equal: TypedFunction
+  typed: TypedFunction;
+  equal: TypedFunction;
 }
 
-const name = 'deepEqual'
-const dependencies = ['typed', 'equal']
+const name = 'deepEqual';
+const dependencies = ['typed', 'equal'];
 
 export const createDeepEqual = /* #__PURE__ */ factory(
   name,
@@ -44,13 +44,10 @@ export const createDeepEqual = /* #__PURE__ */ factory(
      *            Returns true when the input matrices have the same size and each of their elements is equal.
      */
     return typed(name, {
-      'any, any': function (
-        x: { valueOf(): unknown },
-        y: { valueOf(): unknown }
-      ): boolean {
-        return _deepEqual(x.valueOf(), y.valueOf())
-      }
-    })
+      'any, any': function (x: { valueOf(): unknown }, y: { valueOf(): unknown }): boolean {
+        return _deepEqual(x.valueOf(), y.valueOf());
+      },
+    });
 
     /**
      * Test whether two arrays have the same size and all elements are equal
@@ -61,28 +58,28 @@ export const createDeepEqual = /* #__PURE__ */ factory(
     function _deepEqual(x: unknown, y: unknown): boolean {
       if (Array.isArray(x)) {
         if (Array.isArray(y)) {
-          const len = x.length
+          const len = x.length;
           if (len !== y.length) {
-            return false
+            return false;
           }
 
           for (let i = 0; i < len; i++) {
             if (!_deepEqual(x[i], y[i])) {
-              return false
+              return false;
             }
           }
 
-          return true
+          return true;
         } else {
-          return false
+          return false;
         }
       } else {
         if (Array.isArray(y)) {
-          return false
+          return false;
         } else {
-          return equal(x, y) as boolean
+          return equal(x, y) as boolean;
         }
       }
     }
   }
-)
+);

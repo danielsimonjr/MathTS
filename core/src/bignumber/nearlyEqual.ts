@@ -14,26 +14,29 @@
  * nearlyEqual(1.0, 1.009, undefined, 0.02);       // true
  * nearlyEqual(0.000000001, 0.0, undefined, 1e-8); // true
  */
-export function nearlyEqual (a: any, b: any, relTol = 1e-9, absTol = 0) {
+export function nearlyEqual(a: any, b: any, relTol = 1e-9, absTol = 0) {
   if (relTol <= 0) {
-    throw new Error('Relative tolerance must be greater than 0')
+    throw new Error('Relative tolerance must be greater than 0');
   }
 
   if (absTol < 0) {
-    throw new Error('Absolute tolerance must be at least 0')
+    throw new Error('Absolute tolerance must be at least 0');
   }
   // NaN
   if (a.isNaN() || b.isNaN()) {
-    return false
+    return false;
   }
 
   if (!a.isFinite() || !b.isFinite()) {
-    return a.eq(b)
+    return a.eq(b);
   }
   // use "==" operator, handles infinities
   if (a.eq(b)) {
-    return true
+    return true;
   }
   // abs(a-b) <= max(relTol * max(abs(a), abs(b)), absTol)
-  return a.minus(b).abs().lte(a.constructor.max(a.constructor.max(a.abs(), b.abs()).mul(relTol), absTol))
+  return a
+    .minus(b)
+    .abs()
+    .lte(a.constructor.max(a.constructor.max(a.abs(), b.abs()).mul(relTol), absTol));
 }

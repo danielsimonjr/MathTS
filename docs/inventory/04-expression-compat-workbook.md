@@ -19,24 +19,24 @@ No `@danielsimonjr/mathts-core` or `@danielsimonjr/mathts-matrix` imports — th
 
 ### Node Types
 
-| Node | Lines | Key Export |
-|------|-------|------------|
-| `Node.ts` | 408 | `createNode`, `MathNode`, `CompiledExpression`, `StringOptions` |
-| `OperatorNode.ts` | 738 | `createOperatorNode` |
-| `FunctionNode.ts` | 540 | `createFunctionNode` |
-| `RangeNode.ts` | 330 | `createRangeNode` |
-| `AssignmentNode.ts` | 330 | `createAssignmentNode` |
-| `ConditionalNode.ts` | 282 | `createConditionalNode` |
-| `IndexNode.ts` | 269 | `createIndexNode` |
-| `FunctionAssignmentNode.ts` | 269 | `createFunctionAssignmentNode` |
-| `RelationalNode.ts` | 256 | `createRelationalNode` |
-| `AccessorNode.ts` | 254 | `createAccessorNode` |
-| `ObjectNode.ts` | 229 | `createObjectNode` |
-| `ArrayNode.ts` | 183 | `createArrayNode` |
-| `ConstantNode.ts` | 187 | `createConstantNode` |
-| `ParenthesisNode.ts` | 177 | `createParenthesisNode` |
-| `BlockNode.ts` | 197 | `createBlockNode` |
-| `SymbolNode.ts` | 234 | `createSymbolNode` |
+| Node                        | Lines | Key Export                                                      |
+| --------------------------- | ----- | --------------------------------------------------------------- |
+| `Node.ts`                   | 408   | `createNode`, `MathNode`, `CompiledExpression`, `StringOptions` |
+| `OperatorNode.ts`           | 738   | `createOperatorNode`                                            |
+| `FunctionNode.ts`           | 540   | `createFunctionNode`                                            |
+| `RangeNode.ts`              | 330   | `createRangeNode`                                               |
+| `AssignmentNode.ts`         | 330   | `createAssignmentNode`                                          |
+| `ConditionalNode.ts`        | 282   | `createConditionalNode`                                         |
+| `IndexNode.ts`              | 269   | `createIndexNode`                                               |
+| `FunctionAssignmentNode.ts` | 269   | `createFunctionAssignmentNode`                                  |
+| `RelationalNode.ts`         | 256   | `createRelationalNode`                                          |
+| `AccessorNode.ts`           | 254   | `createAccessorNode`                                            |
+| `ObjectNode.ts`             | 229   | `createObjectNode`                                              |
+| `ArrayNode.ts`              | 183   | `createArrayNode`                                               |
+| `ConstantNode.ts`           | 187   | `createConstantNode`                                            |
+| `ParenthesisNode.ts`        | 177   | `createParenthesisNode`                                         |
+| `BlockNode.ts`              | 197   | `createBlockNode`                                               |
+| `SymbolNode.ts`             | 234   | `createSymbolNode`                                              |
 
 ### Parser
 
@@ -45,15 +45,15 @@ No `@danielsimonjr/mathts-core` or `@danielsimonjr/mathts-matrix` imports — th
 
 ### Support Subdirectories
 
-| Directory | Status |
-|-----------|--------|
-| `src/compiler/` | Empty (placeholder) |
-| `src/evaluator/` | Empty (placeholder) |
-| `src/parser/` | Empty (placeholder) |
-| `src/function/` | `compile.ts`, `evaluate.ts`, `help.ts`, `parser.ts` |
-| `src/utils/` | `array.ts`, `bignumber/`, `collection.ts`, `customs.ts`, `factory.ts`, `is.ts`, `latex.ts`, `map.ts`, `number.ts`, `object.ts`, `print.ts`, `scope.ts`, `string.ts`, `switch.ts` |
-| `src/transform/` | 25 transforms — **excluded from tsconfig and build** |
-| `src/embeddedDocs/` | Embedded docs — **excluded from tsconfig and build** |
+| Directory           | Status                                                                                                                                                                           |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/compiler/`     | Empty (placeholder)                                                                                                                                                              |
+| `src/evaluator/`    | Empty (placeholder)                                                                                                                                                              |
+| `src/parser/`       | Empty (placeholder)                                                                                                                                                              |
+| `src/function/`     | `compile.ts`, `evaluate.ts`, `help.ts`, `parser.ts`                                                                                                                              |
+| `src/utils/`        | `array.ts`, `bignumber/`, `collection.ts`, `customs.ts`, `factory.ts`, `is.ts`, `latex.ts`, `map.ts`, `number.ts`, `object.ts`, `print.ts`, `scope.ts`, `string.ts`, `switch.ts` |
+| `src/transform/`    | 25 transforms — **excluded from tsconfig and build**                                                                                                                             |
+| `src/embeddedDocs/` | Embedded docs — **excluded from tsconfig and build**                                                                                                                             |
 
 ### Transforms (dormant — excluded from build via `tsconfig.json`)
 
@@ -75,6 +75,7 @@ No `@danielsimonjr/mathts-core` or `@danielsimonjr/mathts-matrix` imports — th
 ### Exports
 
 `compat/src/index.ts` (293 lines) exports:
+
 - `create(config?)` — factory returning a `MathInstance`
 - `all` — empty record (a stub; `create()` ignores it and wires everything by default)
 - Types: `MathJSConfig`, `MathInstance`
@@ -88,19 +89,19 @@ No `@danielsimonjr/mathts-core` or `@danielsimonjr/mathts-matrix` imports — th
 
 All functions in `shims.ts` (505 lines) are wired to real implementations:
 
-| Category | Functions | Status |
-|----------|-----------|--------|
-| Construction | `complex`, `fraction`, `bignumber`, `matrix`, `sparse` | Wired to `@danielsimonjr/mathts-core` and `@danielsimonjr/mathts-matrix` |
-| Basic arithmetic | `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log` | Wired to `@danielsimonjr/mathts-functions` typed dispatch |
-| Trigonometry | `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2` | Wired (`asin/acos/atan` wrap `Math.*`) |
-| Statistics | `sum`, `mean`, `min`, `max` | Wired |
-| Number theory | `gcd`, `lcm` | Wired |
-| Rounding | `round`, `floor`, `ceil` | Wired |
-| Complex ops | `conj`, `re`, `im`, `arg` | Wired, throw `TypeError` for wrong types |
-| Matrix ops | `transpose`, `det`, `identity`, `zeros`, `ones`, `size` | Wired — `det` uses LU decomposition |
-| Type guards | `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix` | Wired |
-| Constants | `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_` | All wired to `Math.*` or `@danielsimonjr/mathts-core` |
-| `shims` object | Aggregated map of all the above | Wired (`stub_markers: 1` is a false positive from the inventory script detecting a comment) |
+| Category         | Functions                                                                                               | Status                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Construction     | `complex`, `fraction`, `bignumber`, `matrix`, `sparse`                                                  | Wired to `@danielsimonjr/mathts-core` and `@danielsimonjr/mathts-matrix`                    |
+| Basic arithmetic | `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log`                             | Wired to `@danielsimonjr/mathts-functions` typed dispatch                                   |
+| Trigonometry     | `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`                                                    | Wired (`asin/acos/atan` wrap `Math.*`)                                                      |
+| Statistics       | `sum`, `mean`, `min`, `max`                                                                             | Wired                                                                                       |
+| Number theory    | `gcd`, `lcm`                                                                                            | Wired                                                                                       |
+| Rounding         | `round`, `floor`, `ceil`                                                                                | Wired                                                                                       |
+| Complex ops      | `conj`, `re`, `im`, `arg`                                                                               | Wired, throw `TypeError` for wrong types                                                    |
+| Matrix ops       | `transpose`, `det`, `identity`, `zeros`, `ones`, `size`                                                 | Wired — `det` uses LU decomposition                                                         |
+| Type guards      | `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix`                                    | Wired                                                                                       |
+| Constants        | `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_` | All wired to `Math.*` or `@danielsimonjr/mathts-core`                                       |
+| `shims` object   | Aggregated map of all the above                                                                         | Wired (`stub_markers: 1` is a false positive from the inventory script detecting a comment) |
 
 The `all` constant is an empty `{}` object — `create()` wires everything regardless of what is passed. This differs from mathjs's selective factory pattern, where `all` contains actual factory functions.
 
@@ -117,14 +118,14 @@ Two test files, ~87 total `it()` cases:
 
 ### Structure
 
-| File | Lines | Role |
-|------|-------|------|
-| `src/types.ts` | 103 | Type definitions for all core domain objects |
-| `src/parser.ts` | 106 | YAML parsing/serialization — `parseWorkbook`, `serializeWorkbook` (serialize is a stub) |
-| `src/graph.ts` | 129 | Dependency graph — `buildDependencyGraph`, `topologicalSort`, `getDependents`, `detectCycles` |
-| `src/executor.ts` | 161 | `WorkbookExecutor` class and `createExecutor` factory |
-| `src/cli.ts` | 130 | CLI entry point for `.mtsw` files — run/validate/graph/new subcommands (mostly TODOs) |
-| `src/index.ts` | 28 | Public package exports |
+| File              | Lines | Role                                                                                          |
+| ----------------- | ----- | --------------------------------------------------------------------------------------------- |
+| `src/types.ts`    | 103   | Type definitions for all core domain objects                                                  |
+| `src/parser.ts`   | 106   | YAML parsing/serialization — `parseWorkbook`, `serializeWorkbook` (serialize is a stub)       |
+| `src/graph.ts`    | 129   | Dependency graph — `buildDependencyGraph`, `topologicalSort`, `getDependents`, `detectCycles` |
+| `src/executor.ts` | 161   | `WorkbookExecutor` class and `createExecutor` factory                                         |
+| `src/cli.ts`      | 130   | CLI entry point for `.mtsw` files — run/validate/graph/new subcommands (mostly TODOs)         |
+| `src/index.ts`    | 28    | Public package exports                                                                        |
 
 ### Types
 
@@ -147,13 +148,13 @@ Key interfaces from `workbook/src/types.ts`:
 
 ```typescript
 export class WorkbookExecutor {
-  async runAll(): Promise<void>           // runs all cells in topological order
-  async runCell(cellId: string): Promise<unknown>  // runs single cell + propagates
-  private async executeCell(cell: Cell): Promise<unknown>
-  private async executeCode(_cell: Cell): Promise<unknown>  // STUB — throws
-  private async executeData(cell: Cell): Promise<unknown>   // parses YAML/JSON data
+  async runAll(): Promise<void>; // runs all cells in topological order
+  async runCell(cellId: string): Promise<unknown>; // runs single cell + propagates
+  private async executeCell(cell: Cell): Promise<unknown>;
+  private async executeCode(_cell: Cell): Promise<unknown>; // STUB — throws
+  private async executeData(cell: Cell): Promise<unknown>; // parses YAML/JSON data
 }
-export function createExecutor(workbook: Workbook): WorkbookExecutor
+export function createExecutor(workbook: Workbook): WorkbookExecutor;
 ```
 
 Execution modes (reactive/sequential/manual) are defined in types but not yet differentiated in the executor logic. Event emission works via `on()`.

@@ -1,72 +1,66 @@
-import { isArray, isMatrix, isString, typeOf } from '../../utils/is.js'
-import { clone } from '../../utils/object.js'
-import { factory } from '../../utils/factory.js'
+import { isArray, isMatrix, isString, typeOf } from '../../utils/is.js';
+import { clone } from '../../utils/object.js';
+import { factory } from '../../utils/factory.js';
 import type {
   DenseMatrixData,
   DataType,
   MatrixValue,
   IndexInterface,
   ImmutableDenseMatrixJSON,
-  ImmutableDenseMatrixConstructorData
-} from './types.js'
+  ImmutableDenseMatrixConstructorData,
+} from './types.js';
 
-const name = 'ImmutableDenseMatrix'
-const dependencies = ['smaller', 'DenseMatrix']
+const name = 'ImmutableDenseMatrix';
+const dependencies = ['smaller', 'DenseMatrix'];
 
 // Re-export for backward compatibility
-export type { ImmutableDenseMatrixJSON }
+export type { ImmutableDenseMatrixJSON };
 
 /**
  * Interface for Index objects (local copy to avoid circular deps)
  */
 interface Index extends IndexInterface {
-  isIndex: true
+  isIndex: true;
 }
 
 /**
  * Interface for DenseMatrix (local copy to avoid circular deps)
  */
 interface _DenseMatrix {
-  type: string
-  isDenseMatrix: boolean
-  _data: DenseMatrixData
-  _size: number[]
-  _datatype?: DataType
-  storage(): string
-  datatype(): DataType
-  size(): number[]
-  clone(): _DenseMatrix
-  toArray(): DenseMatrixData
-  valueOf(): DenseMatrixData
+  type: string;
+  isDenseMatrix: boolean;
+  _data: DenseMatrixData;
+  _size: number[];
+  _datatype?: DataType;
+  storage(): string;
+  datatype(): DataType;
+  size(): number[];
+  clone(): _DenseMatrix;
+  toArray(): DenseMatrixData;
+  valueOf(): DenseMatrixData;
   subset(
     index: Index,
     replacement?: DenseMatrixData | _DenseMatrix | MatrixValue,
     defaultValue?: MatrixValue
-  ): _DenseMatrix | MatrixValue
-  forEach(
-    callback: (
-      value: MatrixValue,
-      index?: number[],
-      matrix?: _DenseMatrix
-    ) => void
-  ): void
+  ): _DenseMatrix | MatrixValue;
+  forEach(callback: (value: MatrixValue, index?: number[], matrix?: _DenseMatrix) => void): void;
 }
 
 /**
  * Comparison function type.
  * INTENTIONAL ANY: typed-function resolves actual types at runtime.
  */
-type CompareFunction = (a: MatrixValue, b: MatrixValue) => boolean
+type CompareFunction = (a: MatrixValue, b: MatrixValue) => boolean;
 
 /**
  * Dependencies for ImmutableDenseMatrix factory
  */
 interface ImmutableDenseMatrixDependencies {
-  smaller: CompareFunction
+  smaller: CompareFunction;
   DenseMatrix: new (
     data?: DenseMatrixData | ImmutableDenseMatrixConstructorData,
     datatype?: DataType
-  ) => _DenseMatrix
+  ) => _DenseMatrix;
 }
 
 export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
@@ -84,87 +78,83 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
       /**
        * Type identifier
        */
-      readonly type: string = 'ImmutableDenseMatrix'
+      readonly type: string = 'ImmutableDenseMatrix';
 
       /**
        * ImmutableDenseMatrix type flag
        */
-      readonly isImmutableDenseMatrix: boolean = true
+      readonly isImmutableDenseMatrix: boolean = true;
 
       /**
        * Internal matrix data storage
        */
-      _data: DenseMatrixData
+      _data: DenseMatrixData;
 
       /**
        * Size of the matrix
        */
-      _size: number[]
+      _size: number[];
 
       /**
        * Data type of matrix elements
        */
-      _datatype?: DataType
+      _datatype?: DataType;
 
       /**
        * Cached minimum value
        * @template T - The element type (inferred from matrix data)
        */
-      _min: MatrixValue | null
+      _min: MatrixValue | null;
 
       /**
        * Cached maximum value
        * @template T - The element type (inferred from matrix data)
        */
-      _max: MatrixValue | null
+      _max: MatrixValue | null;
 
       constructor(
         data?: DenseMatrixData | ImmutableDenseMatrixConstructorData | null,
         datatype?: DataType
       ) {
-        super()
+        super();
         if (!(this instanceof ImmutableDenseMatrix)) {
-          throw new SyntaxError(
-            'Constructor must be called with the new operator'
-          )
+          throw new SyntaxError('Constructor must be called with the new operator');
         }
         if (datatype && !isString(datatype)) {
-          throw new Error('Invalid datatype: ' + datatype)
+          throw new Error('Invalid datatype: ' + datatype);
         }
 
         if (isMatrix(data) || isArray(data)) {
           // use DenseMatrix implementation
-          const matrix = new DenseMatrix(data, datatype)
+          const matrix = new DenseMatrix(data, datatype);
           // internal structures
-          this._data = matrix._data
-          this._size = matrix._size
-          this._datatype = matrix._datatype
-          this._min = null
-          this._max = null
+          this._data = matrix._data;
+          this._size = matrix._size;
+          this._datatype = matrix._datatype;
+          this._min = null;
+          this._max = null;
         } else if (
           data &&
           isArray((data as ImmutableDenseMatrixConstructorData).data) &&
           isArray((data as ImmutableDenseMatrixConstructorData).size)
         ) {
           // initialize fields from JSON representation
-          const matrixData = data as ImmutableDenseMatrixConstructorData
-          this._data = matrixData.data
-          this._size = matrixData.size
-          this._datatype = matrixData.datatype
-          this._min =
-            typeof matrixData.min !== 'undefined' ? matrixData.min : null
-          this._max =
-            typeof matrixData.max !== 'undefined' ? matrixData.max : null
+          const matrixData = data as ImmutableDenseMatrixConstructorData;
+          this._data = matrixData.data;
+          this._size = matrixData.size;
+          this._datatype = matrixData.datatype;
+          this._min = typeof matrixData.min !== 'undefined' ? matrixData.min : null;
+          this._max = typeof matrixData.max !== 'undefined' ? matrixData.max : null;
         } else if (data) {
           // unsupported type
-          throw new TypeError('Unsupported type of data (' + typeOf(data) + ')')
+          throw new TypeError('Unsupported type of data (' + typeOf(data) + ')');
         } else {
           // nothing provided
-          this._data = []
-          this._size = [0]
-          this._datatype = datatype
-          this._min = null
-          this._max = null
+          this._data = [];
+          this._size = [0];
+          this._datatype = datatype;
+          this._min = null;
+          this._max = null;
         }
       }
 
@@ -189,27 +179,25 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
         switch (arguments.length) {
           case 1: {
             // use base implementation
-            const m = (DenseMatrix.prototype as any).subset.call(this, index)
+            const m = (DenseMatrix.prototype as any).subset.call(this, index);
             // check result is a matrix
             if (isMatrix(m)) {
               // return immutable matrix
               return new ImmutableDenseMatrix({
                 data: (m as any)._data,
                 size: (m as any)._size,
-                datatype: (m as any)._datatype
-              })
+                datatype: (m as any)._datatype,
+              });
             }
-            return m
+            return m;
           }
           // intentional fall through
           case 2:
           case 3:
-            throw new Error(
-              'Cannot invoke set subset on an Immutable Matrix instance'
-            )
+            throw new Error('Cannot invoke set subset on an Immutable Matrix instance');
 
           default:
-            throw new SyntaxError('Wrong number of arguments')
+            throw new SyntaxError('Wrong number of arguments');
         }
       }
 
@@ -227,7 +215,7 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
         _value: MatrixValue,
         _defaultValue?: MatrixValue
       ): ImmutableDenseMatrix {
-        throw new Error('Cannot invoke set on an Immutable Matrix instance')
+        throw new Error('Cannot invoke set on an Immutable Matrix instance');
       }
 
       /**
@@ -242,12 +230,8 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
        *
        * @return {ImmutableDenseMatrix} The resized matrix
        */
-      resize(
-        _size: number[],
-        _defaultValue?: MatrixValue,
-        _copy?: boolean
-      ): ImmutableDenseMatrix {
-        throw new Error('Cannot invoke resize on an Immutable Matrix instance')
+      resize(_size: number[], _defaultValue?: MatrixValue, _copy?: boolean): ImmutableDenseMatrix {
+        throw new Error('Cannot invoke resize on an Immutable Matrix instance');
       }
 
       /**
@@ -256,7 +240,7 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
        * @throws {Error} Operation not allowed
        */
       reshape(_size: number[], _copy?: boolean): ImmutableDenseMatrix {
-        throw new Error('Cannot invoke reshape on an Immutable Matrix instance')
+        throw new Error('Cannot invoke reshape on an Immutable Matrix instance');
       }
 
       /**
@@ -267,8 +251,8 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
         return new ImmutableDenseMatrix({
           data: clone(this._data),
           size: clone(this._size),
-          datatype: this._datatype
-        })
+          datatype: this._datatype,
+        });
       }
 
       /**
@@ -286,8 +270,8 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
           mathjs: 'ImmutableDenseMatrix',
           data: this._data,
           size: this._size,
-          datatype: this._datatype
-        }
+          datatype: this._datatype,
+        };
       }
 
       /**
@@ -298,7 +282,7 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
        * @returns {ImmutableDenseMatrix}
        */
       static fromJSON(json: ImmutableDenseMatrixJSON): ImmutableDenseMatrix {
-        return new ImmutableDenseMatrix(json)
+        return new ImmutableDenseMatrix(json);
       }
 
       /**
@@ -310,9 +294,7 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
        * @return {Matrix} The matrix reference
        */
       swapRows(_i: number, _j: number): ImmutableDenseMatrix {
-        throw new Error(
-          'Cannot invoke swapRows on an Immutable Matrix instance'
-        )
+        throw new Error('Cannot invoke swapRows on an Immutable Matrix instance');
       }
 
       /**
@@ -323,20 +305,17 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
         // check min has been calculated before
         if (this._min === null) {
           // minimum
-          let m: MatrixValue | null = null
+          let m: MatrixValue | null = null;
           // compute min
-          const smallerFn = smaller
-          ;(DenseMatrix.prototype as _DenseMatrix).forEach.call(
-            this,
-            function (v: MatrixValue) {
-              if (m === null || smallerFn(v, m)) {
-                m = v
-              }
+          const smallerFn = smaller;
+          (DenseMatrix.prototype as _DenseMatrix).forEach.call(this, function (v: MatrixValue) {
+            if (m === null || smallerFn(v, m)) {
+              m = v;
             }
-          )
-          this._min = m !== null ? m : undefined
+          });
+          this._min = m !== null ? m : undefined;
         }
-        return this._min ?? undefined
+        return this._min ?? undefined;
       }
 
       /**
@@ -347,32 +326,29 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
         // check max has been calculated before
         if (this._max === null) {
           // maximum
-          let m: MatrixValue | null = null
+          let m: MatrixValue | null = null;
           // compute max
-          const smallerFn = smaller
-          ;(DenseMatrix.prototype as _DenseMatrix).forEach.call(
-            this,
-            function (v: MatrixValue) {
-              if (m === null || smallerFn(m, v)) {
-                m = v
-              }
+          const smallerFn = smaller;
+          (DenseMatrix.prototype as _DenseMatrix).forEach.call(this, function (v: MatrixValue) {
+            if (m === null || smallerFn(m, v)) {
+              m = v;
             }
-          )
-          this._max = m !== null ? m : undefined
+          });
+          this._max = m !== null ? m : undefined;
         }
-        return this._max ?? undefined
+        return this._max ?? undefined;
       }
     }
 
     // Set up prototype chain to inherit from DenseMatrix
-    Object.setPrototypeOf(ImmutableDenseMatrix.prototype, DenseMatrix.prototype)
-    ;(ImmutableDenseMatrix.prototype as any).constructor = ImmutableDenseMatrix
+    Object.setPrototypeOf(ImmutableDenseMatrix.prototype, DenseMatrix.prototype);
+    (ImmutableDenseMatrix.prototype as any).constructor = ImmutableDenseMatrix;
 
     // Override type information
-    ;(ImmutableDenseMatrix.prototype as any).type = 'ImmutableDenseMatrix'
-    ;(ImmutableDenseMatrix.prototype as any).isImmutableDenseMatrix = true
+    (ImmutableDenseMatrix.prototype as any).type = 'ImmutableDenseMatrix';
+    (ImmutableDenseMatrix.prototype as any).isImmutableDenseMatrix = true;
 
-    return ImmutableDenseMatrix
+    return ImmutableDenseMatrix;
   },
   { isClass: true }
-)
+);

@@ -17,6 +17,7 @@
 ### Task 1: Install new dependencies
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/package.json`
 
 **Step 1: Install plotly, katex, allotment**
@@ -43,7 +44,7 @@ Expected: All three print "ok".
 In `demo/mathjs-calc/src/main.tsx`, add at the top:
 
 ```typescript
-import 'allotment/dist/style.css'
+import 'allotment/dist/style.css';
 ```
 
 **Step 4: Commit**
@@ -58,6 +59,7 @@ git commit -m "feat(ise): install plotly.js, katex, and allotment dependencies"
 ### Task 2: Build three-zone split layout shell
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/layouts/ISELayout.tsx`
 - Create: `demo/mathjs-calc/src/layouts/SplitDivider.tsx`
 - Modify: `demo/mathjs-calc/src/App.tsx`
@@ -69,24 +71,24 @@ git commit -m "feat(ise): install plotly.js, katex, and allotment dependencies"
 In `demo/mathjs-calc/src/types.ts`, add:
 
 ```typescript
-export type ViewMode = 'ise' | 'performance' | 'statistics'
+export type ViewMode = 'ise' | 'performance' | 'statistics';
 
 export interface PlotTrace {
-  id: string
-  expression: string
-  type: '2d' | '3d' | 'parametric' | 'polar'
-  color: string
-  visible: boolean
-  data: { x: number[]; y: number[]; z?: number[] }
+  id: string;
+  expression: string;
+  type: '2d' | '3d' | 'parametric' | 'polar';
+  color: string;
+  visible: boolean;
+  data: { x: number[]; y: number[]; z?: number[] };
 }
 
 export interface SymbolicResult {
-  id: string
-  input: string
-  output: string
-  latexIn: string
-  latexOut: string
-  timestamp: number
+  id: string;
+  input: string;
+  output: string;
+  latexIn: string;
+  latexOut: string;
+  timestamp: number;
 }
 ```
 
@@ -123,23 +125,27 @@ updateVariables: (vars: Record<string, { value: string; type: string }>) => void
 Create `demo/mathjs-calc/src/layouts/ISELayout.tsx`:
 
 ```tsx
-import React from 'react'
-import { Allotment } from 'allotment'
-import { useStore } from '../store/useStore'
+import React from 'react';
+import { Allotment } from 'allotment';
+import { useStore } from '../store/useStore';
 
 // Placeholder components — will be replaced in later tasks
 function CalculatorPanel() {
-  return <div className="h-full bg-gray-950 p-2 text-gray-400">Calculator Panel (Task 4-7)</div>
+  return <div className="h-full bg-gray-950 p-2 text-gray-400">Calculator Panel (Task 4-7)</div>;
 }
 function GraphCanvas() {
-  return <div className="h-full bg-gray-950 p-2 text-gray-400 flex items-center justify-center">Graph Canvas (Task 10-13)</div>
+  return (
+    <div className="h-full bg-gray-950 p-2 text-gray-400 flex items-center justify-center">
+      Graph Canvas (Task 10-13)
+    </div>
+  );
 }
 function ExpressionBarNew() {
-  return <div className="h-full bg-gray-900 p-2 text-gray-400">Expression Bar (Task 8-9)</div>
+  return <div className="h-full bg-gray-900 p-2 text-gray-400">Expression Bar (Task 8-9)</div>;
 }
 
 export function ISELayout() {
-  const graphCollapsed = useStore((s) => s.graphCollapsed)
+  const graphCollapsed = useStore((s) => s.graphCollapsed);
 
   return (
     <div className="h-screen flex flex-col bg-gray-950">
@@ -160,7 +166,7 @@ export function ISELayout() {
         <ExpressionBarNew />
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -169,16 +175,16 @@ export function ISELayout() {
 Replace `demo/mathjs-calc/src/App.tsx`:
 
 ```tsx
-import React from 'react'
-import { useStore } from './store/useStore'
-import { ISELayout } from './layouts/ISELayout'
-import { StatisticsPanel } from './panels/StatisticsPanel'
-import { PerformancePanel } from './panels/PerformancePanel'
-import { usePersistence } from './hooks/usePersistence'
+import React from 'react';
+import { useStore } from './store/useStore';
+import { ISELayout } from './layouts/ISELayout';
+import { StatisticsPanel } from './panels/StatisticsPanel';
+import { PerformancePanel } from './panels/PerformancePanel';
+import { usePersistence } from './hooks/usePersistence';
 
 export default function App() {
-  const viewMode = useStore((s) => s.viewMode)
-  usePersistence()
+  const viewMode = useStore((s) => s.viewMode);
+  usePersistence();
 
   if (viewMode === 'statistics') {
     return (
@@ -186,7 +192,7 @@ export default function App() {
         <SecondaryHeader />
         <StatisticsPanel />
       </div>
-    )
+    );
   }
 
   if (viewMode === 'performance') {
@@ -195,14 +201,14 @@ export default function App() {
         <SecondaryHeader />
         <PerformancePanel />
       </div>
-    )
+    );
   }
 
-  return <ISELayout />
+  return <ISELayout />;
 }
 
 function SecondaryHeader() {
-  const setViewMode = useStore((s) => s.setViewMode)
+  const setViewMode = useStore((s) => s.setViewMode);
   return (
     <header className="border-b border-gray-800 p-2 bg-gray-900 flex items-center gap-2">
       <button
@@ -212,7 +218,7 @@ function SecondaryHeader() {
         ← Back to ISE
       </button>
     </header>
-  )
+  );
 }
 ```
 
@@ -238,6 +244,7 @@ git commit -m "feat(ise): build three-zone split layout with allotment"
 ### Task 3: Create icon system
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/icons/MathIcons.tsx`
 
 **Step 1: Create SVG icon components for all toolbar icons**
@@ -247,6 +254,7 @@ Create `demo/mathjs-calc/src/components/icons/MathIcons.tsx`:
 This file exports 35+ small SVG icon components (20x20) for each toolbar action. Use simple geometric shapes and math symbols. Each icon is a React component accepting `className` prop.
 
 Icons needed:
+
 - Algebra: Simplify (= with sparkle), Expand (brackets opening), Factor (brackets closing), Solve (x with checkmark), Rationalize (fraction bar)
 - Calculus: Derivative (d/dx text), Integral (∫ symbol), Limit (lim text), Summation (Σ), Taylor (T∞)
 - Matrix: Determinant (|A| text), Inverse (A⁻¹), Transpose (Aᵀ), Eigenvalues (λ), MatrixGrid (grid dots)
@@ -258,27 +266,31 @@ Icons needed:
 Each icon should be simple text-based or minimal SVG to avoid complexity:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 interface IconProps {
-  className?: string
-  size?: number
+  className?: string;
+  size?: number;
 }
 
 export function DerivativeIcon({ className, size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 18 18" className={className} fill="currentColor">
-      <text x="1" y="13" fontSize="11" fontFamily="serif" fontStyle="italic">d/dx</text>
+      <text x="1" y="13" fontSize="11" fontFamily="serif" fontStyle="italic">
+        d/dx
+      </text>
     </svg>
-  )
+  );
 }
 
 export function IntegralIcon({ className, size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 18 18" className={className} fill="currentColor">
-      <text x="3" y="15" fontSize="16" fontFamily="serif">∫</text>
+      <text x="3" y="15" fontSize="16" fontFamily="serif">
+        ∫
+      </text>
     </svg>
-  )
+  );
 }
 
 // ... (all 35+ icons following same pattern)
@@ -298,6 +310,7 @@ git commit -m "feat(ise): create math icon components for toolbar ribbon"
 ### Task 4: Build toolbar ribbon component
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/ToolbarRibbon.tsx`
 - Create: `demo/mathjs-calc/src/components/ToolbarGroup.tsx`
 - Create: `demo/mathjs-calc/src/components/ToolbarButton.tsx`
@@ -307,14 +320,14 @@ git commit -m "feat(ise): create math icon components for toolbar ribbon"
 Create `demo/mathjs-calc/src/components/ToolbarButton.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 interface ToolbarButtonProps {
-  icon: React.ReactNode
-  label: string
-  tooltip: string
-  onClick: () => void
-  active?: boolean
+  icon: React.ReactNode;
+  label: string;
+  tooltip: string;
+  onClick: () => void;
+  active?: boolean;
 }
 
 export function ToolbarButton({ icon, label, tooltip, onClick, active }: ToolbarButtonProps) {
@@ -323,15 +336,16 @@ export function ToolbarButton({ icon, label, tooltip, onClick, active }: Toolbar
       onClick={onClick}
       title={tooltip}
       className={`flex flex-col items-center gap-0.5 px-1.5 py-1 rounded text-xs transition-colors
-        ${active
-          ? 'bg-blue-600/20 text-blue-400'
-          : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+        ${
+          active
+            ? 'bg-blue-600/20 text-blue-400'
+            : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
         }`}
     >
       <span className="text-base leading-none">{icon}</span>
       <span className="text-[9px] leading-none font-medium">{label}</span>
     </button>
-  )
+  );
 }
 ```
 
@@ -340,24 +354,22 @@ export function ToolbarButton({ icon, label, tooltip, onClick, active }: Toolbar
 Create `demo/mathjs-calc/src/components/ToolbarGroup.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 interface ToolbarGroupProps {
-  title: string
-  children: React.ReactNode
+  title: string;
+  children: React.ReactNode;
 }
 
 export function ToolbarGroup({ title, children }: ToolbarGroupProps) {
   return (
     <div className="flex flex-col">
-      <div className="flex gap-0.5 px-1">
-        {children}
-      </div>
+      <div className="flex gap-0.5 px-1">{children}</div>
       <div className="text-[8px] text-gray-600 text-center mt-0.5 uppercase tracking-wider">
         {title}
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -366,110 +378,226 @@ export function ToolbarGroup({ title, children }: ToolbarGroupProps) {
 Create `demo/mathjs-calc/src/components/ToolbarRibbon.tsx`:
 
 ```tsx
-import React from 'react'
-import { ToolbarGroup } from './ToolbarGroup'
-import { ToolbarButton } from './ToolbarButton'
-import { useStore } from '../store/useStore'
+import React from 'react';
+import { ToolbarGroup } from './ToolbarGroup';
+import { ToolbarButton } from './ToolbarButton';
+import { useStore } from '../store/useStore';
 
 interface ToolbarRibbonProps {
-  onInsert: (template: string, cursorOffset?: number) => void
+  onInsert: (template: string, cursorOffset?: number) => void;
 }
 
 export function ToolbarRibbon({ onInsert }: ToolbarRibbonProps) {
-  const { config, setConfig, setViewMode } = useStore()
+  const { config, setConfig, setViewMode } = useStore();
 
   return (
     <div className="flex items-start gap-0 px-1 py-1 bg-gray-900 border-b border-gray-800 overflow-x-auto">
       {/* Algebra */}
       <ToolbarGroup title="Algebra">
-        <ToolbarButton icon="≡" label="simplify" tooltip="Simplify expression"
-          onClick={() => onInsert('simplify("")', -2)} />
-        <ToolbarButton icon="⟨⟩" label="expand" tooltip="Expand expression"
-          onClick={() => onInsert('expand("")', -2)} />
-        <ToolbarButton icon="[ ]" label="factor" tooltip="Factor expression"
-          onClick={() => onInsert('factor("")', -2)} />
-        <ToolbarButton icon="✓" label="solve" tooltip="Solve equation"
-          onClick={() => onInsert('solve("", "x")', -6)} />
-        <ToolbarButton icon="⁄" label="rational" tooltip="Rationalize"
-          onClick={() => onInsert('rationalize("")', -2)} />
+        <ToolbarButton
+          icon="≡"
+          label="simplify"
+          tooltip="Simplify expression"
+          onClick={() => onInsert('simplify("")', -2)}
+        />
+        <ToolbarButton
+          icon="⟨⟩"
+          label="expand"
+          tooltip="Expand expression"
+          onClick={() => onInsert('expand("")', -2)}
+        />
+        <ToolbarButton
+          icon="[ ]"
+          label="factor"
+          tooltip="Factor expression"
+          onClick={() => onInsert('factor("")', -2)}
+        />
+        <ToolbarButton
+          icon="✓"
+          label="solve"
+          tooltip="Solve equation"
+          onClick={() => onInsert('solve("", "x")', -6)}
+        />
+        <ToolbarButton
+          icon="⁄"
+          label="rational"
+          tooltip="Rationalize"
+          onClick={() => onInsert('rationalize("")', -2)}
+        />
       </ToolbarGroup>
 
       <div className="w-px h-10 bg-gray-800 mx-1 self-center" />
 
       {/* Calculus */}
       <ToolbarGroup title="Calculus">
-        <ToolbarButton icon="d/dx" label="deriv" tooltip="Derivative"
-          onClick={() => onInsert('derivative("", "x")', -6)} />
-        <ToolbarButton icon="∫" label="integ" tooltip="Integral (symbolic)"
-          onClick={() => onInsert('integrate("", "x")', -6)} />
-        <ToolbarButton icon="lim" label="limit" tooltip="Limit"
-          onClick={() => onInsert('limit("", "x", 0)', -7)} />
-        <ToolbarButton icon="Σ" label="sum" tooltip="Summation"
-          onClick={() => onInsert('sum([])', -2)} />
-        <ToolbarButton icon="Tₙ" label="taylor" tooltip="Taylor series"
-          onClick={() => onInsert('taylor("", "x", 0, 5)', -8)} />
+        <ToolbarButton
+          icon="d/dx"
+          label="deriv"
+          tooltip="Derivative"
+          onClick={() => onInsert('derivative("", "x")', -6)}
+        />
+        <ToolbarButton
+          icon="∫"
+          label="integ"
+          tooltip="Integral (symbolic)"
+          onClick={() => onInsert('integrate("", "x")', -6)}
+        />
+        <ToolbarButton
+          icon="lim"
+          label="limit"
+          tooltip="Limit"
+          onClick={() => onInsert('limit("", "x", 0)', -7)}
+        />
+        <ToolbarButton
+          icon="Σ"
+          label="sum"
+          tooltip="Summation"
+          onClick={() => onInsert('sum([])', -2)}
+        />
+        <ToolbarButton
+          icon="Tₙ"
+          label="taylor"
+          tooltip="Taylor series"
+          onClick={() => onInsert('taylor("", "x", 0, 5)', -8)}
+        />
       </ToolbarGroup>
 
       <div className="w-px h-10 bg-gray-800 mx-1 self-center" />
 
       {/* Matrix */}
       <ToolbarGroup title="Matrix">
-        <ToolbarButton icon="|A|" label="det" tooltip="Determinant"
-          onClick={() => onInsert('det()', -1)} />
-        <ToolbarButton icon="A⁻¹" label="inv" tooltip="Inverse"
-          onClick={() => onInsert('inv()', -1)} />
-        <ToolbarButton icon="Aᵀ" label="trans" tooltip="Transpose"
-          onClick={() => onInsert('transpose()', -1)} />
-        <ToolbarButton icon="λ" label="eigs" tooltip="Eigenvalues"
-          onClick={() => onInsert('eigs()', -1)} />
-        <ToolbarButton icon="⊞" label="matrix" tooltip="Create matrix"
-          onClick={() => onInsert('matrix([[]])', -3)} />
+        <ToolbarButton
+          icon="|A|"
+          label="det"
+          tooltip="Determinant"
+          onClick={() => onInsert('det()', -1)}
+        />
+        <ToolbarButton
+          icon="A⁻¹"
+          label="inv"
+          tooltip="Inverse"
+          onClick={() => onInsert('inv()', -1)}
+        />
+        <ToolbarButton
+          icon="Aᵀ"
+          label="trans"
+          tooltip="Transpose"
+          onClick={() => onInsert('transpose()', -1)}
+        />
+        <ToolbarButton
+          icon="λ"
+          label="eigs"
+          tooltip="Eigenvalues"
+          onClick={() => onInsert('eigs()', -1)}
+        />
+        <ToolbarButton
+          icon="⊞"
+          label="matrix"
+          tooltip="Create matrix"
+          onClick={() => onInsert('matrix([[]])', -3)}
+        />
       </ToolbarGroup>
 
       <div className="w-px h-10 bg-gray-800 mx-1 self-center" />
 
       {/* Trig */}
       <ToolbarGroup title="Trig">
-        <ToolbarButton icon="sin" label="sin" tooltip="Sine"
-          onClick={() => onInsert('sin()', -1)} />
-        <ToolbarButton icon="cos" label="cos" tooltip="Cosine"
-          onClick={() => onInsert('cos()', -1)} />
-        <ToolbarButton icon="tan" label="tan" tooltip="Tangent"
-          onClick={() => onInsert('tan()', -1)} />
-        <ToolbarButton icon="sin⁻¹" label="asin" tooltip="Arcsine"
-          onClick={() => onInsert('asin()', -1)} />
-        <ToolbarButton icon="cos⁻¹" label="acos" tooltip="Arccosine"
-          onClick={() => onInsert('acos()', -1)} />
-        <ToolbarButton icon="tan⁻¹" label="atan" tooltip="Arctangent"
-          onClick={() => onInsert('atan()', -1)} />
+        <ToolbarButton
+          icon="sin"
+          label="sin"
+          tooltip="Sine"
+          onClick={() => onInsert('sin()', -1)}
+        />
+        <ToolbarButton
+          icon="cos"
+          label="cos"
+          tooltip="Cosine"
+          onClick={() => onInsert('cos()', -1)}
+        />
+        <ToolbarButton
+          icon="tan"
+          label="tan"
+          tooltip="Tangent"
+          onClick={() => onInsert('tan()', -1)}
+        />
+        <ToolbarButton
+          icon="sin⁻¹"
+          label="asin"
+          tooltip="Arcsine"
+          onClick={() => onInsert('asin()', -1)}
+        />
+        <ToolbarButton
+          icon="cos⁻¹"
+          label="acos"
+          tooltip="Arccosine"
+          onClick={() => onInsert('acos()', -1)}
+        />
+        <ToolbarButton
+          icon="tan⁻¹"
+          label="atan"
+          tooltip="Arctangent"
+          onClick={() => onInsert('atan()', -1)}
+        />
       </ToolbarGroup>
 
       <div className="w-px h-10 bg-gray-800 mx-1 self-center" />
 
       {/* Stats */}
       <ToolbarGroup title="Stats">
-        <ToolbarButton icon="x̄" label="mean" tooltip="Mean"
-          onClick={() => onInsert('mean([])', -2)} />
-        <ToolbarButton icon="σ" label="std" tooltip="Standard deviation"
-          onClick={() => onInsert('std([])', -2)} />
-        <ToolbarButton icon="M̃" label="median" tooltip="Median"
-          onClick={() => onInsert('median([])', -2)} />
+        <ToolbarButton
+          icon="x̄"
+          label="mean"
+          tooltip="Mean"
+          onClick={() => onInsert('mean([])', -2)}
+        />
+        <ToolbarButton
+          icon="σ"
+          label="std"
+          tooltip="Standard deviation"
+          onClick={() => onInsert('std([])', -2)}
+        />
+        <ToolbarButton
+          icon="M̃"
+          label="median"
+          tooltip="Median"
+          onClick={() => onInsert('median([])', -2)}
+        />
       </ToolbarGroup>
 
       <div className="w-px h-10 bg-gray-800 mx-1 self-center" />
 
       {/* Plot */}
       <ToolbarGroup title="Plot">
-        <ToolbarButton icon="📈" label="y=f(x)" tooltip="Plot 2D function"
-          onClick={() => onInsert('plot()', -1)} />
-        <ToolbarButton icon="⟳" label="param" tooltip="Parametric plot"
-          onClick={() => onInsert('plotParametric(cos(t), sin(t), t, 0, 2*pi)', 0)} />
-        <ToolbarButton icon="◎" label="polar" tooltip="Polar plot"
-          onClick={() => onInsert('plotPolar(, theta, 0, 2*pi)', -19)} />
-        <ToolbarButton icon="🏔" label="3D" tooltip="3D surface plot"
-          onClick={() => onInsert('plot3d()', -1)} />
-        <ToolbarButton icon="🗑" label="clear" tooltip="Clear all plots"
-          onClick={() => onInsert('clearPlot()', 0)} />
+        <ToolbarButton
+          icon="📈"
+          label="y=f(x)"
+          tooltip="Plot 2D function"
+          onClick={() => onInsert('plot()', -1)}
+        />
+        <ToolbarButton
+          icon="⟳"
+          label="param"
+          tooltip="Parametric plot"
+          onClick={() => onInsert('plotParametric(cos(t), sin(t), t, 0, 2*pi)', 0)}
+        />
+        <ToolbarButton
+          icon="◎"
+          label="polar"
+          tooltip="Polar plot"
+          onClick={() => onInsert('plotPolar(, theta, 0, 2*pi)', -19)}
+        />
+        <ToolbarButton
+          icon="🏔"
+          label="3D"
+          tooltip="3D surface plot"
+          onClick={() => onInsert('plot3d()', -1)}
+        />
+        <ToolbarButton
+          icon="🗑"
+          label="clear"
+          tooltip="Clear all plots"
+          onClick={() => onInsert('clearPlot()', 0)}
+        />
       </ToolbarGroup>
 
       <div className="w-px h-10 bg-gray-800 mx-1 self-center" />
@@ -483,11 +611,14 @@ export function ToolbarRibbon({ onInsert }: ToolbarRibbonProps) {
           onClick={() => setConfig({ angleMode: config.angleMode === 'deg' ? 'rad' : 'deg' })}
           active={config.angleMode === 'deg'}
         />
-        <ToolbarButton icon="⚡" label="engine" tooltip="Toggle engine (JS/WASM)"
+        <ToolbarButton
+          icon="⚡"
+          label="engine"
+          tooltip="Toggle engine (JS/WASM)"
           onClick={() => {
-            const modes = ['auto', 'js', 'wasm'] as const
-            const idx = modes.indexOf(config.engine)
-            setConfig({ engine: modes[(idx + 1) % 3] })
+            const modes = ['auto', 'js', 'wasm'] as const;
+            const idx = modes.indexOf(config.engine);
+            setConfig({ engine: modes[(idx + 1) % 3] });
           }}
         />
       </ToolbarGroup>
@@ -496,13 +627,21 @@ export function ToolbarRibbon({ onInsert }: ToolbarRibbonProps) {
 
       {/* Views */}
       <ToolbarGroup title="Views">
-        <ToolbarButton icon="📊" label="stats" tooltip="Statistics Dashboard"
-          onClick={() => setViewMode('statistics')} />
-        <ToolbarButton icon="⚡" label="perf" tooltip="Performance Dashboard"
-          onClick={() => setViewMode('performance')} />
+        <ToolbarButton
+          icon="📊"
+          label="stats"
+          tooltip="Statistics Dashboard"
+          onClick={() => setViewMode('statistics')}
+        />
+        <ToolbarButton
+          icon="⚡"
+          label="perf"
+          tooltip="Performance Dashboard"
+          onClick={() => setViewMode('performance')}
+        />
       </ToolbarGroup>
     </div>
-  )
+  );
 }
 ```
 
@@ -520,6 +659,7 @@ git commit -m "feat(ise): build icon toolbar ribbon with 7 groups and template i
 ### Task 5: Build symbolic output area with KaTeX
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/SymbolicOutput.tsx`
 - Create: `demo/mathjs-calc/src/hooks/useSymbolic.ts`
 
@@ -528,66 +668,66 @@ git commit -m "feat(ise): build icon toolbar ribbon with 7 groups and template i
 Create `demo/mathjs-calc/src/hooks/useSymbolic.ts`:
 
 ```typescript
-import { useCallback } from 'react'
-import { useMathParser } from './useMathParser'
-import { useStore } from '../store/useStore'
-import type { SymbolicResult } from '../types'
+import { useCallback } from 'react';
+import { useMathParser } from './useMathParser';
+import { useStore } from '../store/useStore';
+import type { SymbolicResult } from '../types';
 
-const SYMBOLIC_FUNCTIONS = ['simplify', 'derivative', 'expand', 'rationalize', 'solve']
+const SYMBOLIC_FUNCTIONS = ['simplify', 'derivative', 'expand', 'rationalize', 'solve'];
 
 export function useSymbolic() {
-  const { math } = useMathParser()
-  const addSymbolicResult = useStore((s) => s.addSymbolicResult)
+  const { math } = useMathParser();
+  const addSymbolicResult = useStore((s) => s.addSymbolicResult);
 
   const isSymbolic = useCallback((expression: string): boolean => {
-    return SYMBOLIC_FUNCTIONS.some((fn) => expression.trim().startsWith(fn + '('))
-  }, [])
+    return SYMBOLIC_FUNCTIONS.some((fn) => expression.trim().startsWith(fn + '('));
+  }, []);
 
   const evaluateSymbolic = useCallback(
     (expression: string): SymbolicResult | null => {
       try {
-        const result = math.evaluate(expression)
+        const result = math.evaluate(expression);
 
         // Convert input to LaTeX
-        let latexIn = ''
+        let latexIn = '';
         try {
           // Extract the inner expression for LaTeX rendering
-          const match = expression.match(/^(\w+)\("([^"]+)"/)
+          const match = expression.match(/^(\w+)\("([^"]+)"/);
           if (match) {
-            const fnName = match[1]
-            const innerExpr = match[2]
-            const parsed = math.parse(innerExpr)
+            const fnName = match[1];
+            const innerExpr = match[2];
+            const parsed = math.parse(innerExpr);
             if (fnName === 'derivative') {
-              latexIn = `\\frac{d}{dx}\\left[${parsed.toTex()}\\right]`
+              latexIn = `\\frac{d}{dx}\\left[${parsed.toTex()}\\right]`;
             } else if (fnName === 'simplify') {
-              latexIn = `\\text{simplify}\\left(${parsed.toTex()}\\right)`
+              latexIn = `\\text{simplify}\\left(${parsed.toTex()}\\right)`;
             } else {
-              latexIn = `\\text{${fnName}}\\left(${parsed.toTex()}\\right)`
+              latexIn = `\\text{${fnName}}\\left(${parsed.toTex()}\\right)`;
             }
           } else {
-            latexIn = math.parse(expression).toTex()
+            latexIn = math.parse(expression).toTex();
           }
         } catch {
-          latexIn = expression
+          latexIn = expression;
         }
 
         // Convert result to LaTeX
-        let latexOut = ''
-        let output = ''
+        let latexOut = '';
+        let output = '';
         try {
           if (typeof result === 'object' && result !== null && 'toTex' in result) {
-            latexOut = result.toTex()
-            output = result.toString()
+            latexOut = result.toTex();
+            output = result.toString();
           } else if (typeof result === 'string') {
-            latexOut = math.parse(result).toTex()
-            output = result
+            latexOut = math.parse(result).toTex();
+            output = result;
           } else {
-            output = math.format(result, { precision: 14 })
-            latexOut = output
+            output = math.format(result, { precision: 14 });
+            latexOut = output;
           }
         } catch {
-          output = math.format(result, { precision: 14 })
-          latexOut = output
+          output = math.format(result, { precision: 14 });
+          latexOut = output;
         }
 
         const entry: SymbolicResult = {
@@ -597,18 +737,18 @@ export function useSymbolic() {
           latexIn,
           latexOut,
           timestamp: Date.now(),
-        }
+        };
 
-        addSymbolicResult(entry)
-        return entry
+        addSymbolicResult(entry);
+        return entry;
       } catch {
-        return null
+        return null;
       }
     },
     [math, addSymbolicResult]
-  )
+  );
 
-  return { isSymbolic, evaluateSymbolic }
+  return { isSymbolic, evaluateSymbolic };
 }
 ```
 
@@ -617,13 +757,13 @@ export function useSymbolic() {
 Create `demo/mathjs-calc/src/components/SymbolicOutput.tsx`:
 
 ```tsx
-import React, { useRef, useEffect } from 'react'
-import katex from 'katex'
-import 'katex/dist/katex.min.css'
-import { useStore } from '../store/useStore'
+import React, { useRef, useEffect } from 'react';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+import { useStore } from '../store/useStore';
 
 function KaTeXBlock({ latex, className }: { latex: string; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (ref.current && latex) {
@@ -632,25 +772,25 @@ function KaTeXBlock({ latex, className }: { latex: string; className?: string })
           displayMode: true,
           throwOnError: false,
           trust: true,
-        })
+        });
       } catch {
-        if (ref.current) ref.current.textContent = latex
+        if (ref.current) ref.current.textContent = latex;
       }
     }
-  }, [latex])
+  }, [latex]);
 
-  return <div ref={ref} className={className} />
+  return <div ref={ref} className={className} />;
 }
 
 export function SymbolicOutput() {
-  const symbolicHistory = useStore((s) => s.symbolicHistory)
+  const symbolicHistory = useStore((s) => s.symbolicHistory);
 
   if (symbolicHistory.length === 0) {
     return (
       <div className="px-2 py-3 text-center text-gray-600 text-xs italic">
         Symbolic results appear here
       </div>
-    )
+    );
   }
 
   return (
@@ -663,7 +803,7 @@ export function SymbolicOutput() {
         </div>
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -679,6 +819,7 @@ git commit -m "feat(ise): add symbolic output area with KaTeX LaTeX rendering"
 ### Task 6: Build variable explorer
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/VariableExplorer.tsx`
 
 **Step 1: Create VariableExplorer component**
@@ -686,8 +827,8 @@ git commit -m "feat(ise): add symbolic output area with KaTeX LaTeX rendering"
 Create `demo/mathjs-calc/src/components/VariableExplorer.tsx`:
 
 ```tsx
-import React from 'react'
-import { useStore } from '../store/useStore'
+import React from 'react';
+import { useStore } from '../store/useStore';
 
 const TYPE_COLORS: Record<string, string> = {
   number: 'text-green-400',
@@ -700,7 +841,7 @@ const TYPE_COLORS: Record<string, string> = {
   Fraction: 'text-pink-400',
   boolean: 'text-cyan-400',
   ResultSet: 'text-gray-400',
-}
+};
 
 const TYPE_BADGES: Record<string, string> = {
   number: 'bg-green-900/50 text-green-400',
@@ -711,22 +852,20 @@ const TYPE_BADGES: Record<string, string> = {
   Unit: 'bg-orange-900/50 text-orange-400',
   BigNumber: 'bg-teal-900/50 text-teal-400',
   Fraction: 'bg-pink-900/50 text-pink-400',
-}
+};
 
 interface VariableExplorerProps {
-  onInsert: (text: string) => void
+  onInsert: (text: string) => void;
 }
 
 export function VariableExplorer({ onInsert }: VariableExplorerProps) {
-  const variables = useStore((s) => s.variables)
-  const entries = Object.entries(variables)
+  const variables = useStore((s) => s.variables);
+  const entries = Object.entries(variables);
 
   if (entries.length === 0) {
     return (
-      <div className="px-2 py-2 text-center text-gray-600 text-xs italic">
-        No variables defined
-      </div>
-    )
+      <div className="px-2 py-2 text-center text-gray-600 text-xs italic">No variables defined</div>
+    );
   }
 
   return (
@@ -742,11 +881,15 @@ export function VariableExplorer({ onInsert }: VariableExplorerProps) {
             >
               <td className="py-0.5 px-2 font-mono font-bold text-gray-200">{name}</td>
               <td className="py-0.5 px-1">
-                <span className={`px-1 py-0 rounded text-[9px] ${TYPE_BADGES[type] || 'bg-gray-800 text-gray-400'}`}>
+                <span
+                  className={`px-1 py-0 rounded text-[9px] ${TYPE_BADGES[type] || 'bg-gray-800 text-gray-400'}`}
+                >
                   {type}
                 </span>
               </td>
-              <td className={`py-0.5 px-2 font-mono truncate max-w-[150px] ${TYPE_COLORS[type] || 'text-gray-400'}`}>
+              <td
+                className={`py-0.5 px-2 font-mono truncate max-w-[150px] ${TYPE_COLORS[type] || 'text-gray-400'}`}
+              >
                 {value}
               </td>
             </tr>
@@ -754,7 +897,7 @@ export function VariableExplorer({ onInsert }: VariableExplorerProps) {
         </tbody>
       </table>
     </div>
-  )
+  );
 }
 ```
 
@@ -770,6 +913,7 @@ git commit -m "feat(ise): add variable explorer with type badges and click-to-in
 ### Task 7: Build enhanced button grid and assemble calculator panel
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/EnhancedButtonGrid.tsx`
 - Create: `demo/mathjs-calc/src/panels/ISECalculatorPanel.tsx`
 
@@ -778,12 +922,12 @@ git commit -m "feat(ise): add variable explorer with type badges and click-to-in
 Create `demo/mathjs-calc/src/components/EnhancedButtonGrid.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 interface ButtonDef {
-  label: string
-  insert: string
-  variant: 'default' | 'operator' | 'function' | 'constant' | 'action' | 'symbolic'
+  label: string;
+  insert: string;
+  variant: 'default' | 'operator' | 'function' | 'constant' | 'action' | 'symbolic';
 }
 
 const GRID: ButtonDef[][] = [
@@ -859,7 +1003,7 @@ const GRID: ButtonDef[][] = [
     { label: 'i', insert: 'i', variant: 'constant' },
     { label: 'EXP', insert: 'e', variant: 'function' },
   ],
-]
+];
 
 const VARIANT_STYLES: Record<string, string> = {
   default: 'bg-gray-800 hover:bg-gray-700 text-gray-100',
@@ -868,22 +1012,27 @@ const VARIANT_STYLES: Record<string, string> = {
   constant: 'bg-gray-800 hover:bg-gray-700 text-purple-300',
   action: 'bg-blue-700 hover:bg-blue-600 text-white',
   symbolic: 'bg-gray-800 hover:bg-gray-700 text-pink-300',
-}
+};
 
 interface EnhancedButtonGridProps {
-  onInsert: (text: string) => void
-  onDelete: () => void
-  onClear: () => void
-  onEvaluate: () => void
+  onInsert: (text: string) => void;
+  onDelete: () => void;
+  onClear: () => void;
+  onEvaluate: () => void;
 }
 
-export function EnhancedButtonGrid({ onInsert, onDelete, onClear, onEvaluate }: EnhancedButtonGridProps) {
+export function EnhancedButtonGrid({
+  onInsert,
+  onDelete,
+  onClear,
+  onEvaluate,
+}: EnhancedButtonGridProps) {
   const handleClick = (btn: ButtonDef) => {
-    if (btn.insert === '__DEL__') return onDelete()
-    if (btn.insert === '__AC__') return onClear()
-    if (btn.insert === '__EVAL__') return onEvaluate()
-    onInsert(btn.insert)
-  }
+    if (btn.insert === '__DEL__') return onDelete();
+    if (btn.insert === '__AC__') return onClear();
+    if (btn.insert === '__EVAL__') return onEvaluate();
+    onInsert(btn.insert);
+  };
 
   return (
     <div className="grid grid-cols-6 gap-1 p-1">
@@ -897,7 +1046,7 @@ export function EnhancedButtonGrid({ onInsert, onDelete, onClear, onEvaluate }: 
         </button>
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -906,17 +1055,17 @@ export function EnhancedButtonGrid({ onInsert, onDelete, onClear, onEvaluate }: 
 Create `demo/mathjs-calc/src/panels/ISECalculatorPanel.tsx`:
 
 ```tsx
-import React, { useCallback, useRef } from 'react'
-import { ToolbarRibbon } from '../components/ToolbarRibbon'
-import { SymbolicOutput } from '../components/SymbolicOutput'
-import { VariableExplorer } from '../components/VariableExplorer'
-import { EnhancedButtonGrid } from '../components/EnhancedButtonGrid'
+import React, { useCallback, useRef } from 'react';
+import { ToolbarRibbon } from '../components/ToolbarRibbon';
+import { SymbolicOutput } from '../components/SymbolicOutput';
+import { VariableExplorer } from '../components/VariableExplorer';
+import { EnhancedButtonGrid } from '../components/EnhancedButtonGrid';
 
 interface ISECalculatorPanelProps {
-  onInsertToExpression: (text: string, cursorOffset?: number) => void
-  onDeleteFromExpression: () => void
-  onClearExpression: () => void
-  onEvaluateExpression: () => void
+  onInsertToExpression: (text: string, cursorOffset?: number) => void;
+  onDeleteFromExpression: () => void;
+  onClearExpression: () => void;
+  onEvaluateExpression: () => void;
 }
 
 export function ISECalculatorPanel({
@@ -956,7 +1105,7 @@ export function ISECalculatorPanel({
         />
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -974,6 +1123,7 @@ git commit -m "feat(ise): build enhanced button grid and assemble calculator pan
 ### Task 8: Build expression bar with LaTeX preview
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/ExpressionInput.tsx`
 - Create: `demo/mathjs-calc/src/components/LaTeXPreview.tsx`
 - Create: `demo/mathjs-calc/src/components/ResultDisplay.tsx`
@@ -984,28 +1134,28 @@ git commit -m "feat(ise): build enhanced button grid and assemble calculator pan
 Create `demo/mathjs-calc/src/components/LaTeXPreview.tsx`:
 
 ```tsx
-import React, { useRef, useEffect, useMemo } from 'react'
-import katex from 'katex'
-import 'katex/dist/katex.min.css'
-import { useMathParser } from '../hooks/useMathParser'
+import React, { useRef, useEffect, useMemo } from 'react';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+import { useMathParser } from '../hooks/useMathParser';
 
 interface LaTeXPreviewProps {
-  expression: string
+  expression: string;
 }
 
 export function LaTeXPreview({ expression }: LaTeXPreviewProps) {
-  const ref = useRef<HTMLDivElement>(null)
-  const { math } = useMathParser()
+  const ref = useRef<HTMLDivElement>(null);
+  const { math } = useMathParser();
 
   const latex = useMemo(() => {
-    if (!expression.trim()) return ''
+    if (!expression.trim()) return '';
     try {
-      const node = math.parse(expression)
-      return node.toTex()
+      const node = math.parse(expression);
+      return node.toTex();
     } catch {
-      return ''
+      return '';
     }
-  }, [expression, math])
+  }, [expression, math]);
 
   useEffect(() => {
     if (ref.current) {
@@ -1014,23 +1164,23 @@ export function LaTeXPreview({ expression }: LaTeXPreviewProps) {
           katex.render(latex, ref.current, {
             displayMode: false,
             throwOnError: false,
-          })
+          });
         } catch {
-          ref.current.textContent = ''
+          ref.current.textContent = '';
         }
       } else {
-        ref.current.textContent = ''
+        ref.current.textContent = '';
       }
     }
-  }, [latex])
+  }, [latex]);
 
-  if (!expression.trim()) return null
+  if (!expression.trim()) return null;
 
   return (
     <div className="px-3 py-1 bg-gray-900/50 border-b border-gray-800/50 min-h-[24px]">
       <div ref={ref} className="text-gray-300 text-sm" />
     </div>
-  )
+  );
 }
 ```
 
@@ -1039,17 +1189,17 @@ export function LaTeXPreview({ expression }: LaTeXPreviewProps) {
 Create `demo/mathjs-calc/src/components/ResultDisplay.tsx`:
 
 ```tsx
-import React, { useRef, useEffect } from 'react'
-import katex from 'katex'
-import 'katex/dist/katex.min.css'
+import React, { useRef, useEffect } from 'react';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 interface ResultDisplayProps {
-  result: string | null
-  type: string | null
-  error: string | null
-  executionTime: number | null
-  isSymbolic: boolean
-  latex: string | null
+  result: string | null;
+  type: string | null;
+  error: string | null;
+  executionTime: number | null;
+  isSymbolic: boolean;
+  latex: string | null;
 }
 
 const TYPE_BADGE_STYLES: Record<string, string> = {
@@ -1061,22 +1211,29 @@ const TYPE_BADGE_STYLES: Record<string, string> = {
   Function: 'bg-yellow-900/50 text-yellow-400',
   symbolic: 'bg-pink-900/50 text-pink-400',
   plot: 'bg-orange-900/50 text-orange-400',
-}
+};
 
-export function ResultDisplay({ result, type, error, executionTime, isSymbolic, latex }: ResultDisplayProps) {
-  const katexRef = useRef<HTMLDivElement>(null)
+export function ResultDisplay({
+  result,
+  type,
+  error,
+  executionTime,
+  isSymbolic,
+  latex,
+}: ResultDisplayProps) {
+  const katexRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (katexRef.current && latex && isSymbolic) {
       try {
-        katex.render(latex, katexRef.current, { displayMode: false, throwOnError: false })
+        katex.render(latex, katexRef.current, { displayMode: false, throwOnError: false });
       } catch {
-        if (katexRef.current) katexRef.current.textContent = result || ''
+        if (katexRef.current) katexRef.current.textContent = result || '';
       }
     }
-  }, [latex, isSymbolic, result])
+  }, [latex, isSymbolic, result]);
 
-  if (!result && !error) return null
+  if (!result && !error) return null;
 
   return (
     <div className="px-3 py-1 flex items-center gap-2">
@@ -1091,7 +1248,9 @@ export function ResultDisplay({ result, type, error, executionTime, isSymbolic, 
             <span className="text-green-400 font-mono text-sm">{result}</span>
           )}
           {type && (
-            <span className={`text-[9px] px-1 py-0 rounded ${TYPE_BADGE_STYLES[type] || 'bg-gray-800 text-gray-400'}`}>
+            <span
+              className={`text-[9px] px-1 py-0 rounded ${TYPE_BADGE_STYLES[type] || 'bg-gray-800 text-gray-400'}`}
+            >
               {type}
             </span>
           )}
@@ -1101,7 +1260,7 @@ export function ResultDisplay({ result, type, error, executionTime, isSymbolic, 
         <span className="text-gray-600 text-[10px] ml-auto">{executionTime.toFixed(1)}ms</span>
       )}
     </div>
-  )
+  );
 }
 ```
 
@@ -1110,162 +1269,174 @@ export function ResultDisplay({ result, type, error, executionTime, isSymbolic, 
 Create `demo/mathjs-calc/src/components/ISEExpressionBar.tsx`:
 
 ```tsx
-import React, { useState, useCallback, useRef, useImperativeHandle, forwardRef } from 'react'
-import { LaTeXPreview } from './LaTeXPreview'
-import { ResultDisplay } from './ResultDisplay'
-import { useMathParser } from '../hooks/useMathParser'
-import { useSymbolic } from '../hooks/useSymbolic'
-import { useStore } from '../store/useStore'
+import React, { useState, useCallback, useRef, useImperativeHandle, forwardRef } from 'react';
+import { LaTeXPreview } from './LaTeXPreview';
+import { ResultDisplay } from './ResultDisplay';
+import { useMathParser } from '../hooks/useMathParser';
+import { useSymbolic } from '../hooks/useSymbolic';
+import { useStore } from '../store/useStore';
 
 export interface ExpressionBarHandle {
-  insert: (text: string, cursorOffset?: number) => void
-  deleteChar: () => void
-  clear: () => void
-  evaluate: () => void
-  focus: () => void
+  insert: (text: string, cursorOffset?: number) => void;
+  deleteChar: () => void;
+  clear: () => void;
+  evaluate: () => void;
+  focus: () => void;
 }
 
 export const ISEExpressionBar = forwardRef<ExpressionBarHandle>(function ISEExpressionBar(_, ref) {
-  const { evaluate: mathEval, math } = useMathParser()
-  const { isSymbolic, evaluateSymbolic } = useSymbolic()
-  const { updateVariables, addPlotTrace } = useStore()
+  const { evaluate: mathEval, math } = useMathParser();
+  const { isSymbolic, evaluateSymbolic } = useSymbolic();
+  const { updateVariables, addPlotTrace } = useStore();
 
-  const inputRef = useRef<HTMLTextAreaElement>(null)
-  const [input, setInput] = useState('')
-  const [result, setResult] = useState<string | null>(null)
-  const [resultType, setResultType] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [execTime, setExecTime] = useState<number | null>(null)
-  const [isSymbolicResult, setIsSymbolicResult] = useState(false)
-  const [resultLatex, setResultLatex] = useState<string | null>(null)
-  const [historyStack, setHistoryStack] = useState<string[]>([])
-  const [historyIdx, setHistoryIdx] = useState(-1)
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState<string | null>(null);
+  const [resultType, setResultType] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [execTime, setExecTime] = useState<number | null>(null);
+  const [isSymbolicResult, setIsSymbolicResult] = useState(false);
+  const [resultLatex, setResultLatex] = useState<string | null>(null);
+  const [historyStack, setHistoryStack] = useState<string[]>([]);
+  const [historyIdx, setHistoryIdx] = useState(-1);
 
   const handleEvaluate = useCallback(() => {
-    const expr = input.trim()
-    if (!expr) return
+    const expr = input.trim();
+    if (!expr) return;
 
-    setHistoryStack((prev) => [expr, ...prev.slice(0, 99)])
-    setHistoryIdx(-1)
+    setHistoryStack((prev) => [expr, ...prev.slice(0, 99)]);
+    setHistoryIdx(-1);
 
     // Check for plot commands
-    if (expr.startsWith('plot(') || expr.startsWith('plot3d(') ||
-        expr.startsWith('plotParametric(') || expr.startsWith('plotPolar(')) {
+    if (
+      expr.startsWith('plot(') ||
+      expr.startsWith('plot3d(') ||
+      expr.startsWith('plotParametric(') ||
+      expr.startsWith('plotPolar(')
+    ) {
       // Plot handling will be implemented in Task 11
-      setResult('Plot command recognized — graph integration pending')
-      setResultType('plot')
-      setError(null)
-      setExecTime(0)
-      setIsSymbolicResult(false)
-      setResultLatex(null)
-      return
+      setResult('Plot command recognized — graph integration pending');
+      setResultType('plot');
+      setError(null);
+      setExecTime(0);
+      setIsSymbolicResult(false);
+      setResultLatex(null);
+      return;
     }
 
     // Check for symbolic
     if (isSymbolic(expr)) {
-      const symResult = evaluateSymbolic(expr)
+      const symResult = evaluateSymbolic(expr);
       if (symResult) {
-        setResult(symResult.output)
-        setResultType('symbolic')
-        setError(null)
-        setExecTime(0)
-        setIsSymbolicResult(true)
-        setResultLatex(symResult.latexOut)
+        setResult(symResult.output);
+        setResultType('symbolic');
+        setError(null);
+        setExecTime(0);
+        setIsSymbolicResult(true);
+        setResultLatex(symResult.latexOut);
       } else {
         // Fall through to numeric evaluation
       }
     }
 
     // Numeric evaluation
-    const entry = mathEval(expr)
+    const entry = mathEval(expr);
     if (entry.error) {
-      setError(entry.error)
-      setResult(null)
-      setResultType(null)
-      setIsSymbolicResult(false)
-      setResultLatex(null)
+      setError(entry.error);
+      setResult(null);
+      setResultType(null);
+      setIsSymbolicResult(false);
+      setResultLatex(null);
     } else {
-      setResult(entry.result)
-      setResultType(entry.type)
-      setError(null)
-      setIsSymbolicResult(false)
-      setResultLatex(null)
+      setResult(entry.result);
+      setResultType(entry.type);
+      setError(null);
+      setIsSymbolicResult(false);
+      setResultLatex(null);
     }
-    setExecTime(entry.executionTime)
+    setExecTime(entry.executionTime);
 
     // Update variable explorer
     try {
-      const parser = math.parser()
+      const parser = math.parser();
       // Re-evaluate to get parser state... actually we use the shared parser
       // This will be refined when we connect useMathParser properly
     } catch {}
 
-    setInput('')
-  }, [input, mathEval, isSymbolic, evaluateSymbolic, math, updateVariables])
+    setInput('');
+  }, [input, mathEval, isSymbolic, evaluateSymbolic, math, updateVariables]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
-        handleEvaluate()
+        e.preventDefault();
+        handleEvaluate();
       }
       if (e.key === 'ArrowUp' && historyStack.length > 0) {
-        const newIdx = Math.min(historyIdx + 1, historyStack.length - 1)
-        setHistoryIdx(newIdx)
-        setInput(historyStack[newIdx])
+        const newIdx = Math.min(historyIdx + 1, historyStack.length - 1);
+        setHistoryIdx(newIdx);
+        setInput(historyStack[newIdx]);
       }
       if (e.key === 'ArrowDown') {
         if (historyIdx > 0) {
-          setHistoryIdx(historyIdx - 1)
-          setInput(historyStack[historyIdx - 1])
+          setHistoryIdx(historyIdx - 1);
+          setInput(historyStack[historyIdx - 1]);
         } else {
-          setHistoryIdx(-1)
-          setInput('')
+          setHistoryIdx(-1);
+          setInput('');
         }
       }
     },
     [handleEvaluate, historyStack, historyIdx]
-  )
+  );
 
   // Expose methods to parent
-  useImperativeHandle(ref, () => ({
-    insert: (text: string, cursorOffset?: number) => {
-      const textarea = inputRef.current
-      if (!textarea) { setInput((prev) => prev + text); return }
-      const start = textarea.selectionStart
-      const end = textarea.selectionEnd
-      const before = input.slice(0, start)
-      const after = input.slice(end)
-      const newValue = before + text + after
-      setInput(newValue)
-      // Position cursor
-      requestAnimationFrame(() => {
-        const pos = cursorOffset !== undefined ? start + text.length + cursorOffset : start + text.length
-        textarea.setSelectionRange(pos, pos)
-        textarea.focus()
-      })
-    },
-    deleteChar: () => {
-      const textarea = inputRef.current
-      if (!textarea) return
-      const start = textarea.selectionStart
-      if (start > 0) {
-        setInput((prev) => prev.slice(0, start - 1) + prev.slice(start))
+  useImperativeHandle(
+    ref,
+    () => ({
+      insert: (text: string, cursorOffset?: number) => {
+        const textarea = inputRef.current;
+        if (!textarea) {
+          setInput((prev) => prev + text);
+          return;
+        }
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const before = input.slice(0, start);
+        const after = input.slice(end);
+        const newValue = before + text + after;
+        setInput(newValue);
+        // Position cursor
         requestAnimationFrame(() => {
-          textarea.setSelectionRange(start - 1, start - 1)
-          textarea.focus()
-        })
-      }
-    },
-    clear: () => {
-      setInput('')
-      setResult(null)
-      setError(null)
-      inputRef.current?.focus()
-    },
-    evaluate: handleEvaluate,
-    focus: () => inputRef.current?.focus(),
-  }), [input, handleEvaluate])
+          const pos =
+            cursorOffset !== undefined ? start + text.length + cursorOffset : start + text.length;
+          textarea.setSelectionRange(pos, pos);
+          textarea.focus();
+        });
+      },
+      deleteChar: () => {
+        const textarea = inputRef.current;
+        if (!textarea) return;
+        const start = textarea.selectionStart;
+        if (start > 0) {
+          setInput((prev) => prev.slice(0, start - 1) + prev.slice(start));
+          requestAnimationFrame(() => {
+            textarea.setSelectionRange(start - 1, start - 1);
+            textarea.focus();
+          });
+        }
+      },
+      clear: () => {
+        setInput('');
+        setResult(null);
+        setError(null);
+        inputRef.current?.focus();
+      },
+      evaluate: handleEvaluate,
+      focus: () => inputRef.current?.focus(),
+    }),
+    [input, handleEvaluate]
+  );
 
   return (
     <div className="h-full flex flex-col bg-gray-900">
@@ -1301,8 +1472,8 @@ export const ISEExpressionBar = forwardRef<ExpressionBarHandle>(function ISEExpr
         latex={resultLatex}
       />
     </div>
-  )
-})
+  );
+});
 ```
 
 **Step 4: Commit**
@@ -1317,6 +1488,7 @@ git commit -m "feat(ise): build expression bar with LaTeX preview, result displa
 ### Task 9: Wire calculator panel + expression bar into ISELayout
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/layouts/ISELayout.tsx`
 
 **Step 1: Replace placeholders with real components**
@@ -1324,11 +1496,11 @@ git commit -m "feat(ise): build expression bar with LaTeX preview, result displa
 Update `demo/mathjs-calc/src/layouts/ISELayout.tsx`:
 
 ```tsx
-import React, { useRef } from 'react'
-import { Allotment } from 'allotment'
-import { useStore } from '../store/useStore'
-import { ISECalculatorPanel } from '../panels/ISECalculatorPanel'
-import { ISEExpressionBar, type ExpressionBarHandle } from '../components/ISEExpressionBar'
+import React, { useRef } from 'react';
+import { Allotment } from 'allotment';
+import { useStore } from '../store/useStore';
+import { ISECalculatorPanel } from '../panels/ISECalculatorPanel';
+import { ISEExpressionBar, type ExpressionBarHandle } from '../components/ISEExpressionBar';
 
 // Graph placeholder — will be replaced in Task 10
 function GraphCanvasPlaceholder() {
@@ -1340,12 +1512,12 @@ function GraphCanvasPlaceholder() {
         <div className="text-xs mt-1">Use plot(expr) to graph functions</div>
       </div>
     </div>
-  )
+  );
 }
 
 export function ISELayout() {
-  const graphCollapsed = useStore((s) => s.graphCollapsed)
-  const expressionBarRef = useRef<ExpressionBarHandle>(null)
+  const graphCollapsed = useStore((s) => s.graphCollapsed);
+  const expressionBarRef = useRef<ExpressionBarHandle>(null);
 
   return (
     <div className="h-screen flex flex-col bg-gray-950">
@@ -1354,7 +1526,9 @@ export function ISELayout() {
         <Allotment>
           <Allotment.Pane minSize={320} preferredSize="40%">
             <ISECalculatorPanel
-              onInsertToExpression={(text, offset) => expressionBarRef.current?.insert(text, offset)}
+              onInsertToExpression={(text, offset) =>
+                expressionBarRef.current?.insert(text, offset)
+              }
               onDeleteFromExpression={() => expressionBarRef.current?.deleteChar()}
               onClearExpression={() => expressionBarRef.current?.clear()}
               onEvaluateExpression={() => expressionBarRef.current?.evaluate()}
@@ -1373,7 +1547,7 @@ export function ISELayout() {
         <ISEExpressionBar ref={expressionBarRef} />
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -1399,6 +1573,7 @@ git commit -m "feat(ise): wire calculator panel and expression bar into three-zo
 ### Task 10: Build 2D graph canvas with Plotly
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/GraphCanvas.tsx`
 - Create: `demo/mathjs-calc/src/components/GraphToolbar.tsx`
 - Create: `demo/mathjs-calc/src/components/FunctionList.tsx`
@@ -1409,45 +1584,54 @@ git commit -m "feat(ise): wire calculator panel and expression bar into three-zo
 Create `demo/mathjs-calc/src/hooks/usePlot.ts`:
 
 ```typescript
-import { useCallback } from 'react'
-import { useMathParser } from './useMathParser'
-import { useStore } from '../store/useStore'
-import type { PlotTrace } from '../types'
+import { useCallback } from 'react';
+import { useMathParser } from './useMathParser';
+import { useStore } from '../store/useStore';
+import type { PlotTrace } from '../types';
 
-const COLORS = ['#60a5fa', '#f59e0b', '#34d399', '#f87171', '#a78bfa', '#22d3ee', '#fb923c', '#e879f9']
-let colorIdx = 0
+const COLORS = [
+  '#60a5fa',
+  '#f59e0b',
+  '#34d399',
+  '#f87171',
+  '#a78bfa',
+  '#22d3ee',
+  '#fb923c',
+  '#e879f9',
+];
+let colorIdx = 0;
 
 export function usePlot() {
-  const { math } = useMathParser()
-  const { addPlotTrace, plotTraces, clearPlots, setPlotMode } = useStore()
+  const { math } = useMathParser();
+  const { addPlotTrace, plotTraces, clearPlots, setPlotMode } = useStore();
 
   const plot2d = useCallback(
     (expression: string, variable = 'x', xmin = -10, xmax = 10, points = 1000) => {
-      const step = (xmax - xmin) / points
-      const xValues: number[] = []
-      const yValues: number[] = []
-      const scope: Record<string, number> = {}
+      const step = (xmax - xmin) / points;
+      const xValues: number[] = [];
+      const yValues: number[] = [];
+      const scope: Record<string, number> = {};
 
       for (let i = 0; i <= points; i++) {
-        const xVal = xmin + i * step
-        scope[variable] = xVal
+        const xVal = xmin + i * step;
+        scope[variable] = xVal;
         try {
-          const yVal = math.evaluate(expression, scope)
+          const yVal = math.evaluate(expression, scope);
           if (typeof yVal === 'number' && isFinite(yVal)) {
-            xValues.push(xVal)
-            yValues.push(yVal)
+            xValues.push(xVal);
+            yValues.push(yVal);
           } else {
-            xValues.push(xVal)
-            yValues.push(NaN)
+            xValues.push(xVal);
+            yValues.push(NaN);
           }
         } catch {
-          xValues.push(xVal)
-          yValues.push(NaN)
+          xValues.push(xVal);
+          yValues.push(NaN);
         }
       }
 
-      const color = COLORS[colorIdx % COLORS.length]
-      colorIdx++
+      const color = COLORS[colorIdx % COLORS.length];
+      colorIdx++;
 
       const trace: PlotTrace = {
         id: crypto.randomUUID(),
@@ -1456,39 +1640,39 @@ export function usePlot() {
         color,
         visible: true,
         data: { x: xValues, y: yValues },
-      }
+      };
 
-      addPlotTrace(trace)
-      setPlotMode('2d')
-      return trace
+      addPlotTrace(trace);
+      setPlotMode('2d');
+      return trace;
     },
     [math, addPlotTrace, setPlotMode]
-  )
+  );
 
   const plot3d = useCallback(
     (expression: string, xmin = -5, xmax = 5, ymin = -5, ymax = 5, points = 50) => {
-      const xStep = (xmax - xmin) / points
-      const yStep = (ymax - ymin) / points
-      const xValues: number[] = []
-      const yValues: number[] = []
-      const zValues: number[] = []
-      const scope: Record<string, number> = {}
+      const xStep = (xmax - xmin) / points;
+      const yStep = (ymax - ymin) / points;
+      const xValues: number[] = [];
+      const yValues: number[] = [];
+      const zValues: number[] = [];
+      const scope: Record<string, number> = {};
 
       for (let i = 0; i <= points; i++) {
         for (let j = 0; j <= points; j++) {
-          const xVal = xmin + i * xStep
-          const yVal = ymin + j * yStep
-          scope.x = xVal
-          scope.y = yVal
+          const xVal = xmin + i * xStep;
+          const yVal = ymin + j * yStep;
+          scope.x = xVal;
+          scope.y = yVal;
           try {
-            const zVal = math.evaluate(expression, scope)
-            xValues.push(xVal)
-            yValues.push(yVal)
-            zValues.push(typeof zVal === 'number' && isFinite(zVal) ? zVal : NaN)
+            const zVal = math.evaluate(expression, scope);
+            xValues.push(xVal);
+            yValues.push(yVal);
+            zValues.push(typeof zVal === 'number' && isFinite(zVal) ? zVal : NaN);
           } catch {
-            xValues.push(xVal)
-            yValues.push(yVal)
-            zValues.push(NaN)
+            xValues.push(xVal);
+            yValues.push(yVal);
+            zValues.push(NaN);
           }
         }
       }
@@ -1500,34 +1684,34 @@ export function usePlot() {
         color: COLORS[colorIdx % COLORS.length],
         visible: true,
         data: { x: xValues, y: yValues, z: zValues },
-      }
+      };
 
-      colorIdx++
-      addPlotTrace(trace)
-      setPlotMode('3d')
-      return trace
+      colorIdx++;
+      addPlotTrace(trace);
+      setPlotMode('3d');
+      return trace;
     },
     [math, addPlotTrace, setPlotMode]
-  )
+  );
 
   const plotParametric = useCallback(
     (xExpr: string, yExpr: string, variable = 't', tmin = 0, tmax = 2 * Math.PI, points = 500) => {
-      const step = (tmax - tmin) / points
-      const xValues: number[] = []
-      const yValues: number[] = []
-      const scope: Record<string, number> = {}
+      const step = (tmax - tmin) / points;
+      const xValues: number[] = [];
+      const yValues: number[] = [];
+      const scope: Record<string, number> = {};
 
       for (let i = 0; i <= points; i++) {
-        const tVal = tmin + i * step
-        scope[variable] = tVal
+        const tVal = tmin + i * step;
+        scope[variable] = tVal;
         try {
-          const xVal = math.evaluate(xExpr, scope)
-          const yVal = math.evaluate(yExpr, scope)
-          xValues.push(typeof xVal === 'number' ? xVal : NaN)
-          yValues.push(typeof yVal === 'number' ? yVal : NaN)
+          const xVal = math.evaluate(xExpr, scope);
+          const yVal = math.evaluate(yExpr, scope);
+          xValues.push(typeof xVal === 'number' ? xVal : NaN);
+          yValues.push(typeof yVal === 'number' ? yVal : NaN);
         } catch {
-          xValues.push(NaN)
-          yValues.push(NaN)
+          xValues.push(NaN);
+          yValues.push(NaN);
         }
       }
 
@@ -1538,38 +1722,38 @@ export function usePlot() {
         color: COLORS[colorIdx % COLORS.length],
         visible: true,
         data: { x: xValues, y: yValues },
-      }
+      };
 
-      colorIdx++
-      addPlotTrace(trace)
-      setPlotMode('2d')
-      return trace
+      colorIdx++;
+      addPlotTrace(trace);
+      setPlotMode('2d');
+      return trace;
     },
     [math, addPlotTrace, setPlotMode]
-  )
+  );
 
   const plotPolar = useCallback(
     (rExpr: string, variable = 'theta', thetaMin = 0, thetaMax = 2 * Math.PI, points = 500) => {
-      const step = (thetaMax - thetaMin) / points
-      const xValues: number[] = []
-      const yValues: number[] = []
-      const scope: Record<string, number> = {}
+      const step = (thetaMax - thetaMin) / points;
+      const xValues: number[] = [];
+      const yValues: number[] = [];
+      const scope: Record<string, number> = {};
 
       for (let i = 0; i <= points; i++) {
-        const theta = thetaMin + i * step
-        scope[variable] = theta
+        const theta = thetaMin + i * step;
+        scope[variable] = theta;
         try {
-          const r = math.evaluate(rExpr, scope)
+          const r = math.evaluate(rExpr, scope);
           if (typeof r === 'number' && isFinite(r)) {
-            xValues.push(r * Math.cos(theta))
-            yValues.push(r * Math.sin(theta))
+            xValues.push(r * Math.cos(theta));
+            yValues.push(r * Math.sin(theta));
           } else {
-            xValues.push(NaN)
-            yValues.push(NaN)
+            xValues.push(NaN);
+            yValues.push(NaN);
           }
         } catch {
-          xValues.push(NaN)
-          yValues.push(NaN)
+          xValues.push(NaN);
+          yValues.push(NaN);
         }
       }
 
@@ -1580,17 +1764,17 @@ export function usePlot() {
         color: COLORS[colorIdx % COLORS.length],
         visible: true,
         data: { x: xValues, y: yValues },
-      }
+      };
 
-      colorIdx++
-      addPlotTrace(trace)
-      setPlotMode('2d')
-      return trace
+      colorIdx++;
+      addPlotTrace(trace);
+      setPlotMode('2d');
+      return trace;
     },
     [math, addPlotTrace, setPlotMode]
-  )
+  );
 
-  return { plot2d, plot3d, plotParametric, plotPolar, clearPlots }
+  return { plot2d, plot3d, plotParametric, plotPolar, clearPlots };
 }
 ```
 
@@ -1599,13 +1783,13 @@ export function usePlot() {
 Create `demo/mathjs-calc/src/components/FunctionList.tsx`:
 
 ```tsx
-import React from 'react'
-import { useStore } from '../store/useStore'
+import React from 'react';
+import { useStore } from '../store/useStore';
 
 export function FunctionList() {
-  const { plotTraces, removePlotTrace, togglePlotVisibility } = useStore()
+  const { plotTraces, removePlotTrace, togglePlotVisibility } = useStore();
 
-  if (plotTraces.length === 0) return null
+  if (plotTraces.length === 0) return null;
 
   return (
     <div className="absolute top-2 right-2 bg-gray-900/90 backdrop-blur border border-gray-800 rounded-lg p-2 max-w-[200px] z-10">
@@ -1619,10 +1803,7 @@ export function FunctionList() {
           >
             {trace.visible ? '👁' : '👁‍🗨'}
           </button>
-          <div
-            className="w-3 h-0.5 rounded"
-            style={{ backgroundColor: trace.color }}
-          />
+          <div className="w-3 h-0.5 rounded" style={{ backgroundColor: trace.color }} />
           <span className="text-xs font-mono text-gray-300 truncate flex-1">
             {trace.expression}
           </span>
@@ -1635,7 +1816,7 @@ export function FunctionList() {
         </div>
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -1644,11 +1825,11 @@ export function FunctionList() {
 Create `demo/mathjs-calc/src/components/GraphToolbar.tsx`:
 
 ```tsx
-import React from 'react'
-import { useStore } from '../store/useStore'
+import React from 'react';
+import { useStore } from '../store/useStore';
 
 export function GraphToolbar() {
-  const { plotMode, setPlotMode, clearPlots, toggleGraphCollapsed } = useStore()
+  const { plotMode, setPlotMode, clearPlots, toggleGraphCollapsed } = useStore();
 
   return (
     <div className="flex items-center gap-1 px-2 py-1 bg-gray-900 border-b border-gray-800">
@@ -1681,7 +1862,7 @@ export function GraphToolbar() {
         ◀
       </button>
     </div>
-  )
+  );
 }
 ```
 
@@ -1690,16 +1871,16 @@ export function GraphToolbar() {
 Create `demo/mathjs-calc/src/components/GraphCanvas.tsx`:
 
 ```tsx
-import React, { useMemo } from 'react'
-import Plot from 'react-plotly.js'
-import { useStore } from '../store/useStore'
-import { GraphToolbar } from './GraphToolbar'
-import { FunctionList } from './FunctionList'
+import React, { useMemo } from 'react';
+import Plot from 'react-plotly.js';
+import { useStore } from '../store/useStore';
+import { GraphToolbar } from './GraphToolbar';
+import { FunctionList } from './FunctionList';
 
 export function GraphCanvas() {
-  const { plotTraces, plotMode } = useStore()
+  const { plotTraces, plotMode } = useStore();
 
-  const visibleTraces = plotTraces.filter((t) => t.visible)
+  const visibleTraces = plotTraces.filter((t) => t.visible);
 
   const plotlyData = useMemo(() => {
     if (plotMode === '3d') {
@@ -1707,10 +1888,10 @@ export function GraphCanvas() {
         .filter((t) => t.type === '3d')
         .map((trace) => {
           // Reshape flat arrays into 2D grid for surface plot
-          const n = Math.sqrt(trace.data.x.length) | 0
-          const zGrid: number[][] = []
+          const n = Math.sqrt(trace.data.x.length) | 0;
+          const zGrid: number[][] = [];
           for (let i = 0; i < n; i++) {
-            zGrid.push(trace.data.z!.slice(i * (n), (i + 1) * (n)))
+            zGrid.push(trace.data.z!.slice(i * n, (i + 1) * n));
           }
           return {
             type: 'surface' as const,
@@ -1718,8 +1899,8 @@ export function GraphCanvas() {
             colorscale: 'Viridis',
             showscale: false,
             name: trace.expression,
-          }
-        })
+          };
+        });
     }
 
     return visibleTraces
@@ -1732,8 +1913,8 @@ export function GraphCanvas() {
         name: trace.expression,
         line: { color: trace.color, width: 2 },
         connectgaps: false,
-      }))
-  }, [visibleTraces, plotMode])
+      }));
+  }, [visibleTraces, plotMode]);
 
   const layout = useMemo(() => {
     const base = {
@@ -1742,7 +1923,7 @@ export function GraphCanvas() {
       font: { color: '#9ca3af', size: 10 },
       margin: { l: 50, r: 20, t: 20, b: 40 },
       showlegend: false,
-    }
+    };
 
     if (plotMode === '3d') {
       return {
@@ -1753,15 +1934,15 @@ export function GraphCanvas() {
           zaxis: { gridcolor: '#1f2937', zerolinecolor: '#374151' },
           bgcolor: '#0a0f1a',
         },
-      }
+      };
     }
 
     return {
       ...base,
       xaxis: { gridcolor: '#1f2937', zerolinecolor: '#374151', zerolinewidth: 2 },
       yaxis: { gridcolor: '#1f2937', zerolinecolor: '#374151', zerolinewidth: 2 },
-    }
-  }, [plotMode])
+    };
+  }, [plotMode]);
 
   return (
     <div className="h-full flex flex-col bg-gray-950 relative">
@@ -1785,7 +1966,9 @@ export function GraphCanvas() {
           <div className="h-full flex items-center justify-center text-gray-600">
             <div className="text-center">
               <div className="text-4xl mb-2">📈</div>
-              <div className="text-sm">Enter <code className="text-blue-400">plot(sin(x))</code> to graph</div>
+              <div className="text-sm">
+                Enter <code className="text-blue-400">plot(sin(x))</code> to graph
+              </div>
               <div className="text-xs mt-1 text-gray-700">
                 Also: plot3d(), plotParametric(), plotPolar()
               </div>
@@ -1794,7 +1977,7 @@ export function GraphCanvas() {
         )}
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -1810,6 +1993,7 @@ git commit -m "feat(ise): build 2D/3D graph canvas with Plotly, function list, a
 ### Task 11: Connect plot commands to graph canvas
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/components/ISEExpressionBar.tsx`
 - Modify: `demo/mathjs-calc/src/layouts/ISELayout.tsx`
 
@@ -1822,21 +2006,21 @@ Add a prop `onPlotCommand` to ISEExpressionBar that the parent (ISELayout) provi
 ```typescript
 // Add to ISEExpressionBar props:
 interface ISEExpressionBarProps {
-  onPlotCommand?: (command: string, args: string[]) => void
+  onPlotCommand?: (command: string, args: string[]) => void;
 }
 
 // In handleEvaluate, replace the plot placeholder:
 if (expr.startsWith('plot(')) {
-  const inner = expr.slice(5, -1) // extract between plot( and )
-  onPlotCommand?.('plot', [inner])
-  setResult(`Plotted: ${inner}`)
-  setResultType('plot')
-  setError(null)
-  setExecTime(0)
-  setIsSymbolicResult(false)
-  setResultLatex(null)
-  setInput('')
-  return
+  const inner = expr.slice(5, -1); // extract between plot( and )
+  onPlotCommand?.('plot', [inner]);
+  setResult(`Plotted: ${inner}`);
+  setResultType('plot');
+  setError(null);
+  setExecTime(0);
+  setIsSymbolicResult(false);
+  setResultLatex(null);
+  setInput('');
+  return;
 }
 // Similar for plot3d, plotParametric, plotPolar, clearPlot
 ```
@@ -1846,16 +2030,25 @@ if (expr.startsWith('plot(')) {
 In ISELayout, create usePlot() instance and pass handlers to ISEExpressionBar:
 
 ```typescript
-const { plot2d, plot3d, plotParametric, plotPolar, clearPlots } = usePlot()
+const { plot2d, plot3d, plotParametric, plotPolar, clearPlots } = usePlot();
 
-const handlePlotCommand = useCallback((command: string, args: string[]) => {
-  switch (command) {
-    case 'plot': plot2d(args[0]); break
-    case 'plot3d': plot3d(args[0]); break
-    case 'clearPlot': clearPlots(); break
-    // parametric and polar need more arg parsing
-  }
-}, [plot2d, plot3d, clearPlots])
+const handlePlotCommand = useCallback(
+  (command: string, args: string[]) => {
+    switch (command) {
+      case 'plot':
+        plot2d(args[0]);
+        break;
+      case 'plot3d':
+        plot3d(args[0]);
+        break;
+      case 'clearPlot':
+        clearPlots();
+        break;
+      // parametric and polar need more arg parsing
+    }
+  },
+  [plot2d, plot3d, clearPlots]
+);
 ```
 
 **Step 3: Replace GraphCanvasPlaceholder with real GraphCanvas**
@@ -1891,6 +2084,7 @@ git commit -m "feat(ise): connect plot commands to graph canvas for end-to-end 2
 ### Task 12: Connect variable explorer to parser state
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/hooks/useMathParser.ts`
 - Modify: `demo/mathjs-calc/src/components/ISEExpressionBar.tsx`
 
@@ -1900,20 +2094,20 @@ In `useMathParser.ts`, add a function that extracts all user-defined variables f
 
 ```typescript
 const syncVariables = useCallback(() => {
-  const all = parserRef.current.getAll()
-  const vars: Record<string, { value: string; type: string }> = {}
+  const all = parserRef.current.getAll();
+  const vars: Record<string, { value: string; type: string }> = {};
   for (const [name, value] of Object.entries(all)) {
-    if (typeof value === 'function') continue // skip built-in functions
+    if (typeof value === 'function') continue; // skip built-in functions
     vars[name] = {
       value: mathRef.current.format(value, { precision: 6 }),
       type: mathRef.current.typeOf(value),
-    }
+    };
   }
-  return vars
-}, [])
+  return vars;
+}, []);
 
 // Return syncVariables from the hook
-return { evaluate, history, clearParser, getVariables, syncVariables, math: mathRef.current }
+return { evaluate, history, clearParser, getVariables, syncVariables, math: mathRef.current };
 ```
 
 **Step 2: Call syncVariables after every evaluation**
@@ -1921,8 +2115,8 @@ return { evaluate, history, clearParser, getVariables, syncVariables, math: math
 In ISEExpressionBar, after evaluating an expression (both symbolic and numeric), call:
 
 ```typescript
-const vars = syncVariables()
-updateVariables(vars)
+const vars = syncVariables();
+updateVariables(vars);
 ```
 
 This keeps the variable explorer in sync with parser state.
@@ -1948,6 +2142,7 @@ git commit -m "feat(ise): connect variable explorer to parser state with live sy
 ### Task 13: Add KaTeX CSS and fix styling
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/main.tsx`
 - Modify: `demo/mathjs-calc/src/index.css`
 
@@ -1956,8 +2151,8 @@ git commit -m "feat(ise): connect variable explorer to parser state with live sy
 In `demo/mathjs-calc/src/main.tsx`:
 
 ```typescript
-import 'katex/dist/katex.min.css'
-import 'allotment/dist/style.css'
+import 'katex/dist/katex.min.css';
+import 'allotment/dist/style.css';
 ```
 
 **Step 2: Add ISE-specific Tailwind utilities**
@@ -1974,8 +2169,12 @@ In `demo/mathjs-calc/src/index.css`, add after the tailwind directives:
 }
 
 /* KaTeX overrides for dark theme */
-.katex { color: inherit; }
-.katex .mord { color: inherit; }
+.katex {
+  color: inherit;
+}
+.katex .mord {
+  color: inherit;
+}
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
@@ -2017,6 +2216,7 @@ git commit -m "feat(ise): add KaTeX/Plotly dark theme styling and scrollbar cust
 ### Task 14: Add keyboard shortcuts
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/hooks/useKeyboardShortcuts.ts`
 - Modify: `demo/mathjs-calc/src/layouts/ISELayout.tsx`
 
@@ -2025,13 +2225,13 @@ git commit -m "feat(ise): add KaTeX/Plotly dark theme styling and scrollbar cust
 Create `demo/mathjs-calc/src/hooks/useKeyboardShortcuts.ts`:
 
 ```typescript
-import { useEffect } from 'react'
-import { useStore } from '../store/useStore'
+import { useEffect } from 'react';
+import { useStore } from '../store/useStore';
 
 interface ShortcutHandlers {
-  onFocusExpression: () => void
-  onToggleGraph: () => void
-  onClearPlots: () => void
+  onFocusExpression: () => void;
+  onToggleGraph: () => void;
+  onClearPlots: () => void;
 }
 
 export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
@@ -2039,28 +2239,28 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
     function handleKeyDown(e: KeyboardEvent) {
       // Ctrl+E: focus expression bar
       if (e.ctrlKey && e.key === 'e') {
-        e.preventDefault()
-        handlers.onFocusExpression()
+        e.preventDefault();
+        handlers.onFocusExpression();
       }
       // Ctrl+G: toggle graph panel
       if (e.ctrlKey && e.key === 'g') {
-        e.preventDefault()
-        handlers.onToggleGraph()
+        e.preventDefault();
+        handlers.onToggleGraph();
       }
       // Ctrl+L: clear plots
       if (e.ctrlKey && e.key === 'l') {
-        e.preventDefault()
-        handlers.onClearPlots()
+        e.preventDefault();
+        handlers.onClearPlots();
       }
       // Escape: focus expression bar
       if (e.key === 'Escape') {
-        handlers.onFocusExpression()
+        handlers.onFocusExpression();
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handlers])
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlers]);
 }
 ```
 
@@ -2080,6 +2280,7 @@ git commit -m "feat(ise): add keyboard shortcuts (Ctrl+E focus, Ctrl+G toggle gr
 ### Task 15: Update persistence for ISE state
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/hooks/usePersistence.ts`
 
 **Step 1: Extend persistence to save ISE-specific state**
@@ -2100,6 +2301,7 @@ git commit -m "feat(ise): extend persistence to save ISE layout, plot expression
 ### Task 16: Final integration test and README update
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/README.md`
 
 **Step 1: Smoke test all features**
@@ -2109,6 +2311,7 @@ cd demo/mathjs-calc && npm run dev
 ```
 
 Verify:
+
 - [ ] Three-zone layout renders (calculator, graph, expression bar)
 - [ ] Toolbar ribbon icons insert templates into expression bar
 - [ ] Expression evaluation works (numeric, symbolic)
@@ -2140,19 +2343,20 @@ git commit -m "docs(ise): update README with ISE workbench features and keyboard
 
 ## Summary
 
-| Phase | Tasks | What It Delivers |
-|-------|-------|-----------------|
-| 1: Dependencies & Layout | 1-2 | Plotly, KaTeX, allotment installed; three-zone split layout |
-| 2: Toolbar Ribbon | 3-4 | 35+ math icons, 7-group toolbar with template insertion |
-| 3: Calculator Panel | 5-7 | Symbolic output (KaTeX), variable explorer, enhanced 6x8 button grid |
-| 4: Expression Bar | 8-9 | Multi-line input, LaTeX preview, result display, history nav, wired to layout |
-| 5: Graph Canvas | 10-11 | Plotly 2D/3D, function list, plot commands connected end-to-end |
-| 6: Variable Explorer | 12 | Live sync with parser, click-to-insert |
-| 7: Polish | 13-16 | Dark theme styling, keyboard shortcuts, persistence, README |
+| Phase                    | Tasks | What It Delivers                                                              |
+| ------------------------ | ----- | ----------------------------------------------------------------------------- |
+| 1: Dependencies & Layout | 1-2   | Plotly, KaTeX, allotment installed; three-zone split layout                   |
+| 2: Toolbar Ribbon        | 3-4   | 35+ math icons, 7-group toolbar with template insertion                       |
+| 3: Calculator Panel      | 5-7   | Symbolic output (KaTeX), variable explorer, enhanced 6x8 button grid          |
+| 4: Expression Bar        | 8-9   | Multi-line input, LaTeX preview, result display, history nav, wired to layout |
+| 5: Graph Canvas          | 10-11 | Plotly 2D/3D, function list, plot commands connected end-to-end               |
+| 6: Variable Explorer     | 12    | Live sync with parser, click-to-insert                                        |
+| 7: Polish                | 13-16 | Dark theme styling, keyboard shortcuts, persistence, README                   |
 
 **Total: 16 tasks across 7 phases. Each task produces a working commit.**
 
 ---
+
 ---
 
 # Iteration 2: Heavy Numerics Showcase
@@ -2168,6 +2372,7 @@ git commit -m "docs(ise): update README with ISE workbench features and keyboard
 ### Task 17: Build visual matrix editor modal
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/MatrixEditorModal.tsx`
 - Create: `demo/mathjs-calc/src/hooks/useMatrixEditor.ts`
 - Modify: `demo/mathjs-calc/src/store/useStore.ts`
@@ -2175,6 +2380,7 @@ git commit -m "docs(ise): update README with ISE workbench features and keyboard
 **Description:**
 
 Build a modal dialog with:
+
 - Grid input for NxN matrices (editable cells)
 - Row/column add/remove buttons
 - Import from expression (e.g., `[[1,2],[3,4]]`)
@@ -2185,6 +2391,7 @@ Build a modal dialog with:
 The modal opens from the Matrix toolbar group icon or a `matrix()` command.
 
 **Store additions:**
+
 ```typescript
 matrixEditorOpen: boolean
 matrixEditorData: number[][] | null
@@ -2197,11 +2404,13 @@ setMatrixEditorData: (data: number[][] | null) => void
 ### Task 18: Build matrix display component
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/MatrixDisplay.tsx`
 
 **Description:**
 
 Renders matrices as formatted grids in results and symbolic output:
+
 - Bracket notation with proper sizing
 - Alternating row shading for readability
 - Truncation for large matrices (>10x10) with "..." and expand button
@@ -2215,6 +2424,7 @@ Renders matrices as formatted grids in results and symbolic output:
 ### Task 19: Build WASM engine toggle with timing display
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/BenchmarkOverlay.tsx`
 - Create: `demo/mathjs-calc/src/hooks/useBenchmarkTiming.ts`
 - Modify: `demo/mathjs-calc/src/components/ISEExpressionBar.tsx`
@@ -2222,6 +2432,7 @@ Renders matrices as formatted grids in results and symbolic output:
 **Description:**
 
 Add a benchmark overlay to the expression bar result display:
+
 - Toggle between JS / WASM / Auto engine modes (from toolbar Settings group)
 - After each evaluation, show execution time badge: `JS: 2.3ms` or `WASM: 0.4ms`
 - In Auto mode, show both timings: `JS: 2.3ms | WASM: 0.4ms (5.7x faster)`
@@ -2235,12 +2446,14 @@ The `useBenchmarkTiming` hook wraps `math.evaluate()` with `performance.now()` c
 ### Task 20: Add benchmark comparison panel
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/BenchmarkComparison.tsx`
 - Modify: `demo/mathjs-calc/src/store/useStore.ts`
 
 **Description:**
 
 A collapsible panel (accessible from toolbar or Ctrl+B) that:
+
 - Runs a predefined benchmark suite (matrix multiply, FFT, eigenvalues, etc.)
 - Shows JS vs WASM timing table with speedup ratios
 - Bar chart visualization (using Recharts, already available)
@@ -2254,12 +2467,14 @@ A collapsible panel (accessible from toolbar or Ctrl+B) that:
 ### Task 21: Add contour plots
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/hooks/usePlot.ts`
 - Modify: `demo/mathjs-calc/src/components/GraphCanvas.tsx`
 
 **Description:**
 
 Add `plotContour(expr)` command:
+
 - Evaluates z=f(x,y) on a grid (default 50x50)
 - Renders as Plotly contour plot with colorscale
 - Supports explicit ranges: `plotContour(expr, x, xmin, xmax, y, ymin, ymax)`
@@ -2267,6 +2482,7 @@ Add `plotContour(expr)` command:
 - Contour line labels showing z-values
 
 **Implementation in usePlot:**
+
 ```typescript
 plotContour(expr: string, options?: { xRange?: [number, number], yRange?: [number, number], gridSize?: number }) {
   // Generate x,y grid
@@ -2281,6 +2497,7 @@ plotContour(expr: string, options?: { xRange?: [number, number], yRange?: [numbe
 ### Task 22: Add vector field plots
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/hooks/usePlot.ts`
 - Modify: `demo/mathjs-calc/src/components/GraphCanvas.tsx`
 - Create: `demo/mathjs-calc/src/utils/vectorField.ts`
@@ -2288,6 +2505,7 @@ plotContour(expr: string, options?: { xRange?: [number, number], yRange?: [numbe
 **Description:**
 
 Add `plotVector(fx, fy)` command for 2D vector fields:
+
 - `fx` and `fy` are expressions in x,y giving the vector components
 - Renders as arrow/quiver plot using Plotly scatter with arrow annotations
 - Grid density control (default 20x20 arrows)
@@ -2300,12 +2518,14 @@ Add `plotVector(fx, fy)` command for 2D vector fields:
 ### Task 23: Add log/semilog scale support
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/components/GraphCanvas.tsx`
 - Modify: `demo/mathjs-calc/src/components/GraphToolbar.tsx`
 
 **Description:**
 
 Add scale mode buttons to the graph toolbar:
+
 - Linear (default)
 - Log-log
 - Semilog-x (log x, linear y)
@@ -2320,6 +2540,7 @@ Implementation: set `layout.xaxis.type` and `layout.yaxis.type` to `'log'` or `'
 ### Task 24: Surface unit expressions in the UI
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/components/ISEExpressionBar.tsx`
 - Modify: `demo/mathjs-calc/src/components/ResultDisplay.tsx`
 - Create: `demo/mathjs-calc/src/utils/unitFormatting.ts`
@@ -2336,16 +2557,17 @@ Implementation: set `layout.xaxis.type` and `layout.yaxis.type` to `'log'` or `'
 
 ## Iteration 2 Summary
 
-| Phase | Tasks | What It Delivers |
-|-------|-------|-----------------|
-| 8: Matrix Lab | 17-18 | Visual matrix editor modal, formatted matrix display |
-| 9: WASM Benchmark | 19-20 | Engine toggle with timing, JS vs WASM comparison panel |
-| 10: Advanced Plots | 21-23 | Contour plots, vector fields, log/semilog scales |
-| 11: Unit Support | 24 | Unit formatting, conversion, KaTeX rendering |
+| Phase              | Tasks | What It Delivers                                       |
+| ------------------ | ----- | ------------------------------------------------------ |
+| 8: Matrix Lab      | 17-18 | Visual matrix editor modal, formatted matrix display   |
+| 9: WASM Benchmark  | 19-20 | Engine toggle with timing, JS vs WASM comparison panel |
+| 10: Advanced Plots | 21-23 | Contour plots, vector fields, log/semilog scales       |
+| 11: Unit Support   | 24    | Unit formatting, conversion, KaTeX rendering           |
 
 **Total: 8 tasks (17-24) across 4 phases. WASM stress-test value: HIGH.**
 
 ---
+
 ---
 
 # Iteration 3: Live Document Model
@@ -2362,6 +2584,7 @@ Implementation: set `layout.xaxis.type` and `layout.yaxis.type` to `'log'` or `'
 ### Task 25: Design cell data model and dependency tracker
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/types/cell.ts`
 - Create: `demo/mathjs-calc/src/engine/DependencyGraph.ts`
 - Create: `demo/mathjs-calc/src/engine/CellEvaluator.ts`
@@ -2369,28 +2592,30 @@ Implementation: set `layout.xaxis.type` and `layout.yaxis.type` to `'log'` or `'
 **Description:**
 
 Define the cell data model:
+
 ```typescript
 interface Cell {
-  id: string
-  type: 'code' | 'markdown' | 'plot'
-  content: string           // raw expression or markdown
-  result: CellResult | null // evaluated result
-  dependencies: string[]    // variable names this cell reads
-  definitions: string[]     // variable names this cell defines
-  status: 'idle' | 'evaluating' | 'error' | 'stale'
-  order: number             // position in document
+  id: string;
+  type: 'code' | 'markdown' | 'plot';
+  content: string; // raw expression or markdown
+  result: CellResult | null; // evaluated result
+  dependencies: string[]; // variable names this cell reads
+  definitions: string[]; // variable names this cell defines
+  status: 'idle' | 'evaluating' | 'error' | 'stale';
+  order: number; // position in document
 }
 
 interface CellResult {
-  value: unknown
-  type: string
-  latex?: string
-  timing: { js: number; wasm?: number }
-  error?: string
+  value: unknown;
+  type: string;
+  latex?: string;
+  timing: { js: number; wasm?: number };
+  error?: string;
 }
 ```
 
 Build `DependencyGraph`:
+
 - Tracks which cells define which variables
 - Tracks which cells depend on which variables
 - `getDownstream(cellId)`: returns all cells that need re-evaluation when this cell changes
@@ -2398,6 +2623,7 @@ Build `DependencyGraph`:
 - `detectCycles()`: warns on circular dependencies
 
 Build `CellEvaluator`:
+
 - Evaluates cells in dependency order
 - Marks downstream cells as 'stale' when upstream changes
 - Supports incremental re-evaluation (only dirty cells)
@@ -2408,6 +2634,7 @@ Build `CellEvaluator`:
 ### Task 26: Build cell component
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/CellEditor.tsx`
 - Create: `demo/mathjs-calc/src/components/CellResult.tsx`
 - Create: `demo/mathjs-calc/src/components/CellToolbar.tsx`
@@ -2415,6 +2642,7 @@ Build `CellEvaluator`:
 **Description:**
 
 Each cell renders as:
+
 ```
 ┌─ [▸ Run] [↑] [↓] [×] ─ cell #3 ─ status: ✓ (0.2ms) ──────────┐
 │ x = matrix([[1,2],[3,4]])                                        │
@@ -2436,6 +2664,7 @@ Each cell renders as:
 ### Task 27: Build document view mode
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/layouts/DocumentLayout.tsx`
 - Modify: `demo/mathjs-calc/src/store/useStore.ts`
 - Modify: `demo/mathjs-calc/src/App.tsx`
@@ -2443,6 +2672,7 @@ Each cell renders as:
 **Description:**
 
 New layout mode ("Document Mode") alongside existing ISE calculator mode:
+
 - Scrollable vertical list of cells
 - Right sidebar: variable explorer + dependency graph visualization
 - Bottom bar: "Run All" button, cell count, total evaluation time
@@ -2457,12 +2687,14 @@ New layout mode ("Document Mode") alongside existing ISE calculator mode:
 ### Task 28: Implement document save/load (JSON format)
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/engine/DocumentSerializer.ts`
 - Modify: `demo/mathjs-calc/src/hooks/usePersistence.ts`
 
 **Description:**
 
 Document format (`.mjdoc` JSON):
+
 ```json
 {
   "version": "1.0",
@@ -2487,11 +2719,13 @@ Document format (`.mjdoc` JSON):
 ### Task 29: Add markdown cell rendering
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/MarkdownCell.tsx`
 
 **Description:**
 
 Markdown cells support:
+
 - Headers, bold, italic, lists
 - Inline LaTeX: `$x^2$` renders via KaTeX
 - Display LaTeX: `$$\int_0^1 x^2 dx$$` renders as block
@@ -2505,11 +2739,13 @@ Use a lightweight markdown parser (e.g., `marked` or `markdown-it`) with KaTeX i
 ### Task 30: Export to PDF/HTML
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/engine/DocumentExporter.ts`
 
 **Description:**
 
 Export the document with evaluated results:
+
 - **HTML export**: Generates self-contained HTML with inline KaTeX CSS, evaluated results, and plot images (as base64 SVG)
 - **PDF export**: Uses the HTML export + `window.print()` with print-optimized CSS (white background, page breaks between sections)
 - Plots export as static SVG via `Plotly.toImage()`
@@ -2522,11 +2758,13 @@ Export the document with evaluated results:
 ### Task 31: Export to Jupyter notebook (.ipynb)
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/engine/JupyterExporter.ts`
 
 **Description:**
 
 Convert document cells to Jupyter notebook format with Deno kernel metadata:
+
 - Code cells → `"cell_type": "code"` with `"source": ["import { create, all } from 'npm:mathjs'\n", "const math = create(all)\n", ...]`
 - Markdown cells → `"cell_type": "markdown"` (passthrough)
 - Plot cells → code cell with Plotly rendering via `Deno.jupyter.html()`
@@ -2539,15 +2777,16 @@ Convert document cells to Jupyter notebook format with Deno kernel metadata:
 
 ## Iteration 3 Summary
 
-| Phase | Tasks | What It Delivers |
-|-------|-------|-----------------|
-| 12: Cell Engine | 25-27 | Cell data model, dependency graph, cell components, document layout |
-| 13: Persistence | 28-30 | Save/load JSON, markdown cells, PDF/HTML export |
-| 14: Deno Interop | 31 | Export to Jupyter .ipynb with Deno kernel |
+| Phase            | Tasks | What It Delivers                                                    |
+| ---------------- | ----- | ------------------------------------------------------------------- |
+| 12: Cell Engine  | 25-27 | Cell data model, dependency graph, cell components, document layout |
+| 13: Persistence  | 28-30 | Save/load JSON, markdown cells, PDF/HTML export                     |
+| 14: Deno Interop | 31    | Export to Jupyter .ipynb with Deno kernel                           |
 
 **Total: 7 tasks (25-31) across 3 phases. WASM stress-test value: HIGH (100+ cell dependency chains with matrix ops).**
 
 ---
+
 ---
 
 # Iteration 4: Advanced Symbolic
@@ -2564,6 +2803,7 @@ Convert document cells to Jupyter notebook format with Deno kernel metadata:
 ### Task 32: Add symbolic integration UI
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/src/hooks/useSymbolic.ts`
 - Modify: `demo/mathjs-calc/src/components/ToolbarRibbon.tsx`
 - Modify: `demo/mathjs-calc/src/components/SymbolicOutput.tsx`
@@ -2571,6 +2811,7 @@ Convert document cells to Jupyter notebook format with Deno kernel metadata:
 **Description:**
 
 Wire integration to the UI:
+
 - If math.js adds `integrate()`: wire directly
 - If not: implement basic integration rules (power rule, trig, exponential, sum/difference) as a client-side module that operates on the AST
 - Toolbar Calculus group ∫ icon inserts `integrate("expr", "x")`
@@ -2582,12 +2823,14 @@ Wire integration to the UI:
 ### Task 33: Add limits and series expansion
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/engine/SymbolicExtensions.ts`
 - Modify: `demo/mathjs-calc/src/hooks/useSymbolic.ts`
 
 **Description:**
 
 Implement:
+
 - `limit(expr, x, a)` — evaluate limit of expr as x approaches a
   - Direct substitution, L'Hopital's rule for 0/0 and ∞/∞ forms
   - One-sided limits: `limit(expr, x, a, "left")`, `limit(expr, x, a, "right")`
@@ -2603,12 +2846,14 @@ Implement:
 ### Task 34: Build step-by-step solver
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/engine/StepSolver.ts`
 - Create: `demo/mathjs-calc/src/components/StepByStep.tsx`
 
 **Description:**
 
 Show intermediate steps for algebraic operations:
+
 - `solve("x^2 - 4 = 0", "x")` shows:
   ```
   x² - 4 = 0
@@ -2635,12 +2880,14 @@ Implementation approach: instrument the simplify/solve/derivative functions to r
 ### Task 35: Add assumption system UI
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/engine/Assumptions.ts`
 - Modify: `demo/mathjs-calc/src/components/VariableExplorer.tsx`
 
 **Description:**
 
 Allow users to declare variable assumptions:
+
 - In variable explorer: right-click variable → "Set assumptions"
 - Options: real, positive, negative, integer, nonzero
 - Example: `assume(x, "positive")` then `simplify("sqrt(x^2)")` → `x` (not `|x|`)
@@ -2652,14 +2899,15 @@ Allow users to declare variable assumptions:
 
 ## Iteration 4 Summary
 
-| Phase | Tasks | What It Delivers |
-|-------|-------|-----------------|
-| 15: Integration & Limits | 32-33 | Symbolic integration UI, limits, Taylor series |
-| 16: Step Solver | 34-35 | Step-by-step algebraic display, assumption system |
+| Phase                    | Tasks | What It Delivers                                  |
+| ------------------------ | ----- | ------------------------------------------------- |
+| 15: Integration & Limits | 32-33 | Symbolic integration UI, limits, Taylor series    |
+| 16: Step Solver          | 34-35 | Step-by-step algebraic display, assumption system |
 
 **Total: 4 tasks (32-35) across 2 phases. WASM stress-test value: MEDIUM (symbolic operations are AST-based, but integration/series evaluation can be compute-heavy).**
 
 ---
+
 ---
 
 # Iteration 5: Real-Time & Scale
@@ -2675,6 +2923,7 @@ Allow users to declare variable assumptions:
 ### Task 36: Add parameter sliders for animated plots
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/PlotSlider.tsx`
 - Modify: `demo/mathjs-calc/src/hooks/usePlot.ts`
 - Modify: `demo/mathjs-calc/src/components/GraphCanvas.tsx`
@@ -2682,6 +2931,7 @@ Allow users to declare variable assumptions:
 **Description:**
 
 Allow parameters in plot expressions to be controlled by sliders:
+
 - `plot(sin(a*x), {a: {min: 0.1, max: 10, step: 0.1}})` creates a slider for `a`
 - Slider appears below the graph canvas
 - Moving the slider re-evaluates and re-renders the plot in real-time
@@ -2696,11 +2946,13 @@ This is a key WASM stress-test: real-time re-evaluation of 1000+ points at 30-60
 ### Task 37: Add plot animation recording
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/utils/animationRecorder.ts`
 
 **Description:**
 
 Record parameter sweep as animated GIF or MP4:
+
 - "Record" button in graph toolbar starts capture
 - Uses canvas `toBlob()` at each frame
 - Assembles frames into GIF using a client-side library (e.g., `gif.js`)
@@ -2714,12 +2966,14 @@ Record parameter sweep as animated GIF or MP4:
 ### Task 38: Add progress indicators for long operations
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/ProgressOverlay.tsx`
 - Create: `demo/mathjs-calc/src/hooks/useProgressTracking.ts`
 
 **Description:**
 
 For operations that take >500ms:
+
 - Show progress bar overlay on the expression bar
 - Estimated time remaining based on operation type and size
 - Cancel button (terminates the Web Worker)
@@ -2733,12 +2987,14 @@ Implementation: wrap math.evaluate() in a Web Worker with progress messaging.
 ### Task 39: Add parallel computation visualization
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/ParallelViz.tsx`
 - Modify: `demo/mathjs-calc/src/panels/PerformancePanel.tsx`
 
 **Description:**
 
 Visualize multi-core utilization in the Performance panel:
+
 - Core utilization bars (one per logical core)
 - Timeline showing task distribution across workers
 - Speedup chart: 1 core vs 2 vs 4 vs N for the current operation
@@ -2752,12 +3008,14 @@ Visualize multi-core utilization in the Performance panel:
 ### Task 40: WebGPU acceleration spike
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/engine/WebGPUCompute.ts`
 - Create: `demo/mathjs-calc/src/engine/webgpu-shaders/matmul.wgsl`
 
 **Description:**
 
 Proof-of-concept WebGPU acceleration for matrix multiplication:
+
 - Detect WebGPU availability (`navigator.gpu`)
 - Implement a WGSL compute shader for dense matrix multiply
 - Benchmark against JS, WASM, and WASM+parallel for matrices from 100x100 to 5000x5000
@@ -2770,25 +3028,26 @@ This is exploratory — the goal is to determine if WebGPU provides meaningful s
 
 ## Iteration 5 Summary
 
-| Phase | Tasks | What It Delivers |
-|-------|-------|-----------------|
-| 17: Animated Plots | 36-37 | Parameter sliders, real-time re-render, animation recording |
-| 18: Large-Scale Ops | 38-39 | Progress indicators, parallel computation visualization |
-| 19: WebGPU | 40 | Matrix multiply spike, benchmark vs WASM |
+| Phase               | Tasks | What It Delivers                                            |
+| ------------------- | ----- | ----------------------------------------------------------- |
+| 17: Animated Plots  | 36-37 | Parameter sliders, real-time re-render, animation recording |
+| 18: Large-Scale Ops | 38-39 | Progress indicators, parallel computation visualization     |
+| 19: WebGPU          | 40    | Matrix multiply spike, benchmark vs WASM                    |
 
 **Total: 5 tasks (36-40) across 3 phases. WASM stress-test value: VERY HIGH (real-time computation, large matrices, multi-core, GPU comparison).**
 
 ---
+
 ---
 
 # Complete Iteration Summary
 
-| Iteration | Tasks | Phases | Status | WASM Stress-Test Value |
-|-----------|-------|--------|--------|----------------------|
-| 1: ISE MVP | 1-16 | 1-7 | **Complete** (v15.3.2) | Medium |
-| 2: Heavy Numerics | 17-24 | 8-11 | Planned | High |
-| 3: Live Document | 25-31 | 12-14 | Planned | High |
-| 4: Advanced Symbolic | 32-35 | 15-16 | Planned | Medium |
-| 5: Real-Time & Scale | 36-40 | 17-19 | Planned | Very High |
+| Iteration            | Tasks | Phases | Status                 | WASM Stress-Test Value |
+| -------------------- | ----- | ------ | ---------------------- | ---------------------- |
+| 1: ISE MVP           | 1-16  | 1-7    | **Complete** (v15.3.2) | Medium                 |
+| 2: Heavy Numerics    | 17-24 | 8-11   | Planned                | High                   |
+| 3: Live Document     | 25-31 | 12-14  | Planned                | High                   |
+| 4: Advanced Symbolic | 32-35 | 15-16  | Planned                | Medium                 |
+| 5: Real-Time & Scale | 36-40 | 17-19  | Planned                | Very High              |
 
 **Grand total: 40 tasks across 19 phases.**

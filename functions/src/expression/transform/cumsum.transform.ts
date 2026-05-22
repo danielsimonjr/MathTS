@@ -1,18 +1,13 @@
-import { isBigNumber, isCollection, isNumber } from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
-import { errorTransform } from './utils/errorTransform.js'
-import { createCumSum } from '../../statistics/cumsum.js'
-import type {
-  TypedFunction,
-  MathFunction,
-  BigNumberLike,
-  VariadicArgs
-} from './types.js'
+import { isBigNumber, isCollection, isNumber } from '../../utils/is.js';
+import { factory } from '../../utils/factory.js';
+import { errorTransform } from './utils/errorTransform.js';
+import { createCumSum } from '../../statistics/cumsum.js';
+import type { TypedFunction, MathFunction, BigNumberLike, VariadicArgs } from './types.js';
 
 interface CumSumDependencies {
-  typed: TypedFunction
-  add: MathFunction
-  unaryPlus: MathFunction
+  typed: TypedFunction;
+  add: MathFunction;
+  unaryPlus: MathFunction;
 }
 
 /**
@@ -22,34 +17,34 @@ interface CumSumDependencies {
  * This transform changed the last `dim` parameter of function sum
  * from one-based to zero based
  */
-const name = 'cumsum'
-const dependencies = ['typed', 'add', 'unaryPlus']
+const name = 'cumsum';
+const dependencies = ['typed', 'add', 'unaryPlus'];
 
 export const createCumSumTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, add, unaryPlus }: CumSumDependencies) => {
-    const cumsum = createCumSum({ typed, add, unaryPlus })
+    const cumsum = createCumSum({ typed, add, unaryPlus });
 
     return typed(name, {
       '...any': function (args: VariadicArgs): unknown {
         // change last argument dim from one-based to zero-based
         if (args.length === 2 && isCollection(args[0])) {
-          const dim = args[1]
+          const dim = args[1];
           if (isNumber(dim)) {
-            args[1] = dim - 1
+            args[1] = dim - 1;
           } else if (isBigNumber(dim)) {
-            args[1] = (dim as BigNumberLike).minus(1)
+            args[1] = (dim as BigNumberLike).minus(1);
           }
         }
 
         try {
-          return cumsum.apply(null, args)
+          return cumsum.apply(null, args);
         } catch (err) {
-          throw errorTransform(err as Error)
+          throw errorTransform(err as Error);
         }
-      }
-    })
+      },
+    });
   },
   { isTransformFunction: true }
-)
+);

@@ -1,24 +1,24 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for combinatorics
 interface BigNumberType {
   // BigNumber placeholder for type compatibility
 }
 
-type NumericValue = number | BigNumberType
+type NumericValue = number | BigNumberType;
 
 interface CompositionDependencies {
-  typed: TypedFunction
-  addScalar: (x: NumericValue, y: NumericValue) => NumericValue
-  combinations: (n: NumericValue, k: NumericValue) => NumericValue
-  isPositive: (x: NumericValue) => boolean
-  isNegative: (x: NumericValue) => boolean
-  isInteger: (x: NumericValue) => boolean
-  larger: (x: NumericValue, y: NumericValue) => boolean
+  typed: TypedFunction;
+  addScalar: (x: NumericValue, y: NumericValue) => NumericValue;
+  combinations: (n: NumericValue, k: NumericValue) => NumericValue;
+  isPositive: (x: NumericValue) => boolean;
+  isNegative: (x: NumericValue) => boolean;
+  isInteger: (x: NumericValue) => boolean;
+  larger: (x: NumericValue, y: NumericValue) => boolean;
 }
 
-const name = 'composition'
+const name = 'composition';
 const dependencies = [
   'typed',
   'addScalar',
@@ -26,8 +26,8 @@ const dependencies = [
   'isNegative',
   'isPositive',
   'isInteger',
-  'larger'
-]
+  'larger',
+];
 
 export const createComposition = /* #__PURE__ */ factory(
   name,
@@ -39,7 +39,7 @@ export const createComposition = /* #__PURE__ */ factory(
     isPositive,
     isNegative: _isNegative,
     isInteger,
-    larger
+    larger,
   }: CompositionDependencies) => {
     /**
      * The composition counts of n into k parts.
@@ -68,23 +68,14 @@ export const createComposition = /* #__PURE__ */ factory(
         n: NumericValue,
         k: NumericValue
       ): NumericValue {
-        if (
-          !isInteger(n) ||
-          !isPositive(n) ||
-          !isInteger(k) ||
-          !isPositive(k)
-        ) {
-          throw new TypeError(
-            'Positive integer value expected in function composition'
-          )
+        if (!isInteger(n) || !isPositive(n) || !isInteger(k) || !isPositive(k)) {
+          throw new TypeError('Positive integer value expected in function composition');
         } else if (larger(k, n)) {
-          throw new TypeError(
-            'k must be less than or equal to n in function composition'
-          )
+          throw new TypeError('k must be less than or equal to n in function composition');
         }
 
-        return combinations(addScalar(n, -1), addScalar(k, -1))
-      }
-    })
+        return combinations(addScalar(n, -1), addScalar(k, -1));
+      },
+    });
   }
-)
+);

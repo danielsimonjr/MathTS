@@ -10,7 +10,7 @@ import {
   FRACTION_ZERO,
   FRACTION_ONE,
   FRACTION_HALF,
-  FRACTION_THIRD
+  FRACTION_THIRD,
 } from '../../src/types/fraction';
 
 describe('Fraction', () => {
@@ -104,7 +104,7 @@ describe('Fraction', () => {
 
     it('should convert to number', () => {
       expect(new Fraction(3n, 4n).toNumber()).toBe(0.75);
-      expect(new Fraction(1n, 3n).toNumber()).toBeCloseTo(1/3);
+      expect(new Fraction(1n, 3n).toNumber()).toBeCloseTo(1 / 3);
     });
 
     it('should valueOf return number', () => {
@@ -213,7 +213,7 @@ describe('Fraction', () => {
       const a = new Fraction(7n, 3n);
       const b = new Fraction(2n, 1n);
       const mod = a.mod(b);
-      expect(mod.toNumber()).toBeCloseTo(1/3);
+      expect(mod.toNumber()).toBeCloseTo(1 / 3);
     });
   });
 

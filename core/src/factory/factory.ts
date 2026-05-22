@@ -10,7 +10,13 @@
  * @packageDocumentation
  */
 
-import type { TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToSelf } from '../typed/mathts-typed.js';
+import type {
+  TypedFunction,
+  TypedInstance,
+  SignatureFunction,
+  ReferTo,
+  ReferToSelf,
+} from '../typed/mathts-typed.js';
 import { mathTyped } from '../typed/mathts-typed.js';
 
 /**

@@ -44,7 +44,7 @@ interface BatchResult {
 
 interface CLIOptions {
   input: string;
-  inputs: string[];  // For batch mode
+  inputs: string[]; // For batch mode
   output: string;
   format: FileFormat | 'auto';
   level: CompressionLevel;
@@ -55,10 +55,21 @@ interface CLIOptions {
   batch: boolean;
   decompress: boolean;
   recursive: boolean;
-  pattern: string;  // Glob pattern for batch
+  pattern: string; // Glob pattern for batch
 }
 
-type FileFormat = 'json' | 'yaml' | 'markdown' | 'csv' | 'tsv' | 'text' | 'log' | 'typescript' | 'javascript' | 'xml' | 'html';
+type FileFormat =
+  | 'json'
+  | 'yaml'
+  | 'markdown'
+  | 'csv'
+  | 'tsv'
+  | 'text'
+  | 'log'
+  | 'typescript'
+  | 'javascript'
+  | 'xml'
+  | 'html';
 type CompressionLevel = 'light' | 'medium' | 'aggressive';
 
 // ============================================================================
@@ -79,10 +90,10 @@ const COMMON_PATTERNS: Record<string, string> = {
   'class ': 'ᴄʟs ',
   'async ': 'ᴀ ',
   'await ': 'ᴀᴡ ',
-  'undefined': 'ᴜɴᴅ',
-  'null': 'ɴᴜʟ',
-  'true': 'ᴛ',
-  'false': 'ꜰ',
+  undefined: 'ᴜɴᴅ',
+  null: 'ɴᴜʟ',
+  true: 'ᴛ',
+  false: 'ꜰ',
 
   // Common markdown patterns
   '```typescript': '```ts',
@@ -131,7 +142,7 @@ interface Compressor {
  */
 function estimateTokens(text: string): number {
   // More accurate: count words and punctuation
-  const words = text.split(/\s+/).filter(w => w.length > 0).length;
+  const words = text.split(/\s+/).filter((w) => w.length > 0).length;
   const punctuation = (text.match(/[^\w\s]/g) || []).length;
   const numbers = (text.match(/\d+/g) || []).length;
 
@@ -145,7 +156,7 @@ function estimateTokens(text: string): number {
 function generateAbbreviation(key: string, existingAbbrevs: Set<string>): string {
   // Strategy 1: First letter of each camelCase/snake_case word
   const words = key.split(/(?=[A-Z])|[_\-\s]+/);
-  let abbrev = words.map(w => w[0]?.toLowerCase() || '').join('');
+  let abbrev = words.map((w) => w[0]?.toLowerCase() || '').join('');
 
   if (abbrev.length >= 1 && !existingAbbrevs.has(abbrev)) {
     return abbrev;
@@ -232,7 +243,7 @@ function findRepeatedSubstrings(
       const abbrevLength = 2;
       const legendCost = abbrevLength + substring.length + 4; // "§X=substring | "
       const savingsPerOccurrence = substring.length - abbrevLength;
-      const netSavings = (savingsPerOccurrence * count) - legendCost;
+      const netSavings = savingsPerOccurrence * count - legendCost;
 
       if (netSavings > 5) {
         candidates.push({ substring, count, savings: netSavings });
@@ -267,9 +278,11 @@ function findRepeatedSubstrings(
       }
 
       // Check if trimmed versions are same or similar (space-padded variations)
-      if (candidateTrimmed === usedTrimmed ||
-          candidateTrimmed.includes(usedTrimmed) ||
-          usedTrimmed.includes(candidateTrimmed)) {
+      if (
+        candidateTrimmed === usedTrimmed ||
+        candidateTrimmed.includes(usedTrimmed) ||
+        usedTrimmed.includes(candidateTrimmed)
+      ) {
         isTooSimilar = true;
         break;
       }
@@ -334,14 +347,18 @@ function calculateStats(original: string, compressed: string): CompressionStats 
     estimatedTokensBefore,
     estimatedTokensAfter,
     tokenSavings: estimatedTokensBefore - estimatedTokensAfter,
-    tokenSavingsPercent: ((estimatedTokensBefore - estimatedTokensAfter) / estimatedTokensBefore) * 100
+    tokenSavingsPercent:
+      ((estimatedTokensBefore - estimatedTokensAfter) / estimatedTokensBefore) * 100,
   };
 }
 
 /**
  * Apply common pattern replacements for aggressive compression.
  */
-function applyCommonPatterns(text: string, level: CompressionLevel): { text: string; legend: Record<string, string> } {
+function applyCommonPatterns(
+  text: string,
+  level: CompressionLevel
+): { text: string; legend: Record<string, string> } {
   if (level !== 'aggressive') {
     return { text, legend: {} };
   }
@@ -354,7 +371,8 @@ function applyCommonPatterns(text: string, level: CompressionLevel): { text: str
     const count = (result.match(new RegExp(escapeRegex(pattern), 'g')) || []).length;
     const savings = (pattern.length - replacement.length) * count;
 
-    if (savings > pattern.length + replacement.length + 5) { // Only if net positive
+    if (savings > pattern.length + replacement.length + 5) {
+      // Only if net positive
       legend[replacement] = pattern;
       result = result.split(pattern).join(replacement);
     }
@@ -473,10 +491,7 @@ function findFiles(dir: string, pattern: string, recursive: boolean): string[] {
   const results: string[] = [];
 
   // Convert glob pattern to regex
-  const regexPattern = pattern
-    .replace(/\./g, '\\.')
-    .replace(/\*/g, '.*')
-    .replace(/\?/g, '.');
+  const regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.');
   const regex = new RegExp(`^${regexPattern}$`, 'i');
 
   function scan(currentDir: string): void {
@@ -504,10 +519,7 @@ function findFiles(dir: string, pattern: string, recursive: boolean): string[] {
 /**
  * Process multiple files in batch mode.
  */
-function processBatch(
-  files: string[],
-  options: CLIOptions
-): BatchResult[] {
+function processBatch(files: string[], options: CLIOptions): BatchResult[] {
   const results: BatchResult[] = [];
 
   for (const file of files) {
@@ -527,7 +539,7 @@ function processBatch(
           file,
           success: true,
           outputFile,
-          stats: calculateStats(content, decompressed)
+          stats: calculateStats(content, decompressed),
         });
       } else {
         const compressor = getCompressor(format);
@@ -546,14 +558,14 @@ function processBatch(
           file,
           success: true,
           outputFile,
-          stats: result.stats
+          stats: result.stats,
         });
       }
     } catch (error) {
       results.push({
         file,
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -578,7 +590,7 @@ class JSONCompressor implements Compressor {
     // Sort by frequency * length (prioritize high-impact keys)
     const sortedKeys = [...keyFrequency.entries()]
       .filter(([key]) => this.shouldAbbreviate(key, level))
-      .sort((a, b) => (b[1] * b[0].length) - (a[1] * a[0].length));
+      .sort((a, b) => b[1] * b[0].length - a[1] * a[0].length);
 
     // Generate abbreviations
     const keyMap = new Map<string, string>();
@@ -593,21 +605,22 @@ class JSONCompressor implements Compressor {
     const compressed = this.transformKeys(data, keyMap);
 
     // Add legend to output
-    const output = typeof compressed === 'object' && compressed !== null
-      ? { _legend: legend, ...(compressed as Record<string, unknown>) }
-      : { _legend: legend, data: compressed };
+    const output =
+      typeof compressed === 'object' && compressed !== null
+        ? { _legend: legend, ...(compressed as Record<string, unknown>) }
+        : { _legend: legend, data: compressed };
     const compressedStr = JSON.stringify(output);
 
     return {
       compressed: compressedStr,
       legend,
-      stats: calculateStats(content, compressedStr)
+      stats: calculateStats(content, compressedStr),
     };
   }
 
   private collectKeys(obj: unknown, freq: Map<string, number>): void {
     if (Array.isArray(obj)) {
-      obj.forEach(item => this.collectKeys(item, freq));
+      obj.forEach((item) => this.collectKeys(item, freq));
     } else if (obj !== null && typeof obj === 'object') {
       for (const key of Object.keys(obj)) {
         freq.set(key, (freq.get(key) || 0) + 1);
@@ -623,7 +636,7 @@ class JSONCompressor implements Compressor {
 
   private transformKeys(obj: unknown, keyMap: Map<string, string>): unknown {
     if (Array.isArray(obj)) {
-      return obj.map(item => this.transformKeys(item, keyMap));
+      return obj.map((item) => this.transformKeys(item, keyMap));
     } else if (obj !== null && typeof obj === 'object') {
       const result: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(obj)) {
@@ -672,7 +685,7 @@ class YAMLCompressor implements Compressor {
     }
 
     // Apply abbreviations
-    const compressedLines = lines.map(line => {
+    const compressedLines = lines.map((line) => {
       const match = line.match(keyPattern);
       if (match) {
         const [fullMatch, indent, key] = match;
@@ -692,7 +705,7 @@ class YAMLCompressor implements Compressor {
     return {
       compressed,
       legend,
-      stats: calculateStats(content, compressed)
+      stats: calculateStats(content, compressed),
     };
   }
 }
@@ -740,8 +753,11 @@ class MarkdownCompressor implements Compressor {
         legend = result.legend;
 
         // Add legend at top as HTML comment
-        const legendStr = '<!-- §: ' +
-          Object.entries(legend).map(([a, f]) => `${a}=${f}`).join(' | ') +
+        const legendStr =
+          '<!-- §: ' +
+          Object.entries(legend)
+            .map(([a, f]) => `${a}=${f}`)
+            .join(' | ') +
           ' -->\n';
         compressed = legendStr + compressed;
       }
@@ -750,7 +766,7 @@ class MarkdownCompressor implements Compressor {
     return {
       compressed,
       legend,
-      stats: calculateStats(content, compressed)
+      stats: calculateStats(content, compressed),
     };
   }
 }
@@ -767,7 +783,7 @@ class CSVCompressor implements Compressor {
   }
 
   compress(content: string, level: CompressionLevel): CompressionResult {
-    const lines = content.split('\n').filter(l => l.trim());
+    const lines = content.split('\n').filter((l) => l.trim());
     if (lines.length === 0) {
       return { compressed: content, legend: {}, stats: calculateStats(content, content) };
     }
@@ -829,7 +845,7 @@ class CSVCompressor implements Compressor {
 
     for (let i = 1; i < lines.length; i++) {
       const row = this.parseLine(lines[i]);
-      const newRow = row.map(val => valueMap.get(val) || val);
+      const newRow = row.map((val) => valueMap.get(val) || val);
       compressedLines.push(newRow.join(this.delimiter));
     }
 
@@ -843,7 +859,7 @@ class CSVCompressor implements Compressor {
     return {
       compressed,
       legend,
-      stats: calculateStats(content, compressed)
+      stats: calculateStats(content, compressed),
     };
   }
 
@@ -901,12 +917,12 @@ class TextCompressor implements Compressor {
 
       // Common log levels
       const logLevels: Record<string, string> = {
-        'ERROR': '@E',
-        'WARNING': '@W',
-        'WARN': '@W',
-        'INFO': '@I',
-        'DEBUG': '@D',
-        'TRACE': '@T'
+        ERROR: '@E',
+        WARNING: '@W',
+        WARN: '@W',
+        INFO: '@I',
+        DEBUG: '@D',
+        TRACE: '@T',
       };
 
       for (const [full, abbrev] of Object.entries(logLevels)) {
@@ -937,8 +953,11 @@ class TextCompressor implements Compressor {
 
     // Add legend at top
     if (Object.keys(legend).length > 0) {
-      const legendStr = '=== Legend ===\n' +
-        Object.entries(legend).map(([a, f]) => `${a} = ${f}`).join('\n') +
+      const legendStr =
+        '=== Legend ===\n' +
+        Object.entries(legend)
+          .map(([a, f]) => `${a} = ${f}`)
+          .join('\n') +
         '\n=============\n\n';
       compressed = legendStr + compressed;
     }
@@ -946,7 +965,7 @@ class TextCompressor implements Compressor {
     return {
       compressed,
       legend,
-      stats: calculateStats(content, compressed)
+      stats: calculateStats(content, compressed),
     };
   }
 }
@@ -998,7 +1017,7 @@ class CodeCompressor implements Compressor {
     return {
       compressed,
       legend,
-      stats: calculateStats(content, compressed)
+      stats: calculateStats(content, compressed),
     };
   }
 }
@@ -1049,8 +1068,11 @@ class XMLCompressor implements Compressor {
 
     // Add legend as XML comment
     if (Object.keys(legend).length > 0) {
-      const legendStr = '<!-- Legend: ' +
-        Object.entries(legend).map(([a, f]) => `${a}=${f}`).join(', ') +
+      const legendStr =
+        '<!-- Legend: ' +
+        Object.entries(legend)
+          .map(([a, f]) => `${a}=${f}`)
+          .join(', ') +
         ' -->\n';
       compressed = legendStr + compressed;
     }
@@ -1058,7 +1080,7 @@ class XMLCompressor implements Compressor {
     return {
       compressed,
       legend,
-      stats: calculateStats(content, compressed)
+      stats: calculateStats(content, compressed),
     };
   }
 }
@@ -1090,7 +1112,7 @@ function detectFormat(filePath: string): FileFormat {
     '.html': 'html',
     '.htm': 'html',
     '.xhtml': 'html',
-    '.svg': 'xml'
+    '.svg': 'xml',
   };
 
   return formatMap[ext] || 'text';
@@ -1140,7 +1162,7 @@ function parseArgs(args: string[]): CLIOptions {
     batch: false,
     decompress: false,
     recursive: false,
-    pattern: ''
+    pattern: '',
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -1254,7 +1276,9 @@ function printStats(stats: CompressionStats): void {
   console.log('');
   console.log(`Est. tokens before: ${stats.estimatedTokensBefore.toLocaleString()}`);
   console.log(`Est. tokens after:  ${stats.estimatedTokensAfter.toLocaleString()}`);
-  console.log(`Token savings:      ${stats.tokenSavings.toLocaleString()} (${stats.tokenSavingsPercent.toFixed(1)}%)`);
+  console.log(
+    `Token savings:      ${stats.tokenSavings.toLocaleString()} (${stats.tokenSavingsPercent.toFixed(1)}%)`
+  );
   console.log('==============================\n');
 }
 
@@ -1263,8 +1287,8 @@ function printStats(stats: CompressionStats): void {
 // ============================================================================
 
 function printBatchSummary(results: BatchResult[]): void {
-  const successful = results.filter(r => r.success);
-  const failed = results.filter(r => !r.success);
+  const successful = results.filter((r) => r.success);
+  const failed = results.filter((r) => !r.success);
 
   console.log('\n=== Batch Processing Summary ===');
   console.log(`Total files:    ${results.length}`);
@@ -1274,8 +1298,14 @@ function printBatchSummary(results: BatchResult[]): void {
   if (successful.length > 0) {
     const totalOriginal = successful.reduce((sum, r) => sum + (r.stats?.originalSize || 0), 0);
     const totalCompressed = successful.reduce((sum, r) => sum + (r.stats?.compressedSize || 0), 0);
-    const totalTokensBefore = successful.reduce((sum, r) => sum + (r.stats?.estimatedTokensBefore || 0), 0);
-    const totalTokensAfter = successful.reduce((sum, r) => sum + (r.stats?.estimatedTokensAfter || 0), 0);
+    const totalTokensBefore = successful.reduce(
+      (sum, r) => sum + (r.stats?.estimatedTokensBefore || 0),
+      0
+    );
+    const totalTokensAfter = successful.reduce(
+      (sum, r) => sum + (r.stats?.estimatedTokensAfter || 0),
+      0
+    );
 
     console.log('');
     console.log(`Total original:   ${formatBytes(totalOriginal)}`);
@@ -1318,18 +1348,22 @@ function main(): void {
         process.exit(1);
       }
       files = findFiles(searchDir, options.pattern, options.recursive);
-      console.log(`Found ${files.length} files matching "${options.pattern}"${options.recursive ? ' (recursive)' : ''}`);
+      console.log(
+        `Found ${files.length} files matching "${options.pattern}"${options.recursive ? ' (recursive)' : ''}`
+      );
     } else if (options.inputs.length > 0) {
       // Use explicitly provided files
-      files = options.inputs.filter(f => fs.existsSync(f));
+      files = options.inputs.filter((f) => fs.existsSync(f));
       if (files.length !== options.inputs.length) {
-        const missing = options.inputs.filter(f => !fs.existsSync(f));
+        const missing = options.inputs.filter((f) => !fs.existsSync(f));
         console.warn(`Warning: ${missing.length} file(s) not found: ${missing.join(', ')}`);
       }
     }
 
     if (files.length === 0) {
-      console.error('Error: No files to process. Use -p to specify a pattern or provide file arguments.');
+      console.error(
+        'Error: No files to process. Use -p to specify a pattern or provide file arguments.'
+      );
       process.exit(1);
     }
 
@@ -1341,7 +1375,9 @@ function main(): void {
     // Print individual results
     for (const result of results) {
       if (result.success) {
-        const savings = result.stats ? `(${((1 - result.stats.compressionRatio) * 100).toFixed(1)}%)` : '';
+        const savings = result.stats
+          ? `(${((1 - result.stats.compressionRatio) * 100).toFixed(1)}%)`
+          : '';
         console.log(`✓ ${result.file} → ${result.outputFile} ${savings}`);
       } else {
         console.log(`✗ ${result.file}: ${result.error}`);
@@ -1352,7 +1388,7 @@ function main(): void {
       printBatchSummary(results);
     }
 
-    process.exit(results.some(r => !r.success) ? 1 : 0);
+    process.exit(results.some((r) => !r.success) ? 1 : 0);
   }
 
   // Single file mode

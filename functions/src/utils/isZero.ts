@@ -1,20 +1,20 @@
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for isZero
 interface UnitType {
-  valueType(): string
-  value: unknown
+  valueType(): string;
+  value: unknown;
 }
 
 interface IsZeroDependencies {
-  typed: TypedFunction
-  equalScalar: (a: unknown, b: number) => boolean
+  typed: TypedFunction;
+  equalScalar: (a: unknown, b: number) => boolean;
 }
 
-const name = 'isZero'
-const dependencies = ['typed', 'equalScalar']
+const name = 'isZero';
+const dependencies = ['typed', 'equalScalar'];
 
 export const createIsZero = /* #__PURE__ */ factory(
   name,
@@ -54,8 +54,7 @@ export const createIsZero = /* #__PURE__ */ factory(
      *                    Throws an error in case of an unknown data type.
      */
     return typed(name, {
-      'number | BigNumber | Complex | Fraction': (x: unknown): boolean =>
-        equalScalar(x, 0),
+      'number | BigNumber | Complex | Fraction': (x: unknown): boolean => equalScalar(x, 0),
 
       bigint: (x: bigint): boolean => x === 0n,
 
@@ -69,7 +68,7 @@ export const createIsZero = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
             deepMap(x as unknown[], self)
-      )
-    })
+      ),
+    });
   }
-)
+);

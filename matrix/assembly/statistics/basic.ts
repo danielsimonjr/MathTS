@@ -14,13 +14,13 @@
  * @returns Mean value
  */
 export function mean(data: Float64Array, length: i32): f64 {
-  if (length === 0) return 0
+  if (length === 0) return 0;
 
-  let sum: f64 = 0
+  let sum: f64 = 0;
   for (let i: i32 = 0; i < length; i++) {
-    sum += unchecked(data[i])
+    sum += unchecked(data[i]);
   }
-  return sum / f64(length)
+  return sum / f64(length);
 }
 
 /**
@@ -31,16 +31,16 @@ export function mean(data: Float64Array, length: i32): f64 {
  * @returns Median value
  */
 export function median(data: Float64Array, length: i32): f64 {
-  if (length === 0) return 0
-  if (length === 1) return unchecked(data[0])
+  if (length === 0) return 0;
+  if (length === 1) return unchecked(data[0]);
 
-  const mid = length >> 1
+  const mid = length >> 1;
   if (length & 1) {
     // Odd length
-    return unchecked(data[mid])
+    return unchecked(data[mid]);
   } else {
     // Even length
-    return (unchecked(data[mid - 1]) + unchecked(data[mid])) / 2.0
+    return (unchecked(data[mid - 1]) + unchecked(data[mid])) / 2.0;
   }
 }
 
@@ -52,19 +52,19 @@ export function median(data: Float64Array, length: i32): f64 {
  * @returns Variance
  */
 export function variance(data: Float64Array, length: i32, bias: boolean): f64 {
-  if (length === 0) return 0
-  if (length === 1) return bias ? 0 : NaN
+  if (length === 0) return 0;
+  if (length === 1) return bias ? 0 : NaN;
 
-  const m = mean(data, length)
-  let sumSquares: f64 = 0
+  const m = mean(data, length);
+  let sumSquares: f64 = 0;
 
   for (let i: i32 = 0; i < length; i++) {
-    const diff = unchecked(data[i]) - m
-    sumSquares += diff * diff
+    const diff = unchecked(data[i]) - m;
+    sumSquares += diff * diff;
   }
 
-  const divisor = bias ? f64(length) : f64(length - 1)
-  return sumSquares / divisor
+  const divisor = bias ? f64(length) : f64(length - 1);
+  return sumSquares / divisor;
 }
 
 /**
@@ -75,7 +75,7 @@ export function variance(data: Float64Array, length: i32, bias: boolean): f64 {
  * @returns Standard deviation
  */
 export function std(data: Float64Array, length: i32, bias: boolean): f64 {
-  return Math.sqrt(variance(data, length, bias))
+  return Math.sqrt(variance(data, length, bias));
 }
 
 /**
@@ -85,11 +85,11 @@ export function std(data: Float64Array, length: i32, bias: boolean): f64 {
  * @returns Sum of all elements
  */
 export function sum(data: Float64Array, length: i32): f64 {
-  let total: f64 = 0
+  let total: f64 = 0;
   for (let i: i32 = 0; i < length; i++) {
-    total += unchecked(data[i])
+    total += unchecked(data[i]);
   }
-  return total
+  return total;
 }
 
 /**
@@ -99,11 +99,11 @@ export function sum(data: Float64Array, length: i32): f64 {
  * @returns Product of all elements
  */
 export function prod(data: Float64Array, length: i32): f64 {
-  let product: f64 = 1
+  let product: f64 = 1;
   for (let i: i32 = 0; i < length; i++) {
-    product *= unchecked(data[i])
+    product *= unchecked(data[i]);
   }
-  return product
+  return product;
 }
 
 /**
@@ -113,14 +113,14 @@ export function prod(data: Float64Array, length: i32): f64 {
  * @returns Minimum value
  */
 export function min(data: Float64Array, length: i32): f64 {
-  if (length === 0) return NaN
+  if (length === 0) return NaN;
 
-  let minVal = unchecked(data[0])
+  let minVal = unchecked(data[0]);
   for (let i: i32 = 1; i < length; i++) {
-    const val = unchecked(data[i])
-    if (val < minVal) minVal = val
+    const val = unchecked(data[i]);
+    if (val < minVal) minVal = val;
   }
-  return minVal
+  return minVal;
 }
 
 /**
@@ -130,14 +130,14 @@ export function min(data: Float64Array, length: i32): f64 {
  * @returns Maximum value
  */
 export function max(data: Float64Array, length: i32): f64 {
-  if (length === 0) return NaN
+  if (length === 0) return NaN;
 
-  let maxVal = unchecked(data[0])
+  let maxVal = unchecked(data[0]);
   for (let i: i32 = 1; i < length; i++) {
-    const val = unchecked(data[i])
-    if (val > maxVal) maxVal = val
+    const val = unchecked(data[i]);
+    if (val > maxVal) maxVal = val;
   }
-  return maxVal
+  return maxVal;
 }
 
 /**
@@ -146,10 +146,10 @@ export function max(data: Float64Array, length: i32): f64 {
  * @param length Length of array
  */
 export function cumsum(data: Float64Array, length: i32): void {
-  if (length === 0) return
+  if (length === 0) return;
 
   for (let i: i32 = 1; i < length; i++) {
-    unchecked(data[i] += unchecked(data[i - 1]))
+    unchecked((data[i] += unchecked(data[i - 1])));
   }
 }
 
@@ -160,11 +160,11 @@ export function cumsum(data: Float64Array, length: i32): void {
  * @param length Length of arrays
  */
 export function cumsumCopy(input: Float64Array, output: Float64Array, length: i32): void {
-  if (length === 0) return
+  if (length === 0) return;
 
-  unchecked(output[0] = unchecked(input[0]))
+  unchecked((output[0] = unchecked(input[0])));
   for (let i: i32 = 1; i < length; i++) {
-    unchecked(output[i] = unchecked(output[i - 1]) + unchecked(input[i]))
+    unchecked((output[i] = unchecked(output[i - 1]) + unchecked(input[i])));
   }
 }
 
@@ -177,21 +177,21 @@ export function cumsumCopy(input: Float64Array, output: Float64Array, length: i3
  * @returns MAD value
  */
 export function mad(data: Float64Array, length: i32): f64 {
-  if (length === 0) return 0
+  if (length === 0) return 0;
 
   // Calculate median (requires sorting)
-  quicksort(data, 0, length - 1)
-  const med = median(data, length)
+  quicksort(data, 0, length - 1);
+  const med = median(data, length);
 
   // Calculate absolute deviations
-  const deviations = new Float64Array(length)
+  const deviations = new Float64Array(length);
   for (let i: i32 = 0; i < length; i++) {
-    unchecked(deviations[i] = Math.abs(unchecked(data[i]) - med))
+    unchecked((deviations[i] = Math.abs(unchecked(data[i]) - med)));
   }
 
   // Sort deviations and find median
-  quicksort(deviations, 0, length - 1)
-  return median(deviations, length)
+  quicksort(deviations, 0, length - 1);
+  return median(deviations, length);
 }
 
 /**
@@ -203,19 +203,19 @@ export function mad(data: Float64Array, length: i32): f64 {
  * @returns Quantile value
  */
 export function quantile(data: Float64Array, length: i32, p: f64): f64 {
-  if (length === 0) return NaN
-  if (p < 0 || p > 1) return NaN
+  if (length === 0) return NaN;
+  if (p < 0 || p > 1) return NaN;
 
-  const index = p * f64(length - 1)
-  const lower = i32(Math.floor(index))
-  const upper = i32(Math.ceil(index))
+  const index = p * f64(length - 1);
+  const lower = i32(Math.floor(index));
+  const upper = i32(Math.ceil(index));
 
   if (lower === upper) {
-    return unchecked(data[lower])
+    return unchecked(data[lower]);
   }
 
-  const fraction = index - f64(lower)
-  return unchecked(data[lower]) * (1 - fraction) + unchecked(data[upper]) * fraction
+  const fraction = index - f64(lower);
+  return unchecked(data[lower]) * (1 - fraction) + unchecked(data[upper]) * fraction;
 }
 
 /**
@@ -225,36 +225,36 @@ export function quantile(data: Float64Array, length: i32, p: f64): f64 {
  * @param right Right index
  */
 function quicksort(arr: Float64Array, left: i32, right: i32): void {
-  if (left >= right) return
+  if (left >= right) return;
 
-  const pivotIndex = partition(arr, left, right)
-  quicksort(arr, left, pivotIndex - 1)
-  quicksort(arr, pivotIndex + 1, right)
+  const pivotIndex = partition(arr, left, right);
+  quicksort(arr, left, pivotIndex - 1);
+  quicksort(arr, pivotIndex + 1, right);
 }
 
 /**
  * Partition helper for quicksort
  */
 function partition(arr: Float64Array, left: i32, right: i32): i32 {
-  const pivot = unchecked(arr[right])
-  let i = left - 1
+  const pivot = unchecked(arr[right]);
+  let i = left - 1;
 
   for (let j: i32 = left; j < right; j++) {
     if (unchecked(arr[j]) <= pivot) {
-      i++
+      i++;
       // Swap
-      const temp = unchecked(arr[i])
-      unchecked(arr[i] = unchecked(arr[j]))
-      unchecked(arr[j] = temp)
+      const temp = unchecked(arr[i]);
+      unchecked((arr[i] = unchecked(arr[j])));
+      unchecked((arr[j] = temp));
     }
   }
 
   // Swap pivot
-  const temp = unchecked(arr[i + 1])
-  unchecked(arr[i + 1] = unchecked(arr[right]))
-  unchecked(arr[right] = temp)
+  const temp = unchecked(arr[i + 1]);
+  unchecked((arr[i + 1] = unchecked(arr[right])));
+  unchecked((arr[right] = temp));
 
-  return i + 1
+  return i + 1;
 }
 
 /**
@@ -267,33 +267,33 @@ function partition(arr: Float64Array, left: i32, right: i32): i32 {
  * @returns Mode value
  */
 export function mode(data: Float64Array, length: i32, tolerance: f64): f64 {
-  if (length === 0) return NaN
-  if (length === 1) return unchecked(data[0])
+  if (length === 0) return NaN;
+  if (length === 1) return unchecked(data[0]);
 
-  let maxCount: i32 = 1
-  let currentCount: i32 = 1
-  let modeValue = unchecked(data[0])
-  let currentValue = unchecked(data[0])
+  let maxCount: i32 = 1;
+  let currentCount: i32 = 1;
+  let modeValue = unchecked(data[0]);
+  let currentValue = unchecked(data[0]);
 
   for (let i: i32 = 1; i < length; i++) {
-    const val = unchecked(data[i])
+    const val = unchecked(data[i]);
 
     if (Math.abs(val - currentValue) <= tolerance) {
-      currentCount++
+      currentCount++;
     } else {
       if (currentCount > maxCount) {
-        maxCount = currentCount
-        modeValue = currentValue
+        maxCount = currentCount;
+        modeValue = currentValue;
       }
-      currentValue = val
-      currentCount = 1
+      currentValue = val;
+      currentCount = 1;
     }
   }
 
   // Check last group
   if (currentCount > maxCount) {
-    modeValue = currentValue
+    modeValue = currentValue;
   }
 
-  return modeValue
+  return modeValue;
 }

@@ -1,39 +1,39 @@
-import { isChain } from '../../utils/is.js'
-import { format } from '../../utils/string.js'
-import { hasOwnProperty, lazy } from '../../utils/object.js'
-import { factory } from '../../utils/factory.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { isChain } from '../../utils/is.js';
+import { format } from '../../utils/string.js';
+import { hasOwnProperty, lazy } from '../../utils/object.js';
+import { factory } from '../../utils/factory.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 /**
  * JSON representation of a Chain
  */
 export interface ChainJSON {
-  mathjs: 'Chain'
-  value: unknown
+  mathjs: 'Chain';
+  value: unknown;
 }
 
 /**
  * Chain instance interface
  */
 export interface ChainInstance {
-  type: 'Chain'
-  isChain: true
-  value: unknown
-  done(): unknown
-  valueOf(): unknown
-  toString(): string
-  toJSON(): ChainJSON
-  [key: string]: unknown
+  type: 'Chain';
+  isChain: true;
+  value: unknown;
+  done(): unknown;
+  valueOf(): unknown;
+  toString(): string;
+  toJSON(): ChainJSON;
+  [key: string]: unknown;
 }
 
 /**
  * Chain constructor interface
  */
 export interface ChainConstructor {
-  new (value?: unknown): ChainInstance
-  fromJSON(json: ChainJSON): ChainInstance
-  createProxy(arg0: string | Record<string, unknown>, arg1?: unknown): void
-  prototype: ChainInstance
+  new (value?: unknown): ChainInstance;
+  fromJSON(json: ChainJSON): ChainInstance;
+  createProxy(arg0: string | Record<string, unknown>, arg1?: unknown): void;
+  prototype: ChainInstance;
 }
 
 /**
@@ -43,34 +43,34 @@ type ImportEventCallback = (
   name: string,
   resolver: () => unknown,
   path: string | undefined
-) => void
+) => void;
 
 /**
  * On function interface for event subscription
  */
 interface OnFunction {
-  (event: 'import', callback: ImportEventCallback): void
-  (event: string, callback: (...args: unknown[]) => void): void
+  (event: 'import', callback: ImportEventCallback): void;
+  (event: string, callback: (...args: unknown[]) => void): void;
 }
 
 /**
  * Math instance interface with dynamic method access
  */
 interface MathInstance {
-  [key: string]: unknown
+  [key: string]: unknown;
 }
 
 /**
  * Dependencies for Chain factory
  */
 interface ChainDependencies {
-  on?: OnFunction
-  math: MathInstance
-  typed: TypedFunction
+  on?: OnFunction;
+  math: MathInstance;
+  typed: TypedFunction;
 }
 
-const name = 'Chain'
-const dependencies = ['?on', 'math', 'typed']
+const name = 'Chain';
+const dependencies = ['?on', 'math', 'typed'];
 
 export const createChainClass = /* #__PURE__ */ factory(
   name,
@@ -96,23 +96,21 @@ export const createChainClass = /* #__PURE__ */ factory(
      */
     function Chain(this: ChainInstance, value?: unknown): void {
       if (!(this instanceof Chain)) {
-        throw new SyntaxError(
-          'Constructor must be called with the new operator'
-        )
+        throw new SyntaxError('Constructor must be called with the new operator');
       }
 
       if (isChain(value)) {
-        this.value = (value as ChainInstance).value
+        this.value = (value as ChainInstance).value;
       } else {
-        this.value = value
+        this.value = value;
       }
     }
 
     /**
      * Attach type information
      */
-    Chain.prototype.type = 'Chain'
-    Chain.prototype.isChain = true
+    Chain.prototype.type = 'Chain';
+    Chain.prototype.isChain = true;
 
     /**
      * Close the chain. Returns the final value.
@@ -120,8 +118,8 @@ export const createChainClass = /* #__PURE__ */ factory(
      * @returns {*} value
      */
     Chain.prototype.done = function (this: ChainInstance): unknown {
-      return this.value
-    }
+      return this.value;
+    };
 
     /**
      * Close the chain. Returns the final value.
@@ -129,16 +127,16 @@ export const createChainClass = /* #__PURE__ */ factory(
      * @returns {*} value
      */
     Chain.prototype.valueOf = function (this: ChainInstance): unknown {
-      return this.value
-    }
+      return this.value;
+    };
 
     /**
      * Get a string representation of the value in the chain
      * @returns {string}
      */
     Chain.prototype.toString = function (this: ChainInstance): string {
-      return format(this.value, {})
-    }
+      return format(this.value, {});
+    };
 
     /**
      * Get a JSON representation of the chain
@@ -147,9 +145,9 @@ export const createChainClass = /* #__PURE__ */ factory(
     Chain.prototype.toJSON = function (this: ChainInstance): ChainJSON {
       return {
         mathjs: 'Chain',
-        value: this.value
-      }
-    }
+        value: this.value,
+      };
+    };
 
     /**
      * Instantiate a Chain from its JSON representation
@@ -158,11 +156,9 @@ export const createChainClass = /* #__PURE__ */ factory(
      *                       where mathjs is optional
      * @returns {Chain}
      */
-    ;(Chain as unknown as ChainConstructor).fromJSON = function (
-      json: ChainJSON
-    ): ChainInstance {
-      return new (Chain as unknown as ChainConstructor)(json.value)
-    }
+    (Chain as unknown as ChainConstructor).fromJSON = function (json: ChainJSON): ChainInstance {
+      return new (Chain as unknown as ChainConstructor)(json.value);
+    };
 
     /**
      * Create a proxy method for the chain
@@ -173,9 +169,9 @@ export const createChainClass = /* #__PURE__ */ factory(
      */
     function createProxy(name: string, fn: unknown): void {
       if (typeof fn === 'function') {
-        ;(Chain.prototype as Record<string, unknown>)[name] = chainify(
+        (Chain.prototype as Record<string, unknown>)[name] = chainify(
           fn as (...args: unknown[]) => unknown
-        )
+        );
       }
     }
 
@@ -187,18 +183,14 @@ export const createChainClass = /* #__PURE__ */ factory(
      * @private
      */
     function createLazyProxy(name: string, resolver: () => unknown): void {
-      lazy(
-        Chain.prototype as Record<string, unknown>,
-        name,
-        function outerResolver() {
-          const fn = resolver()
-          if (typeof fn === 'function') {
-            return chainify(fn as (...args: unknown[]) => unknown)
-          }
-
-          return undefined // if not a function, ignore
+      lazy(Chain.prototype as Record<string, unknown>, name, function outerResolver() {
+        const fn = resolver();
+        if (typeof fn === 'function') {
+          return chainify(fn as (...args: unknown[]) => unknown);
         }
-      )
+
+        return undefined; // if not a function, ignore
+      });
     }
 
     /**
@@ -213,14 +205,14 @@ export const createChainClass = /* #__PURE__ */ factory(
       return function (this: ChainInstance, ...rest: unknown[]): ChainInstance {
         // Here, `this` will be the context of a Chain instance
         if (rest.length === 0) {
-          return new (Chain as unknown as ChainConstructor)(fn(this.value))
+          return new (Chain as unknown as ChainConstructor)(fn(this.value));
         }
-        const args: unknown[] = [this.value]
+        const args: unknown[] = [this.value];
         for (let i = 0; i < rest.length; i++) {
-          args[i + 1] = rest[i]
+          args[i + 1] = rest[i];
         }
         if (typed.isTypedFunction(fn as TypedFunction)) {
-          const sigObject = typed.resolve(fn as TypedFunction, args)
+          const sigObject = typed.resolve(fn as TypedFunction, args);
           // We want to detect if a rest parameter has matched across the
           // value in the chain and the current arguments of this call.
           // That is the case if and only if the matching signature has
@@ -231,16 +223,16 @@ export const createChainClass = /* #__PURE__ */ factory(
               'chain function ' +
                 fn.name +
                 ' cannot match rest parameter between chain value and additional arguments.'
-            )
+            );
           }
           if (sigObject) {
             return new (Chain as unknown as ChainConstructor)(
               sigObject.implementation.apply(fn, args)
-            )
+            );
           }
         }
-        return new (Chain as unknown as ChainConstructor)(fn.apply(fn, args))
-      }
+        return new (Chain as unknown as ChainConstructor)(fn.apply(fn, args));
+      };
     }
 
     /**
@@ -257,22 +249,22 @@ export const createChainClass = /* #__PURE__ */ factory(
      *                                 functions
      * @param {*} [arg1]               A function, when arg0 is a name
      */
-    ;(Chain as unknown as ChainConstructor).createProxy = function (
+    (Chain as unknown as ChainConstructor).createProxy = function (
       arg0: string | Record<string, unknown>,
       arg1?: unknown
     ): void {
       if (typeof arg0 === 'string') {
         // createProxy(name, value)
-        createProxy(arg0, arg1)
+        createProxy(arg0, arg1);
       } else {
         // createProxy(values)
         for (const name in arg0) {
           if (hasOwnProperty(arg0, name) && excludedNames[name] === undefined) {
-            createLazyProxy(name, () => arg0[name])
+            createLazyProxy(name, () => arg0[name]);
           }
         }
       }
-    }
+    };
 
     const excludedNames: Record<string, boolean> = {
       expression: true,
@@ -281,30 +273,23 @@ export const createChainClass = /* #__PURE__ */ factory(
       classes: true,
       json: true,
       error: true,
-      isChain: true // conflicts with the property isChain of a Chain instance
-    }
+      isChain: true, // conflicts with the property isChain of a Chain instance
+    };
 
     // create proxy for everything that is in math.js
-    ;(Chain as unknown as ChainConstructor).createProxy(math)
+    (Chain as unknown as ChainConstructor).createProxy(math);
 
     // register on the import event, automatically add a proxy for every imported function.
     if (on) {
-      on(
-        'import',
-        function (
-          name: string,
-          resolver: () => unknown,
-          path: string | undefined
-        ) {
-          if (!path) {
-            // an imported function (not a data type or something special)
-            createLazyProxy(name, resolver)
-          }
+      on('import', function (name: string, resolver: () => unknown, path: string | undefined) {
+        if (!path) {
+          // an imported function (not a data type or something special)
+          createLazyProxy(name, resolver);
         }
-      )
+      });
     }
 
-    return Chain as unknown as ChainConstructor
+    return Chain as unknown as ChainConstructor;
   },
   { isClass: true }
-)
+);

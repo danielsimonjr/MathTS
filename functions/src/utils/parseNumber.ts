@@ -1,7 +1,7 @@
-import { factory } from './factory.js'
+import { factory } from './factory.js';
 
-const name = 'parseNumberWithConfig'
-const dependencies = ['config', '?bignumber']
+const name = 'parseNumberWithConfig';
+const dependencies = ['config', '?bignumber'];
 
 export const createParseNumberWithConfig = /* #__PURE__ */ factory(
   name,
@@ -30,57 +30,53 @@ export const createParseNumberWithConfig = /* #__PURE__ */ factory(
      */
     function parseNumberWithConfig(str: string): number | any {
       if (typeof str !== 'string') {
-        throw new TypeError(
-          `parseNumberWithConfig expects string, got ${typeof str}`
-        )
+        throw new TypeError(`parseNumberWithConfig expects string, got ${typeof str}`);
       }
 
-      const numberType = config.number || 'number'
+      const numberType = config.number || 'number';
 
       switch (numberType) {
         case 'BigNumber':
           if (!bignumber) {
-            throw new Error(
-              'BigNumber not available. Configure mathjs with BigNumber support.'
-            )
+            throw new Error('BigNumber not available. Configure mathjs with BigNumber support.');
           }
-          return bignumber(str)
+          return bignumber(str);
 
         case 'bigint':
           // bigint doesn't support decimals - fallback to number
           if (str.includes('.') || str.includes('e') || str.includes('E')) {
-            const num = Number(str)
+            const num = Number(str);
             if (isNaN(num)) {
-              throw new SyntaxError(`String "${str}" is not a valid number`)
+              throw new SyntaxError(`String "${str}" is not a valid number`);
             }
-            return num
+            return num;
           }
           try {
-            return BigInt(str)
+            return BigInt(str);
           } catch {
-            throw new SyntaxError(`String "${str}" is not a valid number`)
+            throw new SyntaxError(`String "${str}" is not a valid number`);
           }
 
         case 'Fraction': {
           // TODO: Add fraction dependency when Fraction support needed
-          const fracNum = Number(str)
+          const fracNum = Number(str);
           if (isNaN(fracNum)) {
-            throw new SyntaxError(`String "${str}" is not a valid number`)
+            throw new SyntaxError(`String "${str}" is not a valid number`);
           }
-          return fracNum
+          return fracNum;
         }
 
         case 'number':
         default: {
-          const num = Number(str)
+          const num = Number(str);
           if (isNaN(num)) {
-            throw new SyntaxError(`String "${str}" is not a valid number`)
+            throw new SyntaxError(`String "${str}" is not a valid number`);
           }
-          return num
+          return num;
         }
       }
     }
 
-    return parseNumberWithConfig
+    return parseNumberWithConfig;
   }
-)
+);

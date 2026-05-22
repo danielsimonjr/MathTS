@@ -29,33 +29,45 @@ export interface RustWasmExports {
 
   // --- Matrix operations ---
   multiplyDense: (
-    aPtr: number, aRows: number, aCols: number,
-    bPtr: number, bRows: number, bCols: number,
+    aPtr: number,
+    aRows: number,
+    aCols: number,
+    bPtr: number,
+    bRows: number,
+    bCols: number,
     resultPtr: number
   ) => void;
   multiplyDenseSIMD: (
-    aPtr: number, aRows: number, aCols: number,
-    bPtr: number, bRows: number, bCols: number,
+    aPtr: number,
+    aRows: number,
+    aCols: number,
+    bPtr: number,
+    bRows: number,
+    bCols: number,
     resultPtr: number
   ) => void;
   multiplyVector: (
-    aPtr: number, aRows: number, aCols: number,
-    xPtr: number, resultPtr: number
+    aPtr: number,
+    aRows: number,
+    aCols: number,
+    xPtr: number,
+    resultPtr: number
   ) => void;
-  transpose: (
-    dataPtr: number, rows: number, cols: number, resultPtr: number
-  ) => void;
+  transpose: (dataPtr: number, rows: number, cols: number, resultPtr: number) => void;
 
   // --- Decompositions ---
   /** Thin SVD: writes U (m*k), S (k), V (n*k); k = min(m,n). */
   svd: (
-    aPtr: number, m: number, n: number,
-    uPtr: number, sPtr: number, vPtr: number, workPtr: number
+    aPtr: number,
+    m: number,
+    n: number,
+    uPtr: number,
+    sPtr: number,
+    vPtr: number,
+    workPtr: number
   ) => number;
   /** Singular values only: writes S (k); k = min(m,n). */
-  singularValues: (
-    aPtr: number, m: number, n: number, sPtr: number, workPtr: number
-  ) => number;
+  singularValues: (aPtr: number, m: number, n: number, sPtr: number, workPtr: number) => number;
   /** Scratch length (in f64s) required by `svd`. */
   svdWorkSize: (m: number, n: number) => number;
   /** Scratch length (in f64s) required by `singularValues`. */
@@ -70,7 +82,14 @@ export interface RustWasmExports {
   simdDotF64: (aPtr: number, bPtr: number, length: number) => number;
   simdSumF64: (aPtr: number, length: number) => number;
   simdNormF64: (aPtr: number, length: number) => number;
-  simdMatMulF64: (aPtr: number, bPtr: number, cPtr: number, m: number, k: number, n: number) => void;
+  simdMatMulF64: (
+    aPtr: number,
+    bPtr: number,
+    cPtr: number,
+    m: number,
+    k: number,
+    n: number
+  ) => void;
 
   // --- Reductions ---
   simdMinF64: (aPtr: number, length: number) => number;
@@ -84,8 +103,12 @@ export interface RustWasmExports {
   qrDecomposition: (aPtr: number, m: number, n: number, qPtr: number) => void;
   choleskyDecomposition: (aPtr: number, n: number, lPtr: number) => number;
   eigsSymmetric: (
-    matrixPtr: number, n: number, precision: number,
-    eigenvaluesPtr: number, eigenvectorsPtr: number, workPtr: number
+    matrixPtr: number,
+    n: number,
+    precision: number,
+    eigenvaluesPtr: number,
+    eigenvectorsPtr: number,
+    workPtr: number
   ) => number;
 
   // --- Linear algebra ---
@@ -265,10 +288,7 @@ export class RustWasmLoader {
         // Browser: use streaming compilation
         const instStart = performance.now();
         if (typeof WebAssembly.instantiateStreaming === 'function') {
-          const result = await WebAssembly.instantiateStreaming(
-            fetch(path),
-            this.getImports()
-          );
+          const result = await WebAssembly.instantiateStreaming(fetch(path), this.getImports());
           this.wasmInstance = result.instance;
         } else {
           const response = await fetch(path);
@@ -326,9 +346,15 @@ export class RustWasmLoader {
         // Published location (copied into matrix package)
         path.resolve(process.cwd(), 'lib/wasm/mathts_rust.wasm'),
         // Development build output
-        path.resolve(process.cwd(), 'wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm'),
+        path.resolve(
+          process.cwd(),
+          'wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm'
+        ),
         // Relative from matrix package
-        path.resolve(process.cwd(), '../wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm'),
+        path.resolve(
+          process.cwd(),
+          '../wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm'
+        ),
       ];
 
       for (const p of candidates) {
@@ -389,7 +415,11 @@ export class RustWasmLoader {
 
     const byteLength = (Array.isArray(data) ? data.length : data.length) * 8;
     const ptr = this.allocator.alloc(byteLength, this.wasmMemory);
-    const view = new Float64Array(this.wasmMemory.buffer, ptr, Array.isArray(data) ? data.length : data.length);
+    const view = new Float64Array(
+      this.wasmMemory.buffer,
+      ptr,
+      Array.isArray(data) ? data.length : data.length
+    );
     view.set(data);
     return ptr;
   }

@@ -1,86 +1,74 @@
-import {
-  isAccessorNode,
-  isIndexNode,
-  isNode,
-  isSymbolNode
-} from '../../utils/is.js'
-import { getSafeProperty, setSafeProperty } from '../../utils/customs.js'
-import { factory } from '../../utils/factory.js'
-import { accessFactory } from './utils/access.js'
-import { assignFactory } from './utils/assign.js'
-import { getPrecedence } from '../operators.js'
-import type { MathNode, Scope, CompileFunction, StringOptions } from './Node.js'
+import { isAccessorNode, isIndexNode, isNode, isSymbolNode } from '../../utils/is.js';
+import { getSafeProperty, setSafeProperty } from '../../utils/customs.js';
+import { factory } from '../../utils/factory.js';
+import { accessFactory } from './utils/access.js';
+import { assignFactory } from './utils/assign.js';
+import { getPrecedence } from '../operators.js';
+import type { MathNode, Scope, CompileFunction, StringOptions } from './Node.js';
 
-const name = 'AssignmentNode'
+const name = 'AssignmentNode';
 const dependencies = [
   'subset',
   '?matrix', // FIXME: should not be needed at all, should be handled by subset
-  'Node'
-]
+  'Node',
+];
 
 /**
  * Interface for SymbolNode with name property
  */
 interface SymbolNodeLike extends MathNode {
-  name: string
+  name: string;
 }
 
 /**
  * Interface for AccessorNode with object and index properties
  */
 interface AccessorNodeLike extends MathNode {
-  object: MathNode
-  index: IndexNodeLike
+  object: MathNode;
+  index: IndexNodeLike;
 }
 
 /**
  * Interface for IndexNode with dimension indexing methods
  */
 interface IndexNodeLike extends MathNode {
-  isObjectProperty: () => boolean
-  getObjectProperty: () => string
-  _compile: (
-    math: MathNamespace,
-    argNames: Record<string, boolean>
-  ) => CompileFunction
+  isObjectProperty: () => boolean;
+  getObjectProperty: () => string;
+  _compile: (math: MathNamespace, argNames: Record<string, boolean>) => CompileFunction;
 }
 
 /**
  * The math namespace interface
  */
 interface MathNamespace {
-  [key: string]: unknown
+  [key: string]: unknown;
 }
 
 /**
  * Subset function type for getting/setting subsets of matrices
  */
-type SubsetFunction = (
-  value: unknown,
-  index: unknown,
-  replacement?: unknown
-) => unknown
+type SubsetFunction = (value: unknown, index: unknown, replacement?: unknown) => unknown;
 
 /**
  * Matrix function type for creating matrices
  */
-type MatrixFunction = (data: unknown) => unknown
+type MatrixFunction = (data: unknown) => unknown;
 
 /**
  * Dependencies for AssignmentNode
  */
 interface AssignmentNodeDependencies {
-  subset: SubsetFunction
-  matrix?: MatrixFunction
-  Node: new () => MathNode
+  subset: SubsetFunction;
+  matrix?: MatrixFunction;
+  Node: new () => MathNode;
 }
 
 export const createAssignmentNode = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ subset, matrix, Node }: AssignmentNodeDependencies) => {
-    const access = accessFactory({ subset })
-    const assign = assignFactory({ subset, matrix })
+    const access = accessFactory({ subset });
+    const assign = assignFactory({ subset, matrix });
 
     /*
      * Is parenthesis needed?
@@ -95,26 +83,18 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
       implicit?: string
     ): boolean {
       if (!parenthesis) {
-        parenthesis = 'keep'
+        parenthesis = 'keep';
       }
 
-      const precedence = getPrecedence(node, parenthesis, implicit, undefined)
-      const exprPrecedence = getPrecedence(
-        node.value,
-        parenthesis,
-        implicit,
-        undefined
-      )
-      return (
-        parenthesis === 'all' ||
-        (exprPrecedence !== null && exprPrecedence <= precedence)
-      )
+      const precedence = getPrecedence(node, parenthesis, implicit, undefined);
+      const exprPrecedence = getPrecedence(node.value, parenthesis, implicit, undefined);
+      return parenthesis === 'all' || (exprPrecedence !== null && exprPrecedence <= precedence);
     }
 
     class AssignmentNode extends Node {
-      object: MathNode
-      index: IndexNodeLike | null
-      value: MathNode
+      object: MathNode;
+      index: IndexNodeLike | null;
+      value: MathNode;
 
       /**
        * @constructor AssignmentNode
@@ -147,48 +127,42 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @param {Node} value
        *     The value to be assigned
        */
-      constructor(
-        object: MathNode,
-        index: IndexNodeLike | MathNode | null,
-        value?: MathNode
-      ) {
-        super()
-        this.object = object
-        this.index = value ? (index as IndexNodeLike | null) : null
-        this.value = value || (index as MathNode)
+      constructor(object: MathNode, index: IndexNodeLike | MathNode | null, value?: MathNode) {
+        super();
+        this.object = object;
+        this.index = value ? (index as IndexNodeLike | null) : null;
+        this.value = value || (index as MathNode);
 
         // validate input
         if (!isSymbolNode(object) && !isAccessorNode(object)) {
-          throw new TypeError('SymbolNode or AccessorNode expected as "object"')
+          throw new TypeError('SymbolNode or AccessorNode expected as "object"');
         }
         if (isSymbolNode(object) && (object as SymbolNodeLike).name === 'end') {
-          throw new Error('Cannot assign to symbol "end"')
+          throw new Error('Cannot assign to symbol "end"');
         }
         if (this.index && !isIndexNode(this.index)) {
           // index is optional
-          throw new TypeError('IndexNode expected as "index"')
+          throw new TypeError('IndexNode expected as "index"');
         }
         if (!isNode(this.value)) {
-          throw new TypeError('Node expected as "value"')
+          throw new TypeError('Node expected as "value"');
         }
       }
 
       // readonly property name
       get name(): string {
         if (this.index) {
-          return this.index.isObjectProperty()
-            ? this.index.getObjectProperty()
-            : ''
+          return this.index.isObjectProperty() ? this.index.getObjectProperty() : '';
         } else {
-          return (this.object as SymbolNodeLike).name || ''
+          return (this.object as SymbolNodeLike).name || '';
         }
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isAssignmentNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -204,21 +178,16 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @returns A function which can be called like:
        *          evalNode(scope: Scope, args: Record<string, unknown>, context: unknown)
        */
-      _compile(
-        math: MathNamespace,
-        argNames: Record<string, boolean>
-      ): CompileFunction {
-        const evalObject = this.object._compile(math, argNames)
-        const evalIndex = this.index
-          ? this.index._compile(math, argNames)
-          : null
-        const evalValue = this.value._compile(math, argNames)
-        const symbolName = (this.object as SymbolNodeLike).name
+      _compile(math: MathNamespace, argNames: Record<string, boolean>): CompileFunction {
+        const evalObject = this.object._compile(math, argNames);
+        const evalIndex = this.index ? this.index._compile(math, argNames) : null;
+        const evalValue = this.value._compile(math, argNames);
+        const symbolName = (this.object as SymbolNodeLike).name;
 
         if (!this.index) {
           // apply a variable to the scope, for example `a=2`
           if (!isSymbolNode(this.object)) {
-            throw new TypeError('SymbolNode expected as object')
+            throw new TypeError('SymbolNode expected as object');
           }
 
           return function evalAssignmentNode(
@@ -226,24 +195,24 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
             args: Record<string, unknown>,
             context: unknown
           ): unknown {
-            const value = evalValue(scope, args, context)
-            scope.set(symbolName, value)
-            return value
-          }
+            const value = evalValue(scope, args, context);
+            scope.set(symbolName, value);
+            return value;
+          };
         } else if (this.index.isObjectProperty()) {
           // apply an object property for example `a.b=2`
-          const prop = this.index.getObjectProperty()
+          const prop = this.index.getObjectProperty();
 
           return function evalAssignmentNode(
             scope: Scope,
             args: Record<string, unknown>,
             context: unknown
           ): unknown {
-            const object = evalObject(scope, args, context)
-            const value = evalValue(scope, args, context)
-            setSafeProperty(object as Record<string, unknown>, prop, value)
-            return value
-          }
+            const object = evalObject(scope, args, context);
+            const value = evalValue(scope, args, context);
+            setSafeProperty(object as Record<string, unknown>, prop, value);
+            return value;
+          };
         } else if (isSymbolNode(this.object)) {
           // update a matrix subset, for example `a[2]=3`
           return function evalAssignmentNode(
@@ -251,17 +220,13 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
             args: Record<string, unknown>,
             context: unknown
           ): unknown {
-            const childObject = evalObject(scope, args, context)
-            const value = evalValue(scope, args, context)
+            const childObject = evalObject(scope, args, context);
+            const value = evalValue(scope, args, context);
             // Important:  we pass childObject instead of context:
-            const index = (evalIndex as CompileFunction)(
-              scope,
-              args,
-              childObject
-            )
-            scope.set(symbolName, assign(childObject, index, value))
-            return value
-          }
+            const index = (evalIndex as CompileFunction)(scope, args, childObject);
+            scope.set(symbolName, assign(childObject, index, value));
+            return value;
+          };
         } else {
           // isAccessorNode(node.object) === true
           // update a matrix subset, for example `a.b[2]=3`
@@ -270,68 +235,51 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
           // compile it ourselves here as we need the parent object of the
           // AccessorNode:
           // we need to apply the updated object to parent object
-          const accessorObject = this.object as AccessorNodeLike
-          const evalParentObject = accessorObject.object._compile(
-            math,
-            argNames
-          )
+          const accessorObject = this.object as AccessorNodeLike;
+          const evalParentObject = accessorObject.object._compile(math, argNames);
 
           if (accessorObject.index.isObjectProperty()) {
-            const parentProp = accessorObject.index.getObjectProperty()
+            const parentProp = accessorObject.index.getObjectProperty();
 
             return function evalAssignmentNode(
               scope: Scope,
               args: Record<string, unknown>,
               context: unknown
             ): unknown {
-              const parent = evalParentObject(scope, args, context)
-              const childObject = getSafeProperty(
-                parent as Record<string, unknown>,
-                parentProp
-              )
+              const parent = evalParentObject(scope, args, context);
+              const childObject = getSafeProperty(parent as Record<string, unknown>, parentProp);
               // Important: we pass childObject instead of context:
-              const index = (evalIndex as CompileFunction)(
-                scope,
-                args,
-                childObject
-              )
-              const value = evalValue(scope, args, context)
+              const index = (evalIndex as CompileFunction)(scope, args, childObject);
+              const value = evalValue(scope, args, context);
               setSafeProperty(
                 parent as Record<string, unknown>,
                 parentProp,
                 assign(childObject, index, value)
-              )
-              return value
-            }
+              );
+              return value;
+            };
           } else {
             // if some parameters use the 'end' parameter, we need to calculate
             // the size
-            const evalParentIndex = accessorObject.index._compile(
-              math,
-              argNames
-            )
+            const evalParentIndex = accessorObject.index._compile(math, argNames);
 
             return function evalAssignmentNode(
               scope: Scope,
               args: Record<string, unknown>,
               context: unknown
             ): unknown {
-              const parent = evalParentObject(scope, args, context)
+              const parent = evalParentObject(scope, args, context);
               // Important: we pass parent instead of context:
-              const parentIndex = evalParentIndex(scope, args, parent)
-              const childObject = access(parent, parentIndex)
+              const parentIndex = evalParentIndex(scope, args, parent);
+              const childObject = access(parent, parentIndex);
               // Important:  we pass childObject instead of context
-              const index = (evalIndex as CompileFunction)(
-                scope,
-                args,
-                childObject
-              )
-              const value = evalValue(scope, args, context)
+              const index = (evalIndex as CompileFunction)(scope, args, childObject);
+              const value = evalValue(scope, args, context);
 
-              assign(parent, parentIndex, assign(childObject, index, value))
+              assign(parent, parentIndex, assign(childObject, index, value));
 
-              return value
-            }
+              return value;
+            };
           }
         }
       }
@@ -340,14 +288,12 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: MathNode, path: string, parent: MathNode) => void
-      ): void {
-        callback(this.object, 'object', this as any)
+      forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
+        callback(this.object, 'object', this as any);
         if (this.index) {
-          callback(this.index, 'index', this as any)
+          callback(this.index, 'index', this as any);
         }
-        callback(this.value, 'value', this as any)
+        callback(this.value, 'value', this as any);
       }
 
       /**
@@ -356,18 +302,12 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node): Node} callback
        * @returns {AssignmentNode} Returns a transformed copy of the node
        */
-      map(
-        callback: (child: MathNode, path: string, parent: MathNode) => MathNode
-      ): AssignmentNode {
-        const object = this._ifNode(
-          callback(this.object, 'object', this as any)
-        )
-        const index = this.index
-          ? this._ifNode(callback(this.index, 'index', this as any))
-          : null
-        const value = this._ifNode(callback(this.value, 'value', this as any))
+      map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): AssignmentNode {
+        const object = this._ifNode(callback(this.object, 'object', this as any));
+        const index = this.index ? this._ifNode(callback(this.index, 'index', this as any)) : null;
+        const value = this._ifNode(callback(this.value, 'value', this as any));
 
-        return new AssignmentNode(object, index, value)
+        return new AssignmentNode(object, index, value);
       }
 
       /**
@@ -375,7 +315,7 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @return {AssignmentNode}
        */
       clone(): AssignmentNode {
-        return new AssignmentNode(this.object, this.index, this.value)
+        return new AssignmentNode(this.object, this.index, this.value);
       }
 
       /**
@@ -384,20 +324,14 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @returns The string representation
        */
       _toString(options?: StringOptions): string {
-        const object = this.object.toString(options)
-        const index = this.index ? this.index.toString(options) : ''
-        let value = this.value.toString(options)
-        if (
-          needParenthesis(
-            this,
-            options && options.parenthesis,
-            options && options.implicit
-          )
-        ) {
-          value = '(' + value + ')'
+        const object = this.object.toString(options);
+        const index = this.index ? this.index.toString(options) : '';
+        let value = this.value.toString(options);
+        if (needParenthesis(this, options && options.parenthesis, options && options.implicit)) {
+          value = '(' + value + ')';
         }
 
-        return object + index + ' = ' + value
+        return object + index + ' = ' + value;
       }
 
       /**
@@ -405,17 +339,17 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @returns The JSON representation
        */
       toJSON(): {
-        mathjs: string
-        object: MathNode
-        index: IndexNodeLike | null
-        value: MathNode
+        mathjs: string;
+        object: MathNode;
+        index: IndexNodeLike | null;
+        value: MathNode;
       } {
         return {
           mathjs: name,
           object: this.object,
           index: this.index,
-          value: this.value
-        }
+          value: this.value,
+        };
       }
 
       /**
@@ -426,11 +360,11 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @returns The AssignmentNode instance
        */
       static fromJSON(json: {
-        object: MathNode
-        index: IndexNodeLike | null
-        value: MathNode
+        object: MathNode;
+        index: IndexNodeLike | null;
+        value: MathNode;
       }): AssignmentNode {
-        return new AssignmentNode(json.object, json.index, json.value)
+        return new AssignmentNode(json.object, json.index, json.value);
       }
 
       /**
@@ -439,20 +373,14 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @returns The HTML representation
        */
       _toHTML(options?: StringOptions): string {
-        const object = this.object.toHTML(options)
-        const index = this.index ? this.index.toHTML(options) : ''
-        let value = this.value.toHTML(options)
-        if (
-          needParenthesis(
-            this,
-            options && options.parenthesis,
-            options && options.implicit
-          )
-        ) {
+        const object = this.object.toHTML(options);
+        const index = this.index ? this.index.toHTML(options) : '';
+        let value = this.value.toHTML(options);
+        if (needParenthesis(this, options && options.parenthesis, options && options.implicit)) {
           value =
             '<span class="math-paranthesis math-round-parenthesis">(</span>' +
             value +
-            '<span class="math-paranthesis math-round-parenthesis">)</span>'
+            '<span class="math-paranthesis math-round-parenthesis">)</span>';
         }
 
         return (
@@ -461,7 +389,7 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
           '<span class="math-operator math-assignment-operator ' +
           'math-variable-assignment-operator math-binary-operator">=</span>' +
           value
-        )
+        );
       }
 
       /**
@@ -470,20 +398,14 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @returns The LaTeX representation
        */
       _toTex(options?: StringOptions): string {
-        const object = this.object.toTex(options)
-        const index = this.index ? this.index.toTex(options) : ''
-        let value = this.value.toTex(options)
-        if (
-          needParenthesis(
-            this,
-            options && options.parenthesis,
-            options && options.implicit
-          )
-        ) {
-          value = `\\left(${value}\\right)`
+        const object = this.object.toTex(options);
+        const index = this.index ? this.index.toTex(options) : '';
+        let value = this.value.toTex(options);
+        if (needParenthesis(this, options && options.parenthesis, options && options.implicit)) {
+          value = `\\left(${value}\\right)`;
         }
 
-        return object + index + '=' + value
+        return object + index + '=' + value;
       }
     }
 
@@ -491,10 +413,10 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(AssignmentNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return AssignmentNode
+    return AssignmentNode;
   },
   { isClass: true, isNode: true }
-)
+);

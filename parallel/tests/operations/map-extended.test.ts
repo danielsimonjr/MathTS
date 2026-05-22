@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  parallelCount,
-} from '../../src/operations/map.js';
+import { parallelCount } from '../../src/operations/map.js';
 
 describe('parallelCount (no predicate)', () => {
   it('should count all elements without predicate', async () => {

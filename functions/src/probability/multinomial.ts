@@ -1,41 +1,25 @@
-import { deepForEach } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { deepForEach } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for multinomial
 interface MultinomialDependencies {
-  typed: TypedFunction
-  add: TypedFunction
-  divide: TypedFunction
-  multiply: TypedFunction
-  factorial: TypedFunction
-  isInteger: TypedFunction
-  isPositive: TypedFunction
+  typed: TypedFunction;
+  add: TypedFunction;
+  divide: TypedFunction;
+  multiply: TypedFunction;
+  factorial: TypedFunction;
+  isInteger: TypedFunction;
+  isPositive: TypedFunction;
 }
 
-const name = 'multinomial'
-const dependencies = [
-  'typed',
-  'add',
-  'divide',
-  'multiply',
-  'factorial',
-  'isInteger',
-  'isPositive'
-]
+const name = 'multinomial';
+const dependencies = ['typed', 'add', 'divide', 'multiply', 'factorial', 'isInteger', 'isPositive'];
 
 export const createMultinomial = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    add,
-    divide,
-    multiply,
-    factorial,
-    isInteger,
-    isPositive
-  }: MultinomialDependencies) => {
+  ({ typed, add, divide, multiply, factorial, isInteger, isPositive }: MultinomialDependencies) => {
     /**
      * Multinomial Coefficients compute the number of ways of picking a1, a2, ..., ai unordered outcomes from `n` possibilities.
      *
@@ -59,21 +43,19 @@ export const createMultinomial = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array | Matrix': function (a: unknown[] | object): unknown {
-        let sum: unknown = 0
-        let denom: unknown = 1
+        let sum: unknown = 0;
+        let denom: unknown = 1;
 
         deepForEach(a as unknown[], function (ai: unknown) {
           if (!isInteger(ai) || !isPositive(ai)) {
-            throw new TypeError(
-              'Positive integer value expected in function multinomial'
-            )
+            throw new TypeError('Positive integer value expected in function multinomial');
           }
-          sum = add(sum, ai)
-          denom = multiply(denom, factorial(ai))
-        })
+          sum = add(sum, ai);
+          denom = multiply(denom, factorial(ai));
+        });
 
-        return divide(factorial(sum), denom)
-      }
-    })
+        return divide(factorial(sum), denom);
+      },
+    });
   }
-)
+);

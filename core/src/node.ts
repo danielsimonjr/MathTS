@@ -17,5 +17,5 @@ export type {
   ParenthesisNode,
   RangeNode,
   RelationalNode,
-  SymbolNode
-} from '../../types/index.js'
+  SymbolNode,
+} from '../../types/index.js';

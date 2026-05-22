@@ -23,46 +23,22 @@
         "internalDependencies": [
           {
             "file": "./wasm-loader.js",
-            "imports": [
-              "MathTSWasm",
-              "loadWasm",
-              "loadWasmSync"
-            ],
+            "imports": ["MathTSWasm", "loadWasm", "loadWasmSync"],
             "reExport": true
           }
         ],
-        "exports": [
-          "MathTSWasm",
-          "loadWasm",
-          "loadWasmSync"
-        ],
-        "reExported": [
-          "MathTSWasm",
-          "loadWasm",
-          "loadWasmSync"
-        ]
+        "exports": ["MathTSWasm", "loadWasm", "loadWasmSync"],
+        "reExported": ["MathTSWasm", "loadWasm", "loadWasmSync"]
       },
       "src/bindings/wasm-loader.ts": {
         "description": "WASM Module Loader",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": [
-          "loadWasm",
-          "loadWasmSync",
-          "MathTSWasm"
-        ],
-        "classes": [
-          "MathTSWasm"
-        ],
-        "interfaces": [
-          "MathTSWasmExports",
-          "MathTSWasmInstance"
-        ],
-        "functions": [
-          "loadWasm",
-          "loadWasmSync"
-        ]
+        "exports": ["loadWasm", "loadWasmSync", "MathTSWasm"],
+        "classes": ["MathTSWasm"],
+        "interfaces": ["MathTSWasmExports", "MathTSWasmInstance"],
+        "functions": ["loadWasm", "loadWasmSync"]
       }
     },
     "env": {
@@ -71,12 +47,8 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": [
-          "abort"
-        ],
-        "functions": [
-          "abort"
-        ]
+        "exports": ["abort"],
+        "functions": ["abort"]
       }
     },
     "entry": {
@@ -87,11 +59,7 @@
         "internalDependencies": [
           {
             "file": "./types/complex",
-            "imports": [
-              "Complex",
-              "complex",
-              "complexFromPolar"
-            ],
+            "imports": ["Complex", "complex", "complexFromPolar"],
             "reExport": true
           },
           {
@@ -845,9 +813,7 @@
         "internalDependencies": [
           {
             "file": "../types/complex",
-            "imports": [
-              "Complex"
-            ]
+            "imports": ["Complex"]
           }
         ],
         "exports": [
@@ -928,10 +894,7 @@
         "internalDependencies": [
           {
             "file": "../types/complex",
-            "imports": [
-              "Complex",
-              "complexFromPolar"
-            ]
+            "imports": ["Complex", "complexFromPolar"]
           }
         ],
         "exports": [
@@ -1253,21 +1216,9 @@
           "complexFromImaginary",
           "Complex"
         ],
-        "classes": [
-          "Complex"
-        ],
-        "functions": [
-          "complex",
-          "complexFromPolar",
-          "complexFromReal",
-          "complexFromImaginary"
-        ],
-        "constants": [
-          "COMPLEX_ZERO",
-          "COMPLEX_ONE",
-          "COMPLEX_I",
-          "COMPLEX_NEG_ONE"
-        ]
+        "classes": ["Complex"],
+        "functions": ["complex", "complexFromPolar", "complexFromReal", "complexFromImaginary"],
+        "constants": ["COMPLEX_ZERO", "COMPLEX_ONE", "COMPLEX_I", "COMPLEX_NEG_ONE"]
       }
     }
   },
@@ -1282,22 +1233,15 @@
     "layers": [
       {
         "name": "Bindings",
-        "files": [
-          "src/bindings/index.ts",
-          "src/bindings/wasm-loader.ts"
-        ]
+        "files": ["src/bindings/index.ts", "src/bindings/wasm-loader.ts"]
       },
       {
         "name": "Env",
-        "files": [
-          "src/env/abort.ts"
-        ]
+        "files": ["src/env/abort.ts"]
       },
       {
         "name": "Entry",
-        "files": [
-          "src/index.ts"
-        ]
+        "files": ["src/index.ts"]
       },
       {
         "name": "Ops",
@@ -1311,9 +1255,7 @@
       },
       {
         "name": "Types",
-        "files": [
-          "src/types/complex.ts"
-        ]
+        "files": ["src/types/complex.ts"]
       }
     ]
   },

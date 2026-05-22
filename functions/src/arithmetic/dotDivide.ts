@@ -1,24 +1,24 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js'
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 
 // Type definitions for dotDivide
 interface DotDivideDependencies {
-  typed: TypedFunction
-  matrix: TypedFunction
-  equalScalar: TypedFunction
-  divideScalar: TypedFunction
-  DenseMatrix: unknown
-  concat: TypedFunction
-  SparseMatrix: unknown
+  typed: TypedFunction;
+  matrix: TypedFunction;
+  equalScalar: TypedFunction;
+  divideScalar: TypedFunction;
+  DenseMatrix: unknown;
+  concat: TypedFunction;
+  SparseMatrix: unknown;
 }
 
-const name = 'dotDivide'
+const name = 'dotDivide';
 const dependencies = [
   'typed',
   'matrix',
@@ -26,8 +26,8 @@ const dependencies = [
   'divideScalar',
   'DenseMatrix',
   'concat',
-  'SparseMatrix'
-]
+  'SparseMatrix',
+];
 
 export const createDotDivide = /* #__PURE__ */ factory(
   name,
@@ -39,18 +39,18 @@ export const createDotDivide = /* #__PURE__ */ factory(
     divideScalar,
     DenseMatrix,
     concat,
-    SparseMatrix
+    SparseMatrix,
   }: DotDivideDependencies): TypedFunction => {
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar })
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix })
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Divide two matrices element wise. The function accepts both matrices and
@@ -86,8 +86,8 @@ export const createDotDivide = /* #__PURE__ */ factory(
         DS: matAlgo03xDSf as any,
         SD: matAlgo02xDS0 as any,
         Ss: matAlgo11xS0s as any,
-        sS: matAlgo12xSfs as any
+        sS: matAlgo12xSfs as any,
       })
-    ) as TypedFunction
+    ) as TypedFunction;
   }
-)
+);

@@ -1,34 +1,34 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
-import { xgcdNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
+import { xgcdNumber } from '../plain/number/index.js';
 
 // Type definitions for xgcd
 interface BigNumberType {
-  isInt(): boolean
-  isZero(): boolean
-  lt(other: BigNumberType): boolean
-  neg(): BigNumberType
-  div(other: BigNumberType): BigNumberType
-  mod(other: BigNumberType): BigNumberType
-  floor(): BigNumberType
-  minus(other: BigNumberType): BigNumberType
-  times(other: BigNumberType): BigNumberType
+  isInt(): boolean;
+  isZero(): boolean;
+  lt(other: BigNumberType): boolean;
+  neg(): BigNumberType;
+  div(other: BigNumberType): BigNumberType;
+  mod(other: BigNumberType): BigNumberType;
+  floor(): BigNumberType;
+  minus(other: BigNumberType): BigNumberType;
+  times(other: BigNumberType): BigNumberType;
 }
 
 interface BigNumberConstructor {
-  new (value: number): BigNumberType
+  new (value: number): BigNumberType;
 }
 
 interface XgcdDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  matrix: (arr: unknown[]) => unknown
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  matrix: (arr: unknown[]) => unknown;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'xgcd'
-const dependencies = ['typed', 'config', 'matrix', 'BigNumber']
+const name = 'xgcd';
+const dependencies = ['typed', 'config', 'matrix', 'BigNumber'];
 
 export const createXgcd = /* #__PURE__ */ factory(
   name,
@@ -59,13 +59,13 @@ export const createXgcd = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'number, number': function (a: number, b: number): unknown {
-        const res = xgcdNumber(a, b)
+        const res = xgcdNumber(a, b);
 
-        return config.matrix === 'Array' ? res : matrix(res)
+        return config.matrix === 'Array' ? res : matrix(res);
       },
-      'BigNumber, BigNumber': _xgcdBigNumber
+      'BigNumber, BigNumber': _xgcdBigNumber,
       // TODO: implement support for Fraction
-    }) as TypedFunction
+    }) as TypedFunction;
 
     /**
      * Calculate xgcd for two BigNumbers
@@ -77,48 +77,48 @@ export const createXgcd = /* #__PURE__ */ factory(
     function _xgcdBigNumber(a: BigNumberType, b: BigNumberType): unknown {
       // source: https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
       let // used to swap two variables
-        t: BigNumberType
+        t: BigNumberType;
 
       let // quotient
-        q: BigNumberType
+        q: BigNumberType;
 
       let // remainder
-        r: BigNumberType
+        r: BigNumberType;
 
-      const zero = new BigNumber(0)
-      const one = new BigNumber(1)
-      let x: BigNumberType = zero
-      let lastx: BigNumberType = one
-      let y: BigNumberType = one
-      let lasty: BigNumberType = zero
+      const zero = new BigNumber(0);
+      const one = new BigNumber(1);
+      let x: BigNumberType = zero;
+      let lastx: BigNumberType = one;
+      let y: BigNumberType = one;
+      let lasty: BigNumberType = zero;
 
       if (!a.isInt() || !b.isInt()) {
-        throw new Error('Parameters in function xgcd must be integer numbers')
+        throw new Error('Parameters in function xgcd must be integer numbers');
       }
 
       while (!b.isZero()) {
-        q = a.div(b).floor()
-        r = a.mod(b)
+        q = a.div(b).floor();
+        r = a.mod(b);
 
-        t = x
-        x = lastx.minus(q.times(x))
-        lastx = t
+        t = x;
+        x = lastx.minus(q.times(x));
+        lastx = t;
 
-        t = y
-        y = lasty.minus(q.times(y))
-        lasty = t
+        t = y;
+        y = lasty.minus(q.times(y));
+        lasty = t;
 
-        a = b
-        b = r
+        a = b;
+        b = r;
       }
 
-      let res: (BigNumberType | number)[]
+      let res: (BigNumberType | number)[];
       if (a.lt(zero)) {
-        res = [a.neg(), lastx.neg(), lasty.neg()]
+        res = [a.neg(), lastx.neg(), lasty.neg()];
       } else {
-        res = [a, !a.isZero() ? lastx : 0, lasty]
+        res = [a, !a.isZero() ? lastx : 0, lasty];
       }
-      return config.matrix === 'Array' ? res : matrix(res)
+      return config.matrix === 'Array' ? res : matrix(res);
     }
   }
-)
+);

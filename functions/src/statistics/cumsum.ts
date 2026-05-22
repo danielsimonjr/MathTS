@@ -1,14 +1,14 @@
-import { containsCollections } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { _switch } from '../utils/switch.js'
-import { improveErrorMessage } from './utils/improveErrorMessage.js'
-import { arraySize } from '../utils/array.js'
-import { IndexError } from '../error/IndexError.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { containsCollections } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { _switch } from '../utils/switch.js';
+import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import { arraySize } from '../utils/array.js';
+import { IndexError } from '../error/IndexError.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_CUMSUM_THRESHOLD = 100
+const WASM_CUMSUM_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -16,27 +16,27 @@ const WASM_CUMSUM_THRESHOLD = 100
 function isFlatNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 // Type definitions for cumsum
 interface MatrixType {
-  create(data: unknown, datatype?: string): MatrixType
-  valueOf(): unknown[] | unknown[][]
-  datatype(): string | undefined
+  create(data: unknown, datatype?: string): MatrixType;
+  valueOf(): unknown[] | unknown[][];
+  datatype(): string | undefined;
 }
 
 interface CumsumDependencies {
-  typed: TypedFunction
-  add: TypedFunction
-  unaryPlus: TypedFunction
+  typed: TypedFunction;
+  add: TypedFunction;
+  unaryPlus: TypedFunction;
 }
 
-const name = 'cumsum'
-const dependencies = ['typed', 'add', 'unaryPlus']
+const name = 'cumsum';
+const dependencies = ['typed', 'add', 'unaryPlus'];
 
 export const createCumSum = /* #__PURE__ */ factory(
   name,
@@ -75,7 +75,7 @@ export const createCumSum = /* #__PURE__ */ factory(
         return matrix.create(
           _cumsum(matrix.valueOf() as unknown[], matrix.datatype()),
           matrix.datatype()
-        )
+        );
       },
 
       // sum([a, b, c, d, ...], dim)
@@ -84,23 +84,18 @@ export const createCumSum = /* #__PURE__ */ factory(
         matrix: MatrixType,
         dim: number | { valueOf(): number }
       ): MatrixType {
-        return matrix.create(
-          _ncumSumDim(matrix.valueOf() as unknown[], dim),
-          matrix.datatype()
-        )
+        return matrix.create(_ncumSumDim(matrix.valueOf() as unknown[], dim), matrix.datatype());
       },
 
       // cumsum(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
         if (containsCollections(args)) {
-          throw new TypeError(
-            'All values expected to be scalar in function cumsum'
-          )
+          throw new TypeError('All values expected to be scalar in function cumsum');
         }
 
-        return _cumsum(args)
-      }
-    })
+        return _cumsum(args);
+      },
+    });
 
     /**
      * Recursively calculate the cumulative sum of an n-dimensional array
@@ -111,9 +106,9 @@ export const createCumSum = /* #__PURE__ */ factory(
      */
     function _cumsum(array: unknown[], _datatype?: string): unknown[] {
       try {
-        return _cumsummap(array)
+        return _cumsummap(array);
       } catch (err) {
-        throw improveErrorMessage(err, name, undefined)
+        throw improveErrorMessage(err, name, undefined);
       }
     }
 
@@ -125,26 +120,26 @@ export const createCumSum = /* #__PURE__ */ factory(
      */
     function _cumsummap(array: unknown[]): unknown[] {
       if (array.length === 0) {
-        return []
+        return [];
       }
 
       // WASM fast path for flat arrays of plain numbers
       if (array.length >= WASM_CUMSUM_THRESHOLD && isFlatNumberArray(array)) {
-        const wasm = wasmLoader.getModule()
+        const wasm = wasmLoader.getModule();
         if (wasm) {
           try {
             // WASM statsCumsum operates in-place, so we allocate and copy
-            const alloc = wasmLoader.allocateFloat64Array(array)
+            const alloc = wasmLoader.allocateFloat64Array(array);
             try {
-              wasm.statsCumsum(alloc.ptr, array.length)
+              wasm.statsCumsum(alloc.ptr, array.length);
               // Read results back
-              const result: number[] = new Array(array.length)
+              const result: number[] = new Array(array.length);
               for (let i = 0; i < array.length; i++) {
-                result[i] = alloc.array[i]
+                result[i] = alloc.array[i];
               }
-              return result
+              return result;
             } finally {
-              wasmLoader.free(alloc.ptr)
+              wasmLoader.free(alloc.ptr);
             }
           } catch {
             // Fall back to JS implementation on WASM error
@@ -153,14 +148,14 @@ export const createCumSum = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback
-      const sums = [unaryPlus(array[0])] // unaryPlus converts to number if need be
+      const sums = [unaryPlus(array[0])]; // unaryPlus converts to number if need be
       for (let i = 1; i < array.length; ++i) {
         // Must use add below and not addScalar for the case of summing a
         // 2+-dimensional array along the 0th dimension (the row vectors,
         // or higher-d analogues, are literally added to each other).
-        sums.push(add(sums[i - 1], array[i]))
+        sums.push(add(sums[i - 1], array[i]));
       }
-      return sums
+      return sums;
     }
 
     /**
@@ -170,21 +165,18 @@ export const createCumSum = /* #__PURE__ */ factory(
      * @return {Array} cumulative sums
      * @private
      */
-    function _ncumSumDim(
-      array: unknown[],
-      dim: number | { valueOf(): number }
-    ): unknown[] {
-      const size = arraySize(array)
-      const dimValue = typeof dim === 'number' ? dim : dim.valueOf()
+    function _ncumSumDim(array: unknown[], dim: number | { valueOf(): number }): unknown[] {
+      const size = arraySize(array);
+      const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
       if (dimValue < 0 || dimValue >= size.length) {
         // TODO: would be more clear when throwing a DimensionError here
-        throw new IndexError(dimValue, 0, size.length)
+        throw new IndexError(dimValue, 0, size.length);
       }
 
       try {
-        return _cumsumDimensional(array, dimValue)
+        return _cumsumDimensional(array, dimValue);
       } catch (err) {
-        throw improveErrorMessage(err, name, undefined)
+        throw improveErrorMessage(err, name, undefined);
       }
     }
 
@@ -197,29 +189,29 @@ export const createCumSum = /* #__PURE__ */ factory(
      * @private
      */
     function _cumsumDimensional(mat: unknown[], dim: number): unknown[] {
-      let i: number
-      let ret: unknown[]
-      let tran: unknown[]
+      let i: number;
+      let ret: unknown[];
+      let tran: unknown[];
 
       if (dim <= 0) {
-        const initialValue = (mat[0] as unknown[])[0]
+        const initialValue = (mat[0] as unknown[])[0];
         if (!Array.isArray(initialValue)) {
-          return _cumsummap(mat)
+          return _cumsummap(mat);
         } else {
-          tran = _switch(mat)
-          ret = []
+          tran = _switch(mat);
+          ret = [];
           for (i = 0; i < tran.length; i++) {
-            ret[i] = _cumsumDimensional(tran[i] as unknown[], dim - 1)
+            ret[i] = _cumsumDimensional(tran[i] as unknown[], dim - 1);
           }
-          return ret
+          return ret;
         }
       } else {
-        ret = []
+        ret = [];
         for (i = 0; i < mat.length; i++) {
-          ret[i] = _cumsumDimensional(mat[i] as unknown[], dim - 1)
+          ret[i] = _cumsumDimensional(mat[i] as unknown[], dim - 1);
         }
-        return ret
+        return ret;
       }
     }
   }
-)
+);

@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import { createTrigUnit } from './trigUnit.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { createTrigUnit } from './trigUnit.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for tan
 interface BigNumberType {
-  tan(): BigNumberType
+  tan(): BigNumberType;
 }
 
 interface ComplexType {
-  tan(): ComplexType
+  tan(): ComplexType;
 }
 
 interface TanDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'tan'
-const dependencies = ['typed']
+const name = 'tan';
+const dependencies = ['typed'];
 
 export const createTan = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed }: TanDependencies) => {
-    const trigUnit = createTrigUnit({ typed })
+    const trigUnit = createTrigUnit({ typed });
 
     /**
      * Calculate the tangent of a value. `tan(x)` is equal to `sin(x) / cos(x)`.
@@ -52,11 +52,10 @@ export const createTan = /* #__PURE__ */ factory(
       name,
       {
         number: Math.tan,
-        'Complex | BigNumber': (
-          x: ComplexType | BigNumberType
-        ): ComplexType | BigNumberType => x.tan()
+        'Complex | BigNumber': (x: ComplexType | BigNumberType): ComplexType | BigNumberType =>
+          x.tan(),
       },
       trigUnit
-    )
+    );
   }
-)
+);

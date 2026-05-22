@@ -1,61 +1,56 @@
-import { factory } from '../utils/factory.js'
-import { extend } from '../utils/object.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js'
+import { factory } from '../utils/factory.js';
+import { extend } from '../utils/object.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
 
 // Type definitions
 interface TypedFunction<T = any> {
-  (...args: any[]): T
-  signatures?: Record<string, Function>
+  (...args: any[]): T;
+  signatures?: Record<string, Function>;
 }
 
 interface DenseMatrix {
-  _data: any[] | any[][]
-  _size: number[]
-  _datatype?: string
-  storage(): 'dense'
-  size(): number[]
-  valueOf(): any[] | any[][]
+  _data: any[] | any[][];
+  _size: number[];
+  _datatype?: string;
+  storage(): 'dense';
+  size(): number[];
+  valueOf(): any[] | any[][];
 }
 
 interface SparseMatrix {
-  _values?: any[]
-  _index?: number[]
-  _ptr?: number[]
-  _size: number[]
-  _datatype?: string
-  storage(): 'sparse'
-  size(): number[]
-  valueOf(): any[] | any[][]
+  _values?: any[];
+  _index?: number[];
+  _ptr?: number[];
+  _size: number[];
+  _datatype?: string;
+  storage(): 'sparse';
+  size(): number[];
+  valueOf(): any[] | any[][];
 }
 
-type Matrix = DenseMatrix | SparseMatrix
+type Matrix = DenseMatrix | SparseMatrix;
 
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix
+  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
 }
 
 interface NodeOperations {
-  createBinaryNode: (
-    op: string,
-    fn: string,
-    left: unknown,
-    right: unknown
-  ) => unknown
-  hasNodeArg: (...args: unknown[]) => boolean
+  createBinaryNode: (op: string, fn: string, left: unknown, right: unknown) => unknown;
+  hasNodeArg: (...args: unknown[]) => boolean;
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  multiply: TypedFunction
-  equalScalar: TypedFunction
-  divideScalar: TypedFunction
-  inv: TypedFunction
-  nodeOperations: NodeOperations
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  multiply: TypedFunction;
+  equalScalar: TypedFunction;
+  divideScalar: TypedFunction;
+  inv: TypedFunction;
+  nodeOperations: NodeOperations;
 }
 
-const name = 'divide'
+const name = 'divide';
 const dependencies = [
   'typed',
   'matrix',
@@ -63,23 +58,15 @@ const dependencies = [
   'equalScalar',
   'divideScalar',
   'inv',
-  'nodeOperations'
-]
+  'nodeOperations',
+];
 
 export const createDivide = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    multiply,
-    equalScalar,
-    divideScalar,
-    inv,
-    nodeOperations
-  }: Dependencies) => {
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
-    const matAlgo14xDs = createMatAlgo14xDs({ typed })
+  ({ typed, matrix, multiply, equalScalar, divideScalar, inv, nodeOperations }: Dependencies) => {
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
     /**
      * Divide two values, `x / y`.
@@ -166,49 +153,28 @@ export const createDivide = /* #__PURE__ */ factory(
             // https://www.mathworks.nl/help/matlab/ref/mrdivide.html
             // https://www.gnu.org/software/octave/doc/interpreter/Arithmetic-Ops.html
             // https://stackoverflow.com/questions/12263932/how-does-gnu-octave-matrix-division-work-getting-unexpected-behaviour
-            return multiply(x, inv(y))
+            return multiply(x, inv(y));
           },
 
           'DenseMatrix, any': function (x: DenseMatrix, y: any): DenseMatrix {
-            return matAlgo14xDs(
-              x as any,
-              y,
-              divideScalar,
-              false
-            ) as unknown as DenseMatrix
+            return matAlgo14xDs(x as any, y, divideScalar, false) as unknown as DenseMatrix;
           },
 
-          'SparseMatrix, any': function (
-            x: SparseMatrix,
-            y: any
-          ): SparseMatrix {
-            return matAlgo11xS0s(
-              x as any,
-              y,
-              divideScalar,
-              false
-            ) as unknown as SparseMatrix
+          'SparseMatrix, any': function (x: SparseMatrix, y: any): SparseMatrix {
+            return matAlgo11xS0s(x as any, y, divideScalar, false) as unknown as SparseMatrix;
           },
 
           'Array, any': function (x: any[], y: any): any[] {
             // use matrix implementation
-            return matAlgo14xDs(
-              matrix(x) as any,
-              y,
-              divideScalar,
-              false
-            ).valueOf() as any[]
+            return matAlgo14xDs(matrix(x) as any, y, divideScalar, false).valueOf() as any[];
           },
 
-          'any, Array | Matrix': function (
-            x: any,
-            y: any[] | Matrix
-          ): any[] | Matrix {
-            return multiply(x, inv(y))
-          }
+          'any, Array | Matrix': function (x: any, y: any[] | Matrix): any[] | Matrix {
+            return multiply(x, inv(y));
+          },
         },
         divideScalar.signatures
       )
-    )
+    );
   }
-)
+);

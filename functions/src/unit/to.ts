@@ -1,25 +1,25 @@
-import { factory } from '../utils/factory.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for unit conversion
 interface UnitType {
-  to(unit: UnitType | string): UnitType
+  to(unit: UnitType | string): UnitType;
 }
 
 interface Matrix {
-  size(): number[]
-  storage(): string
+  size(): number[];
+  storage(): string;
 }
 
 interface ToDependencies {
-  typed: TypedFunction
-  matrix: (data: unknown[]) => Matrix
-  concat: TypedFunction
+  typed: TypedFunction;
+  matrix: (data: unknown[]) => Matrix;
+  concat: TypedFunction;
 }
 
-const name = 'to'
-const dependencies = ['typed', 'matrix', 'concat']
+const name = 'to';
+const dependencies = ['typed', 'matrix', 'concat'];
 
 export const createTo = /* #__PURE__ */ factory(
   name,
@@ -28,8 +28,8 @@ export const createTo = /* #__PURE__ */ factory(
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Change the unit of a value.
@@ -58,12 +58,9 @@ export const createTo = /* #__PURE__ */ factory(
     return typed(
       name,
       {
-        'Unit, Unit | string': (
-          x: UnitType,
-          unit: UnitType | string
-        ): UnitType => x.to(unit)
+        'Unit, Unit | string': (x: UnitType, unit: UnitType | string): UnitType => x.to(unit),
       },
       matrixAlgorithmSuite({ Ds: true } as any)
-    )
+    );
   }
-)
+);

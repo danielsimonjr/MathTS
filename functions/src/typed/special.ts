@@ -55,18 +55,25 @@ function _erf(x: f64): f64 {
   }
 
   const t = 2.0 / (2.0 + a);
-  const ans = t * Math.exp(
-    -a * a - 1.26551223 +
-    t * (1.00002368 +
-    t * (0.37409196 +
-    t * (0.09678418 +
-    t * (-0.18628806 +
-    t * (0.27886807 +
-    t * (-1.13520398 +
-    t * (1.48851587 +
-    t * (-0.82215223 +
-    t * 0.17087277))))))))
-  );
+  const ans =
+    t *
+    Math.exp(
+      -a * a -
+        1.26551223 +
+        t *
+          (1.00002368 +
+            t *
+              (0.37409196 +
+                t *
+                  (0.09678418 +
+                    t *
+                      (-0.18628806 +
+                        t *
+                          (0.27886807 +
+                            t *
+                              (-1.13520398 +
+                                t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))))))))
+    );
   return sign * (1.0 - ans);
 }
 
@@ -81,14 +88,8 @@ function _lgamma(x: f64): f64 {
   x -= 1;
   const g = 7;
   const c = [
-    0.99999999999980993,
-    676.5203681218851,
-    -1259.1392167224028,
-    771.32342877765313,
-    -176.61502916214059,
-    12.507343278686905,
-    -0.13857109526572012,
-    9.9843695780195716e-6,
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
     1.5056327351493116e-7,
   ];
   let sum = c[0];
@@ -127,7 +128,7 @@ function erfiScalar(x: f64): f64 {
   let term: f64 = x;
   for (let n = 0; n < 100; n++) {
     sum += term / (2 * n + 1);
-    term *= x * x / (n + 1);
+    term *= (x * x) / (n + 1);
     if (Math.abs(term / (2 * n + 3)) < Math.abs(sum) * 1e-15) break;
   }
   return c * sum;
@@ -184,7 +185,7 @@ function gammaincpScalar(a: f64, x: f64): f64 {
 function digammaScalar(x: f64): f64 {
   if (x <= 0 && x === Math.floor(x)) return NaN;
   if (x < 0) {
-    return digammaScalar(-x + 1) + Math.PI / Math.tan(Math.PI * (-x));
+    return digammaScalar(-x + 1) + Math.PI / Math.tan(Math.PI * -x);
   }
 
   let result = 0;
@@ -196,10 +197,7 @@ function digammaScalar(x: f64): f64 {
 
   result += Math.log(z) - 0.5 / z;
   const z2 = 1.0 / (z * z);
-  const coeffs = [
-    1.0 / 12, -1.0 / 120, 1.0 / 252, -1.0 / 240, 1.0 / 132,
-    -691.0 / 32760, 1.0 / 12,
-  ];
+  const coeffs = [1.0 / 12, -1.0 / 120, 1.0 / 252, -1.0 / 240, 1.0 / 132, -691.0 / 32760, 1.0 / 12];
   let zPow = z2;
   for (const c of coeffs) {
     result -= c * zPow;
@@ -218,16 +216,10 @@ function besselJ0Scalar(x: f64): f64 {
       57568490574.0 +
       y *
         (-13362590354.0 +
-          y *
-            (651619640.7 +
-              y * (-11214424.18 + y * (77392.33017 + y * (-184.9052456)))));
+          y * (651619640.7 + y * (-11214424.18 + y * (77392.33017 + y * -184.9052456))));
     const r2 =
       57568490411.0 +
-      y *
-        (1029532985.0 +
-          y *
-            (9494680.718 +
-              y * (59272.64853 + y * (267.8532712 + y * 1.0))));
+      y * (1029532985.0 + y * (9494680.718 + y * (59272.64853 + y * (267.8532712 + y * 1.0))));
     return r1 / r2;
   } else {
     const z = 8.0 / ax;
@@ -235,14 +227,10 @@ function besselJ0Scalar(x: f64): f64 {
     const xx = ax - 0.785398164;
     const p0 =
       1.0 +
-      y *
-        (-0.1098628627e-2 +
-          y * (0.2734510407e-4 + y * (-0.2073370639e-5 + y * 0.2093887211e-6)));
+      y * (-0.1098628627e-2 + y * (0.2734510407e-4 + y * (-0.2073370639e-5 + y * 0.2093887211e-6)));
     const q0 =
       -0.1562499995e-1 +
-      y *
-        (0.1430488765e-3 +
-          y * (-0.6911147651e-5 + y * (0.7621095161e-6 - y * 0.934935152e-7)));
+      y * (0.1430488765e-3 + y * (-0.6911147651e-5 + y * (0.7621095161e-6 - y * 0.934935152e-7)));
     return Math.sqrt(0.636619772 / ax) * (p0 * Math.cos(xx) - z * q0 * Math.sin(xx));
   }
 }
@@ -257,16 +245,10 @@ function besselJ1Scalar(x: f64): f64 {
       (72362614232.0 +
         y *
           (-7895059235.0 +
-            y *
-              (242396853.1 +
-                y * (-2972611.439 + y * (15704.4826 + y * (-30.16036606))))));
+            y * (242396853.1 + y * (-2972611.439 + y * (15704.4826 + y * -30.16036606)))));
     const r2 =
       144725228442.0 +
-      y *
-        (2300535178.0 +
-          y *
-            (18583304.74 +
-              y * (99447.43394 + y * (376.9991397 + y * 1.0))));
+      y * (2300535178.0 + y * (18583304.74 + y * (99447.43394 + y * (376.9991397 + y * 1.0))));
     return r1 / r2;
   } else {
     const z = 8.0 / ax;
@@ -274,14 +256,10 @@ function besselJ1Scalar(x: f64): f64 {
     const xx = ax - 2.356194491;
     const p1 =
       1.0 +
-      y *
-        (0.183105e-2 +
-          y * (-0.3516396496e-4 + y * (0.2457520174e-5 + y * (-0.240337019e-6))));
+      y * (0.183105e-2 + y * (-0.3516396496e-4 + y * (0.2457520174e-5 + y * -0.240337019e-6)));
     const q1 =
       0.04687499995 +
-      y *
-        (-0.2002690873e-3 +
-          y * (0.8449199096e-5 + y * (-0.88228987e-6 + y * 0.105787412e-6)));
+      y * (-0.2002690873e-3 + y * (0.8449199096e-5 + y * (-0.88228987e-6 + y * 0.105787412e-6)));
     let ans = Math.sqrt(0.636619772 / ax) * (p1 * Math.cos(xx) - z * q1 * Math.sin(xx));
     if (x < 0) ans = -ans;
     return ans;
@@ -298,16 +276,10 @@ function besselY0Scalar(x: f64): f64 {
       -2957821389.0 +
       y *
         (7062834065.0 +
-          y *
-            (-512359803.6 +
-              y * (10879881.29 + y * (-86327.92757 + y * 228.4622733))));
+          y * (-512359803.6 + y * (10879881.29 + y * (-86327.92757 + y * 228.4622733))));
     const r2 =
       40076544269.0 +
-      y *
-        (745249964.8 +
-          y *
-            (7189466.438 +
-              y * (47447.26470 + y * (226.1030244 + y * 1.0))));
+      y * (745249964.8 + y * (7189466.438 + y * (47447.2647 + y * (226.1030244 + y * 1.0))));
     return r1 / r2 + 0.636619772 * besselJ0Scalar(x) * Math.log(x);
   } else {
     const z = 8.0 / x;
@@ -315,14 +287,10 @@ function besselY0Scalar(x: f64): f64 {
     const xx = x - 0.785398164;
     const p0 =
       1.0 +
-      y *
-        (-0.1098628627e-2 +
-          y * (0.2734510407e-4 + y * (-0.2073370639e-5 + y * 0.2093887211e-6)));
+      y * (-0.1098628627e-2 + y * (0.2734510407e-4 + y * (-0.2073370639e-5 + y * 0.2093887211e-6)));
     const q0 =
       -0.1562499995e-1 +
-      y *
-        (0.1430488765e-3 +
-          y * (-0.6911147651e-5 + y * (0.7621095161e-6 - y * 0.934935152e-7)));
+      y * (0.1430488765e-3 + y * (-0.6911147651e-5 + y * (0.7621095161e-6 - y * 0.934935152e-7)));
     return Math.sqrt(0.636619772 / x) * (p0 * Math.sin(xx) + z * q0 * Math.cos(xx));
   }
 }
@@ -336,12 +304,11 @@ function besselY1Scalar(x: f64): f64 {
     const r1 =
       -0.4900604943e13 +
       y *
-        (0.1275274390e13 +
+        (0.127527439e13 +
           y *
-            (-0.5153486684e11 +
-              y * (0.6227854327e9 + y * (-0.3130827714e7 + y * 0.7374753505e1))));
+            (-0.5153486684e11 + y * (0.6227854327e9 + y * (-0.3130827714e7 + y * 0.7374753505e1))));
     const r2 =
-      0.2499580570e14 +
+      0.249958057e14 +
       y *
         (0.4244419664e12 +
           y *
@@ -354,14 +321,10 @@ function besselY1Scalar(x: f64): f64 {
     const xx = x - 2.356194491;
     const p1 =
       1.0 +
-      y *
-        (0.183105e-2 +
-          y * (-0.3516396496e-4 + y * (0.2457520174e-5 + y * (-0.240337019e-6))));
+      y * (0.183105e-2 + y * (-0.3516396496e-4 + y * (0.2457520174e-5 + y * -0.240337019e-6)));
     const q1 =
       0.04687499995 +
-      y *
-        (-0.2002690873e-3 +
-          y * (0.8449199096e-5 + y * (-0.88228987e-6 + y * 0.105787412e-6)));
+      y * (-0.2002690873e-3 + y * (0.8449199096e-5 + y * (-0.88228987e-6 + y * 0.105787412e-6)));
     return Math.sqrt(0.636619772 / x) * (p1 * Math.sin(xx) + z * q1 * Math.cos(xx));
   }
 }
@@ -379,7 +342,7 @@ function besselJScalar(n: f64, x: f64): f64 {
     let jPrev: f64 = besselJ0Scalar(x);
     let jCurr: f64 = besselJ1Scalar(x);
     for (let k = 1; k < ni; k++) {
-      const jNext = (2 * k / x) * jCurr - jPrev;
+      const jNext = ((2 * k) / x) * jCurr - jPrev;
       jPrev = jCurr;
       jCurr = jNext;
     }
@@ -391,7 +354,7 @@ function besselJScalar(n: f64, x: f64): f64 {
     let result = 0;
     let sum = 0;
     for (let k = nStart; k >= 0; k--) {
-      const jPrev = (2 * (k + 1) / x) * jCurr - jNext;
+      const jPrev = ((2 * (k + 1)) / x) * jCurr - jNext;
       jNext = jCurr;
       jCurr = jPrev;
       if (k === ni) result = jNext;
@@ -412,7 +375,7 @@ function besselYScalar(n: f64, x: f64): f64 {
   let yPrev: f64 = besselY0Scalar(x);
   let yCurr: f64 = besselY1Scalar(x);
   for (let k = 1; k < ni; k++) {
-    const yNext = (2 * k / x) * yCurr - yPrev;
+    const yNext = ((2 * k) / x) * yCurr - yPrev;
     yPrev = yCurr;
     yCurr = yNext;
   }
@@ -441,24 +404,49 @@ function besselKScalar(n: f64, x: f64): f64 {
 
   function k0(x: f64): f64 {
     if (x <= 2) {
-      const y = x * x / 4;
-      return -Math.log(x / 2) * besselIScalar(0, x) +
-        (-0.57721566 + y * (0.42278420 + y * (0.23069756 + y * (0.03488590 + y * (0.00262698 + y * 0.00010750)))));
+      const y = (x * x) / 4;
+      return (
+        -Math.log(x / 2) * besselIScalar(0, x) +
+        (-0.57721566 +
+          y * (0.4227842 + y * (0.23069756 + y * (0.0348859 + y * (0.00262698 + y * 0.0001075)))))
+      );
     }
     const y = 2 / x;
-    return (Math.exp(-x) / Math.sqrt(x)) *
-      (1.25331414 + y * (-0.07832358 + y * (0.02189568 + y * (-0.01062446 + y * (0.00587872 + y * (-0.00251540 + y * 0.00053208))))));
+    return (
+      (Math.exp(-x) / Math.sqrt(x)) *
+      (1.25331414 +
+        y *
+          (-0.07832358 +
+            y *
+              (0.02189568 +
+                y * (-0.01062446 + y * (0.00587872 + y * (-0.0025154 + y * 0.00053208))))))
+    );
   }
 
   function k1(x: f64): f64 {
     if (x <= 2) {
-      const y = x * x / 4;
-      return Math.log(x / 2) * besselIScalar(1, x) +
-        (1 / x) * (1 + y * (0.15443144 + y * (-0.67278579 + y * (-0.18156897 + y * (-0.01919402 + y * (-0.00110404 + y * -0.00004686))))));
+      const y = (x * x) / 4;
+      return (
+        Math.log(x / 2) * besselIScalar(1, x) +
+        (1 / x) *
+          (1 +
+            y *
+              (0.15443144 +
+                y *
+                  (-0.67278579 +
+                    y * (-0.18156897 + y * (-0.01919402 + y * (-0.00110404 + y * -0.00004686))))))
+      );
     }
     const y = 2 / x;
-    return (Math.exp(-x) / Math.sqrt(x)) *
-      (1.25331414 + y * (0.23498619 + y * (-0.03655620 + y * (0.01504268 + y * (-0.00780353 + y * (0.00325614 + y * -0.00068245))))));
+    return (
+      (Math.exp(-x) / Math.sqrt(x)) *
+      (1.25331414 +
+        y *
+          (0.23498619 +
+            y *
+              (-0.0365562 +
+                y * (0.01504268 + y * (-0.00780353 + y * (0.00325614 + y * -0.00068245))))))
+    );
   }
 
   if (ni === 0) return k0(x);
@@ -467,7 +455,7 @@ function besselKScalar(n: f64, x: f64): f64 {
   let kPrev = k0(x);
   let kCurr = k1(x);
   for (let k = 1; k < ni; k++) {
-    const kNext = (2 * k / x) * kCurr + kPrev;
+    const kNext = ((2 * k) / x) * kCurr + kPrev;
     kPrev = kCurr;
     kCurr = kNext;
   }
@@ -489,13 +477,13 @@ function betaincScalar(a: f64, b: f64, x: f64): f64 {
 
   let f = 1;
   let c = 1;
-  let d = 1 - (a + b) * x / (a + 1);
+  let d = 1 - ((a + b) * x) / (a + 1);
   if (Math.abs(d) < 1e-30) d = 1e-30;
   d = 1 / d;
   f = d;
 
   for (let m = 1; m <= 200; m++) {
-    let num = m * (b - m) * x / ((a + 2 * m - 1) * (a + 2 * m));
+    let num = (m * (b - m) * x) / ((a + 2 * m - 1) * (a + 2 * m));
     d = 1 + num * d;
     if (Math.abs(d) < 1e-30) d = 1e-30;
     c = 1 + num / c;
@@ -503,7 +491,7 @@ function betaincScalar(a: f64, b: f64, x: f64): f64 {
     d = 1 / d;
     f *= d * c;
 
-    num = -(a + m) * (a + b + m) * x / ((a + 2 * m) * (a + 2 * m + 1));
+    num = (-(a + m) * (a + b + m) * x) / ((a + 2 * m) * (a + 2 * m + 1));
     d = 1 + num * d;
     if (Math.abs(d) < 1e-30) d = 1e-30;
     c = 1 + num / c;
@@ -528,8 +516,12 @@ function ellipticKScalar(m: f64): f64 {
   for (let i = 0; i < 50; i++) {
     const aNew = (a + b) / 2;
     const bNew = Math.sqrt(a * b);
-    if (Math.abs(aNew - bNew) < 1e-15) { a = aNew; break; }
-    a = aNew; b = bNew;
+    if (Math.abs(aNew - bNew) < 1e-15) {
+      a = aNew;
+      break;
+    }
+    a = aNew;
+    b = bNew;
   }
   return Math.PI / (2 * a);
 }
@@ -538,7 +530,10 @@ function ellipticKScalar(m: f64): f64 {
 function ellipticEScalar(phi: f64, m: f64): f64 {
   const n = 100;
   const h = phi / n;
-  const sinSq = (v: f64) => { const s = Math.sin(v); return s * s; };
+  const sinSq = (v: f64) => {
+    const s = Math.sin(v);
+    return s * s;
+  };
   let sum = Math.sqrt(1 - m * sinSq(0)) + Math.sqrt(1 - m * sinSq(phi));
   for (let i = 1; i < n; i++) {
     const t = i * h;
@@ -558,10 +553,12 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return x;
-  let prev = 1, curr = x;
+  let prev = 1,
+    curr = x;
   for (let k = 2; k <= ni; k++) {
     const next = 2 * x * curr - prev;
-    prev = curr; curr = next;
+    prev = curr;
+    curr = next;
   }
   return curr;
 }
@@ -571,10 +568,12 @@ function hermiteHScalar(n: f64, x: f64): f64 {
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return 2 * x;
-  let prev = 1, curr = 2 * x;
+  let prev = 1,
+    curr = 2 * x;
   for (let k = 2; k <= ni; k++) {
     const next = 2 * x * curr - 2 * (k - 1) * prev;
-    prev = curr; curr = next;
+    prev = curr;
+    curr = next;
   }
   return curr;
 }
@@ -584,10 +583,12 @@ function laguerreLScalar(n: f64, x: f64): f64 {
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return 1 - x;
-  let prev = 1, curr = 1 - x;
+  let prev = 1,
+    curr = 1 - x;
   for (let k = 2; k <= ni; k++) {
     const next = ((2 * k - 1 - x) * curr - (k - 1) * prev) / k;
-    prev = curr; curr = next;
+    prev = curr;
+    curr = next;
   }
   return curr;
 }
@@ -597,10 +598,12 @@ function legendrePScalar(n: f64, x: f64): f64 {
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return x;
-  let prev = 1, curr = x;
+  let prev = 1,
+    curr = x;
   for (let k = 2; k <= ni; k++) {
     const next = ((2 * k - 1) * x * curr - (k - 1) * prev) / k;
-    prev = curr; curr = next;
+    prev = curr;
+    curr = next;
   }
   return curr;
 }
@@ -626,7 +629,7 @@ function lambertWScalar(x: f64): f64 {
     const f = wew - x;
     const fp = ew * (w + 1);
     const fpp = ew * (w + 2);
-    const dw = f / (fp - f * fpp / (2 * fp));
+    const dw = f / (fp - (f * fpp) / (2 * fp));
     w -= dw;
     if (Math.abs(dw) < 1e-15) break;
   }
@@ -643,18 +646,20 @@ function cosIntegralScalar(x: f64): f64 {
     let sum: f64 = 0;
     let term: f64 = 1;
     for (let n = 1; n < 100; n++) {
-      term *= -x * x / ((2 * n - 1) * (2 * n));
+      term *= (-x * x) / ((2 * n - 1) * (2 * n));
       sum += term / (2 * n);
       if (Math.abs(term / (2 * n)) < 1e-15) break;
     }
     return euler + Math.log(x) + sum;
   }
 
-  let f: f64 = 0, g: f64 = 0;
-  let fn: f64 = 1, gn: f64 = 1;
+  let f: f64 = 0,
+    g: f64 = 0;
+  let fn: f64 = 1,
+    gn: f64 = 1;
   for (let n = 1; n <= 30; n++) {
-    fn *= -(2 * n - 1) * (2 * n - 2) / (x * x);
-    gn *= -(2 * n) * (2 * n - 1) / (x * x);
+    fn *= (-(2 * n - 1) * (2 * n - 2)) / (x * x);
+    gn *= (-(2 * n) * (2 * n - 1)) / (x * x);
     f += fn;
     g += gn;
   }
@@ -674,7 +679,7 @@ function sinIntegralScalar(x: f64): f64 {
   let term: f64 = ax;
   for (let n = 0; n < 100; n++) {
     sum += term / (2 * n + 1);
-    term *= -ax * ax / ((2 * n + 2) * (2 * n + 3));
+    term *= (-ax * ax) / ((2 * n + 2) * (2 * n + 3));
     if (Math.abs(term / (2 * n + 3)) < 1e-15) break;
   }
 
@@ -724,7 +729,7 @@ function fresnelCScalar(x: f64): f64 {
   const x4 = ax * ax * ax * ax;
 
   for (let n = 1; n < 50; n++) {
-    term *= -piHalf * piHalf * x4 / ((2 * n) * (2 * n - 1)) * (4 * n - 3) / (4 * n + 1);
+    term *= (((-piHalf * piHalf * x4) / (2 * n * (2 * n - 1))) * (4 * n - 3)) / (4 * n + 1);
     sum += term;
     if (Math.abs(term) < Math.abs(sum) * 1e-15) break;
   }
@@ -738,12 +743,12 @@ function fresnelSScalar(x: f64): f64 {
   const sign = x < 0 ? -1 : 1;
 
   const piHalf = Math.PI / 2;
-  let term: f64 = piHalf * ax * ax * ax / 3;
+  let term: f64 = (piHalf * ax * ax * ax) / 3;
   let sum: f64 = term;
   const x4 = ax * ax * ax * ax;
 
   for (let n = 1; n < 50; n++) {
-    term *= -piHalf * piHalf * x4 / ((2 * n + 1) * (2 * n)) * (4 * n - 1) / (4 * n + 3);
+    term *= (((-piHalf * piHalf * x4) / ((2 * n + 1) * (2 * n))) * (4 * n - 1)) / (4 * n + 3);
     sum += term;
     if (Math.abs(term) < Math.abs(sum) * 1e-15) break;
   }
@@ -759,10 +764,7 @@ function fresnelSScalar(x: f64): f64 {
  * Build a self-contained kernel source string: dependency function
  * declarations followed by an expression that evaluates to `(x) => number`.
  */
-function kernelSource(
-  deps: Array<(...args: never[]) => unknown>,
-  body: string
-): string {
+function kernelSource(deps: Array<(...args: never[]) => unknown>, body: string): string {
   return `(() => {\n${deps.map((d) => d.toString()).join('\n')}\nreturn (${body});\n})()`;
 }
 
@@ -802,9 +804,7 @@ async function mapArray(
 export const erfc = mathTyped('erfc', {
   number: erfcScalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, erfcScalar, () =>
-      kernelSource([_erf, erfcScalar], '(x) => erfcScalar(x)')
-    ),
+    mapArray(x, erfcScalar, () => kernelSource([_erf, erfcScalar], '(x) => erfcScalar(x)')),
 });
 
 /**
@@ -816,9 +816,7 @@ export const erfc = mathTyped('erfc', {
 export const erfi = mathTyped('erfi', {
   number: erfiScalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, erfiScalar, () =>
-      kernelSource([erfiScalar], '(x) => erfiScalar(x)')
-    ),
+    mapArray(x, erfiScalar, () => kernelSource([erfiScalar], '(x) => erfiScalar(x)')),
 });
 
 // =============================================================================
@@ -838,8 +836,10 @@ export const erfi = mathTyped('erfi', {
 export const beta = mathTyped('beta', {
   'number, number': betaScalar,
   'Float64Array, number': (a: Float64Array, b: f64): Promise<Float64Array> =>
-    mapArray(a, (v) => betaScalar(v, b), () =>
-      kernelSource([_lgamma, betaScalar], `(a) => betaScalar(a, ${b})`)
+    mapArray(
+      a,
+      (v) => betaScalar(v, b),
+      () => kernelSource([_lgamma, betaScalar], `(a) => betaScalar(a, ${b})`)
     ),
 });
 
@@ -856,8 +856,10 @@ export const beta = mathTyped('beta', {
 export const gammainc = mathTyped('gammainc', {
   'number, number': gammaincScalar,
   'number, Float64Array': (a: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => gammaincScalar(a, v), () =>
-      kernelSource([_lgamma, gammaincScalar], `(x) => gammaincScalar(${a}, x)`)
+    mapArray(
+      x,
+      (v) => gammaincScalar(a, v),
+      () => kernelSource([_lgamma, gammaincScalar], `(x) => gammaincScalar(${a}, x)`)
     ),
 });
 
@@ -871,11 +873,11 @@ export const gammainc = mathTyped('gammainc', {
 export const gammaincp = mathTyped('gammaincp', {
   'number, number': gammaincpScalar,
   'number, Float64Array': (a: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => gammaincpScalar(a, v), () =>
-      kernelSource(
-        [_lgamma, gammaincScalar, gammaincpScalar],
-        `(x) => gammaincpScalar(${a}, x)`
-      )
+    mapArray(
+      x,
+      (v) => gammaincpScalar(a, v),
+      () =>
+        kernelSource([_lgamma, gammaincScalar, gammaincpScalar], `(x) => gammaincpScalar(${a}, x)`)
     ),
 });
 
@@ -889,13 +891,11 @@ export const gammaincp = mathTyped('gammaincp', {
  */
 export const betainc = mathTyped('betainc', {
   'number, number, number': betaincScalar,
-  'number, number, Float64Array': (
-    a: f64,
-    b: f64,
-    x: Float64Array
-  ): Promise<Float64Array> =>
-    mapArray(x, (v) => betaincScalar(a, b, v), () =>
-      kernelSource([_lgamma, betaincScalar], `(x) => betaincScalar(${a}, ${b}, x)`)
+  'number, number, Float64Array': (a: f64, b: f64, x: Float64Array): Promise<Float64Array> =>
+    mapArray(
+      x,
+      (v) => betaincScalar(a, b, v),
+      () => kernelSource([_lgamma, betaincScalar], `(x) => betaincScalar(${a}, ${b}, x)`)
     ),
 });
 
@@ -911,9 +911,7 @@ export const betainc = mathTyped('betainc', {
 export const digamma = mathTyped('digamma', {
   number: digammaScalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, digammaScalar, () =>
-      kernelSource([digammaScalar], '(x) => digammaScalar(x)')
-    ),
+    mapArray(x, digammaScalar, () => kernelSource([digammaScalar], '(x) => digammaScalar(x)')),
 });
 
 // =============================================================================
@@ -929,9 +927,7 @@ export const digamma = mathTyped('digamma', {
 export const besselJ0 = mathTyped('besselJ0', {
   number: besselJ0Scalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, besselJ0Scalar, () =>
-      kernelSource([besselJ0Scalar], '(x) => besselJ0Scalar(x)')
-    ),
+    mapArray(x, besselJ0Scalar, () => kernelSource([besselJ0Scalar], '(x) => besselJ0Scalar(x)')),
 });
 
 /**
@@ -943,9 +939,7 @@ export const besselJ0 = mathTyped('besselJ0', {
 export const besselJ1 = mathTyped('besselJ1', {
   number: besselJ1Scalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, besselJ1Scalar, () =>
-      kernelSource([besselJ1Scalar], '(x) => besselJ1Scalar(x)')
-    ),
+    mapArray(x, besselJ1Scalar, () => kernelSource([besselJ1Scalar], '(x) => besselJ1Scalar(x)')),
 });
 
 /**
@@ -986,11 +980,14 @@ export const besselY1 = mathTyped('besselY1', {
 export const besselJ = mathTyped('besselJ', {
   'number, number': besselJScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => besselJScalar(n, v), () =>
-      kernelSource(
-        [besselJ0Scalar, besselJ1Scalar, besselJScalar],
-        `(x) => besselJScalar(${n}, x)`
-      )
+    mapArray(
+      x,
+      (v) => besselJScalar(n, v),
+      () =>
+        kernelSource(
+          [besselJ0Scalar, besselJ1Scalar, besselJScalar],
+          `(x) => besselJScalar(${n}, x)`
+        )
     ),
 });
 
@@ -1004,11 +1001,14 @@ export const besselJ = mathTyped('besselJ', {
 export const besselY = mathTyped('besselY', {
   'number, number': besselYScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => besselYScalar(n, v), () =>
-      kernelSource(
-        [besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselYScalar],
-        `(x) => besselYScalar(${n}, x)`
-      )
+    mapArray(
+      x,
+      (v) => besselYScalar(n, v),
+      () =>
+        kernelSource(
+          [besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselYScalar],
+          `(x) => besselYScalar(${n}, x)`
+        )
     ),
 });
 
@@ -1022,11 +1022,10 @@ export const besselY = mathTyped('besselY', {
 export const besselI = mathTyped('besselI', {
   'number, number': besselIScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => besselIScalar(n, v), () =>
-      kernelSource(
-        [factorial, _lgamma, besselIScalar],
-        `(x) => besselIScalar(${n}, x)`
-      )
+    mapArray(
+      x,
+      (v) => besselIScalar(n, v),
+      () => kernelSource([factorial, _lgamma, besselIScalar], `(x) => besselIScalar(${n}, x)`)
     ),
 });
 
@@ -1040,11 +1039,14 @@ export const besselI = mathTyped('besselI', {
 export const besselK = mathTyped('besselK', {
   'number, number': besselKScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => besselKScalar(n, v), () =>
-      kernelSource(
-        [factorial, _lgamma, besselIScalar, besselKScalar],
-        `(x) => besselKScalar(${n}, x)`
-      )
+    mapArray(
+      x,
+      (v) => besselKScalar(n, v),
+      () =>
+        kernelSource(
+          [factorial, _lgamma, besselIScalar, besselKScalar],
+          `(x) => besselKScalar(${n}, x)`
+        )
     ),
 });
 
@@ -1081,10 +1083,7 @@ export const ellipticE = mathTyped('ellipticE', {
   number: ellipticECompleteScalar,
   Float64Array: (m: Float64Array): Promise<Float64Array> =>
     mapArray(m, ellipticECompleteScalar, () =>
-      kernelSource(
-        [ellipticEScalar, ellipticECompleteScalar],
-        '(m) => ellipticECompleteScalar(m)'
-      )
+      kernelSource([ellipticEScalar, ellipticECompleteScalar], '(m) => ellipticECompleteScalar(m)')
     ),
 });
 
@@ -1102,8 +1101,10 @@ export const ellipticE = mathTyped('ellipticE', {
 export const chebyshevT = mathTyped('chebyshevT', {
   'number, number': chebyshevTScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => chebyshevTScalar(n, v), () =>
-      kernelSource([chebyshevTScalar], `(x) => chebyshevTScalar(${n}, x)`)
+    mapArray(
+      x,
+      (v) => chebyshevTScalar(n, v),
+      () => kernelSource([chebyshevTScalar], `(x) => chebyshevTScalar(${n}, x)`)
     ),
 });
 
@@ -1117,8 +1118,10 @@ export const chebyshevT = mathTyped('chebyshevT', {
 export const hermiteH = mathTyped('hermiteH', {
   'number, number': hermiteHScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => hermiteHScalar(n, v), () =>
-      kernelSource([hermiteHScalar], `(x) => hermiteHScalar(${n}, x)`)
+    mapArray(
+      x,
+      (v) => hermiteHScalar(n, v),
+      () => kernelSource([hermiteHScalar], `(x) => hermiteHScalar(${n}, x)`)
     ),
 });
 
@@ -1132,8 +1135,10 @@ export const hermiteH = mathTyped('hermiteH', {
 export const laguerreL = mathTyped('laguerreL', {
   'number, number': laguerreLScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => laguerreLScalar(n, v), () =>
-      kernelSource([laguerreLScalar], `(x) => laguerreLScalar(${n}, x)`)
+    mapArray(
+      x,
+      (v) => laguerreLScalar(n, v),
+      () => kernelSource([laguerreLScalar], `(x) => laguerreLScalar(${n}, x)`)
     ),
 });
 
@@ -1147,8 +1152,10 @@ export const laguerreL = mathTyped('laguerreL', {
 export const legendreP = mathTyped('legendreP', {
   'number, number': legendrePScalar,
   'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, (v) => legendrePScalar(n, v), () =>
-      kernelSource([legendrePScalar], `(x) => legendrePScalar(${n}, x)`)
+    mapArray(
+      x,
+      (v) => legendrePScalar(n, v),
+      () => kernelSource([legendrePScalar], `(x) => legendrePScalar(${n}, x)`)
     ),
 });
 
@@ -1168,9 +1175,7 @@ export const legendreP = mathTyped('legendreP', {
 export const lambertW = mathTyped('lambertW', {
   number: lambertWScalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, lambertWScalar, () =>
-      kernelSource([lambertWScalar], '(x) => lambertWScalar(x)')
-    ),
+    mapArray(x, lambertWScalar, () => kernelSource([lambertWScalar], '(x) => lambertWScalar(x)')),
 });
 
 // =============================================================================
@@ -1215,10 +1220,7 @@ export const logIntegral = mathTyped('logIntegral', {
   number: logIntegralScalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
     mapArray(x, logIntegralScalar, () =>
-      kernelSource(
-        [expIntegralEiScalar, logIntegralScalar],
-        '(x) => logIntegralScalar(x)'
-      )
+      kernelSource([expIntegralEiScalar, logIntegralScalar], '(x) => logIntegralScalar(x)')
     ),
 });
 
@@ -1249,9 +1251,7 @@ export const expIntegralEi = mathTyped('expIntegralEi', {
 export const fresnelC = mathTyped('fresnelC', {
   number: fresnelCScalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, fresnelCScalar, () =>
-      kernelSource([fresnelCScalar], '(x) => fresnelCScalar(x)')
-    ),
+    mapArray(x, fresnelCScalar, () => kernelSource([fresnelCScalar], '(x) => fresnelCScalar(x)')),
 });
 
 /**
@@ -1263,9 +1263,7 @@ export const fresnelC = mathTyped('fresnelC', {
 export const fresnelS = mathTyped('fresnelS', {
   number: fresnelSScalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, fresnelSScalar, () =>
-      kernelSource([fresnelSScalar], '(x) => fresnelSScalar(x)')
-    ),
+    mapArray(x, fresnelSScalar, () => kernelSource([fresnelSScalar], '(x) => fresnelSScalar(x)')),
 });
 
 // =============================================================================

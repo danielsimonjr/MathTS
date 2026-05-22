@@ -1,47 +1,47 @@
-import { factory } from '../../../utils/factory.js'
-import { extend } from '../../../utils/object.js'
-import { createMatAlgo13xDD } from './matAlgo13xDD.js'
-import { createMatAlgo14xDs } from './matAlgo14xDs.js'
-import { broadcast } from './broadcast.js'
+import { factory } from '../../../utils/factory.js';
+import { extend } from '../../../utils/object.js';
+import { createMatAlgo13xDD } from './matAlgo13xDD.js';
+import { createMatAlgo14xDs } from './matAlgo14xDs.js';
+import { broadcast } from './broadcast.js';
 import type {
   TypedFunction,
   MatrixAlgorithmSuiteOptions,
   MatrixSignatures,
   MatrixInterface,
-  DenseMatrixData
-} from '../types.js'
+  DenseMatrixData,
+} from '../types.js';
 
 /**
  * Interface for matrix used in algorithm suite.
  */
 interface Matrix extends MatrixInterface {
-  _data?: DenseMatrixData
-  _size?: number[]
-  _datatype?: string
+  _data?: DenseMatrixData;
+  _size?: number[];
+  _datatype?: string;
 }
 
 /**
  * Matrix constructor function type.
  */
-type MatrixConstructor = (data: DenseMatrixData) => Matrix
+type MatrixConstructor = (data: DenseMatrixData) => Matrix;
 
-const name = 'matrixAlgorithmSuite'
-const dependencies = ['typed', 'matrix']
+const name = 'matrixAlgorithmSuite';
+const dependencies = ['typed', 'matrix'];
 
 /**
  * Dependencies for matrixAlgorithmSuite factory.
  */
 interface MatrixAlgorithmSuiteDependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
 }
 
 export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, matrix }: MatrixAlgorithmSuiteDependencies) => {
-    const matAlgo13xDD = createMatAlgo13xDD({ typed })
-    const matAlgo14xDs = createMatAlgo14xDs({ typed })
+    const matAlgo13xDD = createMatAlgo13xDD({ typed });
+    const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
     /**
      * Return a signatures object with the usual boilerplate of
@@ -60,12 +60,10 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
      * @param {object} options
      * @return {Object<string, function>} signatures
      */
-    return function matrixAlgorithmSuite(
-      options: MatrixAlgorithmSuiteOptions
-    ): MatrixSignatures {
-      const elop = options.elop
-      const SD = options.SD || options.DS
-      let matrixSignatures: MatrixSignatures
+    return function matrixAlgorithmSuite(options: MatrixAlgorithmSuiteOptions): MatrixSignatures {
+      const elop = options.elop;
+      const SD = options.SD || options.DS;
+      let matrixSignatures: MatrixSignatures;
 
       if (elop) {
         // First the dense ones
@@ -78,175 +76,147 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
               elop
             ).valueOf(),
           'Array, DenseMatrix': (x: any[], y: any) =>
-            matAlgo13xDD(
-              ...(broadcast(matrix(x) as any, y) as [any, any]),
-              elop
-            ),
+            matAlgo13xDD(...(broadcast(matrix(x) as any, y) as [any, any]), elop),
           'DenseMatrix, Array': (x: any, y: any[]) =>
-            matAlgo13xDD(
-              ...(broadcast(x, matrix(y) as any) as [any, any]),
-              elop
-            )
-        }
+            matAlgo13xDD(...(broadcast(x, matrix(y) as any) as [any, any]), elop),
+        };
         // Now incorporate sparse matrices
         if (options.SS) {
           matrixSignatures['SparseMatrix, SparseMatrix'] = (x: any, y: any) =>
-            options.SS!(...(broadcast(x, y) as any), elop, false)
+            options.SS!(...(broadcast(x, y) as any), elop, false);
         }
         if (options.DS) {
           matrixSignatures['DenseMatrix, SparseMatrix'] = (x: any, y: any) =>
-            options.DS!(...(broadcast(x, y) as any), elop, false)
+            options.DS!(...(broadcast(x, y) as any), elop, false);
           matrixSignatures['Array, SparseMatrix'] = (x: any[], y: any) =>
-            options.DS!(...(broadcast(matrix(x) as any, y) as any), elop, false)
+            options.DS!(...(broadcast(matrix(x) as any, y) as any), elop, false);
         }
         if (SD) {
           matrixSignatures['SparseMatrix, DenseMatrix'] = (x: any, y: any) =>
-            SD(...(broadcast(y, x) as any), elop, true)
+            SD(...(broadcast(y, x) as any), elop, true);
           matrixSignatures['SparseMatrix, Array'] = (x: any, y: any[]) =>
-            SD(...(broadcast(matrix(y) as any, x) as any), elop, true)
+            SD(...(broadcast(matrix(y) as any, x) as any), elop, true);
         }
       } else {
         // No elop, use this
         // First the dense ones
         matrixSignatures = {
-          'DenseMatrix, DenseMatrix': typed.referToSelf(
-            (self: any) => (x: any, y: any) => {
-              return matAlgo13xDD(...(broadcast(x, y) as [any, any]), self)
-            }
-          ),
-          'Array, Array': typed.referToSelf(
-            (self: any) => (x: any[], y: any[]) => {
-              return matAlgo13xDD(
-                ...(broadcast(matrix(x) as any, matrix(y) as any) as [
-                  any,
-                  any
-                ]),
-                self
-              ).valueOf()
-            }
-          ),
-          'Array, DenseMatrix': typed.referToSelf(
-            (self: any) => (x: any[], y: any) => {
-              return matAlgo13xDD(
-                ...(broadcast(matrix(x) as any, y) as [any, any]),
-                self
-              )
-            }
-          ),
-          'DenseMatrix, Array': typed.referToSelf(
-            (self: any) => (x: any, y: any[]) => {
-              return matAlgo13xDD(
-                ...(broadcast(x, matrix(y) as any) as [any, any]),
-                self
-              )
-            }
-          )
-        }
+          'DenseMatrix, DenseMatrix': typed.referToSelf((self: any) => (x: any, y: any) => {
+            return matAlgo13xDD(...(broadcast(x, y) as [any, any]), self);
+          }),
+          'Array, Array': typed.referToSelf((self: any) => (x: any[], y: any[]) => {
+            return matAlgo13xDD(
+              ...(broadcast(matrix(x) as any, matrix(y) as any) as [any, any]),
+              self
+            ).valueOf();
+          }),
+          'Array, DenseMatrix': typed.referToSelf((self: any) => (x: any[], y: any) => {
+            return matAlgo13xDD(...(broadcast(matrix(x) as any, y) as [any, any]), self);
+          }),
+          'DenseMatrix, Array': typed.referToSelf((self: any) => (x: any, y: any[]) => {
+            return matAlgo13xDD(...(broadcast(x, matrix(y) as any) as [any, any]), self);
+          }),
+        };
         // Now incorporate sparse matrices
         if (options.SS) {
           matrixSignatures['SparseMatrix, SparseMatrix'] = typed.referToSelf(
             (self: any) => (x: any, y: any) => {
-              return options.SS!(...(broadcast(x, y) as any), self, false)
+              return options.SS!(...(broadcast(x, y) as any), self, false);
             }
-          )
+          );
         }
         if (options.DS) {
           matrixSignatures['DenseMatrix, SparseMatrix'] = typed.referToSelf(
             (self: any) => (x: any, y: any) => {
-              return options.DS!(...(broadcast(x, y) as any), self, false)
+              return options.DS!(...(broadcast(x, y) as any), self, false);
             }
-          )
+          );
           matrixSignatures['Array, SparseMatrix'] = typed.referToSelf(
             (self: any) => (x: any[], y: any) => {
-              return options.DS!(
-                ...(broadcast(matrix(x) as any, y) as any),
-                self,
-                false
-              )
+              return options.DS!(...(broadcast(matrix(x) as any, y) as any), self, false);
             }
-          )
+          );
         }
         if (SD) {
           matrixSignatures['SparseMatrix, DenseMatrix'] = typed.referToSelf(
             (self: any) => (x: any, y: any) => {
-              return SD(...(broadcast(y, x) as any), self, true)
+              return SD(...(broadcast(y, x) as any), self, true);
             }
-          )
+          );
           matrixSignatures['SparseMatrix, Array'] = typed.referToSelf(
             (self: any) => (x: any, y: any[]) => {
-              return SD(...(broadcast(matrix(y) as any, x) as any), self, true)
+              return SD(...(broadcast(matrix(y) as any, x) as any), self, true);
             }
-          )
+          );
         }
       }
 
       // Now add the scalars
-      const scalar = options.scalar || 'any'
-      const Ds = options.Ds || options.Ss
+      const scalar = options.scalar || 'any';
+      const Ds = options.Ds || options.Ss;
       if (Ds) {
         if (elop) {
           matrixSignatures['DenseMatrix,' + scalar] = (x: any, y: any) =>
-            matAlgo14xDs(x, y, elop, false)
+            matAlgo14xDs(x, y, elop, false);
           matrixSignatures[scalar + ', DenseMatrix'] = (x: any, y: any) =>
-            matAlgo14xDs(y, x, elop, true)
+            matAlgo14xDs(y, x, elop, true);
           matrixSignatures['Array,' + scalar] = (x: any[], y: any) =>
-            matAlgo14xDs(matrix(x) as any, y, elop, false).valueOf()
+            matAlgo14xDs(matrix(x) as any, y, elop, false).valueOf();
           matrixSignatures[scalar + ', Array'] = (x: any, y: any[]) =>
-            matAlgo14xDs(matrix(y) as any, x, elop, true).valueOf()
+            matAlgo14xDs(matrix(y) as any, x, elop, true).valueOf();
         } else {
           matrixSignatures['DenseMatrix,' + scalar] = typed.referToSelf(
             (self: any) => (x: any, y: any) => {
-              return matAlgo14xDs(x, y, self, false)
+              return matAlgo14xDs(x, y, self, false);
             }
-          )
+          );
           matrixSignatures[scalar + ', DenseMatrix'] = typed.referToSelf(
             (self: any) => (x: any, y: any) => {
-              return matAlgo14xDs(y, x, self, true)
+              return matAlgo14xDs(y, x, self, true);
             }
-          )
+          );
           matrixSignatures['Array,' + scalar] = typed.referToSelf(
             (self: any) => (x: any[], y: any) => {
-              return matAlgo14xDs(matrix(x) as any, y, self, false).valueOf()
+              return matAlgo14xDs(matrix(x) as any, y, self, false).valueOf();
             }
-          )
+          );
           matrixSignatures[scalar + ', Array'] = typed.referToSelf(
             (self: any) => (x: any, y: any[]) => {
-              return matAlgo14xDs(matrix(y) as any, x, self, true).valueOf()
+              return matAlgo14xDs(matrix(y) as any, x, self, true).valueOf();
             }
-          )
+          );
         }
       }
-      const sS = options.sS !== undefined ? options.sS : options.Ss
+      const sS = options.sS !== undefined ? options.sS : options.Ss;
       if (elop) {
         if (options.Ss) {
           matrixSignatures['SparseMatrix,' + scalar] = (x: Matrix, y: any) =>
-            options.Ss!(x, y, elop, false)
+            options.Ss!(x, y, elop, false);
         }
         if (sS) {
-          matrixSignatures[scalar + ', SparseMatrix'] = (x: any, y: Matrix) =>
-            sS(y, x, elop, true)
+          matrixSignatures[scalar + ', SparseMatrix'] = (x: any, y: Matrix) => sS(y, x, elop, true);
         }
       } else {
         if (options.Ss) {
           matrixSignatures['SparseMatrix,' + scalar] = typed.referToSelf(
             (self: any) => (x: Matrix, y: any) => {
-              return options.Ss!(x, y, self, false)
+              return options.Ss!(x, y, self, false);
             }
-          )
+          );
         }
         if (sS) {
           matrixSignatures[scalar + ', SparseMatrix'] = typed.referToSelf(
             (self: any) => (x: any, y: Matrix) => {
-              return sS(y, x, self, true)
+              return sS(y, x, self, true);
             }
-          )
+          );
         }
       }
       // Also pull in the scalar signatures if the operator is a typed function
       if (elop && elop.signatures) {
-        extend(matrixSignatures, elop.signatures)
+        extend(matrixSignatures, elop.signatures);
       }
-      return matrixSignatures
-    }
+      return matrixSignatures;
+    };
   }
-)
+);

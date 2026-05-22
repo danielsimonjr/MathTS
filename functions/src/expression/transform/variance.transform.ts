@@ -1,29 +1,21 @@
-import { factory } from '../../utils/factory.js'
-import { errorTransform } from './utils/errorTransform.js'
-import { createVariance } from '../../statistics/variance.js'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
-import type { TypedFunction, VariadicArgs } from './types.js'
+import { factory } from '../../utils/factory.js';
+import { errorTransform } from './utils/errorTransform.js';
+import { createVariance } from '../../statistics/variance.js';
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
+import type { TypedFunction, VariadicArgs } from './types.js';
 
 interface VarianceDependencies {
-  typed: TypedFunction
-  add: TypedFunction
-  subtract: TypedFunction
-  multiply: TypedFunction
-  divide: TypedFunction
-  mapSlices: TypedFunction
-  isNaN: (x: unknown) => boolean
+  typed: TypedFunction;
+  add: TypedFunction;
+  subtract: TypedFunction;
+  multiply: TypedFunction;
+  divide: TypedFunction;
+  mapSlices: TypedFunction;
+  isNaN: (x: unknown) => boolean;
 }
 
-const name = 'variance'
-const dependencies = [
-  'typed',
-  'add',
-  'subtract',
-  'multiply',
-  'divide',
-  'mapSlices',
-  'isNaN'
-]
+const name = 'variance';
+const dependencies = ['typed', 'add', 'subtract', 'multiply', 'divide', 'mapSlices', 'isNaN'];
 
 /**
  * Attach a transform function to math.var
@@ -42,7 +34,7 @@ export const createVarianceTransform = /* #__PURE__ */ factory(
     multiply,
     divide,
     mapSlices,
-    isNaN: mathIsNaN
+    isNaN: mathIsNaN,
   }: VarianceDependencies) => {
     const variance = createVariance({
       typed,
@@ -51,20 +43,20 @@ export const createVarianceTransform = /* #__PURE__ */ factory(
       multiply,
       divide,
       mapSlices,
-      isNaN: mathIsNaN
-    })
+      isNaN: mathIsNaN,
+    });
 
     return typed(name, {
       '...any': function (args: VariadicArgs): unknown {
-        args = lastDimToZeroBase(args)
+        args = lastDimToZeroBase(args);
 
         try {
-          return variance.apply(null, args)
+          return variance.apply(null, args);
         } catch (err) {
-          throw errorTransform(err as Error)
+          throw errorTransform(err as Error);
         }
-      }
-    })
+      },
+    });
   },
   { isTransformFunction: true }
-)
+);

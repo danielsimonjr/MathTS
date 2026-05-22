@@ -15,7 +15,11 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": ["Sprint 22"],
-      "files": ["functions/src/trigonometry/sin.ts", "functions/src/trigonometry/cos.ts", "functions/src/trigonometry/tan.ts"]
+      "files": [
+        "functions/src/trigonometry/sin.ts",
+        "functions/src/trigonometry/cos.ts",
+        "functions/src/trigonometry/tan.ts"
+      ]
     },
     {
       "id": 2,
@@ -25,7 +29,12 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [1],
-      "files": ["functions/src/trigonometry/asin.ts", "functions/src/trigonometry/acos.ts", "functions/src/trigonometry/atan.ts", "functions/src/trigonometry/atan2.ts"]
+      "files": [
+        "functions/src/trigonometry/asin.ts",
+        "functions/src/trigonometry/acos.ts",
+        "functions/src/trigonometry/atan.ts",
+        "functions/src/trigonometry/atan2.ts"
+      ]
     },
     {
       "id": 3,
@@ -35,7 +44,11 @@
       "estimatedHours": 3,
       "complexity": "Medium",
       "dependencies": ["Sprint 22"],
-      "files": ["functions/src/trigonometry/sinh.ts", "functions/src/trigonometry/cosh.ts", "functions/src/trigonometry/tanh.ts"]
+      "files": [
+        "functions/src/trigonometry/sinh.ts",
+        "functions/src/trigonometry/cosh.ts",
+        "functions/src/trigonometry/tanh.ts"
+      ]
     },
     {
       "id": 4,
@@ -45,7 +58,11 @@
       "estimatedHours": 3,
       "complexity": "Medium",
       "dependencies": [3],
-      "files": ["functions/src/trigonometry/asinh.ts", "functions/src/trigonometry/acosh.ts", "functions/src/trigonometry/atanh.ts"]
+      "files": [
+        "functions/src/trigonometry/asinh.ts",
+        "functions/src/trigonometry/acosh.ts",
+        "functions/src/trigonometry/atanh.ts"
+      ]
     },
     {
       "id": 5,
@@ -55,7 +72,10 @@
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4],
-      "files": ["functions/tests/trigonometry/basic.test.ts", "functions/tests/trigonometry/hyperbolic.test.ts"]
+      "files": [
+        "functions/tests/trigonometry/basic.test.ts",
+        "functions/tests/trigonometry/hyperbolic.test.ts"
+      ]
     }
   ],
   "successCriteria": [
@@ -83,9 +103,7 @@
     "functions/tests/trigonometry/basic.test.ts",
     "functions/tests/trigonometry/hyperbolic.test.ts"
   ],
-  "filesModified": [
-    "functions/src/index.ts"
-  ],
+  "filesModified": ["functions/src/index.ts"],
   "totalEstimatedHours": 20,
   "notes": "Sprint 23 implements trigonometric and hyperbolic functions. Complex number support extends these beyond real values."
 }

@@ -1,25 +1,25 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for bin formatting
 interface BigNumberType {
   // BigNumber placeholder
 }
 
-type NumericValue = number | bigint | BigNumberType
+type NumericValue = number | bigint | BigNumberType;
 
 interface FormatOptions {
-  notation: string
-  wordSize?: number | bigint
+  notation: string;
+  wordSize?: number | bigint;
 }
 
 interface BinDependencies {
-  typed: TypedFunction
-  format: (value: NumericValue, options: FormatOptions) => string
+  typed: TypedFunction;
+  format: (value: NumericValue, options: FormatOptions) => string;
 }
 
-const name = 'bin'
-const dependencies = ['typed', 'format']
+const name = 'bin';
+const dependencies = ['typed', 'format'];
 
 /**
  * Format a number as binary.
@@ -48,14 +48,14 @@ export const createBin = /* #__PURE__ */ factory(
   ({ typed, format }: BinDependencies) => {
     return typed(name, {
       'number | BigNumber': function (n: number | bigint): string {
-        return format(n, { notation: 'bin' })
+        return format(n, { notation: 'bin' });
       },
       'number | BigNumber, number | BigNumber': function (
         n: number | bigint,
         wordSize: number | bigint
       ): string {
-        return format(n, { notation: 'bin', wordSize })
-      }
-    })
+        return format(n, { notation: 'bin', wordSize });
+      },
+    });
   }
-)
+);

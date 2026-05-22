@@ -1,18 +1,18 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { sinhNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { sinhNumber } from '../plain/number/index.js';
 
 // Type definitions for sinh
 interface SinhableType {
-  sinh(): SinhableType
+  sinh(): SinhableType;
 }
 
 interface SinhDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'sinh'
-const dependencies = ['typed']
+const name = 'sinh';
+const dependencies = ['typed'];
 
 export const createSinh = /* #__PURE__ */ factory(
   name,
@@ -42,7 +42,7 @@ export const createSinh = /* #__PURE__ */ factory(
      */
     return typed(name, {
       number: sinhNumber,
-      'Complex | BigNumber': (x: SinhableType): SinhableType => x.sinh()
-    }) as TypedFunction
+      'Complex | BigNumber': (x: SinhableType): SinhableType => x.sinh(),
+    }) as TypedFunction;
   }
-)
+);

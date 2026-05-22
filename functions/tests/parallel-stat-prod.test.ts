@@ -55,7 +55,7 @@ describe('parallelStatProd — Float64Array parallel reduction', () => {
   it('parallel product matches sequential product (forced parallel path)', async () => {
     // Build an array of 200 values near 1.0 so the product stays finite.
     const n = 200;
-    const data = Float64Array.from({ length: n }, (_, i) => 1 + (i % 5 - 2) * 0.01);
+    const data = Float64Array.from({ length: n }, (_, i) => 1 + ((i % 5) - 2) * 0.01);
 
     // Expected: sequential reduction
     const expected = data.reduce((acc, v) => acc * v, 1);

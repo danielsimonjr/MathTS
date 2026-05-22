@@ -1,70 +1,70 @@
-import { createMap } from '../utils/map.js'
+import { createMap } from '../utils/map.js';
 import {
   isFunctionNode,
   isNode,
   isOperatorNode,
   isParenthesisNode,
-  isSymbolNode
-} from '../utils/is.js'
-import { factory } from '../utils/factory.js'
-import type { MathNode } from '../utils/node.js'
-import type { TypedFunction } from '../core/function/typed.js'
+  isSymbolNode,
+} from '../utils/is.js';
+import { factory } from '../utils/factory.js';
+import type { MathNode } from '../utils/node.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for resolve
 interface SymbolNodeType extends MathNode {
-  name: string
+  name: string;
 }
 
 interface OperatorNodeType extends MathNode {
-  op: string
-  fn: string
-  args: MathNode[]
-  implicit: boolean
+  op: string;
+  fn: string;
+  args: MathNode[];
+  implicit: boolean;
 }
 
 interface ParenthesisNodeType extends MathNode {
-  content: MathNode
+  content: MathNode;
 }
 
 interface FunctionNodeType extends MathNode {
-  name: string
-  args: MathNode[]
+  name: string;
+  args: MathNode[];
 }
 
 interface ConstantNodeConstructor {
-  new (value: unknown): MathNode
+  new (value: unknown): MathNode;
 }
 
 interface FunctionNodeConstructor {
-  new (name: string, args: MathNode[]): MathNode
+  new (name: string, args: MathNode[]): MathNode;
 }
 
 interface OperatorNodeConstructor {
-  new (op: string, fn: string, args: MathNode[], implicit: boolean): MathNode
+  new (op: string, fn: string, args: MathNode[], implicit: boolean): MathNode;
 }
 
 interface ParenthesisNodeConstructor {
-  new (content: MathNode): MathNode
+  new (content: MathNode): MathNode;
 }
 
 interface ResolveDependencies {
-  typed: TypedFunction
-  parse: (expr: string) => MathNode
-  ConstantNode: ConstantNodeConstructor
-  FunctionNode: FunctionNodeConstructor
-  OperatorNode: OperatorNodeConstructor
-  ParenthesisNode: ParenthesisNodeConstructor
+  typed: TypedFunction;
+  parse: (expr: string) => MathNode;
+  ConstantNode: ConstantNodeConstructor;
+  FunctionNode: FunctionNodeConstructor;
+  OperatorNode: OperatorNodeConstructor;
+  ParenthesisNode: ParenthesisNodeConstructor;
 }
 
-const name = 'resolve'
+const name = 'resolve';
 const dependencies = [
   'typed',
   'parse',
   'ConstantNode',
   'FunctionNode',
   'OperatorNode',
-  'ParenthesisNode'
-]
+  'ParenthesisNode',
+];
 
 export const createResolve = /* #__PURE__ */ factory(
   name,
@@ -75,7 +75,7 @@ export const createResolve = /* #__PURE__ */ factory(
     ConstantNode,
     FunctionNode,
     OperatorNode,
-    ParenthesisNode
+    ParenthesisNode,
   }: ResolveDependencies) => {
     /**
      * resolve(expr, scope) replaces variable nodes with their scoped values
@@ -112,48 +112,46 @@ export const createResolve = /* #__PURE__ */ factory(
       // `within` is not documented, since it is for internal cycle
       // detection only
       if (!scope) {
-        return node
+        return node;
       }
       if (isSymbolNode(node)) {
-        const symbolNode = node as unknown as SymbolNodeType
+        const symbolNode = node as unknown as SymbolNodeType;
         if (within.has(symbolNode.name)) {
-          const variables = Array.from(within).join(', ')
-          throw new ReferenceError(
-            `recursive loop of variable definitions among {${variables}}`
-          )
+          const variables = Array.from(within).join(', ');
+          throw new ReferenceError(`recursive loop of variable definitions among {${variables}}`);
         }
-        const value = scope.get(symbolNode.name)
+        const value = scope.get(symbolNode.name);
         if (isNode(value)) {
-          const nextWithin = new Set(within)
-          nextWithin.add(symbolNode.name)
-          return _resolve(value as MathNode, scope, nextWithin)
+          const nextWithin = new Set(within);
+          nextWithin.add(symbolNode.name);
+          return _resolve(value as MathNode, scope, nextWithin);
         } else if (typeof value === 'number') {
-          return parse(String(value))
+          return parse(String(value));
         } else if (value !== undefined) {
-          return new ConstantNode(value)
+          return new ConstantNode(value);
         } else {
-          return node
+          return node;
         }
       } else if (isOperatorNode(node)) {
-        const opNode = node as unknown as OperatorNodeType
+        const opNode = node as unknown as OperatorNodeType;
         const args = opNode.args.map(function (arg: MathNode) {
-          return _resolve(arg, scope, within)
-        })
-        return new OperatorNode(opNode.op, opNode.fn, args, opNode.implicit)
+          return _resolve(arg, scope, within);
+        });
+        return new OperatorNode(opNode.op, opNode.fn, args, opNode.implicit);
       } else if (isParenthesisNode(node)) {
-        const parenNode = node as unknown as ParenthesisNodeType
-        return new ParenthesisNode(_resolve(parenNode.content, scope, within))
+        const parenNode = node as unknown as ParenthesisNodeType;
+        return new ParenthesisNode(_resolve(parenNode.content, scope, within));
       } else if (isFunctionNode(node)) {
-        const funcNode = node as unknown as FunctionNodeType
+        const funcNode = node as unknown as FunctionNodeType;
         const args = funcNode.args.map(function (arg: MathNode) {
-          return _resolve(arg, scope, within)
-        })
-        return new FunctionNode(funcNode.name, args)
+          return _resolve(arg, scope, within);
+        });
+        return new FunctionNode(funcNode.name, args);
       }
 
       // Otherwise just recursively resolve any children (might also work
       // for some of the above special cases)
-      return node.map((child: MathNode) => _resolve(child, scope, within))
+      return node.map((child: MathNode) => _resolve(child, scope, within));
     }
 
     return typed('resolve', {
@@ -165,20 +163,17 @@ export const createResolve = /* #__PURE__ */ factory(
       // because resolve is fairly expensive anyway, and this way
       // we get nice error messages if one entry in the array has wrong type.
       'Array | Matrix': typed.referToSelf(
-        (self: TypedFunction) =>
-          (A: { map: (fn: (n: MathNode) => MathNode) => unknown }) =>
-            A.map((n: MathNode) => self(n) as MathNode)
+        (self: TypedFunction) => (A: { map: (fn: (n: MathNode) => MathNode) => unknown }) =>
+          A.map((n: MathNode) => self(n) as MathNode)
       ),
       'Array | Matrix, null | undefined': typed.referToSelf(
-        (self: TypedFunction) =>
-          (A: { map: (fn: (n: MathNode) => MathNode) => unknown }) =>
-            A.map((n: MathNode) => self(n) as MathNode)
+        (self: TypedFunction) => (A: { map: (fn: (n: MathNode) => MathNode) => unknown }) =>
+          A.map((n: MathNode) => self(n) as MathNode)
       ),
       'Array, Object': (typed.referTo as any)(
         'Array,Map',
-        (selfAM: TypedFunction) =>
-          (A: unknown[], scope: Record<string, unknown>) =>
-            selfAM(A, createMap(scope))
+        (selfAM: TypedFunction) => (A: unknown[], scope: Record<string, unknown>) =>
+          selfAM(A, createMap(scope))
       ),
       'Matrix, Object': (typed.referTo as any)(
         'Matrix,Map',
@@ -191,12 +186,9 @@ export const createResolve = /* #__PURE__ */ factory(
       ),
       'Array | Matrix, Map': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            A: { map: (fn: (n: MathNode) => MathNode) => unknown },
-            scope: Map<string, unknown>
-          ) =>
+          (A: { map: (fn: (n: MathNode) => MathNode) => unknown }, scope: Map<string, unknown>) =>
             A.map((n: MathNode) => self(n, scope) as MathNode)
-      )
-    })
+      ),
+    });
   }
-)
+);

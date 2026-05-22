@@ -47,41 +47,41 @@ code. A browsable HTML edition of this page is available at
 
 ## Arithmetic
 
-| Function | Description | Types | Accel |
-|---|---|---|---|
-| `add(a, b)` | Addition | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `subtract(a, b)` | Subtraction | number, bigint, Complex, Fraction, Float64Array | parallel |
+| Function         | Description                     | Types                                           | Accel    |
+| ---------------- | ------------------------------- | ----------------------------------------------- | -------- |
+| `add(a, b)`      | Addition                        | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `subtract(a, b)` | Subtraction                     | number, bigint, Complex, Fraction, Float64Array | parallel |
 | `multiply(a, b)` | Multiplication / matrix product | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `divide(a, b)` | Division | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `unaryMinus(x)` | Negation `-x` | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `unaryPlus(x)` | Identity `+x` | number, bigint, Complex, Fraction | — |
-| `abs(x)` | Absolute value | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `sign(x)` | Sign of x: -1, 0, or 1 | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `pow(x, y)` | Power `x^y` | number, bigint, Complex, Fraction | — |
-| `sqrt(x)` | Square root | number, Complex, BigNumber, Float64Array | parallel |
-| `square(x)` | `x²` | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `cube(x)` | `x³` | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `cbrt(x)` | Cube root | number, Complex, BigNumber, Float64Array | parallel |
-| `nthRoot(x, n)` | nth root | number, Complex | — |
-| `exp(x)` | `e^x` | number, Complex, BigNumber, Float64Array | parallel |
-| `expm1(x)` | `e^x - 1` (stable near 0) | number, Complex, Float64Array | parallel |
-| `log(x[, base])` | Natural log (or log base) | number, Complex, BigNumber, Float64Array | parallel |
-| `log2(x)` | Base-2 logarithm | number, Complex, BigNumber, Float64Array | parallel |
-| `log10(x)` | Base-10 logarithm | number, Complex, BigNumber, Float64Array | parallel |
-| `log1p(x)` | `ln(1 + x)` (stable near 0) | number, Complex, Float64Array | parallel |
-| `round(x[, n])` | Round to n digits | number, bigint, Complex, Fraction, Float64Array | parallel |
-| `floor(x)` | Round down | number, Complex, Fraction, Float64Array | parallel |
-| `ceil(x)` | Round up | number, Complex, Fraction, Float64Array | parallel |
-| `fix(x)` | Round toward zero | number, Complex, Fraction, Float64Array | parallel |
-| `mod(a, b)` | Modulo `a % b` | number, bigint | — |
-| `gcd(a, b)` | Greatest common divisor | number, bigint | — |
-| `lcm(a, b)` | Least common multiple | number, bigint | — |
-| `xgcd(a, b)` | Extended GCD: `{gcd, x, y}` | number | — |
-| `norm(x[, p])` | p-norm | number, Float64Array, DenseMatrix | parallel |
-| `dot(a, b)` | Vector dot product | Float64Array, array | parallel |
-| `outer(a, b)` | Vector outer product | Float64Array, array | parallel |
-| `matmul(A, B)` | Matrix multiplication | Float64Array, DenseMatrix | parallel |
-| `matvec(A, x)` | Matrix–vector product | Float64Array, DenseMatrix | parallel |
+| `divide(a, b)`   | Division                        | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `unaryMinus(x)`  | Negation `-x`                   | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `unaryPlus(x)`   | Identity `+x`                   | number, bigint, Complex, Fraction               | —        |
+| `abs(x)`         | Absolute value                  | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `sign(x)`        | Sign of x: -1, 0, or 1          | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `pow(x, y)`      | Power `x^y`                     | number, bigint, Complex, Fraction               | —        |
+| `sqrt(x)`        | Square root                     | number, Complex, BigNumber, Float64Array        | parallel |
+| `square(x)`      | `x²`                            | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `cube(x)`        | `x³`                            | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `cbrt(x)`        | Cube root                       | number, Complex, BigNumber, Float64Array        | parallel |
+| `nthRoot(x, n)`  | nth root                        | number, Complex                                 | —        |
+| `exp(x)`         | `e^x`                           | number, Complex, BigNumber, Float64Array        | parallel |
+| `expm1(x)`       | `e^x - 1` (stable near 0)       | number, Complex, Float64Array                   | parallel |
+| `log(x[, base])` | Natural log (or log base)       | number, Complex, BigNumber, Float64Array        | parallel |
+| `log2(x)`        | Base-2 logarithm                | number, Complex, BigNumber, Float64Array        | parallel |
+| `log10(x)`       | Base-10 logarithm               | number, Complex, BigNumber, Float64Array        | parallel |
+| `log1p(x)`       | `ln(1 + x)` (stable near 0)     | number, Complex, Float64Array                   | parallel |
+| `round(x[, n])`  | Round to n digits               | number, bigint, Complex, Fraction, Float64Array | parallel |
+| `floor(x)`       | Round down                      | number, Complex, Fraction, Float64Array         | parallel |
+| `ceil(x)`        | Round up                        | number, Complex, Fraction, Float64Array         | parallel |
+| `fix(x)`         | Round toward zero               | number, Complex, Fraction, Float64Array         | parallel |
+| `mod(a, b)`      | Modulo `a % b`                  | number, bigint                                  | —        |
+| `gcd(a, b)`      | Greatest common divisor         | number, bigint                                  | —        |
+| `lcm(a, b)`      | Least common multiple           | number, bigint                                  | —        |
+| `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`     | number                                          | —        |
+| `norm(x[, p])`   | p-norm                          | number, Float64Array, DenseMatrix               | parallel |
+| `dot(a, b)`      | Vector dot product              | Float64Array, array                             | parallel |
+| `outer(a, b)`    | Vector outer product            | Float64Array, array                             | parallel |
+| `matmul(A, B)`   | Matrix multiplication           | Float64Array, DenseMatrix                       | parallel |
+| `matvec(A, x)`   | Matrix–vector product           | Float64Array, DenseMatrix                       | parallel |
 
 The factory layer additionally provides scalar variants used internally and by
 the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,
@@ -111,7 +111,7 @@ the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,
 
 The arithmetic layer generalises the four elementary operations to every MathTS
 numeric type. `gcd`, `lcm`, and `xgcd` derive from the Euclidean algorithm,
-described in Euclid's *Elements* (c. 300 BCE) and still one of the oldest
+described in Euclid's _Elements_ (c. 300 BCE) and still one of the oldest
 algorithms in continuous use; `xgcd` returns the Bézout coefficients that make
 modular inverses and the Chinese Remainder Theorem possible. The
 cancellation-safe pair `expm1` / `log1p` comes from IEEE-754 numerical-analysis
@@ -124,31 +124,31 @@ above.
 import { add, pow, log, mod } from '@danielsimonjr/mathts-functions';
 import { Complex, Fraction } from '@danielsimonjr/mathts-core';
 
-add(1, 2);                                       // 3
+add(1, 2); // 3
 add(new Fraction(1n, 3n), new Fraction(1n, 6n)); // Fraction(1, 2)
-pow(new Complex(0, 1), 2);                       // Complex(-1, 0)
-log(100, 10);                                    // 2
-mod(17, 5);                                      // 2
+pow(new Complex(0, 1), 2); // Complex(-1, 0)
+log(100, 10); // 2
+mod(17, 5); // 2
 ```
 
 ---
 
 ## Relational & Comparison
 
-| Function | Description |
-|---|---|
-| `equal(a, b)` | Equality test |
-| `unequal(a, b)` | Inequality test |
-| `smaller(a, b)` | `a < b` |
-| `smallerEq(a, b)` | `a ≤ b` |
-| `larger(a, b)` | `a > b` |
-| `largerEq(a, b)` | `a ≥ b` |
-| `compare(a, b)` | Three-way compare → -1, 0, 1 |
+| Function               | Description                         |
+| ---------------------- | ----------------------------------- |
+| `equal(a, b)`          | Equality test                       |
+| `unequal(a, b)`        | Inequality test                     |
+| `smaller(a, b)`        | `a < b`                             |
+| `smallerEq(a, b)`      | `a ≤ b`                             |
+| `larger(a, b)`         | `a > b`                             |
+| `largerEq(a, b)`       | `a ≥ b`                             |
+| `compare(a, b)`        | Three-way compare → -1, 0, 1        |
 | `compareNatural(a, b)` | Natural ordering across mixed types |
-| `compareText(a, b)` | Lexical string comparison |
-| `equalScalar(a, b)` | Scalar equality |
-| `equalText(a, b)` | String equality |
-| `deepEqual(a, b)` | Element-wise deep equality |
+| `compareText(a, b)`    | Lexical string comparison           |
+| `equalScalar(a, b)`    | Scalar equality                     |
+| `equalText(a, b)`      | String equality                     |
+| `deepEqual(a, b)`      | Element-wise deep equality          |
 
 ### Details
 
@@ -166,7 +166,7 @@ mod(17, 5);                                      // 2
 ### Background & History
 
 Order and equality relations are foundational to mathematics, but their
-*computational* treatment must contend with the fact that floating-point
+_computational_ treatment must contend with the fact that floating-point
 arithmetic is inexact. Tolerant comparison — testing whether two values agree to
 within a relative/absolute epsilon — is the pragmatic answer adopted across
 numerical software. `compareNatural` additionally supplies a stable canonical
@@ -178,9 +178,9 @@ into a unique normal form regardless of how it was entered.
 ```typescript
 import { equal, smaller, compare, deepEqual } from '@danielsimonjr/mathts-functions';
 
-equal(0.1 + 0.2, 0.3);   // true   (tolerant comparison)
-smaller(3, 5);           // true
-compare(2, 2);           // 0
+equal(0.1 + 0.2, 0.3); // true   (tolerant comparison)
+smaller(3, 5); // true
+compare(2, 2); // 0
 deepEqual([1, 2, 3], [1, 2, 3]); // true
 ```
 
@@ -190,20 +190,20 @@ deepEqual([1, 2, 3], [1, 2, 3]); // true
 
 Functions support `number`, `Complex`, `BigNumber`, and parallel `Float64Array`.
 
-| Function | Description | Accel |
-|---|---|---|
-| `sin(x)` `cos(x)` `tan(x)` | Sine, cosine, tangent | parallel |
-| `csc(x)` `sec(x)` `cot(x)` | Cosecant, secant, cotangent | parallel |
-| `asin(x)` `acos(x)` `atan(x)` | Inverse sine, cosine, tangent | parallel |
-| `atan2(y, x)` | Two-argument arctangent | — |
-| `acsc(x)` `asec(x)` `acot(x)` | Inverse cosecant, secant, cotangent | — |
-| `sinh(x)` `cosh(x)` `tanh(x)` | Hyperbolic sine, cosine, tangent | parallel |
-| `asinh(x)` `acosh(x)` `atanh(x)` | Inverse hyperbolic sine, cosine, tangent | parallel |
-| `csch(x)` `sech(x)` `coth(x)` | Hyperbolic cosecant, secant, cotangent (factory) | — |
-| `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory) | — |
-| `toRadians(deg)` | Convert degrees to radians | — |
-| `toDegrees(rad)` | Convert radians to degrees | — |
-| `hypot(a, b, …)` | Hypotenuse `sqrt(Σ xᵢ²)` | — |
+| Function                         | Description                                      | Accel    |
+| -------------------------------- | ------------------------------------------------ | -------- |
+| `sin(x)` `cos(x)` `tan(x)`       | Sine, cosine, tangent                            | parallel |
+| `csc(x)` `sec(x)` `cot(x)`       | Cosecant, secant, cotangent                      | parallel |
+| `asin(x)` `acos(x)` `atan(x)`    | Inverse sine, cosine, tangent                    | parallel |
+| `atan2(y, x)`                    | Two-argument arctangent                          | —        |
+| `acsc(x)` `asec(x)` `acot(x)`    | Inverse cosecant, secant, cotangent              | —        |
+| `sinh(x)` `cosh(x)` `tanh(x)`    | Hyperbolic sine, cosine, tangent                 | parallel |
+| `asinh(x)` `acosh(x)` `atanh(x)` | Inverse hyperbolic sine, cosine, tangent         | parallel |
+| `csch(x)` `sech(x)` `coth(x)`    | Hyperbolic cosecant, secant, cotangent (factory) | —        |
+| `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory)         | —        |
+| `toRadians(deg)`                 | Convert degrees to radians                       | —        |
+| `toDegrees(rad)`                 | Convert radians to degrees                       | —        |
+| `hypot(a, b, …)`                 | Hypotenuse `sqrt(Σ xᵢ²)`                         | —        |
 
 ### Details
 
@@ -235,27 +235,27 @@ them directly over `Complex` arguments.
 import { sin, cos, toDegrees } from '@danielsimonjr/mathts-functions';
 import { Complex } from '@danielsimonjr/mathts-core';
 
-sin(Math.PI / 6);         // 0.5
-cos(new Complex(0, 1));   // Complex(cosh(1), 0) ≈ Complex(1.543, 0)
+sin(Math.PI / 6); // 0.5
+cos(new Complex(0, 1)); // Complex(cosh(1), 0) ≈ Complex(1.543, 0)
 
-const angles = new Float64Array([0, Math.PI/6, Math.PI/4, Math.PI/3, Math.PI/2]);
-const sines = await sin(angles);   // parallel → Float64Array
+const angles = new Float64Array([0, Math.PI / 6, Math.PI / 4, Math.PI / 3, Math.PI / 2]);
+const sines = await sin(angles); // parallel → Float64Array
 
-toDegrees(Math.PI);       // 180
+toDegrees(Math.PI); // 180
 ```
 
 ---
 
 ## Logical & Bitwise
 
-| Function | Description |
-|---|---|
-| `and(a, b)` `or(a, b)` `xor(a, b)` `not(x)` | Logical operators |
-| `nullish(a, b)` | Nullish coalescing |
-| `bitAnd(a, b)` `bitOr(a, b)` `bitXor(a, b)` `bitNot(x)` | Bitwise operators |
-| `leftShift(x, n)` | Bitwise left shift |
-| `rightArithShift(x, n)` | Arithmetic (signed) right shift |
-| `rightLogShift(x, n)` | Logical (unsigned) right shift |
+| Function                                                | Description                     |
+| ------------------------------------------------------- | ------------------------------- |
+| `and(a, b)` `or(a, b)` `xor(a, b)` `not(x)`             | Logical operators               |
+| `nullish(a, b)`                                         | Nullish coalescing              |
+| `bitAnd(a, b)` `bitOr(a, b)` `bitXor(a, b)` `bitNot(x)` | Bitwise operators               |
+| `leftShift(x, n)`                                       | Bitwise left shift              |
+| `rightArithShift(x, n)`                                 | Arithmetic (signed) right shift |
+| `rightLogShift(x, n)`                                   | Logical (unsigned) right shift  |
 
 ### Details
 
@@ -269,8 +269,8 @@ toDegrees(Math.PI);       // 180
 
 ### Background & History
 
-Boolean algebra was formalised by George Boole in *An Investigation of the Laws
-of Thought* (1854) and became the mathematical basis of digital logic through
+Boolean algebra was formalised by George Boole in _An Investigation of the Laws
+of Thought_ (1854) and became the mathematical basis of digital logic through
 Claude Shannon's 1937 master's thesis. The bitwise operators mirror the
 instruction set of real hardware and remain essential for masks, flags, packed
 data, and fixed-point arithmetic. MathTS extends them to `bigint`, lifting the
@@ -281,49 +281,49 @@ data, and fixed-point arithmetic. MathTS extends them to `bigint`, lifting the
 ```typescript
 import { and, xor, bitAnd, leftShift } from '@danielsimonjr/mathts-functions';
 
-and(true, false);   // false
-xor(1, 0);          // true
-bitAnd(12, 10);     // 8     (1100 & 1010 = 1000)
-leftShift(1, 4);    // 16
+and(true, false); // false
+xor(1, 0); // true
+bitAnd(12, 10); // 8     (1100 & 1010 = 1000)
+leftShift(1, 4); // 16
 ```
 
 ---
 
 ## Special Functions
 
-| Function | Description | Accel |
-|---|---|---|
-| `erfc(x)` | Complementary error function `1 - erf(x)` | parallel |
-| `erf(x)` | Error function (factory layer) | — |
-| `erfi(x)` | Imaginary error function | parallel |
-| `beta(a, b)` | Beta function `Γ(a)·Γ(b)/Γ(a+b)` | parallel |
-| `betainc(x, a, b)` | Incomplete beta function | parallel |
-| `gammainc(a, x)` | Regularized lower incomplete gamma `P(a, x)` | parallel |
-| `gammaincp(a, x)` | Regularized upper incomplete gamma `Q(a, x)` | parallel |
-| `digamma(x)` | Digamma `d/dx ln Γ(x)` | parallel |
-| `gamma(x)` | Gamma function (factory layer) | — |
-| `lgamma(x)` | Log-gamma (factory layer) | — |
-| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind | parallel |
-| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`) | parallel |
-| `besselI(n, x)` `besselK(n, x)` | Modified Bessel functions | parallel |
-| `ellipticK(m)` `ellipticE(m)` | Complete elliptic integrals | parallel |
-| `fresnelC(x)` `fresnelS(x)` | Fresnel integrals | parallel |
-| `sinIntegral(x)` `cosIntegral(x)` | Sine / cosine integrals | parallel |
-| `expIntegralEi(x)` | Exponential integral `Ei(x)` | parallel |
-| `logIntegral(x)` | Logarithmic integral `li(x)` | parallel |
-| `lambertW(x[, branch])` | Lambert W function | parallel |
-| `chebyshevT(n, x)` | Chebyshev polynomial (first kind) | parallel |
-| `hermiteH(n, x)` | Hermite polynomial | parallel |
-| `laguerreL(n, x)` | Laguerre polynomial | parallel |
-| `legendreP(n, x)` | Legendre polynomial | parallel |
-| `zeta(s)` | Riemann zeta function (factory layer) | — |
+| Function                                    | Description                                  | Accel    |
+| ------------------------------------------- | -------------------------------------------- | -------- |
+| `erfc(x)`                                   | Complementary error function `1 - erf(x)`    | parallel |
+| `erf(x)`                                    | Error function (factory layer)               | —        |
+| `erfi(x)`                                   | Imaginary error function                     | parallel |
+| `beta(a, b)`                                | Beta function `Γ(a)·Γ(b)/Γ(a+b)`             | parallel |
+| `betainc(x, a, b)`                          | Incomplete beta function                     | parallel |
+| `gammainc(a, x)`                            | Regularized lower incomplete gamma `P(a, x)` | parallel |
+| `gammaincp(a, x)`                           | Regularized upper incomplete gamma `Q(a, x)` | parallel |
+| `digamma(x)`                                | Digamma `d/dx ln Γ(x)`                       | parallel |
+| `gamma(x)`                                  | Gamma function (factory layer)               | —        |
+| `lgamma(x)`                                 | Log-gamma (factory layer)                    | —        |
+| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind                            | parallel |
+| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                 | parallel |
+| `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                    | parallel |
+| `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                  | parallel |
+| `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                            | parallel |
+| `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                      | parallel |
+| `expIntegralEi(x)`                          | Exponential integral `Ei(x)`                 | parallel |
+| `logIntegral(x)`                            | Logarithmic integral `li(x)`                 | parallel |
+| `lambertW(x[, branch])`                     | Lambert W function                           | parallel |
+| `chebyshevT(n, x)`                          | Chebyshev polynomial (first kind)            | parallel |
+| `hermiteH(n, x)`                            | Hermite polynomial                           | parallel |
+| `laguerreL(n, x)`                           | Laguerre polynomial                          | parallel |
+| `legendreP(n, x)`                           | Legendre polynomial                          | parallel |
+| `zeta(s)`                                   | Riemann zeta function (factory layer)        | —        |
 
 ### Details
 
 - The gamma family is evaluated with the Lanczos approximation; use `lgamma`
   (log-gamma) for large arguments where `gamma` itself would overflow.
   `digamma` is the logarithmic derivative `d/dx ln Γ(x)`.
-- `betainc` and `gammainc` / `gammaincp` return *regularized* (normalised to
+- `betainc` and `gammainc` / `gammaincp` return _regularized_ (normalised to
   `[0, 1]`) incomplete functions — the building blocks of the Beta, Gamma, t,
   F, and chi-squared cumulative distributions.
 - Bessel functions of the second kind (`besselY*`) and `besselK` require
@@ -351,49 +351,49 @@ computer-algebra system.
 ```typescript
 import { erfc, beta, gammainc, besselJ0, lambertW } from '@danielsimonjr/mathts-functions';
 
-erfc(1);          // ~0.1573
-beta(0.5, 0.5);   // pi
-gammainc(1, 1);   // ~0.6321 (= 1 - 1/e)
-besselJ0(0);      // 1
-lambertW(1);      // ~0.5671 (omega constant)
+erfc(1); // ~0.1573
+beta(0.5, 0.5); // pi
+gammainc(1, 1); // ~0.6321 (= 1 - 1/e)
+besselJ0(0); // 1
+lambertW(1); // ~0.5671 (omega constant)
 ```
 
 ---
 
 ## Combinatorics & Number Theory
 
-| Function | Description |
-|---|---|
-| `factorial(n)` | Factorial `n!` (factory layer) |
-| `combinations(n, k)` | Binomial coefficient `C(n, k)` |
-| `combinationsWithRep(n, k)` | Combinations with repetition |
-| `permutations(n[, k])` | Permutations |
-| `multinomial(k)` | Multinomial coefficient |
-| `composition(n, k)` | Number of compositions |
-| `catalan(n)` | nth Catalan number |
-| `stirlingS2(n, k)` | Stirling number of the second kind |
-| `bellNumbers(n)` | nth Bell number |
-| `bernoulli(n)` | nth Bernoulli number |
-| `fibonacci(n)` | nth Fibonacci number (O(log n) fast doubling) |
-| `lucas(n)` `lucasL(n)` | nth Lucas number |
-| `doubleFactorial(n)` | Double factorial `n!!` |
-| `risingFactorial(x, n)` | Pochhammer symbol `x·(x+1)·…·(x+n-1)` |
-| `fallingFactorial(x, n)` | Falling factorial `x·(x-1)·…·(x-n+1)` |
-| `subfactorial(n)` | Derangement count `!n` |
-| `harmonicNumber(n)` | nth harmonic number |
-| `prime(n)` | nth prime |
-| `nextPrime(n)` | Next prime after `n` |
-| `primePi(n)` | Prime-counting function `π(n)` |
-| `primeFactors(n)` | Prime factorization |
-| `divisors(n)` | List of divisors |
-| `divisorSigma(n[, k])` | Sum-of-divisors function |
-| `eulerPhi(n)` | Euler totient `φ(n)` |
-| `carmichaelLambda(n)` | Carmichael function `λ(n)` |
-| `moebiusMu(n)` | Möbius function `μ(n)` |
-| `jacobiSymbol(a, n)` | Jacobi symbol |
-| `chineseRemainder(rems, mods)` | Chinese Remainder Theorem |
-| `partitions(n)` | Integer partition count |
-| `integerDigits(n[, base])` | Digits of an integer |
+| Function                       | Description                                   |
+| ------------------------------ | --------------------------------------------- |
+| `factorial(n)`                 | Factorial `n!` (factory layer)                |
+| `combinations(n, k)`           | Binomial coefficient `C(n, k)`                |
+| `combinationsWithRep(n, k)`    | Combinations with repetition                  |
+| `permutations(n[, k])`         | Permutations                                  |
+| `multinomial(k)`               | Multinomial coefficient                       |
+| `composition(n, k)`            | Number of compositions                        |
+| `catalan(n)`                   | nth Catalan number                            |
+| `stirlingS2(n, k)`             | Stirling number of the second kind            |
+| `bellNumbers(n)`               | nth Bell number                               |
+| `bernoulli(n)`                 | nth Bernoulli number                          |
+| `fibonacci(n)`                 | nth Fibonacci number (O(log n) fast doubling) |
+| `lucas(n)` `lucasL(n)`         | nth Lucas number                              |
+| `doubleFactorial(n)`           | Double factorial `n!!`                        |
+| `risingFactorial(x, n)`        | Pochhammer symbol `x·(x+1)·…·(x+n-1)`         |
+| `fallingFactorial(x, n)`       | Falling factorial `x·(x-1)·…·(x-n+1)`         |
+| `subfactorial(n)`              | Derangement count `!n`                        |
+| `harmonicNumber(n)`            | nth harmonic number                           |
+| `prime(n)`                     | nth prime                                     |
+| `nextPrime(n)`                 | Next prime after `n`                          |
+| `primePi(n)`                   | Prime-counting function `π(n)`                |
+| `primeFactors(n)`              | Prime factorization                           |
+| `divisors(n)`                  | List of divisors                              |
+| `divisorSigma(n[, k])`         | Sum-of-divisors function                      |
+| `eulerPhi(n)`                  | Euler totient `φ(n)`                          |
+| `carmichaelLambda(n)`          | Carmichael function `λ(n)`                    |
+| `moebiusMu(n)`                 | Möbius function `μ(n)`                        |
+| `jacobiSymbol(a, n)`           | Jacobi symbol                                 |
+| `chineseRemainder(rems, mods)` | Chinese Remainder Theorem                     |
+| `partitions(n)`                | Integer partition count                       |
+| `integerDigits(n[, base])`     | Digits of an integer                          |
 
 ### Details
 
@@ -415,7 +415,7 @@ Carl Friedrich Gauss called number theory "the queen of mathematics," and
 combinatorics supplies the discrete counting machinery behind probability,
 cryptography, and algorithm analysis. Several functions here are genuinely
 ancient: the sieve of Eratosthenes dates to c. 240 BCE, and the Chinese
-Remainder Theorem appears in Sunzi's *Mathematical Classic* (3rd–5th century
+Remainder Theorem appears in Sunzi's _Mathematical Classic_ (3rd–5th century
 CE). Euler defined the totient function in 1763; the Möbius function and Möbius
 inversion came from August Möbius in 1832. These tools are no museum pieces —
 `eulerPhi` and `chineseRemainder` are working components of RSA and modern
@@ -424,11 +424,16 @@ public-key cryptography.
 ### Examples
 
 ```typescript
-import { fibonacci, primeFactors, eulerPhi, chineseRemainder } from '@danielsimonjr/mathts-functions';
+import {
+  fibonacci,
+  primeFactors,
+  eulerPhi,
+  chineseRemainder,
+} from '@danielsimonjr/mathts-functions';
 
-fibonacci(20);                    // 6765
-primeFactors(360);                // [2, 2, 2, 3, 3, 5]
-eulerPhi(36);                     // 12
+fibonacci(20); // 6765
+primeFactors(360); // [2, 2, 2, 3, 3, 5]
+eulerPhi(36); // 12
 chineseRemainder([2, 3, 2], [3, 5, 7]); // 23
 ```
 
@@ -443,33 +448,33 @@ The typed arithmetic layer provides scalar/array aggregations: `sum`, `mean`,
 For `Float64Array` data, the `parallelStat*` family runs in worker threads and
 returns a `Promise`. Scalar overloads (2–4 numbers) are synchronous.
 
-| Function | Description | Accel |
-|---|---|---|
-| `parallelStatSum(a)` | Sum of all elements | parallel |
-| `parallelStatMean(a)` | Arithmetic mean | parallel |
-| `parallelStatVariance(a[, type])` | Variance (`unbiased`/`uncorrected`/`biased`) | parallel |
-| `parallelStatStd(a[, type])` | Standard deviation | parallel |
-| `parallelStatMin(a)` `parallelStatMax(a)` | Min / max | parallel |
-| `parallelStatMinMax(a)` | `{ min, max }` in one pass | parallel |
-| `parallelStatMedian(a)` | Median | parallel |
-| `parallelStatMode(a)` | Mode | — |
-| `parallelStatProd(a)` | Product | parallel |
-| `parallelStatNorm(a[, p])` | p-norm | parallel |
-| `parallelStatDistance(a, b)` | Euclidean distance | parallel |
-| `parallelStatCorr(a, b)` | Pearson correlation | parallel |
-| `parallelStatMAD(a)` | Median absolute deviation | parallel |
-| `parallelStatCumsum(a)` | Cumulative sum | — |
-| `parallelStatQuantile(a, q)` | q-th quantile (0–1) | — |
-| `parallelStatHistogram(a, bins)` | Histogram bin counts | parallel |
+| Function                                  | Description                                  | Accel    |
+| ----------------------------------------- | -------------------------------------------- | -------- |
+| `parallelStatSum(a)`                      | Sum of all elements                          | parallel |
+| `parallelStatMean(a)`                     | Arithmetic mean                              | parallel |
+| `parallelStatVariance(a[, type])`         | Variance (`unbiased`/`uncorrected`/`biased`) | parallel |
+| `parallelStatStd(a[, type])`              | Standard deviation                           | parallel |
+| `parallelStatMin(a)` `parallelStatMax(a)` | Min / max                                    | parallel |
+| `parallelStatMinMax(a)`                   | `{ min, max }` in one pass                   | parallel |
+| `parallelStatMedian(a)`                   | Median                                       | parallel |
+| `parallelStatMode(a)`                     | Mode                                         | —        |
+| `parallelStatProd(a)`                     | Product                                      | parallel |
+| `parallelStatNorm(a[, p])`                | p-norm                                       | parallel |
+| `parallelStatDistance(a, b)`              | Euclidean distance                           | parallel |
+| `parallelStatCorr(a, b)`                  | Pearson correlation                          | parallel |
+| `parallelStatMAD(a)`                      | Median absolute deviation                    | parallel |
+| `parallelStatCumsum(a)`                   | Cumulative sum                               | —        |
+| `parallelStatQuantile(a, q)`              | q-th quantile (0–1)                          | —        |
+| `parallelStatHistogram(a, bins)`          | Histogram bin counts                         | parallel |
 
 ### Selection (O(n), no full sort)
 
-| Function | Description |
-|---|---|
+| Function              | Description                      |
+| --------------------- | -------------------------------- |
 | `quickSelect(arr, k)` | kth smallest element (0-indexed) |
-| `medianSelect(arr)` | Exact median via quickselect |
-| `minSelect(arr, k)` | `k` smallest elements |
-| `maxSelect(arr, k)` | `k` largest elements |
+| `medianSelect(arr)`   | Exact median via quickselect     |
+| `minSelect(arr, k)`   | `k` smallest elements            |
+| `maxSelect(arr, k)`   | `k` largest elements             |
 
 ### Details
 
@@ -498,8 +503,8 @@ without paying for a full sort.
 import { parallelStatMean, parallelStatStd, quickSelect } from '@danielsimonjr/mathts-functions';
 
 const data = new Float64Array([2, 4, 4, 4, 5, 5, 7, 9]);
-await parallelStatMean(data);          // 5
-await parallelStatStd(data);           // 2
+await parallelStatMean(data); // 5
+await parallelStatStd(data); // 2
 quickSelect([3, 1, 4, 1, 5, 9, 2], 3); // 3 (4th smallest)
 ```
 
@@ -509,46 +514,46 @@ quickSelect([3, 1, 4, 1, 5, 9, 2], 3); // 3 (4th smallest)
 
 ### Density / mass functions
 
-| Function | Description | Accel |
-|---|---|---|
-| `normalPDF(x[, mu, sigma])` | Normal PDF | parallel |
-| `normalCDF(x[, mu, sigma])` | Normal CDF | parallel |
-| `exponentialPDF(x, lambda)` | Exponential PDF | parallel |
-| `exponentialCDF(x, lambda)` | Exponential CDF | parallel |
-| `poissonPMF(k, lambda)` | Poisson PMF | parallel |
-| `binomialPMF(k, n, p)` | Binomial PMF | parallel |
-| `geometricPMF(k, p)` | Geometric PMF | parallel |
-| `bernoulliPMF(k, p)` | Bernoulli PMF | parallel |
-| `entropy(probs)` | Shannon entropy (bits) | — |
-| `jsDivergence(p, q)` | Jensen–Shannon divergence | — |
-| `kldivergence(p, q)` | Kullback–Leibler divergence (factory layer) | — |
+| Function                    | Description                                 | Accel    |
+| --------------------------- | ------------------------------------------- | -------- |
+| `normalPDF(x[, mu, sigma])` | Normal PDF                                  | parallel |
+| `normalCDF(x[, mu, sigma])` | Normal CDF                                  | parallel |
+| `exponentialPDF(x, lambda)` | Exponential PDF                             | parallel |
+| `exponentialCDF(x, lambda)` | Exponential CDF                             | parallel |
+| `poissonPMF(k, lambda)`     | Poisson PMF                                 | parallel |
+| `binomialPMF(k, n, p)`      | Binomial PMF                                | parallel |
+| `geometricPMF(k, p)`        | Geometric PMF                               | parallel |
+| `bernoulliPMF(k, p)`        | Bernoulli PMF                               | parallel |
+| `entropy(probs)`            | Shannon entropy (bits)                      | —        |
+| `jsDivergence(p, q)`        | Jensen–Shannon divergence                   | —        |
+| `kldivergence(p, q)`        | Kullback–Leibler divergence (factory layer) | —        |
 
 ### Distribution objects
 
 Constructors returning objects with `pdf`, `cdf`, `ppf` (quantile), and
 `sample` methods.
 
-| Function | Description |
-|---|---|
-| `normalDist([mu, sigma])` | Normal distribution |
-| `betaDist(alpha, beta)` | Beta distribution |
-| `binomialDist(n, p)` | Binomial distribution |
-| `chiSquaredDist(k)` | Chi-squared distribution |
-| `exponentialDist([lambda])` | Exponential distribution |
-| `fDist(d1, d2)` | F-distribution |
-| `gammaDist(shape[, rate])` | Gamma distribution |
-| `logNormalDist([mu, sigma])` | Log-normal distribution |
-| `poissonDist(lambda)` | Poisson distribution |
-| `tDist(nu)` | Student's t-distribution |
-| `uniformDist([a, b])` | Uniform distribution |
-| `weibullDist(k[, lambda])` | Weibull distribution |
+| Function                     | Description              |
+| ---------------------------- | ------------------------ |
+| `normalDist([mu, sigma])`    | Normal distribution      |
+| `betaDist(alpha, beta)`      | Beta distribution        |
+| `binomialDist(n, p)`         | Binomial distribution    |
+| `chiSquaredDist(k)`          | Chi-squared distribution |
+| `exponentialDist([lambda])`  | Exponential distribution |
+| `fDist(d1, d2)`              | F-distribution           |
+| `gammaDist(shape[, rate])`   | Gamma distribution       |
+| `logNormalDist([mu, sigma])` | Log-normal distribution  |
+| `poissonDist(lambda)`        | Poisson distribution     |
+| `tDist(nu)`                  | Student's t-distribution |
+| `uniformDist([a, b])`        | Uniform distribution     |
+| `weibullDist(k[, lambda])`   | Weibull distribution     |
 
 ### Random sampling (factory layer)
 
-| Function | Description |
-|---|---|
-| `random([min, max])` | Uniform random number |
-| `randomInt([min, max])` | Uniform random integer |
+| Function                 | Description                     |
+| ------------------------ | ------------------------------- |
+| `random([min, max])`     | Uniform random number           |
+| `randomInt([min, max])`  | Uniform random integer          |
 | `pickRandom(array[, n])` | Random element(s) from an array |
 
 ### Details
@@ -579,9 +584,9 @@ Shannon (1948) and Solomon Kullback & Richard Leibler (1951).
 import { normalDist, tDist, poissonPMF } from '@danielsimonjr/mathts-functions';
 
 const N = normalDist(0, 1);
-N.pdf(0);       // ~0.3989
-N.cdf(1.96);    // ~0.975
-N.ppf(0.975);   // ~1.96
+N.pdf(0); // ~0.3989
+N.cdf(1.96); // ~0.975
+N.ppf(0.975); // ~1.96
 
 poissonPMF(2, 3); // ~0.2240
 ```
@@ -593,44 +598,44 @@ poissonPMF(2, 3); // ~0.2240
 Operates on `DenseMatrix` (and `SparseMatrix` where applicable). Heavy
 operations are eligible for WASM/GPU acceleration via the matrix package.
 
-| Function | Description |
-|---|---|
-| `det(A)` | Determinant |
-| `inv(A)` | Matrix inverse |
-| `pinv(A)` | Moore–Penrose pseudoinverse |
-| `transpose(A)` | Transpose |
-| `ctranspose(A)` | Conjugate (Hermitian) transpose |
-| `eigs(A)` | Eigenvalues and eigenvectors |
-| `lup(A)` | LU decomposition with partial pivoting |
-| `qr(A)` | QR decomposition |
-| `schur(A)` | Schur decomposition |
-| `slu(A)` | Sparse LU decomposition |
-| `lusolve(A, b)` | Solve `Ax = b` via LU |
+| Function                           | Description                             |
+| ---------------------------------- | --------------------------------------- |
+| `det(A)`                           | Determinant                             |
+| `inv(A)`                           | Matrix inverse                          |
+| `pinv(A)`                          | Moore–Penrose pseudoinverse             |
+| `transpose(A)`                     | Transpose                               |
+| `ctranspose(A)`                    | Conjugate (Hermitian) transpose         |
+| `eigs(A)`                          | Eigenvalues and eigenvectors            |
+| `lup(A)`                           | LU decomposition with partial pivoting  |
+| `qr(A)`                            | QR decomposition                        |
+| `schur(A)`                         | Schur decomposition                     |
+| `slu(A)`                           | Sparse LU decomposition                 |
+| `lusolve(A, b)`                    | Solve `Ax = b` via LU                   |
 | `lsolve(A, b)` / `lsolveAll(A, b)` | Forward substitution (lower-triangular) |
-| `usolve(A, b)` / `usolveAll(A, b)` | Back substitution (upper-triangular) |
-| `sylvester(A, B, C)` | Solve `AX + XB = C` |
-| `lyap(A, Q)` | Solve the Lyapunov equation |
-| `expm(A)` | Matrix exponential |
-| `sqrtm(A)` | Matrix square root |
-| `trace(A)` | Trace (sum of the diagonal) |
-| `cross(a, b)` | Vector cross product |
-| `kron(A, B)` | Kronecker product |
-| `rotationMatrix(angle[, axis])` | Rotation matrix |
-| `rotate(v, angle[, axis])` | Rotate a vector |
+| `usolve(A, b)` / `usolveAll(A, b)` | Back substitution (upper-triangular)    |
+| `sylvester(A, B, C)`               | Solve `AX + XB = C`                     |
+| `lyap(A, Q)`                       | Solve the Lyapunov equation             |
+| `expm(A)`                          | Matrix exponential                      |
+| `sqrtm(A)`                         | Matrix square root                      |
+| `trace(A)`                         | Trace (sum of the diagonal)             |
+| `cross(a, b)`                      | Vector cross product                    |
+| `kron(A, B)`                       | Kronecker product                       |
+| `rotationMatrix(angle[, axis])`    | Rotation matrix                         |
+| `rotate(v, angle[, axis])`         | Rotate a vector                         |
 
 ### Decompositions & analysis (typed `matrix-ops`)
 
-| Function | Description | Accel |
-|---|---|---|
-| `cholesky(A)` | Cholesky decomposition | — |
-| `hessenbergForm(A)` | Hessenberg reduction | — |
-| `jordanForm(A)` | Jordan normal form | parallel |
-| `characteristicPolynomial(A)` | Characteristic polynomial | parallel |
-| `matrixRank(A)` | Rank | — |
-| `matrixPower(A, p)` | Matrix power (non-integer) | parallel |
-| `matrixLog(A)` | Matrix logarithm | parallel |
-| `polarDecomposition(A)` | Polar decomposition | parallel |
-| `rowReduce(A)` | Reduced row echelon form | — |
+| Function                      | Description                | Accel    |
+| ----------------------------- | -------------------------- | -------- |
+| `cholesky(A)`                 | Cholesky decomposition     | —        |
+| `hessenbergForm(A)`           | Hessenberg reduction       | —        |
+| `jordanForm(A)`               | Jordan normal form         | parallel |
+| `characteristicPolynomial(A)` | Characteristic polynomial  | parallel |
+| `matrixRank(A)`               | Rank                       | —        |
+| `matrixPower(A, p)`           | Matrix power (non-integer) | parallel |
+| `matrixLog(A)`                | Matrix logarithm           | parallel |
+| `polarDecomposition(A)`       | Polar decomposition        | parallel |
+| `rowReduce(A)`                | Reduced row echelon form   | —        |
 
 The `parallel`-marked decompositions route their O(n³) matrix products through
 the worker pool and therefore return a `Promise`.
@@ -643,12 +648,12 @@ amortize the dispatch, and falls back transparently to the CPU implementation
 otherwise. All four are `async`. The GPU path computes in 32-bit float — use
 the standard `multiply` / `transpose` when full f64 precision is required.
 
-| Function | Description | Accel |
-|---|---|---|
+| Function          | Description           | Accel  |
+| ----------------- | --------------------- | ------ |
 | `gpuMatmul(a, b)` | Matrix multiplication | WebGPU |
-| `gpuAdd(a, b)` | Matrix addition | WebGPU |
-| `gpuTranspose(a)` | Matrix transpose | WebGPU |
-| `gpuScale(a, s)` | Scalar multiplication | WebGPU |
+| `gpuAdd(a, b)`    | Matrix addition       | WebGPU |
+| `gpuTranspose(a)` | Matrix transpose      | WebGPU |
+| `gpuScale(a, s)`  | Scalar multiplication | WebGPU |
 
 ### Sparse (CSC) routines
 
@@ -671,7 +676,7 @@ the standard `multiply` / `transpose` when full f64 precision is required.
 
 Matrices were systematised by Arthur Cayley and James Joseph Sylvester in the
 1850s, though Gaussian elimination is far older — it appears in the Han-dynasty
-Chinese text *Nine Chapters on the Mathematical Art* and was rediscovered by
+Chinese text _Nine Chapters on the Mathematical Art_ and was rediscovered by
 Gauss. The single most important modern result here is the QR algorithm for
 eigenvalues, developed independently by John Francis and Vera Kublanovskaya
 around 1961 and still the standard method. The LAPACK-style decompositions —
@@ -684,9 +689,12 @@ scientific computing rests.
 import { det, inv, eigs, lusolve } from '@danielsimonjr/mathts-functions';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
-const A = new DenseMatrix([[2, 1], [5, 3]]);
-det(A);          // 1
-inv(A);          // [[3,-1],[-5,2]]
+const A = new DenseMatrix([
+  [2, 1],
+  [5, 3],
+]);
+det(A); // 1
+inv(A); // [[3,-1],[-5,2]]
 const { values, vectors } = eigs(A);
 ```
 
@@ -694,27 +702,27 @@ const { values, vectors } = eigs(A);
 
 ## Matrix Construction & Manipulation
 
-| Function | Description |
-|---|---|
-| `identity(n)` | Identity matrix |
-| `zeros(...dims)` / `ones(...dims)` | Zero / one matrices |
-| `diag(v)` | Diagonal matrix or diagonal extraction |
-| `range(start, end[, step])` | Numeric range |
-| `matrixFromRows(...)` / `matrixFromColumns(...)` | Build matrix from vectors |
-| `matrixFromFunction(size, fn)` | Build matrix from a generator |
-| `concat(...)` | Concatenate matrices |
-| `reshape(A, size)` / `resize(A, size)` | Reshape / resize |
-| `flatten(A)` / `squeeze(A)` | Flatten / drop singleton dims |
-| `subset(A, index[, replacement])` | Get/set a submatrix |
-| `size(A)` / `count(A)` | Dimensions / element count |
-| `column(A, i)` / `row(A, i)` | Extract a column / row |
-| `diff(A[, axis])` | Discrete differences |
-| `sort(A[, compare])` | Sort elements |
-| `partitionSelect(A, k)` | kth element via partitioning |
-| `map` / `forEach` / `filter` | Functional iteration |
-| `mapSlices(A, dim, fn)` | Apply a function along a dimension |
-| `getMatrixDataType(A)` | Detect element data type |
-| `indexFn(...ranges)` | Construct an `Index` object |
+| Function                                         | Description                            |
+| ------------------------------------------------ | -------------------------------------- |
+| `identity(n)`                                    | Identity matrix                        |
+| `zeros(...dims)` / `ones(...dims)`               | Zero / one matrices                    |
+| `diag(v)`                                        | Diagonal matrix or diagonal extraction |
+| `range(start, end[, step])`                      | Numeric range                          |
+| `matrixFromRows(...)` / `matrixFromColumns(...)` | Build matrix from vectors              |
+| `matrixFromFunction(size, fn)`                   | Build matrix from a generator          |
+| `concat(...)`                                    | Concatenate matrices                   |
+| `reshape(A, size)` / `resize(A, size)`           | Reshape / resize                       |
+| `flatten(A)` / `squeeze(A)`                      | Flatten / drop singleton dims          |
+| `subset(A, index[, replacement])`                | Get/set a submatrix                    |
+| `size(A)` / `count(A)`                           | Dimensions / element count             |
+| `column(A, i)` / `row(A, i)`                     | Extract a column / row                 |
+| `diff(A[, axis])`                                | Discrete differences                   |
+| `sort(A[, compare])`                             | Sort elements                          |
+| `partitionSelect(A, k)`                          | kth element via partitioning           |
+| `map` / `forEach` / `filter`                     | Functional iteration                   |
+| `mapSlices(A, dim, fn)`                          | Apply a function along a dimension     |
+| `getMatrixDataType(A)`                           | Detect element data type               |
+| `indexFn(...ranges)`                             | Construct an `Index` object            |
 
 ### Details
 
@@ -735,16 +743,16 @@ This vocabulary of array constructors and shape operations is modelled directly
 on the conventions established by MATLAB (Cleve Moler, late 1970s) and carried
 forward by NumPy. A consistent, composable set of building blocks lets
 scientists and engineers express array computations declaratively — describing
-*what* the array is rather than writing explicit element loops.
+_what_ the array is rather than writing explicit element loops.
 
 ### Examples
 
 ```typescript
 import { identity, diag, range, reshape } from '@danielsimonjr/mathts-functions';
 
-identity(3);                     // 3×3 identity matrix
-range(0, 10, 2);                 // [0, 2, 4, 6, 8]
-diag([1, 2, 3]);                 // diagonal matrix with 1, 2, 3
+identity(3); // 3×3 identity matrix
+range(0, 10, 2); // [0, 2, 4, 6, 8]
+diag([1, 2, 3]); // diagonal matrix with 1, 2, 3
 reshape([1, 2, 3, 4, 5, 6], [2, 3]); // 2×3 matrix
 ```
 
@@ -754,40 +762,40 @@ reshape([1, 2, 3, 4, 5, 6], [2, 3]); // 2×3 matrix
 
 Polynomial arithmetic and symbolic manipulation.
 
-| Function | Description |
-|---|---|
-| `polyval(coeffs, x)` | Evaluate a polynomial (Horner) |
-| `polyadd(a, b)` `polymul(a, b)` | Polynomial add / multiply |
-| `polyder(coeffs[, n])` | nth polynomial derivative |
-| `polynomialGCD(a, b)` `polynomialLCM(a, b)` | Polynomial GCD / LCM |
-| `polynomialQuotient(a, b)` `polynomialRemainder(a, b)` | Polynomial division |
-| `polynomialRoot(coeffs)` | Polynomial roots (factory layer) |
-| `degree(coeffs)` | Polynomial degree |
-| `discriminant(coeffs)` | Discriminant |
-| `coefficientList(expr, var)` | Extract coefficients |
-| `resultant(p, q)` | Resultant of two polynomials |
-| `differences(arr[, n])` | nth finite differences |
-| `variables(expr)` | Free variables of an expression |
-| `substitute(expr, var, val)` | Variable substitution |
-| `element(expr, i)` | Extract a sub-expression |
-| `expand(expr)` | Expand (distribute) |
-| `factor(expr)` | Factor into irreducibles |
-| `collect(expr, var)` | Collect like terms |
-| `combine(expr)` | Combine fractions |
-| `cancel(expr)` | Cancel common factors |
-| `apart(expr)` | Partial fraction decomposition |
-| `together(expr)` | Combine into a single fraction |
-| `reduce(expr)` | Reduce an expression |
-| `normalForm(expr)` | Canonical normal form |
-| `powerExpand(expr)` | Expand powers |
-| `functionExpand(expr)` | Expand special functions |
-| `complexExpand(expr)` | Expand complex expressions |
-| `trigExpand(expr)` `trigReduce(expr)` | Trig expansion / reduction |
-| `expToTrig(expr)` `trigToExp(expr)` | Convert between exp and trig forms |
-| `fullSimplify(expr)` | Full algebraic simplification |
-| `eliminate(system, var)` | Eliminate a variable from a system |
-| `tangentLine(expr, var, point)` | Tangent line |
-| `symbolicPartialDerivative(expr, var)` | Symbolic partial derivative |
+| Function                                               | Description                        |
+| ------------------------------------------------------ | ---------------------------------- |
+| `polyval(coeffs, x)`                                   | Evaluate a polynomial (Horner)     |
+| `polyadd(a, b)` `polymul(a, b)`                        | Polynomial add / multiply          |
+| `polyder(coeffs[, n])`                                 | nth polynomial derivative          |
+| `polynomialGCD(a, b)` `polynomialLCM(a, b)`            | Polynomial GCD / LCM               |
+| `polynomialQuotient(a, b)` `polynomialRemainder(a, b)` | Polynomial division                |
+| `polynomialRoot(coeffs)`                               | Polynomial roots (factory layer)   |
+| `degree(coeffs)`                                       | Polynomial degree                  |
+| `discriminant(coeffs)`                                 | Discriminant                       |
+| `coefficientList(expr, var)`                           | Extract coefficients               |
+| `resultant(p, q)`                                      | Resultant of two polynomials       |
+| `differences(arr[, n])`                                | nth finite differences             |
+| `variables(expr)`                                      | Free variables of an expression    |
+| `substitute(expr, var, val)`                           | Variable substitution              |
+| `element(expr, i)`                                     | Extract a sub-expression           |
+| `expand(expr)`                                         | Expand (distribute)                |
+| `factor(expr)`                                         | Factor into irreducibles           |
+| `collect(expr, var)`                                   | Collect like terms                 |
+| `combine(expr)`                                        | Combine fractions                  |
+| `cancel(expr)`                                         | Cancel common factors              |
+| `apart(expr)`                                          | Partial fraction decomposition     |
+| `together(expr)`                                       | Combine into a single fraction     |
+| `reduce(expr)`                                         | Reduce an expression               |
+| `normalForm(expr)`                                     | Canonical normal form              |
+| `powerExpand(expr)`                                    | Expand powers                      |
+| `functionExpand(expr)`                                 | Expand special functions           |
+| `complexExpand(expr)`                                  | Expand complex expressions         |
+| `trigExpand(expr)` `trigReduce(expr)`                  | Trig expansion / reduction         |
+| `expToTrig(expr)` `trigToExp(expr)`                    | Convert between exp and trig forms |
+| `fullSimplify(expr)`                                   | Full algebraic simplification      |
+| `eliminate(system, var)`                               | Eliminate a variable from a system |
+| `tangentLine(expr, var, point)`                        | Tangent line                       |
+| `symbolicPartialDerivative(expr, var)`                 | Symbolic partial derivative        |
 
 The factory layer adds the expression-tree functions `simplify`,
 `simplifyConstant`, `simplifyCore`, `derivative`, `rationalize`,
@@ -822,9 +830,9 @@ not a numerical approximation.
 ```typescript
 import { polyval, factor, expand } from '@danielsimonjr/mathts-functions';
 
-polyval([1, 0, -1], 3);  // 8  (x² - 1 at x = 3)
-factor('x^2 - 1');       // '(x - 1)(x + 1)'
-expand('(x + 1)^3');     // 'x^3 + 3*x^2 + 3*x + 1'
+polyval([1, 0, -1], 3); // 8  (x² - 1 at x = 3)
+factor('x^2 - 1'); // '(x - 1)(x + 1)'
+expand('(x + 1)^3'); // 'x^3 + 3*x^2 + 3*x + 1'
 ```
 
 ---
@@ -833,39 +841,39 @@ expand('(x + 1)^3');     // 'x^3 + 3*x^2 + 3*x + 1'
 
 Symbolic calculus, transforms, and equation solving.
 
-| Function | Description |
-|---|---|
-| `integrate(expr, var[, a, b])` | Symbolic integration (definite/indefinite) |
-| `limit(expr, var, point[, dir])` | Symbolic limit |
-| `partialDerivative(expr, var)` | Partial derivative |
-| `directionalDerivative(expr, vars, dir)` | Directional derivative |
-| `gradientSymbolic(expr, vars)` | Gradient vector |
-| `jacobian(exprs, vars)` | Jacobian matrix |
-| `laplacian(expr, vars)` | Laplacian operator |
-| `divergence(field, vars)` | Divergence of a vector field |
-| `curl(field, vars)` | Curl of a 3D vector field |
-| `implicitDiff(eq, dep, indep)` | Implicit differentiation |
-| `laplace(expr, t, s)` | Laplace transform |
-| `inverseLaplace(expr, s, t)` | Inverse Laplace transform |
-| `inverseLaplaceTransform(...)` | Inverse Laplace (numerical variant) |
-| `fourierSeries(expr, var, n)` | Fourier series coefficients |
-| `zTransform(expr, n, z)` | Z-transform |
-| `taylor(expr, var, point, n)` | Taylor series expansion |
-| `multivariateTaylor(expr, vars, point, n)` | Multivariate Taylor expansion |
-| `series(expr, var, n)` | General series expansion |
-| `seriesCoefficient(expr, var, n)` | nth series coefficient |
-| `solve(expr, var)` | Solve an equation |
-| `summation(expr, var, from, to)` | Symbolic summation |
-| `symbolicProduct(expr, var, from, to)` | Symbolic product |
-| `groebnerBasis(polys, vars)` | Gröbner basis |
-| `minimalPolynomial(value)` | Minimal polynomial |
-| `toRadicals(expr)` | Express roots in radicals |
-| `odeGeneral(ode, y, x)` | Solve an ODE symbolically |
-| `piecewise(conditions)` | Piecewise function definition |
-| `asymptotic(expr, var)` | Asymptotic expansion |
-| `assume(var, property)` | Register an assumption |
-| `getAssumptions([var])` | Read current assumptions |
-| `clearAssumptions()` | Clear all assumptions |
+| Function                                   | Description                                |
+| ------------------------------------------ | ------------------------------------------ |
+| `integrate(expr, var[, a, b])`             | Symbolic integration (definite/indefinite) |
+| `limit(expr, var, point[, dir])`           | Symbolic limit                             |
+| `partialDerivative(expr, var)`             | Partial derivative                         |
+| `directionalDerivative(expr, vars, dir)`   | Directional derivative                     |
+| `gradientSymbolic(expr, vars)`             | Gradient vector                            |
+| `jacobian(exprs, vars)`                    | Jacobian matrix                            |
+| `laplacian(expr, vars)`                    | Laplacian operator                         |
+| `divergence(field, vars)`                  | Divergence of a vector field               |
+| `curl(field, vars)`                        | Curl of a 3D vector field                  |
+| `implicitDiff(eq, dep, indep)`             | Implicit differentiation                   |
+| `laplace(expr, t, s)`                      | Laplace transform                          |
+| `inverseLaplace(expr, s, t)`               | Inverse Laplace transform                  |
+| `inverseLaplaceTransform(...)`             | Inverse Laplace (numerical variant)        |
+| `fourierSeries(expr, var, n)`              | Fourier series coefficients                |
+| `zTransform(expr, n, z)`                   | Z-transform                                |
+| `taylor(expr, var, point, n)`              | Taylor series expansion                    |
+| `multivariateTaylor(expr, vars, point, n)` | Multivariate Taylor expansion              |
+| `series(expr, var, n)`                     | General series expansion                   |
+| `seriesCoefficient(expr, var, n)`          | nth series coefficient                     |
+| `solve(expr, var)`                         | Solve an equation                          |
+| `summation(expr, var, from, to)`           | Symbolic summation                         |
+| `symbolicProduct(expr, var, from, to)`     | Symbolic product                           |
+| `groebnerBasis(polys, vars)`               | Gröbner basis                              |
+| `minimalPolynomial(value)`                 | Minimal polynomial                         |
+| `toRadicals(expr)`                         | Express roots in radicals                  |
+| `odeGeneral(ode, y, x)`                    | Solve an ODE symbolically                  |
+| `piecewise(conditions)`                    | Piecewise function definition              |
+| `asymptotic(expr, var)`                    | Asymptotic expansion                       |
+| `assume(var, property)`                    | Register an assumption                     |
+| `getAssumptions([var])`                    | Read current assumptions                   |
+| `clearAssumptions()`                       | Clear all assumptions                      |
 
 ### Details
 
@@ -890,7 +898,7 @@ Symbolic integration rests on the Risch algorithm (Robert Risch, 1968), which
 decides whether an elementary antiderivative exists, supplemented by heuristic
 rule sets. The integral transforms have deep roots: the Laplace transform comes
 from Pierre-Simon Laplace's work in the 1780s, and the Fourier series from
-Joseph Fourier's 1822 *Théorie analytique de la chaleur*. Both share one
+Joseph Fourier's 1822 _Théorie analytique de la chaleur_. Both share one
 purpose — converting calculus problems into algebra. Gröbner bases (Bruno
 Buchberger, 1965) play the analogous role for systems of polynomial equations.
 
@@ -899,24 +907,24 @@ Buchberger, 1965) play the analogous role for systems of polynomial equations.
 ```typescript
 import { integrate, limit, taylor, solve } from '@danielsimonjr/mathts-functions';
 
-integrate('x^2', 'x');         // 'x^3/3'
-limit('sin(x)/x', 'x', 0);     // '1'
-taylor('exp(x)', 'x', 0, 4);   // '1 + x + x^2/2 + x^3/6 + x^4/24'
-solve('x^2 - 4', 'x');         // [-2, 2]
+integrate('x^2', 'x'); // 'x^3/3'
+limit('sin(x)/x', 'x', 0); // '1'
+taylor('exp(x)', 'x', 0, 4); // '1 + x + x^2/2 + x^3/6 + x^4/24'
+solve('x^2 - 4', 'x'); // [-2, 2]
 ```
 
 ---
 
 ## Numerical Integration
 
-| Function | Description |
-|---|---|
-| `trapz(y[, x])` | Trapezoidal rule on sampled data |
-| `simpson(f, a, b[, n])` | Simpson's 1/3 rule (`n` even) |
-| `simpsons(f, a, b[, n])` | Simpson's rule variant (numeric layer) |
-| `gaussQuad(f, a, b[, n])` | Gauss–Legendre quadrature |
-| `romberg(f, a, b[, tol])` | Romberg integration |
-| `nintegrate(f, a, b[, tol])` | Adaptive numerical integration |
+| Function                     | Description                            |
+| ---------------------------- | -------------------------------------- |
+| `trapz(y[, x])`              | Trapezoidal rule on sampled data       |
+| `simpson(f, a, b[, n])`      | Simpson's 1/3 rule (`n` even)          |
+| `simpsons(f, a, b[, n])`     | Simpson's rule variant (numeric layer) |
+| `gaussQuad(f, a, b[, n])`    | Gauss–Legendre quadrature              |
+| `romberg(f, a, b[, tol])`    | Romberg integration                    |
+| `nintegrate(f, a, b[, tol])` | Adaptive numerical integration         |
 
 ### Details
 
@@ -934,7 +942,7 @@ solve('x^2 - 4', 'x');         // [-2, 2]
 Numerical quadrature — literally "squaring," computing an area — predates
 calculus itself. The trapezoidal and Simpson rules are Newton–Cotes formulas,
 fitting low-degree polynomials through equally spaced points. Gauss–Legendre
-quadrature (Carl Friedrich Gauss, 1814) instead chooses the *optimal* node
+quadrature (Carl Friedrich Gauss, 1814) instead chooses the _optimal_ node
 positions, doubling the degree of exactness for the same number of evaluations.
 Romberg integration (Werner Romberg, 1955) accelerates the trapezoidal rule by
 applying Richardson extrapolation to a sequence of refinements.
@@ -946,40 +954,40 @@ import { simpson, gaussQuad, romberg } from '@danielsimonjr/mathts-functions';
 
 simpson(Math.sin, 0, Math.PI, 100); // ~2.0
 gaussQuad(Math.sin, 0, Math.PI, 5); // ~2.0
-romberg(Math.sin, 0, Math.PI);      // ~2.0
+romberg(Math.sin, 0, Math.PI); // ~2.0
 ```
 
 ---
 
 ## Interpolation & Curve Fitting
 
-| Function | Description | Accel |
-|---|---|---|
-| `linearInterp(xs, ys, x)` | Piecewise linear interpolation | — |
-| `lagrangeInterp(xs, ys, x)` | Lagrange polynomial interpolation | — |
-| `cubicSpline(xs, ys)` | Natural cubic spline → evaluator | — |
-| `cspline(xs, ys)` | Cubic spline (numeric layer) | — |
-| `hermiteInterp(xs, ys, dys, x)` | Hermite interpolation | — |
-| `pchipInterp(xs, ys)` / `pchip(xs, ys)` | Shape-preserving PCHIP spline | — |
-| `polyFit(xs, ys, degree)` | Least-squares polynomial fit | — |
-| `interpolate(xs, ys, x[, method])` | General interpolation dispatcher | — |
-| `griddata(xs, ys, values, xi, yi)` | Scattered-data interpolation to a grid | WASM |
-| `rbfInterpolate(centers, values, query)` | Radial basis function interpolation | WASM |
-| `loess(xs, ys, x[, bandwidth])` | LOESS local regression | WASM |
-| `chebyshevApprox(f, a, b, n)` | Chebyshev polynomial approximation | — |
-| `padeApproximant(coeffs, m, n)` | Padé approximant | — |
-| `bezierCurve(controlPoints, t)` | Bézier curve evaluation | WASM |
-| `bspline(controlPoints, degree, t)` | B-spline curve evaluation | — |
-| `curvefit(xs, ys, model, p0)` | Nonlinear curve fitting | — |
-| `expfit(xs, ys)` | Exponential fit `a·exp(b·x)` | — |
-| `logfit(xs, ys)` | Logarithmic fit | — |
-| `powerfit(xs, ys)` | Power-law fit | — |
+| Function                                 | Description                            | Accel |
+| ---------------------------------------- | -------------------------------------- | ----- |
+| `linearInterp(xs, ys, x)`                | Piecewise linear interpolation         | —     |
+| `lagrangeInterp(xs, ys, x)`              | Lagrange polynomial interpolation      | —     |
+| `cubicSpline(xs, ys)`                    | Natural cubic spline → evaluator       | —     |
+| `cspline(xs, ys)`                        | Cubic spline (numeric layer)           | —     |
+| `hermiteInterp(xs, ys, dys, x)`          | Hermite interpolation                  | —     |
+| `pchipInterp(xs, ys)` / `pchip(xs, ys)`  | Shape-preserving PCHIP spline          | —     |
+| `polyFit(xs, ys, degree)`                | Least-squares polynomial fit           | —     |
+| `interpolate(xs, ys, x[, method])`       | General interpolation dispatcher       | —     |
+| `griddata(xs, ys, values, xi, yi)`       | Scattered-data interpolation to a grid | WASM  |
+| `rbfInterpolate(centers, values, query)` | Radial basis function interpolation    | WASM  |
+| `loess(xs, ys, x[, bandwidth])`          | LOESS local regression                 | WASM  |
+| `chebyshevApprox(f, a, b, n)`            | Chebyshev polynomial approximation     | —     |
+| `padeApproximant(coeffs, m, n)`          | Padé approximant                       | —     |
+| `bezierCurve(controlPoints, t)`          | Bézier curve evaluation                | WASM  |
+| `bspline(controlPoints, degree, t)`      | B-spline curve evaluation              | —     |
+| `curvefit(xs, ys, model, p0)`            | Nonlinear curve fitting                | —     |
+| `expfit(xs, ys)`                         | Exponential fit `a·exp(b·x)`           | —     |
+| `logfit(xs, ys)`                         | Logarithmic fit                        | —     |
+| `powerfit(xs, ys)`                       | Power-law fit                          | —     |
 
 ### Details
 
 - **Interpolation** passes exactly through the data points; **fitting**
   minimises residuals and need not.
-- `cubicSpline`, `pchipInterp`, and `pchip` return an *evaluator function* —
+- `cubicSpline`, `pchipInterp`, and `pchip` return an _evaluator function_ —
   call it at any query point. `pchip` is monotone-preserving and will not
   introduce overshoot between data points.
 - `polyFit` solves a least-squares normal-equation system; `curvefit` fits an
@@ -1003,11 +1011,12 @@ experimental data analysis.
 ```typescript
 import { cubicSpline, polyFit, lagrangeInterp } from '@danielsimonjr/mathts-functions';
 
-const xs = [0, 1, 2, 3], ys = [0, 1, 4, 9];
+const xs = [0, 1, 2, 3],
+  ys = [0, 1, 4, 9];
 const spline = cubicSpline(xs, ys);
-spline(1.5);                     // ~2.25
-polyFit(xs, ys, 2);              // ≈ [1, 0, 0]  (y = x²)
-lagrangeInterp(xs, ys, 2.5);     // ~6.25
+spline(1.5); // ~2.25
+polyFit(xs, ys, 2); // ≈ [1, 0, 0]  (y = x²)
+lagrangeInterp(xs, ys, 2.5); // ~6.25
 ```
 
 ---
@@ -1016,27 +1025,27 @@ lagrangeInterp(xs, ys, 2.5);     // ~6.25
 
 Root-finding, optimization, linear systems, and differential equations.
 
-| Function | Description | Accel |
-|---|---|---|
-| `findRoot(f, a, b[, opts])` | Bracketed root-finding (bisection/Brent) | — |
-| `linsolve(A, b)` | Solve a linear system `Ax = b` | — |
-| `leastSquares(A, b)` | Least-squares solution (overdetermined) | WASM |
-| `minimize(f, x0[, opts])` | Local minimization | — |
-| `maximize(f, x0[, opts])` | Local maximization | — |
-| `globalMinimize(f, bounds[, opts])` | Global minimization | — |
-| `linprog(c, A, b[, opts])` | Linear programming | — |
-| `quadprog(Q, c, A, b[, opts])` | Quadratic programming | — |
-| `solveODE(f, tspan, y0[, opts])` | ODE solver (factory layer) | — |
-| `solveODESystem(fs, tspan, y0)` | System of ODEs | WASM |
-| `solveBVP(...)` | Boundary value problem solver | — |
-| `solvePDE(...)` | PDE solver | — |
-| `stiffODESolver(...)` | Stiff-ODE solver | — |
-| `odeAdaptiveStep(...)` | Adaptive-step ODE integration | — |
-| `eventDetection(...)` | ODE event detection | — |
-| `cond(A)` | Condition number | WASM |
-| `rank(A)` | Numerical rank | WASM |
-| `nullspace(A)` | Null-space basis | — |
-| `residue(b, a)` | Partial-fraction residues | — |
+| Function                            | Description                              | Accel |
+| ----------------------------------- | ---------------------------------------- | ----- |
+| `findRoot(f, a, b[, opts])`         | Bracketed root-finding (bisection/Brent) | —     |
+| `linsolve(A, b)`                    | Solve a linear system `Ax = b`           | —     |
+| `leastSquares(A, b)`                | Least-squares solution (overdetermined)  | WASM  |
+| `minimize(f, x0[, opts])`           | Local minimization                       | —     |
+| `maximize(f, x0[, opts])`           | Local maximization                       | —     |
+| `globalMinimize(f, bounds[, opts])` | Global minimization                      | —     |
+| `linprog(c, A, b[, opts])`          | Linear programming                       | —     |
+| `quadprog(Q, c, A, b[, opts])`      | Quadratic programming                    | —     |
+| `solveODE(f, tspan, y0[, opts])`    | ODE solver (factory layer)               | —     |
+| `solveODESystem(fs, tspan, y0)`     | System of ODEs                           | WASM  |
+| `solveBVP(...)`                     | Boundary value problem solver            | —     |
+| `solvePDE(...)`                     | PDE solver                               | —     |
+| `stiffODESolver(...)`               | Stiff-ODE solver                         | —     |
+| `odeAdaptiveStep(...)`              | Adaptive-step ODE integration            | —     |
+| `eventDetection(...)`               | ODE event detection                      | —     |
+| `cond(A)`                           | Condition number                         | WASM  |
+| `rank(A)`                           | Numerical rank                           | WASM  |
+| `nullspace(A)`                      | Null-space basis                         | —     |
+| `residue(b, a)`                     | Partial-fraction residues                | —     |
 
 ### Details
 
@@ -1066,9 +1075,16 @@ followed in the 1980s, opening up large-scale quadratic and convex programming.
 ```typescript
 import { findRoot, minimize, leastSquares } from '@danielsimonjr/mathts-functions';
 
-findRoot(x => x**3 - x - 2, 1, 2);  // ~1.5214
-minimize(x => (x - 3)**2, 0);       // ~3.0
-leastSquares([[1,0],[1,1],[1,2]], [1,2,3]); // [1, 1]
+findRoot((x) => x ** 3 - x - 2, 1, 2); // ~1.5214
+minimize((x) => (x - 3) ** 2, 0); // ~3.0
+leastSquares(
+  [
+    [1, 0],
+    [1, 1],
+    [1, 2],
+  ],
+  [1, 2, 3]
+); // [1, 1]
 ```
 
 ---
@@ -1084,36 +1100,36 @@ parallelize the element-wise spectra; `parallelConv` / `parallelXCorr` /
 `fft2d` likewise dispatch their batches of independent FFTs. Small inputs fall
 back to the sequential radix-2 implementation on the calling thread.
 
-| Function | Description | Accel |
-|---|---|---|
-| `parallelFFT(x)` | FFT → `Complex[]` | parallel |
-| `parallelIFFT(X)` | Inverse FFT → `Float64Array` | parallel |
-| `parallelFFTMagnitude(x)` | FFT magnitude spectrum | parallel |
-| `parallelFFTPower(x)` | FFT power spectrum | parallel |
-| `parallelConv(a, b)` | Convolution | parallel |
-| `parallelXCorr(a, b)` | Cross-correlation | parallel |
-| `parallelAutoCorr(a)` | Auto-correlation | parallel |
-| `fft(x)` / `ifft(X)` | Discrete Fourier transform / inverse (factory layer) | — |
-| `fft2d(matrix)` | 2D FFT | parallel |
-| `fourier(f)` / `invFourier(F)` | Continuous Fourier transform | — |
-| `dct(x)` / `idct(X)` | Discrete cosine transform / inverse | WASM |
-| `dst(x)` / `idst(X)` | Discrete sine transform / inverse | WASM |
-| `dwt(x[, wavelet])` | Discrete wavelet transform | WASM |
-| `hilbertTransform(x)` | Hilbert transform | WASM |
-| `convolve(a, b)` / `correlate(a, b)` | Convolution / correlation | — |
-| `crossCorrelation(a, b)` / `autoCorrelation(a)` | Cross / auto-correlation | — |
-| `lowpassFilter(x, fc)` | Low-pass filter | WASM |
-| `highpassFilter(x, fc)` | High-pass filter | WASM |
-| `bandpassFilter(x, f1, f2)` | Band-pass filter | WASM |
-| `medfilt(x[, window])` | Median filter | — |
-| `windowFunction(n, type)` | Window functions (Hamming, Hann, …) | — |
-| `resample(x, ratio)` | Signal resampling | — |
-| `spectrogram(x[, opts])` | Spectrogram | parallel, WASM |
-| `periodogram(x)` | Power spectral density estimate | WASM |
-| `groupDelay(b, a, w)` | Filter group delay | — |
-| `unwrapPhase(phase)` | Remove 2π phase discontinuities | — |
-| `freqz(b, a)` | Digital filter frequency response (factory layer) | — |
-| `zpk2tf(z, p, k)` | Zero-pole-gain → transfer function (factory layer) | — |
+| Function                                        | Description                                          | Accel          |
+| ----------------------------------------------- | ---------------------------------------------------- | -------------- |
+| `parallelFFT(x)`                                | FFT → `Complex[]`                                    | parallel       |
+| `parallelIFFT(X)`                               | Inverse FFT → `Float64Array`                         | parallel       |
+| `parallelFFTMagnitude(x)`                       | FFT magnitude spectrum                               | parallel       |
+| `parallelFFTPower(x)`                           | FFT power spectrum                                   | parallel       |
+| `parallelConv(a, b)`                            | Convolution                                          | parallel       |
+| `parallelXCorr(a, b)`                           | Cross-correlation                                    | parallel       |
+| `parallelAutoCorr(a)`                           | Auto-correlation                                     | parallel       |
+| `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer) | —              |
+| `fft2d(matrix)`                                 | 2D FFT                                               | parallel       |
+| `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                         | —              |
+| `dct(x)` / `idct(X)`                            | Discrete cosine transform / inverse                  | WASM           |
+| `dst(x)` / `idst(X)`                            | Discrete sine transform / inverse                    | WASM           |
+| `dwt(x[, wavelet])`                             | Discrete wavelet transform                           | WASM           |
+| `hilbertTransform(x)`                           | Hilbert transform                                    | WASM           |
+| `convolve(a, b)` / `correlate(a, b)`            | Convolution / correlation                            | —              |
+| `crossCorrelation(a, b)` / `autoCorrelation(a)` | Cross / auto-correlation                             | —              |
+| `lowpassFilter(x, fc)`                          | Low-pass filter                                      | WASM           |
+| `highpassFilter(x, fc)`                         | High-pass filter                                     | WASM           |
+| `bandpassFilter(x, f1, f2)`                     | Band-pass filter                                     | WASM           |
+| `medfilt(x[, window])`                          | Median filter                                        | —              |
+| `windowFunction(n, type)`                       | Window functions (Hamming, Hann, …)                  | —              |
+| `resample(x, ratio)`                            | Signal resampling                                    | —              |
+| `spectrogram(x[, opts])`                        | Spectrogram                                          | parallel, WASM |
+| `periodogram(x)`                                | Power spectral density estimate                      | WASM           |
+| `groupDelay(b, a, w)`                           | Filter group delay                                   | —              |
+| `unwrapPhase(phase)`                            | Remove 2π phase discontinuities                      | —              |
+| `freqz(b, a)`                                   | Digital filter frequency response (factory layer)    | —              |
+| `zpk2tf(z, p, k)`                               | Zero-pole-gain → transfer function (factory layer)   | —              |
 
 ### Details
 
@@ -1154,7 +1170,7 @@ compression, wireless communication, and spectral analysis.
 ```typescript
 import { parallelFFT, parallelConv, windowFunction } from '@danielsimonjr/mathts-functions';
 
-const signal = new Float64Array(1024).map((_, i) => Math.sin(2*Math.PI*i/64));
+const signal = new Float64Array(1024).map((_, i) => Math.sin((2 * Math.PI * i) / 64));
 const spectrum = await parallelFFT(signal);
 const filtered = await parallelConv(signal, new Float64Array([0.25, 0.5, 0.25]));
 ```
@@ -1165,35 +1181,35 @@ const filtered = await parallelConv(signal, new Float64Array([0.25, 0.5, 0.25]))
 
 Geometric operations on 2D/3D/nD coordinate arrays.
 
-| Function | Description | Accel |
-|---|---|---|
-| `angle2D(v1, v2)` / `angle3D(v1, v2)` | Angle between vectors | — |
-| `cross3D(a, b)` / `dot3D(a, b)` | 3D cross / dot product | — |
-| `triangleArea(a, b, c)` | Triangle area | — |
-| `polygonArea(vertices)` | Polygon area (shoelace) | — |
-| `polygonPerimeter(vertices)` | Polygon perimeter | — |
-| `area(shape)` | Area of a shape | — |
-| `centroid(polygon)` | Centroid of a polygon | — |
-| `convexHull(points)` | Convex hull (Graham scan) | — |
-| `pointInPolygon(point, polygon)` | Ray-casting containment test | — |
-| `rotateVector2D(v, angle)` / `rotateVector3D(v, axis, angle)` | Vector rotation | — |
-| `reflectVector(v, normal)` | Reflection across a plane | — |
-| `projectVector(v, onto)` | Vector projection | — |
-| `distance2D(a, b)` / `distance3D(a, b)` / `distanceND(a, b)` | Euclidean distance | — |
-| `distancePointToLine2D(point, lineA, lineB)` | Point-to-line distance | — |
-| `manhattanDistance(a, b)` | L1 distance | — |
-| `chebyshevDistance(a, b)` | L∞ distance | — |
-| `minkowskiDistance(a, b, p)` | Lp distance | — |
-| `distance(...)` | mathjs-style distance (factory layer) | — |
-| `intersectLines2D(p1, d1, p2, d2)` | Line intersection | — |
-| `intersectSegments2D(a1, a2, b1, b2)` | Segment intersection | — |
-| `intersect(...)` | mathjs-style intersection (factory layer) | — |
-| `coordinateTransform(point, from, to)` | Coordinate-system conversion | — |
-| `delaunayTriangulation(points)` | Delaunay triangulation | WASM |
-| `voronoiDiagram(points)` | Voronoi diagram | WASM |
-| `kdTree(points)` / `kdTreeNearest(tree, query)` | k-d tree + nearest query | — |
-| `nearestNeighbor(points, query)` | Nearest-neighbour search | WASM |
-| `distanceMatrix(points)` | All-pairs Euclidean distance matrix | parallel |
+| Function                                                      | Description                               | Accel    |
+| ------------------------------------------------------------- | ----------------------------------------- | -------- |
+| `angle2D(v1, v2)` / `angle3D(v1, v2)`                         | Angle between vectors                     | —        |
+| `cross3D(a, b)` / `dot3D(a, b)`                               | 3D cross / dot product                    | —        |
+| `triangleArea(a, b, c)`                                       | Triangle area                             | —        |
+| `polygonArea(vertices)`                                       | Polygon area (shoelace)                   | —        |
+| `polygonPerimeter(vertices)`                                  | Polygon perimeter                         | —        |
+| `area(shape)`                                                 | Area of a shape                           | —        |
+| `centroid(polygon)`                                           | Centroid of a polygon                     | —        |
+| `convexHull(points)`                                          | Convex hull (Graham scan)                 | —        |
+| `pointInPolygon(point, polygon)`                              | Ray-casting containment test              | —        |
+| `rotateVector2D(v, angle)` / `rotateVector3D(v, axis, angle)` | Vector rotation                           | —        |
+| `reflectVector(v, normal)`                                    | Reflection across a plane                 | —        |
+| `projectVector(v, onto)`                                      | Vector projection                         | —        |
+| `distance2D(a, b)` / `distance3D(a, b)` / `distanceND(a, b)`  | Euclidean distance                        | —        |
+| `distancePointToLine2D(point, lineA, lineB)`                  | Point-to-line distance                    | —        |
+| `manhattanDistance(a, b)`                                     | L1 distance                               | —        |
+| `chebyshevDistance(a, b)`                                     | L∞ distance                               | —        |
+| `minkowskiDistance(a, b, p)`                                  | Lp distance                               | —        |
+| `distance(...)`                                               | mathjs-style distance (factory layer)     | —        |
+| `intersectLines2D(p1, d1, p2, d2)`                            | Line intersection                         | —        |
+| `intersectSegments2D(a1, a2, b1, b2)`                         | Segment intersection                      | —        |
+| `intersect(...)`                                              | mathjs-style intersection (factory layer) | —        |
+| `coordinateTransform(point, from, to)`                        | Coordinate-system conversion              | —        |
+| `delaunayTriangulation(points)`                               | Delaunay triangulation                    | WASM     |
+| `voronoiDiagram(points)`                                      | Voronoi diagram                           | WASM     |
+| `kdTree(points)` / `kdTreeNearest(tree, query)`               | k-d tree + nearest query                  | —        |
+| `nearestNeighbor(points, query)`                              | Nearest-neighbour search                  | WASM     |
+| `distanceMatrix(points)`                                      | All-pairs Euclidean distance matrix       | parallel |
 
 ### Details
 
@@ -1223,8 +1239,14 @@ graphics, and scattered-data interpolation.
 ```typescript
 import { convexHull, distance2D, delaunayTriangulation } from '@danielsimonjr/mathts-functions';
 
-distance2D([0, 0], [3, 4]);                          // 5
-convexHull([[0,0],[1,0],[0,1],[1,1],[0.5,0.5]]);     // [[0,0],[1,0],[1,1],[0,1]]
+distance2D([0, 0], [3, 4]); // 5
+convexHull([
+  [0, 0],
+  [1, 0],
+  [0, 1],
+  [1, 1],
+  [0.5, 0.5],
+]); // [[0,0],[1,0],[1,1],[0,1]]
 ```
 
 ---
@@ -1233,16 +1255,16 @@ convexHull([[0,0],[1,0],[0,1],[1,1],[0.5,0.5]]);     // [[0,0],[1,0],[1,1],[0,1]
 
 Algorithms over adjacency-matrix representations.
 
-| Function | Description |
-|---|---|
-| `adjacencyMatrix(edges, n)` | Build adjacency matrix from an edge list |
-| `shortestPath(adj, start, end)` | Dijkstra shortest path (node sequence) |
-| `graphDistance(adj, start, end)` | Shortest-path length |
-| `minimumSpanningTree(adj)` | MST (Prim) → edge list |
-| `connectedComponents(adj)` | Connected components |
-| `stronglyConnectedComponents(adj)` | SCCs (Kosaraju) |
-| `topologicalSort(adj)` | Topological order (DAGs) |
-| `isConnected(adj)` | Connectivity test |
+| Function                           | Description                              |
+| ---------------------------------- | ---------------------------------------- |
+| `adjacencyMatrix(edges, n)`        | Build adjacency matrix from an edge list |
+| `shortestPath(adj, start, end)`    | Dijkstra shortest path (node sequence)   |
+| `graphDistance(adj, start, end)`   | Shortest-path length                     |
+| `minimumSpanningTree(adj)`         | MST (Prim) → edge list                   |
+| `connectedComponents(adj)`         | Connected components                     |
+| `stronglyConnectedComponents(adj)` | SCCs (Kosaraju)                          |
+| `topologicalSort(adj)`             | Topological order (DAGs)                 |
+| `isConnected(adj)`                 | Connectivity test                        |
 
 ### Details
 
@@ -1268,11 +1290,22 @@ design, dependency resolution, and scheduling.
 ### Examples
 
 ```typescript
-import { adjacencyMatrix, shortestPath, minimumSpanningTree } from '@danielsimonjr/mathts-functions';
+import {
+  adjacencyMatrix,
+  shortestPath,
+  minimumSpanningTree,
+} from '@danielsimonjr/mathts-functions';
 
-const adj = adjacencyMatrix([[0, 1], [1, 2], [0, 2]], 3);
-shortestPath(adj, 0, 2);        // [0, 2]
-minimumSpanningTree(adj);       // MST edge list
+const adj = adjacencyMatrix(
+  [
+    [0, 1],
+    [1, 2],
+    [0, 2],
+  ],
+  3
+);
+shortestPath(adj, 0, 2); // [0, 2]
+minimumSpanningTree(adj); // MST edge list
 ```
 
 ---
@@ -1281,15 +1314,15 @@ minimumSpanningTree(adj);       // MST edge list
 
 All return structured result objects.
 
-| Function | Returns | Description |
-|---|---|---|
-| `studentTTest(sample1[, sample2])` | `TTestResult` | One/two-sample t-test |
-| `chiSquareTest(observed, expected)` | `ChiSquareResult` | Chi-square test |
-| `anova(groups)` | `AnovaResult` | One-way ANOVA |
-| `kolmogorovSmirnovTest(sample[, sample2])` | `KSTestResult` | K-S test |
-| `mannWhitneyTest(sample1, sample2)` | `MannWhitneyResult` | Mann–Whitney U test |
-| `shapiroWilkTest(sample)` | `ShapiroWilkResult` | Normality test |
-| `principalComponentAnalysis(data[, k])` | `PCAResult` | PCA |
+| Function                                   | Returns             | Description           |
+| ------------------------------------------ | ------------------- | --------------------- |
+| `studentTTest(sample1[, sample2])`         | `TTestResult`       | One/two-sample t-test |
+| `chiSquareTest(observed, expected)`        | `ChiSquareResult`   | Chi-square test       |
+| `anova(groups)`                            | `AnovaResult`       | One-way ANOVA         |
+| `kolmogorovSmirnovTest(sample[, sample2])` | `KSTestResult`      | K-S test              |
+| `mannWhitneyTest(sample1, sample2)`        | `MannWhitneyResult` | Mann–Whitney U test   |
+| `shapiroWilkTest(sample)`                  | `ShapiroWilkResult` | Normality test        |
+| `principalComponentAnalysis(data[, k])`    | `PCAResult`         | PCA                   |
 
 ### Details
 
@@ -1319,7 +1352,7 @@ analysis goes back to Karl Pearson (1901) and Harold Hotelling (1933).
 ```typescript
 import { studentTTest, anova } from '@danielsimonjr/mathts-functions';
 
-studentTTest([2.1,2.5,2.3], [3.1,3.5,2.9]);
+studentTTest([2.1, 2.5, 2.3], [3.1, 3.5, 2.9]);
 // { t, pValue, degreesOfFreedom, significant }
 ```
 
@@ -1327,18 +1360,18 @@ studentTTest([2.1,2.5,2.3], [3.1,3.5,2.9]);
 
 ## Set Operations
 
-| Function | Description |
-|---|---|
-| `setUnion(...sets)` | Union |
-| `setIntersect(...sets)` | Intersection |
-| `setDifference(a, b)` | Difference |
+| Function                 | Description          |
+| ------------------------ | -------------------- |
+| `setUnion(...sets)`      | Union                |
+| `setIntersect(...sets)`  | Intersection         |
+| `setDifference(a, b)`    | Difference           |
 | `setSymDifference(a, b)` | Symmetric difference |
-| `setCartesian(a, b)` | Cartesian product |
-| `setPowerset(a)` | Power set |
-| `setDistinct(a)` | Distinct elements |
-| `setMultiplicity(e, a)` | Element multiplicity |
-| `setIsSubset(a, b)` | Subset test |
-| `setSize(a)` | Set cardinality |
+| `setCartesian(a, b)`     | Cartesian product    |
+| `setPowerset(a)`         | Power set            |
+| `setDistinct(a)`         | Distinct elements    |
+| `setMultiplicity(e, a)`  | Element multiplicity |
+| `setIsSubset(a, b)`      | Subset test          |
+| `setSize(a)`             | Set cardinality      |
 
 ### Details
 
@@ -1363,22 +1396,22 @@ canonicalisation steps inside symbolic computation.
 ```typescript
 import { setUnion, setIntersect, setPowerset } from '@danielsimonjr/mathts-functions';
 
-setUnion([1, 2, 3], [2, 3, 4]);     // [1, 2, 3, 4]
+setUnion([1, 2, 3], [2, 3, 4]); // [1, 2, 3, 4]
 setIntersect([1, 2, 3], [2, 3, 4]); // [2, 3]
-setPowerset([1, 2]);                // [[], [1], [2], [1, 2]]
+setPowerset([1, 2]); // [[], [1], [2], [1, 2]]
 ```
 
 ---
 
 ## Units
 
-| Function | Description |
-|---|---|
-| `unit(value, unit)` | Construct a `Unit` |
-| `createUnit(defs)` | Define custom units (`factory_createUnit`) |
-| `to(unit, target)` | Convert between units |
-| `toBest(unit)` | Convert to the best-fitting prefix |
-| `splitUnit(unit, parts)` | Split a unit into components |
+| Function                 | Description                                |
+| ------------------------ | ------------------------------------------ |
+| `unit(value, unit)`      | Construct a `Unit`                         |
+| `createUnit(defs)`       | Define custom units (`factory_createUnit`) |
+| `to(unit, target)`       | Convert between units                      |
+| `toBest(unit)`           | Convert to the best-fitting prefix         |
+| `splitUnit(unit, parts)` | Split a unit into components               |
 
 ### Details
 
@@ -1405,7 +1438,7 @@ quantities were silently mixed.
 import { unit, to } from '@danielsimonjr/mathts-functions';
 
 const d = unit(100, 'km');
-to(d, 'mile');               // ≈ 62.137 mile
+to(d, 'mile'); // ≈ 62.137 mile
 to(unit(90, 'km/h'), 'm/s'); // 25 m/s
 ```
 
@@ -1455,21 +1488,21 @@ physical artefacts.
 ```typescript
 import { speedOfLight, planckConstant, boltzmann } from '@danielsimonjr/mathts-functions';
 
-speedOfLight;     // 299792458       (m/s, exact since the 2019 SI redefinition)
-planckConstant;   // 6.62607015e-34  (J·s, exact since 2019)
-boltzmann;        // 1.380649e-23    (J/K, exact since 2019)
+speedOfLight; // 299792458       (m/s, exact since the 2019 SI redefinition)
+planckConstant; // 6.62607015e-34  (J·s, exact since 2019)
+boltzmann; // 1.380649e-23    (J/K, exact since 2019)
 ```
 
 ---
 
 ## Complex Number Utilities
 
-| Function | Description |
-|---|---|
-| `arg(z)` | Phase angle |
+| Function  | Description       |
+| --------- | ----------------- |
+| `arg(z)`  | Phase angle       |
 | `conj(z)` | Complex conjugate |
-| `re(z)` | Real part |
-| `im(z)` | Imaginary part |
+| `re(z)`   | Real part         |
+| `im(z)`   | Imaginary part    |
 
 ### Details
 
@@ -1496,10 +1529,10 @@ import { arg, conj, re, im } from '@danielsimonjr/mathts-functions';
 import { Complex } from '@danielsimonjr/mathts-core';
 
 const z = new Complex(3, 4);
-re(z);    // 3
-im(z);    // 4
-arg(z);   // ~0.9273  (atan2(4, 3))
-conj(z);  // Complex(3, -4)
+re(z); // 3
+im(z); // 4
+arg(z); // ~0.9273  (atan2(4, 3))
+conj(z); // Complex(3, -4)
 ```
 
 ---
@@ -1508,17 +1541,17 @@ conj(z);  // Complex(3, -4)
 
 Convert a value into a specific numeric or container type.
 
-| Function | Description |
-|---|---|
-| `number(x)` | Convert to a primitive `number` |
-| `bigint(x)` | Convert to a `bigint` |
-| `bignumber(x)` | Convert to an arbitrary-precision `BigNumber` |
-| `fraction(x)` | Convert to an exact `Fraction` |
-| `complex(re[, im])` | Convert to / construct a `Complex` |
-| `matrix(data)` | Convert to a dense `DenseMatrix` |
-| `sparse(data)` | Convert to a `SparseMatrix` (CSC storage) |
-| `string(x)` | Convert to a `string` |
-| `boolean(x)` | Convert to a `boolean` |
+| Function            | Description                                   |
+| ------------------- | --------------------------------------------- |
+| `number(x)`         | Convert to a primitive `number`               |
+| `bigint(x)`         | Convert to a `bigint`                         |
+| `bignumber(x)`      | Convert to an arbitrary-precision `BigNumber` |
+| `fraction(x)`       | Convert to an exact `Fraction`                |
+| `complex(re[, im])` | Convert to / construct a `Complex`            |
+| `matrix(data)`      | Convert to a dense `DenseMatrix`              |
+| `sparse(data)`      | Convert to a `SparseMatrix` (CSC storage)     |
+| `string(x)`         | Convert to a `string`                         |
+| `boolean(x)`        | Convert to a `boolean`                        |
 
 The factory-layer `numeric(x, type)` (see below) is a single-entry dispatcher
 over the same conversions.
@@ -1526,7 +1559,7 @@ over the same conversions.
 ### Details
 
 - Conversions to `BigNumber` and `Fraction` are **exact** when the source
-  permits; converting *out* of them (`number`) is lossy and may round.
+  permits; converting _out_ of them (`number`) is lossy and may round.
 - Convert from a string for exactness — `bignumber('0.1')` is the true value
   one-tenth, whereas `bignumber(0.1)` first inherits the binary rounding error
   of the literal `0.1`.
@@ -1547,29 +1580,29 @@ precision is traded for speed.
 ```typescript
 import { fraction, bignumber, complex } from '@danielsimonjr/mathts-functions';
 
-fraction(0.25);     // Fraction(1, 4)
-bignumber('0.1');   // exact BigNumber 0.1 (no binary rounding error)
-complex(2, 3);      // Complex(2, 3)
+fraction(0.25); // Fraction(1, 4)
+bignumber('0.1'); // exact BigNumber 0.1 (no binary rounding error)
+complex(2, 3); // Complex(2, 3)
 ```
 
 ---
 
 ## Type Checking & Utilities
 
-| Function | Description |
-|---|---|
-| `typeOf(x)` | Runtime type name |
-| `clone(x)` | Deep clone |
-| `numeric(x, type)` | Convert to a numeric type |
-| `isNumeric(x)` / `hasNumericValue(x)` | Numeric tests |
-| `isNaN(x)` / `isFinite(x)` / `isBounded(x)` | Value tests |
-| `isZero(x)` / `isPositive(x)` / `isNegative(x)` | Sign tests |
-| `isInteger(x)` | Integer test |
-| `isPrime(x)` | Primality test |
-| `format(x[, opts])` | Format a value as a string |
-| `print(template, values)` | Interpolate values into a template |
-| `bin(x)` / `hex(x)` / `oct(x)` | Binary / hex / octal string |
-| `chain(value)` | Start a chained-operation `Chain` |
+| Function                                        | Description                        |
+| ----------------------------------------------- | ---------------------------------- |
+| `typeOf(x)`                                     | Runtime type name                  |
+| `clone(x)`                                      | Deep clone                         |
+| `numeric(x, type)`                              | Convert to a numeric type          |
+| `isNumeric(x)` / `hasNumericValue(x)`           | Numeric tests                      |
+| `isNaN(x)` / `isFinite(x)` / `isBounded(x)`     | Value tests                        |
+| `isZero(x)` / `isPositive(x)` / `isNegative(x)` | Sign tests                         |
+| `isInteger(x)`                                  | Integer test                       |
+| `isPrime(x)`                                    | Primality test                     |
+| `format(x[, opts])`                             | Format a value as a string         |
+| `print(template, values)`                       | Interpolate values into a template |
+| `bin(x)` / `hex(x)` / `oct(x)`                  | Binary / hex / octal string        |
+| `chain(value)`                                  | Start a chained-operation `Chain`  |
 
 ### Details
 
@@ -1595,9 +1628,9 @@ the connective tissue that makes type-generic mathematical programming practical
 import { typeOf, isPrime, isInteger, format } from '@danielsimonjr/mathts-functions';
 import { Complex } from '@danielsimonjr/mathts-core';
 
-typeOf(new Complex(1, 2));      // 'Complex'
-isPrime(97);                    // true
-isInteger(4.0);                 // true
+typeOf(new Complex(1, 2)); // 'Complex'
+isPrime(97); // true
+isInteger(4.0); // true
 format(1 / 3, { precision: 4 }); // '0.3333'
 ```
 
@@ -1605,14 +1638,14 @@ format(1 / 3, { precision: 4 }); // '0.3333'
 
 ## Expression Evaluation
 
-| Function | Description |
-|---|---|
-| `evaluate(expr[, scope])` | Evaluate an expression string |
-| `compileExpr(expr)` | Compile once, evaluate many |
-| `parse(expr)` | Parse an expression into an AST node |
-| `parser()` | Create a stateful parser with a scope retained across calls |
-| `reviver(key, value)` | `JSON.parse` reviver — restores `Complex`, `Fraction`, non-finite numbers |
-| `replacer(key, value)` | `JSON.stringify` replacer — serialises `Complex`, `Fraction`, non-finite numbers |
+| Function                  | Description                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| `evaluate(expr[, scope])` | Evaluate an expression string                                                    |
+| `compileExpr(expr)`       | Compile once, evaluate many                                                      |
+| `parse(expr)`             | Parse an expression into an AST node                                             |
+| `parser()`                | Create a stateful parser with a scope retained across calls                      |
+| `reviver(key, value)`     | `JSON.parse` reviver — restores `Complex`, `Fraction`, non-finite numbers        |
+| `replacer(key, value)`    | `JSON.stringify` replacer — serialises `Complex`, `Fraction`, non-finite numbers |
 
 ### Details
 
@@ -1641,11 +1674,11 @@ boundary.
 ```typescript
 import { evaluate, compileExpr } from '@danielsimonjr/mathts-functions';
 
-evaluate('2 + 3 * 4');          // 14
+evaluate('2 + 3 * 4'); // 14
 evaluate('pi * r^2', { r: 5 }); // 78.5398...
 
 const fn = compileExpr('x^2 + 2*x + 1');
-fn.evaluate({ x: 3 });          // 16
+fn.evaluate({ x: 3 }); // 16
 ```
 
 ---

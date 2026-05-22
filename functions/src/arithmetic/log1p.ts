@@ -1,36 +1,36 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { MathJsConfig } from '../core/config.js'
-import { deepMap } from '../utils/collection.js'
-import { log1p as _log1p } from '../utils/number.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { MathJsConfig } from '../core/config.js';
+import { deepMap } from '../utils/collection.js';
+import { log1p as _log1p } from '../utils/number.js';
 
 // Type definitions for log1p
 interface ComplexType {
-  re: number
-  im: number
+  re: number;
+  im: number;
 }
 
 interface ComplexConstructor {
-  new (re: number, im: number): ComplexType
+  new (re: number, im: number): ComplexType;
 }
 
 interface BigNumberType {
-  plus(n: number): BigNumberType
-  isNegative(): boolean
-  ln(): BigNumberType
-  toNumber(): number
+  plus(n: number): BigNumberType;
+  isNegative(): boolean;
+  ln(): BigNumberType;
+  toNumber(): number;
 }
 
 interface Log1pDependencies {
-  typed: TypedFunction
-  config: MathJsConfig
-  divideScalar: TypedFunction
-  log: TypedFunction
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  config: MathJsConfig;
+  divideScalar: TypedFunction;
+  log: TypedFunction;
+  Complex: ComplexConstructor;
 }
 
-const name = 'log1p'
-const dependencies = ['typed', 'config', 'divideScalar', 'log', 'Complex']
+const name = 'log1p';
+const dependencies = ['typed', 'config', 'divideScalar', 'log', 'Complex'];
 
 export const createLog1p = /* #__PURE__ */ factory(
   name,
@@ -70,22 +70,22 @@ export const createLog1p = /* #__PURE__ */ factory(
     return typed(name, {
       number: function (x: number): number | ComplexType {
         if (x >= -1 || config.predictable) {
-          return _log1p(x)
+          return _log1p(x);
         } else {
           // negative value -> complex value computation
-          return _log1pComplex(new Complex(x, 0))
+          return _log1pComplex(new Complex(x, 0));
         }
       },
 
       Complex: _log1pComplex,
 
       BigNumber: function (x: BigNumberType): BigNumberType | ComplexType {
-        const y = x.plus(1)
+        const y = x.plus(1);
         if (!y.isNegative() || config.predictable) {
-          return y.ln()
+          return y.ln();
         } else {
           // downgrade to number, return Complex valued result
-          return _log1pComplex(new Complex(x.toNumber(), 0))
+          return _log1pComplex(new Complex(x.toNumber(), 0));
         }
       },
 
@@ -99,10 +99,10 @@ export const createLog1p = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown, base: unknown): unknown => {
             // calculate logarithm for a specified base, log1p(x, base)
-            return divideScalar(self(x), log(base))
+            return divideScalar(self(x), log(base));
           }
-      )
-    })
+      ),
+    });
 
     /**
      * Calculate the natural logarithm of a complex number + 1
@@ -111,11 +111,8 @@ export const createLog1p = /* #__PURE__ */ factory(
      * @private
      */
     function _log1pComplex(x: ComplexType): ComplexType {
-      const xRe1p = x.re + 1
-      return new Complex(
-        Math.log(Math.sqrt(xRe1p * xRe1p + x.im * x.im)),
-        Math.atan2(x.im, xRe1p)
-      )
+      const xRe1p = x.re + 1;
+      return new Complex(Math.log(Math.sqrt(xRe1p * xRe1p + x.im * x.im)), Math.atan2(x.im, xRe1p));
     }
   }
-)
+);

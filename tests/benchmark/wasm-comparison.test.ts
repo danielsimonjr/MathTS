@@ -23,10 +23,14 @@ describe('WASM Backend Comparison', () => {
     const b = new Float64Array(n).fill(2);
 
     it('array add: JS baseline', () => {
-      const t = bench('array_add', () => {
-        const c = new Float64Array(n);
-        for (let i = 0; i < n; i++) c[i] = a[i] + b[i];
-      }, 1000);
+      const t = bench(
+        'array_add',
+        () => {
+          const c = new Float64Array(n);
+          for (let i = 0; i < n; i++) c[i] = a[i] + b[i];
+        },
+        1000
+      );
       console.log(`  JS array add (${n}): ${t.toFixed(2)}ms / 1K ops`);
       expect(t).toBeLessThan(500);
     });
@@ -37,17 +41,24 @@ describe('WASM Backend Comparison', () => {
       const n = 100;
       const a = new Float64Array(n * n);
       const b = new Float64Array(n * n);
-      for (let i = 0; i < n * n; i++) { a[i] = Math.random(); b[i] = Math.random(); }
+      for (let i = 0; i < n * n; i++) {
+        a[i] = Math.random();
+        b[i] = Math.random();
+      }
 
-      const t = bench('matmul', () => {
-        const c = new Float64Array(n * n);
-        for (let i = 0; i < n; i++)
-          for (let j = 0; j < n; j++) {
-            let sum = 0;
-            for (let k = 0; k < n; k++) sum += a[i*n+k] * b[k*n+j];
-            c[i*n+j] = sum;
-          }
-      }, 10);
+      const t = bench(
+        'matmul',
+        () => {
+          const c = new Float64Array(n * n);
+          for (let i = 0; i < n; i++)
+            for (let j = 0; j < n; j++) {
+              let sum = 0;
+              for (let k = 0; k < n; k++) sum += a[i * n + k] * b[k * n + j];
+              c[i * n + j] = sum;
+            }
+        },
+        10
+      );
       console.log(`  JS matmul 100x100: ${t.toFixed(2)}ms / 10 ops`);
       expect(t).toBeLessThan(2000);
     });

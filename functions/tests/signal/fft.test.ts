@@ -55,9 +55,7 @@ describe('FFT', () => {
     it('should compute FFT of simple sinusoid', () => {
       // Cosine at frequency 1: cos(2π·1·n/4) for n=0,1,2,3
       const n = 4;
-      const signal = Array.from({ length: n }, (_, i) =>
-        Math.cos((2 * Math.PI * 1 * i) / n)
-      );
+      const signal = Array.from({ length: n }, (_, i) => Math.cos((2 * Math.PI * 1 * i) / n));
       const result = fft(signal);
 
       // Should have peaks at k=1 and k=n-1 (symmetric)
@@ -134,7 +132,7 @@ describe('FFT', () => {
     });
   });
 
-  describe('Parseval\'s theorem', () => {
+  describe("Parseval's theorem", () => {
     it('should preserve energy: sum(|x|²) = sum(|X|²)/N', () => {
       const signal = [1, 2, 3, 4, 5, 6, 7, 8];
       const fftResult = fft(signal);
@@ -144,8 +142,7 @@ describe('FFT', () => {
 
       // Frequency domain energy (scaled by 1/N)
       const freqEnergy =
-        fftPower(fftResult.spectrum).reduce((sum, p) => sum + p, 0) /
-        fftResult.paddedLength;
+        fftPower(fftResult.spectrum).reduce((sum, p) => sum + p, 0) / fftResult.paddedLength;
 
       expect(freqEnergy).toBeCloseTo(timeEnergy, 8);
     });
@@ -183,8 +180,8 @@ describe('FFT', () => {
     describe('fftPhase', () => {
       it('should compute phase spectrum', () => {
         const spectrum: ComplexNumber[] = [
-          complex(1, 0),  // phase = 0
-          complex(0, 1),  // phase = π/2
+          complex(1, 0), // phase = 0
+          complex(0, 1), // phase = π/2
           complex(-1, 0), // phase = π
           complex(0, -1), // phase = -π/2
         ];
@@ -210,7 +207,7 @@ describe('FFT', () => {
         expect(freqs[4]).toBe(50);
 
         // Second half: negative frequencies
-        expect(freqs[5]).toBe(-3 * 100 / 8);
+        expect(freqs[5]).toBe((-3 * 100) / 8);
       });
 
       it('should default to unit sample rate', () => {

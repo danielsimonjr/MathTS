@@ -15,7 +15,7 @@
  * @returns -(i+2)
  */
 export function csFlip(i: i32): i32 {
-  return -(i + 2)
+  return -(i + 2);
 }
 
 /**
@@ -24,7 +24,7 @@ export function csFlip(i: i32): i32 {
  * @returns i if i >= 0, else -(i+2)
  */
 export function csUnflip(i: i32): i32 {
-  return i < 0 ? -(i + 2) : i
+  return i < 0 ? -(i + 2) : i;
 }
 
 /**
@@ -34,7 +34,7 @@ export function csUnflip(i: i32): i32 {
  * @returns true if marked
  */
 export function csMarked(w: Int32Array, j: i32): boolean {
-  return unchecked(w[j]) < 0
+  return unchecked(w[j]) < 0;
 }
 
 /**
@@ -43,7 +43,7 @@ export function csMarked(w: Int32Array, j: i32): boolean {
  * @param j Node index
  */
 export function csMark(w: Int32Array, j: i32): void {
-  unchecked(w[j] = csFlip(unchecked(w[j])))
+  unchecked((w[j] = csFlip(unchecked(w[j]))));
 }
 
 /**
@@ -55,15 +55,15 @@ export function csMark(w: Int32Array, j: i32): void {
  * @returns Sum of c
  */
 export function csCumsum(p: Int32Array, c: Int32Array, n: i32): i32 {
-  let nz: i32 = 0
+  let nz: i32 = 0;
   for (let i: i32 = 0; i < n; i++) {
-    unchecked(p[i] = nz)
-    const ci = unchecked(c[i])
-    nz += ci
-    unchecked(c[i] = unchecked(p[i]))
+    unchecked((p[i] = nz));
+    const ci = unchecked(c[i]);
+    nz += ci;
+    unchecked((c[i] = unchecked(p[i])));
   }
-  unchecked(p[n] = nz)
-  return nz
+  unchecked((p[n] = nz));
+  return nz;
 }
 
 /**
@@ -92,21 +92,21 @@ export function csPermute(
   cIndex: Int32Array,
   cPtr: Int32Array
 ): void {
-  let nz: i32 = 0
+  let nz: i32 = 0;
 
   for (let k: i32 = 0; k < n; k++) {
-    unchecked(cPtr[k] = nz)
-    const j = q ? unchecked(q[k]) : k
+    unchecked((cPtr[k] = nz));
+    const j = q ? unchecked(q[k]) : k;
 
     for (let t: i32 = unchecked(ptr[j]); t < unchecked(ptr[j + 1]); t++) {
-      const i = pinv ? unchecked(pinv[unchecked(index[t])]) : unchecked(index[t])
+      const i = pinv ? unchecked(pinv[unchecked(index[t])]) : unchecked(index[t]);
 
-      unchecked(cIndex[nz] = i)
-      unchecked(cValues[nz] = unchecked(values[t]))
-      nz++
+      unchecked((cIndex[nz] = i));
+      unchecked((cValues[nz] = unchecked(values[t])));
+      nz++;
     }
   }
-  unchecked(cPtr[n] = nz)
+  unchecked((cPtr[n] = nz));
 }
 
 /**
@@ -127,40 +127,40 @@ export function csLeaf(
   prevleaf: Int32Array,
   ancestor: Int32Array
 ): i32 {
-  let q: i32
-  let s: i32
-  let sparent: i32
-  let jprev: i32
+  let q: i32;
+  let s: i32;
+  let sparent: i32;
+  let jprev: i32;
 
-  let jleaf: i32 = 0
+  let jleaf: i32 = 0;
   if (i <= j || unchecked(first[j]) <= unchecked(maxfirst[i])) {
-    return jleaf
+    return jleaf;
   }
 
-  unchecked(maxfirst[i] = unchecked(first[j]))
-  jprev = unchecked(prevleaf[i])
-  unchecked(prevleaf[i] = j)
+  unchecked((maxfirst[i] = unchecked(first[j])));
+  jprev = unchecked(prevleaf[i]);
+  unchecked((prevleaf[i] = j));
 
   if (jprev === -1) {
-    jleaf = i
+    jleaf = i;
   } else {
-    jleaf = -1
+    jleaf = -1;
 
     for (q = jprev; q !== -1 && q !== j; q = unchecked(ancestor[q])) {
-      s = q
+      s = q;
     }
 
     if (s !== -1 && q === j) {
-      jleaf = s
+      jleaf = s;
     }
 
     for (q = jprev; q !== s; q = sparent) {
-      sparent = unchecked(ancestor[q])
-      unchecked(ancestor[q] = j)
+      sparent = unchecked(ancestor[q]);
+      unchecked((ancestor[q] = j));
     }
   }
 
-  return jleaf
+  return jleaf;
 }
 
 /**
@@ -178,26 +178,26 @@ export function csEtree(
   n: i32,
   parent: Int32Array
 ): void {
-  const ancestor = new Int32Array(n)
+  const ancestor = new Int32Array(n);
 
   for (let i: i32 = 0; i < n; i++) {
-    unchecked(parent[i] = -1)
-    unchecked(ancestor[i] = -1)
+    unchecked((parent[i] = -1));
+    unchecked((ancestor[i] = -1));
   }
 
   for (let k: i32 = 0; k < n; k++) {
     for (let p: i32 = unchecked(ptr[k]); p < unchecked(ptr[k + 1]); p++) {
-      let i: i32 = unchecked(index[p])
+      let i: i32 = unchecked(index[p]);
 
       while (i !== -1 && i < k) {
-        const inext = unchecked(ancestor[i])
-        unchecked(ancestor[i] = k)
+        const inext = unchecked(ancestor[i]);
+        unchecked((ancestor[i] = k));
 
         if (inext === -1) {
-          unchecked(parent[i] = k)
+          unchecked((parent[i] = k));
         }
 
-        i = inext
+        i = inext;
       }
     }
   }
@@ -225,45 +225,45 @@ export function csDfs(
   pinv: Int32Array,
   marked: Int32Array
 ): i32 {
-  let head: i32 = 0
-  let done: boolean = false
-  let p: i32
-  let p2: i32
+  let head: i32 = 0;
+  let done: boolean = false;
+  let p: i32;
+  let p2: i32;
 
-  unchecked(xi[0] = j)
+  unchecked((xi[0] = j));
 
   while (head >= 0) {
-    j = unchecked(xi[head])
-    const jnew = pinv ? unchecked(pinv[j]) : j
+    j = unchecked(xi[head]);
+    const jnew = pinv ? unchecked(pinv[j]) : j;
 
     if (!csMarked(marked, j)) {
-      csMark(marked, j)
-      unchecked(pstack[head] = jnew < 0 ? 0 : unchecked(ptr[jnew]))
+      csMark(marked, j);
+      unchecked((pstack[head] = jnew < 0 ? 0 : unchecked(ptr[jnew])));
     }
 
-    done = true
-    p2 = jnew < 0 ? 0 : unchecked(ptr[jnew + 1])
+    done = true;
+    p2 = jnew < 0 ? 0 : unchecked(ptr[jnew + 1]);
 
     for (p = unchecked(pstack[head]); p < p2; p++) {
-      const i = unchecked(index[p])
+      const i = unchecked(index[p]);
 
       if (csMarked(marked, i)) {
-        continue
+        continue;
       }
 
-      unchecked(pstack[head] = p)
-      unchecked(xi[++head] = i)
-      done = false
-      break
+      unchecked((pstack[head] = p));
+      unchecked((xi[++head] = i));
+      done = false;
+      break;
     }
 
     if (done) {
-      head--
-      unchecked(xi[--top] = j)
+      head--;
+      unchecked((xi[--top] = j));
     }
   }
 
-  return top
+  return top;
 }
 
 /**
@@ -287,36 +287,36 @@ export function csSpsolve(
   lo: boolean,
   n: i32
 ): i32 {
-  let top: i32 = n
+  let top: i32 = n;
 
   // Find nonzero pattern
   for (let k: i32 = 0; k < n; k++) {
     if (unchecked(B[k]) !== 0) {
-      top = csDfs(k, gIndex, gPtr, top, xi, new Int32Array(n), pinv, new Int32Array(n))
+      top = csDfs(k, gIndex, gPtr, top, xi, new Int32Array(n), pinv, new Int32Array(n));
     }
   }
 
   // Initialize x with B
   for (let p: i32 = top; p < n; p++) {
-    unchecked(x[unchecked(xi[p])] = unchecked(B[unchecked(xi[p])]))
+    unchecked((x[unchecked(xi[p])] = unchecked(B[unchecked(xi[p])])));
   }
 
   // Solve
   for (let px: i32 = top; px < n; px++) {
-    const j = unchecked(xi[px])
-    const J = pinv ? unchecked(pinv[j]) : j
+    const j = unchecked(xi[px]);
+    const J = pinv ? unchecked(pinv[j]) : j;
 
-    if (J < 0) continue
+    if (J < 0) continue;
 
-    let xj = unchecked(x[j])
-    const p1 = unchecked(gPtr[J])
-    const p2 = unchecked(gPtr[J + 1])
+    let xj = unchecked(x[j]);
+    const p1 = unchecked(gPtr[J]);
+    const p2 = unchecked(gPtr[J + 1]);
 
     for (let p: i32 = lo ? p1 : p2 - 1; lo ? p < p2 : p >= p1; p = lo ? p + 1 : p - 1) {
-      const i = unchecked(gIndex[p])
-      unchecked(x[i] -= unchecked(gValues[p]) * xj)
+      const i = unchecked(gIndex[p]);
+      unchecked((x[i] -= unchecked(gValues[p]) * xj));
     }
   }
 
-  return n - top
+  return n - top;
 }

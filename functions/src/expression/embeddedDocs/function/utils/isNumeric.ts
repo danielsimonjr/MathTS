@@ -13,7 +13,7 @@ export const isNumericDocs = {
     'isNumeric(bignumber(500))',
     'isNumeric(fraction(0.125))',
     'isNumeric(2 + 3i)',
-    'isNumeric([2.3, "foo", false])'
+    'isNumeric([2.3, "foo", false])',
   ],
   seealso: [
     'isInteger',
@@ -23,6 +23,6 @@ export const isNumericDocs = {
     'isNaN',
     'hasNumericValue',
     'isFinite',
-    'isBounded'
-  ]
-}
+    'isBounded',
+  ],
+};

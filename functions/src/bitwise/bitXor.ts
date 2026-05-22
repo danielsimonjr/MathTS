@@ -1,48 +1,36 @@
-import { bitXor as bigBitXor } from '../utils/bignumber/bitwise.js'
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { factory } from '../utils/factory.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import { bitXorNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { bitXor as bigBitXor } from '../utils/bignumber/bitwise.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { factory } from '../utils/factory.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import { bitXorNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for bitXor
 interface BitXorDependencies {
-  typed: TypedFunction
-  matrix: (data: unknown[]) => unknown
-  DenseMatrix: new (data: unknown) => unknown
-  concat: TypedFunction
-  SparseMatrix: new (data: unknown) => unknown
+  typed: TypedFunction;
+  matrix: (data: unknown[]) => unknown;
+  DenseMatrix: new (data: unknown) => unknown;
+  concat: TypedFunction;
+  SparseMatrix: new (data: unknown) => unknown;
 }
 
-const name = 'bitXor'
-const dependencies = [
-  'typed',
-  'matrix',
-  'DenseMatrix',
-  'concat',
-  'SparseMatrix'
-]
+const name = 'bitXor';
+const dependencies = ['typed', 'matrix', 'DenseMatrix', 'concat', 'SparseMatrix'];
 
 export const createBitXor = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    DenseMatrix,
-    concat,
-    SparseMatrix
-  }: BitXorDependencies) => {
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
+  ({ typed, matrix, DenseMatrix, concat, SparseMatrix }: BitXorDependencies) => {
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Bitwise XOR two values, `x ^ y`.
@@ -71,13 +59,13 @@ export const createBitXor = /* #__PURE__ */ factory(
       {
         'number, number': bitXorNumber,
         'BigNumber, BigNumber': bigBitXor,
-        'bigint, bigint': (x: bigint, y: bigint): bigint => x ^ y
+        'bigint, bigint': (x: bigint, y: bigint): bigint => x ^ y,
       },
       matrixAlgorithmSuite({
         SS: matAlgo07xSSf as any,
         DS: matAlgo03xDSf as any,
-        Ss: matAlgo12xSfs as any
+        Ss: matAlgo12xSfs as any,
       })
-    )
+    );
   }
-)
+);

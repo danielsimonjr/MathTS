@@ -42,8 +42,7 @@ function check(name, cond, detail) {
     console.log(`✗ ${name} ${detail ?? ''}`);
   }
 }
-const arrEq = (a, b) =>
-  a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
+const arrEq = (a, b) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
 
 console.log('AssemblyScript polynomial algebra\n=================================');
 
@@ -70,14 +69,8 @@ check(
   'polynomialRemainder((x^2+1)/(x-1))',
   arrEq(poly2('polynomialRemainder', [1, 0, 1], [-1, 1]), [2])
 );
-check(
-  'polynomialGCD(x^2-1, x-1)',
-  arrEq(poly2('polynomialGCD', [-1, 0, 1], [-1, 1]), [-1, 1])
-);
-check(
-  'polynomialLCM(x-1, x-2)',
-  arrEq(poly2('polynomialLCM', [-1, 1], [-2, 1]), [2, -3, 1])
-);
+check('polynomialGCD(x^2-1, x-1)', arrEq(poly2('polynomialGCD', [-1, 0, 1], [-1, 1]), [-1, 1]));
+check('polynomialLCM(x-1, x-2)', arrEq(poly2('polynomialLCM', [-1, 1], [-2, 1]), [2, -3, 1]));
 
 function disc(coeffs) {
   const p = makeArray(coeffs);

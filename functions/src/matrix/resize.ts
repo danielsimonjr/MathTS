@@ -1,29 +1,29 @@
-import { isBigNumber, isMatrix } from '../utils/is.js'
-import { DimensionError } from '../error/DimensionError.js'
-import { ArgumentsError } from '../error/ArgumentsError.js'
-import { isInteger } from '../utils/number.js'
-import { format } from '../utils/string.js'
-import { clone } from '../utils/object.js'
-import { resize as arrayResize } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { MathJsConfig } from '../core/config.js'
+import { isBigNumber, isMatrix } from '../utils/is.js';
+import { DimensionError } from '../error/DimensionError.js';
+import { ArgumentsError } from '../error/ArgumentsError.js';
+import { isInteger } from '../utils/number.js';
+import { format } from '../utils/string.js';
+import { clone } from '../utils/object.js';
+import { resize as arrayResize } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathJsConfig } from '../core/config.js';
 
 interface MatrixType {
-  valueOf(): any[]
-  resize(size: number[], defaultValue?: any, copy?: boolean): MatrixType
+  valueOf(): any[];
+  resize(size: number[], defaultValue?: any, copy?: boolean): MatrixType;
 }
 
 interface MatrixConstructor {
-  (data: any[]): MatrixType
+  (data: any[]): MatrixType;
 }
 
 interface ResizeDependencies {
-  config: MathJsConfig
-  matrix: MatrixConstructor
+  config: MathJsConfig;
+  matrix: MatrixConstructor;
 }
 
-const name = 'resize'
-const dependencies = ['config', 'matrix']
+const name = 'resize';
+const dependencies = ['config', 'matrix'];
 
 export const createResize = /* #__PURE__ */ factory(
   name,
@@ -58,52 +58,52 @@ export const createResize = /* #__PURE__ */ factory(
     // TODO: rework resize to a typed-function
     return function resize(x: any, size: any, defaultValue?: any): any {
       if (arguments.length !== 2 && arguments.length !== 3) {
-        throw new ArgumentsError('resize', arguments.length, 2, 3)
+        throw new ArgumentsError('resize', arguments.length, 2, 3);
       }
 
       if (isMatrix(size)) {
-        size = size.valueOf() // get Array
+        size = size.valueOf(); // get Array
       }
 
       if (isBigNumber(size[0])) {
         // convert bignumbers to numbers
         size = size.map(function (value: any) {
-          return !isBigNumber(value) ? value : (value as any).toNumber()
-        })
+          return !isBigNumber(value) ? value : (value as any).toNumber();
+        });
       }
 
       // check x is a Matrix
       if (isMatrix(x)) {
         // use optimized matrix implementation, return copy
-        return (x as any).resize(size, defaultValue, true)
+        return (x as any).resize(size, defaultValue, true);
       }
 
       if (typeof x === 'string') {
         // resize string
-        return _resizeString(x, size, defaultValue)
+        return _resizeString(x, size, defaultValue);
       }
 
       // check result should be a matrix
-      const asMatrix = Array.isArray(x) ? false : config.matrix !== 'Array'
+      const asMatrix = Array.isArray(x) ? false : config.matrix !== 'Array';
 
       if (size.length === 0) {
         // output a scalar
         while (Array.isArray(x)) {
-          x = x[0]
+          x = x[0];
         }
 
-        return clone(x)
+        return clone(x);
       } else {
         // output an array/matrix
         if (!Array.isArray(x)) {
-          x = [x]
+          x = [x];
         }
-        x = clone(x)
+        x = clone(x);
 
-        const res = arrayResize(x, size, defaultValue)
-        return asMatrix ? matrix(res) : res
+        const res = arrayResize(x, size, defaultValue);
+        return asMatrix ? matrix(res) : res;
       }
-    }
+    };
 
     /**
      * Resize a string
@@ -112,43 +112,36 @@ export const createResize = /* #__PURE__ */ factory(
      * @param {string} [defaultChar=' ']
      * @private
      */
-    function _resizeString(
-      str: string,
-      size: number[],
-      defaultChar?: string
-    ): string {
+    function _resizeString(str: string, size: number[], defaultChar?: string): string {
       if (defaultChar !== undefined) {
         if (typeof defaultChar !== 'string' || defaultChar.length !== 1) {
-          throw new TypeError('Single character expected as defaultValue')
+          throw new TypeError('Single character expected as defaultValue');
         }
       } else {
-        defaultChar = ' '
+        defaultChar = ' ';
       }
 
       if (size.length !== 1) {
-        throw new DimensionError(size.length, 1)
+        throw new DimensionError(size.length, 1);
       }
-      const len = size[0]
+      const len = size[0];
       if (typeof len !== 'number' || !isInteger(len)) {
         throw new TypeError(
-          'Invalid size, must contain positive integers ' +
-            '(size: ' +
-            format(size, {}) +
-            ')'
-        )
+          'Invalid size, must contain positive integers ' + '(size: ' + format(size, {}) + ')'
+        );
       }
 
       if (str.length > len) {
-        return str.substring(0, len)
+        return str.substring(0, len);
       } else if (str.length < len) {
-        let res = str
+        let res = str;
         for (let i = 0, ii = len - str.length; i < ii; i++) {
-          res += defaultChar
+          res += defaultChar;
         }
-        return res
+        return res;
       } else {
-        return str
+        return str;
       }
     }
   }
-)
+);

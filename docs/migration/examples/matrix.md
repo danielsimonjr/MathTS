@@ -13,13 +13,13 @@ const math = create(all);
 const A = math.matrix([
   [1, 2, 3],
   [4, 5, 6],
-  [7, 8, 9]
+  [7, 8, 9],
 ]);
 
 const B = math.matrix([
   [9, 8, 7],
   [6, 5, 4],
-  [3, 2, 1]
+  [3, 2, 1],
 ]);
 
 // Matrix operations
@@ -33,14 +33,14 @@ const I3 = math.identity(3);
 const Z = math.zeros(2, 3);
 
 // Element access
-const element = A.get([1, 2]);  // mathjs uses array notation
+const element = A.get([1, 2]); // mathjs uses array notation
 const size = A.size();
 
 // Sparse matrices
 const sparse = math.sparse([
   [1, 0, 0],
   [0, 2, 0],
-  [0, 0, 3]
+  [0, 0, 3],
 ]);
 ```
 
@@ -55,13 +55,13 @@ const math = create(all);
 const A = math.matrix([
   [1, 2, 3],
   [4, 5, 6],
-  [7, 8, 9]
+  [7, 8, 9],
 ]);
 
 const B = math.matrix([
   [9, 8, 7],
   [6, 5, 4],
-  [3, 2, 1]
+  [3, 2, 1],
 ]);
 
 // Matrix operations - same API
@@ -75,14 +75,14 @@ const I3 = math.identity(3);
 const Z = math.zeros(2, 3);
 
 // Element access - slight difference
-const element = A.get(1, 2);  // MathTS uses direct arguments
+const element = A.get(1, 2); // MathTS uses direct arguments
 const size = math.size(A);
 
 // Sparse matrices
 const sparse = math.sparse([
   [1, 0, 0],
   [0, 2, 0],
-  [0, 0, 3]
+  [0, 0, 3],
 ]);
 ```
 
@@ -95,13 +95,13 @@ import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 const A = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
-  [7, 8, 9]
+  [7, 8, 9],
 ]);
 
 const B = DenseMatrix.fromArray([
   [9, 8, 7],
   [6, 5, 4],
-  [3, 2, 1]
+  [3, 2, 1],
 ]);
 
 // Matrix operations as methods
@@ -123,11 +123,13 @@ const rows = A.rows;
 const cols = A.cols;
 
 // Sparse matrices
-const sparse = SparseMatrix.fromDense(DenseMatrix.fromArray([
-  [1, 0, 0],
-  [0, 2, 0],
-  [0, 0, 3]
-]));
+const sparse = SparseMatrix.fromDense(
+  DenseMatrix.fromArray([
+    [1, 0, 0],
+    [0, 2, 0],
+    [0, 0, 3],
+  ])
+);
 
 console.log('Non-zeros:', sparse.nnz);
 console.log('Density:', sparse.density);
@@ -139,16 +141,16 @@ const sparseFromDense = A.toSparse();
 
 ## Key Differences
 
-| mathjs | MathTS Compat | MathTS Native |
-|--------|---------------|---------------|
+| mathjs                 | MathTS Compat          | MathTS Native                    |
+| ---------------------- | ---------------------- | -------------------------------- |
 | `math.matrix([[...]])` | `math.matrix([[...]])` | `DenseMatrix.fromArray([[...]])` |
-| `math.sparse([[...]])` | `math.sparse([[...]])` | `SparseMatrix.fromDense(...)` |
-| `A.get([i, j])` | `A.get(i, j)` | `A.get(i, j)` |
-| `A.size()` | `math.size(A)` | `[A.rows, A.cols]` |
-| `math.add(A, B)` | `math.add(A, B)` | `A.add(B)` |
-| `math.multiply(A, B)` | `math.multiply(A, B)` | `A.multiply(B)` |
-| `math.identity(n)` | `math.identity(n)` | `DenseMatrix.identity(n)` |
-| `math.zeros(m, n)` | `math.zeros(m, n)` | `DenseMatrix.zeros(m, n)` |
+| `math.sparse([[...]])` | `math.sparse([[...]])` | `SparseMatrix.fromDense(...)`    |
+| `A.get([i, j])`        | `A.get(i, j)`          | `A.get(i, j)`                    |
+| `A.size()`             | `math.size(A)`         | `[A.rows, A.cols]`               |
+| `math.add(A, B)`       | `math.add(A, B)`       | `A.add(B)`                       |
+| `math.multiply(A, B)`  | `math.multiply(A, B)`  | `A.multiply(B)`                  |
+| `math.identity(n)`     | `math.identity(n)`     | `DenseMatrix.identity(n)`        |
+| `math.zeros(m, n)`     | `math.zeros(m, n)`     | `DenseMatrix.zeros(m, n)`        |
 
 ## Migration Steps
 

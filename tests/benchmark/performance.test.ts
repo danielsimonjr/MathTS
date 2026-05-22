@@ -21,12 +21,7 @@ import { add, abs, sqrt, exp } from '@danielsimonjr/mathts-functions';
  * Runs `fn` for `warmup` iterations (discarded), then `iterations` timed
  * iterations.  Returns elapsed milliseconds and logs a summary line.
  */
-function benchmark(
-  name: string,
-  fn: () => void,
-  iterations = 10_000,
-  warmup = 100
-): number {
+function benchmark(name: string, fn: () => void, iterations = 10_000, warmup = 100): number {
   for (let i = 0; i < warmup; i++) fn();
 
   const start = performance.now();
@@ -83,9 +78,7 @@ describe('Performance Regression Tests', () => {
 
   describe('Core Types – BigNumber', () => {
     it('BigNumber.fromNumber: 10K ops under 300ms', () => {
-      const elapsed = benchmark('BigNumber fromNumber', () =>
-        BigNumber.fromNumber(123456789)
-      );
+      const elapsed = benchmark('BigNumber fromNumber', () => BigNumber.fromNumber(123456789));
       expect(elapsed).toBeLessThan(300);
     });
 
@@ -144,12 +137,7 @@ describe('Performance Regression Tests', () => {
     it('DenseMatrix transpose 100x100: 100 ops under 200ms', () => {
       const data = Float64Array.from({ length: 10_000 }, (_, i) => i);
       const m = new DenseMatrix(100, 100, data);
-      const elapsed = benchmark(
-        'DenseMatrix 100x100 transpose',
-        () => m.transpose(),
-        100,
-        5
-      );
+      const elapsed = benchmark('DenseMatrix 100x100 transpose', () => m.transpose(), 100, 5);
       expect(elapsed).toBeLessThan(200);
     });
 
@@ -157,12 +145,7 @@ describe('Performance Regression Tests', () => {
       const data = Float64Array.from({ length: 10_000 }, (_, i) => i % 100);
       const a = new DenseMatrix(100, 100, data);
       const b = new DenseMatrix(100, 100, data);
-      const elapsed = benchmark(
-        'DenseMatrix 100x100 multiply',
-        () => a.multiply(b),
-        10,
-        2
-      );
+      const elapsed = benchmark('DenseMatrix 100x100 multiply', () => a.multiply(b), 10, 2);
       expect(elapsed).toBeLessThan(1000);
     });
 
@@ -170,9 +153,7 @@ describe('Performance Regression Tests', () => {
       const arr = Array.from({ length: 10 }, (_, r) =>
         Array.from({ length: 10 }, (_, c) => r * 10 + c)
       );
-      const elapsed = benchmark('DenseMatrix fromArray 10x10', () =>
-        DenseMatrix.fromArray(arr)
-      );
+      const elapsed = benchmark('DenseMatrix fromArray 10x10', () => DenseMatrix.fromArray(arr));
       expect(elapsed).toBeLessThan(300);
     });
   });

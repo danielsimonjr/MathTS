@@ -3,11 +3,11 @@
 MathTS provides three levels of API for working with expressions, each trading convenience
 for control:
 
-| API | Use when |
-|---|---|
-| `evaluate(expr, scope?)` | One-shot evaluation — simplest |
-| `parse(expr)` | Inspect or transform the AST before evaluating |
-| `compileExpr(expr)` | Compile once, evaluate many times with different scopes |
+| API                      | Use when                                                |
+| ------------------------ | ------------------------------------------------------- |
+| `evaluate(expr, scope?)` | One-shot evaluation — simplest                          |
+| `parse(expr)`            | Inspect or transform the AST before evaluating          |
+| `compileExpr(expr)`      | Compile once, evaluate many times with different scopes |
 
 All three are exported from `@danielsimonjr/mathts-functions`:
 
@@ -30,14 +30,14 @@ All registered math functions are available in expression strings, including the
 Examples:
 
 ```typescript
-evaluate('2 + 3');                        // 5
-evaluate('sin(pi / 2)');                  // 1
-evaluate('sqrt(-4)');                     // Complex { re: 0, im: 2 }
-evaluate('a * b', { a: 3, b: 4 });        // 12
-evaluate('erfc(1)');                      // ~0.1573
-evaluate('normalPDF(0)');                 // ~0.3989
-evaluate('fibonacci(10)');               // 55
-evaluate('beta(2, 3)');                   // ~0.0833
+evaluate('2 + 3'); // 5
+evaluate('sin(pi / 2)'); // 1
+evaluate('sqrt(-4)'); // Complex { re: 0, im: 2 }
+evaluate('a * b', { a: 3, b: 4 }); // 12
+evaluate('erfc(1)'); // ~0.1573
+evaluate('normalPDF(0)'); // ~0.3989
+evaluate('fibonacci(10)'); // 55
+evaluate('beta(2, 3)'); // ~0.0833
 ```
 
 ### Scope
@@ -47,8 +47,8 @@ the expression are written back to the scope:
 
 ```typescript
 const scope = { a: 3, b: 4 };
-evaluate('c = a + b', scope);   // 7
-scope.c;                        // 7
+evaluate('c = a + b', scope); // 7
+scope.c; // 7
 ```
 
 ### Multi-statement expressions
@@ -78,9 +78,9 @@ Example:
 
 ```typescript
 const node = parse('2 + x');
-node.toString();          // '2 + x'
-node.toTex();             // '2+x'
-node.type;                // 'OperatorNode'
+node.toString(); // '2 + x'
+node.toTex(); // '2+x'
+node.type; // 'OperatorNode'
 ```
 
 The returned node is the root of an [expression tree](expression_trees.md). You can
@@ -108,9 +108,9 @@ Example:
 
 ```typescript
 const compiled = compileExpr('x^2 + y');
-compiled.evaluate({ x: 2, y: 1 });    // 5
-compiled.evaluate({ x: 3, y: 2 });    // 11
-compiled.evaluate({ x: 10, y: 0 });   // 100
+compiled.evaluate({ x: 2, y: 1 }); // 5
+compiled.evaluate({ x: 3, y: 2 }); // 11
+compiled.evaluate({ x: 10, y: 0 }); // 100
 ```
 
 The expression is parsed and compiled once. Each `evaluate()` call only runs the
@@ -141,13 +141,13 @@ All three functions throw descriptive errors on invalid input:
 try {
   evaluate('2 +');
 } catch (err) {
-  console.error(err.message);   // 'Unexpected end of expression'
+  console.error(err.message); // 'Unexpected end of expression'
 }
 
 try {
   evaluate('unknownFn(3)');
 } catch (err) {
-  console.error(err.message);   // 'Undefined symbol unknownFn'
+  console.error(err.message); // 'Undefined symbol unknownFn'
 }
 ```
 
@@ -161,11 +161,11 @@ Use a shared scope object to maintain state across multiple `evaluate` calls:
 const scope: Record<string, any> = {};
 
 evaluate('a = 5', scope);
-evaluate('b = a * 2', scope);    // 10
-evaluate('a + b', scope);        // 15
+evaluate('b = a * 2', scope); // 10
+evaluate('a + b', scope); // 15
 
-scope.a;   // 5
-scope.b;   // 10
+scope.a; // 5
+scope.b; // 10
 ```
 
 This is the equivalent of mathjs's `math.parser()` — without requiring a class instance.

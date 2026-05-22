@@ -1,56 +1,39 @@
-import {
-  isNode,
-  isConstantNode,
-  isOperatorNode,
-  isParenthesisNode
-} from '../../utils/is.js'
-import { map } from '../../utils/array.js'
-import { createSubScope } from '../../utils/scope.js'
-import { escape } from '../../utils/string.js'
-import { getSafeProperty, isSafeMethod } from '../../utils/customs.js'
-import {
-  getAssociativity,
-  getPrecedence,
-  isAssociativeWith,
-  properties
-} from '../operators.js'
-import { latexOperators } from '../../utils/latex.js'
-import { factory } from '../../utils/factory.js'
+import { isNode, isConstantNode, isOperatorNode, isParenthesisNode } from '../../utils/is.js';
+import { map } from '../../utils/array.js';
+import { createSubScope } from '../../utils/scope.js';
+import { escape } from '../../utils/string.js';
+import { getSafeProperty, isSafeMethod } from '../../utils/customs.js';
+import { getAssociativity, getPrecedence, isAssociativeWith, properties } from '../operators.js';
+import { latexOperators } from '../../utils/latex.js';
+import { factory } from '../../utils/factory.js';
 
 // Type definitions
 interface Node {
-  _compile: (
-    math: Record<string, any>,
-    argNames: Record<string, boolean>
-  ) => CompileFunction
-  _ifNode: (node: any) => Node
-  filter: (callback: (node: Node) => boolean) => Node[]
-  getContent: () => Node
-  getIdentifier: () => string
-  toString: (options?: StringOptions) => string
-  toHTML: (options?: StringOptions) => string
-  toTex: (options?: StringOptions) => string
-  type: string
+  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
+  _ifNode: (node: any) => Node;
+  filter: (callback: (node: Node) => boolean) => Node[];
+  getContent: () => Node;
+  getIdentifier: () => string;
+  toString: (options?: StringOptions) => string;
+  toHTML: (options?: StringOptions) => string;
+  toTex: (options?: StringOptions) => string;
+  type: string;
 }
 
-type CompileFunction = (
-  scope: any,
-  args: Record<string, any>,
-  context: any
-) => any
+type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
 
 interface StringOptions {
-  parenthesis?: 'keep' | 'auto' | 'all'
-  implicit?: 'hide' | 'show'
-  [key: string]: any
+  parenthesis?: 'keep' | 'auto' | 'all';
+  implicit?: 'hide' | 'show';
+  [key: string]: any;
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node
+  Node: new (...args: any[]) => Node;
 }
 
-const name = 'OperatorNode'
-const dependencies = ['Node']
+const name = 'OperatorNode';
+const dependencies = ['Node'];
 
 export const createOperatorNode = /* #__PURE__ */ factory(
   name,
@@ -64,15 +47,15 @@ export const createOperatorNode = /* #__PURE__ */ factory(
      * @return {boolean}
      */
     function startsWithConstant(expr: Node, parenthesis: string): boolean {
-      let curNode = expr
+      let curNode = expr;
       if (parenthesis === 'auto') {
-        while (isParenthesisNode(curNode)) curNode = (curNode as any).content
+        while (isParenthesisNode(curNode)) curNode = (curNode as any).content;
       }
-      if (isConstantNode(curNode)) return true
+      if (isConstantNode(curNode)) return true;
       if (isOperatorNode(curNode)) {
-        return startsWithConstant((curNode as any).args[0], parenthesis)
+        return startsWithConstant((curNode as any).args[0], parenthesis);
       }
-      return false
+      return false;
     }
 
     /**
@@ -96,13 +79,8 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       latex: boolean
     ): boolean[] {
       // precedence of the root OperatorNode
-      const precedence = getPrecedence(
-        root as any,
-        parenthesis,
-        implicit,
-        undefined
-      )
-      const associativity = getAssociativity(root as any, parenthesis)
+      const precedence = getPrecedence(root as any, parenthesis, implicit, undefined);
+      const associativity = getAssociativity(root as any, parenthesis);
 
       if (
         parenthesis === 'all' ||
@@ -118,18 +96,18 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             case 'ConstantNode':
             case 'SymbolNode':
             case 'ParenthesisNode':
-              return false
+              return false;
             default:
-              return true
+              return true;
           }
-        })
+        });
       }
 
-      let result: boolean[]
+      let result: boolean[];
       switch (args.length) {
         case 0:
-          result = []
-          break
+          result = [];
+          break;
 
         case 1: // unary operators
           {
@@ -139,177 +117,133 @@ export const createOperatorNode = /* #__PURE__ */ factory(
               parenthesis,
               implicit,
               root as any
-            )
+            );
 
             // handle special cases for LaTeX, where some of the parentheses aren't needed
             if (latex && operandPrecedence !== null) {
-              let operandIdentifier: string
-              let rootIdentifier: string
+              let operandIdentifier: string;
+              let rootIdentifier: string;
               if (parenthesis === 'keep') {
-                operandIdentifier = args[0].getIdentifier()
-                rootIdentifier = root.getIdentifier()
+                operandIdentifier = args[0].getIdentifier();
+                rootIdentifier = root.getIdentifier();
               } else {
                 // Ignore Parenthesis Nodes when not in 'keep' mode
-                operandIdentifier = args[0].getContent().getIdentifier()
-                rootIdentifier = root.getContent().getIdentifier()
+                operandIdentifier = args[0].getContent().getIdentifier();
+                rootIdentifier = root.getContent().getIdentifier();
               }
-              if (
-                (properties[precedence] as any)[rootIdentifier]
-                  .latexLeftParens === false
-              ) {
-                result = [false]
-                break
+              if ((properties[precedence] as any)[rootIdentifier].latexLeftParens === false) {
+                result = [false];
+                break;
               }
 
-              if (
-                (properties[operandPrecedence] as any)[operandIdentifier]
-                  .latexParens === false
-              ) {
-                result = [false]
-                break
+              if ((properties[operandPrecedence] as any)[operandIdentifier].latexParens === false) {
+                result = [false];
+                break;
               }
             }
 
             if (operandPrecedence === null) {
               // if the operand has no defined precedence, no parens are needed
-              result = [false]
-              break
+              result = [false];
+              break;
             }
 
             if (operandPrecedence <= precedence) {
               // if the operands precedence is lower, parens are needed
-              result = [true]
-              break
+              result = [true];
+              break;
             }
 
             // otherwise, no parens needed
-            result = [false]
+            result = [false];
           }
-          break
+          break;
         case 2: // binary operators
           {
-            let lhsParens: boolean // left hand side needs parenthesis?
+            let lhsParens: boolean; // left hand side needs parenthesis?
             // precedence of the left hand side
-            const lhsPrecedence = getPrecedence(
-              args[0] as any,
-              parenthesis,
-              implicit,
-              root as any
-            )
+            const lhsPrecedence = getPrecedence(args[0] as any, parenthesis, implicit, root as any);
             // is the root node associative with the left hand side
-            const assocWithLhs = isAssociativeWith(
-              root as any,
-              args[0] as any,
-              parenthesis
-            )
+            const assocWithLhs = isAssociativeWith(root as any, args[0] as any, parenthesis);
 
             if (lhsPrecedence === null) {
               // if the left hand side has no defined precedence, no parens are needed
               // FunctionNode for example
-              lhsParens = false
-            } else if (
-              lhsPrecedence === precedence &&
-              associativity === 'right' &&
-              !assocWithLhs
-            ) {
+              lhsParens = false;
+            } else if (lhsPrecedence === precedence && associativity === 'right' && !assocWithLhs) {
               // In case of equal precedence, if the root node is left associative
               // parens are **never** necessary for the left hand side.
               // If it is right associative however, parens are necessary
               // if the root node isn't associative with the left hand side
-              lhsParens = true
+              lhsParens = true;
             } else if (lhsPrecedence < precedence) {
-              lhsParens = true
+              lhsParens = true;
             } else {
-              lhsParens = false
+              lhsParens = false;
             }
 
-            let rhsParens: boolean // right hand side needs parenthesis?
+            let rhsParens: boolean; // right hand side needs parenthesis?
             // precedence of the right hand side
-            const rhsPrecedence = getPrecedence(
-              args[1] as any,
-              parenthesis,
-              implicit,
-              root as any
-            )
+            const rhsPrecedence = getPrecedence(args[1] as any, parenthesis, implicit, root as any);
             // is the root node associative with the right hand side?
-            const assocWithRhs = isAssociativeWith(
-              root as any,
-              args[1] as any,
-              parenthesis
-            )
+            const assocWithRhs = isAssociativeWith(root as any, args[1] as any, parenthesis);
 
             if (rhsPrecedence === null) {
               // if the right hand side has no defined precedence, no parens are needed
               // FunctionNode for example
-              rhsParens = false
-            } else if (
-              rhsPrecedence === precedence &&
-              associativity === 'left' &&
-              !assocWithRhs
-            ) {
+              rhsParens = false;
+            } else if (rhsPrecedence === precedence && associativity === 'left' && !assocWithRhs) {
               // In case of equal precedence, if the root node is right associative
               // parens are **never** necessary for the right hand side.
               // If it is left associative however, parens are necessary
               // if the root node isn't associative with the right hand side
-              rhsParens = true
+              rhsParens = true;
             } else if (rhsPrecedence < precedence) {
-              rhsParens = true
+              rhsParens = true;
             } else {
-              rhsParens = false
+              rhsParens = false;
             }
 
             // handle special cases for LaTeX, where some of the parentheses aren't needed
             if (latex) {
-              let rootIdentifier: string
-              let lhsIdentifier: string
-              let rhsIdentifier: string
+              let rootIdentifier: string;
+              let lhsIdentifier: string;
+              let rhsIdentifier: string;
               if (parenthesis === 'keep') {
-                rootIdentifier = root.getIdentifier()
-                lhsIdentifier = root.args[0].getIdentifier()
-                rhsIdentifier = root.args[1].getIdentifier()
+                rootIdentifier = root.getIdentifier();
+                lhsIdentifier = root.args[0].getIdentifier();
+                rhsIdentifier = root.args[1].getIdentifier();
               } else {
                 // Ignore ParenthesisNodes when not in 'keep' mode
-                rootIdentifier = root.getContent().getIdentifier()
-                lhsIdentifier = root.args[0].getContent().getIdentifier()
-                rhsIdentifier = root.args[1].getContent().getIdentifier()
+                rootIdentifier = root.getContent().getIdentifier();
+                lhsIdentifier = root.args[0].getContent().getIdentifier();
+                rhsIdentifier = root.args[1].getContent().getIdentifier();
               }
 
               if (lhsPrecedence !== null) {
-                if (
-                  (properties[precedence] as any)[rootIdentifier]
-                    .latexLeftParens === false
-                ) {
-                  lhsParens = false
+                if ((properties[precedence] as any)[rootIdentifier].latexLeftParens === false) {
+                  lhsParens = false;
                 }
 
-                if (
-                  (properties[lhsPrecedence] as any)[lhsIdentifier]
-                    .latexParens === false
-                ) {
-                  lhsParens = false
+                if ((properties[lhsPrecedence] as any)[lhsIdentifier].latexParens === false) {
+                  lhsParens = false;
                 }
               }
 
               if (rhsPrecedence !== null) {
-                if (
-                  (properties[precedence] as any)[rootIdentifier]
-                    .latexRightParens === false
-                ) {
-                  rhsParens = false
+                if ((properties[precedence] as any)[rootIdentifier].latexRightParens === false) {
+                  rhsParens = false;
                 }
 
-                if (
-                  (properties[rhsPrecedence] as any)[rhsIdentifier]
-                    .latexParens === false
-                ) {
-                  rhsParens = false
+                if ((properties[rhsPrecedence] as any)[rhsIdentifier].latexParens === false) {
+                  rhsParens = false;
                 }
               }
             }
 
-            result = [lhsParens, rhsParens]
+            result = [lhsParens, rhsParens];
           }
-          break
+          break;
 
         default:
           if (
@@ -317,35 +251,26 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             root.getIdentifier() === 'OperatorNode:multiply'
           ) {
             result = args.map(function (arg: Node): boolean {
-              const argPrecedence = getPrecedence(
-                arg as any,
-                parenthesis,
-                implicit,
-                root as any
-              )
-              const assocWithArg = isAssociativeWith(
-                root as any,
-                arg as any,
-                parenthesis
-              )
-              const argAssociativity = getAssociativity(arg as any, parenthesis)
+              const argPrecedence = getPrecedence(arg as any, parenthesis, implicit, root as any);
+              const assocWithArg = isAssociativeWith(root as any, arg as any, parenthesis);
+              const argAssociativity = getAssociativity(arg as any, parenthesis);
               if (argPrecedence === null) {
                 // if the argument has no defined precedence, no parens are needed
-                return false
+                return false;
               } else if (
                 precedence === argPrecedence &&
                 associativity === argAssociativity &&
                 !assocWithArg
               ) {
-                return true
+                return true;
               } else if (argPrecedence < precedence) {
-                return true
+                return true;
               }
 
-              return false
-            })
+              return false;
+            });
           }
-          break
+          break;
       }
 
       // Handles an edge case of parentheses with implicit multiplication
@@ -365,20 +290,20 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             !result[i - 1] &&
             (parenthesis !== 'keep' || !isParenthesisNode(args[i - 1]))
           ) {
-            result[i] = true
+            result[i] = true;
           }
         }
       }
 
-      return result
+      return result;
     }
 
     class OperatorNode extends Node {
-      op: string
-      fn: string
-      args: Node[]
-      implicit: boolean
-      isPercentage: boolean
+      op: string;
+      fn: string;
+      args: Node[];
+      implicit: boolean;
+      isPercentage: boolean;
 
       /**
        * @constructor OperatorNode
@@ -398,32 +323,30 @@ export const createOperatorNode = /* #__PURE__ */ factory(
         implicit?: boolean,
         isPercentage?: boolean
       ) {
-        super()
+        super();
         // validate input
         if (typeof op !== 'string') {
-          throw new TypeError('string expected for parameter "op"')
+          throw new TypeError('string expected for parameter "op"');
         }
         if (typeof fn !== 'string') {
-          throw new TypeError('string expected for parameter "fn"')
+          throw new TypeError('string expected for parameter "fn"');
         }
         if (!Array.isArray(args) || !args.every(isNode)) {
-          throw new TypeError(
-            'Array containing Nodes expected for parameter "args"'
-          )
+          throw new TypeError('Array containing Nodes expected for parameter "args"');
         }
 
-        this.implicit = implicit === true
-        this.isPercentage = isPercentage === true
-        this.op = op
-        this.fn = fn
-        this.args = args || []
+        this.implicit = implicit === true;
+        this.isPercentage = isPercentage === true;
+        this.op = op;
+        this.fn = fn;
+        this.args = args || [];
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isOperatorNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -440,59 +363,51 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error: method signature matches MathNode interface
-      _compile(
-        math: Record<string, any>,
-        argNames: Record<string, boolean>
-      ): CompileFunction {
+      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
         // validate fn
         if (typeof this.fn !== 'string' || !isSafeMethod(math, this.fn)) {
           if (!math[this.fn]) {
-            throw new Error(
-              'Function ' + this.fn + ' missing in provided namespace "math"'
-            )
+            throw new Error('Function ' + this.fn + ' missing in provided namespace "math"');
           } else {
-            throw new Error('No access to function "' + this.fn + '"')
+            throw new Error('No access to function "' + this.fn + '"');
           }
         }
 
-        const fn = getSafeProperty(math, this.fn)
+        const fn = getSafeProperty(math, this.fn);
         const evalArgs = map(this.args, function (arg: Node): CompileFunction {
-          return arg._compile(math, argNames)
-        })
+          return arg._compile(math, argNames);
+        });
 
         if (typeof fn === 'function' && (fn as any).rawArgs === true) {
           // pass unevaluated parameters (nodes) to the function
           // "raw" evaluation
-          const rawArgs = this.args
+          const rawArgs = this.args;
           return function evalOperatorNode(
             scope: any,
             args: Record<string, any>,
             _context: any
           ): any {
-            return fn(rawArgs, math, createSubScope(scope, args))
-          }
+            return fn(rawArgs, math, createSubScope(scope, args));
+          };
         } else if (evalArgs.length === 1) {
-          const evalArg0 = evalArgs[0]
+          const evalArg0 = evalArgs[0];
           return function evalOperatorNode(
             scope: any,
             args: Record<string, any>,
             context: any
           ): any {
-            return fn(evalArg0(scope, args, context))
-          }
+            return fn(evalArg0(scope, args, context));
+          };
         } else if (evalArgs.length === 2) {
-          const evalArg0 = evalArgs[0]
-          const evalArg1 = evalArgs[1]
+          const evalArg0 = evalArgs[0];
+          const evalArg1 = evalArgs[1];
           return function evalOperatorNode(
             scope: any,
             args: Record<string, any>,
             context: any
           ): any {
-            return fn(
-              evalArg0(scope, args, context),
-              evalArg1(scope, args, context)
-            )
-          }
+            return fn(evalArg0(scope, args, context), evalArg1(scope, args, context));
+          };
         } else {
           return function evalOperatorNode(
             scope: any,
@@ -502,10 +417,10 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             return fn.apply(
               null,
               map(evalArgs, function (evalArg: CompileFunction): any {
-                return evalArg(scope, args, context)
+                return evalArg(scope, args, context);
               })
-            )
-          }
+            );
+          };
         }
       }
 
@@ -513,11 +428,9 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: Node, path: string, parent: OperatorNode) => void
-      ): void {
+      forEach(callback: (child: Node, path: string, parent: OperatorNode) => void): void {
         for (let i = 0; i < this.args.length; i++) {
-          callback(this.args[i], 'args[' + i + ']', this)
+          callback(this.args[i], 'args[' + i + ']', this);
         }
       }
 
@@ -527,22 +440,12 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node): Node} callback
        * @returns {OperatorNode} Returns a transformed copy of the node
        */
-      map(
-        callback: (child: Node, path: string, parent: OperatorNode) => Node
-      ): OperatorNode {
-        const args: Node[] = []
+      map(callback: (child: Node, path: string, parent: OperatorNode) => Node): OperatorNode {
+        const args: Node[] = [];
         for (let i = 0; i < this.args.length; i++) {
-          args[i] = this._ifNode(
-            callback(this.args[i], 'args[' + i + ']', this)
-          )
+          args[i] = this._ifNode(callback(this.args[i], 'args[' + i + ']', this));
         }
-        return new OperatorNode(
-          this.op,
-          this.fn,
-          args,
-          this.implicit,
-          this.isPercentage
-        )
+        return new OperatorNode(this.op, this.fn, args, this.implicit, this.isPercentage);
       }
 
       /**
@@ -556,7 +459,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
           this.args.slice(0),
           this.implicit,
           this.isPercentage
-        )
+        );
       }
 
       /**
@@ -566,7 +469,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        *     Returns true when an unary operator node, false otherwise.
        */
       isUnary(): boolean {
-        return this.args.length === 1
+        return this.args.length === 1;
       }
 
       /**
@@ -576,7 +479,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        *     Returns true when a binary operator node, false otherwise.
        */
       isBinary(): boolean {
-        return this.args.length === 2
+        return this.args.length === 2;
       }
 
       /**
@@ -585,50 +488,43 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toString(options?: StringOptions): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
-        const implicit = options && options.implicit ? options.implicit : 'hide'
-        const args = this.args
-        const parens = calculateNecessaryParentheses(
-          this,
-          parenthesis,
-          implicit,
-          args,
-          false
-        )
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        const implicit = options && options.implicit ? options.implicit : 'hide';
+        const args = this.args;
+        const parens = calculateNecessaryParentheses(this, parenthesis, implicit, args, false);
 
         if (args.length === 1) {
           // unary operators
-          const assoc = getAssociativity(this as any, parenthesis)
+          const assoc = getAssociativity(this as any, parenthesis);
 
-          let operand = args[0].toString(options)
+          let operand = args[0].toString(options);
           if (parens[0]) {
-            operand = '(' + operand + ')'
+            operand = '(' + operand + ')';
           }
 
           // for example for "not", we want a space between operand and argument
-          const opIsNamed = /[a-zA-Z]+/.test(this.op)
+          const opIsNamed = /[a-zA-Z]+/.test(this.op);
 
           if (assoc === 'right') {
             // prefix operator
-            return this.op + (opIsNamed ? ' ' : '') + operand
+            return this.op + (opIsNamed ? ' ' : '') + operand;
           } else if (assoc === 'left') {
             // postfix
-            return operand + (opIsNamed ? ' ' : '') + this.op
+            return operand + (opIsNamed ? ' ' : '') + this.op;
           }
 
           // fall back to postfix
-          return operand + this.op
+          return operand + this.op;
         } else if (args.length === 2) {
-          let lhs = args[0].toString(options) // left hand side
-          let rhs = args[1].toString(options) // right hand side
+          let lhs = args[0].toString(options); // left hand side
+          let rhs = args[1].toString(options); // right hand side
           if (parens[0]) {
             // left hand side in parenthesis?
-            lhs = '(' + lhs + ')'
+            lhs = '(' + lhs + ')';
           }
           if (parens[1]) {
             // right hand side in parenthesis?
-            rhs = '(' + rhs + ')'
+            rhs = '(' + rhs + ')';
           }
 
           if (
@@ -636,40 +532,37 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             this.getIdentifier() === 'OperatorNode:multiply' &&
             implicit === 'hide'
           ) {
-            return lhs + ' ' + rhs
+            return lhs + ' ' + rhs;
           }
 
-          return lhs + ' ' + this.op + ' ' + rhs
+          return lhs + ' ' + this.op + ' ' + rhs;
         } else if (
           args.length > 2 &&
           (this.getIdentifier() === 'OperatorNode:add' ||
             this.getIdentifier() === 'OperatorNode:multiply')
         ) {
-          const stringifiedArgs = args.map(function (
-            arg: Node,
-            index: number
-          ): string {
-            let argStr = arg.toString(options)
+          const stringifiedArgs = args.map(function (arg: Node, index: number): string {
+            let argStr = arg.toString(options);
             if (parens[index]) {
               // put in parenthesis?
-              argStr = '(' + argStr + ')'
+              argStr = '(' + argStr + ')';
             }
 
-            return argStr
-          })
+            return argStr;
+          });
 
           if (
             this.implicit &&
             this.getIdentifier() === 'OperatorNode:multiply' &&
             implicit === 'hide'
           ) {
-            return stringifiedArgs.join(' ')
+            return stringifiedArgs.join(' ');
           }
 
-          return stringifiedArgs.join(' ' + this.op + ' ')
+          return stringifiedArgs.join(' ' + this.op + ' ');
         } else {
           // fallback to formatting as a function call
-          return this.fn + '(' + this.args.join(', ') + ')'
+          return this.fn + '(' + this.args.join(', ') + ')';
         }
       }
 
@@ -684,8 +577,8 @@ export const createOperatorNode = /* #__PURE__ */ factory(
           fn: this.fn,
           args: this.args,
           implicit: this.implicit,
-          isPercentage: this.isPercentage
-        }
+          isPercentage: this.isPercentage,
+        };
       }
 
       /**
@@ -702,19 +595,13 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * @returns {OperatorNode}
        */
       static fromJSON(json: {
-        op: string
-        fn: string
-        args: Node[]
-        implicit: boolean
-        isPercentage: boolean
+        op: string;
+        fn: string;
+        args: Node[];
+        implicit: boolean;
+        isPercentage: boolean;
       }): OperatorNode {
-        return new OperatorNode(
-          json.op,
-          json.fn,
-          json.args,
-          json.implicit,
-          json.isPercentage
-        )
+        return new OperatorNode(json.op, json.fn, json.args, json.implicit, json.isPercentage);
       }
 
       /**
@@ -723,28 +610,21 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toHTML(options?: StringOptions): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
-        const implicit = options && options.implicit ? options.implicit : 'hide'
-        const args = this.args
-        const parens = calculateNecessaryParentheses(
-          this,
-          parenthesis,
-          implicit,
-          args,
-          false
-        )
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        const implicit = options && options.implicit ? options.implicit : 'hide';
+        const args = this.args;
+        const parens = calculateNecessaryParentheses(this, parenthesis, implicit, args, false);
 
         if (args.length === 1) {
           // unary operators
-          const assoc = getAssociativity(this as any, parenthesis)
+          const assoc = getAssociativity(this as any, parenthesis);
 
-          let operand = args[0].toHTML(options)
+          let operand = args[0].toHTML(options);
           if (parens[0]) {
             operand =
               '<span class="math-parenthesis math-round-parenthesis">(</span>' +
               operand +
-              '<span class="math-parenthesis math-round-parenthesis">)</span>'
+              '<span class="math-parenthesis math-round-parenthesis">)</span>';
           }
 
           if (assoc === 'right') {
@@ -755,7 +635,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
               escape(this.op) +
               '</span>' +
               operand
-            )
+            );
           } else {
             // postfix when assoc === 'left' or undefined
             return (
@@ -764,25 +644,25 @@ export const createOperatorNode = /* #__PURE__ */ factory(
               'math-righthand-unary-operator">' +
               escape(this.op) +
               '</span>'
-            )
+            );
           }
         } else if (args.length === 2) {
           // binary operatoes
-          let lhs = args[0].toHTML(options) // left hand side
-          let rhs = args[1].toHTML(options) // right hand side
+          let lhs = args[0].toHTML(options); // left hand side
+          let rhs = args[1].toHTML(options); // right hand side
           if (parens[0]) {
             // left hand side in parenthesis?
             lhs =
               '<span class="math-parenthesis math-round-parenthesis">(</span>' +
               lhs +
-              '<span class="math-parenthesis math-round-parenthesis">)</span>'
+              '<span class="math-parenthesis math-round-parenthesis">)</span>';
           }
           if (parens[1]) {
             // right hand side in parenthesis?
             rhs =
               '<span class="math-parenthesis math-round-parenthesis">(</span>' +
               rhs +
-              '<span class="math-parenthesis math-round-parenthesis">)</span>'
+              '<span class="math-parenthesis math-round-parenthesis">)</span>';
           }
 
           if (
@@ -795,7 +675,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
               '<span class="math-operator math-binary-operator ' +
               'math-implicit-binary-operator"></span>' +
               rhs
-            )
+            );
           }
 
           return (
@@ -805,23 +685,20 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             escape(this.op) +
             '</span>' +
             rhs
-          )
+          );
         } else {
-          const stringifiedArgs = args.map(function (
-            arg: Node,
-            index: number
-          ): string {
-            let argStr = arg.toHTML(options)
+          const stringifiedArgs = args.map(function (arg: Node, index: number): string {
+            let argStr = arg.toHTML(options);
             if (parens[index]) {
               // put in parenthesis?
               argStr =
                 '<span class="math-parenthesis math-round-parenthesis">(</span>' +
                 argStr +
-                '<span class="math-parenthesis math-round-parenthesis">)</span>'
+                '<span class="math-parenthesis math-round-parenthesis">)</span>';
             }
 
-            return argStr
-          })
+            return argStr;
+          });
 
           if (
             args.length > 2 &&
@@ -836,7 +713,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
               return stringifiedArgs.join(
                 '<span class="math-operator math-binary-operator ' +
                   'math-implicit-binary-operator"></span>'
-              )
+              );
             }
 
             return stringifiedArgs.join(
@@ -844,7 +721,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
                 'math-explicit-binary-operator">' +
                 escape(this.op) +
                 '</span>'
-            )
+            );
           } else {
             // fallback to formatting as a function call
             return (
@@ -854,7 +731,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
               '(</span>' +
               stringifiedArgs.join('<span class="math-separator">,</span>') +
               '<span class="math-paranthesis math-round-parenthesis">)</span>'
-            )
+            );
           }
         }
       }
@@ -865,106 +742,96 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toTex(options?: StringOptions): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
-        const implicit = options && options.implicit ? options.implicit : 'hide'
-        const args = this.args
-        const parens = calculateNecessaryParentheses(
-          this,
-          parenthesis,
-          implicit,
-          args,
-          true
-        )
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        const implicit = options && options.implicit ? options.implicit : 'hide';
+        const args = this.args;
+        const parens = calculateNecessaryParentheses(this, parenthesis, implicit, args, true);
 
-        let op = (latexOperators as Record<string, string>)[this.fn]
-        op = typeof op === 'undefined' ? this.op : op // fall back to using this.op
+        let op = (latexOperators as Record<string, string>)[this.fn];
+        op = typeof op === 'undefined' ? this.op : op; // fall back to using this.op
 
         if (args.length === 1) {
           // unary operators
-          const assoc = getAssociativity(this as any, parenthesis)
+          const assoc = getAssociativity(this as any, parenthesis);
 
-          let operand = args[0].toTex(options)
+          let operand = args[0].toTex(options);
           if (parens[0]) {
-            operand = `\\left(${operand}\\right)`
+            operand = `\\left(${operand}\\right)`;
           }
 
           if (assoc === 'right') {
             // prefix operator
-            return op + operand
+            return op + operand;
           } else if (assoc === 'left') {
             // postfix operator
-            return operand + op
+            return operand + op;
           }
 
           // fall back to postfix
-          return operand + op
+          return operand + op;
         } else if (args.length === 2) {
           // binary operators
-          const lhs = args[0] // left hand side
-          let lhsTex = lhs.toTex(options)
+          const lhs = args[0]; // left hand side
+          let lhsTex = lhs.toTex(options);
           if (parens[0]) {
-            lhsTex = `\\left(${lhsTex}\\right)`
+            lhsTex = `\\left(${lhsTex}\\right)`;
           }
 
-          const rhs = args[1] // right hand side
-          let rhsTex = rhs.toTex(options)
+          const rhs = args[1]; // right hand side
+          let rhsTex = rhs.toTex(options);
           if (parens[1]) {
-            rhsTex = `\\left(${rhsTex}\\right)`
+            rhsTex = `\\left(${rhsTex}\\right)`;
           }
 
           // handle some exceptions (due to the way LaTeX works)
-          let lhsIdentifier: string
+          let lhsIdentifier: string;
           if (parenthesis === 'keep') {
-            lhsIdentifier = lhs.getIdentifier()
+            lhsIdentifier = lhs.getIdentifier();
           } else {
             // Ignore ParenthesisNodes if in 'keep' mode
-            lhsIdentifier = lhs.getContent().getIdentifier()
+            lhsIdentifier = lhs.getContent().getIdentifier();
           }
           switch (this.getIdentifier()) {
             case 'OperatorNode:divide':
               // op contains '\\frac' at this point
-              return op + '{' + lhsTex + '}' + '{' + rhsTex + '}'
+              return op + '{' + lhsTex + '}' + '{' + rhsTex + '}';
             case 'OperatorNode:pow':
-              lhsTex = '{' + lhsTex + '}'
-              rhsTex = '{' + rhsTex + '}'
+              lhsTex = '{' + lhsTex + '}';
+              rhsTex = '{' + rhsTex + '}';
               switch (lhsIdentifier) {
                 case 'ConditionalNode': //
                 case 'OperatorNode:divide':
-                  lhsTex = `\\left(${lhsTex}\\right)`
+                  lhsTex = `\\left(${lhsTex}\\right)`;
               }
-              break
+              break;
             case 'OperatorNode:multiply':
               if (this.implicit && implicit === 'hide') {
-                return lhsTex + '~' + rhsTex
+                return lhsTex + '~' + rhsTex;
               }
           }
-          return lhsTex + op + rhsTex
+          return lhsTex + op + rhsTex;
         } else if (
           args.length > 2 &&
           (this.getIdentifier() === 'OperatorNode:add' ||
             this.getIdentifier() === 'OperatorNode:multiply')
         ) {
-          const texifiedArgs = args.map(function (
-            arg: Node,
-            index: number
-          ): string {
-            let argStr = arg.toTex(options)
+          const texifiedArgs = args.map(function (arg: Node, index: number): string {
+            let argStr = arg.toTex(options);
             if (parens[index]) {
-              argStr = `\\left(${argStr}\\right)`
+              argStr = `\\left(${argStr}\\right)`;
             }
-            return argStr
-          })
+            return argStr;
+          });
 
           if (
             this.getIdentifier() === 'OperatorNode:multiply' &&
             this.implicit &&
             implicit === 'hide'
           ) {
-            return texifiedArgs.join('~')
+            return texifiedArgs.join('~');
           }
 
-          return texifiedArgs.join(op)
+          return texifiedArgs.join(op);
         } else {
           // fall back to formatting as a function call
           // as this is a fallback, it doesn't use
@@ -975,11 +842,11 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             '}\\left(' +
             args
               .map(function (arg: Node): string {
-                return arg.toTex(options)
+                return arg.toTex(options);
               })
               .join(',') +
             '\\right)'
-          )
+          );
         }
       }
 
@@ -989,7 +856,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        */
       // @ts-expect-error: method signature matches MathNode interface
       getIdentifier(): string {
-        return this.type + ':' + this.fn
+        return this.type + ':' + this.fn;
       }
     }
 
@@ -997,10 +864,10 @@ export const createOperatorNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(OperatorNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return OperatorNode
+    return OperatorNode;
   },
   { isClass: true, isNode: true }
-)
+);

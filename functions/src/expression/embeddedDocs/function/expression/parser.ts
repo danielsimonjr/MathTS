@@ -10,7 +10,7 @@ export const parserDocs = {
     'myParser.set("x", 3)',
     'myParser.evaluate("y = x + 3")',
     'myParser.evaluate(["y = x + 3", "y = y + 1"])',
-    'myParser.get("y")'
+    'myParser.get("y")',
   ],
-  seealso: ['evaluate', 'parse', 'compile']
-}
+  seealso: ['evaluate', 'parse', 'compile'],
+};

@@ -35,16 +35,13 @@ function randomMatrix(rows: number, cols: number): DenseMatrix {
     }
     data.push(row);
   }
-  return new DenseMatrix(data);
+  return new DenseMatrix(rows, cols, data);
 }
 
 /**
  * Measure average execution time
  */
-async function measureTime(
-  fn: () => void | Promise<void>,
-  iterations: number
-): Promise<number> {
+async function measureTime(fn: () => void | Promise<void>, iterations: number): Promise<number> {
   // Warmup
   for (let i = 0; i < Math.min(5, iterations); i++) {
     await fn();
@@ -59,7 +56,14 @@ async function measureTime(
   return (end - start) / iterations;
 }
 
-type Operation = 'add' | 'subtract' | 'multiplyElementwise' | 'divideElementwise' | 'scale' | 'abs' | 'negate';
+type Operation =
+  | 'add'
+  | 'subtract'
+  | 'multiplyElementwise'
+  | 'divideElementwise'
+  | 'scale'
+  | 'abs'
+  | 'negate';
 
 /**
  * Run element-wise benchmark for a specific operation

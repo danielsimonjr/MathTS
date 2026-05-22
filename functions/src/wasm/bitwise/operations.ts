@@ -16,7 +16,7 @@
  * @returns x & y
  */
 export function bitAnd(x: i32, y: i32): i32 {
-  return x & y
+  return x & y;
 }
 
 /**
@@ -26,7 +26,7 @@ export function bitAnd(x: i32, y: i32): i32 {
  * @returns x | y
  */
 export function bitOr(x: i32, y: i32): i32 {
-  return x | y
+  return x | y;
 }
 
 /**
@@ -36,7 +36,7 @@ export function bitOr(x: i32, y: i32): i32 {
  * @returns x ^ y
  */
 export function bitXor(x: i32, y: i32): i32 {
-  return x ^ y
+  return x ^ y;
 }
 
 /**
@@ -45,7 +45,7 @@ export function bitXor(x: i32, y: i32): i32 {
  * @returns ~x
  */
 export function bitNot(x: i32): i32 {
-  return ~x
+  return ~x;
 }
 
 /**
@@ -55,7 +55,7 @@ export function bitNot(x: i32): i32 {
  * @returns x << y
  */
 export function leftShift(x: i32, y: i32): i32 {
-  return x << y
+  return x << y;
 }
 
 /**
@@ -65,7 +65,7 @@ export function leftShift(x: i32, y: i32): i32 {
  * @returns x >> y
  */
 export function rightArithShift(x: i32, y: i32): i32 {
-  return x >> y
+  return x >> y;
 }
 
 /**
@@ -75,7 +75,7 @@ export function rightArithShift(x: i32, y: i32): i32 {
  * @returns x >>> y
  */
 export function rightLogShift(x: i32, y: i32): i32 {
-  return x >>> y
+  return x >>> y;
 }
 
 /**
@@ -85,18 +85,10 @@ export function rightLogShift(x: i32, y: i32): i32 {
  * @param resultPtr Pointer to output array (i32)
  * @param length Array length
  */
-export function bitAndArray(
-  aPtr: usize,
-  bPtr: usize,
-  resultPtr: usize,
-  length: i32
-): void {
+export function bitAndArray(aPtr: usize, bPtr: usize, resultPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 2
-    store<i32>(
-      resultPtr + offset,
-      load<i32>(aPtr + offset) & load<i32>(bPtr + offset)
-    )
+    const offset: usize = (<usize>i) << 2;
+    store<i32>(resultPtr + offset, load<i32>(aPtr + offset) & load<i32>(bPtr + offset));
   }
 }
 
@@ -107,18 +99,10 @@ export function bitAndArray(
  * @param resultPtr Pointer to output array (i32)
  * @param length Array length
  */
-export function bitOrArray(
-  aPtr: usize,
-  bPtr: usize,
-  resultPtr: usize,
-  length: i32
-): void {
+export function bitOrArray(aPtr: usize, bPtr: usize, resultPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 2
-    store<i32>(
-      resultPtr + offset,
-      load<i32>(aPtr + offset) | load<i32>(bPtr + offset)
-    )
+    const offset: usize = (<usize>i) << 2;
+    store<i32>(resultPtr + offset, load<i32>(aPtr + offset) | load<i32>(bPtr + offset));
   }
 }
 
@@ -129,18 +113,10 @@ export function bitOrArray(
  * @param resultPtr Pointer to output array (i32)
  * @param length Array length
  */
-export function bitXorArray(
-  aPtr: usize,
-  bPtr: usize,
-  resultPtr: usize,
-  length: i32
-): void {
+export function bitXorArray(aPtr: usize, bPtr: usize, resultPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 2
-    store<i32>(
-      resultPtr + offset,
-      load<i32>(aPtr + offset) ^ load<i32>(bPtr + offset)
-    )
+    const offset: usize = (<usize>i) << 2;
+    store<i32>(resultPtr + offset, load<i32>(aPtr + offset) ^ load<i32>(bPtr + offset));
   }
 }
 
@@ -150,14 +126,10 @@ export function bitXorArray(
  * @param resultPtr Pointer to output array (i32)
  * @param length Array length
  */
-export function bitNotArray(
-  inputPtr: usize,
-  resultPtr: usize,
-  length: i32
-): void {
+export function bitNotArray(inputPtr: usize, resultPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 2
-    store<i32>(resultPtr + offset, ~load<i32>(inputPtr + offset))
+    const offset: usize = (<usize>i) << 2;
+    store<i32>(resultPtr + offset, ~load<i32>(inputPtr + offset));
   }
 }
 
@@ -168,15 +140,10 @@ export function bitNotArray(
  * @param resultPtr Pointer to output array (i32)
  * @param length Array length
  */
-export function leftShiftArray(
-  valuesPtr: usize,
-  shift: i32,
-  resultPtr: usize,
-  length: i32
-): void {
+export function leftShiftArray(valuesPtr: usize, shift: i32, resultPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 2
-    store<i32>(resultPtr + offset, load<i32>(valuesPtr + offset) << shift)
+    const offset: usize = (<usize>i) << 2;
+    store<i32>(resultPtr + offset, load<i32>(valuesPtr + offset) << shift);
   }
 }
 
@@ -194,8 +161,8 @@ export function rightArithShiftArray(
   length: i32
 ): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 2
-    store<i32>(resultPtr + offset, load<i32>(valuesPtr + offset) >> shift)
+    const offset: usize = (<usize>i) << 2;
+    store<i32>(resultPtr + offset, load<i32>(valuesPtr + offset) >> shift);
   }
 }
 
@@ -213,8 +180,8 @@ export function rightLogShiftArray(
   length: i32
 ): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 2
-    store<i32>(resultPtr + offset, load<i32>(valuesPtr + offset) >>> shift)
+    const offset: usize = (<usize>i) << 2;
+    store<i32>(resultPtr + offset, load<i32>(valuesPtr + offset) >>> shift);
   }
 }
 
@@ -225,12 +192,12 @@ export function rightLogShiftArray(
  */
 export function popcount(x: i32): i32 {
   // Brian Kernighan's algorithm
-  let count: i32 = 0
+  let count: i32 = 0;
   while (x !== 0) {
-    x &= x - 1
-    count++
+    x &= x - 1;
+    count++;
   }
-  return count
+  return count;
 }
 
 /**
@@ -239,7 +206,7 @@ export function popcount(x: i32): i32 {
  * @returns Number of trailing zero bits
  */
 export function ctz(x: i32): i32 {
-  return i32.ctz(x)
+  return i32.ctz(x);
 }
 
 /**
@@ -248,7 +215,7 @@ export function ctz(x: i32): i32 {
  * @returns Number of leading zero bits
  */
 export function clz(x: i32): i32 {
-  return i32.clz(x)
+  return i32.clz(x);
 }
 
 /**
@@ -258,7 +225,7 @@ export function clz(x: i32): i32 {
  * @returns x rotated left by n positions
  */
 export function rotl(x: i32, n: i32): i32 {
-  return i32.rotl(x, n)
+  return i32.rotl(x, n);
 }
 
 /**
@@ -268,5 +235,5 @@ export function rotl(x: i32, n: i32): i32 {
  * @returns x rotated right by n positions
  */
 export function rotr(x: i32, n: i32): i32 {
-  return i32.rotr(x, n)
+  return i32.rotr(x, n);
 }
