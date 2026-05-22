@@ -330,7 +330,7 @@ export const toDegrees = mathTyped('toDegrees', {
 export const hypot = mathTyped('hypot', {
   'number': (a: number) => Math.abs(a),
   'number, number': (a: number, b: number) => Math.hypot(a, b),
-  'number, number, ...number': (a: number, b: number, ...rest: number[]) => Math.hypot(a, b, ...rest),
+  'number, number, ...number': (a: number, b: number, rest: number[]) => Math.hypot(a, b, ...rest),
   'Array': (arr: number[]) => Math.hypot(...arr),
 });
 
