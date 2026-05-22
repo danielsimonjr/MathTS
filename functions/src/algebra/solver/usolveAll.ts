@@ -12,7 +12,7 @@ interface MatrixConstructor {
   (data: ScalarValue[] | ScalarValue[][]): DenseMatrix | SparseMatrix
 }
 
-interface DenseMatrix {
+export interface DenseMatrix {
   type: 'DenseMatrix'
   isDenseMatrix: true
   _data: ScalarValue[][]
@@ -90,8 +90,8 @@ export const createUsolveAll = /* #__PURE__ */ factory(
     DenseMatrix
   }: Dependencies) => {
     const solveValidation = createSolveValidation({
-      DenseMatrix
-    }) as SolveValidationFunction
+      DenseMatrix: DenseMatrix as any
+    }) as unknown as SolveValidationFunction
 
     /**
      * Finds all solutions of a linear equation system by backward substitution. Matrix must be an upper triangular matrix.
@@ -135,10 +135,10 @@ export const createUsolveAll = /* #__PURE__ */ factory(
       'Array, Array | Matrix': function (
         a: ScalarValue[][],
         b: ScalarValue[][] | DenseMatrix | SparseMatrix
-      ): ScalarValue[][][] {
+      ): DenseMatrix[] {
         const m = matrix(a) as DenseMatrix
         const R = _denseBackwardSubstitution(m, b)
-        return R.map((r: DenseMatrix) => r.valueOf())
+        return R.map((r: DenseMatrix) => r.valueOf()) as unknown as DenseMatrix[]
       }
     })
 

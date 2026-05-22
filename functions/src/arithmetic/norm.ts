@@ -158,7 +158,7 @@ export const createNorm = /* #__PURE__ */ factory(
       ): number | BigNumberType {
         return _norm(x, p)
       }
-    })
+    }) as TypedFunction
 
     /**
      * Try WASM-accelerated vector norm for plain number vectors

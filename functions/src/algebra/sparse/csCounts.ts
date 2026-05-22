@@ -10,7 +10,7 @@ import type { TypedFunction } from '../../core/function/typed.js'
 const WASM_COUNTS_THRESHOLD = 50
 
 // Sparse matrix internal structure
-interface SparseMatrixData {
+export interface SparseMatrixData {
   _size: number[]
   _values?: any[]
   _index: number[]
@@ -134,7 +134,7 @@ export const createCsCounts = /* #__PURE__ */ factory(
       const colcount: number[] = [] // (n)
 
       // AT = A'
-      const at = transpose(a)
+      const at = transpose(a) as SparseMatrixData
       // at arrays
       const tindex = at._index
       const tptr = at._ptr

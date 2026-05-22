@@ -51,8 +51,8 @@ export const createAcot = /* #__PURE__ */ factory(
         return x.acot()
       },
 
-      BigNumber: function (x: BigNumber) {
-        return new BigNumber(1).div(x).atan()
+      BigNumber: function (x: BigNumber): BigNumber {
+        return new BigNumber(1).div(x as any).atan() as unknown as BigNumber
       }
     }) as TypedFunction
   }

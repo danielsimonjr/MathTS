@@ -257,14 +257,14 @@ export const createRound = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           function (x: UnitType, n: number, unit: UnitType): UnitType {
             const valueless = x.toNumeric(unit)
-            return unit.multiply(self(valueless, n))
+            return unit.multiply(self(valueless, n) as number | BigNumberType)
           }
       ),
 
       'Unit, BigNumber, Unit': typed.referToSelf(
         (self: TypedFunction) =>
           (x: UnitType, n: BigNumberType, unit: UnitType): UnitType =>
-            self(x, n.toNumber(), unit)
+            self(x, n.toNumber(), unit) as UnitType
       ),
 
       'Array | Matrix, number | BigNumber, Unit': typed.referToSelf(
@@ -275,7 +275,7 @@ export const createRound = /* #__PURE__ */ factory(
             unit: UnitType
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since round(0) = 0
-            return deepMap(x, (value) => self(value, n, unit), true)
+            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as unknown[] | Matrix
           }
       ),
 
@@ -285,28 +285,28 @@ export const createRound = /* #__PURE__ */ factory(
             x: unknown[] | Matrix | UnitType,
             unit: UnitType
           ): unknown[] | Matrix | UnitType =>
-            self(x, 0, unit)
+            self(x, 0, unit) as unknown[] | Matrix | UnitType
       ),
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix => {
             // deep map collection, skip zeros since round(0) = 0
-            return deepMap(x, self, true)
+            return deepMap(x as unknown[], self, true) as unknown[] | Matrix
           }
       ),
 
       'SparseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, n: number | BigNumberType): Matrix => {
-            return matAlgo11xS0s(x, n, self, false)
+            return matAlgo11xS0s(x as any, n, self, false) as any as Matrix
           }
       ),
 
       'DenseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, n: number | BigNumberType): Matrix => {
-            return matAlgo14xDs(x, n, self, false)
+            return matAlgo14xDs(x as any, n, self, false) as any as Matrix
           }
       ),
 
@@ -314,12 +314,12 @@ export const createRound = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[], n: number | BigNumberType): unknown[] => {
             // use matrix implementation
-            return matAlgo14xDs(
-              matrix(x),
+            return (matAlgo14xDs(
+              matrix(x) as any,
               n,
               self,
               false
-            ).valueOf() as unknown[]
+            ) as any).valueOf() as unknown[]
           }
       ),
 
@@ -335,7 +335,7 @@ export const createRound = /* #__PURE__ */ factory(
                 // do not execute algorithm, result will be a zero matrix
                 return zeros(n.size(), n.storage())
               }
-              return matAlgo12xSfs(n, x, self, true)
+              return matAlgo12xSfs(n as any, x, self, true) as any as Matrix
             }
         ),
 
@@ -350,7 +350,7 @@ export const createRound = /* #__PURE__ */ factory(
               // do not execute algorithm, result will be a zero matrix
               return zeros(n.size(), n.storage())
             }
-            return matAlgo14xDs(n, x, self, true)
+            return matAlgo14xDs(n as any, x, self, true) as any as Matrix
           }
       ),
 
@@ -361,7 +361,7 @@ export const createRound = /* #__PURE__ */ factory(
             n: unknown[]
           ): unknown[] => {
             // use matrix implementation
-            return matAlgo14xDs(matrix(n), x, self, true).valueOf() as unknown[]
+            return (matAlgo14xDs(matrix(n) as any, x, self, true) as any).valueOf() as unknown[]
           }
       )
     })

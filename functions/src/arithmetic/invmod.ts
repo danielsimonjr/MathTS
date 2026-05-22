@@ -72,7 +72,7 @@ export const createInvmod = /* #__PURE__ */ factory(
     return typed(name, {
       'number, number': invmod,
       'BigNumber, BigNumber': invmod
-    })
+    }) as TypedFunction
 
     function invmod(a: unknown, b: unknown): unknown {
       if (!isInteger(a) || !isInteger(b))

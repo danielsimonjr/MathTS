@@ -44,7 +44,7 @@ export const createLcm = /* #__PURE__ */ factory(
     })
 
     const lcmTypes = 'number | BigNumber | Fraction | Matrix | Array'
-    const lcmManySignature: Record<string, TypedFunction> = {}
+    const lcmManySignature: Record<string, (...args: unknown[]) => unknown> = {}
     lcmManySignature[`${lcmTypes}, ${lcmTypes}, ...${lcmTypes}`] =
       typed.referToSelf(
         (self: TypedFunction) => (a: unknown, b: unknown, args: unknown[]) => {
@@ -96,12 +96,12 @@ export const createLcm = /* #__PURE__ */ factory(
         ): FractionType => x.lcm(y)
       },
       matrixAlgorithmSuite({
-        SS: matAlgo06xS0S0,
-        DS: matAlgo02xDS0,
-        Ss: matAlgo11xS0s
+        SS: matAlgo06xS0S0 as any,
+        DS: matAlgo02xDS0 as any,
+        Ss: matAlgo11xS0s as any
       }),
       lcmManySignature
-    )
+    ) as TypedFunction
 
     /**
      * Calculate lcm for two BigNumbers

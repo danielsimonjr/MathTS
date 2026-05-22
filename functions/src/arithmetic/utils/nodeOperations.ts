@@ -13,7 +13,7 @@ import { factory } from '../../utils/factory.js'
 import { isNode } from '../../utils/is.js'
 
 // Type definitions
-interface MathNode {
+export interface MathNode {
   type: string
   isNode: boolean
   toString: () => string

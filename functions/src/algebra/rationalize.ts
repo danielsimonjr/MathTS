@@ -186,13 +186,13 @@ export const createRationalize = /* #__PURE__ */ factory(
         let eDistrDiv = true
         let redoInic = false
         // Apply the initial rules, including succ div rules:
-        expr = simplify(expr, setRules.firstRules, {}, noExactFractions)
+        expr = simplify(expr, setRules.firstRules, {}, noExactFractions) as MathNode
         let s: string
         while (true) {
           // Alternate applying successive division rules and distr.div.rules
           // until there are no more changes:
           rules = eDistrDiv ? setRules.distrDivRules : setRules.sucDivRules
-          expr = simplify(expr, rules, {}, withExactFractions)
+          expr = simplify(expr, rules, {}, withExactFractions) as MathNode
           eDistrDiv = !eDistrDiv // Swap between Distr.Div and Succ. Div. Rules
 
           s = expr.toString()
@@ -206,10 +206,10 @@ export const createRationalize = /* #__PURE__ */ factory(
 
         if (redoInic) {
           // Apply first rules again without succ div rules (if there are changes)
-          expr = simplify(expr, setRules.firstRulesAgain, {}, noExactFractions)
+          expr = simplify(expr, setRules.firstRulesAgain, {}, noExactFractions) as MathNode
         }
         // Apply final rules:
-        expr = simplify(expr, setRules.finalRules, {}, noExactFractions)
+        expr = simplify(expr, setRules.finalRules, {}, noExactFractions) as MathNode
       } // NVars >= 1
 
       const coefficients: number[] = []
@@ -287,7 +287,7 @@ export const createRationalize = /* #__PURE__ */ factory(
       rules?: any[]
     ): any {
       const variables: string[] = []
-      const node = simplify(expr, rules, scope, { exactFractions: false }) // Resolves any variables and functions with all defined parameters
+      const node = simplify(expr, rules, scope, { exactFractions: false }) as MathNode // Resolves any variables and functions with all defined parameters
       extended = !!extended
 
       const oper = '+-*' + (extended ? '/' : '')
@@ -617,7 +617,7 @@ export const createRationalize = /* #__PURE__ */ factory(
 
       for (let i = maxExpo; i >= 0; i--) {
         if (coefficients[i] === 0) continue
-        let n1 = new ConstantNode(
+        let n1: MathNode = new ConstantNode(
           first ? coefficients[i] : Math.abs(coefficients[i])
         )
         const op = coefficients[i] < 0 ? '-' : '+'

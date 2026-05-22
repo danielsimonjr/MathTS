@@ -53,6 +53,6 @@ export const createIsFinite = /* #__PURE__ */ factory(
       'Array | Matrix': (A: unknown[] | Matrix): unknown[] | Matrix =>
         map(A, isBounded),
       any: (x: unknown): boolean => isBounded(x)
-    })
+    }) as unknown as TypedFn
   }
 )

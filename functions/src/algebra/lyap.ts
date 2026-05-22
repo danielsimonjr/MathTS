@@ -49,24 +49,24 @@ export const createLyap = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Matrix, Matrix': function (A: MatrixType, Q: MatrixType): MatrixType {
-        return sylvester(A, transpose(A), multiply(-1, Q))
+        return sylvester(A, transpose(A), multiply(-1, Q)) as MatrixType
       },
       'Array, Matrix': function (A: unknown[][], Q: MatrixType): MatrixType {
-        return sylvester(matrix(A), transpose(matrix(A)), multiply(-1, Q))
+        return sylvester(matrix(A), transpose(matrix(A)), multiply(-1, Q)) as MatrixType
       },
       'Matrix, Array': function (A: MatrixType, Q: unknown[][]): MatrixType {
         return sylvester(
           A,
-          transpose(matrix(A)),
+          transpose(A),
           matrix(multiply(-1, Q) as unknown[][])
-        )
+        ) as MatrixType
       },
       'Array, Array': function (A: unknown[][], Q: unknown[][]): unknown[][] {
-        return sylvester(
+        return (sylvester(
           matrix(A),
           transpose(matrix(A)),
           matrix(multiply(-1, Q) as unknown[][])
-        ).toArray()
+        ) as MatrixType).toArray()
       }
     })
   }

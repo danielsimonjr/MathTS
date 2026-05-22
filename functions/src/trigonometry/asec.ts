@@ -64,8 +64,8 @@ export const createAsec = /* #__PURE__ */ factory(
         return x.asec()
       },
 
-      BigNumber: function (x: BigNumber) {
-        return new BigNumber(1).div(x).acos()
+      BigNumber: function (x: BigNumber): BigNumber {
+        return new BigNumber(1).div(x as any).acos() as unknown as BigNumber
       }
     }) as TypedFunction
   }

@@ -14,7 +14,7 @@ const WASM_EXPM_THRESHOLD = 16 // 4x4 matrix
 type Scalar = number | BigNumber | Complex
 
 /** Matrix interface */
-interface Matrix {
+export interface Matrix {
   size(): number[]
   get(index: number[]): Scalar
   storage(): string

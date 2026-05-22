@@ -5,6 +5,7 @@ import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
 import type { TypedFunction } from '../core/function/typed.js'
 import type { ConfigOptions } from '../core/config.js'
+import type { AlgorithmFunction } from '../type/matrix/types.js'
 
 // Type definitions for unequal
 interface MatrixFactory {
@@ -114,9 +115,9 @@ export const createUnequal = /* #__PURE__ */ factory(
       createUnequalNumber({ typed, equalScalar }),
       matrixAlgorithmSuite({
         elop: _unequal,
-        SS: matAlgo07xSSf,
-        DS: matAlgo03xDSf,
-        Ss: matAlgo12xSfs
+        SS: matAlgo07xSSf as unknown as AlgorithmFunction,
+        DS: matAlgo03xDSf as unknown as AlgorithmFunction,
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction
       })
     )
 

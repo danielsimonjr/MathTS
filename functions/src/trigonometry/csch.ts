@@ -49,7 +49,7 @@ export const createCsch = /* #__PURE__ */ factory(
       number: cschNumber,
       Complex: (x: Complex) => x.csch(),
       BigNumber: (x: BigNumber): BigNumber =>
-        new BigNumber(1).div((x as unknown as { sinh(): BigNumber }).sinh())
+        new BigNumber(1).div((x as unknown as { sinh(): unknown }).sinh() as any) as unknown as BigNumber
     }) as TypedFunction
   }
 )

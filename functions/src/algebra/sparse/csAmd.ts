@@ -12,7 +12,7 @@ import type { TypedFunction } from '../../core/function/typed.js'
 const WASM_AMD_THRESHOLD = 100
 
 // Sparse matrix internal structure
-interface SparseMatrixData {
+export interface SparseMatrixData {
   _size: number[]
   _values?: any[]
   _index: number[]
@@ -555,12 +555,12 @@ export const createCsAmd = /* #__PURE__ */ factory(
       dense: number
     ): SparseMatrixData {
       // compute A'
-      const at = transpose(a)
+      const at = transpose(a) as SparseMatrixData
 
       // check order = 1, matrix must be square
       if (order === 1 && n === m) {
         // C = A + A'
-        return add(a, at)
+        return add(a, at) as SparseMatrixData
       }
 
       // check order = 2, drop dense columns from M'
@@ -588,13 +588,13 @@ export const createCsAmd = /* #__PURE__ */ factory(
         // finalize AT
         tptr[m] = p2
         // recreate A from new transpose matrix
-        a = transpose(at)
+        a = transpose(at) as SparseMatrixData
         // use A' * A
-        return multiply(at, a)
+        return multiply(at, a) as SparseMatrixData
       }
 
       // use A' * A, square or rectangular matrix
-      return multiply(at, a)
+      return multiply(at, a) as SparseMatrixData
     }
 
     /**

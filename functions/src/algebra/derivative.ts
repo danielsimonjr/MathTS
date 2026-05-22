@@ -143,16 +143,16 @@ export const createDerivative = /* #__PURE__ */ factory(
 
     function parseIdentifier(string: string): SymbolNode {
       const symbol = parse(string)
-      if (!symbol.isSymbolNode) {
+      if (!(symbol as any).isSymbolNode) {
         throw new TypeError(
           'Invalid variable. ' +
             `Cannot parse ${JSON.stringify(string)} into a variable in function derivative`
         )
       }
-      return symbol
+      return symbol as SymbolNode
     }
 
-    const derivative = typed(name, {
+    const derivative: any = typed(name, {
       'Node, SymbolNode': plainDerivative,
       'Node, SymbolNode, Object': plainDerivative,
       'Node, string': (node: MathNode, symbol: string) =>
@@ -183,7 +183,7 @@ export const createDerivative = /* #__PURE__ */ factory(
 
     // FIXME: move the toTex method of derivative to latex.js. Difficulty is that it relies on parse.
     // NOTE: the optional "order" parameter here is currently unused
-    const _derivTex = typed('_derivTex', {
+    const _derivTex: any = typed('_derivTex', {
       'Node, SymbolNode': function (expr: MathNode, x: SymbolNode): string {
         if (isConstantNode(expr) && typeOf((expr as any).value) === 'string') {
           return _derivTex(
@@ -240,7 +240,7 @@ export const createDerivative = /* #__PURE__ */ factory(
      * @param  {string} varName     Variable that we are differentiating
      * @return {boolean}  if node is constant
      */
-    const _isConst = typed('_isConst', {
+    const _isConst: any = typed('_isConst', {
       'function, ConstantNode, string': function (): boolean {
         return true
       },
@@ -290,7 +290,7 @@ export const createDerivative = /* #__PURE__ */ factory(
      * @param  {function} isConst  Function that tells if a node is constant
      * @return {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode}    The derivative of `expr`
      */
-    const _derivative = typed('_derivative', {
+    const _derivative: any = typed('_derivative', {
       'ConstantNode, function': function (): ConstantNode {
         return createConstantNode(0)
       },

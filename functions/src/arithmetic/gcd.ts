@@ -88,7 +88,7 @@ export const createGcd = /* #__PURE__ */ factory(
       zeros,
       DenseMatrix,
       concat
-    })
+    }) as TypedFunction
     const matAlgo01xDSid = createMatAlgo01xDSid({ typed })
     const matAlgo04xSidSid = createMatAlgo04xSidSid({ typed, equalScalar })
     const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix })
@@ -134,9 +134,9 @@ export const createGcd = /* #__PURE__ */ factory(
         ): FractionType => x.gcd(y)
       },
       matrixAlgorithmSuite({
-        SS: matAlgo04xSidSid,
-        DS: matAlgo01xDSid,
-        Ss: matAlgo10xSids
+        SS: matAlgo04xSidSid as any,
+        DS: matAlgo01xDSid as any,
+        Ss: matAlgo10xSids as any
       }),
       {
         [gcdManyTypesSignature]: typed.referToSelf(
@@ -168,7 +168,7 @@ export const createGcd = /* #__PURE__ */ factory(
               if (wasmResult !== null) return wasmResult
               return self(...array)
             }
-            throw new ArgumentsError('gcd() supports only 1d matrices!')
+            throw new Error('gcd() supports only 1d matrices!')
           }
         ),
         Matrix: typed.referToSelf(
@@ -177,7 +177,7 @@ export const createGcd = /* #__PURE__ */ factory(
           }
         )
       }
-    )
+    ) as TypedFunction
 
     /**
      * Try WASM-accelerated GCD for plain number arrays

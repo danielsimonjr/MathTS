@@ -69,8 +69,8 @@ export const createAsech = /* #__PURE__ */ factory(
         return x.asech()
       },
 
-      BigNumber: function (x: BigNumber) {
-        return new BigNumber(1).div(x).acosh()
+      BigNumber: function (x: BigNumber): BigNumber {
+        return new BigNumber(1).div(x as any).acosh() as unknown as BigNumber
       }
     }) as TypedFunction
   }

@@ -7,7 +7,7 @@ import { createCsSymperm } from './csSymperm.js'
 import type { TypedFunction } from '../../core/function/typed.js'
 
 // Sparse matrix internal structure
-interface SparseMatrixData {
+export interface SparseMatrixData {
   _size: number[]
   _values: any[]
   _index: number[]
@@ -37,14 +37,14 @@ interface CsCholDependencies {
 }
 
 // Symbolic analysis result from csSchol
-interface SymbolicAnalysis {
+export interface SymbolicAnalysis {
   parent: number[]
   cp: number[]
   pinv?: number[]
 }
 
 // Cholesky factorization result
-interface CholResult {
+export interface CholResult {
   L: SparseMatrixData
   P?: SparseMatrixData
 }

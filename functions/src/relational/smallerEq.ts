@@ -8,6 +8,7 @@ import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithm
 import { createCompareUnits } from './compareUnits.js'
 import type { TypedFunction } from '../core/function/typed.js'
 import type { ConfigOptions } from '../core/config.js'
+import type { AlgorithmFunction } from '../type/matrix/types.js'
 
 // Type definitions for smallerEq
 interface BigNumberType {
@@ -128,9 +129,9 @@ export const createSmallerEq = /* #__PURE__ */ factory(
       },
       compareUnits,
       matrixAlgorithmSuite({
-        SS: matAlgo07xSSf,
-        DS: matAlgo03xDSf,
-        Ss: matAlgo12xSfs
+        SS: matAlgo07xSSf as unknown as AlgorithmFunction,
+        DS: matAlgo03xDSf as unknown as AlgorithmFunction,
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction
       })
     )
   }

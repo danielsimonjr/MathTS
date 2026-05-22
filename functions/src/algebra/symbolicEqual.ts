@@ -84,9 +84,9 @@ export const createSymbolicEqual = /* #__PURE__ */ factory(
       options: SimplifyOptions = {}
     ): boolean {
       const diff = new OperatorNode('-', 'subtract', [e1, e2])
-      const simplified = simplify(diff, {}, options)
+      const simplified = simplify(diff, [], options)
       return (
-        isConstantNode(simplified) && !(simplified as ConstantNodeType).value
+        isConstantNode(simplified) && !(simplified as unknown as ConstantNodeType).value
       )
     }
 

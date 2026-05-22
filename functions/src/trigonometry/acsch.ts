@@ -50,8 +50,8 @@ export const createAcsch = /* #__PURE__ */ factory(
         return x.acsch()
       },
 
-      BigNumber: function (x: BigNumber) {
-        return new BigNumber(1).div(x).asinh()
+      BigNumber: function (x: BigNumber): BigNumber {
+        return new BigNumber(1).div(x as any).asinh() as unknown as BigNumber
       }
     }) as TypedFunction
   }

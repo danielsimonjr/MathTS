@@ -19,7 +19,7 @@ interface UnitClass {
 /**
  * Unit instance with fixPrefix property
  */
-interface UnitInstance {
+export interface UnitInstance {
   fixPrefix: boolean
 }
 

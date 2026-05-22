@@ -415,7 +415,7 @@ export function normalizeFormatOptions(
       }
 
       if (options.notation) {
-        notation = options.notation
+        notation = options.notation as NormalizedFormatOptions['notation']
       }
     } else {
       throw new Error(

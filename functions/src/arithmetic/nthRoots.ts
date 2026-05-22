@@ -141,6 +141,6 @@ export const createNthRoots = /* #__PURE__ */ factory(
         return _nthComplexRoots(x, 2)
       },
       'Complex, number': _nthComplexRoots
-    })
+    }) as TypedFunction
   }
 )
