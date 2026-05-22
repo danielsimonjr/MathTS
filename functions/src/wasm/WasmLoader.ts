@@ -583,6 +583,20 @@ export interface WasmModule {
   implicit_euler_step_wasm: (yPtr: number, fPtr: number, jPtr: number, h: number, n: number, resultPtr: number) => void
   ode_system_rk4_step_wasm: (yPtr: number, kPtrs: number, h: number, n: number, resultPtr: number) => void
 
+  // Computational geometry
+  delaunay_wasm: (ptsPtr: number, n: number, trisPtr: number) => number
+  voronoi_wasm: (
+    ptsPtr: number,
+    n: number,
+    boundsPtr: number,
+    vertsPtr: number,
+    edgesPtr: number,
+    maxVerts: number,
+    maxEdges: number
+  ) => number
+  kdtree_build_wasm: (ptsPtr: number, n: number, dims: number, treePtr: number) => number
+  kdtree_nearest_wasm: (treePtr: number, queryPtr: number, dims: number, treeSize: number) => number
+
   // Memory management
   __new: (size: number, id: number) => number
   __pin: (ptr: number) => number
