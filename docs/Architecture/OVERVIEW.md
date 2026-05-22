@@ -27,8 +27,9 @@ files excluded), per the 2026-05-22 dependency-graph report.
 | Reachable TypeScript Files | 485 (of 1,387 total; 902 dormant) |
 | Lines of Code | 125,177 (reachable) |
 | Total Exports | 2,850 (704 re-exports) |
-| Test Files | 114 |
+| Test Files | 114 (18.6% source-file coverage) |
 | Modules | 55 |
+| Circular Dependencies | 0 |
 | Typed Function Exports | 374+ (20 modules, including GPU) |
 | Synced Factory Functions | 242 (19 categories) |
 

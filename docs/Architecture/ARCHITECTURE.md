@@ -11,8 +11,12 @@ A Cargo crate (`wasm-rust`) provides the primary WASM backend but is not an npm 
 - **485 reachable TypeScript files** (out of 1,387 total; 902 dormant synced from mathjs)
 - **125,177 lines of code** (reachable scope)
 - **2,850 total exports** (704 re-exports)
-- **114 test files**
-- **All 12 packages build**, all typecheck
+- **114 test files** — 90 of 485 source files have direct coverage (18.6%)
+- **0 circular import dependencies**
+- **All 12 packages build.** 8 packages typecheck cleanly with `tsc --noEmit`;
+  `functions` carries ~599 pre-existing type errors in its dormant synced code
+  (compiled with `strict: false`), and `tensor` / `autograd` each surface 7
+  errors from the upstream `workerpool` dependency's bundled `.ts` source.
 
 ## Package Dependency Graph
 
