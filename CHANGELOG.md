@@ -247,6 +247,7 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   - `functions/src/factories/evaluate.ts → typed/index.ts → typed/cas.ts → evaluate.ts`: the `export * from './cas.js'` re-export moved from `typed/index.ts` to the package entry `functions/src/index.ts`. The package's export surface is unchanged, and `evaluate.ts` now initializes strictly after `typed/index.ts`, so its module scope is always complete.
   - `matrix/src/types/`: `DenseMatrix ↔ SparseMatrix`: `DenseMatrix` dropped its `import type { SparseMatrix }`; `toSparse()` is now typed as the `Matrix` base class (the `SparseMatrix` subtype is still constructed via the existing lazy runtime load).
   - `matrix/src/backends/`: `BackendManager ↔ config`: the `OperationType` type moved from `BackendManager.ts` to `config.ts` (the lower-level module); `BackendManager` re-exports it so existing importers are unaffected.
+- **`tensor` and `autograd` failed `tsc --noEmit`** — both packages reach the upstream `workerpool` npm dependency transitively (`autograd → tensor → matrix → parallel → workerpool`), and that package ships raw `.ts` source. `skipLibCheck` only skips `.d.ts`, so `tsc` type-checked `workerpool`'s source and surfaced 7 of its own code-quality errors. The `parallel`, `matrix`, `functions`, and `compat` tsconfigs already redirect the `workerpool` specifier to the stub `parallel/types/workerpool.d.ts`; the same `paths` entry was added to `tensor/tsconfig.json` and `autograd/tsconfig.json`. 10 of the 11 TypeScript packages now typecheck cleanly.
 
 ### Documentation
 

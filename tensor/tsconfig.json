@@ -4,7 +4,10 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "types": ["node"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "workerpool": ["../parallel/types/workerpool.d.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests", "../node_modules/**"]
