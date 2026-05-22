@@ -20,8 +20,8 @@ npx tsx tools/create-dependency-graph.ts
 
 **Output:**
 
-- `docs/architecture/DEPENDENCY_GRAPH.md` - Markdown documentation
-- `docs/architecture/dependency-graph.json` - JSON data structure
+- `docs/Architecture/DEPENDENCY_GRAPH.md` - Markdown documentation
+- `docs/Architecture/dependency-graph.json` - JSON data structure
 
 **Features:**
 

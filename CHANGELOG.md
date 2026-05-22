@@ -241,6 +241,7 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
 - **WASM test suites fail opaquely on a fresh checkout** — `tests/wasm/wasm-loader.test.ts` and the `WASM Module Types` block of `typescript-integration.test.ts` call `WasmLoader.load()`, which needs a built `.wasm` artifact (`npm run build:wasm`). When the artifact is absent they now `describe.skip` with a loud one-time `console.warn` (via a new `tests/wasm/wasm-artifact-check.ts`) instead of failing with an opaque `ENOENT`.
 - **`ParallelMatrix` worker never ran** — a four-defect chain disabled the parallel matrix path entirely: (1) `parallel`'s tsup config had no `src/matrix.worker.ts` entry, so `dist/matrix.worker.js` was never built; (2) `ParallelMatrix` had no script-resolution path; (3) `matrix.worker.ts` used the ESM-incompatible `require('worker_threads')`; (4) `WorkerPool`'s Node branch wired only the browser `worker.onmessage`/`onerror` callbacks instead of `.on('message')`/`.on('error')`. Two further defects: workers mutated shared buffers (lost across the structured clone) and the spawn loop never drained the pending queue. Fixed by adding the worker build entry, a `resolveMatrixWorkerScript()` resolver, dynamic `import('node:worker_threads')` with `parentPort` replies, the Node event handlers, return-by-value worker slices, and a `processQueue()` call after each worker spawns. `parallel/package.json`, `parallel/src/{ParallelMatrix,WorkerPool,matrix.worker}.ts`.
 - **JS SVD wrong for non-square matrices** — `svdStep`'s Golub-Kahan QR sweep assigned the unsigned magnitude `Math.sqrt(f*f + g*g)` to `e[k-1]` and `d[k]`, where the algorithm requires the signed rotated values `cs*f - sn*g` / `cs2*f - sn2*g`. The unsigned form corrupted the bidiagonal sweep for any non-square matrix. `matrix/src/operations/svd.ts`.
+- **Dependency-graph tool wrote to the wrong directory** — `tools/create-dependency-graph` hard-coded its `OUTPUT_DIR` as `docs/architecture` (lowercase), but the tracked docs folder is `docs/Architecture`. On a case-sensitive filesystem the generated reports landed in a separate, untracked directory. `OUTPUT_DIR` (and the matching log strings + README) now use `docs/Architecture`.
 
 ### Documentation
 
@@ -267,6 +268,13 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   Execution Model sections were corrected to describe the real behaviour — the
   FFT butterfly runs on the calling thread, and the typed `Float64Array`
   overloads resolve to the value directly, not to a `ParallelResult` wrapper.
+- **`docs/Architecture/` regenerated** — re-ran `tools/create-dependency-graph`
+  over the current tree (485 reachable files, 55 modules, 2,850 exports,
+  125,148 LOC, 7 import cycles, 18.6% test coverage). `OVERVIEW.md` and
+  `ARCHITECTURE.md` were refreshed (LOC, 114 test files), and `ARCHITECTURE.md`
+  gained a **Circular Dependencies** subsection itemizing all 7 cycles the
+  report detects, with a per-cycle assessment (4 are mathjs-synced upstream,
+  the native `evaluate.ts ↔ typed/` cycle is benign, 2 are type-only).
 
 ### Retracted (audit false-positives)
 

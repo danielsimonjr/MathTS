@@ -9,9 +9,9 @@ Turborepo orchestrates builds across the workspace. tsup bundles each package.
 A Cargo crate (`wasm-rust`) provides the primary WASM backend but is not an npm package.
 
 - **485 reachable TypeScript files** (out of 1,387 total; 902 dormant synced from mathjs)
-- **125,142 lines of code** (reachable scope)
+- **125,148 lines of code** (reachable scope)
 - **2,850 total exports** (704 re-exports)
-- **111 test files**
+- **114 test files**
 - **All 12 packages build**, all typecheck
 
 ## Package Dependency Graph
@@ -36,6 +36,29 @@ workerpool --> parallel ------+           |
 | functions | @danielsimonjr/mathts-core (5), @danielsimonjr/mathts-parallel (4) |
 | parallel | @danielsimonjr/mathts-workerpool (1), @danielsimonjr/mathts-parallel (1) |
 | compat | @danielsimonjr/mathts-core (3), @danielsimonjr/mathts-compat (2), @danielsimonjr/mathts-matrix (2), @danielsimonjr/mathts-parallel (1), @danielsimonjr/mathts-functions (1) |
+
+### Circular Dependencies
+
+The 2026-05-22 dependency-graph report detects **7 import cycles** — 5 runtime,
+2 type-only. None block the build, and all are within a single package (no
+cross-package cycles):
+
+| Cycle | Kind | Assessment |
+|-------|------|------------|
+| `functions/src/utils/`: `object → is → map → customs → object` | runtime | mathjs-synced support code; cycle exists upstream, ESM-tolerated |
+| `functions/src/utils/`: `is → map → is` | runtime | mathjs-synced support code; ESM-tolerated |
+| `functions/src/factories/evaluate.ts → typed/index.ts → typed/cas.ts → evaluate.ts` | runtime | native code; benign in the bundled output — `evaluate()` resolves the full math scope (verified) |
+| `expression/src/utils/`: `is → map → customs → object → is` | runtime | mathjs-synced support code; ESM-tolerated |
+| `expression/src/utils/`: `is → map → is` | runtime | mathjs-synced support code; ESM-tolerated |
+| `matrix/src/types/`: `DenseMatrix ↔ SparseMatrix` | type-only | erased at runtime, safe |
+| `matrix/src/backends/`: `BackendManager ↔ config` | type-only | erased at runtime, safe |
+
+The four `utils/` cycles are pre-existing in upstream mathjs and are
+re-introduced by the sync script; fixing them locally would diverge from
+upstream. The `evaluate.ts ↔ typed/` cycle is the only native-code runtime
+cycle — `evaluate.ts` builds its math scope at module-init, but the bundled
+load order produces a complete scope, so it is currently benign. It is tracked
+as a latent risk (see `docs/refactoring/TODO.md`).
 
 ## Core Systems
 

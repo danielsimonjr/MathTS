@@ -112,23 +112,43 @@ below are limited to operations that genuinely clear that bar.
   [`docs/roadmap/UNIFIED_WEBGPU_PATH.md`](../roadmap/UNIFIED_WEBGPU_PATH.md) —
   a separate research effort beyond the existing matrix-op `gpu*` functions.
 
-## 🐞 Known Defects (discovered 2026-05-21)
+## 🐞 Known Defects
 
-Surfaced while fixing the fresh-checkout test failures; both are pre-existing,
-unrelated to the parallelism work, and left for a dedicated fix.
+### Fixed (2026-05-22)
 
-- [ ] **`parallel` package never builds `matrix.worker.js`** — `parallel`'s
-  build is `tsup src/index.ts` only, so `src/matrix.worker.ts` is never emitted
-  to `dist/`. `ParallelMatrix` resolves its worker as `./matrix.worker.js` at
-  runtime, which does not exist — the worker compute paths silently return
-  all-zeros. Causes the 9 `tests/wasm/parallel-processing.test.ts` failures.
-  Fix: add `src/matrix.worker.ts` to the `parallel` build entry points (as
-  `packages/workerpool` already does for `src/worker.ts`).
-- [ ] **JS SVD fallback is wrong for non-square matrices** — when the WASM
-  artifact is absent, `svdWasm` falls back to the JS Golub-Reinsch `svd` in
-  `matrix/src/operations/svd.ts`; for a 5×3 general matrix it produces a
-  decomposition with reconstruction error ~8.28 (≫ 1e-8). A genuine algorithm
-  bug in the JS SVD, independent of WASM.
+Both defects below were surfaced while fixing the fresh-checkout test failures,
+were pre-existing and unrelated to the parallelism work, and are now resolved.
+
+- [x] **`parallel` package never built `matrix.worker.js`** — `parallel`'s
+  build was `tsup src/index.ts` only, so `src/matrix.worker.ts` was never
+  emitted to `dist/`. `ParallelMatrix` resolved its worker as
+  `./matrix.worker.js` at runtime, which did not exist — the worker compute
+  paths silently returned all-zeros. Caused 9 `tests/wasm/parallel-processing.test.ts`
+  failures. **Fixed:** a four-defect chain — missing tsup build entry, no
+  script resolver (`resolveMatrixWorkerScript`), ESM-incompatible
+  `require('worker_threads')`, and browser-only event wiring in `WorkerPool`'s
+  Node branch — plus a shared-buffer-mutation bug and a queue-drain race.
+  `parallel/package.json`, `parallel/src/{ParallelMatrix,WorkerPool,matrix.worker}.ts`.
+- [x] **JS SVD was wrong for non-square matrices** — `svdStep`'s Golub-Kahan
+  QR sweep assigned the unsigned magnitude `Math.sqrt(f*f + g*g)` to `e[k-1]`
+  and `d[k]` where the algorithm requires the signed rotated values
+  `cs*f - sn*g` / `cs2*f - sn2*g`, corrupting the bidiagonal sweep for any
+  non-square matrix (5×3 reconstruction error ~8.28). **Fixed** in
+  `matrix/src/operations/svd.ts`.
+
+### Open (latent, low severity)
+
+- [ ] **`evaluate.ts ↔ typed/` runtime import cycle** — `functions/src/factories/evaluate.ts`
+  imports `* as typedFns` from `typed/index.ts`, which re-exports `typed/cas.ts`,
+  which imports `parse`/`evaluate`/`compileExpr` back from `evaluate.ts`.
+  `evaluate.ts` spreads `...typedFns` into its math scope at module-init time,
+  so the scope could snapshot an incomplete namespace. Verified currently
+  benign — the bundled load order produces a complete scope and `evaluate()`
+  resolves every probed function. A defensive fix would build the math scope
+  lazily (on first `evaluate()`/`compileExpr()` call) instead of at module load.
+  (The other four runtime cycles flagged by the dependency-graph report are in
+  mathjs-synced `utils/` support code, exist upstream, and are re-introduced by
+  the sync script — out of scope to fix locally.)
 
 ## 📋 Next Steps
 

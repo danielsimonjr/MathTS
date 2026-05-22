@@ -4,9 +4,9 @@
  * Generic Dependency Graph Generator
  *
  * Scans a TypeScript codebase and generates:
- * - docs/architecture/DEPENDENCY_GRAPH.md (human-readable)
- * - docs/architecture/dependency-graph.json (machine-readable)
- * - docs/architecture/dependency-graph.yaml (compact, ~40% smaller than JSON)
+ * - docs/Architecture/DEPENDENCY_GRAPH.md (human-readable)
+ * - docs/Architecture/dependency-graph.json (machine-readable)
+ * - docs/Architecture/dependency-graph.yaml (compact, ~40% smaller than JSON)
  *
  * Usage: npx tsx tools/create-dependency-graph.ts
  *
@@ -186,7 +186,7 @@ function getProjectRoot(): string {
 
 const ROOT_DIR = getProjectRoot();
 const SRC_DIR = join(ROOT_DIR, 'src');
-const OUTPUT_DIR = join(ROOT_DIR, 'docs', 'architecture');
+const OUTPUT_DIR = join(ROOT_DIR, 'docs', 'Architecture');
 
 // Read package.json for version and name
 let packageJson: PackageJson = { name: 'unknown', version: '0.0.0' };
@@ -2013,7 +2013,7 @@ async function main(): Promise<void> {
 
   // Write outputs
   writeFileSync(join(OUTPUT_DIR, 'dependency-graph.json'), JSON.stringify(json, null, 2));
-  console.log('Written: docs/architecture/dependency-graph.json');
+  console.log('Written: docs/Architecture/dependency-graph.json');
 
   // Write YAML output (more compact, ~40% smaller than JSON)
   const yamlOutput = yaml.dump(json, {
@@ -2025,16 +2025,16 @@ async function main(): Promise<void> {
     forceQuotes: false,
   });
   writeFileSync(join(OUTPUT_DIR, 'dependency-graph.yaml'), yamlOutput);
-  console.log('Written: docs/architecture/dependency-graph.yaml');
+  console.log('Written: docs/Architecture/dependency-graph.yaml');
 
   writeFileSync(join(OUTPUT_DIR, 'DEPENDENCY_GRAPH.md'), markdown);
-  console.log('Written: docs/architecture/DEPENDENCY_GRAPH.md');
+  console.log('Written: docs/Architecture/DEPENDENCY_GRAPH.md');
 
   // Write compact summary for LLM consumption (CTON-style, ~10KB)
   const compactSummary = generateCompactSummary(activeParsedFiles, modules, stats, circularDeps);
   writeFileSync(join(OUTPUT_DIR, 'dependency-summary.compact.json'), compactSummary);
   const compactSize = Buffer.byteLength(compactSummary, 'utf8');
-  console.log(`Written: docs/architecture/dependency-summary.compact.json (${(compactSize / 1024).toFixed(1)}KB)`);
+  console.log(`Written: docs/Architecture/dependency-summary.compact.json (${(compactSize / 1024).toFixed(1)}KB)`);
 
   // Test coverage analysis (when --include-tests is specified)
   let testCoverage: TestCoverageAnalysis | null = null;
@@ -2076,10 +2076,10 @@ async function main(): Promise<void> {
 
     // Write test coverage outputs
     writeFileSync(join(OUTPUT_DIR, 'TEST_COVERAGE.md'), testCoverageMarkdown);
-    console.log('Written: docs/architecture/TEST_COVERAGE.md');
+    console.log('Written: docs/Architecture/TEST_COVERAGE.md');
 
     writeFileSync(join(OUTPUT_DIR, 'test-coverage.json'), JSON.stringify(testCoverageJson, null, 2));
-    console.log('Written: docs/architecture/test-coverage.json');
+    console.log('Written: docs/Architecture/test-coverage.json');
   }
 
   console.log('\nDependency graph generation complete!');
