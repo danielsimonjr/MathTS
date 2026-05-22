@@ -276,10 +276,6 @@ import {
   factory_nthRoot,
   dotDivide,
   dotMultiply,
-  bitAnd,
-  bitOr,
-  bitXor,
-  leftShift,
   deepEqual,
   unequal,
   compareNatural,
@@ -298,6 +294,9 @@ import {
   composition,
   sort,
 } from '../src/factories/index.js';
+
+// bitAnd/bitOr/bitXor/leftShift moved from factories/ to typed/ — import them from the typed layer
+import { bitAnd, bitOr, bitXor, leftShift } from '../src/typed/bitwise.js';
 
 describe('Tier 5 - relational', () => {
   it('compare(1, 2) = -1', () => expect(factory_compare(1, 2)).toBe(-1));

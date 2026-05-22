@@ -33,6 +33,14 @@ export { typedStatistics } from './statistics.js';
 export * from './signal.js';
 export { typedSignal } from './signal.js';
 
+// Bitwise functions (Int32Array elementwise via ComputePool)
+export * from './bitwise.js';
+export { typedBitwise } from './bitwise.js';
+
+// Logical functions (and / or / xor / not / nullish across all numeric types)
+export * from './logical.js';
+export { typedLogical } from './logical.js';
+
 // Special functions (erf, beta, bessel, etc.)
 export * from './special.js';
 export { typedSpecial } from './special.js';

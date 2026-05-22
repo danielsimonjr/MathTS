@@ -1,16 +1,18 @@
 import { describe, it, expect } from 'vitest';
 
+// bitNot/not moved from factories/ to typed/ — import them from the typed layer
+import { bitNot } from '../src/typed/bitwise.js';
+import { not } from '../src/typed/logical.js';
+
 // Import non-conflicting exports directly
 import {
   addScalar,
   multiplyScalar,
   subtractScalar,
-  bitNot,
   arg,
   conj,
   im,
   re,
-  not,
   flatten,
   size,
   squeeze,
