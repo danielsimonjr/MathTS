@@ -85,13 +85,13 @@ export const createIsPositive = /* #__PURE__ */ factory(
       Unit: typed.referToSelf(
         (self: TypedFunction) =>
           (x: UnitType): boolean =>
-            typed.find(self, x.valueType())(x.value)
+            typed.find(self, x.valueType())(x.value) as boolean
       ),
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
-            deepMap(x, self)
+            deepMap(x as unknown[], self)
       )
     })
   }

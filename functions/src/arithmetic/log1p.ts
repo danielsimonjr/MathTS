@@ -92,7 +92,7 @@ export const createLog1p = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
-            deepMap(x, self)
+            deepMap(x as unknown[], self)
       ),
 
       'any, any': typed.referToSelf(

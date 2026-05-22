@@ -52,6 +52,6 @@ export const createChain = /* #__PURE__ */ factory(
       any: function (value: any) {
         return new Chain(value)
       }
-    })
+    }) as unknown as TypedFunction
   }
 )

@@ -256,8 +256,7 @@ export const createComplexClass = /* #__PURE__ */ factory(
           )
       }
     }
-    ;(Complex.prototype as Complex & { valueOf: () => string }).valueOf =
-      Complex.prototype.toString
+    ;(Complex.prototype as any).valueOf = Complex.prototype.toString
 
     /**
      * Create a Complex number from a JSON object

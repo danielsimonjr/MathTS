@@ -105,11 +105,11 @@ export function createRealSymmetric({
     computeVectors: boolean
   ): EigenResult {
     if (type === 'number') {
-      return diag(arr, prec, computeVectors)
+      return diag(arr as number[][], prec as number, computeVectors)
     }
 
     if (type === 'BigNumber') {
-      return diagBig(arr, prec, computeVectors)
+      return diagBig(arr as BigNumber[][], prec as BigNumber, computeVectors)
     }
 
     throw TypeError('Unsupported data type: ' + type)
@@ -136,7 +136,7 @@ export function createRealSymmetric({
         const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(N * N)
 
         try {
-          const iterations = wasm.eigsSymmetric(
+          const iterations = (wasm as any).eigsSymmetric(
             matrixAlloc.ptr,
             N,
             eigenvaluesAlloc.ptr,
@@ -271,7 +271,7 @@ export function createRealSymmetric({
   // get angle
   function getTheta(aii: number, ajj: number, aij: number): number {
     const denom = ajj - aii
-    if (Math.abs(denom) <= config.relTol) {
+    if (Math.abs(denom) <= (config.relTol as number)) {
       return Math.PI / 4.0
     } else {
       return 0.5 * Math.atan((2.0 * aij) / (ajj - aii))
@@ -286,7 +286,7 @@ export function createRealSymmetric({
   ): BigNumber {
     const denom = subtract(ajj, aii) as BigNumber
     if (bigLte(abs(denom), bignumber(config.relTol as number))) {
-      return bignumber(-1).acos().div(4) as unknown as BigNumber
+      return (bignumber(-1) as any).acos().div(4) as unknown as BigNumber
     } else {
       return multiplyScalar(
         bignumber(0.5),

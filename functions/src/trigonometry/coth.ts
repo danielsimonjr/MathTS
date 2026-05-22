@@ -49,7 +49,7 @@ export const createCoth = /* #__PURE__ */ factory(
       number: cothNumber,
       Complex: (x: Complex) => x.coth(),
       BigNumber: (x: BigNumber): BigNumber =>
-        new BigNumber(1).div((x as unknown as { tanh(): BigNumber }).tanh())
+        new BigNumber(1).div((x as unknown as { tanh(): unknown }).tanh() as any) as unknown as BigNumber
     }) as TypedFunction
   }
 )

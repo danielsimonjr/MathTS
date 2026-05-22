@@ -110,7 +110,7 @@ export const createAnd = /* #__PURE__ */ factory(
         'Unit, Unit': typed.referToSelf(
           (self: TypedFunction) =>
             (x: Unit, y: Unit): boolean =>
-              self(x.value || 0, y.value || 0)
+              self(x.value || 0, y.value || 0) as boolean
         ),
 
         'SparseMatrix, any': typed.referToSelf(
@@ -121,7 +121,7 @@ export const createAnd = /* #__PURE__ */ factory(
                 // return zero matrix
                 return zeros(x.size(), x.storage())
               }
-              return matAlgo11xS0s(x, y, self, false)
+              return matAlgo11xS0s(x as any, y, self, false) as unknown as Matrix
             }
         ),
 
@@ -133,7 +133,7 @@ export const createAnd = /* #__PURE__ */ factory(
                 // return zero matrix
                 return zeros(x.size(), x.storage())
               }
-              return matAlgo14xDs(x, y, self, false)
+              return matAlgo14xDs(x as any, y, self, false) as unknown as Matrix
             }
         ),
 
@@ -145,7 +145,7 @@ export const createAnd = /* #__PURE__ */ factory(
                 // return zero matrix
                 return zeros(y.size(), y.storage())
               }
-              return matAlgo11xS0s(y, x, self, true)
+              return matAlgo11xS0s(y as any, x, self, true) as unknown as Matrix
             }
         ),
 
@@ -157,7 +157,7 @@ export const createAnd = /* #__PURE__ */ factory(
                 // return zero matrix
                 return zeros(y.size(), y.storage())
               }
-              return matAlgo14xDs(y, x, self, true)
+              return matAlgo14xDs(y as any, x, self, true) as unknown as Matrix
             }
         ),
 
@@ -165,7 +165,7 @@ export const createAnd = /* #__PURE__ */ factory(
           (self: TypedFunction) =>
             (x: unknown[], y: ScalarValue): unknown[] => {
               // use matrix implementation
-              return self(matrix(x), y).valueOf()
+              return (self(matrix(x), y) as any).valueOf() as unknown[]
             }
         ),
 
@@ -173,13 +173,13 @@ export const createAnd = /* #__PURE__ */ factory(
           (self: TypedFunction) =>
             (x: ScalarValue, y: unknown[]): unknown[] => {
               // use matrix implementation
-              return self(x, matrix(y)).valueOf()
+              return (self(x, matrix(y)) as any).valueOf() as unknown[]
             }
         )
       },
       matrixAlgorithmSuite({
-        SS: matAlgo06xS0S0,
-        DS: matAlgo02xDS0
+        SS: matAlgo06xS0S0 as any,
+        DS: matAlgo02xDS0 as any
       })
     )
   }

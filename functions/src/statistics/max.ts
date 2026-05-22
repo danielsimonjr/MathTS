@@ -99,7 +99,7 @@ export const createMax = /* #__PURE__ */ factory(
         dim: number | { valueOf(): number }
       ): unknown {
         const dimValue = typeof dim === 'number' ? dim : dim.valueOf()
-        return reduce(array, dimValue, _largest)
+        return reduce(array as unknown[] | any, dimValue, _largest)
       },
 
       // max(a, b, c, d, ...)
@@ -156,7 +156,7 @@ export const createMax = /* #__PURE__ */ factory(
       // JavaScript fallback for mixed types, BigNumber, Complex, etc.
       let res: unknown
 
-      deepForEach(array, function (value: unknown) {
+      deepForEach(array as any, function (value: unknown) {
         try {
           if (mathIsNaN(value)) {
             res = value

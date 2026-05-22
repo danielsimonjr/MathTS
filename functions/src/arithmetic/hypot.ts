@@ -89,7 +89,7 @@ export const createHypot = /* #__PURE__ */ factory(
 
       Matrix: (M: Matrix): NumericValue =>
         _hypot(flatten(M.toArray(), true) as NumericValue[])
-    })
+    }) as TypedFunction
 
     /**
      * Try WASM-accelerated hypot for plain number arrays

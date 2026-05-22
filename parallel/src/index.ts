@@ -85,6 +85,22 @@ export type {
 } from './operations/index.js';
 
 // =============================================================================
+// Bitwise Operations (Int32Array)
+// =============================================================================
+
+export {
+  bitAnd,
+  bitOr,
+  bitXor,
+  bitNot,
+  leftShift,
+  rightArithShift,
+  rightLogShift,
+} from './ops/bitwise.js';
+
+export type { BitwiseBinaryOp } from './ops/bitwise.js';
+
+// =============================================================================
 // Strategies
 // =============================================================================
 

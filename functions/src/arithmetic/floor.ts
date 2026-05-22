@@ -70,7 +70,7 @@ export const createFloorNumber = /* #__PURE__ */ factory(
       // First, if the floor and the round are identical we can be
       // quite comfortable that is the best answer:
       const f = Math.floor(x)
-      const r = round(x)
+      const r = round(x) as number
       if (f === r) return f
       // OK, they are different. If x is truly distinct from f but
       // appears indistinguishable from r, presume it really is just
@@ -123,13 +123,13 @@ export const createFloor = /* #__PURE__ */ factory(
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
     const matAlgo14xDs = createMatAlgo14xDs({ typed })
 
-    const floorNumber = createFloorNumber({ typed, config, round })
+    const floorNumber = createFloorNumber({ typed, config, round }) as TypedFunction
     function _bigFloor(x: BigNumberType): BigNumberType {
       // see _floorNumber above for rationale
       const bne = (a: BigNumberType, b: BigNumberType): boolean =>
         bigNearlyEqual(a, b, config.relTol, config.absTol)
       const f = x.floor()
-      const r = round(x) as BigNumberType
+      const r = round(x) as BigNumberType // round returns unknown from TypedFunction
       if (f.eq(r)) return f
       if (bne(x, r) && !bne(x, f)) return r
       return f
@@ -237,14 +237,14 @@ export const createFloor = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           function (x: UnitType, n: number, unit: UnitType): UnitType {
             const valueless = x.toNumeric(unit)
-            return unit.multiply(self(valueless, n))
+            return unit.multiply(self(valueless, n) as number | BigNumberType)
           }
       ),
 
       'Unit, BigNumber, Unit': typed.referToSelf(
         (self: TypedFunction) =>
           (x: UnitType, n: BigNumberType, unit: UnitType): UnitType =>
-            self(x, (n as unknown as { toNumber(): number }).toNumber(), unit)
+            self(x, (n as unknown as { toNumber(): number }).toNumber(), unit) as UnitType
       ),
 
       'Array | Matrix, number | BigNumber, Unit': typed.referToSelf(
@@ -255,7 +255,7 @@ export const createFloor = /* #__PURE__ */ factory(
             unit: UnitType
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since floor(0) = 0
-            return deepMap(x, (value) => self(value, n, unit), true)
+            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as unknown[] | Matrix
           }
       ),
 
@@ -265,14 +265,14 @@ export const createFloor = /* #__PURE__ */ factory(
             x: unknown[] | Matrix | UnitType,
             unit: UnitType
           ): unknown[] | Matrix | UnitType =>
-            self(x, 0, unit)
+            self(x, 0, unit) as unknown[] | Matrix | UnitType
       ),
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix => {
             // deep map collection, skip zeros since floor(0) = 0
-            return deepMap(x, self, true)
+            return deepMap(x as unknown[], self, true) as unknown[] | Matrix
           }
       ),
 
@@ -280,21 +280,21 @@ export const createFloor = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[], n: number | BigNumberType): unknown[] => {
             // deep map collection, skip zeros since floor(0) = 0
-            return deepMap(x, (i) => self(i, n), true)
+            return deepMap(x, (i) => self(i, n), true) as unknown[]
           }
       ),
 
       'SparseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, y: number | BigNumberType): Matrix => {
-            return matAlgo11xS0s(x, y, self, false)
+            return matAlgo11xS0s(x as any, y, self, false) as any as Matrix
           }
       ),
 
       'DenseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, y: number | BigNumberType): Matrix => {
-            return matAlgo14xDs(x, y, self, false)
+            return matAlgo14xDs(x as any, y, self, false) as any as Matrix
           }
       ),
 
@@ -305,7 +305,7 @@ export const createFloor = /* #__PURE__ */ factory(
             y: unknown[]
           ): unknown[] => {
             // use matrix implementation
-            return matAlgo14xDs(matrix(y), x, self, true).valueOf() as unknown[]
+            return (matAlgo14xDs(matrix(y) as any, x, self, true) as any).valueOf() as unknown[]
           }
       ),
 
@@ -317,9 +317,9 @@ export const createFloor = /* #__PURE__ */ factory(
           ): Matrix => {
             if (equalScalar(x, 0)) return zeros(y.size(), y.storage())
             if (y.storage() === 'dense') {
-              return matAlgo14xDs(y, x, self, true)
+              return matAlgo14xDs(y as any, x, self, true) as any as Matrix
             }
-            return matAlgo12xSfs(y, x, self, true)
+            return matAlgo12xSfs(y as any, x, self, true) as any as Matrix
           }
       )
     })

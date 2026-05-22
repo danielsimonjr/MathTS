@@ -69,11 +69,11 @@ export const createFixNumber = /* #__PURE__ */ factory(
   ({ typed, ceil, floor }: FixNumberDependencies) => {
     return typed(name, {
       number: function (x: number): number {
-        return x > 0 ? floor(x) : ceil(x)
+        return x > 0 ? (floor(x) as number) : (ceil(x) as number)
       },
 
       'number, number': function (x: number, n: number): number {
-        return x > 0 ? floor(x, n) : ceil(x, n)
+        return x > 0 ? (floor(x, n) as number) : (ceil(x, n) as number)
       }
     })
   }
@@ -95,7 +95,7 @@ export const createFix = /* #__PURE__ */ factory(
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
     const matAlgo14xDs = createMatAlgo14xDs({ typed })
 
-    const fixNumber = createFixNumber({ typed, ceil, floor })
+    const fixNumber = createFixNumber({ typed, ceil, floor }) as TypedFunction
     /**
      * Round a value towards zero.
      * For matrices, the function is evaluated element wise.
@@ -154,8 +154,8 @@ export const createFix = /* #__PURE__ */ factory(
 
       'Complex, number': function (x: ComplexType, n: number): ComplexType {
         return new Complex(
-          x.re > 0 ? floor(x.re, n) : ceil(x.re, n),
-          x.im > 0 ? floor(x.im, n) : ceil(x.im, n)
+          x.re > 0 ? (floor(x.re, n) as number) : (ceil(x.re, n) as number),
+          x.im > 0 ? (floor(x.im, n) as number) : (ceil(x.im, n) as number)
         )
       },
 
@@ -165,20 +165,20 @@ export const createFix = /* #__PURE__ */ factory(
       ): ComplexType {
         const n = bn.toNumber()
         return new Complex(
-          x.re > 0 ? floor(x.re, n) : ceil(x.re, n),
-          x.im > 0 ? floor(x.im, n) : ceil(x.im, n)
+          x.re > 0 ? (floor(x.re, n) as number) : (ceil(x.re, n) as number),
+          x.im > 0 ? (floor(x.im, n) as number) : (ceil(x.im, n) as number)
         )
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        return x.isNegative() ? ceil(x) : floor(x)
+        return (x.isNegative() ? ceil(x) : floor(x)) as BigNumberType
       },
 
       'BigNumber, number | BigNumber': function (
         x: BigNumberType,
         n: number | BigNumberType
       ): BigNumberType {
-        return x.isNegative() ? ceil(x, n) : floor(x, n)
+        return (x.isNegative() ? ceil(x, n) : floor(x, n)) as BigNumberType
       },
 
       bigint: (b: bigint): bigint => b,
@@ -193,21 +193,21 @@ export const createFix = /* #__PURE__ */ factory(
         x: FractionType,
         n: number | BigNumberType
       ): FractionType {
-        return x.s < 0n ? ceil(x, n) : floor(x, n)
+        return (x.s < 0n ? ceil(x, n) : floor(x, n)) as FractionType
       },
 
       'Unit, number, Unit': typed.referToSelf(
         (self: TypedFunction) =>
           function (x: UnitType, n: number, unit: UnitType): UnitType {
             const valueless = x.toNumeric(unit)
-            return unit.multiply(self(valueless, n))
+            return unit.multiply(self(valueless, n) as number | BigNumberType)
           }
       ),
 
       'Unit, BigNumber, Unit': typed.referToSelf(
         (self: TypedFunction) =>
           (x: UnitType, n: BigNumberType, unit: UnitType): UnitType =>
-            self(x, n.toNumber(), unit)
+            self(x, n.toNumber(), unit) as UnitType
       ),
 
       'Array | Matrix, number | BigNumber, Unit': typed.referToSelf(
@@ -218,7 +218,7 @@ export const createFix = /* #__PURE__ */ factory(
             unit: UnitType
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since fix(0) = 0
-            return deepMap(x, (value) => self(value, n, unit), true)
+            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as unknown[] | Matrix
           }
       ),
 
@@ -228,14 +228,14 @@ export const createFix = /* #__PURE__ */ factory(
             x: unknown[] | Matrix | UnitType,
             unit: UnitType
           ): unknown[] | Matrix | UnitType =>
-            self(x, 0, unit)
+            self(x, 0, unit) as unknown[] | Matrix | UnitType
       ),
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix => {
             // deep map collection, skip zeros since fix(0) = 0
-            return deepMap(x, self, true)
+            return deepMap(x as unknown[], self, true) as unknown[] | Matrix
           }
       ),
 
@@ -246,7 +246,7 @@ export const createFix = /* #__PURE__ */ factory(
             n: number | BigNumberType
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since fix(0) = 0
-            return deepMap(x, (i) => self(i, n), true)
+            return deepMap(x as unknown[], (i) => self(i, n), true) as unknown[] | Matrix
           }
       ),
 
@@ -257,7 +257,7 @@ export const createFix = /* #__PURE__ */ factory(
             y: unknown[]
           ): unknown[] => {
             // use matrix implementation
-            return matAlgo14xDs(matrix(y), x, self, true).valueOf() as unknown[]
+            return (matAlgo14xDs(matrix(y) as any, x, self, true) as any).valueOf() as unknown[]
           }
       ),
 
@@ -269,9 +269,9 @@ export const createFix = /* #__PURE__ */ factory(
           ): Matrix => {
             if (equalScalar(x, 0)) return zeros(y.size(), y.storage())
             if (y.storage() === 'dense') {
-              return matAlgo14xDs(y, x, self, true)
+              return matAlgo14xDs(y as any, x, self, true) as any as Matrix
             }
-            return matAlgo12xSfs(y, x, self, true)
+            return matAlgo12xSfs(y as any, x, self, true) as any as Matrix
           }
       )
     })

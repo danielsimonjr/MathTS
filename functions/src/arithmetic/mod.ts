@@ -68,7 +68,7 @@ export const createMod = /* #__PURE__ */ factory(
       equalScalar,
       zeros,
       DenseMatrix
-    })
+    }) as TypedFunction
     const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar })
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
     const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar })
@@ -148,11 +148,11 @@ export const createMod = /* #__PURE__ */ factory(
         }
       },
       matrixAlgorithmSuite({
-        SS: matAlgo05xSfSf,
-        DS: matAlgo03xDSf,
-        SD: matAlgo02xDS0,
-        Ss: matAlgo11xS0s,
-        sS: matAlgo12xSfs
+        SS: matAlgo05xSfSf as any,
+        DS: matAlgo03xDSf as any,
+        SD: matAlgo02xDS0 as any,
+        Ss: matAlgo11xS0s as any,
+        sS: matAlgo12xSfs as any
       })
     )
 

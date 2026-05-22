@@ -4,6 +4,7 @@ import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js'
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
 import type { TypedFunction } from '../core/function/typed.js'
+import type { AlgorithmFunction } from '../type/matrix/types.js'
 
 // Type definitions for equal
 interface MatrixFactory {
@@ -106,9 +107,9 @@ export const createEqual = /* #__PURE__ */ factory(
       createEqualNumber({ typed, equalScalar }),
       matrixAlgorithmSuite({
         elop: equalScalar,
-        SS: matAlgo07xSSf,
-        DS: matAlgo03xDSf,
-        Ss: matAlgo12xSfs
+        SS: matAlgo07xSSf as unknown as AlgorithmFunction,
+        DS: matAlgo03xDSf as unknown as AlgorithmFunction,
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction
       })
     )
   }

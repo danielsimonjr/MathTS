@@ -65,7 +65,7 @@ export const createXgcd = /* #__PURE__ */ factory(
       },
       'BigNumber, BigNumber': _xgcdBigNumber
       // TODO: implement support for Fraction
-    })
+    }) as TypedFunction
 
     /**
      * Calculate xgcd for two BigNumbers

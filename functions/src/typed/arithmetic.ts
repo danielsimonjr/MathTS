@@ -79,8 +79,10 @@ export const add = mathTyped('add', {
     return result.result;
   },
 
-  // Variadic addition
-  'number, number, ...number': (a: f64, b: f64, ...rest: f64[]): f64 =>
+  // Variadic addition. NOTE: this repo's typed-function fork delivers
+  // variadic rest args as a single array argument (`fn(a, b, [...rest])`),
+  // so the parameter is declared as a plain array — no JS spread.
+  'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 =>
     rest.reduce((acc: f64, val: f64): f64 => acc + val, a + b),
 });
 
@@ -162,8 +164,8 @@ export const multiply = mathTyped('multiply', {
     return result.result;
   },
 
-  // Variadic multiplication
-  'number, number, ...number': (a: f64, b: f64, ...rest: f64[]): f64 =>
+  // Variadic multiplication (see variadic-add note about rest-array shape).
+  'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 =>
     rest.reduce((acc: f64, val: f64): f64 => acc * val, a * b),
 });
 
@@ -828,7 +830,7 @@ export const min = mathTyped('min', {
   'Array': (arr: f64[]): f64 => Math.min(...arr),
   'number': (a: f64): f64 => a,
   'number, number': (a: f64, b: f64): f64 => Math.min(a, b),
-  'number, number, ...number': (a: f64, b: f64, ...rest: f64[]): f64 => Math.min(a, b, ...rest),
+  'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.min(a, b, ...rest),
 
   // Parallel Float64Array min
   'Float64Array': async (a: Float64Array): Promise<f64> => {
@@ -847,7 +849,7 @@ export const max = mathTyped('max', {
   'Array': (arr: f64[]): f64 => Math.max(...arr),
   'number': (a: f64): f64 => a,
   'number, number': (a: f64, b: f64): f64 => Math.max(a, b),
-  'number, number, ...number': (a: f64, b: f64, ...rest: f64[]): f64 => Math.max(a, b, ...rest),
+  'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.max(a, b, ...rest),
 
   // Parallel Float64Array max
   'Float64Array': async (a: Float64Array): Promise<f64> => {

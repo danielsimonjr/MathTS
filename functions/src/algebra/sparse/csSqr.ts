@@ -10,7 +10,7 @@ import { factory } from '../../utils/factory.js'
 import type { TypedFunction } from '../../core/function/typed.js'
 
 // Sparse matrix internal structure
-interface SparseMatrixData {
+export interface SparseMatrixData {
   _size: number[]
   _values?: any[]
   _index: number[]
@@ -24,7 +24,7 @@ interface CsSqrDependencies {
 }
 
 // Symbolic analysis result
-interface SymbolicAnalysis {
+export interface SymbolicAnalysis {
   q: number[] | null
   parent?: number[]
   cp?: number[]
@@ -78,7 +78,7 @@ export const createCsSqr = /* #__PURE__ */ factory(
       // QR symbolic analysis
       if (qr) {
         // apply permutations if needed
-        const c = order ? csPermute(a, null, s.q, false) : a
+        const c = order ? csPermute(a as any, null, s.q, false) as unknown as SparseMatrixData : a
         // etree of C'*C, where C=A(:,q)
         s.parent = csEtree(c, true)
         // post order elimination tree

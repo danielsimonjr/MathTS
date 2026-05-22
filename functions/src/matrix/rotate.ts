@@ -82,7 +82,7 @@ export const createRotate = /* #__PURE__ */ factory(
         _validateSize(w, 3)
         return multiply(rotationMatrix(theta, v), w)
       }
-    })
+    }) as unknown as TypedFunction
 
     function _validateSize(v: any, expectedSize: any) {
       const actualSize = Array.isArray(v) ? arraySize(v) : v.size()

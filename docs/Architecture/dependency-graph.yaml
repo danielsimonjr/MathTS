@@ -2685,6 +2685,8 @@ modules:
             - createSolveValidation
       exports:
         - createLsolveAll
+      interfaces:
+        - DenseMatrix
       constants:
         - createLsolveAll
     functions/src/algebra/solver/lusolve.ts:
@@ -2745,6 +2747,8 @@ modules:
             - createSolveValidation
       exports:
         - createUsolveAll
+      interfaces:
+        - DenseMatrix
       constants:
         - createUsolveAll
     functions/src/algebra/solver/utils/solveValidation.ts:
@@ -2794,6 +2798,8 @@ modules:
           typeOnly: true
       exports:
         - createCsAmd
+      interfaces:
+        - SparseMatrixData
       constants:
         - createCsAmd
     functions/src/algebra/sparse/csChol.ts:
@@ -2816,6 +2822,10 @@ modules:
           typeOnly: true
       exports:
         - createCsChol
+      interfaces:
+        - SparseMatrixData
+        - SymbolicAnalysis
+        - CholResult
       constants:
         - createCsChol
     functions/src/algebra/sparse/csCounts.ts:
@@ -2838,6 +2848,8 @@ modules:
           typeOnly: true
       exports:
         - createCsCounts
+      interfaces:
+        - SparseMatrixData
       constants:
         - createCsCounts
     functions/src/algebra/sparse/csCumsum.ts:
@@ -2944,6 +2956,10 @@ modules:
           typeOnly: true
       exports:
         - createCsLu
+      interfaces:
+        - SparseMatrixData
+        - SymbolicAnalysis
+        - LuResult
       constants:
         - createCsLu
     functions/src/algebra/sparse/csMark.ts:
@@ -3023,6 +3039,8 @@ modules:
           typeOnly: true
       exports:
         - createCsSpsolve
+      interfaces:
+        - SparseMatrixData
       constants:
         - createCsSpsolve
     functions/src/algebra/sparse/csSqr.ts:
@@ -3054,6 +3072,9 @@ modules:
           typeOnly: true
       exports:
         - createCsSqr
+      interfaces:
+        - SparseMatrixData
+        - SymbolicAnalysis
       constants:
         - createCsSqr
     functions/src/algebra/sparse/csSymperm.ts:
@@ -3073,6 +3094,8 @@ modules:
           typeOnly: true
       exports:
         - createCsSymperm
+      interfaces:
+        - SparseMatrixData
       constants:
         - createCsSymperm
     functions/src/algebra/sparse/csTdfs.ts:
@@ -4127,6 +4150,8 @@ modules:
         - name
         - dependencies
         - createNodeOperations
+      interfaces:
+        - MathNode
       constants:
         - name
         - dependencies
@@ -6565,7 +6590,10 @@ modules:
         - createDet
     functions/src/matrix/diag.ts:
       description: Create a diagonal matrix or retrieve the diagonal of a matrix
-      externalDependencies: []
+      externalDependencies:
+        - package: bignumber.js
+          imports:
+            - BigNumber
       nodeDependencies: []
       internalDependencies:
         - file: ../utils/is.js
@@ -6724,6 +6752,8 @@ modules:
             - wasmLoader
       exports:
         - createExpm
+      interfaces:
+        - Matrix
       constants:
         - createExpm
     functions/src/matrix/fft.ts:
@@ -7297,6 +7327,8 @@ modules:
             - wasmLoader
       exports:
         - createSqrtm
+      interfaces:
+        - Matrix
       constants:
         - createSqrtm
     functions/src/matrix/squeeze.ts:
@@ -8122,6 +8154,10 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+        - file: ../type/matrix/types.js
+          imports:
+            - AlgorithmFunction
+          typeOnly: true
       exports:
         - createCompare
         - createCompareNumber
@@ -8232,6 +8268,10 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ../type/matrix/types.js
+          imports:
+            - AlgorithmFunction
+          typeOnly: true
       exports:
         - createEqual
         - createEqualNumber
@@ -8326,6 +8366,10 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+        - file: ../type/matrix/types.js
+          imports:
+            - AlgorithmFunction
+          typeOnly: true
       exports:
         - createLarger
         - createLargerNumber
@@ -8368,6 +8412,10 @@ modules:
         - file: ../core/config.js
           imports:
             - ConfigOptions
+          typeOnly: true
+        - file: ../type/matrix/types.js
+          imports:
+            - AlgorithmFunction
           typeOnly: true
       exports:
         - createLargerEq
@@ -8412,6 +8460,10 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+        - file: ../type/matrix/types.js
+          imports:
+            - AlgorithmFunction
+          typeOnly: true
       exports:
         - createSmaller
         - createSmallerNumber
@@ -8455,6 +8507,10 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
+        - file: ../type/matrix/types.js
+          imports:
+            - AlgorithmFunction
+          typeOnly: true
       exports:
         - createSmallerEq
         - createSmallerEqNumber
@@ -8488,6 +8544,10 @@ modules:
         - file: ../core/config.js
           imports:
             - ConfigOptions
+          typeOnly: true
+        - file: ../type/matrix/types.js
+          imports:
+            - AlgorithmFunction
           typeOnly: true
       exports:
         - createUnequal
@@ -9592,6 +9652,10 @@ modules:
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
+          typeOnly: true
+        - file: ../type/matrix/types.js
+          imports:
+            - AlgorithmFunction
           typeOnly: true
       exports:
         - createAtan2
@@ -10727,6 +10791,8 @@ modules:
         - createPlanckTime
         - createPlanckCharge
         - createPlanckTemperature
+      interfaces:
+        - UnitInstance
       constants:
         - createSpeedOfLight
         - createGravitationConstant
@@ -17294,17 +17360,17 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 485
   totalModules: 55
-  totalLinesOfCode: 125177
+  totalLinesOfCode: 125209
   totalExports: 2850
   totalClasses: 45
-  totalInterfaces: 237
+  totalInterfaces: 255
   totalFunctions: 1067
   totalTypeGuards: 127
   totalEnums: 0
   totalConstants: 1060
   totalReExports: 704
-  totalTypeOnlyImports: 345
+  totalTypeOnlyImports: 353
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 1
-  unusedExportsCount: 355
+  unusedExportsCount: 372

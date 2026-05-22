@@ -96,13 +96,13 @@ export const createOr = /* #__PURE__ */ factory(
         'Unit, Unit': typed.referToSelf(
           (self: TypedFunction) =>
             (x: Unit, y: Unit): boolean =>
-              self(x.value || 0, y.value || 0)
+              self(x.value || 0, y.value || 0) as boolean
         )
       },
       matrixAlgorithmSuite({
-        SS: matAlgo05xSfSf,
-        DS: matAlgo03xDSf,
-        Ss: matAlgo12xSfs
+        SS: matAlgo05xSfSf as any,
+        DS: matAlgo03xDSf as any,
+        Ss: matAlgo12xSfs as any
       })
     )
   }

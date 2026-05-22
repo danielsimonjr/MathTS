@@ -417,7 +417,7 @@ export function createComplexEigs({
 
         // from j-th row subtract n-times (i+1)th row
         for (let k = 0; k < N; k++) {
-          arr[j][k] = subtract(arr[j][k], multiplyScalar(n, arr[i + 1][k]))
+          arr[j][k] = subtract(arr[j][k], multiplyScalar(n, arr[i + 1][k])) as Scalar
         }
 
         // to (i+1)th column add n-times j-th column
@@ -428,7 +428,7 @@ export function createComplexEigs({
         // keep track of transformations
         if (findVectors) {
           for (let k = 0; k < N; k++) {
-            R![j][k] = subtract(R![j][k], multiplyScalar(n, R![i + 1][k]))
+            R![j][k] = subtract(R![j][k], multiplyScalar(n, R![i + 1][k])) as Scalar
           }
         }
       }
@@ -505,7 +505,7 @@ export function createComplexEigs({
       // optimized third-party package for the linear algebra operations...)
 
       for (let i = 0; i < n; i++) {
-        arr[i][i] = subtract(arr[i][i], k)
+        arr[i][i] = subtract(arr[i][i], k) as Scalar
       }
 
       // TODO do an implicit QR transformation
@@ -635,7 +635,7 @@ export function createComplexEigs({
     type: DataType
   ): EigenvectorResult[] {
     const Cinv = inv(C)
-    const U = multiply(Cinv, A, C) as Scalar[][]
+    const U = multiply(multiply(Cinv, A) as Scalar[][], C) as Scalar[][]
 
     const big = type === 'BigNumber'
     const cplx = type === 'Complex'
@@ -670,7 +670,7 @@ export function createComplexEigs({
 
     for (let i = 0; i < len; i++) {
       const lambda = uniqueValues[i]
-      const S = subtract(U, multiply(lambda, E) as Scalar[][]) as Scalar[][] // the characteristic matrix
+      const S = subtract(U as unknown as Scalar[], multiply(lambda, E) as unknown as Scalar[]) as unknown as Scalar[][] // the characteristic matrix
 
       let solutions = usolveAll(S, b)
       solutions.shift() // ignore the null vector
@@ -688,7 +688,7 @@ export function createComplexEigs({
 
       // Transform back into original array coordinates
       const correction = multiply(inv(R!), C) as Scalar[][]
-      solutions = solutions.map((v) => multiply(correction, v) as Scalar[])
+      solutions = solutions.map((v) => multiply(correction, v as unknown as Scalar[][]) as unknown as Scalar[])
 
       vectors.push(
         ...solutions.map((v) => ({ value: lambda, vector: flatten(v) }))
@@ -709,14 +709,14 @@ export function createComplexEigs({
   ): [Scalar, Scalar] {
     // lambda_+- = 1/2 trA +- 1/2 sqrt( tr^2 A - 4 detA )
     const trA = addScalar(a, d)
-    const detA = subtract(multiplyScalar(a, d), multiplyScalar(b, c))
+    const detA = subtract(multiplyScalar(a, d), multiplyScalar(b, c)) as Scalar
     const x = multiplyScalar(trA, 0.5)
     const y = multiplyScalar(
-      sqrt(subtract(multiplyScalar(trA, trA), multiplyScalar(4, detA))),
+      sqrt(subtract(multiplyScalar(trA, trA), multiplyScalar(4, detA)) as Scalar),
       0.5
     )
 
-    return [addScalar(x, y), subtract(x, y)]
+    return [addScalar(x, y), subtract(x, y) as Scalar]
   }
 
   /**
@@ -945,9 +945,9 @@ export function createComplexEigs({
       w = reshape(w, vectorShape) // make sure this is just a vector computation
       // v := v - (w, v)/|w|^2 w
       v = subtract(
-        v,
-        multiply(divideScalar(dot(w, v), dot(w, w)), w) as Scalar[]
-      ) as Scalar[]
+        v as unknown as Scalar[],
+        multiply(divideScalar(dot(w, v), dot(w, w)), w as unknown as Scalar[][]) as unknown as Scalar[]
+      ) as unknown as Scalar[]
     }
 
     return v
@@ -972,7 +972,7 @@ export function createComplexEigs({
     const cplx = type === 'Complex'
     const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1
 
-    return multiply(divideScalar(one, norm(v)), v) as Scalar[]
+    return multiply(divideScalar(one, norm(v)), v as unknown as Scalar[][]) as unknown as Scalar[]
   }
 
   return complexEigs

@@ -63,8 +63,8 @@ export const createAcsc = /* #__PURE__ */ factory(
         return x.acsc()
       },
 
-      BigNumber: function (x: BigNumber) {
-        return new BigNumber(1).div(x).asin()
+      BigNumber: function (x: BigNumber): BigNumber {
+        return new BigNumber(1).div(x as any).asin() as unknown as BigNumber
       }
     }) as TypedFunction
   }

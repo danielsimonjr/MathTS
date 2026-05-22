@@ -62,7 +62,7 @@ export const createDotPow = /* #__PURE__ */ factory(
         }
       }
     }
-    const powScalar = typed(powScalarSignatures)
+    const powScalar = typed(powScalarSignatures) as TypedFunction
 
     /**
      * Calculates the power of x to y element wise.
@@ -90,12 +90,12 @@ export const createDotPow = /* #__PURE__ */ factory(
     return typed(
       name,
       matrixAlgorithmSuite({
-        elop: powScalar,
-        SS: matAlgo07xSSf,
-        DS: matAlgo03xDSf,
-        Ss: matAlgo11xS0s,
-        sS: matAlgo12xSfs
+        elop: powScalar as any,
+        SS: matAlgo07xSSf as any,
+        DS: matAlgo03xDSf as any,
+        Ss: matAlgo11xS0s as any,
+        sS: matAlgo12xSfs as any
       })
-    )
+    ) as TypedFunction
   }
 )

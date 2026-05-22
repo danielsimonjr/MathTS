@@ -116,7 +116,7 @@ export const createMatrixFromFunction = /* #__PURE__ */ factory(
       ) {
         return _create(size, fn, format, datatype)
       }
-    })
+    }) as unknown as TypedFunction
 
     function _create(size: any, fn: any, format: any, datatype: any) {
       let m

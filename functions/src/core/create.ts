@@ -56,8 +56,8 @@ import type { ConfigOptions, MathJsConfig } from './config.js'
 
 // Re-export MathJsConfig for backward compatibility
 export type { MathJsConfig }
-import { configFactory } from './config.js'
-import { importFactory } from './import.js'
+import { configFactory } from './function/config.js'
+import { importFactory } from './function/import.js'
 
 /**
  * Type for the mathjs instance
@@ -364,7 +364,7 @@ export function create(
     lazyTyped as any,
     load,
     math,
-    importedFactories
+    importedFactories as Record<string, FactoryFunction>
   )
   math.import = internalImport
 
@@ -390,7 +390,7 @@ export function create(
   // import the factory functions like createAdd as an array instead of object,
   // else they will get a different naming (`createAdd` instead of `add`).
   if (factories) {
-    math.import(Object.values(deepFlatten(factories)))
+    math.import(Object.values(deepFlatten(factories as Record<string, unknown>)))
   }
 
   math.ArgumentsError = ArgumentsError

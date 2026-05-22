@@ -7,20 +7,16 @@
 | Metric | Count |
 |--------|-------|
 | Total Source Files | 485 |
-| Total Test Files | 114 |
-| Source Files with Tests | 90 |
-| Source Files without Tests | 395 |
-| Coverage | 18.6% |
+| Total Test Files | 156 |
+| Source Files with Tests | 131 |
+| Source Files without Tests | 354 |
+| Coverage | 27.0% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 395 source files are not directly imported by any test file:
-
-### workerpool/
-
-- `packages/workerpool/src/fft-core.ts` → Expected test: `tests/unit/workerpool/fft-core.test.ts`
+The following 354 source files are not directly imported by any test file:
 
 ### src/
 
@@ -42,49 +38,11 @@ The following 395 source files are not directly imported by any test file:
 - `assembly/src/ops/tensor.ts` → Expected test: `tests/unit/src/tensor.test.ts`
 - `assembly/src/types/complex.ts` → Expected test: `tests/unit/src/complex.test.ts`
 - `core/src/types/interfaces.ts` → Expected test: `tests/unit/src/interfaces.test.ts`
-- `expression/src/Help.ts` → Expected test: `tests/unit/src/Help.test.ts`
-- `expression/src/Parser.ts` → Expected test: `tests/unit/src/Parser.test.ts`
 - `expression/src/compiler/index.ts` → Expected test: `tests/unit/src/index.test.ts`
-- `expression/src/error/DimensionError.ts` → Expected test: `tests/unit/src/DimensionError.test.ts`
-- `expression/src/error/IndexError.ts` → Expected test: `tests/unit/src/IndexError.test.ts`
 - `expression/src/evaluator/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 - `expression/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
-- `expression/src/keywords.ts` → Expected test: `tests/unit/src/keywords.test.ts`
-- `expression/src/node/AccessorNode.ts` → Expected test: `tests/unit/src/AccessorNode.test.ts`
-- `expression/src/node/ArrayNode.ts` → Expected test: `tests/unit/src/ArrayNode.test.ts`
-- `expression/src/node/AssignmentNode.ts` → Expected test: `tests/unit/src/AssignmentNode.test.ts`
-- `expression/src/node/BlockNode.ts` → Expected test: `tests/unit/src/BlockNode.test.ts`
-- `expression/src/node/ConditionalNode.ts` → Expected test: `tests/unit/src/ConditionalNode.test.ts`
-- `expression/src/node/ConstantNode.ts` → Expected test: `tests/unit/src/ConstantNode.test.ts`
-- `expression/src/node/FunctionAssignmentNode.ts` → Expected test: `tests/unit/src/FunctionAssignmentNode.test.ts`
-- `expression/src/node/FunctionNode.ts` → Expected test: `tests/unit/src/FunctionNode.test.ts`
-- `expression/src/node/IndexNode.ts` → Expected test: `tests/unit/src/IndexNode.test.ts`
-- `expression/src/node/Node.ts` → Expected test: `tests/unit/src/Node.test.ts`
-- `expression/src/node/ObjectNode.ts` → Expected test: `tests/unit/src/ObjectNode.test.ts`
-- `expression/src/node/OperatorNode.ts` → Expected test: `tests/unit/src/OperatorNode.test.ts`
-- `expression/src/node/ParenthesisNode.ts` → Expected test: `tests/unit/src/ParenthesisNode.test.ts`
-- `expression/src/node/RangeNode.ts` → Expected test: `tests/unit/src/RangeNode.test.ts`
-- `expression/src/node/RelationalNode.ts` → Expected test: `tests/unit/src/RelationalNode.test.ts`
-- `expression/src/node/SymbolNode.ts` → Expected test: `tests/unit/src/SymbolNode.test.ts`
-- `expression/src/node/utils/access.ts` → Expected test: `tests/unit/src/access.test.ts`
-- `expression/src/node/utils/assign.ts` → Expected test: `tests/unit/src/assign.test.ts`
-- `expression/src/operators.ts` → Expected test: `tests/unit/src/operators.test.ts`
 - `expression/src/parse.ts` → Expected test: `tests/unit/src/parse.test.ts`
-- `expression/src/transform/utils/errorTransform.ts` → Expected test: `tests/unit/src/errorTransform.test.ts`
 - `expression/src/types.ts` → Expected test: `tests/unit/src/types.test.ts`
-- `expression/src/utils/array.ts` → Expected test: `tests/unit/src/array.test.ts`
-- `expression/src/utils/bignumber/formatter.ts` → Expected test: `tests/unit/src/formatter.test.ts`
-- `expression/src/utils/collection.ts` → Expected test: `tests/unit/src/collection.test.ts`
-- `expression/src/utils/customs.ts` → Expected test: `tests/unit/src/customs.test.ts`
-- `expression/src/utils/factory.ts` → Expected test: `tests/unit/src/factory.test.ts`
-- `expression/src/utils/is.ts` → Expected test: `tests/unit/src/is.test.ts`
-- `expression/src/utils/latex.ts` → Expected test: `tests/unit/src/latex.test.ts`
-- `expression/src/utils/map.ts` → Expected test: `tests/unit/src/map.test.ts`
-- `expression/src/utils/number.ts` → Expected test: `tests/unit/src/number.test.ts`
-- `expression/src/utils/object.ts` → Expected test: `tests/unit/src/object.test.ts`
-- `expression/src/utils/scope.ts` → Expected test: `tests/unit/src/scope.test.ts`
-- `expression/src/utils/string.ts` → Expected test: `tests/unit/src/string.test.ts`
-- `expression/src/utils/switch.ts` → Expected test: `tests/unit/src/switch.test.ts`
 - `functions/src/algebra/decomposition/lup.ts` → Expected test: `tests/unit/src/lup.test.ts`
 - `functions/src/algebra/decomposition/qr.ts` → Expected test: `tests/unit/src/qr.test.ts`
 - `functions/src/algebra/decomposition/schur.ts` → Expected test: `tests/unit/src/schur.test.ts`
@@ -190,7 +148,6 @@ The following 395 source files are not directly imported by any test file:
 - `functions/src/error/DimensionError.ts` → Expected test: `tests/unit/src/DimensionError.test.ts`
 - `functions/src/error/IndexError.ts` → Expected test: `tests/unit/src/IndexError.test.ts`
 - `functions/src/expression/operators.ts` → Expected test: `tests/unit/src/operators.test.ts`
-- `functions/src/factories/scope.ts` → Expected test: `tests/unit/src/scope.test.ts`
 - `functions/src/geometry/distance.ts` → Expected test: `tests/unit/src/distance.test.ts`
 - `functions/src/geometry/intersect.ts` → Expected test: `tests/unit/src/intersect.test.ts`
 - `functions/src/logical/and.ts` → Expected test: `tests/unit/src/and.test.ts`
@@ -412,7 +369,6 @@ The following 395 source files are not directly imported by any test file:
 - `functions/src/utils/switch.ts` → Expected test: `tests/unit/src/switch.test.ts`
 - `functions/src/utils/typeOf.ts` → Expected test: `tests/unit/src/typeOf.test.ts`
 - `functions/src/wasm/WasmLoader.ts` → Expected test: `tests/unit/src/WasmLoader.test.ts`
-- `matrix/src/backends/WasmLoader.ts` → Expected test: `tests/unit/src/WasmLoader.test.ts`
 - `parallel/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 - `parallel/src/operations/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 - `parallel/src/strategies/index.ts` → Expected test: `tests/unit/src/index.test.ts`
@@ -441,11 +397,50 @@ The following 395 source files are not directly imported by any test file:
 | `types/bignumber.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `bignumber-math.test.ts`, `bignumber.test.ts`, `version.test.ts` |
 | `types/complex.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `complex.test.ts`, `version.test.ts` |
 | `types/fraction.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `fraction.test.ts`, `version.test.ts` |
+| `src/Help.ts` | `Help.test.ts` |
+| `src/Parser.ts` | `Parser.test.ts` |
 | `compiler/compile.ts` | `compile.test.ts`, `sandbox.test.ts` |
+| `error/DimensionError.ts` | `DimensionError.test.ts` |
+| `error/IndexError.ts` | `IndexError.test.ts`, `errorTransform.test.ts` |
 | `evaluator/evaluate.ts` | `evaluate.test.ts`, `sandbox.test.ts` |
-| `factories/evaluate.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `evaluate.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `src/keywords.ts` | `keywords.test.ts` |
+| `node/AccessorNode.ts` | `AccessorNode.test.ts` |
+| `node/ArrayNode.ts` | `ArrayNode.test.ts` |
+| `node/AssignmentNode.ts` | `AssignmentNode.test.ts` |
+| `node/BlockNode.ts` | `BlockNode.test.ts` |
+| `node/ConditionalNode.ts` | `ConditionalNode.test.ts` |
+| `node/ConstantNode.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts` |
+| `node/FunctionAssignmentNode.ts` | `FunctionAssignmentNode.test.ts` |
+| `node/FunctionNode.ts` | `FunctionNode.test.ts` |
+| `node/IndexNode.ts` | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `IndexNode.test.ts` |
+| `node/Node.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts` |
+| `node/ObjectNode.ts` | `ObjectNode.test.ts` |
+| `node/OperatorNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts` |
+| `node/ParenthesisNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts` |
+| `node/RangeNode.ts` | `RangeNode.test.ts` |
+| `node/RelationalNode.ts` | `RelationalNode.test.ts` |
+| `node/SymbolNode.ts` | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `RangeNode.test.ts`, `SymbolNode.test.ts` |
+| `utils/access.ts` | `access.test.ts` |
+| `utils/assign.ts` | `assign.test.ts` |
+| `src/operators.ts` | `operators.test.ts` |
+| `utils/errorTransform.ts` | `errorTransform.test.ts` |
+| `utils/array.ts` | `utils-array.test.ts` |
+| `bignumber/formatter.ts` | `utils-bignumber-formatter.test.ts` |
+| `utils/collection.ts` | `utils-collection.test.ts` |
+| `utils/customs.ts` | `utils-customs.test.ts` |
+| `utils/factory.ts` | `utils-factory.test.ts` |
+| `utils/is.ts` | `utils-is.test.ts` |
+| `utils/latex.ts` | `utils-latex.test.ts` |
+| `utils/map.ts` | `utils-map.test.ts`, `utils-scope.test.ts` |
+| `utils/number.ts` | `utils-number.test.ts` |
+| `utils/object.ts` | `utils-object.test.ts` |
+| `utils/scope.ts` | `utils-scope.test.ts` |
+| `utils/string.ts` | `utils-string.test.ts` |
+| `utils/switch.ts` | `utils-switch.test.ts` |
+| `factories/evaluate.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `evaluate.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `Parser.test.ts`, `parse.test.ts` |
 | `factories/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-final.test.ts`, `factories-leaf.test.ts`, `factories-matrix.test.ts`, `factories-tier2.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `physical-constants.test.ts`, `typed-arithmetic.test.ts` |
 | `factories/matrix-bridge.ts` | `factories-matrix.test.ts`, `matrix-bridge-accel.test.ts`, `sparse-bridge.test.ts` |
+| `factories/scope.ts` | `factory-scope.test.ts` |
 | `src/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/algebra.ts` | `algebra.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/arithmetic.ts` | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic-unary.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
@@ -477,6 +472,7 @@ The following 395 source files are not directly imported by any test file:
 | `backends/RustWASMBackend.ts` | `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
 | `backends/RustWasmLoader.ts` | `svd-wasm.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
 | `backends/WASMBackend.ts` | `typed-operations.test.ts`, `accuracy.test.ts`, `loading.test.ts`, `operations.test.ts` |
+| `backends/WasmLoader.ts` | `WasmLoader.test.ts` |
 | `gpu/BatchExecutor.ts` | `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
 | `gpu/BufferPool.ts` | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
 | `gpu/GPUContext.ts` | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
@@ -502,6 +498,7 @@ The following 395 source files are not directly imported by any test file:
 | `types/SparseMatrix.ts` | `SparseMatrix.test.ts`, `operations.test.ts`, `typed-operations.test.ts` |
 | `types/index.ts` | `typed-operations.test.ts` |
 | `src/index.ts` | `index.test.ts`, `robust-types.test.ts` |
+| `src/fft-core.ts` | `fft-core.test.ts` |
 | `src/index.ts` | `index.test.ts`, `parallel-dispatch.test.ts` |
 | `src/ComputePool.ts` | `ComputePool.test.ts`, `benchmark.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts` |
 | `operations/elementwise.ts` | `benchmark.test.ts`, `elementwise.test.ts` |
@@ -524,6 +521,7 @@ The following 395 source files are not directly imported by any test file:
 |-----------|---------------------|
 | `tests/index.test.ts` | 1 files |
 | `tests/robust-types.test.ts` | 1 files |
+| `tests/fft-core.test.ts` | 1 files |
 | `tests/index.test.ts` | 1 files |
 | `tests/parallel-dispatch.test.ts` | 1 files |
 | `tests/config.test.ts` | 0 files |
@@ -540,6 +538,7 @@ The following 395 source files are not directly imported by any test file:
 | `tests/version.test.ts` | 9 files |
 | `tests/DenseMatrix.test.ts` | 1 files |
 | `tests/JSBackend.test.ts` | 3 files |
+| `tests/WasmLoader.test.ts` | 1 files |
 | `tests/config.test.ts` | 1 files |
 | `decomposition/eig-wasm.test.ts` | 1 files |
 | `decomposition/eig.test.ts` | 1 files |
@@ -578,6 +577,7 @@ The following 395 source files are not directly imported by any test file:
 | `tests/factories-matrix.test.ts` | 2 files |
 | `tests/factories-tier2.test.ts` | 1 files |
 | `tests/factories-tier4.test.ts` | 1 files |
+| `tests/factory-scope.test.ts` | 1 files |
 | `tests/geometry-extended.test.ts` | 1 files |
 | `tests/geometry.test.ts` | 1 files |
 | `tests/gpu.test.ts` | 1 files |
@@ -608,9 +608,48 @@ The following 395 source files are not directly imported by any test file:
 | `tests/statistics-selection.test.ts` | 1 files |
 | `tests/typed-arithmetic.test.ts` | 22 files |
 | `tests/typed-bridge.test.ts` | 1 files |
+| `tests/AccessorNode.test.ts` | 5 files |
+| `tests/ArrayNode.test.ts` | 3 files |
+| `tests/AssignmentNode.test.ts` | 5 files |
+| `tests/BlockNode.test.ts` | 3 files |
+| `tests/ConditionalNode.test.ts` | 3 files |
+| `tests/ConstantNode.test.ts` | 2 files |
+| `tests/DimensionError.test.ts` | 1 files |
+| `tests/FunctionAssignmentNode.test.ts` | 4 files |
+| `tests/FunctionNode.test.ts` | 4 files |
+| `tests/Help.test.ts` | 1 files |
+| `tests/IndexError.test.ts` | 1 files |
+| `tests/IndexNode.test.ts` | 4 files |
+| `tests/Node.test.ts` | 5 files |
+| `tests/ObjectNode.test.ts` | 4 files |
+| `tests/OperatorNode.test.ts` | 5 files |
+| `tests/ParenthesisNode.test.ts` | 4 files |
+| `tests/Parser.test.ts` | 2 files |
+| `tests/RangeNode.test.ts` | 4 files |
+| `tests/RelationalNode.test.ts` | 3 files |
+| `tests/SymbolNode.test.ts` | 3 files |
+| `tests/access.test.ts` | 1 files |
+| `tests/assign.test.ts` | 1 files |
 | `tests/compile.test.ts` | 1 files |
+| `tests/errorTransform.test.ts` | 2 files |
 | `tests/evaluate.test.ts` | 1 files |
+| `tests/keywords.test.ts` | 1 files |
+| `tests/operators.test.ts` | 1 files |
+| `tests/parse.test.ts` | 1 files |
 | `security/sandbox.test.ts` | 2 files |
+| `tests/utils-array.test.ts` | 1 files |
+| `tests/utils-bignumber-formatter.test.ts` | 1 files |
+| `tests/utils-collection.test.ts` | 1 files |
+| `tests/utils-customs.test.ts` | 1 files |
+| `tests/utils-factory.test.ts` | 1 files |
+| `tests/utils-is.test.ts` | 1 files |
+| `tests/utils-latex.test.ts` | 1 files |
+| `tests/utils-map.test.ts` | 1 files |
+| `tests/utils-number.test.ts` | 1 files |
+| `tests/utils-object.test.ts` | 1 files |
+| `tests/utils-scope.test.ts` | 2 files |
+| `tests/utils-string.test.ts` | 1 files |
+| `tests/utils-switch.test.ts` | 1 files |
 | `tests/ComputePool.test.ts` | 1 files |
 | `tests/ParallelMatrix.test.ts` | 0 files |
 | `tests/WorkerPool.timeout.test.ts` | 0 files |

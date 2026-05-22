@@ -1230,6 +1230,7 @@ graph LR
 | `./utils/solveValidation.js` | `createSolveValidation` | Import |
 
 **Exports:**
+- Interfaces: `DenseMatrix`
 - Constants: `createLsolveAll`
 
 ---
@@ -1273,6 +1274,7 @@ graph LR
 | `./utils/solveValidation.js` | `createSolveValidation` | Import |
 
 **Exports:**
+- Interfaces: `DenseMatrix`
 - Constants: `createUsolveAll`
 
 ---
@@ -1304,6 +1306,7 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `SparseMatrixData`
 - Constants: `createCsAmd`
 
 ---
@@ -1319,6 +1322,7 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `SparseMatrixData`, `SymbolicAnalysis`, `CholResult`
 - Constants: `createCsChol`
 
 ---
@@ -1334,6 +1338,7 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `SparseMatrixData`
 - Constants: `createCsCounts`
 
 ---
@@ -1417,6 +1422,7 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `SparseMatrixData`, `SymbolicAnalysis`, `LuResult`
 - Constants: `createCsLu`
 
 ---
@@ -1483,6 +1489,7 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `SparseMatrixData`
 - Constants: `createCsSpsolve`
 
 ---
@@ -1501,6 +1508,7 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `SparseMatrixData`, `SymbolicAnalysis`
 - Constants: `createCsSqr`
 
 ---
@@ -1515,6 +1523,7 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `SparseMatrixData`
 - Constants: `createCsSymperm`
 
 ---
@@ -2179,6 +2188,7 @@ graph LR
 | `../../utils/is.js` | `isNode` | Import |
 
 **Exports:**
+- Interfaces: `MathNode`
 - Constants: `name`, `dependencies`, `createNodeOperations`
 
 ---
@@ -3104,6 +3114,11 @@ graph LR
 
 ### `functions/src/matrix/diag.ts` - Create a diagonal matrix or retrieve the diagonal of a matrix
 
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `bignumber.js` | `BigNumber` |
+
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
@@ -3222,6 +3237,7 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
+- Interfaces: `Matrix`
 - Constants: `createExpm`
 
 ---
@@ -3623,6 +3639,7 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
+- Interfaces: `Matrix`
 - Constants: `createSqrtm`
 
 ---
@@ -4069,6 +4086,7 @@ graph LR
 | `./compareUnits.js` | `createCompareUnits` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
+| `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createCompare`, `createCompareNumber`
@@ -4146,6 +4164,7 @@ graph LR
 | `../type/matrix/utils/matAlgo12xSfs.js` | `createMatAlgo12xSfs` | Import |
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createEqual`, `createEqualNumber`
@@ -4198,6 +4217,7 @@ graph LR
 | `./compareUnits.js` | `createCompareUnits` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
+| `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createLarger`, `createLargerNumber`
@@ -4219,6 +4239,7 @@ graph LR
 | `./compareUnits.js` | `createCompareUnits` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
+| `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createLargerEq`, `createLargerEqNumber`
@@ -4240,6 +4261,7 @@ graph LR
 | `./compareUnits.js` | `createCompareUnits` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
+| `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSmaller`, `createSmallerNumber`
@@ -4261,6 +4283,7 @@ graph LR
 | `./compareUnits.js` | `createCompareUnits` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
+| `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createSmallerEq`, `createSmallerEqNumber`
@@ -4279,6 +4302,7 @@ graph LR
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
+| `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createUnequal`, `createUnequalNumber`
@@ -4992,6 +5016,7 @@ graph LR
 | `../type/matrix/utils/matAlgo12xSfs.js` | `createMatAlgo12xSfs` | Import |
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
 - Constants: `createAtan2`
@@ -5673,6 +5698,7 @@ graph LR
 | `../../core/config.js` | `MathJsConfig` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `UnitInstance`
 - Constants: `createSpeedOfLight`, `createGravitationConstant`, `createPlanckConstant`, `createReducedPlanckConstant`, `createMagneticConstant`, `createElectricConstant`, `createVacuumImpedance`, `createCoulomb`, `createCoulombConstant`, `createElementaryCharge`, `createBohrMagneton`, `createConductanceQuantum`, `createInverseConductanceQuantum`, `createMagneticFluxQuantum`, `createNuclearMagneton`, `createKlitzing`, `createJosephson`, `createBohrRadius`, `createClassicalElectronRadius`, `createElectronMass`, `createFermiCoupling`, `createFineStructure`, `createHartreeEnergy`, `createProtonMass`, `createDeuteronMass`, `createNeutronMass`, `createQuantumOfCirculation`, `createRydberg`, `createThomsonCrossSection`, `createWeakMixingAngle`, `createEfimovFactor`, `createAtomicMass`, `createAvogadro`, `createBoltzmann`, `createFaraday`, `createFirstRadiation`, `createLoschmidt`, `createGasConstant`, `createMolarPlanckConstant`, `createMolarVolume`, `createSackurTetrode`, `createSecondRadiation`, `createStefanBoltzmann`, `createWienDisplacement`, `createMolarMass`, `createMolarMassC12`, `createGravity`, `createPlanckLength`, `createPlanckMass`, `createPlanckTime`, `createPlanckCharge`, `createPlanckTemperature`
 
 ---
@@ -7504,12 +7530,12 @@ graph LR
 | `functions/src/utils/collection` | 4 files | 37 files |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files | 27 files |
 | `functions/src/utils/object` | 1 file | 28 files |
+| `functions/src/type/matrix/types` | 0 files | 27 files |
 | `expression/src/utils/is` | 0 files | 25 files |
 | `expression/src/index` | 24 files | 0 files |
 | `functions/src/type/matrix/utils/matAlgo12xSfs` | 2 files | 19 files |
 | `expression/src/utils/factory` | 1 file | 19 files |
 | `functions/src/type/bignumber/BigNumber` | 1 file | 18 files |
-| `functions/src/type/matrix/types` | 0 files | 19 files |
 | `functions/src/type/matrix/utils/matAlgo03xDSf` | 3 files | 16 files |
 | `functions/src/typed/index` | 17 files | 2 files |
 | `functions/src/utils/string` | 3 files | 16 files |
@@ -7531,7 +7557,7 @@ graph LR
 | `matrix/src/types/DenseMatrix` | 1 file | 11 files |
 | `functions/src/arithmetic/gcd` | 11 files | 1 file |
 | `functions/src/arithmetic/mod` | 10 files | 2 files |
-| `expression/src/utils/array` | 6 files | 6 files |
+| `functions/src/relational/compare` | 11 files | 1 file |
 
 ---
 
@@ -8086,15 +8112,15 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 485 |
 | Total Modules | 55 |
-| Total Lines of Code | 125177 |
+| Total Lines of Code | 125209 |
 | Total Exports | 2850 |
 | Total Re-exports | 704 |
 | Total Classes | 45 |
-| Total Interfaces | 237 |
+| Total Interfaces | 255 |
 | Total Functions | 1067 |
 | Total Type Guards | 127 |
 | Total Enums | 0 |
-| Type-only Imports | 345 |
+| Type-only Imports | 353 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 0 |
 

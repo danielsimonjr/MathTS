@@ -96,7 +96,7 @@ export const createDiff = /* #__PURE__ */ factory(
         'Matrix,number',
         (selfMn: any) => (arr: any, dim: any) => selfMn(arr, number(dim))
       )
-    })
+    }) as unknown as TypedFunction
 
     /**
      * Recursively find the correct dimension in the array/matrix

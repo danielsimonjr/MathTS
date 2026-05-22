@@ -173,7 +173,7 @@ export const createSylvester = /* #__PURE__ */ factory(
       const vc = (a: unknown, b: unknown) => concat(a, b, 0)
 
       for (let k = 0; k < n; k++) {
-        if (k < n - 1 && abs(subset(G, index(k + 1, k))) > 1e-5) {
+        if (k < n - 1 && (abs(subset(G, index(k + 1, k))) as number) > 1e-5) {
           let RHS = vc(
             subset(D, index(all, [k])),
             subset(D, index(all, [k + 1]))

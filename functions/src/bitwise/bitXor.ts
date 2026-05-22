@@ -74,9 +74,9 @@ export const createBitXor = /* #__PURE__ */ factory(
         'bigint, bigint': (x: bigint, y: bigint): bigint => x ^ y
       },
       matrixAlgorithmSuite({
-        SS: matAlgo07xSSf,
-        DS: matAlgo03xDSf,
-        Ss: matAlgo12xSfs
+        SS: matAlgo07xSSf as any,
+        DS: matAlgo03xDSf as any,
+        Ss: matAlgo12xSfs as any
       })
     )
   }

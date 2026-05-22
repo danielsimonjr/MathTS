@@ -124,7 +124,7 @@ export function configFactory(
       validateOption(options, 'number', NUMBER_OPTIONS)
 
       // merge options
-      deepExtend(config, options)
+      deepExtend(config as unknown as Record<string, unknown>, options)
 
       const curr = clone(config)
 

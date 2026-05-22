@@ -55,7 +55,7 @@ export const createIsBounded = /* #__PURE__ */ factory(
       Unit: typed.referToSelf(
         (self: TypedFunction) =>
           (x: Unit): boolean =>
-            self(x.value)
+            self(x.value) as boolean
       ),
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
@@ -64,6 +64,6 @@ export const createIsBounded = /* #__PURE__ */ factory(
             return arr.every((entry: unknown) => self(entry))
           }
       )
-    })
+    }) as unknown as TypedFn
   }
 )

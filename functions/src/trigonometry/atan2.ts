@@ -6,6 +6,7 @@ import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
 import type { TypedFunction } from '../core/function/typed.js'
+import type { AlgorithmFunction } from '../type/matrix/types.js'
 
 // Type definitions for atan2
 interface BigNumberType {
@@ -112,11 +113,11 @@ export const createAtan2 = /* #__PURE__ */ factory(
       },
       matrixAlgorithmSuite({
         scalar: 'number | BigNumber',
-        SS: matAlgo09xS0Sf,
-        DS: matAlgo03xDSf,
-        SD: matAlgo02xDS0,
-        Ss: matAlgo11xS0s,
-        sS: matAlgo12xSfs
+        SS: matAlgo09xS0Sf as unknown as AlgorithmFunction,
+        DS: matAlgo03xDSf as unknown as AlgorithmFunction,
+        SD: matAlgo02xDS0 as unknown as AlgorithmFunction,
+        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
+        sS: matAlgo12xSfs as unknown as AlgorithmFunction
       })
     )
   }

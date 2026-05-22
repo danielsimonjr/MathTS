@@ -16,6 +16,16 @@ import {
   type PoolStats,
 } from '@danielsimonjr/mathts-workerpool';
 
+import {
+  bitAnd as bitAndOp,
+  bitOr as bitOrOp,
+  bitXor as bitXorOp,
+  bitNot as bitNotOp,
+  leftShift as leftShiftOp,
+  rightArithShift as rightArithShiftOp,
+  rightLogShift as rightLogShiftOp,
+} from './ops/bitwise.js';
+
 /**
  * Configuration for ComputePool
  * Extends the base WorkerPoolConfig with MathTS-specific options
@@ -616,6 +626,127 @@ export class ComputePool {
     return {
       ...result,
       result: result.result.max,
+    };
+  }
+
+  // =========================================================================
+  // Bitwise Operations (Int32Array)
+  // =========================================================================
+  //
+  // Bitwise ops are evaluated in-process rather than via the shared
+  // workerpool kernel registry: that registry is keyed on `Float64Array`
+  // buffers, and bitwise math on doubles would silently lose the upper
+  // bits. The ops still chunk their work to match the call shape of the
+  // Float64Array elementwise ops, so the typed-function dispatch layer
+  // can treat both buffer types uniformly.
+
+  /**
+   * Element-wise bitwise AND on two `Int32Array`s.
+   */
+  async bitAnd(a: Int32Array, b: Int32Array): Promise<ParallelResult<Int32Array>> {
+    const start = performance.now();
+    const result = bitAndOp(a, b);
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
+   * Element-wise bitwise OR on two `Int32Array`s.
+   */
+  async bitOr(a: Int32Array, b: Int32Array): Promise<ParallelResult<Int32Array>> {
+    const start = performance.now();
+    const result = bitOrOp(a, b);
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
+   * Element-wise bitwise XOR on two `Int32Array`s.
+   */
+  async bitXor(a: Int32Array, b: Int32Array): Promise<ParallelResult<Int32Array>> {
+    const start = performance.now();
+    const result = bitXorOp(a, b);
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
+   * Unary bitwise NOT on an `Int32Array`.
+   */
+  async bitNot(a: Int32Array): Promise<ParallelResult<Int32Array>> {
+    const start = performance.now();
+    const result = bitNotOp(a);
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
+   * Element-wise left shift. `b` may be a per-element `Int32Array` of
+   * shift counts or a single scalar `number` applied uniformly.
+   */
+  async leftShift(
+    a: Int32Array,
+    b: Int32Array | number
+  ): Promise<ParallelResult<Int32Array>> {
+    const start = performance.now();
+    const result = leftShiftOp(a, b);
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
+   * Element-wise arithmetic (sign-preserving) right shift.
+   */
+  async rightArithShift(
+    a: Int32Array,
+    b: Int32Array | number
+  ): Promise<ParallelResult<Int32Array>> {
+    const start = performance.now();
+    const result = rightArithShiftOp(a, b);
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
+   * Element-wise logical (zero-filling) right shift. Results are stored
+   * as `Int32Array`, so values ≥ 2^31 wrap into the negative range —
+   * matching `(x >>> n) | 0` JavaScript semantics.
+   */
+  async rightLogShift(
+    a: Int32Array,
+    b: Int32Array | number
+  ): Promise<ParallelResult<Int32Array>> {
+    const start = performance.now();
+    const result = rightLogShiftOp(a, b);
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
     };
   }
 

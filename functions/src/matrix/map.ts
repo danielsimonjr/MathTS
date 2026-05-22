@@ -13,6 +13,11 @@ import type { TypedFunction } from '../core/function/typed.js'
 interface MatrixType {
   map(callback: MapCallback): MatrixType
   toArray(): unknown[]
+  isMatrix?: boolean
+  size?(): number[]
+  create?(data: unknown[], datatype?: string): MatrixType
+  datatype?(): string
+  valueOf?(): unknown[]
 }
 
 type MapCallback = (value: unknown, index: number[], matrix: unknown) => unknown
@@ -89,8 +94,8 @@ export const createMap = /* #__PURE__ */ factory(
         rest: (unknown[] | MatrixType | MapCallback)[]
       ) =>
         _mapMultiple(
-          [A, B, ...rest.slice(0, rest.length - 1)],
-          rest[rest.length - 1]
+          [A, B, ...rest.slice(0, rest.length - 1)] as (unknown[] | MatrixType)[],
+          rest[rest.length - 1] as MapCallback
         )
     })
 
@@ -113,7 +118,7 @@ export const createMap = /* #__PURE__ */ factory(
         throw new Error('Last argument must be a callback function')
       }
 
-      const firstArrayIsMatrix = Arrays[0].isMatrix
+      const firstArrayIsMatrix = (Arrays[0] as any).isMatrix
       const sizes = Arrays.map((M: any) =>
         M.isMatrix ? M.size() : arraySize(M)
       )
@@ -153,7 +158,7 @@ export const createMap = /* #__PURE__ */ factory(
         ? Arrays.map((M: any) =>
             M.isMatrix
               ? M.create(broadcastTo(M.toArray(), newSize), M.datatype())
-              : Arrays[0].create(broadcastTo(M.valueOf(), newSize))
+              : (Arrays[0] as any).create(broadcastTo((M as any).valueOf(), newSize))
           )
         : Arrays.map((M: any) =>
             M.isMatrix
@@ -311,13 +316,13 @@ export const createMap = /* #__PURE__ */ factory(
       idx: number[],
       arrays: any[]
     ): number {
-      if (typed.resolve(callback, [...values, idx, ...arrays]) !== null) {
+      if (typed.resolve(callback as TypedFunction, [...values, idx, ...arrays]) !== null) {
         return 2
       }
-      if (typed.resolve(callback, [...values, idx]) !== null) {
+      if (typed.resolve(callback as TypedFunction, [...values, idx]) !== null) {
         return 1
       }
-      if (typed.resolve(callback, values) !== null) {
+      if (typed.resolve(callback as TypedFunction, values) !== null) {
         return 0
       }
       // this should never happen
@@ -332,7 +337,7 @@ export const createMap = /* #__PURE__ */ factory(
      */
     function _mapArray(array: any[], callback: Function): any[] {
       const fastCallback = optimizeCallback(callback, array, name)
-      return deepMap(array, fastCallback.fn, fastCallback.isUnary)
+      return deepMap(array, fastCallback.fn as (value: any) => any, fastCallback.isUnary) as any[]
     }
   }
 )

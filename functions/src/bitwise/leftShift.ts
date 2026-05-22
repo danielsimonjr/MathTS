@@ -104,7 +104,7 @@ export const createLeftShift = /* #__PURE__ */ factory(
               if (equalScalar(y, 0)) {
                 return x.clone()
               }
-              return matAlgo11xS0s(x, y, self, false)
+              return matAlgo11xS0s(x as any, y, self, false) as unknown as Matrix
             }
         ),
 
@@ -115,7 +115,7 @@ export const createLeftShift = /* #__PURE__ */ factory(
               if (equalScalar(y, 0)) {
                 return x.clone()
               }
-              return matAlgo14xDs(x, y, self, false)
+              return matAlgo14xDs(x as any, y, self, false) as unknown as Matrix
             }
         ),
 
@@ -126,7 +126,7 @@ export const createLeftShift = /* #__PURE__ */ factory(
               if (equalScalar(x, 0)) {
                 return zeros(y.size(), y.storage())
               }
-              return matAlgo10xSids(y, x, self, true)
+              return matAlgo10xSids(y as any, x, self, true) as unknown as Matrix
             }
         ),
 
@@ -137,15 +137,15 @@ export const createLeftShift = /* #__PURE__ */ factory(
               if (equalScalar(x, 0)) {
                 return zeros(y.size(), y.storage())
               }
-              return matAlgo14xDs(y, x, self, true)
+              return matAlgo14xDs(y as any, x, self, true) as unknown as Matrix
             }
         )
       },
       useMatrixForArrayScalar,
       matrixAlgorithmSuite({
-        SS: matAlgo08xS0Sid,
-        DS: matAlgo01xDSid,
-        SD: matAlgo02xDS0
+        SS: matAlgo08xS0Sid as any,
+        DS: matAlgo01xDSid as any,
+        SD: matAlgo02xDS0 as any
       })
     )
   }

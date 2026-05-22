@@ -3,6 +3,7 @@ import { arraySize } from '../utils/array.js'
 import { isInteger } from '../utils/number.js'
 import { factory } from '../utils/factory.js'
 import type { TypedFunction } from '../core/function/typed.js'
+import type { BigNumber } from 'bignumber.js'
 
 // Type definitions for diag
 
@@ -33,6 +34,9 @@ interface SparseMatrixConstructor {
     k?: number
   ): MatrixType
 }
+
+/** Alias so signatures can use the name 'Matrix' consistently */
+type Matrix = MatrixType
 
 interface DiagDependencies {
   typed: TypedFunction

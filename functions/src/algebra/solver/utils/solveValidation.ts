@@ -122,7 +122,7 @@ export function createSolveValidation({
             })
           }
 
-          return b
+          return b as unknown as DenseMatrixType
         }
 
         if (isSparseMatrix(b)) {

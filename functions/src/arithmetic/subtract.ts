@@ -141,11 +141,11 @@ export const createSubtract = /* #__PURE__ */ factory(
       },
       matrixAlgorithmSuite({
         elop: subtractScalar,
-        SS: matAlgo05xSfSf,
-        DS: matAlgo01xDSid,
-        SD: matAlgo03xDSf,
-        Ss: matAlgo12xSfs,
-        sS: matAlgo10xSids
+        SS: matAlgo05xSfSf as any,
+        DS: matAlgo01xDSid as any,
+        SD: matAlgo03xDSf as any,
+        Ss: matAlgo12xSfs as any,
+        sS: matAlgo10xSids as any
       })
     )
   }

@@ -152,7 +152,7 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
         _validateVector(v)
         return _rotationMatrix3x3(theta, v, format)
       }
-    })
+    }) as unknown as TypedFunction
 
     /**
      * Returns 2x2 matrix of 2D rotation of angle theta

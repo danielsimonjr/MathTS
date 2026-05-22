@@ -16,9 +16,10 @@ import {
 } from '../types.js'
 
 // Type definitions for nullish operation
-interface DenseMatrix extends Matrix {
+interface DenseMatrix {
   type: 'DenseMatrix'
   valueOf(): unknown[][]
+  [key: string]: any
 }
 
 interface NullishDependencies {
@@ -106,55 +107,55 @@ export const createNullish = /* #__PURE__ */ factory(
         x: SparseMatrix,
         y: unknown[] | Matrix
       ): SparseMatrix => {
-        const sx = size(x)
-        const sy = size(y)
+        const sx = size(x) as string | number | number[]
+        const sy = size(y) as string | number | number[]
         if (deepEqual(sx, sy)) return x
-        throw new DimensionError(sx, sy)
+        throw new DimensionError(sx, sy as number | number[])
       },
 
       // DenseMatrix-first handlers (no broadcasting between collections)
       'DenseMatrix, DenseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: DenseMatrix, y: DenseMatrix): DenseMatrix =>
-            matAlgo13xDD(x, y, self)
+            matAlgo13xDD(x as any, y as any, self) as unknown as DenseMatrix
       ),
       'DenseMatrix, SparseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: DenseMatrix, y: SparseMatrix): DenseMatrix =>
-            matAlgo03xDSf(x, y, self, false)
+            matAlgo03xDSf(x as any, y as any, self, false) as unknown as DenseMatrix
       ),
       'DenseMatrix, Array': typed.referToSelf(
         (self: TypedFunction) =>
           (x: DenseMatrix, y: unknown[]): DenseMatrix =>
-            matAlgo13xDD(x, toMatrix(y), self)
+            matAlgo13xDD(x as any, toMatrix(y) as any, self) as unknown as DenseMatrix
       ),
       'DenseMatrix, any': typed.referToSelf(
         (self: TypedFunction) =>
           (x: DenseMatrix, y: unknown): DenseMatrix =>
-            matAlgo14xDs(x, y, self, false)
+            matAlgo14xDs(x as any, y, self, false) as unknown as DenseMatrix
       ),
 
       // Array-first handlers (bridge via matrix() where needed)
       'Array, Array': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[], y: unknown[]): unknown[][] =>
-            matAlgo13xDD(toMatrix(x), toMatrix(y), self).valueOf()
+            (matAlgo13xDD(toMatrix(x) as any, toMatrix(y) as any, self) as any).valueOf() as unknown[][]
       ),
       'Array, DenseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[], y: DenseMatrix): DenseMatrix =>
-            matAlgo13xDD(toMatrix(x), y, self)
+            matAlgo13xDD(toMatrix(x) as any, y as any, self) as unknown as DenseMatrix
       ),
       'Array, SparseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[], y: SparseMatrix): DenseMatrix =>
-            matAlgo03xDSf(toMatrix(x), y, self, false)
+            matAlgo03xDSf(toMatrix(x) as any, y as any, self, false) as unknown as DenseMatrix
       ),
       'Array, any': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[], y: unknown): unknown[][] =>
-            matAlgo14xDs(toMatrix(x), y, self, false).valueOf()
+            (matAlgo14xDs(toMatrix(x) as any, y, self, false) as any).valueOf() as unknown[][]
       )
-    })
+    }) as unknown as TypedFunction
   }
 )

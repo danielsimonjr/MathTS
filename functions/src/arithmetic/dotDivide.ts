@@ -82,12 +82,12 @@ export const createDotDivide = /* #__PURE__ */ factory(
       name,
       matrixAlgorithmSuite({
         elop: divideScalar,
-        SS: matAlgo07xSSf,
-        DS: matAlgo03xDSf,
-        SD: matAlgo02xDS0,
-        Ss: matAlgo11xS0s,
-        sS: matAlgo12xSfs
+        SS: matAlgo07xSSf as any,
+        DS: matAlgo03xDSf as any,
+        SD: matAlgo02xDS0 as any,
+        Ss: matAlgo11xS0s as any,
+        sS: matAlgo12xSfs as any
       })
-    )
+    ) as TypedFunction
   }
 )

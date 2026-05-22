@@ -146,8 +146,8 @@ export const addScalar = createAddScalar(factoryScope as any);
 export const multiplyScalar = createMultiplyScalar(factoryScope as any);
 export const subtractScalar = createSubtractScalar(factoryScope as any);
 
-// bitwise
-export const bitNot = createBitNot(factoryScope as any);
+// bitwise (synced factory — superseded by typed/bitwise; kept internal for factoryScope wiring)
+const bitNot = createBitNot(factoryScope as any);
 
 // complex
 export const arg = createArg(factoryScope as any);
@@ -155,8 +155,8 @@ export const conj = createConj(factoryScope as any);
 export const im = createIm(factoryScope as any);
 export const re = createRe(factoryScope as any);
 
-// logical
-export const not = createNot(factoryScope as any);
+// logical (synced factory — superseded by typed/logical; kept internal for factoryScope wiring)
+const not = createNot(factoryScope as any);
 
 // matrix
 export const filter = createFilter(factoryScope as any);
@@ -673,30 +673,30 @@ factoryScope.ceil = factory_ceil;
 export const factory_floor = createFloor(factoryScope as any);
 factoryScope.floor = factory_floor;
 
-// bitwise
-export const bitAnd = createBitAnd(factoryScope as any);
+// bitwise (synced factories — superseded by typed/bitwise; kept internal for factoryScope wiring)
+const bitAnd = createBitAnd(factoryScope as any);
 factoryScope.bitAnd = bitAnd;
 
-export const bitOr = createBitOr(factoryScope as any);
+const bitOr = createBitOr(factoryScope as any);
 factoryScope.bitOr = bitOr;
 
-export const bitXor = createBitXor(factoryScope as any);
+const bitXor = createBitXor(factoryScope as any);
 factoryScope.bitXor = bitXor;
 
-export const leftShift = createLeftShift(factoryScope as any);
+const leftShift = createLeftShift(factoryScope as any);
 factoryScope.leftShift = leftShift;
 
-export const rightArithShift = createRightArithShift(factoryScope as any);
+const rightArithShift = createRightArithShift(factoryScope as any);
 factoryScope.rightArithShift = rightArithShift;
 
-export const rightLogShift = createRightLogShift(factoryScope as any);
+const rightLogShift = createRightLogShift(factoryScope as any);
 factoryScope.rightLogShift = rightLogShift;
 
-// logical
-export const or = createOr(factoryScope as any);
+// logical (synced factories — superseded by typed/logical; kept internal for factoryScope wiring)
+const or = createOr(factoryScope as any);
 factoryScope.or = or;
 
-export const xor = createXor(factoryScope as any);
+const xor = createXor(factoryScope as any);
 factoryScope.xor = xor;
 
 // matrix
@@ -769,11 +769,11 @@ factoryScope.fix = factory_fix;
 export const invmod = createInvmod(factoryScope as any);
 factoryScope.invmod = invmod;
 
-// logical
-export const and = createAnd(factoryScope as any);
+// logical (synced factories — superseded by typed/logical; kept internal for factoryScope wiring)
+const and = createAnd(factoryScope as any);
 factoryScope.and = and;
 
-export const nullish = createNullish(factoryScope as any);
+const nullish = createNullish(factoryScope as any);
 factoryScope.nullish = nullish;
 
 // combinatorics

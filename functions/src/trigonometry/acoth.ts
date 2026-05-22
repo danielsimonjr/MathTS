@@ -62,8 +62,8 @@ export const createAcoth = /* #__PURE__ */ factory(
         return x.acoth()
       },
 
-      BigNumber: function (x: BigNumber) {
-        return new BigNumber(1).div(x).atanh()
+      BigNumber: function (x: BigNumber): BigNumber {
+        return new BigNumber(1).div(x as any).atanh() as unknown as BigNumber
       }
     }) as TypedFunction
   }

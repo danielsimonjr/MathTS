@@ -18,7 +18,7 @@ type Scalar = number | BigNumber | Complex
 type MatrixData = Scalar | Scalar[] | Scalar[][]
 
 /** Matrix interface */
-interface Matrix {
+export interface Matrix {
   size(): number[]
   valueOf(): MatrixData
   _data?: MatrixData

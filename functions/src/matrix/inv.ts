@@ -179,7 +179,7 @@ export const createInv = /* #__PURE__ */ factory(
                 )
               } else {
                 // return an Array
-                return _inv(x as Scalar[][], rows, cols)
+                return _inv(x as Scalar[][], rows, cols) as unknown as Scalar[]
               }
             } else {
               throw new RangeError(
@@ -225,7 +225,7 @@ export const createInv = /* #__PURE__ */ factory(
         isPlainNumberMatrix(mat)
       ) {
         try {
-          const flat = flattenToFloat64(mat, rows, rows)
+          const flat = flattenToFloat64(mat as number[][], rows, rows)
           const input = wasmLoader.allocateFloat64Array(flat)
           const result = wasmLoader.allocateFloat64ArrayEmpty(rows * rows)
           // workPtr needs n * 2n f64 values for augmented matrix

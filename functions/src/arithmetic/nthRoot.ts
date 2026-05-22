@@ -16,6 +16,7 @@ interface BigNumberType {
   neg(): BigNumberType
   abs(): BigNumberType
   pow(exp: BigNumberType): BigNumberType
+  div(other: BigNumberType): BigNumberType
   mod(n: number): BigNumberType
   equals(n: number): boolean
   toPrecision(digits: number): string
@@ -180,11 +181,11 @@ export const createNthRoot = /* #__PURE__ */ factory(
       },
       matrixAlgorithmSuite({
         scalar: 'number | BigNumber',
-        SD: matAlgo02xDS0,
-        Ss: matAlgo11xS0s,
+        SD: matAlgo02xDS0 as any,
+        Ss: matAlgo11xS0s as any,
         sS: false
       })
-    )
+    ) as TypedFunction
 
     /**
      * Calculate the nth root of a for BigNumbers, solve x^root == a
@@ -238,6 +239,6 @@ export const createNthRootNumber = /* #__PURE__ */ factory(
     return typed(name, {
       number: nthRootNumber,
       'number, number': nthRootNumber
-    })
+    }) as TypedFunction
   }
 )

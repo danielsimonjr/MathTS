@@ -74,7 +74,7 @@ export const createUnaryPlus = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
-            deepMap(x, self, true)
+            deepMap(x as unknown[], self, true)
       ),
 
       boolean: function (x: boolean): unknown {

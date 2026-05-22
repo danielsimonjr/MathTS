@@ -115,10 +115,10 @@ export const createIsPrime = /* #__PURE__ */ factory(
           while (!exponent.eq(0)) {
             if (exponent.mod(2).eq(0)) {
               exponent = exponent.div(2)
-              base = base.mul(base).mod(modulus) as unknown as BigNumberType
+              base = base.mul(base).mod(modulus as unknown as number) as unknown as BigNumberType
             } else {
               exponent = exponent.sub(1)
-              accumulator = base.mul(accumulator).mod(modulus)
+              accumulator = base.mul(accumulator).mod(modulus as unknown as number)
             }
           }
           return accumulator
@@ -157,8 +157,8 @@ export const createIsPrime = /* #__PURE__ */ factory(
           if (!(adn as BigNumberType).eq(1)) {
             for (
               let i = 0, x = adn as BigNumberType;
-              !x.eq(n.sub(1));
-              i += 1, x = x.mul(x).mod(n) as unknown as BigNumberType
+              !x.eq(n.sub(1) as unknown as number);
+              i += 1, x = x.mul(x).mod(n as unknown as number) as unknown as BigNumberType
             ) {
               if (i === r - 1) {
                 return false
@@ -172,7 +172,7 @@ export const createIsPrime = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
-            deepMap(x, self)
+            deepMap(x as unknown[], self)
       )
     })
   }

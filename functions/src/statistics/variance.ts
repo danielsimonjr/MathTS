@@ -206,7 +206,7 @@ export const createVariance = /* #__PURE__ */ factory(
       let num = 0
 
       // calculate the mean and number of elements
-      deepForEach(array, function (value: unknown) {
+      deepForEach(array as any, function (value: unknown) {
         try {
           sum = sum === undefined ? value : add(sum, value)
           num++
@@ -221,7 +221,7 @@ export const createVariance = /* #__PURE__ */ factory(
 
       // calculate the variance
       sum = undefined
-      deepForEach(array, function (value: unknown) {
+      deepForEach(array as any, function (value: unknown) {
         const diff = subtract(value, mean)
         sum =
           sum === undefined

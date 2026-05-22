@@ -7,7 +7,7 @@ import { createCsSpsolve } from './csSpsolve.js'
 import type { TypedFunction } from '../../core/function/typed.js'
 
 // Sparse matrix internal structure
-interface SparseMatrixData {
+export interface SparseMatrixData {
   _size: number[]
   _values: any[]
   _index: number[]
@@ -34,14 +34,14 @@ interface CsLuDependencies {
 }
 
 // Symbolic analysis result from csSqr
-interface SymbolicAnalysis {
+export interface SymbolicAnalysis {
   q?: number[]
   lnz?: number
   unz?: number
 }
 
 // LU factorization result
-interface LuResult {
+export interface LuResult {
   L: SparseMatrixData
   U: SparseMatrixData
   pinv: number[]
@@ -172,7 +172,7 @@ export const createCsLu = /* #__PURE__ */ factory(
             // check absoulte value is greater than pivot value
             if (larger(xabs, a)) {
               // largest pivot candidate so far
-              a = xabs
+              a = xabs as number
               ipiv = i
             }
           } else {

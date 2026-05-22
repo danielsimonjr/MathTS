@@ -14,7 +14,7 @@ const WASM_EXPM_THRESHOLD = 16 // 4x4 matrix
 type Scalar = number | BigNumber | Complex
 
 /** Matrix interface */
-interface Matrix {
+export interface Matrix {
   size(): number[]
   get(index: number[]): Scalar
   storage(): string
@@ -213,7 +213,7 @@ export const createExpm = /* #__PURE__ */ factory(
       for (let i = 0; i < n; i++) {
         let rowSum = 0
         for (let j = 0; j < n; j++) {
-          rowSum += abs(A.get([i, j]))
+          rowSum += abs(A.get([i, j])) as number
         }
         infNorm = Math.max(rowSum, infNorm)
       }

@@ -72,10 +72,10 @@ export const createDotMultiply = /* #__PURE__ */ factory(
       name,
       matrixAlgorithmSuite({
         elop: multiplyScalar,
-        SS: matAlgo09xS0Sf,
-        DS: matAlgo02xDS0,
-        Ss: matAlgo11xS0s
+        SS: matAlgo09xS0Sf as any,
+        DS: matAlgo02xDS0 as any,
+        Ss: matAlgo11xS0s as any
       })
-    )
+    ) as TypedFunction
   }
 )
