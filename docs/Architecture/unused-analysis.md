@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-05-20
+**Generated**: 2026-05-22
 
 ## Summary
 
 - **Potentially unused files**: 1
-- **Potentially unused exports**: 353
+- **Potentially unused exports**: 355
 
 ## Potentially Unused Files
 
@@ -16,6 +16,10 @@ These files are not imported by any other file in the codebase:
 ## Potentially Unused Exports
 
 These exports are not imported by any other file in the codebase:
+
+### `packages/workerpool/src/fft-core.ts`
+
+- `fftBitReverse` (function)
 
 ### `core/src/factory/factory.ts`
 
@@ -44,17 +48,17 @@ These exports are not imported by any other file in the codebase:
 - `BackendType` (type)
 - `NumericType` (type)
 
-### `matrix/src/backends/wasm/fft-wasm.ts`
-
-- `FFTResult` (interface)
-- `FFTConfig` (interface)
-- `FFTBackend` (type)
-
 ### `matrix/src/backends/WasmLoader.ts`
 
 - `initWasm` (function)
 - `WasmLoader` (class)
 - `LoadingMetrics` (interface)
+
+### `matrix/src/backends/wasm/fft-wasm.ts`
+
+- `FFTResult` (interface)
+- `FFTConfig` (interface)
+- `FFTBackend` (type)
 
 ### `matrix/src/config.ts`
 
@@ -285,7 +289,6 @@ These exports are not imported by any other file in the codebase:
 ### `functions/src/utils/is.ts`
 
 - `isPartitionedMap` (function)
-- `isObjectWrappingMap` (function)
 - `BigNumber` (interface)
 - `Complex` (interface)
 - `Fraction` (interface)
@@ -318,6 +321,8 @@ These exports are not imported by any other file in the codebase:
 
 - `toObject` (function)
 - `assign` (function)
+- `isObjectWrappingMap` (function)
+- `ObjectWrappingMap` (class)
 - `PartitionedMap` (class)
 
 ### `functions/src/utils/noop.ts`
@@ -353,17 +358,17 @@ These exports are not imported by any other file in the codebase:
 - `stringify` (function)
 - `escape` (function)
 
-### `functions/src/wasm/integrity.ts`
-
-- `sha384OfBuffer` (function)
-- `WasmManifest` (interface)
-
 ### `functions/src/wasm/WasmLoader.ts`
 
 - `initWasm` (function)
 - `WasmLoader` (class)
 - `WasmModule` (interface)
 - `LoadingMetrics` (interface)
+
+### `functions/src/wasm/integrity.ts`
+
+- `sha384OfBuffer` (function)
+- `WasmManifest` (interface)
 
 ### `expression/src/error/IndexError.ts`
 
@@ -449,7 +454,6 @@ These exports are not imported by any other file in the codebase:
 - `isDate` (function)
 - `isRegExp` (function)
 - `isPartitionedMap` (function)
-- `isObjectWrappingMap` (function)
 - `isNull` (function)
 - `isUndefined` (function)
 - `isAssignmentNode` (function)
@@ -493,6 +497,7 @@ These exports are not imported by any other file in the codebase:
 ### `expression/src/utils/map.ts`
 
 - `assign` (function)
+- `isObjectWrappingMap` (function)
 
 ### `expression/src/utils/number.ts`
 

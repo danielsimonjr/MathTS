@@ -8,7 +8,26 @@
  */
 
 import type { BackendType } from './backends/Backend.js';
-import type { OperationType } from './backends/BackendManager.js';
+
+/**
+ * Operation type hints for backend selection.
+ *
+ * Defined here rather than in `BackendManager.ts` so that `config.ts` (the
+ * lower-level module) owns it — `BackendManager` already imports `config`, so
+ * sourcing the type the other way round closed an import cycle.
+ */
+export type OperationType =
+  | 'add'
+  | 'subtract'
+  | 'multiply'
+  | 'multiplyElementwise'
+  | 'transpose'
+  | 'scale'
+  | 'decomposition'
+  | 'solve'
+  | 'fft'
+  | 'eig'
+  | 'svd';
 
 /**
  * Backend preference level

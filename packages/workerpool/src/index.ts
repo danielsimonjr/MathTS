@@ -17,6 +17,7 @@ import {
   type ExecOptions,
   type PoolStats,
 } from 'workerpool';
+import { fftFrameInPlace } from './fft-core.js';
 
 // Try to import WASM feature detection from workerpool/wasm subpath
 // These may not be available in all environments
@@ -1647,7 +1648,7 @@ export class MathWorkerPool {
       const r = real.slice();
       const im = imag.slice();
       for (let f = 0; f < frameCount; f++) {
-        this._fftFrameInPlace(r, im, f * frameLength, frameLength, inverse);
+        fftFrameInPlace(r, im, f * frameLength, frameLength, inverse);
       }
       return {
         result: { real: r, imag: im },
@@ -1701,78 +1702,6 @@ export class MathWorkerPool {
       parallelized: true,
       workersUsed: Math.min(tasks.length, stats.totalWorkers),
     };
-  }
-
-  /**
-   * In-place radix-2 FFT of a single frame — sequential fallback for fftBatch.
-   * Mirrors the `fftBatchChunk` worker kernel exactly.
-   */
-  private _fftFrameInPlace(
-    real: Float64Array,
-    imag: Float64Array,
-    offset: number,
-    n: number,
-    inverse: boolean
-  ): void {
-    const bits = Math.log2(n) | 0;
-
-    for (let i = 0; i < n; i++) {
-      let x = i;
-      let j = 0;
-      for (let b = 0; b < bits; b++) {
-        j = (j << 1) | (x & 1);
-        x >>= 1;
-      }
-      if (j > i) {
-        const tr = real[offset + i];
-        real[offset + i] = real[offset + j];
-        real[offset + j] = tr;
-        const ti = imag[offset + i];
-        imag[offset + i] = imag[offset + j];
-        imag[offset + j] = ti;
-      }
-    }
-
-    const direction = inverse ? 1.0 : -1.0;
-
-    for (let size = 2; size <= n; size *= 2) {
-      const halfSize = size / 2;
-      const angle = (direction * 2.0 * Math.PI) / size;
-      const wRe = Math.cos(angle);
-      const wIm = Math.sin(angle);
-
-      for (let start = 0; start < n; start += size) {
-        let tRe = 1.0;
-        let tIm = 0.0;
-        for (let j = 0; j < halfSize; j++) {
-          const evenIdx = offset + start + j;
-          const oddIdx = offset + start + j + halfSize;
-
-          const uRe = real[oddIdx] * tRe - imag[oddIdx] * tIm;
-          const uIm = real[oddIdx] * tIm + imag[oddIdx] * tRe;
-
-          const eRe = real[evenIdx];
-          const eIm = imag[evenIdx];
-
-          real[evenIdx] = eRe + uRe;
-          imag[evenIdx] = eIm + uIm;
-          real[oddIdx] = eRe - uRe;
-          imag[oddIdx] = eIm - uIm;
-
-          const nextTRe = tRe * wRe - tIm * wIm;
-          const nextTIm = tRe * wIm + tIm * wRe;
-          tRe = nextTRe;
-          tIm = nextTIm;
-        }
-      }
-    }
-
-    if (inverse) {
-      for (let i = 0; i < n; i++) {
-        real[offset + i] /= n;
-        imag[offset + i] /= n;
-      }
-    }
   }
 
   /**

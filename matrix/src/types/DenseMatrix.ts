@@ -8,7 +8,6 @@
  */
 
 import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
-import type { SparseMatrix } from './SparseMatrix.js';
 
 /**
  * Dense matrix implementation using Float64Array
@@ -553,9 +552,10 @@ export class DenseMatrix extends Matrix<number> {
    * containing only the non-zero elements of this matrix.
    *
    * @param dropTolerance - Values below this threshold are treated as zero
-   * @returns SparseMatrix representation
+   * @returns SparseMatrix representation (typed as the `Matrix` base — the
+   *   `SparseMatrix` subtype is loaded lazily to avoid an import cycle)
    */
-  toSparse(dropTolerance: number = 0): SparseMatrix {
+  toSparse(dropTolerance: number = 0): Matrix {
     // Build CSR components directly to avoid circular import issues
     const values: number[] = [];
     const colIndices: number[] = [];

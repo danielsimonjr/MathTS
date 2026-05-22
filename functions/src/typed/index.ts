@@ -69,8 +69,11 @@ export * from './dist-objects.js';
 // Statistical hypothesis tests
 export * from './hypothesis.js';
 
-// CAS (Computer Algebra System) functions
-export * from './cas.js';
+// CAS (Computer Algebra System) functions are re-exported from the package
+// entry point (`functions/src/index.ts`), not here: `cas.ts` imports the
+// expression evaluator from `factories/evaluate.ts`, which imports this barrel.
+// Routing the cas re-export through the entry point keeps the module graph
+// acyclic.
 
 // Matrix operations (characteristic polynomial, RREF, Cholesky, etc.)
 export * from './matrix-ops.js';

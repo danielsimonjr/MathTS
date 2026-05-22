@@ -1,22 +1,26 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-05-20
+**Generated**: 2026-05-22
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
 | Total Source Files | 485 |
-| Total Test Files | 111 |
-| Source Files with Tests | 91 |
-| Source Files without Tests | 394 |
-| Coverage | 18.8% |
+| Total Test Files | 114 |
+| Source Files with Tests | 90 |
+| Source Files without Tests | 395 |
+| Coverage | 18.6% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 394 source files are not directly imported by any test file:
+The following 395 source files are not directly imported by any test file:
+
+### workerpool/
+
+- `packages/workerpool/src/fft-core.ts` → Expected test: `tests/unit/workerpool/fft-core.test.ts`
 
 ### src/
 
@@ -444,12 +448,13 @@ The following 394 source files are not directly imported by any test file:
 | `factories/matrix-bridge.ts` | `factories-matrix.test.ts`, `matrix-bridge-accel.test.ts`, `sparse-bridge.test.ts` |
 | `src/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/algebra.ts` | `algebra.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/arithmetic.ts` | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/arithmetic.ts` | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic-unary.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/cas.ts` | `cas.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/combinatorics.ts` | `combinatorics-extended.test.ts`, `combinatorics.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/dist-objects.ts` | `conversions-parser.test.ts`, `dist-objects.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/distributions.ts` | `conversions-parser.test.ts`, `distributions.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/geometry.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `geometry-extended.test.ts`, `geometry.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/gpu.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `gpu.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/graph.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `graph.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/hypothesis.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `hypothesis.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
@@ -459,8 +464,8 @@ The following 394 source files are not directly imported by any test file:
 | `typed/numeric.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `numeric.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/signal.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `signal-extended.test.ts`, `signal-extended2.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/special.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `special-extended.test.ts`, `special.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/statistics.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `statistics-selection.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/trigonometry.ts` | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/statistics.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `parallel-stat-prod.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `statistics-selection.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/trigonometry.ts` | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `parallel-trig-unary.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/typed-bridge.ts` | `typed-bridge.test.ts` |
 | `wasm/integrity.ts` | `wasm-integrity.test.ts` |
 | `backends/Backend.ts` | `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
@@ -492,16 +497,14 @@ The following 394 source files are not directly imported by any test file:
 | `operations/svd.ts` | `svd.test.ts`, `svd-wasm.test.ts`, `typed-operations.test.ts` |
 | `src/parallel-matrix.ts` | `typed-operations.test.ts` |
 | `src/typed-operations.ts` | `typed-operations.test.ts` |
-| `types/DenseMatrix.ts` | `DenseMatrix.test.ts`, `JSBackend.test.ts`, `operations.test.ts`, `SparseMatrix.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `operations.test.ts`, `rust-wasm.test.ts` |
+| `types/DenseMatrix.ts` | `DenseMatrix.test.ts`, `JSBackend.test.ts`, `SparseMatrix.test.ts`, `operations.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `operations.test.ts`, `rust-wasm.test.ts` |
 | `types/Matrix.ts` | `typed-operations.test.ts` |
-| `types/SparseMatrix.ts` | `operations.test.ts`, `SparseMatrix.test.ts`, `typed-operations.test.ts` |
+| `types/SparseMatrix.ts` | `SparseMatrix.test.ts`, `operations.test.ts`, `typed-operations.test.ts` |
 | `types/index.ts` | `typed-operations.test.ts` |
 | `src/index.ts` | `index.test.ts`, `robust-types.test.ts` |
-| `src/index.ts` | `index.test.ts` |
-| `src/ComputePool.ts` | `benchmark.test.ts`, `ComputePool.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts` |
-| `operations/eig.ts` | `parallel-eig.test.ts` |
+| `src/index.ts` | `index.test.ts`, `parallel-dispatch.test.ts` |
+| `src/ComputePool.ts` | `ComputePool.test.ts`, `benchmark.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts` |
 | `operations/elementwise.ts` | `benchmark.test.ts`, `elementwise.test.ts` |
-| `operations/fft.ts` | `fft.test.ts` |
 | `operations/map.ts` | `map-extended.test.ts`, `map.test.ts` |
 | `operations/matmul.ts` | `benchmark.test.ts`, `matmul.test.ts` |
 | `operations/reduce.ts` | `benchmark.test.ts`, `reduce.test.ts` |
@@ -522,6 +525,7 @@ The following 394 source files are not directly imported by any test file:
 | `tests/index.test.ts` | 1 files |
 | `tests/robust-types.test.ts` | 1 files |
 | `tests/index.test.ts` | 1 files |
+| `tests/parallel-dispatch.test.ts` | 1 files |
 | `tests/config.test.ts` | 0 files |
 | `factory/factory.test.ts` | 2 files |
 | `tests/shared.test.ts` | 0 files |
@@ -534,17 +538,17 @@ The following 394 source files are not directly imported by any test file:
 | `types/fraction.test.ts` | 1 files |
 | `tests/utils.test.ts` | 0 files |
 | `tests/version.test.ts` | 9 files |
+| `tests/DenseMatrix.test.ts` | 1 files |
+| `tests/JSBackend.test.ts` | 3 files |
 | `tests/config.test.ts` | 1 files |
 | `decomposition/eig-wasm.test.ts` | 1 files |
 | `decomposition/eig.test.ts` | 1 files |
 | `decomposition/svd.test.ts` | 1 files |
-| `tests/DenseMatrix.test.ts` | 1 files |
 | `gpu/initialization.test.ts` | 5 files |
 | `gpu/integration.test.ts` | 5 files |
 | `gpu/operations.test.ts` | 1 files |
-| `tests/JSBackend.test.ts` | 3 files |
-| `sparse/operations.test.ts` | 2 files |
 | `sparse/SparseMatrix.test.ts` | 2 files |
+| `sparse/operations.test.ts` | 2 files |
 | `tests/svd-wasm.test.ts` | 3 files |
 | `tests/typed-operations.test.ts` | 32 files |
 | `wasm/accuracy.test.ts` | 2 files |
@@ -564,10 +568,10 @@ The following 394 source files are not directly imported by any test file:
 | `tests/cas.test.ts` | 1 files |
 | `tests/combinatorics-extended.test.ts` | 1 files |
 | `tests/combinatorics.test.ts` | 1 files |
-| `tests/conversions-parser.test.ts` | 21 files |
+| `tests/conversions-parser.test.ts` | 22 files |
 | `tests/dist-objects.test.ts` | 1 files |
 | `tests/distributions.test.ts` | 1 files |
-| `tests/docs-sync.test.ts` | 21 files |
+| `tests/docs-sync.test.ts` | 22 files |
 | `tests/evaluate.test.ts` | 1 files |
 | `tests/factories-final.test.ts` | 1 files |
 | `tests/factories-leaf.test.ts` | 1 files |
@@ -576,6 +580,7 @@ The following 394 source files are not directly imported by any test file:
 | `tests/factories-tier4.test.ts` | 1 files |
 | `tests/geometry-extended.test.ts` | 1 files |
 | `tests/geometry.test.ts` | 1 files |
+| `tests/gpu.test.ts` | 1 files |
 | `tests/graph.test.ts` | 1 files |
 | `tests/hypothesis.test.ts` | 1 files |
 | `tests/integration.test.ts` | 1 files |
@@ -583,9 +588,12 @@ The following 394 source files are not directly imported by any test file:
 | `tests/matrix-bridge-accel.test.ts` | 1 files |
 | `tests/matrix-ops.test.ts` | 1 files |
 | `tests/numeric.test.ts` | 1 files |
-| `tests/parallel-arithmetic.test.ts` | 21 files |
-| `tests/parallel-dispatch.test.ts` | 21 files |
-| `tests/parallel-signal.test.ts` | 21 files |
+| `tests/parallel-arithmetic-unary.test.ts` | 1 files |
+| `tests/parallel-arithmetic.test.ts` | 22 files |
+| `tests/parallel-dispatch.test.ts` | 22 files |
+| `tests/parallel-signal.test.ts` | 22 files |
+| `tests/parallel-stat-prod.test.ts` | 1 files |
+| `tests/parallel-trig-unary.test.ts` | 1 files |
 | `tests/physical-constants.test.ts` | 1 files |
 | `security/wasm-integrity.test.ts` | 1 files |
 | `signal/conv.test.ts` | 0 files |
@@ -598,25 +606,23 @@ The following 394 source files are not directly imported by any test file:
 | `tests/statistics-extended.test.ts` | 1 files |
 | `tests/statistics-extended2.test.ts` | 1 files |
 | `tests/statistics-selection.test.ts` | 1 files |
-| `tests/typed-arithmetic.test.ts` | 21 files |
+| `tests/typed-arithmetic.test.ts` | 22 files |
 | `tests/typed-bridge.test.ts` | 1 files |
 | `tests/compile.test.ts` | 1 files |
 | `tests/evaluate.test.ts` | 1 files |
 | `security/sandbox.test.ts` | 2 files |
+| `tests/ComputePool.test.ts` | 1 files |
+| `tests/ParallelMatrix.test.ts` | 0 files |
+| `tests/WorkerPool.timeout.test.ts` | 0 files |
 | `tests/benchmark.test.ts` | 4 files |
 | `tests/chunk.test.ts` | 1 files |
-| `tests/ComputePool.test.ts` | 1 files |
 | `operations/elementwise.test.ts` | 2 files |
-| `operations/fft.test.ts` | 1 files |
 | `operations/map-extended.test.ts` | 1 files |
 | `operations/map.test.ts` | 1 files |
 | `operations/matmul.test.ts` | 2 files |
-| `operations/parallel-eig.test.ts` | 1 files |
 | `operations/reduce.test.ts` | 1 files |
 | `operations/threshold.test.ts` | 2 files |
-| `tests/ParallelMatrix.test.ts` | 0 files |
 | `strategies/chunk-extended.test.ts` | 1 files |
-| `tests/WorkerPool.timeout.test.ts` | 0 files |
 | `tests/executor.test.ts` | 2 files |
 | `tests/graph.test.ts` | 2 files |
 | `tests/parser.test.ts` | 2 files |

@@ -112,6 +112,46 @@ below are limited to operations that genuinely clear that bar.
   [`docs/roadmap/UNIFIED_WEBGPU_PATH.md`](../roadmap/UNIFIED_WEBGPU_PATH.md) —
   a separate research effort beyond the existing matrix-op `gpu*` functions.
 
+## 🐞 Known Defects
+
+### Fixed (2026-05-22)
+
+Both defects below were surfaced while fixing the fresh-checkout test failures,
+were pre-existing and unrelated to the parallelism work, and are now resolved.
+
+- [x] **`parallel` package never built `matrix.worker.js`** — `parallel`'s
+  build was `tsup src/index.ts` only, so `src/matrix.worker.ts` was never
+  emitted to `dist/`. `ParallelMatrix` resolved its worker as
+  `./matrix.worker.js` at runtime, which did not exist — the worker compute
+  paths silently returned all-zeros. Caused 9 `tests/wasm/parallel-processing.test.ts`
+  failures. **Fixed:** a four-defect chain — missing tsup build entry, no
+  script resolver (`resolveMatrixWorkerScript`), ESM-incompatible
+  `require('worker_threads')`, and browser-only event wiring in `WorkerPool`'s
+  Node branch — plus a shared-buffer-mutation bug and a queue-drain race.
+  `parallel/package.json`, `parallel/src/{ParallelMatrix,WorkerPool,matrix.worker}.ts`.
+- [x] **JS SVD was wrong for non-square matrices** — `svdStep`'s Golub-Kahan
+  QR sweep assigned the unsigned magnitude `Math.sqrt(f*f + g*g)` to `e[k-1]`
+  and `d[k]` where the algorithm requires the signed rotated values
+  `cs*f - sn*g` / `cs2*f - sn2*g`, corrupting the bidiagonal sweep for any
+  non-square matrix (5×3 reconstruction error ~8.28). **Fixed** in
+  `matrix/src/operations/svd.ts`.
+- [x] **All 7 import cycles eliminated** — the dependency-graph report flagged
+  7 cycles (5 runtime, 2 type-only); the report now detects 0.
+  - `is ↔ map` / `object → is → map → customs → object` in both
+    `functions/src/utils/` and `expression/src/utils/`: `isObjectWrappingMap`
+    moved into `map.ts` next to the `ObjectWrappingMap` class, so `is.ts` no
+    longer imports `map.ts` — that single edge closed both cycles per package.
+  - `evaluate.ts → typed/index.ts → typed/cas.ts → evaluate.ts`: the
+    `export * from './cas.js'` re-export moved from `typed/index.ts` to the
+    package entry `functions/src/index.ts`. This also resolves the latent
+    incomplete-`mathScope` risk — `evaluate.ts` now loads strictly after
+    `typed/index.ts` is fully initialized.
+  - `DenseMatrix ↔ SparseMatrix`: `DenseMatrix` dropped its
+    `import type { SparseMatrix }`; `toSparse()` is typed as the `Matrix` base
+    (the `SparseMatrix` subtype is still constructed lazily at runtime).
+  - `BackendManager ↔ config`: `OperationType` moved from `BackendManager.ts`
+    to `config.ts`; `config.ts` no longer imports `BackendManager`.
+
 ## 📋 Next Steps
 
 ### WASM Test Files (46 files, sorted by complexity) ✅ ALL COMPLETE

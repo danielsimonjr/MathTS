@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-05-20
+**Version**: 0.1.0 | **Last Updated**: 2026-05-22
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -50,10 +50,10 @@ This document provides a comprehensive dependency graph of all files, components
 40. [Functions/unit Dependencies](#functions-unit-dependencies)
 41. [Functions/utils Dependencies](#functions-utils-dependencies)
 42. [Functions/wasm Dependencies](#functions-wasm-dependencies)
-43. [Expression/compiler Dependencies](#expression-compiler-dependencies)
-44. [Expression/error Dependencies](#expression-error-dependencies)
-45. [Expression/evaluator Dependencies](#expression-evaluator-dependencies)
-46. [Expression Dependencies](#expression-dependencies)
+43. [Expression Dependencies](#expression-dependencies)
+44. [Expression/compiler Dependencies](#expression-compiler-dependencies)
+45. [Expression/error Dependencies](#expression-error-dependencies)
+46. [Expression/evaluator Dependencies](#expression-evaluator-dependencies)
 47. [Expression/node Dependencies](#expression-node-dependencies)
 48. [Expression/transform Dependencies](#expression-transform-dependencies)
 49. [Expression/utils Dependencies](#expression-utils-dependencies)
@@ -78,7 +78,7 @@ This document provides a comprehensive dependency graph of all files, components
 The codebase is organized into the following modules:
 
 - **packages/typed-function**: 1 file
-- **packages/workerpool**: 1 file
+- **packages/workerpool**: 2 files
 - **core/factory**: 2 files
 - **core**: 1 file
 - **core/typed**: 3 files
@@ -113,19 +113,19 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 19 files
+- **functions/typed**: 20 files
 - **functions/unit**: 2 files
 - **functions/utils**: 37 files
 - **functions/wasm**: 2 files
+- **expression**: 7 files
 - **expression/compiler**: 2 files
 - **expression/error**: 2 files
 - **expression/evaluator**: 2 files
-- **expression**: 7 files
 - **expression/node**: 18 files
 - **expression/transform**: 1 file
 - **expression/utils**: 13 files
 - **parallel**: 2 files
-- **parallel/operations**: 7 files
+- **parallel/operations**: 5 files
 - **parallel/strategies**: 3 files
 - **workbook**: 5 files
 - **assembly**: 1 file
@@ -141,14 +141,14 @@ The codebase is organized into the following modules:
 | Package | Depends On | Files (Active) | Files (Dormant) |
 |---------|------------|----------------|-----------------|
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none) | 1 | 1 |
-| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`) | (none) | 1 | 2 |
+| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`) | (none) | 2 | 2 |
 | `@danielsimonjr/mathts-core` (`core/`) | (none) | 10 | 85 |
 | `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core` | 34 | 4 |
 | `@danielsimonjr/mathts-tensor` (`tensor/`) | `@danielsimonjr/mathts-matrix` | 2 | 0 |
 | `@danielsimonjr/mathts-autograd` (`autograd/`) | `@danielsimonjr/mathts-tensor` | 5 | 0 |
-| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 351 | 418 |
+| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 352 | 418 |
 | `@danielsimonjr/mathts-expression` (`expression/`) | (none) | 45 | 382 |
-| `@danielsimonjr/mathts-parallel` (`parallel/`) | `@danielsimonjr/mathts-workerpool` | 12 | 4 |
+| `@danielsimonjr/mathts-parallel` (`parallel/`) | `@danielsimonjr/mathts-workerpool` | 10 | 4 |
 | `@danielsimonjr/mathts-workbook` (`workbook/`) | `@danielsimonjr/mathts-functions` | 5 | 2 |
 | `@danielsimonjr/mathts-wasm` (`assembly/`) | (none) | 17 | 3 |
 | `@danielsimonjr/mathts-compat` (`compat/`) | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 2 | 1 |
@@ -212,12 +212,24 @@ graph LR
 
 ## Packages/workerpool Dependencies
 
+### `packages/workerpool/src/fft-core.ts` - Shared radix-2 FFT core for @danielsimonjr/mathts-workerpool.
+
+**Exports:**
+- Functions: `fftBitReverse`, `fftFrameInPlace`
+
+---
+
 ### `packages/workerpool/src/index.ts` - Worker pool management for MathTS parallel computations.
 
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
 | `workerpool` | `pool, Pool, Transfer, PoolOptions, ExecOptions, PoolStats` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./fft-core.js` | `fftFrameInPlace` | Import |
 
 **Exports:**
 - Classes: `MathWorkerPool`
@@ -419,113 +431,13 @@ graph LR
 | `./Backend.js` | `MatrixBackend, BackendType, BackendHints` | Import (type-only) |
 | `./Backend.js` | `backendRegistry, DEFAULT_BACKEND_HINTS` | Import |
 | `./JSBackend.js` | `jsBackend` | Import |
-| `../config.js` | `getConfig, onConfigChange, MatrixConfig` | Import |
+| `../config.js` | `getConfig, onConfigChange, MatrixConfig, OperationType` | Import |
 
 **Exports:**
 - Classes: `BackendManager`
 - Interfaces: `ExtendedBackendHints`
-- Types: `OperationType`
 - Functions: `createBackendManager`
 - Constants: `DEFAULT_EXTENDED_HINTS`, `backendManager`
-
----
-
-### `matrix/src/backends/gpu/BatchExecutor.ts` - GPU Batch Executor
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import (type-only) |
-| `./ShaderManager.js` | `ShaderManager` | Import (type-only) |
-| `./BufferPool.js` | `BufferPool` | Import (type-only) |
-
-**Exports:**
-- Classes: `BatchExecutor`
-- Interfaces: `BatchOperation`, `BatchResult`, `BatchOptions`
-- Types: `BatchOperationType`
-
----
-
-### `matrix/src/backends/gpu/BufferPool.ts` - GPU Buffer Pool
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import |
-
-**Exports:**
-- Classes: `BufferPool`
-- Interfaces: `BufferPoolOptions`
-
----
-
-### `matrix/src/backends/gpu/detect.ts` - WebGPU Detection and Capability Checking
-
-**Exports:**
-- Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
-- Functions: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
-
----
-
-### `matrix/src/backends/gpu/GPUContext.ts` - WebGPU Context Management
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
-
-**Exports:**
-- Classes: `GPUContext`
-- Interfaces: `GPUContextOptions`, `DeviceLostEvent`
-- Types: `GPUContextStatus`
-- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
-
----
-
-### `matrix/src/backends/gpu/index.ts` - GPU Backend Exports
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
-| `./GPUContext.js` | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent` | Re-export |
-| `./BufferPool.js` | `BufferPool, BufferPoolOptions` | Re-export |
-| `./ShaderManager.js` | `ShaderManager, BUILTIN_SHADERS, ShaderSource, PipelineConfig` | Re-export |
-| `./BatchExecutor.js` | `BatchExecutor, BatchOperation, BatchOperationType, BatchResult, BatchOptions` | Re-export |
-| `./Sync.js` | `SyncManager, createSyncManager, SyncStrategy, TransferDirection, TransferRequest, TransferResult, SyncConfig` | Re-export |
-
-**Exports:**
-- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `BUILTIN_SHADERS`, `ShaderSource`, `PipelineConfig`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
-
----
-
-### `matrix/src/backends/gpu/ShaderManager.ts` - GPU Shader Manager
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import |
-
-**Exports:**
-- Classes: `ShaderManager`
-- Interfaces: `ShaderSource`, `PipelineConfig`
-- Constants: `BUILTIN_SHADERS`
-
----
-
-### `matrix/src/backends/gpu/Sync.ts` - GPU-CPU Synchronization Strategy
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import (type-only) |
-| `./BufferPool.js` | `BufferPool` | Import (type-only) |
-
-**Exports:**
-- Classes: `SyncManager`
-- Interfaces: `TransferRequest`, `TransferResult`, `SyncConfig`
-- Types: `SyncStrategy`, `TransferDirection`
-- Functions: `createSyncManager`
 
 ---
 
@@ -560,30 +472,6 @@ graph LR
 - Interfaces: `GPUMatrixBackendConfig`
 - Functions: `createGPUMatrixBackend`
 - Constants: `gpuMatrixBackend`
-
----
-
-### `matrix/src/backends/index.ts` - Matrix Backend Exports
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./Backend.js` | `backendRegistry` | Import |
-| `./JSBackend.js` | `jsBackend` | Import |
-| `./Backend.js` | `BackendRegistry, backendRegistry, DEFAULT_BACKEND_HINTS` | Re-export |
-| `./JSBackend.js` | `JSBackend, jsBackend` | Re-export |
-| `./ParallelBackend.js` | `ParallelBackend, parallelBackend, createParallelBackend, ParallelBackendConfig` | Re-export |
-| `./WASMBackend.js` | `WASMBackend, wasmBackend, createWASMBackend, WASMBackendConfig` | Re-export |
-| `./GPUMatrixBackend.js` | `GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, GPUMatrixBackendConfig` | Re-export |
-| `./GPUBackend.js` | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, GPUBackendOptions, GPUBackendStatus` | Re-export |
-| `./RustWASMBackend.js` | `RustWASMBackend, rustWasmBackend, createRustWASMBackend, RustWASMBackendConfig` | Re-export |
-| `./RustWasmLoader.js` | `RustWasmLoader, rustWasmLoader, initRustWasm, RustWasmExports, RustLoadingMetrics` | Re-export |
-| `./BackendManager.js` | `BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, ExtendedBackendHints, OperationType` | Re-export |
-| `./wasm/index.js` | `detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures` | Re-export |
-| `./gpu/index.js` | `hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager` | Re-export |
-
-**Exports:**
-- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `RustWASMBackend`, `rustWasmBackend`, `createRustWASMBackend`, `RustWASMBackendConfig`, `RustWasmLoader`, `rustWasmLoader`, `initRustWasm`, `RustWasmExports`, `RustLoadingMetrics`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`
 
 ---
 
@@ -645,6 +533,158 @@ graph LR
 
 ---
 
+### `matrix/src/backends/WASMBackend.ts` - WASM Matrix Backend
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./JSBackend.js` | `jsBackend` | Import |
+| `./WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+| `./wasm/detect.js` | `detectWasmFeatures, WasmFeatures` | Import |
+
+**Exports:**
+- Classes: `WASMBackend`
+- Interfaces: `WASMBackendConfig`
+- Functions: `createWASMBackend`
+- Constants: `wasmBackend`
+
+---
+
+### `matrix/src/backends/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
+
+**Exports:**
+- Classes: `WasmLoader`
+- Interfaces: `WasmModule`, `LoadingMetrics`
+- Functions: `initWasm`
+- Constants: `wasmLoader`
+
+---
+
+### `matrix/src/backends/gpu/BatchExecutor.ts` - GPU Batch Executor
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import (type-only) |
+| `./ShaderManager.js` | `ShaderManager` | Import (type-only) |
+| `./BufferPool.js` | `BufferPool` | Import (type-only) |
+
+**Exports:**
+- Classes: `BatchExecutor`
+- Interfaces: `BatchOperation`, `BatchResult`, `BatchOptions`
+- Types: `BatchOperationType`
+
+---
+
+### `matrix/src/backends/gpu/BufferPool.ts` - GPU Buffer Pool
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import |
+
+**Exports:**
+- Classes: `BufferPool`
+- Interfaces: `BufferPoolOptions`
+
+---
+
+### `matrix/src/backends/gpu/GPUContext.ts` - WebGPU Context Management
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
+
+**Exports:**
+- Classes: `GPUContext`
+- Interfaces: `GPUContextOptions`, `DeviceLostEvent`
+- Types: `GPUContextStatus`
+- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
+
+---
+
+### `matrix/src/backends/gpu/ShaderManager.ts` - GPU Shader Manager
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import |
+
+**Exports:**
+- Classes: `ShaderManager`
+- Interfaces: `ShaderSource`, `PipelineConfig`
+- Constants: `BUILTIN_SHADERS`
+
+---
+
+### `matrix/src/backends/gpu/Sync.ts` - GPU-CPU Synchronization Strategy
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import (type-only) |
+| `./BufferPool.js` | `BufferPool` | Import (type-only) |
+
+**Exports:**
+- Classes: `SyncManager`
+- Interfaces: `TransferRequest`, `TransferResult`, `SyncConfig`
+- Types: `SyncStrategy`, `TransferDirection`
+- Functions: `createSyncManager`
+
+---
+
+### `matrix/src/backends/gpu/detect.ts` - WebGPU Detection and Capability Checking
+
+**Exports:**
+- Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
+- Functions: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
+
+---
+
+### `matrix/src/backends/gpu/index.ts` - GPU Backend Exports
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
+| `./GPUContext.js` | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent` | Re-export |
+| `./BufferPool.js` | `BufferPool, BufferPoolOptions` | Re-export |
+| `./ShaderManager.js` | `ShaderManager, BUILTIN_SHADERS, ShaderSource, PipelineConfig` | Re-export |
+| `./BatchExecutor.js` | `BatchExecutor, BatchOperation, BatchOperationType, BatchResult, BatchOptions` | Re-export |
+| `./Sync.js` | `SyncManager, createSyncManager, SyncStrategy, TransferDirection, TransferRequest, TransferResult, SyncConfig` | Re-export |
+
+**Exports:**
+- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `BUILTIN_SHADERS`, `ShaderSource`, `PipelineConfig`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
+
+---
+
+### `matrix/src/backends/index.ts` - Matrix Backend Exports
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Backend.js` | `backendRegistry` | Import |
+| `./JSBackend.js` | `jsBackend` | Import |
+| `./Backend.js` | `BackendRegistry, backendRegistry, DEFAULT_BACKEND_HINTS` | Re-export |
+| `./JSBackend.js` | `JSBackend, jsBackend` | Re-export |
+| `./ParallelBackend.js` | `ParallelBackend, parallelBackend, createParallelBackend, ParallelBackendConfig` | Re-export |
+| `./WASMBackend.js` | `WASMBackend, wasmBackend, createWASMBackend, WASMBackendConfig` | Re-export |
+| `./GPUMatrixBackend.js` | `GPUMatrixBackend, gpuMatrixBackend, createGPUMatrixBackend, GPUMatrixBackendConfig` | Re-export |
+| `./GPUBackend.js` | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, destroyGlobalGPUBackend, GPUBackendOptions, GPUBackendStatus` | Re-export |
+| `./RustWASMBackend.js` | `RustWASMBackend, rustWasmBackend, createRustWASMBackend, RustWASMBackendConfig` | Re-export |
+| `./RustWasmLoader.js` | `RustWasmLoader, rustWasmLoader, initRustWasm, RustWasmExports, RustLoadingMetrics` | Re-export |
+| `./BackendManager.js` | `BackendManager, backendManager, createBackendManager, DEFAULT_EXTENDED_HINTS, ExtendedBackendHints, OperationType` | Re-export |
+| `./wasm/index.js` | `detectWasmFeatures, isWasmAvailable, isSharedMemoryAvailable, isAtomicsAvailable, clearFeatureCache, getCachedFeatures` | Re-export |
+| `./gpu/index.js` | `hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager` | Re-export |
+
+**Exports:**
+- Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `RustWASMBackend`, `rustWasmBackend`, `createRustWASMBackend`, `RustWASMBackendConfig`, `RustWasmLoader`, `rustWasmLoader`, `initRustWasm`, `RustWasmExports`, `RustLoadingMetrics`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`
+
+---
+
 ### `matrix/src/backends/wasm/detect.ts` - WASM Feature Detection
 
 **Exports:**
@@ -680,35 +720,6 @@ graph LR
 
 ---
 
-### `matrix/src/backends/WASMBackend.ts` - WASM Matrix Backend
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
-| `./JSBackend.js` | `jsBackend` | Import |
-| `./WasmLoader.js` | `wasmLoader, WasmModule` | Import |
-| `./wasm/detect.js` | `detectWasmFeatures, WasmFeatures` | Import |
-
-**Exports:**
-- Classes: `WASMBackend`
-- Interfaces: `WASMBackendConfig`
-- Functions: `createWASMBackend`
-- Constants: `wasmBackend`
-
----
-
-### `matrix/src/backends/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
-
-**Exports:**
-- Classes: `WasmLoader`
-- Interfaces: `WasmModule`, `LoadingMetrics`
-- Functions: `initWasm`
-- Constants: `wasmLoader`
-
----
-
 <a id="matrix-dependencies"></a>
 
 ## Matrix Dependencies
@@ -719,11 +730,10 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./backends/Backend.js` | `BackendType` | Import (type-only) |
-| `./backends/BackendManager.js` | `OperationType` | Import (type-only) |
 
 **Exports:**
 - Interfaces: `BackendConfig`, `AdaptiveTuningConfig`, `ProfilingConfig`, `MatrixConfig`
-- Types: `BackendPreference`
+- Types: `OperationType`, `BackendPreference`
 - Functions: `getConfig`, `setConfig`, `resetConfig`, `onConfigChange`, `setBackendPreference`, `setBackendThreshold`, `setBackendEnabled`, `getRecommendedBackend`, `forceBackend`, `enableProfiling`, `disableProfiling`, `enableAdaptiveTuning`, `disableAdaptiveTuning`, `configureAdaptiveTuning`
 - Constants: `DEFAULT_CONFIG`
 
@@ -841,25 +851,10 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./Matrix.js` | `Matrix, MatrixEntry, SliceSpec` | Import |
-| `./SparseMatrix.js` | `SparseMatrix` | Import (type-only) |
 
 **Exports:**
 - Classes: `DenseMatrix`
 - Functions: `isDenseMatrix`
-
----
-
-### `matrix/src/types/index.ts` - Matrix Type Exports
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./Matrix.js` | `Matrix, isMatrix` | Re-export |
-| `./DenseMatrix.js` | `DenseMatrix, isDenseMatrix` | Re-export |
-| `./SparseMatrix.js` | `SparseMatrix, isSparseMatrix` | Re-export |
-
-**Exports:**
-- Re-exports: `Matrix`, `isMatrix`, `DenseMatrix`, `isDenseMatrix`, `SparseMatrix`, `isSparseMatrix`
 
 ---
 
@@ -886,9 +881,32 @@ graph LR
 
 ---
 
+### `matrix/src/types/index.ts` - Matrix Type Exports
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Matrix.js` | `Matrix, isMatrix` | Re-export |
+| `./DenseMatrix.js` | `DenseMatrix, isDenseMatrix` | Re-export |
+| `./SparseMatrix.js` | `SparseMatrix, isSparseMatrix` | Re-export |
+
+**Exports:**
+- Re-exports: `Matrix`, `isMatrix`, `DenseMatrix`, `isDenseMatrix`, `SparseMatrix`, `isSparseMatrix`
+
+---
+
 <a id="tensor-dependencies"></a>
 
 ## Tensor Dependencies
+
+### `tensor/src/Tensor.ts` - Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
+
+**Exports:**
+- Classes: `Tensor`
+- Interfaces: `EinsumSpec`
+- Types: `NestedArray`
+
+---
 
 ### `tensor/src/index.ts` - Package entry point for @danielsimonjr/mathts-tensor (re-exports 1 symbols)
 
@@ -899,15 +917,6 @@ graph LR
 
 **Exports:**
 - Re-exports: `Tensor`
-
----
-
-### `tensor/src/Tensor.ts` - Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
-
-**Exports:**
-- Classes: `Tensor`
-- Interfaces: `EinsumSpec`
-- Types: `NestedArray`
 
 ---
 
@@ -2888,11 +2897,12 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./typed/index.js` | `*` | Re-export |
+| `./typed/cas.js` | `*` | Re-export |
 | `./factories/index.js` | `*` | Re-export |
 | `./factories/evaluate.js` | `evaluate, compileExpr, parse, parser, reviver, replacer` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./typed/index.js`, `* from ./factories/index.js`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`
+- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`
 
 ---
 
@@ -5287,20 +5297,6 @@ graph LR
 
 ---
 
-### `functions/src/type/matrix/function/index.ts` - Create an index. An Index can store ranges having start, step, and end
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../../utils/is.js` | `isBigNumber, isMatrix, isArray` | Import |
-| `../../../utils/factory.js` | `factory` | Import |
-| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-
-**Exports:**
-- Constants: `createIndex`
-
----
-
 ### `functions/src/type/matrix/ImmutableDenseMatrix.ts` - Interface for Index objects (local copy to avoid circular deps)
 
 **Internal Dependencies:**
@@ -5343,6 +5339,20 @@ graph LR
 
 **Exports:**
 - Constants: `createSpaClass`
+
+---
+
+### `functions/src/type/matrix/function/index.ts` - Create an index. An Index can store ranges having start, step, and end
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../utils/is.js` | `isBigNumber, isMatrix, isArray` | Import |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+
+**Exports:**
+- Constants: `createIndex`
 
 ---
 
@@ -5591,6 +5601,23 @@ graph LR
 
 ---
 
+### `functions/src/type/unit/Unit.ts` - A unit can be constructed in the following ways:
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../utils/is.js` | `isComplex, isUnit, typeOf` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/function.js` | `memoize` | Import |
+| `../../utils/string.js` | `endsWith` | Import |
+| `../../utils/object.js` | `clone, hasOwnProperty` | Import |
+| `../../utils/bignumber/constants.js` | `createBigNumberPi` | Import |
+
+**Exports:**
+- Constants: `createUnitClass`
+
+---
+
 ### `functions/src/type/unit/function/createUnit.ts` - Unit definition options
 
 **Internal Dependencies:**
@@ -5647,23 +5674,6 @@ graph LR
 
 **Exports:**
 - Constants: `createSpeedOfLight`, `createGravitationConstant`, `createPlanckConstant`, `createReducedPlanckConstant`, `createMagneticConstant`, `createElectricConstant`, `createVacuumImpedance`, `createCoulomb`, `createCoulombConstant`, `createElementaryCharge`, `createBohrMagneton`, `createConductanceQuantum`, `createInverseConductanceQuantum`, `createMagneticFluxQuantum`, `createNuclearMagneton`, `createKlitzing`, `createJosephson`, `createBohrRadius`, `createClassicalElectronRadius`, `createElectronMass`, `createFermiCoupling`, `createFineStructure`, `createHartreeEnergy`, `createProtonMass`, `createDeuteronMass`, `createNeutronMass`, `createQuantumOfCirculation`, `createRydberg`, `createThomsonCrossSection`, `createWeakMixingAngle`, `createEfimovFactor`, `createAtomicMass`, `createAvogadro`, `createBoltzmann`, `createFaraday`, `createFirstRadiation`, `createLoschmidt`, `createGasConstant`, `createMolarPlanckConstant`, `createMolarVolume`, `createSackurTetrode`, `createSecondRadiation`, `createStefanBoltzmann`, `createWienDisplacement`, `createMolarMass`, `createMolarMassC12`, `createGravity`, `createPlanckLength`, `createPlanckMass`, `createPlanckTime`, `createPlanckCharge`, `createPlanckTemperature`
-
----
-
-### `functions/src/type/unit/Unit.ts` - A unit can be constructed in the following ways:
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../utils/is.js` | `isComplex, isUnit, typeOf` | Import |
-| `../../utils/factory.js` | `factory` | Import |
-| `../../utils/function.js` | `memoize` | Import |
-| `../../utils/string.js` | `endsWith` | Import |
-| `../../utils/object.js` | `clone, hasOwnProperty` | Import |
-| `../../utils/bignumber/constants.js` | `createBigNumberPi` | Import |
-
-**Exports:**
-- Constants: `createUnitClass`
 
 ---
 
@@ -5731,7 +5741,14 @@ graph LR
 **Exports:**
 - Interfaces: `KDTreeNode`
 - Types: `Shape`
-- Functions: `angle2D`, `angle3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`, `pointInPolygon`, `rotateVector2D`, `rotateVector3D`, `reflectVector`, `projectVector`, `distance2D`, `distance3D`, `distanceND`, `distancePointToLine2D`, `intersectLines2D`, `intersectSegments2D`, `area`, `centroid`, `coordinateTransform`, `polygonPerimeter`, `manhattanDistance`, `chebyshevDistance`, `minkowskiDistance`, `delaunayTriangulation`, `voronoiDiagram`, `kdTree`, `kdTreeNearest`, `nearestNeighbor`
+- Functions: `angle2D`, `angle3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`, `pointInPolygon`, `rotateVector2D`, `rotateVector3D`, `reflectVector`, `projectVector`, `distance2D`, `distance3D`, `distanceND`, `distancePointToLine2D`, `intersectLines2D`, `intersectSegments2D`, `area`, `centroid`, `coordinateTransform`, `polygonPerimeter`, `manhattanDistance`, `chebyshevDistance`, `minkowskiDistance`, `delaunayTriangulation`, `voronoiDiagram`, `kdTree`, `kdTreeNearest`, `nearestNeighbor`, `distanceMatrix`
+
+---
+
+### `functions/src/typed/gpu.ts` - WebGPU-Accelerated Matrix Operations
+
+**Exports:**
+- Functions: `gpuMatmul`, `gpuAdd`, `gpuTranspose`, `gpuScale`
 
 ---
 
@@ -5778,8 +5795,8 @@ graph LR
 | `./graph.js` | `*` | Re-export |
 | `./dist-objects.js` | `*` | Re-export |
 | `./hypothesis.js` | `*` | Re-export |
-| `./cas.js` | `*` | Re-export |
 | `./matrix-ops.js` | `*` | Re-export |
+| `./gpu.js` | `*` | Re-export |
 | `./arithmetic.js` | `typedArithmetic` | Re-export |
 | `./trigonometry.js` | `typedTrigonometry` | Re-export |
 | `./statistics.js` | `typedStatistics` | Re-export |
@@ -5790,7 +5807,7 @@ graph LR
 
 **Exports:**
 - Constants: `typedFunctions`
-- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./special.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./cas.js`, `* from ./matrix-ops.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedSpecial`, `typedDistributions`, `typedAlgebra`
+- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./special.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedSpecial`, `typedDistributions`, `typedAlgebra`
 
 ---
 
@@ -5845,7 +5862,7 @@ graph LR
 ### `functions/src/typed/special.ts` - Typed Special Functions
 
 **Exports:**
-- Constants: `erfc`, `beta`, `gammainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `besselJ`, `besselY`, `besselI`, `besselK`, `betainc`, `gammaincp`, `ellipticK`, `ellipticE`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `lambertW`, `erfi`, `cosIntegral`, `sinIntegral`, `logIntegral`, `expIntegralEi`, `fresnelC`, `fresnelS`, `typedSpecial`
+- Constants: `erfc`, `erfi`, `beta`, `gammainc`, `gammaincp`, `betainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `besselJ`, `besselY`, `besselI`, `besselK`, `ellipticK`, `ellipticE`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `lambertW`, `cosIntegral`, `sinIntegral`, `logIntegral`, `expIntegralEi`, `fresnelC`, `fresnelS`, `typedSpecial`
 
 ---
 
@@ -6066,14 +6083,9 @@ graph LR
 
 ### `functions/src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./map.js` | `ObjectWrappingMap` | Import |
-
 **Exports:**
 - Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
-- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isObjectWrappingMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
+- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
 - Constants: `isArray`
 
 ---
@@ -6231,7 +6243,7 @@ graph LR
 
 **Exports:**
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
-- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`
+- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`
 
 ---
 
@@ -6369,14 +6381,6 @@ graph LR
 
 ## Functions/wasm Dependencies
 
-### `functions/src/wasm/integrity.ts` - WASM integrity verification — SHA-384 manifest check.
-
-**Exports:**
-- Interfaces: `WasmManifest`
-- Functions: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`
-
----
-
 ### `functions/src/wasm/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
 
 **Internal Dependencies:**
@@ -6389,6 +6393,127 @@ graph LR
 - Interfaces: `WasmModule`, `LoadingMetrics`
 - Functions: `initWasm`
 - Constants: `wasmLoader`
+
+---
+
+### `functions/src/wasm/integrity.ts` - WASM integrity verification — SHA-384 manifest check.
+
+**Exports:**
+- Interfaces: `WasmManifest`
+- Functions: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`
+
+---
+
+<a id="expression-dependencies"></a>
+
+## Expression Dependencies
+
+### `expression/src/Help.ts` - Documentation object
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/is.js` | `isHelp` | Import |
+| `./utils/object.js` | `clone` | Import |
+| `./utils/string.js` | `format` | Import |
+| `./utils/factory.js` | `factory` | Import |
+
+**Exports:**
+- Constants: `createHelpClass`
+
+---
+
+### `expression/src/Parser.ts` - Parser contains methods to evaluate or parse expressions, and has a number
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/factory.js` | `factory` | Import |
+| `./utils/is.js` | `isFunction` | Import |
+| `./utils/map.js` | `createEmptyMap, toObject` | Import |
+
+**Exports:**
+- Constants: `createParserClass`
+
+---
+
+### `expression/src/index.ts` - Expression parsing and evaluation for MathTS.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `*` | Re-export |
+| `./keywords.js` | `*` | Re-export |
+| `./operators.js` | `*` | Re-export |
+| `./parse.js` | `*` | Re-export |
+| `./Parser.js` | `*` | Re-export |
+| `./Help.js` | `*` | Re-export |
+| `./compiler/index.js` | `*` | Re-export |
+| `./evaluator/index.js` | `*` | Re-export |
+| `./node/Node.js` | `createNode` | Re-export |
+| `./node/AccessorNode.js` | `createAccessorNode` | Re-export |
+| `./node/ArrayNode.js` | `createArrayNode` | Re-export |
+| `./node/AssignmentNode.js` | `createAssignmentNode` | Re-export |
+| `./node/BlockNode.js` | `createBlockNode` | Re-export |
+| `./node/ConditionalNode.js` | `createConditionalNode` | Re-export |
+| `./node/ConstantNode.js` | `createConstantNode` | Re-export |
+| `./node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode` | Re-export |
+| `./node/FunctionNode.js` | `createFunctionNode` | Re-export |
+| `./node/IndexNode.js` | `createIndexNode` | Re-export |
+| `./node/ObjectNode.js` | `createObjectNode` | Re-export |
+| `./node/OperatorNode.js` | `createOperatorNode` | Re-export |
+| `./node/ParenthesisNode.js` | `createParenthesisNode` | Re-export |
+| `./node/RangeNode.js` | `createRangeNode` | Re-export |
+| `./node/RelationalNode.js` | `createRelationalNode` | Re-export |
+| `./node/SymbolNode.js` | `createSymbolNode` | Re-export |
+
+**Exports:**
+- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
+
+---
+
+### `expression/src/keywords.ts` - Reserved keywords not allowed to use in the parser
+
+**Exports:**
+- Constants: `keywords`
+
+---
+
+### `expression/src/operators.ts` - Returns the first non-parenthesis internal node, but only
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/object.js` | `hasOwnProperty` | Import |
+| `./utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
+
+**Exports:**
+- Functions: `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
+- Constants: `properties`
+
+---
+
+### `expression/src/parse.ts` - Parse an expression. Returns a node tree, which can be evaluated by
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/factory.js` | `factory` | Import |
+| `./utils/is.js` | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import |
+| `./utils/collection.js` | `deepMap` | Import |
+| `./utils/number.js` | `safeNumberType` | Import |
+| `./utils/object.js` | `hasOwnProperty` | Import |
+| `./node/Node.js` | `MathNode` | Import (type-only) |
+
+**Exports:**
+- Constants: `createParse`
+
+---
+
+### `expression/src/types.ts` - Type definitions for expression module
+
+**Exports:**
+- Types: `TypedFunction`, `TypedFunctionConstructor`
 
 ---
 
@@ -6469,119 +6594,6 @@ graph LR
 
 **Exports:**
 - Re-exports: `createEvaluate`, `compileExpression`
-
----
-
-<a id="expression-dependencies"></a>
-
-## Expression Dependencies
-
-### `expression/src/Help.ts` - Documentation object
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./utils/is.js` | `isHelp` | Import |
-| `./utils/object.js` | `clone` | Import |
-| `./utils/string.js` | `format` | Import |
-| `./utils/factory.js` | `factory` | Import |
-
-**Exports:**
-- Constants: `createHelpClass`
-
----
-
-### `expression/src/index.ts` - Expression parsing and evaluation for MathTS.
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `*` | Re-export |
-| `./keywords.js` | `*` | Re-export |
-| `./operators.js` | `*` | Re-export |
-| `./parse.js` | `*` | Re-export |
-| `./Parser.js` | `*` | Re-export |
-| `./Help.js` | `*` | Re-export |
-| `./compiler/index.js` | `*` | Re-export |
-| `./evaluator/index.js` | `*` | Re-export |
-| `./node/Node.js` | `createNode` | Re-export |
-| `./node/AccessorNode.js` | `createAccessorNode` | Re-export |
-| `./node/ArrayNode.js` | `createArrayNode` | Re-export |
-| `./node/AssignmentNode.js` | `createAssignmentNode` | Re-export |
-| `./node/BlockNode.js` | `createBlockNode` | Re-export |
-| `./node/ConditionalNode.js` | `createConditionalNode` | Re-export |
-| `./node/ConstantNode.js` | `createConstantNode` | Re-export |
-| `./node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode` | Re-export |
-| `./node/FunctionNode.js` | `createFunctionNode` | Re-export |
-| `./node/IndexNode.js` | `createIndexNode` | Re-export |
-| `./node/ObjectNode.js` | `createObjectNode` | Re-export |
-| `./node/OperatorNode.js` | `createOperatorNode` | Re-export |
-| `./node/ParenthesisNode.js` | `createParenthesisNode` | Re-export |
-| `./node/RangeNode.js` | `createRangeNode` | Re-export |
-| `./node/RelationalNode.js` | `createRelationalNode` | Re-export |
-| `./node/SymbolNode.js` | `createSymbolNode` | Re-export |
-
-**Exports:**
-- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
-
----
-
-### `expression/src/keywords.ts` - Reserved keywords not allowed to use in the parser
-
-**Exports:**
-- Constants: `keywords`
-
----
-
-### `expression/src/operators.ts` - Returns the first non-parenthesis internal node, but only
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./utils/object.js` | `hasOwnProperty` | Import |
-| `./utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
-
-**Exports:**
-- Functions: `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
-- Constants: `properties`
-
----
-
-### `expression/src/parse.ts` - Parse an expression. Returns a node tree, which can be evaluated by
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./utils/factory.js` | `factory` | Import |
-| `./utils/is.js` | `isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode, rule2Node` | Import |
-| `./utils/collection.js` | `deepMap` | Import |
-| `./utils/number.js` | `safeNumberType` | Import |
-| `./utils/object.js` | `hasOwnProperty` | Import |
-| `./node/Node.js` | `MathNode` | Import (type-only) |
-
-**Exports:**
-- Constants: `createParse`
-
----
-
-### `expression/src/Parser.ts` - Parser contains methods to evaluate or parse expressions, and has a number
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./utils/factory.js` | `factory` | Import |
-| `./utils/is.js` | `isFunction` | Import |
-| `./utils/map.js` | `createEmptyMap, toObject` | Import |
-
-**Exports:**
-- Constants: `createParserClass`
-
----
-
-### `expression/src/types.ts` - Type definitions for expression module
-
-**Exports:**
-- Types: `TypedFunction`, `TypedFunctionConstructor`
 
 ---
 
@@ -6969,14 +6981,9 @@ graph LR
 
 ### `expression/src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./map.js` | `ObjectWrappingMap` | Import |
-
 **Exports:**
 - Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
-- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isObjectWrappingMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
+- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
 - Constants: `isArray`
 
 ---
@@ -7009,7 +7016,7 @@ graph LR
 
 **Exports:**
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
-- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`
+- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`
 
 ---
 
@@ -7104,20 +7111,6 @@ graph LR
 
 ## Parallel/operations Dependencies
 
-### `parallel/src/operations/eig.ts` - Parallel Eigendecomposition
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../ComputePool.js` | `computePool, ComputePool` | Import |
-| `../ComputePool.js` | `ParallelResult` | Import (type-only) |
-
-**Exports:**
-- Interfaces: `EigResult`, `ParallelEigOptions`
-- Functions: `parallelEig`, `parallelEigvals`
-
----
-
 ### `parallel/src/operations/elementwise.ts` - Parallel Element-wise Operations
 
 **Internal Dependencies:**
@@ -7132,20 +7125,6 @@ graph LR
 
 ---
 
-### `parallel/src/operations/fft.ts` - Parallel FFT Operations
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../ComputePool.js` | `computePool, ComputePool` | Import |
-| `../ComputePool.js` | `ParallelResult` | Import (type-only) |
-
-**Exports:**
-- Interfaces: `FFTResult`, `ParallelFFTOptions`
-- Functions: `parallelFFT`, `parallelIFFT`, `parallelFFTAuto`, `parallelConvolve`
-
----
-
 ### `parallel/src/operations/index.ts` - Parallel Operations
 
 **Internal Dependencies:**
@@ -7154,12 +7133,10 @@ graph LR
 | `./matmul.js` | `parallelMatmul, parallelMatvec, parallelTranspose, parallelOuter, parallelDot, MatmulOptions` | Re-export |
 | `./elementwise.js` | `parallelAdd, parallelSubtract, parallelMultiply, parallelDivide, parallelScale, parallelAbs, parallelNegate, parallelSquare, parallelSqrt, parallelExp, parallelLog, parallelSin, parallelCos, parallelTan, parallelElementwise, parallelUnary, ElementwiseOptions` | Re-export |
 | `./reduce.js` | `parallelSum, parallelMean, parallelMin, parallelMax, parallelMinMax, parallelVariance, parallelStd, parallelNorm, parallelDistance, parallelHistogram, parallelReduce, ReduceOptions` | Re-export |
-| `./fft.js` | `parallelFFT, parallelIFFT, parallelFFTAuto, parallelConvolve, ParallelFFTOptions, FFTResult` | Re-export |
-| `./eig.js` | `parallelEig, parallelEigvals, EigResult, ParallelEigOptions` | Re-export |
 | `./map.js` | `parallelMap, parallelFilter, parallelFind, parallelSort, parallelForEach, parallelSome, parallelEvery, parallelCount, MapOptions` | Re-export |
 
 **Exports:**
-- Re-exports: `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `MatmulOptions`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `ElementwiseOptions`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `ReduceOptions`, `parallelFFT`, `parallelIFFT`, `parallelFFTAuto`, `parallelConvolve`, `ParallelFFTOptions`, `FFTResult`, `parallelEig`, `parallelEigvals`, `EigResult`, `ParallelEigOptions`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `MapOptions`
+- Re-exports: `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `MatmulOptions`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `ElementwiseOptions`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `ReduceOptions`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `MapOptions`
 
 ---
 
@@ -7518,7 +7495,7 @@ graph LR
 | `functions/src/utils/factory` | 1 file | 262 files |
 | `functions/src/factories/index` | 243 files | 2 files |
 | `functions/src/core/function/typed` | 3 files | 181 files |
-| `functions/src/utils/is` | 1 file | 65 files |
+| `functions/src/utils/is` | 0 files | 65 files |
 | `functions/src/plain/number/index` | 9 files | 52 files |
 | `functions/src/utils/array` | 6 files | 50 files |
 | `functions/src/core/config` | 0 files | 52 files |
@@ -7527,7 +7504,7 @@ graph LR
 | `functions/src/utils/collection` | 4 files | 37 files |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files | 27 files |
 | `functions/src/utils/object` | 1 file | 28 files |
-| `expression/src/utils/is` | 1 file | 25 files |
+| `expression/src/utils/is` | 0 files | 25 files |
 | `expression/src/index` | 24 files | 0 files |
 | `functions/src/type/matrix/utils/matAlgo12xSfs` | 2 files | 19 files |
 | `expression/src/utils/factory` | 1 file | 19 files |
@@ -7546,12 +7523,12 @@ graph LR
 | `functions/src/bitwise/rightArithShift` | 13 files | 1 file |
 | `functions/src/type/matrix/utils/matAlgo02xDS0` | 3 files | 11 files |
 | `functions/src/type/matrix/utils/matAlgo14xDs` | 3 files | 11 files |
-| `matrix/src/types/DenseMatrix` | 2 files | 11 files |
 | `functions/src/bitwise/rightLogShift` | 12 files | 1 file |
 | `functions/src/type/matrix/utils/matAlgo07xSSf` | 3 files | 10 files |
 | `expression/src/utils/customs` | 1 file | 12 files |
 | `expression/src/utils/string` | 3 files | 10 files |
 | `matrix/src/backends/index` | 11 files | 1 file |
+| `matrix/src/types/DenseMatrix` | 1 file | 11 files |
 | `functions/src/arithmetic/gcd` | 11 files | 1 file |
 | `functions/src/arithmetic/mod` | 10 files | 2 files |
 | `expression/src/utils/array` | 6 files | 6 files |
@@ -7561,27 +7538,7 @@ graph LR
 <a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
-**6 circular dependencies detected:**
-
-- **Runtime cycles**: 4 (require attention)
-- **Type-only cycles**: 2 (safe, no runtime impact)
-
-### Runtime Circular Dependencies
-
-These cycles involve runtime imports and may cause issues:
-
-- functions/src/utils/object.ts -> functions/src/utils/is.ts -> functions/src/utils/map.ts -> functions/src/utils/customs.ts -> functions/src/utils/object.ts
-- functions/src/utils/is.ts -> functions/src/utils/map.ts -> functions/src/utils/is.ts
-- functions/src/factories/evaluate.ts -> functions/src/typed/index.ts -> functions/src/typed/cas.ts -> functions/src/factories/evaluate.ts
-- expression/src/utils/map.ts -> expression/src/utils/customs.ts -> expression/src/utils/object.ts -> expression/src/utils/is.ts -> expression/src/utils/map.ts
-
-### Type-Only Circular Dependencies
-
-These cycles only involve type imports and are safe (erased at runtime):
-
-- matrix/src/types/DenseMatrix.ts -> matrix/src/types/SparseMatrix.ts -> matrix/src/types/DenseMatrix.ts
-- matrix/src/backends/BackendManager.ts -> matrix/src/config.ts -> matrix/src/backends/BackendManager.ts
-
+**No circular dependencies detected.**
 ---
 
 <a id="visual-dependency-graph"></a>
@@ -7594,531 +7551,530 @@ graph TD
     end
 
     subgraph Packages/workerpool
-        N1[index]
+        N1[fft-core]
+        N2[index]
     end
 
     subgraph Core/factory
-        N2[factory]
-        N3[index]
-    end
-
-    subgraph Core
+        N3[factory]
         N4[index]
     end
 
-    subgraph Core/typed
+    subgraph Core
         N5[index]
-        N6[mathts-typed]
-        N7[type-bridge]
+    end
+
+    subgraph Core/typed
+        N6[index]
+        N7[mathts-typed]
+        N8[type-bridge]
     end
 
     subgraph Core/types
-        N8[bignumber]
-        N9[complex]
-        N10[fraction]
-        N11[interfaces]
+        N9[bignumber]
+        N10[complex]
+        N11[fraction]
+        N12[interfaces]
     end
 
     subgraph Matrix/backends
-        N12[Backend]
-        N13[BackendManager]
-        N14[BatchExecutor]
-        N15[BufferPool]
-        N16[detect]
-        N17[GPUContext]
-        N18[index]
-        N19[ShaderManager]
-        N20[Sync]
-        N21[GPUBackend]
-        N22[...11 more]
+        N13[Backend]
+        N14[BackendManager]
+        N15[GPUBackend]
+        N16[GPUMatrixBackend]
+        N17[JSBackend]
+        N18[ParallelBackend]
+        N19[RustWASMBackend]
+        N20[RustWasmLoader]
+        N21[WASMBackend]
+        N22[WasmLoader]
+        N23[...11 more]
     end
 
     subgraph Matrix
-        N23[config]
-        N24[index]
-        N25[parallel-matrix]
-        N26[typed-operations]
+        N24[config]
+        N25[index]
+        N26[parallel-matrix]
+        N27[typed-operations]
     end
 
     subgraph Matrix/operations
-        N27[eig-wasm]
-        N28[eig]
-        N29[index]
-        N30[svd-wasm]
-        N31[svd]
+        N28[eig-wasm]
+        N29[eig]
+        N30[index]
+        N31[svd-wasm]
+        N32[svd]
     end
 
     subgraph Matrix/types
-        N32[DenseMatrix]
-        N33[index]
+        N33[DenseMatrix]
         N34[Matrix]
         N35[SparseMatrix]
+        N36[index]
     end
 
     subgraph Tensor
-        N36[index]
         N37[Tensor]
+        N38[index]
     end
 
     subgraph Autograd
-        N38[dual-tensor]
-        N39[forward-grad]
-        N40[index]
-        N41[reverse-grad]
-        N42[tape]
+        N39[dual-tensor]
+        N40[forward-grad]
+        N41[index]
+        N42[reverse-grad]
+        N43[tape]
     end
 
     subgraph Functions/algebra
-        N43[lup]
-        N44[qr]
-        N45[schur]
-        N46[slu]
-        N47[derivative]
-        N48[leafCount]
-        N49[lyap]
-        N50[polynomialRoot]
-        N51[rationalize]
-        N52[resolve]
-        N53[...35 more]
+        N44[lup]
+        N45[qr]
+        N46[schur]
+        N47[slu]
+        N48[derivative]
+        N49[leafCount]
+        N50[lyap]
+        N51[polynomialRoot]
+        N52[rationalize]
+        N53[resolve]
+        N54[...35 more]
     end
 
     subgraph Functions/arithmetic
-        N54[abs]
-        N55[addScalar]
-        N56[cbrt]
-        N57[ceil]
-        N58[cube]
-        N59[divide]
-        N60[divideScalar]
-        N61[dotDivide]
-        N62[dotMultiply]
-        N63[dotPow]
-        N64[...28 more]
+        N55[abs]
+        N56[addScalar]
+        N57[cbrt]
+        N58[ceil]
+        N59[cube]
+        N60[divide]
+        N61[divideScalar]
+        N62[dotDivide]
+        N63[dotMultiply]
+        N64[dotPow]
+        N65[...28 more]
     end
 
     subgraph Functions/bitwise
-        N65[bitAnd]
-        N66[bitNot]
-        N67[bitOr]
-        N68[bitXor]
-        N69[leftShift]
-        N70[rightArithShift]
-        N71[rightLogShift]
-        N72[useMatrixForArrayScalar]
+        N66[bitAnd]
+        N67[bitNot]
+        N68[bitOr]
+        N69[bitXor]
+        N70[leftShift]
+        N71[rightArithShift]
+        N72[rightLogShift]
+        N73[useMatrixForArrayScalar]
     end
 
     subgraph Functions/combinatorics
-        N73[bellNumbers]
-        N74[catalan]
-        N75[composition]
-        N76[stirlingS2]
+        N74[bellNumbers]
+        N75[catalan]
+        N76[composition]
+        N77[stirlingS2]
     end
 
     subgraph Functions/complex
-        N77[arg]
-        N78[conj]
-        N79[im]
-        N80[re]
+        N78[arg]
+        N79[conj]
+        N80[im]
+        N81[re]
     end
 
     subgraph Functions/core
-        N81[config]
-        N82[typed]
+        N82[config]
+        N83[typed]
     end
 
     subgraph Functions/error
-        N83[ArgumentsError]
-        N84[DimensionError]
-        N85[IndexError]
+        N84[ArgumentsError]
+        N85[DimensionError]
+        N86[IndexError]
     end
 
     subgraph Functions/expression
-        N86[operators]
+        N87[operators]
     end
 
     subgraph Functions/factories
-        N87[evaluate]
-        N88[index]
-        N89[matrix-bridge]
-        N90[scope]
+        N88[evaluate]
+        N89[index]
+        N90[matrix-bridge]
+        N91[scope]
     end
 
     subgraph Functions/geometry
-        N91[distance]
-        N92[intersect]
+        N92[distance]
+        N93[intersect]
     end
 
     subgraph Functions
-        N93[index]
-        N94[types]
+        N94[index]
+        N95[types]
     end
 
     subgraph Functions/logical
-        N95[and]
-        N96[not]
-        N97[nullish]
-        N98[or]
-        N99[xor]
+        N96[and]
+        N97[not]
+        N98[nullish]
+        N99[or]
+        N100[xor]
     end
 
     subgraph Functions/matrix
-        N100[column]
-        N101[concat]
-        N102[count]
-        N103[cross]
-        N104[ctranspose]
-        N105[det]
-        N106[diag]
-        N107[diff]
-        N108[dot]
-        N109[complexEigs]
-        N110[...34 more]
+        N101[column]
+        N102[concat]
+        N103[count]
+        N104[cross]
+        N105[ctranspose]
+        N106[det]
+        N107[diag]
+        N108[diff]
+        N109[dot]
+        N110[complexEigs]
+        N111[...34 more]
     end
 
     subgraph Functions/numeric
-        N111[solveODE]
+        N112[solveODE]
     end
 
     subgraph Functions/plain
-        N112[arithmetic]
-        N113[bitwise]
-        N114[combinations]
-        N115[constants]
-        N116[index]
-        N117[logical]
-        N118[probability]
-        N119[relational]
-        N120[trigonometry]
-        N121[utils]
+        N113[arithmetic]
+        N114[bitwise]
+        N115[combinations]
+        N116[constants]
+        N117[index]
+        N118[logical]
+        N119[probability]
+        N120[relational]
+        N121[trigonometry]
+        N122[utils]
     end
 
     subgraph Functions/probability
-        N122[bernoulli]
-        N123[combinations]
-        N124[combinationsWithRep]
-        N125[factorial]
-        N126[gamma]
-        N127[kldivergence]
-        N128[lgamma]
-        N129[multinomial]
-        N130[permutations]
-        N131[pickRandom]
-        N132[...4 more]
+        N123[bernoulli]
+        N124[combinations]
+        N125[combinationsWithRep]
+        N126[factorial]
+        N127[gamma]
+        N128[kldivergence]
+        N129[lgamma]
+        N130[multinomial]
+        N131[permutations]
+        N132[pickRandom]
+        N133[...4 more]
     end
 
     subgraph Functions/relational
-        N133[compare]
-        N134[compareNatural]
-        N135[compareText]
-        N136[compareUnits]
-        N137[deepEqual]
-        N138[equal]
-        N139[equalScalar]
-        N140[equalText]
-        N141[larger]
-        N142[largerEq]
-        N143[...3 more]
+        N134[compare]
+        N135[compareNatural]
+        N136[compareText]
+        N137[compareUnits]
+        N138[deepEqual]
+        N139[equal]
+        N140[equalScalar]
+        N141[equalText]
+        N142[larger]
+        N143[largerEq]
+        N144[...3 more]
     end
 
     subgraph Functions/set
-        N144[setCartesian]
-        N145[setDifference]
-        N146[setDistinct]
-        N147[setIntersect]
-        N148[setIsSubset]
-        N149[setMultiplicity]
-        N150[setPowerset]
-        N151[setSize]
-        N152[setSymDifference]
-        N153[setUnion]
+        N145[setCartesian]
+        N146[setDifference]
+        N147[setDistinct]
+        N148[setIntersect]
+        N149[setIsSubset]
+        N150[setMultiplicity]
+        N151[setPowerset]
+        N152[setSize]
+        N153[setSymDifference]
+        N154[setUnion]
     end
 
     subgraph Functions/signal
-        N154[freqz]
-        N155[zpk2tf]
+        N155[freqz]
+        N156[zpk2tf]
     end
 
     subgraph Functions/special
-        N156[erf]
-        N157[zeta]
+        N157[erf]
+        N158[zeta]
     end
 
     subgraph Functions/statistics
-        N158[corr]
-        N159[cumsum]
-        N160[mad]
-        N161[max]
-        N162[mean]
-        N163[median]
-        N164[min]
-        N165[mode]
-        N166[prod]
-        N167[quantileSeq]
-        N168[...4 more]
+        N159[corr]
+        N160[cumsum]
+        N161[mad]
+        N162[max]
+        N163[mean]
+        N164[median]
+        N165[min]
+        N166[mode]
+        N167[prod]
+        N168[quantileSeq]
+        N169[...4 more]
     end
 
     subgraph Functions/string
-        N169[bin]
-        N170[format]
-        N171[hex]
-        N172[oct]
-        N173[print]
+        N170[bin]
+        N171[format]
+        N172[hex]
+        N173[oct]
+        N174[print]
     end
 
     subgraph Functions/trigonometry
-        N174[acos]
-        N175[acosh]
-        N176[acot]
-        N177[acoth]
-        N178[acsc]
-        N179[acsch]
-        N180[asec]
-        N181[asech]
-        N182[asin]
-        N183[asinh]
-        N184[...16 more]
+        N175[acos]
+        N176[acosh]
+        N177[acot]
+        N178[acoth]
+        N179[acsc]
+        N180[acsch]
+        N181[asec]
+        N182[asech]
+        N183[asin]
+        N184[asinh]
+        N185[...16 more]
     end
 
     subgraph Functions/type
-        N185[BigNumber]
-        N186[Chain]
-        N187[chain]
-        N188[Complex]
-        N189[FibonacciHeap]
-        N190[index]
+        N186[BigNumber]
+        N187[Chain]
+        N188[chain]
+        N189[Complex]
+        N190[FibonacciHeap]
         N191[ImmutableDenseMatrix]
         N192[MatrixIndex]
         N193[Spa]
-        N194[types]
-        N195[...22 more]
+        N194[index]
+        N195[types]
+        N196[...22 more]
     end
 
     subgraph Functions/typed
-        N196[algebra]
-        N197[arithmetic]
-        N198[cas]
-        N199[combinatorics]
-        N200[dist-objects]
-        N201[distributions]
-        N202[geometry]
-        N203[graph]
-        N204[hypothesis]
-        N205[index]
-        N206[...9 more]
+        N197[algebra]
+        N198[arithmetic]
+        N199[cas]
+        N200[combinatorics]
+        N201[dist-objects]
+        N202[distributions]
+        N203[geometry]
+        N204[gpu]
+        N205[graph]
+        N206[hypothesis]
+        N207[...10 more]
     end
 
     subgraph Functions/unit
-        N207[to]
-        N208[toBest]
+        N208[to]
+        N209[toBest]
     end
 
     subgraph Functions/utils
-        N209[array]
-        N210[bigint]
-        N211[bitwise]
-        N212[constants]
-        N213[formatter]
-        N214[nearlyEqual]
-        N215[clone]
-        N216[collection]
-        N217[complex]
-        N218[customs]
-        N219[...27 more]
+        N210[array]
+        N211[bigint]
+        N212[bitwise]
+        N213[constants]
+        N214[formatter]
+        N215[nearlyEqual]
+        N216[clone]
+        N217[collection]
+        N218[complex]
+        N219[customs]
+        N220[...27 more]
     end
 
     subgraph Functions/wasm
-        N220[integrity]
         N221[WasmLoader]
-    end
-
-    subgraph Expression/compiler
-        N222[compile]
-        N223[index]
-    end
-
-    subgraph Expression/error
-        N224[DimensionError]
-        N225[IndexError]
-    end
-
-    subgraph Expression/evaluator
-        N226[evaluate]
-        N227[index]
+        N222[integrity]
     end
 
     subgraph Expression
-        N228[Help]
-        N229[index]
-        N230[keywords]
-        N231[operators]
-        N232[parse]
-        N233[Parser]
-        N234[types]
+        N223[Help]
+        N224[Parser]
+        N225[index]
+        N226[keywords]
+        N227[operators]
+        N228[parse]
+        N229[types]
+    end
+
+    subgraph Expression/compiler
+        N230[compile]
+        N231[index]
+    end
+
+    subgraph Expression/error
+        N232[DimensionError]
+        N233[IndexError]
+    end
+
+    subgraph Expression/evaluator
+        N234[evaluate]
+        N235[index]
     end
 
     subgraph Expression/node
-        N235[AccessorNode]
-        N236[ArrayNode]
-        N237[AssignmentNode]
-        N238[BlockNode]
-        N239[ConditionalNode]
-        N240[ConstantNode]
-        N241[FunctionAssignmentNode]
-        N242[FunctionNode]
-        N243[IndexNode]
-        N244[Node]
-        N245[...8 more]
+        N236[AccessorNode]
+        N237[ArrayNode]
+        N238[AssignmentNode]
+        N239[BlockNode]
+        N240[ConditionalNode]
+        N241[ConstantNode]
+        N242[FunctionAssignmentNode]
+        N243[FunctionNode]
+        N244[IndexNode]
+        N245[Node]
+        N246[...8 more]
     end
 
     subgraph Expression/transform
-        N246[errorTransform]
+        N247[errorTransform]
     end
 
     subgraph Expression/utils
-        N247[array]
-        N248[formatter]
-        N249[collection]
-        N250[customs]
-        N251[factory]
-        N252[is]
-        N253[latex]
-        N254[map]
-        N255[number]
-        N256[object]
-        N257[...3 more]
+        N248[array]
+        N249[formatter]
+        N250[collection]
+        N251[customs]
+        N252[factory]
+        N253[is]
+        N254[latex]
+        N255[map]
+        N256[number]
+        N257[object]
+        N258[...3 more]
     end
 
     subgraph Parallel
-        N258[ComputePool]
-        N259[index]
+        N259[ComputePool]
+        N260[index]
     end
 
     subgraph Parallel/operations
-        N260[eig]
         N261[elementwise]
-        N262[fft]
-        N263[index]
-        N264[map]
-        N265[matmul]
-        N266[reduce]
+        N262[index]
+        N263[map]
+        N264[matmul]
+        N265[reduce]
     end
 
     subgraph Parallel/strategies
-        N267[chunk]
-        N268[index]
-        N269[threshold]
+        N266[chunk]
+        N267[index]
+        N268[threshold]
     end
 
     subgraph Workbook
-        N270[executor]
-        N271[graph]
-        N272[index]
-        N273[parser]
-        N274[types]
+        N269[executor]
+        N270[graph]
+        N271[index]
+        N272[parser]
+        N273[types]
     end
 
     subgraph Assembly
-        N275[index]
+        N274[index]
     end
 
     subgraph Assembly/ops
-        N276[approx]
-        N277[array]
-        N278[complex-array]
-        N279[complex-ops]
-        N280[curvefit]
-        N281[linalg]
-        N282[matrix]
-        N283[number-theory]
-        N284[optimization]
-        N285[polynomial]
-        N286[...5 more]
+        N275[approx]
+        N276[array]
+        N277[complex-array]
+        N278[complex-ops]
+        N279[curvefit]
+        N280[linalg]
+        N281[matrix]
+        N282[number-theory]
+        N283[optimization]
+        N284[polynomial]
+        N285[...5 more]
     end
 
     subgraph Assembly/types
-        N287[complex]
+        N286[complex]
     end
 
     subgraph Compat
-        N288[index]
-        N289[shims]
+        N287[index]
+        N288[shims]
     end
 
-    N2 --> N6
-    N3 --> N2
-    N4 --> N9
-    N4 --> N10
-    N4 --> N8
-    N4 --> N5
+    N2 --> N1
+    N3 --> N7
     N4 --> N3
+    N5 --> N10
+    N5 --> N11
+    N5 --> N9
     N5 --> N6
-    N5 --> N7
-    N6 --> N9
-    N6 --> N10
+    N5 --> N4
+    N6 --> N7
     N6 --> N8
-    N7 --> N9
     N7 --> N10
-    N7 --> N8
+    N7 --> N11
+    N7 --> N9
+    N8 --> N10
     N8 --> N11
-    N9 --> N11
-    N10 --> N11
-    N12 --> N32
-    N13 --> N32
-    N13 --> N12
-    N13 --> N23
+    N8 --> N9
+    N9 --> N12
+    N10 --> N12
+    N11 --> N12
+    N13 --> N33
+    N14 --> N33
+    N14 --> N13
     N14 --> N17
-    N14 --> N19
-    N14 --> N15
-    N15 --> N17
-    N17 --> N16
-    N18 --> N16
-    N18 --> N17
-    N18 --> N15
-    N18 --> N19
-    N18 --> N14
-    N18 --> N20
+    N14 --> N24
+    N16 --> N13
+    N16 --> N33
+    N16 --> N17
+    N16 --> N15
+    N17 --> N33
+    N17 --> N13
+    N18 --> N33
+    N18 --> N13
+    N19 --> N13
+    N19 --> N33
     N19 --> N17
-    N20 --> N17
-    N20 --> N15
-    N21 --> N18
-    N23 --> N12
-    N23 --> N13
-    N24 --> N33
-    N24 --> N29
-    N24 --> N26
-    N24 --> N25
-    N27 --> N28
-    N29 --> N28
-    N29 --> N31
-    N29 --> N27
-    N29 --> N30
+    N19 --> N20
+    N21 --> N13
+    N21 --> N33
+    N21 --> N17
+    N21 --> N22
+    N24 --> N13
+    N25 --> N36
+    N25 --> N30
+    N25 --> N27
+    N25 --> N26
+    N28 --> N29
+    N28 --> N22
+    N30 --> N29
+    N30 --> N32
+    N30 --> N28
     N30 --> N31
-    N25 --> N32
-    N26 --> N32
-    N32 --> N34
-    N32 --> N35
+    N31 --> N32
+    N31 --> N20
+    N26 --> N33
+    N27 --> N33
     N33 --> N34
-    N33 --> N32
-    N33 --> N35
     N35 --> N34
-    N35 --> N32
-    N36 --> N37
-    N39 --> N38
-    N40 --> N38
+    N35 --> N33
+    N36 --> N34
+    N36 --> N33
+    N36 --> N35
+    N38 --> N37
     N40 --> N39
-    N40 --> N42
-    N40 --> N41
+    N41 --> N39
+    N41 --> N40
+    N41 --> N43
     N41 --> N42
-    N43 --> N221
+    N42 --> N43
     N44 --> N221
     N45 --> N221
-    N47 --> N82
-    N47 --> N81
+    N46 --> N221
+    N48 --> N83
     N48 --> N82
-    N49 --> N82
-    N50 --> N82
-    N51 --> N82
-    N51 --> N81
+    N49 --> N83
+    N50 --> N83
 ```
 
 ---
@@ -8130,19 +8086,19 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 485 |
 | Total Modules | 55 |
-| Total Lines of Code | 124662 |
-| Total Exports | 2859 |
-| Total Re-exports | 713 |
+| Total Lines of Code | 125177 |
+| Total Exports | 2850 |
+| Total Re-exports | 704 |
 | Total Classes | 45 |
-| Total Interfaces | 241 |
-| Total Functions | 1066 |
+| Total Interfaces | 237 |
+| Total Functions | 1067 |
 | Total Type Guards | 127 |
 | Total Enums | 0 |
-| Type-only Imports | 349 |
-| Runtime Circular Deps | 4 |
-| Type-only Circular Deps | 2 |
+| Type-only Imports | 345 |
+| Runtime Circular Deps | 0 |
+| Type-only Circular Deps | 0 |
 
 ---
 
-*Last Updated*: 2026-05-20
+*Last Updated*: 2026-05-22
 *Version*: 0.1.0

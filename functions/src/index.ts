@@ -12,6 +12,11 @@
 // Typed functions (polymorphic via mathTyped)
 export * from './typed/index.js';
 
+// CAS functions — re-exported from the entry point rather than from
+// `typed/index.js` so the module graph stays acyclic: `cas.ts` depends on the
+// expression evaluator, which depends on the `typed/index.js` barrel.
+export * from './typed/cas.js';
+
 // Activated mathjs leaf factory functions
 export * from './factories/index.js';
 

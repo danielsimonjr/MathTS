@@ -1,6 +1,6 @@
 # MathTS API Reference
 
-**Generated**: 2026-05-20
+**Generated**: 2026-05-22
 
 ---
 
@@ -62,8 +62,8 @@ isObject(x)     isNull(x)        isUndefined(x)    isMatrix(x)
 
 ## @danielsimonjr/mathts-functions
 
-`functions/src/index.ts` exports the typed layer (`functions/src/typed/`, 374
-exports across 17 modules), the factory layer (`functions/src/factories/`), and
+`functions/src/index.ts` exports the typed layer (`functions/src/typed/`, 374+
+exports across 20 modules), the factory layer (`functions/src/factories/`), and
 the expression evaluator — roughly 672 exports total.
 
 ### Arithmetic (54 exports)

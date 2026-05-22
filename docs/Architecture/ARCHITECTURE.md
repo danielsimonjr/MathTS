@@ -1,6 +1,6 @@
 # MathTS Architecture
 
-**Generated**: 2026-05-20
+**Generated**: 2026-05-22
 
 ## System Overview
 
@@ -9,10 +9,14 @@ Turborepo orchestrates builds across the workspace. tsup bundles each package.
 A Cargo crate (`wasm-rust`) provides the primary WASM backend but is not an npm package.
 
 - **485 reachable TypeScript files** (out of 1,387 total; 902 dormant synced from mathjs)
-- **124,662 lines of code** (reachable scope)
-- **2,859 total exports** (713 re-exports)
-- **111 test files**
-- **All 12 packages build**, all typecheck
+- **125,177 lines of code** (reachable scope)
+- **2,850 total exports** (704 re-exports)
+- **114 test files** — 90 of 485 source files have direct coverage (18.6%)
+- **0 circular import dependencies**
+- **All 12 packages build.** 8 packages typecheck cleanly with `tsc --noEmit`;
+  `functions` carries ~599 pre-existing type errors in its dormant synced code
+  (compiled with `strict: false`), and `tensor` / `autograd` each surface 7
+  errors from the upstream `workerpool` dependency's bundled `.ts` source.
 
 ## Package Dependency Graph
 
@@ -36,6 +40,21 @@ workerpool --> parallel ------+           |
 | functions | @danielsimonjr/mathts-core (5), @danielsimonjr/mathts-parallel (4) |
 | parallel | @danielsimonjr/mathts-workerpool (1), @danielsimonjr/mathts-parallel (1) |
 | compat | @danielsimonjr/mathts-core (3), @danielsimonjr/mathts-compat (2), @danielsimonjr/mathts-matrix (2), @danielsimonjr/mathts-parallel (1), @danielsimonjr/mathts-functions (1) |
+
+### Circular Dependencies
+
+The dependency-graph report detects **0 import cycles**. Seven cycles flagged
+by the 2026-05-22 report were all eliminated:
+
+| Former cycle | Fix |
+|--------------|-----|
+| `functions/src/utils/`: `is ↔ map` and `object → is → map → customs → object` | `isObjectWrappingMap` moved into `map.ts` (next to the `ObjectWrappingMap` class); `is.ts` no longer imports `map.ts` — that single edge closed both cycles |
+| `expression/src/utils/`: `is ↔ map` and `object → is → map → customs → object` | same fix as `functions/src/utils/` |
+| `functions/src/factories/evaluate.ts → typed/index.ts → typed/cas.ts → evaluate.ts` | the `export * from './cas.js'` re-export moved from `typed/index.ts` to the package entry `functions/src/index.ts`, so the `typed/index.ts → cas.ts` edge is gone |
+| `matrix/src/types/`: `DenseMatrix ↔ SparseMatrix` | `DenseMatrix` dropped its `import type { SparseMatrix }`; `toSparse()` is typed as the `Matrix` base (the `SparseMatrix` subtype is still loaded lazily at runtime) |
+| `matrix/src/backends/`: `BackendManager ↔ config` | the `OperationType` type moved from `BackendManager.ts` to `config.ts` (the lower-level module); `config.ts` no longer imports `BackendManager` |
+
+No package has any remaining runtime or type-only cycle.
 
 ## Core Systems
 
@@ -66,7 +85,7 @@ Two factory layers exist in the codebase:
 
 | Layer | Location | Count | Status |
 |-------|----------|-------|--------|
-| Native typed functions | `functions/src/typed/` | 17 files, 374 exports | Active, exported |
+| Native typed functions | `functions/src/typed/` | 20 files | Active, exported |
 | Synced mathjs factories | `functions/src/<category>/` | 19 categories, 242 factories | Dormant, not exported |
 
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
@@ -209,7 +228,7 @@ Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build 
 
 Source-file counts below are reachable (active) files; dormant synced files are
 excluded. The report counts 485 reachable TypeScript files total across all
-packages, 902 dormant, and 2,859 exports.
+packages, 902 dormant, and 2,850 exports.
 
 | Package | Active Files | Dormant Files |
 |---------|-------------|---------------|
@@ -217,12 +236,12 @@ packages, 902 dormant, and 2,859 exports.
 | matrix | 34 | 4 |
 | tensor | 2 | 0 |
 | autograd | 5 | 0 |
-| functions | 351 | 418 |
-| parallel | 12 | 4 |
+| functions | 352 | 418 |
+| parallel | 10 | 4 |
 | expression | 45 | 382 |
 | workbook | 5 | 2 |
 | compat | 2 | 1 |
 | assembly (wasm) | 17 | 3 |
 | typed-function | 1 | 1 |
-| workerpool | 1 | 2 |
+| workerpool | 2 | 2 |
 | **Total** | **485** | **902** |

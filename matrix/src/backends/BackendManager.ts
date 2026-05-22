@@ -12,23 +12,17 @@ import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { MatrixBackend, BackendType, BackendHints } from './Backend.js';
 import { backendRegistry, DEFAULT_BACKEND_HINTS } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
-import { getConfig, onConfigChange, type MatrixConfig } from '../config.js';
+import {
+  getConfig,
+  onConfigChange,
+  type MatrixConfig,
+  type OperationType,
+} from '../config.js';
 
-/**
- * Operation type hints for backend selection
- */
-export type OperationType =
-  | 'add'
-  | 'subtract'
-  | 'multiply'
-  | 'multiplyElementwise'
-  | 'transpose'
-  | 'scale'
-  | 'decomposition'
-  | 'solve'
-  | 'fft'
-  | 'eig'
-  | 'svd';
+// `OperationType` is defined in `config.ts` (to break the config/BackendManager
+// import cycle); re-exported here so existing `./BackendManager.js` importers
+// keep resolving it.
+export type { OperationType };
 
 /**
  * Extended backend hints with operation-specific thresholds
