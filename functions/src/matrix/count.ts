@@ -41,7 +41,7 @@ export const createCount = /* #__PURE__ */ factory(
       },
 
       'Matrix | Array': function (x: any): number {
-        return prod(size(x))
+        return prod(size(x)) as number
       }
     })
   }

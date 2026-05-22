@@ -84,7 +84,7 @@ export const createSort = /* #__PURE__ */ factory(
         _matrixIsVector(x)
         return matrix(x.toArray().sort(_comparator(order)), x.storage())
       }
-    })
+    }) as unknown as TypedFunction
 
     /**
      * Get the comparator for given order ('asc', 'desc', 'natural')

@@ -80,7 +80,7 @@ export const createMapSlices = /* #__PURE__ */ factory(
           return _mapSlices(mat, dimNum, callback)
         }
       }
-    })
+    }) as unknown as TypedFunction
   },
   { formerly: 'apply' }
 )

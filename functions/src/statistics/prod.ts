@@ -144,7 +144,7 @@ export const createProd = /* #__PURE__ */ factory(
       // JavaScript fallback for mixed types, BigNumber, Complex, etc.
       let prod: unknown
 
-      deepForEach(array, function (value: unknown) {
+      deepForEach(array as any, function (value: unknown) {
         try {
           // Pre-convert string inputs BEFORE multiplication
           const converted =

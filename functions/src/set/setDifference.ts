@@ -99,10 +99,10 @@ export const createSetDifference = /* #__PURE__ */ factory(
         }
         // return an array, if both inputs were arrays
         if (Array.isArray(a1) && Array.isArray(a2)) {
-          return generalize(result)
+          return generalize(result) as unknown as MathArray
         }
         // return a matrix otherwise
-        return new DenseMatrix(generalize(result))
+        return new DenseMatrix(generalize(result)) as unknown as Matrix
       }
     })
   }

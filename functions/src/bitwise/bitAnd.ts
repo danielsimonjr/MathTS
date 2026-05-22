@@ -61,9 +61,9 @@ export const createBitAnd = /* #__PURE__ */ factory(
         'bigint, bigint': (x: bigint, y: bigint): bigint => x & y
       },
       matrixAlgorithmSuite({
-        SS: matAlgo06xS0S0,
-        DS: matAlgo02xDS0,
-        Ss: matAlgo11xS0s
+        SS: matAlgo06xS0S0 as any,
+        DS: matAlgo02xDS0 as any,
+        Ss: matAlgo11xS0s as any
       })
     )
   }

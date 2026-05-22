@@ -102,13 +102,13 @@ export const createXor = /* #__PURE__ */ factory(
         'Unit, Unit': typed.referToSelf(
           (self: TypedFunction) =>
             (x: Unit, y: Unit): boolean =>
-              self(x.value || 0, y.value || 0)
+              self(x.value || 0, y.value || 0) as boolean
         )
       },
       matrixAlgorithmSuite({
-        SS: matAlgo07xSSf,
-        DS: matAlgo03xDSf,
-        Ss: matAlgo12xSfs
+        SS: matAlgo07xSSf as any,
+        DS: matAlgo03xDSf as any,
+        Ss: matAlgo12xSfs as any
       })
     )
   }

@@ -79,7 +79,7 @@ export const createSetSymDifference = /* #__PURE__ */ factory(
         }
         const b1 = flatten(a1 as MathNumericType[])
         const b2 = flatten(a2 as MathNumericType[])
-        return concat(setDifference(b1, b2), setDifference(b2, b1))
+        return concat(setDifference(b1, b2), setDifference(b2, b1)) as MathNumericType[] | Matrix
       }
     })
   }

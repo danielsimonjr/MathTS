@@ -85,7 +85,7 @@ export const createSetUnion = /* #__PURE__ */ factory(
         }
         const b1 = flatten(a1 as MathNumericType[])
         const b2 = flatten(a2 as MathNumericType[])
-        return concat(setSymDifference(b1, b2), setIntersect(b1, b2))
+        return concat(setSymDifference(b1, b2), setIntersect(b1, b2)) as MathNumericType[] | Matrix
       }
     })
   }

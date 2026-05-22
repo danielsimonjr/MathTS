@@ -96,7 +96,7 @@ export const createErf = /* #__PURE__ */ factory(
                 }
               }
             }
-            return deepMap(n, self)
+            return deepMap(n as any, self) as unknown[] | Matrix
           }
       )
 
