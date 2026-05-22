@@ -1025,6 +1025,209 @@ export class MathWorkerPool {
   }
 
   // =========================================================================
+  // Bitwise Operations (Int32Array)
+  // =========================================================================
+
+  /**
+   * Element-wise bitwise binary op over two `Int32Array`s.
+   *
+   * Mirrors `elementwise` but is keyed on `Int32Array` so the worker reads
+   * the buffers back as `Int32Array` (not `Float64Array`). Below threshold
+   * the binary op is computed in-process; otherwise chunks are distributed
+   * to `bitwiseChunk` worker kernels.
+   *
+   * Op codes correspond to the seven `parallel/src/ops/bitwise.ts` exports:
+   * `'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' |
+   * 'rightLogShift'`.
+   */
+  async bitwiseBinary(
+    a: Int32Array,
+    b: Int32Array,
+    op: 'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' | 'rightLogShift',
+    options?: TaskOptions
+  ): Promise<ParallelResult<Int32Array>> {
+    if (a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+
+    const start = performance.now();
+
+    if (!this.shouldParallelize(a.length, options)) {
+      const result = new Int32Array(a.length);
+      switch (op) {
+        case 'bitAnd':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] & b[i];
+          break;
+        case 'bitOr':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] | b[i];
+          break;
+        case 'bitXor':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] ^ b[i];
+          break;
+        case 'leftShift':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] << b[i];
+          break;
+        case 'rightArithShift':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] >> b[i];
+          break;
+        case 'rightLogShift':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] >>> b[i];
+          break;
+      }
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunkPairs = this.chunkPairInt32Array(a, b, options?.chunkSize);
+    const stats = this.stats();
+
+    const results = await Promise.all(
+      chunkPairs.map(([chunkA, chunkB]) =>
+        this.exec<ArrayBuffer>('bitwiseChunk', [
+          chunkA.buffer,
+          chunkB.buffer,
+          0,
+          chunkA.length,
+          op,
+        ])
+      )
+    );
+
+    const combined = this.combineInt32Buffers(results, a.length);
+
+    return {
+      result: combined,
+      duration: performance.now() - start,
+      chunks: chunkPairs.length,
+      parallelized: true,
+      workersUsed: Math.min(chunkPairs.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * Element-wise bitwise op on an `Int32Array` with a scalar second operand.
+   *
+   * Used by the shift overloads when `b` is a single `number` rather than
+   * a per-element `Int32Array`.
+   */
+  async bitwiseScalar(
+    a: Int32Array,
+    scalar: number,
+    op: 'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' | 'rightLogShift',
+    options?: TaskOptions
+  ): Promise<ParallelResult<Int32Array>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(a.length, options)) {
+      const result = new Int32Array(a.length);
+      switch (op) {
+        case 'bitAnd':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] & scalar;
+          break;
+        case 'bitOr':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] | scalar;
+          break;
+        case 'bitXor':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] ^ scalar;
+          break;
+        case 'leftShift':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] << scalar;
+          break;
+        case 'rightArithShift':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] >> scalar;
+          break;
+        case 'rightLogShift':
+          for (let i = 0; i < a.length; i++) result[i] = a[i] >>> scalar;
+          break;
+      }
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunks = this.chunkInt32Array(a, options?.chunkSize);
+    const stats = this.stats();
+
+    const results = await Promise.all(
+      chunks.map((chunk) =>
+        this.exec<ArrayBuffer>('bitwiseScalarChunk', [
+          chunk.buffer,
+          0,
+          chunk.length,
+          scalar,
+          op,
+        ])
+      )
+    );
+
+    const combined = this.combineInt32Buffers(results, a.length);
+
+    return {
+      result: combined,
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  /**
+   * Unary bitwise NOT (`~a[i]`) over an `Int32Array`.
+   */
+  async bitwiseNot(
+    a: Int32Array,
+    options?: TaskOptions
+  ): Promise<ParallelResult<Int32Array>> {
+    const start = performance.now();
+
+    if (!this.shouldParallelize(a.length, options)) {
+      const result = new Int32Array(a.length);
+      for (let i = 0; i < a.length; i++) {
+        result[i] = ~a[i];
+      }
+      return {
+        result,
+        duration: performance.now() - start,
+        chunks: 1,
+        parallelized: false,
+        workersUsed: 0,
+      };
+    }
+
+    const chunks = this.chunkInt32Array(a, options?.chunkSize);
+    const stats = this.stats();
+
+    const results = await Promise.all(
+      chunks.map((chunk) =>
+        this.exec<ArrayBuffer>('bitwiseNotChunk', [
+          chunk.buffer,
+          0,
+          chunk.length,
+        ])
+      )
+    );
+
+    const combined = this.combineInt32Buffers(results, a.length);
+
+    return {
+      result: combined,
+      duration: performance.now() - start,
+      chunks: chunks.length,
+      parallelized: true,
+      workersUsed: Math.min(chunks.length, stats.totalWorkers),
+    };
+  }
+
+  // =========================================================================
   // Matrix Operations
   // =========================================================================
 
@@ -2316,6 +2519,45 @@ export class MathWorkerPool {
       pairs.push([a.slice(i, end), b.slice(i, end)]);
     }
     return pairs;
+  }
+
+  // Int32 counterparts to the Float64 chunkers. Same slice()-not-subarray()
+  // invariant: a subarray shares the full underlying ArrayBuffer, so passing
+  // `chunk.buffer` with `start: 0` to a worker kernel would read the wrong
+  // region for every chunk past the first.
+  private chunkInt32Array(data: Int32Array, customChunkSize?: number): Int32Array[] {
+    const chunkSize = customChunkSize ?? this.config.chunkSize;
+    const chunks: Int32Array[] = [];
+    for (let i = 0; i < data.length; i += chunkSize) {
+      const end = Math.min(i + chunkSize, data.length);
+      chunks.push(data.slice(i, end));
+    }
+    return chunks;
+  }
+
+  private chunkPairInt32Array(
+    a: Int32Array,
+    b: Int32Array,
+    customChunkSize?: number
+  ): [Int32Array, Int32Array][] {
+    const chunkSize = customChunkSize ?? this.config.chunkSize;
+    const pairs: [Int32Array, Int32Array][] = [];
+    for (let i = 0; i < a.length; i += chunkSize) {
+      const end = Math.min(i + chunkSize, a.length);
+      pairs.push([a.slice(i, end), b.slice(i, end)]);
+    }
+    return pairs;
+  }
+
+  private combineInt32Buffers(buffers: ArrayBuffer[], totalLength: number): Int32Array {
+    const result = new Int32Array(totalLength);
+    let offset = 0;
+    for (const buf of buffers) {
+      const chunk = new Int32Array(buf);
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
+    return result;
   }
 
   private chunkArray<T>(arr: T[], chunkSize?: number): T[][] {

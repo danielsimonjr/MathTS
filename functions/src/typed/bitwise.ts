@@ -22,6 +22,11 @@
 
 import { mathTyped, BigNumber } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import {
+  WASM_BITWISE_THRESHOLD,
+  runBinaryBitwiseWasm,
+  runUnaryBitwiseWasm,
+} from '../wasm/bitwise/wasm-bridge.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -131,6 +136,10 @@ export const bitAnd = mathTyped('bitAnd', {
     a: Int32Array,
     b: Int32Array
   ): Promise<Int32Array> => {
+    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
+      const wasmResult = runBinaryBitwiseWasm('bitAnd', a, b);
+      if (wasmResult) return wasmResult;
+    }
     const result = await computePool.bitAnd(a, b);
     return result.result;
   },
@@ -168,6 +177,10 @@ export const bitOr = mathTyped('bitOr', {
     a: Int32Array,
     b: Int32Array
   ): Promise<Int32Array> => {
+    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
+      const wasmResult = runBinaryBitwiseWasm('bitOr', a, b);
+      if (wasmResult) return wasmResult;
+    }
     const result = await computePool.bitOr(a, b);
     return result.result;
   },
@@ -202,6 +215,10 @@ export const bitXor = mathTyped('bitXor', {
     a: Int32Array,
     b: Int32Array
   ): Promise<Int32Array> => {
+    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
+      const wasmResult = runBinaryBitwiseWasm('bitXor', a, b);
+      if (wasmResult) return wasmResult;
+    }
     const result = await computePool.bitXor(a, b);
     return result.result;
   },
@@ -235,6 +252,10 @@ export const bitNot = mathTyped('bitNot', {
   },
 
   'Int32Array': async (a: Int32Array): Promise<Int32Array> => {
+    if (a.length >= WASM_BITWISE_THRESHOLD) {
+      const wasmResult = runUnaryBitwiseWasm('bitNot', a);
+      if (wasmResult) return wasmResult;
+    }
     const result = await computePool.bitNot(a);
     return result.result;
   },
@@ -269,6 +290,10 @@ export const leftShift = mathTyped('leftShift', {
     a: Int32Array,
     b: Int32Array
   ): Promise<Int32Array> => {
+    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
+      const wasmResult = runBinaryBitwiseWasm('leftShift', a, b);
+      if (wasmResult) return wasmResult;
+    }
     const result = await computePool.leftShift(a, b);
     return result.result;
   },
@@ -313,6 +338,10 @@ export const rightArithShift = mathTyped('rightArithShift', {
     a: Int32Array,
     b: Int32Array
   ): Promise<Int32Array> => {
+    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
+      const wasmResult = runBinaryBitwiseWasm('rightArithShift', a, b);
+      if (wasmResult) return wasmResult;
+    }
     const result = await computePool.rightArithShift(a, b);
     return result.result;
   },
@@ -357,6 +386,10 @@ export const rightLogShift = mathTyped('rightLogShift', {
     a: Int32Array,
     b: Int32Array
   ): Promise<Int32Array> => {
+    if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
+      const wasmResult = runBinaryBitwiseWasm('rightLogShift', a, b);
+      if (wasmResult) return wasmResult;
+    }
     const result = await computePool.rightLogShift(a, b);
     return result.result;
   },

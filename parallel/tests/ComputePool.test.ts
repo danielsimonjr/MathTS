@@ -636,4 +636,273 @@ describe('ComputePool', () => {
       await pool.terminate();
     });
   });
+
+  // ===========================================================================
+  // Bitwise Operations (Int32Array) — both the worker-dispatched path
+  // (above threshold) and the in-process fallback (below threshold).
+  //
+  // Tests use a small custom threshold so we can exercise the parallel
+  // path on 100-element fixtures rather than 50_000-element ones.
+  // ===========================================================================
+
+  describe('Bitwise Operations (Int32Array)', () => {
+    /** Build an Int32Array of `length` with edge values + xorshift fill. */
+    function buildInt32Fixture(length: number, seed = 1): Int32Array {
+      const data = new Int32Array(length);
+      const edges = [0, 1, -1, 0x7fffffff, -0x80000000, 0xff, -2, 0b10101010];
+      let s = seed;
+      for (let i = 0; i < length; i++) {
+        if (i < edges.length) {
+          data[i] = edges[i];
+        } else {
+          s ^= s << 13;
+          s ^= s >>> 17;
+          s ^= s << 5;
+          data[i] = s | 0;
+        }
+      }
+      return data;
+    }
+
+    /** Apply a JS bitwise operator element-wise — the test oracle. */
+    function oracleBinary(
+      a: Int32Array,
+      b: Int32Array,
+      op: 'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' | 'rightLogShift'
+    ): Int32Array {
+      const out = new Int32Array(a.length);
+      for (let i = 0; i < a.length; i++) {
+        switch (op) {
+          case 'bitAnd': out[i] = a[i] & b[i]; break;
+          case 'bitOr': out[i] = a[i] | b[i]; break;
+          case 'bitXor': out[i] = a[i] ^ b[i]; break;
+          case 'leftShift': out[i] = a[i] << b[i]; break;
+          case 'rightArithShift': out[i] = a[i] >> b[i]; break;
+          case 'rightLogShift': out[i] = a[i] >>> b[i]; break;
+        }
+      }
+      return out;
+    }
+
+    function oracleScalar(
+      a: Int32Array,
+      s: number,
+      op: 'leftShift' | 'rightArithShift' | 'rightLogShift'
+    ): Int32Array {
+      const out = new Int32Array(a.length);
+      for (let i = 0; i < a.length; i++) {
+        switch (op) {
+          case 'leftShift': out[i] = a[i] << s; break;
+          case 'rightArithShift': out[i] = a[i] >> s; break;
+          case 'rightLogShift': out[i] = a[i] >>> s; break;
+        }
+      }
+      return out;
+    }
+
+    describe('Above threshold (worker-dispatched)', () => {
+      let pool: ComputePool;
+
+      beforeAll(async () => {
+        // Force parallel path: low threshold + small chunk so a 100-element
+        // input produces multiple chunks (>1).
+        pool = new ComputePool({
+          maxWorkers: 3,
+          thresholdElements: 10,
+          chunkSize: 7,
+        });
+        await pool.initialize();
+      }, 60_000);
+
+      afterAll(async () => {
+        await pool.terminate();
+      });
+
+      it('bitAnd dispatches to workers and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 1);
+        const b = buildInt32Fixture(100, 2);
+        const r = await pool.bitAnd(a, b);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        expect(Array.from(r.result)).toEqual(Array.from(oracleBinary(a, b, 'bitAnd')));
+      });
+
+      it('bitOr dispatches to workers and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 3);
+        const b = buildInt32Fixture(100, 4);
+        const r = await pool.bitOr(a, b);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        expect(Array.from(r.result)).toEqual(Array.from(oracleBinary(a, b, 'bitOr')));
+      });
+
+      it('bitXor dispatches to workers and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 5);
+        const b = buildInt32Fixture(100, 6);
+        const r = await pool.bitXor(a, b);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        expect(Array.from(r.result)).toEqual(Array.from(oracleBinary(a, b, 'bitXor')));
+      });
+
+      it('bitNot dispatches to workers and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 7);
+        const r = await pool.bitNot(a);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        const expected = new Int32Array(100);
+        for (let i = 0; i < 100; i++) expected[i] = ~a[i];
+        expect(Array.from(r.result)).toEqual(Array.from(expected));
+      });
+
+      it('leftShift (Int32 × Int32) dispatches and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 8);
+        const b = buildInt32Fixture(100, 9);
+        const r = await pool.leftShift(a, b);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        expect(Array.from(r.result)).toEqual(Array.from(oracleBinary(a, b, 'leftShift')));
+      });
+
+      it('leftShift (Int32 × scalar) dispatches and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 10);
+        const r = await pool.leftShift(a, 3);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        expect(Array.from(r.result)).toEqual(Array.from(oracleScalar(a, 3, 'leftShift')));
+      });
+
+      it('rightArithShift (Int32 × Int32) dispatches and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 11);
+        const b = buildInt32Fixture(100, 12);
+        const r = await pool.rightArithShift(a, b);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        expect(Array.from(r.result)).toEqual(Array.from(oracleBinary(a, b, 'rightArithShift')));
+      });
+
+      it('rightArithShift (Int32 × scalar) dispatches and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 13);
+        const r = await pool.rightArithShift(a, 4);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        expect(Array.from(r.result)).toEqual(Array.from(oracleScalar(a, 4, 'rightArithShift')));
+      });
+
+      it('rightLogShift (Int32 × Int32) dispatches and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 14);
+        const b = buildInt32Fixture(100, 15);
+        const r = await pool.rightLogShift(a, b);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        expect(Array.from(r.result)).toEqual(Array.from(oracleBinary(a, b, 'rightLogShift')));
+      });
+
+      it('rightLogShift (Int32 × scalar) dispatches and matches oracle', async () => {
+        const a = buildInt32Fixture(100, 16);
+        const r = await pool.rightLogShift(a, 7);
+
+        expect(r.parallelized).toBe(true);
+        expect(r.chunks).toBeGreaterThan(1);
+        expect(Array.from(r.result)).toEqual(Array.from(oracleScalar(a, 7, 'rightLogShift')));
+      });
+
+      it('result is a fresh Int32Array (not a Float64Array)', async () => {
+        const a = buildInt32Fixture(100, 17);
+        const b = buildInt32Fixture(100, 18);
+        const r = await pool.bitAnd(a, b);
+        expect(r.result).toBeInstanceOf(Int32Array);
+      });
+    });
+
+    describe('Below threshold (in-process fallback)', () => {
+      let pool: ComputePool;
+
+      beforeAll(async () => {
+        // Very high threshold forces every call to fall back.
+        pool = new ComputePool({ thresholdElements: 1_000_000 });
+        await pool.initialize();
+      });
+
+      afterAll(async () => {
+        await pool.terminate();
+      });
+
+      it('bitAnd runs in-process below threshold', async () => {
+        const a = Int32Array.from([0b1100, 0b1010, 0b1111]);
+        const b = Int32Array.from([0b1010, 0b1100, 0b0101]);
+        const r = await pool.bitAnd(a, b);
+        expect(r.parallelized).toBe(false);
+        expect(r.chunks).toBe(1);
+        expect(Array.from(r.result)).toEqual([0b1000, 0b1000, 0b0101]);
+      });
+
+      it('bitOr runs in-process below threshold', async () => {
+        const a = Int32Array.from([0b1100, 0b0001]);
+        const b = Int32Array.from([0b0011, 0b1000]);
+        const r = await pool.bitOr(a, b);
+        expect(r.parallelized).toBe(false);
+        expect(Array.from(r.result)).toEqual([0b1111, 0b1001]);
+      });
+
+      it('bitXor runs in-process below threshold', async () => {
+        const a = Int32Array.from([0b1100, 0b1010]);
+        const b = Int32Array.from([0b1010, 0b1010]);
+        const r = await pool.bitXor(a, b);
+        expect(r.parallelized).toBe(false);
+        expect(Array.from(r.result)).toEqual([0b0110, 0]);
+      });
+
+      it('bitNot runs in-process below threshold', async () => {
+        const a = Int32Array.from([0, -1, 1, 0x7fffffff]);
+        const r = await pool.bitNot(a);
+        expect(r.parallelized).toBe(false);
+        expect(Array.from(r.result)).toEqual([-1, 0, -2, -0x80000000]);
+      });
+
+      it('leftShift (scalar) runs in-process below threshold', async () => {
+        const a = Int32Array.from([1, 2, 3, 4]);
+        const r = await pool.leftShift(a, 2);
+        expect(r.parallelized).toBe(false);
+        expect(Array.from(r.result)).toEqual([4, 8, 12, 16]);
+      });
+
+      it('rightArithShift (Int32) runs in-process below threshold', async () => {
+        const a = Int32Array.from([-8, 8, 16]);
+        const b = Int32Array.from([1, 1, 2]);
+        const r = await pool.rightArithShift(a, b);
+        expect(r.parallelized).toBe(false);
+        expect(Array.from(r.result)).toEqual([-4, 4, 4]);
+      });
+
+      it('rightLogShift (scalar) runs in-process below threshold', async () => {
+        const a = Int32Array.from([-1, -2, 4]);
+        const r = await pool.rightLogShift(a, 1);
+        expect(r.parallelized).toBe(false);
+        // -1 >>> 1 = 0x7fffffff
+        expect(Array.from(r.result)).toEqual([0x7fffffff, 0x7fffffff, 2]);
+      });
+
+      it('throws on length mismatch (bitAnd)', async () => {
+        const a = Int32Array.from([1, 2, 3]);
+        const b = Int32Array.from([1, 2]);
+        await expect(pool.bitAnd(a, b)).rejects.toThrow('lengths must match');
+      });
+
+      it('throws on length mismatch (leftShift with Int32 b)', async () => {
+        const a = Int32Array.from([1, 2, 3]);
+        const b = Int32Array.from([1, 2]);
+        await expect(pool.leftShift(a, b)).rejects.toThrow('lengths must match');
+      });
+    });
+  });
 });

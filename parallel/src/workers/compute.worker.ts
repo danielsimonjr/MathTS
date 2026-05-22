@@ -209,76 +209,10 @@ function scaleChunk(
   return result.buffer;
 }
 
-/**
- * Bitwise element-wise op on two Int32Array chunks. The result buffer
- * is returned as a fresh `ArrayBuffer` so the worker can transfer it
- * back zero-copy.
- *
- * Op codes match the binary ops exposed by `parallel/src/ops/bitwise.ts`:
- * `'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' |
- * 'rightLogShift'`.
- */
-function bitwiseBinaryChunk(
-  aBuffer: ArrayBuffer,
-  bBuffer: ArrayBuffer,
-  start: number,
-  length: number,
-  op:
-    | 'bitAnd'
-    | 'bitOr'
-    | 'bitXor'
-    | 'leftShift'
-    | 'rightArithShift'
-    | 'rightLogShift'
-): ArrayBuffer {
-  const a = new Int32Array(aBuffer);
-  const b = new Int32Array(bBuffer);
-  const result = new Int32Array(length);
-
-  for (let i = 0; i < length; i++) {
-    const ai = a[start + i];
-    const bi = b[start + i];
-    switch (op) {
-      case 'bitAnd':
-        result[i] = ai & bi;
-        break;
-      case 'bitOr':
-        result[i] = ai | bi;
-        break;
-      case 'bitXor':
-        result[i] = ai ^ bi;
-        break;
-      case 'leftShift':
-        result[i] = ai << bi;
-        break;
-      case 'rightArithShift':
-        result[i] = ai >> bi;
-        break;
-      case 'rightLogShift':
-        result[i] = ai >>> bi;
-        break;
-    }
-  }
-
-  return result.buffer;
-}
-
-/**
- * Unary bitwise NOT over an `Int32Array` chunk. Returns a fresh
- * `ArrayBuffer` for zero-copy transfer.
- */
-function bitwiseNotChunk(
-  buffer: ArrayBuffer,
-  start: number,
-  length: number
-): ArrayBuffer {
-  const data = new Int32Array(buffer);
-  const result = new Int32Array(length);
-  for (let i = 0; i < length; i++) {
-    result[i] = ~data[start + i];
-  }
-  return result.buffer;
-}
+// Bitwise Int32 kernels live in the active workerpool (`packages/workerpool/src/worker.ts`:
+// `bitwiseChunk`, `bitwiseScalarChunk`, `bitwiseNotChunk`). The handlers that
+// previously sat here were dormant scaffolding — `compute.worker.ts` itself
+// is not loaded by `MathWorkerPool`, so they could never run.
 
 /**
  * Find min/max in a chunk
@@ -322,6 +256,4 @@ worker({
   mapChunk,
   scaleChunk,
   minMaxChunk,
-  bitwiseBinaryChunk,
-  bitwiseNotChunk,
 } as Record<string, (...args: unknown[]) => unknown>);

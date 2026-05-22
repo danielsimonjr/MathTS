@@ -522,6 +522,85 @@ export interface WasmModule {
   rk45Step: (yPtr: number, t: number, h: number, n: number, kPtr: number, yNextPtr: number, yErrorPtr: number) => void
   rk23Step: (yPtr: number, t: number, h: number, n: number, kPtr: number, yNextPtr: number, yErrorPtr: number) => void
 
+  // Bitwise operations (Int32, elementwise). See
+  // functions/src/wasm/WasmLoader.ts for full notes — kept in sync here
+  // because the matrix package ships its own loader interface for the
+  // matrix backends, and downstream code (e.g. the WASMBackend) may use
+  // either signature. Rust naming uses *_Array / *_ArrayPerElement; AS
+  // naming uses *_i32_array.
+  bitAndArray?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  bitOrArray?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  bitXorArray?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  bitNotArray?: (
+    inputPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  leftShiftArrayPerElement?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  rightArithShiftArrayPerElement?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  rightLogShiftArrayPerElement?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  bitAnd_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  bitOr_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  bitXor_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  bitNot_i32_array?: (a: Int32Array, result: Int32Array) => void
+  leftShift_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  rightArithShift_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  rightLogShift_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+
   // Memory management
   __new: (size: number, id: number) => number
   __pin: (ptr: number) => number

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { BigNumber } from '@danielsimonjr/mathts-core'
 import {
   format,
   toEngineering,
@@ -7,85 +8,12 @@ import {
 } from '../src/utils/bignumber/formatter.js'
 
 /**
- * Minimal mock BigNumber that satisfies the formatter's duck-typed interface.
- * The formatter uses: isFinite(), isNaN(), gt(n), isZero(), toSignificantDigits(n),
- * .e, toFixed([n]), toExponential([n]), toPrecision(n), mul(n).
+ * Helper that wraps BigNumber.fromNumber / BigNumber.parse so tests read like
+ * the old `bn(value)` call pattern.
  */
-class MockBigNumber {
-  _value: number
-  e: number
-  isBigNumber: boolean = true
-
-  constructor(value: number | string) {
-    this._value = typeof value === 'number' ? value : parseFloat(value as string)
-    // Exponent of the number in base-10 scientific notation
-    const abs = Math.abs(this._value)
-    this.e = abs === 0 ? 0 : Math.floor(Math.log10(abs))
-  }
-
-  isFinite() {
-    return isFinite(this._value)
-  }
-
-  isNaN() {
-    return isNaN(this._value)
-  }
-
-  isZero() {
-    return this._value === 0
-  }
-
-  gt(x: number | MockBigNumber) {
-    const v = x instanceof MockBigNumber ? x._value : x
-    return this._value > v
-  }
-
-  lessThan(x: number | MockBigNumber) {
-    const v = x instanceof MockBigNumber ? x._value : x
-    return this._value < v
-  }
-
-  greaterThan(x: number | MockBigNumber) {
-    return this.gt(x)
-  }
-
-  toSignificantDigits(n?: number) {
-    const rounded = n !== undefined ? parseFloat(this._value.toPrecision(n)) : this._value
-    const result = new MockBigNumber(rounded)
-    result.e = this.e
-    return result
-  }
-
-  toFixed(n?: number) {
-    return n !== undefined ? this._value.toFixed(n) : String(this._value)
-  }
-
-  toExponential(n?: number) {
-    return n !== undefined ? this._value.toExponential(n) : this._value.toExponential()
-  }
-
-  toPrecision(n?: number) {
-    return n !== undefined ? this._value.toPrecision(n) : String(this._value)
-  }
-
-  mul(x: number | MockBigNumber) {
-    const v = x instanceof MockBigNumber ? x._value : x
-    return new MockBigNumber(this._value * v)
-  }
-
-  toNumber() {
-    return this._value
-  }
-
-  toString() {
-    return String(this._value)
-  }
-}
-
-MockBigNumber.prototype.isBigNumber = true
-
-function bn(value: number | string) {
-  return new MockBigNumber(value)
+function bn(value: number | string): BigNumber {
+  if (typeof value === 'string') return BigNumber.parse(value)
+  return BigNumber.fromNumber(value)
 }
 
 // ---------------------------------------------------------------------------
@@ -146,28 +74,19 @@ describe('format (BigNumber formatter)', () => {
   })
 
   it('returns "Infinity" for positive infinite BigNumber', () => {
-    // Override isFinite/gt for Infinity simulation
-    const infBn = {
-      isFinite: () => false,
-      isNaN: () => false,
-      gt: (x: number) => true,
-      isBigNumber: true,
-    }
+    // Use the real BigNumber for Infinity
+    const infBn = BigNumber.fromNumber(Infinity)
     expect(format(infBn, {})).toBe('Infinity')
   })
 
   it('returns "-Infinity" for negative infinite BigNumber', () => {
-    const negInfBn = {
-      isFinite: () => false,
-      isNaN: () => false,
-      gt: (_x: number) => false,
-      isBigNumber: true,
-    }
+    const negInfBn = BigNumber.fromNumber(-Infinity)
     expect(format(negInfBn, {})).toBe('-Infinity')
   })
 
   it('accepts a custom formatter function', () => {
-    expect(format(bn(42), (v: any) => `(${v._value})`)).toBe('(42)')
+    // The custom function receives the BigNumber; use toNumber() for the value
+    expect(format(bn(42), (v: BigNumber) => `(${v.toNumber()})`)).toBe('(42)')
   })
 
   it('formats with fixed notation via options object', () => {
@@ -187,10 +106,7 @@ describe('format (BigNumber formatter)', () => {
   })
 
   it('returns "0" for zero in auto mode', () => {
-    const zeroBn = Object.assign(new MockBigNumber(0), {
-      isZero: () => true,
-    })
-    const result = format(zeroBn, {})
+    const result = format(bn(0), {})
     expect(result).toBe('0')
   })
 

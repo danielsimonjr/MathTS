@@ -597,6 +597,89 @@ export interface WasmModule {
   kdtree_build_wasm: (ptsPtr: number, n: number, dims: number, treePtr: number) => number
   kdtree_nearest_wasm: (treePtr: number, queryPtr: number, dims: number, treeSize: number) => number
 
+  // Bitwise operations (Int32, elementwise — provided by both Rust and AS
+  // backends; binary kernels accept two Int32 pointers + output + length,
+  // the per-element shift kernels take (a_ptr, b_ptr, result_ptr, length).
+  // Rust uses the *_Array / *_ArrayPerElement naming; AS uses *_i32_array.
+  // The dispatch tier in functions/src/typed/bitwise.ts probes for one or
+  // the other at runtime.
+  bitAndArray?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  bitOrArray?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  bitXorArray?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  bitNotArray?: (
+    inputPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  leftShiftArrayPerElement?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  rightArithShiftArrayPerElement?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  rightLogShiftArrayPerElement?: (
+    aPtr: number,
+    bPtr: number,
+    resultPtr: number,
+    length: number
+  ) => void
+  // AS-backend elementwise bitwise kernels — same semantics, different
+  // naming convention so we can keep both backends working from the same
+  // interface. The dispatch tier prefers Rust names and falls through to
+  // AS names when the binary is the AS one.
+  bitAnd_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  bitOr_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  bitXor_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  bitNot_i32_array?: (a: Int32Array, result: Int32Array) => void
+  leftShift_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  rightArithShift_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+  rightLogShift_i32_array?: (
+    a: Int32Array,
+    b: Int32Array,
+    result: Int32Array
+  ) => void
+
   // Memory management
   __new: (size: number, id: number) => number
   __pin: (ptr: number) => number
