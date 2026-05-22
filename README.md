@@ -201,7 +201,7 @@ sin(new Complex(0, 1));   // Complex sinh(1)
 | `@danielsimonjr/mathts-matrix` | 0.1.2 | Dense/sparse matrices, JS/WASM/GPU backends, FFT, eig, SVD |
 | `@danielsimonjr/mathts-tensor` | 0.1.0 | Rank-N Float64Array-backed dense tensor, einsum/contraction |
 | `@danielsimonjr/mathts-autograd` | 0.1.0 | Forward + reverse-mode automatic differentiation over Tensor |
-| `@danielsimonjr/mathts-parallel` | 0.1.3 | ComputePool, parallel FFT/eig, Web Workers |
+| `@danielsimonjr/mathts-parallel` | 0.1.3 | ComputePool, parallel elementwise/matmul/reduce, Web Workers |
 | `@danielsimonjr/mathts-expression` | 0.2.0 | Expression parser, compiler, sandboxed evaluator |
 | `@danielsimonjr/mathts-compat` | 0.1.2 | mathjs compatibility layer |
 | `@danielsimonjr/mathts-workbook` | 0.1.2 | Scientific workbook runtime (.mtsw) |

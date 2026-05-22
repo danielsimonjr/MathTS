@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: "2026-05-20"
+  lastUpdated: "2026-05-22"
   totalFiles: 485
   totalModules: 55
-  totalExports: 2859
+  totalExports: 2850
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -134,6 +134,17 @@ modules:
         - isUint32Array
         - isArrayBuffer
   packages/workerpool:
+    packages/workerpool/src/fft-core.ts:
+      description: Shared radix-2 FFT core for @danielsimonjr/mathts-workerpool.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - fftBitReverse
+        - fftFrameInPlace
+      functions:
+        - fftBitReverse
+        - fftFrameInPlace
     packages/workerpool/src/index.ts:
       description: Worker pool management for MathTS parallel computations.
       externalDependencies:
@@ -146,7 +157,10 @@ modules:
             - ExecOptions
             - PoolStats
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./fft-core.js
+          imports:
+            - fftFrameInPlace
       exports:
         - Transfer
         - DEFAULT_WORKER_CONFIG
@@ -839,6 +853,222 @@ modules:
       constants:
         - DEFAULT_EXTENDED_HINTS
         - backendManager
+    matrix/src/backends/GPUBackend.ts:
+      description: GPU Backend for Matrix Operations
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./gpu/index.js
+          imports:
+            - GPUContext
+            - GPUContextOptions
+            - getGlobalGPUContext
+            - BufferPool
+            - ShaderManager
+            - hasWebGPU
+            - detectGPUCapabilities
+            - getRecommendedWorkgroupSize
+            - GPUCapabilities
+      exports:
+        - getGlobalGPUBackend
+        - initializeGlobalGPUBackend
+        - destroyGlobalGPUBackend
+        - GPUBackend
+      classes:
+        - GPUBackend
+      interfaces:
+        - GPUBackendOptions
+      functions:
+        - getGlobalGPUBackend
+        - initializeGlobalGPUBackend
+        - destroyGlobalGPUBackend
+    matrix/src/backends/GPUMatrixBackend.ts:
+      description: GPU Matrix Backend Adapter
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./Backend.js
+          imports:
+            - MatrixBackend
+            - BackendType
+          typeOnly: true
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./JSBackend.js
+          imports:
+            - jsBackend
+        - file: ./GPUBackend.js
+          imports:
+            - GPUBackend
+            - getGlobalGPUBackend
+            - initializeGlobalGPUBackend
+            - GPUBackendOptions
+        - file: ./gpu/index.js
+          imports:
+            - hasWebGPU
+            - detectGPUCapabilities
+            - GPUCapabilities
+      exports:
+        - gpuMatrixBackend
+        - createGPUMatrixBackend
+        - GPUMatrixBackend
+      classes:
+        - GPUMatrixBackend
+      interfaces:
+        - GPUMatrixBackendConfig
+      functions:
+        - createGPUMatrixBackend
+      constants:
+        - gpuMatrixBackend
+    matrix/src/backends/JSBackend.ts:
+      description: Pure TypeScript Matrix Backend
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./Backend.js
+          imports:
+            - MatrixBackend
+            - BackendType
+          typeOnly: true
+      exports:
+        - jsBackend
+        - JSBackend
+      classes:
+        - JSBackend
+      constants:
+        - jsBackend
+    matrix/src/backends/ParallelBackend.ts:
+      description: Parallel Matrix Backend
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./Backend.js
+          imports:
+            - BackendType
+          typeOnly: true
+      exports:
+        - parallelBackend
+        - createParallelBackend
+        - ParallelBackend
+      classes:
+        - ParallelBackend
+      interfaces:
+        - ParallelBackendConfig
+      functions:
+        - createParallelBackend
+      constants:
+        - parallelBackend
+    matrix/src/backends/RustWASMBackend.ts:
+      description: Rust WASM Matrix Backend
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./Backend.js
+          imports:
+            - MatrixBackend
+            - BackendType
+          typeOnly: true
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./JSBackend.js
+          imports:
+            - jsBackend
+        - file: ./RustWasmLoader.js
+          imports:
+            - rustWasmLoader
+            - RustWasmExports
+      exports:
+        - rustWasmBackend
+        - createRustWASMBackend
+        - RustWASMBackend
+      classes:
+        - RustWASMBackend
+      interfaces:
+        - RustWASMBackendConfig
+      functions:
+        - createRustWASMBackend
+      constants:
+        - rustWasmBackend
+    matrix/src/backends/RustWasmLoader.ts:
+      description: Rust WASM Loader
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - rustWasmLoader
+        - initRustWasm
+        - RustWasmLoader
+      classes:
+        - RustWasmLoader
+      interfaces:
+        - RustWasmExports
+        - RustLoadingMetrics
+      functions:
+        - initRustWasm
+      constants:
+        - rustWasmLoader
+    matrix/src/backends/WASMBackend.ts:
+      description: WASM Matrix Backend
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./Backend.js
+          imports:
+            - MatrixBackend
+            - BackendType
+          typeOnly: true
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./JSBackend.js
+          imports:
+            - jsBackend
+        - file: ./WasmLoader.js
+          imports:
+            - wasmLoader
+            - WasmModule
+        - file: ./wasm/detect.js
+          imports:
+            - detectWasmFeatures
+            - WasmFeatures
+      exports:
+        - wasmBackend
+        - createWASMBackend
+        - WASMBackend
+      classes:
+        - WASMBackend
+      interfaces:
+        - WASMBackendConfig
+      functions:
+        - createWASMBackend
+      constants:
+        - wasmBackend
+    matrix/src/backends/WasmLoader.ts:
+      description: WASM Loader - Loads and manages WebAssembly modules
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - wasmLoader
+        - initWasm
+        - WasmLoader
+      classes:
+        - WasmLoader
+      interfaces:
+        - WasmModule
+        - LoadingMetrics
+      functions:
+        - initWasm
+      constants:
+        - wasmLoader
     matrix/src/backends/gpu/BatchExecutor.ts:
       description: GPU Batch Executor
       externalDependencies: []
@@ -878,30 +1108,6 @@ modules:
         - BufferPool
       interfaces:
         - BufferPoolOptions
-    matrix/src/backends/gpu/detect.ts:
-      description: WebGPU Detection and Capability Checking
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - hasWebGPU
-        - isBrowser
-        - getGPUAdapter
-        - detectGPUCapabilities
-        - isGPUSuitableForMatrixOps
-        - getRecommendedWorkgroupSize
-        - getMaxMatrixSize
-      interfaces:
-        - GPUAdapterInfo
-        - GPUCapabilities
-      functions:
-        - hasWebGPU
-        - isBrowser
-        - getGPUAdapter
-        - detectGPUCapabilities
-        - isGPUSuitableForMatrixOps
-        - getRecommendedWorkgroupSize
-        - getMaxMatrixSize
     matrix/src/backends/gpu/GPUContext.ts:
       description: WebGPU Context Management
       externalDependencies: []
@@ -927,6 +1133,72 @@ modules:
         - getGlobalGPUContext
         - initializeGlobalGPU
         - destroyGlobalGPU
+    matrix/src/backends/gpu/ShaderManager.ts:
+      description: GPU Shader Manager
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./GPUContext.js
+          imports:
+            - GPUContext
+      exports:
+        - BUILTIN_SHADERS
+        - ShaderManager
+      classes:
+        - ShaderManager
+      interfaces:
+        - ShaderSource
+        - PipelineConfig
+      constants:
+        - BUILTIN_SHADERS
+    matrix/src/backends/gpu/Sync.ts:
+      description: GPU-CPU Synchronization Strategy
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./GPUContext.js
+          imports:
+            - GPUContext
+          typeOnly: true
+        - file: ./BufferPool.js
+          imports:
+            - BufferPool
+          typeOnly: true
+      exports:
+        - createSyncManager
+        - SyncManager
+      classes:
+        - SyncManager
+      interfaces:
+        - TransferRequest
+        - TransferResult
+        - SyncConfig
+      functions:
+        - createSyncManager
+    matrix/src/backends/gpu/detect.ts:
+      description: WebGPU Detection and Capability Checking
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - hasWebGPU
+        - isBrowser
+        - getGPUAdapter
+        - detectGPUCapabilities
+        - isGPUSuitableForMatrixOps
+        - getRecommendedWorkgroupSize
+        - getMaxMatrixSize
+      interfaces:
+        - GPUAdapterInfo
+        - GPUCapabilities
+      functions:
+        - hasWebGPU
+        - isBrowser
+        - getGPUAdapter
+        - detectGPUCapabilities
+        - isGPUSuitableForMatrixOps
+        - getRecommendedWorkgroupSize
+        - getMaxMatrixSize
     matrix/src/backends/gpu/index.ts:
       description: GPU Backend Exports
       externalDependencies: []
@@ -1054,116 +1326,6 @@ modules:
         - TransferRequest
         - TransferResult
         - SyncConfig
-    matrix/src/backends/gpu/ShaderManager.ts:
-      description: GPU Shader Manager
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./GPUContext.js
-          imports:
-            - GPUContext
-      exports:
-        - BUILTIN_SHADERS
-        - ShaderManager
-      classes:
-        - ShaderManager
-      interfaces:
-        - ShaderSource
-        - PipelineConfig
-      constants:
-        - BUILTIN_SHADERS
-    matrix/src/backends/gpu/Sync.ts:
-      description: GPU-CPU Synchronization Strategy
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./GPUContext.js
-          imports:
-            - GPUContext
-          typeOnly: true
-        - file: ./BufferPool.js
-          imports:
-            - BufferPool
-          typeOnly: true
-      exports:
-        - createSyncManager
-        - SyncManager
-      classes:
-        - SyncManager
-      interfaces:
-        - TransferRequest
-        - TransferResult
-        - SyncConfig
-      functions:
-        - createSyncManager
-    matrix/src/backends/GPUBackend.ts:
-      description: GPU Backend for Matrix Operations
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./gpu/index.js
-          imports:
-            - GPUContext
-            - GPUContextOptions
-            - getGlobalGPUContext
-            - BufferPool
-            - ShaderManager
-            - hasWebGPU
-            - detectGPUCapabilities
-            - getRecommendedWorkgroupSize
-            - GPUCapabilities
-      exports:
-        - getGlobalGPUBackend
-        - initializeGlobalGPUBackend
-        - destroyGlobalGPUBackend
-        - GPUBackend
-      classes:
-        - GPUBackend
-      interfaces:
-        - GPUBackendOptions
-      functions:
-        - getGlobalGPUBackend
-        - initializeGlobalGPUBackend
-        - destroyGlobalGPUBackend
-    matrix/src/backends/GPUMatrixBackend.ts:
-      description: GPU Matrix Backend Adapter
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./Backend.js
-          imports:
-            - MatrixBackend
-            - BackendType
-          typeOnly: true
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./JSBackend.js
-          imports:
-            - jsBackend
-        - file: ./GPUBackend.js
-          imports:
-            - GPUBackend
-            - getGlobalGPUBackend
-            - initializeGlobalGPUBackend
-            - GPUBackendOptions
-        - file: ./gpu/index.js
-          imports:
-            - hasWebGPU
-            - detectGPUCapabilities
-            - GPUCapabilities
-      exports:
-        - gpuMatrixBackend
-        - createGPUMatrixBackend
-        - GPUMatrixBackend
-      classes:
-        - GPUMatrixBackend
-      interfaces:
-        - GPUMatrixBackendConfig
-      functions:
-        - createGPUMatrixBackend
-      constants:
-        - gpuMatrixBackend
     matrix/src/backends/index.ts:
       description: Matrix Backend Exports
       externalDependencies: []
@@ -1378,100 +1540,6 @@ modules:
         - BatchExecutor
         - SyncManager
         - createSyncManager
-    matrix/src/backends/JSBackend.ts:
-      description: Pure TypeScript Matrix Backend
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./Backend.js
-          imports:
-            - MatrixBackend
-            - BackendType
-          typeOnly: true
-      exports:
-        - jsBackend
-        - JSBackend
-      classes:
-        - JSBackend
-      constants:
-        - jsBackend
-    matrix/src/backends/ParallelBackend.ts:
-      description: Parallel Matrix Backend
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./Backend.js
-          imports:
-            - BackendType
-          typeOnly: true
-      exports:
-        - parallelBackend
-        - createParallelBackend
-        - ParallelBackend
-      classes:
-        - ParallelBackend
-      interfaces:
-        - ParallelBackendConfig
-      functions:
-        - createParallelBackend
-      constants:
-        - parallelBackend
-    matrix/src/backends/RustWASMBackend.ts:
-      description: Rust WASM Matrix Backend
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./Backend.js
-          imports:
-            - MatrixBackend
-            - BackendType
-          typeOnly: true
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./JSBackend.js
-          imports:
-            - jsBackend
-        - file: ./RustWasmLoader.js
-          imports:
-            - rustWasmLoader
-            - RustWasmExports
-      exports:
-        - rustWasmBackend
-        - createRustWASMBackend
-        - RustWASMBackend
-      classes:
-        - RustWASMBackend
-      interfaces:
-        - RustWASMBackendConfig
-      functions:
-        - createRustWASMBackend
-      constants:
-        - rustWasmBackend
-    matrix/src/backends/RustWasmLoader.ts:
-      description: Rust WASM Loader
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - rustWasmLoader
-        - initRustWasm
-        - RustWasmLoader
-      classes:
-        - RustWasmLoader
-      interfaces:
-        - RustWasmExports
-        - RustLoadingMetrics
-      functions:
-        - initRustWasm
-      constants:
-        - rustWasmLoader
     matrix/src/backends/wasm/detect.ts:
       description: WASM Feature Detection
       externalDependencies: []
@@ -1592,60 +1660,6 @@ modules:
         - isPowerOf2
         - nextPowerOf2
         - isWasmFFTAvailable
-    matrix/src/backends/WASMBackend.ts:
-      description: WASM Matrix Backend
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./Backend.js
-          imports:
-            - MatrixBackend
-            - BackendType
-          typeOnly: true
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./JSBackend.js
-          imports:
-            - jsBackend
-        - file: ./WasmLoader.js
-          imports:
-            - wasmLoader
-            - WasmModule
-        - file: ./wasm/detect.js
-          imports:
-            - detectWasmFeatures
-            - WasmFeatures
-      exports:
-        - wasmBackend
-        - createWASMBackend
-        - WASMBackend
-      classes:
-        - WASMBackend
-      interfaces:
-        - WASMBackendConfig
-      functions:
-        - createWASMBackend
-      constants:
-        - wasmBackend
-    matrix/src/backends/WasmLoader.ts:
-      description: WASM Loader - Loads and manages WebAssembly modules
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - wasmLoader
-        - initWasm
-        - WasmLoader
-      classes:
-        - WasmLoader
-      interfaces:
-        - WasmModule
-        - LoadingMetrics
-      functions:
-        - initWasm
-      constants:
-        - wasmLoader
   matrix:
     matrix/src/config.ts:
       description: MathTS Matrix Configuration
@@ -2071,40 +2085,6 @@ modules:
         - DenseMatrix
       functions:
         - isDenseMatrix
-    matrix/src/types/index.ts:
-      description: Matrix Type Exports
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./Matrix.js
-          imports:
-            - Matrix
-            - isMatrix
-          reExport: true
-        - file: ./DenseMatrix.js
-          imports:
-            - DenseMatrix
-            - isDenseMatrix
-          reExport: true
-        - file: ./SparseMatrix.js
-          imports:
-            - SparseMatrix
-            - isSparseMatrix
-          reExport: true
-      exports:
-        - Matrix
-        - isMatrix
-        - DenseMatrix
-        - isDenseMatrix
-        - SparseMatrix
-        - isSparseMatrix
-      reExported:
-        - Matrix
-        - isMatrix
-        - DenseMatrix
-        - isDenseMatrix
-        - SparseMatrix
-        - isSparseMatrix
     matrix/src/types/Matrix.ts:
       description: Matrix Base Class
       externalDependencies: []
@@ -2139,7 +2119,52 @@ modules:
         - SparseMatrix
       functions:
         - isSparseMatrix
+    matrix/src/types/index.ts:
+      description: Matrix Type Exports
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./Matrix.js
+          imports:
+            - Matrix
+            - isMatrix
+          reExport: true
+        - file: ./DenseMatrix.js
+          imports:
+            - DenseMatrix
+            - isDenseMatrix
+          reExport: true
+        - file: ./SparseMatrix.js
+          imports:
+            - SparseMatrix
+            - isSparseMatrix
+          reExport: true
+      exports:
+        - Matrix
+        - isMatrix
+        - DenseMatrix
+        - isDenseMatrix
+        - SparseMatrix
+        - isSparseMatrix
+      reExported:
+        - Matrix
+        - isMatrix
+        - DenseMatrix
+        - isDenseMatrix
+        - SparseMatrix
+        - isSparseMatrix
   tensor:
+    tensor/src/Tensor.ts:
+      description: Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Tensor
+      classes:
+        - Tensor
+      interfaces:
+        - EinsumSpec
     tensor/src/index.ts:
       description: Package entry point for @danielsimonjr/mathts-tensor (re-exports 1 symbols)
       externalDependencies: []
@@ -2153,17 +2178,6 @@ modules:
         - Tensor
       reExported:
         - Tensor
-    tensor/src/Tensor.ts:
-      description: Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - Tensor
-      classes:
-        - Tensor
-      interfaces:
-        - EinsumSpec
   autograd:
     autograd/src/dual-tensor.ts:
       description: DualTensor — a Tensor + per-element tangent component for forward-mode AD.
@@ -10031,27 +10045,6 @@ modules:
         - createFibonacciHeapClass
       constants:
         - createFibonacciHeapClass
-    functions/src/type/matrix/function/index.ts:
-      description: Create an index. An Index can store ranges having start, step, and end
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../../../utils/is.js
-          imports:
-            - isBigNumber
-            - isMatrix
-            - isArray
-        - file: ../../../utils/factory.js
-          imports:
-            - factory
-        - file: ../../../core/function/typed.js
-          imports:
-            - TypedFunction
-          typeOnly: true
-      exports:
-        - createIndex
-      constants:
-        - createIndex
     functions/src/type/matrix/ImmutableDenseMatrix.ts:
       description: Interface for Index objects (local copy to avoid circular deps)
       externalDependencies: []
@@ -10132,6 +10125,27 @@ modules:
         - createSpaClass
       constants:
         - createSpaClass
+    functions/src/type/matrix/function/index.ts:
+      description: Create an index. An Index can store ranges having start, step, and end
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../../utils/is.js
+          imports:
+            - isBigNumber
+            - isMatrix
+            - isArray
+        - file: ../../../utils/factory.js
+          imports:
+            - factory
+        - file: ../../../core/function/typed.js
+          imports:
+            - TypedFunction
+          typeOnly: true
+      exports:
+        - createIndex
+      constants:
+        - createIndex
     functions/src/type/matrix/types.ts:
       description: "Type Philosophy:"
       externalDependencies: []
@@ -10562,6 +10576,36 @@ modules:
         - ResultSetConstructor
       constants:
         - createResultSet
+    functions/src/type/unit/Unit.ts:
+      description: "A unit can be constructed in the following ways:"
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/is.js
+          imports:
+            - isComplex
+            - isUnit
+            - typeOf
+        - file: ../../utils/factory.js
+          imports:
+            - factory
+        - file: ../../utils/function.js
+          imports:
+            - memoize
+        - file: ../../utils/string.js
+          imports:
+            - endsWith
+        - file: ../../utils/object.js
+          imports:
+            - clone
+            - hasOwnProperty
+        - file: ../../utils/bignumber/constants.js
+          imports:
+            - createBigNumberPi
+      exports:
+        - createUnitClass
+      constants:
+        - createUnitClass
     functions/src/type/unit/function/createUnit.ts:
       description: Unit definition options
       externalDependencies: []
@@ -10738,36 +10782,6 @@ modules:
         - createPlanckTime
         - createPlanckCharge
         - createPlanckTemperature
-    functions/src/type/unit/Unit.ts:
-      description: "A unit can be constructed in the following ways:"
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../../utils/is.js
-          imports:
-            - isComplex
-            - isUnit
-            - typeOf
-        - file: ../../utils/factory.js
-          imports:
-            - factory
-        - file: ../../utils/function.js
-          imports:
-            - memoize
-        - file: ../../utils/string.js
-          imports:
-            - endsWith
-        - file: ../../utils/object.js
-          imports:
-            - clone
-            - hasOwnProperty
-        - file: ../../utils/bignumber/constants.js
-          imports:
-            - createBigNumberPi
-      exports:
-        - createUnitClass
-      constants:
-        - createUnitClass
   functions/typed:
     functions/src/typed/algebra.ts:
       description: Typed Algebra Functions
@@ -11191,6 +11205,7 @@ modules:
         - kdTree
         - kdTreeNearest
         - nearestNeighbor
+        - distanceMatrix
       interfaces:
         - KDTreeNode
       functions:
@@ -11224,6 +11239,22 @@ modules:
         - kdTree
         - kdTreeNearest
         - nearestNeighbor
+        - distanceMatrix
+    functions/src/typed/gpu.ts:
+      description: WebGPU-Accelerated Matrix Operations
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - gpuMatmul
+        - gpuAdd
+        - gpuTranspose
+        - gpuScale
+      functions:
+        - gpuMatmul
+        - gpuAdd
+        - gpuTranspose
+        - gpuScale
     functions/src/typed/graph.ts:
       description: Graph Theory Functions
       externalDependencies: []
@@ -11393,6 +11424,10 @@ modules:
           imports:
             - "*"
           reExport: true
+        - file: ./gpu.js
+          imports:
+            - "*"
+          reExport: true
         - file: ./arithmetic.js
           imports:
             - typedArithmetic
@@ -11448,6 +11483,7 @@ modules:
         - "* from ./hypothesis.js"
         - "* from ./cas.js"
         - "* from ./matrix-ops.js"
+        - "* from ./gpu.js"
         - typedArithmetic
         - typedTrigonometry
         - typedStatistics
@@ -11687,8 +11723,11 @@ modules:
       internalDependencies: []
       exports:
         - erfc
+        - erfi
         - beta
         - gammainc
+        - gammaincp
+        - betainc
         - digamma
         - besselJ0
         - besselJ1
@@ -11698,8 +11737,6 @@ modules:
         - besselY
         - besselI
         - besselK
-        - betainc
-        - gammaincp
         - ellipticK
         - ellipticE
         - chebyshevT
@@ -11707,7 +11744,6 @@ modules:
         - laguerreL
         - legendreP
         - lambertW
-        - erfi
         - cosIntegral
         - sinIntegral
         - logIntegral
@@ -11717,8 +11753,11 @@ modules:
         - typedSpecial
       constants:
         - erfc
+        - erfi
         - beta
         - gammainc
+        - gammaincp
+        - betainc
         - digamma
         - besselJ0
         - besselJ1
@@ -11728,8 +11767,6 @@ modules:
         - besselY
         - besselI
         - besselK
-        - betainc
-        - gammaincp
         - ellipticK
         - ellipticE
         - chebyshevT
@@ -11737,7 +11774,6 @@ modules:
         - laguerreL
         - legendreP
         - lambertW
-        - erfi
         - cosIntegral
         - sinIntegral
         - logIntegral
@@ -12844,21 +12880,6 @@ modules:
       constants:
         - createTypeOf
   functions/wasm:
-    functions/src/wasm/integrity.ts:
-      description: WASM integrity verification — SHA-384 manifest check.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - sha384OfBuffer
-        - loadWasmManifest
-        - verifyWasmIntegrity
-      interfaces:
-        - WasmManifest
-      functions:
-        - sha384OfBuffer
-        - loadWasmManifest
-        - verifyWasmIntegrity
     functions/src/wasm/WasmLoader.ts:
       description: WASM Loader - Loads and manages WebAssembly modules
       externalDependencies: []
@@ -12881,103 +12902,21 @@ modules:
         - initWasm
       constants:
         - wasmLoader
-  expression/compiler:
-    expression/src/compiler/compile.ts:
-      description: Tree-walking AST compiler/evaluator for MathTS expressions.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../utils/map.js
-          imports:
-            - ObjectWrappingMap
-        - file: ../utils/scope.js
-          imports:
-            - createSubScope
-        - file: ../utils/customs.js
-          imports:
-            - getSafeProperty
-            - setSafeProperty
-            - getSafeMethod
-      exports:
-        - compile
-      interfaces:
-        - Scope
-        - CompiledExpression
-      functions:
-        - compile
-    expression/src/compiler/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 1 symbols)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./compile.js
-          imports:
-            - compile
-          reExport: true
-      exports:
-        - compile
-      reExported:
-        - compile
-  expression/error:
-    expression/src/error/DimensionError.ts:
-      description: "Create a range error with the message:"
+    functions/src/wasm/integrity.ts:
+      description: WASM integrity verification — SHA-384 manifest check.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       exports:
-        - DimensionError
-      classes:
-        - DimensionError
-    expression/src/error/IndexError.ts:
-      description: Custom error type for index out of range errors
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - createIndexError
-        - IndexError
-      classes:
-        - IndexError
-      functions:
-        - createIndexError
-  expression/evaluator:
-    expression/src/evaluator/evaluate.ts:
-      description: Expression evaluator for MathTS.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../compiler/compile.js
-          imports:
-            - compile
-        - file: ../compiler/compile.js
-          imports:
-            - CompiledExpression
-            - Scope
-          typeOnly: true
-      exports:
-        - createEvaluate
-        - compileExpression
+        - sha384OfBuffer
+        - loadWasmManifest
+        - verifyWasmIntegrity
       interfaces:
-        - EvaluateOptions
+        - WasmManifest
       functions:
-        - createEvaluate
-        - compileExpression
-    expression/src/evaluator/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./evaluate.js
-          imports:
-            - createEvaluate
-            - compileExpression
-          reExport: true
-      exports:
-        - createEvaluate
-        - compileExpression
-      reExported:
-        - createEvaluate
-        - compileExpression
+        - sha384OfBuffer
+        - loadWasmManifest
+        - verifyWasmIntegrity
   expression:
     expression/src/Help.ts:
       description: Documentation object
@@ -13000,6 +12939,25 @@ modules:
         - createHelpClass
       constants:
         - createHelpClass
+    expression/src/Parser.ts:
+      description: Parser contains methods to evaluate or parse expressions, and has a number
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/is.js
+          imports:
+            - isFunction
+        - file: ./utils/map.js
+          imports:
+            - createEmptyMap
+            - toObject
+      exports:
+        - createParserClass
+      constants:
+        - createParserClass
     expression/src/index.ts:
       description: Expression parsing and evaluation for MathTS.
       externalDependencies: []
@@ -13211,31 +13169,109 @@ modules:
         - createParse
       constants:
         - createParse
-    expression/src/Parser.ts:
-      description: Parser contains methods to evaluate or parse expressions, and has a number
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./utils/factory.js
-          imports:
-            - factory
-        - file: ./utils/is.js
-          imports:
-            - isFunction
-        - file: ./utils/map.js
-          imports:
-            - createEmptyMap
-            - toObject
-      exports:
-        - createParserClass
-      constants:
-        - createParserClass
     expression/src/types.ts:
       description: Type definitions for expression module
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       exports: []
+  expression/compiler:
+    expression/src/compiler/compile.ts:
+      description: Tree-walking AST compiler/evaluator for MathTS expressions.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/map.js
+          imports:
+            - ObjectWrappingMap
+        - file: ../utils/scope.js
+          imports:
+            - createSubScope
+        - file: ../utils/customs.js
+          imports:
+            - getSafeProperty
+            - setSafeProperty
+            - getSafeMethod
+      exports:
+        - compile
+      interfaces:
+        - Scope
+        - CompiledExpression
+      functions:
+        - compile
+    expression/src/compiler/index.ts:
+      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 1 symbols)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./compile.js
+          imports:
+            - compile
+          reExport: true
+      exports:
+        - compile
+      reExported:
+        - compile
+  expression/error:
+    expression/src/error/DimensionError.ts:
+      description: "Create a range error with the message:"
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - DimensionError
+      classes:
+        - DimensionError
+    expression/src/error/IndexError.ts:
+      description: Custom error type for index out of range errors
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - createIndexError
+        - IndexError
+      classes:
+        - IndexError
+      functions:
+        - createIndexError
+  expression/evaluator:
+    expression/src/evaluator/evaluate.ts:
+      description: Expression evaluator for MathTS.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../compiler/compile.js
+          imports:
+            - compile
+        - file: ../compiler/compile.js
+          imports:
+            - CompiledExpression
+            - Scope
+          typeOnly: true
+      exports:
+        - createEvaluate
+        - compileExpression
+      interfaces:
+        - EvaluateOptions
+      functions:
+        - createEvaluate
+        - compileExpression
+    expression/src/evaluator/index.ts:
+      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./evaluate.js
+          imports:
+            - createEvaluate
+            - compileExpression
+          reExport: true
+      exports:
+        - createEvaluate
+        - compileExpression
+      reExported:
+        - createEvaluate
+        - compileExpression
   expression/node:
     expression/src/node/AccessorNode.ts:
       description: Are parenthesis needed?
@@ -14475,28 +14511,6 @@ modules:
         - ExecOptions
         - PoolStats
   parallel/operations:
-    parallel/src/operations/eig.ts:
-      description: Parallel Eigendecomposition
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../ComputePool.js
-          imports:
-            - computePool
-            - ComputePool
-        - file: ../ComputePool.js
-          imports:
-            - ParallelResult
-          typeOnly: true
-      exports:
-        - parallelEig
-        - parallelEigvals
-      interfaces:
-        - EigResult
-        - ParallelEigOptions
-      functions:
-        - parallelEig
-        - parallelEigvals
     parallel/src/operations/elementwise.ts:
       description: Parallel Element-wise Operations
       externalDependencies: []
@@ -14546,32 +14560,6 @@ modules:
         - parallelTan
         - parallelElementwise
         - parallelUnary
-    parallel/src/operations/fft.ts:
-      description: Parallel FFT Operations
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../ComputePool.js
-          imports:
-            - computePool
-            - ComputePool
-        - file: ../ComputePool.js
-          imports:
-            - ParallelResult
-          typeOnly: true
-      exports:
-        - parallelFFT
-        - parallelIFFT
-        - parallelFFTAuto
-        - parallelConvolve
-      interfaces:
-        - FFTResult
-        - ParallelFFTOptions
-      functions:
-        - parallelFFT
-        - parallelIFFT
-        - parallelFFTAuto
-        - parallelConvolve
     parallel/src/operations/index.ts:
       description: Parallel Operations
       externalDependencies: []
@@ -14621,22 +14609,6 @@ modules:
             - parallelReduce
             - ReduceOptions
           reExport: true
-        - file: ./fft.js
-          imports:
-            - parallelFFT
-            - parallelIFFT
-            - parallelFFTAuto
-            - parallelConvolve
-            - ParallelFFTOptions
-            - FFTResult
-          reExport: true
-        - file: ./eig.js
-          imports:
-            - parallelEig
-            - parallelEigvals
-            - EigResult
-            - ParallelEigOptions
-          reExport: true
         - file: ./map.js
           imports:
             - parallelMap
@@ -14685,16 +14657,6 @@ modules:
         - parallelHistogram
         - parallelReduce
         - ReduceOptions
-        - parallelFFT
-        - parallelIFFT
-        - parallelFFTAuto
-        - parallelConvolve
-        - ParallelFFTOptions
-        - FFTResult
-        - parallelEig
-        - parallelEigvals
-        - EigResult
-        - ParallelEigOptions
         - parallelMap
         - parallelFilter
         - parallelFind
@@ -14740,16 +14702,6 @@ modules:
         - parallelHistogram
         - parallelReduce
         - ReduceOptions
-        - parallelFFT
-        - parallelIFFT
-        - parallelFFTAuto
-        - parallelConvolve
-        - ParallelFFTOptions
-        - FFTResult
-        - parallelEig
-        - parallelEigvals
-        - EigResult
-        - ParallelEigOptions
         - parallelMap
         - parallelFilter
         - parallelFind
@@ -16764,11 +16716,14 @@ dependencyGraph:
         - functions/src/typed/index.ts
         - functions/src/typed/cas.ts
         - functions/src/factories/evaluate.ts
-      - - expression/src/utils/map.ts
+      - - expression/src/utils/is.ts
+        - expression/src/utils/map.ts
         - expression/src/utils/customs.ts
         - expression/src/utils/object.ts
         - expression/src/utils/is.ts
+      - - expression/src/utils/is.ts
         - expression/src/utils/map.ts
+        - expression/src/utils/is.ts
     typeOnly:
       - - matrix/src/types/DenseMatrix.ts
         - matrix/src/types/SparseMatrix.ts
@@ -16776,8 +16731,8 @@ dependencyGraph:
       - - matrix/src/backends/BackendManager.ts
         - matrix/src/config.ts
         - matrix/src/backends/BackendManager.ts
-    total: 6
-    runtimeCount: 4
+    total: 7
+    runtimeCount: 5
     typeOnlyCount: 2
   layers:
     - name: Packages/typed-function
@@ -16785,6 +16740,7 @@ dependencyGraph:
         - packages/typed-function/src/index.ts
     - name: Packages/workerpool
       files:
+        - packages/workerpool/src/fft-core.ts
         - packages/workerpool/src/index.ts
     - name: Core/factory
       files:
@@ -16808,25 +16764,25 @@ dependencyGraph:
       files:
         - matrix/src/backends/Backend.ts
         - matrix/src/backends/BackendManager.ts
-        - matrix/src/backends/gpu/BatchExecutor.ts
-        - matrix/src/backends/gpu/BufferPool.ts
-        - matrix/src/backends/gpu/detect.ts
-        - matrix/src/backends/gpu/GPUContext.ts
-        - matrix/src/backends/gpu/index.ts
-        - matrix/src/backends/gpu/ShaderManager.ts
-        - matrix/src/backends/gpu/Sync.ts
         - matrix/src/backends/GPUBackend.ts
         - matrix/src/backends/GPUMatrixBackend.ts
-        - matrix/src/backends/index.ts
         - matrix/src/backends/JSBackend.ts
         - matrix/src/backends/ParallelBackend.ts
         - matrix/src/backends/RustWASMBackend.ts
         - matrix/src/backends/RustWasmLoader.ts
+        - matrix/src/backends/WASMBackend.ts
+        - matrix/src/backends/WasmLoader.ts
+        - matrix/src/backends/gpu/BatchExecutor.ts
+        - matrix/src/backends/gpu/BufferPool.ts
+        - matrix/src/backends/gpu/GPUContext.ts
+        - matrix/src/backends/gpu/ShaderManager.ts
+        - matrix/src/backends/gpu/Sync.ts
+        - matrix/src/backends/gpu/detect.ts
+        - matrix/src/backends/gpu/index.ts
+        - matrix/src/backends/index.ts
         - matrix/src/backends/wasm/detect.ts
         - matrix/src/backends/wasm/fft-wasm.ts
         - matrix/src/backends/wasm/index.ts
-        - matrix/src/backends/WASMBackend.ts
-        - matrix/src/backends/WasmLoader.ts
     - name: Matrix
       files:
         - matrix/src/config.ts
@@ -16843,13 +16799,13 @@ dependencyGraph:
     - name: Matrix/types
       files:
         - matrix/src/types/DenseMatrix.ts
-        - matrix/src/types/index.ts
         - matrix/src/types/Matrix.ts
         - matrix/src/types/SparseMatrix.ts
+        - matrix/src/types/index.ts
     - name: Tensor
       files:
-        - tensor/src/index.ts
         - tensor/src/Tensor.ts
+        - tensor/src/index.ts
     - name: Autograd
       files:
         - autograd/src/dual-tensor.ts
@@ -17169,10 +17125,10 @@ dependencyGraph:
         - functions/src/type/chain/function/chain.ts
         - functions/src/type/complex/Complex.ts
         - functions/src/type/matrix/FibonacciHeap.ts
-        - functions/src/type/matrix/function/index.ts
         - functions/src/type/matrix/ImmutableDenseMatrix.ts
         - functions/src/type/matrix/MatrixIndex.ts
         - functions/src/type/matrix/Spa.ts
+        - functions/src/type/matrix/function/index.ts
         - functions/src/type/matrix/types.ts
         - functions/src/type/matrix/utils/broadcast.ts
         - functions/src/type/matrix/utils/matAlgo01xDSid.ts
@@ -17191,11 +17147,11 @@ dependencyGraph:
         - functions/src/type/matrix/utils/matAlgo14xDs.ts
         - functions/src/type/matrix/utils/matrixAlgorithmSuite.ts
         - functions/src/type/resultset/ResultSet.ts
+        - functions/src/type/unit/Unit.ts
         - functions/src/type/unit/function/createUnit.ts
         - functions/src/type/unit/function/splitUnit.ts
         - functions/src/type/unit/function/unit.ts
         - functions/src/type/unit/physicalConstants.ts
-        - functions/src/type/unit/Unit.ts
     - name: Functions/typed
       files:
         - functions/src/typed/algebra.ts
@@ -17205,6 +17161,7 @@ dependencyGraph:
         - functions/src/typed/dist-objects.ts
         - functions/src/typed/distributions.ts
         - functions/src/typed/geometry.ts
+        - functions/src/typed/gpu.ts
         - functions/src/typed/graph.ts
         - functions/src/typed/hypothesis.ts
         - functions/src/typed/index.ts
@@ -17262,8 +17219,17 @@ dependencyGraph:
         - functions/src/utils/typeOf.ts
     - name: Functions/wasm
       files:
-        - functions/src/wasm/integrity.ts
         - functions/src/wasm/WasmLoader.ts
+        - functions/src/wasm/integrity.ts
+    - name: Expression
+      files:
+        - expression/src/Help.ts
+        - expression/src/Parser.ts
+        - expression/src/index.ts
+        - expression/src/keywords.ts
+        - expression/src/operators.ts
+        - expression/src/parse.ts
+        - expression/src/types.ts
     - name: Expression/compiler
       files:
         - expression/src/compiler/compile.ts
@@ -17276,15 +17242,6 @@ dependencyGraph:
       files:
         - expression/src/evaluator/evaluate.ts
         - expression/src/evaluator/index.ts
-    - name: Expression
-      files:
-        - expression/src/Help.ts
-        - expression/src/index.ts
-        - expression/src/keywords.ts
-        - expression/src/operators.ts
-        - expression/src/parse.ts
-        - expression/src/Parser.ts
-        - expression/src/types.ts
     - name: Expression/node
       files:
         - expression/src/node/AccessorNode.ts
@@ -17329,9 +17286,7 @@ dependencyGraph:
         - parallel/src/index.ts
     - name: Parallel/operations
       files:
-        - parallel/src/operations/eig.ts
         - parallel/src/operations/elementwise.ts
-        - parallel/src/operations/fft.ts
         - parallel/src/operations/index.ts
         - parallel/src/operations/map.ts
         - parallel/src/operations/matmul.ts
@@ -17378,17 +17333,17 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 485
   totalModules: 55
-  totalLinesOfCode: 124662
-  totalExports: 2859
+  totalLinesOfCode: 125142
+  totalExports: 2850
   totalClasses: 45
-  totalInterfaces: 241
-  totalFunctions: 1066
+  totalInterfaces: 237
+  totalFunctions: 1067
   totalTypeGuards: 127
   totalEnums: 0
   totalConstants: 1060
-  totalReExports: 713
-  totalTypeOnlyImports: 349
-  runtimeCircularDeps: 4
+  totalReExports: 704
+  totalTypeOnlyImports: 347
+  runtimeCircularDeps: 5
   typeOnlyCircularDeps: 2
   unusedFilesCount: 1
-  unusedExportsCount: 353
+  unusedExportsCount: 354

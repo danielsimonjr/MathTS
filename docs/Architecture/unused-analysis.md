@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-05-20
+**Generated**: 2026-05-22
 
 ## Summary
 
 - **Potentially unused files**: 1
-- **Potentially unused exports**: 353
+- **Potentially unused exports**: 354
 
 ## Potentially Unused Files
 
@@ -16,6 +16,10 @@ These files are not imported by any other file in the codebase:
 ## Potentially Unused Exports
 
 These exports are not imported by any other file in the codebase:
+
+### `packages/workerpool/src/fft-core.ts`
+
+- `fftBitReverse` (function)
 
 ### `core/src/factory/factory.ts`
 
@@ -44,17 +48,17 @@ These exports are not imported by any other file in the codebase:
 - `BackendType` (type)
 - `NumericType` (type)
 
-### `matrix/src/backends/wasm/fft-wasm.ts`
-
-- `FFTResult` (interface)
-- `FFTConfig` (interface)
-- `FFTBackend` (type)
-
 ### `matrix/src/backends/WasmLoader.ts`
 
 - `initWasm` (function)
 - `WasmLoader` (class)
 - `LoadingMetrics` (interface)
+
+### `matrix/src/backends/wasm/fft-wasm.ts`
+
+- `FFTResult` (interface)
+- `FFTConfig` (interface)
+- `FFTBackend` (type)
 
 ### `matrix/src/config.ts`
 
@@ -353,17 +357,17 @@ These exports are not imported by any other file in the codebase:
 - `stringify` (function)
 - `escape` (function)
 
-### `functions/src/wasm/integrity.ts`
-
-- `sha384OfBuffer` (function)
-- `WasmManifest` (interface)
-
 ### `functions/src/wasm/WasmLoader.ts`
 
 - `initWasm` (function)
 - `WasmLoader` (class)
 - `WasmModule` (interface)
 - `LoadingMetrics` (interface)
+
+### `functions/src/wasm/integrity.ts`
+
+- `sha384OfBuffer` (function)
+- `WasmManifest` (interface)
 
 ### `expression/src/error/IndexError.ts`
 

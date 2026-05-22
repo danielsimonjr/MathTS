@@ -1,6 +1,6 @@
 # MathTS Architecture
 
-**Generated**: 2026-05-20
+**Generated**: 2026-05-22
 
 ## System Overview
 
@@ -9,8 +9,8 @@ Turborepo orchestrates builds across the workspace. tsup bundles each package.
 A Cargo crate (`wasm-rust`) provides the primary WASM backend but is not an npm package.
 
 - **485 reachable TypeScript files** (out of 1,387 total; 902 dormant synced from mathjs)
-- **124,662 lines of code** (reachable scope)
-- **2,859 total exports** (713 re-exports)
+- **125,142 lines of code** (reachable scope)
+- **2,850 total exports** (704 re-exports)
 - **111 test files**
 - **All 12 packages build**, all typecheck
 
@@ -66,7 +66,7 @@ Two factory layers exist in the codebase:
 
 | Layer | Location | Count | Status |
 |-------|----------|-------|--------|
-| Native typed functions | `functions/src/typed/` | 17 files, 374 exports | Active, exported |
+| Native typed functions | `functions/src/typed/` | 20 files | Active, exported |
 | Synced mathjs factories | `functions/src/<category>/` | 19 categories, 242 factories | Dormant, not exported |
 
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
@@ -209,7 +209,7 @@ Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build 
 
 Source-file counts below are reachable (active) files; dormant synced files are
 excluded. The report counts 485 reachable TypeScript files total across all
-packages, 902 dormant, and 2,859 exports.
+packages, 902 dormant, and 2,850 exports.
 
 | Package | Active Files | Dormant Files |
 |---------|-------------|---------------|
@@ -217,12 +217,12 @@ packages, 902 dormant, and 2,859 exports.
 | matrix | 34 | 4 |
 | tensor | 2 | 0 |
 | autograd | 5 | 0 |
-| functions | 351 | 418 |
-| parallel | 12 | 4 |
+| functions | 352 | 418 |
+| parallel | 10 | 4 |
 | expression | 45 | 382 |
 | workbook | 5 | 2 |
 | compat | 2 | 1 |
 | assembly (wasm) | 17 | 3 |
 | typed-function | 1 | 1 |
-| workerpool | 1 | 2 |
+| workerpool | 2 | 2 |
 | **Total** | **485** | **902** |

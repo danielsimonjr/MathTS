@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generatedAt": "2026-05-20T23:13:33.912Z",
+    "generatedAt": "2026-05-22T00:25:10.305Z",
     "totalSourceFiles": 485,
-    "totalTestFiles": 111,
-    "testedCount": 91,
-    "untestedCount": 394,
-    "coveragePercent": "18.8"
+    "totalTestFiles": 114,
+    "testedCount": 90,
+    "untestedCount": 395,
+    "coveragePercent": "18.6"
   },
   "untestedFiles": [
     "assembly/src/index.ts",
@@ -397,6 +397,7 @@
     "functions/src/utils/typeOf.ts",
     "functions/src/wasm/WasmLoader.ts",
     "matrix/src/backends/WasmLoader.ts",
+    "packages/workerpool/src/fft-core.ts",
     "parallel/src/index.ts",
     "parallel/src/operations/index.ts",
     "parallel/src/strategies/index.ts",
@@ -433,6 +434,7 @@
     "functions/src/typed/dist-objects.ts",
     "functions/src/typed/distributions.ts",
     "functions/src/typed/geometry.ts",
+    "functions/src/typed/gpu.ts",
     "functions/src/typed/graph.ts",
     "functions/src/typed/hypothesis.ts",
     "functions/src/typed/index.ts",
@@ -482,9 +484,7 @@
     "packages/typed-function/src/index.ts",
     "packages/workerpool/src/index.ts",
     "parallel/src/ComputePool.ts",
-    "parallel/src/operations/eig.ts",
     "parallel/src/operations/elementwise.ts",
-    "parallel/src/operations/fft.ts",
     "parallel/src/operations/map.ts",
     "parallel/src/operations/matmul.ts",
     "parallel/src/operations/reduce.ts",
@@ -501,8 +501,10 @@
       "packages/typed-function/tests/index.test.ts",
       "packages/typed-function/tests/robust-types.test.ts"
     ],
+    "packages/workerpool/src/fft-core.ts": [],
     "packages/workerpool/src/index.ts": [
-      "packages/workerpool/tests/index.test.ts"
+      "packages/workerpool/tests/index.test.ts",
+      "packages/workerpool/tests/parallel-dispatch.test.ts"
     ],
     "core/src/factory/factory.ts": [
       "core/tests/factory/factory.test.ts",
@@ -561,43 +563,6 @@
       "matrix/tests/wasm/loading.test.ts",
       "matrix/tests/wasm/rust-wasm.test.ts"
     ],
-    "matrix/src/backends/gpu/BatchExecutor.ts": [
-      "matrix/tests/gpu/integration.test.ts",
-      "matrix/tests/typed-operations.test.ts",
-      "matrix/tests/wasm/loading.test.ts"
-    ],
-    "matrix/src/backends/gpu/BufferPool.ts": [
-      "matrix/tests/gpu/initialization.test.ts",
-      "matrix/tests/gpu/integration.test.ts",
-      "matrix/tests/typed-operations.test.ts",
-      "matrix/tests/wasm/loading.test.ts"
-    ],
-    "matrix/src/backends/gpu/detect.ts": [
-      "matrix/tests/gpu/initialization.test.ts",
-      "matrix/tests/typed-operations.test.ts",
-      "matrix/tests/wasm/loading.test.ts"
-    ],
-    "matrix/src/backends/gpu/GPUContext.ts": [
-      "matrix/tests/gpu/initialization.test.ts",
-      "matrix/tests/gpu/integration.test.ts",
-      "matrix/tests/typed-operations.test.ts",
-      "matrix/tests/wasm/loading.test.ts"
-    ],
-    "matrix/src/backends/gpu/index.ts": [
-      "matrix/tests/typed-operations.test.ts",
-      "matrix/tests/wasm/loading.test.ts"
-    ],
-    "matrix/src/backends/gpu/ShaderManager.ts": [
-      "matrix/tests/gpu/initialization.test.ts",
-      "matrix/tests/gpu/integration.test.ts",
-      "matrix/tests/typed-operations.test.ts",
-      "matrix/tests/wasm/loading.test.ts"
-    ],
-    "matrix/src/backends/gpu/Sync.ts": [
-      "matrix/tests/gpu/integration.test.ts",
-      "matrix/tests/typed-operations.test.ts",
-      "matrix/tests/wasm/loading.test.ts"
-    ],
     "matrix/src/backends/GPUBackend.ts": [
       "matrix/tests/gpu/initialization.test.ts",
       "matrix/tests/gpu/operations.test.ts",
@@ -605,10 +570,6 @@
       "matrix/tests/wasm/loading.test.ts"
     ],
     "matrix/src/backends/GPUMatrixBackend.ts": [
-      "matrix/tests/typed-operations.test.ts",
-      "matrix/tests/wasm/loading.test.ts"
-    ],
-    "matrix/src/backends/index.ts": [
       "matrix/tests/typed-operations.test.ts",
       "matrix/tests/wasm/loading.test.ts"
     ],
@@ -633,6 +594,54 @@
       "matrix/tests/wasm/loading.test.ts",
       "matrix/tests/wasm/rust-wasm.test.ts"
     ],
+    "matrix/src/backends/WASMBackend.ts": [
+      "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/accuracy.test.ts",
+      "matrix/tests/wasm/loading.test.ts",
+      "matrix/tests/wasm/operations.test.ts"
+    ],
+    "matrix/src/backends/WasmLoader.ts": [],
+    "matrix/src/backends/gpu/BatchExecutor.ts": [
+      "matrix/tests/gpu/integration.test.ts",
+      "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/loading.test.ts"
+    ],
+    "matrix/src/backends/gpu/BufferPool.ts": [
+      "matrix/tests/gpu/initialization.test.ts",
+      "matrix/tests/gpu/integration.test.ts",
+      "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/loading.test.ts"
+    ],
+    "matrix/src/backends/gpu/GPUContext.ts": [
+      "matrix/tests/gpu/initialization.test.ts",
+      "matrix/tests/gpu/integration.test.ts",
+      "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/loading.test.ts"
+    ],
+    "matrix/src/backends/gpu/ShaderManager.ts": [
+      "matrix/tests/gpu/initialization.test.ts",
+      "matrix/tests/gpu/integration.test.ts",
+      "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/loading.test.ts"
+    ],
+    "matrix/src/backends/gpu/Sync.ts": [
+      "matrix/tests/gpu/integration.test.ts",
+      "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/loading.test.ts"
+    ],
+    "matrix/src/backends/gpu/detect.ts": [
+      "matrix/tests/gpu/initialization.test.ts",
+      "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/loading.test.ts"
+    ],
+    "matrix/src/backends/gpu/index.ts": [
+      "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/loading.test.ts"
+    ],
+    "matrix/src/backends/index.ts": [
+      "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/loading.test.ts"
+    ],
     "matrix/src/backends/wasm/detect.ts": [
       "matrix/tests/typed-operations.test.ts",
       "matrix/tests/wasm/loading.test.ts"
@@ -646,13 +655,6 @@
       "matrix/tests/typed-operations.test.ts",
       "matrix/tests/wasm/loading.test.ts"
     ],
-    "matrix/src/backends/WASMBackend.ts": [
-      "matrix/tests/typed-operations.test.ts",
-      "matrix/tests/wasm/accuracy.test.ts",
-      "matrix/tests/wasm/loading.test.ts",
-      "matrix/tests/wasm/operations.test.ts"
-    ],
-    "matrix/src/backends/WasmLoader.ts": [],
     "matrix/src/config.ts": [
       "matrix/tests/config.test.ts"
     ],
@@ -688,30 +690,30 @@
     "matrix/src/types/DenseMatrix.ts": [
       "matrix/tests/DenseMatrix.test.ts",
       "matrix/tests/JSBackend.test.ts",
-      "matrix/tests/sparse/operations.test.ts",
       "matrix/tests/sparse/SparseMatrix.test.ts",
+      "matrix/tests/sparse/operations.test.ts",
       "matrix/tests/typed-operations.test.ts",
       "matrix/tests/wasm/accuracy.test.ts",
       "matrix/tests/wasm/operations.test.ts",
       "matrix/tests/wasm/rust-wasm.test.ts"
     ],
-    "matrix/src/types/index.ts": [
-      "matrix/tests/typed-operations.test.ts"
-    ],
     "matrix/src/types/Matrix.ts": [
       "matrix/tests/typed-operations.test.ts"
     ],
     "matrix/src/types/SparseMatrix.ts": [
-      "matrix/tests/sparse/operations.test.ts",
       "matrix/tests/sparse/SparseMatrix.test.ts",
+      "matrix/tests/sparse/operations.test.ts",
       "matrix/tests/typed-operations.test.ts"
     ],
-    "tensor/src/index.ts": [],
+    "matrix/src/types/index.ts": [
+      "matrix/tests/typed-operations.test.ts"
+    ],
     "tensor/src/Tensor.ts": [
       "tensor/tests/Tensor.matrix-bridge.test.ts",
       "tensor/tests/Tensor.ops.test.ts",
       "tensor/tests/Tensor.test.ts"
     ],
+    "tensor/src/index.ts": [],
     "autograd/src/dual-tensor.ts": [
       "autograd/tests/scaffold.test.ts"
     ],
@@ -1024,10 +1026,10 @@
     "functions/src/type/chain/function/chain.ts": [],
     "functions/src/type/complex/Complex.ts": [],
     "functions/src/type/matrix/FibonacciHeap.ts": [],
-    "functions/src/type/matrix/function/index.ts": [],
     "functions/src/type/matrix/ImmutableDenseMatrix.ts": [],
     "functions/src/type/matrix/MatrixIndex.ts": [],
     "functions/src/type/matrix/Spa.ts": [],
+    "functions/src/type/matrix/function/index.ts": [],
     "functions/src/type/matrix/types.ts": [],
     "functions/src/type/matrix/utils/broadcast.ts": [],
     "functions/src/type/matrix/utils/matAlgo01xDSid.ts": [],
@@ -1046,11 +1048,11 @@
     "functions/src/type/matrix/utils/matAlgo14xDs.ts": [],
     "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts": [],
     "functions/src/type/resultset/ResultSet.ts": [],
+    "functions/src/type/unit/Unit.ts": [],
     "functions/src/type/unit/function/createUnit.ts": [],
     "functions/src/type/unit/function/splitUnit.ts": [],
     "functions/src/type/unit/function/unit.ts": [],
     "functions/src/type/unit/physicalConstants.ts": [],
-    "functions/src/type/unit/Unit.ts": [],
     "functions/src/typed/algebra.ts": [
       "functions/tests/algebra.test.ts",
       "functions/tests/conversions-parser.test.ts",
@@ -1064,6 +1066,7 @@
       "functions/tests/arithmetic-extended.test.ts",
       "functions/tests/conversions-parser.test.ts",
       "functions/tests/docs-sync.test.ts",
+      "functions/tests/parallel-arithmetic-unary.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
       "functions/tests/parallel-signal.test.ts",
@@ -1111,6 +1114,15 @@
       "functions/tests/docs-sync.test.ts",
       "functions/tests/geometry-extended.test.ts",
       "functions/tests/geometry.test.ts",
+      "functions/tests/parallel-arithmetic.test.ts",
+      "functions/tests/parallel-dispatch.test.ts",
+      "functions/tests/parallel-signal.test.ts",
+      "functions/tests/typed-arithmetic.test.ts"
+    ],
+    "functions/src/typed/gpu.ts": [
+      "functions/tests/conversions-parser.test.ts",
+      "functions/tests/docs-sync.test.ts",
+      "functions/tests/gpu.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
       "functions/tests/parallel-signal.test.ts",
@@ -1204,6 +1216,7 @@
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
       "functions/tests/parallel-signal.test.ts",
+      "functions/tests/parallel-stat-prod.test.ts",
       "functions/tests/statistics-extended.test.ts",
       "functions/tests/statistics-extended2.test.ts",
       "functions/tests/statistics-selection.test.ts",
@@ -1216,6 +1229,7 @@
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
       "functions/tests/parallel-signal.test.ts",
+      "functions/tests/parallel-trig-unary.test.ts",
       "functions/tests/typed-arithmetic.test.ts"
     ],
     "functions/src/typed/typed-bridge.ts": [
@@ -1261,10 +1275,12 @@
     "functions/src/utils/string.ts": [],
     "functions/src/utils/switch.ts": [],
     "functions/src/utils/typeOf.ts": [],
+    "functions/src/wasm/WasmLoader.ts": [],
     "functions/src/wasm/integrity.ts": [
       "functions/tests/security/wasm-integrity.test.ts"
     ],
-    "functions/src/wasm/WasmLoader.ts": [],
+    "expression/src/Help.ts": [],
+    "expression/src/Parser.ts": [],
     "expression/src/compiler/compile.ts": [
       "expression/tests/compile.test.ts",
       "expression/tests/security/sandbox.test.ts"
@@ -1277,7 +1293,6 @@
       "expression/tests/security/sandbox.test.ts"
     ],
     "expression/src/evaluator/index.ts": [],
-    "expression/src/Help.ts": [],
     "expression/src/index.ts": [],
     "expression/src/keywords.ts": [],
     "expression/src/node/AccessorNode.ts": [],
@@ -1300,7 +1315,6 @@
     "expression/src/node/utils/assign.ts": [],
     "expression/src/operators.ts": [],
     "expression/src/parse.ts": [],
-    "expression/src/Parser.ts": [],
     "expression/src/transform/utils/errorTransform.ts": [],
     "expression/src/types.ts": [],
     "expression/src/utils/array.ts": [],
@@ -1317,22 +1331,16 @@
     "expression/src/utils/string.ts": [],
     "expression/src/utils/switch.ts": [],
     "parallel/src/ComputePool.ts": [
-      "parallel/tests/benchmark.test.ts",
       "parallel/tests/ComputePool.test.ts",
+      "parallel/tests/benchmark.test.ts",
       "parallel/tests/operations/elementwise.test.ts",
       "parallel/tests/operations/matmul.test.ts",
       "parallel/tests/operations/threshold.test.ts"
     ],
     "parallel/src/index.ts": [],
-    "parallel/src/operations/eig.ts": [
-      "parallel/tests/operations/parallel-eig.test.ts"
-    ],
     "parallel/src/operations/elementwise.ts": [
       "parallel/tests/benchmark.test.ts",
       "parallel/tests/operations/elementwise.test.ts"
-    ],
-    "parallel/src/operations/fft.ts": [
-      "parallel/tests/operations/fft.test.ts"
     ],
     "parallel/src/operations/index.ts": [],
     "parallel/src/operations/map.ts": [
@@ -1407,6 +1415,9 @@
     "packages/workerpool/tests/index.test.ts": [
       "packages/workerpool/src/index.ts"
     ],
+    "packages/workerpool/tests/parallel-dispatch.test.ts": [
+      "packages/workerpool/src/index.ts"
+    ],
     "core/tests/config.test.ts": [],
     "core/tests/factory/factory.test.ts": [
       "core/src/factory/index.ts",
@@ -1455,6 +1466,14 @@
       "core/src/typed/type-bridge.ts",
       "core/src/factory/factory.ts"
     ],
+    "matrix/tests/DenseMatrix.test.ts": [
+      "matrix/src/types/DenseMatrix.ts"
+    ],
+    "matrix/tests/JSBackend.test.ts": [
+      "matrix/src/backends/JSBackend.ts",
+      "matrix/src/types/DenseMatrix.ts",
+      "matrix/src/backends/Backend.ts"
+    ],
     "matrix/tests/config.test.ts": [
       "matrix/src/config.ts"
     ],
@@ -1466,9 +1485,6 @@
     ],
     "matrix/tests/decomposition/svd.test.ts": [
       "matrix/src/operations/svd.ts"
-    ],
-    "matrix/tests/DenseMatrix.test.ts": [
-      "matrix/src/types/DenseMatrix.ts"
     ],
     "matrix/tests/gpu/initialization.test.ts": [
       "matrix/src/backends/gpu/detect.ts",
@@ -1487,16 +1503,11 @@
     "matrix/tests/gpu/operations.test.ts": [
       "matrix/src/backends/GPUBackend.ts"
     ],
-    "matrix/tests/JSBackend.test.ts": [
-      "matrix/src/backends/JSBackend.ts",
-      "matrix/src/types/DenseMatrix.ts",
-      "matrix/src/backends/Backend.ts"
-    ],
-    "matrix/tests/sparse/operations.test.ts": [
+    "matrix/tests/sparse/SparseMatrix.test.ts": [
       "matrix/src/types/SparseMatrix.ts",
       "matrix/src/types/DenseMatrix.ts"
     ],
-    "matrix/tests/sparse/SparseMatrix.test.ts": [
+    "matrix/tests/sparse/operations.test.ts": [
       "matrix/src/types/SparseMatrix.ts",
       "matrix/src/types/DenseMatrix.ts"
     ],
@@ -1640,7 +1651,8 @@
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/cas.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/gpu.ts"
     ],
     "functions/tests/dist-objects.test.ts": [
       "functions/src/typed/dist-objects.ts"
@@ -1669,7 +1681,8 @@
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/cas.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/gpu.ts"
     ],
     "functions/tests/evaluate.test.ts": [
       "functions/src/factories/evaluate.ts"
@@ -1696,6 +1709,9 @@
     "functions/tests/geometry.test.ts": [
       "functions/src/typed/geometry.ts"
     ],
+    "functions/tests/gpu.test.ts": [
+      "functions/src/typed/gpu.ts"
+    ],
     "functions/tests/graph.test.ts": [
       "functions/src/typed/graph.ts"
     ],
@@ -1716,6 +1732,9 @@
     ],
     "functions/tests/numeric.test.ts": [
       "functions/src/typed/numeric.ts"
+    ],
+    "functions/tests/parallel-arithmetic-unary.test.ts": [
+      "functions/src/typed/arithmetic.ts"
     ],
     "functions/tests/parallel-arithmetic.test.ts": [
       "functions/src/index.ts",
@@ -1738,7 +1757,8 @@
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/cas.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/gpu.ts"
     ],
     "functions/tests/parallel-dispatch.test.ts": [
       "functions/src/index.ts",
@@ -1761,7 +1781,8 @@
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/cas.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/gpu.ts"
     ],
     "functions/tests/parallel-signal.test.ts": [
       "functions/src/index.ts",
@@ -1784,7 +1805,14 @@
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/cas.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/gpu.ts"
+    ],
+    "functions/tests/parallel-stat-prod.test.ts": [
+      "functions/src/typed/statistics.ts"
+    ],
+    "functions/tests/parallel-trig-unary.test.ts": [
+      "functions/src/typed/trigonometry.ts"
     ],
     "functions/tests/physical-constants.test.ts": [
       "functions/src/factories/index.ts"
@@ -1839,7 +1867,8 @@
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/cas.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/gpu.ts"
     ],
     "functions/tests/typed-bridge.test.ts": [
       "functions/src/typed/typed-bridge.ts"
@@ -1854,6 +1883,11 @@
       "expression/src/compiler/compile.ts",
       "expression/src/evaluator/evaluate.ts"
     ],
+    "parallel/tests/ComputePool.test.ts": [
+      "parallel/src/ComputePool.ts"
+    ],
+    "parallel/tests/ParallelMatrix.test.ts": [],
+    "parallel/tests/WorkerPool.timeout.test.ts": [],
     "parallel/tests/benchmark.test.ts": [
       "parallel/src/operations/elementwise.ts",
       "parallel/src/operations/reduce.ts",
@@ -1863,15 +1897,9 @@
     "parallel/tests/chunk.test.ts": [
       "parallel/src/strategies/chunk.ts"
     ],
-    "parallel/tests/ComputePool.test.ts": [
-      "parallel/src/ComputePool.ts"
-    ],
     "parallel/tests/operations/elementwise.test.ts": [
       "parallel/src/operations/elementwise.ts",
       "parallel/src/ComputePool.ts"
-    ],
-    "parallel/tests/operations/fft.test.ts": [
-      "parallel/src/operations/fft.ts"
     ],
     "parallel/tests/operations/map-extended.test.ts": [
       "parallel/src/operations/map.ts"
@@ -1883,9 +1911,6 @@
       "parallel/src/operations/matmul.ts",
       "parallel/src/ComputePool.ts"
     ],
-    "parallel/tests/operations/parallel-eig.test.ts": [
-      "parallel/src/operations/eig.ts"
-    ],
     "parallel/tests/operations/reduce.test.ts": [
       "parallel/src/operations/reduce.ts"
     ],
@@ -1893,11 +1918,9 @@
       "parallel/src/strategies/threshold.ts",
       "parallel/src/ComputePool.ts"
     ],
-    "parallel/tests/ParallelMatrix.test.ts": [],
     "parallel/tests/strategies/chunk-extended.test.ts": [
       "parallel/src/strategies/chunk.ts"
     ],
-    "parallel/tests/WorkerPool.timeout.test.ts": [],
     "workbook/tests/executor.test.ts": [
       "workbook/src/executor.ts",
       "workbook/src/types.ts"

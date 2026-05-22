@@ -1,6 +1,6 @@
 # MathTS Project Overview
 
-**Generated**: 2026-05-20
+**Generated**: 2026-05-22
 
 ## What is MathTS?
 
@@ -20,33 +20,33 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 ## Key Metrics
 
 Metrics below are reachable-file scope (485 active files; 902 dormant synced
-files excluded), per the 2026-05-20 dependency-graph report.
+files excluded), per the 2026-05-22 dependency-graph report.
 
 | Metric | Value |
 |--------|-------|
 | Reachable TypeScript Files | 485 (of 1,387 total; 902 dormant) |
-| Lines of Code | 124,662 (reachable) |
-| Total Exports | 2,859 (713 re-exports) |
+| Lines of Code | 125,142 (reachable) |
+| Total Exports | 2,850 (704 re-exports) |
 | Test Files | 111 |
 | Modules | 55 |
-| Typed Function Exports | 374 (17 modules) |
+| Typed Function Exports | 374+ (20 modules, including GPU) |
 | Synced Factory Functions | 242 (19 categories) |
 
 ## Packages
 
 The monorepo has **12 npm packages** plus the `wasm-rust` Cargo crate (not an
-npm package). File counts are reachable (active) files from the 2026-05-20 report.
+npm package). File counts are reachable (active) files from the 2026-05-22 report.
 
 | Package | Description | Active Files | Version |
 |---------|-------------|-------------|---------|
 | `@danielsimonjr/mathts-typed-function` | Type dispatch system (forked) | 1 | 0.1.2 |
-| `@danielsimonjr/mathts-workerpool` | Worker pool management (forked) | 1 | 0.1.2 |
+| `@danielsimonjr/mathts-workerpool` | Worker pool management (forked) | 2 | 0.1.2 |
 | `@danielsimonjr/mathts-core` | Types, typed-function, factory | 10 | 0.1.2 |
 | `@danielsimonjr/mathts-matrix` | DenseMatrix, SparseMatrix, backends | 34 | 0.1.2 |
 | `@danielsimonjr/mathts-tensor` | Rank-N Float64Array-backed dense Tensor (einsum/contraction) | 2 | 0.1.0 |
 | `@danielsimonjr/mathts-autograd` | Forward + reverse-mode automatic differentiation over Tensor | 5 | 0.1.0 |
-| `@danielsimonjr/mathts-functions` | Math functions via typed dispatch | 351 | 0.1.3 |
-| `@danielsimonjr/mathts-parallel` | ComputePool, WebWorker operations | 12 | 0.1.3 |
+| `@danielsimonjr/mathts-functions` | Math functions via typed dispatch | 352 | 0.1.3 |
+| `@danielsimonjr/mathts-parallel` | ComputePool, WebWorker operations | 10 | 0.1.3 |
 | `@danielsimonjr/mathts-expression` | Parser/compiler/evaluator (fully functional) | 45 | 0.2.0 |
 | `@danielsimonjr/mathts-workbook` | .mtsw notebook runtime + CLI | 5 | 0.1.2 |
 | `@danielsimonjr/mathts-compat` | mathjs compatibility shim | 2 | 0.1.2 |
@@ -61,7 +61,7 @@ npm package). File counts are reachable (active) files from the 2026-05-20 repor
 These are exported, tested, and built. Includes:
 
 - **3 numeric types**: Complex (83 methods), Fraction (61 methods), BigNumber (96 methods including 22 math functions)
-- **374 typed function exports** across 17 modules: arithmetic (54), trigonometry (20), statistics (25), signal (33), special (29), distributions (11), integration (4), interpolation (6), combinatorics (21), geometry (31), algebra (37), cas (30), graph (8), dist-objects (13), hypothesis (14), numeric (37), bridge (1)
+- **374+ typed function exports** across 20 modules: arithmetic (54), trigonometry (20), statistics (25), signal (33), special (29), distributions (11), integration (4), interpolation (6), combinatorics (21), geometry (31), algebra (37), cas (30), graph (8), dist-objects (13), hypothesis (14), numeric (37), bridge (1), gpu (4), matrix-ops, and typed-bridge
 - **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM/GPU backends
 - **Parallel**: ComputePool with 40+ parallel operations
 - **WASM**: 432 AssemblyScript exports (legacy) + **1,017 Rust WASM exports** (primary, full AS parity via compat module)
@@ -145,7 +145,7 @@ math.add(1, 2);
 | Matrix | Stable | Dense/Sparse with JS backend; WASM/GPU backends available |
 | Tensor | Active | Rank-N Float64Array-backed dense Tensor with einsum/contraction |
 | Autograd | Active | Forward + reverse-mode automatic differentiation over Tensor |
-| Functions | Active | 374 typed exports across 17 modules (arithmetic, trig, stats, signal, special, distributions, integration, interpolation, combinatorics, geometry, algebra, CAS, graph theory, distribution objects, hypothesis tests, numerical methods, bridge) |
+| Functions | Active | 374+ typed exports across 20 modules (arithmetic, trig, stats, signal, special, distributions, integration, interpolation, combinatorics, geometry, algebra, CAS, graph theory, distribution objects, hypothesis tests, numerical methods, bridge, gpu, matrix-ops, typed-bridge) |
 | Parallel | Active | ComputePool, 40+ operations, 7 threshold categories |
 | Workbook | Active | YAML parsing, dep graphs, executor; `executeCode()` evaluates cells via `evaluate()` from functions |
 | Expression | Active | Parser (16 node types), compiler, and evaluator fully functional; sandbox-hardened (2026-05-01 security release) |
