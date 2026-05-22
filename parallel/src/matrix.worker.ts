@@ -1,6 +1,13 @@
 /**
  * Matrix Worker for parallel computation
- * Handles matrix operations in a separate thread
+ * Handles matrix operations in a separate thread.
+ *
+ * Each task computes a contiguous slice of the output and returns it. The
+ * parent ({@link ParallelMatrix}) copies returned slices back into the result
+ * buffer. Returning the data (rather than relying on in-place mutation of a
+ * shared buffer) keeps the worker correct whether or not the caller is using
+ * SharedArrayBuffer — a structured-clone copy of a non-shared `resultData`
+ * would otherwise be discarded and the caller would observe all zeros.
  */
 
 interface WorkerMessage {
@@ -11,12 +18,39 @@ interface WorkerMessage {
 }
 
 interface MatrixTask {
-  operation: 'multiply' | 'add' | 'transpose' | 'dot'
+  operation:
+    | 'multiply'
+    | 'add'
+    | 'subtract'
+    | 'scale'
+    | 'elementMultiply'
+    | 'transpose'
+    | 'dot'
+    | 'sum'
   [key: string]: any
 }
 
 // Handle both Node.js worker_threads and browser Web Workers
 const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined
+
+// In Node worker threads `postMessage` is not a global — replies must go
+// through `parentPort`. Resolved asynchronously below; messages are queued
+// until it is ready.
+let nodeParentPort: { postMessage: (value: any) => void } | null = null
+
+/**
+ * Post a message back to the spawning thread, using the correct channel for
+ * the current environment.
+ */
+function sendMessage(message: WorkerMessage): void {
+  if (isNode) {
+    if (nodeParentPort) {
+      nodeParentPort.postMessage(message)
+    }
+  } else {
+    ;(postMessage as (msg: unknown) => void)(message)
+  }
+}
 
 // Message handler
 function handleMessage(event: MessageEvent | any): void {
@@ -31,7 +65,16 @@ function handleMessage(event: MessageEvent | any): void {
         result = multiplyTask(task)
         break
       case 'add':
-        result = addTask(task)
+        result = elementwiseTask(task, (a, b) => a + b)
+        break
+      case 'subtract':
+        result = elementwiseTask(task, (a, b) => a - b)
+        break
+      case 'elementMultiply':
+        result = elementwiseTask(task, (a, b) => a * b)
+        break
+      case 'scale':
+        result = scaleTask(task)
         break
       case 'transpose':
         result = transposeTask(task)
@@ -39,29 +82,35 @@ function handleMessage(event: MessageEvent | any): void {
       case 'dot':
         result = dotProductTask(task)
         break
+      case 'sum':
+        result = sumTask(task)
+        break
       default:
         throw new Error(`Unknown operation: ${task.operation}`)
     }
 
-    postMessage({
+    sendMessage({
       id: message.id,
       type: 'result',
-      data: result
+      data: result,
     })
   } catch (error) {
-    postMessage({
+    sendMessage({
       id: message.id,
       type: 'error',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     })
   }
 }
 
 /**
- * Matrix multiplication task: C[startRow:endRow] = A[startRow:endRow] * B
+ * Matrix multiplication task: computes rows [startRow, endRow) of C = A * B.
+ * Returns the computed row block as a flat Float64Array.
  */
-function multiplyTask(task: any): void {
-  const { aData, aRows, aCols, bData, bRows, bCols, startRow, endRow, resultData } = task
+function multiplyTask(task: any): Float64Array {
+  const { aData, aCols, bData, bCols, startRow, endRow } = task
+  const rowCount = endRow - startRow
+  const out = new Float64Array(rowCount * bCols)
 
   for (let i = startRow; i < endRow; i++) {
     for (let j = 0; j < bCols; j++) {
@@ -69,44 +118,65 @@ function multiplyTask(task: any): void {
       for (let k = 0; k < aCols; k++) {
         sum += aData[i * aCols + k] * bData[k * bCols + j]
       }
-      resultData[i * bCols + j] = sum
+      out[(i - startRow) * bCols + j] = sum
     }
   }
 
-  // No return needed, data is written to shared resultData
-  return undefined
+  return out
 }
 
 /**
- * Matrix addition task: C[start:end] = A[start:end] + B[start:end]
+ * Element-wise binary task: computes op(A[i], B[i]) for i in [start, end).
+ * Returns the computed slice as a flat Float64Array.
  */
-function addTask(task: any): void {
-  const { aData, bData, start, end, resultData } = task
+function elementwiseTask(task: any, op: (a: number, b: number) => number): Float64Array {
+  const { aData, bData, start, end } = task
+  const out = new Float64Array(end - start)
 
   for (let i = start; i < end; i++) {
-    resultData[i] = aData[i] + bData[i]
+    out[i - start] = op(aData[i], bData[i])
   }
 
-  return undefined
+  return out
 }
 
 /**
- * Matrix transpose task: B[j*rows+i] = A[i*cols+j] for i in [startRow:endRow]
+ * Scalar multiplication task: computes A[i] * scalar for i in [start, end).
+ * Returns the computed slice as a flat Float64Array.
  */
-function transposeTask(task: any): void {
-  const { data, rows, cols, startRow, endRow, resultData } = task
+function scaleTask(task: any): Float64Array {
+  const { aData, scalar, start, end } = task
+  const out = new Float64Array(end - start)
+
+  for (let i = start; i < end; i++) {
+    out[i - start] = aData[i] * scalar
+  }
+
+  return out
+}
+
+/**
+ * Matrix transpose task: transposes rows [startRow, endRow) of A.
+ * Returns the transposed block in column-major order relative to the slice
+ * (`out[j * rowCount + (i - startRow)] = A[i * cols + j]`); the parent
+ * scatters it into the final result.
+ */
+function transposeTask(task: any): Float64Array {
+  const { data, cols, startRow, endRow } = task
+  const rowCount = endRow - startRow
+  const out = new Float64Array(rowCount * cols)
 
   for (let i = startRow; i < endRow; i++) {
     for (let j = 0; j < cols; j++) {
-      resultData[j * rows + i] = data[i * cols + j]
+      out[j * rowCount + (i - startRow)] = data[i * cols + j]
     }
   }
 
-  return undefined
+  return out
 }
 
 /**
- * Dot product task: sum(A[start:end] * B[start:end])
+ * Dot product task: sum(A[start:end] * B[start:end]).
  */
 function dotProductTask(task: any): number {
   const { aData, bData, start, end } = task
@@ -119,13 +189,34 @@ function dotProductTask(task: any): number {
   return sum
 }
 
-// Set up message listener based on environment
+/**
+ * Sum task: sum(A[start:end]).
+ */
+function sumTask(task: any): number {
+  const { aData, start, end } = task
+
+  let sum = 0
+  for (let i = start; i < end; i++) {
+    sum += aData[i]
+  }
+
+  return sum
+}
+
+// Set up message listener based on environment.
+//
+// Use a dynamic ESM `import()` (not `require`) for `node:worker_threads`:
+// this file is emitted as an ESM module, and a CommonJS-style `require` would
+// be rewritten by the bundler into a shim that throws
+// "Dynamic require of \"worker_threads\" is not supported" at runtime.
 if (isNode) {
   // Node.js worker_threads
-  const { parentPort } = require('worker_threads')
-  if (parentPort) {
-    parentPort.on('message', handleMessage)
-  }
+  void import('node:worker_threads').then(({ parentPort }) => {
+    if (parentPort) {
+      nodeParentPort = parentPort
+      parentPort.on('message', handleMessage)
+    }
+  })
 } else {
   // Browser Web Worker
   self.onmessage = handleMessage

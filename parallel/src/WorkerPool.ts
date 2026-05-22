@@ -56,6 +56,10 @@ export class WorkerPool {
       const worker = await this.createWorker()
       this.workers.push(worker)
       this.availableWorkers.push(worker)
+      // A task may have been submitted (and queued) before this worker
+      // finished spawning — initialize() is fire-and-forget from the
+      // constructor. Drain the queue now that a worker is available.
+      this.processQueue()
     }
   }
 
@@ -71,18 +75,32 @@ export class WorkerPool {
       const script = this.workerScript.startsWith('file://')
         ? new URL(this.workerScript)
         : this.workerScript
-      worker = new NodeWorker(script) as any
+      const nodeWorker = new NodeWorker(script)
+
+      // Node's worker_threads.Worker is an EventEmitter — it does NOT support
+      // the browser-style `worker.onmessage = fn` / `worker.onerror = fn`
+      // assignment (that just sets an inert property). Listeners must be
+      // registered via `.on(...)`, and the 'message' event delivers the
+      // posted value directly (not wrapped in a MessageEvent).
+      nodeWorker.on('message', (data: WorkerMessage) => {
+        this.handleWorkerMessage(worker, data)
+      })
+      nodeWorker.on('error', (error: Error) => {
+        this.handleWorkerError(worker, { message: error.message } as ErrorEvent)
+      })
+
+      worker = nodeWorker as unknown as Worker
     } else {
       // Browser Web Worker
       worker = new Worker(this.workerScript, { type: 'module' })
-    }
 
-    worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
-      this.handleWorkerMessage(worker, event.data)
-    }
+      worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
+        this.handleWorkerMessage(worker, event.data)
+      }
 
-    worker.onerror = (error: ErrorEvent) => {
-      this.handleWorkerError(worker, error)
+      worker.onerror = (error: ErrorEvent) => {
+        this.handleWorkerError(worker, error)
+      }
     }
 
     return worker

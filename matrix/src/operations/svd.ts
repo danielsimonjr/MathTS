@@ -277,7 +277,12 @@ function svdStep(
     const { c: cs, s: sn } = givens(f, g);
 
     if (k > start) {
-      e[k - 1] = Math.sqrt(f * f + g * g);
+      // The rotated value is the SIGNED quantity `cs*f - sn*g`, not its
+      // magnitude. `givens` normalizes so that `cs*a - sn*b = ±sqrt(a^2+b^2)`;
+      // storing the unsigned `sqrt(...)` here desynchronizes the bidiagonal
+      // `d`/`e` representation from the actual rotated matrix that `U`/`V`
+      // accumulate, which silently corrupts the decomposition.
+      e[k - 1] = cs * f - sn * g;
     }
 
     f = cs * d[k] - sn * e[k];
@@ -291,7 +296,8 @@ function svdStep(
     // Left rotation to zero g
     const { c: cs2, s: sn2 } = givens(f, g);
 
-    d[k] = Math.sqrt(f * f + g * g);
+    // Signed rotated value (see the e[k-1] comment above).
+    d[k] = cs2 * f - sn2 * g;
     f = cs2 * e[k] - sn2 * d[k + 1];
     d[k + 1] = sn2 * e[k] + cs2 * d[k + 1];
 
