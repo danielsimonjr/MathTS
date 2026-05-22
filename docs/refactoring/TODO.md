@@ -135,20 +135,22 @@ were pre-existing and unrelated to the parallelism work, and are now resolved.
   `cs*f - sn*g` / `cs2*f - sn2*g`, corrupting the bidiagonal sweep for any
   non-square matrix (5×3 reconstruction error ~8.28). **Fixed** in
   `matrix/src/operations/svd.ts`.
-
-### Open (latent, low severity)
-
-- [ ] **`evaluate.ts ↔ typed/` runtime import cycle** — `functions/src/factories/evaluate.ts`
-  imports `* as typedFns` from `typed/index.ts`, which re-exports `typed/cas.ts`,
-  which imports `parse`/`evaluate`/`compileExpr` back from `evaluate.ts`.
-  `evaluate.ts` spreads `...typedFns` into its math scope at module-init time,
-  so the scope could snapshot an incomplete namespace. Verified currently
-  benign — the bundled load order produces a complete scope and `evaluate()`
-  resolves every probed function. A defensive fix would build the math scope
-  lazily (on first `evaluate()`/`compileExpr()` call) instead of at module load.
-  (The other four runtime cycles flagged by the dependency-graph report are in
-  mathjs-synced `utils/` support code, exist upstream, and are re-introduced by
-  the sync script — out of scope to fix locally.)
+- [x] **All 7 import cycles eliminated** — the dependency-graph report flagged
+  7 cycles (5 runtime, 2 type-only); the report now detects 0.
+  - `is ↔ map` / `object → is → map → customs → object` in both
+    `functions/src/utils/` and `expression/src/utils/`: `isObjectWrappingMap`
+    moved into `map.ts` next to the `ObjectWrappingMap` class, so `is.ts` no
+    longer imports `map.ts` — that single edge closed both cycles per package.
+  - `evaluate.ts → typed/index.ts → typed/cas.ts → evaluate.ts`: the
+    `export * from './cas.js'` re-export moved from `typed/index.ts` to the
+    package entry `functions/src/index.ts`. This also resolves the latent
+    incomplete-`mathScope` risk — `evaluate.ts` now loads strictly after
+    `typed/index.ts` is fully initialized.
+  - `DenseMatrix ↔ SparseMatrix`: `DenseMatrix` dropped its
+    `import type { SparseMatrix }`; `toSparse()` is typed as the `Matrix` base
+    (the `SparseMatrix` subtype is still constructed lazily at runtime).
+  - `BackendManager ↔ config`: `OperationType` moved from `BackendManager.ts`
+    to `config.ts`; `config.ts` no longer imports `BackendManager`.
 
 ## 📋 Next Steps
 

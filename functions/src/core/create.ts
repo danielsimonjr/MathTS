@@ -34,7 +34,6 @@ import {
   isNumber,
   isObject,
   isObjectNode,
-  isObjectWrappingMap,
   isOperatorNode,
   isParenthesisNode,
   isPartitionedMap,
@@ -50,6 +49,7 @@ import {
   isUnit
 } from '../utils/is.js'
 import { deepFlatten, isLegacyFactory } from '../utils/object.js'
+import { isObjectWrappingMap } from '../utils/map.js'
 import * as emitter from './../utils/emitter.js'
 import { DEFAULT_CONFIG } from './config.js'
 import type { ConfigOptions, MathJsConfig } from './config.js'

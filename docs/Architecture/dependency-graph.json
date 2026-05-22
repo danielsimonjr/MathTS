@@ -1037,7 +1037,8 @@
             "imports": [
               "getConfig",
               "onConfigChange",
-              "MatrixConfig"
+              "MatrixConfig",
+              "OperationType"
             ]
           }
         ],
@@ -2132,13 +2133,6 @@
               "BackendType"
             ],
             "typeOnly": true
-          },
-          {
-            "file": "./backends/BackendManager.js",
-            "imports": [
-              "OperationType"
-            ],
-            "typeOnly": true
           }
         ],
         "exports": [
@@ -2627,13 +2621,6 @@
               "MatrixEntry",
               "SliceSpec"
             ]
-          },
-          {
-            "file": "./SparseMatrix.js",
-            "imports": [
-              "SparseMatrix"
-            ],
-            "typeOnly": true
           }
         ],
         "exports": [
@@ -9379,6 +9366,13 @@
             "reExport": true
           },
           {
+            "file": "./typed/cas.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./factories/index.js",
             "imports": [
               "*"
@@ -9408,6 +9402,7 @@
         ],
         "reExported": [
           "* from ./typed/index.js",
+          "* from ./typed/cas.js",
           "* from ./factories/index.js",
           "evaluate",
           "compileExpr",
@@ -17561,13 +17556,6 @@
             "reExport": true
           },
           {
-            "file": "./cas.js",
-            "imports": [
-              "*"
-            ],
-            "reExport": true
-          },
-          {
             "file": "./matrix-ops.js",
             "imports": [
               "*"
@@ -17657,7 +17645,6 @@
           "* from ./graph.js",
           "* from ./dist-objects.js",
           "* from ./hypothesis.js",
-          "* from ./cas.js",
           "* from ./matrix-ops.js",
           "* from ./gpu.js",
           "typedArithmetic",
@@ -18608,14 +18595,7 @@
         "description": "Test whether a value is a collection: an Array or Matrix",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./map.js",
-            "imports": [
-              "ObjectWrappingMap"
-            ]
-          }
-        ],
+        "internalDependencies": [],
         "exports": [
           "isArray",
           "isNumber",
@@ -18640,7 +18620,6 @@
           "isObject",
           "isMap",
           "isPartitionedMap",
-          "isObjectWrappingMap",
           "isNull",
           "isUndefined",
           "isAccessorNode",
@@ -18718,7 +18697,6 @@
           "isObject",
           "isMap",
           "isPartitionedMap",
-          "isObjectWrappingMap",
           "isNull",
           "isUndefined",
           "isAccessorNode",
@@ -19139,6 +19117,7 @@
           "createMap",
           "toObject",
           "assign",
+          "isObjectWrappingMap",
           "ObjectWrappingMap",
           "PartitionedMap"
         ],
@@ -19150,7 +19129,8 @@
           "createEmptyMap",
           "createMap",
           "toObject",
-          "assign"
+          "assign",
+          "isObjectWrappingMap"
         ]
       },
       "functions/src/utils/node.ts": {
@@ -21185,14 +21165,7 @@
         "description": "Test whether a value is a collection: an Array or Matrix",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./map.js",
-            "imports": [
-              "ObjectWrappingMap"
-            ]
-          }
-        ],
+        "internalDependencies": [],
         "exports": [
           "isArray",
           "isNumber",
@@ -21217,7 +21190,6 @@
           "isObject",
           "isMap",
           "isPartitionedMap",
-          "isObjectWrappingMap",
           "isNull",
           "isUndefined",
           "isAccessorNode",
@@ -21295,7 +21267,6 @@
           "isObject",
           "isMap",
           "isPartitionedMap",
-          "isObjectWrappingMap",
           "isNull",
           "isUndefined",
           "isAccessorNode",
@@ -21386,6 +21357,7 @@
           "createMap",
           "toObject",
           "assign",
+          "isObjectWrappingMap",
           "ObjectWrappingMap",
           "PartitionedMap"
         ],
@@ -21397,7 +21369,8 @@
           "createEmptyMap",
           "createMap",
           "toObject",
-          "assign"
+          "assign",
+          "isObjectWrappingMap"
         ]
       },
       "expression/src/utils/number.ts": {
@@ -24290,53 +24263,11 @@
   },
   "dependencyGraph": {
     "circularDependencies": {
-      "runtime": [
-        [
-          "functions/src/utils/object.ts",
-          "functions/src/utils/is.ts",
-          "functions/src/utils/map.ts",
-          "functions/src/utils/customs.ts",
-          "functions/src/utils/object.ts"
-        ],
-        [
-          "functions/src/utils/is.ts",
-          "functions/src/utils/map.ts",
-          "functions/src/utils/is.ts"
-        ],
-        [
-          "functions/src/factories/evaluate.ts",
-          "functions/src/typed/index.ts",
-          "functions/src/typed/cas.ts",
-          "functions/src/factories/evaluate.ts"
-        ],
-        [
-          "expression/src/utils/is.ts",
-          "expression/src/utils/map.ts",
-          "expression/src/utils/customs.ts",
-          "expression/src/utils/object.ts",
-          "expression/src/utils/is.ts"
-        ],
-        [
-          "expression/src/utils/is.ts",
-          "expression/src/utils/map.ts",
-          "expression/src/utils/is.ts"
-        ]
-      ],
-      "typeOnly": [
-        [
-          "matrix/src/types/DenseMatrix.ts",
-          "matrix/src/types/SparseMatrix.ts",
-          "matrix/src/types/DenseMatrix.ts"
-        ],
-        [
-          "matrix/src/backends/BackendManager.ts",
-          "matrix/src/config.ts",
-          "matrix/src/backends/BackendManager.ts"
-        ]
-      ],
-      "total": 7,
-      "runtimeCount": 5,
-      "typeOnlyCount": 2
+      "runtime": [],
+      "typeOnly": [],
+      "total": 0,
+      "runtimeCount": 0,
+      "typeOnlyCount": 0
     },
     "layers": [
       {
@@ -25104,7 +25035,7 @@
   "statistics": {
     "totalTypeScriptFiles": 485,
     "totalModules": 55,
-    "totalLinesOfCode": 125148,
+    "totalLinesOfCode": 125177,
     "totalExports": 2850,
     "totalClasses": 45,
     "totalInterfaces": 237,
@@ -25113,10 +25044,10 @@
     "totalEnums": 0,
     "totalConstants": 1060,
     "totalReExports": 704,
-    "totalTypeOnlyImports": 347,
-    "runtimeCircularDeps": 5,
-    "typeOnlyCircularDeps": 2,
+    "totalTypeOnlyImports": 345,
+    "runtimeCircularDeps": 0,
+    "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 1,
-    "unusedExportsCount": 354
+    "unusedExportsCount": 355
   }
 }

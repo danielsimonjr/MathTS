@@ -9,7 +9,7 @@ Turborepo orchestrates builds across the workspace. tsup bundles each package.
 A Cargo crate (`wasm-rust`) provides the primary WASM backend but is not an npm package.
 
 - **485 reachable TypeScript files** (out of 1,387 total; 902 dormant synced from mathjs)
-- **125,148 lines of code** (reachable scope)
+- **125,177 lines of code** (reachable scope)
 - **2,850 total exports** (704 re-exports)
 - **114 test files**
 - **All 12 packages build**, all typecheck
@@ -39,26 +39,18 @@ workerpool --> parallel ------+           |
 
 ### Circular Dependencies
 
-The 2026-05-22 dependency-graph report detects **7 import cycles** — 5 runtime,
-2 type-only. None block the build, and all are within a single package (no
-cross-package cycles):
+The dependency-graph report detects **0 import cycles**. Seven cycles flagged
+by the 2026-05-22 report were all eliminated:
 
-| Cycle | Kind | Assessment |
-|-------|------|------------|
-| `functions/src/utils/`: `object → is → map → customs → object` | runtime | mathjs-synced support code; cycle exists upstream, ESM-tolerated |
-| `functions/src/utils/`: `is → map → is` | runtime | mathjs-synced support code; ESM-tolerated |
-| `functions/src/factories/evaluate.ts → typed/index.ts → typed/cas.ts → evaluate.ts` | runtime | native code; benign in the bundled output — `evaluate()` resolves the full math scope (verified) |
-| `expression/src/utils/`: `is → map → customs → object → is` | runtime | mathjs-synced support code; ESM-tolerated |
-| `expression/src/utils/`: `is → map → is` | runtime | mathjs-synced support code; ESM-tolerated |
-| `matrix/src/types/`: `DenseMatrix ↔ SparseMatrix` | type-only | erased at runtime, safe |
-| `matrix/src/backends/`: `BackendManager ↔ config` | type-only | erased at runtime, safe |
+| Former cycle | Fix |
+|--------------|-----|
+| `functions/src/utils/`: `is ↔ map` and `object → is → map → customs → object` | `isObjectWrappingMap` moved into `map.ts` (next to the `ObjectWrappingMap` class); `is.ts` no longer imports `map.ts` — that single edge closed both cycles |
+| `expression/src/utils/`: `is ↔ map` and `object → is → map → customs → object` | same fix as `functions/src/utils/` |
+| `functions/src/factories/evaluate.ts → typed/index.ts → typed/cas.ts → evaluate.ts` | the `export * from './cas.js'` re-export moved from `typed/index.ts` to the package entry `functions/src/index.ts`, so the `typed/index.ts → cas.ts` edge is gone |
+| `matrix/src/types/`: `DenseMatrix ↔ SparseMatrix` | `DenseMatrix` dropped its `import type { SparseMatrix }`; `toSparse()` is typed as the `Matrix` base (the `SparseMatrix` subtype is still loaded lazily at runtime) |
+| `matrix/src/backends/`: `BackendManager ↔ config` | the `OperationType` type moved from `BackendManager.ts` to `config.ts` (the lower-level module); `config.ts` no longer imports `BackendManager` |
 
-The four `utils/` cycles are pre-existing in upstream mathjs and are
-re-introduced by the sync script; fixing them locally would diverge from
-upstream. The `evaluate.ts ↔ typed/` cycle is the only native-code runtime
-cycle — `evaluate.ts` builds its math scope at module-init, but the bundled
-load order produces a complete scope, so it is currently benign. It is tracked
-as a latent risk (see `docs/refactoring/TODO.md`).
+No package has any remaining runtime or type-only cycle.
 
 ## Core Systems
 

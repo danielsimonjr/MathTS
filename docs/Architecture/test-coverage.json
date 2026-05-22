@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-05-22T03:01:03.636Z",
+    "generatedAt": "2026-05-22T03:21:38.384Z",
     "totalSourceFiles": 485,
     "totalTestFiles": 114,
     "testedCount": 90,
@@ -1633,6 +1633,7 @@
     "functions/tests/conversions-parser.test.ts": [
       "functions/src/index.ts",
       "functions/src/typed/index.ts",
+      "functions/src/typed/cas.ts",
       "functions/src/factories/index.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/typed/arithmetic.ts",
@@ -1650,7 +1651,6 @@
       "functions/src/typed/graph.ts",
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/cas.ts",
       "functions/src/typed/matrix-ops.ts",
       "functions/src/typed/gpu.ts"
     ],
@@ -1663,6 +1663,7 @@
     "functions/tests/docs-sync.test.ts": [
       "functions/src/index.ts",
       "functions/src/typed/index.ts",
+      "functions/src/typed/cas.ts",
       "functions/src/factories/index.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/typed/arithmetic.ts",
@@ -1680,7 +1681,6 @@
       "functions/src/typed/graph.ts",
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/cas.ts",
       "functions/src/typed/matrix-ops.ts",
       "functions/src/typed/gpu.ts"
     ],
@@ -1739,6 +1739,7 @@
     "functions/tests/parallel-arithmetic.test.ts": [
       "functions/src/index.ts",
       "functions/src/typed/index.ts",
+      "functions/src/typed/cas.ts",
       "functions/src/factories/index.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/typed/arithmetic.ts",
@@ -1756,13 +1757,13 @@
       "functions/src/typed/graph.ts",
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/cas.ts",
       "functions/src/typed/matrix-ops.ts",
       "functions/src/typed/gpu.ts"
     ],
     "functions/tests/parallel-dispatch.test.ts": [
       "functions/src/index.ts",
       "functions/src/typed/index.ts",
+      "functions/src/typed/cas.ts",
       "functions/src/factories/index.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/typed/arithmetic.ts",
@@ -1780,13 +1781,13 @@
       "functions/src/typed/graph.ts",
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/cas.ts",
       "functions/src/typed/matrix-ops.ts",
       "functions/src/typed/gpu.ts"
     ],
     "functions/tests/parallel-signal.test.ts": [
       "functions/src/index.ts",
       "functions/src/typed/index.ts",
+      "functions/src/typed/cas.ts",
       "functions/src/factories/index.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/typed/arithmetic.ts",
@@ -1804,7 +1805,6 @@
       "functions/src/typed/graph.ts",
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/cas.ts",
       "functions/src/typed/matrix-ops.ts",
       "functions/src/typed/gpu.ts"
     ],
@@ -1849,6 +1849,7 @@
     "functions/tests/typed-arithmetic.test.ts": [
       "functions/src/index.ts",
       "functions/src/typed/index.ts",
+      "functions/src/typed/cas.ts",
       "functions/src/factories/index.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/typed/arithmetic.ts",
@@ -1866,7 +1867,6 @@
       "functions/src/typed/graph.ts",
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/hypothesis.ts",
-      "functions/src/typed/cas.ts",
       "functions/src/typed/matrix-ops.ts",
       "functions/src/typed/gpu.ts"
     ],

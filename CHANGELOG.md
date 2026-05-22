@@ -242,6 +242,11 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
 - **`ParallelMatrix` worker never ran** — a four-defect chain disabled the parallel matrix path entirely: (1) `parallel`'s tsup config had no `src/matrix.worker.ts` entry, so `dist/matrix.worker.js` was never built; (2) `ParallelMatrix` had no script-resolution path; (3) `matrix.worker.ts` used the ESM-incompatible `require('worker_threads')`; (4) `WorkerPool`'s Node branch wired only the browser `worker.onmessage`/`onerror` callbacks instead of `.on('message')`/`.on('error')`. Two further defects: workers mutated shared buffers (lost across the structured clone) and the spawn loop never drained the pending queue. Fixed by adding the worker build entry, a `resolveMatrixWorkerScript()` resolver, dynamic `import('node:worker_threads')` with `parentPort` replies, the Node event handlers, return-by-value worker slices, and a `processQueue()` call after each worker spawns. `parallel/package.json`, `parallel/src/{ParallelMatrix,WorkerPool,matrix.worker}.ts`.
 - **JS SVD wrong for non-square matrices** — `svdStep`'s Golub-Kahan QR sweep assigned the unsigned magnitude `Math.sqrt(f*f + g*g)` to `e[k-1]` and `d[k]`, where the algorithm requires the signed rotated values `cs*f - sn*g` / `cs2*f - sn2*g`. The unsigned form corrupted the bidiagonal sweep for any non-square matrix. `matrix/src/operations/svd.ts`.
 - **Dependency-graph tool wrote to the wrong directory** — `tools/create-dependency-graph` hard-coded its `OUTPUT_DIR` as `docs/architecture` (lowercase), but the tracked docs folder is `docs/Architecture`. On a case-sensitive filesystem the generated reports landed in a separate, untracked directory. `OUTPUT_DIR` (and the matching log strings + README) now use `docs/Architecture`.
+- **All 7 circular import dependencies eliminated** — the dependency-graph report flagged 7 cycles (5 runtime, 2 type-only); it now reports 0.
+  - `is ↔ map` and `object → is → map → customs → object` in both `functions/src/utils/` and `expression/src/utils/` (4 cycles): `isObjectWrappingMap` moved into `map.ts` next to the `ObjectWrappingMap` class it guards, so `is.ts` no longer imports `map.ts` — the sole edge that closed both cycles in each package. `isMap`'s existing duck-typing fallback already covers `ObjectWrappingMap` instances, so the dropped `instanceof` is behaviour-preserving.
+  - `functions/src/factories/evaluate.ts → typed/index.ts → typed/cas.ts → evaluate.ts`: the `export * from './cas.js'` re-export moved from `typed/index.ts` to the package entry `functions/src/index.ts`. The package's export surface is unchanged, and `evaluate.ts` now initializes strictly after `typed/index.ts`, so its module scope is always complete.
+  - `matrix/src/types/`: `DenseMatrix ↔ SparseMatrix`: `DenseMatrix` dropped its `import type { SparseMatrix }`; `toSparse()` is now typed as the `Matrix` base class (the `SparseMatrix` subtype is still constructed via the existing lazy runtime load).
+  - `matrix/src/backends/`: `BackendManager ↔ config`: the `OperationType` type moved from `BackendManager.ts` to `config.ts` (the lower-level module); `BackendManager` re-exports it so existing importers are unaffected.
 
 ### Documentation
 
@@ -270,11 +275,10 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
   overloads resolve to the value directly, not to a `ParallelResult` wrapper.
 - **`docs/Architecture/` regenerated** — re-ran `tools/create-dependency-graph`
   over the current tree (485 reachable files, 55 modules, 2,850 exports,
-  125,148 LOC, 7 import cycles, 18.6% test coverage). `OVERVIEW.md` and
+  125,177 LOC, 0 import cycles, 18.6% test coverage). `OVERVIEW.md` and
   `ARCHITECTURE.md` were refreshed (LOC, 114 test files), and `ARCHITECTURE.md`
-  gained a **Circular Dependencies** subsection itemizing all 7 cycles the
-  report detects, with a per-cycle assessment (4 are mathjs-synced upstream,
-  the native `evaluate.ts ↔ typed/` cycle is benign, 2 are type-only).
+  gained a **Circular Dependencies** subsection — it records that all 7 cycles
+  the earlier report flagged have been eliminated, with the fix for each.
 
 ### Retracted (audit false-positives)
 

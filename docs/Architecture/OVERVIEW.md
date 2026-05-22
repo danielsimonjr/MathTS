@@ -25,7 +25,7 @@ files excluded), per the 2026-05-22 dependency-graph report.
 | Metric | Value |
 |--------|-------|
 | Reachable TypeScript Files | 485 (of 1,387 total; 902 dormant) |
-| Lines of Code | 125,148 (reachable) |
+| Lines of Code | 125,177 (reachable) |
 | Total Exports | 2,850 (704 re-exports) |
 | Test Files | 114 |
 | Modules | 55 |

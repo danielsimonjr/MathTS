@@ -431,12 +431,11 @@ graph LR
 | `./Backend.js` | `MatrixBackend, BackendType, BackendHints` | Import (type-only) |
 | `./Backend.js` | `backendRegistry, DEFAULT_BACKEND_HINTS` | Import |
 | `./JSBackend.js` | `jsBackend` | Import |
-| `../config.js` | `getConfig, onConfigChange, MatrixConfig` | Import |
+| `../config.js` | `getConfig, onConfigChange, MatrixConfig, OperationType` | Import |
 
 **Exports:**
 - Classes: `BackendManager`
 - Interfaces: `ExtendedBackendHints`
-- Types: `OperationType`
 - Functions: `createBackendManager`
 - Constants: `DEFAULT_EXTENDED_HINTS`, `backendManager`
 
@@ -731,11 +730,10 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./backends/Backend.js` | `BackendType` | Import (type-only) |
-| `./backends/BackendManager.js` | `OperationType` | Import (type-only) |
 
 **Exports:**
 - Interfaces: `BackendConfig`, `AdaptiveTuningConfig`, `ProfilingConfig`, `MatrixConfig`
-- Types: `BackendPreference`
+- Types: `OperationType`, `BackendPreference`
 - Functions: `getConfig`, `setConfig`, `resetConfig`, `onConfigChange`, `setBackendPreference`, `setBackendThreshold`, `setBackendEnabled`, `getRecommendedBackend`, `forceBackend`, `enableProfiling`, `disableProfiling`, `enableAdaptiveTuning`, `disableAdaptiveTuning`, `configureAdaptiveTuning`
 - Constants: `DEFAULT_CONFIG`
 
@@ -853,7 +851,6 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./Matrix.js` | `Matrix, MatrixEntry, SliceSpec` | Import |
-| `./SparseMatrix.js` | `SparseMatrix` | Import (type-only) |
 
 **Exports:**
 - Classes: `DenseMatrix`
@@ -2900,11 +2897,12 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./typed/index.js` | `*` | Re-export |
+| `./typed/cas.js` | `*` | Re-export |
 | `./factories/index.js` | `*` | Re-export |
 | `./factories/evaluate.js` | `evaluate, compileExpr, parse, parser, reviver, replacer` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./typed/index.js`, `* from ./factories/index.js`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`
+- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`
 
 ---
 
@@ -5797,7 +5795,6 @@ graph LR
 | `./graph.js` | `*` | Re-export |
 | `./dist-objects.js` | `*` | Re-export |
 | `./hypothesis.js` | `*` | Re-export |
-| `./cas.js` | `*` | Re-export |
 | `./matrix-ops.js` | `*` | Re-export |
 | `./gpu.js` | `*` | Re-export |
 | `./arithmetic.js` | `typedArithmetic` | Re-export |
@@ -5810,7 +5807,7 @@ graph LR
 
 **Exports:**
 - Constants: `typedFunctions`
-- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./special.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./cas.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedSpecial`, `typedDistributions`, `typedAlgebra`
+- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./special.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedSpecial`, `typedDistributions`, `typedAlgebra`
 
 ---
 
@@ -6086,14 +6083,9 @@ graph LR
 
 ### `functions/src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./map.js` | `ObjectWrappingMap` | Import |
-
 **Exports:**
 - Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
-- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isObjectWrappingMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
+- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
 - Constants: `isArray`
 
 ---
@@ -6251,7 +6243,7 @@ graph LR
 
 **Exports:**
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
-- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`
+- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`
 
 ---
 
@@ -6989,14 +6981,9 @@ graph LR
 
 ### `expression/src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
 
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./map.js` | `ObjectWrappingMap` | Import |
-
 **Exports:**
 - Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
-- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isObjectWrappingMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
+- Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
 - Constants: `isArray`
 
 ---
@@ -7029,7 +7016,7 @@ graph LR
 
 **Exports:**
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
-- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`
+- Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`
 
 ---
 
@@ -7508,7 +7495,7 @@ graph LR
 | `functions/src/utils/factory` | 1 file | 262 files |
 | `functions/src/factories/index` | 243 files | 2 files |
 | `functions/src/core/function/typed` | 3 files | 181 files |
-| `functions/src/utils/is` | 1 file | 65 files |
+| `functions/src/utils/is` | 0 files | 65 files |
 | `functions/src/plain/number/index` | 9 files | 52 files |
 | `functions/src/utils/array` | 6 files | 50 files |
 | `functions/src/core/config` | 0 files | 52 files |
@@ -7517,14 +7504,14 @@ graph LR
 | `functions/src/utils/collection` | 4 files | 37 files |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files | 27 files |
 | `functions/src/utils/object` | 1 file | 28 files |
-| `expression/src/utils/is` | 1 file | 25 files |
+| `expression/src/utils/is` | 0 files | 25 files |
 | `expression/src/index` | 24 files | 0 files |
 | `functions/src/type/matrix/utils/matAlgo12xSfs` | 2 files | 19 files |
-| `functions/src/typed/index` | 18 files | 2 files |
 | `expression/src/utils/factory` | 1 file | 19 files |
 | `functions/src/type/bignumber/BigNumber` | 1 file | 18 files |
 | `functions/src/type/matrix/types` | 0 files | 19 files |
 | `functions/src/type/matrix/utils/matAlgo03xDSf` | 3 files | 16 files |
+| `functions/src/typed/index` | 17 files | 2 files |
 | `functions/src/utils/string` | 3 files | 16 files |
 | `functions/src/type/complex/Complex` | 3 files | 15 files |
 | `functions/src/type/matrix/utils/matAlgo11xS0s` | 2 files | 16 files |
@@ -7536,12 +7523,12 @@ graph LR
 | `functions/src/bitwise/rightArithShift` | 13 files | 1 file |
 | `functions/src/type/matrix/utils/matAlgo02xDS0` | 3 files | 11 files |
 | `functions/src/type/matrix/utils/matAlgo14xDs` | 3 files | 11 files |
-| `matrix/src/types/DenseMatrix` | 2 files | 11 files |
 | `functions/src/bitwise/rightLogShift` | 12 files | 1 file |
 | `functions/src/type/matrix/utils/matAlgo07xSSf` | 3 files | 10 files |
 | `expression/src/utils/customs` | 1 file | 12 files |
 | `expression/src/utils/string` | 3 files | 10 files |
 | `matrix/src/backends/index` | 11 files | 1 file |
+| `matrix/src/types/DenseMatrix` | 1 file | 11 files |
 | `functions/src/arithmetic/gcd` | 11 files | 1 file |
 | `functions/src/arithmetic/mod` | 10 files | 2 files |
 | `expression/src/utils/array` | 6 files | 6 files |
@@ -7551,28 +7538,7 @@ graph LR
 <a id="circular-dependency-analysis"></a>
 ## Circular Dependency Analysis
 
-**7 circular dependencies detected:**
-
-- **Runtime cycles**: 5 (require attention)
-- **Type-only cycles**: 2 (safe, no runtime impact)
-
-### Runtime Circular Dependencies
-
-These cycles involve runtime imports and may cause issues:
-
-- functions/src/utils/object.ts -> functions/src/utils/is.ts -> functions/src/utils/map.ts -> functions/src/utils/customs.ts -> functions/src/utils/object.ts
-- functions/src/utils/is.ts -> functions/src/utils/map.ts -> functions/src/utils/is.ts
-- functions/src/factories/evaluate.ts -> functions/src/typed/index.ts -> functions/src/typed/cas.ts -> functions/src/factories/evaluate.ts
-- expression/src/utils/is.ts -> expression/src/utils/map.ts -> expression/src/utils/customs.ts -> expression/src/utils/object.ts -> expression/src/utils/is.ts
-- expression/src/utils/is.ts -> expression/src/utils/map.ts -> expression/src/utils/is.ts
-
-### Type-Only Circular Dependencies
-
-These cycles only involve type imports and are safe (erased at runtime):
-
-- matrix/src/types/DenseMatrix.ts -> matrix/src/types/SparseMatrix.ts -> matrix/src/types/DenseMatrix.ts
-- matrix/src/backends/BackendManager.ts -> matrix/src/config.ts -> matrix/src/backends/BackendManager.ts
-
+**No circular dependencies detected.**
 ---
 
 <a id="visual-dependency-graph"></a>
@@ -8075,7 +8041,6 @@ graph TD
     N21 --> N17
     N21 --> N22
     N24 --> N13
-    N24 --> N14
     N25 --> N36
     N25 --> N30
     N25 --> N27
@@ -8091,7 +8056,6 @@ graph TD
     N26 --> N33
     N27 --> N33
     N33 --> N34
-    N33 --> N35
     N35 --> N34
     N35 --> N33
     N36 --> N34
@@ -8109,6 +8073,8 @@ graph TD
     N46 --> N221
     N48 --> N83
     N48 --> N82
+    N49 --> N83
+    N50 --> N83
 ```
 
 ---
@@ -8120,7 +8086,7 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 485 |
 | Total Modules | 55 |
-| Total Lines of Code | 125148 |
+| Total Lines of Code | 125177 |
 | Total Exports | 2850 |
 | Total Re-exports | 704 |
 | Total Classes | 45 |
@@ -8128,9 +8094,9 @@ graph TD
 | Total Functions | 1067 |
 | Total Type Guards | 127 |
 | Total Enums | 0 |
-| Type-only Imports | 347 |
-| Runtime Circular Deps | 5 |
-| Type-only Circular Deps | 2 |
+| Type-only Imports | 345 |
+| Runtime Circular Deps | 0 |
+| Type-only Circular Deps | 0 |
 
 ---
 

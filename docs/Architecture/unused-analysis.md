@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 1
-- **Potentially unused exports**: 354
+- **Potentially unused exports**: 355
 
 ## Potentially Unused Files
 
@@ -289,7 +289,6 @@ These exports are not imported by any other file in the codebase:
 ### `functions/src/utils/is.ts`
 
 - `isPartitionedMap` (function)
-- `isObjectWrappingMap` (function)
 - `BigNumber` (interface)
 - `Complex` (interface)
 - `Fraction` (interface)
@@ -322,6 +321,8 @@ These exports are not imported by any other file in the codebase:
 
 - `toObject` (function)
 - `assign` (function)
+- `isObjectWrappingMap` (function)
+- `ObjectWrappingMap` (class)
 - `PartitionedMap` (class)
 
 ### `functions/src/utils/noop.ts`
@@ -453,7 +454,6 @@ These exports are not imported by any other file in the codebase:
 - `isDate` (function)
 - `isRegExp` (function)
 - `isPartitionedMap` (function)
-- `isObjectWrappingMap` (function)
 - `isNull` (function)
 - `isUndefined` (function)
 - `isAssignmentNode` (function)
@@ -497,6 +497,7 @@ These exports are not imported by any other file in the codebase:
 ### `expression/src/utils/map.ts`
 
 - `assign` (function)
+- `isObjectWrappingMap` (function)
 
 ### `expression/src/utils/number.ts`
 

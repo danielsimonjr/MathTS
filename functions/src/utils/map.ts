@@ -268,3 +268,17 @@ export function assign<K = any, V = any>(
   }
   return map
 }
+
+/**
+ * Returns `true` if `object` is an {@link ObjectWrappingMap}.
+ *
+ * Defined here, next to the class it guards, so `is.ts` need not import
+ * `map.ts` — that import was the sole edge closing the `is`/`map` cycle.
+ */
+export function isObjectWrappingMap(
+  object: unknown
+): object is ObjectWrappingMap {
+  if (!isMap(object)) return false
+  const wrapper = object as { wrappedObject?: unknown }
+  return isObject(wrapper.wrappedObject)
+}
