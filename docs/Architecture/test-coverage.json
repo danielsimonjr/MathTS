@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generatedAt": "2026-05-22T03:21:38.384Z",
+    "generatedAt": "2026-05-22T21:34:41.283Z",
     "totalSourceFiles": 485,
-    "totalTestFiles": 114,
-    "testedCount": 90,
-    "untestedCount": 395,
-    "coveragePercent": "18.6"
+    "totalTestFiles": 156,
+    "testedCount": 131,
+    "untestedCount": 354,
+    "coveragePercent": "27.0"
   },
   "untestedFiles": [
     "assembly/src/index.ts",
@@ -26,49 +26,11 @@
     "assembly/src/ops/tensor.ts",
     "assembly/src/types/complex.ts",
     "core/src/types/interfaces.ts",
-    "expression/src/Help.ts",
-    "expression/src/Parser.ts",
     "expression/src/compiler/index.ts",
-    "expression/src/error/DimensionError.ts",
-    "expression/src/error/IndexError.ts",
     "expression/src/evaluator/index.ts",
     "expression/src/index.ts",
-    "expression/src/keywords.ts",
-    "expression/src/node/AccessorNode.ts",
-    "expression/src/node/ArrayNode.ts",
-    "expression/src/node/AssignmentNode.ts",
-    "expression/src/node/BlockNode.ts",
-    "expression/src/node/ConditionalNode.ts",
-    "expression/src/node/ConstantNode.ts",
-    "expression/src/node/FunctionAssignmentNode.ts",
-    "expression/src/node/FunctionNode.ts",
-    "expression/src/node/IndexNode.ts",
-    "expression/src/node/Node.ts",
-    "expression/src/node/ObjectNode.ts",
-    "expression/src/node/OperatorNode.ts",
-    "expression/src/node/ParenthesisNode.ts",
-    "expression/src/node/RangeNode.ts",
-    "expression/src/node/RelationalNode.ts",
-    "expression/src/node/SymbolNode.ts",
-    "expression/src/node/utils/access.ts",
-    "expression/src/node/utils/assign.ts",
-    "expression/src/operators.ts",
     "expression/src/parse.ts",
-    "expression/src/transform/utils/errorTransform.ts",
     "expression/src/types.ts",
-    "expression/src/utils/array.ts",
-    "expression/src/utils/bignumber/formatter.ts",
-    "expression/src/utils/collection.ts",
-    "expression/src/utils/customs.ts",
-    "expression/src/utils/factory.ts",
-    "expression/src/utils/is.ts",
-    "expression/src/utils/latex.ts",
-    "expression/src/utils/map.ts",
-    "expression/src/utils/number.ts",
-    "expression/src/utils/object.ts",
-    "expression/src/utils/scope.ts",
-    "expression/src/utils/string.ts",
-    "expression/src/utils/switch.ts",
     "functions/src/algebra/decomposition/lup.ts",
     "functions/src/algebra/decomposition/qr.ts",
     "functions/src/algebra/decomposition/schur.ts",
@@ -174,7 +136,6 @@
     "functions/src/error/DimensionError.ts",
     "functions/src/error/IndexError.ts",
     "functions/src/expression/operators.ts",
-    "functions/src/factories/scope.ts",
     "functions/src/geometry/distance.ts",
     "functions/src/geometry/intersect.ts",
     "functions/src/logical/and.ts",
@@ -396,8 +357,6 @@
     "functions/src/utils/switch.ts",
     "functions/src/utils/typeOf.ts",
     "functions/src/wasm/WasmLoader.ts",
-    "matrix/src/backends/WasmLoader.ts",
-    "packages/workerpool/src/fft-core.ts",
     "parallel/src/index.ts",
     "parallel/src/operations/index.ts",
     "parallel/src/strategies/index.ts",
@@ -421,11 +380,50 @@
     "core/src/types/bignumber.ts",
     "core/src/types/complex.ts",
     "core/src/types/fraction.ts",
+    "expression/src/Help.ts",
+    "expression/src/Parser.ts",
     "expression/src/compiler/compile.ts",
+    "expression/src/error/DimensionError.ts",
+    "expression/src/error/IndexError.ts",
     "expression/src/evaluator/evaluate.ts",
+    "expression/src/keywords.ts",
+    "expression/src/node/AccessorNode.ts",
+    "expression/src/node/ArrayNode.ts",
+    "expression/src/node/AssignmentNode.ts",
+    "expression/src/node/BlockNode.ts",
+    "expression/src/node/ConditionalNode.ts",
+    "expression/src/node/ConstantNode.ts",
+    "expression/src/node/FunctionAssignmentNode.ts",
+    "expression/src/node/FunctionNode.ts",
+    "expression/src/node/IndexNode.ts",
+    "expression/src/node/Node.ts",
+    "expression/src/node/ObjectNode.ts",
+    "expression/src/node/OperatorNode.ts",
+    "expression/src/node/ParenthesisNode.ts",
+    "expression/src/node/RangeNode.ts",
+    "expression/src/node/RelationalNode.ts",
+    "expression/src/node/SymbolNode.ts",
+    "expression/src/node/utils/access.ts",
+    "expression/src/node/utils/assign.ts",
+    "expression/src/operators.ts",
+    "expression/src/transform/utils/errorTransform.ts",
+    "expression/src/utils/array.ts",
+    "expression/src/utils/bignumber/formatter.ts",
+    "expression/src/utils/collection.ts",
+    "expression/src/utils/customs.ts",
+    "expression/src/utils/factory.ts",
+    "expression/src/utils/is.ts",
+    "expression/src/utils/latex.ts",
+    "expression/src/utils/map.ts",
+    "expression/src/utils/number.ts",
+    "expression/src/utils/object.ts",
+    "expression/src/utils/scope.ts",
+    "expression/src/utils/string.ts",
+    "expression/src/utils/switch.ts",
     "functions/src/factories/evaluate.ts",
     "functions/src/factories/index.ts",
     "functions/src/factories/matrix-bridge.ts",
+    "functions/src/factories/scope.ts",
     "functions/src/index.ts",
     "functions/src/typed/algebra.ts",
     "functions/src/typed/arithmetic.ts",
@@ -457,6 +455,7 @@
     "matrix/src/backends/RustWASMBackend.ts",
     "matrix/src/backends/RustWasmLoader.ts",
     "matrix/src/backends/WASMBackend.ts",
+    "matrix/src/backends/WasmLoader.ts",
     "matrix/src/backends/gpu/BatchExecutor.ts",
     "matrix/src/backends/gpu/BufferPool.ts",
     "matrix/src/backends/gpu/GPUContext.ts",
@@ -482,6 +481,7 @@
     "matrix/src/types/SparseMatrix.ts",
     "matrix/src/types/index.ts",
     "packages/typed-function/src/index.ts",
+    "packages/workerpool/src/fft-core.ts",
     "packages/workerpool/src/index.ts",
     "parallel/src/ComputePool.ts",
     "parallel/src/operations/elementwise.ts",
@@ -501,7 +501,9 @@
       "packages/typed-function/tests/index.test.ts",
       "packages/typed-function/tests/robust-types.test.ts"
     ],
-    "packages/workerpool/src/fft-core.ts": [],
+    "packages/workerpool/src/fft-core.ts": [
+      "packages/workerpool/tests/fft-core.test.ts"
+    ],
     "packages/workerpool/src/index.ts": [
       "packages/workerpool/tests/index.test.ts",
       "packages/workerpool/tests/parallel-dispatch.test.ts"
@@ -600,7 +602,9 @@
       "matrix/tests/wasm/loading.test.ts",
       "matrix/tests/wasm/operations.test.ts"
     ],
-    "matrix/src/backends/WasmLoader.ts": [],
+    "matrix/src/backends/WasmLoader.ts": [
+      "matrix/tests/WasmLoader.test.ts"
+    ],
     "matrix/src/backends/gpu/BatchExecutor.ts": [
       "matrix/tests/gpu/integration.test.ts",
       "matrix/tests/typed-operations.test.ts",
@@ -843,7 +847,9 @@
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
       "functions/tests/parallel-signal.test.ts",
-      "functions/tests/typed-arithmetic.test.ts"
+      "functions/tests/typed-arithmetic.test.ts",
+      "expression/tests/Parser.test.ts",
+      "expression/tests/parse.test.ts"
     ],
     "functions/src/factories/index.ts": [
       "functions/tests/conversions-parser.test.ts",
@@ -864,7 +870,9 @@
       "functions/tests/matrix-bridge-accel.test.ts",
       "functions/tests/sparse-bridge.test.ts"
     ],
-    "functions/src/factories/scope.ts": [],
+    "functions/src/factories/scope.ts": [
+      "functions/tests/factory-scope.test.ts"
+    ],
     "functions/src/geometry/distance.ts": [],
     "functions/src/geometry/intersect.ts": [],
     "functions/src/index.ts": [
@@ -1279,57 +1287,180 @@
     "functions/src/wasm/integrity.ts": [
       "functions/tests/security/wasm-integrity.test.ts"
     ],
-    "expression/src/Help.ts": [],
-    "expression/src/Parser.ts": [],
+    "expression/src/Help.ts": [
+      "expression/tests/Help.test.ts"
+    ],
+    "expression/src/Parser.ts": [
+      "expression/tests/Parser.test.ts"
+    ],
     "expression/src/compiler/compile.ts": [
       "expression/tests/compile.test.ts",
       "expression/tests/security/sandbox.test.ts"
     ],
     "expression/src/compiler/index.ts": [],
-    "expression/src/error/DimensionError.ts": [],
-    "expression/src/error/IndexError.ts": [],
+    "expression/src/error/DimensionError.ts": [
+      "expression/tests/DimensionError.test.ts"
+    ],
+    "expression/src/error/IndexError.ts": [
+      "expression/tests/IndexError.test.ts",
+      "expression/tests/errorTransform.test.ts"
+    ],
     "expression/src/evaluator/evaluate.ts": [
       "expression/tests/evaluate.test.ts",
       "expression/tests/security/sandbox.test.ts"
     ],
     "expression/src/evaluator/index.ts": [],
     "expression/src/index.ts": [],
-    "expression/src/keywords.ts": [],
-    "expression/src/node/AccessorNode.ts": [],
-    "expression/src/node/ArrayNode.ts": [],
-    "expression/src/node/AssignmentNode.ts": [],
-    "expression/src/node/BlockNode.ts": [],
-    "expression/src/node/ConditionalNode.ts": [],
-    "expression/src/node/ConstantNode.ts": [],
-    "expression/src/node/FunctionAssignmentNode.ts": [],
-    "expression/src/node/FunctionNode.ts": [],
-    "expression/src/node/IndexNode.ts": [],
-    "expression/src/node/Node.ts": [],
-    "expression/src/node/ObjectNode.ts": [],
-    "expression/src/node/OperatorNode.ts": [],
-    "expression/src/node/ParenthesisNode.ts": [],
-    "expression/src/node/RangeNode.ts": [],
-    "expression/src/node/RelationalNode.ts": [],
-    "expression/src/node/SymbolNode.ts": [],
-    "expression/src/node/utils/access.ts": [],
-    "expression/src/node/utils/assign.ts": [],
-    "expression/src/operators.ts": [],
+    "expression/src/keywords.ts": [
+      "expression/tests/keywords.test.ts"
+    ],
+    "expression/src/node/AccessorNode.ts": [
+      "expression/tests/AccessorNode.test.ts"
+    ],
+    "expression/src/node/ArrayNode.ts": [
+      "expression/tests/ArrayNode.test.ts"
+    ],
+    "expression/src/node/AssignmentNode.ts": [
+      "expression/tests/AssignmentNode.test.ts"
+    ],
+    "expression/src/node/BlockNode.ts": [
+      "expression/tests/BlockNode.test.ts"
+    ],
+    "expression/src/node/ConditionalNode.ts": [
+      "expression/tests/ConditionalNode.test.ts"
+    ],
+    "expression/src/node/ConstantNode.ts": [
+      "expression/tests/AccessorNode.test.ts",
+      "expression/tests/ArrayNode.test.ts",
+      "expression/tests/AssignmentNode.test.ts",
+      "expression/tests/BlockNode.test.ts",
+      "expression/tests/ConditionalNode.test.ts",
+      "expression/tests/ConstantNode.test.ts",
+      "expression/tests/FunctionAssignmentNode.test.ts",
+      "expression/tests/FunctionNode.test.ts",
+      "expression/tests/IndexNode.test.ts",
+      "expression/tests/Node.test.ts",
+      "expression/tests/ObjectNode.test.ts",
+      "expression/tests/OperatorNode.test.ts",
+      "expression/tests/ParenthesisNode.test.ts",
+      "expression/tests/RangeNode.test.ts",
+      "expression/tests/RelationalNode.test.ts",
+      "expression/tests/SymbolNode.test.ts"
+    ],
+    "expression/src/node/FunctionAssignmentNode.ts": [
+      "expression/tests/FunctionAssignmentNode.test.ts"
+    ],
+    "expression/src/node/FunctionNode.ts": [
+      "expression/tests/FunctionNode.test.ts"
+    ],
+    "expression/src/node/IndexNode.ts": [
+      "expression/tests/AccessorNode.test.ts",
+      "expression/tests/AssignmentNode.test.ts",
+      "expression/tests/IndexNode.test.ts"
+    ],
+    "expression/src/node/Node.ts": [
+      "expression/tests/AccessorNode.test.ts",
+      "expression/tests/ArrayNode.test.ts",
+      "expression/tests/AssignmentNode.test.ts",
+      "expression/tests/BlockNode.test.ts",
+      "expression/tests/ConditionalNode.test.ts",
+      "expression/tests/ConstantNode.test.ts",
+      "expression/tests/FunctionAssignmentNode.test.ts",
+      "expression/tests/FunctionNode.test.ts",
+      "expression/tests/IndexNode.test.ts",
+      "expression/tests/Node.test.ts",
+      "expression/tests/ObjectNode.test.ts",
+      "expression/tests/OperatorNode.test.ts",
+      "expression/tests/ParenthesisNode.test.ts",
+      "expression/tests/RangeNode.test.ts",
+      "expression/tests/RelationalNode.test.ts",
+      "expression/tests/SymbolNode.test.ts"
+    ],
+    "expression/src/node/ObjectNode.ts": [
+      "expression/tests/ObjectNode.test.ts"
+    ],
+    "expression/src/node/OperatorNode.ts": [
+      "expression/tests/Node.test.ts",
+      "expression/tests/OperatorNode.test.ts",
+      "expression/tests/ParenthesisNode.test.ts"
+    ],
+    "expression/src/node/ParenthesisNode.ts": [
+      "expression/tests/Node.test.ts",
+      "expression/tests/OperatorNode.test.ts",
+      "expression/tests/ParenthesisNode.test.ts"
+    ],
+    "expression/src/node/RangeNode.ts": [
+      "expression/tests/RangeNode.test.ts"
+    ],
+    "expression/src/node/RelationalNode.ts": [
+      "expression/tests/RelationalNode.test.ts"
+    ],
+    "expression/src/node/SymbolNode.ts": [
+      "expression/tests/AccessorNode.test.ts",
+      "expression/tests/AssignmentNode.test.ts",
+      "expression/tests/FunctionAssignmentNode.test.ts",
+      "expression/tests/FunctionNode.test.ts",
+      "expression/tests/IndexNode.test.ts",
+      "expression/tests/Node.test.ts",
+      "expression/tests/ObjectNode.test.ts",
+      "expression/tests/OperatorNode.test.ts",
+      "expression/tests/RangeNode.test.ts",
+      "expression/tests/SymbolNode.test.ts"
+    ],
+    "expression/src/node/utils/access.ts": [
+      "expression/tests/access.test.ts"
+    ],
+    "expression/src/node/utils/assign.ts": [
+      "expression/tests/assign.test.ts"
+    ],
+    "expression/src/operators.ts": [
+      "expression/tests/operators.test.ts"
+    ],
     "expression/src/parse.ts": [],
-    "expression/src/transform/utils/errorTransform.ts": [],
+    "expression/src/transform/utils/errorTransform.ts": [
+      "expression/tests/errorTransform.test.ts"
+    ],
     "expression/src/types.ts": [],
-    "expression/src/utils/array.ts": [],
-    "expression/src/utils/bignumber/formatter.ts": [],
-    "expression/src/utils/collection.ts": [],
-    "expression/src/utils/customs.ts": [],
-    "expression/src/utils/factory.ts": [],
-    "expression/src/utils/is.ts": [],
-    "expression/src/utils/latex.ts": [],
-    "expression/src/utils/map.ts": [],
-    "expression/src/utils/number.ts": [],
-    "expression/src/utils/object.ts": [],
-    "expression/src/utils/scope.ts": [],
-    "expression/src/utils/string.ts": [],
-    "expression/src/utils/switch.ts": [],
+    "expression/src/utils/array.ts": [
+      "expression/tests/utils-array.test.ts"
+    ],
+    "expression/src/utils/bignumber/formatter.ts": [
+      "expression/tests/utils-bignumber-formatter.test.ts"
+    ],
+    "expression/src/utils/collection.ts": [
+      "expression/tests/utils-collection.test.ts"
+    ],
+    "expression/src/utils/customs.ts": [
+      "expression/tests/utils-customs.test.ts"
+    ],
+    "expression/src/utils/factory.ts": [
+      "expression/tests/utils-factory.test.ts"
+    ],
+    "expression/src/utils/is.ts": [
+      "expression/tests/utils-is.test.ts"
+    ],
+    "expression/src/utils/latex.ts": [
+      "expression/tests/utils-latex.test.ts"
+    ],
+    "expression/src/utils/map.ts": [
+      "expression/tests/utils-map.test.ts",
+      "expression/tests/utils-scope.test.ts"
+    ],
+    "expression/src/utils/number.ts": [
+      "expression/tests/utils-number.test.ts"
+    ],
+    "expression/src/utils/object.ts": [
+      "expression/tests/utils-object.test.ts"
+    ],
+    "expression/src/utils/scope.ts": [
+      "expression/tests/utils-scope.test.ts"
+    ],
+    "expression/src/utils/string.ts": [
+      "expression/tests/utils-string.test.ts"
+    ],
+    "expression/src/utils/switch.ts": [
+      "expression/tests/utils-switch.test.ts"
+    ],
     "parallel/src/ComputePool.ts": [
       "parallel/tests/ComputePool.test.ts",
       "parallel/tests/benchmark.test.ts",
@@ -1412,6 +1543,9 @@
     "packages/typed-function/tests/robust-types.test.ts": [
       "packages/typed-function/src/index.ts"
     ],
+    "packages/workerpool/tests/fft-core.test.ts": [
+      "packages/workerpool/src/fft-core.ts"
+    ],
     "packages/workerpool/tests/index.test.ts": [
       "packages/workerpool/src/index.ts"
     ],
@@ -1473,6 +1607,9 @@
       "matrix/src/backends/JSBackend.ts",
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/backends/Backend.ts"
+    ],
+    "matrix/tests/WasmLoader.test.ts": [
+      "matrix/src/backends/WasmLoader.ts"
     ],
     "matrix/tests/config.test.ts": [
       "matrix/src/config.ts"
@@ -1703,6 +1840,9 @@
     "functions/tests/factories-tier4.test.ts": [
       "functions/src/factories/index.ts"
     ],
+    "functions/tests/factory-scope.test.ts": [
+      "functions/src/factories/scope.ts"
+    ],
     "functions/tests/geometry-extended.test.ts": [
       "functions/src/typed/geometry.ts"
     ],
@@ -1873,15 +2013,180 @@
     "functions/tests/typed-bridge.test.ts": [
       "functions/src/typed/typed-bridge.ts"
     ],
+    "expression/tests/AccessorNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/AccessorNode.ts"
+    ],
+    "expression/tests/ArrayNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/ArrayNode.ts"
+    ],
+    "expression/tests/AssignmentNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/AssignmentNode.ts"
+    ],
+    "expression/tests/BlockNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/BlockNode.ts"
+    ],
+    "expression/tests/ConditionalNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/ConditionalNode.ts"
+    ],
+    "expression/tests/ConstantNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts"
+    ],
+    "expression/tests/DimensionError.test.ts": [
+      "expression/src/error/DimensionError.ts"
+    ],
+    "expression/tests/FunctionAssignmentNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts"
+    ],
+    "expression/tests/FunctionNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/FunctionNode.ts"
+    ],
+    "expression/tests/Help.test.ts": [
+      "expression/src/Help.ts"
+    ],
+    "expression/tests/IndexError.test.ts": [
+      "expression/src/error/IndexError.ts"
+    ],
+    "expression/tests/IndexNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/IndexNode.ts"
+    ],
+    "expression/tests/Node.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/ParenthesisNode.ts"
+    ],
+    "expression/tests/ObjectNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/ObjectNode.ts"
+    ],
+    "expression/tests/OperatorNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/ParenthesisNode.ts"
+    ],
+    "expression/tests/ParenthesisNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/ParenthesisNode.ts",
+      "expression/src/node/OperatorNode.ts"
+    ],
+    "expression/tests/Parser.test.ts": [
+      "expression/src/Parser.ts",
+      "functions/src/factories/evaluate.ts"
+    ],
+    "expression/tests/RangeNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/RangeNode.ts"
+    ],
+    "expression/tests/RelationalNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/RelationalNode.ts"
+    ],
+    "expression/tests/SymbolNode.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts"
+    ],
+    "expression/tests/access.test.ts": [
+      "expression/src/node/utils/access.ts"
+    ],
+    "expression/tests/assign.test.ts": [
+      "expression/src/node/utils/assign.ts"
+    ],
     "expression/tests/compile.test.ts": [
       "expression/src/compiler/compile.ts"
+    ],
+    "expression/tests/errorTransform.test.ts": [
+      "expression/src/transform/utils/errorTransform.ts",
+      "expression/src/error/IndexError.ts"
     ],
     "expression/tests/evaluate.test.ts": [
       "expression/src/evaluator/evaluate.ts"
     ],
+    "expression/tests/keywords.test.ts": [
+      "expression/src/keywords.ts"
+    ],
+    "expression/tests/operators.test.ts": [
+      "expression/src/operators.ts"
+    ],
+    "expression/tests/parse.test.ts": [
+      "functions/src/factories/evaluate.ts"
+    ],
     "expression/tests/security/sandbox.test.ts": [
       "expression/src/compiler/compile.ts",
       "expression/src/evaluator/evaluate.ts"
+    ],
+    "expression/tests/utils-array.test.ts": [
+      "expression/src/utils/array.ts"
+    ],
+    "expression/tests/utils-bignumber-formatter.test.ts": [
+      "expression/src/utils/bignumber/formatter.ts"
+    ],
+    "expression/tests/utils-collection.test.ts": [
+      "expression/src/utils/collection.ts"
+    ],
+    "expression/tests/utils-customs.test.ts": [
+      "expression/src/utils/customs.ts"
+    ],
+    "expression/tests/utils-factory.test.ts": [
+      "expression/src/utils/factory.ts"
+    ],
+    "expression/tests/utils-is.test.ts": [
+      "expression/src/utils/is.ts"
+    ],
+    "expression/tests/utils-latex.test.ts": [
+      "expression/src/utils/latex.ts"
+    ],
+    "expression/tests/utils-map.test.ts": [
+      "expression/src/utils/map.ts"
+    ],
+    "expression/tests/utils-number.test.ts": [
+      "expression/src/utils/number.ts"
+    ],
+    "expression/tests/utils-object.test.ts": [
+      "expression/src/utils/object.ts"
+    ],
+    "expression/tests/utils-scope.test.ts": [
+      "expression/src/utils/scope.ts",
+      "expression/src/utils/map.ts"
+    ],
+    "expression/tests/utils-string.test.ts": [
+      "expression/src/utils/string.ts"
+    ],
+    "expression/tests/utils-switch.test.ts": [
+      "expression/src/utils/switch.ts"
     ],
     "parallel/tests/ComputePool.test.ts": [
       "parallel/src/ComputePool.ts"

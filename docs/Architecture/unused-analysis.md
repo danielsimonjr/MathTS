@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 1
-- **Potentially unused exports**: 355
+- **Potentially unused exports**: 372
 
 ## Potentially Unused Files
 
@@ -91,6 +91,47 @@ These exports are not imported by any other file in the codebase:
 - `EinsumSpec` (interface)
 - `NestedArray` (type)
 
+### `functions/src/algebra/solver/lsolveAll.ts`
+
+- `DenseMatrix` (interface)
+
+### `functions/src/algebra/solver/usolveAll.ts`
+
+- `DenseMatrix` (interface)
+
+### `functions/src/algebra/sparse/csAmd.ts`
+
+- `SparseMatrixData` (interface)
+
+### `functions/src/algebra/sparse/csChol.ts`
+
+- `SparseMatrixData` (interface)
+- `SymbolicAnalysis` (interface)
+- `CholResult` (interface)
+
+### `functions/src/algebra/sparse/csCounts.ts`
+
+- `SparseMatrixData` (interface)
+
+### `functions/src/algebra/sparse/csLu.ts`
+
+- `SparseMatrixData` (interface)
+- `SymbolicAnalysis` (interface)
+- `LuResult` (interface)
+
+### `functions/src/algebra/sparse/csSpsolve.ts`
+
+- `SparseMatrixData` (interface)
+
+### `functions/src/algebra/sparse/csSqr.ts`
+
+- `SparseMatrixData` (interface)
+- `SymbolicAnalysis` (interface)
+
+### `functions/src/algebra/sparse/csSymperm.ts`
+
+- `SparseMatrixData` (interface)
+
 ### `functions/src/arithmetic/ceil.ts`
 
 - `createCeilNumber` (constant)
@@ -109,6 +150,7 @@ These exports are not imported by any other file in the codebase:
 
 ### `functions/src/arithmetic/utils/nodeOperations.ts`
 
+- `MathNode` (interface)
 - `name` (constant)
 - `dependencies` (constant)
 
@@ -134,6 +176,14 @@ These exports are not imported by any other file in the codebase:
 - `getAssociativity` (function)
 - `isAssociativeWith` (function)
 - `properties` (constant)
+
+### `functions/src/matrix/expm.ts`
+
+- `Matrix` (interface)
+
+### `functions/src/matrix/sqrtm.ts`
+
+- `Matrix` (interface)
 
 ### `functions/src/probability/random.ts`
 
@@ -222,7 +272,6 @@ These exports are not imported by any other file in the codebase:
 - `MapCallback` (type)
 - `ForEachCallback` (type)
 - `ElementwiseOperation` (type)
-- `AlgorithmFunction` (type)
 - `RangeForEachCallback` (type)
 - `RangeMapCallback` (type)
 
@@ -231,6 +280,10 @@ These exports are not imported by any other file in the codebase:
 - `ResultSetJSON` (interface)
 - `ResultSetInstance` (interface)
 - `ResultSetConstructor` (interface)
+
+### `functions/src/type/unit/physicalConstants.ts`
+
+- `UnitInstance` (interface)
 
 ### `functions/src/utils/array.ts`
 

@@ -250,6 +250,15 @@ scratch buffers (sized via `*WorkSize` helpers); AS uses its managed heap.
 - **`tensor` and `autograd` failed `tsc --noEmit`** — both packages reach the upstream `workerpool` npm dependency transitively (`autograd → tensor → matrix → parallel → workerpool`), and that package ships raw `.ts` source. `skipLibCheck` only skips `.d.ts`, so `tsc` type-checked `workerpool`'s source and surfaced 7 of its own code-quality errors. The `parallel`, `matrix`, `functions`, and `compat` tsconfigs already redirect the `workerpool` specifier to the stub `parallel/types/workerpool.d.ts`; the same `paths` entry was added to `tensor/tsconfig.json` and `autograd/tsconfig.json`.
 - **All 599 pre-existing `functions` typecheck errors resolved** — the `functions` package's synced mathjs code carried ~599 `tsc --noEmit` errors. Resolved in three parts: (1) config — `functions/tsconfig.json` gained `@webgpu/types` (its typecheck pulls in matrix's WebGPU backend source) and `lib: ES2023`, and the `WasmModule` interface gained the 4 computational-geometry exports (clears ~100); (2) ~499 type-level fixes (`as` casts, annotations, generic arguments — no runtime change) across the synced `arithmetic/`, `algebra/`, `matrix/`, `bitwise/`, `logical/`, `trigonometry/`, `relational/`, `utils/`, `statistics/`, `special/`, `set/`, `core/`, and `type/` directories; (3) 18 previously-internal interfaces exported so `factories/index.ts`'s factory re-exports can name them (resolves the resulting `TS4023` errors). **Every TypeScript package in the monorepo now typechecks with 0 errors.** Full build and test suite pass.
 
+### Added
+
+- **42 new unit-test files for previously-untested active source code** (+1,294 assertions). Source-file coverage rose from **18.6%** (90 / 485) to **27.0%** (131 / 485); the suite is now 156 test files.
+  - `expression`: every AST node class (the 16 `*Node` files plus the `Node` base, `access`/`assign` helpers), the parser (`parse.ts`, `Parser.ts`, `keywords.ts`, `operators.ts`), the `Help` class, `DimensionError`/`IndexError`, `errorTransform`, and 13 util modules (`array`, `bignumber/formatter`, `collection`, `customs` — sandbox-critical, `factory`, `is` — all 40+ type guards, `latex`, `map`, `number`, `object`, `scope`, `string`, `switch`).
+  - `packages/workerpool`: `fft-core.ts` (`fftBitReverse`, `fftFrameInPlace`).
+  - `functions`: `factories/scope.ts` (`factoryScope` shape).
+  - `matrix`: `backends/WasmLoader.ts` (48 tests; 2 skip pending a built `.wasm` artifact).
+  - The remaining untested files are the synced mathjs categories in `functions/src/` (not exported as native API; out of scope for "active code" coverage), the AssemblyScript sources under `assembly/` (separate `asc`-based test runner), and the expression package's synced parser internals.
+
 ### Documentation
 
 - **`docs/roadmap/EXPANSION_PLAN.md`** — codebase expansion plan; revised to v2

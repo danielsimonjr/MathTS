@@ -3577,6 +3577,9 @@
         "exports": [
           "createLsolveAll"
         ],
+        "interfaces": [
+          "DenseMatrix"
+        ],
         "constants": [
           "createLsolveAll"
         ]
@@ -3677,6 +3680,9 @@
         "exports": [
           "createUsolveAll"
         ],
+        "interfaces": [
+          "DenseMatrix"
+        ],
         "constants": [
           "createUsolveAll"
         ]
@@ -3761,6 +3767,9 @@
         "exports": [
           "createCsAmd"
         ],
+        "interfaces": [
+          "SparseMatrixData"
+        ],
         "constants": [
           "createCsAmd"
         ]
@@ -3799,6 +3808,11 @@
         "exports": [
           "createCsChol"
         ],
+        "interfaces": [
+          "SparseMatrixData",
+          "SymbolicAnalysis",
+          "CholResult"
+        ],
         "constants": [
           "createCsChol"
         ]
@@ -3836,6 +3850,9 @@
         ],
         "exports": [
           "createCsCounts"
+        ],
+        "interfaces": [
+          "SparseMatrixData"
         ],
         "constants": [
           "createCsCounts"
@@ -3997,6 +4014,11 @@
         "exports": [
           "createCsLu"
         ],
+        "interfaces": [
+          "SparseMatrixData",
+          "SymbolicAnalysis",
+          "LuResult"
+        ],
         "constants": [
           "createCsLu"
         ]
@@ -4122,6 +4144,9 @@
         "exports": [
           "createCsSpsolve"
         ],
+        "interfaces": [
+          "SparseMatrixData"
+        ],
         "constants": [
           "createCsSpsolve"
         ]
@@ -4178,6 +4203,10 @@
         "exports": [
           "createCsSqr"
         ],
+        "interfaces": [
+          "SparseMatrixData",
+          "SymbolicAnalysis"
+        ],
         "constants": [
           "createCsSqr"
         ]
@@ -4209,6 +4238,9 @@
         ],
         "exports": [
           "createCsSymperm"
+        ],
+        "interfaces": [
+          "SparseMatrixData"
         ],
         "constants": [
           "createCsSymperm"
@@ -6044,6 +6076,9 @@
           "name",
           "dependencies",
           "createNodeOperations"
+        ],
+        "interfaces": [
+          "MathNode"
         ],
         "constants": [
           "name",
@@ -9921,7 +9956,14 @@
       },
       "functions/src/matrix/diag.ts": {
         "description": "Create a diagonal matrix or retrieve the diagonal of a matrix",
-        "externalDependencies": [],
+        "externalDependencies": [
+          {
+            "package": "bignumber.js",
+            "imports": [
+              "BigNumber"
+            ]
+          }
+        ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
@@ -10202,6 +10244,9 @@
         ],
         "exports": [
           "createExpm"
+        ],
+        "interfaces": [
+          "Matrix"
         ],
         "constants": [
           "createExpm"
@@ -11191,6 +11236,9 @@
         ],
         "exports": [
           "createSqrtm"
+        ],
+        "interfaces": [
+          "Matrix"
         ],
         "constants": [
           "createSqrtm"
@@ -12454,6 +12502,13 @@
               "ConfigOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -12639,6 +12694,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -12802,6 +12864,13 @@
               "ConfigOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -12877,6 +12946,13 @@
             "file": "../core/config.js",
             "imports": [
               "ConfigOptions"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
             ],
             "typeOnly": true
           }
@@ -12956,6 +13032,13 @@
               "ConfigOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -13033,6 +13116,13 @@
               "ConfigOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -13090,6 +13180,13 @@
             "file": "../core/config.js",
             "imports": [
               "ConfigOptions"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
             ],
             "typeOnly": true
           }
@@ -14964,6 +15061,13 @@
               "TypedFunction"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": [
+              "AlgorithmFunction"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -16752,6 +16856,9 @@
           "createPlanckTime",
           "createPlanckCharge",
           "createPlanckTemperature"
+        ],
+        "interfaces": [
+          "UnitInstance"
         ],
         "constants": [
           "createSpeedOfLight",
@@ -25035,19 +25142,19 @@
   "statistics": {
     "totalTypeScriptFiles": 485,
     "totalModules": 55,
-    "totalLinesOfCode": 125177,
+    "totalLinesOfCode": 125209,
     "totalExports": 2850,
     "totalClasses": 45,
-    "totalInterfaces": 237,
+    "totalInterfaces": 255,
     "totalFunctions": 1067,
     "totalTypeGuards": 127,
     "totalEnums": 0,
     "totalConstants": 1060,
     "totalReExports": 704,
-    "totalTypeOnlyImports": 345,
+    "totalTypeOnlyImports": 353,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 1,
-    "unusedExportsCount": 355
+    "unusedExportsCount": 372
   }
 }
