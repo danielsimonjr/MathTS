@@ -152,6 +152,71 @@ were pre-existing and unrelated to the parallelism work, and are now resolved.
   - `BackendManager ↔ config`: `OperationType` moved from `BackendManager.ts`
     to `config.ts`; `config.ts` no longer imports `BackendManager`.
 
+### Open
+
+- [ ] **`tensor` and `autograd` fail `tsc --noEmit` — missing `workerpool`
+  path redirect** — surfaced 2026-05-22 while auditing the architecture docs.
+
+  **Symptom.** `npx tsc --noEmit` run in `tensor/` and in `autograd/` each
+  report the same 7 errors; the other 8 TypeScript packages typecheck clean.
+  Both the package build (`tsup`) and the test suites still pass — only the
+  standalone typecheck task fails. So this is a build-tooling defect, not a
+  runtime bug.
+
+  **Where.** All 7 errors are inside the *upstream* `workerpool` npm
+  dependency (`node_modules/workerpool`, v10.0.1 — the unscoped package, which
+  is distinct from the fork `@danielsimonjr/mathts-workerpool` in
+  `packages/workerpool`):
+
+  ```
+  node_modules/workerpool/src/core/Pool.ts(12,10)            TS6133  'FIFOQueue' declared but never read
+  node_modules/workerpool/src/core/Pool.ts(12,21)            TS6133  'LIFOQueue' declared but never read
+  node_modules/workerpool/src/core/Pool.ts(21,3)             TS6196  'QueueStrategy' declared but never used
+  node_modules/workerpool/src/core/Pool.ts(276,20)           TS7030  not all code paths return a value
+  node_modules/workerpool/src/types/index.ts(259,39)         TS6133  'E' declared but never read
+  node_modules/workerpool/src/types/worker-methods.ts(8,34)  TS6196  'ExecOptions' declared but never used
+  node_modules/workerpool/src/workers/worker.ts(137,28)      TS2769  postMessage — no overload matches
+  ```
+
+  These are upstream code-quality issues in `workerpool` itself, not MathTS
+  bugs.
+
+  **Root cause.** Upstream `workerpool` v10.0.1 ships *raw `.ts` source* — its
+  `package.json` `exports` map points subpath `import`s straight at `src/*.ts`.
+  `skipLibCheck` (which `tensor` and `autograd` both set) only suppresses
+  checking of `.d.ts` files — it does **not** skip raw `.ts` files in
+  `node_modules` — so `tsc` type-checks `workerpool`'s source and surfaces its
+  errors. The transitive path that drags it in is
+  `autograd → tensor → matrix → parallel → workerpool`.
+
+  The four packages that reach `workerpool` *without* this failure —
+  `parallel`, `matrix`, `functions`, `compat` — each carry a `tsconfig.json`
+  `paths` redirect that points the `workerpool` specifier at the hand-written
+  stub declaration `parallel/types/workerpool.d.ts`:
+
+  ```jsonc
+  "paths": { "workerpool": ["../parallel/types/workerpool.d.ts"] }
+  ```
+
+  `tensor/tsconfig.json` and `autograd/tsconfig.json` have no `paths` section
+  at all, so they were simply missed.
+
+  **Fix (verified).** Add the same `paths` entry to `tensor/tsconfig.json` and
+  `autograd/tsconfig.json` — the stub sits at `../parallel/types/workerpool.d.ts`
+  relative to each, the exact form `matrix/tsconfig.json` already uses.
+  Confirmed by experiment: with the redirect added to `tensor/tsconfig.json`,
+  `tensor` typechecks with **0 errors** (change reverted, not committed).
+
+  **Longer-term option.** The stub is now referenced by six tsconfigs via a
+  hand-copied relative path. Consider either (a) hoisting the redirect into
+  `tsconfig.base.json` so packages without their own `paths` (`tensor`,
+  `autograd`, …) inherit it — note a child `paths` *replaces* rather than
+  merges, so `parallel`/`matrix`/`functions`/`compat` keep their existing
+  copies; or (b) shipping a real `.d.ts` from the forked
+  `@danielsimonjr/mathts-workerpool` and routing all worker-pool imports
+  through the scoped fork so the upstream raw-`.ts` package never enters the
+  type graph.
+
 ## 📋 Next Steps
 
 ### WASM Test Files (46 files, sorted by complexity) ✅ ALL COMPLETE
