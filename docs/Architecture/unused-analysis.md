@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-05-22
+**Generated**: 2026-05-23
 
 ## Summary
 
 - **Potentially unused files**: 1
-- **Potentially unused exports**: 372
+- **Potentially unused exports**: 377
 
 ## Potentially Unused Files
 
@@ -52,7 +52,9 @@ These exports are not imported by any other file in the codebase:
 
 - `initWasm` (function)
 - `WasmLoader` (class)
+- `Allocation` (interface)
 - `LoadingMetrics` (interface)
+- `AllocatorKind` (type)
 
 ### `matrix/src/backends/wasm/fft-wasm.ts`
 
@@ -415,8 +417,11 @@ These exports are not imported by any other file in the codebase:
 
 - `initWasm` (function)
 - `WasmLoader` (class)
-- `WasmModule` (interface)
 - `LoadingMetrics` (interface)
+
+### `functions/src/wasm/bitwise/wasm-bridge.ts`
+
+- `resetBitwiseWasm` (function)
 
 ### `functions/src/wasm/integrity.ts`
 
@@ -602,6 +607,12 @@ These exports are not imported by any other file in the codebase:
 ### `parallel/src/ComputePool.ts`
 
 - `ComputePoolConfig` (interface)
+- `OpName` (type)
+- `OpThreshold` (type)
+
+### `parallel/src/ops/bitwise.ts`
+
+- `BitwiseBinaryOp` (type)
 
 ### `parallel/src/strategies/chunk.ts`
 
@@ -625,3 +636,4 @@ These exports are not imported by any other file in the codebase:
 - `COMPLEX_ONE` (constant)
 - `COMPLEX_I` (constant)
 - `COMPLEX_NEG_ONE` (constant)
+
