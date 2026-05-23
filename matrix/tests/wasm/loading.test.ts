@@ -143,8 +143,14 @@ describe('WASMBackend Fallback', () => {
     const { DenseMatrix } = await import('../../src/types/DenseMatrix.js');
 
     // Small matrix (4 elements < 1000 threshold)
-    const a = new DenseMatrix(2, 2, [[1, 2], [3, 4]]);
-    const b = new DenseMatrix(2, 2, [[5, 6], [7, 8]]);
+    const a = new DenseMatrix(2, 2, [
+      [1, 2],
+      [3, 4],
+    ]);
+    const b = new DenseMatrix(2, 2, [
+      [5, 6],
+      [7, 8],
+    ]);
 
     // Should use JS backend due to size
     const result = backend.add(a, b);

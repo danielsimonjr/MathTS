@@ -16,6 +16,6 @@ export const detDocs = {
     'subset',
     'trace',
     'transpose',
-    'zeros'
-  ]
-}
+    'zeros',
+  ],
+};

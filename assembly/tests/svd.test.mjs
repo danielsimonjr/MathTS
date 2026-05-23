@@ -101,47 +101,56 @@ function check(name, cond, detail) {
 console.log('AssemblyScript SVD tests\n========================');
 
 {
-  const A = [[3, 0, 0], [0, 1, 0], [0, 0, 2]];
+  const A = [
+    [3, 0, 0],
+    [0, 1, 0],
+    [0, 0, 2],
+  ];
   const { U, S, V, k } = svd(A, 3, 3);
   check(
     '3x3 diagonal: singular values [3,2,1]',
-    Math.abs(S[0] - 3) < 1e-10 &&
-      Math.abs(S[1] - 2) < 1e-10 &&
-      Math.abs(S[2] - 1) < 1e-10,
+    Math.abs(S[0] - 3) < 1e-10 && Math.abs(S[1] - 2) < 1e-10 && Math.abs(S[2] - 1) < 1e-10,
     `S=${S}`
   );
-  check(
-    '3x3 diagonal: reconstruction',
-    maxDiff(A, reconstruct(U, S, V, 3, 3, k)) < 1e-10
-  );
+  check('3x3 diagonal: reconstruction', maxDiff(A, reconstruct(U, S, V, 3, 3, k)) < 1e-10);
 }
 {
-  const A = [[1, 2], [3, 4], [5, 6], [7, 8]];
+  const A = [
+    [1, 2],
+    [3, 4],
+    [5, 6],
+    [7, 8],
+  ];
   const { U, S, V, k } = svd(A, 4, 2);
   check('4x2 tall: singular values descending', S[0] >= S[1] && S[1] >= -1e-12);
-  check(
-    '4x2 tall: reconstruction',
-    maxDiff(A, reconstruct(U, S, V, 4, 2, k)) < 1e-9
-  );
+  check('4x2 tall: reconstruction', maxDiff(A, reconstruct(U, S, V, 4, 2, k)) < 1e-9);
 }
 {
-  const A = [[1, 2, 3, 4], [5, 6, 7, 8]];
+  const A = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+  ];
   const { U, S, V, k } = svd(A, 2, 4);
-  check(
-    '2x4 wide: reconstruction',
-    maxDiff(A, reconstruct(U, S, V, 2, 4, k)) < 1e-9
-  );
+  check('2x4 wide: reconstruction', maxDiff(A, reconstruct(U, S, V, 2, 4, k)) < 1e-9);
 }
 {
-  const A = [[2, -1, 0], [4, 3, -2], [1, 1, 5], [0, 6, -3], [-1, 2, 1]];
+  const A = [
+    [2, -1, 0],
+    [4, 3, -2],
+    [1, 1, 5],
+    [0, 6, -3],
+    [-1, 2, 1],
+  ];
   const { U, S, V, k } = svd(A, 5, 3);
-  check(
-    '5x3 general: reconstruction',
-    maxDiff(A, reconstruct(U, S, V, 5, 3, k)) < 1e-9
-  );
+  check('5x3 general: reconstruction', maxDiff(A, reconstruct(U, S, V, 5, 3, k)) < 1e-9);
 }
 {
-  const A = [[1, 2], [3, 4], [5, 6], [7, 8]];
+  const A = [
+    [1, 2],
+    [3, 4],
+    [5, 6],
+    [7, 8],
+  ];
   const sv = singularValues(A, 4, 2);
   const ref = svd(A, 4, 2).S;
   check(

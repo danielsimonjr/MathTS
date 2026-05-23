@@ -1,4 +1,4 @@
-import { factory } from '../../utils/factory.js'
+import { factory } from '../../utils/factory.js';
 import type {
   MatrixFormatOptions,
   ForEachCallback,
@@ -6,37 +6,37 @@ import type {
   IndexInterface,
   NestedArray,
   DataType,
-  MatrixValue
-} from './types.js'
+  MatrixValue,
+} from './types.js';
 
-const name = 'Matrix'
-const dependencies: string[] = []
+const name = 'Matrix';
+const dependencies: string[] = [];
 
 // Re-export types for backward compatibility
-export type { MatrixFormatOptions }
+export type { MatrixFormatOptions };
 
 /**
  * Callback function for matrix forEach operations
  * @deprecated Use ForEachCallback from './types.js' instead
  */
-export type MatrixForEachCallback<T> = ForEachCallback<T>
+export type MatrixForEachCallback<T> = ForEachCallback<T>;
 
 /**
  * Callback function for matrix map operations
  * @deprecated Use MapCallback from './types.js' instead
  */
-export type MatrixMapCallback<T, U> = MapCallback<T, U>
+export type MatrixMapCallback<T, U> = MapCallback<T, U>;
 
 /**
  * Index type for matrix subsetting
  * @deprecated Use IndexInterface from './types.js' instead
  */
-export type Index = IndexInterface
+export type Index = IndexInterface;
 
 /**
  * Matrix data can be a nested array structure
  */
-export type MatrixData = NestedArray<MatrixValue>
+export type MatrixData = NestedArray<MatrixValue>;
 
 export const createMatrixClass = /* #__PURE__ */ factory(
   name,
@@ -69,18 +69,16 @@ export const createMatrixClass = /* #__PURE__ */ factory(
       /**
        * Type identifier
        */
-      type: string = 'Matrix'
+      type: string = 'Matrix';
 
       /**
        * Matrix type flag
        */
-      isMatrix: boolean = true
+      isMatrix: boolean = true;
 
       constructor() {
         if (!(this instanceof Matrix)) {
-          throw new SyntaxError(
-            'Constructor must be called with the new operator'
-          )
+          throw new SyntaxError('Constructor must be called with the new operator');
         }
       }
 
@@ -94,7 +92,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       storage(): string {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke storage on a Matrix interface')
+        throw new Error('Cannot invoke storage on a Matrix interface');
       }
 
       /**
@@ -107,7 +105,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       datatype(): DataType {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke datatype on a Matrix interface')
+        throw new Error('Cannot invoke datatype on a Matrix interface');
       }
 
       /**
@@ -116,7 +114,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        * @param {string} [datatype]
        */
       create(_data: MatrixData | object, _datatype?: string): Matrix<T> {
-        throw new Error('Cannot invoke create on a Matrix interface')
+        throw new Error('Cannot invoke create on a Matrix interface');
       }
 
       /**
@@ -138,7 +136,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
         _defaultValue?: T
       ): Matrix<T> | T {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke subset on a Matrix interface')
+        throw new Error('Cannot invoke subset on a Matrix interface');
       }
 
       /**
@@ -148,7 +146,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       get(_index: number[]): T {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke get on a Matrix interface')
+        throw new Error('Cannot invoke get on a Matrix interface');
       }
 
       /**
@@ -162,7 +160,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       set(_index: number[], _value: T, _defaultValue?: T): Matrix<T> {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke set on a Matrix interface')
+        throw new Error('Cannot invoke set on a Matrix interface');
       }
 
       /**
@@ -179,7 +177,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       resize(_size: number[], _defaultValue?: T, _copy?: boolean): Matrix<T> {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke resize on a Matrix interface')
+        throw new Error('Cannot invoke resize on a Matrix interface');
       }
 
       /**
@@ -193,7 +191,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       reshape(_size: number[], _copy?: boolean): Matrix<T> {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke reshape on a Matrix interface')
+        throw new Error('Cannot invoke reshape on a Matrix interface');
       }
 
       /**
@@ -202,7 +200,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       clone(): Matrix<T> {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke clone on a Matrix interface')
+        throw new Error('Cannot invoke clone on a Matrix interface');
       }
 
       /**
@@ -211,7 +209,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       size(): number[] {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke size on a Matrix interface')
+        throw new Error('Cannot invoke size on a Matrix interface');
       }
 
       /**
@@ -224,12 +222,9 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        *
        * @return {Matrix} matrix
        */
-      map<U>(
-        _callback: MatrixMapCallback<T, U>,
-        _skipZeros?: boolean
-      ): Matrix<U> {
+      map<U>(_callback: MatrixMapCallback<T, U>, _skipZeros?: boolean): Matrix<U> {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke map on a Matrix interface')
+        throw new Error('Cannot invoke map on a Matrix interface');
       }
 
       /**
@@ -240,7 +235,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       forEach(_callback: MatrixForEachCallback<T>): void {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke forEach on a Matrix interface')
+        throw new Error('Cannot invoke forEach on a Matrix interface');
       }
 
       /**
@@ -249,7 +244,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       [Symbol.iterator](): Iterator<{ value: T; index: number[] }> {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot iterate a Matrix interface')
+        throw new Error('Cannot iterate a Matrix interface');
       }
 
       /**
@@ -258,7 +253,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       toArray(): MatrixData {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke toArray on a Matrix interface')
+        throw new Error('Cannot invoke toArray on a Matrix interface');
       }
 
       /**
@@ -267,7 +262,7 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       valueOf(): MatrixData {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke valueOf on a Matrix interface')
+        throw new Error('Cannot invoke valueOf on a Matrix interface');
       }
 
       /**
@@ -278,11 +273,9 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        *                                               options.
        * @returns {string} str
        */
-      format(
-        _options?: MatrixFormatOptions | number | ((value: T) => string)
-      ): string {
+      format(_options?: MatrixFormatOptions | number | ((value: T) => string)): string {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke format on a Matrix interface')
+        throw new Error('Cannot invoke format on a Matrix interface');
       }
 
       /**
@@ -291,16 +284,16 @@ export const createMatrixClass = /* #__PURE__ */ factory(
        */
       toString(): string {
         // must be implemented by each of the Matrix implementations
-        throw new Error('Cannot invoke toString on a Matrix interface')
+        throw new Error('Cannot invoke toString on a Matrix interface');
       }
     }
 
     // Set prototype properties for type checking (duck typing)
     // These are needed because is.ts checks constructor.prototype.isMatrix
-    Matrix.prototype.type = 'Matrix'
-    Matrix.prototype.isMatrix = true
+    Matrix.prototype.type = 'Matrix';
+    Matrix.prototype.isMatrix = true;
 
-    return Matrix
+    return Matrix;
   },
   { isClass: true }
-)
+);

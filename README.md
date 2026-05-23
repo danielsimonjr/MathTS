@@ -53,10 +53,13 @@ import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
 
 // Use familiar mathjs API
-math.add(1, 2);              // 3
-math.complex(3, 4);          // Complex(3, 4)
-math.matrix([[1,2],[3,4]]);  // DenseMatrix
-math.sin(Math.PI / 2);       // 1
+math.add(1, 2); // 3
+math.complex(3, 4); // Complex(3, 4)
+math.matrix([
+  [1, 2],
+  [3, 4],
+]); // DenseMatrix
+math.sin(Math.PI / 2); // 1
 ```
 
 ### For New Projects
@@ -80,18 +83,18 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 import { evaluate } from '@danielsimonjr/mathts-functions';
 
 // Evaluate math strings directly
-evaluate('sin(pi/2)');           // 1
-evaluate('sqrt(2)');             // 1.4142...
-evaluate('2^10');                // 1024
-evaluate('1 + 2i');             // Complex(1, 2)
+evaluate('sin(pi/2)'); // 1
+evaluate('sqrt(2)'); // 1.4142...
+evaluate('2^10'); // 1024
+evaluate('1 + 2i'); // Complex(1, 2)
 
 // Scoped evaluation
-evaluate('x^2 + y', { x: 3, y: 4 });  // 13
+evaluate('x^2 + y', { x: 3, y: 4 }); // 13
 
 // Reusable compiled expressions
 import { compileExpr } from '@danielsimonjr/mathts-functions';
 const expr = compileExpr('a * b + c');
-expr.evaluate({ a: 2, b: 3, c: 1 });  // 7
+expr.evaluate({ a: 2, b: 3, c: 1 }); // 7
 ```
 
 ### Complex Numbers
@@ -100,12 +103,12 @@ expr.evaluate({ a: 2, b: 3, c: 1 });  // 7
 import { Complex, I } from '@danielsimonjr/mathts-core';
 
 const z = new Complex(3, 4);
-console.log(z.abs());       // 5
-console.log(z.arg());       // 0.927... radians
+console.log(z.abs()); // 5
+console.log(z.arg()); // 0.927... radians
 console.log(z.conjugate()); // Complex(3, -4)
 
 // Using imaginary unit
-const w = z.add(I);         // Complex(3, 5)
+const w = z.add(I); // Complex(3, 5)
 ```
 
 ### Fractions
@@ -115,7 +118,7 @@ import { Fraction } from '@danielsimonjr/mathts-core';
 
 const f = new Fraction(1, 3);
 const g = new Fraction(1, 6);
-const sum = f.add(g);       // Fraction(1, 2) - auto-simplified
+const sum = f.add(g); // Fraction(1, 2) - auto-simplified
 console.log(sum.toString()); // "1/2"
 ```
 
@@ -138,7 +141,7 @@ import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 const A = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
-  [7, 8, 9]
+  [7, 8, 9],
 ]);
 
 const B = DenseMatrix.identity(3);
@@ -146,7 +149,7 @@ const C = A.multiply(B);
 const T = A.transpose();
 
 console.log(A.rows, A.cols); // 3, 3
-console.log(A.get(0, 1));    // 2
+console.log(A.get(0, 1)); // 2
 ```
 
 ### Parallel Operations
@@ -181,33 +184,33 @@ import { add, multiply, sin } from '@danielsimonjr/mathts-functions';
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
 // Automatic type dispatch
-add(1, 2);                                    // 3
-add(new Complex(1, 2), new Complex(3, 4));   // Complex(4, 6)
+add(1, 2); // 3
+add(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
 add(new Fraction(1, 2), new Fraction(1, 3)); // Fraction(5, 6)
 add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber(0.3)
 
 // Works with mixed types too (automatic conversion)
-sin(0);                   // 0
-sin(Math.PI / 2);         // 1
-sin(new Complex(0, 1));   // Complex sinh(1)
+sin(0); // 0
+sin(Math.PI / 2); // 1
+sin(new Complex(0, 1)); // Complex sinh(1)
 ```
 
 ## Packages
 
-| Package | Version | Description |
-|---------|---------|-------------|
-| `@danielsimonjr/mathts-core` | 0.1.2 | Core types: Complex, Fraction, BigNumber, mathTyped |
-| `@danielsimonjr/mathts-functions` | 0.1.3 | 500+ math functions, typed dispatch, `evaluate()` |
-| `@danielsimonjr/mathts-matrix` | 0.1.2 | Dense/sparse matrices, JS/WASM/GPU backends, FFT, eig, SVD |
-| `@danielsimonjr/mathts-tensor` | 0.1.0 | Rank-N Float64Array-backed dense tensor, einsum/contraction |
-| `@danielsimonjr/mathts-autograd` | 0.1.0 | Forward + reverse-mode automatic differentiation over Tensor |
-| `@danielsimonjr/mathts-parallel` | 0.1.3 | ComputePool, parallel elementwise/matmul/reduce, Web Workers |
-| `@danielsimonjr/mathts-expression` | 0.2.0 | Expression parser, compiler, sandboxed evaluator |
-| `@danielsimonjr/mathts-compat` | 0.1.2 | mathjs compatibility layer |
-| `@danielsimonjr/mathts-workbook` | 0.1.2 | Scientific workbook runtime (.mtsw) |
-| `@danielsimonjr/mathts-wasm` | 0.1.3 | AssemblyScript WASM kernels (SIMD) |
-| `@danielsimonjr/mathts-typed-function` | 0.1.2 | Symbol-based typed dispatch (forked, improved) |
-| `@danielsimonjr/mathts-workerpool` | 0.1.2 | Worker pool with SharedArrayBuffer, warmup, metrics |
+| Package                                | Version | Description                                                  |
+| -------------------------------------- | ------- | ------------------------------------------------------------ |
+| `@danielsimonjr/mathts-core`           | 0.1.2   | Core types: Complex, Fraction, BigNumber, mathTyped          |
+| `@danielsimonjr/mathts-functions`      | 0.1.3   | 500+ math functions, typed dispatch, `evaluate()`            |
+| `@danielsimonjr/mathts-matrix`         | 0.1.2   | Dense/sparse matrices, JS/WASM/GPU backends, FFT, eig, SVD   |
+| `@danielsimonjr/mathts-tensor`         | 0.1.0   | Rank-N Float64Array-backed dense tensor, einsum/contraction  |
+| `@danielsimonjr/mathts-autograd`       | 0.1.0   | Forward + reverse-mode automatic differentiation over Tensor |
+| `@danielsimonjr/mathts-parallel`       | 0.1.3   | ComputePool, parallel elementwise/matmul/reduce, Web Workers |
+| `@danielsimonjr/mathts-expression`     | 0.2.0   | Expression parser, compiler, sandboxed evaluator             |
+| `@danielsimonjr/mathts-compat`         | 0.1.2   | mathjs compatibility layer                                   |
+| `@danielsimonjr/mathts-workbook`       | 0.1.2   | Scientific workbook runtime (.mtsw)                          |
+| `@danielsimonjr/mathts-wasm`           | 0.1.3   | AssemblyScript WASM kernels (SIMD)                           |
+| `@danielsimonjr/mathts-typed-function` | 0.1.2   | Symbol-based typed dispatch (forked, improved)               |
+| `@danielsimonjr/mathts-workerpool`     | 0.1.2   | Worker pool with SharedArrayBuffer, warmup, metrics          |
 
 ## Architecture
 
@@ -231,24 +234,24 @@ The `evaluate()` function walks the activated scope, so all activated factory fu
 
 The expression package provides a full math expression compiler with 16 AST node types:
 
-| Node Types | | |
-|-----------|---|---|
-| `ConstantNode` | `SymbolNode` | `OperatorNode` |
-| `FunctionNode` | `AssignmentNode` | `FunctionAssignmentNode` |
-| `ArrayNode` | `ObjectNode` | `IndexNode` |
-| `AccessorNode` | `RangeNode` | `BlockNode` |
-| `ConditionalNode` | `ParenthesisNode` | `RelationalNode` |
+| Node Types        |                   |                          |
+| ----------------- | ----------------- | ------------------------ |
+| `ConstantNode`    | `SymbolNode`      | `OperatorNode`           |
+| `FunctionNode`    | `AssignmentNode`  | `FunctionAssignmentNode` |
+| `ArrayNode`       | `ObjectNode`      | `IndexNode`              |
+| `AccessorNode`    | `RangeNode`       | `BlockNode`              |
+| `ConditionalNode` | `ParenthesisNode` | `RelationalNode`         |
 
 The compiler (`compileExpr`) produces reusable compiled expressions. The evaluator (`evaluate`) wraps compile + evaluate in a single call with optional scope injection.
 
 ### Dual WASM Strategy
 
-| Backend | Technology | Trigger | Operations |
-|---------|-----------|---------|------------|
-| **AssemblyScript WASM** | SIMD vectors | >1,000 elements | Element-wise, matrix multiply |
-| **Rust WASM** | Bump allocator | FFT/eig/SVD | FFT, eigendecomposition, SVD |
-| **WebGPU** | Compute shaders | >100,000 elements | Large matrix ops |
-| **JavaScript** | Default fallback | Always available | All operations |
+| Backend                 | Technology       | Trigger           | Operations                    |
+| ----------------------- | ---------------- | ----------------- | ----------------------------- |
+| **AssemblyScript WASM** | SIMD vectors     | >1,000 elements   | Element-wise, matrix multiply |
+| **Rust WASM**           | Bump allocator   | FFT/eig/SVD       | FFT, eigendecomposition, SVD  |
+| **WebGPU**              | Compute shaders  | >100,000 elements | Large matrix ops              |
+| **JavaScript**          | Default fallback | Always available  | All operations                |
 
 The `BackendManager` selects the optimal backend automatically. Both WASM backends fall back gracefully to JavaScript if unavailable.
 
@@ -259,6 +262,7 @@ User Code → ComputePool (workers) → WASM/GPU Backend → Result
 ```
 
 All large computations dispatch to Web Workers via `ComputePool`. The workerpool package adds:
+
 - **SharedArrayBuffer** — zero-copy transfers for large arrays
 - **Eager warmup** — `pool.ready` promise, `warmup()` for pre-initialized workers
 - **Enhanced metrics** — `enhancedStats()` with p95 latency, throughput, worker utilization
@@ -271,23 +275,23 @@ The `typed-function` package uses `Symbol`-based type identification (`TYPED_FUN
 
 Production bundle sizes (662 KB total, minified + tree-shaken):
 
-| Package | Size |
-|---------|------|
-| mathts-core | ~85 KB |
+| Package          | Size    |
+| ---------------- | ------- |
+| mathts-core      | ~85 KB  |
 | mathts-functions | ~180 KB |
-| mathts-matrix | ~220 KB |
-| mathts-parallel | ~95 KB |
-| mathts-compat | ~82 KB |
+| mathts-matrix    | ~220 KB |
+| mathts-parallel  | ~95 KB  |
+| mathts-compat    | ~82 KB  |
 
 Benchmark highlights (modern developer machine):
 
-| Operation | Performance |
-|-----------|------------|
-| Complex construction | ~500K ops/sec |
-| Typed dispatch (add) | ~200K ops/sec |
-| DenseMatrix 100×100 multiply | ~5K ops/sec |
-| FFT (1024 elements, WASM) | ~50K ops/sec |
-| Parallel sum (100K elements) | <5ms |
+| Operation                    | Performance   |
+| ---------------------------- | ------------- |
+| Complex construction         | ~500K ops/sec |
+| Typed dispatch (add)         | ~200K ops/sec |
+| DenseMatrix 100×100 multiply | ~5K ops/sec   |
+| FFT (1024 elements, WASM)    | ~50K ops/sec  |
+| Parallel sum (100K elements) | <5ms          |
 
 See [Performance Guide](./docs/performance.md) for backend selection thresholds and tuning.
 
@@ -296,9 +300,9 @@ See [Performance Guide](./docs/performance.md) for backend selection thresholds 
 Create a file `example.mtsw`:
 
 ```yaml
-version: "1.0"
+version: '1.0'
 metadata:
-  title: "Matrix Analysis"
+  title: 'Matrix Analysis'
 runtime:
   engine: mathts
   execution: reactive
@@ -351,14 +355,14 @@ See the [Migration Guide](./docs/migration/guide.md) for detailed instructions.
 
 ### Key Differences
 
-| mathjs | MathTS |
-|--------|--------|
-| `math.complex(3, 4)` | `new Complex(3, 4)` |
-| `math.matrix([[1,2]])` | `DenseMatrix.fromArray([[1,2]])` |
-| `math.bignumber('123')` | `BigNumber.parse('123')` |
-| `bn.toNumber()` | `bn.valueOf()` |
-| `m.get([row, col])` | `m.get(row, col)` |
-| `math.evaluate('...')` | `evaluate('...')` |
+| mathjs                  | MathTS                           |
+| ----------------------- | -------------------------------- |
+| `math.complex(3, 4)`    | `new Complex(3, 4)`              |
+| `math.matrix([[1,2]])`  | `DenseMatrix.fromArray([[1,2]])` |
+| `math.bignumber('123')` | `BigNumber.parse('123')`         |
+| `bn.toNumber()`         | `bn.valueOf()`                   |
+| `m.get([row, col])`     | `m.get(row, col)`                |
+| `math.evaluate('...')`  | `evaluate('...')`                |
 
 ## Documentation
 

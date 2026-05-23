@@ -14,16 +14,11 @@
  * @param n Matrix size
  * @param degreePtr Output degree array (i32)
  */
-function computeDegrees(
-  colPtrPtr: usize,
-  rowIdxPtr: usize,
-  n: i32,
-  degreePtr: usize
-): void {
+function computeDegrees(colPtrPtr: usize, rowIdxPtr: usize, n: i32, degreePtr: usize): void {
   for (let j: i32 = 0; j < n; j++) {
-    const colJ = load<i32>(colPtrPtr + (<usize>j << 2))
-    const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
-    store<i32>(degreePtr + (<usize>j << 2), colJ1 - colJ)
+    const colJ = load<i32>(colPtrPtr + ((<usize>j) << 2));
+    const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
+    store<i32>(degreePtr + ((<usize>j) << 2), colJ1 - colJ);
   }
 }
 
@@ -47,53 +42,53 @@ export function amd(
   workPtr: usize
 ): void {
   if (n <= 0) {
-    return
+    return;
   }
 
   // workPtr layout: degree (n i32s), eliminated (n i32s)
-  const degreePtr: usize = workPtr
-  const eliminatedPtr: usize = workPtr + (<usize>n << 2)
+  const degreePtr: usize = workPtr;
+  const eliminatedPtr: usize = workPtr + ((<usize>n) << 2);
 
-  computeDegrees(colPtrPtr, rowIdxPtr, n, degreePtr)
+  computeDegrees(colPtrPtr, rowIdxPtr, n, degreePtr);
 
   // Initialize eliminated to 0
   for (let i: i32 = 0; i < n; i++) {
-    store<i32>(eliminatedPtr + (<usize>i << 2), 0)
+    store<i32>(eliminatedPtr + ((<usize>i) << 2), 0);
   }
 
   for (let step: i32 = 0; step < n; step++) {
     // Find minimum degree node
-    let minDegree: i32 = n + 1
-    let minNode: i32 = -1
+    let minDegree: i32 = n + 1;
+    let minNode: i32 = -1;
 
     for (let j: i32 = 0; j < n; j++) {
-      const elim = load<i32>(eliminatedPtr + (<usize>j << 2))
-      const deg = load<i32>(degreePtr + (<usize>j << 2))
+      const elim = load<i32>(eliminatedPtr + ((<usize>j) << 2));
+      const deg = load<i32>(degreePtr + ((<usize>j) << 2));
       if (elim === 0 && deg < minDegree) {
-        minDegree = deg
-        minNode = j
+        minDegree = deg;
+        minNode = j;
       }
     }
 
     if (minNode === -1) {
-      break
+      break;
     }
 
     // Add to ordering
-    store<i32>(permPtr + (<usize>step << 2), minNode)
-    store<i32>(eliminatedPtr + (<usize>minNode << 2), 1)
+    store<i32>(permPtr + ((<usize>step) << 2), minNode);
+    store<i32>(eliminatedPtr + ((<usize>minNode) << 2), 1);
 
     // Update degrees of neighbors
-    const colMin = load<i32>(colPtrPtr + (<usize>minNode << 2))
-    const colMin1 = load<i32>(colPtrPtr + (<usize>(minNode + 1) << 2))
+    const colMin = load<i32>(colPtrPtr + ((<usize>minNode) << 2));
+    const colMin1 = load<i32>(colPtrPtr + ((<usize>(minNode + 1)) << 2));
 
     for (let p: i32 = colMin; p < colMin1; p++) {
-      const neighbor: i32 = load<i32>(rowIdxPtr + (<usize>p << 2))
-      const neighElim = load<i32>(eliminatedPtr + (<usize>neighbor << 2))
+      const neighbor: i32 = load<i32>(rowIdxPtr + ((<usize>p) << 2));
+      const neighElim = load<i32>(eliminatedPtr + ((<usize>neighbor) << 2));
       if (neighElim === 0) {
-        const neighDeg = load<i32>(degreePtr + (<usize>neighbor << 2))
+        const neighDeg = load<i32>(degreePtr + ((<usize>neighbor) << 2));
         if (neighDeg > 0) {
-          store<i32>(degreePtr + (<usize>neighbor << 2), neighDeg - 1)
+          store<i32>(degreePtr + ((<usize>neighbor) << 2), neighDeg - 1);
         }
       }
     }
@@ -120,106 +115,106 @@ export function amdAggressive(
   workPtr: usize
 ): void {
   if (n <= 0) {
-    return
+    return;
   }
 
   // workPtr layout: degree (n), eliminated (n), parent (n), rowDegree (n), temp (n)
-  const degreePtr: usize = workPtr
-  const eliminatedPtr: usize = workPtr + (<usize>n << 2)
-  const parentPtr: usize = workPtr + (<usize>(2 * n) << 2)
-  const rowDegreePtr: usize = workPtr + (<usize>(3 * n) << 2)
+  const degreePtr: usize = workPtr;
+  const eliminatedPtr: usize = workPtr + ((<usize>n) << 2);
+  const parentPtr: usize = workPtr + ((<usize>(2 * n)) << 2);
+  const rowDegreePtr: usize = workPtr + ((<usize>(3 * n)) << 2);
 
   // Initialize
   for (let j: i32 = 0; j < n; j++) {
-    const offset: usize = <usize>j << 2
-    const colJ = load<i32>(colPtrPtr + offset)
-    const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
-    store<i32>(degreePtr + offset, colJ1 - colJ)
-    store<i32>(parentPtr + offset, -1)
-    store<i32>(eliminatedPtr + offset, 0)
-    store<i32>(rowDegreePtr + offset, 0)
+    const offset: usize = (<usize>j) << 2;
+    const colJ = load<i32>(colPtrPtr + offset);
+    const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
+    store<i32>(degreePtr + offset, colJ1 - colJ);
+    store<i32>(parentPtr + offset, -1);
+    store<i32>(eliminatedPtr + offset, 0);
+    store<i32>(rowDegreePtr + offset, 0);
   }
 
   // Build adjacency lists for symmetric access
   // Count neighbors for each row
   for (let j: i32 = 0; j < n; j++) {
-    const colJ = load<i32>(colPtrPtr + (<usize>j << 2))
-    const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
+    const colJ = load<i32>(colPtrPtr + ((<usize>j) << 2));
+    const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
     for (let p: i32 = colJ; p < colJ1; p++) {
-      const i: i32 = load<i32>(rowIdxPtr + (<usize>p << 2))
+      const i: i32 = load<i32>(rowIdxPtr + ((<usize>p) << 2));
       if (i !== j) {
-        const rd = load<i32>(rowDegreePtr + (<usize>i << 2))
-        store<i32>(rowDegreePtr + (<usize>i << 2), rd + 1)
+        const rd = load<i32>(rowDegreePtr + ((<usize>i) << 2));
+        store<i32>(rowDegreePtr + ((<usize>i) << 2), rd + 1);
       }
     }
   }
 
   // Compute external degree (approximate degree)
   for (let j: i32 = 0; j < n; j++) {
-    const offset: usize = <usize>j << 2
-    const deg = load<i32>(degreePtr + offset)
-    const rowDeg = load<i32>(rowDegreePtr + offset)
-    store<i32>(degreePtr + offset, deg + rowDeg)
+    const offset: usize = (<usize>j) << 2;
+    const deg = load<i32>(degreePtr + offset);
+    const rowDeg = load<i32>(rowDegreePtr + offset);
+    store<i32>(degreePtr + offset, deg + rowDeg);
   }
 
   for (let step: i32 = 0; step < n; step++) {
     // Find minimum external degree node
-    let minDegree: i32 = 2 * n + 1
-    let minNode: i32 = -1
+    let minDegree: i32 = 2 * n + 1;
+    let minNode: i32 = -1;
 
     for (let j: i32 = 0; j < n; j++) {
-      const offset: usize = <usize>j << 2
-      const elim = load<i32>(eliminatedPtr + offset)
-      const deg = load<i32>(degreePtr + offset)
+      const offset: usize = (<usize>j) << 2;
+      const elim = load<i32>(eliminatedPtr + offset);
+      const deg = load<i32>(degreePtr + offset);
       if (elim === 0 && deg < minDegree) {
-        minDegree = deg
-        minNode = j
+        minDegree = deg;
+        minNode = j;
       }
     }
 
     if (minNode === -1) {
-      break
+      break;
     }
 
-    store<i32>(permPtr + (<usize>step << 2), minNode)
-    store<i32>(eliminatedPtr + (<usize>minNode << 2), 1)
+    store<i32>(permPtr + ((<usize>step) << 2), minNode);
+    store<i32>(eliminatedPtr + ((<usize>minNode) << 2), 1);
 
     // Update degrees: absorb eliminated node into neighbors
-    const colMin = load<i32>(colPtrPtr + (<usize>minNode << 2))
-    const colMin1 = load<i32>(colPtrPtr + (<usize>(minNode + 1) << 2))
+    const colMin = load<i32>(colPtrPtr + ((<usize>minNode) << 2));
+    const colMin1 = load<i32>(colPtrPtr + ((<usize>(minNode + 1)) << 2));
 
     for (let p: i32 = colMin; p < colMin1; p++) {
-      const neighbor: i32 = load<i32>(rowIdxPtr + (<usize>p << 2))
-      const neighOffset: usize = <usize>neighbor << 2
-      const neighElim = load<i32>(eliminatedPtr + neighOffset)
+      const neighbor: i32 = load<i32>(rowIdxPtr + ((<usize>p) << 2));
+      const neighOffset: usize = (<usize>neighbor) << 2;
+      const neighElim = load<i32>(eliminatedPtr + neighOffset);
       if (neighElim === 0) {
-        const neighDeg = load<i32>(degreePtr + neighOffset)
+        const neighDeg = load<i32>(degreePtr + neighOffset);
         if (neighDeg > 1) {
-          store<i32>(degreePtr + neighOffset, neighDeg - 1)
+          store<i32>(degreePtr + neighOffset, neighDeg - 1);
         }
 
         // Set parent if not set
-        const neighParent = load<i32>(parentPtr + neighOffset)
+        const neighParent = load<i32>(parentPtr + neighOffset);
         if (neighParent === -1) {
-          store<i32>(parentPtr + neighOffset, minNode)
+          store<i32>(parentPtr + neighOffset, minNode);
         }
       }
     }
 
     // Also check row neighbors (for symmetric pattern)
     for (let j: i32 = 0; j < n; j++) {
-      const jOffset: usize = <usize>j << 2
-      const jElim = load<i32>(eliminatedPtr + jOffset)
+      const jOffset: usize = (<usize>j) << 2;
+      const jElim = load<i32>(eliminatedPtr + jOffset);
       if (jElim === 0) {
-        const colJ = load<i32>(colPtrPtr + jOffset)
-        const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
+        const colJ = load<i32>(colPtrPtr + jOffset);
+        const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
         for (let p: i32 = colJ; p < colJ1; p++) {
-          if (load<i32>(rowIdxPtr + (<usize>p << 2)) === minNode) {
-            const jDeg = load<i32>(degreePtr + jOffset)
+          if (load<i32>(rowIdxPtr + ((<usize>p) << 2)) === minNode) {
+            const jDeg = load<i32>(degreePtr + jOffset);
             if (jDeg > 1) {
-              store<i32>(degreePtr + jOffset, jDeg - 1)
+              store<i32>(degreePtr + jOffset, jDeg - 1);
             }
-            break
+            break;
           }
         }
       }
@@ -247,75 +242,75 @@ export function rcm(
   workPtr: usize
 ): void {
   if (n <= 0) {
-    return
+    return;
   }
 
   // workPtr layout: perm (n), visited (n), queue (n), degree (n)
-  const permPtr: usize = workPtr
-  const visitedPtr: usize = workPtr + (<usize>n << 2)
-  const queuePtr: usize = workPtr + (<usize>(2 * n) << 2)
-  const degreePtr: usize = workPtr + (<usize>(3 * n) << 2)
+  const permPtr: usize = workPtr;
+  const visitedPtr: usize = workPtr + ((<usize>n) << 2);
+  const queuePtr: usize = workPtr + ((<usize>(2 * n)) << 2);
+  const degreePtr: usize = workPtr + ((<usize>(3 * n)) << 2);
 
-  computeDegrees(colPtrPtr, rowIdxPtr, n, degreePtr)
+  computeDegrees(colPtrPtr, rowIdxPtr, n, degreePtr);
 
   // Initialize visited to 0
   for (let i: i32 = 0; i < n; i++) {
-    store<i32>(visitedPtr + (<usize>i << 2), 0)
+    store<i32>(visitedPtr + ((<usize>i) << 2), 0);
   }
 
   // Find starting node (minimum degree)
-  let startNode: i32 = 0
-  let minDegree: i32 = load<i32>(degreePtr)
+  let startNode: i32 = 0;
+  let minDegree: i32 = load<i32>(degreePtr);
   for (let j: i32 = 1; j < n; j++) {
-    const deg = load<i32>(degreePtr + (<usize>j << 2))
+    const deg = load<i32>(degreePtr + ((<usize>j) << 2));
     if (deg < minDegree) {
-      minDegree = deg
-      startNode = j
+      minDegree = deg;
+      startNode = j;
     }
   }
 
   // BFS from starting node
-  let front: i32 = 0
-  let back: i32 = 0
-  let permIdx: i32 = 0
+  let front: i32 = 0;
+  let back: i32 = 0;
+  let permIdx: i32 = 0;
 
-  store<i32>(queuePtr + (<usize>back << 2), startNode)
-  back++
-  store<i32>(visitedPtr + (<usize>startNode << 2), 1)
+  store<i32>(queuePtr + ((<usize>back) << 2), startNode);
+  back++;
+  store<i32>(visitedPtr + ((<usize>startNode) << 2), 1);
 
   while (front < back) {
-    const node: i32 = load<i32>(queuePtr + (<usize>front << 2))
-    front++
-    store<i32>(permPtr + (<usize>permIdx << 2), node)
-    permIdx++
+    const node: i32 = load<i32>(queuePtr + ((<usize>front) << 2));
+    front++;
+    store<i32>(permPtr + ((<usize>permIdx) << 2), node);
+    permIdx++;
 
     // Collect unvisited neighbors
-    const neighborStart: i32 = back
-    const colNode = load<i32>(colPtrPtr + (<usize>node << 2))
-    const colNode1 = load<i32>(colPtrPtr + (<usize>(node + 1) << 2))
+    const neighborStart: i32 = back;
+    const colNode = load<i32>(colPtrPtr + ((<usize>node) << 2));
+    const colNode1 = load<i32>(colPtrPtr + ((<usize>(node + 1)) << 2));
 
     for (let p: i32 = colNode; p < colNode1; p++) {
-      const neighbor: i32 = load<i32>(rowIdxPtr + (<usize>p << 2))
-      const visited = load<i32>(visitedPtr + (<usize>neighbor << 2))
+      const neighbor: i32 = load<i32>(rowIdxPtr + ((<usize>p) << 2));
+      const visited = load<i32>(visitedPtr + ((<usize>neighbor) << 2));
       if (visited === 0) {
-        store<i32>(visitedPtr + (<usize>neighbor << 2), 1)
-        store<i32>(queuePtr + (<usize>back << 2), neighbor)
-        back++
+        store<i32>(visitedPtr + ((<usize>neighbor) << 2), 1);
+        store<i32>(queuePtr + ((<usize>back) << 2), neighbor);
+        back++;
       }
     }
 
     // Also check row neighbors for symmetric access
     for (let j: i32 = 0; j < n; j++) {
-      const jVisited = load<i32>(visitedPtr + (<usize>j << 2))
+      const jVisited = load<i32>(visitedPtr + ((<usize>j) << 2));
       if (jVisited === 0) {
-        const colJ = load<i32>(colPtrPtr + (<usize>j << 2))
-        const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
+        const colJ = load<i32>(colPtrPtr + ((<usize>j) << 2));
+        const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
         for (let p: i32 = colJ; p < colJ1; p++) {
-          if (load<i32>(rowIdxPtr + (<usize>p << 2)) === node) {
-            store<i32>(visitedPtr + (<usize>j << 2), 1)
-            store<i32>(queuePtr + (<usize>back << 2), j)
-            back++
-            break
+          if (load<i32>(rowIdxPtr + ((<usize>p) << 2)) === node) {
+            store<i32>(visitedPtr + ((<usize>j) << 2), 1);
+            store<i32>(queuePtr + ((<usize>back) << 2), j);
+            back++;
+            break;
           }
         }
       }
@@ -323,29 +318,32 @@ export function rcm(
 
     // Sort neighbors by degree (insertion sort for small counts)
     for (let i: i32 = neighborStart + 1; i < back; i++) {
-      const key: i32 = load<i32>(queuePtr + (<usize>i << 2))
-      const keyDegree: i32 = load<i32>(degreePtr + (<usize>key << 2))
-      let j: i32 = i - 1
-      while (j >= neighborStart && load<i32>(degreePtr + (<usize>load<i32>(queuePtr + (<usize>j << 2)) << 2)) > keyDegree) {
-        store<i32>(queuePtr + (<usize>(j + 1) << 2), load<i32>(queuePtr + (<usize>j << 2)))
-        j--
+      const key: i32 = load<i32>(queuePtr + ((<usize>i) << 2));
+      const keyDegree: i32 = load<i32>(degreePtr + ((<usize>key) << 2));
+      let j: i32 = i - 1;
+      while (
+        j >= neighborStart &&
+        load<i32>(degreePtr + ((<usize>load<i32>(queuePtr + ((<usize>j) << 2))) << 2)) > keyDegree
+      ) {
+        store<i32>(queuePtr + ((<usize>(j + 1)) << 2), load<i32>(queuePtr + ((<usize>j) << 2)));
+        j--;
       }
-      store<i32>(queuePtr + (<usize>(j + 1) << 2), key)
+      store<i32>(queuePtr + ((<usize>(j + 1)) << 2), key);
     }
   }
 
   // Handle disconnected components
   for (let j: i32 = 0; j < n; j++) {
-    const visited = load<i32>(visitedPtr + (<usize>j << 2))
+    const visited = load<i32>(visitedPtr + ((<usize>j) << 2));
     if (visited === 0) {
-      store<i32>(permPtr + (<usize>permIdx << 2), j)
-      permIdx++
+      store<i32>(permPtr + ((<usize>permIdx) << 2), j);
+      permIdx++;
     }
   }
 
   // Reverse the ordering into result
   for (let i: i32 = 0; i < n; i++) {
-    store<i32>(resultPtr + (<usize>i << 2), load<i32>(permPtr + (<usize>(n - 1 - i) << 2)))
+    store<i32>(resultPtr + ((<usize>i) << 2), load<i32>(permPtr + ((<usize>(n - 1 - i)) << 2)));
   }
 }
 
@@ -357,8 +355,8 @@ export function rcm(
  */
 export function inversePerm(permPtr: usize, n: i32, ipermPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    const permI = load<i32>(permPtr + (<usize>i << 2))
-    store<i32>(ipermPtr + (<usize>permI << 2), i)
+    const permI = load<i32>(permPtr + ((<usize>i) << 2));
+    store<i32>(ipermPtr + ((<usize>permI) << 2), i);
   }
 }
 
@@ -369,15 +367,10 @@ export function inversePerm(permPtr: usize, n: i32, ipermPtr: usize): void {
  * @param n Size
  * @param yPtr Output permuted vector pointer (f64)
  */
-export function permuteVector(
-  xPtr: usize,
-  permPtr: usize,
-  n: i32,
-  yPtr: usize
-): void {
+export function permuteVector(xPtr: usize, permPtr: usize, n: i32, yPtr: usize): void {
   for (let i: i32 = 0; i < n; i++) {
-    const permI = load<i32>(permPtr + (<usize>i << 2))
-    store<f64>(yPtr + (<usize>i << 3), load<f64>(xPtr + (<usize>permI << 3)))
+    const permI = load<i32>(permPtr + ((<usize>i) << 2));
+    store<f64>(yPtr + ((<usize>i) << 3), load<f64>(xPtr + ((<usize>permI) << 3)));
   }
 }
 
@@ -407,47 +400,47 @@ export function permuteMatrix(
   workPtr: usize
 ): void {
   // workPtr layout: iperm (n), newColCount (n), colPos (n)
-  const ipermPtr: usize = workPtr
-  const newColCountPtr: usize = workPtr + (<usize>n << 2)
-  const colPosPtr: usize = workPtr + (<usize>(2 * n) << 2)
+  const ipermPtr: usize = workPtr;
+  const newColCountPtr: usize = workPtr + ((<usize>n) << 2);
+  const colPosPtr: usize = workPtr + ((<usize>(2 * n)) << 2);
 
   // Compute inverse permutation
-  inversePerm(permPtr, n, ipermPtr)
+  inversePerm(permPtr, n, ipermPtr);
 
   // Count entries per column in permuted matrix
   for (let j: i32 = 0; j < n; j++) {
-    const newJ: i32 = load<i32>(ipermPtr + (<usize>j << 2))
-    const colJ = load<i32>(colPtrPtr + (<usize>j << 2))
-    const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
-    store<i32>(newColCountPtr + (<usize>newJ << 2), colJ1 - colJ)
+    const newJ: i32 = load<i32>(ipermPtr + ((<usize>j) << 2));
+    const colJ = load<i32>(colPtrPtr + ((<usize>j) << 2));
+    const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
+    store<i32>(newColCountPtr + ((<usize>newJ) << 2), colJ1 - colJ);
   }
 
   // Build new column pointers
-  store<i32>(newColPtrPtr, 0)
+  store<i32>(newColPtrPtr, 0);
   for (let j: i32 = 0; j < n; j++) {
-    const prev = load<i32>(newColPtrPtr + (<usize>j << 2))
-    const count = load<i32>(newColCountPtr + (<usize>j << 2))
-    store<i32>(newColPtrPtr + (<usize>(j + 1) << 2), prev + count)
+    const prev = load<i32>(newColPtrPtr + ((<usize>j) << 2));
+    const count = load<i32>(newColCountPtr + ((<usize>j) << 2));
+    store<i32>(newColPtrPtr + ((<usize>(j + 1)) << 2), prev + count);
   }
 
   // Initialize colPos
   for (let j: i32 = 0; j < n; j++) {
-    store<i32>(colPosPtr + (<usize>j << 2), load<i32>(newColPtrPtr + (<usize>j << 2)))
+    store<i32>(colPosPtr + ((<usize>j) << 2), load<i32>(newColPtrPtr + ((<usize>j) << 2)));
   }
 
   // Fill new matrix
   for (let j: i32 = 0; j < n; j++) {
-    const newJ: i32 = load<i32>(ipermPtr + (<usize>j << 2))
-    const colJ = load<i32>(colPtrPtr + (<usize>j << 2))
-    const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
+    const newJ: i32 = load<i32>(ipermPtr + ((<usize>j) << 2));
+    const colJ = load<i32>(colPtrPtr + ((<usize>j) << 2));
+    const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
 
     for (let p: i32 = colJ; p < colJ1; p++) {
-      const i: i32 = load<i32>(rowIdxPtr + (<usize>p << 2))
-      const newI: i32 = load<i32>(ipermPtr + (<usize>i << 2))
-      const pos: i32 = load<i32>(colPosPtr + (<usize>newJ << 2))
-      store<i32>(colPosPtr + (<usize>newJ << 2), pos + 1)
-      store<i32>(newRowIdxPtr + (<usize>pos << 2), newI)
-      store<f64>(newValuesPtr + (<usize>pos << 3), load<f64>(valuesPtr + (<usize>p << 3)))
+      const i: i32 = load<i32>(rowIdxPtr + ((<usize>p) << 2));
+      const newI: i32 = load<i32>(ipermPtr + ((<usize>i) << 2));
+      const pos: i32 = load<i32>(colPosPtr + ((<usize>newJ) << 2));
+      store<i32>(colPosPtr + ((<usize>newJ) << 2), pos + 1);
+      store<i32>(newRowIdxPtr + ((<usize>pos) << 2), newI);
+      store<f64>(newValuesPtr + ((<usize>pos) << 3), load<f64>(valuesPtr + ((<usize>p) << 3)));
     }
   }
 }
@@ -471,73 +464,73 @@ export function symbolicCholeskyNnz(
   workPtr: usize
 ): i32 {
   if (n <= 0) {
-    return 0
+    return 0;
   }
 
   // workPtr layout: parent (n), ancestor (n), iperm (n)
-  const parentPtr: usize = workPtr
-  const ancestorPtr: usize = workPtr + (<usize>n << 2)
-  const ipermPtr: usize = workPtr + (<usize>(2 * n) << 2)
+  const parentPtr: usize = workPtr;
+  const ancestorPtr: usize = workPtr + ((<usize>n) << 2);
+  const ipermPtr: usize = workPtr + ((<usize>(2 * n)) << 2);
 
   for (let i: i32 = 0; i < n; i++) {
-    const offset: usize = <usize>i << 2
-    store<i32>(parentPtr + offset, -1)
-    store<i32>(ancestorPtr + offset, -1)
+    const offset: usize = (<usize>i) << 2;
+    store<i32>(parentPtr + offset, -1);
+    store<i32>(ancestorPtr + offset, -1);
   }
 
   // If using permutation, compute inverse
-  const usePerm: bool = permPtr !== 0
+  const usePerm: bool = permPtr !== 0;
   if (usePerm) {
-    inversePerm(permPtr, n, ipermPtr)
+    inversePerm(permPtr, n, ipermPtr);
   }
 
   for (let k: i32 = 0; k < n; k++) {
-    const j: i32 = usePerm ? load<i32>(permPtr + (<usize>k << 2)) : k
+    const j: i32 = usePerm ? load<i32>(permPtr + ((<usize>k) << 2)) : k;
 
-    const colJ = load<i32>(colPtrPtr + (<usize>j << 2))
-    const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
+    const colJ = load<i32>(colPtrPtr + ((<usize>j) << 2));
+    const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
 
     for (let p: i32 = colJ; p < colJ1; p++) {
-      let i: i32 = load<i32>(rowIdxPtr + (<usize>p << 2))
+      let i: i32 = load<i32>(rowIdxPtr + ((<usize>p) << 2));
       if (usePerm) {
-        i = load<i32>(ipermPtr + (<usize>i << 2))
+        i = load<i32>(ipermPtr + ((<usize>i) << 2));
       }
 
       if (i < k) {
         // Find root of tree containing i
-        let r: i32 = i
+        let r: i32 = i;
         while (true) {
-          const anc = load<i32>(ancestorPtr + (<usize>r << 2))
-          if (anc === -1 || anc === k) break
-          const next: i32 = anc
-          store<i32>(ancestorPtr + (<usize>r << 2), k)
-          r = next
+          const anc = load<i32>(ancestorPtr + ((<usize>r) << 2));
+          if (anc === -1 || anc === k) break;
+          const next: i32 = anc;
+          store<i32>(ancestorPtr + ((<usize>r) << 2), k);
+          r = next;
         }
-        store<i32>(ancestorPtr + (<usize>r << 2), k)
+        store<i32>(ancestorPtr + ((<usize>r) << 2), k);
 
-        const parentR = load<i32>(parentPtr + (<usize>r << 2))
+        const parentR = load<i32>(parentPtr + ((<usize>r) << 2));
         if (parentR === -1) {
-          store<i32>(parentPtr + (<usize>r << 2), k)
+          store<i32>(parentPtr + ((<usize>r) << 2), k);
         }
       }
     }
   }
 
   // Count nonzeros in L
-  let nnz: i32 = 0
+  let nnz: i32 = 0;
   for (let j: i32 = 0; j < n; j++) {
     // Count entries in column j of L
-    nnz++ // diagonal
+    nnz++; // diagonal
 
     // Count off-diagonal entries by walking up tree
-    let p: i32 = load<i32>(parentPtr + (<usize>j << 2))
+    let p: i32 = load<i32>(parentPtr + ((<usize>j) << 2));
     while (p !== -1) {
-      nnz++
-      p = load<i32>(parentPtr + (<usize>p << 2))
+      nnz++;
+      p = load<i32>(parentPtr + ((<usize>p) << 2));
     }
   }
 
-  return nnz
+  return nnz;
 }
 
 /**
@@ -557,39 +550,39 @@ export function bandwidth(
   workPtr: usize
 ): i32 {
   if (n <= 0) {
-    return 0
+    return 0;
   }
 
-  const usePerm: bool = permPtr !== 0
-  const ipermPtr: usize = workPtr
+  const usePerm: bool = permPtr !== 0;
+  const ipermPtr: usize = workPtr;
 
   if (usePerm) {
-    inversePerm(permPtr, n, ipermPtr)
+    inversePerm(permPtr, n, ipermPtr);
   }
 
-  let maxBw: i32 = 0
+  let maxBw: i32 = 0;
 
   for (let j: i32 = 0; j < n; j++) {
-    const newJ: i32 = usePerm ? load<i32>(ipermPtr + (<usize>j << 2)) : j
+    const newJ: i32 = usePerm ? load<i32>(ipermPtr + ((<usize>j) << 2)) : j;
 
-    const colJ = load<i32>(colPtrPtr + (<usize>j << 2))
-    const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
+    const colJ = load<i32>(colPtrPtr + ((<usize>j) << 2));
+    const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
 
     for (let p: i32 = colJ; p < colJ1; p++) {
-      const i: i32 = load<i32>(rowIdxPtr + (<usize>p << 2))
-      const newI: i32 = usePerm ? load<i32>(ipermPtr + (<usize>i << 2)) : i
+      const i: i32 = load<i32>(rowIdxPtr + ((<usize>p) << 2));
+      const newI: i32 = usePerm ? load<i32>(ipermPtr + ((<usize>i) << 2)) : i;
 
-      let diff: i32 = newI - newJ
+      let diff: i32 = newI - newJ;
       if (diff < 0) {
-        diff = -diff
+        diff = -diff;
       }
       if (diff > maxBw) {
-        maxBw = diff
+        maxBw = diff;
       }
     }
   }
 
-  return maxBw
+  return maxBw;
 }
 
 /**
@@ -609,24 +602,24 @@ export function findPeripheralNode(
   workPtr: usize
 ): i32 {
   if (n <= 0) {
-    return 0
+    return 0;
   }
 
   // workPtr layout: degree (n), dist (n), queue (n)
-  const degreePtr: usize = workPtr
-  const distPtr: usize = workPtr + (<usize>n << 2)
-  const queuePtr: usize = workPtr + (<usize>(2 * n) << 2)
+  const degreePtr: usize = workPtr;
+  const distPtr: usize = workPtr + ((<usize>n) << 2);
+  const queuePtr: usize = workPtr + ((<usize>(2 * n)) << 2);
 
-  computeDegrees(colPtrPtr, rowIdxPtr, n, degreePtr)
+  computeDegrees(colPtrPtr, rowIdxPtr, n, degreePtr);
 
   // Start from minimum degree node
-  let startNode: i32 = 0
-  let minDegree: i32 = load<i32>(degreePtr)
+  let startNode: i32 = 0;
+  let minDegree: i32 = load<i32>(degreePtr);
   for (let j: i32 = 1; j < n; j++) {
-    const deg = load<i32>(degreePtr + (<usize>j << 2))
+    const deg = load<i32>(degreePtr + ((<usize>j) << 2));
     if (deg < minDegree) {
-      minDegree = deg
-      startNode = j
+      minDegree = deg;
+      startNode = j;
     }
   }
 
@@ -634,64 +627,64 @@ export function findPeripheralNode(
   for (let iter: i32 = 0; iter < 5; iter++) {
     // Reset distances
     for (let j: i32 = 0; j < n; j++) {
-      store<i32>(distPtr + (<usize>j << 2), -1)
+      store<i32>(distPtr + ((<usize>j) << 2), -1);
     }
 
-    let front: i32 = 0
-    let back: i32 = 0
-    store<i32>(queuePtr + (<usize>back << 2), startNode)
-    back++
-    store<i32>(distPtr + (<usize>startNode << 2), 0)
+    let front: i32 = 0;
+    let back: i32 = 0;
+    store<i32>(queuePtr + ((<usize>back) << 2), startNode);
+    back++;
+    store<i32>(distPtr + ((<usize>startNode) << 2), 0);
 
-    let farNode: i32 = startNode
-    let maxDist: i32 = 0
+    let farNode: i32 = startNode;
+    let maxDist: i32 = 0;
 
     while (front < back) {
-      const node: i32 = load<i32>(queuePtr + (<usize>front << 2))
-      front++
+      const node: i32 = load<i32>(queuePtr + ((<usize>front) << 2));
+      front++;
 
-      const colNode = load<i32>(colPtrPtr + (<usize>node << 2))
-      const colNode1 = load<i32>(colPtrPtr + (<usize>(node + 1) << 2))
-      const distNode = load<i32>(distPtr + (<usize>node << 2))
+      const colNode = load<i32>(colPtrPtr + ((<usize>node) << 2));
+      const colNode1 = load<i32>(colPtrPtr + ((<usize>(node + 1)) << 2));
+      const distNode = load<i32>(distPtr + ((<usize>node) << 2));
 
       for (let p: i32 = colNode; p < colNode1; p++) {
-        const neighbor: i32 = load<i32>(rowIdxPtr + (<usize>p << 2))
-        const distNeigh = load<i32>(distPtr + (<usize>neighbor << 2))
+        const neighbor: i32 = load<i32>(rowIdxPtr + ((<usize>p) << 2));
+        const distNeigh = load<i32>(distPtr + ((<usize>neighbor) << 2));
         if (distNeigh === -1) {
-          const newDist = distNode + 1
-          store<i32>(distPtr + (<usize>neighbor << 2), newDist)
-          store<i32>(queuePtr + (<usize>back << 2), neighbor)
-          back++
+          const newDist = distNode + 1;
+          store<i32>(distPtr + ((<usize>neighbor) << 2), newDist);
+          store<i32>(queuePtr + ((<usize>back) << 2), neighbor);
+          back++;
 
-          const degNeigh = load<i32>(degreePtr + (<usize>neighbor << 2))
-          const degFar = load<i32>(degreePtr + (<usize>farNode << 2))
+          const degNeigh = load<i32>(degreePtr + ((<usize>neighbor) << 2));
+          const degFar = load<i32>(degreePtr + ((<usize>farNode) << 2));
           if (newDist > maxDist || (newDist === maxDist && degNeigh < degFar)) {
-            maxDist = newDist
-            farNode = neighbor
+            maxDist = newDist;
+            farNode = neighbor;
           }
         }
       }
 
       // Check row neighbors
       for (let j: i32 = 0; j < n; j++) {
-        const distJ = load<i32>(distPtr + (<usize>j << 2))
+        const distJ = load<i32>(distPtr + ((<usize>j) << 2));
         if (distJ === -1) {
-          const colJ = load<i32>(colPtrPtr + (<usize>j << 2))
-          const colJ1 = load<i32>(colPtrPtr + (<usize>(j + 1) << 2))
+          const colJ = load<i32>(colPtrPtr + ((<usize>j) << 2));
+          const colJ1 = load<i32>(colPtrPtr + ((<usize>(j + 1)) << 2));
           for (let p: i32 = colJ; p < colJ1; p++) {
-            if (load<i32>(rowIdxPtr + (<usize>p << 2)) === node) {
-              const newDist = distNode + 1
-              store<i32>(distPtr + (<usize>j << 2), newDist)
-              store<i32>(queuePtr + (<usize>back << 2), j)
-              back++
+            if (load<i32>(rowIdxPtr + ((<usize>p) << 2)) === node) {
+              const newDist = distNode + 1;
+              store<i32>(distPtr + ((<usize>j) << 2), newDist);
+              store<i32>(queuePtr + ((<usize>back) << 2), j);
+              back++;
 
-              const degJ = load<i32>(degreePtr + (<usize>j << 2))
-              const degFar = load<i32>(degreePtr + (<usize>farNode << 2))
+              const degJ = load<i32>(degreePtr + ((<usize>j) << 2));
+              const degFar = load<i32>(degreePtr + ((<usize>farNode) << 2));
               if (newDist > maxDist || (newDist === maxDist && degJ < degFar)) {
-                maxDist = newDist
-                farNode = j
+                maxDist = newDist;
+                farNode = j;
               }
-              break
+              break;
             }
           }
         }
@@ -699,10 +692,10 @@ export function findPeripheralNode(
     }
 
     if (farNode === startNode) {
-      break
+      break;
     }
-    startNode = farNode
+    startNode = farNode;
   }
 
-  return startNode
+  return startNode;
 }

@@ -71,20 +71,41 @@ describe('findRoot', () => {
 
 describe('linsolve', () => {
   it('should solve 2x2 system', () => {
-    const x = linsolve([[2, 1], [1, 3]], [5, 10]);
+    const x = linsolve(
+      [
+        [2, 1],
+        [1, 3],
+      ],
+      [5, 10]
+    );
     expectClose(x[0], 1);
     expectClose(x[1], 3);
   });
 
   it('should solve 3x3 identity system', () => {
-    const x = linsolve([[1, 0, 0], [0, 1, 0], [0, 0, 1]], [3, 5, 7]);
+    const x = linsolve(
+      [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+      ],
+      [3, 5, 7]
+    );
     expectClose(x[0], 3);
     expectClose(x[1], 5);
     expectClose(x[2], 7);
   });
 
   it('should throw for singular matrix', () => {
-    expect(() => linsolve([[1, 2], [2, 4]], [3, 6])).toThrow();
+    expect(() =>
+      linsolve(
+        [
+          [1, 2],
+          [2, 4],
+        ],
+        [3, 6]
+      )
+    ).toThrow();
   });
 });
 
@@ -99,11 +120,10 @@ describe('minimize', () => {
   });
 
   it('should minimize Rosenbrock-like 2D', () => {
-    const result = minimize(
-      (x) => (x[0] - 1) * (x[0] - 1) + (x[1] - 2) * (x[1] - 2),
-      [0.5, 1],
-      { step: 0.5, maxIter: 5000 },
-    );
+    const result = minimize((x) => (x[0] - 1) * (x[0] - 1) + (x[1] - 2) * (x[1] - 2), [0.5, 1], {
+      step: 0.5,
+      maxIter: 5000,
+    });
     expectClose(result[0], 1, 0.3);
     expectClose(result[1], 2, 0.3);
   });
@@ -119,7 +139,12 @@ describe('maximize', () => {
 describe('leastSquares', () => {
   it('should fit a line', () => {
     // y = 2x + 1
-    const A = [[1, 0], [1, 1], [1, 2], [1, 3]];
+    const A = [
+      [1, 0],
+      [1, 1],
+      [1, 2],
+      [1, 3],
+    ];
     const b = [1, 3, 5, 7];
     const x = leastSquares(A, b);
     expectClose(x[0], 1, 1e-6);
@@ -133,7 +158,11 @@ describe('leastSquares', () => {
 
 describe('nintegrate', () => {
   it('should integrate x^2 from 0 to 1', () => {
-    expectClose(nintegrate((x) => x * x, 0, 1), 1 / 3, 1e-8);
+    expectClose(
+      nintegrate((x) => x * x, 0, 1),
+      1 / 3,
+      1e-8
+    );
   });
 
   it('should integrate sin from 0 to pi', () => {
@@ -143,7 +172,11 @@ describe('nintegrate', () => {
 
 describe('simpsons', () => {
   it('should integrate x^2 from 0 to 1', () => {
-    expectClose(simpsons((x) => x * x, 0, 1), 1 / 3, 1e-6);
+    expectClose(
+      simpsons((x) => x * x, 0, 1),
+      1 / 3,
+      1e-6
+    );
   });
 });
 
@@ -187,13 +220,23 @@ describe('pchip', () => {
 
 describe('bezierCurve', () => {
   it('should evaluate linear Bezier', () => {
-    const p = bezierCurve([[0, 0], [1, 1]], 0.5);
+    const p = bezierCurve(
+      [
+        [0, 0],
+        [1, 1],
+      ],
+      0.5
+    );
     expectClose(p[0], 0.5);
     expectClose(p[1], 0.5);
   });
 
   it('should return endpoints at t=0 and t=1', () => {
-    const pts = [[0, 0], [1, 2], [3, 1]];
+    const pts = [
+      [0, 0],
+      [1, 2],
+      [3, 1],
+    ];
     const p0 = bezierCurve(pts, 0);
     const p1 = bezierCurve(pts, 1);
     expectClose(p0[0], 0);
@@ -205,7 +248,12 @@ describe('bezierCurve', () => {
 
 describe('bspline', () => {
   it('should evaluate B-spline', () => {
-    const pts = [[0, 0], [1, 2], [2, 0], [3, 1]];
+    const pts = [
+      [0, 0],
+      [1, 2],
+      [2, 0],
+      [3, 1],
+    ];
     const p = bspline(pts, 2, 0.5);
     expect(p.length).toBe(2);
     expect(typeof p[0]).toBe('number');
@@ -225,7 +273,12 @@ describe('loess', () => {
 
 describe('griddata', () => {
   it('should interpolate scattered data', () => {
-    const points = [[0, 0], [1, 0], [0, 1], [1, 1]];
+    const points = [
+      [0, 0],
+      [1, 0],
+      [0, 1],
+      [1, 1],
+    ];
     const values = [0, 1, 1, 2];
     const result = griddata(points, values, [0.5], [0.5]);
     expect(result.length).toBe(1);
@@ -332,7 +385,7 @@ describe('eventDetection', () => {
       (_t, _y) => [1],
       [0],
       [0, 10],
-      (_t, y) => y[0] - 5,
+      (_t, y) => y[0] - 5
     );
     expect(sol.eventTime).toBeDefined();
     expectClose(sol.eventTime!, 5, 0.1);
@@ -345,33 +398,57 @@ describe('eventDetection', () => {
 
 describe('cond', () => {
   it('should return 1 for identity matrix', () => {
-    const c = cond([[1, 0], [0, 1]]);
+    const c = cond([
+      [1, 0],
+      [0, 1],
+    ]);
     expectClose(c, 1, 0.5);
   });
 
   it('should return large value for ill-conditioned matrix', () => {
-    const c = cond([[1, 1], [1, 1.0001]]);
+    const c = cond([
+      [1, 1],
+      [1, 1.0001],
+    ]);
     expect(c).toBeGreaterThan(100);
   });
 });
 
 describe('rank', () => {
   it('should return 2 for full-rank 2x2', () => {
-    expect(rank([[1, 0], [0, 1]])).toBe(2);
+    expect(
+      rank([
+        [1, 0],
+        [0, 1],
+      ])
+    ).toBe(2);
   });
 
   it('should return 1 for rank-deficient 2x2', () => {
-    expect(rank([[1, 2], [2, 4]])).toBe(1);
+    expect(
+      rank([
+        [1, 2],
+        [2, 4],
+      ])
+    ).toBe(1);
   });
 
   it('should handle rectangular matrices', () => {
-    expect(rank([[1, 0, 0], [0, 1, 0]])).toBe(2);
+    expect(
+      rank([
+        [1, 0, 0],
+        [0, 1, 0],
+      ])
+    ).toBe(2);
   });
 });
 
 describe('nullspace', () => {
   it('should find null space of rank-deficient matrix', () => {
-    const ns = nullspace([[1, 2], [2, 4]]);
+    const ns = nullspace([
+      [1, 2],
+      [2, 4],
+    ]);
     expect(ns.length).toBe(1);
     // Verify it is in the null space
     const v = ns[0];
@@ -380,7 +457,10 @@ describe('nullspace', () => {
   });
 
   it('should return empty for full-rank matrix', () => {
-    const ns = nullspace([[1, 0], [0, 1]]);
+    const ns = nullspace([
+      [1, 0],
+      [0, 1],
+    ]);
     expect(ns.length).toBe(0);
   });
 });
@@ -405,7 +485,15 @@ describe('padeApproximant', () => {
 describe('quadprog', () => {
   it('should solve simple QP', () => {
     // min 0.5 * x^2 + 0.5 * y^2 (i.e. find origin)
-    const x = quadprog([[1, 0], [0, 1]], [0, 0], [], []);
+    const x = quadprog(
+      [
+        [1, 0],
+        [0, 1],
+      ],
+      [0, 0],
+      [],
+      []
+    );
     expectClose(x[0], 0, 0.1);
     expectClose(x[1], 0, 0.1);
   });
@@ -434,7 +522,7 @@ describe('solvePDE', () => {
         left: 0,
         right: 0,
         initial: (x) => Math.sin(Math.PI * x),
-      },
+      }
     );
     expect(result.x.length).toBe(21);
     expect(result.u.length).toBe(21);

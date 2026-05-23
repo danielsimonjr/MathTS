@@ -1,23 +1,23 @@
-import { createForEach } from '../../matrix/forEach.js'
-import { createTransformCallback } from './utils/transformCallback.js'
-import { factory } from '../../utils/factory.js'
-import { isFunctionAssignmentNode, isSymbolNode } from '../../utils/is.js'
-import { compileInlineExpression } from './utils/compileInlineExpression.js'
+import { createForEach } from '../../matrix/forEach.js';
+import { createTransformCallback } from './utils/transformCallback.js';
+import { factory } from '../../utils/factory.js';
+import { isFunctionAssignmentNode, isSymbolNode } from '../../utils/is.js';
+import { compileInlineExpression } from './utils/compileInlineExpression.js';
 import type {
   TypedFunction,
   ExpressionNode,
   EvaluationScope,
   MathJsLike,
   CallbackFunction,
-  RawArgsTransformFunction
-} from './types.js'
+  RawArgsTransformFunction,
+} from './types.js';
 
 interface ForEachDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'forEach'
-const dependencies = ['typed']
+const name = 'forEach';
+const dependencies = ['typed'];
 
 export const createForEachTransform = /* #__PURE__ */ factory(
   name,
@@ -29,8 +29,8 @@ export const createForEachTransform = /* #__PURE__ */ factory(
      *
      * This transform creates a one-based index instead of a zero-based index
      */
-    const forEach = createForEach({ typed })
-    const transformCallback = createTransformCallback({ typed })
+    const forEach = createForEach({ typed });
+    const transformCallback = createTransformCallback({ typed });
 
     function forEachTransform(
       args: ExpressionNode[],
@@ -38,50 +38,43 @@ export const createForEachTransform = /* #__PURE__ */ factory(
       scope: EvaluationScope | Map<string, unknown>
     ): unknown {
       if (args.length === 0) {
-        return forEach()
+        return forEach();
       }
-      let x: unknown = args[0]
+      let x: unknown = args[0];
 
       if (args.length === 1) {
-        return forEach(x)
+        return forEach(x);
       }
 
-      const N = args.length - 1
-      let callback: CallbackFunction | ExpressionNode = args[N]
+      const N = args.length - 1;
+      let callback: CallbackFunction | ExpressionNode = args[N];
 
       if (x) {
-        x = _compileAndEvaluate(x as ExpressionNode, scope)
+        x = _compileAndEvaluate(x as ExpressionNode, scope);
       }
 
       if (callback) {
         if (isSymbolNode(callback) || isFunctionAssignmentNode(callback)) {
           // a function pointer, like filter([3, -2, 5], myTestFunction)
-          callback = _compileAndEvaluate(
-            callback as ExpressionNode,
-            scope
-          ) as CallbackFunction
+          callback = _compileAndEvaluate(callback as ExpressionNode, scope) as CallbackFunction;
         } else {
           // an expression like filter([3, -2, 5], x > 0)
-          callback = compileInlineExpression(
-            callback as ExpressionNode,
-            math,
-            scope
-          )
+          callback = compileInlineExpression(callback as ExpressionNode, math, scope);
         }
       }
 
-      return forEach(x, transformCallback(callback as CallbackFunction, N))
+      return forEach(x, transformCallback(callback as CallbackFunction, N));
     }
-    forEachTransform.rawArgs = true as const
+    forEachTransform.rawArgs = true as const;
 
     function _compileAndEvaluate(
       arg: ExpressionNode,
       scope: EvaluationScope | Map<string, unknown>
     ): unknown {
-      return arg.compile().evaluate(scope)
+      return arg.compile().evaluate(scope);
     }
 
-    return forEachTransform as RawArgsTransformFunction
+    return forEachTransform as RawArgsTransformFunction;
   },
   { isTransformFunction: true }
-)
+);

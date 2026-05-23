@@ -1,33 +1,27 @@
-import { optimizeCallback } from '../utils/optimizeCallback.js'
-import {
-  arraySize,
-  broadcastSizes,
-  broadcastTo,
-  get,
-  deepMap
-} from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { optimizeCallback } from '../utils/optimizeCallback.js';
+import { arraySize, broadcastSizes, broadcastTo, get, deepMap } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for map
 interface MatrixType {
-  map(callback: MapCallback): MatrixType
-  toArray(): unknown[]
-  isMatrix?: boolean
-  size?(): number[]
-  create?(data: unknown[], datatype?: string): MatrixType
-  datatype?(): string
-  valueOf?(): unknown[]
+  map(callback: MapCallback): MatrixType;
+  toArray(): unknown[];
+  isMatrix?: boolean;
+  size?(): number[];
+  create?(data: unknown[], datatype?: string): MatrixType;
+  datatype?(): string;
+  valueOf?(): unknown[];
 }
 
-type MapCallback = (value: unknown, index: number[], matrix: unknown) => unknown
+type MapCallback = (value: unknown, index: number[], matrix: unknown) => unknown;
 
 interface MapDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'map'
-const dependencies = ['typed']
+const name = 'map';
+const dependencies = ['typed'];
 
 export const createMap = /* #__PURE__ */ factory(
   name,
@@ -81,11 +75,8 @@ export const createMap = /* #__PURE__ */ factory(
     return typed(name, {
       'Array, function': _mapArray,
 
-      'Matrix, function': function (
-        x: MatrixType,
-        callback: MapCallback
-      ): MatrixType {
-        return x.map(callback)
+      'Matrix, function': function (x: MatrixType, callback: MapCallback): MatrixType {
+        return x.map(callback);
       },
 
       'Array|Matrix, Array|Matrix, ...Array|Matrix|function': (
@@ -96,8 +87,8 @@ export const createMap = /* #__PURE__ */ factory(
         _mapMultiple(
           [A, B, ...rest.slice(0, rest.length - 1)] as (unknown[] | MatrixType)[],
           rest[rest.length - 1] as MapCallback
-        )
-    })
+        ),
+    });
 
     /**
      * Maps over multiple arrays or matrices.
@@ -115,26 +106,20 @@ export const createMap = /* #__PURE__ */ factory(
       multiCallback: MapCallback
     ): unknown[] | MatrixType {
       if (typeof multiCallback !== 'function') {
-        throw new Error('Last argument must be a callback function')
+        throw new Error('Last argument must be a callback function');
       }
 
-      const firstArrayIsMatrix = (Arrays[0] as any).isMatrix
-      const sizes = Arrays.map((M: any) =>
-        M.isMatrix ? M.size() : arraySize(M)
-      )
-      const newSize = broadcastSizes(...sizes)
-      const numberOfArrays = Arrays.length
+      const firstArrayIsMatrix = (Arrays[0] as any).isMatrix;
+      const sizes = Arrays.map((M: any) => (M.isMatrix ? M.size() : arraySize(M)));
+      const newSize = broadcastSizes(...sizes);
+      const numberOfArrays = Arrays.length;
 
-      const _get = firstArrayIsMatrix
-        ? (matrix: any, idx: number[]) => matrix.get(idx)
-        : get
+      const _get = firstArrayIsMatrix ? (matrix: any, idx: number[]) => matrix.get(idx) : get;
 
       const firstValues = Arrays.map((collection: any, i: number) => {
-        const firstIndex = sizes[i].map(() => 0)
-        return collection.isMatrix
-          ? collection.get(firstIndex)
-          : get(collection, firstIndex)
-      })
+        const firstIndex = sizes[i].map(() => 0);
+        return collection.isMatrix ? collection.get(firstIndex) : get(collection, firstIndex);
+      });
 
       const callbackArgCount = (typed as any).isTypedFunction(multiCallback)
         ? _getTypedCallbackArgCount(
@@ -143,15 +128,11 @@ export const createMap = /* #__PURE__ */ factory(
             newSize.map(() => 0),
             Arrays
           )
-        : _getCallbackArgCount(multiCallback, numberOfArrays)
+        : _getCallbackArgCount(multiCallback, numberOfArrays);
 
       if (callbackArgCount < 2) {
-        const callback = _getLimitedCallback(
-          callbackArgCount,
-          multiCallback,
-          null
-        )
-        return mapMultiple(Arrays, callback)
+        const callback = _getLimitedCallback(callbackArgCount, multiCallback, null);
+        return mapMultiple(Arrays, callback);
       }
 
       const broadcastedArrays = firstArrayIsMatrix
@@ -161,92 +142,74 @@ export const createMap = /* #__PURE__ */ factory(
               : (Arrays[0] as any).create(broadcastTo((M as any).valueOf(), newSize))
           )
         : Arrays.map((M: any) =>
-            M.isMatrix
-              ? broadcastTo(M.toArray(), newSize)
-              : broadcastTo(M, newSize)
-          )
+            M.isMatrix ? broadcastTo(M.toArray(), newSize) : broadcastTo(M, newSize)
+          );
 
-      const callback = _getLimitedCallback(
-        callbackArgCount,
-        multiCallback,
-        broadcastedArrays
-      )
+      const callback = _getLimitedCallback(callbackArgCount, multiCallback, broadcastedArrays);
 
       const broadcastedArraysCallback = (x: any, idx: number[]) =>
-        callback(
-          [
-            x,
-            ...broadcastedArrays.slice(1).map((array: any) => _get(array, idx))
-          ],
-          idx
-        )
+        callback([x, ...broadcastedArrays.slice(1).map((array: any) => _get(array, idx))], idx);
 
       if (firstArrayIsMatrix) {
-        return broadcastedArrays[0].map(broadcastedArraysCallback)
+        return broadcastedArrays[0].map(broadcastedArraysCallback);
       } else {
-        return _mapArray(broadcastedArrays[0], broadcastedArraysCallback)
+        return _mapArray(broadcastedArrays[0], broadcastedArraysCallback);
       }
     }
 
     function mapMultiple(collections: any[], callback: Function): any {
       // collections can be matrices or arrays
       // callback must be a function of the form (collections, [index])
-      const firstCollection = collections[0]
+      const firstCollection = collections[0];
       const arrays = collections.map((collection: any) =>
         collection.isMatrix ? collection.valueOf() : collection
-      )
+      );
       const sizes = collections.map((collection: any) =>
         collection.isMatrix ? collection.size() : arraySize(collection)
-      )
-      const finalSize = broadcastSizes(...sizes)
+      );
+      const finalSize = broadcastSizes(...sizes);
       // the offset means for each initial array, how much smaller is it than the final size
-      const offsets = sizes.map(
-        (size: number[]) => finalSize.length - size.length
-      )
-      const maxDepth = finalSize.length - 1
-      const callbackUsesIndex = callback.length > 1
-      const index: number[] | null = callbackUsesIndex ? [] : null
-      const resultsArray = iterate(arrays, 0)
+      const offsets = sizes.map((size: number[]) => finalSize.length - size.length);
+      const maxDepth = finalSize.length - 1;
+      const callbackUsesIndex = callback.length > 1;
+      const index: number[] | null = callbackUsesIndex ? [] : null;
+      const resultsArray = iterate(arrays, 0);
       if (firstCollection.isMatrix) {
-        const resultsMatrix = firstCollection.create()
-        resultsMatrix._data = resultsArray
-        resultsMatrix._size = finalSize
-        return resultsMatrix
+        const resultsMatrix = firstCollection.create();
+        resultsMatrix._data = resultsArray;
+        resultsMatrix._size = finalSize;
+        return resultsMatrix;
       } else {
-        return resultsArray
+        return resultsArray;
       }
 
       function iterate(arrays: any[], depth: number = 0): any[] {
         // each array can have different sizes
-        const currentDimensionSize = finalSize[depth]
-        const result = Array(currentDimensionSize)
+        const currentDimensionSize = finalSize[depth];
+        const result = Array(currentDimensionSize);
         if (depth < maxDepth) {
           for (let i = 0; i < currentDimensionSize; i++) {
-            if (index) index[depth] = i
+            if (index) index[depth] = i;
             // if there is an offset greater than the current dimension
             // pass the array, if the size of the array is 1 pass the first
             // element of the array
             result[i] = iterate(
               arrays.map((array: any, arrayIndex: number) =>
-                offsets[arrayIndex] > depth
-                  ? array
-                  : array.length === 1
-                    ? array[0]
-                    : array[i]
+                offsets[arrayIndex] > depth ? array : array.length === 1 ? array[0] : array[i]
               ),
               depth + 1
-            )
+            );
           }
         } else {
           for (let i = 0; i < currentDimensionSize; i++) {
-            if (index) index[depth] = i
+            if (index) index[depth] = i;
             result[i] = callback(
               arrays.map((a: any) => (a.length === 1 ? a[0] : a[i])),
               index ? index.slice() : undefined
-            )
+            );
           }
         }
-        return result
+        return result;
       }
     }
 
@@ -264,14 +227,13 @@ export const createMap = /* #__PURE__ */ factory(
     ): Function {
       switch (callbackArgCount) {
         case 0:
-          return (x: any) => multiCallback(...x)
+          return (x: any) => multiCallback(...x);
         case 1:
-          return (x: any, idx: number[]) => multiCallback(...x, idx)
+          return (x: any, idx: number[]) => multiCallback(...x, idx);
         case 2:
-          return (x: any, idx: number[]) =>
-            multiCallback(...x, idx, ...broadcastedArrays!)
+          return (x: any, idx: number[]) => multiCallback(...x, idx, ...broadcastedArrays!);
       }
-      throw new Error('Invalid callbackArgCount')
+      throw new Error('Invalid callbackArgCount');
     }
 
     /**
@@ -280,25 +242,22 @@ export const createMap = /* #__PURE__ */ factory(
      * @param {number} numberOfArrays - Number of arrays being processed
      * @returns {number} 0 = values only, 1 = values + index, 2 = values + index + arrays
      */
-    function _getCallbackArgCount(
-      callback: Function,
-      numberOfArrays: number
-    ): number {
-      const callbackStr = callback.toString()
+    function _getCallbackArgCount(callback: Function, numberOfArrays: number): number {
+      const callbackStr = callback.toString();
       // Check if the callback function uses `arguments`
-      if (/arguments/.test(callbackStr)) return 2
+      if (/arguments/.test(callbackStr)) return 2;
 
       // Extract the parameters of the callback function
-      const paramsStr = callbackStr.match(/\(.*?\)/)
+      const paramsStr = callbackStr.match(/\(.*?\)/);
       // Check if the callback function uses rest parameters
-      if (/\.\.\./.test(paramsStr as any)) return 2
+      if (/\.\.\./.test(paramsStr as any)) return 2;
       if (callback.length > numberOfArrays + 1) {
-        return 2
+        return 2;
       }
       if (callback.length === numberOfArrays + 1) {
-        return 1
+        return 1;
       }
-      return 0
+      return 0;
     }
 
     /**
@@ -317,16 +276,16 @@ export const createMap = /* #__PURE__ */ factory(
       arrays: any[]
     ): number {
       if (typed.resolve(callback as TypedFunction, [...values, idx, ...arrays]) !== null) {
-        return 2
+        return 2;
       }
       if (typed.resolve(callback as TypedFunction, [...values, idx]) !== null) {
-        return 1
+        return 1;
       }
       if (typed.resolve(callback as TypedFunction, values) !== null) {
-        return 0
+        return 0;
       }
       // this should never happen
-      return 0
+      return 0;
     }
     /**
      * Map for a multi dimensional array
@@ -336,8 +295,8 @@ export const createMap = /* #__PURE__ */ factory(
      * @private
      */
     function _mapArray(array: any[], callback: Function): any[] {
-      const fastCallback = optimizeCallback(callback, array, name)
-      return deepMap(array, fastCallback.fn as (value: any) => any, fastCallback.isUnary) as any[]
+      const fastCallback = optimizeCallback(callback, array, name);
+      return deepMap(array, fastCallback.fn as (value: any) => any, fastCallback.isUnary) as any[];
     }
   }
-)
+);

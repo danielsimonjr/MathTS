@@ -7,7 +7,7 @@ export const bigintDocs = {
   examples: [
     '123123123123123123 # a large number will lose digits',
     'bigint("123123123123123123")',
-    'bignumber(["1", "3", "5"])'
+    'bignumber(["1", "3", "5"])',
   ],
   seealso: [
     'boolean',
@@ -18,6 +18,6 @@ export const bigintDocs = {
     'index',
     'matrix',
     'string',
-    'unit'
-  ]
-}
+    'unit',
+  ],
+};

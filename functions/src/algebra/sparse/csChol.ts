@@ -1,55 +1,50 @@
 // Copyright (c) 2006-2024, Timothy A. Davis, All Rights Reserved.
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
-import { factory } from '../../utils/factory.js'
-import { csEreach } from './csEreach.js'
-import { createCsSymperm } from './csSymperm.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { factory } from '../../utils/factory.js';
+import { csEreach } from './csEreach.js';
+import { createCsSymperm } from './csSymperm.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Sparse matrix internal structure
 export interface SparseMatrixData {
-  _size: number[]
-  _values: any[]
-  _index: number[]
-  _ptr: number[]
+  _size: number[];
+  _values: any[];
+  _index: number[];
+  _ptr: number[];
 }
 
 interface SparseMatrixConstructor {
-  new (data: {
-    values: any[]
-    index: number[]
-    ptr: number[]
-    size: number[]
-  }): SparseMatrixData
+  new (data: { values: any[]; index: number[]; ptr: number[]; size: number[] }): SparseMatrixData;
 }
 
 interface CsCholDependencies {
-  divideScalar: TypedFunction
-  sqrt: TypedFunction
-  subtract: TypedFunction
-  multiply: TypedFunction
-  im: TypedFunction
-  re: TypedFunction
-  conj: TypedFunction
-  equal: TypedFunction
-  smallerEq: TypedFunction
-  SparseMatrix: SparseMatrixConstructor
+  divideScalar: TypedFunction;
+  sqrt: TypedFunction;
+  subtract: TypedFunction;
+  multiply: TypedFunction;
+  im: TypedFunction;
+  re: TypedFunction;
+  conj: TypedFunction;
+  equal: TypedFunction;
+  smallerEq: TypedFunction;
+  SparseMatrix: SparseMatrixConstructor;
 }
 
 // Symbolic analysis result from csSchol
 export interface SymbolicAnalysis {
-  parent: number[]
-  cp: number[]
-  pinv?: number[]
+  parent: number[];
+  cp: number[];
+  pinv?: number[];
 }
 
 // Cholesky factorization result
 export interface CholResult {
-  L: SparseMatrixData
-  P?: SparseMatrixData
+  L: SparseMatrixData;
+  P?: SparseMatrixData;
 }
 
-const name = 'csChol'
+const name = 'csChol';
 const dependencies = [
   'divideScalar',
   'sqrt',
@@ -60,8 +55,8 @@ const dependencies = [
   'conj',
   'equal',
   'smallerEq',
-  'SparseMatrix'
-] as const
+  'SparseMatrix',
+] as const;
 
 export const createCsChol = /* #__PURE__ */ factory(
   name,
@@ -76,9 +71,9 @@ export const createCsChol = /* #__PURE__ */ factory(
     conj,
     equal,
     smallerEq,
-    SparseMatrix
+    SparseMatrix,
   }: CsCholDependencies) => {
-    const csSymperm = createCsSymperm({ conj, SparseMatrix })
+    const csSymperm = createCsSymperm({ conj, SparseMatrix });
 
     /**
      * Computes the Cholesky factorization of matrix A. It computes L and P so
@@ -89,126 +84,123 @@ export const createCsChol = /* #__PURE__ */ factory(
      *
      * @return {Number}                 The numeric Cholesky factorization of A or null
      */
-    return function csChol(
-      m: SparseMatrixData | null,
-      s: SymbolicAnalysis
-    ): CholResult | null {
+    return function csChol(m: SparseMatrixData | null, s: SymbolicAnalysis): CholResult | null {
       // validate input
       if (!m) {
-        return null
+        return null;
       }
       // m arrays
-      const size = m._size
+      const size = m._size;
       // columns
-      const n = size[1]
+      const n = size[1];
       // symbolic analysis result
-      const parent = s.parent
-      const cp = s.cp
-      const pinv = s.pinv
+      const parent = s.parent;
+      const cp = s.cp;
+      const pinv = s.pinv;
       // L arrays
-      const lvalues: any[] = []
-      const lindex: number[] = []
-      const lptr: number[] = []
+      const lvalues: any[] = [];
+      const lindex: number[] = [];
+      const lptr: number[] = [];
       // L
       const L = new SparseMatrix({
         values: lvalues,
         index: lindex,
         ptr: lptr,
-        size: [n, n]
-      })
+        size: [n, n],
+      });
       // vars
-      const c: number[] = [] // (2 * n)
-      const x: any[] = [] // (n)
+      const c: number[] = []; // (2 * n)
+      const x: any[] = []; // (n)
       // compute C = P * A * P'
-      const cm = pinv ? csSymperm(m, pinv, true) : m
+      const cm = pinv ? csSymperm(m, pinv, true) : m;
       // C matrix arrays
-      const cvalues = cm._values
-      const cindex = cm._index
-      const cptr = cm._ptr
+      const cvalues = cm._values;
+      const cindex = cm._index;
+      const cptr = cm._ptr;
       // vars
-      let k: number, p: number
+      let k: number, p: number;
       // initialize variables
       for (k = 0; k < n; k++) {
-        lptr[k] = c[k] = cp[k]
+        lptr[k] = c[k] = cp[k];
       }
       // compute L(k,:) for L*L' = C
       for (k = 0; k < n; k++) {
         // nonzero pattern of L(k,:)
-        let top = csEreach(cm, k, parent, c)
+        let top = csEreach(cm, k, parent, c);
         // x (0:k) is now zero
-        x[k] = 0
+        x[k] = 0;
         // x = full(triu(C(:,k)))
         for (p = cptr[k]; p < cptr[k + 1]; p++) {
           if (cindex[p] <= k) {
-            x[cindex[p]] = cvalues[p]
+            x[cindex[p]] = cvalues[p];
           }
         }
         // d = C(k,k)
-        let d = x[k]
+        let d = x[k];
         // clear x for k+1st iteration
-        x[k] = 0
+        x[k] = 0;
         // solve L(0:k-1,0:k-1) * x = C(:,k)
         for (; top < n; top++) {
           // s[top..n-1] is pattern of L(k,:)
-          const i = s[top]
+          const i = s[top];
           // L(k,i) = x (i) / L(i,i)
-          const lki = divideScalar(x[i], lvalues[lptr[i]])
+          const lki = divideScalar(x[i], lvalues[lptr[i]]);
           // clear x for k+1st iteration
-          x[i] = 0
+          x[i] = 0;
           for (p = lptr[i] + 1; p < c[i]; p++) {
             // row
-            const r = lindex[p]
+            const r = lindex[p];
             // update x[r]
-            x[r] = subtract(x[r], multiply(lvalues[p], lki))
+            x[r] = subtract(x[r], multiply(lvalues[p], lki));
           }
           // d = d - L(k,i)*L(k,i)
-          d = subtract(d, multiply(lki, conj(lki)))
-          p = c[i]++
+          d = subtract(d, multiply(lki, conj(lki)));
+          p = c[i]++;
           // store L(k,i) in column i
-          lindex[p] = k
-          lvalues[p] = conj(lki)
+          lindex[p] = k;
+          lvalues[p] = conj(lki);
         }
         // compute L(k,k)
         if (smallerEq(re(d), 0) || !equal(im(d), 0)) {
           // not pos def
-          return null
+          return null;
         }
-        p = c[k]++
+        p = c[k]++;
         //  store L(k,k) = sqrt(d) in column k
-        lindex[p] = k
-        lvalues[p] = sqrt(d)
+        lindex[p] = k;
+        lvalues[p] = sqrt(d);
       }
       // finalize L
-      lptr[n] = cp[n]
+      lptr[n] = cp[n];
       // P matrix
-      let P
+      let P;
       // check we need to calculate P
       if (pinv) {
         // P arrays
-        const pvalues: number[] = []
-        const pindex: number[] = []
-        const pptr: number[] = []
+        const pvalues: number[] = [];
+        const pindex: number[] = [];
+        const pptr: number[] = [];
         // create P matrix
         for (p = 0; p < n; p++) {
           // initialize ptr (one value per column)
-          pptr[p] = p
+          pptr[p] = p;
           // index (apply permutation vector)
-          pindex.push(pinv[p])
+          pindex.push(pinv[p]);
           // value 1
-          pvalues.push(1)
+          pvalues.push(1);
         }
         // update ptr
-        pptr[n] = n
+        pptr[n] = n;
         // P
         P = new SparseMatrix({
           values: pvalues,
           index: pindex,
           ptr: pptr,
-          size: [n, n]
-        })
+          size: [n, n],
+        });
       }
       // return L & P
-      return { L, P }
-    }
+      return { L, P };
+    };
   }
-)
+);

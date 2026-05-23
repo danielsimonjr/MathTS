@@ -1,27 +1,27 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 
 // Type definitions for dotPow
 interface PowFunction extends TypedFunction {
-  signatures: Record<string, TypedFunction>
+  signatures: Record<string, TypedFunction>;
 }
 
 interface DotPowDependencies {
-  typed: TypedFunction
-  equalScalar: TypedFunction
-  matrix: TypedFunction
-  pow: PowFunction
-  DenseMatrix: unknown
-  concat: TypedFunction
-  SparseMatrix: unknown
+  typed: TypedFunction;
+  equalScalar: TypedFunction;
+  matrix: TypedFunction;
+  pow: PowFunction;
+  DenseMatrix: unknown;
+  concat: TypedFunction;
+  SparseMatrix: unknown;
 }
 
-const name = 'dotPow'
+const name = 'dotPow';
 const dependencies = [
   'typed',
   'equalScalar',
@@ -29,8 +29,8 @@ const dependencies = [
   'pow',
   'DenseMatrix',
   'concat',
-  'SparseMatrix'
-]
+  'SparseMatrix',
+];
 
 export const createDotPow = /* #__PURE__ */ factory(
   name,
@@ -42,27 +42,27 @@ export const createDotPow = /* #__PURE__ */ factory(
     pow,
     DenseMatrix,
     concat,
-    SparseMatrix
+    SparseMatrix,
   }: DotPowDependencies): TypedFunction => {
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix })
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
-    const powScalarSignatures: Record<string, TypedFunction> = {}
+    const powScalarSignatures: Record<string, TypedFunction> = {};
     for (const signature in pow.signatures) {
       if (Object.prototype.hasOwnProperty.call(pow.signatures, signature)) {
         if (!signature.includes('Matrix') && !signature.includes('Array')) {
-          powScalarSignatures[signature] = pow.signatures[signature]
+          powScalarSignatures[signature] = pow.signatures[signature];
         }
       }
     }
-    const powScalar = typed(powScalarSignatures) as TypedFunction
+    const powScalar = typed(powScalarSignatures) as TypedFunction;
 
     /**
      * Calculates the power of x to y element wise.
@@ -94,8 +94,8 @@ export const createDotPow = /* #__PURE__ */ factory(
         SS: matAlgo07xSSf as any,
         DS: matAlgo03xDSf as any,
         Ss: matAlgo11xS0s as any,
-        sS: matAlgo12xSfs as any
+        sS: matAlgo12xSfs as any,
       })
-    ) as TypedFunction
+    ) as TypedFunction;
   }
-)
+);

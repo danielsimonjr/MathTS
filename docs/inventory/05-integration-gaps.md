@@ -19,6 +19,7 @@ export const createAdd = factory(name, dependencies,
 ```
 
 Key characteristics:
+
 - **`factory()`** from `functions/src/utils/factory.ts` wraps the creator, attaching `.fn`, `.dependencies`, `.isFactory` metadata
 - **`typed`** is the mathjs typed-function instance (NOT `@danielsimonjr/mathts-core`'s `mathTyped`). It knows about `Matrix`, `DenseMatrix`, `SparseMatrix`, `BigNumber`, `Complex`, `Fraction`, `Unit`, `Index`, `Range`, etc.
 - **Dependencies are injected** by the `create()` bootstrap in `functions/src/core/create.ts`, which resolves them from the math instance namespace
@@ -40,10 +41,11 @@ export const add = mathTyped('add', {
   'Fraction, Fraction': (a, b) => a.add(b),
   'BigNumber, BigNumber': (a, b) => a.add(b),
   'Float64Array, Float64Array': async (a, b) => (await computePool.add(a, b)).result,
-})
+});
 ```
 
 Key characteristics:
+
 - Uses `@danielsimonjr/mathts-core`'s **`mathTyped`** singleton, which is a `typed-function` instance pre-configured with MathTS type tests for `Complex`, `Fraction`, `BigNumber`
 - **No dependency injection** -- imports are static ES modules
 - **Parallel-first**: Float64Array operations use `@danielsimonjr/mathts-parallel`'s ComputePool for worker-based parallelism
@@ -56,33 +58,33 @@ There are **5 fundamental disconnects** between the two systems:
 
 ### 1. Two Separate `typed-function` Instances
 
-| Aspect | Native (`@danielsimonjr/mathts-core`) | Synced (mathjs) |
-|--------|------------------------|-----------------|
-| Instance | `mathTyped` singleton | Created per `create()` call via `createTyped` factory |
-| Types known | `Complex`, `Fraction`, `BigNumber`, `number`, `bigint`, `boolean`, `string`, `Date`, `RegExp`, `null`, `undefined`, `Array`, `Float64Array`, `Object`, `Function` | All of the above plus `Matrix`, `DenseMatrix`, `SparseMatrix`, `Unit`, `Index`, `Range`, `ResultSet`, `Help`, `Chain`, `Node` (all AST types), `ObjectWrappingMap`, `PartitionedMap` |
-| Type detection | `instanceof` checks against `@danielsimonjr/mathts-core` classes | Duck-typing via constructor prototype properties (e.g., `x.constructor.prototype.isBigNumber`) |
-| Source | `core/src/typed/mathts-typed.ts` | `functions/src/core/function/typed.ts` |
+| Aspect         | Native (`@danielsimonjr/mathts-core`)                                                                                                                             | Synced (mathjs)                                                                                                                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Instance       | `mathTyped` singleton                                                                                                                                             | Created per `create()` call via `createTyped` factory                                                                                                                                |
+| Types known    | `Complex`, `Fraction`, `BigNumber`, `number`, `bigint`, `boolean`, `string`, `Date`, `RegExp`, `null`, `undefined`, `Array`, `Float64Array`, `Object`, `Function` | All of the above plus `Matrix`, `DenseMatrix`, `SparseMatrix`, `Unit`, `Index`, `Range`, `ResultSet`, `Help`, `Chain`, `Node` (all AST types), `ObjectWrappingMap`, `PartitionedMap` |
+| Type detection | `instanceof` checks against `@danielsimonjr/mathts-core` classes                                                                                                  | Duck-typing via constructor prototype properties (e.g., `x.constructor.prototype.isBigNumber`)                                                                                       |
+| Source         | `core/src/typed/mathts-typed.ts`                                                                                                                                  | `functions/src/core/function/typed.ts`                                                                                                                                               |
 
 **Impact**: The synced `createTyped` factory constructs its own typed-function instance with ~40 type tests using mathjs-style duck typing. The native `mathTyped` has ~15 type tests using `instanceof`. These two instances are **incompatible** -- a `@danielsimonjr/mathts-core` `Complex` will NOT be recognized by mathjs's `isComplex` check, and vice versa.
 
 ### 2. Two Separate Type Hierarchies
 
-| Type | Native (`@danielsimonjr/mathts-core`) | Synced (mathjs factories) |
-|------|------------------------|--------------------------|
-| Complex | `core/src/types/Complex.ts` -- custom class with `.add()`, `.mul()`, etc. | `functions/src/type/complex/Complex.ts` -- wraps `complex.js` npm package |
-| Fraction | `core/src/types/Fraction.ts` -- custom class | `functions/src/type/fraction/Fraction.ts` -- wraps `fraction.js` npm package |
-| BigNumber | `core/src/types/BigNumber.ts` -- custom class | `functions/src/type/bignumber/BigNumber.ts` -- wraps `decimal.js` npm package |
-| DenseMatrix | `matrix/src/types/DenseMatrix.ts` -- `Float64Array`-backed, row-major | `functions/src/type/matrix/DenseMatrix.ts` -- nested `Array`-backed, column-major compatible |
-| SparseMatrix | `matrix/src/types/SparseMatrix.ts` -- CSC format | `functions/src/type/matrix/SparseMatrix.ts` -- CSC format (similar API) |
+| Type         | Native (`@danielsimonjr/mathts-core`)                                     | Synced (mathjs factories)                                                                    |
+| ------------ | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Complex      | `core/src/types/Complex.ts` -- custom class with `.add()`, `.mul()`, etc. | `functions/src/type/complex/Complex.ts` -- wraps `complex.js` npm package                    |
+| Fraction     | `core/src/types/Fraction.ts` -- custom class                              | `functions/src/type/fraction/Fraction.ts` -- wraps `fraction.js` npm package                 |
+| BigNumber    | `core/src/types/BigNumber.ts` -- custom class                             | `functions/src/type/bignumber/BigNumber.ts` -- wraps `decimal.js` npm package                |
+| DenseMatrix  | `matrix/src/types/DenseMatrix.ts` -- `Float64Array`-backed, row-major     | `functions/src/type/matrix/DenseMatrix.ts` -- nested `Array`-backed, column-major compatible |
+| SparseMatrix | `matrix/src/types/SparseMatrix.ts` -- CSC format                          | `functions/src/type/matrix/SparseMatrix.ts` -- CSC format (similar API)                      |
 
 **Impact**: Every factory expects types with specific APIs (e.g., `Complex` must have `.re`, `.im` from `complex.js`; `DenseMatrix` must have `.storage()`, `._data`, `._size`). Native types have different internal structures and APIs.
 
 ### 3. Two Separate Factory Registries
 
-| Aspect | Native (`@danielsimonjr/mathts-core`) | Synced (mathjs) |
-|--------|------------------------|-----------------|
-| Registry | `FunctionRegistry` class in `core/src/factory/factory.ts` | Implicit -- `create()` in `functions/src/core/create.ts` attaches to `math` namespace |
-| Resolution | `registry.get(name)` with circular dependency detection | `factory(math)` -- each factory gets the full `math` scope object |
+| Aspect        | Native (`@danielsimonjr/mathts-core`)                                                            | Synced (mathjs)                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Registry      | `FunctionRegistry` class in `core/src/factory/factory.ts`                                        | Implicit -- `create()` in `functions/src/core/create.ts` attaches to `math` namespace       |
+| Resolution    | `registry.get(name)` with circular dependency detection                                          | `factory(math)` -- each factory gets the full `math` scope object                           |
 | Configuration | `MathTSConfig` (includes `preferredBackend`, `wasmThreshold`, `gpuThreshold`, `parallelEnabled`) | `ConfigOptions` (mathjs standard: `precision`, `matrix`, `number`, `epsilon`, `randomSeed`) |
 
 **Impact**: The native `FunctionRegistry` uses a different `FactoryFunction` interface (`{ name, dependencies, factory }`) than the mathjs `factory()` output (`{ fn, dependencies, isFactory: true, (scope) => result }`). They cannot interoperate without an adapter.
@@ -90,6 +92,7 @@ There are **5 fundamental disconnects** between the two systems:
 ### 4. Matrix Architecture Gap
 
 The native `@danielsimonjr/mathts-matrix` DenseMatrix:
+
 - Backed by `Float64Array` (row-major), numbers only
 - No `storage()` method -- uses `type` property (`'DenseMatrix'`)
 - No `._data` or `._size` internal properties
@@ -98,6 +101,7 @@ The native `@danielsimonjr/mathts-matrix` DenseMatrix:
 - API: `get(row, col)`, `set(row, col, val)`, `toArray()`, `forEach()`, `map()`
 
 The synced mathjs DenseMatrix expects:
+
 - Backed by nested `Array<any>` (supports mixed types)
 - `storage()` returns `'dense'`
 - `._data` and `._size` internal properties accessed by matrix algorithms
@@ -112,16 +116,16 @@ The synced mathjs DenseMatrix expects:
 
 Types/subsystems required by factories but not present in native MathTS:
 
-| Subsystem | Required by | Status |
-|-----------|-------------|--------|
-| **Unit** | 2 factories + conversions in typed, 4+ physics constant factories | Not implemented |
-| **Index** | 15+ factories (subset, column, row, etc.) | Not implemented (native uses `[row, col]`) |
-| **Range** | Index, expressions | Not implemented |
-| **Chain** | 2 factories, expression chaining | Not implemented |
-| **Node (AST)** | 48 expression factories (16 node types + parser + 25 transforms) | `expression/` package exists but build skipped, incomplete |
-| **ResultSet** | 1 factory | Not implemented |
-| **Help** | 1 factory | Not implemented |
-| **ObjectWrappingMap** | Internal to several factories | Not implemented natively |
+| Subsystem             | Required by                                                       | Status                                                     |
+| --------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Unit**              | 2 factories + conversions in typed, 4+ physics constant factories | Not implemented                                            |
+| **Index**             | 15+ factories (subset, column, row, etc.)                         | Not implemented (native uses `[row, col]`)                 |
+| **Range**             | Index, expressions                                                | Not implemented                                            |
+| **Chain**             | 2 factories, expression chaining                                  | Not implemented                                            |
+| **Node (AST)**        | 48 expression factories (16 node types + parser + 25 transforms)  | `expression/` package exists but build skipped, incomplete |
+| **ResultSet**         | 1 factory                                                         | Not implemented                                            |
+| **Help**              | 1 factory                                                         | Not implemented                                            |
+| **ObjectWrappingMap** | Internal to several factories                                     | Not implemented natively                                   |
 
 ## Factory Bootstrap Chain
 
@@ -199,30 +203,30 @@ Parser, evaluator, 16 node types, 25 transform functions, `Help`, `Chain`.
 
 ## Effort Estimate by Category
 
-| Category | Factories | Key Dependencies | Effort | Priority | Phase |
-|----------|-----------|-----------------|--------|----------|-------|
-| **Type bridge** (typed-function unification) | 0 (infrastructure) | typed-function, core types | **High** (2-3 weeks) | **P0** | Pre-req |
-| **Scalar arithmetic** (`addScalar`, `abs`, etc.) | 56 | typed only | **Low** (1 week after bridge) | **P1** | 1 |
-| **Matrix type bridge** (DenseMatrix/SparseMatrix compat) | 0 (infrastructure) | matrix package, 11 matrix utilities | **High** (3-4 weeks) | **P1** | Pre-req for Phase 2 |
-| **Arithmetic composites** (`add`, `multiply`, etc.) | ~40 | matrix, matAlgo*, equalScalar | **Medium** (2 weeks) | **P2** | 2 |
-| **Relational** (`equal`, `compare`, etc.) | 13 | matrix, typed | **Low** (1 week) | **P3** | 3 |
-| **Logical** (`and`, `or`, `xor`, `not`) | 5 | typed | **Low** (days) | **P3** | 3 |
-| **Bitwise** | 7 | typed | **Low** (days) | **P3** | 3 |
-| **Trigonometry** | 25 | typed, Complex, BigNumber | **Low** (1 week) | **P2** | 2 |
-| **Matrix operations** | 42 | Index, Range, matrix suite | **High** (3-4 weeks) | **P3** | 4 |
-| **Statistics** | 13 | matrix, arithmetic composites | **Medium** (1 week) | **P3** | 5 |
-| **Probability** | 14 | typed, arithmetic | **Medium** (1 week) | **P3** | 5 |
-| **Combinatorics** | 4 | typed | **Low** (days) | **P4** | 5 |
-| **Complex** | 4 | typed, Complex class | **Low** (days) | **P2** | 1 |
-| **String** | 5 | typed | **Low** (days) | **P4** | 1 |
-| **Special** | 2 | typed | **Low** (days) | **P4** | 1 |
-| **Set** | 10 | matrix, Index | **Medium** (1 week) | **P4** | 4 |
-| **Geometry** | 2 | matrix | **Low** (days) | **P4** | 4 |
-| **Signal** | 2 | typed, matrix | **Low** (days) | **P3** | 5 |
-| **Algebra** | 20 | Node, matrix, arithmetic | **High** (3-4 weeks) | **P5** | 6 |
-| **Unit** | 6+ | typed, config | **High** (3-4 weeks) | **P5** | 8 |
-| **Expression** | 48 | Node hierarchy, parser | **Very High** (6-8 weeks) | **P6** | 7 |
-| **Numeric** | 1 | typed | **Low** (days) | **P4** | 1 |
+| Category                                                 | Factories          | Key Dependencies                    | Effort                        | Priority | Phase               |
+| -------------------------------------------------------- | ------------------ | ----------------------------------- | ----------------------------- | -------- | ------------------- |
+| **Type bridge** (typed-function unification)             | 0 (infrastructure) | typed-function, core types          | **High** (2-3 weeks)          | **P0**   | Pre-req             |
+| **Scalar arithmetic** (`addScalar`, `abs`, etc.)         | 56                 | typed only                          | **Low** (1 week after bridge) | **P1**   | 1                   |
+| **Matrix type bridge** (DenseMatrix/SparseMatrix compat) | 0 (infrastructure) | matrix package, 11 matrix utilities | **High** (3-4 weeks)          | **P1**   | Pre-req for Phase 2 |
+| **Arithmetic composites** (`add`, `multiply`, etc.)      | ~40                | matrix, matAlgo\*, equalScalar      | **Medium** (2 weeks)          | **P2**   | 2                   |
+| **Relational** (`equal`, `compare`, etc.)                | 13                 | matrix, typed                       | **Low** (1 week)              | **P3**   | 3                   |
+| **Logical** (`and`, `or`, `xor`, `not`)                  | 5                  | typed                               | **Low** (days)                | **P3**   | 3                   |
+| **Bitwise**                                              | 7                  | typed                               | **Low** (days)                | **P3**   | 3                   |
+| **Trigonometry**                                         | 25                 | typed, Complex, BigNumber           | **Low** (1 week)              | **P2**   | 2                   |
+| **Matrix operations**                                    | 42                 | Index, Range, matrix suite          | **High** (3-4 weeks)          | **P3**   | 4                   |
+| **Statistics**                                           | 13                 | matrix, arithmetic composites       | **Medium** (1 week)           | **P3**   | 5                   |
+| **Probability**                                          | 14                 | typed, arithmetic                   | **Medium** (1 week)           | **P3**   | 5                   |
+| **Combinatorics**                                        | 4                  | typed                               | **Low** (days)                | **P4**   | 5                   |
+| **Complex**                                              | 4                  | typed, Complex class                | **Low** (days)                | **P2**   | 1                   |
+| **String**                                               | 5                  | typed                               | **Low** (days)                | **P4**   | 1                   |
+| **Special**                                              | 2                  | typed                               | **Low** (days)                | **P4**   | 1                   |
+| **Set**                                                  | 10                 | matrix, Index                       | **Medium** (1 week)           | **P4**   | 4                   |
+| **Geometry**                                             | 2                  | matrix                              | **Low** (days)                | **P4**   | 4                   |
+| **Signal**                                               | 2                  | typed, matrix                       | **Low** (days)                | **P3**   | 5                   |
+| **Algebra**                                              | 20                 | Node, matrix, arithmetic            | **High** (3-4 weeks)          | **P5**   | 6                   |
+| **Unit**                                                 | 6+                 | typed, config                       | **High** (3-4 weeks)          | **P5**   | 8                   |
+| **Expression**                                           | 48                 | Node hierarchy, parser              | **Very High** (6-8 weeks)     | **P6**   | 7                   |
+| **Numeric**                                              | 1                  | typed                               | **Low** (days)                | **P4**   | 1                   |
 
 ## Critical Path Summary
 
@@ -262,6 +266,7 @@ typed-function bridge (P0, 2-3 weeks)
 ### Option A: Adapter Pattern (Lower risk, higher ongoing cost)
 
 Create adapter layers that wrap native types to satisfy mathjs duck-typing expectations:
+
 - `ComplexAdapter` wraps `@danielsimonjr/mathts-core` `Complex` with `complex.js` API surface
 - `DenseMatrixAdapter` wraps `@danielsimonjr/mathts-matrix` `DenseMatrix` with `._data`, `.storage()`, etc.
 - Register adapters in the synced typed-function instance
@@ -271,6 +276,7 @@ Create adapter layers that wrap native types to satisfy mathjs duck-typing expec
 ### Option B: Converge Types (Higher risk, cleaner long-term)
 
 Replace native type implementations with the mathjs type classes (which use battle-tested `complex.js`, `fraction.js`, `decimal.js`), then add native extensions:
+
 - Use `complex.js` as the Complex implementation, add WASM-accelerated operations
 - Use mathjs `DenseMatrix` as the base, add backend delegation (JS/WASM/GPU) for large operations
 - Use mathjs `typed` factory as the typed-function instance, register parallel operation signatures

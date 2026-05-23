@@ -4,11 +4,7 @@
  */
 
 /** Linear-interpolation resampling of `x` from `oldRate` to `newRate`. */
-export function resample(
-  x: Float64Array,
-  newRate: f64,
-  oldRate: f64
-): Float64Array {
+export function resample(x: Float64Array, newRate: f64, oldRate: f64): Float64Array {
   if (x.length <= 0 || newRate <= 0.0 || oldRate <= 0.0) {
     return new Float64Array(0);
   }

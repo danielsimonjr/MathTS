@@ -47,24 +47,24 @@ The format is designed specifically for theoretical physics research, tensor mat
 ## Document Structure
 
 ```yaml
-version: "1.0"
+version: '1.0'
 
 metadata:
-  title: "Workbook Title"
-  author: "Author Name"
+  title: 'Workbook Title'
+  author: 'Author Name'
   created: 2025-12-05T20:00:00Z
   modified: 2025-12-05T21:30:00Z
-  description: "Description of the workbook"
+  description: 'Description of the workbook'
   tags: [tag1, tag2, tag3]
   license: MIT
 
 runtime:
-  engine: mathts           # mathts | python | julia
-  version: ">=1.0.0"
+  engine: mathts # mathts | python | julia
+  version: '>=1.0.0'
   packages:
-    - "@danielsimonjr/mathts-core"
-    - "@mathts/tensor"
-  execution: reactive      # reactive | sequential | manual
+    - '@danielsimonjr/mathts-core'
+    - '@mathts/tensor'
+  execution: reactive # reactive | sequential | manual
 
 cells:
   # Cell definitions...
@@ -78,24 +78,26 @@ outputs:
 ## Cell Types
 
 ### 1. Markdown Cell
+
 ```yaml
 - markdown: |
     # Heading
-    
+
     This is **bold** and $x^2$ is inline math.
-    
+
     $$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$
   id: intro
 ```
 
 ### 2. Code Cell (TypeScript)
+
 ```yaml
 - code: |
     import { Matrix } from '@danielsimonjr/mathts-core';
-    
+
     const A = Matrix.random(3, 3);
     const det = A.determinant();
-    
+
     console.log('det(A) =', det);
     export { A, det };
   id: matrix-calc
@@ -104,11 +106,12 @@ outputs:
 ```
 
 ### 3. Tensor Cell (Einstein Notation)
+
 ```yaml
 - tensor: |
     # Metric tensor
     g_{μν} = diag(-1, 1, 1, 1)
-    
+
     # Christoffel symbols
     Γ^α_{βγ} = (1/2) g^{αδ} (∂_β g_{δγ} + ∂_γ g_{βδ} - ∂_δ g_{βγ})
   id: metric-def
@@ -116,6 +119,7 @@ outputs:
 ```
 
 ### 4. Equation Cell (LaTeX)
+
 ```yaml
 - equation: |
     \frac{d^2 x^\mu}{d\tau^2} + \Gamma^\mu_{\alpha\beta} 
@@ -126,10 +130,11 @@ outputs:
 ```
 
 ### 5. Visualization Cell (Three.js / D3)
+
 ```yaml
 - visualization: |
     import { Scene, Mesh } from '@mathts/viz';
-    
+
     const scene = new Scene({ renderer: 'webgpu' });
     scene.add(Mesh.sphere({ radius: 1 }));
     scene.render();
@@ -140,6 +145,7 @@ outputs:
 ```
 
 ### 6. Data Cell
+
 ```yaml
 - data: |
     initial_conditions:
@@ -153,11 +159,12 @@ outputs:
 ```
 
 ### 7. Test Cell
+
 ```yaml
 - test: |
     import { assert, almostEqual } from '@mathts/test';
     import { det } from '#matrix-calc';
-    
+
     assert(det !== 0, 'Matrix should be invertible');
     almostEqual(det, expected, 1e-10);
   id: verify-calc
@@ -166,6 +173,7 @@ outputs:
 ```
 
 ### 8. Export Cell
+
 ```yaml
 - export: |
     exportFigure('#viz-3d', { format: 'pdf', dpi: 300 });
@@ -179,6 +187,7 @@ outputs:
 ## Dependency & Reactivity
 
 ### Explicit Dependencies
+
 ```yaml
 - code: |
     import { result } from '#previous-cell';
@@ -187,9 +196,11 @@ outputs:
 ```
 
 ### Auto-Detection
+
 The runtime analyzes `import ... from '#cell-id'` patterns to build the dependency graph automatically.
 
 ### Execution Modes
+
 - **reactive**: Cells re-run when dependencies change
 - **sequential**: Cells run top-to-bottom
 - **manual**: Cells only run when explicitly triggered
@@ -258,15 +269,15 @@ mtsw serve workbook.mtsw --port 3000
 
 ## Comparison with Existing Formats
 
-| Feature | `.mtsw` | ipyaml | Jupyter | Maple | Observable |
-|---------|---------|--------|---------|-------|------------|
-| Human-readable | ✅ YAML | ✅ YAML | ❌ JSON | ❌ Binary | ✅ JS |
-| Git-friendly | ✅ | ✅ | ❌ | ❌ | ✅ |
-| Reactive | ✅ | ❌ | ❌ | Partial | ✅ |
-| Tensor notation | ✅ Native | ❌ | ❌ | ✅ | ❌ |
-| 3D Visualization | ✅ Three.js | ❌ | Via libs | ✅ | Via libs |
-| WASM/GPU accel | ✅ | ❌ | ❌ | ❌ | ❌ |
-| TypeScript native | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Feature           | `.mtsw`     | ipyaml  | Jupyter  | Maple     | Observable |
+| ----------------- | ----------- | ------- | -------- | --------- | ---------- |
+| Human-readable    | ✅ YAML     | ✅ YAML | ❌ JSON  | ❌ Binary | ✅ JS      |
+| Git-friendly      | ✅          | ✅      | ❌       | ❌        | ✅         |
+| Reactive          | ✅          | ❌      | ❌       | Partial   | ✅         |
+| Tensor notation   | ✅ Native   | ❌      | ❌       | ✅        | ❌         |
+| 3D Visualization  | ✅ Three.js | ❌      | Via libs | ✅        | Via libs   |
+| WASM/GPU accel    | ✅          | ❌      | ❌       | ❌        | ❌         |
+| TypeScript native | ✅          | ❌      | ❌       | ❌        | ✅         |
 
 ---
 

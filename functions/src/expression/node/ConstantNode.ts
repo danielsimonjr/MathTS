@@ -1,24 +1,24 @@
-import { format } from '../../utils/string.js'
-import { typeOf } from '../../utils/is.js'
-import { escapeLatex } from '../../utils/latex.js'
-import { factory } from '../../utils/factory.js'
-import type { MathNode } from './Node.js'
+import { format } from '../../utils/string.js';
+import { typeOf } from '../../utils/is.js';
+import { escapeLatex } from '../../utils/latex.js';
+import { factory } from '../../utils/factory.js';
+import type { MathNode } from './Node.js';
 
-const name = 'ConstantNode'
-const dependencies = ['Node', 'isBounded']
+const name = 'ConstantNode';
+const dependencies = ['Node', 'isBounded'];
 
 export const createConstantNode = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({
     Node,
-    isBounded
+    isBounded,
   }: {
-    Node: new (...args: any[]) => MathNode
-    isBounded: (value: any) => boolean
+    Node: new (...args: any[]) => MathNode;
+    isBounded: (value: any) => boolean;
   }) => {
     class ConstantNode extends Node {
-      value: any
+      value: any;
 
       /**
        * A ConstantNode holds a constant value like a number or string.
@@ -33,15 +33,15 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @extends {Node}
        */
       constructor(value: any) {
-        super()
-        this.value = value
+        super();
+        this.value = value;
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isConstantNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -61,20 +61,18 @@ export const createConstantNode = /* #__PURE__ */ factory(
         _math: any,
         _argNames: Record<string, boolean>
       ): (scope: any, args: any, context: any) => any {
-        const value = this.value
+        const value = this.value;
 
         return function evalConstantNode() {
-          return value
-        }
+          return value;
+        };
       }
 
       /**
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        _callback: (child: MathNode, path: string, parent: MathNode) => void
-      ): void {
+      forEach(_callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         // nothing to do, we don't have any children
       }
 
@@ -84,10 +82,8 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node) : Node} callback
        * @returns {ConstantNode} Returns a clone of the node
        */
-      map(
-        _callback: (child: MathNode, path: string, parent: MathNode) => MathNode
-      ): ConstantNode {
-        return this.clone()
+      map(_callback: (child: MathNode, path: string, parent: MathNode) => MathNode): ConstantNode {
+        return this.clone();
       }
 
       /**
@@ -95,7 +91,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @return {ConstantNode}
        */
       clone(): ConstantNode {
-        return new ConstantNode(this.value)
+        return new ConstantNode(this.value);
       }
 
       /**
@@ -104,7 +100,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toString(options?: any): string {
-        return format(this.value, options)
+        return format(this.value, options);
       }
 
       /**
@@ -113,25 +109,25 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toHTML(options?: any): string {
-        const value = this._toString(options)
+        const value = this._toString(options);
 
         switch (typeOf(this.value)) {
           case 'number':
           case 'bigint':
           case 'BigNumber':
           case 'Fraction':
-            return '<span class="math-number">' + value + '</span>'
+            return '<span class="math-number">' + value + '</span>';
           case 'string':
-            return '<span class="math-string">' + value + '</span>'
+            return '<span class="math-string">' + value + '</span>';
           case 'boolean':
-            return '<span class="math-boolean">' + value + '</span>'
+            return '<span class="math-boolean">' + value + '</span>';
           case 'null':
-            return '<span class="math-null-symbol">' + value + '</span>'
+            return '<span class="math-null-symbol">' + value + '</span>';
           case 'undefined':
-            return '<span class="math-undefined">' + value + '</span>'
+            return '<span class="math-undefined">' + value + '</span>';
 
           default:
-            return '<span class="math-symbol">' + value + '</span>'
+            return '<span class="math-symbol">' + value + '</span>';
         }
       }
 
@@ -140,7 +136,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @returns {Object}
        */
       toJSON(): { mathjs: string; value: any } {
-        return { mathjs: name, value: this.value }
+        return { mathjs: name, value: this.value };
       }
 
       /**
@@ -151,7 +147,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @returns {ConstantNode}
        */
       static fromJSON(json: { value: any }): ConstantNode {
-        return new ConstantNode(json.value)
+        return new ConstantNode(json.value);
       }
 
       /**
@@ -160,41 +156,36 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toTex(options?: any): string {
-        const value = this._toString(options)
-        const type = typeOf(this.value)
+        const value = this._toString(options);
+        const type = typeOf(this.value);
 
         switch (type) {
           case 'string':
-            return '\\mathtt{' + escapeLatex(value) + '}'
+            return '\\mathtt{' + escapeLatex(value) + '}';
 
           case 'number':
           case 'BigNumber': {
             if (!isBounded(this.value)) {
-              return this.value.valueOf() < 0 ? '-\\infty' : '\\infty'
+              return this.value.valueOf() < 0 ? '-\\infty' : '\\infty';
             }
 
-            const index = value.toLowerCase().indexOf('e')
+            const index = value.toLowerCase().indexOf('e');
             if (index !== -1) {
-              return (
-                value.substring(0, index) +
-                '\\cdot10^{' +
-                value.substring(index + 1) +
-                '}'
-              )
+              return value.substring(0, index) + '\\cdot10^{' + value.substring(index + 1) + '}';
             }
 
-            return value
+            return value;
           }
 
           case 'bigint': {
-            return value.toString()
+            return value.toString();
           }
 
           case 'Fraction':
-            return this.value.toLatex()
+            return this.value.toLatex();
 
           default:
-            return value
+            return value;
         }
       }
     }
@@ -203,10 +194,10 @@ export const createConstantNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(ConstantNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return ConstantNode
+    return ConstantNode;
   },
   { isClass: true, isNode: true }
-)
+);

@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { compile } from '../compiler/compile.js'
-import type { CompiledExpression, Scope } from '../compiler/compile.js'
+import { compile } from '../compiler/compile.js';
+import type { CompiledExpression, Scope } from '../compiler/compile.js';
 
 /**
  * Options accepted by evaluate / compileExpression.
@@ -19,7 +19,7 @@ import type { CompiledExpression, Scope } from '../compiler/compile.js'
  *   Only opt out when the host is providing trusted, hand-authored input.
  */
 export interface EvaluateOptions {
-  unsafe?: boolean
+  unsafe?: boolean;
 }
 
 /**
@@ -36,8 +36,8 @@ const FORBIDDEN_FUNCTIONS: ReadonlySet<string> = new Set([
   'simplify',
   'derivative',
   'help',
-  'chain'
-])
+  'chain',
+]);
 
 /**
  * Walk an AST and throw on dangerous shapes.
@@ -51,30 +51,30 @@ const FORBIDDEN_FUNCTIONS: ReadonlySet<string> = new Set([
  */
 function validateAst(node: any): void {
   if (node === null || node === undefined || typeof node !== 'object') {
-    return
+    return;
   }
 
   // Hard rejections.
   if (node.isAssignmentNode === true) {
     throw new Error(
       'Security: assignment expressions are disabled. Pass `{ unsafe: true }` to opt out.'
-    )
+    );
   }
   if (node.isFunctionAssignmentNode === true) {
     throw new Error(
       'Security: function definitions (FunctionAssignmentNode) are disabled. ' +
         'Pass `{ unsafe: true }` to opt out.'
-    )
+    );
   }
   if (node.isFunctionNode === true) {
     const fnName: string | undefined =
       (node.fn && typeof node.fn === 'object' && node.fn.isSymbolNode && node.fn.name) ||
-      (typeof node.name === 'string' ? node.name : undefined)
+      (typeof node.name === 'string' ? node.name : undefined);
     if (fnName && FORBIDDEN_FUNCTIONS.has(fnName)) {
       throw new Error(
         `Security: call to forbidden function "${fnName}" is disabled. ` +
           'Pass `{ unsafe: true }` to opt out.'
-      )
+      );
     }
   }
 
@@ -82,11 +82,11 @@ function validateAst(node: any): void {
   // nodes don't, so fall back to walking known relational/structural fields.
   if (typeof node.forEach === 'function') {
     try {
-      node.forEach((child: any) => validateAst(child))
-      return
+      node.forEach((child: any) => validateAst(child));
+      return;
     } catch (err) {
       // Re-throw security errors; absorb forEach incompatibilities.
-      if (err instanceof Error && err.message.startsWith('Security:')) throw err
+      if (err instanceof Error && err.message.startsWith('Security:')) throw err;
     }
   }
 
@@ -103,17 +103,17 @@ function validateAst(node: any): void {
     'fn',
     'start',
     'end',
-    'step'
+    'step',
   ]) {
-    if (key in node) validateAst(node[key])
+    if (key in node) validateAst(node[key]);
   }
   for (const key of ['args', 'items', 'params']) {
-    const arr = node[key]
-    if (Array.isArray(arr)) for (const child of arr) validateAst(child)
+    const arr = node[key];
+    if (Array.isArray(arr)) for (const child of arr) validateAst(child);
   }
-  if (Array.isArray(node.blocks)) for (const b of node.blocks) validateAst(b && b.node)
+  if (Array.isArray(node.blocks)) for (const b of node.blocks) validateAst(b && b.node);
   if (node.properties && typeof node.properties === 'object') {
-    for (const k of Object.keys(node.properties)) validateAst(node.properties[k])
+    for (const k of Object.keys(node.properties)) validateAst(node.properties[k]);
   }
 }
 
@@ -133,10 +133,7 @@ function validateAst(node: any): void {
  * evaluate('x^2', { x: 3 }); // 9
  * ```
  */
-export function createEvaluate(
-  parseFn: (expr: string) => any,
-  mathScope: Record<string, any>
-) {
+export function createEvaluate(parseFn: (expr: string) => any, mathScope: Record<string, any>) {
   /**
    * Evaluate a math expression string.
    *
@@ -149,7 +146,7 @@ export function createEvaluate(
     expr: string,
     scope?: Record<string, any> | Scope,
     options?: EvaluateOptions
-  ): any
+  ): any;
   /**
    * Evaluate multiple expression strings.
    *
@@ -162,16 +159,16 @@ export function createEvaluate(
     exprs: string[],
     scope?: Record<string, any> | Scope,
     options?: EvaluateOptions
-  ): any[]
+  ): any[];
   function evaluate(
     exprOrExprs: string | string[],
     scope?: Record<string, any> | Scope,
     options?: EvaluateOptions
   ): any | any[] {
     if (Array.isArray(exprOrExprs)) {
-      return exprOrExprs.map(expr => evaluateOne(expr, scope, options))
+      return exprOrExprs.map((expr) => evaluateOne(expr, scope, options));
     }
-    return evaluateOne(exprOrExprs, scope, options)
+    return evaluateOne(exprOrExprs, scope, options);
   }
 
   function evaluateOne(
@@ -179,15 +176,15 @@ export function createEvaluate(
     scope?: Record<string, any> | Scope,
     options?: EvaluateOptions
   ): any {
-    const node = parseFn(expr)
+    const node = parseFn(expr);
     if (!options || options.unsafe !== true) {
-      validateAst(node)
+      validateAst(node);
     }
-    const compiled = compile(node, mathScope)
-    return compiled.evaluate(scope)
+    const compiled = compile(node, mathScope);
+    return compiled.evaluate(scope);
   }
 
-  return evaluate
+  return evaluate;
 }
 
 /**
@@ -212,9 +209,9 @@ export function compileExpression(
   expr: string,
   options?: EvaluateOptions
 ): CompiledExpression {
-  const node = parseFn(expr)
+  const node = parseFn(expr);
   if (!options || options.unsafe !== true) {
-    validateAst(node)
+    validateAst(node);
   }
-  return compile(node, mathScope)
+  return compile(node, mathScope);
 }

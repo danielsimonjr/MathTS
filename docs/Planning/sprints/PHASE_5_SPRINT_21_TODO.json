@@ -15,7 +15,11 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": ["Sprint 20"],
-      "files": ["functions/src/statistics/mean.ts", "functions/src/statistics/median.ts", "functions/src/statistics/mode.ts"]
+      "files": [
+        "functions/src/statistics/mean.ts",
+        "functions/src/statistics/median.ts",
+        "functions/src/statistics/mode.ts"
+      ]
     },
     {
       "id": 2,
@@ -35,7 +39,12 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": ["Sprint 20"],
-      "files": ["functions/src/statistics/min.ts", "functions/src/statistics/max.ts", "functions/src/statistics/sum.ts", "functions/src/statistics/prod.ts"]
+      "files": [
+        "functions/src/statistics/min.ts",
+        "functions/src/statistics/max.ts",
+        "functions/src/statistics/sum.ts",
+        "functions/src/statistics/prod.ts"
+      ]
     },
     {
       "id": 4,
@@ -65,7 +74,10 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4, 5],
-      "files": ["functions/tests/statistics/central.test.ts", "functions/tests/statistics/spread.test.ts"]
+      "files": [
+        "functions/tests/statistics/central.test.ts",
+        "functions/tests/statistics/spread.test.ts"
+      ]
     }
   ],
   "successCriteria": [
@@ -93,9 +105,7 @@
     "functions/tests/statistics/central.test.ts",
     "functions/tests/statistics/spread.test.ts"
   ],
-  "filesModified": [
-    "functions/src/index.ts"
-  ],
+  "filesModified": ["functions/src/index.ts"],
   "totalEstimatedHours": 24,
   "notes": "Sprint 21 implements core statistical functions. These are frequently used for data analysis and machine learning preprocessing."
 }

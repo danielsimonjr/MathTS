@@ -53,7 +53,7 @@ function _erf(x: f64): f64 {
   const t = 1.0 / (1.0 + 0.3275911 * a);
   const y =
     1.0 -
-    (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
+    ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
       t *
       Math.exp(-a * a);
   return sign * y;
@@ -86,9 +86,9 @@ function _lgamma(x: f64): f64 {
   x -= 1;
   const g = 7;
   const c = [
-    0.99999999999980993, 676.5203681218851, -1259.1392167224028,
-    771.32342877765313, -176.61502916214059, 12.507343278686905,
-    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7,
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
+    1.5056327351493116e-7,
   ];
   let sum = c[0];
   for (let i = 1; i < g + 2; i++) {
@@ -120,7 +120,7 @@ function _gammainc(a: f64, x: f64): f64 {
     return sum * Math.exp(-x + a * Math.log(x) - _lgamma(a));
   } else {
     const TINY = 1e-30;
-    let b0 = x + 1 - a;
+    const b0 = x + 1 - a;
     let c = 1.0 / TINY;
     let d = 1.0 / b0;
     let f = d;
@@ -159,14 +159,14 @@ function _betainc(x: f64, a: f64, b: f64): f64 {
   // Lentz's continued fraction
   const TINY = 1e-30;
   let c = 1.0;
-  let d = 1.0 - (a + b) * x / (a + 1);
+  let d = 1.0 - ((a + b) * x) / (a + 1);
   if (Math.abs(d) < TINY) d = TINY;
   d = 1.0 / d;
   let f = d;
 
   for (let m = 1; m <= 200; m++) {
     // Even step
-    let numerator = m * (b - m) * x / ((a + 2 * m - 1) * (a + 2 * m));
+    let numerator = (m * (b - m) * x) / ((a + 2 * m - 1) * (a + 2 * m));
     d = 1.0 + numerator * d;
     if (Math.abs(d) < TINY) d = TINY;
     c = 1.0 + numerator / c;
@@ -175,7 +175,7 @@ function _betainc(x: f64, a: f64, b: f64): f64 {
     f *= d * c;
 
     // Odd step
-    numerator = -(a + m) * (a + b + m) * x / ((a + 2 * m) * (a + 2 * m + 1));
+    numerator = (-(a + m) * (a + b + m) * x) / ((a + 2 * m) * (a + 2 * m + 1));
     d = 1.0 + numerator * d;
     if (Math.abs(d) < TINY) d = TINY;
     c = 1.0 + numerator / c;
@@ -266,13 +266,13 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
  */
 export function betaDist(alpha: f64, beta_: f64): Distribution {
   if (alpha <= 0 || beta_ <= 0) throw new Error('betaDist: alpha and beta must be positive');
-  const B = _gamma(alpha) * _gamma(beta_) / _gamma(alpha + beta_);
+  const B = (_gamma(alpha) * _gamma(beta_)) / _gamma(alpha + beta_);
   return {
     pdf: (x: f64) => {
       if (x < 0 || x > 1) return 0;
       if (x === 0 && alpha < 1) return Infinity;
       if (x === 1 && beta_ < 1) return Infinity;
-      return Math.pow(x, alpha - 1) * Math.pow(1 - x, beta_ - 1) / B;
+      return (Math.pow(x, alpha - 1) * Math.pow(1 - x, beta_ - 1)) / B;
     },
     cdf: (x: f64) => {
       if (x <= 0) return 0;
@@ -286,7 +286,7 @@ export function betaDist(alpha: f64, beta_: f64): Distribution {
       let x = alpha / (alpha + beta_); // initial guess = mean
       for (let i = 0; i < 100; i++) {
         const fx = _betainc(x, alpha, beta_) - p;
-        const dx = Math.pow(x, alpha - 1) * Math.pow(1 - x, beta_ - 1) / B;
+        const dx = (Math.pow(x, alpha - 1) * Math.pow(1 - x, beta_ - 1)) / B;
         if (dx === 0) break;
         const step = fx / dx;
         x = Math.max(1e-15, Math.min(1 - 1e-15, x - step));
@@ -350,7 +350,8 @@ function _normalRandom(): f64 {
  * d.mean // 5
  */
 export function binomialDist(n: number, p: f64): Distribution {
-  if (!Number.isInteger(n) || n < 0) throw new Error('binomialDist: n must be a non-negative integer');
+  if (!Number.isInteger(n) || n < 0)
+    throw new Error('binomialDist: n must be a non-negative integer');
   if (p < 0 || p > 1) throw new Error('binomialDist: p must be in [0, 1]');
   const q = 1 - p;
   return {
@@ -463,8 +464,8 @@ export function chiSquaredDist(k: number): Distribution {
 export function exponentialDist(lambda: f64 = 1): Distribution {
   if (lambda <= 0) throw new Error('exponentialDist: lambda must be positive');
   return {
-    pdf: (x: f64) => x < 0 ? 0 : lambda * Math.exp(-lambda * x),
-    cdf: (x: f64) => x < 0 ? 0 : 1 - Math.exp(-lambda * x),
+    pdf: (x: f64) => (x < 0 ? 0 : lambda * Math.exp(-lambda * x)),
+    cdf: (x: f64) => (x < 0 ? 0 : 1 - Math.exp(-lambda * x)),
     quantile: (p: f64) => {
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
@@ -503,23 +504,26 @@ export function fDist(d1: f64, d2: f64): Distribution {
       }
       const num = Math.pow(d1 * x, d1) * Math.pow(d2, d2);
       const den = Math.pow(d1 * x + d2, d1 + d2);
-      return Math.sqrt(num / den) / (x * Math.exp(_lgamma(d1 / 2) + _lgamma(d2 / 2) - _lgamma((d1 + d2) / 2)));
+      return (
+        Math.sqrt(num / den) /
+        (x * Math.exp(_lgamma(d1 / 2) + _lgamma(d2 / 2) - _lgamma((d1 + d2) / 2)))
+      );
     },
     cdf: (x: f64) => {
       if (x <= 0) return 0;
-      return _betainc(d1 * x / (d1 * x + d2), d1 / 2, d2 / 2);
+      return _betainc((d1 * x) / (d1 * x + d2), d1 / 2, d2 / 2);
     },
     quantile: (p: f64) => {
       // Newton's method
       if (p <= 0) return 0;
       if (p >= 1) return Infinity;
-      let x = d1 > 2 ? d2 * (d1 - 2) / (d1 * (d2 + 2)) : 1; // rough initial guess
+      let x = d1 > 2 ? (d2 * (d1 - 2)) / (d1 * (d2 + 2)) : 1; // rough initial guess
       // Prefer simply using bisection for robustness
       let lo = 0;
       let hi = 1000;
       for (let i = 0; i < 100; i++) {
         x = (lo + hi) / 2;
-        const cx = _betainc(d1 * x / (d1 * x + d2), d1 / 2, d2 / 2);
+        const cx = _betainc((d1 * x) / (d1 * x + d2), d1 / 2, d2 / 2);
         if (cx < p) lo = x;
         else hi = x;
         if (hi - lo < 1e-12) break;
@@ -531,7 +535,7 @@ export function fDist(d1: f64, d2: f64): Distribution {
     sample: () => {
       const x1 = _gammaRandom(d1 / 2) * 2;
       const x2 = _gammaRandom(d2 / 2) * 2;
-      return (x1 / d1) / (x2 / d2);
+      return x1 / d1 / (x2 / d2);
     },
   };
 }
@@ -562,7 +566,9 @@ export function gammaDist(shape: f64, rate: f64 = 1): Distribution {
         if (shape === 1) return rate;
         return 0;
       }
-      return Math.exp((shape - 1) * Math.log(x) - x * rate + shape * Math.log(rate) - _lgamma(shape));
+      return Math.exp(
+        (shape - 1) * Math.log(x) - x * rate + shape * Math.log(rate) - _lgamma(shape)
+      );
     },
     cdf: (x: f64) => {
       if (x <= 0) return 0;
@@ -621,7 +627,7 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
       if (p >= 1) return Infinity;
       return Math.exp(mu + sigma * Math.SQRT2 * _erfInv(2 * p - 1));
     },
-    mean: Math.exp(mu + sigma * sigma / 2),
+    mean: Math.exp(mu + (sigma * sigma) / 2),
     variance: (Math.exp(sigma * sigma) - 1) * Math.exp(2 * mu + sigma * sigma),
     sample: () => Math.exp(mu + sigma * _normalRandom()),
   };
@@ -699,7 +705,7 @@ export function tDist(nu: f64): Distribution {
   const coeff = Math.exp(_lgamma((nu + 1) / 2) - _lgamma(nu / 2)) / Math.sqrt(nu * Math.PI);
   return {
     pdf: (x: f64) => {
-      return coeff * Math.pow(1 + x * x / nu, -(nu + 1) / 2);
+      return coeff * Math.pow(1 + (x * x) / nu, -(nu + 1) / 2);
     },
     cdf: (x: f64) => {
       const t = nu / (nu + x * x);
@@ -753,7 +759,7 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
   if (b <= a) throw new Error('uniformDist: b must be greater than a');
   const range = b - a;
   return {
-    pdf: (x: f64) => (x >= a && x <= b) ? 1 / range : 0,
+    pdf: (x: f64) => (x >= a && x <= b ? 1 / range : 0),
     cdf: (x: f64) => {
       if (x < a) return 0;
       if (x > b) return 1;
@@ -765,7 +771,7 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
       return a + p * range;
     },
     mean: (a + b) / 2,
-    variance: range * range / 12,
+    variance: (range * range) / 12,
     sample: () => a + Math.random() * range,
   };
 }

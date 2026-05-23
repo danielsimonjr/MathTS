@@ -1,42 +1,39 @@
-import { factory } from '../utils/factory.js'
-import { randomMatrix } from './util/randomMatrix.js'
-import { createRng } from './util/seededRNG.js'
-import { isMatrix } from '../utils/is.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import { randomMatrix } from './util/randomMatrix.js';
+import { createRng } from './util/seededRNG.js';
+import { isMatrix } from '../utils/is.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for randomInt
 interface MatrixType {
-  create(data: unknown[], datatype?: string): MatrixType
-  valueOf(): number[]
+  create(data: unknown[], datatype?: string): MatrixType;
+  valueOf(): number[];
 }
 
 interface RandomIntDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  log2: (n: bigint) => number
-  on?: (
-    event: string,
-    callback: (curr: ConfigOptions, prev: ConfigOptions) => void
-  ) => void
+  typed: TypedFunction;
+  config: ConfigOptions;
+  log2: (n: bigint) => number;
+  on?: (event: string, callback: (curr: ConfigOptions, prev: ConfigOptions) => void) => void;
 }
 
-const name = 'randomInt'
-const dependencies = ['typed', 'config', 'log2', '?on']
+const name = 'randomInt';
+const dependencies = ['typed', 'config', 'log2', '?on'];
 
 export const createRandomInt = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, log2, on }: RandomIntDependencies) => {
     // seeded pseudo random number generator
-    let rng = createRng(config.randomSeed)
+    let rng = createRng(config.randomSeed);
 
     if (on) {
       on('config', function (curr: ConfigOptions, prev: ConfigOptions) {
         if (curr.randomSeed !== prev.randomSeed) {
-          rng = createRng(curr.randomSeed)
+          rng = createRng(curr.randomSeed);
         }
-      })
+      });
     }
 
     /**
@@ -74,54 +71,47 @@ export const createRandomInt = /* #__PURE__ */ factory(
       'number, number': (min: number, max: number) => _randomInt(min, max),
       bigint: (max: bigint) => _randomBigint(0n, max),
       'bigint, bigint': _randomBigint,
-      'Array | Matrix': (size: number[] | MatrixType) =>
-        _randomIntMatrix(size, 0, 1),
+      'Array | Matrix': (size: number[] | MatrixType) => _randomIntMatrix(size, 0, 1),
       'Array | Matrix, number': (size: number[] | MatrixType, max: number) =>
         _randomIntMatrix(size, 0, max),
-      'Array | Matrix, number, number': (
-        size: number[] | MatrixType,
-        min: number,
-        max: number
-      ) => _randomIntMatrix(size, min, max)
-    })
+      'Array | Matrix, number, number': (size: number[] | MatrixType, min: number, max: number) =>
+        _randomIntMatrix(size, min, max),
+    });
 
     function _randomIntMatrix(
       size: number[] | MatrixType,
       min: number,
       max: number
     ): unknown[] | MatrixType {
-      const res = randomMatrix(
-        (size as { valueOf(): number[] }).valueOf(),
-        () => _randomInt(min, max)
-      )
-      return isMatrix(size)
-        ? (size as MatrixType).create(res as unknown[], 'number')
-        : res
+      const res = randomMatrix((size as { valueOf(): number[] }).valueOf(), () =>
+        _randomInt(min, max)
+      );
+      return isMatrix(size) ? (size as MatrixType).create(res as unknown[], 'number') : res;
     }
 
     function _randomInt(min: number, max: number): number {
-      return Math.floor(min + rng() * (max - min))
+      return Math.floor(min + rng() * (max - min));
     }
 
     function _randomBigint(min: bigint, max: bigint): bigint {
-      const simpleCutoff = 2n ** 30n
-      const width = max - min // number of choices
+      const simpleCutoff = 2n ** 30n;
+      const width = max - min; // number of choices
       if (width <= simpleCutoff) {
         // do it with number type
-        return min + BigInt(_randomInt(0, Number(width)))
+        return min + BigInt(_randomInt(0, Number(width)));
       }
       // Too big to choose accurately that way. Instead, choose the correct
       // number of random bits to cover the width, and repeat until the
       // resulting number falls within the width
-      const bits = log2(width)
-      let picked = width
+      const bits = log2(width);
+      let picked = width;
       while (picked >= width) {
-        picked = 0n
+        picked = 0n;
         for (let i = 0; i < bits; ++i) {
-          picked = 2n * picked + (rng() < 0.5 ? 0n : 1n)
+          picked = 2n * picked + (rng() < 0.5 ? 0n : 1n);
         }
       }
-      return min + picked
+      return min + picked;
     }
   }
-)
+);

@@ -15,17 +15,18 @@
 ### Task 1: Fix method name mismatches in typed functions
 
 **Files:**
+
 - Modify: `functions/src/typed/arithmetic.ts`
 - Modify: `functions/src/typed/trigonometry.ts`
 - Test: `functions/tests/typed-arithmetic.test.ts`
 
 The typed functions call methods by wrong names. Fix these exact mismatches:
 
-| Called | Should Be | Type | File:Line Pattern |
-|--------|-----------|------|-------------------|
-| `.neg()` | `.negate()` | Complex, Fraction, BigNumber | arithmetic.ts |
-| `.reciprocal()` | `.inverse()` | Complex | trigonometry.ts |
-| `.div()` | `.divide()` | BigNumber | trigonometry.ts |
+| Called          | Should Be    | Type                         | File:Line Pattern |
+| --------------- | ------------ | ---------------------------- | ----------------- |
+| `.neg()`        | `.negate()`  | Complex, Fraction, BigNumber | arithmetic.ts     |
+| `.reciprocal()` | `.inverse()` | Complex                      | trigonometry.ts   |
+| `.div()`        | `.divide()`  | BigNumber                    | trigonometry.ts   |
 
 - [ ] **Step 1: Fix arithmetic.ts**
 
@@ -66,6 +67,7 @@ git commit -m "fix(functions): correct method names in typed functions (neg→ne
 ### Task 2: Fix factoriesAny.ts and factoriesNumber.ts import paths
 
 **Files:**
+
 - Modify: `functions/src/factoriesAny.ts`
 - Modify: `functions/src/factoriesNumber.ts`
 
@@ -74,6 +76,7 @@ These files were synced from mathjs but their import paths still use the mathjs 
 - [ ] **Step 1: Update sync script to handle `./function/` in standalone files**
 
 In `~/.claude/scripts/sync_mathjs_to_mathts.py`, the `function/` segment stripping regex is:
+
 ```python
 r"((?:from|import)\s+['\"](?:\.\./){2,})function/"
 ```
@@ -124,6 +127,7 @@ git commit -m "fix(functions): fix factory registry import paths (strip ./functi
 ### Task 3: Add BigNumber trig and transcendental methods
 
 **Files:**
+
 - Modify: `core/src/types/bignumber.ts`
 - Create: `core/tests/types/bignumber-math.test.ts`
 
@@ -236,6 +240,7 @@ sin(): BigNumber {
 ```
 
 For `log2`: `decimal.js` doesn't have a direct `log2`, so compute as `ln(x) / ln(2)`:
+
 ```typescript
 log2(): BigNumber {
   return new BigNumber(this.value.ln().div(new Decimal(2).ln()));
@@ -243,6 +248,7 @@ log2(): BigNumber {
 ```
 
 For `expm1`: `exp(x) - 1`:
+
 ```typescript
 expm1(): BigNumber {
   return new BigNumber(this.value.exp().minus(1));
@@ -250,6 +256,7 @@ expm1(): BigNumber {
 ```
 
 For `log1p`: `ln(1 + x)`:
+
 ```typescript
 log1p(): BigNumber {
   return new BigNumber(new Decimal(1).plus(this.value).ln());
@@ -258,6 +265,7 @@ log1p(): BigNumber {
 
 For hyperbolic functions, `decimal.js` has `sinh`, `cosh`, `tanh` built-in.
 For inverse hyperbolics, use formulas:
+
 ```typescript
 asinh(): BigNumber {
   // asinh(x) = ln(x + sqrt(x² + 1))
@@ -278,6 +286,7 @@ atanh(): BigNumber {
 ```
 
 For `mod`:
+
 ```typescript
 mod(other: BigNumber): BigNumber {
   return new BigNumber(this.value.mod(other.value));
@@ -285,6 +294,7 @@ mod(other: BigNumber): BigNumber {
 ```
 
 For `atan2`:
+
 ```typescript
 atan2(x: BigNumber): BigNumber {
   return new BigNumber(Decimal.atan2(this.value, x.value));
@@ -292,6 +302,7 @@ atan2(x: BigNumber): BigNumber {
 ```
 
 For `hypot`:
+
 ```typescript
 hypot(other: BigNumber): BigNumber {
   return new BigNumber(this.value.times(this.value).plus(other.value.times(other.value)).sqrt());
@@ -328,6 +339,7 @@ git commit -m "feat(core): add trig, hyperbolic, and transcendental methods to B
 ### Task 4: Create type compatibility bridge
 
 **Files:**
+
 - Create: `core/src/typed/type-bridge.ts`
 - Create: `core/tests/typed/type-bridge.test.ts`
 
@@ -409,6 +421,7 @@ git commit -m "feat(core): add type compatibility bridge for mathjs duck-typing"
 ### Task 5: Bridge the typed-function instances
 
 **Files:**
+
 - Create: `functions/src/typed/typed-bridge.ts`
 - Create: `functions/tests/typed-bridge.test.ts`
 
@@ -477,6 +490,7 @@ git commit -m "feat(functions): add typed-function bridge for native type dispat
 ### Task 6: Activate leaf factories (typed-only dependencies)
 
 **Files:**
+
 - Modify: `functions/src/index.ts`
 - Create: `functions/tests/factories-leaf.test.ts`
 
@@ -542,6 +556,7 @@ git commit -m "feat(functions): activate leaf factories (relational, logical, bi
 ### Task 7: Activate arithmetic factories
 
 **Files:**
+
 - Modify: `functions/src/factories/index.ts`
 - Create: `functions/tests/factories-arithmetic.test.ts`
 
@@ -580,6 +595,7 @@ Similar pattern. These depend on Matrix — will need DenseMatrix integration.
 ### Task 10: Connect expression parser to function registry
 
 **Files:**
+
 - Modify: `expression/src/compiler/` (create compiler)
 - Modify: `expression/src/evaluator/` (create evaluator)
 - Create: `expression/tests/parse-eval.test.ts`
@@ -609,6 +625,7 @@ The evaluator wraps the compiler with a default scope containing all registered 
 ### Task 11: Connect workbook executeCode to expression evaluator
 
 **Files:**
+
 - Modify: `workbook/src/executor.ts`
 - Modify: `workbook/tests/executor.test.ts`
 

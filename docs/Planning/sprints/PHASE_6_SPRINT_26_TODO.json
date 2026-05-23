@@ -45,7 +45,11 @@
       "estimatedHours": 4,
       "complexity": "Low",
       "dependencies": [3],
-      "files": ["docs/migration/examples/basic.md", "docs/migration/examples/matrix.md", "docs/migration/examples/complex.md"]
+      "files": [
+        "docs/migration/examples/basic.md",
+        "docs/migration/examples/matrix.md",
+        "docs/migration/examples/complex.md"
+      ]
     }
   ],
   "successCriteria": [
@@ -66,9 +70,7 @@
     "docs/migration/examples/matrix.md",
     "docs/migration/examples/complex.md"
   ],
-  "filesModified": [
-    "package.json"
-  ],
+  "filesModified": ["package.json"],
   "totalEstimatedHours": 22,
   "notes": "Sprint 26 provides migration path from mathjs. The compat layer helps users transition gradually."
 }

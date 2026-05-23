@@ -5,12 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  quickSelect,
-  medianSelect,
-  minSelect,
-  maxSelect,
-} from '../src/typed/statistics.js';
+import { quickSelect, medianSelect, minSelect, maxSelect } from '../src/typed/statistics.js';
 
 const EPSILON = 1e-10;
 

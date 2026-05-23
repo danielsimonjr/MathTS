@@ -9,9 +9,9 @@ wired to the full activated math scope in `@danielsimonjr/mathts-functions` (fun
 ```typescript
 import { evaluate } from '@danielsimonjr/mathts-functions';
 
-evaluate('sqrt(3^2 + 4^2)');         // 5
-evaluate('sin(pi / 4)');             // 0.7071067811865476
-evaluate('x^2 + 1', { x: 3 });      // 10
+evaluate('sqrt(3^2 + 4^2)'); // 5
+evaluate('sin(pi / 4)'); // 0.7071067811865476
+evaluate('x^2 + 1', { x: 3 }); // 10
 ```
 
 ## Key differences from mathjs

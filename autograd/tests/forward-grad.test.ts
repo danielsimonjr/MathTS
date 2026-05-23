@@ -50,10 +50,19 @@ describe('forwardGrad (forward-mode AD via dual numbers)', () => {
 
   it('rank-2 → rank-2 (linear map) returns the correct Jacobian shape', () => {
     // fn: 2x2 matrix → 2x2 matrix, fn(A) = 2*A. Jacobian shape: [2,2,2,2]; J[i,j,k,l] = 2 if (i,j)=(k,l) else 0.
-    const A = Tensor.fromNested([[1, 2], [3, 4]], [2, 2]);
+    const A = Tensor.fromNested(
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      [2, 2]
+    );
     const fn = (t: Tensor) => t.scale(2);
     const { value, jacobian } = forwardGrad(fn, A);
-    expect(value.toNested()).toEqual([[2, 4], [6, 8]]);
+    expect(value.toNested()).toEqual([
+      [2, 4],
+      [6, 8],
+    ]);
     expect(jacobian.shape).toEqual([2, 2, 2, 2]);
     const J = jacobian.toNested() as number[][][][];
     expect(J[0][0][0][0]).toBeCloseTo(2, 12);

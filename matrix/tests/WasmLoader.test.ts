@@ -255,9 +255,7 @@ describe('WasmLoader — load() with missing WASM artifact', () => {
   });
 
   it('rejects with an error when given a non-existent path', async () => {
-    await expect(
-      loader.load('/nonexistent/path/to/missing.wasm')
-    ).rejects.toThrow();
+    await expect(loader.load('/nonexistent/path/to/missing.wasm')).rejects.toThrow();
   });
 
   it('isLoaded() remains false after a failed load', async () => {

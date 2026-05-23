@@ -1,25 +1,25 @@
-import { factory } from '../../../utils/factory.js'
-import { deepMap } from '../../../utils/collection.js'
-import type { TypedFunction } from '../../../core/function/typed.js'
+import { factory } from '../../../utils/factory.js';
+import { deepMap } from '../../../utils/collection.js';
+import type { TypedFunction } from '../../../core/function/typed.js';
 import type {
   Complex,
   ComplexConstructor,
   ComplexJSON,
   PolarInput,
-  AbsArgInput
-} from '../Complex.js'
-import type { MathCollection } from '../../../types.js'
+  AbsArgInput,
+} from '../Complex.js';
+import type { MathCollection } from '../../../types.js';
 
 /**
  * Dependencies for createComplex
  */
 interface ComplexDependencies {
-  typed: TypedFunction
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  Complex: ComplexConstructor;
 }
 
-const name = 'complex'
-const dependencies = ['typed', 'Complex'] as const
+const name = 'complex';
+const dependencies = ['typed', 'Complex'] as const;
 
 export const createComplex = /* #__PURE__ */ factory(
   name,
@@ -65,15 +65,15 @@ export const createComplex = /* #__PURE__ */ factory(
      */
     return typed('complex', {
       '': function (): Complex {
-        return Complex.ZERO
+        return Complex.ZERO;
       },
 
       number: function (x: number): Complex {
-        return new Complex(x, 0)
+        return new Complex(x, 0);
       },
 
       'number, number': function (re: number, im: number): Complex {
-        return new Complex(re, im)
+        return new Complex(re, im);
       },
 
       // TODO: this signature should be redundant
@@ -81,47 +81,44 @@ export const createComplex = /* #__PURE__ */ factory(
         re: { toNumber: () => number },
         im: { toNumber: () => number }
       ): Complex {
-        return new Complex(re.toNumber(), im.toNumber())
+        return new Complex(re.toNumber(), im.toNumber());
       },
 
       Fraction: function (x: { valueOf: () => number }): Complex {
-        return new Complex(x.valueOf(), 0)
+        return new Complex(x.valueOf(), 0);
       },
 
       Complex: function (x: Complex): Complex {
-        return x.clone() as Complex
+        return x.clone() as Complex;
       },
 
       string: function (x: string): Complex {
-        return Complex(x) // for example '2 + 3i'
+        return Complex(x); // for example '2 + 3i'
       },
 
       null: function (_x: null): Complex {
-        return Complex(0)
+        return Complex(0);
       },
 
       Object: function (x: ComplexJSON | PolarInput | AbsArgInput): Complex {
         if ('re' in x && 'im' in x) {
-          return new Complex(x.re, x.im)
+          return new Complex(x.re, x.im);
         }
 
         if (('r' in x && 'phi' in x) || ('abs' in x && 'arg' in x)) {
-          return new Complex(x as PolarInput | AbsArgInput)
+          return new Complex(x as PolarInput | AbsArgInput);
         }
 
         throw new Error(
           'Expected object with properties (re and im) or (r and phi) or (abs and arg)'
-        )
+        );
       },
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: MathCollection): MathCollection =>
-            deepMap(
-              x as unknown[],
-              self as (item: unknown) => unknown
-            ) as unknown as MathCollection
-      )
-    })
+            deepMap(x as unknown[], self as (item: unknown) => unknown) as unknown as MathCollection
+      ),
+    });
   }
-)
+);

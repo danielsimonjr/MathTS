@@ -1,46 +1,39 @@
-import { isNode, isSymbolNode } from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
-import { getPrecedence } from '../operators.js'
+import { isNode, isSymbolNode } from '../../utils/is.js';
+import { factory } from '../../utils/factory.js';
+import { getPrecedence } from '../operators.js';
 
 // Type definitions
 interface Node {
-  _compile: (
-    math: Record<string, any>,
-    argNames: Record<string, boolean>
-  ) => CompileFunction
-  _ifNode: (node: any) => Node
-  filter: (callback: (node: Node) => boolean) => Node[]
-  toString: (options?: StringOptions) => string
-  toHTML: (options?: StringOptions) => string
-  toTex: (options?: StringOptions) => string
-  isSymbolNode?: boolean
-  name?: string
+  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
+  _ifNode: (node: any) => Node;
+  filter: (callback: (node: Node) => boolean) => Node[];
+  toString: (options?: StringOptions) => string;
+  toHTML: (options?: StringOptions) => string;
+  toTex: (options?: StringOptions) => string;
+  isSymbolNode?: boolean;
+  name?: string;
 }
 
-type CompileFunction = (
-  scope: any,
-  args: Record<string, any>,
-  context: any
-) => any
+type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
 
 interface StringOptions {
-  parenthesis?: 'keep' | 'auto' | 'all'
-  implicit?: 'hide' | 'show'
-  [key: string]: any
+  parenthesis?: 'keep' | 'auto' | 'all';
+  implicit?: 'hide' | 'show';
+  [key: string]: any;
 }
 
 interface Parens {
-  start: boolean
-  step?: boolean
-  end: boolean
+  start: boolean;
+  step?: boolean;
+  end: boolean;
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node
+  Node: new (...args: any[]) => Node;
 }
 
-const name = 'RangeNode'
-const dependencies = ['Node']
+const name = 'RangeNode';
+const dependencies = ['Node'];
 
 export const createRangeNode = /* #__PURE__ */ factory(
   name,
@@ -59,53 +52,29 @@ export const createRangeNode = /* #__PURE__ */ factory(
       parenthesis: string,
       implicit: string
     ): Parens {
-      const precedence = getPrecedence(
-        node as any,
-        parenthesis,
-        implicit,
-        undefined
-      )
-      const parens: Parens = { start: false, end: false }
+      const precedence = getPrecedence(node as any, parenthesis, implicit, undefined);
+      const parens: Parens = { start: false, end: false };
 
-      const startPrecedence = getPrecedence(
-        node.start as any,
-        parenthesis,
-        implicit,
-        undefined
-      )
+      const startPrecedence = getPrecedence(node.start as any, parenthesis, implicit, undefined);
       parens.start =
-        (startPrecedence !== null && startPrecedence <= precedence) ||
-        parenthesis === 'all'
+        (startPrecedence !== null && startPrecedence <= precedence) || parenthesis === 'all';
 
       if (node.step) {
-        const stepPrecedence = getPrecedence(
-          node.step as any,
-          parenthesis,
-          implicit,
-          undefined
-        )
+        const stepPrecedence = getPrecedence(node.step as any, parenthesis, implicit, undefined);
         parens.step =
-          (stepPrecedence !== null && stepPrecedence <= precedence) ||
-          parenthesis === 'all'
+          (stepPrecedence !== null && stepPrecedence <= precedence) || parenthesis === 'all';
       }
 
-      const endPrecedence = getPrecedence(
-        node.end as any,
-        parenthesis,
-        implicit,
-        undefined
-      )
-      parens.end =
-        (endPrecedence !== null && endPrecedence <= precedence) ||
-        parenthesis === 'all'
+      const endPrecedence = getPrecedence(node.end as any, parenthesis, implicit, undefined);
+      parens.end = (endPrecedence !== null && endPrecedence <= precedence) || parenthesis === 'all';
 
-      return parens
+      return parens;
     }
 
     class RangeNode extends Node {
-      start: Node
-      end: Node
-      step: Node | null
+      start: Node;
+      end: Node;
+      step: Node | null;
 
       /**
        * @constructor RangeNode
@@ -116,23 +85,23 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @param {Node} [step] optional step
        */
       constructor(start: Node, end: Node, step?: Node) {
-        super()
+        super();
         // validate inputs
-        if (!isNode(start)) throw new TypeError('Node expected')
-        if (!isNode(end)) throw new TypeError('Node expected')
-        if (step && !isNode(step)) throw new TypeError('Node expected')
-        if (arguments.length > 3) throw new Error('Too many arguments')
+        if (!isNode(start)) throw new TypeError('Node expected');
+        if (!isNode(end)) throw new TypeError('Node expected');
+        if (step && !isNode(step)) throw new TypeError('Node expected');
+        if (arguments.length > 3) throw new Error('Too many arguments');
 
-        this.start = start // included lower-bound
-        this.end = end // included upper-bound
-        this.step = step || null // optional step
+        this.start = start; // included lower-bound
+        this.end = end; // included upper-bound
+        this.step = step || null; // optional step
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isRangeNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -143,10 +112,10 @@ export const createRangeNode = /* #__PURE__ */ factory(
       needsEnd(): boolean {
         // find all `end` symbols in this RangeNode
         const endSymbols = this.filter(function (node: Node): boolean {
-          return isSymbolNode(node) && node.name === 'end'
-        })
+          return isSymbolNode(node) && node.name === 'end';
+        });
 
-        return endSymbols.length > 0
+        return endSymbols.length > 0;
       }
 
       /**
@@ -163,39 +132,25 @@ export const createRangeNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error: method signature matches MathNode interface
-      _compile(
-        math: Record<string, any>,
-        argNames: Record<string, boolean>
-      ): CompileFunction {
-        const range = math.range
-        const evalStart = this.start._compile(math, argNames)
-        const evalEnd = this.end._compile(math, argNames)
+      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+        const range = math.range;
+        const evalStart = this.start._compile(math, argNames);
+        const evalEnd = this.end._compile(math, argNames);
 
         if (this.step) {
-          const evalStep = this.step._compile(math, argNames)
+          const evalStep = this.step._compile(math, argNames);
 
-          return function evalRangeNode(
-            scope: any,
-            args: Record<string, any>,
-            context: any
-          ): any {
+          return function evalRangeNode(scope: any, args: Record<string, any>, context: any): any {
             return range(
               evalStart(scope, args, context),
               evalEnd(scope, args, context),
               evalStep(scope, args, context)
-            )
-          }
+            );
+          };
         } else {
-          return function evalRangeNode(
-            scope: any,
-            args: Record<string, any>,
-            context: any
-          ): any {
-            return range(
-              evalStart(scope, args, context),
-              evalEnd(scope, args, context)
-            )
-          }
+          return function evalRangeNode(scope: any, args: Record<string, any>, context: any): any {
+            return range(evalStart(scope, args, context), evalEnd(scope, args, context));
+          };
         }
       }
 
@@ -203,13 +158,11 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: Node, path: string, parent: RangeNode) => void
-      ): void {
-        callback(this.start, 'start', this)
-        callback(this.end, 'end', this)
+      forEach(callback: (child: Node, path: string, parent: RangeNode) => void): void {
+        callback(this.start, 'start', this);
+        callback(this.end, 'end', this);
         if (this.step) {
-          callback(this.step, 'step', this)
+          callback(this.step, 'step', this);
         }
       }
 
@@ -219,16 +172,12 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node): Node} callback
        * @returns {RangeNode} Returns a transformed copy of the node
        */
-      map(
-        callback: (child: Node, path: string, parent: RangeNode) => Node
-      ): RangeNode {
+      map(callback: (child: Node, path: string, parent: RangeNode) => Node): RangeNode {
         return new RangeNode(
           this._ifNode(callback(this.start, 'start', this)),
           this._ifNode(callback(this.end, 'end', this)),
-          this.step
-            ? this._ifNode(callback(this.step, 'step', this))
-            : undefined
-        )
+          this.step ? this._ifNode(callback(this.step, 'step', this)) : undefined
+        );
       }
 
       /**
@@ -236,7 +185,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @return {RangeNode}
        */
       clone(): RangeNode {
-        return new RangeNode(this.start, this.end, this.step || undefined)
+        return new RangeNode(this.start, this.end, this.step || undefined);
       }
 
       /**
@@ -245,38 +194,37 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toString(options?: StringOptions): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         const parens = calculateNecessaryParentheses(
           this,
           parenthesis,
           (options && options.implicit) || 'hide'
-        )
+        );
 
         // format string as start:step:stop
-        let str: string
+        let str: string;
 
-        let start = this.start.toString(options)
+        let start = this.start.toString(options);
         if (parens.start) {
-          start = '(' + start + ')'
+          start = '(' + start + ')';
         }
-        str = start
+        str = start;
 
         if (this.step) {
-          let step = this.step.toString(options)
+          let step = this.step.toString(options);
           if (parens.step) {
-            step = '(' + step + ')'
+            step = '(' + step + ')';
           }
-          str += ':' + step
+          str += ':' + step;
         }
 
-        let end = this.end.toString(options)
+        let end = this.end.toString(options);
         if (parens.end) {
-          end = '(' + end + ')'
+          end = '(' + end + ')';
         }
-        str += ':' + end
+        str += ':' + end;
 
-        return str
+        return str;
       }
 
       /**
@@ -288,8 +236,8 @@ export const createRangeNode = /* #__PURE__ */ factory(
           mathjs: name,
           start: this.start,
           end: this.end,
-          step: this.step
-        }
+          step: this.step,
+        };
       }
 
       /**
@@ -300,12 +248,8 @@ export const createRangeNode = /* #__PURE__ */ factory(
        *     where mathjs is optional
        * @returns {RangeNode}
        */
-      static fromJSON(json: {
-        start: Node
-        end: Node
-        step?: Node
-      }): RangeNode {
-        return new RangeNode(json.start, json.end, json.step)
+      static fromJSON(json: { start: Node; end: Node; step?: Node }): RangeNode {
+        return new RangeNode(json.start, json.end, json.step);
       }
 
       /**
@@ -314,48 +258,46 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toHTML(options?: StringOptions): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         const parens = calculateNecessaryParentheses(
           this,
           parenthesis,
           (options && options.implicit) || 'hide'
-        )
+        );
 
         // format string as start:step:stop
-        let str: string
+        let str: string;
 
-        let start = this.start.toHTML(options)
+        let start = this.start.toHTML(options);
         if (parens.start) {
           start =
             '<span class="math-parenthesis math-round-parenthesis">(</span>' +
             start +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>'
+            '<span class="math-parenthesis math-round-parenthesis">)</span>';
         }
-        str = start
+        str = start;
 
         if (this.step) {
-          let step = this.step.toHTML(options)
+          let step = this.step.toHTML(options);
           if (parens.step) {
             step =
               '<span class="math-parenthesis math-round-parenthesis">(</span>' +
               step +
-              '<span class="math-parenthesis math-round-parenthesis">)</span>'
+              '<span class="math-parenthesis math-round-parenthesis">)</span>';
           }
-          str +=
-            '<span class="math-operator math-range-operator">:</span>' + step
+          str += '<span class="math-operator math-range-operator">:</span>' + step;
         }
 
-        let end = this.end.toHTML(options)
+        let end = this.end.toHTML(options);
         if (parens.end) {
           end =
             '<span class="math-parenthesis math-round-parenthesis">(</span>' +
             end +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>'
+            '<span class="math-parenthesis math-round-parenthesis">)</span>';
         }
-        str += '<span class="math-operator math-range-operator">:</span>' + end
+        str += '<span class="math-operator math-range-operator">:</span>' + end;
 
-        return str
+        return str;
       }
 
       /**
@@ -364,34 +306,33 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @return {string} str
        */
       _toTex(options?: StringOptions): string {
-        const parenthesis =
-          options && options.parenthesis ? options.parenthesis : 'keep'
+        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
         const parens = calculateNecessaryParentheses(
           this,
           parenthesis,
           (options && options.implicit) || 'hide'
-        )
+        );
 
-        let str = this.start.toTex(options)
+        let str = this.start.toTex(options);
         if (parens.start) {
-          str = `\\left(${str}\\right)`
+          str = `\\left(${str}\\right)`;
         }
 
         if (this.step) {
-          let step = this.step.toTex(options)
+          let step = this.step.toTex(options);
           if (parens.step) {
-            step = `\\left(${step}\\right)`
+            step = `\\left(${step}\\right)`;
           }
-          str += ':' + step
+          str += ':' + step;
         }
 
-        let end = this.end.toTex(options)
+        let end = this.end.toTex(options);
         if (parens.end) {
-          end = `\\left(${end}\\right)`
+          end = `\\left(${end}\\right)`;
         }
-        str += ':' + end
+        str += ':' + end;
 
-        return str
+        return str;
       }
     }
 
@@ -399,10 +340,10 @@ export const createRangeNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(RangeNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return RangeNode
+    return RangeNode;
   },
   { isClass: true, isNode: true }
-)
+);

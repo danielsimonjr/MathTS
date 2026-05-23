@@ -1,34 +1,34 @@
-import { factory } from '../../../utils/factory.js'
-import { deepMap } from '../../../utils/collection.js'
-import type { TypedFunction } from '../../../core/function/typed.js'
-import type { MathCollection } from '../../../types.js'
+import { factory } from '../../../utils/factory.js';
+import { deepMap } from '../../../utils/collection.js';
+import type { TypedFunction } from '../../../core/function/typed.js';
+import type { MathCollection } from '../../../types.js';
 
 /**
  * Unit class interface
  */
 interface UnitClass {
-  new (value: number | null, unit?: string): UnitInstance
-  parse(str: string, options?: { allowNoUnits?: boolean }): UnitInstance
-  isValuelessUnit(str: string): boolean
+  new (value: number | null, unit?: string): UnitInstance;
+  parse(str: string, options?: { allowNoUnits?: boolean }): UnitInstance;
+  isValuelessUnit(str: string): boolean;
 }
 
 /**
  * Unit instance interface
  */
 interface UnitInstance {
-  clone(): UnitInstance
+  clone(): UnitInstance;
 }
 
 /**
  * Dependencies for createUnitFunction
  */
 interface UnitFunctionDependencies {
-  typed: TypedFunction
-  Unit: UnitClass
+  typed: TypedFunction;
+  Unit: UnitClass;
 }
 
-const name = 'unit'
-const dependencies = ['typed', 'Unit'] as const
+const name = 'unit';
+const dependencies = ['typed', 'Unit'] as const;
 
 // This function is named createUnitFunction to prevent a naming conflict with createUnit
 export const createUnitFunction = /* #__PURE__ */ factory(
@@ -64,37 +64,34 @@ export const createUnitFunction = /* #__PURE__ */ factory(
 
     return typed(name, {
       Unit: function (x: UnitInstance): UnitInstance {
-        return x.clone()
+        return x.clone();
       },
 
       string: function (x: string): UnitInstance {
         if (Unit.isValuelessUnit(x)) {
-          return new Unit(null, x) // a pure unit
+          return new Unit(null, x); // a pure unit
         }
 
-        return Unit.parse(x, { allowNoUnits: true }) // a unit with value, like '5cm'
+        return Unit.parse(x, { allowNoUnits: true }); // a unit with value, like '5cm'
       },
 
       'number | BigNumber | Fraction | Complex, string | Unit': function (
         value: number,
         unit: string | UnitInstance
       ): UnitInstance {
-        return new Unit(value, unit as string)
+        return new Unit(value, unit as string);
       },
 
       'number | BigNumber | Fraction': function (value: number): UnitInstance {
         // dimensionless
-        return new Unit(value)
+        return new Unit(value);
       },
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: MathCollection): MathCollection =>
-            deepMap(
-              x as unknown[],
-              self as (item: unknown) => unknown
-            ) as unknown as MathCollection
-      )
-    })
+            deepMap(x as unknown[], self as (item: unknown) => unknown) as unknown as MathCollection
+      ),
+    });
   }
-)
+);

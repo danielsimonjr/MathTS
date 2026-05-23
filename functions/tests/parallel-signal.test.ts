@@ -327,21 +327,23 @@ describe('Parallel Signal Processing Functions', () => {
     // Use a deterministic test signal large enough that fftBatch is dispatched.
     const N = 512;
     const M = 128;
-    const x = Float64Array.from({ length: N }, (_, i) =>
-      Math.sin(2 * Math.PI * 7 * i / N) + 0.4 * Math.cos(2 * Math.PI * 23 * i / N),
+    const x = Float64Array.from(
+      { length: N },
+      (_, i) => Math.sin((2 * Math.PI * 7 * i) / N) + 0.4 * Math.cos((2 * Math.PI * 23 * i) / N)
     );
-    const h = Float64Array.from({ length: M }, (_, i) =>
-      Math.exp(-i / 32) * Math.cos(2 * Math.PI * 5 * i / M),
+    const h = Float64Array.from(
+      { length: M },
+      (_, i) => Math.exp(-i / 32) * Math.cos((2 * Math.PI * 5 * i) / M)
     );
 
     it('parallelConv: parallel result matches sequential result within 1e-9', async () => {
       // Sequential reference: force threshold above total element count.
       computePool.updateConfig({ thresholdElements: 1_000_000 });
-      const seq = await parallelConv(x, h) as Float64Array;
+      const seq = (await parallelConv(x, h)) as Float64Array;
 
       // Parallel path: lower threshold so fftBatch fires for 2 * paddedLength frames.
       computePool.updateConfig({ thresholdElements: 4 });
-      const par = await parallelConv(x, h) as Float64Array;
+      const par = (await parallelConv(x, h)) as Float64Array;
       computePool.updateConfig({ thresholdElements: 1_000_000 });
 
       expect(par.length).toBe(seq.length);
@@ -352,10 +354,10 @@ describe('Parallel Signal Processing Functions', () => {
 
     it('parallelXCorr: parallel result matches sequential result within 1e-9', async () => {
       computePool.updateConfig({ thresholdElements: 1_000_000 });
-      const seq = await parallelXCorr(x, h) as Float64Array;
+      const seq = (await parallelXCorr(x, h)) as Float64Array;
 
       computePool.updateConfig({ thresholdElements: 4 });
-      const par = await parallelXCorr(x, h) as Float64Array;
+      const par = (await parallelXCorr(x, h)) as Float64Array;
       computePool.updateConfig({ thresholdElements: 1_000_000 });
 
       expect(par.length).toBe(seq.length);
@@ -368,10 +370,10 @@ describe('Parallel Signal Processing Functions', () => {
       const sig = x.slice(0, 256);
 
       computePool.updateConfig({ thresholdElements: 1_000_000 });
-      const seq = await parallelAutoCorr(sig) as Float64Array;
+      const seq = (await parallelAutoCorr(sig)) as Float64Array;
 
       computePool.updateConfig({ thresholdElements: 4 });
-      const par = await parallelAutoCorr(sig) as Float64Array;
+      const par = (await parallelAutoCorr(sig)) as Float64Array;
       computePool.updateConfig({ thresholdElements: 1_000_000 });
 
       expect(par.length).toBe(seq.length);
@@ -397,10 +399,12 @@ describe('Parallel Signal Processing Functions', () => {
 
     for (const N of sizes) {
       it(`parallelFFT N=${N}: four-step result matches sequential within 1e-9`, async () => {
-        const signal = Float64Array.from({ length: N }, (_, i) =>
-          Math.sin((2 * Math.PI * 7 * i) / N) +
-          0.3 * Math.cos((2 * Math.PI * 31 * i) / N) +
-          0.1 * (i % 5),
+        const signal = Float64Array.from(
+          { length: N },
+          (_, i) =>
+            Math.sin((2 * Math.PI * 7 * i) / N) +
+            0.3 * Math.cos((2 * Math.PI * 31 * i) / N) +
+            0.1 * (i % 5)
         );
 
         // Sequential reference: threshold above N so fftCoreFloat64 runs.
@@ -418,19 +422,18 @@ describe('Parallel Signal Processing Functions', () => {
           maxErr = Math.max(
             maxErr,
             Math.abs(par.real[i] - seq.real[i]),
-            Math.abs(par.imag[i] - seq.imag[i]),
+            Math.abs(par.imag[i] - seq.imag[i])
           );
         }
         expect(maxErr).toBeLessThan(1e-9);
       });
 
       it(`parallelIFFT N=${N}: four-step result matches sequential within 1e-9`, async () => {
-        const re = Float64Array.from({ length: N }, (_, i) =>
-          Math.cos((2 * Math.PI * 11 * i) / N) + 0.2 * (i % 3),
+        const re = Float64Array.from(
+          { length: N },
+          (_, i) => Math.cos((2 * Math.PI * 11 * i) / N) + 0.2 * (i % 3)
         );
-        const im = Float64Array.from({ length: N }, (_, i) =>
-          Math.sin((2 * Math.PI * 5 * i) / N),
-        );
+        const im = Float64Array.from({ length: N }, (_, i) => Math.sin((2 * Math.PI * 5 * i) / N));
 
         computePool.updateConfig({ thresholdElements: 1_000_000 });
         const seq = await parallelIFFT(re, im);
@@ -444,16 +447,17 @@ describe('Parallel Signal Processing Functions', () => {
           maxErr = Math.max(
             maxErr,
             Math.abs(par.real[i] - seq.real[i]),
-            Math.abs(par.imag[i] - seq.imag[i]),
+            Math.abs(par.imag[i] - seq.imag[i])
           );
         }
         expect(maxErr).toBeLessThan(1e-9);
       });
 
       it(`round-trip N=${N}: parallelIFFT(parallelFFT(x)) recovers x`, async () => {
-        const signal = Float64Array.from({ length: N }, (_, i) =>
-          Math.sin((2 * Math.PI * 13 * i) / N) +
-          0.5 * Math.cos((2 * Math.PI * 41 * i) / N),
+        const signal = Float64Array.from(
+          { length: N },
+          (_, i) =>
+            Math.sin((2 * Math.PI * 13 * i) / N) + 0.5 * Math.cos((2 * Math.PI * 41 * i) / N)
         );
 
         // Force the four-step path for both transforms.

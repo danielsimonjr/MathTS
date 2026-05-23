@@ -13,7 +13,7 @@
  * - JS is faster for arrays < ~50-100 elements due to copy overhead
  */
 
-import { wasmLoader, type WasmModule } from './WasmLoader.js'
+import { wasmLoader, type WasmModule } from './WasmLoader.js';
 
 // TODO: ParallelMatrix integration pending proper package export from @danielsimonjr/mathts-parallel
 // import { ParallelMatrix } from '@danielsimonjr/mathts-parallel'
@@ -34,10 +34,10 @@ const ParallelMatrix = {
 };
 
 export interface MatrixOptions {
-  useWasm?: boolean
-  useParallel?: boolean
-  minSizeForWasm?: number
-  minSizeForParallel?: number
+  useWasm?: boolean;
+  useParallel?: boolean;
+  minSizeForWasm?: number;
+  minSizeForParallel?: number;
 }
 
 /**
@@ -65,31 +65,28 @@ export const WasmThresholds = {
   statistics: 500,
 
   // Parallel processing - needs significant work to overcome thread overhead
-  parallel: 10000
-} as const
+  parallel: 10000,
+} as const;
 
 export class MatrixWasmBridge {
   private static defaultOptions: Required<MatrixOptions> = {
     useWasm: true,
     useParallel: true,
     minSizeForWasm: WasmThresholds.elementWise,
-    minSizeForParallel: WasmThresholds.parallel
-  }
+    minSizeForParallel: WasmThresholds.parallel,
+  };
 
-  private static wasmModule: WasmModule | null = null
+  private static wasmModule: WasmModule | null = null;
 
   /**
    * Initialize the WASM module
    */
   public static async init(wasmPath?: string): Promise<void> {
     try {
-      this.wasmModule = await wasmLoader.load(wasmPath)
+      this.wasmModule = await wasmLoader.load(wasmPath);
     } catch (error) {
-      console.warn(
-        'WASM initialization failed, falling back to JavaScript:',
-        error
-      )
-      this.defaultOptions.useWasm = false
+      console.warn('WASM initialization failed, falling back to JavaScript:', error);
+      this.defaultOptions.useWasm = false;
     }
   }
 
@@ -97,7 +94,7 @@ export class MatrixWasmBridge {
    * Configure matrix operation preferences
    */
   public static configure(options: MatrixOptions): void {
-    this.defaultOptions = { ...this.defaultOptions, ...options }
+    this.defaultOptions = { ...this.defaultOptions, ...options };
   }
 
   /**
@@ -118,28 +115,24 @@ export class MatrixWasmBridge {
     bCols: number,
     options?: MatrixOptions
   ): Promise<Float64Array> {
-    const opts = { ...this.defaultOptions, ...options }
-    const totalElements = aRows * aCols + bRows * bCols
-    const outputElements = aRows * bCols
+    const opts = { ...this.defaultOptions, ...options };
+    const totalElements = aRows * aCols + bRows * bCols;
+    const outputElements = aRows * bCols;
 
     // Use matrix-multiply specific threshold
-    const wasmThreshold = WasmThresholds.matrixMultiply
+    const wasmThreshold = WasmThresholds.matrixMultiply;
 
     // Strategy selection based on operation complexity
     // Matrix multiply is O(n³), so WASM benefits even at smaller sizes
     if (opts.useParallel && outputElements >= WasmThresholds.parallel) {
       // Very large matrices: use parallel processing
-      return ParallelMatrix.multiply(aData, aRows, aCols, bData, bRows, bCols)
-    } else if (
-      opts.useWasm &&
-      this.wasmModule &&
-      totalElements >= wasmThreshold
-    ) {
+      return ParallelMatrix.multiply(aData, aRows, aCols, bData, bRows, bCols);
+    } else if (opts.useWasm && this.wasmModule && totalElements >= wasmThreshold) {
       // Medium/large matrices: use WASM with SIMD
-      return this.multiplyWasm(aData, aRows, aCols, bData, bRows, bCols, true)
+      return this.multiplyWasm(aData, aRows, aCols, bData, bRows, bCols, true);
     } else {
       // Small matrices: JS is faster due to no copy overhead
-      return this.multiplyJS(aData, aRows, aCols, bData, bRows, bCols)
+      return this.multiplyJS(aData, aRows, aCols, bData, bRows, bCols);
     }
   }
 
@@ -156,47 +149,29 @@ export class MatrixWasmBridge {
     useSIMD: boolean = false
   ): Promise<Float64Array> {
     if (!this.wasmModule) {
-      throw new Error('WASM module not initialized')
+      throw new Error('WASM module not initialized');
     }
 
     // Allocate arrays in WASM memory
-    const a = wasmLoader.allocateFloat64Array(aData)
-    const b = wasmLoader.allocateFloat64Array(bData)
-    const result = wasmLoader.allocateFloat64Array(
-      new Float64Array(aRows * bCols)
-    )
+    const a = wasmLoader.allocateFloat64Array(aData);
+    const b = wasmLoader.allocateFloat64Array(bData);
+    const result = wasmLoader.allocateFloat64Array(new Float64Array(aRows * bCols));
 
     try {
       // Call WASM function
       if (useSIMD) {
-        this.wasmModule.multiplyDenseSIMD(
-          a.ptr,
-          aRows,
-          aCols,
-          b.ptr,
-          bRows,
-          bCols,
-          result.ptr
-        )
+        this.wasmModule.multiplyDenseSIMD(a.ptr, aRows, aCols, b.ptr, bRows, bCols, result.ptr);
       } else {
-        this.wasmModule.multiplyDense(
-          a.ptr,
-          aRows,
-          aCols,
-          b.ptr,
-          bRows,
-          bCols,
-          result.ptr
-        )
+        this.wasmModule.multiplyDense(a.ptr, aRows, aCols, b.ptr, bRows, bCols, result.ptr);
       }
 
       // Copy result
-      return new Float64Array(result.array)
+      return new Float64Array(result.array);
     } finally {
       // Free WASM memory
-      wasmLoader.free(a.ptr)
-      wasmLoader.free(b.ptr)
-      wasmLoader.free(result.ptr)
+      wasmLoader.free(a.ptr);
+      wasmLoader.free(b.ptr);
+      wasmLoader.free(result.ptr);
     }
   }
 
@@ -211,19 +186,19 @@ export class MatrixWasmBridge {
     _bRows: number, // bRows is implicit from aCols
     bCols: number
   ): Float64Array {
-    const result = new Float64Array(aRows * bCols)
+    const result = new Float64Array(aRows * bCols);
 
     for (let i = 0; i < aRows; i++) {
       for (let j = 0; j < bCols; j++) {
-        let sum = 0
+        let sum = 0;
         for (let k = 0; k < aCols; k++) {
-          sum += aData[i * aCols + k] * bData[k * bCols + j]
+          sum += aData[i * aCols + k] * bData[k * bCols + j];
         }
-        result[i * bCols + j] = sum
+        result[i * bCols + j] = sum;
       }
     }
 
-    return result
+    return result;
   }
 
   /**
@@ -237,17 +212,13 @@ export class MatrixWasmBridge {
     n: number,
     options?: MatrixOptions
   ): Promise<{ lu: Float64Array; perm: Int32Array; singular: boolean }> {
-    const opts = { ...this.defaultOptions, ...options }
+    const opts = { ...this.defaultOptions, ...options };
 
     // Use LU-specific threshold (n is matrix dimension, n*n is element count)
-    if (
-      opts.useWasm &&
-      this.wasmModule &&
-      n * n >= WasmThresholds.luDecomposition
-    ) {
-      return this.luDecompositionWasm(data, n)
+    if (opts.useWasm && this.wasmModule && n * n >= WasmThresholds.luDecomposition) {
+      return this.luDecompositionWasm(data, n);
     } else {
-      return this.luDecompositionJS(data, n)
+      return this.luDecompositionJS(data, n);
     }
   }
 
@@ -256,23 +227,23 @@ export class MatrixWasmBridge {
     n: number
   ): Promise<{ lu: Float64Array; perm: Int32Array; singular: boolean }> {
     if (!this.wasmModule) {
-      throw new Error('WASM module not initialized')
+      throw new Error('WASM module not initialized');
     }
 
-    const a = wasmLoader.allocateFloat64Array(data)
-    const perm = wasmLoader.allocateInt32Array(new Int32Array(n))
+    const a = wasmLoader.allocateFloat64Array(data);
+    const perm = wasmLoader.allocateInt32Array(new Int32Array(n));
 
     try {
-      const success = this.wasmModule.luDecomposition(a.ptr, n, perm.ptr)
+      const success = this.wasmModule.luDecomposition(a.ptr, n, perm.ptr);
 
       return {
         lu: new Float64Array(a.array),
         perm: new Int32Array(perm.array),
-        singular: success === 0
-      }
+        singular: success === 0,
+      };
     } finally {
-      wasmLoader.free(a.ptr)
-      wasmLoader.free(perm.ptr)
+      wasmLoader.free(a.ptr);
+      wasmLoader.free(perm.ptr);
     }
   }
 
@@ -280,52 +251,52 @@ export class MatrixWasmBridge {
     data: number[] | Float64Array,
     n: number
   ): { lu: Float64Array; perm: Int32Array; singular: boolean } {
-    const a = new Float64Array(data)
-    const perm = new Int32Array(n)
+    const a = new Float64Array(data);
+    const perm = new Int32Array(n);
 
     for (let i = 0; i < n; i++) {
-      perm[i] = i
+      perm[i] = i;
     }
 
     for (let k = 0; k < n - 1; k++) {
-      let maxVal = Math.abs(a[k * n + k])
-      let pivotRow = k
+      let maxVal = Math.abs(a[k * n + k]);
+      let pivotRow = k;
 
       for (let i = k + 1; i < n; i++) {
-        const val = Math.abs(a[i * n + k])
+        const val = Math.abs(a[i * n + k]);
         if (val > maxVal) {
-          maxVal = val
-          pivotRow = i
+          maxVal = val;
+          pivotRow = i;
         }
       }
 
       if (maxVal < 1e-14) {
-        return { lu: a, perm, singular: true }
+        return { lu: a, perm, singular: true };
       }
 
       if (pivotRow !== k) {
         for (let j = 0; j < n; j++) {
-          const temp = a[k * n + j]
-          a[k * n + j] = a[pivotRow * n + j]
-          a[pivotRow * n + j] = temp
+          const temp = a[k * n + j];
+          a[k * n + j] = a[pivotRow * n + j];
+          a[pivotRow * n + j] = temp;
         }
-        const temp = perm[k]
-        perm[k] = perm[pivotRow]
-        perm[pivotRow] = temp
+        const temp = perm[k];
+        perm[k] = perm[pivotRow];
+        perm[pivotRow] = temp;
       }
 
-      const pivot = a[k * n + k]
+      const pivot = a[k * n + k];
       for (let i = k + 1; i < n; i++) {
-        const factor = a[i * n + k] / pivot
-        a[i * n + k] = factor
+        const factor = a[i * n + k] / pivot;
+        a[i * n + k] = factor;
 
         for (let j = k + 1; j < n; j++) {
-          a[i * n + j] -= factor * a[k * n + j]
+          a[i * n + j] -= factor * a[k * n + j];
         }
       }
     }
 
-    return { lu: a, perm, singular: false }
+    return { lu: a, perm, singular: false };
   }
 
   /**
@@ -339,14 +310,14 @@ export class MatrixWasmBridge {
     inverse: boolean = false,
     options?: MatrixOptions
   ): Promise<Float64Array> {
-    const opts = { ...this.defaultOptions, ...options }
-    const n = data.length / 2 // Complex numbers
+    const opts = { ...this.defaultOptions, ...options };
+    const n = data.length / 2; // Complex numbers
 
     // FFT-specific threshold - benefits at smaller sizes due to compute intensity
     if (opts.useWasm && this.wasmModule && n >= WasmThresholds.fft) {
-      return this.fftWasm(data, n, inverse)
+      return this.fftWasm(data, n, inverse);
     } else {
-      return this.fftJS(data, n, inverse)
+      return this.fftJS(data, n, inverse);
     }
   }
 
@@ -357,77 +328,71 @@ export class MatrixWasmBridge {
    * uses the same layout. Forward transform is unscaled; the inverse transform
    * scales by `1/n` (standard convention). Requires `n` to be a power of two.
    */
-  private static fftJS(
-    data: Float64Array,
-    n: number,
-    inverse: boolean
-  ): Float64Array {
-    if (n === 0) return new Float64Array(0)
+  private static fftJS(data: Float64Array, n: number, inverse: boolean): Float64Array {
+    if (n === 0) return new Float64Array(0);
     if ((n & (n - 1)) !== 0) {
-      throw new Error(
-        `JavaScript FFT fallback requires a power-of-two length (got ${n})`
-      )
+      throw new Error(`JavaScript FFT fallback requires a power-of-two length (got ${n})`);
     }
 
-    const re = new Float64Array(n)
-    const im = new Float64Array(n)
+    const re = new Float64Array(n);
+    const im = new Float64Array(n);
     for (let i = 0; i < n; i++) {
-      re[i] = data[2 * i]
-      im[i] = data[2 * i + 1]
+      re[i] = data[2 * i];
+      im[i] = data[2 * i + 1];
     }
 
     // Bit-reversal permutation.
     for (let i = 1, j = 0; i < n; i++) {
-      let bit = n >> 1
+      let bit = n >> 1;
       for (; j & bit; bit >>= 1) {
-        j ^= bit
+        j ^= bit;
       }
-      j ^= bit
+      j ^= bit;
       if (i < j) {
-        let t = re[i]
-        re[i] = re[j]
-        re[j] = t
-        t = im[i]
-        im[i] = im[j]
-        im[j] = t
+        let t = re[i];
+        re[i] = re[j];
+        re[j] = t;
+        t = im[i];
+        im[i] = im[j];
+        im[j] = t;
       }
     }
 
     // Iterative Cooley-Tukey butterflies.
-    const sign = inverse ? 1 : -1
+    const sign = inverse ? 1 : -1;
     for (let len = 2; len <= n; len <<= 1) {
-      const half = len >> 1
-      const ang = (sign * 2 * Math.PI) / len
-      const wRe = Math.cos(ang)
-      const wIm = Math.sin(ang)
+      const half = len >> 1;
+      const ang = (sign * 2 * Math.PI) / len;
+      const wRe = Math.cos(ang);
+      const wIm = Math.sin(ang);
       for (let i = 0; i < n; i += len) {
-        let curRe = 1
-        let curIm = 0
+        let curRe = 1;
+        let curIm = 0;
         for (let k = 0; k < half; k++) {
-          const bRe = re[i + k + half]
-          const bIm = im[i + k + half]
-          const tRe = bRe * curRe - bIm * curIm
-          const tIm = bRe * curIm + bIm * curRe
-          const aRe = re[i + k]
-          const aIm = im[i + k]
-          re[i + k] = aRe + tRe
-          im[i + k] = aIm + tIm
-          re[i + k + half] = aRe - tRe
-          im[i + k + half] = aIm - tIm
-          const nextRe = curRe * wRe - curIm * wIm
-          curIm = curRe * wIm + curIm * wRe
-          curRe = nextRe
+          const bRe = re[i + k + half];
+          const bIm = im[i + k + half];
+          const tRe = bRe * curRe - bIm * curIm;
+          const tIm = bRe * curIm + bIm * curRe;
+          const aRe = re[i + k];
+          const aIm = im[i + k];
+          re[i + k] = aRe + tRe;
+          im[i + k] = aIm + tIm;
+          re[i + k + half] = aRe - tRe;
+          im[i + k + half] = aIm - tIm;
+          const nextRe = curRe * wRe - curIm * wIm;
+          curIm = curRe * wIm + curIm * wRe;
+          curRe = nextRe;
         }
       }
     }
 
-    const result = new Float64Array(2 * n)
-    const scale = inverse ? 1 / n : 1
+    const result = new Float64Array(2 * n);
+    const scale = inverse ? 1 / n : 1;
     for (let i = 0; i < n; i++) {
-      result[2 * i] = re[i] * scale
-      result[2 * i + 1] = im[i] * scale
+      result[2 * i] = re[i] * scale;
+      result[2 * i + 1] = im[i] * scale;
     }
-    return result
+    return result;
   }
 
   private static async fftWasm(
@@ -436,16 +401,16 @@ export class MatrixWasmBridge {
     inverse: boolean
   ): Promise<Float64Array> {
     if (!this.wasmModule) {
-      throw new Error('WASM module not initialized')
+      throw new Error('WASM module not initialized');
     }
 
-    const dataAlloc = wasmLoader.allocateFloat64Array(data)
+    const dataAlloc = wasmLoader.allocateFloat64Array(data);
 
     try {
-      this.wasmModule.fft(dataAlloc.ptr, n, inverse ? 1 : 0)
-      return new Float64Array(dataAlloc.array)
+      this.wasmModule.fft(dataAlloc.ptr, n, inverse ? 1 : 0);
+      return new Float64Array(dataAlloc.array);
     } finally {
-      wasmLoader.free(dataAlloc.ptr)
+      wasmLoader.free(dataAlloc.ptr);
     }
   }
 
@@ -457,48 +422,43 @@ export class MatrixWasmBridge {
     data: number[] | Float64Array
   ): Promise<{ result: Float64Array; success: boolean }> {
     if (!this.wasmModule) {
-      return this.inv2x2JS(data)
+      return this.inv2x2JS(data);
     }
 
-    const a = wasmLoader.allocateFloat64Array(data)
-    const result = wasmLoader.allocateFloat64Array(new Float64Array(4))
+    const a = wasmLoader.allocateFloat64Array(data);
+    const result = wasmLoader.allocateFloat64Array(new Float64Array(4));
 
     try {
-      const success = this.wasmModule.laInv2x2(a.ptr, result.ptr)
+      const success = this.wasmModule.laInv2x2(a.ptr, result.ptr);
       return {
         result: new Float64Array(result.array),
-        success: success === 0
-      }
+        success: success === 0,
+      };
     } finally {
-      wasmLoader.free(a.ptr)
-      wasmLoader.free(result.ptr)
+      wasmLoader.free(a.ptr);
+      wasmLoader.free(result.ptr);
     }
   }
 
   private static inv2x2JS(data: number[] | Float64Array): {
-    result: Float64Array
-    success: boolean
+    result: Float64Array;
+    success: boolean;
   } {
     const a = data[0],
       b = data[1],
       c = data[2],
-      d = data[3]
-    const det = a * d - b * c
+      d = data[3];
+    const det = a * d - b * c;
 
     if (Math.abs(det) < 1e-15) {
-      return { result: new Float64Array(4), success: false }
+      return { result: new Float64Array(4), success: false };
     }
 
-    const invDet = 1.0 / det
+    const invDet = 1.0 / det;
     return {
-      result: new Float64Array([
-        d * invDet,
-        -b * invDet,
-        -c * invDet,
-        a * invDet
-      ]),
-      success: true
-    }
+      result: new Float64Array([d * invDet, -b * invDet, -c * invDet, a * invDet]),
+      success: true,
+    };
   }
 
   /**
@@ -508,36 +468,36 @@ export class MatrixWasmBridge {
     data: number[] | Float64Array
   ): Promise<{ result: Float64Array; success: boolean }> {
     if (!this.wasmModule) {
-      return this.inv3x3JS(data)
+      return this.inv3x3JS(data);
     }
 
-    const a = wasmLoader.allocateFloat64Array(data)
-    const result = wasmLoader.allocateFloat64Array(new Float64Array(9))
+    const a = wasmLoader.allocateFloat64Array(data);
+    const result = wasmLoader.allocateFloat64Array(new Float64Array(9));
 
     try {
-      const success = this.wasmModule.laInv3x3(a.ptr, result.ptr)
+      const success = this.wasmModule.laInv3x3(a.ptr, result.ptr);
       return {
         result: new Float64Array(result.array),
-        success: success === 0
-      }
+        success: success === 0,
+      };
     } finally {
-      wasmLoader.free(a.ptr)
-      wasmLoader.free(result.ptr)
+      wasmLoader.free(a.ptr);
+      wasmLoader.free(result.ptr);
     }
   }
 
   private static inv3x3JS(data: number[] | Float64Array): {
-    result: Float64Array
-    success: boolean
+    result: Float64Array;
+    success: boolean;
   } {
-    const [a, b, c, d, e, f, g, h, i] = data
-    const det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
+    const [a, b, c, d, e, f, g, h, i] = data;
+    const det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
 
     if (Math.abs(det) < 1e-15) {
-      return { result: new Float64Array(9), success: false }
+      return { result: new Float64Array(9), success: false };
     }
 
-    const invDet = 1.0 / det
+    const invDet = 1.0 / det;
     return {
       result: new Float64Array([
         (e * i - f * h) * invDet,
@@ -548,10 +508,10 @@ export class MatrixWasmBridge {
         (c * d - a * f) * invDet,
         (d * h - e * g) * invDet,
         (b * g - a * h) * invDet,
-        (a * e - b * d) * invDet
+        (a * e - b * d) * invDet,
       ]),
-      success: true
-    }
+      success: true,
+    };
   }
 
   /**
@@ -563,46 +523,43 @@ export class MatrixWasmBridge {
     n: number,
     options?: MatrixOptions
   ): Promise<number> {
-    const opts = { ...this.defaultOptions, ...options }
+    const opts = { ...this.defaultOptions, ...options };
 
     if (opts.useWasm && this.wasmModule && n >= 2) {
-      return this.cond1Wasm(data, n)
+      return this.cond1Wasm(data, n);
     } else {
-      return this.cond1JS(data, n)
+      return this.cond1JS(data, n);
     }
   }
 
-  private static async cond1Wasm(
-    data: number[] | Float64Array,
-    n: number
-  ): Promise<number> {
+  private static async cond1Wasm(data: number[] | Float64Array, n: number): Promise<number> {
     if (!this.wasmModule) {
-      throw new Error('WASM module not initialized')
+      throw new Error('WASM module not initialized');
     }
 
-    const a = wasmLoader.allocateFloat64Array(data)
-    const workSize = n * n * 2
-    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize))
+    const a = wasmLoader.allocateFloat64Array(data);
+    const workSize = n * n * 2;
+    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize));
 
     try {
-      return this.wasmModule.laCond1(a.ptr, n, work.ptr)
+      return this.wasmModule.laCond1(a.ptr, n, work.ptr);
     } finally {
-      wasmLoader.free(a.ptr)
-      wasmLoader.free(work.ptr)
+      wasmLoader.free(a.ptr);
+      wasmLoader.free(work.ptr);
     }
   }
 
   private static cond1JS(data: number[] | Float64Array, n: number): number {
     // Compute 1-norm of A
-    let norm1 = 0
+    let norm1 = 0;
     for (let j = 0; j < n; j++) {
-      let colSum = 0
+      let colSum = 0;
       for (let i = 0; i < n; i++) {
-        colSum += Math.abs(data[i * n + j])
+        colSum += Math.abs(data[i * n + j]);
       }
-      if (colSum > norm1) norm1 = colSum
+      if (colSum > norm1) norm1 = colSum;
     }
-    return norm1 // Simplified: full implementation needs inverse norm too
+    return norm1; // Simplified: full implementation needs inverse norm too
   }
 
   /**
@@ -614,46 +571,43 @@ export class MatrixWasmBridge {
     n: number,
     options?: MatrixOptions
   ): Promise<number> {
-    const opts = { ...this.defaultOptions, ...options }
+    const opts = { ...this.defaultOptions, ...options };
 
     if (opts.useWasm && this.wasmModule && n >= 2) {
-      return this.condInfWasm(data, n)
+      return this.condInfWasm(data, n);
     } else {
-      return this.condInfJS(data, n)
+      return this.condInfJS(data, n);
     }
   }
 
-  private static async condInfWasm(
-    data: number[] | Float64Array,
-    n: number
-  ): Promise<number> {
+  private static async condInfWasm(data: number[] | Float64Array, n: number): Promise<number> {
     if (!this.wasmModule) {
-      throw new Error('WASM module not initialized')
+      throw new Error('WASM module not initialized');
     }
 
-    const a = wasmLoader.allocateFloat64Array(data)
-    const workSize = n * n * 2
-    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize))
+    const a = wasmLoader.allocateFloat64Array(data);
+    const workSize = n * n * 2;
+    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize));
 
     try {
-      return this.wasmModule.laCondInf(a.ptr, n, work.ptr)
+      return this.wasmModule.laCondInf(a.ptr, n, work.ptr);
     } finally {
-      wasmLoader.free(a.ptr)
-      wasmLoader.free(work.ptr)
+      wasmLoader.free(a.ptr);
+      wasmLoader.free(work.ptr);
     }
   }
 
   private static condInfJS(data: number[] | Float64Array, n: number): number {
     // Compute infinity-norm of A
-    let normInf = 0
+    let normInf = 0;
     for (let i = 0; i < n; i++) {
-      let rowSum = 0
+      let rowSum = 0;
       for (let j = 0; j < n; j++) {
-        rowSum += Math.abs(data[i * n + j])
+        rowSum += Math.abs(data[i * n + j]);
       }
-      if (rowSum > normInf) normInf = rowSum
+      if (rowSum > normInf) normInf = rowSum;
     }
-    return normInf // Simplified: full implementation needs inverse norm too
+    return normInf; // Simplified: full implementation needs inverse norm too
   }
 
   /**
@@ -672,17 +626,17 @@ export class MatrixWasmBridge {
     computeVectors: boolean = true,
     options?: MatrixOptions
   ): Promise<{
-    eigenvalues: Float64Array
-    eigenvectors: Float64Array | null
-    iterations: number
+    eigenvalues: Float64Array;
+    eigenvectors: Float64Array | null;
+    iterations: number;
   }> {
-    const opts = { ...this.defaultOptions, ...options }
+    const opts = { ...this.defaultOptions, ...options };
 
     // Eigenvalue computation is O(n³), benefits from WASM at small sizes
     if (opts.useWasm && this.wasmModule && n >= 3) {
-      return this.eigsSymmetricWasm(data, n, computeVectors)
+      return this.eigsSymmetricWasm(data, n, computeVectors);
     } else {
-      return this.eigsSymmetricJS(data, n, computeVectors)
+      return this.eigsSymmetricJS(data, n, computeVectors);
     }
   }
 
@@ -691,21 +645,21 @@ export class MatrixWasmBridge {
     n: number,
     computeVectors: boolean
   ): Promise<{
-    eigenvalues: Float64Array
-    eigenvectors: Float64Array | null
-    iterations: number
+    eigenvalues: Float64Array;
+    eigenvectors: Float64Array | null;
+    iterations: number;
   }> {
     if (!this.wasmModule) {
-      throw new Error('WASM module not initialized')
+      throw new Error('WASM module not initialized');
     }
 
-    const matrix = wasmLoader.allocateFloat64Array(data)
-    const eigenvalues = wasmLoader.allocateFloat64Array(new Float64Array(n))
+    const matrix = wasmLoader.allocateFloat64Array(data);
+    const eigenvalues = wasmLoader.allocateFloat64Array(new Float64Array(n));
     const eigenvectors = computeVectors
       ? wasmLoader.allocateFloat64Array(new Float64Array(n * n))
-      : null
-    const workSize = 2 * n
-    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize))
+      : null;
+    const workSize = 2 * n;
+    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize));
 
     try {
       const iterations = this.wasmModule.eigsSymmetric(
@@ -715,20 +669,18 @@ export class MatrixWasmBridge {
         eigenvalues.ptr,
         eigenvectors ? eigenvectors.ptr : 0,
         work.ptr
-      )
+      );
 
       return {
         eigenvalues: new Float64Array(eigenvalues.array),
-        eigenvectors: eigenvectors
-          ? new Float64Array(eigenvectors.array)
-          : null,
-        iterations
-      }
+        eigenvectors: eigenvectors ? new Float64Array(eigenvectors.array) : null,
+        iterations,
+      };
     } finally {
-      wasmLoader.free(matrix.ptr)
-      wasmLoader.free(eigenvalues.ptr)
-      if (eigenvectors) wasmLoader.free(eigenvectors.ptr)
-      wasmLoader.free(work.ptr)
+      wasmLoader.free(matrix.ptr);
+      wasmLoader.free(eigenvalues.ptr);
+      if (eigenvectors) wasmLoader.free(eigenvectors.ptr);
+      wasmLoader.free(work.ptr);
     }
   }
 
@@ -737,23 +689,23 @@ export class MatrixWasmBridge {
     n: number,
     computeVectors: boolean
   ): {
-    eigenvalues: Float64Array
-    eigenvectors: Float64Array | null
-    iterations: number
+    eigenvalues: Float64Array;
+    eigenvectors: Float64Array | null;
+    iterations: number;
   } {
     // Simple power iteration for dominant eigenvalue (simplified fallback)
-    const eigenvalues = new Float64Array(n)
-    const eigenvectors = computeVectors ? new Float64Array(n * n) : null
+    const eigenvalues = new Float64Array(n);
+    const eigenvectors = computeVectors ? new Float64Array(n * n) : null;
 
     // For JS fallback, just return diagonal elements as approximation
     for (let i = 0; i < n; i++) {
-      eigenvalues[i] = data[i * n + i]
+      eigenvalues[i] = data[i * n + i];
       if (eigenvectors) {
-        eigenvectors[i * n + i] = 1.0
+        eigenvectors[i * n + i] = 1.0;
       }
     }
 
-    return { eigenvalues, eigenvectors, iterations: 0 }
+    return { eigenvalues, eigenvectors, iterations: 0 };
   }
 
   /**
@@ -770,56 +722,50 @@ export class MatrixWasmBridge {
     n: number,
     options?: MatrixOptions
   ): Promise<Float64Array> {
-    const opts = { ...this.defaultOptions, ...options }
+    const opts = { ...this.defaultOptions, ...options };
 
     if (opts.useWasm && this.wasmModule && n >= 2) {
-      return this.expmWasm(data, n)
+      return this.expmWasm(data, n);
     } else {
-      return this.expmJS(data, n)
+      return this.expmJS(data, n);
     }
   }
 
-  private static async expmWasm(
-    data: number[] | Float64Array,
-    n: number
-  ): Promise<Float64Array> {
+  private static async expmWasm(data: number[] | Float64Array, n: number): Promise<Float64Array> {
     if (!this.wasmModule) {
-      throw new Error('WASM module not initialized')
+      throw new Error('WASM module not initialized');
     }
 
-    const matrix = wasmLoader.allocateFloat64Array(data)
-    const result = wasmLoader.allocateFloat64Array(new Float64Array(n * n))
-    const workSize = 6 * n * n
-    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize))
+    const matrix = wasmLoader.allocateFloat64Array(data);
+    const result = wasmLoader.allocateFloat64Array(new Float64Array(n * n));
+    const workSize = 6 * n * n;
+    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize));
 
     try {
-      this.wasmModule.expm(matrix.ptr, n, result.ptr, work.ptr)
-      return new Float64Array(result.array)
+      this.wasmModule.expm(matrix.ptr, n, result.ptr, work.ptr);
+      return new Float64Array(result.array);
     } finally {
-      wasmLoader.free(matrix.ptr)
-      wasmLoader.free(result.ptr)
-      wasmLoader.free(work.ptr)
+      wasmLoader.free(matrix.ptr);
+      wasmLoader.free(result.ptr);
+      wasmLoader.free(work.ptr);
     }
   }
 
-  private static expmJS(
-    data: number[] | Float64Array,
-    n: number
-  ): Float64Array {
+  private static expmJS(data: number[] | Float64Array, n: number): Float64Array {
     // Simple Taylor series for small matrices (exp(A) ≈ I + A + A²/2! + ...)
-    const result = new Float64Array(n * n)
+    const result = new Float64Array(n * n);
 
     // Initialize to identity
     for (let i = 0; i < n; i++) {
-      result[i * n + i] = 1.0
+      result[i * n + i] = 1.0;
     }
 
     // Add A (first order term)
     for (let i = 0; i < n * n; i++) {
-      result[i] += data[i]
+      result[i] += data[i];
     }
 
-    return result // Simplified: full implementation needs more terms
+    return result; // Simplified: full implementation needs more terms
   }
 
   /**
@@ -836,12 +782,12 @@ export class MatrixWasmBridge {
     n: number,
     options?: MatrixOptions
   ): Promise<{ result: Float64Array; iterations: number }> {
-    const opts = { ...this.defaultOptions, ...options }
+    const opts = { ...this.defaultOptions, ...options };
 
     if (opts.useWasm && this.wasmModule && n >= 2) {
-      return this.sqrtmWasm(data, n)
+      return this.sqrtmWasm(data, n);
     } else {
-      return this.sqrtmJS(data, n)
+      return this.sqrtmJS(data, n);
     }
   }
 
@@ -850,13 +796,13 @@ export class MatrixWasmBridge {
     n: number
   ): Promise<{ result: Float64Array; iterations: number }> {
     if (!this.wasmModule) {
-      throw new Error('WASM module not initialized')
+      throw new Error('WASM module not initialized');
     }
 
-    const matrix = wasmLoader.allocateFloat64Array(data)
-    const result = wasmLoader.allocateFloat64Array(new Float64Array(n * n))
-    const workSize = 5 * n * n
-    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize))
+    const matrix = wasmLoader.allocateFloat64Array(data);
+    const result = wasmLoader.allocateFloat64Array(new Float64Array(n * n));
+    const workSize = 5 * n * n;
+    const work = wasmLoader.allocateFloat64Array(new Float64Array(workSize));
 
     try {
       const iterations = this.wasmModule.sqrtm(
@@ -866,15 +812,15 @@ export class MatrixWasmBridge {
         work.ptr,
         100, // maxIterations
         1e-12 // tolerance
-      )
+      );
       return {
         result: new Float64Array(result.array),
-        iterations
-      }
+        iterations,
+      };
     } finally {
-      wasmLoader.free(matrix.ptr)
-      wasmLoader.free(result.ptr)
-      wasmLoader.free(work.ptr)
+      wasmLoader.free(matrix.ptr);
+      wasmLoader.free(result.ptr);
+      wasmLoader.free(work.ptr);
     }
   }
 
@@ -883,38 +829,38 @@ export class MatrixWasmBridge {
     n: number
   ): { result: Float64Array; iterations: number } {
     // Simple approximation: for diagonal matrices, sqrt of diagonals
-    const result = new Float64Array(n * n)
+    const result = new Float64Array(n * n);
 
     for (let i = 0; i < n; i++) {
-      const diag = data[i * n + i]
-      result[i * n + i] = diag >= 0 ? Math.sqrt(diag) : 0
+      const diag = data[i * n + i];
+      result[i * n + i] = diag >= 0 ? Math.sqrt(diag) : 0;
     }
 
-    return { result, iterations: 0 }
+    return { result, iterations: 0 };
   }
 
   /**
    * Get performance metrics
    */
   public static getCapabilities(): {
-    wasmAvailable: boolean
-    parallelAvailable: boolean
-    simdAvailable: boolean
+    wasmAvailable: boolean;
+    parallelAvailable: boolean;
+    simdAvailable: boolean;
   } {
     return {
       wasmAvailable: this.wasmModule !== null,
       parallelAvailable: typeof Worker !== 'undefined',
-      simdAvailable: this.wasmModule !== null // WASM SIMD available with module
-    }
+      simdAvailable: this.wasmModule !== null, // WASM SIMD available with module
+    };
   }
 
   /**
    * Cleanup resources
    */
   public static async cleanup(): Promise<void> {
-    await ParallelMatrix.terminate()
+    await ParallelMatrix.terminate();
     if (this.wasmModule) {
-      wasmLoader.collect()
+      wasmLoader.collect();
     }
   }
 }
@@ -925,5 +871,5 @@ export class MatrixWasmBridge {
 if (typeof globalThis !== 'undefined') {
   MatrixWasmBridge.init().catch(() => {
     // Silently fail, will use JavaScript fallback
-  })
+  });
 }

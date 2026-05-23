@@ -1,25 +1,25 @@
-import { isArrayNode, isNode } from '../../utils/is.js'
-import { map } from '../../utils/array.js'
-import { factory } from '../../utils/factory.js'
-import type { MathNode } from './Node.js'
+import { isArrayNode, isNode } from '../../utils/is.js';
+import { map } from '../../utils/array.js';
+import { factory } from '../../utils/factory.js';
+import type { MathNode } from './Node.js';
 
 interface NodeConstructor {
-  new (...args: any[]): MathNode
+  new (...args: any[]): MathNode;
 }
 
 interface ArrayNodeDependencies {
-  Node: NodeConstructor
+  Node: NodeConstructor;
 }
 
-const name = 'ArrayNode'
-const dependencies = ['Node']
+const name = 'ArrayNode';
+const dependencies = ['Node'];
 
 export const createArrayNode = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ Node }: ArrayNodeDependencies) => {
     class ArrayNode extends Node {
-      items: MathNode[]
+      items: MathNode[];
 
       /**
        * @constructor ArrayNode
@@ -28,20 +28,20 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * @param {Node[]} [items]   1 dimensional array with items
        */
       constructor(items?: MathNode[]) {
-        super()
-        this.items = items || []
+        super();
+        this.items = items || [];
 
         // validate input
         if (!Array.isArray(this.items) || !this.items.every(isNode)) {
-          throw new TypeError('Array containing Nodes expected')
+          throw new TypeError('Array containing Nodes expected');
         }
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isArrayNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -62,25 +62,25 @@ export const createArrayNode = /* #__PURE__ */ factory(
         argNames: Record<string, boolean>
       ): (scope: any, args: any, context: any) => any {
         const evalItems = map(this.items, function (item) {
-          return item._compile(math, argNames)
-        })
+          return item._compile(math, argNames);
+        });
 
-        const asMatrix = math.config.matrix !== 'Array'
+        const asMatrix = math.config.matrix !== 'Array';
         if (asMatrix) {
-          const matrix = math.matrix
+          const matrix = math.matrix;
           return function evalArrayNode(scope: any, args: any, context: any) {
             return matrix(
               map(evalItems, function (evalItem) {
-                return evalItem(scope, args, context)
+                return evalItem(scope, args, context);
               })
-            )
-          }
+            );
+          };
         } else {
           return function evalArrayNode(scope: any, args: any, context: any) {
             return map(evalItems, function (evalItem) {
-              return evalItem(scope, args, context)
-            })
-          }
+              return evalItem(scope, args, context);
+            });
+          };
         }
       }
 
@@ -88,12 +88,10 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: MathNode, path: string, parent: MathNode) => void
-      ): void {
+      forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         for (let i = 0; i < this.items.length; i++) {
-          const node = this.items[i]
-          callback(node, 'items[' + i + ']', this as any)
+          const node = this.items[i];
+          callback(node, 'items[' + i + ']', this as any);
         }
       }
 
@@ -103,16 +101,12 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node): Node} callback
        * @returns {ArrayNode} Returns a transformed copy of the node
        */
-      map(
-        callback: (child: MathNode, path: string, parent: MathNode) => MathNode
-      ): ArrayNode {
-        const items: MathNode[] = []
+      map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): ArrayNode {
+        const items: MathNode[] = [];
         for (let i = 0; i < this.items.length; i++) {
-          items[i] = this._ifNode(
-            callback(this.items[i], 'items[' + i + ']', this as any)
-          )
+          items[i] = this._ifNode(callback(this.items[i], 'items[' + i + ']', this as any));
         }
-        return new ArrayNode(items)
+        return new ArrayNode(items);
       }
 
       /**
@@ -120,7 +114,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * @return {ArrayNode}
        */
       clone(): ArrayNode {
-        return new ArrayNode(this.items.slice(0))
+        return new ArrayNode(this.items.slice(0));
       }
 
       /**
@@ -131,9 +125,9 @@ export const createArrayNode = /* #__PURE__ */ factory(
        */
       _toString(options?: any): string {
         const items = this.items.map(function (node) {
-          return node.toString(options)
-        })
-        return '[' + items.join(', ') + ']'
+          return node.toString(options);
+        });
+        return '[' + items.join(', ') + ']';
       }
 
       /**
@@ -143,8 +137,8 @@ export const createArrayNode = /* #__PURE__ */ factory(
       toJSON(): { mathjs: string; items: MathNode[] } {
         return {
           mathjs: name,
-          items: this.items
-        }
+          items: this.items,
+        };
       }
 
       /**
@@ -155,7 +149,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * @returns {ArrayNode}
        */
       static fromJSON(json: { items: MathNode[] }): ArrayNode {
-        return new ArrayNode(json.items)
+        return new ArrayNode(json.items);
       }
 
       /**
@@ -166,13 +160,13 @@ export const createArrayNode = /* #__PURE__ */ factory(
        */
       _toHTML(options?: any): string {
         const items = this.items.map(function (node) {
-          return node.toHTML(options)
-        })
+          return node.toHTML(options);
+        });
         return (
           '<span class="math-parenthesis math-square-parenthesis">[</span>' +
           items.join('<span class="math-separator">,</span>') +
           '<span class="math-parenthesis math-square-parenthesis">]</span>'
-        )
+        );
       }
 
       /**
@@ -182,24 +176,23 @@ export const createArrayNode = /* #__PURE__ */ factory(
        */
       _toTex(options?: any): string {
         function itemsToTex(items: MathNode[], nested: boolean): string {
-          const mixedItems =
-            items.some(isArrayNode) && !items.every(isArrayNode)
-          const itemsFormRow = nested || mixedItems
-          const itemSep = itemsFormRow ? '&' : '\\\\'
+          const mixedItems = items.some(isArrayNode) && !items.every(isArrayNode);
+          const itemsFormRow = nested || mixedItems;
+          const itemSep = itemsFormRow ? '&' : '\\\\';
           const itemsTex = items
             .map(function (node: any) {
               if (node.items) {
-                return itemsToTex(node.items, !nested)
+                return itemsToTex(node.items, !nested);
               } else {
-                return node.toTex(options)
+                return node.toTex(options);
               }
             })
-            .join(itemSep)
+            .join(itemSep);
           return mixedItems || !itemsFormRow || (itemsFormRow && !nested)
             ? '\\begin{bmatrix}' + itemsTex + '\\end{bmatrix}'
-            : itemsTex
+            : itemsTex;
         }
-        return itemsToTex(this.items, false)
+        return itemsToTex(this.items, false);
       }
     }
 
@@ -207,10 +200,10 @@ export const createArrayNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(ArrayNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return ArrayNode
+    return ArrayNode;
   },
   { isClass: true, isNode: true }
-)
+);

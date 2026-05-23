@@ -11,15 +11,7 @@ export const unequalDocs = {
     'b = 6-2.8',
     'a != b',
     '50cm != 0.5m',
-    '5 cm != 2 inch'
+    '5 cm != 2 inch',
   ],
-  seealso: [
-    'equal',
-    'smaller',
-    'larger',
-    'smallerEq',
-    'largerEq',
-    'compare',
-    'deepEqual'
-  ]
-}
+  seealso: ['equal', 'smaller', 'larger', 'smallerEq', 'largerEq', 'compare', 'deepEqual'],
+};

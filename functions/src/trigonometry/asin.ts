@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for asin
 interface BigNumberType {
-  asin(): BigNumberType
+  asin(): BigNumberType;
 }
 
 interface ComplexType {
-  asin(): ComplexType
+  asin(): ComplexType;
 }
 
 interface ComplexConstructor {
-  new (re: number, im: number): ComplexType
+  new (re: number, im: number): ComplexType;
 }
 
 interface AsinDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  Complex: ComplexConstructor;
 }
 
-const name = 'asin'
-const dependencies = ['typed', 'config', 'Complex']
+const name = 'asin';
+const dependencies = ['typed', 'config', 'Complex'];
 
 export const createAsin = /* #__PURE__ */ factory(
   name,
@@ -55,19 +55,19 @@ export const createAsin = /* #__PURE__ */ factory(
     return typed(name, {
       number: function (x: number): number | ComplexType {
         if ((x >= -1 && x <= 1) || config.predictable) {
-          return Math.asin(x)
+          return Math.asin(x);
         } else {
-          return new Complex(x, 0).asin()
+          return new Complex(x, 0).asin();
         }
       },
 
       Complex: function (x: ComplexType): ComplexType {
-        return x.asin()
+        return x.asin();
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        return x.asin()
-      }
-    })
+        return x.asin();
+      },
+    });
   }
-)
+);

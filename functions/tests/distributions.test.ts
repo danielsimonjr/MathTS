@@ -56,11 +56,11 @@ describe('Probability Distribution Functions', () => {
     });
 
     it('normalCDF(1.96) ~ 0.975', () => {
-      expect(normalCDF(1.96)).toBeCloseTo(0.97500210, 4);
+      expect(normalCDF(1.96)).toBeCloseTo(0.9750021, 4);
     });
 
     it('normalCDF(-1.96) ~ 0.025', () => {
-      expect(normalCDF(-1.96)).toBeCloseTo(0.02499790, 4);
+      expect(normalCDF(-1.96)).toBeCloseTo(0.0249979, 4);
     });
 
     it('normalCDF(large) ~ 1', () => {
@@ -162,7 +162,7 @@ describe('Probability Distribution Functions', () => {
   // ===========================================================================
   describe('binomialPMF', () => {
     it('binomialPMF(3, 10, 0.5) ~ 0.1172', () => {
-      expect(binomialPMF(3, 10, 0.5)).toBeCloseTo(0.11718750, 6);
+      expect(binomialPMF(3, 10, 0.5)).toBeCloseTo(0.1171875, 6);
     });
 
     it('binomialPMF(0, 5, 0.3) ~ 0.1681', () => {

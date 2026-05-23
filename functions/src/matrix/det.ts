@@ -1,95 +1,91 @@
-import { isMatrix } from '../utils/is.js'
-import { clone } from '../utils/object.js'
-import { format } from '../utils/string.js'
-import { factory } from '../utils/factory.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
+import { isMatrix } from '../utils/is.js';
+import { clone } from '../utils/object.js';
+import { format } from '../utils/string.js';
+import { factory } from '../utils/factory.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Type definitions
-import type { BigNumber } from 'bignumber.js'
-import type Complex from 'complex.js'
+import type { BigNumber } from 'bignumber.js';
+import type Complex from 'complex.js';
 
 /** Scalar types supported by det */
-type Scalar = number | BigNumber | Complex
+type Scalar = number | BigNumber | Complex;
 
 /** Nested array of scalar values */
-type NestedArray<T = Scalar> = T | NestedArray<T>[]
+type NestedArray<T = Scalar> = T | NestedArray<T>[];
 
 /** Matrix data can be nested arrays of scalars */
-type MatrixData = NestedArray<Scalar>
+type MatrixData = NestedArray<Scalar>;
 
 /** Matrix interface */
 interface Matrix {
-  type: string
-  storage(): string
-  datatype(): string | undefined
-  size(): number[]
-  clone(): Matrix
-  toArray(): MatrixData
-  valueOf(): MatrixData
-  _data?: MatrixData
-  _size?: number[]
-  _datatype?: string
+  type: string;
+  storage(): string;
+  datatype(): string | undefined;
+  size(): number[];
+  clone(): Matrix;
+  toArray(): MatrixData;
+  valueOf(): MatrixData;
+  _data?: MatrixData;
+  _size?: number[];
+  _datatype?: string;
 }
 
 /** Typed function interface for math.js functions */
 interface TypedFunction<R = Scalar> {
-  (...args: unknown[]): R
-  find(func: TypedFunction, signature: string[]): TypedFunction<R>
+  (...args: unknown[]): R;
+  find(func: TypedFunction, signature: string[]): TypedFunction<R>;
 }
 
 /** Matrix constructor function */
 interface MatrixConstructor {
-  (data: Scalar[] | Scalar[][], storage?: 'dense' | 'sparse'): Matrix
+  (data: Scalar[] | Scalar[][], storage?: 'dense' | 'sparse'): Matrix;
 }
 
 /** Dependencies for det factory */
 interface Dependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  subtractScalar: TypedFunction<Scalar>
-  multiply: TypedFunction<Scalar>
-  divideScalar: TypedFunction<Scalar>
-  isZero: TypedFunction<boolean>
-  unaryMinus: TypedFunction<Scalar>
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  subtractScalar: TypedFunction<Scalar>;
+  multiply: TypedFunction<Scalar>;
+  divideScalar: TypedFunction<Scalar>;
+  isZero: TypedFunction<boolean>;
+  unaryMinus: TypedFunction<Scalar>;
 }
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 // Explicit formulas handle up to 4x4; WASM kicks in at 5x5
-const WASM_DET_THRESHOLD = 25 // 5x5 matrix
+const WASM_DET_THRESHOLD = 25; // 5x5 matrix
 
 /**
  * Check if a 2D array contains only plain numbers
  */
 function isPlainNumberMatrix(matrix: any[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
-    const row = matrix[i]
+    const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
       if (typeof row[j] !== 'number') {
-        return false
+        return false;
       }
     }
   }
-  return true
+  return true;
 }
 
 /**
  * Flatten a 2D array to a Float64Array in row-major order
  */
-function flattenToFloat64(
-  matrix: number[][],
-  rows: number,
-  cols: number
-): Float64Array {
-  const result = new Float64Array(rows * cols)
+function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
+  const result = new Float64Array(rows * cols);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j]
+      result[i * cols + j] = matrix[i][j];
     }
   }
-  return result
+  return result;
 }
 
-const name = 'det'
+const name = 'det';
 const dependencies = [
   'typed',
   'matrix',
@@ -97,21 +93,13 @@ const dependencies = [
   'multiply',
   'divideScalar',
   'isZero',
-  'unaryMinus'
-]
+  'unaryMinus',
+];
 
 export const createDet = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    subtractScalar,
-    multiply,
-    divideScalar,
-    isZero,
-    unaryMinus
-  }: Dependencies) => {
+  ({ typed, matrix, subtractScalar, multiply, divideScalar, isZero, unaryMinus }: Dependencies) => {
     /**
      * Calculate the determinant of a matrix.
      *
@@ -139,73 +127,62 @@ export const createDet = /* #__PURE__ */ factory(
      */
     return typed(name, {
       any: function (x: Scalar): Scalar {
-        return clone(x) as Scalar
+        return clone(x) as Scalar;
       },
 
       'Array | Matrix': function det(x: Scalar[] | Matrix): Scalar {
-        let size: number[]
-        let matrixValue: Matrix
+        let size: number[];
+        let matrixValue: Matrix;
 
         if (isMatrix(x)) {
-          matrixValue = x as Matrix
-          size = matrixValue.size()
+          matrixValue = x as Matrix;
+          size = matrixValue.size();
         } else if (Array.isArray(x)) {
-          matrixValue = matrix(x)
-          size = matrixValue.size()
+          matrixValue = matrix(x);
+          size = matrixValue.size();
         } else {
           // a scalar
-          return clone(x)
+          return clone(x);
         }
 
         switch (size.length) {
           case 0:
             // scalar
-            return clone(x) as unknown as Scalar
+            return clone(x) as unknown as Scalar;
 
           case 1:
             // vector
             if (size[0] === 1) {
-              return clone((matrixValue.valueOf() as Scalar[])[0]) as Scalar
+              return clone((matrixValue.valueOf() as Scalar[])[0]) as Scalar;
             }
             if (size[0] === 0) {
-              return 1 // det of an empty matrix is per definition 1
+              return 1; // det of an empty matrix is per definition 1
             } else {
-              throw new RangeError(
-                'Matrix must be square ' + '(size: ' + format(size, {}) + ')'
-              )
+              throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
             }
 
           case 2: {
             // two-dimensional array
-            const rows = size[0]
-            const cols = size[1]
+            const rows = size[0];
+            const cols = size[1];
             if (rows === cols) {
-              return _det(
-                matrixValue.clone().valueOf() as Scalar[][],
-                rows,
-                cols
-              )
+              return _det(matrixValue.clone().valueOf() as Scalar[][], rows, cols);
             }
             if (cols === 0) {
-              return 1 // det of an empty matrix is per definition 1
+              return 1; // det of an empty matrix is per definition 1
             } else {
-              throw new RangeError(
-                'Matrix must be square ' + '(size: ' + format(size, {}) + ')'
-              )
+              throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
             }
           }
 
           default:
             // multi dimensional array
             throw new RangeError(
-              'Matrix must be two dimensional ' +
-                '(size: ' +
-                format(size, {}) +
-                ')'
-            )
+              'Matrix must be two dimensional ' + '(size: ' + format(size, {}) + ')'
+            );
         }
-      }
-    })
+      },
+    });
 
     /**
      * Calculate the determinant of a matrix
@@ -217,23 +194,19 @@ export const createDet = /* #__PURE__ */ factory(
      */
     function _det(matrix: Scalar[][], rows: number, _cols: number): Scalar {
       // Try WASM for large matrices with plain numbers
-      const wasm = wasmLoader.getModule()
-      if (
-        wasm &&
-        rows * rows >= WASM_DET_THRESHOLD &&
-        isPlainNumberMatrix(matrix)
-      ) {
+      const wasm = wasmLoader.getModule();
+      if (wasm && rows * rows >= WASM_DET_THRESHOLD && isPlainNumberMatrix(matrix)) {
         try {
-          const flat = flattenToFloat64(matrix as number[][], rows, rows)
-          const a = wasmLoader.allocateFloat64Array(flat)
+          const flat = flattenToFloat64(matrix as number[][], rows, rows);
+          const a = wasmLoader.allocateFloat64Array(flat);
           // workPtr needs n*n f64 values for LU decomposition
-          const work = wasmLoader.allocateFloat64ArrayEmpty(rows * rows)
+          const work = wasmLoader.allocateFloat64ArrayEmpty(rows * rows);
           try {
-            const result = wasm.laDet(a.ptr, rows, work.ptr)
-            return result
+            const result = wasm.laDet(a.ptr, rows, work.ptr);
+            return result;
           } finally {
-            wasmLoader.free(a.ptr)
-            wasmLoader.free(work.ptr)
+            wasmLoader.free(a.ptr);
+            wasmLoader.free(work.ptr);
           }
         } catch {
           // Fall back to JS implementation on WASM error
@@ -242,68 +215,90 @@ export const createDet = /* #__PURE__ */ factory(
 
       if (rows === 1) {
         // this is a 1 x 1 matrix
-        return clone(matrix[0][0]) as Scalar
+        return clone(matrix[0][0]) as Scalar;
       } else if (rows === 2) {
         // this is a 2 x 2 matrix
         // the determinant of [a11,a12;a21,a22] is det = a11*a22-a21*a12
         return subtractScalar(
           multiply(matrix[0][0], matrix[1][1]),
           multiply(matrix[1][0], matrix[0][1])
-        )
+        );
       } else if (rows === 3 && isPlainNumberMatrix(matrix as number[][])) {
         // Explicit 3x3 determinant for plain numbers — avoids Bareiss loop overhead
         // det = a(ei-fh) - b(di-fg) + c(dh-eg)
-        const a = matrix[0][0] as number, b = matrix[0][1] as number, c = matrix[0][2] as number
-        const d = matrix[1][0] as number, e = matrix[1][1] as number, f = matrix[1][2] as number
-        const g = matrix[2][0] as number, h = matrix[2][1] as number, i = matrix[2][2] as number
-        return (a * (e * i - f * h)
-              - b * (d * i - f * g)
-              + c * (d * h - e * g)) as Scalar
+        const a = matrix[0][0] as number,
+          b = matrix[0][1] as number,
+          c = matrix[0][2] as number;
+        const d = matrix[1][0] as number,
+          e = matrix[1][1] as number,
+          f = matrix[1][2] as number;
+        const g = matrix[2][0] as number,
+          h = matrix[2][1] as number,
+          i = matrix[2][2] as number;
+        return (a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)) as Scalar;
       } else if (rows === 4 && isPlainNumberMatrix(matrix as number[][])) {
         // Explicit 4x4 determinant for plain numbers via cofactor expansion
-        const a00 = matrix[0][0] as number, a01 = matrix[0][1] as number
-        const a02 = matrix[0][2] as number, a03 = matrix[0][3] as number
-        const a10 = matrix[1][0] as number, a11 = matrix[1][1] as number
-        const a12 = matrix[1][2] as number, a13 = matrix[1][3] as number
-        const a20 = matrix[2][0] as number, a21 = matrix[2][1] as number
-        const a22 = matrix[2][2] as number, a23 = matrix[2][3] as number
-        const a30 = matrix[3][0] as number, a31 = matrix[3][1] as number
-        const a32 = matrix[3][2] as number, a33 = matrix[3][3] as number
+        const a00 = matrix[0][0] as number,
+          a01 = matrix[0][1] as number;
+        const a02 = matrix[0][2] as number,
+          a03 = matrix[0][3] as number;
+        const a10 = matrix[1][0] as number,
+          a11 = matrix[1][1] as number;
+        const a12 = matrix[1][2] as number,
+          a13 = matrix[1][3] as number;
+        const a20 = matrix[2][0] as number,
+          a21 = matrix[2][1] as number;
+        const a22 = matrix[2][2] as number,
+          a23 = matrix[2][3] as number;
+        const a30 = matrix[3][0] as number,
+          a31 = matrix[3][1] as number;
+        const a32 = matrix[3][2] as number,
+          a33 = matrix[3][3] as number;
 
-        return (
-          a00 * (a11 * (a22 * a33 - a23 * a32) - a12 * (a21 * a33 - a23 * a31) + a13 * (a21 * a32 - a22 * a31))
-        - a01 * (a10 * (a22 * a33 - a23 * a32) - a12 * (a20 * a33 - a23 * a30) + a13 * (a20 * a32 - a22 * a30))
-        + a02 * (a10 * (a21 * a33 - a23 * a31) - a11 * (a20 * a33 - a23 * a30) + a13 * (a20 * a31 - a21 * a30))
-        - a03 * (a10 * (a21 * a32 - a22 * a31) - a11 * (a20 * a32 - a22 * a30) + a12 * (a20 * a31 - a21 * a30))
-        ) as Scalar
+        return (a00 *
+          (a11 * (a22 * a33 - a23 * a32) -
+            a12 * (a21 * a33 - a23 * a31) +
+            a13 * (a21 * a32 - a22 * a31)) -
+          a01 *
+            (a10 * (a22 * a33 - a23 * a32) -
+              a12 * (a20 * a33 - a23 * a30) +
+              a13 * (a20 * a32 - a22 * a30)) +
+          a02 *
+            (a10 * (a21 * a33 - a23 * a31) -
+              a11 * (a20 * a33 - a23 * a30) +
+              a13 * (a20 * a31 - a21 * a30)) -
+          a03 *
+            (a10 * (a21 * a32 - a22 * a31) -
+              a11 * (a20 * a32 - a22 * a30) +
+              a12 * (a20 * a31 - a21 * a30))) as Scalar;
       } else {
         // Bareiss algorithm
         // this algorithm have same complexity as LUP decomposition (O(n^3))
         // but it preserve precision of floating point more relative to the LUP decomposition
-        let negated = false
-        const rowIndices: number[] = []
+        let negated = false;
+        const rowIndices: number[] = [];
         for (let i = 0; i < rows; i++) {
-          rowIndices[i] = i
+          rowIndices[i] = i;
         }
         for (let k = 0; k < rows; k++) {
-          let k_ = rowIndices[k]
+          let k_ = rowIndices[k];
           if (isZero(matrix[k_][k])) {
-            let _k
+            let _k;
             for (_k = k + 1; _k < rows; _k++) {
               if (!isZero(matrix[rowIndices[_k]][k])) {
-                k_ = rowIndices[_k]
-                rowIndices[_k] = rowIndices[k]
-                rowIndices[k] = k_
-                negated = !negated
-                break
+                k_ = rowIndices[_k];
+                rowIndices[_k] = rowIndices[k];
+                rowIndices[k] = k_;
+                negated = !negated;
+                break;
               }
             }
-            if (_k === rows) return matrix[k_][k] // some zero of the type
+            if (_k === rows) return matrix[k_][k]; // some zero of the type
           }
-          const piv = matrix[k_][k]
-          const piv_ = k === 0 ? 1 : matrix[rowIndices[k - 1]][k - 1]
+          const piv = matrix[k_][k];
+          const piv_ = k === 0 ? 1 : matrix[rowIndices[k - 1]][k - 1];
           for (let i = k + 1; i < rows; i++) {
-            const i_ = rowIndices[i]
+            const i_ = rowIndices[i];
             for (let j = k + 1; j < rows; j++) {
               matrix[i_][j] = divideScalar(
                 subtractScalar(
@@ -311,13 +306,13 @@ export const createDet = /* #__PURE__ */ factory(
                   multiply(matrix[i_][k], matrix[k_][j])
                 ),
                 piv_
-              )
+              );
             }
           }
         }
-        const det = matrix[rowIndices[rows - 1]][rows - 1]
-        return negated ? unaryMinus(det) : det
+        const det = matrix[rowIndices[rows - 1]][rows - 1];
+        return negated ? unaryMinus(det) : det;
       }
     }
   }
-)
+);

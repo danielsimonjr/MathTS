@@ -1,17 +1,13 @@
-import {
-  containsCollections,
-  deepForEach,
-  reduce
-} from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { safeNumberType } from '../utils/number.js'
-import { improveErrorMessage } from './utils/improveErrorMessage.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { containsCollections, deepForEach, reduce } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { safeNumberType } from '../utils/number.js';
+import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_MIN_THRESHOLD = 100
+const WASM_MIN_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -19,40 +15,32 @@ const WASM_MIN_THRESHOLD = 100
 function isFlatNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 // Type definitions for min
 interface MatrixType {
-  forEach(
-    callback: (value: unknown) => void,
-    skipZeros: boolean,
-    recurse: boolean
-  ): void
-  map(
-    callback: (value: unknown) => unknown,
-    skipZeros: boolean,
-    recurse: boolean
-  ): MatrixType
-  size(): number[]
-  valueOf(): unknown[] | unknown[][]
-  create(data: unknown[], datatype?: string): MatrixType
-  datatype(): string | undefined
+  forEach(callback: (value: unknown) => void, skipZeros: boolean, recurse: boolean): void;
+  map(callback: (value: unknown) => unknown, skipZeros: boolean, recurse: boolean): MatrixType;
+  size(): number[];
+  valueOf(): unknown[] | unknown[][];
+  create(data: unknown[], datatype?: string): MatrixType;
+  datatype(): string | undefined;
 }
 
 interface MinDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  numeric: TypedFunction
-  smaller: TypedFunction
-  isNaN: TypedFunction
+  typed: TypedFunction;
+  config: ConfigOptions;
+  numeric: TypedFunction;
+  smaller: TypedFunction;
+  isNaN: TypedFunction;
 }
 
-const name = 'min'
-const dependencies = ['typed', 'config', 'numeric', 'smaller', 'isNaN']
+const name = 'min';
+const dependencies = ['typed', 'config', 'numeric', 'smaller', 'isNaN'];
 
 export const createMin = /* #__PURE__ */ factory(
   name,
@@ -98,19 +86,19 @@ export const createMin = /* #__PURE__ */ factory(
         array: unknown[] | MatrixType,
         dim: number | { valueOf(): number }
       ): unknown {
-        const dimValue = typeof dim === 'number' ? dim : dim.valueOf()
-        return reduce(array as any, dimValue, _smallest)
+        const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
+        return reduce(array as any, dimValue, _smallest);
       },
 
       // min(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
         if (containsCollections(args)) {
-          throw new TypeError('Scalar values expected in function min')
+          throw new TypeError('Scalar values expected in function min');
         }
 
-        return _min(args)
-      }
-    })
+        return _min(args);
+      },
+    });
 
     /**
      * Return the smallest of two values
@@ -121,9 +109,9 @@ export const createMin = /* #__PURE__ */ factory(
      */
     function _smallest(x: unknown, y: unknown): unknown {
       try {
-        return smaller(x, y) ? x : y
+        return smaller(x, y) ? x : y;
       } catch (err) {
-        throw improveErrorMessage(err, 'min', y)
+        throw improveErrorMessage(err, 'min', y);
       }
     }
 
@@ -137,14 +125,14 @@ export const createMin = /* #__PURE__ */ factory(
       // WASM fast path for flat arrays of plain numbers
       if (Array.isArray(array) && array.length >= WASM_MIN_THRESHOLD) {
         if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule()
+          const wasm = wasmLoader.getModule();
           if (wasm) {
             try {
-              const alloc = wasmLoader.allocateFloat64Array(array)
+              const alloc = wasmLoader.allocateFloat64Array(array);
               try {
-                return wasm.statsMin(alloc.ptr, array.length)
+                return wasm.statsMin(alloc.ptr, array.length);
               } finally {
-                wasmLoader.free(alloc.ptr)
+                wasmLoader.free(alloc.ptr);
               }
             } catch {
               // Fall back to JS implementation on WASM error
@@ -154,30 +142,30 @@ export const createMin = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback for mixed types, BigNumber, Complex, etc.
-      let min: unknown
+      let min: unknown;
 
       deepForEach(array as any, function (value: unknown) {
         try {
           if (mathIsNaN(value)) {
-            min = value
+            min = value;
           } else if (min === undefined || smaller(value, min)) {
-            min = value
+            min = value;
           }
         } catch (err) {
-          throw improveErrorMessage(err, 'min', value)
+          throw improveErrorMessage(err, 'min', value);
         }
-      })
+      });
 
       if (min === undefined) {
-        throw new Error('Cannot calculate min of an empty array')
+        throw new Error('Cannot calculate min of an empty array');
       }
 
       // make sure returning numeric value: parse a string into a numeric value
       if (typeof min === 'string') {
-        min = numeric(min, safeNumberType(min, config))
+        min = numeric(min, safeNumberType(min, config));
       }
 
-      return min
+      return min;
     }
   }
-)
+);

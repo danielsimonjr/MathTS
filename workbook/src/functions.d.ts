@@ -10,8 +10,5 @@ declare module '@danielsimonjr/mathts-functions' {
   /**
    * Evaluate a math expression string against an optional variable scope.
    */
-  export function evaluate(
-    expr: string,
-    scope?: Record<string, unknown>
-  ): unknown;
+  export function evaluate(expr: string, scope?: Record<string, unknown>): unknown;
 }

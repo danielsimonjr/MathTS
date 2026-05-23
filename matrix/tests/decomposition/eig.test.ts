@@ -25,7 +25,7 @@ function matvec(A: number[][], v: number[]): number[] {
  * Helper: scalar multiply vector
  */
 function scalarMul(s: number, v: number[]): number[] {
-  return v.map(x => x * s);
+  return v.map((x) => x * s);
 }
 
 /**
@@ -97,7 +97,7 @@ describe('Eigenvalue Decomposition', () => {
       const result = eig(A);
 
       // Eigenvalues should be diagonal elements
-      const eigenvalues = result.values.map(e => e.re).sort((a, b) => a - b);
+      const eigenvalues = result.values.map((e) => e.re).sort((a, b) => a - b);
       expect(eigenvalues[0]).toBeCloseTo(2);
       expect(eigenvalues[1]).toBeCloseTo(3);
       expect(eigenvalues[2]).toBeCloseTo(5);
@@ -113,7 +113,7 @@ describe('Eigenvalue Decomposition', () => {
 
       // Characteristic polynomial: λ² - 7λ + 10 = 0
       // λ = (7 ± √9) / 2 = 5 or 2
-      const eigenvalues = result.values.map(e => e.re).sort((a, b) => a - b);
+      const eigenvalues = result.values.map((e) => e.re).sort((a, b) => a - b);
       expect(eigenvalues[0]).toBeCloseTo(2);
       expect(eigenvalues[1]).toBeCloseTo(5);
     });
@@ -161,9 +161,7 @@ describe('Eigenvalue Decomposition', () => {
       const result = eig(A);
 
       for (let i = 0; i < result.values.length; i++) {
-        expect(
-          checkEigenpair(A, result.values[i], result.vectors[i])
-        ).toBe(true);
+        expect(checkEigenpair(A, result.values[i], result.vectors[i])).toBe(true);
       }
     });
 
@@ -194,7 +192,7 @@ describe('Eigenvalue Decomposition', () => {
       const result = eig(A);
 
       // Eigenvalues are diagonal elements
-      const eigenvalues = result.values.map(e => e.re).sort((a, b) => a - b);
+      const eigenvalues = result.values.map((e) => e.re).sort((a, b) => a - b);
       expect(eigenvalues[0]).toBeCloseTo(1);
       expect(eigenvalues[1]).toBeCloseTo(4);
       expect(eigenvalues[2]).toBeCloseTo(6);
@@ -211,7 +209,7 @@ describe('Eigenvalue Decomposition', () => {
       const result = eig(A);
 
       // Eigenvalues: e^{±iθ} = cos(θ) ± i*sin(θ)
-      const hasComplex = result.values.some(e => Math.abs(e.im) > 0.01);
+      const hasComplex = result.values.some((e) => Math.abs(e.im) > 0.01);
       expect(hasComplex).toBe(true);
     });
   });
@@ -227,7 +225,7 @@ describe('Eigenvalue Decomposition', () => {
 
       expect(values.length).toBe(2);
       // Eigenvalues: (5 ± √33) / 2
-      const realParts = values.map(e => e.re).sort((a, b) => a - b);
+      const realParts = values.map((e) => e.re).sort((a, b) => a - b);
       expect(realParts[0]).toBeCloseTo((5 - Math.sqrt(33)) / 2);
       expect(realParts[1]).toBeCloseTo((5 + Math.sqrt(33)) / 2);
     });
@@ -295,7 +293,7 @@ describe('Eigenvalue Decomposition', () => {
 
       const result = eig(A);
 
-      const eigenvalues = result.values.map(e => e.re).sort((a, b) => a - b);
+      const eigenvalues = result.values.map((e) => e.re).sort((a, b) => a - b);
       expect(eigenvalues[0]).toBeCloseTo(1e-10, 5);
       expect(eigenvalues[1]).toBeCloseTo(1);
     });
@@ -337,9 +335,7 @@ describe('Eigenvalue Decomposition', () => {
       // Check eigenpairs for real eigenvalues
       for (let i = 0; i < result.values.length; i++) {
         if (Math.abs(result.values[i].im) < 1e-6) {
-          expect(
-            checkEigenpair(A, result.values[i], result.vectors[i], 1e-4)
-          ).toBe(true);
+          expect(checkEigenpair(A, result.values[i], result.vectors[i], 1e-4)).toBe(true);
         }
       }
     });

@@ -8,7 +8,7 @@ export const forEachDocs = {
     'numberOfPets = {}',
     'addPet(n) = numberOfPets[n] = (numberOfPets[n] ? numberOfPets[n]:0 ) + 1;',
     'forEach(["Dog","Cat","Cat"], addPet)',
-    'numberOfPets'
+    'numberOfPets',
   ],
-  seealso: ['map', 'sort', 'filter']
-}
+  seealso: ['map', 'sort', 'filter'],
+};

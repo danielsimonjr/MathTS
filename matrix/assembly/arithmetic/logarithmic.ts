@@ -13,7 +13,7 @@
  * @returns e^x
  */
 export function exp(x: f64): f64 {
-  return Math.exp(x)
+  return Math.exp(x);
 }
 
 /**
@@ -22,7 +22,7 @@ export function exp(x: f64): f64 {
  * @returns e^x - 1
  */
 export function expm1(x: f64): f64 {
-  return Math.expm1(x)
+  return Math.expm1(x);
 }
 
 /**
@@ -31,7 +31,7 @@ export function expm1(x: f64): f64 {
  * @returns ln(x)
  */
 export function log(x: f64): f64 {
-  return Math.log(x)
+  return Math.log(x);
 }
 
 /**
@@ -40,7 +40,7 @@ export function log(x: f64): f64 {
  * @returns log10(x)
  */
 export function log10(x: f64): f64 {
-  return Math.log10(x)
+  return Math.log10(x);
 }
 
 /**
@@ -49,7 +49,7 @@ export function log10(x: f64): f64 {
  * @returns log2(x)
  */
 export function log2(x: f64): f64 {
-  return Math.log2(x)
+  return Math.log2(x);
 }
 
 /**
@@ -58,7 +58,7 @@ export function log2(x: f64): f64 {
  * @returns ln(1 + x)
  */
 export function log1p(x: f64): f64 {
-  return Math.log1p(x)
+  return Math.log1p(x);
 }
 
 /**
@@ -68,7 +68,7 @@ export function log1p(x: f64): f64 {
  * @returns log_base(x)
  */
 export function logBase(x: f64, base: f64): f64 {
-  return Math.log(x) / Math.log(base)
+  return Math.log(x) / Math.log(base);
 }
 
 /**
@@ -80,9 +80,9 @@ export function logBase(x: f64, base: f64): f64 {
 export function nthRoot(x: f64, n: f64): f64 {
   // Handle negative x for odd roots
   if (x < 0 && n % 2 !== 0) {
-    return -Math.pow(-x, 1.0 / n)
+    return -Math.pow(-x, 1.0 / n);
   }
-  return Math.pow(x, 1.0 / n)
+  return Math.pow(x, 1.0 / n);
 }
 
 /**
@@ -91,7 +91,7 @@ export function nthRoot(x: f64, n: f64): f64 {
  * @returns sqrt(x)
  */
 export function sqrt(x: f64): f64 {
-  return Math.sqrt(x)
+  return Math.sqrt(x);
 }
 
 /**
@@ -101,7 +101,7 @@ export function sqrt(x: f64): f64 {
  * @returns x^y
  */
 export function pow(x: f64, y: f64): f64 {
-  return Math.pow(x, y)
+  return Math.pow(x, y);
 }
 
 /**
@@ -112,7 +112,7 @@ export function pow(x: f64, y: f64): f64 {
  */
 export function expArray(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    unchecked(output[i] = Math.exp(unchecked(input[i])))
+    unchecked((output[i] = Math.exp(unchecked(input[i]))));
   }
 }
 
@@ -124,7 +124,7 @@ export function expArray(input: Float64Array, output: Float64Array, length: i32)
  */
 export function logArray(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    unchecked(output[i] = Math.log(unchecked(input[i])))
+    unchecked((output[i] = Math.log(unchecked(input[i]))));
   }
 }
 
@@ -136,7 +136,7 @@ export function logArray(input: Float64Array, output: Float64Array, length: i32)
  */
 export function log10Array(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    unchecked(output[i] = Math.log10(unchecked(input[i])))
+    unchecked((output[i] = Math.log10(unchecked(input[i]))));
   }
 }
 
@@ -148,7 +148,7 @@ export function log10Array(input: Float64Array, output: Float64Array, length: i3
  */
 export function log2Array(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    unchecked(output[i] = Math.log2(unchecked(input[i])))
+    unchecked((output[i] = Math.log2(unchecked(input[i]))));
   }
 }
 
@@ -160,7 +160,7 @@ export function log2Array(input: Float64Array, output: Float64Array, length: i32
  */
 export function sqrtArray(input: Float64Array, output: Float64Array, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    unchecked(output[i] = Math.sqrt(unchecked(input[i])))
+    unchecked((output[i] = Math.sqrt(unchecked(input[i]))));
   }
 }
 
@@ -171,8 +171,13 @@ export function sqrtArray(input: Float64Array, output: Float64Array, length: i32
  * @param output Output array
  * @param length Length of arrays
  */
-export function powConstantArray(input: Float64Array, exponent: f64, output: Float64Array, length: i32): void {
+export function powConstantArray(
+  input: Float64Array,
+  exponent: f64,
+  output: Float64Array,
+  length: i32
+): void {
   for (let i: i32 = 0; i < length; i++) {
-    unchecked(output[i] = Math.pow(unchecked(input[i]), exponent))
+    unchecked((output[i] = Math.pow(unchecked(input[i]), exponent)));
   }
 }

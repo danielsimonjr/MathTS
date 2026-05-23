@@ -2,54 +2,54 @@
 // SPDX-License-Identifier: ISC
 // Derived from https://github.com/medikoo/lru-queue
 export function lruQueue(limit: any) {
-  let size = 0
-  let base = 1
-  let queue = Object.create(null)
-  let map = Object.create(null)
-  let index = 0
+  let size = 0;
+  let base = 1;
+  let queue = Object.create(null);
+  let map = Object.create(null);
+  let index = 0;
   const del = function (id: any) {
-    const oldIndex = map[id]
-    if (!oldIndex) return
-    delete queue[oldIndex]
-    delete map[id]
-    --size
-    if (base !== oldIndex) return
+    const oldIndex = map[id];
+    if (!oldIndex) return;
+    delete queue[oldIndex];
+    delete map[id];
+    --size;
+    if (base !== oldIndex) return;
     if (!size) {
-      index = 0
-      base = 1
-      return
+      index = 0;
+      base = 1;
+      return;
     }
     while (!Object.prototype.hasOwnProperty.call(queue, ++base)) {
       /* empty */
     }
-  }
-  limit = Math.abs(limit)
+  };
+  limit = Math.abs(limit);
   return {
     hit: function (id: any) {
-      const oldIndex = map[id]
-      const nuIndex = ++index
-      queue[nuIndex] = id
-      map[id] = nuIndex
+      const oldIndex = map[id];
+      const nuIndex = ++index;
+      queue[nuIndex] = id;
+      map[id] = nuIndex;
       if (!oldIndex) {
-        ++size
-        if (size <= limit) return undefined
-        id = queue[base]
-        del(id)
-        return id
+        ++size;
+        if (size <= limit) return undefined;
+        id = queue[base];
+        del(id);
+        return id;
       }
-      delete queue[oldIndex]
-      if (base !== oldIndex) return undefined
+      delete queue[oldIndex];
+      if (base !== oldIndex) return undefined;
       while (!Object.prototype.hasOwnProperty.call(queue, ++base)) {
         /* empty */
       }
-      return undefined
+      return undefined;
     },
     delete: del,
     clear: function () {
-      size = index = 0
-      base = 1
-      queue = Object.create(null)
-      map = Object.create(null)
-    }
-  }
+      size = index = 0;
+      base = 1;
+      queue = Object.create(null);
+      map = Object.create(null);
+    },
+  };
 }

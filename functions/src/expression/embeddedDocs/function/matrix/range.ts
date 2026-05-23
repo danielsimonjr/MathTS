@@ -6,10 +6,9 @@ export const rangeDocs = {
     'start:step:end',
     'range(start, end)',
     'range(start, end, step)',
-    'range(string)'
+    'range(string)',
   ],
-  description:
-    'Create a range. Lower bound of the range is included, upper bound is excluded.',
+  description: 'Create a range. Lower bound of the range is included, upper bound is excluded.',
   examples: [
     '1:5',
     '3:-1:-3',
@@ -18,7 +17,7 @@ export const rangeDocs = {
     'range("4:10")',
     'range(1m, 1m, 3m)',
     'a = [1, 2, 3, 4; 5, 6, 7, 8]',
-    'a[1:2, 1:2]'
+    'a[1:2, 1:2]',
   ],
   seealso: [
     'concat',
@@ -32,6 +31,6 @@ export const rangeDocs = {
     'subset',
     'trace',
     'transpose',
-    'zeros'
-  ]
-}
+    'zeros',
+  ],
+};

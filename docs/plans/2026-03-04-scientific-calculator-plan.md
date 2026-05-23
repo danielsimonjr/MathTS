@@ -15,6 +15,7 @@
 ### Task 1: Initialize Electron + React + Vite project
 
 **Files:**
+
 - Create: `demo/mathjs-calc/package.json`
 - Create: `demo/mathjs-calc/tsconfig.json`
 - Create: `demo/mathjs-calc/vite.config.ts`
@@ -117,8 +118,8 @@ Create `demo/mathjs-calc/tsconfig.electron.json`:
 Create `demo/mathjs-calc/vite.config.ts`:
 
 ```typescript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
@@ -129,7 +130,7 @@ export default defineConfig({
   server: {
     port: 5173,
   },
-})
+});
 ```
 
 **Step 4: Create Electron main process**
@@ -137,14 +138,14 @@ export default defineConfig({
 Create `demo/mathjs-calc/electron/main.ts`:
 
 ```typescript
-import { app, BrowserWindow, ipcMain } from 'electron'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const isDev = process.env.NODE_ENV !== 'production'
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const isDev = process.env.NODE_ENV !== 'production';
 
-let mainWindow: BrowserWindow | null = null
+let mainWindow: BrowserWindow | null = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -158,29 +159,29 @@ function createWindow() {
       nodeIntegration: false,
     },
     title: 'mathjs-calc',
-  })
+  });
 
   if (isDev) {
-    mainWindow.loadURL('http://localhost:5173')
-    mainWindow.webContents.openDevTools()
+    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
   mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+    mainWindow = null;
+  });
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
-})
+  if (process.platform !== 'darwin') app.quit();
+});
 
 app.on('activate', () => {
-  if (mainWindow === null) createWindow()
-})
+  if (mainWindow === null) createWindow();
+});
 ```
 
 **Step 5: Create preload script**
@@ -188,13 +189,13 @@ app.on('activate', () => {
 Create `demo/mathjs-calc/electron/preload.ts`:
 
 ```typescript
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   runWasmOperation: (operation: string, data: unknown) =>
     ipcRenderer.invoke('wasm:run', operation, data),
   getSystemInfo: () => ipcRenderer.invoke('system:info'),
-})
+});
 ```
 
 **Step 6: Create index.html**
@@ -221,22 +222,22 @@ Create `demo/mathjs-calc/index.html`:
 Create `demo/mathjs-calc/src/main.tsx`:
 
 ```tsx
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import './index.css'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
-)
+);
 ```
 
 Create `demo/mathjs-calc/src/App.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 export default function App() {
   return (
@@ -244,7 +245,7 @@ export default function App() {
       <h1 className="text-2xl font-bold">mathjs-calc</h1>
       <p className="text-gray-400 mt-2">Scientific Calculator — powered by math.js TS+AS+WASM</p>
     </div>
-  )
+  );
 }
 ```
 
@@ -268,7 +269,7 @@ export default {
     extend: {},
   },
   plugins: [],
-}
+};
 ```
 
 Create `demo/mathjs-calc/postcss.config.js`:
@@ -279,7 +280,7 @@ export default {
     tailwindcss: {},
     autoprefixer: {},
   },
-}
+};
 ```
 
 **Step 9: Install dependencies and verify app launches**
@@ -304,6 +305,7 @@ git commit -m "feat(demo): scaffold mathjs-calc Electron + React + Vite project"
 ### Task 2: Integrate math.js and verify expression evaluation
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/hooks/useMathParser.ts`
 - Modify: `demo/mathjs-calc/src/App.tsx`
 
@@ -312,31 +314,31 @@ git commit -m "feat(demo): scaffold mathjs-calc Electron + React + Vite project"
 Create `demo/mathjs-calc/src/hooks/useMathParser.ts`:
 
 ```typescript
-import { useState, useRef, useCallback } from 'react'
-import { create, all, type MathJsInstance } from 'mathjs'
+import { useState, useRef, useCallback } from 'react';
+import { create, all, type MathJsInstance } from 'mathjs';
 
 interface EvalResult {
-  expression: string
-  result: string
-  type: string
-  error: string | null
-  timestamp: number
-  executionTime: number
+  expression: string;
+  result: string;
+  type: string;
+  error: string | null;
+  timestamp: number;
+  executionTime: number;
 }
 
 export function useMathParser() {
-  const mathRef = useRef<MathJsInstance>(create(all))
-  const parserRef = useRef(mathRef.current.parser())
-  const [history, setHistory] = useState<EvalResult[]>([])
+  const mathRef = useRef<MathJsInstance>(create(all));
+  const parserRef = useRef(mathRef.current.parser());
+  const [history, setHistory] = useState<EvalResult[]>([]);
 
   const evaluate = useCallback((expression: string): EvalResult => {
-    const start = performance.now()
-    let entry: EvalResult
+    const start = performance.now();
+    let entry: EvalResult;
 
     try {
-      const raw = parserRef.current.evaluate(expression)
-      const result = mathRef.current.format(raw, { precision: 14 })
-      const type = mathRef.current.typeOf(raw)
+      const raw = parserRef.current.evaluate(expression);
+      const result = mathRef.current.format(raw, { precision: 14 });
+      const type = mathRef.current.typeOf(raw);
       entry = {
         expression,
         result,
@@ -344,7 +346,7 @@ export function useMathParser() {
         error: null,
         timestamp: Date.now(),
         executionTime: performance.now() - start,
-      }
+      };
     } catch (err) {
       entry = {
         expression,
@@ -353,22 +355,22 @@ export function useMathParser() {
         error: err instanceof Error ? err.message : String(err),
         timestamp: Date.now(),
         executionTime: performance.now() - start,
-      }
+      };
     }
 
-    setHistory((prev) => [entry, ...prev])
-    return entry
-  }, [])
+    setHistory((prev) => [entry, ...prev]);
+    return entry;
+  }, []);
 
   const clearParser = useCallback(() => {
-    parserRef.current.clear()
-  }, [])
+    parserRef.current.clear();
+  }, []);
 
   const getVariables = useCallback((): Record<string, unknown> => {
-    return parserRef.current.getAll()
-  }, [])
+    return parserRef.current.getAll();
+  }, []);
 
-  return { evaluate, history, clearParser, getVariables, math: mathRef.current }
+  return { evaluate, history, clearParser, getVariables, math: mathRef.current };
 }
 ```
 
@@ -377,34 +379,34 @@ export function useMathParser() {
 Replace `demo/mathjs-calc/src/App.tsx`:
 
 ```tsx
-import React, { useState, useCallback } from 'react'
-import { useMathParser } from './hooks/useMathParser'
+import React, { useState, useCallback } from 'react';
+import { useMathParser } from './hooks/useMathParser';
 
 export default function App() {
-  const { evaluate, history } = useMathParser()
-  const [input, setInput] = useState('')
-  const [currentResult, setCurrentResult] = useState<string | null>(null)
-  const [currentError, setCurrentError] = useState<string | null>(null)
+  const { evaluate, history } = useMathParser();
+  const [input, setInput] = useState('');
+  const [currentResult, setCurrentResult] = useState<string | null>(null);
+  const [currentError, setCurrentError] = useState<string | null>(null);
 
   const handleEvaluate = useCallback(() => {
-    if (!input.trim()) return
-    const result = evaluate(input.trim())
+    if (!input.trim()) return;
+    const result = evaluate(input.trim());
     if (result.error) {
-      setCurrentError(result.error)
-      setCurrentResult(null)
+      setCurrentError(result.error);
+      setCurrentResult(null);
     } else {
-      setCurrentResult(result.result)
-      setCurrentError(null)
+      setCurrentResult(result.result);
+      setCurrentError(null);
     }
-    setInput('')
-  }, [input, evaluate])
+    setInput('');
+  }, [input, evaluate]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') handleEvaluate()
+      if (e.key === 'Enter') handleEvaluate();
     },
     [handleEvaluate]
-  )
+  );
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
@@ -430,9 +432,7 @@ export default function App() {
         {currentResult && (
           <div className="mt-2 text-green-400 font-mono text-lg">= {currentResult}</div>
         )}
-        {currentError && (
-          <div className="mt-2 text-red-400 font-mono text-sm">{currentError}</div>
-        )}
+        {currentError && <div className="mt-2 text-red-400 font-mono text-sm">{currentError}</div>}
       </header>
 
       {/* History */}
@@ -451,7 +451,7 @@ export default function App() {
         ))}
       </main>
     </div>
-  )
+  );
 }
 ```
 
@@ -481,6 +481,7 @@ git commit -m "feat(demo): integrate math.js parser with expression input and hi
 ### Task 3: Create Zustand store for shared state
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/store/useStore.ts`
 - Create: `demo/mathjs-calc/src/types.ts`
 
@@ -489,44 +490,44 @@ git commit -m "feat(demo): integrate math.js parser with expression input and hi
 Create `demo/mathjs-calc/src/types.ts`:
 
 ```typescript
-export type EngineMode = 'js' | 'wasm' | 'auto'
-export type AngleMode = 'deg' | 'rad' | 'grad'
-export type NumberType = 'number' | 'BigNumber' | 'Complex' | 'Fraction'
-export type PanelId = 'calculator' | 'matrix' | 'signal' | 'statistics' | 'performance'
+export type EngineMode = 'js' | 'wasm' | 'auto';
+export type AngleMode = 'deg' | 'rad' | 'grad';
+export type NumberType = 'number' | 'BigNumber' | 'Complex' | 'Fraction';
+export type PanelId = 'calculator' | 'matrix' | 'signal' | 'statistics' | 'performance';
 
 export interface HistoryEntry {
-  id: string
-  expression: string
-  result: string
-  type: string
-  error: string | null
-  panel: PanelId
-  engineUsed: EngineMode
-  executionTime: number
-  timestamp: number
+  id: string;
+  expression: string;
+  result: string;
+  type: string;
+  error: string | null;
+  panel: PanelId;
+  engineUsed: EngineMode;
+  executionTime: number;
+  timestamp: number;
 }
 
 export interface BenchmarkResult {
-  operation: string
-  category: string
-  size: number
-  jsTime: number
-  wasmTime: number
-  speedup: number
+  operation: string;
+  category: string;
+  size: number;
+  jsTime: number;
+  wasmTime: number;
+  speedup: number;
 }
 
 export interface WasmCapabilities {
-  wasmAvailable: boolean
-  simdAvailable: boolean
-  parallelAvailable: boolean
-  coreCount: number
+  wasmAvailable: boolean;
+  simdAvailable: boolean;
+  parallelAvailable: boolean;
+  coreCount: number;
 }
 
 export interface AppConfig {
-  angleMode: AngleMode
-  numberType: NumberType
-  precision: number
-  engine: EngineMode
+  angleMode: AngleMode;
+  numberType: NumberType;
+  precision: number;
+  engine: EngineMode;
 }
 ```
 
@@ -535,31 +536,31 @@ export interface AppConfig {
 Create `demo/mathjs-calc/src/store/useStore.ts`:
 
 ```typescript
-import { create } from 'zustand'
-import type { AppConfig, HistoryEntry, PanelId, WasmCapabilities, EngineMode } from '../types'
+import { create } from 'zustand';
+import type { AppConfig, HistoryEntry, PanelId, WasmCapabilities, EngineMode } from '../types';
 
 interface AppState {
   // Navigation
-  activePanel: PanelId
-  setActivePanel: (panel: PanelId) => void
+  activePanel: PanelId;
+  setActivePanel: (panel: PanelId) => void;
 
   // Config
-  config: AppConfig
-  setEngine: (engine: EngineMode) => void
-  setConfig: (partial: Partial<AppConfig>) => void
+  config: AppConfig;
+  setEngine: (engine: EngineMode) => void;
+  setConfig: (partial: Partial<AppConfig>) => void;
 
   // History
-  history: HistoryEntry[]
-  addHistory: (entry: HistoryEntry) => void
-  clearHistory: () => void
+  history: HistoryEntry[];
+  addHistory: (entry: HistoryEntry) => void;
+  clearHistory: () => void;
 
   // WASM
-  wasmCapabilities: WasmCapabilities | null
-  setWasmCapabilities: (caps: WasmCapabilities) => void
+  wasmCapabilities: WasmCapabilities | null;
+  setWasmCapabilities: (caps: WasmCapabilities) => void;
 
   // Benchmarks
-  benchmarkInline: boolean
-  toggleBenchmarkInline: () => void
+  benchmarkInline: boolean;
+  toggleBenchmarkInline: () => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -572,23 +573,19 @@ export const useStore = create<AppState>((set) => ({
     precision: 14,
     engine: 'auto',
   },
-  setEngine: (engine) =>
-    set((state) => ({ config: { ...state.config, engine } })),
-  setConfig: (partial) =>
-    set((state) => ({ config: { ...state.config, ...partial } })),
+  setEngine: (engine) => set((state) => ({ config: { ...state.config, engine } })),
+  setConfig: (partial) => set((state) => ({ config: { ...state.config, ...partial } })),
 
   history: [],
-  addHistory: (entry) =>
-    set((state) => ({ history: [entry, ...state.history].slice(0, 500) })),
+  addHistory: (entry) => set((state) => ({ history: [entry, ...state.history].slice(0, 500) })),
   clearHistory: () => set({ history: [] }),
 
   wasmCapabilities: null,
   setWasmCapabilities: (caps) => set({ wasmCapabilities: caps }),
 
   benchmarkInline: false,
-  toggleBenchmarkInline: () =>
-    set((state) => ({ benchmarkInline: !state.benchmarkInline })),
-}))
+  toggleBenchmarkInline: () => set((state) => ({ benchmarkInline: !state.benchmarkInline })),
+}));
 ```
 
 **Step 3: Commit**
@@ -603,6 +600,7 @@ git commit -m "feat(demo): add Zustand store and shared type definitions"
 ### Task 4: Build tabbed panel layout
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/TabBar.tsx`
 - Create: `demo/mathjs-calc/src/components/EngineToggle.tsx`
 - Create: `demo/mathjs-calc/src/components/ExpressionBar.tsx`
@@ -618,9 +616,9 @@ git commit -m "feat(demo): add Zustand store and shared type definitions"
 Create `demo/mathjs-calc/src/components/TabBar.tsx`:
 
 ```tsx
-import React from 'react'
-import { useStore } from '../store/useStore'
-import type { PanelId } from '../types'
+import React from 'react';
+import { useStore } from '../store/useStore';
+import type { PanelId } from '../types';
 
 const tabs: { id: PanelId; label: string; icon: string }[] = [
   { id: 'calculator', label: 'Calculator', icon: '🔢' },
@@ -628,10 +626,10 @@ const tabs: { id: PanelId; label: string; icon: string }[] = [
   { id: 'signal', label: 'Signal Studio', icon: '〰' },
   { id: 'statistics', label: 'Statistics', icon: '📊' },
   { id: 'performance', label: 'Performance', icon: '⚡' },
-]
+];
 
 export function TabBar() {
-  const { activePanel, setActivePanel } = useStore()
+  const { activePanel, setActivePanel } = useStore();
 
   return (
     <nav className="flex border-b border-gray-800 bg-gray-900">
@@ -650,7 +648,7 @@ export function TabBar() {
         </button>
       ))}
     </nav>
-  )
+  );
 }
 ```
 
@@ -659,18 +657,18 @@ export function TabBar() {
 Create `demo/mathjs-calc/src/components/EngineToggle.tsx`:
 
 ```tsx
-import React from 'react'
-import { useStore } from '../store/useStore'
-import type { EngineMode } from '../types'
+import React from 'react';
+import { useStore } from '../store/useStore';
+import type { EngineMode } from '../types';
 
 const engines: { id: EngineMode; label: string }[] = [
   { id: 'js', label: 'JS' },
   { id: 'wasm', label: 'WASM' },
   { id: 'auto', label: 'Auto' },
-]
+];
 
 export function EngineToggle() {
-  const { config, setEngine, wasmCapabilities } = useStore()
+  const { config, setEngine, wasmCapabilities } = useStore();
 
   return (
     <div className="flex items-center gap-1 bg-gray-800 rounded p-0.5">
@@ -689,7 +687,7 @@ export function EngineToggle() {
         </button>
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -698,35 +696,35 @@ export function EngineToggle() {
 Create `demo/mathjs-calc/src/components/ExpressionBar.tsx`:
 
 ```tsx
-import React, { useState, useCallback } from 'react'
-import { useMathParser } from '../hooks/useMathParser'
-import { EngineToggle } from './EngineToggle'
+import React, { useState, useCallback } from 'react';
+import { useMathParser } from '../hooks/useMathParser';
+import { EngineToggle } from './EngineToggle';
 
 export function ExpressionBar() {
-  const { evaluate } = useMathParser()
-  const [input, setInput] = useState('')
-  const [result, setResult] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { evaluate } = useMathParser();
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleEvaluate = useCallback(() => {
-    if (!input.trim()) return
-    const entry = evaluate(input.trim())
+    if (!input.trim()) return;
+    const entry = evaluate(input.trim());
     if (entry.error) {
-      setError(entry.error)
-      setResult(null)
+      setError(entry.error);
+      setResult(null);
     } else {
-      setResult(entry.result)
-      setError(null)
+      setResult(entry.result);
+      setError(null);
     }
-    setInput('')
-  }, [input, evaluate])
+    setInput('');
+  }, [input, evaluate]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') handleEvaluate()
+      if (e.key === 'Enter') handleEvaluate();
     },
     [handleEvaluate]
-  )
+  );
 
   return (
     <header className="border-b border-gray-800 p-3 bg-gray-900">
@@ -750,7 +748,7 @@ export function ExpressionBar() {
       {result && <div className="mt-1 text-green-400 font-mono text-lg">= {result}</div>}
       {error && <div className="mt-1 text-red-400 font-mono text-sm">{error}</div>}
     </header>
-  )
+  );
 }
 ```
 
@@ -759,7 +757,7 @@ export function ExpressionBar() {
 Create `demo/mathjs-calc/src/panels/CalculatorPanel.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 export function CalculatorPanel() {
   return (
@@ -767,14 +765,14 @@ export function CalculatorPanel() {
       <h2 className="text-lg font-semibold mb-4">Scientific Calculator</h2>
       <p className="text-gray-400">Calculator button grid — coming in Task 5</p>
     </div>
-  )
+  );
 }
 ```
 
 Create `demo/mathjs-calc/src/panels/MatrixLabPanel.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 export function MatrixLabPanel() {
   return (
@@ -782,14 +780,14 @@ export function MatrixLabPanel() {
       <h2 className="text-lg font-semibold mb-4">Matrix Lab</h2>
       <p className="text-gray-400">Matrix editor and operations — coming in Task 7</p>
     </div>
-  )
+  );
 }
 ```
 
 Create `demo/mathjs-calc/src/panels/SignalStudioPanel.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 export function SignalStudioPanel() {
   return (
@@ -797,14 +795,14 @@ export function SignalStudioPanel() {
       <h2 className="text-lg font-semibold mb-4">Signal Studio</h2>
       <p className="text-gray-400">FFT and signal processing — coming in Task 8</p>
     </div>
-  )
+  );
 }
 ```
 
 Create `demo/mathjs-calc/src/panels/StatisticsPanel.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 export function StatisticsPanel() {
   return (
@@ -812,14 +810,14 @@ export function StatisticsPanel() {
       <h2 className="text-lg font-semibold mb-4">Statistics Dashboard</h2>
       <p className="text-gray-400">Descriptive statistics and histograms — coming in Task 9</p>
     </div>
-  )
+  );
 }
 ```
 
 Create `demo/mathjs-calc/src/panels/PerformancePanel.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 export function PerformancePanel() {
   return (
@@ -827,7 +825,7 @@ export function PerformancePanel() {
       <h2 className="text-lg font-semibold mb-4">Performance Dashboard</h2>
       <p className="text-gray-400">JS vs WASM benchmarks — coming in Task 10</p>
     </div>
-  )
+  );
 }
 ```
 
@@ -836,15 +834,15 @@ export function PerformancePanel() {
 Replace `demo/mathjs-calc/src/App.tsx`:
 
 ```tsx
-import React from 'react'
-import { useStore } from './store/useStore'
-import { ExpressionBar } from './components/ExpressionBar'
-import { TabBar } from './components/TabBar'
-import { CalculatorPanel } from './panels/CalculatorPanel'
-import { MatrixLabPanel } from './panels/MatrixLabPanel'
-import { SignalStudioPanel } from './panels/SignalStudioPanel'
-import { StatisticsPanel } from './panels/StatisticsPanel'
-import { PerformancePanel } from './panels/PerformancePanel'
+import React from 'react';
+import { useStore } from './store/useStore';
+import { ExpressionBar } from './components/ExpressionBar';
+import { TabBar } from './components/TabBar';
+import { CalculatorPanel } from './panels/CalculatorPanel';
+import { MatrixLabPanel } from './panels/MatrixLabPanel';
+import { SignalStudioPanel } from './panels/SignalStudioPanel';
+import { StatisticsPanel } from './panels/StatisticsPanel';
+import { PerformancePanel } from './panels/PerformancePanel';
 
 const panels = {
   calculator: CalculatorPanel,
@@ -852,11 +850,11 @@ const panels = {
   signal: SignalStudioPanel,
   statistics: StatisticsPanel,
   performance: PerformancePanel,
-} as const
+} as const;
 
 export default function App() {
-  const activePanel = useStore((s) => s.activePanel)
-  const ActivePanel = panels[activePanel]
+  const activePanel = useStore((s) => s.activePanel);
+  const ActivePanel = panels[activePanel];
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
@@ -866,7 +864,7 @@ export default function App() {
         <ActivePanel />
       </main>
     </div>
-  )
+  );
 }
 ```
 
@@ -892,6 +890,7 @@ git commit -m "feat(demo): add tabbed panel layout with expression bar and engin
 ### Task 5: Build scientific calculator button grid
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/CalcButton.tsx`
 - Create: `demo/mathjs-calc/src/components/CalcHistory.tsx`
 - Modify: `demo/mathjs-calc/src/panels/CalculatorPanel.tsx`
@@ -901,13 +900,13 @@ git commit -m "feat(demo): add tabbed panel layout with expression bar and engin
 Create `demo/mathjs-calc/src/components/CalcButton.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 interface CalcButtonProps {
-  label: string
-  onClick: () => void
-  variant?: 'default' | 'operator' | 'function' | 'constant' | 'action'
-  span?: number
+  label: string;
+  onClick: () => void;
+  variant?: 'default' | 'operator' | 'function' | 'constant' | 'action';
+  span?: number;
 }
 
 const variantStyles = {
@@ -916,7 +915,7 @@ const variantStyles = {
   function: 'bg-gray-800 hover:bg-gray-700 text-yellow-300',
   constant: 'bg-gray-800 hover:bg-gray-700 text-purple-300',
   action: 'bg-blue-600 hover:bg-blue-700 text-white',
-}
+};
 
 export function CalcButton({ label, onClick, variant = 'default', span = 1 }: CalcButtonProps) {
   return (
@@ -927,7 +926,7 @@ export function CalcButton({ label, onClick, variant = 'default', span = 1 }: Ca
     >
       {label}
     </button>
-  )
+  );
 }
 ```
 
@@ -936,19 +935,19 @@ export function CalcButton({ label, onClick, variant = 'default', span = 1 }: Ca
 Create `demo/mathjs-calc/src/components/CalcHistory.tsx`:
 
 ```tsx
-import React from 'react'
-import type { HistoryEntry } from '../types'
+import React from 'react';
+import type { HistoryEntry } from '../types';
 
 interface CalcHistoryProps {
-  history: HistoryEntry[]
-  onSelect: (expression: string) => void
+  history: HistoryEntry[];
+  onSelect: (expression: string) => void;
 }
 
 export function CalcHistory({ history, onSelect }: CalcHistoryProps) {
-  const calcHistory = history.filter((h) => h.panel === 'calculator')
+  const calcHistory = history.filter((h) => h.panel === 'calculator');
 
   if (calcHistory.length === 0) {
-    return <p className="text-gray-600 text-sm italic">No history yet</p>
+    return <p className="text-gray-600 text-sm italic">No history yet</p>;
   }
 
   return (
@@ -968,7 +967,7 @@ export function CalcHistory({ history, onSelect }: CalcHistoryProps) {
         </button>
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -977,44 +976,44 @@ export function CalcHistory({ history, onSelect }: CalcHistoryProps) {
 Replace `demo/mathjs-calc/src/panels/CalculatorPanel.tsx`:
 
 ```tsx
-import React, { useState, useCallback } from 'react'
-import { CalcButton } from '../components/CalcButton'
-import { CalcHistory } from '../components/CalcHistory'
-import { useStore } from '../store/useStore'
-import { useMathParser } from '../hooks/useMathParser'
+import React, { useState, useCallback } from 'react';
+import { CalcButton } from '../components/CalcButton';
+import { CalcHistory } from '../components/CalcHistory';
+import { useStore } from '../store/useStore';
+import { useMathParser } from '../hooks/useMathParser';
 
 export function CalculatorPanel() {
-  const { evaluate } = useMathParser()
-  const { history, config, setConfig } = useStore()
-  const [input, setInput] = useState('')
-  const [result, setResult] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { evaluate } = useMathParser();
+  const { history, config, setConfig } = useStore();
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const append = useCallback((text: string) => {
-    setInput((prev) => prev + text)
-  }, [])
+    setInput((prev) => prev + text);
+  }, []);
 
   const handleEvaluate = useCallback(() => {
-    if (!input.trim()) return
-    const entry = evaluate(input.trim())
+    if (!input.trim()) return;
+    const entry = evaluate(input.trim());
     if (entry.error) {
-      setError(entry.error)
-      setResult(null)
+      setError(entry.error);
+      setResult(null);
     } else {
-      setResult(entry.result)
-      setError(null)
+      setResult(entry.result);
+      setError(null);
     }
-  }, [input, evaluate])
+  }, [input, evaluate]);
 
   const handleClear = useCallback(() => {
-    setInput('')
-    setResult(null)
-    setError(null)
-  }, [])
+    setInput('');
+    setResult(null);
+    setError(null);
+  }, []);
 
   const handleBackspace = useCallback(() => {
-    setInput((prev) => prev.slice(0, -1))
-  }, [])
+    setInput((prev) => prev.slice(0, -1));
+  }, []);
 
   return (
     <div className="p-4 flex gap-4">
@@ -1102,14 +1101,14 @@ export function CalculatorPanel() {
         <CalcHistory
           history={history}
           onSelect={(expr) => {
-            setInput(expr)
-            setResult(null)
-            setError(null)
+            setInput(expr);
+            setResult(null);
+            setError(null);
           }}
         />
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -1133,6 +1132,7 @@ git commit -m "feat(demo): build scientific calculator panel with button grid an
 ### Task 6: Add number type selector and unit conversion
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/NumberTypeSelector.tsx`
 - Modify: `demo/mathjs-calc/src/panels/CalculatorPanel.tsx`
 
@@ -1141,19 +1141,19 @@ git commit -m "feat(demo): build scientific calculator panel with button grid an
 Create `demo/mathjs-calc/src/components/NumberTypeSelector.tsx`:
 
 ```tsx
-import React from 'react'
-import { useStore } from '../store/useStore'
-import type { NumberType } from '../types'
+import React from 'react';
+import { useStore } from '../store/useStore';
+import type { NumberType } from '../types';
 
 const types: { id: NumberType; label: string; description: string }[] = [
   { id: 'number', label: 'Number', description: 'Standard IEEE 754' },
   { id: 'BigNumber', label: 'BigNum', description: 'Arbitrary precision' },
   { id: 'Complex', label: 'Complex', description: 'a + bi' },
   { id: 'Fraction', label: 'Fraction', description: 'Exact rationals' },
-]
+];
 
 export function NumberTypeSelector() {
-  const { config, setConfig } = useStore()
+  const { config, setConfig } = useStore();
 
   return (
     <div className="flex gap-1">
@@ -1172,7 +1172,7 @@ export function NumberTypeSelector() {
         </button>
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -1199,6 +1199,7 @@ git commit -m "feat(demo): add number type selector and verify unit conversion"
 ### Task 7: Build Matrix Lab with editor and operations
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/components/MatrixEditor.tsx`
 - Create: `demo/mathjs-calc/src/components/MatrixDisplay.tsx`
 - Create: `demo/mathjs-calc/src/hooks/useMatrixOps.ts`
@@ -1209,52 +1210,50 @@ git commit -m "feat(demo): add number type selector and verify unit conversion"
 Create `demo/mathjs-calc/src/components/MatrixEditor.tsx`:
 
 ```tsx
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react';
 
 interface MatrixEditorProps {
-  label: string
-  onMatrixChange: (data: number[][]) => void
+  label: string;
+  onMatrixChange: (data: number[][]) => void;
 }
 
 export function MatrixEditor({ label, onMatrixChange }: MatrixEditorProps) {
-  const [rows, setRows] = useState(3)
-  const [cols, setCols] = useState(3)
-  const [cells, setCells] = useState<number[][]>(
-    Array.from({ length: 3 }, () => Array(3).fill(0))
-  )
+  const [rows, setRows] = useState(3);
+  const [cols, setCols] = useState(3);
+  const [cells, setCells] = useState<number[][]>(Array.from({ length: 3 }, () => Array(3).fill(0)));
 
   const updateCell = useCallback(
     (r: number, c: number, value: string) => {
-      const newCells = cells.map((row) => [...row])
-      newCells[r][c] = parseFloat(value) || 0
-      setCells(newCells)
-      onMatrixChange(newCells)
+      const newCells = cells.map((row) => [...row]);
+      newCells[r][c] = parseFloat(value) || 0;
+      setCells(newCells);
+      onMatrixChange(newCells);
     },
     [cells, onMatrixChange]
-  )
+  );
 
   const resize = useCallback(
     (newRows: number, newCols: number) => {
-      newRows = Math.max(1, Math.min(newRows, 100))
-      newCols = Math.max(1, Math.min(newCols, 100))
+      newRows = Math.max(1, Math.min(newRows, 100));
+      newCols = Math.max(1, Math.min(newCols, 100));
       const newCells = Array.from({ length: newRows }, (_, r) =>
-        Array.from({ length: newCols }, (_, c) => (cells[r]?.[c] ?? 0))
-      )
-      setRows(newRows)
-      setCols(newCols)
-      setCells(newCells)
-      onMatrixChange(newCells)
+        Array.from({ length: newCols }, (_, c) => cells[r]?.[c] ?? 0)
+      );
+      setRows(newRows);
+      setCols(newCols);
+      setCells(newCells);
+      onMatrixChange(newCells);
     },
     [cells, onMatrixChange]
-  )
+  );
 
   const randomize = useCallback(() => {
     const newCells = Array.from({ length: rows }, () =>
       Array.from({ length: cols }, () => Math.round(Math.random() * 20 - 10))
-    )
-    setCells(newCells)
-    onMatrixChange(newCells)
-  }, [rows, cols, onMatrixChange])
+    );
+    setCells(newCells);
+    onMatrixChange(newCells);
+  }, [rows, cols, onMatrixChange]);
 
   return (
     <div>
@@ -1284,7 +1283,10 @@ export function MatrixEditor({ label, onMatrixChange }: MatrixEditorProps) {
           Random
         </button>
       </div>
-      <div className="inline-grid gap-0.5" style={{ gridTemplateColumns: `repeat(${cols}, 3.5rem)` }}>
+      <div
+        className="inline-grid gap-0.5"
+        style={{ gridTemplateColumns: `repeat(${cols}, 3.5rem)` }}
+      >
         {cells.map((row, r) =>
           row.map((val, c) => (
             <input
@@ -1298,7 +1300,7 @@ export function MatrixEditor({ label, onMatrixChange }: MatrixEditorProps) {
         )}
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -1307,19 +1309,19 @@ export function MatrixEditor({ label, onMatrixChange }: MatrixEditorProps) {
 Create `demo/mathjs-calc/src/components/MatrixDisplay.tsx`:
 
 ```tsx
-import React from 'react'
+import React from 'react';
 
 interface MatrixDisplayProps {
-  data: number[][] | number[] | null
-  label: string
-  precision?: number
+  data: number[][] | number[] | null;
+  label: string;
+  precision?: number;
 }
 
 export function MatrixDisplay({ data, label, precision = 4 }: MatrixDisplayProps) {
-  if (!data) return null
+  if (!data) return null;
 
-  const is2d = Array.isArray(data[0])
-  const rows = is2d ? (data as number[][]) : [data as number[]]
+  const is2d = Array.isArray(data[0]);
+  const rows = is2d ? (data as number[][]) : [data as number[]];
 
   return (
     <div>
@@ -1343,7 +1345,7 @@ export function MatrixDisplay({ data, label, precision = 4 }: MatrixDisplayProps
         </table>
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -1352,49 +1354,49 @@ export function MatrixDisplay({ data, label, precision = 4 }: MatrixDisplayProps
 Create `demo/mathjs-calc/src/hooks/useMatrixOps.ts`:
 
 ```typescript
-import { useCallback } from 'react'
-import { useMathParser } from './useMathParser'
+import { useCallback } from 'react';
+import { useMathParser } from './useMathParser';
 
 interface MatrixResult {
-  name: string
-  value: unknown
-  formatted: string
-  executionTime: number
-  error: string | null
+  name: string;
+  value: unknown;
+  formatted: string;
+  executionTime: number;
+  error: string | null;
 }
 
 export function useMatrixOps() {
-  const { math } = useMathParser()
+  const { math } = useMathParser();
 
   const runOperation = useCallback(
     (operation: string, matrixData: number[][]): MatrixResult => {
-      const start = performance.now()
+      const start = performance.now();
       try {
-        const M = math.matrix(matrixData)
-        let result: unknown
-        let name = operation
+        const M = math.matrix(matrixData);
+        let result: unknown;
+        let name = operation;
 
         switch (operation) {
           case 'det':
-            result = math.det(M)
-            break
+            result = math.det(M);
+            break;
           case 'inv':
-            result = math.inv(M)
-            break
+            result = math.inv(M);
+            break;
           case 'transpose':
-            result = math.transpose(M)
-            break
+            result = math.transpose(M);
+            break;
           case 'eigs': {
-            const e = math.eigs(M)
-            result = e.values
-            name = 'eigenvalues'
-            break
+            const e = math.eigs(M);
+            result = e.values;
+            name = 'eigenvalues';
+            break;
           }
           case 'trace':
-            result = math.trace(M)
-            break
+            result = math.trace(M);
+            break;
           default:
-            throw new Error(`Unknown operation: ${operation}`)
+            throw new Error(`Unknown operation: ${operation}`);
         }
 
         return {
@@ -1403,7 +1405,7 @@ export function useMatrixOps() {
           formatted: math.format(result, { precision: 6 }),
           executionTime: performance.now() - start,
           error: null,
-        }
+        };
       } catch (err) {
         return {
           name: operation,
@@ -1411,13 +1413,13 @@ export function useMatrixOps() {
           formatted: '',
           executionTime: performance.now() - start,
           error: err instanceof Error ? err.message : String(err),
-        }
+        };
       }
     },
     [math]
-  )
+  );
 
-  return { runOperation }
+  return { runOperation };
 }
 ```
 
@@ -1426,9 +1428,9 @@ export function useMatrixOps() {
 Replace `demo/mathjs-calc/src/panels/MatrixLabPanel.tsx`:
 
 ```tsx
-import React, { useState, useCallback } from 'react'
-import { MatrixEditor } from '../components/MatrixEditor'
-import { useMatrixOps } from '../hooks/useMatrixOps'
+import React, { useState, useCallback } from 'react';
+import { MatrixEditor } from '../components/MatrixEditor';
+import { useMatrixOps } from '../hooks/useMatrixOps';
 
 const operations = [
   { id: 'det', label: 'Determinant' },
@@ -1436,25 +1438,25 @@ const operations = [
   { id: 'transpose', label: 'Transpose' },
   { id: 'eigs', label: 'Eigenvalues' },
   { id: 'trace', label: 'Trace' },
-]
+];
 
 export function MatrixLabPanel() {
-  const { runOperation } = useMatrixOps()
+  const { runOperation } = useMatrixOps();
   const [matrixData, setMatrixData] = useState<number[][]>([
     [1, 2],
     [3, 4],
-  ])
+  ]);
   const [results, setResults] = useState<
     { name: string; formatted: string; executionTime: number; error: string | null }[]
-  >([])
+  >([]);
 
   const handleRun = useCallback(
     (op: string) => {
-      const result = runOperation(op, matrixData)
-      setResults((prev) => [result, ...prev])
+      const result = runOperation(op, matrixData);
+      setResults((prev) => [result, ...prev]);
     },
     [matrixData, runOperation]
-  )
+  );
 
   return (
     <div className="p-4 flex gap-6">
@@ -1497,7 +1499,7 @@ export function MatrixLabPanel() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -1520,6 +1522,7 @@ git commit -m "feat(demo): build Matrix Lab panel with editor and linear algebra
 ### Task 8: Build Signal Studio with FFT visualization
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/hooks/useSignal.ts`
 - Modify: `demo/mathjs-calc/src/panels/SignalStudioPanel.tsx`
 
@@ -1528,82 +1531,82 @@ git commit -m "feat(demo): build Matrix Lab panel with editor and linear algebra
 Create `demo/mathjs-calc/src/hooks/useSignal.ts`:
 
 ```typescript
-import { useCallback } from 'react'
-import { useMathParser } from './useMathParser'
+import { useCallback } from 'react';
+import { useMathParser } from './useMathParser';
 
-export type WaveformType = 'sine' | 'square' | 'triangle' | 'sawtooth'
+export type WaveformType = 'sine' | 'square' | 'triangle' | 'sawtooth';
 
 interface SignalParams {
-  waveform: WaveformType
-  frequency: number
-  amplitude: number
-  sampleCount: number
+  waveform: WaveformType;
+  frequency: number;
+  amplitude: number;
+  sampleCount: number;
 }
 
 interface SignalResult {
-  timeDomain: { x: number; y: number }[]
-  freqDomain: { freq: number; magnitude: number }[]
-  executionTime: number
+  timeDomain: { x: number; y: number }[];
+  freqDomain: { freq: number; magnitude: number }[];
+  executionTime: number;
 }
 
 export function useSignal() {
-  const { math } = useMathParser()
+  const { math } = useMathParser();
 
   const generate = useCallback(
     (params: SignalParams): SignalResult => {
-      const { waveform, frequency, amplitude, sampleCount } = params
-      const start = performance.now()
+      const { waveform, frequency, amplitude, sampleCount } = params;
+      const start = performance.now();
 
       // Generate time-domain signal
-      const signal: number[] = []
-      const sampleRate = sampleCount
+      const signal: number[] = [];
+      const sampleRate = sampleCount;
       for (let i = 0; i < sampleCount; i++) {
-        const t = i / sampleRate
-        let y: number
-        const phase = 2 * Math.PI * frequency * t
+        const t = i / sampleRate;
+        let y: number;
+        const phase = 2 * Math.PI * frequency * t;
 
         switch (waveform) {
           case 'sine':
-            y = amplitude * Math.sin(phase)
-            break
+            y = amplitude * Math.sin(phase);
+            break;
           case 'square':
-            y = amplitude * Math.sign(Math.sin(phase))
-            break
+            y = amplitude * Math.sign(Math.sin(phase));
+            break;
           case 'triangle':
-            y = amplitude * (2 / Math.PI) * Math.asin(Math.sin(phase))
-            break
+            y = amplitude * (2 / Math.PI) * Math.asin(Math.sin(phase));
+            break;
           case 'sawtooth':
-            y = amplitude * (2 * (frequency * t - Math.floor(0.5 + frequency * t)))
-            break
+            y = amplitude * (2 * (frequency * t - Math.floor(0.5 + frequency * t)));
+            break;
           default:
-            y = 0
+            y = 0;
         }
-        signal.push(y)
+        signal.push(y);
       }
 
       // Run FFT using math.js
-      const complexSignal = signal.map((v) => math.complex(v, 0))
-      const fftResult = math.fft(complexSignal) as any[]
+      const complexSignal = signal.map((v) => math.complex(v, 0));
+      const fftResult = math.fft(complexSignal) as any[];
 
       // Convert to magnitude spectrum
-      const timeDomain = signal.map((y, i) => ({ x: i / sampleRate, y }))
+      const timeDomain = signal.map((y, i) => ({ x: i / sampleRate, y }));
       const freqDomain = fftResult
         .slice(0, Math.floor(sampleCount / 2))
         .map((c: any, i: number) => ({
           freq: (i * sampleRate) / sampleCount,
           magnitude: math.abs(c) as number,
-        }))
+        }));
 
       return {
         timeDomain,
         freqDomain,
         executionTime: performance.now() - start,
-      }
+      };
     },
     [math]
-  )
+  );
 
-  return { generate }
+  return { generate };
 }
 ```
 
@@ -1612,39 +1615,47 @@ export function useSignal() {
 Replace `demo/mathjs-calc/src/panels/SignalStudioPanel.tsx`:
 
 ```tsx
-import React, { useState, useCallback, useMemo } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts'
-import { useSignal, type WaveformType } from '../hooks/useSignal'
+import React, { useState, useCallback, useMemo } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts';
+import { useSignal, type WaveformType } from '../hooks/useSignal';
 
 const waveforms: { id: WaveformType; label: string }[] = [
   { id: 'sine', label: 'Sine' },
   { id: 'square', label: 'Square' },
   { id: 'triangle', label: 'Triangle' },
   { id: 'sawtooth', label: 'Sawtooth' },
-]
+];
 
-const sampleCounts = [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]
+const sampleCounts = [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536];
 
 export function SignalStudioPanel() {
-  const { generate } = useSignal()
-  const [waveform, setWaveform] = useState<WaveformType>('sine')
-  const [frequency, setFrequency] = useState(5)
-  const [amplitude, setAmplitude] = useState(1)
-  const [sampleCount, setSampleCount] = useState(1024)
-  const [execTime, setExecTime] = useState<number | null>(null)
+  const { generate } = useSignal();
+  const [waveform, setWaveform] = useState<WaveformType>('sine');
+  const [frequency, setFrequency] = useState(5);
+  const [amplitude, setAmplitude] = useState(1);
+  const [sampleCount, setSampleCount] = useState(1024);
+  const [execTime, setExecTime] = useState<number | null>(null);
 
   const result = useMemo(() => {
-    const r = generate({ waveform, frequency, amplitude, sampleCount })
-    setExecTime(r.executionTime)
-    return r
-  }, [waveform, frequency, amplitude, sampleCount, generate])
+    const r = generate({ waveform, frequency, amplitude, sampleCount });
+    setExecTime(r.executionTime);
+    return r;
+  }, [waveform, frequency, amplitude, sampleCount, generate]);
 
   // Downsample time domain for rendering (max 500 points)
   const displayTimeDomain = useMemo(() => {
-    if (result.timeDomain.length <= 500) return result.timeDomain
-    const step = Math.ceil(result.timeDomain.length / 500)
-    return result.timeDomain.filter((_, i) => i % step === 0)
-  }, [result.timeDomain])
+    if (result.timeDomain.length <= 500) return result.timeDomain;
+    const step = Math.ceil(result.timeDomain.length / 500);
+    return result.timeDomain.filter((_, i) => i % step === 0);
+  }, [result.timeDomain]);
 
   return (
     <div className="p-4">
@@ -1670,9 +1681,7 @@ export function SignalStudioPanel() {
         </div>
 
         <div>
-          <label className="text-xs text-gray-500 block mb-1">
-            Frequency: {frequency} Hz
-          </label>
+          <label className="text-xs text-gray-500 block mb-1">Frequency: {frequency} Hz</label>
           <input
             type="range"
             min={1}
@@ -1728,9 +1737,7 @@ export function SignalStudioPanel() {
               <CartesianGrid strokeDasharray="3 3" stroke="#333" />
               <XAxis dataKey="x" tick={{ fontSize: 10, fill: '#666' }} />
               <YAxis tick={{ fontSize: 10, fill: '#666' }} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #333' }}
-              />
+              <Tooltip contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #333' }} />
               <Line type="monotone" dataKey="y" stroke="#60a5fa" dot={false} strokeWidth={1.5} />
             </LineChart>
           </ResponsiveContainer>
@@ -1744,9 +1751,7 @@ export function SignalStudioPanel() {
               <CartesianGrid strokeDasharray="3 3" stroke="#333" />
               <XAxis dataKey="freq" tick={{ fontSize: 10, fill: '#666' }} />
               <YAxis tick={{ fontSize: 10, fill: '#666' }} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #333' }}
-              />
+              <Tooltip contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #333' }} />
               <Line
                 type="monotone"
                 dataKey="magnitude"
@@ -1759,7 +1764,7 @@ export function SignalStudioPanel() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -1783,6 +1788,7 @@ git commit -m "feat(demo): build Signal Studio panel with waveform generator and
 ### Task 9: Build Statistics Dashboard with histogram
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/hooks/useStatistics.ts`
 - Modify: `demo/mathjs-calc/src/panels/StatisticsPanel.tsx`
 
@@ -1791,75 +1797,72 @@ git commit -m "feat(demo): build Signal Studio panel with waveform generator and
 Create `demo/mathjs-calc/src/hooks/useStatistics.ts`:
 
 ```typescript
-import { useCallback } from 'react'
-import { useMathParser } from './useMathParser'
+import { useCallback } from 'react';
+import { useMathParser } from './useMathParser';
 
-export type Distribution = 'normal' | 'uniform' | 'poisson'
+export type Distribution = 'normal' | 'uniform' | 'poisson';
 
 interface DescriptiveStats {
-  count: number
-  mean: number
-  median: number
-  std: number
-  variance: number
-  min: number
-  max: number
-  q1: number
-  q3: number
-  executionTime: number
+  count: number;
+  mean: number;
+  median: number;
+  std: number;
+  variance: number;
+  min: number;
+  max: number;
+  q1: number;
+  q3: number;
+  executionTime: number;
 }
 
 interface HistogramBin {
-  binStart: number
-  binEnd: number
-  count: number
-  label: string
+  binStart: number;
+  binEnd: number;
+  count: number;
+  label: string;
 }
 
 export function useStatistics() {
-  const { math } = useMathParser()
+  const { math } = useMathParser();
 
-  const generateData = useCallback(
-    (distribution: Distribution, size: number): number[] => {
-      const data: number[] = []
-      for (let i = 0; i < size; i++) {
-        switch (distribution) {
-          case 'normal': {
-            // Box-Muller transform
-            const u1 = Math.random()
-            const u2 = Math.random()
-            data.push(Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2))
-            break
-          }
-          case 'uniform':
-            data.push(Math.random() * 10 - 5)
-            break
-          case 'poisson': {
-            const lambda = 5
-            let L = Math.exp(-lambda)
-            let k = 0
-            let p = 1
-            do {
-              k++
-              p *= Math.random()
-            } while (p > L)
-            data.push(k - 1)
-            break
-          }
+  const generateData = useCallback((distribution: Distribution, size: number): number[] => {
+    const data: number[] = [];
+    for (let i = 0; i < size; i++) {
+      switch (distribution) {
+        case 'normal': {
+          // Box-Muller transform
+          const u1 = Math.random();
+          const u2 = Math.random();
+          data.push(Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2));
+          break;
+        }
+        case 'uniform':
+          data.push(Math.random() * 10 - 5);
+          break;
+        case 'poisson': {
+          const lambda = 5;
+          let L = Math.exp(-lambda);
+          let k = 0;
+          let p = 1;
+          do {
+            k++;
+            p *= Math.random();
+          } while (p > L);
+          data.push(k - 1);
+          break;
         }
       }
-      return data
-    },
-    []
-  )
+    }
+    return data;
+  }, []);
 
   const computeStats = useCallback(
     (data: number[]): DescriptiveStats => {
-      const start = performance.now()
-      const sorted = [...data].sort((a, b) => a - b)
-      const n = data.length
-      const q1Idx = Math.floor(n * 0.25)
-      const q3Idx = Math.floor(n * 0.75)
+      const start = performance.now();
+      const sorted = [...data].sort((a, b) => a - b);
+      const n = data.length;
+      const q1Idx = Math.floor(n * 0.25);
+      const q3Idx = Math.floor(n * 0.75);
 
       return {
         count: n,
@@ -1872,36 +1875,36 @@ export function useStatistics() {
         q1: sorted[q1Idx],
         q3: sorted[q3Idx],
         executionTime: performance.now() - start,
-      }
+      };
     },
     [math]
-  )
+  );
 
   const computeHistogram = useCallback(
     (data: number[], binCount: number): HistogramBin[] => {
-      const min = math.min(data) as number
-      const max = math.max(data) as number
-      const binWidth = (max - min) / binCount
+      const min = math.min(data) as number;
+      const max = math.max(data) as number;
+      const binWidth = (max - min) / binCount;
       const bins: HistogramBin[] = Array.from({ length: binCount }, (_, i) => ({
         binStart: min + i * binWidth,
         binEnd: min + (i + 1) * binWidth,
         count: 0,
         label: (min + (i + 0.5) * binWidth).toFixed(1),
-      }))
+      }));
 
       for (const val of data) {
-        let idx = Math.floor((val - min) / binWidth)
-        if (idx >= binCount) idx = binCount - 1
-        if (idx < 0) idx = 0
-        bins[idx].count++
+        let idx = Math.floor((val - min) / binWidth);
+        if (idx >= binCount) idx = binCount - 1;
+        if (idx < 0) idx = 0;
+        bins[idx].count++;
       }
 
-      return bins
+      return bins;
     },
     [math]
-  )
+  );
 
-  return { generateData, computeStats, computeHistogram }
+  return { generateData, computeStats, computeHistogram };
 }
 ```
 
@@ -1910,43 +1913,35 @@ export function useStatistics() {
 Replace `demo/mathjs-calc/src/panels/StatisticsPanel.tsx`:
 
 ```tsx
-import React, { useState, useMemo } from 'react'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-} from 'recharts'
-import { useStatistics, type Distribution } from '../hooks/useStatistics'
+import React, { useState, useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
+import { useStatistics, type Distribution } from '../hooks/useStatistics';
 
 const distributions: { id: Distribution; label: string }[] = [
   { id: 'normal', label: 'Normal' },
   { id: 'uniform', label: 'Uniform' },
   { id: 'poisson', label: 'Poisson' },
-]
+];
 
-const dataSizes = [100, 1000, 10000, 100000, 1000000]
+const dataSizes = [100, 1000, 10000, 100000, 1000000];
 
 export function StatisticsPanel() {
-  const { generateData, computeStats, computeHistogram } = useStatistics()
-  const [distribution, setDistribution] = useState<Distribution>('normal')
-  const [dataSize, setDataSize] = useState(10000)
-  const [binCount, setBinCount] = useState(30)
-  const [seed, setSeed] = useState(0) // force regeneration
+  const { generateData, computeStats, computeHistogram } = useStatistics();
+  const [distribution, setDistribution] = useState<Distribution>('normal');
+  const [dataSize, setDataSize] = useState(10000);
+  const [binCount, setBinCount] = useState(30);
+  const [seed, setSeed] = useState(0); // force regeneration
 
   const data = useMemo(
     () => generateData(distribution, dataSize),
     [distribution, dataSize, seed, generateData]
-  )
+  );
 
-  const stats = useMemo(() => computeStats(data), [data, computeStats])
+  const stats = useMemo(() => computeStats(data), [data, computeStats]);
   const histogram = useMemo(
     () => computeHistogram(data, binCount),
     [data, binCount, computeHistogram]
-  )
+  );
 
   return (
     <div className="p-4">
@@ -2005,7 +2000,9 @@ export function StatisticsPanel() {
           Regenerate
         </button>
 
-        <span className="text-xs text-gray-500">Computed in {stats.executionTime.toFixed(1)}ms</span>
+        <span className="text-xs text-gray-500">
+          Computed in {stats.executionTime.toFixed(1)}ms
+        </span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -2034,18 +2031,20 @@ export function StatisticsPanel() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={histogram}>
               <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#666' }} interval="preserveStartEnd" />
-              <YAxis tick={{ fontSize: 10, fill: '#666' }} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #333' }}
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 9, fill: '#666' }}
+                interval="preserveStartEnd"
               />
+              <YAxis tick={{ fontSize: 10, fill: '#666' }} />
+              <Tooltip contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #333' }} />
               <Bar dataKey="count" fill="#60a5fa" />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -2069,6 +2068,7 @@ git commit -m "feat(demo): build Statistics Dashboard with histogram and descrip
 ### Task 10: Build Performance Dashboard with benchmark suite
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/hooks/useBenchmark.ts`
 - Modify: `demo/mathjs-calc/src/panels/PerformancePanel.tsx`
 
@@ -2077,15 +2077,15 @@ git commit -m "feat(demo): build Statistics Dashboard with histogram and descrip
 Create `demo/mathjs-calc/src/hooks/useBenchmark.ts`:
 
 ```typescript
-import { useState, useCallback } from 'react'
-import { useMathParser } from './useMathParser'
-import type { BenchmarkResult } from '../types'
+import { useState, useCallback } from 'react';
+import { useMathParser } from './useMathParser';
+import type { BenchmarkResult } from '../types';
 
 interface BenchmarkConfig {
-  category: string
-  operation: string
-  sizes: number[]
-  runner: (math: any, size: number) => void
+  category: string;
+  operation: string;
+  sizes: number[];
+  runner: (math: any, size: number) => void;
 }
 
 const benchmarks: BenchmarkConfig[] = [
@@ -2094,9 +2094,9 @@ const benchmarks: BenchmarkConfig[] = [
     operation: 'Multiply (NxN)',
     sizes: [10, 50, 100, 200, 500],
     runner: (math, n) => {
-      const A = math.random([n, n])
-      const B = math.random([n, n])
-      math.multiply(A, B)
+      const A = math.random([n, n]);
+      const B = math.random([n, n]);
+      math.multiply(A, B);
     },
   },
   {
@@ -2104,8 +2104,8 @@ const benchmarks: BenchmarkConfig[] = [
     operation: 'Determinant (NxN)',
     sizes: [10, 50, 100, 200],
     runner: (math, n) => {
-      const A = math.random([n, n])
-      math.det(A)
+      const A = math.random([n, n]);
+      math.det(A);
     },
   },
   {
@@ -2113,8 +2113,8 @@ const benchmarks: BenchmarkConfig[] = [
     operation: 'Inverse (NxN)',
     sizes: [10, 50, 100, 200],
     runner: (math, n) => {
-      const A = math.random([n, n])
-      math.inv(A)
+      const A = math.random([n, n]);
+      math.inv(A);
     },
   },
   {
@@ -2123,9 +2123,9 @@ const benchmarks: BenchmarkConfig[] = [
     sizes: [256, 1024, 4096, 16384],
     runner: (math, n) => {
       const signal = Array.from({ length: n }, (_, i) =>
-        math.complex(Math.sin(2 * Math.PI * 5 * i / n), 0)
-      )
-      math.fft(signal)
+        math.complex(Math.sin((2 * Math.PI * 5 * i) / n), 0)
+      );
+      math.fft(signal);
     },
   },
   {
@@ -2133,44 +2133,44 @@ const benchmarks: BenchmarkConfig[] = [
     operation: 'Mean + Variance',
     sizes: [1000, 10000, 100000, 1000000],
     runner: (math, n) => {
-      const data = Array.from({ length: n }, () => Math.random())
-      math.mean(data)
-      math.variance(data)
+      const data = Array.from({ length: n }, () => Math.random());
+      math.mean(data);
+      math.variance(data);
     },
   },
-]
+];
 
 export function useBenchmark() {
-  const { math } = useMathParser()
-  const [results, setResults] = useState<BenchmarkResult[]>([])
-  const [running, setRunning] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const { math } = useMathParser();
+  const [results, setResults] = useState<BenchmarkResult[]>([]);
+  const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const runAll = useCallback(async () => {
-    setRunning(true)
-    setResults([])
-    const allResults: BenchmarkResult[] = []
+    setRunning(true);
+    setResults([]);
+    const allResults: BenchmarkResult[] = [];
 
-    let total = benchmarks.reduce((sum, b) => sum + b.sizes.length, 0)
-    let done = 0
+    let total = benchmarks.reduce((sum, b) => sum + b.sizes.length, 0);
+    let done = 0;
 
     for (const bench of benchmarks) {
       for (const size of bench.sizes) {
         // Run with JS engine timing
-        const start = performance.now()
+        const start = performance.now();
         try {
-          bench.runner(math, size)
+          bench.runner(math, size);
         } catch {
           // skip if operation fails at this size
-          done++
-          setProgress(done / total)
-          continue
+          done++;
+          setProgress(done / total);
+          continue;
         }
-        const jsTime = performance.now() - start
+        const jsTime = performance.now() - start;
 
         // For now, WASM time is estimated (actual WASM integration in Task 11)
-        const wasmTime = jsTime // placeholder — same as JS until WASM is wired
-        const speedup = jsTime / wasmTime
+        const wasmTime = jsTime; // placeholder — same as JS until WASM is wired
+        const speedup = jsTime / wasmTime;
 
         const result: BenchmarkResult = {
           operation: bench.operation,
@@ -2179,23 +2179,23 @@ export function useBenchmark() {
           jsTime,
           wasmTime,
           speedup,
-        }
+        };
 
-        allResults.push(result)
-        setResults([...allResults])
-        done++
-        setProgress(done / total)
+        allResults.push(result);
+        setResults([...allResults]);
+        done++;
+        setProgress(done / total);
 
         // Yield to UI between benchmarks
-        await new Promise((resolve) => setTimeout(resolve, 10))
+        await new Promise((resolve) => setTimeout(resolve, 10));
       }
     }
 
-    setRunning(false)
-    setProgress(1)
-  }, [math])
+    setRunning(false);
+    setProgress(1);
+  }, [math]);
 
-  return { results, running, progress, runAll }
+  return { results, running, progress, runAll };
 }
 ```
 
@@ -2204,7 +2204,7 @@ export function useBenchmark() {
 Replace `demo/mathjs-calc/src/panels/PerformancePanel.tsx`:
 
 ```tsx
-import React, { useMemo } from 'react'
+import React, { useMemo } from 'react';
 import {
   BarChart,
   Bar,
@@ -2216,24 +2216,24 @@ import {
   Legend,
   LineChart,
   Line,
-} from 'recharts'
-import { useBenchmark } from '../hooks/useBenchmark'
-import { useStore } from '../store/useStore'
+} from 'recharts';
+import { useBenchmark } from '../hooks/useBenchmark';
+import { useStore } from '../store/useStore';
 
 export function PerformancePanel() {
-  const { results, running, progress, runAll } = useBenchmark()
-  const wasmCaps = useStore((s) => s.wasmCapabilities)
+  const { results, running, progress, runAll } = useBenchmark();
+  const wasmCaps = useStore((s) => s.wasmCapabilities);
 
   // Group results by category
   const grouped = useMemo(() => {
-    const map = new Map<string, typeof results>()
+    const map = new Map<string, typeof results>();
     for (const r of results) {
-      const key = `${r.category}: ${r.operation}`
-      if (!map.has(key)) map.set(key, [])
-      map.get(key)!.push(r)
+      const key = `${r.category}: ${r.operation}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(r);
     }
-    return map
-  }, [results])
+    return map;
+  }, [results]);
 
   return (
     <div className="p-4">
@@ -2249,9 +2249,9 @@ export function PerformancePanel() {
 
         {/* System info */}
         <div className="text-xs text-gray-500">
-          WASM: {wasmCaps?.wasmAvailable ? 'Available' : 'Checking...'} |
-          SIMD: {wasmCaps?.simdAvailable ? 'Yes' : 'No'} |
-          Cores: {navigator.hardwareConcurrency || 'unknown'}
+          WASM: {wasmCaps?.wasmAvailable ? 'Available' : 'Checking...'} | SIMD:{' '}
+          {wasmCaps?.simdAvailable ? 'Yes' : 'No'} | Cores:{' '}
+          {navigator.hardwareConcurrency || 'unknown'}
         </div>
       </div>
 
@@ -2276,11 +2276,23 @@ export function PerformancePanel() {
                 <XAxis
                   dataKey="size"
                   tick={{ fontSize: 10, fill: '#666' }}
-                  label={{ value: 'Size (N)', position: 'insideBottom', offset: -5, fontSize: 10, fill: '#666' }}
+                  label={{
+                    value: 'Size (N)',
+                    position: 'insideBottom',
+                    offset: -5,
+                    fontSize: 10,
+                    fill: '#666',
+                  }}
                 />
                 <YAxis
                   tick={{ fontSize: 10, fill: '#666' }}
-                  label={{ value: 'Time (ms)', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#666' }}
+                  label={{
+                    value: 'Time (ms)',
+                    angle: -90,
+                    position: 'insideLeft',
+                    fontSize: 10,
+                    fill: '#666',
+                  }}
                 />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #333' }}
@@ -2337,7 +2349,7 @@ export function PerformancePanel() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -2359,6 +2371,7 @@ git commit -m "feat(demo): build Performance Dashboard with benchmark suite and 
 ### Task 11: Wire up WASM engine via Electron IPC
 
 **Files:**
+
 - Modify: `demo/mathjs-calc/electron/main.ts` (add IPC handlers for WASM)
 - Create: `demo/mathjs-calc/electron/wasm-worker.ts`
 - Modify: `demo/mathjs-calc/electron/preload.ts` (expose WASM APIs)
@@ -2369,19 +2382,19 @@ git commit -m "feat(demo): build Performance Dashboard with benchmark suite and 
 In `demo/mathjs-calc/electron/main.ts`, add after `app.whenReady()`:
 
 ```typescript
-import { Worker } from 'worker_threads'
+import { Worker } from 'worker_threads';
 
 // WASM initialization
-let wasmReady = false
+let wasmReady = false;
 
 ipcMain.handle('wasm:init', async () => {
   try {
     // Dynamic import to avoid bundling issues
-    const { MatrixWasmBridge } = await import('mathjs/src/wasm/MatrixWasmBridge.ts')
-    await MatrixWasmBridge.init()
-    const caps = MatrixWasmBridge.getCapabilities()
-    wasmReady = true
-    return { success: true, capabilities: caps }
+    const { MatrixWasmBridge } = await import('mathjs/src/wasm/MatrixWasmBridge.ts');
+    await MatrixWasmBridge.init();
+    const caps = MatrixWasmBridge.getCapabilities();
+    wasmReady = true;
+    return { success: true, capabilities: caps };
   } catch (err) {
     return {
       success: false,
@@ -2391,49 +2404,49 @@ ipcMain.handle('wasm:init', async () => {
         parallelAvailable: false,
         coreCount: 1,
       },
-    }
+    };
   }
-})
+});
 
 ipcMain.handle('wasm:run', async (_event, operation: string, data: unknown) => {
-  const start = performance.now()
+  const start = performance.now();
   try {
-    const math = (await import('mathjs')).default
+    const math = (await import('mathjs')).default;
     // Run operation with math.js (which auto-dispatches to WASM if available)
-    let result: unknown
+    let result: unknown;
     switch (operation) {
       case 'multiply': {
-        const { a, b } = data as { a: number[][]; b: number[][] }
-        result = math.multiply(a, b)
-        break
+        const { a, b } = data as { a: number[][]; b: number[][] };
+        result = math.multiply(a, b);
+        break;
       }
       case 'det': {
-        const { matrix } = data as { matrix: number[][] }
-        result = math.det(matrix)
-        break
+        const { matrix } = data as { matrix: number[][] };
+        result = math.det(matrix);
+        break;
       }
       case 'fft': {
-        const { signal } = data as { signal: number[] }
-        const complex = signal.map((v) => math.complex(v, 0))
-        result = math.fft(complex)
-        break
+        const { signal } = data as { signal: number[] };
+        const complex = signal.map((v) => math.complex(v, 0));
+        result = math.fft(complex);
+        break;
       }
       default:
-        throw new Error(`Unknown WASM operation: ${operation}`)
+        throw new Error(`Unknown WASM operation: ${operation}`);
     }
     return {
       success: true,
       result: JSON.parse(JSON.stringify(result)),
       executionTime: performance.now() - start,
-    }
+    };
   } catch (err) {
     return {
       success: false,
       error: err instanceof Error ? err.message : String(err),
       executionTime: performance.now() - start,
-    }
+    };
   }
-})
+});
 
 ipcMain.handle('system:info', () => ({
   platform: process.platform,
@@ -2441,7 +2454,7 @@ ipcMain.handle('system:info', () => ({
   nodeVersion: process.version,
   cpuCount: require('os').cpus().length,
   totalMemory: require('os').totalmem(),
-}))
+}));
 ```
 
 **Step 2: Update preload to expose WASM init**
@@ -2454,7 +2467,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   runWasmOperation: (operation: string, data: unknown) =>
     ipcRenderer.invoke('wasm:run', operation, data),
   getSystemInfo: () => ipcRenderer.invoke('system:info'),
-})
+});
 ```
 
 **Step 3: Add WASM initialization to App.tsx**
@@ -2462,18 +2475,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
 Add a `useEffect` at the top of `App`:
 
 ```typescript
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
 // Inside App component:
-const setWasmCapabilities = useStore((s) => s.setWasmCapabilities)
+const setWasmCapabilities = useStore((s) => s.setWasmCapabilities);
 
 useEffect(() => {
   if (window.electronAPI) {
     window.electronAPI.initWasm().then((result: any) => {
-      setWasmCapabilities(result.capabilities)
-    })
+      setWasmCapabilities(result.capabilities);
+    });
   }
-}, [setWasmCapabilities])
+}, [setWasmCapabilities]);
 ```
 
 **Step 4: Add TypeScript declarations for electronAPI**
@@ -2483,36 +2496,39 @@ Create `demo/mathjs-calc/src/electron.d.ts`:
 ```typescript
 interface ElectronAPI {
   initWasm: () => Promise<{
-    success: boolean
+    success: boolean;
     capabilities: {
-      wasmAvailable: boolean
-      simdAvailable: boolean
-      parallelAvailable: boolean
-      coreCount: number
-    }
-  }>
-  runWasmOperation: (operation: string, data: unknown) => Promise<{
-    success: boolean
-    result?: unknown
-    error?: string
-    executionTime: number
-  }>
+      wasmAvailable: boolean;
+      simdAvailable: boolean;
+      parallelAvailable: boolean;
+      coreCount: number;
+    };
+  }>;
+  runWasmOperation: (
+    operation: string,
+    data: unknown
+  ) => Promise<{
+    success: boolean;
+    result?: unknown;
+    error?: string;
+    executionTime: number;
+  }>;
   getSystemInfo: () => Promise<{
-    platform: string
-    arch: string
-    nodeVersion: string
-    cpuCount: number
-    totalMemory: number
-  }>
+    platform: string;
+    arch: string;
+    nodeVersion: string;
+    cpuCount: number;
+    totalMemory: number;
+  }>;
 }
 
 declare global {
   interface Window {
-    electronAPI?: ElectronAPI
+    electronAPI?: ElectronAPI;
   }
 }
 
-export {}
+export {};
 ```
 
 **Step 5: Update useBenchmark to use dual-engine timing**
@@ -2542,6 +2558,7 @@ git commit -m "feat(demo): wire up WASM engine via Electron IPC with dual-engine
 ### Task 12: Add auto-save state persistence
 
 **Files:**
+
 - Create: `demo/mathjs-calc/src/hooks/usePersistence.ts`
 - Modify: `demo/mathjs-calc/src/App.tsx`
 
@@ -2550,34 +2567,34 @@ git commit -m "feat(demo): wire up WASM engine via Electron IPC with dual-engine
 Create `demo/mathjs-calc/src/hooks/usePersistence.ts`:
 
 ```typescript
-import { useEffect } from 'react'
-import { useStore } from '../store/useStore'
+import { useEffect } from 'react';
+import { useStore } from '../store/useStore';
 
-const STORAGE_KEY = 'mathjs-calc-state'
+const STORAGE_KEY = 'mathjs-calc-state';
 
 export function usePersistence() {
-  const config = useStore((s) => s.config)
-  const history = useStore((s) => s.history)
+  const config = useStore((s) => s.config);
+  const history = useStore((s) => s.history);
 
   // Save on change
   useEffect(() => {
-    const state = { config, history: history.slice(0, 100) }
+    const state = { config, history: history.slice(0, 100) };
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
       // localStorage might be full
     }
-  }, [config, history])
+  }, [config, history]);
 }
 
 export function loadPersistedState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
   } catch {
     // corrupted state
   }
-  return null
+  return null;
 }
 ```
 
@@ -2597,6 +2614,7 @@ git commit -m "feat(demo): add auto-save state persistence via localStorage"
 ### Task 13: Configure Electron Builder for distribution
 
 **Files:**
+
 - Create: `demo/mathjs-calc/electron-builder.yml`
 - Modify: `demo/mathjs-calc/package.json` (add build config)
 
@@ -2650,6 +2668,7 @@ git commit -m "feat(demo): configure Electron Builder for distribution packaging
 ### Task 14: Final verification and README
 
 **Files:**
+
 - Create: `demo/mathjs-calc/README.md`
 
 **Step 1: Run full app smoke test**
@@ -2660,6 +2679,7 @@ npm run electron:dev
 ```
 
 Verify all 5 panels work:
+
 - [ ] Calculator: expression evaluation, button grid, angle modes, number types
 - [ ] Matrix Lab: matrix editing, determinant, inverse, eigenvalues
 - [ ] Signal Studio: waveform generation, FFT visualization, sample count scaling
@@ -2670,7 +2690,7 @@ Verify all 5 panels work:
 
 Create `demo/mathjs-calc/README.md`:
 
-```markdown
+````markdown
 # mathjs-calc
 
 Advanced scientific calculator demo — proof of concept for the math.js TS+AS+WASM library.
@@ -2681,6 +2701,7 @@ Advanced scientific calculator demo — proof of concept for the math.js TS+AS+W
 npm install
 npm run electron:dev
 ```
+````
 
 ## Features
 
@@ -2706,29 +2727,30 @@ npm run electron:build
 ## Tech Stack
 
 Electron 33, React 19, TypeScript, Vite, Zustand, Recharts, Tailwind CSS, math.js
-```
+
+````
 
 **Step 3: Final commit**
 
 ```bash
 git add demo/mathjs-calc/
 git commit -m "docs(demo): add README and complete smoke test verification"
-```
+````
 
 ---
 
 ## Summary
 
-| Phase | Tasks | What It Delivers |
-|-------|-------|-----------------|
-| 1: Scaffolding | 1-2 | Electron+React+Vite project with math.js integration |
-| 2: Layout | 3-4 | Zustand store, tabbed panels, expression bar, engine toggle |
-| 3: Calculator | 5-6 | Scientific button grid, angle modes, number types, unit conversion |
-| 4: Matrix Lab | 7 | Matrix editor, linear algebra operations |
-| 5: Signal Studio | 8 | Waveform generator, FFT visualization |
-| 6: Statistics | 9 | Data generation, descriptive stats, histograms |
-| 7: Performance | 10 | Benchmark suite with scaling charts |
-| 8: WASM | 11 | Dual-engine IPC, WASM initialization |
-| 9: Polish | 12-14 | Persistence, packaging, README |
+| Phase            | Tasks | What It Delivers                                                   |
+| ---------------- | ----- | ------------------------------------------------------------------ |
+| 1: Scaffolding   | 1-2   | Electron+React+Vite project with math.js integration               |
+| 2: Layout        | 3-4   | Zustand store, tabbed panels, expression bar, engine toggle        |
+| 3: Calculator    | 5-6   | Scientific button grid, angle modes, number types, unit conversion |
+| 4: Matrix Lab    | 7     | Matrix editor, linear algebra operations                           |
+| 5: Signal Studio | 8     | Waveform generator, FFT visualization                              |
+| 6: Statistics    | 9     | Data generation, descriptive stats, histograms                     |
+| 7: Performance   | 10    | Benchmark suite with scaling charts                                |
+| 8: WASM          | 11    | Dual-engine IPC, WASM initialization                               |
+| 9: Polish        | 12-14 | Persistence, packaging, README                                     |
 
 **Total: 14 tasks across 9 phases. Each task produces a working commit.**

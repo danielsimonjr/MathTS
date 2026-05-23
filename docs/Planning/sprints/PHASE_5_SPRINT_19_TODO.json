@@ -37,7 +37,11 @@
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": ["Sprint 18"],
-      "files": ["functions/src/matrix/eigs.ts", "matrix/src/operations/svd.ts", "matrix/src/operations/eig.ts"],
+      "files": [
+        "functions/src/matrix/eigs.ts",
+        "matrix/src/operations/svd.ts",
+        "matrix/src/operations/eig.ts"
+      ],
       "notes": "eigs supports both real symmetric and complex matrices"
     },
     {
@@ -48,7 +52,10 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": ["Sprint 18"],
-      "files": ["functions/src/algebra/decomposition/lup.ts", "functions/src/algebra/decomposition/qr.ts"],
+      "files": [
+        "functions/src/algebra/decomposition/lup.ts",
+        "functions/src/algebra/decomposition/qr.ts"
+      ],
       "notes": "LUP decomposition with partial pivoting, Householder QR"
     },
     {

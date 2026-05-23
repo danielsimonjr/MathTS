@@ -95,10 +95,7 @@
     "matrix/src/backends/WASMBackend.ts",
     "matrix/tests/wasm/loading.test.ts"
   ],
-  "filesModified": [
-    "matrix/src/backends/index.ts",
-    "tsconfig.base.json"
-  ],
+  "filesModified": ["matrix/src/backends/index.ts", "tsconfig.base.json"],
   "totalEstimatedHours": 23,
   "completedAt": "2025-12-11",
   "notes": "Sprint 5 establishes the WASM infrastructure. The WASMBackend class implements the MatrixBackend interface with automatic fallback to JSBackend for small matrices or when WASM is unavailable. Feature detection identifies WASM capabilities including SIMD, bulk memory, reference types, exceptions, and tail call support. All 337 tests passing (320 original + 17 new WASM tests)."

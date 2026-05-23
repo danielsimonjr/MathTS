@@ -1,31 +1,31 @@
-import { factory } from '../utils/factory.js'
-import { combinationsNumber } from '../plain/number/combinations.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { combinationsNumber } from '../plain/number/combinations.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for combinations
 interface BigNumberType {
-  constructor: BigNumberConstructor
-  minus(n: BigNumberType | number): BigNumberType
-  plus(n: BigNumberType | number): BigNumberType
-  times(n: BigNumberType | number): BigNumberType
-  dividedBy(n: BigNumberType | number): BigNumberType
-  gt(n: BigNumberType | number): boolean
-  lt(n: BigNumberType | number): boolean
-  lte(n: BigNumberType | number): boolean
-  gte(n: BigNumberType | number): boolean
-  isInteger(): boolean
+  constructor: BigNumberConstructor;
+  minus(n: BigNumberType | number): BigNumberType;
+  plus(n: BigNumberType | number): BigNumberType;
+  times(n: BigNumberType | number): BigNumberType;
+  dividedBy(n: BigNumberType | number): BigNumberType;
+  gt(n: BigNumberType | number): boolean;
+  lt(n: BigNumberType | number): boolean;
+  lte(n: BigNumberType | number): boolean;
+  gte(n: BigNumberType | number): boolean;
+  isInteger(): boolean;
 }
 
 interface BigNumberConstructor {
-  new (value: number): BigNumberType
+  new (value: number): BigNumberType;
 }
 
 interface CombinationsDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'combinations'
-const dependencies = ['typed']
+const name = 'combinations';
+const dependencies = ['typed'];
 
 export const createCombinations = /* #__PURE__ */ factory(
   name,
@@ -57,43 +57,38 @@ export const createCombinations = /* #__PURE__ */ factory(
     return typed(name, {
       'number, number': combinationsNumber,
 
-      'BigNumber, BigNumber': function (
-        n: BigNumberType,
-        k: BigNumberType
-      ): BigNumberType {
-        const BigNumber = n.constructor
-        let result: BigNumberType
-        let i: BigNumberType
-        const nMinusk = n.minus(k)
-        const one = new BigNumber(1)
+      'BigNumber, BigNumber': function (n: BigNumberType, k: BigNumberType): BigNumberType {
+        const BigNumber = n.constructor;
+        let result: BigNumberType;
+        let i: BigNumberType;
+        const nMinusk = n.minus(k);
+        const one = new BigNumber(1);
 
         if (!isPositiveInteger(n) || !isPositiveInteger(k)) {
-          throw new TypeError(
-            'Positive integer value expected in function combinations'
-          )
+          throw new TypeError('Positive integer value expected in function combinations');
         }
         if (k.gt(n)) {
-          throw new TypeError('k must be less than n in function combinations')
+          throw new TypeError('k must be less than n in function combinations');
         }
 
-        result = one
+        result = one;
         if (k.lt(nMinusk)) {
           for (i = one; i.lte(nMinusk); i = i.plus(one)) {
-            result = result.times(k.plus(i)).dividedBy(i)
+            result = result.times(k.plus(i)).dividedBy(i);
           }
         } else {
           for (i = one; i.lte(k); i = i.plus(one)) {
-            result = result.times(nMinusk.plus(i)).dividedBy(i)
+            result = result.times(nMinusk.plus(i)).dividedBy(i);
           }
         }
 
-        return result
-      }
+        return result;
+      },
 
       // TODO: implement support for collection in combinations
-    })
+    });
   }
-)
+);
 
 /**
  * Test whether BigNumber n is a positive integer
@@ -101,5 +96,5 @@ export const createCombinations = /* #__PURE__ */ factory(
  * @returns {boolean} isPositiveInteger
  */
 function isPositiveInteger(n: BigNumberType): boolean {
-  return n.isInteger() && n.gte(0)
+  return n.isInteger() && n.gte(0);
 }

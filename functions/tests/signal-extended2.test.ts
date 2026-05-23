@@ -107,7 +107,10 @@ describe('dwt', () => {
 
 describe('fft2d', () => {
   it('should compute 2D FFT', async () => {
-    const x = [[1, 2], [3, 4]];
+    const x = [
+      [1, 2],
+      [3, 4],
+    ];
     const result = await fft2d(x);
     expect(result.real.length).toBe(2);
     expect(result.imag.length).toBe(2);
@@ -119,7 +122,7 @@ describe('fft2d', () => {
     // Build a deterministic 16x16 real matrix.
     const n = 16;
     const x: number[][] = Array.from({ length: n }, (_, r) =>
-      Array.from({ length: n }, (_, c) => Math.sin((r + 1) * 0.3 + (c + 1) * 0.17)),
+      Array.from({ length: n }, (_, c) => Math.sin((r + 1) * 0.3 + (c + 1) * 0.17))
     );
 
     // Sequential reference: thresholds high enough that the pool path is skipped.
@@ -156,11 +159,7 @@ describe('fourier / invFourier', () => {
   it('should approximately invert', () => {
     // Gaussian should transform to Gaussian
     const omega = Array.from({ length: 200 }, (_, i) => -10 + i * 0.1);
-    const result = invFourier(
-      (w) => ({ re: Math.exp(-w * w / 4), im: 0 }),
-      omega,
-      0,
-    );
+    const result = invFourier((w) => ({ re: Math.exp((-w * w) / 4), im: 0 }), omega, 0);
     expect(typeof result).toBe('number');
   });
 });
@@ -177,7 +176,7 @@ describe('hilbertTransform', () => {
   });
 
   it('should produce non-zero imaginary for non-constant signal', () => {
-    const x = Array.from({ length: 32 }, (_, i) => Math.sin(2 * Math.PI * i / 32));
+    const x = Array.from({ length: 32 }, (_, i) => Math.sin((2 * Math.PI * i) / 32));
     const h = hilbertTransform(x);
     const maxAbs = Math.max(...h.map(Math.abs));
     expect(maxAbs).toBeGreaterThan(0.1);
@@ -190,7 +189,7 @@ describe('hilbertTransform', () => {
 
 describe('spectrogram', () => {
   it('should produce magnitude matrix', async () => {
-    const x = Array.from({ length: 512 }, (_, i) => Math.sin(2 * Math.PI * 10 * i / 512));
+    const x = Array.from({ length: 512 }, (_, i) => Math.sin((2 * Math.PI * 10 * i) / 512));
     const result = await spectrogram(x, { windowSize: 64 });
     expect(result.magnitude.length).toBeGreaterThan(0);
     expect(result.frequencies.length).toBeGreaterThan(0);
@@ -200,8 +199,10 @@ describe('spectrogram', () => {
   it('parallel result matches sequential result', async () => {
     // Rectangular window keeps the WASM fast-path out of the picture so the
     // comparison isolates the pure-TS sequential vs. worker-batch paths.
-    const x = Array.from({ length: 1024 }, (_, i) =>
-      Math.sin(2 * Math.PI * 7 * i / 1024) + 0.3 * Math.cos(2 * Math.PI * 23 * i / 1024),
+    const x = Array.from(
+      { length: 1024 },
+      (_, i) =>
+        Math.sin((2 * Math.PI * 7 * i) / 1024) + 0.3 * Math.cos((2 * Math.PI * 23 * i) / 1024)
     );
     const opts = { windowSize: 64, hopSize: 16, window: 'rectangular' };
 
@@ -230,7 +231,7 @@ describe('spectrogram', () => {
 
 describe('periodogram', () => {
   it('should estimate PSD', () => {
-    const x = Array.from({ length: 256 }, (_, i) => Math.sin(2 * Math.PI * 10 * i / 256));
+    const x = Array.from({ length: 256 }, (_, i) => Math.sin((2 * Math.PI * 10 * i) / 256));
     const result = periodogram(x);
     expect(result.psd.length).toBeGreaterThan(0);
     expect(result.frequencies.length).toBe(result.psd.length);
@@ -248,8 +249,8 @@ describe('lowpassFilter', () => {
   it('should attenuate high frequencies', () => {
     // Signal: low freq + high freq
     const n = 100;
-    const low = Array.from({ length: n }, (_, i) => Math.sin(2 * Math.PI * 2 * i / n));
-    const high = Array.from({ length: n }, (_, i) => Math.sin(2 * Math.PI * 40 * i / n));
+    const low = Array.from({ length: n }, (_, i) => Math.sin((2 * Math.PI * 2 * i) / n));
+    const high = Array.from({ length: n }, (_, i) => Math.sin((2 * Math.PI * 40 * i) / n));
     const signal = low.map((v, i) => v + high[i]);
     const filtered = lowpassFilter(signal, 0.1);
     expect(filtered.length).toBe(n);
@@ -259,7 +260,7 @@ describe('lowpassFilter', () => {
 
 describe('highpassFilter', () => {
   it('should return same-length signal', () => {
-    const x = Array.from({ length: 64 }, (_, i) => Math.sin(2 * Math.PI * i / 64));
+    const x = Array.from({ length: 64 }, (_, i) => Math.sin((2 * Math.PI * i) / 64));
     const filtered = highpassFilter(x, 0.1);
     expect(filtered.length).toBe(64);
   });
@@ -267,7 +268,7 @@ describe('highpassFilter', () => {
 
 describe('bandpassFilter', () => {
   it('should return same-length signal', () => {
-    const x = Array.from({ length: 64 }, (_, i) => Math.sin(2 * Math.PI * i / 64));
+    const x = Array.from({ length: 64 }, (_, i) => Math.sin((2 * Math.PI * i) / 64));
     const filtered = bandpassFilter(x, 0.1, 0.3);
     expect(filtered.length).toBe(64);
   });

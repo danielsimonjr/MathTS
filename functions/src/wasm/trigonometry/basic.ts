@@ -15,7 +15,7 @@
  * @returns sin(x)
  */
 export function sin(x: f64): f64 {
-  return Math.sin(x)
+  return Math.sin(x);
 }
 
 /**
@@ -24,7 +24,7 @@ export function sin(x: f64): f64 {
  * @returns cos(x)
  */
 export function cos(x: f64): f64 {
-  return Math.cos(x)
+  return Math.cos(x);
 }
 
 /**
@@ -33,7 +33,7 @@ export function cos(x: f64): f64 {
  * @returns tan(x)
  */
 export function tan(x: f64): f64 {
-  return Math.tan(x)
+  return Math.tan(x);
 }
 
 /**
@@ -42,7 +42,7 @@ export function tan(x: f64): f64 {
  * @returns asin(x) in radians
  */
 export function asin(x: f64): f64 {
-  return Math.asin(x)
+  return Math.asin(x);
 }
 
 /**
@@ -51,7 +51,7 @@ export function asin(x: f64): f64 {
  * @returns acos(x) in radians
  */
 export function acos(x: f64): f64 {
-  return Math.acos(x)
+  return Math.acos(x);
 }
 
 /**
@@ -60,7 +60,7 @@ export function acos(x: f64): f64 {
  * @returns atan(x) in radians
  */
 export function atan(x: f64): f64 {
-  return Math.atan(x)
+  return Math.atan(x);
 }
 
 /**
@@ -70,7 +70,7 @@ export function atan(x: f64): f64 {
  * @returns atan2(y, x) in radians
  */
 export function atan2(y: f64, x: f64): f64 {
-  return Math.atan2(y, x)
+  return Math.atan2(y, x);
 }
 
 /**
@@ -79,7 +79,7 @@ export function atan2(y: f64, x: f64): f64 {
  * @returns sinh(x)
  */
 export function sinh(x: f64): f64 {
-  return Math.sinh(x)
+  return Math.sinh(x);
 }
 
 /**
@@ -88,7 +88,7 @@ export function sinh(x: f64): f64 {
  * @returns cosh(x)
  */
 export function cosh(x: f64): f64 {
-  return Math.cosh(x)
+  return Math.cosh(x);
 }
 
 /**
@@ -97,7 +97,7 @@ export function cosh(x: f64): f64 {
  * @returns tanh(x)
  */
 export function tanh(x: f64): f64 {
-  return Math.tanh(x)
+  return Math.tanh(x);
 }
 
 /**
@@ -106,7 +106,7 @@ export function tanh(x: f64): f64 {
  * @returns asinh(x)
  */
 export function asinh(x: f64): f64 {
-  return Math.asinh(x)
+  return Math.asinh(x);
 }
 
 /**
@@ -115,7 +115,7 @@ export function asinh(x: f64): f64 {
  * @returns acosh(x)
  */
 export function acosh(x: f64): f64 {
-  return Math.acosh(x)
+  return Math.acosh(x);
 }
 
 /**
@@ -124,7 +124,7 @@ export function acosh(x: f64): f64 {
  * @returns atanh(x)
  */
 export function atanh(x: f64): f64 {
-  return Math.atanh(x)
+  return Math.atanh(x);
 }
 
 /**
@@ -133,7 +133,7 @@ export function atanh(x: f64): f64 {
  * @returns sec(x) = 1/cos(x)
  */
 export function sec(x: f64): f64 {
-  return 1.0 / Math.cos(x)
+  return 1.0 / Math.cos(x);
 }
 
 /**
@@ -142,7 +142,7 @@ export function sec(x: f64): f64 {
  * @returns csc(x) = 1/sin(x)
  */
 export function csc(x: f64): f64 {
-  return 1.0 / Math.sin(x)
+  return 1.0 / Math.sin(x);
 }
 
 /**
@@ -151,7 +151,7 @@ export function csc(x: f64): f64 {
  * @returns cot(x) = 1/tan(x)
  */
 export function cot(x: f64): f64 {
-  return 1.0 / Math.tan(x)
+  return 1.0 / Math.tan(x);
 }
 
 /**
@@ -160,7 +160,7 @@ export function cot(x: f64): f64 {
  * @returns sech(x) = 1/cosh(x)
  */
 export function sech(x: f64): f64 {
-  return 1.0 / Math.cosh(x)
+  return 1.0 / Math.cosh(x);
 }
 
 /**
@@ -169,7 +169,7 @@ export function sech(x: f64): f64 {
  * @returns csch(x) = 1/sinh(x)
  */
 export function csch(x: f64): f64 {
-  return 1.0 / Math.sinh(x)
+  return 1.0 / Math.sinh(x);
 }
 
 /**
@@ -178,7 +178,7 @@ export function csch(x: f64): f64 {
  * @returns coth(x) = 1/tanh(x)
  */
 export function coth(x: f64): f64 {
-  return 1.0 / Math.tanh(x)
+  return 1.0 / Math.tanh(x);
 }
 
 /**
@@ -187,7 +187,7 @@ export function coth(x: f64): f64 {
  * @returns asec(x) in radians
  */
 export function asec(x: f64): f64 {
-  return Math.acos(1.0 / x)
+  return Math.acos(1.0 / x);
 }
 
 /**
@@ -196,7 +196,7 @@ export function asec(x: f64): f64 {
  * @returns acsc(x) in radians
  */
 export function acsc(x: f64): f64 {
-  return Math.asin(1.0 / x)
+  return Math.asin(1.0 / x);
 }
 
 /**
@@ -205,7 +205,7 @@ export function acsc(x: f64): f64 {
  * @returns acot(x) in radians
  */
 export function acot(x: f64): f64 {
-  return Math.atan(1.0 / x)
+  return Math.atan(1.0 / x);
 }
 
 /**
@@ -214,7 +214,7 @@ export function acot(x: f64): f64 {
  * @returns asech(x)
  */
 export function asech(x: f64): f64 {
-  return Math.acosh(1.0 / x)
+  return Math.acosh(1.0 / x);
 }
 
 /**
@@ -223,7 +223,7 @@ export function asech(x: f64): f64 {
  * @returns acsch(x)
  */
 export function acsch(x: f64): f64 {
-  return Math.asinh(1.0 / x)
+  return Math.asinh(1.0 / x);
 }
 
 /**
@@ -232,7 +232,7 @@ export function acsch(x: f64): f64 {
  * @returns acoth(x)
  */
 export function acoth(x: f64): f64 {
-  return Math.atanh(1.0 / x)
+  return Math.atanh(1.0 / x);
 }
 
 /**
@@ -241,7 +241,7 @@ export function acoth(x: f64): f64 {
  * @returns Angle in radians
  */
 export function degToRad(deg: f64): f64 {
-  return deg * (Math.PI / 180.0)
+  return deg * (Math.PI / 180.0);
 }
 
 /**
@@ -250,7 +250,7 @@ export function degToRad(deg: f64): f64 {
  * @returns Angle in degrees
  */
 export function radToDeg(rad: f64): f64 {
-  return rad * (180.0 / Math.PI)
+  return rad * (180.0 / Math.PI);
 }
 
 /**
@@ -261,8 +261,8 @@ export function radToDeg(rad: f64): f64 {
  */
 export function sinArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.sin(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.sin(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -274,8 +274,8 @@ export function sinArray(inputPtr: usize, outputPtr: usize, length: i32): void {
  */
 export function cosArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.cos(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.cos(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -287,8 +287,8 @@ export function cosArray(inputPtr: usize, outputPtr: usize, length: i32): void {
  */
 export function tanArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.tan(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.tan(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -298,14 +298,10 @@ export function tanArray(inputPtr: usize, outputPtr: usize, length: i32): void {
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function sinhArray(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function sinhArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.sinh(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.sinh(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -315,14 +311,10 @@ export function sinhArray(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function coshArray(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function coshArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.cosh(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.cosh(load<f64>(inputPtr + offset)));
   }
 }
 
@@ -332,13 +324,9 @@ export function coshArray(
  * @param outputPtr Pointer to output array (f64)
  * @param length Length of arrays
  */
-export function tanhArray(
-  inputPtr: usize,
-  outputPtr: usize,
-  length: i32
-): void {
+export function tanhArray(inputPtr: usize, outputPtr: usize, length: i32): void {
   for (let i: i32 = 0; i < length; i++) {
-    const offset: usize = (<usize>i) << 3
-    store<f64>(outputPtr + offset, Math.tanh(load<f64>(inputPtr + offset)))
+    const offset: usize = (<usize>i) << 3;
+    store<f64>(outputPtr + offset, Math.tanh(load<f64>(inputPtr + offset)));
   }
 }

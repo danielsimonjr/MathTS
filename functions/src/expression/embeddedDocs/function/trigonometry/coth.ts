@@ -4,5 +4,5 @@ export const cothDocs = {
   syntax: ['coth(x)'],
   description: 'Compute the hyperbolic cotangent of x in radians.',
   examples: ['coth(2)', '1 / tanh(2)'],
-  seealso: ['sech', 'csch', 'tanh']
-}
+  seealso: ['sech', 'csch', 'tanh'],
+};

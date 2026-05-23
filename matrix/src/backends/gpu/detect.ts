@@ -144,7 +144,8 @@ export async function detectGPUCapabilities(
       maxStorageBufferBindingSize: limits.maxStorageBufferBindingSize,
       maxComputeInvocationsPerWorkgroup: limits.maxComputeInvocationsPerWorkgroup,
       maxComputeWorkgroupsPerDimension: limits.maxComputeWorkgroupsPerDimension,
-      isFallbackAdapter: (adapter as unknown as { isFallbackAdapter?: boolean }).isFallbackAdapter ?? false,
+      isFallbackAdapter:
+        (adapter as unknown as { isFallbackAdapter?: boolean }).isFallbackAdapter ?? false,
       features,
     };
   } catch {
@@ -234,10 +235,7 @@ export function getMaxMatrixSize(
   }
 
   // Use the smaller of max buffer size and max storage buffer binding size
-  const maxBytes = Math.min(
-    capabilities.maxBufferSize,
-    capabilities.maxStorageBufferBindingSize
-  );
+  const maxBytes = Math.min(capabilities.maxBufferSize, capabilities.maxStorageBufferBindingSize);
 
   // Square matrix: n^2 * bytesPerElement <= maxBytes
   const maxElements = Math.floor(maxBytes / bytesPerElement);

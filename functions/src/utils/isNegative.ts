@@ -1,35 +1,35 @@
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { isNegativeNumber } from '../plain/number/index.js'
-import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js'
-import { nearlyEqual } from '../utils/number.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { isNegativeNumber } from '../plain/number/index.js';
+import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { nearlyEqual } from '../utils/number.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for isNegative
 interface BigNumberType {
-  constructor: new (value: number) => BigNumberType
-  isNeg(): boolean
-  isZero(): boolean
-  isNaN(): boolean
+  constructor: new (value: number) => BigNumberType;
+  isNeg(): boolean;
+  isZero(): boolean;
+  isNaN(): boolean;
 }
 
 interface FractionType {
-  s: bigint
+  s: bigint;
 }
 
 interface UnitType {
-  valueType(): string
-  value: unknown
+  valueType(): string;
+  value: unknown;
 }
 
 interface IsNegativeDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
+  typed: TypedFunction;
+  config: ConfigOptions;
 }
 
-const name = 'isNegative'
-const dependencies = ['typed', 'config']
+const name = 'isNegative';
+const dependencies = ['typed', 'config'];
 
 export const createIsNegative = /* #__PURE__ */ factory(
   name,
@@ -66,9 +66,7 @@ export const createIsNegative = /* #__PURE__ */ factory(
      */
     return typed(name, {
       number: (x: number): boolean =>
-        nearlyEqual(x, 0, config.relTol, config.absTol)
-          ? false
-          : isNegativeNumber(x),
+        nearlyEqual(x, 0, config.relTol, config.absTol) ? false : isNegativeNumber(x),
 
       BigNumber: (x: BigNumberType): boolean =>
         bigNearlyEqual(x, new x.constructor(0), config.relTol, config.absTol)
@@ -89,7 +87,7 @@ export const createIsNegative = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
             deepMap(x as unknown[], self)
-      )
-    })
+      ),
+    });
   }
-)
+);

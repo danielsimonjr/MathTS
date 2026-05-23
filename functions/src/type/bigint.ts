@@ -1,10 +1,10 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
 
-import { TypedFunction, BigNumber, Fraction } from '../types.js'
+import { TypedFunction, BigNumber, Fraction } from '../types.js';
 
-const name = 'bigint'
-const dependencies = ['typed']
+const name = 'bigint';
+const dependencies = ['typed'];
 
 export const createBigint = /* #__PURE__ */ factory(
   name,
@@ -34,37 +34,35 @@ export const createBigint = /* #__PURE__ */ factory(
      */
     const bigint = typed('bigint', {
       '': function () {
-        return 0n
+        return 0n;
       },
 
       bigint: function (x: bigint) {
-        return x
+        return x;
       },
 
       number: function (x: number) {
-        return BigInt(x.toFixed())
+        return BigInt(x.toFixed());
       },
 
       BigNumber: function (x: BigNumber) {
-        return BigInt(x.round().toString())
+        return BigInt(x.round().toString());
       },
 
       Fraction: function (x: Fraction) {
-        return BigInt(x.valueOf().toFixed())
+        return BigInt(x.valueOf().toFixed());
       },
 
       'string | boolean': function (x: string | boolean) {
-        return BigInt(x)
+        return BigInt(x);
       },
 
       null: function (_x: null) {
-        return 0n
+        return 0n;
       },
 
-      'Array | Matrix': typed.referToSelf(
-        (self: any) => (x: any) => deepMap(x, self)
-      )
-    })
+      'Array | Matrix': typed.referToSelf((self: any) => (x: any) => deepMap(x, self)),
+    });
 
     // reviver function to parse a JSON object like:
     //
@@ -72,9 +70,9 @@ export const createBigint = /* #__PURE__ */ factory(
     //
     // into a bigint 123n
     bigint.fromJSON = function (json: any) {
-      return BigInt(json.value)
-    }
+      return BigInt(json.value);
+    };
 
-    return bigint
+    return bigint;
   }
-)
+);

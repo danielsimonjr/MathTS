@@ -8,18 +8,18 @@
 
 ## Decision Summary
 
-| Aspect | Decision |
-|--------|----------|
-| **Approach** | Module-by-module port, crates for LA/FFT/stats, pure Rust for simple modules |
-| **ABI** | Same raw pointer `extern "C"` — JS bridge (`WasmLoader.ts`, `MatrixWasmBridge.ts`) unchanged |
-| **Structure** | Single Cargo workspace at `src/wasm-rust/`, one `.wasm` output |
-| **Crates** | `faer` (LA), `rustfft` (signal), `statrs` (special/stats), fallbacks identified |
-| **Migration order** | matrix -> algebra -> signal/SIMD -> stats/numeric/special -> simple modules -> cutover |
-| **SIMD** | `core::arch::wasm32` with `simd128` target feature |
-| **AS preservation** | Kept in `src/wasm/` for benchmarking (same pattern as JS legacy files) |
-| **Build** | `npm run build:wasm:rust` alongside existing `npm run build:wasm` |
-| **Testing** | Existing vitest unmodified + Rust native `cargo test` + parity benchmarks |
-| **Phases** | 0 (scaffold) -> 1-5 (modules) -> 6 (cutover), each with exit gate |
+| Aspect              | Decision                                                                                     |
+| ------------------- | -------------------------------------------------------------------------------------------- |
+| **Approach**        | Module-by-module port, crates for LA/FFT/stats, pure Rust for simple modules                 |
+| **ABI**             | Same raw pointer `extern "C"` — JS bridge (`WasmLoader.ts`, `MatrixWasmBridge.ts`) unchanged |
+| **Structure**       | Single Cargo workspace at `src/wasm-rust/`, one `.wasm` output                               |
+| **Crates**          | `faer` (LA), `rustfft` (signal), `statrs` (special/stats), fallbacks identified              |
+| **Migration order** | matrix -> algebra -> signal/SIMD -> stats/numeric/special -> simple modules -> cutover       |
+| **SIMD**            | `core::arch::wasm32` with `simd128` target feature                                           |
+| **AS preservation** | Kept in `src/wasm/` for benchmarking (same pattern as JS legacy files)                       |
+| **Build**           | `npm run build:wasm:rust` alongside existing `npm run build:wasm`                            |
+| **Testing**         | Existing vitest unmodified + Rust native `cargo test` + parity benchmarks                    |
+| **Phases**          | 0 (scaffold) -> 1-5 (modules) -> 6 (cutover), each with exit gate                            |
 
 ---
 
@@ -86,43 +86,43 @@ src/wasm-rust/                          # New Rust workspace (lives alongside sr
 
 ### Crate-backed modules (the hard stuff)
 
-| Module | Crate | Why |
-|--------|-------|-----|
-| `matrix/multiply`, `matrix/linalg` | `faer` (fallback: `nalgebra`) | Dense LA with SIMD-aware kernels |
-| `matrix/eigs`, `matrix/complexEigs` | `faer` eigendecomposition | Jacobi, QR algorithm, Schur |
-| `matrix/expm`, `matrix/sqrtm` | `faer` + custom algorithms | faer gives matrix ops, we implement Pade/Denman-Beavers on top |
-| `algebra/decomposition` | `faer` (LU, QR, Cholesky) | Direct replacement |
-| `algebra/sparse*` | `faer` sparse or `sprs` | CSC format sparse operations |
-| `signal/fft`, `signal/processing` | `rustfft` | Production FFT with planner |
-| `statistics/basic` | `statrs` (distributions) | Distribution functions |
-| `special/functions` | `statrs` (erf, gamma, beta) | Numerically tricky functions |
+| Module                              | Crate                         | Why                                                            |
+| ----------------------------------- | ----------------------------- | -------------------------------------------------------------- |
+| `matrix/multiply`, `matrix/linalg`  | `faer` (fallback: `nalgebra`) | Dense LA with SIMD-aware kernels                               |
+| `matrix/eigs`, `matrix/complexEigs` | `faer` eigendecomposition     | Jacobi, QR algorithm, Schur                                    |
+| `matrix/expm`, `matrix/sqrtm`       | `faer` + custom algorithms    | faer gives matrix ops, we implement Pade/Denman-Beavers on top |
+| `algebra/decomposition`             | `faer` (LU, QR, Cholesky)     | Direct replacement                                             |
+| `algebra/sparse*`                   | `faer` sparse or `sprs`       | CSC format sparse operations                                   |
+| `signal/fft`, `signal/processing`   | `rustfft`                     | Production FFT with planner                                    |
+| `statistics/basic`                  | `statrs` (distributions)      | Distribution functions                                         |
+| `special/functions`                 | `statrs` (erf, gamma, beta)   | Numerically tricky functions                                   |
 
 ### Pure Rust ports (the simple stuff)
 
-| Module | Lines (AS) | Approach |
-|--------|-----------|----------|
-| `plain/` (arithmetic, trig, probability) | ~594 | Direct translation |
-| `arithmetic/` (basic, advanced, logarithmic) | ~820 | Scalar ops |
-| `bitwise/operations` | ~221 | Trivial port |
-| `logical/operations` | ~283 | Trivial port |
-| `relational/operations` | ~454 | Trivial port |
-| `complex/operations` | ~324 | Complex number math |
-| `geometry/operations` | ~779 | Distance, intersection |
-| `combinatorics/basic` | ~369 | Stirling, Bell numbers |
-| `unit/conversion` | ~801 | Unit factor tables |
-| `string/operations` | ~535 | Char code operations |
-| `set/operations` | ~594 | Sorted array set ops |
-| `utils/` | ~780 | Validation helpers |
+| Module                                       | Lines (AS) | Approach               |
+| -------------------------------------------- | ---------- | ---------------------- |
+| `plain/` (arithmetic, trig, probability)     | ~594       | Direct translation     |
+| `arithmetic/` (basic, advanced, logarithmic) | ~820       | Scalar ops             |
+| `bitwise/operations`                         | ~221       | Trivial port           |
+| `logical/operations`                         | ~283       | Trivial port           |
+| `relational/operations`                      | ~454       | Trivial port           |
+| `complex/operations`                         | ~324       | Complex number math    |
+| `geometry/operations`                        | ~779       | Distance, intersection |
+| `combinatorics/basic`                        | ~369       | Stirling, Bell numbers |
+| `unit/conversion`                            | ~801       | Unit factor tables     |
+| `string/operations`                          | ~535       | Char code operations   |
+| `set/operations`                             | ~594       | Sorted array set ops   |
+| `utils/`                                     | ~780       | Validation helpers     |
 
 ### Crate verification gate (Phase 0)
 
 Before committing to any crate, compile a minimal Rust crate that depends on it and builds to `wasm32-unknown-unknown`.
 
-| Primary | Fallback |
-|---------|----------|
-| `faer` | `nalgebra` (confirmed wasm32 support) |
-| `rustfft` | Port AS FFT (~487 lines) |
-| `statrs` | Port from AS (~572 lines) |
+| Primary   | Fallback                              |
+| --------- | ------------------------------------- |
+| `faer`    | `nalgebra` (confirmed wasm32 support) |
+| `rustfft` | Port AS FFT (~487 lines)              |
+| `statrs`  | Port from AS (~572 lines)             |
 
 ---
 
@@ -146,6 +146,7 @@ pub unsafe extern "C" fn multiplyDense(
 ```
 
 **ABI rules:**
+
 - All array parameters are raw pointers (`*const f64`, `*mut f64`, `*const i32`, `*mut i32`)
 - No Rust `String`, `Vec`, `Box` — everything is caller-allocated via WASM linear memory
 - Return `i32` for success/failure (1/0), `f64` for scalar results, `f64::NAN` for errors
@@ -221,6 +222,7 @@ npm run build:wasm:all    <-- builds both (for benchmark comparisons)
 ```
 
 **rust-toolchain.toml:**
+
 ```toml
 [toolchain]
 channel = "stable"
@@ -228,10 +230,10 @@ targets = ["wasm32-unknown-unknown"]
 ```
 
 **WasmLoader.ts backend selection:**
+
 ```typescript
-const WASM_BINARY = process.env.MATHJS_WASM_BACKEND === 'assemblyscript'
-  ? 'mathjs-as.wasm'
-  : 'mathjs.wasm'   // Rust (default after cutover)
+const WASM_BINARY =
+  process.env.MATHJS_WASM_BACKEND === 'assemblyscript' ? 'mathjs-as.wasm' : 'mathjs.wasm'; // Rust (default after cutover)
 ```
 
 ---

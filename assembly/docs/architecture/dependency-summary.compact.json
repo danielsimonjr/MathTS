@@ -1,1 +1,98 @@
-{"m":{"n":"@danielsimonjr/mathts-wasm","v":"0.1.0","d":"2026-04-04","f":10,"e":431,"re":212},"s":{"loc":3324,"cls":2,"int":2,"fn":203,"tg":2,"en":0,"co":14,"toi":0},"c":{"rt":0,"to":0,"rtp":[]},"mod":{"bindings":{"f":2,"exp":["MathTSWasm","loadWasm","loadWasmSync"],"cls":["MathTSWasm"],"int":["MathTSWasmExports","MathTSWasmInstance"]},"env":{"f":1,"exp":["abort"]},"entry":{"f":1,"exp":["Complex","complex","complexFromPolar","add_f64","sub_f64","mul_f64","div_f64","mod_f64","neg_f64","sqrt_f64","pow_f64","square_f64","cube_f64","cbrt_f64","nthRoot_f64","exp_f64","expm1_f64","log_f64","log1p_f64","log10_f64"]},"ops":{"f":5,"exp":["array_sum","array_product","array_mean","array_variance","array_stddev","array_min","array_max","array_argmin","array_argmax","array_norm","array_norm_l1","array_norm_linf","array_dot","array_add","array_sub","array_mul","array_div","array_scale","array_add_scalar","array_neg"]},"types":{"f":1,"exp":["COMPLEX_ZERO","COMPLEX_ONE","COMPLEX_I","COMPLEX_NEG_ONE","complex","complexFromPolar","complexFromReal","complexFromImaginary","Complex"],"cls":["Complex"]}},"hp":[{"p":"src/index.ts","i":6,"o":0},{"p":"types/complex.ts","i":0,"o":3},{"p":"ops/complex-array.ts","i":1,"o":1},{"p":"ops/complex-ops.ts","i":1,"o":1},{"p":"bindings/index.ts","i":1,"o":0},{"p":"bindings/wasm-loader.ts","i":0,"o":1},{"p":"ops/array.ts","i":0,"o":1},{"p":"ops/matrix.ts","i":0,"o":1},{"p":"ops/scalar.ts","i":0,"o":1},{"p":"env/abort.ts","i":0,"o":0}]}
+{
+  "m": {
+    "n": "@danielsimonjr/mathts-wasm",
+    "v": "0.1.0",
+    "d": "2026-04-04",
+    "f": 10,
+    "e": 431,
+    "re": 212
+  },
+  "s": { "loc": 3324, "cls": 2, "int": 2, "fn": 203, "tg": 2, "en": 0, "co": 14, "toi": 0 },
+  "c": { "rt": 0, "to": 0, "rtp": [] },
+  "mod": {
+    "bindings": {
+      "f": 2,
+      "exp": ["MathTSWasm", "loadWasm", "loadWasmSync"],
+      "cls": ["MathTSWasm"],
+      "int": ["MathTSWasmExports", "MathTSWasmInstance"]
+    },
+    "env": { "f": 1, "exp": ["abort"] },
+    "entry": {
+      "f": 1,
+      "exp": [
+        "Complex",
+        "complex",
+        "complexFromPolar",
+        "add_f64",
+        "sub_f64",
+        "mul_f64",
+        "div_f64",
+        "mod_f64",
+        "neg_f64",
+        "sqrt_f64",
+        "pow_f64",
+        "square_f64",
+        "cube_f64",
+        "cbrt_f64",
+        "nthRoot_f64",
+        "exp_f64",
+        "expm1_f64",
+        "log_f64",
+        "log1p_f64",
+        "log10_f64"
+      ]
+    },
+    "ops": {
+      "f": 5,
+      "exp": [
+        "array_sum",
+        "array_product",
+        "array_mean",
+        "array_variance",
+        "array_stddev",
+        "array_min",
+        "array_max",
+        "array_argmin",
+        "array_argmax",
+        "array_norm",
+        "array_norm_l1",
+        "array_norm_linf",
+        "array_dot",
+        "array_add",
+        "array_sub",
+        "array_mul",
+        "array_div",
+        "array_scale",
+        "array_add_scalar",
+        "array_neg"
+      ]
+    },
+    "types": {
+      "f": 1,
+      "exp": [
+        "COMPLEX_ZERO",
+        "COMPLEX_ONE",
+        "COMPLEX_I",
+        "COMPLEX_NEG_ONE",
+        "complex",
+        "complexFromPolar",
+        "complexFromReal",
+        "complexFromImaginary",
+        "Complex"
+      ],
+      "cls": ["Complex"]
+    }
+  },
+  "hp": [
+    { "p": "src/index.ts", "i": 6, "o": 0 },
+    { "p": "types/complex.ts", "i": 0, "o": 3 },
+    { "p": "ops/complex-array.ts", "i": 1, "o": 1 },
+    { "p": "ops/complex-ops.ts", "i": 1, "o": 1 },
+    { "p": "bindings/index.ts", "i": 1, "o": 0 },
+    { "p": "bindings/wasm-loader.ts", "i": 0, "o": 1 },
+    { "p": "ops/array.ts", "i": 0, "o": 1 },
+    { "p": "ops/matrix.ts", "i": 0, "o": 1 },
+    { "p": "ops/scalar.ts", "i": 0, "o": 1 },
+    { "p": "env/abort.ts", "i": 0, "o": 0 }
+  ]
+}

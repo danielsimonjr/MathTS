@@ -38,40 +38,40 @@ export function freqz(
 ): void {
   // For each frequency point
   for (let i: i32 = 0; i < wLen; i++) {
-    const omega: f64 = unchecked(w[i])
+    const omega: f64 = unchecked(w[i]);
 
     // Compute numerator B(e^jw)
-    let numReal: f64 = 0.0
-    let numImag: f64 = 0.0
+    let numReal: f64 = 0.0;
+    let numImag: f64 = 0.0;
 
     for (let k: i32 = 0; k < bLen; k++) {
-      const angle: f64 = -<f64>k * omega
-      const cosAngle: f64 = Math.cos(angle)
-      const sinAngle: f64 = Math.sin(angle)
+      const angle: f64 = -(<f64>k) * omega;
+      const cosAngle: f64 = Math.cos(angle);
+      const sinAngle: f64 = Math.sin(angle);
 
-      numReal += unchecked(b[k]) * cosAngle
-      numImag += unchecked(b[k]) * sinAngle
+      numReal += unchecked(b[k]) * cosAngle;
+      numImag += unchecked(b[k]) * sinAngle;
     }
 
     // Compute denominator A(e^jw)
-    let denReal: f64 = 0.0
-    let denImag: f64 = 0.0
+    let denReal: f64 = 0.0;
+    let denImag: f64 = 0.0;
 
     for (let k: i32 = 0; k < aLen; k++) {
-      const angle: f64 = -<f64>k * omega
-      const cosAngle: f64 = Math.cos(angle)
-      const sinAngle: f64 = Math.sin(angle)
+      const angle: f64 = -(<f64>k) * omega;
+      const cosAngle: f64 = Math.cos(angle);
+      const sinAngle: f64 = Math.sin(angle);
 
-      denReal += unchecked(a[k]) * cosAngle
-      denImag += unchecked(a[k]) * sinAngle
+      denReal += unchecked(a[k]) * cosAngle;
+      denImag += unchecked(a[k]) * sinAngle;
     }
 
     // Complex division: H = Num / Den
     // (a + bi) / (c + di) = ((ac + bd) + (bc - ad)i) / (c^2 + d^2)
-    const denMagSq: f64 = denReal * denReal + denImag * denImag
+    const denMagSq: f64 = denReal * denReal + denImag * denImag;
 
-    unchecked(hReal[i] = (numReal * denReal + numImag * denImag) / denMagSq)
-    unchecked(hImag[i] = (numImag * denReal - numReal * denImag) / denMagSq)
+    unchecked((hReal[i] = (numReal * denReal + numImag * denImag) / denMagSq));
+    unchecked((hImag[i] = (numImag * denReal - numReal * denImag) / denMagSq));
   }
 }
 
@@ -94,35 +94,35 @@ export function freqzUniform(
   hReal: Float64Array,
   hImag: Float64Array
 ): void {
-  const dw: f64 = Math.PI / <f64>n
+  const dw: f64 = Math.PI / <f64>n;
 
   for (let i: i32 = 0; i < n; i++) {
-    const omega: f64 = <f64>i * dw
+    const omega: f64 = <f64>i * dw;
 
     // Compute numerator
-    let numReal: f64 = 0.0
-    let numImag: f64 = 0.0
+    let numReal: f64 = 0.0;
+    let numImag: f64 = 0.0;
 
     for (let k: i32 = 0; k < bLen; k++) {
-      const angle: f64 = -<f64>k * omega
-      numReal += unchecked(b[k]) * Math.cos(angle)
-      numImag += unchecked(b[k]) * Math.sin(angle)
+      const angle: f64 = -(<f64>k) * omega;
+      numReal += unchecked(b[k]) * Math.cos(angle);
+      numImag += unchecked(b[k]) * Math.sin(angle);
     }
 
     // Compute denominator
-    let denReal: f64 = 0.0
-    let denImag: f64 = 0.0
+    let denReal: f64 = 0.0;
+    let denImag: f64 = 0.0;
 
     for (let k: i32 = 0; k < aLen; k++) {
-      const angle: f64 = -<f64>k * omega
-      denReal += unchecked(a[k]) * Math.cos(angle)
-      denImag += unchecked(a[k]) * Math.sin(angle)
+      const angle: f64 = -(<f64>k) * omega;
+      denReal += unchecked(a[k]) * Math.cos(angle);
+      denImag += unchecked(a[k]) * Math.sin(angle);
     }
 
     // Complex division
-    const denMagSq: f64 = denReal * denReal + denImag * denImag
-    unchecked(hReal[i] = (numReal * denReal + numImag * denImag) / denMagSq)
-    unchecked(hImag[i] = (numImag * denReal - numReal * denImag) / denMagSq)
+    const denMagSq: f64 = denReal * denReal + denImag * denImag;
+    unchecked((hReal[i] = (numReal * denReal + numImag * denImag) / denMagSq));
+    unchecked((hImag[i] = (numImag * denReal - numReal * denImag) / denMagSq));
   }
 }
 
@@ -153,27 +153,27 @@ export function polyMultiply(
   cReal: Float64Array,
   cImag: Float64Array
 ): void {
-  const cLen: i32 = aLen + bLen - 1
+  const cLen: i32 = aLen + bLen - 1;
 
   // Initialize output to zero
   for (let i: i32 = 0; i < cLen; i++) {
-    unchecked(cReal[i] = 0.0)
-    unchecked(cImag[i] = 0.0)
+    unchecked((cReal[i] = 0.0));
+    unchecked((cImag[i] = 0.0));
   }
 
   // Convolution with complex multiplication
   for (let i: i32 = 0; i < cLen; i++) {
     for (let j: i32 = 0; j < aLen; j++) {
-      const k: i32 = i - j
+      const k: i32 = i - j;
       if (k >= 0 && k < bLen) {
         // Complex multiplication: (ar + ai*i) * (br + bi*i)
-        const ar: f64 = unchecked(aReal[j])
-        const ai: f64 = unchecked(aImag[j])
-        const br: f64 = unchecked(bReal[k])
-        const bi: f64 = unchecked(bImag[k])
+        const ar: f64 = unchecked(aReal[j]);
+        const ai: f64 = unchecked(aImag[j]);
+        const br: f64 = unchecked(bReal[k]);
+        const bi: f64 = unchecked(bImag[k]);
 
-        unchecked(cReal[i] += ar * br - ai * bi)
-        unchecked(cImag[i] += ar * bi + ai * br)
+        unchecked((cReal[i] += ar * br - ai * bi));
+        unchecked((cImag[i] += ar * bi + ai * br));
       }
     }
   }
@@ -212,88 +212,80 @@ export function zpk2tf(
   denImag: Float64Array
 ): void {
   // Temporary buffers for polynomial multiplication
-  const maxLen: i32 = zLen > pLen ? zLen : pLen
-  const tempReal1: Float64Array = new Float64Array(maxLen + 2)
-  const tempReal2: Float64Array = new Float64Array(maxLen + 2)
-  const tempImag1: Float64Array = new Float64Array(maxLen + 2)
-  const tempImag2: Float64Array = new Float64Array(maxLen + 2)
+  const maxLen: i32 = zLen > pLen ? zLen : pLen;
+  const tempReal1: Float64Array = new Float64Array(maxLen + 2);
+  const tempReal2: Float64Array = new Float64Array(maxLen + 2);
+  const tempImag1: Float64Array = new Float64Array(maxLen + 2);
+  const tempImag2: Float64Array = new Float64Array(maxLen + 2);
 
   // Build numerator from zeros
   // Start with polynomial "1"
-  tempReal1[0] = 1.0
-  tempImag1[0] = 0.0
-  let numLen: i32 = 1
+  tempReal1[0] = 1.0;
+  tempImag1[0] = 0.0;
+  let numLen: i32 = 1;
 
   for (let i: i32 = 0; i < zLen; i++) {
     // Multiply by (s - zero[i]) = [1, -zero[i]]
-    const zr: f64 = unchecked(zReal[i])
-    const zi: f64 = unchecked(zImag[i])
+    const zr: f64 = unchecked(zReal[i]);
+    const zi: f64 = unchecked(zImag[i]);
 
-    const factorReal: Float64Array = new Float64Array(2)
-    const factorImag: Float64Array = new Float64Array(2)
-    factorReal[0] = 1.0
-    factorImag[0] = 0.0
-    factorReal[1] = -zr
-    factorImag[1] = -zi
+    const factorReal: Float64Array = new Float64Array(2);
+    const factorImag: Float64Array = new Float64Array(2);
+    factorReal[0] = 1.0;
+    factorImag[0] = 0.0;
+    factorReal[1] = -zr;
+    factorImag[1] = -zi;
 
-    polyMultiply(
-      tempReal1, tempImag1, numLen,
-      factorReal, factorImag, 2,
-      tempReal2, tempImag2
-    )
+    polyMultiply(tempReal1, tempImag1, numLen, factorReal, factorImag, 2, tempReal2, tempImag2);
 
-    numLen += 1
+    numLen += 1;
 
     // Copy result back to temp1
     for (let j: i32 = 0; j < numLen; j++) {
-      tempReal1[j] = tempReal2[j]
-      tempImag1[j] = tempImag2[j]
+      tempReal1[j] = tempReal2[j];
+      tempImag1[j] = tempImag2[j];
     }
   }
 
   // Apply gain and copy to output
   for (let i: i32 = 0; i < numLen; i++) {
-    unchecked(numReal[i] = tempReal1[i] * k)
-    unchecked(numImag[i] = tempImag1[i] * k)
+    unchecked((numReal[i] = tempReal1[i] * k));
+    unchecked((numImag[i] = tempImag1[i] * k));
   }
 
   // Build denominator from poles
   // Start with polynomial "1"
-  tempReal1[0] = 1.0
-  tempImag1[0] = 0.0
-  let denLen: i32 = 1
+  tempReal1[0] = 1.0;
+  tempImag1[0] = 0.0;
+  let denLen: i32 = 1;
 
   for (let i: i32 = 0; i < pLen; i++) {
     // Multiply by (s - pole[i]) = [1, -pole[i]]
-    const pr: f64 = unchecked(pReal[i])
-    const pi: f64 = unchecked(pImag[i])
+    const pr: f64 = unchecked(pReal[i]);
+    const pi: f64 = unchecked(pImag[i]);
 
-    const factorReal: Float64Array = new Float64Array(2)
-    const factorImag: Float64Array = new Float64Array(2)
-    factorReal[0] = 1.0
-    factorImag[0] = 0.0
-    factorReal[1] = -pr
-    factorImag[1] = -pi
+    const factorReal: Float64Array = new Float64Array(2);
+    const factorImag: Float64Array = new Float64Array(2);
+    factorReal[0] = 1.0;
+    factorImag[0] = 0.0;
+    factorReal[1] = -pr;
+    factorImag[1] = -pi;
 
-    polyMultiply(
-      tempReal1, tempImag1, denLen,
-      factorReal, factorImag, 2,
-      tempReal2, tempImag2
-    )
+    polyMultiply(tempReal1, tempImag1, denLen, factorReal, factorImag, 2, tempReal2, tempImag2);
 
-    denLen += 1
+    denLen += 1;
 
     // Copy result back to temp1
     for (let j: i32 = 0; j < denLen; j++) {
-      tempReal1[j] = tempReal2[j]
-      tempImag1[j] = tempImag2[j]
+      tempReal1[j] = tempReal2[j];
+      tempImag1[j] = tempImag2[j];
     }
   }
 
   // Copy to output
   for (let i: i32 = 0; i < denLen; i++) {
-    unchecked(denReal[i] = tempReal1[i])
-    unchecked(denImag[i] = tempImag1[i])
+    unchecked((denReal[i] = tempReal1[i]));
+    unchecked((denImag[i] = tempImag1[i]));
   }
 }
 
@@ -311,9 +303,9 @@ export function magnitude(
   magnitude: Float64Array
 ): void {
   for (let i: i32 = 0; i < n; i++) {
-    const re: f64 = unchecked(hReal[i])
-    const im: f64 = unchecked(hImag[i])
-    unchecked(magnitude[i] = Math.sqrt(re * re + im * im))
+    const re: f64 = unchecked(hReal[i]);
+    const im: f64 = unchecked(hImag[i]);
+    unchecked((magnitude[i] = Math.sqrt(re * re + im * im)));
   }
 }
 
@@ -330,18 +322,18 @@ export function magnitudeDb(
   n: i32,
   magnitudeDb: Float64Array
 ): void {
-  const log10Factor: f64 = 20.0 / Math.LN10
+  const log10Factor: f64 = 20.0 / Math.LN10;
 
   for (let i: i32 = 0; i < n; i++) {
-    const re: f64 = unchecked(hReal[i])
-    const im: f64 = unchecked(hImag[i])
-    const mag: f64 = Math.sqrt(re * re + im * im)
+    const re: f64 = unchecked(hReal[i]);
+    const im: f64 = unchecked(hImag[i]);
+    const mag: f64 = Math.sqrt(re * re + im * im);
 
     // Avoid log(0)
     if (mag > 1e-300) {
-      unchecked(magnitudeDb[i] = log10Factor * Math.log(mag))
+      unchecked((magnitudeDb[i] = log10Factor * Math.log(mag)));
     } else {
-      unchecked(magnitudeDb[i] = -300.0) // Very small number in dB
+      unchecked((magnitudeDb[i] = -300.0)); // Very small number in dB
     }
   }
 }
@@ -353,14 +345,9 @@ export function magnitudeDb(
  * @param n - Length
  * @param phase - Output: angle(H) in radians
  */
-export function phase(
-  hReal: Float64Array,
-  hImag: Float64Array,
-  n: i32,
-  phase: Float64Array
-): void {
+export function phase(hReal: Float64Array, hImag: Float64Array, n: i32, phase: Float64Array): void {
   for (let i: i32 = 0; i < n; i++) {
-    unchecked(phase[i] = Math.atan2(unchecked(hImag[i]), unchecked(hReal[i])))
+    unchecked((phase[i] = Math.atan2(unchecked(hImag[i]), unchecked(hReal[i]))));
   }
 }
 
@@ -370,21 +357,21 @@ export function phase(
  * @param n - Length
  */
 export function unwrapPhase(phase: Float64Array, n: i32): void {
-  if (n < 2) return
+  if (n < 2) return;
 
-  const twoPi: f64 = 2.0 * Math.PI
+  const twoPi: f64 = 2.0 * Math.PI;
 
   for (let i: i32 = 1; i < n; i++) {
-    let diff: f64 = unchecked(phase[i]) - unchecked(phase[i - 1])
+    let diff: f64 = unchecked(phase[i]) - unchecked(phase[i - 1]);
 
     // Wrap difference to [-pi, pi]
     while (diff > Math.PI) {
-      unchecked(phase[i] -= twoPi)
-      diff -= twoPi
+      unchecked((phase[i] -= twoPi));
+      diff -= twoPi;
     }
     while (diff < -Math.PI) {
-      unchecked(phase[i] += twoPi)
-      diff += twoPi
+      unchecked((phase[i] += twoPi));
+      diff += twoPi;
     }
   }
 }
@@ -406,24 +393,31 @@ export function groupDelay(
   n: i32,
   groupDelay: Float64Array
 ): void {
-  if (n < 2) return
+  if (n < 2) return;
 
   // Compute phase
-  const phaseArray: Float64Array = new Float64Array(n)
-  phase(hReal, hImag, n, phaseArray)
+  const phaseArray: Float64Array = new Float64Array(n);
+  phase(hReal, hImag, n, phaseArray);
 
   // Unwrap phase
-  unwrapPhase(phaseArray, n)
+  unwrapPhase(phaseArray, n);
 
   // Compute negative derivative
   for (let i: i32 = 1; i < n - 1; i++) {
-    const dPhase: f64 = unchecked(phaseArray[i + 1]) - unchecked(phaseArray[i - 1])
-    const dw: f64 = unchecked(w[i + 1]) - unchecked(w[i - 1])
+    const dPhase: f64 = unchecked(phaseArray[i + 1]) - unchecked(phaseArray[i - 1]);
+    const dw: f64 = unchecked(w[i + 1]) - unchecked(w[i - 1]);
 
-    unchecked(groupDelay[i] = -dPhase / dw)
+    unchecked((groupDelay[i] = -dPhase / dw));
   }
 
   // Endpoints use one-sided differences
-  unchecked(groupDelay[0] = -(unchecked(phaseArray[1]) - unchecked(phaseArray[0])) / (unchecked(w[1]) - unchecked(w[0])))
-  unchecked(groupDelay[n - 1] = -(unchecked(phaseArray[n - 1]) - unchecked(phaseArray[n - 2])) / (unchecked(w[n - 1]) - unchecked(w[n - 2])))
+  unchecked(
+    (groupDelay[0] =
+      -(unchecked(phaseArray[1]) - unchecked(phaseArray[0])) / (unchecked(w[1]) - unchecked(w[0])))
+  );
+  unchecked(
+    (groupDelay[n - 1] =
+      -(unchecked(phaseArray[n - 1]) - unchecked(phaseArray[n - 2])) /
+      (unchecked(w[n - 1]) - unchecked(w[n - 2])))
+  );
 }

@@ -9,6 +9,7 @@
 **Tech Stack:** Rust (wasm32-unknown-unknown target), cargo, wasm-opt, TypeScript wrappers
 
 **Current State:**
+
 - AS: 10 files, 3,324 lines, 202 exports, 23KB WASM
 - Rust: 71 files, 21,933 lines, 742 exports, 648KB WASM
 - `RustWasmLoader` + `RustWASMBackend` already integrated into BackendManager
@@ -19,6 +20,7 @@
 ### Task 1: Audit AS→Rust function parity
 
 **Files:**
+
 - Read: `assembly/src/ops/scalar.ts`, `assembly/src/ops/array.ts`, `assembly/src/ops/matrix.ts`
 - Read: `wasm-rust/crates/mathts-wasm/src/arithmetic/`, `wasm-rust/crates/mathts-wasm/src/matrix/`
 
@@ -45,6 +47,7 @@ Write to `docs/roadmap/RUST_WASM_PARITY.md` — table of every AS export, its Ru
 ### Task 2: Port missing scalar and array functions to Rust
 
 **Files:**
+
 - Modify: `wasm-rust/crates/mathts-wasm/src/arithmetic/basic.rs`
 - Modify: `wasm-rust/crates/mathts-wasm/src/arithmetic/advanced.rs`
 - Create: `wasm-rust/crates/mathts-wasm/src/arithmetic/array.rs`
@@ -87,6 +90,7 @@ node scripts/verify-exports.js
 ### Task 3: Port complex number operations to Rust
 
 **Files:**
+
 - Create: `wasm-rust/crates/mathts-wasm/src/complex/array.rs`
 - Modify: `wasm-rust/crates/mathts-wasm/src/complex/operations.rs`
 
@@ -101,6 +105,7 @@ AS has 44 complex scalar ops and 33 complex array ops. Rust has some but not all
 ### Task 4: Port matrix operations to Rust
 
 **Files:**
+
 - Modify: `wasm-rust/crates/mathts-wasm/src/matrix/basic.rs`
 
 AS has 41 matrix ops (multiply, transpose, trace, identity, etc.). Rust has the heavy ones (multiply, eigs, decompositions) but may miss utilities.
@@ -116,6 +121,7 @@ AS has 41 matrix ops (multiply, transpose, trace, identity, etc.). Rust has the 
 ### Task 5: Update WasmModule interface for Rust exports
 
 **Files:**
+
 - Modify: `matrix/src/backends/WasmLoader.ts` — add missing function signatures to `WasmModule` interface
 - Modify: `matrix/src/backends/RustWasmLoader.ts` — update `RustWasmExports` interface
 
@@ -133,6 +139,7 @@ grep -rn '#\[no_mangle\]' wasm-rust/crates/mathts-wasm/src/ -A2 | grep 'pub.*fn'
 ### Task 6: Wire WASMBackend to prefer Rust
 
 **Files:**
+
 - Modify: `matrix/src/backends/WASMBackend.ts`
 - Modify: `matrix/src/backends/BackendManager.ts`
 
@@ -153,6 +160,7 @@ if (rustWasmLoader.isLoaded) {
 - [ ] **Step 2: Update BackendManager thresholds**
 
 Rust WASM is larger (648KB) but faster. Adjust thresholds:
+
 - Small ops (<100 elements): JS (no WASM overhead)
 - Medium ops (100-1K): AS WASM (23KB, fast load)
 - Large ops (>1K): Rust WASM (if loaded) or AS WASM
@@ -163,6 +171,7 @@ Rust WASM is larger (648KB) but faster. Adjust thresholds:
 ### Task 7: Make Rust the default WASM backend
 
 **Files:**
+
 - Modify: `assembly/package.json` — change build to copy Rust output
 - Create: `wasm-rust/scripts/build-for-mathts.sh`
 - Modify: `CLAUDE.md`
@@ -188,6 +197,7 @@ cd ../assembly && npm run build
 ### Task 8: Benchmark Rust vs AS vs JS
 
 **Files:**
+
 - Create: `tests/benchmark/wasm-comparison.test.ts`
 
 - [ ] **Step 1: Create benchmark comparing all 3 backends**

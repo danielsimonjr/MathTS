@@ -36,7 +36,7 @@
 export function adjacencyMatrix(
   edges: number[][],
   n: number,
-  directed: boolean = false,
+  directed: boolean = false
 ): number[][] {
   if (n < 0 || !Number.isInteger(n)) {
     throw new Error('adjacencyMatrix: n must be a non-negative integer');

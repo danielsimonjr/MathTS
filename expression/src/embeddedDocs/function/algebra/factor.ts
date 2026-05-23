@@ -3,6 +3,6 @@ export const factorDocs = {
   category: 'Algebra',
   syntax: ['factor(expr)'],
   description: 'Factor an expression by extracting common numeric factors from terms.',
-  examples: ['factor(\'6*x + 4*y\')'],
+  examples: ["factor('6*x + 4*y')"],
   seealso: ['expand', 'collect'],
 };

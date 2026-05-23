@@ -42,8 +42,7 @@ function check(name, cond, detail) {
     console.log(`✗ ${name} ${detail ?? ''}`);
   }
 }
-const arrEq = (a, b) =>
-  a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
+const arrEq = (a, b) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
 
 function transpose(data, shape, perm) {
   const pd = makeArray(data);

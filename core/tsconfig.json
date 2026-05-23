@@ -19,9 +19,5 @@
     "src/factory/**/*.ts",
     "src/typed-function.d.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests"
-  ]
+  "exclude": ["node_modules", "dist", "tests"]
 }

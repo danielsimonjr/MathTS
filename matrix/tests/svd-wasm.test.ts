@@ -40,10 +40,40 @@ function maxDiff(A: number[][], B: number[][]): number {
 }
 
 const cases: Array<[string, number[][]]> = [
-  ['3x3 diagonal', [[3, 0, 0], [0, 1, 0], [0, 0, 2]]],
-  ['4x2 tall', [[1, 2], [3, 4], [5, 6], [7, 8]]],
-  ['2x4 wide', [[1, 2, 3, 4], [5, 6, 7, 8]]],
-  ['5x3 general', [[2, -1, 0], [4, 3, -2], [1, 1, 5], [0, 6, -3], [-1, 2, 1]]],
+  [
+    '3x3 diagonal',
+    [
+      [3, 0, 0],
+      [0, 1, 0],
+      [0, 0, 2],
+    ],
+  ],
+  [
+    '4x2 tall',
+    [
+      [1, 2],
+      [3, 4],
+      [5, 6],
+      [7, 8],
+    ],
+  ],
+  [
+    '2x4 wide',
+    [
+      [1, 2, 3, 4],
+      [5, 6, 7, 8],
+    ],
+  ],
+  [
+    '5x3 general',
+    [
+      [2, -1, 0],
+      [4, 3, -2],
+      [1, 1, 5],
+      [0, 6, -3],
+      [-1, 2, 1],
+    ],
+  ],
 ];
 
 describe('svdWasm', () => {
@@ -68,7 +98,10 @@ describe('svdWasm', () => {
   }
 
   it('agrees with the synchronous JS svd on singular values', async () => {
-    const A = [[4, 0], [3, -5]];
+    const A = [
+      [4, 0],
+      [3, -5],
+    ];
     const w = await svdWasm(A);
     const j = svd(A);
     expect(w.S[0]).toBeCloseTo(j.S[0], 9);
@@ -81,12 +114,13 @@ describe('svdWasm', () => {
   });
 
   it('reports which backend served the decomposition', async () => {
-    await svdWasm([[1, 0], [0, 1]]);
+    await svdWasm([
+      [1, 0],
+      [0, 1],
+    ]);
     // Informational: true when the Rust WASM build is present.
     console.log(
-      `svdWasm backend: ${
-        RustWasmLoader.getInstance().isLoaded ? 'Rust WASM' : 'JS fallback'
-      }`
+      `svdWasm backend: ${RustWasmLoader.getInstance().isLoaded ? 'Rust WASM' : 'JS fallback'}`
     );
   });
 });

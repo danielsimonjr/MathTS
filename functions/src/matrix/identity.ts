@@ -1,77 +1,63 @@
-import { isBigNumber } from '../utils/is.js'
-import { resize } from '../utils/array.js'
-import { isInteger } from '../utils/number.js'
-import { factory } from '../utils/factory.js'
+import { isBigNumber } from '../utils/is.js';
+import { resize } from '../utils/array.js';
+import { isInteger } from '../utils/number.js';
+import { factory } from '../utils/factory.js';
 
 // Type definitions
 interface TypedFunction<T = any> {
-  (...args: any[]): T
+  (...args: any[]): T;
 }
 
 interface BigNumberConstructor {
-  new (value: number | string): BigNumber
-  (value: number | string): BigNumber
+  new (value: number | string): BigNumber;
+  (value: number | string): BigNumber;
 }
 
 interface BigNumber {
-  isBigNumber: boolean
-  toNumber(): number
-  constructor: BigNumberConstructor
+  isBigNumber: boolean;
+  toNumber(): number;
+  constructor: BigNumberConstructor;
 }
 
 interface MatrixConstructor {
-  (data?: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix
-  (storage?: 'dense' | 'sparse'): Matrix
+  (data?: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
+  (storage?: 'dense' | 'sparse'): Matrix;
 }
 
 interface Matrix {
-  _size: number[]
-  storage(): 'dense' | 'sparse'
-  valueOf(): any[] | any[][]
+  _size: number[];
+  storage(): 'dense' | 'sparse';
+  valueOf(): any[] | any[][];
 }
 
 interface DenseMatrixConstructor {
-  diagonal(size: number[], value: any, k: number, defaultValue: any): Matrix
+  diagonal(size: number[], value: any, k: number, defaultValue: any): Matrix;
 }
 
 interface SparseMatrixConstructor {
-  diagonal(size: number[], value: any, k: number, defaultValue: any): Matrix
+  diagonal(size: number[], value: any, k: number, defaultValue: any): Matrix;
 }
 
 interface Config {
-  matrix: 'Array' | 'Matrix'
+  matrix: 'Array' | 'Matrix';
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  config: Config
-  matrix: MatrixConstructor
-  BigNumber: BigNumberConstructor
-  DenseMatrix: DenseMatrixConstructor
-  SparseMatrix: SparseMatrixConstructor
+  typed: TypedFunction;
+  config: Config;
+  matrix: MatrixConstructor;
+  BigNumber: BigNumberConstructor;
+  DenseMatrix: DenseMatrixConstructor;
+  SparseMatrix: SparseMatrixConstructor;
 }
 
-const name = 'identity'
-const dependencies = [
-  'typed',
-  'config',
-  'matrix',
-  'BigNumber',
-  'DenseMatrix',
-  'SparseMatrix'
-]
+const name = 'identity';
+const dependencies = ['typed', 'config', 'matrix', 'BigNumber', 'DenseMatrix', 'SparseMatrix'];
 
 export const createIdentity = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    config,
-    matrix,
-    BigNumber,
-    DenseMatrix,
-    SparseMatrix
-  }: Dependencies) => {
+  ({ typed, config, matrix, BigNumber, DenseMatrix, SparseMatrix }: Dependencies) => {
     /**
      * Create a 2-dimensional identity matrix with size m x n or n x n.
      * The matrix has ones on the diagonal and zeros elsewhere.
@@ -104,39 +90,26 @@ export const createIdentity = /* #__PURE__ */ factory(
      */
     return typed(name, {
       '': function (): any[] | Matrix {
-        return config.matrix === 'Matrix' ? matrix([]) : []
+        return config.matrix === 'Matrix' ? matrix([]) : [];
       },
 
       string: function (format: string): Matrix {
-        return (matrix as any)(format)
+        return (matrix as any)(format);
       },
 
-      'number | BigNumber': function (
-        rows: number | BigNumber
-      ): any[][] | Matrix {
-        return _identity(
-          rows,
-          rows,
-          config.matrix === 'Matrix' ? 'dense' : undefined
-        )
+      'number | BigNumber': function (rows: number | BigNumber): any[][] | Matrix {
+        return _identity(rows, rows, config.matrix === 'Matrix' ? 'dense' : undefined);
       },
 
-      'number | BigNumber, string': function (
-        rows: number | BigNumber,
-        format: string
-      ): Matrix {
-        return _identity(rows, rows, format) as Matrix
+      'number | BigNumber, string': function (rows: number | BigNumber, format: string): Matrix {
+        return _identity(rows, rows, format) as Matrix;
       },
 
       'number | BigNumber, number | BigNumber': function (
         rows: number | BigNumber,
         cols: number | BigNumber
       ): any[][] | Matrix {
-        return _identity(
-          rows,
-          cols,
-          config.matrix === 'Matrix' ? 'dense' : undefined
-        )
+        return _identity(rows, cols, config.matrix === 'Matrix' ? 'dense' : undefined);
       },
 
       'number | BigNumber, number | BigNumber, string': function (
@@ -144,42 +117,36 @@ export const createIdentity = /* #__PURE__ */ factory(
         cols: number | BigNumber,
         format: string
       ): Matrix {
-        return _identity(rows, cols, format) as Matrix
+        return _identity(rows, cols, format) as Matrix;
       },
 
       Array: function (size: number[]): any[] | any[][] | Matrix {
-        return _identityVector(size)
+        return _identityVector(size);
       },
 
       'Array, string': function (size: number[], format: string): Matrix {
-        return _identityVector(size, format) as Matrix
+        return _identityVector(size, format) as Matrix;
       },
 
       Matrix: function (size: Matrix): Matrix {
-        return _identityVector(
-          size.valueOf() as number[],
-          size.storage()
-        ) as Matrix
+        return _identityVector(size.valueOf() as number[], size.storage()) as Matrix;
       },
 
       'Matrix, string': function (size: Matrix, format: string): Matrix {
-        return _identityVector(size.valueOf() as number[], format) as Matrix
-      }
-    })
+        return _identityVector(size.valueOf() as number[], format) as Matrix;
+      },
+    });
 
-    function _identityVector(
-      size: number[],
-      format?: string
-    ): any[] | any[][] | Matrix {
+    function _identityVector(size: number[], format?: string): any[] | any[][] | Matrix {
       switch (size.length) {
         case 0:
-          return format ? (matrix as any)(format) : []
+          return format ? (matrix as any)(format) : [];
         case 1:
-          return _identity(size[0], size[0], format)
+          return _identity(size[0], size[0], format);
         case 2:
-          return _identity(size[0], size[1], format)
+          return _identity(size[0], size[1], format);
         default:
-          throw new Error('Vector containing two values expected')
+          throw new Error('Vector containing two values expected');
       }
     }
 
@@ -197,50 +164,43 @@ export const createIdentity = /* #__PURE__ */ factory(
       format?: string
     ): any[][] | Matrix {
       // BigNumber constructor with the right precision
-      const Big = isBigNumber(rows) || isBigNumber(cols) ? BigNumber : null
+      const Big = isBigNumber(rows) || isBigNumber(cols) ? BigNumber : null;
 
-      if (isBigNumber(rows)) rows = (rows as any).toNumber()
-      if (isBigNumber(cols)) cols = (cols as any).toNumber()
+      if (isBigNumber(rows)) rows = (rows as any).toNumber();
+      if (isBigNumber(cols)) cols = (cols as any).toNumber();
 
       if (!isInteger(rows as number) || (rows as number) < 1) {
-        throw new Error(
-          'Parameters in function identity must be positive integers'
-        )
+        throw new Error('Parameters in function identity must be positive integers');
       }
       if (!isInteger(cols as number) || (cols as number) < 1) {
-        throw new Error(
-          'Parameters in function identity must be positive integers'
-        )
+        throw new Error('Parameters in function identity must be positive integers');
       }
 
-      const one = Big ? new BigNumber(1) : 1
-      const defaultValue = Big ? new Big(0) : 0
-      const size = [rows as number, cols as number]
+      const one = Big ? new BigNumber(1) : 1;
+      const defaultValue = Big ? new Big(0) : 0;
+      const size = [rows as number, cols as number];
 
       // check we need to return a matrix
       if (format) {
         // create diagonal matrix (use optimized implementation for storage format)
         if (format === 'sparse') {
-          return SparseMatrix.diagonal(size, one, 0, defaultValue)
+          return SparseMatrix.diagonal(size, one, 0, defaultValue);
         }
         if (format === 'dense') {
-          return DenseMatrix.diagonal(size, one, 0, defaultValue)
+          return DenseMatrix.diagonal(size, one, 0, defaultValue);
         }
-        throw new TypeError(`Unknown matrix type "${format}"`)
+        throw new TypeError(`Unknown matrix type "${format}"`);
       }
 
       // create and resize array
-      const res = resize([], size, defaultValue)
+      const res = resize([], size, defaultValue);
       // fill in ones on the diagonal
-      const minimum =
-        (rows as number) < (cols as number)
-          ? (rows as number)
-          : (cols as number)
+      const minimum = (rows as number) < (cols as number) ? (rows as number) : (cols as number);
       // fill diagonal
       for (let d = 0; d < minimum; d++) {
-        ;(res as any[][])[d][d] = one
+        (res as any[][])[d][d] = one;
       }
-      return res as any[][]
+      return res as any[][];
     }
   }
-)
+);

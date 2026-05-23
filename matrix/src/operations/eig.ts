@@ -61,12 +61,11 @@ function eye(n: number): number[][] {
   return I;
 }
 
-
 /**
  * Clone a matrix
  */
 function cloneMatrix(A: number[][]): number[][] {
-  return A.map(row => [...row]);
+  return A.map((row) => [...row]);
 }
 
 /**
@@ -93,7 +92,7 @@ function householder(x: number[]): { v: number[]; beta: number } {
     } else {
       v[0] = -sigma / (x[0] + mu);
     }
-    const beta = 2 * v[0] * v[0] / (sigma + v[0] * v[0]);
+    const beta = (2 * v[0] * v[0]) / (sigma + v[0] * v[0]);
     const v0 = v[0];
     for (let i = 0; i < n; i++) {
       v[i] /= v0;
@@ -161,7 +160,7 @@ function applyHouseholderRight(
 function hessenberg(A: number[][]): { H: number[][]; Q: number[][] } {
   const n = A.length;
   const H = cloneMatrix(A);
-  let Q = eye(n);
+  const Q = eye(n);
 
   for (let k = 0; k < n - 2; k++) {
     // Extract column below diagonal
@@ -250,12 +249,7 @@ function applyGivensRight(
 /**
  * QR step with implicit shift for Hessenberg matrix
  */
-function qrStep(
-  H: number[][],
-  Q: number[][],
-  start: number,
-  end: number
-): void {
+function qrStep(H: number[][], Q: number[][], start: number, end: number): void {
   const n = end - start + 1;
   if (n < 2) return;
 
@@ -305,12 +299,7 @@ function qrStep(
 /**
  * Francis double-shift QR step for complex eigenvalues
  */
-function doubleShiftQR(
-  H: number[][],
-  Q: number[][],
-  start: number,
-  end: number
-): void {
+function doubleShiftQR(H: number[][], Q: number[][], start: number, end: number): void {
   // Get shifts from bottom 2x2
   const n = H.length;
   const a = H[end - 1][end - 1];
@@ -318,13 +307,15 @@ function doubleShiftQR(
   const c = H[end][end - 1];
   const d = H[end][end];
 
-  const s = a + d;  // trace
-  const t = a * d - b * c;  // determinant
+  const s = a + d; // trace
+  const t = a * d - b * c; // determinant
 
   // First column of (H - s1*I)(H - s2*I) = H^2 - s*H + t*I
-  let x = H[start][start] * H[start][start] +
-          H[start][start + 1] * H[start + 1][start] -
-          s * H[start][start] + t;
+  let x =
+    H[start][start] * H[start][start] +
+    H[start][start + 1] * H[start + 1][start] -
+    s * H[start][start] +
+    t;
   let y = H[start + 1][start] * (H[start][start] + H[start + 1][start + 1] - s);
   let z = H[start + 1][start] * H[start + 2][start + 1];
 
@@ -380,10 +371,7 @@ function doubleShiftQR(
 /**
  * Extract eigenvalues from quasi-upper-triangular Schur form
  */
-function extractEigenvalues(
-  H: number[][],
-  tolerance: number
-): Array<{ re: number; im: number }> {
+function extractEigenvalues(H: number[][], tolerance: number): Array<{ re: number; im: number }> {
   const n = H.length;
   const eigenvalues: Array<{ re: number; im: number }> = [];
 
@@ -487,7 +475,7 @@ function inverseIteration(
   }
 
   // Inverse iteration
-  let v = new Array(n).fill(1);
+  const v = new Array(n).fill(1);
   let prevNorm = 0;
 
   for (let iter = 0; iter < maxIterations; iter++) {
@@ -551,10 +539,7 @@ function inverseIteration(
  * @param options - Computation options
  * @returns Eigenvalues and eigenvectors
  */
-export function eig(
-  matrix: number[][] | Float64Array,
-  options: EigOptions = {}
-): EigResult {
+export function eig(matrix: number[][] | Float64Array, options: EigOptions = {}): EigResult {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,
     tolerance = DEFAULT_TOLERANCE,
@@ -568,9 +553,7 @@ export function eig(
     if (n !== Math.floor(n)) {
       throw new Error('Float64Array length must be a perfect square');
     }
-    A = Array.from({ length: n }, (_, i) =>
-      Array.from({ length: n }, (_, j) => matrix[i * n + j])
-    );
+    A = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => matrix[i * n + j]));
   } else {
     A = matrix;
   }
@@ -599,7 +582,10 @@ export function eig(
   }
 
   if (n === 2) {
-    const a = A[0][0], b = A[0][1], c = A[1][0], d = A[1][1];
+    const a = A[0][0],
+      b = A[0][1],
+      c = A[1][0],
+      d = A[1][1];
     const trace = a + d;
     const det = a * d - b * c;
     const disc = trace * trace - 4 * det;
@@ -611,7 +597,10 @@ export function eig(
       const sqrtDisc = Math.sqrt(disc);
       const e1 = (trace + sqrtDisc) / 2;
       const e2 = (trace - sqrtDisc) / 2;
-      values = [{ re: e1, im: 0 }, { re: e2, im: 0 }];
+      values = [
+        { re: e1, im: 0 },
+        { re: e2, im: 0 },
+      ];
 
       if (computeVectors) {
         // Compute eigenvectors for 2x2
@@ -728,7 +717,7 @@ export function powerIteration(
 
   // Normalize
   let norm = Math.sqrt(v.reduce((sum, x) => sum + x * x, 0));
-  v = v.map(x => x / norm);
+  v = v.map((x) => x / norm);
 
   let eigenvalue = 0;
   let prevEigenvalue = 0;
@@ -747,7 +736,7 @@ export function powerIteration(
 
     // Normalize
     norm = Math.sqrt(w.reduce((sum, x) => sum + x * x, 0));
-    v = w.map(x => x / norm);
+    v = w.map((x) => x / norm);
 
     // Check convergence
     if (Math.abs(eigenvalue - prevEigenvalue) < tolerance * Math.abs(eigenvalue)) {

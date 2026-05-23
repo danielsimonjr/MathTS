@@ -1,5 +1,5 @@
-import { isBigNumber, isNumber } from '../is.js'
-import { isInteger, normalizeFormatOptions } from '../number.js'
+import { isBigNumber, isNumber } from '../is.js';
+import { isInteger, normalizeFormatOptions } from '../number.js';
 
 /**
  * Formats a BigNumber in a given base
@@ -8,33 +8,37 @@ import { isInteger, normalizeFormatOptions } from '../number.js'
  * @param {number} size
  * @returns {string}
  */
-function formatBigNumberToBase (n: any, base: any, size: any) {
-  const BigNumberCtor = n.constructor
-  const big2 = new BigNumberCtor(2)
-  let suffix = ''
+function formatBigNumberToBase(n: any, base: any, size: any) {
+  const BigNumberCtor = n.constructor;
+  const big2 = new BigNumberCtor(2);
+  let suffix = '';
   if (size) {
     if (size < 1) {
-      throw new Error('size must be in greater than 0')
+      throw new Error('size must be in greater than 0');
     }
     if (!isInteger(size)) {
-      throw new Error('size must be an integer')
+      throw new Error('size must be an integer');
     }
     if (n.greaterThan(big2.pow(size - 1).sub(1)) || n.lessThan(big2.pow(size - 1).mul(-1))) {
-      throw new Error(`Value must be in range [-2^${size - 1}, 2^${size - 1}-1]`)
+      throw new Error(`Value must be in range [-2^${size - 1}, 2^${size - 1}-1]`);
     }
     if (!n.isInteger()) {
-      throw new Error('Value must be an integer')
+      throw new Error('Value must be an integer');
     }
     if (n.lessThan(0)) {
-      n = n.add(big2.pow(size))
+      n = n.add(big2.pow(size));
     }
-    suffix = `i${size}`
+    suffix = `i${size}`;
   }
   switch (base) {
-    case 2: return `${n.toBinary()}${suffix}`
-    case 8: return `${n.toOctal()}${suffix}`
-    case 16: return `${n.toHexadecimal()}${suffix}`
-    default: throw new Error(`Base ${base} not supported `)
+    case 2:
+      return `${n.toBinary()}${suffix}`;
+    case 8:
+      return `${n.toOctal()}${suffix}`;
+    case 16:
+      return `${n.toHexadecimal()}${suffix}`;
+    default:
+      throw new Error(`Base ${base} not supported `);
   }
 }
 
@@ -119,71 +123,74 @@ function formatBigNumberToBase (n: any, base: any, size: any) {
  * @param {Object | Function | number | BigNumber} [options]
  * @return {string} str The formatted value
  */
-export function format (value: any, options: any) {
+export function format(value: any, options: any) {
   if (typeof options === 'function') {
     // handle format(value, fn)
-    return options(value)
+    return options(value);
   }
 
   // handle special cases
   if (!value.isFinite()) {
-    return value.isNaN() ? 'NaN' : (value.gt(0) ? 'Infinity' : '-Infinity')
+    return value.isNaN() ? 'NaN' : value.gt(0) ? 'Infinity' : '-Infinity';
   }
 
-  const { notation, precision, wordSize } = normalizeFormatOptions(options)
+  const { notation, precision, wordSize } = normalizeFormatOptions(options);
 
   // handle the various notations
   switch (notation) {
     case 'fixed':
-      return toFixed(value, precision)
+      return toFixed(value, precision);
 
     case 'exponential':
-      return toExponential(value, precision)
+      return toExponential(value, precision);
 
     case 'engineering':
-      return toEngineering(value, precision)
+      return toEngineering(value, precision);
 
     case 'bin':
-      return formatBigNumberToBase(value, 2, wordSize)
+      return formatBigNumberToBase(value, 2, wordSize);
 
     case 'oct':
-      return formatBigNumberToBase(value, 8, wordSize)
+      return formatBigNumberToBase(value, 8, wordSize);
 
     case 'hex':
-      return formatBigNumberToBase(value, 16, wordSize)
+      return formatBigNumberToBase(value, 16, wordSize);
 
-    case 'auto':
-    {
+    case 'auto': {
       // determine lower and upper bound for exponential notation.
       // TODO: implement support for upper and lower to be BigNumbers themselves
-      const lowerExp = _toNumberOrDefault(options?.lowerExp, -3)
-      const upperExp = _toNumberOrDefault(options?.upperExp, 5)
+      const lowerExp = _toNumberOrDefault(options?.lowerExp, -3);
+      const upperExp = _toNumberOrDefault(options?.upperExp, 5);
 
       // handle special case zero
-      if (value.isZero()) return '0'
+      if (value.isZero()) return '0';
 
       // determine whether or not to output exponential notation
-      let str
-      const rounded = value.toSignificantDigits(precision)
-      const exp = rounded.e
+      let str;
+      const rounded = value.toSignificantDigits(precision);
+      const exp = rounded.e;
       if (exp >= lowerExp && exp < upperExp) {
         // normal number notation
-        str = rounded.toFixed()
+        str = rounded.toFixed();
       } else {
         // exponential notation
-        str = toExponential(value, precision)
+        str = toExponential(value, precision);
       }
 
       // remove trailing zeros after the decimal point
       return str.replace(/((\.\d*?)(0+))($|e)/, function () {
-        const digits = arguments[2]
-        const e = arguments[4]
-        return (digits !== '.') ? digits + e : e
-      })
+        const digits = arguments[2];
+        const e = arguments[4];
+        return digits !== '.' ? digits + e : e;
+      });
     }
     default:
-      throw new Error('Unknown notation "' + notation + '". ' +
-          'Choose "auto", "exponential", "fixed", "bin", "oct", or "hex.')
+      throw new Error(
+        'Unknown notation "' +
+          notation +
+          '". ' +
+          'Choose "auto", "exponential", "fixed", "bin", "oct", or "hex.'
+      );
   }
 }
 
@@ -192,21 +199,21 @@ export function format (value: any, options: any) {
  * @param {BigNumber} value
  * @param {number} [precision]        Optional number of significant figures to return.
  */
-export function toEngineering (value: any, precision: any) {
+export function toEngineering(value: any, precision: any) {
   // find nearest lower multiple of 3 for exponent
-  const e = value.e
-  const newExp = e % 3 === 0 ? e : (e < 0 ? (e - 3) - (e % 3) : e - (e % 3))
+  const e = value.e;
+  const newExp = e % 3 === 0 ? e : e < 0 ? e - 3 - (e % 3) : e - (e % 3);
 
   // find difference in exponents, and calculate the value without exponent
-  const valueWithoutExp = value.mul(Math.pow(10, -newExp))
+  const valueWithoutExp = value.mul(Math.pow(10, -newExp));
 
-  let valueStr = valueWithoutExp.toPrecision(precision)
+  let valueStr = valueWithoutExp.toPrecision(precision);
   if (valueStr.includes('e')) {
-    const BigNumber = value.constructor
-    valueStr = new BigNumber(valueStr).toFixed()
+    const BigNumber = value.constructor;
+    valueStr = new BigNumber(valueStr).toFixed();
   }
 
-  return valueStr + 'e' + (e >= 0 ? '+' : '') + newExp.toString()
+  return valueStr + 'e' + (e >= 0 ? '+' : '') + newExp.toString();
 }
 
 /**
@@ -217,11 +224,11 @@ export function toEngineering (value: any, precision: any) {
  *                              is used.
  * @returns {string} str
  */
-export function toExponential (value: any, precision: any) {
+export function toExponential(value: any, precision: any) {
   if (precision !== undefined) {
-    return value.toExponential(precision - 1) // Note the offset of one
+    return value.toExponential(precision - 1); // Note the offset of one
   } else {
-    return value.toExponential()
+    return value.toExponential();
   }
 }
 
@@ -231,16 +238,16 @@ export function toExponential (value: any, precision: any) {
  * @param {number} [precision=undefined] Optional number of decimals after the
  *                                       decimal point. Undefined by default.
  */
-export function toFixed (value: any, precision: any) {
-  return value.toFixed(precision)
+export function toFixed(value: any, precision: any) {
+  return value.toFixed(precision);
 }
 
-function _toNumberOrDefault (value: any, defaultValue: any) {
+function _toNumberOrDefault(value: any, defaultValue: any) {
   if (isNumber(value)) {
-    return value
+    return value;
   } else if (isBigNumber(value)) {
-    return (value as any).toNumber()
+    return (value as any).toNumber();
   } else {
-    return defaultValue
+    return defaultValue;
   }
 }

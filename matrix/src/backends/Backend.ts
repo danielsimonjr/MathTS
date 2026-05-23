@@ -31,8 +31,8 @@ export interface BackendHints {
  * Default backend hints
  */
 export const DEFAULT_BACKEND_HINTS: Required<BackendHints> = {
-  wasmThreshold: 1000,     // > 1000 elements
-  gpuThreshold: 100000,    // > 100K elements
+  wasmThreshold: 1000, // > 1000 elements
+  gpuThreshold: 100000, // > 100K elements
   preferredBackend: 'js',
 };
 

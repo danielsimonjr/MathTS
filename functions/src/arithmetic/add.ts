@@ -1,85 +1,75 @@
-import { factory } from '../utils/factory.js'
-import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js'
-import { createMatAlgo04xSidSid } from '../type/matrix/utils/matAlgo04xSidSid.js'
-import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
+import { factory } from '../utils/factory.js';
+import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
+import { createMatAlgo04xSidSid } from '../type/matrix/utils/matAlgo04xSidSid.js';
+import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 
 // Type definitions for better WASM integration and type safety
 interface TypedFunction<T = any> {
-  (...args: any[]): T
-  find(func: any, signature: string[]): TypedFunction<T>
-  convert(value: any, type: string): any
-  referTo<U>(
-    signature: string,
-    fn: (ref: TypedFunction<U>) => TypedFunction<U>
-  ): TypedFunction<U>
-  referToSelf<U>(
-    fn: (self: TypedFunction<U>) => TypedFunction<U>
-  ): TypedFunction<U>
+  (...args: any[]): T;
+  find(func: any, signature: string[]): TypedFunction<T>;
+  convert(value: any, type: string): any;
+  referTo<U>(signature: string, fn: (ref: TypedFunction<U>) => TypedFunction<U>): TypedFunction<U>;
+  referToSelf<U>(fn: (self: TypedFunction<U>) => TypedFunction<U>): TypedFunction<U>;
 }
 
 interface MatrixData {
-  data?: any[] | any[][]
-  values?: any[]
-  index?: number[]
-  ptr?: number[]
-  size: number[]
-  datatype?: string
+  data?: any[] | any[][];
+  values?: any[];
+  index?: number[];
+  ptr?: number[];
+  size: number[];
+  datatype?: string;
 }
 
 interface DenseMatrix {
-  _data: any[] | any[][]
-  _size: number[]
-  _datatype?: string
-  storage(): 'dense'
-  size(): number[]
-  getDataType(): string
-  createDenseMatrix(data: MatrixData): DenseMatrix
-  valueOf(): any[] | any[][]
+  _data: any[] | any[][];
+  _size: number[];
+  _datatype?: string;
+  storage(): 'dense';
+  size(): number[];
+  getDataType(): string;
+  createDenseMatrix(data: MatrixData): DenseMatrix;
+  valueOf(): any[] | any[][];
 }
 
 interface SparseMatrix {
-  _values?: any[]
-  _index?: number[]
-  _ptr?: number[]
-  _size: number[]
-  _datatype?: string
-  _data?: any
-  storage(): 'sparse'
-  size(): number[]
-  getDataType(): string
-  createSparseMatrix(data: MatrixData): SparseMatrix
-  valueOf(): any[] | any[][]
+  _values?: any[];
+  _index?: number[];
+  _ptr?: number[];
+  _size: number[];
+  _datatype?: string;
+  _data?: any;
+  storage(): 'sparse';
+  size(): number[];
+  getDataType(): string;
+  createSparseMatrix(data: MatrixData): SparseMatrix;
+  valueOf(): any[] | any[][];
 }
 
-type Matrix = DenseMatrix | SparseMatrix
+type Matrix = DenseMatrix | SparseMatrix;
 
 interface MatrixConstructor {
-  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix
+  (data: any[] | any[][], storage?: 'dense' | 'sparse'): Matrix;
 }
 
 interface NodeOperations {
-  createBinaryNode: (
-    op: string,
-    fn: string,
-    left: unknown,
-    right: unknown
-  ) => unknown
-  hasNodeArg: (...args: unknown[]) => boolean
+  createBinaryNode: (op: string, fn: string, left: unknown, right: unknown) => unknown;
+  hasNodeArg: (...args: unknown[]) => boolean;
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  addScalar: TypedFunction
-  equalScalar: TypedFunction
-  DenseMatrix: any
-  SparseMatrix: any
-  concat: TypedFunction
-  nodeOperations: NodeOperations
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  addScalar: TypedFunction;
+  equalScalar: TypedFunction;
+  DenseMatrix: any;
+  SparseMatrix: any;
+  concat: TypedFunction;
+  nodeOperations: NodeOperations;
 }
 
-const name = 'add'
+const name = 'add';
 const dependencies = [
   'typed',
   'matrix',
@@ -88,8 +78,8 @@ const dependencies = [
   'DenseMatrix',
   'SparseMatrix',
   'concat',
-  'nodeOperations'
-]
+  'nodeOperations',
+];
 
 export const createAdd = /* #__PURE__ */ factory(
   name,
@@ -102,16 +92,16 @@ export const createAdd = /* #__PURE__ */ factory(
     DenseMatrix,
     SparseMatrix: _SparseMatrix,
     concat,
-    nodeOperations
+    nodeOperations,
   }: Dependencies) => {
-    const matAlgo01xDSid = createMatAlgo01xDSid({ typed })
-    const matAlgo04xSidSid = createMatAlgo04xSidSid({ typed, equalScalar })
-    const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix })
+    const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
+    const matAlgo04xSidSid = createMatAlgo04xSidSid({ typed, equalScalar });
+    const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
     /**
      * Add two or more values, `x + y`.
      * For matrices, the function is evaluated element wise.
@@ -154,8 +144,7 @@ export const createAdd = /* #__PURE__ */ factory(
         // When any operand is a Node, return an OperatorNode for symbolic computation
         // =========================================================================
 
-        'Node, Node': (x: unknown, y: unknown) =>
-          nodeOperations.createBinaryNode('+', 'add', x, y),
+        'Node, Node': (x: unknown, y: unknown) => nodeOperations.createBinaryNode('+', 'add', x, y),
 
         'number, Node': (x: number, y: unknown) =>
           nodeOperations.createBinaryNode('+', 'add', x, y),
@@ -177,10 +166,8 @@ export const createAdd = /* #__PURE__ */ factory(
         'Node, Fraction': (x: unknown, y: unknown) =>
           nodeOperations.createBinaryNode('+', 'add', x, y),
 
-        'Unit, Node': (x: unknown, y: unknown) =>
-          nodeOperations.createBinaryNode('+', 'add', x, y),
-        'Node, Unit': (x: unknown, y: unknown) =>
-          nodeOperations.createBinaryNode('+', 'add', x, y),
+        'Unit, Node': (x: unknown, y: unknown) => nodeOperations.createBinaryNode('+', 'add', x, y),
+        'Node, Unit': (x: unknown, y: unknown) => nodeOperations.createBinaryNode('+', 'add', x, y),
 
         'string, Node': (x: string, y: unknown) =>
           nodeOperations.createBinaryNode('+', 'add', x, y),
@@ -196,22 +183,22 @@ export const createAdd = /* #__PURE__ */ factory(
         'any, any, ...any': typed.referToSelf(
           (self: TypedFunction): any =>
             (x: any, y: any, rest: any[]) => {
-              let result = self(x, y)
+              let result = self(x, y);
 
               for (let i = 0; i < rest.length; i++) {
-                result = self(result, rest[i])
+                result = self(result, rest[i]);
               }
 
-              return result
+              return result;
             }
-        )
+        ),
       },
       matrixAlgorithmSuite({
         elop: addScalar,
         DS: matAlgo01xDSid,
         SS: matAlgo04xSidSid,
-        Ss: matAlgo10xSids
+        Ss: matAlgo10xSids,
       })
-    )
+    );
   }
-)
+);

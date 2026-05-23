@@ -15,7 +15,7 @@
  *   present any tampered .wasm payload is rejected before instantiation.
  */
 
-import { verifyWasmIntegrity, loadWasmManifest } from './integrity.js'
+import { verifyWasmIntegrity, loadWasmManifest } from './integrity.js';
 
 export interface WasmModule {
   // Matrix operations
@@ -27,7 +27,7 @@ export interface WasmModule {
     bRows: number,
     bCols: number,
     resultPtr: number
-  ) => void
+  ) => void;
   multiplyDenseSIMD: (
     aPtr: number,
     aRows: number,
@@ -36,44 +36,24 @@ export interface WasmModule {
     bRows: number,
     bCols: number,
     resultPtr: number
-  ) => void
+  ) => void;
   multiplyVector: (
     aPtr: number,
     aRows: number,
     aCols: number,
     xPtr: number,
     resultPtr: number
-  ) => void
-  transpose: (
-    dataPtr: number,
-    rows: number,
-    cols: number,
-    resultPtr: number
-  ) => void
-  add: (aPtr: number, bPtr: number, size: number, resultPtr: number) => void
-  subtract: (
-    aPtr: number,
-    bPtr: number,
-    size: number,
-    resultPtr: number
-  ) => void
-  scalarMultiply: (
-    aPtr: number,
-    scalar: number,
-    size: number,
-    resultPtr: number
-  ) => void
-  dotProduct: (aPtr: number, bPtr: number, size: number) => number
+  ) => void;
+  transpose: (dataPtr: number, rows: number, cols: number, resultPtr: number) => void;
+  add: (aPtr: number, bPtr: number, size: number, resultPtr: number) => void;
+  subtract: (aPtr: number, bPtr: number, size: number, resultPtr: number) => void;
+  scalarMultiply: (aPtr: number, scalar: number, size: number, resultPtr: number) => void;
+  dotProduct: (aPtr: number, bPtr: number, size: number) => number;
 
   // Linear algebra decompositions
-  luDecomposition: (aPtr: number, n: number, permPtr: number) => number
-  qrDecomposition: (
-    aPtr: number,
-    m: number,
-    n: number,
-    qPtr: number
-  ) => void
-  choleskyDecomposition: (aPtr: number, n: number, lPtr: number) => number
+  luDecomposition: (aPtr: number, n: number, permPtr: number) => number;
+  qrDecomposition: (aPtr: number, m: number, n: number, qPtr: number) => void;
+  choleskyDecomposition: (aPtr: number, n: number, lPtr: number) => number;
   schur: (
     aPtr: number,
     n: number,
@@ -82,28 +62,17 @@ export interface WasmModule {
     qPtr: number,
     tPtr: number,
     workPtr: number
-  ) => number // returns 1 if successful, 0 if failed
-  luSolve: (
-    luPtr: number,
-    n: number,
-    permPtr: number,
-    bPtr: number,
-    xPtr: number
-  ) => void
-  luDeterminant: (luPtr: number, n: number, permPtr: number) => number
+  ) => number; // returns 1 if successful, 0 if failed
+  luSolve: (luPtr: number, n: number, permPtr: number, bPtr: number, xPtr: number) => void;
+  luDeterminant: (luPtr: number, n: number, permPtr: number) => number;
 
   // Linear algebra (linalg module)
-  laDet: (aPtr: number, n: number, workPtr: number) => number
-  laInv: (
-    aPtr: number,
-    n: number,
-    resultPtr: number,
-    workPtr: number
-  ) => number // returns 1 if successful, 0 if singular
-  laInv2x2: (aPtr: number, resultPtr: number) => number // returns 0 on success, -1 if singular
-  laInv3x3: (aPtr: number, resultPtr: number) => number // returns 0 on success, -1 if singular
-  laCond1: (aPtr: number, n: number, workPtr: number) => number // 1-norm condition number
-  laCondInf: (aPtr: number, n: number, workPtr: number) => number // infinity-norm condition number
+  laDet: (aPtr: number, n: number, workPtr: number) => number;
+  laInv: (aPtr: number, n: number, resultPtr: number, workPtr: number) => number; // returns 1 if successful, 0 if singular
+  laInv2x2: (aPtr: number, resultPtr: number) => number; // returns 0 on success, -1 if singular
+  laInv3x3: (aPtr: number, resultPtr: number) => number; // returns 0 on success, -1 if singular
+  laCond1: (aPtr: number, n: number, workPtr: number) => number; // 1-norm condition number
+  laCondInf: (aPtr: number, n: number, workPtr: number) => number; // infinity-norm condition number
   laKron: (
     aPtr: number,
     aRows: number,
@@ -111,29 +80,13 @@ export interface WasmModule {
     bPtr: number,
     bRows: number,
     bCols: number
-  ) => number // returns ptr to result
-  laDot: (aPtr: number, bPtr: number, n: number) => number
-  laCross: (aPtr: number, bPtr: number) => number // returns ptr to result (3 elements)
-  laNorm2: (xPtr: number, n: number) => number
-  laSolve: (
-    aPtr: number,
-    bPtr: number,
-    n: number,
-    resultPtr: number,
-    workPtr: number
-  ) => number // returns 1 if successful, 0 if singular
-  laLsolve: (
-    lPtr: number,
-    bPtr: number,
-    n: number,
-    resultPtr: number
-  ) => number // returns 1 if successful, 0 if singular
-  laUsolve: (
-    uPtr: number,
-    bPtr: number,
-    n: number,
-    resultPtr: number
-  ) => number // returns 1 if successful, 0 if singular
+  ) => number; // returns ptr to result
+  laDot: (aPtr: number, bPtr: number, n: number) => number;
+  laCross: (aPtr: number, bPtr: number) => number; // returns ptr to result (3 elements)
+  laNorm2: (xPtr: number, n: number) => number;
+  laSolve: (aPtr: number, bPtr: number, n: number, resultPtr: number, workPtr: number) => number; // returns 1 if successful, 0 if singular
+  laLsolve: (lPtr: number, bPtr: number, n: number, resultPtr: number) => number; // returns 1 if successful, 0 if singular
+  laUsolve: (uPtr: number, bPtr: number, n: number, resultPtr: number) => number; // returns 1 if successful, 0 if singular
 
   // Eigenvalue operations
   eigsSymmetric: (
@@ -143,7 +96,7 @@ export interface WasmModule {
     eigenvaluesPtr: number,
     eigenvectorsPtr: number,
     workPtr: number
-  ) => number // returns number of iterations, -1 on failure
+  ) => number; // returns number of iterations, -1 on failure
   powerIteration: (
     matrixPtr: number,
     n: number,
@@ -152,14 +105,14 @@ export interface WasmModule {
     workPtr: number,
     maxIterations: number,
     tolerance: number
-  ) => number // returns number of iterations
+  ) => number; // returns number of iterations
   spectralRadius: (
     matrixPtr: number,
     n: number,
     workPtr: number,
     maxIterations: number,
     tolerance: number
-  ) => number // returns spectral radius
+  ) => number; // returns spectral radius
   inverseIteration: (
     matrixPtr: number,
     n: number,
@@ -168,20 +121,11 @@ export interface WasmModule {
     workPtr: number,
     maxIterations: number,
     tolerance: number
-  ) => number // returns number of iterations
+  ) => number; // returns number of iterations
 
   // Complex eigenvalue operations
-  balanceMatrix: (
-    matrixPtr: number,
-    n: number,
-    scalePtr: number,
-    transformPtr: number
-  ) => void
-  reduceToHessenberg: (
-    matrixPtr: number,
-    n: number,
-    transformPtr: number
-  ) => void
+  balanceMatrix: (matrixPtr: number, n: number, scalePtr: number, transformPtr: number) => void;
+  reduceToHessenberg: (matrixPtr: number, n: number, transformPtr: number) => void;
   eigenvalues2x2: (
     a: number,
     b: number,
@@ -189,13 +133,8 @@ export interface WasmModule {
     d: number,
     realPtr: number,
     imagPtr: number
-  ) => void
-  qrIterationStep: (
-    matrixPtr: number,
-    n: number,
-    workPtr: number,
-    shift: number
-  ) => void
+  ) => void;
+  qrIterationStep: (matrixPtr: number, n: number, workPtr: number, shift: number) => void;
   qrAlgorithm: (
     matrixPtr: number,
     n: number,
@@ -204,29 +143,24 @@ export interface WasmModule {
     workPtr: number,
     maxIterations: number,
     tolerance: number
-  ) => number // returns number of iterations
+  ) => number; // returns number of iterations
   hessenbergQRStep: (
     matrixPtr: number,
     n: number,
     startRow: number,
     endRow: number,
     shift: number
-  ) => void
+  ) => void;
 
   // Matrix exponential
-  expm: (
-    matrixPtr: number,
-    n: number,
-    resultPtr: number,
-    workPtr: number
-  ) => number // returns 0 on success
+  expm: (matrixPtr: number, n: number, resultPtr: number, workPtr: number) => number; // returns 0 on success
   expmSmall: (
     matrixPtr: number,
     n: number,
     resultPtr: number,
     workPtr: number,
     terms: number
-  ) => void
+  ) => void;
   expmv: (
     matrixPtr: number,
     n: number,
@@ -234,7 +168,7 @@ export interface WasmModule {
     resultPtr: number,
     workPtr: number,
     t: number
-  ) => void
+  ) => void;
 
   // Matrix square root
   sqrtm: (
@@ -244,7 +178,7 @@ export interface WasmModule {
     tolerance: number,
     maxIterations: number,
     workPtr: number
-  ) => number // returns 0 on success
+  ) => number; // returns 0 on success
   sqrtmNewtonSchulz: (
     matrixPtr: number,
     n: number,
@@ -252,13 +186,8 @@ export interface WasmModule {
     workPtr: number,
     maxIterations: number,
     tolerance: number
-  ) => number // returns number of iterations
-  sqrtmCholesky: (
-    matrixPtr: number,
-    n: number,
-    resultPtr: number,
-    workPtr: number
-  ) => number // returns 0 on success, -1 if not positive definite
+  ) => number; // returns number of iterations
+  sqrtmCholesky: (matrixPtr: number, n: number, resultPtr: number, workPtr: number) => number; // returns 0 on success, -1 if not positive definite
 
   // Sparse LU decomposition (CSC format)
   sparseLu: (
@@ -275,7 +204,7 @@ export interface WasmModule {
     uColPtrPtr: number,
     permPtr: number,
     workPtr: number
-  ) => number // returns 0 on success
+  ) => number; // returns 0 on success
   sparseForwardSolve: (
     lValuesPtr: number,
     lRowIndPtr: number,
@@ -283,7 +212,7 @@ export interface WasmModule {
     n: number,
     bPtr: number,
     xPtr: number
-  ) => void
+  ) => void;
   sparseBackwardSolve: (
     uValuesPtr: number,
     uRowIndPtr: number,
@@ -291,7 +220,7 @@ export interface WasmModule {
     n: number,
     bPtr: number,
     xPtr: number
-  ) => void
+  ) => void;
   sparseLuSolve: (
     lValuesPtr: number,
     lRowIndPtr: number,
@@ -304,7 +233,7 @@ export interface WasmModule {
     bPtr: number,
     xPtr: number,
     workPtr: number
-  ) => void
+  ) => void;
 
   // Sparse Cholesky decomposition (CSC format)
   sparseChol: (
@@ -318,7 +247,7 @@ export interface WasmModule {
     lColPtrPtr: number,
     parentPtr: number,
     workPtr: number
-  ) => number // returns 0 on success, -1 if not positive definite
+  ) => number; // returns 0 on success, -1 if not positive definite
   sparseCholSolve: (
     lValuesPtr: number,
     lRowIndPtr: number,
@@ -327,13 +256,8 @@ export interface WasmModule {
     bPtr: number,
     xPtr: number,
     workPtr: number
-  ) => void
-  eliminationTree: (
-    rowIndPtr: number,
-    colPtrPtr: number,
-    n: number,
-    parentPtr: number
-  ) => void
+  ) => void;
+  eliminationTree: (rowIndPtr: number, colPtrPtr: number, n: number, parentPtr: number) => void;
   columnCounts: (
     rowIndPtr: number,
     colPtrPtr: number,
@@ -341,23 +265,17 @@ export interface WasmModule {
     parentPtr: number,
     countsPtr: number,
     workPtr: number
-  ) => void
+  ) => void;
 
   // Sparse AMD ordering
-  amd: (
-    colPtrPtr: number,
-    rowIdxPtr: number,
-    n: number,
-    permPtr: number,
-    workPtr: number
-  ) => void
+  amd: (colPtrPtr: number, rowIdxPtr: number, n: number, permPtr: number, workPtr: number) => void;
   amdAggressive: (
     colPtrPtr: number,
     rowIdxPtr: number,
     n: number,
     permPtr: number,
     workPtr: number
-  ) => void
+  ) => void;
   // Symbolic Cholesky (combines elimination tree + column counts)
   symbolicCholesky: (
     indexPtr: number,
@@ -367,43 +285,23 @@ export interface WasmModule {
     postPtr: number,
     colCountPtr: number,
     workPtr: number
-  ) => void
+  ) => void;
 
   // SIMD operations
-  simdDotF64: (aPtr: number, bPtr: number, length: number) => number
-  simdSumF64: (aPtr: number, length: number) => number
-  simdSumSquaresF64: (aPtr: number, length: number) => number
-  simdNormF64: (aPtr: number, length: number) => number
-  simdMinF64: (aPtr: number, length: number) => number
-  simdMaxF64: (aPtr: number, length: number) => number
-  simdMeanF64: (aPtr: number, length: number) => number
-  simdVarianceF64: (aPtr: number, length: number, ddof: number) => number
-  simdStdF64: (aPtr: number, length: number, ddof: number) => number
-  simdAddF64: (
-    aPtr: number,
-    bPtr: number,
-    resultPtr: number,
-    length: number
-  ) => void
-  simdSubF64: (
-    aPtr: number,
-    bPtr: number,
-    resultPtr: number,
-    length: number
-  ) => void
-  simdMulF64: (
-    aPtr: number,
-    bPtr: number,
-    resultPtr: number,
-    length: number
-  ) => void
-  simdScaleF64: (
-    aPtr: number,
-    scalar: number,
-    resultPtr: number,
-    length: number
-  ) => void
-  simdAbsF64: (aPtr: number, resultPtr: number, length: number) => void
+  simdDotF64: (aPtr: number, bPtr: number, length: number) => number;
+  simdSumF64: (aPtr: number, length: number) => number;
+  simdSumSquaresF64: (aPtr: number, length: number) => number;
+  simdNormF64: (aPtr: number, length: number) => number;
+  simdMinF64: (aPtr: number, length: number) => number;
+  simdMaxF64: (aPtr: number, length: number) => number;
+  simdMeanF64: (aPtr: number, length: number) => number;
+  simdVarianceF64: (aPtr: number, length: number, ddof: number) => number;
+  simdStdF64: (aPtr: number, length: number, ddof: number) => number;
+  simdAddF64: (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
+  simdSubF64: (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
+  simdMulF64: (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
+  simdScaleF64: (aPtr: number, scalar: number, resultPtr: number, length: number) => void;
+  simdAbsF64: (aPtr: number, resultPtr: number, length: number) => void;
   simdMatMulF64: (
     aPtr: number,
     bPtr: number,
@@ -411,41 +309,29 @@ export interface WasmModule {
     m: number,
     k: number,
     n: number
-  ) => void
+  ) => void;
 
   // Arithmetic operations (array-oriented)
-  gcdArray: (aPtr: number, n: number) => number
-  hypotArray: (aPtr: number, n: number) => number
-  norm1: (aPtr: number, n: number) => number
-  norm2: (aPtr: number, n: number) => number
-  normInf: (aPtr: number, n: number) => number
-  normP: (aPtr: number, n: number, p: number) => number
+  gcdArray: (aPtr: number, n: number) => number;
+  hypotArray: (aPtr: number, n: number) => number;
+  norm1: (aPtr: number, n: number) => number;
+  norm2: (aPtr: number, n: number) => number;
+  normInf: (aPtr: number, n: number) => number;
+  normP: (aPtr: number, n: number, p: number) => number;
 
   // Special functions (array-accelerated)
-  erfArray: (aPtr: number, n: number, resultPtr: number) => void
-  zetaArray: (aPtr: number, n: number, resultPtr: number) => void
-  gammaArray: (aPtr: number, n: number, resultPtr: number) => void
-  lgammaArray: (aPtr: number, n: number, resultPtr: number) => void
+  erfArray: (aPtr: number, n: number, resultPtr: number) => void;
+  zetaArray: (aPtr: number, n: number, resultPtr: number) => void;
+  gammaArray: (aPtr: number, n: number, resultPtr: number) => void;
+  lgammaArray: (aPtr: number, n: number, resultPtr: number) => void;
 
   // Selection algorithms
-  partitionSelect: (
-    dataPtr: number,
-    n: number,
-    k: number,
-    workPtr: number
-  ) => number
+  partitionSelect: (dataPtr: number, n: number, k: number, workPtr: number) => number;
 
   // Geometry operations
-  distanceND: (p1Ptr: number, p2Ptr: number, n: number) => number
-  distance2D: (x1: number, y1: number, x2: number, y2: number) => number
-  distance3D: (
-    x1: number,
-    y1: number,
-    z1: number,
-    x2: number,
-    y2: number,
-    z2: number
-  ) => number
+  distanceND: (p1Ptr: number, p2Ptr: number, n: number) => number;
+  distance2D: (x1: number, y1: number, x2: number, y2: number) => number;
+  distance3D: (x1: number, y1: number, z1: number, x2: number, y2: number, z2: number) => number;
   intersect2DLines: (
     x1: number,
     y1: number,
@@ -456,7 +342,7 @@ export interface WasmModule {
     x4: number,
     y4: number,
     resultPtr: number
-  ) => void
+  ) => void;
   intersect2DInfiniteLines: (
     x1: number,
     y1: number,
@@ -467,7 +353,7 @@ export interface WasmModule {
     x4: number,
     y4: number,
     resultPtr: number
-  ) => void
+  ) => void;
   distancePointToLine2D: (
     px: number,
     py: number,
@@ -475,60 +361,44 @@ export interface WasmModule {
     y1: number,
     x2: number,
     y2: number
-  ) => number
+  ) => number;
 
   // Statistics operations
-  statsMean: (aPtr: number, n: number) => number
-  statsMedian: (aPtr: number, n: number) => number
-  statsVariance: (aPtr: number, n: number, ddof: number) => number
-  statsStd: (aPtr: number, n: number, ddof: number) => number
-  statsSum: (aPtr: number, n: number) => number
-  statsProd: (aPtr: number, n: number) => number
-  statsMin: (aPtr: number, n: number) => number
-  statsMax: (aPtr: number, n: number) => number
-  statsCumsum: (aPtr: number, n: number) => void
-  statsMad: (aPtr: number, n: number) => number
-  statsCorrelation: (aPtr: number, bPtr: number, n: number) => number
-  statsCovariance: (
-    aPtr: number,
-    bPtr: number,
-    n: number,
-    ddof: number
-  ) => number
+  statsMean: (aPtr: number, n: number) => number;
+  statsMedian: (aPtr: number, n: number) => number;
+  statsVariance: (aPtr: number, n: number, ddof: number) => number;
+  statsStd: (aPtr: number, n: number, ddof: number) => number;
+  statsSum: (aPtr: number, n: number) => number;
+  statsProd: (aPtr: number, n: number) => number;
+  statsMin: (aPtr: number, n: number) => number;
+  statsMax: (aPtr: number, n: number) => number;
+  statsCumsum: (aPtr: number, n: number) => void;
+  statsMad: (aPtr: number, n: number) => number;
+  statsCorrelation: (aPtr: number, bPtr: number, n: number) => number;
+  statsCovariance: (aPtr: number, bPtr: number, n: number, ddof: number) => number;
 
   // Signal processing — extended (processing_ext.rs)
-  dct_wasm: (inPtr: number, outPtr: number, n: number) => void
-  idct_wasm: (inPtr: number, outPtr: number, n: number) => void
-  dst_wasm: (inPtr: number, outPtr: number, n: number) => void
-  idst_wasm: (inPtr: number, outPtr: number, n: number) => void
-  dwt_wasm: (
-    inPtr: number,
-    approxPtr: number,
-    detailPtr: number,
-    n: number
-  ) => void
-  hilbert_wasm: (
-    inRe: number,
-    inIm: number,
-    outRe: number,
-    outIm: number,
-    n: number
-  ) => void
+  dct_wasm: (inPtr: number, outPtr: number, n: number) => void;
+  idct_wasm: (inPtr: number, outPtr: number, n: number) => void;
+  dst_wasm: (inPtr: number, outPtr: number, n: number) => void;
+  idst_wasm: (inPtr: number, outPtr: number, n: number) => void;
+  dwt_wasm: (inPtr: number, approxPtr: number, detailPtr: number, n: number) => void;
+  hilbert_wasm: (inRe: number, inIm: number, outRe: number, outIm: number, n: number) => void;
   spectrogram_wasm: (
     inPtr: number,
     outPtr: number,
     n: number,
     windowSize: number,
     hop: number
-  ) => number
-  periodogram_wasm: (inPtr: number, outPtr: number, n: number) => void
+  ) => number;
+  periodogram_wasm: (inPtr: number, outPtr: number, n: number) => void;
   fir_filter_wasm: (
     inPtr: number,
     coeffsPtr: number,
     outPtr: number,
     n: number,
     numCoeffs: number
-  ) => void
+  ) => void;
 
   // Signal processing
   freqz: (
@@ -540,51 +410,115 @@ export interface WasmModule {
     wLen: number,
     hRealPtr: number,
     hImagPtr: number
-  ) => void
-  fft: (dataPtr: number, n: number, inverse: number) => void
-  fft2d: (dataPtr: number, rows: number, cols: number, inverse: number) => void
-  convolve: (
-    signalPtr: number,
-    n: number,
-    kernelPtr: number,
-    m: number,
-    resultPtr: number
-  ) => void
-  rfft: (dataPtr: number, n: number, resultPtr: number) => void
-  irfft: (dataPtr: number, n: number, resultPtr: number) => void
-  isPowerOf2: (n: number) => number
+  ) => void;
+  fft: (dataPtr: number, n: number, inverse: number) => void;
+  fft2d: (dataPtr: number, rows: number, cols: number, inverse: number) => void;
+  convolve: (signalPtr: number, n: number, kernelPtr: number, m: number, resultPtr: number) => void;
+  rfft: (dataPtr: number, n: number, resultPtr: number) => void;
+  irfft: (dataPtr: number, n: number, resultPtr: number) => void;
+  isPowerOf2: (n: number) => number;
 
   // ODE solver vector operations
-  vectorAdd: (aPtr: number, bPtr: number, n: number, resultPtr: number) => void
-  vectorScale: (aPtr: number, scalar: number, n: number, resultPtr: number) => void
-  vectorCopy: (srcPtr: number, n: number, dstPtr: number) => void
-  maxError: (errorPtr: number, n: number) => number
-  computeStepAdjustment: (maxErr: number, tol: number, order: number, minDelta: number, maxDelta: number) => number
-  rk45Step: (yPtr: number, t: number, h: number, n: number, kPtr: number, yNextPtr: number, yErrorPtr: number) => void
-  rk23Step: (yPtr: number, t: number, h: number, n: number, kPtr: number, yNextPtr: number, yErrorPtr: number) => void
+  vectorAdd: (aPtr: number, bPtr: number, n: number, resultPtr: number) => void;
+  vectorScale: (aPtr: number, scalar: number, n: number, resultPtr: number) => void;
+  vectorCopy: (srcPtr: number, n: number, dstPtr: number) => void;
+  maxError: (errorPtr: number, n: number) => number;
+  computeStepAdjustment: (
+    maxErr: number,
+    tol: number,
+    order: number,
+    minDelta: number,
+    maxDelta: number
+  ) => number;
+  rk45Step: (
+    yPtr: number,
+    t: number,
+    h: number,
+    n: number,
+    kPtr: number,
+    yNextPtr: number,
+    yErrorPtr: number
+  ) => void;
+  rk23Step: (
+    yPtr: number,
+    t: number,
+    h: number,
+    n: number,
+    kPtr: number,
+    yNextPtr: number,
+    yErrorPtr: number
+  ) => void;
 
   // Optimization
-  minimize_quadratic_wasm: (hPtr: number, fPtr: number, n: number, xPtr: number) => number
-  least_squares_wasm: (aPtr: number, bPtr: number, m: number, n: number, xPtr: number) => number
-  levenberg_marquardt_wasm: (jPtr: number, rPtr: number, m: number, n: number, dpPtr: number, lambda: number) => void
+  minimize_quadratic_wasm: (hPtr: number, fPtr: number, n: number, xPtr: number) => number;
+  least_squares_wasm: (aPtr: number, bPtr: number, m: number, n: number, xPtr: number) => number;
+  levenberg_marquardt_wasm: (
+    jPtr: number,
+    rPtr: number,
+    m: number,
+    n: number,
+    dpPtr: number,
+    lambda: number
+  ) => void;
 
   // Matrix analysis (SVD-based)
-  condition_number_wasm: (aPtr: number, n: number) => number
-  matrix_rank_wasm: (aPtr: number, m: number, n: number, tol: number) => number
+  condition_number_wasm: (aPtr: number, n: number) => number;
+  matrix_rank_wasm: (aPtr: number, m: number, n: number, tol: number) => number;
 
   // Advanced interpolation
-  bezier_eval_wasm: (ctrlPtr: number, nPoints: number, dims: number, t: number, resultPtr: number) => void
-  bspline_eval_wasm: (ctrlPtr: number, nPoints: number, degree: number, t: number, resultPtr: number) => void
-  loess_wasm: (xsPtr: number, ysPtr: number, n: number, x: number, bandwidth: number) => number
-  rbf_interp_wasm: (pointsPtr: number, valuesPtr: number, n: number, dims: number, xiPtr: number, ni: number, resultPtr: number) => void
-  griddata_wasm: (pointsPtr: number, valuesPtr: number, n: number, xiPtr: number, yiPtr: number, ni: number, resultPtr: number) => void
+  bezier_eval_wasm: (
+    ctrlPtr: number,
+    nPoints: number,
+    dims: number,
+    t: number,
+    resultPtr: number
+  ) => void;
+  bspline_eval_wasm: (
+    ctrlPtr: number,
+    nPoints: number,
+    degree: number,
+    t: number,
+    resultPtr: number
+  ) => void;
+  loess_wasm: (xsPtr: number, ysPtr: number, n: number, x: number, bandwidth: number) => number;
+  rbf_interp_wasm: (
+    pointsPtr: number,
+    valuesPtr: number,
+    n: number,
+    dims: number,
+    xiPtr: number,
+    ni: number,
+    resultPtr: number
+  ) => void;
+  griddata_wasm: (
+    pointsPtr: number,
+    valuesPtr: number,
+    n: number,
+    xiPtr: number,
+    yiPtr: number,
+    ni: number,
+    resultPtr: number
+  ) => void;
 
   // Advanced ODE
-  implicit_euler_step_wasm: (yPtr: number, fPtr: number, jPtr: number, h: number, n: number, resultPtr: number) => void
-  ode_system_rk4_step_wasm: (yPtr: number, kPtrs: number, h: number, n: number, resultPtr: number) => void
+  implicit_euler_step_wasm: (
+    yPtr: number,
+    fPtr: number,
+    jPtr: number,
+    h: number,
+    n: number,
+    resultPtr: number
+  ) => void;
+  ode_system_rk4_step_wasm: (
+    yPtr: number,
+    kPtrs: number,
+    h: number,
+    n: number,
+    resultPtr: number
+  ) => void;
 
   // Computational geometry
-  delaunay_wasm: (ptsPtr: number, n: number, trisPtr: number) => number
+  delaunay_wasm: (ptsPtr: number, n: number, trisPtr: number) => number;
   voronoi_wasm: (
     ptsPtr: number,
     n: number,
@@ -593,9 +527,14 @@ export interface WasmModule {
     edgesPtr: number,
     maxVerts: number,
     maxEdges: number
-  ) => number
-  kdtree_build_wasm: (ptsPtr: number, n: number, dims: number, treePtr: number) => number
-  kdtree_nearest_wasm: (treePtr: number, queryPtr: number, dims: number, treeSize: number) => number
+  ) => number;
+  kdtree_build_wasm: (ptsPtr: number, n: number, dims: number, treePtr: number) => number;
+  kdtree_nearest_wasm: (
+    treePtr: number,
+    queryPtr: number,
+    dims: number,
+    treeSize: number
+  ) => number;
 
   // Bitwise operations (Int32, elementwise — provided by both Rust and AS
   // backends; binary kernels accept two Int32 pointers + output + length,
@@ -603,135 +542,91 @@ export interface WasmModule {
   // Rust uses the *_Array / *_ArrayPerElement naming; AS uses *_i32_array.
   // The dispatch tier in functions/src/typed/bitwise.ts probes for one or
   // the other at runtime.
-  bitAndArray?: (
-    aPtr: number,
-    bPtr: number,
-    resultPtr: number,
-    length: number
-  ) => void
-  bitOrArray?: (
-    aPtr: number,
-    bPtr: number,
-    resultPtr: number,
-    length: number
-  ) => void
-  bitXorArray?: (
-    aPtr: number,
-    bPtr: number,
-    resultPtr: number,
-    length: number
-  ) => void
-  bitNotArray?: (
-    inputPtr: number,
-    resultPtr: number,
-    length: number
-  ) => void
+  bitAndArray?: (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
+  bitOrArray?: (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
+  bitXorArray?: (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
+  bitNotArray?: (inputPtr: number, resultPtr: number, length: number) => void;
   leftShiftArrayPerElement?: (
     aPtr: number,
     bPtr: number,
     resultPtr: number,
     length: number
-  ) => void
+  ) => void;
   rightArithShiftArrayPerElement?: (
     aPtr: number,
     bPtr: number,
     resultPtr: number,
     length: number
-  ) => void
+  ) => void;
   rightLogShiftArrayPerElement?: (
     aPtr: number,
     bPtr: number,
     resultPtr: number,
     length: number
-  ) => void
+  ) => void;
   // AS-backend elementwise bitwise kernels — same semantics, different
   // naming convention so we can keep both backends working from the same
   // interface. The dispatch tier prefers Rust names and falls through to
   // AS names when the binary is the AS one.
-  bitAnd_i32_array?: (
-    a: Int32Array,
-    b: Int32Array,
-    result: Int32Array
-  ) => void
-  bitOr_i32_array?: (
-    a: Int32Array,
-    b: Int32Array,
-    result: Int32Array
-  ) => void
-  bitXor_i32_array?: (
-    a: Int32Array,
-    b: Int32Array,
-    result: Int32Array
-  ) => void
-  bitNot_i32_array?: (a: Int32Array, result: Int32Array) => void
-  leftShift_i32_array?: (
-    a: Int32Array,
-    b: Int32Array,
-    result: Int32Array
-  ) => void
-  rightArithShift_i32_array?: (
-    a: Int32Array,
-    b: Int32Array,
-    result: Int32Array
-  ) => void
-  rightLogShift_i32_array?: (
-    a: Int32Array,
-    b: Int32Array,
-    result: Int32Array
-  ) => void
+  bitAnd_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
+  bitOr_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
+  bitXor_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
+  bitNot_i32_array?: (a: Int32Array, result: Int32Array) => void;
+  leftShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
+  rightArithShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
+  rightLogShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
 
   // Memory management
-  __new: (size: number, id: number) => number
-  __pin: (ptr: number) => number
-  __unpin: (ptr: number) => void
-  __collect: () => void
-  memory: WebAssembly.Memory
+  __new: (size: number, id: number) => number;
+  __pin: (ptr: number) => number;
+  __unpin: (ptr: number) => void;
+  __collect: () => void;
+  memory: WebAssembly.Memory;
 }
 
 /**
  * Memory pool entry for reusable allocations
  */
 interface PoolEntry {
-  ptr: number
-  size: number
-  inUse: boolean
+  ptr: number;
+  size: number;
+  inUse: boolean;
 }
 
 /**
  * Loading metrics for performance monitoring
  */
 export interface LoadingMetrics {
-  fileReadMs: number
-  compileMs: number
-  instantiateMs: number
-  totalMs: number
-  fromCache: boolean
+  fileReadMs: number;
+  compileMs: number;
+  instantiateMs: number;
+  totalMs: number;
+  fromCache: boolean;
 }
 
 export class WasmLoader {
-  private static instance: WasmLoader | null = null
-  private wasmModule: WasmModule | null = null
-  private compiledModule: WebAssembly.Module | null = null
-  private loading: Promise<WasmModule> | null = null
-  private isNode: boolean
-  private lastMetrics: LoadingMetrics | null = null
+  private static instance: WasmLoader | null = null;
+  private wasmModule: WasmModule | null = null;
+  private compiledModule: WebAssembly.Module | null = null;
+  private loading: Promise<WasmModule> | null = null;
+  private isNode: boolean;
+  private lastMetrics: LoadingMetrics | null = null;
 
   // Memory pool for reusable allocations
-  private float64Pool: PoolEntry[] = []
-  private int32Pool: PoolEntry[] = []
-  private readonly maxPoolSize = 32
-  private readonly poolSizeThreshold = 1024 * 1024 // 1MB max per pool entry
+  private float64Pool: PoolEntry[] = [];
+  private int32Pool: PoolEntry[] = [];
+  private readonly maxPoolSize = 32;
+  private readonly poolSizeThreshold = 1024 * 1024; // 1MB max per pool entry
 
   private constructor() {
-    this.isNode =
-      typeof process !== 'undefined' && process.versions?.node !== undefined
+    this.isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
   }
 
   public static getInstance(): WasmLoader {
     if (!WasmLoader.instance) {
-      WasmLoader.instance = new WasmLoader()
+      WasmLoader.instance = new WasmLoader();
     }
-    return WasmLoader.instance
+    return WasmLoader.instance;
   }
 
   /**
@@ -739,16 +634,16 @@ export class WasmLoader {
    */
   public async load(wasmPath?: string): Promise<WasmModule> {
     if (this.wasmModule) {
-      return this.wasmModule
+      return this.wasmModule;
     }
 
     if (this.loading) {
-      return this.loading
+      return this.loading;
     }
 
-    this.loading = this.loadModule(wasmPath)
-    this.wasmModule = await this.loading
-    return this.wasmModule
+    this.loading = this.loadModule(wasmPath);
+    this.wasmModule = await this.loading;
+    return this.wasmModule;
   }
 
   /**
@@ -756,27 +651,27 @@ export class WasmLoader {
    * Useful for build-time or startup optimization
    */
   public async precompile(wasmPath?: string): Promise<void> {
-    if (this.compiledModule) return
+    if (this.compiledModule) return;
 
-    const path = wasmPath || this.getDefaultWasmPath()
-    const startTime = performance.now()
+    const path = wasmPath || this.getDefaultWasmPath();
+    const startTime = performance.now();
 
     if (this.isNode) {
-      const fs = await import('fs')
-      const { promisify } = await import('util')
-      const readFile = promisify(fs.readFile)
-      const buffer = await readFile(path)
-      await verifyWasmIntegrity(buffer, path)
-      this.compiledModule = await WebAssembly.compile(buffer)
+      const fs = await import('fs');
+      const { promisify } = await import('util');
+      const readFile = promisify(fs.readFile);
+      const buffer = await readFile(path);
+      await verifyWasmIntegrity(buffer, path);
+      this.compiledModule = await WebAssembly.compile(buffer);
     } else {
-      const manifest = await loadWasmManifest(path)
+      const manifest = await loadWasmManifest(path);
       if (!manifest && typeof WebAssembly.compileStreaming === 'function') {
-        this.compiledModule = await WebAssembly.compileStreaming(fetch(path))
+        this.compiledModule = await WebAssembly.compileStreaming(fetch(path));
       } else {
-        const response = await fetch(path)
-        const buffer = await response.arrayBuffer()
-        await verifyWasmIntegrity(buffer, path, { manifest })
-        this.compiledModule = await WebAssembly.compile(buffer)
+        const response = await fetch(path);
+        const buffer = await response.arrayBuffer();
+        await verifyWasmIntegrity(buffer, path, { manifest });
+        this.compiledModule = await WebAssembly.compile(buffer);
       }
     }
 
@@ -785,35 +680,32 @@ export class WasmLoader {
       compileMs: performance.now() - startTime,
       instantiateMs: 0,
       totalMs: performance.now() - startTime,
-      fromCache: false
-    }
+      fromCache: false,
+    };
   }
 
   private async loadModule(wasmPath?: string): Promise<WasmModule> {
-    const path = wasmPath || this.getDefaultWasmPath()
-    const totalStart = performance.now()
+    const path = wasmPath || this.getDefaultWasmPath();
+    const totalStart = performance.now();
 
     // If precompiled, use cached module
     if (this.compiledModule) {
-      const instStart = performance.now()
-      const instance = await WebAssembly.instantiate(
-        this.compiledModule,
-        this.getImports()
-      )
+      const instStart = performance.now();
+      const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
       this.lastMetrics = {
         fileReadMs: 0,
         compileMs: 0,
         instantiateMs: performance.now() - instStart,
         totalMs: performance.now() - totalStart,
-        fromCache: true
-      }
-      return instance.exports as any as WasmModule
+        fromCache: true,
+      };
+      return instance.exports as any as WasmModule;
     }
 
     if (this.isNode) {
-      return this.loadNodeWasm(path, totalStart)
+      return this.loadNodeWasm(path, totalStart);
     } else {
-      return this.loadBrowserWasm(path, totalStart)
+      return this.loadBrowserWasm(path, totalStart);
     }
   }
 
@@ -823,160 +715,145 @@ export class WasmLoader {
    * Default is Rust (after migration cutover).
    */
   private getDefaultWasmPath(): string {
-    const useAS = typeof process !== 'undefined' &&
-      process.env?.MATHJS_WASM_BACKEND === 'assemblyscript'
+    const useAS =
+      typeof process !== 'undefined' && process.env?.MATHJS_WASM_BACKEND === 'assemblyscript';
 
     if (this.isNode) {
-      return useAS ? './lib/wasm/mathjs-as.wasm' : './lib/wasm/mathjs.wasm'
+      return useAS ? './lib/wasm/mathjs-as.wasm' : './lib/wasm/mathjs.wasm';
     } else {
-      const wasmFile = useAS ? 'mathjs-as.wasm' : 'mathjs.wasm'
-      return new URL(`../../lib/wasm/${wasmFile}`, import.meta.url).href
+      const wasmFile = useAS ? 'mathjs-as.wasm' : 'mathjs.wasm';
+      return new URL(`../../lib/wasm/${wasmFile}`, import.meta.url).href;
     }
   }
 
-  private async loadNodeWasm(
-    path: string,
-    totalStart: number
-  ): Promise<WasmModule> {
-    const fs = await import('fs')
-    const { promisify } = await import('util')
-    const readFile = promisify(fs.readFile)
+  private async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {
+    const fs = await import('fs');
+    const { promisify } = await import('util');
+    const readFile = promisify(fs.readFile);
 
-    const readStart = performance.now()
-    const buffer = await readFile(path)
-    const readEnd = performance.now()
+    const readStart = performance.now();
+    const buffer = await readFile(path);
+    const readEnd = performance.now();
 
     // SHA-384 integrity check against sibling wasm-manifest.json.
     // Throws on tamper; warns and continues when manifest is absent.
-    await verifyWasmIntegrity(buffer, path)
+    await verifyWasmIntegrity(buffer, path);
 
-    const compileStart = performance.now()
-    this.compiledModule = await WebAssembly.compile(buffer)
-    const compileEnd = performance.now()
+    const compileStart = performance.now();
+    this.compiledModule = await WebAssembly.compile(buffer);
+    const compileEnd = performance.now();
 
-    const instStart = performance.now()
-    const instance = await WebAssembly.instantiate(
-      this.compiledModule,
-      this.getImports()
-    )
-    const instEnd = performance.now()
+    const instStart = performance.now();
+    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+    const instEnd = performance.now();
 
     this.lastMetrics = {
       fileReadMs: readEnd - readStart,
       compileMs: compileEnd - compileStart,
       instantiateMs: instEnd - instStart,
       totalMs: performance.now() - totalStart,
-      fromCache: false
-    }
+      fromCache: false,
+    };
 
-    return instance.exports as any as WasmModule
+    return instance.exports as any as WasmModule;
   }
 
-  private async loadBrowserWasm(
-    path: string,
-    totalStart: number
-  ): Promise<WasmModule> {
+  private async loadBrowserWasm(path: string, totalStart: number): Promise<WasmModule> {
     // Look for the manifest *before* deciding whether to stream. If a
     // manifest exists we must materialize the buffer to compute its hash
     // before compilation — streaming would let an attacker race the
     // bytes past WebAssembly.compile without being checked.
-    const manifest = await loadWasmManifest(path)
+    const manifest = await loadWasmManifest(path);
 
     if (!manifest && typeof WebAssembly.instantiateStreaming === 'function') {
       // No manifest -> preserve fast streaming path (legacy compat).
-      const instStart = performance.now()
-      const result = await WebAssembly.instantiateStreaming(
-        fetch(path),
-        this.getImports()
-      )
-      this.compiledModule = result.module
+      const instStart = performance.now();
+      const result = await WebAssembly.instantiateStreaming(fetch(path), this.getImports());
+      this.compiledModule = result.module;
       this.lastMetrics = {
         fileReadMs: 0, // Combined with compile in streaming
         compileMs: 0, // Combined in streaming
         instantiateMs: performance.now() - instStart,
         totalMs: performance.now() - totalStart,
-        fromCache: false
-      }
-      return result.instance.exports as any as WasmModule
+        fromCache: false,
+      };
+      return result.instance.exports as any as WasmModule;
     }
 
     // Manifest-present (or older browser): fetch buffer, verify, compile.
-    const readStart = performance.now()
-    const response = await fetch(path)
-    const buffer = await response.arrayBuffer()
-    const readEnd = performance.now()
+    const readStart = performance.now();
+    const response = await fetch(path);
+    const buffer = await response.arrayBuffer();
+    const readEnd = performance.now();
 
-    await verifyWasmIntegrity(buffer, path, { manifest })
+    await verifyWasmIntegrity(buffer, path, { manifest });
 
-    const compileStart = performance.now()
-    this.compiledModule = await WebAssembly.compile(buffer)
-    const compileEnd = performance.now()
+    const compileStart = performance.now();
+    this.compiledModule = await WebAssembly.compile(buffer);
+    const compileEnd = performance.now();
 
-    const instStart = performance.now()
-    const instance = await WebAssembly.instantiate(
-      this.compiledModule,
-      this.getImports()
-    )
-    const instEnd = performance.now()
+    const instStart = performance.now();
+    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+    const instEnd = performance.now();
 
     this.lastMetrics = {
       fileReadMs: readEnd - readStart,
       compileMs: compileEnd - compileStart,
       instantiateMs: instEnd - instStart,
       totalMs: performance.now() - totalStart,
-      fromCache: false
-    }
+      fromCache: false,
+    };
 
-    return instance.exports as any as WasmModule
+    return instance.exports as any as WasmModule;
   }
 
   private getImports(): WebAssembly.Imports {
     return {
       env: {
         abort: (msg: number, file: number, line: number, column: number) => {
-          console.error('WASM abort', { msg, file, line, column })
-          throw new Error('WASM abort')
+          console.error('WASM abort', { msg, file, line, column });
+          throw new Error('WASM abort');
         },
-        seed: () => Date.now()
+        seed: () => Date.now(),
       },
       Math: Math as any,
-      Date: Date as any
-    }
+      Date: Date as any,
+    };
   }
 
   /**
    * Get the loaded WASM module
    */
   public getModule(): WasmModule | null {
-    return this.wasmModule
+    return this.wasmModule;
   }
 
   /**
    * Get the compiled WASM module (for caching/serialization)
    */
   public getCompiledModule(): WebAssembly.Module | null {
-    return this.compiledModule
+    return this.compiledModule;
   }
 
   /**
    * Check if WASM is loaded
    */
   public isLoaded(): boolean {
-    return this.wasmModule !== null
+    return this.wasmModule !== null;
   }
 
   /**
    * Check if WASM is precompiled
    */
   public isPrecompiled(): boolean {
-    return this.compiledModule !== null
+    return this.compiledModule !== null;
   }
 
   /**
    * Get loading performance metrics
    */
   public getLoadingMetrics(): LoadingMetrics | null {
-    return this.lastMetrics
+    return this.lastMetrics;
   }
 
   /**
@@ -984,62 +861,62 @@ export class WasmLoader {
    * Uses memory pooling for frequently reused sizes
    */
   public allocateFloat64Array(data: number[] | Float64Array): {
-    ptr: number
-    array: Float64Array
+    ptr: number;
+    array: Float64Array;
   } {
-    const module = this.wasmModule
-    if (!module) throw new Error('WASM module not loaded')
+    const module = this.wasmModule;
+    if (!module) throw new Error('WASM module not loaded');
 
-    const length = data.length
-    const byteLength = length * 8 // 8 bytes per f64
+    const length = data.length;
+    const byteLength = length * 8; // 8 bytes per f64
 
     // Try to get from pool if size is reasonable
-    let ptr: number
+    let ptr: number;
     if (byteLength <= this.poolSizeThreshold) {
-      const poolEntry = this.getFromPool(this.float64Pool, byteLength)
+      const poolEntry = this.getFromPool(this.float64Pool, byteLength);
       if (poolEntry) {
-        ptr = poolEntry.ptr
-        poolEntry.inUse = true
+        ptr = poolEntry.ptr;
+        poolEntry.inUse = true;
       } else {
-        ptr = module.__new(byteLength, 2)
+        ptr = module.__new(byteLength, 2);
       }
     } else {
-      ptr = module.__new(byteLength, 2)
+      ptr = module.__new(byteLength, 2);
     }
 
-    const array = new Float64Array(module.memory.buffer, ptr, length)
-    array.set(data)
+    const array = new Float64Array(module.memory.buffer, ptr, length);
+    array.set(data);
 
-    return { ptr, array }
+    return { ptr, array };
   }
 
   /**
    * Allocate Float64Array without copying data (for output buffers)
    */
   public allocateFloat64ArrayEmpty(length: number): {
-    ptr: number
-    array: Float64Array
+    ptr: number;
+    array: Float64Array;
   } {
-    const module = this.wasmModule
-    if (!module) throw new Error('WASM module not loaded')
+    const module = this.wasmModule;
+    if (!module) throw new Error('WASM module not loaded');
 
-    const byteLength = length * 8
+    const byteLength = length * 8;
 
-    let ptr: number
+    let ptr: number;
     if (byteLength <= this.poolSizeThreshold) {
-      const poolEntry = this.getFromPool(this.float64Pool, byteLength)
+      const poolEntry = this.getFromPool(this.float64Pool, byteLength);
       if (poolEntry) {
-        ptr = poolEntry.ptr
-        poolEntry.inUse = true
+        ptr = poolEntry.ptr;
+        poolEntry.inUse = true;
       } else {
-        ptr = module.__new(byteLength, 2)
+        ptr = module.__new(byteLength, 2);
       }
     } else {
-      ptr = module.__new(byteLength, 2)
+      ptr = module.__new(byteLength, 2);
     }
 
-    const array = new Float64Array(module.memory.buffer, ptr, length)
-    return { ptr, array }
+    const array = new Float64Array(module.memory.buffer, ptr, length);
+    return { ptr, array };
   }
 
   /**
@@ -1047,194 +924,191 @@ export class WasmLoader {
    * Uses memory pooling for frequently reused sizes
    */
   public allocateInt32Array(data: number[] | Int32Array): {
-    ptr: number
-    array: Int32Array
+    ptr: number;
+    array: Int32Array;
   } {
-    const module = this.wasmModule
-    if (!module) throw new Error('WASM module not loaded')
+    const module = this.wasmModule;
+    if (!module) throw new Error('WASM module not loaded');
 
-    const length = data.length
-    const byteLength = length * 4 // 4 bytes per i32
+    const length = data.length;
+    const byteLength = length * 4; // 4 bytes per i32
 
-    let ptr: number
+    let ptr: number;
     if (byteLength <= this.poolSizeThreshold) {
-      const poolEntry = this.getFromPool(this.int32Pool, byteLength)
+      const poolEntry = this.getFromPool(this.int32Pool, byteLength);
       if (poolEntry) {
-        ptr = poolEntry.ptr
-        poolEntry.inUse = true
+        ptr = poolEntry.ptr;
+        poolEntry.inUse = true;
       } else {
-        ptr = module.__new(byteLength, 1)
+        ptr = module.__new(byteLength, 1);
       }
     } else {
-      ptr = module.__new(byteLength, 1)
+      ptr = module.__new(byteLength, 1);
     }
 
-    const array = new Int32Array(module.memory.buffer, ptr, length)
-    array.set(data)
+    const array = new Int32Array(module.memory.buffer, ptr, length);
+    array.set(data);
 
-    return { ptr, array }
+    return { ptr, array };
   }
 
   /**
    * Allocate Int32Array without copying data (for output buffers)
    */
   public allocateInt32ArrayEmpty(length: number): {
-    ptr: number
-    array: Int32Array
+    ptr: number;
+    array: Int32Array;
   } {
-    const module = this.wasmModule
-    if (!module) throw new Error('WASM module not loaded')
+    const module = this.wasmModule;
+    if (!module) throw new Error('WASM module not loaded');
 
-    const byteLength = length * 4
+    const byteLength = length * 4;
 
-    let ptr: number
+    let ptr: number;
     if (byteLength <= this.poolSizeThreshold) {
-      const poolEntry = this.getFromPool(this.int32Pool, byteLength)
+      const poolEntry = this.getFromPool(this.int32Pool, byteLength);
       if (poolEntry) {
-        ptr = poolEntry.ptr
-        poolEntry.inUse = true
+        ptr = poolEntry.ptr;
+        poolEntry.inUse = true;
       } else {
-        ptr = module.__new(byteLength, 1)
+        ptr = module.__new(byteLength, 1);
       }
     } else {
-      ptr = module.__new(byteLength, 1)
+      ptr = module.__new(byteLength, 1);
     }
 
-    const array = new Int32Array(module.memory.buffer, ptr, length)
-    return { ptr, array }
+    const array = new Int32Array(module.memory.buffer, ptr, length);
+    return { ptr, array };
   }
 
   /**
    * Get a suitable entry from the memory pool
    */
-  private getFromPool(
-    pool: PoolEntry[],
-    requestedSize: number
-  ): PoolEntry | null {
+  private getFromPool(pool: PoolEntry[], requestedSize: number): PoolEntry | null {
     // Find best fit: smallest available entry that's >= requested size
-    let bestFit: PoolEntry | null = null
-    let bestFitWaste = Infinity
+    let bestFit: PoolEntry | null = null;
+    let bestFitWaste = Infinity;
 
     for (const entry of pool) {
       if (!entry.inUse && entry.size >= requestedSize) {
-        const waste = entry.size - requestedSize
+        const waste = entry.size - requestedSize;
         // Accept if exact match or within 2x size (avoid excessive waste)
         if (waste < bestFitWaste && entry.size <= requestedSize * 2) {
-          bestFit = entry
-          bestFitWaste = waste
+          bestFit = entry;
+          bestFitWaste = waste;
         }
       }
     }
 
-    return bestFit
+    return bestFit;
   }
 
   /**
    * Return allocation to pool for reuse
    */
   public release(ptr: number, isFloat64: boolean = true): void {
-    const pool = isFloat64 ? this.float64Pool : this.int32Pool
+    const pool = isFloat64 ? this.float64Pool : this.int32Pool;
 
     // Find entry in pool
-    const entry = pool.find((e) => e.ptr === ptr)
+    const entry = pool.find((e) => e.ptr === ptr);
     if (entry) {
-      entry.inUse = false
-      return
+      entry.inUse = false;
+      return;
     }
 
     // If not in pool, we could add it (but respect max pool size)
     // For now, just unpin it
-    this.free(ptr)
+    this.free(ptr);
   }
 
   /**
    * Free allocated memory (immediate, bypasses pool)
    */
   public free(ptr: number): void {
-    const module = this.wasmModule
-    if (!module) return
+    const module = this.wasmModule;
+    if (!module) return;
 
     // Remove from pools if present
-    this.float64Pool = this.float64Pool.filter((e) => e.ptr !== ptr)
-    this.int32Pool = this.int32Pool.filter((e) => e.ptr !== ptr)
+    this.float64Pool = this.float64Pool.filter((e) => e.ptr !== ptr);
+    this.int32Pool = this.int32Pool.filter((e) => e.ptr !== ptr);
 
-    module.__unpin(ptr)
+    module.__unpin(ptr);
   }
 
   /**
    * Clear the memory pool
    */
   public clearPool(): void {
-    const module = this.wasmModule
-    if (!module) return
+    const module = this.wasmModule;
+    if (!module) return;
 
     for (const entry of this.float64Pool) {
-      module.__unpin(entry.ptr)
+      module.__unpin(entry.ptr);
     }
     for (const entry of this.int32Pool) {
-      module.__unpin(entry.ptr)
+      module.__unpin(entry.ptr);
     }
 
-    this.float64Pool = []
-    this.int32Pool = []
+    this.float64Pool = [];
+    this.int32Pool = [];
   }
 
   /**
    * Get pool statistics
    */
   public getPoolStats(): {
-    float64: { total: number; inUse: number; totalBytes: number }
-    int32: { total: number; inUse: number; totalBytes: number }
+    float64: { total: number; inUse: number; totalBytes: number };
+    int32: { total: number; inUse: number; totalBytes: number };
   } {
-    const f64InUse = this.float64Pool.filter((e) => e.inUse).length
-    const f64Bytes = this.float64Pool.reduce((sum, e) => sum + e.size, 0)
-    const i32InUse = this.int32Pool.filter((e) => e.inUse).length
-    const i32Bytes = this.int32Pool.reduce((sum, e) => sum + e.size, 0)
+    const f64InUse = this.float64Pool.filter((e) => e.inUse).length;
+    const f64Bytes = this.float64Pool.reduce((sum, e) => sum + e.size, 0);
+    const i32InUse = this.int32Pool.filter((e) => e.inUse).length;
+    const i32Bytes = this.int32Pool.reduce((sum, e) => sum + e.size, 0);
 
     return {
       float64: {
         total: this.float64Pool.length,
         inUse: f64InUse,
-        totalBytes: f64Bytes
+        totalBytes: f64Bytes,
       },
       int32: {
         total: this.int32Pool.length,
         inUse: i32InUse,
-        totalBytes: i32Bytes
-      }
-    }
+        totalBytes: i32Bytes,
+      },
+    };
   }
 
   /**
    * Run garbage collection
    */
   public collect(): void {
-    const module = this.wasmModule
-    if (!module) return
+    const module = this.wasmModule;
+    if (!module) return;
 
-    module.__collect()
+    module.__collect();
   }
 
   /**
    * Reset the loader (for testing)
    */
   public reset(): void {
-    this.clearPool()
-    this.wasmModule = null
-    this.compiledModule = null
-    this.loading = null
-    this.lastMetrics = null
+    this.clearPool();
+    this.wasmModule = null;
+    this.compiledModule = null;
+    this.loading = null;
+    this.lastMetrics = null;
   }
 }
 
 /**
  * Global WASM loader instance
  */
-export const wasmLoader = WasmLoader.getInstance()
+export const wasmLoader = WasmLoader.getInstance();
 
 /**
  * Initialize WASM module (call once at startup)
  */
 export async function initWasm(wasmPath?: string): Promise<WasmModule> {
-  return wasmLoader.load(wasmPath)
+  return wasmLoader.load(wasmPath);
 }

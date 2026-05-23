@@ -1,21 +1,21 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import type { Complex } from '../type/complex/Complex.js'
-import { acotNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import type { Complex } from '../type/complex/Complex.js';
+import { acotNumber } from '../plain/number/index.js';
 
 // Type definitions for acot
 interface BigNumberConstructor {
-  new (value: number): BigNumber
+  new (value: number): BigNumber;
 }
 
 interface AcotDependencies {
-  typed: TypedFunction
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'acot'
-const dependencies = ['typed', 'BigNumber']
+const name = 'acot';
+const dependencies = ['typed', 'BigNumber'];
 
 export const createAcot = /* #__PURE__ */ factory(
   name,
@@ -48,12 +48,12 @@ export const createAcot = /* #__PURE__ */ factory(
       number: acotNumber,
 
       Complex: function (x: Complex) {
-        return x.acot()
+        return x.acot();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
-        return new BigNumber(1).div(x as any).atan() as unknown as BigNumber
-      }
-    }) as TypedFunction
+        return new BigNumber(1).div(x as any).atan() as unknown as BigNumber;
+      },
+    }) as TypedFunction;
   }
-)
+);

@@ -1,41 +1,41 @@
-import { factory } from '../utils/factory.js'
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
-import type { AlgorithmFunction } from '../type/matrix/types.js'
+import { factory } from '../utils/factory.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
+import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for unequal
 interface MatrixFactory {
-  (...args: unknown[]): unknown
+  (...args: unknown[]): unknown;
 }
 
 interface DenseMatrixConstructor {
-  new (...args: unknown[]): unknown
+  new (...args: unknown[]): unknown;
 }
 
 interface SparseMatrixConstructor {
-  new (...args: unknown[]): unknown
+  new (...args: unknown[]): unknown;
 }
 
 interface UnequalDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  equalScalar: TypedFunction
-  matrix: MatrixFactory
-  DenseMatrix: DenseMatrixConstructor
-  concat: TypedFunction
-  SparseMatrix: SparseMatrixConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  equalScalar: TypedFunction;
+  matrix: MatrixFactory;
+  DenseMatrix: DenseMatrixConstructor;
+  concat: TypedFunction;
+  SparseMatrix: SparseMatrixConstructor;
 }
 
 interface UnequalNumberDependencies {
-  typed: TypedFunction
-  equalScalar: TypedFunction
+  typed: TypedFunction;
+  equalScalar: TypedFunction;
 }
 
-const name = 'unequal'
+const name = 'unequal';
 const dependencies = [
   'typed',
   'config',
@@ -43,8 +43,8 @@ const dependencies = [
   'matrix',
   'DenseMatrix',
   'concat',
-  'SparseMatrix'
-]
+  'SparseMatrix',
+];
 
 export const createUnequal = /* #__PURE__ */ factory(
   name,
@@ -56,16 +56,16 @@ export const createUnequal = /* #__PURE__ */ factory(
     matrix,
     DenseMatrix,
     concat,
-    SparseMatrix
+    SparseMatrix,
   }: UnequalDependencies) => {
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Test whether two values are unequal.
@@ -117,15 +117,15 @@ export const createUnequal = /* #__PURE__ */ factory(
         elop: _unequal,
         SS: matAlgo07xSSf as unknown as AlgorithmFunction,
         DS: matAlgo03xDSf as unknown as AlgorithmFunction,
-        Ss: matAlgo12xSfs as unknown as AlgorithmFunction
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction,
       })
-    )
+    );
 
     function _unequal(x: unknown, y: unknown): boolean {
-      return !equalScalar(x, y)
+      return !equalScalar(x, y);
     }
   }
-)
+);
 
 export const createUnequalNumber = factory(
   name,
@@ -135,20 +135,20 @@ export const createUnequalNumber = factory(
       'any, any': function (x: unknown, y: unknown): boolean {
         // strict equality for null and undefined?
         if (x === null) {
-          return y !== null
+          return y !== null;
         }
         if (y === null) {
-          return x !== null
+          return x !== null;
         }
         if (x === undefined) {
-          return y !== undefined
+          return y !== undefined;
         }
         if (y === undefined) {
-          return x !== undefined
+          return x !== undefined;
         }
 
-        return !equalScalar(x, y)
-      }
-    })
+        return !equalScalar(x, y);
+      },
+    });
   }
-)
+);

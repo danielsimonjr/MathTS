@@ -11,76 +11,71 @@
  */
 
 interface WasmManifest {
-  [fileName: string]: string
+  [fileName: string]: string;
 }
 
 async function sha384Base64(buffer: ArrayBuffer | Uint8Array): Promise<string> {
-  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)
-  const isNode =
-    typeof process !== 'undefined' && (process as any).versions?.node !== undefined
-  let digest: Uint8Array
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  const isNode = typeof process !== 'undefined' && (process as any).versions?.node !== undefined;
+  let digest: Uint8Array;
   if (isNode) {
-    const { createHash } = await import('crypto')
-    const h = createHash('sha384')
-    h.update(bytes)
-    digest = new Uint8Array(h.digest())
+    const { createHash } = await import('crypto');
+    const h = createHash('sha384');
+    h.update(bytes);
+    digest = new Uint8Array(h.digest());
   } else {
     // Copy into a fresh ArrayBuffer so SubtleCrypto.digest accepts the
     // bytes regardless of the source backing (ArrayBuffer or SharedArrayBuffer).
-    const copy = new ArrayBuffer(bytes.byteLength)
-    new Uint8Array(copy).set(bytes)
-    const out = await crypto.subtle.digest('SHA-384', copy)
-    digest = new Uint8Array(out)
+    const copy = new ArrayBuffer(bytes.byteLength);
+    new Uint8Array(copy).set(bytes);
+    const out = await crypto.subtle.digest('SHA-384', copy);
+    digest = new Uint8Array(out);
   }
-  let bin = ''
-  for (let i = 0; i < digest.length; i++) bin += String.fromCharCode(digest[i])
+  let bin = '';
+  for (let i = 0; i < digest.length; i++) bin += String.fromCharCode(digest[i]);
   const b64 =
     typeof btoa === 'function'
       ? btoa(bin)
-      : (globalThis as any).Buffer.from(digest).toString('base64')
-  return `sha384-${b64}`
+      : (globalThis as any).Buffer.from(digest).toString('base64');
+  return `sha384-${b64}`;
 }
 
 async function loadManifest(wasmPath: string): Promise<WasmManifest | null> {
-  const manifestPath = wasmPath.replace(/[^/\\]+$/, 'wasm-manifest.json')
-  const isNode =
-    typeof process !== 'undefined' && (process as any).versions?.node !== undefined
+  const manifestPath = wasmPath.replace(/[^/\\]+$/, 'wasm-manifest.json');
+  const isNode = typeof process !== 'undefined' && (process as any).versions?.node !== undefined;
   try {
     if (isNode) {
-      const fs = await import('fs')
-      const text = fs.readFileSync(manifestPath, 'utf8')
-      return JSON.parse(text) as WasmManifest
+      const fs = await import('fs');
+      const text = fs.readFileSync(manifestPath, 'utf8');
+      return JSON.parse(text) as WasmManifest;
     } else {
-      const res = await fetch(manifestPath)
-      if (!res.ok) return null
-      return (await res.json()) as WasmManifest
+      const res = await fetch(manifestPath);
+      if (!res.ok) return null;
+      return (await res.json()) as WasmManifest;
     }
   } catch {
-    return null
+    return null;
   }
 }
 
-async function verifyWasm(
-  buffer: ArrayBuffer | Uint8Array,
-  wasmPath: string
-): Promise<void> {
-  const manifest = await loadManifest(wasmPath)
+async function verifyWasm(buffer: ArrayBuffer | Uint8Array, wasmPath: string): Promise<void> {
+  const manifest = await loadManifest(wasmPath);
   if (!manifest) {
     if (typeof console !== 'undefined') {
       console.warn(
         `[wasm-integrity] no manifest found beside "${wasmPath}"; skipping SHA-384 verification`
-      )
+      );
     }
-    return
+    return;
   }
-  const fileName = wasmPath.split(/[/\\]/).pop() || wasmPath
-  const expected = manifest[fileName]
-  if (!expected) return
-  const actual = await sha384Base64(buffer)
+  const fileName = wasmPath.split(/[/\\]/).pop() || wasmPath;
+  const expected = manifest[fileName];
+  if (!expected) return;
+  const actual = await sha384Base64(buffer);
   if (actual !== expected) {
     throw new Error(
       `WASM integrity check failed for "${fileName}": expected ${expected}, got ${actual}`
-    )
+    );
   }
 }
 
@@ -109,7 +104,14 @@ export interface MathTSWasmExports {
   array_norm(dataPtr: number): number;
 
   // Matrix operations (pointers)
-  matrix_multiply(aPtr: number, aRows: number, aCols: number, bPtr: number, bCols: number, resultPtr: number): void;
+  matrix_multiply(
+    aPtr: number,
+    aRows: number,
+    aCols: number,
+    bPtr: number,
+    bCols: number,
+    resultPtr: number
+  ): void;
   matrix_transpose(aPtr: number, rows: number, cols: number, resultPtr: number): void;
   matrix_trace(dataPtr: number, rows: number, cols: number): number;
   matrix_norm_frobenius(dataPtr: number): number;
@@ -124,16 +126,8 @@ export interface MathTSWasmExports {
   bitXor_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
   bitNot_i32_array?(a: Int32Array, result: Int32Array): void;
   leftShift_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
-  rightArithShift_i32_array?(
-    a: Int32Array,
-    b: Int32Array,
-    result: Int32Array
-  ): void;
-  rightLogShift_i32_array?(
-    a: Int32Array,
-    b: Int32Array,
-    result: Int32Array
-  ): void;
+  rightArithShift_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
+  rightLogShift_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
 
   // Memory management
   __new(size: number, id: number): number;
@@ -318,8 +312,8 @@ export class MathTSWasm {
     this.exports.__pin(ptr);
 
     const view = new DataView(this.memory.buffer);
-    view.setInt32(ptr, ptr + 16, true);     // data pointer
-    view.setInt32(ptr + 4, length, true);   // length
+    view.setInt32(ptr, ptr + 16, true); // data pointer
+    view.setInt32(ptr + 4, length, true); // length
 
     const array = new Float64Array(this.memory.buffer, ptr + 16, length);
     return { ptr, array };

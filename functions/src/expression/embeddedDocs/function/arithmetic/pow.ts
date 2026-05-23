@@ -8,7 +8,7 @@ export const powDocs = {
     '2*2*2',
     '1 + e ^ (pi * i)',
     'pow([[1, 2], [4, 3]], 2)',
-    'pow([[1, 2], [4, 3]], -1)'
+    'pow([[1, 2], [4, 3]], -1)',
   ],
-  seealso: ['multiply', 'nthRoot', 'nthRoots', 'sqrt']
-}
+  seealso: ['multiply', 'nthRoot', 'nthRoots', 'sqrt'],
+};

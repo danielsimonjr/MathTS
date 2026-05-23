@@ -11,7 +11,7 @@ import { Tape, TapedTensor } from './tape.js';
 export function reverseGrad(
   fn: (x: Tensor) => Tensor,
   x: Tensor,
-  cotangent?: Tensor,
+  cotangent?: Tensor
 ): { value: Tensor; gradient: Tensor } {
   const tape = new Tape();
   const xTaped = TapedTensor.fromTensorAsInput(x, tape);
@@ -22,7 +22,7 @@ export function reverseGrad(
     throw new Error(
       'reverseGrad: fn must be AD-traceable — its return must propagate through ' +
         'TapedTensor arithmetic (use add/sub/mul/scale on the argument). A fresh ' +
-        'Tensor return loses the tape and silently corrupts the gradient.',
+        'Tensor return loses the tape and silently corrupts the gradient.'
     );
   }
   const yTaped = yRaw;
@@ -34,10 +34,12 @@ export function reverseGrad(
     const data = new Float64Array(value.data.length).fill(1);
     ct = new Tensor(value.shape, data);
   } else {
-    if (cotangent.shape.length !== value.shape.length ||
-        !cotangent.shape.every((v, i) => v === value.shape[i])) {
+    if (
+      cotangent.shape.length !== value.shape.length ||
+      !cotangent.shape.every((v, i) => v === value.shape[i])
+    ) {
       throw new Error(
-        `reverseGrad: cotangent shape [${cotangent.shape}] != value shape [${value.shape}]`,
+        `reverseGrad: cotangent shape [${cotangent.shape}] != value shape [${value.shape}]`
       );
     }
     ct = cotangent;

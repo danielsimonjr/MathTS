@@ -1,10 +1,10 @@
-import { arraySize as size } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
+import { arraySize as size } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
 
-import { TypedFunction, Matrix } from '../types.js'
+import { TypedFunction, Matrix } from '../types.js';
 
-const name = 'sort'
-const dependencies = ['typed', 'matrix', 'compare', 'compareNatural']
+const name = 'sort';
+const dependencies = ['typed', 'matrix', 'compare', 'compareNatural'];
 
 export const createSort = /* #__PURE__ */ factory(
   name,
@@ -13,15 +13,15 @@ export const createSort = /* #__PURE__ */ factory(
     typed,
     matrix,
     compare,
-    compareNatural
+    compareNatural,
   }: {
-    typed: TypedFunction
-    matrix: any
-    compare: any
-    compareNatural: (a: any, b: any) => number
+    typed: TypedFunction;
+    matrix: any;
+    compare: any;
+    compareNatural: (a: any, b: any) => number;
   }): TypedFunction => {
-    const compareAsc = compare
-    const compareDesc = (a: any, b: any) => -compare(a, b)
+    const compareAsc = compare;
+    const compareDesc = (a: any, b: any) => -compare(a, b);
 
     /**
      * Sort the items in a matrix.
@@ -56,35 +56,35 @@ export const createSort = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Array: function (x: any[]) {
-        _arrayIsVector(x)
-        return x.sort(compareAsc)
+        _arrayIsVector(x);
+        return x.sort(compareAsc);
       },
 
       Matrix: function (x: Matrix) {
-        _matrixIsVector(x)
-        return matrix(x.toArray().sort(compareAsc), x.storage())
+        _matrixIsVector(x);
+        return matrix(x.toArray().sort(compareAsc), x.storage());
       },
 
       'Array, function': function (x: any[], _comparator: Function): any[] {
-        _arrayIsVector(x)
-        return x.sort(_comparator as any)
+        _arrayIsVector(x);
+        return x.sort(_comparator as any);
       },
 
       'Matrix, function': function (x: Matrix, _comparator: Function): Matrix {
-        _matrixIsVector(x)
-        return matrix(x.toArray().sort(_comparator as any), x.storage())
+        _matrixIsVector(x);
+        return matrix(x.toArray().sort(_comparator as any), x.storage());
       },
 
       'Array, string': function (x: any[], order: string): any[] {
-        _arrayIsVector(x)
-        return x.sort(_comparator(order))
+        _arrayIsVector(x);
+        return x.sort(_comparator(order));
       },
 
       'Matrix, string': function (x: Matrix, order: string): Matrix {
-        _matrixIsVector(x)
-        return matrix(x.toArray().sort(_comparator(order)), x.storage())
-      }
-    }) as unknown as TypedFunction
+        _matrixIsVector(x);
+        return matrix(x.toArray().sort(_comparator(order)), x.storage());
+      },
+    }) as unknown as TypedFunction;
 
     /**
      * Get the comparator for given order ('asc', 'desc', 'natural')
@@ -93,13 +93,13 @@ export const createSort = /* #__PURE__ */ factory(
      */
     function _comparator(order: any) {
       if (order === 'asc') {
-        return compareAsc
+        return compareAsc;
       } else if (order === 'desc') {
-        return compareDesc
+        return compareDesc;
       } else if (order === 'natural') {
-        return compareNatural
+        return compareNatural;
       } else {
-        throw new Error('String "asc", "desc", or "natural" expected')
+        throw new Error('String "asc", "desc", or "natural" expected');
       }
     }
 
@@ -111,7 +111,7 @@ export const createSort = /* #__PURE__ */ factory(
      */
     function _arrayIsVector(array: any) {
       if (size(array).length !== 1) {
-        throw new Error('One dimensional array expected')
+        throw new Error('One dimensional array expected');
       }
     }
 
@@ -123,8 +123,8 @@ export const createSort = /* #__PURE__ */ factory(
      */
     function _matrixIsVector(matrix: any) {
       if (matrix.size().length !== 1) {
-        throw new Error('One dimensional matrix expected')
+        throw new Error('One dimensional matrix expected');
       }
     }
   }
-)
+);

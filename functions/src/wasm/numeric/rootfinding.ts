@@ -23,24 +23,18 @@
  *                   [nextX, currentA, currentB, fa, fb, status]
  *                   status: 1 = continue, 0 = converged, -1 = no bracket
  */
-export function bisectionSetup(
-  fa: f64,
-  fb: f64,
-  a: f64,
-  b: f64,
-  statePtr: usize
-): void {
+export function bisectionSetup(fa: f64, fb: f64, a: f64, b: f64, statePtr: usize): void {
   if (fa * fb > 0) {
-    store<f64>(statePtr + 40, -1.0) // No bracket
-    return
+    store<f64>(statePtr + 40, -1.0); // No bracket
+    return;
   }
 
-  store<f64>(statePtr, (a + b) / 2.0) // nextX (midpoint)
-  store<f64>(statePtr + 8, a)
-  store<f64>(statePtr + 16, b)
-  store<f64>(statePtr + 24, fa)
-  store<f64>(statePtr + 32, fb)
-  store<f64>(statePtr + 40, 1.0) // Continue
+  store<f64>(statePtr, (a + b) / 2.0); // nextX (midpoint)
+  store<f64>(statePtr + 8, a);
+  store<f64>(statePtr + 16, b);
+  store<f64>(statePtr + 24, fa);
+  store<f64>(statePtr + 32, fb);
+  store<f64>(statePtr + 40, 1.0); // Continue
 }
 
 /**
@@ -51,34 +45,34 @@ export function bisectionSetup(
  * @param tol - Tolerance
  */
 export function bisectionStep(statePtr: usize, fmid: f64, tol: f64): void {
-  const mid: f64 = load<f64>(statePtr)
-  let a: f64 = load<f64>(statePtr + 8)
-  let b: f64 = load<f64>(statePtr + 16)
-  let fa: f64 = load<f64>(statePtr + 24)
-  let fb: f64 = load<f64>(statePtr + 32)
+  const mid: f64 = load<f64>(statePtr);
+  let a: f64 = load<f64>(statePtr + 8);
+  let b: f64 = load<f64>(statePtr + 16);
+  let fa: f64 = load<f64>(statePtr + 24);
+  let fb: f64 = load<f64>(statePtr + 32);
 
   // Check convergence
   if (Math.abs(fmid) < tol || (b - a) / 2.0 < tol) {
-    store<f64>(statePtr, mid)
-    store<f64>(statePtr + 40, 0.0) // Converged
-    return
+    store<f64>(statePtr, mid);
+    store<f64>(statePtr + 40, 0.0); // Converged
+    return;
   }
 
   // Update bracket
   if (fa * fmid < 0) {
-    b = mid
-    fb = fmid
+    b = mid;
+    fb = fmid;
   } else {
-    a = mid
-    fa = fmid
+    a = mid;
+    fa = fmid;
   }
 
-  store<f64>(statePtr, (a + b) / 2.0)
-  store<f64>(statePtr + 8, a)
-  store<f64>(statePtr + 16, b)
-  store<f64>(statePtr + 24, fa)
-  store<f64>(statePtr + 32, fb)
-  store<f64>(statePtr + 40, 1.0) // Continue
+  store<f64>(statePtr, (a + b) / 2.0);
+  store<f64>(statePtr + 8, a);
+  store<f64>(statePtr + 16, b);
+  store<f64>(statePtr + 24, fa);
+  store<f64>(statePtr + 32, fb);
+  store<f64>(statePtr + 40, 1.0); // Continue
 }
 
 /**
@@ -88,8 +82,8 @@ export function bisectionStep(statePtr: usize, fmid: f64, tol: f64): void {
  * @param statePtr - Pointer to output state array (f64, 2 elements): [currentX, status]
  */
 export function newtonSetup(x0: f64, statePtr: usize): void {
-  store<f64>(statePtr, x0)
-  store<f64>(statePtr + 8, 1.0) // Continue
+  store<f64>(statePtr, x0);
+  store<f64>(statePtr + 8, 1.0); // Continue
 }
 
 /**
@@ -102,23 +96,23 @@ export function newtonSetup(x0: f64, statePtr: usize): void {
  * @param tol - Tolerance
  */
 export function newtonStep(statePtr: usize, fx: f64, fpx: f64, tol: f64): void {
-  const x: f64 = load<f64>(statePtr)
+  const x: f64 = load<f64>(statePtr);
 
   // Check convergence
   if (Math.abs(fx) < tol) {
-    store<f64>(statePtr + 8, 0.0) // Converged
-    return
+    store<f64>(statePtr + 8, 0.0); // Converged
+    return;
   }
 
   // Check for zero derivative
   if (Math.abs(fpx) < 1e-15) {
-    store<f64>(statePtr + 8, -1.0) // Failed (zero derivative)
-    return
+    store<f64>(statePtr + 8, -1.0); // Failed (zero derivative)
+    return;
   }
 
-  const newX: f64 = x - fx / fpx
-  store<f64>(statePtr, newX)
-  store<f64>(statePtr + 8, 1.0) // Continue
+  const newX: f64 = x - fx / fpx;
+  store<f64>(statePtr, newX);
+  store<f64>(statePtr + 8, 1.0); // Continue
 }
 
 /**
@@ -131,18 +125,12 @@ export function newtonStep(statePtr: usize, fx: f64, fpx: f64, tol: f64): void {
  * @param statePtr - Pointer to output state array (f64, 5 elements):
  *                   [currentX, prevX, currentF, prevF, status]
  */
-export function secantSetup(
-  x0: f64,
-  x1: f64,
-  fx0: f64,
-  fx1: f64,
-  statePtr: usize
-): void {
-  store<f64>(statePtr, x1)
-  store<f64>(statePtr + 8, x0)
-  store<f64>(statePtr + 16, fx1)
-  store<f64>(statePtr + 24, fx0)
-  store<f64>(statePtr + 32, 1.0) // Continue
+export function secantSetup(x0: f64, x1: f64, fx0: f64, fx1: f64, statePtr: usize): void {
+  store<f64>(statePtr, x1);
+  store<f64>(statePtr + 8, x0);
+  store<f64>(statePtr + 16, fx1);
+  store<f64>(statePtr + 24, fx0);
+  store<f64>(statePtr + 32, 1.0); // Continue
 }
 
 /**
@@ -154,34 +142,34 @@ export function secantSetup(
  * @returns New x value to evaluate (if status becomes 2.0)
  */
 export function secantStep(statePtr: usize, tol: f64): f64 {
-  const x: f64 = load<f64>(statePtr)
-  const xPrev: f64 = load<f64>(statePtr + 8)
-  const fx: f64 = load<f64>(statePtr + 16)
-  const fxPrev: f64 = load<f64>(statePtr + 24)
+  const x: f64 = load<f64>(statePtr);
+  const xPrev: f64 = load<f64>(statePtr + 8);
+  const fx: f64 = load<f64>(statePtr + 16);
+  const fxPrev: f64 = load<f64>(statePtr + 24);
 
   // Check convergence
   if (Math.abs(fx) < tol) {
-    store<f64>(statePtr + 32, 0.0) // Converged
-    return x
+    store<f64>(statePtr + 32, 0.0); // Converged
+    return x;
   }
 
-  const denom: f64 = fx - fxPrev
+  const denom: f64 = fx - fxPrev;
 
   // Check for zero denominator
   if (Math.abs(denom) < 1e-15) {
-    store<f64>(statePtr + 32, -1.0) // Failed
-    return x
+    store<f64>(statePtr + 32, -1.0); // Failed
+    return x;
   }
 
-  const newX: f64 = x - (fx * (x - xPrev)) / denom
+  const newX: f64 = x - (fx * (x - xPrev)) / denom;
 
-  store<f64>(statePtr, newX) // Return new x for evaluation
-  store<f64>(statePtr + 8, x)
-  store<f64>(statePtr + 16, 0.0) // Placeholder for f(newX) - caller must fill
-  store<f64>(statePtr + 24, fx)
-  store<f64>(statePtr + 32, 2.0) // Need function evaluation
+  store<f64>(statePtr, newX); // Return new x for evaluation
+  store<f64>(statePtr + 8, x);
+  store<f64>(statePtr + 16, 0.0); // Placeholder for f(newX) - caller must fill
+  store<f64>(statePtr + 24, fx);
+  store<f64>(statePtr + 32, 2.0); // Need function evaluation
 
-  return newX
+  return newX;
 }
 
 /**
@@ -191,8 +179,8 @@ export function secantStep(statePtr: usize, tol: f64): f64 {
  * @param fNewX - f(newX) value
  */
 export function secantUpdate(statePtr: usize, fNewX: f64): void {
-  store<f64>(statePtr + 16, fNewX)
-  store<f64>(statePtr + 32, 1.0) // Continue
+  store<f64>(statePtr + 16, fNewX);
+  store<f64>(statePtr + 32, 1.0); // Continue
 }
 
 /**
@@ -205,40 +193,34 @@ export function secantUpdate(statePtr: usize, fNewX: f64): void {
  * @param statePtr - Pointer to output state array (f64, 9 elements):
  *                   [a, b, c, fa, fb, fc, d, e, status]
  */
-export function brentSetup(
-  a: f64,
-  b: f64,
-  fa: f64,
-  fb: f64,
-  statePtr: usize
-): void {
+export function brentSetup(a: f64, b: f64, fa: f64, fb: f64, statePtr: usize): void {
   // Ensure |f(b)| <= |f(a)|
-  let aa: f64 = a
-  let bb: f64 = b
-  let faa: f64 = fa
-  let fbb: f64 = fb
+  let aa: f64 = a;
+  let bb: f64 = b;
+  let faa: f64 = fa;
+  let fbb: f64 = fb;
 
   if (Math.abs(fa) < Math.abs(fb)) {
-    aa = b
-    bb = a
-    faa = fb
-    fbb = fa
+    aa = b;
+    bb = a;
+    faa = fb;
+    fbb = fa;
   }
 
   if (faa * fbb > 0) {
-    store<f64>(statePtr + 64, -1.0) // No bracket
-    return
+    store<f64>(statePtr + 64, -1.0); // No bracket
+    return;
   }
 
-  store<f64>(statePtr, aa) // a
-  store<f64>(statePtr + 8, bb) // b (best guess)
-  store<f64>(statePtr + 16, aa) // c = a initially
-  store<f64>(statePtr + 24, faa) // fa
-  store<f64>(statePtr + 32, fbb) // fb
-  store<f64>(statePtr + 40, faa) // fc = fa
-  store<f64>(statePtr + 48, bb - aa) // d
-  store<f64>(statePtr + 56, bb - aa) // e
-  store<f64>(statePtr + 64, 1.0) // Continue
+  store<f64>(statePtr, aa); // a
+  store<f64>(statePtr + 8, bb); // b (best guess)
+  store<f64>(statePtr + 16, aa); // c = a initially
+  store<f64>(statePtr + 24, faa); // fa
+  store<f64>(statePtr + 32, fbb); // fb
+  store<f64>(statePtr + 40, faa); // fc = fa
+  store<f64>(statePtr + 48, bb - aa); // d
+  store<f64>(statePtr + 56, bb - aa); // e
+  store<f64>(statePtr + 64, 1.0); // Continue
 }
 
 /**
@@ -249,102 +231,101 @@ export function brentSetup(
  * @returns Next x value to evaluate (b in state)
  */
 export function brentStep(statePtr: usize, tol: f64): f64 {
-  let a: f64 = load<f64>(statePtr)
-  let b: f64 = load<f64>(statePtr + 8)
-  let c: f64 = load<f64>(statePtr + 16)
-  let fa: f64 = load<f64>(statePtr + 24)
-  let fb: f64 = load<f64>(statePtr + 32)
-  let fc: f64 = load<f64>(statePtr + 40)
-  let d: f64 = load<f64>(statePtr + 48)
-  let e: f64 = load<f64>(statePtr + 56)
+  let a: f64 = load<f64>(statePtr);
+  let b: f64 = load<f64>(statePtr + 8);
+  let c: f64 = load<f64>(statePtr + 16);
+  let fa: f64 = load<f64>(statePtr + 24);
+  let fb: f64 = load<f64>(statePtr + 32);
+  let fc: f64 = load<f64>(statePtr + 40);
+  let d: f64 = load<f64>(statePtr + 48);
+  let e: f64 = load<f64>(statePtr + 56);
 
   // Check convergence
   if (Math.abs(fb) < tol) {
-    store<f64>(statePtr + 64, 0.0) // Converged
-    return b
+    store<f64>(statePtr + 64, 0.0); // Converged
+    return b;
   }
 
   // Ensure f(c) and f(b) have opposite signs
   if ((fb > 0 && fc > 0) || (fb < 0 && fc < 0)) {
-    c = a
-    fc = fa
-    d = b - a
-    e = d
+    c = a;
+    fc = fa;
+    d = b - a;
+    e = d;
   }
 
   // c is the "contrapoint"
   if (Math.abs(fc) < Math.abs(fb)) {
-    a = b
-    b = c
-    c = a
-    fa = fb
-    fb = fc
-    fc = fa
+    a = b;
+    b = c;
+    c = a;
+    fa = fb;
+    fb = fc;
+    fc = fa;
   }
 
-  const tolAbs: f64 = 2.0 * 2.2e-16 * Math.abs(b) + 0.5 * tol
-  const m: f64 = 0.5 * (c - b)
+  const tolAbs: f64 = 2.0 * 2.2e-16 * Math.abs(b) + 0.5 * tol;
+  const m: f64 = 0.5 * (c - b);
 
   if (Math.abs(m) <= tolAbs || fb === 0) {
-    store<f64>(statePtr + 8, b)
-    store<f64>(statePtr + 64, 0.0) // Converged
-    return b
+    store<f64>(statePtr + 8, b);
+    store<f64>(statePtr + 64, 0.0); // Converged
+    return b;
   }
 
-  let newB: f64
+  let newB: f64;
 
   if (Math.abs(e) < tolAbs || Math.abs(fa) <= Math.abs(fb)) {
     // Bisection
-    d = m
-    e = m
-    newB = b + m
+    d = m;
+    e = m;
+    newB = b + m;
   } else {
-    let s: f64
+    let s: f64;
 
     if (a === c) {
       // Secant (linear interpolation)
-      s = fb / fa
-      newB = b + (2.0 * m * s) / (1.0 - s)
+      s = fb / fa;
+      newB = b + (2.0 * m * s) / (1.0 - s);
     } else {
       // Inverse quadratic interpolation
-      const q: f64 = fa / fc
-      const r: f64 = fb / fc
-      s = fb / fa
+      const q: f64 = fa / fc;
+      const r: f64 = fb / fc;
+      s = fb / fa;
       newB =
         b +
-        (s * (2.0 * m * q * (q - r) - (b - a) * (r - 1.0))) /
-          ((q - 1.0) * (r - 1.0) * (s - 1.0))
+        (s * (2.0 * m * q * (q - r) - (b - a) * (r - 1.0))) / ((q - 1.0) * (r - 1.0) * (s - 1.0));
     }
 
     // Check if interpolation is acceptable
-    const delta: f64 = newB - b
+    const delta: f64 = newB - b;
     if (2.0 * Math.abs(delta) < Math.min(Math.abs(e), 3.0 * m - tolAbs)) {
-      e = d
-      d = delta
+      e = d;
+      d = delta;
     } else {
       // Fall back to bisection
-      d = m
-      e = m
-      newB = b + m
+      d = m;
+      e = m;
+      newB = b + m;
     }
   }
 
   // Update state
-  a = b
-  fa = fb
-  b = newB
+  a = b;
+  fa = fb;
+  b = newB;
 
-  store<f64>(statePtr, a)
-  store<f64>(statePtr + 8, b) // Next x to evaluate
-  store<f64>(statePtr + 16, c)
-  store<f64>(statePtr + 24, fa)
-  store<f64>(statePtr + 32, 0.0) // Placeholder for f(newB)
-  store<f64>(statePtr + 40, fc)
-  store<f64>(statePtr + 48, d)
-  store<f64>(statePtr + 56, e)
-  store<f64>(statePtr + 64, 2.0) // Need function evaluation
+  store<f64>(statePtr, a);
+  store<f64>(statePtr + 8, b); // Next x to evaluate
+  store<f64>(statePtr + 16, c);
+  store<f64>(statePtr + 24, fa);
+  store<f64>(statePtr + 32, 0.0); // Placeholder for f(newB)
+  store<f64>(statePtr + 40, fc);
+  store<f64>(statePtr + 48, d);
+  store<f64>(statePtr + 56, e);
+  store<f64>(statePtr + 64, 2.0); // Need function evaluation
 
-  return newB
+  return newB;
 }
 
 /**
@@ -354,8 +335,8 @@ export function brentStep(statePtr: usize, tol: f64): f64 {
  * @param fNewB - f(newB) value
  */
 export function brentUpdate(statePtr: usize, fNewB: f64): void {
-  store<f64>(statePtr + 32, fNewB)
-  store<f64>(statePtr + 64, 1.0) // Continue
+  store<f64>(statePtr + 32, fNewB);
+  store<f64>(statePtr + 64, 1.0); // Continue
 }
 
 /**
@@ -366,8 +347,8 @@ export function brentUpdate(statePtr: usize, fNewB: f64): void {
  * @param statePtr - Pointer to output state array (f64, 2 elements): [x, status]
  */
 export function fixedPointSetup(x0: f64, statePtr: usize): void {
-  store<f64>(statePtr, x0)
-  store<f64>(statePtr + 8, 1.0) // Continue
+  store<f64>(statePtr, x0);
+  store<f64>(statePtr + 8, 1.0); // Continue
 }
 
 /**
@@ -378,17 +359,17 @@ export function fixedPointSetup(x0: f64, statePtr: usize): void {
  * @param tol - Tolerance
  */
 export function fixedPointStep(statePtr: usize, gx: f64, tol: f64): void {
-  const x: f64 = load<f64>(statePtr)
+  const x: f64 = load<f64>(statePtr);
 
   // Check convergence
   if (Math.abs(gx - x) < tol) {
-    store<f64>(statePtr, gx)
-    store<f64>(statePtr + 8, 0.0) // Converged
-    return
+    store<f64>(statePtr, gx);
+    store<f64>(statePtr + 8, 0.0); // Converged
+    return;
   }
 
-  store<f64>(statePtr, gx)
-  store<f64>(statePtr + 8, 1.0) // Continue
+  store<f64>(statePtr, gx);
+  store<f64>(statePtr + 8, 1.0); // Continue
 }
 
 /**
@@ -402,24 +383,18 @@ export function fixedPointStep(statePtr: usize, gx: f64, tol: f64): void {
  * @param statePtr - Pointer to output state array (f64, 6 elements):
  *                   [a, b, fa, fb, side, status]
  */
-export function illinoisSetup(
-  a: f64,
-  b: f64,
-  fa: f64,
-  fb: f64,
-  statePtr: usize
-): void {
+export function illinoisSetup(a: f64, b: f64, fa: f64, fb: f64, statePtr: usize): void {
   if (fa * fb > 0) {
-    store<f64>(statePtr + 40, -1.0) // No bracket
-    return
+    store<f64>(statePtr + 40, -1.0); // No bracket
+    return;
   }
 
-  store<f64>(statePtr, a)
-  store<f64>(statePtr + 8, b)
-  store<f64>(statePtr + 16, fa)
-  store<f64>(statePtr + 24, fb)
-  store<f64>(statePtr + 32, 0.0) // side indicator
-  store<f64>(statePtr + 40, 1.0) // Continue
+  store<f64>(statePtr, a);
+  store<f64>(statePtr + 8, b);
+  store<f64>(statePtr + 16, fa);
+  store<f64>(statePtr + 24, fb);
+  store<f64>(statePtr + 32, 0.0); // side indicator
+  store<f64>(statePtr + 40, 1.0); // Continue
 }
 
 /**
@@ -430,43 +405,43 @@ export function illinoisSetup(
  * @param tol - Tolerance
  */
 export function illinoisStep(statePtr: usize, fc: f64, tol: f64): void {
-  let a: f64 = load<f64>(statePtr)
-  let b: f64 = load<f64>(statePtr + 8)
-  let fa: f64 = load<f64>(statePtr + 16)
-  let fb: f64 = load<f64>(statePtr + 24)
-  let side: f64 = load<f64>(statePtr + 32)
+  let a: f64 = load<f64>(statePtr);
+  let b: f64 = load<f64>(statePtr + 8);
+  let fa: f64 = load<f64>(statePtr + 16);
+  let fb: f64 = load<f64>(statePtr + 24);
+  let side: f64 = load<f64>(statePtr + 32);
 
   // Compute secant point
-  const c: f64 = (fa * b - fb * a) / (fa - fb)
+  const c: f64 = (fa * b - fb * a) / (fa - fb);
 
   // Check convergence
   if (Math.abs(fc) < tol || Math.abs(b - a) < tol) {
-    store<f64>(statePtr, c)
-    store<f64>(statePtr + 40, 0.0) // Converged
-    return
+    store<f64>(statePtr, c);
+    store<f64>(statePtr + 40, 0.0); // Converged
+    return;
   }
 
   // Update bracket
   if (fc * fb < 0) {
-    a = b
-    fa = fb
-    side = 0.0
+    a = b;
+    fa = fb;
+    side = 0.0;
   } else {
     // Illinois modification: reduce fa when stuck on same side
     if (side === 1.0) {
-      fa /= 2.0
+      fa /= 2.0;
     }
-    side = 1.0
+    side = 1.0;
   }
 
-  b = c
-  fb = fc
+  b = c;
+  fb = fc;
 
-  store<f64>(statePtr, a)
-  store<f64>(statePtr + 8, b)
-  store<f64>(statePtr + 16, fa)
-  store<f64>(statePtr + 24, fb)
-  store<f64>(statePtr + 32, side)
+  store<f64>(statePtr, a);
+  store<f64>(statePtr + 8, b);
+  store<f64>(statePtr + 16, fa);
+  store<f64>(statePtr + 24, fb);
+  store<f64>(statePtr + 32, side);
   // state[5] already = 1.0 (Continue)
 }
 
@@ -477,12 +452,12 @@ export function illinoisStep(statePtr: usize, fc: f64, tol: f64): void {
  * @returns x value to evaluate
  */
 export function illinoisNextX(statePtr: usize): f64 {
-  const a: f64 = load<f64>(statePtr)
-  const b: f64 = load<f64>(statePtr + 8)
-  const fa: f64 = load<f64>(statePtr + 16)
-  const fb: f64 = load<f64>(statePtr + 24)
+  const a: f64 = load<f64>(statePtr);
+  const b: f64 = load<f64>(statePtr + 8);
+  const fa: f64 = load<f64>(statePtr + 16);
+  const fb: f64 = load<f64>(statePtr + 24);
 
-  return (fa * b - fb * a) / (fa - fb)
+  return (fa * b - fb * a) / (fa - fb);
 }
 
 /**
@@ -509,44 +484,44 @@ export function mullerStep(
   resultPtr: usize
 ): void {
   if (Math.abs(f2) < tol) {
-    store<f64>(resultPtr, x2)
-    store<f64>(resultPtr + 8, 0.0) // Converged
-    return
+    store<f64>(resultPtr, x2);
+    store<f64>(resultPtr + 8, 0.0); // Converged
+    return;
   }
 
-  const h1: f64 = x1 - x0
-  const h2: f64 = x2 - x1
-  const delta1: f64 = (f1 - f0) / h1
-  const delta2: f64 = (f2 - f1) / h2
+  const h1: f64 = x1 - x0;
+  const h2: f64 = x2 - x1;
+  const delta1: f64 = (f1 - f0) / h1;
+  const delta2: f64 = (f2 - f1) / h2;
 
-  const a: f64 = (delta2 - delta1) / (h2 + h1)
-  const b: f64 = a * h2 + delta2
-  const c: f64 = f2
+  const a: f64 = (delta2 - delta1) / (h2 + h1);
+  const b: f64 = a * h2 + delta2;
+  const c: f64 = f2;
 
-  const discriminant: f64 = b * b - 4.0 * a * c
+  const discriminant: f64 = b * b - 4.0 * a * c;
 
-  let denom: f64
+  let denom: f64;
   if (discriminant >= 0) {
-    const sqrtD: f64 = Math.sqrt(discriminant)
+    const sqrtD: f64 = Math.sqrt(discriminant);
     // Choose sign to maximize denominator (reduce step)
     if (Math.abs(b + sqrtD) > Math.abs(b - sqrtD)) {
-      denom = b + sqrtD
+      denom = b + sqrtD;
     } else {
-      denom = b - sqrtD
+      denom = b - sqrtD;
     }
   } else {
     // Complex case - use magnitude
-    denom = b
+    denom = b;
   }
 
   if (Math.abs(denom) < 1e-15) {
-    store<f64>(resultPtr, x2)
-    store<f64>(resultPtr + 8, -1.0) // Failed
-    return
+    store<f64>(resultPtr, x2);
+    store<f64>(resultPtr + 8, -1.0); // Failed
+    return;
   }
 
-  store<f64>(resultPtr, x2 - (2.0 * c) / denom)
-  store<f64>(resultPtr + 8, 1.0) // Continue
+  store<f64>(resultPtr, x2 - (2.0 * c) / denom);
+  store<f64>(resultPtr + 8, 1.0); // Continue
 }
 
 /**
@@ -559,29 +534,23 @@ export function mullerStep(
  * @param tol - Tolerance
  * @param resultPtr - Pointer to output array (f64, 2 elements): [newX, status]
  */
-export function steffensenStep(
-  x: f64,
-  fx: f64,
-  fxpfx: f64,
-  tol: f64,
-  resultPtr: usize
-): void {
+export function steffensenStep(x: f64, fx: f64, fxpfx: f64, tol: f64, resultPtr: usize): void {
   if (Math.abs(fx) < tol) {
-    store<f64>(resultPtr, x)
-    store<f64>(resultPtr + 8, 0.0) // Converged
-    return
+    store<f64>(resultPtr, x);
+    store<f64>(resultPtr + 8, 0.0); // Converged
+    return;
   }
 
-  const denom: f64 = fxpfx - fx
+  const denom: f64 = fxpfx - fx;
 
   if (Math.abs(denom) < 1e-15) {
-    store<f64>(resultPtr, x)
-    store<f64>(resultPtr + 8, -1.0) // Failed
-    return
+    store<f64>(resultPtr, x);
+    store<f64>(resultPtr + 8, -1.0); // Failed
+    return;
   }
 
-  store<f64>(resultPtr, x - (fx * fx) / denom)
-  store<f64>(resultPtr + 8, 1.0) // Continue
+  store<f64>(resultPtr, x - (fx * fx) / denom);
+  store<f64>(resultPtr + 8, 1.0); // Continue
 }
 
 /**
@@ -595,30 +564,23 @@ export function steffensenStep(
  * @param tol - Tolerance
  * @param resultPtr - Pointer to output array (f64, 2 elements): [newX, status]
  */
-export function halleyStep(
-  x: f64,
-  fx: f64,
-  fpx: f64,
-  fppx: f64,
-  tol: f64,
-  resultPtr: usize
-): void {
+export function halleyStep(x: f64, fx: f64, fpx: f64, fppx: f64, tol: f64, resultPtr: usize): void {
   if (Math.abs(fx) < tol) {
-    store<f64>(resultPtr, x)
-    store<f64>(resultPtr + 8, 0.0) // Converged
-    return
+    store<f64>(resultPtr, x);
+    store<f64>(resultPtr + 8, 0.0); // Converged
+    return;
   }
 
-  const denom: f64 = 2.0 * fpx * fpx - fx * fppx
+  const denom: f64 = 2.0 * fpx * fpx - fx * fppx;
 
   if (Math.abs(denom) < 1e-15) {
-    store<f64>(resultPtr, x)
-    store<f64>(resultPtr + 8, -1.0) // Failed
-    return
+    store<f64>(resultPtr, x);
+    store<f64>(resultPtr + 8, -1.0); // Failed
+    return;
   }
 
-  store<f64>(resultPtr, x - (2.0 * fx * fpx) / denom)
-  store<f64>(resultPtr + 8, 1.0) // Continue
+  store<f64>(resultPtr, x - (2.0 * fx * fpx) / denom);
+  store<f64>(resultPtr + 8, 1.0); // Continue
 }
 
 /**
@@ -630,7 +592,7 @@ export function halleyStep(
  * @returns Status value: 1.0 = continue, 0.0 = converged, -1.0 = failed, 2.0 = need eval
  */
 export function getStatus(statePtr: usize, statusOffset: i32): f64 {
-  return load<f64>(statePtr + <usize>statusOffset)
+  return load<f64>(statePtr + <usize>statusOffset);
 }
 
 /**
@@ -641,5 +603,5 @@ export function getStatus(statePtr: usize, statusOffset: i32): f64 {
  * @returns Current estimate
  */
 export function getEstimate(statePtr: usize, estimateOffset: i32): f64 {
-  return load<f64>(statePtr + <usize>estimateOffset)
+  return load<f64>(statePtr + <usize>estimateOffset);
 }

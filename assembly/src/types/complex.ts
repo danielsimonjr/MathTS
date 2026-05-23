@@ -242,10 +242,7 @@ export class Complex {
    * Math.sin(z) = (Math.exp(iz) - Math.exp(-iz)) / 2i
    */
   sin(): Complex {
-    return new Complex(
-      Math.sin(this.re) * cosh(this.im),
-      Math.cos(this.re) * sinh(this.im)
-    );
+    return new Complex(Math.sin(this.re) * cosh(this.im), Math.cos(this.re) * sinh(this.im));
   }
 
   /**
@@ -253,10 +250,7 @@ export class Complex {
    * Math.cos(z) = (Math.exp(iz) + Math.exp(-iz)) / 2
    */
   cos(): Complex {
-    return new Complex(
-      Math.cos(this.re) * cosh(this.im),
-      -Math.sin(this.re) * sinh(this.im)
-    );
+    return new Complex(Math.cos(this.re) * cosh(this.im), -Math.sin(this.re) * sinh(this.im));
   }
 
   /**
@@ -275,20 +269,14 @@ export class Complex {
    * Complex hyperbolic sine
    */
   sinh(): Complex {
-    return new Complex(
-      sinh(this.re) * Math.cos(this.im),
-      cosh(this.re) * Math.sin(this.im)
-    );
+    return new Complex(sinh(this.re) * Math.cos(this.im), cosh(this.re) * Math.sin(this.im));
   }
 
   /**
    * Complex hyperbolic cosine
    */
   cosh(): Complex {
-    return new Complex(
-      cosh(this.re) * Math.cos(this.im),
-      sinh(this.re) * Math.sin(this.im)
-    );
+    return new Complex(cosh(this.re) * Math.cos(this.im), sinh(this.re) * Math.sin(this.im));
   }
 
   /**

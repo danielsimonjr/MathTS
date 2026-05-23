@@ -1,23 +1,18 @@
-import { factory } from '../../utils/factory.js'
-import { createRow } from '../../matrix/row.js'
-import { errorTransform } from './utils/errorTransform.js'
-import { isNumber } from '../../utils/is.js'
-import type {
-  TypedFunction,
-  MathFunction,
-  IndexConstructor,
-  VariadicArgs
-} from './types.js'
+import { factory } from '../../utils/factory.js';
+import { createRow } from '../../matrix/row.js';
+import { errorTransform } from './utils/errorTransform.js';
+import { isNumber } from '../../utils/is.js';
+import type { TypedFunction, MathFunction, IndexConstructor, VariadicArgs } from './types.js';
 
 interface RowDependencies {
-  typed: TypedFunction
-  Index: IndexConstructor
-  matrix: MathFunction
-  range: MathFunction
+  typed: TypedFunction;
+  Index: IndexConstructor;
+  matrix: MathFunction;
+  range: MathFunction;
 }
 
-const name = 'row'
-const dependencies = ['typed', 'Index', 'matrix', 'range']
+const name = 'row';
+const dependencies = ['typed', 'Index', 'matrix', 'range'];
 
 /**
  * Attach a transform function to matrix.column
@@ -30,25 +25,25 @@ export const createRowTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, Index, matrix, range }: RowDependencies) => {
-    const row = createRow({ typed, Index, matrix, range })
+    const row = createRow({ typed, Index, matrix, range });
 
     // @see: comment of row itself
     return typed('row', {
       '...any': function (args: VariadicArgs): unknown {
         // change last argument from zero-based to one-based
-        const lastIndex = args.length - 1
-        const last = args[lastIndex]
+        const lastIndex = args.length - 1;
+        const last = args[lastIndex];
         if (isNumber(last)) {
-          args[lastIndex] = last - 1
+          args[lastIndex] = last - 1;
         }
 
         try {
-          return row.apply(null, args)
+          return row.apply(null, args);
         } catch (err) {
-          throw errorTransform(err as Error)
+          throw errorTransform(err as Error);
         }
-      }
-    })
+      },
+    });
   },
   { isTransformFunction: true }
-)
+);

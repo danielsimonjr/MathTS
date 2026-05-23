@@ -23,27 +23,13 @@
         "internalDependencies": [
           {
             "file": "../types/DenseMatrix.js",
-            "imports": [
-              "DenseMatrix"
-            ]
+            "imports": ["DenseMatrix"]
           }
         ],
-        "exports": [
-          "DEFAULT_BACKEND_HINTS",
-          "backendRegistry",
-          "BackendRegistry"
-        ],
-        "classes": [
-          "BackendRegistry"
-        ],
-        "interfaces": [
-          "BackendHints",
-          "MatrixBackend"
-        ],
-        "constants": [
-          "DEFAULT_BACKEND_HINTS",
-          "backendRegistry"
-        ]
+        "exports": ["DEFAULT_BACKEND_HINTS", "backendRegistry", "BackendRegistry"],
+        "classes": ["BackendRegistry"],
+        "interfaces": ["BackendHints", "MatrixBackend"],
+        "constants": ["DEFAULT_BACKEND_HINTS", "backendRegistry"]
       },
       "src/backends/BackendManager.ts": {
         "description": "Backend Manager",
@@ -52,39 +38,24 @@
         "internalDependencies": [
           {
             "file": "../types/DenseMatrix.js",
-            "imports": [
-              "DenseMatrix"
-            ]
+            "imports": ["DenseMatrix"]
           },
           {
             "file": "./Backend.js",
-            "imports": [
-              "MatrixBackend",
-              "BackendType",
-              "BackendHints"
-            ],
+            "imports": ["MatrixBackend", "BackendType", "BackendHints"],
             "typeOnly": true
           },
           {
             "file": "./Backend.js",
-            "imports": [
-              "backendRegistry",
-              "DEFAULT_BACKEND_HINTS"
-            ]
+            "imports": ["backendRegistry", "DEFAULT_BACKEND_HINTS"]
           },
           {
             "file": "./JSBackend.js",
-            "imports": [
-              "jsBackend"
-            ]
+            "imports": ["jsBackend"]
           },
           {
             "file": "../config.js",
-            "imports": [
-              "getConfig",
-              "onConfigChange",
-              "MatrixConfig"
-            ]
+            "imports": ["getConfig", "onConfigChange", "MatrixConfig"]
           }
         ],
         "exports": [
@@ -93,19 +64,10 @@
           "createBackendManager",
           "BackendManager"
         ],
-        "classes": [
-          "BackendManager"
-        ],
-        "interfaces": [
-          "ExtendedBackendHints"
-        ],
-        "functions": [
-          "createBackendManager"
-        ],
-        "constants": [
-          "DEFAULT_EXTENDED_HINTS",
-          "backendManager"
-        ]
+        "classes": ["BackendManager"],
+        "interfaces": ["ExtendedBackendHints"],
+        "functions": ["createBackendManager"],
+        "constants": ["DEFAULT_EXTENDED_HINTS", "backendManager"]
       },
       "src/backends/gpu/BatchExecutor.ts": {
         "description": "GPU Batch Executor",
@@ -114,37 +76,23 @@
         "internalDependencies": [
           {
             "file": "./GPUContext.js",
-            "imports": [
-              "GPUContext"
-            ],
+            "imports": ["GPUContext"],
             "typeOnly": true
           },
           {
             "file": "./ShaderManager.js",
-            "imports": [
-              "ShaderManager"
-            ],
+            "imports": ["ShaderManager"],
             "typeOnly": true
           },
           {
             "file": "./BufferPool.js",
-            "imports": [
-              "BufferPool"
-            ],
+            "imports": ["BufferPool"],
             "typeOnly": true
           }
         ],
-        "exports": [
-          "BatchExecutor"
-        ],
-        "classes": [
-          "BatchExecutor"
-        ],
-        "interfaces": [
-          "BatchOperation",
-          "BatchResult",
-          "BatchOptions"
-        ]
+        "exports": ["BatchExecutor"],
+        "classes": ["BatchExecutor"],
+        "interfaces": ["BatchOperation", "BatchResult", "BatchOptions"]
       },
       "src/backends/gpu/BufferPool.ts": {
         "description": "GPU Buffer Pool",
@@ -153,20 +101,12 @@
         "internalDependencies": [
           {
             "file": "./GPUContext.js",
-            "imports": [
-              "GPUContext"
-            ]
+            "imports": ["GPUContext"]
           }
         ],
-        "exports": [
-          "BufferPool"
-        ],
-        "classes": [
-          "BufferPool"
-        ],
-        "interfaces": [
-          "BufferPoolOptions"
-        ]
+        "exports": ["BufferPool"],
+        "classes": ["BufferPool"],
+        "interfaces": ["BufferPoolOptions"]
       },
       "src/backends/gpu/detect.ts": {
         "description": "WebGPU Detection and Capability Checking",
@@ -182,10 +122,7 @@
           "getRecommendedWorkgroupSize",
           "getMaxMatrixSize"
         ],
-        "interfaces": [
-          "GPUAdapterInfo",
-          "GPUCapabilities"
-        ],
+        "interfaces": ["GPUAdapterInfo", "GPUCapabilities"],
         "functions": [
           "hasWebGPU",
           "isBrowser",
@@ -203,32 +140,13 @@
         "internalDependencies": [
           {
             "file": "./detect.js",
-            "imports": [
-              "hasWebGPU",
-              "getGPUAdapter",
-              "detectGPUCapabilities",
-              "GPUCapabilities"
-            ]
+            "imports": ["hasWebGPU", "getGPUAdapter", "detectGPUCapabilities", "GPUCapabilities"]
           }
         ],
-        "exports": [
-          "getGlobalGPUContext",
-          "initializeGlobalGPU",
-          "destroyGlobalGPU",
-          "GPUContext"
-        ],
-        "classes": [
-          "GPUContext"
-        ],
-        "interfaces": [
-          "GPUContextOptions",
-          "DeviceLostEvent"
-        ],
-        "functions": [
-          "getGlobalGPUContext",
-          "initializeGlobalGPU",
-          "destroyGlobalGPU"
-        ]
+        "exports": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU", "GPUContext"],
+        "classes": ["GPUContext"],
+        "interfaces": ["GPUContextOptions", "DeviceLostEvent"],
+        "functions": ["getGlobalGPUContext", "initializeGlobalGPU", "destroyGlobalGPU"]
       },
       "src/backends/gpu/index.ts": {
         "description": "GPU Backend Exports",
@@ -265,20 +183,12 @@
           },
           {
             "file": "./BufferPool.js",
-            "imports": [
-              "BufferPool",
-              "BufferPoolOptions"
-            ],
+            "imports": ["BufferPool", "BufferPoolOptions"],
             "reExport": true
           },
           {
             "file": "./ShaderManager.js",
-            "imports": [
-              "ShaderManager",
-              "BUILTIN_SHADERS",
-              "ShaderSource",
-              "PipelineConfig"
-            ],
+            "imports": ["ShaderManager", "BUILTIN_SHADERS", "ShaderSource", "PipelineConfig"],
             "reExport": true
           },
           {
@@ -386,25 +296,13 @@
         "internalDependencies": [
           {
             "file": "./GPUContext.js",
-            "imports": [
-              "GPUContext"
-            ]
+            "imports": ["GPUContext"]
           }
         ],
-        "exports": [
-          "BUILTIN_SHADERS",
-          "ShaderManager"
-        ],
-        "classes": [
-          "ShaderManager"
-        ],
-        "interfaces": [
-          "ShaderSource",
-          "PipelineConfig"
-        ],
-        "constants": [
-          "BUILTIN_SHADERS"
-        ]
+        "exports": ["BUILTIN_SHADERS", "ShaderManager"],
+        "classes": ["ShaderManager"],
+        "interfaces": ["ShaderSource", "PipelineConfig"],
+        "constants": ["BUILTIN_SHADERS"]
       },
       "src/backends/gpu/Sync.ts": {
         "description": "GPU-CPU Synchronization Strategy",
@@ -413,34 +311,19 @@
         "internalDependencies": [
           {
             "file": "./GPUContext.js",
-            "imports": [
-              "GPUContext"
-            ],
+            "imports": ["GPUContext"],
             "typeOnly": true
           },
           {
             "file": "./BufferPool.js",
-            "imports": [
-              "BufferPool"
-            ],
+            "imports": ["BufferPool"],
             "typeOnly": true
           }
         ],
-        "exports": [
-          "createSyncManager",
-          "SyncManager"
-        ],
-        "classes": [
-          "SyncManager"
-        ],
-        "interfaces": [
-          "TransferRequest",
-          "TransferResult",
-          "SyncConfig"
-        ],
-        "functions": [
-          "createSyncManager"
-        ]
+        "exports": ["createSyncManager", "SyncManager"],
+        "classes": ["SyncManager"],
+        "interfaces": ["TransferRequest", "TransferResult", "SyncConfig"],
+        "functions": ["createSyncManager"]
       },
       "src/backends/GPUBackend.ts": {
         "description": "GPU Backend for Matrix Operations",
@@ -468,12 +351,8 @@
           "destroyGlobalGPUBackend",
           "GPUBackend"
         ],
-        "classes": [
-          "GPUBackend"
-        ],
-        "interfaces": [
-          "GPUBackendOptions"
-        ],
+        "classes": ["GPUBackend"],
+        "interfaces": ["GPUBackendOptions"],
         "functions": [
           "getGlobalGPUBackend",
           "initializeGlobalGPUBackend",
@@ -487,23 +366,16 @@
         "internalDependencies": [
           {
             "file": "./Backend.js",
-            "imports": [
-              "MatrixBackend",
-              "BackendType"
-            ],
+            "imports": ["MatrixBackend", "BackendType"],
             "typeOnly": true
           },
           {
             "file": "../types/DenseMatrix.js",
-            "imports": [
-              "DenseMatrix"
-            ]
+            "imports": ["DenseMatrix"]
           },
           {
             "file": "./JSBackend.js",
-            "imports": [
-              "jsBackend"
-            ]
+            "imports": ["jsBackend"]
           },
           {
             "file": "./GPUBackend.js",
@@ -516,30 +388,14 @@
           },
           {
             "file": "./gpu/index.js",
-            "imports": [
-              "hasWebGPU",
-              "detectGPUCapabilities",
-              "GPUCapabilities"
-            ]
+            "imports": ["hasWebGPU", "detectGPUCapabilities", "GPUCapabilities"]
           }
         ],
-        "exports": [
-          "gpuMatrixBackend",
-          "createGPUMatrixBackend",
-          "GPUMatrixBackend"
-        ],
-        "classes": [
-          "GPUMatrixBackend"
-        ],
-        "interfaces": [
-          "GPUMatrixBackendConfig"
-        ],
-        "functions": [
-          "createGPUMatrixBackend"
-        ],
-        "constants": [
-          "gpuMatrixBackend"
-        ]
+        "exports": ["gpuMatrixBackend", "createGPUMatrixBackend", "GPUMatrixBackend"],
+        "classes": ["GPUMatrixBackend"],
+        "interfaces": ["GPUMatrixBackendConfig"],
+        "functions": ["createGPUMatrixBackend"],
+        "constants": ["gpuMatrixBackend"]
       },
       "src/backends/index.ts": {
         "description": "Matrix Backend Exports",
@@ -548,31 +404,20 @@
         "internalDependencies": [
           {
             "file": "./Backend.js",
-            "imports": [
-              "backendRegistry"
-            ]
+            "imports": ["backendRegistry"]
           },
           {
             "file": "./JSBackend.js",
-            "imports": [
-              "jsBackend"
-            ]
+            "imports": ["jsBackend"]
           },
           {
             "file": "./Backend.js",
-            "imports": [
-              "BackendRegistry",
-              "backendRegistry",
-              "DEFAULT_BACKEND_HINTS"
-            ],
+            "imports": ["BackendRegistry", "backendRegistry", "DEFAULT_BACKEND_HINTS"],
             "reExport": true
           },
           {
             "file": "./JSBackend.js",
-            "imports": [
-              "JSBackend",
-              "jsBackend"
-            ],
+            "imports": ["JSBackend", "jsBackend"],
             "reExport": true
           },
           {
@@ -587,12 +432,7 @@
           },
           {
             "file": "./WASMBackend.js",
-            "imports": [
-              "WASMBackend",
-              "wasmBackend",
-              "createWASMBackend",
-              "WASMBackendConfig"
-            ],
+            "imports": ["WASMBackend", "wasmBackend", "createWASMBackend", "WASMBackendConfig"],
             "reExport": true
           },
           {
@@ -766,29 +606,17 @@
         "internalDependencies": [
           {
             "file": "../types/DenseMatrix.js",
-            "imports": [
-              "DenseMatrix"
-            ]
+            "imports": ["DenseMatrix"]
           },
           {
             "file": "./Backend.js",
-            "imports": [
-              "MatrixBackend",
-              "BackendType"
-            ],
+            "imports": ["MatrixBackend", "BackendType"],
             "typeOnly": true
           }
         ],
-        "exports": [
-          "jsBackend",
-          "JSBackend"
-        ],
-        "classes": [
-          "JSBackend"
-        ],
-        "constants": [
-          "jsBackend"
-        ]
+        "exports": ["jsBackend", "JSBackend"],
+        "classes": ["JSBackend"],
+        "constants": ["jsBackend"]
       },
       "src/backends/MatrixWasmBridge.ts": {
         "description": "Matrix WASM Bridge - Integrates WASM operations with mathts Matrix types",
@@ -797,71 +625,39 @@
         "internalDependencies": [
           {
             "file": "./WasmLoader.js",
-            "imports": [
-              "wasmLoader",
-              "WasmModule"
-            ]
+            "imports": ["wasmLoader", "WasmModule"]
           }
         ],
-        "exports": [
-          "WasmThresholds",
-          "MatrixWasmBridge"
-        ],
-        "classes": [
-          "MatrixWasmBridge"
-        ],
-        "interfaces": [
-          "MatrixOptions"
-        ],
-        "constants": [
-          "WasmThresholds"
-        ]
+        "exports": ["WasmThresholds", "MatrixWasmBridge"],
+        "classes": ["MatrixWasmBridge"],
+        "interfaces": ["MatrixOptions"],
+        "constants": ["WasmThresholds"]
       },
       "src/backends/ParallelBackend.ts": {
         "description": "Parallel Matrix Backend",
         "externalDependencies": [
           {
             "package": "@danielsimonjr/mathts-parallel",
-            "imports": [
-              "computePool",
-              "ComputePool",
-              "ComputePoolConfig"
-            ]
+            "imports": ["computePool", "ComputePool", "ComputePoolConfig"]
           }
         ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "../types/DenseMatrix.js",
-            "imports": [
-              "DenseMatrix"
-            ]
+            "imports": ["DenseMatrix"]
           },
           {
             "file": "./Backend.js",
-            "imports": [
-              "BackendType"
-            ],
+            "imports": ["BackendType"],
             "typeOnly": true
           }
         ],
-        "exports": [
-          "parallelBackend",
-          "createParallelBackend",
-          "ParallelBackend"
-        ],
-        "classes": [
-          "ParallelBackend"
-        ],
-        "interfaces": [
-          "ParallelBackendConfig"
-        ],
-        "functions": [
-          "createParallelBackend"
-        ],
-        "constants": [
-          "parallelBackend"
-        ]
+        "exports": ["parallelBackend", "createParallelBackend", "ParallelBackend"],
+        "classes": ["ParallelBackend"],
+        "interfaces": ["ParallelBackendConfig"],
+        "functions": ["createParallelBackend"],
+        "constants": ["parallelBackend"]
       },
       "src/backends/wasm/detect.ts": {
         "description": "WASM Feature Detection",
@@ -876,9 +672,7 @@
           "clearFeatureCache",
           "getCachedFeatures"
         ],
-        "interfaces": [
-          "WasmFeatures"
-        ],
+        "interfaces": ["WasmFeatures"],
         "functions": [
           "detectWasmFeatures",
           "isWasmAvailable",
@@ -930,80 +724,42 @@
         "internalDependencies": [
           {
             "file": "./Backend.js",
-            "imports": [
-              "MatrixBackend",
-              "BackendType"
-            ],
+            "imports": ["MatrixBackend", "BackendType"],
             "typeOnly": true
           },
           {
             "file": "../types/DenseMatrix.js",
-            "imports": [
-              "DenseMatrix"
-            ]
+            "imports": ["DenseMatrix"]
           },
           {
             "file": "./JSBackend.js",
-            "imports": [
-              "jsBackend"
-            ]
+            "imports": ["jsBackend"]
           },
           {
             "file": "./WasmLoader.js",
-            "imports": [
-              "wasmLoader",
-              "WasmModule"
-            ]
+            "imports": ["wasmLoader", "WasmModule"]
           },
           {
             "file": "./wasm/detect.js",
-            "imports": [
-              "detectWasmFeatures",
-              "WasmFeatures"
-            ]
+            "imports": ["detectWasmFeatures", "WasmFeatures"]
           }
         ],
-        "exports": [
-          "wasmBackend",
-          "createWASMBackend",
-          "WASMBackend"
-        ],
-        "classes": [
-          "WASMBackend"
-        ],
-        "interfaces": [
-          "WASMBackendConfig"
-        ],
-        "functions": [
-          "createWASMBackend"
-        ],
-        "constants": [
-          "wasmBackend"
-        ]
+        "exports": ["wasmBackend", "createWASMBackend", "WASMBackend"],
+        "classes": ["WASMBackend"],
+        "interfaces": ["WASMBackendConfig"],
+        "functions": ["createWASMBackend"],
+        "constants": ["wasmBackend"]
       },
       "src/backends/WasmLoader.ts": {
         "description": "WASM Loader - Loads and manages WebAssembly modules",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": [
-          "wasmLoader",
-          "initWasm",
-          "WasmLoader"
-        ],
-        "classes": [
-          "WasmLoader"
-        ],
-        "interfaces": [
-          "WasmModule",
-          "LoadingMetrics"
-        ],
-        "functions": [
-          "initWasm"
-        ],
-        "constants": [
-          "wasmLoader"
-        ]
+        "exports": ["wasmLoader", "initWasm", "WasmLoader"],
+        "classes": ["WasmLoader"],
+        "interfaces": ["WasmModule", "LoadingMetrics"],
+        "functions": ["initWasm"],
+        "constants": ["wasmLoader"]
       }
     },
     "root": {
@@ -1014,16 +770,12 @@
         "internalDependencies": [
           {
             "file": "./backends/Backend.js",
-            "imports": [
-              "BackendType"
-            ],
+            "imports": ["BackendType"],
             "typeOnly": true
           },
           {
             "file": "./backends/BackendManager.js",
-            "imports": [
-              "OperationType"
-            ],
+            "imports": ["OperationType"],
             "typeOnly": true
           }
         ],
@@ -1044,12 +796,7 @@
           "disableAdaptiveTuning",
           "configureAdaptiveTuning"
         ],
-        "interfaces": [
-          "BackendConfig",
-          "AdaptiveTuningConfig",
-          "ProfilingConfig",
-          "MatrixConfig"
-        ],
+        "interfaces": ["BackendConfig", "AdaptiveTuningConfig", "ProfilingConfig", "MatrixConfig"],
         "functions": [
           "getConfig",
           "setConfig",
@@ -1066,9 +813,7 @@
           "disableAdaptiveTuning",
           "configureAdaptiveTuning"
         ],
-        "constants": [
-          "DEFAULT_CONFIG"
-        ]
+        "constants": ["DEFAULT_CONFIG"]
       },
       "src/matrix.ts": {
         "description": "Base Matrix class",
@@ -1077,10 +822,7 @@
         "internalDependencies": [
           {
             "file": "./types",
-            "imports": [
-              "MatrixLike",
-              "MatrixOptions"
-            ],
+            "imports": ["MatrixLike", "MatrixOptions"],
             "typeOnly": true
           }
         ],
@@ -1091,31 +833,22 @@
         "externalDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
-            "imports": [
-              "mathTyped"
-            ]
+            "imports": ["mathTyped"]
           },
           {
             "package": "@danielsimonjr/mathts-parallel",
-            "imports": [
-              "computePool",
-              "ParallelResult"
-            ]
+            "imports": ["computePool", "ParallelResult"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
-            "imports": [
-              "SignatureFunction"
-            ]
+            "imports": ["SignatureFunction"]
           }
         ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "./types/DenseMatrix.js",
-            "imports": [
-              "DenseMatrix"
-            ]
+            "imports": ["DenseMatrix"]
           }
         ],
         "exports": [
@@ -1162,10 +895,7 @@
           "initializeParallelMatrix",
           "terminateParallelMatrix"
         ],
-        "functions": [
-          "initializeParallelMatrix",
-          "terminateParallelMatrix"
-        ],
+        "functions": ["initializeParallelMatrix", "terminateParallelMatrix"],
         "constants": [
           "parallelMatrix",
           "parallelIdentity",
@@ -1214,24 +944,18 @@
         "externalDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
-            "imports": [
-              "mathTyped"
-            ]
+            "imports": ["mathTyped"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
-            "imports": [
-              "SignatureFunction"
-            ]
+            "imports": ["SignatureFunction"]
           }
         ],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "./types/DenseMatrix.js",
-            "imports": [
-              "DenseMatrix"
-            ]
+            "imports": ["DenseMatrix"]
           }
         ],
         "exports": [
@@ -1306,17 +1030,13 @@
         "externalDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
-            "imports": [
-              "BackendType"
-            ]
+            "imports": ["BackendType"]
           }
         ],
         "nodeDependencies": [],
         "internalDependencies": [],
         "exports": [],
-        "interfaces": [
-          "MatrixOptions"
-        ]
+        "interfaces": ["MatrixOptions"]
       }
     },
     "entry": {
@@ -1327,30 +1047,22 @@
         "internalDependencies": [
           {
             "file": "./types/index.js",
-            "imports": [
-              "*"
-            ],
+            "imports": ["*"],
             "reExport": true
           },
           {
             "file": "./backends/index.js",
-            "imports": [
-              "*"
-            ],
+            "imports": ["*"],
             "reExport": true
           },
           {
             "file": "./typed-operations.js",
-            "imports": [
-              "*"
-            ],
+            "imports": ["*"],
             "reExport": true
           },
           {
             "file": "./parallel-matrix.js",
-            "imports": [
-              "*"
-            ],
+            "imports": ["*"],
             "reExport": true
           }
         ],
@@ -1369,20 +1081,9 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": [
-          "eig",
-          "eigvals",
-          "powerIteration"
-        ],
-        "interfaces": [
-          "EigResult",
-          "EigOptions"
-        ],
-        "functions": [
-          "eig",
-          "eigvals",
-          "powerIteration"
-        ]
+        "exports": ["eig", "eigvals", "powerIteration"],
+        "interfaces": ["EigResult", "EigOptions"],
+        "functions": ["eig", "eigvals", "powerIteration"]
       },
       "src/operations/index.ts": {
         "description": "Matrix Operations",
@@ -1391,13 +1092,7 @@
         "internalDependencies": [
           {
             "file": "./eig.js",
-            "imports": [
-              "eig",
-              "eigvals",
-              "powerIteration",
-              "EigResult",
-              "EigOptions"
-            ],
+            "imports": ["eig", "eigvals", "powerIteration", "EigResult", "EigOptions"],
             "reExport": true
           },
           {
@@ -1454,28 +1149,9 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": [
-          "svd",
-          "singularValues",
-          "pinv",
-          "lowRankApprox",
-          "cond",
-          "norm2",
-          "normFro"
-        ],
-        "interfaces": [
-          "SVDResult",
-          "SVDOptions"
-        ],
-        "functions": [
-          "svd",
-          "singularValues",
-          "pinv",
-          "lowRankApprox",
-          "cond",
-          "norm2",
-          "normFro"
-        ]
+        "exports": ["svd", "singularValues", "pinv", "lowRankApprox", "cond", "norm2", "normFro"],
+        "interfaces": ["SVDResult", "SVDOptions"],
+        "functions": ["svd", "singularValues", "pinv", "lowRankApprox", "cond", "norm2", "normFro"]
       }
     },
     "types": {
@@ -1486,30 +1162,17 @@
         "internalDependencies": [
           {
             "file": "./Matrix.js",
-            "imports": [
-              "Matrix",
-              "MatrixEntry",
-              "SliceSpec"
-            ]
+            "imports": ["Matrix", "MatrixEntry", "SliceSpec"]
           },
           {
             "file": "./SparseMatrix.js",
-            "imports": [
-              "SparseMatrix"
-            ],
+            "imports": ["SparseMatrix"],
             "typeOnly": true
           }
         ],
-        "exports": [
-          "isDenseMatrix",
-          "DenseMatrix"
-        ],
-        "classes": [
-          "DenseMatrix"
-        ],
-        "functions": [
-          "isDenseMatrix"
-        ]
+        "exports": ["isDenseMatrix", "DenseMatrix"],
+        "classes": ["DenseMatrix"],
+        "functions": ["isDenseMatrix"]
       },
       "src/types/index.ts": {
         "description": "Matrix Type Exports",
@@ -1518,26 +1181,17 @@
         "internalDependencies": [
           {
             "file": "./Matrix.js",
-            "imports": [
-              "Matrix",
-              "isMatrix"
-            ],
+            "imports": ["Matrix", "isMatrix"],
             "reExport": true
           },
           {
             "file": "./DenseMatrix.js",
-            "imports": [
-              "DenseMatrix",
-              "isDenseMatrix"
-            ],
+            "imports": ["DenseMatrix", "isDenseMatrix"],
             "reExport": true
           },
           {
             "file": "./SparseMatrix.js",
-            "imports": [
-              "SparseMatrix",
-              "isSparseMatrix"
-            ],
+            "imports": ["SparseMatrix", "isSparseMatrix"],
             "reExport": true
           }
         ],
@@ -1563,39 +1217,19 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": [
-          "isMatrix"
-        ],
-        "interfaces": [
-          "MatrixDimensions",
-          "MatrixIndex",
-          "SliceSpec",
-          "MatrixEntry"
-        ],
-        "functions": [
-          "isMatrix"
-        ]
+        "exports": ["isMatrix"],
+        "interfaces": ["MatrixDimensions", "MatrixIndex", "SliceSpec", "MatrixEntry"],
+        "functions": ["isMatrix"]
       },
       "src/types/parallel.d.ts": {
         "description": "Type declarations for @danielsimonjr/mathts-parallel package",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": [
-          "computePool",
-          "ComputePool"
-        ],
-        "classes": [
-          "ComputePool"
-        ],
-        "interfaces": [
-          "ComputePoolConfig",
-          "ParallelResult",
-          "PoolStats"
-        ],
-        "constants": [
-          "computePool"
-        ]
+        "exports": ["computePool", "ComputePool"],
+        "classes": ["ComputePool"],
+        "interfaces": ["ComputePoolConfig", "ParallelResult", "PoolStats"],
+        "constants": ["computePool"]
       },
       "src/types/SparseMatrix.ts": {
         "description": "Sparse Matrix Implementation (CSR Format)",
@@ -1604,29 +1238,16 @@
         "internalDependencies": [
           {
             "file": "./Matrix.js",
-            "imports": [
-              "Matrix",
-              "MatrixEntry",
-              "SliceSpec"
-            ]
+            "imports": ["Matrix", "MatrixEntry", "SliceSpec"]
           },
           {
             "file": "./DenseMatrix.js",
-            "imports": [
-              "DenseMatrix"
-            ]
+            "imports": ["DenseMatrix"]
           }
         ],
-        "exports": [
-          "isSparseMatrix",
-          "SparseMatrix"
-        ],
-        "classes": [
-          "SparseMatrix"
-        ],
-        "functions": [
-          "isSparseMatrix"
-        ]
+        "exports": ["isSparseMatrix", "SparseMatrix"],
+        "classes": ["SparseMatrix"],
+        "functions": ["isSparseMatrix"]
       }
     }
   },
@@ -1634,16 +1255,8 @@
     "circularDependencies": {
       "runtime": [],
       "typeOnly": [
-        [
-          "src/types/DenseMatrix.ts",
-          "src/types/SparseMatrix.ts",
-          "src/types/DenseMatrix.ts"
-        ],
-        [
-          "src/backends/BackendManager.ts",
-          "src/config.ts",
-          "src/backends/BackendManager.ts"
-        ]
+        ["src/types/DenseMatrix.ts", "src/types/SparseMatrix.ts", "src/types/DenseMatrix.ts"],
+        ["src/backends/BackendManager.ts", "src/config.ts", "src/backends/BackendManager.ts"]
       ],
       "total": 2,
       "runtimeCount": 0,
@@ -1686,17 +1299,11 @@
       },
       {
         "name": "Entry",
-        "files": [
-          "src/index.ts"
-        ]
+        "files": ["src/index.ts"]
       },
       {
         "name": "Operations",
-        "files": [
-          "src/operations/eig.ts",
-          "src/operations/index.ts",
-          "src/operations/svd.ts"
-        ]
+        "files": ["src/operations/eig.ts", "src/operations/index.ts", "src/operations/svd.ts"]
       },
       {
         "name": "Types",

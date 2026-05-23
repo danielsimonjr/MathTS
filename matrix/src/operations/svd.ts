@@ -54,7 +54,7 @@ function eye(n: number): number[][] {
  * Clone a matrix
  */
 function cloneMatrix(A: number[][]): number[][] {
-  return A.map(row => [...row]);
+  return A.map((row) => [...row]);
 }
 
 /**
@@ -81,7 +81,7 @@ function householder(x: number[]): { v: number[]; beta: number } {
     } else {
       v[0] = -sigma / (x[0] + mu);
     }
-    const beta = 2 * v[0] * v[0] / (sigma + v[0] * v[0]);
+    const beta = (2 * v[0] * v[0]) / (sigma + v[0] * v[0]);
     const v0 = v[0];
     for (let i = 0; i < n; i++) {
       v[i] /= v0;
@@ -146,9 +146,7 @@ function applyHouseholderRight(
  * Bidiagonalize matrix A to B = U' * A * V
  * Returns bidiagonal B, and orthogonal U, V
  */
-function bidiagonalize(
-  A: number[][]
-): { B: number[][]; U: number[][]; V: number[][] } {
+function bidiagonalize(A: number[][]): { B: number[][]; U: number[][]; V: number[][] } {
   const m = A.length;
   const n = A[0].length;
   const B = cloneMatrix(A);
@@ -262,7 +260,7 @@ function svdStep(
 
   const trace = a + c;
   const det = a * c - b * b;
-  const disc = Math.sqrt(Math.max(0, trace * trace / 4 - det));
+  const disc = Math.sqrt(Math.max(0, (trace * trace) / 4 - det));
 
   const e1 = trace / 2 + disc;
   const e2 = trace / 2 - disc;
@@ -353,10 +351,7 @@ function handleZero(
  * @param options - Computation options
  * @returns SVD decomposition
  */
-export function svd(
-  matrix: number[][] | Float64Array,
-  options: SVDOptions = {}
-): SVDResult {
+export function svd(matrix: number[][] | Float64Array, options: SVDOptions = {}): SVDResult {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,
     tolerance = DEFAULT_TOLERANCE,
@@ -375,9 +370,7 @@ export function svd(
       throw new Error('Float64Array must represent a square matrix');
     }
     m = n = size;
-    A = Array.from({ length: m }, (_, i) =>
-      Array.from({ length: n }, (_, j) => matrix[i * n + j])
-    );
+    A = Array.from({ length: m }, (_, i) => Array.from({ length: n }, (_, j) => matrix[i * n + j]));
   } else {
     A = matrix;
     m = A.length;
@@ -391,7 +384,7 @@ export function svd(
   // Transpose if m < n for better numerical behavior
   const transposed = m < n;
   if (transposed) {
-    A = A[0].map((_, j) => A.map(row => row[j]));
+    A = A[0].map((_, j) => A.map((row) => row[j]));
     [m, n] = [n, m];
   }
 
@@ -415,7 +408,7 @@ export function svd(
   let end = minMN - 1;
 
   while (end > 0 && iter < maxIterations) {
-    iter++;  // Always increment to prevent infinite loops
+    iter++; // Always increment to prevent infinite loops
 
     // Check for negligible superdiagonal
     let foundSplit = false;
@@ -447,7 +440,10 @@ export function svd(
 
     // Find start of active block
     let start = end - 1;
-    while (start > 0 && Math.abs(e[start - 1]) > tolerance * (Math.abs(d[start - 1]) + Math.abs(d[start]))) {
+    while (
+      start > 0 &&
+      Math.abs(e[start - 1]) > tolerance * (Math.abs(d[start - 1]) + Math.abs(d[start]))
+    ) {
       start--;
     }
 
@@ -469,9 +465,9 @@ export function svd(
   const indices = Array.from({ length: d.length }, (_, i) => i);
   indices.sort((a, b) => d[b] - d[a]);
 
-  const sortedS = indices.map(i => d[i]);
-  const sortedU = U.map(row => indices.map(i => row[i]));
-  const sortedV = V.map(row => indices.map(i => row[i]));
+  const sortedS = indices.map((i) => d[i]);
+  const sortedU = U.map((row) => indices.map((i) => row[i]));
+  const sortedV = V.map((row) => indices.map((i) => row[i]));
 
   // Compute rank
   const maxS = sortedS[0] || 0;
@@ -513,10 +509,7 @@ export function singularValues(
 /**
  * Compute the pseudoinverse (Moore-Penrose inverse) using SVD
  */
-export function pinv(
-  matrix: number[][],
-  options?: SVDOptions
-): number[][] {
+export function pinv(matrix: number[][], options?: SVDOptions): number[][] {
   const { U, S, V, rank } = svd(matrix, options);
 
   if (rank === 0) {
@@ -535,7 +528,7 @@ export function pinv(
   const k = S.length;
 
   // S^{-1} for non-negligible singular values
-  const Sinv = S.map(s => (s > tolerance * maxS ? 1 / s : 0));
+  const Sinv = S.map((s) => (s > tolerance * maxS ? 1 / s : 0));
 
   // Result is n x m
   const result = Array.from({ length: n }, () => new Array(m).fill(0));
@@ -557,11 +550,7 @@ export function pinv(
  * Low-rank approximation using SVD
  * Keeps only the top r singular values
  */
-export function lowRankApprox(
-  matrix: number[][],
-  r: number,
-  options?: SVDOptions
-): number[][] {
+export function lowRankApprox(matrix: number[][], r: number, options?: SVDOptions): number[][] {
   const { U, S, V } = svd(matrix, options);
 
   const m = matrix.length;
@@ -587,10 +576,7 @@ export function lowRankApprox(
 /**
  * Compute condition number using SVD
  */
-export function cond(
-  matrix: number[][],
-  options?: SVDOptions
-): number {
+export function cond(matrix: number[][], options?: SVDOptions): number {
   const S = singularValues(matrix, options);
 
   if (S.length === 0 || S[S.length - 1] === 0) {
@@ -604,10 +590,7 @@ export function cond(
  * Compute matrix norm using SVD
  * Returns the spectral norm (largest singular value)
  */
-export function norm2(
-  matrix: number[][],
-  options?: SVDOptions
-): number {
+export function norm2(matrix: number[][], options?: SVDOptions): number {
   const S = singularValues(matrix, options);
   return S[0] || 0;
 }

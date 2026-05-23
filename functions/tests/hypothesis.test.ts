@@ -87,18 +87,30 @@ describe('Statistical Hypothesis Tests', () => {
   // ===========================================================================
   describe('anova', () => {
     it('should detect significant group differences', () => {
-      const result = anova([[1, 2, 3], [10, 11, 12], [20, 21, 22]]);
+      const result = anova([
+        [1, 2, 3],
+        [10, 11, 12],
+        [20, 21, 22],
+      ]);
       expect(result.fStatistic).toBeGreaterThan(10);
       expect(result.pValue).toBeLessThan(0.001);
     });
 
     it('should return high p-value for similar groups', () => {
-      const result = anova([[1, 2, 3], [1.5, 2.5, 3.5], [1, 3, 2]]);
+      const result = anova([
+        [1, 2, 3],
+        [1.5, 2.5, 3.5],
+        [1, 3, 2],
+      ]);
       expect(result.pValue).toBeGreaterThan(0.1);
     });
 
     it('should have correct degrees of freedom', () => {
-      const result = anova([[1, 2], [3, 4], [5, 6]]);
+      const result = anova([
+        [1, 2],
+        [3, 4],
+        [5, 6],
+      ]);
       expect(result.dfBetween).toBe(2);
       expect(result.dfWithin).toBe(3);
     });
@@ -196,7 +208,12 @@ describe('Statistical Hypothesis Tests', () => {
   // ===========================================================================
   describe('principalComponentAnalysis', () => {
     it('should reduce to k components', () => {
-      const data = [[1, 2], [3, 4], [5, 6], [7, 8]];
+      const data = [
+        [1, 2],
+        [3, 4],
+        [5, 6],
+        [7, 8],
+      ];
       const result = principalComponentAnalysis(data, 1);
       expect(result.components.length).toBe(1);
       expect(result.explained.length).toBe(1);
@@ -205,20 +222,36 @@ describe('Statistical Hypothesis Tests', () => {
     });
 
     it('should explain all variance with full components', () => {
-      const data = [[1, 0], [0, 1], [1, 1], [0, 0]];
+      const data = [
+        [1, 0],
+        [0, 1],
+        [1, 1],
+        [0, 0],
+      ];
       const result = principalComponentAnalysis(data);
       const totalExplained = result.explained.reduce((a, b) => a + b, 0);
       expect(totalExplained).toBeCloseTo(1, 3);
     });
 
     it('perfectly correlated data should have one dominant component', () => {
-      const data = [[1, 2], [2, 4], [3, 6], [4, 8], [5, 10]];
+      const data = [
+        [1, 2],
+        [2, 4],
+        [3, 6],
+        [4, 8],
+        [5, 10],
+      ];
       const result = principalComponentAnalysis(data, 2);
       expect(result.explained[0]).toBeGreaterThan(0.95);
     });
 
     it('components should be unit vectors', () => {
-      const data = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]];
+      const data = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+        [10, 11, 12],
+      ];
       const result = principalComponentAnalysis(data);
       for (const comp of result.components) {
         const norm = Math.sqrt(comp.reduce((s, v) => s + v * v, 0));

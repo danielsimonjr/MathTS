@@ -1,26 +1,26 @@
-import { pickShallow } from './object.js'
+import { pickShallow } from './object.js';
 
 /**
  * Type for a factory function that creates instances
  */
 export interface FactoryFunction<TDeps = any, TResult = any> {
-  (scope: Record<string, any>): TResult
-  isFactory: true
-  fn: string
-  dependencies: string[]
-  meta?: FactoryMeta
+  (scope: Record<string, any>): TResult;
+  isFactory: true;
+  fn: string;
+  dependencies: string[];
+  meta?: FactoryMeta;
 }
 
 /**
  * Type for legacy factory objects (old-style factories)
  */
 export interface LegacyFactory {
-  type?: string
-  name: string
-  factory: (...args: any[]) => any
-  math?: boolean
-  dependencies?: string[]
-  meta?: FactoryMeta
+  type?: string;
+  name: string;
+  factory: (...args: any[]) => any;
+  math?: boolean;
+  dependencies?: string[];
+  meta?: FactoryMeta;
 }
 
 /**
@@ -30,28 +30,28 @@ export interface FactoryMeta {
   /**
    * If true, the factory will be recreated when config changes
    */
-  recreateOnConfigChange?: boolean
+  recreateOnConfigChange?: boolean;
   /**
    * If true, this is a lazy factory that should only be created when needed
    */
-  lazy?: boolean
+  lazy?: boolean;
   /**
    * Additional custom metadata
    */
-  [key: string]: any
+  [key: string]: any;
 }
 
 /**
  * Type for dependency names, which can be optional (prefixed with '?')
  */
-export type DependencyName = string
+export type DependencyName = string;
 
 /**
  * Type for the create callback function
  */
 export type CreateFunction<TDeps extends Record<string, any>, TResult> = (
   dependencies: TDeps
-) => TResult
+) => TResult;
 
 /**
  * Create a factory function, which can be used to inject dependencies.
@@ -89,21 +89,21 @@ export function factory<TDeps extends Record<string, any> = any, TResult = any>(
     // we only pass the requested dependencies to the factory function
     // to prevent functions to rely on dependencies that are not explicitly
     // requested.
-    const deps = pickShallow(scope, dependencies.map(stripOptionalNotation)) as TDeps
+    const deps = pickShallow(scope, dependencies.map(stripOptionalNotation)) as TDeps;
 
-    assertDependencies(name, dependencies, scope)
+    assertDependencies(name, dependencies, scope);
 
-    return create(deps)
+    return create(deps);
   }
 
-  assertAndCreate.isFactory = true as const
-  assertAndCreate.fn = name
-  assertAndCreate.dependencies = dependencies.slice().sort()
+  assertAndCreate.isFactory = true as const;
+  assertAndCreate.fn = name;
+  assertAndCreate.dependencies = dependencies.slice().sort();
   if (meta) {
-    assertAndCreate.meta = meta
+    assertAndCreate.meta = meta;
   }
 
-  return assertAndCreate as FactoryFunction<TDeps, TResult>
+  return assertAndCreate as FactoryFunction<TDeps, TResult>;
 }
 
 /**
@@ -115,12 +115,12 @@ export function factory<TDeps extends Record<string, any> = any, TResult = any>(
 export function sortFactories(
   factories: Array<FactoryFunction | LegacyFactory>
 ): Array<FactoryFunction | LegacyFactory> {
-  const factoriesByName: Record<string, FactoryFunction | LegacyFactory> = {}
+  const factoriesByName: Record<string, FactoryFunction | LegacyFactory> = {};
 
-  factories.forEach(factory => {
-    const name = isFactory(factory) ? factory.fn : factory.name
-    factoriesByName[name] = factory
-  })
+  factories.forEach((factory) => {
+    const name = isFactory(factory) ? factory.fn : factory.name;
+    factoriesByName[name] = factory;
+  });
 
   function containsDependency(
     factory: FactoryFunction | LegacyFactory,
@@ -128,44 +128,42 @@ export function sortFactories(
   ): boolean {
     // TODO: detect circular references
     if (isFactory(factory)) {
-      const depName = isFactory(dependency) ? dependency.fn : dependency.name
+      const depName = isFactory(dependency) ? dependency.fn : dependency.name;
       if (factory.dependencies.includes(depName)) {
-        return true
+        return true;
       }
 
-      if (factory.dependencies.some(d => {
-        const depFactory = factoriesByName[d]
-        return depFactory && containsDependency(depFactory, dependency)
-      })) {
-        return true
+      if (
+        factory.dependencies.some((d) => {
+          const depFactory = factoriesByName[d];
+          return depFactory && containsDependency(depFactory, dependency);
+        })
+      ) {
+        return true;
       }
     }
 
-    return false
+    return false;
   }
 
-  const sorted: Array<FactoryFunction | LegacyFactory> = []
+  const sorted: Array<FactoryFunction | LegacyFactory> = [];
 
   function addFactory(factory: FactoryFunction | LegacyFactory): void {
-    let index = 0
+    let index = 0;
     while (index < sorted.length && !containsDependency(sorted[index], factory)) {
-      index++
+      index++;
     }
 
-    sorted.splice(index, 0, factory)
+    sorted.splice(index, 0, factory);
   }
 
   // sort regular factory functions
-  factories
-    .filter(isFactory)
-    .forEach(addFactory)
+  factories.filter(isFactory).forEach(addFactory);
 
   // sort legacy factory functions AFTER the regular factory functions
-  factories
-    .filter(factory => !isFactory(factory))
-    .forEach(addFactory)
+  factories.filter((factory) => !isFactory(factory)).forEach(addFactory);
 
-  return sorted
+  return sorted;
 }
 
 // TODO: comment or cleanup if unused in the end
@@ -173,13 +171,13 @@ export function create(
   factories: Array<FactoryFunction | LegacyFactory>,
   scope: Record<string, any> = {}
 ): Record<string, any> {
-  sortFactories(factories).forEach(factory => {
+  sortFactories(factories).forEach((factory) => {
     if (isFactory(factory)) {
-      factory(scope)
+      factory(scope);
     }
-  })
+  });
 
-  return scope
+  return scope;
 }
 
 /**
@@ -189,11 +187,7 @@ export function create(
  * @returns true if obj is a factory function
  */
 export function isFactory(obj: any): obj is FactoryFunction {
-  return (
-    typeof obj === 'function' &&
-    typeof obj.fn === 'string' &&
-    Array.isArray(obj.dependencies)
-  )
+  return typeof obj === 'function' && typeof obj.fn === 'string' && Array.isArray(obj.dependencies);
 }
 
 /**
@@ -212,21 +206,19 @@ export function assertDependencies(
   scope: Record<string, any>
 ): void {
   const allDefined = dependencies
-    .filter(dependency => !isOptionalDependency(dependency)) // filter optionals
-    .every(dependency => scope[dependency] !== undefined)
+    .filter((dependency) => !isOptionalDependency(dependency)) // filter optionals
+    .every((dependency) => scope[dependency] !== undefined);
 
   if (!allDefined) {
     const missingDependencies = dependencies.filter(
-      dependency => scope[dependency] === undefined
-    )
+      (dependency) => scope[dependency] === undefined
+    );
 
     // TODO: create a custom error class for this, a MathjsError or something like that
     throw new Error(
       `Cannot create function "${name}", ` +
-        `some dependencies are missing: ${missingDependencies
-          .map(d => `"${d}"`)
-          .join(', ')}.`
-    )
+        `some dependencies are missing: ${missingDependencies.map((d) => `"${d}"`).join(', ')}.`
+    );
   }
 }
 
@@ -236,7 +228,7 @@ export function assertDependencies(
  * @returns true if the dependency is optional
  */
 export function isOptionalDependency(dependency: DependencyName): boolean {
-  return dependency && dependency[0] === '?'
+  return dependency && dependency[0] === '?';
 }
 
 /**
@@ -245,5 +237,5 @@ export function isOptionalDependency(dependency: DependencyName): boolean {
  * @returns The dependency name without optional notation
  */
 export function stripOptionalNotation(dependency: DependencyName): string {
-  return dependency && dependency[0] === '?' ? dependency.slice(1) : dependency
+  return dependency && dependency[0] === '?' ? dependency.slice(1) : dependency;
 }

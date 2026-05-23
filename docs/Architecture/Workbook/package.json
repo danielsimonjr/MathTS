@@ -69,9 +69,17 @@
     "@mathts/viz": ">=1.0.0"
   },
   "peerDependenciesMeta": {
-    "@danielsimonjr/mathts-core": { "optional": true },
-    "@mathts/tensor": { "optional": true },
-    "@mathts/symbolic": { "optional": true },
-    "@mathts/viz": { "optional": true }
+    "@danielsimonjr/mathts-core": {
+      "optional": true
+    },
+    "@mathts/tensor": {
+      "optional": true
+    },
+    "@mathts/symbolic": {
+      "optional": true
+    },
+    "@mathts/viz": {
+      "optional": true
+    }
   }
 }

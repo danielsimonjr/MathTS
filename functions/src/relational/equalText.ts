@@ -1,15 +1,15 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for equalText
 interface EqualTextDependencies {
-  typed: TypedFunction
-  compareText: TypedFunction
-  isZero: TypedFunction
+  typed: TypedFunction;
+  compareText: TypedFunction;
+  isZero: TypedFunction;
 }
 
-const name = 'equalText'
-const dependencies = ['typed', 'compareText', 'isZero']
+const name = 'equalText';
+const dependencies = ['typed', 'compareText', 'isZero'];
 
 export const createEqualText = /* #__PURE__ */ factory(
   name,
@@ -43,8 +43,8 @@ export const createEqualText = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'any, any': function (x: unknown, y: unknown): boolean {
-        return isZero(compareText(x, y)) as boolean
-      }
-    })
+        return isZero(compareText(x, y)) as boolean;
+      },
+    });
   }
-)
+);

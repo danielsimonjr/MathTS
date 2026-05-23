@@ -55,9 +55,7 @@ export interface ComputePoolConfig {
 export const DEFAULT_POOL_CONFIG: ComputePoolConfig = {
   enabled: true,
   minWorkers: 1,
-  maxWorkers: typeof navigator !== 'undefined'
-    ? navigator.hardwareConcurrency || 4
-    : 4,
+  maxWorkers: typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 4 : 4,
   thresholdElements: 50000,
   chunkSize: 10000,
   workerType: 'auto',
@@ -162,11 +160,7 @@ export class ComputePool {
   /**
    * Execute a method in the worker pool
    */
-  async exec<T>(
-    method: string,
-    params: unknown[],
-    options?: TaskOptions
-  ): Promise<T> {
+  async exec<T>(method: string, params: unknown[], options?: TaskOptions): Promise<T> {
     return this.workerPool.exec<T>(method, params, options);
   }
 
@@ -256,10 +250,7 @@ export class ComputePool {
   /**
    * Parallel map operation
    */
-  async map<T, R>(
-    data: T[],
-    fn: (item: T) => R
-  ): Promise<ParallelResult<R[]>> {
+  async map<T, R>(data: T[], fn: (item: T) => R): Promise<ParallelResult<R[]>> {
     const result = await this.workerPool.map(data, fn);
     return toParallelResult(result);
   }
@@ -279,10 +270,7 @@ export class ComputePool {
   /**
    * Parallel filter operation
    */
-  async filter<T>(
-    data: T[],
-    predicate: (item: T) => boolean
-  ): Promise<ParallelResult<T[]>> {
+  async filter<T>(data: T[], predicate: (item: T) => boolean): Promise<ParallelResult<T[]>> {
     const result = await this.workerPool.filter(data, predicate);
     return toParallelResult(result);
   }
@@ -364,10 +352,7 @@ export class ComputePool {
    *   is eval'd in an isolated worker context. Used to parallelize element-wise
    *   math (special functions, distribution PDFs/CDFs).
    */
-  async applyKernel(
-    data: Float64Array,
-    fnSource: string
-  ): Promise<ParallelResult<Float64Array>> {
+  async applyKernel(data: Float64Array, fnSource: string): Promise<ParallelResult<Float64Array>> {
     const result = await this.workerPool.applyKernel(data, fnSource);
     return toParallelResult(result);
   }
@@ -412,13 +397,7 @@ export class ComputePool {
     frameLength: number,
     inverse = false
   ): Promise<ParallelResult<{ real: Float64Array; imag: Float64Array }>> {
-    const result = await this.workerPool.fftBatch(
-      real,
-      imag,
-      frameCount,
-      frameLength,
-      inverse
-    );
+    const result = await this.workerPool.fftBatch(real, imag, frameCount, frameLength, inverse);
     return toParallelResult(result);
   }
 
@@ -545,10 +524,7 @@ export class ComputePool {
   /**
    * Parallel sort operation
    */
-  async sort<T>(
-    data: T[],
-    compare?: (a: T, b: T) => number
-  ): Promise<ParallelResult<T[]>> {
+  async sort<T>(data: T[], compare?: (a: T, b: T) => number): Promise<ParallelResult<T[]>> {
     const result = await this.workerPool.sort(data, compare);
     return toParallelResult(result);
   }
@@ -720,10 +696,7 @@ export class ComputePool {
    * Element-wise left shift. `b` may be a per-element `Int32Array` of
    * shift counts or a single scalar `number` applied uniformly.
    */
-  async leftShift(
-    a: Int32Array,
-    b: Int32Array | number
-  ): Promise<ParallelResult<Int32Array>> {
+  async leftShift(a: Int32Array, b: Int32Array | number): Promise<ParallelResult<Int32Array>> {
     if (typeof b !== 'number' && a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
@@ -776,10 +749,7 @@ export class ComputePool {
    * as `Int32Array`, so values ≥ 2^31 wrap into the negative range —
    * matching `(x >>> n) | 0` JavaScript semantics.
    */
-  async rightLogShift(
-    a: Int32Array,
-    b: Int32Array | number
-  ): Promise<ParallelResult<Int32Array>> {
+  async rightLogShift(a: Int32Array, b: Int32Array | number): Promise<ParallelResult<Int32Array>> {
     if (typeof b !== 'number' && a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }

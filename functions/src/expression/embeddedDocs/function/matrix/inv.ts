@@ -16,6 +16,6 @@ export const invDocs = {
     'subset',
     'trace',
     'transpose',
-    'zeros'
-  ]
-}
+    'zeros',
+  ],
+};

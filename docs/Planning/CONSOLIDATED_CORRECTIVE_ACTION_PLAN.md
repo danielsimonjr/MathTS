@@ -5,42 +5,42 @@
 **Target:** Claude Code Implementation  
 **Branch:** `claude/fix-mathjs-build-system-d2DXI`
 
------
+---
 
 ## Document Purpose
 
 This document consolidates and clarifies two previous corrective action plans into a single, implementation-ready guide for Claude Code. It resolves contradictions, provides verified current state information, and presents a clear execution path.
 
------
+---
 
 ## Part 1: Verified Current State (As of December 14, 2025)
 
 ### 1.1 Project Metrics
 
-|Metric                       |Verified Value                  |Source                         |
-|-----------------------------|--------------------------------|-------------------------------|
-|TypeScript files in `src/`   |686                             |`find src -name "*.ts" | wc -l`|
-|JavaScript files in `src/`   |673                             |`find src -name "*.js" | wc -l`|
-|TypeScript coverage          |~50.5% (686 of 1359 total files)|File count                     |
-|TypeScript compilation errors|~347 errors across ~100+ files  |`npm run compile:ts`           |
-|WASM build status            |**WORKING**                     |`npm run build:wasm` succeeds  |
-|Dependencies installable     |**YES**                         |`npm install` succeeds         |
+| Metric                        | Verified Value                   | Source                        |
+| ----------------------------- | -------------------------------- | ----------------------------- | ------ |
+| TypeScript files in `src/`    | 686                              | `find src -name "\*.ts"       | wc -l` |
+| JavaScript files in `src/`    | 673                              | `find src -name "\*.js"       | wc -l` |
+| TypeScript coverage           | ~50.5% (686 of 1359 total files) | File count                    |
+| TypeScript compilation errors | ~347 errors across ~100+ files   | `npm run compile:ts`          |
+| WASM build status             | **WORKING**                      | `npm run build:wasm` succeeds |
+| Dependencies installable      | **YES**                          | `npm install` succeeds        |
 
 ### 1.2 Error Distribution (TypeScript Compilation)
 
-|Error Code|Count|Description                                      |Severity  |
-|----------|-----|-------------------------------------------------|----------|
-|TS6133    |201  |Declared but never read (unused variables/params)|LOW       |
-|TS6196    |44   |Declared but never used (unused type imports)    |LOW       |
-|TS2322    |33   |Type not assignable                              |MEDIUM    |
-|TS4023    |20   |Exported variable uses unexported type           |**HIGH**  |
-|TS18047   |20   |Value is possibly ‘null’                         |MEDIUM    |
-|TS2345    |6    |Argument type mismatch                           |MEDIUM    |
-|TS4094    |5    |Private property on exported anonymous class     |**HIGH**  |
-|TS2454    |4    |Variable used before assignment                  |MEDIUM    |
-|TS2564    |3    |Property not initialized                         |MEDIUM    |
-|TS2538    |3    |Type cannot be used as index                     |MEDIUM    |
-|Other     |~8   |Various                                          |LOW-MEDIUM|
+| Error Code | Count | Description                                       | Severity   |
+| ---------- | ----- | ------------------------------------------------- | ---------- |
+| TS6133     | 201   | Declared but never read (unused variables/params) | LOW        |
+| TS6196     | 44    | Declared but never used (unused type imports)     | LOW        |
+| TS2322     | 33    | Type not assignable                               | MEDIUM     |
+| TS4023     | 20    | Exported variable uses unexported type            | **HIGH**   |
+| TS18047    | 20    | Value is possibly ‘null’                          | MEDIUM     |
+| TS2345     | 6     | Argument type mismatch                            | MEDIUM     |
+| TS4094     | 5     | Private property on exported anonymous class      | **HIGH**   |
+| TS2454     | 4     | Variable used before assignment                   | MEDIUM     |
+| TS2564     | 3     | Property not initialized                          | MEDIUM     |
+| TS2538     | 3     | Type cannot be used as index                      | MEDIUM     |
+| Other      | ~8    | Various                                           | LOW-MEDIUM |
 
 ### 1.3 Build Outputs Status
 
@@ -48,7 +48,7 @@ This document consolidates and clarifies two previous corrective action plans in
 lib/
 ├── wasm/
 │   ├── index.wasm        ✅ EXISTS (25KB)
-│   ├── index.wat         ✅ EXISTS (246KB)  
+│   ├── index.wat         ✅ EXISTS (246KB)
 │   ├── index.js          ✅ EXISTS (20KB) - ESM bindings
 │   └── index.d.ts        ✅ EXISTS (13KB) - TypeScript defs
 ├── typescript/           ❓ EMPTY (declaration-only mode)
@@ -69,7 +69,7 @@ Last converge was suboptimal.  # Warning only, not an error
 
 Output files are correctly generated in `lib/wasm/`.
 
------
+---
 
 ## Part 2: Architecture Clarification
 
@@ -117,7 +117,7 @@ The previous plans incorrectly criticized the concept. Here’s the **correct un
     └─────────────┘     └─────────────┘     └─────────────┘
 ```
 
------
+---
 
 ## Part 3: Corrective Actions (Prioritized)
 
@@ -135,16 +135,18 @@ These must be completed first as they block other work.
 
 ```typescript
 interface CompiledExpression {
-  evaluate: (scope?: Record<string, any>) => any
+  evaluate: (scope?: Record<string, any>) => any;
 }
 
-type CompileFunction = (scope: Scope, args: Record<string, any>, context: any) => any
+type CompileFunction = (scope: Scope, args: Record<string, any>, context: any) => any;
 
 interface StringOptions {
-  handler?: ((node: Node, options?: StringOptions) => string) | Record<string, (node: Node, options?: StringOptions) => string>
-  parenthesis?: 'keep' | 'auto' | 'all'
-  implicit?: 'hide' | 'show'
-  [key: string]: any
+  handler?:
+    | ((node: Node, options?: StringOptions) => string)
+    | Record<string, (node: Node, options?: StringOptions) => string>;
+  parenthesis?: 'keep' | 'auto' | 'all';
+  implicit?: 'hide' | 'show';
+  [key: string]: any;
 }
 ```
 
@@ -152,16 +154,18 @@ interface StringOptions {
 
 ```typescript
 export interface CompiledExpression {
-  evaluate: (scope?: Record<string, any>) => any
+  evaluate: (scope?: Record<string, any>) => any;
 }
 
-export type CompileFunction = (scope: Scope, args: Record<string, any>, context: any) => any
+export type CompileFunction = (scope: Scope, args: Record<string, any>, context: any) => any;
 
 export interface StringOptions {
-  handler?: ((node: Node, options?: StringOptions) => string) | Record<string, (node: Node, options?: StringOptions) => string>
-  parenthesis?: 'keep' | 'auto' | 'all'
-  implicit?: 'hide' | 'show'
-  [key: string]: any
+  handler?:
+    | ((node: Node, options?: StringOptions) => string)
+    | Record<string, (node: Node, options?: StringOptions) => string>;
+  parenthesis?: 'keep' | 'auto' | 'all';
+  implicit?: 'hide' | 'show';
+  [key: string]: any;
 }
 ```
 
@@ -186,7 +190,7 @@ export interface StringOptions {
 
 ```typescript
 // Option A: Non-null assertion (if logically guaranteed)
-precedence!
+precedence!;
 
 // Option B: Null check (safer)
 if (precedence !== null) {
@@ -194,7 +198,7 @@ if (precedence !== null) {
 }
 
 // Option C: Default value
-const safePrecedence = precedence ?? 0
+const safePrecedence = precedence ?? 0;
 ```
 
 **Recommended approach:** Review each instance and apply Option B or C based on context.
@@ -209,14 +213,14 @@ const safePrecedence = precedence ?? 0
 
 ```typescript
 // Before
-let result
+let result;
 // ... some conditional logic that may not assign result
-return result  // Error: may be undefined
+return result; // Error: may be undefined
 
 // After
-let result = ''  // or appropriate default
+let result = ''; // or appropriate default
 // ... conditional logic
-return result
+return result;
 ```
 
 #### Action 1.4: Fix Index Type Issues
@@ -229,10 +233,10 @@ return result
 
 ```typescript
 // Before
-const value = associativity[op]  // op may be null
+const value = associativity[op]; // op may be null
 
 // After
-const value = op !== null ? associativity[op] : undefined
+const value = op !== null ? associativity[op] : undefined;
 ```
 
 ### Phase 2: Type Visibility Fixes (Estimated: 1-2 hours)
@@ -253,14 +257,14 @@ const value = op !== null ? associativity[op] : undefined
 ```typescript
 // Before
 class ImmutableDenseMatrix {
-  private _max: number
-  private _min: number
+  private _max: number;
+  private _min: number;
 }
 
-// After  
+// After
 class ImmutableDenseMatrix {
-  #max: number  // True private - not visible in type definitions
-  #min: number
+  #max: number; // True private - not visible in type definitions
+  #min: number;
 }
 ```
 
@@ -268,8 +272,8 @@ class ImmutableDenseMatrix {
 
 ```typescript
 class ImmutableDenseMatrix {
-  readonly _max: number  // Public but conventionally private
-  readonly _min: number
+  readonly _max: number; // Public but conventionally private
+  readonly _min: number;
 }
 ```
 
@@ -299,12 +303,12 @@ class ImmutableDenseMatrix {
 ```typescript
 // Before - Error: 'options' is declared but never used
 function toString(options: StringOptions): string {
-  return this.value.toString()
+  return this.value.toString();
 }
 
 // After - No error (TypeScript convention)
 function toString(_options: StringOptions): string {
-  return this.value.toString()
+  return this.value.toString();
 }
 ```
 
@@ -339,13 +343,13 @@ Common patterns to fix:
 
 ```typescript
 // Before
-import { BigNumber, Matrix, Range } from '../types'
+import { BigNumber, Matrix, Range } from '../types';
 
 // After (if truly unused)
 // import { BigNumber, Matrix, Range } from '../types'
 
 // Or if used only as types
-import type { BigNumber, Matrix, Range } from '../types'
+import type { BigNumber, Matrix, Range } from '../types';
 ```
 
 ### Phase 4: Build System Verification (Estimated: 1-2 hours)
@@ -382,7 +386,7 @@ After successful build, verify:
 # Check ESM output
 ls -la lib/esm/
 
-# Check CJS output  
+# Check CJS output
 ls -la lib/cjs/
 
 # Check browser bundle
@@ -402,7 +406,7 @@ Current configuration emits declarations only. If JavaScript output is needed:
 ```json
 {
   "compilerOptions": {
-    "emitDeclarationOnly": false,  // Change from true
+    "emitDeclarationOnly": false, // Change from true
     "declaration": true,
     "outDir": "./lib/esm"
   }
@@ -418,55 +422,55 @@ Current configuration emits declarations only. If JavaScript output is needed:
 Create test file `test/wasm-integration.test.ts`:
 
 ```typescript
-import { WasmLoader, initWasm } from '../src/wasm/WasmLoader'
-import { MatrixWasmBridge } from '../src/wasm/MatrixWasmBridge'
+import { WasmLoader, initWasm } from '../src/wasm/WasmLoader';
+import { MatrixWasmBridge } from '../src/wasm/MatrixWasmBridge';
 
 describe('WASM Integration', () => {
   beforeAll(async () => {
-    await initWasm('./lib/wasm/index.wasm')
-  })
+    await initWasm('./lib/wasm/index.wasm');
+  });
 
   it('should load WASM module', () => {
-    const loader = WasmLoader.getInstance()
-    expect(loader.isLoaded()).toBe(true)
-  })
+    const loader = WasmLoader.getInstance();
+    expect(loader.isLoaded()).toBe(true);
+  });
 
   it('should multiply matrices via WASM', async () => {
-    const a = [1, 2, 3, 4]  // 2x2 matrix
-    const b = [5, 6, 7, 8]  // 2x2 matrix
-    const result = await MatrixWasmBridge.multiply(a, 2, 2, b, 2, 2)
-    
+    const a = [1, 2, 3, 4]; // 2x2 matrix
+    const b = [5, 6, 7, 8]; // 2x2 matrix
+    const result = await MatrixWasmBridge.multiply(a, 2, 2, b, 2, 2);
+
     // [1,2] × [5,6] = [1*5+2*7, 1*6+2*8] = [19, 22]
     // [3,4]   [7,8]   [3*5+4*7, 3*6+4*8]   [43, 50]
-    expect(Array.from(result)).toEqual([19, 22, 43, 50])
-  })
-})
+    expect(Array.from(result)).toEqual([19, 22, 43, 50]);
+  });
+});
 ```
 
 #### Action 5.2: Test Parallel Infrastructure
 
 ```typescript
-import { WorkerPool } from '../src/parallel/WorkerPool'
-import { ParallelMatrix } from '../src/parallel/ParallelMatrix'
+import { WorkerPool } from '../src/parallel/WorkerPool';
+import { ParallelMatrix } from '../src/parallel/ParallelMatrix';
 
 describe('Parallel Computing', () => {
-  let pool: WorkerPool
+  let pool: WorkerPool;
 
   beforeAll(() => {
-    pool = new WorkerPool(4)
-  })
+    pool = new WorkerPool(4);
+  });
 
   afterAll(() => {
-    pool.terminate()
-  })
+    pool.terminate();
+  });
 
   it('should distribute matrix operations across workers', async () => {
     // Test implementation
-  })
-})
+  });
+});
 ```
 
------
+---
 
 ## Part 4: Implementation Checklist
 
@@ -502,34 +506,34 @@ describe('Parallel Computing', () => {
 - [ ] WASM module loads and executes correctly
 - [ ] Parallel operations function correctly
 
------
+---
 
 ## Part 5: File-by-File Fix Reference
 
 ### Critical Fixes (Must Complete)
 
-|File                                     |Line(s)    |Error |Fix                    |
-|-----------------------------------------|-----------|------|-----------------------|
-|`src/expression/node/Node.ts`            |10-22      |TS4023|Export interfaces      |
-|`src/expression/node/OperatorNode.ts`    |256-264    |TS2454|Initialize `result`    |
-|`src/expression/node/OperatorNode.ts`    |115,205,215|TS2538|Null check before index|
-|`src/type/matrix/ImmutableDenseMatrix.ts`|73         |TS4094|Use `#` private fields |
-|`src/type/matrix/MatrixIndex.ts`         |50         |TS4094|Use `#` private fields |
+| File                                      | Line(s)     | Error  | Fix                     |
+| ----------------------------------------- | ----------- | ------ | ----------------------- |
+| `src/expression/node/Node.ts`             | 10-22       | TS4023 | Export interfaces       |
+| `src/expression/node/OperatorNode.ts`     | 256-264     | TS2454 | Initialize `result`     |
+| `src/expression/node/OperatorNode.ts`     | 115,205,215 | TS2538 | Null check before index |
+| `src/type/matrix/ImmutableDenseMatrix.ts` | 73          | TS4094 | Use `#` private fields  |
+| `src/type/matrix/MatrixIndex.ts`          | 50          | TS4094 | Use `#` private fields  |
 
 ### Null Safety Fixes (TS18047)
 
-|File                                           |Line                   |Variable    |Fix           |
-|-----------------------------------------------|-----------------------|------------|--------------|
-|`src/expression/node/AssignmentNode.ts`        |39                     |`precedence`|Add null check|
-|`src/expression/node/ConditionalNode.ts`       |156,165,174,231,243,255|`precedence`|Add null check|
-|`src/expression/node/FunctionAssignmentNode.ts`|38                     |`precedence`|Add null check|
-|`src/expression/node/FunctionNode.ts`          |70                     |`match`     |Add null check|
-|`src/expression/node/OperatorNode.ts`          |132,160,182,240        |`precedence`|Add null check|
-|`src/expression/node/RangeNode.ts`             |54,59,64               |`precedence`|Add null check|
-|`src/expression/node/RelationalNode.ts`        |156,209,242            |`precedence`|Add null check|
-|`src/expression/operators.ts`                  |313                    |`precedence`|Add null check|
+| File                                            | Line                    | Variable     | Fix            |
+| ----------------------------------------------- | ----------------------- | ------------ | -------------- |
+| `src/expression/node/AssignmentNode.ts`         | 39                      | `precedence` | Add null check |
+| `src/expression/node/ConditionalNode.ts`        | 156,165,174,231,243,255 | `precedence` | Add null check |
+| `src/expression/node/FunctionAssignmentNode.ts` | 38                      | `precedence` | Add null check |
+| `src/expression/node/FunctionNode.ts`           | 70                      | `match`      | Add null check |
+| `src/expression/node/OperatorNode.ts`           | 132,160,182,240         | `precedence` | Add null check |
+| `src/expression/node/RangeNode.ts`              | 54,59,64                | `precedence` | Add null check |
+| `src/expression/node/RelationalNode.ts`         | 156,209,242             | `precedence` | Add null check |
+| `src/expression/operators.ts`                   | 313                     | `precedence` | Add null check |
 
------
+---
 
 ## Part 6: Commands Reference
 
@@ -595,7 +599,7 @@ ls -la lib/wasm/
 node -e "import('./lib/esm/index.js').then(m => console.log(Object.keys(m)))"
 ```
 
------
+---
 
 ## Part 7: Success Criteria
 
@@ -620,49 +624,49 @@ node -e "import('./lib/esm/index.js').then(m => console.log(Object.keys(m)))"
 1. All exported types are properly visible
 1. No runtime errors from type mismatches
 
------
+---
 
 ## Appendix A: Glossary of Error Codes
 
-|Code   |Name                      |Description                                              |
-|-------|--------------------------|---------------------------------------------------------|
-|TS2322 |Type not assignable       |Value of type X cannot be assigned to type Y             |
-|TS2345 |Argument type mismatch    |Function argument doesn’t match parameter type           |
-|TS2454 |Used before assigned      |Variable may be used before a value is assigned          |
-|TS2538 |Invalid index type        |Type cannot be used as an index (usually null/undefined) |
-|TS2564 |Not initialized           |Property declared but not assigned in constructor        |
-|TS4023 |Unexported type in export |Exported item references type not exported               |
-|TS4094 |Private in anonymous class|Cannot have private/protected in exported anonymous class|
-|TS6133 |Unused declaration        |Variable/parameter declared but never read               |
-|TS6196 |Unused import             |Type imported but never used                             |
-|TS7029 |Fallthrough in switch     |Switch case falls through to next case                   |
-|TS7030 |Not all paths return      |Function doesn’t return value in all code paths          |
-|TS18047|Possibly null             |Value might be null when used                            |
-|TS18048|Possibly undefined        |Value might be undefined when used                       |
+| Code    | Name                       | Description                                               |
+| ------- | -------------------------- | --------------------------------------------------------- |
+| TS2322  | Type not assignable        | Value of type X cannot be assigned to type Y              |
+| TS2345  | Argument type mismatch     | Function argument doesn’t match parameter type            |
+| TS2454  | Used before assigned       | Variable may be used before a value is assigned           |
+| TS2538  | Invalid index type         | Type cannot be used as an index (usually null/undefined)  |
+| TS2564  | Not initialized            | Property declared but not assigned in constructor         |
+| TS4023  | Unexported type in export  | Exported item references type not exported                |
+| TS4094  | Private in anonymous class | Cannot have private/protected in exported anonymous class |
+| TS6133  | Unused declaration         | Variable/parameter declared but never read                |
+| TS6196  | Unused import              | Type imported but never used                              |
+| TS7029  | Fallthrough in switch      | Switch case falls through to next case                    |
+| TS7030  | Not all paths return       | Function doesn’t return value in all code paths           |
+| TS18047 | Possibly null              | Value might be null when used                             |
+| TS18048 | Possibly undefined         | Value might be undefined when used                        |
 
------
+---
 
 ## Appendix B: Version History
 
-|Version|Date          |Changes                                          |
-|-------|--------------|-------------------------------------------------|
-|1.0    |2025-12-14    |Initial corrective action plan                   |
-|1.1    |2025-12-14    |Second detailed plan with code examples          |
-|**2.0**|**2025-12-14**|**Consolidated plan with verified current state**|
+| Version | Date           | Changes                                           |
+| ------- | -------------- | ------------------------------------------------- |
+| 1.0     | 2025-12-14     | Initial corrective action plan                    |
+| 1.1     | 2025-12-14     | Second detailed plan with code examples           |
+| **2.0** | **2025-12-14** | **Consolidated plan with verified current state** |
 
------
+---
 
 ## Appendix C: Key Corrections from Previous Plans
 
-|Previous Claim                         |Correction                                 |
-|---------------------------------------|-------------------------------------------|
-|“WASM build non-functional”            |WASM build works correctly                 |
-|“~1,046 TypeScript errors”             |~347 errors (verified)                     |
-|“node_modules missing”                 |Dependencies install correctly             |
-|“TypeScript coverage 9%”               |Coverage ~50.5%                            |
-|“Architecture fundamentally flawed”    |Architecture is correct, just incomplete   |
-|"AssemblyScript ≠ TypeScript confusion"|src/wasm correctly uses pure AssemblyScript|
+| Previous Claim                          | Correction                                  |
+| --------------------------------------- | ------------------------------------------- |
+| “WASM build non-functional”             | WASM build works correctly                  |
+| “~1,046 TypeScript errors”              | ~347 errors (verified)                      |
+| “node_modules missing”                  | Dependencies install correctly              |
+| “TypeScript coverage 9%”                | Coverage ~50.5%                             |
+| “Architecture fundamentally flawed”     | Architecture is correct, just incomplete    |
+| "AssemblyScript ≠ TypeScript confusion" | src/wasm correctly uses pure AssemblyScript |
 
------
+---
 
-*This consolidated plan supersedes CORRECTIVE_ACTION_PLAN.md and MathJS_Dual_Build_System_-_Corrective_Action_Plan.md*
+_This consolidated plan supersedes CORRECTIVE*ACTION_PLAN.md and MathJS_Dual_Build_System*-\_Corrective_Action_Plan.md_

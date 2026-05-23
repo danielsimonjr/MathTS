@@ -70,13 +70,8 @@
     "Complex arithmetic follows mathematical definitions",
     "Test coverage >90% for arithmetic functions"
   ],
-  "filesCreated": [
-    "functions/src/typed/arithmetic.ts",
-    "functions/tests/typed-arithmetic.test.ts"
-  ],
-  "filesModified": [
-    "functions/src/typed/index.ts"
-  ],
+  "filesCreated": ["functions/src/typed/arithmetic.ts", "functions/tests/typed-arithmetic.test.ts"],
+  "filesModified": ["functions/src/typed/index.ts"],
   "totalEstimatedHours": 24,
   "notes": "Sprint 17 arithmetic functions implemented in unified arithmetic.ts. Fixed method name bugs (sub->subtract, mul->multiply, div->divide) for Complex, Fraction, BigNumber type dispatch."
 }

@@ -1,14 +1,14 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for hasNumericValue
 interface HasNumericValueDependencies {
-  typed: TypedFunction
-  isNumeric: (x: unknown) => boolean
+  typed: TypedFunction;
+  isNumeric: (x: unknown) => boolean;
 }
 
-const name = 'hasNumericValue'
-const dependencies = ['typed', 'isNumeric']
+const name = 'hasNumericValue';
+const dependencies = ['typed', 'isNumeric'];
 
 export const createHasNumericValue = /* #__PURE__ */ factory(
   name,
@@ -49,11 +49,11 @@ export const createHasNumericValue = /* #__PURE__ */ factory(
     return typed(name, {
       boolean: (): boolean => true,
       string: function (x: string): boolean {
-        return x.trim().length > 0 && !isNaN(Number(x))
+        return x.trim().length > 0 && !isNaN(Number(x));
       },
       any: function (x: unknown): boolean {
-        return isNumeric(x)
-      }
-    })
+        return isNumeric(x);
+      },
+    });
   }
-)
+);

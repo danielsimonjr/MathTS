@@ -153,16 +153,30 @@ declare module 'typed-function' {
   /**
    * Handler function called when no signature matches
    */
-  export type MismatchHandler = (name: string, args: ArrayLike<unknown>, signatures: Signature[]) => never;
+  export type MismatchHandler = (
+    name: string,
+    args: ArrayLike<unknown>,
+    signatures: Signature[]
+  ) => never;
 
   /**
    * The main typed function factory interface
    */
   export interface TypedInstance {
     /** Create a typed function with name and signature definitions */
-    (name: string, signatures: Record<string, SignatureFunction | ReferTo | ReferToSelf>): TypedFunction;
+    (
+      name: string,
+      signatures: Record<string, SignatureFunction | ReferTo | ReferToSelf>
+    ): TypedFunction;
     (signatures: Record<string, SignatureFunction | ReferTo | ReferToSelf>): TypedFunction;
-    (...args: Array<string | Record<string, SignatureFunction | ReferTo | ReferToSelf> | TypedFunction | (SignatureFunction & { signature: string })>): TypedFunction;
+    (
+      ...args: Array<
+        | string
+        | Record<string, SignatureFunction | ReferTo | ReferToSelf>
+        | TypedFunction
+        | (SignatureFunction & { signature: string })
+      >
+    ): TypedFunction;
 
     /** Create a new isolated typed instance */
     create: () => TypedInstance;
@@ -189,10 +203,18 @@ declare module 'typed-function' {
     clearConversions: () => void;
 
     /** Find the implementation function for a signature */
-    find: (fn: TypedFunction, signature: string | string[], options?: FindSignatureOptions) => SignatureFunction;
+    find: (
+      fn: TypedFunction,
+      signature: string | string[],
+      options?: FindSignatureOptions
+    ) => SignatureFunction;
 
     /** Find the full signature object for a signature */
-    findSignature: (fn: TypedFunction, signature: string | string[], options?: FindSignatureOptions) => Signature;
+    findSignature: (
+      fn: TypedFunction,
+      signature: string | string[],
+      options?: FindSignatureOptions
+    ) => Signature;
 
     /** Resolve which signature would be called for given arguments */
     resolve: (fn: TypedFunction, args: ArrayLike<unknown>) => Signature | null;
@@ -204,7 +226,9 @@ declare module 'typed-function' {
     isTypedFunction: (entity: unknown) => entity is TypedFunction;
 
     /** Create a reference to other signatures */
-    referTo: (...args: [...string[], (...fns: SignatureFunction[]) => SignatureFunction]) => ReferTo;
+    referTo: (
+      ...args: [...string[], (...fns: SignatureFunction[]) => SignatureFunction]
+    ) => ReferTo;
 
     /** Create a self-reference */
     referToSelf: (callback: (self: TypedFunction) => SignatureFunction) => ReferToSelf;

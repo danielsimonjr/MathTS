@@ -241,10 +241,7 @@ function modInverse(a: i64, m: i64): i64 {
 }
 
 /** Chinese Remainder Theorem solver — moduli must be pairwise coprime. */
-export function chineseRemainder(
-  rem: Float64Array,
-  mods: Float64Array
-): f64 {
+export function chineseRemainder(rem: Float64Array, mods: Float64Array): f64 {
   const n: i32 = rem.length;
   if (n == 0 || mods.length != n) return NaN;
   let bigM: i64 = 1;
@@ -260,7 +257,7 @@ export function chineseRemainder(
     const mi: i64 = bigM / modi;
     const yi: i64 = modInverse(((mi % modi) + modi) % modi, modi);
     if (yi == -1) return NaN;
-    x += (<i64>rem[i]) * mi * yi;
+    x += <i64>rem[i] * mi * yi;
   }
   return <f64>(((x % bigM) + bigM) % bigM);
 }

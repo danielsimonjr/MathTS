@@ -1,21 +1,21 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import type { Complex } from '../type/complex/Complex.js'
-import { cothNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import type { Complex } from '../type/complex/Complex.js';
+import { cothNumber } from '../plain/number/index.js';
 
 // Type definitions for coth
 interface BigNumberConstructor {
-  new (value: number): BigNumber
+  new (value: number): BigNumber;
 }
 
 interface CothDependencies {
-  typed: TypedFunction
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'coth'
-const dependencies = ['typed', 'BigNumber']
+const name = 'coth';
+const dependencies = ['typed', 'BigNumber'];
 
 export const createCoth = /* #__PURE__ */ factory(
   name,
@@ -49,7 +49,9 @@ export const createCoth = /* #__PURE__ */ factory(
       number: cothNumber,
       Complex: (x: Complex) => x.coth(),
       BigNumber: (x: BigNumber): BigNumber =>
-        new BigNumber(1).div((x as unknown as { tanh(): unknown }).tanh() as any) as unknown as BigNumber
-    }) as TypedFunction
+        new BigNumber(1).div(
+          (x as unknown as { tanh(): unknown }).tanh() as any
+        ) as unknown as BigNumber,
+    }) as TypedFunction;
   }
-)
+);

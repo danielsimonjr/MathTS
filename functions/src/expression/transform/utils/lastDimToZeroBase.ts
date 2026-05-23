@@ -1,6 +1,6 @@
-import { isCollection } from '../../../utils/is.js'
-import { dimToZeroBase, isNumberOrBigNumber } from './dimToZeroBase.js'
-import type { VariadicArgs } from '../types.js'
+import { isCollection } from '../../../utils/is.js';
+import { dimToZeroBase, isNumberOrBigNumber } from './dimToZeroBase.js';
+import type { VariadicArgs } from '../types.js';
 
 /**
  * Change last argument dim from one-based to zero-based.
@@ -10,11 +10,11 @@ import type { VariadicArgs } from '../types.js'
  */
 export function lastDimToZeroBase(args: VariadicArgs): VariadicArgs {
   if (args.length === 2 && isCollection(args[0])) {
-    args = args.slice()
-    const dim = args[1]
+    args = args.slice();
+    const dim = args[1];
     if (isNumberOrBigNumber(dim)) {
-      args[1] = dimToZeroBase(dim)
+      args[1] = dimToZeroBase(dim);
     }
   }
-  return args
+  return args;
 }

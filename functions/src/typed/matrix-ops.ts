@@ -28,7 +28,7 @@ type i32 = number;
 
 /** Clone a matrix (deep copy). */
 function cloneMatrix(A: number[][]): number[][] {
-  return A.map(r => [...r]);
+  return A.map((r) => [...r]);
 }
 
 /** Create an n x n identity matrix. */
@@ -72,13 +72,7 @@ async function matMul(A: number[][], B: number[][]): Promise<number[][]> {
   const n = B[0].length;
 
   if (computePool.shouldParallelize(m * n)) {
-    const r = await computePool.matmul(
-      flatten(A, m, p),
-      m,
-      p,
-      flatten(B, p, n),
-      n
-    );
+    const r = await computePool.matmul(flatten(A, m, p), m, p, flatten(B, p, n), n);
     return unflatten(r.result, m, n);
   }
 
@@ -99,9 +93,7 @@ async function matMul(A: number[][], B: number[][]): Promise<number[][]> {
 function transpose(A: number[][]): number[][] {
   const m = A.length;
   const n = A[0].length;
-  return Array.from({ length: n }, (_, j) =>
-    Array.from({ length: m }, (_, i) => A[i][j])
-  );
+  return Array.from({ length: n }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
 }
 
 /** Compute trace of a square matrix. */
@@ -265,7 +257,10 @@ export function matrixRank(A: number[][], tol: f64 = 1e-10): i32 {
   for (let i = 0; i < rref.length; i++) {
     let nonzero = false;
     for (let j = 0; j < rref[i].length; j++) {
-      if (Math.abs(rref[i][j]) > tol) { nonzero = true; break; }
+      if (Math.abs(rref[i][j]) > tol) {
+        nonzero = true;
+        break;
+      }
     }
     if (nonzero) r++;
   }
@@ -366,7 +361,7 @@ export interface HessenbergResult {
 export function hessenbergForm(A: number[][]): HessenbergResult {
   const n = assertSquare(A, 'hessenbergForm');
   const H = cloneMatrix(A);
-  let Q = eye(n);
+  const Q = eye(n);
 
   for (let k = 0; k < n - 2; k++) {
     // Extract column below diagonal
@@ -537,7 +532,7 @@ function matrixInverse(A: number[][]): number[][] {
     }
   }
 
-  return M.map(row => row.slice(n));
+  return M.map((row) => row.slice(n));
 }
 
 /** Fractional power via eigendecomposition. */
@@ -551,7 +546,9 @@ async function matPowFractional(A: number[][], p: f64): Promise<number[][]> {
       throw new Error('matrixPower: fractional power with complex eigenvalues not supported');
     }
     if (v.re < 0 && !Number.isInteger(p)) {
-      throw new Error('matrixPower: fractional power of matrix with negative eigenvalues not supported');
+      throw new Error(
+        'matrixPower: fractional power of matrix with negative eigenvalues not supported'
+      );
     }
   }
 
@@ -588,7 +585,7 @@ async function matPowFractional(A: number[][], p: f64): Promise<number[][]> {
  * matrixLog([[1,1],[0,1]]) // => [[0,1],[0,0]]
  */
 export async function matrixLog(A: number[][]): Promise<number[][]> {
-  const n = assertSquare(A, 'matrixLog');
+  assertSquare(A, 'matrixLog');
 
   // Use inverse scaling and squaring: repeatedly take square roots
   // until A^(1/2^s) is close to I, then use Taylor series, then scale back.
@@ -621,12 +618,12 @@ async function matLogScalingSquaring(A: number[][]): Promise<number[][]> {
   const X: number[][] = cloneMatrix(M);
   for (let i = 0; i < n; i++) X[i][i] -= 1;
 
-  let logM = cloneMatrix(X);
+  const logM = cloneMatrix(X);
   let Xk = cloneMatrix(X);
   const terms = 20;
   for (let k = 2; k <= terms; k++) {
     Xk = await matMul(Xk, X);
-    const sign = (k % 2 === 0) ? -1 : 1;
+    const sign = k % 2 === 0 ? -1 : 1;
     // Check if Xk is negligible
     let normXk = 0;
     for (let i = 0; i < n; i++) {
@@ -718,7 +715,7 @@ async function matrixSqrtEig(A: number[][]): Promise<number[][]> {
     for (let i = 0; i < n; i++) X[i][i] -= 1;
     const result = eye(n);
     let Xk = eye(n);
-    const coeffs = [1, 0.5, -1/8, 1/16, -5/128, 7/256, -21/1024];
+    const coeffs = [1, 0.5, -1 / 8, 1 / 16, -5 / 128, 7 / 256, -21 / 1024];
     for (let k = 1; k < coeffs.length; k++) {
       Xk = await matMul(Xk, X);
       for (let i = 0; i < n; i++) {
@@ -884,7 +881,7 @@ export async function jordanForm(A: number[][]): Promise<JordanResult> {
 
   // Assemble P from columns
   const P = Array.from({ length: n }, (_, i) =>
-    Array.from({ length: n }, (_, j) => (j < Pcols.length ? Pcols[j][i] : (i === j ? 1 : 0)))
+    Array.from({ length: n }, (_, j) => (j < Pcols.length ? Pcols[j][i] : i === j ? 1 : 0))
   );
 
   return { J, P };
@@ -896,7 +893,10 @@ function matrixRankInternal(A: number[][], tol: f64): i32 {
   let r = 0;
   for (let i = 0; i < rref.length; i++) {
     for (let j = 0; j < rref[i].length; j++) {
-      if (Math.abs(rref[i][j]) > tol) { r++; break; }
+      if (Math.abs(rref[i][j]) > tol) {
+        r++;
+        break;
+      }
     }
   }
   return r;
@@ -999,7 +999,10 @@ function findKernelVector(A: number[][], n: i32, tol: f64): number[] {
   // First free column
   let freeCol = -1;
   for (let j = 0; j < n; j++) {
-    if (!pivotCols.has(j)) { freeCol = j; break; }
+    if (!pivotCols.has(j)) {
+      freeCol = j;
+      break;
+    }
   }
 
   if (freeCol === -1) {
@@ -1072,7 +1075,7 @@ async function solveApprox(A: number[][], b: number[], n: i32): Promise<number[]
     }
   }
 
-  const x = M.map(row => row[n]);
+  const x = M.map((row) => row[n]);
 
   // Normalize
   let norm = 0;

@@ -5,12 +5,7 @@
  */
 
 /** Reduced row echelon form of an m x n row-major matrix. */
-export function rowReduce(
-  a: Float64Array,
-  m: i32,
-  n: i32,
-  tol: f64
-): Float64Array {
+export function rowReduce(a: Float64Array, m: i32, n: i32, tol: f64): Float64Array {
   if (m <= 0 || n <= 0) return new Float64Array(0);
   const out = new Float64Array(m * n);
   for (let i = 0; i < m * n; i++) out[i] = a[i];
@@ -57,10 +52,7 @@ export function rowReduce(
  * Characteristic polynomial of an n x n matrix (Faddeev-LeVerrier).
  * Returns n + 1 coefficients, constant term first, monic.
  */
-export function characteristicPolynomial(
-  a: Float64Array,
-  n: i32
-): Float64Array {
+export function characteristicPolynomial(a: Float64Array, n: i32): Float64Array {
   if (n <= 0) return new Float64Array(0);
   const out = new Float64Array(n + 1);
   out[n] = 1.0;

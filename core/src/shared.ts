@@ -10,5 +10,5 @@
  * @param {string} property
  */
 export function hasOwnProperty(object: any, property: string): boolean {
-  return object && Object.hasOwnProperty.call(object, property)
+  return object && Object.hasOwnProperty.call(object, property);
 }

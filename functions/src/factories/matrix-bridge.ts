@@ -115,28 +115,16 @@ export class MathJSDenseMatrix {
    * Map over all elements, producing a new matrix.
    */
   map(
-    callback: (
-      value: number,
-      index: number[],
-      matrix: MathJSDenseMatrix
-    ) => number
+    callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => number
   ): MathJSDenseMatrix {
-    const result = this._data.map((row, i) =>
-      row.map((val, j) => callback(val, [i, j], this))
-    );
+    const result = this._data.map((row, i) => row.map((val, j) => callback(val, [i, j], this)));
     return new MathJSDenseMatrix(result);
   }
 
   /**
    * Iterate over all elements.
    */
-  forEach(
-    callback: (
-      value: number,
-      index: number[],
-      matrix: MathJSDenseMatrix
-    ) => void
-  ): void {
+  forEach(callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => void): void {
     this._data.forEach((row, i) => {
       row.forEach((val, j) => callback(val, [i, j], this));
     });
@@ -196,7 +184,7 @@ export class MathJSDenseMatrix {
       const flat: number[] = [];
       const oldData = this._data as unknown as number[];
       for (let i = 0; i < len; i++) {
-        flat.push(i < (this._size[0] ?? 0) ? oldData[i] ?? fill : fill);
+        flat.push(i < (this._size[0] ?? 0) ? (oldData[i] ?? fill) : fill);
       }
       this._data = flat as unknown as number[][];
       this._size = [len];
@@ -211,11 +199,7 @@ export class MathJSDenseMatrix {
     for (let i = 0; i < rows; i++) {
       const row: number[] = [];
       for (let j = 0; j < cols; j++) {
-        row.push(
-          i < oldRows && j < oldCols && this._data[i]
-            ? this._data[i][j] ?? fill
-            : fill
-        );
+        row.push(i < oldRows && j < oldCols && this._data[i] ? (this._data[i][j] ?? fill) : fill);
       }
       data.push(row);
     }
@@ -324,9 +308,7 @@ export class MathJSDenseMatrix {
     defaultValue: number = 0
   ): MathJSDenseMatrix {
     const [rows, cols] = size;
-    const data: number[][] = Array.from({ length: rows }, () =>
-      new Array(cols).fill(defaultValue)
-    );
+    const data: number[][] = Array.from({ length: rows }, () => new Array(cols).fill(defaultValue));
     // Determine diagonal length
     const kRow = k < 0 ? -k : 0;
     const kCol = k > 0 ? k : 0;
@@ -494,9 +476,7 @@ export class MathJSSparseMatrix {
   get(index: number[]): any {
     const [i, j] = index;
     if (j < 0 || j >= this._size[1] || i < 0 || i >= this._size[0]) {
-      throw new RangeError(
-        `Index out of range (${i}, ${j}) for matrix of size [${this._size}]`
-      );
+      throw new RangeError(`Index out of range (${i}, ${j}) for matrix of size [${this._size}]`);
     }
     for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
       if (this._index[k] === i) {
@@ -564,9 +544,7 @@ export class MathJSSparseMatrix {
    */
   valueOf(): any[][] {
     const [rows, cols] = this._size;
-    const result: any[][] = Array.from({ length: rows }, () =>
-      new Array(cols).fill(0)
-    );
+    const result: any[][] = Array.from({ length: rows }, () => new Array(cols).fill(0));
     for (let j = 0; j < cols; j++) {
       for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
         result[this._index[k]][j] = this._values ? this._values[k] : 1;
@@ -660,13 +638,7 @@ export class MathJSSparseMatrix {
    * Iterate over non-zero elements.
    * Callback signature: (value, index, matrix) => void
    */
-  forEach(
-    callback: (
-      value: any,
-      index: number[],
-      matrix: MathJSSparseMatrix
-    ) => void
-  ): void {
+  forEach(callback: (value: any, index: number[], matrix: MathJSSparseMatrix) => void): void {
     const cols = this._size[1];
     for (let j = 0; j < cols; j++) {
       for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
@@ -680,7 +652,7 @@ export class MathJSSparseMatrix {
   /**
    * Resize the matrix. Truncates or extends as needed.
    */
-  resize(newSize: number[], defaultValue?: any): MathJSSparseMatrix {
+  resize(newSize: number[], _defaultValue?: unknown): MathJSSparseMatrix {
     const [newRows, newCols] = newSize;
     const oldCols = this._size[1];
 
@@ -748,7 +720,10 @@ export class MathJSSparseMatrix {
         lines.push(`    (${this._index[k]}, ${j}) ==> ${v}`);
       }
     }
-    return `Sparse Matrix [${this._size[0]} x ${this._size[1]}] (${this._index.length} non-zero)\n` + lines.join('\n');
+    return (
+      `Sparse Matrix [${this._size[0]} x ${this._size[1]}] (${this._index.length} non-zero)\n` +
+      lines.join('\n')
+    );
   }
 
   /**
@@ -909,9 +884,7 @@ export function createMatrixBridge() {
       return isSparse ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
     }
     if (!data) {
-      return storageType === 'sparse'
-        ? new MathJSSparseMatrix()
-        : new MathJSDenseMatrix();
+      return storageType === 'sparse' ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
     }
     if (data instanceof MathJSSparseMatrix) {
       return data;
@@ -922,9 +895,7 @@ export function createMatrixBridge() {
       }
       return data;
     }
-    return storageType === 'sparse'
-      ? new MathJSSparseMatrix(data)
-      : new MathJSDenseMatrix(data);
+    return storageType === 'sparse' ? new MathJSSparseMatrix(data) : new MathJSDenseMatrix(data);
   };
 }
 

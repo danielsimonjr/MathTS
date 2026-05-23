@@ -15,7 +15,11 @@ describe('WASM Operations', () => {
   let wasmBackendSIMD: WASMBackend;
 
   // Helper to create a test matrix
-  function createMatrix(rows: number, cols: number, fill?: (i: number, j: number) => number): DenseMatrix {
+  function createMatrix(
+    rows: number,
+    cols: number,
+    fill?: (i: number, j: number) => number
+  ): DenseMatrix {
     const data: number[][] = [];
     for (let i = 0; i < rows; i++) {
       const row: number[] = [];

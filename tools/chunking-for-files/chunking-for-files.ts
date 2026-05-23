@@ -56,7 +56,7 @@ function simpleHash(content: string): string {
   let hash = 0;
   for (let i = 0; i < content.length; i++) {
     const char = content.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
   return Math.abs(hash).toString(16).padStart(8, '0');
@@ -91,9 +91,12 @@ function detectFileType(filePath: string): FileType {
 // Get file extension for chunks based on file type
 function getChunkExtension(fileType: FileType): string {
   switch (fileType) {
-    case 'markdown': return '.md';
-    case 'json': return '.json';
-    case 'typescript': return '.ts';
+    case 'markdown':
+      return '.md';
+    case 'json':
+      return '.json';
+    case 'typescript':
+      return '.ts';
   }
 }
 
@@ -106,7 +109,8 @@ function parseMarkdownSections(content: string, splitLevel: number): Section[] {
   const lines = normalizedContent.split('\n');
   const sections: Section[] = [];
 
-  let currentSection: { title: string; level: number; lines: string[]; startLine: number } | null = null;
+  let currentSection: { title: string; level: number; lines: string[]; startLine: number } | null =
+    null;
   const headingRegex = new RegExp(`^(#{1,${splitLevel}})\\s+(.+)$`);
 
   let preambleLines: string[] = [];
@@ -125,7 +129,7 @@ function parseMarkdownSections(content: string, splitLevel: number): Section[] {
           level: 0,
           content: preambleLines.join('\n'),
           startLine: preambleStart + 1,
-          endLine: i
+          endLine: i,
         });
         preambleLines = [];
       }
@@ -136,7 +140,7 @@ function parseMarkdownSections(content: string, splitLevel: number): Section[] {
           level: currentSection.level,
           content: currentSection.lines.join('\n'),
           startLine: currentSection.startLine,
-          endLine: i
+          endLine: i,
         });
       }
 
@@ -145,7 +149,7 @@ function parseMarkdownSections(content: string, splitLevel: number): Section[] {
         title: match[2].trim(),
         level: level,
         lines: [line],
-        startLine: i + 1
+        startLine: i + 1,
       };
     } else {
       if (currentSection) {
@@ -163,7 +167,7 @@ function parseMarkdownSections(content: string, splitLevel: number): Section[] {
       level: currentSection.level,
       content: currentSection.lines.join('\n'),
       startLine: currentSection.startLine,
-      endLine: lines.length
+      endLine: lines.length,
     });
   } else if (preambleLines.length > 0) {
     sections.push({
@@ -171,7 +175,7 @@ function parseMarkdownSections(content: string, splitLevel: number): Section[] {
       level: 0,
       content: preambleLines.join('\n'),
       startLine: 1,
-      endLine: lines.length
+      endLine: lines.length,
     });
   }
 
@@ -197,7 +201,7 @@ function parseJsonSections(content: string): Section[] {
         level: 0,
         content: normalizedContent,
         startLine: 1,
-        endLine: lines.length
+        endLine: lines.length,
       });
     } else if (typeof parsed === 'object' && parsed !== null) {
       // Split by top-level keys
@@ -214,7 +218,7 @@ function parseJsonSections(content: string): Section[] {
           level: 1,
           content: chunkContent,
           startLine: i + 1, // Approximate
-          endLine: i + lineCount
+          endLine: i + lineCount,
         });
       }
     }
@@ -226,7 +230,7 @@ function parseJsonSections(content: string): Section[] {
       level: 0,
       content: normalizedContent,
       startLine: 1,
-      endLine: lines.length
+      endLine: lines.length,
     });
   }
 
@@ -264,7 +268,8 @@ function parseTypeScriptSections(content: string): Section[] {
   // Patterns for top-level declarations
   const patterns = {
     import: /^import\s+/,
-    export: /^export\s+(?:default\s+)?(?:async\s+)?(?:function|class|interface|type|const|let|var|enum)/,
+    export:
+      /^export\s+(?:default\s+)?(?:async\s+)?(?:function|class|interface|type|const|let|var|enum)/,
     exportFrom: /^export\s+\{[^}]*\}\s+from/,
     exportAll: /^export\s+\*\s+from/,
     function: /^(?:async\s+)?function\s+(\w+)/,
@@ -279,10 +284,17 @@ function parseTypeScriptSections(content: string): Section[] {
     arrowFunctionSimple: /^(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s+)?\w+\s*=>/,
     decorator: /^@(\w+)(?:\([^)]*\))?$/,
     namespace: /^(?:export\s+)?namespace\s+(\w+)/,
-    classMethod: /^\s+(?:public|private|protected|static|async|readonly)*\s*(?:get|set)?\s*(\w+)\s*[<(]/,
+    classMethod:
+      /^\s+(?:public|private|protected|static|async|readonly)*\s*(?:get|set)?\s*(\w+)\s*[<(]/,
   };
 
-  let currentSection: { title: string; level: number; lines: string[]; startLine: number; type: string } | null = null;
+  let currentSection: {
+    title: string;
+    level: number;
+    lines: string[];
+    startLine: number;
+    type: string;
+  } | null = null;
   let importLines: string[] = [];
   let importStart = -1;
   let importBracketDepth = 0; // Track brackets within import statements
@@ -313,7 +325,7 @@ function parseTypeScriptSections(content: string): Section[] {
     templateExpressionDepth: 0,
     inBlockComment: false,
     nestedStringChar: '',
-    inRegex: false
+    inRegex: false,
   };
 
   // Helper to count brackets in a line (respecting strings and comments, with cross-line state)
@@ -394,7 +406,12 @@ function parseTypeScriptSections(content: string): Section[] {
         // Determine which quote char to match
         const activeQuote = stringState.nestedStringChar || stringState.stringChar;
 
-        if (stringState.stringChar === '`' && stringState.nestedStringChar === '' && char === '$' && nextChar === '{') {
+        if (
+          stringState.stringChar === '`' &&
+          stringState.nestedStringChar === '' &&
+          char === '$' &&
+          nextChar === '{'
+        ) {
           // Entering ${...} expression inside template literal (only when not in nested string)
           stringState.templateExpressionDepth++;
           stringState.inString = false;
@@ -481,7 +498,7 @@ function parseTypeScriptSections(content: string): Section[] {
       templateExpressionDepth: 0,
       inBlockComment: false,
       nestedStringChar: '',
-      inRegex: false
+      inRegex: false,
     };
   }
 
@@ -490,14 +507,15 @@ function parseTypeScriptSections(content: string): Section[] {
     if (currentSection && currentSection.lines.length > 0) {
       // Prepend any JSDoc comments and decorators
       const allLines = [...decorators, ...pendingComments, ...currentSection.lines];
-      const adjustedStartLine = currentSection.startLine - decorators.length - pendingComments.length;
+      const adjustedStartLine =
+        currentSection.startLine - decorators.length - pendingComments.length;
 
       sections.push({
         title: currentSection.title,
         level: currentSection.level,
         content: allLines.join('\n'),
         startLine: adjustedStartLine > 0 ? adjustedStartLine : currentSection.startLine,
-        endLine: endLine
+        endLine: endLine,
       });
     }
     currentSection = null;
@@ -518,7 +536,7 @@ function parseTypeScriptSections(content: string): Section[] {
         level: 0,
         content: importLines.join('\n'),
         startLine: importStart + 1,
-        endLine: endLine
+        endLine: endLine,
       });
       importLines = [];
       importStart = -1;
@@ -567,7 +585,11 @@ function parseTypeScriptSections(content: string): Section[] {
     }
 
     // Handle regular multi-line comments (not JSDoc)
-    if (trimmedLine.startsWith('/*') && !trimmedLine.startsWith('/**') && !trimmedLine.includes('*/')) {
+    if (
+      trimmedLine.startsWith('/*') &&
+      !trimmedLine.startsWith('/**') &&
+      !trimmedLine.includes('*/')
+    ) {
       if (currentSection) {
         currentSection.lines.push(line);
       }
@@ -599,7 +621,7 @@ function parseTypeScriptSections(content: string): Section[] {
               level: 2,
               lines: [line],
               startLine: i + 1,
-              type: 'method'
+              type: 'method',
             };
             const methodBrackets = countBrackets(line);
             bracketDepth = methodBrackets.brackets;
@@ -660,14 +682,20 @@ function parseTypeScriptSections(content: string): Section[] {
       matched = true;
     }
     // Arrow function declaration
-    else if (patterns.arrowFunction.test(trimmedLine) || patterns.arrowFunctionSimple.test(trimmedLine)) {
+    else if (
+      patterns.arrowFunction.test(trimmedLine) ||
+      patterns.arrowFunctionSimple.test(trimmedLine)
+    ) {
       const match = trimmedLine.match(/const\s+(\w+)/);
       title = match ? `function:${match[1]}` : '_function';
       level = 1;
       matched = true;
     }
     // Function declaration
-    else if (patterns.function.test(trimmedLine) || /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/.test(trimmedLine)) {
+    else if (
+      patterns.function.test(trimmedLine) ||
+      /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/.test(trimmedLine)
+    ) {
       const match = trimmedLine.match(/function\s+(\w+)/);
       title = match ? `function:${match[1]}` : '_function';
       level = 1;
@@ -681,7 +709,10 @@ function parseTypeScriptSections(content: string): Section[] {
       matched = true;
     }
     // Class declaration
-    else if (patterns.class.test(trimmedLine) || /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/.test(trimmedLine)) {
+    else if (
+      patterns.class.test(trimmedLine) ||
+      /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/.test(trimmedLine)
+    ) {
       const match = trimmedLine.match(/class\s+(\w+)/);
       title = match ? `class:${match[1]}` : '_class';
       currentClassName = match ? match[1] : '';
@@ -691,14 +722,18 @@ function parseTypeScriptSections(content: string): Section[] {
       matched = true;
     }
     // Interface declaration (with generic support)
-    else if (patterns.interface.test(trimmedLine) || /^(?:export\s+)?interface\s+(\w+)/.test(trimmedLine)) {
+    else if (
+      patterns.interface.test(trimmedLine) ||
+      /^(?:export\s+)?interface\s+(\w+)/.test(trimmedLine)
+    ) {
       const match = trimmedLine.match(/interface\s+(\w+)/);
       title = match ? `interface:${match[1]}` : '_interface';
       level = 2;
       matched = true;
       // Handle generic parameters <T, U>
       if (trimmedLine.includes('<') && !trimmedLine.includes('{')) {
-        const angleBrackets = (trimmedLine.match(/</g) || []).length - (trimmedLine.match(/>/g) || []).length;
+        const angleBrackets =
+          (trimmedLine.match(/</g) || []).length - (trimmedLine.match(/>/g) || []).length;
         if (angleBrackets > 0) {
           // Multi-line generic, don't count angle brackets as part of body
           bracketDepth = 0;
@@ -713,7 +748,8 @@ function parseTypeScriptSections(content: string): Section[] {
       matched = true;
       // Handle generic parameters <T, U>
       if (trimmedLine.includes('<') && !trimmedLine.includes('=')) {
-        const angleBrackets = (trimmedLine.match(/</g) || []).length - (trimmedLine.match(/>/g) || []).length;
+        const angleBrackets =
+          (trimmedLine.match(/</g) || []).length - (trimmedLine.match(/>/g) || []).length;
         if (angleBrackets > 0) {
           // Multi-line generic, don't count angle brackets
           bracketDepth = 0;
@@ -733,14 +769,12 @@ function parseTypeScriptSections(content: string): Section[] {
       title = match ? `const:${match[1]}` : '_const';
       level = 2;
       matched = true;
-    }
-    else if (patterns.let.test(trimmedLine)) {
+    } else if (patterns.let.test(trimmedLine)) {
       const match = trimmedLine.match(/let\s+(\w+)/);
       title = match ? `let:${match[1]}` : '_let';
       level = 2;
       matched = true;
-    }
-    else if (patterns.var.test(trimmedLine)) {
+    } else if (patterns.var.test(trimmedLine)) {
       const match = trimmedLine.match(/var\s+(\w+)/);
       title = match ? `var:${match[1]}` : '_var';
       level = 2;
@@ -752,15 +786,24 @@ function parseTypeScriptSections(content: string): Section[] {
         title,
         level,
         lines: [line],
-        startLine: decoratorStartLine !== -1 ? decoratorStartLine + 1 : (commentStartLine !== -1 ? commentStartLine + 1 : i + 1),
-        type: title.split(':')[0]
+        startLine:
+          decoratorStartLine !== -1
+            ? decoratorStartLine + 1
+            : commentStartLine !== -1
+              ? commentStartLine + 1
+              : i + 1,
+        type: title.split(':')[0],
       };
       const { brackets, parens } = countBrackets(line);
       bracketDepth = brackets;
       parenDepth = parens;
 
       // Check if single-line declaration
-      if (bracketDepth <= 0 && parenDepth <= 0 && (trimmedLine.endsWith(';') || trimmedLine.endsWith('}'))) {
+      if (
+        bracketDepth <= 0 &&
+        parenDepth <= 0 &&
+        (trimmedLine.endsWith(';') || trimmedLine.endsWith('}'))
+      ) {
         saveCurrentSection(i + 1);
       }
     } else {
@@ -785,7 +828,7 @@ function parseTypeScriptSections(content: string): Section[] {
       level: 0,
       content: normalizedContent,
       startLine: 1,
-      endLine: lines.length
+      endLine: lines.length,
     });
   }
 
@@ -810,7 +853,10 @@ function sanitizeFilename(title: string, index: number, fileType: FileType): str
 // SPLIT COMMAND
 // ============================================================================
 
-function splitFile(inputFile: string, options: { output?: string; level?: number; maxLines?: number; type?: string; dryRun?: boolean }) {
+function splitFile(
+  inputFile: string,
+  options: { output?: string; level?: number; maxLines?: number; type?: string; dryRun?: boolean }
+) {
   const maxLines = options.maxLines ?? 500;
   const dryRun = options.dryRun ?? false;
 
@@ -822,9 +868,10 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
   }
 
   // Detect or use specified file type
-  const fileType: FileType = (options.type && options.type !== 'auto')
-    ? options.type as FileType
-    : detectFileType(absoluteInput);
+  const fileType: FileType =
+    options.type && options.type !== 'auto'
+      ? (options.type as FileType)
+      : detectFileType(absoluteInput);
 
   const splitLevel = options.level ?? (fileType === 'markdown' ? 2 : 1);
 
@@ -890,17 +937,28 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
       endLine: section.endLine,
       lineCount: lineCount,
       hash: simpleHash(section.content),
-      modified: false
+      modified: false,
     };
 
     chunks.push(chunk);
 
-    const levelIndicator = fileType === 'markdown'
-      ? (section.level > 0 ? `h${section.level}` : 'pre')
-      : (section.level === 0 ? 'meta' : section.level === 1 ? 'decl' : section.level === 2 ? 'type' : 'meth');
+    const levelIndicator =
+      fileType === 'markdown'
+        ? section.level > 0
+          ? `h${section.level}`
+          : 'pre'
+        : section.level === 0
+          ? 'meta'
+          : section.level === 1
+            ? 'decl'
+            : section.level === 2
+              ? 'type'
+              : 'meth';
     const sizeWarning = lineCount > maxLines ? ' [LARGE]' : '';
     const warningColor = lineCount > maxLines ? '⚠️ ' : '';
-    console.log(`  ${String(i + 1).padStart(2)}. [${levelIndicator.padEnd(4)}] ${section.title.substring(0, 40).padEnd(40)} ${String(lineCount).padStart(4)} lines${sizeWarning ? ' ' + warningColor + sizeWarning : ''}`);
+    console.log(
+      `  ${String(i + 1).padStart(2)}. [${levelIndicator.padEnd(4)}] ${section.title.substring(0, 40).padEnd(40)} ${String(lineCount).padStart(4)} lines${sizeWarning ? ' ' + warningColor + sizeWarning : ''}`
+    );
 
     // Write chunk file
     if (!dryRun) {
@@ -920,7 +978,7 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
     createdAt: new Date().toISOString(),
     fileType: fileType,
     splitLevel: splitLevel,
-    chunks: chunks
+    chunks: chunks,
   };
 
   if (!dryRun) {
@@ -931,7 +989,7 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
 
   // Summary
   const totalLines = chunks.reduce((sum, c) => sum + c.lineCount, 0);
-  const largeChunks = chunks.filter(c => c.lineCount > maxLines).length;
+  const largeChunks = chunks.filter((c) => c.lineCount > maxLines).length;
 
   console.log(`\nSummary:`);
   console.log(`  Total chunks:  ${chunks.length}`);
@@ -1011,9 +1069,7 @@ function mergeChunks(manifestPath: string, options: { output?: string; dryRun?: 
   }
 
   // Determine output path
-  const outputPath = options.output
-    ? path.resolve(options.output)
-    : manifest.sourceFile;
+  const outputPath = options.output ? path.resolve(options.output) : manifest.sourceFile;
 
   // Check if source file changed since split
   if (fs.existsSync(manifest.sourceFile)) {
@@ -1040,7 +1096,9 @@ function mergeChunks(manifestPath: string, options: { output?: string; dryRun?: 
     console.log(`\nMerged file written: ${outputPath}`);
     console.log(`Total lines: ${mergedContent.split('\n').length}`);
   } else {
-    console.log(`\n[DRY RUN] Would write ${mergedContent.split('\n').length} lines to: ${outputPath}`);
+    console.log(
+      `\n[DRY RUN] Would write ${mergedContent.split('\n').length} lines to: ${outputPath}`
+    );
   }
 }
 
@@ -1099,10 +1157,13 @@ function showStatus(manifestPath: string) {
     }
 
     totalLines += lines;
-    const statusColor = status === 'MODIFIED' ? '\x1b[33m' : status === 'MISSING' ? '\x1b[31m' : '\x1b[90m';
+    const statusColor =
+      status === 'MODIFIED' ? '\x1b[33m' : status === 'MISSING' ? '\x1b[31m' : '\x1b[90m';
     const reset = '\x1b[0m';
 
-    console.log(`  ${String(chunk.index).padStart(2)}  ${chunk.filename.padEnd(45)} ${String(lines).padStart(5)}   ${statusColor}${status}${reset}`);
+    console.log(
+      `  ${String(chunk.index).padStart(2)}  ${chunk.filename.padEnd(45)} ${String(lines).padStart(5)}   ${statusColor}${status}${reset}`
+    );
   }
 
   console.log();
@@ -1180,7 +1241,11 @@ WORKFLOW:
 // CLI
 // ============================================================================
 
-function parseArgs(args: string[]): { command: string; target: string; options: Record<string, any> } {
+function parseArgs(args: string[]): {
+  command: string;
+  target: string;
+  options: Record<string, any>;
+} {
   const command = args[0] || 'help';
   const target = args[1] || '';
   const options: Record<string, any> = {};

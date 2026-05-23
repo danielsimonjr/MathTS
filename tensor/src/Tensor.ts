@@ -27,7 +27,9 @@ export class Tensor {
 
   constructor(shape: ReadonlyArray<number>, data: Float64Array) {
     if (data.length !== Tensor.sizeOf(shape)) {
-      throw new Error(`Tensor: data length ${data.length} does not match shape [${shape}] (size ${Tensor.sizeOf(shape)})`);
+      throw new Error(
+        `Tensor: data length ${data.length} does not match shape [${shape}] (size ${Tensor.sizeOf(shape)})`
+      );
     }
     this.shape = shape;
     this.data = data;
@@ -117,8 +119,9 @@ export class Tensor {
   }
 
   private sameShape(other: Tensor): boolean {
-    return this.shape.length === other.shape.length
-      && this.shape.every((v, i) => v === other.shape[i]);
+    return (
+      this.shape.length === other.shape.length && this.shape.every((v, i) => v === other.shape[i])
+    );
   }
 
   private elementwise(other: Tensor, op: string, f: (x: number, y: number) => number): Tensor {
@@ -130,9 +133,15 @@ export class Tensor {
     return new Tensor(this.shape, out);
   }
 
-  add(other: Tensor): Tensor { return this.elementwise(other, 'add', (x, y) => x + y); }
-  sub(other: Tensor): Tensor { return this.elementwise(other, 'sub', (x, y) => x - y); }
-  mul(other: Tensor): Tensor { return this.elementwise(other, 'mul', (x, y) => x * y); }
+  add(other: Tensor): Tensor {
+    return this.elementwise(other, 'add', (x, y) => x + y);
+  }
+  sub(other: Tensor): Tensor {
+    return this.elementwise(other, 'sub', (x, y) => x - y);
+  }
+  mul(other: Tensor): Tensor {
+    return this.elementwise(other, 'mul', (x, y) => x * y);
+  }
 
   scale(k: number): Tensor {
     const out = new Float64Array(this.data.length);
@@ -150,7 +159,10 @@ export class Tensor {
   }
 
   private static forEachIndex(shape: ReadonlyArray<number>, visit: (idx: number[]) => void): void {
-    if (shape.length === 0) { visit([]); return; }
+    if (shape.length === 0) {
+      visit([]);
+      return;
+    }
     const idx = new Array<number>(shape.length).fill(0);
     const total = Tensor.sizeOf(shape);
     for (let n = 0; n < total; n++) {
@@ -178,7 +190,8 @@ export class Tensor {
   transpose(perm?: ReadonlyArray<number>): Tensor {
     const rank = this.shape.length;
     const p = perm ?? Array.from({ length: rank }, (_, i) => rank - 1 - i);
-    if (p.length !== rank) throw new Error(`Tensor.transpose: perm length ${p.length} != rank ${rank}`);
+    if (p.length !== rank)
+      throw new Error(`Tensor.transpose: perm length ${p.length} != rank ${rank}`);
     const outShape = p.map((axis) => this.shape[axis]);
     const inStrides = Tensor.rowMajorStrides(this.shape);
     const outStrides = Tensor.rowMajorStrides(outShape);
@@ -229,23 +242,27 @@ export class Tensor {
     for (let o = 0; o < operands.length; o++) {
       if (operands[o].shape.length === 0) continue;
       const covered = new Set<number>();
-      spec.free.forEach((fa) => { if (fa.operand === o) covered.add(fa.axis); });
+      spec.free.forEach((fa) => {
+        if (fa.operand === o) covered.add(fa.axis);
+      });
       spec.contractions.forEach((c) => {
         const [[oa, axa], [ob, axb]] = c.pair;
         if (oa === o) covered.add(axa);
         if (ob === o) covered.add(axb);
       });
       if (covered.size !== operands[o].shape.length) {
-        throw new Error(
-          `Tensor.einsum: operand ${o} has axes not referenced by the spec`,
-        );
+        throw new Error(`Tensor.einsum: operand ${o} has axes not referenced by the spec`);
       }
     }
     const operandFlatIndex = (
-      opIndex: number, freeVals: ReadonlyArray<number>, contractVals: ReadonlyArray<number>,
+      opIndex: number,
+      freeVals: ReadonlyArray<number>,
+      contractVals: ReadonlyArray<number>
     ): number => {
       const idx = new Array<number>(operands[opIndex].shape.length).fill(0);
-      spec.free.forEach((fa, v) => { if (fa.operand === opIndex) idx[fa.axis] = freeVals[v]; });
+      spec.free.forEach((fa, v) => {
+        if (fa.operand === opIndex) idx[fa.axis] = freeVals[v];
+      });
       spec.contractions.forEach((c, v) => {
         const [[oa, axa], [ob, axb]] = c.pair;
         if (oa === opIndex) idx[axa] = contractVals[v];

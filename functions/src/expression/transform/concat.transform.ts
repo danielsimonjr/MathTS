@@ -1,28 +1,23 @@
-import { isBigNumber, isNumber } from '../../utils/is.js'
-import { errorTransform } from './utils/errorTransform.js'
-import { factory } from '../../utils/factory.js'
-import { createConcat } from '../../matrix/concat.js'
-import type {
-  TypedFunction,
-  MathFunction,
-  BigNumberLike,
-  VariadicArgs
-} from './types.js'
+import { isBigNumber, isNumber } from '../../utils/is.js';
+import { errorTransform } from './utils/errorTransform.js';
+import { factory } from '../../utils/factory.js';
+import { createConcat } from '../../matrix/concat.js';
+import type { TypedFunction, MathFunction, BigNumberLike, VariadicArgs } from './types.js';
 
 interface ConcatDependencies {
-  typed: TypedFunction
-  matrix: MathFunction
-  isInteger: (x: unknown) => boolean
+  typed: TypedFunction;
+  matrix: MathFunction;
+  isInteger: (x: unknown) => boolean;
 }
 
-const name = 'concat'
-const dependencies = ['typed', 'matrix', 'isInteger']
+const name = 'concat';
+const dependencies = ['typed', 'matrix', 'isInteger'];
 
 export const createConcatTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, matrix, isInteger }: ConcatDependencies) => {
-    const concat = createConcat({ typed, matrix, isInteger })
+    const concat = createConcat({ typed, matrix, isInteger });
 
     /**
      * Attach a transform function to math.range
@@ -34,21 +29,21 @@ export const createConcatTransform = /* #__PURE__ */ factory(
     return typed('concat', {
       '...any': function (args: VariadicArgs): unknown {
         // change last argument from one-based to zero-based
-        const lastIndex = args.length - 1
-        const last = args[lastIndex]
+        const lastIndex = args.length - 1;
+        const last = args[lastIndex];
         if (isNumber(last)) {
-          args[lastIndex] = last - 1
+          args[lastIndex] = last - 1;
         } else if (isBigNumber(last)) {
-          args[lastIndex] = (last as BigNumberLike).minus(1)
+          args[lastIndex] = (last as BigNumberLike).minus(1);
         }
 
         try {
-          return concat.apply(null, args)
+          return concat.apply(null, args);
         } catch (err) {
-          throw errorTransform(err as Error)
+          throw errorTransform(err as Error);
         }
-      }
-    })
+      },
+    });
   },
   { isTransformFunction: true }
-)
+);

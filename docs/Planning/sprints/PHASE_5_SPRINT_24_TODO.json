@@ -65,7 +65,11 @@
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4, 5],
-      "files": ["expression/tests/parser.test.ts", "expression/tests/evaluator.test.ts", "expression/tests/compiler.test.ts"]
+      "files": [
+        "expression/tests/parser.test.ts",
+        "expression/tests/evaluator.test.ts",
+        "expression/tests/compiler.test.ts"
+      ]
     }
   ],
   "successCriteria": [

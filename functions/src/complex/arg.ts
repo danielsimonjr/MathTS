@@ -1,24 +1,24 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for complex arg operation
 interface BigNumberType {
   constructor: {
-    atan2(y: number, x: BigNumberType): BigNumberType
-  }
+    atan2(y: number, x: BigNumberType): BigNumberType;
+  };
 }
 
 interface ComplexType {
-  arg(): number
+  arg(): number;
 }
 
 interface ArgDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'arg'
-const dependencies = ['typed']
+const name = 'arg';
+const dependencies = ['typed'];
 
 export const createArg = /* #__PURE__ */ factory(
   name,
@@ -53,22 +53,22 @@ export const createArg = /* #__PURE__ */ factory(
      */
     return typed(name, {
       number: function (x: number): number {
-        return Math.atan2(0, x)
+        return Math.atan2(0, x);
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        return x.constructor.atan2(0, x)
+        return x.constructor.atan2(0, x);
       },
 
       Complex: function (x: ComplexType): number {
-        return x.arg()
+        return x.arg();
       },
 
       // TODO: implement BigNumber support for function arg
 
       'Array | Matrix': typed.referToSelf(
         (self: (value: any) => any) => (x: any) => deepMap(x, self)
-      )
-    })
+      ),
+    });
   }
-)
+);

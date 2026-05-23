@@ -1,21 +1,21 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for lyap
 interface MatrixType {
-  toArray(): unknown[][]
+  toArray(): unknown[][];
 }
 
 interface LyapDependencies {
-  typed: TypedFunction
-  matrix: (arr: unknown[][]) => MatrixType
-  sylvester: TypedFunction
-  multiply: TypedFunction
-  transpose: TypedFunction
+  typed: TypedFunction;
+  matrix: (arr: unknown[][]) => MatrixType;
+  sylvester: TypedFunction;
+  multiply: TypedFunction;
+  transpose: TypedFunction;
 }
 
-const name = 'lyap'
-const dependencies = ['typed', 'matrix', 'sylvester', 'multiply', 'transpose']
+const name = 'lyap';
+const dependencies = ['typed', 'matrix', 'sylvester', 'multiply', 'transpose'];
 
 export const createLyap = /* #__PURE__ */ factory(
   name,
@@ -49,25 +49,23 @@ export const createLyap = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Matrix, Matrix': function (A: MatrixType, Q: MatrixType): MatrixType {
-        return sylvester(A, transpose(A), multiply(-1, Q)) as MatrixType
+        return sylvester(A, transpose(A), multiply(-1, Q)) as MatrixType;
       },
       'Array, Matrix': function (A: unknown[][], Q: MatrixType): MatrixType {
-        return sylvester(matrix(A), transpose(matrix(A)), multiply(-1, Q)) as MatrixType
+        return sylvester(matrix(A), transpose(matrix(A)), multiply(-1, Q)) as MatrixType;
       },
       'Matrix, Array': function (A: MatrixType, Q: unknown[][]): MatrixType {
-        return sylvester(
-          A,
-          transpose(A),
-          matrix(multiply(-1, Q) as unknown[][])
-        ) as MatrixType
+        return sylvester(A, transpose(A), matrix(multiply(-1, Q) as unknown[][])) as MatrixType;
       },
       'Array, Array': function (A: unknown[][], Q: unknown[][]): unknown[][] {
-        return (sylvester(
-          matrix(A),
-          transpose(matrix(A)),
-          matrix(multiply(-1, Q) as unknown[][])
-        ) as MatrixType).toArray()
-      }
-    })
+        return (
+          sylvester(
+            matrix(A),
+            transpose(matrix(A)),
+            matrix(multiply(-1, Q) as unknown[][])
+          ) as MatrixType
+        ).toArray();
+      },
+    });
   }
-)
+);

@@ -7,44 +7,44 @@
  *   AS WASM:    npm run build:wasm         → assembly/build/mathts.wasm
  */
 
-import { performance } from 'perf_hooks'
-import * as fs from 'fs'
-import * as path from 'path'
-import { fileURLToPath } from 'url'
+import { performance } from 'perf_hooks';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ============================================================
 // Utilities
 // ============================================================
 
 interface WasmExports {
-  memory: WebAssembly.Memory
-  multiplyDense?: Function
-  add?: Function
-  dotProduct?: Function
-  transpose?: Function
-  det?: Function
-  [key: string]: any
+  memory: WebAssembly.Memory;
+  multiplyDense?: Function;
+  add?: Function;
+  dotProduct?: Function;
+  transpose?: Function;
+  det?: Function;
+  [key: string]: any;
 }
 
 function bench(fn: () => void, warmup = 3, iterations = 10): number {
-  for (let i = 0; i < warmup; i++) fn()
-  const times: number[] = []
+  for (let i = 0; i < warmup; i++) fn();
+  const times: number[] = [];
   for (let i = 0; i < iterations; i++) {
-    const start = performance.now()
-    fn()
-    times.push(performance.now() - start)
+    const start = performance.now();
+    fn();
+    times.push(performance.now() - start);
   }
-  times.sort((a, b) => a - b)
-  return times[Math.floor(times.length / 2)]
+  times.sort((a, b) => a - b);
+  return times[Math.floor(times.length / 2)];
 }
 
 function speedup(base: number, fast: number): string {
-  if (fast <= 0 || base <= 0) return 'N/A'
-  const ratio = base / fast
-  return ratio >= 1 ? `${ratio.toFixed(1)}x faster` : `${(1 / ratio).toFixed(1)}x slower`
+  if (fast <= 0 || base <= 0) return 'N/A';
+  const ratio = base / fast;
+  return ratio >= 1 ? `${ratio.toFixed(1)}x faster` : `${(1 / ratio).toFixed(1)}x slower`;
 }
 
 // ============================================================
@@ -52,10 +52,10 @@ function speedup(base: number, fast: number): string {
 // ============================================================
 
 async function loadWasm(wasmPath: string): Promise<WasmExports | null> {
-  if (!fs.existsSync(wasmPath)) return null
+  if (!fs.existsSync(wasmPath)) return null;
   try {
-    const buffer = fs.readFileSync(wasmPath)
-    const module = await WebAssembly.compile(buffer)
+    const buffer = fs.readFileSync(wasmPath);
+    const module = await WebAssembly.compile(buffer);
     const instance = await WebAssembly.instantiate(module, {
       env: {
         abort: () => {},
@@ -75,11 +75,11 @@ async function loadWasm(wasmPath: string): Promise<WasmExports | null> {
         'Math.max': Math.max,
         seed: () => {},
       },
-    })
-    return instance.exports as any as WasmExports
+    });
+    return instance.exports as any as WasmExports;
   } catch (e: any) {
-    console.log(`  [Could not load ${path.basename(wasmPath)}: ${e.message?.slice(0, 80)}]`)
-    return null
+    console.log(`  [Could not load ${path.basename(wasmPath)}: ${e.message?.slice(0, 80)}]`);
+    return null;
   }
 }
 
@@ -88,16 +88,15 @@ async function loadWasm(wasmPath: string): Promise<WasmExports | null> {
 // ============================================================
 
 function writeF64(memory: WebAssembly.Memory, offset: number, data: Float64Array): void {
-  new Float64Array(memory.buffer, offset, data.length).set(data)
+  new Float64Array(memory.buffer, offset, data.length).set(data);
 }
 
 function flattenMatrix(m: number[][]): Float64Array {
   const rows = m.length,
-    cols = m[0].length
-  const flat = new Float64Array(rows * cols)
-  for (let i = 0; i < rows; i++)
-    for (let j = 0; j < cols; j++) flat[i * cols + j] = m[i][j]
-  return flat
+    cols = m[0].length;
+  const flat = new Float64Array(rows * cols);
+  for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) flat[i * cols + j] = m[i][j];
+  return flat;
 }
 
 // ============================================================
@@ -107,56 +106,56 @@ function flattenMatrix(m: number[][]): Float64Array {
 function jsMatMul(a: number[][], b: number[][]): number[][] {
   const m = a.length,
     n = b[0].length,
-    k = b.length
-  const c: number[][] = Array.from({ length: m }, () => new Array(n).fill(0))
+    k = b.length;
+  const c: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
   for (let i = 0; i < m; i++)
     for (let j = 0; j < n; j++) {
-      let s = 0
-      for (let p = 0; p < k; p++) s += a[i][p] * b[p][j]
-      c[i][j] = s
+      let s = 0;
+      for (let p = 0; p < k; p++) s += a[i][p] * b[p][j];
+      c[i][j] = s;
     }
-  return c
+  return c;
 }
 
 function jsDot(a: Float64Array, b: Float64Array): number {
-  let s = 0
-  for (let i = 0; i < a.length; i++) s += a[i] * b[i]
-  return s
+  let s = 0;
+  for (let i = 0; i < a.length; i++) s += a[i] * b[i];
+  return s;
 }
 
 function jsVecAdd(a: Float64Array, b: Float64Array): Float64Array {
-  const r = new Float64Array(a.length)
-  for (let i = 0; i < a.length; i++) r[i] = a[i] + b[i]
-  return r
+  const r = new Float64Array(a.length);
+  for (let i = 0; i < a.length; i++) r[i] = a[i] + b[i];
+  return r;
 }
 
 function jsDet(m: number[][], n: number): number {
   // LU-based determinant
-  const a = m.map((r) => [...r])
-  let sign = 1
+  const a = m.map((r) => [...r]);
+  let sign = 1;
   for (let k = 0; k < n; k++) {
     let maxVal = 0,
-      maxRow = k
+      maxRow = k;
     for (let i = k; i < n; i++) {
-      const v = Math.abs(a[i][k])
+      const v = Math.abs(a[i][k]);
       if (v > maxVal) {
-        maxVal = v
-        maxRow = i
+        maxVal = v;
+        maxRow = i;
       }
     }
     if (maxRow !== k) {
-      ;[a[k], a[maxRow]] = [a[maxRow], a[k]]
-      sign = -sign
+      [a[k], a[maxRow]] = [a[maxRow], a[k]];
+      sign = -sign;
     }
-    if (Math.abs(a[k][k]) < 1e-14) return 0
+    if (Math.abs(a[k][k]) < 1e-14) return 0;
     for (let i = k + 1; i < n; i++) {
-      const f = a[i][k] / a[k][k]
-      for (let j = k + 1; j < n; j++) a[i][j] -= f * a[k][j]
+      const f = a[i][k] / a[k][k];
+      for (let j = k + 1; j < n; j++) a[i][j] -= f * a[k][j];
     }
   }
-  let det = sign
-  for (let i = 0; i < n; i++) det *= a[i][i]
-  return det
+  let det = sign;
+  for (let i = 0; i < n; i++) det *= a[i][i];
+  return det;
 }
 
 // ============================================================
@@ -164,15 +163,13 @@ function jsDet(m: number[][], n: number): number {
 // ============================================================
 
 function randomMatrix(n: number): number[][] {
-  return Array.from({ length: n }, () =>
-    Array.from({ length: n }, () => Math.random() * 10 - 5),
-  )
+  return Array.from({ length: n }, () => Array.from({ length: n }, () => Math.random() * 10 - 5));
 }
 
 function randomF64(n: number): Float64Array {
-  const a = new Float64Array(n)
-  for (let i = 0; i < n; i++) a[i] = Math.random() * 10 - 5
-  return a
+  const a = new Float64Array(n);
+  for (let i = 0; i < n; i++) a[i] = Math.random() * 10 - 5;
+  return a;
 }
 
 // ============================================================
@@ -180,46 +177,46 @@ function randomF64(n: number): Float64Array {
 // ============================================================
 
 async function main() {
-  console.log('='.repeat(80))
-  console.log(' Benchmark: Rust WASM  vs  AssemblyScript WASM  vs  JavaScript')
-  console.log('='.repeat(80))
-  console.log()
+  console.log('='.repeat(80));
+  console.log(' Benchmark: Rust WASM  vs  AssemblyScript WASM  vs  JavaScript');
+  console.log('='.repeat(80));
+  console.log();
 
   // Rust WASM: built to lib/wasm/ by wasm-rust/scripts/build.sh
-  const rustPath = path.join(__dirname, '..', '..', 'lib', 'wasm', 'mathts.wasm')
+  const rustPath = path.join(__dirname, '..', '..', 'lib', 'wasm', 'mathts.wasm');
   // AS WASM: built to assembly/build/ by npm run build:wasm
-  const asPath = path.join(__dirname, '..', '..', 'assembly', 'build', 'mathts.wasm')
+  const asPath = path.join(__dirname, '..', '..', 'assembly', 'build', 'mathts.wasm');
 
-  const hasRust = fs.existsSync(rustPath)
-  const hasAS = fs.existsSync(asPath)
+  const hasRust = fs.existsSync(rustPath);
+  const hasAS = fs.existsSync(asPath);
 
   console.log(
-    `Rust WASM: ${hasRust ? (fs.statSync(rustPath).size / 1024).toFixed(0) + ' KB  (' + rustPath + ')' : 'NOT FOUND — run: npm run build:wasm:rust'}`,
-  )
+    `Rust WASM: ${hasRust ? (fs.statSync(rustPath).size / 1024).toFixed(0) + ' KB  (' + rustPath + ')' : 'NOT FOUND — run: npm run build:wasm:rust'}`
+  );
   console.log(
-    `AS WASM:   ${hasAS ? (fs.statSync(asPath).size / 1024).toFixed(0) + ' KB  (' + asPath + ')' : 'NOT FOUND — run: npm run build:wasm'}`,
-  )
-  console.log()
+    `AS WASM:   ${hasAS ? (fs.statSync(asPath).size / 1024).toFixed(0) + ' KB  (' + asPath + ')' : 'NOT FOUND — run: npm run build:wasm'}`
+  );
+  console.log();
 
   // Load WASM modules
-  console.log('Loading WASM modules...')
-  const rust = hasRust ? await loadWasm(rustPath) : null
-  const as_ = hasAS ? await loadWasm(asPath) : null
+  console.log('Loading WASM modules...');
+  const rust = hasRust ? await loadWasm(rustPath) : null;
+  const as_ = hasAS ? await loadWasm(asPath) : null;
   console.log(
-    `  Rust: ${rust ? 'loaded (' + Object.keys(rust).filter((k) => typeof rust[k] === 'function').length + ' exports)' : 'not available'}`,
-  )
+    `  Rust: ${rust ? 'loaded (' + Object.keys(rust).filter((k) => typeof rust[k] === 'function').length + ' exports)' : 'not available'}`
+  );
   console.log(
-    `  AS:   ${as_ ? 'loaded (' + Object.keys(as_).filter((k) => typeof as_[k] === 'function').length + ' exports)' : 'not available'}`,
-  )
-  console.log()
+    `  AS:   ${as_ ? 'loaded (' + Object.keys(as_).filter((k) => typeof as_[k] === 'function').length + ' exports)' : 'not available'}`
+  );
+  console.log();
 
   // Results collector
-  const rows: string[][] = []
-  rows.push(['Operation', 'JS (ms)', 'Rust (ms)', 'AS (ms)', 'Rust vs JS', 'Rust vs AS'])
+  const rows: string[][] = [];
+  rows.push(['Operation', 'JS (ms)', 'Rust (ms)', 'AS (ms)', 'Rust vs JS', 'Rust vs AS']);
 
   function rustEnsureMemory(r: WasmExports, neededBytes: number): void {
     while (r.memory.buffer.byteLength < neededBytes) {
-      r.memory.grow(Math.ceil(neededBytes / 65536))
+      r.memory.grow(Math.ceil(neededBytes / 65536));
     }
   }
 
@@ -227,47 +224,47 @@ async function main() {
   // Matrix Multiply
   // ============================================================
   for (const n of [50, 100, 200]) {
-    const label = `matmul ${n}x${n}`
-    console.log(`--- ${label} ---`)
+    const label = `matmul ${n}x${n}`;
+    console.log(`--- ${label} ---`);
 
-    const a = randomMatrix(n)
-    const b = randomMatrix(n)
-    const flatA = flattenMatrix(a)
-    const flatB = flattenMatrix(b)
+    const a = randomMatrix(n);
+    const b = randomMatrix(n);
+    const flatA = flattenMatrix(a);
+    const flatB = flattenMatrix(b);
 
-    const jsMs = bench(() => jsMatMul(a, b))
+    const jsMs = bench(() => jsMatMul(a, b));
 
     // Rust WASM (flat memory)
-    let rustMs: number | null = null
+    let rustMs: number | null = null;
     if (rust?.multiplyDense && rust.memory) {
       const aOff = 1024,
         bOff = aOff + n * n * 8,
-        cOff = bOff + n * n * 8
-      rustEnsureMemory(rust, cOff + n * n * 8)
-      writeF64(rust.memory, aOff, flatA)
-      writeF64(rust.memory, bOff, flatB)
+        cOff = bOff + n * n * 8;
+      rustEnsureMemory(rust, cOff + n * n * 8);
+      writeF64(rust.memory, aOff, flatA);
+      writeF64(rust.memory, bOff, flatB);
       rustMs = bench(() => {
-        ;(rust.multiplyDense as Function)(aOff, n, n, bOff, n, n, cOff)
-      })
+        (rust.multiplyDense as Function)(aOff, n, n, bOff, n, n, cOff);
+      });
     }
 
     // AS WASM (same raw pointer ABI)
-    let asMs: number | null = null
+    let asMs: number | null = null;
     if (as_?.multiplyDense && as_.memory) {
       const asA = 1024,
         asB = asA + n * n * 8,
-        asC = asB + n * n * 8
-      while (as_.memory.buffer.byteLength < asC + n * n * 8) as_.memory.grow(16)
-      writeF64(as_.memory, asA, flatA)
-      writeF64(as_.memory, asB, flatB)
+        asC = asB + n * n * 8;
+      while (as_.memory.buffer.byteLength < asC + n * n * 8) as_.memory.grow(16);
+      writeF64(as_.memory, asA, flatA);
+      writeF64(as_.memory, asB, flatB);
       asMs = bench(() => {
-        ;(as_.multiplyDense as Function)(asA, n, n, asB, n, n, asC)
-      })
+        (as_.multiplyDense as Function)(asA, n, n, asB, n, n, asC);
+      });
     }
 
-    console.log(`  JS:   ${jsMs.toFixed(3)} ms`)
-    if (rustMs !== null) console.log(`  Rust: ${rustMs.toFixed(3)} ms  (${speedup(jsMs, rustMs)})`)
-    if (asMs !== null) console.log(`  AS:   ${asMs.toFixed(3)} ms  (${speedup(jsMs, asMs)})`)
+    console.log(`  JS:   ${jsMs.toFixed(3)} ms`);
+    if (rustMs !== null) console.log(`  Rust: ${rustMs.toFixed(3)} ms  (${speedup(jsMs, rustMs)})`);
+    if (asMs !== null) console.log(`  AS:   ${asMs.toFixed(3)} ms  (${speedup(jsMs, asMs)})`);
 
     rows.push([
       label,
@@ -276,48 +273,48 @@ async function main() {
       asMs?.toFixed(3) ?? '-',
       rustMs ? speedup(jsMs, rustMs) : '-',
       rustMs && asMs ? speedup(asMs, rustMs) : '-',
-    ])
+    ]);
   }
 
   // ============================================================
   // Dot Product
   // ============================================================
   for (const n of [1000, 10000, 100000]) {
-    const label = `dot ${n}`
-    console.log(`--- ${label} ---`)
+    const label = `dot ${n}`;
+    console.log(`--- ${label} ---`);
 
-    const va = randomF64(n)
-    const vb = randomF64(n)
+    const va = randomF64(n);
+    const vb = randomF64(n);
 
-    const jsMs = bench(() => jsDot(va, vb))
+    const jsMs = bench(() => jsDot(va, vb));
 
-    let rustMs: number | null = null
+    let rustMs: number | null = null;
     if (rust?.dotProduct && rust.memory) {
       const aOff = 1024,
-        bOff = aOff + n * 8
-      rustEnsureMemory(rust, bOff + n * 8)
-      writeF64(rust.memory, aOff, va)
-      writeF64(rust.memory, bOff, vb)
+        bOff = aOff + n * 8;
+      rustEnsureMemory(rust, bOff + n * 8);
+      writeF64(rust.memory, aOff, va);
+      writeF64(rust.memory, bOff, vb);
       rustMs = bench(() => {
-        ;(rust.dotProduct as Function)(aOff, bOff, n)
-      })
+        (rust.dotProduct as Function)(aOff, bOff, n);
+      });
     }
 
-    let asMs: number | null = null
+    let asMs: number | null = null;
     if (as_?.dotProduct && as_.memory) {
       const asA = 1024,
-        asB = asA + n * 8
-      while (as_.memory.buffer.byteLength < asB + n * 8) as_.memory.grow(16)
-      writeF64(as_.memory, asA, va)
-      writeF64(as_.memory, asB, vb)
+        asB = asA + n * 8;
+      while (as_.memory.buffer.byteLength < asB + n * 8) as_.memory.grow(16);
+      writeF64(as_.memory, asA, va);
+      writeF64(as_.memory, asB, vb);
       asMs = bench(() => {
-        ;(as_.dotProduct as Function)(asA, asB, n)
-      })
+        (as_.dotProduct as Function)(asA, asB, n);
+      });
     }
 
-    console.log(`  JS:   ${jsMs.toFixed(3)} ms`)
-    if (rustMs !== null) console.log(`  Rust: ${rustMs.toFixed(3)} ms  (${speedup(jsMs, rustMs)})`)
-    if (asMs !== null) console.log(`  AS:   ${asMs.toFixed(3)} ms  (${speedup(jsMs, asMs)})`)
+    console.log(`  JS:   ${jsMs.toFixed(3)} ms`);
+    if (rustMs !== null) console.log(`  Rust: ${rustMs.toFixed(3)} ms  (${speedup(jsMs, rustMs)})`);
+    if (asMs !== null) console.log(`  AS:   ${asMs.toFixed(3)} ms  (${speedup(jsMs, asMs)})`);
 
     rows.push([
       label,
@@ -326,50 +323,50 @@ async function main() {
       asMs?.toFixed(3) ?? '-',
       rustMs ? speedup(jsMs, rustMs) : '-',
       rustMs && asMs ? speedup(asMs, rustMs) : '-',
-    ])
+    ]);
   }
 
   // ============================================================
   // Vector Add
   // ============================================================
   for (const n of [1000, 10000, 100000]) {
-    const label = `vecadd ${n}`
-    console.log(`--- ${label} ---`)
+    const label = `vecadd ${n}`;
+    console.log(`--- ${label} ---`);
 
-    const va = randomF64(n)
-    const vb = randomF64(n)
+    const va = randomF64(n);
+    const vb = randomF64(n);
 
-    const jsMs = bench(() => jsVecAdd(va, vb))
+    const jsMs = bench(() => jsVecAdd(va, vb));
 
-    let rustMs: number | null = null
+    let rustMs: number | null = null;
     if (rust?.add && rust.memory) {
       const aOff = 1024,
         bOff = aOff + n * 8,
-        cOff = bOff + n * 8
-      rustEnsureMemory(rust, cOff + n * 8)
-      writeF64(rust.memory, aOff, va)
-      writeF64(rust.memory, bOff, vb)
+        cOff = bOff + n * 8;
+      rustEnsureMemory(rust, cOff + n * 8);
+      writeF64(rust.memory, aOff, va);
+      writeF64(rust.memory, bOff, vb);
       rustMs = bench(() => {
-        ;(rust.add as Function)(aOff, bOff, n, cOff)
-      })
+        (rust.add as Function)(aOff, bOff, n, cOff);
+      });
     }
 
-    let asMs: number | null = null
+    let asMs: number | null = null;
     if (as_?.add && as_.memory) {
       const asA = 1024,
         asB = asA + n * 8,
-        asC = asB + n * 8
-      while (as_.memory.buffer.byteLength < asC + n * 8) as_.memory.grow(16)
-      writeF64(as_.memory, asA, va)
-      writeF64(as_.memory, asB, vb)
+        asC = asB + n * 8;
+      while (as_.memory.buffer.byteLength < asC + n * 8) as_.memory.grow(16);
+      writeF64(as_.memory, asA, va);
+      writeF64(as_.memory, asB, vb);
       asMs = bench(() => {
-        ;(as_.add as Function)(asA, asB, n, asC)
-      })
+        (as_.add as Function)(asA, asB, n, asC);
+      });
     }
 
-    console.log(`  JS:   ${jsMs.toFixed(3)} ms`)
-    if (rustMs !== null) console.log(`  Rust: ${rustMs.toFixed(3)} ms  (${speedup(jsMs, rustMs)})`)
-    if (asMs !== null) console.log(`  AS:   ${asMs.toFixed(3)} ms  (${speedup(jsMs, asMs)})`)
+    console.log(`  JS:   ${jsMs.toFixed(3)} ms`);
+    if (rustMs !== null) console.log(`  Rust: ${rustMs.toFixed(3)} ms  (${speedup(jsMs, rustMs)})`);
+    if (asMs !== null) console.log(`  AS:   ${asMs.toFixed(3)} ms  (${speedup(jsMs, asMs)})`);
 
     rows.push([
       label,
@@ -378,44 +375,44 @@ async function main() {
       asMs?.toFixed(3) ?? '-',
       rustMs ? speedup(jsMs, rustMs) : '-',
       rustMs && asMs ? speedup(asMs, rustMs) : '-',
-    ])
+    ]);
   }
 
   // ============================================================
   // Determinant
   // ============================================================
   for (const n of [10, 50, 100]) {
-    const label = `det ${n}x${n}`
-    console.log(`--- ${label} ---`)
+    const label = `det ${n}x${n}`;
+    console.log(`--- ${label} ---`);
 
-    const m = randomMatrix(n)
-    const flat = flattenMatrix(m)
+    const m = randomMatrix(n);
+    const flat = flattenMatrix(m);
 
-    const jsMs = bench(() => jsDet(m, n))
+    const jsMs = bench(() => jsDet(m, n));
 
-    let rustMs: number | null = null
+    let rustMs: number | null = null;
     if (rust?.det && rust.memory) {
-      const aOff = 1024
-      rustEnsureMemory(rust, aOff + n * n * 8)
-      writeF64(rust.memory, aOff, flat)
+      const aOff = 1024;
+      rustEnsureMemory(rust, aOff + n * n * 8);
+      writeF64(rust.memory, aOff, flat);
       rustMs = bench(() => {
-        ;(rust.det as Function)(aOff, n)
-      })
+        (rust.det as Function)(aOff, n);
+      });
     }
 
-    let asMs: number | null = null
+    let asMs: number | null = null;
     if (as_?.det && as_.memory) {
-      const asA = 1024
-      while (as_.memory.buffer.byteLength < asA + n * n * 8) as_.memory.grow(16)
-      writeF64(as_.memory, asA, flat)
+      const asA = 1024;
+      while (as_.memory.buffer.byteLength < asA + n * n * 8) as_.memory.grow(16);
+      writeF64(as_.memory, asA, flat);
       asMs = bench(() => {
-        ;(as_.det as Function)(asA, n)
-      })
+        (as_.det as Function)(asA, n);
+      });
     }
 
-    console.log(`  JS:   ${jsMs.toFixed(3)} ms`)
-    if (rustMs !== null) console.log(`  Rust: ${rustMs.toFixed(3)} ms  (${speedup(jsMs, rustMs)})`)
-    if (asMs !== null) console.log(`  AS:   ${asMs.toFixed(3)} ms  (${speedup(jsMs, asMs)})`)
+    console.log(`  JS:   ${jsMs.toFixed(3)} ms`);
+    if (rustMs !== null) console.log(`  Rust: ${rustMs.toFixed(3)} ms  (${speedup(jsMs, rustMs)})`);
+    if (asMs !== null) console.log(`  AS:   ${asMs.toFixed(3)} ms  (${speedup(jsMs, asMs)})`);
 
     rows.push([
       label,
@@ -424,29 +421,29 @@ async function main() {
       asMs?.toFixed(3) ?? '-',
       rustMs ? speedup(jsMs, rustMs) : '-',
       rustMs && asMs ? speedup(asMs, rustMs) : '-',
-    ])
+    ]);
   }
 
   // ============================================================
   // Summary Table
   // ============================================================
-  console.log()
-  console.log('='.repeat(80))
-  console.log(' Results')
-  console.log('='.repeat(80))
-  console.log()
+  console.log();
+  console.log('='.repeat(80));
+  console.log(' Results');
+  console.log('='.repeat(80));
+  console.log();
 
-  const colWidths = rows[0].map((_, ci) => Math.max(...rows.map((r) => (r[ci] || '').length)))
+  const colWidths = rows[0].map((_, ci) => Math.max(...rows.map((r) => (r[ci] || '').length)));
   for (const [ri, row] of rows.entries()) {
-    const line = row.map((cell, ci) => cell.padStart(colWidths[ci])).join('  ')
-    console.log(line)
-    if (ri === 0) console.log('-'.repeat(line.length))
+    const line = row.map((cell, ci) => cell.padStart(colWidths[ci])).join('  ');
+    console.log(line);
+    if (ri === 0) console.log('-'.repeat(line.length));
   }
 
-  console.log()
+  console.log();
   console.log(
-    `Binary sizes: Rust ${hasRust ? (fs.statSync(rustPath).size / 1024).toFixed(0) : '?'} KB  |  AS ${hasAS ? (fs.statSync(asPath).size / 1024).toFixed(0) : '?'} KB`,
-  )
+    `Binary sizes: Rust ${hasRust ? (fs.statSync(rustPath).size / 1024).toFixed(0) : '?'} KB  |  AS ${hasAS ? (fs.statSync(asPath).size / 1024).toFixed(0) : '?'} KB`
+  );
 }
 
-main().catch(console.error)
+main().catch(console.error);

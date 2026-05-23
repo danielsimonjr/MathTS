@@ -22,11 +22,7 @@
 /**
  * Element-wise bitwise AND: result = a & b
  */
-export function bitAnd_i32_array(
-  a: Int32Array,
-  b: Int32Array,
-  result: Int32Array
-): void {
+export function bitAnd_i32_array(a: Int32Array, b: Int32Array, result: Int32Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
     unchecked((result[i] = unchecked(a[i]) & unchecked(b[i])));
@@ -36,11 +32,7 @@ export function bitAnd_i32_array(
 /**
  * Element-wise bitwise OR: result = a | b
  */
-export function bitOr_i32_array(
-  a: Int32Array,
-  b: Int32Array,
-  result: Int32Array
-): void {
+export function bitOr_i32_array(a: Int32Array, b: Int32Array, result: Int32Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
     unchecked((result[i] = unchecked(a[i]) | unchecked(b[i])));
@@ -50,11 +42,7 @@ export function bitOr_i32_array(
 /**
  * Element-wise bitwise XOR: result = a ^ b
  */
-export function bitXor_i32_array(
-  a: Int32Array,
-  b: Int32Array,
-  result: Int32Array
-): void {
+export function bitXor_i32_array(a: Int32Array, b: Int32Array, result: Int32Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
     unchecked((result[i] = unchecked(a[i]) ^ unchecked(b[i])));
@@ -77,11 +65,7 @@ export function bitNot_i32_array(a: Int32Array, result: Int32Array): void {
  * AssemblyScript's `<<` on `i32` masks the shift count modulo 32, which
  * matches JavaScript semantics on Int32Array members.
  */
-export function leftShift_i32_array(
-  a: Int32Array,
-  b: Int32Array,
-  result: Int32Array
-): void {
+export function leftShift_i32_array(a: Int32Array, b: Int32Array, result: Int32Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
     unchecked((result[i] = unchecked(a[i]) << unchecked(b[i])));
@@ -92,11 +76,7 @@ export function leftShift_i32_array(
  * Element-wise arithmetic (sign-preserving) right shift:
  *   result[i] = a[i] >> (b[i] & 31)
  */
-export function rightArithShift_i32_array(
-  a: Int32Array,
-  b: Int32Array,
-  result: Int32Array
-): void {
+export function rightArithShift_i32_array(a: Int32Array, b: Int32Array, result: Int32Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
     unchecked((result[i] = unchecked(a[i]) >> unchecked(b[i])));
@@ -111,11 +91,7 @@ export function rightArithShift_i32_array(
  * JS `(a[i] >>> b[i]) | 0` semantics — the high bit becomes negative on
  * values ≥ 2^31.
  */
-export function rightLogShift_i32_array(
-  a: Int32Array,
-  b: Int32Array,
-  result: Int32Array
-): void {
+export function rightLogShift_i32_array(a: Int32Array, b: Int32Array, result: Int32Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
     const av = unchecked(a[i]) as u32;

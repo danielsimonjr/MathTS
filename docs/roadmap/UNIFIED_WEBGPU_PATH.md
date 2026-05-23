@@ -8,7 +8,7 @@ compute-bound operations across MathTS — element-wise math, reductions, linear
 algebra, FFT, and distance matrices — without silently degrading the f64 API.
 
 > This is a **design document**, not a committed plan. It exists so the work can
-> be scoped honestly. Read the *Constraints* and *Recommendation* sections
+> be scoped honestly. Read the _Constraints_ and _Recommendation_ sections
 > first — a unified GPU path is genuinely valuable only for a specific class of
 > workload, and the cost is real.
 
@@ -31,17 +31,17 @@ numerical workloads.
 
 ## 2. Current state (what exists today)
 
-| Component | Location | What it does |
-|---|---|---|
-| `GPUBackend` | `matrix/src/backends/GPUBackend.ts` | WebGPU compute shaders for `add`, `matmul`, `transpose`, `scale` (f32, flat `Float32Array`). |
-| `GPUMatrixBackend` / `gpuMatrixBackend` | `matrix/src/backends/GPUMatrixBackend.ts` | `DenseMatrix`-level wrappers; `*Async` methods with a JS fallback via `executeWithFallback`. |
-| `GPUContext` | `matrix/src/backends/gpu/GPUContext.ts` | Device / adapter acquisition, queue, buffer writes. |
-| `BufferPool` | `matrix/src/backends/gpu/BufferPool.ts` | Reuses `GPUBuffer`s across dispatches to avoid alloc churn. |
-| `ShaderManager` | `matrix/src/backends/gpu/ShaderManager.ts` | Compiles + caches pipelines; holds the builtin WGSL shaders. |
-| `BatchExecutor` | `matrix/src/backends/gpu/BatchExecutor.ts` | Groups multiple dispatches into one submission. |
-| `detect.ts` | `matrix/src/backends/gpu/detect.ts` | `hasWebGPU()` and capability detection. |
-| `BackendManager` | `matrix/src/backends/BackendManager.ts` | Size-thresholded JS / WASM / GPU routing — **matrix ops only**. |
-| `gpuMatmul` / `gpuAdd` / `gpuTranspose` / `gpuScale` | `functions/src/typed/gpu.ts` | Opt-in async `functions`-package entry points. |
+| Component                                            | Location                                   | What it does                                                                                 |
+| ---------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `GPUBackend`                                         | `matrix/src/backends/GPUBackend.ts`        | WebGPU compute shaders for `add`, `matmul`, `transpose`, `scale` (f32, flat `Float32Array`). |
+| `GPUMatrixBackend` / `gpuMatrixBackend`              | `matrix/src/backends/GPUMatrixBackend.ts`  | `DenseMatrix`-level wrappers; `*Async` methods with a JS fallback via `executeWithFallback`. |
+| `GPUContext`                                         | `matrix/src/backends/gpu/GPUContext.ts`    | Device / adapter acquisition, queue, buffer writes.                                          |
+| `BufferPool`                                         | `matrix/src/backends/gpu/BufferPool.ts`    | Reuses `GPUBuffer`s across dispatches to avoid alloc churn.                                  |
+| `ShaderManager`                                      | `matrix/src/backends/gpu/ShaderManager.ts` | Compiles + caches pipelines; holds the builtin WGSL shaders.                                 |
+| `BatchExecutor`                                      | `matrix/src/backends/gpu/BatchExecutor.ts` | Groups multiple dispatches into one submission.                                              |
+| `detect.ts`                                          | `matrix/src/backends/gpu/detect.ts`        | `hasWebGPU()` and capability detection.                                                      |
+| `BackendManager`                                     | `matrix/src/backends/BackendManager.ts`    | Size-thresholded JS / WASM / GPU routing — **matrix ops only**.                              |
+| `gpuMatmul` / `gpuAdd` / `gpuTranspose` / `gpuScale` | `functions/src/typed/gpu.ts`               | Opt-in async `functions`-package entry points.                                               |
 
 **Gaps.** GPU coverage stops at four matrix ops. Every call is a standalone
 CPU→GPU→CPU round trip — no way to keep an intermediate on the device. There is
@@ -118,9 +118,9 @@ Operations accept and return `GpuArray`. Data crosses the PCIe boundary only at
 explicit edges:
 
 ```ts
-const ga = await GpuArray.upload(cpuFloat64Array, shape);   // one upload
-const r  = await gpuMatmul(gpuAdd(ga, bias), weights);      // stays on device
-const out = await r.toFloat64Array();                       // one download
+const ga = await GpuArray.upload(cpuFloat64Array, shape); // one upload
+const r = await gpuMatmul(gpuAdd(ga, bias), weights); // stays on device
+const out = await r.toFloat64Array(); // one download
 ```
 
 This is what makes WebGPU pay off. Without it, every `gpu*` call is a fresh
@@ -152,15 +152,15 @@ than a separate subsystem.
 
 Listed cheapest-to-hardest. Each is a WGSL module in the `ShaderLibrary`.
 
-| Family | Kernels | Notes |
-|---|---|---|
-| Element-wise unary | `abs`, `sqrt`, `exp`, `log`, `sin`, … | One invocation per element. Trivial WGSL. Only worth GPU when fused (§7) or when the input is already a `GpuArray`. |
-| Element-wise binary | `add`, `sub`, `mul`, `div` | `add` exists. Same fusion caveat. |
-| Reductions | `sum`, `min`/`max`, `norm`, `mean`/`variance` | Tree reduction: workgroup-local reduce in shared memory, then a second pass over partials. Multi-dispatch — drive via `BatchExecutor`. |
-| Linear algebra | `matmul` (tiled), `matvec`, `transpose`, `outer` | `matmul`/`transpose` exist; make them tiled with shared-memory blocking for large sizes. |
-| **FFT** | radix-2 **Stockham autosort**, batched | The hard one. Use Stockham (not Cooley-Tukey-with-bit-reversal): it ping-pongs between two buffers and avoids the scattered bit-reversal permutation, which is hostile to GPU memory access. `log2(N)` dispatches per transform; one workgroup per frame for batched FFT (`spectrogram`, `fft2d`). Reference designs: VkFFT, GPU-FFT literature. |
-| Distance / similarity | `distanceMatrix`, `cosineSimilarity` | Tiled pairwise: load point blocks into shared memory, accumulate. Maps cleanly to the existing `distanceMatrixRowsChunk` row-block decomposition. |
-| Scan / convolution | prefix-sum, 1-D convolution | Blelloch scan; convolution either direct (small kernels) or via the FFT module. |
+| Family                | Kernels                                          | Notes                                                                                                                                                                                                                                                                                                                                            |
+| --------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Element-wise unary    | `abs`, `sqrt`, `exp`, `log`, `sin`, …            | One invocation per element. Trivial WGSL. Only worth GPU when fused (§7) or when the input is already a `GpuArray`.                                                                                                                                                                                                                              |
+| Element-wise binary   | `add`, `sub`, `mul`, `div`                       | `add` exists. Same fusion caveat.                                                                                                                                                                                                                                                                                                                |
+| Reductions            | `sum`, `min`/`max`, `norm`, `mean`/`variance`    | Tree reduction: workgroup-local reduce in shared memory, then a second pass over partials. Multi-dispatch — drive via `BatchExecutor`.                                                                                                                                                                                                           |
+| Linear algebra        | `matmul` (tiled), `matvec`, `transpose`, `outer` | `matmul`/`transpose` exist; make them tiled with shared-memory blocking for large sizes.                                                                                                                                                                                                                                                         |
+| **FFT**               | radix-2 **Stockham autosort**, batched           | The hard one. Use Stockham (not Cooley-Tukey-with-bit-reversal): it ping-pongs between two buffers and avoids the scattered bit-reversal permutation, which is hostile to GPU memory access. `log2(N)` dispatches per transform; one workgroup per frame for batched FFT (`spectrogram`, `fft2d`). Reference designs: VkFFT, GPU-FFT literature. |
+| Distance / similarity | `distanceMatrix`, `cosineSimilarity`             | Tiled pairwise: load point blocks into shared memory, accumulate. Maps cleanly to the existing `distanceMatrixRowsChunk` row-block decomposition.                                                                                                                                                                                                |
+| Scan / convolution    | prefix-sum, 1-D convolution                      | Blelloch scan; convolution either direct (small kernels) or via the FFT module.                                                                                                                                                                                                                                                                  |
 
 ---
 
@@ -174,7 +174,7 @@ Non-negotiable: **the GPU path never silently replaces an f64 result.**
 2. **Documented precision.** Every `gpu*` function's JSDoc and the function
    reference's `Accel` column state f32.
 3. **Optional `f64`-emulation mode.** For accuracy-sensitive callers, offer a
-   *double-single* (two-f32 / compensated-arithmetic, à la Dekker) variant of
+   _double-single_ (two-f32 / compensated-arithmetic, à la Dekker) variant of
    the hot kernels — ~1e-13 effective precision at ~3–10× the f32 cost. This is
    a per-kernel opt-in (`{ precision: 'extended' }`), not the default.
 4. **Mixed precision.** For iterative algorithms, a GPU f32 bulk pass followed
@@ -191,7 +191,7 @@ Two levels, increasing payoff and effort:
   per-op round trips — the chain stays on-device. This is most of the win and
   needs no compiler.
 - **Kernel fusion (Phase 5, optional).** A small lazy graph: element-wise chains
-  (`a*b + c`, `exp(-x)`) compile to a *single* generated WGSL shader instead of
+  (`a*b + c`, `exp(-x)`) compile to a _single_ generated WGSL shader instead of
   one dispatch per op, eliminating intermediate buffers entirely. This is a real
   mini-compiler — only justified if profiling shows element-wise dispatch
   overhead dominating.
@@ -218,14 +218,14 @@ The Node-has-no-WebGPU gap is the main friction.
 
 ## 10. Phased delivery
 
-| Phase | Scope | Depends on |
-|---|---|---|
-| 1 | `ShaderLibrary` skeleton; element-wise unary/binary + reduction WGSL; tiled `matmul`. | existing `gpu/` infra |
-| 2 | `GpuArray` resident handle; `upload` / `toFloat64Array`; route the Phase-1 kernels through it. | 1 |
-| 3 | Stockham FFT module (single + batched); wire opt-in `gpuFft` / batched paths. | 1, 2 |
-| 4 | `BackendRouter` generalization; `gpuDistanceMatrix`; residency-aware selection. | 2 |
-| 5 *(optional)* | Element-wise kernel fusion (lazy graph → generated WGSL). | 2 |
-| — | Native-WebGPU CI lane (Deno or Dawn). | parallel with 1 |
+| Phase          | Scope                                                                                          | Depends on            |
+| -------------- | ---------------------------------------------------------------------------------------------- | --------------------- |
+| 1              | `ShaderLibrary` skeleton; element-wise unary/binary + reduction WGSL; tiled `matmul`.          | existing `gpu/` infra |
+| 2              | `GpuArray` resident handle; `upload` / `toFloat64Array`; route the Phase-1 kernels through it. | 1                     |
+| 3              | Stockham FFT module (single + batched); wire opt-in `gpuFft` / batched paths.                  | 1, 2                  |
+| 4              | `BackendRouter` generalization; `gpuDistanceMatrix`; residency-aware selection.                | 2                     |
+| 5 _(optional)_ | Element-wise kernel fusion (lazy graph → generated WGSL).                                      | 2                     |
+| —              | Native-WebGPU CI lane (Deno or Dawn).                                                          | parallel with 1       |
 
 Phases 1–2 are the minimum that delivers value (coverage + residency). Phase 3
 (FFT) is the largest single piece. Phase 5 is speculative.
@@ -252,7 +252,7 @@ Phases 1–2 are the minimum that delivers value (coverage + residency). Phase 3
 ## 12. Recommendation
 
 Build the unified WebGPU path **only if** MathTS is targeting browser-hosted
-workloads that do *sustained, large, compute-bound* numerical work — big dense
+workloads that do _sustained, large, compute-bound_ numerical work — big dense
 linear algebra, large or batched FFTs, ML-style pipelines — where f32 precision
 is acceptable and data can stay resident across many operations.
 

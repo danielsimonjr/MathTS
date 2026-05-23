@@ -3,6 +3,6 @@ export const cancelDocs = {
   category: 'Algebra',
   syntax: ['cancel(expr)'],
   description: 'Cancel common factors in a rational expression (numeric fractions).',
-  examples: ['cancel(\'6/4\')', 'cancel(\'10/5\')'],
+  examples: ["cancel('6/4')", "cancel('10/5')"],
   seealso: ['together', 'apart'],
 };

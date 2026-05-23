@@ -142,11 +142,7 @@ export function residue(p: Float64Array, q: Float64Array): Float64Array {
  * Padé approximant `[m/n]` from Taylor coefficients. Returns a packed
  * `Float64Array` `[numerator (m+1) | denominator (n+1)]`.
  */
-export function padeApproximant(
-  coeffs: Float64Array,
-  m: i32,
-  n: i32
-): Float64Array {
+export function padeApproximant(coeffs: Float64Array, m: i32, n: i32): Float64Array {
   if (m < 0 || n < 0) return new Float64Array(0);
   const cLen: i32 = coeffs.length > m + n + 1 ? coeffs.length : m + n + 1;
   const c = new Float64Array(cLen);

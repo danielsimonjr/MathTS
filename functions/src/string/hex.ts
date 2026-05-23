@@ -1,25 +1,25 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for hex formatting
 interface BigNumberType {
   // BigNumber placeholder
 }
 
-type NumericValue = number | bigint | BigNumberType
+type NumericValue = number | bigint | BigNumberType;
 
 interface FormatOptions {
-  notation: string
-  wordSize?: number | bigint
+  notation: string;
+  wordSize?: number | bigint;
 }
 
 interface HexDependencies {
-  typed: TypedFunction
-  format: (value: NumericValue, options: FormatOptions) => string
+  typed: TypedFunction;
+  format: (value: NumericValue, options: FormatOptions) => string;
 }
 
-const name = 'hex'
-const dependencies = ['typed', 'format']
+const name = 'hex';
+const dependencies = ['typed', 'format'];
 
 /**
  * Format a number as hexadecimal.
@@ -47,14 +47,14 @@ export const createHex = /* #__PURE__ */ factory(
   ({ typed, format }: HexDependencies) => {
     return typed(name, {
       'number | BigNumber': function (n: number | bigint): string {
-        return format(n, { notation: 'hex' })
+        return format(n, { notation: 'hex' });
       },
       'number | BigNumber, number | BigNumber': function (
         n: number | bigint,
         wordSize: number | bigint
       ): string {
-        return format(n, { notation: 'hex', wordSize })
-      }
-    })
+        return format(n, { notation: 'hex', wordSize });
+      },
+    });
   }
-)
+);

@@ -87,18 +87,17 @@ export const createRelationalNode = /* #__PURE__ */ factory(name, dependencies, 
      */
     // @ts-expect-error - method overrides property from Node base class
     _compile (math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
-      const self = this
-
+      const conditionals = this.conditionals
       const compiled = this.params.map((p: Node): CompileFunction => p._compile(math, argNames))
 
       return function evalRelationalNode (scope: any, args: Record<string, any>, context: any): boolean {
         let evalLhs: any
         let evalRhs = compiled[0](scope, args, context)
 
-        for (let i = 0; i < self.conditionals.length; i++) {
+        for (let i = 0; i < conditionals.length; i++) {
           evalLhs = evalRhs
           evalRhs = compiled[i + 1](scope, args, context)
-          const condFn = getSafeProperty(math, self.conditionals[i])
+          const condFn = getSafeProperty(math, conditionals[i])
           if (!condFn(evalLhs, evalRhs)) {
             return false
           }
@@ -147,7 +146,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(name, dependencies, 
       const precedence =
           getPrecedence(this as any, parenthesis, options && options.implicit || 'hide', undefined)
 
-      const paramStrings = this.params.map(function (p: Node, index: number): string {
+      const paramStrings = this.params.map(function (p: Node, _index: number): string {
         const paramPrecedence =
             getPrecedence(p as any, parenthesis, options && options.implicit || 'hide', undefined)
         return (parenthesis === 'all' ||
@@ -200,7 +199,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(name, dependencies, 
       const precedence =
           getPrecedence(this as any, parenthesis, options && options.implicit || 'hide', undefined)
 
-      const paramStrings = this.params.map(function (p: Node, index: number): string {
+      const paramStrings = this.params.map(function (p: Node, _index: number): string {
         const paramPrecedence =
             getPrecedence(p as any, parenthesis, options && options.implicit || 'hide', undefined)
         return (parenthesis === 'all' ||
@@ -233,7 +232,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(name, dependencies, 
       const precedence =
           getPrecedence(this as any, parenthesis, options && options.implicit || 'hide', undefined)
 
-      const paramStrings = this.params.map(function (p: Node, index: number): string {
+      const paramStrings = this.params.map(function (p: Node, _index: number): string {
         const paramPrecedence =
             getPrecedence(p as any, parenthesis, options && options.implicit || 'hide', undefined)
         return (parenthesis === 'all' ||

@@ -26,7 +26,7 @@ export function matrix_ones(rows: i32, cols: i32): Float64Array {
   const data = new Float64Array(rows * cols);
   const len = rows * cols;
   for (let i = 0; i < len; i++) {
-    unchecked(data[i] = 1.0);
+    unchecked((data[i] = 1.0));
   }
   return data;
 }
@@ -38,7 +38,7 @@ export function matrix_fill(rows: i32, cols: i32, value: f64): Float64Array {
   const data = new Float64Array(rows * cols);
   const len = rows * cols;
   for (let i = 0; i < len; i++) {
-    unchecked(data[i] = value);
+    unchecked((data[i] = value));
   }
   return data;
 }
@@ -49,7 +49,7 @@ export function matrix_fill(rows: i32, cols: i32, value: f64): Float64Array {
 export function matrix_identity(n: i32): Float64Array {
   const data = new Float64Array(n * n);
   for (let i = 0; i < n; i++) {
-    unchecked(data[i * n + i] = 1.0);
+    unchecked((data[i * n + i] = 1.0));
   }
   return data;
 }
@@ -61,7 +61,7 @@ export function matrix_diag(values: Float64Array): Float64Array {
   const n = values.length;
   const data = new Float64Array(n * n);
   for (let i = 0; i < n; i++) {
-    unchecked(data[i * n + i] = unchecked(values[i]));
+    unchecked((data[i * n + i] = unchecked(values[i])));
   }
   return data;
 }
@@ -81,7 +81,7 @@ export function matrix_get(data: Float64Array, cols: i32, row: i32, col: i32): f
  * Set element at (row, col)
  */
 export function matrix_set(data: Float64Array, cols: i32, row: i32, col: i32, value: f64): void {
-  unchecked(data[row * cols + col] = value);
+  unchecked((data[row * cols + col] = value));
 }
 
 /**
@@ -91,7 +91,7 @@ export function matrix_get_row(data: Float64Array, cols: i32, row: i32): Float64
   const result = new Float64Array(cols);
   const offset = row * cols;
   for (let j = 0; j < cols; j++) {
-    unchecked(result[j] = unchecked(data[offset + j]));
+    unchecked((result[j] = unchecked(data[offset + j])));
   }
   return result;
 }
@@ -102,7 +102,7 @@ export function matrix_get_row(data: Float64Array, cols: i32, row: i32): Float64
 export function matrix_get_col(data: Float64Array, rows: i32, cols: i32, col: i32): Float64Array {
   const result = new Float64Array(rows);
   for (let i = 0; i < rows; i++) {
-    unchecked(result[i] = unchecked(data[i * cols + col]));
+    unchecked((result[i] = unchecked(data[i * cols + col])));
   }
   return result;
 }
@@ -114,7 +114,7 @@ export function matrix_get_diag(data: Float64Array, rows: i32, cols: i32): Float
   const n = min(rows, cols);
   const result = new Float64Array(n);
   for (let i = 0; i < n; i++) {
-    unchecked(result[i] = unchecked(data[i * cols + i]));
+    unchecked((result[i] = unchecked(data[i * cols + i])));
   }
   return result;
 }
@@ -126,24 +126,20 @@ export function matrix_get_diag(data: Float64Array, rows: i32, cols: i32): Float
 /**
  * Matrix addition: C = A + B
  */
-export function matrix_add(
-  a: Float64Array, b: Float64Array, result: Float64Array
-): void {
+export function matrix_add(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) + unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) + unchecked(b[i])));
   }
 }
 
 /**
  * Matrix subtraction: C = A - B
  */
-export function matrix_sub(
-  a: Float64Array, b: Float64Array, result: Float64Array
-): void {
+export function matrix_sub(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) - unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) - unchecked(b[i])));
   }
 }
 
@@ -151,11 +147,13 @@ export function matrix_sub(
  * Element-wise multiplication (Hadamard product): C = A .* B
  */
 export function matrix_mul_elementwise(
-  a: Float64Array, b: Float64Array, result: Float64Array
+  a: Float64Array,
+  b: Float64Array,
+  result: Float64Array
 ): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) * unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) * unchecked(b[i])));
   }
 }
 
@@ -163,35 +161,33 @@ export function matrix_mul_elementwise(
  * Element-wise division: C = A ./ B
  */
 export function matrix_div_elementwise(
-  a: Float64Array, b: Float64Array, result: Float64Array
+  a: Float64Array,
+  b: Float64Array,
+  result: Float64Array
 ): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) / unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) / unchecked(b[i])));
   }
 }
 
 /**
  * Scalar multiplication: C = A * scalar
  */
-export function matrix_scale(
-  a: Float64Array, scalar: f64, result: Float64Array
-): void {
+export function matrix_scale(a: Float64Array, scalar: f64, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) * scalar);
+    unchecked((result[i] = unchecked(a[i]) * scalar));
   }
 }
 
 /**
  * Scalar addition: C = A + scalar
  */
-export function matrix_add_scalar(
-  a: Float64Array, scalar: f64, result: Float64Array
-): void {
+export function matrix_add_scalar(a: Float64Array, scalar: f64, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) + scalar);
+    unchecked((result[i] = unchecked(a[i]) + scalar));
   }
 }
 
@@ -201,7 +197,7 @@ export function matrix_add_scalar(
 export function matrix_neg(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = -unchecked(a[i]));
+    unchecked((result[i] = -unchecked(a[i])));
   }
 }
 
@@ -216,14 +212,17 @@ export function matrix_neg(a: Float64Array, result: Float64Array): void {
  * Uses naive O(n^3) algorithm - suitable for SIMD optimization
  */
 export function matrix_multiply(
-  a: Float64Array, aRows: i32, aCols: i32,
-  b: Float64Array, bCols: i32,
+  a: Float64Array,
+  aRows: i32,
+  aCols: i32,
+  b: Float64Array,
+  bCols: i32,
   result: Float64Array
 ): void {
   // Clear result
   const resultLen = aRows * bCols;
   for (let i = 0; i < resultLen; i++) {
-    unchecked(result[i] = 0.0);
+    unchecked((result[i] = 0.0));
   }
 
   // Naive matmul with good cache access pattern
@@ -231,7 +230,7 @@ export function matrix_multiply(
     for (let k = 0; k < aCols; k++) {
       const aik = unchecked(a[i * aCols + k]);
       for (let j = 0; j < bCols; j++) {
-        unchecked(result[i * bCols + j] += aik * unchecked(b[k * bCols + j]));
+        unchecked((result[i * bCols + j] += aik * unchecked(b[k * bCols + j])));
       }
     }
   }
@@ -242,7 +241,9 @@ export function matrix_multiply(
  * A is (rows x cols), x is (cols), y is (rows)
  */
 export function matrix_vector_multiply(
-  a: Float64Array, rows: i32, cols: i32,
+  a: Float64Array,
+  rows: i32,
+  cols: i32,
   x: Float64Array,
   result: Float64Array
 ): void {
@@ -252,7 +253,7 @@ export function matrix_vector_multiply(
     for (let j = 0; j < cols; j++) {
       sum += unchecked(a[offset + j]) * unchecked(x[j]);
     }
-    unchecked(result[i] = sum);
+    unchecked((result[i] = sum));
   }
 }
 
@@ -262,19 +263,21 @@ export function matrix_vector_multiply(
  */
 export function vector_matrix_multiply(
   x: Float64Array,
-  a: Float64Array, rows: i32, cols: i32,
+  a: Float64Array,
+  rows: i32,
+  cols: i32,
   result: Float64Array
 ): void {
   // Clear result
   for (let j = 0; j < cols; j++) {
-    unchecked(result[j] = 0.0);
+    unchecked((result[j] = 0.0));
   }
 
   for (let i = 0; i < rows; i++) {
     const xi = unchecked(x[i]);
     const offset = i * cols;
     for (let j = 0; j < cols; j++) {
-      unchecked(result[j] += xi * unchecked(a[offset + j]));
+      unchecked((result[j] += xi * unchecked(a[offset + j])));
     }
   }
 }
@@ -283,16 +286,14 @@ export function vector_matrix_multiply(
  * Outer product: C = x * y^T
  * x is (m), y is (n), C is (m x n)
  */
-export function matrix_outer(
-  x: Float64Array, y: Float64Array, result: Float64Array
-): void {
+export function matrix_outer(x: Float64Array, y: Float64Array, result: Float64Array): void {
   const m = x.length;
   const n = y.length;
   for (let i = 0; i < m; i++) {
     const xi = unchecked(x[i]);
     const offset = i * n;
     for (let j = 0; j < n; j++) {
-      unchecked(result[offset + j] = xi * unchecked(y[j]));
+      unchecked((result[offset + j] = xi * unchecked(y[j])));
     }
   }
 }
@@ -306,11 +307,14 @@ export function matrix_outer(
  * A is (rows x cols), B is (cols x rows)
  */
 export function matrix_transpose(
-  a: Float64Array, rows: i32, cols: i32, result: Float64Array
+  a: Float64Array,
+  rows: i32,
+  cols: i32,
+  result: Float64Array
 ): void {
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      unchecked(result[j * rows + i] = unchecked(a[i * cols + j]));
+      unchecked((result[j * rows + i] = unchecked(a[i * cols + j])));
     }
   }
 }
@@ -399,7 +403,10 @@ export function matrix_trace(data: Float64Array, rows: i32, cols: i32): f64 {
  * Sum along rows (result is column vector)
  */
 export function matrix_sum_rows(
-  data: Float64Array, rows: i32, cols: i32, result: Float64Array
+  data: Float64Array,
+  rows: i32,
+  cols: i32,
+  result: Float64Array
 ): void {
   for (let i = 0; i < rows; i++) {
     let sum: f64 = 0.0;
@@ -407,7 +414,7 @@ export function matrix_sum_rows(
     for (let j = 0; j < cols; j++) {
       sum += unchecked(data[offset + j]);
     }
-    unchecked(result[i] = sum);
+    unchecked((result[i] = sum));
   }
 }
 
@@ -415,17 +422,20 @@ export function matrix_sum_rows(
  * Sum along columns (result is row vector)
  */
 export function matrix_sum_cols(
-  data: Float64Array, rows: i32, cols: i32, result: Float64Array
+  data: Float64Array,
+  rows: i32,
+  cols: i32,
+  result: Float64Array
 ): void {
   // Clear result
   for (let j = 0; j < cols; j++) {
-    unchecked(result[j] = 0.0);
+    unchecked((result[j] = 0.0));
   }
 
   for (let i = 0; i < rows; i++) {
     const offset = i * cols;
     for (let j = 0; j < cols; j++) {
-      unchecked(result[j] += unchecked(data[offset + j]));
+      unchecked((result[j] += unchecked(data[offset + j])));
     }
   }
 }
@@ -445,7 +455,10 @@ export function matrix_is_square(rows: i32, cols: i32): bool {
  * Check if matrix is symmetric (within tolerance)
  */
 export function matrix_is_symmetric(
-  data: Float64Array, rows: i32, cols: i32, tolerance: f64
+  data: Float64Array,
+  rows: i32,
+  cols: i32,
+  tolerance: f64
 ): bool {
   if (rows != cols) return false;
 
@@ -462,9 +475,7 @@ export function matrix_is_symmetric(
 /**
  * Check if matrix is diagonal (within tolerance)
  */
-export function matrix_is_diagonal(
-  data: Float64Array, rows: i32, cols: i32, tolerance: f64
-): bool {
+export function matrix_is_diagonal(data: Float64Array, rows: i32, cols: i32, tolerance: f64): bool {
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       if (i != j) {
@@ -478,9 +489,7 @@ export function matrix_is_diagonal(
 /**
  * Check if matrix equals identity (within tolerance)
  */
-export function matrix_is_identity(
-  data: Float64Array, rows: i32, cols: i32, tolerance: f64
-): bool {
+export function matrix_is_identity(data: Float64Array, rows: i32, cols: i32, tolerance: f64): bool {
   if (rows != cols) return false;
 
   for (let i = 0; i < rows; i++) {
@@ -502,7 +511,7 @@ export function matrix_is_identity(
 export function matrix_scale_inplace(data: Float64Array, scalar: f64): void {
   const len = data.length;
   for (let i = 0; i < len; i++) {
-    unchecked(data[i] = unchecked(data[i]) * scalar);
+    unchecked((data[i] = unchecked(data[i]) * scalar));
   }
 }
 
@@ -512,7 +521,7 @@ export function matrix_scale_inplace(data: Float64Array, scalar: f64): void {
 export function matrix_add_scalar_inplace(data: Float64Array, scalar: f64): void {
   const len = data.length;
   for (let i = 0; i < len; i++) {
-    unchecked(data[i] = unchecked(data[i]) + scalar);
+    unchecked((data[i] = unchecked(data[i]) + scalar));
   }
 }
 
@@ -522,7 +531,7 @@ export function matrix_add_scalar_inplace(data: Float64Array, scalar: f64): void
 export function matrix_add_inplace(a: Float64Array, b: Float64Array): void {
   const len = min(a.length, b.length);
   for (let i = 0; i < len; i++) {
-    unchecked(a[i] = unchecked(a[i]) + unchecked(b[i]));
+    unchecked((a[i] = unchecked(a[i]) + unchecked(b[i])));
   }
 }
 
@@ -532,7 +541,7 @@ export function matrix_add_inplace(a: Float64Array, b: Float64Array): void {
 export function matrix_copy(src: Float64Array, dst: Float64Array): void {
   const len = min(src.length, dst.length);
   for (let i = 0; i < len; i++) {
-    unchecked(dst[i] = unchecked(src[i]));
+    unchecked((dst[i] = unchecked(src[i])));
   }
 }
 
@@ -543,12 +552,10 @@ export function matrix_copy(src: Float64Array, dst: Float64Array): void {
 /**
  * AXPY operation: Y = alpha*X + Y (BLAS Level 1)
  */
-export function matrix_axpy(
-  alpha: f64, x: Float64Array, y: Float64Array
-): void {
+export function matrix_axpy(alpha: f64, x: Float64Array, y: Float64Array): void {
   const len = min(x.length, y.length);
   for (let i = 0; i < len; i++) {
-    unchecked(y[i] = alpha * unchecked(x[i]) + unchecked(y[i]));
+    unchecked((y[i] = alpha * unchecked(x[i]) + unchecked(y[i])));
   }
 }
 
@@ -557,14 +564,19 @@ export function matrix_axpy(
  * A is (m x k), B is (k x n), C is (m x n)
  */
 export function matrix_gemm(
-  alpha: f64, a: Float64Array, m: i32, k: i32,
-  b: Float64Array, n: i32,
-  beta: f64, c: Float64Array
+  alpha: f64,
+  a: Float64Array,
+  m: i32,
+  k: i32,
+  b: Float64Array,
+  n: i32,
+  beta: f64,
+  c: Float64Array
 ): void {
   // Scale C by beta
   const cLen = m * n;
   for (let i = 0; i < cLen; i++) {
-    unchecked(c[i] = beta * unchecked(c[i]));
+    unchecked((c[i] = beta * unchecked(c[i])));
   }
 
   // Add alpha * A * B
@@ -572,7 +584,7 @@ export function matrix_gemm(
     for (let p = 0; p < k; p++) {
       const aip = alpha * unchecked(a[i * k + p]);
       for (let j = 0; j < n; j++) {
-        unchecked(c[i * n + j] += aip * unchecked(b[p * n + j]));
+        unchecked((c[i * n + j] += aip * unchecked(b[p * n + j])));
       }
     }
   }
@@ -583,9 +595,13 @@ export function matrix_gemm(
  * A is (m x n), x is (n), y is (m)
  */
 export function matrix_gemv(
-  alpha: f64, a: Float64Array, m: i32, n: i32,
+  alpha: f64,
+  a: Float64Array,
+  m: i32,
+  n: i32,
   x: Float64Array,
-  beta: f64, y: Float64Array
+  beta: f64,
+  y: Float64Array
 ): void {
   for (let i = 0; i < m; i++) {
     let dot: f64 = 0.0;
@@ -593,6 +609,6 @@ export function matrix_gemv(
     for (let j = 0; j < n; j++) {
       dot += unchecked(a[offset + j]) * unchecked(x[j]);
     }
-    unchecked(y[i] = alpha * dot + beta * unchecked(y[i]));
+    unchecked((y[i] = alpha * dot + beta * unchecked(y[i])));
   }
 }

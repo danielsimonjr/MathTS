@@ -9,7 +9,7 @@ export const cloneDocs = {
     'clone(2 - 4i)',
     'clone(45 deg)',
     'clone([1, 2; 3, 4])',
-    'clone("hello world")'
+    'clone("hello world")',
   ],
-  seealso: [] as any[]
-}
+  seealso: [] as any[],
+};

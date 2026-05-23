@@ -1,23 +1,23 @@
-import { factory } from '../../utils/factory.js'
-import { errorTransform } from './utils/errorTransform.js'
-import { createSubset } from '../../matrix/subset.js'
-import type { TypedFunction, MathFunction, VariadicArgs } from './types.js'
+import { factory } from '../../utils/factory.js';
+import { errorTransform } from './utils/errorTransform.js';
+import { createSubset } from '../../matrix/subset.js';
+import type { TypedFunction, MathFunction, VariadicArgs } from './types.js';
 
 interface SubsetDependencies {
-  typed: TypedFunction
-  matrix: MathFunction
-  zeros: MathFunction
-  add: TypedFunction
+  typed: TypedFunction;
+  matrix: MathFunction;
+  zeros: MathFunction;
+  add: TypedFunction;
 }
 
-const name = 'subset'
-const dependencies = ['typed', 'matrix', 'zeros', 'add']
+const name = 'subset';
+const dependencies = ['typed', 'matrix', 'zeros', 'add'];
 
 export const createSubsetTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, matrix, zeros, add }: SubsetDependencies) => {
-    const subset = createSubset({ typed, matrix, zeros, add })
+    const subset = createSubset({ typed, matrix, zeros, add });
 
     /**
      * Attach a transform function to math.subset
@@ -28,12 +28,12 @@ export const createSubsetTransform = /* #__PURE__ */ factory(
     return typed('subset', {
       '...any': function (args: VariadicArgs): unknown {
         try {
-          return subset.apply(null, args)
+          return subset.apply(null, args);
         } catch (err) {
-          throw errorTransform(err as Error)
+          throw errorTransform(err as Error);
         }
-      }
-    })
+      },
+    });
   },
   { isTransformFunction: true }
-)
+);

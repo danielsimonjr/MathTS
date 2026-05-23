@@ -11,7 +11,7 @@ export const partitionSelectDocs = {
     'partitionSelect(arr, 0) # returns 1, arr is now: [1, 2, 5]',
     'arr',
     "partitionSelect(arr, 1, 'desc') # returns 2, arr is now: [5, 2, 1]",
-    'arr'
+    'arr',
   ],
-  seealso: ['sort']
-}
+  seealso: ['sort'],
+};

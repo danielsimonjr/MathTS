@@ -1,34 +1,34 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for sqrt
 interface BigNumberType {
-  isNegative(): boolean
-  toNumber(): number
-  sqrt(): BigNumberType
+  isNegative(): boolean;
+  toNumber(): number;
+  sqrt(): BigNumberType;
 }
 
 interface ComplexType {
-  sqrt(): ComplexType
+  sqrt(): ComplexType;
 }
 
 interface ComplexConstructor {
-  new (re: number, im: number): ComplexType
+  new (re: number, im: number): ComplexType;
 }
 
 interface UnitType {
-  pow(value: number): UnitType
+  pow(value: number): UnitType;
 }
 
 interface SqrtDependencies {
-  config: ConfigOptions
-  typed: TypedFunction
-  Complex: ComplexConstructor
+  config: ConfigOptions;
+  typed: TypedFunction;
+  Complex: ComplexConstructor;
 }
 
-const name = 'sqrt'
-const dependencies = ['config', 'typed', 'Complex']
+const name = 'sqrt';
+const dependencies = ['config', 'typed', 'Complex'];
 
 export const createSqrt = /* #__PURE__ */ factory(
   name,
@@ -64,25 +64,23 @@ export const createSqrt = /* #__PURE__ */ factory(
       number: _sqrtNumber,
 
       Complex: function (x: ComplexType): ComplexType {
-        return x.sqrt()
+        return x.sqrt();
       },
 
-      BigNumber: function (
-        x: BigNumberType
-      ): BigNumberType | number | ComplexType {
+      BigNumber: function (x: BigNumberType): BigNumberType | number | ComplexType {
         if (!x.isNegative() || config.predictable) {
-          return x.sqrt()
+          return x.sqrt();
         } else {
           // negative value -> downgrade to number to do complex value computation
-          return _sqrtNumber(x.toNumber())
+          return _sqrtNumber(x.toNumber());
         }
       },
 
       Unit: function (x: UnitType): UnitType {
         // Someday will work for complex units when they are implemented
-        return x.pow(0.5)
-      }
-    })
+        return x.pow(0.5);
+      },
+    });
 
     /**
      * Calculate sqrt for a number
@@ -92,12 +90,12 @@ export const createSqrt = /* #__PURE__ */ factory(
      */
     function _sqrtNumber(x: number): number | ComplexType {
       if (isNaN(x)) {
-        return NaN
+        return NaN;
       } else if (x >= 0 || config.predictable) {
-        return Math.sqrt(x)
+        return Math.sqrt(x);
       } else {
-        return new Complex(x, 0).sqrt()
+        return new Complex(x, 0).sqrt();
       }
     }
   }
-)
+);

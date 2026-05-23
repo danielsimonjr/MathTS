@@ -45,7 +45,11 @@ describe('area', () => {
   it('should compute triangle area', () => {
     const a = area({
       type: 'triangle',
-      vertices: [[0, 0], [4, 0], [0, 3]],
+      vertices: [
+        [0, 0],
+        [4, 0],
+        [0, 3],
+      ],
     });
     expectClose(a, 6);
   });
@@ -53,7 +57,12 @@ describe('area', () => {
   it('should compute polygon area', () => {
     const a = area({
       type: 'polygon',
-      vertices: [[0, 0], [1, 0], [1, 1], [0, 1]],
+      vertices: [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 1],
+      ],
     });
     expectClose(a, 1);
   });
@@ -65,13 +74,22 @@ describe('area', () => {
 
 describe('centroid', () => {
   it('should compute centroid of a square', () => {
-    const c = centroid([[0, 0], [4, 0], [4, 4], [0, 4]]);
+    const c = centroid([
+      [0, 0],
+      [4, 0],
+      [4, 4],
+      [0, 4],
+    ]);
     expectClose(c[0], 2);
     expectClose(c[1], 2);
   });
 
   it('should compute centroid of a triangle', () => {
-    const c = centroid([[0, 0], [3, 0], [0, 3]]);
+    const c = centroid([
+      [0, 0],
+      [3, 0],
+      [0, 3],
+    ]);
     expectClose(c[0], 1, 0.1);
     expectClose(c[1], 1, 0.1);
   });
@@ -119,12 +137,21 @@ describe('coordinateTransform', () => {
 
 describe('polygonPerimeter', () => {
   it('should compute perimeter of a unit square', () => {
-    const p = polygonPerimeter([[0, 0], [1, 0], [1, 1], [0, 1]]);
+    const p = polygonPerimeter([
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1],
+    ]);
     expectClose(p, 4);
   });
 
   it('should compute perimeter of a triangle', () => {
-    const p = polygonPerimeter([[0, 0], [3, 0], [0, 4]]);
+    const p = polygonPerimeter([
+      [0, 0],
+      [3, 0],
+      [0, 4],
+    ]);
     expectClose(p, 12);
   });
 });
@@ -173,18 +200,32 @@ describe('minkowskiDistance', () => {
 
 describe('delaunayTriangulation', () => {
   it('should triangulate 3 points into 1 triangle', () => {
-    const tris = delaunayTriangulation([[0, 0], [1, 0], [0.5, 1]]);
+    const tris = delaunayTriangulation([
+      [0, 0],
+      [1, 0],
+      [0.5, 1],
+    ]);
     expect(tris.length).toBe(1);
     expect(tris[0].length).toBe(3);
   });
 
   it('should triangulate 4 points into 2 triangles', () => {
-    const tris = delaunayTriangulation([[0, 0], [1, 0], [1, 1], [0, 1]]);
+    const tris = delaunayTriangulation([
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1],
+    ]);
     expect(tris.length).toBe(2);
   });
 
   it('should handle fewer than 3 points', () => {
-    expect(delaunayTriangulation([[0, 0], [1, 1]])).toEqual([]);
+    expect(
+      delaunayTriangulation([
+        [0, 0],
+        [1, 1],
+      ])
+    ).toEqual([]);
     expect(delaunayTriangulation([[0, 0]])).toEqual([]);
   });
 });
@@ -196,8 +237,12 @@ describe('delaunayTriangulation', () => {
 describe('voronoiDiagram', () => {
   it('should produce vertices and regions', () => {
     const result = voronoiDiagram(
-      [[0, 0], [1, 0], [0.5, 1]],
-      [-1, -1, 2, 2],
+      [
+        [0, 0],
+        [1, 0],
+        [0.5, 1],
+      ],
+      [-1, -1, 2, 2]
     );
     expect(result.vertices.length).toBeGreaterThan(0);
     expect(result.regions.length).toBe(3);
@@ -210,7 +255,12 @@ describe('voronoiDiagram', () => {
 
 describe('kdTree', () => {
   it('should build a tree', () => {
-    const tree = kdTree([[0, 0], [1, 1], [2, 2], [3, 3]]);
+    const tree = kdTree([
+      [0, 0],
+      [1, 1],
+      [2, 2],
+      [3, 3],
+    ]);
     expect(tree).not.toBeNull();
     expect(tree!.point.length).toBe(2);
   });
@@ -222,7 +272,12 @@ describe('kdTree', () => {
 
 describe('kdTreeNearest', () => {
   it('should find nearest neighbor', () => {
-    const tree = kdTree([[0, 0], [3, 3], [1, 1], [5, 5]]);
+    const tree = kdTree([
+      [0, 0],
+      [3, 3],
+      [1, 1],
+      [5, 5],
+    ]);
     const result = kdTreeNearest(tree, [0.9, 0.9]);
     expect(result).not.toBeNull();
     expect(result!.point).toEqual([1, 1]);
@@ -230,7 +285,11 @@ describe('kdTreeNearest', () => {
   });
 
   it('should find exact match', () => {
-    const tree = kdTree([[0, 0], [1, 1], [2, 2]]);
+    const tree = kdTree([
+      [0, 0],
+      [1, 1],
+      [2, 2],
+    ]);
     const result = kdTreeNearest(tree, [1, 1]);
     expect(result!.point).toEqual([1, 1]);
     expectClose(result!.distance, 0);
@@ -244,8 +303,13 @@ describe('kdTreeNearest', () => {
 describe('nearestNeighbor', () => {
   it('should find nearest neighbor in small set', () => {
     const result = nearestNeighbor(
-      [[0, 0], [3, 3], [1, 1], [5, 5]],
-      [0.9, 0.9],
+      [
+        [0, 0],
+        [3, 3],
+        [1, 1],
+        [5, 5],
+      ],
+      [0.9, 0.9]
     );
     expect(result).not.toBeNull();
     expect(result!.point).toEqual([1, 1]);
@@ -254,8 +318,12 @@ describe('nearestNeighbor', () => {
 
   it('should find exact match', () => {
     const result = nearestNeighbor(
-      [[0, 0], [1, 1], [2, 2]],
-      [1, 1],
+      [
+        [0, 0],
+        [1, 1],
+        [2, 2],
+      ],
+      [1, 1]
     );
     expect(result!.index).toBe(1);
     expectClose(result!.distance, 0);
@@ -266,7 +334,12 @@ describe('nearestNeighbor', () => {
   });
 
   it('should work with 3D points', () => {
-    const points = [[0, 0, 0], [1, 1, 1], [2, 2, 2], [10, 10, 10]];
+    const points = [
+      [0, 0, 0],
+      [1, 1, 1],
+      [2, 2, 2],
+      [10, 10, 10],
+    ];
     const result = nearestNeighbor(points, [1.1, 1.1, 1.1]);
     expect(result).not.toBeNull();
     expect(result!.point).toEqual([1, 1, 1]);
@@ -298,7 +371,11 @@ describe('distanceMatrix', () => {
 
   it('computes the all-pairs Euclidean distance matrix', async () => {
     // 3-4-5 right triangle.
-    const dm = await distanceMatrix([[0, 0], [3, 0], [0, 4]]);
+    const dm = await distanceMatrix([
+      [0, 0],
+      [3, 0],
+      [0, 4],
+    ]);
     expect(dm).toEqual([
       [0, 3, 4],
       [3, 0, 5],
@@ -325,7 +402,7 @@ describe('distanceMatrix', () => {
     const n = 256;
     const dim = 5;
     const pts = Array.from({ length: n }, (_, i) =>
-      Array.from({ length: dim }, (_, k) => Math.sin(i * 0.3 + k * 1.7)),
+      Array.from({ length: dim }, (_, k) => Math.sin(i * 0.3 + k * 1.7))
     );
 
     computePool.updateConfig({ thresholdElements: 1_000_000 });

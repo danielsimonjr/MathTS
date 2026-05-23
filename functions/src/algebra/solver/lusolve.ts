@@ -1,56 +1,53 @@
-import { isArray, isMatrix } from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
-import { createSolveValidation } from './utils/solveValidation.js'
-import { csIpvec } from '../sparse/csIpvec.js'
-import { wasmLoader } from '../../wasm/WasmLoader.js'
+import { isArray, isMatrix } from '../../utils/is.js';
+import { factory } from '../../utils/factory.js';
+import { createSolveValidation } from './utils/solveValidation.js';
+import { csIpvec } from '../sparse/csIpvec.js';
+import { wasmLoader } from '../../wasm/WasmLoader.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
-const WASM_LUSOLVE_THRESHOLD = 16 // 4x4 matrix
+const WASM_LUSOLVE_THRESHOLD = 16; // 4x4 matrix
 
 // Type definitions
-type _MatrixData = any[][] // eslint-disable-line @typescript-eslint/no-unused-vars
+type _MatrixData = any[][]; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 interface TypedFunction<T = any> {
-  (...args: any[]): T
+  (...args: any[]): T;
 }
 
 interface MatrixConstructor {
-  (
-    data: any[] | any[][],
-    storage?: 'dense' | 'sparse'
-  ): DenseMatrix | SparseMatrix
+  (data: any[] | any[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
 }
 
 interface DenseMatrix {
-  type: 'DenseMatrix'
-  isDenseMatrix: true
-  _data: any[][]
-  _size: number[]
-  _datatype?: string
-  valueOf(): any[][]
+  type: 'DenseMatrix';
+  isDenseMatrix: true;
+  _data: any[][];
+  _size: number[];
+  _datatype?: string;
+  valueOf(): any[][];
 }
 
 interface SparseMatrix {
-  type: 'SparseMatrix'
-  isSparseMatrix: true
-  _values?: any[]
-  _index?: number[]
-  _ptr?: number[]
-  _size: number[]
-  _datatype?: string
-  _data?: any
-  valueOf(): any[][]
+  type: 'SparseMatrix';
+  isSparseMatrix: true;
+  _values?: any[];
+  _index?: number[];
+  _ptr?: number[];
+  _size: number[];
+  _datatype?: string;
+  _data?: any;
+  valueOf(): any[][];
 }
 
 interface DenseMatrixConstructor {
-  new (data: { data: any[][]; size: number[]; datatype?: string }): DenseMatrix
+  new (data: { data: any[][]; size: number[]; datatype?: string }): DenseMatrix;
 }
 
 interface LUPDecomposition {
-  L: DenseMatrix | SparseMatrix | any[][]
-  U: DenseMatrix | SparseMatrix | any[][]
-  p: number[] | null
-  q?: number[] | null
+  L: DenseMatrix | SparseMatrix | any[][];
+  U: DenseMatrix | SparseMatrix | any[][];
+  p: number[] | null;
+  q?: number[] | null;
 }
 
 interface SolveValidationFunction {
@@ -58,33 +55,33 @@ interface SolveValidationFunction {
     matrix: DenseMatrix | SparseMatrix,
     b: any[][] | DenseMatrix | SparseMatrix,
     copy: boolean
-  ): DenseMatrix
+  ): DenseMatrix;
 }
 
 interface LupFunction {
-  (matrix: DenseMatrix | SparseMatrix | any[][]): LUPDecomposition
+  (matrix: DenseMatrix | SparseMatrix | any[][]): LUPDecomposition;
 }
 
 interface SluFunction {
-  (matrix: SparseMatrix, order: number, threshold: number): LUPDecomposition
+  (matrix: SparseMatrix, order: number, threshold: number): LUPDecomposition;
 }
 
 interface LsolveFunction {
-  (L: DenseMatrix | SparseMatrix, b: DenseMatrix): DenseMatrix
+  (L: DenseMatrix | SparseMatrix, b: DenseMatrix): DenseMatrix;
 }
 
 interface UsolveFunction {
-  (U: DenseMatrix | SparseMatrix, b: DenseMatrix): DenseMatrix
+  (U: DenseMatrix | SparseMatrix, b: DenseMatrix): DenseMatrix;
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  lup: LupFunction
-  slu: SluFunction
-  usolve: UsolveFunction
-  lsolve: LsolveFunction
-  DenseMatrix: DenseMatrixConstructor
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  lup: LupFunction;
+  slu: SluFunction;
+  usolve: UsolveFunction;
+  lsolve: LsolveFunction;
+  DenseMatrix: DenseMatrixConstructor;
 }
 
 /**
@@ -92,14 +89,14 @@ interface Dependencies {
  */
 function isPlainNumberMatrix(matrix: any[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
-    const row = matrix[i]
+    const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
       if (typeof row[j] !== 'number') {
-        return false
+        return false;
       }
     }
   }
-  return true
+  return true;
 }
 
 /**
@@ -108,58 +105,46 @@ function isPlainNumberMatrix(matrix: any[][]): boolean {
 function isPlainNumberVector(vec: any[][]): boolean {
   for (let i = 0; i < vec.length; i++) {
     if (typeof vec[i][0] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 /**
  * Flatten a 2D array to a Float64Array in row-major order
  */
-function flattenToFloat64(
-  matrix: number[][],
-  rows: number,
-  cols: number
-): Float64Array {
-  const result = new Float64Array(rows * cols)
+function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
+  const result = new Float64Array(rows * cols);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j]
+      result[i * cols + j] = matrix[i][j];
     }
   }
-  return result
+  return result;
 }
 
 /**
  * Extract column vector to Float64Array
  */
 function vectorToFloat64(vec: number[][]): Float64Array {
-  const result = new Float64Array(vec.length)
+  const result = new Float64Array(vec.length);
   for (let i = 0; i < vec.length; i++) {
-    result[i] = vec[i][0]
+    result[i] = vec[i][0];
   }
-  return result
+  return result;
 }
 
-const name = 'lusolve'
-const dependencies = [
-  'typed',
-  'matrix',
-  'lup',
-  'slu',
-  'usolve',
-  'lsolve',
-  'DenseMatrix'
-]
+const name = 'lusolve';
+const dependencies = ['typed', 'matrix', 'lup', 'slu', 'usolve', 'lsolve', 'DenseMatrix'];
 
 export const createLusolve = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, matrix, lup, slu, usolve, lsolve, DenseMatrix }: Dependencies) => {
     const solveValidation = createSolveValidation({
-      DenseMatrix: DenseMatrix as any
-    }) as unknown as SolveValidationFunction
+      DenseMatrix: DenseMatrix as any,
+    }) as unknown as SolveValidationFunction;
 
     /**
      * Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
@@ -199,11 +184,11 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: any[][],
         b: any[][] | DenseMatrix | SparseMatrix
       ): any[][] {
-        const rows = a.length
-        const columns = a[0]?.length || 0
+        const rows = a.length;
+        const columns = a[0]?.length || 0;
 
         // WASM fast path for square plain number matrices
-        const wasm = wasmLoader.getModule()
+        const wasm = wasmLoader.getModule();
         if (
           wasm &&
           rows === columns &&
@@ -211,21 +196,19 @@ export const createLusolve = /* #__PURE__ */ factory(
           isPlainNumberMatrix(a)
         ) {
           // Convert b to column vector format
-          const aMatrix = matrix(a) as DenseMatrix
-          const bMatrix = solveValidation(aMatrix, b, true)
-          const bdata = bMatrix._data
+          const aMatrix = matrix(a) as DenseMatrix;
+          const bMatrix = solveValidation(aMatrix, b, true);
+          const bdata = bMatrix._data;
 
           if (isPlainNumberVector(bdata) && bdata.length === rows) {
             try {
-              const aFlat = flattenToFloat64(a, rows, columns)
-              const bFlat = vectorToFloat64(bdata as number[][])
+              const aFlat = flattenToFloat64(a, rows, columns);
+              const bFlat = vectorToFloat64(bdata as number[][]);
 
-              const aAlloc = wasmLoader.allocateFloat64Array(aFlat)
-              const bAlloc = wasmLoader.allocateFloat64Array(bFlat)
-              const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows)
-              const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(
-                rows * rows
-              )
+              const aAlloc = wasmLoader.allocateFloat64Array(aFlat);
+              const bAlloc = wasmLoader.allocateFloat64Array(bFlat);
+              const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows);
+              const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows * rows);
 
               try {
                 const success = wasm.laSolve(
@@ -234,28 +217,26 @@ export const createLusolve = /* #__PURE__ */ factory(
                   rows,
                   resultAlloc.ptr,
                   workAlloc.ptr
-                )
+                );
                 if (success === 0) {
-                  throw new Error(
-                    'Linear system cannot be solved since matrix is singular'
-                  )
+                  throw new Error('Linear system cannot be solved since matrix is singular');
                 }
                 // Convert result back to column vector (as plain array)
-                const x: number[][] = []
+                const x: number[][] = [];
                 for (let i = 0; i < rows; i++) {
-                  x[i] = [resultAlloc.array[i]]
+                  x[i] = [resultAlloc.array[i]];
                 }
-                return x
+                return x;
               } finally {
-                wasmLoader.free(aAlloc.ptr)
-                wasmLoader.free(bAlloc.ptr)
-                wasmLoader.free(resultAlloc.ptr)
-                wasmLoader.free(workAlloc.ptr)
+                wasmLoader.free(aAlloc.ptr);
+                wasmLoader.free(bAlloc.ptr);
+                wasmLoader.free(resultAlloc.ptr);
+                wasmLoader.free(workAlloc.ptr);
               }
             } catch (e) {
               // If it's a singularity error, rethrow it
               if (e instanceof Error && e.message.includes('singular')) {
-                throw e
+                throw e;
               }
               // Otherwise fall back to JS implementation on WASM error
             }
@@ -263,21 +244,21 @@ export const createLusolve = /* #__PURE__ */ factory(
         }
 
         // JavaScript fallback
-        const aMatrix = matrix(a)
-        const d = lup(aMatrix)
-        const x = _lusolve(d.L, d.U, d.p, null, b)
-        return x.valueOf()
+        const aMatrix = matrix(a);
+        const d = lup(aMatrix);
+        const x = _lusolve(d.L, d.U, d.p, null, b);
+        return x.valueOf();
       },
 
       'DenseMatrix, Array | Matrix': function (
         a: DenseMatrix,
         b: any[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
-        const rows = a._size[0]
-        const columns = a._size[1]
+        const rows = a._size[0];
+        const columns = a._size[1];
 
         // WASM fast path for square plain number matrices
-        const wasm = wasmLoader.getModule()
+        const wasm = wasmLoader.getModule();
         if (
           wasm &&
           rows === columns &&
@@ -285,21 +266,19 @@ export const createLusolve = /* #__PURE__ */ factory(
           isPlainNumberMatrix(a._data)
         ) {
           // Get b as a column vector
-          const bMatrix = solveValidation(a, b, true)
-          const bdata = bMatrix._data
+          const bMatrix = solveValidation(a, b, true);
+          const bdata = bMatrix._data;
 
           if (isPlainNumberVector(bdata) && bdata.length === rows) {
             try {
-              const aFlat = flattenToFloat64(a._data, rows, columns)
-              const bFlat = vectorToFloat64(bdata as number[][])
+              const aFlat = flattenToFloat64(a._data, rows, columns);
+              const bFlat = vectorToFloat64(bdata as number[][]);
 
-              const aAlloc = wasmLoader.allocateFloat64Array(aFlat)
-              const bAlloc = wasmLoader.allocateFloat64Array(bFlat)
-              const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows)
+              const aAlloc = wasmLoader.allocateFloat64Array(aFlat);
+              const bAlloc = wasmLoader.allocateFloat64Array(bFlat);
+              const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows);
               // Work buffer needs at least n*n for LU decomposition
-              const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(
-                rows * rows
-              )
+              const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows * rows);
 
               try {
                 const success = wasm.laSolve(
@@ -308,31 +287,29 @@ export const createLusolve = /* #__PURE__ */ factory(
                   rows,
                   resultAlloc.ptr,
                   workAlloc.ptr
-                )
+                );
                 if (success === 0) {
-                  throw new Error(
-                    'Linear system cannot be solved since matrix is singular'
-                  )
+                  throw new Error('Linear system cannot be solved since matrix is singular');
                 }
                 // Convert result back to column vector
-                const x: number[][] = []
+                const x: number[][] = [];
                 for (let i = 0; i < rows; i++) {
-                  x[i] = [resultAlloc.array[i]]
+                  x[i] = [resultAlloc.array[i]];
                 }
                 return new DenseMatrix({
                   data: x,
-                  size: [rows, 1]
-                })
+                  size: [rows, 1],
+                });
               } finally {
-                wasmLoader.free(aAlloc.ptr)
-                wasmLoader.free(bAlloc.ptr)
-                wasmLoader.free(resultAlloc.ptr)
-                wasmLoader.free(workAlloc.ptr)
+                wasmLoader.free(aAlloc.ptr);
+                wasmLoader.free(bAlloc.ptr);
+                wasmLoader.free(resultAlloc.ptr);
+                wasmLoader.free(workAlloc.ptr);
               }
             } catch (e) {
               // If it's a singularity error, rethrow it
               if (e instanceof Error && e.message.includes('singular')) {
-                throw e
+                throw e;
               }
               // Otherwise fall back to JS implementation on WASM error
             }
@@ -340,16 +317,16 @@ export const createLusolve = /* #__PURE__ */ factory(
         }
 
         // JavaScript fallback
-        const d = lup(a)
-        return _lusolve(d.L, d.U, d.p, null, b)
+        const d = lup(a);
+        return _lusolve(d.L, d.U, d.p, null, b);
       },
 
       'SparseMatrix, Array | Matrix': function (
         a: SparseMatrix,
         b: any[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
-        const d = lup(a)
-        return _lusolve(d.L, d.U, d.p, null, b)
+        const d = lup(a);
+        return _lusolve(d.L, d.U, d.p, null, b);
       },
 
       'SparseMatrix, Array | Matrix, number, number': function (
@@ -358,28 +335,26 @@ export const createLusolve = /* #__PURE__ */ factory(
         order: number,
         threshold: number
       ): DenseMatrix {
-        const d = slu(a, order, threshold)
-        return _lusolve(d.L, d.U, d.p, d.q, b)
+        const d = slu(a, order, threshold);
+        return _lusolve(d.L, d.U, d.p, d.q, b);
       },
 
       'Object, Array | Matrix': function (
         d: LUPDecomposition,
         b: any[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
-        return _lusolve(d.L, d.U, d.p, d.q, b)
-      }
-    })
+        return _lusolve(d.L, d.U, d.p, d.q, b);
+      },
+    });
 
-    function _toMatrix(
-      a: DenseMatrix | SparseMatrix | any[][]
-    ): DenseMatrix | SparseMatrix {
+    function _toMatrix(a: DenseMatrix | SparseMatrix | any[][]): DenseMatrix | SparseMatrix {
       if (isMatrix(a)) {
-        return a as DenseMatrix | SparseMatrix
+        return a as DenseMatrix | SparseMatrix;
       }
       if (isArray(a)) {
-        return matrix(a)
+        return matrix(a);
       }
-      throw new TypeError('Invalid Matrix LU decomposition')
+      throw new TypeError('Invalid Matrix LU decomposition');
     }
 
     function _lusolve(
@@ -390,29 +365,29 @@ export const createLusolve = /* #__PURE__ */ factory(
       b: any[][] | DenseMatrix | SparseMatrix
     ): DenseMatrix {
       // verify decomposition
-      const L = _toMatrix(l)
-      const U = _toMatrix(u)
+      const L = _toMatrix(l);
+      const U = _toMatrix(u);
 
       // apply row permutations if needed (b is a DenseMatrix)
-      let bMatrix: DenseMatrix
+      let bMatrix: DenseMatrix;
       if (p) {
-        bMatrix = solveValidation(L, b, true)
-        bMatrix._data = csIpvec(p, bMatrix._data) as any[][]
+        bMatrix = solveValidation(L, b, true);
+        bMatrix._data = csIpvec(p, bMatrix._data) as any[][];
       } else {
-        bMatrix = solveValidation(L, b, true)
+        bMatrix = solveValidation(L, b, true);
       }
 
       // use forward substitution to resolve L * y = b
-      const y = lsolve(L, bMatrix)
+      const y = lsolve(L, bMatrix);
       // use backward substitution to resolve U * x = y
-      const x = usolve(U, y)
+      const x = usolve(U, y);
 
       // apply column permutations if needed (x is a DenseMatrix)
       if (q) {
-        x._data = csIpvec(q, x._data) as any[][]
+        x._data = csIpvec(q, x._data) as any[][];
       }
 
-      return x
+      return x;
     }
   }
-)
+);

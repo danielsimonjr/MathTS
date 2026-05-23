@@ -6,11 +6,11 @@ MathTS numeric types implement `toJSON()` / `fromJSON()` for lossless JSON seria
 
 Every MathTS type serializes to a plain object with a `mathjs` discriminant field. This allows a single reviver function to reconstruct the correct type.
 
-| Type | Serialized shape |
-|---|---|
-| `Complex` | `{ mathjs: "Complex", re: number, im: number }` |
-| `Fraction` | `{ mathjs: "Fraction", n: string, d: string }` |
-| `BigNumber` | `{ mathjs: "BigNumber", value: string }` |
+| Type        | Serialized shape                                |
+| ----------- | ----------------------------------------------- |
+| `Complex`   | `{ mathjs: "Complex", re: number, im: number }` |
+| `Fraction`  | `{ mathjs: "Fraction", n: string, d: string }`  |
+| `BigNumber` | `{ mathjs: "BigNumber", value: string }`        |
 
 `DenseMatrix` does not implement `toJSON()` / `fromJSON()`. To persist a matrix, serialize its array form (`m.toArray()`) and rebuild with `DenseMatrix.fromArray(...)`.
 
@@ -37,9 +37,9 @@ JSON.stringify(b);
 ```typescript
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
-const c = Complex.fromJSON({ re: 2, im: 3 });          // Complex(2, 3)
-const f = Fraction.fromJSON({ n: '1', d: '3' });       // Fraction(1/3)
-const b = BigNumber.fromJSON({ value: '3.14159' });    // BigNumber('3.14159')
+const c = Complex.fromJSON({ re: 2, im: 3 }); // Complex(2, 3)
+const f = Fraction.fromJSON({ n: '1', d: '3' }); // Fraction(1/3)
+const b = BigNumber.fromJSON({ value: '3.14159' }); // BigNumber('3.14159')
 ```
 
 ## Round-Trip Example
@@ -54,9 +54,9 @@ const parsed = JSON.parse(json);
 // Reconstruct from the parsed object
 const restored = Complex.fromJSON(parsed);
 
-console.log(restored.toString());   // '2 - 5i'
-console.log(restored.re === 2);     // true
-console.log(restored.im === -5);    // true
+console.log(restored.toString()); // '2 - 5i'
+console.log(restored.re === 2); // true
+console.log(restored.im === -5); // true
 ```
 
 ## Writing a Universal Reviver
@@ -67,8 +67,8 @@ When mixing types in a single JSON payload, write a reviver that dispatches on t
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
 const revivers: Record<string, (json: any) => unknown> = {
-  Complex:   Complex.fromJSON.bind(Complex),
-  Fraction:  Fraction.fromJSON.bind(Fraction),
+  Complex: Complex.fromJSON.bind(Complex),
+  Fraction: Fraction.fromJSON.bind(Fraction),
   BigNumber: BigNumber.fromJSON.bind(BigNumber),
 };
 
@@ -87,8 +87,8 @@ const payload = `{
 }`;
 
 const result = JSON.parse(payload, mathtsReviver);
-console.log(result.x instanceof Complex);   // true
-console.log(result.q instanceof Fraction);  // true
+console.log(result.x instanceof Complex); // true
+console.log(result.q instanceof Fraction); // true
 ```
 
 ## Handling Special Numbers
@@ -120,12 +120,15 @@ and rebuild with `DenseMatrix.fromArray(...)`:
 ```typescript
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
-const m = DenseMatrix.fromArray([[1, 2], [3, 4]]);
+const m = DenseMatrix.fromArray([
+  [1, 2],
+  [3, 4],
+]);
 const json = JSON.stringify(m.toArray());
 // '[[1,2],[3,4]]'
 
 const restored = DenseMatrix.fromArray(JSON.parse(json));
-console.log(restored.size);   // { rows: 2, cols: 2 }
+console.log(restored.size); // { rows: 2, cols: 2 }
 ```
 
 ## Fraction Compatibility
@@ -133,6 +136,6 @@ console.log(restored.size);   // { rows: 2, cols: 2 }
 `Fraction.fromJSON` accepts both short-form (`n`, `d`) and long-form (`numerator`, `denominator`) keys:
 
 ```typescript
-Fraction.fromJSON({ n: '1', d: '3' });                          // Fraction(1/3)
-Fraction.fromJSON({ numerator: '1', denominator: '3' });        // Fraction(1/3)
+Fraction.fromJSON({ n: '1', d: '3' }); // Fraction(1/3)
+Fraction.fromJSON({ numerator: '1', denominator: '3' }); // Fraction(1/3)
 ```

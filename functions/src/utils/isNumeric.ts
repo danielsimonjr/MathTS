@@ -1,10 +1,10 @@
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction as TypedFn } from '../types.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction as TypedFn } from '../types.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
-const name = 'isNumeric'
-const dependencies = ['typed']
+const name = 'isNumeric';
+const dependencies = ['typed'];
 
 export const createIsNumeric = /* #__PURE__ */ factory(
   name,
@@ -47,7 +47,7 @@ export const createIsNumeric = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
             deepMap(x as unknown[], self)
-      )
-    }) as unknown as TypedFn
+      ),
+    }) as unknown as TypedFn;
   }
-)
+);

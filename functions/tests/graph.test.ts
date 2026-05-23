@@ -20,7 +20,13 @@ describe('Graph Theory', () => {
   // ===========================================================================
   describe('adjacencyMatrix', () => {
     it('should create undirected adjacency matrix from edge list', () => {
-      const adj = adjacencyMatrix([[0, 1], [1, 2]], 3);
+      const adj = adjacencyMatrix(
+        [
+          [0, 1],
+          [1, 2],
+        ],
+        3
+      );
       expect(adj).toEqual([
         [0, 1, 0],
         [1, 0, 1],
@@ -29,7 +35,14 @@ describe('Graph Theory', () => {
     });
 
     it('should create directed adjacency matrix', () => {
-      const adj = adjacencyMatrix([[0, 1], [1, 2]], 3, true);
+      const adj = adjacencyMatrix(
+        [
+          [0, 1],
+          [1, 2],
+        ],
+        3,
+        true
+      );
       expect(adj).toEqual([
         [0, 1, 0],
         [0, 0, 1],
@@ -38,14 +51,24 @@ describe('Graph Theory', () => {
     });
 
     it('should handle weighted edges', () => {
-      const adj = adjacencyMatrix([[0, 1, 5], [1, 2, 3]], 3);
+      const adj = adjacencyMatrix(
+        [
+          [0, 1, 5],
+          [1, 2, 3],
+        ],
+        3
+      );
       expect(adj[0][1]).toBe(5);
       expect(adj[1][2]).toBe(3);
     });
 
     it('should create empty matrix for no edges', () => {
       const adj = adjacencyMatrix([], 3);
-      expect(adj).toEqual([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
+      expect(adj).toEqual([
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ]);
     });
 
     it('should throw for out of bounds edges', () => {
@@ -58,17 +81,28 @@ describe('Graph Theory', () => {
   // ===========================================================================
   describe('shortestPath', () => {
     it('should find direct path', () => {
-      const adj = [[0, 1, 0], [1, 0, 1], [0, 1, 0]];
+      const adj = [
+        [0, 1, 0],
+        [1, 0, 1],
+        [0, 1, 0],
+      ];
       expect(shortestPath(adj, 0, 2)).toEqual([0, 1, 2]);
     });
 
     it('should return single node for same start/end', () => {
-      const adj = [[0, 1], [1, 0]];
+      const adj = [
+        [0, 1],
+        [1, 0],
+      ];
       expect(shortestPath(adj, 0, 0)).toEqual([0]);
     });
 
     it('should return empty for unreachable node', () => {
-      const adj = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+      const adj = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ];
       expect(shortestPath(adj, 0, 2)).toEqual([]);
     });
 
@@ -120,7 +154,10 @@ describe('Graph Theory', () => {
   // ===========================================================================
   describe('connectedComponents', () => {
     it('should find single component in connected graph', () => {
-      const adj = [[0, 1], [1, 0]];
+      const adj = [
+        [0, 1],
+        [1, 0],
+      ];
       const cc = connectedComponents(adj);
       expect(cc.length).toBe(1);
       expect(cc[0].sort()).toEqual([0, 1]);
@@ -138,7 +175,11 @@ describe('Graph Theory', () => {
     });
 
     it('should handle isolated nodes', () => {
-      const adj = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+      const adj = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ];
       expect(connectedComponents(adj).length).toBe(3);
     });
   });
@@ -224,11 +265,21 @@ describe('Graph Theory', () => {
   // ===========================================================================
   describe('isConnected', () => {
     it('should return true for connected graph', () => {
-      expect(isConnected([[0, 1], [1, 0]])).toBe(true);
+      expect(
+        isConnected([
+          [0, 1],
+          [1, 0],
+        ])
+      ).toBe(true);
     });
 
     it('should return false for disconnected graph', () => {
-      expect(isConnected([[0, 0], [0, 0]])).toBe(false);
+      expect(
+        isConnected([
+          [0, 0],
+          [0, 0],
+        ])
+      ).toBe(false);
     });
 
     it('should return true for single node', () => {
@@ -245,7 +296,11 @@ describe('Graph Theory', () => {
   // ===========================================================================
   describe('graphDistance', () => {
     it('should return distance for connected nodes', () => {
-      const adj = [[0, 3, 0], [3, 0, 2], [0, 2, 0]];
+      const adj = [
+        [0, 3, 0],
+        [3, 0, 2],
+        [0, 2, 0],
+      ];
       expect(graphDistance(adj, 0, 2)).toBe(5);
     });
 
@@ -254,7 +309,10 @@ describe('Graph Theory', () => {
     });
 
     it('should return Infinity for unreachable node', () => {
-      const adj = [[0, 0], [0, 0]];
+      const adj = [
+        [0, 0],
+        [0, 0],
+      ];
       expect(graphDistance(adj, 0, 1)).toBe(Infinity);
     });
 

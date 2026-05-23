@@ -5,6 +5,7 @@ This guide helps you migrate from mathjs to MathTS, either gradually using the c
 ## Overview
 
 MathTS is a modern TypeScript rewrite of mathjs with:
+
 - **TypeScript-first** design with full type safety
 - **Parallel-first** architecture using Web Workers
 - **WASM/WebGPU** acceleration for large computations
@@ -30,12 +31,16 @@ import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all);
 
 // Your existing code continues to work
-math.add(1, 2);           // 3
-math.complex(3, 4);       // Complex(3, 4)
-math.matrix([[1,2],[3,4]]); // DenseMatrix
+math.add(1, 2); // 3
+math.complex(3, 4); // Complex(3, 4)
+math.matrix([
+  [1, 2],
+  [3, 4],
+]); // DenseMatrix
 ```
 
 This approach allows you to:
+
 1. Drop-in replace your mathjs import
 2. Continue using the familiar `math.*` API
 3. Gradually migrate to native MathTS as needed
@@ -58,7 +63,10 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 // Direct usage
 const c = new Complex(3, 4);
 const result = add(1, 2);
-const m = DenseMatrix.fromArray([[1,2],[3,4]]);
+const m = DenseMatrix.fromArray([
+  [1, 2],
+  [3, 4],
+]);
 ```
 
 ## Step-by-Step Migration
@@ -73,6 +81,7 @@ npm install @danielsimonjr/mathts-compat
 ### Step 2: Update Imports
 
 Find and replace:
+
 ```typescript
 // Before
 import { create, all } from 'mathjs';
@@ -165,20 +174,29 @@ const num = bn.valueOf(); // Use valueOf(), not toNumber()
 
 ```typescript
 // mathjs
-const m = math.matrix([[1,2],[3,4]]);
+const m = math.matrix([
+  [1, 2],
+  [3, 4],
+]);
 const element = m.get([0, 1]);
 const dims = m.size();
 
 // MathTS native
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
-const m = DenseMatrix.fromArray([[1,2],[3,4]]);
-const element = m.get(0, 1);    // Direct indices, not array
-const dims = [m.rows, m.cols];  // Properties, not method
+const m = DenseMatrix.fromArray([
+  [1, 2],
+  [3, 4],
+]);
+const element = m.get(0, 1); // Direct indices, not array
+const dims = [m.rows, m.cols]; // Properties, not method
 
 // MathTS compat
-const m = math.matrix([[1,2],[3,4]]);
-const element = m.get(0, 1);     // Updated API
-const dims = math.size(m);       // Returns [rows, cols]
+const m = math.matrix([
+  [1, 2],
+  [3, 4],
+]);
+const element = m.get(0, 1); // Updated API
+const dims = math.size(m); // Returns [rows, cols]
 ```
 
 ### Parallel Operations (MathTS Exclusive)
@@ -198,8 +216,8 @@ const mean = await computePool.mean(data);
 const variance = await computePool.variance(data);
 
 // Matrix multiplication
-const A = new Float64Array([1,2,3,4]);
-const B = new Float64Array([5,6,7,8]);
+const A = new Float64Array([1, 2, 3, 4]);
+const B = new Float64Array([5, 6, 7, 8]);
 const C = await computePool.matmul(A, 2, 2, B, 2);
 
 // Cleanup on app shutdown
@@ -210,21 +228,21 @@ await computePool.terminate();
 
 ### 1. Type Constructors
 
-| mathjs | MathTS |
-|--------|--------|
-| `math.complex(3, 4)` | `new Complex(3, 4)` |
-| `math.fraction(1, 2)` | `new Fraction(1, 2)` |
-| `math.bignumber('123')` | `BigNumber.parse('123')` |
-| `math.matrix([[1,2]])` | `DenseMatrix.fromArray([[1,2]])` |
+| mathjs                  | MathTS                           |
+| ----------------------- | -------------------------------- |
+| `math.complex(3, 4)`    | `new Complex(3, 4)`              |
+| `math.fraction(1, 2)`   | `new Fraction(1, 2)`             |
+| `math.bignumber('123')` | `BigNumber.parse('123')`         |
+| `math.matrix([[1,2]])`  | `DenseMatrix.fromArray([[1,2]])` |
 
 ### 2. Method Names
 
-| mathjs | MathTS |
-|--------|--------|
-| `bn.toNumber()` | `bn.valueOf()` |
-| `m.get([row, col])` | `m.get(row, col)` |
-| `m.size()` | `m.rows, m.cols` |
-| `f.n, f.d` | `f.numerator, f.denominator` |
+| mathjs              | MathTS                       |
+| ------------------- | ---------------------------- |
+| `bn.toNumber()`     | `bn.valueOf()`               |
+| `m.get([row, col])` | `m.get(row, col)`            |
+| `m.size()`          | `m.rows, m.cols`             |
+| `f.n, f.d`          | `f.numerator, f.denominator` |
 
 ### 3. Fraction Internals
 
@@ -232,7 +250,7 @@ MathTS Fractions use `bigint` internally for perfect precision:
 
 ```typescript
 const f = new Fraction(1, 2);
-console.log(typeof f.numerator);   // 'bigint'
+console.log(typeof f.numerator); // 'bigint'
 console.log(typeof f.denominator); // 'bigint'
 ```
 
@@ -253,6 +271,7 @@ const parallelSum = await computePool.sum(largeArray);
 ### Import Errors
 
 If you see module resolution errors, ensure your tsconfig.json has:
+
 ```json
 {
   "compilerOptions": {
@@ -281,6 +300,7 @@ import type { Complex } from '@danielsimonjr/mathts-compat';
 If you notice performance differences:
 
 1. For large arrays, use parallel operations:
+
 ```typescript
 // Instead of
 const sum = math.sum(largeArray);
@@ -290,6 +310,7 @@ const sum = await computePool.sum(new Float64Array(largeArray));
 ```
 
 2. Use TypedArrays (Float64Array) for numerical data:
+
 ```typescript
 // Slower
 const arr = [1, 2, 3, 4, 5];
@@ -300,19 +321,19 @@ const arr = new Float64Array([1, 2, 3, 4, 5]);
 
 ## Feature Comparison
 
-| Feature | mathjs | MathTS |
-|---------|--------|--------|
-| TypeScript types | Partial | Full |
-| Tree-shaking | Limited | Full |
-| Web Workers | No | Yes |
-| WASM acceleration | No | Yes |
-| WebGPU | No | Yes |
-| Expression parser | Yes | Yes |
-| Units | Yes | Partial |
-| Matrix operations | Yes | Yes |
-| Complex numbers | Yes | Yes |
-| Fractions | Yes | Yes |
-| BigNumber | Yes | Yes |
+| Feature           | mathjs  | MathTS  |
+| ----------------- | ------- | ------- |
+| TypeScript types  | Partial | Full    |
+| Tree-shaking      | Limited | Full    |
+| Web Workers       | No      | Yes     |
+| WASM acceleration | No      | Yes     |
+| WebGPU            | No      | Yes     |
+| Expression parser | Yes     | Yes     |
+| Units             | Yes     | Partial |
+| Matrix operations | Yes     | Yes     |
+| Complex numbers   | Yes     | Yes     |
+| Fractions         | Yes     | Yes     |
+| BigNumber         | Yes     | Yes     |
 
 ## Getting Help
 

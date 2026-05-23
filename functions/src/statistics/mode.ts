@@ -1,20 +1,20 @@
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for mode
 interface MatrixType {
-  valueOf(): unknown[] | unknown[][]
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface ModeDependencies {
-  typed: TypedFunction
-  isNaN: TypedFunction
-  isNumeric: (value: unknown) => boolean
+  typed: TypedFunction;
+  isNaN: TypedFunction;
+  isNumeric: (value: unknown) => boolean;
 }
 
-const name = 'mode'
-const dependencies = ['typed', 'isNaN', 'isNumeric']
+const name = 'mode';
+const dependencies = ['typed', 'isNaN', 'isNumeric'];
 
 export const createMode = /* #__PURE__ */ factory(
   name,
@@ -49,9 +49,9 @@ export const createMode = /* #__PURE__ */ factory(
       'Array | Matrix': _mode,
 
       '...': function (args: unknown[]): unknown[] {
-        return _mode(args)
-      }
-    })
+        return _mode(args);
+      },
+    });
 
     /**
      * Calculates the mode in an 1-dimensional array
@@ -60,38 +60,36 @@ export const createMode = /* #__PURE__ */ factory(
      * @private
      */
     function _mode(values: unknown[] | MatrixType): unknown[] {
-      const flat = flatten((values as MatrixType).valueOf()) as unknown[]
-      const num = flat.length
+      const flat = flatten((values as MatrixType).valueOf()) as unknown[];
+      const num = flat.length;
       if (num === 0) {
-        throw new Error('Cannot calculate mode of an empty array')
+        throw new Error('Cannot calculate mode of an empty array');
       }
 
-      const count: Record<string, number> = {}
-      let mode: unknown[] = []
-      let max = 0
+      const count: Record<string, number> = {};
+      let mode: unknown[] = [];
+      let max = 0;
       for (let i = 0; i < flat.length; i++) {
-        const value = flat[i]
+        const value = flat[i];
 
         if (isNumeric(value) && mathIsNaN(value)) {
-          throw new Error(
-            'Cannot calculate mode of an array containing NaN values'
-          )
+          throw new Error('Cannot calculate mode of an array containing NaN values');
         }
 
         if (!(String(value) in count)) {
-          count[String(value)] = 0
+          count[String(value)] = 0;
         }
 
-        count[String(value)]++
+        count[String(value)]++;
 
         if (count[String(value)] === max) {
-          mode.push(value)
+          mode.push(value);
         } else if (count[String(value)] > max) {
-          max = count[String(value)]
-          mode = [value]
+          max = count[String(value)];
+          mode = [value];
         }
       }
-      return mode
+      return mode;
     }
   }
-)
+);

@@ -1,17 +1,10 @@
-import { isBigNumber } from '../utils/is.js'
-import { factory } from '../utils/factory.js'
+import { isBigNumber } from '../utils/is.js';
+import { factory } from '../utils/factory.js';
 
-import {
-  TypedFunction,
-  Matrix,
-  MatrixConstructor,
-  BigNumber,
-  Complex,
-  Unit
-} from '../types.js'
-import type { ConfigOptions } from '../core/config.js'
+import { TypedFunction, Matrix, MatrixConstructor, BigNumber, Complex, Unit } from '../types.js';
+import type { ConfigOptions } from '../core/config.js';
 
-const name = 'rotationMatrix'
+const name = 'rotationMatrix';
 const dependencies = [
   'typed',
   'config',
@@ -24,8 +17,8 @@ const dependencies = [
   'DenseMatrix',
   'SparseMatrix',
   'cos',
-  'sin'
-]
+  'sin',
+];
 
 export const createRotationMatrix = /* #__PURE__ */ factory(
   name,
@@ -42,20 +35,20 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
     DenseMatrix,
     SparseMatrix,
     cos,
-    sin
+    sin,
   }: {
-    typed: TypedFunction
-    config: ConfigOptions
-    multiplyScalar: (a: number, b: number) => number
-    addScalar: (a: number, b: number) => number
-    unaryMinus: (a: number) => number
-    norm: any
-    BigNumber: any
-    matrix: MatrixConstructor
-    DenseMatrix: any
-    SparseMatrix: any
-    cos: any
-    sin: any
+    typed: TypedFunction;
+    config: ConfigOptions;
+    multiplyScalar: (a: number, b: number) => number;
+    addScalar: (a: number, b: number) => number;
+    unaryMinus: (a: number) => number;
+    norm: any;
+    BigNumber: any;
+    matrix: MatrixConstructor;
+    DenseMatrix: any;
+    SparseMatrix: any;
+    cos: any;
+    sin: any;
   }): TypedFunction => {
     /**
      * Create a 2-dimensional counter-clockwise rotation matrix (2x2) for a given angle (expressed in radians).
@@ -92,46 +85,40 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
 
     return typed(name, {
       '': function () {
-        return config.matrix === 'Matrix' ? (matrix as any)([]) : []
+        return config.matrix === 'Matrix' ? (matrix as any)([]) : [];
       },
 
       string: function (format: string) {
-        return (matrix as any)(format)
+        return (matrix as any)(format);
       },
 
-      'number | BigNumber | Complex | Unit': function (
-        theta: number | BigNumber | Complex | Unit
-      ) {
-        return _rotationMatrix2x2(
-          theta,
-          config.matrix === 'Matrix' ? 'dense' : undefined
-        )
+      'number | BigNumber | Complex | Unit': function (theta: number | BigNumber | Complex | Unit) {
+        return _rotationMatrix2x2(theta, config.matrix === 'Matrix' ? 'dense' : undefined);
       },
 
       'number | BigNumber | Complex | Unit, string': function (
         theta: number | BigNumber | Complex | Unit,
         format: string
       ) {
-        return _rotationMatrix2x2(theta, format)
+        return _rotationMatrix2x2(theta, format);
       },
 
       'number | BigNumber | Complex | Unit, Array': function (
         theta: number | BigNumber | Complex | Unit,
         v: any[]
       ): any[] {
-        const matrixV = (matrix as any)(v)
-        _validateVector(matrixV)
-        return _rotationMatrix3x3(theta, matrixV, undefined)
+        const matrixV = (matrix as any)(v);
+        _validateVector(matrixV);
+        return _rotationMatrix3x3(theta, matrixV, undefined);
       },
 
       'number | BigNumber | Complex | Unit, Matrix': function (
         theta: number | BigNumber | Complex | Unit,
         v: Matrix
       ): Matrix {
-        _validateVector(v)
-        const storageType =
-          v.storage() || (config.matrix === 'Matrix' ? 'dense' : undefined)
-        return _rotationMatrix3x3(theta, v, storageType)
+        _validateVector(v);
+        const storageType = v.storage() || (config.matrix === 'Matrix' ? 'dense' : undefined);
+        return _rotationMatrix3x3(theta, v, storageType);
       },
 
       'number | BigNumber | Complex | Unit, Array, string': function (
@@ -139,9 +126,9 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
         v: any[],
         format: string
       ): any[] {
-        const matrixV = (matrix as any)(v)
-        _validateVector(matrixV)
-        return _rotationMatrix3x3(theta, matrixV, format)
+        const matrixV = (matrix as any)(v);
+        _validateVector(matrixV);
+        return _rotationMatrix3x3(theta, matrixV, format);
       },
 
       'number | BigNumber | Complex | Unit, Matrix, string': function (
@@ -149,10 +136,10 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
         v: Matrix,
         format: string
       ): Matrix {
-        _validateVector(v)
-        return _rotationMatrix3x3(theta, v, format)
-      }
-    }) as unknown as TypedFunction
+        _validateVector(v);
+        return _rotationMatrix3x3(theta, v, format);
+      },
+    }) as unknown as TypedFunction;
 
     /**
      * Returns 2x2 matrix of 2D rotation of angle theta
@@ -163,41 +150,41 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
      * @private
      */
     function _rotationMatrix2x2(theta: any, format: any) {
-      const Big = isBigNumber(theta)
+      const Big = isBigNumber(theta);
 
-      const minusOne = Big ? new BigNumber(-1) : -1
-      const cosTheta = cos(theta)
-      const sinTheta = sin(theta)
+      const minusOne = Big ? new BigNumber(-1) : -1;
+      const cosTheta = cos(theta);
+      const sinTheta = sin(theta);
       const data = [
         [cosTheta, multiplyScalar(minusOne, sinTheta)],
-        [sinTheta, cosTheta]
-      ]
+        [sinTheta, cosTheta],
+      ];
 
-      return _convertToFormat(data, format)
+      return _convertToFormat(data, format);
     }
 
     function _validateVector(v: any) {
-      const size = v.size()
+      const size = v.size();
       if (size.length < 1 || size[0] !== 3) {
-        throw new RangeError('Vector must be of dimensions 1x3')
+        throw new RangeError('Vector must be of dimensions 1x3');
       }
     }
 
     function _mul(array: any) {
-      return array.reduce((p: any, curr: any) => multiplyScalar(p, curr))
+      return array.reduce((p: any, curr: any) => multiplyScalar(p, curr));
     }
 
     function _convertToFormat(data: any, format: any) {
       if (format) {
         if (format === 'sparse') {
-          return new SparseMatrix(data)
+          return new SparseMatrix(data);
         }
         if (format === 'dense') {
-          return new DenseMatrix(data)
+          return new DenseMatrix(data);
         }
-        throw new TypeError(`Unknown matrix type "${format}"`)
+        throw new TypeError(`Unknown matrix type "${format}"`);
       }
-      return data
+      return data;
     }
 
     /**
@@ -210,41 +197,41 @@ export const createRotationMatrix = /* #__PURE__ */ factory(
      * @private
      */
     function _rotationMatrix3x3(theta: any, v: any, format: any) {
-      const normV = norm(v)
+      const normV = norm(v);
       if (normV === 0) {
-        throw new RangeError('Rotation around zero vector')
+        throw new RangeError('Rotation around zero vector');
       }
 
-      const Big = isBigNumber(theta) ? BigNumber : null
+      const Big = isBigNumber(theta) ? BigNumber : null;
 
-      const one = Big ? new Big(1) : 1
-      const minusOne = Big ? new Big(-1) : -1
-      const vx = Big ? new Big(v.get([0]) / normV) : v.get([0]) / normV
-      const vy = Big ? new Big(v.get([1]) / normV) : v.get([1]) / normV
-      const vz = Big ? new Big(v.get([2]) / normV) : v.get([2]) / normV
-      const c = cos(theta)
-      const oneMinusC = addScalar(one, unaryMinus(c))
-      const s = sin(theta)
+      const one = Big ? new Big(1) : 1;
+      const minusOne = Big ? new Big(-1) : -1;
+      const vx = Big ? new Big(v.get([0]) / normV) : v.get([0]) / normV;
+      const vy = Big ? new Big(v.get([1]) / normV) : v.get([1]) / normV;
+      const vz = Big ? new Big(v.get([2]) / normV) : v.get([2]) / normV;
+      const c = cos(theta);
+      const oneMinusC = addScalar(one, unaryMinus(c));
+      const s = sin(theta);
 
-      const r11 = addScalar(c, _mul([vx, vx, oneMinusC]))
-      const r12 = addScalar(_mul([vx, vy, oneMinusC]), _mul([minusOne, vz, s]))
-      const r13 = addScalar(_mul([vx, vz, oneMinusC]), _mul([vy, s]))
+      const r11 = addScalar(c, _mul([vx, vx, oneMinusC]));
+      const r12 = addScalar(_mul([vx, vy, oneMinusC]), _mul([minusOne, vz, s]));
+      const r13 = addScalar(_mul([vx, vz, oneMinusC]), _mul([vy, s]));
 
-      const r21 = addScalar(_mul([vx, vy, oneMinusC]), _mul([vz, s]))
-      const r22 = addScalar(c, _mul([vy, vy, oneMinusC]))
-      const r23 = addScalar(_mul([vy, vz, oneMinusC]), _mul([minusOne, vx, s]))
+      const r21 = addScalar(_mul([vx, vy, oneMinusC]), _mul([vz, s]));
+      const r22 = addScalar(c, _mul([vy, vy, oneMinusC]));
+      const r23 = addScalar(_mul([vy, vz, oneMinusC]), _mul([minusOne, vx, s]));
 
-      const r31 = addScalar(_mul([vx, vz, oneMinusC]), _mul([minusOne, vy, s]))
-      const r32 = addScalar(_mul([vy, vz, oneMinusC]), _mul([vx, s]))
-      const r33 = addScalar(c, _mul([vz, vz, oneMinusC]))
+      const r31 = addScalar(_mul([vx, vz, oneMinusC]), _mul([minusOne, vy, s]));
+      const r32 = addScalar(_mul([vy, vz, oneMinusC]), _mul([vx, s]));
+      const r33 = addScalar(c, _mul([vz, vz, oneMinusC]));
 
       const data = [
         [r11, r12, r13],
         [r21, r22, r23],
-        [r31, r32, r33]
-      ]
+        [r31, r32, r33],
+      ];
 
-      return _convertToFormat(data, format)
+      return _convertToFormat(data, format);
     }
   }
-)
+);

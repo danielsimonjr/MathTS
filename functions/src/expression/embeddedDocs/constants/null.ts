@@ -4,5 +4,5 @@ export const nullDocs = {
   syntax: ['null'],
   description: 'Value null',
   examples: ['null'],
-  seealso: ['true', 'false']
-}
+  seealso: ['true', 'false'],
+};

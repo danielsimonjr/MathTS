@@ -1,15 +1,15 @@
-import { factory } from '../utils/factory.js'
-import { isFunction } from '../utils/is.js'
-import { createEmptyMap, toObject } from '../utils/map.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { isFunction } from '../utils/is.js';
+import { createEmptyMap, toObject } from '../utils/map.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface ParserClassDependencies {
-  evaluate: TypedFunction
-  parse: TypedFunction
+  evaluate: TypedFunction;
+  parse: TypedFunction;
 }
 
-const name = 'Parser'
-const dependencies = ['evaluate', 'parse'] as const
+const name = 'Parser';
+const dependencies = ['evaluate', 'parse'] as const;
 
 export const createParserClass = /* #__PURE__ */ factory(
   name,
@@ -65,22 +65,20 @@ export const createParserClass = /* #__PURE__ */ factory(
      */
     function Parser(this: any) {
       if (!(this instanceof Parser)) {
-        throw new SyntaxError(
-          'Constructor must be called with the new operator'
-        )
+        throw new SyntaxError('Constructor must be called with the new operator');
       }
 
       Object.defineProperty(this, 'scope', {
         value: createEmptyMap(),
-        writable: false
-      })
+        writable: false,
+      });
     }
 
     /**
      * Attach type information
      */
-    Parser.prototype.type = 'Parser'
-    Parser.prototype.isParser = true
+    Parser.prototype.type = 'Parser';
+    Parser.prototype.isParser = true;
 
     /**
      * Parse and evaluate the given expression
@@ -89,13 +87,10 @@ export const createParserClass = /* #__PURE__ */ factory(
      * @return {*} result     The result, or undefined when the expression was empty
      * @throws {Error}
      */
-    Parser.prototype.evaluate = function (
-      this: any,
-      expr: string | string[]
-    ): any {
+    Parser.prototype.evaluate = function (this: any, expr: string | string[]): any {
       // TODO: validate arguments
-      return evaluate(expr, this.scope)
-    }
+      return evaluate(expr, this.scope);
+    };
 
     /**
      * Get a variable (a function or variable) by name from the parsers scope.
@@ -106,44 +101,43 @@ export const createParserClass = /* #__PURE__ */ factory(
     Parser.prototype.get = function (this: any, name: string): any {
       // TODO: validate arguments
       if (this.scope.has(name)) {
-        return this.scope.get(name)
+        return this.scope.get(name);
       }
-    }
+    };
 
     /**
      * Get a map with all defined variables
      * @return {Object} values
      */
     Parser.prototype.getAll = function (this: any): Record<string, any> {
-      return toObject(this.scope)
-    }
+      return toObject(this.scope);
+    };
 
     /**
      * Get a map with all defined variables
      * @return {Map} values
      */
     Parser.prototype.getAllAsMap = function (this: any): Map<string, any> {
-      return this.scope
-    }
+      return this.scope;
+    };
 
     function isValidVariableName(name: string): boolean {
       if (name.length === 0) {
-        return false
+        return false;
       }
 
       for (let i = 0; i < name.length; i++) {
-        const cPrev = name.charAt(i - 1)
-        const c = name.charAt(i)
-        const cNext = name.charAt(i + 1)
-        const valid =
-          parse.isAlpha(c, cPrev, cNext) || (i > 0 && parse.isDigit(c))
+        const cPrev = name.charAt(i - 1);
+        const c = name.charAt(i);
+        const cNext = name.charAt(i + 1);
+        const valid = parse.isAlpha(c, cPrev, cNext) || (i > 0 && parse.isDigit(c));
 
         if (!valid) {
-          return false
+          return false;
         }
       }
 
-      return true
+      return true;
     }
 
     /**
@@ -155,78 +149,74 @@ export const createParserClass = /* #__PURE__ */ factory(
       if (!isValidVariableName(name)) {
         throw new Error(
           `Invalid variable name: '${name}'. Variable names must follow the specified rules.`
-        )
+        );
       }
-      this.scope.set(name, value)
-      return value
-    }
+      this.scope.set(name, value);
+      return value;
+    };
 
     /**
      * Remove a variable from the parsers scope
      * @param {string} name
      */
     Parser.prototype.remove = function (this: any, name: string): void {
-      this.scope.delete(name)
-    }
+      this.scope.delete(name);
+    };
 
     /**
      * Clear the scope with variables and functions
      */
     Parser.prototype.clear = function (this: any): void {
-      this.scope.clear()
-    }
+      this.scope.clear();
+    };
 
     Parser.prototype.toJSON = function (this: any): {
-      mathjs: string
-      variables: Record<string, any>
-      functions: Record<string, string>
+      mathjs: string;
+      variables: Record<string, any>;
+      functions: Record<string, string>;
     } {
       const json = {
         mathjs: 'Parser',
         variables: {} as Record<string, any>,
-        functions: {} as Record<string, string>
-      }
+        functions: {} as Record<string, string>,
+      };
 
       for (const [name, value] of this.scope) {
         if (isFunction(value)) {
           if (!isExpressionFunction(value)) {
-            throw new Error(`Cannot serialize external function ${name}`)
+            throw new Error(`Cannot serialize external function ${name}`);
           }
 
-          json.functions[name] = `${value.syntax} = ${value.expr}`
+          json.functions[name] = `${value.syntax} = ${value.expr}`;
         } else {
-          json.variables[name] = value
+          json.variables[name] = value;
         }
       }
 
-      return json
-    }
+      return json;
+    };
 
     Parser.fromJSON = function (json: {
-      variables?: Record<string, any>
-      functions?: Record<string, string>
+      variables?: Record<string, any>;
+      functions?: Record<string, string>;
     }): any {
-      const parser = new (Parser as any)()
+      const parser = new (Parser as any)();
 
-      Object.entries(json.variables || {}).forEach(([name, value]) =>
-        parser.set(name, value)
-      )
-      Object.entries(json.functions || {}).forEach(([_name, fn]) =>
-        parser.evaluate(fn)
-      )
+      Object.entries(json.variables || {}).forEach(([name, value]) => parser.set(name, value));
+      Object.entries(json.functions || {}).forEach(([_name, fn]) => parser.evaluate(fn));
 
-      return parser
-    }
+      return parser;
+    };
 
-    return Parser
+    return Parser;
   },
   { isClass: true }
-)
+);
 
 function isExpressionFunction(value: any): boolean {
   return (
     typeof value === 'function' &&
     typeof value.syntax === 'string' &&
     typeof value.expr === 'string'
-  )
+  );
 }

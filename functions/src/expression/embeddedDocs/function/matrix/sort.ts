@@ -9,7 +9,7 @@ export const sortDocs = {
     'sort(["C", "B", "A", "D"], "natural")',
     'sortByLength(a, b) = size(a)[1] - size(b)[1]',
     'sort(["Langdon", "Tom", "Sara"], sortByLength)',
-    'sort(["10", "1", "2"], "natural")'
+    'sort(["10", "1", "2"], "natural")',
   ],
-  seealso: ['map', 'filter', 'forEach']
-}
+  seealso: ['map', 'filter', 'forEach'],
+};

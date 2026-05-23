@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
-import type { Complex } from '../type/complex/Complex.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import { acothNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
+import type { Complex } from '../type/complex/Complex.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import { acothNumber } from '../plain/number/index.js';
 
 // Type definitions for acoth
 interface ComplexConstructor {
-  new (re: number, im: number): Complex
+  new (re: number, im: number): Complex;
 }
 
 interface BigNumberConstructor {
-  new (value: number): BigNumber
+  new (value: number): BigNumber;
 }
 
 interface AcothDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  Complex: ComplexConstructor
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  Complex: ComplexConstructor;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'acoth'
-const dependencies = ['typed', 'config', 'Complex', 'BigNumber']
+const name = 'acoth';
+const dependencies = ['typed', 'config', 'Complex', 'BigNumber'];
 
 export const createAcoth = /* #__PURE__ */ factory(
   name,
@@ -53,18 +53,18 @@ export const createAcoth = /* #__PURE__ */ factory(
     return typed(name, {
       number: function (x: number) {
         if (x >= 1 || x <= -1 || config.predictable) {
-          return acothNumber(x)
+          return acothNumber(x);
         }
-        return new Complex(x, 0).acoth()
+        return new Complex(x, 0).acoth();
       },
 
       Complex: function (x: Complex) {
-        return x.acoth()
+        return x.acoth();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
-        return new BigNumber(1).div(x as any).atanh() as unknown as BigNumber
-      }
-    }) as TypedFunction
+        return new BigNumber(1).div(x as any).atanh() as unknown as BigNumber;
+      },
+    }) as TypedFunction;
   }
-)
+);

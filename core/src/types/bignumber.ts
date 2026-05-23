@@ -27,22 +27,22 @@ export interface BigNumberConfig {
 }
 
 export type RoundingMode =
-  | 'up'        // Round away from zero
-  | 'down'      // Round toward zero (truncate)
-  | 'ceil'      // Round toward +Infinity
-  | 'floor'     // Round toward -Infinity
-  | 'halfUp'    // Round half away from zero (default)
-  | 'halfDown'  // Round half toward zero
-  | 'halfEven'  // Round half to even (banker's rounding)
-  | 'halfCeil'  // Round half toward +Infinity
-  | 'halfFloor';// Round half toward -Infinity
+  | 'up' // Round away from zero
+  | 'down' // Round toward zero (truncate)
+  | 'ceil' // Round toward +Infinity
+  | 'floor' // Round toward -Infinity
+  | 'halfUp' // Round half away from zero (default)
+  | 'halfDown' // Round half toward zero
+  | 'halfEven' // Round half to even (banker's rounding)
+  | 'halfCeil' // Round half toward +Infinity
+  | 'halfFloor'; // Round half toward -Infinity
 
 // Default configuration
 const defaultConfig: BigNumberConfig = {
   precision: 64,
   rounding: 'halfUp',
   minExponent: -1e9,
-  maxExponent: 1e9
+  maxExponent: 1e9,
 };
 
 // Global configuration (can be modified)
@@ -66,8 +66,8 @@ export class BigNumber implements MathTSValue {
 
   // Internal representation: sign * coefficient * 10^exponent
   private readonly _sign: 1 | -1 | 0;
-  private readonly _coefficient: bigint;  // Absolute value, normalized
-  private readonly _exponent: number;     // Power of 10
+  private readonly _coefficient: bigint; // Absolute value, normalized
+  private readonly _exponent: number; // Power of 10
 
   // Special values
   private readonly _isNaN: boolean = false;
@@ -256,7 +256,7 @@ export class BigNumber implements MathTSValue {
 
     // Same sign - compare magnitudes
     const result = BigNumber.compareMagnitude(a, b);
-    return a._sign === 1 ? result : -result as -1 | 0 | 1;
+    return a._sign === 1 ? result : (-result as -1 | 0 | 1);
   }
 
   private static compareMagnitude(a: BigNumber, b: BigNumber): -1 | 0 | 1 {
@@ -324,7 +324,7 @@ export class BigNumber implements MathTSValue {
   toJSON(): { mathjs: string; value: string } {
     return {
       mathjs: 'BigNumber',
-      value: this.toString()
+      value: this.toString(),
     };
   }
 
@@ -354,7 +354,7 @@ export class BigNumber implements MathTSValue {
     const dp = decimalPlaces ?? -1; // -1 signals "all digits"
     const allDigits = dp < 0;
 
-    if (this._sign === 0) return allDigits ? '0' : (dp > 0 ? '0.' + '0'.repeat(dp) : '0');
+    if (this._sign === 0) return allDigits ? '0' : dp > 0 ? '0.' + '0'.repeat(dp) : '0';
 
     const sign = this._sign === -1 ? '-' : '';
     const digits = this._coefficient.toString();
@@ -647,7 +647,12 @@ export class BigNumber implements MathTSValue {
 
     for (let i = 0; i < 100; i++) {
       const newGuess = guess.add(this.divide(guess)).divide(BigNumber.fromNumber(2));
-      if (guess.subtract(newGuess).abs().compareTo(guess.multiply(BigNumber.parse('1e-' + (precision + 5)))) <= 0) {
+      if (
+        guess
+          .subtract(newGuess)
+          .abs()
+          .compareTo(guess.multiply(BigNumber.parse('1e-' + (precision + 5)))) <= 0
+      ) {
         return newGuess.roundToPrecision(precision);
       }
       guess = newGuess;
@@ -738,16 +743,26 @@ export class BigNumber implements MathTSValue {
     const isMoreThanHalf = remainder > halfDivisor;
 
     switch (mode) {
-      case 'up': return remainder > 0n;
-      case 'down': return false;
-      case 'ceil': return isPositive && remainder > 0n;
-      case 'floor': return !isPositive && remainder > 0n;
-      case 'halfUp': return isMoreThanHalf || isExactlyHalf;
-      case 'halfDown': return isMoreThanHalf;
-      case 'halfEven': return isMoreThanHalf || (isExactlyHalf && quotient % 2n !== 0n);
-      case 'halfCeil': return isMoreThanHalf || (isExactlyHalf && isPositive);
-      case 'halfFloor': return isMoreThanHalf || (isExactlyHalf && !isPositive);
-      default: return isMoreThanHalf || isExactlyHalf;
+      case 'up':
+        return remainder > 0n;
+      case 'down':
+        return false;
+      case 'ceil':
+        return isPositive && remainder > 0n;
+      case 'floor':
+        return !isPositive && remainder > 0n;
+      case 'halfUp':
+        return isMoreThanHalf || isExactlyHalf;
+      case 'halfDown':
+        return isMoreThanHalf;
+      case 'halfEven':
+        return isMoreThanHalf || (isExactlyHalf && quotient % 2n !== 0n);
+      case 'halfCeil':
+        return isMoreThanHalf || (isExactlyHalf && isPositive);
+      case 'halfFloor':
+        return isMoreThanHalf || (isExactlyHalf && !isPositive);
+      default:
+        return isMoreThanHalf || isExactlyHalf;
     }
   }
 
@@ -907,9 +922,7 @@ export class BigNumber implements MathTSValue {
     const denominator = one.subtract(xSquared).sqrt();
     if (denominator.isZero()) {
       // |x| = 1 exactly
-      return this._sign === 1
-        ? BIGNUMBER_PI.divide(2)
-        : BIGNUMBER_PI.divide(-2);
+      return this._sign === 1 ? BIGNUMBER_PI.divide(2) : BIGNUMBER_PI.divide(-2);
     }
     return this.divide(denominator).atan();
   }
@@ -936,9 +949,7 @@ export class BigNumber implements MathTSValue {
     if (this._isNaN) return this;
     if (this._sign === 0) return this;
     if (this._isInfinite) {
-      return this._sign === 1
-        ? BIGNUMBER_PI.divide(2)
-        : BIGNUMBER_PI.divide(-2);
+      return this._sign === 1 ? BIGNUMBER_PI.divide(2) : BIGNUMBER_PI.divide(-2);
     }
 
     // For |x| > 1: atan(x) = sign(x)*PI/2 - atan(1/x)
@@ -1222,10 +1233,16 @@ export class BigNumber implements MathTSValue {
     // Newton's method: x_{n+1} = (2*x_n + a / x_n^2) / 3
     for (let i = 0; i < 100; i++) {
       const guessSquared = guess.multiply(guess);
-      const newGuess = guess.multiply(BigNumber.fromNumber(2)).add(this.divide(guessSquared)).divide(three);
-      if (guess.subtract(newGuess).abs().compareTo(
-        guess.abs().multiply(BigNumber.parse('1e-' + (precision + 5)))
-      ) <= 0) {
+      const newGuess = guess
+        .multiply(BigNumber.fromNumber(2))
+        .add(this.divide(guessSquared))
+        .divide(three);
+      if (
+        guess
+          .subtract(newGuess)
+          .abs()
+          .compareTo(guess.abs().multiply(BigNumber.parse('1e-' + (precision + 5)))) <= 0
+      ) {
         return newGuess.roundToPrecision(precision);
       }
       guess = newGuess;
@@ -1327,9 +1344,10 @@ export class BigNumber implements MathTSValue {
     const maxIter = precision + 20;
 
     for (let n = 1; n <= maxIter; n++) {
-      term = term.multiply(xSquared).divide(
-        BigNumber.fromNumber((2 * n) * (2 * n + 1))
-      ).negate();
+      term = term
+        .multiply(xSquared)
+        .divide(BigNumber.fromNumber(2 * n * (2 * n + 1)))
+        .negate();
       const newSum = sum.add(term);
       if (sum.equals(newSum)) break;
       sum = newSum;
@@ -1347,9 +1365,10 @@ export class BigNumber implements MathTSValue {
     const maxIter = precision + 20;
 
     for (let n = 1; n <= maxIter; n++) {
-      term = term.multiply(xSquared).divide(
-        BigNumber.fromNumber((2 * n - 1) * (2 * n))
-      ).negate();
+      term = term
+        .multiply(xSquared)
+        .divide(BigNumber.fromNumber((2 * n - 1) * (2 * n)))
+        .negate();
       const newSum = sum.add(term);
       if (sum.equals(newSum)) break;
       sum = newSum;
@@ -1415,7 +1434,13 @@ export class BigNumber implements MathTSValue {
   }
 
   clone(): BigNumber {
-    return new BigNumber(this._sign, this._coefficient, this._exponent, this._isNaN, this._isInfinite);
+    return new BigNumber(
+      this._sign,
+      this._coefficient,
+      this._exponent,
+      this._isNaN,
+      this._isInfinite
+    );
   }
 
   // ============================================================
@@ -1434,12 +1459,8 @@ export class BigNumber implements MathTSValue {
     const aShift = a._exponent - minExp;
     const bShift = b._exponent - minExp;
 
-    const aCoef = aShift > 0
-      ? a._coefficient * BigInt(10) ** BigInt(aShift)
-      : a._coefficient;
-    const bCoef = bShift > 0
-      ? b._coefficient * BigInt(10) ** BigInt(bShift)
-      : b._coefficient;
+    const aCoef = aShift > 0 ? a._coefficient * BigInt(10) ** BigInt(aShift) : a._coefficient;
+    const bCoef = bShift > 0 ? b._coefficient * BigInt(10) ** BigInt(bShift) : b._coefficient;
 
     return [aCoef, bCoef, minExp];
   }
@@ -1472,5 +1493,9 @@ export const BIGNUMBER_TEN = BigNumber.fromNumber(10);
 // Math constants with high precision
 export const BIGNUMBER_PI = BigNumber.parse('3.14159265358979323846264338327950288419716939937510');
 export const BIGNUMBER_E = BigNumber.parse('2.71828182845904523536028747135266249775724709369995');
-export const BIGNUMBER_LN2 = BigNumber.parse('0.69314718055994530941723212145817656807550013436026');
-export const BIGNUMBER_LN10 = BigNumber.parse('2.30258509299404568401799145468436420760110148862877');
+export const BIGNUMBER_LN2 = BigNumber.parse(
+  '0.69314718055994530941723212145817656807550013436026'
+);
+export const BIGNUMBER_LN10 = BigNumber.parse(
+  '2.30258509299404568401799145468436420760110148862877'
+);

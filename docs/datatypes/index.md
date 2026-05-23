@@ -16,11 +16,7 @@ The supported data types are:
 All core numeric types are exported from `@danielsimonjr/mathts-core`:
 
 ```ts
-import {
-  Complex,
-  Fraction,
-  BigNumber,
-} from '@danielsimonjr/mathts-core';
+import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 ```
 
 Matrix types are in `@danielsimonjr/mathts-matrix`:
@@ -42,19 +38,19 @@ import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // JavaScript numbers (fastest, ~16 significant digits)
-0.1 + 0.2                             // 0.30000000000000004
+0.1 + 0.2; // 0.30000000000000004
 
 // BigNumber (arbitrary precision)
-BigNumber.parse('0.1').add('0.2')     // BigNumber 0.3 (exact)
+BigNumber.parse('0.1').add('0.2'); // BigNumber 0.3 (exact)
 
 // Complex numbers
-new Complex(3, 4).abs()               // 5 (Pythagorean triple)
+new Complex(3, 4).abs(); // 5 (Pythagorean triple)
 
 // Exact fractions
-new Fraction(1n, 3n).toString()       // '1/3'
+new Fraction(1n, 3n).toString(); // '1/3'
 
 // Dense matrix
-const m = DenseMatrix.identity(3)     // 3×3 identity
+const m = DenseMatrix.identity(3); // 3×3 identity
 ```
 
 ## Type Checking
@@ -64,7 +60,7 @@ MathTS exports type guard functions for each type:
 ```ts
 import { isComplex, isFraction, isBigNumber } from '@danielsimonjr/mathts-core';
 
-isComplex(new Complex(1, 2))   // true
-isFraction(new Fraction(1n))   // true
-isBigNumber(BigNumber.parse('3.14')) // true
+isComplex(new Complex(1, 2)); // true
+isFraction(new Fraction(1n)); // true
+isBigNumber(BigNumber.parse('3.14')); // true
 ```

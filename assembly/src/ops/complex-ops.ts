@@ -110,10 +110,7 @@ export function complex_pow(a: Complex, n: f64): Complex {
 export function complex_cpow(a: Complex, b: Complex): Complex {
   // a^b = Math.exp(b * Math.log(a))
   const logA = a.log();
-  const product = new Complex(
-    b.re * logA.re - b.im * logA.im,
-    b.re * logA.im + b.im * logA.re
-  );
+  const product = new Complex(b.re * logA.re - b.im * logA.im, b.re * logA.im + b.im * logA.re);
   return product.exp();
 }
 
@@ -121,10 +118,7 @@ export function complex_cpow(a: Complex, b: Complex): Complex {
  * Square
  */
 export function complex_square(a: Complex): Complex {
-  return new Complex(
-    a.re * a.re - a.im * a.im,
-    2.0 * a.re * a.im
-  );
+  return new Complex(a.re * a.re - a.im * a.im, 2.0 * a.re * a.im);
 }
 
 /**
@@ -133,10 +127,7 @@ export function complex_square(a: Complex): Complex {
 export function complex_cube(a: Complex): Complex {
   const re2 = a.re * a.re;
   const im2 = a.im * a.im;
-  return new Complex(
-    a.re * (re2 - 3.0 * im2),
-    a.im * (3.0 * re2 - im2)
-  );
+  return new Complex(a.re * (re2 - 3.0 * im2), a.im * (3.0 * re2 - im2));
 }
 
 // =============================================================================
@@ -350,8 +341,8 @@ export function complex_from_polar(r: f64, theta: f64): Complex {
  */
 export function complex_to_polar(a: Complex): Float64Array {
   const result = new Float64Array(2);
-  unchecked(result[0] = a.abs());
-  unchecked(result[1] = a.arg());
+  unchecked((result[0] = a.abs()));
+  unchecked((result[1] = a.arg()));
   return result;
 }
 
@@ -362,10 +353,7 @@ export function complex_to_polar(a: Complex): Float64Array {
 /**
  * Linear combination: alpha*a + beta*b
  */
-export function complex_axpby(
-  alpha: Complex, a: Complex,
-  beta: Complex, b: Complex
-): Complex {
+export function complex_axpby(alpha: Complex, a: Complex, beta: Complex, b: Complex): Complex {
   return alpha.mul(a).add(beta.mul(b));
 }
 

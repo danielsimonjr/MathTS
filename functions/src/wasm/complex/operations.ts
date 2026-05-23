@@ -12,7 +12,7 @@
  * @returns The argument in radians
  */
 export function arg(re: f64, im: f64): f64 {
-  return Math.atan2(im, re)
+  return Math.atan2(im, re);
 }
 
 /**
@@ -23,11 +23,11 @@ export function arg(re: f64, im: f64): f64 {
  */
 export function argArray(dataPtr: usize, len: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < len; i++) {
-    const srcOffset: usize = (<usize>(i << 1)) << 3
-    const dstOffset: usize = (<usize>i) << 3
-    const re: f64 = load<f64>(dataPtr + srcOffset)
-    const im: f64 = load<f64>(dataPtr + srcOffset + 8)
-    store<f64>(resultPtr + dstOffset, Math.atan2(im, re))
+    const srcOffset: usize = (<usize>(i << 1)) << 3;
+    const dstOffset: usize = (<usize>i) << 3;
+    const re: f64 = load<f64>(dataPtr + srcOffset);
+    const im: f64 = load<f64>(dataPtr + srcOffset + 8);
+    store<f64>(resultPtr + dstOffset, Math.atan2(im, re));
   }
 }
 
@@ -38,8 +38,8 @@ export function argArray(dataPtr: usize, len: i32, resultPtr: usize): void {
  * @param resultPtr - Pointer to output [real, -imag]
  */
 export function conj(re: f64, im: f64, resultPtr: usize): void {
-  store<f64>(resultPtr, re)
-  store<f64>(resultPtr + 8, -im)
+  store<f64>(resultPtr, re);
+  store<f64>(resultPtr + 8, -im);
 }
 
 /**
@@ -50,9 +50,9 @@ export function conj(re: f64, im: f64, resultPtr: usize): void {
  */
 export function conjArray(dataPtr: usize, len: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < len; i++) {
-    const offset: usize = (<usize>(i << 1)) << 3
-    store<f64>(resultPtr + offset, load<f64>(dataPtr + offset)) // real part unchanged
-    store<f64>(resultPtr + offset + 8, -load<f64>(dataPtr + offset + 8)) // imaginary part negated
+    const offset: usize = (<usize>(i << 1)) << 3;
+    store<f64>(resultPtr + offset, load<f64>(dataPtr + offset)); // real part unchanged
+    store<f64>(resultPtr + offset + 8, -load<f64>(dataPtr + offset + 8)); // imaginary part negated
   }
 }
 
@@ -63,7 +63,7 @@ export function conjArray(dataPtr: usize, len: i32, resultPtr: usize): void {
  * @returns The real part
  */
 export function re(re: f64, im: f64): f64 {
-  return re
+  return re;
 }
 
 /**
@@ -74,9 +74,9 @@ export function re(re: f64, im: f64): f64 {
  */
 export function reArray(dataPtr: usize, len: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < len; i++) {
-    const srcOffset: usize = (<usize>(i << 1)) << 3
-    const dstOffset: usize = (<usize>i) << 3
-    store<f64>(resultPtr + dstOffset, load<f64>(dataPtr + srcOffset))
+    const srcOffset: usize = (<usize>(i << 1)) << 3;
+    const dstOffset: usize = (<usize>i) << 3;
+    store<f64>(resultPtr + dstOffset, load<f64>(dataPtr + srcOffset));
   }
 }
 
@@ -87,7 +87,7 @@ export function reArray(dataPtr: usize, len: i32, resultPtr: usize): void {
  * @returns The imaginary part
  */
 export function im(re: f64, im: f64): f64 {
-  return im
+  return im;
 }
 
 /**
@@ -98,9 +98,9 @@ export function im(re: f64, im: f64): f64 {
  */
 export function imArray(dataPtr: usize, len: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < len; i++) {
-    const srcOffset: usize = (<usize>(i << 1)) << (3 + 8)
-    const dstOffset: usize = (<usize>i) << 3
-    store<f64>(resultPtr + dstOffset, load<f64>(dataPtr + srcOffset))
+    const srcOffset: usize = (<usize>(i << 1)) << (3 + 8);
+    const dstOffset: usize = (<usize>i) << 3;
+    store<f64>(resultPtr + dstOffset, load<f64>(dataPtr + srcOffset));
   }
 }
 
@@ -111,7 +111,7 @@ export function imArray(dataPtr: usize, len: i32, resultPtr: usize): void {
  * @returns The magnitude sqrt(re^2 + im^2)
  */
 export function abs(re: f64, im: f64): f64 {
-  return Math.sqrt(re * re + im * im)
+  return Math.sqrt(re * re + im * im);
 }
 
 /**
@@ -122,11 +122,11 @@ export function abs(re: f64, im: f64): f64 {
  */
 export function absArray(dataPtr: usize, len: i32, resultPtr: usize): void {
   for (let i: i32 = 0; i < len; i++) {
-    const srcOffset: usize = (<usize>(i << 1)) << 3
-    const dstOffset: usize = (<usize>i) << 3
-    const re: f64 = load<f64>(dataPtr + srcOffset)
-    const im: f64 = load<f64>(dataPtr + srcOffset + 8)
-    store<f64>(resultPtr + dstOffset, Math.sqrt(re * re + im * im))
+    const srcOffset: usize = (<usize>(i << 1)) << 3;
+    const dstOffset: usize = (<usize>i) << 3;
+    const re: f64 = load<f64>(dataPtr + srcOffset);
+    const im: f64 = load<f64>(dataPtr + srcOffset + 8);
+    store<f64>(resultPtr + dstOffset, Math.sqrt(re * re + im * im));
   }
 }
 
@@ -138,15 +138,9 @@ export function absArray(dataPtr: usize, len: i32, resultPtr: usize): void {
  * @param im2 - Imaginary part of second number
  * @param resultPtr - Pointer to output [real, imag]
  */
-export function addComplex(
-  re1: f64,
-  im1: f64,
-  re2: f64,
-  im2: f64,
-  resultPtr: usize
-): void {
-  store<f64>(resultPtr, re1 + re2)
-  store<f64>(resultPtr + 8, im1 + im2)
+export function addComplex(re1: f64, im1: f64, re2: f64, im2: f64, resultPtr: usize): void {
+  store<f64>(resultPtr, re1 + re2);
+  store<f64>(resultPtr + 8, im1 + im2);
 }
 
 /**
@@ -157,15 +151,9 @@ export function addComplex(
  * @param im2 - Imaginary part of second number
  * @param resultPtr - Pointer to output [real, imag]
  */
-export function subComplex(
-  re1: f64,
-  im1: f64,
-  re2: f64,
-  im2: f64,
-  resultPtr: usize
-): void {
-  store<f64>(resultPtr, re1 - re2)
-  store<f64>(resultPtr + 8, im1 - im2)
+export function subComplex(re1: f64, im1: f64, re2: f64, im2: f64, resultPtr: usize): void {
+  store<f64>(resultPtr, re1 - re2);
+  store<f64>(resultPtr + 8, im1 - im2);
 }
 
 /**
@@ -177,15 +165,9 @@ export function subComplex(
  * @param im2 - Imaginary part of second number
  * @param resultPtr - Pointer to output [real, imag]
  */
-export function mulComplex(
-  re1: f64,
-  im1: f64,
-  re2: f64,
-  im2: f64,
-  resultPtr: usize
-): void {
-  store<f64>(resultPtr, re1 * re2 - im1 * im2)
-  store<f64>(resultPtr + 8, re1 * im2 + im1 * re2)
+export function mulComplex(re1: f64, im1: f64, re2: f64, im2: f64, resultPtr: usize): void {
+  store<f64>(resultPtr, re1 * re2 - im1 * im2);
+  store<f64>(resultPtr + 8, re1 * im2 + im1 * re2);
 }
 
 /**
@@ -197,16 +179,10 @@ export function mulComplex(
  * @param im2 - Imaginary part of second number
  * @param resultPtr - Pointer to output [real, imag]
  */
-export function divComplex(
-  re1: f64,
-  im1: f64,
-  re2: f64,
-  im2: f64,
-  resultPtr: usize
-): void {
-  const denom: f64 = re2 * re2 + im2 * im2
-  store<f64>(resultPtr, (re1 * re2 + im1 * im2) / denom)
-  store<f64>(resultPtr + 8, (im1 * re2 - re1 * im2) / denom)
+export function divComplex(re1: f64, im1: f64, re2: f64, im2: f64, resultPtr: usize): void {
+  const denom: f64 = re2 * re2 + im2 * im2;
+  store<f64>(resultPtr, (re1 * re2 + im1 * im2) / denom);
+  store<f64>(resultPtr + 8, (im1 * re2 - re1 * im2) / denom);
 }
 
 /**
@@ -216,22 +192,19 @@ export function divComplex(
  * @param resultPtr - Pointer to output [real, imag]
  */
 export function sqrtComplex(re: f64, im: f64, resultPtr: usize): void {
-  const r: f64 = Math.sqrt(re * re + im * im)
+  const r: f64 = Math.sqrt(re * re + im * im);
 
   if (im === 0.0) {
     if (re >= 0.0) {
-      store<f64>(resultPtr, Math.sqrt(re))
-      store<f64>(resultPtr + 8, 0.0)
+      store<f64>(resultPtr, Math.sqrt(re));
+      store<f64>(resultPtr + 8, 0.0);
     } else {
-      store<f64>(resultPtr, 0.0)
-      store<f64>(resultPtr + 8, Math.sqrt(-re))
+      store<f64>(resultPtr, 0.0);
+      store<f64>(resultPtr + 8, Math.sqrt(-re));
     }
   } else {
-    store<f64>(resultPtr, Math.sqrt((r + re) / 2.0))
-    store<f64>(
-      resultPtr + 8,
-      (im >= 0.0 ? 1.0 : -1.0) * Math.sqrt((r - re) / 2.0)
-    )
+    store<f64>(resultPtr, Math.sqrt((r + re) / 2.0));
+    store<f64>(resultPtr + 8, (im >= 0.0 ? 1.0 : -1.0) * Math.sqrt((r - re) / 2.0));
   }
 }
 
@@ -242,9 +215,9 @@ export function sqrtComplex(re: f64, im: f64, resultPtr: usize): void {
  * @param resultPtr - Pointer to output [real, imag]
  */
 export function expComplex(re: f64, im: f64, resultPtr: usize): void {
-  const expRe: f64 = Math.exp(re)
-  store<f64>(resultPtr, expRe * Math.cos(im))
-  store<f64>(resultPtr + 8, expRe * Math.sin(im))
+  const expRe: f64 = Math.exp(re);
+  store<f64>(resultPtr, expRe * Math.cos(im));
+  store<f64>(resultPtr + 8, expRe * Math.sin(im));
 }
 
 /**
@@ -255,8 +228,8 @@ export function expComplex(re: f64, im: f64, resultPtr: usize): void {
  * @param resultPtr - Pointer to output [real, imag]
  */
 export function logComplex(re: f64, im: f64, resultPtr: usize): void {
-  store<f64>(resultPtr, Math.log(Math.sqrt(re * re + im * im)))
-  store<f64>(resultPtr + 8, Math.atan2(im, re))
+  store<f64>(resultPtr, Math.log(Math.sqrt(re * re + im * im)));
+  store<f64>(resultPtr + 8, Math.atan2(im, re));
 }
 
 /**
@@ -267,8 +240,8 @@ export function logComplex(re: f64, im: f64, resultPtr: usize): void {
  * @param resultPtr - Pointer to output [real, imag]
  */
 export function sinComplex(re: f64, im: f64, resultPtr: usize): void {
-  store<f64>(resultPtr, Math.sin(re) * Math.cosh(im))
-  store<f64>(resultPtr + 8, Math.cos(re) * Math.sinh(im))
+  store<f64>(resultPtr, Math.sin(re) * Math.cosh(im));
+  store<f64>(resultPtr + 8, Math.cos(re) * Math.sinh(im));
 }
 
 /**
@@ -279,8 +252,8 @@ export function sinComplex(re: f64, im: f64, resultPtr: usize): void {
  * @param resultPtr - Pointer to output [real, imag]
  */
 export function cosComplex(re: f64, im: f64, resultPtr: usize): void {
-  store<f64>(resultPtr, Math.cos(re) * Math.cosh(im))
-  store<f64>(resultPtr + 8, -Math.sin(re) * Math.sinh(im))
+  store<f64>(resultPtr, Math.cos(re) * Math.cosh(im));
+  store<f64>(resultPtr + 8, -Math.sin(re) * Math.sinh(im));
 }
 
 /**
@@ -291,14 +264,14 @@ export function cosComplex(re: f64, im: f64, resultPtr: usize): void {
  * @param resultPtr - Pointer to output [real, imag]
  */
 export function tanComplex(re: f64, im: f64, resultPtr: usize): void {
-  const sinRe: f64 = Math.sin(re) * Math.cosh(im)
-  const sinIm: f64 = Math.cos(re) * Math.sinh(im)
-  const cosRe: f64 = Math.cos(re) * Math.cosh(im)
-  const cosIm: f64 = -Math.sin(re) * Math.sinh(im)
+  const sinRe: f64 = Math.sin(re) * Math.cosh(im);
+  const sinIm: f64 = Math.cos(re) * Math.sinh(im);
+  const cosRe: f64 = Math.cos(re) * Math.cosh(im);
+  const cosIm: f64 = -Math.sin(re) * Math.sinh(im);
 
-  const denom: f64 = cosRe * cosRe + cosIm * cosIm
-  store<f64>(resultPtr, (sinRe * cosRe + sinIm * cosIm) / denom)
-  store<f64>(resultPtr + 8, (sinIm * cosRe - sinRe * cosIm) / denom)
+  const denom: f64 = cosRe * cosRe + cosIm * cosIm;
+  store<f64>(resultPtr, (sinRe * cosRe + sinIm * cosIm) / denom);
+  store<f64>(resultPtr + 8, (sinIm * cosRe - sinRe * cosIm) / denom);
 }
 
 /**
@@ -309,17 +282,12 @@ export function tanComplex(re: f64, im: f64, resultPtr: usize): void {
  * @param n - Power (real number)
  * @param resultPtr - Pointer to output [real, imag]
  */
-export function powComplexReal(
-  re: f64,
-  im: f64,
-  n: f64,
-  resultPtr: usize
-): void {
-  const r: f64 = Math.sqrt(re * re + im * im)
-  const theta: f64 = Math.atan2(im, re)
-  const rn: f64 = Math.pow(r, n)
-  const ntheta: f64 = n * theta
+export function powComplexReal(re: f64, im: f64, n: f64, resultPtr: usize): void {
+  const r: f64 = Math.sqrt(re * re + im * im);
+  const theta: f64 = Math.atan2(im, re);
+  const rn: f64 = Math.pow(r, n);
+  const ntheta: f64 = n * theta;
 
-  store<f64>(resultPtr, rn * Math.cos(ntheta))
-  store<f64>(resultPtr + 8, rn * Math.sin(ntheta))
+  store<f64>(resultPtr, rn * Math.cos(ntheta));
+  store<f64>(resultPtr + 8, rn * Math.sin(ntheta));
 }

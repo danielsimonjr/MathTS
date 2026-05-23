@@ -1,28 +1,28 @@
-import { isInteger } from '../utils/number.js'
-import { product } from '../utils/product.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { isInteger } from '../utils/number.js';
+import { product } from '../utils/product.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for permutations
 interface BigNumberType {
-  mul(n: number): BigNumberType
-  add(n: number): BigNumberType
-  minus(n: BigNumberType | number): BigNumberType
-  plus(n: BigNumberType | number): BigNumberType
-  times(n: BigNumberType): BigNumberType
-  gt(n: BigNumberType): boolean
-  lte(n: BigNumberType): boolean
-  gte(n: BigNumberType | number): boolean
-  isInteger(): boolean
+  mul(n: number): BigNumberType;
+  add(n: number): BigNumberType;
+  minus(n: BigNumberType | number): BigNumberType;
+  plus(n: BigNumberType | number): BigNumberType;
+  times(n: BigNumberType): BigNumberType;
+  gt(n: BigNumberType): boolean;
+  lte(n: BigNumberType): boolean;
+  gte(n: BigNumberType | number): boolean;
+  isInteger(): boolean;
 }
 
 interface PermutationsDependencies {
-  typed: TypedFunction
-  factorial: TypedFunction
+  typed: TypedFunction;
+  factorial: TypedFunction;
 }
 
-const name = 'permutations'
-const dependencies = ['typed', 'factorial']
+const name = 'permutations';
+const dependencies = ['typed', 'factorial'];
 
 export const createPermutations = /* #__PURE__ */ factory(
   name,
@@ -57,55 +57,42 @@ export const createPermutations = /* #__PURE__ */ factory(
       'number | BigNumber': factorial,
       'number, number': function (n: number, k: number): number {
         if (!isInteger(n) || n < 0) {
-          throw new TypeError(
-            'Positive integer value expected in function permutations'
-          )
+          throw new TypeError('Positive integer value expected in function permutations');
         }
         if (!isInteger(k) || k < 0) {
-          throw new TypeError(
-            'Positive integer value expected in function permutations'
-          )
+          throw new TypeError('Positive integer value expected in function permutations');
         }
         if (k > n) {
-          throw new TypeError(
-            'second argument k must be less than or equal to first argument n'
-          )
+          throw new TypeError('second argument k must be less than or equal to first argument n');
         }
         // Permute n objects, k at a time
-        return product(n - k + 1, n)
+        return product(n - k + 1, n);
       },
 
-      'BigNumber, BigNumber': function (
-        n: BigNumberType,
-        k: BigNumberType
-      ): BigNumberType {
-        let result: BigNumberType
-        let i: BigNumberType
+      'BigNumber, BigNumber': function (n: BigNumberType, k: BigNumberType): BigNumberType {
+        let result: BigNumberType;
+        let i: BigNumberType;
 
         if (!isPositiveInteger(n) || !isPositiveInteger(k)) {
-          throw new TypeError(
-            'Positive integer value expected in function permutations'
-          )
+          throw new TypeError('Positive integer value expected in function permutations');
         }
         if (k.gt(n)) {
-          throw new TypeError(
-            'second argument k must be less than or equal to first argument n'
-          )
+          throw new TypeError('second argument k must be less than or equal to first argument n');
         }
 
-        const one = n.mul(0).add(1)
-        result = one
+        const one = n.mul(0).add(1);
+        result = one;
         for (i = n.minus(k).plus(1); i.lte(n); i = i.plus(1)) {
-          result = result.times(i)
+          result = result.times(i);
         }
 
-        return result
-      }
+        return result;
+      },
 
       // TODO: implement support for collection in permutations
-    })
+    });
   }
-)
+);
 
 /**
  * Test whether BigNumber n is a positive integer
@@ -113,5 +100,5 @@ export const createPermutations = /* #__PURE__ */ factory(
  * @returns {boolean} isPositiveInteger
  */
 function isPositiveInteger(n: BigNumberType): boolean {
-  return n.isInteger() && n.gte(0)
+  return n.isInteger() && n.gte(0);
 }

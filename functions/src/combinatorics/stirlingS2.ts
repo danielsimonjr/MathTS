@@ -1,31 +1,31 @@
-import { factory } from '../utils/factory.js'
-import { isNumber } from '../utils/is.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { isNumber } from '../utils/is.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for combinatorics
 interface BigNumberType {
   // BigNumber placeholder for type compatibility
 }
 
-type NumericValue = number | BigNumberType
+type NumericValue = number | BigNumberType;
 
 interface StirlingS2Dependencies {
-  typed: TypedFunction
-  addScalar: (x: NumericValue, y: NumericValue) => NumericValue
-  subtractScalar: (x: NumericValue, y: NumericValue) => NumericValue
-  multiplyScalar: (x: NumericValue, y: NumericValue) => NumericValue
-  divideScalar: (x: NumericValue, y: NumericValue) => NumericValue
-  pow: (x: NumericValue, y: NumericValue) => NumericValue
-  factorial: (x: NumericValue) => NumericValue
-  combinations: (n: NumericValue, k: NumericValue) => NumericValue
-  isNegative: (x: NumericValue) => boolean
-  isInteger: (x: NumericValue) => boolean
-  number: (x: NumericValue) => number
-  bignumber?: (x: NumericValue) => BigNumberType
-  larger: (x: NumericValue, y: NumericValue) => boolean
+  typed: TypedFunction;
+  addScalar: (x: NumericValue, y: NumericValue) => NumericValue;
+  subtractScalar: (x: NumericValue, y: NumericValue) => NumericValue;
+  multiplyScalar: (x: NumericValue, y: NumericValue) => NumericValue;
+  divideScalar: (x: NumericValue, y: NumericValue) => NumericValue;
+  pow: (x: NumericValue, y: NumericValue) => NumericValue;
+  factorial: (x: NumericValue) => NumericValue;
+  combinations: (n: NumericValue, k: NumericValue) => NumericValue;
+  isNegative: (x: NumericValue) => boolean;
+  isInteger: (x: NumericValue) => boolean;
+  number: (x: NumericValue) => number;
+  bignumber?: (x: NumericValue) => BigNumberType;
+  larger: (x: NumericValue, y: NumericValue) => boolean;
 }
 
-const name = 'stirlingS2'
+const name = 'stirlingS2';
 const dependencies = [
   'typed',
   'addScalar',
@@ -39,8 +39,8 @@ const dependencies = [
   'isInteger',
   'number',
   '?bignumber',
-  'larger'
-]
+  'larger',
+];
 
 export const createStirlingS2 = /* #__PURE__ */ factory(
   name,
@@ -58,10 +58,10 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
     isInteger,
     number,
     bignumber,
-    larger
+    larger,
   }: StirlingS2Dependencies) => {
-    const smallCache: NumericValue[][] = []
-    const bigCache: NumericValue[][] = []
+    const smallCache: NumericValue[][] = [];
+    const bigCache: NumericValue[][] = [];
     /**
      * The Stirling numbers of the second kind, counts the number of ways to partition
      * a set of n labelled objects into k nonempty unlabelled subsets.
@@ -96,42 +96,38 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
         k: NumericValue
       ): NumericValue {
         if (!isInteger(n) || isNegative(n) || !isInteger(k) || isNegative(k)) {
-          throw new TypeError(
-            'Non-negative integer value expected in function stirlingS2'
-          )
+          throw new TypeError('Non-negative integer value expected in function stirlingS2');
         } else if (larger(k, n)) {
-          throw new TypeError(
-            'k must be less than or equal to n in function stirlingS2'
-          )
+          throw new TypeError('k must be less than or equal to n in function stirlingS2');
         }
 
-        const big = !(isNumber(n) && isNumber(k))
-        const cache = big ? bigCache : smallCache
-        const make = big ? bignumber! : number
-        const nn = number(n)
-        const nk = number(k)
+        const big = !(isNumber(n) && isNumber(k));
+        const cache = big ? bigCache : smallCache;
+        const make = big ? bignumber! : number;
+        const nn = number(n);
+        const nk = number(k);
         /* See if we already have the value: */
         if (cache[nn] && cache[nn].length > nk) {
-          return cache[nn][nk]
+          return cache[nn][nk];
         }
         /* Fill the cache */
         for (let m = 0; m <= nn; ++m) {
           if (!cache[m]) {
-            cache[m] = [m === 0 ? make(1) : make(0)]
+            cache[m] = [m === 0 ? make(1) : make(0)];
           }
-          if (m === 0) continue
-          const row = cache[m]
-          const prev = cache[m - 1]
+          if (m === 0) continue;
+          const row = cache[m];
+          const prev = cache[m - 1];
           for (let i = row.length; i <= m && i <= nk; ++i) {
             if (i === m) {
-              row[i] = 1
+              row[i] = 1;
             } else {
-              row[i] = addScalar(multiplyScalar(make(i), prev[i]), prev[i - 1])
+              row[i] = addScalar(multiplyScalar(make(i), prev[i]), prev[i - 1]);
             }
           }
         }
-        return cache[nn][nk]
-      }
-    })
+        return cache[nn][nk];
+      },
+    });
   }
-)
+);

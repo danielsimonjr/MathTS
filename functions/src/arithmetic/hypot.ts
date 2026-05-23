@@ -1,35 +1,35 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import { flatten } from '../utils/array.js'
-import { isComplex } from '../utils/is.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import { flatten } from '../utils/array.js';
+import { isComplex } from '../utils/is.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_HYPOT_THRESHOLD = 50
+const WASM_HYPOT_THRESHOLD = 50;
 
 // Type definitions for dependency injection
 interface Matrix {
-  toArray(): unknown[]
+  toArray(): unknown[];
 }
 
 interface BigNumberType {
   // BigNumber operations for hypot calculation
 }
 
-type NumericValue = number | BigNumberType
+type NumericValue = number | BigNumberType;
 
 interface HypotDependencies {
-  typed: TypedFunction
-  abs: TypedFunction
-  addScalar: TypedFunction
-  divideScalar: TypedFunction
-  multiplyScalar: TypedFunction
-  sqrt: TypedFunction
-  smaller: TypedFunction
-  isPositive: TypedFunction
+  typed: TypedFunction;
+  abs: TypedFunction;
+  addScalar: TypedFunction;
+  divideScalar: TypedFunction;
+  multiplyScalar: TypedFunction;
+  sqrt: TypedFunction;
+  smaller: TypedFunction;
+  isPositive: TypedFunction;
 }
 
-const name = 'hypot'
+const name = 'hypot';
 const dependencies = [
   'typed',
   'abs',
@@ -38,8 +38,8 @@ const dependencies = [
   'multiplyScalar',
   'sqrt',
   'smaller',
-  'isPositive'
-]
+  'isPositive',
+];
 
 export const createHypot = /* #__PURE__ */ factory(
   name,
@@ -52,7 +52,7 @@ export const createHypot = /* #__PURE__ */ factory(
     multiplyScalar,
     sqrt,
     smaller,
-    isPositive
+    isPositive,
   }: HypotDependencies): TypedFunction => {
     /**
      * Calculate the hypotenuse of a list with values. The hypotenuse is defined as:
@@ -87,34 +87,33 @@ export const createHypot = /* #__PURE__ */ factory(
 
       Array: _hypot,
 
-      Matrix: (M: Matrix): NumericValue =>
-        _hypot(flatten(M.toArray(), true) as NumericValue[])
-    }) as TypedFunction
+      Matrix: (M: Matrix): NumericValue => _hypot(flatten(M.toArray(), true) as NumericValue[]),
+    }) as TypedFunction;
 
     /**
      * Try WASM-accelerated hypot for plain number arrays
      */
     function _tryWasmHypot(args: NumericValue[]): number | null {
-      if (args.length < WASM_HYPOT_THRESHOLD) return null
+      if (args.length < WASM_HYPOT_THRESHOLD) return null;
 
-      const wasm = wasmLoader.getModule()
-      if (!wasm) return null
+      const wasm = wasmLoader.getModule();
+      if (!wasm) return null;
 
       // Check all elements are plain numbers (not BigNumber or Complex)
-      const n = args.length
-      const data = new Float64Array(n)
+      const n = args.length;
+      const data = new Float64Array(n);
       for (let i = 0; i < n; i++) {
-        if (typeof args[i] !== 'number') return null
-        data[i] = args[i] as number
+        if (typeof args[i] !== 'number') return null;
+        data[i] = args[i] as number;
       }
 
-      const alloc = wasmLoader.allocateFloat64Array(data)
+      const alloc = wasmLoader.allocateFloat64Array(data);
       try {
-        return wasm.hypotArray(alloc.ptr, n)
+        return wasm.hypotArray(alloc.ptr, n);
       } catch {
-        return null
+        return null;
       } finally {
-        wasmLoader.free(alloc.ptr)
+        wasmLoader.free(alloc.ptr);
       }
     }
 
@@ -126,43 +125,37 @@ export const createHypot = /* #__PURE__ */ factory(
      */
     function _hypot(args: NumericValue[]): NumericValue {
       // Try WASM path for large plain number arrays
-      const wasmResult = _tryWasmHypot(args)
-      if (wasmResult !== null) return wasmResult
+      const wasmResult = _tryWasmHypot(args);
+      if (wasmResult !== null) return wasmResult;
 
       // code based on `hypot` from es6-shim:
       // https://github.com/paulmillr/es6-shim/blob/master/es6-shim.js#L1619-L1633
-      let result: NumericValue = 0
-      let largest: NumericValue = 0
+      let result: NumericValue = 0;
+      let largest: NumericValue = 0;
 
       for (let i = 0; i < args.length; i++) {
         if (isComplex(args[i])) {
-          throw new TypeError('Unexpected type of argument to hypot')
+          throw new TypeError('Unexpected type of argument to hypot');
         }
-        const value: NumericValue = abs(args[i])
+        const value: NumericValue = abs(args[i]);
         if (smaller(largest, value)) {
           result = multiplyScalar(
             result,
-            multiplyScalar(
-              divideScalar(largest, value),
-              divideScalar(largest, value)
-            )
-          )
-          result = addScalar(result, 1)
-          largest = value
+            multiplyScalar(divideScalar(largest, value), divideScalar(largest, value))
+          );
+          result = addScalar(result, 1);
+          largest = value;
         } else {
           result = addScalar(
             result,
             isPositive(value)
-              ? multiplyScalar(
-                  divideScalar(value, largest),
-                  divideScalar(value, largest)
-                )
+              ? multiplyScalar(divideScalar(value, largest), divideScalar(value, largest))
               : value
-          )
+          );
         }
       }
 
-      return multiplyScalar(largest, sqrt(result))
+      return multiplyScalar(largest, sqrt(result));
     }
   }
-)
+);

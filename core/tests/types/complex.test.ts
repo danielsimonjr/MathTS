@@ -148,7 +148,7 @@ describe('Complex', () => {
       // (3+4i)/(1+2i) = (3+4i)(1-2i)/(1+4) = (3-6i+4i+8)/(5) = (11-2i)/5
       const result = a.divide(b);
       expect(result.re).toBeCloseTo(2.2);
-      expect(result.im).toBeCloseTo(-.4);
+      expect(result.im).toBeCloseTo(-0.4);
     });
 
     it('should negate complex numbers', () => {

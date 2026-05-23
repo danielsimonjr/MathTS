@@ -9,6 +9,7 @@
 ## Executive Summary
 
 The math.js fork intended to create a dual build system producing:
+
 1. **Efficient JavaScript** compiled from AssemblyScript-friendly TypeScript
 2. **WebAssembly (WASM)** modules for parallel computing via worker pooling
 
@@ -16,13 +17,13 @@ The math.js fork intended to create a dual build system producing:
 
 ### Critical Findings
 
-| Issue | Severity | Impact |
-|-------|----------|--------|
-| Dependencies not installed (`node_modules` missing) | **CRITICAL** | All npm scripts fail |
-| Fundamental AssemblyScript/TypeScript confusion | **CRITICAL** | Architecture won't work as designed |
-| TypeScript type visibility errors (25+ files) | **HIGH** | TypeScript compilation fails |
-| ESLint configuration incompatible with ESLint 9.x | **MEDIUM** | Linting fails |
-| WASM build tooling not installed | **HIGH** | WASM compilation fails |
+| Issue                                               | Severity     | Impact                              |
+| --------------------------------------------------- | ------------ | ----------------------------------- |
+| Dependencies not installed (`node_modules` missing) | **CRITICAL** | All npm scripts fail                |
+| Fundamental AssemblyScript/TypeScript confusion     | **CRITICAL** | Architecture won't work as designed |
+| TypeScript type visibility errors (25+ files)       | **HIGH**     | TypeScript compilation fails        |
+| ESLint configuration incompatible with ESLint 9.x   | **MEDIUM**   | Linting fails                       |
+| WASM build tooling not installed                    | **HIGH**     | WASM compilation fails              |
 
 ---
 
@@ -93,11 +94,11 @@ lib/
 
 Running `npm run compile:ts` produces **25+ type errors**:
 
-| Error Code | Count | Description | Root Cause |
-|------------|-------|-------------|------------|
-| TS2688 | 1 | Cannot find type definition for 'node' | @types/node not installed |
-| TS4023 | ~20 | Exported variable uses unexported type | Internal types not exported |
-| TS4094 | 5 | Private property on exported class | Factory pattern + strict mode conflict |
+| Error Code | Count | Description                            | Root Cause                             |
+| ---------- | ----- | -------------------------------------- | -------------------------------------- |
+| TS2688     | 1     | Cannot find type definition for 'node' | @types/node not installed              |
+| TS4023     | ~20   | Exported variable uses unexported type | Internal types not exported            |
+| TS4094     | 5     | Private property on exported class     | Factory pattern + strict mode conflict |
 
 #### Key Type Visibility Issues
 
@@ -115,6 +116,7 @@ export const createAccessorNode = factory(...)
 ```
 
 **Files Affected:**
+
 - `src/expression/node/AccessorNode.ts`
 - `src/expression/node/ArrayNode.ts`
 - `src/expression/node/AssignmentNode.ts`
@@ -149,6 +151,7 @@ npm install
 ```
 
 **Expected Result:** All devDependencies installed including:
+
 - `gulp`, `babel`, `webpack` (build tools)
 - `typescript`, `assemblyscript` (compilers)
 - `mocha` (testing)
@@ -169,9 +172,9 @@ npx eslint --cache --max-warnings 0 src/ test/ types/
 Create `eslint.config.js`:
 
 ```javascript
-import js from '@eslint/js'
-import typescript from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
+import js from '@eslint/js';
+import typescript from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 
 export default [
   js.configs.recommended,
@@ -180,20 +183,21 @@ export default [
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: './tsconfig.json'
-      }
+        project: './tsconfig.json',
+      },
     },
     plugins: {
-      '@typescript-eslint': typescript
+      '@typescript-eslint': typescript,
     },
     rules: {
       // Port rules from .eslintrc.cjs
-    }
-  }
-]
+    },
+  },
+];
 ```
 
 Then update `package.json`:
+
 ```json
 "devDependencies": {
   "eslint": "^9.0.0",
@@ -206,12 +210,14 @@ Then update `package.json`:
 **File: `src/expression/node/Node.ts`**
 
 Change from:
+
 ```typescript
 interface CompiledExpression { ... }
 interface StringOptions { ... }
 ```
 
 To:
+
 ```typescript
 export interface CompiledExpression { ... }
 export interface StringOptions { ... }
@@ -220,11 +226,12 @@ export interface StringOptions { ... }
 **File: `src/utils/function.ts`**
 
 Export the `MemoizedFunction` type:
+
 ```typescript
 export interface MemoizedFunction<T extends (...args: any[]) => any> {
-  (...args: Parameters<T>): ReturnType<T>
-  cache: Map<string, ReturnType<T>>
-  clear: () => void
+  (...args: Parameters<T>): ReturnType<T>;
+  cache: Map<string, ReturnType<T>>;
+  clear: () => void;
 }
 ```
 
@@ -259,11 +266,11 @@ Current config is too strict for the factory function pattern. Adjust:
 
     // Relax these for factory pattern
     "declaration": true,
-    "emitDeclarationOnly": false,  // Change from true - emit JS too
-    "stripInternal": true,         // Add this - strip @internal types
+    "emitDeclarationOnly": false, // Change from true - emit JS too
+    "stripInternal": true, // Add this - strip @internal types
 
     // Consider relaxing
-    "noUnusedLocals": false,       // Many factory patterns have intentional unused
+    "noUnusedLocals": false, // Many factory patterns have intentional unused
     "noUnusedParameters": false
   }
 }
@@ -350,15 +357,18 @@ The term "AssemblyScript-friendly TypeScript" is misleading. There are two separ
 2. **AssemblyScript in `src/wasm/`** - AssemblyScript that compiles to WebAssembly
 
 These share:
+
 - Similar syntax (both TypeScript-like)
 - Conceptual interfaces (both implement matrix multiply, etc.)
 
 These do NOT share:
+
 - Type definitions (`i32` vs `number`)
 - Runtime APIs (WASM memory vs JS objects)
 - Compilation toolchain
 
 **Recommendation:** Remove all references to "AssemblyScript-friendly TypeScript" from documentation. Instead document:
+
 - "TypeScript source code" for `src/`
 - "AssemblyScript WASM modules" for `src/wasm/`
 
@@ -372,12 +382,13 @@ To ensure TypeScript and AssemblyScript implementations stay in sync, create int
 ## Matrix Operations
 
 ### multiplyDense
+
 JavaScript signature:
-  (a: number[][], b: number[][]) => number[][]
+(a: number[][], b: number[][]) => number[][]
 
 WASM signature (AssemblyScript):
-  (a: Float64Array, aRows: i32, aCols: i32,
-   b: Float64Array, bRows: i32, bCols: i32) => Float64Array
+(a: Float64Array, aRows: i32, aCols: i32,
+b: Float64Array, bRows: i32, bCols: i32) => Float64Array
 
 Bridge responsibility: Convert between formats
 ```
@@ -387,6 +398,7 @@ Bridge responsibility: Convert between formats
 #### Action 3.1: Fix WASM Build Script
 
 Current `package.json`:
+
 ```json
 "build:wasm": "asc src/wasm/index.ts --config asconfig.json --target release"
 ```
@@ -394,6 +406,7 @@ Current `package.json`:
 Problem: `asc` command not found (not installed or not in PATH).
 
 **Fix:** Ensure `npx` is used:
+
 ```json
 "build:wasm": "npx asc src/wasm/index.ts --config asconfig.json --target release"
 ```
@@ -406,7 +419,7 @@ The gulpfile.js only compiles `.js` files:
 
 ```javascript
 // Line 20 in gulpfile.js
-const COMPILE_SRC = `${SRC_DIR}/**/*.?(c)js`
+const COMPILE_SRC = `${SRC_DIR}/**/*.?(c)js`;
 ```
 
 This ignores `.ts` files. The build pipeline needs updating:
@@ -415,23 +428,22 @@ This ignores `.ts` files. The build pipeline needs updating:
 
 ```javascript
 // Add to gulpfile.js
-import gulpTypescript from 'gulp-typescript'
+import gulpTypescript from 'gulp-typescript';
 
-const tsProject = gulpTypescript.createProject('tsconfig.build.json')
+const tsProject = gulpTypescript.createProject('tsconfig.build.json');
 
 function compileTypescript() {
-  return gulp.src('src/**/*.ts')
-    .pipe(tsProject())
-    .pipe(gulp.dest('lib/typescript'))
+  return gulp.src('src/**/*.ts').pipe(tsProject()).pipe(gulp.dest('lib/typescript'));
 }
 
 // Update compile task to include TS
-const COMPILE_SRC = `${SRC_DIR}/**/*.{js,cjs,ts}`
+const COMPILE_SRC = `${SRC_DIR}/**/*.{js,cjs,ts}`;
 ```
 
 **Option B: Let TypeScript Emit JS, Babel Only for Browser Bundle**
 
 1. Change `tsconfig.build.json`:
+
    ```json
    "emitDeclarationOnly": false,
    "outDir": "./lib/esm"
@@ -447,9 +459,9 @@ Recent commit changed runtime from `"stub"` to `"incremental"`. Verify this is c
 {
   "targets": {
     "release": {
-      "runtime": "incremental",  // GC-enabled runtime
-      "exportRuntime": true,     // Export __new, __pin, __unpin
-      "exportMemory": true       // Export memory for direct access
+      "runtime": "incremental", // GC-enabled runtime
+      "exportRuntime": true, // Export __new, __pin, __unpin
+      "exportMemory": true // Export memory for direct access
     }
   }
 }
@@ -471,12 +483,14 @@ The project uses custom forks:
 **Risk:** These are alpha/unpublished packages. If unavailable on npm, build will fail.
 
 **Verification:**
+
 ```bash
 npm view @danielsimonjr/typed-function
 npm view @danielsimonjr/workerpool
 ```
 
 **If packages don't exist:**
+
 1. Publish them to npm
 2. Or use git URLs: `"@danielsimonjr/typed-function": "github:danielsimonjr/typed-function#v5.0.0-alpha.1"`
 3. Or revert to upstream packages with patches
@@ -490,6 +504,7 @@ npm view @danielsimonjr/workerpool
 AssemblyScript 0.28+ uses the modern compiler API. Ensure `asconfig.json` uses correct format.
 
 **Verify:**
+
 ```bash
 npx asc --version
 npx asc src/wasm/index.ts --config asconfig.json --target release --validate
@@ -602,8 +617,8 @@ mathjs (core)
 Instead of custom AssemblyScript, use established WASM math libraries:
 
 ```javascript
-import * as ndarray from 'ndarray'
-import gemm from 'ndarray-gemm'  // BLAS-like operations
+import * as ndarray from 'ndarray';
+import gemm from 'ndarray-gemm'; // BLAS-like operations
 
 // Or use WebGPU for GPU acceleration (newer alternative)
 ```
@@ -616,8 +631,8 @@ import gemm from 'ndarray-gemm'  // BLAS-like operations
 Modern alternative to WASM for compute-intensive operations:
 
 ```javascript
-const adapter = await navigator.gpu.requestAdapter()
-const device = await adapter.requestDevice()
+const adapter = await navigator.gpu.requestAdapter();
+const device = await adapter.requestDevice();
 // Use compute shaders for matrix operations
 ```
 
@@ -630,46 +645,46 @@ const device = await adapter.requestDevice()
 
 ### TypeScript Type Export Fixes
 
-| File | Line | Fix |
-|------|------|-----|
-| `src/expression/node/Node.ts` | 11-22 | Export `CompiledExpression`, `StringOptions`, `CompileFunction` |
-| `src/utils/function.ts` | (find) | Export `MemoizedFunction` type |
-| `src/type/matrix/ImmutableDenseMatrix.ts` | 73 | Change `private _max` to `readonly _max` |
-| `src/type/matrix/ImmutableDenseMatrix.ts` | 73 | Change `private _min` to `readonly _min` |
-| `src/type/matrix/MatrixIndex.ts` | 50 | Change `private _dimensions` to `readonly _dimensions` |
-| `src/type/matrix/MatrixIndex.ts` | 50 | Change `private _isScalar` to `readonly _isScalar` |
-| `src/type/matrix/MatrixIndex.ts` | 50 | Change `private _sourceSize` to `readonly _sourceSize` |
+| File                                      | Line   | Fix                                                             |
+| ----------------------------------------- | ------ | --------------------------------------------------------------- |
+| `src/expression/node/Node.ts`             | 11-22  | Export `CompiledExpression`, `StringOptions`, `CompileFunction` |
+| `src/utils/function.ts`                   | (find) | Export `MemoizedFunction` type                                  |
+| `src/type/matrix/ImmutableDenseMatrix.ts` | 73     | Change `private _max` to `readonly _max`                        |
+| `src/type/matrix/ImmutableDenseMatrix.ts` | 73     | Change `private _min` to `readonly _min`                        |
+| `src/type/matrix/MatrixIndex.ts`          | 50     | Change `private _dimensions` to `readonly _dimensions`          |
+| `src/type/matrix/MatrixIndex.ts`          | 50     | Change `private _isScalar` to `readonly _isScalar`              |
+| `src/type/matrix/MatrixIndex.ts`          | 50     | Change `private _sourceSize` to `readonly _sourceSize`          |
 
 ### Build Configuration Fixes
 
-| File | Issue | Fix |
-|------|-------|-----|
-| `tsconfig.build.json` | `emitDeclarationOnly: true` | Change to `false` or add separate emit step |
-| `tsconfig.build.json` | Missing types | Remove `"types": ["node"]` or ensure @types/node installed |
-| `.eslintrc.cjs` | Wrong format for ESLint 9 | Migrate to `eslint.config.js` |
-| `gulpfile.js` | Only compiles `.js` | Add `.ts` to glob pattern |
-| `package.json` | build:wasm uses bare `asc` | Use `npx asc` or ensure PATH correct |
+| File                  | Issue                       | Fix                                                        |
+| --------------------- | --------------------------- | ---------------------------------------------------------- |
+| `tsconfig.build.json` | `emitDeclarationOnly: true` | Change to `false` or add separate emit step                |
+| `tsconfig.build.json` | Missing types               | Remove `"types": ["node"]` or ensure @types/node installed |
+| `.eslintrc.cjs`       | Wrong format for ESLint 9   | Migrate to `eslint.config.js`                              |
+| `gulpfile.js`         | Only compiles `.js`         | Add `.ts` to glob pattern                                  |
+| `package.json`        | build:wasm uses bare `asc`  | Use `npx asc` or ensure PATH correct                       |
 
 ---
 
 ## Appendix B: Glossary
 
-| Term | Definition |
-|------|------------|
-| **AssemblyScript** | A TypeScript-like language that compiles to WebAssembly. NOT TypeScript. |
-| **TypeScript** | A typed superset of JavaScript that compiles to JavaScript. |
-| **WASM** | WebAssembly - a binary instruction format for stack-based virtual machines |
-| **Factory Function** | Math.js pattern where functions are created via dependency injection |
-| **typed-function** | Library used by math.js for function overloading based on argument types |
-| **Dual Build** | Strategy to produce both JavaScript and WASM outputs from source code |
-| **ESM** | ECMAScript Modules - modern JavaScript module format |
-| **CJS** | CommonJS - Node.js module format using `require()` |
-| **UMD** | Universal Module Definition - works in browsers and Node.js |
+| Term                 | Definition                                                                 |
+| -------------------- | -------------------------------------------------------------------------- |
+| **AssemblyScript**   | A TypeScript-like language that compiles to WebAssembly. NOT TypeScript.   |
+| **TypeScript**       | A typed superset of JavaScript that compiles to JavaScript.                |
+| **WASM**             | WebAssembly - a binary instruction format for stack-based virtual machines |
+| **Factory Function** | Math.js pattern where functions are created via dependency injection       |
+| **typed-function**   | Library used by math.js for function overloading based on argument types   |
+| **Dual Build**       | Strategy to produce both JavaScript and WASM outputs from source code      |
+| **ESM**              | ECMAScript Modules - modern JavaScript module format                       |
+| **CJS**              | CommonJS - Node.js module format using `require()`                         |
+| **UMD**              | Universal Module Definition - works in browsers and Node.js                |
 
 ---
 
 ## Document History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-12-14 | Claude | Initial corrective action plan |
+| Version | Date       | Author | Changes                        |
+| ------- | ---------- | ------ | ------------------------------ |
+| 1.0     | 2025-12-14 | Claude | Initial corrective action plan |

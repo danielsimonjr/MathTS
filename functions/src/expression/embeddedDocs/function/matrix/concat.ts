@@ -9,7 +9,7 @@ export const concatDocs = {
     'B = [3, 4; 7, 8]',
     'concat(A, B)',
     'concat(A, B, 1)',
-    'concat(A, B, 2)'
+    'concat(A, B, 2)',
   ],
   seealso: [
     'det',
@@ -23,6 +23,6 @@ export const concatDocs = {
     'subset',
     'trace',
     'transpose',
-    'zeros'
-  ]
-}
+    'zeros',
+  ],
+};

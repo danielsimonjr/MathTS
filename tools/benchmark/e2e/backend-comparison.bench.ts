@@ -113,13 +113,13 @@ function printResults(results: BenchmarkResult[]): void {
     console.log(`\n## ${operation}\n`);
     console.log(
       'Backend'.padEnd(12) +
-      'Size'.padEnd(12) +
-      'Elements'.padEnd(12) +
-      'Avg(ms)'.padEnd(12) +
-      'Min(ms)'.padEnd(12) +
-      'Max(ms)'.padEnd(12) +
-      'Throughput'.padEnd(15) +
-      (operation === 'matmul' ? 'GFLOPS' : '')
+        'Size'.padEnd(12) +
+        'Elements'.padEnd(12) +
+        'Avg(ms)'.padEnd(12) +
+        'Min(ms)'.padEnd(12) +
+        'Max(ms)'.padEnd(12) +
+        'Throughput'.padEnd(15) +
+        (operation === 'matmul' ? 'GFLOPS' : '')
     );
     console.log('-'.repeat(operation === 'matmul' ? 100 : 85));
 
@@ -151,9 +151,13 @@ async function benchmarkAdd(): Promise<BenchmarkResult[]> {
     const elements = size.rows * size.cols;
 
     // JS Backend
-    const jsResult = await runBenchmark('add-js', () => {
-      jsBackend.add(a, b);
-    }, iterations);
+    const jsResult = await runBenchmark(
+      'add-js',
+      () => {
+        jsBackend.add(a, b);
+      },
+      iterations
+    );
 
     results.push({
       backend: 'JS',
@@ -173,9 +177,13 @@ async function benchmarkAdd(): Promise<BenchmarkResult[]> {
     // WASM Backend (if available)
     if (wasmBackend.isAvailable()) {
       try {
-        const wasmResult = await runBenchmark('add-wasm', () => {
-          wasmBackend.add(a, b);
-        }, iterations);
+        const wasmResult = await runBenchmark(
+          'add-wasm',
+          () => {
+            wasmBackend.add(a, b);
+          },
+          iterations
+        );
 
         results.push({
           backend: 'WASM',
@@ -197,9 +205,13 @@ async function benchmarkAdd(): Promise<BenchmarkResult[]> {
     }
 
     // BackendManager (auto-select)
-    const autoResult = await runBenchmark('add-auto', () => {
-      backendManager.add(a, b);
-    }, iterations);
+    const autoResult = await runBenchmark(
+      'add-auto',
+      () => {
+        backendManager.add(a, b);
+      },
+      iterations
+    );
 
     results.push({
       backend: 'Auto',
@@ -237,9 +249,13 @@ async function benchmarkMatmul(): Promise<BenchmarkResult[]> {
     const flops = 2 * size.rows * size.cols * size.cols; // 2*M*N*K
 
     // JS Backend
-    const jsResult = await runBenchmark('matmul-js', () => {
-      jsBackend.multiply(a, b);
-    }, iterations);
+    const jsResult = await runBenchmark(
+      'matmul-js',
+      () => {
+        jsBackend.multiply(a, b);
+      },
+      iterations
+    );
 
     results.push({
       backend: 'JS',
@@ -260,9 +276,13 @@ async function benchmarkMatmul(): Promise<BenchmarkResult[]> {
     // WASM Backend (if available)
     if (wasmBackend.isAvailable()) {
       try {
-        const wasmResult = await runBenchmark('matmul-wasm', () => {
-          wasmBackend.multiply(a, b);
-        }, iterations);
+        const wasmResult = await runBenchmark(
+          'matmul-wasm',
+          () => {
+            wasmBackend.multiply(a, b);
+          },
+          iterations
+        );
 
         results.push({
           backend: 'WASM',
@@ -285,9 +305,13 @@ async function benchmarkMatmul(): Promise<BenchmarkResult[]> {
     }
 
     // BackendManager (auto-select)
-    const autoResult = await runBenchmark('matmul-auto', () => {
-      backendManager.multiply(a, b);
-    }, iterations);
+    const autoResult = await runBenchmark(
+      'matmul-auto',
+      () => {
+        backendManager.multiply(a, b);
+      },
+      iterations
+    );
 
     results.push({
       backend: 'Auto',
@@ -321,9 +345,13 @@ async function benchmarkTranspose(): Promise<BenchmarkResult[]> {
     const elements = size.rows * size.cols;
 
     // JS Backend
-    const jsResult = await runBenchmark('transpose-js', () => {
-      jsBackend.transpose(a);
-    }, iterations);
+    const jsResult = await runBenchmark(
+      'transpose-js',
+      () => {
+        jsBackend.transpose(a);
+      },
+      iterations
+    );
 
     results.push({
       backend: 'JS',
@@ -343,9 +371,13 @@ async function benchmarkTranspose(): Promise<BenchmarkResult[]> {
     // WASM Backend (if available)
     if (wasmBackend.isAvailable()) {
       try {
-        const wasmResult = await runBenchmark('transpose-wasm', () => {
-          wasmBackend.transpose(a);
-        }, iterations);
+        const wasmResult = await runBenchmark(
+          'transpose-wasm',
+          () => {
+            wasmBackend.transpose(a);
+          },
+          iterations
+        );
 
         results.push({
           backend: 'WASM',
@@ -367,9 +399,13 @@ async function benchmarkTranspose(): Promise<BenchmarkResult[]> {
     }
 
     // BackendManager (auto-select)
-    const autoResult = await runBenchmark('transpose-auto', () => {
-      backendManager.transpose(a);
-    }, iterations);
+    const autoResult = await runBenchmark(
+      'transpose-auto',
+      () => {
+        backendManager.transpose(a);
+      },
+      iterations
+    );
 
     results.push({
       backend: 'Auto',
@@ -420,14 +456,15 @@ async function findCrossoverPoints(): Promise<void> {
     }
 
     const faster = wasmTime < jsTime ? 'WASM' : 'JS';
-    const speedup = wasmTime < jsTime
-      ? (jsTime / wasmTime).toFixed(2) + 'x faster'
-      : (wasmTime / jsTime).toFixed(2) + 'x slower';
+    const speedup =
+      wasmTime < jsTime
+        ? (jsTime / wasmTime).toFixed(2) + 'x faster'
+        : (wasmTime / jsTime).toFixed(2) + 'x slower';
 
     console.log(
       `${size}x${size} (${(size * size).toLocaleString()} elements): ` +
-      `JS=${jsTime.toFixed(2)}ms, WASM=${wasmTime.toFixed(2)}ms ` +
-      `→ ${faster} wins (${speedup})`
+        `JS=${jsTime.toFixed(2)}ms, WASM=${wasmTime.toFixed(2)}ms ` +
+        `→ ${faster} wins (${speedup})`
     );
   }
 }

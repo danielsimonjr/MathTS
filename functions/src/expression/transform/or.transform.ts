@@ -1,6 +1,6 @@
-import { createOr } from '../../logical/or.js'
-import { factory } from '../../utils/factory.js'
-import { isCollection } from '../../utils/is.js'
+import { createOr } from '../../logical/or.js';
+import { factory } from '../../utils/factory.js';
+import { isCollection } from '../../utils/is.js';
 import type {
   TypedFunction,
   MathFunction,
@@ -8,42 +8,42 @@ import type {
   EvaluationScope,
   MathJsLike,
   DenseMatrixConstructor,
-  RawArgsTransformFunction
-} from './types.js'
+  RawArgsTransformFunction,
+} from './types.js';
 
 interface OrDependencies {
-  typed: TypedFunction
-  matrix: MathFunction
-  equalScalar: MathFunction<boolean>
-  DenseMatrix: DenseMatrixConstructor
-  concat: MathFunction
+  typed: TypedFunction;
+  matrix: MathFunction;
+  equalScalar: MathFunction<boolean>;
+  DenseMatrix: DenseMatrixConstructor;
+  concat: MathFunction;
 }
 
-const name = 'or'
-const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat']
+const name = 'or';
+const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat'];
 
 export const createOrTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, matrix, equalScalar, DenseMatrix, concat }: OrDependencies) => {
-    const or = createOr({ typed, matrix, equalScalar, DenseMatrix, concat })
+    const or = createOr({ typed, matrix, equalScalar, DenseMatrix, concat });
 
     function orTransform(
       args: ExpressionNode[],
       math: MathJsLike,
       scope: EvaluationScope | Map<string, unknown>
     ): unknown {
-      const condition1 = args[0].compile().evaluate(scope)
+      const condition1 = args[0].compile().evaluate(scope);
       if (!isCollection(condition1) && or(condition1, false)) {
-        return true
+        return true;
       }
-      const condition2 = args[1].compile().evaluate(scope)
-      return or(condition1, condition2)
+      const condition2 = args[1].compile().evaluate(scope);
+      return or(condition1, condition2);
     }
 
-    orTransform.rawArgs = true as const
+    orTransform.rawArgs = true as const;
 
-    return orTransform as RawArgsTransformFunction
+    return orTransform as RawArgsTransformFunction;
   },
   { isTransformFunction: true }
-)
+);

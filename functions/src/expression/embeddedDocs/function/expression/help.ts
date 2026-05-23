@@ -4,5 +4,5 @@ export const helpDocs = {
   syntax: ['help(object)', 'help(string)'],
   description: 'Display documentation on a function or data type.',
   examples: ['help(sqrt)', 'help("complex")'],
-  seealso: [] as any[]
-}
+  seealso: [] as any[],
+};

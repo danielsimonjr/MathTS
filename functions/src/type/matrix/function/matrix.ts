@@ -1,7 +1,7 @@
-import { factory } from '../../../utils/factory.js'
+import { factory } from '../../../utils/factory.js';
 
-const name = 'matrix'
-const dependencies = ['typed', 'Matrix', 'DenseMatrix', 'SparseMatrix']
+const name = 'matrix';
+const dependencies = ['typed', 'Matrix', 'DenseMatrix', 'SparseMatrix'];
 
 export const createMatrix = /* #__PURE__ */ factory(
   name,
@@ -10,12 +10,12 @@ export const createMatrix = /* #__PURE__ */ factory(
     typed,
     Matrix: _Matrix,
     DenseMatrix,
-    SparseMatrix
+    SparseMatrix,
   }: {
-    typed: any
-    Matrix: any
-    DenseMatrix: any
-    SparseMatrix: any
+    typed: any;
+    Matrix: any;
+    DenseMatrix: any;
+    SparseMatrix: any;
   }) => {
     /**
      * Create a Matrix. The function creates a new `math.Matrix` object from
@@ -52,29 +52,29 @@ export const createMatrix = /* #__PURE__ */ factory(
      */
     return typed(name, {
       '': function (): any {
-        return _create([])
+        return _create([]);
       },
 
       string: function (format: string): any {
-        return _create([], format)
+        return _create([], format);
       },
 
       'string, string': function (format: string, datatype: string): any {
-        return _create([], format, datatype)
+        return _create([], format, datatype);
       },
 
       Array: function (data: any[]): any {
-        return _create(data)
+        return _create(data);
       },
 
       Matrix: function (data: any): any {
-        return _create(data, data.storage())
+        return _create(data, data.storage());
       },
 
       'Array | Matrix, string': _create,
 
-      'Array | Matrix, string, string': _create
-    })
+      'Array | Matrix, string, string': _create,
+    });
 
     /**
      * Create a new Matrix with given storage format
@@ -87,14 +87,14 @@ export const createMatrix = /* #__PURE__ */ factory(
     function _create(data: any, format?: string, datatype?: string): any {
       // get storage format constructor
       if (format === 'dense' || format === 'default' || format === undefined) {
-        return new DenseMatrix(data, datatype)
+        return new DenseMatrix(data, datatype);
       }
 
       if (format === 'sparse') {
-        return new SparseMatrix(data, datatype)
+        return new SparseMatrix(data, datatype);
       }
 
-      throw new TypeError('Unknown matrix type ' + JSON.stringify(format) + '.')
+      throw new TypeError('Unknown matrix type ' + JSON.stringify(format) + '.');
     }
   }
-)
+);

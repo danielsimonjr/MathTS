@@ -1,14 +1,14 @@
-import { factory } from '../utils/factory.js'
-import { getArrayDataType } from '../utils/array.js'
-import { typeOf } from '../utils/is.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { getArrayDataType } from '../utils/array.js';
+import { typeOf } from '../utils/is.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface GetMatrixDataTypeDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'getMatrixDataType'
-const dependencies = ['typed']
+const name = 'getMatrixDataType';
+const dependencies = ['typed'];
 
 export const createGetMatrixDataType = /* #__PURE__ */ factory(
   name,
@@ -50,11 +50,11 @@ export const createGetMatrixDataType = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Array: function (x: any[]): string {
-        return getArrayDataType(x, typeOf)
+        return getArrayDataType(x, typeOf);
       },
       Matrix: function (x: any): string {
-        return x.getDataType()
-      }
-    })
+        return x.getDataType();
+      },
+    });
   }
-)
+);

@@ -391,11 +391,7 @@ function bitwiseScalarChunk(
 /**
  * Unary bitwise NOT (`~a[i]`) on an `Int32Array` chunk.
  */
-function bitwiseNotChunk(
-  buffer: ArrayBuffer,
-  start: number,
-  length: number
-): ArrayBuffer {
+function bitwiseNotChunk(buffer: ArrayBuffer, start: number, length: number): ArrayBuffer {
   const data = new Int32Array(buffer);
   const result = new Int32Array(length);
   for (let i = 0; i < length; i++) {

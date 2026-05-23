@@ -497,10 +497,7 @@ describe('element', () => {
 
 describe('eliminate', () => {
   it('should eliminate variable from system', () => {
-    const result = eliminate(
-      ['2*x + 3*y = 5', 'x + y = 2'],
-      'x',
-    );
+    const result = eliminate(['2*x + 3*y = 5', 'x + y = 2'], 'x');
     expect(result.length).toBe(1);
     expect(result[0]).toContain('x eliminated');
   });
@@ -517,9 +514,7 @@ describe('symbolicPartialDerivative', () => {
   });
 
   it('should differentiate 3*x^2 + 2*y with respect to x', () => {
-    expect(symbolicPartialDerivative('3*x^2 + 2*y', 'x')).toBe(
-      '6*x^1 + 0',
-    );
+    expect(symbolicPartialDerivative('3*x^2 + 2*y', 'x')).toBe('6*x^1 + 0');
   });
 
   it('should differentiate sin(x)', () => {

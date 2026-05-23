@@ -112,11 +112,7 @@ export function nextPowerOf2(n: number): number {
  *
  * Input length must be a power of 2.
  */
-export function fftJS(
-  real: Float64Array,
-  imag: Float64Array,
-  inverse: boolean = false
-): FFTResult {
+export function fftJS(real: Float64Array, imag: Float64Array, inverse: boolean = false): FFTResult {
   const n = real.length;
 
   if (n === 0) {
@@ -215,11 +211,7 @@ export function isWasmFFTAvailable(): boolean {
  * The Rust WASM operates on interleaved complex data in-place.
  * This function handles the conversion and memory management.
  */
-function fftWasmCore(
-  real: Float64Array,
-  imag: Float64Array,
-  inverse: boolean = false
-): FFTResult {
+function fftWasmCore(real: Float64Array, imag: Float64Array, inverse: boolean = false): FFTResult {
   const module = wasmLoader.getModule();
   if (!module) {
     throw new Error('WASM module not loaded');
@@ -263,11 +255,7 @@ function fftWasmCore(
  * @param config - Backend configuration
  * @returns FFT result with real and imaginary arrays
  */
-export function fft(
-  real: Float64Array,
-  imag: Float64Array,
-  config: FFTConfig = {}
-): FFTResult {
+export function fft(real: Float64Array, imag: Float64Array, config: FFTConfig = {}): FFTResult {
   const cfg = { ...DEFAULT_FFT_CONFIG, ...config };
   const n = real.length;
 
@@ -293,11 +281,7 @@ export function fft(
  * @param config - Backend configuration
  * @returns Time-domain signal with real and imaginary arrays
  */
-export function ifft(
-  real: Float64Array,
-  imag: Float64Array,
-  config: FFTConfig = {}
-): FFTResult {
+export function ifft(real: Float64Array, imag: Float64Array, config: FFTConfig = {}): FFTResult {
   const cfg = { ...DEFAULT_FFT_CONFIG, ...config };
   const n = real.length;
 
@@ -345,11 +329,7 @@ export function rfft(data: Float64Array, config: FFTConfig = {}): FFTResult {
 
       try {
         module.rfft(dataAlloc.ptr, n, resultAlloc.ptr);
-        const resultInterleaved = new Float64Array(
-          module.memory.buffer,
-          resultAlloc.ptr,
-          n * 2
-        );
+        const resultInterleaved = new Float64Array(module.memory.buffer, resultAlloc.ptr, n * 2);
         return fromInterleaved(resultInterleaved, n);
       } finally {
         wasmLoader.free(dataAlloc.ptr);
@@ -370,10 +350,7 @@ export function rfft(data: Float64Array, config: FFTConfig = {}): FFTResult {
  * @param imag - Imaginary part of FFT output
  * @returns Power spectrum array
  */
-export function powerSpectrum(
-  real: Float64Array,
-  imag: Float64Array
-): Float64Array {
+export function powerSpectrum(real: Float64Array, imag: Float64Array): Float64Array {
   const n = real.length;
 
   // Try WASM if available
@@ -389,9 +366,7 @@ export function powerSpectrum(
 
       try {
         exports.powerSpectrum(dataAlloc.ptr, n, resultAlloc.ptr);
-        return new Float64Array(
-          new Float64Array(module.memory.buffer, resultAlloc.ptr, n)
-        );
+        return new Float64Array(new Float64Array(module.memory.buffer, resultAlloc.ptr, n));
       } finally {
         wasmLoader.free(dataAlloc.ptr);
         wasmLoader.free(resultAlloc.ptr);
@@ -414,10 +389,7 @@ export function powerSpectrum(
  * @param imag - Imaginary part of FFT output
  * @returns Magnitude spectrum array
  */
-export function magnitudeSpectrum(
-  real: Float64Array,
-  imag: Float64Array
-): Float64Array {
+export function magnitudeSpectrum(real: Float64Array, imag: Float64Array): Float64Array {
   const n = real.length;
   const result = new Float64Array(n);
   for (let i = 0; i < n; i++) {
@@ -433,10 +405,7 @@ export function magnitudeSpectrum(
  * @param imag - Imaginary part of FFT output
  * @returns Phase spectrum array (radians)
  */
-export function phaseSpectrum(
-  real: Float64Array,
-  imag: Float64Array
-): Float64Array {
+export function phaseSpectrum(real: Float64Array, imag: Float64Array): Float64Array {
   const n = real.length;
   const result = new Float64Array(n);
   for (let i = 0; i < n; i++) {

@@ -50,11 +50,7 @@
       "estimatedHours": 0.5,
       "status": "completed",
       "completedDate": "2026-01-18",
-      "commands": [
-        "npm run build",
-        "ls -la lib/browser/",
-        "ls -la lib/typescript/"
-      ],
+      "commands": ["npm run build", "ls -la lib/browser/", "ls -la lib/typescript/"],
       "files": ["lib/browser/", "lib/typescript/"]
     },
     {

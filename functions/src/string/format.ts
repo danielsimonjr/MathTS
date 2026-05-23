@@ -1,14 +1,14 @@
-import { format as formatString } from '../utils/string.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { format as formatString } from '../utils/string.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for format function
 interface FormatDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'format'
-const dependencies = ['typed']
+const name = 'format';
+const dependencies = ['typed'];
 
 export const createFormat = /* #__PURE__ */ factory(
   name,
@@ -134,7 +134,7 @@ export const createFormat = /* #__PURE__ */ factory(
      */
     return typed(name, {
       any: formatString,
-      'any, Object | function | number | BigNumber': formatString
-    })
+      'any, Object | function | number | BigNumber': formatString,
+    });
   }
-)
+);

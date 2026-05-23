@@ -1,6 +1,6 @@
 /**
  * MathTS Scientific Workbook Runtime
- * 
+ *
  * Main entry point for the .mtsw workbook format
  */
 
@@ -31,10 +31,7 @@ export {
   toMermaid,
 } from './runtime/graph';
 
-export {
-  WorkbookExecutor,
-  createExecutor,
-} from './runtime/executor';
+export { WorkbookExecutor, createExecutor } from './runtime/executor';
 
 // ============================================================================
 // High-Level API
@@ -73,7 +70,7 @@ export async function runWorkbook(
   options?: { onEvent?: (event: unknown) => void }
 ): Promise<Map<string, CellOutput>> {
   const executor = createExecutor(workbook);
-  
+
   if (options?.onEvent) {
     executor.on(options.onEvent);
   }
@@ -89,12 +86,12 @@ export async function runWorkbookFile(
   options?: { onEvent?: (event: unknown) => void }
 ): Promise<{ workbook: Workbook; outputs: Map<string, CellOutput> }> {
   const result = loadWorkbook(path);
-  
+
   if (!result.success || !result.workbook) {
-    throw new Error(`Failed to parse workbook: ${result.errors?.map(e => e.message).join(', ')}`);
+    throw new Error(`Failed to parse workbook: ${result.errors?.map((e) => e.message).join(', ')}`);
   }
 
   const outputs = await runWorkbook(result.workbook, options);
-  
+
   return { workbook: result.workbook, outputs };
 }

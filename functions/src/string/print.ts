@@ -1,16 +1,16 @@
-import { format } from '../utils/string.js'
-import { isString } from '../utils/is.js'
-import { factory } from '../utils/factory.js'
-import { printTemplate } from '../utils/print.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { format } from '../utils/string.js';
+import { isString } from '../utils/is.js';
+import { factory } from '../utils/factory.js';
+import { printTemplate } from '../utils/print.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for print function
 interface PrintDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'print'
-const dependencies = ['typed']
+const name = 'print';
+const dependencies = ['typed'];
 
 export const createPrint = /* #__PURE__ */ factory(
   name,
@@ -63,10 +63,10 @@ export const createPrint = /* #__PURE__ */ factory(
     return typed(name, {
       // note: Matrix will be converted automatically to an Array
       'string, Object | Array': _print,
-      'string, Object | Array, number | Object': _print
-    })
+      'string, Object | Array, number | Object': _print,
+    });
   }
-)
+);
 
 /**
  * Interpolate values into a string template.
@@ -77,37 +77,32 @@ export const createPrint = /* #__PURE__ */ factory(
  * @private
  */
 // Value type for print template values
-type PrintValue = unknown | { isMatrix?: boolean; toArray?: () => unknown[] }
+type PrintValue = unknown | { isMatrix?: boolean; toArray?: () => unknown[] };
 
 function _print(
   template: string,
   values: Record<string, PrintValue> | PrintValue[],
   options?: number | Record<string, unknown>
 ): string {
-  return template.replace(
-    printTemplate,
-    function (original: string, key: string): string {
-      const keys = key.split('.')
-      let value: PrintValue = (values as Record<string, PrintValue>)[
-        keys.shift()!
-      ]
-      if (value !== undefined && (value as { isMatrix?: boolean }).isMatrix) {
-        value = (value as { toArray: () => unknown[] }).toArray()
-      }
-      while (keys.length && value !== undefined) {
-        const k = keys.shift()
-        value = k ? (value as Record<string, PrintValue>)[k] : value + '.'
-      }
-
-      if (value !== undefined) {
-        if (!isString(value)) {
-          return format(value, options)
-        } else {
-          return value as string
-        }
-      }
-
-      return original
+  return template.replace(printTemplate, function (original: string, key: string): string {
+    const keys = key.split('.');
+    let value: PrintValue = (values as Record<string, PrintValue>)[keys.shift()!];
+    if (value !== undefined && (value as { isMatrix?: boolean }).isMatrix) {
+      value = (value as { toArray: () => unknown[] }).toArray();
     }
-  )
+    while (keys.length && value !== undefined) {
+      const k = keys.shift();
+      value = k ? (value as Record<string, PrintValue>)[k] : value + '.';
+    }
+
+    if (value !== undefined) {
+      if (!isString(value)) {
+        return format(value, options);
+      } else {
+        return value as string;
+      }
+    }
+
+    return original;
+  });
 }

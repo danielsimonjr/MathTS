@@ -82,10 +82,7 @@
     "matrix/src/backends/gpu/Sync.ts",
     "matrix/tests/gpu/integration.test.ts"
   ],
-  "filesModified": [
-    "matrix/src/backends/GPUBackend.ts",
-    "matrix/src/backends/gpu/index.ts"
-  ],
+  "filesModified": ["matrix/src/backends/GPUBackend.ts", "matrix/src/backends/gpu/index.ts"],
   "totalEstimatedHours": 25,
   "notes": "Sprint 15 adds advanced GPU operations and optimization infrastructure. Batch execution and async pipelines are critical for hiding GPU latency.",
   "completedAt": "2025-12-12"

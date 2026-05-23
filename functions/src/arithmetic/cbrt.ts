@@ -1,56 +1,56 @@
-import { factory } from '../utils/factory.js'
-import { isBigNumber, isComplex, isFraction } from '../utils/is.js'
-import { cbrtNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { MathJsConfig } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import { isBigNumber, isComplex, isFraction } from '../utils/is.js';
+import { cbrtNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { MathJsConfig } from '../core/config.js';
 
 // Type definitions for cbrt
 interface ComplexType {
-  arg(): number
-  abs(): number
-  mul(other: ComplexType): ComplexType
-  exp(): ComplexType
+  arg(): number;
+  abs(): number;
+  mul(other: ComplexType): ComplexType;
+  exp(): ComplexType;
 }
 
 interface ComplexConstructor {
-  new (re: number, im: number): ComplexType
+  new (re: number, im: number): ComplexType;
 }
 
 interface BigNumberType {
-  cbrt(): BigNumberType
-  div(n: number): BigNumberType
+  cbrt(): BigNumberType;
+  div(n: number): BigNumberType;
 }
 
 interface BigNumberConstructor {
-  new (value: number): BigNumberType
+  new (value: number): BigNumberType;
 }
 
 interface FractionConstructor {
-  new (num: number, den: number): unknown
+  new (num: number, den: number): unknown;
 }
 
 interface UnitType {
-  value: unknown
-  clone(): UnitType
-  pow(exp: unknown): UnitType
+  value: unknown;
+  clone(): UnitType;
+  pow(exp: unknown): UnitType;
 }
 
 interface MatrixType {
-  (data: ComplexType[]): unknown
+  (data: ComplexType[]): unknown;
 }
 
 interface CbrtDependencies {
-  config: MathJsConfig
-  typed: TypedFunction
-  isNegative: (x: unknown) => boolean
-  unaryMinus: TypedFunction
-  matrix: MatrixType
-  Complex: ComplexConstructor
-  BigNumber: BigNumberConstructor
-  Fraction: FractionConstructor
+  config: MathJsConfig;
+  typed: TypedFunction;
+  isNegative: (x: unknown) => boolean;
+  unaryMinus: TypedFunction;
+  matrix: MatrixType;
+  Complex: ComplexConstructor;
+  BigNumber: BigNumberConstructor;
+  Fraction: FractionConstructor;
 }
 
-const name = 'cbrt'
+const name = 'cbrt';
 const dependencies = [
   'config',
   'typed',
@@ -59,8 +59,8 @@ const dependencies = [
   'matrix',
   'Complex',
   'BigNumber',
-  'Fraction'
-]
+  'Fraction',
+];
 
 export const createCbrt = /* #__PURE__ */ factory(
   name,
@@ -73,7 +73,7 @@ export const createCbrt = /* #__PURE__ */ factory(
     matrix,
     Complex,
     BigNumber,
-    Fraction
+    Fraction,
   }: CbrtDependencies) => {
     /**
      * Calculate the cubic root of a value.
@@ -126,11 +126,11 @@ export const createCbrt = /* #__PURE__ */ factory(
       'Complex, boolean': _cbrtComplex,
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        return x.cbrt()
+        return x.cbrt();
       },
 
-      Unit: _cbrtUnit
-    })
+      Unit: _cbrtUnit,
+    });
 
     /**
      * Calculate the cubic root for a complex number
@@ -147,28 +147,22 @@ export const createCbrt = /* #__PURE__ */ factory(
     ): ComplexType | ComplexType[] | unknown {
       // https://www.wikiwand.com/en/Cube_root#/Complex_numbers
 
-      const arg3 = x.arg() / 3
-      const abs = x.abs()
+      const arg3 = x.arg() / 3;
+      const abs = x.abs();
 
       // principal root:
-      const principal = new Complex(cbrtNumber(abs), 0).mul(
-        new Complex(0, arg3).exp()
-      )
+      const principal = new Complex(cbrtNumber(abs), 0).mul(new Complex(0, arg3).exp());
 
       if (allRoots) {
         const all = [
           principal,
-          new Complex(cbrtNumber(abs), 0).mul(
-            new Complex(0, arg3 + (Math.PI * 2) / 3).exp()
-          ),
-          new Complex(cbrtNumber(abs), 0).mul(
-            new Complex(0, arg3 - (Math.PI * 2) / 3).exp()
-          )
-        ]
+          new Complex(cbrtNumber(abs), 0).mul(new Complex(0, arg3 + (Math.PI * 2) / 3).exp()),
+          new Complex(cbrtNumber(abs), 0).mul(new Complex(0, arg3 - (Math.PI * 2) / 3).exp()),
+        ];
 
-        return config.matrix === 'Array' ? all : matrix(all)
+        return config.matrix === 'Array' ? all : matrix(all);
       } else {
-        return principal
+        return principal;
       }
     }
 
@@ -180,35 +174,35 @@ export const createCbrt = /* #__PURE__ */ factory(
      */
     function _cbrtUnit(x: UnitType): UnitType {
       if (x.value && isComplex(x.value)) {
-        let result = x.clone()
-        result.value = 1.0
-        result = result.pow(1.0 / 3) // Compute the units
-        result.value = _cbrtComplex(x.value as unknown as ComplexType) // Compute the value
-        return result
+        let result = x.clone();
+        result.value = 1.0;
+        result = result.pow(1.0 / 3); // Compute the units
+        result.value = _cbrtComplex(x.value as unknown as ComplexType); // Compute the value
+        return result;
       } else {
-        const negate = isNegative(x.value)
+        const negate = isNegative(x.value);
         if (negate) {
-          x.value = unaryMinus(x.value)
+          x.value = unaryMinus(x.value);
         }
 
         // TODO: create a helper function for this
-        let third: unknown
+        let third: unknown;
         if (isBigNumber(x.value)) {
-          third = new BigNumber(1).div(3)
+          third = new BigNumber(1).div(3);
         } else if (isFraction(x.value)) {
-          third = new Fraction(1, 3)
+          third = new Fraction(1, 3);
         } else {
-          third = 1 / 3
+          third = 1 / 3;
         }
 
-        const result = x.pow(third)
+        const result = x.pow(third);
 
         if (negate) {
-          result.value = unaryMinus(result.value)
+          result.value = unaryMinus(result.value);
         }
 
-        return result
+        return result;
       }
     }
   }
-)
+);

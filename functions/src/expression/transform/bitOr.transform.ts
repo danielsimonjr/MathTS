@@ -1,6 +1,6 @@
-import { createBitOr } from '../../bitwise/bitOr.js'
-import { factory } from '../../utils/factory.js'
-import { isCollection } from '../../utils/is.js'
+import { createBitOr } from '../../bitwise/bitOr.js';
+import { factory } from '../../utils/factory.js';
+import { isCollection } from '../../utils/is.js';
 import type {
   TypedFunction,
   MathFunction,
@@ -8,19 +8,19 @@ import type {
   EvaluationScope,
   MathJsLike,
   DenseMatrixConstructor,
-  RawArgsTransformFunction
-} from './types.js'
+  RawArgsTransformFunction,
+} from './types.js';
 
 interface BitOrDependencies {
-  typed: TypedFunction
-  matrix: MathFunction
-  equalScalar: MathFunction<boolean>
-  DenseMatrix: DenseMatrixConstructor
-  concat: MathFunction
+  typed: TypedFunction;
+  matrix: MathFunction;
+  equalScalar: MathFunction<boolean>;
+  DenseMatrix: DenseMatrixConstructor;
+  concat: MathFunction;
 }
 
-const name = 'bitOr'
-const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat']
+const name = 'bitOr';
+const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat'];
 
 export const createBitOrTransform = /* #__PURE__ */ factory(
   name,
@@ -31,33 +31,33 @@ export const createBitOrTransform = /* #__PURE__ */ factory(
       matrix,
       equalScalar,
       DenseMatrix,
-      concat
-    })
+      concat,
+    });
 
     function bitOrTransform(
       args: ExpressionNode[],
       math: MathJsLike,
       scope: EvaluationScope | Map<string, unknown>
     ): unknown {
-      const condition1 = args[0].compile().evaluate(scope)
+      const condition1 = args[0].compile().evaluate(scope);
       if (!isCollection(condition1)) {
         if (isNaN(condition1 as number)) {
-          return NaN
+          return NaN;
         }
         if (condition1 === -1) {
-          return -1
+          return -1;
         }
         if (condition1 === true) {
-          return 1
+          return 1;
         }
       }
-      const condition2 = args[1].compile().evaluate(scope)
-      return bitOr(condition1, condition2)
+      const condition2 = args[1].compile().evaluate(scope);
+      return bitOr(condition1, condition2);
     }
 
-    bitOrTransform.rawArgs = true as const
+    bitOrTransform.rawArgs = true as const;
 
-    return bitOrTransform as RawArgsTransformFunction
+    return bitOrTransform as RawArgsTransformFunction;
   },
   { isTransformFunction: true }
-)
+);

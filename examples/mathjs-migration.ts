@@ -65,11 +65,15 @@ console.log('  element (0,1):', m.get(0, 1));
 console.log('\nmath.det(m) =', math.det(m));
 console.log('math.transpose(m):');
 const t = math.transpose(m);
-console.log('  [[' + t.get(0, 0) + ',' + t.get(0, 1) + '],[' + t.get(1, 0) + ',' + t.get(1, 1) + ']]');
+console.log(
+  '  [[' + t.get(0, 0) + ',' + t.get(0, 1) + '],[' + t.get(1, 0) + ',' + t.get(1, 1) + ']]'
+);
 
 const I2 = math.identity(2);
 console.log('\nmath.identity(2):');
-console.log('  [[' + I2.get(0, 0) + ',' + I2.get(0, 1) + '],[' + I2.get(1, 0) + ',' + I2.get(1, 1) + ']]');
+console.log(
+  '  [[' + I2.get(0, 0) + ',' + I2.get(0, 1) + '],[' + I2.get(1, 0) + ',' + I2.get(1, 1) + ']]'
+);
 
 const z2x3 = math.zeros(2, 3);
 console.log('\nmath.zeros(2, 3):');

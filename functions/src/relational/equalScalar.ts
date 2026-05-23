@@ -1,20 +1,20 @@
-import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js'
-import { nearlyEqual } from '../utils/number.js'
-import { factory } from '../utils/factory.js'
-import { complexEquals } from '../utils/complex.js'
-import { createCompareUnits } from './compareUnits.js'
+import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { nearlyEqual } from '../utils/number.js';
+import { factory } from '../utils/factory.js';
+import { complexEquals } from '../utils/complex.js';
+import { createCompareUnits } from './compareUnits.js';
 
-import { TypedFunction, BigNumber, Complex, Fraction } from '../types.js'
-import { ConfigOptions } from '../core/config.js'
+import { TypedFunction, BigNumber, Complex, Fraction } from '../types.js';
+import { ConfigOptions } from '../core/config.js';
 
-const name = 'equalScalar'
-const dependencies = ['typed', 'config']
+const name = 'equalScalar';
+const dependencies = ['typed', 'config'];
 
 export const createEqualScalar = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config }: { typed: TypedFunction; config: ConfigOptions }) => {
-    const compareUnits = createCompareUnits({ typed })
+    const compareUnits = createCompareUnits({ typed });
 
     /**
      * Test whether two scalar values are nearly equal.
@@ -28,33 +28,33 @@ export const createEqualScalar = /* #__PURE__ */ factory(
       name,
       {
         'boolean, boolean': function (x: boolean, y: boolean): boolean {
-          return x === y
+          return x === y;
         },
 
         'number, number': function (x: number, y: number): boolean {
-          return nearlyEqual(x, y, config.relTol, config.absTol)
+          return nearlyEqual(x, y, config.relTol, config.absTol);
         },
 
         'BigNumber, BigNumber': function (x: BigNumber, y: BigNumber): boolean {
-          return x.eq(y) || bigNearlyEqual(x, y, config.relTol, config.absTol)
+          return x.eq(y) || bigNearlyEqual(x, y, config.relTol, config.absTol);
         },
 
         'bigint, bigint': function (x: bigint, y: bigint): boolean {
-          return x === y
+          return x === y;
         },
 
         'Fraction, Fraction': function (x: Fraction, y: Fraction): boolean {
-          return x.equals(y)
+          return x.equals(y);
         },
 
         'Complex, Complex': function (x: Complex, y: Complex): boolean {
-          return complexEquals(x, y, config.relTol, config.absTol)
-        }
+          return complexEquals(x, y, config.relTol, config.absTol);
+        },
       },
       compareUnits
-    )
+    );
   }
-)
+);
 
 export const createEqualScalarNumber = factory(
   name,
@@ -62,8 +62,8 @@ export const createEqualScalarNumber = factory(
   ({ typed, config }: { typed: TypedFunction; config: ConfigOptions }) => {
     return typed(name, {
       'number, number': function (x: number, y: number): boolean {
-        return nearlyEqual(x, y, config.relTol, config.absTol)
-      }
-    })
+        return nearlyEqual(x, y, config.relTol, config.absTol);
+      },
+    });
   }
-)
+);

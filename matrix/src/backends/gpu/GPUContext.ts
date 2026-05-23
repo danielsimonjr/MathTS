@@ -4,12 +4,7 @@
  * Manages WebGPU device, queue, and command encoding.
  */
 
-import {
-  hasWebGPU,
-  getGPUAdapter,
-  detectGPUCapabilities,
-  type GPUCapabilities,
-} from './detect.js';
+import { hasWebGPU, getGPUAdapter, detectGPUCapabilities, type GPUCapabilities } from './detect.js';
 
 /**
  * Options for GPUContext initialization
@@ -120,9 +115,7 @@ export class GPUContext {
       }
 
       // Detect capabilities
-      this._capabilities = await detectGPUCapabilities(
-        options.preferHighPerformance ?? true
-      );
+      this._capabilities = await detectGPUCapabilities(options.preferHighPerformance ?? true);
 
       if (!this._capabilities.supported) {
         throw new Error('WebGPU adapter not available');
@@ -130,9 +123,7 @@ export class GPUContext {
 
       // Get adapter
       this.adapter = await getGPUAdapter({
-        powerPreference: options.preferHighPerformance
-          ? 'high-performance'
-          : 'low-power',
+        powerPreference: options.preferHighPerformance ? 'high-performance' : 'low-power',
       });
 
       if (!this.adapter) {
@@ -234,11 +225,7 @@ export class GPUContext {
    * Create a staging buffer for reading back data
    */
   createStagingBuffer(size: number, label?: string): GPUBuffer {
-    return this.createBuffer(
-      size,
-      GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
-      label
-    );
+    return this.createBuffer(size, GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST, label);
   }
 
   /**
@@ -303,23 +290,13 @@ export class GPUContext {
     size?: number
   ): void {
     // Cast to BufferSource for the WebGPU API
-    this.getQueue().writeBuffer(
-      buffer,
-      bufferOffset,
-      data as BufferSource,
-      dataOffset,
-      size
-    );
+    this.getQueue().writeBuffer(buffer, bufferOffset, data as BufferSource, dataOffset, size);
   }
 
   /**
    * Read data from a buffer (async)
    */
-  async readBuffer(
-    buffer: GPUBuffer,
-    offset: number = 0,
-    size?: number
-  ): Promise<ArrayBuffer> {
+  async readBuffer(buffer: GPUBuffer, offset: number = 0, size?: number): Promise<ArrayBuffer> {
     const readSize = size ?? buffer.size - offset;
 
     // Create staging buffer
@@ -398,9 +375,7 @@ export function getGlobalGPUContext(): GPUContext {
 /**
  * Initialize the global GPU context
  */
-export async function initializeGlobalGPU(
-  options?: GPUContextOptions
-): Promise<boolean> {
+export async function initializeGlobalGPU(options?: GPUContextOptions): Promise<boolean> {
   const ctx = getGlobalGPUContext();
   return ctx.initialize(options);
 }

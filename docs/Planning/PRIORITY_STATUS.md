@@ -10,19 +10,20 @@
 
 ## Sprint Completion
 
-| Phase | Sprints | Done | Status |
-|-------|---------|------|--------|
-| 1: Core Foundation | 1-4 | 28/28 | **COMPLETE** |
-| 2: WASM Acceleration | 5-8 | 26/26 | **COMPLETE** |
-| 3: Parallel Execution | 9-12 | 26/26 | **COMPLETE** |
-| 4: WebGPU Acceleration | 13-16 | 25/25 | **COMPLETE** |
-| 5: Function Library | 17-24 | 43/43 | **COMPLETE** |
-| 6: Integration & Polish | 25-28 | 18/18 | **COMPLETE** |
-| **Total** | 1-28 | **166/166** | **100%** |
+| Phase                   | Sprints | Done        | Status       |
+| ----------------------- | ------- | ----------- | ------------ |
+| 1: Core Foundation      | 1-4     | 28/28       | **COMPLETE** |
+| 2: WASM Acceleration    | 5-8     | 26/26       | **COMPLETE** |
+| 3: Parallel Execution   | 9-12    | 26/26       | **COMPLETE** |
+| 4: WebGPU Acceleration  | 13-16   | 25/25       | **COMPLETE** |
+| 5: Function Library     | 17-24   | 43/43       | **COMPLETE** |
+| 6: Integration & Polish | 25-28   | 18/18       | **COMPLETE** |
+| **Total**               | 1-28    | **166/166** | **100%**     |
 
 ## What Was Completed
 
 All integration tasks complete:
+
 - npm publishing setup: COMPLETE (v0.1.2 published)
 - Bundle optimization: COMPLETE (57% reduction, 662 KB total)
 - Performance regression tests: COMPLETE (23 benchmarks)
@@ -36,14 +37,14 @@ All integration tasks complete:
 
 ## Feature Plans (Future)
 
-| Plan | Status | Depends On |
-|------|--------|-----------|
-| Workbook ↔ expression integration | Deferred | Independent |
-| Rust WASM migration | **COMPLETE** — 1,017 exports, full AS parity via 192 compat wrappers | Independent |
-| WASM optimization (75 high+medium functions) | **COMPLETE** — 32 high-value + 40 medium-value functions implemented, 8 review bugs fixed, ~1,100 total Rust WASM exports | Independent |
-| Scientific calculator (Electron) | Not started | Factory activation (done) |
-| ISE Workbench (3-zone layout) | Not started (0/16) | Expression evaluator (done) |
-| Deno notebook | Not started | Workbook + Expression |
-| typed-function improvements | Partial | Independent |
-| workerpool improvements | Partial | Independent |
-| Synced factory activation (231 factories) | Dormant | Type bridge (not started) |
+| Plan                                         | Status                                                                                                                    | Depends On                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| Workbook ↔ expression integration            | Deferred                                                                                                                  | Independent                 |
+| Rust WASM migration                          | **COMPLETE** — 1,017 exports, full AS parity via 192 compat wrappers                                                      | Independent                 |
+| WASM optimization (75 high+medium functions) | **COMPLETE** — 32 high-value + 40 medium-value functions implemented, 8 review bugs fixed, ~1,100 total Rust WASM exports | Independent                 |
+| Scientific calculator (Electron)             | Not started                                                                                                               | Factory activation (done)   |
+| ISE Workbench (3-zone layout)                | Not started (0/16)                                                                                                        | Expression evaluator (done) |
+| Deno notebook                                | Not started                                                                                                               | Workbook + Expression       |
+| typed-function improvements                  | Partial                                                                                                                   | Independent                 |
+| workerpool improvements                      | Partial                                                                                                                   | Independent                 |
+| Synced factory activation (231 factories)    | Dormant                                                                                                                   | Type bridge (not started)   |

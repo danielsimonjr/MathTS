@@ -1,43 +1,29 @@
-import { flatten, generalize, identify } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { MathArray, Matrix } from '../../types/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { flatten, generalize, identify } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathArray, Matrix } from '../../types/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for setDifference
 interface SetDifferenceDependencies {
-  typed: TypedFunction
-  size: (arr: MathArray | Matrix) => number[]
-  subset: (arr: number[], index: Index) => number
-  compareNatural: (a: unknown, b: unknown) => number
-  Index: new (i: number) => Index
-  DenseMatrix: new (data: unknown[]) => Matrix
+  typed: TypedFunction;
+  size: (arr: MathArray | Matrix) => number[];
+  subset: (arr: number[], index: Index) => number;
+  compareNatural: (a: unknown, b: unknown) => number;
+  Index: new (i: number) => Index;
+  DenseMatrix: new (data: unknown[]) => Matrix;
 }
 
 interface Index {
   // Index placeholder
 }
 
-const name = 'setDifference'
-const dependencies = [
-  'typed',
-  'size',
-  'subset',
-  'compareNatural',
-  'Index',
-  'DenseMatrix'
-]
+const name = 'setDifference';
+const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index', 'DenseMatrix'];
 
 export const createSetDifference = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    size,
-    subset,
-    compareNatural,
-    Index,
-    DenseMatrix
-  }: SetDifferenceDependencies) => {
+  ({ typed, size, subset, compareNatural, Index, DenseMatrix }: SetDifferenceDependencies) => {
     /**
      * Create the difference of two (multi)sets: every element of set1, that is not the element of set2.
      * Multi-dimension arrays will be converted to single-dimension arrays before the operation.
@@ -64,46 +50,42 @@ export const createSetDifference = /* #__PURE__ */ factory(
         a1: MathArray | Matrix,
         a2: MathArray | Matrix
       ): MathArray | Matrix {
-        let result
+        let result;
         if (subset(size(a1), new Index(0)) === 0) {
           // empty-anything=empty
-          result = []
+          result = [];
         } else if (subset(size(a2), new Index(0)) === 0) {
           // anything-empty=anything
-          return flatten((a1 as Matrix).toArray())
+          return flatten((a1 as Matrix).toArray());
         } else {
-          const b1 = identify(
-            flatten(Array.isArray(a1) ? a1 : a1.toArray()).sort(compareNatural)
-          )
-          const b2 = identify(
-            flatten(Array.isArray(a2) ? a2 : a2.toArray()).sort(compareNatural)
-          )
-          result = []
-          let inb2
+          const b1 = identify(flatten(Array.isArray(a1) ? a1 : a1.toArray()).sort(compareNatural));
+          const b2 = identify(flatten(Array.isArray(a2) ? a2 : a2.toArray()).sort(compareNatural));
+          result = [];
+          let inb2;
           for (let i = 0; i < b1.length; i++) {
-            inb2 = false
+            inb2 = false;
             for (let j = 0; j < b2.length; j++) {
               if (
                 compareNatural(b1[i].value, b2[j].value) === 0 &&
                 b1[i].identifier === b2[j].identifier
               ) {
                 // the identifier is always a decimal int
-                inb2 = true
-                break
+                inb2 = true;
+                break;
               }
             }
             if (!inb2) {
-              result.push(b1[i])
+              result.push(b1[i]);
             }
           }
         }
         // return an array, if both inputs were arrays
         if (Array.isArray(a1) && Array.isArray(a2)) {
-          return generalize(result) as unknown as MathArray
+          return generalize(result) as unknown as MathArray;
         }
         // return a matrix otherwise
-        return new DenseMatrix(generalize(result)) as unknown as Matrix
-      }
-    })
+        return new DenseMatrix(generalize(result)) as unknown as Matrix;
+      },
+    });
   }
-)
+);

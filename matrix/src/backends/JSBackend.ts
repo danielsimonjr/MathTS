@@ -284,17 +284,13 @@ export class JSBackend implements MatrixBackend {
 
   private checkDimensionsMatch(a: DenseMatrix, b: DenseMatrix): void {
     if (a.rows !== b.rows || a.cols !== b.cols) {
-      throw new Error(
-        `Matrix dimensions must match: ${a.rows}×${a.cols} vs ${b.rows}×${b.cols}`
-      );
+      throw new Error(`Matrix dimensions must match: ${a.rows}×${a.cols} vs ${b.rows}×${b.cols}`);
     }
   }
 
   private checkMultiplyDimensions(a: DenseMatrix, b: DenseMatrix): void {
     if (a.cols !== b.rows) {
-      throw new Error(
-        `Cannot multiply ${a.rows}×${a.cols} matrix with ${b.rows}×${b.cols} matrix`
-      );
+      throw new Error(`Cannot multiply ${a.rows}×${a.cols} matrix with ${b.rows}×${b.cols} matrix`);
     }
   }
 }

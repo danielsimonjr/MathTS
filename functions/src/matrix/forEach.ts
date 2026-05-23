@@ -1,14 +1,14 @@
-import { optimizeCallback } from '../utils/optimizeCallback.js'
-import { factory } from '../utils/factory.js'
-import { deepForEach } from '../utils/array.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { optimizeCallback } from '../utils/optimizeCallback.js';
+import { factory } from '../utils/factory.js';
+import { deepForEach } from '../utils/array.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface ForEachDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'forEach'
-const dependencies = ['typed']
+const name = 'forEach';
+const dependencies = ['typed'];
 
 export const createForEach = /* #__PURE__ */ factory(
   name,
@@ -48,11 +48,11 @@ export const createForEach = /* #__PURE__ */ factory(
       'Array, function': _forEach,
 
       'Matrix, function': function (x: any, callback: Function): void {
-        x.forEach(callback)
-      }
-    })
+        x.forEach(callback);
+      },
+    });
   }
-)
+);
 
 /**
  * forEach for a multidimensional array
@@ -61,6 +61,6 @@ export const createForEach = /* #__PURE__ */ factory(
  * @private
  */
 function _forEach(array: any[], callback: Function): void {
-  const fastCallback = optimizeCallback(callback, array, name)
-  deepForEach(array, fastCallback.fn, fastCallback.isUnary)
+  const fastCallback = optimizeCallback(callback, array, name);
+  deepForEach(array, fastCallback.fn, fastCallback.isUnary);
 }

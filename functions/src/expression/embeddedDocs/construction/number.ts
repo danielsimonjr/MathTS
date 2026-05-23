@@ -11,7 +11,7 @@ export const numberDocs = {
     'number("7.2")',
     'number(true)',
     'number([true, false, true, true])',
-    'number(unit("52cm"), "m")'
+    'number(unit("52cm"), "m")',
   ],
   seealso: [
     'bignumber',
@@ -22,6 +22,6 @@ export const numberDocs = {
     'index',
     'matrix',
     'string',
-    'unit'
-  ]
-}
+    'unit',
+  ],
+};

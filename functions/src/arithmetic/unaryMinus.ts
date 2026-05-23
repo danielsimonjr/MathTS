@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import { unaryMinusNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import { unaryMinusNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for unaryMinus
 interface HasNegMethod {
-  neg(): unknown
+  neg(): unknown;
 }
 
 interface UnitType {
-  clone(): UnitType
-  valueType(): string
-  value: unknown
+  clone(): UnitType;
+  valueType(): string;
+  value: unknown;
 }
 
 interface UnaryMinusDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  bignumber?: (value: number) => unknown
+  typed: TypedFunction;
+  config: ConfigOptions;
+  bignumber?: (value: number) => unknown;
 }
 
-const name = 'unaryMinus'
-const dependencies = ['typed', 'config', '?bignumber']
+const name = 'unaryMinus';
+const dependencies = ['typed', 'config', '?bignumber'];
 
 export const createUnaryMinus = /* #__PURE__ */ factory(
   name,
@@ -58,42 +58,37 @@ export const createUnaryMinus = /* #__PURE__ */ factory(
 
       bigint: (x: bigint): bigint => -x,
 
-      Unit: typed.referToSelf(
-        (self: TypedFunction) =>
-          (x: UnitType): UnitType => {
-            const res = x.clone()
-            res.value = typed.find(self, res.valueType())(x.value)
-            return res
-          }
-      ),
+      Unit: typed.referToSelf((self: TypedFunction) => (x: UnitType): UnitType => {
+        const res = x.clone();
+        res.value = typed.find(self, res.valueType())(x.value);
+        return res;
+      }),
 
       boolean: function (x: boolean): number | bigint | unknown {
         // Convert boolean to number: true→1, false→0
-        const numValue = x ? 1 : 0
-        const negValue = -numValue
+        const numValue = x ? 1 : 0;
+        const negValue = -numValue;
 
         // Return in configured number type
-        const numberType = config?.number || 'number'
+        const numberType = config?.number || 'number';
 
         switch (numberType) {
           case 'BigNumber':
             if (!bignumber) {
-              throw new Error(
-                'BigNumber not available. Configure mathjs with BigNumber support.'
-              )
+              throw new Error('BigNumber not available. Configure mathjs with BigNumber support.');
             }
-            return bignumber(negValue)
+            return bignumber(negValue);
 
           case 'bigint':
-            return BigInt(negValue)
+            return BigInt(negValue);
 
           case 'Fraction':
             // TODO: Add Fraction support when dependency available
-            return negValue
+            return negValue;
 
           case 'number':
           default:
-            return negValue
+            return negValue;
         }
       },
 
@@ -102,9 +97,9 @@ export const createUnaryMinus = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
             deepMap(x as unknown[], self, true)
-      )
+      ),
 
       // TODO: add support for string
-    })
+    });
   }
-)
+);

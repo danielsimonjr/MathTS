@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
-import type { Complex } from '../type/complex/Complex.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import { asechNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
+import type { Complex } from '../type/complex/Complex.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import { asechNumber } from '../plain/number/index.js';
 
 // Type definitions for asech
 interface ComplexConstructor {
-  new (re: number, im: number): Complex
+  new (re: number, im: number): Complex;
 }
 
 interface BigNumberConstructor {
-  new (value: number): BigNumber
+  new (value: number): BigNumber;
 }
 
 interface AsechDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  Complex: ComplexConstructor
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  Complex: ComplexConstructor;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'asech'
-const dependencies = ['typed', 'config', 'Complex', 'BigNumber']
+const name = 'asech';
+const dependencies = ['typed', 'config', 'Complex', 'BigNumber'];
 
 export const createAsech = /* #__PURE__ */ factory(
   name,
@@ -53,25 +53,25 @@ export const createAsech = /* #__PURE__ */ factory(
     return typed(name, {
       number: function (x: number) {
         if ((x <= 1 && x >= -1) || config.predictable) {
-          const xInv = 1 / x
+          const xInv = 1 / x;
           if (xInv > 0 || config.predictable) {
-            return asechNumber(x)
+            return asechNumber(x);
           }
 
-          const ret = Math.sqrt(xInv * xInv - 1)
-          return new Complex(Math.log(ret - xInv), Math.PI)
+          const ret = Math.sqrt(xInv * xInv - 1);
+          return new Complex(Math.log(ret - xInv), Math.PI);
         }
 
-        return new Complex(x, 0).asech()
+        return new Complex(x, 0).asech();
       },
 
       Complex: function (x: Complex) {
-        return x.asech()
+        return x.asech();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
-        return new BigNumber(1).div(x as any).acosh() as unknown as BigNumber
-      }
-    }) as TypedFunction
+        return new BigNumber(1).div(x as any).acosh() as unknown as BigNumber;
+      },
+    }) as TypedFunction;
   }
-)
+);

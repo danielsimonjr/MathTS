@@ -3,12 +3,7 @@ export const squeezeDocs = {
   category: 'Matrix',
   syntax: ['squeeze(x)'],
   description: 'Remove inner and outer singleton dimensions from a matrix.',
-  examples: [
-    'a = zeros(3,2,1)',
-    'size(squeeze(a))',
-    'b = zeros(1,1,3)',
-    'size(squeeze(b))'
-  ],
+  examples: ['a = zeros(3,2,1)', 'size(squeeze(a))', 'b = zeros(1,1,3)', 'size(squeeze(b))'],
   seealso: [
     'concat',
     'det',
@@ -21,6 +16,6 @@ export const squeezeDocs = {
     'subset',
     'trace',
     'transpose',
-    'zeros'
-  ]
-}
+    'zeros',
+  ],
+};

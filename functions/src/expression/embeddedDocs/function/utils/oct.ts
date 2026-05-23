@@ -4,5 +4,5 @@ export const octDocs = {
   syntax: ['oct(value)'],
   description: 'Format a number as octal',
   examples: ['oct(56)'],
-  seealso: ['bin', 'hex']
-}
+  seealso: ['bin', 'hex'],
+};

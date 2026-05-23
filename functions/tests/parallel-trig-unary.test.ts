@@ -8,17 +8,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import {
-  csc,
-  sec,
-  cot,
-  asin,
-  acos,
-  atan,
-  asinh,
-  acosh,
-  atanh,
-} from '../src/typed/trigonometry.js';
+import { csc, sec, cot, asin, acos, atan, asinh, acosh, atanh } from '../src/typed/trigonometry.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 
 describe('Parallel Float64Array overloads — trigonometry unary', () => {

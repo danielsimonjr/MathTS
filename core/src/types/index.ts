@@ -14,7 +14,7 @@ export type {
   IComplex,
   IFraction,
   IBigNumber,
-  MatrixDimensions
+  MatrixDimensions,
 } from './interfaces';
 
 // Complex numbers
@@ -29,7 +29,7 @@ export {
   FRACTION_NEG_ONE,
   FRACTION_HALF,
   FRACTION_THIRD,
-  FRACTION_QUARTER
+  FRACTION_QUARTER,
 } from './fraction';
 
 // BigNumber (arbitrary precision decimals)
@@ -43,6 +43,6 @@ export {
   BIGNUMBER_PI,
   BIGNUMBER_E,
   BIGNUMBER_LN2,
-  BIGNUMBER_LN10
+  BIGNUMBER_LN10,
 } from './bignumber';
 export type { BigNumberConfig, RoundingMode } from './bignumber';

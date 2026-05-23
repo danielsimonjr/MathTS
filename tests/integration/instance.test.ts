@@ -249,7 +249,7 @@ describe('MathTS Instance Creation', () => {
     it('should handle type conversions', () => {
       // Create a typed function that only handles Complex
       const complexOp = mathTyped('complexOp', {
-        'Complex': (c: Complex) => c.abs(),
+        Complex: (c: Complex) => c.abs(),
       });
 
       // If automatic conversion is set up, this should work
@@ -308,9 +308,7 @@ describe('Cross-Package Integration', () => {
   });
 
   it('should support chained operations', () => {
-    const c = new Complex(1, 0)
-      .add(new Complex(0, 1))
-      .multiply(new Complex(2, 0));
+    const c = new Complex(1, 0).add(new Complex(0, 1)).multiply(new Complex(2, 0));
 
     expect(c.re).toBe(2);
     expect(c.im).toBe(2);

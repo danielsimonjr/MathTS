@@ -36,8 +36,8 @@
  * @returns The created typed-function
  */
 
-import typedFunction from 'typed-function'
-import { factory } from '../../utils/factory.js'
+import typedFunction from 'typed-function';
+import { factory } from '../../utils/factory.js';
 import {
   isAccessorNode,
   isArray,
@@ -79,70 +79,72 @@ import {
   isString,
   isSymbolNode,
   isUndefined,
-  isUnit
-} from '../../utils/is.js'
-import { digits } from '../../utils/number.js'
+  isUnit,
+} from '../../utils/is.js';
+import { digits } from '../../utils/number.js';
 
 /**
  * Type definition for a typed function
  */
 export interface TypedFunction extends Function {
-  (...args: any[]): any
-  isTypedFunction?: (value: any) => boolean
-  referToSelf: (callback: (self: any) => (...args: any[]) => any) => any
-  referTo: (...signatures: string[]) => (callback: (...refs: any[]) => (...args: any[]) => any) => any
-  create: () => TypedFunction
-  addTypes: (types: any[]) => void
-  addConversions: (conversions: any[]) => void
-  addConversion: (conversion: any) => void
-  clear: () => void
-  onMismatch: (name: string, args: any[], signatures: any[]) => any
-  createError: (name: string, args: any[], signatures: any[]) => Error
-  find: (fn: TypedFunction, signature: string | any[]) => ((...args: any[]) => any) | null
-  resolve: (fn: TypedFunction, args: any[]) => any
+  (...args: any[]): any;
+  isTypedFunction?: (value: any) => boolean;
+  referToSelf: (callback: (self: any) => (...args: any[]) => any) => any;
+  referTo: (
+    ...signatures: string[]
+  ) => (callback: (...refs: any[]) => (...args: any[]) => any) => any;
+  create: () => TypedFunction;
+  addTypes: (types: any[]) => void;
+  addConversions: (conversions: any[]) => void;
+  addConversion: (conversion: any) => void;
+  clear: () => void;
+  onMismatch: (name: string, args: any[], signatures: any[]) => any;
+  createError: (name: string, args: any[], signatures: any[]) => Error;
+  find: (fn: TypedFunction, signature: string | any[]) => ((...args: any[]) => any) | null;
+  resolve: (fn: TypedFunction, args: any[]) => any;
 }
 
 /**
  * Type for the dependencies required by createTyped
  */
 interface TypedDependencies {
-  BigNumber?: any
-  Complex?: any
-  DenseMatrix?: any
-  Fraction?: any
+  BigNumber?: any;
+  Complex?: any;
+  DenseMatrix?: any;
+  Fraction?: any;
 }
 
 /**
  * Type definition for a type test function
  */
-type TypeTest = (value: any) => boolean
+type TypeTest = (value: any) => boolean;
 
 /**
  * Type definition for a type conversion function
  */
 type TypeConversion = {
-  from: string
-  to: string
-  convert: (value: any) => any
-}
+  from: string;
+  to: string;
+  convert: (value: any) => any;
+};
 
 /**
  * Type definition for a type definition
  */
 type TypeDefinition = {
-  name: string
-  test: TypeTest
-}
+  name: string;
+  test: TypeTest;
+};
 
 // returns a new instance of typed-function
-let _createTyped: (() => TypedFunction) = function (): TypedFunction {
+let _createTyped: () => TypedFunction = function (): TypedFunction {
   // initially, return the original instance of typed-function
   // consecutively, return a new instance from typed.create.
-  _createTyped = typedFunction.create as unknown as () => TypedFunction
-  return typedFunction as unknown as TypedFunction
-}
+  _createTyped = typedFunction.create as unknown as () => TypedFunction;
+  return typedFunction as unknown as TypedFunction;
+};
 
-const dependencies = ['?BigNumber', '?Complex', '?DenseMatrix', '?Fraction']
+const dependencies = ['?BigNumber', '?Complex', '?DenseMatrix', '?Fraction'];
 
 /**
  * Factory function for creating a new typed instance
@@ -156,12 +158,12 @@ export const createTyped = /* #__PURE__ */ factory(
     // TODO: typed-function must be able to silently ignore signatures with unknown data types
 
     // get a new instance of typed-function
-    const _typed: any = _createTyped()
+    const _typed: any = _createTyped();
 
     // define all types. The order of the types determines in which order function
     // arguments are type-checked (so for performance it's important to put the
     // most used types first).
-    _typed.clear()
+    _typed.clear();
     _typed.addTypes([
       { name: 'number', test: isNumber },
       { name: 'Complex', test: isComplex },
@@ -177,7 +179,7 @@ export const createTyped = /* #__PURE__ */ factory(
       {
         name: 'identifier',
         // Using simpler regex for TS compatibility (original: /^\p{L}[\p{L}\d]*$/u)
-        test: (s: any): boolean => isString(s) && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(s)
+        test: (s: any): boolean => isString(s) && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(s),
       },
       { name: 'string', test: isString },
       { name: 'Chain', test: isChain },
@@ -214,8 +216,8 @@ export const createTyped = /* #__PURE__ */ factory(
       { name: 'SymbolNode', test: isSymbolNode },
 
       { name: 'Map', test: isMap },
-      { name: 'Object', test: isObject } // order 'Object' last, it matches on other classes too
-    ] as TypeDefinition[])
+      { name: 'Object', test: isObject }, // order 'Object' last, it matches on other classes too
+    ] as TypeDefinition[]);
 
     _typed.addConversions([
       {
@@ -223,7 +225,7 @@ export const createTyped = /* #__PURE__ */ factory(
         to: 'BigNumber',
         convert: function (x: number) {
           if (!BigNumber) {
-            throwNoBignumber(x)
+            throwNoBignumber(x);
           }
 
           // note: conversion from number to BigNumber can fail if x has >15 digits
@@ -234,32 +236,32 @@ export const createTyped = /* #__PURE__ */ factory(
                 x +
                 '). ' +
                 'Use function bignumber(x) to convert to BigNumber.'
-            )
+            );
           }
-          return new BigNumber(x)
-        }
+          return new BigNumber(x);
+        },
       },
       {
         from: 'number',
         to: 'Complex',
         convert: function (x: number) {
           if (!Complex) {
-            throwNoComplex(x)
+            throwNoComplex(x);
           }
 
-          return new Complex(x, 0)
-        }
+          return new Complex(x, 0);
+        },
       },
       {
         from: 'BigNumber',
         to: 'Complex',
         convert: function (x: any) {
           if (!Complex) {
-            throwNoComplex(x)
+            throwNoComplex(x);
           }
 
-          return new Complex((x as any).toNumber(), 0)
-        }
+          return new Complex((x as any).toNumber(), 0);
+        },
       },
       {
         from: 'bigint',
@@ -271,33 +273,33 @@ export const createTyped = /* #__PURE__ */ factory(
                 'value exceeds the max safe integer value (value: ' +
                 x +
                 ')'
-            )
+            );
           }
 
-          return Number(x)
-        }
+          return Number(x);
+        },
       },
       {
         from: 'bigint',
         to: 'BigNumber',
         convert: function (x: bigint) {
           if (!BigNumber) {
-            throwNoBignumber(x)
+            throwNoBignumber(x);
           }
 
-          return new BigNumber(x.toString())
-        }
+          return new BigNumber(x.toString());
+        },
       },
       {
         from: 'bigint',
         to: 'Fraction',
         convert: function (x: bigint) {
           if (!Fraction) {
-            throwNoFraction(x)
+            throwNoFraction(x);
           }
 
-          return new Fraction(x)
-        }
+          return new Fraction(x);
+        },
       },
       {
         from: 'Fraction',
@@ -306,29 +308,29 @@ export const createTyped = /* #__PURE__ */ factory(
           throw new TypeError(
             'Cannot implicitly convert a Fraction to BigNumber or vice versa. ' +
               'Use function bignumber(x) to convert to BigNumber or fraction(x) to convert to Fraction.'
-          )
-        }
+          );
+        },
       },
       {
         from: 'Fraction',
         to: 'Complex',
         convert: function (x: any) {
           if (!Complex) {
-            throwNoComplex(x)
+            throwNoComplex(x);
           }
 
-          return new Complex(x.valueOf(), 0)
-        }
+          return new Complex(x.valueOf(), 0);
+        },
       },
       {
         from: 'number',
         to: 'Fraction',
         convert: function (x: number) {
           if (!Fraction) {
-            throwNoFraction(x)
+            throwNoFraction(x);
           }
 
-          const f = new Fraction(x)
+          const f = new Fraction(x);
           if (f.valueOf() !== x) {
             throw new TypeError(
               'Cannot implicitly convert a number to a Fraction when there will be a loss of precision ' +
@@ -336,10 +338,10 @@ export const createTyped = /* #__PURE__ */ factory(
                 x +
                 '). ' +
                 'Use function fraction(x) to convert to Fraction.'
-            )
+            );
           }
-          return f
-        }
+          return f;
+        },
       },
       {
         // FIXME: add conversion from Fraction to number, for example for `sqrt(fraction(1,3))`
@@ -352,138 +354,138 @@ export const createTyped = /* #__PURE__ */ factory(
         from: 'string',
         to: 'number',
         convert: function (x: string): number {
-          const n = Number(x)
+          const n = Number(x);
           if (isNaN(n)) {
-            throw new Error('Cannot convert "' + x + '" to a number')
+            throw new Error('Cannot convert "' + x + '" to a number');
           }
-          return n
-        }
+          return n;
+        },
       },
       {
         from: 'string',
         to: 'BigNumber',
         convert: function (x: string) {
           if (!BigNumber) {
-            throwNoBignumber(x)
+            throwNoBignumber(x);
           }
 
           try {
-            return new BigNumber(x)
+            return new BigNumber(x);
           } catch (err) {
-            throw new Error('Cannot convert "' + x + '" to BigNumber')
+            throw new Error('Cannot convert "' + x + '" to BigNumber');
           }
-        }
+        },
       },
       {
         from: 'string',
         to: 'bigint',
         convert: function (x: string): bigint {
           try {
-            return BigInt(x)
+            return BigInt(x);
           } catch (err) {
-            throw new Error('Cannot convert "' + x + '" to BigInt')
+            throw new Error('Cannot convert "' + x + '" to BigInt');
           }
-        }
+        },
       },
       {
         from: 'string',
         to: 'Fraction',
         convert: function (x: string) {
           if (!Fraction) {
-            throwNoFraction(x)
+            throwNoFraction(x);
           }
 
           try {
-            return new Fraction(x)
+            return new Fraction(x);
           } catch (err) {
-            throw new Error('Cannot convert "' + x + '" to Fraction')
+            throw new Error('Cannot convert "' + x + '" to Fraction');
           }
-        }
+        },
       },
       {
         from: 'string',
         to: 'Complex',
         convert: function (x: string) {
           if (!Complex) {
-            throwNoComplex(x)
+            throwNoComplex(x);
           }
 
           try {
-            return new Complex(x)
+            return new Complex(x);
           } catch (err) {
-            throw new Error('Cannot convert "' + x + '" to Complex')
+            throw new Error('Cannot convert "' + x + '" to Complex');
           }
-        }
+        },
       },
       {
         from: 'boolean',
         to: 'number',
         convert: function (x: boolean): number {
-          return +x
-        }
+          return +x;
+        },
       },
       {
         from: 'boolean',
         to: 'BigNumber',
         convert: function (x: boolean) {
           if (!BigNumber) {
-            throwNoBignumber(x)
+            throwNoBignumber(x);
           }
 
-          return new BigNumber(+x)
-        }
+          return new BigNumber(+x);
+        },
       },
       {
         from: 'boolean',
         to: 'bigint',
         convert: function (x: boolean): bigint {
-          return BigInt(+x)
-        }
+          return BigInt(+x);
+        },
       },
       {
         from: 'boolean',
         to: 'Fraction',
         convert: function (x: boolean) {
           if (!Fraction) {
-            throwNoFraction(x)
+            throwNoFraction(x);
           }
 
-          return new Fraction(+x)
-        }
+          return new Fraction(+x);
+        },
       },
       {
         from: 'boolean',
         to: 'string',
         convert: function (x: boolean): string {
-          return String(x)
-        }
+          return String(x);
+        },
       },
       {
         from: 'Array',
         to: 'Matrix',
         convert: function (array: any[]) {
           if (!DenseMatrix) {
-            throwNoMatrix()
+            throwNoMatrix();
           }
 
-          return new DenseMatrix(array)
-        }
+          return new DenseMatrix(array);
+        },
       },
       {
         from: 'Matrix',
         to: 'Array',
         convert: function (matrix: any): any[] {
-          return matrix.valueOf()
-        }
-      }
-    ] as TypeConversion[])
+          return matrix.valueOf();
+        },
+      },
+    ] as TypeConversion[]);
 
     // Provide a suggestion on how to call a function elementwise
     // This was added primarily as guidance for the v10 -> v11 transition,
     // and could potentially be removed in the future if it no longer seems
     // to be helpful.
     _typed.onMismatch = (name: string, args: any[], signatures: any[]) => {
-      const usualError = _typed.createError(name, args, signatures)
+      const usualError = _typed.createError(name, args, signatures);
       if (
         ['wrongType', 'mismatch'].includes(usualError.data.category) &&
         args.length === 1 &&
@@ -494,37 +496,29 @@ export const createTyped = /* #__PURE__ */ factory(
         const err = new TypeError(
           `Function '${name}' doesn't apply to matrices. To call it ` +
             `elementwise on a matrix 'M', try 'map(M, ${name})'.`
-        ) as TypeError & { data: any }
-        err.data = usualError.data
-        throw err
+        ) as TypeError & { data: any };
+        err.data = usualError.data;
+        throw err;
       }
-      throw usualError
-    }
+      throw usualError;
+    };
 
-    return _typed
+    return _typed;
   }
-)
+);
 
 function throwNoBignumber(x: any): never {
-  throw new Error(
-    `Cannot convert value ${x} into a BigNumber: no class 'BigNumber' provided`
-  )
+  throw new Error(`Cannot convert value ${x} into a BigNumber: no class 'BigNumber' provided`);
 }
 
 function throwNoComplex(x: any): never {
-  throw new Error(
-    `Cannot convert value ${x} into a Complex number: no class 'Complex' provided`
-  )
+  throw new Error(`Cannot convert value ${x} into a Complex number: no class 'Complex' provided`);
 }
 
 function throwNoMatrix(): never {
-  throw new Error(
-    "Cannot convert array into a Matrix: no class 'DenseMatrix' provided"
-  )
+  throw new Error("Cannot convert array into a Matrix: no class 'DenseMatrix' provided");
 }
 
 function throwNoFraction(x: any): never {
-  throw new Error(
-    `Cannot convert value ${x} into a Fraction, no class 'Fraction' provided.`
-  )
+  throw new Error(`Cannot convert value ${x} into a Fraction, no class 'Fraction' provided.`);
 }

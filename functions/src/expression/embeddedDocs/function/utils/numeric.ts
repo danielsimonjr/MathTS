@@ -11,7 +11,7 @@ export const numericDocs = {
     'numeric("4", "BigNumber")',
     'numeric("4", "Fraction")',
     'numeric(4, "Fraction")',
-    'numeric(fraction(2, 5), "number")'
+    'numeric(fraction(2, 5), "number")',
   ],
-  seealso: ['number', 'bigint', 'fraction', 'bignumber', 'string', 'format']
-}
+  seealso: ['number', 'bigint', 'fraction', 'bignumber', 'string', 'format'],
+};

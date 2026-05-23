@@ -14,10 +14,6 @@ interface StringOptions {
   [key: string]: any
 }
 
-interface Unit {
-  new (value: null, unit: string): Unit
-}
-
 interface UnitConstructor {
   isValuelessUnit: (name: string) => boolean
 }
@@ -88,11 +84,11 @@ export const createSymbolNode = /* #__PURE__ */ factory(name, dependencies, ({ m
         // this is a FunctionAssignment argument
         // (like an x when inside the expression of a function
         // assignment `f(x) = ...`)
-        return function (scope: any, args: Record<string, any>, context: any): any {
+        return function (scope: any, args: Record<string, any>, _context: any): any {
           return getSafeProperty(args, name)
         }
       } else if (name in math) {
-        return function (scope: any, args: Record<string, any>, context: any): any {
+        return function (scope: any, _args: Record<string, any>, _context: any): any {
           return scope.has(name)
             ? scope.get(name)
             : getSafeProperty(math, name)
@@ -100,7 +96,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(name, dependencies, ({ m
       } else {
         const isUnit = isValuelessUnit(name)
 
-        return function (scope: any, args: Record<string, any>, context: any): any {
+        return function (scope: any, _args: Record<string, any>, _context: any): any {
           return scope.has(name)
             ? scope.get(name)
             : isUnit
@@ -114,7 +110,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(name, dependencies, ({ m
      * Execute a callback for each of the child nodes of this node
      * @param {function(child: Node, path: string, parent: Node)} callback
      */
-    forEach (callback: (child: Node, path: string, parent: SymbolNode) => void): void {
+    forEach (_callback: (child: Node, path: string, parent: SymbolNode) => void): void {
       // nothing to do, we don't have any children
     }
 
@@ -124,7 +120,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(name, dependencies, ({ m
      * @param {function(child: Node, path: string, parent: Node) : Node} callback
      * @returns {SymbolNode} Returns a clone of the node
      */
-    map (callback: (child: Node, path: string, parent: SymbolNode) => Node): SymbolNode {
+    map (_callback: (child: Node, path: string, parent: SymbolNode) => Node): SymbolNode {
       return this.clone()
     }
 
@@ -151,7 +147,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(name, dependencies, ({ m
      * @return {string} str
      * @override
      */
-    _toString (options?: StringOptions): string {
+    _toString (_options?: StringOptions): string {
       return this.name
     }
 
@@ -161,7 +157,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(name, dependencies, ({ m
      * @return {string} str
      * @override
      */
-    _toHTML (options?: StringOptions): string {
+    _toHTML (_options?: StringOptions): string {
       const name = escape(this.name)
 
       if (name === 'true' || name === 'false') {
@@ -212,7 +208,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(name, dependencies, ({ m
      * @return {string} str
      * @override
      */
-    _toTex (options?: StringOptions): string {
+    _toTex (_options?: StringOptions): string {
       let isUnit = false
       if ((typeof math[this.name] === 'undefined') &&
           isValuelessUnit(this.name)) {

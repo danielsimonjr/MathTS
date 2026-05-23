@@ -1,5 +1,5 @@
-import { isNumber, isBigNumber } from '../../../utils/is.js'
-import type { BigNumberLike, DimensionValue } from '../types.js'
+import { isNumber, isBigNumber } from '../../../utils/is.js';
+import type { BigNumberLike, DimensionValue } from '../types.js';
 
 /**
  * Change last argument dim from one-based to zero-based.
@@ -8,11 +8,11 @@ import type { BigNumberLike, DimensionValue } from '../types.js'
  */
 export function dimToZeroBase(dim: DimensionValue): number | BigNumberLike {
   if (isNumber(dim)) {
-    return dim - 1
+    return dim - 1;
   } else if (isBigNumber(dim)) {
-    return (dim as BigNumberLike).minus(1)
+    return (dim as BigNumberLike).minus(1);
   } else {
-    return dim
+    return dim;
   }
 }
 
@@ -22,5 +22,5 @@ export function dimToZeroBase(dim: DimensionValue): number | BigNumberLike {
  * @returns True if n is a number or BigNumber
  */
 export function isNumberOrBigNumber(n: unknown): n is number | BigNumberLike {
-  return isNumber(n) || isBigNumber(n)
+  return isNumber(n) || isBigNumber(n);
 }

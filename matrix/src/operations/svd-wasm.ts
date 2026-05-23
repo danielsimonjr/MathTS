@@ -45,10 +45,7 @@ function toThin(full: SVDResult, k: number, rankTolerance: number): SVDResult {
  * @param options - SVD options; `rankTolerance` controls the rank estimate
  * @returns thin SVD `{ U (m x k), S (k), V (n x k), rank }`
  */
-export async function svdWasm(
-  matrix: number[][],
-  options?: SVDOptions
-): Promise<SVDResult> {
+export async function svdWasm(matrix: number[][], options?: SVDOptions): Promise<SVDResult> {
   const m = matrix.length;
   const n = matrix[0]?.length ?? 0;
   if (m === 0 || n === 0) {

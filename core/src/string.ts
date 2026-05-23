@@ -1,16 +1,16 @@
-import { isBigNumber, isString, typeOf } from './is.js'
-import { format as formatNumber } from './number.js'
-import { format as formatBigNumber } from './bignumber/formatter.js'
+import { isBigNumber, isString, typeOf } from './is.js';
+import { format as formatNumber } from './number.js';
+import { format as formatBigNumber } from './bignumber/formatter.js';
 
 /**
  * Check if a text ends with a certain string.
  * @param {string} text
  * @param {string} search
  */
-export function endsWith (text: any, search: any) {
-  const start = text.length - search.length
-  const end = text.length
-  return (text.substring(start, end) === search)
+export function endsWith(text: any, search: any) {
+  const start = text.length - search.length;
+  const end = text.length;
+  return text.substring(start, end) === search;
 }
 
 /**
@@ -51,22 +51,26 @@ export function endsWith (text: any, search: any) {
  *     have been more, they are deleted and replaced by an ellipsis).
  * @return {string} str
  */
-export function format (value: any, options: any): string {
-  const result: string = _format(value, options)
-  if (options && typeof options === 'object' && 'truncate' in options &&
-      result.length > options.truncate) {
-    return result.substring(0, options.truncate - 3) + '...'
+export function format(value: any, options: any): string {
+  const result: string = _format(value, options);
+  if (
+    options &&
+    typeof options === 'object' &&
+    'truncate' in options &&
+    result.length > options.truncate
+  ) {
+    return result.substring(0, options.truncate - 3) + '...';
   }
-  return result
+  return result;
 }
 
-function _format (value: any, options: any): string {
+function _format(value: any, options: any): string {
   if (typeof value === 'number') {
-    return formatNumber(value, options)
+    return formatNumber(value, options);
   }
 
   if (isBigNumber(value)) {
-    return formatBigNumber(value, options)
+    return formatBigNumber(value, options);
   }
 
   // note: we use unsafe duck-typing here to check for Fractions, this is
@@ -74,41 +78,41 @@ function _format (value: any, options: any): string {
   if (looksLikeFraction(value)) {
     if (!options || options.fraction !== 'decimal') {
       // output as ratio, like '1/3'
-      return `${value.s * value.n}/${value.d}`
+      return `${value.s * value.n}/${value.d}`;
     } else {
       // output as decimal, like '0.(3)'
-      return value.toString()
+      return value.toString();
     }
   }
 
   if (Array.isArray(value)) {
-    return formatArray(value, options)
+    return formatArray(value, options);
   }
 
   if (isString(value)) {
-    return stringify(value)
+    return stringify(value);
   }
 
   if (typeof value === 'function') {
-    return value.syntax ? String(value.syntax) : 'function'
+    return value.syntax ? String(value.syntax) : 'function';
   }
 
   if (value && typeof value === 'object') {
     if (typeof value.format === 'function') {
-      return value.format(options)
+      return value.format(options);
     } else if (value && value.toString(options) !== {}.toString()) {
       // this object has a non-native toString method, use that one
-      return value.toString(options)
+      return value.toString(options);
     } else {
-      const entries = Object.keys(value).map(key => {
-        return stringify(key) + ': ' + format(value[key], options)
-      })
+      const entries = Object.keys(value).map((key) => {
+        return stringify(key) + ': ' + format(value[key], options);
+      });
 
-      return '{' + entries.join(', ') + '}'
+      return '{' + entries.join(', ') + '}';
     }
   }
 
-  return String(value)
+  return String(value);
 }
 
 /**
@@ -117,17 +121,17 @@ function _format (value: any, options: any): string {
  * @param {*} value
  * @return {string}
  */
-export function stringify (value: any) {
-  const text = String(value)
-  let escaped = ''
-  let i = 0
+export function stringify(value: any) {
+  const text = String(value);
+  let escaped = '';
+  let i = 0;
   while (i < text.length) {
-    const c = text.charAt(i)
-    escaped += (c in controlCharacters) ? (controlCharacters as Record<string, string>)[c] : c
-    i++
+    const c = text.charAt(i);
+    escaped += c in controlCharacters ? (controlCharacters as Record<string, string>)[c] : c;
+    i++;
   }
 
-  return '"' + escaped + '"'
+  return '"' + escaped + '"';
 }
 
 const controlCharacters = {
@@ -137,23 +141,24 @@ const controlCharacters = {
   '\f': '\\f',
   '\n': '\\n',
   '\r': '\\r',
-  '\t': '\\t'
-}
+  '\t': '\\t',
+};
 
 /**
  * Escape special HTML characters
  * @param {*} value
  * @return {string}
  */
-export function escape (value: any) {
-  let text = String(value)
-  text = text.replace(/&/g, '&amp;')
+export function escape(value: any) {
+  let text = String(value);
+  text = text
+    .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+    .replace(/>/g, '&gt;');
 
-  return text
+  return text;
 }
 
 /**
@@ -166,20 +171,20 @@ export function escape (value: any) {
  *                                                options.
  * @returns {string} str
  */
-function formatArray (array: any, options: any) {
+function formatArray(array: any, options: any) {
   if (Array.isArray(array)) {
-    let str = '['
-    const len = array.length
+    let str = '[';
+    const len = array.length;
     for (let i = 0; i < len; i++) {
       if (i !== 0) {
-        str += ', '
+        str += ', ';
       }
-      str += formatArray(array[i], options)
+      str += formatArray(array[i], options);
     }
-    str += ']'
-    return str
+    str += ']';
+    return str;
   } else {
-    return format(array, options)
+    return format(array, options);
   }
 }
 
@@ -188,12 +193,15 @@ function formatArray (array: any, options: any) {
  * @param {*} value
  * @return {boolean}
  */
-function looksLikeFraction (value: any) {
-  return (value &&
+function looksLikeFraction(value: any) {
+  return (
+    (value &&
       typeof value === 'object' &&
       typeof value.s === 'bigint' &&
       typeof value.n === 'bigint' &&
-      typeof value.d === 'bigint') || false
+      typeof value.d === 'bigint') ||
+    false
+  );
 }
 
 /**
@@ -202,18 +210,24 @@ function looksLikeFraction (value: any) {
  * @param {string} y
  * @returns {number}
  */
-export function compareText (x: any, y: any) {
+export function compareText(x: any, y: any) {
   // we don't want to convert numbers to string, only accept string input
   if (!isString(x)) {
-    throw new TypeError('Unexpected type of argument in function compareText ' +
-      '(expected: string or Array or Matrix, actual: ' + typeOf(x) + ', index: 0)')
+    throw new TypeError(
+      'Unexpected type of argument in function compareText ' +
+        '(expected: string or Array or Matrix, actual: ' +
+        typeOf(x) +
+        ', index: 0)'
+    );
   }
   if (!isString(y)) {
-    throw new TypeError('Unexpected type of argument in function compareText ' +
-      '(expected: string or Array or Matrix, actual: ' + typeOf(y) + ', index: 1)')
+    throw new TypeError(
+      'Unexpected type of argument in function compareText ' +
+        '(expected: string or Array or Matrix, actual: ' +
+        typeOf(y) +
+        ', index: 1)'
+    );
   }
 
-  return (x === y)
-    ? 0
-    : (x > y ? 1 : -1)
+  return x === y ? 0 : x > y ? 1 : -1;
 }

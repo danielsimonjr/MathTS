@@ -1,66 +1,58 @@
-import Decimal from 'decimal.js'
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import { isInteger, nearlyEqual } from '../utils/number.js'
-import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import Decimal from 'decimal.js';
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import { isInteger, nearlyEqual } from '../utils/number.js';
+import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for dependency injection
 interface Matrix {
-  size(): number[]
-  storage(): string
-  valueOf(): unknown[] | unknown[][]
+  size(): number[];
+  storage(): string;
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface BigNumberType {
-  floor(): BigNumberType
-  eq(other: BigNumberType): boolean
-  mul(other: BigNumberType): BigNumberType
-  div(other: BigNumberType): BigNumberType
+  floor(): BigNumberType;
+  eq(other: BigNumberType): boolean;
+  mul(other: BigNumberType): BigNumberType;
+  div(other: BigNumberType): BigNumberType;
 }
 
 interface ComplexType {
-  floor(n?: number): ComplexType
+  floor(n?: number): ComplexType;
 }
 
 interface FractionType {
-  floor(n?: number): FractionType
+  floor(n?: number): FractionType;
 }
 
 interface UnitType {
-  toNumeric(unit: UnitType): number | BigNumberType
-  multiply(value: number | BigNumberType): UnitType
+  toNumeric(unit: UnitType): number | BigNumberType;
+  multiply(value: number | BigNumberType): UnitType;
 }
 
 interface FloorNumberDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  round: TypedFunction
+  typed: TypedFunction;
+  config: ConfigOptions;
+  round: TypedFunction;
 }
 
 interface FloorDependencies extends FloorNumberDependencies {
-  matrix: (data: unknown[]) => Matrix
-  equalScalar: TypedFunction
-  zeros: (size: number[], storage?: string) => Matrix
-  DenseMatrix: new (data: unknown) => Matrix
+  matrix: (data: unknown[]) => Matrix;
+  equalScalar: TypedFunction;
+  zeros: (size: number[], storage?: string) => Matrix;
+  DenseMatrix: new (data: unknown) => Matrix;
 }
 
-const name = 'floor'
-const dependencies = [
-  'typed',
-  'config',
-  'round',
-  'matrix',
-  'equalScalar',
-  'zeros',
-  'DenseMatrix'
-]
+const name = 'floor';
+const dependencies = ['typed', 'config', 'round', 'matrix', 'equalScalar', 'zeros', 'DenseMatrix'];
 
-const bigTen = new Decimal(10)
+const bigTen = new Decimal(10);
 
 export const createFloorNumber = /* #__PURE__ */ factory(
   name,
@@ -69,9 +61,9 @@ export const createFloorNumber = /* #__PURE__ */ factory(
     function _floorNumber(x: number): number {
       // First, if the floor and the round are identical we can be
       // quite comfortable that is the best answer:
-      const f = Math.floor(x)
-      const r = round(x) as number
-      if (f === r) return f
+      const f = Math.floor(x);
+      const r = round(x) as number;
+      if (f === r) return f;
       // OK, they are different. If x is truly distinct from f but
       // appears indistinguishable from r, presume it really is just
       // the integer r with rounding/computation error, and return that
@@ -79,60 +71,48 @@ export const createFloorNumber = /* #__PURE__ */ factory(
         nearlyEqual(x, r, config.relTol, config.absTol) &&
         !nearlyEqual(x, f, config.relTol, config.absTol)
       ) {
-        return r
+        return r;
       }
       // Otherwise (x distinct from both r and f, or indistinguishable from
       // both r and f) may as well just return f, as that's the best
       // candidate we can discern:
-      return f
+      return f;
     }
 
     return typed(name, {
       number: _floorNumber,
       'number, number': function (x: number, n: number): number {
         if (!isInteger(n)) {
-          throw new RangeError(
-            'number of decimals in function floor must be an integer'
-          )
+          throw new RangeError('number of decimals in function floor must be an integer');
         }
         if (n < 0 || n > 15) {
-          throw new RangeError(
-            'number of decimals in floor number must be in range 0 - 15'
-          )
+          throw new RangeError('number of decimals in floor number must be in range 0 - 15');
         }
-        const shift = 10 ** n
-        return _floorNumber(x * shift) / shift
-      }
-    })
+        const shift = 10 ** n;
+        return _floorNumber(x * shift) / shift;
+      },
+    });
   }
-)
+);
 
 export const createFloor = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    config,
-    round,
-    matrix,
-    equalScalar,
-    zeros,
-    DenseMatrix
-  }: FloorDependencies) => {
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
-    const matAlgo14xDs = createMatAlgo14xDs({ typed })
+  ({ typed, config, round, matrix, equalScalar, zeros, DenseMatrix }: FloorDependencies) => {
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
+    const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
-    const floorNumber = createFloorNumber({ typed, config, round }) as TypedFunction
+    const floorNumber = createFloorNumber({ typed, config, round }) as TypedFunction;
     function _bigFloor(x: BigNumberType): BigNumberType {
       // see _floorNumber above for rationale
       const bne = (a: BigNumberType, b: BigNumberType): boolean =>
-        bigNearlyEqual(a, b, config.relTol, config.absTol)
-      const f = x.floor()
-      const r = round(x) as BigNumberType // round returns unknown from TypedFunction
-      if (f.eq(r)) return f
-      if (bne(x, r) && !bne(x, f)) return r
-      return f
+        bigNearlyEqual(a, b, config.relTol, config.absTol);
+      const f = x.floor();
+      const r = round(x) as BigNumberType; // round returns unknown from TypedFunction
+      if (f.eq(r)) return f;
+      if (bne(x, r) && !bne(x, f)) return r;
+      return f;
     }
     /**
      * Round a value towards minus infinity.
@@ -188,30 +168,24 @@ export const createFloor = /* #__PURE__ */ factory(
       'number,number': floorNumber.signatures['number,number'],
 
       Complex: function (x: ComplexType): ComplexType {
-        return x.floor()
+        return x.floor();
       },
 
       'Complex, number': function (x: ComplexType, n: number): ComplexType {
-        return x.floor(n)
+        return x.floor(n);
       },
 
-      'Complex, BigNumber': function (
-        x: ComplexType,
-        n: BigNumberType
-      ): ComplexType {
-        return x.floor((n as unknown as { toNumber(): number }).toNumber())
+      'Complex, BigNumber': function (x: ComplexType, n: BigNumberType): ComplexType {
+        return x.floor((n as unknown as { toNumber(): number }).toNumber());
       },
 
       BigNumber: _bigFloor,
 
-      'BigNumber, BigNumber': function (
-        x: BigNumberType,
-        n: BigNumberType
-      ): BigNumberType {
-        const shift = bigTen.pow(n as unknown as Decimal)
+      'BigNumber, BigNumber': function (x: BigNumberType, n: BigNumberType): BigNumberType {
+        const shift = bigTen.pow(n as unknown as Decimal);
         return _bigFloor(x.mul(shift as unknown as BigNumberType)).div(
           shift as unknown as BigNumberType
-        )
+        );
       },
 
       bigint: (b: bigint): bigint => b,
@@ -219,25 +193,22 @@ export const createFloor = /* #__PURE__ */ factory(
       'bigint, BigNumber': (b: bigint, _dummy: BigNumberType): bigint => b,
 
       Fraction: function (x: FractionType): FractionType {
-        return x.floor()
+        return x.floor();
       },
 
       'Fraction, number': function (x: FractionType, n: number): FractionType {
-        return x.floor(n)
+        return x.floor(n);
       },
 
-      'Fraction, BigNumber': function (
-        x: FractionType,
-        n: BigNumberType
-      ): FractionType {
-        return x.floor((n as unknown as { toNumber(): number }).toNumber())
+      'Fraction, BigNumber': function (x: FractionType, n: BigNumberType): FractionType {
+        return x.floor((n as unknown as { toNumber(): number }).toNumber());
       },
 
       'Unit, number, Unit': typed.referToSelf(
         (self: TypedFunction) =>
           function (x: UnitType, n: number, unit: UnitType): UnitType {
-            const valueless = x.toNumeric(unit)
-            return unit.multiply(self(valueless, n) as number | BigNumberType)
+            const valueless = x.toNumeric(unit);
+            return unit.multiply(self(valueless, n) as number | BigNumberType);
           }
       ),
 
@@ -255,16 +226,15 @@ export const createFloor = /* #__PURE__ */ factory(
             unit: UnitType
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since floor(0) = 0
-            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as unknown[] | Matrix
+            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as
+              | unknown[]
+              | Matrix;
           }
       ),
 
       'Array | Matrix | Unit, Unit': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            x: unknown[] | Matrix | UnitType,
-            unit: UnitType
-          ): unknown[] | Matrix | UnitType =>
+          (x: unknown[] | Matrix | UnitType, unit: UnitType): unknown[] | Matrix | UnitType =>
             self(x, 0, unit) as unknown[] | Matrix | UnitType
       ),
 
@@ -272,7 +242,7 @@ export const createFloor = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix => {
             // deep map collection, skip zeros since floor(0) = 0
-            return deepMap(x as unknown[], self, true) as unknown[] | Matrix
+            return deepMap(x as unknown[], self, true) as unknown[] | Matrix;
           }
       ),
 
@@ -280,48 +250,42 @@ export const createFloor = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[], n: number | BigNumberType): unknown[] => {
             // deep map collection, skip zeros since floor(0) = 0
-            return deepMap(x, (i) => self(i, n), true) as unknown[]
+            return deepMap(x, (i) => self(i, n), true) as unknown[];
           }
       ),
 
       'SparseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, y: number | BigNumberType): Matrix => {
-            return matAlgo11xS0s(x as any, y, self, false) as any as Matrix
+            return matAlgo11xS0s(x as any, y, self, false) as any as Matrix;
           }
       ),
 
       'DenseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, y: number | BigNumberType): Matrix => {
-            return matAlgo14xDs(x as any, y, self, false) as any as Matrix
+            return matAlgo14xDs(x as any, y, self, false) as any as Matrix;
           }
       ),
 
       'number | Complex | Fraction | BigNumber, Array': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            x: number | ComplexType | FractionType | BigNumberType,
-            y: unknown[]
-          ): unknown[] => {
+          (x: number | ComplexType | FractionType | BigNumberType, y: unknown[]): unknown[] => {
             // use matrix implementation
-            return (matAlgo14xDs(matrix(y) as any, x, self, true) as any).valueOf() as unknown[]
+            return (matAlgo14xDs(matrix(y) as any, x, self, true) as any).valueOf() as unknown[];
           }
       ),
 
       'number | Complex | Fraction | BigNumber, Matrix': typed.referToSelf(
         (self: TypedFunction) =>
-          (
-            x: number | ComplexType | FractionType | BigNumberType,
-            y: Matrix
-          ): Matrix => {
-            if (equalScalar(x, 0)) return zeros(y.size(), y.storage())
+          (x: number | ComplexType | FractionType | BigNumberType, y: Matrix): Matrix => {
+            if (equalScalar(x, 0)) return zeros(y.size(), y.storage());
             if (y.storage() === 'dense') {
-              return matAlgo14xDs(y as any, x, self, true) as any as Matrix
+              return matAlgo14xDs(y as any, x, self, true) as any as Matrix;
             }
-            return matAlgo12xSfs(y as any, x, self, true) as any as Matrix
+            return matAlgo12xSfs(y as any, x, self, true) as any as Matrix;
           }
-      )
-    })
+      ),
+    });
   }
-)
+);

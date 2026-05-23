@@ -1,4 +1,4 @@
-import { ObjectWrappingMap, PartitionedMap } from './map.js'
+import { ObjectWrappingMap, PartitionedMap } from './map.js';
 
 /**
  * Create a new scope which can access the parent scope,
@@ -21,5 +21,5 @@ export function createSubScope<K = any, V = any>(
     parentScope,
     new ObjectWrappingMap(args) as unknown as Map<K, V>,
     new Set(Object.keys(args) as K[])
-  )
+  );
 }

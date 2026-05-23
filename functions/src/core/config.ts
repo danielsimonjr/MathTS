@@ -4,43 +4,43 @@
 export interface ConfigOptions {
   // minimum relative difference between two compared values,
   // used by all comparison functions
-  relTol: number
+  relTol: number;
 
   // minimum absolute difference between two compared values,
   // used by all comparison functions
-  absTol: number
+  absTol: number;
 
   // type of default matrix output. Choose 'matrix' (default) or 'array'
-  matrix: 'Matrix' | 'Array'
+  matrix: 'Matrix' | 'Array';
 
   // type of default number output. Choose 'number' (default) 'BigNumber', 'bigint', or 'Fraction'
-  number: 'number' | 'BigNumber' | 'bigint' | 'Fraction'
+  number: 'number' | 'BigNumber' | 'bigint' | 'Fraction';
 
   // type of fallback used for config { number: 'bigint' } when a value cannot be represented
   // in the configured numeric type. Choose 'number' (default) or 'BigNumber'.
-  numberFallback: 'number' | 'BigNumber'
+  numberFallback: 'number' | 'BigNumber';
 
   // number of significant digits in BigNumbers
-  precision: number
+  precision: number;
 
   // predictable output type of functions. When true, output type depends only
   // on the input types. When false (default), output type can vary depending
   // on input values. For example `math.sqrt(-4)` returns `complex('2i')` when
   // predictable is false, and returns `NaN` when true.
-  predictable: boolean
+  predictable: boolean;
 
   // random seed for seeded pseudo random number generation
   // null = randomly seed
-  randomSeed: string | null
+  randomSeed: string | null;
 
   // legacy behavior for matrix subset. When true, the subset function
   // returns a matrix or array with the same size as the index (except for scalars).
   // When false, it returns a matrix or array with a size depending on the type of index.
-  legacySubset: boolean
+  legacySubset: boolean;
 }
 
 // Keep MathJsConfig as an alias for backwards compatibility
-export type MathJsConfig = ConfigOptions
+export type MathJsConfig = ConfigOptions;
 
 export const DEFAULT_CONFIG: ConfigOptions = {
   // minimum relative difference between two compared values,
@@ -77,5 +77,5 @@ export const DEFAULT_CONFIG: ConfigOptions = {
   // legacy behavior for matrix subset. When true, the subset function
   // returns a matrix or array with the same size as the index (except for scalars).
   // When false, it returns a matrix or array with a size depending on the type of index.
-  legacySubset: false
-}
+  legacySubset: false,
+};

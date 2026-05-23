@@ -7,27 +7,21 @@ import {
   isNode,
   isObjectNode,
   isParenthesisNode,
-  isSymbolNode
-} from '../../utils/is.js'
-import { getSafeProperty } from '../../utils/customs.js'
-import { factory } from '../../utils/factory.js'
-import { accessFactory } from './utils/access.js'
-import type { MathNode } from './Node.js'
+  isSymbolNode,
+} from '../../utils/is.js';
+import { getSafeProperty } from '../../utils/customs.js';
+import { factory } from '../../utils/factory.js';
+import { accessFactory } from './utils/access.js';
+import type { MathNode } from './Node.js';
 
-const name = 'AccessorNode'
-const dependencies = ['subset', 'Node']
+const name = 'AccessorNode';
+const dependencies = ['subset', 'Node'];
 
 export const createAccessorNode = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    subset,
-    Node
-  }: {
-    subset: any
-    Node: new (...args: any[]) => MathNode
-  }) => {
-    const access = accessFactory({ subset })
+  ({ subset, Node }: { subset: any; Node: new (...args: any[]) => MathNode }) => {
+    const access = accessFactory({ subset });
 
     /**
      * Are parenthesis needed?
@@ -43,13 +37,13 @@ export const createAccessorNode = /* #__PURE__ */ factory(
         isObjectNode(node) ||
         isParenthesisNode(node) ||
         isSymbolNode(node)
-      )
+      );
     }
 
     class AccessorNode extends Node {
-      object: MathNode
-      index: any // IndexNode
-      optionalChaining: boolean
+      object: MathNode;
+      index: any; // IndexNode
+      optionalChaining: boolean;
 
       /**
        * @constructor AccessorNode
@@ -64,40 +58,34 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        *     using `a?.b`, or `a?.["b"] with bracket notation.
        *     Forces evaluate to undefined if the given object is undefined or null.
        */
-      constructor(
-        object: MathNode,
-        index: any,
-        optionalChaining: boolean = false
-      ) {
-        super()
+      constructor(object: MathNode, index: any, optionalChaining: boolean = false) {
+        super();
         if (!isNode(object)) {
-          throw new TypeError('Node expected for parameter "object"')
+          throw new TypeError('Node expected for parameter "object"');
         }
         if (!isIndexNode(index)) {
-          throw new TypeError('IndexNode expected for parameter "index"')
+          throw new TypeError('IndexNode expected for parameter "index"');
         }
 
-        this.object = object
-        this.index = index
-        this.optionalChaining = optionalChaining
+        this.object = object;
+        this.index = index;
+        this.optionalChaining = optionalChaining;
       }
 
       // readonly property name
       get name(): string {
         if (this.index) {
-          return this.index.isObjectProperty()
-            ? this.index.getObjectProperty()
-            : ''
+          return this.index.isObjectProperty() ? this.index.getObjectProperty() : '';
         } else {
-          return (this.object as any).name || ''
+          return (this.object as any).name || '';
         }
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isAccessorNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -117,57 +105,49 @@ export const createAccessorNode = /* #__PURE__ */ factory(
         math: any,
         argNames: Record<string, boolean>
       ): (scope: any, args: any, context: any) => any {
-        const evalObject = this.object._compile(math, argNames)
-        const evalIndex = this.index._compile(math, argNames)
+        const evalObject = this.object._compile(math, argNames);
+        const evalIndex = this.index._compile(math, argNames);
 
-        const optionalChaining = this.optionalChaining
+        const optionalChaining = this.optionalChaining;
         const prevOptionalChaining =
-          isAccessorNode(this.object) && (this.object as any).optionalChaining
+          isAccessorNode(this.object) && (this.object as any).optionalChaining;
 
         if (this.index.isObjectProperty()) {
-          const prop = this.index.getObjectProperty()
-          return function evalAccessorNode(
-            scope: any,
-            args: any,
-            context: any
-          ) {
-            const ctx = context || {}
-            const object = evalObject(scope, args, ctx)
+          const prop = this.index.getObjectProperty();
+          return function evalAccessorNode(scope: any, args: any, context: any) {
+            const ctx = context || {};
+            const object = evalObject(scope, args, ctx);
 
             if (optionalChaining && object == null) {
-              ctx.optionalShortCircuit = true
-              return undefined
+              ctx.optionalShortCircuit = true;
+              return undefined;
             }
 
             if (prevOptionalChaining && ctx?.optionalShortCircuit) {
-              return undefined
+              return undefined;
             }
 
             // get a property from an object evaluated using the scope.
-            return getSafeProperty(object, prop)
-          }
+            return getSafeProperty(object, prop);
+          };
         } else {
-          return function evalAccessorNode(
-            scope: any,
-            args: any,
-            context: any
-          ) {
-            const ctx = context || {}
-            const object = evalObject(scope, args, ctx)
+          return function evalAccessorNode(scope: any, args: any, context: any) {
+            const ctx = context || {};
+            const object = evalObject(scope, args, ctx);
 
             if (optionalChaining && object == null) {
-              ctx.optionalShortCircuit = true
-              return undefined
+              ctx.optionalShortCircuit = true;
+              return undefined;
             }
 
             if (prevOptionalChaining && ctx?.optionalShortCircuit) {
-              return undefined
+              return undefined;
             }
 
             // we pass just object here instead of context:
-            const index = evalIndex(scope, args, object)
-            return access(object, index)
-          }
+            const index = evalIndex(scope, args, object);
+            return access(object, index);
+          };
         }
       }
 
@@ -175,11 +155,9 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: MathNode, path: string, parent: MathNode) => void
-      ): void {
-        callback(this.object, 'object', this as any)
-        callback(this.index, 'index', this as any)
+      forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
+        callback(this.object, 'object', this as any);
+        callback(this.index, 'index', this as any);
       }
 
       /**
@@ -188,14 +166,12 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node): Node} callback
        * @returns {AccessorNode} Returns a transformed copy of the node
        */
-      map(
-        callback: (child: MathNode, path: string, parent: MathNode) => MathNode
-      ): AccessorNode {
+      map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): AccessorNode {
         return new AccessorNode(
           this._ifNode(callback(this.object, 'object', this as any)),
           this._ifNode(callback(this.index, 'index', this as any)),
           this.optionalChaining
-        )
+        );
       }
 
       /**
@@ -203,7 +179,7 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * @return {AccessorNode}
        */
       clone(): AccessorNode {
-        return new AccessorNode(this.object, this.index, this.optionalChaining)
+        return new AccessorNode(this.object, this.index, this.optionalChaining);
       }
 
       /**
@@ -212,16 +188,12 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * @return {string}
        */
       _toString(options?: any): string {
-        let object = this.object.toString(options)
+        let object = this.object.toString(options);
         if (needParenthesis(this.object)) {
-          object = '(' + object + ')'
+          object = '(' + object + ')';
         }
-        const optionalChaining = this.optionalChaining
-          ? this.index.dotNotation
-            ? '?'
-            : '?.'
-          : ''
-        return object + optionalChaining + this.index.toString(options)
+        const optionalChaining = this.optionalChaining ? (this.index.dotNotation ? '?' : '?.') : '';
+        return object + optionalChaining + this.index.toString(options);
       }
 
       /**
@@ -230,15 +202,15 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * @return {string}
        */
       _toHTML(options?: any): string {
-        let object = this.object.toHTML(options)
+        let object = this.object.toHTML(options);
         if (needParenthesis(this.object)) {
           object =
             '<span class="math-parenthesis math-round-parenthesis">(</span>' +
             object +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>'
+            '<span class="math-parenthesis math-round-parenthesis">)</span>';
         }
 
-        return object + this.index.toHTML(options)
+        return object + this.index.toHTML(options);
       }
 
       /**
@@ -247,12 +219,12 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * @return {string}
        */
       _toTex(options?: any): string {
-        let object = this.object.toTex(options)
+        let object = this.object.toTex(options);
         if (needParenthesis(this.object)) {
-          object = "\\left(' + object + '\\right)"
+          object = "\\left(' + object + '\\right)";
         }
 
-        return object + this.index.toTex(options)
+        return object + this.index.toTex(options);
       }
 
       /**
@@ -260,17 +232,17 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * @returns {Object}
        */
       toJSON(): {
-        mathjs: string
-        object: MathNode
-        index: any
-        optionalChaining: boolean
+        mathjs: string;
+        object: MathNode;
+        index: any;
+        optionalChaining: boolean;
       } {
         return {
           mathjs: name,
           object: this.object,
           index: this.index,
-          optionalChaining: this.optionalChaining
-        }
+          optionalChaining: this.optionalChaining,
+        };
       }
 
       /**
@@ -282,11 +254,11 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * @returns {AccessorNode}
        */
       static fromJSON(json: {
-        object: MathNode
-        index: any
-        optionalChaining?: boolean
+        object: MathNode;
+        index: any;
+        optionalChaining?: boolean;
       }): AccessorNode {
-        return new AccessorNode(json.object, json.index, json.optionalChaining)
+        return new AccessorNode(json.object, json.index, json.optionalChaining);
       }
     }
 
@@ -294,10 +266,10 @@ export const createAccessorNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(AccessorNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return AccessorNode
+    return AccessorNode;
   },
   { isClass: true, isNode: true }
-)
+);

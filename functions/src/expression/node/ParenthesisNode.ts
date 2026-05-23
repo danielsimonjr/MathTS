@@ -1,42 +1,35 @@
-import { isNode } from '../../utils/is.js'
-import { factory } from '../../utils/factory.js'
+import { isNode } from '../../utils/is.js';
+import { factory } from '../../utils/factory.js';
 
 // Type definitions
 interface Node {
-  _compile: (
-    math: Record<string, any>,
-    argNames: Record<string, boolean>
-  ) => CompileFunction
-  getContent: () => Node
-  toString: (options?: StringOptions) => string
-  toHTML: (options?: StringOptions) => string
-  toTex: (options?: StringOptions) => string
+  _compile: (math: Record<string, any>, argNames: Record<string, boolean>) => CompileFunction;
+  getContent: () => Node;
+  toString: (options?: StringOptions) => string;
+  toHTML: (options?: StringOptions) => string;
+  toTex: (options?: StringOptions) => string;
 }
 
-type CompileFunction = (
-  scope: any,
-  args: Record<string, any>,
-  context: any
-) => any
+type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
 
 interface StringOptions {
-  parenthesis?: 'keep' | 'auto' | 'all'
-  [key: string]: any
+  parenthesis?: 'keep' | 'auto' | 'all';
+  [key: string]: any;
 }
 
 interface Dependencies {
-  Node: new (...args: any[]) => Node
+  Node: new (...args: any[]) => Node;
 }
 
-const name = 'ParenthesisNode'
-const dependencies = ['Node']
+const name = 'ParenthesisNode';
+const dependencies = ['Node'];
 
 export const createParenthesisNode = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ Node }: Dependencies) => {
     class ParenthesisNode extends Node {
-      content: Node
+      content: Node;
 
       /**
        * @constructor ParenthesisNode
@@ -46,20 +39,20 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @extends {Node}
        */
       constructor(content: Node) {
-        super()
+        super();
         // validate input
         if (!isNode(content)) {
-          throw new TypeError('Node expected for parameter "content"')
+          throw new TypeError('Node expected for parameter "content"');
         }
 
-        this.content = content
+        this.content = content;
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isParenthesisNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -76,11 +69,8 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error: method signature matches MathNode interface
-      _compile(
-        math: Record<string, any>,
-        argNames: Record<string, boolean>
-      ): CompileFunction {
-        return this.content._compile(math, argNames)
+      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+        return this.content._compile(math, argNames);
       }
 
       /**
@@ -90,17 +80,15 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        **/
       // @ts-expect-error: method signature matches MathNode interface
       getContent(): Node {
-        return this.content.getContent()
+        return this.content.getContent();
       }
 
       /**
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: Node, path: string, parent: ParenthesisNode) => void
-      ): void {
-        callback(this.content, 'content', this)
+      forEach(callback: (child: Node, path: string, parent: ParenthesisNode) => void): void {
+        callback(this.content, 'content', this);
       }
 
       /**
@@ -109,11 +97,9 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node) : Node} callback
        * @returns {ParenthesisNode} Returns a clone of the node
        */
-      map(
-        callback: (child: Node, path: string, parent: ParenthesisNode) => Node
-      ): ParenthesisNode {
-        const content = callback(this.content, 'content', this)
-        return new ParenthesisNode(content)
+      map(callback: (child: Node, path: string, parent: ParenthesisNode) => Node): ParenthesisNode {
+        const content = callback(this.content, 'content', this);
+        return new ParenthesisNode(content);
       }
 
       /**
@@ -121,7 +107,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @return {ParenthesisNode}
        */
       clone(): ParenthesisNode {
-        return new ParenthesisNode(this.content)
+        return new ParenthesisNode(this.content);
       }
 
       /**
@@ -136,9 +122,9 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
           (options && !options.parenthesis) ||
           (options && options.parenthesis === 'keep')
         ) {
-          return '(' + this.content.toString(options) + ')'
+          return '(' + this.content.toString(options) + ')';
         }
-        return this.content.toString(options)
+        return this.content.toString(options);
       }
 
       /**
@@ -146,7 +132,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @returns {Object}
        */
       toJSON(): Record<string, any> {
-        return { mathjs: name, content: this.content }
+        return { mathjs: name, content: this.content };
       }
 
       /**
@@ -157,7 +143,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @returns {ParenthesisNode}
        */
       static fromJSON(json: { content: Node }): ParenthesisNode {
-        return new ParenthesisNode(json.content)
+        return new ParenthesisNode(json.content);
       }
 
       /**
@@ -176,9 +162,9 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
             '<span class="math-parenthesis math-round-parenthesis">(</span>' +
             this.content.toHTML(options) +
             '<span class="math-parenthesis math-round-parenthesis">)</span>'
-          )
+          );
         }
-        return this.content.toHTML(options)
+        return this.content.toHTML(options);
       }
 
       /**
@@ -193,9 +179,9 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
           (options && !options.parenthesis) ||
           (options && options.parenthesis === 'keep')
         ) {
-          return `\\left(${this.content.toTex(options)}\\right)`
+          return `\\left(${this.content.toTex(options)}\\right)`;
         }
-        return this.content.toTex(options)
+        return this.content.toTex(options);
       }
     }
 
@@ -203,10 +189,10 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(ParenthesisNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return ParenthesisNode
+    return ParenthesisNode;
   },
   { isClass: true, isNode: true }
-)
+);

@@ -1,125 +1,118 @@
-import { factory } from '../../utils/factory.js'
-import { wasmLoader } from '../../wasm/WasmLoader.js'
+import { factory } from '../../utils/factory.js';
+import { wasmLoader } from '../../wasm/WasmLoader.js';
 
 // Minimum matrix size (m*n elements) for WASM to be beneficial
-const WASM_QR_THRESHOLD = 16 // 4x4 matrix
+const WASM_QR_THRESHOLD = 16; // 4x4 matrix
 
 /**
  * Check if a 2D array contains only plain numbers
  */
 function isPlainNumberMatrix(matrix: any[][]): boolean {
   for (let i = 0; i < matrix.length; i++) {
-    const row = matrix[i]
+    const row = matrix[i];
     for (let j = 0; j < row.length; j++) {
       if (typeof row[j] !== 'number') {
-        return false
+        return false;
       }
     }
   }
-  return true
+  return true;
 }
 
 /**
  * Flatten a 2D array to a Float64Array in row-major order
  */
-function flattenToFloat64(
-  matrix: number[][],
-  rows: number,
-  cols: number
-): Float64Array {
-  const result = new Float64Array(rows * cols)
+function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
+  const result = new Float64Array(rows * cols);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j]
+      result[i * cols + j] = matrix[i][j];
     }
   }
-  return result
+  return result;
 }
 
 // Type definitions
-type NestedArray<T = any> = T | NestedArray<T>[]
-type _MatrixData = NestedArray<any> // eslint-disable-line @typescript-eslint/no-unused-vars
+type NestedArray<T = any> = T | NestedArray<T>[];
+type _MatrixData = NestedArray<any>; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 interface TypedFunction<T = any> {
-  (...args: any[]): T
-  find(func: any, signature: string[]): TypedFunction<T>
+  (...args: any[]): T;
+  find(func: any, signature: string[]): TypedFunction<T>;
 }
 
 interface MatrixConstructor {
-  (
-    data: any[] | any[][],
-    storage?: 'dense' | 'sparse'
-  ): DenseMatrix | SparseMatrix
+  (data: any[] | any[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
 }
 
 interface DenseMatrix {
-  type: 'DenseMatrix'
-  isDenseMatrix: true
-  _data: any[][] | any[]
-  _size: number[]
-  _datatype?: string
-  storage(): 'dense'
-  size(): number[]
-  valueOf(): any[][] | any[]
-  clone(): DenseMatrix
+  type: 'DenseMatrix';
+  isDenseMatrix: true;
+  _data: any[][] | any[];
+  _size: number[];
+  _datatype?: string;
+  storage(): 'dense';
+  size(): number[];
+  valueOf(): any[][] | any[];
+  clone(): DenseMatrix;
 }
 
 interface SparseMatrix {
-  type: 'SparseMatrix'
-  isSparseMatrix: true
-  _values?: any[]
-  _index?: number[]
-  _ptr?: number[]
-  _size: number[]
-  _datatype?: string
-  _data?: any
-  storage(): 'sparse'
-  size(): number[]
-  valueOf(): any[][]
+  type: 'SparseMatrix';
+  isSparseMatrix: true;
+  _values?: any[];
+  _index?: number[];
+  _ptr?: number[];
+  _size: number[];
+  _datatype?: string;
+  _data?: any;
+  storage(): 'sparse';
+  size(): number[];
+  valueOf(): any[][];
 }
 
 interface ZerosFunction {
-  (size: number[], format?: string): DenseMatrix
+  (size: number[], format?: string): DenseMatrix;
 }
 
 interface IdentityFunction {
-  (size: number[], format?: string): DenseMatrix
+  (size: number[], format?: string): DenseMatrix;
 }
 
 interface ComplexFunction {
-  (re: number, im?: number): any
+  (re: number, im?: number): any;
 }
 
 interface QRResult {
-  Q: DenseMatrix | SparseMatrix
-  R: DenseMatrix | SparseMatrix
-  toString(): string
+  Q: DenseMatrix | SparseMatrix;
+  R: DenseMatrix | SparseMatrix;
+  toString(): string;
 }
 
 interface QRArrayResult {
-  Q: any[][]
-  R: any[][]
+  Q: any[][];
+  R: any[][];
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  zeros: ZerosFunction
-  identity: IdentityFunction
-  isZero: TypedFunction<boolean>
-  equal: TypedFunction<boolean>
-  sign: TypedFunction
-  sqrt: TypedFunction
-  conj: TypedFunction
-  unaryMinus: TypedFunction
-  addScalar: TypedFunction
-  divideScalar: TypedFunction
-  multiplyScalar: TypedFunction
-  subtractScalar: TypedFunction
-  complex: ComplexFunction
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  zeros: ZerosFunction;
+  identity: IdentityFunction;
+  isZero: TypedFunction<boolean>;
+  equal: TypedFunction<boolean>;
+  sign: TypedFunction;
+  sqrt: TypedFunction;
+  conj: TypedFunction;
+  unaryMinus: TypedFunction;
+  addScalar: TypedFunction;
+  divideScalar: TypedFunction;
+  multiplyScalar: TypedFunction;
+  subtractScalar: TypedFunction;
+  complex: ComplexFunction;
 }
 
-const name = 'qr'
+const name = 'qr';
 const dependencies = [
   'typed',
   'matrix',
@@ -135,8 +128,8 @@ const dependencies = [
   'divideScalar',
   'multiplyScalar',
   'subtractScalar',
-  'complex'
-]
+  'complex',
+];
 
 export const createQr = /* #__PURE__ */ factory(
   name,
@@ -156,7 +149,7 @@ export const createQr = /* #__PURE__ */ factory(
     divideScalar,
     multiplyScalar,
     subtractScalar,
-    complex
+    complex,
   }: Dependencies) => {
     /**
      * Calculate the Matrix QR decomposition. Matrix `A` is decomposed in
@@ -203,84 +196,80 @@ export const createQr = /* #__PURE__ */ factory(
      */
     const qrTyped = typed(name, {
       DenseMatrix: function (m: DenseMatrix): QRResult {
-        return _denseQR(m)
+        return _denseQR(m);
       },
 
       SparseMatrix: function (m: SparseMatrix): QRResult {
-        return _sparseQR(m)
+        return _sparseQR(m);
       },
 
       Array: function (a: any[][]): QRArrayResult {
         // create dense matrix from array
-        const m = matrix(a) as DenseMatrix
+        const m = matrix(a) as DenseMatrix;
         // lup, use matrix implementation
-        const r = _denseQR(m)
+        const r = _denseQR(m);
         // result
         return {
           Q: r.Q.valueOf() as any[][],
-          R: r.R.valueOf() as any[][]
-        }
-      }
-    })
+          R: r.R.valueOf() as any[][],
+        };
+      },
+    });
 
     // Attach _denseQRimpl to the typed function
-    ;(qrTyped as any)._denseQRimpl = _denseQRimpl
+    (qrTyped as any)._denseQRimpl = _denseQRimpl;
 
-    return qrTyped
+    return qrTyped;
 
     function _denseQRimpl(m: DenseMatrix): QRResult {
       // rows & columns (m x n)
-      const rows = m._size[0] // m
-      const cols = m._size[1] // n
+      const rows = m._size[0]; // m
+      const cols = m._size[1]; // n
 
       // WASM fast path for plain number matrices
-      const wasm = wasmLoader.getModule()
-      if (
-        wasm &&
-        rows * cols >= WASM_QR_THRESHOLD &&
-        isPlainNumberMatrix(m._data as any[][])
-      ) {
+      const wasm = wasmLoader.getModule();
+      if (wasm && rows * cols >= WASM_QR_THRESHOLD && isPlainNumberMatrix(m._data as any[][])) {
         try {
-          const flat = flattenToFloat64(m._data as number[][], rows, cols)
-          const aAlloc = wasmLoader.allocateFloat64Array(flat)
+          const flat = flattenToFloat64(m._data as number[][], rows, cols);
+          const aAlloc = wasmLoader.allocateFloat64Array(flat);
           // Q is m x m orthogonal matrix
-          const qAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows * rows)
+          const qAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows * rows);
 
           try {
-            wasm.qrDecomposition(aAlloc.ptr, rows, cols, qAlloc.ptr)
+            wasm.qrDecomposition(aAlloc.ptr, rows, cols, qAlloc.ptr);
 
             // Extract R from the modified A matrix
-            const Rdata: number[][] = []
+            const Rdata: number[][] = [];
             for (let i = 0; i < rows; i++) {
-              Rdata[i] = []
+              Rdata[i] = [];
               for (let j = 0; j < cols; j++) {
-                Rdata[i][j] = aAlloc.array[i * cols + j]
+                Rdata[i][j] = aAlloc.array[i * cols + j];
               }
             }
 
             // Extract Q from qPtr (m x m matrix, stored row-major)
-            const Qdata: number[][] = []
+            const Qdata: number[][] = [];
             for (let i = 0; i < rows; i++) {
-              Qdata[i] = []
+              Qdata[i] = [];
               for (let j = 0; j < rows; j++) {
-                Qdata[i][j] = qAlloc.array[i * rows + j]
+                Qdata[i][j] = qAlloc.array[i * rows + j];
               }
             }
 
             // Create Q and R matrices
-            const Q = matrix(Qdata) as DenseMatrix
-            const R = matrix(Rdata) as DenseMatrix
+            const Q = matrix(Qdata) as DenseMatrix;
+            const R = matrix(Rdata) as DenseMatrix;
 
             return {
               Q,
               R,
               toString: function () {
-                return 'Q: ' + this.Q.toString() + '\nR: ' + this.R.toString()
-              }
-            }
+                return 'Q: ' + this.Q.toString() + '\nR: ' + this.R.toString();
+              },
+            };
           } finally {
-            wasmLoader.free(aAlloc.ptr)
-            wasmLoader.free(qAlloc.ptr)
+            wasmLoader.free(aAlloc.ptr);
+            wasmLoader.free(qAlloc.ptr);
           }
         } catch {
           // Fall back to JS implementation on WASM error
@@ -288,16 +277,16 @@ export const createQr = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback
-      const Q = identity([rows], 'dense')
-      const Qdata = Q._data as any[][]
+      const Q = identity([rows], 'dense');
+      const Qdata = Q._data as any[][];
 
-      const R = m.clone()
-      const Rdata = R._data as any[][]
+      const R = m.clone();
+      const Rdata = R._data as any[][];
 
       // vars
-      let i: number, j: number, k: number
+      let i: number, j: number, k: number;
 
-      const w = zeros([rows], '') as any
+      const w = zeros([rows], '') as any;
 
       for (k = 0; k < Math.min(cols, rows); ++k) {
         /*
@@ -324,36 +313,33 @@ export const createQr = /* #__PURE__ */ factory(
          *
          */
 
-        const pivot = Rdata[k][k]
-        const sgn = unaryMinus(equal(pivot, 0) ? 1 : sign(pivot))
-        const conjSgn = conj(sgn)
+        const pivot = Rdata[k][k];
+        const sgn = unaryMinus(equal(pivot, 0) ? 1 : sign(pivot));
+        const conjSgn = conj(sgn);
 
-        let alphaSquared: any = 0
+        let alphaSquared: any = 0;
 
         for (i = k; i < rows; i++) {
-          alphaSquared = addScalar(
-            alphaSquared,
-            multiplyScalar(Rdata[i][k], conj(Rdata[i][k]))
-          )
+          alphaSquared = addScalar(alphaSquared, multiplyScalar(Rdata[i][k], conj(Rdata[i][k])));
         }
 
-        const alpha = multiplyScalar(sgn, sqrt(alphaSquared))
+        const alpha = multiplyScalar(sgn, sqrt(alphaSquared));
 
         if (!isZero(alpha)) {
           // first element in vector u
-          const u1 = subtractScalar(pivot, alpha)
+          const u1 = subtractScalar(pivot, alpha);
 
           // w = v * u1 / |u|    (only elements k to (rows-1) are used)
-          w[k] = 1
+          w[k] = 1;
 
           for (i = k + 1; i < rows; i++) {
-            w[i] = divideScalar(Rdata[i][k], u1)
+            w[i] = divideScalar(Rdata[i][k], u1);
           }
 
           // tau = - conj(u1 / alpha)
-          const tau = unaryMinus(conj(divideScalar(u1, alpha)))
+          const tau = unaryMinus(conj(divideScalar(u1, alpha)));
 
-          let s: any
+          let s: any;
 
           /*
            * tau and w have been choosen so that
@@ -368,21 +354,21 @@ export const createQr = /* #__PURE__ */ factory(
            *   multiplication so do not bother recalculating them
            */
           for (j = k; j < cols; j++) {
-            s = 0.0
+            s = 0.0;
 
             // calculate jth element of [tranpose(w) * R]
             for (i = k; i < rows; i++) {
-              s = addScalar(s, multiplyScalar(conj(w[i]), Rdata[i][j]))
+              s = addScalar(s, multiplyScalar(conj(w[i]), Rdata[i][j]));
             }
 
             // calculate the jth element of [tau * transpose(w) * R]
-            s = multiplyScalar(s, tau)
+            s = multiplyScalar(s, tau);
 
             for (i = k; i < rows; i++) {
               Rdata[i][j] = multiplyScalar(
                 subtractScalar(Rdata[i][j], multiplyScalar(w[i], s)),
                 conjSgn
-              )
+              );
             }
           }
           /*
@@ -393,21 +379,21 @@ export const createQr = /* #__PURE__ */ factory(
            *   multiplication so do not bother recalculating them
            */
           for (i = 0; i < rows; i++) {
-            s = 0.0
+            s = 0.0;
 
             // calculate ith element of [Q * w]
             for (j = k; j < rows; j++) {
-              s = addScalar(s, multiplyScalar(Qdata[i][j], w[j]))
+              s = addScalar(s, multiplyScalar(Qdata[i][j], w[j]));
             }
 
             // calculate the ith element of [tau * Q * w]
-            s = multiplyScalar(s, tau)
+            s = multiplyScalar(s, tau);
 
             for (j = k; j < rows; ++j) {
               Qdata[i][j] = divideScalar(
                 subtractScalar(Qdata[i][j], multiplyScalar(s, conj(w[j]))),
                 conjSgn
-              )
+              );
             }
           }
         }
@@ -418,29 +404,29 @@ export const createQr = /* #__PURE__ */ factory(
         Q,
         R,
         toString: function () {
-          return 'Q: ' + this.Q.toString() + '\nR: ' + this.R.toString()
-        }
-      }
+          return 'Q: ' + this.Q.toString() + '\nR: ' + this.R.toString();
+        },
+      };
     }
 
     function _denseQR(m: DenseMatrix): QRResult {
-      const ret = _denseQRimpl(m)
-      const Rdata = ret.R._data as any[][]
+      const ret = _denseQRimpl(m);
+      const Rdata = ret.R._data as any[][];
       if ((m._data as any[][]).length > 0) {
-        const zero = Rdata[0][0].type === 'Complex' ? complex(0) : 0
+        const zero = Rdata[0][0].type === 'Complex' ? complex(0) : 0;
 
         for (let i = 0; i < Rdata.length; ++i) {
           for (let j = 0; j < i && j < (Rdata[0] || []).length; ++j) {
-            Rdata[i][j] = zero
+            Rdata[i][j] = zero;
           }
         }
       }
 
-      return ret
+      return ret;
     }
 
     function _sparseQR(_m: SparseMatrix): QRResult {
-      throw new Error('qr not implemented for sparse matrices yet')
+      throw new Error('qr not implemented for sparse matrices yet');
     }
   }
-)
+);

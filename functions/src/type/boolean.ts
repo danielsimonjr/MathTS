@@ -1,14 +1,14 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import type { Decimal } from 'decimal.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import type { Decimal } from 'decimal.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface BooleanDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'boolean'
-const dependencies = ['typed']
+const name = 'boolean';
+const dependencies = ['typed'];
 
 export const createBoolean = /* #__PURE__ */ factory(
   name,
@@ -43,46 +43,44 @@ export const createBoolean = /* #__PURE__ */ factory(
      */
     return typed(name, {
       '': function (): boolean {
-        return false
+        return false;
       },
 
       boolean: function (x: boolean): boolean {
-        return x
+        return x;
       },
 
       number: function (x: number): boolean {
-        return !!x
+        return !!x;
       },
 
       null: function (_x: null): boolean {
-        return false
+        return false;
       },
 
       BigNumber: function (x: Decimal): boolean {
-        return !x.isZero()
+        return !x.isZero();
       },
 
       string: function (x: string): boolean {
         // try case insensitive
-        const lcase = x.toLowerCase()
+        const lcase = x.toLowerCase();
         if (lcase === 'true') {
-          return true
+          return true;
         } else if (lcase === 'false') {
-          return false
+          return false;
         }
 
         // test whether value is a valid number
-        const num = Number(x)
+        const num = Number(x);
         if (x !== '' && !isNaN(num)) {
-          return !!num
+          return !!num;
         }
 
-        throw new Error('Cannot convert "' + x + '" to a boolean')
+        throw new Error('Cannot convert "' + x + '" to a boolean');
       },
 
-      'Array | Matrix': typed.referToSelf(
-        (self: (x: any) => any) => (x: any) => deepMap(x, self)
-      )
-    })
+      'Array | Matrix': typed.referToSelf((self: (x: any) => any) => (x: any) => deepMap(x, self)),
+    });
   }
-)
+);

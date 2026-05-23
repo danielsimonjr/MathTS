@@ -1,17 +1,17 @@
-import { factory } from '../../../utils/factory.js'
-import type { TypedFunction } from '../../../core/function/typed.js'
+import { factory } from '../../../utils/factory.js';
+import type { TypedFunction } from '../../../core/function/typed.js';
 
 interface SparseMatrixConstructor {
-  new (data: any[], datatype?: string): any
+  new (data: any[], datatype?: string): any;
 }
 
 interface SparseDependencies {
-  typed: TypedFunction
-  SparseMatrix: SparseMatrixConstructor
+  typed: TypedFunction;
+  SparseMatrix: SparseMatrixConstructor;
 }
 
-const name = 'sparse'
-const dependencies = ['typed', 'SparseMatrix']
+const name = 'sparse';
+const dependencies = ['typed', 'SparseMatrix'];
 
 export const createSparse = /* #__PURE__ */ factory(
   name,
@@ -52,20 +52,20 @@ export const createSparse = /* #__PURE__ */ factory(
      */
     return typed(name, {
       '': function (): any {
-        return new SparseMatrix([])
+        return new SparseMatrix([]);
       },
 
       string: function (datatype: string): any {
-        return new SparseMatrix([], datatype)
+        return new SparseMatrix([], datatype);
       },
 
       'Array | Matrix': function (data: any): any {
-        return new SparseMatrix(data)
+        return new SparseMatrix(data);
       },
 
       'Array | Matrix, string': function (data: any, datatype: string): any {
-        return new SparseMatrix(data, datatype)
-      }
-    })
+        return new SparseMatrix(data, datatype);
+      },
+    });
   }
-)
+);

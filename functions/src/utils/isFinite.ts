@@ -1,19 +1,16 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction as TypedFn, Matrix } from '../types.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction as TypedFn, Matrix } from '../types.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for isFinite
 interface IsFiniteDependencies {
-  typed: TypedFunction
-  isBounded: (x: unknown) => boolean
-  map: (
-    arr: unknown[] | Matrix,
-    fn: (x: unknown) => boolean
-  ) => unknown[] | Matrix
+  typed: TypedFunction;
+  isBounded: (x: unknown) => boolean;
+  map: (arr: unknown[] | Matrix, fn: (x: unknown) => boolean) => unknown[] | Matrix;
 }
 
-const name = 'isFinite'
-const dependencies = ['typed', 'isBounded', 'map']
+const name = 'isFinite';
+const dependencies = ['typed', 'isBounded', 'map'];
 
 export const createIsFinite = /* #__PURE__ */ factory(
   name,
@@ -50,9 +47,8 @@ export const createIsFinite = /* #__PURE__ */ factory(
      * @return {boolean | Array | Matrix}
      */
     return typed(name, {
-      'Array | Matrix': (A: unknown[] | Matrix): unknown[] | Matrix =>
-        map(A, isBounded),
-      any: (x: unknown): boolean => isBounded(x)
-    }) as unknown as TypedFn
+      'Array | Matrix': (A: unknown[] | Matrix): unknown[] | Matrix => map(A, isBounded),
+      any: (x: unknown): boolean => isBounded(x),
+    }) as unknown as TypedFn;
   }
-)
+);

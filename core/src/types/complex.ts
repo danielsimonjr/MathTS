@@ -544,10 +544,7 @@ export class Complex implements IComplex {
    * Check equality within tolerance
    */
   equals(other: Complex, epsilon: number = 1e-12): boolean {
-    return (
-      Math.abs(this.re - other.re) < epsilon &&
-      Math.abs(this.im - other.im) < epsilon
-    );
+    return Math.abs(this.re - other.re) < epsilon && Math.abs(this.im - other.im) < epsilon;
   }
 
   /**

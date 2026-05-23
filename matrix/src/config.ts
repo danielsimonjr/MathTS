@@ -239,10 +239,7 @@ function mergeConfig(base: MatrixConfig, override: Partial<MatrixConfig>): Matri
 /**
  * Set backend preference
  */
-export function setBackendPreference(
-  backend: BackendType,
-  preference: BackendPreference
-): void {
+export function setBackendPreference(backend: BackendType, preference: BackendPreference): void {
   if (backend === 'parallel') return; // Not configurable
 
   setConfig({
@@ -259,10 +256,7 @@ export function setBackendPreference(
 /**
  * Set backend threshold
  */
-export function setBackendThreshold(
-  backend: BackendType,
-  threshold: number
-): void {
+export function setBackendThreshold(backend: BackendType, threshold: number): void {
   if (backend === 'parallel') return;
 
   setConfig({
@@ -279,10 +273,7 @@ export function setBackendThreshold(
 /**
  * Enable or disable a backend
  */
-export function setBackendEnabled(
-  backend: BackendType,
-  enabled: boolean
-): void {
+export function setBackendEnabled(backend: BackendType, enabled: boolean): void {
   if (backend === 'parallel' || backend === 'js') return; // Always enabled
 
   setConfig({
@@ -307,9 +298,10 @@ export function getRecommendedBackend(
 
   // Check GPU first (highest priority for large data)
   if (backends.gpu.enabled && backends.gpu.preference !== 'disable') {
-    const threshold = operation && backends.gpu.operationThresholds?.[operation]
-      ? backends.gpu.operationThresholds[operation]!
-      : backends.gpu.threshold;
+    const threshold =
+      operation && backends.gpu.operationThresholds?.[operation]
+        ? backends.gpu.operationThresholds[operation]!
+        : backends.gpu.threshold;
 
     if (elementCount >= threshold) {
       return 'gpu';
@@ -318,9 +310,10 @@ export function getRecommendedBackend(
 
   // Check WASM
   if (backends.wasm.enabled && backends.wasm.preference !== 'disable') {
-    const threshold = operation && backends.wasm.operationThresholds?.[operation]
-      ? backends.wasm.operationThresholds[operation]!
-      : backends.wasm.threshold;
+    const threshold =
+      operation && backends.wasm.operationThresholds?.[operation]
+        ? backends.wasm.operationThresholds[operation]!
+        : backends.wasm.threshold;
 
     if (elementCount >= threshold) {
       return 'wasm';

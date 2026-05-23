@@ -427,8 +427,7 @@ export const det = createDet(factoryScope as any);
 factoryScope.det = det;
 
 // reshape needs isInteger — provide a simple stub
-factoryScope.isInteger = (x: any) =>
-  typeof x === 'number' && Number.isInteger(x);
+factoryScope.isInteger = (x: any) => typeof x === 'number' && Number.isInteger(x);
 export const reshape = createReshape(factoryScope as any);
 factoryScope.reshape = reshape;
 
@@ -1311,24 +1310,60 @@ factoryScope.lyap = lyap;
 // ---------------------------------------------------------------------------
 
 import {
-  createSpeedOfLight, createGravitationConstant, createPlanckConstant,
-  createReducedPlanckConstant, createMagneticConstant, createElectricConstant,
-  createVacuumImpedance, createCoulomb, createCoulombConstant,
-  createElementaryCharge, createBohrMagneton, createConductanceQuantum,
-  createInverseConductanceQuantum, createMagneticFluxQuantum, createNuclearMagneton,
-  createKlitzing, createJosephson, createFaraday, createFineStructure,
-  createBoltzmann, createGasConstant, createMolarVolume, createMolarMass,
-  createMolarMassC12, createMolarPlanckConstant, createAvogadro, createLoschmidt,
-  createSackurTetrode, createStefanBoltzmann, createFirstRadiation,
-  createSecondRadiation, createWienDisplacement, createElectronMass,
-  createProtonMass, createNeutronMass, createDeuteronMass, createAtomicMass,
-  createBohrRadius, createClassicalElectronRadius,
+  createSpeedOfLight,
+  createGravitationConstant,
+  createPlanckConstant,
+  createReducedPlanckConstant,
+  createMagneticConstant,
+  createElectricConstant,
+  createVacuumImpedance,
+  createCoulomb,
+  createCoulombConstant,
+  createElementaryCharge,
+  createBohrMagneton,
+  createConductanceQuantum,
+  createInverseConductanceQuantum,
+  createMagneticFluxQuantum,
+  createNuclearMagneton,
+  createKlitzing,
+  createJosephson,
+  createFaraday,
+  createFineStructure,
+  createBoltzmann,
+  createGasConstant,
+  createMolarVolume,
+  createMolarMass,
+  createMolarMassC12,
+  createMolarPlanckConstant,
+  createAvogadro,
+  createLoschmidt,
+  createSackurTetrode,
+  createStefanBoltzmann,
+  createFirstRadiation,
+  createSecondRadiation,
+  createWienDisplacement,
+  createElectronMass,
+  createProtonMass,
+  createNeutronMass,
+  createDeuteronMass,
+  createAtomicMass,
+  createBohrRadius,
+  createClassicalElectronRadius,
 } from '../type/unit/physicalConstants.js';
 import {
-  createGravity, createPlanckLength, createPlanckMass, createPlanckTime,
-  createPlanckCharge, createPlanckTemperature, createHartreeEnergy,
-  createQuantumOfCirculation, createRydberg, createThomsonCrossSection,
-  createWeakMixingAngle, createEfimovFactor, createFermiCoupling,
+  createGravity,
+  createPlanckLength,
+  createPlanckMass,
+  createPlanckTime,
+  createPlanckCharge,
+  createPlanckTemperature,
+  createHartreeEnergy,
+  createQuantumOfCirculation,
+  createRydberg,
+  createThomsonCrossSection,
+  createWeakMixingAngle,
+  createEfimovFactor,
+  createFermiCoupling,
 } from '../type/unit/physicalConstants.js';
 
 export const speedOfLight = createSpeedOfLight(factoryScope as any);
@@ -1389,24 +1424,11 @@ export const fermiCoupling = createFermiCoupling(factoryScope as any);
 // Collision-free named exports — the scope already holds the constructors.
 // ---------------------------------------------------------------------------
 
-export const complex = factoryScope.complex as (
-  re?: number,
-  im?: number
-) => unknown;
-export const fraction = factoryScope.fraction as (
-  n: number,
-  d?: number
-) => unknown;
-export const bignumber = factoryScope.bignumber as (
-  x: number | string
-) => unknown;
-export const matrix = factoryScope.matrix as (
-  data?: unknown,
-  format?: string
-) => unknown;
-export const sparse = factoryScope.createSparseMatrix as (
-  data?: unknown
-) => unknown;
+export const complex = factoryScope.complex as (re?: number, im?: number) => unknown;
+export const fraction = factoryScope.fraction as (n: number, d?: number) => unknown;
+export const bignumber = factoryScope.bignumber as (x: number | string) => unknown;
+export const matrix = factoryScope.matrix as (data?: unknown, format?: string) => unknown;
+export const sparse = factoryScope.createSparseMatrix as (data?: unknown) => unknown;
 export const number = (x?: unknown): number => Number(x ?? 0);
 export const string = (x?: unknown): string => (x === undefined ? '' : String(x));
 export const boolean = (x?: unknown): boolean => Boolean(x);

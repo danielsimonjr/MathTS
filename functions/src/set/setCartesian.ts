@@ -1,11 +1,7 @@
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type {
-  MathArray,
-  Matrix,
-  MathNumericType
-} from '../../types/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathArray, Matrix, MathNumericType } from '../../types/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for setCartesian
 interface Index {
@@ -13,35 +9,21 @@ interface Index {
 }
 
 interface SetCartesianDependencies {
-  typed: TypedFunction
-  size: (arr: MathArray | Matrix) => number[]
-  subset: (arr: number[], index: Index) => number
-  compareNatural: (a: unknown, b: unknown) => number
-  Index: new (i: number) => Index
-  DenseMatrix: new (data: unknown[]) => Matrix
+  typed: TypedFunction;
+  size: (arr: MathArray | Matrix) => number[];
+  subset: (arr: number[], index: Index) => number;
+  compareNatural: (a: unknown, b: unknown) => number;
+  Index: new (i: number) => Index;
+  DenseMatrix: new (data: unknown[]) => Matrix;
 }
 
-const name = 'setCartesian'
-const dependencies = [
-  'typed',
-  'size',
-  'subset',
-  'compareNatural',
-  'Index',
-  'DenseMatrix'
-]
+const name = 'setCartesian';
+const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index', 'DenseMatrix'];
 
 export const createSetCartesian = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    size,
-    subset,
-    compareNatural,
-    Index,
-    DenseMatrix
-  }: SetCartesianDependencies) => {
+  ({ typed, size, subset, compareNatural, Index, DenseMatrix }: SetCartesianDependencies) => {
     /**
      * Create the cartesian product of two (multi)sets.
      * Multi-dimension arrays will be converted to single-dimension arrays
@@ -69,33 +51,26 @@ export const createSetCartesian = /* #__PURE__ */ factory(
         a1: MathArray | Matrix,
         a2: MathArray | Matrix
       ): MathArray | Matrix {
-        let result: MathNumericType[][] = []
+        let result: MathNumericType[][] = [];
 
-        if (
-          subset(size(a1), new Index(0)) !== 0 &&
-          subset(size(a2), new Index(0)) !== 0
-        ) {
+        if (subset(size(a1), new Index(0)) !== 0 && subset(size(a2), new Index(0)) !== 0) {
           // if any of them is empty, return empty
-          const b1 = flatten(Array.isArray(a1) ? a1 : a1.toArray()).sort(
-            compareNatural
-          )
-          const b2 = flatten(Array.isArray(a2) ? a2 : a2.toArray()).sort(
-            compareNatural
-          )
-          result = []
+          const b1 = flatten(Array.isArray(a1) ? a1 : a1.toArray()).sort(compareNatural);
+          const b2 = flatten(Array.isArray(a2) ? a2 : a2.toArray()).sort(compareNatural);
+          result = [];
           for (let i = 0; i < b1.length; i++) {
             for (let j = 0; j < b2.length; j++) {
-              result.push([b1[i], b2[j]])
+              result.push([b1[i], b2[j]]);
             }
           }
         }
         // return an array, if both inputs were arrays
         if (Array.isArray(a1) && Array.isArray(a2)) {
-          return result
+          return result;
         }
         // return a matrix otherwise
-        return new DenseMatrix(result)
-      }
-    })
+        return new DenseMatrix(result);
+      },
+    });
   }
-)
+);

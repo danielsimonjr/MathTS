@@ -21,9 +21,9 @@ export const clamp = mathTyped('clamp', {
 });
 
 // Use it with any registered type
-clamp(5, 0, 10);                       // 5
-clamp(15, 0, 10);                      // 10
-clamp(new Complex(3, 4), 0, 4);        // Complex at magnitude 4
+clamp(5, 0, 10); // 5
+clamp(15, 0, 10); // 10
+clamp(new Complex(3, 4), 0, 4); // Complex at magnitude 4
 ```
 
 ## Registering a Custom Type
@@ -35,13 +35,14 @@ import { TypeRegistry, mathTyped } from '@danielsimonjr/mathts-core';
 
 // Define a custom Quaternion type
 class Quaternion {
-  constructor(public w: number, public x: number,
-              public y: number, public z: number) {}
+  constructor(
+    public w: number,
+    public x: number,
+    public y: number,
+    public z: number
+  ) {}
   add(other: Quaternion): Quaternion {
-    return new Quaternion(
-      this.w + other.w, this.x + other.x,
-      this.y + other.y, this.z + other.z
-    );
+    return new Quaternion(this.w + other.w, this.x + other.x, this.y + other.y, this.z + other.z);
   }
 }
 
@@ -51,7 +52,8 @@ registry.registerType<Quaternion>('Quaternion', (v): v is Quaternion => v instan
 
 // Register a conversion from number → Quaternion
 registry.registerConversion<number, Quaternion>(
-  'number', 'Quaternion',
+  'number',
+  'Quaternion',
   (n) => new Quaternion(n, 0, 0, 0)
 );
 
@@ -75,7 +77,7 @@ import type { Quaternion } from './quaternion.js';
 
 // Extend add() with Quaternion support
 export const addExtended = mathTyped('add', {
-  ...add,   // carry over existing signatures
+  ...add, // carry over existing signatures
   'Quaternion, Quaternion': (a: Quaternion, b: Quaternion) => a.add(b),
 });
 ```
@@ -90,10 +92,10 @@ import { createMathTSTyped } from '@danielsimonjr/mathts-core';
 const isolated = createMathTSTyped();
 
 const double = isolated('double', {
-  'number': (x: number) => x * 2,
+  number: (x: number) => x * 2,
 });
 
-double(5);   // 10
+double(5); // 10
 ```
 
 ## Parallel Extension
@@ -105,9 +107,9 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 
 export const reciprocal = mathTyped('reciprocal', {
-  'number': (x: number) => 1 / x,
+  number: (x: number) => 1 / x,
 
-  'Float64Array': async (a: Float64Array): Promise<Float64Array> => {
+  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
     // Parallel element-wise 1/x via worker pool
     const result = await computePool.map(a, (x) => 1 / x);
     return result.result;
@@ -117,11 +119,11 @@ export const reciprocal = mathTyped('reciprocal', {
 
 ## TypeRegistry API
 
-| Method | Description |
-|---|---|
-| `registerType(name, testFn)` | Register a new type with its type-test predicate |
-| `registerConversion(from, to, convertFn)` | Register an automatic type coercion |
-| `build()` | Build a typed-function instance with all registered types |
+| Method                                    | Description                                               |
+| ----------------------------------------- | --------------------------------------------------------- |
+| `registerType(name, testFn)`              | Register a new type with its type-test predicate          |
+| `registerConversion(from, to, convertFn)` | Register an automatic type coercion                       |
+| `build()`                                 | Build a typed-function instance with all registered types |
 
 ## Key Rules
 

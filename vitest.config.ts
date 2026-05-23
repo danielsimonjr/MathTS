@@ -63,13 +63,7 @@ export default defineConfig({
         // Compat - all active
         'compat/src/**',
       ],
-      exclude: [
-        'node_modules/',
-        'dist/',
-        '**/*.d.ts',
-        '**/*.config.*',
-        '**/index.ts',
-      ],
+      exclude: ['node_modules/', 'dist/', '**/*.d.ts', '**/*.config.*', '**/index.ts'],
     },
   },
 });

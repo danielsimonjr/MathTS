@@ -77,7 +77,11 @@ console.log('AssemblyScript optimization\n===========================');
   const v = readArr(exports.nullspace(a, 3, 3));
   const count = v.length / 3;
   let maxResid = 0;
-  const A = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+  const A = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+  ];
   for (let i = 0; i < 3; i++) {
     let s = 0;
     for (let j = 0; j < 3; j++) s += A[i][j] * v[j];

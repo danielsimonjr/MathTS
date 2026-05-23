@@ -1,41 +1,41 @@
-import { factory } from '../utils/factory.js'
-import { createFloor } from './floor.js'
-import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js'
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js'
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import { createFloor } from './floor.js';
+import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js';
+import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for mod
 interface BigNumberType {
-  isZero(): boolean
-  sub(value: BigNumberType): BigNumberType
-  mul(value: BigNumberType): BigNumberType
-  div(value: BigNumberType): BigNumberType
+  isZero(): boolean;
+  sub(value: BigNumberType): BigNumberType;
+  mul(value: BigNumberType): BigNumberType;
+  div(value: BigNumberType): BigNumberType;
 }
 
 interface FractionType {
-  equals(value: number): boolean
-  sub(value: FractionType): FractionType
-  mul(value: FractionType): FractionType
-  div(value: FractionType): FractionType
+  equals(value: number): boolean;
+  sub(value: FractionType): FractionType;
+  mul(value: FractionType): FractionType;
+  div(value: FractionType): FractionType;
 }
 
 interface ModDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  round: TypedFunction
-  matrix: TypedFunction
-  equalScalar: TypedFunction
-  zeros: TypedFunction
-  DenseMatrix: unknown
-  concat: TypedFunction
+  typed: TypedFunction;
+  config: ConfigOptions;
+  round: TypedFunction;
+  matrix: TypedFunction;
+  equalScalar: TypedFunction;
+  zeros: TypedFunction;
+  DenseMatrix: unknown;
+  concat: TypedFunction;
 }
 
-const name = 'mod'
+const name = 'mod';
 const dependencies = [
   'typed',
   'config',
@@ -44,22 +44,13 @@ const dependencies = [
   'equalScalar',
   'zeros',
   'DenseMatrix',
-  'concat'
-]
+  'concat',
+];
 
 export const createMod = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    config,
-    round,
-    matrix,
-    equalScalar,
-    zeros,
-    DenseMatrix,
-    concat
-  }: ModDependencies) => {
+  ({ typed, config, round, matrix, equalScalar, zeros, DenseMatrix, concat }: ModDependencies) => {
     const floor = createFloor({
       typed,
       config,
@@ -67,18 +58,18 @@ export const createMod = /* #__PURE__ */ factory(
       matrix,
       equalScalar,
       zeros,
-      DenseMatrix
-    }) as TypedFunction
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar })
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar })
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
+      DenseMatrix,
+    }) as TypedFunction;
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Calculates the modulus, the remainder of an integer division.
@@ -120,41 +111,35 @@ export const createMod = /* #__PURE__ */ factory(
       {
         'number, number': _modNumber,
 
-        'BigNumber, BigNumber': function (
-          x: BigNumberType,
-          y: BigNumberType
-        ): BigNumberType {
-          return y.isZero() ? x : x.sub(y.mul(floor(x.div(y)) as BigNumberType))
+        'BigNumber, BigNumber': function (x: BigNumberType, y: BigNumberType): BigNumberType {
+          return y.isZero() ? x : x.sub(y.mul(floor(x.div(y)) as BigNumberType));
         },
 
         'bigint, bigint': function (x: bigint, y: bigint): bigint {
           if (y === 0n) {
-            return x
+            return x;
           }
 
           if (x < 0) {
-            const m = x % y
-            return m === 0n ? m : m + y
+            const m = x % y;
+            return m === 0n ? m : m + y;
           }
 
-          return x % y
+          return x % y;
         },
 
-        'Fraction, Fraction': function (
-          x: FractionType,
-          y: FractionType
-        ): FractionType {
-          return y.equals(0) ? x : x.sub(y.mul(floor(x.div(y)) as FractionType))
-        }
+        'Fraction, Fraction': function (x: FractionType, y: FractionType): FractionType {
+          return y.equals(0) ? x : x.sub(y.mul(floor(x.div(y)) as FractionType));
+        },
       },
       matrixAlgorithmSuite({
         SS: matAlgo05xSfSf as any,
         DS: matAlgo03xDSf as any,
         SD: matAlgo02xDS0 as any,
         Ss: matAlgo11xS0s as any,
-        sS: matAlgo12xSfs as any
+        sS: matAlgo12xSfs as any,
       })
-    )
+    );
 
     /**
      * Calculate the modulus of two numbers
@@ -170,7 +155,7 @@ export const createMod = /* #__PURE__ */ factory(
 
       // We use mathjs floor to handle errors associated with
       // precision float approximation
-      return y === 0 ? x : x - y * (floor(x / y) as number)
+      return y === 0 ? x : x - y * (floor(x / y) as number);
     }
   }
-)
+);

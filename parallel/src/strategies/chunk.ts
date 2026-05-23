@@ -66,10 +66,7 @@ const DEFAULT_CHUNK_OPTIONS: Required<ChunkOptions> = {
  * @param options - Chunking options
  * @returns Optimal number of chunks
  */
-export function calculateOptimalChunks(
-  totalElements: number,
-  options: ChunkOptions = {}
-): number {
+export function calculateOptimalChunks(totalElements: number, options: ChunkOptions = {}): number {
   const { minChunkSize, maxChunks, targetChunkSize } = {
     ...DEFAULT_CHUNK_OPTIONS,
     ...options,

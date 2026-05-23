@@ -81,12 +81,12 @@ describe('factoryScope.config', () => {
 
   it('has relTol', () => {
     expect(typeof config.relTol).toBe('number');
-    expect((config.relTol as number)).toBeGreaterThan(0);
+    expect(config.relTol as number).toBeGreaterThan(0);
   });
 
   it('has absTol', () => {
     expect(typeof config.absTol).toBe('number');
-    expect((config.absTol as number)).toBeGreaterThan(0);
+    expect(config.absTol as number).toBeGreaterThan(0);
   });
 
   it('has matrix type set to "Matrix"', () => {
@@ -99,7 +99,7 @@ describe('factoryScope.config', () => {
 
   it('has precision (BigNumber digits)', () => {
     expect(typeof config.precision).toBe('number');
-    expect((config.precision as number)).toBeGreaterThan(0);
+    expect(config.precision as number).toBeGreaterThan(0);
   });
 
   it('has predictable flag', () => {
@@ -215,13 +215,19 @@ describe('factoryScope.createDenseMatrix helper', () => {
   const create = factoryScope.createDenseMatrix as (data: unknown) => unknown;
 
   it('constructs a DenseMatrix-like object from a 2-D array', () => {
-    const m = create([[1, 2], [3, 4]]) as any;
+    const m = create([
+      [1, 2],
+      [3, 4],
+    ]) as any;
     expect(typeof m).toBe('object');
     expect(m).not.toBeNull();
   });
 
   it('result has _data property', () => {
-    const m = create([[1, 2], [3, 4]]) as any;
+    const m = create([
+      [1, 2],
+      [3, 4],
+    ]) as any;
     expect(Array.isArray(m._data)).toBe(true);
   });
 });
@@ -230,7 +236,10 @@ describe('factoryScope.createSparseMatrix helper', () => {
   const create = factoryScope.createSparseMatrix as (data: unknown) => unknown;
 
   it('constructs a SparseMatrix-like object from a 2-D array', () => {
-    const m = create([[1, 0], [0, 2]]) as any;
+    const m = create([
+      [1, 0],
+      [0, 2],
+    ]) as any;
     expect(typeof m).toBe('object');
     expect(m).not.toBeNull();
   });
@@ -248,7 +257,10 @@ describe('factoryScope.matrix factory', () => {
   });
 
   it('creates a matrix object when called with a 2-D array', () => {
-    const m = matrixFn([[1, 2], [3, 4]]) as any;
+    const m = matrixFn([
+      [1, 2],
+      [3, 4],
+    ]) as any;
     expect(typeof m).toBe('object');
     expect(m).not.toBeNull();
   });

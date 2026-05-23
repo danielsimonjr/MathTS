@@ -1,8 +1,8 @@
 /* eslint no-template-curly-in-string: "off" */
 
 // @ts-expect-error - escape-latex has no type declarations
-import escapeLatexLib from 'escape-latex'
-import { hasOwnProperty } from './object.js'
+import escapeLatexLib from 'escape-latex';
+import { hasOwnProperty } from './object.js';
 
 export const latexSymbols = {
   // GREEK LETTERS
@@ -72,8 +72,8 @@ export const latexSymbols = {
   Infinity: '\\infty',
   oo: '\\infty',
   lim: '\\lim',
-  undefined: '\\mathbf{?}'
-}
+  undefined: '\\mathbf{?}',
+};
 
 export const latexOperators = {
   transpose: '^\\top',
@@ -107,8 +107,8 @@ export const latexOperators = {
   bitOr: '|',
   and: '\\wedge',
   xor: '\\veebar',
-  or: '\\vee'
-}
+  or: '\\vee',
+};
 
 export const latexFunctions = {
   // arithmetic
@@ -130,26 +130,26 @@ export const latexFunctions = {
   hypot: '\\hypot\\left(${args}\\right)',
   log: {
     1: '\\ln\\left(${args[0]}\\right)',
-    2: '\\log_{${args[1]}}\\left(${args[0]}\\right)'
+    2: '\\log_{${args[1]}}\\left(${args[0]}\\right)',
   },
   log10: { 1: '\\log_{10}\\left(${args[0]}\\right)' },
   log1p: {
     1: '\\ln\\left(${args[0]}+1\\right)',
-    2: '\\log_{${args[1]}}\\left(${args[0]}+1\\right)'
+    2: '\\log_{${args[1]}}\\left(${args[0]}+1\\right)',
   },
   log2: '\\log_{2}\\left(${args[0]}\\right)',
   mod: { 2: `\\left(\${args[0]}${latexOperators.mod}\${args[1]}\\right)` },
   multiply: { 2: `\\left(\${args[0]}${latexOperators.multiply}\${args[1]}\\right)` },
   norm: {
     1: '\\left\\|${args[0]}\\right\\|',
-    2: undefined as any // use default template
+    2: undefined as any, // use default template
   },
   nthRoot: { 2: '\\sqrt[${args[1]}]{${args[0]}}' },
   nthRoots: { 2: '\\{y : y^${args[1]} = {${args[0]}}\\}' },
   pow: { 2: `\\left(\${args[0]}\\right)${latexOperators.pow}{\${args[1]}}` },
   round: {
     1: '\\left\\lfloor${args[0]}\\right\\rceil',
-    2: undefined as any // use default template
+    2: undefined as any, // use default template
   },
   sign: { 1: '\\mathrm{${name}}\\left(${args[0]}\\right)' },
   sqrt: { 1: '\\sqrt{${args[0]}}' },
@@ -252,73 +252,72 @@ export const latexFunctions = {
   // utils
   numeric: function (node: any, options: any) {
     // Not sure if this is strictly right but should work correctly for the vast majority of use cases.
-    return node.args[0].toTex()
+    return node.args[0].toTex();
   },
 
   // type
   number: {
     0: '0',
     1: '\\left(${args[0]}\\right)',
-    2: '\\left(\\left(${args[0]}\\right)${args[1]}\\right)'
+    2: '\\left(\\left(${args[0]}\\right)${args[1]}\\right)',
   },
   string: {
     0: '\\mathtt{""}',
-    1: '\\mathrm{string}\\left(${args[0]}\\right)'
+    1: '\\mathrm{string}\\left(${args[0]}\\right)',
   },
   bignumber: {
     0: '0',
-    1: '\\left(${args[0]}\\right)'
+    1: '\\left(${args[0]}\\right)',
   },
   bigint: {
     0: '0',
-    1: '\\left(${args[0]}\\right)'
+    1: '\\left(${args[0]}\\right)',
   },
   complex: {
     0: '0',
     1: '\\left(${args[0]}\\right)',
-    2: `\\left(\\left(\${args[0]}\\right)+${latexSymbols.i}\\cdot\\left(\${args[1]}\\right)\\right)`
+    2: `\\left(\\left(\${args[0]}\\right)+${latexSymbols.i}\\cdot\\left(\${args[1]}\\right)\\right)`,
   },
   matrix: {
     0: '\\begin{bmatrix}\\end{bmatrix}',
     1: '\\left(${args[0]}\\right)',
-    2: '\\left(${args[0]}\\right)'
+    2: '\\left(${args[0]}\\right)',
   },
   sparse: {
     0: '\\begin{bsparse}\\end{bsparse}',
-    1: '\\left(${args[0]}\\right)'
+    1: '\\left(${args[0]}\\right)',
   },
   unit: {
     1: '\\left(${args[0]}\\right)',
-    2: '\\left(\\left(${args[0]}\\right)${args[1]}\\right)'
-  }
+    2: '\\left(\\left(${args[0]}\\right)${args[1]}\\right)',
+  },
+};
 
-}
-
-export const defaultTemplate = '\\mathrm{${name}}\\left(${args}\\right)'
+export const defaultTemplate = '\\mathrm{${name}}\\left(${args}\\right)';
 
 const latexUnits = {
-  deg: '^\\circ'
-}
+  deg: '^\\circ',
+};
 
-export function escapeLatex (string: any) {
-  return escapeLatexLib(string, { preserveFormatting: true })
+export function escapeLatex(string: any) {
+  return escapeLatexLib(string, { preserveFormatting: true });
 }
 
 // @param {string} name
 // @param {boolean} isUnit
-export function toSymbol (name: any, isUnit: any) {
-  isUnit = typeof isUnit === 'undefined' ? false : isUnit
+export function toSymbol(name: any, isUnit: any) {
+  isUnit = typeof isUnit === 'undefined' ? false : isUnit;
   if (isUnit) {
     if (hasOwnProperty(latexUnits, name)) {
-      return (latexUnits as Record<string, string>)[name]
+      return (latexUnits as Record<string, string>)[name];
     }
 
-    return '\\mathrm{' + escapeLatex(name) + '}'
+    return '\\mathrm{' + escapeLatex(name) + '}';
   }
 
   if (hasOwnProperty(latexSymbols, name)) {
-    return (latexSymbols as Record<string, string>)[name]
+    return (latexSymbols as Record<string, string>)[name];
   }
 
-  return escapeLatex(name)
+  return escapeLatex(name);
 }

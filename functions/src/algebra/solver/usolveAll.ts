@@ -1,51 +1,47 @@
-import { factory } from '../../utils/factory.js'
-import { createSolveValidation } from './utils/solveValidation.js'
+import { factory } from '../../utils/factory.js';
+import { createSolveValidation } from './utils/solveValidation.js';
 
 // Type definitions
-type ScalarValue = number | bigint | { re: number; im: number } | unknown
+type ScalarValue = number | bigint | { re: number; im: number } | unknown;
 
 interface TypedFunction {
-  <T>(name: string, signatures: Record<string, (...args: unknown[]) => T>): T
+  <T>(name: string, signatures: Record<string, (...args: unknown[]) => T>): T;
 }
 
 interface MatrixConstructor {
-  (data: ScalarValue[] | ScalarValue[][]): DenseMatrix | SparseMatrix
+  (data: ScalarValue[] | ScalarValue[][]): DenseMatrix | SparseMatrix;
 }
 
 export interface DenseMatrix {
-  type: 'DenseMatrix'
-  isDenseMatrix: true
-  _data: ScalarValue[][]
-  _size: number[]
-  _datatype?: string
-  valueOf(): ScalarValue[][]
+  type: 'DenseMatrix';
+  isDenseMatrix: true;
+  _data: ScalarValue[][];
+  _size: number[];
+  _datatype?: string;
+  valueOf(): ScalarValue[][];
 }
 
 interface SparseMatrix {
-  type: 'SparseMatrix'
-  isSparseMatrix: true
-  _values?: ScalarValue[]
-  _index: number[]
-  _ptr: number[]
-  _size: number[]
-  _datatype?: string
-  valueOf(): ScalarValue[][]
+  type: 'SparseMatrix';
+  isSparseMatrix: true;
+  _values?: ScalarValue[];
+  _index: number[];
+  _ptr: number[];
+  _size: number[];
+  _datatype?: string;
+  valueOf(): ScalarValue[][];
 }
 
 interface DenseMatrixConstructor {
-  new (data: {
-    data: ScalarValue[][]
-    size: number[]
-    datatype?: string
-  }): DenseMatrix
+  new (data: { data: ScalarValue[][]; size: number[]; datatype?: string }): DenseMatrix;
 }
 
 interface ScalarFunction {
-  (a: ScalarValue, b: ScalarValue): ScalarValue
+  (a: ScalarValue, b: ScalarValue): ScalarValue;
 }
 
 interface EqualScalarFunction {
-  (a: ScalarValue, b: ScalarValue): boolean
+  (a: ScalarValue, b: ScalarValue): boolean;
 }
 
 interface SolveValidationFunction {
@@ -53,20 +49,20 @@ interface SolveValidationFunction {
     matrix: DenseMatrix | SparseMatrix,
     b: ScalarValue[][] | DenseMatrix | SparseMatrix,
     copy: boolean
-  ): DenseMatrix
+  ): DenseMatrix;
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  divideScalar: ScalarFunction
-  multiplyScalar: ScalarFunction
-  subtractScalar: ScalarFunction
-  equalScalar: EqualScalarFunction
-  DenseMatrix: DenseMatrixConstructor
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  divideScalar: ScalarFunction;
+  multiplyScalar: ScalarFunction;
+  subtractScalar: ScalarFunction;
+  equalScalar: EqualScalarFunction;
+  DenseMatrix: DenseMatrixConstructor;
 }
 
-const name = 'usolveAll'
+const name = 'usolveAll';
 const dependencies = [
   'typed',
   'matrix',
@@ -74,8 +70,8 @@ const dependencies = [
   'multiplyScalar',
   'subtractScalar',
   'equalScalar',
-  'DenseMatrix'
-] as const
+  'DenseMatrix',
+] as const;
 
 export const createUsolveAll = /* #__PURE__ */ factory(
   name,
@@ -87,11 +83,11 @@ export const createUsolveAll = /* #__PURE__ */ factory(
     multiplyScalar,
     subtractScalar,
     equalScalar,
-    DenseMatrix
+    DenseMatrix,
   }: Dependencies) => {
     const solveValidation = createSolveValidation({
-      DenseMatrix: DenseMatrix as any
-    }) as unknown as SolveValidationFunction
+      DenseMatrix: DenseMatrix as any,
+    }) as unknown as SolveValidationFunction;
 
     /**
      * Finds all solutions of a linear equation system by backward substitution. Matrix must be an upper triangular matrix.
@@ -122,25 +118,25 @@ export const createUsolveAll = /* #__PURE__ */ factory(
         m: SparseMatrix,
         b: ScalarValue[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix[] {
-        return _sparseBackwardSubstitution(m, b)
+        return _sparseBackwardSubstitution(m, b);
       },
 
       'DenseMatrix, Array | Matrix': function (
         m: DenseMatrix,
         b: ScalarValue[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix[] {
-        return _denseBackwardSubstitution(m, b)
+        return _denseBackwardSubstitution(m, b);
       },
 
       'Array, Array | Matrix': function (
         a: ScalarValue[][],
         b: ScalarValue[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix[] {
-        const m = matrix(a) as DenseMatrix
-        const R = _denseBackwardSubstitution(m, b)
-        return R.map((r: DenseMatrix) => r.valueOf()) as unknown as DenseMatrix[]
-      }
-    })
+        const m = matrix(a) as DenseMatrix;
+        const R = _denseBackwardSubstitution(m, b);
+        return R.map((r: DenseMatrix) => r.valueOf()) as unknown as DenseMatrix[];
+      },
+    });
 
     function _denseBackwardSubstitution(
       m: DenseMatrix,
@@ -151,55 +147,53 @@ export const createUsolveAll = /* #__PURE__ */ factory(
 
       // array of right-hand sides
       const B: ScalarValue[][] = [
-        solveValidation(m, b_, true)._data.map(
-          (e: ScalarValue[]) => e[0]
-        ) as ScalarValue[]
-      ]
+        solveValidation(m, b_, true)._data.map((e: ScalarValue[]) => e[0]) as ScalarValue[],
+      ];
 
-      const M = m._data
-      const rows = m._size[0]
-      const columns = m._size[1]
+      const M = m._data;
+      const rows = m._size[0];
+      const columns = m._size[1];
 
       // loop columns backwards
       for (let i = columns - 1; i >= 0; i--) {
-        let L = B.length
+        let L = B.length;
 
         // loop right-hand sides
         for (let k = 0; k < L; k++) {
-          const b = B[k]
+          const b = B[k];
 
           if (!equalScalar(M[i][i], 0)) {
             // non-singular row
 
-            b[i] = divideScalar(b[i], M[i][i])
+            b[i] = divideScalar(b[i], M[i][i]);
 
             for (let j = i - 1; j >= 0; j--) {
               // b[j] -= b[i] * M[j,i]
-              b[j] = subtractScalar(b[j], multiplyScalar(b[i], M[j][i]))
+              b[j] = subtractScalar(b[j], multiplyScalar(b[i], M[j][i]));
             }
           } else if (!equalScalar(b[i], 0)) {
             // singular row, nonzero RHS
 
             if (k === 0) {
               // There is no valid solution
-              return []
+              return [];
             } else {
               // This RHS is invalid but other solutions may still exist
-              B.splice(k, 1)
-              k -= 1
-              L -= 1
+              B.splice(k, 1);
+              k -= 1;
+              L -= 1;
             }
           } else if (k === 0) {
             // singular row, RHS is zero
 
-            const bNew = [...b]
-            bNew[i] = 1
+            const bNew = [...b];
+            bNew[i] = 1;
 
             for (let j = i - 1; j >= 0; j--) {
-              bNew[j] = subtractScalar(bNew[j], M[j][i])
+              bNew[j] = subtractScalar(bNew[j], M[j][i]);
             }
 
-            B.push(bNew)
+            B.push(bNew);
           }
         }
       }
@@ -208,9 +202,9 @@ export const createUsolveAll = /* #__PURE__ */ factory(
         (x: ScalarValue[]) =>
           new DenseMatrix({
             data: x.map((e: ScalarValue) => [e]),
-            size: [rows, 1]
+            size: [rows, 1],
           })
-      )
+      );
     }
 
     function _sparseBackwardSubstitution(
@@ -219,83 +213,81 @@ export const createUsolveAll = /* #__PURE__ */ factory(
     ): DenseMatrix[] {
       // array of right-hand sides
       const B: ScalarValue[][] = [
-        solveValidation(m, b_, true)._data.map(
-          (e: ScalarValue[]) => e[0]
-        ) as ScalarValue[]
-      ]
+        solveValidation(m, b_, true)._data.map((e: ScalarValue[]) => e[0]) as ScalarValue[],
+      ];
 
-      const rows = m._size[0]
-      const columns = m._size[1]
+      const rows = m._size[0];
+      const columns = m._size[1];
 
-      const values = m._values
-      const index = m._index
-      const ptr = m._ptr
+      const values = m._values;
+      const index = m._index;
+      const ptr = m._ptr;
 
       // loop columns backwards
       for (let i = columns - 1; i >= 0; i--) {
-        let L = B.length
+        let L = B.length;
 
         // loop right-hand sides
         for (let k = 0; k < L; k++) {
-          const b = B[k]
+          const b = B[k];
 
           // values & indices (column i)
-          const iValues: ScalarValue[] = []
-          const iIndices: number[] = []
+          const iValues: ScalarValue[] = [];
+          const iIndices: number[] = [];
 
           // first & last indeces in column
-          const firstIndex = ptr[i]
-          const lastIndex = ptr[i + 1]
+          const firstIndex = ptr[i];
+          const lastIndex = ptr[i + 1];
 
           // find the value at [i, i]
-          let Mii: ScalarValue = 0
+          let Mii: ScalarValue = 0;
           for (let j = lastIndex - 1; j >= firstIndex; j--) {
-            const J = index[j]
+            const J = index[j];
             // check row
             if (J === i) {
-              Mii = values![j]
+              Mii = values![j];
             } else if (J < i) {
               // store upper triangular
-              iValues.push(values![j])
-              iIndices.push(J)
+              iValues.push(values![j]);
+              iIndices.push(J);
             }
           }
 
           if (!equalScalar(Mii, 0)) {
             // non-singular row
 
-            b[i] = divideScalar(b[i], Mii)
+            b[i] = divideScalar(b[i], Mii);
 
             // loop upper triangular
             for (let j = 0, lastIdx = iIndices.length; j < lastIdx; j++) {
-              const J = iIndices[j]
-              b[J] = subtractScalar(b[J], multiplyScalar(b[i], iValues[j]))
+              const J = iIndices[j];
+              b[J] = subtractScalar(b[J], multiplyScalar(b[i], iValues[j]));
             }
           } else if (!equalScalar(b[i], 0)) {
             // singular row, nonzero RHS
 
             if (k === 0) {
               // There is no valid solution
-              return []
+              return [];
             } else {
               // This RHS is invalid but other solutions may still exist
-              B.splice(k, 1)
-              k -= 1
-              L -= 1
+              B.splice(k, 1);
+              k -= 1;
+              L -= 1;
             }
           } else if (k === 0) {
             // singular row, RHS is zero
 
-            const bNew = [...b]
-            bNew[i] = 1
+            const bNew = [...b];
+            bNew[i] = 1;
 
             // loop upper triangular
             for (let j = 0, lastIdx = iIndices.length; j < lastIdx; j++) {
-              const J = iIndices[j]
-              bNew[J] = subtractScalar(bNew[J], iValues[j])
+              const J = iIndices[j];
+              bNew[J] = subtractScalar(bNew[J], iValues[j]);
             }
 
-            B.push(bNew)
+            B.push(bNew);
           }
         }
       }
@@ -304,9 +296,9 @@ export const createUsolveAll = /* #__PURE__ */ factory(
         (x: ScalarValue[]) =>
           new DenseMatrix({
             data: x.map((e: ScalarValue) => [e]),
-            size: [rows, 1]
+            size: [rows, 1],
           })
-      )
+      );
     }
   }
-)
+);

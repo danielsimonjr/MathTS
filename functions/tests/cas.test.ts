@@ -144,29 +144,21 @@ describe('CAS: Calculus', () => {
 
   describe('directionalDerivative', () => {
     it('should compute directional derivative along x-axis', () => {
-      const result = directionalDerivative(
-        'x^2 + y^2', ['x', 'y'], [1, 0], { x: 3, y: 4 },
-      );
+      const result = directionalDerivative('x^2 + y^2', ['x', 'y'], [1, 0], { x: 3, y: 4 });
       expect(result).toBeCloseTo(6, 4);
     });
 
     it('should compute directional derivative along diagonal', () => {
-      const result = directionalDerivative(
-        'x + y', ['x', 'y'], [1, 1], { x: 0, y: 0 },
-      );
+      const result = directionalDerivative('x + y', ['x', 'y'], [1, 1], { x: 0, y: 0 });
       expect(result).toBeCloseTo(Math.sqrt(2), 4);
     });
 
     it('should throw for zero direction', () => {
-      expect(() =>
-        directionalDerivative('x', ['x'], [0], { x: 1 }),
-      ).toThrow();
+      expect(() => directionalDerivative('x', ['x'], [0], { x: 1 })).toThrow();
     });
 
     it('should throw for mismatched lengths', () => {
-      expect(() =>
-        directionalDerivative('x', ['x', 'y'], [1], { x: 1, y: 1 }),
-      ).toThrow();
+      expect(() => directionalDerivative('x', ['x', 'y'], [1], { x: 1, y: 1 })).toThrow();
     });
   });
 
@@ -211,9 +203,7 @@ describe('CAS: Calculus', () => {
 
   describe('divergence', () => {
     it('should compute divergence of [x^2, y^2, z^2]', () => {
-      const result = divergence(
-        ['x^2', 'y^2', 'z^2'], ['x', 'y', 'z'], { x: 1, y: 2, z: 3 },
-      );
+      const result = divergence(['x^2', 'y^2', 'z^2'], ['x', 'y', 'z'], { x: 1, y: 2, z: 3 });
       expect(result).toBeCloseTo(12, 4); // 2 + 4 + 6
     });
 
@@ -223,9 +213,7 @@ describe('CAS: Calculus', () => {
     });
 
     it('should throw for mismatched lengths', () => {
-      expect(() =>
-        divergence(['x', 'y'], ['x', 'y', 'z'], { x: 0, y: 0, z: 0 }),
-      ).toThrow();
+      expect(() => divergence(['x', 'y'], ['x', 'y', 'z'], { x: 0, y: 0, z: 0 })).toThrow();
     });
   });
 });

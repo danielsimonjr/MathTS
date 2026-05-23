@@ -29,10 +29,7 @@ export {
 } from './GPUContext.js';
 
 // Buffer Pool
-export {
-  BufferPool,
-  type BufferPoolOptions,
-} from './BufferPool.js';
+export { BufferPool, type BufferPoolOptions } from './BufferPool.js';
 
 // Shader Manager
 export {

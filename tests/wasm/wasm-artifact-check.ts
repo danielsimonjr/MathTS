@@ -12,8 +12,8 @@
  * and emit a loud, single warning via {@link warnWasmArtifactsMissing} so a
  * contributor can tell an environmental skip from a real failure.
  */
-import { existsSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Path to the AssemblyScript WASM binary that `WasmLoader` loads by default
@@ -25,17 +25,17 @@ const WASM_BINARY_PATHS = [
   // Default (Rust-after-cutover) and AssemblyScript binary names.
   '../../lib/wasm/mathts.wasm',
   '../../lib/wasm/mathts-as.wasm',
-].map((rel) => fileURLToPath(new URL(rel, import.meta.url)))
+].map((rel) => fileURLToPath(new URL(rel, import.meta.url)));
 
 /**
  * True when at least one compiled `.wasm` artifact is present on disk.
  * When false, WASM-dependent suites should skip rather than fail.
  */
 export function wasmArtifactAvailable(): boolean {
-  return WASM_BINARY_PATHS.some((p) => existsSync(p))
+  return WASM_BINARY_PATHS.some((p) => existsSync(p));
 }
 
-let warned = false
+let warned = false;
 
 /**
  * Emit a single loud warning explaining why WASM suites were skipped.
@@ -44,12 +44,12 @@ let warned = false
  * @param skippedSuiteCount - number of suites being skipped by the caller
  */
 export function warnWasmArtifactsMissing(skippedSuiteCount: number): void {
-  if (warned) return
-  warned = true
+  if (warned) return;
+  warned = true;
   console.warn(
     `\n[WASM] WASM artifacts not built — run \`npm run build:wasm\` ` +
       `(or \`npm run build:wasm:rust\`). ` +
       `Skipping ${skippedSuiteCount} WASM-dependent test suite(s) ` +
-      `(lib/wasm/mathts.wasm is absent).\n`,
-  )
+      `(lib/wasm/mathts.wasm is absent).\n`
+  );
 }

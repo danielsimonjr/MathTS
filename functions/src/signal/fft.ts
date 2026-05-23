@@ -147,7 +147,7 @@ function fftCore(data: ComplexNumber[], inverse: boolean = false): ComplexNumber
   }
 
   // Bit-reverse reorder
-  let result = bitReverseReorder(data);
+  const result = bitReverseReorder(data);
 
   // Direction factor for inverse FFT
   const direction = inverse ? 1 : -1;
@@ -275,10 +275,7 @@ export function fft(signal: number[] | Float64Array | ComplexNumber[]): FFTResul
  * // recovered ≈ signal
  * ```
  */
-export function ifft(
-  spectrum: ComplexNumber[],
-  originalLength?: number
-): ComplexNumber[] {
+export function ifft(spectrum: ComplexNumber[], originalLength?: number): ComplexNumber[] {
   if (spectrum.length === 0) {
     return [];
   }
@@ -360,9 +357,7 @@ export function fftFrequencies(n: number, sampleRate: number = 1): number[] {
  * @param matrix - 2D array of real or complex values
  * @returns 2D frequency spectrum
  */
-export function fft2(
-  matrix: number[][] | ComplexNumber[][]
-): ComplexNumber[][] {
+export function fft2(matrix: number[][] | ComplexNumber[][]): ComplexNumber[][] {
   const rows = matrix.length;
   if (rows === 0) return [];
 
@@ -370,7 +365,7 @@ export function fft2(
   if (cols === 0) return [];
 
   // FFT each row
-  let rowFFTs: ComplexNumber[][] = [];
+  const rowFFTs: ComplexNumber[][] = [];
   for (let i = 0; i < rows; i++) {
     const row = matrix[i];
     const isReal = typeof row[0] === 'number';

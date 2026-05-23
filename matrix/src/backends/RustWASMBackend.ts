@@ -90,9 +90,7 @@ export class RustWASMBackend implements MatrixBackend {
       throw new Error('WebAssembly is not available in this environment');
     }
 
-    const loaded = await rustWasmLoader.load(
-      this.config.wasmPath || undefined
-    );
+    const loaded = await rustWasmLoader.load(this.config.wasmPath || undefined);
 
     if (loaded) {
       this.exports = rustWasmLoader.getExports();
@@ -252,11 +250,7 @@ export class RustWASMBackend implements MatrixBackend {
       const outPtr = rustWasmLoader.allocF64(resultSize);
 
       // Use SIMD-accelerated multiply (faer-based)
-      this.exports!.multiplyDenseSIMD(
-        aPtr, a.rows, a.cols,
-        bPtr, b.rows, b.cols,
-        outPtr
-      );
+      this.exports!.multiplyDenseSIMD(aPtr, a.rows, a.cols, bPtr, b.rows, b.cols, outPtr);
 
       const result = rustWasmLoader.readF64(outPtr, resultSize);
       return DenseMatrix.fromFlat(a.rows, b.cols, Array.from(result));
@@ -369,7 +363,10 @@ export class RustWASMBackend implements MatrixBackend {
   /**
    * Eigenvalue decomposition for symmetric matrices using Rust WASM.
    */
-  async eigsSymmetric(a: DenseMatrix, precision: number = 1e-12): Promise<{
+  async eigsSymmetric(
+    a: DenseMatrix,
+    precision: number = 1e-12
+  ): Promise<{
     eigenvalues: Float64Array;
     eigenvectors: DenseMatrix;
     iterations: number;
@@ -390,12 +387,21 @@ export class RustWASMBackend implements MatrixBackend {
     const workPtr = rustWasmLoader.allocF64(n * n);
 
     const iterations = this.exports.eigsSymmetric(
-      aPtr, n, precision, eigvalsPtr, eigvecsPtr, workPtr
+      aPtr,
+      n,
+      precision,
+      eigvalsPtr,
+      eigvecsPtr,
+      workPtr
     );
 
     return {
       eigenvalues: rustWasmLoader.readF64(eigvalsPtr, n),
-      eigenvectors: DenseMatrix.fromFlat(n, n, Array.from(rustWasmLoader.readF64(eigvecsPtr, n * n))),
+      eigenvectors: DenseMatrix.fromFlat(
+        n,
+        n,
+        Array.from(rustWasmLoader.readF64(eigvecsPtr, n * n))
+      ),
       iterations,
     };
   }

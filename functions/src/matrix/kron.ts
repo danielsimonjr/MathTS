@@ -1,78 +1,74 @@
-import { arraySize as size } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
+import { arraySize as size } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Type definitions
 interface Matrix {
-  toArray(): any[]
+  toArray(): any[];
 }
 
 interface TypedFunction<T = any> {
-  (...args: any[]): T
+  (...args: any[]): T;
 }
 
 interface MatrixConstructor {
-  (data: any[]): Matrix
+  (data: any[]): Matrix;
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  multiplyScalar: TypedFunction
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  multiplyScalar: TypedFunction;
 }
 
 // Minimum total elements for WASM to be beneficial
-const WASM_KRON_THRESHOLD = 64
+const WASM_KRON_THRESHOLD = 64;
 
 /**
  * Check if a 2D array contains only plain numbers
  */
 function isPlainNumber2D(arr: any[][]): boolean {
   for (let i = 0; i < arr.length; i++) {
-    const row = arr[i]
+    const row = arr[i];
     for (let j = 0; j < row.length; j++) {
       if (typeof row[j] !== 'number') {
-        return false
+        return false;
       }
     }
   }
-  return true
+  return true;
 }
 
 /**
  * Flatten a 2D array to Float64Array in row-major order
  */
 function flatten2D(arr: number[][], rows: number, cols: number): Float64Array {
-  const result = new Float64Array(rows * cols)
+  const result = new Float64Array(rows * cols);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = arr[i][j]
+      result[i * cols + j] = arr[i][j];
     }
   }
-  return result
+  return result;
 }
 
 /**
  * Unflatten a Float64Array to 2D array
  */
-function unflatten2D(
-  flat: Float64Array,
-  rows: number,
-  cols: number
-): number[][] {
-  const result: number[][] = []
+function unflatten2D(flat: Float64Array, rows: number, cols: number): number[][] {
+  const result: number[][] = [];
   for (let i = 0; i < rows; i++) {
-    const row: number[] = []
+    const row: number[] = [];
     for (let j = 0; j < cols; j++) {
-      row.push(flat[i * cols + j])
+      row.push(flat[i * cols + j]);
     }
-    result.push(row)
+    result.push(row);
   }
-  return result
+  return result;
 }
 
-const name = 'kron'
-const dependencies = ['typed', 'matrix', 'multiplyScalar']
+const name = 'kron';
+const dependencies = ['typed', 'matrix', 'multiplyScalar'];
 
 export const createKron = /* #__PURE__ */ factory(
   name,
@@ -107,19 +103,19 @@ export const createKron = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Matrix, Matrix': function (x: Matrix, y: Matrix): Matrix {
-        return matrix(_kron(x.toArray(), y.toArray()))
+        return matrix(_kron(x.toArray(), y.toArray()));
       },
 
       'Matrix, Array': function (x: Matrix, y: any[]): Matrix {
-        return matrix(_kron(x.toArray(), y))
+        return matrix(_kron(x.toArray(), y));
       },
 
       'Array, Matrix': function (x: any[], y: Matrix): Matrix {
-        return matrix(_kron(x, y.toArray()))
+        return matrix(_kron(x, y.toArray()));
       },
 
-      'Array, Array': _kron
-    })
+      'Array, Array': _kron,
+    });
 
     /**
      * Calculate the Kronecker product of two (1-dimensional) vectors,
@@ -133,7 +129,7 @@ export const createKron = /* #__PURE__ */ factory(
       // TODO in core overhaul: would be faster to see if we can choose a
       // particular implementation of multiplyScalar at the beginning,
       // rather than re-dispatch for _every_ ordered pair of entries.
-      return a.flatMap((x) => b.map((y) => multiplyScalar(x, y)))
+      return a.flatMap((x) => b.map((y) => multiplyScalar(x, y)));
     }
 
     /**
@@ -146,26 +142,26 @@ export const createKron = /* #__PURE__ */ factory(
      */
     function _kron(a: any[], b: any[], d: number = -1): any[] {
       if (d < 0) {
-        let adim = size(a).length
-        let bdim = size(b).length
-        d = Math.max(adim, bdim)
-        while (adim++ < d) a = [a]
-        while (bdim++ < d) b = [b]
+        let adim = size(a).length;
+        let bdim = size(b).length;
+        d = Math.max(adim, bdim);
+        while (adim++ < d) a = [a];
+        while (bdim++ < d) b = [b];
       }
 
-      if (d === 1) return _kron1d(a, b)
+      if (d === 1) return _kron1d(a, b);
 
       // Try WASM for 2D arrays with plain numbers
       if (d === 2) {
-        const aSize = size(a)
-        const bSize = size(b)
-        const aRows = aSize[0]
-        const aCols = aSize[1]
-        const bRows = bSize[0]
-        const bCols = bSize[1]
-        const totalElements = aRows * aCols * bRows * bCols
+        const aSize = size(a);
+        const bSize = size(b);
+        const aRows = aSize[0];
+        const aCols = aSize[1];
+        const bRows = bSize[0];
+        const bCols = bSize[1];
+        const totalElements = aRows * aCols * bRows * bCols;
 
-        const wasm = wasmLoader.getModule()
+        const wasm = wasmLoader.getModule();
         if (
           wasm &&
           totalElements >= WASM_KRON_THRESHOLD &&
@@ -173,26 +169,24 @@ export const createKron = /* #__PURE__ */ factory(
           isPlainNumber2D(b as number[][])
         ) {
           try {
-            const aFlat = flatten2D(a as number[][], aRows, aCols)
-            const bFlat = flatten2D(b as number[][], bRows, bCols)
+            const aFlat = flatten2D(a as number[][], aRows, aCols);
+            const bFlat = flatten2D(b as number[][], bRows, bCols);
 
-            const aAlloc = wasmLoader.allocateFloat64Array(aFlat)
-            const bAlloc = wasmLoader.allocateFloat64Array(bFlat)
-            const resultRows = aRows * bRows
-            const resultCols = aCols * bCols
-            const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(
-              resultRows * resultCols
-            )
+            const aAlloc = wasmLoader.allocateFloat64Array(aFlat);
+            const bAlloc = wasmLoader.allocateFloat64Array(bFlat);
+            const resultRows = aRows * bRows;
+            const resultCols = aCols * bCols;
+            const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(resultRows * resultCols);
 
             try {
-              wasm.laKron(aAlloc.ptr, aRows, aCols, bAlloc.ptr, bRows, bCols)
+              wasm.laKron(aAlloc.ptr, aRows, aCols, bAlloc.ptr, bRows, bCols);
               // Read result from WASM memory
-              const resultFlat = new Float64Array(resultAlloc.array)
-              return unflatten2D(resultFlat, resultRows, resultCols)
+              const resultFlat = new Float64Array(resultAlloc.array);
+              return unflatten2D(resultFlat, resultRows, resultCols);
             } finally {
-              wasmLoader.free(aAlloc.ptr)
-              wasmLoader.free(bAlloc.ptr)
-              wasmLoader.free(resultAlloc.ptr)
+              wasmLoader.free(aAlloc.ptr);
+              wasmLoader.free(bAlloc.ptr);
+              wasmLoader.free(resultAlloc.ptr);
             }
           } catch {
             // Fall back to JS implementation on WASM error
@@ -200,9 +194,7 @@ export const createKron = /* #__PURE__ */ factory(
         }
       }
 
-      return a.flatMap((aSlice) =>
-        b.map((bSlice) => _kron(aSlice, bSlice, d - 1))
-      )
+      return a.flatMap((aSlice) => b.map((bSlice) => _kron(aSlice, bSlice, d - 1)));
     }
   }
-)
+);

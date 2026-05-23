@@ -1,11 +1,7 @@
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type {
-  MathArray,
-  Matrix,
-  MathNumericType
-} from '../../types/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathArray, Matrix, MathNumericType } from '../../types/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for setUnion
 interface Index {
@@ -13,22 +9,16 @@ interface Index {
 }
 
 interface SetUnionDependencies {
-  typed: TypedFunction
-  size: (arr: MathArray | Matrix) => number[]
-  concat: TypedFunction
-  subset: (arr: number[], index: Index) => number
-  setIntersect: (
-    a1: MathNumericType[],
-    a2: MathNumericType[]
-  ) => MathNumericType[]
-  setSymDifference: (
-    a1: MathNumericType[],
-    a2: MathNumericType[]
-  ) => MathNumericType[]
-  Index: new (i: number) => Index
+  typed: TypedFunction;
+  size: (arr: MathArray | Matrix) => number[];
+  concat: TypedFunction;
+  subset: (arr: number[], index: Index) => number;
+  setIntersect: (a1: MathNumericType[], a2: MathNumericType[]) => MathNumericType[];
+  setSymDifference: (a1: MathNumericType[], a2: MathNumericType[]) => MathNumericType[];
+  Index: new (i: number) => Index;
 }
 
-const name = 'setUnion'
+const name = 'setUnion';
 const dependencies = [
   'typed',
   'size',
@@ -36,8 +26,8 @@ const dependencies = [
   'subset',
   'setIntersect',
   'setSymDifference',
-  'Index'
-]
+  'Index',
+];
 
 export const createSetUnion = /* #__PURE__ */ factory(
   name,
@@ -49,7 +39,7 @@ export const createSetUnion = /* #__PURE__ */ factory(
     subset,
     setIntersect,
     setSymDifference,
-    Index
+    Index,
   }: SetUnionDependencies) => {
     /**
      * Create the union of two (multi)sets.
@@ -79,14 +69,14 @@ export const createSetUnion = /* #__PURE__ */ factory(
       ): MathNumericType[] | Matrix {
         if (subset(size(a1), new Index(0)) === 0) {
           // if any of them is empty, return the other one
-          return flatten(a2 as MathNumericType[])
+          return flatten(a2 as MathNumericType[]);
         } else if (subset(size(a2), new Index(0)) === 0) {
-          return flatten(a1 as MathNumericType[])
+          return flatten(a1 as MathNumericType[]);
         }
-        const b1 = flatten(a1 as MathNumericType[])
-        const b2 = flatten(a2 as MathNumericType[])
-        return concat(setSymDifference(b1, b2), setIntersect(b1, b2)) as MathNumericType[] | Matrix
-      }
-    })
+        const b1 = flatten(a1 as MathNumericType[]);
+        const b2 = flatten(a2 as MathNumericType[]);
+        return concat(setSymDifference(b1, b2), setIntersect(b1, b2)) as MathNumericType[] | Matrix;
+      },
+    });
   }
-)
+);

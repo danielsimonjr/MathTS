@@ -1,30 +1,30 @@
-import { factory } from '../../../utils/factory.js'
-import type { TypedFunction } from '../../../core/function/typed.js'
+import { factory } from '../../../utils/factory.js';
+import type { TypedFunction } from '../../../core/function/typed.js';
 
 /**
  * Unit definition options
  */
 interface UnitDefinitionOptions {
-  prefixes?: string
-  aliases?: string[]
-  offset?: number
+  prefixes?: string;
+  aliases?: string[];
+  offset?: number;
 }
 
 /**
  * Unit definition object
  */
 interface UnitDefinition {
-  definition?: string
-  aliases?: string[]
-  prefixes?: string | object
-  offset?: number
+  definition?: string;
+  aliases?: string[];
+  prefixes?: string | object;
+  offset?: number;
 }
 
 /**
  * Unit instance interface
  */
 interface UnitInstance {
-  [key: string]: unknown
+  [key: string]: unknown;
 }
 
 /**
@@ -34,19 +34,19 @@ interface UnitClass {
   createUnit(
     obj: Record<string, string | UnitInstance | UnitDefinition>,
     options: UnitDefinitionOptions
-  ): UnitInstance
+  ): UnitInstance;
 }
 
 /**
  * Dependencies for createCreateUnit
  */
 interface CreateUnitDependencies {
-  typed: TypedFunction
-  Unit: UnitClass
+  typed: TypedFunction;
+  Unit: UnitClass;
 }
 
-const name = 'createUnit'
-const dependencies = ['typed', 'Unit'] as const
+const name = 'createUnit';
+const dependencies = ['typed', 'Unit'] as const;
 
 export const createCreateUnit = /* #__PURE__ */ factory(
   name,
@@ -100,14 +100,12 @@ export const createCreateUnit = /* #__PURE__ */ factory(
         obj: Record<string, string | UnitInstance | UnitDefinition>,
         options: UnitDefinitionOptions
       ): UnitInstance {
-        return Unit.createUnit(obj, options)
+        return Unit.createUnit(obj, options);
       },
 
       // Same as above but without the options.
-      Object: function (
-        obj: Record<string, string | UnitInstance | UnitDefinition>
-      ): UnitInstance {
-        return Unit.createUnit(obj, {})
+      Object: function (obj: Record<string, string | UnitInstance | UnitDefinition>): UnitInstance {
+        return Unit.createUnit(obj, {});
       },
 
       // Shortcut method for creating one unit.
@@ -116,9 +114,9 @@ export const createCreateUnit = /* #__PURE__ */ factory(
         def: string | UnitInstance | UnitDefinition,
         options: UnitDefinitionOptions
       ): UnitInstance {
-        const obj: Record<string, string | UnitInstance | UnitDefinition> = {}
-        obj[name] = def
-        return Unit.createUnit(obj, options)
+        const obj: Record<string, string | UnitInstance | UnitDefinition> = {};
+        obj[name] = def;
+        return Unit.createUnit(obj, options);
       },
 
       // Same as above but without the options.
@@ -126,17 +124,17 @@ export const createCreateUnit = /* #__PURE__ */ factory(
         name: string,
         def: string | UnitInstance | UnitDefinition
       ): UnitInstance {
-        const obj: Record<string, string | UnitInstance | UnitDefinition> = {}
-        obj[name] = def
-        return Unit.createUnit(obj, {})
+        const obj: Record<string, string | UnitInstance | UnitDefinition> = {};
+        obj[name] = def;
+        return Unit.createUnit(obj, {});
       },
 
       // Without a definition, creates a base unit.
       string: function (name: string): UnitInstance {
-        const obj: Record<string, UnitDefinition> = {}
-        obj[name] = {}
-        return Unit.createUnit(obj, {})
-      }
-    })
+        const obj: Record<string, UnitDefinition> = {};
+        obj[name] = {};
+        return Unit.createUnit(obj, {});
+      },
+    });
   }
-)
+);

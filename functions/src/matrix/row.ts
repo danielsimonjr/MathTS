@@ -1,35 +1,35 @@
-import { factory } from '../utils/factory.js'
-import { isMatrix } from '../utils/is.js'
-import { clone } from '../utils/object.js'
-import { validateIndex } from '../utils/array.js'
+import { factory } from '../utils/factory.js';
+import { isMatrix } from '../utils/is.js';
+import { clone } from '../utils/object.js';
+import { validateIndex } from '../utils/array.js';
 
 // Type definitions
 interface Matrix {
-  size(): number[]
-  subset(index: any): any
+  size(): number[];
+  subset(index: any): any;
 }
 
 interface Index {
-  new (...ranges: any[]): Index
+  new (...ranges: any[]): Index;
 }
 
 interface TypedFunction<T = any> {
-  (...args: any[]): T
+  (...args: any[]): T;
 }
 
 interface MatrixConstructor {
-  (data: any[]): Matrix
+  (data: any[]): Matrix;
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  Index: Index
-  matrix: MatrixConstructor
-  range: TypedFunction
+  typed: TypedFunction;
+  Index: Index;
+  matrix: MatrixConstructor;
+  range: TypedFunction;
 }
 
-const name = 'row'
-const dependencies = ['typed', 'Index', 'matrix', 'range']
+const name = 'row';
+const dependencies = ['typed', 'Index', 'matrix', 'range'];
 
 export const createRow = /* #__PURE__ */ factory(
   name,
@@ -60,9 +60,9 @@ export const createRow = /* #__PURE__ */ factory(
       'Matrix, number': _row,
 
       'Array, number': function (value: any[], row: number): any[] {
-        return _row(matrix(clone(value)), row).valueOf() as any[]
-      }
-    })
+        return _row(matrix(clone(value)), row).valueOf() as any[];
+      },
+    });
 
     /**
      * Retrieve a row of a matrix
@@ -73,16 +73,16 @@ export const createRow = /* #__PURE__ */ factory(
     function _row(value: Matrix, row: number): Matrix {
       // check dimensions
       if ((value as any).size().length !== 2) {
-        throw new Error('Only two dimensional matrix is supported')
+        throw new Error('Only two dimensional matrix is supported');
       }
 
-      validateIndex(row, (value as any).size()[0])
+      validateIndex(row, (value as any).size()[0]);
 
-      const columnRange = range(0, (value as any).size()[1])
-      const index = new Index([row], columnRange)
-      const result = (value as any).subset(index)
+      const columnRange = range(0, (value as any).size()[1]);
+      const index = new Index([row], columnRange);
+      const result = (value as any).subset(index);
       // once config.legacySubset just return result
-      return isMatrix(result) ? (result as Matrix) : matrix([[result]])
+      return isMatrix(result) ? (result as Matrix) : matrix([[result]]);
     }
   }
-)
+);

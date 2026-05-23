@@ -20,12 +20,26 @@ vi.mock('../../src/ComputePool.js', () => ({
       return { result: Math.max(...data), duration: 0, chunks: 1, parallelized: false };
     }),
     minMax: vi.fn(async (data: Float64Array) => {
-      let min = Infinity, max = -Infinity, minIdx = 0, maxIdx = 0;
+      let min = Infinity,
+        max = -Infinity,
+        minIdx = 0,
+        maxIdx = 0;
       for (let i = 0; i < data.length; i++) {
-        if (data[i] < min) { min = data[i]; minIdx = i; }
-        if (data[i] > max) { max = data[i]; maxIdx = i; }
+        if (data[i] < min) {
+          min = data[i];
+          minIdx = i;
+        }
+        if (data[i] > max) {
+          max = data[i];
+          maxIdx = i;
+        }
       }
-      return { result: { min, max, minIndex: minIdx, maxIndex: maxIdx }, duration: 0, chunks: 1, parallelized: false };
+      return {
+        result: { min, max, minIndex: minIdx, maxIndex: maxIdx },
+        duration: 0,
+        chunks: 1,
+        parallelized: false,
+      };
     }),
     variance: vi.fn(async (data: Float64Array) => {
       let s = 0;
@@ -41,7 +55,12 @@ vi.mock('../../src/ComputePool.js', () => ({
       const mean = s / data.length;
       let v = 0;
       for (let i = 0; i < data.length; i++) v += (data[i] - mean) ** 2;
-      return { result: Math.sqrt(v / (data.length - 1)), duration: 0, chunks: 1, parallelized: false };
+      return {
+        result: Math.sqrt(v / (data.length - 1)),
+        duration: 0,
+        chunks: 1,
+        parallelized: false,
+      };
     }),
     norm: vi.fn(async (data: Float64Array) => {
       let s = 0;

@@ -7,12 +7,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
-import {
-  ComputePool,
-  computePool,
-  DEFAULT_POOL_CONFIG,
-  Transfer,
-} from '../src/ComputePool.js';
+import { ComputePool, computePool, DEFAULT_POOL_CONFIG, Transfer } from '../src/ComputePool.js';
 import type { ParallelResult, ComputePoolConfig } from '../src/ComputePool.js';
 
 describe('ComputePool', () => {
@@ -673,12 +668,24 @@ describe('ComputePool', () => {
       const out = new Int32Array(a.length);
       for (let i = 0; i < a.length; i++) {
         switch (op) {
-          case 'bitAnd': out[i] = a[i] & b[i]; break;
-          case 'bitOr': out[i] = a[i] | b[i]; break;
-          case 'bitXor': out[i] = a[i] ^ b[i]; break;
-          case 'leftShift': out[i] = a[i] << b[i]; break;
-          case 'rightArithShift': out[i] = a[i] >> b[i]; break;
-          case 'rightLogShift': out[i] = a[i] >>> b[i]; break;
+          case 'bitAnd':
+            out[i] = a[i] & b[i];
+            break;
+          case 'bitOr':
+            out[i] = a[i] | b[i];
+            break;
+          case 'bitXor':
+            out[i] = a[i] ^ b[i];
+            break;
+          case 'leftShift':
+            out[i] = a[i] << b[i];
+            break;
+          case 'rightArithShift':
+            out[i] = a[i] >> b[i];
+            break;
+          case 'rightLogShift':
+            out[i] = a[i] >>> b[i];
+            break;
         }
       }
       return out;
@@ -692,9 +699,15 @@ describe('ComputePool', () => {
       const out = new Int32Array(a.length);
       for (let i = 0; i < a.length; i++) {
         switch (op) {
-          case 'leftShift': out[i] = a[i] << s; break;
-          case 'rightArithShift': out[i] = a[i] >> s; break;
-          case 'rightLogShift': out[i] = a[i] >>> s; break;
+          case 'leftShift':
+            out[i] = a[i] << s;
+            break;
+          case 'rightArithShift':
+            out[i] = a[i] >> s;
+            break;
+          case 'rightLogShift':
+            out[i] = a[i] >>> s;
+            break;
         }
       }
       return out;

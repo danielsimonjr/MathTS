@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import type { Complex } from '../type/complex/Complex.js'
-import { cotNumber } from '../plain/number/index.js'
-import { createTrigUnit } from './trigUnit.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import type { Complex } from '../type/complex/Complex.js';
+import { cotNumber } from '../plain/number/index.js';
+import { createTrigUnit } from './trigUnit.js';
 
 // Type definitions for cot
 interface BigNumberConstructor {
-  new (value: number): BigNumber
+  new (value: number): BigNumber;
 }
 
 interface CotDependencies {
-  typed: TypedFunction
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'cot'
-const dependencies = ['typed', 'BigNumber']
+const name = 'cot';
+const dependencies = ['typed', 'BigNumber'];
 
 export const createCot = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, BigNumber }: CotDependencies) => {
-    const trigUnit = createTrigUnit({ typed })
+    const trigUnit = createTrigUnit({ typed });
 
     /**
      * Calculate the cotangent of a value. Defined as `cot(x) = 1 / tan(x)`.
@@ -52,9 +52,11 @@ export const createCot = /* #__PURE__ */ factory(
         number: cotNumber,
         Complex: (x: Complex) => x.cot(),
         BigNumber: (x: BigNumber): BigNumber =>
-          new BigNumber(1).div((x as unknown as { tan(): unknown }).tan() as any) as unknown as BigNumber
+          new BigNumber(1).div(
+            (x as unknown as { tan(): unknown }).tan() as any
+          ) as unknown as BigNumber,
       },
       trigUnit
-    ) as TypedFunction
+    ) as TypedFunction;
   }
-)
+);

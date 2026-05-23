@@ -1,21 +1,21 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { BigNumber } from '../type/bignumber/BigNumber.js'
-import type { Complex } from '../type/complex/Complex.js'
-import { acschNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from '../type/bignumber/BigNumber.js';
+import type { Complex } from '../type/complex/Complex.js';
+import { acschNumber } from '../plain/number/index.js';
 
 // Type definitions for acsch
 interface BigNumberConstructor {
-  new (value: number): BigNumber
+  new (value: number): BigNumber;
 }
 
 interface AcschDependencies {
-  typed: TypedFunction
-  BigNumber: BigNumberConstructor
+  typed: TypedFunction;
+  BigNumber: BigNumberConstructor;
 }
 
-const name = 'acsch'
-const dependencies = ['typed', 'BigNumber']
+const name = 'acsch';
+const dependencies = ['typed', 'BigNumber'];
 
 export const createAcsch = /* #__PURE__ */ factory(
   name,
@@ -47,12 +47,12 @@ export const createAcsch = /* #__PURE__ */ factory(
       number: acschNumber,
 
       Complex: function (x: Complex) {
-        return x.acsch()
+        return x.acsch();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
-        return new BigNumber(1).div(x as any).asinh() as unknown as BigNumber
-      }
-    }) as TypedFunction
+        return new BigNumber(1).div(x as any).asinh() as unknown as BigNumber;
+      },
+    }) as TypedFunction;
   }
-)
+);

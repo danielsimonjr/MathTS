@@ -1,28 +1,28 @@
-import { isInteger } from '../../utils/number.js'
+import { isInteger } from '../../utils/number.js';
 
-const n1 = 'number'
+const n1 = 'number';
 
 export function isIntegerNumber(x: number): boolean {
-  return isInteger(x)
+  return isInteger(x);
 }
-isIntegerNumber.signature = n1
+isIntegerNumber.signature = n1;
 
 export function isNegativeNumber(x: number): boolean {
-  return x < 0
+  return x < 0;
 }
-isNegativeNumber.signature = n1
+isNegativeNumber.signature = n1;
 
 export function isPositiveNumber(x: number): boolean {
-  return x > 0
+  return x > 0;
 }
-isPositiveNumber.signature = n1
+isPositiveNumber.signature = n1;
 
 export function isZeroNumber(x: number): boolean {
-  return x === 0
+  return x === 0;
 }
-isZeroNumber.signature = n1
+isZeroNumber.signature = n1;
 
 export function isNaNNumber(x: number): boolean {
-  return Number.isNaN(x)
+  return Number.isNaN(x);
 }
-isNaNNumber.signature = n1
+isNaNNumber.signature = n1;

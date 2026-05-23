@@ -27,12 +27,12 @@ console.log(DEFAULT_CONFIG);
 
 The default numeric type used when parsing string expressions.
 
-| Value | Description |
-|---|---|
-| `'number'` | JavaScript `number` (default) |
+| Value         | Description                               |
+| ------------- | ----------------------------------------- |
+| `'number'`    | JavaScript `number` (default)             |
 | `'BigNumber'` | Arbitrary-precision via `BigNumber` class |
-| `'bigint'` | Native JavaScript `bigint` |
-| `'Fraction'` | Exact rational via `Fraction` class |
+| `'bigint'`    | Native JavaScript `bigint`                |
+| `'Fraction'`  | Exact rational via `Fraction` class       |
 
 For most functions, the output type is inferred from the input type — `add(1, 2)` always returns a `number`. The `number` setting affects expression evaluation and factory-created instances.
 
@@ -57,7 +57,7 @@ Number of significant digits for `BigNumber` operations. Default: `64`.
 ```typescript
 import { BigNumber } from '@danielsimonjr/mathts-core';
 
-BigNumber.config({ precision: 128 });  // configure globally
+BigNumber.config({ precision: 128 }); // configure globally
 const x = BigNumber.parse('1.23456789012345678901234567890');
 ```
 
@@ -90,7 +90,7 @@ import { create, all } from '@danielsimonjr/mathts-compat';
 const math = create(all, {
   number: 'BigNumber',
   precision: 128,
-  predictable: true
+  predictable: true,
 });
 ```
 

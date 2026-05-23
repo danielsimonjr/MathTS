@@ -7,7 +7,7 @@ export const lyapDocs = {
     'lyap([[-2, 0], [1, -4]], [[3, 1], [1, 3]])',
     'A = [[-2, 0], [1, -4]]',
     'Q = [[3, 1], [1, 3]]',
-    'lyap(A,Q)'
+    'lyap(A,Q)',
   ],
-  seealso: ['schur', 'sylvester']
-}
+  seealso: ['schur', 'sylvester'],
+};

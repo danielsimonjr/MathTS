@@ -9,16 +9,19 @@ This guide provides detailed TypeScript implementation patterns for the highest-
 ## Quick Reference: What To Build First
 
 ### Phase 1: Foundation (Critical Path)
+
 1. **Expression Tree System** - All symbolic math depends on this
 2. **Pattern Matching Engine** - Powers simplification, integration, solving
 3. **Simplification Rules** - Makes output usable
 
 ### Phase 2: UPTF Core
+
 4. **Tensor Class** - Einstein notation, contraction, products
 5. **Metric Tensor** - Christoffel computation
 6. **Curvature Tensors** - Riemann, Ricci, Einstein
 
 ### Phase 3: Analysis
+
 7. **Symbolic Differentiation** - Extend existing
 8. **Symbolic Integration** - Pattern-based
 9. **Series & Limits** - Taylor, Laurent
@@ -28,6 +31,7 @@ This guide provides detailed TypeScript implementation patterns for the highest-
 ## Key Design Decisions
 
 ### 1. Immutable Expression Trees
+
 All expression nodes are immutable. Operations return new nodes.
 
 ```typescript
@@ -35,22 +39,25 @@ All expression nodes are immutable. Operations return new nodes.
 const simplified = expr.simplify();
 
 // ❌ Wrong - don't mutate
-expr.children.push(newChild);  // Never do this
+expr.children.push(newChild); // Never do this
 ```
 
 ### 2. Canonical Forms
+
 Expressions are automatically normalized:
+
 - Addition terms sorted (numbers first, then alphabetically)
 - Multiplication factors sorted
 - Nested operations flattened (a + (b + c) → a + b + c)
 
 ### 3. Lazy Evaluation
+
 Heavy computations (Christoffel symbols, matrix inverses) are cached:
 
 ```typescript
 class MetricTensor {
   private _inverse?: MetricTensor;
-  
+
   inverse(): MetricTensor {
     if (!this._inverse) {
       this._inverse = this.computeInverse();
@@ -84,6 +91,7 @@ Expression (interface)
 ## Implementation Checklist
 
 ### Week 1-2: Expression Nodes
+
 - [ ] NumberLiteral with exact fractions
 - [ ] SymbolNode with assumptions
 - [ ] ConstantNode (π, e, i)
@@ -93,6 +101,7 @@ Expression (interface)
 - [ ] FunctionCallNode
 
 ### Week 3-4: Pattern Matching
+
 - [ ] Pattern base class
 - [ ] PatternVar (capture variable)
 - [ ] LiteralPattern (match exact value)
@@ -102,6 +111,7 @@ Expression (interface)
 - [ ] FunctionPattern
 
 ### Week 5-6: Simplification
+
 - [ ] SimplificationRule interface
 - [ ] 50+ algebraic rules
 - [ ] 20+ trigonometric rules
@@ -109,6 +119,7 @@ Expression (interface)
 - [ ] Canonical form normalization
 
 ### Week 7-8: Differentiation
+
 - [ ] Power rule
 - [ ] Product rule
 - [ ] Quotient rule
@@ -118,6 +129,7 @@ Expression (interface)
 - [ ] Implicit differentiation
 
 ### Week 9-12: Tensor Engine
+
 - [ ] Tensor class with index structure
 - [ ] Index contraction
 - [ ] Tensor products
@@ -134,7 +146,9 @@ Expression (interface)
 ## Testing Strategy
 
 ### Unit Tests
+
 Every expression type needs:
+
 - Construction tests
 - Evaluation tests
 - Substitution tests
@@ -142,12 +156,14 @@ Every expression type needs:
 - Equality tests
 
 ### Property-Based Tests
+
 - Associativity: (a + b) + c = a + (b + c)
 - Commutativity: a + b = b + a
 - Distributivity: a(b + c) = ab + ac
 - Simplification idempotence: simplify(simplify(x)) = simplify(x)
 
 ### Integration Tests
+
 - Complete derivations (Schwarzschild geodesics)
 - Known results (Ricci scalar for standard metrics)
 - Round-trip: parse → simplify → toLatex → parse
@@ -157,15 +173,18 @@ Every expression type needs:
 ## Performance Considerations
 
 ### Expression Tree Memory
+
 - Use interning for common subexpressions
 - Pool small objects (NumberLiteral for 0, 1, -1)
 
 ### Pattern Matching
+
 - Index patterns by root type for fast rejection
 - Cache failed matches
 
 ### Tensor Computation
-- Exploit symmetries (g_{μν} = g_{νμ})
+
+- Exploit symmetries (g*{μν} = g*{νμ})
 - Skip zero components
 - Use sparse representation for mostly-zero tensors
 
@@ -197,32 +216,37 @@ if (base instanceof NumberLiteral && base.isZero()) {
 ## LaTeX Output Guidelines
 
 ### Fractions
+
 ```typescript
 // Prefer \frac for simple fractions
-"\\frac{1}{2}"  // Not 1/2
+'\\frac{1}{2}'; // Not 1/2
 
 // Use inline for complex expressions
-"\\left(x + y\\right) / z"
+'\\left(x + y\\right) / z';
 ```
 
 ### Greek Letters
+
 ```typescript
 const greekMap = {
-  alpha: '\\alpha', beta: '\\beta', gamma: '\\gamma',
+  alpha: '\\alpha',
+  beta: '\\beta',
+  gamma: '\\gamma',
   // ... etc
 };
 ```
 
 ### Tensor Indices
+
 ```typescript
 // Contravariant (upper) indices
-"T^{\\mu\\nu}"
+'T^{\\mu\\nu}';
 
 // Covariant (lower) indices
-"T_{\\mu\\nu}"
+'T_{\\mu\\nu}';
 
 // Mixed indices
-"T^{\\mu}{}_{\\nu}"  // Note the {} for spacing
+'T^{\\mu}{}_{\\nu}'; // Note the {} for spacing
 ```
 
 ---
@@ -288,9 +312,9 @@ const θ = symbol('θ');
 const φ = symbol('φ');
 
 // Define parameters
-const M = symbol('M');  // Mass
-const G = symbol('G');  // Gravitational constant
-const c = symbol('c');  // Speed of light
+const M = symbol('M'); // Mass
+const G = symbol('G'); // Gravitational constant
+const c = symbol('c'); // Speed of light
 
 // Create Schwarzschild metric
 const metric = MetricTensor.schwarzschild(M, G, c);
@@ -300,7 +324,7 @@ const curvature = new CurvatureTensors(metric);
 
 // Get Ricci scalar (should be 0 for vacuum solution)
 const R = curvature.ricciScalar();
-console.log('Ricci scalar:', R.toLatex());  // Should simplify to 0
+console.log('Ricci scalar:', R.toLatex()); // Should simplify to 0
 
 // Get Kretschmann scalar
 const K = curvature.kretschmann();
@@ -321,4 +345,4 @@ for (let μ = 0; μ < 4; μ++) {
 
 ---
 
-*This guide will be updated as implementation progresses.*
+_This guide will be updated as implementation progresses._

@@ -1,4 +1,4 @@
-import { memoize } from '../function.js'
+import { memoize } from '../function.js';
 
 /**
  * Calculate BigNumber e
@@ -7,10 +7,10 @@ import { memoize } from '../function.js'
  */
 export const createBigNumberE = memoize(
   function (BigNumber: any) {
-    return new (BigNumber as any)(1).exp()
+    return new (BigNumber as any)(1).exp();
   },
   { hasher }
-)
+);
 
 /**
  * Calculate BigNumber golden ratio, phi = (1+sqrt(5))/2
@@ -19,12 +19,10 @@ export const createBigNumberE = memoize(
  */
 export const createBigNumberPhi = memoize(
   function (BigNumber: any) {
-    return new (BigNumber as any)(1)
-      .plus(new (BigNumber as any)(5).sqrt())
-      .div(2)
+    return new (BigNumber as any)(1).plus(new (BigNumber as any)(5).sqrt()).div(2);
   },
   { hasher }
-)
+);
 
 /**
  * Calculate BigNumber pi.
@@ -33,10 +31,10 @@ export const createBigNumberPhi = memoize(
  */
 export const createBigNumberPi = memoize(
   function (BigNumber: any) {
-    return BigNumber.acos(-1)
+    return BigNumber.acos(-1);
   },
   { hasher }
-)
+);
 
 /**
  * Calculate BigNumber tau, tau = 2 * pi
@@ -45,10 +43,10 @@ export const createBigNumberPi = memoize(
  */
 export const createBigNumberTau = memoize(
   function (BigNumber: any) {
-    return (createBigNumberPi as any)(BigNumber).times(2)
+    return (createBigNumberPi as any)(BigNumber).times(2);
   },
   { hasher }
-)
+);
 
 /**
  * Create a hash for a BigNumber constructor function. The created has is
@@ -59,5 +57,5 @@ export const createBigNumberTau = memoize(
  * @private
  */
 function hasher(args: any) {
-  return args[0].precision
+  return args[0].precision;
 }

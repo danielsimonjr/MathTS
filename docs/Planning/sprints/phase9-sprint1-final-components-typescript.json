@@ -16,11 +16,7 @@
       "status": "completed",
       "wasmPriority": "None",
       "complexity": "Medium",
-      "files": [
-        "src/core/import.js",
-        "src/core/config.js",
-        "src/core/function/typed.js"
-      ]
+      "files": ["src/core/import.js", "src/core/config.js", "src/core/function/typed.js"]
     },
     {
       "id": "9.1.2",

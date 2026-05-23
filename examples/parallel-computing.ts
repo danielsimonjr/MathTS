@@ -43,7 +43,9 @@ async function main() {
   console.log(`Std Dev: ${varianceResult.result.std.toFixed(4)}`);
 
   const minMaxResult = await computePool.minMax(data);
-  console.log(`\nMin: ${minMaxResult.result.min.toFixed(4)} at index ${minMaxResult.result.minIdx}`);
+  console.log(
+    `\nMin: ${minMaxResult.result.min.toFixed(4)} at index ${minMaxResult.result.minIdx}`
+  );
   console.log(`Max: ${minMaxResult.result.max.toFixed(4)} at index ${minMaxResult.result.maxIdx}`);
 
   // Element-wise operations
@@ -84,10 +86,7 @@ async function main() {
   console.log(`  [${C[2]}, ${C[3]}]`);
 
   // Dot product
-  const dot = await computePool.dot(
-    new Float64Array([1, 2, 3]),
-    new Float64Array([4, 5, 6])
-  );
+  const dot = await computePool.dot(new Float64Array([1, 2, 3]), new Float64Array([4, 5, 6]));
   console.log(`\nDot product [1,2,3] · [4,5,6] = ${dot}`);
 
   // Batch operations with Promise.all

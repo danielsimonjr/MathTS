@@ -45,21 +45,21 @@ left.
 
 ### 2.2 Not worth accelerating
 
-| Category / function | Why not |
-|---|---|
-| Relational, Logical & Bitwise | O(1)/element — pure transfer-bound. |
-| Algebra, CAS | Symbolic tree/string work — not data-parallel. |
-| Graph Theory | Dijkstra / DFS / MST are inherently sequential. |
-| Set Operations | Sort/hash-bound; `setPowerset` exponential. |
-| Matrix Construction | Memory/structural — bandwidth-bound. |
-| Units, Constants, Complex utils, Type Conversion/Checking, Expression | Scalar or structural; not numeric-array work. |
-| `cholesky`, `rowReduce`, `matrixRank` | Sequential pivoting / column dependencies. |
-| `findRoot`, `minimize`, ODE solvers, `curvefit` | Iterative — each step depends on the last. |
-| `quickSelect`, `medianSelect`, `parallelStatQuantile` | Selection/sort don't parallelize cleanly at these sizes. |
-| `entropy`, `jsDivergence`, `kldivergence` | Reductions, but over **probability vectors**, which are typically small (a handful to a few thousand outcomes). The parallel threshold would essentially never trigger. |
-| `parallelStatCumsum` | Prefix sum — O(n) work, O(n) output: transfer-bound. |
-| `hessenbergForm` | Its Householder updates are rank-1 (matrix-vector + outer product), not a clean `matMul` call; one worker dispatch per reduction step would be dominated by round-trip latency. |
-| Numerical integration (`simpson`, `gaussQuad`), `globalMinimize` | The integrand / objective is a **user callback**, usually a closure over outer variables — it cannot be safely serialized to a worker. Function-shipping parallelism is fragile here. |
+| Category / function                                                   | Why not                                                                                                                                                                               |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Relational, Logical & Bitwise                                         | O(1)/element — pure transfer-bound.                                                                                                                                                   |
+| Algebra, CAS                                                          | Symbolic tree/string work — not data-parallel.                                                                                                                                        |
+| Graph Theory                                                          | Dijkstra / DFS / MST are inherently sequential.                                                                                                                                       |
+| Set Operations                                                        | Sort/hash-bound; `setPowerset` exponential.                                                                                                                                           |
+| Matrix Construction                                                   | Memory/structural — bandwidth-bound.                                                                                                                                                  |
+| Units, Constants, Complex utils, Type Conversion/Checking, Expression | Scalar or structural; not numeric-array work.                                                                                                                                         |
+| `cholesky`, `rowReduce`, `matrixRank`                                 | Sequential pivoting / column dependencies.                                                                                                                                            |
+| `findRoot`, `minimize`, ODE solvers, `curvefit`                       | Iterative — each step depends on the last.                                                                                                                                            |
+| `quickSelect`, `medianSelect`, `parallelStatQuantile`                 | Selection/sort don't parallelize cleanly at these sizes.                                                                                                                              |
+| `entropy`, `jsDivergence`, `kldivergence`                             | Reductions, but over **probability vectors**, which are typically small (a handful to a few thousand outcomes). The parallel threshold would essentially never trigger.               |
+| `parallelStatCumsum`                                                  | Prefix sum — O(n) work, O(n) output: transfer-bound.                                                                                                                                  |
+| `hessenbergForm`                                                      | Its Householder updates are rank-1 (matrix-vector + outer product), not a clean `matMul` call; one worker dispatch per reduction step would be dominated by round-trip latency.       |
+| Numerical integration (`simpson`, `gaussQuad`), `globalMinimize`      | The integrand / objective is a **user callback**, usually a closure over outer variables — it cannot be safely serialized to a worker. Function-shipping parallelism is fragile here. |
 
 ---
 
@@ -69,11 +69,11 @@ left.
 
 Implemented and merged on `claude/create-function-reference-html-NcTOS`.
 
-| Item | Change | Status |
-|---|---|---|
-| Element-wise arithmetic overloads | `Float64Array` overloads added to `sign`, `cube`, `cbrt`, `expm1`, `log2`, `log10`, `log1p`, `round`, `floor`, `ceil`, `fix`, `sinh`, `cosh`, `tanh` in `functions/src/typed/arithmetic.ts`, dispatching to `computePool.applyKernel`; sequential fallback below threshold. | ✅ Done |
-| Element-wise trig overloads | `Float64Array` overloads added to `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `asinh`, `acosh`, `atanh` in `functions/src/typed/trigonometry.ts`. (`asin`/`acos` return `NaN` for out-of-domain values — the scalar overloads promote to `Complex` there, which a `Float64Array` cannot hold.) | ✅ Done |
-| `parallelStatProd` | `prodChunk` worker kernel + `MathWorkerPool.prod` + `ComputePool.prod` added; `parallelStatProd`'s `Float64Array` overload now dispatches to the worker pool (now `async`, matching the `parallelStat*` family). | ✅ Done |
+| Item                              | Change                                                                                                                                                                                                                                                                                          | Status  |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Element-wise arithmetic overloads | `Float64Array` overloads added to `sign`, `cube`, `cbrt`, `expm1`, `log2`, `log10`, `log1p`, `round`, `floor`, `ceil`, `fix`, `sinh`, `cosh`, `tanh` in `functions/src/typed/arithmetic.ts`, dispatching to `computePool.applyKernel`; sequential fallback below threshold.                     | ✅ Done |
+| Element-wise trig overloads       | `Float64Array` overloads added to `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `asinh`, `acosh`, `atanh` in `functions/src/typed/trigonometry.ts`. (`asin`/`acos` return `NaN` for out-of-domain values — the scalar overloads promote to `Complex` there, which a `Float64Array` cannot hold.) | ✅ Done |
+| `parallelStatProd`                | `prodChunk` worker kernel + `MathWorkerPool.prod` + `ComputePool.prod` added; `parallelStatProd`'s `Float64Array` overload now dispatches to the worker pool (now `async`, matching the `parallelStat*` family).                                                                                | ✅ Done |
 
 Each was verified in Node against the sequential reference — no WASM build,
 no browser needed. `acsc` / `asec` / `acot` were left out of scope (rarely
@@ -81,7 +81,7 @@ used; can be added later by the same pattern).
 
 ### Tier 2 — Blocked (needs a prerequisite)
 
-**WASM kernel wiring** — *not low-effort, despite an earlier estimate.* The
+**WASM kernel wiring** — _not low-effort, despite an earlier estimate._ The
 AssemblyScript kernels for number theory and orthogonal polynomials/integral
 functions do exist in source (`assembly/src/ops/number-theory.ts`,
 `assembly/src/ops/special.ts`), **but**:
@@ -91,13 +91,13 @@ functions do exist in source (`assembly/src/ops/number-theory.ts`,
 - The Rust WASM path (`getRustWasm` in the old `special.ts`) was **deliberately
   disabled** — ESM cannot `require()` it and its loader API did not match
   (`wasm.exports.x` vs `getExports()?.x`). It was removed as dead code.
-- Wiring therefore cannot be written *and verified* without first producing a
+- Wiring therefore cannot be written _and verified_ without first producing a
   working WASM build and re-validating the `WasmLoader` integration (including
   the SHA-384 manifest integrity check, a security invariant).
 
 **Prerequisite before this is buildable:** confirm `npm run build:wasm`
 succeeds, the AS module exports the expected number-theory/poly symbols, and
-`WasmLoader.getModule()` returns them — *then* wire `combinatorics.ts` /
+`WasmLoader.getModule()` returns them — _then_ wire `combinatorics.ts` /
 `special.ts` the way `signal.ts` already wires `dct` / `dwt`.
 
 ### Tier 3 — Considered, not pursued

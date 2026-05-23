@@ -20,10 +20,7 @@
  * @packageDocumentation
  */
 
-import {
-  calculateOptimalChunks,
-  type ChunkOptions,
-} from '../strategies/chunk.js';
+import { calculateOptimalChunks, type ChunkOptions } from '../strategies/chunk.js';
 
 /**
  * The set of supported binary bitwise op codes.
@@ -117,33 +114,21 @@ function runBinary(
 /**
  * Bitwise AND on two equal-length `Int32Array`s.
  */
-export function bitAnd(
-  a: Int32Array,
-  b: Int32Array,
-  options?: ChunkOptions
-): Int32Array {
+export function bitAnd(a: Int32Array, b: Int32Array, options?: ChunkOptions): Int32Array {
   return runBinary(a, b, 'bitAnd', options);
 }
 
 /**
  * Bitwise OR on two equal-length `Int32Array`s.
  */
-export function bitOr(
-  a: Int32Array,
-  b: Int32Array,
-  options?: ChunkOptions
-): Int32Array {
+export function bitOr(a: Int32Array, b: Int32Array, options?: ChunkOptions): Int32Array {
   return runBinary(a, b, 'bitOr', options);
 }
 
 /**
  * Bitwise XOR on two equal-length `Int32Array`s.
  */
-export function bitXor(
-  a: Int32Array,
-  b: Int32Array,
-  options?: ChunkOptions
-): Int32Array {
+export function bitXor(a: Int32Array, b: Int32Array, options?: ChunkOptions): Int32Array {
   return runBinary(a, b, 'bitXor', options);
 }
 

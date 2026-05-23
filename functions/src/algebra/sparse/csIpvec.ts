@@ -12,22 +12,22 @@
  */
 export function csIpvec<T>(p: number[] | null, b: T[]): T[] {
   // vars
-  let k
-  const n = b.length
-  const x: T[] = []
+  let k;
+  const n = b.length;
+  const x: T[] = [];
   // check permutation vector was provided, p = null denotes identity
   if (p) {
     // loop vector
     for (k = 0; k < n; k++) {
       // apply permutation
-      x[p[k]] = b[k]
+      x[p[k]] = b[k];
     }
   } else {
     // loop vector
     for (k = 0; k < n; k++) {
       // x[i] = b[i]
-      x[k] = b[k]
+      x[k] = b[k];
     }
   }
-  return x
+  return x;
 }

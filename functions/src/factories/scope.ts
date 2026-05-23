@@ -8,11 +8,7 @@
 import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 import { initTypeBridge } from '../typed/typed-bridge.js';
 import { DEFAULT_CONFIG } from '../core/config.js';
-import {
-  MathJSDenseMatrix,
-  MathJSSparseMatrix,
-  createMatrixBridge,
-} from './matrix-bridge.js';
+import { MathJSDenseMatrix, MathJSSparseMatrix, createMatrixBridge } from './matrix-bridge.js';
 
 // Initialize type bridge so typed-function recognizes native types
 initTypeBridge();
@@ -22,28 +18,104 @@ initTypeBridge();
 const typed = mathTyped as any;
 const extraTypes = [
   // mathjs uses lowercase 'function' in signatures; typed-function registers 'Function'
-  { name: 'function', test: (x: unknown): x is Function => typeof x === 'function' },
+  {
+    name: 'function',
+    test: (x: unknown): x is (...args: unknown[]) => unknown =>
+      typeof x === 'function',
+  },
   // Expression node types — match objects with isNode flag and specific type properties
-  { name: 'Node', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isNode === true },
-  { name: 'SymbolNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isSymbolNode === true },
-  { name: 'ConstantNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isConstantNode === true },
-  { name: 'OperatorNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isOperatorNode === true },
-  { name: 'FunctionNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isFunctionNode === true },
-  { name: 'ParenthesisNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isParenthesisNode === true },
-  { name: 'AccessorNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isAccessorNode === true },
-  { name: 'ArrayNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isArrayNode === true },
-  { name: 'AssignmentNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isAssignmentNode === true },
-  { name: 'BlockNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isBlockNode === true },
-  { name: 'ConditionalNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isConditionalNode === true },
-  { name: 'FunctionAssignmentNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isFunctionAssignmentNode === true },
-  { name: 'IndexNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isIndexNode === true },
-  { name: 'ObjectNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isObjectNode === true },
-  { name: 'RangeNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isRangeNode === true },
-  { name: 'RelationalNode', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isRelationalNode === true },
+  {
+    name: 'Node',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isNode === true,
+  },
+  {
+    name: 'SymbolNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isSymbolNode === true,
+  },
+  {
+    name: 'ConstantNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isConstantNode === true,
+  },
+  {
+    name: 'OperatorNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isOperatorNode === true,
+  },
+  {
+    name: 'FunctionNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isFunctionNode === true,
+  },
+  {
+    name: 'ParenthesisNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isParenthesisNode === true,
+  },
+  {
+    name: 'AccessorNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isAccessorNode === true,
+  },
+  {
+    name: 'ArrayNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isArrayNode === true,
+  },
+  {
+    name: 'AssignmentNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isAssignmentNode === true,
+  },
+  {
+    name: 'BlockNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isBlockNode === true,
+  },
+  {
+    name: 'ConditionalNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isConditionalNode === true,
+  },
+  {
+    name: 'FunctionAssignmentNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isFunctionAssignmentNode === true,
+  },
+  {
+    name: 'IndexNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isIndexNode === true,
+  },
+  {
+    name: 'ObjectNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isObjectNode === true,
+  },
+  {
+    name: 'RangeNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isRangeNode === true,
+  },
+  {
+    name: 'RelationalNode',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isRelationalNode === true,
+  },
   // Index type — stub that matches objects with isIndex flag
-  { name: 'Index', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isIndex === true },
+  {
+    name: 'Index',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isIndex === true,
+  },
   // Range type — stub that matches objects with isRange flag
-  { name: 'Range', test: (x: unknown): x is object => typeof x === 'object' && x !== null && (x as any).isRange === true },
+  {
+    name: 'Range',
+    test: (x: unknown): x is object =>
+      typeof x === 'object' && x !== null && (x as any).isRange === true,
+  },
   // Map type — needed by resolve() and other factories that accept scope maps
   { name: 'Map', test: (x: unknown): x is Map<string, unknown> => x instanceof Map },
   // Note: DenseMatrix, SparseMatrix, Matrix types are already registered by @danielsimonjr/mathts-core.

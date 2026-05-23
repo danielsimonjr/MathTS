@@ -42,7 +42,10 @@ let cachedFeatures: WasmFeatures | null = null;
 async function testWasmFeature(bytes: Uint8Array): Promise<boolean> {
   try {
     // Use buffer.slice and type assert to ArrayBuffer for WebAssembly.compile
-    const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+    const buffer = bytes.buffer.slice(
+      bytes.byteOffset,
+      bytes.byteOffset + bytes.byteLength
+    ) as ArrayBuffer;
     await WebAssembly.compile(buffer);
     return true;
   } catch {
@@ -58,19 +61,49 @@ async function detectSIMD(): Promise<boolean> {
   // Minimal WASM module using v128 (SIMD) type
   // (module (func (result v128) (v128.const i32x4 0 0 0 0)))
   const simdBytes = new Uint8Array([
-    0x00, 0x61, 0x73, 0x6d, // WASM magic
-    0x01, 0x00, 0x00, 0x00, // Version 1
-    0x01, 0x05, 0x01, 0x60, // Type section: 1 type, function
-    0x00, 0x01, 0x7b,       // () -> v128
-    0x03, 0x02, 0x01, 0x00, // Function section: 1 function, type 0
-    0x0a, 0x0a, 0x01, 0x08, // Code section
-    0x00,                   // 0 locals
-    0xfd, 0x0c,             // v128.const
-    0x00, 0x00, 0x00, 0x00, // i32x4 0, 0, 0, 0
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x0b                    // end
+    0x00,
+    0x61,
+    0x73,
+    0x6d, // WASM magic
+    0x01,
+    0x00,
+    0x00,
+    0x00, // Version 1
+    0x01,
+    0x05,
+    0x01,
+    0x60, // Type section: 1 type, function
+    0x00,
+    0x01,
+    0x7b, // () -> v128
+    0x03,
+    0x02,
+    0x01,
+    0x00, // Function section: 1 function, type 0
+    0x0a,
+    0x0a,
+    0x01,
+    0x08, // Code section
+    0x00, // 0 locals
+    0xfd,
+    0x0c, // v128.const
+    0x00,
+    0x00,
+    0x00,
+    0x00, // i32x4 0, 0, 0, 0
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x0b, // end
   ]);
 
   return testWasmFeature(simdBytes);
@@ -82,20 +115,45 @@ async function detectSIMD(): Promise<boolean> {
 async function detectBulkMemory(): Promise<boolean> {
   // Module using memory.copy (bulk memory)
   const bulkBytes = new Uint8Array([
-    0x00, 0x61, 0x73, 0x6d, // WASM magic
-    0x01, 0x00, 0x00, 0x00, // Version 1
-    0x01, 0x04, 0x01, 0x60, // Type section
-    0x00, 0x00,             // () -> ()
-    0x03, 0x02, 0x01, 0x00, // Function section
-    0x05, 0x03, 0x01, 0x00, // Memory section: 1 page
     0x00,
-    0x0a, 0x0e, 0x01, 0x0c, // Code section
-    0x00,                   // 0 locals
-    0x41, 0x00,             // i32.const 0 (dest)
-    0x41, 0x00,             // i32.const 0 (src)
-    0x41, 0x00,             // i32.const 0 (len)
-    0xfc, 0x0a, 0x00, 0x00, // memory.copy
-    0x0b                    // end
+    0x61,
+    0x73,
+    0x6d, // WASM magic
+    0x01,
+    0x00,
+    0x00,
+    0x00, // Version 1
+    0x01,
+    0x04,
+    0x01,
+    0x60, // Type section
+    0x00,
+    0x00, // () -> ()
+    0x03,
+    0x02,
+    0x01,
+    0x00, // Function section
+    0x05,
+    0x03,
+    0x01,
+    0x00, // Memory section: 1 page
+    0x00,
+    0x0a,
+    0x0e,
+    0x01,
+    0x0c, // Code section
+    0x00, // 0 locals
+    0x41,
+    0x00, // i32.const 0 (dest)
+    0x41,
+    0x00, // i32.const 0 (src)
+    0x41,
+    0x00, // i32.const 0 (len)
+    0xfc,
+    0x0a,
+    0x00,
+    0x00, // memory.copy
+    0x0b, // end
   ]);
 
   return testWasmFeature(bulkBytes);
@@ -107,15 +165,33 @@ async function detectBulkMemory(): Promise<boolean> {
 async function detectReferenceTypes(): Promise<boolean> {
   // Module using externref type
   const refBytes = new Uint8Array([
-    0x00, 0x61, 0x73, 0x6d, // WASM magic
-    0x01, 0x00, 0x00, 0x00, // Version 1
-    0x01, 0x04, 0x01, 0x60, // Type section
-    0x00, 0x01, 0x6f,       // () -> externref
-    0x03, 0x02, 0x01, 0x00, // Function section
-    0x0a, 0x05, 0x01, 0x03, // Code section
-    0x00,                   // 0 locals
-    0xd0, 0x6f,             // ref.null extern
-    0x0b                    // end
+    0x00,
+    0x61,
+    0x73,
+    0x6d, // WASM magic
+    0x01,
+    0x00,
+    0x00,
+    0x00, // Version 1
+    0x01,
+    0x04,
+    0x01,
+    0x60, // Type section
+    0x00,
+    0x01,
+    0x6f, // () -> externref
+    0x03,
+    0x02,
+    0x01,
+    0x00, // Function section
+    0x0a,
+    0x05,
+    0x01,
+    0x03, // Code section
+    0x00, // 0 locals
+    0xd0,
+    0x6f, // ref.null extern
+    0x0b, // end
   ]);
 
   return testWasmFeature(refBytes);
@@ -127,19 +203,40 @@ async function detectReferenceTypes(): Promise<boolean> {
 async function detectExceptions(): Promise<boolean> {
   // Module using try/catch
   const excBytes = new Uint8Array([
-    0x00, 0x61, 0x73, 0x6d, // WASM magic
-    0x01, 0x00, 0x00, 0x00, // Version 1
-    0x01, 0x04, 0x01, 0x60, // Type section
-    0x00, 0x00,             // () -> ()
-    0x03, 0x02, 0x01, 0x00, // Function section
-    0x0d, 0x03, 0x01, 0x00, // Tag section: 1 tag
     0x00,
-    0x0a, 0x0a, 0x01, 0x08, // Code section
-    0x00,                   // 0 locals
-    0x06, 0x40,             // try
-    0x07, 0x00,             // catch tag 0
-    0x0b,                   // end try
-    0x0b                    // end func
+    0x61,
+    0x73,
+    0x6d, // WASM magic
+    0x01,
+    0x00,
+    0x00,
+    0x00, // Version 1
+    0x01,
+    0x04,
+    0x01,
+    0x60, // Type section
+    0x00,
+    0x00, // () -> ()
+    0x03,
+    0x02,
+    0x01,
+    0x00, // Function section
+    0x0d,
+    0x03,
+    0x01,
+    0x00, // Tag section: 1 tag
+    0x00,
+    0x0a,
+    0x0a,
+    0x01,
+    0x08, // Code section
+    0x00, // 0 locals
+    0x06,
+    0x40, // try
+    0x07,
+    0x00, // catch tag 0
+    0x0b, // end try
+    0x0b, // end func
   ]);
 
   return testWasmFeature(excBytes);
@@ -151,17 +248,36 @@ async function detectExceptions(): Promise<boolean> {
 async function detectTailCall(): Promise<boolean> {
   // Module using return_call
   const tailBytes = new Uint8Array([
-    0x00, 0x61, 0x73, 0x6d, // WASM magic
-    0x01, 0x00, 0x00, 0x00, // Version 1
-    0x01, 0x04, 0x01, 0x60, // Type section
-    0x00, 0x00,             // () -> ()
-    0x03, 0x03, 0x02, 0x00, // Function section: 2 functions
     0x00,
-    0x0a, 0x09, 0x02,       // Code section: 2 functions
-    0x02, 0x00, 0x0b,       // func 0: empty
-    0x04, 0x00,             // func 1: 0 locals
-    0x12, 0x00,             // return_call 0
-    0x0b                    // end
+    0x61,
+    0x73,
+    0x6d, // WASM magic
+    0x01,
+    0x00,
+    0x00,
+    0x00, // Version 1
+    0x01,
+    0x04,
+    0x01,
+    0x60, // Type section
+    0x00,
+    0x00, // () -> ()
+    0x03,
+    0x03,
+    0x02,
+    0x00, // Function section: 2 functions
+    0x00,
+    0x0a,
+    0x09,
+    0x02, // Code section: 2 functions
+    0x02,
+    0x00,
+    0x0b, // func 0: empty
+    0x04,
+    0x00, // func 1: 0 locals
+    0x12,
+    0x00, // return_call 0
+    0x0b, // end
   ]);
 
   return testWasmFeature(tailBytes);

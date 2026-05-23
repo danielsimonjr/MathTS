@@ -1,24 +1,24 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for combinatorics
 interface BigNumberType {
   // BigNumber placeholder for type compatibility
 }
 
-type NumericValue = number | BigNumberType
+type NumericValue = number | BigNumberType;
 
 interface CatalanDependencies {
-  typed: TypedFunction
-  addScalar: (x: NumericValue, y: NumericValue) => NumericValue
-  divideScalar: (x: NumericValue, y: NumericValue) => NumericValue
-  multiplyScalar: (x: NumericValue, y: NumericValue) => NumericValue
-  combinations: (n: NumericValue, k: NumericValue) => NumericValue
-  isNegative: (x: NumericValue) => boolean
-  isInteger: (x: NumericValue) => boolean
+  typed: TypedFunction;
+  addScalar: (x: NumericValue, y: NumericValue) => NumericValue;
+  divideScalar: (x: NumericValue, y: NumericValue) => NumericValue;
+  multiplyScalar: (x: NumericValue, y: NumericValue) => NumericValue;
+  combinations: (n: NumericValue, k: NumericValue) => NumericValue;
+  isNegative: (x: NumericValue) => boolean;
+  isInteger: (x: NumericValue) => boolean;
 }
 
-const name = 'catalan'
+const name = 'catalan';
 const dependencies = [
   'typed',
   'addScalar',
@@ -26,8 +26,8 @@ const dependencies = [
   'multiplyScalar',
   'combinations',
   'isNegative',
-  'isInteger'
-]
+  'isInteger',
+];
 
 export const createCatalan = /* #__PURE__ */ factory(
   name,
@@ -39,7 +39,7 @@ export const createCatalan = /* #__PURE__ */ factory(
     multiplyScalar,
     combinations,
     isNegative,
-    isInteger
+    isInteger,
   }: CatalanDependencies) => {
     /**
      * The Catalan Numbers enumerate combinatorial structures of many different types.
@@ -65,16 +65,11 @@ export const createCatalan = /* #__PURE__ */ factory(
     return typed(name, {
       'number | BigNumber': function (n: NumericValue): NumericValue {
         if (!isInteger(n) || isNegative(n)) {
-          throw new TypeError(
-            'Non-negative integer value expected in function catalan'
-          )
+          throw new TypeError('Non-negative integer value expected in function catalan');
         }
 
-        return divideScalar(
-          combinations(multiplyScalar(n, 2), n),
-          addScalar(n, 1)
-        )
-      }
-    })
+        return divideScalar(combinations(multiplyScalar(n, 2), n), addScalar(n, 1));
+      },
+    });
   }
-)
+);

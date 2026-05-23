@@ -55,12 +55,12 @@ matrix.multiply(other)   // DenseMatrix or SparseMatrix
   5. Returns result as DenseMatrix
 ```
 
-| Backend | Threshold | Key Ops |
-|---------|-----------|---------|
-| `JSBackend` | Default | All ops, pure TypeScript, Float64Array |
-| `WASMBackend` | >1K elements | SIMD multiply, LU/QR/Cholesky, eigenvalues |
-| `GPUBackend` | >100K elements | WebGPU matmul, transpose, scale, elementwise |
-| `ParallelBackend` | Configurable | WebWorker-backed elementwise + matmul |
+| Backend           | Threshold      | Key Ops                                      |
+| ----------------- | -------------- | -------------------------------------------- |
+| `JSBackend`       | Default        | All ops, pure TypeScript, Float64Array       |
+| `WASMBackend`     | >1K elements   | SIMD multiply, LU/QR/Cholesky, eigenvalues   |
+| `GPUBackend`      | >100K elements | WebGPU matmul, transpose, scale, elementwise |
+| `ParallelBackend` | Configurable   | WebWorker-backed elementwise + matmul        |
 
 ---
 
@@ -118,12 +118,12 @@ typed-function dispatch -> MatrixWasmBridge.execute(op, args)
 
 Backend selected by `MATHTS_WASM_BACKEND` environment variable:
 
-| Value | Behavior |
-|-------|----------|
-| `rust` | Force Rust WASM backend |
-| `assemblyscript` | Force AssemblyScript WASM backend |
+| Value            | Behavior                                    |
+| ---------------- | ------------------------------------------- |
+| `rust`           | Force Rust WASM backend                     |
+| `assemblyscript` | Force AssemblyScript WASM backend           |
 | `auto` (default) | Prefer Rust; fall back to AS if unavailable |
-| `none` | Disable WASM, use JS only |
+| `none`           | Disable WASM, use JS only                   |
 
 ---
 
@@ -339,12 +339,12 @@ typed-function (@danielsimonjr/mathts-core)
 
 ## 7. Configuration Flow
 
-| Config Object | Consumer | Effect |
-|---------------|----------|--------|
-| `MatrixConfig` | `BackendManager` | Backend selection thresholds |
-| `ComputePoolConfig` | `ComputePool` | Worker count, task queue size |
-| `WorkbookConfig` | `WorkbookExecutor` | Execution mode, reactivity |
-| `BackendPreference` | `BackendManager` | Override automatic backend order |
-| `ProfilingConfig` | `BackendManager` | Enable runtime execution timing |
-| `AdaptiveTuningConfig` | `BackendManager` | Auto-adjust WASM/GPU thresholds |
-| `BigNumber.config()` | `BigNumber` | Decimal precision, rounding mode |
+| Config Object          | Consumer           | Effect                           |
+| ---------------------- | ------------------ | -------------------------------- |
+| `MatrixConfig`         | `BackendManager`   | Backend selection thresholds     |
+| `ComputePoolConfig`    | `ComputePool`      | Worker count, task queue size    |
+| `WorkbookConfig`       | `WorkbookExecutor` | Execution mode, reactivity       |
+| `BackendPreference`    | `BackendManager`   | Override automatic backend order |
+| `ProfilingConfig`      | `BackendManager`   | Enable runtime execution timing  |
+| `AdaptiveTuningConfig` | `BackendManager`   | Auto-adjust WASM/GPU thresholds  |
+| `BigNumber.config()`   | `BigNumber`        | Decimal precision, rounding mode |

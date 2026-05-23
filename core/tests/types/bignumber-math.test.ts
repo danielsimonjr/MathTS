@@ -405,24 +405,15 @@ describe('BigNumber math methods', () => {
     });
 
     it('atan2(1, 1) = PI/4', () => {
-      expectCloseTo(
-        BigNumber.fromNumber(1).atan2(BigNumber.fromNumber(1)),
-        Math.PI / 4
-      );
+      expectCloseTo(BigNumber.fromNumber(1).atan2(BigNumber.fromNumber(1)), Math.PI / 4);
     });
 
     it('atan2(1, 0) = PI/2', () => {
-      expectCloseTo(
-        BigNumber.fromNumber(1).atan2(BigNumber.fromNumber(0)),
-        Math.PI / 2
-      );
+      expectCloseTo(BigNumber.fromNumber(1).atan2(BigNumber.fromNumber(0)), Math.PI / 2);
     });
 
     it('atan2(-1, -1) = -3*PI/4', () => {
-      expectCloseTo(
-        BigNumber.fromNumber(-1).atan2(BigNumber.fromNumber(-1)),
-        -3 * Math.PI / 4
-      );
+      expectCloseTo(BigNumber.fromNumber(-1).atan2(BigNumber.fromNumber(-1)), (-3 * Math.PI) / 4);
     });
   });
 

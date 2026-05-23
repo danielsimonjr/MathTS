@@ -1,22 +1,22 @@
-import { factory } from '../../../utils/factory.js'
-import type { TypedFunction } from '../../../core/function/typed.js'
+import { factory } from '../../../utils/factory.js';
+import type { TypedFunction } from '../../../core/function/typed.js';
 
 /**
  * Unit instance interface with splitUnit method
  */
 interface UnitInstance {
-  splitUnit(parts: Array<string | UnitInstance>): UnitInstance[]
+  splitUnit(parts: Array<string | UnitInstance>): UnitInstance[];
 }
 
 /**
  * Dependencies for createSplitUnit
  */
 interface SplitUnitDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'splitUnit'
-const dependencies = ['typed'] as const
+const name = 'splitUnit';
+const dependencies = ['typed'] as const;
 
 export const createSplitUnit = /* #__PURE__ */ factory(
   name,
@@ -46,8 +46,8 @@ export const createSplitUnit = /* #__PURE__ */ factory(
         unit: UnitInstance,
         parts: Array<string | UnitInstance>
       ): UnitInstance[] {
-        return unit.splitUnit(parts)
-      }
-    })
+        return unit.splitUnit(parts);
+      },
+    });
   }
-)
+);

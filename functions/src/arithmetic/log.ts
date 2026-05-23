@@ -1,39 +1,39 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { MathJsConfig } from '../core/config.js'
-import { promoteLogarithm } from '../utils/bigint.js'
-import { logNumber } from '../plain/number/index.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { MathJsConfig } from '../core/config.js';
+import { promoteLogarithm } from '../utils/bigint.js';
+import { logNumber } from '../plain/number/index.js';
 
 // Type definitions for log
 interface ComplexType {
-  log(): ComplexType
+  log(): ComplexType;
 }
 
 interface ComplexConstructor {
-  new (re: number, im: number): ComplexType
+  new (re: number, im: number): ComplexType;
 }
 
 interface BigNumberType {
-  isNegative(): boolean
-  ln(): BigNumberType
-  toNumber(): number
+  isNegative(): boolean;
+  ln(): BigNumberType;
+  toNumber(): number;
 }
 
 interface FractionType {
-  log(base: FractionType): FractionType | null
+  log(base: FractionType): FractionType | null;
 }
 
 interface LogDependencies {
-  typed: TypedFunction
-  typeOf: (x: unknown) => string
-  config: MathJsConfig
-  divideScalar: TypedFunction
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  typeOf: (x: unknown) => string;
+  config: MathJsConfig;
+  divideScalar: TypedFunction;
+  Complex: ComplexConstructor;
 }
 
-const name = 'log'
-const dependencies = ['config', 'typed', 'typeOf', 'divideScalar', 'Complex']
-const nlg16 = Math.log(16)
+const name = 'log';
+const dependencies = ['config', 'typed', 'typeOf', 'divideScalar', 'Complex'];
+const nlg16 = Math.log(16);
 
 export const createLog = /* #__PURE__ */ factory(
   name,
@@ -75,20 +75,20 @@ export const createLog = /* #__PURE__ */ factory(
      *            Returns the logarithm of `x`
      */
     function complexLog(c: ComplexType): ComplexType {
-      return c.log()
+      return c.log();
     }
 
     function complexLogNumber(x: number): ComplexType {
-      return complexLog(new Complex(x, 0))
+      return complexLog(new Complex(x, 0));
     }
 
     return typed(name, {
       number: function (x: number): number | ComplexType {
         if (x >= 0 || config.predictable) {
-          return logNumber(x)
+          return logNumber(x);
         } else {
           // negative value -> complex value computation
-          return complexLogNumber(x)
+          return complexLogNumber(x);
         }
       },
 
@@ -98,10 +98,10 @@ export const createLog = /* #__PURE__ */ factory(
 
       BigNumber: function (x: BigNumberType): BigNumberType | ComplexType {
         if (!x.isNegative() || config.predictable) {
-          return x.ln()
+          return x.ln();
         } else {
           // downgrade to number, return Complex valued result
-          return complexLogNumber(x.toNumber())
+          return complexLogNumber(x.toNumber());
         }
       },
 
@@ -111,16 +111,16 @@ export const createLog = /* #__PURE__ */ factory(
             // calculate logarithm for a specified base, log(x, base)
 
             if (typeOf(x) === 'Fraction' && typeOf(base) === 'Fraction') {
-              const result = (x as FractionType).log(base as FractionType)
+              const result = (x as FractionType).log(base as FractionType);
 
               if (result !== null) {
-                return result
+                return result;
               }
             }
 
-            return divideScalar(self(x), self(base))
+            return divideScalar(self(x), self(base));
           }
-      )
-    })
+      ),
+    });
   }
-)
+);

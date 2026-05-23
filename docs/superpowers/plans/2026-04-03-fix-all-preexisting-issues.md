@@ -13,6 +13,7 @@
 ### Task 1: Fix root tsconfig.json and add @types/node everywhere
 
 **Files:**
+
 - Modify: `tsconfig.json`
 - Modify: `core/package.json`
 - Modify: `matrix/package.json`
@@ -78,6 +79,7 @@ git add -A && git commit -m "fix: add @types/node to all workspace packages"
 ### Task 2: Add missing vitest.config.ts to 5 packages
 
 **Files:**
+
 - Create: `functions/vitest.config.ts`
 - Create: `parallel/vitest.config.ts`
 - Create: `workbook/vitest.config.ts`
@@ -182,6 +184,7 @@ git commit -m "fix: add missing vitest.config.ts to 5 packages"
 ### Task 3: Fix parallel/ typecheck failure
 
 **Files:**
+
 - Modify: `parallel/tsconfig.json`
 
 The errors come from `../node_modules/workerpool/src/workers/worker.ts` and `../node_modules/workerpool/src/core/Pool.ts` — TypeScript `.ts` source files in node_modules that `skipLibCheck` doesn't cover (it only skips `.d.ts`). The fix is to exclude the node_modules workerpool source from compilation.
@@ -237,6 +240,7 @@ git commit -m "fix(parallel): exclude workerpool .ts sources from typecheck"
 ### Task 4: Fix assembly/ WASM build (64 errors)
 
 **Files:**
+
 - Modify: `assembly/asconfig.json` (abort path)
 - Modify: `assembly/src/types/complex.ts` (add 6 missing methods + prefix bare math calls)
 - Modify: `assembly/src/ops/scalar.ts` (prefix bare math calls)
@@ -246,6 +250,7 @@ git commit -m "fix(parallel): exclude workerpool .ts sources from typecheck"
 - Modify: `assembly/src/bindings/wasm-loader.ts` (prefix bare math calls)
 
 There are three root causes:
+
 1. `asconfig.json` uses `"abort=src/env/abort"` but asc resolves relative to entry root `src/`, so it should be `"abort=env/abort"`
 2. AssemblyScript uses `Math.cos()` / `Mathf.cos()`, not bare `cos()` — 114 bare calls across 6 files
 3. `Complex` class is missing 6 inverse trig methods: `asin`, `acos`, `atan`, `asinh`, `acosh`, `atanh`
@@ -381,6 +386,7 @@ git commit -m "fix(assembly): fix WASM build - Math. prefix, abort path, Complex
 ### Task 5: Fix expression/ package — make it build
 
 **Files:**
+
 - Modify: `expression/src/types.ts` (fix import)
 - Create: `expression/tsconfig.json`
 - Modify: `expression/package.json` (fix build script, add deps)
@@ -390,13 +396,13 @@ git commit -m "fix(assembly): fix WASM build - Math. prefix, abort path, Complex
 The file imports `TypedFunction` from `../core/function/typed.js` — a path that resolves into the synced mathjs code in `functions/src/core/`. Since `TypedFunctionConstructor` is already defined inline, and the `TypedFunction` type is a simple callable, define it locally instead of importing:
 
 Replace:
+
 ```typescript
-export type {
-  TypedFunction
-} from '../core/function/typed.js'
+export type { TypedFunction } from '../core/function/typed.js';
 ```
 
 With:
+
 ```typescript
 // Typed function type - a callable with metadata
 export type TypedFunction = ((...args: any[]) => any) & {
@@ -435,6 +441,7 @@ If there are errors, fix them. Expected issues: missing typed-function types, im
 - [ ] **Step 4: Fix build script in package.json**
 
 Change `"build": "echo 'Skipping build - expression package is incomplete'"` to:
+
 ```json
 "build": "tsup src/index.ts --format esm --dts --clean"
 ```
@@ -469,11 +476,13 @@ git commit -m "fix(expression): enable build - fix types import, add tsconfig, r
 ### Task 6: Update CLAUDE.md known issues
 
 **Files:**
+
 - Modify: `CLAUDE.md`
 
 - [ ] **Step 1: Remove fixed known issues**
 
 Remove these from the Known Issues section:
+
 - `expression/` build is skipped (now builds)
 - `assembly/` WASM build fails (now builds)
 - Some packages may need `npm i -D @types/node` (now all have it)

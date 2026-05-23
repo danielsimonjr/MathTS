@@ -70,7 +70,8 @@ export class SparseMatrix extends Matrix<number> {
     this.cols = cols;
     this._data = values instanceof Float64Array ? values : new Float64Array(values);
     this._colIndices = colIndices instanceof Int32Array ? colIndices : new Int32Array(colIndices);
-    this._rowPointers = rowPointers instanceof Int32Array ? rowPointers : new Int32Array(rowPointers);
+    this._rowPointers =
+      rowPointers instanceof Int32Array ? rowPointers : new Int32Array(rowPointers);
 
     // Validate CSR structure
     if (this._rowPointers.length !== rows + 1) {
@@ -218,13 +219,7 @@ export class SparseMatrix extends Matrix<number> {
       rowPointers.push(idx);
     }
 
-    return new SparseMatrix(
-      n,
-      n,
-      vals,
-      new Int32Array(colIndices),
-      new Int32Array(rowPointers)
-    );
+    return new SparseMatrix(n, n, vals, new Int32Array(colIndices), new Int32Array(rowPointers));
   }
 
   // =========================================================================
@@ -344,13 +339,7 @@ export class SparseMatrix extends Matrix<number> {
         // Update existing entry
         const newData = new Float64Array(this._data);
         newData[insertPos] = value;
-        return new SparseMatrix(
-          this.rows,
-          this.cols,
-          newData,
-          this._colIndices,
-          this._rowPointers
-        );
+        return new SparseMatrix(this.rows, this.cols, newData, this._colIndices, this._rowPointers);
       }
     } else {
       if (value === 0) {
@@ -487,10 +476,7 @@ export class SparseMatrix extends Matrix<number> {
    * Get the diagonal elements
    */
   diagonal(k: number = 0): SparseMatrix {
-    const diagLength = Math.min(
-      this.rows - Math.max(0, -k),
-      this.cols - Math.max(0, k)
-    );
+    const diagLength = Math.min(this.rows - Math.max(0, -k), this.cols - Math.max(0, k));
 
     if (diagLength <= 0) {
       return SparseMatrix.zeros(0, 1);
@@ -692,13 +678,7 @@ export class SparseMatrix extends Matrix<number> {
       newData[i] = this._data[i] * scalar;
     }
 
-    return new SparseMatrix(
-      this.rows,
-      this.cols,
-      newData,
-      this._colIndices,
-      this._rowPointers
-    );
+    return new SparseMatrix(this.rows, this.cols, newData, this._colIndices, this._rowPointers);
   }
 
   /**

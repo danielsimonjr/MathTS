@@ -82,9 +82,7 @@ export class WASMBackend implements MatrixBackend {
 
     // Load WASM module
     try {
-      this.wasmModule = await wasmLoader.load(
-        this.config.wasmPath || undefined
-      );
+      this.wasmModule = await wasmLoader.load(this.config.wasmPath || undefined);
     } catch (error) {
       console.warn('Failed to load WASM module, falling back to JS:', error);
       this.wasmModule = null;
@@ -95,10 +93,7 @@ export class WASMBackend implements MatrixBackend {
    * Check if operation should use WASM
    */
   private shouldUseWasm(elementCount: number): boolean {
-    return (
-      this.wasmModule !== null &&
-      elementCount >= this.config.minElements
-    );
+    return this.wasmModule !== null && elementCount >= this.config.minElements;
   }
 
   /**
@@ -306,14 +301,22 @@ export class WASMBackend implements MatrixBackend {
       // Use SIMD-optimized version if available
       if (this.config.useSIMD && this.features?.simd) {
         this.wasmModule!.multiplyDenseSIMD(
-          aAlloc.ptr, a.rows, a.cols,
-          bAlloc.ptr, b.rows, b.cols,
+          aAlloc.ptr,
+          a.rows,
+          a.cols,
+          bAlloc.ptr,
+          b.rows,
+          b.cols,
           resultAlloc.ptr
         );
       } else {
         this.wasmModule!.multiplyDense(
-          aAlloc.ptr, a.rows, a.cols,
-          bAlloc.ptr, b.rows, b.cols,
+          aAlloc.ptr,
+          a.rows,
+          a.cols,
+          bAlloc.ptr,
+          b.rows,
+          b.cols,
           resultAlloc.ptr
         );
       }

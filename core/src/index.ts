@@ -102,7 +102,15 @@ export {
   registerNativeTypes,
 } from './typed/index.js';
 
-export type { TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf } from './typed/index.js';
+export type {
+  TypedFunction,
+  TypedInstance,
+  TypeDef,
+  ConversionDef,
+  SignatureFunction,
+  ReferTo,
+  ReferToSelf,
+} from './typed/index.js';
 
 // =============================================================================
 // Factory pattern

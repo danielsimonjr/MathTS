@@ -22,7 +22,12 @@ describe('type-conversion exports', () => {
     expect((c as { re: number }).re).toBe(3);
     expect(fraction(1, 2)).toBeDefined();
     expect(bignumber('123')).toBeDefined();
-    expect(matrix([[1, 2], [3, 4]])).toBeDefined();
+    expect(
+      matrix([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toBeDefined();
   });
 
   it('coerces primitive types', () => {

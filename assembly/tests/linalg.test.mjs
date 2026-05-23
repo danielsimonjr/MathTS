@@ -42,8 +42,7 @@ function check(name, cond, detail) {
     console.log(`✗ ${name} ${detail ?? ''}`);
   }
 }
-const arrEq = (a, b) =>
-  a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
+const arrEq = (a, b) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
 
 console.log('AssemblyScript extra linear algebra\n===================================');
 
@@ -58,10 +57,7 @@ check(
   'rowReduce([[1,2,3],[4,5,6],[7,8,9]])',
   arrEq(rref([1, 2, 3, 4, 5, 6, 7, 8, 9], 3, 3), [1, 0, -1, 0, 1, 2, 0, 0, 0])
 );
-check(
-  'rowReduce([[2,4],[1,1]]) = I',
-  arrEq(rref([2, 4, 1, 1], 2, 2), [1, 0, 0, 1])
-);
+check('rowReduce([[2,4],[1,1]]) = I', arrEq(rref([2, 4, 1, 1], 2, 2), [1, 0, 0, 1]));
 
 function charpoly(a, n) {
   const p = makeArray(a);

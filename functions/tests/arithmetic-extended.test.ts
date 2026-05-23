@@ -5,14 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  gcd,
-  lcm,
-  mod,
-  xgcd,
-  nthRoot,
-  norm,
-} from '../src/typed/arithmetic.js';
+import { gcd, lcm, mod, xgcd, nthRoot, norm } from '../src/typed/arithmetic.js';
 import { hypot } from '../src/typed/trigonometry.js';
 
 describe('Extended Arithmetic Functions (Sprint 18)', () => {
@@ -77,8 +70,8 @@ describe('Extended Arithmetic Functions (Sprint 18)', () => {
 
     it('should handle negative dividend (Euclidean mod)', () => {
       // Euclidean modulo always returns non-negative
-      expect(mod(-5, 3)).toBe(1);  // -5 = -2*3 + 1
-      expect(mod(-7, 4)).toBe(1);  // -7 = -2*4 + 1
+      expect(mod(-5, 3)).toBe(1); // -5 = -2*3 + 1
+      expect(mod(-7, 4)).toBe(1); // -7 = -2*4 + 1
     });
 
     it('should work with bigint', () => {
@@ -140,7 +133,7 @@ describe('Extended Arithmetic Functions (Sprint 18)', () => {
 
     it('should handle non-perfect roots', () => {
       expect(nthRoot(2, 2)).toBeCloseTo(Math.SQRT2);
-      expect(nthRoot(10, 3)).toBeCloseTo(Math.pow(10, 1/3));
+      expect(nthRoot(10, 3)).toBeCloseTo(Math.pow(10, 1 / 3));
     });
   });
 
@@ -206,7 +199,7 @@ describe('Extended Arithmetic Functions (Sprint 18)', () => {
       });
 
       it('should compute arbitrary p-norm', () => {
-        expect(norm([1, 2, 3], 3)).toBeCloseTo(Math.pow(1 + 8 + 27, 1/3));
+        expect(norm([1, 2, 3], 3)).toBeCloseTo(Math.pow(1 + 8 + 27, 1 / 3));
       });
     });
   });

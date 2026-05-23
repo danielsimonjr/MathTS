@@ -4,5 +4,5 @@ export const trueDocs = {
   syntax: ['true'],
   description: 'Boolean value true',
   examples: ['true'],
-  seealso: ['false']
-}
+  seealso: ['false'],
+};

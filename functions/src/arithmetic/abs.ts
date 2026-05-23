@@ -1,19 +1,19 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import { absNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import { absNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for abs
 interface HasAbsMethod {
-  abs(): unknown
+  abs(): unknown;
 }
 
 interface AbsDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'abs'
-const dependencies = ['typed']
+const name = 'abs';
+const dependencies = ['typed'];
 
 export const createAbs = /* #__PURE__ */ factory(
   name,
@@ -46,8 +46,7 @@ export const createAbs = /* #__PURE__ */ factory(
     return typed(name, {
       number: absNumber,
 
-      'Complex | BigNumber | Fraction | Unit': (x: HasAbsMethod): unknown =>
-        x.abs(),
+      'Complex | BigNumber | Fraction | Unit': (x: HasAbsMethod): unknown => x.abs(),
 
       bigint: (x: bigint): bigint => (x < 0n ? -x : x),
 
@@ -56,7 +55,7 @@ export const createAbs = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
             deepMap(x as unknown[], self, true)
-      )
-    })
+      ),
+    });
   }
-)
+);

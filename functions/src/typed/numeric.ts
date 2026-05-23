@@ -52,12 +52,7 @@ export interface FindRootOptions {
  * @example
  * findRoot(x => x**2 - 2, 1, 2) // => ~1.4142135
  */
-export function findRoot(
-  f: (x: f64) => f64,
-  a: f64,
-  b: f64,
-  opts?: FindRootOptions,
-): f64 {
+export function findRoot(f: (x: f64) => f64, a: f64, b: f64, opts?: FindRootOptions): f64 {
   const tol = opts?.tol ?? 1e-12;
   const maxIter = opts?.maxIter ?? 100;
 
@@ -92,7 +87,7 @@ export function findRoot(
         (c * fa * fb) / ((fc - fa) * (fc - fb));
     } else {
       // Secant method
-      s = b - fb * (b - a) / (fb - fa);
+      s = b - (fb * (b - a)) / (fb - fa);
     }
 
     // Conditions for accepting s
@@ -211,11 +206,7 @@ export interface MinimizeOptions {
  * @example
  * minimize(x => (x[0]-1)**2 + (x[1]-2)**2, [0, 0]) // => ~[1, 2]
  */
-export function minimize(
-  f: (x: number[]) => f64,
-  x0: number[],
-  opts?: MinimizeOptions,
-): number[] {
+export function minimize(f: (x: number[]) => f64, x0: number[], opts?: MinimizeOptions): number[] {
   const tol = opts?.tol ?? 1e-8;
   const maxIter = opts?.maxIter ?? 1000;
   const step = opts?.step ?? 0.1;
@@ -320,11 +311,7 @@ export function minimize(
  * @param opts - Options
  * @returns Approximate maximizer
  */
-export function maximize(
-  f: (x: number[]) => f64,
-  x0: number[],
-  opts?: MinimizeOptions,
-): number[] {
+export function maximize(f: (x: number[]) => f64, x0: number[], opts?: MinimizeOptions): number[] {
   return minimize((x) => -f(x), x0, opts);
 }
 
@@ -339,10 +326,9 @@ export function maximize(
 export function globalMinimize(
   f: (x: number[]) => f64,
   bounds: [number, number][],
-  opts?: MinimizeOptions & { nHops?: i32 },
+  opts?: MinimizeOptions & { nHops?: i32 }
 ): number[] {
   const nHops = opts?.nHops ?? 20;
-  const n = bounds.length;
 
   // Random initial point within bounds
   function randomPoint(): number[] {
@@ -382,8 +368,7 @@ export function leastSquares(A: number[][], b: number[]): number[] {
     if (wasm) {
       try {
         const flatA = new Float64Array(m * n);
-        for (let i = 0; i < m; i++)
-          for (let j = 0; j < n; j++) flatA[i * n + j] = A[i][j];
+        for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) flatA[i * n + j] = A[i][j];
         const aAlloc = wasmLoader.allocateFloat64Array(flatA);
         const bAlloc = wasmLoader.allocateFloat64Array(new Float64Array(b));
         const xAlloc = wasmLoader.allocateFloat64Array(new Float64Array(n));
@@ -395,7 +380,9 @@ export function leastSquares(A: number[][], b: number[]): number[] {
           wasmLoader.free(bAlloc.ptr);
           wasmLoader.free(xAlloc.ptr);
         }
-      } catch { /* fall through to JS */ }
+      } catch {
+        /* fall through to JS */
+      }
     }
   }
 
@@ -438,7 +425,7 @@ export function nintegrate(
   f: (x: f64) => f64,
   a: f64,
   b: f64,
-  opts?: { tol?: f64; maxDepth?: i32 },
+  opts?: { tol?: f64; maxDepth?: i32 }
 ): f64 {
   const tol = opts?.tol ?? 1e-10;
   const maxDepth = opts?.maxDepth ?? 30;
@@ -463,7 +450,10 @@ export function nintegrate(
 /** 5-point Gauss-Legendre quadrature on [a,b] */
 function gaussLegendre5(f: (x: f64) => f64, a: f64, b: f64): f64 {
   const nodes = [-0.906179845938664, -0.5384693101056831, 0, 0.5384693101056831, 0.906179845938664];
-  const weights = [0.2369268850561891, 0.4786286704993665, 0.5688888888888889, 0.4786286704993665, 0.2369268850561891];
+  const weights = [
+    0.2369268850561891, 0.4786286704993665, 0.5688888888888889, 0.4786286704993665,
+    0.2369268850561891,
+  ];
   const hw = (b - a) / 2;
   const mid = (a + b) / 2;
   let sum = 0;
@@ -507,7 +497,7 @@ export function simpsons(f: (x: f64) => f64, a: f64, b: f64, n: i32 = 100): f64 
 export function interpolate(
   xs: number[],
   ys: number[],
-  method: 'linear' | 'lagrange' | 'spline' = 'linear',
+  method: 'linear' | 'lagrange' | 'spline' = 'linear'
 ): (x: f64) => f64 {
   if (xs.length !== ys.length || xs.length < 2) {
     throw new Error('interpolate: need at least 2 matching data points');
@@ -550,7 +540,7 @@ export function interpolate(
       const d = new Array(n);
       for (let j = n - 1; j >= 0; j--) {
         c[j] = z[j] - mu[j] * c[j + 1];
-        bArr[j] = (ys[j + 1] - ys[j]) / h[j] - h[j] * (c[j + 1] + 2 * c[j]) / 3;
+        bArr[j] = (ys[j + 1] - ys[j]) / h[j] - (h[j] * (c[j + 1] + 2 * c[j])) / 3;
         d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
       }
       const aArr = ys.slice(0, n);
@@ -607,10 +597,14 @@ export function pchip(xs: number[], ys: number[], x: f64): f64 {
 
   const m: number[] = new Array(n);
   if (n === 2) {
-    m[0] = delta[0]; m[1] = delta[0];
+    m[0] = delta[0];
+    m[1] = delta[0];
   } else {
     for (let i = 1; i < n - 1; i++) {
-      if (delta[i - 1] * delta[i] <= 0) { m[i] = 0; continue; }
+      if (delta[i - 1] * delta[i] <= 0) {
+        m[i] = 0;
+        continue;
+      }
       const h1 = xs[i] - xs[i - 1];
       const h2 = xs[i + 1] - xs[i];
       const w1 = 2 * h2 + h1;
@@ -634,8 +628,12 @@ export function pchip(xs: number[], ys: number[], x: f64): f64 {
   const t = (x - xs[idx]) / h;
   const t2 = t * t;
   const t3 = t2 * t;
-  return (2 * t3 - 3 * t2 + 1) * ys[idx] + (t3 - 2 * t2 + t) * h * m[idx] +
-    (-2 * t3 + 3 * t2) * ys[idx + 1] + (t3 - t2) * h * m[idx + 1];
+  return (
+    (2 * t3 - 3 * t2 + 1) * ys[idx] +
+    (t3 - 2 * t2 + t) * h * m[idx] +
+    (-2 * t3 + 3 * t2) * ys[idx + 1] +
+    (t3 - t2) * h * m[idx + 1]
+  );
 }
 
 /**
@@ -668,7 +666,9 @@ export function bezierCurve(controlPoints: number[][], t: f64): number[] {
           wasmLoader.free(ctrlAlloc.ptr);
           wasmLoader.free(resultAlloc.ptr);
         }
-      } catch { /* fall through to JS */ }
+      } catch {
+        /* fall through to JS */
+      }
     }
   }
 
@@ -716,7 +716,10 @@ export function bspline(controlPoints: number[][], degree: i32, t: f64): number[
   // Find knot span
   let k = p;
   for (let i = p; i < n; i++) {
-    if (tClamped >= knots[i] && tClamped < knots[i + 1]) { k = i; break; }
+    if (tClamped >= knots[i] && tClamped < knots[i + 1]) {
+      k = i;
+      break;
+    }
   }
 
   const dim = controlPoints[0].length;
@@ -764,7 +767,9 @@ export function loess(xs: number[], ys: number[], x: f64, bandwidth: f64 = 0.3):
           wasmLoader.free(xsAlloc.ptr);
           wasmLoader.free(ysAlloc.ptr);
         }
-      } catch { /* fall through to JS */ }
+      } catch {
+        /* fall through to JS */
+      }
     }
   }
 
@@ -783,7 +788,11 @@ export function loess(xs: number[], ys: number[], x: f64, bandwidth: f64 = 0.3):
   });
 
   // Weighted linear regression
-  let sw = 0, swx = 0, swy = 0, swxx = 0, swxy = 0;
+  let sw = 0,
+    swx = 0,
+    swy = 0,
+    swxx = 0,
+    swxy = 0;
   for (let j = 0; j < k; j++) {
     const i = neighbors[j].i;
     const w = weights[j];
@@ -815,7 +824,7 @@ export function griddata(
   points: number[][],
   values: number[],
   xi: number[],
-  yi: number[],
+  yi: number[]
 ): number[][] {
   const n = points.length;
 
@@ -847,7 +856,15 @@ export function griddata(
         const yiAlloc = wasmLoader.allocateFloat64Array(flatYi);
         const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(ni));
         try {
-          wasm.griddata_wasm(ptsAlloc.ptr, valsAlloc.ptr, n, xiAlloc.ptr, yiAlloc.ptr, ni, resultAlloc.ptr);
+          wasm.griddata_wasm(
+            ptsAlloc.ptr,
+            valsAlloc.ptr,
+            n,
+            xiAlloc.ptr,
+            yiAlloc.ptr,
+            ni,
+            resultAlloc.ptr
+          );
           const result2d: number[][] = [];
           let k = 0;
           for (let j = 0; j < yi.length; j++) {
@@ -865,7 +882,9 @@ export function griddata(
           wasmLoader.free(yiAlloc.ptr);
           wasmLoader.free(resultAlloc.ptr);
         }
-      } catch { /* fall through to JS */ }
+      } catch {
+        /* fall through to JS */
+      }
     }
   }
 
@@ -884,7 +903,11 @@ export function griddata(
         const dx = xi[i] - points[k][0];
         const dy = yi[j] - points[k][1];
         const d = Math.sqrt(dx * dx + dy * dy);
-        if (d < 1e-15) { exact = true; exactVal = values[k]; break; }
+        if (d < 1e-15) {
+          exact = true;
+          exactVal = values[k];
+          break;
+        }
         const w = 1 / Math.pow(d, p);
         sumW += w;
         sumWV += w * values[k];
@@ -911,7 +934,7 @@ export function rbfInterpolate(
   points: number[][],
   values: number[],
   xi: number[][],
-  kernel: 'gaussian' | 'multiquadric' | 'thinplate' = 'gaussian',
+  kernel: 'gaussian' | 'multiquadric' | 'thinplate' = 'gaussian'
 ): number[] {
   const n = points.length;
   const dim = points[0].length;
@@ -926,14 +949,21 @@ export function rbfInterpolate(
         for (let i = 0; i < n; i++)
           for (let d = 0; d < dim; d++) flatPts[i * dim + d] = points[i][d];
         const flatXi = new Float64Array(ni * dim);
-        for (let i = 0; i < ni; i++)
-          for (let d = 0; d < dim; d++) flatXi[i * dim + d] = xi[i][d];
+        for (let i = 0; i < ni; i++) for (let d = 0; d < dim; d++) flatXi[i * dim + d] = xi[i][d];
         const ptsAlloc = wasmLoader.allocateFloat64Array(flatPts);
         const valsAlloc = wasmLoader.allocateFloat64Array(new Float64Array(values));
         const xiAlloc = wasmLoader.allocateFloat64Array(flatXi);
         const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(ni));
         try {
-          wasm.rbf_interp_wasm(ptsAlloc.ptr, valsAlloc.ptr, n, dim, xiAlloc.ptr, ni, resultAlloc.ptr);
+          wasm.rbf_interp_wasm(
+            ptsAlloc.ptr,
+            valsAlloc.ptr,
+            n,
+            dim,
+            xiAlloc.ptr,
+            ni,
+            resultAlloc.ptr
+          );
           return Array.from(resultAlloc.array);
         } finally {
           wasmLoader.free(ptsAlloc.ptr);
@@ -941,7 +971,9 @@ export function rbfInterpolate(
           wasmLoader.free(xiAlloc.ptr);
           wasmLoader.free(resultAlloc.ptr);
         }
-      } catch { /* fall through to JS */ }
+      } catch {
+        /* fall through to JS */
+      }
     }
   }
 
@@ -951,7 +983,10 @@ export function rbfInterpolate(
   for (let i = 0; i < Math.min(n, 50); i++) {
     for (let j = i + 1; j < Math.min(n, 50); j++) {
       let d = 0;
-      for (let k = 0; k < dim; k++) { const dk = points[i][k] - points[j][k]; d += dk * dk; }
+      for (let k = 0; k < dim; k++) {
+        const dk = points[i][k] - points[j][k];
+        d += dk * dk;
+      }
       sumDist += Math.sqrt(d);
       count++;
     }
@@ -961,16 +996,22 @@ export function rbfInterpolate(
   // RBF kernel function
   function phi(r: f64): f64 {
     switch (kernel) {
-      case 'multiquadric': return Math.sqrt(1 + Math.pow(eps * r, 2));
-      case 'thinplate': return r === 0 ? 0 : r * r * Math.log(r);
+      case 'multiquadric':
+        return Math.sqrt(1 + Math.pow(eps * r, 2));
+      case 'thinplate':
+        return r === 0 ? 0 : r * r * Math.log(r);
       case 'gaussian':
-      default: return Math.exp(-Math.pow(eps * r, 2));
+      default:
+        return Math.exp(-Math.pow(eps * r, 2));
     }
   }
 
   function dist(a: number[], b: number[]): f64 {
     let s = 0;
-    for (let k = 0; k < dim; k++) { const dk = a[k] - b[k]; s += dk * dk; }
+    for (let k = 0; k < dim; k++) {
+      const dk = a[k] - b[k];
+      s += dk * dk;
+    }
     return Math.sqrt(s);
   }
 
@@ -1013,7 +1054,7 @@ export function curvefit(
   f: (x: f64, params: number[]) => f64,
   xs: number[],
   ys: number[],
-  p0: number[],
+  p0: number[]
 ): number[] {
   const m = xs.length;
   const n = p0.length;
@@ -1106,10 +1147,15 @@ export function expfit(xs: number[], ys: number[]): [f64, f64] {
   // Log-linearize: ln(y) = ln(a) + b*x
   const logYs = ys.map((y) => Math.log(Math.abs(y) || 1e-15));
   const n = xs.length;
-  let sx = 0, sy = 0, sxx = 0, sxy = 0;
+  let sx = 0,
+    sy = 0,
+    sxx = 0,
+    sxy = 0;
   for (let i = 0; i < n; i++) {
-    sx += xs[i]; sy += logYs[i];
-    sxx += xs[i] * xs[i]; sxy += xs[i] * logYs[i];
+    sx += xs[i];
+    sy += logYs[i];
+    sxx += xs[i] * xs[i];
+    sxy += xs[i] * logYs[i];
   }
   const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
   const lna = (sy - b * sx) / n;
@@ -1126,10 +1172,15 @@ export function expfit(xs: number[], ys: number[]): [f64, f64] {
 export function logfit(xs: number[], ys: number[]): [f64, f64] {
   const logXs = xs.map((x) => Math.log(x));
   const n = xs.length;
-  let sx = 0, sy = 0, sxx = 0, sxy = 0;
+  let sx = 0,
+    sy = 0,
+    sxx = 0,
+    sxy = 0;
   for (let i = 0; i < n; i++) {
-    sx += logXs[i]; sy += ys[i];
-    sxx += logXs[i] * logXs[i]; sxy += logXs[i] * ys[i];
+    sx += logXs[i];
+    sy += ys[i];
+    sxx += logXs[i] * logXs[i];
+    sxy += logXs[i] * ys[i];
   }
   const a = (n * sxy - sx * sy) / (n * sxx - sx * sx);
   const b = (sy - a * sx) / n;
@@ -1148,10 +1199,15 @@ export function powerfit(xs: number[], ys: number[]): [f64, f64] {
   const logXs = xs.map((x) => Math.log(x));
   const logYs = ys.map((y) => Math.log(y));
   const n = xs.length;
-  let sx = 0, sy = 0, sxx = 0, sxy = 0;
+  let sx = 0,
+    sy = 0,
+    sxx = 0,
+    sxy = 0;
   for (let i = 0; i < n; i++) {
-    sx += logXs[i]; sy += logYs[i];
-    sxx += logXs[i] * logXs[i]; sxy += logXs[i] * logYs[i];
+    sx += logXs[i];
+    sy += logYs[i];
+    sxx += logXs[i] * logXs[i];
+    sxy += logXs[i] * logYs[i];
   }
   const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
   const lna = (sy - b * sx) / n;
@@ -1183,7 +1239,7 @@ export function solveODESystem(
   f: (t: f64, y: number[]) => number[],
   y0: number[],
   tspan: [f64, f64],
-  opts?: { tol?: f64; maxSteps?: i32; dt?: f64 },
+  opts?: { tol?: f64; maxSteps?: i32; dt?: f64 }
 ): ODESolution {
   const n = y0.length;
   const dt = opts?.dt ?? (tspan[1] - tspan[0]) / 200;
@@ -1263,7 +1319,7 @@ export function solveODESystem(
 export function stiffODESolver(
   f: (t: f64, y: number[]) => number[],
   y0: number[],
-  tspan: [f64, f64],
+  tspan: [f64, f64]
 ): ODESolution {
   const nSteps = 200;
   const n = y0.length;
@@ -1306,7 +1362,7 @@ export function stiffODESolver(
 export function solveBVP(
   f: (t: f64, y: number[]) => number[],
   bc: (y0: number[], yf: number[]) => number[],
-  mesh: number[],
+  mesh: number[]
 ): ODESolution {
   const n = 2; // Simple 2-point BVP
   const tspan: [f64, f64] = [mesh[0], mesh[mesh.length - 1]];
@@ -1319,7 +1375,7 @@ export function solveBVP(
   }
 
   // Use simple Newton iteration
-  let s = new Array(n).fill(0);
+  const s = new Array(n).fill(0);
   const delta = 1e-7;
 
   for (let iter = 0; iter < 50; iter++) {
@@ -1341,7 +1397,10 @@ export function solveBVP(
     }
 
     try {
-      const ds = linsolve(J, r.map((v) => -v));
+      const ds = linsolve(
+        J,
+        r.map((v) => -v)
+      );
       for (let i = 0; i < n; i++) s[i] += ds[i];
     } catch {
       break;
@@ -1366,7 +1425,7 @@ export function odeAdaptiveStep(
   y0: number[],
   t0: f64,
   h: f64,
-  tol: f64 = 1e-6,
+  tol: f64 = 1e-6
 ): { y: number[]; t: f64; h: f64 } {
   const n = y0.length;
 
@@ -1431,7 +1490,7 @@ export function eventDetection(
   f: (t: f64, y: number[]) => number[],
   y0: number[],
   tspan: [f64, f64],
-  event: (t: f64, y: number[]) => f64,
+  event: (t: f64, y: number[]) => f64
 ): ODESolution & { eventTime?: f64 } {
   const nSteps = 1000;
   const h = (tspan[1] - tspan[0]) / nSteps;
@@ -1445,9 +1504,18 @@ export function eventDetection(
 
   for (let step = 0; step < nSteps; step++) {
     const k1 = f(t, y);
-    const k2 = f(t + h / 2, y.map((v, i) => v + (h / 2) * k1[i]));
-    const k3 = f(t + h / 2, y.map((v, i) => v + (h / 2) * k2[i]));
-    const k4 = f(t + h, y.map((v, i) => v + h * k3[i]));
+    const k2 = f(
+      t + h / 2,
+      y.map((v, i) => v + (h / 2) * k1[i])
+    );
+    const k3 = f(
+      t + h / 2,
+      y.map((v, i) => v + (h / 2) * k2[i])
+    );
+    const k4 = f(
+      t + h,
+      y.map((v, i) => v + h * k3[i])
+    );
 
     const yNew: number[] = new Array(n);
     for (let i = 0; i < n; i++) {
@@ -1459,24 +1527,32 @@ export function eventDetection(
 
     if (prevE * curE < 0) {
       // Event detected between t and tNew; bisect
-      let tLo = t, tHi = tNew;
-      let yLo = y, yHi = yNew;
+      let tLo = t,
+        tHi = tNew;
+      let yLo = y,
+        yHi = yNew;
       for (let bi = 0; bi < 50; bi++) {
         const tMid = (tLo + tHi) / 2;
         const hMid = tMid - tLo;
         const km1 = f(tLo, yLo);
-        const km2 = f(tLo + hMid / 2, yLo.map((v, i) => v + (hMid / 2) * km1[i]));
+        const km2 = f(
+          tLo + hMid / 2,
+          yLo.map((v, i) => v + (hMid / 2) * km1[i])
+        );
         const yMid = yLo.map((v, i) => v + hMid * km2[i]);
         const eMid = event(tMid, yMid);
-        if (Math.abs(eMid) < 1e-12 || (tHi - tLo) < 1e-14) {
+        if (Math.abs(eMid) < 1e-12 || tHi - tLo < 1e-14) {
           ts.push(tMid);
           ys.push(yMid);
           return { t: ts, y: ys, eventTime: tMid };
         }
         if (prevE * eMid < 0) {
-          tHi = tMid; yHi = yMid;
+          tHi = tMid;
+          yHi = yMid;
         } else {
-          tLo = tMid; yLo = yMid; prevE = eMid;
+          tLo = tMid;
+          yLo = yMid;
+          prevE = eMid;
         }
       }
       ts.push(tHi);
@@ -1515,8 +1591,7 @@ export function cond(A: number[][]): f64 {
     if (wasm) {
       try {
         const flat = new Float64Array(n * n);
-        for (let i = 0; i < n; i++)
-          for (let j = 0; j < n; j++) flat[i * n + j] = A[i][j];
+        for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) flat[i * n + j] = A[i][j];
         const aAlloc = wasmLoader.allocateFloat64Array(flat);
         try {
           const result = wasm.condition_number_wasm(aAlloc.ptr, n);
@@ -1524,7 +1599,9 @@ export function cond(A: number[][]): f64 {
         } finally {
           wasmLoader.free(aAlloc.ptr);
         }
-      } catch { /* fall through to JS */ }
+      } catch {
+        /* fall through to JS */
+      }
     }
   }
 
@@ -1592,8 +1669,7 @@ export function rank(A: number[][], tol: f64 = 1e-10): i32 {
     if (wasm) {
       try {
         const flat = new Float64Array(m * n);
-        for (let i = 0; i < m; i++)
-          for (let j = 0; j < n; j++) flat[i * n + j] = A[i][j];
+        for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) flat[i * n + j] = A[i][j];
         const aAlloc = wasmLoader.allocateFloat64Array(flat);
         try {
           const result = wasm.matrix_rank_wasm(aAlloc.ptr, m, n, tol);
@@ -1601,7 +1677,9 @@ export function rank(A: number[][], tol: f64 = 1e-10): i32 {
         } finally {
           wasmLoader.free(aAlloc.ptr);
         }
-      } catch { /* fall through to JS */ }
+      } catch {
+        /* fall through to JS */
+      }
     }
   }
 
@@ -1700,10 +1778,7 @@ export function nullspace(A: number[][]): number[][] {
  * @param q - Denominator polynomial coefficients
  * @returns { residues: number[], poles: number[] }
  */
-export function residue(
-  p: number[],
-  q: number[],
-): { residues: number[]; poles: number[] } {
+export function residue(p: number[], q: number[]): { residues: number[]; poles: number[] } {
   // Find roots of q using companion matrix eigenvalues (simple for small degree)
   // For simplicity, use Durand-Kerner for roots
   const poles = polyRoots(q);
@@ -1748,22 +1823,26 @@ function polyRoots(coeffs: number[]): number[] {
   for (let iter = 0; iter < 100; iter++) {
     for (let i = 0; i < n; i++) {
       // Evaluate polynomial at roots[i]
-      let pRe = c[n], pIm = 0;
+      let pRe = c[n],
+        pIm = 0;
       for (let j = n - 1; j >= 0; j--) {
         const newRe = pRe * roots[i].re - pIm * roots[i].im + c[j];
         const newIm = pRe * roots[i].im + pIm * roots[i].re;
-        pRe = newRe; pIm = newIm;
+        pRe = newRe;
+        pIm = newIm;
       }
 
       // Product of (roots[i] - roots[j])
-      let dRe = 1, dIm = 0;
+      let dRe = 1,
+        dIm = 0;
       for (let j = 0; j < n; j++) {
         if (i === j) continue;
         const diffRe = roots[i].re - roots[j].re;
         const diffIm = roots[i].im - roots[j].im;
         const newDRe = dRe * diffRe - dIm * diffIm;
         const newDIm = dRe * diffIm + dIm * diffRe;
-        dRe = newDRe; dIm = newDIm;
+        dRe = newDRe;
+        dIm = newDIm;
       }
 
       // roots[i] -= p(roots[i]) / prod
@@ -1788,17 +1867,12 @@ function polyRoots(coeffs: number[]): number[] {
  * @param n - Number of terms (default 10)
  * @returns Evaluation function
  */
-export function chebyshevApprox(
-  f: (x: f64) => f64,
-  a: f64,
-  b: f64,
-  n: i32 = 10,
-): (x: f64) => f64 {
+export function chebyshevApprox(f: (x: f64) => f64, a: f64, b: f64, n: i32 = 10): (x: f64) => f64 {
   // Chebyshev nodes on [-1, 1]
   const nodes: number[] = [];
   const fVals: number[] = [];
   for (let k = 0; k < n; k++) {
-    const tk = Math.cos(Math.PI * (k + 0.5) / n);
+    const tk = Math.cos((Math.PI * (k + 0.5)) / n);
     nodes.push(tk);
     fVals.push(f(((b - a) * tk + (a + b)) / 2));
   }
@@ -1808,7 +1882,7 @@ export function chebyshevApprox(
   for (let j = 0; j < n; j++) {
     let c = 0;
     for (let k = 0; k < n; k++) {
-      c += fVals[k] * Math.cos(Math.PI * j * (k + 0.5) / n);
+      c += fVals[k] * Math.cos((Math.PI * j * (k + 0.5)) / n);
     }
     coeffs.push((2 / n) * c);
   }
@@ -1817,7 +1891,8 @@ export function chebyshevApprox(
   return (x: f64): f64 => {
     const t = (2 * x - a - b) / (b - a);
     // Clenshaw recurrence
-    let b1 = 0, b2 = 0;
+    let b1 = 0,
+      b2 = 0;
     for (let j = n - 1; j >= 1; j--) {
       const tmp = 2 * t * b1 - b2 + coeffs[j];
       b2 = b1;
@@ -1838,7 +1913,7 @@ export function chebyshevApprox(
 export function padeApproximant(
   coeffs: number[],
   m: i32,
-  n: i32,
+  n: i32
 ): { num: number[]; den: number[] } {
   // Need at least m + n + 1 coefficients
   const c = [...coeffs];
@@ -1894,12 +1969,7 @@ export function padeApproximant(
  * @param b - Inequality constraint bounds (length m)
  * @returns Solution vector x
  */
-export function quadprog(
-  H: number[][],
-  f: number[],
-  A: number[][],
-  b: number[],
-): number[] {
+export function quadprog(H: number[][], f: number[], A: number[][], b: number[]): number[] {
   const n = f.length;
   const mConstraints = A.length;
   let x = new Array(n).fill(0);
@@ -1949,11 +2019,7 @@ export function quadprog(
  * @param b - Constraint bounds (length m, non-negative)
  * @returns Solution vector x, or null if infeasible
  */
-export function linprog(
-  c: number[],
-  A: number[][],
-  b: number[],
-): number[] | null {
+export function linprog(c: number[], A: number[][], b: number[]): number[] | null {
   const m = A.length;
   const n = c.length;
 
@@ -2025,7 +2091,10 @@ export function linprog(
     // Check all rows including objective
     for (let i = 0; i <= m; i++) {
       if (Math.abs(tableau[i][j] - 1) < 1e-10) {
-        if (basicRow !== -1) { isBasic = false; break; }
+        if (basicRow !== -1) {
+          isBasic = false;
+          break;
+        }
         basicRow = i;
       } else if (Math.abs(tableau[i][j]) > 1e-10) {
         isBasic = false;
@@ -2053,13 +2122,13 @@ export function linprog(
 export function solvePDE(
   pde: { alpha: f64 },
   domain: { L: f64; nx: i32; nt: i32; T: f64 },
-  bc: { left: f64; right: f64; initial: (x: f64) => f64 },
+  bc: { left: f64; right: f64; initial: (x: f64) => f64 }
 ): { x: number[]; u: number[] } {
   const { alpha } = pde;
   const { L, nx, nt, T } = domain;
   const dx = L / (nx - 1);
   const dt = T / nt;
-  const r = alpha * dt / (dx * dx);
+  const r = (alpha * dt) / (dx * dx);
 
   if (r > 0.5) {
     // CFL condition warning - still compute but may be unstable

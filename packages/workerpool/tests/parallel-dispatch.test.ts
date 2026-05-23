@@ -44,7 +44,7 @@ describe('parallel kernel dispatch (real workers)', () => {
 
   it('dispatches prodChunk to a real worker', async () => {
     // Use values near 1 to avoid overflow; sequential reference for comparison.
-    const data = Float64Array.from({ length: 100 }, (_, i) => 1 + (i % 5 - 2) * 0.001);
+    const data = Float64Array.from({ length: 100 }, (_, i) => 1 + ((i % 5) - 2) * 0.001);
     const expected = data.reduce((acc, v) => acc * v, 1);
     const r = await pool.prod(data, { forceParallel: true });
     expect(r.parallelized).toBe(true);
@@ -111,12 +111,9 @@ describe('parallel kernel dispatch (real workers)', () => {
     const a = Float64Array.from({ length: 100 }, (_, i) => i);
     const b = Float64Array.from({ length: 100 }, (_, i) => i + 1);
 
-    const hyp = await pool.applyKernel2(
-      a,
-      b,
-      '(a, b) => Math.sqrt(a * a + b * b)',
-      { forceParallel: true }
-    );
+    const hyp = await pool.applyKernel2(a, b, '(a, b) => Math.sqrt(a * a + b * b)', {
+      forceParallel: true,
+    });
     expect(hyp.parallelized).toBe(true);
     expect(hyp.result[3]).toBeCloseTo(Math.sqrt(9 + 16), 12);
     expect(hyp.result[99]).toBeCloseTo(Math.sqrt(99 * 99 + 100 * 100), 12);

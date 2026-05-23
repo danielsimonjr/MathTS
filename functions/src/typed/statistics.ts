@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
@@ -46,9 +46,11 @@ function toFloat64Array(arr: number[]): Float64Array {
 }
 
 /**
- * Welford's online algorithm for variance (stable numerical computation)
+ * Welford's online algorithm for variance (stable numerical computation).
+ * Currently unused inline — kept for the AS-port path. Prefixed `_` so
+ * eslint accepts the intentional retention.
  */
-function welfordVariance(data: Float64Array): { mean: f64; variance: f64; count: i32 } {
+function _welfordVariance(data: Float64Array): { mean: f64; variance: f64; count: i32 } {
   const n: i32 = data.length;
   if (n === 0) {
     return { mean: NaN, variance: NaN, count: 0 };
@@ -77,13 +79,13 @@ function welfordVariance(data: Float64Array): { mean: f64; variance: f64; count:
  */
 export const parallelStatSum = mathTyped('parallelStatSum', {
   // Float64Array - parallel execution
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     const result = await computePool.sum(data);
     return result.result;
   },
 
   // Number array
-  'Array': async (arr: number[]): Promise<f64> => {
+  Array: async (arr: number[]): Promise<f64> => {
     const data = toFloat64Array(arr);
     const result = await computePool.sum(data);
     return result.result;
@@ -106,13 +108,13 @@ export const parallelStatSum = mathTyped('parallelStatSum', {
  */
 export const parallelStatMean = mathTyped('parallelStatMean', {
   // Float64Array - parallel execution
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     const result = await computePool.mean(data);
     return result.result;
   },
 
   // Number array - parallel execution
-  'Array': async (arr: number[]): Promise<f64> => {
+  Array: async (arr: number[]): Promise<f64> => {
     if (arr.length === 0) return NaN;
     const data = toFloat64Array(arr);
     const result = await computePool.mean(data);
@@ -138,17 +140,20 @@ export const parallelStatMean = mathTyped('parallelStatMean', {
  */
 export const parallelStatVariance = mathTyped('parallelStatVariance', {
   // Float64Array with default normalization (unbiased)
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     const result = await computePool.variance(data);
     // Default to unbiased (n-1 denominator)
     const n = data.length;
     if (n <= 1) return 0;
     // The computePool returns population variance, convert to sample variance
-    return result.result.variance * n / (n - 1);
+    return (result.result.variance * n) / (n - 1);
   },
 
   // Float64Array with normalization
-  'Float64Array, string': async (data: Float64Array, normalization: NormalizationType): Promise<f64> => {
+  'Float64Array, string': async (
+    data: Float64Array,
+    normalization: NormalizationType
+  ): Promise<f64> => {
     const result = await computePool.variance(data);
     const n = data.length;
 
@@ -160,16 +165,16 @@ export const parallelStatVariance = mathTyped('parallelStatVariance', {
       case 'uncorrected':
         return populationVariance;
       case 'biased':
-        return populationVariance * n / (n + 1);
+        return (populationVariance * n) / (n + 1);
       case 'unbiased':
       default:
         if (n === 1) return 0;
-        return populationVariance * n / (n - 1);
+        return (populationVariance * n) / (n - 1);
     }
   },
 
   // Number array
-  'Array': async (arr: number[]): Promise<f64> => {
+  Array: async (arr: number[]): Promise<f64> => {
     if (arr.length === 0) return NaN;
     const data = toFloat64Array(arr);
     return parallelStatVariance(data) as Promise<f64>;
@@ -203,7 +208,7 @@ export const parallelStatVariance = mathTyped('parallelStatVariance', {
  */
 export const parallelStatStd = mathTyped('parallelStatStd', {
   // Float64Array with default normalization (unbiased)
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     const result = await computePool.std(data);
     const n = data.length;
     if (n <= 1) return 0;
@@ -212,13 +217,16 @@ export const parallelStatStd = mathTyped('parallelStatStd', {
   },
 
   // Float64Array with normalization
-  'Float64Array, string': async (data: Float64Array, normalization: NormalizationType): Promise<f64> => {
+  'Float64Array, string': async (
+    data: Float64Array,
+    normalization: NormalizationType
+  ): Promise<f64> => {
     const variance = await parallelStatVariance(data, normalization);
     return Math.sqrt(variance as number);
   },
 
   // Number array
-  'Array': async (arr: number[]): Promise<f64> => {
+  Array: async (arr: number[]): Promise<f64> => {
     if (arr.length === 0) return NaN;
     const data = toFloat64Array(arr);
     return parallelStatStd(data) as Promise<f64>;
@@ -241,13 +249,13 @@ export const parallelStatStd = mathTyped('parallelStatStd', {
  */
 export const parallelStatMin = mathTyped('parallelStatMin', {
   // Float64Array - parallel execution
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     const result = await computePool.min(data);
     return result.result;
   },
 
   // Number array
-  'Array': async (arr: number[]): Promise<f64> => {
+  Array: async (arr: number[]): Promise<f64> => {
     if (arr.length === 0) return Infinity;
     const data = toFloat64Array(arr);
     const result = await computePool.min(data);
@@ -269,13 +277,13 @@ export const parallelStatMin = mathTyped('parallelStatMin', {
  */
 export const parallelStatMax = mathTyped('parallelStatMax', {
   // Float64Array - parallel execution
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     const result = await computePool.max(data);
     return result.result;
   },
 
   // Number array
-  'Array': async (arr: number[]): Promise<f64> => {
+  Array: async (arr: number[]): Promise<f64> => {
     if (arr.length === 0) return -Infinity;
     const data = toFloat64Array(arr);
     const result = await computePool.max(data);
@@ -298,13 +306,15 @@ export const parallelStatMax = mathTyped('parallelStatMax', {
  */
 export const parallelStatMinMax = mathTyped('parallelStatMinMax', {
   // Float64Array - parallel execution
-  'Float64Array': async (data: Float64Array): Promise<{ min: f64; max: f64; minIdx: i32; maxIdx: i32 }> => {
+  Float64Array: async (
+    data: Float64Array
+  ): Promise<{ min: f64; max: f64; minIdx: i32; maxIdx: i32 }> => {
     const result = await computePool.minMax(data);
     return result.result;
   },
 
   // Number array
-  'Array': async (arr: number[]): Promise<{ min: f64; max: f64; minIdx: i32; maxIdx: i32 }> => {
+  Array: async (arr: number[]): Promise<{ min: f64; max: f64; minIdx: i32; maxIdx: i32 }> => {
     const data = toFloat64Array(arr);
     const result = await computePool.minMax(data);
     return result.result;
@@ -322,7 +332,7 @@ export const parallelStatMinMax = mathTyped('parallelStatMinMax', {
  */
 export const parallelStatMedian = mathTyped('parallelStatMedian', {
   // Float64Array
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     const n: i32 = data.length;
     if (n === 0) return NaN;
     if (n === 1) return data[0];
@@ -339,7 +349,7 @@ export const parallelStatMedian = mathTyped('parallelStatMedian', {
   },
 
   // Number array
-  'Array': async (arr: number[]): Promise<f64> => {
+  Array: async (arr: number[]): Promise<f64> => {
     if (arr.length === 0) return NaN;
     return parallelStatMedian(toFloat64Array(arr)) as Promise<f64>;
   },
@@ -364,7 +374,7 @@ export const parallelStatMedian = mathTyped('parallelStatMedian', {
  */
 export const parallelStatMode = mathTyped('parallelStatMode', {
   // Number array
-  'Array': (arr: number[]): number[] => {
+  Array: (arr: number[]): number[] => {
     if (arr.length === 0) return [];
 
     const counts = new Map<number, i32>();
@@ -386,7 +396,7 @@ export const parallelStatMode = mathTyped('parallelStatMode', {
   },
 
   // Float64Array
-  'Float64Array': (data: Float64Array): number[] => {
+  Float64Array: (data: Float64Array): number[] => {
     return parallelStatMode(Array.from(data)) as number[];
   },
 });
@@ -400,7 +410,7 @@ export const parallelStatMode = mathTyped('parallelStatMode', {
  */
 export const parallelStatProd = mathTyped('parallelStatProd', {
   // Number array
-  'Array': (arr: number[]): f64 => {
+  Array: (arr: number[]): f64 => {
     if (arr.length === 0) return 1;
     let prod: f64 = 1;
     for (let i: i32 = 0; i < arr.length; i++) {
@@ -410,7 +420,7 @@ export const parallelStatProd = mathTyped('parallelStatProd', {
   },
 
   // Float64Array - parallel execution
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     if (data.length === 0) return 1;
     if (computePool.shouldParallelize(data.length)) {
       return (await computePool.prod(data)).result;
@@ -439,13 +449,13 @@ export const parallelStatProd = mathTyped('parallelStatProd', {
  */
 export const parallelStatNorm = mathTyped('parallelStatNorm', {
   // Float64Array - parallel execution
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     const result = await computePool.norm(data);
     return result.result;
   },
 
   // Number array
-  'Array': async (arr: number[]): Promise<f64> => {
+  Array: async (arr: number[]): Promise<f64> => {
     const data = toFloat64Array(arr);
     const result = await computePool.norm(data);
     return result.result;
@@ -575,7 +585,7 @@ export const parallelStatCorr = mathTyped('parallelStatCorr', {
  */
 export const parallelStatMAD = mathTyped('parallelStatMAD', {
   // Float64Array
-  'Float64Array': async (data: Float64Array): Promise<f64> => {
+  Float64Array: async (data: Float64Array): Promise<f64> => {
     const n: i32 = data.length;
     if (n === 0) return NaN;
 
@@ -592,7 +602,7 @@ export const parallelStatMAD = mathTyped('parallelStatMAD', {
   },
 
   // Number array
-  'Array': async (arr: number[]): Promise<f64> => {
+  Array: async (arr: number[]): Promise<f64> => {
     return parallelStatMAD(toFloat64Array(arr)) as Promise<f64>;
   },
 });
@@ -606,7 +616,7 @@ export const parallelStatMAD = mathTyped('parallelStatMAD', {
  */
 export const parallelStatCumsum = mathTyped('parallelStatCumsum', {
   // Float64Array
-  'Float64Array': (data: Float64Array): Float64Array => {
+  Float64Array: (data: Float64Array): Float64Array => {
     const result = new Float64Array(data.length);
     let sum: f64 = 0;
     for (let i: i32 = 0; i < data.length; i++) {
@@ -617,7 +627,7 @@ export const parallelStatCumsum = mathTyped('parallelStatCumsum', {
   },
 
   // Number array
-  'Array': (arr: number[]): number[] => {
+  Array: (arr: number[]): number[] => {
     const result: number[] = [];
     let sum: f64 = 0;
     for (let i: i32 = 0; i < arr.length; i++) {
@@ -665,7 +675,7 @@ export const parallelStatQuantile = mathTyped('parallelStatQuantile', {
 
   // Multiple quantiles
   'Float64Array, Array': (data: Float64Array, quantiles: number[]): number[] => {
-    return quantiles.map(q => parallelStatQuantile(data, q) as number);
+    return quantiles.map((q) => parallelStatQuantile(data, q) as number);
   },
 });
 
@@ -724,9 +734,21 @@ function _quickSelect(a: number[], lo: i32, hi: i32, k: i32): f64 {
   while (lo < hi) {
     // Median-of-three pivot selection
     const mid: i32 = (lo + hi) >>> 1;
-    if (a[mid] < a[lo]) { const t = a[lo]; a[lo] = a[mid]; a[mid] = t; }
-    if (a[hi] < a[lo]) { const t = a[lo]; a[lo] = a[hi]; a[hi] = t; }
-    if (a[mid] < a[hi]) { const t = a[mid]; a[mid] = a[hi]; a[hi] = t; }
+    if (a[mid] < a[lo]) {
+      const t = a[lo];
+      a[lo] = a[mid];
+      a[mid] = t;
+    }
+    if (a[hi] < a[lo]) {
+      const t = a[lo];
+      a[lo] = a[hi];
+      a[hi] = t;
+    }
+    if (a[mid] < a[hi]) {
+      const t = a[mid];
+      a[mid] = a[hi];
+      a[hi] = t;
+    }
     const pivot: f64 = a[hi];
 
     let i: i32 = lo;
@@ -735,11 +757,15 @@ function _quickSelect(a: number[], lo: i32, hi: i32, k: i32): f64 {
       while (a[i] < pivot) i++;
       while (j > lo && a[j] > pivot) j--;
       if (i >= j) break;
-      const t = a[i]; a[i] = a[j]; a[j] = t;
+      const t = a[i];
+      a[i] = a[j];
+      a[j] = t;
       i++;
       j--;
     }
-    const t = a[i]; a[i] = a[hi]; a[hi] = t;
+    const t = a[i];
+    a[i] = a[hi];
+    a[hi] = t;
 
     if (k === i) return a[i];
     if (k < i) hi = i - 1;

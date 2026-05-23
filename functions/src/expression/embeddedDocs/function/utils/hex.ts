@@ -4,5 +4,5 @@ export const hexDocs = {
   syntax: ['hex(value)'],
   description: 'Format a number as hexadecimal',
   examples: ['hex(240)'],
-  seealso: ['bin', 'oct']
-}
+  seealso: ['bin', 'oct'],
+};

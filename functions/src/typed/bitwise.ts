@@ -99,8 +99,8 @@ function bigNumberShiftCount(value: BigNumber, fnName: string): bigint {
  * `(x >>> n) | 0` would yield on a 32-bit integer.
  */
 function logShiftBigInt(x: bigint, n: bigint): bigint {
-  const masked = x & 0xffffffffn;          // -> uint32-equivalent
-  const shifted = masked >> n;             // logical because masked is non-negative
+  const masked = x & 0xffffffffn; // -> uint32-equivalent
+  const shifted = masked >> n; // logical because masked is non-negative
   // Re-wrap into the signed 32-bit range to match `Int32Array` storage.
   return shifted >= 0x80000000n ? shifted - 0x100000000n : shifted;
 }
@@ -132,10 +132,7 @@ export const bitAnd = mathTyped('bitAnd', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber =>
     bigNumberBinary(a, b, 'bitAnd', (x, y) => x & y),
 
-  'Int32Array, Int32Array': async (
-    a: Int32Array,
-    b: Int32Array
-  ): Promise<Int32Array> => {
+  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
     if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
       const wasmResult = runBinaryBitwiseWasm('bitAnd', a, b);
       if (wasmResult) return wasmResult;
@@ -148,12 +145,15 @@ export const bitAnd = mathTyped('bitAnd', {
   // single array argument (`fn(a, b, [...rest])`), so we receive it as
   // one positional param rather than via JS rest syntax.
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
-    rest.reduce((acc: i32, val: i32): i32 => {
-      if (!Number.isInteger(val)) {
-        throw new Error('Integers expected in function bitAnd');
-      }
-      return acc & val;
-    }, (a & b) as i32),
+    rest.reduce(
+      (acc: i32, val: i32): i32 => {
+        if (!Number.isInteger(val)) {
+          throw new Error('Integers expected in function bitAnd');
+        }
+        return acc & val;
+      },
+      (a & b) as i32
+    ),
 });
 
 // =============================================================================
@@ -173,10 +173,7 @@ export const bitOr = mathTyped('bitOr', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber =>
     bigNumberBinary(a, b, 'bitOr', (x, y) => x | y),
 
-  'Int32Array, Int32Array': async (
-    a: Int32Array,
-    b: Int32Array
-  ): Promise<Int32Array> => {
+  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
     if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
       const wasmResult = runBinaryBitwiseWasm('bitOr', a, b);
       if (wasmResult) return wasmResult;
@@ -186,12 +183,15 @@ export const bitOr = mathTyped('bitOr', {
   },
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
-    rest.reduce((acc: i32, val: i32): i32 => {
-      if (!Number.isInteger(val)) {
-        throw new Error('Integers expected in function bitOr');
-      }
-      return acc | val;
-    }, (a | b) as i32),
+    rest.reduce(
+      (acc: i32, val: i32): i32 => {
+        if (!Number.isInteger(val)) {
+          throw new Error('Integers expected in function bitOr');
+        }
+        return acc | val;
+      },
+      (a | b) as i32
+    ),
 });
 
 // =============================================================================
@@ -211,10 +211,7 @@ export const bitXor = mathTyped('bitXor', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber =>
     bigNumberBinary(a, b, 'bitXor', (x, y) => x ^ y),
 
-  'Int32Array, Int32Array': async (
-    a: Int32Array,
-    b: Int32Array
-  ): Promise<Int32Array> => {
+  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
     if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
       const wasmResult = runBinaryBitwiseWasm('bitXor', a, b);
       if (wasmResult) return wasmResult;
@@ -224,12 +221,15 @@ export const bitXor = mathTyped('bitXor', {
   },
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
-    rest.reduce((acc: i32, val: i32): i32 => {
-      if (!Number.isInteger(val)) {
-        throw new Error('Integers expected in function bitXor');
-      }
-      return acc ^ val;
-    }, (a ^ b) as i32),
+    rest.reduce(
+      (acc: i32, val: i32): i32 => {
+        if (!Number.isInteger(val)) {
+          throw new Error('Integers expected in function bitXor');
+        }
+        return acc ^ val;
+      },
+      (a ^ b) as i32
+    ),
 });
 
 // =============================================================================
@@ -237,21 +237,21 @@ export const bitXor = mathTyped('bitXor', {
 // =============================================================================
 
 export const bitNot = mathTyped('bitNot', {
-  'number': (a: i32): i32 => {
+  number: (a: i32): i32 => {
     if (!Number.isInteger(a)) {
       throw new Error('Integer expected in function bitNot');
     }
     return ~a;
   },
 
-  'bigint': (a: i64): i64 => ~a,
+  bigint: (a: i64): i64 => ~a,
 
-  'BigNumber': (a: BigNumber): BigNumber => {
+  BigNumber: (a: BigNumber): BigNumber => {
     const ai = bigNumberToBigInt(a, 'bitNot');
     return bigIntToBigNumber(~ai);
   },
 
-  'Int32Array': async (a: Int32Array): Promise<Int32Array> => {
+  Int32Array: async (a: Int32Array): Promise<Int32Array> => {
     if (a.length >= WASM_BITWISE_THRESHOLD) {
       const wasmResult = runUnaryBitwiseWasm('bitNot', a);
       if (wasmResult) return wasmResult;
@@ -286,10 +286,7 @@ export const leftShift = mathTyped('leftShift', {
     return bigIntToBigNumber(ai << bi);
   },
 
-  'Int32Array, Int32Array': async (
-    a: Int32Array,
-    b: Int32Array
-  ): Promise<Int32Array> => {
+  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
     if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
       const wasmResult = runBinaryBitwiseWasm('leftShift', a, b);
       if (wasmResult) return wasmResult;
@@ -299,12 +296,15 @@ export const leftShift = mathTyped('leftShift', {
   },
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
-    rest.reduce((acc: i32, val: i32): i32 => {
-      if (!Number.isInteger(val)) {
-        throw new Error('Integers expected in function leftShift');
-      }
-      return acc << val;
-    }, (a << b) as i32),
+    rest.reduce(
+      (acc: i32, val: i32): i32 => {
+        if (!Number.isInteger(val)) {
+          throw new Error('Integers expected in function leftShift');
+        }
+        return acc << val;
+      },
+      (a << b) as i32
+    ),
 });
 
 // =============================================================================
@@ -321,9 +321,7 @@ export const rightArithShift = mathTyped('rightArithShift', {
 
   'bigint, bigint': (a: i64, b: i64): i64 => {
     if (b < 0n) {
-      throw new Error(
-        'Negative shift count not allowed in function rightArithShift'
-      );
+      throw new Error('Negative shift count not allowed in function rightArithShift');
     }
     return a >> b;
   },
@@ -334,10 +332,7 @@ export const rightArithShift = mathTyped('rightArithShift', {
     return bigIntToBigNumber(ai >> bi);
   },
 
-  'Int32Array, Int32Array': async (
-    a: Int32Array,
-    b: Int32Array
-  ): Promise<Int32Array> => {
+  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
     if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
       const wasmResult = runBinaryBitwiseWasm('rightArithShift', a, b);
       if (wasmResult) return wasmResult;
@@ -347,12 +342,15 @@ export const rightArithShift = mathTyped('rightArithShift', {
   },
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
-    rest.reduce((acc: i32, val: i32): i32 => {
-      if (!Number.isInteger(val)) {
-        throw new Error('Integers expected in function rightArithShift');
-      }
-      return acc >> val;
-    }, (a >> b) as i32),
+    rest.reduce(
+      (acc: i32, val: i32): i32 => {
+        if (!Number.isInteger(val)) {
+          throw new Error('Integers expected in function rightArithShift');
+        }
+        return acc >> val;
+      },
+      (a >> b) as i32
+    ),
 });
 
 // =============================================================================
@@ -369,9 +367,7 @@ export const rightLogShift = mathTyped('rightLogShift', {
 
   'bigint, bigint': (a: i64, b: i64): i64 => {
     if (b < 0n) {
-      throw new Error(
-        'Negative shift count not allowed in function rightLogShift'
-      );
+      throw new Error('Negative shift count not allowed in function rightLogShift');
     }
     return logShiftBigInt(a, b);
   },
@@ -382,10 +378,7 @@ export const rightLogShift = mathTyped('rightLogShift', {
     return bigIntToBigNumber(logShiftBigInt(ai, bi));
   },
 
-  'Int32Array, Int32Array': async (
-    a: Int32Array,
-    b: Int32Array
-  ): Promise<Int32Array> => {
+  'Int32Array, Int32Array': async (a: Int32Array, b: Int32Array): Promise<Int32Array> => {
     if (a.length >= WASM_BITWISE_THRESHOLD && a.length === b.length) {
       const wasmResult = runBinaryBitwiseWasm('rightLogShift', a, b);
       if (wasmResult) return wasmResult;
@@ -395,12 +388,15 @@ export const rightLogShift = mathTyped('rightLogShift', {
   },
 
   'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
-    rest.reduce((acc: i32, val: i32): i32 => {
-      if (!Number.isInteger(val)) {
-        throw new Error('Integers expected in function rightLogShift');
-      }
-      return acc >>> val;
-    }, (a >>> b) as i32),
+    rest.reduce(
+      (acc: i32, val: i32): i32 => {
+        if (!Number.isInteger(val)) {
+          throw new Error('Integers expected in function rightLogShift');
+        }
+        return acc >>> val;
+      },
+      (a >>> b) as i32
+    ),
 });
 
 // =============================================================================

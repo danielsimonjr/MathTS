@@ -5,7 +5,7 @@
 **Scope**: Identify self-contained, import-free, numeric functions across the
 MathTS TypeScript packages that are candidates for WebAssembly packaging
 (Rust as the primary toolchain, AssemblyScript as the fallback), and measure
-them against what is *already* in WASM.
+them against what is _already_ in WASM.
 **Method**: Two parallel codebase surveys — (1) full inventory of the existing
 WASM surface, (2) scan of every package for pure import-free numeric kernels —
 followed by direct verification of the gap claims against the Rust crate.
@@ -15,22 +15,22 @@ followed by direct verification of the gap claims against the Rust crate.
 ## 1. Executive summary
 
 The headline finding is **counter-intuitive**: "convert these functions to
-Rust" is *mostly already done*. The Rust crate
+Rust" is _mostly already done_. The Rust crate
 (`wasm-rust/crates/mathts-wasm/`) is `#![no_std]` and exports **~1,016
 functions** across 20 domains. The AssemblyScript package (`assembly/src/`)
 exports **~202**.
 
 So the gap is not one gap — it is **three distinct gaps**:
 
-| Gap | What it is | Size | Effort to close |
-|-----|-----------|------|-----------------|
-| **A — Activation gap** | Pure-JS kernels in `functions/src/typed/` that *already have a Rust twin* but never call it — the JS fallback always runs. | ~60–100 functions | Low–medium (wiring, not porting) |
-| **B — True porting gap** | Pure, import-free functions with **no Rust counterpart at all**. | ~45 functions | Medium–high (new Rust code) |
-| **C — AssemblyScript parity gap** | AS lags Rust by ~800 exports; entire domains (special, signal, combinatorics, algebra, numeric, …) have **zero** AS coverage. | ~13 domains | High (volume) |
+| Gap                               | What it is                                                                                                                    | Size              | Effort to close                  |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------------------------------- |
+| **A — Activation gap**            | Pure-JS kernels in `functions/src/typed/` that _already have a Rust twin_ but never call it — the JS fallback always runs.    | ~60–100 functions | Low–medium (wiring, not porting) |
+| **B — True porting gap**          | Pure, import-free functions with **no Rust counterpart at all**.                                                              | ~45 functions     | Medium–high (new Rust code)      |
+| **C — AssemblyScript parity gap** | AS lags Rust by ~800 exports; entire domains (special, signal, combinatorics, algebra, numeric, …) have **zero** AS coverage. | ~13 domains       | High (volume)                    |
 
 The single most important concrete fact: **`functions/src/typed/special.ts`'s
-`getRustWasm()` returns `null` unconditionally** (line 25-32, comment: *"Currently
-disabled — JS fallbacks handle all operations"*). Every special function runs
+`getRustWasm()` returns `null` unconditionally** (line 25-32, comment: _"Currently
+disabled — JS fallbacks handle all operations"_). Every special function runs
 its pure-JS kernel even though Rust equivalents for ~half of them already
 exist. That one disabled function is the largest slice of Gap A.
 
@@ -46,7 +46,7 @@ A function qualifies as "import-free and WASM-convertible" when:
 1. **No computational module imports.** The `mathTyped('name', {...})` wrapper
    and `import type` lines do not disqualify it — typed-function dispatch is
    boilerplate, not a computation. Calling `computePool.*`, other factory
-   functions, or `Complex`/`Fraction`/`BigNumber` instance methods *does*
+   functions, or `Complex`/`Fraction`/`BigNumber` instance methods _does_
    disqualify it.
 2. **Numeric data only.** Operates on `number`, `bigint`, `Float64Array` /
    `Int32Array` / other typed arrays, or plain `number[]`. WASM cannot cheaply
@@ -55,7 +55,7 @@ A function qualifies as "import-free and WASM-convertible" when:
    function-pointer callbacks.
 3. **Compute-bound enough to be worth it.** A loop-heavy kernel or an
    iterative numerical algorithm. A single `Math.sin` call or one arithmetic
-   op is *not* worth the FFI overhead.
+   op is _not_ worth the FFI overhead.
 
 ---
 
@@ -64,18 +64,18 @@ A function qualifies as "import-free and WASM-convertible" when:
 Surveyed across `functions/src/typed/`, `matrix/src/`, `tensor/src/`,
 `autograd/src/`. Domains where every relevant kernel is pure:
 
-| Domain | File | Pure kernels found |
-|--------|------|--------------------|
-| Special functions | `functions/src/typed/special.ts` | **~30** — erf/erfc, lgamma, beta, gammainc/betainc, digamma, full Bessel family, elliptic K/E, Lambert W, Fresnel, integral functions, orthogonal polynomials. The whole file's only import is `mathTyped`. |
-| Signal/DSP | `functions/src/typed/signal.ts` | **~22** — `fftCoreFloat64`, convolution, correlation, DCT/DST, DWT, Hilbert, spectrogram, periodogram, FIR filters, window functions. |
-| Statistics | `functions/src/typed/statistics.ts` | **~12** — Welford variance, quickselect family, quantile, cumsum, p-norm, prod. |
-| Combinatorics / number theory | `functions/src/typed/combinatorics.ts` | **~25** — Fibonacci/Lucas, factorials, prime sieve, factorization, totient, Möbius, Jacobi, CRT, partitions. |
-| Linear algebra | `matrix/src/operations/svd.ts`, `eig.ts`; `functions/src/typed/matrix-ops.ts` | **~20** — SVD (Golub-Reinsch), eigensolver, `rowReduce`, `cholesky`, `hessenbergForm`, `characteristicPolynomial`. `svd.ts`/`eig.ts` have **zero project imports**. |
-| Numeric / optimization | `functions/src/typed/numeric.ts` | **~12** non-callback — `linsolve`, `leastSquares`, `rank`, `cond`, `nullspace`, `polyRoots`, `quadprog`, `linprog`, `residue`, curve fits. |
-| Interpolation | `functions/src/typed/interpolation.ts` | **~6** — entire file is import-free (Lagrange, Hermite, PCHIP, `polyFit`, splines). |
-| Algebra (polynomial) | `functions/src/typed/algebra.ts` | **~9** — `polyval`, `polyadd`, `polymul`, `polyder`, polynomial GCD/LCM, `discriminant`, `resultant`. |
-| Tensor | `tensor/src/Tensor.ts` | **~6** — `matMul`, rank-N `transpose`, `einsum`, elementwise ops (pure `Float64Array`). |
-| Autograd | `autograd/src/dual-tensor.ts` | **~4** — dual-number elementwise `add`/`sub`/`mul`/`scale`. |
+| Domain                        | File                                                                          | Pure kernels found                                                                                                                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Special functions             | `functions/src/typed/special.ts`                                              | **~30** — erf/erfc, lgamma, beta, gammainc/betainc, digamma, full Bessel family, elliptic K/E, Lambert W, Fresnel, integral functions, orthogonal polynomials. The whole file's only import is `mathTyped`. |
+| Signal/DSP                    | `functions/src/typed/signal.ts`                                               | **~22** — `fftCoreFloat64`, convolution, correlation, DCT/DST, DWT, Hilbert, spectrogram, periodogram, FIR filters, window functions.                                                                       |
+| Statistics                    | `functions/src/typed/statistics.ts`                                           | **~12** — Welford variance, quickselect family, quantile, cumsum, p-norm, prod.                                                                                                                             |
+| Combinatorics / number theory | `functions/src/typed/combinatorics.ts`                                        | **~25** — Fibonacci/Lucas, factorials, prime sieve, factorization, totient, Möbius, Jacobi, CRT, partitions.                                                                                                |
+| Linear algebra                | `matrix/src/operations/svd.ts`, `eig.ts`; `functions/src/typed/matrix-ops.ts` | **~20** — SVD (Golub-Reinsch), eigensolver, `rowReduce`, `cholesky`, `hessenbergForm`, `characteristicPolynomial`. `svd.ts`/`eig.ts` have **zero project imports**.                                         |
+| Numeric / optimization        | `functions/src/typed/numeric.ts`                                              | **~12** non-callback — `linsolve`, `leastSquares`, `rank`, `cond`, `nullspace`, `polyRoots`, `quadprog`, `linprog`, `residue`, curve fits.                                                                  |
+| Interpolation                 | `functions/src/typed/interpolation.ts`                                        | **~6** — entire file is import-free (Lagrange, Hermite, PCHIP, `polyFit`, splines).                                                                                                                         |
+| Algebra (polynomial)          | `functions/src/typed/algebra.ts`                                              | **~9** — `polyval`, `polyadd`, `polymul`, `polyder`, polynomial GCD/LCM, `discriminant`, `resultant`.                                                                                                       |
+| Tensor                        | `tensor/src/Tensor.ts`                                                        | **~6** — `matMul`, rank-N `transpose`, `einsum`, elementwise ops (pure `Float64Array`).                                                                                                                     |
+| Autograd                      | `autograd/src/dual-tensor.ts`                                                 | **~4** — dual-number elementwise `add`/`sub`/`mul`/`scale`.                                                                                                                                                 |
 
 That is **~150 pure import-free numeric kernels** in the candidate pool.
 
@@ -86,21 +86,21 @@ That is **~150 pure import-free numeric kernels** in the candidate pool.
 `wasm-rust/crates/mathts-wasm/` — ~1,016 `#[no_mangle] extern "C"` exports
 (camelCase names; **no** `#[wasm_bindgen]`), 20 domains:
 
-| Domain | Rust exports | AS exports | AS coverage |
-|--------|-------------:|-----------:|-------------|
-| Arithmetic | ~100 | ~78 | deep |
-| Trigonometry | 25 | 13 | partial (no reciprocal trig) |
-| Complex numbers | ~103 | ~81 | near-parity |
-| Matrix / linear algebra | ~197 | 41 | dense ops only |
-| Algebra / decompositions | 85 | 0 | **none** |
-| Numerical analysis | 128 | 0 | **none** |
-| Signal processing | 33 | 0 | **none** |
-| Statistics | 32 | ~7 | reductions only |
-| Special functions | ~30 | 0 | **none** |
-| Combinatorics | 18 | 0 | **none** |
-| Probability / distributions | 29 | 0 | **none** |
-| Geometry | ~33 | 0 | **none** |
-| Relational, Logical, Bitwise, Set, String, Unit, Number-theory utils, SIMD | ~170 | ~2 | near-zero |
+| Domain                                                                     | Rust exports | AS exports | AS coverage                  |
+| -------------------------------------------------------------------------- | -----------: | ---------: | ---------------------------- |
+| Arithmetic                                                                 |         ~100 |        ~78 | deep                         |
+| Trigonometry                                                               |           25 |         13 | partial (no reciprocal trig) |
+| Complex numbers                                                            |         ~103 |        ~81 | near-parity                  |
+| Matrix / linear algebra                                                    |         ~197 |         41 | dense ops only               |
+| Algebra / decompositions                                                   |           85 |          0 | **none**                     |
+| Numerical analysis                                                         |          128 |          0 | **none**                     |
+| Signal processing                                                          |           33 |          0 | **none**                     |
+| Statistics                                                                 |           32 |         ~7 | reductions only              |
+| Special functions                                                          |          ~30 |          0 | **none**                     |
+| Combinatorics                                                              |           18 |          0 | **none**                     |
+| Probability / distributions                                                |           29 |          0 | **none**                     |
+| Geometry                                                                   |          ~33 |          0 | **none**                     |
+| Relational, Logical, Bitwise, Set, String, Unit, Number-theory utils, SIMD |         ~170 |         ~2 | near-zero                    |
 
 The Rust `compat/` module exists specifically to mirror the AS API — i.e.
 everything AS has, Rust also has.
@@ -113,7 +113,8 @@ For each domain: candidate kernels → already in Rust (Gap A, wire it) vs. not
 in Rust (Gap B, port it). **Every row is also a Gap C item** unless AS already
 covers it (only arithmetic/complex/dense-matrix do).
 
-### Special functions — *mostly Gap A, partly Gap B*
+### Special functions — _mostly Gap A, partly Gap B_
+
 - **Gap A (Rust twin exists, JS fallback runs)**: `erf`, `erfc`, `lgamma`,
   `beta`, `gammainc`, `betainc`, `digamma`, `besselJ0/J1/Y0/Y1`,
   `besselJ/Y/I/K`, `ellipticK`, `ellipticE`, `lambertW`, `fresnelC`,
@@ -124,7 +125,8 @@ covers it (only arithmetic/complex/dense-matrix do).
   `erfi`, `cosIntegral` (Ci), `sinIntegral` (Si), `logIntegral` (li),
   `expIntegralEi` (Ei). **9 functions.**
 
-### Signal / DSP — *mostly Gap A, partly Gap B*
+### Signal / DSP — _mostly Gap A, partly Gap B_
+
 - **Gap A**: `fftCoreFloat64`, `fft2d`, `convolve`/`_convolve`,
   `crossCorrelation`, `autoCorrelation`, `dct`/`idct`, `dst`/`idst`, `dwt`,
   `hilbertTransform`, `spectrogram`, `periodogram`, FIR filters,
@@ -133,13 +135,15 @@ covers it (only arithmetic/complex/dense-matrix do).
   `medfilt` (median filter), `windowFunction` (Hamming/Hann/Blackman/Bartlett
   generators). **3 functions.**
 
-### Statistics — *entirely Gap A*
+### Statistics — _entirely Gap A_
+
 `welfordVariance`, `quickSelect`/`medianSelect`/`minSelect`/`maxSelect`,
 `parallelStatQuantile`, `parallelStatCumsum`, `parallelStatProd`,
 `parallelStatNorm` — all have Rust twins in `statistics/basic.rs` +
 `statistics/select.rs`. Pure wiring.
 
-### Combinatorics / number theory — *split*
+### Combinatorics / number theory — _split_
+
 - **Gap A**: `fibonacci`, `lucas`/`lucasL`, `doubleFactorial`,
   `risingFactorial`/`fallingFactorial`, `subfactorial`, `prime`/`nextPrime`,
   `primePi`. (Rust `combinatorics/` + `utils/checks.rs`.)
@@ -149,18 +153,20 @@ covers it (only arithmetic/complex/dense-matrix do).
   `partitions` (integer-partition DP), `harmonicNumber`, `integerDigits`.
   **11 functions** — a whole missing sub-domain.
 
-### Linear algebra — *the biggest Gap B*
+### Linear algebra — _the biggest Gap B_
+
 - **Gap A**: `cholesky`, `hessenbergForm`, `matrixRank`, the `eig`
   QR-algorithm path (Rust `matrix/eigs.rs` + `complex_eigs.rs`).
 - **Gap B (verified absent)**: **`svd`** — `matrix/src/operations/svd.ts` is a
-  pure, import-free Golub-Reinsch SVD; Rust only has an *internal* one-sided
+  pure, import-free Golub-Reinsch SVD; Rust only has an _internal_ one-sided
   Jacobi routine for `cond`/`rank` in `numeric/analysis.rs`, with **no
   standalone `svd` export** returning U/Σ/V. Also `pinv`, `lowRankApprox`,
   `singularValues` (all SVD-dependent), `rowReduce` (RREF),
   `characteristicPolynomial` (Faddeev-LeVerrier). **~6 functions** — highest
   value in the whole analysis.
 
-### Numeric / optimization — *split*
+### Numeric / optimization — _split_
+
 - **Gap A**: `linsolve` (→ Rust `solve`), `leastSquares`, `rank`, `cond`,
   `polyRoots`.
 - **Gap B (verified absent — Rust `optimization.rs` has only 3 functions)**:
@@ -168,13 +174,15 @@ covers it (only arithmetic/complex/dense-matrix do).
   `residue` (partial-fraction expansion), `padeApproximant`,
   `expfit`/`logfit`/`powerfit`. **~8 functions.**
 
-### Algebra (polynomial) — *split*
+### Algebra (polynomial) — _split_
+
 - **Gap A**: `polyval`, `polymul`, `polyder` (Rust `algebra/polynomial.rs`).
 - **Gap B (verified absent)**: `polyadd`, `polynomialGCD`, `polynomialLCM`,
   `polynomialQuotient`, `polynomialRemainder`, `discriminant`, `resultant`.
   **7 functions.**
 
-### Tensor & autograd — *entirely Gap B (no Rust tensor module)*
+### Tensor & autograd — _entirely Gap B (no Rust tensor module)_
+
 - **Gap B**: `Tensor.matMul` (rank-2 ~ covered by matrix multiply, but the
   rank-N path is not), **rank-N `transpose`**, **`einsum`** (general tensor
   contraction), `DualTensor` dual-number elementwise kernels. **~6 functions.**
@@ -188,18 +196,18 @@ covers it (only arithmetic/complex/dense-matrix do).
 Functions that genuinely need new Rust (and AS) implementations, ranked by
 value × purity:
 
-| Priority | Function(s) | Domain | Why |
-|----------|-------------|--------|-----|
-| **P0** | `svd`, `pinv`, `lowRankApprox`, `singularValues` | Linear algebra | SVD is foundational (PCA, least squares, conditioning); pure O(n³) iterative QR — the textbook WASM win. |
-| **P1** | `linprog`, `quadprog`, `nullspace` | Optimization | Heavy iterative kernels; Rust `optimization.rs` is nearly empty. |
-| **P1** | `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP` | Special | Pure recurrences; needed for spectral methods / quadrature. |
-| **P2** | `primeFactors`, `eulerPhi`, `moebiusMu`, `jacobiSymbol`, `divisors`, `divisorSigma`, `carmichaelLambda`, `chineseRemainder`, `partitions` | Number theory | A coherent missing sub-domain; trial-division + sieve + DP, all integer math. |
-| **P2** | `erfi`, `cosIntegral`, `sinIntegral`, `logIntegral`, `expIntegralEi` | Special | Series/asymptotic kernels; complete the special-function set. |
-| **P3** | `einsum`, rank-N `transpose` | Tensor | Compute-heavy contraction; no Rust tensor module exists. |
-| **P3** | `resultant`, `discriminant`, `polynomialGCD/LCM`, `polyadd` | Algebra | Coefficient-array polynomial algebra. |
-| **P3** | `resample`, `medfilt`, `windowFunction` | Signal | Small DSP kernels missing from `signal/`. |
-| **P4** | `rowReduce`, `characteristicPolynomial` | Linear algebra | Gaussian elimination / Faddeev-LeVerrier. |
-| **P4** | `DualTensor` elementwise, `padeApproximant`, `residue`, curve fits | Autograd / numeric | Lower compute intensity; do alongside tensor work. |
+| Priority | Function(s)                                                                                                                               | Domain             | Why                                                                                                      |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------- |
+| **P0**   | `svd`, `pinv`, `lowRankApprox`, `singularValues`                                                                                          | Linear algebra     | SVD is foundational (PCA, least squares, conditioning); pure O(n³) iterative QR — the textbook WASM win. |
+| **P1**   | `linprog`, `quadprog`, `nullspace`                                                                                                        | Optimization       | Heavy iterative kernels; Rust `optimization.rs` is nearly empty.                                         |
+| **P1**   | `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`                                                                                        | Special            | Pure recurrences; needed for spectral methods / quadrature.                                              |
+| **P2**   | `primeFactors`, `eulerPhi`, `moebiusMu`, `jacobiSymbol`, `divisors`, `divisorSigma`, `carmichaelLambda`, `chineseRemainder`, `partitions` | Number theory      | A coherent missing sub-domain; trial-division + sieve + DP, all integer math.                            |
+| **P2**   | `erfi`, `cosIntegral`, `sinIntegral`, `logIntegral`, `expIntegralEi`                                                                      | Special            | Series/asymptotic kernels; complete the special-function set.                                            |
+| **P3**   | `einsum`, rank-N `transpose`                                                                                                              | Tensor             | Compute-heavy contraction; no Rust tensor module exists.                                                 |
+| **P3**   | `resultant`, `discriminant`, `polynomialGCD/LCM`, `polyadd`                                                                               | Algebra            | Coefficient-array polynomial algebra.                                                                    |
+| **P3**   | `resample`, `medfilt`, `windowFunction`                                                                                                   | Signal             | Small DSP kernels missing from `signal/`.                                                                |
+| **P4**   | `rowReduce`, `characteristicPolynomial`                                                                                                   | Linear algebra     | Gaussian elimination / Faddeev-LeVerrier.                                                                |
+| **P4**   | `DualTensor` elementwise, `padeApproximant`, `residue`, curve fits                                                                        | Autograd / numeric | Lower compute intensity; do alongside tensor work.                                                       |
 
 **~45 functions** total in Gap B.
 
@@ -207,7 +215,7 @@ value × purity:
 
 ## 7. Gap A — the activation backlog
 
-These pure-JS kernels already have a Rust twin; the work is *wiring*, not
+These pure-JS kernels already have a Rust twin; the work is _wiring_, not
 porting. Ordered by payoff:
 
 1. **Re-enable `special.ts` `getRustWasm()`** — currently a hard `return null`.
@@ -251,7 +259,7 @@ parity as a long-tail effort.
 Excluded from all three gaps; documented so they are not re-surveyed:
 
 - **`Float64Array` signatures in arithmetic/trig/statistics/signal** — already
-  delegate to `computePool.*` (the worker-pool import); the async dispatch *is*
+  delegate to `computePool.*` (the worker-pool import); the async dispatch _is_
   the body.
 - **`Complex` / `Fraction` / `BigNumber` signatures** — call instance methods
   on imported class objects (dynamic dispatch over heap objects).
@@ -261,7 +269,7 @@ Excluded from all three gaps; documented so they are not re-surveyed:
   `globalMinimize`, `nintegrate`, `simpson`, `gaussQuad`, `romberg`,
   `curvefit`, `solveODESystem`, `solveBVP`, `chebyshevApprox` — numerically
   pure but accept a JS `(x)=>number` callback WASM cannot invoke. (Portable
-  *only* if the model function is itself compiled — a separate effort.)
+  _only_ if the model function is itself compiled — a separate effort.)
 - **Object/Map-structured** — `parallelStatMode` (`Map`), `kdTree`,
   `voronoiDiagram` (pointer-linked trees), `area`/`coordinateTransform`
   (discriminated-union args).

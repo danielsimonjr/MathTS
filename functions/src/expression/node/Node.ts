@@ -1,38 +1,34 @@
-import { isNode } from '../../utils/is.js'
+import { isNode } from '../../utils/is.js';
 
-import { keywords } from '../keywords.js'
-import { deepStrictEqual } from '../../utils/object.js'
-import { factory } from '../../utils/factory.js'
-import { createMap } from '../../utils/map.js'
+import { keywords } from '../keywords.js';
+import { deepStrictEqual } from '../../utils/object.js';
+import { factory } from '../../utils/factory.js';
+import { createMap } from '../../utils/map.js';
 
 // Type definitions - exported for use by other node types
-export type Scope = Map<string, any>
+export type Scope = Map<string, any>;
 
 export interface CompiledExpression {
-  evaluate: (scope?: Record<string, any>) => any
+  evaluate: (scope?: Record<string, any>) => any;
 }
 
-export type CompileFunction = (
-  scope: Scope,
-  args: Record<string, any>,
-  context: any
-) => any
+export type CompileFunction = (scope: Scope, args: Record<string, any>, context: any) => any;
 
 export interface StringOptions {
   handler?:
     | ((node: any, options?: StringOptions) => string)
-    | Record<string, (node: any, options?: StringOptions) => string>
-  parenthesis?: 'keep' | 'auto' | 'all'
-  implicit?: 'hide' | 'show'
-  [key: string]: any
+    | Record<string, (node: any, options?: StringOptions) => string>;
+  parenthesis?: 'keep' | 'auto' | 'all';
+  implicit?: 'hide' | 'show';
+  [key: string]: any;
 }
 
 interface Dependencies {
-  mathWithTransform: Record<string, any>
+  mathWithTransform: Record<string, any>;
 }
 
-const name = 'Node'
-const dependencies = ['mathWithTransform']
+const name = 'Node';
+const dependencies = ['mathWithTransform'];
 
 export const createNode = /* #__PURE__ */ factory(
   name,
@@ -47,20 +43,18 @@ export const createNode = /* #__PURE__ */ factory(
       for (const symbol of [...keywords]) {
         if (scope.has(symbol)) {
           throw new Error(
-            'Scope contains an illegal symbol, "' +
-              symbol +
-              '" is a reserved keyword'
-          )
+            'Scope contains an illegal symbol, "' + symbol + '" is a reserved keyword'
+          );
         }
       }
     }
 
     class Node {
       get type(): string {
-        return 'Node'
+        return 'Node';
       }
       get isNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -69,7 +63,7 @@ export const createNode = /* #__PURE__ */ factory(
        * @return {*}              Returns the result
        */
       evaluate(scope?: Record<string, any>): any {
-        return this.compile().evaluate(scope)
+        return this.compile().evaluate(scope);
       }
 
       /**
@@ -81,19 +75,19 @@ export const createNode = /* #__PURE__ */ factory(
        *                variables.
        */
       compile(): CompiledExpression {
-        const expr = this._compile(mathWithTransform, {})
-        const args: Record<string, any> = {}
-        const context: any = null
+        const expr = this._compile(mathWithTransform, {});
+        const args: Record<string, any> = {};
+        const context: any = null;
 
         function evaluate(scope?: Record<string, any>): any {
-          const s = createMap(scope)
-          _validateScope(s)
-          return expr(s, args, context)
+          const s = createMap(scope);
+          _validateScope(s);
+          return expr(s, args, context);
         }
 
         return {
-          evaluate
-        }
+          evaluate,
+        };
       }
 
       /**
@@ -109,24 +103,17 @@ export const createNode = /* #__PURE__ */ factory(
        * @return {function} Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      _compile(
-        _math: Record<string, any>,
-        _argNames: Record<string, boolean>
-      ): CompileFunction {
-        throw new Error(
-          'Method _compile must be implemented by type ' + this.type
-        )
+      _compile(_math: Record<string, any>, _argNames: Record<string, boolean>): CompileFunction {
+        throw new Error('Method _compile must be implemented by type ' + this.type);
       }
 
       /**
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        _callback: (child: Node, path: string, parent: Node) => void
-      ): void {
+      forEach(_callback: (child: Node, path: string, parent: Node) => void): void {
         // must be implemented by each of the Node implementations
-        throw new Error('Cannot run forEach on a Node interface')
+        throw new Error('Cannot run forEach on a Node interface');
       }
 
       /**
@@ -137,7 +124,7 @@ export const createNode = /* #__PURE__ */ factory(
        */
       map(_callback: (child: Node, path: string, parent: Node) => Node): Node {
         // must be implemented by each of the Node implementations
-        throw new Error('Cannot run map on a Node interface')
+        throw new Error('Cannot run map on a Node interface');
       }
 
       /**
@@ -148,9 +135,9 @@ export const createNode = /* #__PURE__ */ factory(
        */
       _ifNode(node: any): Node {
         if (!isNode(node)) {
-          throw new TypeError('Callback function must return a Node')
+          throw new TypeError('Callback function must return a Node');
         }
-        return node as Node
+        return node as Node;
       }
 
       /**
@@ -159,29 +146,23 @@ export const createNode = /* #__PURE__ */ factory(
        * @param {function(node: Node, path: string, parent: Node)} callback
        *          A callback called for every node in the node tree.
        */
-      traverse(
-        callback: (node: Node, path: string | null, parent: Node | null) => void
-      ): void {
+      traverse(callback: (node: Node, path: string | null, parent: Node | null) => void): void {
         // execute callback for itself
         // eslint-disable-next-line
-      callback(this, null, null)
+        callback(this, null, null);
 
         // recursively traverse over all children of a node
         function _traverse(
           node: Node,
-          callback: (
-            node: Node,
-            path: string | null,
-            parent: Node | null
-          ) => void
+          callback: (node: Node, path: string | null, parent: Node | null) => void
         ): void {
           node.forEach(function (child: Node, path: string, parent: Node) {
-            callback(child, path, parent)
-            _traverse(child, callback)
-          })
+            callback(child, path, parent);
+            _traverse(child, callback);
+          });
         }
 
-        _traverse(this, callback)
+        _traverse(this, callback);
       }
 
       /**
@@ -206,25 +187,19 @@ export const createNode = /* #__PURE__ */ factory(
        *          callback(node: Node, index: string, parent: Node) : Node
        * @return {Node} Returns the original node or its replacement
        */
-      transform(
-        callback: (node: Node, path: string | null, parent: Node | null) => Node
-      ): Node {
-        function _transform(
-          child: Node,
-          path: string | null,
-          parent: Node | null
-        ): Node {
-          const replacement = callback(child, path, parent)
+      transform(callback: (node: Node, path: string | null, parent: Node | null) => Node): Node {
+        function _transform(child: Node, path: string | null, parent: Node | null): Node {
+          const replacement = callback(child, path, parent);
 
           if (replacement !== child) {
             // stop iterating when the node is replaced
-            return replacement
+            return replacement;
           }
 
-          return child.map(_transform)
+          return child.map(_transform);
         }
 
-        return _transform(this, null, null)
+        return _transform(this, null, null);
       }
 
       /**
@@ -242,26 +217,16 @@ export const createNode = /* #__PURE__ */ factory(
        * @return {Node[]} nodes
        *            An array with nodes matching given filter criteria
        */
-      filter(
-        callback: (
-          node: Node,
-          path: string | null,
-          parent: Node | null
-        ) => boolean
-      ): Node[] {
-        const nodes: Node[] = []
+      filter(callback: (node: Node, path: string | null, parent: Node | null) => boolean): Node[] {
+        const nodes: Node[] = [];
 
-        this.traverse(function (
-          node: Node,
-          path: string | null,
-          parent: Node | null
-        ) {
+        this.traverse(function (node: Node, path: string | null, parent: Node | null) {
           if (callback(node, path, parent)) {
-            nodes.push(node)
+            nodes.push(node);
           }
-        })
+        });
 
-        return nodes
+        return nodes;
       }
 
       /**
@@ -270,7 +235,7 @@ export const createNode = /* #__PURE__ */ factory(
        */
       clone(): Node {
         // must be implemented by each of the Node implementations
-        throw new Error('Cannot clone a Node interface')
+        throw new Error('Cannot clone a Node interface');
       }
 
       /**
@@ -279,8 +244,8 @@ export const createNode = /* #__PURE__ */ factory(
        */
       cloneDeep(): Node {
         return this.map(function (node: Node): Node {
-          return node.cloneDeep()
-        })
+          return node.cloneDeep();
+        });
       }
 
       /**
@@ -290,9 +255,7 @@ export const createNode = /* #__PURE__ */ factory(
        *                   contain the same values (as do their childs)
        */
       equals(other: Node | null | undefined): boolean {
-        return other
-          ? this.type === other.type && deepStrictEqual(this, other)
-          : false
+        return other ? this.type === other.type && deepStrictEqual(this, other) : false;
       }
 
       /**
@@ -311,13 +274,13 @@ export const createNode = /* #__PURE__ */ factory(
        * @return {string}
        */
       toString(options?: StringOptions): string {
-        const customString = this._getCustomString(options)
+        const customString = this._getCustomString(options);
 
         if (typeof customString !== 'undefined') {
-          return customString
+          return customString;
         }
 
-        return this._toString(options)
+        return this._toString(options);
       }
 
       /**
@@ -328,7 +291,7 @@ export const createNode = /* #__PURE__ */ factory(
        */
       _toString(_options?: StringOptions): string {
         // must be implemented by each of the Node implementations
-        throw new Error('_toString not implemented for ' + this.type)
+        throw new Error('_toString not implemented for ' + this.type);
       }
 
       /**
@@ -338,9 +301,7 @@ export const createNode = /* #__PURE__ */ factory(
        * @returns {Object}
        */
       toJSON(): Record<string, any> {
-        throw new Error(
-          'Cannot serialize object: toJSON not implemented by ' + this.type
-        )
+        throw new Error('Cannot serialize object: toJSON not implemented by ' + this.type);
       }
 
       /**
@@ -359,13 +320,13 @@ export const createNode = /* #__PURE__ */ factory(
        * @return {string}
        */
       toHTML(options?: StringOptions): string {
-        const customString = this._getCustomString(options)
+        const customString = this._getCustomString(options);
 
         if (typeof customString !== 'undefined') {
-          return customString
+          return customString;
         }
 
-        return this._toHTML(options)
+        return this._toHTML(options);
       }
 
       /**
@@ -376,7 +337,7 @@ export const createNode = /* #__PURE__ */ factory(
        */
       _toHTML(_options?: StringOptions): string {
         // must be implemented by each of the Node implementations
-        throw new Error('_toHTML not implemented for ' + this.type)
+        throw new Error('_toHTML not implemented for ' + this.type);
       }
 
       /**
@@ -395,13 +356,13 @@ export const createNode = /* #__PURE__ */ factory(
        * @return {string}
        */
       toTex(options?: StringOptions): string {
-        const customString = this._getCustomString(options)
+        const customString = this._getCustomString(options);
 
         if (typeof customString !== 'undefined') {
-          return customString
+          return customString;
         }
 
-        return this._toTex(options)
+        return this._toTex(options);
       }
 
       /**
@@ -413,7 +374,7 @@ export const createNode = /* #__PURE__ */ factory(
        */
       _toTex(_options?: StringOptions): string {
         // must be implemented by each of the Node implementations
-        throw new Error('_toTex not implemented for ' + this.type)
+        throw new Error('_toTex not implemented for ' + this.type);
       }
 
       /**
@@ -424,11 +385,11 @@ export const createNode = /* #__PURE__ */ factory(
           switch (typeof options.handler) {
             case 'object':
             case 'undefined':
-              return
+              return;
             case 'function':
-              return options.handler(this as any, options)
+              return options.handler(this as any, options);
             default:
-              throw new TypeError('Object or function expected as callback')
+              throw new TypeError('Object or function expected as callback');
           }
         }
       }
@@ -438,7 +399,7 @@ export const createNode = /* #__PURE__ */ factory(
        * @return {string}
        */
       getIdentifier(): string {
-        return this.type
+        return this.type;
       }
 
       /**
@@ -446,14 +407,14 @@ export const createNode = /* #__PURE__ */ factory(
        * @return {Node} node
        **/
       getContent(): Node {
-        return this
+        return this;
       }
     }
 
-    return Node
+    return Node;
   },
   { isClass: true, isNode: true }
-)
+);
 
 // Export the Node type for use in other modules
-export type MathNode = InstanceType<ReturnType<typeof createNode>>
+export type MathNode = InstanceType<ReturnType<typeof createNode>>;

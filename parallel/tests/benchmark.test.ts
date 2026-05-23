@@ -7,11 +7,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import {
-  parallelAdd,
-  parallelMultiply,
-  parallelSqrt,
-} from '../src/operations/elementwise.js';
+import { parallelAdd, parallelMultiply, parallelSqrt } from '../src/operations/elementwise.js';
 import { parallelSum } from '../src/operations/reduce.js';
 import { parallelMatmul, parallelDot } from '../src/operations/matmul.js';
 import { ComputePool } from '../src/ComputePool.js';

@@ -1,6 +1,6 @@
 /**
  * MathTS Scientific Workbook - Core Types
- * 
+ *
  * Type definitions for the .mtsw workbook format
  */
 
@@ -148,8 +148,8 @@ export interface OutputResult {
   type: 'tensor' | 'matrix' | 'scalar' | 'symbolic' | 'object';
   value?: unknown;
   shape?: number[];
-  data_ref?: string;  // Path to cached binary data
-  latex?: string;     // LaTeX representation
+  data_ref?: string; // Path to cached binary data
+  latex?: string; // LaTeX representation
 }
 
 export interface FigureOutput {
@@ -175,7 +175,7 @@ export interface ErrorOutput {
 
 export interface DependencyGraph {
   nodes: Map<string, DependencyNode>;
-  edges: Map<string, Set<string>>;  // id -> set of dependent ids
+  edges: Map<string, Set<string>>; // id -> set of dependent ids
 }
 
 export interface DependencyNode {
@@ -187,12 +187,12 @@ export interface DependencyNode {
   dependents: string[];
 }
 
-export type CellStatus = 
-  | 'pending'      // Not yet executed
-  | 'running'      // Currently executing
-  | 'success'      // Executed successfully
-  | 'error'        // Execution failed
-  | 'stale';       // Needs re-execution (dependency changed)
+export type CellStatus =
+  | 'pending' // Not yet executed
+  | 'running' // Currently executing
+  | 'success' // Executed successfully
+  | 'error' // Execution failed
+  | 'stale'; // Needs re-execution (dependency changed)
 
 // ============================================================================
 // Runtime Context
@@ -201,7 +201,7 @@ export type CellStatus =
 export interface ExecutionContext {
   workbook: Workbook;
   graph: DependencyGraph;
-  scope: Map<string, unknown>;  // Exported variables by cell id
+  scope: Map<string, unknown>; // Exported variables by cell id
   outputs: Map<string, CellOutput>;
   config: RuntimeConfig;
 }

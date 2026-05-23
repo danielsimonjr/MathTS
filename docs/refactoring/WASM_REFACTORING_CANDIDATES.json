@@ -17,7 +17,16 @@
       "phase": 1,
       "name": "Statistics Reductions",
       "duration": "2 days",
-      "files": ["sum.ts", "prod.ts", "mean.ts", "cumsum.ts", "max.ts", "min.ts", "variance.ts", "std.ts"],
+      "files": [
+        "sum.ts",
+        "prod.ts",
+        "mean.ts",
+        "cumsum.ts",
+        "max.ts",
+        "min.ts",
+        "variance.ts",
+        "std.ts"
+      ],
       "total_speedup": "15-25x",
       "status": "completed",
       "completed_date": "2026-01-30"
@@ -86,10 +95,7 @@
       "complexity": "Low",
       "effort": "Low",
       "speedup_estimate": "15-20x",
-      "refactoring_needed": [
-        "Mirror of sum.ts refactoring",
-        "Multiplicative accumulation pattern"
-      ],
+      "refactoring_needed": ["Mirror of sum.ts refactoring", "Multiplicative accumulation pattern"],
       "status": "wasm_fast_path_added",
       "notes": "WASM fast path added 2026-01-30 - calls statsProd for flat number arrays >= 100 elements"
     },
@@ -145,9 +151,7 @@
       "complexity": "Low",
       "effort": "Low",
       "speedup_estimate": "10-15x",
-      "refactoring_needed": [
-        "Mirror of max.ts refactoring"
-      ],
+      "refactoring_needed": ["Mirror of max.ts refactoring"],
       "status": "wasm_fast_path_added",
       "notes": "WASM fast path added 2026-01-30 - calls statsMin for flat number arrays >= 100 elements"
     },
@@ -262,10 +266,7 @@
       "complexity": "Low-Medium",
       "effort": "Low",
       "speedup_estimate": "8-12x",
-      "refactoring_needed": [
-        "Pure number fast path",
-        "Vectorized for N-ary hypot"
-      ],
+      "refactoring_needed": ["Pure number fast path", "Vectorized for N-ary hypot"],
       "status": "pending",
       "notes": "Building block for norm calculations"
     },
@@ -339,10 +340,7 @@
       "complexity": "Medium",
       "effort": "Medium",
       "speedup_estimate": "20-50x",
-      "refactoring_needed": [
-        "WASM forward substitution",
-        "Eliminate scalar function indirection"
-      ],
+      "refactoring_needed": ["WASM forward substitution", "Eliminate scalar function indirection"],
       "status": "wasm_fast_path_added",
       "notes": "WASM fast path added 2026-01-30 - calls laLsolve for dense plain number matrices >= 4x4"
     },
@@ -353,10 +351,7 @@
       "complexity": "Medium",
       "effort": "Medium",
       "speedup_estimate": "20-50x",
-      "refactoring_needed": [
-        "WASM backward substitution",
-        "Eliminate scalar function indirection"
-      ],
+      "refactoring_needed": ["WASM backward substitution", "Eliminate scalar function indirection"],
       "status": "wasm_fast_path_added",
       "notes": "WASM fast path added 2026-01-30 - calls laUsolve for dense plain number matrices >= 4x4"
     },
@@ -526,10 +521,7 @@
       "complexity": "Very Low",
       "effort": "Low",
       "speedup_estimate": "5-8x",
-      "refactoring_needed": [
-        "Extract numeric path",
-        "Create WASM wrapper for pure number inputs"
-      ],
+      "refactoring_needed": ["Extract numeric path", "Create WASM wrapper for pure number inputs"],
       "status": "pending",
       "notes": "Polar coordinate conversion"
     },
@@ -540,10 +532,7 @@
       "complexity": "Very Low",
       "effort": "Low",
       "speedup_estimate": "8-12x",
-      "refactoring_needed": [
-        "Pure number path extraction",
-        "Add WASM interleaved format support"
-      ],
+      "refactoring_needed": ["Pure number path extraction", "Add WASM interleaved format support"],
       "status": "pending",
       "notes": "Simple conjugate operation"
     },
@@ -584,10 +573,7 @@
       "complexity": "Low-Medium",
       "effort": "Low",
       "speedup_estimate": "10-20x",
-      "refactoring_needed": [
-        "WASM pure number path",
-        "Optimize for repeated calls"
-      ],
+      "refactoring_needed": ["WASM pure number path", "Optimize for repeated calls"],
       "status": "pending",
       "notes": "Less frequently called"
     },
@@ -643,11 +629,7 @@
       "complexity": "High",
       "effort": "Very High",
       "speedup_estimate": "100-500x",
-      "refactoring_needed": [
-        "Sparse LU in WASM",
-        "Pivoting optimization",
-        "Fill-in minimization"
-      ],
+      "refactoring_needed": ["Sparse LU in WASM", "Pivoting optimization", "Fill-in minimization"],
       "status": "pending",
       "notes": "Sparse LU factorization"
     },
@@ -658,10 +640,7 @@
       "complexity": "High",
       "effort": "High",
       "speedup_estimate": "50-200x",
-      "refactoring_needed": [
-        "Sparse triangular solve in WASM",
-        "Optimize for sparse RHS"
-      ],
+      "refactoring_needed": ["Sparse triangular solve in WASM", "Optimize for sparse RHS"],
       "status": "pending",
       "notes": "Sparse triangular solve"
     },
@@ -672,10 +651,7 @@
       "complexity": "High",
       "effort": "High",
       "speedup_estimate": "50-100x",
-      "refactoring_needed": [
-        "DFS in WASM with stack-based approach",
-        "Eliminate recursion"
-      ],
+      "refactoring_needed": ["DFS in WASM with stack-based approach", "Eliminate recursion"],
       "status": "pending",
       "notes": "Depth-first search"
     },
@@ -686,10 +662,7 @@
       "complexity": "High",
       "effort": "High",
       "speedup_estimate": "50-100x",
-      "refactoring_needed": [
-        "Reachability in WASM",
-        "Efficient sparse traversal"
-      ],
+      "refactoring_needed": ["Reachability in WASM", "Efficient sparse traversal"],
       "status": "pending",
       "notes": "Reachability analysis"
     }

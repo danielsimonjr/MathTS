@@ -1,6 +1,6 @@
 /**
  * MathTS Scientific Workbook - YAML Parser
- * 
+ *
  * Parses .mtsw YAML files into typed Workbook structures
  */
 
@@ -87,13 +87,14 @@ export function parseWorkbook(yamlContent: string): ParseResult {
       workbook,
       warnings: warnings.length > 0 ? warnings : undefined,
     };
-
   } catch (e) {
     return {
       success: false,
-      errors: [{
-        message: `YAML parse error: ${e instanceof Error ? e.message : String(e)}`,
-      }],
+      errors: [
+        {
+          message: `YAML parse error: ${e instanceof Error ? e.message : String(e)}`,
+        },
+      ],
     };
   }
 }
@@ -260,8 +261,14 @@ function parseCell(raw: unknown, index: number): CellParseResult {
 
 function detectCellType(obj: Record<string, unknown>): CellType | null {
   const typeKeys: CellType[] = [
-    'markdown', 'code', 'tensor', 'equation',
-    'visualization', 'data', 'test', 'export',
+    'markdown',
+    'code',
+    'tensor',
+    'equation',
+    'visualization',
+    'data',
+    'test',
+    'export',
   ];
 
   for (const key of typeKeys) {
@@ -293,7 +300,7 @@ export function serializeWorkbook(workbook: Workbook, options?: SerializeOptions
   }
 
   // Serialize cells
-  doc.cells = workbook.cells.map(cell => serializeCell(cell, includeOutputs));
+  doc.cells = workbook.cells.map((cell) => serializeCell(cell, includeOutputs));
 
   // Include outputs if requested
   if (includeOutputs && workbook.outputs) {
@@ -301,8 +308,8 @@ export function serializeWorkbook(workbook: Workbook, options?: SerializeOptions
   }
 
   return stringifyYAML(doc, {
-    lineWidth: 0,  // No line wrapping
-    defaultStringType: 'BLOCK_LITERAL',  // Use | for multiline strings
+    lineWidth: 0, // No line wrapping
+    defaultStringType: 'BLOCK_LITERAL', // Use | for multiline strings
   });
 }
 
@@ -390,7 +397,7 @@ export interface SerializeOptions {
 export function stripOutputs(workbook: Workbook): Workbook {
   return {
     ...workbook,
-    cells: workbook.cells.map(cell => {
+    cells: workbook.cells.map((cell) => {
       if (cell.type === 'code') {
         const { output, ...rest } = cell;
         return rest as CodeCell;
@@ -405,14 +412,14 @@ export function stripOutputs(workbook: Workbook): Workbook {
  * Get cell by ID
  */
 export function getCellById(workbook: Workbook, id: string): Cell | undefined {
-  return workbook.cells.find(c => c.id === id);
+  return workbook.cells.find((c) => c.id === id);
 }
 
 /**
  * Get all cell IDs
  */
 export function getCellIds(workbook: Workbook): string[] {
-  return workbook.cells.map(c => c.id);
+  return workbook.cells.map((c) => c.id);
 }
 
 /**

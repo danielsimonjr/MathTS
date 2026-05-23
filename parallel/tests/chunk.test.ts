@@ -35,9 +35,7 @@ describe('Chunking Strategies', () => {
     });
 
     it('should use targetChunkSize when specified', () => {
-      expect(
-        calculateOptimalChunks(10000, { targetChunkSize: 2000, maxChunks: 16 })
-      ).toBe(5);
+      expect(calculateOptimalChunks(10000, { targetChunkSize: 2000, maxChunks: 16 })).toBe(5);
     });
   });
 
@@ -151,11 +149,7 @@ describe('Chunking Strategies', () => {
     });
 
     it('should merge multiple chunks', () => {
-      const chunks = [
-        new Float64Array([1, 2]),
-        new Float64Array([3, 4]),
-        new Float64Array([5, 6]),
-      ];
+      const chunks = [new Float64Array([1, 2]), new Float64Array([3, 4]), new Float64Array([5, 6])];
 
       const result = mergeFloat64Chunks(chunks);
 
@@ -163,11 +157,7 @@ describe('Chunking Strategies', () => {
     });
 
     it('should handle chunks of different sizes', () => {
-      const chunks = [
-        new Float64Array([1]),
-        new Float64Array([2, 3, 4]),
-        new Float64Array([5, 6]),
-      ];
+      const chunks = [new Float64Array([1]), new Float64Array([2, 3, 4]), new Float64Array([5, 6])];
 
       const result = mergeFloat64Chunks(chunks);
 

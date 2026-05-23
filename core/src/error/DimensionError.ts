@@ -3,10 +3,10 @@
  *     'Dimension mismatch (<actual size> != <expected size>)'
  */
 export class DimensionError extends RangeError {
-  actual: number | number[]
-  expected: number | number[]
-  relation?: string
-  isDimensionError: boolean = true
+  actual: number | number[];
+  expected: number | number[];
+  relation?: string;
+  isDimensionError = true as const;
 
   /**
    * @param actual - The actual size
@@ -14,22 +14,25 @@ export class DimensionError extends RangeError {
    * @param relation - Optional relation between actual and expected size: '!=', '<', etc.
    */
   constructor(actual: number | number[], expected: number | number[], relation?: string) {
-    const message = 'Dimension mismatch (' +
-      (Array.isArray(actual) ? ('[' + actual.join(', ') + ']') : actual) +
-      ' ' + (relation || '!=') + ' ' +
-      (Array.isArray(expected) ? ('[' + expected.join(', ') + ']') : expected) +
-      ')'
+    const message =
+      'Dimension mismatch (' +
+      (Array.isArray(actual) ? '[' + actual.join(', ') + ']' : actual) +
+      ' ' +
+      (relation || '!=') +
+      ' ' +
+      (Array.isArray(expected) ? '[' + expected.join(', ') + ']' : expected) +
+      ')';
 
-    super(message)
+    super(message);
 
-    this.name = 'DimensionError'
-    this.actual = actual
-    this.expected = expected
-    this.relation = relation
+    this.name = 'DimensionError';
+    this.actual = actual;
+    this.expected = expected;
+    this.relation = relation;
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     if ((Error as any).captureStackTrace) {
-      (Error as any).captureStackTrace(this, DimensionError)
+      (Error as any).captureStackTrace(this, DimensionError);
     }
   }
 }

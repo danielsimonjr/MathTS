@@ -11,7 +11,7 @@ export const cbrtDocs = {
     'cbrt(2 + 3i)',
     'cbrt(8i)',
     'cbrt(8i, true)',
-    'cbrt(27 m^3)'
+    'cbrt(27 m^3)',
   ],
-  seealso: ['square', 'sqrt', 'cube', 'multiply']
-}
+  seealso: ['square', 'sqrt', 'cube', 'multiply'],
+};

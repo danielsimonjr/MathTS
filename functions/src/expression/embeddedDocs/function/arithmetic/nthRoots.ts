@@ -9,5 +9,5 @@ export const nthRootsDocs = {
     'is a positive real solution of the equation "x^root = A". ' +
     'This function returns an array of complex values.',
   examples: ['nthRoots(1)', 'nthRoots(1, 3)'],
-  seealso: ['sqrt', 'pow', 'nthRoot']
-}
+  seealso: ['sqrt', 'pow', 'nthRoot'],
+};

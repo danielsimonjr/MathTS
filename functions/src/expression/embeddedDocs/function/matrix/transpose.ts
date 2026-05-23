@@ -16,6 +16,6 @@ export const transposeDocs = {
     'squeeze',
     'subset',
     'trace',
-    'zeros'
-  ]
-}
+    'zeros',
+  ],
+};

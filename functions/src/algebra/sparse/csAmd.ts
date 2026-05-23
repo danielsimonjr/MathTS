@@ -1,32 +1,32 @@
 // Copyright (c) 2006-2024, Timothy A. Davis, All Rights Reserved.
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
-import { factory } from '../../utils/factory.js'
-import { csFkeep } from './csFkeep.js'
-import { csFlip } from './csFlip.js'
-import { csTdfs } from './csTdfs.js'
-import { wasmLoader } from '../../wasm/WasmLoader.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { factory } from '../../utils/factory.js';
+import { csFkeep } from './csFkeep.js';
+import { csFlip } from './csFlip.js';
+import { csTdfs } from './csTdfs.js';
+import { wasmLoader } from '../../wasm/WasmLoader.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Minimum nonzeros for WASM AMD to be beneficial
-const WASM_AMD_THRESHOLD = 100
+const WASM_AMD_THRESHOLD = 100;
 
 // Sparse matrix internal structure
 export interface SparseMatrixData {
-  _size: number[]
-  _values?: any[]
-  _index: number[]
-  _ptr: number[]
+  _size: number[];
+  _values?: any[];
+  _index: number[];
+  _ptr: number[];
 }
 
 interface CsAmdDependencies {
-  add: TypedFunction
-  multiply: TypedFunction
-  transpose: TypedFunction
+  add: TypedFunction;
+  multiply: TypedFunction;
+  transpose: TypedFunction;
 }
 
-const name = 'csAmd'
-const dependencies = ['add', 'multiply', 'transpose'] as const
+const name = 'csAmd';
+const dependencies = ['add', 'multiply', 'transpose'] as const;
 
 export const createCsAmd = /* #__PURE__ */ factory(
   name,
@@ -35,46 +35,40 @@ export const createCsAmd = /* #__PURE__ */ factory(
     /**
      * Try WASM-accelerated AMD ordering for large sparse matrices
      */
-    function _tryWasmAmd(
-      a: SparseMatrixData,
-      n: number
-    ): number[] | null {
-      const wasm = wasmLoader.getModule()
-      if (!wasm || !a._ptr || !a._index) return null
-      const nnz = a._ptr[n]
-      if (nnz < WASM_AMD_THRESHOLD) return null
+    function _tryWasmAmd(a: SparseMatrixData, n: number): number[] | null {
+      const wasm = wasmLoader.getModule();
+      if (!wasm || !a._ptr || !a._index) return null;
+      const nnz = a._ptr[n];
+      if (nnz < WASM_AMD_THRESHOLD) return null;
 
       try {
-        const colPtr = new Int32Array(a._ptr)
-        const rowIdx = new Int32Array(a._index)
+        const colPtr = new Int32Array(a._ptr);
+        const rowIdx = new Int32Array(a._index);
 
-        const colPtrAlloc = wasmLoader.allocateInt32Array(colPtr)
-        const rowIdxAlloc = wasmLoader.allocateInt32Array(rowIdx)
-        const permAlloc = wasmLoader.allocateInt32ArrayEmpty(n)
+        const colPtrAlloc = wasmLoader.allocateInt32Array(colPtr);
+        const rowIdxAlloc = wasmLoader.allocateInt32Array(rowIdx);
+        const permAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
         // workPtr: AMD needs ~8*(n+1) i32 workspace
-        const workAlloc = wasmLoader.allocateInt32ArrayEmpty(8 * (n + 1))
+        const workAlloc = wasmLoader.allocateInt32ArrayEmpty(8 * (n + 1));
 
         try {
-          wasm.amd(
-            colPtrAlloc.ptr, rowIdxAlloc.ptr, n,
-            permAlloc.ptr, workAlloc.ptr
-          )
+          wasm.amd(colPtrAlloc.ptr, rowIdxAlloc.ptr, n, permAlloc.ptr, workAlloc.ptr);
 
-          const perm: number[] = new Array(n)
+          const perm: number[] = new Array(n);
           for (let i = 0; i < n; i++) {
-            perm[i] = permAlloc.array[i]
+            perm[i] = permAlloc.array[i];
           }
-          return perm
+          return perm;
         } finally {
-          wasmLoader.free(colPtrAlloc.ptr)
-          wasmLoader.free(rowIdxAlloc.ptr)
-          wasmLoader.free(permAlloc.ptr)
-          wasmLoader.free(workAlloc.ptr)
+          wasmLoader.free(colPtrAlloc.ptr);
+          wasmLoader.free(rowIdxAlloc.ptr);
+          wasmLoader.free(permAlloc.ptr);
+          wasmLoader.free(workAlloc.ptr);
         }
       } catch {
         // Fall through to JS
       }
-      return null
+      return null;
     }
 
     /**
@@ -86,56 +80,53 @@ export const createCsAmd = /* #__PURE__ */ factory(
      * @param {Number} order    0: Natural, 1: Cholesky, 2: LU, 3: QR
      * @param {Matrix} m        Sparse Matrix
      */
-    return function csAmd(
-      order: number,
-      a: SparseMatrixData | null
-    ): number[] | null {
+    return function csAmd(order: number, a: SparseMatrixData | null): number[] | null {
       // check input parameters
       if (!a || order <= 0 || order > 3) {
-        return null
+        return null;
       }
       // a matrix arrays
-      const asize = a._size
+      const asize = a._size;
       // rows and columns
-      const m = asize[0]
-      const n = asize[1]
+      const m = asize[0];
+      const n = asize[1];
 
       // Try WASM for large sparse matrices
-      const wasmResult = _tryWasmAmd(a, n)
-      if (wasmResult !== null) return wasmResult
+      const wasmResult = _tryWasmAmd(a, n);
+      if (wasmResult !== null) return wasmResult;
 
       // initialize vars
-      let lemax = 0
+      let lemax = 0;
       // dense threshold
-      let dense = Math.max(16, 10 * Math.sqrt(n))
-      dense = Math.min(n - 2, dense)
+      let dense = Math.max(16, 10 * Math.sqrt(n));
+      dense = Math.min(n - 2, dense);
       // create target matrix C
-      const cm = _createTargetMatrix(order, a, m, n, dense)
+      const cm = _createTargetMatrix(order, a, m, n, dense);
       // drop diagonal entries
-      csFkeep(cm, _diag, null)
+      csFkeep(cm, _diag, null);
       // C matrix arrays
-      const cindex = cm._index
-      const cptr = cm._ptr
+      const cindex = cm._index;
+      const cptr = cm._ptr;
 
       // number of nonzero elements in C
-      let cnz = cptr[n]
+      let cnz = cptr[n];
 
       // allocate result (n+1)
-      const P: number[] = []
+      const P: number[] = [];
 
       // create workspace (8 * (n + 1))
-      const W: number[] = []
-      const len = 0 // first n + 1 entries
-      const nv = n + 1 // next n + 1 entries
-      const next = 2 * (n + 1) // next n + 1 entries
-      const head = 3 * (n + 1) // next n + 1 entries
-      const elen = 4 * (n + 1) // next n + 1 entries
-      const degree = 5 * (n + 1) // next n + 1 entries
-      const w = 6 * (n + 1) // next n + 1 entries
-      const hhead = 7 * (n + 1) // last n + 1 entries
+      const W: number[] = [];
+      const len = 0; // first n + 1 entries
+      const nv = n + 1; // next n + 1 entries
+      const next = 2 * (n + 1); // next n + 1 entries
+      const head = 3 * (n + 1); // next n + 1 entries
+      const elen = 4 * (n + 1); // next n + 1 entries
+      const degree = 5 * (n + 1); // next n + 1 entries
+      const w = 6 * (n + 1); // next n + 1 entries
+      const hhead = 7 * (n + 1); // last n + 1 entries
 
       // use P as workspace for last
-      const last = P
+      const last = P;
 
       // initialize quotient graph
       let mark = _initializeQuotientGraph(
@@ -151,25 +142,13 @@ export const createCsAmd = /* #__PURE__ */ factory(
         w,
         elen,
         degree
-      )
+      );
 
       // initialize degree lists
-      let nel = _initializeDegreeLists(
-        n,
-        cptr,
-        W,
-        degree,
-        elen,
-        w,
-        dense,
-        nv,
-        head,
-        last,
-        next
-      )
+      let nel = _initializeDegreeLists(n, cptr, W, degree, elen, w, dense, nv, head, last, next);
 
       // minimum degree node
-      let mindeg = 0
+      let mindeg = 0;
 
       // vars
       let i: number,
@@ -187,7 +166,7 @@ export const createCsAmd = /* #__PURE__ */ factory(
         p2: number,
         pn: number,
         h: number,
-        d: number
+        d: number;
 
       // while (selecting pivots) do
       while (nel < n) {
@@ -196,107 +175,107 @@ export const createCsAmd = /* #__PURE__ */ factory(
         // many nodes have been eliminated.
         for (k = -1; mindeg < n && (k = W[head + mindeg]) === -1; mindeg++);
         if (W[next + k] !== -1) {
-          last[W[next + k]] = -1
+          last[W[next + k]] = -1;
         }
         // remove k from degree list
-        W[head + mindeg] = W[next + k]
+        W[head + mindeg] = W[next + k];
         // elenk = |Ek|
-        const elenk = W[elen + k]
+        const elenk = W[elen + k];
         // # of nodes k represents
-        let nvk = W[nv + k]
+        let nvk = W[nv + k];
         // W[nv + k] nodes of A eliminated
-        nel += nvk
+        nel += nvk;
 
         // Construct a new element. The new element Lk is constructed in place if |Ek| = 0. nv[i] is
         // negated for all nodes i in Lk to flag them as members of this set. Each node i is removed from the
         // degree lists. All elements e in Ek are absorved into element k.
-        let dk = 0
+        let dk = 0;
         // flag k as in Lk
-        W[nv + k] = -nvk
-        let p = cptr[k]
+        W[nv + k] = -nvk;
+        let p = cptr[k];
         // do in place if W[elen + k] === 0
-        const pk1 = elenk === 0 ? p : cnz
-        let pk2 = pk1
+        const pk1 = elenk === 0 ? p : cnz;
+        let pk2 = pk1;
         for (k1 = 1; k1 <= elenk + 1; k1++) {
           if (k1 > elenk) {
             // search the nodes in k
-            e = k
+            e = k;
             // list of nodes starts at cindex[pj]
-            pj = p
+            pj = p;
             // length of list of nodes in k
-            ln = W[len + k] - elenk
+            ln = W[len + k] - elenk;
           } else {
             // search the nodes in e
-            e = cindex[p++]
-            pj = cptr[e]
+            e = cindex[p++];
+            pj = cptr[e];
             // length of list of nodes in e
-            ln = W[len + e]
+            ln = W[len + e];
           }
           for (k2 = 1; k2 <= ln; k2++) {
-            i = cindex[pj++]
+            i = cindex[pj++];
             // check  node i dead, or seen
             if ((nvi = W[nv + i]) <= 0) {
-              continue
+              continue;
             }
             // W[degree + Lk] += size of node i
-            dk += nvi
+            dk += nvi;
             // negate W[nv + i] to denote i in Lk
-            W[nv + i] = -nvi
+            W[nv + i] = -nvi;
             // place i in Lk
-            cindex[pk2++] = i
+            cindex[pk2++] = i;
             if (W[next + i] !== -1) {
-              last[W[next + i]] = last[i]
+              last[W[next + i]] = last[i];
             }
             // check we need to remove i from degree list
             if (last[i] !== -1) {
-              W[next + last[i]] = W[next + i]
+              W[next + last[i]] = W[next + i];
             } else {
-              W[head + W[degree + i]] = W[next + i]
+              W[head + W[degree + i]] = W[next + i];
             }
           }
           if (e !== k) {
             // absorb e into k
-            cptr[e] = csFlip(k)
+            cptr[e] = csFlip(k);
             // e is now a dead element
-            W[w + e] = 0
+            W[w + e] = 0;
           }
         }
         // cindex[cnz...nzmax] is free
         if (elenk !== 0) {
-          cnz = pk2
+          cnz = pk2;
         }
         // external degree of k - |Lk\i|
-        W[degree + k] = dk
+        W[degree + k] = dk;
         // element k is in cindex[pk1..pk2-1]
-        cptr[k] = pk1
-        W[len + k] = pk2 - pk1
+        cptr[k] = pk1;
+        W[len + k] = pk2 - pk1;
         // k is now an element
-        W[elen + k] = -2
+        W[elen + k] = -2;
 
         // Find set differences. The scan1 function now computes the set differences |Le \ Lk| for all elements e. At the start of the
         // scan, no entry in the w array is greater than or equal to mark.
 
         // clear w if necessary
-        mark = _wclear(mark, lemax, W, w, n)
+        mark = _wclear(mark, lemax, W, w, n);
         // scan 1: find |Le\Lk|
         for (pk = pk1; pk < pk2; pk++) {
-          i = cindex[pk]
+          i = cindex[pk];
           // check if W[elen + i] empty, skip it
           if ((eln = W[elen + i]) <= 0) {
-            continue
+            continue;
           }
           // W[nv + i] was negated
-          nvi = -W[nv + i]
-          const wnvi = mark - nvi
+          nvi = -W[nv + i];
+          const wnvi = mark - nvi;
           // scan Ei
           for (p = cptr[i], p1 = cptr[i] + eln - 1; p <= p1; p++) {
-            e = cindex[p]
+            e = cindex[p];
             if (W[w + e] >= mark) {
               // decrement |Le\Lk|
-              W[w + e] -= nvi
+              W[w + e] -= nvi;
             } else if (W[w + e] !== 0) {
               // ensure e is a live element, 1st time e seen in scan 1
-              W[w + e] = W[degree + e] + wnvi
+              W[w + e] = W[degree + e] + wnvi;
             }
           }
         }
@@ -308,134 +287,134 @@ export const createCsAmd = /* #__PURE__ */ factory(
         // scan2: degree update
         for (pk = pk1; pk < pk2; pk++) {
           // consider node i in Lk
-          i = cindex[pk]
-          p1 = cptr[i]
-          p2 = p1 + W[elen + i] - 1
-          pn = p1
+          i = cindex[pk];
+          p1 = cptr[i];
+          p2 = p1 + W[elen + i] - 1;
+          pn = p1;
           // scan Ei
           for (h = 0, d = 0, p = p1; p <= p2; p++) {
-            e = cindex[p]
+            e = cindex[p];
             // check e is an unabsorbed element
             if (W[w + e] !== 0) {
               // dext = |Le\Lk|
-              const dext = W[w + e] - mark
+              const dext = W[w + e] - mark;
               if (dext > 0) {
                 // sum up the set differences
-                d += dext
+                d += dext;
                 // keep e in Ei
-                cindex[pn++] = e
+                cindex[pn++] = e;
                 // compute the hash of node i
-                h += e
+                h += e;
               } else {
                 // aggressive absorb. e->k
-                cptr[e] = csFlip(k)
+                cptr[e] = csFlip(k);
                 // e is a dead element
-                W[w + e] = 0
+                W[w + e] = 0;
               }
             }
           }
           // W[elen + i] = |Ei|
-          W[elen + i] = pn - p1 + 1
-          const p3 = pn
-          const p4 = p1 + W[len + i]
+          W[elen + i] = pn - p1 + 1;
+          const p3 = pn;
+          const p4 = p1 + W[len + i];
           // prune edges in Ai
           for (p = p2 + 1; p < p4; p++) {
-            j = cindex[p]
+            j = cindex[p];
             // check node j dead or in Lk
-            const nvj = W[nv + j]
+            const nvj = W[nv + j];
             if (nvj <= 0) {
-              continue
+              continue;
             }
             // degree(i) += |j|
-            d += nvj
+            d += nvj;
             // place j in node list of i
-            cindex[pn++] = j
+            cindex[pn++] = j;
             // compute hash for node i
-            h += j
+            h += j;
           }
           // check for mass elimination
           if (d === 0) {
             // absorb i into k
-            cptr[i] = csFlip(k)
-            nvi = -W[nv + i]
+            cptr[i] = csFlip(k);
+            nvi = -W[nv + i];
             // |Lk| -= |i|
-            dk -= nvi
+            dk -= nvi;
             // |k| += W[nv + i]
-            nvk += nvi
-            nel += nvi
-            W[nv + i] = 0
+            nvk += nvi;
+            nel += nvi;
+            W[nv + i] = 0;
             // node i is dead
-            W[elen + i] = -1
+            W[elen + i] = -1;
           } else {
             // update degree(i)
-            W[degree + i] = Math.min(W[degree + i], d)
+            W[degree + i] = Math.min(W[degree + i], d);
             // move first node to end
-            cindex[pn] = cindex[p3]
+            cindex[pn] = cindex[p3];
             // move 1st el. to end of Ei
-            cindex[p3] = cindex[p1]
+            cindex[p3] = cindex[p1];
             // add k as 1st element in of Ei
-            cindex[p1] = k
+            cindex[p1] = k;
             // new len of adj. list of node i
-            W[len + i] = pn - p1 + 1
+            W[len + i] = pn - p1 + 1;
             // finalize hash of i
-            h = (h < 0 ? -h : h) % n
+            h = (h < 0 ? -h : h) % n;
             // place i in hash bucket
-            W[next + i] = W[hhead + h]
-            W[hhead + h] = i
+            W[next + i] = W[hhead + h];
+            W[hhead + h] = i;
             // save hash of i in last[i]
-            last[i] = h
+            last[i] = h;
           }
         }
         // finalize |Lk|
-        W[degree + k] = dk
-        lemax = Math.max(lemax, dk)
+        W[degree + k] = dk;
+        lemax = Math.max(lemax, dk);
         // clear w
-        mark = _wclear(mark + lemax, lemax, W, w, n)
+        mark = _wclear(mark + lemax, lemax, W, w, n);
 
         // Supernode detection. Supernode detection relies on the hash function h(i) computed for each node i.
         // If two nodes have identical adjacency lists, their hash functions wil be identical.
         for (pk = pk1; pk < pk2; pk++) {
-          i = cindex[pk]
+          i = cindex[pk];
           // check i is dead, skip it
           if (W[nv + i] >= 0) {
-            continue
+            continue;
           }
           // scan hash bucket of node i
-          h = last[i]
-          i = W[hhead + h]
+          h = last[i];
+          i = W[hhead + h];
           // hash bucket will be empty
-          W[hhead + h] = -1
+          W[hhead + h] = -1;
           for (; i !== -1 && W[next + i] !== -1; i = W[next + i], mark++) {
-            ln = W[len + i]
-            eln = W[elen + i]
+            ln = W[len + i];
+            eln = W[elen + i];
             for (p = cptr[i] + 1; p <= cptr[i] + ln - 1; p++) {
-              W[w + cindex[p]] = mark
+              W[w + cindex[p]] = mark;
             }
-            let jlast = i
+            let jlast = i;
             // compare i with all j
             for (j = W[next + i]; j !== -1; ) {
-              let ok = W[len + j] === ln && W[elen + j] === eln
+              let ok = W[len + j] === ln && W[elen + j] === eln;
               for (p = cptr[j] + 1; ok && p <= cptr[j] + ln - 1; p++) {
                 // compare i and j
                 if (W[w + cindex[p]] !== mark) {
-                  ok = false
+                  ok = false;
                 }
               }
               // check i and j are identical
               if (ok) {
                 // absorb j into i
-                cptr[j] = csFlip(i)
-                W[nv + i] += W[nv + j]
-                W[nv + j] = 0
+                cptr[j] = csFlip(i);
+                W[nv + i] += W[nv + j];
+                W[nv + j] = 0;
                 // node j is dead
-                W[elen + j] = -1
+                W[elen + j] = -1;
                 // delete j from hash bucket
-                j = W[next + j]
-                W[next + jlast] = j
+                j = W[next + j];
+                W[next + jlast] = j;
               } else {
                 // j and i are different
-                jlast = j
-                j = W[next + j]
+                jlast = j;
+                j = W[next + j];
               }
             }
           }
@@ -444,41 +423,41 @@ export const createCsAmd = /* #__PURE__ */ factory(
         // Finalize new element. The elimination of node k is nearly complete. All nodes i in Lk are scanned one last time.
         // Node i is removed from Lk if it is dead. The flagged status of nv[i] is cleared.
         for (p = pk1, pk = pk1; pk < pk2; pk++) {
-          i = cindex[pk]
+          i = cindex[pk];
           // check  i is dead, skip it
           if ((nvi = -W[nv + i]) <= 0) {
-            continue
+            continue;
           }
           // restore W[nv + i]
-          W[nv + i] = nvi
+          W[nv + i] = nvi;
           // compute external degree(i)
-          d = W[degree + i] + dk - nvi
-          d = Math.min(d, n - nel - nvi)
+          d = W[degree + i] + dk - nvi;
+          d = Math.min(d, n - nel - nvi);
           if (W[head + d] !== -1) {
-            last[W[head + d]] = i
+            last[W[head + d]] = i;
           }
           // put i back in degree list
-          W[next + i] = W[head + d]
-          last[i] = -1
-          W[head + d] = i
+          W[next + i] = W[head + d];
+          last[i] = -1;
+          W[head + d] = i;
           // find new minimum degree
-          mindeg = Math.min(mindeg, d)
-          W[degree + i] = d
+          mindeg = Math.min(mindeg, d);
+          W[degree + i] = d;
           // place i in Lk
-          cindex[p++] = i
+          cindex[p++] = i;
         }
         // # nodes absorbed into k
-        W[nv + k] = nvk
+        W[nv + k] = nvk;
         // length of adj list of element k
         if ((W[len + k] = p - pk1) === 0) {
           // k is a root of the tree
-          cptr[k] = -1
+          cptr[k] = -1;
           // k is now a dead element
-          W[w + k] = 0
+          W[w + k] = 0;
         }
         if (elenk !== 0) {
           // free unused space in Lk
-          cnz = p
+          cnz = p;
         }
       }
 
@@ -489,44 +468,44 @@ export const createCsAmd = /* #__PURE__ */ factory(
 
       // fix assembly tree
       for (i = 0; i < n; i++) {
-        cptr[i] = csFlip(cptr[i])
+        cptr[i] = csFlip(cptr[i]);
       }
       for (j = 0; j <= n; j++) {
-        W[head + j] = -1
+        W[head + j] = -1;
       }
       // place unordered nodes in lists
       for (j = n; j >= 0; j--) {
         // skip if j is an element
         if (W[nv + j] > 0) {
-          continue
+          continue;
         }
         // place j in list of its parent
-        W[next + j] = W[head + cptr[j]]
-        W[head + cptr[j]] = j
+        W[next + j] = W[head + cptr[j]];
+        W[head + cptr[j]] = j;
       }
       // place elements in lists
       for (e = n; e >= 0; e--) {
         // skip unless e is an element
         if (W[nv + e] <= 0) {
-          continue
+          continue;
         }
         if (cptr[e] !== -1) {
           // place e in list of its parent
-          W[next + e] = W[head + cptr[e]]
-          W[head + cptr[e]] = e
+          W[next + e] = W[head + cptr[e]];
+          W[head + cptr[e]] = e;
         }
       }
       // postorder the assembly tree
       for (k = 0, i = 0; i <= n; i++) {
         if (cptr[i] === -1) {
-          k = csTdfs(i, k, W, head, next, P, w)
+          k = csTdfs(i, k, W, head, next, P, w);
         }
       }
       // remove last item in array
-      P.splice(P.length - 1, 1)
+      P.splice(P.length - 1, 1);
       // return P
-      return P
-    }
+      return P;
+    };
 
     /**
      * Creates the matrix that will be used by the approximate minimum degree ordering algorithm. The function accepts the matrix M as input and returns a permutation
@@ -555,46 +534,46 @@ export const createCsAmd = /* #__PURE__ */ factory(
       dense: number
     ): SparseMatrixData {
       // compute A'
-      const at = transpose(a) as SparseMatrixData
+      const at = transpose(a) as SparseMatrixData;
 
       // check order = 1, matrix must be square
       if (order === 1 && n === m) {
         // C = A + A'
-        return add(a, at) as SparseMatrixData
+        return add(a, at) as SparseMatrixData;
       }
 
       // check order = 2, drop dense columns from M'
       if (order === 2) {
         // transpose arrays
-        const tindex = at._index
-        const tptr = at._ptr
+        const tindex = at._index;
+        const tptr = at._ptr;
         // new column index
-        let p2 = 0
+        let p2 = 0;
         // loop A' columns (rows)
         for (let j = 0; j < m; j++) {
           // column j of AT starts here
-          let p = tptr[j]
+          let p = tptr[j];
           // new column j starts here
-          tptr[j] = p2
+          tptr[j] = p2;
           // skip dense col j
           if (tptr[j + 1] - p > dense) {
-            continue
+            continue;
           }
           // map rows in column j of A
           for (const p1 = tptr[j + 1]; p < p1; p++) {
-            tindex[p2++] = tindex[p]
+            tindex[p2++] = tindex[p];
           }
         }
         // finalize AT
-        tptr[m] = p2
+        tptr[m] = p2;
         // recreate A from new transpose matrix
-        a = transpose(at) as SparseMatrixData
+        a = transpose(at) as SparseMatrixData;
         // use A' * A
-        return multiply(at, a) as SparseMatrixData
+        return multiply(at, a) as SparseMatrixData;
       }
 
       // use A' * A, square or rectangular matrix
-      return multiply(at, a) as SparseMatrixData
+      return multiply(at, a) as SparseMatrixData;
     }
 
     /**
@@ -621,36 +600,36 @@ export const createCsAmd = /* #__PURE__ */ factory(
     ): number {
       // Initialize quotient graph
       for (let k = 0; k < n; k++) {
-        W[len + k] = cptr[k + 1] - cptr[k]
+        W[len + k] = cptr[k + 1] - cptr[k];
       }
-      W[len + n] = 0
+      W[len + n] = 0;
       // initialize workspace
       for (let i = 0; i <= n; i++) {
         // degree list i is empty
-        W[head + i] = -1
-        last[i] = -1
-        W[next + i] = -1
+        W[head + i] = -1;
+        last[i] = -1;
+        W[next + i] = -1;
         // hash list i is empty
-        W[hhead + i] = -1
+        W[hhead + i] = -1;
         // node i is just one node
-        W[nv + i] = 1
+        W[nv + i] = 1;
         // node i is alive
-        W[w + i] = 1
+        W[w + i] = 1;
         // Ek of node i is empty
-        W[elen + i] = 0
+        W[elen + i] = 0;
         // degree of node i
-        W[degree + i] = W[len + i]
+        W[degree + i] = W[len + i];
       }
       // clear w
-      const mark = _wclear(0, 0, W, w, n)
+      const mark = _wclear(0, 0, W, w, n);
       // n is a dead element
-      W[elen + n] = -2
+      W[elen + n] = -2;
       // n is a root of assembly tree
-      cptr[n] = -1
+      cptr[n] = -1;
       // n is a dead element
-      W[w + n] = 0
+      W[w + n] = 0;
       // return mark
-      return mark
+      return mark;
     }
 
     /**
@@ -672,61 +651,55 @@ export const createCsAmd = /* #__PURE__ */ factory(
       next: number
     ): number {
       // result
-      let nel = 0
+      let nel = 0;
       // loop columns
       for (let i = 0; i < n; i++) {
         // degree @ i
-        const d = W[degree + i]
+        const d = W[degree + i];
         // check node i is empty
         if (d === 0) {
           // element i is dead
-          W[elen + i] = -2
-          nel++
+          W[elen + i] = -2;
+          nel++;
           // i is a root of assembly tree
-          cptr[i] = -1
-          W[w + i] = 0
+          cptr[i] = -1;
+          W[w + i] = 0;
         } else if (d > dense) {
           // absorb i into element n
-          W[nv + i] = 0
+          W[nv + i] = 0;
           // node i is dead
-          W[elen + i] = -1
-          nel++
-          cptr[i] = csFlip(n)
-          W[nv + n]++
+          W[elen + i] = -1;
+          nel++;
+          cptr[i] = csFlip(n);
+          W[nv + n]++;
         } else {
-          const h = W[head + d]
+          const h = W[head + d];
           if (h !== -1) {
-            last[h] = i
+            last[h] = i;
           }
           // put node i in degree list d
-          W[next + i] = W[head + d]
-          W[head + d] = i
+          W[next + i] = W[head + d];
+          W[head + d] = i;
         }
       }
-      return nel
+      return nel;
     }
 
-    function _wclear(
-      mark: number,
-      lemax: number,
-      W: number[],
-      w: number,
-      n: number
-    ): number {
+    function _wclear(mark: number, lemax: number, W: number[], w: number, n: number): number {
       if (mark < 2 || mark + lemax < 0) {
         for (let k = 0; k < n; k++) {
           if (W[w + k] !== 0) {
-            W[w + k] = 1
+            W[w + k] = 1;
           }
         }
-        mark = 2
+        mark = 2;
       }
       // at this point, W [0..n-1] < mark holds
-      return mark
+      return mark;
     }
 
     function _diag(i: number, j: number): boolean {
-      return i !== j
+      return i !== j;
     }
   }
-)
+);

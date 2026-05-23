@@ -1,51 +1,51 @@
-import { isMatrix } from '../utils/is.js'
-import { format } from '../utils/string.js'
-import { arraySize } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
+import { isMatrix } from '../utils/is.js';
+import { format } from '../utils/string.js';
+import { arraySize } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Type definitions
-import type { BigNumber } from 'bignumber.js'
-import type Complex from 'complex.js'
+import type { BigNumber } from 'bignumber.js';
+import type Complex from 'complex.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
-const WASM_SQRTM_THRESHOLD = 16 // 4x4 matrix
+const WASM_SQRTM_THRESHOLD = 16; // 4x4 matrix
 
 /** Scalar types supported by sqrtm */
-type Scalar = number | BigNumber | Complex
+type Scalar = number | BigNumber | Complex;
 
 /** Matrix data representation */
-type MatrixData = Scalar | Scalar[] | Scalar[][]
+type MatrixData = Scalar | Scalar[] | Scalar[][];
 
 /** Matrix interface */
 export interface Matrix {
-  size(): number[]
-  valueOf(): MatrixData
-  _data?: MatrixData
-  _size?: number[]
+  size(): number[];
+  valueOf(): MatrixData;
+  _data?: MatrixData;
+  _size?: number[];
 }
 
 /** Typed function interface for math.js functions */
 interface TypedFunction<R = Scalar | Matrix> {
-  (...args: unknown[]): R
+  (...args: unknown[]): R;
 }
 
 /** Dependencies for sqrtm factory */
 interface Dependencies {
-  typed: TypedFunction
-  abs: TypedFunction<number | BigNumber>
-  add: TypedFunction<Scalar | Matrix>
-  multiply: TypedFunction<Scalar | Matrix>
-  map: TypedFunction<Matrix>
-  sqrt: TypedFunction<Scalar>
-  subtract: TypedFunction<Scalar | Matrix>
-  inv: TypedFunction<Scalar[][] | Matrix>
-  size: TypedFunction<number[]>
-  max: TypedFunction<number | BigNumber>
-  identity: TypedFunction<Matrix>
+  typed: TypedFunction;
+  abs: TypedFunction<number | BigNumber>;
+  add: TypedFunction<Scalar | Matrix>;
+  multiply: TypedFunction<Scalar | Matrix>;
+  map: TypedFunction<Matrix>;
+  sqrt: TypedFunction<Scalar>;
+  subtract: TypedFunction<Scalar | Matrix>;
+  inv: TypedFunction<Scalar[][] | Matrix>;
+  size: TypedFunction<number[]>;
+  max: TypedFunction<number | BigNumber>;
+  identity: TypedFunction<Matrix>;
 }
 
-const name = 'sqrtm'
+const name = 'sqrtm';
 const dependencies = [
   'typed',
   'abs',
@@ -57,93 +57,82 @@ const dependencies = [
   'inv',
   'size',
   'max',
-  'identity'
-]
+  'identity',
+];
 
 export const createSqrtm = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    abs,
-    add,
-    multiply,
-    map,
-    sqrt,
-    subtract,
-    inv,
-    size,
-    max,
-    identity
-  }: Dependencies) => {
-    const _maxIterations = 1e3
-    const _tolerance = 1e-6
+  ({ typed, abs, add, multiply, map, sqrt, subtract, inv, size, max, identity }: Dependencies) => {
+    const _maxIterations = 1e3;
+    const _tolerance = 1e-6;
 
     /**
      * Try WASM-accelerated matrix square root for plain number matrices
      */
-    function _tryWasmSqrtm(
-      A: Scalar[][] | Matrix,
-      n: number
-    ): Scalar[][] | Matrix | null {
-      const wasm = wasmLoader.getModule()
-      if (!wasm || n * n < WASM_SQRTM_THRESHOLD) return null
+    function _tryWasmSqrtm(A: Scalar[][] | Matrix, n: number): Scalar[][] | Matrix | null {
+      const wasm = wasmLoader.getModule();
+      if (!wasm || n * n < WASM_SQRTM_THRESHOLD) return null;
 
       // Extract data
-      const data = isMatrix(A) ? (A as any)._data : A
-      if (!data || !Array.isArray(data)) return null
+      const data = isMatrix(A) ? (A as any)._data : A;
+      if (!data || !Array.isArray(data)) return null;
 
       try {
-        const flat = new Float64Array(n * n)
+        const flat = new Float64Array(n * n);
         for (let i = 0; i < n; i++) {
-          const row = data[i]
-          if (!Array.isArray(row)) return null
+          const row = data[i];
+          if (!Array.isArray(row)) return null;
           for (let j = 0; j < n; j++) {
-            if (typeof row[j] !== 'number') return null
-            flat[i * n + j] = row[j]
+            if (typeof row[j] !== 'number') return null;
+            flat[i * n + j] = row[j];
           }
         }
 
-        const matrixAlloc = wasmLoader.allocateFloat64Array(flat)
-        const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * n)
+        const matrixAlloc = wasmLoader.allocateFloat64Array(flat);
+        const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * n);
         // workPtr needs 5*n*n f64 values for sqrtm
-        const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(5 * n * n)
+        const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(5 * n * n);
 
         try {
           const status = wasm.sqrtm(
-            matrixAlloc.ptr, n, resultAlloc.ptr,
-            _tolerance, _maxIterations, workAlloc.ptr
-          )
+            matrixAlloc.ptr,
+            n,
+            resultAlloc.ptr,
+            _tolerance,
+            _maxIterations,
+            workAlloc.ptr
+          );
 
           if (status > 0) {
             // AS sqrtm returns iteration count (>0) on success, -1 on failure
-            const result: number[][] = []
+            const result: number[][] = [];
             for (let i = 0; i < n; i++) {
-              const row: number[] = []
+              const row: number[] = [];
               for (let j = 0; j < n; j++) {
-                row[j] = resultAlloc.array[i * n + j]
+                row[j] = resultAlloc.array[i * n + j];
               }
-              result[i] = row
+              result[i] = row;
             }
 
             if (isMatrix(A)) {
               return (A as any).createDenseMatrix({
                 data: result,
                 size: [n, n],
-                datatype: (A as any)._datatype
-              })
+                datatype: (A as any)._datatype,
+              });
             }
-            return result
+            return result;
           }
         } finally {
-          wasmLoader.free(matrixAlloc.ptr)
-          wasmLoader.free(resultAlloc.ptr)
-          wasmLoader.free(workAlloc.ptr)
+          wasmLoader.free(matrixAlloc.ptr);
+          wasmLoader.free(resultAlloc.ptr);
+          wasmLoader.free(workAlloc.ptr);
         }
       } catch {
         // Fall through to JS
       }
-      return null
+      return null;
     }
 
     /**
@@ -156,27 +145,25 @@ export const createSqrtm = /* #__PURE__ */ factory(
      * @private
      */
     function _denmanBeavers(A: Scalar[][] | Matrix): Scalar[][] | Matrix {
-      let error: number
-      let iterations = 0
+      let error: number;
+      let iterations = 0;
 
-      let Y: Scalar[][] | Matrix = A
-      let Z: Scalar[][] | Matrix = identity(size(A))
+      let Y: Scalar[][] | Matrix = A;
+      let Z: Scalar[][] | Matrix = identity(size(A));
 
       do {
-        const Yk = Y
-        Y = multiply(0.5, add(Yk, inv(Z))) as Scalar[][] | Matrix
-        Z = multiply(0.5, add(Z, inv(Yk))) as Scalar[][] | Matrix
+        const Yk = Y;
+        Y = multiply(0.5, add(Yk, inv(Z))) as Scalar[][] | Matrix;
+        Z = multiply(0.5, add(Z, inv(Yk))) as Scalar[][] | Matrix;
 
-        error = max(abs(subtract(Y, Yk))) as number
+        error = max(abs(subtract(Y, Yk))) as number;
 
         if (error > _tolerance && ++iterations > _maxIterations) {
-          throw new Error(
-            'computing square root of matrix: iterative method could not converge'
-          )
+          throw new Error('computing square root of matrix: iterative method could not converge');
         }
-      } while (error > _tolerance)
+      } while (error > _tolerance);
 
-      return Y
+      return Y;
     }
 
     /**
@@ -201,54 +188,43 @@ export const createSqrtm = /* #__PURE__ */ factory(
      * @return {Array | Matrix}     The principal square root of matrix `A`
      */
     return typed(name, {
-      'Array | Matrix': function (
-        A: Scalar[] | Scalar[][] | Matrix
-      ): Scalar[][] | Matrix {
+      'Array | Matrix': function (A: Scalar[] | Scalar[][] | Matrix): Scalar[][] | Matrix {
         const sizeArray = isMatrix(A)
           ? (A as Matrix).size()
-          : arraySize(A as Scalar[] | Scalar[][])
+          : arraySize(A as Scalar[] | Scalar[][]);
         switch (sizeArray.length) {
           case 1:
             // Single element Array | Matrix
             if (sizeArray[0] === 1) {
-              return map(A, sqrt)
+              return map(A, sqrt);
             } else {
               throw new RangeError(
-                'Matrix must be square ' +
-                  '(size: ' +
-                  format(sizeArray, {}) +
-                  ')'
-              )
+                'Matrix must be square ' + '(size: ' + format(sizeArray, {}) + ')'
+              );
             }
 
           case 2: {
             // Two-dimensional Array | Matrix
-            const rows = sizeArray[0]
-            const cols = sizeArray[1]
+            const rows = sizeArray[0];
+            const cols = sizeArray[1];
             if (rows === cols) {
               // Try WASM for plain number matrices
-              const wasmResult = _tryWasmSqrtm(A as Scalar[][] | Matrix, rows)
-              if (wasmResult !== null) return wasmResult
-              return _denmanBeavers(A as Scalar[][] | Matrix)
+              const wasmResult = _tryWasmSqrtm(A as Scalar[][] | Matrix, rows);
+              if (wasmResult !== null) return wasmResult;
+              return _denmanBeavers(A as Scalar[][] | Matrix);
             } else {
               throw new RangeError(
-                'Matrix must be square ' +
-                  '(size: ' +
-                  format(sizeArray, {}) +
-                  ')'
-              )
+                'Matrix must be square ' + '(size: ' + format(sizeArray, {}) + ')'
+              );
             }
           }
           default:
             // Multi dimensional array
             throw new RangeError(
-              'Matrix must be at most two dimensional ' +
-                '(size: ' +
-                format(sizeArray, {}) +
-                ')'
-            )
+              'Matrix must be at most two dimensional ' + '(size: ' + format(sizeArray, {}) + ')'
+            );
         }
-      }
-    })
+      },
+    });
   }
-)
+);

@@ -1,52 +1,44 @@
-import { isMatrix } from '../utils/is.js'
-import { arraySize } from '../utils/array.js'
-import { isInteger } from '../utils/number.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { BigNumber } from 'bignumber.js'
+import { isMatrix } from '../utils/is.js';
+import { arraySize } from '../utils/array.js';
+import { isInteger } from '../utils/number.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { BigNumber } from 'bignumber.js';
 
 // Type definitions for diag
 
 interface MatrixType {
-  _size: number[]
-  storage(): 'dense' | 'sparse'
-  valueOf(): unknown[] | unknown[][]
-  size(): number[]
-  diagonal(k: number): MatrixType
+  _size: number[];
+  storage(): 'dense' | 'sparse';
+  valueOf(): unknown[] | unknown[][];
+  size(): number[];
+  diagonal(k: number): MatrixType;
 }
 
 interface MatrixConstructor {
-  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): MatrixType
+  (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): MatrixType;
 }
 
 interface DenseMatrixConstructor {
-  diagonal(
-    size: number[],
-    values: unknown[] | MatrixType,
-    k?: number
-  ): MatrixType
+  diagonal(size: number[], values: unknown[] | MatrixType, k?: number): MatrixType;
 }
 
 interface SparseMatrixConstructor {
-  diagonal(
-    size: number[],
-    values: unknown[] | MatrixType,
-    k?: number
-  ): MatrixType
+  diagonal(size: number[], values: unknown[] | MatrixType, k?: number): MatrixType;
 }
 
 /** Alias so signatures can use the name 'Matrix' consistently */
-type Matrix = MatrixType
+type Matrix = MatrixType;
 
 interface DiagDependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  DenseMatrix: DenseMatrixConstructor
-  SparseMatrix: SparseMatrixConstructor
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  DenseMatrix: DenseMatrixConstructor;
+  SparseMatrix: SparseMatrixConstructor;
 }
 
-const name = 'diag'
-const dependencies = ['typed', 'matrix', 'DenseMatrix', 'SparseMatrix']
+const name = 'diag';
+const dependencies = ['typed', 'matrix', 'DenseMatrix', 'SparseMatrix'];
 
 export const createDiag = /* #__PURE__ */ factory(
   name,
@@ -93,65 +85,47 @@ export const createDiag = /* #__PURE__ */ factory(
       // FIXME: simplify this huge amount of signatures as soon as typed-function supports optional arguments
 
       Array: function (x: any[]): any[] | any[][] | Matrix {
-        return _diag(x, 0, arraySize(x), null)
+        return _diag(x, 0, arraySize(x), null);
       },
 
-      'Array, number': function (
-        x: any[],
-        k: number
-      ): any[] | any[][] | Matrix {
-        return _diag(x, k, arraySize(x), null)
+      'Array, number': function (x: any[], k: number): any[] | any[][] | Matrix {
+        return _diag(x, k, arraySize(x), null);
       },
 
-      'Array, BigNumber': function (
-        x: any[],
-        k: BigNumber
-      ): any[] | any[][] | Matrix {
-        return _diag(x, (k as any).toNumber(), arraySize(x), null)
+      'Array, BigNumber': function (x: any[], k: BigNumber): any[] | any[][] | Matrix {
+        return _diag(x, (k as any).toNumber(), arraySize(x), null);
       },
 
       'Array, string': function (x: any[], format: string): Matrix {
-        return _diag(x, 0, arraySize(x), format) as Matrix
+        return _diag(x, 0, arraySize(x), format) as Matrix;
       },
 
-      'Array, number, string': function (
-        x: any[],
-        k: number,
-        format: string
-      ): Matrix {
-        return _diag(x, k, arraySize(x), format) as Matrix
+      'Array, number, string': function (x: any[], k: number, format: string): Matrix {
+        return _diag(x, k, arraySize(x), format) as Matrix;
       },
 
-      'Array, BigNumber, string': function (
-        x: any[],
-        k: BigNumber,
-        format: string
-      ): Matrix {
-        return _diag(x, (k as any).toNumber(), arraySize(x), format) as Matrix
+      'Array, BigNumber, string': function (x: any[], k: BigNumber, format: string): Matrix {
+        return _diag(x, (k as any).toNumber(), arraySize(x), format) as Matrix;
       },
 
       Matrix: function (x: Matrix): Matrix {
-        return _diag(x, 0, x.size(), x.storage()) as Matrix
+        return _diag(x, 0, x.size(), x.storage()) as Matrix;
       },
 
       'Matrix, number': function (x: Matrix, k: number): Matrix | any[] {
-        return _diag(x, k, x.size(), x.storage())
+        return _diag(x, k, x.size(), x.storage());
       },
 
       'Matrix, BigNumber': function (x: Matrix, k: BigNumber): Matrix | any[] {
-        return _diag(x, (k as any).toNumber(), x.size(), x.storage())
+        return _diag(x, (k as any).toNumber(), x.size(), x.storage());
       },
 
       'Matrix, string': function (x: Matrix, format: string): Matrix {
-        return _diag(x, 0, x.size(), format) as Matrix
+        return _diag(x, 0, x.size(), format) as Matrix;
       },
 
-      'Matrix, number, string': function (
-        x: Matrix,
-        k: number,
-        format: string
-      ): Matrix | any[] {
-        return _diag(x, k, x.size(), format)
+      'Matrix, number, string': function (x: Matrix, k: number, format: string): Matrix | any[] {
+        return _diag(x, k, x.size(), format);
       },
 
       'Matrix, BigNumber, string': function (
@@ -159,9 +133,9 @@ export const createDiag = /* #__PURE__ */ factory(
         k: BigNumber,
         format: string
       ): Matrix | any[] {
-        return _diag(x, (k as any).toNumber(), x.size(), format)
-      }
-    })
+        return _diag(x, (k as any).toNumber(), x.size(), format);
+      },
+    });
 
     /**
      * Create diagonal matrix from a vector or vice versa
@@ -180,22 +154,20 @@ export const createDiag = /* #__PURE__ */ factory(
       format: string | null
     ): any[] | any[][] | Matrix {
       if (!isInteger(k)) {
-        throw new TypeError(
-          'Second parameter in function diag must be an integer'
-        )
+        throw new TypeError('Second parameter in function diag must be an integer');
       }
 
-      const kSuper = k > 0 ? k : 0
-      const kSub = k < 0 ? -k : 0
+      const kSuper = k > 0 ? k : 0;
+      const kSub = k < 0 ? -k : 0;
 
       // check dimensions
       switch (size.length) {
         case 1:
-          return _createDiagonalMatrix(x, k, format, size[0], kSub, kSuper)
+          return _createDiagonalMatrix(x, k, format, size[0], kSub, kSuper);
         case 2:
-          return _getDiagonal(x, k, format, size, kSub, kSuper)
+          return _getDiagonal(x, k, format, size, kSub, kSuper);
       }
-      throw new RangeError('Matrix for function diag must be 2 dimensional')
+      throw new RangeError('Matrix for function diag must be 2 dimensional');
     }
 
     function _createDiagonalMatrix(
@@ -207,19 +179,17 @@ export const createDiag = /* #__PURE__ */ factory(
       kSuper: number
     ): any[][] | Matrix {
       // matrix size
-      const ms = [l + kSub, l + kSuper]
+      const ms = [l + kSub, l + kSuper];
 
       if (format && format !== 'sparse' && format !== 'dense') {
-        throw new TypeError(`Unknown matrix type ${format}"`)
+        throw new TypeError(`Unknown matrix type ${format}"`);
       }
 
       // create diagonal matrix
       const m =
-        format === 'sparse'
-          ? SparseMatrix.diagonal(ms, x, k)
-          : DenseMatrix.diagonal(ms, x, k)
+        format === 'sparse' ? SparseMatrix.diagonal(ms, x, k) : DenseMatrix.diagonal(ms, x, k);
       // check we need to return a matrix
-      return format !== null ? m : (m.valueOf() as any[][])
+      return format !== null ? m : (m.valueOf() as any[][]);
     }
 
     function _getDiagonal(
@@ -233,27 +203,27 @@ export const createDiag = /* #__PURE__ */ factory(
       // check x is a Matrix
       if (isMatrix(x)) {
         // get diagonal matrix
-        const dm = (x as Matrix).diagonal(k)
+        const dm = (x as Matrix).diagonal(k);
         // check we need to return a matrix
         if (format !== null) {
           // check we need to change matrix format
           if (format !== dm.storage()) {
-            return matrix(dm.valueOf(), format as 'dense' | 'sparse')
+            return matrix(dm.valueOf(), format as 'dense' | 'sparse');
           }
-          return dm
+          return dm;
         }
-        return dm.valueOf() as any[]
+        return dm.valueOf() as any[];
       }
       // vector size
-      const n = Math.min(s[0] - kSub, s[1] - kSuper)
+      const n = Math.min(s[0] - kSub, s[1] - kSuper);
       // diagonal values
-      const vector: any[] = []
+      const vector: any[] = [];
       // loop diagonal
       for (let i = 0; i < n; i++) {
-        vector[i] = (x as any[][])[i + kSub][i + kSuper]
+        vector[i] = (x as any[][])[i + kSub][i + kSuper];
       }
       // check we need to return a matrix
-      return format !== null ? matrix(vector) : vector
+      return format !== null ? matrix(vector) : vector;
     }
   }
-)
+);

@@ -1,8 +1,8 @@
-import { typeOf } from '../../utils/is.js'
+import { typeOf } from '../../utils/is.js';
 
 // Error with additional data property
 interface TypedError extends Error {
-  data?: { actual: string }
+  data?: { actual: string };
 }
 
 /**
@@ -15,38 +15,32 @@ interface TypedError extends Error {
  * @param {*} [value]
  * @return {Error}
  */
-export function improveErrorMessage(
-  err: TypedError,
-  fnName: string,
-  value?: unknown
-): Error {
+export function improveErrorMessage(err: TypedError, fnName: string, value?: unknown): Error {
   // TODO: add information with the index (also needs transform in expression parser)
-  let details
+  let details;
 
   if (String(err).includes('Unexpected type')) {
     details =
       value !== undefined
         ? ' (type: ' + typeOf(value) + ', value: ' + JSON.stringify(value) + ')'
-        : ' (type: ' + (err.data?.actual ?? 'unknown') + ')'
+        : ' (type: ' + (err.data?.actual ?? 'unknown') + ')';
 
-    return new TypeError(
-      'Cannot calculate ' + fnName + ', unexpected type of argument' + details
-    )
+    return new TypeError('Cannot calculate ' + fnName + ', unexpected type of argument' + details);
   }
 
   if (String(err).includes('complex numbers')) {
     details =
       value !== undefined
         ? ' (type: ' + typeOf(value) + ', value: ' + JSON.stringify(value) + ')'
-        : ''
+        : '';
 
     return new TypeError(
       'Cannot calculate ' +
         fnName +
         ', no ordering relation is defined for complex numbers' +
         details
-    )
+    );
   }
 
-  return err
+  return err;
 }

@@ -1,14 +1,14 @@
-import { clone } from '../utils/object.js'
-import { squeeze as arraySqueeze } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { clone } from '../utils/object.js';
+import { squeeze as arraySqueeze } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface SqueezeDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'squeeze'
-const dependencies = ['typed']
+const name = 'squeeze';
+const dependencies = ['typed'];
 
 export const createSqueeze = /* #__PURE__ */ factory(
   name,
@@ -45,19 +45,19 @@ export const createSqueeze = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Array: function (x: any[]): any {
-        return arraySqueeze(clone(x))
+        return arraySqueeze(clone(x));
       },
 
       Matrix: function (x: any): any {
-        const res = arraySqueeze(x.toArray())
+        const res = arraySqueeze(x.toArray());
         // FIXME: return the same type of matrix as the input
-        return Array.isArray(res) ? x.create(res, x.datatype()) : res
+        return Array.isArray(res) ? x.create(res, x.datatype()) : res;
       },
 
       any: function (x: any): any {
         // scalar
-        return clone(x)
-      }
-    })
+        return clone(x);
+      },
+    });
   }
-)
+);

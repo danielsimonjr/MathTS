@@ -47,7 +47,7 @@ declare module 'workerpool' {
     activeTasks: number;
   }
 
-  export interface WorkerpoolPromise<T, E = unknown> extends Promise<T> {
+  export interface WorkerpoolPromise<T, _E = unknown> extends Promise<T> {
     readonly resolved: boolean;
     readonly rejected: boolean;
     readonly pending: boolean;

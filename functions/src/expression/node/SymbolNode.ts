@@ -1,35 +1,31 @@
-import { escape } from '../../utils/string.js'
-import { getSafeProperty } from '../../utils/customs.js'
-import { factory } from '../../utils/factory.js'
-import { toSymbol } from '../../utils/latex.js'
+import { escape } from '../../utils/string.js';
+import { getSafeProperty } from '../../utils/customs.js';
+import { factory } from '../../utils/factory.js';
+import { toSymbol } from '../../utils/latex.js';
 
 // Type definitions
 interface Node {
-  clone: () => Node
+  clone: () => Node;
 }
 
-type CompileFunction = (
-  scope: any,
-  args: Record<string, any>,
-  context: any
-) => any
+type CompileFunction = (scope: any, args: Record<string, any>, context: any) => any;
 
 interface StringOptions {
-  [key: string]: any
+  [key: string]: any;
 }
 
 interface UnitConstructor {
-  isValuelessUnit: (name: string) => boolean
+  isValuelessUnit: (name: string) => boolean;
 }
 
 interface Dependencies {
-  math: Record<string, any>
-  Unit?: UnitConstructor
-  Node: new (...args: any[]) => Node
+  math: Record<string, any>;
+  Unit?: UnitConstructor;
+  Node: new (...args: any[]) => Node;
 }
 
-const name = 'SymbolNode'
-const dependencies = ['math', '?Unit', 'Node']
+const name = 'SymbolNode';
+const dependencies = ['math', '?Unit', 'Node'];
 
 export const createSymbolNode = /* #__PURE__ */ factory(
   name,
@@ -41,11 +37,11 @@ export const createSymbolNode = /* #__PURE__ */ factory(
      * @return {boolean}
      */
     function isValuelessUnit(name: string): boolean {
-      return Unit ? Unit.isValuelessUnit(name) : false
+      return Unit ? Unit.isValuelessUnit(name) : false;
     }
 
     class SymbolNode extends Node {
-      name: string
+      name: string;
 
       /**
        * @constructor SymbolNode
@@ -55,20 +51,20 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @extends {Node}
        */
       constructor(name: string) {
-        super()
+        super();
         // validate input
         if (typeof name !== 'string') {
-          throw new TypeError('String expected for parameter "name"')
+          throw new TypeError('String expected for parameter "name"');
         }
 
-        this.name = name
+        this.name = name;
       }
 
       get type(): string {
-        return 'SymbolNode'
+        return 'SymbolNode';
       }
       get isSymbolNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -84,47 +80,30 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @return {function} Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      _compile(
-        math: Record<string, any>,
-        argNames: Record<string, boolean>
-      ): CompileFunction {
-        const name = this.name
+      _compile(math: Record<string, any>, argNames: Record<string, boolean>): CompileFunction {
+        const name = this.name;
 
         if (argNames[name] === true) {
           // this is a FunctionAssignment argument
           // (like an x when inside the expression of a function
           // assignment `f(x) = ...`)
-          return function (
-            scope: any,
-            args: Record<string, any>,
-            _context: any
-          ): any {
-            return getSafeProperty(args, name)
-          }
+          return function (scope: any, args: Record<string, any>, _context: any): any {
+            return getSafeProperty(args, name);
+          };
         } else if (name in math) {
-          return function (
-            scope: any,
-            _args: Record<string, any>,
-            _context: any
-          ): any {
-            return scope.has(name)
-              ? scope.get(name)
-              : getSafeProperty(math, name)
-          }
+          return function (scope: any, _args: Record<string, any>, _context: any): any {
+            return scope.has(name) ? scope.get(name) : getSafeProperty(math, name);
+          };
         } else {
-          const isUnit = isValuelessUnit(name)
+          const isUnit = isValuelessUnit(name);
 
-          return function (
-            scope: any,
-            _args: Record<string, any>,
-            _context: any
-          ): any {
+          return function (scope: any, _args: Record<string, any>, _context: any): any {
             return scope.has(name)
               ? scope.get(name)
               : isUnit
                 ? new (Unit as any)(null, name)
-                : SymbolNode.onUndefinedSymbol(name)
-          }
+                : SymbolNode.onUndefinedSymbol(name);
+          };
         }
       }
 
@@ -132,9 +111,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        _callback: (child: Node, path: string, parent: SymbolNode) => void
-      ): void {
+      forEach(_callback: (child: Node, path: string, parent: SymbolNode) => void): void {
         // nothing to do, we don't have any children
       }
 
@@ -144,10 +121,8 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node) : Node} callback
        * @returns {SymbolNode} Returns a clone of the node
        */
-      map(
-        _callback: (child: Node, path: string, parent: SymbolNode) => Node
-      ): SymbolNode {
-        return this.clone()
+      map(_callback: (child: Node, path: string, parent: SymbolNode) => Node): SymbolNode {
+        return this.clone();
       }
 
       /**
@@ -155,7 +130,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @param {string} name
        */
       static onUndefinedSymbol(name: string): never {
-        throw new Error('Undefined symbol ' + name)
+        throw new Error('Undefined symbol ' + name);
       }
 
       /**
@@ -164,7 +139,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        */
       // @ts-expect-error: clone returns SymbolNode which is compatible with MathNode
       clone(): SymbolNode {
-        return new SymbolNode(this.name)
+        return new SymbolNode(this.name);
       }
 
       /**
@@ -174,7 +149,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @override
        */
       _toString(_options?: StringOptions): string {
-        return this.name
+        return this.name;
       }
 
       /**
@@ -184,35 +159,23 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @override
        */
       _toHTML(_options?: StringOptions): string {
-        const name = escape(this.name)
+        const name = escape(this.name);
 
         if (name === 'true' || name === 'false') {
-          return '<span class="math-symbol math-boolean">' + name + '</span>'
+          return '<span class="math-symbol math-boolean">' + name + '</span>';
         } else if (name === 'i') {
-          return (
-            '<span class="math-symbol math-imaginary-symbol">' +
-            name +
-            '</span>'
-          )
+          return '<span class="math-symbol math-imaginary-symbol">' + name + '</span>';
         } else if (name === 'Infinity') {
-          return (
-            '<span class="math-symbol math-infinity-symbol">' + name + '</span>'
-          )
+          return '<span class="math-symbol math-infinity-symbol">' + name + '</span>';
         } else if (name === 'NaN') {
-          return '<span class="math-symbol math-nan-symbol">' + name + '</span>'
+          return '<span class="math-symbol math-nan-symbol">' + name + '</span>';
         } else if (name === 'null') {
-          return (
-            '<span class="math-symbol math-null-symbol">' + name + '</span>'
-          )
+          return '<span class="math-symbol math-null-symbol">' + name + '</span>';
         } else if (name === 'undefined') {
-          return (
-            '<span class="math-symbol math-undefined-symbol">' +
-            name +
-            '</span>'
-          )
+          return '<span class="math-symbol math-undefined-symbol">' + name + '</span>';
         }
 
-        return '<span class="math-symbol">' + name + '</span>'
+        return '<span class="math-symbol">' + name + '</span>';
       }
 
       /**
@@ -222,8 +185,8 @@ export const createSymbolNode = /* #__PURE__ */ factory(
       toJSON(): Record<string, any> {
         return {
           mathjs: 'SymbolNode',
-          name: this.name
-        }
+          name: this.name,
+        };
       }
 
       /**
@@ -234,7 +197,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @returns {SymbolNode}
        */
       static fromJSON(json: { name: string }): SymbolNode {
-        return new SymbolNode(json.name)
+        return new SymbolNode(json.name);
       }
 
       /**
@@ -244,25 +207,22 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @override
        */
       _toTex(_options?: StringOptions): string {
-        let isUnit = false
-        if (
-          typeof math[this.name] === 'undefined' &&
-          isValuelessUnit(this.name)
-        ) {
-          isUnit = true
+        let isUnit = false;
+        if (typeof math[this.name] === 'undefined' && isValuelessUnit(this.name)) {
+          isUnit = true;
         }
-        const symbol = toSymbol(this.name, isUnit)
+        const symbol = toSymbol(this.name, isUnit);
         if (symbol[0] === '\\') {
           // no space needed if the symbol starts with '\'
-          return symbol
+          return symbol;
         }
         // the space prevents symbols from breaking stuff like '\cdot'
         // if it's written right before the symbol
-        return ' ' + symbol
+        return ' ' + symbol;
       }
     }
 
-    return SymbolNode
+    return SymbolNode;
   },
   { isClass: true, isNode: true }
-)
+);

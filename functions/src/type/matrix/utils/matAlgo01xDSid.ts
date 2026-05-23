@@ -1,24 +1,24 @@
-import { factory } from '../../../utils/factory.js'
-import { DimensionError } from '../../../error/DimensionError.js'
+import { factory } from '../../../utils/factory.js';
+import { DimensionError } from '../../../error/DimensionError.js';
 import type {
   DataType,
   MatrixValue,
   MatrixArray,
   MatrixCallback,
   TypedFunction,
-  DenseMatrixConstructorData
-} from '../types.js'
+  DenseMatrixConstructorData,
+} from '../types.js';
 
 /**
  * DenseMatrix interface for algorithm operations.
  * Note: This algorithm only operates on 2D matrices, so we use MatrixArray (T[][]).
  */
 interface DenseMatrix {
-  _data: MatrixArray
-  _size: [number, number]
-  _datatype?: DataType
-  getDataType(): string
-  createDenseMatrix(config: DenseMatrixConstructorData): DenseMatrix
+  _data: MatrixArray;
+  _size: [number, number];
+  _datatype?: DataType;
+  getDataType(): string;
+  createDenseMatrix(config: DenseMatrixConstructorData): DenseMatrix;
 }
 
 /**
@@ -26,23 +26,23 @@ interface DenseMatrix {
  * Note: SparseMatrix is always 2D.
  */
 interface SparseMatrix {
-  _values?: MatrixValue[]
-  _index: number[]
-  _ptr: number[]
-  _size: [number, number]
-  _data?: MatrixArray
-  _datatype?: DataType
-  getDataType(): string
+  _values?: MatrixValue[];
+  _index: number[];
+  _ptr: number[];
+  _size: [number, number];
+  _data?: MatrixArray;
+  _datatype?: DataType;
+  getDataType(): string;
 }
 
-const name = 'matAlgo01xDSid'
-const dependencies = ['typed']
+const name = 'matAlgo01xDSid';
+const dependencies = ['typed'];
 
 /**
  * Dependencies for matAlgo01xDSid factory
  */
 interface MatAlgo01xDSidDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
 export const createMatAlgo01xDSid = /* #__PURE__ */ factory(
@@ -75,96 +75,86 @@ export const createMatAlgo01xDSid = /* #__PURE__ */ factory(
       inverse: boolean
     ): DenseMatrix {
       // dense matrix arrays
-      const adata: MatrixArray = denseMatrix._data
-      const asize: number[] = denseMatrix._size
-      const adt: DataType = denseMatrix._datatype || denseMatrix.getDataType()
+      const adata: MatrixArray = denseMatrix._data;
+      const asize: number[] = denseMatrix._size;
+      const adt: DataType = denseMatrix._datatype || denseMatrix.getDataType();
 
       // sparse matrix arrays
-      const bvalues: MatrixValue[] | undefined = sparseMatrix._values
-      const bindex: number[] = sparseMatrix._index
-      const bptr: number[] = sparseMatrix._ptr
-      const bsize: number[] = sparseMatrix._size
+      const bvalues: MatrixValue[] | undefined = sparseMatrix._values;
+      const bindex: number[] = sparseMatrix._index;
+      const bptr: number[] = sparseMatrix._ptr;
+      const bsize: number[] = sparseMatrix._size;
       const bdt: DataType =
         sparseMatrix._datatype || sparseMatrix._data === undefined
           ? sparseMatrix._datatype
-          : sparseMatrix.getDataType()
+          : sparseMatrix.getDataType();
 
       // validate dimensions
       if (asize.length !== bsize.length) {
-        throw new DimensionError(asize.length, bsize.length)
+        throw new DimensionError(asize.length, bsize.length);
       }
 
       // check rows & columns
       if (asize[0] !== bsize[0] || asize[1] !== bsize[1]) {
         throw new RangeError(
-          'Dimension mismatch. Matrix A (' +
-            asize +
-            ') must match Matrix B (' +
-            bsize +
-            ')'
-        )
+          'Dimension mismatch. Matrix A (' + asize + ') must match Matrix B (' + bsize + ')'
+        );
       }
 
       // sparse matrix cannot be a Pattern matrix
       if (!bvalues) {
-        throw new Error(
-          'Cannot perform operation on Dense Matrix and Pattern Sparse Matrix'
-        )
+        throw new Error('Cannot perform operation on Dense Matrix and Pattern Sparse Matrix');
       }
 
       // rows & columns
-      const rows: number = asize[0]
-      const columns: number = asize[1]
+      const rows: number = asize[0];
+      const columns: number = asize[1];
 
       // process data types
       const dt: DataType =
-        typeof adt === 'string' && adt !== 'mixed' && adt === bdt
-          ? adt
-          : undefined
+        typeof adt === 'string' && adt !== 'mixed' && adt === bdt ? adt : undefined;
       // callback function - typed.find returns specialized implementation
       const cf: MatrixCallback = dt
         ? (typed.find(callback, [dt, dt]) as MatrixCallback) || callback
-        : callback
+        : callback;
 
       // vars
-      let i: number, j: number
+      let i: number, j: number;
 
       // result (DenseMatrix)
-      const cdata: MatrixArray = []
+      const cdata: MatrixArray = [];
       // initialize c
       for (i = 0; i < rows; i++) {
-        cdata[i] = []
+        cdata[i] = [];
       }
 
       // workspace
-      const x: MatrixValue[] = []
+      const x: MatrixValue[] = [];
       // marks indicating we have a value in x for a given column
-      const w: number[] = []
+      const w: number[] = [];
 
       // loop columns in b
       for (j = 0; j < columns; j++) {
         // column mark
-        const mark: number = j + 1
+        const mark: number = j + 1;
         // values in column j
         for (let k0 = bptr[j], k1 = bptr[j + 1], k = k0; k < k1; k++) {
           // row
-          i = bindex[k]
+          i = bindex[k];
           // update workspace
-          x[i] = inverse
-            ? cf(bvalues[k], adata[i][j])
-            : cf(adata[i][j], bvalues[k])
+          x[i] = inverse ? cf(bvalues[k], adata[i][j]) : cf(adata[i][j], bvalues[k]);
           // mark i as updated
-          w[i] = mark
+          w[i] = mark;
         }
         // loop rows
         for (i = 0; i < rows; i++) {
           // check row is in workspace
           if (w[i] === mark) {
             // c[i][j] was already calculated
-            cdata[i][j] = x[i]
+            cdata[i][j] = x[i];
           } else {
             // item does not exist in S
-            cdata[i][j] = adata[i][j]
+            cdata[i][j] = adata[i][j];
           }
         }
       }
@@ -173,11 +163,8 @@ export const createMatAlgo01xDSid = /* #__PURE__ */ factory(
       return denseMatrix.createDenseMatrix({
         data: cdata,
         size: [rows, columns],
-        datatype:
-          adt === denseMatrix._datatype && bdt === sparseMatrix._datatype
-            ? dt
-            : undefined
-      })
-    }
+        datatype: adt === denseMatrix._datatype && bdt === sparseMatrix._datatype ? dt : undefined,
+      });
+    };
   }
-)
+);

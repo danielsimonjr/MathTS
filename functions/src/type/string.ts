@@ -1,14 +1,14 @@
-import { factory } from '../utils/factory.js'
-import { deepMap } from '../utils/collection.js'
-import { format } from '../utils/number.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
+import { format } from '../utils/number.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface StringDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'string'
-const dependencies = ['typed']
+const name = 'string';
+const dependencies = ['typed'];
 
 export const createString = /* #__PURE__ */ factory(
   name,
@@ -41,30 +41,28 @@ export const createString = /* #__PURE__ */ factory(
      */
     return typed(name, {
       '': function (): string {
-        return ''
+        return '';
       },
 
       number: format,
 
       null: function (_x: null): string {
-        return 'null'
+        return 'null';
       },
 
       boolean: function (x: boolean): string {
-        return x + ''
+        return x + '';
       },
 
       string: function (x: string): string {
-        return x
+        return x;
       },
 
-      'Array | Matrix': typed.referToSelf(
-        (self: (x: any) => any) => (x: any) => deepMap(x, self)
-      ),
+      'Array | Matrix': typed.referToSelf((self: (x: any) => any) => (x: any) => deepMap(x, self)),
 
       any: function (x: any): string {
-        return String(x)
-      }
-    })
+        return String(x);
+      },
+    });
   }
-)
+);

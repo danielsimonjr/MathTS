@@ -6,6 +6,7 @@
 physical-constants function gap.
 
 > **v2 changelog** (adversarial review findings folded in):
+>
 > - W1 scoped to **number-mode only** — the synced factories' BigNumber path
 >   needs decimal.js semantics that core's `BigNumber` does not provide, and
 >   `Unit` rejects core-BigNumber values. Default config uses `number` mode, so
@@ -14,11 +15,11 @@ physical-constants function gap.
 >   activates **after tier 4**, not tier 1. `reshape`'s inline stub is correct
 >   for numeric dimensions and is left alone.
 > - W6 **redesigned** — native `DenseMatrix.multiply/transpose` are plain JS and
->   do *not* use `BackendManager`. Route through `BackendManager` directly
+>   do _not_ use `BackendManager`. Route through `BackendManager` directly
 >   (its `multiply`/`transpose` are sync) after pre-initialising it.
 > - W8 **re-scoped** — auto-dispatching `Float64Array` to the async pool would
 >   turn a sync return into a `Promise` (breaking). No return-type changes;
->   W8 becomes an audit + doc of the *existing* additive overloads.
+>   W8 becomes an audit + doc of the _existing_ additive overloads.
 > - Added **W0 — export-surface collision audit** as a prerequisite for W5/W9.
 > - W7 must declare a new `tensor → matrix` workspace dependency.
 > - W3 must rewrite two `executor.test.ts` cases that use JS-only syntax.
@@ -39,7 +40,7 @@ physical-constants function gap.
 
 ---
 
-## W0 — Export-surface collision audit  *(prerequisite, S)*
+## W0 — Export-surface collision audit _(prerequisite, S)_
 
 `functions/src/index.ts` does `export *` over both `typed/` and `factories/`.
 A name exported by both barrels becomes an ambiguous star-export that resolves
@@ -54,13 +55,13 @@ to `undefined` with no compile error.
 
 ## Workstreams
 
-### W1 — Activate the 52 physical constants  *(#2, P0, S)*
+### W1 — Activate the 52 physical constants _(#2, P0, S)_
 
 - Factories live in `functions/src/type/unit/physicalConstants.ts`; each takes
   `{ config, Unit, BigNumber }`. Under the **default config** (`number:
-  'number'`) `unitFactory`/`numberFactory` take the `parseFloat` branch and
+'number'`) `unitFactory`/`numberFactory` take the `parseFloat` branch and
   produce a plain `number` (or a `Unit` wrapping a `number`) — no `new
-  BigNumber` call, no `Unit` type-rejection. **BigNumber mode is out of scope.**
+BigNumber` call, no `Unit` type-rejection. **BigNumber mode is out of scope.**
 - **Steps**: in `factories/index.ts`, after tier 12 (where `Unit` exists), add a
   "Tier 19 — physical constants" block: import all 52 `create*`, call each with
   `factoryScope`, `export const`.
@@ -70,7 +71,7 @@ to `undefined` with no compile error.
   units — upstream quirk).
 - **Docs**: add a "Physical Constants" section to `docs/reference/constants.md`.
 
-### W2 — Fix factory stubs (`isInteger`, `det`)  *(#5, P1, S)*
+### W2 — Fix factory stubs (`isInteger`, `det`) _(#5, P1, S)_
 
 - Activate the real `createIsInteger` (`../utils/isInteger.js`, deps
   `['typed','equal']`) **after tier 4** (`factory_equal` is in scope there);
@@ -83,7 +84,7 @@ to `undefined` with no compile error.
 - **Verify**: typecheck; `isInteger(4) === true`, `isInteger(4.5) === false`;
   `det` on a non-trivial 3×3.
 
-### W3 — Workbook cells through the expression engine  *(#1, P0-critical, M)*
+### W3 — Workbook cells through the expression engine _(#1, P0-critical, M)_
 
 - Replace `new Function(...)` in `workbook/src/executor.ts#executeCode()` with
   `evaluate()` from `@danielsimonjr/mathts-functions`. This is the evaluator
@@ -99,14 +100,14 @@ to `undefined` with no compile error.
   expressions; add a `sin(pi/2) → 1` cell test.
 - **Verify**: typecheck workbook; `vitest run` workbook.
 
-### W4 — Implement `executeData()` (YAML/JSON)  *(#8, P2, S)*
+### W4 — Implement `executeData()` (YAML/JSON) _(#8, P2, S)_
 
 - `executeData()` is a TODO stub. Parse `cell.content` with the `yaml` package
   (already a workbook dep) — YAML parses JSON too.
 - **Verify**: data cell with YAML and with JSON; existing data-cell tests
   (`'json-data'`, `'data'`) still pass (YAML scalars round-trip).
 
-### W6 — Accelerated matrix-bridge multiply/transpose  *(#4, P1, M — redesigned)*
+### W6 — Accelerated matrix-bridge multiply/transpose _(#4, P1, M — redesigned)_
 
 - Native `DenseMatrix.multiply/transpose` are plain JS; `BackendManager`'s
   `multiply`/`transpose` are the accelerated, **synchronous** entry points.
@@ -120,7 +121,7 @@ to `undefined` with no compile error.
   instance methods are additive and opt-in.
 - **Verify**: numeric parity adapter-vs-native on a 64×64 product; typecheck.
 
-### W7 — Tensor ↔ DenseMatrix converters  *(#6, P2, L)*
+### W7 — Tensor ↔ DenseMatrix converters _(#6, P2, L)_
 
 - Add `Tensor.fromDenseMatrix(m)` and `Tensor.prototype.toDenseMatrix()`
   (rank-2 only; throw for other ranks).
@@ -129,7 +130,7 @@ to `undefined` with no compile error.
   import `tensor` → no cycle.
 - **Verify**: round-trip a 3×3 matrix; typecheck tensor.
 
-### W8 — Audit & document parallel auto-dispatch  *(#7, P2, S — re-scoped)*
+### W8 — Audit & document parallel auto-dispatch _(#7, P2, S — re-scoped)_
 
 - The active `add`/`multiply`/`sin`/`mean` etc. in `typed/arithmetic.ts`
   **already** auto-dispatch `Float64Array` to the pool (returning a `Promise`).
@@ -137,11 +138,11 @@ to `undefined` with no compile error.
 - W8 = **verify** the existing dispatch works and **document** it accurately in
   `functions.md` (already done in the Parallel Return Type section). No code
   change to return types. If a genuinely missing `Float64Array` overload is
-  found, add it as a *separate* `Promise`-returning path.
+  found, add it as a _separate_ `Promise`-returning path.
 - **Verify**: confirm `mean(Float64Array)` resolves to the same value as
   `parallelStatMean`.
 
-### W9 — Type-conversion exports, `parser()`, reviver/replacer  *(#9, P3, M)*
+### W9 — Type-conversion exports, `parser()`, reviver/replacer _(#9, P3, M)_
 
 - Export `complex`, `fraction`, `bignumber`, `matrix`, `number`, `string`,
   `boolean`, `bigint` as named functions (collision-free per W0 — none are
@@ -153,7 +154,7 @@ to `undefined` with no compile error.
 - **Verify**: typecheck; `parser()` retains variables; `reviver(replacer(c))`
   round-trips a `Complex`.
 
-### W10 — JS FFT fallback in `MatrixWasmBridge`  *(#10, P3, S)*
+### W10 — JS FFT fallback in `MatrixWasmBridge` _(#10, P3, S)_
 
 - `MatrixWasmBridge.ts:~350` throws "not implemented". Implement a synchronous
   **radix-2** FFT (power-of-2 lengths only; throw a clear error otherwise),
@@ -161,7 +162,7 @@ to `undefined` with no compile error.
   pairs) and the existing inverse-scaling convention.
 - **Verify**: FFT of a known signal matches the WASM path within tolerance.
 
-### W11 — Keep `functions.md` from drifting  *(#11, P3, S)*
+### W11 — Keep `functions.md` from drifting _(#11, P3, S)_
 
 - Add `functions/tests/docs-sync.test.ts`: extract `` `name(` `` tokens from
   `docs/reference/functions.md` and assert each resolves to a real package
@@ -169,7 +170,7 @@ to `undefined` with no compile error.
   (`indexFn`/`index`, `factory_*`). Hard-fail on unknown names.
 - **Verify**: the test passes against the current (Revision 2) doc.
 
-### W5 — Make the `compat` package real  *(#3, P1, M — runs last)*
+### W5 — Make the `compat` package real _(#3, P1, M — runs last)_
 
 - `compat/src/index.ts`: set `all` to the full `@danielsimonjr/mathts-functions`
   namespace. `create(all, config)` returns `{ ...all, ...shims, config }` —
@@ -211,9 +212,9 @@ W5  → compat: rebuild (LAST — sees W1/W6/W9 additions)
 
 - BigNumber-mode physical constants (needs a decimal.js-compatible BigNumber or
   an `isBigNumber` marker on core's class).
-- Routing *every* matrix factory onto native types — W6 covers the
+- Routing _every_ matrix factory onto native types — W6 covers the
   `multiply`/`transpose` instance path only.
-- Reverse-mode autodiff *through* arbitrary `functions` calls — W7 ships
+- Reverse-mode autodiff _through_ arbitrary `functions` calls — W7 ships
   converters only.
 - Changesets / version bumps / publish.
 
@@ -223,20 +224,20 @@ W5  → compat: rebuild (LAST — sees W1/W6/W9 additions)
 
 All 11 workstreams implemented, each in its own commit, verified by tests.
 
-| WS | Status | Notes |
-|----|--------|-------|
-| W0 | Done | Audit clean — **zero** collisions between the typed and factory barrels. |
-| W1 | Done | 52 physical constants activated as "tier 19" of `factories/index.ts`; `functions/tests/physical-constants.test.ts`. |
-| W2 | Done (adjusted) | Real `createIsInteger` activated after tier 4. **Deviation**: the `det` relocation was reverted — `inv` (tier 4) depends on `det`, so `det` stays at tier 3; its internal `multiply` use is scalar-only, so the `multiplyScalar` binding is correct, not a bug. |
-| W3 | Done | Workbook `executeCode()` now calls `evaluate()`; raw `new Function` removed; ambient `workbook/src/functions.d.ts` added; two JS-syntax tests rewritten as math expressions. |
-| W4 | Done | `executeData()` parses cell content as YAML/JSON. |
-| W5 | Done | `compat` `all` = full functions namespace; `create()` honours it; `MathInstance` keeps precise members + index signature. |
-| W6 | Done | `MathJSDenseMatrix.multiply/transpose()` route through `BackendManager`; manager pre-initialised at module load. |
-| W7 | Done | `Tensor.fromDenseMatrix` / `toDenseMatrix`; `tensor → matrix` dependency declared. |
-| W8 | Done (verify-only) | Confirmed `sum`/`mean` already auto-dispatch `Float64Array` to the pool; no return-type change (that would be breaking). Test added. |
-| W9 | Done (adjusted) | Conversion exports, `parser()`, `reviver`/`replacer`. **Deviation**: `parser()` does not support assignment expressions inside `evaluate` — the expression security validator rejects `AssignmentNode`; retained state is managed via `set`/`get`. |
-| W10 | Done | Radix-2 Cooley-Tukey JS FFT fallback in `MatrixWasmBridge`. |
-| W11 | Done | `functions/tests/docs-sync.test.ts` guards `functions.md` against export drift. |
+| WS  | Status             | Notes                                                                                                                                                                                                                                                           |
+| --- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W0  | Done               | Audit clean — **zero** collisions between the typed and factory barrels.                                                                                                                                                                                        |
+| W1  | Done               | 52 physical constants activated as "tier 19" of `factories/index.ts`; `functions/tests/physical-constants.test.ts`.                                                                                                                                             |
+| W2  | Done (adjusted)    | Real `createIsInteger` activated after tier 4. **Deviation**: the `det` relocation was reverted — `inv` (tier 4) depends on `det`, so `det` stays at tier 3; its internal `multiply` use is scalar-only, so the `multiplyScalar` binding is correct, not a bug. |
+| W3  | Done               | Workbook `executeCode()` now calls `evaluate()`; raw `new Function` removed; ambient `workbook/src/functions.d.ts` added; two JS-syntax tests rewritten as math expressions.                                                                                    |
+| W4  | Done               | `executeData()` parses cell content as YAML/JSON.                                                                                                                                                                                                               |
+| W5  | Done               | `compat` `all` = full functions namespace; `create()` honours it; `MathInstance` keeps precise members + index signature.                                                                                                                                       |
+| W6  | Done               | `MathJSDenseMatrix.multiply/transpose()` route through `BackendManager`; manager pre-initialised at module load.                                                                                                                                                |
+| W7  | Done               | `Tensor.fromDenseMatrix` / `toDenseMatrix`; `tensor → matrix` dependency declared.                                                                                                                                                                              |
+| W8  | Done (verify-only) | Confirmed `sum`/`mean` already auto-dispatch `Float64Array` to the pool; no return-type change (that would be breaking). Test added.                                                                                                                            |
+| W9  | Done (adjusted)    | Conversion exports, `parser()`, `reviver`/`replacer`. **Deviation**: `parser()` does not support assignment expressions inside `evaluate` — the expression security validator rejects `AssignmentNode`; retained state is managed via `set`/`get`.              |
+| W10 | Done               | Radix-2 Cooley-Tukey JS FFT fallback in `MatrixWasmBridge`.                                                                                                                                                                                                     |
+| W11 | Done               | `functions/tests/docs-sync.test.ts` guards `functions.md` against export drift.                                                                                                                                                                                 |
 
 **Verification**: `functions` 1469 tests / 41 files green; `matrix` + `tensor` +
 `workbook` + `compat` 612 passing / 7 skipped / 27 files green. No regressions.

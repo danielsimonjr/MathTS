@@ -1,5 +1,5 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for useMatrixForArrayScalar
 interface BigNumberType {
@@ -7,16 +7,16 @@ interface BigNumberType {
 }
 
 interface Matrix {
-  valueOf(): unknown[][]
+  valueOf(): unknown[][];
 }
 
 interface MatrixConstructor {
-  (data: unknown[]): Matrix
+  (data: unknown[]): Matrix;
 }
 
 interface UseMatrixDependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
 }
 
 export const createUseMatrixForArrayScalar = /* #__PURE__ */ factory(
@@ -49,6 +49,6 @@ export const createUseMatrixForArrayScalar = /* #__PURE__ */ factory(
       (selfBD: TypedFunction) =>
         (x: BigNumberType, y: unknown[]): unknown[] =>
           (selfBD(x, matrix(y)) as any).valueOf() as unknown[]
-    )
+    ),
   })
-)
+);

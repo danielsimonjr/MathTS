@@ -1,20 +1,15 @@
-import { factory } from '../../utils/factory.js'
-import { errorTransform } from './utils/errorTransform.js'
-import { createSum } from '../../statistics/sum.js'
-import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js'
-import type {
-  TypedFunction,
-  MathFunction,
-  MathJsConfig,
-  VariadicArgs
-} from './types.js'
+import { factory } from '../../utils/factory.js';
+import { errorTransform } from './utils/errorTransform.js';
+import { createSum } from '../../statistics/sum.js';
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
+import type { TypedFunction, MathFunction, MathJsConfig, VariadicArgs } from './types.js';
 
 interface SumDependencies {
-  typed: TypedFunction
-  config: MathJsConfig
-  add: MathFunction
-  numeric: MathFunction
-  parseNumberWithConfig: (value: string) => unknown
+  typed: TypedFunction;
+  config: MathJsConfig;
+  add: MathFunction;
+  numeric: MathFunction;
+  parseNumberWithConfig: (value: string) => unknown;
 }
 
 /**
@@ -24,26 +19,26 @@ interface SumDependencies {
  * This transform changed the last `dim` parameter of function sum
  * from one-based to zero based
  */
-const name = 'sum'
-const dependencies = ['typed', 'config', 'add', 'numeric', 'parseNumberWithConfig']
+const name = 'sum';
+const dependencies = ['typed', 'config', 'add', 'numeric', 'parseNumberWithConfig'];
 
 export const createSumTransform = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, add, numeric, parseNumberWithConfig }: SumDependencies) => {
-    const sum = createSum({ typed, config, add, numeric, parseNumberWithConfig })
+    const sum = createSum({ typed, config, add, numeric, parseNumberWithConfig });
 
     return typed(name, {
       '...any': function (args: VariadicArgs): unknown {
-        args = lastDimToZeroBase(args)
+        args = lastDimToZeroBase(args);
 
         try {
-          return sum.apply(null, args)
+          return sum.apply(null, args);
         } catch (err) {
-          throw errorTransform(err as Error)
+          throw errorTransform(err as Error);
         }
-      }
-    })
+      },
+    });
   },
   { isTransformFunction: true }
-)
+);

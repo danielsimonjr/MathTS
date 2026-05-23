@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 
-import { mathTyped, Complex } from '@danielsimonjr/mathts-core';
+import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { wasmLoader } from '../wasm/WasmLoader.js';
 
@@ -35,55 +35,8 @@ type f64 = number;
 type i32 = number;
 
 // =============================================================================
-// Complex Number Interface
-// =============================================================================
-
-interface ComplexNumber {
-  re: f64;
-  im: f64;
-}
-
-// =============================================================================
 // Utility Functions (AssemblyScript-Friendly)
 // =============================================================================
-
-/**
- * Create complex number
- */
-function complexNum(re: f64, im: f64 = 0): ComplexNumber {
-  return { re, im };
-}
-
-/**
- * Complex multiplication
- */
-function complexMul(a: ComplexNumber, b: ComplexNumber): ComplexNumber {
-  return {
-    re: a.re * b.re - a.im * b.im,
-    im: a.re * b.im + a.im * b.re,
-  };
-}
-
-/**
- * Complex addition
- */
-function complexAdd(a: ComplexNumber, b: ComplexNumber): ComplexNumber {
-  return { re: a.re + b.re, im: a.im + b.im };
-}
-
-/**
- * Complex subtraction
- */
-function complexSub(a: ComplexNumber, b: ComplexNumber): ComplexNumber {
-  return { re: a.re - b.re, im: a.im - b.im };
-}
-
-/**
- * Complex magnitude
- */
-function complexAbs(a: ComplexNumber): f64 {
-  return Math.sqrt(a.re * a.re + a.im * a.im);
-}
 
 /**
  * Check if power of 2
@@ -226,7 +179,7 @@ function fftCoreFloat64(
 async function fourStepFFT(
   real: Float64Array,
   imag: Float64Array,
-  inverse: boolean,
+  inverse: boolean
 ): Promise<{ real: Float64Array; imag: Float64Array }> {
   const N: i32 = real.length;
 
@@ -313,7 +266,7 @@ async function fourStepFFT(
  */
 export const parallelFFT = mathTyped('parallelFFT', {
   // FFT of number array
-  'Array': (signal: number[]) => {
+  Array: (signal: number[]) => {
     const n: i32 = signal.length;
     if (n === 0) return { real: new Float64Array(0), imag: new Float64Array(0), originalLength: 0 };
 
@@ -330,7 +283,7 @@ export const parallelFFT = mathTyped('parallelFFT', {
   },
 
   // FFT of Float64Array (parallel-ready)
-  'Float64Array': async (signal: Float64Array) => {
+  Float64Array: async (signal: Float64Array) => {
     const n: i32 = signal.length;
     if (n === 0) return { real: new Float64Array(0), imag: new Float64Array(0), originalLength: 0 };
 
@@ -365,7 +318,7 @@ export const parallelIFFT = mathTyped('parallelIFFT', {
   },
 
   // IFFT from object with real/imag
-  'Object': async (spectrum: { real: Float64Array; imag: Float64Array }) => {
+  Object: async (spectrum: { real: Float64Array; imag: Float64Array }) => {
     return computePool.shouldParallelize(spectrum.real.length)
       ? fourStepFFT(spectrum.real, spectrum.imag, true)
       : fftCoreFloat64(spectrum.real, spectrum.imag, true);
@@ -376,7 +329,10 @@ export const parallelIFFT = mathTyped('parallelIFFT', {
  * FFT magnitude spectrum
  */
 export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
-  'Float64Array, Float64Array': async (real: Float64Array, imag: Float64Array): Promise<Float64Array> => {
+  'Float64Array, Float64Array': async (
+    real: Float64Array,
+    imag: Float64Array
+  ): Promise<Float64Array> => {
     if (computePool.shouldParallelize(real.length)) {
       const r = await computePool.applyKernel2(
         real,
@@ -393,7 +349,7 @@ export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
     return result;
   },
 
-  'Object': async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
+  Object: async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
     return parallelFFTMagnitude(spectrum.real, spectrum.imag) as Promise<Float64Array>;
   },
 });
@@ -402,13 +358,12 @@ export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
  * FFT power spectrum (|X|^2)
  */
 export const parallelFFTPower = mathTyped('parallelFFTPower', {
-  'Float64Array, Float64Array': async (real: Float64Array, imag: Float64Array): Promise<Float64Array> => {
+  'Float64Array, Float64Array': async (
+    real: Float64Array,
+    imag: Float64Array
+  ): Promise<Float64Array> => {
     if (computePool.shouldParallelize(real.length)) {
-      const r = await computePool.applyKernel2(
-        real,
-        imag,
-        '(re, im) => re * re + im * im'
-      );
+      const r = await computePool.applyKernel2(real, imag, '(re, im) => re * re + im * im');
       return r.result;
     }
 
@@ -419,7 +374,7 @@ export const parallelFFTPower = mathTyped('parallelFFTPower', {
     return result;
   },
 
-  'Object': async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
+  Object: async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
     return parallelFFTPower(spectrum.real, spectrum.imag) as Promise<Float64Array>;
   },
 });
@@ -435,10 +390,7 @@ export const parallelFFTPower = mathTyped('parallelFFTPower', {
  */
 export const parallelConv = mathTyped('parallelConv', {
   // Convolution of two Float64Arrays
-  'Float64Array, Float64Array': async (
-    x: Float64Array,
-    h: Float64Array
-  ): Promise<Float64Array> => {
+  'Float64Array, Float64Array': async (x: Float64Array, h: Float64Array): Promise<Float64Array> => {
     const n: i32 = x.length;
     const m: i32 = h.length;
 
@@ -509,10 +461,7 @@ export const parallelConv = mathTyped('parallelConv', {
  * Parallel cross-correlation
  */
 export const parallelXCorr = mathTyped('parallelXCorr', {
-  'Float64Array, Float64Array': async (
-    x: Float64Array,
-    h: Float64Array
-  ): Promise<Float64Array> => {
+  'Float64Array, Float64Array': async (x: Float64Array, h: Float64Array): Promise<Float64Array> => {
     // Cross-correlation is convolution with reversed kernel
     const hReversed = new Float64Array(h.length);
     for (let i: i32 = 0; i < h.length; i++) {
@@ -530,11 +479,11 @@ export const parallelXCorr = mathTyped('parallelXCorr', {
  * Parallel auto-correlation
  */
 export const parallelAutoCorr = mathTyped('parallelAutoCorr', {
-  'Float64Array': async (x: Float64Array): Promise<Float64Array> => {
+  Float64Array: async (x: Float64Array): Promise<Float64Array> => {
     return parallelXCorr(x, x) as Promise<Float64Array>;
   },
 
-  'Array': async (x: number[]): Promise<Float64Array> => {
+  Array: async (x: number[]): Promise<Float64Array> => {
     return parallelAutoCorr(new Float64Array(x)) as Promise<Float64Array>;
   },
 });
@@ -871,10 +820,7 @@ export function idst(X: number[]): number[] {
  * @param wavelet - Wavelet name (currently only 'haar')
  * @returns { approx: number[], detail: number[] }
  */
-export function dwt(
-  x: number[],
-  wavelet: string = 'haar',
-): { approx: number[]; detail: number[] } {
+export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; detail: number[] } {
   const n: i32 = x.length;
   if (n < 2) throw new Error('dwt: signal must have at least 2 samples');
 
@@ -934,9 +880,7 @@ export function dwt(
  * @param x - 2D input (rows x cols), each value is real
  * @returns { real: number[][], imag: number[][] }
  */
-export async function fft2d(
-  x: number[][],
-): Promise<{ real: number[][]; imag: number[][] }> {
+export async function fft2d(x: number[][]): Promise<{ real: number[][]; imag: number[][] }> {
   const rows: i32 = x.length;
   const cols: i32 = x[0].length;
   const paddedCols: i32 = nextPowerOf2(cols);
@@ -959,13 +903,7 @@ export async function fft2d(
   let rowFFTReal: Float64Array;
   let rowFFTImag: Float64Array;
   if (computePool.shouldParallelize(paddedRows * paddedCols)) {
-    const batch = await computePool.fftBatch(
-      rowReal,
-      rowImag,
-      paddedRows,
-      paddedCols,
-      false,
-    );
+    const batch = await computePool.fftBatch(rowReal, rowImag, paddedRows, paddedCols, false);
     rowFFTReal = batch.result.real;
     rowFFTImag = batch.result.imag;
   } else {
@@ -976,7 +914,7 @@ export async function fft2d(
       const slice = fftCoreFloat64(
         rowReal.subarray(base, base + paddedCols),
         rowImag.subarray(base, base + paddedCols),
-        false,
+        false
       );
       rowFFTReal.set(slice.real, base);
       rowFFTImag.set(slice.imag, base);
@@ -999,13 +937,7 @@ export async function fft2d(
   let colFFTReal: Float64Array;
   let colFFTImag: Float64Array;
   if (computePool.shouldParallelize(paddedCols * paddedRows)) {
-    const batch = await computePool.fftBatch(
-      colReal,
-      colImag,
-      paddedCols,
-      paddedRows,
-      false,
-    );
+    const batch = await computePool.fftBatch(colReal, colImag, paddedCols, paddedRows, false);
     colFFTReal = batch.result.real;
     colFFTImag = batch.result.imag;
   } else {
@@ -1016,7 +948,7 @@ export async function fft2d(
       const slice = fftCoreFloat64(
         colReal.subarray(base, base + paddedRows),
         colImag.subarray(base, base + paddedRows),
-        false,
+        false
       );
       colFFTReal.set(slice.real, base);
       colFFTImag.set(slice.imag, base);
@@ -1050,11 +982,7 @@ export async function fft2d(
  * @param omega - Frequency to evaluate at
  * @returns { re: number, im: number }
  */
-export function fourier(
-  f: (t: f64) => f64,
-  t: number[],
-  omega: f64,
-): { re: f64; im: f64 } {
+export function fourier(f: (t: f64) => f64, t: number[], omega: f64): { re: f64; im: f64 } {
   let re: f64 = 0;
   let im: f64 = 0;
   for (let i: i32 = 1; i < t.length; i++) {
@@ -1076,11 +1004,7 @@ export function fourier(
  * @param t - Time point to evaluate at
  * @returns Reconstructed value at t
  */
-export function invFourier(
-  F: (omega: f64) => { re: f64; im: f64 },
-  omega: number[],
-  t: f64,
-): f64 {
+export function invFourier(F: (omega: f64) => { re: f64; im: f64 }, omega: number[], t: f64): f64 {
   let result: f64 = 0;
   for (let i: i32 = 1; i < omega.length; i++) {
     const dw: f64 = omega[i] - omega[i - 1];
@@ -1182,7 +1106,7 @@ export function hilbertTransform(x: number[]): number[] {
  */
 export async function spectrogram(
   x: number[],
-  opts?: { windowSize?: i32; hopSize?: i32; window?: string },
+  opts?: { windowSize?: i32; hopSize?: i32; window?: string }
 ): Promise<{ magnitude: number[][]; frequencies: number[]; times: number[] }> {
   const windowSize: i32 = opts?.windowSize ?? 256;
   const hopSize: i32 = opts?.hopSize ?? Math.floor(windowSize / 2);
@@ -1200,7 +1124,13 @@ export async function spectrogram(
           const inAlloc = wasmLoader.allocateFloat64Array(x);
           const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(numFrames * nFreqs);
           try {
-            const frames = wasm.spectrogram_wasm(inAlloc.ptr, outAlloc.ptr, x.length, windowSize, hopSize);
+            const frames = wasm.spectrogram_wasm(
+              inAlloc.ptr,
+              outAlloc.ptr,
+              x.length,
+              windowSize,
+              hopSize
+            );
             const magnitude: number[][] = [];
             const times: number[] = [];
             const frequencies: number[] = Array.from({ length: nFreqs }, (_, i) => i / nfft);
@@ -1303,13 +1233,17 @@ export async function spectrogram(
  */
 export function periodogram(
   x: number[],
-  opts?: { nfft?: i32; window?: string },
+  opts?: { nfft?: i32; window?: string }
 ): { psd: number[]; frequencies: number[] } {
   const nfft: i32 = opts?.nfft ?? nextPowerOf2(x.length);
   const winType = opts?.window ?? 'hann';
 
   // WASM-accelerated path (uses built-in Hann window, nfft = next power of 2)
-  if (x.length >= WASM_THRESHOLD && (winType === 'hann' || winType === 'hanning') && nfft === nextPowerOf2(x.length)) {
+  if (
+    x.length >= WASM_THRESHOLD &&
+    (winType === 'hann' || winType === 'hanning') &&
+    nfft === nextPowerOf2(x.length)
+  ) {
     const wasm = wasmLoader.getModule();
     if (wasm) {
       try {
@@ -1558,7 +1492,8 @@ export function windowFunction(n: i32, type: string): number[] {
       break;
     case 'blackman':
       for (let i: i32 = 0; i < n; i++)
-        w[i] = 0.42 - 0.5 * Math.cos((2 * Math.PI * i) / N1) + 0.08 * Math.cos((4 * Math.PI * i) / N1);
+        w[i] =
+          0.42 - 0.5 * Math.cos((2 * Math.PI * i) / N1) + 0.08 * Math.cos((4 * Math.PI * i) / N1);
       break;
     case 'bartlett':
       for (let i: i32 = 0; i < n; i++) w[i] = 1 - Math.abs((2 * i - N1) / N1);

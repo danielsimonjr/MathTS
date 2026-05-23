@@ -1,14 +1,14 @@
-import { reshape as arrayReshape } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { reshape as arrayReshape } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface ReshapeDependencies {
-  typed: TypedFunction
-  isInteger: (x: unknown) => boolean
+  typed: TypedFunction;
+  isInteger: (x: unknown) => boolean;
 }
 
-const name = 'reshape'
-const dependencies = ['typed', 'isInteger', 'matrix']
+const name = 'reshape';
+const dependencies = ['typed', 'isInteger', 'matrix'];
 
 export const createReshape = /* #__PURE__ */ factory(
   name,
@@ -56,17 +56,17 @@ export const createReshape = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Matrix, Array': function (x: any, sizes: number[]): any {
-        return x.reshape(sizes, true)
+        return x.reshape(sizes, true);
       },
 
       'Array, Array': function (x: any[], sizes: number[]): any[] {
         sizes.forEach(function (size) {
           if (!isInteger(size)) {
-            throw new TypeError('Invalid size for dimension: ' + size)
+            throw new TypeError('Invalid size for dimension: ' + size);
           }
-        })
-        return arrayReshape(x, sizes)
-      }
-    })
+        });
+        return arrayReshape(x, sizes);
+      },
+    });
   }
-)
+);

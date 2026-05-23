@@ -49,7 +49,7 @@ export const createConstantNode = /* #__PURE__ */ factory(name, dependencies, ({
      * @return {function} Returns a function which can be called like:
      *                        evalNode(scope: Object, args: Object, context: *)
      */
-    _compile (math: any, argNames: Record<string, boolean>): (scope: any, args: any, context: any) => any {
+    _compile (_math: any, _argNames: Record<string, boolean>): (scope: any, args: any, context: any) => any {
       const value = this.value
 
       return function evalConstantNode () {
@@ -61,7 +61,7 @@ export const createConstantNode = /* #__PURE__ */ factory(name, dependencies, ({
      * Execute a callback for each of the child nodes of this node
      * @param {function(child: Node, path: string, parent: Node)} callback
      */
-    forEach (callback: (child: MathNode, path: string, parent: MathNode) => void): void {
+    forEach (_callback: (child: MathNode, path: string, parent: MathNode) => void): void {
       // nothing to do, we don't have any children
     }
 
@@ -71,7 +71,7 @@ export const createConstantNode = /* #__PURE__ */ factory(name, dependencies, ({
      * @param {function(child: Node, path: string, parent: Node) : Node} callback
      * @returns {ConstantNode} Returns a clone of the node
      */
-    map (callback: (child: MathNode, path: string, parent: MathNode) => MathNode): ConstantNode {
+    map (_callback: (child: MathNode, path: string, parent: MathNode) => MathNode): ConstantNode {
       return this.clone()
     }
 

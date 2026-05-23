@@ -23,6 +23,7 @@ Please report security vulnerabilities by emailing:
 **security@mathts.dev** (or danielsimonjr@gmail.com)
 
 Include the following information:
+
 - Type of vulnerability
 - Full paths of source file(s) related to the vulnerability
 - Location of the affected source code (tag/branch/commit or direct URL)

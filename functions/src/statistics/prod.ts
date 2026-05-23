@@ -1,12 +1,12 @@
-import { deepForEach } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { improveErrorMessage } from './utils/improveErrorMessage.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { deepForEach } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_PROD_THRESHOLD = 100
+const WASM_PROD_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -14,46 +14,32 @@ const WASM_PROD_THRESHOLD = 100
 function isFlatNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 // Type definitions for prod
 interface MatrixType {
-  forEach(
-    callback: (value: unknown) => void,
-    skipZeros: boolean,
-    recurse: boolean
-  ): void
-  map(
-    callback: (value: unknown) => unknown,
-    skipZeros: boolean,
-    recurse: boolean
-  ): MatrixType
-  size(): number[]
-  valueOf(): unknown[] | unknown[][]
-  create(data: unknown[], datatype?: string): MatrixType
-  datatype(): string | undefined
+  forEach(callback: (value: unknown) => void, skipZeros: boolean, recurse: boolean): void;
+  map(callback: (value: unknown) => unknown, skipZeros: boolean, recurse: boolean): MatrixType;
+  size(): number[];
+  valueOf(): unknown[] | unknown[][];
+  create(data: unknown[], datatype?: string): MatrixType;
+  datatype(): string | undefined;
 }
 
 interface ProdDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  multiplyScalar: TypedFunction
-  numeric: TypedFunction
-  parseNumberWithConfig: (value: string) => unknown
+  typed: TypedFunction;
+  config: ConfigOptions;
+  multiplyScalar: TypedFunction;
+  numeric: TypedFunction;
+  parseNumberWithConfig: (value: string) => unknown;
 }
 
-const name = 'prod'
-const dependencies = [
-  'typed',
-  'config',
-  'multiplyScalar',
-  'numeric',
-  'parseNumberWithConfig'
-]
+const name = 'prod';
+const dependencies = ['typed', 'config', 'multiplyScalar', 'numeric', 'parseNumberWithConfig'];
 
 export const createProd = /* #__PURE__ */ factory(
   name,
@@ -63,7 +49,7 @@ export const createProd = /* #__PURE__ */ factory(
     config: _config,
     multiplyScalar,
     numeric: _numeric,
-    parseNumberWithConfig
+    parseNumberWithConfig,
   }: ProdDependencies) => {
     /**
      * Compute the product of a matrix or a list with values.
@@ -93,7 +79,7 @@ export const createProd = /* #__PURE__ */ factory(
     return typed(name, {
       // prod(string) - single string input
       string: function (x: string): unknown {
-        return parseNumberWithConfig(x)
+        return parseNumberWithConfig(x);
       },
 
       // prod([a, b, c, d, ...])
@@ -105,15 +91,15 @@ export const createProd = /* #__PURE__ */ factory(
         _dim: number | { valueOf(): number }
       ): unknown {
         // TODO: implement prod(A, dim)
-        throw new Error('prod(A, dim) is not yet supported')
+        throw new Error('prod(A, dim) is not yet supported');
         // return reduce(arguments[0], arguments[1], math.prod)
       },
 
       // prod(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
-        return _prod(args)
-      }
-    })
+        return _prod(args);
+      },
+    });
 
     /**
      * Recursively calculate the product of an n-dimensional array
@@ -125,14 +111,14 @@ export const createProd = /* #__PURE__ */ factory(
       // WASM fast path for flat arrays of plain numbers
       if (Array.isArray(array) && array.length >= WASM_PROD_THRESHOLD) {
         if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule()
+          const wasm = wasmLoader.getModule();
           if (wasm) {
             try {
-              const alloc = wasmLoader.allocateFloat64Array(array)
+              const alloc = wasmLoader.allocateFloat64Array(array);
               try {
-                return wasm.statsProd(alloc.ptr, array.length)
+                return wasm.statsProd(alloc.ptr, array.length);
               } finally {
-                wasmLoader.free(alloc.ptr)
+                wasmLoader.free(alloc.ptr);
               }
             } catch {
               // Fall back to JS implementation on WASM error
@@ -142,26 +128,24 @@ export const createProd = /* #__PURE__ */ factory(
       }
 
       // JavaScript fallback for mixed types, BigNumber, Complex, etc.
-      let prod: unknown
+      let prod: unknown;
 
       deepForEach(array as any, function (value: unknown) {
         try {
           // Pre-convert string inputs BEFORE multiplication
-          const converted =
-            typeof value === 'string' ? parseNumberWithConfig(value) : value
+          const converted = typeof value === 'string' ? parseNumberWithConfig(value) : value;
 
-          prod =
-            prod === undefined ? converted : multiplyScalar(prod, converted)
+          prod = prod === undefined ? converted : multiplyScalar(prod, converted);
         } catch (err) {
-          throw improveErrorMessage(err, 'prod', value)
+          throw improveErrorMessage(err, 'prod', value);
         }
-      })
+      });
 
       if (prod === undefined) {
-        throw new Error('Cannot calculate prod of an empty array')
+        throw new Error('Cannot calculate prod of an empty array');
       }
 
-      return prod
+      return prod;
     }
   }
-)
+);

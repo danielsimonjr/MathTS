@@ -199,7 +199,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(name, dependencies, ({
           } else {
             // "regular" evaluation
             switch (evalArgs.length) {
-              case 0: return function evalFunctionNode (scope: any, args: any, context: any) {
+              case 0: return function evalFunctionNode (scope: any, _args: any, _context: any) {
                 const fn = resolveFn(scope)
                 if (fromOptionalChaining && fn === undefined) return undefined
                 return fn()

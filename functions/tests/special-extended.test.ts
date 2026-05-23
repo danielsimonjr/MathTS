@@ -84,7 +84,7 @@ describe('besselI', () => {
 
 describe('besselK', () => {
   it('should compute K0(1)', () => {
-    expectClose(besselK(0, 1) as number, 0.4210, 0.01);
+    expectClose(besselK(0, 1) as number, 0.421, 0.01);
   });
 
   it('should return NaN for x <= 0', () => {

@@ -42,7 +42,7 @@ import { DualTensor } from './dual-tensor.js';
  */
 export function forwardGrad(
   fn: (x: Tensor) => Tensor,
-  x: Tensor,
+  x: Tensor
 ): { value: Tensor; jacobian: Tensor } {
   // First call: compute the value with zero tangent to learn the output shape.
   // (We need to know the output shape to allocate the Jacobian.)
@@ -52,7 +52,7 @@ export function forwardGrad(
     throw new Error(
       'forwardGrad: fn must be AD-traceable — its return must propagate through ' +
         'DualTensor arithmetic (use add/sub/mul/scale on the argument). A fresh ' +
-        'Tensor return loses the tangent and silently corrupts the Jacobian.',
+        'Tensor return loses the tangent and silently corrupts the Jacobian.'
     );
   }
   const yPrimal = yProbeRaw.toPrimalTensor();

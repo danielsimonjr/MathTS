@@ -152,7 +152,7 @@ describe('Threshold Dispatcher', () => {
 
     it('should default to general category', () => {
       expect(dispatcher.shouldParallelize(40000)).toBe(false); // Below general threshold
-      expect(dispatcher.shouldParallelize(60000)).toBe(true);  // Above general threshold
+      expect(dispatcher.shouldParallelize(60000)).toBe(true); // Above general threshold
     });
   });
 

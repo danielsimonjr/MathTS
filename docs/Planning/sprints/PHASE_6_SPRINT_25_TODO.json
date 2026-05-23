@@ -74,9 +74,7 @@
     "tests/integration/instance.test.ts",
     "tests/integration/functions.test.ts"
   ],
-  "filesModified": [
-    "package.json"
-  ],
+  "filesModified": ["package.json"],
   "totalEstimatedHours": 21,
   "notes": "Sprint 25 assembles the main MathTS package. Main package structure exists in src/ with mathjs-style architecture."
 }

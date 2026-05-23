@@ -4,12 +4,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import {
-  Complex,
-  Fraction,
-  BigNumber,
-  isComplex,
-} from '@danielsimonjr/mathts-core';
+import { Complex, Fraction, BigNumber, isComplex } from '@danielsimonjr/mathts-core';
 import {
   add,
   subtract,
@@ -465,7 +460,7 @@ describe('MathTS Functions Integration', () => {
       const c = new Complex(4, 2);
 
       const product = multiply(a, b); // (2+3i)(1-i) = 2 - 2i + 3i - 3i² = 2 + i + 3 = 5 + i
-      const result = add(product, c);  // (5 + i) + (4 + 2i) = 9 + 3i
+      const result = add(product, c); // (5 + i) + (4 + 2i) = 9 + 3i
 
       expect(result.re).toBe(9);
       expect(result.im).toBe(3);

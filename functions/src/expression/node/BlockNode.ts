@@ -1,28 +1,22 @@
-import { isNode } from '../../utils/is.js'
-import { forEach, map } from '../../utils/array.js'
-import { factory } from '../../utils/factory.js'
-import type { MathNode } from './Node.js'
+import { isNode } from '../../utils/is.js';
+import { forEach, map } from '../../utils/array.js';
+import { factory } from '../../utils/factory.js';
+import type { MathNode } from './Node.js';
 
-const name = 'BlockNode'
-const dependencies = ['ResultSet', 'Node']
+const name = 'BlockNode';
+const dependencies = ['ResultSet', 'Node'];
 
 interface BlockItem {
-  node: MathNode
-  visible: boolean
+  node: MathNode;
+  visible: boolean;
 }
 
 export const createBlockNode = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    ResultSet,
-    Node
-  }: {
-    ResultSet: any
-    Node: new (...args: any[]) => MathNode
-  }) => {
+  ({ ResultSet, Node }: { ResultSet: any; Node: new (...args: any[]) => MathNode }) => {
     class BlockNode extends Node {
-      blocks: BlockItem[]
+      blocks: BlockItem[];
 
       /**
        * @constructor BlockNode
@@ -35,29 +29,27 @@ export const createBlockNode = /* #__PURE__ */ factory(
        *            is true by default
        */
       constructor(blocks: Array<{ node: MathNode; visible?: boolean }>) {
-        super()
+        super();
         // validate input, copy blocks
-        if (!Array.isArray(blocks)) throw new Error('Array expected')
+        if (!Array.isArray(blocks)) throw new Error('Array expected');
         this.blocks = blocks.map(function (block) {
-          const node = block && block.node
-          const visible =
-            block && block.visible !== undefined ? block.visible : true
+          const node = block && block.node;
+          const visible = block && block.visible !== undefined ? block.visible : true;
 
-          if (!isNode(node))
-            throw new TypeError('Property "node" must be a Node')
+          if (!isNode(node)) throw new TypeError('Property "node" must be a Node');
           if (typeof visible !== 'boolean') {
-            throw new TypeError('Property "visible" must be a boolean')
+            throw new TypeError('Property "visible" must be a boolean');
           }
 
-          return { node, visible }
-        })
+          return { node, visible };
+        });
       }
 
       get type(): string {
-        return name
+        return name;
       }
       get isBlockNode(): boolean {
-        return true
+        return true;
       }
 
       /**
@@ -80,33 +72,31 @@ export const createBlockNode = /* #__PURE__ */ factory(
         const evalBlocks = map(this.blocks, function (block) {
           return {
             evaluate: block.node._compile(math, argNames),
-            visible: block.visible
-          }
-        })
+            visible: block.visible,
+          };
+        });
 
         return function evalBlockNodes(scope: any, args: any, context: any) {
-          const results: any[] = []
+          const results: any[] = [];
 
           forEach(evalBlocks, function evalBlockNode(block: any) {
-            const result = block.evaluate(scope, args, context)
+            const result = block.evaluate(scope, args, context);
             if (block.visible) {
-              results.push(result)
+              results.push(result);
             }
-          })
+          });
 
-          return new ResultSet(results)
-        }
+          return new ResultSet(results);
+        };
       }
 
       /**
        * Execute a callback for each of the child blocks of this node
        * @param {function(child: Node, path: string, parent: Node)} callback
        */
-      forEach(
-        callback: (child: MathNode, path: string, parent: MathNode) => void
-      ): void {
+      forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         for (let i = 0; i < this.blocks.length; i++) {
-          callback(this.blocks[i].node, 'blocks[' + i + '].node', this as any)
+          callback(this.blocks[i].node, 'blocks[' + i + '].node', this as any);
         }
       }
 
@@ -116,21 +106,17 @@ export const createBlockNode = /* #__PURE__ */ factory(
        * @param {function(child: Node, path: string, parent: Node): Node} callback
        * @returns {BlockNode} Returns a transformed copy of the node
        */
-      map(
-        callback: (child: MathNode, path: string, parent: MathNode) => MathNode
-      ): BlockNode {
-        const blocks: BlockItem[] = []
+      map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): BlockNode {
+        const blocks: BlockItem[] = [];
         for (let i = 0; i < this.blocks.length; i++) {
-          const block = this.blocks[i]
-          const node = this._ifNode(
-            callback(block.node, 'blocks[' + i + '].node', this as any)
-          )
+          const block = this.blocks[i];
+          const node = this._ifNode(callback(block.node, 'blocks[' + i + '].node', this as any));
           blocks[i] = {
             node,
-            visible: block.visible
-          }
+            visible: block.visible,
+          };
         }
-        return new BlockNode(blocks)
+        return new BlockNode(blocks);
       }
 
       /**
@@ -141,11 +127,11 @@ export const createBlockNode = /* #__PURE__ */ factory(
         const blocks = this.blocks.map(function (block) {
           return {
             node: block.node,
-            visible: block.visible
-          }
-        })
+            visible: block.visible,
+          };
+        });
 
-        return new BlockNode(blocks)
+        return new BlockNode(blocks);
       }
 
       /**
@@ -157,9 +143,9 @@ export const createBlockNode = /* #__PURE__ */ factory(
       _toString(options?: any): string {
         return this.blocks
           .map(function (param) {
-            return param.node.toString(options) + (param.visible ? '' : ';')
+            return param.node.toString(options) + (param.visible ? '' : ';');
           })
-          .join('\n')
+          .join('\n');
       }
 
       /**
@@ -169,8 +155,8 @@ export const createBlockNode = /* #__PURE__ */ factory(
       toJSON(): { mathjs: string; blocks: BlockItem[] } {
         return {
           mathjs: name,
-          blocks: this.blocks
-        }
+          blocks: this.blocks,
+        };
       }
 
       /**
@@ -181,10 +167,8 @@ export const createBlockNode = /* #__PURE__ */ factory(
        *     where mathjs is optional
        * @returns {BlockNode}
        */
-      static fromJSON(json: {
-        blocks: Array<{ node: MathNode; visible?: boolean }>
-      }): BlockNode {
-        return new BlockNode(json.blocks)
+      static fromJSON(json: { blocks: Array<{ node: MathNode; visible?: boolean }> }): BlockNode {
+        return new BlockNode(json.blocks);
       }
 
       /**
@@ -199,9 +183,9 @@ export const createBlockNode = /* #__PURE__ */ factory(
             return (
               param.node.toHTML(options) +
               (param.visible ? '' : '<span class="math-separator">;</span>')
-            )
+            );
           })
-          .join('<span class="math-separator"><br /></span>')
+          .join('<span class="math-separator"><br /></span>');
       }
 
       /**
@@ -212,9 +196,9 @@ export const createBlockNode = /* #__PURE__ */ factory(
       _toTex(options?: any): string {
         return this.blocks
           .map(function (param) {
-            return param.node.toTex(options) + (param.visible ? '' : ';')
+            return param.node.toTex(options) + (param.visible ? '' : ';');
           })
-          .join('\\;\\;\n')
+          .join('\\;\\;\n');
       }
     }
 
@@ -222,10 +206,10 @@ export const createBlockNode = /* #__PURE__ */ factory(
     // Using Object.defineProperty because Function.name is read-only
     Object.defineProperty(BlockNode, 'name', {
       value: name,
-      configurable: true
-    })
+      configurable: true,
+    });
 
-    return BlockNode
+    return BlockNode;
   },
   { isClass: true, isNode: true }
-)
+);

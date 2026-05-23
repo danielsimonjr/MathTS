@@ -1,55 +1,50 @@
-import { factory } from '../utils/factory.js'
-import { isMatrix } from '../utils/is.js'
+import { factory } from '../utils/factory.js';
+import { isMatrix } from '../utils/is.js';
 
 // Type definitions for better WASM integration and type safety
 interface TypedFunction<T = any> {
-  (...args: any[]): T
-  find(func: any, signature: string[]): TypedFunction<T>
-  convert(value: any, type: string): any
-  referTo<U>(
-    signature: string,
-    fn: (ref: TypedFunction<U>) => TypedFunction<U>
-  ): TypedFunction<U>
-  referToSelf<U>(
-    fn: (self: TypedFunction<U>) => TypedFunction<U>
-  ): TypedFunction<U>
+  (...args: any[]): T;
+  find(func: any, signature: string[]): TypedFunction<T>;
+  convert(value: any, type: string): any;
+  referTo<U>(signature: string, fn: (ref: TypedFunction<U>) => TypedFunction<U>): TypedFunction<U>;
+  referToSelf<U>(fn: (self: TypedFunction<U>) => TypedFunction<U>): TypedFunction<U>;
 }
 
 interface DenseMatrix {
-  _data: any[] | any[][]
-  _size: number[]
-  _datatype?: string
-  storage(): 'dense'
-  size(): number[]
-  getDataType(): string
-  valueOf(): any[] | any[][]
+  _data: any[] | any[][];
+  _size: number[];
+  _datatype?: string;
+  storage(): 'dense';
+  size(): number[];
+  getDataType(): string;
+  valueOf(): any[] | any[][];
 }
 
 interface SparseMatrix {
-  _values?: any[]
-  _index?: number[]
-  _ptr?: number[]
-  _size: number[]
-  _datatype?: string
-  _data?: any
-  storage(): 'sparse'
-  size(): number[]
-  getDataType(): string
-  valueOf(): any[] | any[][]
+  _values?: any[];
+  _index?: number[];
+  _ptr?: number[];
+  _size: number[];
+  _datatype?: string;
+  _data?: any;
+  storage(): 'sparse';
+  size(): number[];
+  getDataType(): string;
+  valueOf(): any[] | any[][];
 }
 
-type Matrix = DenseMatrix | SparseMatrix
+type Matrix = DenseMatrix | SparseMatrix;
 
 interface Dependencies {
-  typed: TypedFunction
-  addScalar: TypedFunction
-  multiplyScalar: TypedFunction
-  conj: TypedFunction
-  size: TypedFunction
+  typed: TypedFunction;
+  addScalar: TypedFunction;
+  multiplyScalar: TypedFunction;
+  conj: TypedFunction;
+  size: TypedFunction;
 }
 
-const name = 'dot'
-const dependencies = ['typed', 'addScalar', 'multiplyScalar', 'conj', 'size']
+const name = 'dot';
+const dependencies = ['typed', 'addScalar', 'multiplyScalar', 'conj', 'size'];
 
 export const createDot = /* #__PURE__ */ factory(
   name,
@@ -80,8 +75,8 @@ export const createDot = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array | DenseMatrix, Array | DenseMatrix': _denseDot,
-      'SparseMatrix, SparseMatrix': _sparseDot
-    })
+      'SparseMatrix, SparseMatrix': _sparseDot,
+    });
 
     /**
      * Validate dimensions of vectors for dot product
@@ -90,44 +85,35 @@ export const createDot = /* #__PURE__ */ factory(
      * @returns Length of vectors
      */
     function _validateDim(x: any[] | Matrix, y: any[] | Matrix): number {
-      const xSize = _size(x)
-      const ySize = _size(y)
-      let xLen: number, yLen: number
+      const xSize = _size(x);
+      const ySize = _size(y);
+      let xLen: number, yLen: number;
 
       if (xSize.length === 1) {
-        xLen = xSize[0]
+        xLen = xSize[0];
       } else if (xSize.length === 2 && xSize[1] === 1) {
-        xLen = xSize[0]
+        xLen = xSize[0];
       } else {
         throw new RangeError(
-          'Expected a column vector, instead got a matrix of size (' +
-            xSize.join(', ') +
-            ')'
-        )
+          'Expected a column vector, instead got a matrix of size (' + xSize.join(', ') + ')'
+        );
       }
 
       if (ySize.length === 1) {
-        yLen = ySize[0]
+        yLen = ySize[0];
       } else if (ySize.length === 2 && ySize[1] === 1) {
-        yLen = ySize[0]
+        yLen = ySize[0];
       } else {
         throw new RangeError(
-          'Expected a column vector, instead got a matrix of size (' +
-            ySize.join(', ') +
-            ')'
-        )
+          'Expected a column vector, instead got a matrix of size (' + ySize.join(', ') + ')'
+        );
       }
 
       if (xLen !== yLen)
-        throw new RangeError(
-          'Vectors must have equal length (' + xLen + ' != ' + yLen + ')'
-        )
-      if (xLen === 0)
-        throw new RangeError(
-          'Cannot calculate the dot product of empty vectors'
-        )
+        throw new RangeError('Vectors must have equal length (' + xLen + ' != ' + yLen + ')');
+      if (xLen === 0) throw new RangeError('Cannot calculate the dot product of empty vectors');
 
-      return xLen
+      return xLen;
     }
 
     /**
@@ -137,76 +123,67 @@ export const createDot = /* #__PURE__ */ factory(
      * @returns Dot product result
      */
     function _denseDot(a: any[] | DenseMatrix, b: any[] | DenseMatrix): any {
-      const N = _validateDim(a, b)
+      const N = _validateDim(a, b);
 
-      const adata = isMatrix(a) ? (a as DenseMatrix)._data : a
+      const adata = isMatrix(a) ? (a as DenseMatrix)._data : a;
       const adt = isMatrix(a)
         ? (a as DenseMatrix)._datatype || (a as DenseMatrix).getDataType()
-        : undefined
+        : undefined;
 
-      const bdata = isMatrix(b) ? (b as DenseMatrix)._data : b
+      const bdata = isMatrix(b) ? (b as DenseMatrix)._data : b;
       const bdt = isMatrix(b)
         ? (b as DenseMatrix)._datatype || (b as DenseMatrix).getDataType()
-        : undefined
+        : undefined;
 
       // are these 2-dimensional column vectors? (as opposed to 1-dimensional vectors)
-      const aIsColumn = _size(a).length === 2
-      const bIsColumn = _size(b).length === 2
+      const aIsColumn = _size(a).length === 2;
+      const bIsColumn = _size(b).length === 2;
 
-      let add: TypedFunction = addScalar
-      let mul: TypedFunction = multiplyScalar
+      let add: TypedFunction = addScalar;
+      let mul: TypedFunction = multiplyScalar;
 
       // process data types
-      if (
-        adt &&
-        bdt &&
-        adt === bdt &&
-        typeof adt === 'string' &&
-        adt !== 'mixed'
-      ) {
-        const dt = adt
+      if (adt && bdt && adt === bdt && typeof adt === 'string' && adt !== 'mixed') {
+        const dt = adt;
         // find signatures that matches (dt, dt)
-        add = typed.find(addScalar, [dt, dt])
-        mul = typed.find(multiplyScalar, [dt, dt])
+        add = typed.find(addScalar, [dt, dt]);
+        mul = typed.find(multiplyScalar, [dt, dt]);
       }
 
       // both vectors 1-dimensional
       if (!aIsColumn && !bIsColumn) {
-        let c = mul(conj((adata as any[])[0]), (bdata as any[])[0])
+        let c = mul(conj((adata as any[])[0]), (bdata as any[])[0]);
         for (let i = 1; i < N; i++) {
-          c = add(c, mul(conj((adata as any[])[i]), (bdata as any[])[i]))
+          c = add(c, mul(conj((adata as any[])[i]), (bdata as any[])[i]));
         }
-        return c
+        return c;
       }
 
       // a is 1-dim, b is column
       if (!aIsColumn && bIsColumn) {
-        let c = mul(conj((adata as any[])[0]), (bdata as any[][])[0][0])
+        let c = mul(conj((adata as any[])[0]), (bdata as any[][])[0][0]);
         for (let i = 1; i < N; i++) {
-          c = add(c, mul(conj((adata as any[])[i]), (bdata as any[][])[i][0]))
+          c = add(c, mul(conj((adata as any[])[i]), (bdata as any[][])[i][0]));
         }
-        return c
+        return c;
       }
 
       // a is column, b is 1-dim
       if (aIsColumn && !bIsColumn) {
-        let c = mul(conj((adata as any[][])[0][0]), (bdata as any[])[0])
+        let c = mul(conj((adata as any[][])[0][0]), (bdata as any[])[0]);
         for (let i = 1; i < N; i++) {
-          c = add(c, mul(conj((adata as any[][])[i][0]), (bdata as any[])[i]))
+          c = add(c, mul(conj((adata as any[][])[i][0]), (bdata as any[])[i]));
         }
-        return c
+        return c;
       }
 
       // both vectors are column
       if (aIsColumn && bIsColumn) {
-        let c = mul(conj((adata as any[][])[0][0]), (bdata as any[][])[0][0])
+        let c = mul(conj((adata as any[][])[0][0]), (bdata as any[][])[0][0]);
         for (let i = 1; i < N; i++) {
-          c = add(
-            c,
-            mul(conj((adata as any[][])[i][0]), (bdata as any[][])[i][0])
-          )
+          c = add(c, mul(conj((adata as any[][])[i][0]), (bdata as any[][])[i][0]));
         }
-        return c
+        return c;
       }
     }
 
@@ -217,41 +194,41 @@ export const createDot = /* #__PURE__ */ factory(
      * @returns Dot product result
      */
     function _sparseDot(x: SparseMatrix, y: SparseMatrix): any {
-      _validateDim(x, y)
+      _validateDim(x, y);
 
-      const xindex = x._index!
-      const xvalues = x._values!
+      const xindex = x._index!;
+      const xvalues = x._values!;
 
-      const yindex = y._index!
-      const yvalues = y._values!
+      const yindex = y._index!;
+      const yvalues = y._values!;
 
       // TODO optimize add & mul using datatype
-      let c: any = 0
-      const add: TypedFunction = addScalar
-      const mul: TypedFunction = multiplyScalar
+      let c: any = 0;
+      const add: TypedFunction = addScalar;
+      const mul: TypedFunction = multiplyScalar;
 
-      let i = 0
-      let j = 0
+      let i = 0;
+      let j = 0;
       while (i < xindex.length && j < yindex.length) {
-        const I = xindex[i]
-        const J = yindex[j]
+        const I = xindex[i];
+        const J = yindex[j];
 
         if (I < J) {
-          i++
-          continue
+          i++;
+          continue;
         }
         if (I > J) {
-          j++
-          continue
+          j++;
+          continue;
         }
         if (I === J) {
-          c = add(c, mul(xvalues[i], yvalues[j]))
-          i++
-          j++
+          c = add(c, mul(xvalues[i], yvalues[j]));
+          i++;
+          j++;
         }
       }
 
-      return c
+      return c;
     }
 
     // TODO remove this once #1771 is fixed
@@ -261,7 +238,7 @@ export const createDot = /* #__PURE__ */ factory(
      * @returns Size array
      */
     function _size(x: any[] | Matrix): number[] {
-      return isMatrix(x) ? (x as Matrix).size() : size(x)
+      return isMatrix(x) ? (x as Matrix).size() : size(x);
     }
   }
-)
+);

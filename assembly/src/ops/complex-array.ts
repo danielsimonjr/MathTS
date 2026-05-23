@@ -26,7 +26,7 @@ export function complex_array_zeros(n: i32): Float64Array {
 export function complex_array_ones(n: i32): Float64Array {
   const data = new Float64Array(n * 2);
   for (let i = 0; i < n; i++) {
-    unchecked(data[i * 2] = 1.0);  // real part
+    unchecked((data[i * 2] = 1.0)); // real part
     // imaginary part is already 0
   }
   return data;
@@ -38,8 +38,8 @@ export function complex_array_ones(n: i32): Float64Array {
 export function complex_array_fill(n: i32, re: f64, im: f64): Float64Array {
   const data = new Float64Array(n * 2);
   for (let i = 0; i < n; i++) {
-    unchecked(data[i * 2] = re);
-    unchecked(data[i * 2 + 1] = im);
+    unchecked((data[i * 2] = re));
+    unchecked((data[i * 2 + 1] = im));
   }
   return data;
 }
@@ -61,16 +61,16 @@ export function complex_array_get(data: Float64Array, index: i32): Complex {
  * Set complex number at index
  */
 export function complex_array_set(data: Float64Array, index: i32, value: Complex): void {
-  unchecked(data[index * 2] = value.re);
-  unchecked(data[index * 2 + 1] = value.im);
+  unchecked((data[index * 2] = value.re));
+  unchecked((data[index * 2 + 1] = value.im));
 }
 
 /**
  * Set complex number at index from components
  */
 export function complex_array_set_parts(data: Float64Array, index: i32, re: f64, im: f64): void {
-  unchecked(data[index * 2] = re);
-  unchecked(data[index * 2 + 1] = im);
+  unchecked((data[index * 2] = re));
+  unchecked((data[index * 2 + 1] = im));
 }
 
 /**
@@ -101,24 +101,20 @@ export function complex_array_length(data: Float64Array): i32 {
 /**
  * Complex array addition: result = a + b
  */
-export function complex_array_add(
-  a: Float64Array, b: Float64Array, result: Float64Array
-): void {
+export function complex_array_add(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) + unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) + unchecked(b[i])));
   }
 }
 
 /**
  * Complex array subtraction: result = a - b
  */
-export function complex_array_sub(
-  a: Float64Array, b: Float64Array, result: Float64Array
-): void {
+export function complex_array_sub(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const len = min(min(a.length, b.length), result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) - unchecked(b[i]));
+    unchecked((result[i] = unchecked(a[i]) - unchecked(b[i])));
   }
 }
 
@@ -126,9 +122,7 @@ export function complex_array_sub(
  * Complex array multiplication: result = a * b (element-wise)
  * (a + bi)(c + di) = (ac - bd) + (ad + bc)i
  */
-export function complex_array_mul(
-  a: Float64Array, b: Float64Array, result: Float64Array
-): void {
+export function complex_array_mul(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const n = min(min(a.length, b.length), result.length) / 2;
   for (let i = 0; i < n; i++) {
     const idx = i * 2;
@@ -137,17 +131,15 @@ export function complex_array_mul(
     const bRe = unchecked(b[idx]);
     const bIm = unchecked(b[idx + 1]);
 
-    unchecked(result[idx] = aRe * bRe - aIm * bIm);
-    unchecked(result[idx + 1] = aRe * bIm + aIm * bRe);
+    unchecked((result[idx] = aRe * bRe - aIm * bIm));
+    unchecked((result[idx + 1] = aRe * bIm + aIm * bRe));
   }
 }
 
 /**
  * Complex array division: result = a / b (element-wise)
  */
-export function complex_array_div(
-  a: Float64Array, b: Float64Array, result: Float64Array
-): void {
+export function complex_array_div(a: Float64Array, b: Float64Array, result: Float64Array): void {
   const n = min(min(a.length, b.length), result.length) / 2;
   for (let i = 0; i < n; i++) {
     const idx = i * 2;
@@ -157,20 +149,18 @@ export function complex_array_div(
     const bIm = unchecked(b[idx + 1]);
 
     const denom = bRe * bRe + bIm * bIm;
-    unchecked(result[idx] = (aRe * bRe + aIm * bIm) / denom);
-    unchecked(result[idx + 1] = (aIm * bRe - aRe * bIm) / denom);
+    unchecked((result[idx] = (aRe * bRe + aIm * bIm) / denom));
+    unchecked((result[idx + 1] = (aIm * bRe - aRe * bIm) / denom));
   }
 }
 
 /**
  * Scale complex array by real scalar: result = a * scalar
  */
-export function complex_array_scale_real(
-  a: Float64Array, scalar: f64, result: Float64Array
-): void {
+export function complex_array_scale_real(a: Float64Array, scalar: f64, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = unchecked(a[i]) * scalar);
+    unchecked((result[i] = unchecked(a[i]) * scalar));
   }
 }
 
@@ -178,7 +168,10 @@ export function complex_array_scale_real(
  * Scale complex array by complex scalar: result = a * (re + im*i)
  */
 export function complex_array_scale_complex(
-  a: Float64Array, re: f64, im: f64, result: Float64Array
+  a: Float64Array,
+  re: f64,
+  im: f64,
+  result: Float64Array
 ): void {
   const n = min(a.length, result.length) / 2;
   for (let i = 0; i < n; i++) {
@@ -186,8 +179,8 @@ export function complex_array_scale_complex(
     const aRe = unchecked(a[idx]);
     const aIm = unchecked(a[idx + 1]);
 
-    unchecked(result[idx] = aRe * re - aIm * im);
-    unchecked(result[idx + 1] = aRe * im + aIm * re);
+    unchecked((result[idx] = aRe * re - aIm * im));
+    unchecked((result[idx + 1] = aRe * im + aIm * re));
   }
 }
 
@@ -197,7 +190,7 @@ export function complex_array_scale_complex(
 export function complex_array_neg(a: Float64Array, result: Float64Array): void {
   const len = min(a.length, result.length);
   for (let i = 0; i < len; i++) {
-    unchecked(result[i] = -unchecked(a[i]));
+    unchecked((result[i] = -unchecked(a[i])));
   }
 }
 
@@ -208,8 +201,8 @@ export function complex_array_conj(a: Float64Array, result: Float64Array): void 
   const n = min(a.length, result.length) / 2;
   for (let i = 0; i < n; i++) {
     const idx = i * 2;
-    unchecked(result[idx] = unchecked(a[idx]));        // real unchanged
-    unchecked(result[idx + 1] = -unchecked(a[idx + 1])); // negate imaginary
+    unchecked((result[idx] = unchecked(a[idx]))); // real unchanged
+    unchecked((result[idx + 1] = -unchecked(a[idx + 1]))); // negate imaginary
   }
 }
 
@@ -225,7 +218,7 @@ export function complex_array_abs(a: Float64Array, result: Float64Array): void {
   for (let i = 0; i < n; i++) {
     const re = unchecked(a[i * 2]);
     const im = unchecked(a[i * 2 + 1]);
-    unchecked(result[i] = sqrt(re * re + im * im));
+    unchecked((result[i] = sqrt(re * re + im * im)));
   }
 }
 
@@ -237,7 +230,7 @@ export function complex_array_arg(a: Float64Array, result: Float64Array): void {
   for (let i = 0; i < n; i++) {
     const re = unchecked(a[i * 2]);
     const im = unchecked(a[i * 2 + 1]);
-    unchecked(result[i] = Math.atan2(im, re));
+    unchecked((result[i] = Math.atan2(im, re)));
   }
 }
 
@@ -249,7 +242,7 @@ export function complex_array_abs_squared(a: Float64Array, result: Float64Array)
   for (let i = 0; i < n; i++) {
     const re = unchecked(a[i * 2]);
     const im = unchecked(a[i * 2 + 1]);
-    unchecked(result[i] = re * re + im * im);
+    unchecked((result[i] = re * re + im * im));
   }
 }
 
@@ -259,7 +252,7 @@ export function complex_array_abs_squared(a: Float64Array, result: Float64Array)
 export function complex_array_real(a: Float64Array, result: Float64Array): void {
   const n = min(a.length / 2, result.length);
   for (let i = 0; i < n; i++) {
-    unchecked(result[i] = unchecked(a[i * 2]));
+    unchecked((result[i] = unchecked(a[i * 2])));
   }
 }
 
@@ -269,7 +262,7 @@ export function complex_array_real(a: Float64Array, result: Float64Array): void 
 export function complex_array_imag(a: Float64Array, result: Float64Array): void {
   const n = min(a.length / 2, result.length);
   for (let i = 0; i < n; i++) {
-    unchecked(result[i] = unchecked(a[i * 2 + 1]));
+    unchecked((result[i] = unchecked(a[i * 2 + 1])));
   }
 }
 
@@ -284,8 +277,8 @@ export function complex_array_exp(a: Float64Array, result: Float64Array): void {
     const im = unchecked(a[idx + 1]);
 
     const expRe = Math.exp(re);
-    unchecked(result[idx] = expRe * Math.cos(im));
-    unchecked(result[idx + 1] = expRe * Math.sin(im));
+    unchecked((result[idx] = expRe * Math.cos(im)));
+    unchecked((result[idx + 1] = expRe * Math.sin(im)));
   }
 }
 
@@ -299,8 +292,8 @@ export function complex_array_log(a: Float64Array, result: Float64Array): void {
     const re = unchecked(a[idx]);
     const im = unchecked(a[idx + 1]);
 
-    unchecked(result[idx] = Math.log(sqrt(re * re + im * im)));
-    unchecked(result[idx + 1] = Math.atan2(im, re));
+    unchecked((result[idx] = Math.log(sqrt(re * re + im * im))));
+    unchecked((result[idx + 1] = Math.atan2(im, re)));
   }
 }
 
@@ -318,8 +311,8 @@ export function complex_array_sqrt(a: Float64Array, result: Float64Array): void 
     const sqrtR = sqrt(r);
     const halfTheta = Math.atan2(im, re) / 2.0;
 
-    unchecked(result[idx] = sqrtR * Math.cos(halfTheta));
-    unchecked(result[idx + 1] = sqrtR * Math.sin(halfTheta));
+    unchecked((result[idx] = sqrtR * Math.cos(halfTheta)));
+    unchecked((result[idx + 1] = sqrtR * Math.sin(halfTheta)));
   }
 }
 
@@ -402,7 +395,7 @@ export function complex_array_norm(a: Float64Array): f64 {
 export function complex_array_scale_inplace(a: Float64Array, scalar: f64): void {
   const len = a.length;
   for (let i = 0; i < len; i++) {
-    unchecked(a[i] = unchecked(a[i]) * scalar);
+    unchecked((a[i] = unchecked(a[i]) * scalar));
   }
 }
 
@@ -412,7 +405,7 @@ export function complex_array_scale_inplace(a: Float64Array, scalar: f64): void 
 export function complex_array_conj_inplace(a: Float64Array): void {
   const n = a.length / 2;
   for (let i = 0; i < n; i++) {
-    unchecked(a[i * 2 + 1] = -unchecked(a[i * 2 + 1]));
+    unchecked((a[i * 2 + 1] = -unchecked(a[i * 2 + 1])));
   }
 }
 
@@ -422,7 +415,7 @@ export function complex_array_conj_inplace(a: Float64Array): void {
 export function complex_array_add_inplace(a: Float64Array, b: Float64Array): void {
   const len = min(a.length, b.length);
   for (let i = 0; i < len; i++) {
-    unchecked(a[i] = unchecked(a[i]) + unchecked(b[i]));
+    unchecked((a[i] = unchecked(a[i]) + unchecked(b[i])));
   }
 }
 
@@ -432,6 +425,6 @@ export function complex_array_add_inplace(a: Float64Array, b: Float64Array): voi
 export function complex_array_copy(src: Float64Array, dst: Float64Array): void {
   const len = min(src.length, dst.length);
   for (let i = 0; i < len; i++) {
-    unchecked(dst[i] = unchecked(src[i]));
+    unchecked((dst[i] = unchecked(src[i])));
   }
 }

@@ -8,7 +8,7 @@ export const resizeDocs = {
     'resize([1,2,3], [5])',
     'resize([1,2,3], [5], -1)',
     'resize(2, [2, 3])',
-    'resize("hello", [8], "!")'
+    'resize("hello", [8], "!")',
   ],
-  seealso: ['size', 'subset', 'squeeze', 'reshape']
-}
+  seealso: ['size', 'subset', 'squeeze', 'reshape'],
+};

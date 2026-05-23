@@ -5,6 +5,7 @@ This guide covers performance characteristics, optimization strategies, and tuni
 ## Performance Overview
 
 MathTS achieves high performance through:
+
 1. **Automatic backend selection** based on data size
 2. **SIMD acceleration** in WebAssembly
 3. **GPU compute shaders** for massive parallelism
@@ -14,17 +15,20 @@ MathTS achieves high performance through:
 ## Performance Tiers
 
 ### Small Matrices (< 1,000 elements)
+
 - **Best backend:** JavaScript
 - **Why:** Initialization overhead of WASM/GPU exceeds computation time
 - **Typical operations:** 3x3 rotations, 4x4 transforms, small vectors
 
 ### Medium Matrices (1,000 - 100,000 elements)
+
 - **Best backend:** WebAssembly with SIMD
 - **Why:** SIMD processes 2-4 elements per instruction
 - **Typical speedup:** 2-4x over JavaScript
 - **Typical operations:** Image processing, physics simulations
 
 ### Large Matrices (> 100,000 elements)
+
 - **Best backend:** WebGPU
 - **Why:** Thousands of parallel threads
 - **Typical speedup:** 10-100x over JavaScript
@@ -33,40 +37,44 @@ MathTS achieves high performance through:
 ## Operation Performance Characteristics
 
 ### Element-wise Operations (add, subtract, scale)
+
 - Memory-bound operations
 - Linear scaling with element count
 - GPU provides parallelism benefit at large scales
 
-| Size | JS (ms) | WASM (ms) | GPU (ms) | Best |
-|------|---------|-----------|----------|------|
-| 64x64 | 0.1 | 0.15 | 5.0 | JS |
-| 256x256 | 1.5 | 0.8 | 5.2 | WASM |
-| 1024x1024 | 25 | 12 | 6.0 | GPU |
+| Size      | JS (ms) | WASM (ms) | GPU (ms) | Best |
+| --------- | ------- | --------- | -------- | ---- |
+| 64x64     | 0.1     | 0.15      | 5.0      | JS   |
+| 256x256   | 1.5     | 0.8       | 5.2      | WASM |
+| 1024x1024 | 25      | 12        | 6.0      | GPU  |
 
 ### Matrix Multiplication
+
 - Compute-bound operation (O(n³) complexity)
 - Benefits most from GPU acceleration
 - WASM tiled algorithms effective for medium sizes
 
-| Size | JS (ms) | WASM (ms) | GPU (ms) | GFLOPS |
-|------|---------|-----------|----------|--------|
-| 64x64 | 1.0 | 0.5 | 10 | 0.5 |
-| 256x256 | 50 | 15 | 12 | 2.8 |
-| 512x512 | 400 | 100 | 25 | 10.7 |
-| 1024x1024 | 3200 | 600 | 50 | 42.9 |
+| Size      | JS (ms) | WASM (ms) | GPU (ms) | GFLOPS |
+| --------- | ------- | --------- | -------- | ------ |
+| 64x64     | 1.0     | 0.5       | 10       | 0.5    |
+| 256x256   | 50      | 15        | 12       | 2.8    |
+| 512x512   | 400     | 100       | 25       | 10.7   |
+| 1024x1024 | 3200    | 600       | 50       | 42.9   |
 
 ### Transpose
+
 - Memory-bound operation
 - Cache-friendly algorithms critical
 - GPU shared memory optimization effective
 
-| Size | JS (ms) | WASM (ms) | GPU (ms) |
-|------|---------|-----------|----------|
-| 256x256 | 0.5 | 0.3 | 5.0 |
-| 1024x1024 | 8.0 | 4.0 | 5.5 |
-| 4096x4096 | 150 | 70 | 15 |
+| Size      | JS (ms) | WASM (ms) | GPU (ms) |
+| --------- | ------- | --------- | -------- |
+| 256x256   | 0.5     | 0.3       | 5.0      |
+| 1024x1024 | 8.0     | 4.0       | 5.5      |
+| 4096x4096 | 150     | 70        | 15       |
 
 ### Decompositions (LU, QR, Cholesky)
+
 - Mixed compute/memory operations
 - Sequential dependencies limit parallelism
 - Blocked algorithms improve cache usage
@@ -185,9 +193,9 @@ import { enableAdaptiveTuning, configureAdaptiveTuning } from '@danielsimonjr/ma
 
 enableAdaptiveTuning();
 configureAdaptiveTuning({
-  sampleSize: 20,         // More samples = more accurate
-  minSpeedupRatio: 1.1,   // Smaller ratio = more aggressive switching
-  cooldownMs: 10000,      // Longer cooldown = more stable
+  sampleSize: 20, // More samples = more accurate
+  minSpeedupRatio: 1.1, // Smaller ratio = more aggressive switching
+  cooldownMs: 10000, // Longer cooldown = more stable
 });
 ```
 
@@ -202,7 +210,7 @@ import { BufferPool } from '@danielsimonjr/mathts-matrix';
 
 const pool = new BufferPool(context, {
   maxCacheSize: 256 * 1024 * 1024, // 256MB max cache
-  evictionTimeout: 30000,          // 30s before eviction
+  evictionTimeout: 30000, // 30s before eviction
 });
 
 // Get pool statistics
@@ -268,22 +276,25 @@ npx ts-node tools/benchmark/e2e/backend-comparison.bench.ts
 ## Hardware Considerations
 
 ### CPU
+
 - More cores benefit parallel WASM operations (when threads available)
 - Larger L3 cache improves matrix operations
 - AVX2 support enables better SIMD
 
 ### GPU
+
 - Higher compute unit count = better parallelism
 - More VRAM = larger matrices without paging
 - PCIe bandwidth affects data transfer speed
 
 ### Browser
-| Browser | WASM SIMD | WebGPU |
-|---------|-----------|--------|
-| Chrome 113+ | Yes | Yes |
-| Edge 113+ | Yes | Yes |
-| Firefox 89+ | Yes | Nightly |
-| Safari 16.4+ | Yes | Preview |
+
+| Browser      | WASM SIMD | WebGPU  |
+| ------------ | --------- | ------- |
+| Chrome 113+  | Yes       | Yes     |
+| Edge 113+    | Yes       | Yes     |
+| Firefox 89+  | Yes       | Nightly |
+| Safari 16.4+ | Yes       | Preview |
 
 ## Common Performance Issues
 
@@ -341,29 +352,29 @@ The following measurements were recorded using the three-way benchmark suite (`n
 
 ### Matrix Multiplication
 
-| Size | JS (ms) | WASM-AS (ms) | WASM-Rust (ms) | Rust Speedup |
-|------|---------|--------------|----------------|-------------|
-| 50×50 | 1.2 | 0.4 | 0.3 | 4.0x |
-| 100×100 | 5.8 | 1.2 | 0.8 | 7.3x |
-| **200×200** | **20.0** | **4.1** | **2.7** | **7.4x** |
-| 500×500 | 310 | 52 | 38 | 8.2x |
+| Size        | JS (ms)  | WASM-AS (ms) | WASM-Rust (ms) | Rust Speedup |
+| ----------- | -------- | ------------ | -------------- | ------------ |
+| 50×50       | 1.2      | 0.4          | 0.3            | 4.0x         |
+| 100×100     | 5.8      | 1.2          | 0.8            | 7.3x         |
+| **200×200** | **20.0** | **4.1**      | **2.7**        | **7.4x**     |
+| 500×500     | 310      | 52           | 38             | 8.2x         |
 
 ### Dot Product
 
-| Size | JS (ms) | WASM-AS (ms) | WASM-Rust (ms) | Rust Speedup |
-|------|---------|--------------|----------------|-------------|
-| 100 | 0.008 | 0.003 | 0.001 | 8.0x |
-| 500 | 0.025 | 0.006 | 0.002 | 12.5x |
-| **1000** | **0.050** | **0.008** | **0.002** | **27.6x** |
-| 5000 | 0.240 | 0.035 | 0.009 | 26.7x |
+| Size     | JS (ms)   | WASM-AS (ms) | WASM-Rust (ms) | Rust Speedup |
+| -------- | --------- | ------------ | -------------- | ------------ |
+| 100      | 0.008     | 0.003        | 0.001          | 8.0x         |
+| 500      | 0.025     | 0.006        | 0.002          | 12.5x        |
+| **1000** | **0.050** | **0.008**    | **0.002**      | **27.6x**    |
+| 5000     | 0.240     | 0.035        | 0.009          | 26.7x        |
 
 ### Determinant
 
-| Size | JS (ms) | WASM-AS (ms) | WASM-Rust (ms) | Rust Speedup |
-|------|---------|--------------|----------------|-------------|
-| 20×20 | 0.12 | 0.04 | 0.02 | 6.0x |
-| 50×50 | 0.55 | 0.15 | 0.06 | 9.2x |
-| **100×100** | **1.50** | **0.45** | **0.20** | **6.9x** |
+| Size        | JS (ms)  | WASM-AS (ms) | WASM-Rust (ms) | Rust Speedup |
+| ----------- | -------- | ------------ | -------------- | ------------ |
+| 20×20       | 0.12     | 0.04         | 0.02           | 6.0x         |
+| 50×50       | 0.55     | 0.15         | 0.06           | 9.2x         |
+| **100×100** | **1.50** | **0.45**     | **0.20**       | **6.9x**     |
 
 ### Notes
 

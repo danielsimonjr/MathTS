@@ -1,9 +1,9 @@
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type { MathArray, Matrix } from '../../types/index.js'
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathArray, Matrix } from '../../types/index.js';
 
-const name = 'setSize'
-const dependencies = ['typed', 'compareNatural']
+const name = 'setSize';
+const dependencies = ['typed', 'compareNatural'];
 
 export const createSetSize = /* #__PURE__ */ factory(
   name,
@@ -33,31 +33,22 @@ export const createSetSize = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'Array | Matrix': function (a: MathArray | Matrix): number {
-        return Array.isArray(a)
-          ? flatten(a).length
-          : flatten(a.toArray()).length
+        return Array.isArray(a) ? flatten(a).length : flatten(a.toArray()).length;
       },
-      'Array | Matrix, boolean': function (
-        a: MathArray | Matrix,
-        unique: boolean
-      ): number {
+      'Array | Matrix, boolean': function (a: MathArray | Matrix, unique: boolean): number {
         if (unique === false || (a as any).length === 0) {
-          return Array.isArray(a)
-            ? flatten(a).length
-            : flatten(a.toArray()).length
+          return Array.isArray(a) ? flatten(a).length : flatten(a.toArray()).length;
         } else {
-          const b = flatten(Array.isArray(a) ? a : a.toArray()).sort(
-            compareNatural
-          )
-          let count = 1
+          const b = flatten(Array.isArray(a) ? a : a.toArray()).sort(compareNatural);
+          let count = 1;
           for (let i = 1; i < b.length; i++) {
             if (compareNatural(b[i], b[i - 1]) !== 0) {
-              count++
+              count++;
             }
           }
-          return count
+          return count;
         }
-      }
-    })
+      },
+    });
   }
-)
+);

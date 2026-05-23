@@ -46,7 +46,7 @@ describe('statistics typed functions - extended synchronous paths', () => {
 
     it('should compute general p-norm (p=3)', () => {
       const data = new Float64Array([1, 2, 3]);
-      const expected = Math.pow(1 + 8 + 27, 1/3);
+      const expected = Math.pow(1 + 8 + 27, 1 / 3);
       expect(parallelStatNorm(data, 3)).toBeCloseTo(expected, 10);
     });
 

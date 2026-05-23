@@ -75,7 +75,11 @@
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4, 5, 6],
-      "files": ["core/tests/types/complex.test.ts", "core/tests/types/fraction.test.ts", "core/tests/types/bignumber.test.ts"]
+      "files": [
+        "core/tests/types/complex.test.ts",
+        "core/tests/types/fraction.test.ts",
+        "core/tests/types/bignumber.test.ts"
+      ]
     }
   ],
   "successCriteria": [
@@ -94,10 +98,7 @@
     "core/tests/types/fraction.test.ts",
     "core/tests/types/bignumber.test.ts"
   ],
-  "filesModified": [
-    "core/src/types/index.ts",
-    "core/src/typed/mathts-typed.ts"
-  ],
+  "filesModified": ["core/src/types/index.ts", "core/src/typed/mathts-typed.ts"],
   "totalEstimatedHours": 30,
   "completedAt": "2025-12-11",
   "notes": "Sprint 2 implements the fundamental numeric types beyond plain numbers. Complex provides complex arithmetic, Fraction provides exact rationals using bigint, and BigNumber provides arbitrary precision decimals using pure TypeScript (no external dependencies like decimal.js). All 190 tests passing."

@@ -6,17 +6,17 @@ MathTS is a parallel-first TypeScript math library. It exposes numeric types, ty
 
 MathTS ships as 12 npm packages. The most commonly used:
 
-| Package | Description |
-|---|---|
-| `@danielsimonjr/mathts-core` | Types, typed-function integration, factory registry |
-| `@danielsimonjr/mathts-matrix` | DenseMatrix, SparseMatrix, JS/WASM/GPU backends |
-| `@danielsimonjr/mathts-tensor` | Rank-N dense Tensor (Float64Array-backed) |
-| `@danielsimonjr/mathts-autograd` | Forward + reverse-mode autodiff over Tensor |
-| `@danielsimonjr/mathts-functions` | Math functions via typed dispatch |
-| `@danielsimonjr/mathts-expression` | Expression parser, AST, compiler |
-| `@danielsimonjr/mathts-parallel` | ComputePool, parallel array operations |
-| `@danielsimonjr/mathts-workbook` | `.mtsw` reactive notebook runtime + CLI |
-| `@danielsimonjr/mathts-compat` | mathjs-compatible `create(all)` shim |
+| Package                            | Description                                         |
+| ---------------------------------- | --------------------------------------------------- |
+| `@danielsimonjr/mathts-core`       | Types, typed-function integration, factory registry |
+| `@danielsimonjr/mathts-matrix`     | DenseMatrix, SparseMatrix, JS/WASM/GPU backends     |
+| `@danielsimonjr/mathts-tensor`     | Rank-N dense Tensor (Float64Array-backed)           |
+| `@danielsimonjr/mathts-autograd`   | Forward + reverse-mode autodiff over Tensor         |
+| `@danielsimonjr/mathts-functions`  | Math functions via typed dispatch                   |
+| `@danielsimonjr/mathts-expression` | Expression parser, AST, compiler                    |
+| `@danielsimonjr/mathts-parallel`   | ComputePool, parallel array operations              |
+| `@danielsimonjr/mathts-workbook`   | `.mtsw` reactive notebook runtime + CLI             |
+| `@danielsimonjr/mathts-compat`     | mathjs-compatible `create(all)` shim                |
 
 The remaining packages — `@danielsimonjr/mathts-wasm`, `@danielsimonjr/mathts-typed-function`, and `@danielsimonjr/mathts-workerpool` — are lower-level building blocks consumed by the packages above.
 
@@ -29,8 +29,8 @@ import { add, multiply } from '@danielsimonjr/mathts-functions';
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
-add(1, 2);                                     // 3
-add(new Complex(1, 2), new Complex(3, 4));     // Complex(4, 6)
+add(1, 2); // 3
+add(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
 multiply(new Fraction(1, 2), new Fraction(2, 3)); // Fraction(1, 3)
 ```
 
@@ -42,8 +42,8 @@ For projects migrating from mathjs, use the compat shim:
 import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all);
-math.add(1, 2);               // 3
-math.sqrt(new math.Complex(-1, 0));  // Complex(0, 1)
+math.add(1, 2); // 3
+math.sqrt(new math.Complex(-1, 0)); // Complex(0, 1)
 ```
 
 ### Parallel operations
@@ -56,8 +56,8 @@ import { add, sin } from '@danielsimonjr/mathts-functions';
 const a = new Float64Array([1, 2, 3, 4]);
 const b = new Float64Array([10, 20, 30, 40]);
 
-const result = await add(a, b);   // runs in parallel workers
-const sines  = await sin(a);      // parallel sin over array
+const result = await add(a, b); // runs in parallel workers
+const sines = await sin(a); // parallel sin over array
 ```
 
 ## Core Concepts
@@ -68,13 +68,13 @@ const sines  = await sin(a);      // parallel sin over array
 
 ## Key Differences from mathjs
 
-| mathjs | MathTS |
-|---|---|
+| mathjs                                 | MathTS                                          |
+| -------------------------------------- | ----------------------------------------------- |
 | `math.config({ number: 'BigNumber' })` | Import `DEFAULT_CONFIG` and override at startup |
-| `math.import(myFn)` | Direct ESM import; register with `mathTyped` |
-| `math.chain(x).add(1).done()` | Not yet available — use direct calls |
-| Single-package install | Monorepo — install only what you need |
-| CommonJS + ESM | ESM-only (`"type": "module"`) |
+| `math.import(myFn)`                    | Direct ESM import; register with `mathTyped`    |
+| `math.chain(x).add(1).done()`          | Not yet available — use direct calls            |
+| Single-package install                 | Monorepo — install only what you need           |
+| CommonJS + ESM                         | ESM-only (`"type": "module"`)                   |
 
 ## Type System
 

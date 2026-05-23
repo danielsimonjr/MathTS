@@ -13,25 +13,37 @@ declare module '@danielsimonjr/mathts-functions' {
   export function add(a: Complex, b: Complex): Complex;
   export function add(a: Fraction, b: Fraction): Fraction;
   export function add(a: BigNumber, b: BigNumber): BigNumber;
-  export function add(a: number | Complex | Fraction | BigNumber, b: number | Complex | Fraction | BigNumber): number | Complex | Fraction | BigNumber;
+  export function add(
+    a: number | Complex | Fraction | BigNumber,
+    b: number | Complex | Fraction | BigNumber
+  ): number | Complex | Fraction | BigNumber;
 
   export function subtract(a: number, b: number): number;
   export function subtract(a: Complex, b: Complex): Complex;
   export function subtract(a: Fraction, b: Fraction): Fraction;
   export function subtract(a: BigNumber, b: BigNumber): BigNumber;
-  export function subtract(a: number | Complex | Fraction | BigNumber, b: number | Complex | Fraction | BigNumber): number | Complex | Fraction | BigNumber;
+  export function subtract(
+    a: number | Complex | Fraction | BigNumber,
+    b: number | Complex | Fraction | BigNumber
+  ): number | Complex | Fraction | BigNumber;
 
   export function multiply(a: number, b: number): number;
   export function multiply(a: Complex, b: Complex): Complex;
   export function multiply(a: Fraction, b: Fraction): Fraction;
   export function multiply(a: BigNumber, b: BigNumber): BigNumber;
-  export function multiply(a: number | Complex | Fraction | BigNumber, b: number | Complex | Fraction | BigNumber): number | Complex | Fraction | BigNumber;
+  export function multiply(
+    a: number | Complex | Fraction | BigNumber,
+    b: number | Complex | Fraction | BigNumber
+  ): number | Complex | Fraction | BigNumber;
 
   export function divide(a: number, b: number): number;
   export function divide(a: Complex, b: Complex): Complex;
   export function divide(a: Fraction, b: Fraction): Fraction;
   export function divide(a: BigNumber, b: BigNumber): BigNumber;
-  export function divide(a: number | Complex | Fraction | BigNumber, b: number | Complex | Fraction | BigNumber): number | Complex | Fraction | BigNumber;
+  export function divide(
+    a: number | Complex | Fraction | BigNumber,
+    b: number | Complex | Fraction | BigNumber
+  ): number | Complex | Fraction | BigNumber;
 
   export function pow(base: number, exponent: number): number;
   export function pow(base: Complex, exponent: number): Complex;

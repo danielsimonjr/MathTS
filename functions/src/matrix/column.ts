@@ -1,35 +1,35 @@
-import { factory } from '../utils/factory.js'
-import { isMatrix } from '../utils/is.js'
-import { clone } from '../utils/object.js'
-import { validateIndex } from '../utils/array.js'
+import { factory } from '../utils/factory.js';
+import { isMatrix } from '../utils/is.js';
+import { clone } from '../utils/object.js';
+import { validateIndex } from '../utils/array.js';
 
 // Type definitions
 interface Matrix {
-  size(): number[]
-  subset(index: any): any
+  size(): number[];
+  subset(index: any): any;
 }
 
 interface Index {
-  new (...ranges: any[]): Index
+  new (...ranges: any[]): Index;
 }
 
 interface TypedFunction<T = any> {
-  (...args: any[]): T
+  (...args: any[]): T;
 }
 
 interface MatrixConstructor {
-  (data: any[]): Matrix
+  (data: any[]): Matrix;
 }
 
 interface Dependencies {
-  typed: TypedFunction
-  Index: Index
-  matrix: MatrixConstructor
-  range: TypedFunction
+  typed: TypedFunction;
+  Index: Index;
+  matrix: MatrixConstructor;
+  range: TypedFunction;
 }
 
-const name = 'column'
-const dependencies = ['typed', 'Index', 'matrix', 'range']
+const name = 'column';
+const dependencies = ['typed', 'Index', 'matrix', 'range'];
 
 export const createColumn = /* #__PURE__ */ factory(
   name,
@@ -60,9 +60,9 @@ export const createColumn = /* #__PURE__ */ factory(
       'Matrix, number': _column,
 
       'Array, number': function (value: any[], column: number): any[] {
-        return _column(matrix(clone(value)), column).valueOf() as any[]
-      }
-    })
+        return _column(matrix(clone(value)), column).valueOf() as any[];
+      },
+    });
 
     /**
      * Retrieve a column of a matrix
@@ -73,16 +73,16 @@ export const createColumn = /* #__PURE__ */ factory(
     function _column(value: Matrix, column: number): Matrix {
       // check dimensions
       if ((value as any).size().length !== 2) {
-        throw new Error('Only two dimensional matrix is supported')
+        throw new Error('Only two dimensional matrix is supported');
       }
 
-      validateIndex(column, (value as any).size()[1])
+      validateIndex(column, (value as any).size()[1]);
 
-      const rowRange = range(0, (value as any).size()[0])
-      const index = new Index(rowRange, [column])
-      const result = (value as any).subset(index)
+      const rowRange = range(0, (value as any).size()[0]);
+      const index = new Index(rowRange, [column]);
+      const result = (value as any).subset(index);
       // once config.legacySubset just return result
-      return isMatrix(result) ? (result as Matrix) : matrix([[result]])
+      return isMatrix(result) ? (result as Matrix) : matrix([[result]]);
     }
   }
-)
+);

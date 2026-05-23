@@ -410,8 +410,14 @@ describe('diag factory', () => {
 describe('kron factory', () => {
   it('computes Kronecker product of two arrays', () => {
     const result = kron(
-      [[1, 0], [0, 1]],
-      [[1, 2], [3, 4]]
+      [
+        [1, 0],
+        [0, 1],
+      ],
+      [
+        [1, 2],
+        [3, 4],
+      ]
     );
     expect(result).toEqual([
       [1, 2, 0, 0],

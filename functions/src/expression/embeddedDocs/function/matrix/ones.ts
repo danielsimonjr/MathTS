@@ -7,7 +7,7 @@ export const onesDocs = {
     'ones(m, n, p, ...)',
     'ones([m])',
     'ones([m, n])',
-    'ones([m, n, p, ...])'
+    'ones([m, n, p, ...])',
   ],
   description: 'Create a matrix containing ones.',
   examples: [
@@ -15,7 +15,7 @@ export const onesDocs = {
     'ones(3, 5)',
     'ones([2,3]) * 4.5',
     'a = [1, 2, 3; 4, 5, 6]',
-    'ones(size(a))'
+    'ones(size(a))',
   ],
   seealso: [
     'concat',
@@ -29,6 +29,6 @@ export const onesDocs = {
     'subset',
     'trace',
     'transpose',
-    'zeros'
-  ]
-}
+    'zeros',
+  ],
+};

@@ -3,8 +3,8 @@
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
 
 interface CsLeafResult {
-  jleaf: number
-  q: number
+  jleaf: number;
+  q: number;
 }
 
 /**
@@ -30,37 +30,37 @@ export function csLeaf(
   prevleaf: number,
   ancestor: number
 ): number | CsLeafResult {
-  let s: number, sparent: number
+  let s: number, sparent: number;
 
   // our result
-  let jleaf = 0
-  let q: number
+  let jleaf = 0;
+  let q: number;
 
   // check j is a leaf
   if (i <= j || w[first + j] <= w[maxfirst + i]) {
-    return -1
+    return -1;
   }
   // update max first[j] seen so far
-  w[maxfirst + i] = w[first + j]
+  w[maxfirst + i] = w[first + j];
   // jprev = previous leaf of ith subtree
-  const jprev = w[prevleaf + i]
-  w[prevleaf + i] = j
+  const jprev = w[prevleaf + i];
+  w[prevleaf + i] = j;
 
   // check j is first or subsequent leaf
   if (jprev === -1) {
     // 1st leaf, q = root of ith subtree
-    jleaf = 1
-    q = i
+    jleaf = 1;
+    q = i;
   } else {
     // update jleaf
-    jleaf = 2
+    jleaf = 2;
     // q = least common ancester (jprev,j)
     for (q = jprev; q !== w[ancestor + q]; q = w[ancestor + q]);
     for (s = jprev; s !== q; s = sparent) {
       // path compression
-      sparent = w[ancestor + s]
-      w[ancestor + s] = q
+      sparent = w[ancestor + s];
+      w[ancestor + s] = q;
     }
   }
-  return { jleaf, q }
+  return { jleaf, q };
 }

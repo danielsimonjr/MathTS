@@ -1,26 +1,26 @@
-import { factory } from '../utils/factory.js'
-import { cubeNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { cubeNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for cube
 interface HasMulMethod {
-  mul(other: unknown): HasMulMethod
+  mul(other: unknown): HasMulMethod;
 }
 
 interface HasTimesMethod {
-  times(other: unknown): HasTimesMethod
+  times(other: unknown): HasTimesMethod;
 }
 
 interface HasPowMethod {
-  pow(n: number): unknown
+  pow(n: number): unknown;
 }
 
 interface CubeDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'cube'
-const dependencies = ['typed']
+const name = 'cube';
+const dependencies = ['typed'];
 
 export const createCube = /* #__PURE__ */ factory(
   name,
@@ -55,24 +55,24 @@ export const createCube = /* #__PURE__ */ factory(
       number: cubeNumber,
 
       Complex: function (x: HasMulMethod): unknown {
-        return x.mul(x).mul(x) // Is faster than pow(x, 3)
+        return x.mul(x).mul(x); // Is faster than pow(x, 3)
       },
 
       BigNumber: function (x: HasTimesMethod): unknown {
-        return x.times(x).times(x)
+        return x.times(x).times(x);
       },
 
       bigint: function (x: bigint): bigint {
-        return x * x * x
+        return x * x * x;
       },
 
       Fraction: function (x: HasPowMethod): unknown {
-        return x.pow(3) // Is faster than mul()mul()mul()
+        return x.pow(3); // Is faster than mul()mul()mul()
       },
 
       Unit: function (x: HasPowMethod): unknown {
-        return x.pow(3)
-      }
-    })
+        return x.pow(3);
+      },
+    });
   }
-)
+);

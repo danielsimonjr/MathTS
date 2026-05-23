@@ -1,10 +1,10 @@
-import { factory } from '../utils/factory.js'
-import { isCollection } from '../utils/is.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import { isCollection } from '../utils/is.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Minimum array length for WASM to be beneficial
-const WASM_STD_THRESHOLD = 100
+const WASM_STD_THRESHOLD = 100;
 
 /**
  * Check if an array is a flat array of plain numbers
@@ -12,28 +12,28 @@ const WASM_STD_THRESHOLD = 100
 function isFlatNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
 // Type definitions for std
 interface MatrixType {
-  valueOf(): unknown[] | unknown[][]
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface StdDependencies {
-  typed: TypedFunction
-  map: TypedFunction
-  sqrt: TypedFunction
-  variance: TypedFunction
+  typed: TypedFunction;
+  map: TypedFunction;
+  sqrt: TypedFunction;
+  variance: TypedFunction;
 }
 
-type NormalizationType = 'unbiased' | 'uncorrected' | 'biased'
+type NormalizationType = 'unbiased' | 'uncorrected' | 'biased';
 
-const name = 'std'
-const dependencies = ['typed', 'map', 'sqrt', 'variance']
+const name = 'std';
+const dependencies = ['typed', 'map', 'sqrt', 'variance'];
 
 export const createStd = /* #__PURE__ */ factory(
   name,
@@ -106,28 +106,25 @@ export const createStd = /* #__PURE__ */ factory(
 
       // std(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
-        return _std(args)
-      }
-    })
+        return _std(args);
+      },
+    });
 
     function _std(
       array: unknown[] | MatrixType,
       normalizationOrDim?: NormalizationType | number | { valueOf(): number }
     ): unknown {
       if ((array as unknown[]).length === 0) {
-        throw new SyntaxError(
-          'Function std requires one or more parameters (0 provided)'
-        )
+        throw new SyntaxError('Function std requires one or more parameters (0 provided)');
       }
 
       // WASM fast path for flat arrays of plain numbers with normalization (not dimension)
       // Only use WASM when we have a flat array and string normalization (or default)
       const normalization: NormalizationType =
-        typeof normalizationOrDim === 'string' ? normalizationOrDim : 'unbiased'
+        typeof normalizationOrDim === 'string' ? normalizationOrDim : 'unbiased';
       const isDimension =
         typeof normalizationOrDim === 'number' ||
-        (normalizationOrDim !== undefined &&
-          typeof normalizationOrDim === 'object')
+        (normalizationOrDim !== undefined && typeof normalizationOrDim === 'object');
 
       if (
         !isDimension &&
@@ -136,15 +133,15 @@ export const createStd = /* #__PURE__ */ factory(
         (normalization === 'unbiased' || normalization === 'uncorrected')
       ) {
         if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule()
+          const wasm = wasmLoader.getModule();
           if (wasm) {
             try {
-              const alloc = wasmLoader.allocateFloat64Array(array)
+              const alloc = wasmLoader.allocateFloat64Array(array);
               try {
-                const ddof = normalization === 'unbiased' ? 1 : 0
-                return wasm.statsStd(alloc.ptr, array.length, ddof)
+                const ddof = normalization === 'unbiased' ? 1 : 0;
+                return wasm.statsStd(alloc.ptr, array.length, ddof);
               } finally {
-                wasmLoader.free(alloc.ptr)
+                wasmLoader.free(alloc.ptr);
               }
             } catch {
               // Fall back to JS implementation on WASM error
@@ -155,19 +152,19 @@ export const createStd = /* #__PURE__ */ factory(
 
       // JavaScript fallback
       try {
-        const v = variance.apply(null, arguments as unknown as unknown[])
+        const v = variance.apply(null, arguments as unknown as unknown[]);
         if (isCollection(v)) {
-          return map(v, sqrt)
+          return map(v, sqrt);
         } else {
-          return sqrt(v)
+          return sqrt(v);
         }
       } catch (err: unknown) {
         if (err instanceof TypeError && err.message.includes(' variance')) {
-          throw new TypeError(err.message.replace(' variance', ' std'))
+          throw new TypeError(err.message.replace(' variance', ' std'));
         } else {
-          throw err
+          throw err;
         }
       }
     }
   }
-)
+);

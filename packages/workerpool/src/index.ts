@@ -28,12 +28,14 @@ let _canUseSharedMemory: (() => boolean) | undefined;
 try {
   // Use dynamic import to avoid TypeScript resolution issues
   const wasmPath = 'workerpool/wasm';
-  import(/* @vite-ignore */ wasmPath).then((wasmModule) => {
-    _canUseWasm = wasmModule.canUseWasm;
-    _canUseSharedMemory = wasmModule.canUseSharedMemory;
-  }).catch(() => {
-    // WASM module not available, fallbacks will be used
-  });
+  import(/* @vite-ignore */ wasmPath)
+    .then((wasmModule) => {
+      _canUseWasm = wasmModule.canUseWasm;
+      _canUseSharedMemory = wasmModule.canUseSharedMemory;
+    })
+    .catch(() => {
+      // WASM module not available, fallbacks will be used
+    });
 } catch {
   // Import not available
 }
@@ -131,7 +133,7 @@ export function createSharedFloat64Array(length: number): Float64Array {
   if (!canUseSharedMemory()) {
     throw new Error(
       'SharedArrayBuffer is not available. ' +
-      'In browsers, Cross-Origin-Isolation headers are required.'
+        'In browsers, Cross-Origin-Isolation headers are required.'
     );
   }
   const sab = new SharedArrayBuffer(length * Float64Array.BYTES_PER_ELEMENT);
@@ -149,7 +151,7 @@ export function createSharedBuffer(byteLength: number): SharedArrayBuffer {
   if (!canUseSharedMemory()) {
     throw new Error(
       'SharedArrayBuffer is not available. ' +
-      'In browsers, Cross-Origin-Isolation headers are required.'
+        'In browsers, Cross-Origin-Isolation headers are required.'
     );
   }
   return new SharedArrayBuffer(byteLength);
@@ -158,9 +160,7 @@ export function createSharedBuffer(byteLength: number): SharedArrayBuffer {
 /**
  * Check if a value is backed by SharedArrayBuffer
  */
-export function isSharedBuffer(
-  value: unknown
-): value is SharedArrayBuffer | ArrayBufferView {
+export function isSharedBuffer(value: unknown): value is SharedArrayBuffer | ArrayBufferView {
   if (value instanceof SharedArrayBuffer) return true;
   if (
     value !== null &&
@@ -328,10 +328,7 @@ export interface WorkerPoolConfig {
  *          cannot be located (callers then fall back to the generic worker).
  */
 async function resolveDefaultWorkerScript(): Promise<string | undefined> {
-  const isNode =
-    typeof process !== 'undefined' &&
-    !!process.versions &&
-    !!process.versions.node;
+  const isNode = typeof process !== 'undefined' && !!process.versions && !!process.versions.node;
 
   // Browser: let the consuming bundler rewrite the worker URL.
   if (!isNode) {
@@ -369,9 +366,7 @@ async function resolveDefaultWorkerScript(): Promise<string | undefined> {
 export const DEFAULT_WORKER_CONFIG: WorkerPoolConfig = {
   enabled: true,
   minWorkers: 1,
-  maxWorkers: typeof navigator !== 'undefined'
-    ? navigator.hardwareConcurrency || 4
-    : 4,
+  maxWorkers: typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 4 : 4,
   parallelThreshold: 10000,
   chunkSize: 5000,
   workerType: 'auto',
@@ -510,7 +505,9 @@ export class MathWorkerPool {
 
     const options: PoolOptions = {
       minWorkers: this.config.eagerInit
-        ? (this.config.minWorkers === 0 ? this.config.maxWorkers : this.config.minWorkers)
+        ? this.config.minWorkers === 0
+          ? this.config.maxWorkers
+          : this.config.minWorkers
         : this.config.minWorkers,
       maxWorkers: this.config.maxWorkers,
       workerType: this.config.workerType,
@@ -519,8 +516,7 @@ export class MathWorkerPool {
 
     // Use the explicit worker script if provided, otherwise resolve the
     // built kernel worker so named-method dispatch (sumChunk, ...) works.
-    const workerScript =
-      this.config.workerScript ?? (await resolveDefaultWorkerScript());
+    const workerScript = this.config.workerScript ?? (await resolveDefaultWorkerScript());
 
     if (workerScript) {
       this.pool = createPool(workerScript, options);
@@ -602,9 +598,7 @@ export class MathWorkerPool {
     if (options?.forceParallel) return true;
 
     return (
-      this.config.enabled &&
-      this.pool !== null &&
-      elementCount >= this.config.parallelThreshold
+      this.config.enabled && this.pool !== null && elementCount >= this.config.parallelThreshold
     );
   }
 
@@ -652,19 +646,13 @@ export class MathWorkerPool {
 
     // Calculate throughput (tasks/sec in rolling window)
     const windowStart = now - this._metricsWindowMs;
-    const recentCompletions = this._completionTimestamps.filter(
-      (t) => t >= windowStart
-    );
+    const recentCompletions = this._completionTimestamps.filter((t) => t >= windowStart);
     const throughput =
-      recentCompletions.length > 0
-        ? recentCompletions.length / (this._metricsWindowMs / 1000)
-        : 0;
+      recentCompletions.length > 0 ? recentCompletions.length / (this._metricsWindowMs / 1000) : 0;
 
     // Worker utilization
     const utilization =
-      baseStats.totalWorkers > 0
-        ? baseStats.busyWorkers / baseStats.totalWorkers
-        : 0;
+      baseStats.totalWorkers > 0 ? baseStats.busyWorkers / baseStats.totalWorkers : 0;
 
     return {
       ...baseStats,
@@ -709,19 +697,13 @@ export class MathWorkerPool {
 
     // Trim completion timestamps outside window
     const windowStart = now - this._metricsWindowMs;
-    this._completionTimestamps = this._completionTimestamps.filter(
-      (t) => t >= windowStart
-    );
+    this._completionTimestamps = this._completionTimestamps.filter((t) => t >= windowStart);
   }
 
   /**
    * Execute a method in the worker pool
    */
-  async exec<T>(
-    method: string,
-    params: unknown[],
-    options?: TaskOptions
-  ): Promise<T> {
+  async exec<T>(method: string, params: unknown[], options?: TaskOptions): Promise<T> {
     if (!this.pool) {
       throw new Error('WorkerPool not initialized. Call initialize() first.');
     }
@@ -735,7 +717,9 @@ export class MathWorkerPool {
     const execStart = performance.now();
 
     try {
-      const result = await (this.pool.exec<T>(method, params, execOptions).timeout(timeout) as Promise<T>);
+      const result = await (this.pool
+        .exec<T>(method, params, execOptions)
+        .timeout(timeout) as Promise<T>);
       this._recordExecution(performance.now() - execStart, false);
       return result;
     } catch (err) {
@@ -747,11 +731,7 @@ export class MathWorkerPool {
   /**
    * Execute a function directly (for simple parallelization)
    */
-  async execFunction<T, R>(
-    fn: (arg: T) => R,
-    arg: T,
-    options?: TaskOptions
-  ): Promise<R> {
+  async execFunction<T, R>(fn: (arg: T) => R, arg: T, options?: TaskOptions): Promise<R> {
     if (!this.pool) {
       throw new Error('WorkerPool not initialized. Call initialize() first.');
     }
@@ -761,7 +741,9 @@ export class MathWorkerPool {
 
     try {
       // Use workerpool's ability to execute functions directly
-      const result = await (this.pool.exec<R>(fn as unknown as string, [arg]).timeout(timeout) as Promise<R>);
+      const result = await (this.pool
+        .exec<R>(fn as unknown as string, [arg])
+        .timeout(timeout) as Promise<R>);
       this._recordExecution(performance.now() - execStart, false);
       return result;
     } catch (err) {
@@ -798,9 +780,7 @@ export class MathWorkerPool {
     const stats = this.stats();
 
     const partialSums = await Promise.all(
-      chunks.map((chunk) =>
-        this.exec<number>('sumChunk', [chunk.buffer, 0, chunk.length])
-      )
+      chunks.map((chunk) => this.exec<number>('sumChunk', [chunk.buffer, 0, chunk.length]))
     );
 
     const result = partialSums.reduce((a, b) => a + b, 0);
@@ -838,9 +818,7 @@ export class MathWorkerPool {
     const stats = this.stats();
 
     const partialProds = await Promise.all(
-      chunks.map((chunk) =>
-        this.exec<number>('prodChunk', [chunk.buffer, 0, chunk.length])
-      )
+      chunks.map((chunk) => this.exec<number>('prodChunk', [chunk.buffer, 0, chunk.length]))
     );
 
     const result = partialProds.reduce((a, b) => a * b, 1);
@@ -887,12 +865,7 @@ export class MathWorkerPool {
 
     const partialDots = await Promise.all(
       chunkPairs.map(([chunkA, chunkB]) =>
-        this.exec<number>('dotChunk', [
-          chunkA.buffer,
-          chunkB.buffer,
-          0,
-          chunkA.length,
-        ])
+        this.exec<number>('dotChunk', [chunkA.buffer, chunkB.buffer, 0, chunkA.length])
       )
     );
 
@@ -1004,12 +977,7 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<ArrayBuffer>('scaleChunk', [
-          chunk.buffer,
-          0,
-          chunk.length,
-          scalar,
-        ])
+        this.exec<ArrayBuffer>('scaleChunk', [chunk.buffer, 0, chunk.length, scalar])
       )
     );
 
@@ -1088,13 +1056,7 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunkPairs.map(([chunkA, chunkB]) =>
-        this.exec<ArrayBuffer>('bitwiseChunk', [
-          chunkA.buffer,
-          chunkB.buffer,
-          0,
-          chunkA.length,
-          op,
-        ])
+        this.exec<ArrayBuffer>('bitwiseChunk', [chunkA.buffer, chunkB.buffer, 0, chunkA.length, op])
       )
     );
 
@@ -1159,13 +1121,7 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<ArrayBuffer>('bitwiseScalarChunk', [
-          chunk.buffer,
-          0,
-          chunk.length,
-          scalar,
-          op,
-        ])
+        this.exec<ArrayBuffer>('bitwiseScalarChunk', [chunk.buffer, 0, chunk.length, scalar, op])
       )
     );
 
@@ -1183,10 +1139,7 @@ export class MathWorkerPool {
   /**
    * Unary bitwise NOT (`~a[i]`) over an `Int32Array`.
    */
-  async bitwiseNot(
-    a: Int32Array,
-    options?: TaskOptions
-  ): Promise<ParallelResult<Int32Array>> {
+  async bitwiseNot(a: Int32Array, options?: TaskOptions): Promise<ParallelResult<Int32Array>> {
     const start = performance.now();
 
     if (!this.shouldParallelize(a.length, options)) {
@@ -1208,11 +1161,7 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<ArrayBuffer>('bitwiseNotChunk', [
-          chunk.buffer,
-          0,
-          chunk.length,
-        ])
+        this.exec<ArrayBuffer>('bitwiseNotChunk', [chunk.buffer, 0, chunk.length])
       )
     );
 
@@ -1355,13 +1304,7 @@ export class MathWorkerPool {
       if (rowStart >= rows) break;
 
       tasks.push(
-        this.exec<ArrayBuffer>('transposeRows', [
-          data.buffer,
-          rows,
-          cols,
-          rowStart,
-          rowEnd,
-        ])
+        this.exec<ArrayBuffer>('transposeRows', [data.buffer, rows, cols, rowStart, rowEnd])
       );
     }
 
@@ -1438,10 +1381,11 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk, idx) =>
-        this.exec<{ min: number; max: number; minIdx: number; maxIdx: number }>(
-          'minMaxChunk',
-          [chunk.buffer, 0, chunk.length]
-        ).then(result => ({
+        this.exec<{ min: number; max: number; minIdx: number; maxIdx: number }>('minMaxChunk', [
+          chunk.buffer,
+          0,
+          chunk.length,
+        ]).then((result) => ({
           ...result,
           minIdx: result.minIdx + idx * (options?.chunkSize ?? this.config.chunkSize),
           maxIdx: result.maxIdx + idx * (options?.chunkSize ?? this.config.chunkSize),
@@ -1507,10 +1451,11 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<{ count: number; mean: number; m2: number }>(
-          'varianceChunk',
-          [chunk.buffer, 0, chunk.length]
-        )
+        this.exec<{ count: number; mean: number; m2: number }>('varianceChunk', [
+          chunk.buffer,
+          0,
+          chunk.length,
+        ])
       )
     );
 
@@ -1523,7 +1468,7 @@ export class MathWorkerPool {
       const delta = mean - totalMean;
       const newCount = totalCount + count;
       totalMean = (totalMean * totalCount + mean * count) / newCount;
-      totalM2 = totalM2 + m2 + delta * delta * (totalCount * count) / newCount;
+      totalM2 = totalM2 + m2 + (delta * delta * (totalCount * count)) / newCount;
       totalCount = newCount;
     }
 
@@ -1541,10 +1486,7 @@ export class MathWorkerPool {
   /**
    * Compute norm (Euclidean length) in parallel
    */
-  async norm(
-    data: Float64Array,
-    options?: TaskOptions
-  ): Promise<ParallelResult<number>> {
+  async norm(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
@@ -1565,9 +1507,7 @@ export class MathWorkerPool {
     const stats = this.stats();
 
     const partialNorms = await Promise.all(
-      chunks.map((chunk) =>
-        this.exec<number>('normChunk', [chunk.buffer, 0, chunk.length])
-      )
+      chunks.map((chunk) => this.exec<number>('normChunk', [chunk.buffer, 0, chunk.length]))
     );
 
     const sumSq = partialNorms.reduce((a, b) => a + b, 0);
@@ -1615,12 +1555,7 @@ export class MathWorkerPool {
 
     const partialDistances = await Promise.all(
       chunkPairs.map(([chunkA, chunkB]) =>
-        this.exec<number>('distanceChunk', [
-          chunkA.buffer,
-          chunkB.buffer,
-          0,
-          chunkA.length,
-        ])
+        this.exec<number>('distanceChunk', [chunkA.buffer, chunkB.buffer, 0, chunkA.length])
       )
     );
 
@@ -1649,15 +1584,33 @@ export class MathWorkerPool {
       const result = new Float64Array(data.length);
       for (let i = 0; i < data.length; i++) {
         switch (fn) {
-          case 'abs': result[i] = Math.abs(data[i]); break;
-          case 'sqrt': result[i] = Math.sqrt(data[i]); break;
-          case 'exp': result[i] = Math.exp(data[i]); break;
-          case 'log': result[i] = Math.log(data[i]); break;
-          case 'sin': result[i] = Math.sin(data[i]); break;
-          case 'cos': result[i] = Math.cos(data[i]); break;
-          case 'tan': result[i] = Math.tan(data[i]); break;
-          case 'negate': result[i] = -data[i]; break;
-          case 'square': result[i] = data[i] * data[i]; break;
+          case 'abs':
+            result[i] = Math.abs(data[i]);
+            break;
+          case 'sqrt':
+            result[i] = Math.sqrt(data[i]);
+            break;
+          case 'exp':
+            result[i] = Math.exp(data[i]);
+            break;
+          case 'log':
+            result[i] = Math.log(data[i]);
+            break;
+          case 'sin':
+            result[i] = Math.sin(data[i]);
+            break;
+          case 'cos':
+            result[i] = Math.cos(data[i]);
+            break;
+          case 'tan':
+            result[i] = Math.tan(data[i]);
+            break;
+          case 'negate':
+            result[i] = -data[i];
+            break;
+          case 'square':
+            result[i] = data[i] * data[i];
+            break;
         }
       }
       return {
@@ -1725,12 +1678,7 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<ArrayBuffer>('applyKernelChunk', [
-          chunk.buffer,
-          0,
-          chunk.length,
-          fnSource,
-        ])
+        this.exec<ArrayBuffer>('applyKernelChunk', [chunk.buffer, 0, chunk.length, fnSource])
       )
     );
 
@@ -1958,13 +1906,7 @@ export class MathWorkerPool {
       const rowEnd = Math.min(rowStart + rowsPerWorker, n);
       if (rowStart >= n) break;
       tasks.push(
-        this.exec<ArrayBuffer>('distanceMatrixRowsChunk', [
-          points.buffer,
-          n,
-          dim,
-          rowStart,
-          rowEnd,
-        ])
+        this.exec<ArrayBuffer>('distanceMatrixRowsChunk', [points.buffer, n, dim, rowStart, rowEnd])
       );
     }
 
@@ -2213,9 +2155,7 @@ export class MathWorkerPool {
     if (!this.shouldParallelize(data.length, options)) {
       const index = data.findIndex(predicate);
       return {
-        result: index === -1
-          ? { found: false }
-          : { found: true, value: data[index], index },
+        result: index === -1 ? { found: false } : { found: true, value: data[index], index },
         duration: performance.now() - start,
         chunks: 1,
         parallelized: false,
@@ -2230,10 +2170,11 @@ export class MathWorkerPool {
     // Search chunks in parallel
     const results = await Promise.all(
       chunks.map((chunk, idx) =>
-        this.exec<{ found: boolean; value?: T; index?: number }>(
-          'findChunk',
-          [chunk, predicate.toString(), idx * chunkSize]
-        )
+        this.exec<{ found: boolean; value?: T; index?: number }>('findChunk', [
+          chunk,
+          predicate.toString(),
+          idx * chunkSize,
+        ])
       )
     );
 
@@ -2286,9 +2227,7 @@ export class MathWorkerPool {
 
     // Sort each chunk in parallel
     const sortedChunks = await Promise.all(
-      chunks.map((chunk) =>
-        this.exec<T[]>('sortChunk', [chunk, compare?.toString()])
-      )
+      chunks.map((chunk) => this.exec<T[]>('sortChunk', [chunk, compare?.toString()]))
     );
 
     // Merge sorted chunks (k-way merge)
@@ -2362,9 +2301,7 @@ export class MathWorkerPool {
     const stats = this.stats();
 
     const results = await Promise.all(
-      chunks.map((chunk) =>
-        this.exec<R[]>('mapChunk', [chunk, fn.toString()])
-      )
+      chunks.map((chunk) => this.exec<R[]>('mapChunk', [chunk, fn.toString()]))
     );
 
     return {
@@ -2404,9 +2341,7 @@ export class MathWorkerPool {
 
     // Reduce each chunk in parallel
     const partialResults = await Promise.all(
-      chunks.map((chunk) =>
-        this.exec<R>('reduceChunk', [chunk, fn.toString(), initial])
-      )
+      chunks.map((chunk) => this.exec<R>('reduceChunk', [chunk, fn.toString(), initial]))
     );
 
     // Final sequential reduction of partial results
@@ -2449,9 +2384,7 @@ export class MathWorkerPool {
     const stats = this.stats();
 
     const results = await Promise.all(
-      chunks.map((chunk) =>
-        this.exec<T[]>('filterChunk', [chunk, predicate.toString()])
-      )
+      chunks.map((chunk) => this.exec<T[]>('filterChunk', [chunk, predicate.toString()]))
     );
 
     return {
@@ -2597,9 +2530,7 @@ export const mathWorkerPool = new MathWorkerPool();
 /**
  * Initialize the global worker pool
  */
-export async function initializePool(
-  config?: Partial<WorkerPoolConfig>
-): Promise<MathWorkerPool> {
+export async function initializePool(config?: Partial<WorkerPoolConfig>): Promise<MathWorkerPool> {
   if (config) {
     mathWorkerPool.updateConfig(config);
   }

@@ -1,54 +1,54 @@
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js'
-import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js'
-import { factory } from '../utils/factory.js'
-import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js'
-import { orNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
+import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js';
+import { factory } from '../utils/factory.js';
+import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
+import { orNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for logical or operation
 interface Complex {
-  re: number
-  im: number
+  re: number;
+  im: number;
 }
 
 interface BigNumber {
-  isZero(): boolean
-  isNaN(): boolean
+  isZero(): boolean;
+  isNaN(): boolean;
 }
 
 interface Unit {
-  value: number | BigNumber | Complex | null
+  value: number | BigNumber | Complex | null;
 }
 
 interface Matrix {
-  size(): number[]
-  storage(): string
+  size(): number[];
+  storage(): string;
 }
 
 interface OrDependencies {
-  typed: TypedFunction
-  matrix: (data: unknown[]) => Matrix
-  equalScalar: TypedFunction
-  DenseMatrix: new (data: unknown) => Matrix
-  concat: TypedFunction
+  typed: TypedFunction;
+  matrix: (data: unknown[]) => Matrix;
+  equalScalar: TypedFunction;
+  DenseMatrix: new (data: unknown) => Matrix;
+  concat: TypedFunction;
 }
 
-const name = 'or'
-const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat']
+const name = 'or';
+const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat'];
 
 export const createOr = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, matrix, equalScalar, DenseMatrix, concat }: OrDependencies) => {
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar })
-    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix })
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat
-    })
+      concat,
+    });
 
     /**
      * Logical `or`. Test if at least one value is defined with a nonzero/nonempty value.
@@ -84,11 +84,11 @@ export const createOr = /* #__PURE__ */ factory(
         'number, number': orNumber,
 
         'Complex, Complex': function (x: Complex, y: Complex): boolean {
-          return x.re !== 0 || x.im !== 0 || y.re !== 0 || y.im !== 0
+          return x.re !== 0 || x.im !== 0 || y.re !== 0 || y.im !== 0;
         },
 
         'BigNumber, BigNumber': function (x: BigNumber, y: BigNumber): boolean {
-          return (!x.isZero() && !x.isNaN()) || (!y.isZero() && !y.isNaN())
+          return (!x.isZero() && !x.isNaN()) || (!y.isZero() && !y.isNaN());
         },
 
         'bigint, bigint': orNumber,
@@ -97,13 +97,13 @@ export const createOr = /* #__PURE__ */ factory(
           (self: TypedFunction) =>
             (x: Unit, y: Unit): boolean =>
               self(x.value || 0, y.value || 0) as boolean
-        )
+        ),
       },
       matrixAlgorithmSuite({
         SS: matAlgo05xSfSf as any,
         DS: matAlgo03xDSf as any,
-        Ss: matAlgo12xSfs as any
+        Ss: matAlgo12xSfs as any,
       })
-    )
+    );
   }
-)
+);

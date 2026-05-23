@@ -33,6 +33,6 @@ export function isMatrix(value: unknown): value is number[][] {
     Array.isArray(value) &&
     value.length > 0 &&
     Array.isArray(value[0]) &&
-    value.every(row => Array.isArray(row) && row.every(isNumeric))
+    value.every((row) => Array.isArray(row) && row.every(isNumeric))
   );
 }

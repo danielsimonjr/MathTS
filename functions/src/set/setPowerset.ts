@@ -1,13 +1,9 @@
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import type {
-  MathArray,
-  Matrix,
-  MathNumericType
-} from '../../types/index.js'
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import type { MathArray, Matrix, MathNumericType } from '../../types/index.js';
 
-const name = 'setPowerset'
-const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index']
+const name = 'setPowerset';
+const dependencies = ['typed', 'size', 'subset', 'compareNatural', 'Index'];
 
 export const createSetPowerset = /* #__PURE__ */ factory(
   name,
@@ -36,49 +32,44 @@ export const createSetPowerset = /* #__PURE__ */ factory(
       'Array | Matrix': function (a: MathArray | Matrix): MathNumericType[][] {
         if (subset(size(a), new Index(0)) === 0) {
           // if empty, return empty
-          return []
+          return [];
         }
-        const b = flatten(Array.isArray(a) ? a : a.toArray()).sort(
-          compareNatural
-        )
-        const result: MathNumericType[][] = []
-        let number = 0
+        const b = flatten(Array.isArray(a) ? a : a.toArray()).sort(compareNatural);
+        const result: MathNumericType[][] = [];
+        let number = 0;
         while (number.toString(2).length <= b.length) {
-          result.push(_subset(b, number.toString(2).split('').reverse()))
-          number++
+          result.push(_subset(b, number.toString(2).split('').reverse()));
+          number++;
         }
         // can not return a matrix, because of the different size of the subarrays
-        return _sort(result)
-      }
-    })
+        return _sort(result);
+      },
+    });
 
     // create subset
-    function _subset(
-      array: MathNumericType[],
-      bitarray: string[]
-    ): MathNumericType[] {
-      const result: MathNumericType[] = []
+    function _subset(array: MathNumericType[], bitarray: string[]): MathNumericType[] {
+      const result: MathNumericType[] = [];
       for (let i = 0; i < bitarray.length; i++) {
         if (bitarray[i] === '1') {
-          result.push(array[i])
+          result.push(array[i]);
         }
       }
-      return result
+      return result;
     }
 
     // sort subsests by length
     function _sort(array: MathNumericType[][]): MathNumericType[][] {
-      let temp: MathNumericType[] = []
+      let temp: MathNumericType[] = [];
       for (let i = array.length - 1; i > 0; i--) {
         for (let j = 0; j < i; j++) {
           if (array[j].length > array[j + 1].length) {
-            temp = array[j]
-            array[j] = array[j + 1]
-            array[j + 1] = temp
+            temp = array[j];
+            array[j] = array[j + 1];
+            array[j + 1] = temp;
           }
         }
       }
-      return array
+      return array;
     }
   }
-)
+);

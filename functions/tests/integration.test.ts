@@ -34,7 +34,7 @@ describe('Numerical Integration', () => {
 
   describe('simpson', () => {
     it('should integrate x^2 from 0 to 1', () => {
-      expect(simpson(x => x ** 2, 0, 1)).toBeCloseTo(1 / 3, 10);
+      expect(simpson((x) => x ** 2, 0, 1)).toBeCloseTo(1 / 3, 10);
     });
 
     it('should integrate sin(x) from 0 to pi', () => {
@@ -46,23 +46,23 @@ describe('Numerical Integration', () => {
     });
 
     it('should integrate x^3 from 0 to 1', () => {
-      expect(simpson(x => x ** 3, 0, 1)).toBeCloseTo(0.25, 8);
+      expect(simpson((x) => x ** 3, 0, 1)).toBeCloseTo(0.25, 8);
     });
 
     it('should handle odd n by rounding up', () => {
       // n=99 becomes n=100
-      expect(simpson(x => x ** 2, 0, 1, 99)).toBeCloseTo(1 / 3, 8);
+      expect(simpson((x) => x ** 2, 0, 1, 99)).toBeCloseTo(1 / 3, 8);
     });
   });
 
   describe('gaussQuad', () => {
     it('should integrate x^2 from 0 to 1', () => {
-      expect(gaussQuad(x => x ** 2, 0, 1, 3)).toBeCloseTo(1 / 3, 12);
+      expect(gaussQuad((x) => x ** 2, 0, 1, 3)).toBeCloseTo(1 / 3, 12);
     });
 
     it('should integrate polynomial exactly (degree <= 2n-1)', () => {
       // 2-point rule is exact for degree <= 3
-      expect(gaussQuad(x => x ** 3, 0, 1, 2)).toBeCloseTo(0.25, 12);
+      expect(gaussQuad((x) => x ** 3, 0, 1, 2)).toBeCloseTo(0.25, 12);
     });
 
     it('should integrate exp(x) from 0 to 1', () => {
@@ -70,8 +70,8 @@ describe('Numerical Integration', () => {
     });
 
     it('should throw for unsupported number of points', () => {
-      expect(() => gaussQuad(x => x, 0, 1, 1)).toThrow();
-      expect(() => gaussQuad(x => x, 0, 1, 6)).toThrow();
+      expect(() => gaussQuad((x) => x, 0, 1, 1)).toThrow();
+      expect(() => gaussQuad((x) => x, 0, 1, 6)).toThrow();
     });
   });
 
@@ -81,7 +81,7 @@ describe('Numerical Integration', () => {
     });
 
     it('should integrate x^2 from 0 to 1', () => {
-      expect(romberg(x => x ** 2, 0, 1)).toBeCloseTo(1 / 3, 10);
+      expect(romberg((x) => x ** 2, 0, 1)).toBeCloseTo(1 / 3, 10);
     });
 
     it('should integrate exp(x) from 0 to 1', () => {
@@ -89,7 +89,7 @@ describe('Numerical Integration', () => {
     });
 
     it('should integrate 1/x from 1 to 2 (ln 2)', () => {
-      expect(romberg(x => 1 / x, 1, 2)).toBeCloseTo(Math.LN2, 10);
+      expect(romberg((x) => 1 / x, 1, 2)).toBeCloseTo(Math.LN2, 10);
     });
 
     it('should handle custom tolerance', () => {

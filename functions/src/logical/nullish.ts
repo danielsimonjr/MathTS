@@ -1,8 +1,8 @@
-import { factory } from '../utils/factory.js'
-import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js'
-import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js'
-import { createMatAlgo13xDD } from '../type/matrix/utils/matAlgo13xDD.js'
-import { DimensionError } from '../error/DimensionError.js'
+import { factory } from '../utils/factory.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
+import { createMatAlgo13xDD } from '../type/matrix/utils/matAlgo13xDD.js';
+import { DimensionError } from '../error/DimensionError.js';
 
 import {
   TypedFunction,
@@ -12,22 +12,22 @@ import {
   Complex,
   BigNumber,
   Fraction,
-  Unit
-} from '../types.js'
+  Unit,
+} from '../types.js';
 
 // Type definitions for nullish operation
 interface DenseMatrix {
-  type: 'DenseMatrix'
-  valueOf(): unknown[][]
-  [key: string]: any
+  type: 'DenseMatrix';
+  valueOf(): unknown[][];
+  [key: string]: any;
 }
 
 interface NullishDependencies {
-  typed: TypedFunction
-  matrix: MatrixConstructor
-  size: TypedFunction
-  flatten: TypedFunction
-  deepEqual: TypedFunction
+  typed: TypedFunction;
+  matrix: MatrixConstructor;
+  size: TypedFunction;
+  flatten: TypedFunction;
+  deepEqual: TypedFunction;
 }
 
 type NullishScalarType =
@@ -39,24 +39,18 @@ type NullishScalarType =
   | Unit
   | string
   | boolean
-  | SparseMatrix
+  | SparseMatrix;
 
-const name = 'nullish'
-const dependencies = ['typed', 'matrix', 'size', 'flatten', 'deepEqual']
+const name = 'nullish';
+const dependencies = ['typed', 'matrix', 'size', 'flatten', 'deepEqual'];
 
 export const createNullish = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    size,
-    flatten: _flatten,
-    deepEqual
-  }: NullishDependencies): TypedFunction => {
-    const matAlgo03xDSf = createMatAlgo03xDSf({ typed })
-    const matAlgo14xDs = createMatAlgo14xDs({ typed })
-    const matAlgo13xDD = createMatAlgo13xDD({ typed })
+  ({ typed, matrix, size, flatten: _flatten, deepEqual }: NullishDependencies): TypedFunction => {
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo14xDs = createMatAlgo14xDs({ typed });
+    const matAlgo13xDD = createMatAlgo13xDD({ typed });
 
     /**
      * Nullish coalescing operator (??). Returns the right-hand side operand
@@ -92,25 +86,24 @@ export const createNullish = /* #__PURE__ */ factory(
 
     // Helper function to create matrix from array
     const toMatrix = (arr: unknown[]): DenseMatrix => {
-      return (matrix as unknown as (data: unknown[]) => DenseMatrix)(arr)
-    }
+      return (matrix as unknown as (data: unknown[]) => DenseMatrix)(arr);
+    };
 
     return typed(name, {
       // Scalar and SparseMatrix-first short-circuit handlers
-      'number|bigint|Complex|BigNumber|Fraction|Unit|string|boolean|SparseMatrix, any':
-        (x: NullishScalarType, _y: unknown): NullishScalarType => x,
+      'number|bigint|Complex|BigNumber|Fraction|Unit|string|boolean|SparseMatrix, any': (
+        x: NullishScalarType,
+        _y: unknown
+      ): NullishScalarType => x,
       'null, any': (_x: null, y: unknown): unknown => y,
       'undefined, any': (_x: undefined, y: unknown): unknown => y,
 
       // SparseMatrix-first with collection RHS: enforce exact shape match
-      'SparseMatrix, Array | Matrix': (
-        x: SparseMatrix,
-        y: unknown[] | Matrix
-      ): SparseMatrix => {
-        const sx = size(x) as string | number | number[]
-        const sy = size(y) as string | number | number[]
-        if (deepEqual(sx, sy)) return x
-        throw new DimensionError(sx, sy as number | number[])
+      'SparseMatrix, Array | Matrix': (x: SparseMatrix, y: unknown[] | Matrix): SparseMatrix => {
+        const sx = size(x) as string | number | number[];
+        const sy = size(y) as string | number | number[];
+        if (deepEqual(sx, sy)) return x;
+        throw new DimensionError(sx, sy as number | number[]);
       },
 
       // DenseMatrix-first handlers (no broadcasting between collections)
@@ -139,7 +132,9 @@ export const createNullish = /* #__PURE__ */ factory(
       'Array, Array': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[], y: unknown[]): unknown[][] =>
-            (matAlgo13xDD(toMatrix(x) as any, toMatrix(y) as any, self) as any).valueOf() as unknown[][]
+            (
+              matAlgo13xDD(toMatrix(x) as any, toMatrix(y) as any, self) as any
+            ).valueOf() as unknown[][]
       ),
       'Array, DenseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
@@ -155,7 +150,7 @@ export const createNullish = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[], y: unknown): unknown[][] =>
             (matAlgo14xDs(toMatrix(x) as any, y, self, false) as any).valueOf() as unknown[][]
-      )
-    }) as unknown as TypedFunction
+      ),
+    }) as unknown as TypedFunction;
   }
-)
+);

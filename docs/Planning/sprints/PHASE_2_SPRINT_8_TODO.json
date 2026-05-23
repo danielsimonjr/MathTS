@@ -65,7 +65,10 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [3, 4, 5],
-      "files": ["matrix/tests/sparse/SparseMatrix.test.ts", "matrix/tests/sparse/operations.test.ts"]
+      "files": [
+        "matrix/tests/sparse/SparseMatrix.test.ts",
+        "matrix/tests/sparse/operations.test.ts"
+      ]
     }
   ],
   "successCriteria": [

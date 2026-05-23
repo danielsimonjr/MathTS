@@ -35,9 +35,9 @@ import { MathTSWasm } from '@danielsimonjr/mathts-wasm';
 const wasm = await MathTSWasm.create('/path/to/mathts.wasm');
 
 // Scalar operations
-const sum = wasm.add(2, 3);       // 5
-const sqrt = wasm.sqrt(16);       // 4
-const sin = wasm.sin(Math.PI/2);  // 1
+const sum = wasm.add(2, 3); // 5
+const sqrt = wasm.sqrt(16); // 4
+const sin = wasm.sin(Math.PI / 2); // 1
 
 // For array/matrix operations, use the raw exports
 const exports = wasm.raw;
@@ -84,6 +84,7 @@ assembly/
 ## Available Operations
 
 ### Scalar Operations
+
 - Basic: `add_f64`, `sub_f64`, `mul_f64`, `div_f64`, `mod_f64`, `neg_f64`
 - Power: `sqrt_f64`, `pow_f64`, `square_f64`, `cube_f64`, `cbrt_f64`
 - Exp/Log: `exp_f64`, `log_f64`, `log10_f64`, `log2_f64`
@@ -92,18 +93,21 @@ assembly/
 - Rounding: `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`
 
 ### Array Operations
+
 - Reductions: `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_min`, `array_max`
 - Norms: `array_norm`, `array_norm_l1`, `array_norm_linf`
 - Element-wise: `array_add`, `array_sub`, `array_mul`, `array_div`, `array_scale`
 - BLAS-like: `array_dot`, `array_axpby`, `array_distance`
 
 ### Matrix Operations
+
 - Creation: `matrix_zeros`, `matrix_ones`, `matrix_identity`, `matrix_diag`
 - Arithmetic: `matrix_add`, `matrix_sub`, `matrix_scale`, `matrix_multiply`
 - Properties: `matrix_trace`, `matrix_norm_frobenius`, `matrix_transpose`
 - BLAS: `matrix_gemm`, `matrix_gemv`, `matrix_axpy`
 
 ### Complex Operations
+
 - Arithmetic: `complex_add`, `complex_sub`, `complex_mul`, `complex_div`
 - Functions: `complex_exp`, `complex_log`, `complex_sqrt`, `complex_pow`
 - Trig: `complex_sin`, `complex_cos`, `complex_tan`, `complex_asin`, `complex_acos`

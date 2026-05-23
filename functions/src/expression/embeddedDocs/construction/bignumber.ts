@@ -8,16 +8,7 @@ export const bignumberDocs = {
     'bignumber(0.1) + bignumber(0.2)',
     'bignumber("7.2")',
     'bignumber("7.2e500")',
-    'bignumber([0.1, 0.2, 0.3])'
+    'bignumber([0.1, 0.2, 0.3])',
   ],
-  seealso: [
-    'boolean',
-    'bigint',
-    'complex',
-    'fraction',
-    'index',
-    'matrix',
-    'string',
-    'unit'
-  ]
-}
+  seealso: ['boolean', 'bigint', 'complex', 'fraction', 'index', 'matrix', 'string', 'unit'],
+};

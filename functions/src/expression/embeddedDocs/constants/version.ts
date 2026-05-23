@@ -4,5 +4,5 @@ export const versionDocs = {
   syntax: ['version'],
   description: 'A string with the version number of math.js',
   examples: ['version'],
-  seealso: [] as any[]
-}
+  seealso: [] as any[],
+};

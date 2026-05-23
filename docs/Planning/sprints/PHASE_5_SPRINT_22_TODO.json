@@ -45,7 +45,10 @@
       "estimatedHours": 3,
       "complexity": "Low",
       "dependencies": [1],
-      "files": ["functions/src/combinatorics/combinations.ts", "functions/src/combinatorics/permutations.ts"]
+      "files": [
+        "functions/src/combinatorics/combinations.ts",
+        "functions/src/combinatorics/permutations.ts"
+      ]
     },
     {
       "id": 5,
@@ -55,7 +58,11 @@
       "estimatedHours": 4,
       "complexity": "Medium",
       "dependencies": [4],
-      "files": ["functions/src/combinatorics/bell.ts", "functions/src/combinatorics/stirling.ts", "functions/src/combinatorics/catalan.ts"]
+      "files": [
+        "functions/src/combinatorics/bell.ts",
+        "functions/src/combinatorics/stirling.ts",
+        "functions/src/combinatorics/catalan.ts"
+      ]
     },
     {
       "id": 6,
@@ -65,7 +72,10 @@
       "estimatedHours": 6,
       "complexity": "Medium",
       "dependencies": [1, 2, 3, 4, 5],
-      "files": ["functions/tests/special/gamma.test.ts", "functions/tests/combinatorics/basic.test.ts"]
+      "files": [
+        "functions/tests/special/gamma.test.ts",
+        "functions/tests/combinatorics/basic.test.ts"
+      ]
     }
   ],
   "successCriteria": [
@@ -91,9 +101,7 @@
     "functions/tests/special/gamma.test.ts",
     "functions/tests/combinatorics/basic.test.ts"
   ],
-  "filesModified": [
-    "functions/src/index.ts"
-  ],
+  "filesModified": ["functions/src/index.ts"],
   "totalEstimatedHours": 24,
   "notes": "Sprint 22 implements special mathematical functions and combinatorics. These are essential for advanced mathematical and scientific computing."
 }

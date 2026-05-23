@@ -15,7 +15,13 @@
       "estimatedHours": 12,
       "complexity": "Medium",
       "dependencies": ["Sprint 26"],
-      "files": ["docs/api/core.md", "docs/api/matrix.md", "docs/api/functions.md", "docs/api/parallel.md", "docs/api/expression.md"]
+      "files": [
+        "docs/api/core.md",
+        "docs/api/matrix.md",
+        "docs/api/functions.md",
+        "docs/api/parallel.md",
+        "docs/api/expression.md"
+      ]
     },
     {
       "id": 2,
@@ -45,7 +51,12 @@
       "estimatedHours": 8,
       "complexity": "Medium",
       "dependencies": [2],
-      "files": ["examples/basic-usage/", "examples/matrix-operations/", "examples/parallel-computing/", "examples/webgpu-acceleration/"]
+      "files": [
+        "examples/basic-usage/",
+        "examples/matrix-operations/",
+        "examples/parallel-computing/",
+        "examples/webgpu-acceleration/"
+      ]
     }
   ],
   "successCriteria": [
@@ -73,9 +84,7 @@
     "examples/webgpu-acceleration/package.json",
     "examples/webgpu-acceleration/index.ts"
   ],
-  "filesModified": [
-    "docs/README.md"
-  ],
+  "filesModified": ["docs/README.md"],
   "totalEstimatedHours": 30,
   "notes": "Sprint 27 focuses on documentation and examples. Good documentation is essential for adoption and developer experience."
 }

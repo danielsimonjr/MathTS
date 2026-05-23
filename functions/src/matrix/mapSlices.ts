@@ -1,22 +1,22 @@
-import { factory } from '../utils/factory.js'
-import { arraySize } from '../utils/array.js'
-import { isMatrix } from '../utils/is.js'
-import { IndexError } from '../error/IndexError.js'
+import { factory } from '../utils/factory.js';
+import { arraySize } from '../utils/array.js';
+import { isMatrix } from '../utils/is.js';
+import { IndexError } from '../error/IndexError.js';
 
-import { TypedFunction, Matrix, BigNumber } from '../types.js'
+import { TypedFunction, Matrix, BigNumber } from '../types.js';
 
-const name = 'mapSlices'
-const dependencies = ['typed', 'isInteger']
+const name = 'mapSlices';
+const dependencies = ['typed', 'isInteger'];
 
 export const createMapSlices = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({
     typed,
-    isInteger
+    isInteger,
   }: {
-    typed: TypedFunction
-    isInteger: (value: any) => boolean
+    typed: TypedFunction;
+    isInteger: (value: any) => boolean;
   }): TypedFunction => {
     /**
      * Apply a function that maps an array to a scalar
@@ -62,28 +62,28 @@ export const createMapSlices = /* #__PURE__ */ factory(
         callback: Function
       ) {
         if (!isInteger(dim)) {
-          throw new TypeError('Integer number expected for dimension')
+          throw new TypeError('Integer number expected for dimension');
         }
 
-        const dimNum = typeof dim === 'number' ? dim : (dim as any).toNumber()
-        const size = Array.isArray(mat) ? arraySize(mat) : (mat as any).size()
+        const dimNum = typeof dim === 'number' ? dim : (dim as any).toNumber();
+        const size = Array.isArray(mat) ? arraySize(mat) : (mat as any).size();
         if (dimNum < 0 || dimNum >= size.length) {
-          throw new IndexError(dimNum, 0, size.length) as any
+          throw new IndexError(dimNum, 0, size.length) as any;
         }
 
         if (isMatrix(mat)) {
           return (mat as any).create(
             _mapSlices((mat as any).valueOf(), dimNum, callback),
             (mat as any).datatype()
-          )
+          );
         } else {
-          return _mapSlices(mat, dimNum, callback)
+          return _mapSlices(mat, dimNum, callback);
         }
-      }
-    }) as unknown as TypedFunction
+      },
+    }) as unknown as TypedFunction;
   },
   { formerly: 'apply' }
-)
+);
 
 /**
  * Recursively reduce a matrix
@@ -94,25 +94,25 @@ export const createMapSlices = /* #__PURE__ */ factory(
  * @private
  */
 function _mapSlices(mat: any, dim: any, callback: any): any {
-  let i, ret, tran
+  let i, ret, tran;
 
   if (dim <= 0) {
     if (!Array.isArray(mat[0])) {
-      return callback(mat)
+      return callback(mat);
     } else {
-      tran = _switch(mat)
-      ret = []
+      tran = _switch(mat);
+      ret = [];
       for (i = 0; i < tran.length; i++) {
-        ret[i] = _mapSlices(tran[i], dim - 1, callback)
+        ret[i] = _mapSlices(tran[i], dim - 1, callback);
       }
-      return ret
+      return ret;
     }
   } else {
-    ret = []
+    ret = [];
     for (i = 0; i < mat.length; i++) {
-      ret[i] = _mapSlices(mat[i], dim - 1, callback)
+      ret[i] = _mapSlices(mat[i], dim - 1, callback);
     }
-    return ret
+    return ret;
   }
 }
 
@@ -123,16 +123,16 @@ function _mapSlices(mat: any, dim: any, callback: any): any {
  * @private
  */
 function _switch(mat: any) {
-  const I = mat.length
-  const J = mat[0].length
-  let i, j
-  const ret = []
+  const I = mat.length;
+  const J = mat[0].length;
+  let i, j;
+  const ret = [];
   for (j = 0; j < J; j++) {
-    const tmp = []
+    const tmp = [];
     for (i = 0; i < I; i++) {
-      tmp.push(mat[i][j])
+      tmp.push(mat[i][j]);
     }
-    ret.push(tmp)
+    ret.push(tmp);
   }
-  return ret
+  return ret;
 }

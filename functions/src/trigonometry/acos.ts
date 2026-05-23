@@ -1,28 +1,28 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
-import type { ConfigOptions } from '../core/config.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
+import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for acos
 interface BigNumberType {
-  acos(): BigNumberType
+  acos(): BigNumberType;
 }
 
 interface ComplexType {
-  acos(): ComplexType
+  acos(): ComplexType;
 }
 
 interface ComplexConstructor {
-  new (re: number, im: number): ComplexType
+  new (re: number, im: number): ComplexType;
 }
 
 interface AcosDependencies {
-  typed: TypedFunction
-  config: ConfigOptions
-  Complex: ComplexConstructor
+  typed: TypedFunction;
+  config: ConfigOptions;
+  Complex: ComplexConstructor;
 }
 
-const name = 'acos'
-const dependencies = ['typed', 'config', 'Complex']
+const name = 'acos';
+const dependencies = ['typed', 'config', 'Complex'];
 
 export const createAcos = /* #__PURE__ */ factory(
   name,
@@ -55,19 +55,19 @@ export const createAcos = /* #__PURE__ */ factory(
     return typed(name, {
       number: function (x: number): number | ComplexType {
         if ((x >= -1 && x <= 1) || config.predictable) {
-          return Math.acos(x)
+          return Math.acos(x);
         } else {
-          return new Complex(x, 0).acos()
+          return new Complex(x, 0).acos();
         }
       },
 
       Complex: function (x: ComplexType): ComplexType {
-        return x.acos()
+        return x.acos();
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        return x.acos()
-      }
-    })
+        return x.acos();
+      },
+    });
   }
-)
+);

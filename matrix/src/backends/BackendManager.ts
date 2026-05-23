@@ -12,12 +12,7 @@ import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { MatrixBackend, BackendType, BackendHints } from './Backend.js';
 import { backendRegistry, DEFAULT_BACKEND_HINTS } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
-import {
-  getConfig,
-  onConfigChange,
-  type MatrixConfig,
-  type OperationType,
-} from '../config.js';
+import { getConfig, onConfigChange, type MatrixConfig, type OperationType } from '../config.js';
 
 // `OperationType` is defined in `config.ts` (to break the config/BackendManager
 // import cycle); re-exported here so existing `./BackendManager.js` importers
@@ -29,7 +24,9 @@ export type { OperationType };
  */
 export interface ExtendedBackendHints extends BackendHints {
   /** Specific thresholds by operation type */
-  operationThresholds?: Partial<Record<OperationType, { wasm?: number; gpu?: number; rustWasm?: number }>>;
+  operationThresholds?: Partial<
+    Record<OperationType, { wasm?: number; gpu?: number; rustWasm?: number }>
+  >;
   /** Enable automatic SIMD detection for WASM */
   autoSIMD?: boolean;
   /** Fallback to JS on backend failure */
@@ -186,10 +183,7 @@ export class BackendManager {
    *   5. Elements > wasmThreshold -> AS WASM (if loaded)
    *   6. JS fallback
    */
-  selectBackend(
-    elementCount: number,
-    operation?: OperationType
-  ): MatrixBackend {
+  selectBackend(elementCount: number, operation?: OperationType): MatrixBackend {
     const {
       preferredBackend,
       operationThresholds,
@@ -208,7 +202,11 @@ export class BackendManager {
     }
 
     // Heavy operations always prefer Rust WASM (faer/rustfft) regardless of size
-    if (operation && rustWasmPreferredOps?.includes(operation) && backendRegistry.has('rust-wasm')) {
+    if (
+      operation &&
+      rustWasmPreferredOps?.includes(operation) &&
+      backendRegistry.has('rust-wasm')
+    ) {
       const rustBackend = backendRegistry.get('rust-wasm');
       if (rustBackend) return rustBackend;
     }
@@ -249,10 +247,7 @@ export class BackendManager {
   /**
    * Execute an operation with automatic backend selection
    */
-  private executeWithFallback<T>(
-    operation: () => T,
-    fallback: () => T
-  ): T {
+  private executeWithFallback<T>(operation: () => T, fallback: () => T): T {
     if (!this.hints.fallbackOnError) {
       return operation();
     }
@@ -495,8 +490,7 @@ export class BackendManager {
     if (!config.adaptiveTuning.enabled) return;
 
     const now = Date.now();
-    const { cooldownMs, sampleSize, minSpeedupRatio, maxAdjustmentPercent } =
-      config.adaptiveTuning;
+    const { cooldownMs, sampleSize, minSpeedupRatio, maxAdjustmentPercent } = config.adaptiveTuning;
 
     // Check cooldown
     if (now - this.adaptiveState.lastAdjustment < cooldownMs) {
@@ -601,17 +595,23 @@ export class BackendManager {
    */
   getPerformanceStats(): {
     sampleCount: number;
-    operationStats: Map<OperationType, {
-      avgDuration: number;
-      samples: number;
-      backendUsage: Record<BackendType, number>;
-    }>;
+    operationStats: Map<
+      OperationType,
+      {
+        avgDuration: number;
+        samples: number;
+        backendUsage: Record<BackendType, number>;
+      }
+    >;
   } {
-    const operationStats = new Map<OperationType, {
-      avgDuration: number;
-      samples: number;
-      backendUsage: Record<BackendType, number>;
-    }>();
+    const operationStats = new Map<
+      OperationType,
+      {
+        avgDuration: number;
+        samples: number;
+        backendUsage: Record<BackendType, number>;
+      }
+    >();
 
     // Group by operation
     const byOperation = new Map<OperationType, PerformanceSample[]>();

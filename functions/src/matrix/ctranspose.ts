@@ -1,14 +1,14 @@
-import { factory } from '../utils/factory.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { factory } from '../utils/factory.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface CtransposeDependencies {
-  typed: TypedFunction
-  transpose: TypedFunction
-  conj: TypedFunction
+  typed: TypedFunction;
+  transpose: TypedFunction;
+  conj: TypedFunction;
 }
 
-const name = 'ctranspose'
-const dependencies = ['typed', 'transpose', 'conj']
+const name = 'ctranspose';
+const dependencies = ['typed', 'transpose', 'conj'];
 
 export const createCtranspose = /* #__PURE__ */ factory(
   name,
@@ -38,8 +38,8 @@ export const createCtranspose = /* #__PURE__ */ factory(
      */
     return typed(name, {
       any: function (x: any): any {
-        return conj(transpose(x))
-      }
-    })
+        return conj(transpose(x));
+      },
+    });
   }
-)
+);

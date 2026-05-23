@@ -1,43 +1,43 @@
-import { factory } from '../../../utils/factory.js'
-import type { TypedFunction, CallbackFunction } from '../types.js'
+import { factory } from '../../../utils/factory.js';
+import type { TypedFunction, CallbackFunction } from '../types.js';
 
 /**
  * Typed-function signatures record type
  */
-type SignaturesRecord = Record<string, CallbackFunction>
+type SignaturesRecord = Record<string, CallbackFunction>;
 
 /**
  * Extended typed function with signatures property
  */
 interface TypedFunctionWithSignatures extends CallbackFunction {
-  signatures: SignaturesRecord
-  name?: string
+  signatures: SignaturesRecord;
+  name?: string;
 }
 
 /**
  * Extended typed function interface with isTypedFunction method
  */
 interface TypedWithChecker extends TypedFunction {
-  isTypedFunction(fn: unknown): fn is TypedFunctionWithSignatures
+  isTypedFunction(fn: unknown): fn is TypedFunctionWithSignatures;
 }
 
 interface TransformCallbackDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'transformCallback'
-const dependencies = ['typed']
+const name = 'transformCallback';
+const dependencies = ['typed'];
 
 export const createTransformCallback = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({
-    typed
+    typed,
   }: TransformCallbackDependencies): ((
     callback: CallbackFunction,
     numberOfArrays: number
   ) => CallbackFunction) => {
-    const typedChecker = typed as TypedWithChecker
+    const typedChecker = typed as TypedWithChecker;
 
     /**
      * Transforms the given callback function based on its type and number of arrays.
@@ -46,20 +46,13 @@ export const createTransformCallback = /* #__PURE__ */ factory(
      * @param numberOfArrays - The number of arrays to pass to the callback function.
      * @returns The transformed callback function.
      */
-    return function (
-      callback: CallbackFunction,
-      numberOfArrays: number
-    ): CallbackFunction {
+    return function (callback: CallbackFunction, numberOfArrays: number): CallbackFunction {
       if (typedChecker.isTypedFunction(callback)) {
-        return _transformTypedCallbackFunction(callback, numberOfArrays)
+        return _transformTypedCallbackFunction(callback, numberOfArrays);
       } else {
-        return _transformCallbackFunction(
-          callback,
-          callback.length,
-          numberOfArrays
-        )
+        return _transformCallbackFunction(callback, callback.length, numberOfArrays);
       }
-    }
+    };
 
     /**
      * Transforms the given typed callback function based on the number of arrays.
@@ -75,15 +68,9 @@ export const createTransformCallback = /* #__PURE__ */ factory(
       const signatures: SignaturesRecord = Object.fromEntries(
         Object.entries(typedFunction.signatures).map(
           ([signature, callbackFunction]): [string, CallbackFunction] => {
-            const numberOfCallbackInputs = signature.split(',').length
+            const numberOfCallbackInputs = signature.split(',').length;
             if (typedChecker.isTypedFunction(callbackFunction)) {
-              return [
-                signature,
-                _transformTypedCallbackFunction(
-                  callbackFunction,
-                  numberOfArrays
-                )
-              ]
+              return [signature, _transformTypedCallbackFunction(callbackFunction, numberOfArrays)];
             } else {
               return [
                 signature,
@@ -91,21 +78,21 @@ export const createTransformCallback = /* #__PURE__ */ factory(
                   callbackFunction,
                   numberOfCallbackInputs,
                   numberOfArrays
-                )
-              ]
+                ),
+              ];
             }
           }
         )
-      )
+      );
 
       if (typeof typedFunction.name === 'string') {
-        return typed(typedFunction.name, signatures) as CallbackFunction
+        return typed(typedFunction.name, signatures) as CallbackFunction;
       } else {
-        return typed(signatures) as CallbackFunction
+        return typed(signatures) as CallbackFunction;
       }
     }
   }
-)
+);
 
 /**
  * Transforms the callback function based on the number of callback inputs and arrays.
@@ -125,22 +112,22 @@ function _transformCallbackFunction(
   numberOfArrays: number
 ): CallbackFunction {
   if (numberOfCallbackInputs === numberOfArrays) {
-    return callbackFunction
+    return callbackFunction;
   } else if (numberOfCallbackInputs === numberOfArrays + 1) {
     return function (...args: unknown[]): unknown {
-      const vals = args.slice(0, numberOfArrays)
-      const idx = _transformDims(args[numberOfArrays] as number[])
-      return callbackFunction(...vals, idx)
-    }
+      const vals = args.slice(0, numberOfArrays);
+      const idx = _transformDims(args[numberOfArrays] as number[]);
+      return callbackFunction(...vals, idx);
+    };
   } else if (numberOfCallbackInputs > numberOfArrays + 1) {
     return function (...args: unknown[]): unknown {
-      const vals = args.slice(0, numberOfArrays)
-      const idx = _transformDims(args[numberOfArrays] as number[])
-      const rest = args.slice(numberOfArrays + 1)
-      return callbackFunction(...vals, idx, ...rest)
-    }
+      const vals = args.slice(0, numberOfArrays);
+      const idx = _transformDims(args[numberOfArrays] as number[]);
+      const rest = args.slice(numberOfArrays + 1);
+      return callbackFunction(...vals, idx, ...rest);
+    };
   } else {
-    return callbackFunction
+    return callbackFunction;
   }
 }
 
@@ -151,5 +138,5 @@ function _transformCallbackFunction(
  * @returns The transformed dimensions.
  */
 function _transformDims(dims: number[]): number[] {
-  return dims.map((dim: number) => dim + 1)
+  return dims.map((dim: number) => dim + 1);
 }

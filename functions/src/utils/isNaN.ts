@@ -1,27 +1,27 @@
-import { deepMap } from '../utils/collection.js'
-import { factory } from '../utils/factory.js'
-import { isNaNNumber } from '../plain/number/index.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { deepMap } from '../utils/collection.js';
+import { factory } from '../utils/factory.js';
+import { isNaNNumber } from '../plain/number/index.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for isNaN
 interface BigNumberType {
-  isNaN(): boolean
+  isNaN(): boolean;
 }
 
 interface ComplexType {
-  isNaN(): boolean
+  isNaN(): boolean;
 }
 
 interface UnitType {
-  value: number
+  value: number;
 }
 
 interface IsNaNDependencies {
-  typed: TypedFunction
+  typed: TypedFunction;
 }
 
-const name = 'isNaN'
-const dependencies = ['typed']
+const name = 'isNaN';
+const dependencies = ['typed'];
 
 export const createIsNaN = /* #__PURE__ */ factory(
   name,
@@ -60,30 +60,30 @@ export const createIsNaN = /* #__PURE__ */ factory(
       number: isNaNNumber,
 
       BigNumber: function (x: BigNumberType): boolean {
-        return x.isNaN()
+        return x.isNaN();
       },
 
       bigint: function (_x: bigint): boolean {
-        return false
+        return false;
       },
 
       Fraction: function (_x: unknown): boolean {
-        return false
+        return false;
       },
 
       Complex: function (x: ComplexType): boolean {
-        return x.isNaN()
+        return x.isNaN();
       },
 
       Unit: function (x: UnitType): boolean {
-        return Number.isNaN(x.value)
+        return Number.isNaN(x.value);
       },
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown): unknown =>
             deepMap(x as unknown[], self)
-      )
-    })
+      ),
+    });
   }
-)
+);

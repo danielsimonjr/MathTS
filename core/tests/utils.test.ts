@@ -39,7 +39,12 @@ describe('isComplex', () => {
 
 describe('isMatrix', () => {
   it('should return true for valid matrices', () => {
-    expect(isMatrix([[1, 2], [3, 4]])).toBe(true);
+    expect(
+      isMatrix([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toBe(true);
     expect(isMatrix([[1]])).toBe(true);
     expect(isMatrix([[1, 2, 3]])).toBe(true);
   });
@@ -47,7 +52,12 @@ describe('isMatrix', () => {
   it('should return false for invalid matrices', () => {
     expect(isMatrix([])).toBe(false);
     expect(isMatrix([1, 2, 3])).toBe(false);
-    expect(isMatrix([[1, 'a'], [3, 4]])).toBe(false);
+    expect(
+      isMatrix([
+        [1, 'a'],
+        [3, 4],
+      ])
+    ).toBe(false);
     expect(isMatrix(null)).toBe(false);
   });
 });

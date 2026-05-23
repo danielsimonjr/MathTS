@@ -17,7 +17,7 @@ import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 const A = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
-  [7, 8, 9]
+  [7, 8, 9],
 ]);
 
 // Basic operations
@@ -32,11 +32,11 @@ const { U, S, V } = svd(A.toArray());
 
 ## Backends
 
-| Backend | Trigger | Performance |
-|---------|---------|-------------|
-| **JS** | Default | 1x baseline |
-| **WASM** | >1K elements | ~10x faster |
-| **GPU** | >100K elements | ~100x faster |
+| Backend  | Trigger        | Performance  |
+| -------- | -------------- | ------------ |
+| **JS**   | Default        | 1x baseline  |
+| **WASM** | >1K elements   | ~10x faster  |
+| **GPU**  | >100K elements | ~100x faster |
 
 ## Matrix Types
 

@@ -10,7 +10,7 @@ import {
   BIGNUMBER_ZERO,
   BIGNUMBER_ONE,
   BIGNUMBER_TEN,
-  BIGNUMBER_PI
+  BIGNUMBER_PI,
 } from '../../src/types/bignumber';
 
 describe('BigNumber', () => {

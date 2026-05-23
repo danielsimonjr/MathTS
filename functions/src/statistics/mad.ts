@@ -1,24 +1,24 @@
-import { flatten } from '../utils/array.js'
-import { factory } from '../utils/factory.js'
-import { improveErrorMessage } from './utils/improveErrorMessage.js'
-import { wasmLoader } from '../wasm/WasmLoader.js'
-import type { TypedFunction } from '../core/function/typed.js'
+import { flatten } from '../utils/array.js';
+import { factory } from '../utils/factory.js';
+import { improveErrorMessage } from './utils/improveErrorMessage.js';
+import { wasmLoader } from '../wasm/WasmLoader.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for mad
 interface MatrixType {
-  valueOf(): unknown[] | unknown[][]
+  valueOf(): unknown[] | unknown[][];
 }
 
 interface MadDependencies {
-  typed: TypedFunction
-  abs: TypedFunction
-  map: TypedFunction
-  median: TypedFunction
-  subtract: TypedFunction
+  typed: TypedFunction;
+  abs: TypedFunction;
+  map: TypedFunction;
+  median: TypedFunction;
+  subtract: TypedFunction;
 }
 
 // Minimum array length for WASM to be beneficial
-const WASM_MAD_THRESHOLD = 500
+const WASM_MAD_THRESHOLD = 500;
 
 /**
  * Check if an array contains only plain numbers
@@ -26,14 +26,14 @@ const WASM_MAD_THRESHOLD = 500
 function isPlainNumberArray(arr: unknown[]): arr is number[] {
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i] !== 'number') {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
 
-const name = 'mad'
-const dependencies = ['typed', 'abs', 'map', 'median', 'subtract']
+const name = 'mad';
+const dependencies = ['typed', 'abs', 'map', 'median', 'subtract'];
 
 export const createMad = /* #__PURE__ */ factory(
   name,
@@ -69,9 +69,9 @@ export const createMad = /* #__PURE__ */ factory(
 
       // mad(a, b, c, d, ...)
       '...': function (args: unknown[]): unknown {
-        return _mad(args)
-      }
-    })
+        return _mad(args);
+      },
+    });
 
     /**
      * Calculate the median absolute deviation
@@ -80,29 +80,23 @@ export const createMad = /* #__PURE__ */ factory(
      * @private
      */
     function _mad(array: unknown[] | MatrixType): unknown {
-      const flat = flatten((array as MatrixType).valueOf()) as unknown[]
+      const flat = flatten((array as MatrixType).valueOf()) as unknown[];
 
       if (flat.length === 0) {
-        throw new Error(
-          'Cannot calculate median absolute deviation (mad) of an empty array'
-        )
+        throw new Error('Cannot calculate median absolute deviation (mad) of an empty array');
       }
 
       // Try WASM for large arrays with plain numbers
-      const wasm = wasmLoader.getModule()
-      if (
-        wasm &&
-        flat.length >= WASM_MAD_THRESHOLD &&
-        isPlainNumberArray(flat)
-      ) {
+      const wasm = wasmLoader.getModule();
+      if (wasm && flat.length >= WASM_MAD_THRESHOLD && isPlainNumberArray(flat)) {
         try {
-          const aAlloc = wasmLoader.allocateFloat64Array(flat)
+          const aAlloc = wasmLoader.allocateFloat64Array(flat);
 
           try {
-            const result = wasm.statsMad(aAlloc.ptr, flat.length)
-            return result
+            const result = wasm.statsMad(aAlloc.ptr, flat.length);
+            return result;
           } finally {
-            wasmLoader.free(aAlloc.ptr)
+            wasmLoader.free(aAlloc.ptr);
           }
         } catch {
           // Fall back to JS implementation on WASM error
@@ -110,19 +104,19 @@ export const createMad = /* #__PURE__ */ factory(
       }
 
       try {
-        const med = median(flat)
+        const med = median(flat);
         return median(
           map(flat, function (value: unknown): unknown {
-            return abs(subtract(value, med))
+            return abs(subtract(value, med));
           })
-        )
+        );
       } catch (err) {
         if (err instanceof TypeError && err.message.includes('median')) {
-          throw new TypeError(err.message.replace('median', 'mad'))
+          throw new TypeError(err.message.replace('median', 'mad'));
         } else {
-          throw improveErrorMessage(err, 'mad', undefined)
+          throw improveErrorMessage(err, 'mad', undefined);
         }
       }
     }
   }
-)
+);

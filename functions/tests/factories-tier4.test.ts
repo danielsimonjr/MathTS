@@ -314,8 +314,7 @@ describe('Tier 5 - arithmetic', () => {
   it('ceil(4.1) = 5', () => expect(factory_ceil(4.1)).toBe(5));
   it('floor(4.9) = 4', () => expect(factory_floor(4.9)).toBe(4));
   it('nthRoot(27, 3) = 3', () => expect(factory_nthRoot(27, 3)).toBe(3));
-  it('dotDivide([6, 9], [2, 3]) = [3, 3]', () =>
-    expect(dotDivide([6, 9], [2, 3])).toEqual([3, 3]));
+  it('dotDivide([6, 9], [2, 3]) = [3, 3]', () => expect(dotDivide([6, 9], [2, 3])).toEqual([3, 3]));
   it('dotMultiply([2, 3], [4, 5]) = [8, 15]', () =>
     expect(dotMultiply([2, 3], [4, 5])).toEqual([8, 15]));
 });

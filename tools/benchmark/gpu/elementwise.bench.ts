@@ -111,12 +111,12 @@ async function main() {
 
   // Test sizes (total elements)
   const sizes = [
-    { name: '64KB', elements: 16384 },      // 64KB
-    { name: '256KB', elements: 65536 },     // 256KB
-    { name: '1MB', elements: 262144 },      // 1MB
-    { name: '4MB', elements: 1048576 },     // 4MB
-    { name: '16MB', elements: 4194304 },    // 16MB
-    { name: '64MB', elements: 16777216 },   // 64MB
+    { name: '64KB', elements: 16384 }, // 64KB
+    { name: '256KB', elements: 65536 }, // 256KB
+    { name: '1MB', elements: 262144 }, // 1MB
+    { name: '4MB', elements: 1048576 }, // 4MB
+    { name: '16MB', elements: 4194304 }, // 16MB
+    { name: '64MB', elements: 16777216 }, // 64MB
   ];
 
   // CPU Benchmarks
@@ -128,11 +128,7 @@ async function main() {
     const a = randomMatrix(elements);
     const b = randomMatrix(elements);
 
-    const result = await benchmark(
-      name,
-      () => cpuOps.add(a, b),
-      elements > 1000000 ? 10 : 20
-    );
+    const result = await benchmark(name, () => cpuOps.add(a, b), elements > 1000000 ? 10 : 20);
 
     const throughput = calculateThroughput(elements, result.mean);
     console.log(`  ${name}: ${formatResult(result)} - ${throughput.toFixed(2)} GB/s`);
@@ -142,11 +138,7 @@ async function main() {
   for (const { name, elements } of sizes) {
     const a = randomMatrix(elements);
 
-    const result = await benchmark(
-      name,
-      () => cpuOps.scale(a, 2.5),
-      elements > 1000000 ? 10 : 20
-    );
+    const result = await benchmark(name, () => cpuOps.scale(a, 2.5), elements > 1000000 ? 10 : 20);
 
     const throughput = calculateThroughput(elements, result.mean, 2);
     console.log(`  ${name}: ${formatResult(result)} - ${throughput.toFixed(2)} GB/s`);
@@ -156,11 +148,7 @@ async function main() {
   for (const { name, elements } of sizes) {
     const a = randomMatrix(elements);
 
-    const result = await benchmark(
-      name,
-      () => cpuOps.sum(a),
-      elements > 1000000 ? 10 : 20
-    );
+    const result = await benchmark(name, () => cpuOps.sum(a), elements > 1000000 ? 10 : 20);
 
     const throughput = calculateThroughput(elements, result.mean, 1);
     console.log(`  ${name}: ${formatResult(result)} - ${throughput.toFixed(2)} GB/s`);
@@ -194,11 +182,7 @@ async function main() {
       const a = randomMatrix(elements);
       const b = randomMatrix(elements);
 
-      const result = await benchmark(
-        name,
-        () => backend.add(a, b, rows, cols),
-        20
-      );
+      const result = await benchmark(name, () => backend.add(a, b, rows, cols), 20);
 
       const throughput = calculateThroughput(elements, result.mean);
       console.log(`  ${name}: ${formatResult(result)} - ${throughput.toFixed(2)} GB/s`);
@@ -209,11 +193,7 @@ async function main() {
       const elements = rows * cols;
       const a = randomMatrix(elements);
 
-      const result = await benchmark(
-        name,
-        () => backend.scale(a, 2.5, rows, cols),
-        20
-      );
+      const result = await benchmark(name, () => backend.scale(a, 2.5, rows, cols), 20);
 
       const throughput = calculateThroughput(elements, result.mean, 2);
       console.log(`  ${name}: ${formatResult(result)} - ${throughput.toFixed(2)} GB/s`);
@@ -237,7 +217,7 @@ async function main() {
 
       console.log(
         `${name}: CPU ${cpuResult.mean.toFixed(3)}ms, GPU ${gpuResult.mean.toFixed(3)}ms ` +
-        `-> ${winner} wins (${speedup > 1 ? speedup.toFixed(2) : (1/speedup).toFixed(2)}x faster)`
+          `-> ${winner} wins (${speedup > 1 ? speedup.toFixed(2) : (1 / speedup).toFixed(2)}x faster)`
       );
     }
   }

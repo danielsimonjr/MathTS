@@ -45,8 +45,7 @@ function check(name, cond, detail) {
   }
 }
 const near = (a, b, tol) => Math.abs(a - b) < (tol ?? 1e-9);
-const arrEq = (a, b) =>
-  a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
+const arrEq = (a, b) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-9);
 
 console.log('AssemblyScript special functions\n================================');
 check('chebyshevT(2, 0.5) = -0.5', near(exports.chebyshevT(2, 0.5), -0.5));
@@ -72,22 +71,13 @@ check(
   'primeFactors(360) = [2,2,2,3,3,5]',
   arrEq(readArr(exports.primeFactors(360)), [2, 2, 2, 3, 3, 5])
 );
-check(
-  'divisors(12) = [1,2,3,4,6,12]',
-  arrEq(readArr(exports.divisors(12)), [1, 2, 3, 4, 6, 12])
-);
-check(
-  'integerDigits(255, 16) = [15,15]',
-  arrEq(readArr(exports.integerDigits(255, 16)), [15, 15])
-);
+check('divisors(12) = [1,2,3,4,6,12]', arrEq(readArr(exports.divisors(12)), [1, 2, 3, 4, 6, 12]));
+check('integerDigits(255, 16) = [15,15]', arrEq(readArr(exports.integerDigits(255, 16)), [15, 15]));
 
 {
   const rem = makeArray([2, 3, 2]);
   const mods = makeArray([3, 5, 7]);
-  check(
-    'chineseRemainder([2,3,2],[3,5,7]) = 23',
-    exports.chineseRemainder(rem, mods) === 23
-  );
+  check('chineseRemainder([2,3,2],[3,5,7]) = 23', exports.chineseRemainder(rem, mods) === 23);
   exports.__unpin(rem);
   exports.__unpin(mods);
 }

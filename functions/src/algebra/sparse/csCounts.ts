@@ -1,28 +1,28 @@
 // Copyright (c) 2006-2024, Timothy A. Davis, All Rights Reserved.
 // SPDX-License-Identifier: LGPL-2.1+
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
-import { factory } from '../../utils/factory.js'
-import { csLeaf } from './csLeaf.js'
-import { wasmLoader } from '../../wasm/WasmLoader.js'
-import type { TypedFunction } from '../../core/function/typed.js'
+import { factory } from '../../utils/factory.js';
+import { csLeaf } from './csLeaf.js';
+import { wasmLoader } from '../../wasm/WasmLoader.js';
+import type { TypedFunction } from '../../core/function/typed.js';
 
 // Minimum columns for WASM column counts to be beneficial
-const WASM_COUNTS_THRESHOLD = 50
+const WASM_COUNTS_THRESHOLD = 50;
 
 // Sparse matrix internal structure
 export interface SparseMatrixData {
-  _size: number[]
-  _values?: any[]
-  _index: number[]
-  _ptr: number[]
+  _size: number[];
+  _values?: any[];
+  _index: number[];
+  _ptr: number[];
 }
 
 interface CsCountsDependencies {
-  transpose: TypedFunction
+  transpose: TypedFunction;
 }
 
-const name = 'csCounts'
-const dependencies = ['transpose'] as const
+const name = 'csCounts';
+const dependencies = ['transpose'] as const;
 
 export const createCsCounts = /* #__PURE__ */ factory(
   name,
@@ -47,42 +47,46 @@ export const createCsCounts = /* #__PURE__ */ factory(
       post: number[],
       n: number
     ): number[] | null {
-      const wasm = wasmLoader.getModule()
-      if (!wasm || n < WASM_COUNTS_THRESHOLD || !a._index || !a._ptr) return null
+      const wasm = wasmLoader.getModule();
+      if (!wasm || n < WASM_COUNTS_THRESHOLD || !a._index || !a._ptr) return null;
 
       try {
-        const indexAlloc = wasmLoader.allocateInt32Array(new Int32Array(a._index))
-        const ptrAlloc = wasmLoader.allocateInt32Array(new Int32Array(a._ptr))
-        const parentAlloc = wasmLoader.allocateInt32Array(new Int32Array(parent))
-        const postAlloc = wasmLoader.allocateInt32Array(new Int32Array(post))
-        const colCountAlloc = wasmLoader.allocateInt32ArrayEmpty(n)
+        const indexAlloc = wasmLoader.allocateInt32Array(new Int32Array(a._index));
+        const ptrAlloc = wasmLoader.allocateInt32Array(new Int32Array(a._ptr));
+        const parentAlloc = wasmLoader.allocateInt32Array(new Int32Array(parent));
+        const postAlloc = wasmLoader.allocateInt32Array(new Int32Array(post));
+        const colCountAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
         // Work buffer: 3*n i32 values
-        const workAlloc = wasmLoader.allocateInt32ArrayEmpty(3 * n)
+        const workAlloc = wasmLoader.allocateInt32ArrayEmpty(3 * n);
 
         try {
           wasm.symbolicCholesky(
-            indexAlloc.ptr, ptrAlloc.ptr, n,
-            parentAlloc.ptr, postAlloc.ptr,
-            colCountAlloc.ptr, workAlloc.ptr
-          )
+            indexAlloc.ptr,
+            ptrAlloc.ptr,
+            n,
+            parentAlloc.ptr,
+            postAlloc.ptr,
+            colCountAlloc.ptr,
+            workAlloc.ptr
+          );
 
-          const colcount: number[] = new Array(n)
+          const colcount: number[] = new Array(n);
           for (let i = 0; i < n; i++) {
-            colcount[i] = colCountAlloc.array[i]
+            colcount[i] = colCountAlloc.array[i];
           }
-          return colcount
+          return colcount;
         } finally {
-          wasmLoader.free(indexAlloc.ptr)
-          wasmLoader.free(ptrAlloc.ptr)
-          wasmLoader.free(parentAlloc.ptr)
-          wasmLoader.free(postAlloc.ptr)
-          wasmLoader.free(colCountAlloc.ptr)
-          wasmLoader.free(workAlloc.ptr)
+          wasmLoader.free(indexAlloc.ptr);
+          wasmLoader.free(ptrAlloc.ptr);
+          wasmLoader.free(parentAlloc.ptr);
+          wasmLoader.free(postAlloc.ptr);
+          wasmLoader.free(colCountAlloc.ptr);
+          wasmLoader.free(workAlloc.ptr);
         }
       } catch {
         // Fall through to JS
       }
-      return null
+      return null;
     }
 
     return function csCounts(
@@ -93,59 +97,53 @@ export const createCsCounts = /* #__PURE__ */ factory(
     ): number[] | null {
       // check inputs
       if (!a || !parent || !post) {
-        return null
+        return null;
       }
       // a matrix arrays
-      const asize = a._size
+      const asize = a._size;
       // rows and columns
-      const m = asize[0]
-      const n = asize[1]
+      const m = asize[0];
+      const n = asize[1];
 
       // Try WASM for large matrices (only non-ata case — symbolicCholesky handles both)
       if (!ata) {
-        const wasmResult = _tryWasmCounts(a, parent, post, n)
-        if (wasmResult !== null) return wasmResult
+        const wasmResult = _tryWasmCounts(a, parent, post, n);
+        if (wasmResult !== null) return wasmResult;
       }
       // variables
-      let i: number,
-        j: number,
-        k: number,
-        J: number,
-        p: number,
-        p0: number,
-        p1: number
+      let i: number, j: number, k: number, J: number, p: number, p0: number, p1: number;
 
       // workspace size
-      const s = 4 * n + (ata ? n + m + 1 : 0)
+      const s = 4 * n + (ata ? n + m + 1 : 0);
       // allocate workspace
-      const w: number[] = [] // (s)
-      const ancestor = 0 // first n entries
-      const maxfirst = n // next n entries
-      const prevleaf = 2 * n // next n entries
-      const first = 3 * n // next n entries
-      const head = 4 * n // next n + 1 entries (used when ata is true)
-      const next = 5 * n + 1 // last entries in workspace
+      const w: number[] = []; // (s)
+      const ancestor = 0; // first n entries
+      const maxfirst = n; // next n entries
+      const prevleaf = 2 * n; // next n entries
+      const first = 3 * n; // next n entries
+      const head = 4 * n; // next n + 1 entries (used when ata is true)
+      const next = 5 * n + 1; // last entries in workspace
       // clear workspace w[0..s-1]
       for (k = 0; k < s; k++) {
-        w[k] = -1
+        w[k] = -1;
       }
 
       // allocate result
-      const colcount: number[] = [] // (n)
+      const colcount: number[] = []; // (n)
 
       // AT = A'
-      const at = transpose(a) as SparseMatrixData
+      const at = transpose(a) as SparseMatrixData;
       // at arrays
-      const tindex = at._index
-      const tptr = at._ptr
+      const tindex = at._index;
+      const tptr = at._ptr;
 
       // find w[first + j]
       for (k = 0; k < n; k++) {
-        j = post[k]
+        j = post[k];
         // colcount[j]=1 if j is a leaf
-        colcount[j] = w[first + j] === -1 ? 1 : 0
+        colcount[j] = w[first + j] === -1 ? 1 : 0;
         for (; j !== -1 && w[first + j] === -1; j = parent[j]) {
-          w[first + j] = k
+          w[first + j] = k;
         }
       }
 
@@ -153,59 +151,59 @@ export const createCsCounts = /* #__PURE__ */ factory(
       if (ata) {
         // invert post
         for (k = 0; k < n; k++) {
-          w[post[k]] = k
+          w[post[k]] = k;
         }
         // loop rows (columns in AT)
         for (i = 0; i < m; i++) {
           // values in column i of AT
           for (k = n, p0 = tptr[i], p1 = tptr[i + 1], p = p0; p < p1; p++) {
-            k = Math.min(k, w[tindex[p]])
+            k = Math.min(k, w[tindex[p]]);
           }
           // place row i in linked list k
-          w[next + i] = w[head + k]
-          w[head + k] = i
+          w[next + i] = w[head + k];
+          w[head + k] = i;
         }
       }
 
       // each node in its own set
       for (i = 0; i < n; i++) {
-        w[ancestor + i] = i
+        w[ancestor + i] = i;
       }
 
       for (k = 0; k < n; k++) {
         // j is the kth node in postordered etree
-        j = post[k]
+        j = post[k];
         // check j is not a root
         if (parent[j] !== -1) {
-          colcount[parent[j]]--
+          colcount[parent[j]]--;
         }
 
         // J=j for LL'=A case
         for (J = ata ? w[head + k] : j; J !== -1; J = ata ? w[next + J] : -1) {
           for (p = tptr[J]; p < tptr[J + 1]; p++) {
-            i = tindex[p]
-            const r = csLeaf(i, j, w, first, maxfirst, prevleaf, ancestor)
+            i = tindex[p];
+            const r = csLeaf(i, j, w, first, maxfirst, prevleaf, ancestor);
             // check A(i,j) is in skeleton
             if (typeof r === 'object' && r.jleaf >= 1) {
-              colcount[j]++
+              colcount[j]++;
             }
             // check account for overlap in q
             if (typeof r === 'object' && r.jleaf === 2) {
-              colcount[r.q]--
+              colcount[r.q]--;
             }
           }
         }
         if (parent[j] !== -1) {
-          w[ancestor + j] = parent[j]
+          w[ancestor + j] = parent[j];
         }
       }
       // sum up colcount's of each child
       for (j = 0; j < n; j++) {
         if (parent[j] !== -1) {
-          colcount[parent[j]] += colcount[j]
+          colcount[parent[j]] += colcount[j];
         }
       }
-      return colcount
-    }
+      return colcount;
+    };
   }
-)
+);

@@ -117,16 +117,13 @@ describe('@danielsimonjr/mathts-typed-function', () => {
       }
 
       const isPoint = (v: unknown): v is Point =>
-        typeof v === 'object' &&
-        v !== null &&
-        (v as Point).type === 'Point';
+        typeof v === 'object' && v !== null && (v as Point).type === 'Point';
 
       const myTyped = create();
       myTyped.addType({ name: 'Point', test: isPoint });
 
       const distance = myTyped('distance', {
-        'Point, Point': (a: Point, b: Point) =>
-          Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2),
+        'Point, Point': (a: Point, b: Point) => Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2),
       });
 
       const p1: Point = { x: 0, y: 0, type: 'Point' };
