@@ -20,6 +20,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 >    parallelism across the distribution, special-function, signal-spectrum, and
 >    matrix-decomposition layers.
 
+### Fixed
+
+- **Full repo-wide cleanup pass.** `npx prettier --write .` normalized
+  formatting across the whole tree (1500+ TS, 120+ MD, 60+ JSON, 4 YAML,
+  1 shell, 1 HTML — purely cosmetic, no semantic changes). ESLint config
+  gained a `synced mathjs` overrides block that downgrades 22 stylistic
+  rules (no-unused-vars, no-unsafe-function-type, no-empty-object-type,
+  no-this-alias, ban-ts-comment, no-misused-new, prefer-as-const,
+  no-require-imports, no-loss-of-precision, no-case-declarations,
+  prefer-spread, prefer-const, prefer-rest-params, no-useless-escape,
+  no-self-assign, no-undef, no-empty, no-prototype-builtins,
+  no-control-regex, no-fallthrough, no-unsafe-finally, no-cond-assign)
+  to warnings under the synced directories — mirrors the existing
+  `strict: false` policy in `functions/tsconfig.json`. The hand-written
+  typed-function layer stays strict. **All 10 packages now report 0
+  ESLint errors.**
+
+- **38 active-code lint errors closed** across `core`, `functions`, and
+  `expression`. Interface-required unused args prefixed `_` (the entire
+  `expression/src/node/` family — Node, ConstantNode, FunctionNode,
+  IndexNode, OperatorNode, RelationalNode, SymbolNode), dead complex
+  helpers removed from `typed/signal.ts`, unused dispatch imports
+  dropped from `typed/{statistics,cas}.ts`, `prefer-as-const` applied
+  to `isArgumentsError` / `isDimensionError` / `isIndexError` across
+  the three error classes, `Function` type replaced with explicit
+  callable signatures in `factories/scope.ts` and
+  `expression/src/node/FunctionAssignmentNode.ts`, `.apply()` → spread
+  in `OperatorNode.ts`, `const self = this` rewritten to direct
+  closure capture in `RelationalNode.ts`, dead `interface Unit {
+  new(...): Unit }` removed from `SymbolNode.ts`.
+
+- **Real bugs surfaced and fixed (not stylistic):**
+  - `core/src/is.ts:313` — a literal `\!isMap(object)` (escaped
+    exclamation) instead of `!isMap(object)`. The escape was a
+    paste/sync error ESLint's parser refused; TypeScript happened to
+    tolerate it.
+  - `wasm-rust/scripts/build.sh` — `WASM_DST="../../lib/wasm/..."`
+    landed the Rust artifact OUTSIDE the repo (in `$HOME/lib/wasm/`),
+    so `tests/benchmark/wasm_rust_vs_as_benchmark.ts` reported empty
+    Rust columns. Path corrected to `../lib/wasm/`.
+  - `tools/benchmark/wasm/{matmul,elementwise}.bench.ts` — calls to
+    `new DenseMatrix(data)` used the obsolete single-arg signature
+    against the current `(rows, cols, data?)` constructor, throwing
+    "Matrix dimensions must match" on every iteration. Both call
+    sites fixed.
+  - `expression/src/node/{ObjectNode,RangeNode,ParenthesisNode}.ts`
+    had latent `_compile(_math: ..., argNames: ...)` signatures where
+    the method body still referenced the un-prefixed `math`
+    identifier. The DTS build (`tsup --dts`) caught them once
+    typecheck ran cleanly. Renamed back to `math` in the signature.
+
+### Verified
+
+- `npx turbo build`: 12/12 packages green.
+- `npx turbo test`: 19/19 task packages green.
+- `npx tsc --noEmit` per package: 0 errors across all 11 TypeScript
+  packages.
+- `npx eslint src --ext .ts` per package: 0 errors.
+- `npm run bench:wasm`: Rust column populated, **1.3× to 26.6×
+  faster than JS** across matmul / dot / vecadd / det.
+- `npm run bench:parallel`: full per-op break-even data; only
+  `matmul` (≥64-element matrices) and `spectrogram` (≥65,536 samples)
+  beat sequential in this container.
+
 ### Added
 
 #### WASM kernels — Rust crate + AssemblyScript parity
