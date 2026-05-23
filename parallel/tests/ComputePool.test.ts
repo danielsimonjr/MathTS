@@ -7,8 +7,14 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
-import { ComputePool, computePool, DEFAULT_POOL_CONFIG, Transfer } from '../src/ComputePool.js';
-import type { ParallelResult, ComputePoolConfig } from '../src/ComputePool.js';
+import {
+  ComputePool,
+  computePool,
+  DEFAULT_POOL_CONFIG,
+  Transfer,
+  resolveOpThreshold,
+} from '../src/ComputePool.js';
+import type { ParallelResult, ComputePoolConfig, OpName } from '../src/ComputePool.js';
 
 describe('ComputePool', () => {
   describe('Configuration', () => {
@@ -114,6 +120,162 @@ describe('ComputePool', () => {
     it('should return true at or above threshold', () => {
       expect(pool.shouldParallelize(1000)).toBe(true);
       expect(pool.shouldParallelize(10000)).toBe(true);
+    });
+  });
+
+  // ===========================================================================
+  // Per-op threshold map — benchmark-derived values (2026-05-23)
+  // Source: tools/benchmark/parallel/run.ts
+  // ===========================================================================
+
+  describe('Per-op threshold map (thresholdByOp)', () => {
+    let pool: ComputePool;
+
+    beforeEach(async () => {
+      // Use the default config (which embeds DEFAULT_THRESHOLD_BY_OP) but lower
+      // the global fallback so we can distinguish "op in map → never" from
+      // "op not in map → falls through to global".
+      pool = new ComputePool({ thresholdElements: 1000 });
+      await pool.initialize();
+    });
+
+    afterEach(async () => {
+      await pool.terminate();
+    });
+
+    // --- 'never' ops --------------------------------------------------------
+
+    it("shouldParallelize(1_000_000, 'add') returns false — add is 'never'", () => {
+      // Even at 1M elements, 'add' is benchmarked as never worth parallelizing.
+      expect(pool.shouldParallelize(1_000_000, 'add')).toBe(false);
+    });
+
+    it("shouldParallelize(1_000_000, 'sin') returns false — sin is 'never'", () => {
+      expect(pool.shouldParallelize(1_000_000, 'sin')).toBe(false);
+    });
+
+    it("shouldParallelize(1_000_000, 'multiply') returns false — multiply is 'never'", () => {
+      expect(pool.shouldParallelize(1_000_000, 'multiply')).toBe(false);
+    });
+
+    it("shouldParallelize(1_000_000, 'parallelFFT') returns false — parallelFFT is 'never'", () => {
+      expect(pool.shouldParallelize(1_000_000, 'parallelFFT')).toBe(false);
+    });
+
+    // --- matmul numeric threshold -------------------------------------------
+
+    it("shouldParallelize(8_000, 'matmul') returns true — above 4096 break-even", () => {
+      // matmul threshold is 4_096 (break-even at 64×64).
+      expect(pool.shouldParallelize(8_000, 'matmul')).toBe(true);
+    });
+
+    it("shouldParallelize(2_000, 'matmul') returns false — below 4096 break-even", () => {
+      expect(pool.shouldParallelize(2_000, 'matmul')).toBe(false);
+    });
+
+    it("shouldParallelize(4_096, 'matmul') returns true — exactly at threshold", () => {
+      expect(pool.shouldParallelize(4_096, 'matmul')).toBe(true);
+    });
+
+    // --- erfc / besselJ / spectrogram numeric thresholds --------------------
+
+    it("shouldParallelize(100_000, 'erfc') returns true — exactly at erfc threshold", () => {
+      expect(pool.shouldParallelize(100_000, 'erfc')).toBe(true);
+    });
+
+    it("shouldParallelize(99_999, 'erfc') returns false — just below erfc threshold", () => {
+      expect(pool.shouldParallelize(99_999, 'erfc')).toBe(false);
+    });
+
+    it("shouldParallelize(65_536, 'spectrogram') returns true — exactly at threshold", () => {
+      expect(pool.shouldParallelize(65_536, 'spectrogram')).toBe(true);
+    });
+
+    it("shouldParallelize(1_000_000, 'besselJ') returns true — exactly at threshold", () => {
+      expect(pool.shouldParallelize(1_000_000, 'besselJ')).toBe(true);
+    });
+
+    // --- fallback: op not in per-op map uses global thresholdElements -------
+
+    it("op not in map ('dot') falls through to global thresholdElements", () => {
+      // 'dot' is not in DEFAULT_THRESHOLD_BY_OP → falls back to the pool's
+      // thresholdElements (1000 in this test's pool).
+      expect(pool.shouldParallelize(999, 'dot')).toBe(false);
+      expect(pool.shouldParallelize(1000, 'dot')).toBe(true);
+    });
+
+    it('no op argument uses global thresholdElements (backward compat)', () => {
+      // Callers that don't pass an op still work via the global fallback.
+      expect(pool.shouldParallelize(999)).toBe(false);
+      expect(pool.shouldParallelize(1000)).toBe(true);
+    });
+  });
+
+  // ===========================================================================
+  // resolveOpThreshold helper
+  // ===========================================================================
+
+  describe('resolveOpThreshold', () => {
+    it("'never' resolves to Number.MAX_SAFE_INTEGER", () => {
+      expect(resolveOpThreshold('never')).toBe(Number.MAX_SAFE_INTEGER);
+    });
+
+    it("'always' resolves to 0", () => {
+      expect(resolveOpThreshold('always')).toBe(0);
+    });
+
+    it('numeric value passes through unchanged', () => {
+      expect(resolveOpThreshold(50_000)).toBe(50_000);
+      expect(resolveOpThreshold(0)).toBe(0);
+      expect(resolveOpThreshold(1)).toBe(1);
+    });
+  });
+
+  // ===========================================================================
+  // thresholdByOp custom config
+  // ===========================================================================
+
+  describe('Custom thresholdByOp config', () => {
+    it("'always' threshold causes shouldParallelize to return true for 1 element", async () => {
+      const pool = new ComputePool({
+        thresholdElements: 1_000_000,
+        thresholdByOp: { matmul: 'always' },
+      });
+      await pool.initialize();
+
+      // 'always' → threshold 0 → any positive count triggers parallel
+      expect(pool.shouldParallelize(1, 'matmul')).toBe(true);
+      // ops not in the custom map fall back to the high global threshold
+      expect(pool.shouldParallelize(50_000, 'add')).toBe(false);
+
+      await pool.terminate();
+    });
+
+    it("'never' threshold disables an op that would otherwise be above global threshold", async () => {
+      const pool = new ComputePool({
+        thresholdElements: 100,
+        thresholdByOp: { add: 'never' },
+      });
+      await pool.initialize();
+
+      expect(pool.shouldParallelize(1_000_000, 'add')).toBe(false);
+      // 'dot' is not overridden → falls back to 100
+      expect(pool.shouldParallelize(101, 'dot')).toBe(true);
+
+      await pool.terminate();
+    });
+
+    it('numeric threshold in custom map is respected', async () => {
+      const pool = new ComputePool({
+        thresholdElements: 50_000,
+        thresholdByOp: { matmul: 8_000 },
+      });
+      await pool.initialize();
+
+      expect(pool.shouldParallelize(7_999, 'matmul')).toBe(false);
+      expect(pool.shouldParallelize(8_000, 'matmul')).toBe(true);
+
+      await pool.terminate();
     });
   });
 

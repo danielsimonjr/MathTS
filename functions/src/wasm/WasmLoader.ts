@@ -576,6 +576,34 @@ export interface WasmModule {
   rightArithShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
   rightLogShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
 
+  // Dense matrix decompositions exported by the AssemblyScript binary.
+  // The Rust binary exposes the same algorithms under `luDecomposition` /
+  // `qrDecomposition` / `choleskyDecomposition` / `laInv` / `laDet` (see
+  // entries above) with raw flat-memory pointer arguments. The AS exports
+  // use AS-runtime header references that carry their own length, so the
+  // signatures here take `number` headers because calling these through
+  // `instance.exports` passes the header pointer, not a JS typed array.
+  // The matrix backend (matrix/src/backends/WASMBackend.ts) probes for
+  // these at runtime and falls through to JS when the loaded binary is
+  // not the AS one.
+  matrix_lu_decompose?: (
+    aHdr: number,
+    n: number,
+    lOutHdr: number,
+    uOutHdr: number,
+    permOutHdr: number
+  ) => number;
+  matrix_qr_decompose?: (
+    aHdr: number,
+    m: number,
+    n: number,
+    qOutHdr: number,
+    rOutHdr: number
+  ) => number;
+  matrix_cholesky?: (aHdr: number, n: number, lOutHdr: number) => number;
+  matrix_inverse?: (aHdr: number, n: number, resultHdr: number, workHdr: number) => number;
+  matrix_determinant?: (aHdr: number, n: number, workHdr: number) => number;
+
   // Memory management
   __new: (size: number, id: number) => number;
   __pin: (ptr: number) => number;

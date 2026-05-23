@@ -6,7 +6,11 @@
  * inverse transforms, convolution, and spectral analysis.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import {
   fftJS,
   isPowerOf2,
@@ -19,6 +23,11 @@ import {
   rfft,
   powerSpectrum,
 } from '../../src/backends/wasm/fft-wasm.js';
+import { wasmLoader } from '../../src/backends/WasmLoader.js';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const rustWasmPath = path.resolve(here, '../../../lib/wasm/mathts.wasm');
+const wasmAvailable = fs.existsSync(rustWasmPath);
 
 // =============================================================================
 // Utility: isPowerOf2 / nextPowerOf2
@@ -317,6 +326,57 @@ describe('convolve', () => {
 // =============================================================================
 // Parseval's Theorem Verification
 // =============================================================================
+
+// =============================================================================
+// WASM Backend Round-Trip (exercises the previously-dead bridge path).
+// Before the Rust/AS hybrid-allocator fix landed, these tests crashed in
+// `wasmLoader.allocateFloat64Array` because the Rust artifact (the default)
+// has no `__new` export. They are the live regression guard for that bug.
+// =============================================================================
+
+describe('fft (wasm backend)', () => {
+  beforeAll(async () => {
+    if (!wasmAvailable) return;
+    wasmLoader.reset();
+    await wasmLoader.load(rustWasmPath);
+  });
+
+  it.runIf(wasmAvailable)('fft + ifft round-trip with WASM backend', () => {
+    const n = 64;
+    const real = new Float64Array(n);
+    const imag = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      real[i] = Math.cos((2 * Math.PI * 4 * i) / n);
+    }
+
+    const spectrum = fft(real, imag, { backend: 'wasm' });
+    expect(spectrum.real.length).toBe(n);
+    expect(spectrum.imag.length).toBe(n);
+
+    const recon = ifft(spectrum.real, spectrum.imag, { backend: 'wasm' });
+    for (let i = 0; i < n; i++) {
+      expect(recon.real[i]).toBeCloseTo(real[i], 8);
+      expect(recon.imag[i]).toBeCloseTo(0, 8);
+    }
+  });
+
+  it.runIf(wasmAvailable)('wasm-backend fft matches js-backend fft for the same input', () => {
+    const n = 32;
+    const real = new Float64Array(n);
+    const imag = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      real[i] = Math.sin((2 * Math.PI * 5 * i) / n) + 0.25 * Math.cos((2 * Math.PI * 11 * i) / n);
+    }
+
+    const jsSpec = fft(real, imag, { backend: 'js' });
+    const wasmSpec = fft(real, imag, { backend: 'wasm' });
+
+    for (let i = 0; i < n; i++) {
+      expect(wasmSpec.real[i]).toBeCloseTo(jsSpec.real[i], 8);
+      expect(wasmSpec.imag[i]).toBeCloseTo(jsSpec.imag[i], 8);
+    }
+  });
+});
 
 describe('Parseval theorem', () => {
   it('energy in time domain equals energy in frequency domain', () => {

@@ -27,6 +27,84 @@ import {
 } from './ops/bitwise.js';
 
 /**
+ * Recognised kernel / operation names.
+ *
+ * These are the string identifiers passed to `shouldParallelize(length, op)` so
+ * the per-op threshold map can be consulted before falling back to the global
+ * `thresholdElements`.  The list covers:
+ *   - Element-wise float ops dispatched through `ComputePool.unary/elementwise/scale`
+ *   - Reduction ops (`sum`, `mean`, `variance`, etc.)
+ *   - Linear-algebra ops (`matmul`, `matrixPower`, `characteristicPolynomial`)
+ *   - Signal-processing ops (`parallelFFT`, `parallelConv`, `spectrogram`, `fft2d`)
+ *   - Geometry ops (`distanceMatrix`)
+ *   - Special / distribution functions (`erfc`, `besselJ`, `normalCDF`)
+ *   - Additional ops exposed via the typed functions layer
+ */
+export type OpName =
+  // element-wise
+  | 'add'
+  | 'subtract'
+  | 'multiply'
+  | 'divide'
+  | 'scale'
+  | 'abs'
+  | 'negate'
+  | 'sqrt'
+  | 'square'
+  | 'exp'
+  | 'log'
+  | 'sin'
+  | 'cos'
+  | 'tan'
+  | 'sign'
+  // reductions
+  | 'sum'
+  | 'mean'
+  | 'variance'
+  | 'norm'
+  | 'histogram'
+  | 'dot'
+  | 'distance'
+  | 'parallelStatProd'
+  // linear algebra
+  | 'matmul'
+  | 'outer'
+  | 'matvec'
+  | 'transpose'
+  | 'matrixPower'
+  | 'characteristicPolynomial'
+  // signal
+  | 'parallelFFT'
+  | 'parallelConv'
+  | 'spectrogram'
+  | 'fft2d'
+  // geometry
+  | 'distanceMatrix'
+  // special / distribution
+  | 'erfc'
+  | 'besselJ'
+  | 'normalCDF';
+
+/**
+ * Per-op threshold override.  The value is the minimum element count required
+ * before parallelizing the named operation.  Special string aliases:
+ *
+ *  - `'never'`  → `Number.MAX_SAFE_INTEGER` (never parallelize)
+ *  - `'always'` → `0`                       (always parallelize when pool is ready)
+ */
+export type OpThreshold = number | 'never' | 'always';
+
+/**
+ * Resolve an `OpThreshold` alias to its numeric equivalent.
+ * @internal
+ */
+export function resolveOpThreshold(t: OpThreshold): number {
+  if (t === 'never') return Number.MAX_SAFE_INTEGER;
+  if (t === 'always') return 0;
+  return t;
+}
+
+/**
  * Configuration for ComputePool
  * Extends the base WorkerPoolConfig with MathTS-specific options
  */
@@ -37,8 +115,20 @@ export interface ComputePoolConfig {
   minWorkers: number;
   /** Maximum number of workers */
   maxWorkers: number;
-  /** Minimum elements before parallelizing */
+  /**
+   * Global minimum element count before parallelizing.
+   * Acts as the fallback for ops not listed in `thresholdByOp`.
+   */
   thresholdElements: number;
+  /**
+   * Per-operation parallelization thresholds.
+   *
+   * Values measured on a noisy CI container (2026-05-23) — re-run on target
+   * hardware to retune.  Source: tools/benchmark/parallel/run.ts
+   *
+   * Ops absent from this map fall back to `thresholdElements`.
+   */
+  thresholdByOp?: Partial<Record<OpName, OpThreshold>>;
   /** Elements per chunk for parallel operations */
   chunkSize: number;
   /** Worker type: 'auto' | 'web' | 'thread' */
@@ -50,6 +140,56 @@ export interface ComputePoolConfig {
 }
 
 /**
+ * Default per-op thresholds derived from benchmark data (tools/benchmark/parallel/run.ts,
+ * 2026-05-23).  Values measured on a noisy CI container — re-run on target hardware to retune.
+ *
+ *  'never'  → Number.MAX_SAFE_INTEGER  (benchmark showed no reliable speedup)
+ *  'always' → 0                        (always parallelize when pool is ready)
+ *  number   → minimum element count before dispatching to workers
+ */
+const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
+  // element-wise: overhead dominates at all tested sizes
+  add: 'never',
+  subtract: 'never',
+  multiply: 'never',
+  divide: 'never',
+  scale: 'never',
+  abs: 'never',
+  negate: 'never',
+  exp: 'never',
+  log: 'never',
+  sin: 'never',
+  cos: 'never',
+  tan: 'never',
+  sign: 'never',
+
+  // reductions: overhead dominates
+  sum: 'never',
+  mean: 'never',
+  variance: 'never',
+  parallelStatProd: 'never',
+  normalCDF: 'never',
+
+  // signal: overhead dominates or break-even never reached
+  parallelFFT: 'never',
+  parallelConv: 'never',
+  fft2d: 'never',
+
+  // geometry: overhead dominates
+  distanceMatrix: 'never',
+
+  // special functions: parallel wins above these sizes
+  erfc: 100_000,
+  besselJ: 1_000_000,
+  spectrogram: 65_536,
+
+  // linear algebra: parallel wins above these element counts
+  matmul: 4_096, // break-even at 64×64 (4,096 elements)
+  matrixPower: 9_216, // break-even at ~96×96
+  characteristicPolynomial: 9_216, // break-even at ~96×96
+};
+
+/**
  * Default ComputePool configuration
  */
 export const DEFAULT_POOL_CONFIG: ComputePoolConfig = {
@@ -57,6 +197,7 @@ export const DEFAULT_POOL_CONFIG: ComputePoolConfig = {
   minWorkers: 1,
   maxWorkers: typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 4 : 4,
   thresholdElements: 50000,
+  thresholdByOp: DEFAULT_THRESHOLD_BY_OP,
   chunkSize: 10000,
   workerType: 'auto',
   workerIdleTimeout: 60000,
@@ -151,9 +292,22 @@ export class ComputePool {
   }
 
   /**
-   * Determine if operation should be parallelized
+   * Determine if operation should be parallelized.
+   *
+   * When `op` is supplied the per-op threshold map is consulted first;
+   * if the op is absent from the map the global `thresholdElements` fallback
+   * is used.  When `op` is omitted the global threshold is always used (for
+   * backward-compatibility with existing callers that don't know the op name).
    */
-  shouldParallelize(elementCount: number): boolean {
+  shouldParallelize(elementCount: number, op?: OpName): boolean {
+    const byOp = this.config.thresholdByOp;
+    if (op !== undefined && byOp !== undefined && op in byOp) {
+      const raw = byOp[op];
+      if (raw !== undefined) {
+        const threshold = resolveOpThreshold(raw);
+        return this.config.enabled && elementCount >= threshold && this.workerPool.isReady();
+      }
+    }
     return this.workerPool.shouldParallelize(elementCount);
   }
 
@@ -622,7 +776,7 @@ export class ComputePool {
     if (a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.workerPool.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length)) {
       return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitAnd'));
     }
     const start = performance.now();
@@ -642,7 +796,7 @@ export class ComputePool {
     if (a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.workerPool.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length)) {
       return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitOr'));
     }
     const start = performance.now();
@@ -662,7 +816,7 @@ export class ComputePool {
     if (a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.workerPool.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length)) {
       return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitXor'));
     }
     const start = performance.now();
@@ -679,7 +833,7 @@ export class ComputePool {
    * Unary bitwise NOT on an `Int32Array`.
    */
   async bitNot(a: Int32Array): Promise<ParallelResult<Int32Array>> {
-    if (this.workerPool.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length)) {
       return toParallelResult(await this.workerPool.bitwiseNot(a));
     }
     const start = performance.now();
@@ -700,7 +854,7 @@ export class ComputePool {
     if (typeof b !== 'number' && a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.workerPool.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length)) {
       const result =
         typeof b === 'number'
           ? await this.workerPool.bitwiseScalar(a, b, 'leftShift')
@@ -727,7 +881,7 @@ export class ComputePool {
     if (typeof b !== 'number' && a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.workerPool.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length)) {
       const result =
         typeof b === 'number'
           ? await this.workerPool.bitwiseScalar(a, b, 'rightArithShift')
@@ -753,7 +907,7 @@ export class ComputePool {
     if (typeof b !== 'number' && a.length !== b.length) {
       throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
     }
-    if (this.workerPool.shouldParallelize(a.length)) {
+    if (this.shouldParallelize(a.length)) {
       const result =
         typeof b === 'number'
           ? await this.workerPool.bitwiseScalar(a, b, 'rightLogShift')

@@ -93,12 +93,35 @@ interface AsModule {
   array_sum: (aHdr: number) => number;
   array_norm: (aHdr: number) => number;
   array_dot: (aHdr: number, bHdr: number) => number;
+
+  // Dense decompositions — see assembly/src/algebra/decomposition.ts.
+  // Optional because older AS artifacts don't expose them; the methods
+  // below probe at call time and fall back to JS when absent.
+  matrix_lu_decompose?: (
+    aHdr: number,
+    n: number,
+    lOutHdr: number,
+    uOutHdr: number,
+    permOutHdr: number
+  ) => number;
+  matrix_qr_decompose?: (
+    aHdr: number,
+    m: number,
+    n: number,
+    qOutHdr: number,
+    rOutHdr: number
+  ) => number;
+  matrix_cholesky?: (aHdr: number, n: number, lOutHdr: number) => number;
+  matrix_inverse?: (aHdr: number, n: number, resultHdr: number, workHdr: number) => number;
+  matrix_determinant?: (aHdr: number, n: number, workHdr: number) => number;
 }
 
 /** AssemblyScript runtime-info IDs (extracted from `assembly/build/mathts.js`). */
 const AS_ID_ARRAY_BUFFER = 1;
 const AS_ID_FLOAT64_ARRAY = 5;
+const AS_ID_INT32_ARRAY = 6;
 const AS_F64_ALIGN_SHIFT = 3; // log2(8 bytes/f64)
+const AS_I32_ALIGN_SHIFT = 2; // log2(4 bytes/i32)
 const AS_HEADER_BYTES = 12;
 
 /**
@@ -202,6 +225,59 @@ function allocAsFloat64Array(
 function readAsFloat64Array(module: AsModule, alloc: AsFloat64Allocation): Float64Array {
   const view = new Float64Array(module.memory.buffer, alloc.bufferPtr, alloc.length);
   return new Float64Array(view);
+}
+
+/**
+ * AS-managed Int32Array allocation handle. Same shape as the Float64
+ * variant — see `AsFloat64Allocation` above for the rationale.
+ *
+ * Used by the decomposition kernels (`matrix_lu_decompose` returns the
+ * row permutation as an Int32Array). The pool is much simpler than the
+ * Float64 case because permutation buffers are tiny (length == n) and
+ * allocated at most once per call.
+ */
+interface AsInt32Allocation {
+  headerPtr: number;
+  bufferPtr: number;
+  view: Int32Array;
+  length: number;
+}
+
+/**
+ * Allocate (and pin) a fresh AS-managed Int32Array. No pooling: the
+ * decomposition path holds at most one Int32 buffer in flight per call
+ * and each is sized by `n` (a small integer), so the cost is negligible
+ * compared to the Float64 buffers that the AS-runtime stub allocator
+ * already retains for the duration of the process.
+ */
+function allocAsInt32Array(module: AsModule, length: number): AsInt32Allocation {
+  const byteLength = length << AS_I32_ALIGN_SHIFT;
+  const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
+  const headerPtr = module.__new(AS_HEADER_BYTES, AS_ID_INT32_ARRAY) >>> 0;
+  module.__pin(headerPtr);
+  const dv = new DataView(module.memory.buffer);
+  dv.setUint32(headerPtr + 0, bufferPtr, true);
+  dv.setUint32(headerPtr + 4, bufferPtr, true);
+  dv.setUint32(headerPtr + 8, byteLength, true);
+  const view = new Int32Array(module.memory.buffer, bufferPtr, length);
+  return { headerPtr, bufferPtr, view, length };
+}
+
+/** Copy the AS-managed Int32 buffer into a fresh JS Int32Array. */
+function readAsInt32Array(module: AsModule, alloc: AsInt32Allocation): Int32Array {
+  const view = new Int32Array(module.memory.buffer, alloc.bufferPtr, alloc.length);
+  return new Int32Array(view);
+}
+
+/**
+ * Release the Int32 allocation. With `--runtime stub` this is a no-op
+ * at the WASM level (the AS bump allocator never frees), but we still
+ * call `__unpin` for API hygiene — if a future build switches to a
+ * real GC runtime this becomes correctness-relevant.
+ */
+function releaseAsInt32Array(module: AsModule, alloc: AsInt32Allocation): void {
+  module.__unpin(alloc.headerPtr);
+  module.__unpin(alloc.bufferPtr);
 }
 
 /**
@@ -573,10 +649,13 @@ export class WASMBackend implements MatrixBackend {
   // =========================================================================
   // LU / QR / Cholesky / Inverse / Determinant
   // -------------------------------------------------------------------------
-  // AssemblyScript does NOT export these — only Rust does. We keep the
-  // methods on the class for API compatibility but they always fall back
-  // to the JS implementations. If you need WASM-accelerated decompositions,
-  // use `RustWASMBackend` instead.
+  // AssemblyScript now exports these alongside the Rust binary (see
+  // assembly/src/algebra/decomposition.ts). Each method dispatches to
+  // the AS export when the loaded module exposes it; otherwise it falls
+  // back to the in-process JS implementation that previously handled
+  // every call. The probe is per-call (not per-instance) so older AS
+  // binaries that predate this addition keep working — they just hit
+  // the JS path until the artifact is rebuilt.
   // =========================================================================
 
   async luDecomposition(a: DenseMatrix): Promise<{
@@ -584,7 +663,50 @@ export class WASMBackend implements MatrixBackend {
     perm: Int32Array;
     singular: boolean;
   }> {
-    return this.luDecompositionJS(a);
+    const n = a.rows;
+    if (n !== a.cols) {
+      throw new Error('LU decomposition requires a square matrix');
+    }
+    const mod = this.wasmModule;
+    if (!mod || typeof mod.matrix_lu_decompose !== 'function') {
+      return this.luDecompositionJS(a);
+    }
+
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const lAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
+    const uAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
+    const permAlloc = allocAsInt32Array(mod, n);
+    try {
+      const status = mod.matrix_lu_decompose!(
+        aAlloc.headerPtr,
+        n,
+        lAlloc.headerPtr,
+        uAlloc.headerPtr,
+        permAlloc.headerPtr
+      );
+      if (status !== 0) {
+        // Singular — match the JS contract: return zeros with singular=true.
+        return { lu: DenseMatrix.zeros(n, n), perm: readAsInt32Array(mod, permAlloc), singular: true };
+      }
+      // Reconstruct the combined LU storage the JS contract returns: the L
+      // factor below the diagonal, U on/above. The new AS kernel emits L
+      // and U separately, so we recombine here to keep callers stable.
+      const lFlat = readAsFloat64Array(mod, lAlloc);
+      const uFlat = readAsFloat64Array(mod, uAlloc);
+      const combined = new Float64Array(n * n);
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          combined[i * n + j] = i > j ? lFlat[i * n + j] : uFlat[i * n + j];
+        }
+      }
+      const perm = readAsInt32Array(mod, permAlloc);
+      return { lu: DenseMatrix.fromFlat(n, n, Array.from(combined)), perm, singular: false };
+    } finally {
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(lAlloc);
+      this.allocCache.release(uAlloc);
+      releaseAsInt32Array(mod, permAlloc);
+    }
   }
 
   private luDecompositionJS(a: DenseMatrix): {
@@ -643,7 +765,31 @@ export class WASMBackend implements MatrixBackend {
   }
 
   async qrDecomposition(a: DenseMatrix): Promise<{ q: DenseMatrix; r: DenseMatrix }> {
-    return this.qrDecompositionJS(a);
+    const m = a.rows;
+    const n = a.cols;
+    const mod = this.wasmModule;
+    // AS Householder QR assumes m >= n; fall back to JS for wide matrices
+    // (the JS path handles both shapes correctly).
+    if (!mod || typeof mod.matrix_qr_decompose !== 'function' || m < n) {
+      return this.qrDecompositionJS(a);
+    }
+
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const qAlloc = allocAsFloat64Array(this.allocCache, mod, m * m);
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, m * n);
+    try {
+      mod.matrix_qr_decompose!(aAlloc.headerPtr, m, n, qAlloc.headerPtr, rAlloc.headerPtr);
+      const qFlat = readAsFloat64Array(mod, qAlloc);
+      const rFlat = readAsFloat64Array(mod, rAlloc);
+      return {
+        q: DenseMatrix.fromFlat(m, m, Array.from(qFlat)),
+        r: DenseMatrix.fromFlat(m, n, Array.from(rFlat)),
+      };
+    } finally {
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(qAlloc);
+      this.allocCache.release(rAlloc);
+    }
   }
 
   private qrDecompositionJS(a: DenseMatrix): { q: DenseMatrix; r: DenseMatrix } {
@@ -703,7 +849,35 @@ export class WASMBackend implements MatrixBackend {
   }
 
   async inverse(a: DenseMatrix): Promise<{ inverse: DenseMatrix; singular: boolean }> {
-    return this.inverseJS(a);
+    const n = a.rows;
+    if (n !== a.cols) {
+      throw new Error('Matrix inverse requires a square matrix');
+    }
+    const mod = this.wasmModule;
+    if (!mod || typeof mod.matrix_inverse !== 'function') {
+      return this.inverseJS(a);
+    }
+
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const resultAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
+    const workAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
+    try {
+      const status = mod.matrix_inverse!(
+        aAlloc.headerPtr,
+        n,
+        resultAlloc.headerPtr,
+        workAlloc.headerPtr
+      );
+      if (status !== 0) {
+        return { inverse: DenseMatrix.zeros(n, n), singular: true };
+      }
+      const result = readAsFloat64Array(mod, resultAlloc);
+      return { inverse: DenseMatrix.fromFlat(n, n, Array.from(result)), singular: false };
+    } finally {
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(resultAlloc);
+      this.allocCache.release(workAlloc);
+    }
   }
 
   private inverseJS(a: DenseMatrix): { inverse: DenseMatrix; singular: boolean } {
@@ -741,7 +915,23 @@ export class WASMBackend implements MatrixBackend {
   }
 
   async determinantWasm(a: DenseMatrix): Promise<number> {
-    return this.determinantJS(a);
+    const n = a.rows;
+    if (n !== a.cols) {
+      throw new Error('Determinant requires a square matrix');
+    }
+    const mod = this.wasmModule;
+    if (!mod || typeof mod.matrix_determinant !== 'function') {
+      return this.determinantJS(a);
+    }
+
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const workAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
+    try {
+      return mod.matrix_determinant!(aAlloc.headerPtr, n, workAlloc.headerPtr);
+    } finally {
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(workAlloc);
+    }
   }
 
   private determinantJS(a: DenseMatrix): number {
@@ -765,7 +955,28 @@ export class WASMBackend implements MatrixBackend {
     l: DenseMatrix;
     positiveDefinite: boolean;
   }> {
-    return this.choleskyDecompositionJS(a);
+    const n = a.rows;
+    if (n !== a.cols) {
+      throw new Error('Cholesky decomposition requires a square matrix');
+    }
+    const mod = this.wasmModule;
+    if (!mod || typeof mod.matrix_cholesky !== 'function') {
+      return this.choleskyDecompositionJS(a);
+    }
+
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const lAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
+    try {
+      const status = mod.matrix_cholesky!(aAlloc.headerPtr, n, lAlloc.headerPtr);
+      if (status !== 0) {
+        return { l: DenseMatrix.zeros(n, n), positiveDefinite: false };
+      }
+      const result = readAsFloat64Array(mod, lAlloc);
+      return { l: DenseMatrix.fromFlat(n, n, Array.from(result)), positiveDefinite: true };
+    } finally {
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(lAlloc);
+    }
   }
 
   private choleskyDecompositionJS(a: DenseMatrix): {

@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { wasmLoader } from '../WasmLoader.js';
+import { wasmLoader, type WasmModule } from '../WasmLoader.js';
 
 // =============================================================================
 // Types
@@ -229,14 +229,17 @@ function fftWasmCore(real: Float64Array, imag: Float64Array, inverse: boolean = 
   const alloc = wasmLoader.allocateFloat64Array(interleaved);
 
   try {
-    // Call WASM FFT (in-place, interleaved)
+    // Call WASM FFT (in-place, interleaved). The function takes whatever
+    // pointer shape the loaded artifact expects (header on AS, flat on Rust).
     module.fft(alloc.ptr, n, inverse ? 1 : 0);
 
-    // Read back results -- need to re-create view since memory might have grown
-    const resultInterleaved = new Float64Array(module.memory.buffer, alloc.ptr, n * 2);
+    // Read back results from the data region — memory.buffer may have been
+    // re-bound by an intervening grow, so we re-create the view here.
+    const resultInterleaved = new Float64Array(module.memory.buffer, alloc.dataPtr, n * 2);
     return fromInterleaved(resultInterleaved, n);
   } finally {
     wasmLoader.free(alloc.ptr);
+    wasmLoader.resetRustAllocator();
   }
 }
 
@@ -329,11 +332,16 @@ export function rfft(data: Float64Array, config: FFTConfig = {}): FFTResult {
 
       try {
         module.rfft(dataAlloc.ptr, n, resultAlloc.ptr);
-        const resultInterleaved = new Float64Array(module.memory.buffer, resultAlloc.ptr, n * 2);
+        const resultInterleaved = new Float64Array(
+          module.memory.buffer,
+          resultAlloc.dataPtr,
+          n * 2
+        );
         return fromInterleaved(resultInterleaved, n);
       } finally {
         wasmLoader.free(dataAlloc.ptr);
         wasmLoader.free(resultAlloc.ptr);
+        wasmLoader.resetRustAllocator();
       }
     }
   }
@@ -353,23 +361,28 @@ export function rfft(data: Float64Array, config: FFTConfig = {}): FFTResult {
 export function powerSpectrum(real: Float64Array, imag: Float64Array): Float64Array {
   const n = real.length;
 
-  // Try WASM if available
+  // Try WASM if available. We dispatch through a typed surface (a narrow
+  // local interface) so this stays out of `any`-cast territory.
   if (isWasmFFTAvailable()) {
-    const module = wasmLoader.getModule()!;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const exports = module as any;
-    if (typeof exports.powerSpectrum === 'function') {
-      // powerSpectrum expects interleaved input
-      const interleaved = toInterleaved(real, imag);
-      const dataAlloc = wasmLoader.allocateFloat64Array(interleaved);
-      const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+    const module = wasmLoader.getModule();
+    if (module !== null) {
+      const moduleWithPower = module as WasmModule & {
+        powerSpectrum?: (dataPtr: number, n: number, resultPtr: number) => void;
+      };
+      if (typeof moduleWithPower.powerSpectrum === 'function') {
+        // powerSpectrum expects interleaved input
+        const interleaved = toInterleaved(real, imag);
+        const dataAlloc = wasmLoader.allocateFloat64Array(interleaved);
+        const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
 
-      try {
-        exports.powerSpectrum(dataAlloc.ptr, n, resultAlloc.ptr);
-        return new Float64Array(new Float64Array(module.memory.buffer, resultAlloc.ptr, n));
-      } finally {
-        wasmLoader.free(dataAlloc.ptr);
-        wasmLoader.free(resultAlloc.ptr);
+        try {
+          moduleWithPower.powerSpectrum(dataAlloc.ptr, n, resultAlloc.ptr);
+          return new Float64Array(new Float64Array(module.memory.buffer, resultAlloc.dataPtr, n));
+        } finally {
+          wasmLoader.free(dataAlloc.ptr);
+          wasmLoader.free(resultAlloc.ptr);
+          wasmLoader.resetRustAllocator();
+        }
       }
     }
   }

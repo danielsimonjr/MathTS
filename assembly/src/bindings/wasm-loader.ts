@@ -116,6 +116,29 @@ export interface MathTSWasmExports {
   matrix_trace(dataPtr: number, rows: number, cols: number): number;
   matrix_norm_frobenius(dataPtr: number): number;
 
+  // Dense matrix decompositions — AS exports added in tandem with the
+  // Rust crate's `decomposition.rs` so the AS backend can stop falling
+  // back to JS for these ops. AS calling convention: pass typed-array
+  // *header* references (the AS runtime carries length, no ptr+len args).
+  // See `assembly/src/algebra/decomposition.ts` for the kernels.
+  matrix_lu_decompose?(
+    a: Float64Array,
+    n: number,
+    l_out: Float64Array,
+    u_out: Float64Array,
+    perm_out: Int32Array
+  ): number;
+  matrix_qr_decompose?(
+    a: Float64Array,
+    m: number,
+    n: number,
+    q_out: Float64Array,
+    r_out: Float64Array
+  ): number;
+  matrix_cholesky?(a: Float64Array, n: number, l_out: Float64Array): number;
+  matrix_inverse?(a: Float64Array, n: number, result: Float64Array, work: Float64Array): number;
+  matrix_determinant?(a: Float64Array, n: number, work: Float64Array): number;
+
   // Bitwise operations (Int32Array, elementwise) — AS-backend kernels.
   // The Rust backend ships an equivalent set under the `*Array` /
   // `*ArrayPerElement` naming (declared in
