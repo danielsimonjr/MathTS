@@ -19,10 +19,128 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 >    dispatch and the Float64Array chunking, then extends genuine worker
 >    parallelism across the distribution, special-function, signal-spectrum, and
 >    matrix-decomposition layers.
+> 4. **Typed-layer expansion + repo-wide cleanup (2026-05-22)** — closes
+>    the 599 pre-existing `functions` typecheck errors, raises source-file
+>    coverage 18.6% → 27.0%, ports the bitwise and logical mathjs
+>    categories to the active `typed/` layer with full WASM-WebWorker-JS
+>    dispatch tiers, fixes a long-latent variadic-dispatch bug in
+>    `typed/arithmetic.ts`, surfaces and fixes several pre-existing bugs
+>    (latent `\!` in `core/is.ts`, Rust WASM build-script destination
+>    outside the repo, stale `DenseMatrix(data)` calls in benches, three
+>    `_compile(_math:…)` signatures whose bodies still used `math`,
+>    matrix `WasmLoader` CWD-relative default path, cubic+quartic root
+>    cases never implemented in `typed/cas.ts`, hybrid Rust/AS bug in
+>    `WASMBackend`), and lands a clean `WASMBackend` (AS-only) +
+>    `RustWASMBackend` (Rust-only) split with all four standalone WASM
+>    benches now reporting Rust **2.5×–34× faster than JS**.
+
+### Added
+
+#### Typed-layer ports (commit `2a141d4`)
+
+- **Bitwise category** (7 ops + helper): `bitAnd`, `bitOr`, `bitXor`,
+  `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift` now first-
+  class typed-function-dispatched implementations in
+  `functions/src/typed/bitwise.ts` with `number / BigNumber / bigint /
+  Int32Array` signatures. BigNumber bitwise reimplemented through
+  native `bigint` (the synced helper depends on decimal.js internals
+  `mathts-core`'s BigNumber does not expose); non-integer / NaN /
+  Infinity throws `'Integers expected'` to match mathjs.
+- **Logical category** (5 ops): `and`, `or`, `xor`, `not`, `nullish`
+  now first-class typed-function-dispatched implementations in
+  `functions/src/typed/logical.ts` over `number / bigint / BigNumber /
+  Complex / any`. `nullish` carries explicit `boolean,any` /
+  `string,any` / `BigNumber,any` / `Complex,any` / `bigint,any` short-
+  circuit signatures so typed-function does not coerce `false` or
+  `''` through a different signature before the catch-all.
+- **`ComputePool` gained 7 async `Int32Array` bitwise methods**
+  (`bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`,
+  `rightArithShift`, `rightLogShift`) returning
+  `ParallelResult<Int32Array>`. New `parallel/src/ops/bitwise.ts`
+  carries pure elementwise impls and chunking.
+- 171 new tests in `functions/tests/typed-{bitwise,logical}.test.ts`.
+  `factories/index.ts`'s 12 superseded synced-factory exports made
+  module-private (`factoryScope` wiring preserved); two existing
+  factory tests repointed at the typed/ modules.
+
+#### Typed-layer deferred follow-ups closed (commit `d6ea55c`)
+
+- **BigNumber API extension.** `core/src/types/bignumber.ts` gained
+  three new Decimal.js-shaped surfaces the synced expression formatter
+  duck-types against: `.gt(BigNumber | number | string) → boolean`,
+  `.toSignificantDigits(n?, roundingMode?) → BigNumber` (uses the
+  class's existing global `RoundingMode`, no second rounding
+  convention), `.e → number` (decimal exponent —
+  `floor(log10(|x|))` for non-zero finite values; `0` for zero / NaN /
+  Infinity, callers gate with `isZero` / `isFinite`). Plus
+  `.toNumber()` alias of `.valueOf()`, a `readonly isBigNumber = true`
+  duck-typing marker, and `toFixed()` now accepts no-arg for the
+  full fixed-point string. `expression/tests/utils-bignumber-formatter.
+  test.ts` dropped its `MockBigNumber` and runs against the real
+  class (16/16 pass). 42 new direct tests in
+  `core/tests/BigNumber-formatter-api.test.ts`.
+
+- **Int32-aware workerpool kernel slot.**
+  `packages/workerpool/src/worker.ts` gained three Int32-aware kernels
+  matching the existing `<op>Chunk` naming convention —
+  `bitwiseChunk` (op-tagged binary), `bitwiseScalarChunk` (Int32 ×
+  scalar for shifts), `bitwiseNotChunk` (unary).
+  `packages/workerpool/src/index.ts` exposes `bitwiseBinary` /
+  `bitwiseScalar` / `bitwiseNot` on `MathWorkerPool` plus
+  `chunkInt32Array` / `chunkPairInt32Array` / `combineInt32Buffers`
+  siblinged to the Float64 helpers. `parallel/src/ComputePool.ts`
+  routes the seven `bit*` methods through the worker pool when
+  `shouldParallelize(length)` holds (same threshold used by
+  `add`/`multiply`); the in-process drivers from
+  `parallel/src/ops/bitwise.ts` are the small-input fallback. The
+  dormant `bitwiseBinaryChunk` / `bitwiseNotChunk` in
+  `parallel/src/workers/compute.worker.ts` (never reachable from
+  `MathWorkerPool`) was deleted with a pointer comment. 12 new
+  kernel-level tests plus 25 new `ComputePool` tests covering
+  above-threshold worker dispatch for all seven ops, the three
+  scalar-shift overloads, the small-input fallback, length-mismatch
+  errors, and an `Int32Array instanceof` regression guard.
+
+- **WASM bitwise tier (Rust + AssemblyScript).** Three per-element
+  shift kernels added to `wasm-rust/crates/mathts-wasm/src/bitwise/
+  operations.rs` (`leftShiftArrayPerElement`,
+  `rightArithShiftArrayPerElement`, `rightLogShiftArrayPerElement`);
+  bit{And,Or,Xor,Not}Array already existed. AS module gained its
+  first bitwise ops via new `assembly/src/ops/bitwise.ts` (seven
+  Int32Array kernels). Three WasmModule interfaces (`functions`,
+  `matrix`, `assembly/bindings`) stay in sync. New
+  `functions/src/wasm/bitwise/wasm-bridge.ts` owns the WASM
+  interaction — `WASM_BITWISE_THRESHOLD = 65,536` elements,
+  `runBinaryBitwiseWasm` / `runUnaryBitwiseWasm` swallow kernel
+  errors and return `null` so the bridge always falls through to
+  `ComputePool` on any WASM failure. `functions/src/typed/bitwise.ts`
+  now layers **WASM (>65 536) → ComputePool worker → in-process**
+  for each `Int32Array` signature. 9 new tests in
+  `functions/tests/typed-bitwise-wasm.test.ts`; security invariant in
+  `functions/tests/security/wasm-integrity.test.ts` still 5/5.
 
 ### Fixed
 
-- **Full repo-wide cleanup pass.** `npx prettier --write .` normalized
+- **Variadic typed-function dispatch (commit `69ad262`).** This repo's
+  typed-function fork delivers a `'...T'` rest arg as a single packed
+  array argument (`fn(a, b, [c, d])`), not as JS spread. Five impls in
+  `typed/arithmetic.ts` (`add`, `multiply`, `min`, `max`) and
+  `typed/trigonometry.ts` (`hypot`) declared `(a, b, ...rest)` and got
+  `rest = [[c, d]]` — `add(1, 2, 3)` returned the string `'33'`,
+  `multiply(2, 3, 4)` returned `'24'`, etc. Fixed by declaring `rest`
+  as a plain array parameter (no JS spread). 17 regression tests in
+  `functions/tests/typed-variadic.test.ts` pin the corrected behaviour.
+
+- **`matrix/tests/WasmLoader.test.ts` skipped tests (commit `69ad262`).**
+  Two `.skip`-ped tests asserted Rust-WASM-shaped exports
+  (`multiplyDense`) that the AS artifact at `assembly/build/mathts.wasm`
+  doesn't ship (AS exports `add_f64` / `matrix_multiply`). Replaced
+  with one real conditional test that loads the AS artifact and
+  asserts the universals (`mod.memory` is a `WebAssembly.Memory`,
+  non-empty function table); skips dynamically if the artifact is
+  missing. 48 → 49 pass, 0 skipped.
+
+- **Full repo-wide cleanup pass (commit `a5dc31b`).** `npx prettier --write .` normalized
   formatting across the whole tree (1500+ TS, 120+ MD, 60+ JSON, 4 YAML,
   1 shell, 1 HTML — purely cosmetic, no semantic changes). ESLint config
   gained a `synced mathjs` overrides block that downgrades 22 stylistic
@@ -71,18 +189,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     identifier. The DTS build (`tsup --dts`) caught them once
     typecheck ran cleanly. Renamed back to `math` in the signature.
 
+- **Repo-cleanup follow-ups (commit `3979eb1`).** Three pre-existing
+  issues surfaced by the cleanup, closed by three parallel subagents:
+  - **Matrix `WasmLoader` CWD-relative default path.**
+    `getDefaultWasmPath()` returned `'./lib/wasm/mathts.wasm'`, so
+    the matrix test suite (running from inside `matrix/`) emitted
+    "Failed to load WASM module, falling back to JS" ~50 times per
+    run. Both branches now resolve via `new URL('../../../lib/wasm/
+    <file>', import.meta.url).pathname` (3 hops up = repo root).
+    Matrix test run prints **0** fallback lines.
+  - **`functions/src/typed/cas.ts` cubic + quartic root cases never
+    implemented.** `fm2 = f(-2)` was computed but never read.
+    Added 227 lines of new helpers: `depressedCubicRoots(p, q)`
+    (Cardano when Δ<0, trigonometric Viète form when Δ>0, arccos
+    arg clamped to [-1,1]), `solveCubicRadicals(A,B,C,D, fm2…f2)`
+    (short-circuits on {-2,-1,0,1,2} via synthetic division +
+    quadratic; falls back to depression + the new cubic),
+    `solveQuarticRadicals(A,B,C,D,E, fm2…f2)` (Ferrari via
+    resolvent cubic, same short-circuit). `_fm2` prefix dropped;
+    `fm2` now read at 7 sites. 6 new tests cover the three-real
+    rational cubic, one-real Cardano cubic, repeated-root + `fm2`-
+    short-circuit cubic, four-rational quartic, `fm2`-short-circuit
+    quartic, and a two-real-two-complex quartic.
+  - **`matrix/src/backends/WASMBackend` hybrid Rust/AS bug.**
+    Backend called Rust camelCase exports (`add`, `multiplyDense`,
+    …) but allocated via the AS-specific `module.__new` — every
+    standalone WASM bench threw `module.__new is not a function`.
+    Switching to AS via `MATHTS_WASM_BACKEND=assemblyscript` then
+    hit `this.wasmModule.add is not a function` because AS exports
+    `add_f64` / `matrix_multiply` (snake_case, type-suffixed).
+    Closed with **Option A — clean split**: `WASMBackend`
+    rewritten as AS-only, owning its own AS instance with an
+    inline AS-managed Float64Array allocator plus a per-instance
+    allocation pool (the AS `--runtime stub` build has no free /
+    no GC). Rust callers route to the existing `RustWASMBackend`
+    (whose `findWasmPath()` was also fixed to use `import.meta.url`
+    instead of a broken `require()` shim). Registration extracted
+    to a shared `matrix/src/backends/register-backends.ts`. All
+    four standalone WASM benches under `tools/benchmark/wasm/` and
+    `tools/benchmark/e2e/` now complete cleanly; bench results
+    show **Rust 2.5×–34× faster than JS** across matmul / dot /
+    vecadd / det. The comparison bench's AS column populated via
+    new `asAllocFloat64` / `asWriteFloat64` / `AsPool` helpers
+    wired to the AS export names.
+
 ### Verified
 
-- `npx turbo build`: 12/12 packages green.
-- `npx turbo test`: 19/19 task packages green.
-- `npx tsc --noEmit` per package: 0 errors across all 11 TypeScript
-  packages.
-- `npx eslint src --ext .ts` per package: 0 errors.
-- `npm run bench:wasm`: Rust column populated, **1.3× to 26.6×
-  faster than JS** across matmul / dot / vecadd / det.
+- `npx turbo build`: **12/12** packages green.
+- `npx turbo test`: **19/19** task packages green (1766+ tests across
+  all functions tests, 49 matrix WasmLoader tests with 0 skips).
+- `npx tsc --noEmit` per package: **0 errors** across all 11
+  TypeScript packages (core, matrix, tensor, autograd, functions,
+  parallel, expression, workbook, compat, typed-function, workerpool).
+- `npx eslint src --ext .ts` per package: **0 errors** across all 10
+  linted packages.
+- Matrix "Failed to load WASM module" fallback log lines: **0** (was
+  ~50 per test run).
+- `npm run bench:wasm`: Rust + AS + JS columns all populated; **Rust
+  2.5×–34× faster than JS** across matmul / dot / vecadd / det; Rust
+  3.5×–13.7× faster than AS at matmul sizes ≥ 100×100.
 - `npm run bench:parallel`: full per-op break-even data; only
   `matmul` (≥64-element matrices) and `spectrogram` (≥65,536 samples)
   beat sequential in this container.
+- All four standalone WASM benches under `tools/benchmark/wasm/` and
+  `tools/benchmark/e2e/` complete without throwing.
+- `functions/tests/security/wasm-integrity.test.ts`: **5/5** pass
+  (SHA-384 manifest verification intact after manifest regeneration).
+- Source-file test coverage: **18.6 % → 27.0 %** (90/485 → 131/485)
+  across 42 new test files (+1,294 assertions).
 
 ### Added
 
