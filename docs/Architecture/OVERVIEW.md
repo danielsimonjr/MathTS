@@ -1,6 +1,6 @@
 # MathTS Project Overview
 
-**Generated**: 2026-05-22
+**Generated**: 2026-05-23
 
 ## What is MathTS?
 
@@ -19,16 +19,16 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 
 ## Key Metrics
 
-Metrics below are reachable-file scope (485 active files; 902 dormant synced
-files excluded), per the 2026-05-22 dependency-graph report.
+Metrics below are reachable-file scope (491 active files; 903 dormant synced
+files excluded), per the 2026-05-23 dependency-graph report.
 
 | Metric                     | Value                                        |
 | -------------------------- | -------------------------------------------- |
-| Reachable TypeScript Files | 485 (of 1,387 total; 902 dormant)            |
-| Lines of Code              | 125,177 (reachable)                          |
-| Total Exports              | 2,850 (704 re-exports)                       |
-| Test Files                 | 156 (27.0% source-file coverage; 131 of 485) |
-| Modules                    | 55                                           |
+| Reachable TypeScript Files | 491 (of 1,394 total; 903 dormant)            |
+| Lines of Code              | 124,615 (reachable)                          |
+| Total Exports              | 2,898 (728 re-exports)                       |
+| Test Files                 | 164 (27.5% source-file coverage; 135 of 491) |
+| Modules                    | 57                                           |
 | Circular Dependencies      | 0                                            |
 | Typed Function Exports     | 374+ (20 modules, including GPU)             |
 | Synced Factory Functions   | 242 (19 categories)                          |
@@ -36,7 +36,7 @@ files excluded), per the 2026-05-22 dependency-graph report.
 ## Packages
 
 The monorepo has **12 npm packages** plus the `wasm-rust` Cargo crate (not an
-npm package). File counts are reachable (active) files from the 2026-05-22 report.
+npm package). File counts are reachable (active) files from the 2026-05-23 report.
 
 | Package                                   | Description                                                  | Active Files | Version |
 | ----------------------------------------- | ------------------------------------------------------------ | ------------ | ------- |
@@ -46,19 +46,19 @@ npm package). File counts are reachable (active) files from the 2026-05-22 repor
 | `@danielsimonjr/mathts-matrix`            | DenseMatrix, SparseMatrix, backends                          | 34           | 0.1.2   |
 | `@danielsimonjr/mathts-tensor`            | Rank-N Float64Array-backed dense Tensor (einsum/contraction) | 2            | 0.1.0   |
 | `@danielsimonjr/mathts-autograd`          | Forward + reverse-mode automatic differentiation over Tensor | 5            | 0.1.0   |
-| `@danielsimonjr/mathts-functions`         | Math functions via typed dispatch                            | 352          | 0.1.3   |
-| `@danielsimonjr/mathts-parallel`          | ComputePool, WebWorker operations                            | 10           | 0.1.3   |
+| `@danielsimonjr/mathts-functions`         | Math functions via typed dispatch                            | 355          | 0.1.3   |
+| `@danielsimonjr/mathts-parallel`          | ComputePool, WebWorker operations                            | 11           | 0.1.3   |
 | `@danielsimonjr/mathts-expression`        | Parser/compiler/evaluator (fully functional)                 | 45           | 0.2.0   |
 | `@danielsimonjr/mathts-workbook`          | .mtsw notebook runtime + CLI                                 | 5            | 0.1.2   |
 | `@danielsimonjr/mathts-compat`            | mathjs compatibility shim                                    | 2            | 0.1.2   |
-| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM source (AssemblyScript)                                 | 17           | 0.1.3   |
+| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM source (AssemblyScript)                                 | 19           | 0.1.3   |
 | `wasm-rust`                               | Rust WASM (primary backend; Cargo crate)                     | 63           | —       |
 
 ## Two-Layer Code Architecture
 
 ### Active Layer (native MathTS)
 
-485 reachable files across `core/`, `matrix/`, `tensor/`, `autograd/`, `functions/`, `parallel/`, `expression/`, `workbook/`, `compat/`, and the WASM packages.
+491 reachable files across `core/`, `matrix/`, `tensor/`, `autograd/`, `functions/`, `parallel/`, `expression/`, `workbook/`, `compat/`, and the WASM packages.
 These are exported, tested, and built. Includes:
 
 - **3 numeric types**: Complex (83 methods), Fraction (61 methods), BigNumber (96 methods including 22 math functions)
@@ -89,7 +89,7 @@ The following function categories go beyond the mathjs API surface, available as
 
 ### Dormant Layer (synced from mathjs)
 
-902 files synced from the mathjs fork. 19 categories, 242 factory-pattern functions.
+903 files synced from the mathjs fork. 19 categories, 242 factory-pattern functions.
 Not exported from package entry points. Support files in `functions/src/{utils,core,plain,type,expression,error,wasm}/`.
 
 ## Computation Backends
@@ -168,8 +168,8 @@ math.add(1, 2);
 | ---------------------- | ----- |
 | Total synced factories | 242   |
 | Synced categories      | 19    |
-| Dormant files          | 902   |
-| Reachable files        | 485   |
+| Dormant files          | 903   |
+| Reachable files        | 491   |
 
 ### Remaining Barriers
 

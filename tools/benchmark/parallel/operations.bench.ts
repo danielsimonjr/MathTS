@@ -43,6 +43,7 @@ import {
   characteristicPolynomial,
   matrixPower,
 } from '@danielsimonjr/mathts-functions';
+import { eig, svd, singularValues } from '@danielsimonjr/mathts-matrix';
 
 import type { BenchCase } from './harness.js';
 import { squareLabel } from './harness.js';
@@ -255,6 +256,72 @@ const charPolyBench: BenchCase = {
 };
 
 // ---------------------------------------------------------------------------
+// Decomposition operations (eig / svd / singularValues)
+//
+// These operate on the JS-fallback path in matrix/src/operations/{eig,svd}.ts.
+// The outer QR-iteration loop is sequential by construction (each shifted step
+// depends on the previous matrix state), but each iteration contains:
+//
+//   - A Hessenberg / bidiagonalize reduction (Householder bilateral update)
+//   - O(n) per-step Givens rotations on H, U, V (data-parallel across columns)
+//
+// `matmul`'s break-even on this hardware is 64×64. The Hessenberg reduction
+// and the per-step Givens sweep are not single matmuls — they are length-n
+// rank-1 updates and column rotations.
+//
+// **Result (re-validated 2026-05-23, see `eig-inner-probe.ts`).** The bench
+// here is *unable* to show a win because `eig` / `svd` / `singularValues` do
+// not dispatch any work to the pool — both "sequential" and "parallel" rows
+// time identical code. The numbers oscillate within noise (0.84×–1.27×). The
+// real question — *would* inner dispatch win if we wired it up — is answered
+// by `eig-inner-probe.ts`: at n = 256 one Givens sweep is ~0.18 ms vs ~35 ms
+// for a `computePool.matmul` round-trip, so dispatching inner steps would
+// slow `eig` by 100×–1000×. The earlier "not pursued" decision in
+// `docs/refactoring/TODO.md` is therefore re-validated, and `OpName` /
+// `thresholdByOp` continues to omit `eig`/`svd`/`singularValues`.
+//
+// The bench cases are kept so future runs on different hardware (especially
+// large-core boxes where dispatch may amortize differently) can re-check.
+// ---------------------------------------------------------------------------
+
+// Eig dimensions: 32 is below matmul break-even; 64 is at it; 128, 256 exceed.
+// We cap at 256 — `inverseIteration` per eigenvector + the QR loop make eig
+// expensive enough that 256x256 already takes O(seconds).
+const EIG_DIMS = [32, 64, 128, 256];
+
+const eigBench: BenchCase = {
+  operation: 'eig',
+  category: 'linear-algebra',
+  sizeUnit: 'matrix dim',
+  sizes: EIG_DIMS,
+  label: squareLabel,
+  iterations: (dim) => (dim >= 256 ? 3 : dim >= 128 ? 5 : 10),
+  run: async (dim) => eig(randMatrix(dim), { computeVectors: false }),
+};
+
+// SVD: same dims as eig. Bidiagonalize cost ~ matmul cost; the bidiagonal
+// QR sweep is cheaper per step than the full QR loop in eig.
+const svdBench: BenchCase = {
+  operation: 'svd',
+  category: 'linear-algebra',
+  sizeUnit: 'matrix dim',
+  sizes: EIG_DIMS,
+  label: squareLabel,
+  iterations: (dim) => (dim >= 256 ? 3 : dim >= 128 ? 5 : 10),
+  run: async (dim) => svd(randMatrix(dim)),
+};
+
+const singularValuesBench: BenchCase = {
+  operation: 'singularValues',
+  category: 'linear-algebra',
+  sizeUnit: 'matrix dim',
+  sizes: EIG_DIMS,
+  label: squareLabel,
+  iterations: (dim) => (dim >= 256 ? 3 : dim >= 128 ? 5 : 10),
+  run: async (dim) => singularValues(randMatrix(dim)),
+};
+
+// ---------------------------------------------------------------------------
 // Signal processing
 // ---------------------------------------------------------------------------
 
@@ -354,6 +421,9 @@ export const ALL_BENCHES: BenchCase[] = [
   matmulBench,
   matrixPowerBench,
   charPolyBench,
+  eigBench,
+  svdBench,
+  singularValuesBench,
   // signal
   parallelFFTBench,
   parallelConvBench,

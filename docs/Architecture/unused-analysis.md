@@ -11,7 +11,12 @@
 
 These files are not imported by any other file in the codebase:
 
-- `packages/workerpool/src/index.ts`
+- `packages/workerpool/src/index.ts` — **FALSE POSITIVE**: this is the npm
+  package entry point declared in `packages/workerpool/package.json` `"exports"`
+  field. No workspace file imports it via a relative path; downstream packages
+  import it as `@danielsimonjr/mathts-workerpool`. The CDG tool does not resolve
+  `package.json` exports, so it cannot detect cross-package consumers. This file
+  is actively used and must not be removed.
 
 ## Potentially Unused Exports
 
@@ -637,3 +642,30 @@ These exports are not imported by any other file in the codebase:
 - `COMPLEX_I` (constant)
 - `COMPLEX_NEG_ONE` (constant)
 
+---
+
+## Triage Notes
+
+**Spot-check scope**: first 20 of the 377 "potentially unused exports" findings,
+covering `packages/workerpool/src/fft-core.ts`, `core/src/factory/factory.ts`,
+`core/src/typed/mathts-typed.ts`, `core/src/types/bignumber.ts`,
+`core/src/types/interfaces.ts`, and `matrix/src/backends/WasmLoader.ts`.
+
+| Category                    | Count (of 20 checked) | Notes                                                                              |
+| --------------------------- | --------------------- | ---------------------------------------------------------------------------------- |
+| Public API (export only)    | 14                    | Re-exported through package-root `index.ts`; no internal consumer needed           |
+| Type-only / internal export | 5                     | Interface or type not re-exported from package root; used only via `import type`   |
+| Internal helper export      | 1                     | `fftBitReverse` — used only within its own file; exported as implementation detail |
+| Genuinely dead code deleted | 0                     | Nothing deleted; all 20 findings have plausible justifications                     |
+
+**Policy**: Exports from package-root `index.ts` files are intentionally part of
+the public surface area of each npm package; they will always appear in this
+report as "potentially unused" (no intra-repo consumer) and are not defects.
+Similarly, exports from `core/src/types/` and similar type-definition files may
+be consumed only via `import type` statements, which the CDG tool does not always
+trace as import edges.
+
+**Recommendation**: Do not act on the 377 findings in bulk. Before removing any
+export, verify it is absent from: (1) all package `index.ts` re-export chains,
+(2) all test files, and (3) any documented public API surface (`API.md`,
+`OVERVIEW.md`). When in doubt, leave the export in place.
