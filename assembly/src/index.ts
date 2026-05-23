@@ -215,6 +215,18 @@ export {
 export { matrix_svd, matrix_singular_values } from './ops/svd';
 
 // =============================================================================
+// Dense Matrix Decompositions (LU, QR, Cholesky, inverse, determinant)
+// =============================================================================
+
+export {
+  matrix_lu_decompose,
+  matrix_qr_decompose,
+  matrix_cholesky,
+  matrix_inverse,
+  matrix_determinant,
+} from './algebra/decomposition';
+
+// =============================================================================
 // Special Functions (orthogonal polynomials, integral functions)
 // =============================================================================
 

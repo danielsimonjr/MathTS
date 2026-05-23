@@ -11,9 +11,15 @@
 // Core Pool
 // =============================================================================
 
-export { ComputePool, computePool, Transfer, DEFAULT_POOL_CONFIG } from './ComputePool.js';
+export {
+  ComputePool,
+  computePool,
+  Transfer,
+  DEFAULT_POOL_CONFIG,
+  resolveOpThreshold,
+} from './ComputePool.js';
 
-export type { ComputePoolConfig, ParallelResult } from './ComputePool.js';
+export type { ComputePoolConfig, ParallelResult, OpName, OpThreshold } from './ComputePool.js';
 
 // =============================================================================
 // Operations

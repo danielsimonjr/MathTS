@@ -8,6 +8,29 @@
  * - Memory pooling for frequent allocations
  * - Compiled module caching for faster re-instantiation
  * - Configurable size thresholds for JS fallback
+ *
+ * Hybrid Rust/AssemblyScript ABI support
+ * --------------------------------------
+ * The two WASM artifacts shipped by this package use *different* memory
+ * models. The loader detects which one is loaded after `load()` resolves
+ * and routes allocations through the correct path:
+ *
+ *  - AssemblyScript artifact (`mathts-as.wasm`): managed runtime. Buffers
+ *    are allocated via `__new(byteLength, id)` and the typed-array exports
+ *    expect a 12-byte *header* pointer (id=5 for Float64Array, id=4 for
+ *    Int32Array). The header holds [dataStart, dataStart, byteLength] in
+ *    little-endian u32s. The data block (id=1 = ArrayBuffer) is allocated
+ *    separately; we pin both so the GC can't reclaim them.
+ *
+ *  - Rust artifact (`mathts.wasm`): no managed runtime. The Rust functions
+ *    take *flat* linear-memory offsets as pointers. There is no `__new`
+ *    export; we manage a JS-side bump allocator anchored at `__heap_base`
+ *    so caller buffers sit above Rust's static-data section.
+ *
+ * Callers receive an opaque `Allocation` handle whose `.ptr` is always the
+ * pointer to pass to the WASM function (header pointer on AS, flat offset
+ * on Rust) and whose `.array` is a JS view over the data region. Callers
+ * do not need to branch on `kind`; only the loader does.
  */
 
 export interface WasmModule {
@@ -455,21 +478,138 @@ export interface WasmModule {
   rightArithShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
   rightLogShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
 
-  // Memory management
+  // Dense matrix decompositions exported by the AssemblyScript binary.
+  // The Rust binary exposes the same algorithms under `luDecomposition` /
+  // `qrDecomposition` / `choleskyDecomposition` / `laInv` / `laDet` (see
+  // entries above) with raw flat-memory pointer arguments. The AS exports
+  // use AS-runtime header references that carry their own length, so the
+  // signatures here take `number` headers because calling these through
+  // `instance.exports` (e.g. from WASMBackend.ts) passes the header
+  // pointer, not a JS typed array. The matrix/src/backends/WASMBackend.ts
+  // dispatch tier probes for these at runtime and falls through to JS
+  // when the loaded binary is not the AS one.
+  matrix_lu_decompose?: (
+    aHdr: number,
+    n: number,
+    lOutHdr: number,
+    uOutHdr: number,
+    permOutHdr: number
+  ) => number;
+  matrix_qr_decompose?: (
+    aHdr: number,
+    m: number,
+    n: number,
+    qOutHdr: number,
+    rOutHdr: number
+  ) => number;
+  matrix_cholesky?: (aHdr: number, n: number, lOutHdr: number) => number;
+  matrix_inverse?: (aHdr: number, n: number, resultHdr: number, workHdr: number) => number;
+  matrix_determinant?: (aHdr: number, n: number, workHdr: number) => number;
+
+  // Memory management — present in AS module, absent in Rust module.
+  // The loader gates all uses behind a kind discriminant so neither callers
+  // nor this interface need an optionality knob; for the Rust module these
+  // exports are simply missing and the loader will never invoke them.
   __new: (size: number, id: number) => number;
   __pin: (ptr: number) => number;
   __unpin: (ptr: number) => void;
   __collect: () => void;
   memory: WebAssembly.Memory;
+  // Rust modules expose `__heap_base` as a WebAssembly.Global instead of
+  // having a managed allocator. The loader reads this when present.
+  __heap_base?: WebAssembly.Global | number;
 }
 
 /**
- * Memory pool entry for reusable allocations
+ * AssemblyScript managed-runtime ID constants. Mirrored from
+ * `assembly/build/mathts.js`; do not change without verifying against the
+ * generated AS metadata.
+ */
+const AS_ID_ARRAY_BUFFER = 1;
+const AS_ID_INT32_ARRAY = 4;
+const AS_ID_FLOAT64_ARRAY = 5;
+const AS_HEADER_BYTES = 12;
+
+/**
+ * Discriminator for the loaded WASM artifact's allocator model.
+ *  - 'as': AssemblyScript managed runtime (`__new`/`__pin`/`__unpin`).
+ *  - 'rust': flat linear memory; we run a JS-side bump allocator.
+ */
+export type AllocatorKind = 'as' | 'rust';
+
+/**
+ * Opaque allocation handle returned by `allocateFloat64Array` and friends.
+ *
+ * Callers must treat `ptr` as the pointer to pass to WASM functions — on
+ * AS that is the typed-array *header* pointer, on Rust it is a flat
+ * linear-memory offset. The `array` view is always positioned over the
+ * data region so callers can `set()` and read it as JS expects.
+ *
+ * `kind` is exposed so advanced consumers (e.g. tests) can introspect,
+ * but typical callers don't need to branch on it.
+ */
+export interface Allocation<TArray extends Float64Array | Int32Array> {
+  readonly kind: AllocatorKind;
+  /** Pointer to pass to WASM functions. */
+  readonly ptr: number;
+  /** JS-side view of the data region. */
+  array: TArray;
+  /** Element length (independent of byte-width). */
+  readonly length: number;
+  /** Internal: the flat data offset (== ptr for Rust; != ptr for AS). */
+  readonly dataPtr: number;
+}
+
+/**
+ * Memory pool entry for reusable allocations.
+ *
+ * On AS we pool by length and recycle both the header and the data block.
+ * On Rust there is no pool — allocations are bump-allocated and reclaimed
+ * en masse via `resetRustAllocator()`.
  */
 interface PoolEntry {
-  ptr: number;
-  size: number;
+  ptr: number; // header pointer for AS, flat ptr for Rust (Rust pool is unused today)
+  dataPtr: number;
+  size: number; // byte length of the data region
   inUse: boolean;
+}
+
+/**
+ * Bump allocator for Rust linear memory.
+ *
+ * The Rust WASM has no allocator exports. We manage a JS-side bump
+ * allocator anchored at `__heap_base` so caller buffers sit above the
+ * Rust static-data section. Reset reclaims everything in O(1).
+ */
+class RustBumpAllocator {
+  private offset: number;
+  private readonly base: number;
+
+  constructor(baseOffset: number) {
+    this.base = baseOffset;
+    this.offset = baseOffset;
+  }
+
+  alloc(byteLength: number, memory: WebAssembly.Memory): number {
+    // f64 alignment (8 bytes) is the strictest we need; align everything to 8.
+    const aligned = (this.offset + 7) & ~7;
+    const end = aligned + byteLength;
+    const currentBytes = memory.buffer.byteLength;
+    if (end > currentBytes) {
+      const pagesNeeded = Math.ceil((end - currentBytes) / 65536);
+      memory.grow(pagesNeeded);
+    }
+    this.offset = end;
+    return aligned;
+  }
+
+  reset(): void {
+    this.offset = this.base;
+  }
+
+  get highWaterMark(): number {
+    return this.offset;
+  }
 }
 
 /**
@@ -491,7 +631,12 @@ export class WasmLoader {
   private isNode: boolean;
   private lastMetrics: LoadingMetrics | null = null;
 
-  // Memory pool for reusable allocations
+  // Discriminant chosen at load() time. Null before load().
+  private allocatorKind: AllocatorKind | null = null;
+  // Rust path: a bump allocator anchored at __heap_base.
+  private rustAllocator: RustBumpAllocator | null = null;
+
+  // Memory pool for AS allocations (Rust does not use these pools).
   private float64Pool: PoolEntry[] = [];
   private int32Pool: PoolEntry[] = [];
   private readonly poolSizeThreshold = 1024 * 1024; // 1MB max per pool entry
@@ -521,6 +666,7 @@ export class WasmLoader {
 
     this.loading = this.loadModule(wasmPath);
     this.wasmModule = await this.loading;
+    this.detectAllocatorKind(this.wasmModule);
     return this.wasmModule;
   }
 
@@ -575,7 +721,7 @@ export class WasmLoader {
         totalMs: performance.now() - totalStart,
         fromCache: true,
       };
-      return instance.exports as any as WasmModule;
+      return instance.exports as unknown as WasmModule;
     }
 
     if (this.isNode) {
@@ -646,7 +792,7 @@ export class WasmLoader {
       fromCache: false,
     };
 
-    return instance.exports as any as WasmModule;
+    return instance.exports as unknown as WasmModule;
   }
 
   private async loadBrowserWasm(path: string, totalStart: number): Promise<WasmModule> {
@@ -663,7 +809,7 @@ export class WasmLoader {
         totalMs: performance.now() - totalStart,
         fromCache: false,
       };
-      return result.instance.exports as any as WasmModule;
+      return result.instance.exports as unknown as WasmModule;
     }
 
     // Fallback for older browsers
@@ -688,7 +834,7 @@ export class WasmLoader {
       fromCache: false,
     };
 
-    return instance.exports as any as WasmModule;
+    return instance.exports as unknown as WasmModule;
   }
 
   private getImports(): WebAssembly.Imports {
@@ -700,9 +846,40 @@ export class WasmLoader {
         },
         seed: () => Date.now(),
       },
-      Math: Math as any,
-      Date: Date as any,
+      Math: Math as unknown as WebAssembly.ModuleImports,
+      Date: Date as unknown as WebAssembly.ModuleImports,
     };
+  }
+
+  /**
+   * Inspect a freshly loaded module and set up the allocator path.
+   *
+   * Discriminant: the AssemblyScript managed runtime exports `__new`. The
+   * Rust artifact does not. We branch on that exactly once at load time and
+   * cache the result so the hot path doesn't have to re-detect.
+   */
+  private detectAllocatorKind(module: WasmModule): void {
+    const hasManagedRuntime =
+      typeof (module as unknown as { __new?: unknown }).__new === 'function';
+    if (hasManagedRuntime) {
+      this.allocatorKind = 'as';
+      this.rustAllocator = null;
+      return;
+    }
+
+    this.allocatorKind = 'rust';
+    // Anchor the bump allocator at __heap_base when present (the Rust crate
+    // has ~1 MB of static-data tables; a fixed 64 KB base would write into
+    // them). Fall back to a 64 KB base for modules that omit the global.
+    const heapBaseGlobal = (module as unknown as { __heap_base?: WebAssembly.Global | number })
+      .__heap_base;
+    let heapBase = 65536;
+    if (typeof heapBaseGlobal === 'number') {
+      heapBase = heapBaseGlobal;
+    } else if (heapBaseGlobal && typeof heapBaseGlobal.value === 'number') {
+      heapBase = heapBaseGlobal.value;
+    }
+    this.rustAllocator = new RustBumpAllocator(heapBase);
   }
 
   /**
@@ -734,189 +911,262 @@ export class WasmLoader {
   }
 
   /**
+   * Allocator kind (rust/as) chosen at load-time.
+   * Returns null before load() has resolved.
+   */
+  public getAllocatorKind(): AllocatorKind | null {
+    return this.allocatorKind;
+  }
+
+  /**
+   * Reset the Rust bump allocator's high-water mark.
+   *
+   * This is a coarse batch-free for the Rust path: every previously
+   * allocated pointer becomes invalid. Use only when no pointers are still
+   * in flight (e.g. between matrix operations that explicitly free their
+   * own scratch).
+   *
+   * No-op on the AS path; AS uses per-allocation pin/unpin via release().
+   */
+  public resetRustAllocator(): void {
+    if (this.allocatorKind === 'rust' && this.rustAllocator) {
+      this.rustAllocator.reset();
+    }
+  }
+
+  /**
    * Get loading performance metrics
    */
   public getLoadingMetrics(): LoadingMetrics | null {
     return this.lastMetrics;
   }
 
+  // ===========================================================================
+  // Allocation API
+  // ---------------------------------------------------------------------------
+  // All allocation methods branch on `allocatorKind`. The returned handle's
+  // `ptr` is always the value that should be passed to WASM functions.
+  // ===========================================================================
+
   /**
-   * Allocate Float64Array in WASM memory
-   * Uses memory pooling for frequently reused sizes
+   * Allocate Float64Array in WASM memory and copy `data` into it.
+   * Uses memory pooling on the AS path.
    */
-  public allocateFloat64Array(data: number[] | Float64Array): {
-    ptr: number;
-    array: Float64Array;
-  } {
+  public allocateFloat64Array(data: number[] | Float64Array): Allocation<Float64Array> {
     const module = this.wasmModule;
     if (!module) throw new Error('WASM module not loaded');
-
     const length = data.length;
-    const byteLength = length * 8; // 8 bytes per f64
 
-    // Try to get from pool if size is reasonable
-    let ptr: number;
-    if (byteLength <= this.poolSizeThreshold) {
-      const poolEntry = this.getFromPool(this.float64Pool, byteLength);
-      if (poolEntry) {
-        ptr = poolEntry.ptr;
-        poolEntry.inUse = true;
-      } else {
-        ptr = module.__new(byteLength, 2);
-      }
-    } else {
-      ptr = module.__new(byteLength, 2);
+    if (this.allocatorKind === 'rust') {
+      const alloc = this.allocateRustFloat64(module, length);
+      alloc.array.set(data);
+      return alloc;
     }
 
-    const array = new Float64Array(module.memory.buffer, ptr, length);
-    array.set(data);
-
-    return { ptr, array };
+    const alloc = this.allocateAsFloat64(module, length);
+    alloc.array.set(data);
+    return alloc;
   }
 
   /**
    * Allocate Float64Array without copying data (for output buffers)
    */
-  public allocateFloat64ArrayEmpty(length: number): {
-    ptr: number;
-    array: Float64Array;
-  } {
+  public allocateFloat64ArrayEmpty(length: number): Allocation<Float64Array> {
     const module = this.wasmModule;
     if (!module) throw new Error('WASM module not loaded');
 
-    const byteLength = length * 8;
-
-    let ptr: number;
-    if (byteLength <= this.poolSizeThreshold) {
-      const poolEntry = this.getFromPool(this.float64Pool, byteLength);
-      if (poolEntry) {
-        ptr = poolEntry.ptr;
-        poolEntry.inUse = true;
-      } else {
-        ptr = module.__new(byteLength, 2);
-      }
-    } else {
-      ptr = module.__new(byteLength, 2);
+    if (this.allocatorKind === 'rust') {
+      return this.allocateRustFloat64(module, length);
     }
-
-    const array = new Float64Array(module.memory.buffer, ptr, length);
-    return { ptr, array };
+    return this.allocateAsFloat64(module, length);
   }
 
   /**
-   * Allocate Int32Array in WASM memory
-   * Uses memory pooling for frequently reused sizes
+   * Allocate Int32Array in WASM memory and copy `data` into it.
    */
-  public allocateInt32Array(data: number[] | Int32Array): {
-    ptr: number;
-    array: Int32Array;
-  } {
+  public allocateInt32Array(data: number[] | Int32Array): Allocation<Int32Array> {
     const module = this.wasmModule;
     if (!module) throw new Error('WASM module not loaded');
-
     const length = data.length;
-    const byteLength = length * 4; // 4 bytes per i32
 
-    let ptr: number;
-    if (byteLength <= this.poolSizeThreshold) {
-      const poolEntry = this.getFromPool(this.int32Pool, byteLength);
-      if (poolEntry) {
-        ptr = poolEntry.ptr;
-        poolEntry.inUse = true;
-      } else {
-        ptr = module.__new(byteLength, 1);
-      }
-    } else {
-      ptr = module.__new(byteLength, 1);
+    if (this.allocatorKind === 'rust') {
+      const alloc = this.allocateRustInt32(module, length);
+      alloc.array.set(data);
+      return alloc;
     }
 
-    const array = new Int32Array(module.memory.buffer, ptr, length);
-    array.set(data);
-
-    return { ptr, array };
+    const alloc = this.allocateAsInt32(module, length);
+    alloc.array.set(data);
+    return alloc;
   }
 
   /**
    * Allocate Int32Array without copying data (for output buffers)
    */
-  public allocateInt32ArrayEmpty(length: number): {
-    ptr: number;
-    array: Int32Array;
-  } {
+  public allocateInt32ArrayEmpty(length: number): Allocation<Int32Array> {
     const module = this.wasmModule;
     if (!module) throw new Error('WASM module not loaded');
 
-    const byteLength = length * 4;
-
-    let ptr: number;
-    if (byteLength <= this.poolSizeThreshold) {
-      const poolEntry = this.getFromPool(this.int32Pool, byteLength);
-      if (poolEntry) {
-        ptr = poolEntry.ptr;
-        poolEntry.inUse = true;
-      } else {
-        ptr = module.__new(byteLength, 1);
-      }
-    } else {
-      ptr = module.__new(byteLength, 1);
+    if (this.allocatorKind === 'rust') {
+      return this.allocateRustInt32(module, length);
     }
+    return this.allocateAsInt32(module, length);
+  }
 
+  // ---- Rust path (flat memory + bump allocator) --------------------------
+
+  private allocateRustFloat64(module: WasmModule, length: number): Allocation<Float64Array> {
+    const allocator = this.rustAllocator;
+    if (!allocator) throw new Error('Rust allocator not initialized');
+    const byteLength = length * 8;
+    const ptr = allocator.alloc(byteLength, module.memory);
+    const array = new Float64Array(module.memory.buffer, ptr, length);
+    return { kind: 'rust', ptr, dataPtr: ptr, array, length };
+  }
+
+  private allocateRustInt32(module: WasmModule, length: number): Allocation<Int32Array> {
+    const allocator = this.rustAllocator;
+    if (!allocator) throw new Error('Rust allocator not initialized');
+    const byteLength = length * 4;
+    const ptr = allocator.alloc(byteLength, module.memory);
     const array = new Int32Array(module.memory.buffer, ptr, length);
-    return { ptr, array };
+    return { kind: 'rust', ptr, dataPtr: ptr, array, length };
+  }
+
+  // ---- AS path (managed runtime + header pointers) -----------------------
+
+  private allocateAsFloat64(module: WasmModule, length: number): Allocation<Float64Array> {
+    const byteLength = length * 8;
+
+    // Try to recycle a pooled allocation of the same data-byte size.
+    if (byteLength <= this.poolSizeThreshold) {
+      const recycled = this.acquireFromAsPool(this.float64Pool, byteLength);
+      if (recycled) {
+        const array = new Float64Array(module.memory.buffer, recycled.dataPtr, length);
+        return {
+          kind: 'as',
+          ptr: recycled.ptr,
+          dataPtr: recycled.dataPtr,
+          array,
+          length,
+        };
+      }
+    }
+    return this.makeAsFloat64(module, length);
+  }
+
+  private allocateAsInt32(module: WasmModule, length: number): Allocation<Int32Array> {
+    const byteLength = length * 4;
+    if (byteLength <= this.poolSizeThreshold) {
+      const recycled = this.acquireFromAsPool(this.int32Pool, byteLength);
+      if (recycled) {
+        const array = new Int32Array(module.memory.buffer, recycled.dataPtr, length);
+        return {
+          kind: 'as',
+          ptr: recycled.ptr,
+          dataPtr: recycled.dataPtr,
+          array,
+          length,
+        };
+      }
+    }
+    return this.makeAsInt32(module, length);
+  }
+
+  private makeAsFloat64(module: WasmModule, length: number): Allocation<Float64Array> {
+    const byteLength = length * 8;
+    const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
+    const headerPtr = module.__new(AS_HEADER_BYTES, AS_ID_FLOAT64_ARRAY) >>> 0;
+    module.__pin(headerPtr);
+    // Write header: [dataStart, dataStart, byteLength] (little-endian u32s).
+    const dv = new DataView(module.memory.buffer);
+    dv.setUint32(headerPtr + 0, bufferPtr, true);
+    dv.setUint32(headerPtr + 4, bufferPtr, true);
+    dv.setUint32(headerPtr + 8, byteLength, true);
+    const array = new Float64Array(module.memory.buffer, bufferPtr, length);
+    return { kind: 'as', ptr: headerPtr, dataPtr: bufferPtr, array, length };
+  }
+
+  private makeAsInt32(module: WasmModule, length: number): Allocation<Int32Array> {
+    const byteLength = length * 4;
+    const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
+    const headerPtr = module.__new(AS_HEADER_BYTES, AS_ID_INT32_ARRAY) >>> 0;
+    module.__pin(headerPtr);
+    const dv = new DataView(module.memory.buffer);
+    dv.setUint32(headerPtr + 0, bufferPtr, true);
+    dv.setUint32(headerPtr + 4, bufferPtr, true);
+    dv.setUint32(headerPtr + 8, byteLength, true);
+    const array = new Int32Array(module.memory.buffer, bufferPtr, length);
+    return { kind: 'as', ptr: headerPtr, dataPtr: bufferPtr, array, length };
   }
 
   /**
-   * Get a suitable entry from the memory pool
+   * Find a pool entry whose data region is large enough; returns null when
+   * no suitable entry is available.
    */
-  private getFromPool(pool: PoolEntry[], requestedSize: number): PoolEntry | null {
-    // Find best fit: smallest available entry that's >= requested size
+  private acquireFromAsPool(pool: PoolEntry[], requestedSize: number): PoolEntry | null {
     let bestFit: PoolEntry | null = null;
     let bestFitWaste = Infinity;
-
     for (const entry of pool) {
       if (!entry.inUse && entry.size >= requestedSize) {
         const waste = entry.size - requestedSize;
-        // Accept if exact match or within 2x size (avoid excessive waste)
         if (waste < bestFitWaste && entry.size <= requestedSize * 2) {
           bestFit = entry;
           bestFitWaste = waste;
         }
       }
     }
-
+    if (bestFit) bestFit.inUse = true;
     return bestFit;
   }
 
   /**
-   * Return allocation to pool for reuse
+   * Return an allocation to the pool for reuse.
+   *
+   * `isFloat64` exists for backwards compatibility — callers can still
+   * pass it positionally to disambiguate the pool to use on the AS path.
+   * Prefer `releaseAllocation` for new code, which discovers the pool
+   * automatically.
    */
   public release(ptr: number, isFloat64: boolean = true): void {
+    if (this.allocatorKind === 'rust') {
+      // Rust path: individual release is a no-op. Buffers are reclaimed
+      // en masse via `resetRustAllocator()` after the operation completes.
+      return;
+    }
     const pool = isFloat64 ? this.float64Pool : this.int32Pool;
-
-    // Find entry in pool
     const entry = pool.find((e) => e.ptr === ptr);
     if (entry) {
       entry.inUse = false;
       return;
     }
-
-    // If not in pool, we could add it (but respect max pool size)
-    // For now, just unpin it
+    // Not in pool: drop it on the floor (matches prior behaviour — the AS
+    // managed runtime in `--runtime stub` does not really free anyway).
     this.free(ptr);
   }
 
   /**
-   * Free allocated memory (immediate, bypasses pool)
+   * Free allocated memory (immediate, bypasses pool).
+   *
+   * - Rust path: no-op (use `resetRustAllocator`).
+   * - AS path: unpin the header pointer.
    */
   public free(ptr: number): void {
     const module = this.wasmModule;
     if (!module) return;
 
-    // Remove from pools if present
+    if (this.allocatorKind === 'rust') {
+      // Nothing to do — bump allocator reclaims via `resetRustAllocator`.
+      return;
+    }
+
+    // Remove from pools if present.
     this.float64Pool = this.float64Pool.filter((e) => e.ptr !== ptr);
     this.int32Pool = this.int32Pool.filter((e) => e.ptr !== ptr);
 
-    module.__unpin(ptr);
+    if (typeof module.__unpin === 'function') {
+      module.__unpin(ptr);
+    }
   }
 
   /**
@@ -926,15 +1176,21 @@ export class WasmLoader {
     const module = this.wasmModule;
     if (!module) return;
 
-    for (const entry of this.float64Pool) {
-      module.__unpin(entry.ptr);
-    }
-    for (const entry of this.int32Pool) {
-      module.__unpin(entry.ptr);
+    if (this.allocatorKind === 'as' && typeof module.__unpin === 'function') {
+      for (const entry of this.float64Pool) {
+        module.__unpin(entry.ptr);
+      }
+      for (const entry of this.int32Pool) {
+        module.__unpin(entry.ptr);
+      }
     }
 
     this.float64Pool = [];
     this.int32Pool = [];
+
+    if (this.allocatorKind === 'rust' && this.rustAllocator) {
+      this.rustAllocator.reset();
+    }
   }
 
   /**
@@ -964,13 +1220,15 @@ export class WasmLoader {
   }
 
   /**
-   * Run garbage collection
+   * Run garbage collection (AS path only).
    */
   public collect(): void {
     const module = this.wasmModule;
     if (!module) return;
-
-    module.__collect();
+    if (this.allocatorKind === 'as' && typeof module.__collect === 'function') {
+      module.__collect();
+    }
+    // Rust path: nothing to collect.
   }
 
   /**
@@ -982,6 +1240,8 @@ export class WasmLoader {
     this.compiledModule = null;
     this.loading = null;
     this.lastMetrics = null;
+    this.allocatorKind = null;
+    this.rustAllocator = null;
   }
 }
 

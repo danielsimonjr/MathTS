@@ -165,13 +165,20 @@ export class MatrixWasmBridge {
         this.wasmModule.multiplyDense(a.ptr, aRows, aCols, b.ptr, bRows, bCols, result.ptr);
       }
 
-      // Copy result
-      return new Float64Array(result.array);
+      // Re-bind the result view from current memory.buffer: the WASM call
+      // may have grown linear memory and detached our earlier view.
+      const view = new Float64Array(
+        this.wasmModule.memory.buffer,
+        result.dataPtr,
+        aRows * bCols
+      );
+      return new Float64Array(view);
     } finally {
-      // Free WASM memory
+      // Per-allocation free (AS path) and batch-reset (Rust path).
       wasmLoader.free(a.ptr);
       wasmLoader.free(b.ptr);
       wasmLoader.free(result.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
@@ -236,14 +243,17 @@ export class MatrixWasmBridge {
     try {
       const success = this.wasmModule.luDecomposition(a.ptr, n, perm.ptr);
 
+      const luView = new Float64Array(this.wasmModule.memory.buffer, a.dataPtr, n * n);
+      const permView = new Int32Array(this.wasmModule.memory.buffer, perm.dataPtr, n);
       return {
-        lu: new Float64Array(a.array),
-        perm: new Int32Array(perm.array),
+        lu: new Float64Array(luView),
+        perm: new Int32Array(permView),
         singular: success === 0,
       };
     } finally {
       wasmLoader.free(a.ptr);
       wasmLoader.free(perm.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
@@ -408,9 +418,17 @@ export class MatrixWasmBridge {
 
     try {
       this.wasmModule.fft(dataAlloc.ptr, n, inverse ? 1 : 0);
-      return new Float64Array(dataAlloc.array);
+      // Re-bind the view from current memory.buffer (Rust FFT may grow the
+      // module's linear memory and detach the original Float64Array view).
+      const view = new Float64Array(
+        this.wasmModule.memory.buffer,
+        dataAlloc.dataPtr,
+        2 * n
+      );
+      return new Float64Array(view);
     } finally {
       wasmLoader.free(dataAlloc.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
@@ -430,13 +448,15 @@ export class MatrixWasmBridge {
 
     try {
       const success = this.wasmModule.laInv2x2(a.ptr, result.ptr);
+      const view = new Float64Array(this.wasmModule.memory.buffer, result.dataPtr, 4);
       return {
-        result: new Float64Array(result.array),
+        result: new Float64Array(view),
         success: success === 0,
       };
     } finally {
       wasmLoader.free(a.ptr);
       wasmLoader.free(result.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
@@ -476,13 +496,15 @@ export class MatrixWasmBridge {
 
     try {
       const success = this.wasmModule.laInv3x3(a.ptr, result.ptr);
+      const view = new Float64Array(this.wasmModule.memory.buffer, result.dataPtr, 9);
       return {
-        result: new Float64Array(result.array),
+        result: new Float64Array(view),
         success: success === 0,
       };
     } finally {
       wasmLoader.free(a.ptr);
       wasmLoader.free(result.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
@@ -546,6 +568,7 @@ export class MatrixWasmBridge {
     } finally {
       wasmLoader.free(a.ptr);
       wasmLoader.free(work.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
@@ -594,6 +617,7 @@ export class MatrixWasmBridge {
     } finally {
       wasmLoader.free(a.ptr);
       wasmLoader.free(work.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
@@ -671,9 +695,13 @@ export class MatrixWasmBridge {
         work.ptr
       );
 
+      const evalView = new Float64Array(this.wasmModule.memory.buffer, eigenvalues.dataPtr, n);
+      const evecView = eigenvectors
+        ? new Float64Array(this.wasmModule.memory.buffer, eigenvectors.dataPtr, n * n)
+        : null;
       return {
-        eigenvalues: new Float64Array(eigenvalues.array),
-        eigenvectors: eigenvectors ? new Float64Array(eigenvectors.array) : null,
+        eigenvalues: new Float64Array(evalView),
+        eigenvectors: evecView ? new Float64Array(evecView) : null,
         iterations,
       };
     } finally {
@@ -681,6 +709,7 @@ export class MatrixWasmBridge {
       wasmLoader.free(eigenvalues.ptr);
       if (eigenvectors) wasmLoader.free(eigenvectors.ptr);
       wasmLoader.free(work.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
@@ -743,11 +772,13 @@ export class MatrixWasmBridge {
 
     try {
       this.wasmModule.expm(matrix.ptr, n, result.ptr, work.ptr);
-      return new Float64Array(result.array);
+      const view = new Float64Array(this.wasmModule.memory.buffer, result.dataPtr, n * n);
+      return new Float64Array(view);
     } finally {
       wasmLoader.free(matrix.ptr);
       wasmLoader.free(result.ptr);
       wasmLoader.free(work.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
@@ -813,14 +844,16 @@ export class MatrixWasmBridge {
         100, // maxIterations
         1e-12 // tolerance
       );
+      const view = new Float64Array(this.wasmModule.memory.buffer, result.dataPtr, n * n);
       return {
-        result: new Float64Array(result.array),
+        result: new Float64Array(view),
         iterations,
       };
     } finally {
       wasmLoader.free(matrix.ptr);
       wasmLoader.free(result.ptr);
       wasmLoader.free(work.ptr);
+      wasmLoader.resetRustAllocator();
     }
   }
 
