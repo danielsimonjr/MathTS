@@ -7,16 +7,16 @@
 | Metric | Count |
 |--------|-------|
 | Total Source Files | 491 |
-| Total Test Files | 164 |
-| Source Files with Tests | 135 |
-| Source Files without Tests | 356 |
-| Coverage | 27.5% |
+| Total Test Files | 176 |
+| Source Files with Tests | 147 |
+| Source Files without Tests | 344 |
+| Coverage | 29.9% |
 
 ---
 
 ## Source Files Without Test Coverage
 
-The following 356 source files are not directly imported by any test file:
+The following 344 source files are not directly imported by any test file:
 
 ### src/
 
@@ -39,12 +39,6 @@ The following 356 source files are not directly imported by any test file:
 - `assembly/src/ops/svd.ts` → Expected test: `tests/unit/src/svd.test.ts`
 - `assembly/src/ops/tensor.ts` → Expected test: `tests/unit/src/tensor.test.ts`
 - `assembly/src/types/complex.ts` → Expected test: `tests/unit/src/complex.test.ts`
-- `core/src/types/interfaces.ts` → Expected test: `tests/unit/src/interfaces.test.ts`
-- `expression/src/compiler/index.ts` → Expected test: `tests/unit/src/index.test.ts`
-- `expression/src/evaluator/index.ts` → Expected test: `tests/unit/src/index.test.ts`
-- `expression/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
-- `expression/src/parse.ts` → Expected test: `tests/unit/src/parse.test.ts`
-- `expression/src/types.ts` → Expected test: `tests/unit/src/types.test.ts`
 - `functions/src/algebra/decomposition/lup.ts` → Expected test: `tests/unit/src/lup.test.ts`
 - `functions/src/algebra/decomposition/qr.ts` → Expected test: `tests/unit/src/qr.test.ts`
 - `functions/src/algebra/decomposition/schur.ts` → Expected test: `tests/unit/src/schur.test.ts`
@@ -370,12 +364,6 @@ The following 356 source files are not directly imported by any test file:
 - `functions/src/utils/string.ts` → Expected test: `tests/unit/src/string.test.ts`
 - `functions/src/utils/switch.ts` → Expected test: `tests/unit/src/switch.test.ts`
 - `functions/src/utils/typeOf.ts` → Expected test: `tests/unit/src/typeOf.test.ts`
-- `parallel/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
-- `parallel/src/operations/index.ts` → Expected test: `tests/unit/src/index.test.ts`
-- `parallel/src/ops/bitwise.ts` → Expected test: `tests/unit/src/bitwise.test.ts`
-- `parallel/src/strategies/index.ts` → Expected test: `tests/unit/src/index.test.ts`
-- `tensor/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
-- `workbook/src/index.ts` → Expected test: `tests/unit/src/index.test.ts`
 
 ---
 
@@ -399,33 +387,39 @@ The following 356 source files are not directly imported by any test file:
 | `types/bignumber.ts` | `BigNumber-formatter-api.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `bignumber-math.test.ts`, `bignumber.test.ts`, `version.test.ts` |
 | `types/complex.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `complex.test.ts`, `version.test.ts` |
 | `types/fraction.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `fraction.test.ts`, `version.test.ts` |
-| `src/Help.ts` | `Help.test.ts` |
-| `src/Parser.ts` | `Parser.test.ts` |
-| `compiler/compile.ts` | `compile.test.ts`, `sandbox.test.ts` |
+| `types/interfaces.ts` | `types-interfaces.test.ts` |
+| `src/Help.ts` | `Help.test.ts`, `package-index.test.ts` |
+| `src/Parser.ts` | `Parser.test.ts`, `package-index.test.ts` |
+| `compiler/compile.ts` | `compile.test.ts`, `compiler-index.test.ts`, `package-index.test.ts`, `sandbox.test.ts` |
+| `compiler/index.ts` | `compiler-index.test.ts`, `package-index.test.ts` |
 | `error/DimensionError.ts` | `DimensionError.test.ts` |
 | `error/IndexError.ts` | `IndexError.test.ts`, `errorTransform.test.ts` |
-| `evaluator/evaluate.ts` | `evaluate.test.ts`, `sandbox.test.ts` |
-| `src/keywords.ts` | `keywords.test.ts` |
-| `node/AccessorNode.ts` | `AccessorNode.test.ts` |
-| `node/ArrayNode.ts` | `ArrayNode.test.ts` |
-| `node/AssignmentNode.ts` | `AssignmentNode.test.ts` |
-| `node/BlockNode.ts` | `BlockNode.test.ts` |
-| `node/ConditionalNode.ts` | `ConditionalNode.test.ts` |
-| `node/ConstantNode.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts` |
-| `node/FunctionAssignmentNode.ts` | `FunctionAssignmentNode.test.ts` |
-| `node/FunctionNode.ts` | `FunctionNode.test.ts` |
-| `node/IndexNode.ts` | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `IndexNode.test.ts` |
-| `node/Node.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts` |
-| `node/ObjectNode.ts` | `ObjectNode.test.ts` |
-| `node/OperatorNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts` |
-| `node/ParenthesisNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts` |
-| `node/RangeNode.ts` | `RangeNode.test.ts` |
-| `node/RelationalNode.ts` | `RelationalNode.test.ts` |
-| `node/SymbolNode.ts` | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `RangeNode.test.ts`, `SymbolNode.test.ts` |
+| `evaluator/evaluate.ts` | `evaluate.test.ts`, `evaluator-index.test.ts`, `package-index.test.ts`, `sandbox.test.ts` |
+| `evaluator/index.ts` | `evaluator-index.test.ts`, `package-index.test.ts` |
+| `src/index.ts` | `package-index.test.ts` |
+| `src/keywords.ts` | `keywords.test.ts`, `package-index.test.ts` |
+| `node/AccessorNode.ts` | `AccessorNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/ArrayNode.ts` | `ArrayNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/AssignmentNode.ts` | `AssignmentNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/BlockNode.ts` | `BlockNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/ConditionalNode.ts` | `ConditionalNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/ConstantNode.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/FunctionAssignmentNode.ts` | `FunctionAssignmentNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/FunctionNode.ts` | `FunctionNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/IndexNode.ts` | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `IndexNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/Node.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/ObjectNode.ts` | `ObjectNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/OperatorNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/ParenthesisNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/RangeNode.ts` | `RangeNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/RelationalNode.ts` | `RelationalNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/SymbolNode.ts` | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `RangeNode.test.ts`, `SymbolNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
 | `utils/access.ts` | `access.test.ts` |
 | `utils/assign.ts` | `assign.test.ts` |
-| `src/operators.ts` | `operators.test.ts` |
+| `src/operators.ts` | `operators.test.ts`, `package-index.test.ts` |
+| `src/parse.ts` | `package-index.test.ts`, `parse.test.ts` |
 | `utils/errorTransform.ts` | `errorTransform.test.ts` |
+| `src/types.ts` | `package-index.test.ts`, `types.test.ts` |
 | `utils/array.ts` | `utils-array.test.ts` |
 | `bignumber/formatter.ts` | `utils-bignumber-formatter.test.ts` |
 | `utils/collection.ts` | `utils-collection.test.ts` |
@@ -439,7 +433,7 @@ The following 356 source files are not directly imported by any test file:
 | `utils/scope.ts` | `utils-scope.test.ts` |
 | `utils/string.ts` | `utils-string.test.ts` |
 | `utils/switch.ts` | `utils-switch.test.ts` |
-| `factories/evaluate.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `evaluate.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `Parser.test.ts`, `parse.test.ts` |
+| `factories/evaluate.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `evaluate.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `Parser.test.ts` |
 | `factories/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-final.test.ts`, `factories-leaf.test.ts`, `factories-matrix.test.ts`, `factories-tier2.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `physical-constants.test.ts`, `typed-arithmetic.test.ts` |
 | `factories/matrix-bridge.ts` | `factories-matrix.test.ts`, `matrix-bridge-accel.test.ts`, `sparse-bridge.test.ts` |
 | `factories/scope.ts` | `factory-scope.test.ts` |
@@ -457,10 +451,10 @@ The following 356 source files are not directly imported by any test file:
 | `typed/hypothesis.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `hypothesis.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/integration.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `integration.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/interpolation.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `interpolation.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/interpolation.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `interpolation.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-regression.test.ts` |
 | `typed/logical.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-leaf.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-logical.test.ts` |
 | `typed/matrix-ops.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `matrix-ops.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/numeric.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `numeric.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
+| `typed/numeric.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `numeric.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-regression.test.ts` |
 | `typed/signal.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `signal-extended.test.ts`, `signal-extended2.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/special.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `special-extended.test.ts`, `special.test.ts`, `typed-arithmetic.test.ts` |
 | `typed/statistics.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `parallel-stat-prod.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `statistics-selection.test.ts`, `typed-arithmetic.test.ts` |
@@ -506,17 +500,23 @@ The following 356 source files are not directly imported by any test file:
 | `src/index.ts` | `index.test.ts`, `robust-types.test.ts` |
 | `src/fft-core.ts` | `fft-core.test.ts` |
 | `src/index.ts` | `bitwise-dispatch.test.ts`, `index.test.ts`, `parallel-dispatch.test.ts` |
-| `src/ComputePool.ts` | `ComputePool.test.ts`, `benchmark.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts` |
-| `operations/elementwise.ts` | `benchmark.test.ts`, `elementwise.test.ts` |
-| `operations/map.ts` | `map-extended.test.ts`, `map.test.ts` |
-| `operations/matmul.ts` | `benchmark.test.ts`, `matmul.test.ts` |
-| `operations/reduce.ts` | `benchmark.test.ts`, `reduce.test.ts` |
-| `strategies/chunk.ts` | `chunk.test.ts`, `chunk-extended.test.ts` |
-| `strategies/threshold.ts` | `threshold.test.ts` |
-| `src/Tensor.ts` | `Tensor.matrix-bridge.test.ts`, `Tensor.ops.test.ts`, `Tensor.test.ts` |
-| `src/executor.ts` | `executor.test.ts` |
-| `src/graph.ts` | `graph.test.ts` |
-| `src/parser.ts` | `parser.test.ts` |
+| `src/ComputePool.ts` | `ComputePool.test.ts`, `benchmark.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts`, `package-index.test.ts` |
+| `src/index.ts` | `package-index.test.ts` |
+| `operations/elementwise.ts` | `benchmark.test.ts`, `elementwise.test.ts`, `operations-index.test.ts`, `package-index.test.ts` |
+| `operations/index.ts` | `operations-index.test.ts`, `package-index.test.ts` |
+| `operations/map.ts` | `map-extended.test.ts`, `map.test.ts`, `operations-index.test.ts`, `package-index.test.ts` |
+| `operations/matmul.ts` | `benchmark.test.ts`, `matmul.test.ts`, `operations-index.test.ts`, `package-index.test.ts` |
+| `operations/reduce.ts` | `benchmark.test.ts`, `reduce.test.ts`, `operations-index.test.ts`, `package-index.test.ts` |
+| `ops/bitwise.ts` | `ops-bitwise.test.ts`, `package-index.test.ts` |
+| `strategies/chunk.ts` | `chunk.test.ts`, `package-index.test.ts`, `chunk-extended.test.ts`, `strategies-index.test.ts` |
+| `strategies/index.ts` | `package-index.test.ts`, `strategies-index.test.ts` |
+| `strategies/threshold.ts` | `threshold.test.ts`, `package-index.test.ts`, `strategies-index.test.ts` |
+| `src/Tensor.ts` | `Tensor.matrix-bridge.test.ts`, `Tensor.ops.test.ts`, `Tensor.test.ts`, `package-index.test.ts` |
+| `src/index.ts` | `package-index.test.ts` |
+| `src/executor.ts` | `executor.test.ts`, `package-index.test.ts` |
+| `src/graph.ts` | `graph.test.ts`, `package-index.test.ts` |
+| `src/index.ts` | `package-index.test.ts` |
+| `src/parser.ts` | `package-index.test.ts`, `parser.test.ts` |
 | `src/types.ts` | `executor.test.ts`, `graph.test.ts`, `parser.test.ts` |
 
 ---
@@ -542,6 +542,7 @@ The following 356 source files are not directly imported by any test file:
 | `types/bignumber.test.ts` | 1 files |
 | `types/complex.test.ts` | 1 files |
 | `types/fraction.test.ts` | 1 files |
+| `tests/types-interfaces.test.ts` | 1 files |
 | `tests/utils.test.ts` | 0 files |
 | `tests/version.test.ts` | 9 files |
 | `tests/DenseMatrix.test.ts` | 1 files |
@@ -569,6 +570,7 @@ The following 356 source files are not directly imported by any test file:
 | `tests/Tensor.matrix-bridge.test.ts` | 1 files |
 | `tests/Tensor.ops.test.ts` | 1 files |
 | `tests/Tensor.test.ts` | 1 files |
+| `tests/package-index.test.ts` | 2 files |
 | `tests/forward-grad.test.ts` | 1 files |
 | `tests/reverse-grad.test.ts` | 1 files |
 | `tests/scaffold.test.ts` | 5 files |
@@ -621,6 +623,7 @@ The following 356 source files are not directly imported by any test file:
 | `tests/typed-bitwise.test.ts` | 1 files |
 | `tests/typed-bridge.test.ts` | 1 files |
 | `tests/typed-logical.test.ts` | 1 files |
+| `tests/typed-regression.test.ts` | 2 files |
 | `tests/typed-variadic.test.ts` | 2 files |
 | `tests/AccessorNode.test.ts` | 5 files |
 | `tests/ArrayNode.test.ts` | 3 files |
@@ -645,12 +648,16 @@ The following 356 source files are not directly imported by any test file:
 | `tests/access.test.ts` | 1 files |
 | `tests/assign.test.ts` | 1 files |
 | `tests/compile.test.ts` | 1 files |
+| `tests/compiler-index.test.ts` | 2 files |
 | `tests/errorTransform.test.ts` | 2 files |
 | `tests/evaluate.test.ts` | 1 files |
+| `tests/evaluator-index.test.ts` | 2 files |
 | `tests/keywords.test.ts` | 1 files |
 | `tests/operators.test.ts` | 1 files |
-| `tests/parse.test.ts` | 1 files |
+| `tests/package-index.test.ts` | 27 files |
+| `tests/parse.test.ts` | 17 files |
 | `security/sandbox.test.ts` | 2 files |
+| `tests/types.test.ts` | 1 files |
 | `tests/utils-array.test.ts` | 1 files |
 | `tests/utils-bignumber-formatter.test.ts` | 1 files |
 | `tests/utils-collection.test.ts` | 1 files |
@@ -675,9 +682,14 @@ The following 356 source files are not directly imported by any test file:
 | `operations/matmul.test.ts` | 2 files |
 | `operations/reduce.test.ts` | 1 files |
 | `operations/threshold.test.ts` | 2 files |
+| `tests/operations-index.test.ts` | 5 files |
+| `tests/ops-bitwise.test.ts` | 1 files |
+| `tests/package-index.test.ts` | 11 files |
 | `strategies/chunk-extended.test.ts` | 1 files |
+| `tests/strategies-index.test.ts` | 3 files |
 | `tests/executor.test.ts` | 2 files |
 | `tests/graph.test.ts` | 2 files |
+| `tests/package-index.test.ts` | 4 files |
 | `tests/parser.test.ts` | 2 files |
 | `tests/compat.test.ts` | 2 files |
 | `tests/create.test.ts` | 2 files |
