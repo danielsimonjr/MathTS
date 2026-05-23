@@ -492,6 +492,76 @@ least → most complex). Kept as a checklist of what was done.
       live test that triggers the path so a future regression cannot
       hide behind dead code.
 
+- [ ] **`npm run test:wasm:integration` — 5 tests fail across 2 files.**
+      The cross-package WASM integration suite under `tests/wasm/`
+      (`wasm-loader.test.ts`, `parallel-processing.test.ts`,
+      `typescript-integration.test.ts`) is invoked by a separate npm
+      script that the standard `npx turbo test` graph does not cover.
+      Quick run: `Tests 5 failed | 212 passed (217); Test Files 2
+      failed | 8 passed (10)`. The Rust/AS split closed most of the
+      `module.__new is not a function` cases; the remaining five are
+      either now-stale assertions or genuine integration gaps the
+      split did not address. **Goal:** triage each failure, fix the
+      ones that are real (likely `WasmLoader` interface contract or
+      backend-selection mismatches), update the ones that are stale
+      contract checks, run the suite end-to-end and confirm 0 fails.
+
+- [ ] **`bench:parallel` recommended thresholds vs. code default.**
+      The bench output (`tools/benchmark/parallel/run.ts`) explicitly
+      reports per-op recommendations — element-wise / reductions /
+      `parallelFFT` / `parallelConv` / `fft2d` / `distanceMatrix` all
+      come back with "do not parallelize (set MAX_SAFE_INTEGER)";
+      `matmul`/`spectrogram` win above their stated thresholds;
+      special-functions break even around 10⁵–10⁶. The code still
+      uses a single flat `thresholdElements: 50000` in
+      `parallel/src/ComputePool.ts:59`. **Goal:** add a per-op
+      threshold map (or a `policy: 'auto' | 'never' | 'always'`
+      knob) so `ComputePool.add / multiply / sin / exp / sign / sum
+      / mean / variance / parallelFFT / parallelConv / fft2d /
+      distanceMatrix` stop parallelizing by default, and bump
+      `matmul` / `spectrogram` / `erfc` / `besselJ` thresholds to
+      the bench-recommended values. Note in the comment that the
+      numbers were measured in a noisy CI container — re-run on
+      target hardware to retune. Add a test that verifies the
+      adaptive path (e.g. small `add` stays sequential) so the
+      thresholds don't silently regress.
+
+- [ ] **AS WASM module export gap.** After the Rust/AS split, the
+      AS path in `WASMBackend` falls back to JS for `LU`, `QR`,
+      `Cholesky`, `inverse`, `determinant` because the AS module
+      (`assembly/src/`) does not export them. Rust does. **Goal:**
+      add these five linear-algebra kernels to the AS module
+      (`assembly/src/algebra/decomposition.ts` already exists for
+      adjacent ops — extend it), re-export from
+      `assembly/src/index.ts`, rebuild via `npm run build:wasm`,
+      regenerate `wasm-manifest.json`, wire them through
+      `WASMBackend.ts`'s naming map so `WASMBackend.lu` / `qr` /
+      `cholesky` / `inverse` / `determinant` stop falling back to
+      JS, and confirm
+      `functions/tests/security/wasm-integrity.test.ts` still pins
+      the regenerated hash list (5/5 must stay green).
+
+- [ ] **No browser smoke test for the WebGPU paths.** WGSL syntax
+      errors and shader-module init bugs in `functions/src/typed/
+      gpu.ts` and `matrix/src/backends/gpu/*` can't surface in
+      headless Node CI — there's no test environment that can
+      instantiate a WebGPU adapter. **Goal:** add a Playwright or
+      Vitest-browser smoke test that boots one trivial op
+      (`gpuMatmul` on a 4×4) and verifies the output, gated behind
+      a CI matrix entry that runs on a runner with a software
+      WebGPU backend (Linux + Mesa lavapipe, or Windows + DX12).
+      Out of scope for the local-only test container — this needs
+      a CI infrastructure change before it can land.
+
+- [ ] **Cut a release for the [Unreleased] CHANGELOG section.** The
+      `[Unreleased]` block has grown to 550+ lines covering four
+      distinct strands of work since the `autograd 0.1.0` tag
+      (2026-05-15). Worth tagging the typed-layer + cleanup +
+      WASM-port work as a labelled cut (`0.2.0` or similar) so the
+      changelog history is browsable. Mechanical — pick a version
+      via the Changesets config in `.changeset/`, run the version
+      bump, commit.
+
 ## 📋 Next Steps
 
 ### WASM Test Files (46 files, sorted by complexity) ✅ ALL COMPLETE
