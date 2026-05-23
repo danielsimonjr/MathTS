@@ -1,6 +1,6 @@
 # MathTS Architecture
 
-**Generated**: 2026-05-22
+**Generated**: 2026-05-23
 
 ## System Overview
 
@@ -8,10 +8,10 @@ MathTS is an npm workspaces monorepo with **12 packages**, all ESM-only (ES2022)
 Turborepo orchestrates builds across the workspace. tsup bundles each package.
 A Cargo crate (`wasm-rust`) provides the primary WASM backend but is not an npm package.
 
-- **485 reachable TypeScript files** (out of 1,387 total; 902 dormant synced from mathjs)
-- **125,177 lines of code** (reachable scope)
-- **2,850 total exports** (704 re-exports)
-- **156 test files** — 131 of 485 source files have direct coverage (27.0%)
+- **491 reachable TypeScript files** (out of 1,394 total; 903 dormant synced from mathjs)
+- **124,615 lines of code** (reachable scope)
+- **2,898 total exports** (728 re-exports)
+- **164 test files** — 135 of 491 source files have direct coverage (27.5%)
 - **0 circular import dependencies**
 - **All 12 packages build, and all 11 TypeScript packages typecheck with 0
   errors** under `tsc --noEmit`. (`functions` uses `strict: false` for its
@@ -121,6 +121,15 @@ matrix (matmul, matvec, transpose, outer, dot), reduce, and map operations.
 
 Results wrapped in `ParallelResult<T>` with result data, duration, chunk count, and parallelization flag.
 
+`ComputePool` exposes an `OpName` union type covering all recognised kernel
+names (element-wise, reduction, linear-algebra, signal, geometry, and special
+functions). A `thresholdByOp` map (`Partial<Record<OpName, OpThreshold>>`)
+stored in `ComputePoolConfig` lets callers override the global
+`thresholdElements` for individual ops. Default thresholds in
+`DEFAULT_THRESHOLD_BY_OP` were measured on a CI container (2026-05-23) and
+sourced from `tools/benchmark/parallel/run.ts`. `OpThreshold` accepts a number
+or the string aliases `'never'` / `'always'`.
+
 ### 6. WASM Layer
 
 MathTS has two WASM backends. The Rust backend is primary; AssemblyScript is kept for benchmarking.
@@ -156,16 +165,35 @@ Key crate dependencies:
 
 Two TypeScript files manage the bridge between JavaScript and WASM:
 
-- **`WasmLoader.ts`**: Loads and instantiates the WASM binary, manages a shared linear memory pool, handles allocation/deallocation, and exposes the `MATHTS_WASM_BACKEND` environment variable for selecting `rust`, `assemblyscript`, or `auto` (default).
+- **`WasmLoader.ts`**: Loads and instantiates the AssemblyScript WASM binary (`mathts-as.wasm`), manages a shared linear memory pool, and handles allocation/deallocation. At load time it calls `detectAllocatorKind()` to inspect whether the module exports `__new` (AS managed runtime) or not (Rust flat memory), setting `AllocatorKind` to `'as'` or `'rust'` accordingly. The `MATHTS_WASM_BACKEND` environment variable selects `rust`, `assemblyscript`, or `auto` (default). Callers receive an opaque `Allocation` handle — the correct pointer arithmetic is handled internally so callers need not branch on `kind`.
 - **`MatrixWasmBridge.ts`**: Intercepts typed-function dispatch and decides whether to use JavaScript or WASM for each operation. Selection is based on per-operation element-count thresholds (e.g., matrix multiply switches to WASM above 1,000 elements). Falls back to `JSBackend` transparently on WASM failure.
 
+`WASMBackend` (`matrix/src/backends/WASMBackend.ts`) is AssemblyScript-only and uses the managed allocator path in `WasmLoader`. Rust callers route through `RustWASMBackend` (`matrix/src/backends/RustWASMBackend.ts`) and `RustWasmLoader`, which loads the separate Rust-compiled binary and uses a JS-side bump allocator anchored at `__heap_base`.
+
 #### 6d. Three-Tier Performance Model
+
+For matrix operations via `BackendManager`:
 
 ```
 JS fallback (always)
   --> WASM acceleration (>1K elements, 2-10x faster)
         --> Parallel/multi-core (>100K elements, additional 2-4x)
 ```
+
+For bitwise operations on `Int32Array` inputs (`functions/src/typed/bitwise.ts` +
+`functions/src/wasm/bitwise/wasm-bridge.ts`), a separate three-tier model applies:
+
+```
+in-process JS (small arrays)
+  --> ComputePool worker (per-op threshold from thresholdByOp in ComputePool)
+        --> WASM kernel (>65,536 elements; SIMD/native path dominates marshal cost)
+```
+
+The WASM tier is the outermost check: if `WASM_BITWISE_THRESHOLD` (64 × 1,024
+elements) is met and the module is loaded, `runBinaryBitwiseWasm` /
+`runUnaryBitwiseWasm` are called directly and bypass the worker pool entirely.
+The `ComputePool` path is the fallback when WASM is unavailable or returns
+`null`; in-process JS is the innermost fallback.
 
 ### 7. Expression Package
 
@@ -200,8 +228,8 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 
 | Metric                               | Value    |
 | ------------------------------------ | -------- |
-| Reachable files (from entry points)  | 485      |
-| Dormant files (synced, not exported) | 902      |
+| Reachable files (from entry points)  | 491      |
+| Dormant files (synced, not exported) | 903      |
 | Total synced factories               | 242      |
 | Synced categories                    | 19       |
 | Type bridge                          | In place |
@@ -228,8 +256,8 @@ Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build 
 ## Module Summary
 
 Source-file counts below are reachable (active) files; dormant synced files are
-excluded. The report counts 485 reachable TypeScript files total across all
-packages, 902 dormant, and 2,850 exports.
+excluded. The report counts 491 reachable TypeScript files total across all
+packages, 903 dormant, and 2,898 exports.
 
 | Package         | Active Files | Dormant Files |
 | --------------- | ------------ | ------------- |
@@ -237,12 +265,12 @@ packages, 902 dormant, and 2,850 exports.
 | matrix          | 34           | 4             |
 | tensor          | 2            | 0             |
 | autograd        | 5            | 0             |
-| functions       | 352          | 418           |
-| parallel        | 10           | 4             |
+| functions       | 355          | 418           |
+| parallel        | 11           | 4             |
 | expression      | 45           | 382           |
 | workbook        | 5            | 2             |
 | compat          | 2            | 1             |
-| assembly (wasm) | 17           | 3             |
+| assembly (wasm) | 19           | 3             |
 | typed-function  | 1            | 1             |
 | workerpool      | 2            | 2             |
-| **Total**       | **485**      | **902**       |
+| **Total**       | **491**      | **903**       |

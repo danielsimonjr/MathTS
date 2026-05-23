@@ -93,13 +93,110 @@ below are limited to operations that genuinely clear that bar.
 
 - [x] `distanceMatrix` — new function computing the all-pairs Euclidean distance
       matrix; rows are distributed across workers (`distanceMatrixRowsChunk`).
-- [ ] `eigs` / SVD — **not pursued.** Eigendecomposition via QR iteration is
-      fundamentally sequential (each step depends on the previous), so worker
-      dispatch inside the loop is net-negative; SVD already has a WASM path.
-- [ ] `polyFit` / `leastSquares` — **deferred.** `polyFit` has few parameters so
-      `AᵀA` is tiny; `leastSquares` would need a custom contraction-dimension
-      reduction (`computePool.matmul`'s threshold keys on result size, not the
-      O(n²·m) cost), genuine only for unusually wide systems.
+- [ ] `eigs` / SVD — **not pursued (re-validated 2026-05-23).**
+      Eigendecomposition via QR iteration is fundamentally sequential (each step
+      depends on the previous), so worker dispatch inside the loop is
+      net-negative; SVD already has a WASM path.
+
+      **Re-measured 2026-05-23** (4-core CI container; bench cases now in
+      `tools/benchmark/parallel/operations.bench.ts`, probe in
+      `tools/benchmark/parallel/eig-inner-probe.ts`):
+
+      - End-to-end `eig` / `svd` / `singularValues` at n ∈ {32, 64, 128, 256}:
+        sequential vs. parallel `thresholdElements` are statistically
+        indistinguishable (0.84×–1.27× across re-runs is pure noise — the JS
+        code does not dispatch to workers, so both paths execute identically).
+        `svd` and `singularValues` show **no break-even at any tested size**;
+        `eig` flickers between 32x32 and 256x256 across runs (noise).
+      - **Inner-step viability probe:** at n = 256, one Givens sweep
+        (one QR step's worth of work) is **0.18 ms**, one Householder bilateral
+        update is **0.55 ms**, while `computePool.matmul` round-trip at the
+        same size is **35.2 ms**. Dispatching inner steps would slow `eig` by
+        roughly 100×–1000×. The end-to-end matmul at n = 256 is barely
+        break-even (1.03×), but `eig` runs **~512 QR steps** internally — even
+        a one-time matmul dispatch for Q-accumulation saves <1 ms vs. the
+        dispatch overhead it adds. Q-accumulation is also already amortized
+        by Givens column rotations, not a single matmul.
+      - **Hessenberg / bidiagonalize cost** (the one-shot reduction at the
+        start) is ~47 ms total at n = 256, but is itself n sequential
+        Householder reflectors, each ≪ pool dispatch overhead, and each
+        consumes the result of the prior reflector — they cannot be batched
+        across workers without restructuring into a blocked algorithm
+        (LAPACK-style; out of scope here).
+
+      Decision: the JS-fallback path stays sequential. `eigs` / `svd` /
+      `singularValues` remain absent from `OpName` / `thresholdByOp`. The
+      bench cases and probe are checked in so future re-measurement on
+      different hardware is a one-command operation.
+- [ ] `polyFit` / `leastSquares` — **deferral re-validated 2026-05-23.**
+      `polyFit` has few parameters so `AᵀA` is tiny; `leastSquares` would need
+      a custom contraction-dimension reduction (`computePool.matmul`'s
+      threshold keys on result size, not the O(n²·m) cost), genuine only for
+      unusually wide systems.
+
+      **Re-measured 2026-05-23** (`tools/benchmark/parallel/regression-probe.ts`
+      vs. the in-process sequential reference; noisy CI container,
+      maxWorkers=4). Threshold knob: `computePool.updateConfig({
+      thresholdElements: 1 })` to force every internal `matmul` / `matvec` to
+      dispatch.
+
+      _polyFit-shaped (small `n = degree + 1`, varied `m`)_ — parallel
+      **never wins**:
+
+      ```
+      case                   seq ms   par ms   speedup   verdict
+      polyFit deg=3, m=1k     0.094    0.331    0.28x   sequential
+      polyFit deg=3, m=10k    0.409    1.589    0.26x   sequential
+      polyFit deg=3, m=100k   4.307    9.519    0.45x   sequential
+      polyFit deg=7, m=10k    1.586    2.489    0.64x   sequential
+      polyFit deg=7, m=100k  20.498   27.318    0.75x   sequential
+      polyFit deg=15, m=10k   8.359    9.333    0.90x   sequential
+      polyFit deg=15, m=100k 131.586 132.509    0.99x   tie
+      ```
+
+      _leastSquares (general overdetermined)_ — wins only in a narrow
+      tall-thin band, ties (≤ 1.15×) or noise elsewhere:
+
+      ```
+      case                  seq ms     par ms    speedup   verdict
+      LS m=500,  n=50         2.941     3.188    0.92x    tie
+      LS m=1k,   n=100       23.412    22.649    1.03x    tie
+      LS m=2k,   n=200      199.300   178.503    1.12x    parallel
+      LS m=10k,  n=100      561.857   277.876    2.02x    parallel
+      LS m=20k,  n=100     1449.946   933.609    1.55x    parallel
+      LS m=5k,   n=200      568.625   498.599    1.14x    parallel
+      LS m=10k,  n=200     2740.887  1339.906    2.05x    parallel
+      LS m=1k,   n=500      724.434   675.363    1.07x    tie
+      ```
+
+      **Decision: deferral honoured for both.** `polyFit` has no winning
+      regime — `degree + 1` is too small for `(AᵀA)` to amortize a worker
+      dispatch even at `m = 100k`. `leastSquares` has a real ~2× win in a
+      narrow corner (`m ≈ 10k`, `n = 100…200`, tall-and-thin) but ties
+      (1.03–1.15×) across the bulk of realistic shapes. Per the project's
+      quality bar — "a 1.05× speedup with `async`-virality cost is NOT a win"
+      — making the function `async` for every caller to capture one shape
+      band's 2× is not worth it. A future change that introduces a genuinely
+      async-friendly call site (e.g. a batched least-squares solver) can
+      revisit. `polyFit` / `leastSquares` therefore stay absent from `OpName` /
+      `thresholdByOp` in `parallel/src/ComputePool.ts`.
+
+      _Aside._ The original deferral note assumed parallelism would win for
+      _wide_ systems (large `n`, where the inner `m` contraction is the long
+      dimension). The data inverts that intuition: the only regime where
+      parallel beats sequential is _tall-and-thin_ (`m ≫ n`), because that
+      is where `Aᵀ · A` (`n×m` × `m×n`) has enough work per output element
+      to amortize the dispatch round-trip while still producing a small
+      enough result matrix that the worker pool returns quickly.
+
+      Implementations remain sequential and exported in
+      `functions/src/typed/{interpolation.ts,numeric.ts}`. Strengthened
+      correctness tests live in `functions/tests/typed-regression.test.ts`
+      (clean polynomial recovery, noisy recovery within `1e-6` /
+      `1e-3`, multi-parameter linear models, singular-system error path).
+      The probe is checked in so future re-measurement on different
+      hardware is a one-command operation:
+      `npx tsx tools/benchmark/parallel/regression-probe.ts`.
 
 **High effort**
 

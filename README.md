@@ -5,377 +5,223 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 
-A high-performance TypeScript mathematics library with WASM/WebGPU/WebWorker acceleration, featuring reactive scientific workbooks for computational physics and tensor mathematics.
+MathTS is a ground-up TypeScript rewrite of [mathjs](https://mathjs.org) packaged as an
+ESM-only npm workspaces monorepo. It accelerates computation through two WASM toolchains
+(Rust primary, AssemblyScript secondary), a WebWorker parallel-execution layer
+(`ComputePool`), and an optional WebGPU backend for large matrix operations.
+All 12 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
 
-## What's New
+## Contents
 
-All 12 packages are published on npm under the `@danielsimonjr/mathts-*` scope
-(independently versioned).
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Performance](#performance)
+- [Architecture](#architecture)
+- [Development](#development)
+- [Status](#status)
+- [Contributing](#contributing)
+- [License](#license)
+- [Documentation](#documentation)
 
-- **500+ math functions** — typed-dispatch + factory layers, plus 52 CODATA physical constants
-- **`tensor` + `autograd` packages** — rank-N dense tensors with forward & reverse-mode automatic differentiation
-- **Security hardening** — WASM SHA-384 manifest verification, sandboxed expression evaluation, opt-in WorkerPool timeouts
-- **Algebra, CAS, Graph Theory, Distribution Objects, Hypothesis Tests, Numerical Methods**
-- **String expression evaluation** — `evaluate('sin(pi/2)')` works end-to-end
-- **Expression compiler** — full 16-node AST interpreter with `parse()` and `compileExpr()`
-- **Dual WASM strategy** — AssemblyScript (SIMD) + Rust WASM (FFT, eigendecomposition, SVD)
-- **Symbol-based typed dispatch** — survives minification/esbuild
-- **workerpool improvements** — SharedArrayBuffer, eager warmup, p95/throughput metrics
-- **Bundle optimization** — 662 KB production total (57% reduction from 1524 KB dev)
-
-## Features
-
-- **Native TypeScript** — Full type safety with compile-time type checking
-- **Expression Evaluation** — Parse and evaluate math strings (`evaluate('sin(pi/2)')`)
-- **500+ Math Functions** — typed-dispatch exports + mathjs factory functions across 17 categories
-- **Computer Algebra** — Symbolic integration, limits, Taylor series, Laplace transforms, Gröbner bases
-- **Graph Theory** — Shortest paths, MST, connected components, topological sort
-- **Statistical Testing** — t-tests, ANOVA, KS test, Shapiro-Wilk, PCA
-- **Distribution Objects** — 12 statistical distributions with pdf/cdf/ppf/sample methods
-- **Parallel-First** — WebWorker-based parallelization via ComputePool
-- **Dual WASM Acceleration** — AssemblyScript SIMD + Rust WASM for FFT, eig, SVD
-- **WebGPU Backend** — Compute shaders for matrices >100K elements
-- **mathjs Compatible** — Drop-in replacement with `@danielsimonjr/mathts-compat`
-- **Scientific Workbooks** — YAML-based reactive notebooks (`.mtsw` format)
-- **Tree-Shakeable** — Full ESM support, 662 KB production bundle
-- **Physics-First** — Built for tensor mathematics and the Universal Physics Tensor Framework (UPTF)
+---
 
 ## Installation
 
-### For mathjs Users (Quickest Migration)
+### Quickest path: compat shim (drop-in for mathjs users)
 
 ```bash
 npm install @danielsimonjr/mathts-compat
 ```
 
-```typescript
+### Typed-function API (recommended for new projects)
+
+```bash
+npm install @danielsimonjr/mathts-core @danielsimonjr/mathts-functions
+```
+
+Add optional packages as needed:
+
+```bash
+npm install @danielsimonjr/mathts-matrix   # DenseMatrix, SparseMatrix
+npm install @danielsimonjr/mathts-parallel  # ComputePool, parallel ops
+npm install @danielsimonjr/mathts-tensor    # rank-N tensors
+npm install @danielsimonjr/mathts-autograd  # forward + reverse-mode AD
+```
+
+---
+
+## Quick Start
+
+### (a) Compat shim — reads like vanilla mathjs
+
+```ts
 import { create, all } from '@danielsimonjr/mathts-compat';
+
 const math = create(all);
 
-// Use familiar mathjs API
 math.add(1, 2); // 3
-math.complex(3, 4); // Complex(3, 4)
+math.complex(3, 4); // Complex { re: 3, im: 4 }
 math.matrix([
   [1, 2],
   [3, 4],
 ]); // DenseMatrix
-math.sin(Math.PI / 2); // 1
+math.evaluate('sin(pi/2)'); // 1
+math.evaluate('x^2 + y', { x: 3, y: 4 }); // 13
 ```
 
-### For New Projects
+### (b) Typed-function API — direct imports, full TypeScript types
 
-```bash
-npm install @danielsimonjr/mathts-core @danielsimonjr/mathts-functions @danielsimonjr/mathts-matrix @danielsimonjr/mathts-parallel
-```
-
-```typescript
+```ts
+import { add, multiply, sin, sqrt, evaluate } from '@danielsimonjr/mathts-functions';
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
-import { add, multiply, sin, cos, evaluate } from '@danielsimonjr/mathts-functions';
-import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
-import { computePool } from '@danielsimonjr/mathts-parallel';
-```
 
-## Quick Start
+// Scalar dispatch — synchronous
+add(1, 2); // 3
+add(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
+add(new Fraction(1, 3), new Fraction(1, 6)); // Fraction(1/2)
+add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber(0.3)
+sin(Math.PI / 2); // 1
 
-### Expression Evaluation
-
-```typescript
-import { evaluate } from '@danielsimonjr/mathts-functions';
-
-// Evaluate math strings directly
-evaluate('sin(pi/2)'); // 1
+// String evaluation
 evaluate('sqrt(2)'); // 1.4142...
 evaluate('2^10'); // 1024
-evaluate('1 + 2i'); // Complex(1, 2)
-
-// Scoped evaluation
-evaluate('x^2 + y', { x: 3, y: 4 }); // 13
-
-// Reusable compiled expressions
-import { compileExpr } from '@danielsimonjr/mathts-functions';
-const expr = compileExpr('a * b + c');
-expr.evaluate({ a: 2, b: 3, c: 1 }); // 7
 ```
 
-### Complex Numbers
+### (c) Parallel array operations via ComputePool
 
-```typescript
-import { Complex, I } from '@danielsimonjr/mathts-core';
-
-const z = new Complex(3, 4);
-console.log(z.abs()); // 5
-console.log(z.arg()); // 0.927... radians
-console.log(z.conjugate()); // Complex(3, -4)
-
-// Using imaginary unit
-const w = z.add(I); // Complex(3, 5)
-```
-
-### Fractions
-
-```typescript
-import { Fraction } from '@danielsimonjr/mathts-core';
-
-const f = new Fraction(1, 3);
-const g = new Fraction(1, 6);
-const sum = f.add(g); // Fraction(1, 2) - auto-simplified
-console.log(sum.toString()); // "1/2"
-```
-
-### BigNumbers
-
-```typescript
-import { BigNumber } from '@danielsimonjr/mathts-core';
-
-const a = BigNumber.parse('0.1');
-const b = BigNumber.parse('0.2');
-const sum = a.add(b);
-console.log(sum.toString()); // "0.3" - exact, no floating point errors
-```
-
-### Matrices
-
-```typescript
-import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
-
-const A = DenseMatrix.fromArray([
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9],
-]);
-
-const B = DenseMatrix.identity(3);
-const C = A.multiply(B);
-const T = A.transpose();
-
-console.log(A.rows, A.cols); // 3, 3
-console.log(A.get(0, 1)); // 2
-```
-
-### Parallel Operations
-
-```typescript
+```ts
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { add } from '@danielsimonjr/mathts-functions';
 
-// Initialize once at app startup
+// add(Float64Array, Float64Array) routes through the worker pool
+const a = new Float64Array([1, 2, 3, 4]);
+const b = new Float64Array([5, 6, 7, 8]);
+const result = await add(a, b); // Float64Array([6, 8, 10, 12])
+
+// Direct pool access for larger operations
 await computePool.initialize();
 
-// Parallel operations on large arrays
-const data = new Float64Array(100000);
-for (let i = 0; i < data.length; i++) data[i] = Math.random();
-
+const data = new Float64Array(100_000).map(() => Math.random());
 const sum = await computePool.sum(data);
-const mean = await computePool.mean(data);
-const { variance, std } = (await computePool.variance(data)).result;
+const { result: matC } = await computePool.matmul(
+  new Float64Array([1, 2, 3, 4]),
+  2,
+  2,
+  new Float64Array([5, 6, 7, 8]),
+  2
+);
 
-// Parallel matrix multiplication
-const A = new Float64Array([1, 2, 3, 4]);
-const B = new Float64Array([5, 6, 7, 8]);
-const C = await computePool.matmul(A, 2, 2, B, 2);
-
-// Cleanup on app shutdown
 await computePool.terminate();
 ```
 
-### Typed Functions
-
-```typescript
-import { add, multiply, sin } from '@danielsimonjr/mathts-functions';
-import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
-
-// Automatic type dispatch
-add(1, 2); // 3
-add(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
-add(new Fraction(1, 2), new Fraction(1, 3)); // Fraction(5, 6)
-add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber(0.3)
-
-// Works with mixed types too (automatic conversion)
-sin(0); // 0
-sin(Math.PI / 2); // 1
-sin(new Complex(0, 1)); // Complex sinh(1)
-```
-
-## Packages
-
-| Package                                | Version | Description                                                  |
-| -------------------------------------- | ------- | ------------------------------------------------------------ |
-| `@danielsimonjr/mathts-core`           | 0.1.2   | Core types: Complex, Fraction, BigNumber, mathTyped          |
-| `@danielsimonjr/mathts-functions`      | 0.1.3   | 500+ math functions, typed dispatch, `evaluate()`            |
-| `@danielsimonjr/mathts-matrix`         | 0.1.2   | Dense/sparse matrices, JS/WASM/GPU backends, FFT, eig, SVD   |
-| `@danielsimonjr/mathts-tensor`         | 0.1.0   | Rank-N Float64Array-backed dense tensor, einsum/contraction  |
-| `@danielsimonjr/mathts-autograd`       | 0.1.0   | Forward + reverse-mode automatic differentiation over Tensor |
-| `@danielsimonjr/mathts-parallel`       | 0.1.3   | ComputePool, parallel elementwise/matmul/reduce, Web Workers |
-| `@danielsimonjr/mathts-expression`     | 0.2.0   | Expression parser, compiler, sandboxed evaluator             |
-| `@danielsimonjr/mathts-compat`         | 0.1.2   | mathjs compatibility layer                                   |
-| `@danielsimonjr/mathts-workbook`       | 0.1.2   | Scientific workbook runtime (.mtsw)                          |
-| `@danielsimonjr/mathts-wasm`           | 0.1.3   | AssemblyScript WASM kernels (SIMD)                           |
-| `@danielsimonjr/mathts-typed-function` | 0.1.2   | Symbol-based typed dispatch (forked, improved)               |
-| `@danielsimonjr/mathts-workerpool`     | 0.1.2   | Worker pool with SharedArrayBuffer, warmup, metrics          |
-
-## Architecture
-
-### Factory Activation System
-
-MathTS uses a tiered factory activation system that mirrors mathjs's factory pattern while layering on native TypeScript types:
-
-```
-mathjs factory functions (activated across 19 tiers)
-         ↓
-Factory scope injection (typed-function bridge, expression nodes)
-         ↓
-@danielsimonjr/mathts-core types (Complex, Fraction, BigNumber)
-         ↓
-evaluate('sin(pi/2)') → 1
-```
-
-The `evaluate()` function walks the activated scope, so all activated factory functions (arithmetic, trigonometry, algebra, matrix operations, statistics, set operations, signal processing, and more) are available as named identifiers in expressions.
-
-### Expression Compiler
-
-The expression package provides a full math expression compiler with 16 AST node types:
-
-| Node Types        |                   |                          |
-| ----------------- | ----------------- | ------------------------ |
-| `ConstantNode`    | `SymbolNode`      | `OperatorNode`           |
-| `FunctionNode`    | `AssignmentNode`  | `FunctionAssignmentNode` |
-| `ArrayNode`       | `ObjectNode`      | `IndexNode`              |
-| `AccessorNode`    | `RangeNode`       | `BlockNode`              |
-| `ConditionalNode` | `ParenthesisNode` | `RelationalNode`         |
-
-The compiler (`compileExpr`) produces reusable compiled expressions. The evaluator (`evaluate`) wraps compile + evaluate in a single call with optional scope injection.
-
-### Dual WASM Strategy
-
-| Backend                 | Technology       | Trigger           | Operations                    |
-| ----------------------- | ---------------- | ----------------- | ----------------------------- |
-| **AssemblyScript WASM** | SIMD vectors     | >1,000 elements   | Element-wise, matrix multiply |
-| **Rust WASM**           | Bump allocator   | FFT/eig/SVD       | FFT, eigendecomposition, SVD  |
-| **WebGPU**              | Compute shaders  | >100,000 elements | Large matrix ops              |
-| **JavaScript**          | Default fallback | Always available  | All operations                |
-
-The `BackendManager` selects the optimal backend automatically. Both WASM backends fall back gracefully to JavaScript if unavailable.
-
-### Parallel-First Design
-
-```
-User Code → ComputePool (workers) → WASM/GPU Backend → Result
-```
-
-All large computations dispatch to Web Workers via `ComputePool`. The workerpool package adds:
-
-- **SharedArrayBuffer** — zero-copy transfers for large arrays
-- **Eager warmup** — `pool.ready` promise, `warmup()` for pre-initialized workers
-- **Enhanced metrics** — `enhancedStats()` with p95 latency, throughput, worker utilization
-
-### Symbol-Based Typed Dispatch
-
-The `typed-function` package uses `Symbol`-based type identification (`TYPED_FUNCTION_TYPE`) that survives minification and esbuild tree-shaking. A multi-strategy fallback (symbol → property → prototype) ensures type tests work across bundlers.
+---
 
 ## Performance
 
-Production bundle sizes (662 KB total, minified + tree-shaken):
+Benchmark numbers from `npm run bench:wasm` (Rust vs JS, 2026-05-23,
+noisy CI container). Source: `tests/benchmark/wasm_rust_vs_as_benchmark.ts`.
 
-| Package          | Size    |
-| ---------------- | ------- |
-| mathts-core      | ~85 KB  |
-| mathts-functions | ~180 KB |
-| mathts-matrix    | ~220 KB |
-| mathts-parallel  | ~95 KB  |
-| mathts-compat    | ~82 KB  |
+| Operation   | Rust WASM vs JS | Rust WASM vs AS (matmul >=100x100) |
+| ----------- | --------------- | ---------------------------------- |
+| matmul      | up to 34x       | 3.5x–13.7x                         |
+| dot product | 2.5x–34x range  | —                                  |
+| vector add  | 2.5x–34x range  | —                                  |
+| determinant | 2.5x–34x range  | —                                  |
 
-Benchmark highlights (modern developer machine):
+> Numbers were measured on a shared CI container; results on developer hardware
+> will differ. The 2.5x–34x range spans all four operations across tested sizes.
 
-| Operation                    | Performance   |
-| ---------------------------- | ------------- |
-| Complex construction         | ~500K ops/sec |
-| Typed dispatch (add)         | ~200K ops/sec |
-| DenseMatrix 100×100 multiply | ~5K ops/sec   |
-| FFT (1024 elements, WASM)    | ~50K ops/sec  |
-| Parallel sum (100K elements) | <5ms          |
+Per-operation worker-pool thresholds (from `npm run bench:parallel`,
+default values in `parallel/src/ComputePool.ts`):
 
-See [Performance Guide](./docs/performance.md) for backend selection thresholds and tuning.
+| Op                         | Default threshold  | Rationale                                   |
+| -------------------------- | ------------------ | ------------------------------------------- |
+| `matmul`                   | 4,096 elements     | Break-even at 64x64                         |
+| `matrixPower`              | 9,216 elements     | Break-even at ~96x96                        |
+| `characteristicPolynomial` | 9,216 elements     | Break-even at ~96x96                        |
+| `spectrogram`              | 65,536 samples     | Break-even measured on CI                   |
+| `erfc`                     | 100,000 elements   | Special-function compute cost               |
+| `besselJ`                  | 1,000,000 elements | Special-function compute cost               |
+| Most element-wise ops      | `'never'`          | Transfer overhead dominates at tested sizes |
 
-## Scientific Workbook
+The bitwise WASM tier activates at `WASM_BITWISE_THRESHOLD = 65,536` elements
+(source: `functions/src/wasm/bitwise/wasm-bridge.ts`).
 
-Create a file `example.mtsw`:
+Override defaults via `ComputePoolConfig.thresholdByOp` (see
+`parallel/src/ComputePool.ts` for the `OpName` union and `OpThreshold` type).
 
-```yaml
-version: '1.0'
-metadata:
-  title: 'Matrix Analysis'
-runtime:
-  engine: mathts
-  execution: reactive
+---
 
-cells:
-  - markdown: |
-      # Matrix Eigenvalue Analysis
-    id: intro
+## Architecture
 
-  - code: |
-      import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+### Packages
 
-      const A = DenseMatrix.random(3, 3);
-      console.log('Matrix A:', A.toArray());
-      export { A };
-    id: compute
+| Package                                | Role                                                            |
+| -------------------------------------- | --------------------------------------------------------------- |
+| `@danielsimonjr/mathts-typed-function` | Symbol-based typed dispatch (forked, survives minification)     |
+| `@danielsimonjr/mathts-workerpool`     | Worker pool management (forked, SharedArrayBuffer support)      |
+| `@danielsimonjr/mathts-core`           | Complex, Fraction, BigNumber types; mathTyped; FunctionRegistry |
+| `@danielsimonjr/mathts-matrix`         | DenseMatrix, SparseMatrix; JS/WASM/GPU backends; SVD/eig/FFT    |
+| `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction     |
+| `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor  |
+| `@danielsimonjr/mathts-functions`      | 374+ math functions via typed dispatch; `evaluate()`            |
+| `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch      |
+| `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (16 AST nodes) |
+| `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                    |
+| `@danielsimonjr/mathts-compat`         | mathjs API compatibility shim (`create(all)`)                   |
+| `@danielsimonjr/mathts-wasm`           | AssemblyScript WASM kernels (secondary WASM toolchain)          |
+| `wasm-rust` (Cargo crate)              | Rust WASM primary backend; 1,017 exports; full AS parity        |
 
-  - test: |
-      import { A } from '#compute';
-      assert(A.rows === 3);
-      assert(A.cols === 3);
-    id: verify
-    depends_on: [compute]
+### Dependency graph
+
+```
+typed-function <- core <- matrix <- functions
+                    ^         ^          ^
+workerpool <- parallel ------+          |
+                    ^                   |
+                    +-------------------+
+matrix <- tensor <- autograd
+core <- workbook
+core, matrix, functions, parallel <- compat
 ```
 
-Run with the CLI:
+Zero circular dependencies (verified by `tools/create-dependency-graph`).
 
-```bash
-npx mtsw run example.mtsw
+### Three-tier dispatch
+
+For each operation, the runtime selects the fastest available tier:
+
+```
+WASM (Rust or AS, above size threshold)
+  -> WebWorker / ComputePool (above per-op threshold)
+    -> In-process JavaScript (always available)
 ```
 
-## Workbook CLI
+The `BackendManager` in `@danielsimonjr/mathts-matrix` handles backend
+selection for matrix operations. `ComputePool.shouldParallelize(n, op?)`
+resolves per-op thresholds via `thresholdByOp`.
 
-```bash
-mtsw run <file>        # Execute a workbook
-mtsw validate <file>   # Validate workbook structure
-mtsw graph <file>      # Show the dependency graph
-mtsw new <name>        # Create a workbook from a template
-```
+### WASM backends
 
-## Migration from mathjs
+Two WASM toolchains coexist and serve different consumers:
 
-See the [Migration Guide](./docs/migration/guide.md) for detailed instructions.
+| Backend           | Class     | Source              | Exports | Primary use                  |
+| ----------------- | --------- | ------------------- | ------- | ---------------------------- |
+| `WASMBackend`     | AS-only   | `assembly/src/`     | 432     | Element-wise, decompositions |
+| `RustWASMBackend` | Rust-only | `wasm-rust/crates/` | 1,017   | FFT, eig, SVD, number theory |
 
-### Quick Migration
+The two backends have clean separate class identities after the Rust/AS split
+(see `matrix/src/backends/register-backends.ts`).
 
-1. Install: `npm install @danielsimonjr/mathts-compat`
-2. Replace import: `import { create, all } from '@danielsimonjr/mathts-compat'`
-3. Continue using `math.*` API
+### WebGPU (opt-in, f32 only)
 
-### Key Differences
+`@danielsimonjr/mathts-functions` exports `gpuMatmul`, `gpuAdd`,
+`gpuTranspose`, and `gpuScale` from `functions/src/typed/gpu.ts`. Each is
+`async` and falls back to CPU when no WebGPU adapter is present. WGSL has no
+f64, so these are additive exports — the existing f64 `multiply`/`transpose`
+are unaffected.
 
-| mathjs                  | MathTS                           |
-| ----------------------- | -------------------------------- |
-| `math.complex(3, 4)`    | `new Complex(3, 4)`              |
-| `math.matrix([[1,2]])`  | `DenseMatrix.fromArray([[1,2]])` |
-| `math.bignumber('123')` | `BigNumber.parse('123')`         |
-| `bn.toNumber()`         | `bn.valueOf()`                   |
-| `m.get([row, col])`     | `m.get(row, col)`                |
-| `math.evaluate('...')`  | `evaluate('...')`                |
-
-## Documentation
-
-- [Getting Started](./docs/getting-started.md)
-- [Data Types](./docs/datatypes/) — Complex, Fraction, BigNumber, matrices
-- [Expression Syntax](./docs/expressions/) — parsing, compilation, security
-- [Core Reference](./docs/core/) — configuration, serialization, extension
-- [Function Reference](./docs/reference/) — 500+ functions
-- [Performance Guide](./docs/performance.md)
-- [Backends](./docs/backends.md)
-- [API Differences](./docs/migration/api-diff.md)
-- [Migration Guide](./docs/migration/guide.md)
-- [Workbook Specification](./docs/Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md)
+---
 
 ## Development
 
@@ -386,26 +232,99 @@ npm install
 # Build all packages
 npm run build
 
-# Run tests
-npm test
+# Run all tests
+npm run test
 
-# Type check
+# Cross-package WASM integration tests (separate from turbo graph)
+npm run test:wasm:integration
+
+# Type-check all packages
 npm run typecheck
 
-# Production build (minified + tree-shaken)
-npm run build:prod
+# Lint all packages
+npm run lint
+
+# WASM benchmarks (Rust vs AS vs JS)
+npm run bench:wasm
+
+# Parallel-execution break-even benchmarks
+npm run bench:parallel
+
+# Build WASM artifacts (AssemblyScript)
+npm run build:wasm
+
+# Build WASM artifacts (Rust)
+npm run build:wasm:rust
+
+# Build both WASM toolchains
+npm run build:wasm:all
+
+# Format all files
+npm run format
 ```
+
+Single-package commands (examples):
+
+```bash
+npx turbo build --filter=@danielsimonjr/mathts-core
+npx turbo test --filter=@danielsimonjr/mathts-matrix
+cd functions && npx vitest run
+```
+
+---
+
+## Status
+
+As of 2026-05-23:
+
+| Check                              | Result                          |
+| ---------------------------------- | ------------------------------- |
+| Packages building (`turbo build`)  | 12/12                           |
+| Test tasks green (`turbo test`)    | 19/19                           |
+| TypeScript errors (`tsc --noEmit`) | 0 (all 11 TS packages)          |
+| ESLint errors                      | 0 (all 10 linted packages)      |
+| Circular dependencies              | 0                               |
+| WASM integration tests             | 224/224 passed, 0 failed        |
+| SHA-384 manifest verification      | 5/5 passed                      |
+| Source-file test coverage          | 27.5% (135/491 reachable files) |
+
+Detailed coverage breakdown: [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md).
+Full architecture report: [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md).
+
+### Known open items
+
+- No browser smoke test for WebGPU paths (WebGPU is not available in headless
+  Node; needs a CI runner with a software WebGPU backend such as Mesa lavapipe).
+- The `[Unreleased]` changelog section covers four work strands since
+  `autograd 0.1.0` (2026-05-15) and is ready to tag as a versioned release.
+
+See [`docs/refactoring/TODO.md`](./docs/refactoring/TODO.md) for the full
+open-items list.
+
+---
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines, code style, commit
+message conventions (Conventional Commits), and the pre-commit hook setup.
+
+---
 
 ## License
 
 [MIT](./LICENSE) © Daniel Simon Jr.
 
-## Acknowledgments
+---
 
-- Inspired by [mathjs](https://mathjs.org/)
-- Type dispatch via [typed-function](https://github.com/josdejong/typed-function)
-- Workbook format influenced by [Observable](https://observablehq.com/), [marimo](https://marimo.io/), and [Maple](https://www.maplesoft.com/)
+## Documentation
+
+| Document                                                                           | Contents                                               |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| [`CHANGELOG.md`](./CHANGELOG.md)                                                   | Full change history                                    |
+| [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md)                 | Package metrics, two-layer code architecture           |
+| [`docs/Architecture/ARCHITECTURE.md`](./docs/Architecture/ARCHITECTURE.md)         | Component design, circular-dependency audit            |
+| [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md) | Generated dependency graph                             |
+| [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md)       | Per-file coverage report                               |
+| [`docs/migration-guide.md`](./docs/migration-guide.md)                             | Migrating from mathjs v15                              |
+| [`docs/refactoring/TODO.md`](./docs/refactoring/TODO.md)                           | Open items and deferred decisions                      |
+| [`docs/reference/functions.md`](./docs/reference/functions.md)                     | Full typed-function export reference with Accel column |
