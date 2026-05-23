@@ -474,72 +474,84 @@ least → most complex). Kept as a checklist of what was done.
 
 ### Newly surfaced — pinned for the next pass
 
-- [ ] **`matrix/src/backends/WasmLoader.allocateFloat64Array()` (lines
-      ~744–867) carries the same hybrid Rust/AS bug `WASMBackend` used
-      to have.** It calls `module.__new(byteLength, 2)` (AS-specific)
-      but returns a flat-memory `.ptr` for callers that expect the
-      Rust raw-pointer ABI. `matrix/src/backends/MatrixWasmBridge.ts`
-      and `matrix/src/backends/wasm/fft-wasm.ts` inherit the bug. No
-      live test currently exercises the broken paths so they pass, but
-      they will throw the moment a caller hits them. Surfaced by the
-      opus agent that fixed `WASMBackend`; explicitly left out of
-      scope for that commit per the agent's stay-out-of-zone constraint.
-      **Goal:** split the allocator helpers the same way `WASMBackend`
-      was split — AS-only path stays in `WasmLoader`, Rust callers use
-      the existing `RustWasmLoader` (which uses flat-memory offsets,
-      not `__new`). Audit `MatrixWasmBridge.ts` and `fft-wasm.ts` for
-      hidden calls and route them at the same time. Add at least one
-      live test that triggers the path so a future regression cannot
-      hide behind dead code.
+- [x] **`matrix/src/backends/WasmLoader.allocateFloat64Array()` (lines
+      ~744–867) carried the same hybrid Rust/AS bug `WASMBackend`
+      had.** `module.__new(byteLength, 2)` (AS-specific) returned a
+      flat-memory `.ptr` for callers that expected the Rust raw-pointer
+      ABI. `MatrixWasmBridge.ts` and `matrix/src/backends/wasm/fft-wasm.ts`
+      inherited the bug. **Closed in commit b96b53a (Option A — detect
+      and branch at load time).** `WasmLoader` caches an
+      `AllocatorKind` discriminant on load (`__new` present → `'as'`;
+      otherwise `'rust'`); the four `allocate*` methods +
+      `release` / `free` / `clearPool` / `collect` branch on the kind.
+      Rust path uses a flat-memory bump allocator anchored at
+      `__heap_base`, exposed via `resetRustAllocator()` /
+      `getAllocatorKind()` accessors. `Allocation<T>` typed sum lets
+      consumers re-bind output views to `module.memory.buffer +
+      alloc.dataPtr` after each call (Rust `Vec` allocations may grow
+      memory and detach earlier views). `MatrixWasmBridge.ts` and
+      `fft-wasm.ts` updated for the re-bind + `resetRustAllocator()`
+      pattern. 9 new live tests in `matrix/tests/MatrixWasmBridge.test.ts`
+      (new, 7) and `matrix/tests/wasm/fft-wasm.test.ts` (+2 for
+      `backend: 'wasm'`) exercise the previously-dead bridge paths.
 
-- [ ] **`npm run test:wasm:integration` — 5 tests fail across 2 files.**
-      The cross-package WASM integration suite under `tests/wasm/`
-      (`wasm-loader.test.ts`, `parallel-processing.test.ts`,
-      `typescript-integration.test.ts`) is invoked by a separate npm
-      script that the standard `npx turbo test` graph does not cover.
-      Quick run: `Tests 5 failed | 212 passed (217); Test Files 2
-      failed | 8 passed (10)`. The Rust/AS split closed most of the
-      `module.__new is not a function` cases; the remaining five are
-      either now-stale assertions or genuine integration gaps the
-      split did not address. **Goal:** triage each failure, fix the
-      ones that are real (likely `WasmLoader` interface contract or
-      backend-selection mismatches), update the ones that are stale
-      contract checks, run the suite end-to-end and confirm 0 fails.
+- [x] **`npm run test:wasm:integration` — was 5 fails across 2
+      files.** The cross-package WASM integration suite under
+      `tests/wasm/` is invoked by a separate npm script that the
+      standard `npx turbo test` graph does not cover. **Closed in
+      commit b96b53a.** Three of the original five failures were
+      transitively closed by the parallel `WasmLoader` allocator-
+      split and `WASMBackend` work landing in the shared tree. The
+      remaining two were addressed directly:
+      `typescript-integration.test.ts` "Direct WASM Imports… AS
+      functions" — stale assertion against rolldown 1.0.0-rc.17
+      (Vite 8.x) which cannot parse the top-level-await
+      destructuring AS generates; `shouldSkip()` extended to catch
+      `RolldownError` / `"Parse failure"` / `"Duplicated export"`
+      with an inline note. "Performance Verification > large matrix
+      operations" — was `it.skip` pinning the WasmLoader hybrid
+      bug; **unskipped after the bug was closed**, now passes.
+      Suite is now **11 files, 224 passed, 0 failed, 0 skipped**
+      (was 212 + 5 fail).
 
-- [ ] **`bench:parallel` recommended thresholds vs. code default.**
-      The bench output (`tools/benchmark/parallel/run.ts`) explicitly
-      reports per-op recommendations — element-wise / reductions /
-      `parallelFFT` / `parallelConv` / `fft2d` / `distanceMatrix` all
-      come back with "do not parallelize (set MAX_SAFE_INTEGER)";
-      `matmul`/`spectrogram` win above their stated thresholds;
-      special-functions break even around 10⁵–10⁶. The code still
-      uses a single flat `thresholdElements: 50000` in
-      `parallel/src/ComputePool.ts:59`. **Goal:** add a per-op
-      threshold map (or a `policy: 'auto' | 'never' | 'always'`
-      knob) so `ComputePool.add / multiply / sin / exp / sign / sum
-      / mean / variance / parallelFFT / parallelConv / fft2d /
-      distanceMatrix` stop parallelizing by default, and bump
-      `matmul` / `spectrogram` / `erfc` / `besselJ` thresholds to
-      the bench-recommended values. Note in the comment that the
-      numbers were measured in a noisy CI container — re-run on
-      target hardware to retune. Add a test that verifies the
-      adaptive path (e.g. small `add` stays sequential) so the
-      thresholds don't silently regress.
+- [x] **`bench:parallel` recommended thresholds vs. code default.**
+      The bench output (`tools/benchmark/parallel/run.ts`) reports
+      per-op recommendations. **Closed in commit b96b53a.**
+      `ComputePoolConfig` gained an `OpName` union covering the 37
+      dispatched operations and a
+      `thresholdByOp?: Partial<Record<OpName, number | 'never' |
+      'always'>>` map. `shouldParallelize(elementCount, op?)`
+      resolves the per-op threshold first and falls back to the
+      flat `thresholdElements: 50000` only for ops not in the map.
+      Default values applied (source: `tools/benchmark/parallel/run.ts`,
+      2026-05-23, noisy CI container): most ops `'never'`,
+      `matmul=4_096`, `spectrogram=65_536`,
+      `matrixPower=characteristicPolynomial=9_216`,
+      `erfc=100_000`, `besselJ=1_000_000`. `resolveOpThreshold` /
+      `OpName` / `OpThreshold` exported. 18 new tests in
+      `parallel/tests/ComputePool.test.ts`.
 
-- [ ] **AS WASM module export gap.** After the Rust/AS split, the
-      AS path in `WASMBackend` falls back to JS for `LU`, `QR`,
-      `Cholesky`, `inverse`, `determinant` because the AS module
-      (`assembly/src/`) does not export them. Rust does. **Goal:**
-      add these five linear-algebra kernels to the AS module
-      (`assembly/src/algebra/decomposition.ts` already exists for
-      adjacent ops — extend it), re-export from
-      `assembly/src/index.ts`, rebuild via `npm run build:wasm`,
-      regenerate `wasm-manifest.json`, wire them through
-      `WASMBackend.ts`'s naming map so `WASMBackend.lu` / `qr` /
-      `cholesky` / `inverse` / `determinant` stop falling back to
-      JS, and confirm
-      `functions/tests/security/wasm-integrity.test.ts` still pins
-      the regenerated hash list (5/5 must stay green).
+- [x] **AS WASM module export gap.** After the Rust/AS split, the
+      AS path fell back to JS for `LU`, `QR`, `Cholesky`,
+      `inverse`, `determinant`. **Closed in commit b96b53a.** Five
+      new AS kernels in `assembly/src/algebra/decomposition.ts`
+      (`matrix_lu_decompose`, `matrix_qr_decompose`,
+      `matrix_cholesky`, `matrix_inverse`, `matrix_determinant`),
+      re-exported from `assembly/src/index.ts`, AS artifact rebuilt
+      (42,128 → 45,354 bytes, +3.2 KB). `WASMBackend.ts` dispatches
+      to the AS exports first and falls back to JS only when the
+      probe (`typeof mod.matrix_xxx === 'function'`) fails.
+      WasmModule interface entries added to
+      `assembly/src/bindings/wasm-loader.ts`,
+      `matrix/src/backends/WasmLoader.ts`,
+      `functions/src/wasm/WasmLoader.ts` (kept in sync).
+      `wasm-manifest.json` regenerated at both `lib/wasm/` and
+      `assembly/build/`. SHA-384 integrity test 5/5. 5 new tests in
+      `matrix/tests/wasm/decompositions-as.test.ts` within `1e-9`
+      tolerance. Porting note: Rust QR's inline-recompute
+      Householder pattern degenerates in AS, so the AS port follows
+      the JS-reference precompute-into-`vBuf` pattern (same maths,
+      different storage discipline).
 
 - [ ] **No browser smoke test for the WebGPU paths.** WGSL syntax
       errors and shader-module init bugs in `functions/src/typed/

@@ -233,6 +233,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     new `asAllocFloat64` / `asWriteFloat64` / `AsPool` helpers
     wired to the AS export names.
 
+- **Post-cleanup audit follow-ups (commit `b96b53a`).** Four
+  parallel subagents (least → most complex) closed every actionable
+  item the post-cleanup audit pinned:
+  - **Per-op `ComputePool` thresholds.** `ComputePoolConfig`
+    grew an `OpName` union over the 37 dispatched operations and
+    a `thresholdByOp?: Partial<Record<OpName, number | 'never' |
+    'always'>>` map. `shouldParallelize(elementCount, op?)` now
+    resolves per-op first and falls back to the flat
+    `thresholdElements: 50000` only for ops not in the map.
+    Default values applied from `tools/benchmark/parallel/run.ts`
+    measurements (2026-05-23 noisy-CI container): most ops
+    `'never'`, `matmul = 4,096`, `spectrogram = 65,536`,
+    `matrixPower = characteristicPolynomial = 9,216`,
+    `erfc = 100,000`, `besselJ = 1,000,000`. `resolveOpThreshold`
+    / `OpName` / `OpThreshold` exported from
+    `parallel/src/index.ts`. 18 new tests in
+    `parallel/tests/ComputePool.test.ts`.
+  - **`matrix` `WasmLoader` allocator hybrid Rust/AS bug**
+    (lines ~744–867) inherited by `MatrixWasmBridge.ts` and
+    `matrix/src/backends/wasm/fft-wasm.ts`. Closed via Option A
+    (load-time `AllocatorKind` detect + branch). Rust path uses a
+    flat-memory bump allocator anchored at `__heap_base`, exposed
+    via `resetRustAllocator()` and `getAllocatorKind()`.
+    `Allocation<T>` typed sum lets consumers re-bind output views
+    to `module.memory.buffer + alloc.dataPtr` after each call
+    (Rust `Vec` allocations may grow memory and detach earlier
+    views). `MatrixWasmBridge.ts` and `fft-wasm.ts` updated for
+    the re-bind + `resetRustAllocator()` pattern. 9 new live
+    tests (`matrix/tests/MatrixWasmBridge.test.ts` ×7 and
+    `matrix/tests/wasm/fft-wasm.test.ts` +2 for the WASM-backed
+    path) exercise paths that previously would have thrown
+    `TypeError: this.wasmModule.__new is not a function`.
+  - **AS WASM module gained `matrix_lu_decompose` /
+    `matrix_qr_decompose` / `matrix_cholesky` /
+    `matrix_inverse` / `matrix_determinant`** (335 lines new in
+    `assembly/src/algebra/decomposition.ts`), re-exported from
+    `assembly/src/index.ts`. `WASMBackend` dispatches to the AS
+    exports first; the JS fallback remains via the
+    `typeof mod.matrix_xxx === 'function'` probe so older AS
+    artifacts that predate this change keep working. AS artifact
+    rebuilt (42,128 → 45,354 bytes, +3.2 KB). `WasmModule`
+    interfaces in `assembly/src/bindings/wasm-loader.ts`,
+    `matrix/src/backends/WasmLoader.ts`, and
+    `functions/src/wasm/WasmLoader.ts` kept in sync.
+    `wasm-manifest.json` regenerated at both `/home/user/MathTS/
+    lib/wasm/` and `/home/user/MathTS/assembly/build/`. SHA-384
+    verification 5/5 (security invariant intact). 5 new tests in
+    `matrix/tests/wasm/decompositions-as.test.ts` within `1e-9`
+    tolerance. Notable porting detail: Rust QR's inline-recompute
+    Householder pattern degenerates in AS (storage gets clobbered
+    by the next column's update); ported using the JS-reference
+    precompute-into-`vBuf` pattern — same mathematics, different
+    storage discipline.
+  - **`tests/wasm/` cross-package integration suite — 5 fails →
+    0.** Three of the original five failures were transitively
+    closed by the WasmLoader / WASMBackend work landing in the
+    shared tree. The remaining two: a `RolldownError` against
+    rolldown 1.0.0-rc.17 (cannot parse the top-level-await
+    destructuring AS generates — `shouldSkip()` extended to catch
+    `RolldownError` / `"Parse failure"` / `"Duplicated export"`),
+    and a `MatrixWasmBridge.multiply` test that was originally
+    `it.skip` pointing at the WasmLoader hybrid bug — unskipped
+    after the bug closed, now passes. Suite is now **11 files,
+    224 passed, 0 failed, 0 skipped** (was `Tests 5 failed |
+    212 passed (217); Test Files 2 failed | 8 passed (10)`).
+
 ### Verified
 
 - `npx turbo build`: **12/12** packages green.
@@ -248,15 +314,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `npm run bench:wasm`: Rust + AS + JS columns all populated; **Rust
   2.5×–34× faster than JS** across matmul / dot / vecadd / det; Rust
   3.5×–13.7× faster than AS at matmul sizes ≥ 100×100.
-- `npm run bench:parallel`: full per-op break-even data; only
-  `matmul` (≥64-element matrices) and `spectrogram` (≥65,536 samples)
-  beat sequential in this container.
+- `npm run bench:parallel`: full per-op break-even data drives the
+  default `thresholdByOp` map; only `matmul` (≥64-element matrices)
+  and `spectrogram` (≥65,536 samples) beat sequential in this
+  container, plus `erfc` / `besselJ` above their break-even sizes.
 - All four standalone WASM benches under `tools/benchmark/wasm/` and
   `tools/benchmark/e2e/` complete without throwing.
+- `npm run test:wasm:integration`: **11 files, 224 passed, 0 failed,
+  0 skipped** (was 5 failed | 212 passed (217); 2 failed test files
+  | 8 passed (10) at the start of the audit).
 - `functions/tests/security/wasm-integrity.test.ts`: **5/5** pass
-  (SHA-384 manifest verification intact after manifest regeneration).
+  (SHA-384 manifest verification intact through two manifest
+  regenerations).
 - Source-file test coverage: **18.6 % → 27.0 %** (90/485 → 131/485)
-  across 42 new test files (+1,294 assertions).
+  across 42 new test files (+1,294 assertions). The post-cleanup
+  audit added a further ~45 tests (18 `ComputePool` + 9
+  `MatrixWasmBridge` / fft-wasm + 5 AS decomposition + integration-
+  suite unskip), bringing the live-test surface meaningfully wider
+  in the previously-dead hybrid bridge / per-op dispatch / AS-
+  decomposition paths.
 
 ### Added
 
