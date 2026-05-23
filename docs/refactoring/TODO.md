@@ -297,45 +297,63 @@ Complex / any`. `nullish` carries explicit `boolean,any` / `string,any` /
 
 ### Open follow-ups (deferred from this session — real but out of scope of the bug-fix slice)
 
-These are the three items I deliberately did not touch in the typed-layer
-expansion. They are listed least → most complex, which is the order the
-follow-up subagent team should tackle them.
+### Open follow-ups (closed in commit d6ea55c — 2026-05-22)
 
-- [ ] **(Sonnet, low) BigNumber API gap.** `expression/tests/utils-bignumber-formatter.test.ts`
-      currently uses a `MockBigNumber` because the synced
+These are the three items deferred from the typed-layer expansion. All
+three landed in commit `d6ea55c` (three subagents in parallel, least →
+most complex). Kept here as a checklist of what was done.
+
+- [x] **(Sonnet, low) BigNumber API gap.** `expression/tests/utils-bignumber-formatter.test.ts`
+      previously used a `MockBigNumber` because the synced
       `expression/src/utils/bignumber/formatter.ts` duck-types against
       `.gt()`, `.toSignificantDigits()`, and the `.e` (exponent) field on
       Decimal.js-shaped numbers, and `@danielsimonjr/mathts-core`'s BigNumber
-      exposes none of them. **Goal:** add `.gt(other)`,
-      `.toSignificantDigits(n, roundingMode?)`, and `.e` (or an equivalent
-      exponent getter) to `core/src/numeric/BigNumber` so the formatter works
-      on the real type. Backwards-compatible — these are new methods/fields.
-      Then rewrite the bignumber-formatter test to drop the mock.
+      exposed none of them. **Closed:** added `.gt(other)`,
+      `.toSignificantDigits(n, roundingMode?)`, and a `.e` getter to
+      `core/src/types/bignumber.ts` plus a `.toNumber()` alias and a
+      `readonly isBigNumber = true` duck-typing marker. Rewrote
+      `utils-bignumber-formatter.test.ts` to drop the mock; 16/16 pass
+      against the real BigNumber. 42 new direct tests in
+      `core/tests/BigNumber-formatter-api.test.ts`.
 
-- [ ] **(Opus, medium) Int32Array-aware workerpool kernel slot.** The
-      `packages/workerpool/src/worker.ts` kernel registry is keyed on
-      `Float64Array` — running bitwise math on doubles would silently corrupt
-      the upper bits, so the new `ComputePool.bit*` methods currently chunk
-      in-process. **Goal:** add an Int32-aware kernel path (a sibling family
-      to the Float64 elementwise kernels), wire the seven worker handlers
-      already drafted in `parallel/src/workers/compute.worker.ts`
-      (`bitwiseBinaryChunk` / `bitwiseNotChunk`) into the active
-      `MathWorkerPool`, and switch the seven `ComputePool.bit*` methods over
-      so they actually move off-thread for arrays above the elementwise
-      threshold. Update / extend `parallel/tests/ComputePool.test.ts` to
-      exercise the worker path.
+- [x] **(Opus, medium) Int32Array-aware workerpool kernel slot.** The
+      `packages/workerpool/src/worker.ts` kernel registry was Float64Array-
+      only — running bitwise math on doubles would silently corrupt the
+      upper bits, so the seven new `ComputePool.bit*` methods initially
+      ran in-process. **Closed:** added three Int32-aware kernels
+      (`bitwiseChunk`, `bitwiseScalarChunk`, `bitwiseNotChunk`) plus
+      public dispatch methods (`bitwiseBinary`, `bitwiseScalar`,
+      `bitwiseNot`) and Int32 chunking helpers on `MathWorkerPool`.
+      Routed `ComputePool.bit*` through the new kernels above the
+      standard elementwise threshold; the in-process path stays as the
+      below-threshold fallback. Deleted the dormant
+      `bitwiseBinaryChunk` / `bitwiseNotChunk` handlers in
+      `parallel/src/workers/compute.worker.ts` (never reachable from
+      the active pool). 37 new tests in `parallel/tests/ComputePool.test.ts`
+      and `packages/workerpool/tests/bitwise-dispatch.test.ts`.
 
-- [ ] **(Opus, high) Rust + AssemblyScript WASM ports of bitwise (and
-      logical) ops, plus manifest regeneration.** Add bitwise kernels to both
-      the Rust workspace (`wasm-rust/crates/`) and the AssemblyScript module
-      (`assembly/src/`), expose them through the existing WasmModule
-      interfaces in `functions/src/wasm/WasmLoader.ts` and
-      `matrix/src/backends/WasmLoader.ts`, run `npm run build:wasm:all`,
-      regenerate `wasm-manifest.json` via `tools/generate-wasm-manifest.mjs`,
-      and confirm the SHA-384 verification path in
-      `functions/tests/security/wasm-integrity.test.ts` still pins the new
-      hashes. Wire the WASM path into `typed/bitwise.ts` as a third dispatch
-      tier (WASM for large `Int32Array` inputs once available).
+- [x] **(Opus, high) Rust + AssemblyScript WASM ports of bitwise (and
+      logical) ops, plus manifest regeneration.** Added bitwise kernels
+      to both the Rust workspace (`wasm-rust/crates/mathts-wasm/src/
+      bitwise/operations.rs` — three new per-element shift variants;
+      bitAndArray / bitOrArray / bitXorArray / bitNotArray already
+      existed) and the AssemblyScript module (`assembly/src/ops/
+      bitwise.ts` — seven brand-new kernels, AS module had no bitwise
+      ops before). Exposed via the existing WasmModule interfaces in
+      `functions/src/wasm/WasmLoader.ts`,
+      `matrix/src/backends/WasmLoader.ts`, and
+      `assembly/src/bindings/wasm-loader.ts`. Built via
+      `npm run build:wasm:all`, regenerated `wasm-manifest.json` via
+      `tools/generate-wasm-manifest.mjs`, and confirmed the SHA-384
+      verification path in
+      `functions/tests/security/wasm-integrity.test.ts` still pins the
+      new hashes (5/5 pass). Wired the WASM path into
+      `typed/bitwise.ts` as a third dispatch tier: WASM (above
+      `WASM_BITWISE_THRESHOLD = 65,536` elements) → ComputePool worker
+      → in-process. New bridge at
+      `functions/src/wasm/bitwise/wasm-bridge.ts` swallows WASM-load
+      failures and falls through to ComputePool. 9 new tests in
+      `functions/tests/typed-bitwise-wasm.test.ts`.
 
 ## 🔧 Repo-wide Cleanup (2026-05-22)
 
@@ -386,65 +404,93 @@ below.
       data. Only `matmul` (≥64-element matrices) and `spectrogram`
       (≥65,536 samples) beat sequential in this container.
 
-### Open follow-ups (real bugs surfaced this turn — least → most complex)
+### Open follow-ups (closed in commit 3979eb1 — real bugs surfaced this turn)
 
-- [ ] **(Sonnet, low) `matrix/src/backends/WasmLoader.ts` default-path
-      is CWD-relative.** `getDefaultWasmPath()` returns
+All three landed in commit `3979eb1` (three subagents in parallel,
+least → most complex). Kept as a checklist of what was done.
+
+- [x] **(Sonnet, low) `matrix/src/backends/WasmLoader.ts` default-path
+      was CWD-relative.** `getDefaultWasmPath()` returned
       `'./lib/wasm/mathts.wasm'`, so the matrix test suite (running
-      from `matrix/`) looks at `matrix/lib/wasm/mathts.wasm` and logs
-      "Failed to load WASM module, falling back to JS" 50+ times during
-      `npm run test`. The artifact actually lives at repo-root
-      `lib/wasm/mathts.wasm`. **Goal:** resolve the default path via
-      `import.meta.url` (walking up from the package dir, the same
-      pattern `WasmLoader.test.ts`'s new conditional test uses) so the
-      artifact is found regardless of CWD. Verify the matrix test run
-      no longer prints any "Failed to load WASM" lines.
+      from `matrix/`) looked at `matrix/lib/wasm/mathts.wasm` and
+      logged "Failed to load WASM module, falling back to JS" ~50
+      times during `npm run test`. **Closed:** unified the Node and
+      browser branches to resolve via
+      `new URL('../../../lib/wasm/<file>', import.meta.url).pathname`
+      (3 hops up = repo root). The matrix test run now prints zero
+      "Failed to load WASM" lines.
 
-- [ ] **(Sonnet, medium) `functions/src/typed/cas.ts:1470` —
-      cubic/quartic polynomial-root case never implemented.** `fm2 =
-      f(-2)` is computed but never read; the surrounding rational-roots
-      search only handles linear and quadratic. **Goal:** implement the
-      cubic case (Cardano / depressed cubic / discriminant branches)
-      and the quartic case (Ferrari / Descartes' substitution) using
-      the existing `f(-2)`, `f(-1)`, `f(0)`, `f(1)`, `f(2)` evaluations
-      to pick rational candidates. Drop the `_` prefix on `fm2` once
-      it is consumed. Cover with tests: known-roots polynomials of
-      degree 3 and 4 (including repeated roots and one with no rational
-      root, which must fall through gracefully).
+- [x] **(Sonnet, medium) `functions/src/typed/cas.ts` cubic/quartic
+      polynomial-root cases never implemented.** `fm2 = f(-2)` was
+      computed but never read; the rational-roots search only handled
+      linear and quadratic. **Closed:** added 227 lines of new helpers
+      — `depressedCubicRoots(p, q)` (Cardano when Δ<0, trigonometric
+      Viète when Δ>0, arccos arg clamped to [-1,1]),
+      `solveCubicRadicals(A,B,C,D,fm2…f2)` (short-circuits on the five
+      pre-evaluated samples then falls back to depression + the new
+      cubic), `solveQuarticRadicals(A,B,C,D,E,fm2…f2)` (Ferrari via
+      resolvent cubic, same rational-root short-circuit). `_fm2` prefix
+      dropped; `fm2` now read at 7 sites. 6 new tests in
+      `functions/tests/cas.test.ts` cover the three-rational-roots
+      cubic, one-real Cardano cubic, repeated-root + fm2-short-circuit
+      cubic, four-rational-roots quartic, fm2-short-circuit quartic,
+      and a two-real-two-complex quartic.
 
-- [ ] **(Opus, high) `matrix/src/backends/WASMBackend` is half-written
-      for Rust and half for AS, breaking standalone WASM benches.** The
-      backend calls `this.wasmModule.add(…)` / `multiplyDense(…)`
-      (Rust-style camelCase export names), allocates via
+- [x] **(Opus, high) `matrix/src/backends/WASMBackend` was half-written
+      for Rust and half for AS — every standalone WASM bench threw.**
+      The backend called `this.wasmModule.add(…)` / `multiplyDense(…)`
+      (Rust camelCase exports), allocated via
       `wasmLoader.allocateFloat64Array()` which uses `module.__new()`
-      (AS-specific runtime), and is loaded against whichever artifact
-      `WasmLoader.getDefaultWasmPath()` resolves to (Rust by default,
-      AS only when `MATHTS_WASM_BACKEND=assemblyscript`). Symptom:
-      `tools/benchmark/wasm/{matmul,elementwise}.bench.ts` and
-      `tools/benchmark/e2e/backend-comparison.bench.ts` all throw
-      `module.__new is not a function`; switching to AS via the env
-      var hits `this.wasmModule.add is not a function` because the AS
-      module exports `add_f64` / `matrix_multiply` (snake_case,
-      type-suffixed), not the camelCase names the backend looks up.
-      The repo already has a separate `RustWASMBackend` and
-      `RustWasmLoader` — so the architecture supports split paths.
-      **Goal:** either (a) split into `WASMBackend` (AS-only) with a
-      proper AS export-name lookup table + AS allocation, while
-      pointing Rust benches at the existing `RustWASMBackend`; or (b)
-      make `WASMBackend` autoselect at load time — detect whether the
-      loaded module exposes `__new` (AS) or a flat-memory ABI (Rust)
-      and pick the right naming + allocator branch transparently. The
-      comparison benchmark in
-      `tests/benchmark/wasm_rust_vs_as_benchmark.ts` should additionally
-      gain a small camelCase→snake_case adapter so the AS column stops
-      being empty. Verify all four standalone WASM benches under
-      `tools/benchmark/wasm/` and `tools/benchmark/e2e/` complete
-      without throwing.
+      (AS-specific runtime), and was loaded against whichever artifact
+      `WasmLoader.getDefaultWasmPath()` resolved to (Rust by default).
+      `module.__new is not a function` on every standalone bench;
+      `this.wasmModule.add is not a function` once `MATHTS_WASM_BACKEND
+      =assemblyscript` flipped the loader. **Closed (Option A — clean
+      split).** `WASMBackend` rewritten as **AS-only**, owning its own
+      AS instance (bypasses the wasmLoader singleton keyed on Rust),
+      with an inline AS-managed Float64Array allocator (`__new(byteLength
+      ,1)` for buffer + `__new(12,5)` for the header) and a per-instance
+      allocation pool to dodge the AS `--runtime stub` no-free
+      constraint. Rust callers now route to the existing
+      `RustWASMBackend` (whose `RustWasmLoader.findWasmPath()` was
+      also fixed to use `import.meta.url` instead of a broken `require()`
+      shim). Backend registration extracted to a shared
+      `matrix/src/backends/register-backends.ts` so the registry is
+      populated regardless of which entry point a consumer imports.
+      The four standalone benches under `tools/benchmark/wasm/` and
+      `tools/benchmark/e2e/` switched to `RustWASMBackend` for the
+      Rust column and the rewritten `WASMBackend` for the AS column.
+      `tests/benchmark/wasm_rust_vs_as_benchmark.ts` gained
+      `asAllocFloat64` / `asWriteFloat64` / `AsPool` helpers wired to
+      the AS export names (`matrix_multiply` / `array_dot` /
+      `matrix_add`) — AS column no longer empty. Bench summary now
+      shows Rust 2.5–34× faster than JS across matmul / dot / vecadd /
+      det.
 
 - [ ] **(Environment) GPU benches under `tools/benchmark/gpu/`** —
       WebGPU is not available in headless Node so these are out of
       scope for the local test container. They will run in browsers /
       on hardware with a WebGPU adapter. Not a code defect.
+
+### Newly surfaced — pinned for the next pass
+
+- [ ] **`matrix/src/backends/WasmLoader.allocateFloat64Array()` (lines
+      ~744–867) carries the same hybrid Rust/AS bug `WASMBackend` used
+      to have.** It calls `module.__new(byteLength, 2)` (AS-specific)
+      but returns a flat-memory `.ptr` for callers that expect the
+      Rust raw-pointer ABI. `matrix/src/backends/MatrixWasmBridge.ts`
+      and `matrix/src/backends/wasm/fft-wasm.ts` inherit the bug. No
+      live test currently exercises the broken paths so they pass, but
+      they will throw the moment a caller hits them. Surfaced by the
+      opus agent that fixed `WASMBackend`; explicitly left out of
+      scope for that commit per the agent's stay-out-of-zone constraint.
+      **Goal:** split the allocator helpers the same way `WASMBackend`
+      was split — AS-only path stays in `WasmLoader`, Rust callers use
+      the existing `RustWasmLoader` (which uses flat-memory offsets,
+      not `__new`). Audit `MatrixWasmBridge.ts` and `fft-wasm.ts` for
+      hidden calls and route them at the same time. Add at least one
+      live test that triggers the path so a future regression cannot
+      hide behind dead code.
 
 ## 📋 Next Steps
 
