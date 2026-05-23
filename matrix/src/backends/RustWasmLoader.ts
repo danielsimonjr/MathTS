@@ -337,36 +337,16 @@ export class RustWasmLoader {
     const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
 
     if (isNode) {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const fs = require('fs');
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const path = require('path');
-
-      const candidates = [
-        // Published location (copied into matrix package)
-        path.resolve(process.cwd(), 'lib/wasm/mathts_rust.wasm'),
-        // Development build output
-        path.resolve(
-          process.cwd(),
-          'wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm'
-        ),
-        // Relative from matrix package
-        path.resolve(
-          process.cwd(),
-          '../wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm'
-        ),
-      ];
-
-      for (const p of candidates) {
-        if (fs.existsSync(p)) return p;
-      }
-
-      // Return the dev path as default (will fail gracefully)
-      return candidates[1];
+      // Resolve relative to this source file rather than process.cwd() so the
+      // path is consistent regardless of where Node was launched from.
+      //   <repo-root>/matrix/src/backends/RustWasmLoader.ts
+      // → <repo-root>/lib/wasm/mathts.wasm  (3 hops up + lib/wasm/)
+      const primary = new URL(`../../../lib/wasm/mathts.wasm`, import.meta.url).pathname;
+      return primary;
     }
 
-    // Browser
-    return 'mathts_rust.wasm';
+    // Browser: the same logical path, but expressed as a fetch-able URL.
+    return new URL(`../../../lib/wasm/mathts.wasm`, import.meta.url).href;
   }
 
   private getImports(): WebAssembly.Imports {

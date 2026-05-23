@@ -595,6 +595,69 @@ describe('CAS: Advanced', () => {
       expect(result.length).toBeGreaterThanOrEqual(1);
       // Root should be 1
     });
+
+    // ── Cubic tests ────────────────────────────────────────────────────────────
+
+    it('cubic: three rational roots (x-1)(x-2)(x-3) = x^3 - 6x^2 + 11x - 6', () => {
+      // All five of {-2,-1,0,1,2} are evaluated; f(1)=0 triggers the short-circuit.
+      const result = toRadicals('x^3 - 6*x^2 + 11*x - 6');
+      expect(result.length).toBe(3);
+      const roots = result.map(parseFloat).sort((a, b) => a - b);
+      expect(roots[0]).toBeCloseTo(1, 6);
+      expect(roots[1]).toBeCloseTo(2, 6);
+      expect(roots[2]).toBeCloseTo(3, 6);
+    });
+
+    it('cubic: one real root (Cardano path): x^3 + x + 1', () => {
+      // Δ < 0 — one real root, two complex conjugates.
+      // Real root ≈ −0.6823278038
+      const result = toRadicals('x^3 + x + 1');
+      expect(result.length).toBe(1);
+      expect(parseFloat(result[0])).toBeCloseTo(-0.6823278038, 6);
+    });
+
+    it('cubic: repeated root — x^3 - 3x + 2 = (x-1)^2(x+2); f(-2)=0 short-circuit', () => {
+      // f(-2) = -8 + 6 + 2 = 0, so the fm2 short-circuit fires first.
+      const result = toRadicals('x^3 - 3*x + 2');
+      // roots: -2 (simple), 1 (double)
+      expect(result.length).toBeGreaterThanOrEqual(2);
+      const roots = result.map(parseFloat).sort((a, b) => a - b);
+      expect(roots[0]).toBeCloseTo(-2, 6);
+      expect(roots[roots.length - 1]).toBeCloseTo(1, 6);
+    });
+
+    // ── Quartic tests ──────────────────────────────────────────────────────────
+
+    it('quartic: four rational roots x^4 - 10x^2 + 9 = (x-1)(x+1)(x-3)(x+3)', () => {
+      // f(-1) = 1 - 10 + 9 = 0 triggers the fm1 short-circuit.
+      const result = toRadicals('x^4 - 10*x^2 + 9');
+      expect(result.length).toBe(4);
+      const roots = result.map(parseFloat).sort((a, b) => a - b);
+      expect(roots[0]).toBeCloseTo(-3, 6);
+      expect(roots[1]).toBeCloseTo(-1, 6);
+      expect(roots[2]).toBeCloseTo(1, 6);
+      expect(roots[3]).toBeCloseTo(3, 6);
+    });
+
+    it('quartic: fm2 short-circuit — x^4 - 5x^2 + 4 = (x-2)(x+2)(x-1)(x+1)', () => {
+      // f(-2) = 16 - 20 + 4 = 0 triggers the fm2 short-circuit.
+      const result = toRadicals('x^4 - 5*x^2 + 4');
+      expect(result.length).toBe(4);
+      const roots = result.map(parseFloat).sort((a, b) => a - b);
+      expect(roots[0]).toBeCloseTo(-2, 6);
+      expect(roots[1]).toBeCloseTo(-1, 6);
+      expect(roots[2]).toBeCloseTo(1, 6);
+      expect(roots[3]).toBeCloseTo(2, 6);
+    });
+
+    it('quartic: two real + two complex roots — x^4 + x^2 - 2 = (x-1)(x+1)(x^2+2)', () => {
+      // Real roots: -1, 1 (complex pair from x^2+2 omitted).
+      const result = toRadicals('x^4 + x^2 - 2');
+      expect(result.length).toBe(2);
+      const roots = result.map(parseFloat).sort((a, b) => a - b);
+      expect(roots[0]).toBeCloseTo(-1, 6);
+      expect(roots[1]).toBeCloseTo(1, 6);
+    });
   });
 
   describe('piecewise', () => {

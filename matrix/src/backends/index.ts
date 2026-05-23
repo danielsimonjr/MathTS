@@ -93,8 +93,7 @@ export {
 
 export type { GPUCapabilities, GPUContextOptions, SyncStrategy, SyncConfig } from './gpu/index.js';
 
-// Register JS backend by default
-import { backendRegistry } from './Backend.js';
-import { jsBackend } from './JSBackend.js';
-
-backendRegistry.register(jsBackend);
+// Registration side-effects live in ./register-backends.js so they fire
+// regardless of which module the consumer imports first (e.g. BackendManager
+// alone). See that file for details.
+import './register-backends.js';

@@ -13,6 +13,10 @@ import type { MatrixBackend, BackendType, BackendHints } from './Backend.js';
 import { backendRegistry, DEFAULT_BACKEND_HINTS } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
 import { getConfig, onConfigChange, type MatrixConfig, type OperationType } from '../config.js';
+// Side-effect import: makes sure JS / Rust-WASM / AS-WASM backends are
+// registered in `backendRegistry` even when consumers import this module
+// without first touching `./index.ts`. Cheap (no WASM load until init()).
+import './register-backends.js';
 
 // `OperationType` is defined in `config.ts` (to break the config/BackendManager
 // import cycle); re-exported here so existing `./BackendManager.js` importers

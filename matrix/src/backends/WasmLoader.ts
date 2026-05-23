@@ -589,16 +589,35 @@ export class WasmLoader {
    * Get the WASM binary path based on the selected backend.
    * Set MATHTS_WASM_BACKEND=assemblyscript to use the AS binary.
    * Default is Rust (after migration cutover).
+   *
+   * The path is resolved relative to this source file's location so it is
+   * CWD-independent.  This file lives at:
+   *   <repo-root>/matrix/src/backends/WasmLoader.ts
+   * so the repo root is three directories up, and the artifact is at
+   *   <repo-root>/lib/wasm/mathts[‑as].wasm
+   *
+   * Both branches use `new URL(relative, import.meta.url)` which is fully
+   * synchronous and works in Node (ESM) and browsers alike.
+   * In Node we take `.pathname` to get a filesystem path; in the browser we
+   * keep the full `.href` so fetch() can use it directly.
    */
   private getDefaultWasmPath(): string {
     const useAS =
       typeof process !== 'undefined' && process.env?.MATHTS_WASM_BACKEND === 'assemblyscript';
 
+    const wasmFile = useAS ? 'mathts-as.wasm' : 'mathts.wasm';
+
+    // import.meta.url → file://<repo-root>/matrix/src/backends/WasmLoader.ts
+    // Three "../" hops: backends/ → src/ → matrix/ → <repo-root>
+    const resolvedUrl = new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url);
+
     if (this.isNode) {
-      return useAS ? './lib/wasm/mathts-as.wasm' : './lib/wasm/mathts.wasm';
+      // In Node ESM, import.meta.url is always a file: URL, so .pathname
+      // gives us the absolute filesystem path that readFile() expects.
+      return resolvedUrl.pathname;
     } else {
-      const wasmFile = useAS ? 'mathts-as.wasm' : 'mathts.wasm';
-      return new URL(`../../lib/wasm/${wasmFile}`, import.meta.url).href;
+      // In a browser context, return the full href so fetch() can use it.
+      return resolvedUrl.href;
     }
   }
 

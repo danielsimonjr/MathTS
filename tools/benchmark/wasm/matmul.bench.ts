@@ -7,8 +7,17 @@
 
 import { DenseMatrix } from '../../../matrix/src/types/DenseMatrix.js';
 import { jsBackend } from '../../../matrix/src/backends/JSBackend.js';
+import { RustWASMBackend } from '../../../matrix/src/backends/RustWASMBackend.js';
 import { WASMBackend } from '../../../matrix/src/backends/WASMBackend.js';
 
+// Bench column meanings (after the WASMBackend split):
+//   * "WASM"  — Rust WASM backend (the primary, `lib/wasm/mathts.wasm`).
+//                This is what `multiplyDenseSIMD` calls into.
+//   * "SIMD"  — Same Rust backend with no flag distinction (the Rust crate
+//                already enables `wasm32-simd128` so the "non-SIMD" path
+//                would just be JS). We keep two columns for table layout
+//                and to show the Rust backend variance run-to-run.
+//   * (AS WASMBackend has its own dedicated bench in tests/benchmark/wasm_rust_vs_as_benchmark.ts.)
 interface BenchmarkResult {
   name: string;
   size: number;
@@ -62,33 +71,36 @@ async function benchmarkMatmul(size: number, iterations: number): Promise<Benchm
   const a = randomMatrix(size, size);
   const b = randomMatrix(size, size);
 
-  // Create backends
-  const wasmBackendNoSIMD = new WASMBackend({ useSIMD: false, minElements: 0 });
-  const wasmBackendSIMD = new WASMBackend({ useSIMD: true, minElements: 0 });
+  // Create backends.
+  //   * Rust backend handles the "WASM" column (the active primary).
+  //   * AS backend handles the "SIMD" column — it goes through the AS
+  //     artifact (`mathts-as.wasm`), which is a much smaller binary; it's
+  //     useful to see in the same table for comparison.
+  const rustBackend = new RustWASMBackend({ minElements: 0 });
+  const asBackend = new WASMBackend({ useSIMD: true, minElements: 0 });
 
   // Initialize WASM
-  await wasmBackendNoSIMD.initialize();
-  await wasmBackendSIMD.initialize();
+  await rustBackend.initialize();
+  await asBackend.initialize();
 
   // Benchmark JS
   const jsTime = await measureTime(() => {
     jsBackend.multiply(a, b);
   }, iterations);
 
-  // Benchmark WASM (no SIMD)
+  // Benchmark Rust WASM
   let wasmTime = jsTime;
-  if (wasmBackendNoSIMD.isAvailable()) {
+  if (rustBackend.isAvailable()) {
     wasmTime = await measureTime(() => {
-      wasmBackendNoSIMD.multiply(a, b);
+      rustBackend.multiply(a, b);
     }, iterations);
   }
 
-  // Benchmark WASM + SIMD
+  // Benchmark AS WASM
   let simdTime = jsTime;
-  const features = wasmBackendSIMD.getFeatures();
-  if (wasmBackendSIMD.isAvailable() && features?.simd) {
+  if (asBackend.isAvailable()) {
     simdTime = await measureTime(() => {
-      wasmBackendSIMD.multiply(a, b);
+      asBackend.multiply(a, b);
     }, iterations);
   }
 
@@ -129,10 +141,10 @@ function formatOps(ops: number): string {
 function printResults(results: BenchmarkResult[]): void {
   console.log('\n=== Matrix Multiplication Benchmark ===\n');
   console.log(
-    '| Size | JS Time (ms) | WASM Time (ms) | SIMD Time (ms) | WASM Speedup | SIMD Speedup |'
+    '| Size | JS (ms) | Rust WASM (ms) | AS WASM (ms) | Rust Speedup | AS Speedup |'
   );
   console.log(
-    '|------|--------------|----------------|----------------|--------------|--------------|'
+    '|------|---------|----------------|--------------|--------------|------------|'
   );
 
   for (const r of results) {
@@ -142,8 +154,8 @@ function printResults(results: BenchmarkResult[]): void {
   }
 
   console.log('\n=== Performance (FLOPS) ===\n');
-  console.log('| Size | JS | WASM | SIMD |');
-  console.log('|------|-----|------|------|');
+  console.log('| Size | JS | Rust WASM | AS WASM |');
+  console.log('|------|-----|-----------|---------|');
 
   for (const r of results) {
     console.log(

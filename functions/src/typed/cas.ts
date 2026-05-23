@@ -1444,6 +1444,233 @@ function findIntegerRelation(vals: f64[], maxCoeff: number): number[] | null {
   return null;
 }
 
+// =============================================================================
+// Cubic and Quartic radical-form solvers (internal helpers for toRadicals)
+// =============================================================================
+
+/**
+ * Solve the depressed cubic t³ + pt + q = 0 and return real roots.
+ * Uses Cardano's formula when Δ < 0 (one real root) and the trigonometric
+ * (Viète) method when Δ > 0 (three distinct real roots).
+ *
+ * Returns roots sorted ascending.
+ */
+function depressedCubicRoots(p: f64, q: f64): f64[] {
+  // Discriminant: Δ = -4p³ - 27q² (positive → 3 real roots)
+  const Delta = -4 * p * p * p - 27 * q * q;
+
+  if (Math.abs(Delta) < 1e-10) {
+    // Repeated-root case
+    if (Math.abs(q) < 1e-12) {
+      // Triple root at 0
+      return [0];
+    }
+    // Double root: t = 3q/p  and simple root: t = -6q/p
+    const t1 = (3 * q) / p;
+    const t2 = (-6 * q) / p;
+    return [t1, t2].sort((a, b) => a - b);
+  }
+
+  if (Delta > 0) {
+    // Three distinct real roots — trigonometric form (Viète / Cardano-trig)
+    // t_k = 2√(-p/3) · cos(⅓ · arccos((3q)/(2p) · √(-3/p)) − 2πk/3)
+    const m = 2 * Math.sqrt(-p / 3);
+    // clamp to [-1, 1] to guard against tiny floating-point overshoot
+    const acosArg = Math.max(-1, Math.min(1, ((3 * q) / (2 * p)) * Math.sqrt(-3 / p)));
+    const theta = Math.acos(acosArg) / 3;
+    const roots: f64[] = [
+      m * Math.cos(theta),
+      m * Math.cos(theta - (2 * Math.PI) / 3),
+      m * Math.cos(theta - (4 * Math.PI) / 3),
+    ];
+    return roots.sort((a, b) => a - b);
+  }
+
+  // Delta < 0: one real root, two complex conjugates — Cardano's formula
+  const sqrtArg = (q / 2) * (q / 2) + (p / 3) * (p / 3) * (p / 3);
+  const sqrtVal = Math.sqrt(Math.abs(sqrtArg));
+  const u = Math.cbrt(-q / 2 + sqrtVal);
+  const v = Math.cbrt(-q / 2 - sqrtVal);
+  return [u + v];
+}
+
+/**
+ * Solve cubic Ax³ + Bx² + Cx + D = 0 and return real roots as radical strings.
+ * The five pre-evaluated samples fm2…f2 are used for a fast integer-root
+ * short-circuit (rational-roots check on {-2,-1,0,1,2}) before calling the
+ * closed-form solver.
+ */
+function solveCubicRadicals(
+  A: f64,
+  B: f64,
+  C: f64,
+  D: f64,
+  fm2: f64,
+  fm1: f64,
+  f0: f64,
+  f1: f64,
+  f2: f64,
+): string[] {
+  // Fast rational-root short-circuit: if a sample point is an exact root,
+  // factor it out and solve the resulting quadratic.
+  const candidates: [f64, f64][] = [
+    [-2, fm2],
+    [-1, fm1],
+    [0, f0],
+    [1, f1],
+    [2, f2],
+  ];
+
+  for (const [r, fr] of candidates) {
+    if (Math.abs(fr) < 1e-8) {
+      // r is a root; divide out (x - r) via synthetic division
+      // Ax³ + Bx² + Cx + D = (x - r)(Ax² + (B + rA)x + (C + r(B + rA)))
+      const qa = A;
+      const qb = B + r * A;
+      const qc = C + r * qb;
+      // Solve quadratic qa*x² + qb*x + qc = 0
+      const disc = qb * qb - 4 * qa * qc;
+      const roots: string[] = [formatCoeff(r)];
+      if (Math.abs(disc) < 1e-10) {
+        roots.push(formatCoeff(-qb / (2 * qa)));
+      } else if (disc > 0) {
+        const s = Math.sqrt(disc);
+        roots.push(formatCoeff((-qb + s) / (2 * qa)));
+        roots.push(formatCoeff((-qb - s) / (2 * qa)));
+      }
+      // disc < 0: complex conjugate pair — omit
+      return roots;
+    }
+  }
+
+  // Depress: x = t - B/(3A)
+  const shift = B / (3 * A);
+  const p = (C / A) - (B * B) / (3 * A * A);
+  const q = (D / A) - (B * C) / (3 * A * A) + (2 * B * B * B) / (27 * A * A * A);
+
+  const tRoots = depressedCubicRoots(p, q);
+  return tRoots.map((t) => formatCoeff(t - shift));
+}
+
+/**
+ * Solve quartic Ax⁴ + Bx³ + Cx² + Dx + E = 0 and return real roots as
+ * radical strings.
+ * Uses Ferrari's method (resolvent cubic) after depressing the quartic.
+ * The five pre-evaluated samples fm2…f2 provide a fast integer-root
+ * short-circuit before the closed-form path.
+ */
+function solveQuarticRadicals(
+  A: f64,
+  B: f64,
+  C: f64,
+  D: f64,
+  E: f64,
+  fm2: f64,
+  fm1: f64,
+  f0: f64,
+  f1: f64,
+  f2: f64,
+): string[] {
+  // Fast rational-root short-circuit (same set as cubic)
+  const candidates: [f64, f64][] = [
+    [-2, fm2],
+    [-1, fm1],
+    [0, f0],
+    [1, f1],
+    [2, f2],
+  ];
+
+  for (const [r, fr] of candidates) {
+    if (Math.abs(fr) < 1e-8) {
+      // Factor out (x - r) via synthetic division: quartic → cubic
+      const c1 = B + r * A;
+      const c2 = C + r * c1;
+      const c3 = D + r * c2;
+      // Resulting cubic: A·x³ + c1·x² + c2·x + c3
+      // Use depressed-cubic path (we don't have the cubic evaluations here
+      // so we can't use the short-circuit; just call the closed-form directly)
+      const shift2 = c1 / (3 * A);
+      const p2 = c2 / A - (c1 * c1) / (3 * A * A);
+      const q2 =
+        c3 / A -
+        (c1 * c2) / (3 * A * A) +
+        (2 * c1 * c1 * c1) / (27 * A * A * A);
+      const tRoots2 = depressedCubicRoots(p2, q2);
+      const cubicRoots = tRoots2.map((t) => t - shift2);
+
+      // Combine integer root with cubic roots
+      const allRoots = [r, ...cubicRoots];
+      return allRoots.map(formatCoeff);
+    }
+  }
+
+  // Depress the quartic: x = t - B/(4A)
+  // Depressed form: t⁴ + p4·t² + q4·t + r4  (no cubic term, leading coeff 1)
+  const shift4 = B / (4 * A);
+  const p4 = C / A - (6 * B * B) / (16 * A * A);
+  const q4 =
+    D / A -
+    (3 * B * C) / (8 * A * A) +
+    (B * B * B) / (8 * A * A * A);
+  const r4 =
+    E / A -
+    (B * D) / (4 * A * A) +
+    (B * B * C) / (16 * A * A * A) -
+    (3 * B * B * B * B) / (256 * A * A * A * A);
+
+  // Ferrari's method: resolve via the resolvent cubic
+  // t⁴ + p4·t² + q4·t + r4 = 0
+  // Resolvent cubic: 8m³ + 8p4·m² + (2p4² - 8r4)·m - q4² = 0
+  const rA = 8;
+  const rB = 8 * p4;
+  const rC = 2 * p4 * p4 - 8 * r4;
+  const rD = -(q4 * q4);
+
+  // Solve resolvent cubic for m (we need any real root; take the first one)
+  const rShift = rB / (3 * rA);
+  const rp = rC / rA - (rB * rB) / (3 * rA * rA);
+  const rq =
+    rD / rA -
+    (rB * rC) / (3 * rA * rA) +
+    (2 * rB * rB * rB) / (27 * rA * rA * rA);
+  const mRoots = depressedCubicRoots(rp, rq);
+  const m = mRoots[mRoots.length - 1] - rShift; // pick largest for stability
+
+  // With m known, factor the depressed quartic into two quadratics:
+  // (t² + sqrt(2m + p4)·t + (m - q4/(2*sqrt(2m+p4))))
+  // (t² - sqrt(2m + p4)·t + (m + q4/(2*sqrt(2m+p4))))
+  const inner = 2 * m + p4;
+  if (inner < -1e-10) {
+    // No real factorisation found from this m; fall back to numerical
+    const numRoots = solve(`${A}*x^4 + ${B}*x^3 + ${C}*x^2 + ${D}*x + ${E}`, 'x');
+    return numRoots.map(formatCoeff);
+  }
+
+  const sqrtInner = Math.sqrt(Math.max(0, inner));
+  const real: f64[] = [];
+
+  // Quadratic 1: t² + sqrtInner·t + (m - q4/(2*sqrtInner))
+  const offset1 = Math.abs(sqrtInner) < 1e-12 ? 0 : -q4 / (2 * sqrtInner);
+  const disc1 = sqrtInner * sqrtInner - 4 * (m + offset1);
+  if (disc1 >= -1e-10) {
+    const s1 = Math.sqrt(Math.max(0, disc1));
+    real.push(-sqrtInner / 2 + s1 / 2 - shift4);
+    if (Math.abs(disc1) > 1e-10) real.push(-sqrtInner / 2 - s1 / 2 - shift4);
+  }
+
+  // Quadratic 2: t² - sqrtInner·t + (m + q4/(2*sqrtInner))
+  const offset2 = Math.abs(sqrtInner) < 1e-12 ? 0 : q4 / (2 * sqrtInner);
+  const disc2 = sqrtInner * sqrtInner - 4 * (m + offset2);
+  if (disc2 >= -1e-10) {
+    const s2 = Math.sqrt(Math.max(0, disc2));
+    real.push(sqrtInner / 2 + s2 / 2 - shift4);
+    if (Math.abs(disc2) > 1e-10) real.push(sqrtInner / 2 - s2 / 2 - shift4);
+  }
+
+  real.sort((a, b) => a - b);
+  return real.map(formatCoeff);
+}
+
 /**
  * Express a polynomial solution in radical form.
  *
@@ -1467,7 +1694,23 @@ export function toRadicals(expr: string): string[] {
   const f1 = f(1);
   const fm1 = f(-1);
   const f2 = f(2);
-  const _fm2 = f(-2);
+  const fm2 = f(-2);
+
+  // ── Coefficient extraction helpers ──────────────────────────────────────────
+  // For a polynomial p(x) = a_n x^n + … evaluated at x ∈ {-2,-1,0,1,2}:
+  //
+  // Even-part sums cancel odd-degree terms:
+  //   f(1)+f(-1) = 2*(a_2 + a_0)          [for quad] or 2*(a_3-terms cancel)
+  //   f(2)+f(-2) = 2*(16*a_4 + 4*a_2 + a_0)
+  //
+  // Odd-part differences cancel even-degree terms:
+  //   f(1)-f(-1) = 2*(a_1)                [for linear] or 2*(a_3 + a_1)
+  //   f(2)-f(-2) = 2*(8*a_3 + 2*a_1)
+
+  const sumP1 = (f1 + fm1) / 2; // even part at ±1  (cancels odd-degree)
+  const sumP2 = (f2 + fm2) / 2; // even part at ±2
+  const difP1 = (f1 - fm1) / 2; // odd part at ±1   (cancels even-degree)
+  const difP2 = (f2 - fm2) / 2; // odd part at ±2
 
   // Check if linear: ax + b
   // f(0)=b, f(1)=a+b => a = f(1)-f(0)
@@ -1508,6 +1751,57 @@ export function toRadicals(expr: string): string[] {
       `(${formatCoeff(-b)} + ${sqrtDiscStr})/${formatCoeff(denom)}`,
       `(${formatCoeff(-b)} - ${sqrtDiscStr})/${formatCoeff(denom)}`,
     ];
+  }
+
+  // ── Cubic: Ax³ + Bx² + Cx + D ──────────────────────────────────────────────
+  // Extract coefficients using the 5 evaluation points.
+  // Even parts: sumP1 = B + D,  sumP2 = 4B + D  =>  B = (sumP2 - D)/4 - ...
+  //   sumP2 - sumP1 = 3B  =>  B = (sumP2 - sumP1) / 3
+  //   D = sumP1 - B
+  // Odd parts:  difP1 = A + C,  difP2 = 8A + 2C
+  //   difP2 - 2*difP1 = 6A  =>  A = (difP2 - 2*difP1) / 6
+  //   C = difP1 - A
+  const cub_B = (sumP2 - sumP1) / 3;
+  const cub_D = sumP1 - cub_B;
+  const cub_A = (difP2 - 2 * difP1) / 6;
+  const cub_C = difP1 - cub_A;
+
+  // Verify it's cubic: check f(0)=D and that f(2) matches (already encoded in
+  // the extraction, but we also ensure it's not actually quartic+).
+  // A quartic would show a residual when we subtract our cubic fit.
+  const cubicFit2 = cub_A * 8 + cub_B * 4 + cub_C * 2 + cub_D;
+  const cubicFitM2 = -cub_A * 8 + cub_B * 4 - cub_C * 2 + cub_D;
+
+  if (
+    Math.abs(cub_D - f0) < 1e-6 &&
+    Math.abs(cubicFit2 - f2) < 1e-6 &&
+    Math.abs(cubicFitM2 - fm2) < 1e-6 &&
+    Math.abs(cub_A) > 1e-8
+  ) {
+    return solveCubicRadicals(cub_A, cub_B, cub_C, cub_D, fm2, fm1, f0, f1, f2);
+  }
+
+  // ── Quartic: Ax⁴ + Bx³ + Cx² + Dx + E ─────────────────────────────────────
+  // Extract coefficients using all 5 evaluation points.
+  // Even parts: sumP1 = A + C + E,   sumP2 = 16A + 4C + E
+  //   sumP2 - 4*sumP1 = 12A  =>  A = (sumP2 - 4*sumP1 + 3*E) / 12
+  // Odd parts:  difP1 = B + D,        difP2 = 8B + 2D
+  //   difP2 - 2*difP1 = 6B  =>  B = (difP2 - 2*difP1) / 6
+  const qrt_E = f0;
+  const qrt_A = (sumP2 - 4 * sumP1 + 3 * qrt_E) / 12;
+  const qrt_C = sumP1 - qrt_A - qrt_E;
+  const qrt_B = (difP2 - 2 * difP1) / 6;
+  const qrt_D = difP1 - qrt_B;
+
+  const quarticFit2 = qrt_A * 16 + qrt_B * 8 + qrt_C * 4 + qrt_D * 2 + qrt_E;
+  const quarticFitM2 = qrt_A * 16 - qrt_B * 8 + qrt_C * 4 - qrt_D * 2 + qrt_E;
+
+  if (
+    Math.abs(quarticFit2 - f2) < 1e-6 &&
+    Math.abs(quarticFitM2 - fm2) < 1e-6 &&
+    Math.abs(qrt_A) > 1e-8
+  ) {
+    return solveQuarticRadicals(qrt_A, qrt_B, qrt_C, qrt_D, qrt_E, fm2, fm1, f0, f1, f2);
   }
 
   // Higher degree: fall back to numerical roots

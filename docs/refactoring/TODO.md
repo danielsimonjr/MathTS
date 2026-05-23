@@ -337,6 +337,115 @@ follow-up subagent team should tackle them.
       hashes. Wire the WASM path into `typed/bitwise.ts` as a third dispatch
       tier (WASM for large `Int32Array` inputs once available).
 
+## 🔧 Repo-wide Cleanup (2026-05-22)
+
+A full pass over the entire workspace (prettier reformatting across
+1700+ files, ESLint config tightening on synced dirs only, 38 active-
+code lint errors closed). Real bugs surfaced along the way and pinned
+below.
+
+### Done
+
+- [x] **ESLint `synced mathjs` override block.** Mirrors `strict: false`
+      in `functions/tsconfig.json`: 22 stylistic rules downgrade to
+      warnings under the synced category dirs (`functions/src/{arithmetic,
+      algebra,bitwise,…}/`, `functions/src/wasm/{plain,matrix,…}/`,
+      `expression/src/utils/**`, `expression/src/transform/**`, the
+      synced helpers at the root of `core/src/`, `core/src/bignumber/`,
+      `core/src/function/`, `core/src/types/{bigint,bignumber,fraction,
+      number,matrix/,unit/}`). Active typed-function code stays strict.
+- [x] **38 active-code lint errors closed** across core, functions, and
+      expression. Interface-required unused args prefixed `_`, dead
+      imports removed, `Function`-type replaced with callable signatures,
+      `prefer-spread` rewrites, `prefer-as-const` on three error classes.
+- [x] **`npx prettier --write .`** normalized formatting across 1500+
+      TS / 120+ MD / 60+ JSON / 4 YAML / 1 shell / 1 HTML file. Purely
+      cosmetic — no semantic changes.
+- [x] **`core/src/is.ts:313`** — literal `\!isMap(object)` (escaped
+      exclamation) replaced with `!isMap(object)`. The escape was a
+      paste/sync error that ESLint's parser refused.
+- [x] **`wasm-rust/scripts/build.sh`** — `WASM_DST="../../lib/wasm/..."`
+      landed the Rust artifact OUTSIDE the repo (in
+      `$HOME/lib/wasm/`); the comparison benchmark therefore reported
+      empty Rust columns. Path corrected to `../lib/wasm/` so it lands
+      at repo-root/lib/wasm/.
+- [x] **`tools/benchmark/wasm/{matmul,elementwise}.bench.ts`** — calls
+      to `new DenseMatrix(data)` (old single-arg signature) against the
+      current `(rows, cols, data?)` constructor failed with "Matrix
+      dimensions must match" on every iteration. Both call sites fixed
+      to pass `(rows, cols, data)`.
+- [x] **`expression/src/node/{ObjectNode,RangeNode,ParenthesisNode}.ts`**
+      had latent `_compile(_math: …)` signatures where the method body
+      referenced the un-prefixed `math` identifier. Surfaced once
+      `--dts` typecheck ran cleanly. Renamed back to `math` in the
+      signature; bodies are correct as written.
+- [x] **`npm run bench:wasm`** now runs end-to-end. Rust column
+      populated: **1.3×–26.6× faster than JS** across matmul / dot /
+      vecadd / det.
+- [x] **`npm run bench:parallel`** produces full per-op break-even
+      data. Only `matmul` (≥64-element matrices) and `spectrogram`
+      (≥65,536 samples) beat sequential in this container.
+
+### Open follow-ups (real bugs surfaced this turn — least → most complex)
+
+- [ ] **(Sonnet, low) `matrix/src/backends/WasmLoader.ts` default-path
+      is CWD-relative.** `getDefaultWasmPath()` returns
+      `'./lib/wasm/mathts.wasm'`, so the matrix test suite (running
+      from `matrix/`) looks at `matrix/lib/wasm/mathts.wasm` and logs
+      "Failed to load WASM module, falling back to JS" 50+ times during
+      `npm run test`. The artifact actually lives at repo-root
+      `lib/wasm/mathts.wasm`. **Goal:** resolve the default path via
+      `import.meta.url` (walking up from the package dir, the same
+      pattern `WasmLoader.test.ts`'s new conditional test uses) so the
+      artifact is found regardless of CWD. Verify the matrix test run
+      no longer prints any "Failed to load WASM" lines.
+
+- [ ] **(Sonnet, medium) `functions/src/typed/cas.ts:1470` —
+      cubic/quartic polynomial-root case never implemented.** `fm2 =
+      f(-2)` is computed but never read; the surrounding rational-roots
+      search only handles linear and quadratic. **Goal:** implement the
+      cubic case (Cardano / depressed cubic / discriminant branches)
+      and the quartic case (Ferrari / Descartes' substitution) using
+      the existing `f(-2)`, `f(-1)`, `f(0)`, `f(1)`, `f(2)` evaluations
+      to pick rational candidates. Drop the `_` prefix on `fm2` once
+      it is consumed. Cover with tests: known-roots polynomials of
+      degree 3 and 4 (including repeated roots and one with no rational
+      root, which must fall through gracefully).
+
+- [ ] **(Opus, high) `matrix/src/backends/WASMBackend` is half-written
+      for Rust and half for AS, breaking standalone WASM benches.** The
+      backend calls `this.wasmModule.add(…)` / `multiplyDense(…)`
+      (Rust-style camelCase export names), allocates via
+      `wasmLoader.allocateFloat64Array()` which uses `module.__new()`
+      (AS-specific runtime), and is loaded against whichever artifact
+      `WasmLoader.getDefaultWasmPath()` resolves to (Rust by default,
+      AS only when `MATHTS_WASM_BACKEND=assemblyscript`). Symptom:
+      `tools/benchmark/wasm/{matmul,elementwise}.bench.ts` and
+      `tools/benchmark/e2e/backend-comparison.bench.ts` all throw
+      `module.__new is not a function`; switching to AS via the env
+      var hits `this.wasmModule.add is not a function` because the AS
+      module exports `add_f64` / `matrix_multiply` (snake_case,
+      type-suffixed), not the camelCase names the backend looks up.
+      The repo already has a separate `RustWASMBackend` and
+      `RustWasmLoader` — so the architecture supports split paths.
+      **Goal:** either (a) split into `WASMBackend` (AS-only) with a
+      proper AS export-name lookup table + AS allocation, while
+      pointing Rust benches at the existing `RustWASMBackend`; or (b)
+      make `WASMBackend` autoselect at load time — detect whether the
+      loaded module exposes `__new` (AS) or a flat-memory ABI (Rust)
+      and pick the right naming + allocator branch transparently. The
+      comparison benchmark in
+      `tests/benchmark/wasm_rust_vs_as_benchmark.ts` should additionally
+      gain a small camelCase→snake_case adapter so the AS column stops
+      being empty. Verify all four standalone WASM benches under
+      `tools/benchmark/wasm/` and `tools/benchmark/e2e/` complete
+      without throwing.
+
+- [ ] **(Environment) GPU benches under `tools/benchmark/gpu/`** —
+      WebGPU is not available in headless Node so these are out of
+      scope for the local test container. They will run in browsers /
+      on hardware with a WebGPU adapter. Not a code defect.
+
 ## 📋 Next Steps
 
 ### WASM Test Files (46 files, sorted by complexity) ✅ ALL COMPLETE
