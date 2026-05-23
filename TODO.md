@@ -6,6 +6,47 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
 
+## 🎯 Open Actions
+
+Pending items, sorted ascending by **dependencies** then **complexity**.
+Audited independently against the live codebase on 2026-05-23 — every
+item below was verified actionable (vs. done, stale, or a documented
+non-decision).
+
+| # | Item                                                          | Deps                                  | Complexity                | Owner / next step                                                            |
+| - | ------------------------------------------------------------- | ------------------------------------- | ------------------------- | ---------------------------------------------------------------------------- |
+| 1 | **Cut a release for the [Unreleased] CHANGELOG section**      | 0                                     | Low (admin)               | Run `npx changeset version` consuming the pending `.changeset/*.md`, tag, push. |
+| 2 | **Add a browser smoke test for the WebGPU paths**             | Playwright / vitest-browser (not yet) | Low–medium (CI infra)     | Install Playwright (or `@vitest/browser`) at repo root, add one smoke test that boots `gpuMatmul` on a 4×4 input, gate behind a CI matrix entry on a runner with a software WebGPU adapter (Mesa lavapipe on Linux or DX12 on Windows). |
+
+Detail:
+
+- [ ] **Cut a release for the `[Unreleased]` CHANGELOG section.** The
+      `[Unreleased]` block has grown to 550+ lines covering five
+      distinct strands of work since the `autograd 0.1.0` tag
+      (2026-05-15): the WASM gap-analysis sprint, the mathjs JS→AS
+      port workflow, the parallel-execution remediation, the typed-
+      layer expansion + repo-wide cleanup, and the CDG-driven
+      coverage push. A pending changeset already sits at
+      `.changeset/parallel-execution-remediation.md`. Worth tagging
+      the cumulative work as a labelled cut (probably `0.2.0` given
+      the breadth of breaking API changes) so the changelog history
+      is browsable. Mechanical — pick a version via the Changesets
+      config in `.changeset/`, run the version bump, commit, push,
+      tag.
+
+- [ ] **No browser smoke test for the WebGPU paths.** WGSL syntax
+      errors and shader-module init bugs in
+      `functions/src/typed/gpu.ts` and `matrix/src/backends/gpu/*`
+      cannot surface in headless Node CI — there is no test
+      environment that can instantiate a WebGPU adapter today.
+      **Goal:** add a Playwright or Vitest-browser smoke test that
+      boots one trivial op (`gpuMatmul` on a 4×4) and verifies the
+      output, gated behind a CI matrix entry that runs on a runner
+      with a software WebGPU backend (Linux + Mesa lavapipe, or
+      Windows + DX12). The Playwright dependency itself isn't yet
+      in any `package.json` — landing this requires a one-time
+      install + config PR before the smoke test can be wired in.
+
 ## ✅ Completed
 
 - [x] TypeScript conversion (src/) - 66% coverage, 0 errors
@@ -565,10 +606,13 @@ least → most complex). Kept as a checklist of what was done.
       shows Rust 2.5–34× faster than JS across matmul / dot / vecadd /
       det.
 
-- [ ] **(Environment) GPU benches under `tools/benchmark/gpu/`** —
-      WebGPU is not available in headless Node so these are out of
-      scope for the local test container. They will run in browsers /
-      on hardware with a WebGPU adapter. Not a code defect.
+> _Removed (2026-05-23, post-audit): the previously-pinned
+> "(Environment) GPU benches under `tools/benchmark/gpu/`" item.
+> The two bench files (`matmul.bench.ts`, `elementwise.bench.ts`)
+> already exist; the open part was a runtime constraint (no WebGPU
+> adapter in headless Node), not a backlog action. The related
+> backlog item is the new "browser smoke test" entry under
+> 🎯 Open Actions at the top of this file._
 
 ## 🔧 CDG-driven Coverage Push (2026-05-23)
 
@@ -735,26 +779,11 @@ intentionally out of scope:
       the JS-reference precompute-into-`vBuf` pattern (same maths,
       different storage discipline).
 
-- [ ] **No browser smoke test for the WebGPU paths.** WGSL syntax
-      errors and shader-module init bugs in `functions/src/typed/
-      gpu.ts` and `matrix/src/backends/gpu/*` can't surface in
-      headless Node CI — there's no test environment that can
-      instantiate a WebGPU adapter. **Goal:** add a Playwright or
-      Vitest-browser smoke test that boots one trivial op
-      (`gpuMatmul` on a 4×4) and verifies the output, gated behind
-      a CI matrix entry that runs on a runner with a software
-      WebGPU backend (Linux + Mesa lavapipe, or Windows + DX12).
-      Out of scope for the local-only test container — this needs
-      a CI infrastructure change before it can land.
-
-- [ ] **Cut a release for the [Unreleased] CHANGELOG section.** The
-      `[Unreleased]` block has grown to 550+ lines covering four
-      distinct strands of work since the `autograd 0.1.0` tag
-      (2026-05-15). Worth tagging the typed-layer + cleanup +
-      WASM-port work as a labelled cut (`0.2.0` or similar) so the
-      changelog history is browsable. Mechanical — pick a version
-      via the Changesets config in `.changeset/`, run the version
-      bump, commit.
+> _Moved to 🎯 Open Actions at the top of the file (2026-05-23,
+> post-audit): the previously-pinned "browser smoke test for
+> WebGPU paths" and "Cut a release for [Unreleased] CHANGELOG"
+> items. Both are genuinely actionable; the rest of this section's
+> backlog was either decided-not-pursued or environmental._
 
 ## 📋 Next Steps
 
@@ -834,11 +863,11 @@ All 46 test files created for src/wasm/ modules:
   - TS index file (embeddedDocs.ts) imports from .ts extensions
   - Simple string exports — no type annotations needed
 
-### Keeping for Benchmarking
-
-- [ ] **Keep duplicate JS/TS files** (418 files)
-  - JS files with TS equivalents intentionally kept
-  - Used for JS vs TS vs WASM benchmarking
+> _Removed (2026-05-23, post-audit): the "Keep duplicate JS/TS files
+> (418 files)" backlog item. `find functions/src -name '*.js' -not
+> -path '*/node_modules/*' | wc -l` returns 0 — the duplicate
+> JS files are gone, so the concern is moot. There is nothing to
+> keep or remove._
 
 ### Performance
 
@@ -869,13 +898,25 @@ All 46 test files created for src/wasm/ modules:
 
 ### Documentation
 
-- [ ] **Update main README with TypeScript/WASM status**
-  - Document the three-tier performance system
-  - Add usage examples for WASM acceleration
+- [x] **Update main README with TypeScript/WASM status** — done in
+      commit `c6514ed` (2026-05-23). README rewritten end-to-end:
+      three-tier dispatch (in-process JS → ComputePool worker →
+      WASM kernel), Rust/AS split, per-op thresholds from
+      `bench:parallel`, WebGPU opt-in, build/test/lint/bench npm
+      scripts, status summary (12/12 build, 19/19 test, 224/224
+      WASM integration, SHA-384 5/5).
 
-- [ ] **Add migration guide for users**
-  - Document breaking changes (if any)
-  - Provide upgrade path from JS-only version
+- [x] **Add migration guide for users** — done in commit `c6514ed`
+      (2026-05-23). New `docs/migration-guide.md` (356 lines)
+      covers: drop-in `@danielsimonjr/mathts-compat` shim,
+      switching to the typed-function API (scalar /
+      `Float64Array` / `Int32Array` overloads), breaking changes
+      from mathjs v15 (now-async matrix decompositions, the new
+      typed overloads, matrix-constructor signature change,
+      `m.get([row,col])` form, `BigNumber.parse`, WebGPU f32-only
+      opt-in), performance migration path with
+      `WASM_BITWISE_THRESHOLD = 65,536`, type-checking and
+      workbook + expression pointers.
 
 ### CI/CD ✅ COMPLETE
 
