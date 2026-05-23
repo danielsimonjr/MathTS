@@ -1,7 +1,8 @@
-# Math.js Refactoring TODO
+# MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-05-21
+Updated: 2026-05-23
+Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
 
@@ -568,6 +569,90 @@ least → most complex). Kept as a checklist of what was done.
       WebGPU is not available in headless Node so these are out of
       scope for the local test container. They will run in browsers /
       on hardware with a WebGPU adapter. Not a code defect.
+
+## 🔧 CDG-driven Coverage Push (2026-05-23)
+
+Ran `tools/create-dependency-graph/` (CDG) to identify untested
+active source files and addressed every actionable finding.
+
+### Done
+
+- [x] **Regenerated dependency reports** at commit `baf9007`:
+      `DEPENDENCY_GRAPH.md`, `TEST_COVERAGE.md`,
+      `dependency-graph.{json,yaml}`,
+      `dependency-summary.compact.json`, `test-coverage.json`,
+      `unused-analysis.md`. Headline numbers: 1,394 TS files (491
+      reachable, 903 dormant), 0 circular dependencies, 27.5%
+      source-file coverage (135 / 491).
+
+- [x] **README full rewrite + new `docs/migration-guide.md`** at
+      commit `c6514ed`. README now reflects the current state
+      (typed-layer ports, Rust/AS split, three-tier dispatch, per-op
+      thresholds); migration guide covers the breaking changes from
+      mathjs v15 (functions now async, new typed overloads, matrix
+      constructor signature, `m.get([row,col])` form,
+      `BigNumber.parse`, WebGPU f32-only opt-in).
+
+- [x] **`docs/Architecture/{OVERVIEW,ARCHITECTURE}.md` refreshed**
+      with the regenerated CDG numbers (491 / 903 / 1,394 / 124,615
+      LOC / 2,898 exports / 164 test files / 27.5% / module counts).
+      Three new content paragraphs added to `ARCHITECTURE.md`
+      (per-op `thresholdByOp`, the `AllocatorKind` discriminant,
+      the bitwise three-tier dispatch diagram).
+
+- [x] **`unused-analysis.md` triage.** False-positive
+      `packages/workerpool/src/index.ts` annotated. First 20 of 377
+      "unused exports" classified (14 public-API, 5 type-only, 1
+      internal-only, 0 deletions). Triage Notes section at the
+      bottom with policy: exports from package-root `index.ts` files
+      are intentionally part of the public surface and will always
+      appear in this report without being defects.
+
+- [x] **`eigs` / `svd` / `singularValues` re-validated `not
+      pursued`** with measured evidence (see also the existing
+      Acceleration Roadmap entry above for the data). New durable
+      probe `tools/benchmark/parallel/eig-inner-probe.ts` checked
+      in.
+
+- [x] **`polyFit` / `leastSquares` re-validated `deferred`** with
+      measured evidence. New probe
+      `tools/benchmark/parallel/regression-probe.ts` checked in;
+      8 new tests in `functions/tests/typed-regression.test.ts`.
+
+- [x] **+12 active files moved from untested → tested** at commit
+      `122c590`. Source-file coverage **27.5% → 29.9%** (135/491 →
+      **147/491**); test-file count **165 → 176**. Test files
+      created:
+      - `expression/tests/parse.test.ts` (NEW, 101 tests across 24
+        describe blocks covering literals, operators, precedence,
+        function calls, assignments, blocks, arrays / objects /
+        index access, ranges, conditional ternary, whitespace,
+        error handling, static helpers).
+      - `parallel/tests/ops-bitwise.test.ts` (NEW, 64 tests):
+        direct unit tests for the 7 pure elementwise bitwise op
+        functions against JS oracles, with two's-complement
+        boundaries, INT32 limits, scalar-vs-array shifts, mod-32
+        shifts, empty arrays, length-mismatch errors, output-type
+        check, no-mutation invariant.
+      - 10 barrel / type-only smoke tests across
+        `core / expression / parallel / tensor / workbook`. Each
+        directly imports its target file and asserts the expected
+        export names exist (or for type-only files, that the
+        import compiles with a `satisfies` check). Fixed a stale
+        `new Tensor([2,3])` call missing the required
+        `Float64Array` data arg.
+
+The remaining 344 untested files in the CDG report are
+intentionally out of scope:
+
+- **325** synced mathjs files under
+  `functions/src/{arithmetic,algebra,bitwise,…}/` — tested via the
+  active `typed/` layer with which they share factory entry points.
+- **19** AssemblyScript sources under `assembly/src/` — tested via
+  `npm run test:wasm:integration`; Vitest's `**/*.test.ts`
+  discovery does not see them.
+- Synced `expression/src/{utils,transform}/` directories — same
+  reasoning as the synced functions code.
 
 ### Newly surfaced — pinned for the next pass
 

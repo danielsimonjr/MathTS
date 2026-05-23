@@ -298,8 +298,7 @@ Full architecture report: [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/
 - The `[Unreleased]` changelog section covers four work strands since
   `autograd 0.1.0` (2026-05-15) and is ready to tag as a versioned release.
 
-See [`docs/refactoring/TODO.md`](./docs/refactoring/TODO.md) for the full
-open-items list.
+See [`TODO.md`](./TODO.md) for the full open-items list.
 
 ---
 
@@ -326,5 +325,5 @@ message conventions (Conventional Commits), and the pre-commit hook setup.
 | [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md) | Generated dependency graph                             |
 | [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md)       | Per-file coverage report                               |
 | [`docs/migration-guide.md`](./docs/migration-guide.md)                             | Migrating from mathjs v15                              |
-| [`docs/refactoring/TODO.md`](./docs/refactoring/TODO.md)                           | Open items and deferred decisions                      |
+| [`TODO.md`](./TODO.md)                                                             | Open items and deferred decisions                      |
 | [`docs/reference/functions.md`](./docs/reference/functions.md)                     | Full typed-function export reference with Accel column |

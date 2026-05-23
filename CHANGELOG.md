@@ -299,16 +299,166 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     224 passed, 0 failed, 0 skipped** (was `Tests 5 failed |
     212 passed (217); Test Files 2 failed | 8 passed (10)`).
 
+### Changed
+
+- **`TODO.md` relocated from `docs/refactoring/TODO.md` to the repo
+  root**, alongside `CHANGELOG.md`. The other refactoring planning
+  docs (`REFACTORING_PLAN.md`, `DEFERRED_WORK_IMPLEMENTATION_PLAN.md`,
+  `PARALLEL_COMPUTING_IMPROVEMENT_PLAN.md`, the AS-candidate JSON,
+  the sprint status reports) stay under `docs/refactoring/`; only
+  the active TODO moved. Updated the three referrers
+  (`README.md`'s open-items link + documentation-index table,
+  `tools/benchmark/parallel/operations.bench.ts` header comment,
+  `functions/tests/typed-regression.test.ts` header comment) and
+  refreshed the doc's "Updated" date plus a "Location:" breadcrumb
+  pointing future readers to the old path.
+
+### Fixed
+
+- **CDG-driven coverage push (commits `baf9007` + `c6514ed` + `122c590`).**
+  Re-ran `tools/create-dependency-graph/` and acted on its output:
+  - **Regenerated reports** committed at `baf9007`:
+    `DEPENDENCY_GRAPH.md`, `TEST_COVERAGE.md`,
+    `dependency-graph.{json,yaml}`,
+    `dependency-summary.compact.json`, `test-coverage.json`,
+    `unused-analysis.md`. CDG numbers: 1,394 TS files (491
+    reachable, 903 dormant), 0 circular dependencies, 27.5%
+    source-file coverage.
+  - **`README.md` full rewrite** and new **`docs/migration-guide.md`**.
+    README covers installation (compat shim and typed-function
+    API), three quick-start code blocks (compat / typed /
+    parallel `Float64Array` via `ComputePool`), performance with
+    the bench-derived numbers (Rust 2.5×–34× faster than JS for
+    matmul / dot / vecadd / det), the package list + dependency
+    graph, the three-tier dispatch (WASM > worker > in-process),
+    the Rust/AS split (`WASMBackend` AS-only, `RustWASMBackend`
+    Rust-only), the WebGPU opt-in (f32 only), the npm scripts
+    including `test:wasm:integration`, the 12/12 build + 19/19
+    test + 0 lint/tsc errors + 224/224 cross-package WASM + 5/5
+    security status, and a documentation index. Migration guide
+    covers: TL;DR, drop-in compat-shim replacement, switching to
+    the typed-function API (scalar / `Float64Array` / `Int32Array`
+    overloads), breaking changes from mathjs v15 (functions now
+    async, the new typed overloads, matrix-constructor signature,
+    `m.get([row,col])` vs `m.get(row,col)`, `math.bignumber` vs
+    `BigNumber.parse`, `bn.toNumber()` alias, WebGPU f32-only
+    opt-in), Not yet ported, performance migration path with the
+    `WASM_BITWISE_THRESHOLD = 65,536`, type-checking, workbook +
+    expression pointers.
+  - **`docs/Architecture/{OVERVIEW,ARCHITECTURE}.md` refresh.**
+    Every stale metric updated to the regenerated CDG numbers
+    (491 reachable, 903 dormant, 1,394 total, 124,615 LOC,
+    2,898 exports / 728 re-exports, 164 test files, 135 / 491 /
+    27.5% coverage, modules: `functions` 355 / `parallel` 11 /
+    `assembly` 19). Three new content paragraphs added to
+    `ARCHITECTURE.md`: the `OpName` union + `thresholdByOp` map
+    + `DEFAULT_THRESHOLD_BY_OP` defaults; the load-time
+    `detectAllocatorKind()` + `AllocatorKind` ('as'/'rust')
+    discriminant + opaque `Allocation` handle distinguishing
+    `WASMBackend` from `RustWASMBackend` + `RustWasmLoader`; the
+    bitwise-specific three-tier dispatch diagram (in-process JS
+    → `ComputePool` worker per `thresholdByOp` → WASM kernel ≥
+    `WASM_BITWISE_THRESHOLD`).
+  - **`unused-analysis.md` triage** —
+    `packages/workerpool/src/index.ts` annotated as a false
+    positive (package entry exported via `package.json` `exports`
+    field, not imported by anything inside the workspace). 20 of
+    377 "unused exports" spot-checked: 14 public-API re-exports
+    from package roots, 5 type-only / internal exports, 1
+    internal-only helper. 0 deletions under the conservative
+    policy. Triage Notes section added with the policy statement
+    that exports from package-root `index.ts` files are
+    intentionally part of the public surface and will always
+    appear in this report without being defects.
+  - **`eigs` / `svd` / `singularValues` parallelization —
+    re-validated `not pursued`** with measured evidence. End-to-end
+    bench across three back-to-back runs shows noise-floor
+    oscillation (0.84×–1.77×) because both seq and par paths
+    execute identical JS code. New inner-step probe
+    `tools/benchmark/parallel/eig-inner-probe.ts` measures
+    whether hypothetical inner-loop dispatch could win: at n=256
+    `computePool.matmul` round-trip is 35.2 ms while one Givens
+    sweep is 0.18 ms and one Householder bilateral 0.55 ms —
+    dispatching inner steps would slow `eig` by ~200×. The
+    Hessenberg / bidiag reduction is n sequential Householders
+    each ≪ pool overhead and each consumes the prior reflector's
+    output; cannot be batched across workers without a
+    blocked-LAPACK redesign (out of scope). Probe checked in for
+    future re-measurement on better hardware.
+  - **`polyFit` / `leastSquares` parallelization — re-validated
+    `deferred`** with measured evidence. Both pre-existed as
+    sequential typed-layer exports in
+    `functions/src/typed/{interpolation,numeric}.ts`. Wrote a
+    candidate parallel implementation (transpose →
+    `computePool.matmul` for AᵀA → `computePool.matvec` for
+    Aᵀb → sequential n×n solve) and measured at
+    `tools/benchmark/parallel/regression-probe.ts`: `polyFit`
+    0.26×–0.99× (never wins); `leastSquares` 0.92×–1.15×
+    dominant regime, 2.02×–2.05× in the narrow tall-thin band
+    (m=10k, n=100..200), 1.55× at m=20k n=100 (worker
+    contention). The original deferral note speculated wide
+    systems would win — the data inverts that, it's tall-thin
+    not wide. A 2× win in one narrow shape band does not justify
+    async virality across every caller. Both functions stay
+    sequential. Added 8 new tests in
+    `functions/tests/typed-regression.test.ts` covering exact and
+    degree-5 polynomial recovery, noisy recovery
+    (σ=1e-8 → within 1e-6; σ=1e-4 → within 1e-3), 3- and
+    5-parameter linear models, and the singular-system error
+    path. Probe checked in.
+  - **+12 active files moved from untested → tested** at `122c590`.
+    Source-file coverage **27.5% → 29.9%** (135/491 → 147/491);
+    test files 165 → 176.
+    - `expression/tests/parse.test.ts` (NEW, 101 tests across 24
+      describe blocks): factory metadata, numeric / boolean /
+      string / symbol literals, arithmetic / comparison / logical
+      / bitwise operators, operator precedence, parentheses,
+      function calls, variable + function assignments, block
+      sequences, conditional ternary, range expressions, array
+      and object literals, index access, whitespace tolerance,
+      arrays of expressions, error handling, static helpers.
+    - `parallel/tests/ops-bitwise.test.ts` (NEW, 64 tests):
+      direct unit tests for the 7 pure elementwise op functions —
+      `bitAnd / bitOr / bitXor / bitNot / leftShift /
+      rightArithShift / rightLogShift` — against JS oracles, with
+      two's-complement boundaries, INT32 limits, scalar-vs-array
+      shifts, mod-32 shifts, empty arrays, length-mismatch
+      errors, output-type check, and no-mutation invariant.
+    - **10 barrel / type-only smoke tests** across
+      `core / expression / parallel / tensor / workbook`
+      asserting expected export names exist (or for type-only
+      files, that the import compiles with a `satisfies` check):
+      `core/tests/types-interfaces.test.ts`,
+      `expression/tests/{compiler,evaluator,package}-index.test.ts`,
+      `expression/tests/types.test.ts`,
+      `parallel/tests/{package,operations,strategies}-index.test.ts`,
+      `tensor/tests/package-index.test.ts`,
+      `workbook/tests/package-index.test.ts`. Fixed a stale
+      `new Tensor([2,3])` call missing the required
+      `Float64Array` data arg.
+
+  The remaining 344 untested files in the CDG report are
+  intentionally out of scope: 325 synced mathjs files under
+  `functions/src/{arithmetic,algebra,bitwise,…}/` (tested via
+  the typed/ layer with which they share factory entry points);
+  19 AssemblyScript sources under `assembly/src/` (tested via
+  `npm run test:wasm:integration` — Vitest does not see them);
+  and the synced `expression/src/{utils,transform}/` directories.
+
 ### Verified
 
 - `npx turbo build`: **12/12** packages green.
-- `npx turbo test`: **19/19** task packages green (1766+ tests across
-  all functions tests, 49 matrix WasmLoader tests with 0 skips).
+- `npx turbo test`: **19/19** task packages green (functions: 1,774
+  tests, parallel: 339, matrix WasmLoader: 49 with 0 skips, plus
+  the new parse / ops-bitwise / barrel suites).
 - `npx tsc --noEmit` per package: **0 errors** across all 11
   TypeScript packages (core, matrix, tensor, autograd, functions,
   parallel, expression, workbook, compat, typed-function, workerpool).
 - `npx eslint src --ext .ts` per package: **0 errors** across all 10
   linted packages.
+- **0 circular import dependencies** (CDG re-confirmed).
+- **Test-file count 165 → 176**; source-file coverage **27.5% →
+  29.9%** (135/491 → 147/491) after the CDG-driven coverage push.
 - Matrix "Failed to load WASM module" fallback log lines: **0** (was
   ~50 per test run).
 - `npm run bench:wasm`: Rust + AS + JS columns all populated; **Rust
