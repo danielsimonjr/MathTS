@@ -277,7 +277,7 @@ const charPolyBench: BenchCase = {
 // by `eig-inner-probe.ts`: at n = 256 one Givens sweep is ~0.18 ms vs ~35 ms
 // for a `computePool.matmul` round-trip, so dispatching inner steps would
 // slow `eig` by 100×–1000×. The earlier "not pursued" decision in
-// `docs/refactoring/TODO.md` is therefore re-validated, and `OpName` /
+// `TODO.md` is therefore re-validated, and `OpName` /
 // `thresholdByOp` continues to omit `eig`/`svd`/`singularValues`.
 //
 // The bench cases are kept so future runs on different hardware (especially

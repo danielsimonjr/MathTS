@@ -7,7 +7,7 @@
  *  - leastSquares against a closed-form solution for an overdetermined system
  *
  * These functions are sequential by design (see the 2026-05-23 re-measurement
- * notes in docs/refactoring/TODO.md). The tests below pin the *current*
+ * notes in TODO.md). The tests below pin the *current*
  * (sequential) numerical behaviour so any future parallel-path refactor can be
  * validated against the same baseline.
  */

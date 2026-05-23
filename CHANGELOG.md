@@ -299,6 +299,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     224 passed, 0 failed, 0 skipped** (was `Tests 5 failed |
     212 passed (217); Test Files 2 failed | 8 passed (10)`).
 
+### Changed
+
+- **`TODO.md` relocated from `docs/refactoring/TODO.md` to the repo
+  root**, alongside `CHANGELOG.md`. The other refactoring planning
+  docs (`REFACTORING_PLAN.md`, `DEFERRED_WORK_IMPLEMENTATION_PLAN.md`,
+  `PARALLEL_COMPUTING_IMPROVEMENT_PLAN.md`, the AS-candidate JSON,
+  the sprint status reports) stay under `docs/refactoring/`; only
+  the active TODO moved. Updated the three referrers
+  (`README.md`'s open-items link + documentation-index table,
+  `tools/benchmark/parallel/operations.bench.ts` header comment,
+  `functions/tests/typed-regression.test.ts` header comment) and
+  refreshed the doc's "Updated" date plus a "Location:" breadcrumb
+  pointing future readers to the old path.
+
+### Fixed
+
 - **CDG-driven coverage push (commits `baf9007` + `c6514ed` + `122c590`).**
   Re-ran `tools/create-dependency-graph/` and acted on its output:
   - **Regenerated reports** committed at `baf9007`:

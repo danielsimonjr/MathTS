@@ -1,7 +1,8 @@
-# Math.js Refactoring TODO
+# MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-05-21
+Updated: 2026-05-23
+Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
 
