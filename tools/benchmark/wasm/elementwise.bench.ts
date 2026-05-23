@@ -7,8 +7,15 @@
 
 import { DenseMatrix } from '../../../matrix/src/types/DenseMatrix.js';
 import { jsBackend } from '../../../matrix/src/backends/JSBackend.js';
+import { RustWASMBackend } from '../../../matrix/src/backends/RustWASMBackend.js';
 import { WASMBackend } from '../../../matrix/src/backends/WASMBackend.js';
 
+// Bench columns (after the WASMBackend split):
+//   * "WASM"  — Rust backend (`lib/wasm/mathts.wasm`, the primary).
+//   * "SIMD"  — AS backend (`lib/wasm/mathts-as.wasm`, legacy / comparison).
+// (These are not "SIMD on" vs "SIMD off"; the Rust crate already enables
+// wasm32-simd128 at compile time. The column label is kept for back-compat
+// with downstream tooling that parses the markdown table.)
 interface BenchmarkResult {
   operation: string;
   size: number;
@@ -78,16 +85,17 @@ async function benchmarkElementwise(
   const scalar = 2.5;
   const elements = size * size;
 
-  // Create backends
-  const wasmBackendNoSIMD = new WASMBackend({ useSIMD: false, minElements: 0 });
-  const wasmBackendSIMD = new WASMBackend({ useSIMD: true, minElements: 0 });
+  // Create backends — Rust = "WASM" column, AS = "SIMD" column.
+  const rustBackend = new RustWASMBackend({ minElements: 0 });
+  const asBackend = new WASMBackend({ useSIMD: true, minElements: 0 });
 
   // Initialize WASM
-  await wasmBackendNoSIMD.initialize();
-  await wasmBackendSIMD.initialize();
+  await rustBackend.initialize();
+  await asBackend.initialize();
 
   // Get the operation function for each backend
-  const getOp = (backend: typeof jsBackend | WASMBackend) => {
+  type AnyBackend = typeof jsBackend | RustWASMBackend | WASMBackend;
+  const getOp = (backend: AnyBackend) => {
     switch (operation) {
       case 'add':
         return () => backend.add(a, b);
@@ -109,17 +117,16 @@ async function benchmarkElementwise(
   // Benchmark JS
   const jsTime = await measureTime(getOp(jsBackend), iterations);
 
-  // Benchmark WASM (no SIMD)
+  // Benchmark Rust WASM
   let wasmTime = jsTime;
-  if (wasmBackendNoSIMD.isAvailable()) {
-    wasmTime = await measureTime(getOp(wasmBackendNoSIMD), iterations);
+  if (rustBackend.isAvailable()) {
+    wasmTime = await measureTime(getOp(rustBackend), iterations);
   }
 
-  // Benchmark WASM + SIMD
+  // Benchmark AS WASM
   let simdTime = jsTime;
-  const features = wasmBackendSIMD.getFeatures();
-  if (wasmBackendSIMD.isAvailable() && features?.simd) {
-    simdTime = await measureTime(getOp(wasmBackendSIMD), iterations);
+  if (asBackend.isAvailable()) {
+    simdTime = await measureTime(getOp(asBackend), iterations);
   }
 
   return {
@@ -153,21 +160,21 @@ function formatElementsPerSec(eps: number): string {
 function printResults(results: BenchmarkResult[]): void {
   console.log('\n=== Element-wise Operations Benchmark ===\n');
   console.log(
-    '| Operation | Size | JS (ms) | WASM (ms) | SIMD (ms) | WASM Speedup | SIMD Speedup |'
+    '| Operation | Size | JS (ms) | Rust (ms) | AS (ms) | Rust Speedup | AS Speedup |'
   );
   console.log(
-    '|-----------|------|---------|-----------|-----------|--------------|--------------|'
+    '|-----------|------|---------|-----------|---------|--------------|------------|'
   );
 
   for (const r of results) {
     console.log(
-      `| ${r.operation.padEnd(18)} | ${r.size}x${r.size} | ${r.jsTime.toFixed(3).padStart(7)} | ${r.wasmTime.toFixed(3).padStart(9)} | ${r.simdTime.toFixed(3).padStart(9)} | ${r.wasmSpeedup.toFixed(2).padStart(12)}x | ${r.simdSpeedup.toFixed(2).padStart(12)}x |`
+      `| ${r.operation.padEnd(18)} | ${r.size}x${r.size} | ${r.jsTime.toFixed(3).padStart(7)} | ${r.wasmTime.toFixed(3).padStart(9)} | ${r.simdTime.toFixed(3).padStart(7)} | ${r.wasmSpeedup.toFixed(2).padStart(12)}x | ${r.simdSpeedup.toFixed(2).padStart(10)}x |`
     );
   }
 
   console.log('\n=== Throughput (elements/sec) ===\n');
-  console.log('| Operation | Size | JS | WASM | SIMD |');
-  console.log('|-----------|------|-----|------|------|');
+  console.log('| Operation | Size | JS | Rust WASM | AS WASM |');
+  console.log('|-----------|------|-----|-----------|---------|');
 
   for (const r of results) {
     console.log(
@@ -189,8 +196,14 @@ async function main(): Promise<void> {
     'abs',
     'negate',
   ];
-  const sizes = [100, 500, 1000, 2000];
-  const iterations = { 100: 10000, 500: 1000, 1000: 200, 2000: 50 };
+  // Iteration counts tuned to keep wall time under ~80s with three backends
+  // (JS / Rust / AS). Each sub-bench has to copy n² f64 values into WASM
+  // memory per iteration on top of the actual operation, so wall time
+  // scales as ~3 × iters × n². The previous 2000² × 50-iter combination
+  // alone took ~25s per operation × 7 operations; dropped to fit the
+  // CI budget without changing the comparison's shape.
+  const sizes = [100, 500, 1000];
+  const iterations = { 100: 1000, 500: 100, 1000: 10 };
 
   console.log('Running element-wise operation benchmarks...\n');
 

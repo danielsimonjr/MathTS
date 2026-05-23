@@ -1,19 +1,208 @@
 /**
- * WASM Matrix Backend
+ * WASM Matrix Backend (AssemblyScript)
  *
- * Implements MatrixBackend using WebAssembly for accelerated operations.
- * Falls back to JSBackend when WASM is unavailable or for small matrices.
+ * Implements MatrixBackend using the AssemblyScript-compiled WebAssembly
+ * module (`lib/wasm/mathts-as.wasm`, ~42 KB). Falls back to JSBackend when
+ * the WASM module is unavailable or for small matrices.
+ *
+ * ABI:
+ *   The AS module exports a managed runtime (`__new` / `__pin` / `__unpin` /
+ *   `__collect`) and its matrix/array functions accept managed `Float64Array`
+ *   *header* pointers — NOT raw flat-memory pointers. A typed-array header is
+ *   a 12-byte block at some offset that stores (buffer, buffer, byteLength).
+ *
+ *   To call e.g. `matrix_add(a, b, result)` from JS, we have to:
+ *     1. `__new(byteLength, 1)` — allocate the data buffer (id=1 = ArrayBuffer)
+ *     2. `__pin(buffer)`         — pin so it survives GC while building header
+ *     3. `__new(12, 5)`          — allocate the Float64Array header (id=5)
+ *     4. Write [buffer, buffer, byteLength] into the header
+ *     5. Copy caller data into the buffer
+ *     6. `__unpin(buffer)`       — the header now owns the buffer reference
+ *
+ *   The Rust artifact has no managed runtime and uses a completely different
+ *   ABI (camelCase exports, flat-memory raw pointers); for that backend, use
+ *   `RustWASMBackend` (from `./RustWASMBackend.ts`).
+ *
+ * Naming map (Rust ↔ AssemblyScript) — for cross-backend reference:
+ *
+ *   Op                  Rust (camelCase, flat ptrs)        AS (snake_case, header refs)
+ *   ------------------  ---------------------------------  -------------------------------
+ *   add                 add(aPtr,bPtr,n,resPtr)            matrix_add(a,b,result)
+ *   subtract            subtract(aPtr,bPtr,n,resPtr)       matrix_sub(a,b,result)
+ *   multiplyElementwise simdMulF64(aPtr,bPtr,resPtr,n)     matrix_mul_elementwise(a,b,result)
+ *   divideElementwise   (none)                              matrix_div_elementwise(a,b,result)
+ *   scale               simdScaleF64(aPtr,s,resPtr,n)      matrix_scale(a,scalar,result)
+ *   abs                 simdAbsF64(aPtr,resPtr,n)          array_abs(a,result)
+ *   negate              simdScaleF64(aPtr,-1,resPtr,n)     matrix_neg(a,result)
+ *   multiply            multiplyDense(a,r,c,b,r,c,res)     matrix_multiply(a,aRows,aCols,b,bCols,result)
+ *   transpose           transpose(a,r,c,res)               matrix_transpose(a,rows,cols,result)
+ *   sum                 simdSumF64(aPtr,n)                 array_sum(a)
+ *   norm                simdNormF64(aPtr,n)                array_norm(a)
+ *   dot                 dotProduct(aPtr,bPtr,n)            array_dot(a,b)
+ *
+ *   AssemblyScript has no LU / QR / Cholesky / inverse / determinant exports,
+ *   so those operations fall back to the JS implementation. The Rust backend
+ *   has them — route those calls through `RustWASMBackend` if you need WASM.
  *
  * @packageDocumentation
  */
 
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-
 import type { MatrixBackend, BackendType } from './Backend.js';
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { jsBackend } from './JSBackend.js';
-import { wasmLoader, type WasmModule } from './WasmLoader.js';
 import { detectWasmFeatures, type WasmFeatures } from './wasm/detect.js';
+
+/**
+ * Subset of the AssemblyScript module surface this backend uses.
+ *
+ * The AS module exports ~250 functions total; we only declare the ones the
+ * matrix backend actually calls. Anything else lives behind a cast at the
+ * call site, but the typed surface here keeps the hot paths honest.
+ */
+interface AsModule {
+  // Managed runtime
+  __new: (size: number, id: number) => number;
+  __pin: (ptr: number) => number;
+  __unpin: (ptr: number) => void;
+  __collect: () => void;
+
+  // Linear memory (used to set up typed-array views)
+  memory: WebAssembly.Memory;
+
+  // Matrix operations (take Float64Array *header* pointers)
+  matrix_add: (aHdr: number, bHdr: number, resultHdr: number) => void;
+  matrix_sub: (aHdr: number, bHdr: number, resultHdr: number) => void;
+  matrix_mul_elementwise: (aHdr: number, bHdr: number, resultHdr: number) => void;
+  matrix_div_elementwise: (aHdr: number, bHdr: number, resultHdr: number) => void;
+  matrix_scale: (aHdr: number, scalar: number, resultHdr: number) => void;
+  matrix_neg: (aHdr: number, resultHdr: number) => void;
+  matrix_multiply: (
+    aHdr: number,
+    aRows: number,
+    aCols: number,
+    bHdr: number,
+    bCols: number,
+    resultHdr: number
+  ) => void;
+  matrix_transpose: (aHdr: number, rows: number, cols: number, resultHdr: number) => void;
+  matrix_norm_frobenius: (aHdr: number) => number;
+  matrix_sum: (aHdr: number) => number;
+
+  // Array operations
+  array_abs: (aHdr: number, resultHdr: number) => void;
+  array_sum: (aHdr: number) => number;
+  array_norm: (aHdr: number) => number;
+  array_dot: (aHdr: number, bHdr: number) => number;
+}
+
+/** AssemblyScript runtime-info IDs (extracted from `assembly/build/mathts.js`). */
+const AS_ID_ARRAY_BUFFER = 1;
+const AS_ID_FLOAT64_ARRAY = 5;
+const AS_F64_ALIGN_SHIFT = 3; // log2(8 bytes/f64)
+const AS_HEADER_BYTES = 12;
+
+/**
+ * AssemblyScript-managed Float64Array allocation handle.
+ *   - `headerPtr` is what AS exports take.
+ *   - `bufferPtr` is the data block.
+ *   - `view` is a JS Float64Array over that block (re-bound on each
+ *     `acquire()` so it stays valid across `memory.grow()`).
+ */
+interface AsFloat64Allocation {
+  headerPtr: number;
+  bufferPtr: number;
+  view: Float64Array;
+  length: number;
+}
+
+/**
+ * Per-module allocation cache.
+ *
+ * Why this is needed: the AS module ships with `--runtime stub`, which is
+ * a bump allocator with NO free / NO GC (`__pin`/`__unpin`/`__collect` are
+ * no-ops at the WASM level — see `assembly/build/mathts.wat`). Naive
+ * allocate-per-call leaks linearly and OOMs after a few thousand iterations.
+ *
+ * The cache pools handles by `length`. A simple LRU-ish "in-use list"
+ * lets multiple buffers of the same size coexist (e.g. for a 3-operand
+ * matrix op we hold A, B, and Result simultaneously). On `releaseAll`
+ * the buffers go back to the free list without being freed.
+ *
+ * Net effect: total allocator growth is bounded by `max_size × max_concurrent`
+ * across the backend's lifetime — typically just a few MB.
+ */
+class AsAllocCache {
+  private free = new Map<number, AsFloat64Allocation[]>();
+
+  /** Acquire (allocate or reuse) a Float64Array of the requested length. */
+  acquire(module: AsModule, length: number): AsFloat64Allocation {
+    const pool = this.free.get(length);
+    if (pool && pool.length > 0) {
+      const alloc = pool.pop()!;
+      // memory.buffer may have detached after a foreign `memory.grow()`;
+      // re-bind the view so the JS-side reference is current.
+      alloc.view = new Float64Array(module.memory.buffer, alloc.bufferPtr, length);
+      return alloc;
+    }
+    return this.allocate(module, length);
+  }
+
+  /** Return an allocation to the pool (no free; just marks it reusable). */
+  release(alloc: AsFloat64Allocation): void {
+    let pool = this.free.get(alloc.length);
+    if (!pool) {
+      pool = [];
+      this.free.set(alloc.length, pool);
+    }
+    pool.push(alloc);
+  }
+
+  private allocate(module: AsModule, length: number): AsFloat64Allocation {
+    const byteLength = length << AS_F64_ALIGN_SHIFT;
+    // Allocate + pin the data buffer (id=1 = ArrayBuffer).
+    const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
+    // Allocate the Float64Array header (id=5) and pin it too so the AS GC
+    // (if it ever wakes up — see comment above; today it doesn't) never
+    // reclaims it out from under us.
+    const headerPtr = module.__new(AS_HEADER_BYTES, AS_ID_FLOAT64_ARRAY) >>> 0;
+    module.__pin(headerPtr);
+
+    // Write the header. Layout: [dataStart, dataStart, byteLength].
+    const dv = new DataView(module.memory.buffer);
+    dv.setUint32(headerPtr + 0, bufferPtr, true);
+    dv.setUint32(headerPtr + 4, bufferPtr, true);
+    dv.setUint32(headerPtr + 8, byteLength, true);
+
+    const view = new Float64Array(module.memory.buffer, bufferPtr, length);
+    return { headerPtr, bufferPtr, view, length };
+  }
+}
+
+/** Copy JS data into an existing allocation's view. */
+function writeAsFloat64Array(
+  cache: AsAllocCache,
+  module: AsModule,
+  data: Float64Array
+): AsFloat64Allocation {
+  const alloc = cache.acquire(module, data.length);
+  alloc.view.set(data);
+  return alloc;
+}
+
+/** Allocate without copy. */
+function allocAsFloat64Array(
+  cache: AsAllocCache,
+  module: AsModule,
+  length: number
+): AsFloat64Allocation {
+  return cache.acquire(module, length);
+}
+
+/** Read back into a fresh JS Float64Array (copy out before pool reuse). */
+function readAsFloat64Array(module: AsModule, alloc: AsFloat64Allocation): Float64Array {
+  const view = new Float64Array(module.memory.buffer, alloc.bufferPtr, alloc.length);
+  return new Float64Array(view);
+}
 
 /**
  * WASM Backend configuration
@@ -21,9 +210,10 @@ import { detectWasmFeatures, type WasmFeatures } from './wasm/detect.js';
 export interface WASMBackendConfig {
   /** Minimum elements to use WASM (default: 100) */
   minElements?: number;
-  /** Path to WASM file */
+  /** Path to WASM file (defaults to the AS artifact, `lib/wasm/mathts-as.wasm`) */
   wasmPath?: string;
-  /** Enable SIMD optimizations when available */
+  /** Enable SIMD code paths if the AS module exposes them (currently a no-op
+   * — AS export surface does not include `simd*` ops; kept for API stability). */
   useSIMD?: boolean;
 }
 
@@ -37,33 +227,30 @@ const DEFAULT_CONFIG: Required<WASMBackendConfig> = {
 };
 
 /**
- * WASM Backend for matrix operations
+ * WASM Backend for matrix operations (AssemblyScript path).
  *
- * Uses WebAssembly for accelerated matrix operations with SIMD support.
- * Automatically falls back to JavaScript for small matrices or when WASM unavailable.
+ * For the Rust path use `RustWASMBackend`. Both implement `MatrixBackend`
+ * and report different `type` discriminants ('wasm' vs 'rust-wasm') so that
+ * `BackendManager` can route operations to the correct one.
  */
 export class WASMBackend implements MatrixBackend {
   readonly type: BackendType = 'wasm';
 
   private config: Required<WASMBackendConfig>;
-  private wasmModule: WasmModule | null = null;
+  private wasmModule: AsModule | null = null;
   private features: WasmFeatures | null = null;
   private initPromise: Promise<void> | null = null;
+  /** Pooled allocations — see `AsAllocCache` for rationale. */
+  private allocCache = new AsAllocCache();
 
   constructor(config: WASMBackendConfig = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
 
-  /**
-   * Check if WASM is available in the current environment
-   */
   isAvailable(): boolean {
     return typeof WebAssembly !== 'undefined';
   }
 
-  /**
-   * Initialize the WASM backend
-   */
   async initialize(): Promise<void> {
     if (this.wasmModule) return;
     if (this.initPromise) return this.initPromise;
@@ -77,28 +264,85 @@ export class WASMBackend implements MatrixBackend {
       throw new Error('WebAssembly is not available in this environment');
     }
 
-    // Detect WASM features
     this.features = await detectWasmFeatures();
 
-    // Load WASM module
     try {
-      this.wasmModule = await wasmLoader.load(this.config.wasmPath || undefined);
+      // Load the AS artifact directly. The shared `WasmLoader` singleton
+      // is intentionally avoided here: it caches the first module loaded
+      // and returns the same instance regardless of the path argument on
+      // subsequent calls, so it would clobber Rust ↔ AS routing in a
+      // process that uses both. We compile a fresh AS instance for this
+      // backend and let `RustWASMBackend` own the Rust instance.
+      const path = this.config.wasmPath || this.resolveAsWasmPath();
+      const loaded = await this.loadAsModule(path);
+
+      if (typeof loaded.__new !== 'function' || typeof loaded.matrix_multiply !== 'function') {
+        console.warn(
+          'WASMBackend: loaded module is not the AssemblyScript artifact; falling back to JS. ' +
+            'Pass an explicit wasmPath or use RustWASMBackend for the Rust artifact.'
+        );
+        this.wasmModule = null;
+        return;
+      }
+      this.wasmModule = loaded;
     } catch (error) {
-      console.warn('Failed to load WASM module, falling back to JS:', error);
+      console.warn('Failed to load AssemblyScript WASM module, falling back to JS:', error);
       this.wasmModule = null;
     }
   }
 
   /**
-   * Check if operation should use WASM
+   * Resolve the path to the AssemblyScript artifact (`lib/wasm/mathts-as.wasm`).
    */
+  private resolveAsWasmPath(): string {
+    const url = new URL(`../../../lib/wasm/mathts-as.wasm`, import.meta.url);
+    const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
+    return isNode ? url.pathname : url.href;
+  }
+
+  /**
+   * Compile + instantiate the AssemblyScript WASM artifact. Each
+   * WASMBackend instance owns its own instance — this is intentional so
+   * tests and the Rust backend can coexist in the same process.
+   */
+  private async loadAsModule(path: string): Promise<AsModule> {
+    const imports: WebAssembly.Imports = {
+      env: {
+        abort: (msg: number, file: number, line: number, column: number) => {
+          console.error('AS WASM abort', { msg, file, line, column });
+          throw new Error('AS WASM abort');
+        },
+        seed: () => Date.now(),
+      },
+      Math: Math as unknown as WebAssembly.ModuleImports,
+      Date: Date as unknown as WebAssembly.ModuleImports,
+    };
+
+    const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
+    let instance: WebAssembly.Instance;
+    if (isNode) {
+      const fs = await import('fs');
+      const { promisify } = await import('util');
+      const readFile = promisify(fs.readFile);
+      const buffer = await readFile(path);
+      const module = await WebAssembly.compile(buffer);
+      instance = await WebAssembly.instantiate(module, imports);
+    } else if (typeof WebAssembly.instantiateStreaming === 'function') {
+      const result = await WebAssembly.instantiateStreaming(fetch(path), imports);
+      instance = result.instance;
+    } else {
+      const response = await fetch(path);
+      const buffer = await response.arrayBuffer();
+      const module = await WebAssembly.compile(buffer);
+      instance = await WebAssembly.instantiate(module, imports);
+    }
+    return instance.exports as unknown as AsModule;
+  }
+
   private shouldUseWasm(elementCount: number): boolean {
     return this.wasmModule !== null && elementCount >= this.config.minElements;
   }
 
-  /**
-   * Get detected WASM features
-   */
   getFeatures(): WasmFeatures | null {
     return this.features;
   }
@@ -109,173 +353,129 @@ export class WASMBackend implements MatrixBackend {
 
   add(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.add(a, b);
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.add(a, b);
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const bAlloc = wasmLoader.allocateFloat64Array(bData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const bAlloc = writeAsFloat64Array(this.allocCache, mod, b.toFloat64Array());
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, elementCount);
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdAddF64(aAlloc.ptr, bAlloc.ptr, resultAlloc.ptr, elementCount);
-      } else {
-        this.wasmModule!.add(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
-      }
-      const resultData = Array.from(new Float64Array(resultAlloc.array));
-      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+      mod.matrix_add(aAlloc.headerPtr, bAlloc.headerPtr, rAlloc.headerPtr);
+      const result = readAsFloat64Array(mod, rAlloc);
+      return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
     } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(bAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(bAlloc);
+      this.allocCache.release(rAlloc);
     }
   }
 
   subtract(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.subtract(a, b);
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.subtract(a, b);
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const bAlloc = wasmLoader.allocateFloat64Array(bData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const bAlloc = writeAsFloat64Array(this.allocCache, mod, b.toFloat64Array());
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, elementCount);
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdSubF64(aAlloc.ptr, bAlloc.ptr, resultAlloc.ptr, elementCount);
-      } else {
-        this.wasmModule!.subtract(aAlloc.ptr, bAlloc.ptr, elementCount, resultAlloc.ptr);
-      }
-      const resultData = Array.from(new Float64Array(resultAlloc.array));
-      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+      mod.matrix_sub(aAlloc.headerPtr, bAlloc.headerPtr, rAlloc.headerPtr);
+      const result = readAsFloat64Array(mod, rAlloc);
+      return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
     } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(bAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(bAlloc);
+      this.allocCache.release(rAlloc);
     }
   }
 
   multiplyElementwise(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.multiplyElementwise(a, b);
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.multiplyElementwise(a, b);
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const bAlloc = wasmLoader.allocateFloat64Array(bData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const bAlloc = writeAsFloat64Array(this.allocCache, mod, b.toFloat64Array());
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, elementCount);
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdMulF64(aAlloc.ptr, bAlloc.ptr, resultAlloc.ptr, elementCount);
-      } else {
-        this.wasmModule!.simdMulF64(aAlloc.ptr, bAlloc.ptr, resultAlloc.ptr, elementCount);
-      }
-      const resultData = Array.from(new Float64Array(resultAlloc.array));
-      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+      mod.matrix_mul_elementwise(aAlloc.headerPtr, bAlloc.headerPtr, rAlloc.headerPtr);
+      const result = readAsFloat64Array(mod, rAlloc);
+      return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
     } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(bAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(bAlloc);
+      this.allocCache.release(rAlloc);
     }
   }
 
   divideElementwise(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
-    return jsBackend.divideElementwise(a, b);
+    const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.divideElementwise(a, b);
+
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const bAlloc = writeAsFloat64Array(this.allocCache, mod, b.toFloat64Array());
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, elementCount);
+    try {
+      mod.matrix_div_elementwise(aAlloc.headerPtr, bAlloc.headerPtr, rAlloc.headerPtr);
+      const result = readAsFloat64Array(mod, rAlloc);
+      return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
+    } finally {
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(bAlloc);
+      this.allocCache.release(rAlloc);
+    }
   }
 
   scale(a: DenseMatrix, scalar: number): DenseMatrix {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.scale(a, scalar);
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.scale(a, scalar);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, elementCount);
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdScaleF64(aAlloc.ptr, scalar, resultAlloc.ptr, elementCount);
-      } else {
-        this.wasmModule!.scalarMultiply(aAlloc.ptr, scalar, elementCount, resultAlloc.ptr);
-      }
-      const resultData = Array.from(new Float64Array(resultAlloc.array));
-      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+      mod.matrix_scale(aAlloc.headerPtr, scalar, rAlloc.headerPtr);
+      const result = readAsFloat64Array(mod, rAlloc);
+      return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
     } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(rAlloc);
     }
   }
 
   abs(a: DenseMatrix): DenseMatrix {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.abs(a);
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.abs(a);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, elementCount);
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdAbsF64(aAlloc.ptr, resultAlloc.ptr, elementCount);
-      } else {
-        this.wasmModule!.simdAbsF64(aAlloc.ptr, resultAlloc.ptr, elementCount);
-      }
-      const resultData = Array.from(new Float64Array(resultAlloc.array));
-      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+      // AS has no dedicated matrix_abs; array_abs operates element-wise.
+      mod.array_abs(aAlloc.headerPtr, rAlloc.headerPtr);
+      const result = readAsFloat64Array(mod, rAlloc);
+      return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
     } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(rAlloc);
     }
   }
 
   negate(a: DenseMatrix): DenseMatrix {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.negate(a);
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.negate(a);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, elementCount);
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.simdScaleF64(aAlloc.ptr, -1, resultAlloc.ptr, elementCount);
-      } else {
-        this.wasmModule!.simdScaleF64(aAlloc.ptr, -1, resultAlloc.ptr, elementCount);
-      }
-      const resultData = Array.from(new Float64Array(resultAlloc.array));
-      return DenseMatrix.fromFlat(a.rows, a.cols, resultData);
+      mod.matrix_neg(aAlloc.headerPtr, rAlloc.headerPtr);
+      const result = readAsFloat64Array(mod, rAlloc);
+      return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
     } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(rAlloc);
     }
   }
 
@@ -285,69 +485,39 @@ export class WASMBackend implements MatrixBackend {
 
   multiply(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
     const elementCount = a.rows * a.cols + b.rows * b.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.multiply(a, b);
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.multiply(a, b);
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const bAlloc = wasmLoader.allocateFloat64Array(bData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(a.rows * b.cols));
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const bAlloc = writeAsFloat64Array(this.allocCache, mod, b.toFloat64Array());
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, a.rows * b.cols);
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        this.wasmModule!.multiplyDenseSIMD(
-          aAlloc.ptr,
-          a.rows,
-          a.cols,
-          bAlloc.ptr,
-          b.rows,
-          b.cols,
-          resultAlloc.ptr
-        );
-      } else {
-        this.wasmModule!.multiplyDense(
-          aAlloc.ptr,
-          a.rows,
-          a.cols,
-          bAlloc.ptr,
-          b.rows,
-          b.cols,
-          resultAlloc.ptr
-        );
-      }
-
-      const resultData = Array.from(new Float64Array(resultAlloc.array));
-      return DenseMatrix.fromFlat(a.rows, b.cols, resultData);
+      // Note: AS signature is matrix_multiply(a, aRows, aCols, b, bCols, result).
+      // aCols == bRows is implied by the math; no bRows arg is needed.
+      mod.matrix_multiply(aAlloc.headerPtr, a.rows, a.cols, bAlloc.headerPtr, b.cols, rAlloc.headerPtr);
+      const result = readAsFloat64Array(mod, rAlloc);
+      return DenseMatrix.fromFlat(a.rows, b.cols, Array.from(result));
     } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(bAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(bAlloc);
+      this.allocCache.release(rAlloc);
     }
   }
 
   transpose(a: DenseMatrix): DenseMatrix {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.transpose(a);
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.transpose(a);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(elementCount));
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const rAlloc = allocAsFloat64Array(this.allocCache, mod, elementCount);
     try {
-      this.wasmModule!.transpose(aAlloc.ptr, a.rows, a.cols, resultAlloc.ptr);
-      const resultData = Array.from(new Float64Array(resultAlloc.array));
-      return DenseMatrix.fromFlat(a.cols, a.rows, resultData);
+      mod.matrix_transpose(aAlloc.headerPtr, a.rows, a.cols, rAlloc.headerPtr);
+      const result = readAsFloat64Array(mod, rAlloc);
+      return DenseMatrix.fromFlat(a.cols, a.rows, Array.from(result));
     } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(rAlloc);
     }
   }
 
@@ -357,117 +527,64 @@ export class WASMBackend implements MatrixBackend {
 
   sum(a: DenseMatrix): number {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.sum(a) as number;
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.sum(a) as number;
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        return this.wasmModule!.simdSumF64(aAlloc.ptr, elementCount);
-      } else {
-        return this.wasmModule!.simdSumF64(aAlloc.ptr, elementCount);
-      }
+      return mod.matrix_sum(aAlloc.headerPtr);
     } finally {
-      wasmLoader.free(aAlloc.ptr);
+      this.allocCache.release(aAlloc);
     }
   }
 
   sumAxis(a: DenseMatrix, axis: 0 | 1): DenseMatrix {
-    // Use JS backend for axis reductions
     return jsBackend.sumAxis(a, axis);
   }
 
   norm(a: DenseMatrix): number {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.norm(a);
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.norm(a);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        return this.wasmModule!.simdNormF64(aAlloc.ptr, elementCount);
-      } else {
-        return this.wasmModule!.simdNormF64(aAlloc.ptr, elementCount);
-      }
+      return mod.matrix_norm_frobenius(aAlloc.headerPtr);
     } finally {
-      wasmLoader.free(aAlloc.ptr);
+      this.allocCache.release(aAlloc);
     }
   }
 
   dot(a: DenseMatrix, b: DenseMatrix): number {
     const elementCount = a.rows * a.cols;
+    if (!this.shouldUseWasm(elementCount)) return jsBackend.dot(a, b) as number;
 
-    if (!this.shouldUseWasm(elementCount)) {
-      return jsBackend.dot(a, b) as number;
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const bAlloc = wasmLoader.allocateFloat64Array(bData);
-
+    const mod = this.wasmModule!;
+    const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
+    const bAlloc = writeAsFloat64Array(this.allocCache, mod, b.toFloat64Array());
     try {
-      // Use SIMD-optimized version if available
-      if (this.config.useSIMD && this.features?.simd) {
-        return this.wasmModule!.simdDotF64(aAlloc.ptr, bAlloc.ptr, elementCount);
-      } else {
-        return this.wasmModule!.dotProduct(aAlloc.ptr, bAlloc.ptr, elementCount);
-      }
+      return mod.array_dot(aAlloc.headerPtr, bAlloc.headerPtr);
     } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(bAlloc.ptr);
+      this.allocCache.release(aAlloc);
+      this.allocCache.release(bAlloc);
     }
   }
 
   // =========================================================================
-  // LU Decomposition (WASM-accelerated)
+  // LU / QR / Cholesky / Inverse / Determinant
+  // -------------------------------------------------------------------------
+  // AssemblyScript does NOT export these — only Rust does. We keep the
+  // methods on the class for API compatibility but they always fall back
+  // to the JS implementations. If you need WASM-accelerated decompositions,
+  // use `RustWASMBackend` instead.
   // =========================================================================
 
-  /**
-   * LU Decomposition using WASM
-   */
   async luDecomposition(a: DenseMatrix): Promise<{
     lu: DenseMatrix;
     perm: Int32Array;
     singular: boolean;
   }> {
-    const n = a.rows;
-    if (n !== a.cols) {
-      throw new Error('LU decomposition requires a square matrix');
-    }
-
-    if (!this.shouldUseWasm(n * n)) {
-      // Fall back to JS implementation
-      return this.luDecompositionJS(a);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const permAlloc = wasmLoader.allocateInt32Array(new Int32Array(n));
-
-    try {
-      const success = this.wasmModule!.luDecomposition(aAlloc.ptr, n, permAlloc.ptr);
-
-      return {
-        lu: DenseMatrix.fromFlat(n, n, Array.from(new Float64Array(aAlloc.array))),
-        perm: new Int32Array(permAlloc.array),
-        singular: success === 0,
-      };
-    } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(permAlloc.ptr);
-    }
+    return this.luDecompositionJS(a);
   }
 
   private luDecompositionJS(a: DenseMatrix): {
@@ -476,12 +593,14 @@ export class WASMBackend implements MatrixBackend {
     singular: boolean;
   } {
     const n = a.rows;
+    if (n !== a.cols) {
+      throw new Error('LU decomposition requires a square matrix');
+    }
+
     const data = new Float64Array(a.toFloat64Array());
     const perm = new Int32Array(n);
 
-    for (let i = 0; i < n; i++) {
-      perm[i] = i;
-    }
+    for (let i = 0; i < n; i++) perm[i] = i;
 
     for (let k = 0; k < n - 1; k++) {
       let maxVal = Math.abs(data[k * n + k]);
@@ -514,7 +633,6 @@ export class WASMBackend implements MatrixBackend {
       for (let i = k + 1; i < n; i++) {
         const factor = data[i * n + k] / pivot;
         data[i * n + k] = factor;
-
         for (let j = k + 1; j < n; j++) {
           data[i * n + j] -= factor * data[k * n + j];
         }
@@ -524,39 +642,8 @@ export class WASMBackend implements MatrixBackend {
     return { lu: DenseMatrix.fromFlat(n, n, Array.from(data)), perm, singular: false };
   }
 
-  // =========================================================================
-  // QR Decomposition (WASM-accelerated)
-  // =========================================================================
-
-  /**
-   * QR Decomposition using WASM
-   */
-  async qrDecomposition(a: DenseMatrix): Promise<{
-    q: DenseMatrix;
-    r: DenseMatrix;
-  }> {
-    const m = a.rows;
-    const n = a.cols;
-
-    if (!this.shouldUseWasm(m * n)) {
-      return this.qrDecompositionJS(a);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const qAlloc = wasmLoader.allocateFloat64Array(new Float64Array(m * m));
-
-    try {
-      this.wasmModule!.qrDecomposition(aAlloc.ptr, m, n, qAlloc.ptr);
-
-      return {
-        q: DenseMatrix.fromFlat(m, m, Array.from(new Float64Array(qAlloc.array))),
-        r: DenseMatrix.fromFlat(m, n, Array.from(new Float64Array(aAlloc.array))),
-      };
-    } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(qAlloc.ptr);
-    }
+  async qrDecomposition(a: DenseMatrix): Promise<{ q: DenseMatrix; r: DenseMatrix }> {
+    return this.qrDecompositionJS(a);
   }
 
   private qrDecompositionJS(a: DenseMatrix): { q: DenseMatrix; r: DenseMatrix } {
@@ -566,16 +653,9 @@ export class WASMBackend implements MatrixBackend {
     const r = new Float64Array(m * n);
     const q = new Float64Array(m * m);
 
-    // Copy a to r
-    for (let i = 0; i < m * n; i++) {
-      r[i] = aData[i];
-    }
-
-    // Initialize Q as identity
+    for (let i = 0; i < m * n; i++) r[i] = aData[i];
     for (let i = 0; i < m; i++) {
-      for (let j = 0; j < m; j++) {
-        q[i * m + j] = i === j ? 1.0 : 0.0;
-      }
+      for (let j = 0; j < m; j++) q[i * m + j] = i === j ? 1.0 : 0.0;
     }
 
     const minDim = Math.min(m, n);
@@ -595,38 +675,24 @@ export class WASMBackend implements MatrixBackend {
 
       const v = new Float64Array(m - k);
       v[0] = 1.0;
-      for (let i = 1; i < m - k; i++) {
-        v[i] = r[(k + i) * n + k] / u1;
-      }
+      for (let i = 1; i < m - k; i++) v[i] = r[(k + i) * n + k] / u1;
 
       let vDotV = 0.0;
-      for (let i = 0; i < m - k; i++) {
-        vDotV += v[i] * v[i];
-      }
+      for (let i = 0; i < m - k; i++) vDotV += v[i] * v[i];
       const tau = 2.0 / vDotV;
 
-      // Apply to R
       for (let j = k; j < n; j++) {
         let vDotCol = 0.0;
-        for (let i = 0; i < m - k; i++) {
-          vDotCol += v[i] * r[(k + i) * n + j];
-        }
+        for (let i = 0; i < m - k; i++) vDotCol += v[i] * r[(k + i) * n + j];
         const factor = tau * vDotCol;
-        for (let i = 0; i < m - k; i++) {
-          r[(k + i) * n + j] -= factor * v[i];
-        }
+        for (let i = 0; i < m - k; i++) r[(k + i) * n + j] -= factor * v[i];
       }
 
-      // Apply to Q
       for (let j = 0; j < m; j++) {
         let vDotCol = 0.0;
-        for (let i = 0; i < m - k; i++) {
-          vDotCol += v[i] * q[(k + i) * m + j];
-        }
+        for (let i = 0; i < m - k; i++) vDotCol += v[i] * q[(k + i) * m + j];
         const factor = tau * vDotCol;
-        for (let i = 0; i < m - k; i++) {
-          q[(k + i) * m + j] -= factor * v[i];
-        }
+        for (let i = 0; i < m - k; i++) q[(k + i) * m + j] -= factor * v[i];
       }
     }
 
@@ -636,43 +702,11 @@ export class WASMBackend implements MatrixBackend {
     };
   }
 
-  // =========================================================================
-  // Matrix Inversion (WASM-accelerated)
-  // =========================================================================
-
-  /**
-   * Matrix inversion using LU decomposition
-   */
   async inverse(a: DenseMatrix): Promise<{ inverse: DenseMatrix; singular: boolean }> {
-    const n = a.rows;
-    if (n !== a.cols) {
-      throw new Error('Matrix inversion requires a square matrix');
-    }
-
-    if (!this.shouldUseWasm(n * n)) {
-      return this.inverseJS(a);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const resultAlloc = wasmLoader.allocateFloat64Array(new Float64Array(n * n));
-    const workAlloc = wasmLoader.allocateFloat64Array(new Float64Array(n * n));
-
-    try {
-      const success = this.wasmModule!.laInv(aAlloc.ptr, n, resultAlloc.ptr, workAlloc.ptr);
-
-      return {
-        inverse: DenseMatrix.fromFlat(n, n, Array.from(new Float64Array(resultAlloc.array))),
-        singular: success === 0,
-      };
-    } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(resultAlloc.ptr);
-      wasmLoader.free(workAlloc.ptr);
-    }
+    return this.inverseJS(a);
   }
 
-  private async inverseJS(a: DenseMatrix): Promise<{ inverse: DenseMatrix; singular: boolean }> {
+  private inverseJS(a: DenseMatrix): { inverse: DenseMatrix; singular: boolean } {
     const n = a.rows;
     const { lu, perm, singular } = this.luDecompositionJS(a);
 
@@ -686,131 +720,63 @@ export class WASMBackend implements MatrixBackend {
     const x = new Float64Array(n);
 
     for (let col = 0; col < n; col++) {
-      // Create column of identity
-      for (let i = 0; i < n; i++) {
-        b[i] = i === col ? 1.0 : 0.0;
-      }
+      for (let i = 0; i < n; i++) b[i] = i === col ? 1.0 : 0.0;
 
-      // Forward substitution
       for (let i = 0; i < n; i++) {
         let sum = b[perm[i]];
-        for (let j = 0; j < i; j++) {
-          sum -= luData[i * n + j] * x[j];
-        }
+        for (let j = 0; j < i; j++) sum -= luData[i * n + j] * x[j];
         x[i] = sum;
       }
 
-      // Backward substitution
       for (let i = n - 1; i >= 0; i--) {
         let sum = x[i];
-        for (let j = i + 1; j < n; j++) {
-          sum -= luData[i * n + j] * x[j];
-        }
+        for (let j = i + 1; j < n; j++) sum -= luData[i * n + j] * x[j];
         x[i] = sum / luData[i * n + i];
       }
 
-      // Store column
-      for (let i = 0; i < n; i++) {
-        result[i * n + col] = x[i];
-      }
+      for (let i = 0; i < n; i++) result[i * n + col] = x[i];
     }
 
     return { inverse: DenseMatrix.fromFlat(n, n, Array.from(result)), singular: false };
   }
 
-  // =========================================================================
-  // Determinant (WASM-accelerated)
-  // =========================================================================
-
-  /**
-   * Compute matrix determinant using LU decomposition
-   */
   async determinantWasm(a: DenseMatrix): Promise<number> {
-    const n = a.rows;
-    if (n !== a.cols) {
-      throw new Error('Determinant requires a square matrix');
-    }
-
-    if (!this.shouldUseWasm(n * n)) {
-      return this.determinantJS(a);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const permAlloc = wasmLoader.allocateFloat64Array(new Float64Array(n));
-
-    try {
-      return this.wasmModule!.luDeterminant(aAlloc.ptr, n, permAlloc.ptr);
-    } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(permAlloc.ptr);
-    }
+    return this.determinantJS(a);
   }
 
   private determinantJS(a: DenseMatrix): number {
     const n = a.rows;
     const { lu, perm, singular } = this.luDecompositionJS(a);
 
-    if (singular) {
-      return 0.0;
-    }
+    if (singular) return 0.0;
 
     const luData = lu.toFloat64Array();
     let det = 1.0;
+    for (let i = 0; i < n; i++) det *= luData[i * n + i];
 
-    for (let i = 0; i < n; i++) {
-      det *= luData[i * n + i];
-    }
-
-    // Count row swaps
     let swaps = 0;
     for (let i = 0; i < n; i++) {
       if (perm[i] !== i) swaps++;
     }
-
     return swaps % 2 === 0 ? det : -det;
   }
 
-  // =========================================================================
-  // Cholesky Decomposition (WASM-accelerated)
-  // =========================================================================
-
-  /**
-   * Cholesky Decomposition using WASM
-   * For symmetric positive-definite matrices: A = L * L^T
-   */
   async choleskyDecomposition(a: DenseMatrix): Promise<{
     l: DenseMatrix;
     positiveDefinite: boolean;
   }> {
+    return this.choleskyDecompositionJS(a);
+  }
+
+  private choleskyDecompositionJS(a: DenseMatrix): {
+    l: DenseMatrix;
+    positiveDefinite: boolean;
+  } {
     const n = a.rows;
     if (n !== a.cols) {
       throw new Error('Cholesky decomposition requires a square matrix');
     }
 
-    if (!this.shouldUseWasm(n * n)) {
-      return this.choleskyDecompositionJS(a);
-    }
-
-    const aData = a.toFloat64Array();
-    const aAlloc = wasmLoader.allocateFloat64Array(aData);
-    const lAlloc = wasmLoader.allocateFloat64Array(new Float64Array(n * n));
-
-    try {
-      const success = this.wasmModule!.choleskyDecomposition(aAlloc.ptr, n, lAlloc.ptr);
-
-      return {
-        l: DenseMatrix.fromFlat(n, n, Array.from(new Float64Array(lAlloc.array))),
-        positiveDefinite: success === 1,
-      };
-    } finally {
-      wasmLoader.free(aAlloc.ptr);
-      wasmLoader.free(lAlloc.ptr);
-    }
-  }
-
-  private choleskyDecompositionJS(a: DenseMatrix): { l: DenseMatrix; positiveDefinite: boolean } {
-    const n = a.rows;
     const aData = a.toFloat64Array();
     const l = new Float64Array(n * n);
 
@@ -852,12 +818,12 @@ export class WASMBackend implements MatrixBackend {
 }
 
 /**
- * Global WASM backend instance
+ * Global WASM backend instance (AssemblyScript path)
  */
 export const wasmBackend = new WASMBackend();
 
 /**
- * Create a WASM backend with custom configuration
+ * Create a WASM backend (AssemblyScript path) with custom configuration
  */
 export function createWASMBackend(config?: WASMBackendConfig): WASMBackend {
   return new WASMBackend(config);

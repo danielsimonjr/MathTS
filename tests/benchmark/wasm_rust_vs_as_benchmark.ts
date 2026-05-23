@@ -21,12 +21,84 @@ const __dirname = path.dirname(__filename);
 
 interface WasmExports {
   memory: WebAssembly.Memory;
+  // Rust ABI (camelCase, raw pointers into linear memory)
   multiplyDense?: Function;
   add?: Function;
   dotProduct?: Function;
   transpose?: Function;
   det?: Function;
+  // AS managed runtime
+  __new?: Function;
+  __pin?: Function;
+  __unpin?: Function;
+  __collect?: Function;
+  // AS ABI (snake_case, Float64Array header refs)
+  matrix_multiply?: Function;
+  matrix_add?: Function;
+  array_dot?: Function;
+  matrix_transpose?: Function;
   [key: string]: any;
+}
+
+// ============================================================
+// AssemblyScript managed-array helpers
+// ============================================================
+//
+// AS exports (`matrix_add`, `matrix_multiply`, `array_dot`, ...) take
+// Float64Array **header** refs — a 12-byte block holding
+// [dataStart, dataStart, byteLength] — NOT raw pointers like the Rust ABI.
+// The helpers below mirror what `assembly/build/mathts.js` does in
+// `__lowerTypedArray(Float64Array, 5, 3, ...)`.
+//
+// IDs (from `__rtti_base` in the AS module):
+//   1 = ArrayBuffer
+//   5 = Float64Array  (header type)
+const AS_ID_ARRAY_BUFFER = 1;
+const AS_ID_FLOAT64_ARRAY = 5;
+const AS_HEADER_BYTES = 12;
+
+interface AsAlloc {
+  header: number;
+  buffer: number;
+  length: number;
+}
+
+/** Allocate a Float64Array (data + header) inside an AS module. */
+function asAllocFloat64(mod: WasmExports, length: number): AsAlloc {
+  const byteLength = length * 8;
+  const buffer = (mod.__pin as Function)((mod.__new as Function)(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
+  const header = ((mod.__new as Function)(AS_HEADER_BYTES, AS_ID_FLOAT64_ARRAY) >>> 0) as number;
+  (mod.__pin as Function)(header);
+  const dv = new DataView(mod.memory.buffer);
+  dv.setUint32(header + 0, buffer, true);
+  dv.setUint32(header + 4, buffer, true);
+  dv.setUint32(header + 8, byteLength, true);
+  return { header, buffer, length };
+}
+
+/** Allocate + fill a Float64Array from JS data. */
+function asWriteFloat64(mod: WasmExports, data: Float64Array): AsAlloc {
+  const alloc = asAllocFloat64(mod, data.length);
+  new Float64Array(mod.memory.buffer, alloc.buffer, alloc.length).set(data);
+  return alloc;
+}
+
+/**
+ * Per-module pool — same rationale as `WASMBackend`: the AS `stub` runtime
+ * has no `free` so allocate-per-iter OOMs. Cache and reuse handles by length.
+ */
+class AsPool {
+  private free = new Map<number, AsAlloc[]>();
+  acquire(mod: WasmExports, length: number): AsAlloc {
+    const pool = this.free.get(length);
+    if (pool && pool.length > 0) return pool.pop()!;
+    return asAllocFloat64(mod, length);
+  }
+  release(alloc: AsAlloc): void {
+    const pool = this.free.get(alloc.length) ?? [];
+    pool.push(alloc);
+    this.free.set(alloc.length, pool);
+  }
 }
 
 function bench(fn: () => void, warmup = 3, iterations = 10): number {
@@ -220,6 +292,9 @@ async function main() {
     }
   }
 
+  // Shared AS pool — reused across benchmark sections.
+  const asPool = new AsPool();
+
   // ============================================================
   // Matrix Multiply
   // ============================================================
@@ -248,18 +323,19 @@ async function main() {
       });
     }
 
-    // AS WASM (same raw pointer ABI)
+    // AS WASM: uses `matrix_multiply(aHdr, aRows, aCols, bHdr, bCols, resHdr)`.
+    // Managed Float64Array headers, NOT raw flat-memory pointers.
     let asMs: number | null = null;
-    if (as_?.multiplyDense && as_.memory) {
-      const asA = 1024,
-        asB = asA + n * n * 8,
-        asC = asB + n * n * 8;
-      while (as_.memory.buffer.byteLength < asC + n * n * 8) as_.memory.grow(16);
-      writeF64(as_.memory, asA, flatA);
-      writeF64(as_.memory, asB, flatB);
+    if (as_?.matrix_multiply && as_.__new && as_.memory) {
+      const aAlloc = asWriteFloat64(as_, flatA);
+      const bAlloc = asWriteFloat64(as_, flatB);
+      const rAlloc = asPool.acquire(as_, n * n);
       asMs = bench(() => {
-        (as_.multiplyDense as Function)(asA, n, n, asB, n, n, asC);
+        (as_.matrix_multiply as Function)(aAlloc.header, n, n, bAlloc.header, n, rAlloc.header);
       });
+      asPool.release(aAlloc);
+      asPool.release(bAlloc);
+      asPool.release(rAlloc);
     }
 
     console.log(`  JS:   ${jsMs.toFixed(3)} ms`);
@@ -300,16 +376,16 @@ async function main() {
       });
     }
 
+    // AS WASM: uses `array_dot(aHdr, bHdr) -> f64`.
     let asMs: number | null = null;
-    if (as_?.dotProduct && as_.memory) {
-      const asA = 1024,
-        asB = asA + n * 8;
-      while (as_.memory.buffer.byteLength < asB + n * 8) as_.memory.grow(16);
-      writeF64(as_.memory, asA, va);
-      writeF64(as_.memory, asB, vb);
+    if (as_?.array_dot && as_.__new && as_.memory) {
+      const aAlloc = asWriteFloat64(as_, va);
+      const bAlloc = asWriteFloat64(as_, vb);
       asMs = bench(() => {
-        (as_.dotProduct as Function)(asA, asB, n);
+        (as_.array_dot as Function)(aAlloc.header, bAlloc.header);
       });
+      asPool.release(aAlloc);
+      asPool.release(bAlloc);
     }
 
     console.log(`  JS:   ${jsMs.toFixed(3)} ms`);
@@ -351,17 +427,19 @@ async function main() {
       });
     }
 
+    // AS WASM: uses `matrix_add(aHdr, bHdr, resHdr)` — same as array_add but
+    // we keep matrix_add for symmetry with the Rust column's "add" op.
     let asMs: number | null = null;
-    if (as_?.add && as_.memory) {
-      const asA = 1024,
-        asB = asA + n * 8,
-        asC = asB + n * 8;
-      while (as_.memory.buffer.byteLength < asC + n * 8) as_.memory.grow(16);
-      writeF64(as_.memory, asA, va);
-      writeF64(as_.memory, asB, vb);
+    if (as_?.matrix_add && as_.__new && as_.memory) {
+      const aAlloc = asWriteFloat64(as_, va);
+      const bAlloc = asWriteFloat64(as_, vb);
+      const rAlloc = asPool.acquire(as_, n);
       asMs = bench(() => {
-        (as_.add as Function)(asA, asB, n, asC);
+        (as_.matrix_add as Function)(aAlloc.header, bAlloc.header, rAlloc.header);
       });
+      asPool.release(aAlloc);
+      asPool.release(bAlloc);
+      asPool.release(rAlloc);
     }
 
     console.log(`  JS:   ${jsMs.toFixed(3)} ms`);
@@ -400,15 +478,11 @@ async function main() {
       });
     }
 
-    let asMs: number | null = null;
-    if (as_?.det && as_.memory) {
-      const asA = 1024;
-      while (as_.memory.buffer.byteLength < asA + n * n * 8) as_.memory.grow(16);
-      writeF64(as_.memory, asA, flat);
-      asMs = bench(() => {
-        (as_.det as Function)(asA, n);
-      });
-    }
+    // AS WASM: no `det` / `matrix_det` export. AS ships only basic algebra
+    // (matrix_*) and array_* primitives — LU / determinant come from the
+    // Rust crate. Leave the AS column empty for `det` rows. (Confirmed via
+    // `grep '^export declare function.*det' assembly/build/mathts.d.ts`.)
+    const asMs: number | null = null;
 
     console.log(`  JS:   ${jsMs.toFixed(3)} ms`);
     if (rustMs !== null) console.log(`  Rust: ${rustMs.toFixed(3)} ms  (${speedup(jsMs, rustMs)})`);

@@ -7,7 +7,11 @@
 
 import { DenseMatrix } from '../../../matrix/src/types/DenseMatrix.js';
 import { jsBackend } from '../../../matrix/src/backends/JSBackend.js';
-import { wasmBackend } from '../../../matrix/src/backends/WASMBackend.js';
+// Use the Rust backend as the "WASM" baseline: that's what `wasmLoader.load()`
+// resolves to by default and what the manager prefers for large matrices.
+// The AS-only WASMBackend still exists (see ./WASMBackend.ts) and can be
+// benchmarked alongside via tests/benchmark/wasm_rust_vs_as_benchmark.ts.
+import { rustWasmBackend as wasmBackend } from '../../../matrix/src/backends/RustWASMBackend.js';
 import { backendManager } from '../../../matrix/src/backends/BackendManager.js';
 import { getConfig, setBackendThreshold } from '../../../matrix/src/config.js';
 
@@ -535,7 +539,7 @@ export {
   BenchmarkResult,
 };
 
-// Run if executed directly
-if (typeof require !== 'undefined' && require.main === module) {
-  main().catch(console.error);
-}
+// Run if executed directly. Under tsx (ESM) `require` is undefined; instead
+// we compare `import.meta.url` against the entry script path. This matches
+// the convention the wasm/*.bench.ts files use (unconditional `main()`).
+main().catch(console.error);
