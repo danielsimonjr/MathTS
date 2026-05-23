@@ -313,6 +313,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   refreshed the doc's "Updated" date plus a "Location:" breadcrumb
   pointing future readers to the old path.
 
+- **`TODO.md` reorganized — pending items moved to a top-level
+  🎯 Open Actions block (2026-05-23 post-audit).** A sonnet sub-
+  agent independently audited each of the previously-open
+  checkboxes against the live codebase and produced verdicts.
+  Result: 2 items are truly pending and now sit at the top of the
+  file sorted by dependencies ascending then complexity ascending
+  — (1) cut a release for the `[Unreleased]` CHANGELOG (deps=0,
+  admin), (2) add a browser smoke test for the WebGPU paths
+  (needs Playwright infra, low–medium complexity). 2 stale items
+  (`Update main README with TypeScript/WASM status` and `Add
+  migration guide for users`) were marked `[x]` — both shipped
+  in commit `c6514ed` (README rewrite + new
+  `docs/migration-guide.md`). 1 stale item (`Keep duplicate
+  JS/TS files (418 files)`) deleted with a one-line replacement
+  note — `find functions/src -name '*.js' | wc -l` returns 0
+  today, so the concern is moot. 1 environmental item (GPU
+  benches under `tools/benchmark/gpu/` — code exists, no
+  WebGPU adapter in headless Node) deleted with a one-line
+  note; the related backlog action is the new browser-smoke-test
+  entry. 3 items remain marked `- [ ]` as **documented non-
+  decisions** in their original sections (eigs/SVD
+  parallelization, polyFit/leastSquares parallelization, unified
+  f32 WebGPU path) — these were re-validated 2026-05-23 with
+  bench-evidence inline and are kept for traceability, not as
+  actions. Final counts: 113 closed, 5 unchecked (2 actionable
+  at the top, 3 documented non-actions).
+
 ### Fixed
 
 - **CDG-driven coverage push (commits `baf9007` + `c6514ed` + `122c590`).**
