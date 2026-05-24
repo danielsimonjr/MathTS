@@ -175,10 +175,14 @@ Detail:
             KS/MW/SW keep sort on main thread (no `wasm.sortF64` yet),
             offload post-sort stats. Custom-CDF KS bypasses route.
             20 new tests in `typed-hypothesis-parallel.test.ts`.
-      - [ ] **Slice 3.10b** — `typed/interpolation.ts` tridiag-solve
-            WASM (rank 10b). NEW `wasm.tridiagSolveF64` (Thomas
-            algorithm). Wire `cubicSpline`/`pchip`/`akima`.
-            Starting threshold ≥ 1024 knots.
+      - [x] **Slice 3.10b** ✅ `ec7363b` — `typed/interpolation.ts`
+            tridiag-solve WASM. NEW Rust `tridiag_solve_f64` + AS
+            parity + bridge at threshold = 1024 unknowns. `cubicSpline`
+            wired (refactored to build explicit (n-1)×(n-1) tridiag
+            system). **Finding:** `pchip`/`akima` use Fritsch-Carlson /
+            Akima analytic slopes (no tridiag), so this bridge is
+            cubicSpline-only — audit B.1 entry updated to reflect.
+            18 new tests; manifest regenerated.
       - [ ] **Slice 3.10c** — `typed/special.ts` Bessel/Airy WASM
             family (rank 10c). NEW `wasm.besselJF64`/`besselYF64`/
             `airyAiF64`/`airyBiF64`. May split into 3.10c-1 (Bessel)

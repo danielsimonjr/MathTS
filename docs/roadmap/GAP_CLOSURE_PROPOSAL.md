@@ -190,7 +190,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Threshold starting point:** ≥ 4096 samples.
 
-### Slice 3.10b — typed/interpolation.ts tridiag-solve WASM (rank 10b)
+### Slice 3.10b — ✅ LANDED in `ec7363b` — typed/interpolation.ts tridiag-solve WASM (rank 10b)
 
 **Goal:** WASM kernel for the tridiagonal-solve hot loop of `cubicSpline`, `pchip`, `akima`.
 

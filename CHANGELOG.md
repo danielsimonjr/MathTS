@@ -145,7 +145,16 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
-#### Gap-closure Wave 3b — WASM-route slices (sequenced; 3.7 done)
+#### Gap-closure Wave 3b — WASM-route slices (sequenced; 3.7 + 3.10b done)
+
+- **Slice 3.10b — commit `ec7363b`** — Tridiagonal-solve WASM kernel (Thomas algorithm).
+  - NEW `wasm-rust/crates/mathts-wasm/src/tridiag.rs` (~102 LOC): `tridiag_solve_f64` with pointer ABI, returns `n` on success or `-1` on zero-pivot. 5 native Rust unit tests.
+  - NEW `assembly/src/tridiag.ts` (~68 LOC): AS parity port returning `Float64Array(0)` on singular system.
+  - NEW `functions/src/wasm/interpolation/wasm-bridge.ts` (~196 LOC): threshold-gated dispatch at `WASM_TRIDIAG_THRESHOLD = 1024` unknowns; probe-Rust-then-AS-then-JS fallback chain.
+  - `functions/src/wasm/WasmLoader.ts` gained `tridiag_solve_f64` (Rust pointer ABI) and `tridiag_solve_f64_as` (AS typed-array ABI) registrations.
+  - `cubicSpline` refactored in `typed/interpolation.ts` to build an explicit `(n-1)×(n-1)` tridiagonal system and route through the bridge. **Surprise:** `pchip` and `akima` use Fritsch-Carlson / Akima analytic-slope formulas, not a tridiag system, so they're not in scope for this bridge — the audit's §B.1 entry now reflects this finding (cubicSpline-only).
+  - `wasm-manifest.json` regenerated; `wasm-integrity` still 5/5.
+  - 18 new tests across 4 suites in `typed-interpolation-wasm.test.ts`. `functions`: 1,982 → **2,000 tests** (+18).
 
 - **Slice 3.7 — commit `6520a76`** — Polynomial WASM kernel.
   - NEW `wasm-rust/crates/mathts-wasm/src/poly.rs` (~100 LOC): `poly_mul_f64` (O(n·m) convolution) and `poly_div_mod_f64` (long division returning concatenated `[quotient, remainder]`).
