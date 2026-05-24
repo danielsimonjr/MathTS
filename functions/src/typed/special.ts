@@ -28,6 +28,27 @@ import {
   ellipticKDispatch,
   ellipticEDispatch,
   lgammaDispatch,
+  carlsonRCDispatch,
+  carlsonRFDispatch,
+  carlsonRDDispatch,
+  carlsonRJDispatch,
+  ellipticFIncompleteDispatch,
+  ellipticEIncompleteDispatch,
+  ellipticPiIncompleteDispatch,
+  carlsonRCJS,
+  carlsonRFJS,
+  carlsonRDJS,
+  carlsonRJJS,
+  ellipticFIncompleteJS,
+  ellipticEIncompleteJS,
+  ellipticPiIncompleteJS,
+  carlsonRCScalar,
+  carlsonRFScalar,
+  carlsonRDScalar,
+  carlsonRJScalar,
+  ellipticFIncompleteScalar,
+  ellipticEIncompleteScalar,
+  ellipticPiIncompleteScalar,
 } from '../wasm/special/wasm-bridge.js';
 
 // =============================================================================
@@ -1608,6 +1629,158 @@ export const airyBi = mathTyped('airyBi', {
 });
 
 // =============================================================================
+// Carlson Symmetric Forms (Slice 6.4)
+//
+// Scalar inputs use the JS implementation directly.
+// Float64Array inputs of length ≥ WASM_SPECIAL_THRESHOLD are dispatched to the
+// WASM array kernel; smaller arrays use the JS fallback loop.
+// =============================================================================
+
+/**
+ * Carlson degenerate symmetric integral RC(x, y).
+ *
+ * RC(x, y) = ∫_0^∞ dt / ((t+x)^{1/2} (t+y))
+ *
+ * Identities: RC(0, 1) = π/2; RC(1, 1) = 1.
+ *
+ * Reference: DLMF §19.16.6; Numerical Recipes §6.11.
+ *
+ * @param x - First argument (≥ 0), or Float64Array of values
+ * @param y - Second argument (≠ 0), or Float64Array of values
+ */
+export const carlsonRC = mathTyped('carlsonRC', {
+  'number, number': carlsonRCScalar,
+  'Float64Array, Float64Array': (xs: Float64Array, ys: Float64Array): Float64Array => {
+    if (xs.length >= WASM_SPECIAL_THRESHOLD) return carlsonRCDispatch(xs, ys);
+    return carlsonRCJS(xs, ys);
+  },
+});
+
+/**
+ * Carlson symmetric integral RF(x, y, z).
+ *
+ * RF(x, y, z) = (1/2) ∫_0^∞ dt / (√(t+x)·√(t+y)·√(t+z))
+ *
+ * Symmetry: RF is symmetric in all three arguments.
+ * Identity: RF(0, 1, 2) ≈ 1.3110287771461...
+ *
+ * Reference: DLMF §19.16.1; Numerical Recipes §6.11.
+ */
+export const carlsonRF = mathTyped('carlsonRF', {
+  'number, number, number': carlsonRFScalar,
+  'Float64Array, Float64Array, Float64Array': (xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array => {
+    if (xs.length >= WASM_SPECIAL_THRESHOLD) return carlsonRFDispatch(xs, ys, zs);
+    return carlsonRFJS(xs, ys, zs);
+  },
+});
+
+/**
+ * Carlson symmetric integral RD(x, y, z).
+ *
+ * RD(x, y, z) = (3/2) ∫_0^∞ dt / (√(t+x)·√(t+y)·(t+z)^{3/2})
+ *
+ * Identity: RD(0, 2, 1) ≈ 1.7972103521033...
+ *
+ * Reference: DLMF §19.16.5; Numerical Recipes §6.11.
+ */
+export const carlsonRD = mathTyped('carlsonRD', {
+  'number, number, number': carlsonRDScalar,
+  'Float64Array, Float64Array, Float64Array': (xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array => {
+    if (xs.length >= WASM_SPECIAL_THRESHOLD) return carlsonRDDispatch(xs, ys, zs);
+    return carlsonRDJS(xs, ys, zs);
+  },
+});
+
+/**
+ * Carlson symmetric integral RJ(x, y, z, p).
+ *
+ * RJ(x, y, z, p) = (3/2) ∫_0^∞ dt / ((t+p)·√(t+x)·√(t+y)·√(t+z))
+ *
+ * Reference: DLMF §19.16.2; Numerical Recipes §6.11.
+ */
+export const carlsonRJ = mathTyped('carlsonRJ', {
+  'number, number, number, number': carlsonRJScalar,
+  'Float64Array, Float64Array, Float64Array, Float64Array': (xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array): Float64Array => {
+    if (xs.length >= WASM_SPECIAL_THRESHOLD) return carlsonRJDispatch(xs, ys, zs, ps);
+    return carlsonRJJS(xs, ys, zs, ps);
+  },
+});
+
+// =============================================================================
+// Incomplete Elliptic Integrals (Slice 6.4)
+//
+// Built atop Carlson R-forms (DLMF §19.25 Legendre–Carlson identities).
+// `ellipticE` already exists as the complete integral (1-arg) and as the
+// 2-arg form (phi, m) via Simpson quadrature.  The new `ellipticEIncomplete`
+// is added as a separate export to avoid naming conflicts and to clarify that
+// it uses the Carlson-based algorithm (higher accuracy than Simpson).
+// =============================================================================
+
+/**
+ * Incomplete elliptic integral of the first kind F(φ, m).
+ *
+ * F(φ, m) = ∫_0^φ dθ / √(1 − m·sin²θ)
+ *
+ * Implemented via F(φ, m) = sin(φ)·RF(cos²φ, 1−m·sin²φ, 1) (DLMF §19.25.5).
+ *
+ * Special cases: F(0, m) = 0; F(π/2, m) = K(m).
+ *
+ * Reference values (DLMF §19.6): F(π/2, 0.5) = K(0.5) ≈ 1.8540746773013719.
+ *
+ * @param phi - Amplitude in [0, π/2]
+ * @param m - Parameter in [0, 1)
+ */
+export const ellipticF = mathTyped('ellipticF', {
+  'number, number': ellipticFIncompleteScalar,
+  'Float64Array, Float64Array': (phis: Float64Array, ms: Float64Array): Float64Array => {
+    if (phis.length >= WASM_SPECIAL_THRESHOLD) return ellipticFIncompleteDispatch(phis, ms);
+    return ellipticFIncompleteJS(phis, ms);
+  },
+});
+
+/**
+ * Incomplete elliptic integral of the second kind E(φ, m) — Carlson form.
+ *
+ * E(φ, m) = ∫_0^φ √(1 − m·sin²θ) dθ
+ *
+ * Implemented via Carlson forms (DLMF §19.25.7):
+ *   E(φ, m) = sin(φ)·RF(c², 1−m·s², 1) − (m/3)·s³·RD(c², 1−m·s², 1)
+ *
+ * Special cases: E(0, m) = 0; E(π/2, m) = E(m) (complete second kind).
+ *
+ * Named `ellipticEIncomplete` to distinguish from the existing `ellipticE`
+ * export which handles both the complete form (1-arg) and the Simpson
+ * 2-arg form.
+ */
+export const ellipticEIncomplete = mathTyped('ellipticEIncomplete', {
+  'number, number': ellipticEIncompleteScalar,
+  'Float64Array, Float64Array': (phis: Float64Array, ms: Float64Array): Float64Array => {
+    if (phis.length >= WASM_SPECIAL_THRESHOLD) return ellipticEIncompleteDispatch(phis, ms);
+    return ellipticEIncompleteJS(phis, ms);
+  },
+});
+
+/**
+ * Incomplete elliptic integral of the third kind Π(n, φ, m).
+ *
+ * Π(n, φ, m) = ∫_0^φ dθ / ((1 − n·sin²θ)·√(1 − m·sin²θ))
+ *
+ * Implemented via Carlson forms (DLMF §19.25.9):
+ *   Π(n, φ, m) = sin(φ)·RF(c², 1−m·s², 1) + (n/3)·s³·RJ(c², 1−m·s², 1, 1−n·s²)
+ *
+ * Special cases: Π(n, 0, m) = 0; Π(n, π/2, m) = Π(n, m) (complete third kind).
+ *
+ * Reference: DLMF §19.6, Abramowitz & Stegun §17.7.
+ */
+export const ellipticPi = mathTyped('ellipticPi', {
+  'number, number, number': ellipticPiIncompleteScalar,
+  'Float64Array, Float64Array, Float64Array': (ns: Float64Array, phis: Float64Array, ms: Float64Array): Float64Array => {
+    if (ns.length >= WASM_SPECIAL_THRESHOLD) return ellipticPiIncompleteDispatch(ns, phis, ms);
+    return ellipticPiIncompleteJS(ns, phis, ms);
+  },
+});
+
+// =============================================================================
 // Named Export Collection
 // =============================================================================
 
@@ -1646,4 +1819,11 @@ export const typedSpecial = {
   fresnelS,
   airyAi,
   airyBi,
+  carlsonRC,
+  carlsonRF,
+  carlsonRD,
+  carlsonRJ,
+  ellipticF,
+  ellipticEIncomplete,
+  ellipticPi,
 };

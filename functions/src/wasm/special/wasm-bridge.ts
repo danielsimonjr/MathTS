@@ -52,6 +52,12 @@ function getWasm(): WasmModule | null {
 // Rust-backend function type signatures (pointer-style calling convention).
 type RustJ01Fn = (xsPtr: number, n: number, outPtr: number) => number;
 type RustJnFn = (order: number, xsPtr: number, nElems: number, outPtr: number) => number;
+// Carlson R-form types (multiple input pointer arrays, element-wise).
+type RustRC2Fn = (xsPtr: number, ysPtr: number, n: number, outPtr: number) => number;
+type RustRF3Fn = (xsPtr: number, ysPtr: number, zsPtr: number, n: number, outPtr: number) => number;
+type RustRJ4Fn = (xsPtr: number, ysPtr: number, zsPtr: number, psPtr: number, n: number, outPtr: number) => number;
+type RustIncomplete2Fn = (phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
+type RustPi3Fn = (nsPtr: number, phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
 
 // ---------------------------------------------------------------------------
 // Pure-JS fallback implementations
@@ -544,6 +550,490 @@ export function lgammaDispatch(xs: Float64Array): Float64Array {
     }
   }
   return lgammaJS(xs);
+}
+
+// ===========================================================================
+// Carlson Symmetric Forms — Slice 6.4
+//
+// JS fallbacks mirror the duplication-theorem algorithm from
+// wasm-rust/crates/mathts-wasm/src/special/functions.rs :: carlson_*.
+// Numerical Recipes §6.11; tolerance 0.0015; ≤ 30 iterations.
+// ===========================================================================
+
+function _carlsonRC(x: number, y: number): number {
+  // RC is RF(x, y, y) — pure duplication, no external sum accumulation.
+  // Algorithm: Carlson (1995) §2, duplication theorem for RC.
+  // Reference: DLMF §19.20.3 — RC(x, y) = (1/2)∫_0^∞ (t+x)^{-1/2}(t+y)^{-1} dt
+  if (x < 0 || y <= 0) return NaN;
+  let xx = x;
+  let yy = y;
+  for (let i = 0; i < 50; i++) {
+    const lam = 2.0 * Math.sqrt(xx * yy) + yy;
+    xx = (xx + lam) / 4.0;
+    yy = (yy + lam) / 4.0;
+    const ave = (xx + 2.0 * yy) / 3.0;
+    const dx = (ave - xx) / ave;
+    const dy = (ave - yy) / ave;
+    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10) {
+      // Taylor series for RC (Carlson 1995, eq. 2.7)
+      const s = dx * dx * (3.0 + dx * (1.0 + dx * (0.75 + dx * (9.0 / 22.0))));
+      return (1.0 + s) / Math.sqrt(ave);
+    }
+  }
+  return 1.0 / Math.sqrt(yy);
+}
+
+function _carlsonRF(x: number, y: number, z: number): number {
+  if (x < 0 || y < 0 || z < 0) return NaN;
+  let xx = x;
+  let yy = y;
+  let zz = z;
+  for (let i = 0; i < 50; i++) {
+    const sx = Math.sqrt(xx);
+    const sy = Math.sqrt(yy);
+    const sz = Math.sqrt(zz);
+    const lam = sx * sy + sy * sz + sz * sx;
+    xx = (xx + lam) / 4.0;
+    yy = (yy + lam) / 4.0;
+    zz = (zz + lam) / 4.0;
+    const ave = (xx + yy + zz) / 3.0;
+    const dx = (ave - xx) / ave;
+    const dy = (ave - yy) / ave;
+    const dz = (ave - zz) / ave;
+    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10 && Math.abs(dz) < 1e-10) {
+      const e2 = dx * dy - dz * dz;
+      const e3 = dx * dy * dz;
+      return (1.0 + e2 * (-0.1 + (3.0 / 44.0) * e2 - (9.0 / 52.0) * e3) + e3 / 14.0) /
+        Math.sqrt(ave);
+    }
+  }
+  return 1.0 / Math.sqrt(zz);
+}
+
+function _carlsonRD(x: number, y: number, z: number): number {
+  if (x < 0 || y < 0 || z <= 0) return NaN;
+  if (x === 0 && y === 0) return NaN;
+  // Degenerate case: x=y=z — algorithm converges prematurely; return exact value.
+  if (x === y && y === z) return Math.pow(x, -1.5);
+  let xx = x;
+  let yy = y;
+  let zz = z;
+  let sum = 0.0;
+  let fac = 1.0;
+  for (let i = 0; i < 50; i++) {
+    const sx = Math.sqrt(xx);
+    const sy = Math.sqrt(yy);
+    const sz = Math.sqrt(zz);
+    const lam = sx * sy + sy * sz + sz * sx;
+    sum += fac / (sz * (zz + lam));
+    fac /= 4.0;
+    xx = (xx + lam) / 4.0;
+    yy = (yy + lam) / 4.0;
+    zz = (zz + lam) / 4.0;
+    const ave = (xx + yy + 3.0 * zz) / 5.0;
+    const dx = (ave - xx) / ave;
+    const dy = (ave - yy) / ave;
+    const dz = (ave - zz) / ave;
+    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10 && Math.abs(dz) < 1e-10) {
+      const xy = dx * dy;
+      const xz = dx * dz;
+      const yz = dy * dz;
+      const z2 = dz * dz;
+      const e2 = xy - xz - yz - z2;
+      const e3 = xy * dz + dz * (xz + yz);
+      const e4 = xy * z2;
+      const e5 = dz * z2 * dz;
+      return 3.0 * sum +
+        (fac * (1.0 + e2 * (-3.0 / 14.0) + e3 / 6.0 + e2 * e2 * (9.0 / 88.0) +
+          e4 * (-45.0 / 132.0) - e5 * (5.0 / 44.0) + e3 * e2 * (-3.0 / 44.0))) /
+        (ave * ave * Math.sqrt(ave));
+    }
+  }
+  return 3.0 * sum + fac / (zz * zz * Math.sqrt(zz));
+}
+
+function _carlsonRJ(x: number, y: number, z: number, p: number): number {
+  if (x < 0 || y < 0 || z < 0 || p === 0) return NaN;
+  let xx = x;
+  let yy = y;
+  let zz = z;
+  let pp = p;
+  let sum = 0.0;
+  let fac = 1.0;
+  for (let i = 0; i < 50; i++) {
+    const sx = Math.sqrt(xx);
+    const sy = Math.sqrt(yy);
+    const sz = Math.sqrt(zz);
+    const lam = sx * sy + sy * sz + sz * sx;
+    const alpha = pp * (sx + sy + sz) + sx * sy * sz;
+    const beta = pp * (pp + lam) * (pp + lam);
+    sum += fac * _carlsonRC(alpha * alpha, beta);
+    fac /= 4.0;
+    xx = (xx + lam) / 4.0;
+    yy = (yy + lam) / 4.0;
+    zz = (zz + lam) / 4.0;
+    pp = (pp + lam) / 4.0;
+    const ave = (xx + yy + zz + pp + pp) / 5.0;
+    const dx = (ave - xx) / ave;
+    const dy = (ave - yy) / ave;
+    const dz = (ave - zz) / ave;
+    const dp = (ave - pp) / ave;
+    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10 &&
+        Math.abs(dz) < 1e-10 && Math.abs(dp) < 1e-10) {
+      const xyz = dx * dy + dy * dz + dz * dx;
+      const p2 = dp * dp;
+      const e2 = xyz - 3.0 * p2;
+      const e3 = dx * dy * dz + 2.0 * xyz * dp - 3.0 * p2 * dp;
+      const e4 = (2.0 * dx * dy * dz + xyz * dp + 3.0 * p2 * dp) * dp;
+      const e5 = dx * dy * dz * p2;
+      return 3.0 * sum +
+        (fac * (1.0 + e2 * (-3.0 / 14.0) + e3 / 6.0 + e2 * e2 * (9.0 / 88.0) -
+          e4 * (45.0 / 132.0) + e5 * (-5.0 / 44.0) + e3 * e2 * (-3.0 / 44.0))) /
+        (ave * ave * Math.sqrt(ave));
+    }
+  }
+  return 3.0 * sum + fac / (pp * pp * Math.sqrt(pp));
+}
+
+// ---------------------------------------------------------------------------
+// Incomplete elliptic integrals via Carlson forms
+// ---------------------------------------------------------------------------
+
+function _ellipticFIncomplete(phi: number, m: number): number {
+  if (phi === 0) return 0;
+  const s = Math.sin(phi);
+  const c = Math.cos(phi);
+  const s2 = s * s;
+  const y = 1.0 - m * s2;
+  if (y < 0) return NaN;
+  return s * _carlsonRF(c * c, y, 1.0);
+}
+
+function _ellipticEIncomplete(phi: number, m: number): number {
+  if (phi === 0) return 0;
+  const s = Math.sin(phi);
+  const c = Math.cos(phi);
+  const s2 = s * s;
+  const c2 = c * c;
+  const y = 1.0 - m * s2;
+  if (y < 0) return NaN;
+  return s * _carlsonRF(c2, y, 1.0) - (m / 3.0) * s * s2 * _carlsonRD(c2, y, 1.0);
+}
+
+function _ellipticPiIncomplete(n: number, phi: number, m: number): number {
+  if (phi === 0) return 0;
+  const s = Math.sin(phi);
+  const c = Math.cos(phi);
+  const s2 = s * s;
+  const c2 = c * c;
+  const y = 1.0 - m * s2;
+  const q = 1.0 - n * s2;
+  if (y < 0 || q <= 0) return NaN;
+  return s * _carlsonRF(c2, y, 1.0) + (n / 3.0) * s * s2 * _carlsonRJ(c2, y, 1.0, q);
+}
+
+// ---------------------------------------------------------------------------
+// JS fallback array implementations
+// ---------------------------------------------------------------------------
+
+export function carlsonRCJS(xs: Float64Array, ys: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i = 0; i < xs.length; i++) out[i] = _carlsonRC(xs[i], ys[i]);
+  return out;
+}
+
+export function carlsonRFJS(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i = 0; i < xs.length; i++) out[i] = _carlsonRF(xs[i], ys[i], zs[i]);
+  return out;
+}
+
+export function carlsonRDJS(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i = 0; i < xs.length; i++) out[i] = _carlsonRD(xs[i], ys[i], zs[i]);
+  return out;
+}
+
+export function carlsonRJJS(xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i = 0; i < xs.length; i++) out[i] = _carlsonRJ(xs[i], ys[i], zs[i], ps[i]);
+  return out;
+}
+
+export function ellipticFIncompleteJS(phis: Float64Array, ms: Float64Array): Float64Array {
+  const out = new Float64Array(phis.length);
+  for (let i = 0; i < phis.length; i++) out[i] = _ellipticFIncomplete(phis[i], ms[i]);
+  return out;
+}
+
+export function ellipticEIncompleteJS(phis: Float64Array, ms: Float64Array): Float64Array {
+  const out = new Float64Array(phis.length);
+  for (let i = 0; i < phis.length; i++) out[i] = _ellipticEIncomplete(phis[i], ms[i]);
+  return out;
+}
+
+export function ellipticPiIncompleteJS(ns: Float64Array, phis: Float64Array, ms: Float64Array): Float64Array {
+  const out = new Float64Array(ns.length);
+  for (let i = 0; i < ns.length; i++) out[i] = _ellipticPiIncomplete(ns[i], phis[i], ms[i]);
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Scalar exports (for TypedFunction scalar overloads)
+// ---------------------------------------------------------------------------
+
+export function carlsonRCScalar(x: number, y: number): number { return _carlsonRC(x, y); }
+export function carlsonRFScalar(x: number, y: number, z: number): number { return _carlsonRF(x, y, z); }
+export function carlsonRDScalar(x: number, y: number, z: number): number { return _carlsonRD(x, y, z); }
+export function carlsonRJScalar(x: number, y: number, z: number, p: number): number { return _carlsonRJ(x, y, z, p); }
+export function ellipticFIncompleteScalar(phi: number, m: number): number { return _ellipticFIncomplete(phi, m); }
+export function ellipticEIncompleteScalar(phi: number, m: number): number { return _ellipticEIncomplete(phi, m); }
+export function ellipticPiIncompleteScalar(n: number, phi: number, m: number): number { return _ellipticPiIncomplete(n, phi, m); }
+
+// ---------------------------------------------------------------------------
+// WASM dispatch helpers — Carlson R-forms (Slice 6.4)
+//
+// Multi-array Rust kernels use pointer-style ABI with multiple input ptrs.
+// AS kernels use typed-array calling convention (same function signatures
+// as the AS exports in assembly/src/special.ts).
+// ---------------------------------------------------------------------------
+
+/** Dispatch RC(x, y) element-wise — Rust WASM ≥ threshold, AS fallback, JS fallback. */
+export function carlsonRCDispatch(xs: Float64Array, ys: Float64Array): Float64Array {
+  const n = xs.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['carlson_rc_f64'] as RustRC2Fn | undefined;
+        if (typeof rustFn === 'function') {
+          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) return new Float64Array(outAlloc.array);
+          } finally {
+            wasmLoader.release(xsAlloc.ptr, true);
+            wasmLoader.release(ysAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch { /* fall through */ }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['carlson_rc_f64_as'] as
+          ((xs: Float64Array, ys: Float64Array) => Float64Array) | undefined;
+        if (typeof asFn === 'function') return asFn(xs, ys);
+      } catch { /* fall through */ }
+    }
+  }
+  return carlsonRCJS(xs, ys);
+}
+
+/** Dispatch RF(x, y, z) element-wise. */
+export function carlsonRFDispatch(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
+  const n = xs.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['carlson_rf_f64'] as RustRF3Fn | undefined;
+        if (typeof rustFn === 'function') {
+          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
+          const zsAlloc = wasmLoader.allocateFloat64Array(zs);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, zsAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) return new Float64Array(outAlloc.array);
+          } finally {
+            wasmLoader.release(xsAlloc.ptr, true);
+            wasmLoader.release(ysAlloc.ptr, true);
+            wasmLoader.release(zsAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch { /* fall through */ }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['carlson_rf_f64_as'] as
+          ((xs: Float64Array, ys: Float64Array, zs: Float64Array) => Float64Array) | undefined;
+        if (typeof asFn === 'function') return asFn(xs, ys, zs);
+      } catch { /* fall through */ }
+    }
+  }
+  return carlsonRFJS(xs, ys, zs);
+}
+
+/** Dispatch RD(x, y, z) element-wise. */
+export function carlsonRDDispatch(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
+  const n = xs.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['carlson_rd_f64'] as RustRF3Fn | undefined;
+        if (typeof rustFn === 'function') {
+          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
+          const zsAlloc = wasmLoader.allocateFloat64Array(zs);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, zsAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) return new Float64Array(outAlloc.array);
+          } finally {
+            wasmLoader.release(xsAlloc.ptr, true);
+            wasmLoader.release(ysAlloc.ptr, true);
+            wasmLoader.release(zsAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch { /* fall through */ }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['carlson_rd_f64_as'] as
+          ((xs: Float64Array, ys: Float64Array, zs: Float64Array) => Float64Array) | undefined;
+        if (typeof asFn === 'function') return asFn(xs, ys, zs);
+      } catch { /* fall through */ }
+    }
+  }
+  return carlsonRDJS(xs, ys, zs);
+}
+
+/** Dispatch RJ(x, y, z, p) element-wise. */
+export function carlsonRJDispatch(xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array): Float64Array {
+  const n = xs.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['carlson_rj_f64'] as RustRJ4Fn | undefined;
+        if (typeof rustFn === 'function') {
+          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
+          const zsAlloc = wasmLoader.allocateFloat64Array(zs);
+          const psAlloc = wasmLoader.allocateFloat64Array(ps);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, zsAlloc.ptr, psAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) return new Float64Array(outAlloc.array);
+          } finally {
+            wasmLoader.release(xsAlloc.ptr, true);
+            wasmLoader.release(ysAlloc.ptr, true);
+            wasmLoader.release(zsAlloc.ptr, true);
+            wasmLoader.release(psAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch { /* fall through */ }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['carlson_rj_f64_as'] as
+          ((xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array) => Float64Array) | undefined;
+        if (typeof asFn === 'function') return asFn(xs, ys, zs, ps);
+      } catch { /* fall through */ }
+    }
+  }
+  return carlsonRJJS(xs, ys, zs, ps);
+}
+
+/** Dispatch F(φ, m) element-wise. */
+export function ellipticFIncompleteDispatch(phis: Float64Array, ms: Float64Array): Float64Array {
+  const n = phis.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_f_incomplete_f64'] as RustIncomplete2Fn | undefined;
+        if (typeof rustFn === 'function') {
+          const phisAlloc = wasmLoader.allocateFloat64Array(phis);
+          const msAlloc = wasmLoader.allocateFloat64Array(ms);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(phisAlloc.ptr, msAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) return new Float64Array(outAlloc.array);
+          } finally {
+            wasmLoader.release(phisAlloc.ptr, true);
+            wasmLoader.release(msAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch { /* fall through */ }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_f_incomplete_f64_as'] as
+          ((phis: Float64Array, ms: Float64Array) => Float64Array) | undefined;
+        if (typeof asFn === 'function') return asFn(phis, ms);
+      } catch { /* fall through */ }
+    }
+  }
+  return ellipticFIncompleteJS(phis, ms);
+}
+
+/** Dispatch E(φ, m) (incomplete) element-wise. */
+export function ellipticEIncompleteDispatch(phis: Float64Array, ms: Float64Array): Float64Array {
+  const n = phis.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_e_incomplete_f64'] as RustIncomplete2Fn | undefined;
+        if (typeof rustFn === 'function') {
+          const phisAlloc = wasmLoader.allocateFloat64Array(phis);
+          const msAlloc = wasmLoader.allocateFloat64Array(ms);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(phisAlloc.ptr, msAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) return new Float64Array(outAlloc.array);
+          } finally {
+            wasmLoader.release(phisAlloc.ptr, true);
+            wasmLoader.release(msAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch { /* fall through */ }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_e_incomplete_f64_as'] as
+          ((phis: Float64Array, ms: Float64Array) => Float64Array) | undefined;
+        if (typeof asFn === 'function') return asFn(phis, ms);
+      } catch { /* fall through */ }
+    }
+  }
+  return ellipticEIncompleteJS(phis, ms);
+}
+
+/** Dispatch Π(n, φ, m) element-wise. */
+export function ellipticPiIncompleteDispatch(ns: Float64Array, phis: Float64Array, ms: Float64Array): Float64Array {
+  const n = ns.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_pi_incomplete_f64'] as RustPi3Fn | undefined;
+        if (typeof rustFn === 'function') {
+          const nsAlloc = wasmLoader.allocateFloat64Array(ns);
+          const phisAlloc = wasmLoader.allocateFloat64Array(phis);
+          const msAlloc = wasmLoader.allocateFloat64Array(ms);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(nsAlloc.ptr, phisAlloc.ptr, msAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) return new Float64Array(outAlloc.array);
+          } finally {
+            wasmLoader.release(nsAlloc.ptr, true);
+            wasmLoader.release(phisAlloc.ptr, true);
+            wasmLoader.release(msAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch { /* fall through */ }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_pi_incomplete_f64_as'] as
+          ((ns: Float64Array, phis: Float64Array, ms: Float64Array) => Float64Array) | undefined;
+        if (typeof asFn === 'function') return asFn(ns, phis, ms);
+      } catch { /* fall through */ }
+    }
+  }
+  return ellipticPiIncompleteJS(ns, phis, ms);
+}
+
+export function resetCarlsonWasm(): void {
+  wasmLoader.reset();
 }
 
 /**

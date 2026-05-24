@@ -433,6 +433,13 @@ export {
   elliptic_k_f64,
   elliptic_e_f64,
   lgamma_f64,
+  carlson_rc_f64,
+  carlson_rf_f64,
+  carlson_rd_f64,
+  carlson_rj_f64,
+  elliptic_f_incomplete_f64,
+  elliptic_e_incomplete_f64,
+  elliptic_pi_incomplete_f64,
 } from './special';
 
 // =============================================================================

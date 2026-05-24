@@ -23,7 +23,9 @@ use alloc::vec::Vec;
 // ------------------------------------------------------------------ //
 
 use crate::special::functions::{
-    airy_ai, airy_bi, besselJ0, besselJ1, besselY0, besselY1, elliptic_e, elliptic_k, lgamma,
+    airy_ai, airy_bi, besselJ0, besselJ1, besselY0, besselY1, carlson_rc, carlson_rd, carlson_rf,
+    carlson_rj, elliptic_e, elliptic_e_incomplete, elliptic_f_incomplete, elliptic_k,
+    elliptic_pi_incomplete, lgamma,
 };
 
 /// Scalar J_n(x) via forward or Miller backward recurrence.
@@ -281,6 +283,157 @@ pub unsafe extern "C" fn elliptic_e_f64(ms_ptr: *const f64, n: i32, out_ptr: *mu
     }
     for i in 0..n as usize {
         *out_ptr.add(i) = elliptic_e(*ms_ptr.add(i));
+    }
+    n
+}
+
+// ------------------------------------------------------------------ //
+// Carlson R-form array kernels (Slice 6.4)                           //
+//                                                                    //
+// Naming convention: <name>_f64(args_ptr..., n, out_ptr) → n | -1   //
+// Matches the pointer-ABI used by elliptic_k_f64 / elliptic_e_f64.  //
+//                                                                    //
+// RC(x, y): 2-scalar input + element count + output pointer.        //
+// RD/RF:    3-scalar inputs. RJ: 4-scalar inputs.                   //
+// Incomplete integrals: (phi_ptr, m_ptr, n, out_ptr) or similar.    //
+//                                                                    //
+// For multi-argument functions we adopt the convention that the      //
+// *last* argument is the varying one — the earlier args are scalars. //
+// This matches the pattern used by bessel_j_f64 (fixed order).      //
+// For the 3- and 4-argument Carlson forms we provide pair arrays:   //
+//   carlson_rf_f64(xs_ptr, ys_ptr, zs_ptr, n, out_ptr)             //
+// so all three arguments vary element-wise.                          //
+// ------------------------------------------------------------------ //
+
+/// Apply RC(x, y) element-wise. xs and ys must each have n elements.
+/// Returns n on success, -1 if n ≤ 0.
+#[no_mangle]
+pub unsafe extern "C" fn carlson_rc_f64(
+    xs_ptr: *const f64,
+    ys_ptr: *const f64,
+    n: i32,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = carlson_rc(*xs_ptr.add(i), *ys_ptr.add(i));
+    }
+    n
+}
+
+/// Apply RF(x, y, z) element-wise. All three arrays must have n elements.
+/// Returns n on success, -1 if n ≤ 0.
+#[no_mangle]
+pub unsafe extern "C" fn carlson_rf_f64(
+    xs_ptr: *const f64,
+    ys_ptr: *const f64,
+    zs_ptr: *const f64,
+    n: i32,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = carlson_rf(*xs_ptr.add(i), *ys_ptr.add(i), *zs_ptr.add(i));
+    }
+    n
+}
+
+/// Apply RD(x, y, z) element-wise. All three arrays must have n elements.
+/// Returns n on success, -1 if n ≤ 0.
+#[no_mangle]
+pub unsafe extern "C" fn carlson_rd_f64(
+    xs_ptr: *const f64,
+    ys_ptr: *const f64,
+    zs_ptr: *const f64,
+    n: i32,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = carlson_rd(*xs_ptr.add(i), *ys_ptr.add(i), *zs_ptr.add(i));
+    }
+    n
+}
+
+/// Apply RJ(x, y, z, p) element-wise. All four arrays must have n elements.
+/// Returns n on success, -1 if n ≤ 0.
+#[no_mangle]
+pub unsafe extern "C" fn carlson_rj_f64(
+    xs_ptr: *const f64,
+    ys_ptr: *const f64,
+    zs_ptr: *const f64,
+    ps_ptr: *const f64,
+    n: i32,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) =
+            carlson_rj(*xs_ptr.add(i), *ys_ptr.add(i), *zs_ptr.add(i), *ps_ptr.add(i));
+    }
+    n
+}
+
+/// Apply F(φ, m) element-wise. phis and ms must each have n elements.
+/// Returns n on success, -1 if n ≤ 0.
+#[no_mangle]
+pub unsafe extern "C" fn elliptic_f_incomplete_f64(
+    phis_ptr: *const f64,
+    ms_ptr: *const f64,
+    n: i32,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = elliptic_f_incomplete(*phis_ptr.add(i), *ms_ptr.add(i));
+    }
+    n
+}
+
+/// Apply E(φ, m) (incomplete) element-wise. phis and ms must each have n elements.
+/// Returns n on success, -1 if n ≤ 0.
+#[no_mangle]
+pub unsafe extern "C" fn elliptic_e_incomplete_f64(
+    phis_ptr: *const f64,
+    ms_ptr: *const f64,
+    n: i32,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = elliptic_e_incomplete(*phis_ptr.add(i), *ms_ptr.add(i));
+    }
+    n
+}
+
+/// Apply Π(n_param, φ, m) element-wise. ns, phis, ms must each have n elements.
+/// Returns n on success, -1 if n ≤ 0.
+#[no_mangle]
+pub unsafe extern "C" fn elliptic_pi_incomplete_f64(
+    ns_ptr: *const f64,
+    phis_ptr: *const f64,
+    ms_ptr: *const f64,
+    n: i32,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) =
+            elliptic_pi_incomplete(*ns_ptr.add(i), *phis_ptr.add(i), *ms_ptr.add(i));
     }
     n
 }

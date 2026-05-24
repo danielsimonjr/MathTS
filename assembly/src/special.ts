@@ -585,3 +585,250 @@ export function elliptic_e_f64(ms: Float64Array): Float64Array {
   for (let i: i32 = 0; i < ms.length; i++) out[i] = _ellipticE(ms[i]);
   return out;
 }
+
+// ===========================================================================
+// Carlson Symmetric Forms — Slice 6.4
+//
+// Mirrors wasm-rust/crates/mathts-wasm/src/special/functions.rs :: carlson_*.
+// Duplication-theorem iterative algorithm (Numerical Recipes §6.11).
+// Tolerance 0.0015 per NR; ≤ 30 iterations for f64 precision.
+// ===========================================================================
+
+function _carlsonRC(x: f64, y: f64): f64 {
+  // RC is RF(x, y, y) — pure duplication, no external sum accumulation.
+  // Algorithm: Carlson (1995) §2, duplication theorem for RC.
+  // Reference: DLMF §19.20.3 — RC(x, y) = (1/2)∫_0^∞ (t+x)^{-1/2}(t+y)^{-1} dt
+  if (x < 0.0 || y <= 0.0) return NaN;
+  let xx: f64 = x;
+  let yy: f64 = y;
+  for (let i: i32 = 0; i < 50; i++) {
+    const lam: f64 = 2.0 * Math.sqrt(xx * yy) + yy;
+    xx = (xx + lam) / 4.0;
+    yy = (yy + lam) / 4.0;
+    const ave: f64 = (xx + 2.0 * yy) / 3.0;
+    const dx: f64 = (ave - xx) / ave;
+    const dy: f64 = (ave - yy) / ave;
+    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10) {
+      // Taylor series for RC (Carlson 1995, eq. 2.7)
+      const s: f64 = dx * dx * (3.0 + dx * (1.0 + dx * (0.75 + dx * (9.0 / 22.0))));
+      return (1.0 + s) / Math.sqrt(ave);
+    }
+  }
+  return 1.0 / Math.sqrt(yy);
+}
+
+function _carlsonRF(x: f64, y: f64, z: f64): f64 {
+  if (x < 0.0 || y < 0.0 || z < 0.0) return NaN;
+  let xx: f64 = x;
+  let yy: f64 = y;
+  let zz: f64 = z;
+  for (let i: i32 = 0; i < 50; i++) {
+    const sx: f64 = Math.sqrt(xx);
+    const sy: f64 = Math.sqrt(yy);
+    const sz: f64 = Math.sqrt(zz);
+    const lam: f64 = sx * sy + sy * sz + sz * sx;
+    xx = (xx + lam) / 4.0;
+    yy = (yy + lam) / 4.0;
+    zz = (zz + lam) / 4.0;
+    const ave: f64 = (xx + yy + zz) / 3.0;
+    const dx: f64 = (ave - xx) / ave;
+    const dy: f64 = (ave - yy) / ave;
+    const dz: f64 = (ave - zz) / ave;
+    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10 && Math.abs(dz) < 1e-10) {
+      const e2: f64 = dx * dy - dz * dz;
+      const e3: f64 = dx * dy * dz;
+      return (1.0 + e2 * (-0.1 + e2 * (3.0 / 44.0) - e3 * (9.0 / 52.0)) + e3 / 14.0) /
+        Math.sqrt(ave);
+    }
+  }
+  return 1.0 / Math.sqrt(zz);
+}
+
+function _carlsonRD(x: f64, y: f64, z: f64): f64 {
+  if (x < 0.0 || y < 0.0 || z <= 0.0) return NaN;
+  if (x == 0.0 && y == 0.0) return NaN;
+  // Degenerate case: x=y=z — algorithm converges prematurely; return exact value.
+  if (x == y && y == z) return Math.pow(x, -1.5);
+  let xx: f64 = x;
+  let yy: f64 = y;
+  let zz: f64 = z;
+  let sum: f64 = 0.0;
+  let fac: f64 = 1.0;
+  for (let i: i32 = 0; i < 50; i++) {
+    const sx: f64 = Math.sqrt(xx);
+    const sy: f64 = Math.sqrt(yy);
+    const sz: f64 = Math.sqrt(zz);
+    const lam: f64 = sx * sy + sy * sz + sz * sx;
+    sum += fac / (sz * (zz + lam));
+    fac /= 4.0;
+    xx = (xx + lam) / 4.0;
+    yy = (yy + lam) / 4.0;
+    zz = (zz + lam) / 4.0;
+    const ave: f64 = (xx + yy + 3.0 * zz) / 5.0;
+    const dx: f64 = (ave - xx) / ave;
+    const dy: f64 = (ave - yy) / ave;
+    const dz: f64 = (ave - zz) / ave;
+    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10 && Math.abs(dz) < 1e-10) {
+      const xy: f64 = dx * dy;
+      const xz: f64 = dx * dz;
+      const yz: f64 = dy * dz;
+      const z2: f64 = dz * dz;
+      const e2: f64 = xy - xz - yz - z2;
+      const e3: f64 = xy * dz + dz * (xz + yz);
+      const e4: f64 = xy * z2;
+      const e5: f64 = dz * z2 * dz;
+      return 3.0 * sum +
+        fac * (1.0 + e2 * (-3.0 / 14.0) + e3 / 6.0 + e2 * e2 * (9.0 / 88.0) +
+          e4 * (-45.0 / 132.0) - e5 * (5.0 / 44.0) + e3 * e2 * (-3.0 / 44.0)) /
+        (ave * ave * Math.sqrt(ave));
+    }
+  }
+  return 3.0 * sum + fac / (zz * zz * Math.sqrt(zz));
+}
+
+function _carlsonRJ(x: f64, y: f64, z: f64, p: f64): f64 {
+  if (x < 0.0 || y < 0.0 || z < 0.0 || p == 0.0) return NaN;
+  let xx: f64 = x;
+  let yy: f64 = y;
+  let zz: f64 = z;
+  let pp: f64 = p;
+  let sum: f64 = 0.0;
+  let fac: f64 = 1.0;
+  for (let i: i32 = 0; i < 50; i++) {
+    const sx: f64 = Math.sqrt(xx);
+    const sy: f64 = Math.sqrt(yy);
+    const sz: f64 = Math.sqrt(zz);
+    const lam: f64 = sx * sy + sy * sz + sz * sx;
+    const alpha: f64 = pp * (sx + sy + sz) + sx * sy * sz;
+    const alpha2: f64 = alpha * alpha;
+    const beta: f64 = pp * (pp + lam) * (pp + lam);
+    sum += fac * _carlsonRC(alpha2, beta);
+    fac /= 4.0;
+    xx = (xx + lam) / 4.0;
+    yy = (yy + lam) / 4.0;
+    zz = (zz + lam) / 4.0;
+    pp = (pp + lam) / 4.0;
+    const ave: f64 = (xx + yy + zz + pp + pp) / 5.0;
+    const dx: f64 = (ave - xx) / ave;
+    const dy: f64 = (ave - yy) / ave;
+    const dz: f64 = (ave - zz) / ave;
+    const dp: f64 = (ave - pp) / ave;
+    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10 &&
+        Math.abs(dz) < 1e-10 && Math.abs(dp) < 1e-10) {
+      const xyz: f64 = dx * dy + dy * dz + dz * dx;
+      const p2: f64 = dp * dp;
+      const e2: f64 = xyz - 3.0 * p2;
+      const e3: f64 = dx * dy * dz + 2.0 * xyz * dp - 3.0 * p2 * dp;
+      const e4: f64 = (2.0 * dx * dy * dz + xyz * dp + 3.0 * p2 * dp) * dp;
+      const e5: f64 = dx * dy * dz * p2;
+      return 3.0 * sum +
+        fac * (1.0 + e2 * (-3.0 / 14.0) + e3 / 6.0 + e2 * e2 * (9.0 / 88.0) -
+          e4 * (45.0 / 132.0) + e5 * (-5.0 / 44.0) + e3 * e2 * (-3.0 / 44.0)) /
+        (ave * ave * Math.sqrt(ave));
+    }
+  }
+  return 3.0 * sum + fac / (pp * pp * Math.sqrt(pp));
+}
+
+// ===========================================================================
+// Incomplete elliptic integrals via Carlson forms (Slice 6.4)
+//
+// DLMF §19.25 Legendre–Carlson identities:
+//   F(φ, m) = sin(φ) · RF(cos²φ, 1−m·sin²φ, 1)
+//   E(φ, m) = sin(φ) · RF(c², 1−m·s², 1) − (m/3)·s³ · RD(c², 1−m·s², 1)
+//   Π(n,φ,m) = sin(φ) · RF(c², 1−m·s², 1) + (n/3)·s³ · RJ(c², 1−m·s², 1, 1−n·s²)
+// ===========================================================================
+
+function _ellipticFIncomplete(phi: f64, m: f64): f64 {
+  if (phi == 0.0) return 0.0;
+  const s: f64 = Math.sin(phi);
+  const c: f64 = Math.cos(phi);
+  const s2: f64 = s * s;
+  const y: f64 = 1.0 - m * s2;
+  if (y < 0.0) return NaN;
+  return s * _carlsonRF(c * c, y, 1.0);
+}
+
+function _ellipticEIncomplete(phi: f64, m: f64): f64 {
+  if (phi == 0.0) return 0.0;
+  const s: f64 = Math.sin(phi);
+  const c: f64 = Math.cos(phi);
+  const s2: f64 = s * s;
+  const c2: f64 = c * c;
+  const y: f64 = 1.0 - m * s2;
+  if (y < 0.0) return NaN;
+  return s * _carlsonRF(c2, y, 1.0) - (m / 3.0) * s * s2 * _carlsonRD(c2, y, 1.0);
+}
+
+function _ellipticPiIncomplete(n: f64, phi: f64, m: f64): f64 {
+  if (phi == 0.0) return 0.0;
+  const s: f64 = Math.sin(phi);
+  const c: f64 = Math.cos(phi);
+  const s2: f64 = s * s;
+  const c2: f64 = c * c;
+  const y: f64 = 1.0 - m * s2;
+  const q: f64 = 1.0 - n * s2;
+  if (y < 0.0 || q <= 0.0) return NaN;
+  return s * _carlsonRF(c2, y, 1.0) + (n / 3.0) * s * s2 * _carlsonRJ(c2, y, 1.0, q);
+}
+
+// ===========================================================================
+// Array exports — Carlson forms (Slice 6.4)
+// Typed-array calling convention: all input arrays must have the same length.
+// ===========================================================================
+
+/** Apply RC(x, y) element-wise. */
+export function carlson_rc_f64(xs: Float64Array, ys: Float64Array): Float64Array {
+  const n: i32 = xs.length;
+  const out = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) out[i] = _carlsonRC(xs[i], ys[i]);
+  return out;
+}
+
+/** Apply RF(x, y, z) element-wise. */
+export function carlson_rf_f64(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
+  const n: i32 = xs.length;
+  const out = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) out[i] = _carlsonRF(xs[i], ys[i], zs[i]);
+  return out;
+}
+
+/** Apply RD(x, y, z) element-wise. */
+export function carlson_rd_f64(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
+  const n: i32 = xs.length;
+  const out = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) out[i] = _carlsonRD(xs[i], ys[i], zs[i]);
+  return out;
+}
+
+/** Apply RJ(x, y, z, p) element-wise. */
+export function carlson_rj_f64(xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array): Float64Array {
+  const n: i32 = xs.length;
+  const out = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) out[i] = _carlsonRJ(xs[i], ys[i], zs[i], ps[i]);
+  return out;
+}
+
+/** Apply F(φ, m) element-wise. */
+export function elliptic_f_incomplete_f64(phis: Float64Array, ms: Float64Array): Float64Array {
+  const n: i32 = phis.length;
+  const out = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) out[i] = _ellipticFIncomplete(phis[i], ms[i]);
+  return out;
+}
+
+/** Apply E(φ, m) (incomplete) element-wise. */
+export function elliptic_e_incomplete_f64(phis: Float64Array, ms: Float64Array): Float64Array {
+  const n: i32 = phis.length;
+  const out = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) out[i] = _ellipticEIncomplete(phis[i], ms[i]);
+  return out;
+}
+
+/** Apply Π(n, φ, m) element-wise. */
+export function elliptic_pi_incomplete_f64(ns: Float64Array, phis: Float64Array, ms: Float64Array): Float64Array {
+  const n: i32 = ns.length;
+  const out = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) out[i] = _ellipticPiIncomplete(ns[i], phis[i], ms[i]);
+  return out;
+}
