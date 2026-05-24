@@ -13,6 +13,8 @@
 import {
   polyMulDispatch,
   polyDivModDispatch,
+  resultantDispatch,
+  discriminantDispatch,
   WASM_POLY_THRESHOLD,
 } from '../wasm/poly/wasm-bridge.js';
 
@@ -392,6 +394,12 @@ export function discriminant(coeffs: number[]): f64 {
   if (deg < 1) {
     throw new Error('Discriminant requires polynomial of degree >= 1');
   }
+
+  // WASM fast path for large inputs.
+  if (t.length >= WASM_POLY_THRESHOLD) {
+    return discriminantDispatch(new Float64Array(t));
+  }
+
   if (deg === 1) {
     return 1; // Linear polynomials: discriminant is 1 (always one root)
   }
@@ -1096,6 +1104,11 @@ export function resultant(p: number[], q: number[]): f64 {
   if (m === 0 && n === 0) return 1;
   if (m === 0) return Math.pow(pt[0], n);
   if (n === 0) return Math.pow(qt[0], m);
+
+  // WASM fast path for large inputs.
+  if (pt.length >= WASM_POLY_THRESHOLD || qt.length >= WASM_POLY_THRESHOLD) {
+    return resultantDispatch(new Float64Array(pt), new Float64Array(qt));
+  }
 
   // Build Sylvester matrix (n+m) x (n+m)
   const size = m + n;

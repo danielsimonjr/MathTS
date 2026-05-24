@@ -21,6 +21,8 @@ import { fileURLToPath } from 'url';
 import {
   polyMulDispatch,
   polyDivModDispatch,
+  discriminantDispatch,
+  resultantDispatch,
   WASM_POLY_THRESHOLD,
 } from '../../../functions/src/wasm/poly/wasm-bridge.js';
 import { wasmLoader } from '../../../functions/src/wasm/WasmLoader.js';
@@ -60,6 +62,78 @@ function jsDivMod(num: Float64Array, den: Float64Array): void {
     for (let j = 0; j < den.length; j++)
       work[i - den.length + 1 + j] -= quot[i - den.length + 1] * den[j];
   }
+}
+
+/** Pure-JS resultant (Sylvester-matrix det) baseline. */
+function jsResultant(p: Float64Array, q: Float64Array): number {
+  let pm = p.length - 1;
+  while (pm > 0 && p[pm] === 0) pm--;
+  let qn = q.length - 1;
+  while (qn > 0 && q[qn] === 0) qn--;
+  const m = pm;
+  const n = qn;
+  if (m === 0 && n === 0) return 1;
+  if (m === 0) return Math.pow(p[0], n);
+  if (n === 0) return Math.pow(q[0], m);
+  const size = m + n;
+  const flat: number[] = new Array(size * size).fill(0);
+  for (let i = 0; i < n; i++) for (let j = 0; j <= m; j++) flat[i * size + (i + j)] = p[m - j];
+  for (let i = 0; i < m; i++)
+    for (let j = 0; j <= n; j++) flat[(n + i) * size + (i + j)] = q[n - j];
+  let det = 1;
+  for (let col = 0; col < size; col++) {
+    let maxRow = col;
+    let maxVal = Math.abs(flat[col * size + col]);
+    for (let row = col + 1; row < size; row++) {
+      const v = Math.abs(flat[row * size + col]);
+      if (v > maxVal) {
+        maxVal = v;
+        maxRow = row;
+      }
+    }
+    if (maxVal < 1e-15) return 0;
+    if (maxRow !== col) {
+      for (let k = 0; k < size; k++) {
+        const tmp = flat[col * size + k];
+        flat[col * size + k] = flat[maxRow * size + k];
+        flat[maxRow * size + k] = tmp;
+      }
+      det = -det;
+    }
+    det *= flat[col * size + col];
+    for (let row = col + 1; row < size; row++) {
+      const factor = flat[row * size + col] / flat[col * size + col];
+      for (let k = col; k < size; k++) flat[row * size + k] -= factor * flat[col * size + k];
+    }
+  }
+  return det;
+}
+
+/** Pure-JS discriminant baseline. */
+function jsDiscriminant(p: Float64Array): number {
+  let end = p.length - 1;
+  while (end > 0 && p[end] === 0) end--;
+  const t = p.slice(0, end + 1);
+  const deg = t.length - 1;
+  if (deg < 1) return NaN;
+  if (deg === 1) return 1;
+  if (deg === 2) return t[1] * t[1] - 4 * t[2] * t[0];
+  if (deg === 3) {
+    const [d, c, b, a] = [t[0], t[1], t[2], t[3]];
+    return (
+      18 * a * b * c * d -
+      4 * b * b * b * d +
+      b * b * c * c -
+      4 * a * c * c * c -
+      27 * a * a * d * d
+    );
+  }
+  const fp = new Float64Array(deg);
+  for (let i = 1; i <= deg; i++) fp[i - 1] = t[i] * i;
+  const res = jsResultant(t, fp);
+  const an = t[t.length - 1];
+  const sign = ((deg * (deg - 1)) / 2) % 2 === 0 ? 1 : -1;
+  return (sign * res) / an;
 }
 
 function bench(label: string, fn: () => unknown, runs: number): number {
@@ -112,6 +186,30 @@ async function run(): Promise<void> {
     } else {
       console.log(
         `  → JS div wins by ${(wasmDivT / jsDivT).toFixed(2)}× (expected below threshold)`
+      );
+    }
+
+    // discriminant / resultant (Slice 4.5)
+    // Use degree-n polynomial for discriminant, pair for resultant.
+    const jsDiscT = bench('discriminant JS baseline', () => jsDiscriminant(a), RUNS);
+    const wasmDiscT = bench('discriminant WASM dispatch', () => discriminantDispatch(a), RUNS);
+
+    if (wasmDiscT < jsDiscT) {
+      console.log(`  → WASM disc wins by ${(jsDiscT / wasmDiscT).toFixed(2)}×`);
+    } else {
+      console.log(
+        `  → JS disc wins by ${(wasmDiscT / jsDiscT).toFixed(2)}× (expected below threshold)`
+      );
+    }
+
+    const jsResT = bench('resultant JS baseline', () => jsResultant(a, b), RUNS);
+    const wasmResT = bench('resultant WASM dispatch', () => resultantDispatch(a, b), RUNS);
+
+    if (wasmResT < jsResT) {
+      console.log(`  → WASM res wins by ${(jsResT / wasmResT).toFixed(2)}×`);
+    } else {
+      console.log(
+        `  → JS res wins by ${(wasmResT / jsResT).toFixed(2)}× (expected below threshold)`
       );
     }
   }

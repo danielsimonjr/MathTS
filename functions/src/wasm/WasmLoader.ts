@@ -591,6 +591,15 @@ export interface WasmModule {
   poly_mul_f64_as?: (a: Float64Array, b: Float64Array) => Float64Array;
   poly_div_mod_f64_as?: (num: Float64Array, den: Float64Array) => Float64Array;
 
+  // Polynomial scalar kernels (Slice 4.5).
+  // Rust backend: pointer-style, returns a scalar f64.
+  // AS  backend: typed-array calling convention, returns f64.
+  poly_resultant_f64?: (pPtr: number, pLen: number, qPtr: number, qLen: number) => number;
+  poly_discriminant_f64?: (pPtr: number, pLen: number) => number;
+  // AS-backend variants (typed-array calling convention).
+  poly_resultant_f64_as?: (p: Float64Array, q: Float64Array) => number;
+  poly_discriminant_f64_as?: (p: Float64Array) => number;
+
   // Tridiagonal-solve kernel (Slice 3.10b).
   // Rust backend: pointer-style
   //   (diag_ptr, lower_ptr, upper_ptr, rhs_ptr, n, out_ptr) → n (or -1 on singular).

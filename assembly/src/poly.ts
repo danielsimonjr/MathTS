@@ -39,6 +39,91 @@ export function poly_mul_f64(a: Float64Array, b: Float64Array): Float64Array {
 }
 
 // ---------------------------------------------------------------------------
+// Internal helpers for resultant / discriminant
+// ---------------------------------------------------------------------------
+
+/** Trim trailing zero coefficients, keeping at least one element. */
+function trimCoeffs(c: Float64Array): Float64Array {
+  if (c.length == 0) {
+    const z = new Float64Array(1);
+    z[0] = 0.0;
+    return z;
+  }
+  let end: i32 = c.length - 1;
+  while (end > 0 && c[end] == 0.0) end--;
+  const out = new Float64Array(end + 1);
+  for (let i: i32 = 0; i <= end; i++) out[i] = c[i];
+  return out;
+}
+
+/**
+ * Gaussian-elimination determinant of a row-major `n × n` matrix
+ * stored in a flat Float64Array.
+ */
+function detSquare(flat: Float64Array, n: i32): f64 {
+  // Copy into a mutable work buffer.
+  const m = new Float64Array(n * n);
+  for (let i: i32 = 0; i < n * n; i++) m[i] = flat[i];
+
+  let det: f64 = 1.0;
+  for (let col: i32 = 0; col < n; col++) {
+    // Partial pivoting.
+    let maxRow: i32 = col;
+    let maxVal: f64 = Math.abs(m[col * n + col]);
+    for (let row: i32 = col + 1; row < n; row++) {
+      const v: f64 = Math.abs(m[row * n + col]);
+      if (v > maxVal) {
+        maxVal = v;
+        maxRow = row;
+      }
+    }
+    if (maxVal < 1e-15) return 0.0;
+    if (maxRow != col) {
+      for (let k: i32 = 0; k < n; k++) {
+        const tmp: f64 = m[col * n + k];
+        m[col * n + k] = m[maxRow * n + k];
+        m[maxRow * n + k] = tmp;
+      }
+      det = -det;
+    }
+    det *= m[col * n + col];
+    for (let row: i32 = col + 1; row < n; row++) {
+      const factor: f64 = m[row * n + col] / m[col * n + col];
+      for (let k: i32 = col; k < n; k++) {
+        m[row * n + k] -= factor * m[col * n + k];
+      }
+    }
+  }
+  return det;
+}
+
+/** Build the (m+n) × (m+n) Sylvester matrix and return its determinant. */
+function sylvesterDet(p: Float64Array, q: Float64Array): f64 {
+  const pt = trimCoeffs(p);
+  const qt = trimCoeffs(q);
+  const m: i32 = pt.length - 1; // degree of p
+  const n: i32 = qt.length - 1; // degree of q
+  if (m == 0 && n == 0) return 1.0;
+  if (m == 0) return Math.pow(pt[0], <f64>n);
+  if (n == 0) return Math.pow(qt[0], <f64>m);
+  const size: i32 = m + n;
+  const mat = new Float64Array(size * size);
+  // First n rows: shifted copies of p (highest-degree first).
+  for (let i: i32 = 0; i < n; i++) {
+    for (let j: i32 = 0; j <= m; j++) {
+      mat[i * size + (i + j)] = pt[m - j];
+    }
+  }
+  // Next m rows: shifted copies of q (highest-degree first).
+  for (let i: i32 = 0; i < m; i++) {
+    for (let j: i32 = 0; j <= n; j++) {
+      mat[(n + i) * size + (i + j)] = qt[n - j];
+    }
+  }
+  return detSquare(mat, size);
+}
+
+// ---------------------------------------------------------------------------
 // poly_div_mod_f64  — polynomial long division
 // ---------------------------------------------------------------------------
 
@@ -102,4 +187,62 @@ export function poly_div_mod_f64(num: Float64Array, den: Float64Array): Float64A
   for (let i: i32 = 0; i < qLen; i++) out[i] = quotient[i];
   for (let i: i32 = 0; i < rLen; i++) out[qLen + i] = work[i];
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// poly_resultant_f64  — Sylvester-matrix determinant
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute the resultant of polynomials `p` and `q`.
+ * Returns NaN when either input is empty.
+ */
+export function poly_resultant_f64(p: Float64Array, q: Float64Array): f64 {
+  if (p.length == 0 || q.length == 0) return NaN;
+  return sylvesterDet(p, q);
+}
+
+// ---------------------------------------------------------------------------
+// poly_discriminant_f64  — disc(p) = (-1)^(m(m-1)/2) / a_m · Res(p, p')
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute the discriminant of polynomial `p`.
+ * Returns NaN for degree < 1 inputs.
+ */
+export function poly_discriminant_f64(p: Float64Array): f64 {
+  if (p.length == 0) return NaN;
+  const t = trimCoeffs(p);
+  const deg: i32 = t.length - 1;
+  if (deg < 1) return NaN;
+  if (deg == 1) return 1.0;
+  if (deg == 2) {
+    const c = t[0];
+    const b = t[1];
+    const a = t[2];
+    return b * b - 4.0 * a * c;
+  }
+  if (deg == 3) {
+    const d = t[0];
+    const c = t[1];
+    const b = t[2];
+    const a = t[3];
+    return (
+      18.0 * a * b * c * d -
+      4.0 * b * b * b * d +
+      b * b * c * c -
+      4.0 * a * c * c * c -
+      27.0 * a * a * d * d
+    );
+  }
+  // deg >= 4: disc(p) = (-1)^(deg*(deg-1)/2) / a_deg * Res(p, p')
+  const fp = new Float64Array(deg);
+  for (let i: i32 = 1; i <= deg; i++) {
+    fp[i - 1] = t[i] * <f64>i;
+  }
+  const res = sylvesterDet(t, fp);
+  const an = t[t.length - 1];
+  const exponent: i32 = (deg * (deg - 1)) / 2;
+  const sign: f64 = exponent % 2 == 0 ? 1.0 : -1.0;
+  return (sign * res) / an;
 }

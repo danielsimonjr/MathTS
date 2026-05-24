@@ -3,7 +3,7 @@
 //! Polynomials are coefficient arrays where index = power, i.e.
 //! `p(x) = coeffs[0] + coeffs[1]*x + coeffs[2]*x^2 + ...`
 //!
-//! Two kernels are exported:
+//! Four kernels are exported:
 //!
 //! * `poly_mul_f64(a, b)` — O(n·m) convolution, returns the product.
 //! * `poly_div_mod_f64(num, den)` — polynomial long division.
@@ -11,6 +11,8 @@
 //!   The caller slices it using the length rule:
 //!     quotient_len  = max(0, num.len() - den.len() + 1)
 //!     remainder_len = result.len() - quotient_len
+//! * `poly_resultant_f64(p, q)` — Sylvester-matrix determinant.
+//! * `poly_discriminant_f64(p)` — disc(p) = (-1)^(m(m-1)/2) / a_m · Res(p, p').
 //!
 //! All exported symbols use `#[no_mangle] pub unsafe extern "C"` and
 //! pointer-style arguments to stay consistent with the rest of the crate.
@@ -149,4 +151,157 @@ pub unsafe extern "C" fn poly_div_mod_f64(
     }
 
     (q_len + r_len) as i32
+}
+
+// ============================================================
+// INTERNAL HELPERS (shared by resultant / discriminant kernels)
+// ============================================================
+
+/// Trim trailing zero coefficients, keeping at least one element.
+fn trim_f64(c: &[f64]) -> alloc::vec::Vec<f64> {
+    if c.is_empty() {
+        return vec![0.0];
+    }
+    let mut end = c.len() - 1;
+    while end > 0 && c[end] == 0.0 {
+        end -= 1;
+    }
+    c[..=end].to_vec()
+}
+
+/// Gaussian-elimination determinant of a row-major `n × n` matrix.
+fn det_f64(mut m: alloc::vec::Vec<f64>, n: usize) -> f64 {
+    let mut det = 1.0_f64;
+    for col in 0..n {
+        // Partial pivoting.
+        let mut max_row = col;
+        let mut max_val = libm::fabs(m[col * n + col]);
+        for row in (col + 1)..n {
+            let v = libm::fabs(m[row * n + col]);
+            if v > max_val {
+                max_val = v;
+                max_row = row;
+            }
+        }
+        if max_val < 1e-15 {
+            return 0.0;
+        }
+        if max_row != col {
+            for k in 0..n {
+                m.swap(col * n + k, max_row * n + k);
+            }
+            det = -det;
+        }
+        det *= m[col * n + col];
+        for row in (col + 1)..n {
+            let factor = m[row * n + col] / m[col * n + col];
+            for k in col..n {
+                m[row * n + k] -= factor * m[col * n + k];
+            }
+        }
+    }
+    det
+}
+
+/// Build the `(m+n) × (m+n)` Sylvester matrix and return its determinant.
+fn sylvester_det(p: &[f64], q: &[f64]) -> f64 {
+    let pt = trim_f64(p);
+    let qt = trim_f64(q);
+    let m = pt.len() - 1; // degree of p
+    let n = qt.len() - 1; // degree of q
+    if m == 0 && n == 0 {
+        return 1.0;
+    }
+    if m == 0 {
+        return libm::pow(pt[0], n as f64);
+    }
+    if n == 0 {
+        return libm::pow(qt[0], m as f64);
+    }
+    let size = m + n;
+    let mut mat = vec![0.0_f64; size * size];
+    // First n rows: shifted copies of p (highest-degree first).
+    for i in 0..n {
+        for j in 0..=m {
+            mat[i * size + (i + j)] = pt[m - j];
+        }
+    }
+    // Next m rows: shifted copies of q (highest-degree first).
+    for i in 0..m {
+        for j in 0..=n {
+            mat[(n + i) * size + (i + j)] = qt[n - j];
+        }
+    }
+    det_f64(mat, size)
+}
+
+// ============================================================
+// POLY_RESULTANT_F64  — Sylvester-matrix determinant
+// ============================================================
+
+/// Compute the resultant of polynomials `p` and `q` via the Sylvester matrix.
+///
+/// Returns `NaN` when either polynomial has degree < 1.
+///
+/// # Safety
+/// `p_ptr` / `q_ptr` must point to valid, aligned `f64` slices of
+/// lengths `p_len` and `q_len` respectively.
+#[no_mangle]
+pub unsafe extern "C" fn poly_resultant_f64(
+    p_ptr: *const f64,
+    p_len: i32,
+    q_ptr: *const f64,
+    q_len: i32,
+) -> f64 {
+    if p_len <= 0 || q_len <= 0 {
+        return f64::NAN;
+    }
+    let p = core::slice::from_raw_parts(p_ptr, p_len as usize);
+    let q = core::slice::from_raw_parts(q_ptr, q_len as usize);
+    sylvester_det(p, q)
+}
+
+// ============================================================
+// POLY_DISCRIMINANT_F64  — disc(p) = (-1)^(m(m-1)/2) / a_m · Res(p, p')
+// ============================================================
+
+/// Compute the discriminant of polynomial `p` via its derivative's resultant.
+///
+/// Returns `NaN` for polynomials of degree < 1.
+///
+/// # Safety
+/// `p_ptr` must point to a valid, aligned `f64` slice of length `p_len`.
+#[no_mangle]
+pub unsafe extern "C" fn poly_discriminant_f64(p_ptr: *const f64, p_len: i32) -> f64 {
+    if p_len <= 0 {
+        return f64::NAN;
+    }
+    let raw = core::slice::from_raw_parts(p_ptr, p_len as usize);
+    let t = trim_f64(raw);
+    let deg = t.len() - 1;
+    if deg < 1 {
+        return f64::NAN;
+    }
+    if deg == 1 {
+        return 1.0;
+    }
+    if deg == 2 {
+        let (c, b, a) = (t[0], t[1], t[2]);
+        return b * b - 4.0 * a * c;
+    }
+    if deg == 3 {
+        let (d, c, b, a) = (t[0], t[1], t[2], t[3]);
+        return 18.0 * a * b * c * d - 4.0 * b * b * b * d + b * b * c * c
+            - 4.0 * a * c * c * c
+            - 27.0 * a * a * d * d;
+    }
+    // deg >= 4: disc(p) = (-1)^(m(m-1)/2) / a_m · Res(p, p')
+    let mut fp = vec![0.0_f64; deg];
+    for i in 1..=deg {
+        fp[i - 1] = t[i] * i as f64;
+    }
+    let res = sylvester_det(&t, &fp);
+    let an = t[t.len() - 1];
+    let sign = if ((deg * (deg - 1)) / 2) % 2 == 0 { 1.0 } else { -1.0 };
+    sign * res / an
 }

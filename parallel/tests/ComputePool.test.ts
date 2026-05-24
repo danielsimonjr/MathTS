@@ -1127,4 +1127,242 @@ describe('ComputePool', () => {
       });
     });
   });
+
+  // ===========================================================================
+  // Slice 4.1: pow, sign, tensordot
+  // ===========================================================================
+
+  describe('pow (elementwise exponentiation)', () => {
+    let pool: ComputePool;
+
+    beforeAll(async () => {
+      // High threshold → sequential path for all tests unless overridden
+      pool = new ComputePool({ thresholdElements: 1_000_000 });
+      await pool.initialize();
+    }, 30_000);
+
+    afterAll(async () => {
+      await pool.terminate();
+    });
+
+    it('pow: small array — correctness', async () => {
+      const a = new Float64Array([2, 3, 4, 5]);
+      const b = new Float64Array([3, 2, 0.5, 0]);
+      const result = await pool.pow(a, b);
+
+      expect(result.result[0]).toBeCloseTo(8, 10); // 2^3
+      expect(result.result[1]).toBeCloseTo(9, 10); // 3^2
+      expect(result.result[2]).toBeCloseTo(2, 10); // 4^0.5
+      expect(result.result[3]).toBeCloseTo(1, 10); // 5^0
+    });
+
+    it('pow: large array (1M elements) matches JS reference within 1e-9', async () => {
+      const N = 1_000_000;
+      const a = new Float64Array(N);
+      const b = new Float64Array(N);
+      for (let i = 0; i < N; i++) {
+        a[i] = 1 + (i % 10) * 0.1; // values in [1, 2)
+        b[i] = ((i % 5) + 1) * 0.5; // exponents in {0.5, 1, 1.5, 2, 2.5}
+      }
+
+      const result = await pool.pow(a, b);
+
+      expect(result.result.length).toBe(N);
+      const step = Math.floor(N / 1000);
+      for (let i = 0; i < N; i += step) {
+        const expected = a[i] ** b[i];
+        expect(Math.abs(result.result[i] - expected)).toBeLessThan(1e-9);
+      }
+    }, 30_000);
+
+    it('pow: below-threshold falls through to sequential path (parallelized: false)', async () => {
+      // Create a pool with an extremely high threshold so pow never parallelizes
+      const seqPool = new ComputePool({
+        thresholdElements: Number.MAX_SAFE_INTEGER,
+        thresholdByOp: { pow: 'never' },
+      });
+      await seqPool.initialize();
+
+      const a = new Float64Array([2, 3, 4]);
+      const b = new Float64Array([1, 2, 3]);
+      const result = await seqPool.pow(a, b);
+
+      expect(result.parallelized).toBe(false);
+      expect(Array.from(result.result)).toEqual([2, 9, 64]);
+
+      await seqPool.terminate();
+    });
+
+    it('pow: mismatched-length inputs throw a descriptive error', async () => {
+      const a = new Float64Array([1, 2, 3]);
+      const b = new Float64Array([1, 2]);
+      await expect(pool.pow(a, b)).rejects.toThrow(/Array lengths must match/);
+    });
+  });
+
+  describe('sign (elementwise sign function)', () => {
+    let pool: ComputePool;
+
+    beforeAll(async () => {
+      pool = new ComputePool({ thresholdElements: 1_000_000 });
+      await pool.initialize();
+    }, 30_000);
+
+    afterAll(async () => {
+      await pool.terminate();
+    });
+
+    it('sign: negative, zero, positive, NaN inputs', async () => {
+      const data = new Float64Array([-5, 0, 3, NaN]);
+      const result = await pool.sign(data);
+
+      expect(result.result[0]).toBe(-1);
+      expect(result.result[1]).toBe(0);
+      expect(result.result[2]).toBe(1);
+      expect(Number.isNaN(result.result[3])).toBe(true);
+    });
+
+    it('sign: large array (1M elements) matches JS reference within 1e-9', async () => {
+      const N = 1_000_000;
+      const data = new Float64Array(N);
+      // Mix of negative, zero, positive
+      for (let i = 0; i < N; i++) {
+        if (i % 3 === 0) data[i] = -(i + 1) * 0.001;
+        else if (i % 3 === 1) data[i] = 0;
+        else data[i] = (i + 1) * 0.001;
+      }
+
+      const result = await pool.sign(data);
+
+      expect(result.result.length).toBe(N);
+      const step = Math.floor(N / 1000);
+      for (let i = 0; i < N; i += step) {
+        expect(result.result[i]).toBe(Math.sign(data[i]));
+      }
+    }, 30_000);
+
+    it('sign: below-threshold falls through to sequential path (parallelized: false)', async () => {
+      const seqPool = new ComputePool({
+        thresholdElements: Number.MAX_SAFE_INTEGER,
+        thresholdByOp: { sign: 'never' },
+      });
+      await seqPool.initialize();
+
+      const data = new Float64Array([-3, 0, 7, -0.001]);
+      const result = await seqPool.sign(data);
+
+      expect(result.parallelized).toBe(false);
+      expect(Array.from(result.result)).toEqual([-1, 0, 1, -1]);
+
+      await seqPool.terminate();
+    });
+  });
+
+  describe('tensordot (general tensor contraction)', () => {
+    let pool: ComputePool;
+
+    beforeAll(async () => {
+      pool = new ComputePool({ thresholdElements: 1_000_000 });
+      await pool.initialize();
+    }, 30_000);
+
+    afterAll(async () => {
+      await pool.terminate();
+    });
+
+    it('tensordot: 2D matmul-equivalent ([m,k] × [k,n] over axes [1],[0])', async () => {
+      // 2×3 @ 3×2 = 2×2
+      // A = [[1,2,3],[4,5,6]]
+      const a = new Float64Array([1, 2, 3, 4, 5, 6]);
+      // B = [[7,8],[9,10],[11,12]]
+      const b = new Float64Array([7, 8, 9, 10, 11, 12]);
+
+      const result = await pool.tensordot(a, [2, 3], b, [3, 2], [1], [0]);
+
+      expect(result.result.shape).toEqual([2, 2]);
+      // Row 0: [1*7+2*9+3*11, 1*8+2*10+3*12] = [58, 64]
+      // Row 1: [4*7+5*9+6*11, 4*8+5*10+6*12] = [139, 154]
+      expect(Array.from(result.result.data)).toEqual([58, 64, 139, 154]);
+      expect(result.parallelized).toBe(false);
+    });
+
+    it('tensordot: 3D × 3D contraction over two axes', async () => {
+      // A shape [2,3,4], B shape [3,4,5]
+      // Contract A's axes [1,2] with B's axes [0,1] → result shape [2,5]
+      // Each output[i,j] = sum over k in [0,3), l in [0,4): A[i,k,l] * B[k,l,j]
+      const aShape = [2, 3, 4];
+      const bShape = [3, 4, 5];
+      const aSize = 2 * 3 * 4;
+      const bSize = 3 * 4 * 5;
+      const a = new Float64Array(aSize);
+      const b = new Float64Array(bSize);
+      // Fill with deterministic values
+      for (let i = 0; i < aSize; i++) a[i] = i + 1;
+      for (let i = 0; i < bSize; i++) b[i] = i + 1;
+
+      const result = await pool.tensordot(a, aShape, b, bShape, [1, 2], [0, 1]);
+
+      expect(result.result.shape).toEqual([2, 5]);
+      expect(result.result.data.length).toBe(10);
+
+      // Verify against a pure-JS reference
+      const ref = new Float64Array(10);
+      for (let i = 0; i < 2; i++) {
+        for (let j = 0; j < 5; j++) {
+          let acc = 0;
+          for (let k = 0; k < 3; k++) {
+            for (let l = 0; l < 4; l++) {
+              const aIdx = i * 12 + k * 4 + l;
+              const bIdx = k * 20 + l * 5 + j;
+              acc += a[aIdx] * b[bIdx];
+            }
+          }
+          ref[i * 5 + j] = acc;
+        }
+      }
+      for (let i = 0; i < 10; i++) {
+        expect(Math.abs(result.result.data[i] - ref[i])).toBeLessThan(1e-9);
+      }
+    });
+
+    it('tensordot: shape-mismatch (axesA dim != axesB dim) rejects', async () => {
+      // A shape [2, 3], B shape [4, 5] — A.axis1=3 != B.axis0=4
+      const a = new Float64Array(6);
+      const b = new Float64Array(20);
+      await expect(pool.tensordot(a, [2, 3], b, [4, 5], [1], [0])).rejects.toThrow(
+        /dimension mismatch/
+      );
+    });
+
+    it('tensordot: mismatched axesA/axesB length rejects', async () => {
+      const a = new Float64Array(6);
+      const b = new Float64Array(6);
+      await expect(pool.tensordot(a, [2, 3], b, [2, 3], [0], [0, 1])).rejects.toThrow(
+        /axesA.length.*axesB.length/
+      );
+    });
+
+    it('tensordot: vector dot product (1D contraction)', async () => {
+      // [4] @ [4] over axes [0],[0] → scalar result shape []
+      const a = new Float64Array([1, 2, 3, 4]);
+      const b = new Float64Array([5, 6, 7, 8]);
+
+      const result = await pool.tensordot(a, [4], b, [4], [0], [0]);
+
+      expect(result.result.shape).toEqual([]);
+      // 1*5 + 2*6 + 3*7 + 4*8 = 5+12+21+32 = 70
+      expect(result.result.data[0]).toBeCloseTo(70, 10);
+    });
+
+    it('tensordot: outer product (no contracted axes)', async () => {
+      // [2] outer [3] → result shape [2, 3]
+      const a = new Float64Array([1, 2]);
+      const b = new Float64Array([3, 4, 5]);
+
+      const result = await pool.tensordot(a, [2], b, [3], [], []);
+
+      expect(result.result.shape).toEqual([2, 3]);
+      expect(Array.from(result.result.data)).toEqual([3, 4, 5, 6, 8, 10]);
+    });
+  });
 });

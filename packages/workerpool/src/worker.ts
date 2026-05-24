@@ -756,6 +756,126 @@ function quantileChunk(
 }
 
 // =============================================================================
+// Tensor Contraction (tensordot)
+// =============================================================================
+
+/**
+ * Row-major strides for a shape array (worker-local copy; cannot import from
+ * parallel/ since workerpool sits below it in the dependency graph).
+ */
+function _tdRowMajorStrides(shape: readonly number[]): number[] {
+  const strides = new Array<number>(shape.length);
+  let stride = 1;
+  for (let i = shape.length - 1; i >= 0; i--) {
+    strides[i] = stride;
+    stride *= shape[i];
+  }
+  return strides;
+}
+
+/**
+ * Multi-index to flat index.
+ */
+function _tdFlatIndex(idx: readonly number[], strides: readonly number[]): number {
+  let flat = 0;
+  for (let i = 0; i < idx.length; i++) flat += idx[i] * strides[i];
+  return flat;
+}
+
+/**
+ * Iterate over all multi-indices for `sizes`, calling `cb(idx)`.
+ */
+function _tdForEachIndex(sizes: readonly number[], cb: (idx: number[]) => void): void {
+  const rank = sizes.length;
+  if (rank === 0) {
+    cb([]);
+    return;
+  }
+  const idx = new Array<number>(rank).fill(0);
+  const total = sizes.reduce((a: number, b: number) => a * b, 1);
+  for (let n = 0; n < total; n++) {
+    cb(idx.slice());
+    for (let d = rank - 1; d >= 0; d--) {
+      idx[d]++;
+      if (idx[d] < sizes[d]) break;
+      idx[d] = 0;
+    }
+  }
+}
+
+/**
+ * Worker kernel for a contiguous slice `[outStart, outEnd)` of a tensordot
+ * output. Called by `ComputePool.tensordot` when the contracted-axis volume
+ * exceeds the parallelization threshold.
+ *
+ * Parameters mirror `ComputePool.tensordot` exactly so the caller can forward
+ * its validated inputs directly.
+ */
+function tensordotChunk(
+  aBuffer: ArrayBuffer,
+  aShape: number[],
+  bBuffer: ArrayBuffer,
+  bShape: number[],
+  axesA: number[],
+  axesB: number[],
+  resultShape: number[],
+  outStart: number,
+  outEnd: number
+): ArrayBuffer {
+  const a = new Float64Array(aBuffer);
+  const b = new Float64Array(bBuffer);
+
+  const aStrides = _tdRowMajorStrides(aShape);
+  const bStrides = _tdRowMajorStrides(bShape);
+  const outStrides = _tdRowMajorStrides(resultShape);
+
+  const aRank = aShape.length;
+  const bRank = bShape.length;
+  const contractedSetA = new Set(axesA);
+  const contractedSetB = new Set(axesB);
+
+  const aFreeAxes: number[] = [];
+  const bFreeAxes: number[] = [];
+  for (let i = 0; i < aRank; i++) if (!contractedSetA.has(i)) aFreeAxes.push(i);
+  for (let i = 0; i < bRank; i++) if (!contractedSetB.has(i)) bFreeAxes.push(i);
+
+  const contractedSizes = axesA.map((ax: number) => aShape[ax]);
+
+  const chunkLen = outEnd - outStart;
+  const result = new Float64Array(chunkLen);
+  const outRank = resultShape.length;
+  const outIdx = new Array<number>(outRank);
+
+  for (let outFlat = outStart; outFlat < outEnd; outFlat++) {
+    let rem = outFlat;
+    for (let d = 0; d < outRank; d++) {
+      outIdx[d] = Math.floor(rem / outStrides[d]);
+      rem -= outIdx[d] * outStrides[d];
+    }
+
+    const aFreeVals = outIdx.slice(0, aFreeAxes.length);
+    const bFreeVals = outIdx.slice(aFreeAxes.length);
+
+    let acc = 0;
+    _tdForEachIndex(contractedSizes, (contractVals: number[]) => {
+      const aIdx = new Array<number>(aRank).fill(0);
+      for (let fi = 0; fi < aFreeAxes.length; fi++) aIdx[aFreeAxes[fi]] = aFreeVals[fi];
+      for (let ci = 0; ci < axesA.length; ci++) aIdx[axesA[ci]] = contractVals[ci];
+
+      const bIdx = new Array<number>(bRank).fill(0);
+      for (let fi = 0; fi < bFreeAxes.length; fi++) bIdx[bFreeAxes[fi]] = bFreeVals[fi];
+      for (let ci = 0; ci < axesB.length; ci++) bIdx[axesB[ci]] = contractVals[ci];
+
+      acc += a[_tdFlatIndex(aIdx, aStrides)] * b[_tdFlatIndex(bIdx, bStrides)];
+    });
+
+    result[outFlat - outStart] = acc;
+  }
+
+  return result.buffer;
+}
+
+// =============================================================================
 // Register Worker Functions
 // =============================================================================
 
@@ -806,6 +926,9 @@ const workerMethods: Record<string, (...args: any[]) => any> = {
   // Statistics
   histogramChunk,
   quantileChunk,
+
+  // Tensor contraction
+  tensordotChunk,
 };
 
 worker(workerMethods);
