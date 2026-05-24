@@ -145,7 +145,19 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
-#### Gap-closure Wave 3b — WASM-route slices (sequenced; 3.7 + 3.10b done)
+#### Gap-closure Wave 3b — WASM-route slices (sequenced; 3.7 + 3.10b + 3.10c-1 done)
+
+- **Slice 3.10c-1 — commit `572363f`** — Bessel WASM kernels (Airy + AS port deferred as 3.10c-2 per the proposal's explicit scope-split contract).
+  - NEW `wasm-rust/crates/mathts-wasm/src/bessel.rs`: 6 `#[no_mangle] extern "C"` functions — `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64` (arbitrary integer order), `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`. **No new Rust dependency** — scalar Bessel already existed in `special/functions.rs` (hand-implemented NR §6.5 polynomial approximations + recurrence); array kernels delegate to scalars.
+  - NEW `functions/src/wasm/special/wasm-bridge.ts` with probe-Rust-then-AS-then-JS pattern at `WASM_SPECIAL_THRESHOLD = 1024`. AS-suffix probe is wired even though no AS implementation exists yet (forward-compatible for Slice 3.10c-2).
+  - `functions/src/wasm/WasmLoader.ts` registered 6 new optional exports on `WasmModule`.
+  - `functions/src/typed/special.ts`: 6 Bessel typed-function array overloads route to the bridge for ≥ 1024-element inputs.
+  - `wasm-manifest.json` regenerated; `wasm-integrity` 5/5.
+  - 34 new TS tests + 8 native Rust unit tests. `functions`: 2,000 → **2,034 tests** (+34).
+  - **Precision note:** J-functions ~1e-7 relative error (NR algorithm design); Y-functions near `x=1` have ~5e-4 error from the polynomial form's logarithmic-singularity handling — inherent to NR §6.5. WASM↔JS agreement is 1e-14 (bit-identical since both share the same algorithm path).
+  - `tools/benchmark/wasm/special.bench.ts` added.
+
+- **Slice 3.10b — commit `ec7363b`** — Tridiagonal-solve WASM kernel (Thomas algorithm).
 
 - **Slice 3.10b — commit `ec7363b`** — Tridiagonal-solve WASM kernel (Thomas algorithm).
   - NEW `wasm-rust/crates/mathts-wasm/src/tridiag.rs` (~102 LOC): `tridiag_solve_f64` with pointer ABI, returns `n` on success or `-1` on zero-pivot. 5 native Rust unit tests.

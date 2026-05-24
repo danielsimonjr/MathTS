@@ -183,10 +183,21 @@ Detail:
             Akima analytic slopes (no tridiag), so this bridge is
             cubicSpline-only — audit B.1 entry updated to reflect.
             18 new tests; manifest regenerated.
-      - [ ] **Slice 3.10c** — `typed/special.ts` Bessel/Airy WASM
-            family (rank 10c). NEW `wasm.besselJF64`/`besselYF64`/
-            `airyAiF64`/`airyBiF64`. May split into 3.10c-1 (Bessel)
-            + 3.10c-2 (Airy + elliptic) if scope balloons.
+      - [x] **Slice 3.10c-1** ✅ `572363f` — Bessel WASM only.
+            6 Rust functions in `wasm-rust/crates/mathts-wasm/src/bessel.rs`
+            (`bessel_j0/j1/jn/y0/y1/yn_f64`) delegating to scalar NR
+            §6.5 implementations already in `special/functions.rs`.
+            Bridge at `WASM_SPECIAL_THRESHOLD = 1024`; AS-suffix probe
+            wired (forward-compat for 10c-2). 34 new TS + 8 Rust tests.
+            Precision: J ~1e-7, Y near x=1 ~5e-4 (NR algorithm limits);
+            WASM↔JS agreement 1e-14 (bit-identical algorithm path).
+      - [ ] **Slice 3.10c-2 (deferred)** — Airy `Ai`/`Bi` WASM kernels
+            + AssemblyScript parity port for Bessel. Bridge already has
+            the `_as`-suffix probe wired; only the AS module + Airy
+            implementation are missing. Blocked on consumer demand; Airy
+            needs asymptotic expansion at large |x| (different from
+            Bessel's series + recurrence path). See
+            [`docs/roadmap/GAP_CLOSURE_PROPOSAL.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL.md#slice-310c-2--todo-deferred).
 
       **Tier 4 (deferred, awaiting consumer pressure or blockers):**
       ranks 9 (probability dedup audit needed), 11 (Tensor.slice
