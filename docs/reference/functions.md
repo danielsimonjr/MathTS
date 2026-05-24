@@ -135,20 +135,20 @@ mod(17, 5); // 2
 
 ## Relational & Comparison
 
-| Function               | Description                         |
-| ---------------------- | ----------------------------------- |
-| `equal(a, b)`          | Equality test                       |
-| `unequal(a, b)`        | Inequality test                     |
-| `smaller(a, b)`        | `a < b`                             |
-| `smallerEq(a, b)`      | `a ≤ b`                             |
-| `larger(a, b)`         | `a > b`                             |
-| `largerEq(a, b)`       | `a ≥ b`                             |
-| `compare(a, b)`        | Three-way compare → -1, 0, 1        |
-| `compareNatural(a, b)` | Natural ordering across mixed types |
-| `compareText(a, b)`    | Lexical string comparison           |
-| `equalScalar(a, b)`    | Scalar equality                     |
-| `equalText(a, b)`      | String equality                     |
-| `deepEqual(a, b)`      | Element-wise deep equality          |
+| Function               | Description                         | Accel |
+| ---------------------- | ----------------------------------- | ----- |
+| `equal(a, b)`          | Equality test                       | —     |
+| `unequal(a, b)`        | Inequality test                     | —     |
+| `smaller(a, b)`        | `a < b`                             | —     |
+| `smallerEq(a, b)`      | `a ≤ b`                             | —     |
+| `larger(a, b)`         | `a > b`                             | —     |
+| `largerEq(a, b)`       | `a ≥ b`                             | —     |
+| `compare(a, b)`        | Three-way compare → -1, 0, 1        | —     |
+| `compareNatural(a, b)` | Natural ordering across mixed types | —     |
+| `compareText(a, b)`    | Lexical string comparison           | —     |
+| `equalScalar(a, b)`    | Scalar equality                     | —     |
+| `equalText(a, b)`      | String equality                     | —     |
+| `deepEqual(a, b)`      | Element-wise deep equality          | —     |
 
 ### Details
 
@@ -162,6 +162,11 @@ mod(17, 5); // 2
 - `compareText` and `equalText` operate on raw strings with no numeric coercion.
 - `deepEqual` recurses into matrices and nested arrays, comparing element by
   element.
+- All twelve ops dispatch typed-only (no `parallel`/`WASM`/`WebGPU` tier).
+  Per-element comparison cost is too low for worker marshaling to be a net win;
+  bulk-array comparison use-cases that genuinely benefit from parallel routing
+  are tracked as a deferred Tier-3 slice (see
+  [`docs/roadmap/FUNCTION_GAPS_AUDIT.md`](../roadmap/FUNCTION_GAPS_AUDIT.md)).
 
 ### Background & History
 
