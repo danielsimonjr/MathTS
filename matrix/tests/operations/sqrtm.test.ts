@@ -170,4 +170,95 @@ describe('matrixSqrtm', () => {
       expect(Rarr[i][i]).toBeGreaterThanOrEqual(-1e-10);
     }
   });
+
+  // ---------------------------------------------------------------------------
+  // Slice 6.1 — Schur-Björck-Hammarling general-case tests
+  // ---------------------------------------------------------------------------
+
+  it('11. Schur path: defective 2×2 Jordan block (repeated eigenvalue, non-diagonalisable)', () => {
+    // A = [[4, 1], [0, 4]] — Jordan block. sqrtm via Björck recurrence:
+    // U_00 = sqrt(4) = 2, U_11 = 2, U_01 = T_01/(U_00+U_11) = 1/4 = 0.25
+    const A = DenseMatrix.fromArray([
+      [4, 1],
+      [0, 4],
+    ]);
+    const R = matrixSqrtm(A);
+    const R2 = matMulDense(R, R);
+    expect(frobDiff(R2, A)).toBeLessThan(1e-10);
+    // Verify known closed-form values (Björck-Hammarling)
+    const Rarr = R.toArray();
+    expect(Math.abs(Rarr[0][0] - 2)).toBeLessThan(1e-10);
+    expect(Math.abs(Rarr[1][1] - 2)).toBeLessThan(1e-10);
+    expect(Math.abs(Rarr[0][1] - 0.25)).toBeLessThan(1e-10);
+    expect(Math.abs(Rarr[1][0])).toBeLessThan(1e-10);
+  });
+
+  it('12. Schur path: 3×3 defective Jordan block sqrtm', () => {
+    // A = [[4,1,0],[0,4,1],[0,0,4]] — Jordan block of size 3.
+    // U_00=U_11=U_22=2, U_01=U_12=0.25, U_02 = (0 - 0.25*0.25)/(2+2) = -0.015625
+    const A = DenseMatrix.fromArray([
+      [4, 1, 0],
+      [0, 4, 1],
+      [0, 0, 4],
+    ]);
+    const R = matrixSqrtm(A);
+    const R2 = matMulDense(R, R);
+    expect(frobDiff(R2, A)).toBeLessThan(1e-8);
+    const Rarr = R.toArray();
+    // Diagonal
+    for (let i = 0; i < 3; i++) expect(Math.abs(Rarr[i][i] - 2)).toBeLessThan(1e-8);
+    // Known off-diagonal entries (Björck recurrence)
+    expect(Math.abs(Rarr[0][1] - 0.25)).toBeLessThan(1e-8);
+    expect(Math.abs(Rarr[1][2] - 0.25)).toBeLessThan(1e-8);
+    expect(Math.abs(Rarr[0][2] - (-0.015625))).toBeLessThan(1e-8);
+  });
+
+  it('13. Schur path: matrix with complex-conjugate eigenvalues (2D rotation)', () => {
+    // A = [[0, -1], [1, 0]] — eigenvalues ±i. sqrtm = rotation by π/4.
+    // SciPy reference: sqrtm([[0,-1],[1,0]]) = (1/√2)*[[1,-1],[1,1]]
+    const A = DenseMatrix.fromArray([
+      [0, -1],
+      [1, 0],
+    ]);
+    const R = matrixSqrtm(A);
+    const R2 = matMulDense(R, R);
+    expect(frobDiff(R2, A)).toBeLessThan(1e-10);
+    // Closed form: R = (1/sqrt(2))*[[1,-1],[1,1]]
+    const s = 1 / Math.sqrt(2);
+    const Rarr = R.toArray();
+    expect(Math.abs(Math.abs(Rarr[0][0]) - s)).toBeLessThan(1e-8);
+    expect(Math.abs(Math.abs(Rarr[0][1]) - s)).toBeLessThan(1e-8);
+    expect(Math.abs(Math.abs(Rarr[1][0]) - s)).toBeLessThan(1e-8);
+    expect(Math.abs(Math.abs(Rarr[1][1]) - s)).toBeLessThan(1e-8);
+  });
+
+  it('14. Schur path: 4×4 block-diagonal with two complex-eigenvalue blocks', () => {
+    // A = [[0,-1,0,0],[1,0,0,0],[0,0,0,-1],[0,0,1,0]] — two rotation blocks (eigenvalues ±i each)
+    const A = DenseMatrix.fromArray([
+      [0, -1, 0, 0],
+      [1, 0, 0, 0],
+      [0, 0, 0, -1],
+      [0, 0, 1, 0],
+    ]);
+    const R = matrixSqrtm(A);
+    const R2 = matMulDense(R, R);
+    expect(frobDiff(R2, A)).toBeLessThan(1e-8);
+  });
+
+  it('15. Schur path: upper-triangular with repeated positive eigenvalue', () => {
+    // A = [[3, 1], [0, 3]] — repeated eigenvalue 3.
+    // U_00=U_11=sqrt(3), U_01=1/(2*sqrt(3))
+    const A = DenseMatrix.fromArray([
+      [3, 1],
+      [0, 3],
+    ]);
+    const R = matrixSqrtm(A);
+    const R2 = matMulDense(R, R);
+    expect(frobDiff(R2, A)).toBeLessThan(1e-10);
+    const Rarr = R.toArray();
+    expect(Math.abs(Rarr[0][0] - Math.sqrt(3))).toBeLessThan(1e-8);
+    expect(Math.abs(Rarr[1][1] - Math.sqrt(3))).toBeLessThan(1e-8);
+    // U_01 = T_01 / (U_00 + U_11) = 1 / (2*sqrt(3))
+    expect(Math.abs(Rarr[0][1] - 1 / (2 * Math.sqrt(3)))).toBeLessThan(1e-8);
+  });
 });

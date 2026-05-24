@@ -45,5 +45,8 @@ export { matrixExpm, type ExpmOptions } from './expm.js';
 // Matrix logarithm (DenseMatrix primitive — inverse scaling-and-squaring, Slice 5.9a)
 export { matrixLogm, type LogmOptions } from './logm.js';
 
-// Matrix square root (DenseMatrix primitive — eig-based, Slice 5.9a)
+// Matrix square root (DenseMatrix primitive — Schur-Björck-Hammarling, Slices 5.9a + 6.1)
 export { matrixSqrtm, type SqrtmOptions } from './sqrtm.js';
+
+// Schur decomposition primitive (Slice 6.1)
+export { matrixSchur, type SchurResult, type SchurOptions } from './schur.js';

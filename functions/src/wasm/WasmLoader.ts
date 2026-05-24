@@ -537,6 +537,18 @@ export interface WasmModule {
     dims: number,
     treeSize: number
   ) => number;
+  // Convex hull 3D (QuickHull incremental — Barber, Dobkin, Huhdanpaa 1996).
+  // pts_ptr: interleaved [x0,y0,z0, x1,y1,z1, ...], stride=3, n_pts points.
+  // faces_ptr: output buffer for triangle indices (u32); each triple is CCW
+  //            when viewed from outside the hull.
+  // max_faces: capacity of faces_ptr in triangles.
+  // Returns number of triangles written, or -1 on overflow.
+  convex_hull_3d_wasm: (
+    ptsPtr: number,
+    nPts: number,
+    facesPtr: number,
+    maxFaces: number
+  ) => number;
 
   // Bitwise operations (Int32, elementwise — provided by both Rust and AS
   // backends; binary kernels accept two Int32 pointers + output + length,

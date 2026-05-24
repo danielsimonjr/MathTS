@@ -1,30 +1,24 @@
 /**
- * Matrix Logarithm — Inverse Scaling-and-Squaring via Padé Approximant
+ * Matrix Logarithm — Schur-Padé inverse scaling-and-squaring (Slices 5.9a + 6.1)
  *
- * Implements an inverse-scaling-and-squaring approach based on:
- *   Higham, N. J. (2008). "Functions of Matrices: Theory and Computation."
- *   SIAM. Chapter 11.
+ * Implements the Schur-Padé algorithm based on:
+ *   Higham (2008) "Functions of Matrices: Theory and Computation," Chapter 11
+ *   (Algorithm 11.10).
  *
- * Algorithm (eig-based, Slice 5.9a):
- *   For diagonalisable A = V * diag(λ) * V^{-1}:
- *     logm(A) = V * diag(log(λ)) * V^{-1}
+ * Algorithm (general Schur-based path, Slice 6.1):
+ *   1. Schur decompose: A = Q · T · Q^T.
+ *   2. Repeatedly take matrix square roots of T (Björck recurrence on upper-
+ *      triangular matrices) until ||T^{1/2^k} - I||_1 < 0.25.
+ *   3. Evaluate log(I + X) via 16-point Gauss-Legendre quadrature.
+ *   4. Scale back by 2^k; rotate by Q: logm(A) = Q · (2^k · log(T^{1/2^k})) · Q^T.
  *
- *   Limitation: fails (throws) for matrices with non-positive real eigenvalues
- *   or complex eigenvalues, and for defective (non-diagonalisable) matrices.
- *   Full Schur-based inverse-scaling-and-squaring is deferred to Slice 5.9b.
- *
- *   For matrices near I, uses inverse-scaling-and-squaring + Padé-7 on
- *   log(I + X) to handle the common case more robustly:
- *     1. Repeatedly take square roots: M ← sqrt(M) until ||M - I||_1 < 0.25.
- *     2. Evaluate Padé approximant for log(I + X) where X = M - I.
- *     3. Multiply result by 2^k.
- *
- * This gives good accuracy for well-conditioned matrices whose eigenvalues
- * are all positive real.
+ * For the eig-based fallback (diagonalisable matrices with positive real
+ * eigenvalues): logm(A) = V · diag(log(λ)) · V^{-1}.
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
+import { schurInternal } from './schur.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -243,6 +237,142 @@ function logPade(X: number[][]): number[][] {
 }
 
 // ---------------------------------------------------------------------------
+// Upper-triangular square root (Björck recurrence) for Schur-based logm
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute the upper-triangular square root U of an upper-triangular matrix T
+ * (T assumed to be a 1×1 or all-real-diagonal block — i.e., T is strictly
+ * upper triangular with positive diagonal entries).
+ *
+ * Diagonal: U_ii = sqrt(T_ii).
+ * Super-diagonal: U_ij = (T_ij - sum_{k=i+1}^{j-1} U_ik * U_kj) / (U_ii + U_jj).
+ *
+ * Used by the inverse-scaling phase in logmSchur to take repeated square roots
+ * of an upper-triangular Schur factor. Only applicable when all diagonal
+ * entries are strictly positive (no 2×2 complex-eigenvalue blocks).
+ *
+ * Ref: Björck & Hammarling (1983); Higham (2008) §6.2 eq. (6.4)–(6.5).
+ */
+function sqrtUpperTriangular(T: number[][]): number[][] | null {
+  const n = T.length;
+  const U: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
+
+  for (let i = 0; i < n; i++) {
+    if (T[i][i] < 0) return null;
+    U[i][i] = Math.sqrt(T[i][i]);
+  }
+
+  for (let j = 1; j < n; j++) {
+    for (let i = j - 1; i >= 0; i--) {
+      let sum = 0;
+      for (let k = i + 1; k < j; k++) sum += U[i][k] * U[k][j];
+      const denom = U[i][i] + U[j][j];
+      U[i][j] = Math.abs(denom) < 1e-14 ? 0 : (T[i][j] - sum) / denom;
+    }
+  }
+
+  return U;
+}
+
+/**
+ * Matrix multiply A × B (2-D plain arrays).
+ */
+function matMulArr(A: number[][], B: number[][]): number[][] {
+  const m = A.length;
+  const p = A[0].length;
+  const n = B[0].length;
+  const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
+  for (let i = 0; i < m; i++)
+    for (let k = 0; k < p; k++) {
+      const aik = A[i][k];
+      if (aik === 0) continue;
+      for (let j = 0; j < n; j++) C[i][j] += aik * B[k][j];
+    }
+  return C;
+}
+
+function transposeArr(A: number[][]): number[][] {
+  const m = A.length;
+  const n = A[0].length;
+  return Array.from({ length: n }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
+}
+
+/**
+ * Check whether a quasi-upper-triangular Schur form T has any 2×2 blocks
+ * (i.e. any complex-conjugate eigenvalue pair). Returns true if all diagonal
+ * blocks are 1×1 (all real eigenvalues).
+ */
+function isStrictlyUpperTriangular(T: number[][]): boolean {
+  const n = T.length;
+  for (let i = 1; i < n; i++) {
+    if (Math.abs(T[i][i - 1]) > 1e-12) return false;
+  }
+  return true;
+}
+
+/**
+ * Schur-Padé logm: Higham (2008) Algorithm 11.10.
+ *
+ * 1. Schur decompose A = Q · T · Q^T.
+ * 2. Take repeated triangular square roots of T until ||T^{1/2^k} - I||_1 < tol.
+ * 3. Apply Padé quadrature for log(I + X) where X = T^{1/2^k} - I.
+ * 4. Scale back: logm(T) = 2^k · log(T^{1/2^k}).
+ * 5. Rotate: logm(A) = Q · logm(T) · Q^T.
+ *
+ * Restricted to matrices whose Schur form T has all-positive diagonal (i.e.
+ * no 2×2 blocks — complex eigenvalues — and no negative 1×1 blocks). If T
+ * has complex-conjugate 2×2 blocks, falls through to the eig-based path.
+ *
+ * Returns null if the matrix cannot be handled by the Schur-triangular path.
+ */
+function logmSchur(A: number[][], tol: number): number[][] | null {
+  const { H: T, Q } = schurInternal(A);
+
+  // Only handle all-real-diagonal Schur forms here. Complex-eigenvalue blocks
+  // require a more involved 2×2 block log (deferred; eig path throws instead).
+  if (!isStrictlyUpperTriangular(T)) return null;
+
+  // Check that all diagonal entries are strictly positive
+  const n = T.length;
+  for (let i = 0; i < n; i++) {
+    if (T[i][i] <= 1e-14) return null;
+  }
+
+  // Inverse-scaling phase: repeatedly take upper-triangular sqrt of T
+  let M = T;
+  let numSqrt = 0;
+  const maxSqrt = 64;
+
+  while (numSqrt < maxSqrt) {
+    const MminI = M.map((row, i) => row.map((v, j) => v - (i === j ? 1 : 0)));
+    if (norm1(MminI) < tol) break;
+
+    const sqrtM = sqrtUpperTriangular(M);
+    if (sqrtM === null || !isFinite(normInf(sqrtM))) break;
+
+    M = sqrtM;
+    numSqrt++;
+  }
+
+  // Padé quadrature on log(I + X) where X = M - I
+  const MminI = M.map((row, i) => row.map((v, j) => v - (i === j ? 1 : 0)));
+  if (norm1(MminI) >= tol) return null; // did not converge
+
+  let logT = logPade(MminI);
+
+  // Scale back: multiply by 2^numSqrt
+  if (numSqrt > 0) {
+    const scale = Math.pow(2, numSqrt);
+    logT = logT.map((row) => row.map((v) => v * scale));
+  }
+
+  // Rotate: logm(A) = Q * logm(T) * Q^T
+  const Qt = transposeArr(Q);
+  return matMulArr(matMulArr(Q, logT), Qt);
+}
+
+// ---------------------------------------------------------------------------
 // Eig-based fallback for general matrices
 // ---------------------------------------------------------------------------
 
@@ -375,31 +505,32 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
   const tol = opts?.nearIdentityTol ?? 0.25;
   const Aarr = A.toArray();
 
-  // ----- Pre-validate eigenvalues -----
-  // Always check upfront to detect non-positive or complex eigenvalues.
-  // This prevents the scaling loop from amplifying floating-point noise
-  // into a spurious near-identity convergence for singular/degenerate matrices.
+  // ----- Schur-Padé path (Slice 6.1) -----
+  // Handles: real positive eigenvalues, repeated eigenvalues, defective matrices.
+  // Falls through (returns null) for complex-eigenvalue Schur blocks.
+  const schurResult = logmSchur(Aarr, tol);
+  if (schurResult !== null) {
+    const data = new Float64Array(n * n);
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = schurResult[i][j];
+    return new DenseMatrix(n, n, data);
+  }
+
+  // ----- Eig-based fallback -----
+  // Validates eigenvalues (throws for non-positive or complex) and uses
+  // V * diag(log λ) * V^{-1} for diagonalisable matrices.
   validateEigenvalues(Aarr);
 
-  // ----- Inverse-scaling phase -----
-  // Repeatedly take sqrt until ||M - I||_1 < tol
+  // ----- Inverse-scaling phase (original path) -----
   let M = Aarr;
   let numSqrt = 0;
   const maxSqrt = 64;
 
   while (numSqrt < maxSqrt) {
-    // Compute ||M - I||_1
     const MminI = M.map((row, i) => row.map((v, j) => v - (i === j ? 1 : 0)));
     if (norm1(MminI) < tol) break;
 
-    // Take matrix square root (Newton iteration)
     const sqrtM = matSqrt(M);
-
-    // Check if sqrtM is valid (not NaN, not diverged)
-    if (!isFinite(normInf(sqrtM))) {
-      // Newton iteration diverged — fall back to eig
-      break;
-    }
+    if (!isFinite(normInf(sqrtM))) break;
 
     M = sqrtM;
     numSqrt++;
@@ -407,23 +538,18 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
 
   let logM: number[][];
 
-  // Check if we converged to near-identity
   const MminI = M.map((row, i) => row.map((v, j) => v - (i === j ? 1 : 0)));
   if (norm1(MminI) < tol) {
-    // Padé quadrature path: log(I + X) = X * ∫₀¹ (I + tX)^{-1} dt
     logM = logPade(MminI);
   } else {
-    // Fall back to eigendecomposition
     logM = logmEig(Aarr);
-    numSqrt = 0; // no squaring needed — eig path already uses original A
+    numSqrt = 0;
   }
 
-  // Scale back: multiply by 2^numSqrt
   if (numSqrt > 0) {
     logM = matScale(logM, Math.pow(2, numSqrt));
   }
 
-  // Convert to DenseMatrix
   const data = new Float64Array(n * n);
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = logM[i][j];
 

@@ -16,7 +16,7 @@
  * F-matrix denominators) is documented in tape.ts.
  */
 import { describe, it, expect } from 'vitest';
-import { Tensor } from '@danielsimonjr/mathts-tensor';
+import { Tensor, tensorEig } from '@danielsimonjr/mathts-tensor';
 import { Tape, TapedTensor } from '../src/tape.js';
 
 // ---------------------------------------------------------------------------
@@ -579,11 +579,11 @@ describe('TapedTensor.svd — backward correctness (FD)', () => {
 // ---------------------------------------------------------------------------
 
 describe('TapedTensor.eig — type/opts validation', () => {
-  it('rejects calls without { symmetric: true }', () => {
+  it('rejects calls without an explicit symmetric flag', () => {
     const tape = new Tape();
     const { id } = tape.allocate(4);
     const a = new TapedTensor([2, 2], new Float64Array([1, 0, 0, 1]), tape, id);
-    expect(() => a.eig({} as { symmetric: true })).toThrow(/symmetric/);
+    expect(() => a.eig({} as { symmetric: boolean })).toThrow(/symmetric/);
   });
 
   it('rejects non-square or non-rank-2 input', () => {
@@ -810,6 +810,397 @@ describe('TapedTensor.eig — backward correctness (FD)', () => {
     let gNorm = 0;
     for (const v of grad) gNorm += v * v;
     expect(Math.sqrt(gNorm)).toBeLessThan(10);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// eig (non-symmetric / general)
+// ---------------------------------------------------------------------------
+//
+// Slice 6.2: extends Slice 4.8 to the general case A = V·diag(λ)·V^{-1}.
+//
+// Complex-eigenvalue handling decision: the underlying matrix-eig primitive
+// returns placeholder eigenvectors (not actual complex vectors) when complex
+// eigenvalues arise — so the AD path cannot evaluate the adjoint formula.
+// We throw a clear error and require callers to restrict to inputs with a
+// real spectrum. Real-Schur differentiation would require complex arithmetic
+// infrastructure throughout the Tape/TapedTensor stack and is out of scope.
+//
+// Defective-input handling: the adjoint assumes A is diagonalizable. We
+// detect via cond_∞(V) > 1e14 (computed during the explicit V^{-1} build)
+// and throw.
+
+function buildAFromEig(V: number[][], lam: number[]): Float64Array {
+  // Construct A = V · diag(λ) · V^{-1} for a known eigenstructure. V need not
+  // be orthogonal (this is the whole point of the non-symmetric path).
+  const n = V.length;
+  const invert = (M: number[][]): number[][] => {
+    const A = M.map((r) => [...r]);
+    const I = Array.from({ length: n }, (_, i) =>
+      Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
+    );
+    for (let k = 0; k < n; k++) {
+      let max = Math.abs(A[k][k]);
+      let maxI = k;
+      for (let i = k + 1; i < n; i++) {
+        if (Math.abs(A[i][k]) > max) {
+          max = Math.abs(A[i][k]);
+          maxI = i;
+        }
+      }
+      if (maxI !== k) {
+        [A[k], A[maxI]] = [A[maxI], A[k]];
+        [I[k], I[maxI]] = [I[maxI], I[k]];
+      }
+      const p = A[k][k];
+      for (let j = 0; j < n; j++) {
+        A[k][j] /= p;
+        I[k][j] /= p;
+      }
+      for (let i = 0; i < n; i++) {
+        if (i === k) continue;
+        const f = A[i][k];
+        for (let j = 0; j < n; j++) {
+          A[i][j] -= f * A[k][j];
+          I[i][j] -= f * I[k][j];
+        }
+      }
+    }
+    return I;
+  };
+  const Vinv = invert(V);
+  const out = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      let s = 0;
+      for (let k = 0; k < n; k++) s += V[i][k] * lam[k] * Vinv[k][j];
+      out[i * n + j] = s;
+    }
+  }
+  return out;
+}
+
+describe('TapedTensor.eig (non-symmetric) — backward correctness (FD)', () => {
+  it('case 1: sum(λ²) on well-conditioned 3×3 (constructed from VΛV^{-1})', () => {
+    const aData = buildAFromEig(
+      [
+        [1, 1, 0],
+        [0, 1, 1],
+        [1, 0, 1],
+      ],
+      [1, 2, 3]
+    );
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    const { eigvals } = a.eig({ symmetric: false });
+    const out = eigvals.square().sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = new Float64Array(tape.getInputGrad(id)!);
+
+    const num = fdGrad((x) => {
+      const aT = new Tensor([3, 3], x);
+      const r = tensorEig(aT, [0], { symmetric: false, computeVectors: false });
+      let s = 0;
+      for (const v of r.eigenvalues.data) s += v * v;
+      return s;
+    }, aData);
+
+    assertClose(grad, num, 1e-4, 'non-sym eig sum(λ²) FD');
+  });
+
+  it('case 2: sum(λ) on diagonal-dominant 3×3', () => {
+    // Diagonally dominant non-symmetric: well-conditioned eigenvectors.
+    const aData = new Float64Array([5, 0.1, 0.2, 0.3, 4, 0.4, 0.1, 0.2, 3]);
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    const { eigvals } = a.eig({ symmetric: false });
+    const out = eigvals.sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = new Float64Array(tape.getInputGrad(id)!);
+    // sum(λ) = trace(A): ∂/∂A_ii = 1, ∂/∂A_ij (i≠j) = 0.
+    const expected = new Float64Array(9);
+    expected[0] = 1;
+    expected[4] = 1;
+    expected[8] = 1;
+    assertClose(grad, expected, 1e-5, 'non-sym eig sum(λ) = trace');
+  });
+
+  it('case 3: sum(eigvecs) FD on well-conditioned 3×3', () => {
+    const aData = buildAFromEig(
+      [
+        [1, 1, 0],
+        [0, 1, 1],
+        [1, 0, 1],
+      ],
+      [1, 2, 3]
+    );
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    const { eigvecs } = a.eig({ symmetric: false });
+    const out = eigvecs.sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = new Float64Array(tape.getInputGrad(id)!);
+
+    const num = fdGrad((x) => {
+      const aT = new Tensor([3, 3], x);
+      const r = tensorEig(aT, [0], { symmetric: false, computeVectors: true });
+      let s = 0;
+      for (const v of r.eigenvectors!.data) s += v;
+      return s;
+    }, aData);
+
+    assertClose(grad, num, 1e-4, 'non-sym eig sum(V) FD');
+  });
+
+  it('case 4: sum(V²) on unit-normalised V → near-zero gradient', () => {
+    // ||V_i||=1 by primitive convention, so sum(V²) = n (constant). The
+    // gauge-correction term in the backward must zero out the parallel
+    // component of dV in the eigenbasis; gradient should be at machine eps.
+    const aData = buildAFromEig(
+      [
+        [1, 1, 0],
+        [0, 1, 1],
+        [1, 0, 1],
+      ],
+      [1, 2, 3]
+    );
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    const { eigvecs } = a.eig({ symmetric: false });
+    const out = eigvecs.square().sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = new Float64Array(tape.getInputGrad(id)!);
+    assertFinite(grad, 'non-sym eig sum(V²) finite');
+    let maxAbs = 0;
+    for (const g of grad) maxAbs = Math.max(maxAbs, Math.abs(g));
+    expect(maxAbs).toBeLessThan(1e-10);
+  });
+
+  it('case 5: sum(λ²) on a 4×4 well-conditioned non-symmetric matrix', () => {
+    // Distinct eigenvalues, well-conditioned V (Vandermonde-like).
+    const V = [
+      [1, 1, 1, 1],
+      [1, 0.5, -0.5, -1],
+      [1, -0.5, -0.5, 1],
+      [1, -1, 1, -1],
+    ];
+    const aData = buildAFromEig(V, [1, 2, 3, 5]);
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([4, 4], new Float64Array(aData), tape, id);
+    const { eigvals } = a.eig({ symmetric: false });
+    const out = eigvals.square().sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = new Float64Array(tape.getInputGrad(id)!);
+
+    const num = fdGrad(
+      (x) => {
+        const aT = new Tensor([4, 4], x);
+        const r = tensorEig(aT, [0], { symmetric: false, computeVectors: false });
+        let s = 0;
+        for (const v of r.eigenvalues.data) s += v * v;
+        return s;
+      },
+      aData,
+      1e-5
+    );
+
+    assertClose(grad, num, 1e-3, 'non-sym eig 4×4 sum(λ²) FD');
+  });
+
+  it('case 6: chained — sum((λ + 1)²) flows through .add(scalar).square().sum()', () => {
+    const aData = buildAFromEig(
+      [
+        [2, 1, 0],
+        [0, 2, 1],
+        [1, 0, 2],
+      ],
+      [1, 4, 7]
+    );
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    const { eigvals } = a.eig({ symmetric: false });
+    // L = sum((λ + 1)²). Build via scale-by-1 add, since TapedTensor.add wants
+    // another taped operand: use a scalar-only equivalent via .scale(1) + manual
+    // shift through a constant taped tensor.
+    const onesT = (() => {
+      const t = new Tape();
+      void t;
+      // Use eigvals.scale(1).add(constant-eigvals-shape) — simplest: build via add of
+      // eigvals to a constant taped tensor allocated on the SAME tape with input grad
+      // we ignore.
+      const { id: cId } = tape.allocate(eigvals.shape[0]);
+      return new TapedTensor([eigvals.shape[0]], new Float64Array(eigvals.shape[0]).fill(1), tape, cId);
+    })();
+    const shifted = eigvals.add(onesT);
+    const out = shifted.square().sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = new Float64Array(tape.getInputGrad(id)!);
+
+    const num = fdGrad(
+      (x) => {
+        const aT = new Tensor([3, 3], x);
+        const r = tensorEig(aT, [0], { symmetric: false, computeVectors: false });
+        let s = 0;
+        for (const v of r.eigenvalues.data) s += (v + 1) * (v + 1);
+        return s;
+      },
+      aData,
+      1e-5
+    );
+
+    assertClose(grad, num, 1e-3, 'non-sym eig chained sum((λ+1)²) FD');
+  });
+
+  it('case 7: chained — eigvecs downstream via square+sum (eigval-order invariant)', () => {
+    // L = sum(V²) and L = sum(V) are NOT eigval-order invariant under FD when
+    // eigenvalues are well-separated and may permute under perturbation. We use
+    // sum(eigvecs.square().scale(λ-weights).sum()) → invariant under column
+    // permutation only if weights are symmetric. Simplest invariant chained
+    // pipeline: L = sum( (V · V^T) elementwise-squared ) which depends only on
+    // the eigenspace, not the labeling.
+    //
+    // Easier: use the matmul V · V^T (a projection-like quantity invariant under
+    // column-permutation+sign-flip of V), then sum its entries.
+    const aData = buildAFromEig(
+      [
+        [1, 1, 0],
+        [0, 1, 1],
+        [1, 0, 1],
+      ],
+      [1, 2, 3]
+    );
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    const { eigvecs } = a.eig({ symmetric: false });
+    // L = sum(V · V^T). For ortho V this equals trace(V·V^T) = n; for general
+    // (column-unit-norm) V it's a permutation-invariant, sign-invariant
+    // quantity.
+    // V^T via transpose-tensordot: V.tensordot(V, [[0,0]]) = V^T·V (3×3).
+    // We want V·V^T, so contract on the SECOND axis of both:
+    //   V.tensordot(V, [[1, 1]])[i,j] = sum_k V[i,k] · V[j,k] = (V·V^T)[i,j].
+    const prod = eigvecs.tensordot(eigvecs, [[1, 1]]);
+    const out = prod.sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = new Float64Array(tape.getInputGrad(id)!);
+
+    const num = fdGrad(
+      (x) => {
+        const aT = new Tensor([3, 3], x);
+        const r = tensorEig(aT, [0], { symmetric: false, computeVectors: true });
+        const V = r.eigenvectors!.data;
+        let s = 0;
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            let p = 0;
+            for (let k = 0; k < 3; k++) p += V[i * 3 + k] * V[j * 3 + k];
+            s += p;
+          }
+        }
+        return s;
+      },
+      aData,
+      1e-5
+    );
+
+    assertClose(grad, num, 1e-3, 'non-sym eig chained V·V^T sum FD');
+  });
+
+  it('case 8: complex eigenvalues → throws a clear error', () => {
+    // Rotation matrix has eigenvalues ±i.
+    const aData = new Float64Array([0, -1, 1, 0]);
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([2, 2], new Float64Array(aData), tape, id);
+    expect(() => a.eig({ symmetric: false })).toThrow(/complex/);
+  });
+
+  it('case 9: 3×3 with a complex conjugate pair → throws', () => {
+    // 3×3 with one real eigenvalue and a complex pair.
+    // Block-diagonal: [[0, -1, 0], [1, 0, 0], [0, 0, 5]] → eigvals ±i, 5.
+    const aData = new Float64Array([0, -1, 0, 1, 0, 0, 0, 0, 5]);
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    expect(() => a.eig({ symmetric: false })).toThrow(/complex/);
+  });
+
+  it('case 10: defective Jordan block → throws "defective"', () => {
+    // [[2, 1], [0, 2]] has algebraic multiplicity 2 for λ=2, geometric mult 1.
+    const aData = new Float64Array([2, 1, 0, 2]);
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([2, 2], new Float64Array(aData), tape, id);
+    expect(() => a.eig({ symmetric: false })).toThrow(/defective/);
+  });
+
+  it('case 11: 3×3 defective (Jordan-like) → throws "defective"', () => {
+    // [[3, 1, 0], [0, 3, 1], [0, 0, 3]] — full Jordan block.
+    const aData = new Float64Array([3, 1, 0, 0, 3, 1, 0, 0, 3]);
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    expect(() => a.eig({ symmetric: false })).toThrow(/defective/);
+  });
+
+  it('case 12: near-degenerate eigenvalues — finite gradient (no NaN)', () => {
+    // Two eigenvalues are close (within REL_TOL · |λ|_max). The mask should
+    // zero out that off-diagonal F entry, producing a finite subgradient.
+    const eps = 1e-12;
+    const aData = buildAFromEig(
+      [
+        [1, 1, 0],
+        [0, 1, 1],
+        [1, 0, 1],
+      ],
+      [2, 2 + eps, 5]
+    );
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    const { eigvals } = a.eig({ symmetric: false });
+    const out = eigvals.sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = new Float64Array(tape.getInputGrad(id)!);
+    assertFinite(grad, 'non-sym eig near-degenerate finite');
+    let gNorm = 0;
+    for (const v of grad) gNorm += v * v;
+    expect(Math.sqrt(gNorm)).toBeLessThan(10);
+  });
+
+  it('case 13: cross-check non-symmetric path on a symmetric input agrees with FD', () => {
+    // Symmetric A is a special case; the non-symmetric path should still
+    // produce a correct gradient (it's just less efficient).
+    const aData = new Float64Array([3.0, 0.4, 0.2, 0.4, 2.5, 0.3, 0.2, 0.3, 1.8]);
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const a = new TapedTensor([3, 3], new Float64Array(aData), tape, id);
+    const { eigvals } = a.eig({ symmetric: false });
+    const out = eigvals.square().sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = new Float64Array(tape.getInputGrad(id)!);
+
+    // sum(λ²) = trace(A²) = sum_ij A_ij · A_ji. ∂/∂A_ij = 2·A_ji.
+    // For symmetric A, this equals 2·A_ij.
+    const num = fdGrad(
+      (x) => {
+        const aT = new Tensor([3, 3], x);
+        const r = tensorEig(aT, [0], { symmetric: false, computeVectors: false });
+        let s = 0;
+        for (const v of r.eigenvalues.data) s += v * v;
+        return s;
+      },
+      aData,
+      1e-5
+    );
+
+    assertClose(grad, num, 1e-4, 'non-sym path on symmetric input matches FD');
   });
 });
 
