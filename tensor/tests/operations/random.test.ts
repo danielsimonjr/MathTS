@@ -164,6 +164,36 @@ describe('randomTensor', () => {
     expect(a.data).toEqual(b.data);
   });
 
+  // --- 6b. Orthogonal: Qᵀ·Q ≈ I (delegates to matrix.qr) ----------------------
+
+  it('orthogonal 8×8: Qᵀ·Q ≈ I to 1e-10 (delegates to matrix.qr)', () => {
+    const n = 8;
+    const Q = randomTensor([n, n], { distribution: 'orthogonal', seed: 42 });
+    expect(Q.shape).toEqual([n, n]);
+
+    // Verify QᵀQ = I: (QᵀQ)[i,k] = sum_j Q[j,i] * Q[j,k]
+    for (let i = 0; i < n; i++) {
+      for (let k = 0; k < n; k++) {
+        let sum = 0;
+        for (let j = 0; j < n; j++) {
+          sum += Q.data[j * n + i] * Q.data[j * n + k];
+        }
+        const expected = i === k ? 1 : 0;
+        expect(Math.abs(sum - expected)).toBeLessThan(1e-10);
+      }
+    }
+  });
+
+  it('orthogonal random tensor is reproducible with the same seed', () => {
+    const n = 6;
+    const Q1 = randomTensor([n, n], { distribution: 'orthogonal', seed: 123 });
+    const Q2 = randomTensor([n, n], { distribution: 'orthogonal', seed: 123 });
+    expect(Q1.data.length).toBe(Q2.data.length);
+    for (let i = 0; i < Q1.data.length; i++) {
+      expect(Q1.data[i]).toBe(Q2.data[i]);
+    }
+  });
+
   // --- 7. axisLabels forwarding ------------------------------------------------
 
   it('axisLabels are forwarded to the constructed Tensor', () => {
