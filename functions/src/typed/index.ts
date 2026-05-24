@@ -118,6 +118,10 @@ export { typedString } from './string.js';
 export * from './probability.js';
 export { typedProbability } from './probability.js';
 
+// Unit dimensional-analysis functions (to, toBest)
+export * from './unit.js';
+export { typedUnit } from './unit.js';
+
 // =============================================================================
 // Combined Exports
 // =============================================================================
@@ -152,6 +156,7 @@ import {
 import { typedSpecial } from './special.js';
 import { typedDistributions } from './distributions.js';
 import { typedAlgebra } from './algebra.js';
+import { typedUnit } from './unit.js';
 
 /**
  * All typed functions combined (parallel-first)
@@ -189,4 +194,5 @@ export const typedFunctions = {
   ...typedSpecial,
   ...typedDistributions,
   ...typedAlgebra,
+  ...typedUnit,
 };

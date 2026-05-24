@@ -161,6 +161,10 @@ Four disjoint Tier-1 slices from [`GAP_CLOSURE_PROPOSAL_WAVE5.md`](docs/roadmap/
 
 Pipeline 19/19 turbo tasks green. Wave 5B (sequential WASM slices 5.3-5.6) dispatches next.
 
+#### Gap-closure Wave 5E — Opus Slice 5.15 LANDED (rank 14 closure)
+
+- **Slice 5.15** — `core/Unit` type + `typed/unit.ts` promotion. **Opus subagent.** Closes the deferred rank-14 entry from the function-gap audit by implementing a TypeScript-native `Unit` value type and wiring `to(value, target)` and `toBest(value)` through the active `typed/` dispatch layer. Three new core files (`core/src/types/unit.ts`, `unit-definitions.ts`, `unit-prefixes.ts`), one new typed wrapper (`functions/src/typed/unit.ts`), and 68 new tests (53 core + 15 typed). Design choices intentionally diverging from the synced mathjs `Unit.ts` (3,488-line `@ts-nocheck` factory): immutable value semantics with `readonly` fields, `Dimensions` as a struct over the 7 SI bases (not an indexed array), no closure over a `math` instance (Unit is self-contained), explicit `DimensionMismatchError` / `UnitParseError` error classes. Parser is recursive-descent supporting `m/s²`, `kg·m/s^2`, `1/s`, Unicode middle-dot/superscripts; prefix ambiguity (`min` vs `m + in`) resolved by trying plain match before prefix. Temperature offsets stored on the unit definition (`{multiplier, offset?}`) and applied only when a unit is used standalone with exponent 1 (matching mathjs). `toBest()` ranks candidate units+prefixes by minimising `|log10(displayed)|`; skips `kg` to avoid colliding with the prefixable `g` entry. `to(number, string)` is registered as a constructor shorthand alongside `to(Unit, string)`. Name-collision finding: synced-mathjs `factories/index.ts` already re-exports `to`/`toBest`; resolved via an explicit `export { to, toBest } from './typed/unit.js';` override in `functions/src/index.ts`, mirroring how `cond` is resolved. `functions`: 2,471 → **2,486** (+15); `core`: 391 → **444** (+53).
+
 #### Gap-closure Wave 4C — two Tier-3 design-heavy slices LANDED
 
 - **Slice 4.8 — commit `fd81cd8`** — `TapedTensor` decomposition AD (rank 12). **Opus subagent.** Three new methods:

@@ -20,5 +20,12 @@ export * from './typed/cas.js';
 // Activated mathjs leaf factory functions
 export * from './factories/index.js';
 
+// Explicit re-export to resolve `to` / `toBest` ambiguity between the
+// synced-mathjs factory layer (factories/index.js) and the new typed Unit
+// implementation (typed/unit.js). The typed-dispatch version supersedes
+// the factory version for the public barrel, mirroring how `cond` is
+// resolved inside typed/index.js.
+export { to, toBest } from './typed/unit.js';
+
 // Expression evaluator (wired to full math scope)
 export { evaluate, compileExpr, parse, parser, reviver, replacer } from './factories/evaluate.js';
