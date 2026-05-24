@@ -1,7 +1,8 @@
 /**
  * Tests for reverse-mode AD over TapedTensor elementwise transcendentals.
  *
- * Methods covered: log, exp, sin, cos, tan, sqrt, square, pow, reciprocal, abs.
+ * Methods covered: log, exp, sin, cos, tan, sqrt, square, pow, reciprocal, abs,
+ *                  sub, divide.
  *
  * For each method:
  *   - Forward-correctness test: primal output equals the corresponding Math.* call.
@@ -11,10 +12,12 @@
  * Special cases:
  *   - pow tested with integer and fractional k.
  *   - abs at exact zero — subgradient = 0.
+ *   - divide: aliased self-division (a/a → grad = 0).
  *
  * Composition tests:
  *   - taped.log().sum() → gradient = 1/x.
  *   - a.contract(b).square().sum() → gradients across both leaves correct.
+ *   - sub and divide chained in multi-step graphs.
  */
 import { describe, it, expect } from 'vitest';
 import { Tensor } from '@danielsimonjr/mathts-tensor';
@@ -97,6 +100,63 @@ function assertClose(a: Float64Array, b: Float64Array, tol = 1e-7, label = ''): 
     }
     expect(diff).toBeLessThan(tol);
   }
+}
+
+/**
+ * Two-leaf reverse-mode helper.
+ * Computes fn(leafA, leafB), seeds backward with all-ones, returns both gradients.
+ */
+function reverseGradTwo(
+  fn: (a: TapedTensor, b: TapedTensor) => TapedTensor,
+  aData: Float64Array,
+  aShape: ReadonlyArray<number>,
+  bData: Float64Array,
+  bShape: ReadonlyArray<number>
+): { gradA: Float64Array; gradB: Float64Array; value: Float64Array } {
+  const tape = new Tape();
+  const { id: idA } = tape.allocate(aData.length);
+  const { id: idB } = tape.allocate(bData.length);
+  const leafA = new TapedTensor(aShape, new Float64Array(aData), tape, idA);
+  const leafB = new TapedTensor(bShape, new Float64Array(bData), tape, idB);
+  const out = fn(leafA, leafB);
+  tape.backward(out.id, new Float64Array(out.primal.length).fill(1));
+  return {
+    gradA: new Float64Array(tape.getInputGrad(idA)!),
+    gradB: new Float64Array(tape.getInputGrad(idB)!),
+    value: new Float64Array(out.primal),
+  };
+}
+
+/**
+ * Numerical gradient (central FD) of sum(f(a, b)) w.r.t. both a and b.
+ */
+function numericalGradTwo(
+  fn: (aData: Float64Array, bData: Float64Array) => Float64Array,
+  aData: Float64Array,
+  bData: Float64Array,
+  eps = 1e-5
+): { numGradA: Float64Array; numGradB: Float64Array } {
+  const numGradA = new Float64Array(aData.length);
+  for (let i = 0; i < aData.length; i++) {
+    const aPlus = new Float64Array(aData);
+    aPlus[i] += eps;
+    const aMinus = new Float64Array(aData);
+    aMinus[i] -= eps;
+    const fPlus = fn(aPlus, bData).reduce((s, v) => s + v, 0);
+    const fMinus = fn(aMinus, bData).reduce((s, v) => s + v, 0);
+    numGradA[i] = (fPlus - fMinus) / (2 * eps);
+  }
+  const numGradB = new Float64Array(bData.length);
+  for (let i = 0; i < bData.length; i++) {
+    const bPlus = new Float64Array(bData);
+    bPlus[i] += eps;
+    const bMinus = new Float64Array(bData);
+    bMinus[i] -= eps;
+    const fPlus = fn(aData, bPlus).reduce((s, v) => s + v, 0);
+    const fMinus = fn(aData, bMinus).reduce((s, v) => s + v, 0);
+    numGradB[i] = (fPlus - fMinus) / (2 * eps);
+  }
+  return { numGradA, numGradB };
 }
 
 // ---------------------------------------------------------------------------
@@ -537,5 +597,164 @@ describe('TapedTensor composition — a.contract(b).square().sum()', () => {
 
     assertClose(gradA, numGradA, 1e-7, 'dA for contract.square.sum');
     assertClose(gradB, numGradB, 1e-7, 'dB for contract.square.sum');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// sub — forward + gradient
+// ---------------------------------------------------------------------------
+
+describe('TapedTensor.sub — forward + gradient', () => {
+  it('sub() primal is a - b element-wise (same shape)', () => {
+    const aData = new Float64Array([5, 3, 8, 1]);
+    const bData = new Float64Array([2, 1, 5, 4]);
+    const { value } = reverseGradTwo((a, b) => a.sub(b), aData, [4], bData, [4]);
+    for (let i = 0; i < aData.length; i++) {
+      expect(value[i]).toBeCloseTo(aData[i] - bData[i], 12);
+    }
+  });
+
+  it('sub() gradient w.r.t. a is +dY (all-ones seed → gradA = 1 per element)', () => {
+    const aData = new Float64Array([3, 7, 2]);
+    const bData = new Float64Array([1, 4, 6]);
+    const { gradA } = reverseGradTwo((a, b) => a.sub(b), aData, [3], bData, [3]);
+    for (let i = 0; i < gradA.length; i++) {
+      expect(gradA[i]).toBeCloseTo(1, 12);
+    }
+  });
+
+  it('sub() gradient w.r.t. b is -dY (all-ones seed → gradB = -1 per element)', () => {
+    const aData = new Float64Array([3, 7, 2]);
+    const bData = new Float64Array([1, 4, 6]);
+    const { gradB } = reverseGradTwo((a, b) => a.sub(b), aData, [3], bData, [3]);
+    for (let i = 0; i < gradB.length; i++) {
+      expect(gradB[i]).toBeCloseTo(-1, 12);
+    }
+  });
+
+  it('sub() gradients match finite differences', () => {
+    const aData = new Float64Array([2, -1, 4, 0.5]);
+    const bData = new Float64Array([1, 3, -2, 0.1]);
+    const fwd = (aD: Float64Array, bD: Float64Array) => {
+      const out = new Float64Array(aD.length);
+      for (let i = 0; i < out.length; i++) out[i] = aD[i] - bD[i];
+      return out;
+    };
+    const { numGradA, numGradB } = numericalGradTwo(fwd, aData, bData);
+    const { gradA, gradB } = reverseGradTwo((a, b) => a.sub(b), aData, [4], bData, [4]);
+    assertClose(gradA, numGradA, 1e-6, 'sub gradA');
+    assertClose(gradB, numGradB, 1e-6, 'sub gradB');
+  });
+
+  it('sub() chained in a multi-step graph: ((a - b) * a).sum()', () => {
+    // f = sum((a - b) * a) = sum(a² - a·b)
+    // df/da = 2a - b, df/db = -a
+    const aData = new Float64Array([2, 3]);
+    const bData = new Float64Array([1, 1]);
+    const tape = new Tape();
+    const { id: idA } = tape.allocate(aData.length);
+    const { id: idB } = tape.allocate(bData.length);
+    const leafA = new TapedTensor([2], new Float64Array(aData), tape, idA);
+    const leafB = new TapedTensor([2], new Float64Array(bData), tape, idB);
+    const out = leafA.sub(leafB).mul(leafA).sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const gradA = tape.getInputGrad(idA)!;
+    const gradB = tape.getInputGrad(idB)!;
+    // df/da[i] = 2*a[i] - b[i]
+    for (let i = 0; i < aData.length; i++) {
+      expect(gradA[i]).toBeCloseTo(2 * aData[i] - bData[i], 8);
+    }
+    // df/db[i] = -a[i]
+    for (let i = 0; i < bData.length; i++) {
+      expect(gradB[i]).toBeCloseTo(-aData[i], 8);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// divide — forward + gradient
+// ---------------------------------------------------------------------------
+
+describe('TapedTensor.divide — forward + gradient', () => {
+  it('divide() primal is a / b element-wise (same shape)', () => {
+    const aData = new Float64Array([6, 4, 9, 1]);
+    const bData = new Float64Array([2, 2, 3, 5]);
+    const { value } = reverseGradTwo((a, b) => a.divide(b), aData, [4], bData, [4]);
+    for (let i = 0; i < aData.length; i++) {
+      expect(value[i]).toBeCloseTo(aData[i] / bData[i], 12);
+    }
+  });
+
+  it('divide() gradient w.r.t. a is dY/b (all-ones seed → 1/b)', () => {
+    const aData = new Float64Array([6, 4, 9]);
+    const bData = new Float64Array([2, 2, 3]);
+    const { gradA } = reverseGradTwo((a, b) => a.divide(b), aData, [3], bData, [3]);
+    for (let i = 0; i < gradA.length; i++) {
+      expect(gradA[i]).toBeCloseTo(1 / bData[i], 10);
+    }
+  });
+
+  it('divide() gradient w.r.t. b is -dY*a/b² (all-ones seed → -a/b²)', () => {
+    const aData = new Float64Array([6, 4, 9]);
+    const bData = new Float64Array([2, 2, 3]);
+    const { gradB } = reverseGradTwo((a, b) => a.divide(b), aData, [3], bData, [3]);
+    for (let i = 0; i < gradB.length; i++) {
+      expect(gradB[i]).toBeCloseTo(-aData[i] / (bData[i] * bData[i]), 10);
+    }
+  });
+
+  it('divide() gradients match finite differences', () => {
+    const aData = new Float64Array([3, 5, 2, 8]);
+    const bData = new Float64Array([1, 2, 4, 0.5]);
+    const fwd = (aD: Float64Array, bD: Float64Array) => {
+      const out = new Float64Array(aD.length);
+      for (let i = 0; i < out.length; i++) out[i] = aD[i] / bD[i];
+      return out;
+    };
+    const { numGradA, numGradB } = numericalGradTwo(fwd, aData, bData, 1e-5);
+    const { gradA, gradB } = reverseGradTwo((a, b) => a.divide(b), aData, [4], bData, [4]);
+    assertClose(gradA, numGradA, 1e-6, 'divide gradA');
+    assertClose(gradB, numGradB, 1e-6, 'divide gradB');
+  });
+
+  it('divide() aliased self-division (a.divide(a)) has zero gradient', () => {
+    // d(a/a)/da = d(1)/da = 0 everywhere.
+    const aData = new Float64Array([2, -3, 5]);
+    const tape = new Tape();
+    const { id } = tape.allocate(aData.length);
+    const leaf = new TapedTensor([3], new Float64Array(aData), tape, id);
+    const out = leaf.divide(leaf);
+    tape.backward(out.id, new Float64Array(out.primal.length).fill(1));
+    const grad = tape.getInputGrad(id)!;
+    for (let i = 0; i < grad.length; i++) {
+      expect(grad[i]).toBeCloseTo(0, 12);
+    }
+  });
+
+  it('divide() chained with mul and add in a multi-step graph', () => {
+    // f = sum((a / b) * b + a) = sum(a + a) = sum(2a)  (algebraically)
+    // df/da = 2 for each element, df/db = 0 for each element.
+    // This tests multi-node graph traversal.
+    const aData = new Float64Array([3, 1, 4]);
+    const bData = new Float64Array([2, 5, 1]);
+    const tape = new Tape();
+    const { id: idA } = tape.allocate(aData.length);
+    const { id: idB } = tape.allocate(bData.length);
+    const leafA = new TapedTensor([3], new Float64Array(aData), tape, idA);
+    const leafB = new TapedTensor([3], new Float64Array(bData), tape, idB);
+    // (a / b) * b + a
+    const div = leafA.divide(leafB);
+    const restored = div.mul(leafB);
+    const result = restored.add(leafA);
+    const out = result.sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const gradA = tape.getInputGrad(idA)!;
+    const gradB = tape.getInputGrad(idB)!;
+    for (let i = 0; i < gradA.length; i++) {
+      expect(gradA[i]).toBeCloseTo(2, 8);
+    }
+    for (let i = 0; i < gradB.length; i++) {
+      expect(gradB[i]).toBeCloseTo(0, 8);
+    }
   });
 });
