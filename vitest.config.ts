@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    exclude: ['**/*.browser.test.ts', 'node_modules/**'],
     include: [
       'packages/*/test/**/*.test.ts',
       'packages/*/tests/**/*.test.ts',
