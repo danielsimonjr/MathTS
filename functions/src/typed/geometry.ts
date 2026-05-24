@@ -23,6 +23,9 @@ type i32 = number;
 // WASM dispatch threshold — point sets smaller than this use pure-TS fallback
 const GEOMETRY_WASM_THRESHOLD = 32;
 
+// Threshold for convexHull3D WASM dispatch (≥ 1024 points)
+const HULL3D_WASM_THRESHOLD = 1024;
+
 // =============================================================================
 // Angle Functions
 // =============================================================================
@@ -993,6 +996,214 @@ export function nearestNeighbor(
   // Pure JS fallback via kdTree + kdTreeNearest
   const root = kdTree(points);
   return kdTreeNearest(root, query);
+}
+
+// =============================================================================
+// Convex Hull 3D
+// =============================================================================
+
+/**
+ * Represents a triangular face of a 3-D convex hull as three vertex indices
+ * into the input point array.  The vertices are in counter-clockwise order
+ * when viewed from outside the hull.
+ */
+export type HullFace3D = [i32, i32, i32];
+
+/**
+ * Compute the 3-D convex hull of a set of points using QuickHull (incremental
+ * variant — Barber, Dobkin, Huhdanpaa 1996).
+ *
+ * Point sets with ≥ 1024 points are dispatched to the Rust WASM kernel;
+ * smaller sets use a pure-TypeScript fallback with the same algorithm.
+ *
+ * @param points - Array of 3-D points, each `[x, y, z]`.
+ * @returns Array of triangular faces.  Each face is `[i, j, k]` where i/j/k
+ *          are indices into `points`, oriented CCW from outside.
+ * @throws {Error} When the input is degenerate (fewer than 4 non-coplanar points).
+ */
+export function convexHull3D(points: number[][]): HullFace3D[] {
+  const n: i32 = points.length;
+  if (n < 4) {
+    throw new Error('convexHull3D: at least 4 non-coplanar points are required');
+  }
+
+  if (n >= HULL3D_WASM_THRESHOLD) {
+    const wasm = wasmLoader.getModule();
+    if (wasm) {
+      try {
+        const flat = new Float64Array(n * 3);
+        for (let i = 0; i < n; i++) {
+          flat[i * 3] = points[i][0];
+          flat[i * 3 + 1] = points[i][1];
+          flat[i * 3 + 2] = points[i][2];
+        }
+        const ptsAlloc = wasmLoader.allocateFloat64Array(flat);
+        // Upper bound on hull faces: O(n) — 2n is safe for random inputs.
+        // We use 4*n to be conservative.
+        const maxFaces = 4 * n;
+        // The kernel writes u32 indices; allocate as Int32Array (same byte width).
+        const facesAlloc = wasmLoader.allocateInt32ArrayEmpty(maxFaces * 3);
+        try {
+          const nFaces = wasm.convex_hull_3d_wasm(ptsAlloc.ptr, n, facesAlloc.ptr, maxFaces);
+          if (nFaces === -1) {
+            throw new Error('convexHull3D: WASM output buffer overflow — retrying with JS');
+          }
+          if (nFaces === 0) {
+            throw new Error('convexHull3D: degenerate input (all points co-planar or collinear)');
+          }
+          const result: HullFace3D[] = [];
+          for (let i = 0; i < nFaces; i++) {
+            result.push([
+              facesAlloc.array[i * 3],
+              facesAlloc.array[i * 3 + 1],
+              facesAlloc.array[i * 3 + 2],
+            ]);
+          }
+          return result;
+        } finally {
+          wasmLoader.free(ptsAlloc.ptr);
+          wasmLoader.free(facesAlloc.ptr);
+        }
+      } catch (err) {
+        // Re-throw degenerate-input errors — don't silently fall back.
+        if (err instanceof Error && err.message.includes('degenerate')) throw err;
+        // Otherwise fall through to JS.
+      }
+    }
+  }
+
+  return convexHull3DJS(points);
+}
+
+/**
+ * Pure-TypeScript QuickHull-3D fallback (same incremental algorithm as the
+ * Rust kernel).  Used for n < HULL3D_WASM_THRESHOLD and as a safety net when
+ * the WASM module is unavailable.
+ */
+function convexHull3DJS(points: number[][]): HullFace3D[] {
+  const n: i32 = points.length;
+
+  function orient3d(
+    a: number[], b: number[], c: number[], p: number[]
+  ): f64 {
+    const bax = b[0] - a[0]; const bay = b[1] - a[1]; const baz = b[2] - a[2];
+    const cax = c[0] - a[0]; const cay = c[1] - a[1]; const caz = c[2] - a[2];
+    const pax = p[0] - a[0]; const pay = p[1] - a[1]; const paz = p[2] - a[2];
+    return (
+      bax * (cay * paz - caz * pay) -
+      bay * (cax * paz - caz * pax) +
+      baz * (cax * pay - cay * pax)
+    );
+  }
+
+  // Make a face outward-pointing relative to an interior reference point.
+  function makeFaceOutward(a: i32, b: i32, c: i32, refPt: number[]): HullFace3D {
+    const d = orient3d(points[a], points[b], points[c], refPt);
+    return d > 0 ? [a, c, b] : [a, b, c];
+  }
+
+  function faceDist(face: HullFace3D, p: i32): f64 {
+    return orient3d(points[face[0]], points[face[1]], points[face[2]], points[p]);
+  }
+
+  // Find 4 extreme points for the initial tetrahedron.
+  let i0 = 0;
+  let i1 = 0;
+  for (let i = 1; i < n; i++) {
+    if (points[i][0] < points[i0][0]) i0 = i;
+    if (points[i][0] > points[i1][0]) i1 = i;
+  }
+  if (Math.abs(points[i1][0] - points[i0][0]) < 1e-12) {
+    throw new Error('convexHull3D: degenerate input (all points share the same x-coordinate)');
+  }
+
+  let i2 = -1;
+  let bestD = -1;
+  for (let i = 0; i < n; i++) {
+    if (i === i0 || i === i1) continue;
+    const ax = points[i1][0] - points[i0][0];
+    const ay = points[i1][1] - points[i0][1];
+    const az = points[i1][2] - points[i0][2];
+    const vx = points[i][0] - points[i0][0];
+    const vy = points[i][1] - points[i0][1];
+    const vz = points[i][2] - points[i0][2];
+    const cx = ay * vz - az * vy;
+    const cy = az * vx - ax * vz;
+    const cz = ax * vy - ay * vx;
+    const d = cx * cx + cy * cy + cz * cz;
+    if (d > bestD) { bestD = d; i2 = i; }
+  }
+  if (i2 < 0 || bestD < 1e-24) {
+    throw new Error('convexHull3D: degenerate input (all points collinear)');
+  }
+
+  let i3 = -1;
+  bestD = -1;
+  for (let i = 0; i < n; i++) {
+    if (i === i0 || i === i1 || i === i2) continue;
+    const d = Math.abs(faceDist([i0, i1, i2] as HullFace3D, i));
+    if (d > bestD) { bestD = d; i3 = i; }
+  }
+  if (i3 < 0 || bestD < 1e-12) {
+    throw new Error('convexHull3D: degenerate input (all points co-planar)');
+  }
+
+  const refPt = [
+    (points[i0][0] + points[i1][0] + points[i2][0] + points[i3][0]) / 4,
+    (points[i0][1] + points[i1][1] + points[i2][1] + points[i3][1]) / 4,
+    (points[i0][2] + points[i1][2] + points[i2][2] + points[i3][2]) / 4,
+  ];
+
+  let hull: HullFace3D[] = [
+    makeFaceOutward(i0, i1, i2, refPt),
+    makeFaceOutward(i0, i1, i3, refPt),
+    makeFaceOutward(i0, i2, i3, refPt),
+    makeFaceOutward(i1, i2, i3, refPt),
+  ];
+
+  const tetSet = new Set([i0, i1, i2, i3]);
+
+  for (let p = 0; p < n; p++) {
+    if (tetSet.has(p)) continue;
+
+    const visible: i32[] = [];
+    for (let fi = 0; fi < hull.length; fi++) {
+      if (faceDist(hull[fi], p) > 1e-12) visible.push(fi);
+    }
+    if (visible.length === 0) continue;
+
+    const visSet = new Set(visible);
+
+    // Collect horizon edges.
+    const horizon: [i32, i32][] = [];
+    for (const fi of visible) {
+      const fv = hull[fi];
+      const edges: [i32, i32][] = [[fv[0], fv[1]], [fv[1], fv[2]], [fv[2], fv[0]]];
+      for (const [ea, eb] of edges) {
+        let shared = false;
+        for (const fj of visible) {
+          if (fj === fi) continue;
+          const gv = hull[fj];
+          if (
+            (gv[0] === eb && gv[1] === ea) ||
+            (gv[1] === eb && gv[2] === ea) ||
+            (gv[2] === eb && gv[0] === ea)
+          ) {
+            shared = true;
+            break;
+          }
+        }
+        if (!shared) horizon.push([ea, eb]);
+      }
+    }
+
+    hull = hull.filter((_, fi) => !visSet.has(fi));
+    for (const [ea, eb] of horizon) {
+      hull.push([ea, eb, p]);
+    }
+  }
+
+  return hull;
 }
 
 // =============================================================================

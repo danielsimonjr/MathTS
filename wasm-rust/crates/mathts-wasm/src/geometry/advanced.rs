@@ -708,3 +708,234 @@ pub unsafe extern "C" fn kdtree_nearest_wasm(
 
     best_idx
 }
+
+// =============================================================================
+// Convex Hull 3D (QuickHull incremental — Barber, Dobkin, Huhdanpaa 1996)
+// =============================================================================
+
+/// Compute the signed volume of a tetrahedron formed by the origin and three
+/// points. Positive = the triple (a, b, c) is oriented counter-clockwise when
+/// viewed from outside (right-hand rule from the origin).
+#[inline]
+fn signed_volume(
+    ax: f64, ay: f64, az: f64,
+    bx: f64, by: f64, bz: f64,
+    cx: f64, cy: f64, cz: f64,
+) -> f64 {
+    ax * (by * cz - bz * cy)
+        - ay * (bx * cz - bz * cx)
+        + az * (bx * cy - by * cx)
+}
+
+/// Signed distance from point p to the plane of face (a, b, c).
+/// Positive means p is on the same side as the outward normal (n = (b-a)×(c-a)).
+#[inline]
+fn orient3d(
+    ax: f64, ay: f64, az: f64,
+    bx: f64, by: f64, bz: f64,
+    cx: f64, cy: f64, cz: f64,
+    px: f64, py: f64, pz: f64,
+) -> f64 {
+    signed_volume(
+        bx - ax, by - ay, bz - az,
+        cx - ax, cy - ay, cz - az,
+        px - ax, py - ay, pz - az,
+    )
+}
+
+#[derive(Clone, Copy)]
+struct Face3 {
+    v: [usize; 3],
+}
+
+/// Compute the outward-facing normal direction (not normalised) for a face,
+/// given the centroid of the initial tetrahedron as an interior reference point.
+/// The face vertices are reordered so that the normal points away from `ref_pt`.
+fn make_face_outward(
+    pts: &[(f64, f64, f64)],
+    a: usize, b: usize, c: usize,
+    ref_px: f64, ref_py: f64, ref_pz: f64,
+) -> Face3 {
+    let (ax, ay, az) = pts[a];
+    let (bx, by, bz) = pts[b];
+    let (cx, cy, cz) = pts[c];
+    let d = orient3d(ax, ay, az, bx, by, bz, cx, cy, cz, ref_px, ref_py, ref_pz);
+    if d > 0.0 {
+        // ref_pt is on the positive side — flip to make normal point away from it
+        Face3 { v: [a, c, b] }
+    } else {
+        Face3 { v: [a, b, c] }
+    }
+}
+
+/// Signed distance of point `p_idx` above the plane of `face` (positive = outside).
+fn face_dist(pts: &[(f64, f64, f64)], face: &Face3, p_idx: usize) -> f64 {
+    let (ax, ay, az) = pts[face.v[0]];
+    let (bx, by, bz) = pts[face.v[1]];
+    let (cx, cy, cz) = pts[face.v[2]];
+    let (px, py, pz) = pts[p_idx];
+    orient3d(ax, ay, az, bx, by, bz, cx, cy, cz, px, py, pz)
+}
+
+/// Build and write a 3-D convex hull via incremental QuickHull.
+///
+/// # Arguments
+/// * `pts_ptr`   — Interleaved `[x0, y0, z0, x1, y1, z1, ...]` coordinates.
+/// * `n_pts`     — Number of input points.
+/// * `faces_ptr` — Output buffer for triangle indices `[a0, b0, c0, a1, b1, c1, ...]`.
+///                 Each triple is CCW when viewed from outside the hull.
+/// * `max_faces` — Capacity of `faces_ptr` in triangles.
+///
+/// # Returns
+/// Number of triangles written, or `-1` on output-buffer overflow.
+#[no_mangle]
+pub unsafe extern "C" fn convex_hull_3d_wasm(
+    pts_ptr: *const f64,
+    n_pts: usize,
+    faces_ptr: *mut u32,
+    max_faces: usize,
+) -> i32 {
+    if n_pts < 4 {
+        // Fewer than 4 points cannot form a 3-D hull.
+        return 0;
+    }
+
+    // Load points.
+    let mut pts: Vec<(f64, f64, f64)> = Vec::with_capacity(n_pts);
+    for i in 0..n_pts {
+        let x = *pts_ptr.add(i * 3);
+        let y = *pts_ptr.add(i * 3 + 1);
+        let z = *pts_ptr.add(i * 3 + 2);
+        pts.push((x, y, z));
+    }
+
+    // --- Step 1: Find initial tetrahedron from 4 extreme points ---
+
+    // Extreme along x.
+    let mut i0 = 0usize;
+    let mut i1 = 0usize;
+    for i in 1..n_pts {
+        if pts[i].0 < pts[i0].0 { i0 = i; }
+        if pts[i].0 > pts[i1].0 { i1 = i; }
+    }
+    if (pts[i1].0 - pts[i0].0).abs() < 1e-12 {
+        return 0; // All points share the same x — degenerate (co-planar or worse).
+    }
+
+    // Farthest from segment i0-i1.
+    let (ax, ay, az) = pts[i0];
+    let (bx, by, bz) = pts[i1];
+    let mut i2 = n_pts; // sentinel
+    let mut best_d: f64 = -1.0;
+    for i in 0..n_pts {
+        if i == i0 || i == i1 { continue; }
+        let (px, py, pz) = pts[i];
+        // Cross product magnitude of (b-a) × (p-a)
+        let ux = bx - ax; let uy = by - ay; let uz = bz - az;
+        let vx = px - ax; let vy = py - ay; let vz = pz - az;
+        let cx = uy * vz - uz * vy;
+        let cy = uz * vx - ux * vz;
+        let cz = ux * vy - uy * vx;
+        let d = cx * cx + cy * cy + cz * cz;
+        if d > best_d { best_d = d; i2 = i; }
+    }
+    if i2 == n_pts || best_d < 1e-24 {
+        return 0; // All points collinear.
+    }
+
+    // Farthest from plane i0-i1-i2.
+    let mut i3 = n_pts; // sentinel
+    best_d = -1.0;
+    for i in 0..n_pts {
+        if i == i0 || i == i1 || i == i2 { continue; }
+        let d = libm::fabs(face_dist(&pts, &Face3 { v: [i0, i1, i2] }, i));
+        if d > best_d { best_d = d; i3 = i; }
+    }
+    if i3 == n_pts || best_d < 1e-12 {
+        return 0; // All points co-planar.
+    }
+
+    // Interior reference point = centroid of initial tetrahedron.
+    let ref_px = (pts[i0].0 + pts[i1].0 + pts[i2].0 + pts[i3].0) / 4.0;
+    let ref_py = (pts[i0].1 + pts[i1].1 + pts[i2].1 + pts[i3].1) / 4.0;
+    let ref_pz = (pts[i0].2 + pts[i1].2 + pts[i2].2 + pts[i3].2) / 4.0;
+
+    // --- Step 2: Build the initial 4 faces (outward-oriented) ---
+    let mut hull: Vec<Face3> = Vec::with_capacity(n_pts * 2);
+    hull.push(make_face_outward(&pts, i0, i1, i2, ref_px, ref_py, ref_pz));
+    hull.push(make_face_outward(&pts, i0, i1, i3, ref_px, ref_py, ref_pz));
+    hull.push(make_face_outward(&pts, i0, i2, i3, ref_px, ref_py, ref_pz));
+    hull.push(make_face_outward(&pts, i1, i2, i3, ref_px, ref_py, ref_pz));
+
+    // --- Step 3: For each remaining point, expand the hull if it is outside ---
+    let tet_set = [i0, i1, i2, i3];
+
+    for p in 0..n_pts {
+        // Skip the four tetrahedron vertices.
+        if tet_set.contains(&p) { continue; }
+
+        // Determine which faces can see point p.
+        let mut visible: Vec<usize> = Vec::new();
+        for (fi, face) in hull.iter().enumerate() {
+            if face_dist(&pts, face, p) > 1e-12 {
+                visible.push(fi);
+            }
+        }
+        if visible.is_empty() { continue; }
+
+        // Find the horizon: edges of the visible-face boundary that are not
+        // shared by two visible faces (i.e., edges adjacent to exactly one
+        // visible face).
+        let mut horizon: Vec<(usize, usize)> = Vec::new();
+        for &fi in &visible {
+            let fv = hull[fi].v;
+            let edges = [(fv[0], fv[1]), (fv[1], fv[2]), (fv[2], fv[0])];
+            for (ea, eb) in &edges {
+                // Check if the reversed edge appears in another visible face.
+                let mut shared = false;
+                for &fj in &visible {
+                    if fj == fi { continue; }
+                    let gv = hull[fj].v;
+                    let gedges = [(gv[0], gv[1]), (gv[1], gv[2]), (gv[2], gv[0])];
+                    for (ga, gb) in &gedges {
+                        if *ga == *eb && *gb == *ea {
+                            shared = true;
+                            break;
+                        }
+                    }
+                    if shared { break; }
+                }
+                if !shared {
+                    horizon.push((*ea, *eb));
+                }
+            }
+        }
+
+        // Remove visible faces (descending order to keep indices stable).
+        let mut vis_sorted = visible.clone();
+        vis_sorted.sort_unstable();
+        for &fi in vis_sorted.iter().rev() {
+            hull.swap_remove(fi);
+        }
+
+        // Plug the horizon with new faces pointing outward toward p.
+        for (ea, eb) in &horizon {
+            // The horizon edge ea->eb is oriented so that the new face ea->eb->p
+            // has its normal pointing outward (because ea->eb came from the
+            // visible face's CCW edge, and the new face inherits that orientation).
+            hull.push(Face3 { v: [*ea, *eb, p] });
+        }
+    }
+
+    // --- Step 4: Write output ---
+    let nf = hull.len();
+    if nf > max_faces {
+        return -1;
+    }
+    for (i, face) in hull.iter().enumerate() {
+        *faces_ptr.add(i * 3) = face.v[0] as u32;
+        *faces_ptr.add(i * 3 + 1) = face.v[1] as u32;
+        *faces_ptr.add(i * 3 + 2) = face.v[2] as u32;
+    }
+    nf as i32
+}
