@@ -33,3 +33,11 @@ export { tensorSolve } from './operations/solve';
 export type { TensorSolveOpts, TensorSolveResult } from './operations/solve';
 export { tensorKron } from './operations/kron';
 export type { TensorKronOpts } from './operations/kron';
+
+// Slice 4.7: indexing primitives — slice, gather, stack, concatenate
+export { slice } from './operations/slice';
+export type { SliceRange } from './operations/slice';
+export { gather } from './operations/gather';
+export { stack } from './operations/stack';
+export type { StackOpts } from './operations/stack';
+export { concatenate } from './operations/concatenate';
