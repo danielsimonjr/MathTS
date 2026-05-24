@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-05-23
+**Generated**: 2026-05-24
 
 ## Summary
 
 - **Potentially unused files**: 1
-- **Potentially unused exports**: 377
+- **Potentially unused exports**: 383
 
 ## Potentially Unused Files
 
@@ -92,6 +92,24 @@ These exports are not imported by any other file in the codebase:
 
 - `EinsumSpec` (interface)
 - `NestedArray` (type)
+
+### `tensor/src/contraction-sequence.ts`
+
+- `ContractNetworkOpts` (interface)
+- `ContractNetworkResult` (interface)
+
+### `tensor/src/named-index.ts`
+
+- `IndexOpts` (interface)
+
+### `tensor/src/operations/random.ts`
+
+- `RandomTensorOpts` (interface)
+
+### `tensor/src/operations/svd.ts`
+
+- `TensorSvdOpts` (interface)
+- `TensorSvdResult` (interface)
 
 ### `functions/src/algebra/solver/lsolveAll.ts`
 

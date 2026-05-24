@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generatedAt": "2026-05-23T04:08:52.081Z",
-    "totalSourceFiles": 491,
-    "totalTestFiles": 176,
-    "testedCount": 147,
+    "generatedAt": "2026-05-24T01:33:40.435Z",
+    "totalSourceFiles": 495,
+    "totalTestFiles": 187,
+    "testedCount": 151,
     "untestedCount": 344,
-    "coveragePercent": "29.9"
+    "coveragePercent": "30.5"
   },
   "untestedFiles": [
     "assembly/src/algebra/decomposition.ts",
@@ -495,7 +495,11 @@
     "parallel/src/strategies/index.ts",
     "parallel/src/strategies/threshold.ts",
     "tensor/src/Tensor.ts",
+    "tensor/src/contraction-sequence.ts",
     "tensor/src/index.ts",
+    "tensor/src/named-index.ts",
+    "tensor/src/operations/random.ts",
+    "tensor/src/operations/svd.ts",
     "workbook/src/executor.ts",
     "workbook/src/graph.ts",
     "workbook/src/index.ts",
@@ -727,12 +731,40 @@
       "matrix/tests/typed-operations.test.ts"
     ],
     "tensor/src/Tensor.ts": [
+      "tensor/tests/Tensor-contract.test.ts",
       "tensor/tests/Tensor.matrix-bridge.test.ts",
       "tensor/tests/Tensor.ops.test.ts",
       "tensor/tests/Tensor.test.ts",
+      "tensor/tests/broadcasting.test.ts",
+      "tensor/tests/contraction-sequence.test.ts",
+      "tensor/tests/operations/random.test.ts",
+      "tensor/tests/operations/svd.test.ts",
+      "tensor/tests/package-index.test.ts",
+      "tensor/tests/reductions.test.ts",
+      "tensor/tests/tensordot.test.ts"
+    ],
+    "tensor/src/contraction-sequence.ts": [
+      "tensor/tests/contraction-sequence.test.ts",
       "tensor/tests/package-index.test.ts"
     ],
     "tensor/src/index.ts": [
+      "tensor/tests/package-index.test.ts"
+    ],
+    "tensor/src/named-index.ts": [
+      "tensor/tests/Index.test.ts",
+      "tensor/tests/Tensor-contract.test.ts",
+      "tensor/tests/contraction-sequence.test.ts",
+      "tensor/tests/operations/random.test.ts",
+      "tensor/tests/package-index.test.ts",
+      "tensor/tests/reductions.test.ts",
+      "tensor/tests/tensordot.test.ts"
+    ],
+    "tensor/src/operations/random.ts": [
+      "tensor/tests/operations/random.test.ts",
+      "tensor/tests/package-index.test.ts"
+    ],
+    "tensor/src/operations/svd.ts": [
+      "tensor/tests/operations/svd.test.ts",
       "tensor/tests/package-index.test.ts"
     ],
     "autograd/src/dual-tensor.ts": [
@@ -750,7 +782,9 @@
       "autograd/tests/scaffold.test.ts"
     ],
     "autograd/src/tape.ts": [
-      "autograd/tests/scaffold.test.ts"
+      "autograd/tests/ad-wasm-interop.test.ts",
+      "autograd/tests/scaffold.test.ts",
+      "autograd/tests/tensor-contract-ad.test.ts"
     ],
     "functions/src/algebra/decomposition/lup.ts": [],
     "functions/src/algebra/decomposition/qr.ts": [],
@@ -1418,6 +1452,7 @@
       "expression/tests/RangeNode.test.ts",
       "expression/tests/RelationalNode.test.ts",
       "expression/tests/SymbolNode.test.ts",
+      "expression/tests/node-extension.test.ts",
       "expression/tests/package-index.test.ts",
       "expression/tests/parse.test.ts"
     ],
@@ -1455,6 +1490,7 @@
       "expression/tests/RangeNode.test.ts",
       "expression/tests/RelationalNode.test.ts",
       "expression/tests/SymbolNode.test.ts",
+      "expression/tests/node-extension.test.ts",
       "expression/tests/package-index.test.ts",
       "expression/tests/parse.test.ts"
     ],
@@ -1538,6 +1574,7 @@
       "expression/tests/utils-factory.test.ts"
     ],
     "expression/src/utils/is.ts": [
+      "expression/tests/node-extension.test.ts",
       "expression/tests/utils-is.test.ts"
     ],
     "expression/src/utils/latex.ts": [
@@ -1879,6 +1916,13 @@
       "matrix/src/types/DenseMatrix.ts"
     ],
     "matrix/tests/wasm-fft-fallback.test.ts": [],
+    "tensor/tests/Index.test.ts": [
+      "tensor/src/named-index.ts"
+    ],
+    "tensor/tests/Tensor-contract.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts"
+    ],
     "tensor/tests/Tensor.matrix-bridge.test.ts": [
       "tensor/src/Tensor.ts"
     ],
@@ -1888,9 +1932,41 @@
     "tensor/tests/Tensor.test.ts": [
       "tensor/src/Tensor.ts"
     ],
+    "tensor/tests/broadcasting.test.ts": [
+      "tensor/src/Tensor.ts"
+    ],
+    "tensor/tests/contraction-sequence.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts",
+      "tensor/src/contraction-sequence.ts"
+    ],
+    "tensor/tests/operations/random.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/operations/random.ts",
+      "tensor/src/named-index.ts"
+    ],
+    "tensor/tests/operations/svd.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/operations/svd.ts"
+    ],
     "tensor/tests/package-index.test.ts": [
       "tensor/src/index.ts",
-      "tensor/src/Tensor.ts"
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts",
+      "tensor/src/operations/svd.ts",
+      "tensor/src/operations/random.ts",
+      "tensor/src/contraction-sequence.ts"
+    ],
+    "tensor/tests/reductions.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts"
+    ],
+    "tensor/tests/tensordot.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts"
+    ],
+    "autograd/tests/ad-wasm-interop.test.ts": [
+      "autograd/src/tape.ts"
     ],
     "autograd/tests/forward-grad.test.ts": [
       "autograd/src/forward-grad.ts"
@@ -1904,6 +1980,9 @@
       "autograd/src/forward-grad.ts",
       "autograd/src/tape.ts",
       "autograd/src/reverse-grad.ts"
+    ],
+    "autograd/tests/tensor-contract-ad.test.ts": [
+      "autograd/src/tape.ts"
     ],
     "functions/tests/algebra.test.ts": [
       "functions/src/typed/algebra.ts"
@@ -2333,6 +2412,11 @@
     ],
     "expression/tests/keywords.test.ts": [
       "expression/src/keywords.ts"
+    ],
+    "expression/tests/node-extension.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/utils/is.ts"
     ],
     "expression/tests/operators.test.ts": [
       "expression/src/operators.ts"
