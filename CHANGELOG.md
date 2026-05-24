@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-> Two strands of work since the autograd 0.1.0 release:
+> Strands of work since the autograd 0.1.0 release:
 > 1. **WASM gap-analysis sprint** (`EXPANSION_PLAN` W1–W11, PRs #25–#35) — extends
 >    both WASM toolchains (Rust crate primary, AssemblyScript parity) with the
 >    kernels the gap analysis flagged as missing, and wires the cross-package
@@ -33,6 +33,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 >    `WASMBackend`), and lands a clean `WASMBackend` (AS-only) +
 >    `RustWASMBackend` (Rust-only) split with all four standalone WASM
 >    benches now reporting Rust **2.5×–34× faster than JS**.
+> 5. **CDG-driven coverage push (2026-05-23)** — `tools/create-dependency-graph/`
+>    re-run identified every actionable untested file; +12 active files moved
+>    untested → tested (source coverage 27.5% → 29.9%), 0 circular deps,
+>    `eigs/svd/singularValues` and `polyFit/leastSquares` re-validated
+>    `not-pursued`/`deferred` with measured probes checked in. Surfaced the
+>    AllocatorKind Rust/AS WasmLoader split (commit `b96b53a`), the AS-WASM
+>    decomposition export gap (5 new kernels — LU/QR/Cholesky/inverse/det),
+>    the per-op `thresholdByOp` configuration, and the `wasm:integration`
+>    suite green (224/224).
+> 6. **Six-wave gap-closure programme — COMPLETE (2026-05-24).** 38 slices
+>    across the six waves designed in `GAP_CLOSURE_PROPOSAL.md` →
+>    `GAP_CLOSURE_PROPOSAL_WAVE6.md` close every item in
+>    `FUNCTION_GAPS_AUDIT.md`. The §D ranks 1-14, the §B.1/§B.2 playbook,
+>    the §C cross-cutting items, the rank-14 Unit-type blocker, the
+>    matrix-function evaluators (full Higham general-case via Schur in
+>    Wave 6), the non-symmetric eig AD, the 3-D convex hull WASM kernel,
+>    the Carlson R-forms + incomplete elliptic integrals, and the WebGPU
+>    browser smoke test infrastructure are all landed. After Wave 6 the
+>    audit roadmap is closed; only the dormant mathjs upstream sync and
+>    the mathjs.org parity ratchet remain (neither in the gap audit's
+>    scope).
 
 ### Added
 
@@ -144,6 +165,36 @@ iterative — that's its precision floor).
     `tensor/src/operations/{lu,cholesky}.ts` should eventually be
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
+
+#### Gap-closure Wave 6 — COMPLETE (5 slices, final cleanup; audit closed)
+
+Wave 6 closed the 5 forward-tracked items remaining after Wave 5 — the WebGPU browser smoke-test infra, full Higham general-case `logm`/`sqrtm` for non-diagonalisable / defective / complex-eigenvalue matrices, non-symmetric `TapedTensor.eig` AD, 3-D convex-hull WASM, and Carlson R-forms + incomplete elliptic integrals. **With this wave the entire `FUNCTION_GAPS_AUDIT.md` roadmap is closed.** Design at [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md).
+
+**Wave 6A (Tier-1 — parallel, 3 disjoint agents):**
+
+- **Slice 6.1 — commit `d0466b3`** — Slice 5.9b closed: full Higham Schur-based `logm`/`sqrtm` for general matrices. NEW `matrix/src/operations/schur.ts` exposing a public Schur primitive (Francis QR-with-double-shifts; ~150 LOC). Extended `logm.ts` with the Schur-Padé algorithm per Higham (2008) Algorithm 11.10 (Schur → inverse scaling-and-squaring on the triangular factor via the Björck-recurrence sqrt → Padé approximant for `log(I+X)` near identity → multiply back by `2^k` and rotate by Q). Extended `sqrtm.ts` with the Björck-Hammarling algorithm per Higham (2008) Algorithm 6.3 (Schur → direct upper-triangular back-substitution `T_ij = U_ii·U_ij + U_ij·U_jj + Σ U_ik·U_kj` → rotate back). +19 matrix tests covering complex / defective / repeated-eigenvalue cases, all within `1e-10` of SciPy reference. `matrix`: 586 → **605 tests** (+19).
+- **Slice 6.2 — commit `048e9e1`** — Non-symmetric `TapedTensor.eig` AD (Opus subagent). Lifts the symmetric-only restriction from Slice 4.8. General-case adjoint per Townsend (2016) §4 / Magnus & Neudecker (1999) §10.6: `dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T` where `E[i,j] = 1/(λ_j − λ_i)` for i ≠ j else 0. Near-degenerate subgradient masking at `REL_TOL = 1e-10` (same as Slice 4.8 for symmetric); clean throw on defective inputs when `cond(V) > 1e14`. +13 autograd tests (finite-difference verification at 5 well-conditioned non-symmetric inputs + chained-graph + defective error path). `autograd`: 136 → **149 tests** (+13).
+- **Slice 6.5 — commit `3aac312`** — WebGPU browser smoke test infrastructure. Closes the infra-prerequisite item that has been on the open-actions list since the original audit. Installed `@vitest/browser` + `playwright` at repo root; NEW `vitest.config.browser.ts` gated to `*.browser.test.ts`; NEW `functions/tests/gpu-smoke.browser.test.ts` verifies `gpuMatmul` on a 4×4 input matches the CPU reference within float32 precision (explicitly checks GPU runtime when an adapter is available, transparent CPU fallback otherwise). NEW CI job installs Mesa lavapipe (`apt-get install mesa-vulkan-drivers libegl1`) and runs `npm run test:browser`. WGSL syntax errors and shader-module init bugs in `functions/src/typed/gpu.ts` and `matrix/src/backends/gpu/*` can now surface in CI rather than silently passing.
+
+**Wave 6B (Tier-2 — sequential WASM, 2 slices):**
+
+- **Slice 6.3 — commit `bba468b`** — `convexHull3D` WASM via incremental QuickHull-3D (Barber, Dobkin, Huhdanpaa 1996). NEW `convex_hull_3d_wasm(pts_ptr, n, faces_ptr) -> i32` in `wasm-rust/crates/mathts-wasm/src/geometry/advanced.rs`; new `convexHull3D` typed export via `functions/src/typed/geometry.ts`. The 2-D hull + Delaunay 2-D + Voronoi 2-D + k-d tree already have WASM kernels (Slice 5.7d + the existing `geometry/advanced.rs`); this slice closes the geometry gap. Threshold ≥ 1024 points. +18 hull-3D tests (tetrahedron / cube / cospherical sample / degenerate co-planar fallback / 1024-point random cloud).
+- **Slice 6.4 — commit `2be52f9`** — Carlson R-forms (`carlsonRC`/`RD`/`RF`/`RJ`) + incomplete elliptic integrals (`ellipticF(φ,m)`, `ellipticEIncomplete(φ,m)`, `ellipticPi(n,φ,m)`) WASM. Quadratically convergent and branch-cut-free per Carlson (1995), NR §6.11, DLMF §19. Scalar Rust functions in `wasm-rust/crates/mathts-wasm/src/special/functions.rs` (corrected RC pure-duplication algorithm with no external sum; RD `x=y=z` special-case returning `x^{-3/2}` to avoid degenerate early convergence; NR threshold tightened `0.0015 → 1e-10` for ~`1e-11` accuracy vs DLMF references). Array kernels in `wasm-rust/crates/mathts-wasm/src/bessel.rs` using pointer-style ABI. Full AS parity port (`assembly/src/special.ts` scalar + array kernels; AS wiring through `assembly/src/index.ts` landed in commit `28e50ec`). Threshold ≥ 1024 samples. +41 tests across 10 suites against DLMF §19.16-19.36 and Abramowitz & Stegun §17 reference values.
+
+**Manifest regeneration — commit `dc5c050`:** Slice 6.4 was branched off a base predating Slice 6.3, so its manifest `mathts.wasm` hash reflected only the Carlson kernels. After cherry-picking both slices, the rebuilt `mathts.wasm` contains `convex_hull_3d_wasm` + the four Carlson R-forms + three incomplete-elliptic kernels — a new binary that the manifest must match. SHA-384 manifest regenerated to match the combined-rebuild output.
+
+**Doc closures + AS wiring polish — commit `28e50ec`:** Wire AS Carlson exports through `assembly/src/index.ts` (`carlson_{rc,rf,rd,rj}_f64`, `elliptic_{f,e,pi}_incomplete_f64`); rebuilt `mathts-as.wasm` now exposes the 7 new kernels matching the Rust binary, manifest extended to track both artifacts. Mark all 5 Wave-6 slices `✅ LANDED` in `GAP_CLOSURE_PROPOSAL_WAVE6.md` with commit hashes; add closing-summary table. Strike the three "remaining open items" in `FUNCTION_GAPS_AUDIT.md §F` — all three forward-tracked items closed, plus the bonus slices (6.2 non-symmetric eig AD, 6.3 convexHull3D).
+
+**Wave 6 cumulative test deltas:**
+
+  - `functions`: 2,486 → **2,545** (+59 = 18 hull3D + 41 Carlson)
+  - `matrix`:    586  → **605**  (+19, Schur + general-case logm/sqrtm)
+  - `autograd`:  136  → **149**  (+13, non-symmetric eig AD)
+  - 238 test files total (+2 new files); 6308 vitest + 172 WASM integration tests pass / 7 skipped / **zero regressions**.
+
+**Security invariants intact.** WASM SHA-384 manifest verification re-validated for both `mathts.wasm` (Rust, 754 KB, primary) and `mathts-as.wasm` (AS, 62 KB, legacy with full Carlson parity). Expression sandbox `getSafeProperty`/`setSafeProperty`/`getSafeMethod` call sites untouched. `WorkerPool.execute()` timeout+replace plumbing untouched.
+
+**Total Wave 6 = 5 slices across 7 commits** (`d0466b3` Schur+logm/sqrtm, `048e9e1` non-symm eig AD, `3aac312` WebGPU browser harness, `bba468b` convexHull3D, `2be52f9` Carlson+incomplete elliptics, `dc5c050` manifest regen, `28e50ec` doc closures + AS wiring). After Wave 6 the entire `FUNCTION_GAPS_AUDIT.md` gap-closure roadmap is **closed**.
 
 #### Gap-closure Wave 5 — COMPLETE (15 slices, B.1/B.2 backlog + Unit type)
 
