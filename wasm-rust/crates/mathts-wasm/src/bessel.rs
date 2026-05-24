@@ -23,7 +23,7 @@ use alloc::vec::Vec;
 // ------------------------------------------------------------------ //
 
 use crate::special::functions::{
-    airy_ai, airy_bi, besselJ0, besselJ1, besselY0, besselY1, elliptic_e, elliptic_k,
+    airy_ai, airy_bi, besselJ0, besselJ1, besselY0, besselY1, elliptic_e, elliptic_k, lgamma,
 };
 
 /// Scalar J_n(x) via forward or Miller backward recurrence.
@@ -225,6 +225,28 @@ pub unsafe extern "C" fn airy_bi_f64(xs_ptr: *const f64, n: i32, out_ptr: *mut f
     }
     for i in 0..n as usize {
         *out_ptr.add(i) = airy_bi(*xs_ptr.add(i));
+    }
+    n
+}
+
+// ------------------------------------------------------------------ //
+// lgamma array kernel (Slice 5.8)                                     //
+// ------------------------------------------------------------------ //
+
+/// Apply `lgamma(x)` element-wise to `xs[0..n]` → `out[0..n]`.
+///
+/// Uses the Lanczos lgamma from `special/functions.rs`.  Poles (x ≤ 0 and
+/// x is a non-positive integer) return `+∞`; other non-positive x use the
+/// reflection formula already handled in the scalar.
+///
+/// Returns `n` on success, `-1` if `n ≤ 0`.
+#[no_mangle]
+pub unsafe extern "C" fn lgamma_f64(xs_ptr: *const f64, n: i32, out_ptr: *mut f64) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = lgamma(*xs_ptr.add(i));
     }
     n
 }

@@ -876,6 +876,161 @@ function tensordotChunk(
 }
 
 // =============================================================================
+// Distribution Batch Sampling Kernel (Slice 5.12)
+// =============================================================================
+
+/**
+ * Mulberry32 seeded PRNG (worker-local copy; cannot import from functions/).
+ *
+ * Reference: Tommy Ettinger,
+ * https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
+ * Period: 2^32.
+ */
+function _workerMulberry32(seed: number): () => number {
+  let s = seed | 0;
+  return (): number => {
+    s = (s + 0x6d2b79f5) | 0;
+    let z = s;
+    z = Math.imul(z ^ (z >>> 15), z | 1);
+    z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
+    z = (z ^ (z >>> 14)) >>> 0;
+    return z / 0x100000000;
+  };
+}
+
+/**
+ * Lanczos log-gamma (g=7, n=9) — worker-local copy.
+ */
+function _workerLgamma(x: number): number {
+  if (x <= 0 && x === Math.floor(x)) return Infinity;
+  if (x < 0.5) {
+    return Math.log(Math.PI / Math.sin(Math.PI * x)) - _workerLgamma(1 - x);
+  }
+  x -= 1;
+  const g = 7;
+  const c = [
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
+    1.5056327351493116e-7,
+  ];
+  let sum = c[0];
+  for (let i = 1; i < g + 2; i++) {
+    sum += c[i] / (x + i);
+  }
+  const t = x + g + 0.5;
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(sum);
+}
+
+/**
+ * Box-Muller normal variate using a provided PRNG.
+ */
+function _workerNormalRandom(rng: () => number): number {
+  const u1 = rng();
+  const u2 = rng();
+  return Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) * Math.cos(2 * Math.PI * u2);
+}
+
+/**
+ * Marsaglia & Tsang gamma variate using a provided PRNG.
+ */
+function _workerGammaRandom(alpha: number, rng: () => number): number {
+  if (alpha < 1) {
+    return _workerGammaRandom(alpha + 1, rng) * Math.pow(rng(), 1 / alpha);
+  }
+  const d = alpha - 1 / 3;
+  const c = 1 / Math.sqrt(9 * d);
+  while (true) {
+    let x: number;
+    let v: number;
+    do {
+      x = _workerNormalRandom(rng);
+      v = 1 + c * x;
+    } while (v <= 0);
+    v = v * v * v;
+    const u = rng();
+    if (u < 1 - 0.0331 * (x * x) * (x * x)) return d * v;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
+}
+
+/**
+ * Generate `count` samples from a named distribution.
+ *
+ * **Seed splitting scheme (SplitMix64-style):** each chunk receives a seed
+ * derived from the caller-supplied base seed and the chunk index:
+ *   `chunkSeed = (baseSeed ^ (chunkIdx * 0x9E3779B97F4A7C15)) >>> 0`
+ * This applies a Fibonacci-hashing multiplier to the chunk index before XOR,
+ * which gives good avalanche properties and ensures the K chunk seeds are
+ * mutually distinct even when baseSeed is 0. The `>>> 0` truncates to uint32
+ * matching the Mulberry32 input domain.
+ *
+ * @param distName  - One of 'normal', 'gamma', 'beta', 'studentT', 'exponential'
+ * @param params    - Distribution parameters (order matches the public factory)
+ * @param seed      - uint32 chunk seed (already split by caller)
+ * @param count     - Number of samples to generate
+ * @returns Float64Array as ArrayBuffer (Transferable)
+ */
+function sampleChunk(distName: string, params: number[], seed: number, count: number): ArrayBuffer {
+  const rng = _workerMulberry32(seed);
+  const out = new Float64Array(count);
+
+  switch (distName) {
+    case 'normal': {
+      // params: [mu, sigma]
+      const mu = params[0];
+      const sigma = params[1];
+      for (let i = 0; i < count; i++) {
+        out[i] = mu + sigma * _workerNormalRandom(rng);
+      }
+      break;
+    }
+    case 'gamma': {
+      // params: [shape, scale]  (scale = 1/rate)
+      const shape = params[0];
+      const scale = params[1];
+      for (let i = 0; i < count; i++) {
+        out[i] = _workerGammaRandom(shape, rng) * scale;
+      }
+      break;
+    }
+    case 'beta': {
+      // params: [alpha, beta_]
+      const alpha = params[0];
+      const beta_ = params[1];
+      for (let i = 0; i < count; i++) {
+        const ga = _workerGammaRandom(alpha, rng);
+        const gb = _workerGammaRandom(beta_, rng);
+        out[i] = ga / (ga + gb);
+      }
+      break;
+    }
+    case 'studentT': {
+      // params: [nu]
+      const nu = params[0];
+      for (let i = 0; i < count; i++) {
+        const z = _workerNormalRandom(rng);
+        const chi = _workerGammaRandom(nu / 2, rng) * 2;
+        out[i] = z / Math.sqrt(chi / nu);
+      }
+      break;
+    }
+    case 'exponential': {
+      // params: [lambda]
+      const lambda = params[0];
+      for (let i = 0; i < count; i++) {
+        const u = rng();
+        out[i] = -Math.log(u < 1e-300 ? 1e-300 : u) / lambda;
+      }
+      break;
+    }
+    default:
+      throw new Error(`sampleChunk: unknown distribution "${distName}"`);
+  }
+
+  return out.buffer;
+}
+
+// =============================================================================
 // Integration Fan-out Kernel
 // =============================================================================
 
@@ -966,6 +1121,9 @@ const workerMethods: Record<string, (...args: any[]) => any> = {
 
   // Tensor contraction
   tensordotChunk,
+
+  // Distribution batch sampling (Slice 5.12)
+  sampleChunk,
 
   // Integration fan-out
   integrateChunk,

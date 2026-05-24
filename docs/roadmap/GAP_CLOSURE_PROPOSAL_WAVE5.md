@@ -73,7 +73,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 ## Tier 2 — Sequential WASM slices
 
-### Slice 5.3 — `typed/special.ts` elliptic-integral WASM (`ellipticK`, `ellipticE`)
+### Slice 5.3 — ✅ LANDED in `098656e` — `typed/special.ts` elliptic-integral WASM (`ellipticK`, `ellipticE`)
 
 **Goal:** Mirror the Airy pattern from Slice 4.9. AGM (arithmetic-geometric-mean) algorithm — well-conditioned at all `m ∈ [0, 1)`.
 
@@ -81,7 +81,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Reference:** Slice 4.9 (`276a75b`). AGM convergence reference: DLMF §19.8.
 
-### Slice 5.4 — `typed/cas.ts` polynomial-fit WASM (`polyFit`, `chebyshevFit`, `legendreFit`)
+### Slice 5.4 — ✅ LANDED in `f537a56` — `typed/cas.ts` polynomial-fit WASM (`polyFit`, `chebyshevFit`, `legendreFit`)
 
 **Goal:** Build a Vandermonde matrix and call into the existing `wasm.qrF64` kernel.
 
@@ -89,7 +89,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Threshold:** `≥ 1024 samples`.
 
-### Slice 5.5 — `typed/interpolation.ts` divided-difference WASM (`lagrange`, `newtonInterp`)
+### Slice 5.5 — ✅ LANDED in `2b273a1` — `typed/interpolation.ts` divided-difference WASM (`lagrange`, `newtonInterp`)
 
 **Goal:** O(n²) divided-difference table → WASM kernel. Reuses the existing interpolation bridge from Slice 3.10b.
 
@@ -97,7 +97,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Threshold:** `≥ 256 nodes`.
 
-### Slice 5.6 — `typed/signal.ts` spectral-windowing WASM (`welchPSD`, `bartlettPSD`, `multiTaperPSD`, `goertzel`, `chirpZTransform`)
+### Slice 5.6 — ✅ LANDED in `2d0ebfa` — `typed/signal.ts` spectral-windowing WASM (`welchPSD`, `bartlettPSD`, `multiTaperPSD`, `goertzel`, `chirpZTransform`)
 
 **Goal:** Window-application + frame-averaging hot loops. FFT path already WASM (Slice 1 of Wave 1 / earlier). This slice adds `applyWindowF64` and `averagePSDF64` kernels.
 
@@ -107,19 +107,19 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 ## Tier 3 — Larger / design-heavy slices
 
-### Slice 5.7 — `wasm.sortF64` kernel + sort-based ops batch
+### Slice 5.7 — ✅ LANDED as 5.7d in `5a0ca7c` — `wasm.sortF64` kernel + sort-based ops batch (full slice)
 
 **Goal:** Unblocks several B.1 candidates that all depend on a fast sort. Add the kernel, then wire `typed/statistics.ts` `histogram`/`quantile`/`percentile`, `typed/hypothesis.ts` `KS/MW/SW` (which currently keep sort on main thread per Slice 3.10), and `typed/geometry.ts` `convexHull2D`/`convexHull3D`/`delaunay2D`.
 
 **Files:** New Rust + AS sort kernel (probably a SIMD-friendly radix-sort or fall-back to introsort), bridge, then 3 typed-layer rewires. Larger slice; may split into 5.7a (kernel) + 5.7b (statistics wire) + 5.7c (hypothesis re-wire) + 5.7d (geometry wire) if scope balloons.
 
-### Slice 5.8 — `wasm.lgammaF64` + distributions pdf WASM (`betaPdf`, `gammaPdf`, `studentTPdf`, `noncentralChi2Pdf`)
+### Slice 5.8 — ✅ LANDED in `8872e4b` — `wasm.lgammaF64` + distributions pdf WASM (`betaPdf`, `gammaPdf`, `studentTPdf`, `noncentralChi2Pdf`)
 
 **Goal:** New `lgamma_f64` array kernel (most are reachable via `statrs::function::gamma::ln_gamma` already in the Rust crate; check first). Then wire the four pdf functions to use it.
 
 **Files:** Rust kernel addition, AS parity, bridge, typed wiring, tests, manifest.
 
-### Slice 5.9 — `matrixExpm` / `matrixLogm` / `matrixSqrtm` primitives + typed wiring
+### Slice 5.9 — ✅ LANDED as 5.9a in `ca08c12` — `matrixExpm` / `matrixLogm` / `matrixSqrtm` primitives + typed wiring
 
 **Goal:** Add matrix-function evaluators using scaling-and-squaring with Padé approximant (Higham 2008). NEW primitives in `matrix/src/operations/expm.ts` + `logm.ts` + `sqrtm.ts`. Then promote to `typed/matrix-ops.ts`.
 
@@ -127,21 +127,21 @@ This is the slice the audit's B.1 row referenced; it requires implementing the p
 
 ## Tier 4 — Parallel worker-route batches (3 agents)
 
-### Slice 5.12 — `typed/dist-objects.ts` batch sampling (B.2 row 4)
+### Slice 5.12 — ✅ LANDED in `effc15e` (co-landed with 5.13) — `typed/dist-objects.ts` batch sampling (B.2 row 4)
 
 Worker-route `Normal.sample(n)` / `Gamma.sample(n)` / etc. when `n ≥ 100_000`.
 
-### Slice 5.13 — `typed/graph.ts` centrality random-restarts (B.2 row 7)
+### Slice 5.13 — ✅ LANDED in `effc15e` — `typed/graph.ts` centrality random-restarts (B.2 row 7)
 
 Worker-route `pageRank` / `betweennessCentrality` / `eigenvectorCentrality` when the consumer passes `restarts: N` ≥ 4.
 
-### Slice 5.14 — `typed/cas.ts` batch fan-out (B.2 row 6)
+### Slice 5.14 — ✅ LANDED in `444fec4` — `typed/cas.ts` batch fan-out (B.2 row 6)
 
 Worker-route `simplify`/`derivative`/`expand`/`factor` over batches of expressions when length ≥ 16. Symbolic-tree closure stringification is the hard part (symbolic ops aren't trivially serialisable across worker boundaries — may need to ship the expression source string and re-parse in the worker).
 
 ## Tier 5 — Opus: Core Unit type → unblock typed/unit (rank 14)
 
-### Slice 5.15 — `core/Unit` type + `typed/unit.ts` (rank 14)
+### Slice 5.15 — ✅ LANDED in `8131212` — `core/Unit` type + `typed/unit.ts` (rank 14)
 
 **Opus agent.** Design and implement a `Unit` type in `@danielsimonjr/mathts-core` covering:
 

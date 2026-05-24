@@ -281,6 +281,18 @@ export {
 export { resample, medfilt, windowFunction } from './ops/signal';
 
 // =============================================================================
+// Spectral signal kernels (Slice 5.6): windowing + Welch/Bartlett PSD + Goertzel + CZT
+// =============================================================================
+
+export {
+  apply_window_f64,
+  welch_psd_f64,
+  bartlett_psd_f64,
+  goertzel_f64,
+  chirp_z_transform_f64,
+} from './signal';
+
+// =============================================================================
 // Extra Linear Algebra (RREF, characteristic polynomial)
 // =============================================================================
 
@@ -405,8 +417,8 @@ export { poly_mul_f64, poly_div_mod_f64, poly_fit_f64, cheb_fit_f64, legendre_fi
 export { tridiag_solve_f64, divided_difference_f64 } from './tridiag';
 
 // =============================================================================
-// Bessel J/Y and Airy Ai/Bi array kernels (Slice 3.10c-1 / Slice 4.9)
-// Elliptic K/E array kernels (Slice 5.3)
+// Bessel J/Y, Airy Ai/Bi, lgamma array kernels
+// Slice 3.10c-1 / Slice 4.9 / Slice 5.3 / Slice 5.8
 // =============================================================================
 
 export {
@@ -420,7 +432,14 @@ export {
   airy_bi_f64,
   elliptic_k_f64,
   elliptic_e_f64,
+  lgamma_f64,
 } from './special';
+
+// =============================================================================
+// Sort kernels (Slice 5.7a): sort_f64, argsort_f64, rank_f64
+// =============================================================================
+
+export { sort_f64, argsort_f64, rank_f64 } from './sort';
 
 // =============================================================================
 // Complex Array Operations

@@ -305,3 +305,160 @@ describe('singularValues (typed/)', () => {
     expect(() => (singularValues as any)(null)).toThrow(TypeError);
   });
 });
+
+// =============================================================================
+// matrixExpm / matrixLogm / matrixSqrtm — Slice 5.9
+// =============================================================================
+
+import { matrixExpm, matrixLogm, matrixSqrtm } from '../src/typed/matrix-ops.js';
+
+/** Identity matrix n×n as number[][]. */
+function eyeArr(n: number): number[][] {
+  return Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
+  );
+}
+
+/** Frobenius distance. */
+function frobDiff2(A: number[][], B: number[][]): number {
+  let s = 0;
+  for (let i = 0; i < A.length; i++)
+    for (let j = 0; j < A[0].length; j++) {
+      const d = A[i][j] - B[i][j];
+      s += d * d;
+    }
+  return Math.sqrt(s);
+}
+
+describe('matrixExpm (typed/)', () => {
+  it('1. Array dispatch: expm(0) = I', () => {
+    const R = matrixExpm([
+      [0, 0],
+      [0, 0],
+    ]) as number[][];
+    expect(frobDiff2(R, eyeArr(2))).toBeLessThan(1e-12);
+  });
+
+  it('2. DenseMatrix dispatch: expm(I) = e * I', () => {
+    const A = DenseMatrix.fromArray([
+      [1, 0],
+      [0, 1],
+    ]);
+    const R = matrixExpm(A) as DenseMatrix;
+    expect(R).toBeInstanceOf(DenseMatrix);
+    expect(Math.abs(R.get(0, 0) - Math.E)).toBeLessThan(1e-10);
+    expect(Math.abs(R.get(1, 1) - Math.E)).toBeLessThan(1e-10);
+    expect(Math.abs(R.get(0, 1))).toBeLessThan(1e-12);
+  });
+
+  it('3. expm(diag) = diag(exp(λ)) — typed Array path', () => {
+    const R = matrixExpm([
+      [2, 0],
+      [0, 3],
+    ]) as number[][];
+    expect(Math.abs(R[0][0] - Math.exp(2))).toBeLessThan(1e-10);
+    expect(Math.abs(R[1][1] - Math.exp(3))).toBeLessThan(1e-10);
+  });
+
+  it('4. expm(-A) is inverse of expm(A)', () => {
+    const A = [
+      [1, 0.5],
+      [0.5, 2],
+    ];
+    const eA = matrixExpm(A) as number[][];
+    const enA = matrixExpm([
+      [-1, -0.5],
+      [-0.5, -2],
+    ]) as number[][];
+    const prod: number[][] = matMul(eA, enA);
+    expect(frobDiff2(prod, eyeArr(2))).toBeLessThan(1e-10);
+  });
+
+  it('5. TypeError for non-matrix input', () => {
+    expect(() => (matrixExpm as any)(null)).toThrow(TypeError);
+  });
+});
+
+describe('matrixLogm (typed/)', () => {
+  it('6. Array dispatch: logm(I) = 0', () => {
+    const R = matrixLogm([
+      [1, 0],
+      [0, 1],
+    ]) as number[][];
+    const Z = [
+      [0, 0],
+      [0, 0],
+    ];
+    expect(frobDiff2(R, Z)).toBeLessThan(1e-12);
+  });
+
+  it('7. DenseMatrix dispatch: logm(diag) = diag(log)', () => {
+    const A = DenseMatrix.fromArray([
+      [4, 0],
+      [0, 9],
+    ]);
+    const R = matrixLogm(A) as DenseMatrix;
+    expect(R).toBeInstanceOf(DenseMatrix);
+    expect(Math.abs(R.get(0, 0) - Math.log(4))).toBeLessThan(1e-9);
+    expect(Math.abs(R.get(1, 1) - Math.log(9))).toBeLessThan(1e-9);
+  });
+
+  it('8. Round-trip: expm(logm(A)) ≈ A (Array path)', () => {
+    const A = [
+      [3, 0],
+      [0, 5],
+    ];
+    const logA = matrixLogm(A) as number[][];
+    const R = matrixExpm(logA) as number[][];
+    expect(frobDiff2(R, A)).toBeLessThan(1e-7);
+  });
+
+  it('9. Throws for non-positive eigenvalue', () => {
+    expect(() =>
+      matrixLogm([
+        [0, 0],
+        [0, 1],
+      ])
+    ).toThrow(/non-positive|not supported/i);
+  });
+});
+
+describe('matrixSqrtm (typed/)', () => {
+  it('10. Array dispatch: sqrtm(I) = I', () => {
+    const R = matrixSqrtm([
+      [1, 0],
+      [0, 1],
+    ]) as number[][];
+    expect(frobDiff2(R, eyeArr(2))).toBeLessThan(1e-12);
+  });
+
+  it('11. DenseMatrix dispatch: sqrtm(4I) = 2I', () => {
+    const A = DenseMatrix.fromArray([
+      [4, 0],
+      [0, 4],
+    ]);
+    const R = matrixSqrtm(A) as DenseMatrix;
+    expect(R).toBeInstanceOf(DenseMatrix);
+    expect(Math.abs(R.get(0, 0) - 2)).toBeLessThan(1e-12);
+    expect(Math.abs(R.get(1, 1) - 2)).toBeLessThan(1e-12);
+  });
+
+  it('12. sqrtm(A)^2 ≈ A for SPD matrix (Array path)', () => {
+    const A = [
+      [4, 2],
+      [2, 3],
+    ];
+    const R = matrixSqrtm(A) as number[][];
+    const R2 = matMul(R, R);
+    expect(frobDiff2(R2, A)).toBeLessThan(1e-8);
+  });
+
+  it('13. Throws for negative eigenvalue', () => {
+    expect(() =>
+      matrixSqrtm([
+        [-4, 0],
+        [0, 1],
+      ])
+    ).toThrow(/negative eigenvalue|not supported/i);
+  });
+});

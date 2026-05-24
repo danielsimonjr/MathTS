@@ -58,6 +58,25 @@ export {
 } from './types/bignumber.js';
 export type { BigNumberConfig, RoundingMode } from './types/bignumber.js';
 
+// Units (dimensional analysis)
+export {
+  Unit,
+  isUnit as isUnitValue,
+  DimensionMismatchError,
+  UnitParseError,
+  DIMENSIONLESS,
+  dim,
+} from './types/unit.js';
+export type { Dimensions, UnitDef } from './types/unit.js';
+export {
+  BASE_UNITS,
+  DERIVED_UNITS,
+  ALL_UNITS,
+  UNIT_ALIASES,
+  getUnitDef,
+} from './types/unit-definitions.js';
+export { SI_PREFIXES, BEST_PREFIXES, getPrefix } from './types/unit-prefixes.js';
+
 // =============================================================================
 // typed-function integration
 // =============================================================================

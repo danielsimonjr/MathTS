@@ -168,9 +168,21 @@ export const isSparseMatrix = (x: unknown): boolean =>
 
 /**
  * Check if value is a Unit
+ *
+ * Recognises both the native {@link Unit} class (which exposes `value`,
+ * `dimensions`, and `notation`) and the legacy duck-typed shape used by
+ * mathjs-compatibility shims (`{ value, unit, type }`).
  */
-export const isUnit = (x: unknown): boolean =>
-  isObject(x) && 'value' in x && 'unit' in x && typeof (x as { type?: string }).type === 'string';
+export const isUnit = (x: unknown): boolean => {
+  if (!isObject(x)) return false;
+  const o = x as { type?: string; value?: unknown; unit?: unknown; dimensions?: unknown };
+  if (typeof o.type !== 'string') return false;
+  // Native Unit class.
+  if (o.type === 'Unit' && 'value' in o && 'dimensions' in o) return true;
+  // Legacy duck-typing path.
+  if ('value' in o && 'unit' in o) return true;
+  return false;
+};
 
 // =============================================================================
 // MathTS Core Type Definitions for typed-function

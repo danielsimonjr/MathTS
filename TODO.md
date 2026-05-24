@@ -339,41 +339,52 @@ Detail:
             replacement; KS/Shapiro = parametric bootstrap; MW =
             permutation (Fisher-Yates). +17 tests.
 
-      **Wave 5B Tier 2 (sequential WASM, 4 slices):**
-      - [ ] **Slice 5.3** — typed/special.ts ellipticK/E WASM via
-            AGM (mirror Airy pattern from 4.9).
-      - [ ] **Slice 5.4** — typed/cas.ts polyFit/chebyshevFit/
-            legendreFit WASM via Vandermonde + existing qr kernel.
-      - [ ] **Slice 5.5** — typed/interpolation.ts lagrange/
-            newtonInterp divided-difference WASM (extends 3.10b).
-      - [ ] **Slice 5.6** — typed/signal.ts spectral-windowing
-            WASM (welchPSD/bartlettPSD/multiTaperPSD + goertzel +
-            chirpZTransform).
+      **Wave 5B Tier 2 (sequential WASM, 4 slices) — ✅ ALL LANDED:**
+      - [x] **Slice 5.3** ✅ `098656e` — ellipticK/E via AGM; +28
+            TS + 9 Rust tests.
+      - [x] **Slice 5.4** ✅ `f537a56` — polyFit/chebyshevFit/
+            legendreFit via Vandermonde + inlined Householder QR
+            (~230 LOC Rust + ~170 LOC AS + ~170 LOC bridge);
+            +18 tests.
+      - [x] **Slice 5.5** ✅ `2b273a1` — lagrange/newtonInterp
+            divided-difference WASM. Existing lagrangeInterp was
+            direct-Lagrange (not Newton); preserved as below-
+            threshold path; new newtonInterp export. +14 tests.
+      - [x] **Slice 5.6** ✅ `2d0ebfa` — applyWindow + welchPSD +
+            bartlettPSD + multiTaperPSD + goertzel + chirpZTransform
+            (full 5-kernel module). welch/CZT use rustfft via
+            crate-local helper. +25 TS + 8 Rust tests.
 
-      **Wave 5C Tier 3 (sequential larger/design, 3 slices):**
-      - [ ] **Slice 5.7** — wasm.sortF64 kernel + sort-based ops
-            batch (statistics histogram/quantile/percentile;
-            hypothesis KS/MW/SW resort; geometry convexHull/Delaunay).
-      - [ ] **Slice 5.8** — wasm.lgammaF64 + distributions pdf
-            WASM (betaPdf/gammaPdf/studentTPdf/noncentralChi2Pdf).
-      - [ ] **Slice 5.9** — matrixExpm/Logm/Sqrtm primitives
-            (Padé/scaling-and-squaring per Higham 2008) + typed
-            wiring.
+      **Wave 5C Tier 3 (sequential larger/design, 3 slices) — ✅ ALL LANDED:**
+      - [x] **Slice 5.7d** ✅ `5a0ca7c` — wasm.sortF64/argsortF64/
+            rankF64 + full consumer wiring (full slice, no sub-split).
+            Wires statistics + hypothesis + geometry hull. +54 tests.
+      - [x] **Slice 5.8** ✅ `8872e4b` — lgamma_f64 array kernel +
+            4 distribution-pdf wirings. +52 tests.
+      - [x] **Slice 5.9a** ✅ `ca08c12` — matrixExpm (Higham Padé-13),
+            matrixLogm (GL-16 quadrature), matrixSqrtm (Newton from
+            Y_0 = I). +30 matrix tests + 13 typed-dispatch tests.
+            Slice 5.9b deferred for complex/defective cases.
 
-      **Wave 5D Tier 4 (parallel worker-route, 3 disjoint agents):**
-      - [ ] **Slice 5.12** — typed/dist-objects.ts batch sampling
-            ≥ 100K via workers.
-      - [ ] **Slice 5.13** — typed/graph.ts centrality random
-            restarts via workers.
-      - [ ] **Slice 5.14** — typed/cas.ts batch fan-out for
-            simplify/derivative/expand/factor.
+      **Wave 5D Tier 4 (parallel worker-route, 3 disjoint agents) — ✅ ALL LANDED:**
+      - [x] **Slice 5.12** ✅ `effc15e` (co-landed with 5.13) —
+            distribution batch sampling >= 100K. New sampleChunk
+            worker kernel. SplitMix64 seed-splitting. 5 distributions.
+            +12 tests.
+      - [x] **Slice 5.13** ✅ `effc15e` — graph centrality restarts
+            (Option B Promise.all). pageRank + betweenness +
+            eigenvector. +18 tests.
+      - [x] **Slice 5.14** ✅ `444fec4` — CAS batch fan-out via
+            mapChunk + eval. cas-prefixed names to avoid factory
+            collision. +13 tests.
 
-      **Wave 5E Tier 5 (Opus, single big slice):**
-      - [ ] **Slice 5.15** — core Unit type (7-D dimensional
-            vector + composition + conversion + printing) →
-            unblocks Slice 4.10 / rank 14 typed/unit.ts.
-            Ports algorithm from mathjs's Unit class with cleaner
-            TS shape.
+      **Wave 5E Tier 5 (Opus, single big slice) — ✅ LANDED:**
+      - [x] **Slice 5.15** ✅ `8131212` — core Unit type + typed/unit.
+            Closes rank 14. 7-D SI dimensional vector, canonical-value
+            invariant, recursive-descent parser, prefix-ambiguity
+            via plain-match-first + longest-prefix-split, temperature
+            offsets per-atom standalone only. +53 core + 15 typed
+            tests. Differences from mathjs's Unit class documented.
 
 - [x] **CDG bugfix + post-Wave-3 gap-audit refresh** — Ran
       `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --include-tests`

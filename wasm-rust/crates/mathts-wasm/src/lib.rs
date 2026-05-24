@@ -41,6 +41,7 @@ pub mod simd;
 pub use signal::fft::*;
 pub use signal::processing::*;
 pub use signal::processing_ext::*;
+pub use signal::spectral::*;
 pub use signal::windowing::*;
 pub use simd::operations::*;
 
@@ -145,6 +146,12 @@ pub use tridiag::*;
 // ============================================================
 pub mod bessel;
 pub use bessel::*;
+
+// ============================================================
+// Slice 5.7a: Sort hot-loop kernels (sort_f64, argsort_f64, rank_f64)
+// ============================================================
+pub mod sort;
+pub use sort::*;
 
 // ============================================================
 // AssemblyScript-compatible wrappers (scalar + array ops)

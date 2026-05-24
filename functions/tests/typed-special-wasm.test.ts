@@ -32,6 +32,9 @@ import {
   besselY0Dispatch,
   besselY1Dispatch,
   besselYDispatch,
+  lgammaDispatch,
+  lgammaJS,
+  resetLgammaWasm,
   besselJ0JS,
   besselJ1JS,
   besselJnJS,
@@ -748,6 +751,155 @@ describe('Elliptic WASM — fallback to JS path (module not loaded)', () => {
     const result = ellipticEDispatch(ms);
     const oracle = ellipticEJS(ms);
     for (let i = 0; i < ms.length; i++) {
+      expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
+    }
+  });
+});
+
+// ===========================================================================
+// Suite 11 — lgamma scalar reference values (Slice 5.8)
+// ===========================================================================
+//
+// Reference values: NIST DLMF §5.4 / Abramowitz & Stegun §6.1.
+// Tolerance: Lanczos g=7 achieves ~1e-13 relative error for x > 0.
+//
+// lgamma(1)   = 0                 (Γ(1) = 1)
+// lgamma(2)   = 0                 (Γ(2) = 1)
+// lgamma(0.5) = ln(√π) ≈ 0.57236…
+// lgamma(10)  = ln(9!) ≈ 12.80182…
+// lgamma(100) ≈ 359.13420…
+// lgamma(0)   = +Infinity (pole)
+// lgamma(-1)  = +Infinity (pole)
+// ===========================================================================
+
+const TOL_LGAMMA = 1e-12;
+
+describe('lgamma scalar reference values (Slice 5.8)', () => {
+  // Test 1: lgamma(1) = 0
+  it('lgamma(1) = 0', () => {
+    const r = lgammaJS(new Float64Array([1]))[0];
+    expect(Math.abs(r)).toBeLessThan(TOL_LGAMMA);
+  });
+
+  // Test 2: lgamma(2) = 0
+  it('lgamma(2) = 0', () => {
+    const r = lgammaJS(new Float64Array([2]))[0];
+    expect(Math.abs(r)).toBeLessThan(TOL_LGAMMA);
+  });
+
+  // Test 3: lgamma(0.5) ≈ ln(√π)
+  it('lgamma(0.5) ≈ 0.5723649429247001', () => {
+    const r = lgammaJS(new Float64Array([0.5]))[0];
+    expect(Math.abs(r - 0.5723649429247001)).toBeLessThan(TOL_LGAMMA);
+  });
+
+  // Test 4: lgamma(10) ≈ ln(9!)
+  it('lgamma(10) ≈ 12.801827480081469', () => {
+    const r = lgammaJS(new Float64Array([10]))[0];
+    expect(Math.abs(r - 12.801827480081469)).toBeLessThan(TOL_LGAMMA);
+  });
+
+  // Test 5: large x — lgamma(100)
+  it('lgamma(100) ≈ 359.13420536957544', () => {
+    const r = lgammaJS(new Float64Array([100]))[0];
+    expect(Math.abs(r - 359.13420536957544)).toBeLessThan(1e-8);
+  });
+
+  // Test 6: pole at 0 → +Infinity
+  it('lgamma(0) = +Infinity (pole)', () => {
+    const r = lgammaJS(new Float64Array([0]))[0];
+    expect(r).toBe(Infinity);
+  });
+
+  // Test 7: pole at -1 → +Infinity
+  it('lgamma(-1) = +Infinity (negative integer pole)', () => {
+    const r = lgammaJS(new Float64Array([-1]))[0];
+    expect(r).toBe(Infinity);
+  });
+
+  // Test 8: negative non-integer (reflection)
+  it('lgamma(-0.5) is finite and ~1.2655…', () => {
+    const r = lgammaJS(new Float64Array([-0.5]))[0];
+    expect(isFinite(r)).toBe(true);
+    // lgamma(-0.5) = ln(|Γ(-0.5)|) = ln(2√π) ≈ 1.2655121234846454
+    expect(Math.abs(r - 1.2655121234846454)).toBeLessThan(TOL_LGAMMA);
+  });
+});
+
+// ===========================================================================
+// Suite 12 — lgamma WASM dispatch (Slice 5.8)
+// ===========================================================================
+
+describe('lgamma WASM dispatch (Slice 5.8)', () => {
+  // Test 1: small array falls back to JS (below threshold)
+  it('small array (< 1024) lgammaDispatch matches JS fallback exactly', () => {
+    const xs = linspace(0.5, 5.0, 10);
+    const dr = lgammaDispatch(xs);
+    const jr = lgammaJS(xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(dr[i] - jr[i])).toBeLessThan(1e-14);
+    }
+  });
+
+  // Test 2: large array dispatch matches JS within tolerance
+  it('large array (≥ 1024) lgammaDispatch result matches JS fallback within 1e-12', () => {
+    const xs = linspace(0.5, 50.0, WASM_SPECIAL_THRESHOLD);
+    const dr = lgammaDispatch(xs);
+    const jr = lgammaJS(xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(dr[i] - jr[i])).toBeLessThan(1e-12);
+    }
+  });
+
+  // Test 3: typed lgamma scalar overload
+  it('lgamma typed scalar overload: lgamma(1) = 0', async () => {
+    const { lgamma } = await import('../src/typed/special.js');
+    const r = lgamma(1) as number;
+    expect(Math.abs(r)).toBeLessThan(1e-14);
+  });
+
+  // Test 4: typed lgamma array overload above threshold resolves correctly
+  it('lgamma typed array overload (≥ threshold) resolves within 1e-12 of JS', async () => {
+    const { lgamma } = await import('../src/typed/special.js');
+    const xs = linspace(1.0, 20.0, WASM_SPECIAL_THRESHOLD);
+    const result = await (lgamma(xs) as Promise<Float64Array>);
+    const jr = lgammaJS(xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(result[i] - jr[i])).toBeLessThan(1e-12);
+    }
+  });
+
+  // Test 5: typed lgamma array overload below threshold resolves correctly
+  it('lgamma typed array overload (< threshold) resolves correctly', async () => {
+    const { lgamma } = await import('../src/typed/special.js');
+    const xs = new Float64Array([1, 2, 0.5, 10]);
+    const result = await (lgamma(xs) as Promise<Float64Array>);
+    expect(Math.abs(result[0])).toBeLessThan(1e-14); // lgamma(1)=0
+    expect(Math.abs(result[1])).toBeLessThan(1e-14); // lgamma(2)=0
+    expect(Math.abs(result[2] - 0.5723649429247001)).toBeLessThan(TOL_LGAMMA);
+    expect(Math.abs(result[3] - 12.801827480081469)).toBeLessThan(TOL_LGAMMA);
+  });
+});
+
+// ===========================================================================
+// Suite 13 — lgamma fallback when WASM not loaded (Slice 5.8)
+// ===========================================================================
+
+describe('lgamma WASM — fallback to JS path (module not loaded)', () => {
+  beforeAll(() => {
+    resetLgammaWasm();
+  });
+
+  afterAll(() => {
+    resetLgammaWasm();
+  });
+
+  it('lgammaDispatch above threshold falls back to JS when WASM not loaded', () => {
+    const xs = linspace(0.5, 10.0, WASM_SPECIAL_THRESHOLD);
+    const result = lgammaDispatch(xs);
+    const oracle = lgammaJS(xs);
+    expect(result.length).toBe(oracle.length);
+    for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
     }
   });

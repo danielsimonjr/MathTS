@@ -170,7 +170,8 @@ export const squeeze = createSqueeze(factoryScope as any);
 // probability (synced factories — superseded by typed/probability; kept internal for factoryScope wiring)
 const combinations = createCombinations(factoryScope as any);
 const combinationsWithRep = createCombinationsWithRep(factoryScope as any);
-export const lgamma = createLgamma(factoryScope as any);
+// lgamma superseded by typed/special.ts (WASM-backed); kept internal for factoryScope wiring
+const lgamma = createLgamma(factoryScope as any);
 const pickRandom = createPickRandom(factoryScope as any);
 const random = createRandom(factoryScope as any);
 

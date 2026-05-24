@@ -18,6 +18,18 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { wasmLoader } from '../wasm/WasmLoader.js';
+import {
+  applyWindowDispatch,
+  bartlettPSDDispatch,
+  bartlettPSDJS,
+  chirpZTransformDispatch,
+  chirpZTransformJS,
+  goertzelDispatch,
+  goertzelJS,
+  welchPSDDispatch,
+  welchPSDJS,
+  WASM_SIGNAL_THRESHOLD,
+} from '../wasm/signal/wasm-bridge.js';
 
 // =============================================================================
 // WASM dispatch threshold — signals shorter than this use pure-TS fallback
@@ -1548,6 +1560,166 @@ export function correlate(a: number[], b: number[]): number[] {
 // Export All Signal Functions
 // =============================================================================
 
+// =============================================================================
+// Slice 5.6 — Spectral windowing WASM dispatch
+// =============================================================================
+
+/**
+ * Welch's overlapped-segment-averaging Power Spectral Density.
+ *
+ * For arrays >= WASM_SIGNAL_THRESHOLD samples (4096) dispatches to the
+ * WASM kernel (Rust → AS → JS fallback).
+ *
+ * @param signal - Input signal samples
+ * @param opts - { frameLength, overlap, window }
+ * @returns { psd: number[], frequencies: number[], frameLength: number }
+ */
+export function welchPSD(
+  signal: number[] | Float64Array,
+  opts?: { frameLength?: i32; overlap?: i32; window?: string }
+): { psd: number[]; frequencies: number[]; frameLength: number } {
+  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  const frameLength: i32 = opts?.frameLength ?? 256;
+  const overlap: i32 = opts?.overlap ?? Math.floor(frameLength / 2);
+  const window = opts?.window ?? 'hann';
+
+  const psdArr = welchPSDDispatch(samples, frameLength, overlap, window);
+  const nfft = frameLength;
+  const psd = Array.from(psdArr);
+  const frequencies = Array.from({ length: psdArr.length }, (_, i) => i / nfft);
+  return { psd, frequencies, frameLength };
+}
+
+/**
+ * Bartlett's non-overlapped segment-averaging Power Spectral Density.
+ *
+ * Special case of Welch with overlap=0 and rectangular window.
+ *
+ * @param signal - Input signal samples
+ * @param opts - { frameLength }
+ * @returns { psd: number[], frequencies: number[], frameLength: number }
+ */
+export function bartlettPSD(
+  signal: number[] | Float64Array,
+  opts?: { frameLength?: i32 }
+): { psd: number[]; frequencies: number[]; frameLength: number } {
+  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  const frameLength: i32 = opts?.frameLength ?? 256;
+
+  const psdArr = bartlettPSDDispatch(samples, frameLength);
+  const nfft = frameLength;
+  const psd = Array.from(psdArr);
+  const frequencies = Array.from({ length: psdArr.length }, (_, i) => i / nfft);
+  return { psd, frequencies, frameLength };
+}
+
+/**
+ * Multi-taper Power Spectral Density (Thomson's method, order K=5).
+ *
+ * Uses K discrete prolate spheroidal sequences (DPSS, approximated here
+ * as Slepian windows via cos-sum) to reduce spectral leakage. The final
+ * PSD is the mean of the K individual tapered periodograms.
+ *
+ * For large inputs, each tapered periodogram is computed via the WASM
+ * Welch kernel (frame = full signal, overlap = 0).
+ *
+ * @param signal - Input signal samples
+ * @param opts - { nfft, K } (K = number of tapers, default 5)
+ * @returns { psd: number[], frequencies: number[] }
+ */
+export function multiTaperPSD(
+  signal: number[] | Float64Array,
+  opts?: { nfft?: i32; K?: i32 }
+): { psd: number[]; frequencies: number[] } {
+  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  const n: i32 = samples.length;
+  const nfft: i32 = opts?.nfft ?? (Math.pow(2, Math.ceil(Math.log2(n))) as i32);
+  const K: i32 = opts?.K ?? 5;
+
+  // Approximate Slepian tapers via discrete cosine windows.
+  // Taper k: w_k[n] = sin((k+1) * pi * n / (N+1)) — a sine-family taper.
+  const psdLen: i32 = nfft / 2 + 1;
+  const accumPsd = new Float64Array(psdLen);
+
+  for (let k: i32 = 0; k < K; k++) {
+    // Build taper k and apply to signal
+    const tapered = new Float64Array(n);
+    for (let j: i32 = 0; j < n; j++) {
+      const w: f64 = Math.sin(((k + 1) * Math.PI * (j + 1)) / (n + 1));
+      tapered[j] = samples[j] * w;
+    }
+
+    // Per-taper PSD via Welch (single frame = full signal, no overlap)
+    let frameLen: i32 = nfft;
+    if (frameLen > n) frameLen = n;
+    const taperPsd =
+      n >= WASM_SIGNAL_THRESHOLD
+        ? welchPSDDispatch(tapered, frameLen, 0, 'rect')
+        : welchPSDJS(tapered, frameLen, 0, 3);
+
+    for (let i: i32 = 0; i < psdLen && i < taperPsd.length; i++) {
+      accumPsd[i] += taperPsd[i];
+    }
+  }
+
+  // Average over tapers
+  const psd: number[] = [];
+  const frequencies: number[] = [];
+  for (let i: i32 = 0; i < psdLen; i++) {
+    psd.push(accumPsd[i] / K);
+    frequencies.push(i / nfft);
+  }
+  return { psd, frequencies };
+}
+
+/**
+ * Goertzel algorithm: compute the power |X[k]|² at a single frequency.
+ *
+ * Dispatches to the WASM kernel for arrays >= 4096 samples.
+ *
+ * @param signal - Input signal samples
+ * @param targetFreq - Target frequency in Hz
+ * @param sampleRate - Sample rate in Hz
+ * @returns |X[k]|² (unnormalized power at the target frequency)
+ */
+export function goertzel(signal: number[] | Float64Array, targetFreq: f64, sampleRate: f64): f64 {
+  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  return goertzelDispatch(samples, targetFreq, sampleRate);
+}
+
+/**
+ * Chirp-Z Transform (Bluestein algorithm).
+ *
+ * Computes M points of the z-transform along a chirp contour in the
+ * z-plane. The contour is defined by:
+ *   A = exp(2πi·phiStart)  — starting point
+ *   W = exp(2πi·phiStep)   — angular step
+ *
+ * Dispatches to the WASM kernel for max(n, m) >= 4096.
+ *
+ * @param signal - Input signal samples (real)
+ * @param m - Number of output points
+ * @param phiStart - Start angle in turns (e.g. 0 = DC, 0.5 = Nyquist)
+ * @param phiStep - Step angle in turns (negative for standard DFT)
+ * @returns { re: Float64Array, im: Float64Array } — M complex output values
+ */
+export function chirpZTransform(
+  signal: number[] | Float64Array,
+  m: i32,
+  phiStart: f64 = 0,
+  phiStep: f64 = -1 / (signal instanceof Float64Array ? signal.length : signal.length)
+): { re: Float64Array; im: Float64Array } {
+  const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
+  // Convert turns to complex exponentials
+  const twoPi = 2 * Math.PI;
+  const phiStartRe: f64 = Math.cos(twoPi * phiStart);
+  const phiStartIm: f64 = Math.sin(twoPi * phiStart);
+  const phiStepRe: f64 = Math.cos(twoPi * phiStep);
+  const phiStepIm: f64 = Math.sin(twoPi * phiStep);
+
+  return chirpZTransformDispatch(samples, m, phiStartRe, phiStartIm, phiStepRe, phiStepIm);
+}
+
 /**
  * Primary export: typed signal processing functions
  */
@@ -1582,6 +1754,13 @@ export const typedSignal = {
   windowFunction,
   convolve,
   correlate,
+  // Slice 5.6 additions
+  welchPSD,
+  bartlettPSD,
+  multiTaperPSD,
+  goertzel,
+  chirpZTransform,
+  applyWindow: applyWindowDispatch,
 };
 
 /**

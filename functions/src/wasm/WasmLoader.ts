@@ -324,6 +324,8 @@ export interface WasmModule {
   zetaArray: (aPtr: number, n: number, resultPtr: number) => void;
   gammaArray: (aPtr: number, n: number, resultPtr: number) => void;
   lgammaArray: (aPtr: number, n: number, resultPtr: number) => void;
+  // Pointer-style lgamma array kernel (Slice 5.8)
+  lgamma_f64: (xsPtr: number, n: number, outPtr: number) => number;
 
   // Selection algorithms
   partitionSelect: (dataPtr: number, n: number, k: number, workPtr: number) => number;
@@ -709,6 +711,72 @@ export interface WasmModule {
   bessel_yn_f64_as?: (n: number, xs: Float64Array) => Float64Array;
   airy_ai_f64_as?: (xs: Float64Array) => Float64Array;
   airy_bi_f64_as?: (xs: Float64Array) => Float64Array;
+
+  // Spectral signal kernels (Slice 5.6).
+  // Rust backend: pointer-style ABI.
+  //   apply_window_f64(samples_ptr, n, window_type) → 0 on success, -1 on error
+  //   welch_psd_f64(samples_ptr, n, frame_length, overlap, window_type, out_ptr) → 0/-1
+  //   bartlett_psd_f64(samples_ptr, n, frame_length, out_ptr) → 0/-1
+  //   goertzel_f64(samples_ptr, n, target_freq, sample_rate) → |X[k]|² (f64)
+  //   chirp_z_transform_f64(samples_ptr, n, m, ps_re, ps_im, pw_re, pw_im, re_ptr, im_ptr) → 0/-1
+  // AS backend: typed-array calling convention.
+  //   apply_window_f64_as(samples, window_type) → 0/-1
+  //   welch_psd_f64_as(samples, frame_length, overlap, window_type) → Float64Array
+  //   bartlett_psd_f64_as(samples, frame_length) → Float64Array
+  //   goertzel_f64_as(samples, target_freq, sample_rate) → f64
+  //   chirp_z_transform_f64_as(samples, m, ps_re, ps_im, pw_re, pw_im) → Float64Array (interleaved)
+  apply_window_f64?: (samplesPtr: number, n: number, windowType: number) => number;
+  welch_psd_f64?: (
+    samplesPtr: number,
+    n: number,
+    frameLength: number,
+    overlap: number,
+    windowType: number,
+    outPtr: number
+  ) => number;
+  bartlett_psd_f64?: (samplesPtr: number, n: number, frameLength: number, outPtr: number) => number;
+  goertzel_f64?: (samplesPtr: number, n: number, targetFreq: number, sampleRate: number) => number;
+  chirp_z_transform_f64?: (
+    samplesPtr: number,
+    n: number,
+    m: number,
+    phiStartRe: number,
+    phiStartIm: number,
+    phiStepRe: number,
+    phiStepIm: number,
+    outRePtr: number,
+    outImPtr: number
+  ) => number;
+  apply_window_f64_as?: (samples: Float64Array, windowType: number) => number;
+  welch_psd_f64_as?: (
+    samples: Float64Array,
+    frameLength: number,
+    overlap: number,
+    windowType: number
+  ) => Float64Array;
+  bartlett_psd_f64_as?: (samples: Float64Array, frameLength: number) => Float64Array;
+  goertzel_f64_as?: (samples: Float64Array, targetFreq: number, sampleRate: number) => number;
+  chirp_z_transform_f64_as?: (
+    samples: Float64Array,
+    m: number,
+    phiStartRe: number,
+    phiStartIm: number,
+    phiStepRe: number,
+    phiStepIm: number
+  ) => Float64Array;
+
+  // Sort kernels (Slice 5.7a).
+  // Rust backend: pointer-style ABI.
+  //   sort_f64(ptr, n)              → n (in-place, NaN-last)
+  //   argsort_f64(data_ptr, n, out_ptr) → n
+  //   rank_f64(data_ptr, n, out_ptr)    → n
+  // AS backend: typed-array ABI (no _as suffix — same name, detected by signature).
+  //   sort_f64(data)     → Float64Array
+  //   argsort_f64(data)  → Int32Array
+  //   rank_f64(data)     → Int32Array
+  sort_f64?: (ptr: number, n: number) => number;
+  argsort_f64?: (dataPtr: number, n: number, outPtr: number) => number;
+  rank_f64?: (dataPtr: number, n: number, outPtr: number) => number;
 
   // Dense matrix decompositions exported by the AssemblyScript binary.
   // The Rust binary exposes the same algorithms under `luDecomposition` /

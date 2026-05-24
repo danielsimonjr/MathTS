@@ -22,6 +22,13 @@ import {
   singularValues as matrixSingularValues,
   matrixPinv,
   type PinvOptions,
+  matrixExpm as matrixExpmPrimitive,
+  matrixLogm as matrixLogmPrimitive,
+  matrixSqrtm as matrixSqrtmPrimitive,
+  type ExpmOptions,
+  type LogmOptions,
+  type SqrtmOptions,
+  DenseMatrix,
 } from '@danielsimonjr/mathts-matrix';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
@@ -1176,4 +1183,96 @@ export const lowRankApprox = mathTyped('lowRankApprox', {
  */
 export const singularValues = mathTyped('singularValues', {
   Array: (A: number[][]) => matrixSingularValues(A),
+});
+
+// =============================================================================
+// 11. Matrix Exponential (Slice 5.9)
+// =============================================================================
+
+/**
+ * Compute the matrix exponential via Padé-13 scaling-and-squaring.
+ *
+ * Dispatches on `DenseMatrix` (returns `DenseMatrix`) or `Array` (number[][],
+ * wraps in DenseMatrix, returns number[][]).
+ *
+ * Algorithm: Higham (2005) "The scaling and squaring method for the matrix
+ * exponential revisited." Accurate to near machine precision for general real
+ * matrices.
+ *
+ * @example
+ * matrixExpm(DenseMatrix.zeros(3, 3))          // => identity DenseMatrix
+ * matrixExpm([[0,0],[0,0]])                     // => [[1,0],[0,1]]
+ * matrixExpm([[1,0],[0,1]])                     // => [[e,0],[0,e]]
+ */
+export const matrixExpm = mathTyped('matrixExpm', {
+  DenseMatrix: (A: Parameters<typeof matrixExpmPrimitive>[0]) => matrixExpmPrimitive(A),
+  'DenseMatrix, Object': (A: Parameters<typeof matrixExpmPrimitive>[0], opts: ExpmOptions) =>
+    matrixExpmPrimitive(A),
+  Array: (A: number[][]) => {
+    const D = DenseMatrix.fromArray(A);
+    return matrixExpmPrimitive(D).toArray();
+  },
+});
+
+// =============================================================================
+// 12. Matrix Logarithm (Slice 5.9)
+// =============================================================================
+
+/**
+ * Compute the principal matrix logarithm via inverse scaling-and-squaring
+ * with 16-point Gauss-Legendre quadrature for log(I + X).
+ *
+ * Dispatches on `DenseMatrix` (returns `DenseMatrix`) or `Array` (returns
+ * number[][]). Throws for matrices with non-positive or complex eigenvalues.
+ *
+ * Slice 5.9a limitations:
+ *   - Non-positive eigenvalues: throws (principal log undefined).
+ *   - Complex eigenvalues: throws.
+ *   - Full Schur-based algorithm for non-diagonalisable A: Slice 5.9b.
+ *
+ * @example
+ * matrixLogm(DenseMatrix.eye(3))               // => zero DenseMatrix
+ * matrixLogm([[Math.E,0],[0,Math.E]])           // => [[1,0],[0,1]]
+ */
+export const matrixLogm = mathTyped('matrixLogm', {
+  DenseMatrix: (A: Parameters<typeof matrixLogmPrimitive>[0]) => matrixLogmPrimitive(A),
+  'DenseMatrix, Object': (A: Parameters<typeof matrixLogmPrimitive>[0], opts: LogmOptions) =>
+    matrixLogmPrimitive(A, opts),
+  Array: (A: number[][]) => {
+    const D = DenseMatrix.fromArray(A);
+    return matrixLogmPrimitive(D).toArray();
+  },
+});
+
+// =============================================================================
+// 13. Matrix Square Root (Slice 5.9)
+// =============================================================================
+
+/**
+ * Compute the principal square root of a matrix.
+ *
+ * For symmetric positive semi-definite A: uses Newton iteration (robust for
+ * all non-negative eigenvalue cases). For general diagonalisable A: Newton
+ * iteration falling back to eigendecomposition.
+ *
+ * Dispatches on `DenseMatrix` (returns `DenseMatrix`) or `Array` (returns
+ * number[][]). Throws for matrices with negative or complex eigenvalues.
+ *
+ * Slice 5.9a limitations:
+ *   - Negative eigenvalues: throws (complex sqrt not supported).
+ *   - Complex eigenvalues: throws.
+ *   - Full Schur-based Björck-Hammarling: Slice 5.9b.
+ *
+ * @example
+ * matrixSqrtm(DenseMatrix.fromArray([[4,0],[0,9]]))  // => [[2,0],[0,3]] DenseMatrix
+ * matrixSqrtm([[4,0],[0,9]])                          // => [[2,0],[0,3]]
+ */
+export const matrixSqrtm = mathTyped('matrixSqrtm', {
+  DenseMatrix: (A: Parameters<typeof matrixSqrtmPrimitive>[0]) => matrixSqrtmPrimitive(A),
+  'DenseMatrix, Object': (A: Parameters<typeof matrixSqrtmPrimitive>[0], opts: SqrtmOptions) =>
+    matrixSqrtmPrimitive(A, opts),
+  Array: (A: number[][]) => {
+    const D = DenseMatrix.fromArray(A);
+    return matrixSqrtmPrimitive(D).toArray();
+  },
 });

@@ -27,6 +27,7 @@ import {
   airyBiDispatch,
   ellipticKDispatch,
   ellipticEDispatch,
+  lgammaDispatch,
 } from '../wasm/special/wasm-bridge.js';
 
 // =============================================================================
@@ -1000,6 +1001,35 @@ export const erfi = mathTyped('erfi', {
 // =============================================================================
 
 /**
+ * Log-gamma function: lgamma(x) = log(|Γ(x)|).
+ *
+ * Poles at non-positive integers return +Infinity.
+ * Negative non-integer inputs use the reflection formula.
+ *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via lgamma_f64, Slice 5.8; or AS via lgamma_f64_as).
+ *
+ * Reference values:
+ *   lgamma(1)   = 0
+ *   lgamma(2)   = 0
+ *   lgamma(0.5) ≈ 0.5723649429247001 (ln(√π))
+ *   lgamma(10)  ≈ 12.801827480081469
+ *   lgamma(100) ≈ 359.13420536957544
+ *
+ * @param x - Input value, or Float64Array of values
+ * @returns log(|Γ(x)|)
+ */
+export const lgamma = mathTyped('lgamma', {
+  number: _lgamma,
+  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+    if (x.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(lgammaDispatch(x));
+    }
+    return mapArray(x, _lgamma, () => kernelSource([_lgamma], '(x) => _lgamma(x)'));
+  },
+});
+
+/**
  * Beta function: B(a, b) = Gamma(a) * Gamma(b) / Gamma(a + b).
  *
  * @param a - First parameter (positive), or Float64Array of values
@@ -1586,6 +1616,7 @@ export const airyBi = mathTyped('airyBi', {
  */
 export const typedSpecial = {
   erfc,
+  lgamma,
   beta,
   gammainc,
   digamma,

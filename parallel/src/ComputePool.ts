@@ -93,7 +93,9 @@ export type OpName =
   | 'mannWhitneyTest'
   | 'shapiroWilkTest'
   // integration fan-out (Slice 5.10)
-  | 'integrateChunk';
+  | 'integrateChunk'
+  // distribution batch sampling (Slice 5.12)
+  | 'sampleChunk';
 
 /**
  * Per-op threshold override.  The value is the minimum element count required
@@ -207,6 +209,10 @@ const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   kolmogorovSmirnovTest: 4_096,
   mannWhitneyTest: 4_096,
   shapiroWilkTest: 4_096,
+
+  // distribution batch sampling: per-sample cost (rejection/transcendental) amortises
+  // worker overhead above 100 000 samples (Slice 5.12).
+  sampleChunk: 100_000,
 };
 
 /**
@@ -721,6 +727,64 @@ export class ComputePool {
     }
     const partials = await Promise.all(tasks);
     return partials.reduce((acc, v) => acc + v, 0);
+  }
+
+  /**
+   * Fan-out distribution batch sampling across `workerCount` workers.
+   *
+   * Partitions `n` samples into `workerCount` equal chunks (last chunk absorbs
+   * the remainder) and dispatches one `sampleChunk` task per chunk. Each chunk
+   * uses an independent seed derived from `baseSeed` via SplitMix64-style
+   * hashing:
+   *
+   *   `chunkSeed = (baseSeed ^ (chunkIdx * 0x9E3779B97F4A7C15)) >>> 0`
+   *
+   * This Fibonacci-hashing multiplier gives good avalanche: even baseSeed=0
+   * produces K distinct seeds, and adjacent chunk indices produce uncorrelated
+   * sequences. See the `sampleChunk` worker kernel for the full rationale.
+   *
+   * @param distName    - One of 'normal', 'gamma', 'beta', 'studentT', 'exponential'
+   * @param params      - Distribution parameters (order matches factory functions)
+   * @param n           - Total number of samples to generate
+   * @param baseSeed    - Base seed for reproducible output
+   * @param workerCount - Number of parallel worker tasks
+   * @returns Concatenated Float64Array of `n` samples
+   */
+  async distributionSampleFanOut(
+    distName: string,
+    params: number[],
+    n: number,
+    baseSeed: number,
+    workerCount: number
+  ): Promise<Float64Array> {
+    // SplitMix64-style seed derivation constant (Fibonacci hashing).
+    // Low 32 bits of the golden-ratio fractional part × 2^64.
+    const SPLIT_MIX_CONST = 0x9e3779b9; // truncated to 32-bit safe range for JS
+
+    const baseChunkSize = Math.floor(n / workerCount);
+    const tasks: Promise<ArrayBuffer>[] = [];
+
+    for (let k = 0; k < workerCount; k++) {
+      const chunkCount =
+        k < workerCount - 1 ? baseChunkSize : n - baseChunkSize * (workerCount - 1);
+      // Seed splitting: XOR baseSeed with k * SPLIT_MIX_CONST (uint32)
+      const chunkSeed = (baseSeed ^ (Math.imul(k, SPLIT_MIX_CONST) | 0)) >>> 0;
+      tasks.push(
+        this.workerPool.exec<ArrayBuffer>('sampleChunk', [distName, params, chunkSeed, chunkCount])
+      );
+    }
+
+    const buffers = await Promise.all(tasks);
+
+    // Concatenate chunk results into a single Float64Array
+    const out = new Float64Array(n);
+    let offset = 0;
+    for (const buf of buffers) {
+      const chunk = new Float64Array(buf);
+      out.set(chunk, offset);
+      offset += chunk.length;
+    }
+    return out;
   }
 
   /**
@@ -1325,6 +1389,14 @@ export class ComputePool {
    */
   getConfig(): ComputePoolConfig {
     return { ...this.config };
+  }
+
+  /**
+   * Maximum number of workers configured for this pool.
+   * Used by distribution sampling fan-out to determine chunk count.
+   */
+  get workerCount(): number {
+    return this.config.maxWorkers;
   }
 
   /**

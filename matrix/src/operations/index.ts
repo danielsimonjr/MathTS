@@ -38,3 +38,12 @@ export { lu, type LUResult } from './lu.js';
 
 // Cholesky decomposition (DenseMatrix primitive — right-looking algorithm)
 export { cholesky, type CholeskyResult } from './cholesky.js';
+
+// Matrix exponential (DenseMatrix primitive — Padé-13 scaling-and-squaring, Slice 5.9)
+export { matrixExpm, type ExpmOptions } from './expm.js';
+
+// Matrix logarithm (DenseMatrix primitive — inverse scaling-and-squaring, Slice 5.9a)
+export { matrixLogm, type LogmOptions } from './logm.js';
+
+// Matrix square root (DenseMatrix primitive — eig-based, Slice 5.9a)
+export { matrixSqrtm, type SqrtmOptions } from './sqrtm.js';

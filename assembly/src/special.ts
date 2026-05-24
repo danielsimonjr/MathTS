@@ -1,8 +1,8 @@
 /**
- * Bessel J/Y and Airy Ai/Bi functions — AssemblyScript parity port.
+ * Bessel J/Y, Airy Ai/Bi, lgamma — AssemblyScript parity port.
  *
  * Mirrors the algorithms in:
- *   wasm-rust/crates/mathts-wasm/src/special/functions.rs  (Bessel scalars)
+ *   wasm-rust/crates/mathts-wasm/src/special/functions.rs  (Bessel/lgamma scalars)
  *   wasm-rust/crates/mathts-wasm/src/bessel.rs             (array kernels)
  *   wasm-rust/crates/mathts-wasm/src/special/functions.rs  (Airy scalars)
  *
@@ -18,7 +18,65 @@
  *   |x| > 4.5 (asymptotic):    ~1e-7 relative error
  *
  * Slice 4.9 — companion to Slice 3.10c-1.
+ * Slice 5.8 — adds lgamma array kernel.
  */
+
+// ===========================================================================
+// Log-gamma function (Slice 5.8)
+//
+// Lanczos approximation: g = 7, 9 coefficients.
+// Handles x ≤ 0 (non-positive integers) → +∞.
+// Negative non-integer x: reflection formula  lgamma(x) = ln(π/|sin(πx)|) − lgamma(1−x).
+//
+// Reference: Numerical Recipes §6.1; matches Rust implementation in
+//   wasm-rust/crates/mathts-wasm/src/special/functions.rs :: lgamma.
+// ===========================================================================
+
+const _LGAMMA_G: f64 = 7.0;
+const _LGAMMA_C0: f64 = 0.99999999999980993;
+const _LGAMMA_C1: f64 = 676.5203681218851;
+const _LGAMMA_C2: f64 = -1259.1392167224028;
+const _LGAMMA_C3: f64 = 771.32342877765313;
+const _LGAMMA_C4: f64 = -176.61502916214059;
+const _LGAMMA_C5: f64 = 12.507343278686905;
+const _LGAMMA_C6: f64 = -0.13857109526572012;
+const _LGAMMA_C7: f64 = 9.9843695780195716e-6;
+const _LGAMMA_C8: f64 = 1.5056327351493116e-7;
+
+function _lgamma(x: f64): f64 {
+  // Poles at 0 and negative integers
+  if (x <= 0.0 && x == Math.floor(x)) return Infinity;
+  if (x < 0.5) {
+    // Reflection: lgamma(x) = ln(π/|sin(πx)|) − lgamma(1−x)
+    const sinPiX: f64 = Math.abs(Math.sin(Math.PI * x));
+    if (sinPiX == 0.0) return Infinity;
+    return Math.log(Math.PI / sinPiX) - _lgamma(1.0 - x);
+  }
+  const xm1: f64 = x - 1.0;
+  let a: f64 =
+    _LGAMMA_C0 +
+    _LGAMMA_C1 / (xm1 + 1.0) +
+    _LGAMMA_C2 / (xm1 + 2.0) +
+    _LGAMMA_C3 / (xm1 + 3.0) +
+    _LGAMMA_C4 / (xm1 + 4.0) +
+    _LGAMMA_C5 / (xm1 + 5.0) +
+    _LGAMMA_C6 / (xm1 + 6.0) +
+    _LGAMMA_C7 / (xm1 + 7.0) +
+    _LGAMMA_C8 / (xm1 + 8.0);
+  const t: f64 = xm1 + _LGAMMA_G + 0.5;
+  return 0.5 * Math.log(2.0 * Math.PI) + (xm1 + 0.5) * Math.log(t) - t + Math.log(a);
+}
+
+// ===========================================================================
+// Array export — lgamma (Slice 5.8)
+// ===========================================================================
+
+/** Apply lgamma(x) element-wise.  Poles → +∞. */
+export function lgamma_f64(xs: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i: i32 = 0; i < xs.length; i++) out[i] = _lgamma(xs[i]);
+  return out;
+}
 
 // ---------------------------------------------------------------------------
 // Bessel J0 scalar

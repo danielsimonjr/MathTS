@@ -145,6 +145,43 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 5 — COMPLETE (15 slices, B.1/B.2 backlog + Unit type)
+
+Wave 5 closed the remaining B.1/B.2 playbook backlog from `FUNCTION_GAPS_AUDIT.md` plus the previously-blocked rank-14 (typed/unit), the 4.7b sub-slice (Tensor scatter/pad/roll/flip), and the matrix-function evaluator primitives. **All §D ranks 1-14 and all §B.1 / §B.2 / §C items are now landed.** Only the WebGPU browser smoke test (infra) and incomplete-elliptic / non-symm full-Higham follow-ups remain.
+
+**Wave 5B (Tier-2 — sequential WASM ports):**
+
+- **Slice 5.3 — commit `098656e`** — `ellipticK(m)` / `ellipticE(m)` WASM via AGM. NEW scalar `elliptic_k(m)` / `elliptic_e(m)` in `special/functions.rs` (the existing `ellipticK_wasm` was the wrong incomplete form); AGM converges quadratically to f64 precision in ≤10 iterations. Full AS parity port. 28 new TS tests + 9 Rust unit tests.
+- **Slice 5.4 — commit `f537a56`** — `polyFit` / `chebyshevFit` / `legendreFit` WASM via Vandermonde + inlined Householder QR. ~230 LOC Rust + ~170 LOC AS + ~170 LOC bridge at `WASM_POLY_FIT_THRESHOLD = 1024`. Inlined the Householder QR rather than calling into the matrix-package QR to avoid cross-crate coupling. 18 new tests. `chebyshevFit` / `legendreFit` are new public exports.
+- **Slice 5.5 — commit `2b273a1`** — `lagrangeInterp` (above threshold) + new `newtonInterp` divided-difference WASM. Existing `lagrangeInterp` was direct-Lagrange-formula, not Newton form — preserved as the below-threshold path; above `WASM_INTERP_THRESHOLD = 256` knots it dispatches to the Newton divided-difference WASM. 14 new tests.
+- **Slice 5.6 — commit `2d0ebfa`** — `applyWindow` + `welchPSD` + `bartlettPSD` + `multiTaperPSD` + `goertzel` + `chirpZTransform` WASM (full 5-kernel module). `welch_psd_f64` and `chirp_z_transform_f64` use rustfft via crate-local helper (no cross-module linking). 25 new TS tests + 8 Rust unit tests. CZT phase computed directly via libm cos/sin per index (not recursive) — keeps numerical error <1e-7.
+
+**Wave 5C (Tier-3 — sequential larger / design-heavy):**
+
+- **Slice 5.7d — commit `5a0ca7c`** — `wasm.sortF64` / `argsortF64` / `rankF64` kernel + full consumer wiring (full slice, no sub-slice split). Rust uses `slice::sort` (pdqsort + insertion-sort fallback) with NaN-last comparator. AS port uses median-of-three quicksort + insertion-sort fallback. Bridge at `WASM_SORT_THRESHOLD = 16_384`. **Wires:** `parallelStatMedian` / `parallelStatQuantile` / new `parallelStatPercentile` (statistics, 5.7b); `kolmogorovSmirnovTest` / `mannWhitneyTest` (argsort path) / `shapiroWilkTest` (hypothesis re-wire, 5.7c); `convexHull` Andrew's monotone-chain (geometry, 5.7d). 54 new tests (21 kernel + 15 statistics + 11 hypothesis + 7 geometry).
+- **Slice 5.8 — commit `8872e4b`** — `lgamma_f64` WASM array kernel + 4 distribution-pdf wirings. Scalar `lgamma` (Lanczos g=7) already existed in `special/functions.rs`; this slice added the pointer-ABI array kernel + AS parity port. Distribution-pdf wirings: `betaPDF` / `gammaPDF` / `studentTPDF` cache lgamma scalar constants once per call, vectorise the per-element work; `noncentralChi2PDF` vectorises the lgamma table over the truncation sum via `lgammaDispatch`. Threshold `WASM_SPECIAL_THRESHOLD = 1024`. 52 new tests (28 lgamma + 24 distribution). Name-collision finding: `factories/index.ts` already had a dormant `lgamma` export; stripped to resolve (same pattern as `cond` in Slice 5.2).
+- **Slice 5.9a — commit `ca08c12`** — `matrixExpm` / `matrixLogm` / `matrixSqrtm` primitives + typed promotion. **expm:** full Higham Padé-13 scaling-and-squaring (Algorithm 10.20). **logm:** inverse scaling-and-squaring with 16-point Gauss-Legendre quadrature for `log(I + X)`; pre-validates eigenvalues upfront (critical — without this, Newton-sqrt noise amplifies near-zero eigenvalues toward 1, causing spurious near-identity convergence). **sqrtm:** Newton iteration `Y_{k+1} = (Y_k + A·Y_k⁻¹)/2` starting from `Y_0 = I` (not `A` — starting from I avoids the "converges to A" trap); for SPD matrices, eig validates non-negative eigenvalues first. logm/sqrtm general-case (complex eigenvalues, defective matrices, Schur-based Björck-Hammarling) deferred to Slice 5.9b. 30 matrix tests + 13 typed-dispatch tests.
+
+**Wave 5D (Tier-4 — parallel worker-route batches, 3 agents):**
+
+- **Slice 5.12 — commit `effc15e` (co-landed with 5.13)** — Distribution batch sampling worker fan-out at `n >= 100_000`. New `sampleChunk` worker kernel (self-contained mulberry32 + Box-Muller + Marsaglia-Tsang gamma; no main-thread imports). SplitMix64-style seed-splitting: `chunkSeed = ((baseSeed ^ Math.imul(chunkIdx, 0x9E3779B9)) >>> 0)`. Distributions with worker route: `normalDist`, `gammaDist`, `betaDist`, `tDist`, `exponentialDist` (5 per spec). 12 new tests; 1M-sample statistical correctness verified.
+- **Slice 5.13 — commit `effc15e`** — Graph centrality random-restart fan-out for `pageRank`, `betweennessCentrality`, `eigenvectorCentrality` (3 new typed exports; they didn't exist before). Threshold `restarts >= 4`. **Option B** (main-thread `Promise.all` rather than a dedicated worker kernel — registering one would have exceeded the slice's file scope). Same SplitMix64 seed-splitting. 18 new tests.
+- **Slice 5.14 — commit `444fec4`** — CAS batch worker fan-out for `simplify` / `derivative` / `expand` / `factor` at array-length ≥ 16. Worker imports from `@danielsimonjr/mathts-expression` aren't reachable (workerpool is below functions in the dep graph), so the implementation uses self-contained string-manipulation kernels shipped via `.toString()` + `eval()` (via the existing `mapChunk` worker handler). Exports use `cas`-prefixed names (`casSimplify`, `casDerivative`, `casExpand`, `casFactor`) to avoid colliding with the factory-layer `simplify`/`derivative`/`expand`/`factor` already in the build. 13 new tests.
+
+**Wave 5E (Opus, single big slice):**
+
+- **Slice 5.15 — commit `8131212`** — Core `Unit` type + `typed/unit.ts` promotion. **Closes rank 14.** New files: `core/src/types/unit.ts`, `unit-definitions.ts`, `unit-prefixes.ts`. Design: immutable class (mirroring `Complex`/`Fraction`/`BigNumber`); 7-D SI dimensional vector as a `Dimensions` struct; canonical-value invariant (`unit.value` always in SI base units regardless of construction notation); recursive-descent parser (~90 LOC); prefix-ambiguity resolution by registry-plain-match-first then longest-prefix-split; temperature offsets honoured only when atom is standalone with exponent 1 (matches mathjs semantics); `toBest()` ranks `(unit, prefix)` candidates by `|log10(displayed)|`. 53 core tests + 15 typed tests. Differences from mathjs's `Unit` class documented: self-contained (no closure over a `math` instance), explicit `DimensionMismatchError` / `UnitParseError` classes, sane `toBest()` (skips kg/non-multiplicative entries that produce awkward output).
+
+**Wave 5 cumulative test deltas:**
+
+  - `functions`: 2,229 → **2,486** (+257)
+  - `tensor`: 323 → **379** (+56)
+  - `matrix`: 556 → **586** (+30)
+  - `core`: → **444** (+53)
+  - 25+ Rust native unit tests added across the WASM crates.
+
+**Total Wave 5 = 15 slices across 11 commits.** All §D Tier-4 ranks closed; all §B.1 / §B.2 / §C items closed.
+
 #### Gap-closure Wave 5A — four Tier-1 slices LANDED in parallel
 
 Four disjoint Tier-1 slices from [`GAP_CLOSURE_PROPOSAL_WAVE5.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md) opening the B.1/B.2 playbook backlog:
@@ -160,6 +197,10 @@ Four disjoint Tier-1 slices from [`GAP_CLOSURE_PROPOSAL_WAVE5.md`](docs/roadmap/
 - `functions`: 2,171 → **2,229** (+58 across 5.2 + 5.10 + 5.11)
 
 Pipeline 19/19 turbo tasks green. Wave 5B (sequential WASM slices 5.3-5.6) dispatches next.
+
+#### Gap-closure Wave 5E — Opus Slice 5.15 LANDED (rank 14 closure)
+
+- **Slice 5.15** — `core/Unit` type + `typed/unit.ts` promotion. **Opus subagent.** Closes the deferred rank-14 entry from the function-gap audit by implementing a TypeScript-native `Unit` value type and wiring `to(value, target)` and `toBest(value)` through the active `typed/` dispatch layer. Three new core files (`core/src/types/unit.ts`, `unit-definitions.ts`, `unit-prefixes.ts`), one new typed wrapper (`functions/src/typed/unit.ts`), and 68 new tests (53 core + 15 typed). Design choices intentionally diverging from the synced mathjs `Unit.ts` (3,488-line `@ts-nocheck` factory): immutable value semantics with `readonly` fields, `Dimensions` as a struct over the 7 SI bases (not an indexed array), no closure over a `math` instance (Unit is self-contained), explicit `DimensionMismatchError` / `UnitParseError` error classes. Parser is recursive-descent supporting `m/s²`, `kg·m/s^2`, `1/s`, Unicode middle-dot/superscripts; prefix ambiguity (`min` vs `m + in`) resolved by trying plain match before prefix. Temperature offsets stored on the unit definition (`{multiplier, offset?}`) and applied only when a unit is used standalone with exponent 1 (matching mathjs). `toBest()` ranks candidate units+prefixes by minimising `|log10(displayed)|`; skips `kg` to avoid colliding with the prefixable `g` entry. `to(number, string)` is registered as a constructor shorthand alongside `to(Unit, string)`. Name-collision finding: synced-mathjs `factories/index.ts` already re-exports `to`/`toBest`; resolved via an explicit `export { to, toBest } from './typed/unit.js';` override in `functions/src/index.ts`, mirroring how `cond` is resolved. `functions`: 2,471 → **2,486** (+15); `core`: 391 → **444** (+53).
 
 #### Gap-closure Wave 4C — two Tier-3 design-heavy slices LANDED
 

@@ -2,15 +2,28 @@
  * Distribution Objects
  *
  * Each factory function returns an object with .pdf(x), .cdf(x),
- * .quantile(p), .mean, .variance, and .sample() methods.
+ * .quantile(p), .mean, .variance, .sample() and .sampleN(n, opts?) methods.
  *
  * Supported distributions:
  * - normalDist, betaDist, binomialDist, chiSquaredDist
  * - exponentialDist, fDist, gammaDist, logNormalDist
  * - poissonDist, tDist, uniformDist, weibullDist
  *
+ * Worker dispatch (Slice 5.12):
+ * - `.sampleN(n, opts?)` routes to workers via `sampleChunk` kernel when
+ *   `n >= DIST_WORKER_THRESHOLD` (100 000).
+ * - Supports five distributions with worker paths: normalDist, gammaDist,
+ *   betaDist, tDist, exponentialDist.
+ * - Below threshold (or for distributions without a worker kernel), falls back
+ *   to a synchronous JS loop.
+ * - Seed splitting: chunk k uses seed `(baseSeed ^ (k * 0x9E3779B9)) >>> 0`
+ *   (SplitMix64-style Fibonacci hashing — gives uncorrelated chunk streams
+ *   even when baseSeed is 0 or small).
+ *
  * @packageDocumentation
  */
+
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
 // Type Definitions
@@ -18,6 +31,29 @@
 
 /** 64-bit float (default for decimals) */
 type f64 = number;
+
+/**
+ * Minimum sample count that triggers the worker-dispatch path in `.sampleN()`.
+ * Below this threshold, `.sampleN()` falls back to a synchronous JS loop.
+ */
+export const DIST_WORKER_THRESHOLD = 100_000;
+
+/**
+ * Options for batch sampling via `.sampleN()`.
+ */
+export interface SampleNOptions {
+  /**
+   * Integer seed for the Mulberry32 PRNG used within each worker chunk.
+   * When omitted, a random seed is chosen (non-reproducible).
+   */
+  seed?: number;
+  /**
+   * Number of worker tasks to fan out when `n >= DIST_WORKER_THRESHOLD`.
+   * Defaults to the pool's `maxWorkers` setting.  Set to 1 to use the
+   * worker path with a single task (useful for testing the async code path).
+   */
+  workerCount?: number;
+}
 
 /**
  * A probability distribution object with common statistical methods.
@@ -33,8 +69,19 @@ export interface Distribution {
   mean: f64;
   /** Distribution variance */
   variance: f64;
-  /** Generate a random sample */
+  /** Generate a single random sample (synchronous) */
   sample: () => f64;
+  /**
+   * Generate `n` random samples.
+   *
+   * - When `n < DIST_WORKER_THRESHOLD` returns a plain `Float64Array`
+   *   synchronously (wrapped in a resolved Promise for a uniform call-site).
+   * - When `n >= DIST_WORKER_THRESHOLD` **and** the distribution supports
+   *   the worker kernel, fans out across workers asynchronously.
+   * - For distributions without a dedicated worker kernel (binomialDist,
+   *   chiSquaredDist, etc.) always uses the JS loop regardless of `n`.
+   */
+  sampleN: (n: number, opts?: SampleNOptions) => Promise<Float64Array>;
 }
 
 // =============================================================================
@@ -216,6 +263,60 @@ function _normalQuantile(p: f64): f64 {
 }
 
 // =============================================================================
+// Batch Sampling Helpers (Slice 5.12)
+// =============================================================================
+
+/**
+ * Create a Mulberry32 PRNG seeded with `seed`.
+ *
+ * Returns a closure yielding U[0,1) floats.  Period: 2^32.
+ * NOT cryptographically secure.
+ *
+ * Reference: Tommy Ettinger, https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
+ * Canonical copy also in tensor/src/operations/random.ts and hypothesis.ts.
+ */
+function _makeMulberry32(seed: number): () => number {
+  let s = seed | 0;
+  return (): number => {
+    s = (s + 0x6d2b79f5) | 0;
+    let z = s;
+    z = Math.imul(z ^ (z >>> 15), z | 1);
+    z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
+    z = (z ^ (z >>> 14)) >>> 0;
+    return z / 0x100000000;
+  };
+}
+
+/**
+ * Fan out distribution sampling to workers or fall back to JS loop.
+ *
+ * @param distName  - Worker kernel name ('normal', 'gamma', etc.)
+ * @param params    - Distribution parameters
+ * @param n         - Number of samples
+ * @param opts      - Optional seed and workerCount overrides
+ * @param jsFallback - Synchronous JS generator for the below-threshold / no-kernel path
+ */
+async function _sampleNDispatch(
+  distName: string | null,
+  params: number[],
+  n: number,
+  opts: SampleNOptions | undefined,
+  jsFallback: (n: number, rng: () => number) => Float64Array
+): Promise<Float64Array> {
+  const seed = opts?.seed !== undefined ? opts.seed >>> 0 : (Math.random() * 0xffffffff) >>> 0;
+
+  if (distName !== null && n >= DIST_WORKER_THRESHOLD && computePool.isReady()) {
+    const K = opts?.workerCount !== undefined ? opts.workerCount : computePool.workerCount;
+    const effectiveK = Math.max(1, Math.min(K, n));
+    return computePool.distributionSampleFanOut(distName, params, n, seed, effectiveK);
+  }
+
+  // JS fallback (synchronous, wrapped in Promise for uniform API)
+  const rng = _makeMulberry32(seed);
+  return Promise.resolve(jsFallback(n, rng));
+}
+
+// =============================================================================
 // normalDist
 // =============================================================================
 
@@ -246,6 +347,20 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
       const u2 = Math.random();
       return mu + sigma * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
     },
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch('normal', [mu, sigma], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let i = 0; i < count; i++) {
+          const u1 = rng();
+          const u2 = rng();
+          out[i] =
+            mu +
+            sigma *
+              Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) *
+              Math.cos(2 * Math.PI * u2);
+        }
+        return out;
+      }),
   };
 }
 
@@ -302,6 +417,16 @@ export function betaDist(alpha: f64, beta_: f64): Distribution {
       const gb = _gammaRandom(beta_);
       return ga / (ga + gb);
     },
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch('beta', [alpha, beta_], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let i = 0; i < count; i++) {
+          const ga = _gammaRandomRng(alpha, rng);
+          const gb = _gammaRandomRng(beta_, rng);
+          out[i] = ga / (ga + gb);
+        }
+        return out;
+      }),
   };
 }
 
@@ -332,6 +457,32 @@ function _normalRandom(): f64 {
   const u1 = Math.random();
   const u2 = Math.random();
   return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+
+/**
+ * Gamma(alpha, 1) variate with a caller-supplied PRNG (used by JS fallback
+ * path in batch sampling to avoid calling Math.random()).
+ */
+function _gammaRandomRng(alpha: f64, rng: () => number): f64 {
+  if (alpha < 1) {
+    return _gammaRandomRng(alpha + 1, rng) * Math.pow(rng(), 1 / alpha);
+  }
+  const d = alpha - 1 / 3;
+  const c = 1 / Math.sqrt(9 * d);
+  while (true) {
+    let x: f64;
+    let v: f64;
+    do {
+      const u1 = rng();
+      const u2 = rng();
+      x = Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) * Math.cos(2 * Math.PI * u2);
+      v = 1 + c * x;
+    } while (v <= 0);
+    v = v * v * v;
+    const u = rng();
+    if (u < 1 - 0.0331 * (x * x) * (x * x)) return d * v;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
 }
 
 // =============================================================================
@@ -390,6 +541,18 @@ export function binomialDist(n: number, p: f64): Distribution {
       }
       return successes;
     },
+    sampleN: (count: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], count, opts, (sz, rng) => {
+        const out = new Float64Array(sz);
+        for (let j = 0; j < sz; j++) {
+          let successes = 0;
+          for (let i = 0; i < n; i++) {
+            if (rng() < p) successes++;
+          }
+          out[j] = successes;
+        }
+        return out;
+      }),
   };
 }
 
@@ -444,6 +607,22 @@ export function chiSquaredDist(k: number): Distribution {
       }
       return sum;
     },
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let j = 0; j < count; j++) {
+          let sum = 0;
+          for (let i = 0; i < k; i++) {
+            const u1 = rng();
+            const u2 = rng();
+            const z =
+              Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) * Math.cos(2 * Math.PI * u2);
+            sum += z * z;
+          }
+          out[j] = sum;
+        }
+        return out;
+      }),
   };
 }
 
@@ -474,6 +653,15 @@ export function exponentialDist(lambda: f64 = 1): Distribution {
     mean: 1 / lambda,
     variance: 1 / (lambda * lambda),
     sample: () => -Math.log(Math.random()) / lambda,
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch('exponential', [lambda], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let i = 0; i < count; i++) {
+          const u = rng();
+          out[i] = -Math.log(u < 1e-300 ? 1e-300 : u) / lambda;
+        }
+        return out;
+      }),
   };
 }
 
@@ -537,6 +725,16 @@ export function fDist(d1: f64, d2: f64): Distribution {
       const x2 = _gammaRandom(d2 / 2) * 2;
       return x1 / d1 / (x2 / d2);
     },
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let i = 0; i < count; i++) {
+          const x1 = _gammaRandomRng(d1 / 2, rng) * 2;
+          const x2 = _gammaRandomRng(d2 / 2, rng) * 2;
+          out[i] = x1 / d1 / (x2 / d2);
+        }
+        return out;
+      }),
   };
 }
 
@@ -592,6 +790,14 @@ export function gammaDist(shape: f64, rate: f64 = 1): Distribution {
     mean: shape * scale,
     variance: shape * scale * scale,
     sample: () => _gammaRandom(shape) * scale,
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch('gamma', [shape, scale], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let i = 0; i < count; i++) {
+          out[i] = _gammaRandomRng(shape, rng) * scale;
+        }
+        return out;
+      }),
   };
 }
 
@@ -630,6 +836,18 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
     mean: Math.exp(mu + (sigma * sigma) / 2),
     variance: (Math.exp(sigma * sigma) - 1) * Math.exp(2 * mu + sigma * sigma),
     sample: () => Math.exp(mu + sigma * _normalRandom()),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let i = 0; i < count; i++) {
+          const u1 = rng();
+          const u2 = rng();
+          const z =
+            Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) * Math.cos(2 * Math.PI * u2);
+          out[i] = Math.exp(mu + sigma * z);
+        }
+        return out;
+      }),
   };
 }
 
@@ -683,6 +901,21 @@ export function poissonDist(lambda: f64): Distribution {
       } while (p > L);
       return k - 1;
     },
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        const L = Math.exp(-lambda);
+        for (let j = 0; j < count; j++) {
+          let kk = 0;
+          let pp = 1;
+          do {
+            kk++;
+            pp *= rng();
+          } while (pp > L);
+          out[j] = kk - 1;
+        }
+        return out;
+      }),
   };
 }
 
@@ -737,6 +970,19 @@ export function tDist(nu: f64): Distribution {
       const chi = _gammaRandom(nu / 2) * 2;
       return z / Math.sqrt(chi / nu);
     },
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch('studentT', [nu], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let i = 0; i < count; i++) {
+          const u1 = rng();
+          const u2 = rng();
+          const z =
+            Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) * Math.cos(2 * Math.PI * u2);
+          const chi = _gammaRandomRng(nu / 2, rng) * 2;
+          out[i] = z / Math.sqrt(chi / nu);
+        }
+        return out;
+      }),
   };
 }
 
@@ -773,6 +1019,14 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
     mean: (a + b) / 2,
     variance: (range * range) / 12,
     sample: () => a + Math.random() * range,
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let i = 0; i < count; i++) {
+          out[i] = a + rng() * range;
+        }
+        return out;
+      }),
   };
 }
 
@@ -811,5 +1065,14 @@ export function weibullDist(k: f64, lambda: f64 = 1): Distribution {
     mean: lambda * _gamma(1 + 1 / k),
     variance: lambda * lambda * (_gamma(1 + 2 / k) - _gamma(1 + 1 / k) ** 2),
     sample: () => lambda * Math.pow(-Math.log(Math.random()), 1 / k),
+    sampleN: (n: number, opts?: SampleNOptions) =>
+      _sampleNDispatch(null, [], n, opts, (count, rng) => {
+        const out = new Float64Array(count);
+        for (let i = 0; i < count; i++) {
+          const u = rng();
+          out[i] = lambda * Math.pow(-Math.log(u < 1e-300 ? 1e-300 : u), 1 / k);
+        }
+        return out;
+      }),
   };
 }
