@@ -144,10 +144,13 @@ Detail:
             tensorQr 32³ = 3.6 ms/op, contract n=24 = 1639 ms/op,
             contractNetwork N=12 greedy = 3.7 ms vs exact 17.4 ms).
 
-      **Tier 2 (follow-up, depends on Slice 1.5):**
-      - [ ] **Slice 2.4** — `tensorPinv` + `tensorSolve` + `tensorKron`
-            (rank 4). NEW `tensor/src/operations/{pinv,solve,kron}.ts`.
-            Composes the now-public `matrix.lu` + `matrix.svd`.
+      **Tier 2 (follow-up, depends on Slice 1.5) — ✅ LANDED:**
+      - [x] **Slice 2.4** ✅ `70217b7` — `tensorPinv` + `tensorSolve` +
+            `tensorKron`. NEW `tensor/src/operations/{pinv,solve,kron}.ts`
+            composing on the public `matrix.lu`/`matrix.svd` from Slice
+            1.5. `tensor`: 215 → 264 tests (+49). functions.md / .html
+            Linear-Algebra Details bullets now cross-reference the
+            rank-N tensor equivalents.
 
       **Tier 3 (WASM-route, sequenced one at a time):**
       - [ ] **Slice 3.7** — `typed/algebra.ts` polynomial WASM ports

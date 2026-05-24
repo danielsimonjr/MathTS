@@ -143,14 +143,14 @@ For a B.2 (worker-only) entry, steps 1–4 are skipped — only the `typed/<file
 
 ### Tensor (`@danielsimonjr/mathts-tensor`)
 
-| Item                                                                        | Status                                                          |
-| --------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `tensorSvd` truncated tensor SVD                                            | ✅ landed in `a21a844` (ITENSOR_PARITY Phase 2)                 |
-| `tensorQr` / `tensorLU` / `tensorCholesky` / `tensorEig`                    | ✅ landed in `1bfad1e` (FUNCTION_GAPS Slice 3)                  |
-| `tensorPinv` (Moore-Penrose pseudoinverse)                                  | ⏳ pending — one-liner on top of `tensorSvd`                    |
-| `tensorSolve(A, b)` (linear system on tensors with named indices)           | ⏳ pending                                                      |
-| `tensorKron` (Kronecker product)                                            | ⏳ pending — comes up frequently in quantum / signal processing |
-| `Tensor.slice / gather / scatter / concatenate / stack / pad / roll / flip` | ⏳ pending — NumPy/JAX-style indexing primitives                |
+| Item                                                                        | Status                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tensorSvd` truncated tensor SVD                                            | ✅ landed in `a21a844` (ITENSOR_PARITY Phase 2)                                                                                                                                                         |
+| `tensorQr` / `tensorLU` / `tensorCholesky` / `tensorEig`                    | ✅ landed in `1bfad1e` (FUNCTION_GAPS Slice 3)                                                                                                                                                          |
+| `tensorPinv` (Moore-Penrose pseudoinverse)                                  | ✅ landed in `70217b7` (GAP_CLOSURE Slice 2.4) — full SVD + `rcond·max(S)` thresholding (default 1e-10); 17 tests                                                                                       |
+| `tensorSolve(A, b)` (linear system on tensors with named indices)           | ✅ landed in `70217b7` (GAP_CLOSURE Slice 2.4) — LU + inline forward/back substitution (no intermediate matrix allocation); auto-matches A/b axes by named Index when both carry `axisLabels`; 15 tests |
+| `tensorKron` (Kronecker product)                                            | ✅ landed in `70217b7` (GAP_CLOSURE Slice 2.4) — axis-by-axis Kron with size-1 prepending for rank-mismatched operands; axisLabels concatenated as `"aName_X_bName"`; 17 tests                          |
+| `Tensor.slice / gather / scatter / concatenate / stack / pad / roll / flip` | ⏳ pending — NumPy/JAX-style indexing primitives                                                                                                                                                        |
 
 ### Autograd (`@danielsimonjr/mathts-autograd`)
 
@@ -199,7 +199,7 @@ What's left and ranked by leverage:
 | 1    | ✅ `4462f69` — `TapedTensor.divide` + `.sub`                                                  | C (autograd)              | Smallest gap closes a symmetry asymmetry; trivial adjoints (`dA = dY / b`, `dB = -dY · A / b²` for divide; `dA = dY`, `dB = -dY` for sub). |
 | 2    | ✅ `7fe73b7` — `typed/relational.ts` (7 missing comparison ops)                               | A                         | Leaf-function promotion; no architectural risk; same pattern as `typed/complex.ts`.                                                        |
 | 3    | ✅ `fe40938` — `ComputePool.divide`                                                           | C (parallel)              | One-line plumbing parity with `subtract`.                                                                                                  |
-| 4    | `tensorPinv` + `tensorSolve` + `tensorKron`                                                   | C (tensor)                | Common ML/stats primitives; small impl on top of `tensorSvd`.                                                                              |
+| 4    | ✅ `70217b7` — `tensorPinv` + `tensorSolve` + `tensorKron`                                    | C (tensor)                | Common ML/stats primitives; small impl on top of `tensorSvd`.                                                                              |
 | 5    | ✅ `c0df3dd` — Promote `tensor/src/operations/{lu,cholesky}.ts` into `matrix/src/operations/` | C (matrix de-duplication) | Pure refactor; no behavioural change.                                                                                                      |
 | 6    | ✅ `08ce15f` — `bench:tensor` suite                                                           | C (benchmarks)            | Closes the perf-measurement gap for the ITensor-parity surface so future regressions show up in CI.                                        |
 | 7    | `typed/algebra.ts` polynomial WASM ports (B.1 rows 1-2)                                       | B                         | Substantial — Rust crate kernels + AS port + bridge + manifest regen. Worth doing once consumer pressure shows up.                         |

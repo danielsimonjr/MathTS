@@ -703,6 +703,11 @@ the standard `multiply` / `transpose` when full f64 precision is required.
   followed by `lsolve`/`usolve`, rather than forming `inv(A)`.
 - Sparse routines accept compressed-sparse-column (`SparseMatrix`) input and
   preserve sparsity through the factorisation.
+- For rank-N tensor equivalents — `tensorPinv`, `tensorSolve(A, b)`,
+  `tensorKron(a, b)`, `tensorQr`, `tensorSvd`, `tensorLU`, `tensorCholesky`,
+  `tensorEig` — see the `@danielsimonjr/mathts-tensor` package. The tensor
+  versions accept named `Index` axes and auto-match operands by Index id when
+  `axisLabels` are present.
 
 ### Background & History
 

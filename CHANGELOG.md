@@ -145,6 +145,15 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 2 — Slice 2.4 LANDED (depends on Wave-1 Slice 1.5)
+
+- **Slice 2.4 — commit `70217b7`** — Three new tensor primitives composing on the now-public `matrix.lu`/`matrix.svd` from Slice 1.5:
+  - **`tensorPinv(t, rowAxes, {rcond})`** — Moore-Penrose pseudoinverse via full SVD with `rcond·max(S)` thresholding (default `1e-10`). 17 tests.
+  - **`tensorSolve(A, b, {rowAxesA, rowAxesB})`** — Linear solver. LU + inline forward/back substitution (no intermediate dense-matrix allocation for the substitution phase). When both `A` and `b` carry `axisLabels`, row axes of `A` are auto-matched as those whose Index ids appear in `b`'s labels. Multi-RHS handled natively. 15 tests.
+  - **`tensorKron(a, b)`** — Kronecker product for rank-N tensors. Axis-by-axis formula `result.shape[k] = a.shape[k]*b.shape[k]`; rank-mismatched operands get size-1 dims prepended to the smaller. Axis labels concatenated as `"aName_X_bName"` (separator configurable). 17 tests.
+
+  `tensor`: 215 → **264 tests** (+49). `docs/reference/functions.md` and `functions.html` Linear Algebra Details bullets cross-reference the new tensor-package equivalents for users who need rank-N versions.
+
 #### Gap-closure Wave 1 — five Tier-1 slices LANDED in parallel
 
 Five disjoint slices from [`docs/roadmap/GAP_CLOSURE_PROPOSAL.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL.md) Tier 1, dispatched to five sonnet subagents working on non-overlapping file scopes, all landed cleanly:

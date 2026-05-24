@@ -121,7 +121,7 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 
 ## Tier 2 — Sequential slice
 
-### Slice 2.4 — tensorPinv + tensorSolve + tensorKron (rank 4)
+### Slice 2.4 — ✅ LANDED in `70217b7` — tensorPinv + tensorSolve + tensorKron (rank 4)
 
 **Goal:** Three common ML/stats primitives the ITensor proposal called out but the audit deferred until the QR/LU/Cholesky landing finished. Now that those primitives exist, these are direct compositions.
 
