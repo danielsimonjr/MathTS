@@ -166,7 +166,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Acceptance:** Same as the bitwise port — WASM path measurably faster than JS at the chosen threshold; below threshold the JS path stays.
 
-### Slice 3.8 — typed/integration.ts worker dispatch (rank 8)
+### Slice 3.8 — ✅ LANDED in `64c6168` — typed/integration.ts worker dispatch (rank 8)
 
 **Goal:** Worker-route the integration ops over big sub-interval counts.
 
@@ -179,7 +179,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Acceptance:** Bench shows worker dispatch wins above threshold; existing serial path correct below.
 
-### Slice 3.10 — typed/hypothesis.ts worker dispatch (rank 10)
+### Slice 3.10 — ✅ LANDED in `fad8324` — typed/hypothesis.ts worker dispatch (rank 10)
 
 **Goal:** Same pattern as integration; worker-route the four big tests at high sample counts.
 

@@ -145,6 +145,22 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 3a — two worker-route slices LANDED in parallel
+
+Two disjoint Tier-3 slices (worker-only — no WASM toolchain churn) dispatched in parallel:
+
+- **Slice 3.8 — commit `64c6168`** — `typed/integration.ts` worker dispatch. All four integration ops now async. `gaussQuad` composite-mode offloads the dot-product `Σ values[k] · weights[k]` to `ComputePool.dot()` when `totalPoints ≥ 64` sub-intervals (user-supplied integrand `f` stays on the main thread because closures can't cross worker boundaries). `romberg` offloads the trapezoidal-sum to `ComputePool.sum()` at the same threshold. NEW `trapzF64`/`simpsonF64` Float64Array overloads route through `ComputePool.sum()` at `length ≥ 65,536`. `gaussQuad` returns `number | Promise<number>` — sync in legacy 2–5 point mode, async in composite mode. NEW `tools/benchmark/parallel/integration.bench.ts` (run manually). 35 tests in `integration.test.ts` updated for async signatures.
+
+- **Slice 3.10 — commit `fad8324`** — `typed/hypothesis.ts` worker dispatch. All four hypothesis tests now async at ≥ 4,096 samples:
+  - **`chiSquareTest`** — fully worker-routed (element-wise `(o-e)²/e` via `applyKernel2` + sum). Strongest win — no sequential bottleneck.
+  - **`kolmogorovSmirnovTest`** — sort stays main-thread (Amdahl-limited; no `wasm.sortF64` kernel yet); CDF evaluation (default normal CDF only — custom-CDF closures bypass and stay sequential) offloaded.
+  - **`mannWhitneyTest`** — sort main-thread; rank-sum via `dot(ranks, indicator)` offloaded.
+  - **`shapiroWilkTest`** — sort main-thread; W-numerator dot-product offloaded.
+
+  4 new `OpName` entries + 4096 thresholds added to `ComputePool`. NEW `typed-hypothesis-parallel.test.ts` (20 dispatch-correctness tests including parallel↔sequential 1e-9 agreement, known reference cases, error propagation). NEW `tools/benchmark/parallel/hypothesis.bench.ts`. `hypothesis.test.ts` updated for async signatures.
+
+`functions`: 1,925 → **1,960 tests** (+35).
+
 #### Gap-closure Wave 2 — Slice 2.4 LANDED (depends on Wave-1 Slice 1.5)
 
 - **Slice 2.4 — commit `70217b7`** — Three new tensor primitives composing on the now-public `matrix.lu`/`matrix.svd` from Slice 1.5:

@@ -158,12 +158,19 @@ Detail:
             AS parity + bridge + threshold bench. Wire `polymul`,
             `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`,
             `polynomialRemainder`. Starting threshold ≥ 256 coeffs.
-      - [ ] **Slice 3.8** — `typed/integration.ts` worker dispatch
-            (rank 8). `gaussQuad`/`romberg` ≥ 64 sub-intervals;
-            `trapz`/`simpson` ≥ 65,536 samples.
-      - [ ] **Slice 3.10** — `typed/hypothesis.ts` worker dispatch
-            (rank 10). `kolmogorovSmirnovTest`/`mannWhitneyTest`/
-            `shapiroWilkTest`/`chiSquareTest` ≥ 4096 samples.
+      - [x] **Slice 3.8** ✅ `64c6168` — `typed/integration.ts` worker
+            dispatch. All four ops async; `gaussQuad`/`romberg` offload
+            dot/sum at ≥ 64 sub-intervals (integrand stays main-thread,
+            only the post-eval reduction goes to workers); NEW
+            `trapzF64`/`simpsonF64` Float64Array overloads at ≥ 65,536
+            samples. Integrand-bench in
+            `tools/benchmark/parallel/integration.bench.ts`.
+      - [x] **Slice 3.10** ✅ `fad8324` — `typed/hypothesis.ts` worker
+            dispatch. All 4 tests async at ≥ 4,096 samples.
+            `chiSquareTest` fully worker-routed (strongest win);
+            KS/MW/SW keep sort on main thread (no `wasm.sortF64` yet),
+            offload post-sort stats. Custom-CDF KS bypasses route.
+            20 new tests in `typed-hypothesis-parallel.test.ts`.
       - [ ] **Slice 3.10b** — `typed/interpolation.ts` tridiag-solve
             WASM (rank 10b). NEW `wasm.tridiagSolveF64` (Thomas
             algorithm). Wire `cubicSpline`/`pchip`/`akima`.
