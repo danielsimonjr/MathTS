@@ -591,6 +591,26 @@ export interface WasmModule {
   poly_mul_f64_as?: (a: Float64Array, b: Float64Array) => Float64Array;
   poly_div_mod_f64_as?: (num: Float64Array, den: Float64Array) => Float64Array;
 
+  // Tridiagonal-solve kernel (Slice 3.10b).
+  // Rust backend: pointer-style
+  //   (diag_ptr, lower_ptr, upper_ptr, rhs_ptr, n, out_ptr) → n (or -1 on singular).
+  // AS  backend: typed-array-style (diag, lower, upper, rhs) → Float64Array.
+  tridiag_solve_f64?: (
+    diagPtr: number,
+    lowerPtr: number,
+    upperPtr: number,
+    rhsPtr: number,
+    n: number,
+    outPtr: number
+  ) => number;
+  // AS-backend variant (typed-array calling convention).
+  tridiag_solve_f64_as?: (
+    diag: Float64Array,
+    lower: Float64Array,
+    upper: Float64Array,
+    rhs: Float64Array
+  ) => Float64Array;
+
   // Dense matrix decompositions exported by the AssemblyScript binary.
   // The Rust binary exposes the same algorithms under `luDecomposition` /
   // `qrDecomposition` / `choleskyDecomposition` / `laInv` / `laDet` (see

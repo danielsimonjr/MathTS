@@ -11,8 +11,14 @@
  *
  * These use plain exports since some return functions.
  *
+ * The hot-loop tridiagonal solver used by `cubicSpline` is dispatched
+ * through `functions/src/wasm/interpolation/wasm-bridge.ts` when the
+ * knot count reaches the WASM_TRIDIAG_THRESHOLD (1024).
+ *
  * @packageDocumentation
  */
+
+import { tridiagSolveDispatch } from '../wasm/interpolation/wasm-bridge.js';
 
 // =============================================================================
 // linearInterp - Linear Interpolation
@@ -123,32 +129,46 @@ export function cubicSpline(xs: number[], ys: number[]): (x: number) => number {
     h[i] = xs[i + 1] - xs[i];
   }
 
-  // Solve tridiagonal system for second derivatives (c coefficients)
-  // Natural spline: c[0] = c[n] = 0
-  const alpha: number[] = [0];
-  for (let i = 1; i < n; i++) {
-    alpha[i] = (3 / h[i]) * (ys[i + 1] - ys[i]) - (3 / h[i - 1]) * (ys[i] - ys[i - 1]);
+  // Build the tridiagonal system for the interior second-derivative unknowns
+  // c[1..n-1].  Natural spline: c[0] = c[n] = 0 (boundary conditions).
+  //
+  // System size is (n-1) × (n-1) — the interior points only.
+  const m = n - 1; // system size
+
+  // RHS (alpha in the standard natural-spline derivation).
+  const rhs = new Float64Array(m);
+  for (let i = 0; i < m; i++) {
+    const row = i + 1; // interior index 1..n-1
+    rhs[i] = (3 / h[row]) * (ys[row + 1] - ys[row]) - (3 / h[row - 1]) * (ys[row] - ys[row - 1]);
   }
 
-  const l: number[] = [1];
-  const mu: number[] = [0];
-  const z: number[] = [0];
-
-  for (let i = 1; i < n; i++) {
-    l[i] = 2 * (xs[i + 1] - xs[i - 1]) - h[i - 1] * mu[i - 1];
-    mu[i] = h[i] / l[i];
-    z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+  // Main diagonal: 2*(h[i-1]+h[i]) for interior i = 1..n-1.
+  const diagArr = new Float64Array(m);
+  for (let i = 0; i < m; i++) {
+    diagArr[i] = 2 * (h[i] + h[i + 1]);
   }
 
+  // Sub- and super-diagonals: h[i] for off-diagonal entries.
+  const lowerArr = new Float64Array(Math.max(0, m - 1));
+  const upperArr = new Float64Array(Math.max(0, m - 1));
+  for (let i = 0; i < m - 1; i++) {
+    lowerArr[i] = h[i + 1]; // sub-diagonal
+    upperArr[i] = h[i + 1]; // super-diagonal (symmetric)
+  }
+
+  // Solve via WASM-gated dispatch (falls back to pure JS below threshold).
+  const cInterior = tridiagSolveDispatch(diagArr, lowerArr, upperArr, rhs);
+
+  // Reconstruct full c[] array including the boundary zeros.
   const c: number[] = new Array(n + 1).fill(0);
+  for (let i = 0; i < m; i++) {
+    c[i + 1] = cInterior[i];
+  }
+
   const b: number[] = new Array(n);
   const d: number[] = new Array(n);
 
-  l[n] = 1;
-  z[n] = 0;
-
-  for (let j = n - 1; j >= 0; j--) {
-    c[j] = z[j] - mu[j] * c[j + 1];
+  for (let j = 0; j < n; j++) {
     b[j] = (ys[j + 1] - ys[j]) / h[j] - (h[j] * (c[j + 1] + 2 * c[j])) / 3;
     d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
   }

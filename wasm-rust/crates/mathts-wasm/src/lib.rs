@@ -135,6 +135,12 @@ pub mod poly;
 pub use poly::*;
 
 // ============================================================
+// Slice 3.10b: Tridiagonal-solve kernel (Thomas algorithm)
+// ============================================================
+pub mod tridiag;
+pub use tridiag::*;
+
+// ============================================================
 // AssemblyScript-compatible wrappers (scalar + array ops)
 // ============================================================
 pub mod compat;
