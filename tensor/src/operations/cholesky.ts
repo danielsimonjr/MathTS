@@ -4,8 +4,8 @@
  *
  * Mirrors the `tensorSvd` pattern: partitions the axes of `t` into "row"
  * axes and "col" axes, reshapes `t` into a 2-D matrix, performs the
- * Cholesky decomposition via the standard right-looking algorithm, and
- * returns the factor as a Tensor.
+ * Cholesky decomposition via the matrix primitive (right-looking algorithm),
+ * and returns the factor as a Tensor.
  *
  * The 2-D reshaped input must be square and symmetric positive-definite;
  * otherwise an error is thrown.
@@ -22,6 +22,8 @@
 
 import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { cholesky as matrixCholesky } from '@danielsimonjr/mathts-matrix';
 
 export interface TensorCholeskyOpts {
   /** When true (default), return L such that A = L·Lᵀ. When false, return U such that A = Uᵀ·U. */
@@ -36,42 +38,7 @@ export interface TensorCholeskyResult {
 }
 
 /**
- * Compute the Cholesky factor L of a symmetric positive-definite matrix
- * stored as a row-major Float64Array. Returns L in row-major form with
- * zeros above the diagonal.
- *
- * Throws "matrix is not positive definite" if a non-positive diagonal
- * pivot is encountered.
- */
-function choleskyDecompose(data: Float64Array, n: number): Float64Array {
-  const L = new Float64Array(n * n);
-
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j <= i; j++) {
-      let sum = data[i * n + j];
-      for (let k = 0; k < j; k++) {
-        sum -= L[i * n + k] * L[j * n + k];
-      }
-      if (i === j) {
-        if (sum <= 0) {
-          throw new Error('tensorCholesky: matrix is not positive definite');
-        }
-        L[i * n + j] = Math.sqrt(sum);
-      } else {
-        const ljj = L[j * n + j];
-        if (ljj === 0) {
-          throw new Error('tensorCholesky: matrix is not positive definite');
-        }
-        L[i * n + j] = sum / ljj;
-      }
-    }
-  }
-  return L;
-}
-
-/**
- * Transpose a square row-major Float64Array of size n×n in place into a
- * new Float64Array.
+ * Transpose a square row-major Float64Array of size n×n into a new Float64Array.
  */
 function transposeSquare(data: Float64Array, n: number): Float64Array {
   const out = new Float64Array(n * n);
@@ -87,6 +54,9 @@ function transposeSquare(data: Float64Array, n: number): Float64Array {
  * Compute the Cholesky decomposition of tensor `t` by partitioning its
  * axes into "row" and "col" groups. The reshaped 2-D matrix must be
  * square and symmetric positive-definite.
+ *
+ * Delegates the core right-looking Cholesky algorithm to
+ * `@danielsimonjr/mathts-matrix`'s `cholesky` primitive.
  *
  * @param t        - Input tensor of any rank ≥ 1.
  * @param rowAxes  - Axis indices forming the row dimension of the effective
@@ -142,8 +112,18 @@ export function tensorCholesky(
   const permuted = t.transpose(perm);
   const n = numRows;
 
-  // --- Cholesky factor ---
-  const lData = choleskyDecompose(permuted.data, n);
+  // --- Delegate to matrix Cholesky primitive ---
+  // Re-map error messages to preserve the "tensorCholesky:" prefix consumers expect.
+  let lData: Float64Array;
+  try {
+    const matA = new DenseMatrix(n, n, new Float64Array(permuted.data));
+    const { L: matL } = matrixCholesky(matA);
+    lData = matL.toFloat64Array();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(msg.replace(/^cholesky:/, 'tensorCholesky:'));
+  }
+
   const factorData = lower ? lData : transposeSquare(lData, n);
 
   // --- Propagate axisLabels ---
