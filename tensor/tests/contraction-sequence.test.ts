@@ -449,7 +449,7 @@ describe('contractNetwork — numerical correctness vs Tensor.contract', () => {
     expectCloseUpToPermutation(res.result, reference, 1e-9);
   });
 
-  it("greedy result matches the left-to-right reference on a 5-tensor network", () => {
+  it('greedy result matches the left-to-right reference on a 5-tensor network', () => {
     const i0 = idx(2, 'i0');
     const i1 = idx(3, 'i1');
     const i2 = idx(2, 'i2');

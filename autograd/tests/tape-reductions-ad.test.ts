@@ -71,11 +71,7 @@ function numericalGrad(
 /**
  * Allocate a leaf TapedTensor from raw data + shape.
  */
-function makeTaped(
-  tape: Tape,
-  data: Float64Array,
-  shape: ReadonlyArray<number>
-): TapedTensor {
+function makeTaped(tape: Tape, data: Float64Array, shape: ReadonlyArray<number>): TapedTensor {
   const { id } = tape.allocate(data.length);
   return new TapedTensor(shape, new Float64Array(data), tape, id);
 }
@@ -140,8 +136,7 @@ describe('TapedTensor.sum — gradient check', () => {
   it('sum(axis=0) gradient matches finite differences (3×4 tensor)', () => {
     const shape: ReadonlyArray<number> = [3, 4];
     const xData = new Float64Array([1, -2, 3, 0.5, 2, 1, -1, 4, 0, 3, -2, 1]);
-    const fwd = (d: Float64Array) =>
-      new Tensor(shape, new Float64Array(d)).sum(0).data;
+    const fwd = (d: Float64Array) => new Tensor(shape, new Float64Array(d)).sum(0).data;
     const numGrad = numericalGrad(fwd, xData);
 
     const tape = new Tape();
@@ -218,8 +213,7 @@ describe('TapedTensor.mean — gradient check', () => {
   it('mean(axis=0) gradient matches finite differences (3×2 tensor)', () => {
     const shape: ReadonlyArray<number> = [3, 2];
     const xData = new Float64Array([1, 2, 3, 4, 5, 6]);
-    const fwd = (d: Float64Array) =>
-      new Tensor(shape, new Float64Array(d)).mean(0).data;
+    const fwd = (d: Float64Array) => new Tensor(shape, new Float64Array(d)).mean(0).data;
     const numGrad = numericalGrad(fwd, xData);
 
     const tape = new Tape();
@@ -252,8 +246,7 @@ describe('TapedTensor.prod — gradient check', () => {
   it('prod() gradient matches finite differences (no zeros)', () => {
     const shape: ReadonlyArray<number> = [4];
     const xData = new Float64Array([2, 3, 4, 5]);
-    const fwd = (d: Float64Array) =>
-      new Tensor(shape, new Float64Array(d)).prod().data;
+    const fwd = (d: Float64Array) => new Tensor(shape, new Float64Array(d)).prod().data;
     const numGrad = numericalGrad(fwd, xData);
 
     const tape = new Tape();
@@ -364,8 +357,7 @@ describe('TapedTensor.max — gradient check', () => {
   it('max(axis=0) gradient matches finite differences (3×3 tensor)', () => {
     const shape: ReadonlyArray<number> = [3, 3];
     const xData = new Float64Array([1, 5, 2, 3, 1, 6, 4, 2, 3]);
-    const fwd = (d: Float64Array) =>
-      new Tensor(shape, new Float64Array(d)).max(0).data;
+    const fwd = (d: Float64Array) => new Tensor(shape, new Float64Array(d)).max(0).data;
     const numGrad = numericalGrad(fwd, xData);
 
     const tape = new Tape();
@@ -412,8 +404,7 @@ describe('TapedTensor.min — gradient check', () => {
   it('min(axis=1) gradient matches finite differences (3×2 tensor)', () => {
     const shape: ReadonlyArray<number> = [3, 2];
     const xData = new Float64Array([2, 1, 5, 3, 4, 6]);
-    const fwd = (d: Float64Array) =>
-      new Tensor(shape, new Float64Array(d)).min(1).data;
+    const fwd = (d: Float64Array) => new Tensor(shape, new Float64Array(d)).min(1).data;
     const numGrad = numericalGrad(fwd, xData);
 
     const tape = new Tape();
@@ -489,8 +480,7 @@ describe('TapedTensor.norm — gradient check', () => {
   it('norm(p=2) gradient matches finite differences (random 4-vector)', () => {
     const shape: ReadonlyArray<number> = [4];
     const xData = new Float64Array([1, 2, -3, 4]);
-    const fwd = (d: Float64Array) =>
-      new Tensor(shape, new Float64Array(d)).norm({ p: 2 }).data;
+    const fwd = (d: Float64Array) => new Tensor(shape, new Float64Array(d)).norm({ p: 2 }).data;
     const numGrad = numericalGrad(fwd, xData);
 
     const tape = new Tape();
@@ -511,10 +501,10 @@ describe('TapedTensor.norm — gradient check', () => {
     const out = leaf.norm({ p: 1 });
     tape.backward(out.id, new Float64Array([1]));
     const grad = tape.getInputGrad(id)!;
-    expect(grad[0]).toBeCloseTo(1, 12);  // sign(3) = 1
+    expect(grad[0]).toBeCloseTo(1, 12); // sign(3) = 1
     expect(grad[1]).toBeCloseTo(-1, 12); // sign(-2) = -1
-    expect(grad[2]).toBeCloseTo(0, 12);  // subgradient at 0 = 0
-    expect(grad[3]).toBeCloseTo(1, 12);  // sign(1) = 1
+    expect(grad[2]).toBeCloseTo(0, 12); // subgradient at 0 = 0
+    expect(grad[3]).toBeCloseTo(1, 12); // sign(1) = 1
   });
 
   it('norm(p="inf") gradient scattered to max-abs position, first-wins', () => {
@@ -530,7 +520,7 @@ describe('TapedTensor.norm — gradient check', () => {
     expect(grad[0]).toBeCloseTo(0, 12);
     expect(grad[1]).toBeCloseTo(-1, 12); // sign(-5) = -1, first winner
     expect(grad[2]).toBeCloseTo(0, 12);
-    expect(grad[3]).toBeCloseTo(0, 12);  // also |5| but not first-wins
+    expect(grad[3]).toBeCloseTo(0, 12); // also |5| but not first-wins
   });
 });
 
@@ -548,8 +538,8 @@ describe('TapedTensor composition — contract().sum()', () => {
     const kAB = idx(3, 'k'); // shared — size 3
     const jB = idx(2, 'j');
 
-    const aData = new Float64Array([1, 2, 3, 4, 5, 6]);       // [2,3]
-    const bData = new Float64Array([7, 8, 9, 10, 11, 12]);     // [3,2]
+    const aData = new Float64Array([1, 2, 3, 4, 5, 6]); // [2,3]
+    const bData = new Float64Array([7, 8, 9, 10, 11, 12]); // [3,2]
     const aShape: ReadonlyArray<number> = [2, 3];
     const bShape: ReadonlyArray<number> = [3, 2];
 
@@ -560,7 +550,7 @@ describe('TapedTensor composition — contract().sum()', () => {
     const B = new TapedTensor(bShape, new Float64Array(bData), tape, idB, [kAB, jB]);
 
     const Y = A.contract(B); // shape [2,2]
-    const S = Y.sum();       // scalar
+    const S = Y.sum(); // scalar
 
     tape.backward(S.id, new Float64Array([1]));
 

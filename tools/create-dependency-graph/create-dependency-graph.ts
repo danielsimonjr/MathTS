@@ -404,10 +404,7 @@ function loadCoveragePolicy(rootDir: string): CoveragePolicy | null {
  * get reclassified because some directory it happens to live under is
  * also covered by a prefix.
  */
-function classifyAgainstPolicy(
-  filePath: string,
-  policy: CoveragePolicy | null
-): string | null {
+function classifyAgainstPolicy(filePath: string, policy: CoveragePolicy | null): string | null {
   if (!policy) return null;
   for (const [categoryId, cat] of Object.entries(policy.categories)) {
     if (cat.exactPaths?.includes(filePath)) return categoryId;
@@ -468,8 +465,7 @@ function buildCategoryBreakdown(
   }
   const activeFiles = sourceFiles.length - excludedTotal;
   const testedActive = testedFiles.length - testedExcluded;
-  const effectivePercent =
-    activeFiles > 0 ? ((testedActive / activeFiles) * 100).toFixed(1) : '0';
+  const effectivePercent = activeFiles > 0 ? ((testedActive / activeFiles) * 100).toFixed(1) : '0';
 
   return {
     byCategory,
@@ -643,12 +639,7 @@ function analyzeTestCoverage(
 
   const policy = loadCoveragePolicy(ROOT_DIR);
   const sourcePaths = sourceFiles.map((f) => f.path);
-  const policyBreakdown = buildCategoryBreakdown(
-    sourcePaths,
-    testedFiles,
-    untestedFiles,
-    policy
-  );
+  const policyBreakdown = buildCategoryBreakdown(sourcePaths, testedFiles, untestedFiles, policy);
 
   return {
     sourceFiles: sourcePaths,
@@ -2111,9 +2102,7 @@ function generateTestCoverageJson(coverage: TestCoverageAnalysis): object {
     testToSourceMap: testToSourceObj,
     // Per-file classification of every untested file. category=null means
     // the file is a genuine gap (not matched by any policy category).
-    classifiedUntested: b.classifiedUntested
-      .slice()
-      .sort((a, c) => a.file.localeCompare(c.file)),
+    classifiedUntested: b.classifiedUntested.slice().sort((a, c) => a.file.localeCompare(c.file)),
   };
 }
 

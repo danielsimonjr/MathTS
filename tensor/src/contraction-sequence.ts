@@ -688,8 +688,7 @@ function solveGreedy(
 
     const slotI = working[bestI].slot;
     const slotJ = working[bestJ].slot;
-    const orderedPair: readonly [number, number] =
-      slotI <= slotJ ? [slotI, slotJ] : [slotJ, slotI];
+    const orderedPair: readonly [number, number] = slotI <= slotJ ? [slotI, slotJ] : [slotJ, slotI];
     steps.push({ pair: orderedPair, cost: bestStep.cost, resultSize: bestStep.resultSize });
 
     // Replace (bestI, bestJ) in `working` with the produced intermediate.

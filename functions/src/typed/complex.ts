@@ -24,7 +24,9 @@ import { mathTyped, Complex, BigNumber } from '@danielsimonjr/mathts-core';
  * Returns a new array of the same shape.
  */
 function deepMapArray<T>(arr: unknown[], fn: (x: unknown) => T): T[] {
-  return arr.map((item) => (Array.isArray(item) ? (deepMapArray(item, fn) as unknown as T) : fn(item)));
+  return arr.map((item) =>
+    Array.isArray(item) ? (deepMapArray(item, fn) as unknown as T) : fn(item)
+  );
 }
 
 // =============================================================================

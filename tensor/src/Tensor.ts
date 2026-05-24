@@ -28,11 +28,7 @@ export class Tensor {
   /** Optional per-axis Index labels. When set, enables `contract`, `replaceIndex`, `axisOf`. */
   readonly axisLabels?: ReadonlyArray<Index>;
 
-  constructor(
-    shape: ReadonlyArray<number>,
-    data: Float64Array,
-    axisLabels?: ReadonlyArray<Index>
-  ) {
+  constructor(shape: ReadonlyArray<number>, data: Float64Array, axisLabels?: ReadonlyArray<Index>) {
     if (data.length !== Tensor.sizeOf(shape)) {
       throw new Error(
         `Tensor: data length ${data.length} does not match shape [${shape}] (size ${Tensor.sizeOf(shape)})`
@@ -205,10 +201,7 @@ export class Tensor {
    * missing leading axes are treated as length-1.
    * Throws with message including both shape arrays on incompatibility.
    */
-  static broadcastShape(
-    a: ReadonlyArray<number>,
-    b: ReadonlyArray<number>
-  ): number[] {
+  static broadcastShape(a: ReadonlyArray<number>, b: ReadonlyArray<number>): number[] {
     const rank = Math.max(a.length, b.length);
     const out = new Array<number>(rank);
     for (let i = 0; i < rank; i++) {
@@ -312,9 +305,7 @@ export class Tensor {
     // Validate axes
     for (const ax of axes) {
       if (!Number.isInteger(ax) || ax < 0 || ax >= rank) {
-        throw new Error(
-          `Tensor.reduce: axis ${ax} out of range for rank-${rank} tensor`
-        );
+        throw new Error(`Tensor.reduce: axis ${ax} out of range for rank-${rank} tensor`);
       }
     }
 
@@ -400,10 +391,7 @@ export class Tensor {
    * Sum elements along the given axis/axes (or all axes if omitted).
    * `keepDims: true` preserves reduced axes as length-1.
    */
-  sum(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): Tensor {
+  sum(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor {
     const axes = this.resolveAxes(axis);
     const keepDims = opts?.keepDims ?? false;
     return this.reduceAxes(axes, keepDims, 0, (acc, v) => acc + v);
@@ -412,10 +400,7 @@ export class Tensor {
   /**
    * Arithmetic mean along the given axis/axes (or all axes if omitted).
    */
-  mean(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): Tensor {
+  mean(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor {
     const axes = this.resolveAxes(axis);
     const keepDims = opts?.keepDims ?? false;
     return this.reduceAxes(
@@ -431,17 +416,11 @@ export class Tensor {
    * Element-wise maximum along the given axis/axes (or all axes if omitted).
    * NaN propagates (matches NumPy default behaviour).
    */
-  max(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): Tensor {
+  max(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor {
     const axes = this.resolveAxes(axis);
     const keepDims = opts?.keepDims ?? false;
-    return this.reduceAxes(
-      axes,
-      keepDims,
-      -Infinity,
-      (acc, v) => (isNaN(v) ? v : isNaN(acc) ? acc : Math.max(acc, v))
+    return this.reduceAxes(axes, keepDims, -Infinity, (acc, v) =>
+      isNaN(v) ? v : isNaN(acc) ? acc : Math.max(acc, v)
     );
   }
 
@@ -449,27 +428,18 @@ export class Tensor {
    * Element-wise minimum along the given axis/axes (or all axes if omitted).
    * NaN propagates (matches NumPy default behaviour).
    */
-  min(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): Tensor {
+  min(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor {
     const axes = this.resolveAxes(axis);
     const keepDims = opts?.keepDims ?? false;
-    return this.reduceAxes(
-      axes,
-      keepDims,
-      Infinity,
-      (acc, v) => (isNaN(v) ? v : isNaN(acc) ? acc : Math.min(acc, v))
+    return this.reduceAxes(axes, keepDims, Infinity, (acc, v) =>
+      isNaN(v) ? v : isNaN(acc) ? acc : Math.min(acc, v)
     );
   }
 
   /**
    * Product of elements along the given axis/axes (or all axes if omitted).
    */
-  prod(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): Tensor {
+  prod(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor {
     const axes = this.resolveAxes(axis);
     const keepDims = opts?.keepDims ?? false;
     return this.reduceAxes(axes, keepDims, 1, (acc, v) => acc * v);
@@ -488,11 +458,7 @@ export class Tensor {
    * result has rank reduced by 1 (or stays the same with `keepDims`).
    * When `axis` is omitted, the norm is computed over all elements.
    */
-  norm(opts?: {
-    p?: number | 'inf' | '-inf' | 'fro';
-    axis?: number;
-    keepDims?: boolean;
-  }): Tensor {
+  norm(opts?: { p?: number | 'inf' | '-inf' | 'fro'; axis?: number; keepDims?: boolean }): Tensor {
     const p = opts?.p ?? 2;
     const keepDims = opts?.keepDims ?? false;
     const axes = opts?.axis !== undefined ? [opts.axis] : this.resolveAxes(undefined);
@@ -504,20 +470,10 @@ export class Tensor {
       return new Tensor(sqSum.shape, sqrtData, sqSum.axisLabels);
     }
     if (p === 'inf') {
-      return this.reduceAxes(
-        axes,
-        keepDims,
-        0,
-        (acc, v) => Math.max(acc, Math.abs(v))
-      );
+      return this.reduceAxes(axes, keepDims, 0, (acc, v) => Math.max(acc, Math.abs(v)));
     }
     if (p === '-inf') {
-      return this.reduceAxes(
-        axes,
-        keepDims,
-        Infinity,
-        (acc, v) => Math.min(acc, Math.abs(v))
-      );
+      return this.reduceAxes(axes, keepDims, Infinity, (acc, v) => Math.min(acc, Math.abs(v)));
     }
     // General numeric p: (sum |x|^p)^(1/p)
     const pNum = p as number;
@@ -551,9 +507,7 @@ export class Tensor {
     const otherContracted = new Set<number>();
     for (const [a, b] of axes) {
       if (!Number.isInteger(a) || a < 0 || a >= selfRank) {
-        throw new Error(
-          `Tensor.tensordot: axis ${a} of 'this' (rank ${selfRank}) is out of range`
-        );
+        throw new Error(`Tensor.tensordot: axis ${a} of 'this' (rank ${selfRank}) is out of range`);
       }
       if (!Number.isInteger(b) || b < 0 || b >= otherRank) {
         throw new Error(
@@ -561,14 +515,10 @@ export class Tensor {
         );
       }
       if (selfContracted.has(a)) {
-        throw new Error(
-          `Tensor.tensordot: duplicate axis ${a} in self contraction list`
-        );
+        throw new Error(`Tensor.tensordot: duplicate axis ${a} in self contraction list`);
       }
       if (otherContracted.has(b)) {
-        throw new Error(
-          `Tensor.tensordot: duplicate axis ${b} in other contraction list`
-        );
+        throw new Error(`Tensor.tensordot: duplicate axis ${b} in other contraction list`);
       }
       if (this.shape[a] !== other.shape[b]) {
         throw new Error(
@@ -796,9 +746,7 @@ export class Tensor {
     }
     const pos = this.axisLabels.findIndex((lbl) => lbl.matches(oldIndex));
     if (pos === -1) {
-      throw new Error(
-        `Tensor.replaceIndex: index ${oldIndex.toString()} not found in axisLabels`
-      );
+      throw new Error(`Tensor.replaceIndex: index ${oldIndex.toString()} not found in axisLabels`);
     }
     const newLabels = [...this.axisLabels];
     newLabels[pos] = newIndex;

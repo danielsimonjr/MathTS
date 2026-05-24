@@ -53,17 +53,13 @@ describe('AD over WASM-routed primitives (UPT v0.7 §10.2 Q3)', () => {
 
     // Record the op on the tape with the analytical adjoint
     // (dA = dY, dB = dY for elementwise add).
-    const { id: outputId } = tape.record(
-      [aLeaf.id, bLeaf.id],
-      result.length,
-      (outputGrad) => {
-        // Push outputGrad into both inputs' grad slots.
-        for (let i = 0; i < outputGrad.length; i++) {
-          aLeaf.gradSlot[i] += outputGrad[i];
-          bLeaf.gradSlot[i] += outputGrad[i];
-        }
+    const { id: outputId } = tape.record([aLeaf.id, bLeaf.id], result.length, (outputGrad) => {
+      // Push outputGrad into both inputs' grad slots.
+      for (let i = 0; i < outputGrad.length; i++) {
+        aLeaf.gradSlot[i] += outputGrad[i];
+        bLeaf.gradSlot[i] += outputGrad[i];
       }
-    );
+    });
 
     // Seed the output cotangent and replay backward.
     const cotangent = new Float64Array([1, 1, 1, 1]);
@@ -87,16 +83,12 @@ describe('AD over WASM-routed primitives (UPT v0.7 §10.2 Q3)', () => {
     expect(Array.from(result)).toEqual([14, 33, 65]);
 
     // Record op with adjoint dA = b·dY, dB = a·dY.
-    const { id: outputId } = tape.record(
-      [aLeaf.id, bLeaf.id],
-      result.length,
-      (outputGrad) => {
-        for (let i = 0; i < outputGrad.length; i++) {
-          aLeaf.gradSlot[i] += b[i] * outputGrad[i];
-          bLeaf.gradSlot[i] += a[i] * outputGrad[i];
-        }
+    const { id: outputId } = tape.record([aLeaf.id, bLeaf.id], result.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        aLeaf.gradSlot[i] += b[i] * outputGrad[i];
+        bLeaf.gradSlot[i] += a[i] * outputGrad[i];
       }
-    );
+    });
 
     // Cotangent = [1, 1, 1]; expected dA = b, dB = a.
     tape.backward(outputId, new Float64Array([1, 1, 1]));

@@ -16,14 +16,14 @@ What we are **not** adding: MPS/MPO, DMRG/TEBD/TDVP, fermion anticommutation, qu
 
 The six landings in this proposal, in priority order:
 
-| Phase | Surface                                                        | Effort           | Status / Value |
-| ----- | ------------------------------------------------ | ------------ | ----- |
-| 1     | `Index` value type + `Tensor.contract(other)`                  | ~150 LOC + tests | ✅ LANDED (`a21a844`) — readable, type-checkable, position-independent tensor algebra |
-| 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD | ~80 LOC + tests  | ✅ LANDED (`a21a844`) — low-rank approximation primitive every downstream consumer wants |
-| 3     | `randomTensor(shape, {distribution, seed})`                    | ~40 LOC + tests  | ✅ LANDED (`a21a844`) — uniform / normal / orthogonal with Mulberry32 seeding |
-| 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order | ~300 LOC + tests | In flight — DP exact for N ≤ 16, Hendrickson–Sundaram greedy beyond |
-| 5     | `TapedTensor.contract` + `TapedTensor.matmul` (AD closure)     | ~120 LOC + tests | In flight — closes the AD loop for UPT v0.7 Proposal 8 |
-| 6     | Tensor reductions, NumPy broadcasting, `tensordot(other, axes)` | ~300 LOC + tests | In flight — biggest single jump in everyday usability |
+| Phase | Surface                                                         | Effort           | Status / Value                                                                           |
+| ----- | --------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------- |
+| 1     | `Index` value type + `Tensor.contract(other)`                   | ~150 LOC + tests | ✅ LANDED (`a21a844`) — readable, type-checkable, position-independent tensor algebra    |
+| 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD  | ~80 LOC + tests  | ✅ LANDED (`a21a844`) — low-rank approximation primitive every downstream consumer wants |
+| 3     | `randomTensor(shape, {distribution, seed})`                     | ~40 LOC + tests  | ✅ LANDED (`a21a844`) — uniform / normal / orthogonal with Mulberry32 seeding            |
+| 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order | ~300 LOC + tests | In flight — DP exact for N ≤ 16, Hendrickson–Sundaram greedy beyond                      |
+| 5     | `TapedTensor.contract` + `TapedTensor.matmul` (AD closure)      | ~120 LOC + tests | In flight — closes the AD loop for UPT v0.7 Proposal 8                                   |
+| 6     | Tensor reductions, NumPy broadcasting, `tensordot(other, axes)` | ~300 LOC + tests | In flight — biggest single jump in everyday usability                                    |
 
 ---
 
@@ -34,8 +34,20 @@ The six landings in this proposal, in priority order:
 ```ts
 import { Tensor } from '@danielsimonjr/mathts-tensor';
 
-const A = Tensor.fromNested([[1, 2], [3, 4]], [2, 2]);
-const B = Tensor.fromNested([[5, 6], [7, 8]], [2, 2]);
+const A = Tensor.fromNested(
+  [
+    [1, 2],
+    [3, 4],
+  ],
+  [2, 2]
+);
+const B = Tensor.fromNested(
+  [
+    [5, 6],
+    [7, 8],
+  ],
+  [2, 2]
+);
 
 const C = Tensor.einsum('ij,jk->ik', A, B);
 ```
@@ -44,7 +56,7 @@ Problems:
 
 1. The `'ij,jk->ik'` spec string is stringly-typed — typos are runtime errors.
 2. Axis identity is implicit in position. If a downstream developer adds a new axis to `A` (e.g. a batch dimension), every `einsum` call that consumed `A` needs to be re-spelled.
-3. The contraction *intent* ("contract the inner dimension") is hidden in the letters of the spec string. Reading code, you have to mentally map indices to axes.
+3. The contraction _intent_ ("contract the inner dimension") is hidden in the letters of the spec string. Reading code, you have to mentally map indices to axes.
 
 ### 1.2 What ITensor does
 
@@ -98,12 +110,12 @@ export class Index {
   readonly primeLevel: number;
 
   constructor(dim: number, opts?: IndexOpts);
-  prime(by?: number): Index;        // returns a new Index with primeLevel + by
-  noprime(): Index;                  // returns a new Index with primeLevel = 0
+  prime(by?: number): Index; // returns a new Index with primeLevel + by
+  noprime(): Index; // returns a new Index with primeLevel = 0
   addTag(tag: string): Index;
   removeTag(tag: string): Index;
   hasTag(tag: string): boolean;
-  matches(other: Index): boolean;    // id === other.id && primeLevel === other.primeLevel
+  matches(other: Index): boolean; // id === other.id && primeLevel === other.primeLevel
   toString(): string;
 }
 
@@ -119,7 +131,7 @@ Add an **optional** `axisLabels?: ReadonlyArray<Index>` property and correspondi
 export class Tensor {
   readonly shape: ReadonlyArray<number>;
   readonly data: Float64Array;
-  readonly axisLabels?: ReadonlyArray<Index>;  // NEW, optional
+  readonly axisLabels?: ReadonlyArray<Index>; // NEW, optional
 
   constructor(shape: ReadonlyArray<number>, data: Float64Array, axisLabels?: ReadonlyArray<Index>);
 
@@ -146,7 +158,7 @@ This **delegates to existing einsum** rather than reimplementing contraction —
 
 ### 2.3 Tests (new): `tensor/tests/Index.test.ts` + `tensor/tests/Tensor-contract.test.ts`
 
-- `Index`: construction, id immutability, two indices with same dim/name have *different* ids (unless you reuse a reference); `prime` / `noprime` / `addTag` / `removeTag` return new instances; `matches` honours both id and primeLevel.
+- `Index`: construction, id immutability, two indices with same dim/name have _different_ ids (unless you reuse a reference); `prime` / `noprime` / `addTag` / `removeTag` return new instances; `matches` honours both id and primeLevel.
 - `Tensor.contract`: matrix-matrix product via shared index, 3-tensor chain (a × b × c with two shared indices), prime-level distinction (a tensor with `i` does NOT contract with a tensor carrying `prime(i)`), dimension-mismatch error, no-shared-indices error.
 
 ### 2.4 Out of scope for Phase 1
@@ -175,10 +187,10 @@ export interface TensorSvdOpts {
 
 export interface TensorSvdResult {
   U: Tensor;
-  S: Tensor;     // 1-D, holds the singular values
+  S: Tensor; // 1-D, holds the singular values
   V: Tensor;
   truncatedDim: number;
-  truncationError: number;  // Frobenius-norm squared of dropped singular values
+  truncationError: number; // Frobenius-norm squared of dropped singular values
 }
 
 /**
@@ -229,10 +241,7 @@ export interface RandomTensorOpts {
   axisLabels?: ReadonlyArray<Index>;
 }
 
-export function randomTensor(
-  shape: ReadonlyArray<number>,
-  opts?: RandomTensorOpts
-): Tensor;
+export function randomTensor(shape: ReadonlyArray<number>, opts?: RandomTensorOpts): Tensor;
 ```
 
 Implementation:
@@ -240,7 +249,7 @@ Implementation:
 1. Default distribution is `'uniform'`.
 2. `'normal'`: Box–Muller transform on the underlying seeded RNG.
 3. `'orthogonal'`: only valid for rank-2 shapes; generates a normal random matrix and QR-decomposes via `matrix/src/operations/qr.ts`, returning Q.
-4. Seeded RNG: Mulberry32 (small, fast, good enough for test data). Document that the seeded path is *not* cryptographic.
+4. Seeded RNG: Mulberry32 (small, fast, good enough for test data). Document that the seeded path is _not_ cryptographic.
 
 ### 4.2 Tests (new): `tensor/tests/operations/random.test.ts`
 
@@ -272,9 +281,9 @@ export interface ContractNetworkOpts {
 
 export interface ContractNetworkResult {
   result: Tensor;
-  contractionOrder: ReadonlyArray<readonly [number, number]>;  // sequence of pairwise contractions in input indices
+  contractionOrder: ReadonlyArray<readonly [number, number]>; // sequence of pairwise contractions in input indices
   totalFlops: number;
-  intermediateSizes: ReadonlyArray<number>;  // element count of each intermediate
+  intermediateSizes: ReadonlyArray<number>; // element count of each intermediate
 }
 
 /**

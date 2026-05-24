@@ -123,7 +123,7 @@ describe('tensorCholesky', () => {
   });
 
   // Test 5: lower: false → Uᵀ · U ≈ A
-  it("lower: false returns U such that Uᵀ · U ≈ A", () => {
+  it('lower: false returns U such that Uᵀ · U ≈ A', () => {
     const A = Tensor.fromNested(
       [
         [4, 2],
@@ -147,11 +147,7 @@ describe('tensorCholesky', () => {
   it('propagates axisLabels: L has rowAxes labels + joining', () => {
     const i = new Index(3, { name: 'i' });
     const j = new Index(3, { name: 'j' });
-    const A = new Tensor(
-      [3, 3],
-      new Float64Array([25, 15, -5, 15, 18, 0, -5, 0, 11]),
-      [i, j]
-    );
+    const A = new Tensor([3, 3], new Float64Array([25, 15, -5, 15, 18, 0, -5, 0, 11]), [i, j]);
 
     const { L } = tensorCholesky(A, [0], { joiningIndexName: 'mid' });
 

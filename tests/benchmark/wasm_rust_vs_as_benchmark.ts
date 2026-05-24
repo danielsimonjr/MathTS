@@ -66,7 +66,8 @@ interface AsAlloc {
 /** Allocate a Float64Array (data + header) inside an AS module. */
 function asAllocFloat64(mod: WasmExports, length: number): AsAlloc {
   const byteLength = length * 8;
-  const buffer = (mod.__pin as Function)((mod.__new as Function)(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
+  const buffer =
+    (mod.__pin as Function)((mod.__new as Function)(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
   const header = ((mod.__new as Function)(AS_HEADER_BYTES, AS_ID_FLOAT64_ARRAY) >>> 0) as number;
   (mod.__pin as Function)(header);
   const dv = new DataView(mod.memory.buffer);

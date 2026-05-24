@@ -307,7 +307,12 @@ describe('setSize', () => {
   });
 
   it('size of nested array is based on flat length', () => {
-    expect(setSize([[1, 2], [3, 4]])).toBe(4);
+    expect(
+      setSize([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toBe(4);
   });
 });
 

@@ -70,7 +70,7 @@ describe('bitAnd', () => {
     expect(result).toEqual(oracle(SMALL_A, SMALL_B, (a, b) => a & b));
   });
 
-  it('handles negative numbers (two\'s complement)', () => {
+  it("handles negative numbers (two's complement)", () => {
     const result = bitAnd(NEG_A, NEG_B);
     expect(result).toEqual(oracle(NEG_A, NEG_B, (a, b) => a & b));
   });
@@ -306,9 +306,7 @@ describe('leftShift', () => {
   });
 
   it('throws on mismatched lengths (array path)', () => {
-    expect(() =>
-      leftShift(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))
-    ).toThrow();
+    expect(() => leftShift(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))).toThrow();
   });
 });
 
@@ -384,9 +382,7 @@ describe('rightArithShift', () => {
   });
 
   it('throws on mismatched lengths', () => {
-    expect(() =>
-      rightArithShift(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))
-    ).toThrow();
+    expect(() => rightArithShift(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))).toThrow();
   });
 });
 
@@ -473,8 +469,6 @@ describe('rightLogShift', () => {
   });
 
   it('throws on mismatched lengths', () => {
-    expect(() =>
-      rightLogShift(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))
-    ).toThrow();
+    expect(() => rightLogShift(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))).toThrow();
   });
 });

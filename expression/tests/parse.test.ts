@@ -35,11 +35,14 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 // `typed.addConversion({ from: 'string', to: 'Node', ... })` succeeds.
 // We must do this before calling createParse.
 try {
-  (mathTyped as any).addType({
-    name: 'Node',
-    test: (x: unknown): boolean =>
-      typeof x === 'object' && x !== null && (x as any).isNode === true,
-  }, false);
+  (mathTyped as any).addType(
+    {
+      name: 'Node',
+      test: (x: unknown): boolean =>
+        typeof x === 'object' && x !== null && (x as any).isNode === true,
+    },
+    false
+  );
 } catch {
   // Already registered in a previous test run (module-level singleton) — ignore
 }

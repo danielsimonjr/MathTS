@@ -4,25 +4,25 @@
 
 ## Summary
 
-| Metric | Count |
-|--------|-------|
-| Total Source Files | 495 |
-| Total Test Files | 187 |
-| Source Files with Tests | 151 |
-| Source Files without Tests | 344 |
-| Coverage (raw, direct-import) | **30.5%** |
+| Metric                                 | Count                  |
+| -------------------------------------- | ---------------------- |
+| Total Source Files                     | 495                    |
+| Total Test Files                       | 187                    |
+| Source Files with Tests                | 151                    |
+| Source Files without Tests             | 344                    |
+| Coverage (raw, direct-import)          | **30.5%**              |
 | Coverage (effective, active code only) | **100.0%** (148 / 148) |
 
 > The raw figure counts every source file the CDG tool finds, including code that is intentionally not direct-imported by a vitest `*.test.ts` (synced mathjs categories, AssemblyScript sources, type-only barrels, …). The **effective** figure excludes those per `docs/Architecture/coverage-policy.json` so the number reflects the genuinely-active hand-written code only. See [`COVERAGE_POLICY.md`](./COVERAGE_POLICY.md) for the policy.
 
 ### Untested-file breakdown by category
 
-| Category | Count | Why it is intentionally untested |
-|---|---:|---|
-| **Synced mathjs categories in functions/** | 323 | Mechanically synced from upstream mathjs by ~/. |
-| **AssemblyScript sources under assembly/src/** | 19 | AssemblyScript is not a vitest target. |
-| **Type-only files** | 2 | Pure interface / type declarations with no runtime to exercise. |
-| **Active (real gap — needs a test)** | 0 | These are the files that should grow a direct-import test. |
+| Category                                       | Count | Why it is intentionally untested                                |
+| ---------------------------------------------- | ----: | --------------------------------------------------------------- |
+| **Synced mathjs categories in functions/**     |   323 | Mechanically synced from upstream mathjs by ~/.                 |
+| **AssemblyScript sources under assembly/src/** |    19 | AssemblyScript is not a vitest target.                          |
+| **Type-only files**                            |     2 | Pure interface / type declarations with no runtime to exercise. |
+| **Active (real gap — needs a test)**           |     0 | These are the files that should grow a direct-import test.      |
 
 ---
 
@@ -381,350 +381,350 @@ The following 344 source files are not directly imported by any test file:
 
 ## Source Files With Test Coverage
 
-| Source File | Test Files |
-|-------------|------------|
-| `src/dual-tensor.ts` | `scaffold.test.ts` |
-| `src/forward-grad.ts` | `forward-grad.test.ts`, `scaffold.test.ts` |
-| `src/index.ts` | `scaffold.test.ts` |
-| `src/reverse-grad.ts` | `reverse-grad.test.ts`, `scaffold.test.ts` |
-| `src/tape.ts` | `ad-wasm-interop.test.ts`, `scaffold.test.ts`, `tensor-contract-ad.test.ts` |
-| `src/index.ts` | `compat.test.ts`, `create.test.ts` |
-| `src/shims.ts` | `compat.test.ts`, `create.test.ts`, `shims.test.ts` |
-| `factory/factory.ts` | `factory.test.ts`, `version.test.ts` |
-| `factory/index.ts` | `factory.test.ts`, `version.test.ts` |
-| `src/index.ts` | `version.test.ts` |
-| `typed/index.ts` | `version.test.ts` |
-| `typed/mathts-typed.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `version.test.ts` |
-| `typed/type-bridge.ts` | `type-bridge.test.ts`, `version.test.ts` |
-| `types/bignumber.ts` | `BigNumber-formatter-api.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `bignumber-math.test.ts`, `bignumber.test.ts`, `version.test.ts` |
-| `types/complex.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `complex.test.ts`, `version.test.ts` |
-| `types/fraction.ts` | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `fraction.test.ts`, `version.test.ts` |
-| `types/interfaces.ts` | `types-interfaces.test.ts` |
-| `src/Help.ts` | `Help.test.ts`, `package-index.test.ts` |
-| `src/Parser.ts` | `Parser.test.ts`, `package-index.test.ts` |
-| `compiler/compile.ts` | `compile.test.ts`, `compiler-index.test.ts`, `package-index.test.ts`, `sandbox.test.ts` |
-| `compiler/index.ts` | `compiler-index.test.ts`, `package-index.test.ts` |
-| `error/DimensionError.ts` | `DimensionError.test.ts` |
-| `error/IndexError.ts` | `IndexError.test.ts`, `errorTransform.test.ts` |
-| `evaluator/evaluate.ts` | `evaluate.test.ts`, `evaluator-index.test.ts`, `package-index.test.ts`, `sandbox.test.ts` |
-| `evaluator/index.ts` | `evaluator-index.test.ts`, `package-index.test.ts` |
-| `src/index.ts` | `package-index.test.ts` |
-| `src/keywords.ts` | `keywords.test.ts`, `package-index.test.ts` |
-| `node/AccessorNode.ts` | `AccessorNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/ArrayNode.ts` | `ArrayNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/AssignmentNode.ts` | `AssignmentNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/BlockNode.ts` | `BlockNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/ConditionalNode.ts` | `ConditionalNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/ConstantNode.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `node-extension.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/FunctionAssignmentNode.ts` | `FunctionAssignmentNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/FunctionNode.ts` | `FunctionNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/IndexNode.ts` | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `IndexNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/Node.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `node-extension.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/ObjectNode.ts` | `ObjectNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/OperatorNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/ParenthesisNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/RangeNode.ts` | `RangeNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/RelationalNode.ts` | `RelationalNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/SymbolNode.ts` | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `RangeNode.test.ts`, `SymbolNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `utils/access.ts` | `access.test.ts` |
-| `utils/assign.ts` | `assign.test.ts` |
-| `src/operators.ts` | `operators.test.ts`, `package-index.test.ts` |
-| `src/parse.ts` | `package-index.test.ts`, `parse.test.ts` |
-| `utils/errorTransform.ts` | `errorTransform.test.ts` |
-| `src/types.ts` | `package-index.test.ts`, `types.test.ts` |
-| `utils/array.ts` | `utils-array.test.ts` |
-| `bignumber/formatter.ts` | `utils-bignumber-formatter.test.ts` |
-| `utils/collection.ts` | `utils-collection.test.ts` |
-| `utils/customs.ts` | `utils-customs.test.ts` |
-| `utils/factory.ts` | `utils-factory.test.ts` |
-| `utils/is.ts` | `node-extension.test.ts`, `utils-is.test.ts` |
-| `utils/latex.ts` | `utils-latex.test.ts` |
-| `utils/map.ts` | `utils-map.test.ts`, `utils-scope.test.ts` |
-| `utils/number.ts` | `utils-number.test.ts` |
-| `utils/object.ts` | `utils-object.test.ts` |
-| `utils/scope.ts` | `utils-scope.test.ts` |
-| `utils/string.ts` | `utils-string.test.ts` |
-| `utils/switch.ts` | `utils-switch.test.ts` |
-| `factories/evaluate.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `evaluate.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `Parser.test.ts` |
-| `factories/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-final.test.ts`, `factories-leaf.test.ts`, `factories-matrix.test.ts`, `factories-tier2.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `physical-constants.test.ts`, `typed-arithmetic.test.ts` |
-| `factories/matrix-bridge.ts` | `factories-matrix.test.ts`, `matrix-bridge-accel.test.ts`, `sparse-bridge.test.ts` |
-| `factories/scope.ts` | `factory-scope.test.ts` |
-| `src/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/algebra.ts` | `algebra.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/arithmetic.ts` | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic-unary.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-variadic.test.ts` |
-| `typed/bitwise.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-leaf.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-bitwise-wasm.test.ts`, `typed-bitwise.test.ts` |
-| `typed/cas.ts` | `cas.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/combinatorics.ts` | `combinatorics-extended.test.ts`, `combinatorics.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/dist-objects.ts` | `conversions-parser.test.ts`, `dist-objects.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/distributions.ts` | `conversions-parser.test.ts`, `distributions.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/geometry.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `geometry-extended.test.ts`, `geometry.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/gpu.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `gpu.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/graph.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `graph.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/hypothesis.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `hypothesis.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/index.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/integration.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `integration.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/interpolation.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `interpolation.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-regression.test.ts` |
-| `typed/logical.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-leaf.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-logical.test.ts` |
-| `typed/matrix-ops.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `matrix-ops.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/numeric.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `numeric.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-regression.test.ts` |
-| `typed/signal.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `signal-extended.test.ts`, `signal-extended2.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/special.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `special-extended.test.ts`, `special.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/statistics.ts` | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `parallel-stat-prod.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `statistics-selection.test.ts`, `typed-arithmetic.test.ts` |
-| `typed/trigonometry.ts` | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `parallel-trig-unary.test.ts`, `typed-arithmetic.test.ts`, `typed-variadic.test.ts` |
-| `typed/typed-bridge.ts` | `typed-bridge.test.ts` |
-| `wasm/WasmLoader.ts` | `typed-bitwise-wasm.test.ts` |
-| `bitwise/wasm-bridge.ts` | `typed-bitwise-wasm.test.ts` |
-| `wasm/integrity.ts` | `wasm-integrity.test.ts` |
-| `backends/Backend.ts` | `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
-| `backends/BackendManager.ts` | `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
-| `backends/GPUBackend.ts` | `initialization.test.ts`, `operations.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
-| `backends/GPUMatrixBackend.ts` | `typed-operations.test.ts`, `loading.test.ts` |
-| `backends/JSBackend.ts` | `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `operations.test.ts` |
-| `backends/ParallelBackend.ts` | `typed-operations.test.ts`, `loading.test.ts` |
-| `backends/RustWASMBackend.ts` | `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
-| `backends/RustWasmLoader.ts` | `svd-wasm.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts` |
-| `backends/WASMBackend.ts` | `typed-operations.test.ts`, `accuracy.test.ts`, `decompositions-as.test.ts`, `loading.test.ts`, `operations.test.ts` |
-| `backends/WasmLoader.ts` | `MatrixWasmBridge.test.ts`, `WasmLoader.test.ts`, `fft-wasm.test.ts` |
-| `gpu/BatchExecutor.ts` | `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
-| `gpu/BufferPool.ts` | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
-| `gpu/GPUContext.ts` | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
-| `gpu/ShaderManager.ts` | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
-| `gpu/Sync.ts` | `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
-| `gpu/detect.ts` | `initialization.test.ts`, `typed-operations.test.ts`, `loading.test.ts` |
-| `gpu/index.ts` | `typed-operations.test.ts`, `loading.test.ts` |
-| `backends/index.ts` | `typed-operations.test.ts`, `loading.test.ts` |
-| `wasm/detect.ts` | `typed-operations.test.ts`, `loading.test.ts` |
-| `wasm/fft-wasm.ts` | `typed-operations.test.ts`, `fft-wasm.test.ts`, `loading.test.ts` |
-| `wasm/index.ts` | `typed-operations.test.ts`, `loading.test.ts` |
-| `src/config.ts` | `config.test.ts` |
-| `src/index.ts` | `typed-operations.test.ts` |
-| `operations/eig-wasm.ts` | `eig-wasm.test.ts`, `typed-operations.test.ts` |
-| `operations/eig.ts` | `eig.test.ts`, `typed-operations.test.ts` |
-| `operations/index.ts` | `typed-operations.test.ts` |
-| `operations/svd-wasm.ts` | `svd-wasm.test.ts`, `typed-operations.test.ts` |
-| `operations/svd.ts` | `svd.test.ts`, `svd-wasm.test.ts`, `typed-operations.test.ts` |
-| `src/parallel-matrix.ts` | `typed-operations.test.ts` |
-| `src/typed-operations.ts` | `typed-operations.test.ts` |
-| `types/DenseMatrix.ts` | `DenseMatrix.test.ts`, `JSBackend.test.ts`, `SparseMatrix.test.ts`, `operations.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `decompositions-as.test.ts`, `operations.test.ts`, `rust-wasm.test.ts` |
-| `types/Matrix.ts` | `typed-operations.test.ts` |
-| `types/SparseMatrix.ts` | `SparseMatrix.test.ts`, `operations.test.ts`, `typed-operations.test.ts` |
-| `types/index.ts` | `typed-operations.test.ts` |
-| `src/index.ts` | `index.test.ts`, `robust-types.test.ts` |
-| `src/fft-core.ts` | `fft-core.test.ts` |
-| `src/index.ts` | `bitwise-dispatch.test.ts`, `index.test.ts`, `parallel-dispatch.test.ts` |
-| `src/ComputePool.ts` | `ComputePool.test.ts`, `benchmark.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts`, `package-index.test.ts` |
-| `src/index.ts` | `package-index.test.ts` |
-| `operations/elementwise.ts` | `benchmark.test.ts`, `elementwise.test.ts`, `operations-index.test.ts`, `package-index.test.ts` |
-| `operations/index.ts` | `operations-index.test.ts`, `package-index.test.ts` |
-| `operations/map.ts` | `map-extended.test.ts`, `map.test.ts`, `operations-index.test.ts`, `package-index.test.ts` |
-| `operations/matmul.ts` | `benchmark.test.ts`, `matmul.test.ts`, `operations-index.test.ts`, `package-index.test.ts` |
-| `operations/reduce.ts` | `benchmark.test.ts`, `reduce.test.ts`, `operations-index.test.ts`, `package-index.test.ts` |
-| `ops/bitwise.ts` | `ops-bitwise.test.ts`, `package-index.test.ts` |
-| `strategies/chunk.ts` | `chunk.test.ts`, `package-index.test.ts`, `chunk-extended.test.ts`, `strategies-index.test.ts` |
-| `strategies/index.ts` | `package-index.test.ts`, `strategies-index.test.ts` |
-| `strategies/threshold.ts` | `threshold.test.ts`, `package-index.test.ts`, `strategies-index.test.ts` |
-| `src/Tensor.ts` | `Tensor-contract.test.ts`, `Tensor.matrix-bridge.test.ts`, `Tensor.ops.test.ts`, `Tensor.test.ts`, `broadcasting.test.ts`, `contraction-sequence.test.ts`, `random.test.ts`, `svd.test.ts`, `package-index.test.ts`, `reductions.test.ts`, `tensordot.test.ts` |
-| `src/contraction-sequence.ts` | `contraction-sequence.test.ts`, `package-index.test.ts` |
-| `src/index.ts` | `package-index.test.ts` |
-| `src/named-index.ts` | `Index.test.ts`, `Tensor-contract.test.ts`, `contraction-sequence.test.ts`, `random.test.ts`, `package-index.test.ts`, `reductions.test.ts`, `tensordot.test.ts` |
-| `operations/random.ts` | `random.test.ts`, `package-index.test.ts` |
-| `operations/svd.ts` | `svd.test.ts`, `package-index.test.ts` |
-| `src/executor.ts` | `executor.test.ts`, `package-index.test.ts` |
-| `src/graph.ts` | `graph.test.ts`, `package-index.test.ts` |
-| `src/index.ts` | `package-index.test.ts` |
-| `src/parser.ts` | `package-index.test.ts`, `parser.test.ts` |
-| `src/types.ts` | `executor.test.ts`, `graph.test.ts`, `parser.test.ts` |
+| Source File                      | Test Files                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/dual-tensor.ts`             | `scaffold.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `src/forward-grad.ts`            | `forward-grad.test.ts`, `scaffold.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `src/index.ts`                   | `scaffold.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `src/reverse-grad.ts`            | `reverse-grad.test.ts`, `scaffold.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `src/tape.ts`                    | `ad-wasm-interop.test.ts`, `scaffold.test.ts`, `tensor-contract-ad.test.ts`                                                                                                                                                                                                                                                                                                                                                                                    |
+| `src/index.ts`                   | `compat.test.ts`, `create.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `src/shims.ts`                   | `compat.test.ts`, `create.test.ts`, `shims.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `factory/factory.ts`             | `factory.test.ts`, `version.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `factory/index.ts`               | `factory.test.ts`, `version.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `src/index.ts`                   | `version.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `typed/index.ts`                 | `version.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `typed/mathts-typed.ts`          | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `version.test.ts`                                                                                                                                                                                                                                                                                                                                                                                     |
+| `typed/type-bridge.ts`           | `type-bridge.test.ts`, `version.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `types/bignumber.ts`             | `BigNumber-formatter-api.test.ts`, `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `bignumber-math.test.ts`, `bignumber.test.ts`, `version.test.ts`                                                                                                                                                                                                                                                                            |
+| `types/complex.ts`               | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `complex.test.ts`, `version.test.ts`                                                                                                                                                                                                                                                                                                                                           |
+| `types/fraction.ts`              | `mathts-typed-extended.test.ts`, `mathts-typed.test.ts`, `type-bridge.test.ts`, `fraction.test.ts`, `version.test.ts`                                                                                                                                                                                                                                                                                                                                          |
+| `types/interfaces.ts`            | `types-interfaces.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `src/Help.ts`                    | `Help.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/Parser.ts`                  | `Parser.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `compiler/compile.ts`            | `compile.test.ts`, `compiler-index.test.ts`, `package-index.test.ts`, `sandbox.test.ts`                                                                                                                                                                                                                                                                                                                                                                        |
+| `compiler/index.ts`              | `compiler-index.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `error/DimensionError.ts`        | `DimensionError.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `error/IndexError.ts`            | `IndexError.test.ts`, `errorTransform.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `evaluator/evaluate.ts`          | `evaluate.test.ts`, `evaluator-index.test.ts`, `package-index.test.ts`, `sandbox.test.ts`                                                                                                                                                                                                                                                                                                                                                                      |
+| `evaluator/index.ts`             | `evaluator-index.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `src/index.ts`                   | `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/keywords.ts`                | `keywords.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `node/AccessorNode.ts`           | `AccessorNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                               |
+| `node/ArrayNode.ts`              | `ArrayNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `node/AssignmentNode.ts`         | `AssignmentNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                             |
+| `node/BlockNode.ts`              | `BlockNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `node/ConditionalNode.ts`        | `ConditionalNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                            |
+| `node/ConstantNode.ts`           | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `node-extension.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/FunctionAssignmentNode.ts` | `FunctionAssignmentNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                     |
+| `node/FunctionNode.ts`           | `FunctionNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                               |
+| `node/IndexNode.ts`              | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `IndexNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                |
+| `node/Node.ts`                   | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `node-extension.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/ObjectNode.ts`             | `ObjectNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `node/OperatorNode.ts`           | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                    |
+| `node/ParenthesisNode.ts`        | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                    |
+| `node/RangeNode.ts`              | `RangeNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `node/RelationalNode.ts`         | `RelationalNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                             |
+| `node/SymbolNode.ts`             | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `RangeNode.test.ts`, `SymbolNode.test.ts`, `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                             |
+| `utils/access.ts`                | `access.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `utils/assign.ts`                | `assign.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `src/operators.ts`               | `operators.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `src/parse.ts`                   | `package-index.test.ts`, `parse.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `utils/errorTransform.ts`        | `errorTransform.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `src/types.ts`                   | `package-index.test.ts`, `types.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `utils/array.ts`                 | `utils-array.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `bignumber/formatter.ts`         | `utils-bignumber-formatter.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `utils/collection.ts`            | `utils-collection.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `utils/customs.ts`               | `utils-customs.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `utils/factory.ts`               | `utils-factory.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `utils/is.ts`                    | `node-extension.test.ts`, `utils-is.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `utils/latex.ts`                 | `utils-latex.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `utils/map.ts`                   | `utils-map.test.ts`, `utils-scope.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `utils/number.ts`                | `utils-number.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `utils/object.ts`                | `utils-object.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `utils/scope.ts`                 | `utils-scope.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `utils/string.ts`                | `utils-string.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `utils/switch.ts`                | `utils-switch.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `factories/evaluate.ts`          | `conversions-parser.test.ts`, `docs-sync.test.ts`, `evaluate.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `Parser.test.ts`                                                                                                                                                                                                                                                     |
+| `factories/index.ts`             | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-final.test.ts`, `factories-leaf.test.ts`, `factories-matrix.test.ts`, `factories-tier2.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `physical-constants.test.ts`, `typed-arithmetic.test.ts`                                                                                                                      |
+| `factories/matrix-bridge.ts`     | `factories-matrix.test.ts`, `matrix-bridge-accel.test.ts`, `sparse-bridge.test.ts`                                                                                                                                                                                                                                                                                                                                                                             |
+| `factories/scope.ts`             | `factory-scope.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/index.ts`                   | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                                           |
+| `typed/algebra.ts`               | `algebra.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                        |
+| `typed/arithmetic.ts`            | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic-unary.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-variadic.test.ts`                                                                                                                                                                                             |
+| `typed/bitwise.ts`               | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-leaf.test.ts`, `factories-tier4.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-bitwise-wasm.test.ts`, `typed-bitwise.test.ts`                                                                                                                                                                               |
+| `typed/cas.ts`                   | `cas.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                            |
+| `typed/combinatorics.ts`         | `combinatorics-extended.test.ts`, `combinatorics.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                |
+| `typed/dist-objects.ts`          | `conversions-parser.test.ts`, `dist-objects.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                   |
+| `typed/distributions.ts`         | `conversions-parser.test.ts`, `distributions.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                  |
+| `typed/geometry.ts`              | `conversions-parser.test.ts`, `docs-sync.test.ts`, `geometry-extended.test.ts`, `geometry.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                          |
+| `typed/gpu.ts`                   | `conversions-parser.test.ts`, `docs-sync.test.ts`, `gpu.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                            |
+| `typed/graph.ts`                 | `conversions-parser.test.ts`, `docs-sync.test.ts`, `graph.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                          |
+| `typed/hypothesis.ts`            | `conversions-parser.test.ts`, `docs-sync.test.ts`, `hypothesis.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                     |
+| `typed/index.ts`                 | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                                           |
+| `typed/integration.ts`           | `conversions-parser.test.ts`, `docs-sync.test.ts`, `integration.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                    |
+| `typed/interpolation.ts`         | `conversions-parser.test.ts`, `docs-sync.test.ts`, `interpolation.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-regression.test.ts`                                                                                                                                                                                                                                      |
+| `typed/logical.ts`               | `conversions-parser.test.ts`, `docs-sync.test.ts`, `factories-leaf.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-logical.test.ts`                                                                                                                                                                                                                                        |
+| `typed/matrix-ops.ts`            | `conversions-parser.test.ts`, `docs-sync.test.ts`, `matrix-ops.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                                                     |
+| `typed/numeric.ts`               | `conversions-parser.test.ts`, `docs-sync.test.ts`, `numeric.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `typed-arithmetic.test.ts`, `typed-regression.test.ts`                                                                                                                                                                                                                                            |
+| `typed/signal.ts`                | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `signal-extended.test.ts`, `signal-extended2.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                    |
+| `typed/special.ts`               | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `special-extended.test.ts`, `special.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                                                                                                            |
+| `typed/statistics.ts`            | `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `parallel-stat-prod.test.ts`, `statistics-extended.test.ts`, `statistics-extended2.test.ts`, `statistics-selection.test.ts`, `typed-arithmetic.test.ts`                                                                                                                                                              |
+| `typed/trigonometry.ts`          | `arithmetic-extended.test.ts`, `conversions-parser.test.ts`, `docs-sync.test.ts`, `parallel-arithmetic.test.ts`, `parallel-dispatch.test.ts`, `parallel-signal.test.ts`, `parallel-trig-unary.test.ts`, `typed-arithmetic.test.ts`, `typed-variadic.test.ts`                                                                                                                                                                                                   |
+| `typed/typed-bridge.ts`          | `typed-bridge.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `wasm/WasmLoader.ts`             | `typed-bitwise-wasm.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `bitwise/wasm-bridge.ts`         | `typed-bitwise-wasm.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `wasm/integrity.ts`              | `wasm-integrity.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `backends/Backend.ts`            | `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts`                                                                                                                                                                                                                                                                                                                                                                        |
+| `backends/BackendManager.ts`     | `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts`                                                                                                                                                                                                                                                                                                                                                                                             |
+| `backends/GPUBackend.ts`         | `initialization.test.ts`, `operations.test.ts`, `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                  |
+| `backends/GPUMatrixBackend.ts`   | `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `backends/JSBackend.ts`          | `JSBackend.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                       |
+| `backends/ParallelBackend.ts`    | `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `backends/RustWASMBackend.ts`    | `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts`                                                                                                                                                                                                                                                                                                                                                                                             |
+| `backends/RustWasmLoader.ts`     | `svd-wasm.test.ts`, `typed-operations.test.ts`, `loading.test.ts`, `rust-wasm.test.ts`                                                                                                                                                                                                                                                                                                                                                                         |
+| `backends/WASMBackend.ts`        | `typed-operations.test.ts`, `accuracy.test.ts`, `decompositions-as.test.ts`, `loading.test.ts`, `operations.test.ts`                                                                                                                                                                                                                                                                                                                                           |
+| `backends/WasmLoader.ts`         | `MatrixWasmBridge.test.ts`, `WasmLoader.test.ts`, `fft-wasm.test.ts`                                                                                                                                                                                                                                                                                                                                                                                           |
+| `gpu/BatchExecutor.ts`           | `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                           |
+| `gpu/BufferPool.ts`              | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                 |
+| `gpu/GPUContext.ts`              | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                 |
+| `gpu/ShaderManager.ts`           | `initialization.test.ts`, `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                 |
+| `gpu/Sync.ts`                    | `integration.test.ts`, `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                           |
+| `gpu/detect.ts`                  | `initialization.test.ts`, `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                        |
+| `gpu/index.ts`                   | `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `backends/index.ts`              | `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `wasm/detect.ts`                 | `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `wasm/fft-wasm.ts`               | `typed-operations.test.ts`, `fft-wasm.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                              |
+| `wasm/index.ts`                  | `typed-operations.test.ts`, `loading.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `src/config.ts`                  | `config.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `src/index.ts`                   | `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `operations/eig-wasm.ts`         | `eig-wasm.test.ts`, `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `operations/eig.ts`              | `eig.test.ts`, `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `operations/index.ts`            | `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `operations/svd-wasm.ts`         | `svd-wasm.test.ts`, `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `operations/svd.ts`              | `svd.test.ts`, `svd-wasm.test.ts`, `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `src/parallel-matrix.ts`         | `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `src/typed-operations.ts`        | `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `types/DenseMatrix.ts`           | `DenseMatrix.test.ts`, `JSBackend.test.ts`, `SparseMatrix.test.ts`, `operations.test.ts`, `typed-operations.test.ts`, `accuracy.test.ts`, `decompositions-as.test.ts`, `operations.test.ts`, `rust-wasm.test.ts`                                                                                                                                                                                                                                               |
+| `types/Matrix.ts`                | `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `types/SparseMatrix.ts`          | `SparseMatrix.test.ts`, `operations.test.ts`, `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                       |
+| `types/index.ts`                 | `typed-operations.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `src/index.ts`                   | `index.test.ts`, `robust-types.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/fft-core.ts`                | `fft-core.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `src/index.ts`                   | `bitwise-dispatch.test.ts`, `index.test.ts`, `parallel-dispatch.test.ts`                                                                                                                                                                                                                                                                                                                                                                                       |
+| `src/ComputePool.ts`             | `ComputePool.test.ts`, `benchmark.test.ts`, `elementwise.test.ts`, `matmul.test.ts`, `threshold.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                              |
+| `src/index.ts`                   | `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `operations/elementwise.ts`      | `benchmark.test.ts`, `elementwise.test.ts`, `operations-index.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                |
+| `operations/index.ts`            | `operations-index.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `operations/map.ts`              | `map-extended.test.ts`, `map.test.ts`, `operations-index.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                     |
+| `operations/matmul.ts`           | `benchmark.test.ts`, `matmul.test.ts`, `operations-index.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                     |
+| `operations/reduce.ts`           | `benchmark.test.ts`, `reduce.test.ts`, `operations-index.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                     |
+| `ops/bitwise.ts`                 | `ops-bitwise.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `strategies/chunk.ts`            | `chunk.test.ts`, `package-index.test.ts`, `chunk-extended.test.ts`, `strategies-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                 |
+| `strategies/index.ts`            | `package-index.test.ts`, `strategies-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `strategies/threshold.ts`        | `threshold.test.ts`, `package-index.test.ts`, `strategies-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                       |
+| `src/Tensor.ts`                  | `Tensor-contract.test.ts`, `Tensor.matrix-bridge.test.ts`, `Tensor.ops.test.ts`, `Tensor.test.ts`, `broadcasting.test.ts`, `contraction-sequence.test.ts`, `random.test.ts`, `svd.test.ts`, `package-index.test.ts`, `reductions.test.ts`, `tensordot.test.ts`                                                                                                                                                                                                 |
+| `src/contraction-sequence.ts`    | `contraction-sequence.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/index.ts`                   | `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/named-index.ts`             | `Index.test.ts`, `Tensor-contract.test.ts`, `contraction-sequence.test.ts`, `random.test.ts`, `package-index.test.ts`, `reductions.test.ts`, `tensordot.test.ts`                                                                                                                                                                                                                                                                                               |
+| `operations/random.ts`           | `random.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `operations/svd.ts`              | `svd.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `src/executor.ts`                | `executor.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `src/graph.ts`                   | `graph.test.ts`, `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `src/index.ts`                   | `package-index.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/parser.ts`                  | `package-index.test.ts`, `parser.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `src/types.ts`                   | `executor.test.ts`, `graph.test.ts`, `parser.test.ts`                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ---
 
 ## Test File Details
 
-| Test File | Imports from Source |
-|-----------|---------------------|
-| `tests/index.test.ts` | 1 files |
-| `tests/robust-types.test.ts` | 1 files |
-| `tests/bitwise-dispatch.test.ts` | 1 files |
-| `tests/fft-core.test.ts` | 1 files |
-| `tests/index.test.ts` | 1 files |
-| `tests/parallel-dispatch.test.ts` | 1 files |
-| `tests/BigNumber-formatter-api.test.ts` | 1 files |
-| `tests/config.test.ts` | 0 files |
-| `factory/factory.test.ts` | 2 files |
-| `tests/shared.test.ts` | 0 files |
-| `typed/mathts-typed-extended.test.ts` | 4 files |
-| `typed/mathts-typed.test.ts` | 4 files |
-| `typed/type-bridge.test.ts` | 4 files |
-| `types/bignumber-math.test.ts` | 1 files |
-| `types/bignumber.test.ts` | 1 files |
-| `types/complex.test.ts` | 1 files |
-| `types/fraction.test.ts` | 1 files |
-| `tests/types-interfaces.test.ts` | 1 files |
-| `tests/utils.test.ts` | 0 files |
-| `tests/version.test.ts` | 9 files |
-| `tests/DenseMatrix.test.ts` | 1 files |
-| `tests/JSBackend.test.ts` | 3 files |
-| `tests/MatrixWasmBridge.test.ts` | 1 files |
-| `tests/WasmLoader.test.ts` | 1 files |
-| `tests/config.test.ts` | 1 files |
-| `decomposition/eig-wasm.test.ts` | 1 files |
-| `decomposition/eig.test.ts` | 1 files |
-| `decomposition/svd.test.ts` | 1 files |
-| `gpu/initialization.test.ts` | 5 files |
-| `gpu/integration.test.ts` | 5 files |
-| `gpu/operations.test.ts` | 1 files |
-| `sparse/SparseMatrix.test.ts` | 2 files |
-| `sparse/operations.test.ts` | 2 files |
-| `tests/svd-wasm.test.ts` | 3 files |
-| `tests/typed-operations.test.ts` | 32 files |
-| `wasm/accuracy.test.ts` | 2 files |
-| `wasm/decompositions-as.test.ts` | 2 files |
-| `wasm/fft-wasm.test.ts` | 2 files |
-| `wasm/loading.test.ts` | 20 files |
-| `wasm/operations.test.ts` | 3 files |
-| `wasm/rust-wasm.test.ts` | 5 files |
-| `tests/wasm-fft-fallback.test.ts` | 0 files |
-| `tests/Index.test.ts` | 1 files |
-| `tests/Tensor-contract.test.ts` | 2 files |
-| `tests/Tensor.matrix-bridge.test.ts` | 1 files |
-| `tests/Tensor.ops.test.ts` | 1 files |
-| `tests/Tensor.test.ts` | 1 files |
-| `tests/broadcasting.test.ts` | 1 files |
-| `tests/contraction-sequence.test.ts` | 3 files |
-| `operations/random.test.ts` | 3 files |
-| `operations/svd.test.ts` | 2 files |
-| `tests/package-index.test.ts` | 6 files |
-| `tests/reductions.test.ts` | 2 files |
-| `tests/tensordot.test.ts` | 2 files |
-| `tests/ad-wasm-interop.test.ts` | 1 files |
-| `tests/forward-grad.test.ts` | 1 files |
-| `tests/reverse-grad.test.ts` | 1 files |
-| `tests/scaffold.test.ts` | 5 files |
-| `tests/tensor-contract-ad.test.ts` | 1 files |
-| `tests/algebra.test.ts` | 1 files |
-| `tests/arithmetic-extended.test.ts` | 2 files |
-| `tests/cas.test.ts` | 1 files |
-| `tests/combinatorics-extended.test.ts` | 1 files |
-| `tests/combinatorics.test.ts` | 1 files |
-| `tests/conversions-parser.test.ts` | 24 files |
-| `tests/dist-objects.test.ts` | 1 files |
-| `tests/distributions.test.ts` | 1 files |
-| `tests/docs-sync.test.ts` | 24 files |
-| `tests/evaluate.test.ts` | 1 files |
-| `tests/factories-final.test.ts` | 1 files |
-| `tests/factories-leaf.test.ts` | 3 files |
-| `tests/factories-matrix.test.ts` | 2 files |
-| `tests/factories-tier2.test.ts` | 1 files |
-| `tests/factories-tier4.test.ts` | 2 files |
-| `tests/factory-scope.test.ts` | 1 files |
-| `tests/geometry-extended.test.ts` | 1 files |
-| `tests/geometry.test.ts` | 1 files |
-| `tests/gpu.test.ts` | 1 files |
-| `tests/graph.test.ts` | 1 files |
-| `tests/hypothesis.test.ts` | 1 files |
-| `tests/integration.test.ts` | 1 files |
-| `tests/interpolation.test.ts` | 1 files |
-| `tests/matrix-bridge-accel.test.ts` | 1 files |
-| `tests/matrix-ops.test.ts` | 1 files |
-| `tests/numeric.test.ts` | 1 files |
-| `tests/parallel-arithmetic-unary.test.ts` | 1 files |
-| `tests/parallel-arithmetic.test.ts` | 24 files |
-| `tests/parallel-dispatch.test.ts` | 24 files |
-| `tests/parallel-signal.test.ts` | 24 files |
-| `tests/parallel-stat-prod.test.ts` | 1 files |
-| `tests/parallel-trig-unary.test.ts` | 1 files |
-| `tests/physical-constants.test.ts` | 1 files |
-| `security/wasm-integrity.test.ts` | 1 files |
-| `signal/conv.test.ts` | 0 files |
-| `signal/fft.test.ts` | 0 files |
-| `tests/signal-extended.test.ts` | 1 files |
-| `tests/signal-extended2.test.ts` | 1 files |
-| `tests/sparse-bridge.test.ts` | 1 files |
-| `tests/special-extended.test.ts` | 1 files |
-| `tests/special.test.ts` | 1 files |
-| `tests/statistics-extended.test.ts` | 1 files |
-| `tests/statistics-extended2.test.ts` | 1 files |
-| `tests/statistics-selection.test.ts` | 1 files |
-| `tests/typed-arithmetic.test.ts` | 24 files |
-| `tests/typed-bitwise-wasm.test.ts` | 3 files |
-| `tests/typed-bitwise.test.ts` | 1 files |
-| `tests/typed-bridge.test.ts` | 1 files |
-| `tests/typed-logical.test.ts` | 1 files |
-| `tests/typed-regression.test.ts` | 2 files |
-| `tests/typed-variadic.test.ts` | 2 files |
-| `tests/AccessorNode.test.ts` | 5 files |
-| `tests/ArrayNode.test.ts` | 3 files |
-| `tests/AssignmentNode.test.ts` | 5 files |
-| `tests/BlockNode.test.ts` | 3 files |
-| `tests/ConditionalNode.test.ts` | 3 files |
-| `tests/ConstantNode.test.ts` | 2 files |
-| `tests/DimensionError.test.ts` | 1 files |
-| `tests/FunctionAssignmentNode.test.ts` | 4 files |
-| `tests/FunctionNode.test.ts` | 4 files |
-| `tests/Help.test.ts` | 1 files |
-| `tests/IndexError.test.ts` | 1 files |
-| `tests/IndexNode.test.ts` | 4 files |
-| `tests/Node.test.ts` | 5 files |
-| `tests/ObjectNode.test.ts` | 4 files |
-| `tests/OperatorNode.test.ts` | 5 files |
-| `tests/ParenthesisNode.test.ts` | 4 files |
-| `tests/Parser.test.ts` | 2 files |
-| `tests/RangeNode.test.ts` | 4 files |
-| `tests/RelationalNode.test.ts` | 3 files |
-| `tests/SymbolNode.test.ts` | 3 files |
-| `tests/access.test.ts` | 1 files |
-| `tests/assign.test.ts` | 1 files |
-| `tests/compile.test.ts` | 1 files |
-| `tests/compiler-index.test.ts` | 2 files |
-| `tests/errorTransform.test.ts` | 2 files |
-| `tests/evaluate.test.ts` | 1 files |
-| `tests/evaluator-index.test.ts` | 2 files |
-| `tests/keywords.test.ts` | 1 files |
-| `tests/node-extension.test.ts` | 3 files |
-| `tests/operators.test.ts` | 1 files |
-| `tests/package-index.test.ts` | 27 files |
-| `tests/parse.test.ts` | 17 files |
-| `security/sandbox.test.ts` | 2 files |
-| `tests/types.test.ts` | 1 files |
-| `tests/utils-array.test.ts` | 1 files |
-| `tests/utils-bignumber-formatter.test.ts` | 1 files |
-| `tests/utils-collection.test.ts` | 1 files |
-| `tests/utils-customs.test.ts` | 1 files |
-| `tests/utils-factory.test.ts` | 1 files |
-| `tests/utils-is.test.ts` | 1 files |
-| `tests/utils-latex.test.ts` | 1 files |
-| `tests/utils-map.test.ts` | 1 files |
-| `tests/utils-number.test.ts` | 1 files |
-| `tests/utils-object.test.ts` | 1 files |
-| `tests/utils-scope.test.ts` | 2 files |
-| `tests/utils-string.test.ts` | 1 files |
-| `tests/utils-switch.test.ts` | 1 files |
-| `tests/ComputePool.test.ts` | 1 files |
-| `tests/ParallelMatrix.test.ts` | 0 files |
-| `tests/WorkerPool.timeout.test.ts` | 0 files |
-| `tests/benchmark.test.ts` | 4 files |
-| `tests/chunk.test.ts` | 1 files |
-| `operations/elementwise.test.ts` | 2 files |
-| `operations/map-extended.test.ts` | 1 files |
-| `operations/map.test.ts` | 1 files |
-| `operations/matmul.test.ts` | 2 files |
-| `operations/reduce.test.ts` | 1 files |
-| `operations/threshold.test.ts` | 2 files |
-| `tests/operations-index.test.ts` | 5 files |
-| `tests/ops-bitwise.test.ts` | 1 files |
-| `tests/package-index.test.ts` | 11 files |
-| `strategies/chunk-extended.test.ts` | 1 files |
-| `tests/strategies-index.test.ts` | 3 files |
-| `tests/executor.test.ts` | 2 files |
-| `tests/graph.test.ts` | 2 files |
-| `tests/package-index.test.ts` | 4 files |
-| `tests/parser.test.ts` | 2 files |
-| `tests/compat.test.ts` | 2 files |
-| `tests/create.test.ts` | 2 files |
-| `tests/shims.test.ts` | 1 files |
-| `benchmark/performance.test.ts` | 0 files |
-| `benchmark/wasm-comparison.test.ts` | 0 files |
-| `integration/functions.test.ts` | 0 files |
-| `integration/instance.test.ts` | 0 files |
-| `wasm/parallel-processing.test.ts` | 0 files |
-| `wasm/typescript-integration.test.ts` | 0 files |
-| `wasm/wasm-loader.test.ts` | 0 files |
+| Test File                                 | Imports from Source |
+| ----------------------------------------- | ------------------- |
+| `tests/index.test.ts`                     | 1 files             |
+| `tests/robust-types.test.ts`              | 1 files             |
+| `tests/bitwise-dispatch.test.ts`          | 1 files             |
+| `tests/fft-core.test.ts`                  | 1 files             |
+| `tests/index.test.ts`                     | 1 files             |
+| `tests/parallel-dispatch.test.ts`         | 1 files             |
+| `tests/BigNumber-formatter-api.test.ts`   | 1 files             |
+| `tests/config.test.ts`                    | 0 files             |
+| `factory/factory.test.ts`                 | 2 files             |
+| `tests/shared.test.ts`                    | 0 files             |
+| `typed/mathts-typed-extended.test.ts`     | 4 files             |
+| `typed/mathts-typed.test.ts`              | 4 files             |
+| `typed/type-bridge.test.ts`               | 4 files             |
+| `types/bignumber-math.test.ts`            | 1 files             |
+| `types/bignumber.test.ts`                 | 1 files             |
+| `types/complex.test.ts`                   | 1 files             |
+| `types/fraction.test.ts`                  | 1 files             |
+| `tests/types-interfaces.test.ts`          | 1 files             |
+| `tests/utils.test.ts`                     | 0 files             |
+| `tests/version.test.ts`                   | 9 files             |
+| `tests/DenseMatrix.test.ts`               | 1 files             |
+| `tests/JSBackend.test.ts`                 | 3 files             |
+| `tests/MatrixWasmBridge.test.ts`          | 1 files             |
+| `tests/WasmLoader.test.ts`                | 1 files             |
+| `tests/config.test.ts`                    | 1 files             |
+| `decomposition/eig-wasm.test.ts`          | 1 files             |
+| `decomposition/eig.test.ts`               | 1 files             |
+| `decomposition/svd.test.ts`               | 1 files             |
+| `gpu/initialization.test.ts`              | 5 files             |
+| `gpu/integration.test.ts`                 | 5 files             |
+| `gpu/operations.test.ts`                  | 1 files             |
+| `sparse/SparseMatrix.test.ts`             | 2 files             |
+| `sparse/operations.test.ts`               | 2 files             |
+| `tests/svd-wasm.test.ts`                  | 3 files             |
+| `tests/typed-operations.test.ts`          | 32 files            |
+| `wasm/accuracy.test.ts`                   | 2 files             |
+| `wasm/decompositions-as.test.ts`          | 2 files             |
+| `wasm/fft-wasm.test.ts`                   | 2 files             |
+| `wasm/loading.test.ts`                    | 20 files            |
+| `wasm/operations.test.ts`                 | 3 files             |
+| `wasm/rust-wasm.test.ts`                  | 5 files             |
+| `tests/wasm-fft-fallback.test.ts`         | 0 files             |
+| `tests/Index.test.ts`                     | 1 files             |
+| `tests/Tensor-contract.test.ts`           | 2 files             |
+| `tests/Tensor.matrix-bridge.test.ts`      | 1 files             |
+| `tests/Tensor.ops.test.ts`                | 1 files             |
+| `tests/Tensor.test.ts`                    | 1 files             |
+| `tests/broadcasting.test.ts`              | 1 files             |
+| `tests/contraction-sequence.test.ts`      | 3 files             |
+| `operations/random.test.ts`               | 3 files             |
+| `operations/svd.test.ts`                  | 2 files             |
+| `tests/package-index.test.ts`             | 6 files             |
+| `tests/reductions.test.ts`                | 2 files             |
+| `tests/tensordot.test.ts`                 | 2 files             |
+| `tests/ad-wasm-interop.test.ts`           | 1 files             |
+| `tests/forward-grad.test.ts`              | 1 files             |
+| `tests/reverse-grad.test.ts`              | 1 files             |
+| `tests/scaffold.test.ts`                  | 5 files             |
+| `tests/tensor-contract-ad.test.ts`        | 1 files             |
+| `tests/algebra.test.ts`                   | 1 files             |
+| `tests/arithmetic-extended.test.ts`       | 2 files             |
+| `tests/cas.test.ts`                       | 1 files             |
+| `tests/combinatorics-extended.test.ts`    | 1 files             |
+| `tests/combinatorics.test.ts`             | 1 files             |
+| `tests/conversions-parser.test.ts`        | 24 files            |
+| `tests/dist-objects.test.ts`              | 1 files             |
+| `tests/distributions.test.ts`             | 1 files             |
+| `tests/docs-sync.test.ts`                 | 24 files            |
+| `tests/evaluate.test.ts`                  | 1 files             |
+| `tests/factories-final.test.ts`           | 1 files             |
+| `tests/factories-leaf.test.ts`            | 3 files             |
+| `tests/factories-matrix.test.ts`          | 2 files             |
+| `tests/factories-tier2.test.ts`           | 1 files             |
+| `tests/factories-tier4.test.ts`           | 2 files             |
+| `tests/factory-scope.test.ts`             | 1 files             |
+| `tests/geometry-extended.test.ts`         | 1 files             |
+| `tests/geometry.test.ts`                  | 1 files             |
+| `tests/gpu.test.ts`                       | 1 files             |
+| `tests/graph.test.ts`                     | 1 files             |
+| `tests/hypothesis.test.ts`                | 1 files             |
+| `tests/integration.test.ts`               | 1 files             |
+| `tests/interpolation.test.ts`             | 1 files             |
+| `tests/matrix-bridge-accel.test.ts`       | 1 files             |
+| `tests/matrix-ops.test.ts`                | 1 files             |
+| `tests/numeric.test.ts`                   | 1 files             |
+| `tests/parallel-arithmetic-unary.test.ts` | 1 files             |
+| `tests/parallel-arithmetic.test.ts`       | 24 files            |
+| `tests/parallel-dispatch.test.ts`         | 24 files            |
+| `tests/parallel-signal.test.ts`           | 24 files            |
+| `tests/parallel-stat-prod.test.ts`        | 1 files             |
+| `tests/parallel-trig-unary.test.ts`       | 1 files             |
+| `tests/physical-constants.test.ts`        | 1 files             |
+| `security/wasm-integrity.test.ts`         | 1 files             |
+| `signal/conv.test.ts`                     | 0 files             |
+| `signal/fft.test.ts`                      | 0 files             |
+| `tests/signal-extended.test.ts`           | 1 files             |
+| `tests/signal-extended2.test.ts`          | 1 files             |
+| `tests/sparse-bridge.test.ts`             | 1 files             |
+| `tests/special-extended.test.ts`          | 1 files             |
+| `tests/special.test.ts`                   | 1 files             |
+| `tests/statistics-extended.test.ts`       | 1 files             |
+| `tests/statistics-extended2.test.ts`      | 1 files             |
+| `tests/statistics-selection.test.ts`      | 1 files             |
+| `tests/typed-arithmetic.test.ts`          | 24 files            |
+| `tests/typed-bitwise-wasm.test.ts`        | 3 files             |
+| `tests/typed-bitwise.test.ts`             | 1 files             |
+| `tests/typed-bridge.test.ts`              | 1 files             |
+| `tests/typed-logical.test.ts`             | 1 files             |
+| `tests/typed-regression.test.ts`          | 2 files             |
+| `tests/typed-variadic.test.ts`            | 2 files             |
+| `tests/AccessorNode.test.ts`              | 5 files             |
+| `tests/ArrayNode.test.ts`                 | 3 files             |
+| `tests/AssignmentNode.test.ts`            | 5 files             |
+| `tests/BlockNode.test.ts`                 | 3 files             |
+| `tests/ConditionalNode.test.ts`           | 3 files             |
+| `tests/ConstantNode.test.ts`              | 2 files             |
+| `tests/DimensionError.test.ts`            | 1 files             |
+| `tests/FunctionAssignmentNode.test.ts`    | 4 files             |
+| `tests/FunctionNode.test.ts`              | 4 files             |
+| `tests/Help.test.ts`                      | 1 files             |
+| `tests/IndexError.test.ts`                | 1 files             |
+| `tests/IndexNode.test.ts`                 | 4 files             |
+| `tests/Node.test.ts`                      | 5 files             |
+| `tests/ObjectNode.test.ts`                | 4 files             |
+| `tests/OperatorNode.test.ts`              | 5 files             |
+| `tests/ParenthesisNode.test.ts`           | 4 files             |
+| `tests/Parser.test.ts`                    | 2 files             |
+| `tests/RangeNode.test.ts`                 | 4 files             |
+| `tests/RelationalNode.test.ts`            | 3 files             |
+| `tests/SymbolNode.test.ts`                | 3 files             |
+| `tests/access.test.ts`                    | 1 files             |
+| `tests/assign.test.ts`                    | 1 files             |
+| `tests/compile.test.ts`                   | 1 files             |
+| `tests/compiler-index.test.ts`            | 2 files             |
+| `tests/errorTransform.test.ts`            | 2 files             |
+| `tests/evaluate.test.ts`                  | 1 files             |
+| `tests/evaluator-index.test.ts`           | 2 files             |
+| `tests/keywords.test.ts`                  | 1 files             |
+| `tests/node-extension.test.ts`            | 3 files             |
+| `tests/operators.test.ts`                 | 1 files             |
+| `tests/package-index.test.ts`             | 27 files            |
+| `tests/parse.test.ts`                     | 17 files            |
+| `security/sandbox.test.ts`                | 2 files             |
+| `tests/types.test.ts`                     | 1 files             |
+| `tests/utils-array.test.ts`               | 1 files             |
+| `tests/utils-bignumber-formatter.test.ts` | 1 files             |
+| `tests/utils-collection.test.ts`          | 1 files             |
+| `tests/utils-customs.test.ts`             | 1 files             |
+| `tests/utils-factory.test.ts`             | 1 files             |
+| `tests/utils-is.test.ts`                  | 1 files             |
+| `tests/utils-latex.test.ts`               | 1 files             |
+| `tests/utils-map.test.ts`                 | 1 files             |
+| `tests/utils-number.test.ts`              | 1 files             |
+| `tests/utils-object.test.ts`              | 1 files             |
+| `tests/utils-scope.test.ts`               | 2 files             |
+| `tests/utils-string.test.ts`              | 1 files             |
+| `tests/utils-switch.test.ts`              | 1 files             |
+| `tests/ComputePool.test.ts`               | 1 files             |
+| `tests/ParallelMatrix.test.ts`            | 0 files             |
+| `tests/WorkerPool.timeout.test.ts`        | 0 files             |
+| `tests/benchmark.test.ts`                 | 4 files             |
+| `tests/chunk.test.ts`                     | 1 files             |
+| `operations/elementwise.test.ts`          | 2 files             |
+| `operations/map-extended.test.ts`         | 1 files             |
+| `operations/map.test.ts`                  | 1 files             |
+| `operations/matmul.test.ts`               | 2 files             |
+| `operations/reduce.test.ts`               | 1 files             |
+| `operations/threshold.test.ts`            | 2 files             |
+| `tests/operations-index.test.ts`          | 5 files             |
+| `tests/ops-bitwise.test.ts`               | 1 files             |
+| `tests/package-index.test.ts`             | 11 files            |
+| `strategies/chunk-extended.test.ts`       | 1 files             |
+| `tests/strategies-index.test.ts`          | 3 files             |
+| `tests/executor.test.ts`                  | 2 files             |
+| `tests/graph.test.ts`                     | 2 files             |
+| `tests/package-index.test.ts`             | 4 files             |
+| `tests/parser.test.ts`                    | 2 files             |
+| `tests/compat.test.ts`                    | 2 files             |
+| `tests/create.test.ts`                    | 2 files             |
+| `tests/shims.test.ts`                     | 1 files             |
+| `benchmark/performance.test.ts`           | 0 files             |
+| `benchmark/wasm-comparison.test.ts`       | 0 files             |
+| `integration/functions.test.ts`           | 0 files             |
+| `integration/instance.test.ts`            | 0 files             |
+| `wasm/parallel-processing.test.ts`        | 0 files             |
+| `wasm/typescript-integration.test.ts`     | 0 files             |
+| `wasm/wasm-loader.test.ts`                | 0 files             |

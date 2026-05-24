@@ -432,8 +432,8 @@ describe('TapedTensor.abs — forward + gradient', () => {
     const xData = new Float64Array([-3, 0, 2]);
     const { grad } = reverseGradOne((t) => t.abs(), xData, [3]);
     expect(grad[0]).toBeCloseTo(-1, 12); // sign(-3) = -1
-    expect(grad[1]).toBeCloseTo(0, 12);  // subgradient at 0 = 0
-    expect(grad[2]).toBeCloseTo(1, 12);  // sign(2) = 1
+    expect(grad[1]).toBeCloseTo(0, 12); // subgradient at 0 = 0
+    expect(grad[2]).toBeCloseTo(1, 12); // sign(2) = 1
   });
 
   it('abs() gradient matches finite differences (away from zero)', () => {
@@ -482,8 +482,8 @@ describe('TapedTensor composition — a.contract(b).square().sum()', () => {
     const kAB = idx(2, 'k'); // shared axis — size 2
     const jB = idx(2, 'j');
 
-    const aData = new Float64Array([1, 2, 3, 4]);       // [2,2]
-    const bData = new Float64Array([0.5, 1, 1.5, 2]);   // [2,2]
+    const aData = new Float64Array([1, 2, 3, 4]); // [2,2]
+    const bData = new Float64Array([0.5, 1, 1.5, 2]); // [2,2]
     const aShape: ReadonlyArray<number> = [2, 2];
     const bShape: ReadonlyArray<number> = [2, 2];
 
@@ -510,8 +510,10 @@ describe('TapedTensor composition — a.contract(b).square().sum()', () => {
         for (let k = 0; k < c.data.length; k++) s += c.data[k] * c.data[k];
         return s;
       };
-      const aPlus = new Float64Array(aData); aPlus[i] += eps;
-      const aMinus = new Float64Array(aData); aMinus[i] -= eps;
+      const aPlus = new Float64Array(aData);
+      aPlus[i] += eps;
+      const aMinus = new Float64Array(aData);
+      aMinus[i] -= eps;
       numGradA[i] = (fwd(aPlus, bData) - fwd(aMinus, bData)) / (2 * eps);
     }
 
@@ -526,8 +528,10 @@ describe('TapedTensor composition — a.contract(b).square().sum()', () => {
         for (let k = 0; k < c.data.length; k++) s += c.data[k] * c.data[k];
         return s;
       };
-      const bPlus = new Float64Array(bData); bPlus[i] += eps;
-      const bMinus = new Float64Array(bData); bMinus[i] -= eps;
+      const bPlus = new Float64Array(bData);
+      bPlus[i] += eps;
+      const bMinus = new Float64Array(bData);
+      bMinus[i] -= eps;
       numGradB[i] = (fwd(aData, bPlus) - fwd(aData, bMinus)) / (2 * eps);
     }
 

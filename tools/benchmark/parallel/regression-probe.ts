@@ -172,25 +172,25 @@ interface Case {
 
 // polyFit-like: large m (samples), small n = degree+1 (4, 8, 16)
 const POLYFIT_CASES: Case[] = [
-  { label: 'polyFit deg=3, m=1k',    m: 1000,   n: 4,  iters: 15 },
-  { label: 'polyFit deg=3, m=10k',   m: 10000,  n: 4,  iters: 10 },
-  { label: 'polyFit deg=3, m=100k',  m: 100000, n: 4,  iters: 5 },
-  { label: 'polyFit deg=7, m=10k',   m: 10000,  n: 8,  iters: 8 },
-  { label: 'polyFit deg=7, m=100k',  m: 100000, n: 8,  iters: 4 },
-  { label: 'polyFit deg=15, m=10k',  m: 10000,  n: 16, iters: 6 },
+  { label: 'polyFit deg=3, m=1k', m: 1000, n: 4, iters: 15 },
+  { label: 'polyFit deg=3, m=10k', m: 10000, n: 4, iters: 10 },
+  { label: 'polyFit deg=3, m=100k', m: 100000, n: 4, iters: 5 },
+  { label: 'polyFit deg=7, m=10k', m: 10000, n: 8, iters: 8 },
+  { label: 'polyFit deg=7, m=100k', m: 100000, n: 8, iters: 4 },
+  { label: 'polyFit deg=15, m=10k', m: 10000, n: 16, iters: 6 },
   { label: 'polyFit deg=15, m=100k', m: 100000, n: 16, iters: 3 },
 ];
 
 // leastSquares: also wide / tall variations
 const LS_CASES: Case[] = [
-  { label: 'LS m=500,  n=50',   m: 500,   n: 50,  iters: 10 },
-  { label: 'LS m=1k,   n=100',  m: 1000,  n: 100, iters: 6 },
-  { label: 'LS m=2k,   n=200',  m: 2000,  n: 200, iters: 5 },
-  { label: 'LS m=10k,  n=100',  m: 10000, n: 100, iters: 4 },
-  { label: 'LS m=20k,  n=100',  m: 20000, n: 100, iters: 3 },
-  { label: 'LS m=5k,   n=200',  m: 5000,  n: 200, iters: 3 },
-  { label: 'LS m=10k,  n=200',  m: 10000, n: 200, iters: 2 },
-  { label: 'LS m=1k,   n=500',  m: 1000,  n: 500, iters: 3 }, // wide-ish
+  { label: 'LS m=500,  n=50', m: 500, n: 50, iters: 10 },
+  { label: 'LS m=1k,   n=100', m: 1000, n: 100, iters: 6 },
+  { label: 'LS m=2k,   n=200', m: 2000, n: 200, iters: 5 },
+  { label: 'LS m=10k,  n=100', m: 10000, n: 100, iters: 4 },
+  { label: 'LS m=20k,  n=100', m: 20000, n: 100, iters: 3 },
+  { label: 'LS m=5k,   n=200', m: 5000, n: 200, iters: 3 },
+  { label: 'LS m=10k,  n=200', m: 10000, n: 200, iters: 2 },
+  { label: 'LS m=1k,   n=500', m: 1000, n: 500, iters: 3 }, // wide-ish
 ];
 
 async function runLadder(cases: Case[], label: string): Promise<void> {

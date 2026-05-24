@@ -43,7 +43,11 @@ function flattenArray(arr: unknown[]): unknown[] {
 function toFlatArray(a: unknown): unknown[] {
   if (Array.isArray(a)) return flattenArray(a);
   // Duck-typed Matrix: has a toArray() method
-  if (typeof a === 'object' && a !== null && typeof (a as { toArray?: unknown }).toArray === 'function') {
+  if (
+    typeof a === 'object' &&
+    a !== null &&
+    typeof (a as { toArray?: unknown }).toArray === 'function'
+  ) {
     return flattenArray((a as { toArray: () => unknown[] }).toArray());
   }
   return [a];

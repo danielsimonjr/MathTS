@@ -133,11 +133,11 @@ signal — not of poor test discipline, but of a healthy synced /
 generated / barrel layer. The thing to watch is the `active_untested`
 row in `TEST_COVERAGE.md`'s breakdown table:
 
-| `active_untested` count | What it means |
-|---|---|
-| **0** | Every active file has at least one direct-import test. Healthy. |
-| **1–10** | A handful of new files added since the last test pass. Catch up in the next slice. |
-| **> 10** | Coverage is regressing. Investigate. |
+| `active_untested` count | What it means                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| **0**                   | Every active file has at least one direct-import test. Healthy.                    |
+| **1–10**                | A handful of new files added since the last test pass. Catch up in the next slice. |
+| **> 10**                | Coverage is regressing. Investigate.                                               |
 
 ## How to maintain the policy
 

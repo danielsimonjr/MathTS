@@ -84,8 +84,7 @@ describe('AS WASM decomposition kernels', () => {
     // Probe: did the AS module actually expose the new exports? If not,
     // emit a warning and let the tests proceed via JS fallback — they
     // still verify correctness, just not the dispatch wire.
-    const mod = (backend as unknown as { wasmModule: Record<string, unknown> | null })
-      .wasmModule;
+    const mod = (backend as unknown as { wasmModule: Record<string, unknown> | null }).wasmModule;
     asReady = mod !== null && typeof mod.matrix_lu_decompose === 'function';
     if (!asReady) {
       console.warn(

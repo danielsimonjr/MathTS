@@ -159,12 +159,8 @@ function formatElementsPerSec(eps: number): string {
  */
 function printResults(results: BenchmarkResult[]): void {
   console.log('\n=== Element-wise Operations Benchmark ===\n');
-  console.log(
-    '| Operation | Size | JS (ms) | Rust (ms) | AS (ms) | Rust Speedup | AS Speedup |'
-  );
-  console.log(
-    '|-----------|------|---------|-----------|---------|--------------|------------|'
-  );
+  console.log('| Operation | Size | JS (ms) | Rust (ms) | AS (ms) | Rust Speedup | AS Speedup |');
+  console.log('|-----------|------|---------|-----------|---------|--------------|------------|');
 
   for (const r of results) {
     console.log(
