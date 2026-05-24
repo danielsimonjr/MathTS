@@ -204,6 +204,78 @@ Detail:
       family), 12 (TapedTensor decomposition AD), 13 (typed/string.ts),
       14 (typed/unit.ts — blocked on Unit type in core).
 
+- [ ] **Wave 4 gap-closure (audit refresh follow-up)** — design at
+      [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md).
+      Operationalises the §D Tier-4 ranks + §C cross-cutting items + 3.10c-2 sub-slice into 9 actionable slices across three
+      implementation tiers:
+
+      **Wave 4 Tier 1 (parallel, 5 disjoint agents):**
+      - [ ] **Slice 4.1** — `ComputePool` extras (`pow`, `sign`,
+            `tensordot`). `parallel/src/ComputePool.ts` adds three
+            methods + `OpName` entries + thresholds; mirrors the
+            Slice-1.3 pattern.
+      - [ ] **Slice 4.2** — `matrixPinv` Moore-Penrose pseudoinverse
+            on `DenseMatrix`. NEW `matrix/src/operations/pinv.ts`
+            composing `matrix.svd` + `rcond·max(S)` thresholding.
+            Sibling of the `tensorPinv` landed in Slice 2.4.
+      - [ ] **Slice 4.3** — `tensor/src/operations/random.ts` QR
+            cleanup. Replace inline Gram-Schmidt with the now-public
+            `matrix.qr`. Pure refactor, no behaviour change.
+      - [ ] **Slice 4.4** — `typed/string.ts` promotion (rank 13).
+            5 ops (`bin`/`hex`/`oct`/`format`/`print`); same pattern
+            as `typed/relational.ts` from Slice 1.2.
+      - [ ] **Slice 4.5** — Polynomial WASM follow-up: `discriminant`
+            + `resultant` via Sylvester-matrix det. Reuses the now-
+            landed `poly_div_mod_f64` kernel and the existing `det`
+            primitive. Closes the gap left at the end of Slice 3.7.
+
+      **Wave 4 Tier 2 (sequential, 1 agent each):**
+      - [ ] **Slice 4.6** — `typed/probability.ts` dedup audit +
+            selective promotion (rank 9). Audit which of the 12
+            synced probability files are already surfaced under
+            different names in `typed/distributions.ts` /
+            `typed/special.ts`; only promote the genuinely-missing
+            ones (proposal-defaults: `bernoulli`, `combinations`,
+            `combinationsWithRep`, `multinomial`, `pickRandom`,
+            `randomInt`).
+      - [ ] **Slice 4.7** — Tensor indexing primitives core (rank
+            11). NEW `tensor/src/operations/{slice,gather,stack,
+            concatenate}.ts`. `scatter`/`pad`/`roll`/`flip` deferred
+            to a follow-up sub-slice if scope balloons.
+
+      **Wave 4 Tier 3 (sequential, design-heavy):**
+      - [ ] **Slice 4.8** — `TapedTensor` decomposition AD (rank 12).
+            **Opus subagent.** AD adjoints for `tensordot`, `svd`,
+            `eig` (symmetric path only — general non-symm deferred).
+            Repeated-value edge cases require subgradient handling
+            per Townsend (2016) / PyTorch's regularisation.
+      - [ ] **Slice 4.9** — Slice 3.10c-2: Airy `Ai`/`Bi` WASM + AS
+            Bessel parity. Closes the deferred sub-slice from
+            3.10c-1; AS-suffix bridge probe is already wired.
+
+      **Tier 4 deferred (no agent dispatch):**
+      - [ ] **Slice 4.10** — `typed/unit.ts` (rank 14). Blocked on
+            a real `Unit` type in `@danielsimonjr/mathts-core`.
+            One-liner wrappers (`to`, `toBest`) once that lands.
+      - [ ] **B.1 / B.2 playbook backlog** — 8 WASM-route + 7
+            worker-route candidates from
+            [`FUNCTION_GAPS_AUDIT.md §B.1`](docs/roadmap/FUNCTION_GAPS_AUDIT.md#b1-wasm-route-playbook--pure-js-functions-worth-porting-to-a-wasm-kernel)
+            and §B.2. Future wins awaiting consumer pressure; not
+            dispatched in this wave. Includes the Sylvester-fill
+            follow-up for B.1 row 2 (now closed by Slice 4.5),
+            `polyFit`/`chebyshevFit`/`legendreFit` WASM, lagrange/
+            newton-interp WASM, histogram/quantile sort WASM,
+            distribution-pdf WASM, signal spectral-windowing WASM,
+            geometry hull/Delaunay WASM, matrix-function evaluator
+            wiring; worker-route fan-outs for integration sub-
+            intervals, hypothesis bootstrap, CAS K-fold CV, batch
+            sampling, distribution closure-pdf, CAS batch ops,
+            graph-centrality restarts.
+      - [ ] **WebGPU browser smoke test** — needs Playwright (or
+            vitest-browser) infra PR + CI matrix entry with a
+            software WebGPU adapter (Mesa lavapipe on Linux or DX12
+            on Windows). Infra slice, not implementation.
+
 - [x] **CDG bugfix + post-Wave-3 gap-audit refresh** — Ran
       `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --include-tests`
       to check for issues after Wave-1/2/3 landings. Surfaced and
