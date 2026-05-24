@@ -17,7 +17,6 @@ import {
   mapSlices,
   resize,
   subset,
-  bernoulli,
   zpk2tf,
   csCounts,
   csSymperm,
@@ -28,6 +27,9 @@ import {
   usolve,
   usolveAll,
 } from '../src/factories/index.js';
+
+// bernoulli moved from factories/ to typed/ — import from the typed layer
+import { bernoulli } from '../src/typed/probability.js';
 
 // ---------------------------------------------------------------------------
 // Relational
@@ -287,7 +289,6 @@ import {
   partitionSelect,
   bellNumbers,
   stirlingS2,
-  permutations,
   composition,
   sort,
 } from '../src/factories/index.js';
@@ -297,6 +298,9 @@ import { bitAnd, bitOr, bitXor, leftShift } from '../src/typed/bitwise.js';
 
 // deepEqual/unequal/compareNatural moved from factories/ to typed/ — import from the typed layer
 import { deepEqual, unequal, compareNatural } from '../src/typed/relational.js';
+
+// permutations moved from factories/ to typed/ — import from the typed layer
+import { permutations } from '../src/typed/probability.js';
 
 describe('Tier 5 - relational', () => {
   it('compare(1, 2) = -1', () => expect(factory_compare(1, 2)).toBe(-1));

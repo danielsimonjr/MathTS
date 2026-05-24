@@ -19,6 +19,9 @@ import {
   setUnion,
 } from '../src/typed/set.js';
 
+// multinomial moved from factories/ to typed/ — import from the typed layer
+import { multinomial } from '../src/typed/probability.js';
+
 import {
   // Tier 11: expression-dependent factories
   nodeOperations,
@@ -51,7 +54,6 @@ import {
   factory_variance,
   quantileSeq,
   kldivergence,
-  multinomial,
   freqz,
   simplifyCore,
   polynomialRoot,

@@ -108,6 +108,11 @@ export { typedRelational } from './relational.js';
 export * from './string.js';
 export { typedString } from './string.js';
 
+// Probability & combinatorics functions (bernoulli, combinations, combinationsWithRep,
+// multinomial, permutations, random, randomInt, pickRandom)
+export * from './probability.js';
+export { typedProbability } from './probability.js';
+
 // =============================================================================
 // Combined Exports
 // =============================================================================

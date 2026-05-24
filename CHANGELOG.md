@@ -145,6 +145,29 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 4B — two Tier-2 slices LANDED in parallel
+
+Two disjoint Tier-2 slices from [`GAP_CLOSURE_PROPOSAL_WAVE4.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md), dispatched to two sonnet subagents on disjoint scopes:
+
+- **Slice 4.6 — commit `43f45a1`** — `typed/probability.ts` dedup audit + selective promotion (rank 9). Audited all 12 synced `probability/<name>.ts` files. **Promoted 8 of 12:** `bernoulli`, `combinations`, `combinationsWithRep`, `multinomial`, `permutations`, `pickRandom`, `random`, `randomInt`. **Skipped 4** that were already reachable via the factory surface with richer type coverage (Complex/BigNumber/WASM paths): `factorial` (tier 7), `gamma` (tier 6 — needs Complex/BigNumber deps), `kldivergence` (tier 13 — needs matrix wiring), `lgamma` (tier 1 — needs WASM bridge). Notable semantic finding: `bernoulli` is the number-theoretic _nth Bernoulli number_ (used in series expansions), not the `bernoulliPMF` already in `distributions.ts` — they share a name but the math is different. All seeded-RNG ops share a single `_rng` instance with a `seedProbabilityRng()` reset so `random` / `randomInt` / `pickRandom` are composable in one seeded sequence. 57 new tests. `functions`: 2,093 → **2,150 tests** (+57).
+- **Slice 4.7 — commit `13eda2f`** — Tensor indexing primitives, core family (rank 11). NEW `tensor/src/operations/{slice,gather,stack,concatenate}.ts`:
+  - **`slice(t, ranges)`** — JAX-style per-axis `[start, stop, step]` triples; supports negative indexing and `null` for "whole axis"; preserves axis labels.
+  - **`gather(t, axis, indices)`** — NumPy `take` / JAX `gather`; output rank unchanged, gathered-axis length = indices.length. **Axis-label semantics:** the gathered axis is _primed_ via the existing `Index.prime()` mechanism (same `id` Symbol, `primeLevel + 1`) so it cannot auto-contract with the original even though they share an id.
+  - **`stack(tensors, axis, opts?)`** — NumPy `stack`; result rank = input rank + 1. Optional `newAxisLabel` for the inserted axis (default `undefined`).
+  - **`concatenate(tensors, axis)`** — NumPy `concatenate`; result rank unchanged. Preserves labels from `tensors[0]` (silently if downstream tensors disagree on the join-axis label).
+  - 57 new tests across 4 files (15 slice + 14 gather + 14 stack + 14 concatenate). `tensor`: 266 → **323 tests** (+57).
+  - Subtle finding: when `stack` inserts a new axis at position `ax`, output strides for input dimensions _above_ `ax` are `outStrides[k+1]`, not `outStrides[k]` — the inserted axis shifts all subsequent stride indices up by one.
+
+**Scatter / pad / roll / flip stay deferred** to a future Slice 4.7b sub-slice per the proposal's scope-balloon contract.
+
+**Test deltas this wave:**
+
+- `functions`: 2,093 → **2,150** (+57)
+- `tensor`: 266 → **323** (+57)
+- All other packages unchanged.
+
+Pipeline 19/19 turbo tasks green.
+
 #### Gap-closure Wave 4A — five Tier-1 slices LANDED in parallel
 
 Five disjoint slices from [`GAP_CLOSURE_PROPOSAL_WAVE4.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md) Tier 1, dispatched to five sonnet subagents on non-overlapping file scopes, all green:
