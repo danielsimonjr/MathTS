@@ -145,6 +145,26 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 1 — five Tier-1 slices LANDED in parallel
+
+Five disjoint slices from [`docs/roadmap/GAP_CLOSURE_PROPOSAL.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL.md) Tier 1, dispatched to five sonnet subagents working on non-overlapping file scopes, all landed cleanly:
+
+- **Slice 1.1 — commit `4462f69`** — `TapedTensor.divide` + `.sub` with full reverse-mode AD. Adjoints: `divide(a,b)` → `dA = dY/b`, `dB = -dY·a/b²`; `sub(a,b)` → `dA = dY`, `dB = -dY`. Aliased self-division explicitly returns zero gradient. 10 new tests including finite-difference correctness checks. `autograd`: 92 → 103 tests.
+- **Slice 1.2 — commit `7fe73b7`** — 7 relational ops promoted from the synced layer to active `typed/`: `deepEqual`, `unequal`, `compareNatural`, `compareText`, `compareUnits`, `equalScalar`, `equalText`. NEW `functions/src/typed/relational.ts`; 6 colliding `export` keywords stripped from `factories/index.ts` (mirrors the bitwise/logical/complex/set promotion pattern). 60 new tests. `functions`: 1865 → 1925 tests.
+- **Slice 1.3 — commit `fe40938`** — `ComputePool.divide` API symmetry with `subtract`. No new kernel needed — the existing `elementwiseChunk` worker handler already covered `'divide'` generically; only the public method was missing. 3 new tests (1M-element correctness, threshold fallback, mismatched-length rejection). `parallel`: 339 → 342 tests.
+- **Slice 1.5 — commit `c0df3dd`** — Promote inlined Doolittle LU and right-looking Cholesky from `tensor/src/operations/` to first-class `matrix/src/operations/` primitives. `matrix.lu` returns `{L, U, P}`; `matrix.cholesky` returns `{L}`. Tensor wrappers now delegate; parity is derived from the permutation's cycle structure since `matrix.lu` doesn't return it. 22 new matrix-level tests; 16 existing tensor tests still pass through delegation. De-duplication only — no behavioural change.
+- **Slice 1.6 — commit `08ce15f`** — `bench:tensor` suite. NEW `tools/benchmark/tensor/{contract,contract-network,tensordot,decompositions}.bench.ts` + root `npm run bench:tensor` script. Baseline numbers (2026-05-24, pure-JS, Node 22.22.x) captured in `docs/roadmap/ACCELERATION_BENCHMARKS.md`: tensorQr 32³ = 3.6 ms/op; tensorSvd 32³ maxdim=8 = 221 ms/op; tensorEig 64×64 symmetric = 25 ms/op; `Tensor.contract` n=24 = 1639 ms/op; `contractNetwork` N=12 greedy = 3.7 ms/op vs exact = 17.4 ms/op. Full suite 25s wall time.
+
+**Cumulative test deltas this wave (active code only):**
+
+  - `functions`: 1,865 → **1,925 tests** (+60)
+  - `autograd`:    92 → **103 tests** (+11)
+  - `tensor`:      215 → **231 tests** (delegation through matrix; +16 net at matrix level)
+  - `parallel`:    339 → **342 tests** (+3)
+  - `matrix`:      +22 NEW lu/cholesky algorithm-level tests
+
+All five commits verified: `npx turbo run test --force --concurrency=4` reports 19/19 tasks successful. The default-concurrency turbo run hits transient timeouts in the 16-tensor contraction DP test under load — known turbo-cache-recovery quirk documented in earlier `[Unreleased]` entries.
+
 #### Function-gap audit — WASM/Worker promotion playbook added
 
 Extended [`docs/roadmap/FUNCTION_GAPS_AUDIT.md`](docs/roadmap/FUNCTION_GAPS_AUDIT.md) with three new sub-sections that make the "Acceleration gaps" class directly actionable as a promotion roadmap:

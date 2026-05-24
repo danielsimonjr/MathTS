@@ -19,7 +19,7 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 
 ## Tier 1 — Parallel slices (5 agents, disjoint scopes)
 
-### Slice 1.1 — TapedTensor.divide + TapedTensor.sub (rank 1)
+### Slice 1.1 — ✅ LANDED in `4462f69` — TapedTensor.divide + TapedTensor.sub (rank 1)
 
 **Goal:** Close the autograd symmetry gap. `TapedTensor.add` and `.mul` are tape-aware; their inverses `sub` and `divide` are not.
 
@@ -41,7 +41,7 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 - Existing autograd tests unchanged.
 - Verify numeric gradient at a few inputs matches the analytical adjoint within 1e-7.
 
-### Slice 1.2 — typed/relational.ts promotion (rank 2)
+### Slice 1.2 — ✅ LANDED in `7fe73b7` — typed/relational.ts promotion (rank 2)
 
 **Goal:** Promote the 7 missing relational ops from the synced `functions/src/relational/` directory into the active `typed/` layer.
 
@@ -62,7 +62,7 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 - `npm run typecheck --workspace=@danielsimonjr/mathts-functions` clean.
 - Synced `functions/src/relational/` directory untouched (still dormant; the typed file delegates).
 
-### Slice 1.3 — ComputePool.divide (rank 3)
+### Slice 1.3 — ✅ LANDED in `fe40938` — ComputePool.divide (rank 3)
 
 **Goal:** Close the pool API asymmetry — `subtract` exists but `divide` does not.
 
@@ -79,7 +79,7 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 - Parallel divide of two `Float64Array(1_000_000)` matches the pure-JS reference within numeric tolerance.
 - Worker is actually exercised (verify with `WorkerPool.metrics()` if available).
 
-### Slice 1.5 — Promote LU + Cholesky to matrix primitives (rank 5)
+### Slice 1.5 — ✅ LANDED in `c0df3dd` — Promote LU + Cholesky to matrix primitives (rank 5)
 
 **Goal:** De-duplicate. The Doolittle LU and right-looking Cholesky algorithms currently live inlined in `tensor/src/operations/{lu,cholesky}.ts`; promote them to first-class `matrix/src/operations/{lu,cholesky}.ts` primitives and have the tensor layer delegate.
 
@@ -100,7 +100,7 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 - New matrix-level tests pass.
 - The CHANGELOG follow-up cleanup bullets for "Promote inlined Doolittle LU…" can be marked done.
 
-### Slice 1.6 — bench:tensor benchmark suite (rank 6)
+### Slice 1.6 — ✅ LANDED in `08ce15f` — bench:tensor benchmark suite (rank 6)
 
 **Goal:** Close the perf-measurement gap for the ITensor-parity surface so future regressions show up in CI.
 

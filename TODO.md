@@ -119,27 +119,30 @@ Detail:
       Operationalises the audit's §D sequencing table into 4 tiers
       with concrete file lists and slice boundaries:
 
-      **Tier 1 (parallel, 5 agents, disjoint scopes):**
-      - [ ] **Slice 1.1** — `TapedTensor.divide` + `TapedTensor.sub`
-            (rank 1). `autograd/src/tape.ts`. Adjoints:
-            `divide(a,b)`: `dA=dY/b`, `dB=-dY·a/b²`; `sub(a,b)`:
-            `dA=dY`, `dB=-dY`.
-      - [ ] **Slice 1.2** — `typed/relational.ts` promotion (rank 2).
-            7 missing exports: `deepEqual`, `unequal`, `compareNatural`,
-            `compareText`, `compareUnits`, `equalScalar`, `equalText`.
-            NEW `functions/src/typed/relational.ts` + tests; strip
-            colliding `export`s from `factories/index.ts`.
-      - [ ] **Slice 1.3** — `ComputePool.divide` (rank 3).
-            `parallel/src/ComputePool.ts` — close the asymmetry with
-            `subtract`. Wire `applyKernel2` with `(x,y) => x/y`.
-      - [ ] **Slice 1.5** — Promote LU + Cholesky to matrix primitives
-            (rank 5). Move inlined Doolittle LU and right-looking
-            Cholesky from `tensor/src/operations/{lu,cholesky}.ts` to
-            new `matrix/src/operations/{lu,cholesky}.ts`; tensor
-            delegates. De-duplication only — no behavioural change.
-      - [ ] **Slice 1.6** — `bench:tensor` suite (rank 6). NEW
-            `tools/benchmark/tensor/{contract,contract-network,tensordot,decompositions}.bench.ts`
-            + root `npm run bench:tensor` script.
+      **Tier 1 (parallel, 5 agents, disjoint scopes) — ✅ ALL LANDED:**
+      - [x] **Slice 1.1** ✅ `4462f69` — `TapedTensor.divide` +
+            `TapedTensor.sub`. 10 new tests in
+            `tape-elementwise-ad.test.ts` (forward, backward, fd-check,
+            chained graphs, aliased self-division → gradient = 0).
+            autograd: 92 → 103 tests.
+      - [x] **Slice 1.2** ✅ `7fe73b7` — `typed/relational.ts` promotion.
+            7 ops (`deepEqual`/`unequal`/`compareNatural`/`compareText`/
+            `compareUnits`/`equalScalar`/`equalText`); 60 new tests.
+            functions: 1865 → 1925 tests.
+      - [x] **Slice 1.3** ✅ `fe40938` — `ComputePool.divide`.
+            No new kernel needed — `elementwiseChunk` already covered
+            `'divide'`. 3 new tests (1M-element correctness, threshold
+            fallback, mismatched-length rejection).
+      - [x] **Slice 1.5** ✅ `c0df3dd` — Promote LU + Cholesky to matrix
+            primitives. NEW `matrix/src/operations/{lu,cholesky}.ts`;
+            tensor wrappers delegate (parity derived from permutation
+            cycle structure). 22 new matrix tests; 16 existing tensor
+            tests still pass through delegation.
+      - [x] **Slice 1.6** ✅ `08ce15f` — `bench:tensor` suite. 4 bench
+            files + `npm run bench:tensor` script; 25s full suite.
+            Baseline numbers in `ACCELERATION_BENCHMARKS.md` (e.g.
+            tensorQr 32³ = 3.6 ms/op, contract n=24 = 1639 ms/op,
+            contractNetwork N=12 greedy = 3.7 ms vs exact 17.4 ms).
 
       **Tier 2 (follow-up, depends on Slice 1.5):**
       - [ ] **Slice 2.4** — `tensorPinv` + `tensorSolve` + `tensorKron`
