@@ -47,22 +47,40 @@ Detail:
       in any `package.json` — landing this requires a one-time
       install + config PR before the smoke test can be wired in.
 
-- [ ] **ITensor-parity tensor primitives** — see proposal at
+- [x] **ITensor-parity tensor primitives** — see proposal at
       [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md).
-      Six phases. Phases 1–3 LANDED in commit `a21a844` (named Index,
-      truncated tensor SVD, random tensor constructors). Phases 4–6
-      currently in flight via a parallel three-agent team.
+      All six phases LANDED. Phases 1-3 in commit `a21a844`, Phases
+      4-6 in commit `4417836`.
 
-      | Phase | Deliverable                                                                    | Status   |
-      | ----- | ------------------------------------------------------------------------------ | -------- |
+      | Phase | Deliverable                                                                    | Status     |
+      | ----- | ------------------------------------------------------------------------------ | ---------- |
       | 1     | `Index` value type + `Tensor.contract` (match-by-id)                           | ✅ a21a844 |
       | 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD                 | ✅ a21a844 |
       | 3     | `randomTensor(shape, {distribution, seed})` constructors                       | ✅ a21a844 |
-      | 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order (DP + greedy)  | in flight |
-      | 5     | `TapedTensor.contract` + `TapedTensor.matmul` — AD over named-index contractions | in flight |
-      | 6     | Tensor arithmetic completeness: reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`), NumPy broadcasting in `add`/`sub`/`mul`, `tensordot(other, axes)` | in flight |
+      | 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order (DP + greedy)  | ✅ 4417836 |
+      | 5     | `TapedTensor.contract` + `TapedTensor.matmul` — AD over named-index contractions | ✅ 4417836 |
+      | 6     | Tensor arithmetic completeness: reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`), NumPy broadcasting in `add`/`sub`/`mul`, `tensordot(other, axes)` | ✅ 4417836 |
 
-      Out of scope per the proposal §11 (was §6): MPS/MPO/DMRG/TEBD/TDVP
+      Phase-by-phase engineering notes worth keeping (full detail in
+      the proposal + CHANGELOG):
+      - Phase 1 surfaced the `Index.ts` vs `index.ts` case-sensitivity
+        conflict; the class file is `named-index.ts` to keep
+        `forceConsistentCasingInFileNames` on across the monorepo.
+      - Phase 4's first cut ran the 16-tensor exact DP in ~20 s; the
+        rewrite uses a canonical-index XOR-safe bitmask stored as two
+        30-bit halves in `Int32Array` and runs in 1.66 s. The
+        original O(|A|·|B|) Index-array scan is the fallback path
+        for the rare case of an Index appearing in > 2 tensors.
+      - Phase 5's batched matmul + its VJPs are direct
+        `Float64Array` loop implementations because the `EinsumSpec`
+        format can't express batch dimensions without summing over
+        them.
+      - Phase 6 surfaced a latent crash in `reduceAxes` where
+        `keepDims=true` would construct a Tensor with mismatched
+        `axisLabels.length` vs `shape.length`; fixed by skipping
+        label propagation when `keepDims=true`.
+
+      Out of scope per the proposal §8: MPS/MPO/DMRG/TEBD/TDVP
       (live in UPT or a sibling), quantum-number block-sparse storage,
       fermionic anticommutation, HDF5 I/O, dtypes beyond Float64,
       compile-time shape inference in the TS type system.
