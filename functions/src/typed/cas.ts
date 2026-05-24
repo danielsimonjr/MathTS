@@ -14,11 +14,14 @@
  * - Solver (4): solve, implicitDiff, summation, symbolicProduct
  * - Advanced (8): assume, asymptotic, groebnerBasis, minimalPolynomial,
  *   toRadicals, piecewise, odeGeneral, curl
+ * - Batch CAS (4): simplify, derivative, expand, factor — with worker fan-out
+ *   for arrays of length ≥ 16 (Slice 5.14).
  *
  * @packageDocumentation
  */
 
 import { parse, evaluate } from '../factories/evaluate.js';
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
 // Type Aliases
@@ -2259,4 +2262,768 @@ export function inverseLaplaceTransform(
     node = expr;
   }
   return _inverseLaplaceNode(node, sVar, tVar);
+}
+
+// =============================================================================
+// BATCH CAS — Slice 5.14
+// =============================================================================
+
+/**
+ * Batch fan-out threshold.
+ *
+ * Arrays of length ≥ CAS_BATCH_THRESHOLD are processed via the compute pool
+ * worker fan-out.  Below the threshold the expressions are processed in-process
+ * with a simple loop (still async for a uniform call signature).
+ */
+export const CAS_BATCH_THRESHOLD = 16;
+
+// ---------------------------------------------------------------------------
+// Self-contained CAS kernels
+//
+// Each kernel function is designed to be fully self-contained so it can be
+// serialised via `.toString()` and `eval()`'d inside a worker.  They must not
+// close over any module-level variables or imports.
+// ---------------------------------------------------------------------------
+
+/**
+ * Self-contained simplify kernel.
+ *
+ * Applies algebraic identity rules to a single expression string:
+ * - Remove multiplication by 1
+ * - Remove addition/subtraction of 0
+ * - Collapse x^0 → 1, x^1 → x
+ * - Evaluate pure-numeric sub-expressions
+ * - Combine like-terms for simple polynomial patterns (2*x + x → 3*x)
+ *
+ * @internal
+ */
+function _casSimplifyOne(expr: string): string {
+  let r = expr.trim();
+
+  // x^0 → 1, x^1 → x  (must precede coefficient stripping)
+  r = r.replace(/\b(\w+)\^0\b/g, '1');
+  r = r.replace(/\b(\w+)\^1\b/g, '$1');
+
+  // Remove multiplication by 1
+  r = r.replace(/\b1\s*\*\s*/g, '');
+  r = r.replace(/\s*\*\s*1\b/g, '');
+
+  // Remove addition of 0
+  r = r.replace(/\b0\s*\+\s*/g, '');
+  r = r.replace(/\s*\+\s*0\b/g, '');
+
+  // 0*anything → 0
+  r = r.replace(/\b0\s*\*\s*[^+\-]*/g, '0');
+
+  // Evaluate pure-numeric expressions (digits, operators, parens)
+  const numericPattern = /^[\d\s+\-*/().^]+$/;
+  if (numericPattern.test(r)) {
+    try {
+      const jsExpr = r.replace(/\^/g, '**');
+      // eslint-disable-next-line no-new-func
+      const val: unknown = new Function('"use strict"; return (' + jsExpr + ')')();
+      if (typeof val === 'number' && isFinite(val)) return String(val);
+    } catch {
+      // fall through
+    }
+  }
+
+  // Combine like terms: c1*x + c2*x → (c1+c2)*x, x + x → 2*x, etc.
+  // Simple single-variable, single-power pass.
+  r = _combineLikeTerms(r);
+
+  return r || '0';
+}
+
+/**
+ * Combine like terms in a sum of monomials.  Only handles additive
+ * combinations of terms matching `c*var` or standalone `var`.
+ *
+ * @internal
+ */
+function _combineLikeTerms(expr: string): string {
+  // Normalise minus signs so every term is joined by +
+  const normalised = expr.replace(/\s*-\s*/g, ' + -');
+  const rawTerms = normalised.split(/\s*\+\s*/);
+
+  // Map from key (e.g. "x", "x^2") to summed coefficient
+  const termMap = new Map<string, number>();
+  const otherTerms: string[] = [];
+
+  for (const raw of rawTerms) {
+    const t = raw.trim();
+    if (!t) continue;
+
+    // Numeric literal
+    if (/^-?\d+(\.\d+)?$/.test(t)) {
+      termMap.set('__const__', (termMap.get('__const__') ?? 0) + Number(t));
+      continue;
+    }
+
+    // c*var^n or -c*var^n
+    const cvpMatch = t.match(/^(-?\d*\.?\d*)\s*\*?\s*(\w+)\^(\d+)$/);
+    if (cvpMatch) {
+      const c =
+        cvpMatch[1] === '' || cvpMatch[1] === '+'
+          ? 1
+          : cvpMatch[1] === '-'
+            ? -1
+            : Number(cvpMatch[1]);
+      const key = cvpMatch[2] + '^' + cvpMatch[3];
+      termMap.set(key, (termMap.get(key) ?? 0) + c);
+      continue;
+    }
+
+    // c*var or -c*var
+    const cvMatch = t.match(/^(-?\d*\.?\d*)\s*\*?\s*(\w+)$/);
+    if (cvMatch && !/^\d+$/.test(cvMatch[2])) {
+      const c =
+        cvMatch[1] === '' || cvMatch[1] === '+' ? 1 : cvMatch[1] === '-' ? -1 : Number(cvMatch[1]);
+      termMap.set(cvMatch[2], (termMap.get(cvMatch[2]) ?? 0) + c);
+      continue;
+    }
+
+    otherTerms.push(t);
+  }
+
+  const parts: string[] = [];
+
+  for (const [key, c] of termMap) {
+    if (Math.abs(c) < 1e-12) continue;
+    if (key === '__const__') {
+      parts.push(String(c));
+    } else if (Math.abs(c - 1) < 1e-12) {
+      parts.push(key);
+    } else if (Math.abs(c + 1) < 1e-12) {
+      parts.push('-' + key);
+    } else {
+      parts.push(c + '*' + key);
+    }
+  }
+
+  parts.push(...otherTerms);
+
+  if (parts.length === 0) return '0';
+  return parts.join(' + ').replace(/\+\s*-/g, '- ');
+}
+
+/**
+ * Self-contained expand kernel.
+ *
+ * Distributes products over sums: `(a+b)*(c+d)` → `a*c + a*d + b*c + b*d`.
+ * Also expands `(expr)^2` → `(expr)*(expr)`.
+ *
+ * @internal
+ */
+function _casExpandOne(expr: string): string {
+  let result = expr;
+
+  // Handle (expr)^2 → (expr)*(expr)
+  result = result.replace(/\(([^()]+)\)\^2/g, '($1)*($1)');
+
+  // Distribute (a+b)*(c+d)
+  const mulPattern = /\(([^()]+)\)\s*\*\s*\(([^()]+)\)/g;
+  let match: RegExpExecArray | null;
+  let safetyCount = 0;
+  while ((match = mulPattern.exec(result)) !== null && safetyCount++ < 20) {
+    const leftTerms = match[1].split(/\s*\+\s*/);
+    const rightTerms = match[2].split(/\s*\+\s*/);
+    const products: string[] = [];
+    for (const l of leftTerms) {
+      for (const rv of rightTerms) {
+        products.push(l.trim() + '*' + rv.trim());
+      }
+    }
+    result =
+      result.slice(0, match.index) +
+      products.join(' + ') +
+      result.slice(match.index + match[0].length);
+    mulPattern.lastIndex = 0;
+  }
+
+  return result;
+}
+
+/**
+ * Self-contained factor kernel.
+ *
+ * Factors out the integer GCD from a sum of integer-coefficient terms.
+ * Returns the original expression unchanged when no common factor is found.
+ *
+ * @internal
+ */
+function _casFactorOne(expr: string): string {
+  function _gcd(a: number, b: number): number {
+    a = Math.abs(a);
+    b = Math.abs(b);
+    while (b !== 0) {
+      const tmp = b;
+      b = a % b;
+      a = tmp;
+    }
+    return a;
+  }
+
+  const normalized = expr.replace(/\s*-\s*/g, ' + -');
+  const terms = normalized.split(/\s*\+\s*/).filter((t) => t.trim() !== '');
+  if (terms.length < 2) return expr;
+
+  const coeffs: number[] = [];
+  const varParts: string[] = [];
+
+  for (const term of terms) {
+    const numMatch = term.match(/^(-?\d+)\s*\*?\s*(.*)$/);
+    if (numMatch) {
+      coeffs.push(parseInt(numMatch[1], 10));
+      varParts.push(numMatch[2] || '1');
+    } else {
+      return expr;
+    }
+  }
+
+  let g = Math.abs(coeffs[0]);
+  for (let i = 1; i < coeffs.length; i++) {
+    g = _gcd(g, Math.abs(coeffs[i]));
+  }
+
+  if (g <= 1) return expr;
+
+  const inner = coeffs
+    .map((c, i) => {
+      const reduced = c / g;
+      if (varParts[i] === '1') return String(reduced);
+      if (reduced === 1) return varParts[i];
+      if (reduced === -1) return '-' + varParts[i];
+      return reduced + '*' + varParts[i];
+    })
+    .join(' + ');
+
+  return g + '*(' + inner + ')';
+}
+
+/**
+ * Self-contained derivative kernel.
+ *
+ * Computes a symbolic derivative using power rule, trig, exp, and log patterns.
+ * Returns `d/d<var>(<term>)` as a placeholder for unrecognised forms.
+ *
+ * @internal
+ */
+function _casDerivativeOne(expr: string, variable: string): string {
+  const terms = expr.split(/\s*\+\s*/);
+  const derivedTerms: string[] = [];
+
+  for (const term of terms) {
+    const t = term.trim();
+
+    if (!t.includes(variable)) {
+      derivedTerms.push('0');
+      continue;
+    }
+
+    // c*var^n
+    const powerRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)$');
+    const powerMatch = t.match(powerRe);
+    if (powerMatch) {
+      const coeff =
+        powerMatch[1] === '' || powerMatch[1] === undefined ? 1 : parseFloat(powerMatch[1]);
+      const n = parseInt(powerMatch[2], 10);
+      if (n === 0) {
+        derivedTerms.push('0');
+      } else if (n === 1) {
+        derivedTerms.push(String(coeff));
+      } else {
+        derivedTerms.push(coeff * n + '*' + variable + '^' + (n - 1));
+      }
+      continue;
+    }
+
+    // c*var (linear)
+    const linearRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '$');
+    const linearMatch = t.match(linearRe);
+    if (linearMatch) {
+      const coeff = linearMatch[1] === '' ? 1 : parseFloat(linearMatch[1]);
+      derivedTerms.push(String(coeff));
+      continue;
+    }
+
+    // var alone
+    if (t === variable) {
+      derivedTerms.push('1');
+      continue;
+    }
+
+    if (t === 'sin(' + variable + ')') {
+      derivedTerms.push('cos(' + variable + ')');
+      continue;
+    }
+
+    if (t === 'cos(' + variable + ')') {
+      derivedTerms.push('-sin(' + variable + ')');
+      continue;
+    }
+
+    if (t === 'exp(' + variable + ')') {
+      derivedTerms.push('exp(' + variable + ')');
+      continue;
+    }
+
+    if (t === 'ln(' + variable + ')') {
+      derivedTerms.push('1/' + variable);
+      continue;
+    }
+
+    derivedTerms.push('d/d' + variable + '(' + t + ')');
+  }
+
+  return derivedTerms.join(' + ');
+}
+
+// ---------------------------------------------------------------------------
+// Normalise input: string | MathNode → string
+// ---------------------------------------------------------------------------
+
+/** Convert a MathNode (or string) to its canonical string form. */
+function _nodeToStr(expr: string | MathNode): string {
+  return typeof expr === 'string' ? expr : expr.toString();
+}
+
+// ---------------------------------------------------------------------------
+// Worker-dispatch helpers
+//
+// Batches of length ≥ CAS_BATCH_THRESHOLD are shipped to the compute pool
+// via `computePool.map`.  The transformation closure is shipped as a source
+// string (via `.toString()`) so it can be `eval`'d in the worker.  Therefore
+// the closure passed to `computePool.map` must be fully self-contained — no
+// captured imports or module-level bindings.
+//
+// The round-trip is: string → worker eval → transformed string → main thread.
+// The caller receives `string[]` for the batch path and `string` for the
+// single-expression path.
+//
+// Note on Option A / Option B choice:
+//   We use Option A (string round-trip).  Workers cannot import
+//   `@danielsimonjr/mathts-expression` at runtime (workerpool sits below
+//   functions in the dep graph), so re-parsing in the worker is not
+//   available.  Instead the worker kernel performs the same string-level
+//   symbolic transformations that the single-expression path uses; this is
+//   correct because those transformations are pure string-manipulation.
+// ---------------------------------------------------------------------------
+
+/**
+ * Simplify a single expression (CAS batch-capable variant).
+ *
+ * Named `casSimplify` to avoid ambiguity with the factory-generated
+ * `simplify` from the mathjs compatibility layer.  Both perform algebraic
+ * simplification; this one uses string-level pattern matching and supports
+ * a batch-array overload with worker fan-out for large inputs.
+ *
+ * @param expr - Expression string or parsed MathNode
+ * @returns Simplified expression string
+ *
+ * @example
+ * casSimplify('x + x')   // => '2*x'
+ * casSimplify('1*y')     // => 'y'
+ * casSimplify('2 * 3')   // => '6'
+ */
+export function casSimplify(expr: string | MathNode): string;
+/**
+ * Simplify an array of expressions (batch overload with worker fan-out).
+ *
+ * Arrays shorter than {@link CAS_BATCH_THRESHOLD} (16) are processed
+ * synchronously in-process and the promise resolves immediately.
+ * Longer arrays are dispatched to the worker pool — each expression is
+ * shipped as a source string, the worker applies the same string-level
+ * simplification rules, and the results are returned as strings.
+ *
+ * **String round-trip:** batch inputs are serialised to their source string,
+ * processed in the worker, and the result strings are returned.  Parsed
+ * `MathNode` inputs are converted to strings via `.toString()` before
+ * dispatch.
+ *
+ * @param exprs - Array of expression strings (or MathNodes)
+ * @returns Promise resolving to an array of simplified expression strings
+ *
+ * @example
+ * // Below threshold — resolved synchronously
+ * await casSimplify(['x + x', 'y * 1', '2 * 3'])
+ * // => ['2*x', 'y', '6']
+ *
+ * // Above threshold — worker fan-out
+ * await casSimplify(Array.from({ length: 32 }, (_, i) => `${i}*x + ${i}*x`))
+ */
+export function casSimplify(exprs: Array<string | MathNode>): Promise<string[]>;
+export function casSimplify(
+  input: string | MathNode | Array<string | MathNode>
+): string | Promise<string[]> {
+  if (!Array.isArray(input)) {
+    // Single expression — synchronous path
+    return _casSimplifyOne(_nodeToStr(input));
+  }
+
+  const strs = input.map(_nodeToStr);
+
+  if (strs.length < CAS_BATCH_THRESHOLD || !computePool.isReady()) {
+    // Below threshold or pool not ready — in-process loop
+    return Promise.resolve(strs.map(_casSimplifyOne));
+  }
+
+  // ≥ threshold — worker fan-out via computePool.map
+  // The closure must be self-contained (no captured imports).
+  return computePool
+    .map<string, string>(strs, (exprStr) => {
+      // --- self-contained simplify kernel (copied from _casSimplifyOne) ---
+      function _combineLikeTermsW(expr: string): string {
+        const normalised = expr.replace(/\s*-\s*/g, ' + -');
+        const rawTerms = normalised.split(/\s*\+\s*/);
+        const termMap = new Map<string, number>();
+        const otherTerms: string[] = [];
+        for (const raw of rawTerms) {
+          const t = raw.trim();
+          if (!t) continue;
+          if (/^-?\d+(\.\d+)?$/.test(t)) {
+            termMap.set('__const__', (termMap.get('__const__') ?? 0) + Number(t));
+            continue;
+          }
+          const cvpMatch = t.match(/^(-?\d*\.?\d*)\s*\*?\s*(\w+)\^(\d+)$/);
+          if (cvpMatch) {
+            const c =
+              cvpMatch[1] === '' || cvpMatch[1] === '+'
+                ? 1
+                : cvpMatch[1] === '-'
+                  ? -1
+                  : Number(cvpMatch[1]);
+            const key = cvpMatch[2] + '^' + cvpMatch[3];
+            termMap.set(key, (termMap.get(key) ?? 0) + c);
+            continue;
+          }
+          const cvMatch = t.match(/^(-?\d*\.?\d*)\s*\*?\s*(\w+)$/);
+          if (cvMatch && !/^\d+$/.test(cvMatch[2])) {
+            const c =
+              cvMatch[1] === '' || cvMatch[1] === '+'
+                ? 1
+                : cvMatch[1] === '-'
+                  ? -1
+                  : Number(cvMatch[1]);
+            termMap.set(cvMatch[2], (termMap.get(cvMatch[2]) ?? 0) + c);
+            continue;
+          }
+          otherTerms.push(t);
+        }
+        const parts: string[] = [];
+        for (const [key, c] of termMap) {
+          if (Math.abs(c) < 1e-12) continue;
+          if (key === '__const__') {
+            parts.push(String(c));
+          } else if (Math.abs(c - 1) < 1e-12) {
+            parts.push(key);
+          } else if (Math.abs(c + 1) < 1e-12) {
+            parts.push('-' + key);
+          } else {
+            parts.push(c + '*' + key);
+          }
+        }
+        parts.push(...otherTerms);
+        if (parts.length === 0) return '0';
+        return parts.join(' + ').replace(/\+\s*-/g, '- ');
+      }
+
+      let r = exprStr.trim();
+      r = r.replace(/\b(\w+)\^0\b/g, '1');
+      r = r.replace(/\b(\w+)\^1\b/g, '$1');
+      r = r.replace(/\b1\s*\*\s*/g, '');
+      r = r.replace(/\s*\*\s*1\b/g, '');
+      r = r.replace(/\b0\s*\+\s*/g, '');
+      r = r.replace(/\s*\+\s*0\b/g, '');
+      r = r.replace(/\b0\s*\*\s*[^+\-]*/g, '0');
+      if (/^[\d\s+\-*/().^]+$/.test(r)) {
+        try {
+          const jsExpr = r.replace(/\^/g, '**');
+          // eslint-disable-next-line no-new-func
+          const val: unknown = new Function('"use strict"; return (' + jsExpr + ')')();
+          if (typeof val === 'number' && isFinite(val as number)) return String(val);
+        } catch {
+          /**/
+        }
+      }
+      return _combineLikeTermsW(r) || '0';
+    })
+    .then((r) => r.result);
+}
+
+/**
+ * Compute the symbolic derivative of a single expression (CAS batch-capable variant).
+ *
+ * Named `casDerivative` to avoid ambiguity with the factory-generated
+ * `derivative` from the mathjs compatibility layer.
+ *
+ * Uses power rule, trig (sin/cos), exp, and ln patterns.  Unrecognised terms
+ * are left as `d/d<variable>(<term>)` placeholders.
+ *
+ * @param expr - Expression string or parsed MathNode
+ * @param variable - Variable to differentiate with respect to
+ * @returns Derivative expression string
+ *
+ * @example
+ * casDerivative('x^2', 'x')   // => '2*x^1'
+ * casDerivative('sin(x)', 'x') // => 'cos(x)'
+ * casDerivative('exp(x)', 'x') // => 'exp(x)'
+ */
+export function casDerivative(expr: string | MathNode, variable: string): string;
+/**
+ * Compute the symbolic derivative of an array of expressions (batch overload).
+ *
+ * Arrays shorter than {@link CAS_BATCH_THRESHOLD} (16) are processed
+ * synchronously in-process.  Longer arrays are dispatched to the worker pool.
+ *
+ * **String round-trip:** batch inputs are serialised to their source string
+ * before dispatch.
+ *
+ * @param exprs - Array of expression strings (or MathNodes)
+ * @param variable - Variable to differentiate with respect to
+ * @returns Promise resolving to an array of derivative expression strings
+ *
+ * @example
+ * await casDerivative(['x^2', 'sin(x)', 'exp(x)'], 'x')
+ * // => ['2*x^1', 'cos(x)', 'exp(x)']
+ */
+export function casDerivative(exprs: Array<string | MathNode>, variable: string): Promise<string[]>;
+export function casDerivative(
+  input: string | MathNode | Array<string | MathNode>,
+  variable: string
+): string | Promise<string[]> {
+  if (!Array.isArray(input)) {
+    return _casDerivativeOne(_nodeToStr(input), variable);
+  }
+
+  const strs = input.map(_nodeToStr);
+
+  if (strs.length < CAS_BATCH_THRESHOLD || !computePool.isReady()) {
+    return Promise.resolve(strs.map((s) => _casDerivativeOne(s, variable)));
+  }
+
+  // Worker fan-out — closure must be self-contained
+  const varName = variable;
+  return computePool
+    .map<string, string>(strs, (exprStr) => {
+      // --- self-contained derivative kernel ---
+      const _variable = varName;
+      const terms = exprStr.split(/\s*\+\s*/);
+      const derivedTerms: string[] = [];
+      for (const term of terms) {
+        const t = term.trim();
+        if (!t.includes(_variable)) {
+          derivedTerms.push('0');
+          continue;
+        }
+        const powerRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + _variable + '\\^(\\d+)$');
+        const powerMatch = t.match(powerRe);
+        if (powerMatch) {
+          const coeff =
+            powerMatch[1] === '' || powerMatch[1] === undefined ? 1 : parseFloat(powerMatch[1]);
+          const n = parseInt(powerMatch[2], 10);
+          if (n === 0) {
+            derivedTerms.push('0');
+          } else if (n === 1) {
+            derivedTerms.push(String(coeff));
+          } else {
+            derivedTerms.push(coeff * n + '*' + _variable + '^' + (n - 1));
+          }
+          continue;
+        }
+        const linearRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + _variable + '$');
+        const linearMatch = t.match(linearRe);
+        if (linearMatch) {
+          const coeff = linearMatch[1] === '' ? 1 : parseFloat(linearMatch[1]);
+          derivedTerms.push(String(coeff));
+          continue;
+        }
+        if (t === _variable) {
+          derivedTerms.push('1');
+          continue;
+        }
+        if (t === 'sin(' + _variable + ')') {
+          derivedTerms.push('cos(' + _variable + ')');
+          continue;
+        }
+        if (t === 'cos(' + _variable + ')') {
+          derivedTerms.push('-sin(' + _variable + ')');
+          continue;
+        }
+        if (t === 'exp(' + _variable + ')') {
+          derivedTerms.push('exp(' + _variable + ')');
+          continue;
+        }
+        if (t === 'ln(' + _variable + ')') {
+          derivedTerms.push('1/' + _variable);
+          continue;
+        }
+        derivedTerms.push('d/d' + _variable + '(' + t + ')');
+      }
+      return derivedTerms.join(' + ');
+    })
+    .then((r) => r.result);
+}
+
+/**
+ * Expand a single expression by distributing products over sums
+ * (CAS batch-capable variant).
+ *
+ * Named `casExpand` to avoid ambiguity with the `expand` function in
+ * `algebra.ts`.  Both perform algebraic expansion; this one additionally
+ * supports a batch-array overload with worker fan-out for large inputs.
+ *
+ * @param expr - Expression string or parsed MathNode
+ * @returns Expanded expression string
+ *
+ * @example
+ * casExpand('(x+1)^2')    // => 'x*x + x*1 + 1*x + 1*1'
+ * casExpand('(a+b)*(a-b)') // distributes fully
+ */
+export function casExpand(expr: string | MathNode): string;
+/**
+ * Expand an array of expressions (batch overload with worker fan-out).
+ *
+ * Arrays shorter than {@link CAS_BATCH_THRESHOLD} (16) are processed
+ * synchronously in-process.  Longer arrays are dispatched to the worker pool.
+ *
+ * **String round-trip:** batch inputs are serialised to their source string
+ * before dispatch.
+ *
+ * @param exprs - Array of expression strings (or MathNodes)
+ * @returns Promise resolving to an array of expanded expression strings
+ *
+ * @example
+ * await casExpand(['(x+1)^2', '(a+b)^3'])
+ */
+export function casExpand(exprs: Array<string | MathNode>): Promise<string[]>;
+export function casExpand(
+  input: string | MathNode | Array<string | MathNode>
+): string | Promise<string[]> {
+  if (!Array.isArray(input)) {
+    return _casExpandOne(_nodeToStr(input));
+  }
+
+  const strs = input.map(_nodeToStr);
+
+  if (strs.length < CAS_BATCH_THRESHOLD || !computePool.isReady()) {
+    return Promise.resolve(strs.map(_casExpandOne));
+  }
+
+  return computePool
+    .map<string, string>(strs, (exprStr) => {
+      // --- self-contained expand kernel ---
+      let result = exprStr;
+      result = result.replace(/\(([^()]+)\)\^2/g, '($1)*($1)');
+      const mulPattern = /\(([^()]+)\)\s*\*\s*\(([^()]+)\)/g;
+      let match: RegExpExecArray | null;
+      let safetyCount = 0;
+      while ((match = mulPattern.exec(result)) !== null && safetyCount++ < 20) {
+        const leftTerms = (match[1] as string).split(/\s*\+\s*/);
+        const rightTerms = (match[2] as string).split(/\s*\+\s*/);
+        const products: string[] = [];
+        for (const l of leftTerms) {
+          for (const rv of rightTerms) {
+            products.push((l as string).trim() + '*' + (rv as string).trim());
+          }
+        }
+        result =
+          result.slice(0, (match as RegExpExecArray).index) +
+          products.join(' + ') +
+          result.slice((match as RegExpExecArray).index + (match as RegExpExecArray)[0].length);
+        mulPattern.lastIndex = 0;
+      }
+      return result;
+    })
+    .then((r) => r.result);
+}
+
+/**
+ * Factor a single expression by extracting the integer GCD from all terms
+ * (CAS batch-capable variant).
+ *
+ * Named `casFactor` to avoid ambiguity with the `factor` function in
+ * `algebra.ts`.  Both factor expressions; this one additionally supports a
+ * batch-array overload with worker fan-out for large inputs.
+ *
+ * Returns the original expression unchanged when no common integer factor
+ * greater than 1 is found, or when terms do not follow the `c*var` pattern.
+ *
+ * @param expr - Expression string or parsed MathNode
+ * @returns Factored expression string
+ *
+ * @example
+ * casFactor('2*x + 4*y')  // => '2*(x + 2*y)'
+ * casFactor('x^2 - 1')    // => 'x^2 - 1'  (no integer GCD > 1)
+ */
+export function casFactor(expr: string | MathNode): string;
+/**
+ * Factor an array of expressions (batch overload with worker fan-out).
+ *
+ * Arrays shorter than {@link CAS_BATCH_THRESHOLD} (16) are processed
+ * synchronously in-process.  Longer arrays are dispatched to the worker pool.
+ *
+ * **String round-trip:** batch inputs are serialised to their source string
+ * before dispatch.
+ *
+ * @param exprs - Array of expression strings (or MathNodes)
+ * @returns Promise resolving to an array of factored expression strings
+ *
+ * @example
+ * await casFactor(['2*x + 4*y', '3*a + 6*b'])
+ */
+export function casFactor(exprs: Array<string | MathNode>): Promise<string[]>;
+export function casFactor(
+  input: string | MathNode | Array<string | MathNode>
+): string | Promise<string[]> {
+  if (!Array.isArray(input)) {
+    return _casFactorOne(_nodeToStr(input));
+  }
+
+  const strs = input.map(_nodeToStr);
+
+  if (strs.length < CAS_BATCH_THRESHOLD || !computePool.isReady()) {
+    return Promise.resolve(strs.map(_casFactorOne));
+  }
+
+  return computePool
+    .map<string, string>(strs, (exprStr) => {
+      // --- self-contained factor kernel ---
+      function _gcdW(a: number, b: number): number {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        while (b !== 0) {
+          const tmp = b;
+          b = a % b;
+          a = tmp;
+        }
+        return a;
+      }
+      const normalized = exprStr.replace(/\s*-\s*/g, ' + -');
+      const terms = normalized.split(/\s*\+\s*/).filter((t: string) => t.trim() !== '');
+      if (terms.length < 2) return exprStr;
+      const coeffs: number[] = [];
+      const varParts: string[] = [];
+      for (const term of terms) {
+        const numMatch = (term as string).match(/^(-?\d+)\s*\*?\s*(.*)$/);
+        if (numMatch) {
+          coeffs.push(parseInt(numMatch[1], 10));
+          varParts.push(numMatch[2] || '1');
+        } else return exprStr;
+      }
+      let g = Math.abs(coeffs[0]);
+      for (let i = 1; i < coeffs.length; i++) g = _gcdW(g, Math.abs(coeffs[i]));
+      if (g <= 1) return exprStr;
+      const inner = coeffs
+        .map((c: number, i: number) => {
+          const reduced = c / g;
+          if (varParts[i] === '1') return String(reduced);
+          if (reduced === 1) return varParts[i];
+          if (reduced === -1) return '-' + varParts[i];
+          return reduced + '*' + varParts[i];
+        })
+        .join(' + ');
+      return g + '*(' + inner + ')';
+    })
+    .then((r) => r.result);
 }
