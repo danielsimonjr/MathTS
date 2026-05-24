@@ -143,7 +143,7 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 
 These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice ends with a `bench:wasm` pass that sets the per-op `minElements` threshold.
 
-### Slice 3.7 — typed/algebra.ts polynomial WASM ports (rank 7)
+### Slice 3.7 — ✅ LANDED in `6520a76` — typed/algebra.ts polynomial WASM ports (rank 7)
 
 **Goal:** WASM kernels for the polynomial hot loops.
 

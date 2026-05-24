@@ -145,6 +145,16 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 3b — WASM-route slices (sequenced; 3.7 done)
+
+- **Slice 3.7 — commit `6520a76`** — Polynomial WASM kernel.
+  - NEW `wasm-rust/crates/mathts-wasm/src/poly.rs` (~100 LOC): `poly_mul_f64` (O(n·m) convolution) and `poly_div_mod_f64` (long division returning concatenated `[quotient, remainder]`).
+  - NEW `assembly/src/poly.ts` (~90 LOC): AssemblyScript parity port returning `Float64Array`.
+  - NEW `functions/src/wasm/poly/wasm-bridge.ts` (~240 LOC): threshold-gated dispatch at `WASM_POLY_THRESHOLD = 256` coefficients. For `polymul`, WASM fires when either operand reaches 256 elements; for `polyDivMod`, when `num.length ≥ 256`.
+  - Wires into `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder` in `typed/algebra.ts`. (`discriminant`/`resultant` deferred to a follow-up — they'll reuse the new `poly_div_mod_f64` plus a Sylvester-fill helper.)
+  - `wasm-manifest.json` regenerated (SHA-384 of the new `.wasm` blob); `functions/tests/security/wasm-integrity.test.ts` still green (5/5).
+  - 22 new tests in `functions/tests/typed-algebra-wasm.test.ts`. `functions`: 1,960 → **1,982 tests** (+22).
+
 #### Gap-closure Wave 3a — two worker-route slices LANDED in parallel
 
 Two disjoint Tier-3 slices (worker-only — no WASM toolchain churn) dispatched in parallel:

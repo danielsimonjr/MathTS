@@ -153,11 +153,15 @@ Detail:
             rank-N tensor equivalents.
 
       **Tier 3 (WASM-route, sequenced one at a time):**
-      - [ ] **Slice 3.7** — `typed/algebra.ts` polynomial WASM ports
-            (rank 7). NEW `wasm-rust/crates/<crate>/src/poly.rs` +
-            AS parity + bridge + threshold bench. Wire `polymul`,
+      - [x] **Slice 3.7** ✅ `6520a76` — `typed/algebra.ts` polynomial
+            WASM ports. NEW `wasm-rust/crates/mathts-wasm/src/poly.rs`
+            (`poly_mul_f64` + `poly_div_mod_f64`), AS parity in
+            `assembly/src/poly.ts`, bridge at
+            `WASM_POLY_THRESHOLD = 256` coeffs; wires into `polymul`,
             `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`,
-            `polynomialRemainder`. Starting threshold ≥ 256 coeffs.
+            `polynomialRemainder`. 22 new tests; manifest regenerated.
+            (`discriminant`/`resultant` deferred — will reuse the new
+            div-mod kernel + Sylvester-fill in a follow-up.)
       - [x] **Slice 3.8** ✅ `64c6168` — `typed/integration.ts` worker
             dispatch. All four ops async; `gaussQuad`/`romberg` offload
             dot/sum at ≥ 64 sub-intervals (integrand stays main-thread,
