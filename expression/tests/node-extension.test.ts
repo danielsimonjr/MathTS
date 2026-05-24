@@ -41,8 +41,7 @@ describe('Node base class extensibility (UPT v0.7 §10.2 Q1)', () => {
   // Resolve ConstantNode similarly so we can use it as a child.
   const ConstantNode = createConstantNode({
     Node,
-    isBounded: (v: unknown) =>
-      typeof v === 'number' && Number.isFinite(v as number),
+    isBounded: (v: unknown) => typeof v === 'number' && Number.isFinite(v as number),
   } as unknown as {
     Node: typeof Node;
     isBounded: (value: unknown) => boolean;

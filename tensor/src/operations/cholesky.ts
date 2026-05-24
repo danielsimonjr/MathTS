@@ -134,9 +134,7 @@ export function tensorCholesky(
   const numCols = colDims.reduce((a, b) => a * b, 1);
 
   if (numRows !== numCols) {
-    throw new Error(
-      `tensorCholesky: reshaped matrix must be square (got ${numRows}×${numCols})`
-    );
+    throw new Error(`tensorCholesky: reshaped matrix must be square (got ${numRows}×${numCols})`);
   }
 
   // --- Permute and reshape to 2-D ---

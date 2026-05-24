@@ -570,7 +570,14 @@ export class WASMBackend implements MatrixBackend {
     try {
       // Note: AS signature is matrix_multiply(a, aRows, aCols, b, bCols, result).
       // aCols == bRows is implied by the math; no bRows arg is needed.
-      mod.matrix_multiply(aAlloc.headerPtr, a.rows, a.cols, bAlloc.headerPtr, b.cols, rAlloc.headerPtr);
+      mod.matrix_multiply(
+        aAlloc.headerPtr,
+        a.rows,
+        a.cols,
+        bAlloc.headerPtr,
+        b.cols,
+        rAlloc.headerPtr
+      );
       const result = readAsFloat64Array(mod, rAlloc);
       return DenseMatrix.fromFlat(a.rows, b.cols, Array.from(result));
     } finally {
@@ -686,7 +693,11 @@ export class WASMBackend implements MatrixBackend {
       );
       if (status !== 0) {
         // Singular — match the JS contract: return zeros with singular=true.
-        return { lu: DenseMatrix.zeros(n, n), perm: readAsInt32Array(mod, permAlloc), singular: true };
+        return {
+          lu: DenseMatrix.zeros(n, n),
+          perm: readAsInt32Array(mod, permAlloc),
+          singular: true,
+        };
       }
       // Reconstruct the combined LU storage the JS contract returns: the L
       // factor below the diagonal, U on/above. The new AS kernel emits L

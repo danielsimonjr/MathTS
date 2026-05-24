@@ -189,11 +189,7 @@ describe('tensorLU', () => {
   it('propagates axisLabels: L has rowAxes labels + joining, U has joining + colAxes labels', () => {
     const i = new Index(3, { name: 'i' });
     const j = new Index(3, { name: 'j' });
-    const A = new Tensor(
-      [3, 3],
-      new Float64Array([4, 3, 2, 6, 3, 1, 8, 4, 2]),
-      [i, j]
-    );
+    const A = new Tensor([3, 3], new Float64Array([4, 3, 2, 6, 3, 1, 8, 4, 2]), [i, j]);
 
     const { L, U } = tensorLU(A, [0], { joiningIndexName: 'mid' });
 

@@ -139,7 +139,7 @@ async function probeAtSize(n: number): Promise<void> {
 
   // Hessenberg/bidiag reductions are n Householders, decreasing size from n-1 to 1.
   // Total cost ~ Σ (n-k)² ~ n³/3.
-  const estimatedHessenbergCost = (n * n * n) / 3 * (householderMs / ((n - 1) * (n - 1)));
+  const estimatedHessenbergCost = ((n * n * n) / 3) * (householderMs / ((n - 1) * (n - 1)));
 
   console.log('');
   console.log(`n = ${n}`);
@@ -149,8 +149,12 @@ async function probeAtSize(n: number): Promise<void> {
   console.log(`  single Givens sweep (n cols):  ${givensMs.toFixed(3)} ms`);
   console.log(`  single Householder bilateral:  ${householderMs.toFixed(3)} ms`);
   console.log(`  est. Hessenberg/bidiag total:  ${estimatedHessenbergCost.toFixed(1)} ms`);
-  console.log(`  Givens × ${estimatedQRSteps} QR steps:        ${cumulativeGivensMs.toFixed(1)} ms (sequential)`);
-  console.log(`  if dispatched each QR step:    ${cumulativeParDispatchMs.toFixed(1)} ms (worker dispatch × ${estimatedQRSteps})`);
+  console.log(
+    `  Givens × ${estimatedQRSteps} QR steps:        ${cumulativeGivensMs.toFixed(1)} ms (sequential)`
+  );
+  console.log(
+    `  if dispatched each QR step:    ${cumulativeParDispatchMs.toFixed(1)} ms (worker dispatch × ${estimatedQRSteps})`
+  );
   const innerViable = parMatmulMs < givensMs;
   const householderViable = parMatmulMs < householderMs;
   console.log(

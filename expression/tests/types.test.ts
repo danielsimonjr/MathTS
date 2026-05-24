@@ -11,10 +11,9 @@ import type { TypedFunction, TypedFunctionConstructor } from '../src/types.js';
 describe('expression/src/types.ts – type-only smoke test', () => {
   it('TypedFunction shape check (compile-time)', () => {
     // A compatible implementation of the TypedFunction type.
-    const fn = Object.assign(
-      (..._args: unknown[]) => undefined,
-      { signatures: { 'number': (..._a: unknown[]) => 42 } }
-    ) satisfies TypedFunction;
+    const fn = Object.assign((..._args: unknown[]) => undefined, {
+      signatures: { number: (..._a: unknown[]) => 42 },
+    }) satisfies TypedFunction;
     expect(typeof fn).toBe('function');
     expect(typeof fn.signatures).toBe('object');
   });

@@ -167,11 +167,7 @@ export class MatrixWasmBridge {
 
       // Re-bind the result view from current memory.buffer: the WASM call
       // may have grown linear memory and detached our earlier view.
-      const view = new Float64Array(
-        this.wasmModule.memory.buffer,
-        result.dataPtr,
-        aRows * bCols
-      );
+      const view = new Float64Array(this.wasmModule.memory.buffer, result.dataPtr, aRows * bCols);
       return new Float64Array(view);
     } finally {
       // Per-allocation free (AS path) and batch-reset (Rust path).
@@ -420,11 +416,7 @@ export class MatrixWasmBridge {
       this.wasmModule.fft(dataAlloc.ptr, n, inverse ? 1 : 0);
       // Re-bind the view from current memory.buffer (Rust FFT may grow the
       // module's linear memory and detach the original Float64Array view).
-      const view = new Float64Array(
-        this.wasmModule.memory.buffer,
-        dataAlloc.dataPtr,
-        2 * n
-      );
+      const view = new Float64Array(this.wasmModule.memory.buffer, dataAlloc.dataPtr, 2 * n);
       return new Float64Array(view);
     } finally {
       wasmLoader.free(dataAlloc.ptr);

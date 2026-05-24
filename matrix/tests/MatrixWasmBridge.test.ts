@@ -25,7 +25,13 @@ const wasmAvailable = fs.existsSync(rustWasmPath);
 
 // JS oracles ---------------------------------------------------------------
 
-function jsMultiply(a: number[], aRows: number, aCols: number, b: number[], bCols: number): number[] {
+function jsMultiply(
+  a: number[],
+  aRows: number,
+  aCols: number,
+  b: number[],
+  bCols: number
+): number[] {
   const out = new Array<number>(aRows * bCols).fill(0);
   for (let i = 0; i < aRows; i++) {
     for (let j = 0; j < bCols; j++) {

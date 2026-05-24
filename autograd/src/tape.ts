@@ -303,7 +303,13 @@ export class TapedTensor {
       }
     );
 
-    return new TapedTensor([...yPrimal.shape], new Float64Array(yPrimal.data), this.tape, id, yLabels);
+    return new TapedTensor(
+      [...yPrimal.shape],
+      new Float64Array(yPrimal.data),
+      this.tape,
+      id,
+      yLabels
+    );
   }
 
   /**
@@ -328,14 +334,10 @@ export class TapedTensor {
     const rankB = other.shape.length;
 
     if (rankA < 2) {
-      throw new Error(
-        `TapedTensor.matmul: 'this' operand must have rank ≥ 2, got rank ${rankA}`
-      );
+      throw new Error(`TapedTensor.matmul: 'this' operand must have rank ≥ 2, got rank ${rankA}`);
     }
     if (rankB < 2) {
-      throw new Error(
-        `TapedTensor.matmul: 'other' operand must have rank ≥ 2, got rank ${rankB}`
-      );
+      throw new Error(`TapedTensor.matmul: 'other' operand must have rank ≥ 2, got rank ${rankB}`);
     }
 
     // The batch rank is (rank - 2); both operands must agree on batch dims.
@@ -361,9 +363,7 @@ export class TapedTensor {
     const k2 = other.shape[rankB - 2];
     const n = other.shape[rankB - 1];
     if (k !== k2) {
-      throw new Error(
-        `TapedTensor.matmul: inner dimension mismatch (${k} vs ${k2})`
-      );
+      throw new Error(`TapedTensor.matmul: inner dimension mismatch (${k} vs ${k2})`);
     }
 
     // Forward pass: Y[...ij] = Σ_k A[...ik] * B[...kj].
@@ -421,10 +421,7 @@ export class TapedTensor {
    * counterpart (the non-reduced coordinates select the dY element; the
    * reduced coordinates are collapsed to 0 in the keepDims=false case).
    */
-  sum(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): TapedTensor {
+  sum(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): TapedTensor {
     const primalT = this.toPrimalTensor();
     const outT = primalT.sum(axis, opts);
 
@@ -479,10 +476,7 @@ export class TapedTensor {
    * Adjoint: dX[...] = dY[reduced(idx)] / N, broadcast back to input shape.
    * N = product of reduced-axis dimensions.
    */
-  mean(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): TapedTensor {
+  mean(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): TapedTensor {
     const primalT = this.toPrimalTensor();
     const outT = primalT.mean(axis, opts);
 
@@ -539,10 +533,7 @@ export class TapedTensor {
    *
    * Implementation: uses prefix/suffix products to handle zeros robustly.
    */
-  prod(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): TapedTensor {
+  prod(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): TapedTensor {
     const primalT = this.toPrimalTensor();
     const outT = primalT.prod(axis, opts);
 
@@ -628,10 +619,7 @@ export class TapedTensor {
    * Tie-breaking: "first-wins" — the gradient flows to the first (smallest
    * flat-index) element among those that attain the maximum.
    */
-  max(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): TapedTensor {
+  max(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): TapedTensor {
     const primalT = this.toPrimalTensor();
     const outT = primalT.max(axis, opts);
 
@@ -692,10 +680,7 @@ export class TapedTensor {
    * Tie-breaking: "first-wins" — gradient flows to the first (smallest
    * flat-index) element that attains the minimum.
    */
-  min(
-    axis?: number | ReadonlyArray<number>,
-    opts?: { keepDims?: boolean }
-  ): TapedTensor {
+  min(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): TapedTensor {
     const primalT = this.toPrimalTensor();
     const outT = primalT.min(axis, opts);
 
@@ -770,7 +755,8 @@ export class TapedTensor {
     const thisGradSlot = this.tape.getInputGrad(this.id)!;
 
     // Determine which axes are being reduced.
-    const axes = opts?.axis !== undefined ? [opts.axis] : _resolveAxes(undefined, this.shape.length);
+    const axes =
+      opts?.axis !== undefined ? [opts.axis] : _resolveAxes(undefined, this.shape.length);
     const axisSet = new Set(axes);
 
     if (p === 2 || p === 'fro') {
@@ -796,7 +782,7 @@ export class TapedTensor {
           const normVal = normData[outFlat];
           // Avoid division by zero when norm = 0 (subgradient = 0).
           if (normVal !== 0) {
-            thisGradSlot[n] += outputGrad[outFlat] * primalData[n] / normVal;
+            thisGradSlot[n] += (outputGrad[outFlat] * primalData[n]) / normVal;
           }
           for (let k = inputShape.length - 1; k >= 0; k--) {
             if (++inCoords[k] < inputShape[k]) break;
@@ -859,8 +845,7 @@ export class TapedTensor {
             }
           }
           const prevWinner = argmaxAbsSlot[outFlat];
-          if (prevWinner === -1 ||
-              Math.abs(primalData[n]) > Math.abs(primalData[prevWinner])) {
+          if (prevWinner === -1 || Math.abs(primalData[n]) > Math.abs(primalData[prevWinner])) {
             argmaxAbsSlot[outFlat] = n;
           }
           for (let k = inputShape.length - 1; k >= 0; k--) {
@@ -1104,10 +1089,7 @@ export class TapedTensor {
  * If `axis` is undefined, returns all axes [0, 1, ..., rank-1].
  * Negative indices are not supported (use non-negative indices only).
  */
-function _resolveAxes(
-  axis: number | ReadonlyArray<number> | undefined,
-  rank: number
-): number[] {
+function _resolveAxes(axis: number | ReadonlyArray<number> | undefined, rank: number): number[] {
   if (axis === undefined) {
     return Array.from({ length: rank }, (_, i) => i);
   }
@@ -1139,10 +1121,7 @@ function _rowMajorStrides(shape: ReadonlyArray<number>): number[] {
  * Both `tensor.axisLabels` and `targetLabels` must cover the same set of
  * Index objects (matched by `Index.matches`).
  */
-function _scatterToOriginalAxes(
-  tensor: Tensor,
-  targetLabels: ReadonlyArray<Index>
-): Float64Array {
+function _scatterToOriginalAxes(tensor: Tensor, targetLabels: ReadonlyArray<Index>): Float64Array {
   const currentLabels = tensor.axisLabels!;
   const rank = targetLabels.length;
 

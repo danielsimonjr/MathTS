@@ -140,12 +140,8 @@ function formatOps(ops: number): string {
  */
 function printResults(results: BenchmarkResult[]): void {
   console.log('\n=== Matrix Multiplication Benchmark ===\n');
-  console.log(
-    '| Size | JS (ms) | Rust WASM (ms) | AS WASM (ms) | Rust Speedup | AS Speedup |'
-  );
-  console.log(
-    '|------|---------|----------------|--------------|--------------|------------|'
-  );
+  console.log('| Size | JS (ms) | Rust WASM (ms) | AS WASM (ms) | Rust Speedup | AS Speedup |');
+  console.log('|------|---------|----------------|--------------|--------------|------------|');
 
   for (const r of results) {
     console.log(

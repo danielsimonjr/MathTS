@@ -24,3 +24,9 @@ yarn.lock
 
 # CHANGELOG (managed by changesets)
 CHANGELOG.md
+
+# AssemblyScript sources — prettier's TS parser does not understand AS
+# decorators (@inline, @unmanaged, @external, …). The AS toolchain
+# (asc) is the source of truth for formatting these files.
+assembly/src/
+matrix/assembly/

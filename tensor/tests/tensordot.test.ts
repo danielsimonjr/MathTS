@@ -51,7 +51,14 @@ describe('Tensor.tensordot — matrix multiply', () => {
   it('tensordot result matches einsum spec for matrix multiply', () => {
     // Build the equivalent einsum spec manually: ij,jk->ik
     const spec = {
-      contractions: [{ pair: [[0, 1], [1, 0]] as const }],
+      contractions: [
+        {
+          pair: [
+            [0, 1],
+            [1, 0],
+          ] as const,
+        },
+      ],
       free: [
         { operand: 0, axis: 0 },
         { operand: 1, axis: 1 },
@@ -250,11 +257,21 @@ describe('Tensor.tensordot — error handling', () => {
   });
 
   it('throws on duplicate self axis', () => {
-    expect(() => A.tensordot(B, [[0, 0], [0, 1]])).toThrow(/duplicate axis/);
+    expect(() =>
+      A.tensordot(B, [
+        [0, 0],
+        [0, 1],
+      ])
+    ).toThrow(/duplicate axis/);
   });
 
   it('throws on duplicate other axis', () => {
-    expect(() => A.tensordot(B, [[0, 0], [1, 0]])).toThrow(/duplicate axis/);
+    expect(() =>
+      A.tensordot(B, [
+        [0, 0],
+        [1, 0],
+      ])
+    ).toThrow(/duplicate axis/);
   });
 
   it('throws on dimension mismatch', () => {

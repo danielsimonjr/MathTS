@@ -20,8 +20,7 @@ const extraTypes = [
   // mathjs uses lowercase 'function' in signatures; typed-function registers 'Function'
   {
     name: 'function',
-    test: (x: unknown): x is (...args: unknown[]) => unknown =>
-      typeof x === 'function',
+    test: (x: unknown): x is (...args: unknown[]) => unknown => typeof x === 'function',
   },
   // Expression node types — match objects with isNode flag and specific type properties
   {

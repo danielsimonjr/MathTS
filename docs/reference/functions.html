@@ -773,24 +773,51 @@
 
       ## Logical & Bitwise
 
-      | Function                                                | Description                     |
-      | ------------------------------------------------------- | ------------------------------- |
-      | `and(a, b)` `or(a, b)` `xor(a, b)` `not(x)`             | Logical operators               |
-      | `nullish(a, b)`                                         | Nullish coalescing              |
-      | `bitAnd(a, b)` `bitOr(a, b)` `bitXor(a, b)` `bitNot(x)` | Bitwise operators               |
-      | `leftShift(x, n)`                                       | Bitwise left shift              |
-      | `rightArithShift(x, n)`                                 | Arithmetic (signed) right shift |
-      | `rightLogShift(x, n)`                                   | Logical (unsigned) right shift  |
+      ### Bitwise
+
+      | Function                | Description                              | Types                                 | Accel                   |
+      | ----------------------- | ---------------------------------------- | ------------------------------------- | ----------------------- |
+      | `bitAnd(a, b)`          | Bitwise AND                              | number, bigint, BigNumber, Int32Array | parallel + WASM (≥65 K) |
+      | `bitOr(a, b)`           | Bitwise OR                               | number, bigint, BigNumber, Int32Array | parallel + WASM (≥65 K) |
+      | `bitXor(a, b)`          | Bitwise XOR                              | number, bigint, BigNumber, Int32Array | parallel + WASM (≥65 K) |
+      | `bitNot(x)`             | Bitwise NOT (unary)                      | number, bigint, BigNumber, Int32Array | parallel + WASM (≥65 K) |
+      | `leftShift(x, n)`       | Bitwise left shift                       | number, bigint, BigNumber, Int32Array | parallel + WASM (≥65 K) |
+      | `rightArithShift(x, n)` | Arithmetic (sign-preserving) right shift | number, bigint, BigNumber, Int32Array | parallel + WASM (≥65 K) |
+      | `rightLogShift(x, n)`   | Logical (zero-filling) right shift       | number, bigint, BigNumber, Int32Array | parallel + WASM (≥65 K) |
+
+      `Int32Array` operands are processed in parallel worker threads via `ComputePool`.
+      Above the threshold `WASM_BITWISE_THRESHOLD = 65,536` elements, a WASM kernel is
+      used instead of the worker-pool path. Scalar (`number`, `bigint`, `BigNumber`)
+      inputs run synchronously with no dispatch overhead. Shift operations also accept
+      `(Int32Array, number)` for a scalar shift count.
+
+      ### Logical
+
+      | Function        | Description                                            | Types                                    | Accel |
+      | --------------- | ------------------------------------------------------ | ---------------------------------------- | ----- |
+      | `and(a, b)`     | Logical AND — true when both operands are truthy       | any, number, bigint, BigNumber, Complex  | —     |
+      | `or(a, b)`      | Logical OR — true when at least one operand is truthy  | any, number, bigint, BigNumber, Complex  | —     |
+      | `xor(a, b)`     | Logical XOR — true when exactly one operand is truthy  | any, number, bigint, BigNumber, Complex  | —     |
+      | `not(x)`        | Logical NOT — flips truthiness                         | any, number, bigint, BigNumber, Complex  | —     |
+      | `nullish(a, b)` | Returns `a` unless `a` is `null`/`undefined`, else `b` | any (returns one operand, not a boolean) | —     |
+
+      Truthiness rules: `number` — non-zero and non-NaN; `bigint` — non-zero;
+      `BigNumber` — non-zero and non-NaN; `Complex` — `re !== 0 || im !== 0`.
+      All operators accept a variadic third+ argument. `nullish` is unlike `or` — a
+      value of `0`, `false`, or `''` is **not** considered nullish.
 
       ### Details
 
-      - Logical operators coerce their operands to boolean; `not` returns a boolean.
-      - `nullish(a, b)` returns `a` unless `a` is `null` or `undefined`, in which case
-        it returns `b`.
-      - Bitwise operators act on 32-bit two's-complement integers for `number` inputs
-        and on arbitrary-width values for `bigint` inputs.
+      - Bitwise operators (`bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`,
+        `rightArithShift`, `rightLogShift`) act on 32-bit two's-complement integers for
+        `number` inputs and on arbitrary-width values for `bigint` inputs; `BigNumber`
+        operands must be finite integers.
       - `rightArithShift` preserves the sign bit (sign extension); `rightLogShift`
         zero-fills from the left.
+      - Logical operators (`and`, `or`, `xor`, `not`) coerce their operands to boolean
+        using the truthiness rules above; `not` returns a boolean.
+      - `nullish` returns `a` unless `a` is `null` or `undefined`, in which case it
+        returns `b`.
 
       ### Background & History
 
@@ -1893,28 +1920,33 @@
 
       ## Set Operations
 
-      | Function                 | Description          |
-      | ------------------------ | -------------------- |
-      | `setUnion(...sets)`      | Union                |
-      | `setIntersect(...sets)`  | Intersection         |
-      | `setDifference(a, b)`    | Difference           |
-      | `setSymDifference(a, b)` | Symmetric difference |
-      | `setCartesian(a, b)`     | Cartesian product    |
-      | `setPowerset(a)`         | Power set            |
-      | `setDistinct(a)`         | Distinct elements    |
-      | `setMultiplicity(e, a)`  | Element multiplicity |
-      | `setIsSubset(a, b)`      | Subset test          |
-      | `setSize(a)`             | Set cardinality      |
+      | Function                 | Description                                                       | Types | Accel |
+      | ------------------------ | ----------------------------------------------------------------- | ----- | ----- |
+      | `setUnion(a, b)`         | Union of two multisets                                            | Array | —     |
+      | `setIntersect(a, b)`     | Intersection of two multisets                                     | Array | —     |
+      | `setDifference(a, b)`    | Elements of `a` not in `b` (multiset difference)                  | Array | —     |
+      | `setSymDifference(a, b)` | Symmetric difference of two multisets                             | Array | —     |
+      | `setCartesian(a, b)`     | Cartesian product — all ordered pairs                             | Array | —     |
+      | `setPowerset(a)`         | All subsets ordered by size                                       | Array | —     |
+      | `setDistinct(a)`         | Distinct elements (remove duplicates)                             | Array | —     |
+      | `setMultiplicity(e, a)`  | Count occurrences of element `e` in multiset `a`                  | Array | —     |
+      | `setIsSubset(a, b)`      | True when every element of `a` (with multiplicity) appears in `b` | Array | —     |
+      | `setSize(a[, unique])`   | Element count; pass `true` for distinct count                     | Array | —     |
 
       ### Details
 
-      - Sets are represented as plain arrays; `setMultiplicity` and `setDistinct`
-        expose and collapse repeated elements, so multiset semantics are available
-        where they matter.
+      - All ten functions (`setUnion`, `setIntersect`, `setDifference`,
+        `setSymDifference`, `setCartesian`, `setPowerset`, `setDistinct`,
+        `setMultiplicity`, `setIsSubset`, `setSize`) are **typed-layer**
+        implementations; multi-dimensional input arrays are flattened before the
+        operation.
+      - Operations respect **multiset semantics**: duplicate elements count
+        independently. `setMultiplicity` returns the count of a value; `setDistinct`
+        removes duplicates; `setIsSubset` checks with multiplicity.
       - `setPowerset` produces `2ⁿ` subsets — guard the input size, as it grows
         exponentially.
-      - `setCartesian` returns all ordered pairs `(a, b)`; `setSize` reports
-        cardinality.
+      - `setCartesian` returns all ordered pairs `[x, y]`; `setSize` with `true`
+        reports the count of unique values only.
 
       ### Background & History
 
@@ -2030,21 +2062,23 @@
 
       ## Complex Number Utilities
 
-      | Function  | Description       |
-      | --------- | ----------------- |
-      | `arg(z)`  | Phase angle       |
-      | `conj(z)` | Complex conjugate |
-      | `re(z)`   | Real part         |
-      | `im(z)`   | Imaginary part    |
+      | Function  | Description                                           | Types                                     | Accel |
+      | --------- | ----------------------------------------------------- | ----------------------------------------- | ----- |
+      | `arg(z)`  | Phase angle in radians — `atan2(im, re)`              | number, bigint, BigNumber, Complex, Array | —     |
+      | `conj(z)` | Complex conjugate — negates the imaginary part        | number, bigint, BigNumber, Complex, Array | —     |
+      | `re(z)`   | Real part — identity for real types, `re` for Complex | number, bigint, BigNumber, Complex, Array | —     |
+      | `im(z)`   | Imaginary part — 0 for real types, `im` for Complex   | number, bigint, BigNumber, Complex, Array | —     |
 
       ### Details
 
-      - `arg(z)` returns the phase (argument) in radians, in the range `(-π, π]`.
-      - `conj(z)` negates the imaginary part; `re` and `im` extract the Cartesian
-        components.
-      - Applied to a real `number`, `re` returns it unchanged, `im` returns `0`, and
-        `conj` returns it unchanged — so the utilities are safe in mixed real/complex
-        code.
+      - All four functions (`arg`, `conj`, `re`, `im`) are **typed-layer**
+        implementations with `Array` elementwise dispatch.
+      - `arg` returns the phase (argument) in radians; for positive reals the result is
+        `0`, for negative reals `π`. Range for `Complex` inputs: `(-π, π]`.
+      - `conj` negates the imaginary part; for real types (`number`, `bigint`,
+        `BigNumber`) it returns the value unchanged.
+      - `re` and `im` extract the Cartesian components; for real types `re` returns the
+        value itself and `im` returns `0`.
 
       ### Background & History
 

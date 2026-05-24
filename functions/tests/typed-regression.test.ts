@@ -45,12 +45,7 @@ function mulberry32(seed: number): () => number {
 }
 
 /** Sample y = p(x) + N(0, sigma) at the given xs using a deterministic PRNG. */
-function noisySamples(
-  xs: number[],
-  trueCoeffs: number[],
-  sigma: number,
-  seed: number
-): number[] {
+function noisySamples(xs: number[], trueCoeffs: number[], sigma: number, seed: number): number[] {
   const rng = mulberry32(seed);
   return xs.map((x) => {
     // Box-Muller for one standard normal

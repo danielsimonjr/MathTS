@@ -1509,7 +1509,7 @@ function solveCubicRadicals(
   fm1: f64,
   f0: f64,
   f1: f64,
-  f2: f64,
+  f2: f64
 ): string[] {
   // Fast rational-root short-circuit: if a sample point is an exact root,
   // factor it out and solve the resulting quadratic.
@@ -1545,8 +1545,8 @@ function solveCubicRadicals(
 
   // Depress: x = t - B/(3A)
   const shift = B / (3 * A);
-  const p = (C / A) - (B * B) / (3 * A * A);
-  const q = (D / A) - (B * C) / (3 * A * A) + (2 * B * B * B) / (27 * A * A * A);
+  const p = C / A - (B * B) / (3 * A * A);
+  const q = D / A - (B * C) / (3 * A * A) + (2 * B * B * B) / (27 * A * A * A);
 
   const tRoots = depressedCubicRoots(p, q);
   return tRoots.map((t) => formatCoeff(t - shift));
@@ -1569,7 +1569,7 @@ function solveQuarticRadicals(
   fm1: f64,
   f0: f64,
   f1: f64,
-  f2: f64,
+  f2: f64
 ): string[] {
   // Fast rational-root short-circuit (same set as cubic)
   const candidates: [f64, f64][] = [
@@ -1591,10 +1591,7 @@ function solveQuarticRadicals(
       // so we can't use the short-circuit; just call the closed-form directly)
       const shift2 = c1 / (3 * A);
       const p2 = c2 / A - (c1 * c1) / (3 * A * A);
-      const q2 =
-        c3 / A -
-        (c1 * c2) / (3 * A * A) +
-        (2 * c1 * c1 * c1) / (27 * A * A * A);
+      const q2 = c3 / A - (c1 * c2) / (3 * A * A) + (2 * c1 * c1 * c1) / (27 * A * A * A);
       const tRoots2 = depressedCubicRoots(p2, q2);
       const cubicRoots = tRoots2.map((t) => t - shift2);
 
@@ -1608,10 +1605,7 @@ function solveQuarticRadicals(
   // Depressed form: t⁴ + p4·t² + q4·t + r4  (no cubic term, leading coeff 1)
   const shift4 = B / (4 * A);
   const p4 = C / A - (6 * B * B) / (16 * A * A);
-  const q4 =
-    D / A -
-    (3 * B * C) / (8 * A * A) +
-    (B * B * B) / (8 * A * A * A);
+  const q4 = D / A - (3 * B * C) / (8 * A * A) + (B * B * B) / (8 * A * A * A);
   const r4 =
     E / A -
     (B * D) / (4 * A * A) +
@@ -1629,10 +1623,7 @@ function solveQuarticRadicals(
   // Solve resolvent cubic for m (we need any real root; take the first one)
   const rShift = rB / (3 * rA);
   const rp = rC / rA - (rB * rB) / (3 * rA * rA);
-  const rq =
-    rD / rA -
-    (rB * rC) / (3 * rA * rA) +
-    (2 * rB * rB * rB) / (27 * rA * rA * rA);
+  const rq = rD / rA - (rB * rC) / (3 * rA * rA) + (2 * rB * rB * rB) / (27 * rA * rA * rA);
   const mRoots = depressedCubicRoots(rp, rq);
   const m = mRoots[mRoots.length - 1] - rShift; // pick largest for stability
 

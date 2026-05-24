@@ -13,10 +13,10 @@ Audited independently against the live codebase on 2026-05-23 — every
 item below was verified actionable (vs. done, stale, or a documented
 non-decision).
 
-| # | Item                                                          | Deps                                  | Complexity                | Owner / next step                                                            |
-| - | ------------------------------------------------------------- | ------------------------------------- | ------------------------- | ---------------------------------------------------------------------------- |
-| 1 | **Cut a release for the [Unreleased] CHANGELOG section**      | 0                                     | Low (admin)               | Run `npx changeset version` consuming the pending `.changeset/*.md`, tag, push. |
-| 2 | **Add a browser smoke test for the WebGPU paths**             | Playwright / vitest-browser (not yet) | Low–medium (CI infra)     | Install Playwright (or `@vitest/browser`) at repo root, add one smoke test that boots `gpuMatmul` on a 4×4 input, gate behind a CI matrix entry on a runner with a software WebGPU adapter (Mesa lavapipe on Linux or DX12 on Windows). |
+| #   | Item                                                     | Deps                                  | Complexity            | Owner / next step                                                                                                                                                                                                                       |
+| --- | -------------------------------------------------------- | ------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Cut a release for the [Unreleased] CHANGELOG section** | 0                                     | Low (admin)           | Run `npx changeset version` consuming the pending `.changeset/*.md`, tag, push.                                                                                                                                                         |
+| 2   | **Add a browser smoke test for the WebGPU paths**        | Playwright / vitest-browser (not yet) | Low–medium (CI infra) | Install Playwright (or `@vitest/browser`) at repo root, add one smoke test that boots `gpuMatmul` on a 4×4 input, gate behind a CI matrix entry on a runner with a software WebGPU adapter (Mesa lavapipe on Linux or DX12 on Windows). |
 
 Detail:
 
@@ -262,6 +262,7 @@ below are limited to operations that genuinely clear that bar.
       `singularValues` remain absent from `OpName` / `thresholdByOp`. The
       bench cases and probe are checked in so future re-measurement on
       different hardware is a one-command operation.
+
 - [ ] `polyFit` / `leastSquares` — **deferral re-validated 2026-05-23.**
       `polyFit` has few parameters so `AᵀA` is tiny; `leastSquares` would need
       a custom contraction-dimension reduction (`computePool.matmul`'s
@@ -566,10 +567,10 @@ most complex). Kept here as a checklist of what was done.
 - [x] **(Opus, high) Rust + AssemblyScript WASM ports of bitwise (and
       logical) ops, plus manifest regeneration.** Added bitwise kernels
       to both the Rust workspace (`wasm-rust/crates/mathts-wasm/src/
-      bitwise/operations.rs` — three new per-element shift variants;
+bitwise/operations.rs` — three new per-element shift variants;
       bitAndArray / bitOrArray / bitXorArray / bitNotArray already
       existed) and the AssemblyScript module (`assembly/src/ops/
-      bitwise.ts` — seven brand-new kernels, AS module had no bitwise
+bitwise.ts` — seven brand-new kernels, AS module had no bitwise
       ops before). Exposed via the existing WasmModule interfaces in
       `functions/src/wasm/WasmLoader.ts`,
       `matrix/src/backends/WasmLoader.ts`, and
@@ -598,11 +599,11 @@ below.
 - [x] **ESLint `synced mathjs` override block.** Mirrors `strict: false`
       in `functions/tsconfig.json`: 22 stylistic rules downgrade to
       warnings under the synced category dirs (`functions/src/{arithmetic,
-      algebra,bitwise,…}/`, `functions/src/wasm/{plain,matrix,…}/`,
+algebra,bitwise,…}/`, `functions/src/wasm/{plain,matrix,…}/`,
       `expression/src/utils/**`, `expression/src/transform/**`, the
       synced helpers at the root of `core/src/`, `core/src/bignumber/`,
       `core/src/function/`, `core/src/types/{bigint,bignumber,fraction,
-      number,matrix/,unit/}`). Active typed-function code stays strict.
+number,matrix/,unit/}`). Active typed-function code stays strict.
 - [x] **38 active-code lint errors closed** across core, functions, and
       expression. Interface-required unused args prefixed `_`, dead
       imports removed, `Function`-type replaced with callable signatures,
@@ -676,11 +677,11 @@ least → most complex). Kept as a checklist of what was done.
       `WasmLoader.getDefaultWasmPath()` resolved to (Rust by default).
       `module.__new is not a function` on every standalone bench;
       `this.wasmModule.add is not a function` once `MATHTS_WASM_BACKEND
-      =assemblyscript` flipped the loader. **Closed (Option A — clean
+=assemblyscript` flipped the loader. **Closed (Option A — clean
       split).** `WASMBackend` rewritten as **AS-only**, owning its own
       AS instance (bypasses the wasmLoader singleton keyed on Rust),
       with an inline AS-managed Float64Array allocator (`__new(byteLength
-      ,1)` for buffer + `__new(12,5)` for the header) and a per-instance
+,1)` for buffer + `__new(12,5)` for the header) and a per-instance
       allocation pool to dodge the AS `--runtime stub` no-free
       constraint. Rust callers now route to the existing
       `RustWASMBackend` (whose `RustWasmLoader.findWasmPath()` was
@@ -745,7 +746,7 @@ active source files and addressed every actionable finding.
       appear in this report without being defects.
 
 - [x] **`eigs` / `svd` / `singularValues` re-validated `not
-      pursued`** with measured evidence (see also the existing
+pursued`** with measured evidence (see also the existing
       Acceleration Roadmap entry above for the data). New durable
       probe `tools/benchmark/parallel/eig-inner-probe.ts` checked
       in.
@@ -758,25 +759,22 @@ active source files and addressed every actionable finding.
 - [x] **+12 active files moved from untested → tested** at commit
       `122c590`. Source-file coverage **27.5% → 29.9%** (135/491 →
       **147/491**); test-file count **165 → 176**. Test files
-      created:
-      - `expression/tests/parse.test.ts` (NEW, 101 tests across 24
-        describe blocks covering literals, operators, precedence,
-        function calls, assignments, blocks, arrays / objects /
-        index access, ranges, conditional ternary, whitespace,
-        error handling, static helpers).
-      - `parallel/tests/ops-bitwise.test.ts` (NEW, 64 tests):
-        direct unit tests for the 7 pure elementwise bitwise op
-        functions against JS oracles, with two's-complement
-        boundaries, INT32 limits, scalar-vs-array shifts, mod-32
-        shifts, empty arrays, length-mismatch errors, output-type
-        check, no-mutation invariant.
-      - 10 barrel / type-only smoke tests across
-        `core / expression / parallel / tensor / workbook`. Each
-        directly imports its target file and asserts the expected
-        export names exist (or for type-only files, that the
-        import compiles with a `satisfies` check). Fixed a stale
-        `new Tensor([2,3])` call missing the required
-        `Float64Array` data arg.
+      created: - `expression/tests/parse.test.ts` (NEW, 101 tests across 24
+      describe blocks covering literals, operators, precedence,
+      function calls, assignments, blocks, arrays / objects /
+      index access, ranges, conditional ternary, whitespace,
+      error handling, static helpers). - `parallel/tests/ops-bitwise.test.ts` (NEW, 64 tests):
+      direct unit tests for the 7 pure elementwise bitwise op
+      functions against JS oracles, with two's-complement
+      boundaries, INT32 limits, scalar-vs-array shifts, mod-32
+      shifts, empty arrays, length-mismatch errors, output-type
+      check, no-mutation invariant. - 10 barrel / type-only smoke tests across
+      `core / expression / parallel / tensor / workbook`. Each
+      directly imports its target file and asserts the expected
+      export names exist (or for type-only files, that the
+      import compiles with a `satisfies` check). Fixed a stale
+      `new Tensor([2,3])` call missing the required
+      `Float64Array` data arg.
 
 The remaining 344 untested files in the CDG report are
 intentionally out of scope:
@@ -806,7 +804,7 @@ intentionally out of scope:
       `__heap_base`, exposed via `resetRustAllocator()` /
       `getAllocatorKind()` accessors. `Allocation<T>` typed sum lets
       consumers re-bind output views to `module.memory.buffer +
-      alloc.dataPtr` after each call (Rust `Vec` allocations may grow
+alloc.dataPtr` after each call (Rust `Vec` allocations may grow
       memory and detach earlier views). `MatrixWasmBridge.ts` and
       `fft-wasm.ts` updated for the re-bind + `resetRustAllocator()`
       pattern. 9 new live tests in `matrix/tests/MatrixWasmBridge.test.ts`
@@ -838,7 +836,7 @@ intentionally out of scope:
       `ComputePoolConfig` gained an `OpName` union covering the 37
       dispatched operations and a
       `thresholdByOp?: Partial<Record<OpName, number | 'never' |
-      'always'>>` map. `shouldParallelize(elementCount, op?)`
+'always'>>` map. `shouldParallelize(elementCount, op?)`
       resolves the per-op threshold first and falls back to the
       flat `thresholdElements: 50000` only for ops not in the map.
       Default values applied (source: `tools/benchmark/parallel/run.ts`,
@@ -957,7 +955,7 @@ All 46 test files created for src/wasm/ modules:
 
 > _Removed (2026-05-23, post-audit): the "Keep duplicate JS/TS files
 > (418 files)" backlog item. `find functions/src -name '*.js' -not
-> -path '*/node_modules/*' | wc -l` returns 0 — the duplicate
+-path '*/node_modules/*' | wc -l` returns 0 — the duplicate
 > JS files are gone, so the concern is moot. There is nothing to
 > keep or remove._
 

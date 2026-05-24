@@ -20,14 +20,14 @@ here first.
 
 ## Consumed MathTS APIs (UPT v0.7+)
 
-| UPT proposal     | MathTS package                        | Status              | Key surfaces                                                                                  |
-| ---------------- | ------------------------------------- | ------------------- | --------------------------------------------------------------------------------------------- |
-| 1 (LabeledTensor)| `@danielsimonjr/mathts-tensor` v0.1.0 | shipped             | `Tensor`, `einsum`, `transpose`, `reshape`, `fromDenseMatrix`, `toDenseMatrix`                |
-| 4 (Bridge AST)   | `@danielsimonjr/mathts-expression` v0.2.0 | shipped         | `parse`, `compileExpr`, the 16-node AST + `Node` base, `getSafeProperty` sandbox helpers      |
-| 7 (.mtsw bridges)| `@danielsimonjr/mathts-workbook` v0.1.2  | shipped          | `.mtsw` reactive notebook, `mtsw` CLI (`run` / `validate` / `graph` / `new`)                  |
-| 8 (Differentiable bridge) | `@danielsimonjr/mathts-autograd` v0.1.0 | shipped    | `forwardGrad`, `reverseGrad`, `DualTensor`, `Tape`, `TapedTensor`                             |
-| (implicit, all)  | `@danielsimonjr/mathts-functions`     | shipped             | `evaluate` sandbox, 500+ typed functions, 52 CODATA constants                                 |
-| (implicit, heavy) | `@danielsimonjr/mathts-parallel`     | shipped             | `ComputePool` + `thresholdByOp` map, three-tier WASM/worker/in-process dispatch               |
+| UPT proposal              | MathTS package                            | Status  | Key surfaces                                                                             |
+| ------------------------- | ----------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| 1 (LabeledTensor)         | `@danielsimonjr/mathts-tensor` v0.1.0     | shipped | `Tensor`, `einsum`, `transpose`, `reshape`, `fromDenseMatrix`, `toDenseMatrix`           |
+| 4 (Bridge AST)            | `@danielsimonjr/mathts-expression` v0.2.0 | shipped | `parse`, `compileExpr`, the 16-node AST + `Node` base, `getSafeProperty` sandbox helpers |
+| 7 (.mtsw bridges)         | `@danielsimonjr/mathts-workbook` v0.1.2   | shipped | `.mtsw` reactive notebook, `mtsw` CLI (`run` / `validate` / `graph` / `new`)             |
+| 8 (Differentiable bridge) | `@danielsimonjr/mathts-autograd` v0.1.0   | shipped | `forwardGrad`, `reverseGrad`, `DualTensor`, `Tape`, `TapedTensor`                        |
+| (implicit, all)           | `@danielsimonjr/mathts-functions`         | shipped | `evaluate` sandbox, 500+ typed functions, 52 CODATA constants                            |
+| (implicit, heavy)         | `@danielsimonjr/mathts-parallel`          | shipped | `ComputePool` + `thresholdByOp` map, three-tier WASM/worker/in-process dispatch          |
 
 Reading order before any UPT PR lands: confirm each consumed export
 still exists in `<package>/src/index.ts` of the relevant package, since
@@ -125,16 +125,12 @@ Demonstrated in
 const { result } = await computePool.add(a, b);
 
 // Record the op on the tape with the analytical adjoint.
-const { id: outputId } = tape.record(
-  [aLeaf.id, bLeaf.id],
-  result.length,
-  (outputGrad) => {
-    for (let i = 0; i < outputGrad.length; i++) {
-      aLeaf.gradSlot[i] += outputGrad[i]; // dA = dY for elementwise add
-      bLeaf.gradSlot[i] += outputGrad[i]; // dB = dY
-    }
+const { id: outputId } = tape.record([aLeaf.id, bLeaf.id], result.length, (outputGrad) => {
+  for (let i = 0; i < outputGrad.length; i++) {
+    aLeaf.gradSlot[i] += outputGrad[i]; // dA = dY for elementwise add
+    bLeaf.gradSlot[i] += outputGrad[i]; // dB = dY
   }
-);
+});
 
 tape.backward(outputId, cotangent);
 ```

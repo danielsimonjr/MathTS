@@ -305,7 +305,12 @@ describe('TapedTensor.contract — compositional (contract + add + mul)', () => 
     const gradD = new Float64Array(tape.getInputGrad(D.id)!);
 
     // Forward function for numerical check
-    const fFwdAll = (ad: Float64Array, bd: Float64Array, cd: Float64Array, dd: Float64Array): Float64Array => {
+    const fFwdAll = (
+      ad: Float64Array,
+      bd: Float64Array,
+      cd: Float64Array,
+      dd: Float64Array
+    ): Float64Array => {
       const Ao = new Tensor([2, 3], new Float64Array(ad), [iIdx, jIdx]);
       const Bo = new Tensor([3, 2], new Float64Array(bd), [jIdx, kIdx]);
       const Co = new Tensor([2, 2], new Float64Array(cd));
@@ -320,40 +325,56 @@ describe('TapedTensor.contract — compositional (contract + add + mul)', () => 
     // gradA
     const numGradA = new Float64Array(aData.length);
     for (let i = 0; i < aData.length; i++) {
-      const ap = new Float64Array(aData); ap[i] += eps;
-      const am = new Float64Array(aData); am[i] -= eps;
-      numGradA[i] = (fFwdAll(ap, bData, cData, dData).reduce((s,x)=>s+x,0) -
-                     fFwdAll(am, bData, cData, dData).reduce((s,x)=>s+x,0)) / (2*eps);
+      const ap = new Float64Array(aData);
+      ap[i] += eps;
+      const am = new Float64Array(aData);
+      am[i] -= eps;
+      numGradA[i] =
+        (fFwdAll(ap, bData, cData, dData).reduce((s, x) => s + x, 0) -
+          fFwdAll(am, bData, cData, dData).reduce((s, x) => s + x, 0)) /
+        (2 * eps);
     }
     assertClose(gradA, numGradA, 1e-7, 'compositional gradA');
 
     // gradB
     const numGradB = new Float64Array(bData.length);
     for (let i = 0; i < bData.length; i++) {
-      const bp = new Float64Array(bData); bp[i] += eps;
-      const bm = new Float64Array(bData); bm[i] -= eps;
-      numGradB[i] = (fFwdAll(aData, bp, cData, dData).reduce((s,x)=>s+x,0) -
-                     fFwdAll(aData, bm, cData, dData).reduce((s,x)=>s+x,0)) / (2*eps);
+      const bp = new Float64Array(bData);
+      bp[i] += eps;
+      const bm = new Float64Array(bData);
+      bm[i] -= eps;
+      numGradB[i] =
+        (fFwdAll(aData, bp, cData, dData).reduce((s, x) => s + x, 0) -
+          fFwdAll(aData, bm, cData, dData).reduce((s, x) => s + x, 0)) /
+        (2 * eps);
     }
     assertClose(gradB, numGradB, 1e-7, 'compositional gradB');
 
     // gradC
     const numGradC = new Float64Array(cData.length);
     for (let i = 0; i < cData.length; i++) {
-      const cp = new Float64Array(cData); cp[i] += eps;
-      const cm = new Float64Array(cData); cm[i] -= eps;
-      numGradC[i] = (fFwdAll(aData, bData, cp, dData).reduce((s,x)=>s+x,0) -
-                     fFwdAll(aData, bData, cm, dData).reduce((s,x)=>s+x,0)) / (2*eps);
+      const cp = new Float64Array(cData);
+      cp[i] += eps;
+      const cm = new Float64Array(cData);
+      cm[i] -= eps;
+      numGradC[i] =
+        (fFwdAll(aData, bData, cp, dData).reduce((s, x) => s + x, 0) -
+          fFwdAll(aData, bData, cm, dData).reduce((s, x) => s + x, 0)) /
+        (2 * eps);
     }
     assertClose(gradC, numGradC, 1e-7, 'compositional gradC');
 
     // gradD
     const numGradD = new Float64Array(dData.length);
     for (let i = 0; i < dData.length; i++) {
-      const dp = new Float64Array(dData); dp[i] += eps;
-      const dm = new Float64Array(dData); dm[i] -= eps;
-      numGradD[i] = (fFwdAll(aData, bData, cData, dp).reduce((s,x)=>s+x,0) -
-                     fFwdAll(aData, bData, cData, dm).reduce((s,x)=>s+x,0)) / (2*eps);
+      const dp = new Float64Array(dData);
+      dp[i] += eps;
+      const dm = new Float64Array(dData);
+      dm[i] -= eps;
+      numGradD[i] =
+        (fFwdAll(aData, bData, cData, dp).reduce((s, x) => s + x, 0) -
+          fFwdAll(aData, bData, cData, dm).reduce((s, x) => s + x, 0)) /
+        (2 * eps);
     }
     assertClose(gradD, numGradD, 1e-7, 'compositional gradD');
   });
@@ -430,7 +451,7 @@ describe('TapedTensor.matmul — rank-2 classic', () => {
   });
 
   it('gradients match closed-form dA = dY @ Bᵀ, dB = Aᵀ @ dY (2×3 @ 3×2 → 2×2)', () => {
-    const aData = new Float64Array([1, 2, 3, 4, 5, 6]);     // 2×3
+    const aData = new Float64Array([1, 2, 3, 4, 5, 6]); // 2×3
     const bData = new Float64Array([0.5, -0.5, 1.5, -1.5, 2.5, -2.5]); // 3×2
 
     const aTensor = new Tensor([2, 3], new Float64Array(aData));
@@ -447,11 +468,7 @@ describe('TapedTensor.matmul — rank-2 classic', () => {
     // Σ_j B[2,j] = 2.5 + (-2.5) = 0   → dA[i,2] = 0
 
     // Let's use a non-cancelling dY instead. Compute via numerics.
-    const { gradA, gradB } = reverseGradTwo(
-      (A, B) => A.matmul(B),
-      aTensor,
-      bTensor
-    );
+    const { gradA, gradB } = reverseGradTwo((A, B) => A.matmul(B), aTensor, bTensor);
 
     const fFwd = (ad: Float64Array, bd: Float64Array): Float64Array => {
       return new Tensor([2, 3], new Float64Array(ad)).matMul(
@@ -467,7 +484,9 @@ describe('TapedTensor.matmul — rank-2 classic', () => {
   });
 
   it('gradient w.r.t. A matches dA = dY @ Bᵀ computed directly (3×4 @ 4×5)', () => {
-    const M = 3, K = 4, N = 5;
+    const M = 3,
+      K = 4,
+      N = 5;
     const aData = new Float64Array(M * K);
     const bData = new Float64Array(K * N);
     for (let x = 0; x < M * K; x++) aData[x] = Math.sin(x + 1);
@@ -476,11 +495,7 @@ describe('TapedTensor.matmul — rank-2 classic', () => {
     const aTensor = new Tensor([M, K], new Float64Array(aData));
     const bTensor = new Tensor([K, N], new Float64Array(bData));
 
-    const { gradA, gradB } = reverseGradTwo(
-      (A, B) => A.matmul(B),
-      aTensor,
-      bTensor
-    );
+    const { gradA, gradB } = reverseGradTwo((A, B) => A.matmul(B), aTensor, bTensor);
 
     // dY = ones(M×N), so:
     // dA[i,q] = Σ_j B[q,j]  → dA row i = sum of rows of B
@@ -510,7 +525,10 @@ describe('TapedTensor.matmul — rank-2 classic', () => {
 
 describe('TapedTensor.matmul — rank-3 batched', () => {
   it('batched 2×3×4 @ 2×4×5 → 2×3×5 forward correct', () => {
-    const B2 = 2, M = 3, K = 4, N = 5;
+    const B2 = 2,
+      M = 3,
+      K = 4,
+      N = 5;
     const aData = new Float64Array(B2 * M * K);
     const bData = new Float64Array(B2 * K * N);
     for (let x = 0; x < aData.length; x++) aData[x] = x + 1;
@@ -546,7 +564,10 @@ describe('TapedTensor.matmul — rank-3 batched', () => {
   });
 
   it('batched 2×3×4 @ 2×4×5: gradients match numerical estimate (tol 1e-7)', () => {
-    const B2 = 2, M = 3, K = 4, N = 5;
+    const B2 = 2,
+      M = 3,
+      K = 4,
+      N = 5;
     const aData = new Float64Array(B2 * M * K);
     const bData = new Float64Array(B2 * K * N);
     for (let x = 0; x < aData.length; x++) aData[x] = Math.sin(x * 0.3 + 1);
@@ -555,11 +576,7 @@ describe('TapedTensor.matmul — rank-3 batched', () => {
     const aTensor = new Tensor([B2, M, K], new Float64Array(aData));
     const bTensor = new Tensor([B2, K, N], new Float64Array(bData));
 
-    const { gradA, gradB } = reverseGradTwo(
-      (A, B) => A.matmul(B),
-      aTensor,
-      bTensor
-    );
+    const { gradA, gradB } = reverseGradTwo((A, B) => A.matmul(B), aTensor, bTensor);
 
     const fFwd = (ad: Float64Array, bd: Float64Array): Float64Array => {
       const Ao = new Tensor([B2, M, K], new Float64Array(ad));
@@ -649,9 +666,11 @@ describe('TapedTensor — independence: contract and matmul compose with add/sub
   });
 
   it('matmul(B).sub(C).mul(D) composes cleanly across all leaves', () => {
-    const M = 2, K = 3, N = 2;
-    const aData = new Float64Array([1, 2, 3, 4, 5, 6]);     // 2×3
-    const bData = new Float64Array([1, -1, 2, -2, 3, -3]);  // 3×2
+    const M = 2,
+      K = 3,
+      N = 2;
+    const aData = new Float64Array([1, 2, 3, 4, 5, 6]); // 2×3
+    const bData = new Float64Array([1, -1, 2, -2, 3, -3]); // 3×2
     const cData = new Float64Array([0.5, 1.0, -0.5, -1.0]); // 2×2
     const dData = new Float64Array([2.0, -1.0, 1.0, -2.0]); // 2×2
 
@@ -676,7 +695,12 @@ describe('TapedTensor — independence: contract and matmul compose with add/sub
     const gradD = new Float64Array(tape.getInputGrad(D.id)!);
 
     // Numerical verification
-    const fFwdAll = (ad: Float64Array, bd: Float64Array, cd: Float64Array, dd: Float64Array): Float64Array => {
+    const fFwdAll = (
+      ad: Float64Array,
+      bd: Float64Array,
+      cd: Float64Array,
+      dd: Float64Array
+    ): Float64Array => {
       const Ao = new Tensor([M, K], new Float64Array(ad));
       const Bo = new Tensor([K, N], new Float64Array(bd));
       const Co = new Tensor([M, N], new Float64Array(cd));
@@ -686,16 +710,32 @@ describe('TapedTensor — independence: contract and matmul compose with add/sub
 
     const eps = 1e-6;
     for (const [grad, data, label, getDiff] of [
-      [gradA, aData, 'gradA', (d: Float64Array, i: number, delta: number) => {
-        const r = new Float64Array(d); r[i] += delta; return r;
-      }] as const,
-    ] as Array<[Float64Array, Float64Array, string, (d: Float64Array, i: number, delta: number) => Float64Array]>) {
+      [
+        gradA,
+        aData,
+        'gradA',
+        (d: Float64Array, i: number, delta: number) => {
+          const r = new Float64Array(d);
+          r[i] += delta;
+          return r;
+        },
+      ] as const,
+    ] as Array<
+      [
+        Float64Array,
+        Float64Array,
+        string,
+        (d: Float64Array, i: number, delta: number) => Float64Array,
+      ]
+    >) {
       const numGrad = new Float64Array(data.length);
       for (let i = 0; i < data.length; i++) {
         const ap = getDiff(data, i, eps);
         const am = getDiff(data, i, -eps);
-        numGrad[i] = (fFwdAll(ap, bData, cData, dData).reduce((s,x)=>s+x,0) -
-                      fFwdAll(am, bData, cData, dData).reduce((s,x)=>s+x,0)) / (2*eps);
+        numGrad[i] =
+          (fFwdAll(ap, bData, cData, dData).reduce((s, x) => s + x, 0) -
+            fFwdAll(am, bData, cData, dData).reduce((s, x) => s + x, 0)) /
+          (2 * eps);
       }
       assertClose(grad, numGrad, 1e-7, label);
     }
@@ -703,30 +743,42 @@ describe('TapedTensor — independence: contract and matmul compose with add/sub
     // gradB numerical
     const numGradB = new Float64Array(bData.length);
     for (let i = 0; i < bData.length; i++) {
-      const bp = new Float64Array(bData); bp[i] += eps;
-      const bm = new Float64Array(bData); bm[i] -= eps;
-      numGradB[i] = (fFwdAll(aData, bp, cData, dData).reduce((s,x)=>s+x,0) -
-                     fFwdAll(aData, bm, cData, dData).reduce((s,x)=>s+x,0)) / (2*eps);
+      const bp = new Float64Array(bData);
+      bp[i] += eps;
+      const bm = new Float64Array(bData);
+      bm[i] -= eps;
+      numGradB[i] =
+        (fFwdAll(aData, bp, cData, dData).reduce((s, x) => s + x, 0) -
+          fFwdAll(aData, bm, cData, dData).reduce((s, x) => s + x, 0)) /
+        (2 * eps);
     }
     assertClose(gradB, numGradB, 1e-7, 'compose matmul gradB');
 
     // gradC numerical
     const numGradC = new Float64Array(cData.length);
     for (let i = 0; i < cData.length; i++) {
-      const cp = new Float64Array(cData); cp[i] += eps;
-      const cm = new Float64Array(cData); cm[i] -= eps;
-      numGradC[i] = (fFwdAll(aData, bData, cp, dData).reduce((s,x)=>s+x,0) -
-                     fFwdAll(aData, bData, cm, dData).reduce((s,x)=>s+x,0)) / (2*eps);
+      const cp = new Float64Array(cData);
+      cp[i] += eps;
+      const cm = new Float64Array(cData);
+      cm[i] -= eps;
+      numGradC[i] =
+        (fFwdAll(aData, bData, cp, dData).reduce((s, x) => s + x, 0) -
+          fFwdAll(aData, bData, cm, dData).reduce((s, x) => s + x, 0)) /
+        (2 * eps);
     }
     assertClose(gradC, numGradC, 1e-7, 'compose matmul gradC');
 
     // gradD numerical
     const numGradD = new Float64Array(dData.length);
     for (let i = 0; i < dData.length; i++) {
-      const dp = new Float64Array(dData); dp[i] += eps;
-      const dm = new Float64Array(dData); dm[i] -= eps;
-      numGradD[i] = (fFwdAll(aData, bData, cData, dp).reduce((s,x)=>s+x,0) -
-                     fFwdAll(aData, bData, cData, dm).reduce((s,x)=>s+x,0)) / (2*eps);
+      const dp = new Float64Array(dData);
+      dp[i] += eps;
+      const dm = new Float64Array(dData);
+      dm[i] -= eps;
+      numGradD[i] =
+        (fFwdAll(aData, bData, cData, dp).reduce((s, x) => s + x, 0) -
+          fFwdAll(aData, bData, cData, dm).reduce((s, x) => s + x, 0)) /
+        (2 * eps);
     }
     assertClose(gradD, numGradD, 1e-7, 'compose matmul gradD');
   });

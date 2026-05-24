@@ -61,9 +61,7 @@
     "synced_expression_utils": {
       "label": "Synced expression utils + transforms",
       "rationale": "Synced from mathjs. expression/src/utils/ has its own direct tests (utils-array, utils-bignumber-formatter, …); only files NOT covered there fall into this bucket — exercised transitively via the parser and compiler tests.",
-      "pathPrefixes": [
-        "expression/src/transform/"
-      ]
+      "pathPrefixes": ["expression/src/transform/"]
     },
     "synced_core_helpers": {
       "label": "Synced helpers in core/src/",
@@ -99,17 +97,12 @@
     "assemblyscript_sources": {
       "label": "AssemblyScript sources under assembly/src/",
       "rationale": "AssemblyScript is not a vitest target. Exercised end-to-end by the cross-package WASM integration suite invoked via `npm run test:wasm:integration` (224/224 passing across 11 files). Direct-import test files in vitest cannot meaningfully cover AS-only syntax.",
-      "pathPrefixes": [
-        "assembly/src/"
-      ]
+      "pathPrefixes": ["assembly/src/"]
     },
     "type_only_barrels": {
       "label": "Type-only files",
       "rationale": "Pure interface / type declarations with no runtime to exercise. A vitest test would be a no-op.",
-      "exactPaths": [
-        "functions/src/core/config.ts",
-        "functions/src/types.ts"
-      ]
+      "exactPaths": ["functions/src/core/config.ts", "functions/src/types.ts"]
     }
   }
 }
