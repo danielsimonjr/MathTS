@@ -664,6 +664,100 @@ pub unsafe extern "C" fn ellipticE_wasm(phi: f64, m: f64) -> f64 {
 }
 
 // =============================================================================
+// Complete Elliptic Integrals via AGM (Slice 5.3)
+//
+// K(m) = π / (2 · agm(1, √(1−m)))
+//
+// E(m) via the Carlson-Bulirsch AGM variant:
+//   a₀ = 1, b₀ = √(1−m), c₀ = √m
+//   a_{n+1} = (aₙ + bₙ) / 2
+//   b_{n+1} = √(aₙ · bₙ)
+//   c_{n+1} = (aₙ − bₙ) / 2
+//   K = π / (2 · a_∞)
+//   E = K · (1 − ½ · Σ_{k=0}^{∞} 2^k · c_k²)
+//
+// Domain: m ∈ [0, 1).  Special cases: K(1) = +∞, E(1) = 1.0.
+// Out-of-domain (m < 0 or m > 1) → NaN.
+//
+// Both converge quadratically; ≤ 10 iterations suffice for f64 precision.
+// =============================================================================
+
+/// Complete elliptic integral of the first kind K(m) via AGM (Slice 5.3).
+///
+/// Domain: m ∈ [0, 1).  K(1) = +∞.  m < 0 or m > 1 → NaN.
+pub fn elliptic_k(m: f64) -> f64 {
+    if m != m {
+        return f64::NAN; // propagate NaN
+    }
+    if m < 0.0 || m > 1.0 {
+        return f64::NAN;
+    }
+    if m == 1.0 {
+        return f64::INFINITY;
+    }
+    if m == 0.0 {
+        return PI / 2.0;
+    }
+
+    let mut a = 1.0_f64;
+    let mut b = libm::sqrt(1.0 - m);
+    for _ in 0..50 {
+        let a_new = (a + b) / 2.0;
+        let b_new = libm::sqrt(a * b);
+        if libm::fabs(a_new - b_new) < 1e-16 * a_new {
+            a = a_new;
+            break;
+        }
+        a = a_new;
+        b = b_new;
+    }
+    PI / (2.0 * a)
+}
+
+/// Complete elliptic integral of the second kind E(m) via AGM (Slice 5.3).
+///
+/// Domain: m ∈ [0, 1].  E(0) = E(1) = 1 (E(0) = π/2, E(1) = 1).
+/// m < 0 or m > 1 → NaN.
+pub fn elliptic_e(m: f64) -> f64 {
+    if m != m {
+        return f64::NAN;
+    }
+    if m < 0.0 || m > 1.0 {
+        return f64::NAN;
+    }
+    if m == 0.0 {
+        return PI / 2.0;
+    }
+    if m == 1.0 {
+        return 1.0;
+    }
+
+    let mut a = 1.0_f64;
+    let mut b = libm::sqrt(1.0 - m);
+
+    // Accumulate: sum = Σ 2^k · c_k²
+    // k=0 contributes c_0² = m (weight 2^0 = 1, c_0 = √m)
+    let mut sum = m; // 2^0 · c_0² = m
+    let mut pow2: f64 = 1.0; // 2^k
+
+    for _ in 0..50 {
+        let a_new = (a + b) / 2.0;
+        let b_new = libm::sqrt(a * b);
+        let c_new = (a - b) / 2.0;
+        pow2 *= 2.0;
+        sum += pow2 * c_new * c_new;
+        if libm::fabs(c_new) < 1e-16 * a_new {
+            a = a_new;
+            break;
+        }
+        a = a_new;
+        b = b_new;
+    }
+    let k = PI / (2.0 * a);
+    k * (1.0 - 0.5 * sum)
+}
+
+// =============================================================================
 // Lambert W Function
 // =============================================================================
 

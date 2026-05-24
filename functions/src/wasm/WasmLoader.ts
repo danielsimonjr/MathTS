@@ -647,6 +647,17 @@ export interface WasmModule {
   bessel_y_f64?: (order: number, xsPtr: number, nElems: number, outPtr: number) => number;
   airy_ai_f64?: (xsPtr: number, n: number, outPtr: number) => number;
   airy_bi_f64?: (xsPtr: number, n: number, outPtr: number) => number;
+  // Elliptic K/E array kernels (Slice 5.3).
+  // Rust backend: pointer-style.
+  //   elliptic_k_f64(ms_ptr, n, out_ptr) → n (or -1 on error)
+  //   elliptic_e_f64(ms_ptr, n, out_ptr) → n (or -1 on error)
+  // AS backend: typed-array calling convention.
+  //   elliptic_k_f64_as(ms: Float64Array) → Float64Array
+  //   elliptic_e_f64_as(ms: Float64Array) → Float64Array
+  elliptic_k_f64?: (msPtr: number, n: number, outPtr: number) => number;
+  elliptic_e_f64?: (msPtr: number, n: number, outPtr: number) => number;
+  elliptic_k_f64_as?: (ms: Float64Array) => Float64Array;
+  elliptic_e_f64_as?: (ms: Float64Array) => Float64Array;
   // AS-backend variants (typed-array calling convention, Slice 4.9).
   bessel_j0_f64_as?: (xs: Float64Array) => Float64Array;
   bessel_j1_f64_as?: (xs: Float64Array) => Float64Array;

@@ -26,6 +26,10 @@ export { eigWasm, eigvalsWasm, spectralRadiusWasm } from './eig-wasm.js';
 // WASM-accelerated SVD
 export { svdWasm } from './svd-wasm.js';
 
+// Moore-Penrose pseudoinverse (DenseMatrix primitive — Slice 4.2)
+// Re-exported as `matrixPinv` to avoid collision with `pinv` from svd.js above.
+export { pinv as matrixPinv, type PinvOptions } from './pinv.js';
+
 // QR decomposition (DenseMatrix primitive — Gram-Schmidt with re-orthogonalisation)
 export { qr, type QRResult, type QROptions } from './qr.js';
 

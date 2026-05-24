@@ -476,6 +476,174 @@ export function resetAiryWasm(): void {
   wasmLoader.reset();
 }
 
+/**
+ * Test-only alias for Elliptic reset (uses same singleton).
+ */
+export function resetEllipticWasm(): void {
+  wasmLoader.reset();
+}
+
+// ---------------------------------------------------------------------------
+// Elliptic K / E — pure-JS fallbacks (Slice 5.3)
+//
+// K(m) via AGM: K = π / (2·agm(1, √(1−m)))
+// E(m) via Carlson-Bulirsch AGM (same iteration, accumulates Σ 2^k·c_k²)
+//
+// Domain: m ∈ [0, 1).  K(1)=+∞, E(1)=1.  m<0 or m>1 → NaN.
+// ---------------------------------------------------------------------------
+
+/** JS implementation of K(m) — complete elliptic integral of the first kind. */
+function _ellipticK(m: number): number {
+  if (isNaN(m)) return NaN;
+  if (m < 0.0 || m > 1.0) return NaN;
+  if (m === 1.0) return Infinity;
+  if (m === 0.0) return Math.PI / 2.0;
+  let a = 1.0;
+  let b = Math.sqrt(1.0 - m);
+  for (let i = 0; i < 50; i++) {
+    const aNew = (a + b) / 2.0;
+    const bNew = Math.sqrt(a * b);
+    if (Math.abs(aNew - bNew) < 1e-16 * aNew) {
+      a = aNew;
+      break;
+    }
+    a = aNew;
+    b = bNew;
+  }
+  return Math.PI / (2.0 * a);
+}
+
+/** JS implementation of E(m) — complete elliptic integral of the second kind. */
+function _ellipticE(m: number): number {
+  if (isNaN(m)) return NaN;
+  if (m < 0.0 || m > 1.0) return NaN;
+  if (m === 0.0) return Math.PI / 2.0;
+  if (m === 1.0) return 1.0;
+  let a = 1.0;
+  let b = Math.sqrt(1.0 - m);
+  let sum = m; // 2^0 · c_0² = m (c_0 = √m, c_0² = m)
+  let pow2 = 1.0;
+  for (let i = 0; i < 50; i++) {
+    const aNew = (a + b) / 2.0;
+    const bNew = Math.sqrt(a * b);
+    const cNew = (a - b) / 2.0;
+    pow2 *= 2.0;
+    sum += pow2 * cNew * cNew;
+    if (Math.abs(cNew) < 1e-16 * aNew) {
+      a = aNew;
+      break;
+    }
+    a = aNew;
+    b = bNew;
+  }
+  const k = Math.PI / (2.0 * a);
+  return k * (1.0 - 0.5 * sum);
+}
+
+/** JS fallback: K(m) applied element-wise. */
+export function ellipticKJS(ms: Float64Array): Float64Array {
+  const out = new Float64Array(ms.length);
+  for (let i = 0; i < ms.length; i++) {
+    out[i] = _ellipticK(ms[i]);
+  }
+  return out;
+}
+
+/** JS fallback: E(m) applied element-wise. */
+export function ellipticEJS(ms: Float64Array): Float64Array {
+  const out = new Float64Array(ms.length);
+  for (let i = 0; i < ms.length; i++) {
+    out[i] = _ellipticE(ms[i]);
+  }
+  return out;
+}
+
+/** Dispatch K(m) over an array — Rust WASM above threshold, then AS, then JS. */
+export function ellipticKDispatch(ms: Float64Array): Float64Array {
+  const n = ms.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      // Probe Rust (pointer-style)
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_k_f64'] as
+          | RustJ01Fn
+          | undefined;
+        if (typeof rustFn === 'function') {
+          const msAlloc = wasmLoader.allocateFloat64Array(ms);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(msAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) {
+              return new Float64Array(outAlloc.array);
+            }
+          } finally {
+            wasmLoader.release(msAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch {
+        // fall through to AS probe
+      }
+      // Probe AS (typed-array style)
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_k_f64_as'] as
+          | ((ms: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') {
+          return asFn(ms);
+        }
+      } catch {
+        // fall through to JS
+      }
+    }
+  }
+  return ellipticKJS(ms);
+}
+
+/** Dispatch E(m) over an array — Rust WASM above threshold, then AS, then JS. */
+export function ellipticEDispatch(ms: Float64Array): Float64Array {
+  const n = ms.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      // Probe Rust (pointer-style)
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_e_f64'] as
+          | RustJ01Fn
+          | undefined;
+        if (typeof rustFn === 'function') {
+          const msAlloc = wasmLoader.allocateFloat64Array(ms);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(msAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) {
+              return new Float64Array(outAlloc.array);
+            }
+          } finally {
+            wasmLoader.release(msAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch {
+        // fall through to AS probe
+      }
+      // Probe AS (typed-array style)
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_e_f64_as'] as
+          | ((ms: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') {
+          return asFn(ms);
+        }
+      } catch {
+        // fall through to JS
+      }
+    }
+  }
+  return ellipticEJS(ms);
+}
+
 // ---------------------------------------------------------------------------
 // Internal scalar implementations (mirrors typed/special.ts besselXScalar)
 // These are used by the JS fallback loops so this file is self-contained.

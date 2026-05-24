@@ -406,6 +406,7 @@ export { tridiag_solve_f64 } from './tridiag';
 
 // =============================================================================
 // Bessel J/Y and Airy Ai/Bi array kernels (Slice 3.10c-1 / Slice 4.9)
+// Elliptic K/E array kernels (Slice 5.3)
 // =============================================================================
 
 export {
@@ -417,6 +418,8 @@ export {
   bessel_yn_f64,
   airy_ai_f64,
   airy_bi_f64,
+  elliptic_k_f64,
+  elliptic_e_f64,
 } from './special';
 
 // =============================================================================

@@ -94,7 +94,12 @@ export * from './hypothesis.js';
 // acyclic.
 
 // Matrix operations (characteristic polynomial, RREF, Cholesky, etc.)
+// `cond` is also defined in numeric.ts (plain function); the typed-dispatch
+// version from matrix-ops.ts supersedes it for the public barrel.
 export * from './matrix-ops.js';
+// Explicit re-export to resolve the `cond` ambiguity that TypeScript raises when
+// both numeric.js and matrix-ops.js export a symbol with the same name.
+export { cond } from './matrix-ops.js';
 
 // WebGPU-accelerated matrix operations (gpuMatmul, gpuAdd, gpuTranspose, gpuScale)
 export * from './gpu.js';

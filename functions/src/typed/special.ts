@@ -25,6 +25,8 @@ import {
   besselYDispatch,
   airyAiDispatch,
   airyBiDispatch,
+  ellipticKDispatch,
+  ellipticEDispatch,
 } from '../wasm/special/wasm-bridge.js';
 
 // =============================================================================
@@ -517,9 +519,11 @@ function betaincScalar(a: f64, b: f64, x: f64): f64 {
   return front * f;
 }
 
-/** Complete elliptic integral of the first kind K(m). */
+/** Complete elliptic integral of the first kind K(m) via AGM. */
 function ellipticKScalar(m: f64): f64 {
-  if (m < 0 || m >= 1) return NaN;
+  if (isNaN(m)) return NaN;
+  if (m < 0 || m > 1) return NaN;
+  if (m === 1) return Infinity;
   if (m === 0) return Math.PI / 2;
 
   let a: f64 = 1;
@@ -527,7 +531,7 @@ function ellipticKScalar(m: f64): f64 {
   for (let i = 0; i < 50; i++) {
     const aNew = (a + b) / 2;
     const bNew = Math.sqrt(a * b);
-    if (Math.abs(aNew - bNew) < 1e-15) {
+    if (Math.abs(aNew - bNew) < 1e-16 * aNew) {
       a = aNew;
       break;
     }
@@ -537,7 +541,35 @@ function ellipticKScalar(m: f64): f64 {
   return Math.PI / (2 * a);
 }
 
-/** Incomplete elliptic integral of the second kind E(phi, m). */
+/** Complete elliptic integral of the second kind E(m) via Carlson-Bulirsch AGM. */
+function ellipticECompleteScalar(m: f64): f64 {
+  if (isNaN(m)) return NaN;
+  if (m < 0 || m > 1) return NaN;
+  if (m === 0) return Math.PI / 2;
+  if (m === 1) return 1.0;
+
+  let a: f64 = 1;
+  let b: f64 = Math.sqrt(1 - m);
+  let sum: f64 = m; // 2^0 · c_0² = m
+  let pow2: f64 = 1;
+  for (let i = 0; i < 50; i++) {
+    const aNew = (a + b) / 2;
+    const bNew = Math.sqrt(a * b);
+    const cNew = (a - b) / 2;
+    pow2 *= 2;
+    sum += pow2 * cNew * cNew;
+    if (Math.abs(cNew) < 1e-16 * aNew) {
+      a = aNew;
+      break;
+    }
+    a = aNew;
+    b = bNew;
+  }
+  const k = Math.PI / (2 * a);
+  return k * (1 - 0.5 * sum);
+}
+
+/** Incomplete elliptic integral of the second kind E(phi, m) via Simpson's rule. */
 function ellipticEScalar(phi: f64, m: f64): f64 {
   const n = 100;
   const h = phi / n;
@@ -552,11 +584,6 @@ function ellipticEScalar(phi: f64, m: f64): f64 {
     sum += weight * Math.sqrt(1 - m * sinSq(t));
   }
   return (h / 3) * sum;
-}
-
-/** Complete elliptic integral of the second kind E(m) = E(pi/2, m). */
-function ellipticECompleteScalar(m: f64): f64 {
-  return ellipticEScalar(Math.PI / 2, m);
 }
 
 /** Chebyshev polynomial of the first kind T_n(x). */
@@ -1253,34 +1280,65 @@ export const besselK = mathTyped('besselK', {
 /**
  * Complete elliptic integral of the first kind K(m).
  *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via elliptic_k_f64, Slice 5.3; or AS via elliptic_k_f64_as).
+ *
+ * Algorithm: AGM (arithmetic-geometric mean) — K = π / (2·agm(1, √(1−m))).
+ * Converges quadratically; ~10 iterations for full f64 precision.
+ *
+ * Domain: m ∈ [0, 1).  K(1) = +∞.  m < 0 or m > 1 → NaN.
+ *
+ * Reference values (DLMF §19.6):
+ *   K(0) = π/2 ≈ 1.5707963267948966
+ *   K(0.5) ≈ 1.8540746773013719
+ *   K(0.99) ≈ 3.6956373629898747
+ *
  * @param m - Parameter (0 <= m < 1), or Float64Array of parameters
  * @returns K(m)
  */
 export const ellipticK = mathTyped('ellipticK', {
   number: ellipticKScalar,
-  Float64Array: (m: Float64Array): Promise<Float64Array> =>
-    mapArray(m, ellipticKScalar, () =>
+  Float64Array: (m: Float64Array): Promise<Float64Array> => {
+    if (m.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(ellipticKDispatch(m));
+    }
+    return mapArray(m, ellipticKScalar, () =>
       kernelSource([ellipticKScalar], '(m) => ellipticKScalar(m)')
-    ),
+    );
+  },
 });
 
 /**
- * Elliptic integral of the second kind E(phi, m).
+ * Elliptic integral of the second kind E(phi, m) or complete form E(m).
  *
- * With one argument, returns the complete integral E(m). With a Float64Array,
- * returns the complete integral evaluated across an array of parameters.
+ * With one number argument, returns the complete integral E(m).
+ * With a Float64Array, dispatches the complete integral E(m) across the array.
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) use the WASM kernel
+ * (Rust via elliptic_e_f64, Slice 5.3; or AS via elliptic_e_f64_as).
  *
- * @param phi - Amplitude (radians)
+ * Algorithm: Carlson-Bulirsch AGM variant (complete form).
+ * Domain: m ∈ [0, 1].  E(0) = π/2, E(1) = 1.  m < 0 or m > 1 → NaN.
+ *
+ * Reference values (DLMF §19.6):
+ *   E(0) = π/2 ≈ 1.5707963267948966
+ *   E(0.5) ≈ 1.3506438810476755
+ *   E(1) = 1.0
+ *
+ * @param phi - Amplitude (radians), or Float64Array of m-values for complete form
  * @param m - Parameter (0 <= m <= 1)
- * @returns E(phi, m), or E(m) for the single-argument form
+ * @returns E(phi, m), or E(m) for the single-argument / array form
  */
 export const ellipticE = mathTyped('ellipticE', {
   'number, number': ellipticEScalar,
   number: ellipticECompleteScalar,
-  Float64Array: (m: Float64Array): Promise<Float64Array> =>
-    mapArray(m, ellipticECompleteScalar, () =>
+  Float64Array: (m: Float64Array): Promise<Float64Array> => {
+    if (m.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(ellipticEDispatch(m));
+    }
+    return mapArray(m, ellipticECompleteScalar, () =>
       kernelSource([ellipticEScalar, ellipticECompleteScalar], '(m) => ellipticECompleteScalar(m)')
-    ),
+    );
+  },
 });
 
 // =============================================================================

@@ -22,7 +22,9 @@ use alloc::vec::Vec;
 // Scalar helpers (delegate to special/functions.rs implementations)   //
 // ------------------------------------------------------------------ //
 
-use crate::special::functions::{airy_ai, airy_bi, besselJ0, besselJ1, besselY0, besselY1};
+use crate::special::functions::{
+    airy_ai, airy_bi, besselJ0, besselJ1, besselY0, besselY1, elliptic_e, elliptic_k,
+};
 
 /// Scalar J_n(x) via forward or Miller backward recurrence.
 ///
@@ -223,6 +225,40 @@ pub unsafe extern "C" fn airy_bi_f64(xs_ptr: *const f64, n: i32, out_ptr: *mut f
     }
     for i in 0..n as usize {
         *out_ptr.add(i) = airy_bi(*xs_ptr.add(i));
+    }
+    n
+}
+
+// ------------------------------------------------------------------ //
+// Elliptic K / E array kernels (Slice 5.3)                            //
+// ------------------------------------------------------------------ //
+
+/// Apply `K(m)` element-wise to `ms[0..n]` → `out[0..n]`.
+///
+/// Domain: m ∈ [0, 1).  K(1) = +∞.  m < 0 or m > 1 → NaN.
+/// Returns `n` on success, `-1` if `n ≤ 0`.
+#[no_mangle]
+pub unsafe extern "C" fn elliptic_k_f64(ms_ptr: *const f64, n: i32, out_ptr: *mut f64) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = elliptic_k(*ms_ptr.add(i));
+    }
+    n
+}
+
+/// Apply `E(m)` element-wise to `ms[0..n]` → `out[0..n]`.
+///
+/// Domain: m ∈ [0, 1].  E(0) = π/2, E(1) = 1.  m < 0 or m > 1 → NaN.
+/// Returns `n` on success, `-1` if `n ≤ 0`.
+#[no_mangle]
+pub unsafe extern "C" fn elliptic_e_f64(ms_ptr: *const f64, n: i32, out_ptr: *mut f64) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = elliptic_e(*ms_ptr.add(i));
     }
     n
 }
@@ -437,5 +473,108 @@ mod tests {
         assert_eq!(ret, 4);
         assert!((out[0] - 0.35502805388781723).abs() < TOL_AIRY, "batch Ai(0)={}", out[0]);
         assert!((out[1] - 0.13529241631288141).abs() < TOL_AIRY, "batch Ai(1)={}", out[1]);
+    }
+
+    // --- Elliptic K / E tests (Slice 5.3) ---
+
+    fn ek(m: f64) -> f64 {
+        let ms = [m];
+        let mut out = [0.0f64];
+        unsafe { elliptic_k_f64(ms.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+
+    fn ee(m: f64) -> f64 {
+        let ms = [m];
+        let mut out = [0.0f64];
+        unsafe { elliptic_e_f64(ms.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+
+    const TOL_ELLIPTIC: f64 = 1e-10;
+
+    #[test]
+    fn test_ek_at_zero() {
+        // K(0) = π/2
+        let k_pi_half = core::f64::consts::PI / 2.0;
+        assert!(
+            (ek(0.0) - k_pi_half).abs() < TOL_ELLIPTIC,
+            "K(0) = π/2, got {}",
+            ek(0.0)
+        );
+    }
+
+    #[test]
+    fn test_ek_at_half() {
+        // K(0.5) ≈ 1.8540746773013719 (DLMF §19.6)
+        let ref_val = 1.8540746773013719_f64;
+        assert!(
+            (ek(0.5) - ref_val).abs() < TOL_ELLIPTIC,
+            "K(0.5), got {}",
+            ek(0.5)
+        );
+    }
+
+    #[test]
+    fn test_ek_at_one() {
+        // K(1) = +∞
+        assert!(ek(1.0).is_infinite() && ek(1.0) > 0.0, "K(1) = +∞, got {}", ek(1.0));
+    }
+
+    #[test]
+    fn test_ek_out_of_domain() {
+        assert!(ek(-0.1).is_nan(), "K(-0.1) = NaN");
+        assert!(ek(1.5).is_nan(), "K(1.5) = NaN");
+    }
+
+    #[test]
+    fn test_ee_at_zero() {
+        // E(0) = π/2
+        let e_pi_half = core::f64::consts::PI / 2.0;
+        assert!(
+            (ee(0.0) - e_pi_half).abs() < TOL_ELLIPTIC,
+            "E(0) = π/2, got {}",
+            ee(0.0)
+        );
+    }
+
+    #[test]
+    fn test_ee_at_half() {
+        // E(0.5) ≈ 1.3506438810476755 (DLMF §19.6)
+        let ref_val = 1.3506438810476755_f64;
+        assert!(
+            (ee(0.5) - ref_val).abs() < TOL_ELLIPTIC,
+            "E(0.5), got {}",
+            ee(0.5)
+        );
+    }
+
+    #[test]
+    fn test_ee_at_one() {
+        // E(1) = 1.0
+        assert!((ee(1.0) - 1.0).abs() < TOL_ELLIPTIC, "E(1) = 1.0, got {}", ee(1.0));
+    }
+
+    #[test]
+    fn test_ee_out_of_domain() {
+        assert!(ee(-0.1).is_nan(), "E(-0.1) = NaN");
+        assert!(ee(1.5).is_nan(), "E(1.5) = NaN");
+    }
+
+    #[test]
+    fn test_elliptic_batch() {
+        let ms: Vec<f64> = vec![0.0, 0.5, 0.99];
+        let mut out = vec![0.0f64; 3];
+        let ret = unsafe { elliptic_k_f64(ms.as_ptr(), 3, out.as_mut_ptr()) };
+        assert_eq!(ret, 3);
+        let k_pi_half = core::f64::consts::PI / 2.0;
+        assert!((out[0] - k_pi_half).abs() < TOL_ELLIPTIC, "batch K(0)={}", out[0]);
+        assert!((out[1] - 1.8540746773013719_f64).abs() < TOL_ELLIPTIC, "batch K(0.5)={}", out[1]);
+        // K(0.99) ≈ 3.6956373629898747 (reference)
+        assert!(
+            (out[2] - 3.6956373629898747_f64).abs() < 1e-7,
+            "batch K(0.99)={}",
+            out[2]
+        );
     }
 }

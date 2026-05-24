@@ -786,8 +786,10 @@ factoryScope.composition = composition;
 export const partitionSelect = createPartitionSelect(factoryScope as any);
 factoryScope.partitionSelect = partitionSelect;
 
-export const pinv = createPinv(factoryScope as any);
-factoryScope.pinv = pinv;
+// pinv: the typed/ layer owns the public `pinv` export (Slice 5.2).
+// Keep the factory internal so the factoryScope wiring still works.
+const pinv_factory = createPinv(factoryScope as any);
+factoryScope.pinv = pinv_factory;
 
 export const qr = createQr(factoryScope as any);
 factoryScope.qr = qr;

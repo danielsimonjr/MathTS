@@ -145,6 +145,22 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 5A — four Tier-1 slices LANDED in parallel
+
+Four disjoint Tier-1 slices from [`GAP_CLOSURE_PROPOSAL_WAVE5.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md) opening the B.1/B.2 playbook backlog:
+
+- **Slice 5.1 — commit `09eadea`** — Tensor `scatter`/`pad`/`roll`/`flip` closes the 4.7b sub-slice deferred from Slice 4.7. All four preserve input axis labels (output shape == input shape). Notable indexing-math choices: `roll` uses `((outIdx[k] - shift[k]) % dim + dim) % dim` for branchless negative-shift handling; `pad` `'reflect'` mode excludes the boundary element (matching NumPy `np.pad`); `scatter` with `reduce: 'add'` is order-dependent for duplicate indices (documented behaviour). 56 new tests (14 per op). `tensor`: 323 → **379 tests** (+56).
+- **Slice 5.2 — commit `0cef320`** — Promote 6 matrix-package exports to the typed/ layer: `pinv`, `cond`, `norm2`, `normFro`, `lowRankApprox`, `singularValues`. `pinv` wired to the DenseMatrix-based `matrixPinv` from Slice 4.2 (Option A — cleaner DenseMatrix API). Name-collision finding: `cond` already existed as a plain export in `typed/numeric.ts`; resolved via an explicit barrel-level re-export override (`functions/src/typed/index.ts`) so deep imports from `numeric.ts` still work but the typed-function dispatch surface gets the SVD-based mathTyped version. Also added a `matrixPinv` re-export to `matrix/src/operations/index.ts`. 27 new tests.
+- **Slice 5.10 — commit `6b78c31`** — `typed/integration.ts` sub-interval worker fan-out. Extends Slice 3.8 — that slice offloaded the post-evaluation dot/sum; this slice offloads the integrand evaluation itself across `workerCount` sub-domains. New `validateClosureSource()` allow-list heuristic: parses the stringified closure, extracts declared parameter name(s), tokenises the body with a lookbehind regex, and rejects any non-allowlisted identifiers (allow-list = JS keywords, `Math.*`, `Infinity`, `NaN`, the parameter name). Rejects async closures. New `integrateChunk` worker kernel (returns scalar, not `Float64Array` — doesn't fit the elementwise `applyKernel` shape). 14 new tests covering rejection paths, multi-worker correctness, and the totalPoints-below-threshold fallback.
+- **Slice 5.11 — commit `9f74b1e`** — `typed/hypothesis.ts` bootstrap helper. Adds `{ bootstrap: N, bootstrapSeed }` opt-in to all 4 tests. Per-test resampling scheme: `chiSquareTest` = multinomial with replacement; `kolmogorovSmirnovTest` = parametric bootstrap with replacement from the original sorted sample, D recomputed against the same CDF; `mannWhitneyTest` = permutation bootstrap via Fisher-Yates shuffle of the combined pool; `shapiroWilkTest` = bootstrap with replacement, W recomputed with the same precomputed coefficients. Mulberry32 seeded PRNG for reproducibility. Return type union — `BaseResult | BootstrapResult` per test, where bootstrap result carries `bootstrapStatistics: Float64Array`, `bootstrapMean`, `bootstrapStd`, `pValueEmpirical`. 17 new tests.
+
+**Cumulative Wave 5A test deltas:**
+
+- `tensor`: 323 → **379** (+56)
+- `functions`: 2,171 → **2,229** (+58 across 5.2 + 5.10 + 5.11)
+
+Pipeline 19/19 turbo tasks green. Wave 5B (sequential WASM slices 5.3-5.6) dispatches next.
+
 #### Gap-closure Wave 4C — two Tier-3 design-heavy slices LANDED
 
 - **Slice 4.8 — commit `fd81cd8`** — `TapedTensor` decomposition AD (rank 12). **Opus subagent.** Three new methods:

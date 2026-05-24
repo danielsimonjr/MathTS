@@ -12,7 +12,18 @@
  * @packageDocumentation
  */
 
-import { eig, svd } from '@danielsimonjr/mathts-matrix';
+import {
+  eig,
+  svd,
+  cond as matrixCond,
+  norm2 as matrixNorm2,
+  normFro as matrixNormFro,
+  lowRankApprox as matrixLowRankApprox,
+  singularValues as matrixSingularValues,
+  matrixPinv,
+  type PinvOptions,
+} from '@danielsimonjr/mathts-matrix';
+import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
@@ -1087,3 +1098,82 @@ async function solveApprox(A: number[][], b: number[], n: i32): Promise<number[]
 
   return x;
 }
+
+// =============================================================================
+// 10. Typed SVD-derived matrix operations (Slice 5.2)
+// =============================================================================
+
+/**
+ * Compute the Moore-Penrose pseudoinverse of a DenseMatrix (Option A — Slice 4.2 primitive).
+ *
+ * Delegates to the DenseMatrix-based `matrixPinv` from `@danielsimonjr/mathts-matrix`,
+ * which uses full SVD with `rcond · max(S)` singular-value thresholding.
+ *
+ * @example
+ * const A = DenseMatrix.fromArray([[1,2],[3,4],[5,6]]);
+ * const Ap = pinv(A);           // shape 2x3
+ * const Ap2 = pinv(A, { rcond: 1e-6 });
+ */
+export const pinv = mathTyped('pinv', {
+  DenseMatrix: (A: Parameters<typeof matrixPinv>[0]) => matrixPinv(A),
+  'DenseMatrix, Object': (A: Parameters<typeof matrixPinv>[0], opts: PinvOptions) =>
+    matrixPinv(A, opts),
+});
+
+/**
+ * Compute the condition number of a matrix (ratio σ_max / σ_min via SVD).
+ *
+ * Returns `Infinity` for singular or rank-deficient matrices.
+ *
+ * @example
+ * cond([[1,0],[0,2]])  // => 2
+ * cond([[1,2],[2,4]])  // => Infinity
+ */
+export const cond = mathTyped('cond', {
+  Array: (A: number[][]) => matrixCond(A),
+});
+
+/**
+ * Compute the spectral norm (2-norm) of a matrix — the largest singular value.
+ *
+ * @example
+ * norm2([[3,0],[0,2]])  // => 3
+ */
+export const norm2 = mathTyped('norm2', {
+  Array: (A: number[][]) => matrixNorm2(A),
+});
+
+/**
+ * Compute the Frobenius norm of a matrix — `sqrt(sum(A_ij²))`.
+ *
+ * @example
+ * normFro([[1,0],[0,1]])  // => sqrt(2) ≈ 1.414
+ */
+export const normFro = mathTyped('normFro', {
+  Array: (A: number[][]) => matrixNormFro(A),
+});
+
+/**
+ * Compute a rank-k approximation of a matrix using truncated SVD.
+ *
+ * Returns the best rank-k approximation in the Frobenius-norm sense:
+ * `A_k = U[:, :k] * diag(S[:k]) * V[:, :k]^T`.
+ *
+ * @example
+ * lowRankApprox([[1,2],[3,4],[5,6]], 1)
+ */
+export const lowRankApprox = mathTyped('lowRankApprox', {
+  'Array, number': (A: number[][], k: number) => matrixLowRankApprox(A, k),
+});
+
+/**
+ * Return the singular values of a matrix in descending order.
+ *
+ * The result has length `min(m, n)` and all values are non-negative.
+ *
+ * @example
+ * singularValues([[3,0],[0,2]])  // => [3, 2]
+ */
+export const singularValues = mathTyped('singularValues', {
+  Array: (A: number[][]) => matrixSingularValues(A),
+});

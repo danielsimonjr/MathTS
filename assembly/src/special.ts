@@ -448,3 +448,82 @@ export function airy_bi_f64(xs: Float64Array): Float64Array {
   for (let i: i32 = 0; i < xs.length; i++) out[i] = _airyBi(xs[i]);
   return out;
 }
+
+// ===========================================================================
+// Complete Elliptic Integrals K(m) and E(m) via AGM (Slice 5.3)
+//
+// K(m) = π / (2 · agm(1, √(1−m)))
+//
+// E(m) via Carlson-Bulirsch AGM:
+//   a₀ = 1, b₀ = √(1−m), c₀ = √m
+//   iterate until convergence (quadratic — ~10 steps for f64)
+//   E = K · (1 − ½ · Σ 2^k · c_k²)
+//
+// Domain: m ∈ [0, 1).  K(1) = +∞, E(1) = 1.  m < 0 or m > 1 → NaN.
+// ===========================================================================
+
+function _ellipticK(m: f64): f64 {
+  if (isNaN(m)) return NaN;
+  if (m < 0.0 || m > 1.0) return NaN;
+  if (m == 1.0) return Infinity;
+  if (m == 0.0) return Math.PI / 2.0;
+  let a: f64 = 1.0;
+  let b: f64 = Math.sqrt(1.0 - m);
+  for (let i: i32 = 0; i < 50; i++) {
+    const aNew: f64 = (a + b) / 2.0;
+    const bNew: f64 = Math.sqrt(a * b);
+    if (Math.abs(aNew - bNew) < 1e-16 * aNew) {
+      a = aNew;
+      break;
+    }
+    a = aNew;
+    b = bNew;
+  }
+  return Math.PI / (2.0 * a);
+}
+
+function _ellipticE(m: f64): f64 {
+  if (isNaN(m)) return NaN;
+  if (m < 0.0 || m > 1.0) return NaN;
+  if (m == 0.0) return Math.PI / 2.0;
+  if (m == 1.0) return 1.0;
+  let a: f64 = 1.0;
+  let b: f64 = Math.sqrt(1.0 - m);
+  let c: f64 = Math.sqrt(m);
+  let sum: f64 = c * c; // 2^0 · c₀²
+  let pow2: f64 = 1.0;
+  for (let i: i32 = 0; i < 50; i++) {
+    const aNew: f64 = (a + b) / 2.0;
+    const bNew: f64 = Math.sqrt(a * b);
+    const cNew: f64 = (a - b) / 2.0;
+    pow2 *= 2.0;
+    sum += pow2 * cNew * cNew;
+    if (Math.abs(cNew) < 1e-16 * aNew) {
+      a = aNew;
+      break;
+    }
+    a = aNew;
+    b = bNew;
+    c = cNew;
+  }
+  const k: f64 = Math.PI / (2.0 * a);
+  return k * (1.0 - 0.5 * sum);
+}
+
+// ===========================================================================
+// Array exports — Elliptic K / E
+// ===========================================================================
+
+/** Apply K(m) element-wise.  Domain: m ∈ [0,1).  K(1)=+∞.  Out-of-domain → NaN. */
+export function elliptic_k_f64(ms: Float64Array): Float64Array {
+  const out = new Float64Array(ms.length);
+  for (let i: i32 = 0; i < ms.length; i++) out[i] = _ellipticK(ms[i]);
+  return out;
+}
+
+/** Apply E(m) element-wise.  Domain: m ∈ [0,1].  E(1)=1.  Out-of-domain → NaN. */
+export function elliptic_e_f64(ms: Float64Array): Float64Array {
+  const out = new Float64Array(ms.length);
+  for (let i: i32 = 0; i < ms.length; i++) out[i] = _ellipticE(ms[i]);
+  return out;
+}
