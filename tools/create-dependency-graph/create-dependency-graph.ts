@@ -1179,9 +1179,32 @@ function findReachableFiles(entryPoints: string[], allFiles: ParsedFile[]): Set<
         queue.push(resolved);
       }
     }
+
+    // Workspace (cross-package, scoped-name) imports also reach into
+    // the imported package's entry-point file. Without this edge,
+    // packages consumed only via their npm-scoped name (e.g.
+    // `@danielsimonjr/mathts-workerpool` from `parallel/`) get
+    // false-flagged as unused/dormant.
+    for (const ws of file.workspaceDependencies) {
+      const target = workspaceEntryPath(ws.package);
+      if (target && fileMap.has(target) && !reachable.has(target)) {
+        queue.push(target);
+      }
+    }
   }
 
   return reachable;
+}
+
+/**
+ * Resolve a workspace package name to its entry-point file path
+ * (`<srcDir>/index.ts`). Returns undefined if the package isn't a
+ * known workspace member.
+ */
+function workspaceEntryPath(packageName: string): string | undefined {
+  const ws = workspaceMap.get(packageName);
+  if (!ws) return undefined;
+  return `${ws.srcDir}/index.ts`;
 }
 
 interface CircularDependencyResult {
@@ -1278,7 +1301,7 @@ function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResu
 /**
  * Detect unused files and exports
  */
-function detectUnused(files: ParsedFile[]): UnusedAnalysis {
+function detectUnused(files: ParsedFile[], testFiles: ParsedFile[] = []): UnusedAnalysis {
   const filePaths = new Set(files.map((f) => f.path));
 
   // Build a set of all imported files
@@ -1286,7 +1309,10 @@ function detectUnused(files: ParsedFile[]): UnusedAnalysis {
   // Build a map of all imported symbols per file
   const importedSymbols = new Map<string, Set<string>>();
 
-  for (const file of files) {
+  // Walk source files + test files (when supplied) so that test-only
+  // imports (e.g. `resetPolyWasm`, `WASM_TRIDIAG_THRESHOLD`) register as
+  // legitimate consumers and don't false-flag exported test helpers.
+  for (const file of [...files, ...testFiles]) {
     for (const dep of file.internalDependencies) {
       const resolved = resolvePath(file.path, dep.file);
       if (filePaths.has(resolved)) {
@@ -1304,6 +1330,25 @@ function detectUnused(files: ParsedFile[]): UnusedAnalysis {
           } else {
             symbols.add(imp.replace(/^\* as /, ''));
           }
+        }
+      }
+    }
+
+    // Cross-package workspace imports count as use of the imported
+    // package's entry-point file (and the symbols listed in the
+    // import). Without this, every workspace-only consumer looks like
+    // dead code to the unused-export detector.
+    for (const ws of file.workspaceDependencies) {
+      const target = workspaceEntryPath(ws.package);
+      if (!target || !filePaths.has(target)) continue;
+      importedFiles.add(target);
+      if (!importedSymbols.has(target)) importedSymbols.set(target, new Set());
+      const symbols = importedSymbols.get(target)!;
+      for (const imp of ws.imports) {
+        if (imp === '*') {
+          symbols.add('*');
+        } else {
+          symbols.add(imp.replace(/^\* as /, ''));
         }
       }
     }
@@ -2292,8 +2337,30 @@ async function main(): Promise<void> {
     `Found ${circularDeps.all.length} circular dependencies (${circularDeps.runtime.length} runtime, ${circularDeps.typeOnly.length} type-only)`
   );
 
+  // Parse test files up-front when --include-tests is set so they can
+  // also be fed into the unused-analysis (test-only imports of helpers
+  // like `resetPolyWasm` would otherwise false-flag those helpers).
+  let parsedTestFiles: ParsedFile[] = [];
+  let testFilePaths: string[] = [];
+  if (cliOptions.includeTests) {
+    if (isMonorepo) {
+      for (const [, ws] of workspaceMap) {
+        const testDir = join(ROOT_DIR, ws.directory, 'tests');
+        const srcDir = join(ROOT_DIR, ws.srcDir);
+        testFilePaths.push(...getAllTestFiles(testDir));
+        testFilePaths.push(...getAllTestFiles(srcDir));
+      }
+      const rootTestDir = join(ROOT_DIR, 'tests');
+      testFilePaths.push(...getAllTestFiles(rootTestDir));
+    } else {
+      const testDir = join(ROOT_DIR, 'tests');
+      testFilePaths = [...getAllTestFiles(testDir), ...getAllTestFiles(SRC_DIR)];
+    }
+    parsedTestFiles = testFilePaths.map(parseFile);
+  }
+
   // Detect unused files and exports
-  const unusedAnalysis = detectUnused(activeParsedFiles);
+  const unusedAnalysis = detectUnused(activeParsedFiles, parsedTestFiles);
 
   // Generate statistics
   const stats = generateStatistics(activeParsedFiles, modules, circularDeps, unusedAnalysis);
@@ -2359,29 +2426,9 @@ async function main(): Promise<void> {
   let testCoverage: TestCoverageAnalysis | null = null;
   if (cliOptions.includeTests) {
     console.log('\nAnalyzing test coverage...');
-
-    // Scan for test files
-    let testFilePaths: string[];
-    if (isMonorepo) {
-      testFilePaths = [];
-      for (const [, ws] of workspaceMap) {
-        const testDir = join(ROOT_DIR, ws.directory, 'tests');
-        const srcDir = join(ROOT_DIR, ws.srcDir);
-        testFilePaths.push(...getAllTestFiles(testDir));
-        testFilePaths.push(...getAllTestFiles(srcDir));
-      }
-      // Also check root tests/ directory
-      const rootTestDir = join(ROOT_DIR, 'tests');
-      testFilePaths.push(...getAllTestFiles(rootTestDir));
-    } else {
-      const testDir = join(ROOT_DIR, 'tests');
-      testFilePaths = [...getAllTestFiles(testDir), ...getAllTestFiles(SRC_DIR)];
-    }
+    // Test files were parsed up-front so the unused-analysis could
+    // also see them; reuse those parses here.
     console.log(`Found ${testFilePaths.length} test files`);
-
-    // Parse test files
-    const parsedTestFiles = testFilePaths.map(parseFile);
-    console.log('Parsed all test files');
 
     // Analyze test coverage
     testCoverage = analyzeTestCoverage(activeParsedFiles, parsedTestFiles);

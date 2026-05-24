@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-05-24", "f": 495, "e": 2908, "re": 733 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-05-24", "f": 513, "e": 2971, "re": 756 },
   "s": {
-    "loc": 127057,
+    "loc": 132264,
     "cls": 46,
-    "int": 262,
-    "fn": 1094,
+    "int": 278,
+    "fn": 1128,
     "tg": 127,
     "en": 0,
-    "co": 1063,
+    "co": 1072,
     "toi": 353
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -257,8 +257,9 @@
       "int": ["BackendConfig", "AdaptiveTuningConfig", "ProfilingConfig", "MatrixConfig"]
     },
     "matrix/operations": {
-      "f": 5,
+      "f": 8,
       "exp": [
+        "cholesky",
         "eigWasm",
         "eigvalsWasm",
         "spectralRadiusWasm",
@@ -274,10 +275,18 @@
         "cond",
         "norm2",
         "normFro",
+        "SVDResult"
+      ],
+      "int": [
+        "CholeskyResult",
+        "EigResult",
+        "EigOptions",
+        "LUResult",
+        "QRResult",
+        "QROptions",
         "SVDResult",
         "SVDOptions"
-      ],
-      "int": ["EigResult", "EigOptions", "SVDResult", "SVDOptions"]
+      ]
     },
     "matrix/types": {
       "f": 4,
@@ -294,14 +303,49 @@
     },
     "tensor": {
       "f": 4,
-      "exp": ["Tensor", "contractNetwork", "Index", "idx", "tensorSvd", "randomTensor"],
+      "exp": [
+        "Tensor",
+        "contractNetwork",
+        "Index",
+        "idx",
+        "tensorSvd",
+        "randomTensor",
+        "tensorQr",
+        "tensorLU",
+        "tensorCholesky",
+        "tensorEig",
+        "tensorPinv",
+        "tensorSolve",
+        "tensorKron"
+      ],
       "cls": ["Tensor", "Index"],
       "int": ["EinsumSpec", "ContractNetworkOpts", "ContractNetworkResult", "IndexOpts"]
     },
     "tensor/operations": {
-      "f": 2,
-      "exp": ["randomTensor", "tensorSvd"],
-      "int": ["RandomTensorOpts", "TensorSvdOpts", "TensorSvdResult"]
+      "f": 9,
+      "exp": [
+        "tensorCholesky",
+        "tensorEig",
+        "tensorKron",
+        "tensorLU",
+        "tensorPinv",
+        "tensorQr",
+        "randomTensor",
+        "tensorSolve",
+        "tensorSvd"
+      ],
+      "int": [
+        "TensorCholeskyOpts",
+        "TensorCholeskyResult",
+        "TensorEigOpts",
+        "TensorEigResult",
+        "TensorKronOpts",
+        "TensorLUResult",
+        "TensorLUOpts",
+        "TensorPinvOpts",
+        "TensorQrOpts",
+        "TensorQrResult"
+      ]
     },
     "autograd": {
       "f": 5,
@@ -410,17 +454,17 @@
         "addScalar",
         "multiplyScalar",
         "subtractScalar",
-        "arg",
-        "conj",
-        "im",
-        "re",
         "filter",
         "flatten",
         "forEach",
         "getMatrixDataType",
         "map",
         "size",
-        "squeeze"
+        "squeeze",
+        "combinations",
+        "combinationsWithRep",
+        "lgamma",
+        "pickRandom"
       ],
       "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
     },
@@ -634,7 +678,7 @@
       ]
     },
     "functions/typed": {
-      "f": 22,
+      "f": 25,
       "exp": [
         "typedAlgebra",
         "polyval",
@@ -710,7 +754,7 @@
       ]
     },
     "functions/wasm": {
-      "f": 3,
+      "f": 6,
       "exp": [
         "wasmLoader",
         "initWasm",
@@ -721,7 +765,17 @@
         "resetBitwiseWasm",
         "sha384OfBuffer",
         "loadWasmManifest",
-        "verifyWasmIntegrity"
+        "verifyWasmIntegrity",
+        "WASM_TRIDIAG_THRESHOLD",
+        "tridiagSolveJS",
+        "tridiagSolveDispatch",
+        "resetTridiagWasm",
+        "WASM_POLY_THRESHOLD",
+        "polyMulDispatch",
+        "polyDivModDispatch",
+        "resetPolyWasm",
+        "WASM_SPECIAL_THRESHOLD",
+        "besselJ0JS"
       ],
       "cls": ["WasmLoader"],
       "int": ["WasmModule", "LoadingMetrics", "WasmManifest"]
@@ -942,7 +996,7 @@
       ]
     },
     "assembly": {
-      "f": 1,
+      "f": 3,
       "exp": [
         "Complex",
         "complex",
@@ -1041,10 +1095,10 @@
     { "p": "number/index.ts", "i": 9, "o": 52 },
     { "p": "utils/array.ts", "i": 6, "o": 50 },
     { "p": "core/config.ts", "i": 0, "o": 52 },
-    { "p": "utils/number.ts", "i": 1, "o": 48 },
-    { "p": "wasm/WasmLoader.ts", "i": 1, "o": 43 },
+    { "p": "utils/number.ts", "i": 1, "o": 49 },
+    { "p": "wasm/WasmLoader.ts", "i": 1, "o": 46 },
+    { "p": "typed/index.ts", "i": 42, "o": 2 },
     { "p": "utils/collection.ts", "i": 4, "o": 37 },
-    { "p": "typed/index.ts", "i": 36, "o": 2 },
     { "p": "utils/matrixAlgorithmSuite.ts", "i": 6, "o": 27 },
     { "p": "utils/object.ts", "i": 1, "o": 28 },
     { "p": "matrix/types.ts", "i": 0, "o": 27 },

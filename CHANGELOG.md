@@ -145,6 +145,40 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### CDG refresh + gap-audit recheck (post-Wave-3)
+
+Ran the Create Dependency Graph tool to verify no new issues or regressions after the Wave-1/2/3 landings. **Two pre-existing CDG bugs surfaced and were fixed in the same pass:**
+
+- **`tools/create-dependency-graph/create-dependency-graph.ts`** — `findReachableFiles` and `detectUnused` both only followed `internalDependencies` (relative imports) and ignored `workspaceDependencies` (cross-package npm-scoped imports). That caused `packages/workerpool/src/index.ts` to be false-flagged as the only "unused file" because `parallel/ComputePool.ts` consumes it via `@danielsimonjr/mathts-workerpool` and the workspace edge wasn't traced. **Fix:** added a `workspaceEntryPath(packageName)` helper and traced workspace deps to their entry-point file in both functions.
+- **Test files weren't considered as consumers** by `detectUnused` even with `--include-tests` set. Test-only consumers (`resetPolyWasm`, `resetTridiagWasm`, JS-fallback exports like `tridiagSolveJS`/`besselJ0JS`, threshold constants like `WASM_TRIDIAG_THRESHOLD`) were false-flagged. **Fix:** parse test files up-front when `--include-tests` is on and feed them to `detectUnused` as an additional consumer corpus.
+
+Reset-helper test-coverage gap — the two genuinely-unconsumed exports flagged after the CDG fixes (`resetBitwiseWasm`, `resetBesselWasm`) were both addressed:
+
+- `functions/tests/typed-bitwise-wasm.test.ts` — the existing WASM-fallback suite now calls `resetBitwiseWasm()` (the stable wrapper around `wasmLoader.reset()`) instead of `wasmLoader.reset()` directly, matching the poly/tridiag pattern.
+- `functions/tests/typed-special-wasm.test.ts` — new "Suite 4 — Bessel WASM fallback when module not loaded" with 2 tests exercising `besselJ0Dispatch` and `besselYDispatch(2, …)` after `resetBesselWasm()`. `functions`: 2,034 → **2,036 tests** (+2).
+
+#### CDG metrics, before vs after the fix
+
+| Metric                           | Before | After   | Δ                       |
+| -------------------------------- | -----: | ------: | ----------------------- |
+| Unused files                     |      1 |       0 | −1 (false positive)     |
+| Unused exports                   |    406 |     308 | −98 (false positives)   |
+| Circular dependencies            |      0 |       0 | unchanged               |
+| Effective coverage (active code) | 100.0% |  100.0% | unchanged (163 / 163)   |
+| Reachable source files           |    513 |     513 | unchanged               |
+
+The remaining 308 unused-export flags break down as: 201 type/interface declarations (65%) — public API for downstream consumers; 64 functions (21%) — public-API helpers and benchmark-only entry points (`tools/benchmark/` not in CDG's reachability scope); 42 constants (14%) — thresholds and config defaults exported for consumer tuning; 3 classes (1%) — public-API class exports. **All legitimate public API**, not real dead code.
+
+#### Gap-audit refresh — no new gaps
+
+Added a new **§G "Audit refresh — 2026-05-24 (post-Wave-3)"** to `docs/roadmap/FUNCTION_GAPS_AUDIT.md` documenting the CDG bugfix, post-fix metrics, and the categorical breakdown of the remaining unused-export flags. **No new gaps surfaced** — the refresh confirms:
+
+- Effective test coverage stays at 100% (163/163 active files; no new active code added without a test).
+- No new circular dependencies introduced.
+- All Wave 1-3 primitives trace correctly through reachability after the CDG fixes.
+
+Tier-4 deferred items remain the only forward work tracked: rank 9 (probability dedup), rank 11 (Tensor.slice family), rank 12 (TapedTensor decomposition AD), rank 13 (typed/string), rank 14 (typed/unit, blocked on core Unit type), plus 3.10c-2 (Airy + AS Bessel parity).
+
 #### Gap-closure Wave 3b — WASM-route slices (sequenced; 3.7 + 3.10b + 3.10c-1 done)
 
 - **Slice 3.10c-1 — commit `572363f`** — Bessel WASM kernels (Airy + AS port deferred as 3.10c-2 per the proposal's explicit scope-split contract).

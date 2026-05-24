@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-05-24",
-    "totalFiles": 495,
+    "totalFiles": 513,
     "totalModules": 58,
-    "totalExports": 2908
+    "totalExports": 2971
   },
   "entryPoints": [
     {
@@ -1984,6 +1984,20 @@
       }
     },
     "matrix/operations": {
+      "matrix/src/operations/cholesky.ts": {
+        "description": "Cholesky Decomposition (DenseMatrix primitive)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          }
+        ],
+        "exports": ["cholesky"],
+        "interfaces": ["CholeskyResult"],
+        "functions": ["cholesky"]
+      },
       "matrix/src/operations/eig-wasm.ts": {
         "description": "WASM-accelerated Eigendecomposition",
         "externalDependencies": [],
@@ -2044,6 +2058,21 @@
             "file": "./svd-wasm.js",
             "imports": ["svdWasm"],
             "reExport": true
+          },
+          {
+            "file": "./qr.js",
+            "imports": ["qr", "QRResult", "QROptions"],
+            "reExport": true
+          },
+          {
+            "file": "./lu.js",
+            "imports": ["lu", "LUResult"],
+            "reExport": true
+          },
+          {
+            "file": "./cholesky.js",
+            "imports": ["cholesky", "CholeskyResult"],
+            "reExport": true
           }
         ],
         "exports": [
@@ -2064,7 +2093,14 @@
           "eigWasm",
           "eigvalsWasm",
           "spectralRadiusWasm",
-          "svdWasm"
+          "svdWasm",
+          "qr",
+          "QRResult",
+          "QROptions",
+          "lu",
+          "LUResult",
+          "cholesky",
+          "CholeskyResult"
         ],
         "reExported": [
           "eig",
@@ -2084,8 +2120,43 @@
           "eigWasm",
           "eigvalsWasm",
           "spectralRadiusWasm",
-          "svdWasm"
+          "svdWasm",
+          "qr",
+          "QRResult",
+          "QROptions",
+          "lu",
+          "LUResult",
+          "cholesky",
+          "CholeskyResult"
         ]
+      },
+      "matrix/src/operations/lu.ts": {
+        "description": "LU Decomposition (DenseMatrix primitive)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          }
+        ],
+        "exports": ["lu"],
+        "interfaces": ["LUResult"],
+        "functions": ["lu"]
+      },
+      "matrix/src/operations/qr.ts": {
+        "description": "QR Decomposition (DenseMatrix primitive)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix"]
+          }
+        ],
+        "exports": ["qr"],
+        "interfaces": ["QRResult", "QROptions"],
+        "functions": ["qr"]
       },
       "matrix/src/operations/svd-wasm.ts": {
         "description": "WASM-accelerated Singular Value Decomposition.",
@@ -2257,10 +2328,73 @@
             "file": "./contraction-sequence",
             "imports": ["contractNetwork"],
             "reExport": true
+          },
+          {
+            "file": "./operations/qr",
+            "imports": ["tensorQr"],
+            "reExport": true
+          },
+          {
+            "file": "./operations/lu",
+            "imports": ["tensorLU"],
+            "reExport": true
+          },
+          {
+            "file": "./operations/cholesky",
+            "imports": ["tensorCholesky"],
+            "reExport": true
+          },
+          {
+            "file": "./operations/eig",
+            "imports": ["tensorEig"],
+            "reExport": true
+          },
+          {
+            "file": "./operations/pinv",
+            "imports": ["tensorPinv"],
+            "reExport": true
+          },
+          {
+            "file": "./operations/solve",
+            "imports": ["tensorSolve"],
+            "reExport": true
+          },
+          {
+            "file": "./operations/kron",
+            "imports": ["tensorKron"],
+            "reExport": true
           }
         ],
-        "exports": ["Tensor", "Index", "idx", "tensorSvd", "randomTensor", "contractNetwork"],
-        "reExported": ["Tensor", "Index", "idx", "tensorSvd", "randomTensor", "contractNetwork"]
+        "exports": [
+          "Tensor",
+          "Index",
+          "idx",
+          "tensorSvd",
+          "randomTensor",
+          "contractNetwork",
+          "tensorQr",
+          "tensorLU",
+          "tensorCholesky",
+          "tensorEig",
+          "tensorPinv",
+          "tensorSolve",
+          "tensorKron"
+        ],
+        "reExported": [
+          "Tensor",
+          "Index",
+          "idx",
+          "tensorSvd",
+          "randomTensor",
+          "contractNetwork",
+          "tensorQr",
+          "tensorLU",
+          "tensorCholesky",
+          "tensorEig",
+          "tensorPinv",
+          "tensorSolve",
+          "tensorKron"
+        ]
       },
       "tensor/src/named-index.ts": {
         "description": "Index — an immutable value type carrying a unique identity, a dimension,",
@@ -2274,6 +2408,110 @@
       }
     },
     "tensor/operations": {
+      "tensor/src/operations/cholesky.ts": {
+        "description": "tensorCholesky — Cholesky decomposition for symmetric positive-definite",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": ["Tensor"]
+          },
+          {
+            "file": "../named-index.js",
+            "imports": ["Index"]
+          }
+        ],
+        "exports": ["tensorCholesky"],
+        "interfaces": ["TensorCholeskyOpts", "TensorCholeskyResult"],
+        "functions": ["tensorCholesky"]
+      },
+      "tensor/src/operations/eig.ts": {
+        "description": "tensorEig — eigenvalue / eigenvector decomposition for rank-N tensors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": ["Tensor"]
+          }
+        ],
+        "exports": ["tensorEig"],
+        "interfaces": ["TensorEigOpts", "TensorEigResult"],
+        "functions": ["tensorEig"]
+      },
+      "tensor/src/operations/kron.ts": {
+        "description": "tensorKron — Kronecker product for rank-N tensors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": ["Tensor"]
+          },
+          {
+            "file": "../named-index.js",
+            "imports": ["Index"]
+          }
+        ],
+        "exports": ["tensorKron"],
+        "interfaces": ["TensorKronOpts"],
+        "functions": ["tensorKron"]
+      },
+      "tensor/src/operations/lu.ts": {
+        "description": "tensorLU — LU decomposition with partial pivoting for rank-N tensors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": ["Tensor"]
+          },
+          {
+            "file": "../named-index.js",
+            "imports": ["Index"]
+          }
+        ],
+        "exports": ["tensorLU"],
+        "interfaces": ["TensorLUResult", "TensorLUOpts"],
+        "functions": ["tensorLU"]
+      },
+      "tensor/src/operations/pinv.ts": {
+        "description": "tensorPinv — Moore-Penrose pseudoinverse for rank-N tensors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": ["Tensor"]
+          },
+          {
+            "file": "../named-index.js",
+            "imports": ["Index"]
+          }
+        ],
+        "exports": ["tensorPinv"],
+        "interfaces": ["TensorPinvOpts"],
+        "functions": ["tensorPinv"]
+      },
+      "tensor/src/operations/qr.ts": {
+        "description": "tensorQr — QR decomposition for rank-N tensors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": ["Tensor"]
+          },
+          {
+            "file": "../named-index.js",
+            "imports": ["Index"]
+          }
+        ],
+        "exports": ["tensorQr"],
+        "interfaces": ["TensorQrOpts", "TensorQrResult"],
+        "functions": ["tensorQr"]
+      },
       "tensor/src/operations/random.ts": {
         "description": "randomTensor — construct a Tensor filled with pseudo-random values.",
         "externalDependencies": [],
@@ -2291,6 +2529,24 @@
         "exports": ["randomTensor"],
         "interfaces": ["RandomTensorOpts"],
         "functions": ["randomTensor"]
+      },
+      "tensor/src/operations/solve.ts": {
+        "description": "tensorSolve — named-index linear solver for rank-N tensors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": ["Tensor"]
+          },
+          {
+            "file": "../named-index.js",
+            "imports": ["Index"]
+          }
+        ],
+        "exports": ["tensorSolve"],
+        "interfaces": ["TensorSolveOpts", "TensorSolveResult"],
+        "functions": ["tensorSolve"]
       },
       "tensor/src/operations/svd.ts": {
         "description": "tensorSvd — truncated SVD for rank-N tensors.",
@@ -6308,10 +6564,6 @@
           "addScalar",
           "multiplyScalar",
           "subtractScalar",
-          "arg",
-          "conj",
-          "im",
-          "re",
           "filter",
           "flatten",
           "forEach",
@@ -6324,7 +6576,6 @@
           "lgamma",
           "pickRandom",
           "random",
-          "equalScalar",
           "erf",
           "format",
           "print",
@@ -6425,13 +6676,10 @@
           "usolve",
           "usolveAll",
           "factory_compare",
-          "compareText",
-          "deepEqual",
           "factory_larger",
           "factory_largerEq",
           "factory_smaller",
           "factory_smallerEq",
-          "unequal",
           "dotDivide",
           "dotMultiply",
           "factory_gcd",
@@ -6445,8 +6693,6 @@
           "expm",
           "factory_atan2",
           "to",
-          "compareNatural",
-          "equalText",
           "dotPow",
           "factory_fix",
           "invmod",
@@ -6461,7 +6707,6 @@
           "factory_min",
           "factory_hypot",
           "factorial",
-          "setSize",
           "sort",
           "stirlingS2",
           "permutations",
@@ -6498,13 +6743,6 @@
           "kldivergence",
           "multinomial",
           "freqz",
-          "setCartesian",
-          "setDifference",
-          "setDistinct",
-          "setIntersect",
-          "setIsSubset",
-          "setMultiplicity",
-          "setPowerset",
           "simplifyCore",
           "polynomialRoot",
           "solveODE",
@@ -6515,12 +6753,10 @@
           "corr",
           "mad",
           "factory_std",
-          "setSymDifference",
           "simplify",
           "derivative",
           "factory_norm",
           "rationalize",
-          "setUnion",
           "symbolicEqual",
           "rotationMatrix",
           "schur",
@@ -6593,10 +6829,6 @@
           "addScalar",
           "multiplyScalar",
           "subtractScalar",
-          "arg",
-          "conj",
-          "im",
-          "re",
           "filter",
           "flatten",
           "forEach",
@@ -6609,7 +6841,6 @@
           "lgamma",
           "pickRandom",
           "random",
-          "equalScalar",
           "erf",
           "format",
           "print",
@@ -6710,13 +6941,10 @@
           "usolve",
           "usolveAll",
           "factory_compare",
-          "compareText",
-          "deepEqual",
           "factory_larger",
           "factory_largerEq",
           "factory_smaller",
           "factory_smallerEq",
-          "unequal",
           "dotDivide",
           "dotMultiply",
           "factory_gcd",
@@ -6730,8 +6958,6 @@
           "expm",
           "factory_atan2",
           "to",
-          "compareNatural",
-          "equalText",
           "dotPow",
           "factory_fix",
           "invmod",
@@ -6746,7 +6972,6 @@
           "factory_min",
           "factory_hypot",
           "factorial",
-          "setSize",
           "sort",
           "stirlingS2",
           "permutations",
@@ -6783,13 +7008,6 @@
           "kldivergence",
           "multinomial",
           "freqz",
-          "setCartesian",
-          "setDifference",
-          "setDistinct",
-          "setIntersect",
-          "setIsSubset",
-          "setMultiplicity",
-          "setPowerset",
           "simplifyCore",
           "polynomialRoot",
           "solveODE",
@@ -6800,12 +7018,10 @@
           "corr",
           "mad",
           "factory_std",
-          "setSymDifference",
           "simplify",
           "derivative",
           "factory_norm",
           "rationalize",
-          "setUnion",
           "symbolicEqual",
           "rotationMatrix",
           "schur",
@@ -12223,7 +12439,12 @@
         "description": "Typed Algebra Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../wasm/poly/wasm-bridge.js",
+            "imports": ["polyMulDispatch", "polyDivModDispatch", "WASM_POLY_THRESHOLD"]
+          }
+        ],
         "exports": [
           "typedAlgebra",
           "polyval",
@@ -12583,6 +12804,14 @@
           "integerDigits"
         ]
       },
+      "functions/src/typed/complex.ts": {
+        "description": "Typed Complex Helper Functions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": ["arg", "conj", "im", "re", "typedComplex"],
+        "constants": ["arg", "conj", "im", "re", "typedComplex"]
+      },
       "functions/src/typed/dist-objects.ts": {
         "description": "Distribution Objects",
         "externalDependencies": [],
@@ -12885,6 +13114,16 @@
             "reExport": true
           },
           {
+            "file": "./complex.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
+            "file": "./set.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
             "file": "./special.js",
             "imports": ["*"],
             "reExport": true
@@ -12950,6 +13189,11 @@
             "reExport": true
           },
           {
+            "file": "./relational.js",
+            "imports": ["*"],
+            "reExport": true
+          },
+          {
             "file": "./arithmetic.js",
             "imports": ["typedArithmetic"],
             "reExport": true
@@ -12980,6 +13224,16 @@
             "reExport": true
           },
           {
+            "file": "./complex.js",
+            "imports": ["typedComplex"],
+            "reExport": true
+          },
+          {
+            "file": "./set.js",
+            "imports": ["typedSet"],
+            "reExport": true
+          },
+          {
             "file": "./special.js",
             "imports": ["typedSpecial"],
             "reExport": true
@@ -12993,6 +13247,11 @@
             "file": "./algebra.js",
             "imports": ["typedAlgebra"],
             "reExport": true
+          },
+          {
+            "file": "./relational.js",
+            "imports": ["typedRelational"],
+            "reExport": true
           }
         ],
         "exports": [
@@ -13002,9 +13261,12 @@
           "typedSignal",
           "typedBitwise",
           "typedLogical",
+          "typedComplex",
+          "typedSet",
           "typedSpecial",
           "typedDistributions",
           "typedAlgebra",
+          "typedRelational",
           "typedFunctions"
         ],
         "reExported": [
@@ -13014,6 +13276,8 @@
           "* from ./signal.js",
           "* from ./bitwise.js",
           "* from ./logical.js",
+          "* from ./complex.js",
+          "* from ./set.js",
           "* from ./special.js",
           "* from ./distributions.js",
           "* from ./geometry.js",
@@ -13027,15 +13291,19 @@
           "* from ./hypothesis.js",
           "* from ./matrix-ops.js",
           "* from ./gpu.js",
+          "* from ./relational.js",
           "typedArithmetic",
           "typedTrigonometry",
           "typedStatistics",
           "typedSignal",
           "typedBitwise",
           "typedLogical",
+          "typedComplex",
+          "typedSet",
           "typedSpecial",
           "typedDistributions",
-          "typedAlgebra"
+          "typedAlgebra",
+          "typedRelational"
         ],
         "constants": ["typedFunctions"]
       },
@@ -13044,14 +13312,29 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": ["trapz", "simpson", "gaussQuad", "romberg"],
-        "functions": ["trapz", "simpson", "gaussQuad", "romberg"]
+        "exports": [
+          "GAUSS_WORKER_THRESHOLD",
+          "ARRAY_WORKER_THRESHOLD",
+          "trapz",
+          "trapzF64",
+          "simpson",
+          "simpsonF64",
+          "gaussQuad",
+          "romberg"
+        ],
+        "functions": ["trapz", "trapzF64", "simpson", "simpsonF64", "gaussQuad", "romberg"],
+        "constants": ["GAUSS_WORKER_THRESHOLD", "ARRAY_WORKER_THRESHOLD"]
       },
       "functions/src/typed/interpolation.ts": {
         "description": "Interpolation Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../wasm/interpolation/wasm-bridge.js",
+            "imports": ["tridiagSolveDispatch"]
+          }
+        ],
         "exports": [
           "linearInterp",
           "lagrangeInterp",
@@ -13190,6 +13473,74 @@
           "solvePDE"
         ]
       },
+      "functions/src/typed/relational.ts": {
+        "description": "Typed Relational Functions",
+        "externalDependencies": [
+          {
+            "package": "javascript-natural-sort",
+            "imports": ["naturalSort"]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/number.js",
+            "imports": ["nearlyEqual"]
+          }
+        ],
+        "exports": [
+          "equalScalar",
+          "unequal",
+          "deepEqual",
+          "compareText",
+          "equalText",
+          "compareNatural",
+          "compareUnits",
+          "typedRelational"
+        ],
+        "constants": [
+          "equalScalar",
+          "unequal",
+          "deepEqual",
+          "compareText",
+          "equalText",
+          "compareNatural",
+          "compareUnits",
+          "typedRelational"
+        ]
+      },
+      "functions/src/typed/set.ts": {
+        "description": "Typed Set Functions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "setUnion",
+          "setIntersect",
+          "setDifference",
+          "setSymDifference",
+          "setIsSubset",
+          "setMultiplicity",
+          "setPowerset",
+          "setDistinct",
+          "setSize",
+          "setCartesian",
+          "typedSet"
+        ],
+        "constants": [
+          "setUnion",
+          "setIntersect",
+          "setDifference",
+          "setSymDifference",
+          "setIsSubset",
+          "setMultiplicity",
+          "setPowerset",
+          "setDistinct",
+          "setSize",
+          "setCartesian",
+          "typedSet"
+        ]
+      },
       "functions/src/typed/signal.ts": {
         "description": "Typed Signal Processing Functions (Parallel-First)",
         "externalDependencies": [],
@@ -13277,7 +13628,20 @@
         "description": "Typed Special Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../wasm/special/wasm-bridge.js",
+            "imports": [
+              "WASM_SPECIAL_THRESHOLD",
+              "besselJ0Dispatch",
+              "besselJ1Dispatch",
+              "besselJDispatch",
+              "besselY0Dispatch",
+              "besselY1Dispatch",
+              "besselYDispatch"
+            ]
+          }
+        ],
         "exports": [
           "erfc",
           "erfi",
@@ -14538,6 +14902,87 @@
         "exports": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"],
         "interfaces": ["WasmManifest"],
         "functions": ["sha384OfBuffer", "loadWasmManifest", "verifyWasmIntegrity"]
+      },
+      "functions/src/wasm/interpolation/wasm-bridge.ts": {
+        "description": "WASM dispatch bridge for the tridiagonal-solve hot loop (Slice 3.10b).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../WasmLoader.js",
+            "imports": ["wasmLoader", "WasmModule"]
+          }
+        ],
+        "exports": [
+          "WASM_TRIDIAG_THRESHOLD",
+          "tridiagSolveJS",
+          "tridiagSolveDispatch",
+          "resetTridiagWasm"
+        ],
+        "functions": ["tridiagSolveJS", "tridiagSolveDispatch", "resetTridiagWasm"],
+        "constants": ["WASM_TRIDIAG_THRESHOLD"]
+      },
+      "functions/src/wasm/poly/wasm-bridge.ts": {
+        "description": "WASM dispatch bridge for polynomial hot-loop kernels.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../WasmLoader.js",
+            "imports": ["wasmLoader", "WasmModule"]
+          }
+        ],
+        "exports": [
+          "WASM_POLY_THRESHOLD",
+          "polyMulDispatch",
+          "polyDivModDispatch",
+          "resetPolyWasm"
+        ],
+        "functions": ["polyMulDispatch", "polyDivModDispatch", "resetPolyWasm"],
+        "constants": ["WASM_POLY_THRESHOLD"]
+      },
+      "functions/src/wasm/special/wasm-bridge.ts": {
+        "description": "WASM dispatch bridge for Bessel J/Y array kernels (Slice 3.10c-1).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../WasmLoader.js",
+            "imports": ["wasmLoader", "WasmModule"]
+          }
+        ],
+        "exports": [
+          "WASM_SPECIAL_THRESHOLD",
+          "besselJ0JS",
+          "besselJ1JS",
+          "besselJnJS",
+          "besselY0JS",
+          "besselY1JS",
+          "besselYnJS",
+          "besselJ0Dispatch",
+          "besselJ1Dispatch",
+          "besselJDispatch",
+          "besselY0Dispatch",
+          "besselY1Dispatch",
+          "besselYDispatch",
+          "resetBesselWasm"
+        ],
+        "functions": [
+          "besselJ0JS",
+          "besselJ1JS",
+          "besselJnJS",
+          "besselY0JS",
+          "besselY1JS",
+          "besselYnJS",
+          "besselJ0Dispatch",
+          "besselJ1Dispatch",
+          "besselJDispatch",
+          "besselY0Dispatch",
+          "besselY1Dispatch",
+          "besselYDispatch",
+          "resetBesselWasm"
+        ],
+        "constants": ["WASM_SPECIAL_THRESHOLD"]
       }
     },
     "expression": {
@@ -17234,6 +17679,16 @@
             "reExport": true
           },
           {
+            "file": "./poly",
+            "imports": ["poly_mul_f64", "poly_div_mod_f64"],
+            "reExport": true
+          },
+          {
+            "file": "./tridiag",
+            "imports": ["tridiag_solve_f64"],
+            "reExport": true
+          },
+          {
             "file": "./ops/complex-array",
             "imports": [
               "complex_array_zeros",
@@ -17505,6 +17960,9 @@
           "leftShift_i32_array",
           "rightArithShift_i32_array",
           "rightLogShift_i32_array",
+          "poly_mul_f64",
+          "poly_div_mod_f64",
+          "tridiag_solve_f64",
           "complex_array_zeros",
           "complex_array_ones",
           "complex_array_fill",
@@ -17771,6 +18229,9 @@
           "leftShift_i32_array",
           "rightArithShift_i32_array",
           "rightLogShift_i32_array",
+          "poly_mul_f64",
+          "poly_div_mod_f64",
+          "tridiag_solve_f64",
           "complex_array_zeros",
           "complex_array_ones",
           "complex_array_fill",
@@ -17805,6 +18266,22 @@
           "complex_array_add_inplace",
           "complex_array_copy"
         ]
+      },
+      "assembly/src/poly.ts": {
+        "description": "Polynomial hot-loop kernels — AssemblyScript parity port.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": ["poly_mul_f64", "poly_div_mod_f64"],
+        "functions": ["poly_mul_f64", "poly_div_mod_f64"]
+      },
+      "assembly/src/tridiag.ts": {
+        "description": "Tridiagonal-solve kernel — AssemblyScript parity port (Slice 3.10b).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": ["tridiag_solve_f64"],
+        "functions": ["tridiag_solve_f64"]
       }
     },
     "assembly/ops": {
@@ -18738,9 +19215,12 @@
       {
         "name": "Matrix/operations",
         "files": [
+          "matrix/src/operations/cholesky.ts",
           "matrix/src/operations/eig-wasm.ts",
           "matrix/src/operations/eig.ts",
           "matrix/src/operations/index.ts",
+          "matrix/src/operations/lu.ts",
+          "matrix/src/operations/qr.ts",
           "matrix/src/operations/svd-wasm.ts",
           "matrix/src/operations/svd.ts"
         ]
@@ -18765,7 +19245,17 @@
       },
       {
         "name": "Tensor/operations",
-        "files": ["tensor/src/operations/random.ts", "tensor/src/operations/svd.ts"]
+        "files": [
+          "tensor/src/operations/cholesky.ts",
+          "tensor/src/operations/eig.ts",
+          "tensor/src/operations/kron.ts",
+          "tensor/src/operations/lu.ts",
+          "tensor/src/operations/pinv.ts",
+          "tensor/src/operations/qr.ts",
+          "tensor/src/operations/random.ts",
+          "tensor/src/operations/solve.ts",
+          "tensor/src/operations/svd.ts"
+        ]
       },
       {
         "name": "Autograd",
@@ -19177,6 +19667,7 @@
           "functions/src/typed/bitwise.ts",
           "functions/src/typed/cas.ts",
           "functions/src/typed/combinatorics.ts",
+          "functions/src/typed/complex.ts",
           "functions/src/typed/dist-objects.ts",
           "functions/src/typed/distributions.ts",
           "functions/src/typed/geometry.ts",
@@ -19189,6 +19680,8 @@
           "functions/src/typed/logical.ts",
           "functions/src/typed/matrix-ops.ts",
           "functions/src/typed/numeric.ts",
+          "functions/src/typed/relational.ts",
+          "functions/src/typed/set.ts",
           "functions/src/typed/signal.ts",
           "functions/src/typed/special.ts",
           "functions/src/typed/statistics.ts",
@@ -19247,7 +19740,10 @@
         "files": [
           "functions/src/wasm/WasmLoader.ts",
           "functions/src/wasm/bitwise/wasm-bridge.ts",
-          "functions/src/wasm/integrity.ts"
+          "functions/src/wasm/integrity.ts",
+          "functions/src/wasm/interpolation/wasm-bridge.ts",
+          "functions/src/wasm/poly/wasm-bridge.ts",
+          "functions/src/wasm/special/wasm-bridge.ts"
         ]
       },
       {
@@ -19361,7 +19857,7 @@
       },
       {
         "name": "Assembly",
-        "files": ["assembly/src/index.ts"]
+        "files": ["assembly/src/index.ts", "assembly/src/poly.ts", "assembly/src/tridiag.ts"]
       },
       {
         "name": "Assembly/ops",
@@ -19395,21 +19891,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 495,
+    "totalTypeScriptFiles": 513,
     "totalModules": 58,
-    "totalLinesOfCode": 127057,
-    "totalExports": 2908,
+    "totalLinesOfCode": 132264,
+    "totalExports": 2971,
     "totalClasses": 46,
-    "totalInterfaces": 262,
-    "totalFunctions": 1094,
+    "totalInterfaces": 278,
+    "totalFunctions": 1128,
     "totalTypeGuards": 127,
     "totalEnums": 0,
-    "totalConstants": 1063,
-    "totalReExports": 733,
+    "totalConstants": 1072,
+    "totalReExports": 756,
     "totalTypeOnlyImports": 353,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
-    "unusedFilesCount": 1,
-    "unusedExportsCount": 383
+    "unusedFilesCount": 0,
+    "unusedExportsCount": 308
   }
 }

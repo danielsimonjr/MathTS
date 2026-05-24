@@ -204,6 +204,32 @@ Detail:
       family), 12 (TapedTensor decomposition AD), 13 (typed/string.ts),
       14 (typed/unit.ts — blocked on Unit type in core).
 
+- [x] **CDG bugfix + post-Wave-3 gap-audit refresh** — Ran
+      `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --include-tests`
+      to check for issues after Wave-1/2/3 landings. Surfaced and
+      fixed two pre-existing CDG bugs: - `findReachableFiles` + `detectUnused` only followed
+      relative-path edges, not cross-package workspace
+      (`@danielsimonjr/mathts-*`) edges. Fixed by adding a
+      `workspaceEntryPath(name)` helper and tracing workspace deps
+      through to their entry-point file. - Test files weren't fed to `detectUnused` even with
+      `--include-tests`. Fixed by parsing tests up-front and
+      passing them as a second consumer corpus.
+
+      Resulting counts: unused files 1 → 0; unused exports 406 → 308.
+      The remaining 308 split as 201 type/interface (public-API
+      contracts), 64 functions (incl. bench-only consumers in
+      `tools/benchmark/` which CDG doesn't scan), 42 constants
+      (consumer-tunable thresholds), 3 classes — all legitimate
+      public API. Two genuinely-unconsumed reset helpers
+      (`resetBitwiseWasm`, `resetBesselWasm`) were addressed by
+      adding fallback-suite test calls that exercise them.
+
+      Gap-audit re-run shows no new gaps. Effective coverage stays at
+      100% (163/163 active files); 0 circular deps; all Wave-1/2/3
+      primitives reach correctly through the now-fixed reachability.
+      See [`docs/roadmap/FUNCTION_GAPS_AUDIT.md §G`](docs/roadmap/FUNCTION_GAPS_AUDIT.md#g-audit-refresh--2026-05-24-post-wave-3)
+      for the full refresh summary.
+
 - [x] **ITensor-parity tensor primitives** — see proposal at
       [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md).
       All six phases LANDED. Phases 1-3 in commit `a21a844`, Phases
