@@ -299,6 +299,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     224 passed, 0 failed, 0 skipped** (was `Tests 5 failed |
     212 passed (217); Test Files 2 failed | 8 passed (10)`).
 
+### Added (UPT consumer support)
+
+- **Downstream UPT integration notes** at
+  `docs/integration/upt.md`. Catalogues the MathTS APIs UPT v0.7+
+  consumes across `mathts-tensor`, `mathts-expression`, `mathts-
+  workbook`, `mathts-autograd`, `mathts-functions`, and
+  `mathts-parallel`, with version pins. Answers the three open
+  questions raised in UPT's v0.70 proposal §10.2:
+  - **Q1 (AST extensibility)** — yes, `Node` is designed for
+    inheritance via the existing `createNode(deps)` factory.
+    Demonstrated in `expression/tests/node-extension.test.ts`
+    (NEW, 8 tests, all green): builds a `BridgeEquationNode`
+    stand-in, confirms `isNode` duck-typing, and that
+    `forEach` / `map` / `traverse` / `clone` / `toJSON` /
+    `_toString` all behave correctly alongside built-in nodes.
+  - **Q2 (Tensor dimensional analysis)** — intentionally absent in
+    MathTS; `Tensor` stays the unit-free numeric primitive.
+    Dimensional analysis remains a UPT-layer responsibility per
+    the proposal's own §1.3.
+  - **Q3 (AD over WASM-accelerated kernels)** — yes, `Tape` is
+    agnostic about the forward-pass strategy. A forward op can run
+    through `ComputePool` (in-process, worker, or WASM tier); the
+    tape only needs the produced primal `Float64Array` plus the
+    adjoint closure. Demonstrated in
+    `autograd/tests/ad-wasm-interop.test.ts` (NEW, 3 tests, all
+    green): forward via `computePool.add` / `computePool.multiply`
+    / chained `add → scale`, with analytical adjoints, gradients
+    verified against closed-form.
+  - Caveat noted in the integration doc: `TapedTensor` currently
+    has `add` / `sub` / `mul` / `scale` but not `matmul`. UPT can
+    either use the low-level
+    `tape.record(inputIds, outputSize, backward)` interface (shown
+    in the demo test) or contribute a `TapedTensor.matmul`
+    upstream.
+- README's documentation-index gains a row for the new
+  `docs/integration/upt.md`.
+
 ### Changed
 
 - **`TODO.md` relocated from `docs/refactoring/TODO.md` to the repo
