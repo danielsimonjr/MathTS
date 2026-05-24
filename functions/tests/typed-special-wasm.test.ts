@@ -44,6 +44,11 @@ import {
   airyBiJS,
   resetBesselWasm,
   resetAiryWasm,
+  ellipticKDispatch,
+  ellipticEDispatch,
+  ellipticKJS,
+  ellipticEJS,
+  resetEllipticWasm,
 } from '../src/wasm/special/wasm-bridge.js';
 
 // ---------------------------------------------------------------------------
@@ -557,6 +562,192 @@ describe('Airy WASM — fallback to JS path (module not loaded)', () => {
     const result = airyBiDispatch(xs);
     const oracle = airyBiJS(xs);
     for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
+    }
+  });
+});
+
+// ===========================================================================
+// Suite 8 — Elliptic K / E scalar reference values (Slice 5.3)
+// ===========================================================================
+
+// Tolerance: AGM converges to machine precision (~1e-15). We test to 1e-10
+// to be safely above floating-point round-trip noise.
+const TOL_ELLIPTIC = 1e-10;
+const TOL_ELLIPTIC_AGREE = 1e-14; // JS vs WASM (same algorithm, bit-identical)
+const PI = Math.PI;
+
+describe('Elliptic K/E scalar reference values (DLMF §19.6)', () => {
+  // Test 1: K(0) = π/2
+  it('K(0) = π/2', () => {
+    const r = ellipticKJS(new Float64Array([0]))[0];
+    expect(Math.abs(r - PI / 2)).toBeLessThan(TOL_ELLIPTIC);
+  });
+
+  // Test 2: K(0.5) ≈ 1.8540746773013719
+  it('K(0.5) ≈ 1.8540746773013719', () => {
+    const r = ellipticKJS(new Float64Array([0.5]))[0];
+    expect(Math.abs(r - 1.8540746773013719)).toBeLessThan(TOL_ELLIPTIC);
+  });
+
+  // Test 3: K(0.99) ≈ 3.6956373629898747
+  it('K(0.99) ≈ 3.6956373629898747', () => {
+    const r = ellipticKJS(new Float64Array([0.99]))[0];
+    expect(Math.abs(r - 3.6956373629898747)).toBeLessThan(1e-7);
+  });
+
+  // Test 4: K(1) = +∞
+  it('K(1) = +Infinity', () => {
+    const r = ellipticKJS(new Float64Array([1]))[0];
+    expect(r).toBe(Infinity);
+  });
+
+  // Test 5: K(m < 0) = NaN
+  it('K(m < 0) returns NaN', () => {
+    const r = ellipticKJS(new Float64Array([-0.1]))[0];
+    expect(isNaN(r)).toBe(true);
+  });
+
+  // Test 6: K(m > 1) = NaN
+  it('K(m > 1) returns NaN', () => {
+    const r = ellipticKJS(new Float64Array([1.5]))[0];
+    expect(isNaN(r)).toBe(true);
+  });
+
+  // Test 7: E(0) = π/2
+  it('E(0) = π/2', () => {
+    const r = ellipticEJS(new Float64Array([0]))[0];
+    expect(Math.abs(r - PI / 2)).toBeLessThan(TOL_ELLIPTIC);
+  });
+
+  // Test 8: E(0.5) ≈ 1.3506438810476755
+  it('E(0.5) ≈ 1.3506438810476755', () => {
+    const r = ellipticEJS(new Float64Array([0.5]))[0];
+    expect(Math.abs(r - 1.3506438810476755)).toBeLessThan(TOL_ELLIPTIC);
+  });
+
+  // Test 9: E(1) = 1.0
+  it('E(1) = 1.0 (limit case)', () => {
+    const r = ellipticEJS(new Float64Array([1]))[0];
+    expect(Math.abs(r - 1.0)).toBeLessThan(TOL_ELLIPTIC);
+  });
+
+  // Test 10: E(m < 0) = NaN
+  it('E(m < 0) returns NaN', () => {
+    const r = ellipticEJS(new Float64Array([-0.5]))[0];
+    expect(isNaN(r)).toBe(true);
+  });
+
+  // Test 11: E(m > 1) = NaN
+  it('E(m > 1) returns NaN', () => {
+    const r = ellipticEJS(new Float64Array([2.0]))[0];
+    expect(isNaN(r)).toBe(true);
+  });
+
+  // Test 12: K(m) ≥ E(m) for m ∈ (0, 1)  (well-known identity)
+  it('K(m) ≥ E(m) for m ∈ (0, 1)', () => {
+    const ms = [0.1, 0.3, 0.5, 0.7, 0.9, 0.99];
+    for (const m of ms) {
+      const k = ellipticKJS(new Float64Array([m]))[0];
+      const e = ellipticEJS(new Float64Array([m]))[0];
+      expect(k).toBeGreaterThanOrEqual(e - 1e-14);
+    }
+  });
+});
+
+// ===========================================================================
+// Suite 9 — Elliptic dispatch threshold behaviour
+// ===========================================================================
+
+describe('Elliptic K/E dispatch threshold behaviour', () => {
+  it('small array (< 1024) ellipticKDispatch matches JS fallback exactly', () => {
+    const ms = linspace(0.01, 0.9, 100);
+    const dr = ellipticKDispatch(ms);
+    const jr = ellipticKJS(ms);
+    for (let i = 0; i < ms.length; i++) {
+      expect(Math.abs(dr[i] - jr[i])).toBeLessThan(TOL_ELLIPTIC_AGREE);
+    }
+  });
+
+  it('large array (≥ 1024) ellipticKDispatch matches JS fallback within TOL', () => {
+    const ms = linspace(0.01, 0.99, WASM_SPECIAL_THRESHOLD);
+    const dr = ellipticKDispatch(ms);
+    const jr = ellipticKJS(ms);
+    for (let i = 0; i < ms.length; i++) {
+      expect(Math.abs(dr[i] - jr[i])).toBeLessThan(TOL_ELLIPTIC_AGREE);
+    }
+  });
+
+  it('large array (≥ 1024) ellipticEDispatch matches JS fallback within TOL', () => {
+    const ms = linspace(0.0, 0.99, WASM_SPECIAL_THRESHOLD);
+    const dr = ellipticEDispatch(ms);
+    const jr = ellipticEJS(ms);
+    for (let i = 0; i < ms.length; i++) {
+      expect(Math.abs(dr[i] - jr[i])).toBeLessThan(TOL_ELLIPTIC_AGREE);
+    }
+  });
+
+  it('ellipticK typed scalar overload returns correct value', async () => {
+    const { ellipticK } = await import('../src/typed/special.js');
+    const r = ellipticK(0.5) as number;
+    expect(Math.abs(r - 1.8540746773013719)).toBeLessThan(TOL_ELLIPTIC);
+  });
+
+  it('ellipticE typed scalar overload returns correct value', async () => {
+    const { ellipticE } = await import('../src/typed/special.js');
+    const r = ellipticE(0.5) as number;
+    expect(Math.abs(r - 1.3506438810476755)).toBeLessThan(TOL_ELLIPTIC);
+  });
+
+  it('ellipticK typed array overload (≥ threshold) resolves correctly', async () => {
+    const { ellipticK } = await import('../src/typed/special.js');
+    const ms = linspace(0.01, 0.9, WASM_SPECIAL_THRESHOLD);
+    const result = await (ellipticK(ms) as Promise<Float64Array>);
+    const jr = ellipticKJS(ms);
+    for (let i = 0; i < ms.length; i++) {
+      expect(Math.abs(result[i] - jr[i])).toBeLessThan(TOL_ELLIPTIC_AGREE);
+    }
+  });
+
+  it('ellipticE typed array overload (≥ threshold) resolves correctly', async () => {
+    const { ellipticE } = await import('../src/typed/special.js');
+    const ms = linspace(0.0, 0.99, WASM_SPECIAL_THRESHOLD);
+    const result = await (ellipticE(ms) as Promise<Float64Array>);
+    const jr = ellipticEJS(ms);
+    for (let i = 0; i < ms.length; i++) {
+      expect(Math.abs(result[i] - jr[i])).toBeLessThan(TOL_ELLIPTIC_AGREE);
+    }
+  });
+});
+
+// ===========================================================================
+// Suite 10 — Elliptic fallback when WASM module not loaded
+// ===========================================================================
+
+describe('Elliptic WASM — fallback to JS path (module not loaded)', () => {
+  beforeAll(() => {
+    resetEllipticWasm();
+  });
+
+  afterAll(() => {
+    resetEllipticWasm();
+  });
+
+  it('ellipticKDispatch above threshold falls back to JS when WASM not loaded', () => {
+    const ms = linspace(0.01, 0.9, WASM_SPECIAL_THRESHOLD);
+    const result = ellipticKDispatch(ms);
+    const oracle = ellipticKJS(ms);
+    expect(result.length).toBe(oracle.length);
+    for (let i = 0; i < ms.length; i++) {
+      expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
+    }
+  });
+
+  it('ellipticEDispatch above threshold falls back to JS when WASM not loaded', () => {
+    const ms = linspace(0.0, 0.99, WASM_SPECIAL_THRESHOLD);
+    const result = ellipticEDispatch(ms);
+    const oracle = ellipticEJS(ms);
+    for (let i = 0; i < ms.length; i++) {
       expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
     }
   });

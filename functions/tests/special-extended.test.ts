@@ -140,8 +140,11 @@ describe('ellipticK', () => {
     expect(k).toBeGreaterThan(3);
   });
 
-  it('should return NaN for m >= 1', () => {
-    expect(ellipticK(1)).toBeNaN();
+  it('should return Infinity for m = 1 and NaN for m > 1', () => {
+    // K(1) = +∞ (the complete elliptic integral diverges at m = 1)
+    expect(ellipticK(1)).toBe(Infinity);
+    // m > 1 is out of domain
+    expect(ellipticK(1.5)).toBeNaN();
   });
 });
 
