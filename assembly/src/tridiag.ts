@@ -1,5 +1,6 @@
 /**
  * Tridiagonal-solve kernel — AssemblyScript parity port (Slice 3.10b).
+ * Divided-difference kernel — AssemblyScript parity port (Slice 5.5).
  *
  * Solves a tridiagonal linear system A·x = rhs in O(n) using the
  * Thomas algorithm (forward-sweep + back-substitution).
@@ -68,4 +69,54 @@ export function tridiag_solve_f64(
   }
 
   return x;
+}
+
+// ============================================================================
+// divided_difference_f64 — Newton's divided-difference coefficients (Slice 5.5)
+// ============================================================================
+
+/**
+ * Compute Newton's divided-difference coefficients for polynomial interpolation.
+ *
+ * Given n distinct nodes (x_0, y_0) … (x_{n-1}, y_{n-1}), returns a
+ * Float64Array of n Newton-form coefficients c_0 … c_{n-1} such that the
+ * interpolating polynomial is:
+ *
+ *   P(x) = c_0 + c_1·(x-x_0) + c_2·(x-x_0)(x-x_1) + …
+ *
+ * Returns a zero-length Float64Array when any two x-values are equal
+ * (degenerate / rank-deficient input), matching the AS convention from
+ * tridiag_solve_f64.
+ *
+ * Mirrors `divided_difference_f64` in
+ * wasm-rust/crates/mathts-wasm/src/tridiag.rs.
+ */
+export function divided_difference_f64(
+  xs: Float64Array,
+  ys: Float64Array,
+): Float64Array {
+  const n: i32 = xs.length;
+
+  if (n == 0) {
+    return new Float64Array(0);
+  }
+
+  // Initialise work buffer with y-values.
+  const out = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) {
+    out[i] = ys[i];
+  }
+
+  // In-place divided-difference computation.
+  for (let j: i32 = 1; j < n; j++) {
+    for (let i: i32 = n - 1; i >= j; i--) {
+      const denom: f64 = xs[i] - xs[i - j];
+      if (denom == 0.0) {
+        return new Float64Array(0); // duplicate x → degenerate
+      }
+      out[i] = (out[i] - out[i - 1]) / denom;
+    }
+  }
+
+  return out;
 }

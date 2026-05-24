@@ -393,16 +393,16 @@ export {
 } from './ops/bitwise';
 
 // =============================================================================
-// Polynomial hot-loop kernels (Slice 3.7)
+// Polynomial hot-loop kernels (Slice 3.7) + Fit kernels (Slice 5.4)
 // =============================================================================
 
-export { poly_mul_f64, poly_div_mod_f64 } from './poly';
+export { poly_mul_f64, poly_div_mod_f64, poly_fit_f64, cheb_fit_f64, legendre_fit_f64 } from './poly';
 
 // =============================================================================
-// Tridiagonal-solve kernel (Slice 3.10b)
+// Tridiagonal-solve kernel (Slice 3.10b) + Divided-difference kernel (Slice 5.5)
 // =============================================================================
 
-export { tridiag_solve_f64 } from './tridiag';
+export { tridiag_solve_f64, divided_difference_f64 } from './tridiag';
 
 // =============================================================================
 // Bessel J/Y and Airy Ai/Bi array kernels (Slice 3.10c-1 / Slice 4.9)

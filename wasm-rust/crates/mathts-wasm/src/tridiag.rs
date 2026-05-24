@@ -101,6 +101,64 @@ pub unsafe extern "C" fn tridiag_solve_f64(
 }
 
 // ============================================================
+// Divided-difference kernel (Slice 5.5)
+// ============================================================
+//
+// Computes Newton's divided-difference coefficients for polynomial
+// interpolation in O(n²) time using O(n) extra memory.
+//
+// Given n distinct nodes (x_0, y_0) … (x_{n-1}, y_{n-1}), the output
+// array `out` is filled with the Newton coefficients c_0 … c_{n-1}
+// such that the interpolating polynomial is:
+//
+//   P(x) = c_0 + c_1·(x-x_0) + c_2·(x-x_0)(x-x_1) + …
+//
+// The coefficients are computed by the standard in-place scheme:
+//   start with out[i] = y[i];
+//   for j = 1..n:  for i = n-1..j (rev):
+//     out[i] = (out[i] - out[i-1]) / (xs[i] - xs[i-j])
+//
+// Returns n (the number of coefficients written) on success.
+// Returns -1 when any denominator is zero (duplicate x-values).
+
+/// Compute Newton's divided-difference coefficients in-place.
+///
+/// # Safety
+/// `xs_ptr` and `ys_ptr` must be valid aligned `*const f64` arrays of
+/// length `n`.  `out_ptr` must be a valid writable `*mut f64` buffer of
+/// length `n`.  All pointers must remain live for the duration of this call.
+#[no_mangle]
+pub unsafe extern "C" fn divided_difference_f64(
+    xs_ptr: *const f64,
+    ys_ptr: *const f64,
+    n: usize,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n == 0 {
+        return 0;
+    }
+
+    let xs = core::slice::from_raw_parts(xs_ptr, n);
+    let ys = core::slice::from_raw_parts(ys_ptr, n);
+    let out = core::slice::from_raw_parts_mut(out_ptr, n);
+
+    // Initialise with y-values.
+    out.copy_from_slice(ys);
+
+    for j in 1..n {
+        for i in (j..n).rev() {
+            let denom = xs[i] - xs[i - j];
+            if denom == 0.0 {
+                return -1; // duplicate x-values → degenerate
+            }
+            out[i] = (out[i] - out[i - 1]) / denom;
+        }
+    }
+
+    n as i32
+}
+
+// ============================================================
 // Native unit tests (run with `cargo test`, not in WASM)
 // ============================================================
 
@@ -208,5 +266,85 @@ mod tests {
     fn test_n1() {
         let x = solve(&[5.0], &[], &[], &[10.0]);
         assert!((x[0] - 2.0).abs() < 1e-14);
+    }
+
+    // -------------------------------------------------------------------
+    // divided_difference_f64 tests
+    // -------------------------------------------------------------------
+
+    /// Call `divided_difference_f64` via slices and return the output.
+    fn div_diff(xs: &[f64], ys: &[f64]) -> Vec<f64> {
+        let n = xs.len();
+        let mut out = vec![0.0f64; n];
+        let ret = unsafe {
+            divided_difference_f64(xs.as_ptr(), ys.as_ptr(), n, out.as_mut_ptr())
+        };
+        assert!(ret >= 0, "divided_difference returned error {ret}");
+        out
+    }
+
+    /// Evaluate the Newton-form polynomial at `x` using the divided-difference
+    /// coefficients and nodes.
+    fn newton_eval(xs: &[f64], coeffs: &[f64], x: f64) -> f64 {
+        let n = coeffs.len();
+        let mut result = coeffs[n - 1];
+        for k in (0..n - 1).rev() {
+            result = result * (x - xs[k]) + coeffs[k];
+        }
+        result
+    }
+
+    #[test]
+    fn test_dd_constant() {
+        // f(x) = 5 → coefficients should be [5, 0, 0]
+        let xs = [0.0, 1.0, 2.0];
+        let ys = [5.0, 5.0, 5.0];
+        let c = div_diff(&xs, &ys);
+        assert!((c[0] - 5.0).abs() < 1e-14);
+        assert!(c[1].abs() < 1e-14);
+        assert!(c[2].abs() < 1e-14);
+    }
+
+    #[test]
+    fn test_dd_linear() {
+        // f(x) = 2x + 1: Newton coeffs = [1, 2, 0]
+        let xs = [0.0, 1.0, 2.0];
+        let ys = [1.0, 3.0, 5.0];
+        let c = div_diff(&xs, &ys);
+        assert!((c[0] - 1.0).abs() < 1e-13);
+        assert!((c[1] - 2.0).abs() < 1e-13);
+        assert!(c[2].abs() < 1e-13);
+    }
+
+    #[test]
+    fn test_dd_quadratic_round_trip() {
+        // f(x) = x^2: interpolate at x=0,1,2 → coeffs [0, 1, 1]
+        let xs = [0.0, 1.0, 2.0];
+        let ys = [0.0, 1.0, 4.0];
+        let c = div_diff(&xs, &ys);
+        // Evaluate at x = 1.5 → 2.25
+        let v = newton_eval(&xs, &c, 1.5);
+        assert!((v - 2.25).abs() < 1e-12, "expected 2.25, got {v}");
+    }
+
+    #[test]
+    fn test_dd_duplicate_x_returns_minus_one() {
+        let xs = [0.0, 1.0, 1.0]; // duplicate!
+        let ys = [0.0, 1.0, 2.0];
+        let n = xs.len();
+        let mut out = vec![0.0f64; n];
+        let ret = unsafe {
+            divided_difference_f64(xs.as_ptr(), ys.as_ptr(), n, out.as_mut_ptr())
+        };
+        assert_eq!(ret, -1, "expected -1 for duplicate x");
+    }
+
+    #[test]
+    fn test_dd_n1() {
+        let xs = [3.0];
+        let ys = [7.0];
+        let c = div_diff(&xs, &ys);
+        assert_eq!(c.len(), 1);
+        assert!((c[0] - 7.0).abs() < 1e-14);
     }
 }

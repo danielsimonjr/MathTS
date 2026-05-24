@@ -203,6 +203,205 @@ export function poly_resultant_f64(p: Float64Array, q: Float64Array): f64 {
 }
 
 // ---------------------------------------------------------------------------
+// Internal Householder QR least-squares solver
+// Used by poly_fit_f64 / cheb_fit_f64 / legendre_fit_f64.
+// a: Float64Array of shape n×k row-major (modified in-place)
+// b: Float64Array length n (right-hand side, modified in-place → solution)
+// Returns true on success, false on rank-deficient input.
+// ---------------------------------------------------------------------------
+
+function householderQRSolve(a: Float64Array, n: i32, k: i32, b: Float64Array): bool {
+  const tol: f64 = 1e-12;
+
+  for (let col: i32 = 0; col < k; col++) {
+    // Compute norm of column col from row col downward.
+    let norm2: f64 = 0.0;
+    for (let row: i32 = col; row < n; row++) {
+      const v: f64 = a[row * k + col];
+      norm2 += v * v;
+    }
+    const norm: f64 = Math.sqrt(norm2);
+    if (norm < tol) return false;
+
+    const sign: f64 = a[col * k + col] >= 0.0 ? 1.0 : -1.0;
+    const u1: f64 = a[col * k + col] + sign * norm;
+    let vtv: f64 = u1 * u1;
+    for (let row: i32 = col + 1; row < n; row++) {
+      vtv += a[row * k + col] * a[row * k + col];
+    }
+    const tau: f64 = 2.0 / vtv;
+
+    // Apply H to columns col..k of A.
+    for (let c: i32 = col; c < k; c++) {
+      let dot: f64 = u1 * a[col * k + c];
+      for (let row: i32 = col + 1; row < n; row++) {
+        dot += a[row * k + col] * a[row * k + c];
+      }
+      dot *= tau;
+      a[col * k + c] -= u1 * dot;
+      for (let row: i32 = col + 1; row < n; row++) {
+        a[row * k + c] -= a[row * k + col] * dot;
+      }
+    }
+
+    // Apply H to b[col..n].
+    {
+      let dot: f64 = u1 * b[col];
+      for (let row: i32 = col + 1; row < n; row++) {
+        dot += a[row * k + col] * b[row];
+      }
+      dot *= tau;
+      b[col] -= u1 * dot;
+      for (let row: i32 = col + 1; row < n; row++) {
+        b[row] -= a[row * k + col] * dot;
+      }
+    }
+
+    // Update R diagonal and clear sub-diagonal.
+    a[col * k + col] = -sign * norm;
+    for (let row: i32 = col + 1; row < n; row++) {
+      a[row * k + col] = 0.0;
+    }
+  }
+
+  // Back-substitution.
+  for (let i: i32 = k - 1; i >= 0; i--) {
+    let s: f64 = b[i];
+    for (let j: i32 = i + 1; j < k; j++) {
+      s -= a[i * k + j] * b[j];
+    }
+    const r_ii: f64 = a[i * k + i];
+    if (Math.abs(r_ii) < tol) return false;
+    b[i] = s / r_ii;
+  }
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// poly_fit_f64  — Vandermonde + QR least-squares polynomial fit
+// ---------------------------------------------------------------------------
+
+/**
+ * Fit a polynomial of given degree to (xs, ys) using Vandermonde + QR.
+ * Returns a Float64Array of length (degree+1) with coefficients [a0..a_d],
+ * or a length-1 array containing NaN on rank-deficient input.
+ */
+export function poly_fit_f64(xs: Float64Array, ys: Float64Array, degree: i32): Float64Array {
+  const n: i32 = xs.length;
+  const k: i32 = degree + 1;
+  const nanResult = new Float64Array(1);
+  nanResult[0] = NaN;
+  if (n < k || k <= 0 || n != ys.length) return nanResult;
+
+  // Build Vandermonde matrix (n × k), row-major.
+  const a = new Float64Array(n * k);
+  for (let i: i32 = 0; i < n; i++) {
+    const x: f64 = xs[i];
+    let xpow: f64 = 1.0;
+    for (let j: i32 = 0; j < k; j++) {
+      a[i * k + j] = xpow;
+      xpow *= x;
+    }
+  }
+
+  // Copy ys into work buffer (modified in-place by QR solver).
+  const b = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) b[i] = ys[i];
+
+  if (!householderQRSolve(a, n, k, b)) return nanResult;
+
+  const out = new Float64Array(k);
+  for (let j: i32 = 0; j < k; j++) out[j] = b[j];
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// cheb_fit_f64  — Chebyshev-basis + QR least-squares fit
+// ---------------------------------------------------------------------------
+
+/**
+ * Fit a Chebyshev-series of given degree to (xs, ys) using QR.
+ * Returns a Float64Array of coefficients [c0..c_d] (Chebyshev basis),
+ * or a length-1 NaN array on rank-deficient input.
+ */
+export function cheb_fit_f64(xs: Float64Array, ys: Float64Array, degree: i32): Float64Array {
+  const n: i32 = xs.length;
+  const k: i32 = degree + 1;
+  const nanResult = new Float64Array(1);
+  nanResult[0] = NaN;
+  if (n < k || k <= 0 || n != ys.length) return nanResult;
+
+  // Build Chebyshev Vandermonde (n × k), row-major.
+  const a = new Float64Array(n * k);
+  for (let i: i32 = 0; i < n; i++) {
+    const x: f64 = xs[i];
+    let tPrev: f64 = 1.0;
+    let tCurr: f64 = x;
+    a[i * k + 0] = tPrev;
+    if (k > 1) a[i * k + 1] = tCurr;
+    for (let j: i32 = 2; j < k; j++) {
+      const tNext: f64 = 2.0 * x * tCurr - tPrev;
+      a[i * k + j] = tNext;
+      tPrev = tCurr;
+      tCurr = tNext;
+    }
+  }
+
+  const b = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) b[i] = ys[i];
+
+  if (!householderQRSolve(a, n, k, b)) return nanResult;
+
+  const out = new Float64Array(k);
+  for (let j: i32 = 0; j < k; j++) out[j] = b[j];
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// legendre_fit_f64  — Legendre-basis + QR least-squares fit
+// ---------------------------------------------------------------------------
+
+/**
+ * Fit a Legendre-series of given degree to (xs, ys) using QR.
+ * Returns a Float64Array of coefficients [c0..c_d] (Legendre basis),
+ * or a length-1 NaN array on rank-deficient input.
+ */
+export function legendre_fit_f64(xs: Float64Array, ys: Float64Array, degree: i32): Float64Array {
+  const n: i32 = xs.length;
+  const k: i32 = degree + 1;
+  const nanResult = new Float64Array(1);
+  nanResult[0] = NaN;
+  if (n < k || k <= 0 || n != ys.length) return nanResult;
+
+  // Build Legendre Vandermonde (n × k), row-major.
+  const a = new Float64Array(n * k);
+  for (let i: i32 = 0; i < n; i++) {
+    const x: f64 = xs[i];
+    let pPrev: f64 = 1.0;
+    let pCurr: f64 = x;
+    a[i * k + 0] = pPrev;
+    if (k > 1) a[i * k + 1] = pCurr;
+    for (let degN: i32 = 1; degN < k - 1; degN++) {
+      // (degN+1) P_{degN+1} = (2*degN+1)*x*P_{degN} - degN*P_{degN-1}
+      const pNext: f64 =
+        (<f64>(2 * degN + 1) * x * pCurr - <f64>degN * pPrev) / <f64>(degN + 1);
+      a[i * k + degN + 1] = pNext;
+      pPrev = pCurr;
+      pCurr = pNext;
+    }
+  }
+
+  const b = new Float64Array(n);
+  for (let i: i32 = 0; i < n; i++) b[i] = ys[i];
+
+  if (!householderQRSolve(a, n, k, b)) return nanResult;
+
+  const out = new Float64Array(k);
+  for (let j: i32 = 0; j < k; j++) out[j] = b[j];
+  return out;
+}
+
+// ---------------------------------------------------------------------------
 // poly_discriminant_f64  — disc(p) = (-1)^(m(m-1)/2) / a_m · Res(p, p')
 // ---------------------------------------------------------------------------
 

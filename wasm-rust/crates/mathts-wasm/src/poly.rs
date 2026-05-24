@@ -21,6 +21,111 @@ use alloc::vec;
 use alloc::vec::Vec;
 
 // ============================================================
+// INTERNAL QR FACTORISATION (Householder, inlined)
+// Used by poly_fit_f64 / cheb_fit_f64 / legendre_fit_f64.
+// ============================================================
+
+/// Thin Householder QR of a row-major `m × k` matrix stored in `a`
+/// (modified in-place to contain R in its upper triangle and the
+/// Householder reflectors in the lower triangle).
+///
+/// `q_times_b` accumulates Q^T · b using the stored reflectors
+/// and returns the length-`k` result in `qtb`.
+///
+/// Returns `true` on success, `false` when the matrix is rank-deficient
+/// (diagonal of R drops below `tol`).
+unsafe fn householder_qr_solve(
+    a: &mut [f64],
+    m: usize,
+    k: usize,
+    b: &[f64],
+    qtb: &mut [f64],
+    tol: f64,
+) -> bool {
+    // qtb = b (we will apply reflectors to it)
+    for i in 0..m {
+        qtb[i] = b[i];
+    }
+
+    for col in 0..k {
+        // --- compute Householder reflector for column `col` ---
+        // v = a[col..m, col]
+        let mut norm2: f64 = 0.0;
+        for row in col..m {
+            let v = a[row * k + col];
+            norm2 += v * v;
+        }
+        let norm = libm::sqrt(norm2);
+        if norm < tol {
+            return false; // rank-deficient
+        }
+
+        // Choose sign to avoid cancellation
+        let sign = if a[col * k + col] >= 0.0 { 1.0 } else { -1.0 };
+        let u1 = a[col * k + col] + sign * norm;
+        // tau = 2 / (v^T v) where v[0] = u1, v[j] = a[(col+j)*k+col]
+        let mut vtv: f64 = u1 * u1;
+        for row in (col + 1)..m {
+            vtv += a[row * k + col] * a[row * k + col];
+        }
+        let tau = 2.0 / vtv;
+
+        // Apply H = I - tau * v * v^T to columns col..k of A
+        // v[0] = u1, v[j] = a[(col+j)*k+col] for j>=1
+        for c in col..k {
+            let mut dot: f64 = u1 * a[col * k + c];
+            for row in (col + 1)..m {
+                dot += a[row * k + col] * a[row * k + c];
+            }
+            dot *= tau;
+            a[col * k + c] -= u1 * dot;
+            for row in (col + 1)..m {
+                a[row * k + c] -= a[row * k + col] * dot;
+            }
+        }
+
+        // Apply H to qtb[col..m]
+        {
+            let mut dot: f64 = u1 * qtb[col];
+            for row in (col + 1)..m {
+                dot += a[row * k + col] * qtb[row];
+            }
+            dot *= tau;
+            qtb[col] -= u1 * dot;
+            for row in (col + 1)..m {
+                qtb[row] -= a[row * k + col] * dot;
+            }
+        }
+
+        // Store u1 in a[col*k+col] for book-keeping (R will be built next)
+        // Overwrite lower part with u1/normalised reflector (we no longer need it)
+        // Actually we already have R in the upper triangle; just clear sub-diagonal.
+        a[col * k + col] = -sign * norm; // R[col,col]
+        for row in (col + 1)..m {
+            a[row * k + col] = 0.0; // clear sub-diagonal (already used above)
+        }
+    }
+
+    // Back-substitution: solve R * x = qtb[0..k]
+    for i in (0..k).rev() {
+        let mut s = qtb[i];
+        for j in (i + 1)..k {
+            s -= a[i * k + j] * qtb[j];
+        }
+        let r_ii = a[i * k + i];
+        if libm::fabs(r_ii) < tol {
+            return false;
+        }
+        qtb[i] = s / r_ii;
+    }
+    true
+}
+
+// ============================================================
+// POLY_VANDERMONDE_F64 — build Vandermonde matrix (x^k basis)
+// ============================================================
+
+// ============================================================
 // POLYNOMIAL MULTIPLICATION  (O(n · m) convolution)
 // ============================================================
 
@@ -304,4 +409,207 @@ pub unsafe extern "C" fn poly_discriminant_f64(p_ptr: *const f64, p_len: i32) ->
     let an = t[t.len() - 1];
     let sign = if ((deg * (deg - 1)) / 2) % 2 == 0 { 1.0 } else { -1.0 };
     sign * res / an
+}
+
+// ============================================================
+// POLY_VANDERMONDE_F64 — build Vandermonde matrix (x^k basis)
+// ============================================================
+
+/// Build an n × (degree+1) Vandermonde matrix in row-major order.
+///
+/// `out_ptr` must point to a writable buffer of `n * (degree+1)` f64s.
+/// Returns 0 on success, -1 on invalid input.
+///
+/// # Safety
+/// `xs_ptr` must be a valid `f64` slice of length `n`.
+/// `out_ptr` must point to a writable buffer of `n * (degree+1)` f64s.
+#[no_mangle]
+pub unsafe extern "C" fn poly_vandermonde_f64(
+    xs_ptr: *const f64,
+    n: usize,
+    degree: usize,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n == 0 || degree == 0 {
+        return -1;
+    }
+    let xs = core::slice::from_raw_parts(xs_ptr, n);
+    let cols = degree + 1;
+    for i in 0..n {
+        let x = xs[i];
+        let mut xpow: f64 = 1.0;
+        for j in 0..cols {
+            *out_ptr.add(i * cols + j) = xpow;
+            xpow *= x;
+        }
+    }
+    0
+}
+
+// ============================================================
+// POLY_FIT_F64 — Vandermonde + QR least-squares fit
+// ============================================================
+
+/// Fit a polynomial of given degree to (xs, ys) via Vandermonde + QR.
+///
+/// Returns `(degree+1) as i32` on success (number of coefficients written
+/// to `out_coeffs_ptr`), or `-1` on rank-deficient / degenerate input.
+///
+/// # Safety
+/// `xs_ptr` / `ys_ptr` must be valid `f64` slices of length `n`.
+/// `out_coeffs_ptr` must be a writable buffer of at least `degree+1` f64s.
+#[no_mangle]
+pub unsafe extern "C" fn poly_fit_f64(
+    xs_ptr: *const f64,
+    ys_ptr: *const f64,
+    n: usize,
+    degree: usize,
+    out_coeffs_ptr: *mut f64,
+) -> i32 {
+    let k = degree + 1;
+    if n < k || k == 0 {
+        return -1;
+    }
+    let xs = core::slice::from_raw_parts(xs_ptr, n);
+    let ys = core::slice::from_raw_parts(ys_ptr, n);
+
+    // Build Vandermonde matrix (n × k), row-major.
+    let mut a: Vec<f64> = vec![0.0; n * k];
+    for i in 0..n {
+        let x = xs[i];
+        let mut xpow: f64 = 1.0;
+        for j in 0..k {
+            a[i * k + j] = xpow;
+            xpow *= x;
+        }
+    }
+
+    // qtb will receive Q^T y then become the solution x.
+    let mut qtb: Vec<f64> = vec![0.0; n];
+
+    let tol = 1e-12;
+    if !householder_qr_solve(&mut a, n, k, ys, &mut qtb, tol) {
+        return -1;
+    }
+
+    for j in 0..k {
+        *out_coeffs_ptr.add(j) = qtb[j];
+    }
+    k as i32
+}
+
+// ============================================================
+// CHEB_FIT_F64 — Chebyshev-basis Vandermonde + QR fit
+// ============================================================
+
+/// Fit a Chebyshev-series of given degree to (xs, ys).
+///
+/// Uses the three-term recurrence T_{n+1} = 2x·T_n - T_{n-1} to build
+/// the design matrix row-by-row.
+///
+/// Returns `(degree+1) as i32` on success, -1 on failure.
+///
+/// # Safety
+/// Same as `poly_fit_f64`.
+#[no_mangle]
+pub unsafe extern "C" fn cheb_fit_f64(
+    xs_ptr: *const f64,
+    ys_ptr: *const f64,
+    n: usize,
+    degree: usize,
+    out_coeffs_ptr: *mut f64,
+) -> i32 {
+    let k = degree + 1;
+    if n < k || k == 0 {
+        return -1;
+    }
+    let xs = core::slice::from_raw_parts(xs_ptr, n);
+    let ys = core::slice::from_raw_parts(ys_ptr, n);
+
+    // Build Chebyshev Vandermonde (n × k), row-major.
+    let mut a: Vec<f64> = vec![0.0; n * k];
+    for i in 0..n {
+        let x = xs[i];
+        let mut t_prev: f64 = 1.0; // T_0
+        let mut t_curr: f64 = x;   // T_1
+        a[i * k] = t_prev;
+        if k > 1 {
+            a[i * k + 1] = t_curr;
+        }
+        for j in 2..k {
+            let t_next = 2.0 * x * t_curr - t_prev;
+            a[i * k + j] = t_next;
+            t_prev = t_curr;
+            t_curr = t_next;
+        }
+    }
+
+    let mut qtb: Vec<f64> = vec![0.0; n];
+    let tol = 1e-12;
+    if !householder_qr_solve(&mut a, n, k, ys, &mut qtb, tol) {
+        return -1;
+    }
+    for j in 0..k {
+        *out_coeffs_ptr.add(j) = qtb[j];
+    }
+    k as i32
+}
+
+// ============================================================
+// LEGENDRE_FIT_F64 — Legendre-basis Vandermonde + QR fit
+// ============================================================
+
+/// Fit a Legendre-series of given degree to (xs, ys).
+///
+/// Uses the three-term recurrence
+///   (n+1) P_{n+1} = (2n+1) x P_n - n P_{n-1}
+///
+/// Returns `(degree+1) as i32` on success, -1 on failure.
+///
+/// # Safety
+/// Same as `poly_fit_f64`.
+#[no_mangle]
+pub unsafe extern "C" fn legendre_fit_f64(
+    xs_ptr: *const f64,
+    ys_ptr: *const f64,
+    n: usize,
+    degree: usize,
+    out_coeffs_ptr: *mut f64,
+) -> i32 {
+    let k = degree + 1;
+    if n < k || k == 0 {
+        return -1;
+    }
+    let xs = core::slice::from_raw_parts(xs_ptr, n);
+    let ys = core::slice::from_raw_parts(ys_ptr, n);
+
+    // Build Legendre Vandermonde (n × k), row-major.
+    let mut a: Vec<f64> = vec![0.0; n * k];
+    for i in 0..n {
+        let x = xs[i];
+        let mut p_prev: f64 = 1.0; // P_0
+        let mut p_curr: f64 = x;   // P_1
+        a[i * k] = p_prev;
+        if k > 1 {
+            a[i * k + 1] = p_curr;
+        }
+        for deg_n in 1..(k - 1) {
+            // (deg_n+1) * P_{deg_n+1} = (2*deg_n+1)*x*P_{deg_n} - deg_n*P_{deg_n-1}
+            let p_next = ((2 * deg_n + 1) as f64 * x * p_curr - deg_n as f64 * p_prev)
+                / (deg_n + 1) as f64;
+            a[i * k + deg_n + 1] = p_next;
+            p_prev = p_curr;
+            p_curr = p_next;
+        }
+    }
+
+    let mut qtb: Vec<f64> = vec![0.0; n];
+    let tol = 1e-12;
+    if !householder_qr_solve(&mut a, n, k, ys, &mut qtb, tol) {
+        return -1;
+    }
+    for j in 0..k {
+        *out_coeffs_ptr.add(j) = qtb[j];
+    }
+    k as i32
 }
