@@ -281,6 +281,18 @@ export {
 export { resample, medfilt, windowFunction } from './ops/signal';
 
 // =============================================================================
+// Spectral signal kernels (Slice 5.6): windowing + Welch/Bartlett PSD + Goertzel + CZT
+// =============================================================================
+
+export {
+  apply_window_f64,
+  welch_psd_f64,
+  bartlett_psd_f64,
+  goertzel_f64,
+  chirp_z_transform_f64,
+} from './signal';
+
+// =============================================================================
 // Extra Linear Algebra (RREF, characteristic polynomial)
 // =============================================================================
 
