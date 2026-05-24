@@ -129,6 +129,24 @@ pub use unit::conversion::*;
 pub use utils::checks::*;
 
 // ============================================================
+// Slice 3.7: Polynomial hot-loop kernels
+// ============================================================
+pub mod poly;
+pub use poly::*;
+
+// ============================================================
+// Slice 3.10b: Tridiagonal-solve kernel (Thomas algorithm)
+// ============================================================
+pub mod tridiag;
+pub use tridiag::*;
+
+// ============================================================
+// Slice 3.10c-1: Bessel J/Y array kernels
+// ============================================================
+pub mod bessel;
+pub use bessel::*;
+
+// ============================================================
 // AssemblyScript-compatible wrappers (scalar + array ops)
 // ============================================================
 pub mod compat;

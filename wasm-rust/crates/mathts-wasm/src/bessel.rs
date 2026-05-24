@@ -1,0 +1,339 @@
+//! Bessel-function array kernels — Slice 3.10c-1.
+//!
+//! Provides per-element Bessel J / Y array hot-loops that the TypeScript
+//! bridge calls when the input length exceeds the WASM threshold (≥ 1024).
+//!
+//! Scalar helpers (`besselJ0`, `besselJ1`, `besselY0`, `besselY1`) already
+//! exist in `special/functions.rs` and are re-used here via delegation to
+//! avoid duplicating the polynomial approximations.
+//!
+//! Pointer-ABI convention (mirrors `tridiag.rs`):
+//!   - Input and output arrays are passed as raw `*const f64` / `*mut f64`.
+//!   - `n` is the element count as `i32` (WebAssembly i32 boundary).
+//!   - Return value is `n` on success, `-1` if `n ≤ 0`.
+//!
+//! Used by `functions/src/wasm/special/wasm-bridge.ts` through
+//! `functions/src/typed/special.ts`.
+
+use alloc::vec;
+use alloc::vec::Vec;
+
+// ------------------------------------------------------------------ //
+// Scalar helpers (delegate to special/functions.rs implementations)   //
+// ------------------------------------------------------------------ //
+
+use crate::special::functions::{besselJ0, besselJ1, besselY0, besselY1};
+
+/// Scalar J_n(x) via forward or Miller backward recurrence.
+///
+/// Matches the logic in `special/functions.rs :: besselJ_wasm` but as a safe
+/// function so we can call it from within Rust tests without `unsafe`.
+fn bessel_j_scalar(n: i32, x: f64) -> f64 {
+    let ni = n.unsigned_abs() as i32;
+    let sign = if n < 0 && ni % 2 != 0 { -1.0_f64 } else { 1.0_f64 };
+
+    if ni == 0 {
+        return sign * besselJ0(x);
+    }
+    if ni == 1 {
+        return sign * besselJ1(x);
+    }
+    if x.abs() < 1e-15 {
+        return 0.0;
+    }
+
+    let result = if ni <= 20 || x.abs() > ni as f64 {
+        // Forward recurrence: J_{k+1}(x) = (2k/x)·J_k(x) − J_{k-1}(x)
+        let mut j_prev = besselJ0(x);
+        let mut j_curr = besselJ1(x);
+        for k in 1..ni {
+            let j_next = (2.0 * k as f64 / x) * j_curr - j_prev;
+            j_prev = j_curr;
+            j_curr = j_next;
+        }
+        j_curr
+    } else {
+        // Miller's backward recurrence (numerically stable for n > |x|).
+        let isqrt = (40.0 * ni as f64).sqrt() as i32;
+        let extra = if 10 > isqrt { 10 } else { isqrt };
+        let n_start = ni + 2 * extra;
+        let mut j_next = 0.0_f64;
+        let mut j_curr = 1.0_f64;
+        let mut result_val = 0.0_f64;
+        let mut sum = 0.0_f64;
+        for k in (0..=n_start).rev() {
+            let j_prev = (2.0 * (k + 1) as f64 / x) * j_curr - j_next;
+            j_next = j_curr;
+            j_curr = j_prev;
+            if k == ni {
+                result_val = j_next;
+            }
+            if k % 2 == 0 {
+                sum += j_curr;
+            }
+        }
+        // Normalize: J_0 + 2·(J_2 + J_4 + …) = 1
+        sum = 2.0 * sum - j_curr;
+        result_val / sum
+    };
+    sign * result
+}
+
+/// Scalar Y_n(x) via forward recurrence (x > 0).
+fn bessel_y_scalar(n: i32, x: f64) -> f64 {
+    if x <= 0.0 {
+        return f64::NAN;
+    }
+    let ni = n.unsigned_abs() as i32;
+    let sign = if n < 0 && ni % 2 != 0 { -1.0_f64 } else { 1.0_f64 };
+
+    if ni == 0 {
+        return sign * besselY0(x);
+    }
+    if ni == 1 {
+        return sign * besselY1(x);
+    }
+
+    // Forward recurrence: Y_{k+1}(x) = (2k/x)·Y_k(x) − Y_{k-1}(x)
+    let mut y_prev = besselY0(x);
+    let mut y_curr = besselY1(x);
+    for k in 1..ni {
+        let y_next = (2.0 * k as f64 / x) * y_curr - y_prev;
+        y_prev = y_curr;
+        y_curr = y_next;
+    }
+    sign * y_curr
+}
+
+// ------------------------------------------------------------------ //
+// Array kernels — pointer ABI                                         //
+// ------------------------------------------------------------------ //
+
+/// Apply `J0` element-wise to `xs[0..n]` → `out[0..n]`.
+///
+/// Returns `n` on success, `-1` if `n ≤ 0`.
+#[no_mangle]
+pub unsafe extern "C" fn bessel_j0_f64(xs_ptr: *const f64, n: i32, out_ptr: *mut f64) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = besselJ0(*xs_ptr.add(i));
+    }
+    n
+}
+
+/// Apply `J1` element-wise to `xs[0..n]` → `out[0..n]`.
+#[no_mangle]
+pub unsafe extern "C" fn bessel_j1_f64(xs_ptr: *const f64, n: i32, out_ptr: *mut f64) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = besselJ1(*xs_ptr.add(i));
+    }
+    n
+}
+
+/// Apply `J_n(order, ·)` element-wise to `xs[0..n_elems]` → `out[0..n_elems]`.
+///
+/// `order` is the fixed integer Bessel order; `n_elems` is the array length.
+#[no_mangle]
+pub unsafe extern "C" fn bessel_j_f64(
+    order: i32,
+    xs_ptr: *const f64,
+    n_elems: i32,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n_elems <= 0 {
+        return -1;
+    }
+    for i in 0..n_elems as usize {
+        *out_ptr.add(i) = bessel_j_scalar(order, *xs_ptr.add(i));
+    }
+    n_elems
+}
+
+/// Apply `Y0` element-wise to `xs[0..n]` → `out[0..n]`.
+#[no_mangle]
+pub unsafe extern "C" fn bessel_y0_f64(xs_ptr: *const f64, n: i32, out_ptr: *mut f64) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = besselY0(*xs_ptr.add(i));
+    }
+    n
+}
+
+/// Apply `Y1` element-wise to `xs[0..n]` → `out[0..n]`.
+#[no_mangle]
+pub unsafe extern "C" fn bessel_y1_f64(xs_ptr: *const f64, n: i32, out_ptr: *mut f64) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = besselY1(*xs_ptr.add(i));
+    }
+    n
+}
+
+/// Apply `Y_n(order, ·)` element-wise to `xs[0..n_elems]` → `out[0..n_elems]`.
+#[no_mangle]
+pub unsafe extern "C" fn bessel_y_f64(
+    order: i32,
+    xs_ptr: *const f64,
+    n_elems: i32,
+    out_ptr: *mut f64,
+) -> i32 {
+    if n_elems <= 0 {
+        return -1;
+    }
+    for i in 0..n_elems as usize {
+        *out_ptr.add(i) = bessel_y_scalar(order, *xs_ptr.add(i));
+    }
+    n_elems
+}
+
+// ------------------------------------------------------------------ //
+// Native tests (cargo test — not compiled for WASM)                   //
+// ------------------------------------------------------------------ //
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn j0(x: f64) -> f64 {
+        let xs = [x];
+        let mut out = [0.0f64];
+        unsafe { bessel_j0_f64(xs.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+    fn j1(x: f64) -> f64 {
+        let xs = [x];
+        let mut out = [0.0f64];
+        unsafe { bessel_j1_f64(xs.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+    fn jn(n: i32, x: f64) -> f64 {
+        let xs = [x];
+        let mut out = [0.0f64];
+        unsafe { bessel_j_f64(n, xs.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+    fn y0(x: f64) -> f64 {
+        let xs = [x];
+        let mut out = [0.0f64];
+        unsafe { bessel_y0_f64(xs.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+    fn y1(x: f64) -> f64 {
+        let xs = [x];
+        let mut out = [0.0f64];
+        unsafe { bessel_y1_f64(xs.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+    fn yn(n: i32, x: f64) -> f64 {
+        let xs = [x];
+        let mut out = [0.0f64];
+        unsafe { bessel_y_f64(n, xs.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+
+    // Tolerance: the polynomial approximations (NR §6.5) achieve ~1e-4 to
+    // 1e-7 accuracy depending on argument. Y1 near x = 1 is only accurate
+    // to ~5e-4 in the reference code. We use 1e-3 for Y-function tests and
+    // 1e-6 for J-function tests (which are better conditioned).
+    const TOL_J: f64 = 1e-6;
+    const TOL_Y: f64 = 1e-3;
+
+    #[test]
+    fn test_j0_known_values() {
+        assert!((j0(0.0) - 1.0).abs() < TOL_J, "J0(0) = 1, got {}", j0(0.0));
+        assert!(
+            (j0(1.0) - 0.7651976865579666).abs() < TOL_J,
+            "J0(1), got {}",
+            j0(1.0)
+        );
+        assert!((j0(2.4048) - 0.0).abs() < 1e-4, "J0 first zero ≈ 2.4048");
+    }
+
+    #[test]
+    fn test_j1_known_values() {
+        assert!(j1(0.0).abs() < 1e-10, "J1(0) = 0");
+        assert!(
+            (j1(1.0) - 0.4400505857449335).abs() < TOL_J,
+            "J1(1), got {}",
+            j1(1.0)
+        );
+    }
+
+    #[test]
+    fn test_jn_known_values() {
+        // J5(10) from A&S table 9.1 = -0.2340615281
+        assert!(
+            (jn(5, 10.0) - (-0.23406152816422887)).abs() < TOL_J,
+            "J5(10), got {}",
+            jn(5, 10.0)
+        );
+        // J_n(0) = 0 for n >= 1
+        assert!(jn(3, 0.0).abs() < 1e-15, "J3(0) = 0");
+    }
+
+    #[test]
+    fn test_y0_known_values() {
+        // Y0(1) ≈ 0.0882569642 (A&S) — polynomial is accurate to ~1e-4 here
+        assert!(
+            (y0(1.0) - 0.08825696421567697).abs() < TOL_Y,
+            "Y0(1), got {}",
+            y0(1.0)
+        );
+        assert!(y0(0.0).is_nan() || y0(0.0).is_infinite(), "Y0(0) diverges");
+        assert!(y0(-1.0).is_nan(), "Y0(-1) is NaN");
+    }
+
+    #[test]
+    fn test_y1_known_values() {
+        // Y1(1) ≈ -0.7812 — polynomial approximation at x=1 has ~5e-4 error
+        // (NR §6.5 polynomial; exact = -0.7812128213, poly gives -0.7817)
+        assert!(
+            (y1(1.0) - (-0.7812128213002887)).abs() < TOL_Y,
+            "Y1(1), got {}",
+            y1(1.0)
+        );
+        assert!(y1(0.0).is_nan(), "Y1(0) is NaN");
+    }
+
+    #[test]
+    fn test_yn_known_values() {
+        // Y2(1) from recurrence — similarly TOL_Y
+        assert!(
+            (yn(2, 1.0) - (-1.6506826068162546)).abs() < TOL_Y,
+            "Y2(1), got {}",
+            yn(2, 1.0)
+        );
+    }
+
+    #[test]
+    fn test_array_kernel_batch() {
+        // Batch of 4 values for J0
+        let xs: Vec<f64> = vec![0.0, 1.0, 2.0, 3.0];
+        let mut out = vec![0.0f64; 4];
+        let ret = unsafe { bessel_j0_f64(xs.as_ptr(), 4, out.as_mut_ptr()) };
+        assert_eq!(ret, 4);
+        assert!((out[0] - 1.0).abs() < TOL_J, "batch J0(0), got {}", out[0]);
+        assert!(
+            (out[1] - 0.7651976865579666).abs() < TOL_J,
+            "batch J0(1), got {}",
+            out[1]
+        );
+    }
+
+    #[test]
+    fn test_negative_n_returns_minus1() {
+        let xs: Vec<f64> = vec![1.0];
+        let mut out = vec![0.0f64; 1];
+        let ret = unsafe { bessel_j0_f64(xs.as_ptr(), -1, out.as_mut_ptr()) };
+        assert_eq!(ret, -1);
+    }
+}

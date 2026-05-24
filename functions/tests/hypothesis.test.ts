@@ -60,25 +60,25 @@ describe('Statistical Hypothesis Tests', () => {
   // chiSquareTest
   // ===========================================================================
   describe('chiSquareTest', () => {
-    it('should detect significant deviation', () => {
-      const result = chiSquareTest([10, 20, 30], [20, 20, 20]);
+    it('should detect significant deviation', async () => {
+      const result = await chiSquareTest([10, 20, 30], [20, 20, 20]);
       expect(result.statistic).toBe(10);
       expect(result.degreesOfFreedom).toBe(2);
       expect(result.pValue).toBeLessThan(0.01);
     });
 
-    it('should return high p-value for matching frequencies', () => {
-      const result = chiSquareTest([20, 20, 20], [20, 20, 20]);
+    it('should return high p-value for matching frequencies', async () => {
+      const result = await chiSquareTest([20, 20, 20], [20, 20, 20]);
       expect(result.statistic).toBe(0);
       expect(result.pValue).toBeCloseTo(1, 5);
     });
 
-    it('should throw for mismatched lengths', () => {
-      expect(() => chiSquareTest([1], [1, 2])).toThrow();
+    it('should throw for mismatched lengths', async () => {
+      await expect(chiSquareTest([1], [1, 2])).rejects.toThrow();
     });
 
-    it('should throw for non-positive expected values', () => {
-      expect(() => chiSquareTest([1, 2], [0, 2])).toThrow();
+    it('should throw for non-positive expected values', async () => {
+      await expect(chiSquareTest([1, 2], [0, 2])).rejects.toThrow();
     });
   });
 
@@ -124,26 +124,26 @@ describe('Statistical Hypothesis Tests', () => {
   // kolmogorovSmirnovTest
   // ===========================================================================
   describe('kolmogorovSmirnovTest', () => {
-    it('should accept uniform data against uniform CDF', () => {
+    it('should accept uniform data against uniform CDF', async () => {
       const sample = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
-      const result = kolmogorovSmirnovTest(sample, (x) => x);
+      const result = await kolmogorovSmirnovTest(sample, (x) => x);
       expect(result.pValue).toBeGreaterThan(0.05);
     });
 
-    it('should reject non-uniform data against uniform CDF', () => {
+    it('should reject non-uniform data against uniform CDF', async () => {
       const sample = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1];
-      const result = kolmogorovSmirnovTest(sample, (x) => x);
+      const result = await kolmogorovSmirnovTest(sample, (x) => x);
       expect(result.statistic).toBeGreaterThan(0.5);
     });
 
-    it('statistic should be between 0 and 1', () => {
-      const result = kolmogorovSmirnovTest([1, 2, 3, 4, 5]);
+    it('statistic should be between 0 and 1', async () => {
+      const result = await kolmogorovSmirnovTest([1, 2, 3, 4, 5]);
       expect(result.statistic).toBeGreaterThanOrEqual(0);
       expect(result.statistic).toBeLessThanOrEqual(1);
     });
 
-    it('should throw for empty sample', () => {
-      expect(() => kolmogorovSmirnovTest([])).toThrow();
+    it('should throw for empty sample', async () => {
+      await expect(kolmogorovSmirnovTest([])).rejects.toThrow();
     });
   });
 
@@ -151,27 +151,27 @@ describe('Statistical Hypothesis Tests', () => {
   // mannWhitneyTest
   // ===========================================================================
   describe('mannWhitneyTest', () => {
-    it('should detect different distributions', () => {
+    it('should detect different distributions', async () => {
       const s1 = [1, 2, 3, 4, 5];
       const s2 = [10, 11, 12, 13, 14];
-      const result = mannWhitneyTest(s1, s2);
+      const result = await mannWhitneyTest(s1, s2);
       expect(result.pValue).toBeLessThan(0.05);
     });
 
-    it('should accept similar distributions', () => {
+    it('should accept similar distributions', async () => {
       const s1 = [1, 3, 5, 7, 9];
       const s2 = [2, 4, 6, 8, 10];
-      const result = mannWhitneyTest(s1, s2);
+      const result = await mannWhitneyTest(s1, s2);
       expect(result.pValue).toBeGreaterThan(0.1);
     });
 
-    it('should return U statistic', () => {
-      const result = mannWhitneyTest([1, 2, 3], [4, 5, 6]);
+    it('should return U statistic', async () => {
+      const result = await mannWhitneyTest([1, 2, 3], [4, 5, 6]);
       expect(result.uStatistic).toBeGreaterThanOrEqual(0);
     });
 
-    it('should throw for empty samples', () => {
-      expect(() => mannWhitneyTest([], [1, 2])).toThrow();
+    it('should throw for empty samples', async () => {
+      await expect(mannWhitneyTest([], [1, 2])).rejects.toThrow();
     });
   });
 
@@ -179,27 +179,27 @@ describe('Statistical Hypothesis Tests', () => {
   // shapiroWilkTest
   // ===========================================================================
   describe('shapiroWilkTest', () => {
-    it('should accept approximately normal data', () => {
+    it('should accept approximately normal data', async () => {
       // Approximately normal sample
       const sample = [-1.5, -1, -0.5, 0, 0.1, 0.5, 1, 1.2, 1.5];
-      const result = shapiroWilkTest(sample);
+      const result = await shapiroWilkTest(sample);
       expect(result.statistic).toBeGreaterThan(0.7);
       expect(result.statistic).toBeLessThanOrEqual(1);
     });
 
-    it('statistic should be in (0, 1]', () => {
-      const result = shapiroWilkTest([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    it('statistic should be in (0, 1]', async () => {
+      const result = await shapiroWilkTest([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
       expect(result.statistic).toBeGreaterThan(0);
       expect(result.statistic).toBeLessThanOrEqual(1);
     });
 
-    it('should return W=1 for identical values', () => {
-      const result = shapiroWilkTest([5, 5, 5, 5, 5]);
+    it('should return W=1 for identical values', async () => {
+      const result = await shapiroWilkTest([5, 5, 5, 5, 5]);
       expect(result.statistic).toBe(1);
     });
 
-    it('should throw for < 3 observations', () => {
-      expect(() => shapiroWilkTest([1, 2])).toThrow();
+    it('should throw for < 3 observations', async () => {
+      await expect(shapiroWilkTest([1, 2])).rejects.toThrow();
     });
   });
 

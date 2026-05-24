@@ -323,32 +323,32 @@ leftShift(1, 4); // 16
 
 ## Special Functions
 
-| Function                                    | Description                                  | Accel    |
-| ------------------------------------------- | -------------------------------------------- | -------- |
-| `erfc(x)`                                   | Complementary error function `1 - erf(x)`    | parallel |
-| `erf(x)`                                    | Error function (factory layer)               | —        |
-| `erfi(x)`                                   | Imaginary error function                     | parallel |
-| `beta(a, b)`                                | Beta function `Γ(a)·Γ(b)/Γ(a+b)`             | parallel |
-| `betainc(x, a, b)`                          | Incomplete beta function                     | parallel |
-| `gammainc(a, x)`                            | Regularized lower incomplete gamma `P(a, x)` | parallel |
-| `gammaincp(a, x)`                           | Regularized upper incomplete gamma `Q(a, x)` | parallel |
-| `digamma(x)`                                | Digamma `d/dx ln Γ(x)`                       | parallel |
-| `gamma(x)`                                  | Gamma function (factory layer)               | —        |
-| `lgamma(x)`                                 | Log-gamma (factory layer)                    | —        |
-| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind                            | parallel |
-| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                 | parallel |
-| `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                    | parallel |
-| `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                  | parallel |
-| `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                            | parallel |
-| `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                      | parallel |
-| `expIntegralEi(x)`                          | Exponential integral `Ei(x)`                 | parallel |
-| `logIntegral(x)`                            | Logarithmic integral `li(x)`                 | parallel |
-| `lambertW(x[, branch])`                     | Lambert W function                           | parallel |
-| `chebyshevT(n, x)`                          | Chebyshev polynomial (first kind)            | parallel |
-| `hermiteH(n, x)`                            | Hermite polynomial                           | parallel |
-| `laguerreL(n, x)`                           | Laguerre polynomial                          | parallel |
-| `legendreP(n, x)`                           | Legendre polynomial                          | parallel |
-| `zeta(s)`                                   | Riemann zeta function (factory layer)        | —        |
+| Function                                    | Description                                  | Accel                  |
+| ------------------------------------------- | -------------------------------------------- | ---------------------- |
+| `erfc(x)`                                   | Complementary error function `1 - erf(x)`    | parallel               |
+| `erf(x)`                                    | Error function (factory layer)               | —                      |
+| `erfi(x)`                                   | Imaginary error function                     | parallel               |
+| `beta(a, b)`                                | Beta function `Γ(a)·Γ(b)/Γ(a+b)`             | parallel               |
+| `betainc(x, a, b)`                          | Incomplete beta function                     | parallel               |
+| `gammainc(a, x)`                            | Regularized lower incomplete gamma `P(a, x)` | parallel               |
+| `gammaincp(a, x)`                           | Regularized upper incomplete gamma `Q(a, x)` | parallel               |
+| `digamma(x)`                                | Digamma `d/dx ln Γ(x)`                       | parallel               |
+| `gamma(x)`                                  | Gamma function (factory layer)               | —                      |
+| `lgamma(x)`                                 | Log-gamma (factory layer)                    | —                      |
+| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind                            | parallel + WASM (≥1 K) |
+| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                 | parallel + WASM (≥1 K) |
+| `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                    | parallel               |
+| `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                  | parallel               |
+| `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                            | parallel               |
+| `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                      | parallel               |
+| `expIntegralEi(x)`                          | Exponential integral `Ei(x)`                 | parallel               |
+| `logIntegral(x)`                            | Logarithmic integral `li(x)`                 | parallel               |
+| `lambertW(x[, branch])`                     | Lambert W function                           | parallel               |
+| `chebyshevT(n, x)`                          | Chebyshev polynomial (first kind)            | parallel               |
+| `hermiteH(n, x)`                            | Hermite polynomial                           | parallel               |
+| `laguerreL(n, x)`                           | Laguerre polynomial                          | parallel               |
+| `legendreP(n, x)`                           | Legendre polynomial                          | parallel               |
+| `zeta(s)`                                   | Riemann zeta function (factory layer)        | —                      |
 
 ### Details
 
@@ -365,6 +365,15 @@ leftShift(1, 4); // 16
   modulus `k`.
 - `lambertW` solves `w·e^w = x`; pass `branch = 0` for the principal branch
   (default) or `branch = -1` for the lower real branch on `[-1/e, 0)`.
+- **WASM acceleration:** `besselJ0` / `besselJ1` / `besselJ(n, x)` and
+  `besselY0` / `besselY1` / `besselY(n, x)` route to a Rust WASM kernel for
+  `Float64Array` inputs of length ≥ 1024 (`WASM_SPECIAL_THRESHOLD`). Both
+  paths share the Numerical Recipes §6.5 polynomial-and-recurrence
+  algorithm, so WASM↔JS agreement is bit-identical (J ~1e-7 relative
+  precision; Y near `x = 1` ~5e-4 from the logarithmic-singularity form —
+  inherent to the algorithm). Airy `Ai`/`Bi` and the elliptic integrals
+  are tracked for a follow-up slice (3.10c-2) along with the
+  AssemblyScript parity port.
 
 ### Background & History
 
@@ -703,6 +712,11 @@ the standard `multiply` / `transpose` when full f64 precision is required.
   followed by `lsolve`/`usolve`, rather than forming `inv(A)`.
 - Sparse routines accept compressed-sparse-column (`SparseMatrix`) input and
   preserve sparsity through the factorisation.
+- For rank-N tensor equivalents — `tensorPinv`, `tensorSolve(A, b)`,
+  `tensorKron(a, b)`, `tensorQr`, `tensorSvd`, `tensorLU`, `tensorCholesky`,
+  `tensorEig` — see the `@danielsimonjr/mathts-tensor` package. The tensor
+  versions accept named `Index` axes and auto-match operands by Index id when
+  `axisLabels` are present.
 
 ### Background & History
 
@@ -846,6 +860,12 @@ The factory layer adds the expression-tree functions `simplify`,
   complex roots unless they are already present.
 - `apart` / `together` are inverses: partial-fraction decomposition versus
   recombination into a single rational expression.
+- **WASM acceleration:** `polymul`, `polynomialGCD`, `polynomialLCM`,
+  `polynomialQuotient`, and `polynomialRemainder` route to a Rust/AS WASM
+  kernel for coefficient arrays of length ≥ 256 (`WASM_POLY_THRESHOLD`).
+  Smaller inputs stay on the JS path where marshal overhead would dominate.
+  `discriminant` and `resultant` are tracked for a follow-up slice that
+  reuses the new `poly_div_mod_f64` kernel.
 
 ### Background & History
 
@@ -1026,6 +1046,11 @@ romberg(Math.sin, 0, Math.PI); // ~2.0
   arbitrary nonlinear model from an initial parameter guess `p0`.
 - `griddata` and `rbfInterpolate` handle scattered (non-gridded) data;
   `chebyshevApprox` and `padeApproximant` approximate a known function.
+- **WASM acceleration:** `cubicSpline` routes its tridiagonal-solve hot loop
+  to a Rust/AS WASM kernel (Thomas algorithm) when the system has ≥ 1024
+  unknowns (`WASM_TRIDIAG_THRESHOLD`). `pchip` and `akima` use analytic
+  monotone-cubic slope formulas (Fritsch-Carlson / Akima) with no
+  tridiagonal system, so they stay pure JS.
 
 ### Background & History
 

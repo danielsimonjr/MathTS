@@ -83,7 +83,12 @@ export type OpName =
   // special / distribution
   | 'erfc'
   | 'besselJ'
-  | 'normalCDF';
+  | 'normalCDF'
+  // hypothesis tests
+  | 'chiSquareTest'
+  | 'kolmogorovSmirnovTest'
+  | 'mannWhitneyTest'
+  | 'shapiroWilkTest';
 
 /**
  * Per-op threshold override.  The value is the minimum element count required
@@ -187,6 +192,13 @@ const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   matmul: 4_096, // break-even at 64×64 (4,096 elements)
   matrixPower: 9_216, // break-even at ~96×96
   characteristicPolynomial: 9_216, // break-even at ~96×96
+
+  // hypothesis tests: element-wise reduction (chiSquare) and post-sort
+  // dot-product (KS/MW/SW). Threshold 4096 per Slice 3.10 spec.
+  chiSquareTest: 4_096,
+  kolmogorovSmirnovTest: 4_096,
+  mannWhitneyTest: 4_096,
+  shapiroWilkTest: 4_096,
 };
 
 /**

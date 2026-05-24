@@ -144,31 +144,60 @@ Detail:
             tensorQr 32³ = 3.6 ms/op, contract n=24 = 1639 ms/op,
             contractNetwork N=12 greedy = 3.7 ms vs exact 17.4 ms).
 
-      **Tier 2 (follow-up, depends on Slice 1.5):**
-      - [ ] **Slice 2.4** — `tensorPinv` + `tensorSolve` + `tensorKron`
-            (rank 4). NEW `tensor/src/operations/{pinv,solve,kron}.ts`.
-            Composes the now-public `matrix.lu` + `matrix.svd`.
+      **Tier 2 (follow-up, depends on Slice 1.5) — ✅ LANDED:**
+      - [x] **Slice 2.4** ✅ `70217b7` — `tensorPinv` + `tensorSolve` +
+            `tensorKron`. NEW `tensor/src/operations/{pinv,solve,kron}.ts`
+            composing on the public `matrix.lu`/`matrix.svd` from Slice
+            1.5. `tensor`: 215 → 264 tests (+49). functions.md / .html
+            Linear-Algebra Details bullets now cross-reference the
+            rank-N tensor equivalents.
 
       **Tier 3 (WASM-route, sequenced one at a time):**
-      - [ ] **Slice 3.7** — `typed/algebra.ts` polynomial WASM ports
-            (rank 7). NEW `wasm-rust/crates/<crate>/src/poly.rs` +
-            AS parity + bridge + threshold bench. Wire `polymul`,
+      - [x] **Slice 3.7** ✅ `6520a76` — `typed/algebra.ts` polynomial
+            WASM ports. NEW `wasm-rust/crates/mathts-wasm/src/poly.rs`
+            (`poly_mul_f64` + `poly_div_mod_f64`), AS parity in
+            `assembly/src/poly.ts`, bridge at
+            `WASM_POLY_THRESHOLD = 256` coeffs; wires into `polymul`,
             `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`,
-            `polynomialRemainder`. Starting threshold ≥ 256 coeffs.
-      - [ ] **Slice 3.8** — `typed/integration.ts` worker dispatch
-            (rank 8). `gaussQuad`/`romberg` ≥ 64 sub-intervals;
-            `trapz`/`simpson` ≥ 65,536 samples.
-      - [ ] **Slice 3.10** — `typed/hypothesis.ts` worker dispatch
-            (rank 10). `kolmogorovSmirnovTest`/`mannWhitneyTest`/
-            `shapiroWilkTest`/`chiSquareTest` ≥ 4096 samples.
-      - [ ] **Slice 3.10b** — `typed/interpolation.ts` tridiag-solve
-            WASM (rank 10b). NEW `wasm.tridiagSolveF64` (Thomas
-            algorithm). Wire `cubicSpline`/`pchip`/`akima`.
-            Starting threshold ≥ 1024 knots.
-      - [ ] **Slice 3.10c** — `typed/special.ts` Bessel/Airy WASM
-            family (rank 10c). NEW `wasm.besselJF64`/`besselYF64`/
-            `airyAiF64`/`airyBiF64`. May split into 3.10c-1 (Bessel)
-            + 3.10c-2 (Airy + elliptic) if scope balloons.
+            `polynomialRemainder`. 22 new tests; manifest regenerated.
+            (`discriminant`/`resultant` deferred — will reuse the new
+            div-mod kernel + Sylvester-fill in a follow-up.)
+      - [x] **Slice 3.8** ✅ `64c6168` — `typed/integration.ts` worker
+            dispatch. All four ops async; `gaussQuad`/`romberg` offload
+            dot/sum at ≥ 64 sub-intervals (integrand stays main-thread,
+            only the post-eval reduction goes to workers); NEW
+            `trapzF64`/`simpsonF64` Float64Array overloads at ≥ 65,536
+            samples. Integrand-bench in
+            `tools/benchmark/parallel/integration.bench.ts`.
+      - [x] **Slice 3.10** ✅ `fad8324` — `typed/hypothesis.ts` worker
+            dispatch. All 4 tests async at ≥ 4,096 samples.
+            `chiSquareTest` fully worker-routed (strongest win);
+            KS/MW/SW keep sort on main thread (no `wasm.sortF64` yet),
+            offload post-sort stats. Custom-CDF KS bypasses route.
+            20 new tests in `typed-hypothesis-parallel.test.ts`.
+      - [x] **Slice 3.10b** ✅ `ec7363b` — `typed/interpolation.ts`
+            tridiag-solve WASM. NEW Rust `tridiag_solve_f64` + AS
+            parity + bridge at threshold = 1024 unknowns. `cubicSpline`
+            wired (refactored to build explicit (n-1)×(n-1) tridiag
+            system). **Finding:** `pchip`/`akima` use Fritsch-Carlson /
+            Akima analytic slopes (no tridiag), so this bridge is
+            cubicSpline-only — audit B.1 entry updated to reflect.
+            18 new tests; manifest regenerated.
+      - [x] **Slice 3.10c-1** ✅ `572363f` — Bessel WASM only.
+            6 Rust functions in `wasm-rust/crates/mathts-wasm/src/bessel.rs`
+            (`bessel_j0/j1/jn/y0/y1/yn_f64`) delegating to scalar NR
+            §6.5 implementations already in `special/functions.rs`.
+            Bridge at `WASM_SPECIAL_THRESHOLD = 1024`; AS-suffix probe
+            wired (forward-compat for 10c-2). 34 new TS + 8 Rust tests.
+            Precision: J ~1e-7, Y near x=1 ~5e-4 (NR algorithm limits);
+            WASM↔JS agreement 1e-14 (bit-identical algorithm path).
+      - [ ] **Slice 3.10c-2 (deferred)** — Airy `Ai`/`Bi` WASM kernels
+            + AssemblyScript parity port for Bessel. Bridge already has
+            the `_as`-suffix probe wired; only the AS module + Airy
+            implementation are missing. Blocked on consumer demand; Airy
+            needs asymptotic expansion at large |x| (different from
+            Bessel's series + recurrence path). See
+            [`docs/roadmap/GAP_CLOSURE_PROPOSAL.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL.md#slice-310c-2--todo-deferred).
 
       **Tier 4 (deferred, awaiting consumer pressure or blockers):**
       ranks 9 (probability dedup audit needed), 11 (Tensor.slice

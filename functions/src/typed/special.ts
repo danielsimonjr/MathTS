@@ -15,6 +15,15 @@
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import {
+  WASM_SPECIAL_THRESHOLD,
+  besselJ0Dispatch,
+  besselJ1Dispatch,
+  besselJDispatch,
+  besselY0Dispatch,
+  besselY1Dispatch,
+  besselYDispatch,
+} from '../wasm/special/wasm-bridge.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -921,57 +930,93 @@ export const digamma = mathTyped('digamma', {
 /**
  * Bessel function of the first kind, order 0: J0(x).
  *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via bessel_j0_f64, Slice 3.10c-1); smaller inputs and
+ * scalars use the inline JS approximation.
+ *
  * @param x - Input value, or Float64Array of values
  * @returns J0(x)
  */
 export const besselJ0 = mathTyped('besselJ0', {
   number: besselJ0Scalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, besselJ0Scalar, () => kernelSource([besselJ0Scalar], '(x) => besselJ0Scalar(x)')),
+  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+    if (x.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(besselJ0Dispatch(x));
+    }
+    return mapArray(x, besselJ0Scalar, () =>
+      kernelSource([besselJ0Scalar], '(x) => besselJ0Scalar(x)')
+    );
+  },
 });
 
 /**
  * Bessel function of the first kind, order 1: J1(x).
+ *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via bessel_j1_f64, Slice 3.10c-1).
  *
  * @param x - Input value, or Float64Array of values
  * @returns J1(x)
  */
 export const besselJ1 = mathTyped('besselJ1', {
   number: besselJ1Scalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, besselJ1Scalar, () => kernelSource([besselJ1Scalar], '(x) => besselJ1Scalar(x)')),
+  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+    if (x.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(besselJ1Dispatch(x));
+    }
+    return mapArray(x, besselJ1Scalar, () =>
+      kernelSource([besselJ1Scalar], '(x) => besselJ1Scalar(x)')
+    );
+  },
 });
 
 /**
  * Bessel function of the second kind, order 0: Y0(x).
+ *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via bessel_y0_f64, Slice 3.10c-1).
  *
  * @param x - Input value (must be positive), or Float64Array of values
  * @returns Y0(x)
  */
 export const besselY0 = mathTyped('besselY0', {
   number: besselY0Scalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, besselY0Scalar, () =>
+  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+    if (x.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(besselY0Dispatch(x));
+    }
+    return mapArray(x, besselY0Scalar, () =>
       kernelSource([besselJ0Scalar, besselY0Scalar], '(x) => besselY0Scalar(x)')
-    ),
+    );
+  },
 });
 
 /**
  * Bessel function of the second kind, order 1: Y1(x).
+ *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via bessel_y1_f64, Slice 3.10c-1).
  *
  * @param x - Input value (must be positive), or Float64Array of values
  * @returns Y1(x)
  */
 export const besselY1 = mathTyped('besselY1', {
   number: besselY1Scalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, besselY1Scalar, () =>
+  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+    if (x.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(besselY1Dispatch(x));
+    }
+    return mapArray(x, besselY1Scalar, () =>
       kernelSource([besselJ1Scalar, besselY1Scalar], '(x) => besselY1Scalar(x)')
-    ),
+    );
+  },
 });
 
 /**
  * Bessel function of the first kind, general integer order n: J_n(x).
+ *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via bessel_j_f64, Slice 3.10c-1).
  *
  * @param n - Order (integer)
  * @param x - Input value, or Float64Array of values
@@ -979,8 +1024,11 @@ export const besselY1 = mathTyped('besselY1', {
  */
 export const besselJ = mathTyped('besselJ', {
   'number, number': besselJScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
+  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> => {
+    if (x.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(besselJDispatch(n, x));
+    }
+    return mapArray(
       x,
       (v) => besselJScalar(n, v),
       () =>
@@ -988,11 +1036,15 @@ export const besselJ = mathTyped('besselJ', {
           [besselJ0Scalar, besselJ1Scalar, besselJScalar],
           `(x) => besselJScalar(${n}, x)`
         )
-    ),
+    );
+  },
 });
 
 /**
  * Bessel function of the second kind, general integer order n: Y_n(x).
+ *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via bessel_y_f64, Slice 3.10c-1).
  *
  * @param n - Order (integer)
  * @param x - Input value (must be positive), or Float64Array of values
@@ -1000,8 +1052,11 @@ export const besselJ = mathTyped('besselJ', {
  */
 export const besselY = mathTyped('besselY', {
   'number, number': besselYScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> =>
-    mapArray(
+  'number, Float64Array': (n: f64, x: Float64Array): Promise<Float64Array> => {
+    if (x.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(besselYDispatch(n, x));
+    }
+    return mapArray(
       x,
       (v) => besselYScalar(n, v),
       () =>
@@ -1009,7 +1064,8 @@ export const besselY = mathTyped('besselY', {
           [besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselYScalar],
           `(x) => besselYScalar(${n}, x)`
         )
-    ),
+    );
+  },
 });
 
 /**

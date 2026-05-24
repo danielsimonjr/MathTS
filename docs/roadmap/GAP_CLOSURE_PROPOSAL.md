@@ -121,7 +121,7 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 
 ## Tier 2 — Sequential slice
 
-### Slice 2.4 — tensorPinv + tensorSolve + tensorKron (rank 4)
+### Slice 2.4 — ✅ LANDED in `70217b7` — tensorPinv + tensorSolve + tensorKron (rank 4)
 
 **Goal:** Three common ML/stats primitives the ITensor proposal called out but the audit deferred until the QR/LU/Cholesky landing finished. Now that those primitives exist, these are direct compositions.
 
@@ -143,7 +143,7 @@ Tier 1 lands first as one wave of 5 parallel subagents; Tier 2 lands as a follow
 
 These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice ends with a `bench:wasm` pass that sets the per-op `minElements` threshold.
 
-### Slice 3.7 — typed/algebra.ts polynomial WASM ports (rank 7)
+### Slice 3.7 — ✅ LANDED in `6520a76` — typed/algebra.ts polynomial WASM ports (rank 7)
 
 **Goal:** WASM kernels for the polynomial hot loops.
 
@@ -166,7 +166,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Acceptance:** Same as the bitwise port — WASM path measurably faster than JS at the chosen threshold; below threshold the JS path stays.
 
-### Slice 3.8 — typed/integration.ts worker dispatch (rank 8)
+### Slice 3.8 — ✅ LANDED in `64c6168` — typed/integration.ts worker dispatch (rank 8)
 
 **Goal:** Worker-route the integration ops over big sub-interval counts.
 
@@ -179,7 +179,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Acceptance:** Bench shows worker dispatch wins above threshold; existing serial path correct below.
 
-### Slice 3.10 — typed/hypothesis.ts worker dispatch (rank 10)
+### Slice 3.10 — ✅ LANDED in `fad8324` — typed/hypothesis.ts worker dispatch (rank 10)
 
 **Goal:** Same pattern as integration; worker-route the four big tests at high sample counts.
 
@@ -190,7 +190,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Threshold starting point:** ≥ 4096 samples.
 
-### Slice 3.10b — typed/interpolation.ts tridiag-solve WASM (rank 10b)
+### Slice 3.10b — ✅ LANDED in `ec7363b` — typed/interpolation.ts tridiag-solve WASM (rank 10b)
 
 **Goal:** WASM kernel for the tridiagonal-solve hot loop of `cubicSpline`, `pchip`, `akima`.
 
@@ -208,7 +208,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Threshold starting point:** `minElements = 1024` knots.
 
-### Slice 3.10c — typed/special.ts Bessel/Airy WASM family (rank 10c)
+### Slice 3.10c-1 — ✅ LANDED in `572363f` (Bessel-only) — typed/special.ts Bessel WASM kernels (rank 10c)
 
 **Goal:** Per-element transcendental WASM kernels for the special-function family operating over arrays.
 
@@ -226,7 +226,14 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Threshold starting point:** `minElements = 1024`.
 
-**Risk note:** Largest of the Tier-3 slices (~300 LOC across the family). May land in two sub-slices: 3.10c-1 (Bessel) and 3.10c-2 (Airy + elliptic).
+**Risk note:** Largest of the Tier-3 slices (~300 LOC across the family). Landed as two sub-slices per plan: 3.10c-1 (Bessel J/Y, Rust only) is done; 3.10c-2 is deferred.
+
+**Slice 3.10c-2 — TODO (deferred):** Airy Ai/Bi WASM kernels + AssemblyScript parity port for Bessel.
+
+- Add `airyAi(x)` / `airyBi(x)` scalar functions and array kernels in `wasm-rust/crates/mathts-wasm/src/bessel.rs` (or a new `airy.rs`).
+- Add AS parity in `assembly/src/special.ts`; register `bessel_j0_f64_as` etc. in `WasmLoader.ts`.
+- The bridge in `functions/src/wasm/special/wasm-bridge.ts` is already wired for `_as`-suffix probing — only the AS implementation is missing.
+- Blocked on: no immediate consumer demand; Airy series convergence at large |x| requires asymptotic expansion (different from Bessel).
 
 ## Tier 4 — Deferred
 

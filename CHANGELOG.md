@@ -145,6 +145,62 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 3b — WASM-route slices (sequenced; 3.7 + 3.10b + 3.10c-1 done)
+
+- **Slice 3.10c-1 — commit `572363f`** — Bessel WASM kernels (Airy + AS port deferred as 3.10c-2 per the proposal's explicit scope-split contract).
+  - NEW `wasm-rust/crates/mathts-wasm/src/bessel.rs`: 6 `#[no_mangle] extern "C"` functions — `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64` (arbitrary integer order), `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`. **No new Rust dependency** — scalar Bessel already existed in `special/functions.rs` (hand-implemented NR §6.5 polynomial approximations + recurrence); array kernels delegate to scalars.
+  - NEW `functions/src/wasm/special/wasm-bridge.ts` with probe-Rust-then-AS-then-JS pattern at `WASM_SPECIAL_THRESHOLD = 1024`. AS-suffix probe is wired even though no AS implementation exists yet (forward-compatible for Slice 3.10c-2).
+  - `functions/src/wasm/WasmLoader.ts` registered 6 new optional exports on `WasmModule`.
+  - `functions/src/typed/special.ts`: 6 Bessel typed-function array overloads route to the bridge for ≥ 1024-element inputs.
+  - `wasm-manifest.json` regenerated; `wasm-integrity` 5/5.
+  - 34 new TS tests + 8 native Rust unit tests. `functions`: 2,000 → **2,034 tests** (+34).
+  - **Precision note:** J-functions ~1e-7 relative error (NR algorithm design); Y-functions near `x=1` have ~5e-4 error from the polynomial form's logarithmic-singularity handling — inherent to NR §6.5. WASM↔JS agreement is 1e-14 (bit-identical since both share the same algorithm path).
+  - `tools/benchmark/wasm/special.bench.ts` added.
+
+- **Slice 3.10b — commit `ec7363b`** — Tridiagonal-solve WASM kernel (Thomas algorithm).
+
+- **Slice 3.10b — commit `ec7363b`** — Tridiagonal-solve WASM kernel (Thomas algorithm).
+  - NEW `wasm-rust/crates/mathts-wasm/src/tridiag.rs` (~102 LOC): `tridiag_solve_f64` with pointer ABI, returns `n` on success or `-1` on zero-pivot. 5 native Rust unit tests.
+  - NEW `assembly/src/tridiag.ts` (~68 LOC): AS parity port returning `Float64Array(0)` on singular system.
+  - NEW `functions/src/wasm/interpolation/wasm-bridge.ts` (~196 LOC): threshold-gated dispatch at `WASM_TRIDIAG_THRESHOLD = 1024` unknowns; probe-Rust-then-AS-then-JS fallback chain.
+  - `functions/src/wasm/WasmLoader.ts` gained `tridiag_solve_f64` (Rust pointer ABI) and `tridiag_solve_f64_as` (AS typed-array ABI) registrations.
+  - `cubicSpline` refactored in `typed/interpolation.ts` to build an explicit `(n-1)×(n-1)` tridiagonal system and route through the bridge. **Surprise:** `pchip` and `akima` use Fritsch-Carlson / Akima analytic-slope formulas, not a tridiag system, so they're not in scope for this bridge — the audit's §B.1 entry now reflects this finding (cubicSpline-only).
+  - `wasm-manifest.json` regenerated; `wasm-integrity` still 5/5.
+  - 18 new tests across 4 suites in `typed-interpolation-wasm.test.ts`. `functions`: 1,982 → **2,000 tests** (+18).
+
+- **Slice 3.7 — commit `6520a76`** — Polynomial WASM kernel.
+  - NEW `wasm-rust/crates/mathts-wasm/src/poly.rs` (~100 LOC): `poly_mul_f64` (O(n·m) convolution) and `poly_div_mod_f64` (long division returning concatenated `[quotient, remainder]`).
+  - NEW `assembly/src/poly.ts` (~90 LOC): AssemblyScript parity port returning `Float64Array`.
+  - NEW `functions/src/wasm/poly/wasm-bridge.ts` (~240 LOC): threshold-gated dispatch at `WASM_POLY_THRESHOLD = 256` coefficients. For `polymul`, WASM fires when either operand reaches 256 elements; for `polyDivMod`, when `num.length ≥ 256`.
+  - Wires into `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder` in `typed/algebra.ts`. (`discriminant`/`resultant` deferred to a follow-up — they'll reuse the new `poly_div_mod_f64` plus a Sylvester-fill helper.)
+  - `wasm-manifest.json` regenerated (SHA-384 of the new `.wasm` blob); `functions/tests/security/wasm-integrity.test.ts` still green (5/5).
+  - 22 new tests in `functions/tests/typed-algebra-wasm.test.ts`. `functions`: 1,960 → **1,982 tests** (+22).
+
+#### Gap-closure Wave 3a — two worker-route slices LANDED in parallel
+
+Two disjoint Tier-3 slices (worker-only — no WASM toolchain churn) dispatched in parallel:
+
+- **Slice 3.8 — commit `64c6168`** — `typed/integration.ts` worker dispatch. All four integration ops now async. `gaussQuad` composite-mode offloads the dot-product `Σ values[k] · weights[k]` to `ComputePool.dot()` when `totalPoints ≥ 64` sub-intervals (user-supplied integrand `f` stays on the main thread because closures can't cross worker boundaries). `romberg` offloads the trapezoidal-sum to `ComputePool.sum()` at the same threshold. NEW `trapzF64`/`simpsonF64` Float64Array overloads route through `ComputePool.sum()` at `length ≥ 65,536`. `gaussQuad` returns `number | Promise<number>` — sync in legacy 2–5 point mode, async in composite mode. NEW `tools/benchmark/parallel/integration.bench.ts` (run manually). 35 tests in `integration.test.ts` updated for async signatures.
+
+- **Slice 3.10 — commit `fad8324`** — `typed/hypothesis.ts` worker dispatch. All four hypothesis tests now async at ≥ 4,096 samples:
+  - **`chiSquareTest`** — fully worker-routed (element-wise `(o-e)²/e` via `applyKernel2` + sum). Strongest win — no sequential bottleneck.
+  - **`kolmogorovSmirnovTest`** — sort stays main-thread (Amdahl-limited; no `wasm.sortF64` kernel yet); CDF evaluation (default normal CDF only — custom-CDF closures bypass and stay sequential) offloaded.
+  - **`mannWhitneyTest`** — sort main-thread; rank-sum via `dot(ranks, indicator)` offloaded.
+  - **`shapiroWilkTest`** — sort main-thread; W-numerator dot-product offloaded.
+
+  4 new `OpName` entries + 4096 thresholds added to `ComputePool`. NEW `typed-hypothesis-parallel.test.ts` (20 dispatch-correctness tests including parallel↔sequential 1e-9 agreement, known reference cases, error propagation). NEW `tools/benchmark/parallel/hypothesis.bench.ts`. `hypothesis.test.ts` updated for async signatures.
+
+`functions`: 1,925 → **1,960 tests** (+35).
+
+#### Gap-closure Wave 2 — Slice 2.4 LANDED (depends on Wave-1 Slice 1.5)
+
+- **Slice 2.4 — commit `70217b7`** — Three new tensor primitives composing on the now-public `matrix.lu`/`matrix.svd` from Slice 1.5:
+  - **`tensorPinv(t, rowAxes, {rcond})`** — Moore-Penrose pseudoinverse via full SVD with `rcond·max(S)` thresholding (default `1e-10`). 17 tests.
+  - **`tensorSolve(A, b, {rowAxesA, rowAxesB})`** — Linear solver. LU + inline forward/back substitution (no intermediate dense-matrix allocation for the substitution phase). When both `A` and `b` carry `axisLabels`, row axes of `A` are auto-matched as those whose Index ids appear in `b`'s labels. Multi-RHS handled natively. 15 tests.
+  - **`tensorKron(a, b)`** — Kronecker product for rank-N tensors. Axis-by-axis formula `result.shape[k] = a.shape[k]*b.shape[k]`; rank-mismatched operands get size-1 dims prepended to the smaller. Axis labels concatenated as `"aName_X_bName"` (separator configurable). 17 tests.
+
+  `tensor`: 215 → **264 tests** (+49). `docs/reference/functions.md` and `functions.html` Linear Algebra Details bullets cross-reference the new tensor-package equivalents for users who need rank-N versions.
+
 #### Gap-closure Wave 1 — five Tier-1 slices LANDED in parallel
 
 Five disjoint slices from [`docs/roadmap/GAP_CLOSURE_PROPOSAL.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL.md) Tier 1, dispatched to five sonnet subagents working on non-overlapping file scopes, all landed cleanly:
