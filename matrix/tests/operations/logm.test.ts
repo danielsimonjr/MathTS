@@ -179,4 +179,76 @@ describe('matrixLogm', () => {
     const R = matrixLogm(eX);
     expect(frobDiff(R, X)).toBeLessThan(1e-8);
   });
+
+  // ---------------------------------------------------------------------------
+  // Slice 6.1 — Schur-based general-case tests
+  // ---------------------------------------------------------------------------
+
+  it('11. Schur path: repeated eigenvalue (defective 2×2 Jordan block)', () => {
+    // A = [[4, 1], [0, 4]] — non-diagonalisable.
+    // logm(A)[0][1] = T_{01} / (U_{00} + U_{11}) analytic = 1/(log(4)+log(4))
+    // = 1/(2*ln4) = 0.25 (Higham §11.2 closed form for Jordan 2×2)
+    // Full result: [[log(4), 0.25], [0, log(4)]]
+    const A = DenseMatrix.fromArray([
+      [4, 1],
+      [0, 4],
+    ]);
+    const R = matrixLogm(A);
+    const Rarr = R.toArray();
+    expect(Math.abs(Rarr[0][0] - Math.log(4))).toBeLessThan(1e-10);
+    expect(Math.abs(Rarr[1][1] - Math.log(4))).toBeLessThan(1e-10);
+    // Off-diagonal: 1/(log4 + log4) = 1/4 for this Jordan block
+    expect(Math.abs(Rarr[0][1] - 0.25)).toBeLessThan(1e-8);
+    expect(Math.abs(Rarr[1][0])).toBeLessThan(1e-10);
+  });
+
+  it('12. Schur path: 3×3 defective Jordan block logm(J3)', () => {
+    // A = [[4,1,0],[0,4,1],[0,0,4]] — Jordan block of size 3
+    // logm has closed form: [[log4, 1/4, -1/64],[0, log4, 1/4],[0, 0, log4]]
+    // Verify via expm round-trip (expm ∘ logm = I)
+    const A = DenseMatrix.fromArray([
+      [4, 1, 0],
+      [0, 4, 1],
+      [0, 0, 4],
+    ]);
+    const logA = matrixLogm(A);
+    const expLogA = matrixExpm(logA);
+    expect(frobDiff(expLogA, A)).toBeLessThan(1e-8);
+    // Diagonal entries
+    const arr = logA.toArray();
+    expect(Math.abs(arr[0][0] - Math.log(4))).toBeLessThan(1e-8);
+    expect(Math.abs(arr[1][1] - Math.log(4))).toBeLessThan(1e-8);
+    expect(Math.abs(arr[2][2] - Math.log(4))).toBeLessThan(1e-8);
+  });
+
+  it('13. Schur path: upper-triangular with distinct positive diagonals', () => {
+    // A = [[2, 1], [0, 3]] — already in Schur form
+    // logm[0][1] = (log(3)-log(2))/(3-2) = log(3/2) ≈ 0.405465
+    const A = DenseMatrix.fromArray([
+      [2, 1],
+      [0, 3],
+    ]);
+    const R = matrixLogm(A);
+    const Rarr = R.toArray();
+    expect(Math.abs(Rarr[0][0] - Math.log(2))).toBeLessThan(1e-8);
+    expect(Math.abs(Rarr[1][1] - Math.log(3))).toBeLessThan(1e-8);
+    // Off-diagonal: (log3 - log2)/(3-2) * T_{01}
+    const expected01 = (Math.log(3) - Math.log(2)) / (3 - 2) * 1;
+    expect(Math.abs(Rarr[0][1] - expected01)).toBeLessThan(1e-6);
+  });
+
+  it('14. Schur path: 3×3 matrix with repeated diagonal and off-diagonal', () => {
+    // A = [[3,0,0],[0,3,1],[0,0,3]] — repeated eigenvalue 3 with Jordan block in bottom-right
+    // logm diagonal = log(3), logm[1][2] = 1/(2*log(3)) ... verify via expm
+    const A = DenseMatrix.fromArray([
+      [3, 0, 0],
+      [0, 3, 1],
+      [0, 0, 3],
+    ]);
+    const logA = matrixLogm(A);
+    const expLogA = matrixExpm(logA);
+    expect(frobDiff(expLogA, A)).toBeLessThan(1e-8);
+    const arr = logA.toArray();
+    for (let i = 0; i < 3; i++) expect(Math.abs(arr[i][i] - Math.log(3))).toBeLessThan(1e-8);
+  });
 });
