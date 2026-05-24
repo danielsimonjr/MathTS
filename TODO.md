@@ -47,18 +47,56 @@ Detail:
       in any `package.json` — landing this requires a one-time
       install + config PR before the smoke test can be wired in.
 
-- [ ] **Function & auxiliary-function gaps** — see proposal at
+- [x] **Function & auxiliary-function gaps** — see proposal at
       [`docs/roadmap/FUNCTION_GAPS.md`](docs/roadmap/FUNCTION_GAPS.md).
-      Three slices from the 2026-05-24 dep-graph audit; team
-      dispatched in parallel via disjoint file scopes.
+      All three slices LANDED in commit `1bfad1e`.
 
       | Slice | Deliverable                                                                                | Owner   | Status     |
       | ----- | ------------------------------------------------------------------------------------------ | ------- | ---------- |
-      | 1     | `TapedTensor` reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`) + elementwise math (`log`/`exp`/`sin`/`cos`/`tan`/`sqrt`/`square`/`pow`/`reciprocal`/`abs`) AD | autograd | in flight |
-      | 2     | `typed/complex.ts` (`arg`/`conj`/`im`/`re`) + `typed/set.ts` (10 set ops) promotion         | functions | in flight |
-      | 3     | Tensor decomposition wrappers (`tensorQr` / `tensorLU` / `tensorCholesky` / `tensorEig`)    | tensor  | in flight |
+      | 1     | `TapedTensor` reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`) + elementwise math (`log`/`exp`/`sin`/`cos`/`tan`/`sqrt`/`square`/`pow`/`reciprocal`/`abs`) AD | autograd | ✅ 1bfad1e |
+      | 2     | `typed/complex.ts` (`arg`/`conj`/`im`/`re`) + `typed/set.ts` (10 set ops) promotion         | functions | ✅ 1bfad1e |
+      | 3     | Tensor decomposition wrappers (`tensorQr` / `tensorLU` / `tensorCholesky` / `tensorEig`)    | tensor  | ✅ 1bfad1e |
 
-      Out of scope (per proposal §4): `TapedTensor.divide`/`sub`/
+      Per-slice engineering notes worth keeping:
+      - Slice 1 surfaced a real pre-existing build break: the AD
+        methods had been drafted in an earlier landing without the
+        two helpers (`_resolveAxes` / `_rowMajorStrides`) they
+        called, plus a `mean()` reduce callback with implicit
+        `any`. The Slice-1 fix wires the helpers and types in.
+      - Slice 1 chose deliberate adjoint semantics on edge cases:
+        prod with multiple zeros uses prefix/suffix products
+        (single-zero and multi-zero cases differentiate
+        correctly), max/min tie-break first-wins, abs subgradient
+        at exact 0 = 0, norm p='inf' scatters dY to the unique
+        max-abs index.
+      - Slice 2 matched the bitwise+logical factory-collision
+        pattern from commit 2a141d4: 14 `export` keywords stripped
+        from `factories/index.ts` (factoryScope wiring kept), two
+        factory-tier tests (factories-leaf, factories-final)
+        repointed to the new typed/ imports.
+      - Slice 3 found `matrix/src/operations/qr.ts` already
+        present but not re-exported — fixed by adding one line to
+        `matrix/src/operations/index.ts`. LU and Cholesky are
+        inlined inside their tensor wrappers because the matrix
+        package doesn't have public primitives for them; flagged
+        as a future cleanup slice. Eig delegates to matrix; the
+        `symmetric: true` option symmetrises the input first so
+        the matrix primitive's internal symmetric path picks the
+        stable real-eigenvalue routine.
+
+      Cumulative test deltas this landing:
+        tensor:    179 → 215 tests (+36 across 16 files)
+        autograd:   29 →  92 tests (+63 across 7 files)
+        functions: 1,774 → 1,865 tests (+91 across 53 files)
+
+      Future cleanup tracked (not regressions — internal de-duplication):
+        - Refactor `tensor/src/operations/random.ts` to call the now-
+          exported `matrix.qr` instead of its inline Gram-Schmidt.
+        - Promote the inlined Doolittle LU and right-looking
+          Cholesky in `tensor/src/operations/{lu,cholesky}.ts` to
+          proper `matrix/src/operations/{lu,cholesky}.ts` primitives.
+
+      Out of scope per the proposal §4: `TapedTensor.divide`/`sub`/
       `tensordot`/`svd`/`eig`, promotion of `probability`/`relational`/
       `unit`/`string`, acceleration of `algebra`/`integration`/
       `hypothesis`, sparse-tensor decompositions.
