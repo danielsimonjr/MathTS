@@ -714,6 +714,30 @@ export interface WasmModule {
   elliptic_e_f64?: (msPtr: number, n: number, outPtr: number) => number;
   elliptic_k_f64_as?: (ms: Float64Array) => Float64Array;
   elliptic_e_f64_as?: (ms: Float64Array) => Float64Array;
+  // Carlson symmetric forms + incomplete elliptic integrals (Slice 6.4).
+  // Rust backend: pointer-style ABI (all input arrays + count + output pointer).
+  //   carlson_rc_f64(xs_ptr, ys_ptr, n, out_ptr)                     → n | -1
+  //   carlson_rf_f64(xs_ptr, ys_ptr, zs_ptr, n, out_ptr)             → n | -1
+  //   carlson_rd_f64(xs_ptr, ys_ptr, zs_ptr, n, out_ptr)             → n | -1
+  //   carlson_rj_f64(xs_ptr, ys_ptr, zs_ptr, ps_ptr, n, out_ptr)     → n | -1
+  //   elliptic_f_incomplete_f64(phis_ptr, ms_ptr, n, out_ptr)         → n | -1
+  //   elliptic_e_incomplete_f64(phis_ptr, ms_ptr, n, out_ptr)         → n | -1
+  //   elliptic_pi_incomplete_f64(ns_ptr, phis_ptr, ms_ptr, n, out)   → n | -1
+  // AS backend: typed-array calling convention (_as suffix).
+  carlson_rc_f64?: (xsPtr: number, ysPtr: number, n: number, outPtr: number) => number;
+  carlson_rf_f64?: (xsPtr: number, ysPtr: number, zsPtr: number, n: number, outPtr: number) => number;
+  carlson_rd_f64?: (xsPtr: number, ysPtr: number, zsPtr: number, n: number, outPtr: number) => number;
+  carlson_rj_f64?: (xsPtr: number, ysPtr: number, zsPtr: number, psPtr: number, n: number, outPtr: number) => number;
+  elliptic_f_incomplete_f64?: (phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
+  elliptic_e_incomplete_f64?: (phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
+  elliptic_pi_incomplete_f64?: (nsPtr: number, phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
+  carlson_rc_f64_as?: (xs: Float64Array, ys: Float64Array) => Float64Array;
+  carlson_rf_f64_as?: (xs: Float64Array, ys: Float64Array, zs: Float64Array) => Float64Array;
+  carlson_rd_f64_as?: (xs: Float64Array, ys: Float64Array, zs: Float64Array) => Float64Array;
+  carlson_rj_f64_as?: (xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array) => Float64Array;
+  elliptic_f_incomplete_f64_as?: (phis: Float64Array, ms: Float64Array) => Float64Array;
+  elliptic_e_incomplete_f64_as?: (phis: Float64Array, ms: Float64Array) => Float64Array;
+  elliptic_pi_incomplete_f64_as?: (ns: Float64Array, phis: Float64Array, ms: Float64Array) => Float64Array;
   // AS-backend variants (typed-array calling convention, Slice 4.9).
   bessel_j0_f64_as?: (xs: Float64Array) => Float64Array;
   bessel_j1_f64_as?: (xs: Float64Array) => Float64Array;

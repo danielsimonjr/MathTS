@@ -1048,3 +1048,307 @@ pub fn airy_bi(x: f64) -> f64 {
         sqrt3 * (AI0 * f + AI_PRIME0 * g)
     }
 }
+
+// =============================================================================
+// Carlson Symmetric Forms (Slice 6.4)
+//
+// Reference: Carlson (1995) "Numerical Computation of Real or Complex
+//   Elliptic Integrals," Numer. Algorithms 10:13-26.
+//   Numerical Recipes (Press et al.) §6.11 — duplication algorithm.
+//
+// All four R-forms converge quadratically via the duplication theorem.
+// Tolerance r * 0.0015 per NR; ≤ 30 iterations suffice for f64.
+//
+// Domain restrictions:
+//   RF: x, y, z ≥ 0, at most one zero.
+//   RC: x ≥ 0, y ≠ 0.
+//   RD: x, y ≥ 0, z > 0, at most one of x, y is zero.
+//   RJ: x, y, z ≥ 0, p ≠ 0, at most one of x, y, z is zero.
+// =============================================================================
+
+/// Carlson degenerate symmetric integral RC(x, y).
+///
+/// RC(x, y) = RF(x, y, y) — pure duplication without an external sum.
+/// Identity: RC(0, 1) = π/2; RC(1, 1) = 1; RC(x, x) = 1/√x.
+///
+/// Domain: x ≥ 0, y > 0.
+pub fn carlson_rc(x: f64, y: f64) -> f64 {
+    if x < 0.0 || y <= 0.0 {
+        return f64::NAN;
+    }
+    let mut xx = x;
+    let mut yy = y;
+    for _ in 0..50 {
+        let lam = 2.0 * libm::sqrt(xx * yy) + yy;
+        xx = (xx + lam) / 4.0;
+        yy = (yy + lam) / 4.0;
+        let ave = (xx + 2.0 * yy) / 3.0; // (x + y + y) / 3
+        let dx = (ave - xx) / ave;
+        let dy = (ave - yy) / ave;
+        if libm::fabs(dx) < 1e-10 && libm::fabs(dy) < 1e-10 {
+            let s = dx * dx * (3.0 + dx * (1.0 + dx * (0.75 + dx * 9.0 / 22.0)));
+            return (1.0 + s) / libm::sqrt(ave);
+        }
+    }
+    1.0 / libm::sqrt(yy)
+}
+
+/// Carlson symmetric integral RF(x, y, z).
+///
+/// RF = (1/2) ∫_0^∞ dt / (√(t+x)·√(t+y)·√(t+z))
+///
+/// Identities used for testing (DLMF §19.20):
+///   RF(0, 1, 2) = Γ(1/4) Γ(3/4) / (2√(2π)) ≈ 1.3110287771461...
+///   RF(0, y, y) = π / (2√y)
+///   RF(x, x, x) = 1/√x
+///
+/// Domain: x, y, z ≥ 0, at most one zero.
+pub fn carlson_rf(x: f64, y: f64, z: f64) -> f64 {
+    if x < 0.0 || y < 0.0 || z < 0.0 {
+        return f64::NAN;
+    }
+    // At most one zero allowed.
+    let n_zeros = (x == 0.0) as u32 + (y == 0.0) as u32 + (z == 0.0) as u32;
+    if n_zeros > 1 {
+        return f64::NAN;
+    }
+    let mut xx = x;
+    let mut yy = y;
+    let mut zz = z;
+    for _ in 0..50 {
+        let sx = libm::sqrt(xx);
+        let sy = libm::sqrt(yy);
+        let sz = libm::sqrt(zz);
+        let lam = sx * sy + sy * sz + sz * sx;
+        xx = (xx + lam) / 4.0;
+        yy = (yy + lam) / 4.0;
+        zz = (zz + lam) / 4.0;
+        let ave = (xx + yy + zz) / 3.0;
+        let dx = (ave - xx) / ave;
+        let dy = (ave - yy) / ave;
+        let dz = (ave - zz) / ave;
+        if libm::fabs(dx) < 1e-10 && libm::fabs(dy) < 1e-10 && libm::fabs(dz) < 1e-10 {
+            let e2 = dx * dy - dz * dz;
+            let e3 = dx * dy * dz;
+            return (1.0
+                + e2 * (-1.0 / 10.0 + 3.0 * e2 / 44.0 - 9.0 * e3 / 52.0)
+                + e3 / 14.0)
+                / libm::sqrt(ave);
+        }
+    }
+    1.0 / libm::sqrt(zz)
+}
+
+/// Carlson symmetric integral RD(x, y, z).
+///
+/// RD(x, y, z) = (3/2) ∫_0^∞ dt / (√(t+x)·√(t+y)·(t+z)^{3/2})
+///
+/// Useful identity (DLMF §19.20.3):
+///   RD(0, 2, 1) = 3(Γ(3/4))² / (2^{1/4} √π) ≈ 1.7972103521033...
+///   RF(x,y,z) + RD(x,y,z) combination gives Pi (complete third kind).
+///
+/// Domain: x, y ≥ 0, z > 0, at most one of x, y is zero.
+pub fn carlson_rd(x: f64, y: f64, z: f64) -> f64 {
+    if x < 0.0 || y < 0.0 || z <= 0.0 {
+        return f64::NAN;
+    }
+    if x == 0.0 && y == 0.0 {
+        return f64::NAN;
+    }
+    // Degenerate case: x=y=z — algorithm converges prematurely; return exact value.
+    if x == y && y == z {
+        return libm::pow(x, -1.5);
+    }
+    let mut xx = x;
+    let mut yy = y;
+    let mut zz = z;
+    let mut sum = 0.0_f64;
+    let mut fac = 1.0_f64;
+    for _ in 0..50 {
+        let sx = libm::sqrt(xx);
+        let sy = libm::sqrt(yy);
+        let sz = libm::sqrt(zz);
+        let lam = sx * sy + sy * sz + sz * sx;
+        sum += fac / (sz * (zz + lam));
+        fac /= 4.0;
+        xx = (xx + lam) / 4.0;
+        yy = (yy + lam) / 4.0;
+        zz = (zz + lam) / 4.0;
+        let ave = (xx + yy + 3.0 * zz) / 5.0;
+        let dx = (ave - xx) / ave;
+        let dy = (ave - yy) / ave;
+        let dz = (ave - zz) / ave;
+        if libm::fabs(dx) < 1e-10 && libm::fabs(dy) < 1e-10 && libm::fabs(dz) < 1e-10 {
+            let xy = dx * dy;
+            let xz = dx * dz;
+            let yz = dy * dz;
+            let z2 = dz * dz;
+            let e2 = xy - xz - yz - z2;
+            let e3 = xy * dz + dz * (xz + yz);
+            let e4 = xy * z2;
+            let e5 = dz * z2 * dz;
+            return 3.0 * sum
+                + fac
+                    * (1.0
+                        + e2 * (-3.0 / 14.0)
+                        + e3 * (1.0 / 6.0)
+                        + e2 * e2 * (9.0 / 88.0)
+                        + e4 * (-45.0 / 132.0)
+                        - e5 * (5.0 / 44.0)
+                        + e3 * e2 * (-3.0 / 44.0))
+                    / (ave * ave * libm::sqrt(ave));
+        }
+    }
+    3.0 * sum + fac / (zz * zz * libm::sqrt(zz))
+}
+
+/// Carlson symmetric integral RJ(x, y, z, p).
+///
+/// RJ(x, y, z, p) = (3/2) ∫_0^∞ dt / ((t+p)·√(t+x)·√(t+y)·√(t+z))
+///
+/// Domain: x, y, z ≥ 0, p ≠ 0, at most one of x, y, z is zero.
+pub fn carlson_rj(x: f64, y: f64, z: f64, p: f64) -> f64 {
+    if x < 0.0 || y < 0.0 || z < 0.0 || p == 0.0 {
+        return f64::NAN;
+    }
+    let n_zeros = (x == 0.0) as u32 + (y == 0.0) as u32 + (z == 0.0) as u32;
+    if n_zeros > 1 {
+        return f64::NAN;
+    }
+    let mut xx = x;
+    let mut yy = y;
+    let mut zz = z;
+    let mut pp = p;
+    let mut sum = 0.0_f64;
+    let mut fac = 1.0_f64;
+    for _ in 0..50 {
+        let sx = libm::sqrt(xx);
+        let sy = libm::sqrt(yy);
+        let sz = libm::sqrt(zz);
+        let lam = sx * sy + sy * sz + sz * sx;
+        let alpha = pp * (sx + sy + sz) + sx * sy * sz;
+        let alpha2 = alpha * alpha;
+        let beta = pp * (pp + lam) * (pp + lam);
+        sum += fac * carlson_rc(alpha2, beta);
+        fac /= 4.0;
+        xx = (xx + lam) / 4.0;
+        yy = (yy + lam) / 4.0;
+        zz = (zz + lam) / 4.0;
+        pp = (pp + lam) / 4.0;
+        let ave = (xx + yy + zz + pp + pp) / 5.0;
+        let dx = (ave - xx) / ave;
+        let dy = (ave - yy) / ave;
+        let dz = (ave - zz) / ave;
+        let dp = (ave - pp) / ave;
+        if libm::fabs(dx) < 1e-10
+            && libm::fabs(dy) < 1e-10
+            && libm::fabs(dz) < 1e-10
+            && libm::fabs(dp) < 1e-10
+        {
+            let xyz = dx * dy + dy * dz + dz * dx;
+            let p2 = dp * dp;
+            let e2 = xyz - 3.0 * p2;
+            let e3 = dx * dy * dz + 2.0 * xyz * dp - 3.0 * p2 * dp;
+            let e4 = (2.0 * dx * dy * dz + xyz * dp + 3.0 * p2 * dp) * dp;
+            let e5 = dx * dy * dz * p2;
+            return 3.0 * sum
+                + fac
+                    * (1.0
+                        + e2 * (-3.0 / 14.0)
+                        + e3 / 6.0
+                        + e2 * e2 * 9.0 / 88.0
+                        - e4 * 45.0 / 132.0
+                        + e5 * (-5.0 / 44.0)
+                        + e3 * e2 * (-3.0 / 44.0))
+                    / (ave * ave * libm::sqrt(ave));
+        }
+    }
+    // Fallback
+    3.0 * sum + fac / (pp * pp * libm::sqrt(pp))
+}
+
+// =============================================================================
+// Incomplete Elliptic Integrals via Carlson Forms (Slice 6.4)
+//
+// Legendre–Carlson identities (DLMF §19.25):
+//   F(φ, m) = sin(φ) · RF(cos²φ, 1 − m·sin²φ, 1)
+//   E(φ, m) = sin(φ) · RF(c², 1−m·s², 1) − (m/3)·sin³φ · RD(c², 1−m·s², 1)
+//             where c = cos(φ), s = sin(φ)
+//   Π(n, φ, m) = sin(φ) · RF(c², 1−m·s², 1)
+//              + (n/3) · sin³φ · RJ(c², 1−m·s², 1, 1−n·s²)
+//
+// These reduce to the complete forms when φ = π/2 (cos φ = 0, sin φ = 1).
+// =============================================================================
+
+/// Incomplete elliptic integral of the first kind F(φ, m).
+///
+/// F(φ, m) = ∫_0^φ dθ / √(1 − m·sin²θ)
+///
+/// Special cases:
+///   F(0, m) = 0
+///   F(π/2, m) = K(m)  (complete first kind)
+///
+/// Domain: 0 ≤ φ ≤ π/2, 0 ≤ m < 1 (or m·sin²φ < 1).
+pub fn elliptic_f_incomplete(phi: f64, m: f64) -> f64 {
+    if phi == 0.0 {
+        return 0.0;
+    }
+    let s = libm::sin(phi);
+    let c = libm::cos(phi);
+    let s2 = s * s;
+    let x = c * c;
+    let y = 1.0 - m * s2;
+    if y < 0.0 {
+        return f64::NAN;
+    }
+    s * carlson_rf(x, y, 1.0)
+}
+
+/// Incomplete elliptic integral of the second kind E(φ, m).
+///
+/// E(φ, m) = ∫_0^φ √(1 − m·sin²θ) dθ
+///
+/// Special cases:
+///   E(0, m) = 0
+///   E(π/2, m) = E(m)  (complete second kind)
+///
+/// Domain: 0 ≤ φ ≤ π/2, 0 ≤ m ≤ 1.
+pub fn elliptic_e_incomplete(phi: f64, m: f64) -> f64 {
+    if phi == 0.0 {
+        return 0.0;
+    }
+    let s = libm::sin(phi);
+    let c = libm::cos(phi);
+    let s2 = s * s;
+    let c2 = c * c;
+    let y = 1.0 - m * s2;
+    if y < 0.0 {
+        return f64::NAN;
+    }
+    s * carlson_rf(c2, y, 1.0) - (m / 3.0) * s * s2 * carlson_rd(c2, y, 1.0)
+}
+
+/// Incomplete elliptic integral of the third kind Π(n, φ, m).
+///
+/// Π(n, φ, m) = ∫_0^φ dθ / ((1 − n·sin²θ) √(1 − m·sin²θ))
+///
+/// Special cases:
+///   Π(n, 0, m) = 0
+///   Π(n, π/2, m) = Π(n, m)  (complete third kind)
+///
+/// Domain: 0 ≤ φ ≤ π/2, 0 ≤ m < 1, 1 − n·sin²φ > 0.
+pub fn elliptic_pi_incomplete(n: f64, phi: f64, m: f64) -> f64 {
+    if phi == 0.0 {
+        return 0.0;
+    }
+    let s = libm::sin(phi);
+    let c = libm::cos(phi);
+    let s2 = s * s;
+    let c2 = c * c;
+    let y = 1.0 - m * s2;
+    let q = 1.0 - n * s2;
+    if y < 0.0 || q <= 0.0 {
+        return f64::NAN;
+    }
+    s * carlson_rf(c2, y, 1.0) + (n / 3.0) * s * s2 * carlson_rj(c2, y, 1.0, q)
+}
