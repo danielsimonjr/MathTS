@@ -311,19 +311,33 @@ Detail:
       Unit type that unblocks rank 14. 15 slices total across 5
       tiers:
 
-      **Wave 5A Tier 1 (parallel, 4 disjoint agents):**
-      - [ ] **Slice 5.1** — Tensor scatter/pad/roll/flip (closes
-            4.7b sub-slice). 4 new NumPy-style indexing ops; no
-            WASM.
-      - [ ] **Slice 5.2** — Promote matrixPinv + cond + norm2 +
-            normFro + lowRankApprox + singularValues to typed/.
-            Pure promotion, no new algorithms.
-      - [ ] **Slice 5.10** — typed/integration.ts sub-interval
-            worker fan-out (extends 3.8). Add `workerCount` opt;
-            closure-stringification path.
-      - [ ] **Slice 5.11** — typed/hypothesis.ts bootstrap worker
-            helper (extends 3.10). Add `bootstrap: N` opt to all 4
+      **Wave 5A Tier 1 (parallel, 4 disjoint agents) — ✅ ALL LANDED:**
+      - [x] **Slice 5.1** ✅ `09eadea` — Tensor scatter/pad/roll/flip.
+            4 new ops + 56 tests. tensor: 323 → 379. Notable: `roll`
+            uses double-mod-plus-dim for branchless negative-shift
+            handling; `pad` reflect mode excludes the boundary
+            element (matching NumPy); `scatter` reduce='add' is
+            order-dependent for duplicate indices (documented).
+      - [x] **Slice 5.2** ✅ `0cef320` — Promote pinv/cond/norm2/
+            normFro/lowRankApprox/singularValues to typed/. Wired
+            pinv to the DenseMatrix-based `matrixPinv` (Option A).
+            `cond` collision with existing typed/numeric.ts export
+            resolved via explicit barrel-level re-export override.
+            +27 tests; functions: 2171 → 2229 (incl. parallel slice
+            additions).
+      - [x] **Slice 5.10** ✅ `6b78c31` — typed/integration.ts
+            sub-interval worker fan-out. Added `workerCount` opt
+            with closure-stringification path; allow-list heuristic
+            accepts Math.* + parameter name only (rejects outer-
+            scope closures, async closures). New `integrateChunk`
+            worker kernel (returns scalar, not Float64Array). +14
             tests.
+      - [x] **Slice 5.11** ✅ `9f74b1e` — typed/hypothesis.ts
+            bootstrap helper. `bootstrap: N` + `bootstrapSeed` opts
+            on all 4 tests; mulberry32 PRNG for reproducibility.
+            Resampling schemes: chiSquare = multinomial with
+            replacement; KS/Shapiro = parametric bootstrap; MW =
+            permutation (Fisher-Yates). +17 tests.
 
       **Wave 5B Tier 2 (sequential WASM, 4 slices):**
       - [ ] **Slice 5.3** — typed/special.ts ellipticK/E WASM via

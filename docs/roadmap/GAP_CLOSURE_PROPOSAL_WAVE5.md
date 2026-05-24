@@ -21,7 +21,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 ## Tier 1 — Parallel slices (4 agents, no WASM toolchain churn)
 
-### Slice 5.1 — Tensor scatter / pad / roll / flip (4.7b)
+### Slice 5.1 — ✅ LANDED in `09eadea` — Tensor scatter / pad / roll / flip (4.7b)
 
 **Goal:** Complete the NumPy-style indexing primitive family Slice 4.7 deferred.
 
@@ -36,7 +36,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Reference:** Slice 4.7 (`13eda2f`) — `slice.ts` / `gather.ts` / `stack.ts` / `concatenate.ts`. Mirror their axis-label propagation. For `pad`, preserve labels; for `roll`/`flip`, preserve labels; for `scatter`, output keeps input's labels.
 
-### Slice 5.2 — Promote `matrixPinv` + `matrix.cond` / `norm2` / `normFro` / `lowRankApprox` / `singularValues` to typed/
+### Slice 5.2 — ✅ LANDED in `0cef320` — Promote `matrixPinv` + `matrix.cond` / `norm2` / `normFro` / `lowRankApprox` / `singularValues` to typed/
 
 **Goal:** Several public matrix-package exports (Slice 1.5 + 4.2) aren't reachable through `typed/`. This slice closes that gap so consumers get the same dispatch surface they get for other matrix ops.
 
@@ -48,7 +48,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 
 **Pure promotion** — no new algorithms, just delegate to `matrix.pinv` / `matrix.cond` / etc.
 
-### Slice 5.10 — `typed/integration.ts` sub-interval worker fan-out (B.2 row 1)
+### Slice 5.10 — ✅ LANDED in `6b78c31` — `typed/integration.ts` sub-interval worker fan-out (B.2 row 1)
 
 **Goal:** Extends Slice 3.8 — that slice offloaded the dot-product reduction; this slice offloads the **per-sub-interval** integrand evaluation, which is the natural shape for `gaussQuad` and `romberg` when the user is integrating a closure over many sub-intervals.
 
@@ -60,7 +60,7 @@ A pre-flight audit found that several B.1 candidates (`expm`/`logm`/`sqrtm`/`pin
 - `parallel/src/ComputePool.ts` — add `integrateChunk` kernel name to `OpName` if not generic.
 - `functions/tests/typed-integration-fanout.test.ts` — NEW; ≥ 6 tests covering fan-out correctness + closure-stringification edge cases (must reject non-serialisable closures with a clear message).
 
-### Slice 5.11 — `typed/hypothesis.ts` bootstrap/permutation worker helper (B.2 row 2)
+### Slice 5.11 — ✅ LANDED in `9f74b1e` — `typed/hypothesis.ts` bootstrap/permutation worker helper (B.2 row 2)
 
 **Goal:** Extends Slice 3.10 — that slice offloaded the post-sort statistical computation; this slice adds a **`bootstrap` opt-in** so consumers can run many independent resampled tests in parallel.
 
