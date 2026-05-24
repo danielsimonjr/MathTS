@@ -49,18 +49,23 @@ Detail:
 
 - [ ] **ITensor-parity tensor primitives** — see proposal at
       [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md).
-      Four phases, three currently in flight:
+      Six phases. Phases 1–3 LANDED in commit `a21a844` (named Index,
+      truncated tensor SVD, random tensor constructors). Phases 4–6
+      currently in flight via a parallel three-agent team.
 
-      | Phase | Deliverable                                                    | Effort   |
-      | ----- | -------------------------------------------------------------- | -------- |
-      | 1     | `Index` value type + `Tensor.contract` (match-by-id)           | ~150 LOC |
-      | 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD | ~80 LOC  |
-      | 3     | `randomTensor(shape, {distribution, seed})` constructors       | ~40 LOC  |
-      | 4     | Optimal contraction-sequence solver — DEFERRED to a follow-up  | ~300 LOC |
+      | Phase | Deliverable                                                                    | Status   |
+      | ----- | ------------------------------------------------------------------------------ | -------- |
+      | 1     | `Index` value type + `Tensor.contract` (match-by-id)                           | ✅ a21a844 |
+      | 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD                 | ✅ a21a844 |
+      | 3     | `randomTensor(shape, {distribution, seed})` constructors                       | ✅ a21a844 |
+      | 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order (DP + greedy)  | in flight |
+      | 5     | `TapedTensor.contract` + `TapedTensor.matmul` — AD over named-index contractions | in flight |
+      | 6     | Tensor arithmetic completeness: reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`), NumPy broadcasting in `add`/`sub`/`mul`, `tensordot(other, axes)` | in flight |
 
-      Out of scope per the proposal §6: MPS/MPO/DMRG/TEBD/TDVP (live
-      in UPT or a sibling), quantum-number block-sparse storage,
-      fermionic anticommutation, HDF5 I/O.
+      Out of scope per the proposal §11 (was §6): MPS/MPO/DMRG/TEBD/TDVP
+      (live in UPT or a sibling), quantum-number block-sparse storage,
+      fermionic anticommutation, HDF5 I/O, dtypes beyond Float64,
+      compile-time shape inference in the TS type system.
 
 ## ✅ Completed
 
