@@ -174,8 +174,8 @@ export const lgamma = createLgamma(factoryScope as any);
 export const pickRandom = createPickRandom(factoryScope as any);
 export const random = createRandom(factoryScope as any);
 
-// relational
-export const equalScalar = createEqualScalar(factoryScope as any);
+// relational (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
+const equalScalar = createEqualScalar(factoryScope as any);
 
 // special
 export const erf = createErf(factoryScope as any);
@@ -620,10 +620,12 @@ import { createTo } from '../unit/to.js';
 export const factory_compare = createCompare(factoryScope as any);
 factoryScope.compare = factory_compare;
 
-export const compareText = createCompareText(factoryScope as any);
+// compareText (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
+const compareText = createCompareText(factoryScope as any);
 factoryScope.compareText = compareText;
 
-export const deepEqual = createDeepEqual(factoryScope as any);
+// deepEqual (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
+const deepEqual = createDeepEqual(factoryScope as any);
 factoryScope.deepEqual = deepEqual;
 
 export const factory_larger = createLarger(factoryScope as any);
@@ -638,7 +640,8 @@ factoryScope.smaller = factory_smaller;
 export const factory_smallerEq = createSmallerEq(factoryScope as any);
 factoryScope.smallerEq = factory_smallerEq;
 
-export const unequal = createUnequal(factoryScope as any);
+// unequal (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
+const unequal = createUnequal(factoryScope as any);
 factoryScope.unequal = unequal;
 
 // arithmetic
@@ -751,11 +754,11 @@ import { createDistance } from '../geometry/distance.js';
 
 // --- Activate tier 6 ---
 
-// relational
-export const compareNatural = createCompareNatural(factoryScope as any);
+// relational (synced factories — superseded by typed/relational; kept internal for factoryScope wiring)
+const compareNatural = createCompareNatural(factoryScope as any);
 factoryScope.compareNatural = compareNatural;
 
-export const equalText = createEqualText(factoryScope as any);
+const equalText = createEqualText(factoryScope as any);
 factoryScope.equalText = equalText;
 
 // arithmetic

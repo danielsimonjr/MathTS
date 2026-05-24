@@ -7,6 +7,9 @@ import { not } from '../src/typed/logical.js';
 // arg/conj/im/re moved from factories/ to typed/ — import from the typed layer
 import { arg, conj, im, re } from '../src/typed/complex.js';
 
+// equalScalar moved from factories/ to typed/ — import from the typed layer
+import { equalScalar } from '../src/typed/relational.js';
+
 // Import non-conflicting exports directly
 import {
   addScalar,
@@ -18,7 +21,6 @@ import {
   combinations,
   combinationsWithRep,
   erf,
-  equalScalar,
   format,
   clone,
   isNaN as mathIsNaN,
