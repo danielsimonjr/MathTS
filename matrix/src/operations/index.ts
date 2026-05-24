@@ -28,3 +28,9 @@ export { svdWasm } from './svd-wasm.js';
 
 // QR decomposition (DenseMatrix primitive — Gram-Schmidt with re-orthogonalisation)
 export { qr, type QRResult, type QROptions } from './qr.js';
+
+// LU decomposition (DenseMatrix primitive — Doolittle with partial pivoting)
+export { lu, type LUResult } from './lu.js';
+
+// Cholesky decomposition (DenseMatrix primitive — right-looking algorithm)
+export { cholesky, type CholeskyResult } from './cholesky.js';

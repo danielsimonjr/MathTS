@@ -396,6 +396,53 @@ describe('ComputePool', () => {
 
         expect(Array.from(result.result)).toEqual([5, 5, 6]);
       });
+
+      it('divide: large array (1M elements) matches pure-JS reference within 1e-9', async () => {
+        const N = 1_000_000;
+        const a = new Float64Array(N);
+        const b = new Float64Array(N);
+        for (let i = 0; i < N; i++) {
+          a[i] = (i + 1) * 0.001;
+          b[i] = (i % 7) + 1; // divisor in [1..7], never zero
+        }
+
+        const result = await pool.divide(a, b);
+
+        expect(result.result.length).toBe(N);
+        // Sample 1000 evenly-spaced indices to verify correctness within tolerance
+        const step = Math.floor(N / 1000);
+        for (let i = 0; i < N; i += step) {
+          const expected = a[i] / b[i];
+          expect(Math.abs(result.result[i] - expected)).toBeLessThan(1e-9);
+        }
+      }, 30_000);
+
+      it('divide: below-threshold input falls through to sequential computation', async () => {
+        // Create a pool whose thresholdElements is set very high so that even
+        // a moderately-sized array stays below the threshold.
+        const seqPool = new ComputePool({
+          thresholdElements: Number.MAX_SAFE_INTEGER,
+          thresholdByOp: { divide: 'never' },
+        });
+        await seqPool.initialize();
+
+        const a = new Float64Array([4, 9, 16, 25]);
+        const b = new Float64Array([2, 3, 4, 5]);
+
+        const result = await seqPool.divide(a, b);
+
+        expect(Array.from(result.result)).toEqual([2, 3, 4, 5]);
+        expect(result.parallelized).toBe(false);
+
+        await seqPool.terminate();
+      });
+
+      it('divide: mismatched-length inputs throw a descriptive error', async () => {
+        const a = new Float64Array([1, 2, 3]);
+        const b = new Float64Array([1, 2]);
+
+        await expect(pool.divide(a, b)).rejects.toThrow(/Array lengths must match/);
+      });
     });
 
     describe('Scale', () => {

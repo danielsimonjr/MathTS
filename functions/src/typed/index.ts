@@ -99,6 +99,11 @@ export * from './matrix-ops.js';
 // WebGPU-accelerated matrix operations (gpuMatmul, gpuAdd, gpuTranspose, gpuScale)
 export * from './gpu.js';
 
+// Relational functions (deepEqual, unequal, compareNatural, compareText,
+//                       compareUnits, equalScalar, equalText)
+export * from './relational.js';
+export { typedRelational } from './relational.js';
+
 // =============================================================================
 // Combined Exports
 // =============================================================================

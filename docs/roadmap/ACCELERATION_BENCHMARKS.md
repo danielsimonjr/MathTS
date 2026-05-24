@@ -243,3 +243,132 @@ Harness files:
   `runCase`, reporting.
 - `tools/benchmark/parallel/operations.bench.ts` — the `BenchCase` definitions.
 - `tools/benchmark/parallel/run.ts` — runner / CLI entry point.
+
+---
+
+## Tensor Primitives Baseline (Slice 1.6)
+
+**Date captured:** 2026-05-24
+**Suite:** `npm run bench:tensor` (wall time ≈ 25 s)
+**Runner:** `npx tsx tools/benchmark/tensor/*.bench.ts`
+
+These numbers establish the **JS-only baseline** for the ITensor-parity surface
+(`Tensor.contract`, `contractNetwork`, `Tensor.tensordot`, and the decomposition
+trio). Future WASM/GPU acceleration should show a speedup in these tables.
+
+### Environment
+
+Same container as the parallel bench above (4 logical CPUs, Node v22.22.x).
+
+### Methodology
+
+- `performance.now()` timing, `Math.min(2, iterations)` warmup runs, then
+  `iterations` timed runs; average reported.
+- Iteration counts tuned to keep each bench file ≤ ~10 s wall time.
+- No WASM or GPU paths are active; all computation is pure TypeScript einsum.
+
+### Caveats
+
+The pure-JS einsum is O(n^K) where K depends on the number of free + contracted
+axes. At the sizes shown (n ≤ 32 for rank-3 operations, n ≤ 64 for eig on
+rank-2) GFLOPS are around 0.01 — deliberately low; these numbers are a
+correctness/regression baseline, not a performance target. Future WASM
+kernels should raise throughput by 10–100x.
+
+### Tensor.contract (3-D × 3-D, 1 shared axis)
+
+Benchmarks `Tensor.contract` on two `[n, n, n]` tensors sharing one named Index.
+Output shape is `[n, n, n, n]`; FLOPs ≈ 2·n⁵.
+
+| Edge dim (n) |    ms/op | GFLOPS |
+| :----------: | -------: | -----: |
+|      8       |    7.150 |  0.009 |
+|      16      |  221.294 |  0.009 |
+|      24      | 1639.081 |  0.010 |
+
+At n=32 (expected ≈ 7000 ms/op) the pure-JS path becomes impractical;
+the bench caps at n=24 to stay within budget. This is the primary
+regression guard: a WASM matmul-routed contraction should reduce this to
+< 100 ms at n=32.
+
+### contractNetwork (MPS chain, bond_dim=2, phys_dim=2)
+
+Benchmarks both contraction-order algorithms on a linear MPS chain.
+
+| N tensors | exact ms/op | greedy ms/op | exact/greedy ratio |
+| :-------: | ----------: | -----------: | -----------------: |
+|     4     |       0.158 |        0.081 |               1.95 |
+|     8     |       0.918 |        0.397 |               2.31 |
+|    12     |      17.434 |        3.702 |               4.71 |
+|    16     |         n/a |       53.682 |                n/a |
+
+The exact-DP algorithm is O(3^N) in subset enumeration. At N=12 it is
+~5x slower than greedy; at N=16 the combination of DP planning + actual
+tensor contractions was too slow to time reliably on this hardware. The
+greedy result at N=16 (54 ms) is the regression guard for the O(N^3)
+heuristic path.
+
+### Tensor.tensordot (3-D × 3-D, 1-axis and 2-axis)
+
+| Size (n) | Axes |    ms/op | GFLOPS |
+| :------: | :--: | -------: | -----: |
+|    8     |  1   |    7.126 |  0.009 |
+|    16    |  1   |  222.168 |  0.009 |
+|    24    |  1   | 1648.293 |  0.010 |
+|    8     |  2   |    0.987 |  0.008 |
+|    16    |  2   |   15.008 |  0.009 |
+|    24    |  2   |   75.062 |  0.009 |
+|    32    |  2   |  238.434 |  0.009 |
+
+1-axis at n=32 (≈ 7000 ms) is excluded from the timed suite; 2-axis is
+O(n⁴) and tractable to n=32.
+
+### tensorQr (shape [n, n, n], rowAxes=[0])
+
+Effective matrix: n × n² (thin QR).
+
+|  n  | ms/op |
+| :-: | ----: |
+|  8  | 0.286 |
+| 16  | 0.413 |
+| 32  | 3.648 |
+
+### tensorSvd (truncated, shape [n, n, n], rowAxes=[0])
+
+|  n  | maxdim |   ms/op |
+| :-: | :----: | ------: |
+|  8  |   2    |   0.422 |
+|  8  |   4    |   0.406 |
+| 16  |   4    |   7.894 |
+| 16  |   8    |   7.934 |
+| 32  |   8    | 221.159 |
+| 32  |   16   | 229.140 |
+
+SVD time at n=32 is dominated by the underlying Householder/Golub-Reinsch
+on a 32 × 1024 matrix. Truncation (maxdim) has minimal impact once the
+full SVD is computed.
+
+### tensorEig (symmetric, shape [n, n])
+
+|  n  |  ms/op |
+| :-: | -----: |
+|  8  |  0.291 |
+| 16  |  0.457 |
+| 32  |  2.571 |
+| 64  | 24.994 |
+
+Symmetric eigensolver scales well to n=64. The n=64 number is the primary
+regression guard here.
+
+## Reproducing the tensor suite
+
+```bash
+npm run bench:tensor
+```
+
+Bench files (each is a standalone tsx script):
+
+- `tools/benchmark/tensor/contract.bench.ts` — `Tensor.contract`
+- `tools/benchmark/tensor/contract-network.bench.ts` — `contractNetwork` (exact + greedy)
+- `tools/benchmark/tensor/tensordot.bench.ts` — `Tensor.tensordot` (1-axis, 2-axis)
+- `tools/benchmark/tensor/decompositions.bench.ts` — `tensorQr`, `tensorSvd`, `tensorEig`

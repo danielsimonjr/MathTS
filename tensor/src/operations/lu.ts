@@ -3,8 +3,8 @@
  *
  * Mirrors the `tensorSvd` pattern: partitions the axes of `t` into "row"
  * axes and "col" axes, reshapes `t` into a 2-D matrix, performs LU with
- * partial pivoting (Doolittle's algorithm), and returns the factors as
- * Tensors.
+ * partial pivoting (Doolittle's algorithm via the matrix primitive), and
+ * returns the factors as Tensors.
  *
  * The 2-D-reshaped input must be square; otherwise an error is thrown.
  *
@@ -20,6 +20,8 @@
 
 import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { lu as matrixLU } from '@danielsimonjr/mathts-matrix';
 
 export interface TensorLUResult {
   /** Unit lower-triangular L. Shape [...rowDims, n]. */
@@ -38,82 +40,11 @@ export interface TensorLUOpts {
 }
 
 /**
- * Perform LU decomposition (with partial pivoting) on a square row-major
- * Float64Array. Returns L, U, P, and the parity of the permutation.
- *
- * The matrix is consumed (cloned internally).
- */
-function luDecompose(
-  data: Float64Array,
-  n: number
-): { L: Float64Array; U: Float64Array; P: Int32Array; parity: 1 | -1 } {
-  // Working copy — we'll overwrite this with the LU factors stored in the
-  // standard "compact" form (L below the diagonal with unit diagonal implicit,
-  // U on and above the diagonal).
-  const A = new Float64Array(data);
-  const perm = new Int32Array(n);
-  for (let i = 0; i < n; i++) perm[i] = i;
-  let parity: 1 | -1 = 1;
-
-  for (let k = 0; k < n; k++) {
-    // --- Partial pivot: find row with the largest absolute value in column k ---
-    let pivotRow = k;
-    let pivotVal = Math.abs(A[k * n + k]);
-    for (let i = k + 1; i < n; i++) {
-      const v = Math.abs(A[i * n + k]);
-      if (v > pivotVal) {
-        pivotVal = v;
-        pivotRow = i;
-      }
-    }
-
-    if (pivotVal === 0) {
-      throw new Error('tensorLU: matrix is singular (zero pivot encountered)');
-    }
-
-    // --- Swap rows in A and perm ---
-    if (pivotRow !== k) {
-      for (let j = 0; j < n; j++) {
-        const tmp = A[k * n + j];
-        A[k * n + j] = A[pivotRow * n + j];
-        A[pivotRow * n + j] = tmp;
-      }
-      const tmpP = perm[k];
-      perm[k] = perm[pivotRow];
-      perm[pivotRow] = tmpP;
-      parity = (parity === 1 ? -1 : 1) as 1 | -1;
-    }
-
-    // --- Eliminate below the pivot ---
-    const pivot = A[k * n + k];
-    for (let i = k + 1; i < n; i++) {
-      const factor = A[i * n + k] / pivot;
-      A[i * n + k] = factor; // store L[i,k]
-      for (let j = k + 1; j < n; j++) {
-        A[i * n + j] -= factor * A[k * n + j];
-      }
-    }
-  }
-
-  // --- Extract L (unit lower-triangular) and U (upper-triangular) ---
-  const L = new Float64Array(n * n);
-  const U = new Float64Array(n * n);
-  for (let i = 0; i < n; i++) {
-    L[i * n + i] = 1;
-    for (let j = 0; j < i; j++) {
-      L[i * n + j] = A[i * n + j];
-    }
-    for (let j = i; j < n; j++) {
-      U[i * n + j] = A[i * n + j];
-    }
-  }
-
-  return { L, U, P: perm, parity };
-}
-
-/**
  * Compute the LU decomposition of tensor `t` by partitioning its axes into
  * "row" and "col" groups. The reshaped 2-D matrix must be square.
+ *
+ * Delegates the core Doolittle algorithm to `@danielsimonjr/mathts-matrix`'s
+ * `lu` primitive.
  *
  * @param t        - Input tensor of any rank ≥ 1.
  * @param rowAxes  - Axis indices forming the row dimension of the effective
@@ -169,8 +100,36 @@ export function tensorLU(
   const permuted = t.transpose(perm);
   const n = numRows;
 
-  // --- LU factor ---
-  const { L: lData, U: uData, P, parity } = luDecompose(permuted.data, n);
+  // --- Delegate to matrix LU primitive ---
+  const matA = new DenseMatrix(n, n, new Float64Array(permuted.data));
+  const { L: matL, U: matU, P: matP } = matrixLU(matA);
+
+  // Convert number[] permutation to Int32Array and compute parity.
+  const P = new Int32Array(matP);
+  let parity: 1 | -1 = 1;
+  // Parity = sign of the permutation: count the number of inversions modulo 2.
+  const visited = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    if (visited[i] || P[i] === i) {
+      visited[i] = 1;
+      continue;
+    }
+    // Trace the cycle length.
+    let cycleLen = 0;
+    let j = i;
+    while (!visited[j]) {
+      visited[j] = 1;
+      j = P[j];
+      cycleLen++;
+    }
+    // A cycle of length c contributes (c-1) transpositions.
+    if ((cycleLen - 1) % 2 !== 0) {
+      parity = (parity === 1 ? -1 : 1) as 1 | -1;
+    }
+  }
+
+  const lData = matL.toFloat64Array();
+  const uData = matU.toFloat64Array();
 
   // --- Propagate axisLabels ---
   let lLabels: ReadonlyArray<Index> | undefined;

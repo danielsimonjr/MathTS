@@ -143,6 +143,45 @@ export class TapedTensor {
     return new TapedTensor(this.shape, out, this.tape, id);
   }
 
+  /**
+   * Elementwise division: this / other.
+   *
+   * Adjoints (quotient rule):
+   *   dA = dY / b
+   *   dB = −dY · a / b²
+   *
+   * The alias case (a.divide(a)) is handled explicitly: the combined gradient
+   * is dA + dB = dY/a − dY·a/a² = dY/a − dY/a = 0. This is correct since
+   * a/a = 1 everywhere and d(1)/da = 0.
+   */
+  divide(other: TapedTensor): TapedTensor {
+    this.checkSameShape(other, 'divide');
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) out[i] = this.primal[i] / other.primal[i];
+    const thisPrimal = new Float64Array(this.primal); // capture for closure
+    const otherPrimal = new Float64Array(other.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const otherGradSlot = this.tape.getInputGrad(other.id)!;
+    const isAliased = this === other;
+    const { id } = this.tape.record([this.id, other.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        if (isAliased) {
+          // d(a/a)/da = 0; gradient is zero for self-division.
+          // Combined: dY/a - dY*a/a² = dY/a - dY/a = 0.
+          // thisGradSlot[i] += 0; (no-op, but kept for clarity)
+        } else {
+          const b = otherPrimal[i];
+          const a = thisPrimal[i];
+          // dA = dY / b
+          thisGradSlot[i] += outputGrad[i] / b;
+          // dB = -dY * a / b²
+          otherGradSlot[i] += (-outputGrad[i] * a) / (b * b);
+        }
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
   mul(other: TapedTensor): TapedTensor {
     this.checkSameShape(other, 'mul');
     const out = new Float64Array(this.primal.length);
