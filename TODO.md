@@ -263,15 +263,22 @@ Detail:
             `scatter`/`pad`/`roll`/`flip` remain deferred to a
             future Slice 4.7b sub-slice.
 
-      **Wave 4 Tier 3 (sequential, design-heavy):**
-      - [ ] **Slice 4.8** — `TapedTensor` decomposition AD (rank 12).
-            **Opus subagent.** AD adjoints for `tensordot`, `svd`,
-            `eig` (symmetric path only — general non-symm deferred).
-            Repeated-value edge cases require subgradient handling
-            per Townsend (2016) / PyTorch's regularisation.
-      - [ ] **Slice 4.9** — Slice 3.10c-2: Airy `Ai`/`Bi` WASM + AS
-            Bessel parity. Closes the deferred sub-slice from
-            3.10c-1; AS-suffix bridge probe is already wired.
+      **Wave 4 Tier 3 (sequential, design-heavy) — ✅ ALL LANDED:**
+      - [x] **Slice 4.8** ✅ `fd81cd8` — `TapedTensor.tensordot` +
+            `.svd` + `.eig({symmetric:true})` reverse-mode AD. Opus
+            agent. References: Townsend (2016), Magnus & Neudecker
+            (1999), PyTorch source. Repeated-value subgradient mask
+            at `REL_TOL = 1e-10`. autograd: 103 → 136 tests (+33).
+            Non-symmetric `eig` AD still deferred (complex eigenvals).
+      - [x] **Slice 4.9** ✅ `276a75b` — Airy `Ai`/`Bi` WASM + full
+            AssemblyScript Bessel parity (closes 3.10c-2). Scalar
+            Airy implemented from scratch: power series for
+            `|x| ≤ 4.5`, 7-term asymptotic for larger (DLMF §9.2 +
+            §9.7); ~1e-7 relative error. AS port full — no 4.9b
+            split needed. `Bi`'s large-negative-x phase
+            (`θ = ζ + π/4` vs Ai's `θ = ζ − π/4`) was the
+            precision-sensitive design call; verified against DLMF.
+            functions: 2150 → 2171 tests (+21).
 
       **Tier 4 deferred (no agent dispatch):**
       - [ ] **Slice 4.10** — `typed/unit.ts` (rank 14). Blocked on
