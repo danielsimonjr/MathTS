@@ -47,6 +47,22 @@ Detail:
       in any `package.json` — landing this requires a one-time
       install + config PR before the smoke test can be wired in.
 
+- [ ] **Function & auxiliary-function gaps** — see proposal at
+      [`docs/roadmap/FUNCTION_GAPS.md`](docs/roadmap/FUNCTION_GAPS.md).
+      Three slices from the 2026-05-24 dep-graph audit; team
+      dispatched in parallel via disjoint file scopes.
+
+      | Slice | Deliverable                                                                                | Owner   | Status     |
+      | ----- | ------------------------------------------------------------------------------------------ | ------- | ---------- |
+      | 1     | `TapedTensor` reductions (`sum`/`mean`/`max`/`min`/`prod`/`norm`) + elementwise math (`log`/`exp`/`sin`/`cos`/`tan`/`sqrt`/`square`/`pow`/`reciprocal`/`abs`) AD | autograd | in flight |
+      | 2     | `typed/complex.ts` (`arg`/`conj`/`im`/`re`) + `typed/set.ts` (10 set ops) promotion         | functions | in flight |
+      | 3     | Tensor decomposition wrappers (`tensorQr` / `tensorLU` / `tensorCholesky` / `tensorEig`)    | tensor  | in flight |
+
+      Out of scope (per proposal §4): `TapedTensor.divide`/`sub`/
+      `tensordot`/`svd`/`eig`, promotion of `probability`/`relational`/
+      `unit`/`string`, acceleration of `algebra`/`integration`/
+      `hypothesis`, sparse-tensor decompositions.
+
 - [x] **ITensor-parity tensor primitives** — see proposal at
       [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md).
       All six phases LANDED. Phases 1-3 in commit `a21a844`, Phases
