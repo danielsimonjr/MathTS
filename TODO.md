@@ -1,51 +1,48 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-05-23
+Updated: 2026-05-24
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
+>
+> **Roadmap status (2026-05-24):** ✅ The entire `FUNCTION_GAPS_AUDIT.md` gap-closure roadmap is **closed** — all 6 waves (38 slices) landed across ~36 commits. Effective coverage 100% on active code; 0 circular deps; pipeline 19/19 green; 6308 vitest + 172 WASM integration tests pass / 7 skipped / zero regressions.
 
 ## 🎯 Open Actions
 
 Pending items, sorted ascending by **dependencies** then **complexity**.
-Audited independently against the live codebase on 2026-05-23 — every
+Audited independently against the live codebase on 2026-05-24 — every
 item below was verified actionable (vs. done, stale, or a documented
 non-decision).
 
-| #   | Item                                                     | Deps                                  | Complexity            | Owner / next step                                                                                                                                                                                                                       |
-| --- | -------------------------------------------------------- | ------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Cut a release for the [Unreleased] CHANGELOG section** | 0                                     | Low (admin)           | Run `npx changeset version` consuming the pending `.changeset/*.md`, tag, push.                                                                                                                                                         |
-| 2   | **Add a browser smoke test for the WebGPU paths**        | Playwright / vitest-browser (not yet) | Low–medium (CI infra) | Install Playwright (or `@vitest/browser`) at repo root, add one smoke test that boots `gpuMatmul` on a 4×4 input, gate behind a CI matrix entry on a runner with a software WebGPU adapter (Mesa lavapipe on Linux or DX12 on Windows). |
+| #   | Item                                                     | Deps | Complexity  | Owner / next step                                                                |
+| --- | -------------------------------------------------------- | ---- | ----------- | -------------------------------------------------------------------------------- |
+| 1   | **Cut a release for the [Unreleased] CHANGELOG section** | 0    | Low (admin) | Run `npx changeset version` consuming the pending `.changeset/*.md`, tag, push. |
 
 Detail:
 
 - [ ] **Cut a release for the `[Unreleased]` CHANGELOG section.** The
-      `[Unreleased]` block has grown to 550+ lines covering five
+      `[Unreleased]` block has grown to 600+ lines covering six
       distinct strands of work since the `autograd 0.1.0` tag
       (2026-05-15): the WASM gap-analysis sprint, the mathjs JS→AS
       port workflow, the parallel-execution remediation, the typed-
-      layer expansion + repo-wide cleanup, and the CDG-driven
-      coverage push. A pending changeset already sits at
-      `.changeset/parallel-execution-remediation.md`. Worth tagging
-      the cumulative work as a labelled cut (probably `0.2.0` given
-      the breadth of breaking API changes) so the changelog history
-      is browsable. Mechanical — pick a version via the Changesets
-      config in `.changeset/`, run the version bump, commit, push,
-      tag.
+      layer expansion + repo-wide cleanup, the CDG-driven coverage
+      push, and the six-wave gap-closure programme (now complete
+      with Wave 6 on 2026-05-24). A pending changeset already sits
+      at `.changeset/parallel-execution-remediation.md`. Worth
+      tagging the cumulative work as a labelled cut (probably
+      `0.2.0` given the breadth of breaking API changes) so the
+      changelog history is browsable. Mechanical — pick a version
+      via the Changesets config in `.changeset/`, run the version
+      bump, commit, push, tag.
 
-- [ ] **No browser smoke test for the WebGPU paths.** WGSL syntax
-      errors and shader-module init bugs in
-      `functions/src/typed/gpu.ts` and `matrix/src/backends/gpu/*`
-      cannot surface in headless Node CI — there is no test
-      environment that can instantiate a WebGPU adapter today.
-      **Goal:** add a Playwright or Vitest-browser smoke test that
-      boots one trivial op (`gpuMatmul` on a 4×4) and verifies the
-      output, gated behind a CI matrix entry that runs on a runner
-      with a software WebGPU backend (Linux + Mesa lavapipe, or
-      Windows + DX12). The Playwright dependency itself isn't yet
-      in any `package.json` — landing this requires a one-time
-      install + config PR before the smoke test can be wired in.
+- [x] **Add a browser smoke test for the WebGPU paths.** ✅ LANDED
+      via Wave-6 Slice 6.5 (`3aac312`). `@vitest/browser` +
+      Playwright wired at repo root, `vitest.config.browser.ts`
+      gated to `*.browser.test.ts`, `functions/tests/gpu-smoke.browser.test.ts`
+      verifies `gpuMatmul` on 4×4 input matches the CPU reference
+      within float32 precision (falls back to CPU when no WebGPU
+      adapter), CI job runs the suite on a Mesa lavapipe runner.
 
 - [x] **Function & auxiliary-function gaps** — see proposal at
       [`docs/roadmap/FUNCTION_GAPS.md`](docs/roadmap/FUNCTION_GAPS.md).
@@ -298,10 +295,10 @@ Detail:
             intervals, hypothesis bootstrap, CAS K-fold CV, batch
             sampling, distribution closure-pdf, CAS batch ops,
             graph-centrality restarts.
-      - [ ] **WebGPU browser smoke test** — needs Playwright (or
-            vitest-browser) infra PR + CI matrix entry with a
-            software WebGPU adapter (Mesa lavapipe on Linux or DX12
-            on Windows). Infra slice, not implementation.
+      - [x] **WebGPU browser smoke test** — ✅ Wave-6 Slice 6.5
+            (`3aac312`). Playwright + `@vitest/browser` wired,
+            `gpuMatmul` 4×4 smoke test green on Mesa lavapipe CI
+            runner.
 
 - [ ] **Wave 5 gap-closure (B.1/B.2 backlog)** — design at
       [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md).
@@ -386,45 +383,77 @@ Detail:
             offsets per-atom standalone only. +53 core + 15 typed
             tests. Differences from mathjs's Unit class documented.
 
-- [ ] **Wave 6 gap-closure (final cleanup)** — design at
-      [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md).
-      Picks up the 5 forward-tracked items remaining after Wave 5
-      closed the audit's main body. After Wave 6 lands, the
-      FUNCTION_GAPS_AUDIT roadmap is fully closed.
+- [x] **Wave 6 gap-closure (final cleanup) — ✅ COMPLETE (2026-05-24).**
+      Design at [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md).
+      Picked up the 5 forward-tracked items remaining after Wave 5
+      closed the audit's main body. **All 5 slices LANDED**; with
+      this wave the entire `FUNCTION_GAPS_AUDIT.md` roadmap is fully
+      closed. Manifest fix in commit `dc5c050`; AS Carlson parity
+      wiring + roadmap-doc closures in commit `28e50ec`.
 
-      **Wave 6A Tier 1 (parallel, 3 disjoint agents):**
-      - [ ] **Slice 6.1** — Slice 5.9b: full Higham Schur-based
-            logm/sqrtm for general matrices (complex eigenvalues,
-            defective Jordan blocks). NEW `matrix/src/operations/
-            schur.ts` exposing public Schur primitive (extract from
-            existing internal in eig.ts or implement standalone
-            Francis QR-with-double-shifts). Extend `logm.ts` +
-            `sqrtm.ts` with Schur-Padé and Björck-Hammarling
-            algorithms per Higham 2008 §6, §11.
-      - [ ] **Slice 6.2** (Opus) — Non-symmetric `TapedTensor.eig`
-            AD. Lifts the symmetric-only restriction from Slice 4.8.
-            Implement general-case adjoint per Magnus & Neudecker
-            §10.6 / Townsend (2016) §4. Handle complex eigenvalues,
-            near-degenerate masking (REL_TOL=1e-10), and defective
-            matrices (cond(V) > 1e14 → throw with clear error).
-      - [ ] **Slice 6.5** — WebGPU browser smoke test infrastructure.
-            Install @vitest/browser + playwright; new
-            `vitest.config.browser.ts`; one trivial `gpuMatmul`
-            smoke test on a 4×4 input; CI matrix entry with Mesa
-            lavapipe / DX12 software WebGPU adapter. Scope-balloon
-            escape allowed: commit local plumbing + smoke test
-            even if CI matrix proves fiddly.
+      **Wave 6A Tier 1 (parallel, 3 disjoint agents) — ✅ ALL LANDED:**
+      - [x] **Slice 6.1** ✅ `d0466b3` — Slice 5.9b: full Higham
+            Schur-based logm/sqrtm for general matrices (complex
+            eigenvalues, defective Jordan blocks). NEW
+            `matrix/src/operations/schur.ts` exposing public Schur
+            primitive (Francis QR-with-double-shifts). Extended
+            `logm.ts` (Schur-Padé Algorithm 11.10) + `sqrtm.ts`
+            (Björck-Hammarling Algorithm 6.3 by direct back-
+            substitution on the upper-triangular recurrence).
+            +19 matrix tests covering complex / defective / repeated
+            eigenvalue cases, all within `1e-10` of SciPy reference.
+      - [x] **Slice 6.2** (Opus) ✅ `048e9e1` — Non-symmetric
+            `TapedTensor.eig` AD. Lifts the symmetric-only
+            restriction from Slice 4.8. General-case adjoint
+            `dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T` per
+            Townsend (2016) §4 / Magnus & Neudecker §10.6.
+            Near-degenerate masking at `REL_TOL = 1e-10`; clean
+            throw on defective inputs when `cond(V) > 1e14`. +13
+            autograd tests (FD verification at 5 well-conditioned
+            inputs + chained-graph + defective error path).
+      - [x] **Slice 6.5** ✅ `3aac312` — WebGPU browser smoke test
+            infrastructure. `@vitest/browser` + `playwright`
+            installed at repo root; NEW `vitest.config.browser.ts`
+            gated to `*.browser.test.ts`; NEW `functions/tests/
+            gpu-smoke.browser.test.ts` verifies `gpuMatmul` on 4×4
+            input matches CPU reference within float32 precision
+            (transparent CPU fallback when no adapter); CI job
+            installs Mesa lavapipe (`apt-get install
+            mesa-vulkan-drivers libegl1`) and runs `npm run
+            test:browser`. Closes the "WebGPU browser smoke test"
+            forward-tracked item that was carried in 🎯 Open
+            Actions since the original audit.
 
-      **Wave 6B Tier 2 (sequential WASM, 2 slices):**
-      - [ ] **Slice 6.3** — `convexHull3D` WASM via incremental
-            QuickHull-3D (Barber, Dobkin, Huhdanpaa 1996). 2-D hull
-            + Delaunay 2-D + Voronoi 2-D + k-d tree all already
-            WASM. Threshold ≥ 1024 points.
-      - [ ] **Slice 6.4** — Carlson R-forms (RC/RD/RF/RJ) +
-            incomplete elliptic integrals (ellipticF, ellipticE
-            incomplete, ellipticPi). Quadratically convergent and
-            branch-cut-free. References: Carlson (1995), NR §6.11,
-            DLMF §19. Threshold ≥ 1024 samples.
+      **Wave 6B Tier 2 (sequential WASM, 2 slices) — ✅ ALL LANDED:**
+      - [x] **Slice 6.3** ✅ `bba468b` — `convexHull3D` WASM via
+            incremental QuickHull-3D (Barber, Dobkin, Huhdanpaa
+            1996). NEW `convex_hull_3d_wasm(pts_ptr, n, faces_ptr)
+            -> i32` in `wasm-rust/crates/mathts-wasm/src/geometry/
+            advanced.rs`; new `convexHull3D` typed export. Threshold
+            ≥ 1024 points. +18 hull-3D tests (tetrahedron, cube,
+            cospherical sample, degenerate co-planar fallback).
+      - [x] **Slice 6.4** ✅ `2be52f9` — Carlson R-forms
+            (`carlsonRC`/`RD`/`RF`/`RJ`) + incomplete elliptic
+            integrals (`ellipticF`, `ellipticEIncomplete`,
+            `ellipticPi`) WASM. Quadratically convergent and
+            branch-cut-free per Carlson (1995), NR §6.11, DLMF §19.
+            Threshold ≥ 1024 samples. Rust + AS WASM parity (AS
+            wiring through `assembly/src/index.ts` landed in commit
+            `28e50ec`). +41 tests against DLMF §19.16-19.36 and
+            Abramowitz & Stegun §17 reference values.
+
+      **Wave 6 cumulative test deltas:**
+
+      - `functions`: 2,486 → **2,545** (+59 = 18 hull3D + 41 Carlson)
+      - `matrix`: 586 → **605** (+19, Schur + logm/sqrtm extensions)
+      - `autograd`: 136 → **149** (+13, non-symmetric eig AD)
+      - 238 test files total (+2); 6308 tests + 172 WASM integration
+        tests pass / 7 skipped / zero regressions.
+
+      **Total Wave 6 = 5 slices across 6 commits** (`d0466b3`,
+      `048e9e1`, `3aac312`, `bba468b`, `2be52f9`, `dc5c050` manifest
+      regen + `28e50ec` doc/AS polish). After this wave the entire
+      `FUNCTION_GAPS_AUDIT.md` roadmap is **closed**.
 
 - [x] **CDG bugfix + post-Wave-3 gap-audit refresh** — Ran
       `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --include-tests`
