@@ -410,6 +410,257 @@ export function discriminantDispatch(p: Float64Array): number {
   return discriminantJS(p);
 }
 
+// ---------------------------------------------------------------------------
+// Polynomial-fit dispatch (Slice 5.4)
+// ---------------------------------------------------------------------------
+
+/**
+ * Sample-count threshold above which we attempt the WASM kernel for
+ * poly_fit / cheb_fit / legendre_fit.  Below this, the marshal cost
+ * (two memcpys in + one out) dominates; above it, the O(n·k²) QR
+ * factorisation pays off.
+ */
+export const WASM_POLY_FIT_THRESHOLD = 1024;
+
+// Rust-backend function type signatures for fit kernels.
+type RustFitFn = (
+  xsPtr: number,
+  ysPtr: number,
+  n: number,
+  degree: number,
+  outPtr: number
+) => number;
+
+// AS-backend function type signatures for fit kernels.
+type ASFitFn = (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array;
+
+/** Internal helper: build normal equations and solve via Cholesky/Gauss (JS fallback). */
+function polyFitJS(
+  xs: Float64Array,
+  ys: Float64Array,
+  degree: number,
+  buildRow: (x: number, k: number) => Float64Array
+): Float64Array | null {
+  const n = xs.length;
+  const k = degree + 1;
+  if (n < k) return null;
+
+  // Build Vandermonde-like matrix (n × k) in a flat buffer.
+  const A: number[][] = [];
+  for (let i = 0; i < n; i++) {
+    const row = buildRow(xs[i], k);
+    A.push(Array.from(row));
+  }
+
+  // Form normal equations: (A^T A) c = A^T y via Gaussian elimination.
+  // Build augmented matrix [A^T A | A^T y].
+  const ATA: number[][] = Array.from({ length: k }, () => new Array(k + 1).fill(0));
+  for (let j = 0; j < k; j++) {
+    for (let l = 0; l < k; l++) {
+      let s = 0;
+      for (let i = 0; i < n; i++) s += A[i][j] * A[i][l];
+      ATA[j][l] = s;
+    }
+    let s = 0;
+    for (let i = 0; i < n; i++) s += A[i][j] * ys[i];
+    ATA[j][k] = s;
+  }
+
+  // Gaussian elimination with partial pivoting.
+  for (let col = 0; col < k; col++) {
+    let maxRow = col;
+    let maxVal = Math.abs(ATA[col][col]);
+    for (let row = col + 1; row < k; row++) {
+      if (Math.abs(ATA[row][col]) > maxVal) {
+        maxVal = Math.abs(ATA[row][col]);
+        maxRow = row;
+      }
+    }
+    if (maxVal < 1e-14) return null;
+    if (maxRow !== col) [ATA[col], ATA[maxRow]] = [ATA[maxRow], ATA[col]];
+    for (let row = col + 1; row < k; row++) {
+      const factor = ATA[row][col] / ATA[col][col];
+      for (let j = col; j <= k; j++) ATA[row][j] -= factor * ATA[col][j];
+    }
+  }
+
+  const coeffs = new Float64Array(k);
+  for (let i = k - 1; i >= 0; i--) {
+    coeffs[i] = ATA[i][k];
+    for (let j = i + 1; j < k; j++) coeffs[i] -= ATA[i][j] * coeffs[j];
+    coeffs[i] /= ATA[i][i];
+  }
+  return coeffs;
+}
+
+/** Build a standard power basis row: [1, x, x^2, ...]. */
+function powerBasisRow(x: number, k: number): Float64Array {
+  const row = new Float64Array(k);
+  let xpow = 1;
+  for (let j = 0; j < k; j++) {
+    row[j] = xpow;
+    xpow *= x;
+  }
+  return row;
+}
+
+/** Build a Chebyshev-T basis row: [T_0(x), T_1(x), ...]. */
+function chebBasisRow(x: number, k: number): Float64Array {
+  const row = new Float64Array(k);
+  let tPrev = 1,
+    tCurr = x;
+  row[0] = tPrev;
+  if (k > 1) row[1] = tCurr;
+  for (let j = 2; j < k; j++) {
+    const tNext = 2 * x * tCurr - tPrev;
+    row[j] = tNext;
+    tPrev = tCurr;
+    tCurr = tNext;
+  }
+  return row;
+}
+
+/** Build a Legendre-P basis row: [P_0(x), P_1(x), ...]. */
+function legendreBasisRow(x: number, k: number): Float64Array {
+  const row = new Float64Array(k);
+  let pPrev = 1,
+    pCurr = x;
+  row[0] = pPrev;
+  if (k > 1) row[1] = pCurr;
+  for (let n = 1; n < k - 1; n++) {
+    const pNext = ((2 * n + 1) * x * pCurr - n * pPrev) / (n + 1);
+    row[n + 1] = pNext;
+    pPrev = pCurr;
+    pCurr = pNext;
+  }
+  return row;
+}
+
+/** JS fallback for polyFit. */
+function polyFitJSFallback(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
+  const result = polyFitJS(xs, ys, degree, powerBasisRow);
+  if (!result) throw new Error('polyFit: rank-deficient or insufficient data');
+  return result;
+}
+
+/** JS fallback for chebyshevFit. */
+function chebFitJSFallback(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
+  const result = polyFitJS(xs, ys, degree, chebBasisRow);
+  if (!result) throw new Error('chebyshevFit: rank-deficient or insufficient data');
+  return result;
+}
+
+/** JS fallback for legendreFit. */
+function legendreFitJSFallback(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
+  const result = polyFitJS(xs, ys, degree, legendreBasisRow);
+  if (!result) throw new Error('legendreFit: rank-deficient or insufficient data');
+  return result;
+}
+
+/**
+ * Generic dispatch helper for fit kernels.
+ * Probes for Rust export (`rustName`) first, then AS export (`asName`),
+ * then falls back to the provided `jsFallback`.
+ */
+function fitDispatch(
+  xs: Float64Array,
+  ys: Float64Array,
+  degree: number,
+  rustName: string,
+  asName: string,
+  jsFallback: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array
+): Float64Array {
+  if (xs.length !== ys.length) throw new Error('xs and ys must have the same length');
+  const bigEnough = xs.length >= WASM_POLY_FIT_THRESHOLD;
+  if (bigEnough) {
+    const wasm = getWasm();
+    if (wasm) {
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)[rustName] as
+          | RustFitFn
+          | undefined;
+        if (typeof rustFn === 'function') {
+          const k = degree + 1;
+          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(k);
+          try {
+            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, xs.length, degree, outAlloc.ptr);
+            if (written < 0) {
+              throw new Error(`${rustName}: rank-deficient or degenerate input`);
+            }
+            return new Float64Array(new Float64Array(outAlloc.array.buffer, outAlloc.ptr, k));
+          } finally {
+            wasmLoader.release(xsAlloc.ptr, true);
+            wasmLoader.release(ysAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+
+        // Try AS backend.
+        const asFn = (wasm as unknown as Record<string, unknown>)[asName] as ASFitFn | undefined;
+        if (typeof asFn === 'function') {
+          const result = asFn(xs, ys, degree);
+          if (result.length === 1 && isNaN(result[0])) {
+            throw new Error(`${asName}: rank-deficient or degenerate input`);
+          }
+          return new Float64Array(result);
+        }
+      } catch (e) {
+        // If the error is a rank-deficient message, re-throw it.
+        if (e instanceof Error && e.message.includes('rank-deficient')) throw e;
+        // Otherwise fall through to JS.
+      }
+    }
+  }
+  return jsFallback(xs, ys, degree);
+}
+
+/**
+ * Fit a polynomial via Vandermonde + QR using WASM when n ≥ threshold.
+ *
+ * Returns a `Float64Array` of length `degree + 1` with coefficients
+ * `[a0, a1, ..., a_degree]` (constant-first / power-ascending order).
+ *
+ * Throws when the system is rank-deficient (e.g. all xs equal).
+ */
+export function polyFitDispatch(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
+  return fitDispatch(xs, ys, degree, 'poly_fit_f64', 'poly_fit_f64_as', polyFitJSFallback);
+}
+
+/**
+ * Fit a Chebyshev-series via Vandermonde + QR using WASM when n ≥ threshold.
+ *
+ * Returns a `Float64Array` of length `degree + 1` with Chebyshev coefficients.
+ *
+ * Throws when the system is rank-deficient.
+ */
+export function chebFitDispatch(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
+  return fitDispatch(xs, ys, degree, 'cheb_fit_f64', 'cheb_fit_f64_as', chebFitJSFallback);
+}
+
+/**
+ * Fit a Legendre-series via Vandermonde + QR using WASM when n ≥ threshold.
+ *
+ * Returns a `Float64Array` of length `degree + 1` with Legendre coefficients.
+ *
+ * Throws when the system is rank-deficient.
+ */
+export function legendreFitDispatch(
+  xs: Float64Array,
+  ys: Float64Array,
+  degree: number
+): Float64Array {
+  return fitDispatch(
+    xs,
+    ys,
+    degree,
+    'legendre_fit_f64',
+    'legendre_fit_f64_as',
+    legendreFitJSFallback
+  );
+}
+
 /**
  * Test-only hook — re-exported so tests can reset loader state
  * without importing WasmLoader directly.

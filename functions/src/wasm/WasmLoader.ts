@@ -600,6 +600,40 @@ export interface WasmModule {
   poly_resultant_f64_as?: (p: Float64Array, q: Float64Array) => number;
   poly_discriminant_f64_as?: (p: Float64Array) => number;
 
+  // Polynomial-fit kernels (Slice 5.4).
+  // Rust backend: pointer-style.
+  //   poly_fit_f64(xs_ptr, ys_ptr, n, degree, out_ptr) → degree+1 (or -1 on error)
+  //   cheb_fit_f64(xs_ptr, ys_ptr, n, degree, out_ptr) → degree+1 (or -1 on error)
+  //   legendre_fit_f64(xs_ptr, ys_ptr, n, degree, out_ptr) → degree+1 (or -1 on error)
+  // AS backend: typed-array calling convention.
+  //   poly_fit_f64_as(xs, ys, degree) → Float64Array (NaN[1] on error)
+  //   cheb_fit_f64_as(xs, ys, degree) → Float64Array (NaN[1] on error)
+  //   legendre_fit_f64_as(xs, ys, degree) → Float64Array (NaN[1] on error)
+  poly_fit_f64?: (
+    xsPtr: number,
+    ysPtr: number,
+    n: number,
+    degree: number,
+    outPtr: number
+  ) => number;
+  cheb_fit_f64?: (
+    xsPtr: number,
+    ysPtr: number,
+    n: number,
+    degree: number,
+    outPtr: number
+  ) => number;
+  legendre_fit_f64?: (
+    xsPtr: number,
+    ysPtr: number,
+    n: number,
+    degree: number,
+    outPtr: number
+  ) => number;
+  poly_fit_f64_as?: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array;
+  cheb_fit_f64_as?: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array;
+  legendre_fit_f64_as?: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array;
+
   // Tridiagonal-solve kernel (Slice 3.10b).
   // Rust backend: pointer-style
   //   (diag_ptr, lower_ptr, upper_ptr, rhs_ptr, n, out_ptr) → n (or -1 on singular).

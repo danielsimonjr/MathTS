@@ -23,7 +23,11 @@ import {
   polyDivModDispatch,
   discriminantDispatch,
   resultantDispatch,
+  polyFitDispatch,
+  chebFitDispatch,
+  legendreFitDispatch,
   WASM_POLY_THRESHOLD,
+  WASM_POLY_FIT_THRESHOLD,
 } from '../../../functions/src/wasm/poly/wasm-bridge.js';
 import { wasmLoader } from '../../../functions/src/wasm/WasmLoader.js';
 
@@ -215,4 +219,91 @@ async function run(): Promise<void> {
   }
 }
 
-run().catch(console.error);
+// ---------------------------------------------------------------------------
+// polyFit / chebFit / legendreFit benchmarks (Slice 5.4)
+// ---------------------------------------------------------------------------
+
+/** Pure-JS polynomial fit (normal equations, power basis). */
+function jsPolyFit(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
+  const n = xs.length;
+  const k = degree + 1;
+  const ATA: number[][] = Array.from({ length: k }, () => new Array(k + 1).fill(0));
+  for (let i = 0; i < n; i++) {
+    const row: number[] = new Array(k);
+    let xpow = 1;
+    for (let j = 0; j < k; j++) {
+      row[j] = xpow;
+      xpow *= xs[i];
+    }
+    for (let j = 0; j < k; j++) {
+      for (let l = 0; l < k; l++) ATA[j][l] += row[j] * row[l];
+      ATA[j][k] += row[j] * ys[i];
+    }
+  }
+  for (let col = 0; col < k; col++) {
+    let maxRow = col;
+    let maxVal = Math.abs(ATA[col][col]);
+    for (let row = col + 1; row < k; row++) {
+      if (Math.abs(ATA[row][col]) > maxVal) {
+        maxVal = Math.abs(ATA[row][col]);
+        maxRow = row;
+      }
+    }
+    if (maxRow !== col) [ATA[col], ATA[maxRow]] = [ATA[maxRow], ATA[col]];
+    for (let row = col + 1; row < k; row++) {
+      const f = ATA[row][col] / ATA[col][col];
+      for (let j = col; j <= k; j++) ATA[row][j] -= f * ATA[col][j];
+    }
+  }
+  const coeffs = new Float64Array(k);
+  for (let i = k - 1; i >= 0; i--) {
+    coeffs[i] = ATA[i][k];
+    for (let j = i + 1; j < k; j++) coeffs[i] -= ATA[i][j] * coeffs[j];
+    coeffs[i] /= ATA[i][i];
+  }
+  return coeffs;
+}
+
+async function runFitBench(): Promise<void> {
+  console.log('\n=== Polynomial Fit WASM Kernel Benchmark (Slice 5.4) ===');
+  console.log(`  WASM_POLY_FIT_THRESHOLD = ${WASM_POLY_FIT_THRESHOLD}`);
+
+  const fitSizes = [256, 512, WASM_POLY_FIT_THRESHOLD, 2048, 4096];
+  const degree = 5;
+
+  for (const n of fitSizes) {
+    const xs = new Float64Array(n);
+    const ys = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      xs[i] = (i / (n - 1)) * 2 - 1; // uniform in [-1, 1]
+      ys[i] = 1 - xs[i] + 0.5 * xs[i] * xs[i];
+    }
+
+    console.log(
+      `\n--- n = ${n} (${n >= WASM_POLY_FIT_THRESHOLD ? 'above' : 'below'} threshold) ---`
+    );
+
+    const jsT = bench('polyFit JS baseline', () => jsPolyFit(xs, ys, degree), RUNS);
+    const wasmPolyT = bench('polyFit WASM dispatch', () => polyFitDispatch(xs, ys, degree), RUNS);
+    const wasmChebT = bench('chebFit WASM dispatch', () => chebFitDispatch(xs, ys, degree), RUNS);
+    const wasmLegT = bench(
+      'legendreFit WASM dispatch',
+      () => legendreFitDispatch(xs, ys, degree),
+      RUNS
+    );
+
+    if (wasmPolyT < jsT) {
+      console.log(`  → polyFit WASM wins by ${(jsT / wasmPolyT).toFixed(2)}×`);
+    } else {
+      console.log(
+        `  → polyFit JS wins by ${(wasmPolyT / jsT).toFixed(2)}× (expected below threshold)`
+      );
+    }
+    void wasmChebT;
+    void wasmLegT;
+  }
+}
+
+run()
+  .then(() => runFitBench())
+  .catch(console.error);

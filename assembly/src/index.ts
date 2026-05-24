@@ -393,10 +393,10 @@ export {
 } from './ops/bitwise';
 
 // =============================================================================
-// Polynomial hot-loop kernels (Slice 3.7)
+// Polynomial hot-loop kernels (Slice 3.7) + Fit kernels (Slice 5.4)
 // =============================================================================
 
-export { poly_mul_f64, poly_div_mod_f64 } from './poly';
+export { poly_mul_f64, poly_div_mod_f64, poly_fit_f64, cheb_fit_f64, legendre_fit_f64 } from './poly';
 
 // =============================================================================
 // Tridiagonal-solve kernel (Slice 3.10b)

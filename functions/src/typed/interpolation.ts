@@ -19,6 +19,12 @@
  */
 
 import { tridiagSolveDispatch } from '../wasm/interpolation/wasm-bridge.js';
+import {
+  polyFitDispatch,
+  chebFitDispatch,
+  legendreFitDispatch,
+  WASM_POLY_FIT_THRESHOLD,
+} from '../wasm/poly/wasm-bridge.js';
 
 // =============================================================================
 // linearInterp - Linear Interpolation
@@ -377,14 +383,18 @@ function pchipEndSlope(
 }
 
 // =============================================================================
-// polyFit - Least-Squares Polynomial Fitting
+// polyFit - Least-Squares Polynomial Fitting (WASM-routed, Slice 5.4)
 // =============================================================================
 
 /**
  * Least-squares polynomial fit.
  *
- * Fits a polynomial of given degree to data points using the normal equations.
+ * Fits a polynomial of given degree to data points using Vandermonde + QR.
  * Returns coefficients [a0, a1, ..., a_degree] where p(x) = a0 + a1*x + ... + a_d*x^d.
+ *
+ * When xs.length >= WASM_POLY_FIT_THRESHOLD (1024), the hot-loop is dispatched
+ * to the WASM Rust backend (or AS fallback). Below the threshold, a normal-
+ * equation / Gaussian-elimination path runs in pure JS.
  *
  * @param xs - x-coordinates
  * @param ys - y-values
@@ -399,10 +409,19 @@ export function polyFit(xs: number[], ys: number[], degree: number): number[] {
     throw new Error('polyFit requires more data points than polynomial degree');
   }
 
+  if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
+    try {
+      const result = polyFitDispatch(new Float64Array(xs), new Float64Array(ys), degree);
+      return Array.from(result);
+    } catch {
+      // fall through to JS path
+    }
+  }
+
+  // --- JS path (normal equations + Gaussian elimination) ---
   const n = xs.length;
   const m = degree + 1;
 
-  // Build normal equations: (V^T V) c = V^T y
   const VtV: number[][] = Array.from({ length: m }, () => new Array(m).fill(0));
   const Vty: number[] = new Array(m).fill(0);
 
@@ -420,7 +439,6 @@ export function polyFit(xs: number[], ys: number[], degree: number): number[] {
     }
   }
 
-  // Solve via Gaussian elimination with partial pivoting
   const A = VtV.map((row, i) => [...row, Vty[i]]);
 
   for (let col = 0; col < m; col++) {
@@ -435,7 +453,9 @@ export function polyFit(xs: number[], ys: number[], degree: number): number[] {
     if (maxRow !== col) {
       [A[col], A[maxRow]] = [A[maxRow], A[col]];
     }
-
+    if (Math.abs(A[col][col]) < 1e-14) {
+      throw new Error('polyFit: rank-deficient system (all xs equal or collinear)');
+    }
     for (let row = col + 1; row < m; row++) {
       const factor = A[row][col] / A[col][col];
       for (let j = col; j <= m; j++) {
@@ -453,5 +473,192 @@ export function polyFit(xs: number[], ys: number[], degree: number): number[] {
     coeffs[i] /= A[i][i];
   }
 
+  return coeffs;
+}
+
+// =============================================================================
+// chebyshevFit — Chebyshev-basis least-squares fit (Slice 5.4)
+// =============================================================================
+
+/**
+ * Fit a Chebyshev-series of given degree to data points.
+ *
+ * Returns coefficients [c0, c1, ..., c_degree] in the Chebyshev-T basis so
+ * that f(x) ≈ c0·T_0(x) + c1·T_1(x) + ... + c_d·T_d(x).
+ *
+ * When xs.length >= WASM_POLY_FIT_THRESHOLD, the QR solve is dispatched
+ * to WASM.  Below the threshold, a normal-equation JS path is used.
+ *
+ * @param xs - x-coordinates (ideally in [-1, 1] for numerical stability)
+ * @param ys - y-values
+ * @param degree - Chebyshev degree
+ * @returns Array of Chebyshev coefficients [c0, ..., c_degree]
+ *
+ * @example
+ * // T_2(x) = 2x² - 1: coefficients should be approx [-1, 0, 2] (wait — basis order)
+ * // T_0 = 1, T_1 = x, T_2 = 2x²-1 → recovery coefficients [0, 0, 1] for T_2 alone
+ * chebyshevFit(xs, ys, 2) // ys = T_2(xs): => ~[0, 0, 1]
+ */
+export function chebyshevFit(xs: number[], ys: number[], degree: number): number[] {
+  if (xs.length !== ys.length || xs.length < degree + 1) {
+    throw new Error('chebyshevFit requires more data points than polynomial degree');
+  }
+
+  if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
+    try {
+      const result = chebFitDispatch(new Float64Array(xs), new Float64Array(ys), degree);
+      return Array.from(result);
+    } catch {
+      // fall through to JS path
+    }
+  }
+
+  // --- JS path (normal equations using Chebyshev basis) ---
+  const n = xs.length;
+  const k = degree + 1;
+
+  /** Build Chebyshev-T basis row. */
+  function chebRow(x: number): number[] {
+    const row: number[] = new Array(k);
+    let tPrev = 1,
+      tCurr = x;
+    row[0] = tPrev;
+    if (k > 1) row[1] = tCurr;
+    for (let j = 2; j < k; j++) {
+      const tNext = 2 * x * tCurr - tPrev;
+      row[j] = tNext;
+      tPrev = tCurr;
+      tCurr = tNext;
+    }
+    return row;
+  }
+
+  const ATA: number[][] = Array.from({ length: k }, () => new Array(k + 1).fill(0));
+  for (let i = 0; i < n; i++) {
+    const row = chebRow(xs[i]);
+    for (let j = 0; j < k; j++) {
+      for (let l = 0; l < k; l++) ATA[j][l] += row[j] * row[l];
+      ATA[j][k] += row[j] * ys[i];
+    }
+  }
+
+  for (let col = 0; col < k; col++) {
+    let maxRow = col;
+    let maxVal = Math.abs(ATA[col][col]);
+    for (let row = col + 1; row < k; row++) {
+      if (Math.abs(ATA[row][col]) > maxVal) {
+        maxVal = Math.abs(ATA[row][col]);
+        maxRow = row;
+      }
+    }
+    if (maxRow !== col) [ATA[col], ATA[maxRow]] = [ATA[maxRow], ATA[col]];
+    if (Math.abs(ATA[col][col]) < 1e-14) {
+      throw new Error('chebyshevFit: rank-deficient system');
+    }
+    for (let row = col + 1; row < k; row++) {
+      const factor = ATA[row][col] / ATA[col][col];
+      for (let j = col; j <= k; j++) ATA[row][j] -= factor * ATA[col][j];
+    }
+  }
+
+  const coeffs = new Array(k);
+  for (let i = k - 1; i >= 0; i--) {
+    coeffs[i] = ATA[i][k];
+    for (let j = i + 1; j < k; j++) coeffs[i] -= ATA[i][j] * coeffs[j];
+    coeffs[i] /= ATA[i][i];
+  }
+  return coeffs;
+}
+
+// =============================================================================
+// legendreFit — Legendre-basis least-squares fit (Slice 5.4)
+// =============================================================================
+
+/**
+ * Fit a Legendre-series of given degree to data points.
+ *
+ * Returns coefficients [c0, c1, ..., c_degree] in the Legendre-P basis so
+ * that f(x) ≈ c0·P_0(x) + c1·P_1(x) + ... + c_d·P_d(x).
+ *
+ * When xs.length >= WASM_POLY_FIT_THRESHOLD, the QR solve is dispatched
+ * to WASM.  Below the threshold, a normal-equation JS path is used.
+ *
+ * @param xs - x-coordinates (ideally in [-1, 1] for numerical stability)
+ * @param ys - y-values
+ * @param degree - Legendre degree
+ * @returns Array of Legendre coefficients [c0, ..., c_degree]
+ *
+ * @example
+ * // P_2(x) = (3x² - 1)/2: recovery coefficients [0, 0, 1] for P_2 alone
+ * legendreFit(xs, ys, 2) // ys = P_2(xs): => ~[0, 0, 1]
+ */
+export function legendreFit(xs: number[], ys: number[], degree: number): number[] {
+  if (xs.length !== ys.length || xs.length < degree + 1) {
+    throw new Error('legendreFit requires more data points than polynomial degree');
+  }
+
+  if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
+    try {
+      const result = legendreFitDispatch(new Float64Array(xs), new Float64Array(ys), degree);
+      return Array.from(result);
+    } catch {
+      // fall through to JS path
+    }
+  }
+
+  // --- JS path (normal equations using Legendre basis) ---
+  const n = xs.length;
+  const k = degree + 1;
+
+  /** Build Legendre-P basis row. */
+  function legRow(x: number): number[] {
+    const row: number[] = new Array(k);
+    let pPrev = 1,
+      pCurr = x;
+    row[0] = pPrev;
+    if (k > 1) row[1] = pCurr;
+    for (let dn = 1; dn < k - 1; dn++) {
+      const pNext = ((2 * dn + 1) * x * pCurr - dn * pPrev) / (dn + 1);
+      row[dn + 1] = pNext;
+      pPrev = pCurr;
+      pCurr = pNext;
+    }
+    return row;
+  }
+
+  const ATA: number[][] = Array.from({ length: k }, () => new Array(k + 1).fill(0));
+  for (let i = 0; i < n; i++) {
+    const row = legRow(xs[i]);
+    for (let j = 0; j < k; j++) {
+      for (let l = 0; l < k; l++) ATA[j][l] += row[j] * row[l];
+      ATA[j][k] += row[j] * ys[i];
+    }
+  }
+
+  for (let col = 0; col < k; col++) {
+    let maxRow = col;
+    let maxVal = Math.abs(ATA[col][col]);
+    for (let row = col + 1; row < k; row++) {
+      if (Math.abs(ATA[row][col]) > maxVal) {
+        maxVal = Math.abs(ATA[row][col]);
+        maxRow = row;
+      }
+    }
+    if (maxRow !== col) [ATA[col], ATA[maxRow]] = [ATA[maxRow], ATA[col]];
+    if (Math.abs(ATA[col][col]) < 1e-14) {
+      throw new Error('legendreFit: rank-deficient system');
+    }
+    for (let row = col + 1; row < k; row++) {
+      const factor = ATA[row][col] / ATA[col][col];
+      for (let j = col; j <= k; j++) ATA[row][j] -= factor * ATA[col][j];
+    }
+  }
+
+  const coeffs = new Array(k);
+  for (let i = k - 1; i >= 0; i--) {
+    coeffs[i] = ATA[i][k];
+    for (let j = i + 1; j < k; j++) coeffs[i] -= ATA[i][j] * coeffs[j];
+    coeffs[i] /= ATA[i][i];
+  }
   return coeffs;
 }
