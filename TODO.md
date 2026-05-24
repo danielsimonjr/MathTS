@@ -101,6 +101,19 @@ Detail:
       `unit`/`string`, acceleration of `algebra`/`integration`/
       `hypothesis`, sparse-tensor decompositions.
 
+- [ ] **WASM / Worker promotion playbook** — see
+      [`docs/roadmap/FUNCTION_GAPS_AUDIT.md`](docs/roadmap/FUNCTION_GAPS_AUDIT.md)
+      §B.1 (WASM-route, 14 candidates) and §B.2 (Worker-route, 9
+      candidates). Each row is dispatch-ready: it names the specific
+      `typed/<file>.ts` exports, the suggested kernel (with explicit
+      "reuse existing" markers where the Rust crate already has the
+      primitive), the starting-point `minElements` threshold, and the
+      effort estimate. The procedure in §B.4 lifts the bitwise WASM
+      port pattern into a 7-step checklist so the next contributor
+      doesn't have to reverse-engineer it. Worth picking off slice-
+      sized chunks in the order suggested by §D rank rows 7, 8, 10,
+      10b, 10c (the entries with B-class lineage).
+
 - [x] **ITensor-parity tensor primitives** — see proposal at
       [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md).
       All six phases LANDED. Phases 1-3 in commit `a21a844`, Phases

@@ -145,6 +145,19 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Function-gap audit — WASM/Worker promotion playbook added
+
+Extended [`docs/roadmap/FUNCTION_GAPS_AUDIT.md`](docs/roadmap/FUNCTION_GAPS_AUDIT.md) with three new sub-sections that make the "Acceleration gaps" class directly actionable as a promotion roadmap:
+
+- **B.1 — WASM-route playbook** — 14 specific `typed/<file>.ts` exports flagged for a Rust/AS kernel port, each row giving the loop kind, where the time goes, the suggested kernel name (with explicit "reuse existing" markers when the Rust crate already has the primitive), starting-point `minElements` threshold, and effort estimate. Covers polynomial ops, polyfit/chebfit/legendrefit, tridiag solve for cubic spline, divided-difference for Lagrange/Newton, simpson/trapz/gaussQuad/romberg, KS/Mann-Whitney/Shapiro-Wilk, histogram/quantile sort path, batched pdf/cdf for distributions, special functions (Bessel/Airy/elliptic), spectral windowing/averaging, convex-hull/Delaunay predicates, and matrix-function evaluators.
+- **B.2 — Worker-route playbook** — 9 candidates for `ComputePool` offload (rather than WASM), with the explicit "why worker, not WASM" reason for each. Covers user-closure-bearing functions (integration, distributions/pdf-cdf over user f, interpolation kernels), batch sampling, K-fold CV for polyFit, batched symbolic ops, graph algorithms with random restarts.
+- **B.3 — Why some `typed/` files are deliberately not in either playbook** — explicit rationale for combinatorics, logical, CAS symbolic core, bitwise (already WASM at bridge level), and GPU.
+- **B.4 — Procedure for landing a B.1 / B.2 entry** — 7-step checklist lifted from the bitwise WASM port that's already shipped, so the next contributor doesn't have to reverse-engineer the pattern.
+
+The sequencing table in section D was updated to thread the new playbook rows in by rank, including two new entries (10b: tridiag-solve for interpolation, 10c: Bessel/Airy WASM family).
+
+This addresses feedback that the audit's main value is in **pointing out the WASM/Worker opportunities** for code currently running pure-JS, so each opportunity is now first-class and dispatch-ready instead of being buried in class-B verdict prose.
+
 #### ITensor-parity tensor primitives — Phases 1-6 LANDED
 
 Full design at [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md). Six phases, all green.
