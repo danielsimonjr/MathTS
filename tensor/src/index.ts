@@ -41,3 +41,11 @@ export { gather } from './operations/gather';
 export { stack } from './operations/stack';
 export type { StackOpts } from './operations/stack';
 export { concatenate } from './operations/concatenate';
+
+// Slice 5.1 (4.7b): scatter, pad, roll, flip
+export { scatter } from './operations/scatter';
+export type { ScatterOpts } from './operations/scatter';
+export { pad } from './operations/pad';
+export type { PadOptions } from './operations/pad';
+export { roll } from './operations/roll';
+export { flip } from './operations/flip';
