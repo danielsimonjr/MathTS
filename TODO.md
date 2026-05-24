@@ -242,19 +242,26 @@ Detail:
             worked example) for `Res(x+1, x-1)`; tests match the
             existing implementation.
 
-      **Wave 4 Tier 2 (sequential, 1 agent each):**
-      - [ ] **Slice 4.6** — `typed/probability.ts` dedup audit +
-            selective promotion (rank 9). Audit which of the 12
-            synced probability files are already surfaced under
-            different names in `typed/distributions.ts` /
-            `typed/special.ts`; only promote the genuinely-missing
-            ones (proposal-defaults: `bernoulli`, `combinations`,
-            `combinationsWithRep`, `multinomial`, `pickRandom`,
-            `randomInt`).
-      - [ ] **Slice 4.7** — Tensor indexing primitives core (rank
-            11). NEW `tensor/src/operations/{slice,gather,stack,
-            concatenate}.ts`. `scatter`/`pad`/`roll`/`flip` deferred
-            to a follow-up sub-slice if scope balloons.
+      **Wave 4 Tier 2 (parallel, 2 disjoint agents) — ✅ ALL LANDED:**
+      - [x] **Slice 4.6** ✅ `43f45a1` — `typed/probability.ts` dedup
+            audit + selective promotion. 8 of 12 promoted
+            (`bernoulli`, `combinations`, `combinationsWithRep`,
+            `multinomial`, `permutations`, `pickRandom`, `random`,
+            `randomInt`); 4 skipped because already reachable via
+            factory surface (`factorial`, `gamma`, `lgamma`,
+            `kldivergence`). 57 new tests; functions: 2093 → 2150.
+            Notable finding: `bernoulli` (nth Bernoulli number) ≠
+            `bernoulliPMF` already in distributions.ts — same name
+            different math.
+      - [x] **Slice 4.7** ✅ `13eda2f` — Tensor indexing primitives,
+            core 4 (`slice`/`gather`/`stack`/`concatenate`). NEW
+            `tensor/src/operations/{slice,gather,stack,concatenate}.ts`.
+            Gather axis-label semantics: primed via existing
+            `Index.prime()` (same id, primeLevel+1) so the primed
+            axis cannot auto-contract with the original. 57 new
+            tests across 4 files; tensor: 266 → 323.
+            `scatter`/`pad`/`roll`/`flip` remain deferred to a
+            future Slice 4.7b sub-slice.
 
       **Wave 4 Tier 3 (sequential, design-heavy):**
       - [ ] **Slice 4.8** — `TapedTensor` decomposition AD (rank 12).

@@ -97,7 +97,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 
 ## Tier 2 — Sequential slices
 
-### Slice 4.6 — `typed/probability.ts` dedup audit + selective promotion (rank 9)
+### Slice 4.6 — ✅ LANDED in `43f45a1` — `typed/probability.ts` dedup audit + selective promotion (rank 9)
 
 **Goal:** Promote the genuinely-missing 6 from the synced `probability/` layer while avoiding duplication with the active `typed/distributions.ts` and `typed/special.ts`.
 
@@ -115,7 +115,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 
 **Acceptance:** No double-promotion (a function already in `typed/distributions.ts` should not appear in `typed/probability.ts` with a different name). Tests pass. Seeded-random paths verified by reproducibility (same seed → same output).
 
-### Slice 4.7 — Tensor indexing primitives — core family (rank 11)
+### Slice 4.7 — ✅ LANDED in `13eda2f` — Tensor indexing primitives — core family (rank 11)
 
 **Goal:** NumPy/JAX-style indexing primitives on `Tensor`. The audit's rank-11 entry lists 8 ops: `slice`, `gather`, `scatter`, `concatenate`, `stack`, `pad`, `roll`, `flip`. **This slice lands the core 4 (`slice`, `gather`, `stack`, `concatenate`); `scatter`, `pad`, `roll`, `flip` are deferred to a follow-up sub-slice if scope balloons.**
 
