@@ -25,3 +25,6 @@ export { eigWasm, eigvalsWasm, spectralRadiusWasm } from './eig-wasm.js';
 
 // WASM-accelerated SVD
 export { svdWasm } from './svd-wasm.js';
+
+// QR decomposition (DenseMatrix primitive — Gram-Schmidt with re-orthogonalisation)
+export { qr, type QRResult, type QROptions } from './qr.js';

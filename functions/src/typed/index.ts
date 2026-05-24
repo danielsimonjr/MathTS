@@ -41,6 +41,16 @@ export { typedBitwise } from './bitwise.js';
 export * from './logical.js';
 export { typedLogical } from './logical.js';
 
+// Complex helper functions (arg / conj / im / re across numeric + Complex types)
+export * from './complex.js';
+export { typedComplex } from './complex.js';
+
+// Set functions (setUnion / setIntersect / setDifference / setSymDifference /
+//                setIsSubset / setMultiplicity / setPowerset / setDistinct /
+//                setSize / setCartesian)
+export * from './set.js';
+export { typedSet } from './set.js';
+
 // Special functions (erf, beta, bessel, etc.)
 export * from './special.js';
 export { typedSpecial } from './special.js';

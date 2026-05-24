@@ -6,6 +6,19 @@
  */
 import { describe, it, expect } from 'vitest';
 
+// set ops moved from factories/ to typed/ — import from the typed layer
+import {
+  setCartesian,
+  setDifference,
+  setDistinct,
+  setIntersect,
+  setIsSubset,
+  setMultiplicity,
+  setPowerset,
+  setSymDifference,
+  setUnion,
+} from '../src/typed/set.js';
+
 import {
   // Tier 11: expression-dependent factories
   nodeOperations,
@@ -40,13 +53,6 @@ import {
   kldivergence,
   multinomial,
   freqz,
-  setCartesian,
-  setDifference,
-  setDistinct,
-  setIntersect,
-  setIsSubset,
-  setMultiplicity,
-  setPowerset,
   simplifyCore,
   polynomialRoot,
   solveODE,
@@ -59,14 +65,12 @@ import {
   corr,
   mad,
   factory_std,
-  setSymDifference,
   simplify,
 
   // Tier 15
   derivative,
   factory_norm,
   rationalize,
-  setUnion,
   symbolicEqual,
 
   // Tier 16

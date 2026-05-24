@@ -408,11 +408,728 @@ export class TapedTensor {
       throw new Error(`TapedTensor.${op}: shape mismatch [${this.shape}] vs [${other.shape}]`);
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Reductions
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Sum elements along the given axis/axes (or all axes if omitted).
+   *
+   * Adjoint: dX[...] = dY[reduced(idx)] broadcast back to input shape.
+   * Each input element receives the output-gradient entry from its reduced
+   * counterpart (the non-reduced coordinates select the dY element; the
+   * reduced coordinates are collapsed to 0 in the keepDims=false case).
+   */
+  sum(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): TapedTensor {
+    const primalT = this.toPrimalTensor();
+    const outT = primalT.sum(axis, opts);
+
+    const inputShape = [...this.shape];
+    const inputSize = this.primal.length;
+    const keepDims = opts?.keepDims ?? false;
+    const axes = _resolveAxes(axis, this.shape.length);
+    const axisSet = new Set(axes);
+
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+      // Build strides for the output shape (which may be keepDims or reduced).
+      const outShape = [...outT.shape];
+      const outStrides = _rowMajorStrides(outShape);
+      const inStrides = _rowMajorStrides(inputShape);
+
+      // For each input element, compute the corresponding output flat index.
+      const inCoords = new Array<number>(inputShape.length).fill(0);
+      for (let n = 0; n < inputSize; n++) {
+        // Compute output coords from input coords.
+        let outFlat = 0;
+        let outDim = 0;
+        for (let k = 0; k < inputShape.length; k++) {
+          if (axisSet.has(k)) {
+            if (keepDims) {
+              // The output dim is 1 (size-1 kept), coordinate is always 0.
+              outDim++;
+            }
+            // else: skip this axis in the output
+          } else {
+            outFlat += inCoords[k] * outStrides[outDim];
+            outDim++;
+          }
+        }
+        thisGradSlot[n] += outputGrad[outFlat];
+
+        // Advance inCoords.
+        for (let k = inputShape.length - 1; k >= 0; k--) {
+          if (++inCoords[k] < inputShape[k]) break;
+          inCoords[k] = 0;
+        }
+      }
+      void inStrides; // used implicitly via n loop
+    });
+
+    return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+  }
+
+  /**
+   * Arithmetic mean along the given axis/axes (or all axes if omitted).
+   *
+   * Adjoint: dX[...] = dY[reduced(idx)] / N, broadcast back to input shape.
+   * N = product of reduced-axis dimensions.
+   */
+  mean(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): TapedTensor {
+    const primalT = this.toPrimalTensor();
+    const outT = primalT.mean(axis, opts);
+
+    const inputShape = [...this.shape];
+    const inputSize = this.primal.length;
+    const keepDims = opts?.keepDims ?? false;
+    const axes = _resolveAxes(axis, this.shape.length);
+    const axisSet = new Set(axes);
+
+    // N = product of reduced-axis dimensions.
+    const N = axes.reduce((prod: number, ax: number) => prod * this.shape[ax], 1);
+
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+      const outShape = [...outT.shape];
+      const outStrides = _rowMajorStrides(outShape);
+
+      const inCoords = new Array<number>(inputShape.length).fill(0);
+      for (let n = 0; n < inputSize; n++) {
+        let outFlat = 0;
+        let outDim = 0;
+        for (let k = 0; k < inputShape.length; k++) {
+          if (axisSet.has(k)) {
+            if (keepDims) outDim++;
+          } else {
+            outFlat += inCoords[k] * outStrides[outDim];
+            outDim++;
+          }
+        }
+        thisGradSlot[n] += outputGrad[outFlat] / N;
+
+        for (let k = inputShape.length - 1; k >= 0; k--) {
+          if (++inCoords[k] < inputShape[k]) break;
+          inCoords[k] = 0;
+        }
+      }
+    });
+
+    return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+  }
+
+  /**
+   * Product of elements along the given axis/axes (or all axes if omitted).
+   *
+   * Adjoint: dX_i = dY * (prod_over_axes(x) / x_i) per element.
+   *
+   * Zero-element corners:
+   * - Exactly one x_i = 0 in the reduced group: d/dx_i = product of all others
+   *   (which is the full product / x_i evaluated via alternate product),
+   *   and d/dx_j = 0 for all j ≠ i where x_j ≠ 0.
+   * - Two or more zeros in the reduced group: gradient is 0 everywhere for that
+   *   group (because changing any single zero cannot change a product that is
+   *   zero due to another zero).
+   *
+   * Implementation: uses prefix/suffix products to handle zeros robustly.
+   */
+  prod(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): TapedTensor {
+    const primalT = this.toPrimalTensor();
+    const outT = primalT.prod(axis, opts);
+
+    const inputShape = [...this.shape];
+    const keepDims = opts?.keepDims ?? false;
+    const axes = _resolveAxes(axis, this.shape.length);
+    const axisSet = new Set(axes);
+
+    // Capture primal data for the closure.
+    const primalData = new Float64Array(this.primal);
+
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+      const outShape = [...outT.shape];
+      const outStrides = _rowMajorStrides(outShape);
+      const inStrides = _rowMajorStrides(inputShape);
+
+      // For each output element, we need the prefix/suffix products of the
+      // elements that were reduced into it (to handle zeros robustly).
+      // We iterate over all input elements, group them by their output index,
+      // and compute the gradient using prefix products within each group.
+
+      // Step 1: Group input indices by their output flat index.
+      const groups = new Map<number, number[]>(); // outFlat → list of input flat indices
+      const inCoords = new Array<number>(inputShape.length).fill(0);
+      for (let n = 0; n < primalData.length; n++) {
+        let outFlat = 0;
+        let outDim = 0;
+        for (let k = 0; k < inputShape.length; k++) {
+          if (axisSet.has(k)) {
+            if (keepDims) outDim++;
+          } else {
+            outFlat += inCoords[k] * outStrides[outDim];
+            outDim++;
+          }
+        }
+        const group = groups.get(outFlat);
+        if (group === undefined) {
+          groups.set(outFlat, [n]);
+        } else {
+          group.push(n);
+        }
+        for (let k = inputShape.length - 1; k >= 0; k--) {
+          if (++inCoords[k] < inputShape[k]) break;
+          inCoords[k] = 0;
+        }
+      }
+      void inStrides;
+
+      // Step 2: For each group, compute prefix/suffix products and accumulate gradients.
+      for (const [outFlat, group] of groups) {
+        const dY = outputGrad[outFlat];
+        const m = group.length;
+
+        // Build prefix products: prefix[i] = product of group[0..i-1].
+        const prefix = new Float64Array(m);
+        prefix[0] = 1;
+        for (let i = 1; i < m; i++) {
+          prefix[i] = prefix[i - 1] * primalData[group[i - 1]];
+        }
+
+        // Build suffix products: suffix[i] = product of group[i+1..m-1].
+        const suffix = new Float64Array(m);
+        suffix[m - 1] = 1;
+        for (let i = m - 2; i >= 0; i--) {
+          suffix[i] = suffix[i + 1] * primalData[group[i + 1]];
+        }
+
+        // Gradient for group[i] = dY * prefix[i] * suffix[i].
+        for (let i = 0; i < m; i++) {
+          thisGradSlot[group[i]] += dY * prefix[i] * suffix[i];
+        }
+      }
+    });
+
+    return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+  }
+
+  /**
+   * Maximum value along the given axis/axes (or all axes if omitted).
+   *
+   * Adjoint: dY is scattered to the argmax position(s).
+   * Tie-breaking: "first-wins" — the gradient flows to the first (smallest
+   * flat-index) element among those that attain the maximum.
+   */
+  max(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): TapedTensor {
+    const primalT = this.toPrimalTensor();
+    const outT = primalT.max(axis, opts);
+
+    const inputShape = [...this.shape];
+    const keepDims = opts?.keepDims ?? false;
+    const axes = _resolveAxes(axis, this.shape.length);
+    const axisSet = new Set(axes);
+
+    const primalData = new Float64Array(this.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+
+    const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+      const outShape = [...outT.shape];
+      const outStrides = _rowMajorStrides(outShape);
+
+      // First-wins: track which input flat index achieves the max for each output.
+      const argmaxSlot = new Int32Array(outT.data.length).fill(-1);
+
+      const inCoords = new Array<number>(inputShape.length).fill(0);
+      for (let n = 0; n < primalData.length; n++) {
+        let outFlat = 0;
+        let outDim = 0;
+        for (let k = 0; k < inputShape.length; k++) {
+          if (axisSet.has(k)) {
+            if (keepDims) outDim++;
+          } else {
+            outFlat += inCoords[k] * outStrides[outDim];
+            outDim++;
+          }
+        }
+        // First-wins: only update argmax if this element strictly exceeds the current max.
+        // The forward primalT.max() stores the max value in outT.data[outFlat].
+        if (argmaxSlot[outFlat] === -1 || primalData[n] > primalData[argmaxSlot[outFlat]]) {
+          argmaxSlot[outFlat] = n;
+        }
+        for (let k = inputShape.length - 1; k >= 0; k--) {
+          if (++inCoords[k] < inputShape[k]) break;
+          inCoords[k] = 0;
+        }
+      }
+
+      // Scatter dY to the argmax positions.
+      for (let outFlat = 0; outFlat < outT.data.length; outFlat++) {
+        const winner = argmaxSlot[outFlat];
+        if (winner !== -1) {
+          thisGradSlot[winner] += outputGrad[outFlat];
+        }
+      }
+    });
+
+    return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+  }
+
+  /**
+   * Minimum value along the given axis/axes (or all axes if omitted).
+   *
+   * Adjoint: dY is scattered to the argmin position(s).
+   * Tie-breaking: "first-wins" — gradient flows to the first (smallest
+   * flat-index) element that attains the minimum.
+   */
+  min(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): TapedTensor {
+    const primalT = this.toPrimalTensor();
+    const outT = primalT.min(axis, opts);
+
+    const inputShape = [...this.shape];
+    const keepDims = opts?.keepDims ?? false;
+    const axes = _resolveAxes(axis, this.shape.length);
+    const axisSet = new Set(axes);
+
+    const primalData = new Float64Array(this.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+
+    const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+      const outShape = [...outT.shape];
+      const outStrides = _rowMajorStrides(outShape);
+
+      // First-wins: track which input flat index achieves the min for each output.
+      const argminSlot = new Int32Array(outT.data.length).fill(-1);
+
+      const inCoords = new Array<number>(inputShape.length).fill(0);
+      for (let n = 0; n < primalData.length; n++) {
+        let outFlat = 0;
+        let outDim = 0;
+        for (let k = 0; k < inputShape.length; k++) {
+          if (axisSet.has(k)) {
+            if (keepDims) outDim++;
+          } else {
+            outFlat += inCoords[k] * outStrides[outDim];
+            outDim++;
+          }
+        }
+        if (argminSlot[outFlat] === -1 || primalData[n] < primalData[argminSlot[outFlat]]) {
+          argminSlot[outFlat] = n;
+        }
+        for (let k = inputShape.length - 1; k >= 0; k--) {
+          if (++inCoords[k] < inputShape[k]) break;
+          inCoords[k] = 0;
+        }
+      }
+
+      for (let outFlat = 0; outFlat < outT.data.length; outFlat++) {
+        const winner = argminSlot[outFlat];
+        if (winner !== -1) {
+          thisGradSlot[winner] += outputGrad[outFlat];
+        }
+      }
+    });
+
+    return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+  }
+
+  /**
+   * p-norm of the tensor.
+   *
+   * Supported p values: 1, 2, 'fro', 'inf'. Default p = 2.
+   * When `opts.axis` is given, reduces along that axis; otherwise reduces all axes.
+   *
+   * Adjoints:
+   * - p=2 / p='fro': dX = dY · x / ‖x‖₂  (Frobenius is the 2-norm of the flattened tensor)
+   * - p=1:           dX = dY · sign(x)  (subgradient = 0 at exact zero)
+   * - p='inf':       dX scattered to the element(s) of max absolute value;
+   *                  tie-breaking: first-wins. Sign of the scattered gradient
+   *                  matches sign(x_max).
+   */
+  norm(opts?: { p?: 1 | 2 | 'fro' | 'inf'; axis?: number; keepDims?: boolean }): TapedTensor {
+    const p = opts?.p ?? 2;
+    const keepDims = opts?.keepDims ?? false;
+    const primalT = this.toPrimalTensor();
+    const outT = primalT.norm({ p, axis: opts?.axis, keepDims });
+
+    const inputShape = [...this.shape];
+    const primalData = new Float64Array(this.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+
+    // Determine which axes are being reduced.
+    const axes = opts?.axis !== undefined ? [opts.axis] : _resolveAxes(undefined, this.shape.length);
+    const axisSet = new Set(axes);
+
+    if (p === 2 || p === 'fro') {
+      // Capture the norm values (primal output) for the adjoint.
+      const normData = new Float64Array(outT.data);
+      const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+        // dX_i = dY * x_i / ‖x‖
+        const outShape = [...outT.shape];
+        const outStrides = _rowMajorStrides(outShape);
+
+        const inCoords = new Array<number>(inputShape.length).fill(0);
+        for (let n = 0; n < primalData.length; n++) {
+          let outFlat = 0;
+          let outDim = 0;
+          for (let k = 0; k < inputShape.length; k++) {
+            if (axisSet.has(k)) {
+              if (keepDims) outDim++;
+            } else {
+              outFlat += inCoords[k] * outStrides[outDim];
+              outDim++;
+            }
+          }
+          const normVal = normData[outFlat];
+          // Avoid division by zero when norm = 0 (subgradient = 0).
+          if (normVal !== 0) {
+            thisGradSlot[n] += outputGrad[outFlat] * primalData[n] / normVal;
+          }
+          for (let k = inputShape.length - 1; k >= 0; k--) {
+            if (++inCoords[k] < inputShape[k]) break;
+            inCoords[k] = 0;
+          }
+        }
+      });
+      return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+    }
+
+    if (p === 1) {
+      const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+        // dX_i = dY * sign(x_i)  (subgradient = 0 at exact zero)
+        const outShape = [...outT.shape];
+        const outStrides = _rowMajorStrides(outShape);
+
+        const inCoords = new Array<number>(inputShape.length).fill(0);
+        for (let n = 0; n < primalData.length; n++) {
+          let outFlat = 0;
+          let outDim = 0;
+          for (let k = 0; k < inputShape.length; k++) {
+            if (axisSet.has(k)) {
+              if (keepDims) outDim++;
+            } else {
+              outFlat += inCoords[k] * outStrides[outDim];
+              outDim++;
+            }
+          }
+          const xi = primalData[n];
+          const sign = xi > 0 ? 1 : xi < 0 ? -1 : 0;
+          thisGradSlot[n] += outputGrad[outFlat] * sign;
+          for (let k = inputShape.length - 1; k >= 0; k--) {
+            if (++inCoords[k] < inputShape[k]) break;
+            inCoords[k] = 0;
+          }
+        }
+      });
+      return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+    }
+
+    // p === 'inf': dX scattered to max-abs position(s), first-wins.
+    {
+      const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
+        const outShape = [...outT.shape];
+        const outStrides = _rowMajorStrides(outShape);
+
+        // Track which input index attains the max absolute value for each output slot.
+        const argmaxAbsSlot = new Int32Array(outT.data.length).fill(-1);
+
+        const inCoords = new Array<number>(inputShape.length).fill(0);
+        for (let n = 0; n < primalData.length; n++) {
+          let outFlat = 0;
+          let outDim = 0;
+          for (let k = 0; k < inputShape.length; k++) {
+            if (axisSet.has(k)) {
+              if (keepDims) outDim++;
+            } else {
+              outFlat += inCoords[k] * outStrides[outDim];
+              outDim++;
+            }
+          }
+          const prevWinner = argmaxAbsSlot[outFlat];
+          if (prevWinner === -1 ||
+              Math.abs(primalData[n]) > Math.abs(primalData[prevWinner])) {
+            argmaxAbsSlot[outFlat] = n;
+          }
+          for (let k = inputShape.length - 1; k >= 0; k--) {
+            if (++inCoords[k] < inputShape[k]) break;
+            inCoords[k] = 0;
+          }
+        }
+
+        // Scatter: dX_winner = dY * sign(x_winner)
+        for (let outFlat = 0; outFlat < outT.data.length; outFlat++) {
+          const winner = argmaxAbsSlot[outFlat];
+          if (winner !== -1) {
+            const xi = primalData[winner];
+            const sign = xi > 0 ? 1 : xi < 0 ? -1 : 0;
+            thisGradSlot[winner] += outputGrad[outFlat] * sign;
+          }
+        }
+      });
+      return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Elementwise transcendentals
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Elementwise natural logarithm.
+   *
+   * Adjoint: dX = dY / x
+   */
+  log(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) out[i] = Math.log(this.primal[i]);
+
+    const primalData = new Float64Array(this.primal); // capture for closure
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        thisGradSlot[i] += outputGrad[i] / primalData[i];
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Elementwise exponential.
+   *
+   * Adjoint: dX = dY · y  where y = exp(x). Primal output is cached.
+   */
+  exp(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) out[i] = Math.exp(this.primal[i]);
+
+    const expData = new Float64Array(out); // cache primal output
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        thisGradSlot[i] += outputGrad[i] * expData[i];
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Elementwise sine.
+   *
+   * Adjoint: dX = dY · cos(x)
+   */
+  sin(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    const cosData = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) {
+      out[i] = Math.sin(this.primal[i]);
+      cosData[i] = Math.cos(this.primal[i]);
+    }
+
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        thisGradSlot[i] += outputGrad[i] * cosData[i];
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Elementwise cosine.
+   *
+   * Adjoint: dX = −dY · sin(x)
+   */
+  cos(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    const sinData = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) {
+      out[i] = Math.cos(this.primal[i]);
+      sinData[i] = Math.sin(this.primal[i]);
+    }
+
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        thisGradSlot[i] += -outputGrad[i] * sinData[i];
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Elementwise tangent.
+   *
+   * Adjoint: dX = dY / cos²(x)  (= dY · sec²(x))
+   */
+  tan(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    const cosData = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) {
+      out[i] = Math.tan(this.primal[i]);
+      cosData[i] = Math.cos(this.primal[i]);
+    }
+
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        const c = cosData[i];
+        thisGradSlot[i] += outputGrad[i] / (c * c);
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Elementwise square root.
+   *
+   * Adjoint: dX = dY / (2·y)  where y = sqrt(x). Primal output is cached.
+   */
+  sqrt(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) out[i] = Math.sqrt(this.primal[i]);
+
+    const sqrtData = new Float64Array(out); // cache primal output
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        thisGradSlot[i] += outputGrad[i] / (2 * sqrtData[i]);
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Elementwise square (x²).
+   *
+   * Adjoint: dX = dY · 2x
+   */
+  square(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) out[i] = this.primal[i] * this.primal[i];
+
+    const primalData = new Float64Array(this.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        thisGradSlot[i] += outputGrad[i] * 2 * primalData[i];
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Elementwise fixed-exponent power: x^k.
+   *
+   * Only fixed (non-TapedTensor) exponents are supported. Variable-exponent
+   * pow(taped, taped) is a follow-up slice.
+   *
+   * Adjoint: dX = dY · k · x^(k−1)
+   */
+  pow(k: number): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) out[i] = Math.pow(this.primal[i], k);
+
+    const primalData = new Float64Array(this.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        thisGradSlot[i] += outputGrad[i] * k * Math.pow(primalData[i], k - 1);
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Elementwise reciprocal: 1 / x.
+   *
+   * Adjoint: dX = −dY / x²
+   */
+  reciprocal(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) out[i] = 1 / this.primal[i];
+
+    const primalData = new Float64Array(this.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        const xi = primalData[i];
+        thisGradSlot[i] += -outputGrad[i] / (xi * xi);
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /**
+   * Elementwise absolute value: |x|.
+   *
+   * Adjoint: dX = dY · sign(x)
+   * Subgradient at exact zero is defined as 0 (rather than undefined).
+   */
+  abs(): TapedTensor {
+    const out = new Float64Array(this.primal.length);
+    for (let i = 0; i < out.length; i++) out[i] = Math.abs(this.primal[i]);
+
+    const primalData = new Float64Array(this.primal);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        const xi = primalData[i];
+        const sign = xi > 0 ? 1 : xi < 0 ? -1 : 0; // subgradient = 0 at exact zero
+        thisGradSlot[i] += outputGrad[i] * sign;
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
 }
 
 // ---------------------------------------------------------------------------
 // Module-level helpers (not exported; private to this module)
 // ---------------------------------------------------------------------------
+
+/**
+ * Normalise an axis argument to a sorted array of non-negative axis indices.
+ * If `axis` is undefined, returns all axes [0, 1, ..., rank-1].
+ * Negative indices are not supported (use non-negative indices only).
+ */
+function _resolveAxes(
+  axis: number | ReadonlyArray<number> | undefined,
+  rank: number
+): number[] {
+  if (axis === undefined) {
+    return Array.from({ length: rank }, (_, i) => i);
+  }
+  if (typeof axis === 'number') {
+    return [axis];
+  }
+  return [...axis].sort((a, b) => a - b);
+}
+
+/**
+ * Row-major strides for a given shape.
+ * strides[k] = product of shape[k+1..n-1].
+ */
+function _rowMajorStrides(shape: ReadonlyArray<number>): number[] {
+  const strides = new Array<number>(shape.length);
+  let acc = 1;
+  for (let k = shape.length - 1; k >= 0; k--) {
+    strides[k] = acc;
+    acc *= shape[k];
+  }
+  return strides;
+}
 
 /**
  * Given a Tensor whose axisLabels are some permutation of `targetLabels`,

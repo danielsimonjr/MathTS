@@ -4,15 +4,14 @@ import { describe, it, expect } from 'vitest';
 import { bitNot } from '../src/typed/bitwise.js';
 import { not } from '../src/typed/logical.js';
 
+// arg/conj/im/re moved from factories/ to typed/ — import from the typed layer
+import { arg, conj, im, re } from '../src/typed/complex.js';
+
 // Import non-conflicting exports directly
 import {
   addScalar,
   multiplyScalar,
   subtractScalar,
-  arg,
-  conj,
-  im,
-  re,
   flatten,
   size,
   squeeze,

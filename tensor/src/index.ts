@@ -15,3 +15,13 @@ export type { RandomTensorOpts } from './operations/random';
 // Phase 4: optimal pairwise-contraction order over a tensor network.
 export { contractNetwork } from './contraction-sequence';
 export type { ContractNetworkOpts, ContractNetworkResult } from './contraction-sequence';
+
+// Slice 3: tensor decomposition wrappers (QR / LU / Cholesky / Eig)
+export { tensorQr } from './operations/qr';
+export type { TensorQrOpts, TensorQrResult } from './operations/qr';
+export { tensorLU } from './operations/lu';
+export type { TensorLUOpts, TensorLUResult } from './operations/lu';
+export { tensorCholesky } from './operations/cholesky';
+export type { TensorCholeskyOpts, TensorCholeskyResult } from './operations/cholesky';
+export { tensorEig } from './operations/eig';
+export type { TensorEigOpts, TensorEigResult } from './operations/eig';
