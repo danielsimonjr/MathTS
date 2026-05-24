@@ -405,6 +405,21 @@ export { poly_mul_f64, poly_div_mod_f64 } from './poly';
 export { tridiag_solve_f64 } from './tridiag';
 
 // =============================================================================
+// Bessel J/Y and Airy Ai/Bi array kernels (Slice 3.10c-1 / Slice 4.9)
+// =============================================================================
+
+export {
+  bessel_j0_f64,
+  bessel_j1_f64,
+  bessel_jn_f64,
+  bessel_y0_f64,
+  bessel_y1_f64,
+  bessel_yn_f64,
+  airy_ai_f64,
+  airy_bi_f64,
+} from './special';
+
+// =============================================================================
 // Complex Array Operations
 // =============================================================================
 

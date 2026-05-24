@@ -1,5 +1,7 @@
 /**
- * Tests for WASM-dispatched Bessel J/Y array kernels (Slice 3.10c-1).
+ * Tests for WASM-dispatched Bessel J/Y and Airy Ai/Bi array kernels.
+ *
+ * Slice 3.10c-1 (Bessel) + Slice 4.9 (Airy + AS Bessel parity).
  *
  * Strategy:
  * - Correctness: compare the WASM bridge dispatch result against the pure-JS
@@ -7,12 +9,16 @@
  *   approximation so the results must be bit-identical.
  * - Dispatch probe: verify that the bridge fires for arrays ≥ 1024 elements.
  * - Edge cases: x = 0, x < 0, large x, n = 0/1/high.
+ * - Airy reference values: DLMF §9.2 — tested within 1e-7 relative error.
+ * - AS path: after resetBesselWasm()/resetAiryWasm() the bridge falls back to
+ *   JS (module not loaded scenario); actual AS module tested if artifact present.
  *
  * Note on precision: the NR §6.5 polynomial approximations achieve
  *   J0/J1: ~1e-7 max relative error (good to 7 decimal places)
  *   Y0/Y1: ~1e-4 max relative error near x = 1 (larger near the log singularity)
+ *   Airy:  ~1e-7 relative error across all three regions
  *
- * For J-functions we use TOL = 1e-6; for Y-functions TOL = 1e-3.
+ * For J-functions we use TOL = 1e-6; for Y-functions TOL = 1e-3; for Airy TOL = 1e-7.
  * The WASM results are compared to the JS fallback with TOL = 1e-14 (bit-level
  * agreement expected since both use the same algorithm).
  */
@@ -32,7 +38,12 @@ import {
   besselY0JS,
   besselY1JS,
   besselYnJS,
+  airyAiDispatch,
+  airyBiDispatch,
+  airyAiJS,
+  airyBiJS,
   resetBesselWasm,
+  resetAiryWasm,
 } from '../src/wasm/special/wasm-bridge.js';
 
 // ---------------------------------------------------------------------------
@@ -358,6 +369,193 @@ describe('Bessel WASM — fallback to JS path (module not loaded)', () => {
     const xs = linspace(0.5, 12.0, WASM_SPECIAL_THRESHOLD);
     const result = besselYDispatch(2, xs);
     const oracle = besselYnJS(2, xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
+    }
+  });
+});
+
+// ===========================================================================
+// Suite 5 — Airy Ai/Bi scalar reference values (Slice 4.9)
+// ===========================================================================
+
+// Tolerance for Airy: asymptotic expansion reaches ~1e-7 relative error at the
+// crossover region (|x| ≈ 4.5); power series gives ~1e-10 inside.
+const TOL_AIRY = 1e-7;
+const TOL_AIRY_AGREE = 1e-14; // JS vs WASM (same algorithm, bit-identical)
+
+describe('Airy Ai/Bi scalar reference values (DLMF §9.2)', () => {
+  it('Ai(0) ≈ 0.355028053887817', () => {
+    const r = airyAiJS(new Float64Array([0]))[0];
+    const ref = 0.35502805388781723926;
+    expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
+  });
+
+  it('Bi(0) ≈ 0.614926627446001', () => {
+    const r = airyBiJS(new Float64Array([0]))[0];
+    const ref = 0.61492662744600073;
+    expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
+  });
+
+  it('Ai(1) ≈ 0.135292416312881', () => {
+    const r = airyAiJS(new Float64Array([1]))[0];
+    const ref = 0.13529241631288141;
+    expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
+  });
+
+  it('Bi(1) ≈ 1.207423594952871', () => {
+    const r = airyBiJS(new Float64Array([1]))[0];
+    const ref = 1.2074235949528715;
+    expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
+  });
+
+  it('Ai(-1) ≈ 0.535560883292352', () => {
+    const r = airyAiJS(new Float64Array([-1]))[0];
+    const ref = 0.53556088329235129;
+    expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
+  });
+
+  it('Bi(-1) ≈ 0.103997389496945', () => {
+    const r = airyBiJS(new Float64Array([-1]))[0];
+    const ref = 0.10399738949694461;
+    expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
+  });
+
+  it('Ai(2) ≈ 0.034924130123397', () => {
+    const r = airyAiJS(new Float64Array([2]))[0];
+    const ref = 0.034924130123397;
+    expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
+  });
+
+  it('Bi(2) ≈ 3.298095200755', () => {
+    const r = airyBiJS(new Float64Array([2]))[0];
+    const ref = 3.298095200755;
+    expect(Math.abs(r - ref) / ref).toBeLessThan(TOL_AIRY);
+  });
+
+  it('Ai decays for large positive x', () => {
+    // Ai(10) ≈ 1.135e-9 — verify it is small and positive
+    const r = airyAiJS(new Float64Array([10]))[0];
+    expect(r).toBeGreaterThan(0);
+    expect(r).toBeLessThan(1e-6);
+  });
+
+  it('Bi grows for large positive x', () => {
+    // Bi(5) >> Bi(1)
+    const r5 = airyBiJS(new Float64Array([5]))[0];
+    const r1 = airyBiJS(new Float64Array([1]))[0];
+    expect(r5).toBeGreaterThan(r1 * 10);
+  });
+
+  it('Ai oscillates for large negative x (values bounded)', () => {
+    const xs = linspace(-20, -5, 50);
+    const rs = airyAiJS(xs);
+    for (const r of rs) {
+      expect(Math.abs(r)).toBeLessThanOrEqual(1.0);
+    }
+  });
+
+  it('Bi oscillates for large negative x (values bounded)', () => {
+    const xs = linspace(-20, -5, 50);
+    const rs = airyBiJS(xs);
+    for (const r of rs) {
+      expect(Math.abs(r)).toBeLessThanOrEqual(1.0);
+    }
+  });
+});
+
+// ===========================================================================
+// Suite 6 — Airy dispatch (WASM above threshold, JS below)
+// ===========================================================================
+
+describe('Airy dispatch threshold behaviour', () => {
+  it('small array (< 1024) airyAiDispatch matches JS fallback exactly', () => {
+    const xs = linspace(-3.0, 3.0, 100);
+    const dr = airyAiDispatch(xs);
+    const jr = airyAiJS(xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(dr[i] - jr[i])).toBeLessThan(TOL_AIRY_AGREE);
+    }
+  });
+
+  it('large array (≥ 1024) airyAiDispatch result matches JS fallback within TOL', () => {
+    const xs = linspace(-3.0, 3.0, WASM_SPECIAL_THRESHOLD);
+    const dr = airyAiDispatch(xs);
+    const jr = airyAiJS(xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(dr[i] - jr[i])).toBeLessThan(TOL_AIRY_AGREE);
+    }
+  });
+
+  it('large array airyBiDispatch result matches JS fallback within TOL', () => {
+    const xs = linspace(-3.0, 3.0, WASM_SPECIAL_THRESHOLD);
+    const dr = airyBiDispatch(xs);
+    const jr = airyBiJS(xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(dr[i] - jr[i])).toBeLessThan(TOL_AIRY_AGREE);
+    }
+  });
+
+  it('airyAi typed scalar overload returns correct value', async () => {
+    const { airyAi } = await import('../src/typed/special.js');
+    const r = airyAi(0.0) as number;
+    expect(Math.abs(r - 0.35502805388781723926)).toBeLessThan(TOL_AIRY);
+  });
+
+  it('airyBi typed scalar overload returns correct value', async () => {
+    const { airyBi } = await import('../src/typed/special.js');
+    const r = airyBi(0.0) as number;
+    expect(Math.abs(r - 0.61492662744600073)).toBeLessThan(TOL_AIRY);
+  });
+
+  it('airyAi typed array overload (≥ threshold) resolves correctly', async () => {
+    const { airyAi } = await import('../src/typed/special.js');
+    const xs = linspace(-2.0, 2.0, WASM_SPECIAL_THRESHOLD);
+    const result = await (airyAi(xs) as Promise<Float64Array>);
+    const jr = airyAiJS(xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(result[i] - jr[i])).toBeLessThan(TOL_AIRY_AGREE);
+    }
+  });
+
+  it('airyBi typed array overload (≥ threshold) resolves correctly', async () => {
+    const { airyBi } = await import('../src/typed/special.js');
+    const xs = linspace(-2.0, 2.0, WASM_SPECIAL_THRESHOLD);
+    const result = await (airyBi(xs) as Promise<Float64Array>);
+    const jr = airyBiJS(xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(result[i] - jr[i])).toBeLessThan(TOL_AIRY_AGREE);
+    }
+  });
+});
+
+// ===========================================================================
+// Suite 7 — Airy fallback when WASM module not loaded
+// ===========================================================================
+
+describe('Airy WASM — fallback to JS path (module not loaded)', () => {
+  beforeAll(() => {
+    resetAiryWasm();
+  });
+
+  afterAll(() => {
+    resetAiryWasm();
+  });
+
+  it('airyAiDispatch above threshold falls back to JS when WASM not loaded', () => {
+    const xs = linspace(-4.0, 4.0, WASM_SPECIAL_THRESHOLD);
+    const result = airyAiDispatch(xs);
+    const oracle = airyAiJS(xs);
+    expect(result.length).toBe(oracle.length);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
+    }
+  });
+
+  it('airyBiDispatch above threshold falls back to JS when WASM not loaded', () => {
+    const xs = linspace(-4.0, 4.0, WASM_SPECIAL_THRESHOLD);
+    const result = airyBiDispatch(xs);
+    const oracle = airyBiJS(xs);
     for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
     }

@@ -1,4 +1,4 @@
-//! Bessel-function array kernels — Slice 3.10c-1.
+//! Bessel-function and Airy-function array kernels — Slice 3.10c-1 / 4.9.
 //!
 //! Provides per-element Bessel J / Y array hot-loops that the TypeScript
 //! bridge calls when the input length exceeds the WASM threshold (≥ 1024).
@@ -22,7 +22,7 @@ use alloc::vec::Vec;
 // Scalar helpers (delegate to special/functions.rs implementations)   //
 // ------------------------------------------------------------------ //
 
-use crate::special::functions::{besselJ0, besselJ1, besselY0, besselY1};
+use crate::special::functions::{airy_ai, airy_bi, besselJ0, besselJ1, besselY0, besselY1};
 
 /// Scalar J_n(x) via forward or Miller backward recurrence.
 ///
@@ -196,6 +196,38 @@ pub unsafe extern "C" fn bessel_y_f64(
 }
 
 // ------------------------------------------------------------------ //
+// Airy Ai / Bi array kernels (Slice 4.9)                              //
+// ------------------------------------------------------------------ //
+
+/// Apply `Ai(x)` element-wise to `xs[0..n]` → `out[0..n]`.
+///
+/// Returns `n` on success, `-1` if `n ≤ 0`.
+#[no_mangle]
+pub unsafe extern "C" fn airy_ai_f64(xs_ptr: *const f64, n: i32, out_ptr: *mut f64) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = airy_ai(*xs_ptr.add(i));
+    }
+    n
+}
+
+/// Apply `Bi(x)` element-wise to `xs[0..n]` → `out[0..n]`.
+///
+/// Returns `n` on success, `-1` if `n ≤ 0`.
+#[no_mangle]
+pub unsafe extern "C" fn airy_bi_f64(xs_ptr: *const f64, n: i32, out_ptr: *mut f64) -> i32 {
+    if n <= 0 {
+        return -1;
+    }
+    for i in 0..n as usize {
+        *out_ptr.add(i) = airy_bi(*xs_ptr.add(i));
+    }
+    n
+}
+
+// ------------------------------------------------------------------ //
 // Native tests (cargo test — not compiled for WASM)                   //
 // ------------------------------------------------------------------ //
 
@@ -335,5 +367,75 @@ mod tests {
         let mut out = vec![0.0f64; 1];
         let ret = unsafe { bessel_j0_f64(xs.as_ptr(), -1, out.as_mut_ptr()) };
         assert_eq!(ret, -1);
+    }
+
+    // --- Airy function tests (Slice 4.9) ---
+
+    fn ai(x: f64) -> f64 {
+        let xs = [x];
+        let mut out = [0.0f64];
+        unsafe { airy_ai_f64(xs.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+
+    fn bi(x: f64) -> f64 {
+        let xs = [x];
+        let mut out = [0.0f64];
+        unsafe { airy_bi_f64(xs.as_ptr(), 1, out.as_mut_ptr()) };
+        out[0]
+    }
+
+    const TOL_AIRY: f64 = 1e-7;
+
+    #[test]
+    fn test_ai_at_zero() {
+        // Ai(0) = 1/(3^{2/3}·Γ(2/3)) ≈ 0.35502805388781723
+        assert!((ai(0.0) - 0.35502805388781723).abs() < TOL_AIRY, "Ai(0) got {}", ai(0.0));
+    }
+
+    #[test]
+    fn test_bi_at_zero() {
+        // Bi(0) = 1/(3^{1/6}·Γ(2/3)) ≈ 0.61492662744600073
+        assert!((bi(0.0) - 0.61492662744600073).abs() < TOL_AIRY, "Bi(0) got {}", bi(0.0));
+    }
+
+    #[test]
+    fn test_ai_at_one() {
+        // Ai(1) ≈ 0.13529241631288141
+        assert!((ai(1.0) - 0.13529241631288141).abs() < TOL_AIRY, "Ai(1) got {}", ai(1.0));
+    }
+
+    #[test]
+    fn test_bi_at_one() {
+        // Bi(1) ≈ 1.2074235949528715
+        assert!((bi(1.0) - 1.2074235949528715).abs() < TOL_AIRY, "Bi(1) got {}", bi(1.0));
+    }
+
+    #[test]
+    fn test_ai_at_neg_one() {
+        // Ai(-1) ≈ 0.53556088329235129
+        assert!((ai(-1.0) - 0.53556088329235129).abs() < TOL_AIRY, "Ai(-1) got {}", ai(-1.0));
+    }
+
+    #[test]
+    fn test_bi_at_neg_one() {
+        // Bi(-1) ≈ 0.10399738949694461
+        assert!((bi(-1.0) - 0.10399738949694461).abs() < TOL_AIRY, "Bi(-1) got {}", bi(-1.0));
+    }
+
+    #[test]
+    fn test_airy_large_positive() {
+        // Ai(5) ≈ 1.0834442572e-4 (asymptotic regime)
+        assert!(ai(5.0) > 0.0 && ai(5.0) < 0.001, "Ai(5) in (0, 0.001), got {}", ai(5.0));
+    }
+
+    #[test]
+    fn test_airy_batch() {
+        let xs: Vec<f64> = vec![0.0, 1.0, -1.0, 5.0];
+        let mut out = vec![0.0f64; 4];
+        let ret = unsafe { airy_ai_f64(xs.as_ptr(), 4, out.as_mut_ptr()) };
+        assert_eq!(ret, 4);
+        assert!((out[0] - 0.35502805388781723).abs() < TOL_AIRY, "batch Ai(0)={}", out[0]);
+        assert!((out[1] - 0.13529241631288141).abs() < TOL_AIRY, "batch Ai(1)={}", out[1]);
     }
 }
