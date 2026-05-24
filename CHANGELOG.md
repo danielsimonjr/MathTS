@@ -145,6 +145,25 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 4A — five Tier-1 slices LANDED in parallel
+
+Five disjoint slices from [`GAP_CLOSURE_PROPOSAL_WAVE4.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md) Tier 1, dispatched to five sonnet subagents on non-overlapping file scopes, all green:
+
+- **Slice 4.1 — commit `73e6ca9`** — `ComputePool` extras: `pow`, `sign`, `tensordot`. `pow` and `sign` reuse the existing generic `applyKernel2`/`applyKernel` dispatchers (no new worker kernels). `tensordot` required a new `tensordotChunk` worker kernel (registered in `packages/workerpool/src/worker.ts`) because shape/axis metadata can't ride the elementwise pipeline. `pow` threshold = `'never'` (overhead dominates), `tensordot` = 8 K contracted-axis volume. `parallel`: 342 → **355 tests** (+13).
+- **Slice 4.2 — commit `8b357cc`** — `matrixPinv` Moore-Penrose pseudoinverse on `DenseMatrix`. NEW `matrix/src/operations/pinv.ts` (~80 LOC) using full SVD + `rcond·max(S)` thresholding (default `rcond = 1e-10`). Exported as `matrixPinv` to avoid colliding with the existing `pinv` in `svd.ts` (which operates on `number[][]`). 14 new tests covering the four Moore-Penrose identities, tall/wide/rank-deficient cases, and a Hilbert(5) stability check. `matrix`: → **556 tests**.
+- **Slice 4.3 — landed via 4.1 + 4.2** — `tensor/src/operations/random.ts` QR cleanup. The Slice-4.1 agent's scope crept slightly and refactored `random.ts` to replace the 47-LOC inline Gram-Schmidt `thinQR()` with a 9-LOC `thinQViaMatrixQr()` delegation to `matrix.qr`. The Slice-4.2 agent added the 2 required reproducibility/orthogonality tests. Slice-4.3 agent verified the work was complete (no-op). Net: −38 LOC in `random.ts`, 2 new tensor tests, `Qᵀ·Q ≈ I` verified to `1e-10`.
+- **Slice 4.4 — commit `8af250b`** — `typed/string.ts` promotion (rank 13). 5 ops (`bin`/`hex`/`oct`/`format`/`print`) with 39 new tests. Three semantic findings worth documenting: (1) mathjs uses sign-magnitude (not two's-complement) for negative-number `bin`/`hex`/`oct` unless `wordSize` is passed — `bin(-5) → '-0b101'`. Two's-complement only activates with explicit `wordSize`; (2) the core BigNumber lacks Decimal.js's `toBinary`/`toOctal`/`toHexadecimal` so base conversion routes through `toNumber()`; (3) `mathTyped`'s `number → BigNumber` auto-conversion conflicts with `'BigNumber, X'` signatures, so the typed file uses `'any'` / `'any, any'` with inline `instanceof BigNumber` guards. `functions`: 2035 → **2093 tests** (+58).
+- **Slice 4.5 — commit `6e9f9c0`** — polynomial WASM follow-up: `discriminant` + `resultant`. NEW Rust `poly_resultant_f64` (Sylvester matrix + inlined Gaussian-elimination det, ~90 LOC) and `poly_discriminant_f64` (special-cases deg 1/2/3, then `(-1)^(deg·(deg-1)/2) / a_deg · Res(p, p')` for deg ≥ 4, ~45 LOC). AS parity port (~115 LOC) with `sylvesterDet` + `detSquare` + `trimCoeffs` helpers. Bridge additions (~145 LOC) follow the existing probe-Rust-then-AS-then-JS pattern at `WASM_POLY_THRESHOLD = 256`. 18 new tests across 3 suites. Manifest regenerated; `wasm-integrity` still 5/5. **Sign-convention finding:** the task spec's worked example expected `resultant([1,1],[1,-1]) = -2` but the existing typed-layer Sylvester construction gives `+2`; tests match the existing implementation rather than the spec's example.
+
+**Test deltas this wave:**
+
+- `parallel`: 342 → **355** (+13)
+- `matrix`: → **556**
+- `tensor`: 266 → **268** (+2 new orthogonality tests from 4.3)
+- `functions`: 2,036 → **2,113** (+77 across 4.4 / 4.5 / earlier reset-helper tests)
+
+Pipeline 19/19 turbo tasks green via `npx turbo run test --concurrency=2`.
+
 #### CDG refresh + gap-audit recheck (post-Wave-3)
 
 Ran the Create Dependency Graph tool to verify no new issues or regressions after the Wave-1/2/3 landings. **Two pre-existing CDG bugs surfaced and were fixed in the same pass:**

@@ -209,25 +209,38 @@ Detail:
       Operationalises the §D Tier-4 ranks + §C cross-cutting items + 3.10c-2 sub-slice into 9 actionable slices across three
       implementation tiers:
 
-      **Wave 4 Tier 1 (parallel, 5 disjoint agents):**
-      - [ ] **Slice 4.1** — `ComputePool` extras (`pow`, `sign`,
-            `tensordot`). `parallel/src/ComputePool.ts` adds three
-            methods + `OpName` entries + thresholds; mirrors the
-            Slice-1.3 pattern.
-      - [ ] **Slice 4.2** — `matrixPinv` Moore-Penrose pseudoinverse
-            on `DenseMatrix`. NEW `matrix/src/operations/pinv.ts`
-            composing `matrix.svd` + `rcond·max(S)` thresholding.
-            Sibling of the `tensorPinv` landed in Slice 2.4.
-      - [ ] **Slice 4.3** — `tensor/src/operations/random.ts` QR
-            cleanup. Replace inline Gram-Schmidt with the now-public
-            `matrix.qr`. Pure refactor, no behaviour change.
-      - [ ] **Slice 4.4** — `typed/string.ts` promotion (rank 13).
-            5 ops (`bin`/`hex`/`oct`/`format`/`print`); same pattern
-            as `typed/relational.ts` from Slice 1.2.
-      - [ ] **Slice 4.5** — Polynomial WASM follow-up: `discriminant`
-            + `resultant` via Sylvester-matrix det. Reuses the now-
-            landed `poly_div_mod_f64` kernel and the existing `det`
-            primitive. Closes the gap left at the end of Slice 3.7.
+      **Wave 4 Tier 1 (parallel, 5 disjoint agents) — ✅ ALL LANDED:**
+      - [x] **Slice 4.1** ✅ `73e6ca9` — `ComputePool.pow` + `.sign` +
+            `.tensordot`. `pow`/`sign` reuse the generic kernels;
+            `tensordot` got a new `tensordotChunk` worker kernel.
+            `pow` threshold = `'never'` (overhead dominates),
+            `tensordot` = 8 K contracted-axis volume. `parallel`:
+            342 → 355 tests (+13).
+      - [x] **Slice 4.2** ✅ `8b357cc` — `matrixPinv` via full SVD +
+            `rcond·max(S)` threshold (default 1e-10). Exported as
+            `matrixPinv` (alias to avoid the `pinv` name collision
+            with `svd.ts`). 14 new tests; matrix: 556 tests.
+      - [x] **Slice 4.3** ✅ landed via Slices 4.1 + 4.2 (parallel
+            scope-creep, but verified correct). 47-LOC inline
+            Gram-Schmidt `thinQR()` replaced by 9-LOC
+            `thinQViaMatrixQr()` delegation; 2 new orthogonality
+            tests landed in 4.2's commit. tensor: 266 → 268 tests.
+      - [x] **Slice 4.4** ✅ `8af250b` — `typed/string.ts` promotion.
+            5 ops (`bin`/`hex`/`oct`/`format`/`print`); 39 new
+            tests. functions: 2035 → 2093 (+58). Surfaced
+            sign-magnitude vs two's-complement convention finding
+            (mathjs uses sign-magnitude unless `wordSize` is passed)
+            + BigNumber `instanceof` vs `isBigNumber` duck-test
+            mismatch.
+      - [x] **Slice 4.5** ✅ `6e9f9c0` — polynomial WASM follow-up:
+            `discriminant` + `resultant` via Sylvester-matrix det.
+            NEW Rust + AS kernels (~245 LOC + ~205 LOC) at
+            `WASM_POLY_THRESHOLD = 256`. 18 new tests across 3
+            suites. Manifest regenerated; wasm-integrity 5/5.
+            Sign-convention surprise: the existing typed-layer
+            Sylvester ordering gives +2 (not -2 as in the spec's
+            worked example) for `Res(x+1, x-1)`; tests match the
+            existing implementation.
 
       **Wave 4 Tier 2 (sequential, 1 agent each):**
       - [ ] **Slice 4.6** — `typed/probability.ts` dedup audit +
