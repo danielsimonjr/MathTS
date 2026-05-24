@@ -36,6 +36,115 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Function & auxiliary-function gaps — three slices LANDED (commit `1bfad1e`)
+
+Full design at [`docs/roadmap/FUNCTION_GAPS.md`](docs/roadmap/FUNCTION_GAPS.md). Three slices from the 2026-05-24 dep-graph audit; three subagents in parallel with disjoint file scopes.
+
+**Slice 1 — `TapedTensor` reductions + elementwise math (autograd, +63 tests)**
+
+`autograd/src/tape.ts` gains 16 new methods on `TapedTensor`:
+
+  - Reductions: `sum`, `mean`, `max`, `min`, `prod`, `norm` over an
+    optional `axis | axis[]` with `keepDims`. `norm` supports
+    `p ∈ {1, 2, 'fro', 'inf'}`.
+  - Elementwise transcendentals: `log`, `exp`, `sin`, `cos`, `tan`,
+    `sqrt`, `square`, `pow(k)` (fixed exponent), `reciprocal`, `abs`.
+
+Adjoints per the proposal §1.2. Deliberate semantics on edge cases:
+  - `prod` with multiple zeros uses prefix/suffix products so the
+    single-zero and multi-zero cases differentiate correctly.
+  - `max`/`min` tie-break first-wins (smallest input index gets the
+    gradient).
+  - `abs` subgradient at exact 0 = 0.
+  - `norm p='inf'` scatters dY to the unique max-abs index.
+
+Also fixed a real pre-existing build break: the methods were drafted
+in an earlier landing without the two helpers (`_resolveAxes`,
+`_rowMajorStrides`) they call, plus a `mean()` reduce callback with
+implicit `any`. Slice 1 added the helpers and the explicit type.
+
+30 + 33 = 63 new tests across `tape-reductions-ad.test.ts` and
+`tape-elementwise-ad.test.ts`. FD gradient-check tolerance `1e-7`;
+closed-form analytical-adjoint tests within `1e-10` to `1e-12`.
+**Closes the AD loop for any loss function** — direct unblock for
+UPT v0.7 Proposal 8's `differentiableEvaluator`.
+
+**Slice 2 — `typed/complex.ts` + `typed/set.ts` promotion (functions, +91 tests)**
+
+14 leaf functions promoted from synced factories to the active typed
+dispatch layer:
+  - `typed/complex.ts`: `arg`, `conj`, `im`, `re` over `number`,
+    `bigint`, `BigNumber`, `Complex`, `Array`. Real-number identities:
+    `arg(real)` = `atan2(0, x)`, `conj(real)` = identity, `im(real)`
+    = 0, `re(real)` = identity.
+  - `typed/set.ts`: `setUnion`, `setIntersect`, `setDifference`,
+    `setSymDifference`, `setIsSubset`, `setMultiplicity`,
+    `setPowerset`, `setDistinct`, `setSize`, `setCartesian`. Multiset
+    semantics with order preserved by first appearance, matching
+    mathjs convention.
+
+Factory collision handling mirrors the bitwise+logical landing in
+commit `2a141d4`: 14 `export` keywords stripped from
+`functions/src/factories/index.ts` (factoryScope wiring lines
+preserved); `factories-leaf.test.ts` repointed the 4 complex names
+to `../src/typed/complex.js`; `factories-final.test.ts` repointed
+the 10 set names to `../src/typed/set.js`.
+
+43 + 48 = 91 new tests across `typed-complex.test.ts` and
+`typed-set.test.ts`.
+
+**Slice 3 — Tensor decomposition wrappers (tensor, +36 tests)**
+
+Four new `tensor/src/operations/` files mirror the `tensorSvd`
+pattern (permute → reshape into 2-D → call the matrix primitive →
+reshape outputs back → propagate `axisLabels`):
+
+  - `tensorQr(t, rowAxes, opts?)` → `{ Q, R }` with `mode ∈
+    {'reduced', 'full'}`. Delegates to `matrix/src/operations/qr.ts`
+    (which already existed; one line added to
+    `matrix/src/operations/index.ts` to re-export it).
+  - `tensorLU(t, rowAxes)` → `{ L, U, P: Int32Array, parity: 1 | -1 }`.
+    Self-contained Doolittle LU with partial pivoting (matrix has no
+    LU primitive yet). Throws clear `"square"` / `"singular"`
+    messages.
+  - `tensorCholesky(t, rowAxes, { lower? = true })` → `{ L }` or
+    `{ L: U }` when `lower = false` (A = Uᵀ·U). Throws
+    `"matrix is not positive definite"` / `"square"`.
+  - `tensorEig(t, rowAxes, opts?)` →
+    `{ eigenvalues, eigenvectors?, eigenvaluesImaginary? }`.
+    Delegates to matrix's eig; `opts.symmetric` symmetrises the input
+    before calling so the matrix primitive's internal symmetric path
+    picks the stable real-eigenvalue routine.
+    `eigenvaluesImaginary` populated only when any eigenvalue has
+    nonzero imaginary part on the non-symmetric path.
+
+axisLabels propagation: rowAxes labels survive on the "row-side"
+factor; colAxes labels on the "col-side" factor; a fresh joining
+Index sits between them (via the `joiningIndexName` opt where
+supported).
+
+10 + 9 + 7 + 10 = 36 new tests across `qr.test.ts`, `lu.test.ts`,
+`cholesky.test.ts`, `eig.test.ts`. Reconstruction tolerances `1e-9`
+for QR/LU/Cholesky; `1e-7` for the eig reconstruction (matrix eig is
+iterative — that's its precision floor).
+
+#### Cumulative test deltas
+
+  - `tensor`:   12 files / 179 tests → **16 files / 215 tests** (+36)
+  - `autograd`:  5 files /  29 tests → **7 files /  92 tests** (+63)
+  - `functions`: 51 files / 1,774 tests → **53 files / 1,865 tests** (+91)
+
+#### Follow-up cleanup tracked (not regressions, internal de-duplication)
+
+  - `tensor/src/operations/random.ts` still has an inlined
+    Gram-Schmidt QR. Now that matrix re-exports `qr`, that can be
+    refactored to call into matrix in a future slice. Functionally
+    equivalent today.
+  - The inlined Doolittle LU and right-looking Cholesky in
+    `tensor/src/operations/{lu,cholesky}.ts` should eventually be
+    promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
+    primitives. Tracked as a future clean-up slice.
+
 #### ITensor-parity tensor primitives — Phases 1-6 LANDED
 
 Full design at [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md). Six phases, all green.
