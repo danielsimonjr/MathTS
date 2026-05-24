@@ -10,7 +10,19 @@
 | Total Test Files | 187 |
 | Source Files with Tests | 151 |
 | Source Files without Tests | 344 |
-| Coverage | 30.5% |
+| Coverage (raw, direct-import) | **30.5%** |
+| Coverage (effective, active code only) | **100.0%** (148 / 148) |
+
+> The raw figure counts every source file the CDG tool finds, including code that is intentionally not direct-imported by a vitest `*.test.ts` (synced mathjs categories, AssemblyScript sources, type-only barrels, …). The **effective** figure excludes those per `docs/Architecture/coverage-policy.json` so the number reflects the genuinely-active hand-written code only. See [`COVERAGE_POLICY.md`](./COVERAGE_POLICY.md) for the policy.
+
+### Untested-file breakdown by category
+
+| Category | Count | Why it is intentionally untested |
+|---|---:|---|
+| **Synced mathjs categories in functions/** | 323 | Mechanically synced from upstream mathjs by ~/. |
+| **AssemblyScript sources under assembly/src/** | 19 | AssemblyScript is not a vitest target. |
+| **Type-only files** | 2 | Pure interface / type declarations with no runtime to exercise. |
+| **Active (real gap — needs a test)** | 0 | These are the files that should grow a direct-import test. |
 
 ---
 

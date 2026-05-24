@@ -1,0 +1,115 @@
+{
+  "$schema": "./coverage-policy.schema.json",
+  "description": "Test-coverage exclusions used by tools/create-dependency-graph/ to compute an 'effective coverage' metric alongside the raw CDG number. Files matched by any category below are intentionally not direct-imported by a vitest *.test.ts file but are exercised through one of the documented indirect paths. See docs/Architecture/COVERAGE_POLICY.md for the full policy.",
+  "updated": "2026-05-24",
+  "categories": {
+    "synced_mathjs_functions": {
+      "label": "Synced mathjs categories in functions/",
+      "rationale": "Mechanically synced from upstream mathjs by ~/.claude/scripts/sync_mathjs_to_mathts.py. Exercised end-to-end through the active functions/src/typed/ dispatch layer (1,774 functions tests). Per CLAUDE.md: 'synced files are dormant — they are NOT exported from functions/src/index.ts directly; only functions/src/typed/ contains active implementations.'",
+      "pathPrefixes": [
+        "functions/src/arithmetic/",
+        "functions/src/algebra/",
+        "functions/src/bitwise/",
+        "functions/src/logical/",
+        "functions/src/relational/",
+        "functions/src/trigonometry/",
+        "functions/src/statistics/",
+        "functions/src/set/",
+        "functions/src/special/",
+        "functions/src/matrix/",
+        "functions/src/signal/",
+        "functions/src/combinatorics/",
+        "functions/src/complex/",
+        "functions/src/probability/",
+        "functions/src/string/",
+        "functions/src/geometry/",
+        "functions/src/unit/",
+        "functions/src/utils/",
+        "functions/src/plain/",
+        "functions/src/type/",
+        "functions/src/expression/",
+        "functions/src/error/",
+        "functions/src/numeric/",
+        "functions/src/core/function/"
+      ]
+    },
+    "synced_wasm_bindings": {
+      "label": "Synced WASM binding helpers under functions/src/wasm/",
+      "rationale": "Same sync source as the mathjs categories. Exercised via the active functions/src/wasm/{WasmLoader,integrity,MatrixWasmBridge}.ts files and functions/src/wasm/bitwise/wasm-bridge.ts, all of which DO have direct tests.",
+      "pathPrefixes": [
+        "functions/src/wasm/plain/",
+        "functions/src/wasm/matrix/",
+        "functions/src/wasm/algebra/",
+        "functions/src/wasm/arithmetic/",
+        "functions/src/wasm/trigonometry/",
+        "functions/src/wasm/statistics/",
+        "functions/src/wasm/set/",
+        "functions/src/wasm/numeric/",
+        "functions/src/wasm/special/",
+        "functions/src/wasm/simd/",
+        "functions/src/wasm/logical/",
+        "functions/src/wasm/probability/",
+        "functions/src/wasm/string/",
+        "functions/src/wasm/relational/",
+        "functions/src/wasm/combinatorics/",
+        "functions/src/wasm/complex/",
+        "functions/src/wasm/expression/",
+        "functions/src/wasm/unit/",
+        "functions/src/wasm/signal/"
+      ]
+    },
+    "synced_expression_utils": {
+      "label": "Synced expression utils + transforms",
+      "rationale": "Synced from mathjs. expression/src/utils/ has its own direct tests (utils-array, utils-bignumber-formatter, …); only files NOT covered there fall into this bucket — exercised transitively via the parser and compiler tests.",
+      "pathPrefixes": [
+        "expression/src/transform/"
+      ]
+    },
+    "synced_core_helpers": {
+      "label": "Synced helpers in core/src/",
+      "rationale": "Hand-ported analogues of mathjs utils that share the same factory pattern. Exercised through core/src/{numeric,typed,factory}/ which DO have direct tests.",
+      "pathPrefixes": [
+        "core/src/bignumber/",
+        "core/src/function/",
+        "core/src/types/matrix/",
+        "core/src/types/unit/"
+      ],
+      "exactPaths": [
+        "core/src/array.ts",
+        "core/src/customs.ts",
+        "core/src/customs.d.ts",
+        "core/src/emitter.ts",
+        "core/src/factory.ts",
+        "core/src/function.ts",
+        "core/src/is.ts",
+        "core/src/latex.ts",
+        "core/src/map.ts",
+        "core/src/number.ts",
+        "core/src/object.ts",
+        "core/src/optimizeCallback.ts",
+        "core/src/scope.ts",
+        "core/src/string.ts",
+        "core/src/create.ts",
+        "core/src/types/bigint.ts",
+        "core/src/types/bignumber.ts",
+        "core/src/types/fraction.ts",
+        "core/src/types/number.ts"
+      ]
+    },
+    "assemblyscript_sources": {
+      "label": "AssemblyScript sources under assembly/src/",
+      "rationale": "AssemblyScript is not a vitest target. Exercised end-to-end by the cross-package WASM integration suite invoked via `npm run test:wasm:integration` (224/224 passing across 11 files). Direct-import test files in vitest cannot meaningfully cover AS-only syntax.",
+      "pathPrefixes": [
+        "assembly/src/"
+      ]
+    },
+    "type_only_barrels": {
+      "label": "Type-only files",
+      "rationale": "Pure interface / type declarations with no runtime to exercise. A vitest test would be a no-op.",
+      "exactPaths": [
+        "functions/src/core/config.ts",
+        "functions/src/types.ts"
+      ]
+    }
+  }
+}
