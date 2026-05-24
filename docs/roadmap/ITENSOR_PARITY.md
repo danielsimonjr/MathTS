@@ -14,14 +14,16 @@ ITensor has been the standard for tensor-network programming in Julia for almost
 
 What we are **not** adding: MPS/MPO, DMRG/TEBD/TDVP, fermion anticommutation, quantum-number block-sparse storage. Those are physics-specific and belong in the UPT layer or a sibling package, not in `mathts-tensor`. The UPT v0.70 proposal §1.3 explicitly disclaims wanting them upstream.
 
-The four landings in this proposal, in priority order:
+The six landings in this proposal, in priority order:
 
-| Phase | Surface                                          | Effort       | Value |
+| Phase | Surface                                                        | Effort           | Status / Value |
 | ----- | ------------------------------------------------ | ------------ | ----- |
-| 1     | `Index` value type + `Tensor.contract(other)`    | ~150 LOC + tests | Highest leverage: makes tensor algebra readable, type-checkable, position-independent |
-| 2     | `tensorSvd(t, {maxdim, cutoff})` truncated SVD   | ~80 LOC + tests  | Low-rank approximation primitive every downstream consumer wants (PCA, compression, …) |
-| 3     | `randomTensor(shape, {distribution, seed})`      | ~40 LOC + tests  | Trivial, blocks no one but unblocks testing + ML |
-| 4     | Optimal contraction-sequence solver              | ~300 LOC + tests | Big algorithmic win for any user composing 3+ tensors; **deferred to a follow-up slice** after Phase 1 lands |
+| 1     | `Index` value type + `Tensor.contract(other)`                  | ~150 LOC + tests | ✅ LANDED (`a21a844`) — readable, type-checkable, position-independent tensor algebra |
+| 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD | ~80 LOC + tests  | ✅ LANDED (`a21a844`) — low-rank approximation primitive every downstream consumer wants |
+| 3     | `randomTensor(shape, {distribution, seed})`                    | ~40 LOC + tests  | ✅ LANDED (`a21a844`) — uniform / normal / orthogonal with Mulberry32 seeding |
+| 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order | ~300 LOC + tests | In flight — DP exact for N ≤ 16, Hendrickson–Sundaram greedy beyond |
+| 5     | `TapedTensor.contract` + `TapedTensor.matmul` (AD closure)     | ~120 LOC + tests | In flight — closes the AD loop for UPT v0.7 Proposal 8 |
+| 6     | Tensor reductions, NumPy broadcasting, `tensordot(other, axes)` | ~300 LOC + tests | In flight — biggest single jump in everyday usability |
 
 ---
 
@@ -251,24 +253,172 @@ Implementation:
 
 ---
 
-## 5. Phase 4 — optimal contraction-sequence solver (DEFERRED)
+## 5. Phase 4 — optimal contraction-sequence solver
 
-For a list of tensors and a target output index set, find the pairwise-contraction order minimising the total FLOP count. NP-hard in general; the standard algorithm is a depth-first branch-and-bound (Hendrickson–Sundaram) or for small networks (≤ ~16 tensors) a dynamic-programming exact solver. ITensor uses `TensorOperations.optimaltree`.
+For a network of tensors with named indices, find the pairwise-contraction order minimising the total FLOP count. NP-hard in general; standard approach is depth-first branch-and-bound (Hendrickson–Sundaram) or, for small networks (≤ ~16 tensors), an exact dynamic-programming solver. ITensor uses `TensorOperations.optimaltree`.
 
-Surface:
+### 5.1 New file: `tensor/src/contraction-sequence.ts`
 
 ```ts
-function contractNetwork(
+import { Tensor } from './Tensor.js';
+
+export interface ContractNetworkOpts {
+  /** Cap intermediate-tensor element count to avoid blowups (default: 2^31). */
+  maxIntermediateSize?: number;
+  /** 'exact' = DP optimal (≤ ~16 tensors); 'greedy' = Hendrickson–Sundaram heuristic (any N).
+   *  Default 'exact' when N ≤ 16, otherwise 'greedy'. */
+  algorithm?: 'exact' | 'greedy' | 'auto';
+}
+
+export interface ContractNetworkResult {
+  result: Tensor;
+  contractionOrder: ReadonlyArray<readonly [number, number]>;  // sequence of pairwise contractions in input indices
+  totalFlops: number;
+  intermediateSizes: ReadonlyArray<number>;  // element count of each intermediate
+}
+
+/**
+ * Contract a list of tensors (each with `axisLabels`) in the FLOP-optimal pairwise order.
+ * Equivalent in output to applying `Tensor.contract` in some order until one tensor remains,
+ * but chooses an order minimising total FLOPs.
+ */
+export function contractNetwork(
   tensors: ReadonlyArray<Tensor>,
-  opts?: { maxIntermediateSize?: number }
-): Tensor;
+  opts?: ContractNetworkOpts
+): ContractNetworkResult;
 ```
 
-This phase **depends on Phase 1's `Index`** because the solver needs index labels to identify shared axes across the network. Held for a separate slice after Phase 1 lands.
+### 5.2 Algorithm
+
+- **Exact (DP)** — Pearl's bitmask DP. For N tensors, state space is `2^N`; for each subset S of tensors, store the cheapest sequence to contract them. Transition: split S into S₁ ∪ S₂, recursively get the cheapest contractions for each, plus the cost of one final pairwise contraction. O(N · 3^N) time. Practical for N ≤ ~16.
+- **Greedy / Hendrickson–Sundaram** — at each step, pick the pair (i, j) minimising the cost of contracting `T_i` and `T_j` given their current intermediate shapes. O(N³) per step, N-1 steps. Suboptimal but fast.
+- Cost model: for a single pairwise contraction with shared dim products `D_shared` and free dim products `D_free_left`, `D_free_right`, FLOP cost ≈ `D_shared · D_free_left · D_free_right` (the volume of the output × the contraction depth, equivalent to `2 · result_elements · shared_dim_product` to leading order).
+
+### 5.3 Acceptance
+
+- Reproduces the same optimal order as ITensor's `optimal_contraction_sequence` on a handful of representative networks (we'll fix a small test corpus).
+- ≥ 2× speedup vs naive left-to-right contraction on at least one network in the corpus (a chain where the best order is "middle out").
+- Throws if any input lacks `axisLabels` (require Phase 1 surface).
 
 ---
 
-## 6. Non-goals (explicit)
+## 6. Phase 5 — Autograd over named-index contractions
+
+UPT v0.7 Proposal 8 (`differentiableEvaluator`) needs reverse-mode AD to traverse bridge equations whose primitive ops include `contract` and `matmul`. `TapedTensor` today exposes `add / sub / mul / scale` but neither. This phase closes the loop.
+
+### 6.1 Modifications to `autograd/src/tape.ts`
+
+Add two new methods on `TapedTensor`:
+
+```ts
+class TapedTensor {
+  /**
+   * Reverse-mode AD over `Tensor.contract`. Both operands must have axisLabels;
+   * the resulting TapedTensor inherits the contracted-output axisLabels.
+   *
+   * Adjoints (T-base notation, treating contract as "matmul on shared axes"):
+   *   dA = dY.contract(B')   where B' has shared indices restored
+   *   dB = A'.contract(dY)
+   * Implemented in the closure by einsum'ing dY against the appropriate operand
+   * with index identities preserved (we have axisLabels — match-by-id makes this exact).
+   */
+  contract(other: TapedTensor): TapedTensor;
+
+  /**
+   * Reverse-mode AD over matmul (a generalisation of contract on rank-2 inputs;
+   * also accepts rank-N inputs as batched matmul, similar to NumPy's @).
+   *
+   * Adjoints (classical):
+   *   dA = dY · Bᵀ
+   *   dB = Aᵀ · dY
+   */
+  matmul(other: TapedTensor): TapedTensor;
+}
+```
+
+### 6.2 Tests (new): `autograd/tests/tensor-contract-ad.test.ts`
+
+- `contract`: 2-tensor product (3×4 ⊗ 4×5 → 3×5) gradients match numerical AD via small perturbations.
+- `contract`: 3-tensor chain reverse-mode = analytical adjoint to 1e-9.
+- `matmul`: 2-D classic, 3-D batched matmul, gradient correctness vs the closed-form `dA = dY · Bᵀ`, `dB = Aᵀ · dY`.
+- Both ops compose cleanly with the existing `add` / `mul` / `scale` (a chain `(A · B) + C` returns correct gradients across all leaves).
+- Error: contracting two `TapedTensor`s without overlapping axisLabels throws.
+
+---
+
+## 7. Phase 6 — Tensor arithmetic completeness
+
+The biggest single jump in usability — bringing `Tensor` from "scalar + elementwise + einsum-only" to the surface NumPy / JAX users expect. Three closely-related sub-deliverables on a single Tensor.ts pass.
+
+### 7.1 Reductions
+
+```ts
+class Tensor {
+  /** Reduce over the given axis (or all axes if omitted). `keepDims=true` preserves axis as length 1. */
+  sum(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor;
+  mean(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor;
+  max(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor;
+  min(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor;
+  prod(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor;
+
+  /** Vector p-norm (default p=2). When `axis` is a single dim, reduces along it. */
+  norm(opts?: { p?: number | 'inf' | '-inf' | 'fro'; axis?: number; keepDims?: boolean }): Tensor;
+}
+```
+
+The reductions over a scalar axis-set produce a rank-0 Tensor. `axisLabels` (if set) drop the contracted axes, exactly like `Tensor.contract` does.
+
+### 7.2 Broadcasting
+
+`add` / `sub` / `mul` (elementwise) currently require exact shape match. Extend them with NumPy broadcasting semantics:
+
+1. Right-align shapes by axis.
+2. A dimension of 1 broadcasts against any other dimension.
+3. Missing axes are treated as length-1.
+
+```ts
+class Tensor {
+  /** Now broadcasts both operands per NumPy rules. */
+  add(other: Tensor | number): Tensor;
+  sub(other: Tensor | number): Tensor;
+  mul(other: Tensor | number): Tensor;
+}
+```
+
+Backwards-compat: same-shape inputs still hit the existing fast path; broadcasting is the new fallback.
+
+### 7.3 `tensordot`
+
+```ts
+class Tensor {
+  /**
+   * Generalised dot product over the listed axis pairs.
+   *   tensordot(b, [[0, 2], [1, 0]]) contracts axis 0 of `this` with axis 1 of `b`
+   *   and axis 2 of `this` with axis 0 of `b`. Equivalent to NumPy's tensordot.
+   */
+  tensordot(other: Tensor, axes: ReadonlyArray<readonly [number, number]>): Tensor;
+}
+```
+
+Implementation delegates to `einsum` under the hood (build the spec string from the axis-pair list).
+
+### 7.4 Tests (new): three files
+
+- `tensor/tests/reductions.test.ts`: each reduction over each axis-set shape, `keepDims=true/false`, `norm` for p ∈ {1, 2, Infinity, 'fro'}, axisLabels propagation drops the contracted axes.
+- `tensor/tests/broadcasting.test.ts`: scalar + tensor, rank-2 + rank-1 vector along each axis, rank-3 + rank-2, error on incompatible shapes.
+- `tensor/tests/tensordot.test.ts`: rank-2 matrix multiply via `tensordot(b, [[1, 0]])`, rank-3 with multiple axis pairs, equivalence with the corresponding einsum spec.
+
+### 7.5 Acceptance
+
+- Reductions: identical numerical result to a hand-written reference loop, within `1e-12` (no truncation other than IEEE rounding).
+- Broadcasting: all NumPy-style shape combinations succeed; the spec is the same as `numpy.broadcast_shapes`.
+- `tensordot`: numerical equivalence to einsum spec to `1e-12` on rank-3 test inputs.
+
+---
+
+---
+
+## 8. Non-goals (explicit)
 
 - **MPS / MPO** state representations → live in UPT or a sibling package; consume the primitives from this proposal.
 - **DMRG / TEBD / TDVP** variational algorithms → physics-specific.
@@ -279,16 +429,25 @@ This phase **depends on Phase 1's `Index`** because the solver needs index label
 
 ---
 
-## 7. Sequencing + risk
+## 9. Sequencing + risk
 
-- Phases 1 / 2 / 3 are independently writable: Phase 2 and 3 do not depend on Phase 1's `Index` (they accept positional axis sets but *opt to* carry `axisLabels` through if present).
+- Phases 1 / 2 / 3 LANDED in commit `a21a844`.
+- Phase 4 (contraction-sequence solver) depends on Phase 1's `Index`. Self-contained algorithm in a new file `tensor/src/contraction-sequence.ts`; does not modify `Tensor.ts`.
+- Phase 5 (AD closure) modifies `autograd/src/tape.ts` and adds tests under `autograd/tests/`. Disjoint from Phase 4 and Phase 6 file scopes.
+- Phase 6 (reductions + broadcasting + tensordot) modifies `Tensor.ts` heavily. Phase 4 explicitly avoids `Tensor.ts` to make the two phases concurrently writable.
+
+- Backwards-compatibility:
+  - Phase 1 was opt-in (`axisLabels` is optional). Same applies forward.
+  - Phase 6 extends `add` / `sub` / `mul` with broadcasting; the same-shape fast path is preserved.
+
+- Build/test risk: Phases 4-6 are concurrently writable because each owns disjoint files. After all three land, `tensor/src/index.ts` is wired centrally to re-export the new symbols.
 - Phase 4 strictly depends on Phase 1.
 - Backwards-compatibility: every existing positional Tensor consumer keeps working. `axisLabels` is opt-in.
 - Build/test risk: the only file with concurrency risk is `tensor/src/Tensor.ts`. Phase 1 alone modifies it; Phases 2 + 3 write new files. Index re-exports from `tensor/src/index.ts` are wired centrally after all three phases land.
 
 ---
 
-## 8. Acceptance criteria
+## 10. Acceptance criteria
 
 - Each phase: 0 lint errors, 0 tsc errors in `tensor/`; full `npx turbo build` and `npx turbo test` remain green.
 - Phase 1: a chained `A.contract(B).contract(C)` returns the same numerical result as the equivalent einsum spec.

@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-05-23",
-    "totalFiles": 491,
-    "totalModules": 57,
-    "totalExports": 2898
+    "lastUpdated": "2026-05-24",
+    "totalFiles": 495,
+    "totalModules": 58,
+    "totalExports": 2908
   },
   "entryPoints": [
     {
@@ -31,7 +31,7 @@
     {
       "file": "tensor/src/index.ts",
       "type": "main",
-      "description": "Entry Point"
+      "description": "ITensor-parity additions (see docs/roadmap/ITENSOR_PARITY.md)"
     },
     {
       "file": "autograd/src/index.ts",
@@ -2719,7 +2719,14 @@
         "description": "Tensor — rank-N, Float64Array-backed, row-major dense tensor. The",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./named-index.js",
+            "imports": [
+              "Index"
+            ]
+          }
+        ],
         "exports": [
           "Tensor"
         ],
@@ -2730,8 +2737,37 @@
           "EinsumSpec"
         ]
       },
+      "tensor/src/contraction-sequence.ts": {
+        "description": "contractNetwork — given an ordered list of Tensors (each carrying",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./Tensor.js",
+            "imports": [
+              "Tensor"
+            ]
+          },
+          {
+            "file": "./named-index.js",
+            "imports": [
+              "Index"
+            ]
+          }
+        ],
+        "exports": [
+          "contractNetwork"
+        ],
+        "interfaces": [
+          "ContractNetworkOpts",
+          "ContractNetworkResult"
+        ],
+        "functions": [
+          "contractNetwork"
+        ]
+      },
       "tensor/src/index.ts": {
-        "description": "Package entry point for @danielsimonjr/mathts-tensor (re-exports 1 symbols)",
+        "description": "ITensor-parity additions (see docs/roadmap/ITENSOR_PARITY.md)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2741,13 +2777,124 @@
               "Tensor"
             ],
             "reExport": true
+          },
+          {
+            "file": "./named-index",
+            "imports": [
+              "Index",
+              "idx"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./operations/svd",
+            "imports": [
+              "tensorSvd"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./operations/random",
+            "imports": [
+              "randomTensor"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./contraction-sequence",
+            "imports": [
+              "contractNetwork"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
-          "Tensor"
+          "Tensor",
+          "Index",
+          "idx",
+          "tensorSvd",
+          "randomTensor",
+          "contractNetwork"
         ],
         "reExported": [
-          "Tensor"
+          "Tensor",
+          "Index",
+          "idx",
+          "tensorSvd",
+          "randomTensor",
+          "contractNetwork"
+        ]
+      },
+      "tensor/src/named-index.ts": {
+        "description": "Index — an immutable value type carrying a unique identity, a dimension,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "idx",
+          "Index"
+        ],
+        "classes": [
+          "Index"
+        ],
+        "interfaces": [
+          "IndexOpts"
+        ],
+        "functions": [
+          "idx"
+        ]
+      }
+    },
+    "tensor/operations": {
+      "tensor/src/operations/random.ts": {
+        "description": "randomTensor — construct a Tensor filled with pseudo-random values.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": [
+              "Tensor"
+            ]
+          },
+          {
+            "file": "../named-index.js",
+            "imports": [
+              "Index"
+            ]
+          }
+        ],
+        "exports": [
+          "randomTensor"
+        ],
+        "interfaces": [
+          "RandomTensorOpts"
+        ],
+        "functions": [
+          "randomTensor"
+        ]
+      },
+      "tensor/src/operations/svd.ts": {
+        "description": "tensorSvd — truncated SVD for rank-N tensors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": [
+              "Tensor"
+            ]
+          }
+        ],
+        "exports": [
+          "tensorSvd"
+        ],
+        "interfaces": [
+          "TensorSvdOpts",
+          "TensorSvdResult"
+        ],
+        "functions": [
+          "tensorSvd"
         ]
       }
     },
@@ -24724,7 +24871,16 @@
         "name": "Tensor",
         "files": [
           "tensor/src/Tensor.ts",
-          "tensor/src/index.ts"
+          "tensor/src/contraction-sequence.ts",
+          "tensor/src/index.ts",
+          "tensor/src/named-index.ts"
+        ]
+      },
+      {
+        "name": "Tensor/operations",
+        "files": [
+          "tensor/src/operations/random.ts",
+          "tensor/src/operations/svd.ts"
         ]
       },
       {
@@ -25402,21 +25558,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 491,
-    "totalModules": 57,
-    "totalLinesOfCode": 124615,
-    "totalExports": 2898,
-    "totalClasses": 45,
-    "totalInterfaces": 256,
-    "totalFunctions": 1090,
+    "totalTypeScriptFiles": 495,
+    "totalModules": 58,
+    "totalLinesOfCode": 127057,
+    "totalExports": 2908,
+    "totalClasses": 46,
+    "totalInterfaces": 262,
+    "totalFunctions": 1094,
     "totalTypeGuards": 127,
     "totalEnums": 0,
     "totalConstants": 1063,
-    "totalReExports": 728,
+    "totalReExports": 733,
     "totalTypeOnlyImports": 353,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 1,
-    "unusedExportsCount": 377
+    "unusedExportsCount": 383
   }
 }

@@ -336,6 +336,149 @@ interface TestCoverageAnalysis {
   testedFiles: string[];
   untestedFiles: string[];
   testToSourceMap: Map<string, string[]>; // test file -> source files it imports
+  policy: CoveragePolicy | null;
+  policyBreakdown: CategoryBreakdown;
+}
+
+// Coverage-policy support (loaded from docs/Architecture/coverage-policy.json
+// if present). Categorises untested files into "intentionally indirect"
+// buckets so the headline metric can carry an "effective coverage" companion
+// number alongside the raw direct-import figure. See
+// docs/Architecture/COVERAGE_POLICY.md for the policy.
+
+interface CoveragePolicyCategory {
+  label: string;
+  rationale: string;
+  pathPrefixes?: string[];
+  exactPaths?: string[];
+}
+
+interface CoveragePolicy {
+  description?: string;
+  updated?: string;
+  categories: Record<string, CoveragePolicyCategory>;
+}
+
+// Per-untested-file classification result. `null` category = active gap (real).
+type ClassifiedUntested = { file: string; category: string | null };
+
+// Aggregate breakdown returned alongside the raw counts.
+interface CategoryBreakdown {
+  // count by category id; key 'active_untested' covers files that match NO policy category.
+  byCategory: Record<string, number>;
+  // total source files matched by any policy category — these are excluded from the "active" count.
+  excludedTotal: number;
+  // active reachable file count (sourceFiles.length - excludedTotal).
+  activeFiles: number;
+  // tested active files (active files - active_untested).
+  testedActive: number;
+  // effective coverage percent of active code, 1 decimal place.
+  effectivePercent: string;
+  // per-file classification list (for the JSON output; the markdown summarises).
+  classifiedUntested: ClassifiedUntested[];
+}
+
+/**
+ * Load coverage-policy.json from the project's docs/Architecture/ if present.
+ * Returns null when the file is missing — the tool stays backwards-compatible
+ * (the breakdown collapses to "active_untested = untestedCount" with no other
+ * categories).
+ */
+function loadCoveragePolicy(rootDir: string): CoveragePolicy | null {
+  const policyPath = join(rootDir, 'docs', 'Architecture', 'coverage-policy.json');
+  if (!existsSync(policyPath)) return null;
+  try {
+    const raw = readFileSync(policyPath, 'utf8');
+    const parsed = JSON.parse(raw) as CoveragePolicy;
+    if (!parsed.categories || typeof parsed.categories !== 'object') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Classify one path against the policy. Returns the category id (e.g.
+ * 'synced_mathjs_functions') if it matches any, or null otherwise.
+ * `exactPaths` wins over `pathPrefixes` — a file listed by name doesn't
+ * get reclassified because some directory it happens to live under is
+ * also covered by a prefix.
+ */
+function classifyAgainstPolicy(
+  filePath: string,
+  policy: CoveragePolicy | null
+): string | null {
+  if (!policy) return null;
+  for (const [categoryId, cat] of Object.entries(policy.categories)) {
+    if (cat.exactPaths?.includes(filePath)) return categoryId;
+  }
+  for (const [categoryId, cat] of Object.entries(policy.categories)) {
+    if (cat.pathPrefixes) {
+      for (const prefix of cat.pathPrefixes) {
+        if (filePath.startsWith(prefix)) return categoryId;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Build the per-untested-file classification and aggregate counts.
+ * Note: the policy applies to ALL source files (so we can compute how many
+ * synced files are also tested, e.g. via the typed/ layer), but the
+ * effective-coverage metric is computed over the active (non-excluded) set
+ * only.
+ */
+function buildCategoryBreakdown(
+  sourceFiles: string[],
+  testedFiles: string[],
+  untestedFiles: string[],
+  policy: CoveragePolicy | null
+): CategoryBreakdown {
+  const byCategory: Record<string, number> = {};
+  if (policy) {
+    for (const id of Object.keys(policy.categories)) byCategory[id] = 0;
+  }
+  byCategory.active_untested = 0;
+
+  const classifiedUntested: ClassifiedUntested[] = [];
+  for (const f of untestedFiles) {
+    const cat = classifyAgainstPolicy(f, policy);
+    if (cat) {
+      byCategory[cat] = (byCategory[cat] ?? 0) + 1;
+    } else {
+      byCategory.active_untested = (byCategory.active_untested ?? 0) + 1;
+    }
+    classifiedUntested.push({ file: f, category: cat });
+  }
+
+  // The "excluded" denominator is every SOURCE file (tested or not) that
+  // matches a policy category. For the active-tested calculation we also
+  // need to know how many tested files fall inside excluded categories —
+  // they shouldn't count toward the active-tested numerator.
+  let excludedTotal = 0;
+  let testedExcluded = 0;
+  const testedSet = new Set(testedFiles);
+  for (const f of sourceFiles) {
+    const cat = classifyAgainstPolicy(f, policy);
+    if (cat) {
+      excludedTotal++;
+      if (testedSet.has(f)) testedExcluded++;
+    }
+  }
+  const activeFiles = sourceFiles.length - excludedTotal;
+  const testedActive = testedFiles.length - testedExcluded;
+  const effectivePercent =
+    activeFiles > 0 ? ((testedActive / activeFiles) * 100).toFixed(1) : '0';
+
+  return {
+    byCategory,
+    excludedTotal,
+    activeFiles,
+    testedActive,
+    effectivePercent,
+    classifiedUntested,
+  };
 }
 
 // Re-export map: barrel file -> source files it re-exports from
@@ -498,13 +641,24 @@ function analyzeTestCoverage(
     }
   }
 
+  const policy = loadCoveragePolicy(ROOT_DIR);
+  const sourcePaths = sourceFiles.map((f) => f.path);
+  const policyBreakdown = buildCategoryBreakdown(
+    sourcePaths,
+    testedFiles,
+    untestedFiles,
+    policy
+  );
+
   return {
-    sourceFiles: sourceFiles.map((f) => f.path),
+    sourceFiles: sourcePaths,
     testFiles,
     coverageMap,
     testedFiles,
     untestedFiles,
     testToSourceMap,
+    policy,
+    policyBreakdown,
   };
 }
 
@@ -1812,8 +1966,37 @@ function generateTestCoverageMarkdown(coverage: TestCoverageAnalysis): string {
   lines.push(`| Total Test Files | ${coverage.testFiles.length} |`);
   lines.push(`| Source Files with Tests | ${totalTested} |`);
   lines.push(`| Source Files without Tests | ${totalUntested} |`);
-  lines.push(`| Coverage | ${coveragePercent}% |`);
-  lines.push('');
+  lines.push(`| Coverage (raw, direct-import) | **${coveragePercent}%** |`);
+
+  // Effective-coverage companion metric — only emitted when a
+  // coverage-policy.json was loaded successfully.
+  const b = coverage.policyBreakdown;
+  if (coverage.policy) {
+    lines.push(
+      `| Coverage (effective, active code only) | **${b.effectivePercent}%** (${b.testedActive} / ${b.activeFiles}) |`
+    );
+    lines.push('');
+    lines.push(
+      '> The raw figure counts every source file the CDG tool finds, including code that is intentionally not direct-imported by a vitest `*.test.ts` (synced mathjs categories, AssemblyScript sources, type-only barrels, …). The **effective** figure excludes those per `docs/Architecture/coverage-policy.json` so the number reflects the genuinely-active hand-written code only. See [`COVERAGE_POLICY.md`](./COVERAGE_POLICY.md) for the policy.'
+    );
+    lines.push('');
+
+    // Category breakdown table
+    lines.push('### Untested-file breakdown by category');
+    lines.push('');
+    lines.push('| Category | Count | Why it is intentionally untested |');
+    lines.push('|---|---:|---|');
+    for (const [id, cat] of Object.entries(coverage.policy.categories)) {
+      const count = b.byCategory[id] ?? 0;
+      if (count === 0) continue;
+      lines.push(`| **${cat.label}** | ${count} | ${cat.rationale.split('.')[0]}. |`);
+    }
+    const activeUntested = b.byCategory.active_untested ?? 0;
+    lines.push(
+      `| **Active (real gap — needs a test)** | ${activeUntested} | These are the files that should grow a direct-import test. |`
+    );
+    lines.push('');
+  }
   lines.push('---');
   lines.push('');
 
@@ -1897,6 +2080,7 @@ function generateTestCoverageJson(coverage: TestCoverageAnalysis): object {
     testToSourceObj[test] = sources;
   }
 
+  const b = coverage.policyBreakdown;
   return {
     metadata: {
       generatedAt: new Date().toISOString(),
@@ -1908,11 +2092,28 @@ function generateTestCoverageJson(coverage: TestCoverageAnalysis): object {
         coverage.sourceFiles.length > 0
           ? ((coverage.testedFiles.length / coverage.sourceFiles.length) * 100).toFixed(1)
           : '0',
+      // Companion 'effective' coverage — the same direct-import metric but
+      // computed over the active (non-policy-excluded) file set only. When
+      // no coverage-policy.json is present, this collapses to the raw figure.
+      effectiveCoverage: {
+        policyLoaded: coverage.policy !== null,
+        activeFiles: b.activeFiles,
+        testedActive: b.testedActive,
+        activeUntested: b.byCategory.active_untested ?? 0,
+        excludedTotal: b.excludedTotal,
+        percent: b.effectivePercent,
+        breakdown: b.byCategory,
+      },
     },
     untestedFiles: coverage.untestedFiles.sort(),
     testedFiles: coverage.testedFiles.sort(),
     coverageMap: coverageMapObj,
     testToSourceMap: testToSourceObj,
+    // Per-file classification of every untested file. category=null means
+    // the file is a genuine gap (not matched by any policy category).
+    classifiedUntested: b.classifiedUntested
+      .slice()
+      .sort((a, c) => a.file.localeCompare(c.file)),
   };
 }
 

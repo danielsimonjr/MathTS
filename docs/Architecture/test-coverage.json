@@ -1,11 +1,28 @@
 {
   "metadata": {
-    "generatedAt": "2026-05-23T04:08:52.081Z",
-    "totalSourceFiles": 491,
-    "totalTestFiles": 176,
-    "testedCount": 147,
+    "generatedAt": "2026-05-24T01:42:52.755Z",
+    "totalSourceFiles": 495,
+    "totalTestFiles": 187,
+    "testedCount": 151,
     "untestedCount": 344,
-    "coveragePercent": "29.9"
+    "coveragePercent": "30.5",
+    "effectiveCoverage": {
+      "policyLoaded": true,
+      "activeFiles": 148,
+      "testedActive": 148,
+      "activeUntested": 0,
+      "excludedTotal": 347,
+      "percent": "100.0",
+      "breakdown": {
+        "synced_mathjs_functions": 323,
+        "synced_wasm_bindings": 0,
+        "synced_expression_utils": 0,
+        "synced_core_helpers": 0,
+        "assemblyscript_sources": 19,
+        "type_only_barrels": 2,
+        "active_untested": 0
+      }
+    }
   },
   "untestedFiles": [
     "assembly/src/algebra/decomposition.ts",
@@ -495,7 +512,11 @@
     "parallel/src/strategies/index.ts",
     "parallel/src/strategies/threshold.ts",
     "tensor/src/Tensor.ts",
+    "tensor/src/contraction-sequence.ts",
     "tensor/src/index.ts",
+    "tensor/src/named-index.ts",
+    "tensor/src/operations/random.ts",
+    "tensor/src/operations/svd.ts",
     "workbook/src/executor.ts",
     "workbook/src/graph.ts",
     "workbook/src/index.ts",
@@ -727,12 +748,40 @@
       "matrix/tests/typed-operations.test.ts"
     ],
     "tensor/src/Tensor.ts": [
+      "tensor/tests/Tensor-contract.test.ts",
       "tensor/tests/Tensor.matrix-bridge.test.ts",
       "tensor/tests/Tensor.ops.test.ts",
       "tensor/tests/Tensor.test.ts",
+      "tensor/tests/broadcasting.test.ts",
+      "tensor/tests/contraction-sequence.test.ts",
+      "tensor/tests/operations/random.test.ts",
+      "tensor/tests/operations/svd.test.ts",
+      "tensor/tests/package-index.test.ts",
+      "tensor/tests/reductions.test.ts",
+      "tensor/tests/tensordot.test.ts"
+    ],
+    "tensor/src/contraction-sequence.ts": [
+      "tensor/tests/contraction-sequence.test.ts",
       "tensor/tests/package-index.test.ts"
     ],
     "tensor/src/index.ts": [
+      "tensor/tests/package-index.test.ts"
+    ],
+    "tensor/src/named-index.ts": [
+      "tensor/tests/Index.test.ts",
+      "tensor/tests/Tensor-contract.test.ts",
+      "tensor/tests/contraction-sequence.test.ts",
+      "tensor/tests/operations/random.test.ts",
+      "tensor/tests/package-index.test.ts",
+      "tensor/tests/reductions.test.ts",
+      "tensor/tests/tensordot.test.ts"
+    ],
+    "tensor/src/operations/random.ts": [
+      "tensor/tests/operations/random.test.ts",
+      "tensor/tests/package-index.test.ts"
+    ],
+    "tensor/src/operations/svd.ts": [
+      "tensor/tests/operations/svd.test.ts",
       "tensor/tests/package-index.test.ts"
     ],
     "autograd/src/dual-tensor.ts": [
@@ -750,7 +799,9 @@
       "autograd/tests/scaffold.test.ts"
     ],
     "autograd/src/tape.ts": [
-      "autograd/tests/scaffold.test.ts"
+      "autograd/tests/ad-wasm-interop.test.ts",
+      "autograd/tests/scaffold.test.ts",
+      "autograd/tests/tensor-contract-ad.test.ts"
     ],
     "functions/src/algebra/decomposition/lup.ts": [],
     "functions/src/algebra/decomposition/qr.ts": [],
@@ -1418,6 +1469,7 @@
       "expression/tests/RangeNode.test.ts",
       "expression/tests/RelationalNode.test.ts",
       "expression/tests/SymbolNode.test.ts",
+      "expression/tests/node-extension.test.ts",
       "expression/tests/package-index.test.ts",
       "expression/tests/parse.test.ts"
     ],
@@ -1455,6 +1507,7 @@
       "expression/tests/RangeNode.test.ts",
       "expression/tests/RelationalNode.test.ts",
       "expression/tests/SymbolNode.test.ts",
+      "expression/tests/node-extension.test.ts",
       "expression/tests/package-index.test.ts",
       "expression/tests/parse.test.ts"
     ],
@@ -1538,6 +1591,7 @@
       "expression/tests/utils-factory.test.ts"
     ],
     "expression/src/utils/is.ts": [
+      "expression/tests/node-extension.test.ts",
       "expression/tests/utils-is.test.ts"
     ],
     "expression/src/utils/latex.ts": [
@@ -1879,6 +1933,13 @@
       "matrix/src/types/DenseMatrix.ts"
     ],
     "matrix/tests/wasm-fft-fallback.test.ts": [],
+    "tensor/tests/Index.test.ts": [
+      "tensor/src/named-index.ts"
+    ],
+    "tensor/tests/Tensor-contract.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts"
+    ],
     "tensor/tests/Tensor.matrix-bridge.test.ts": [
       "tensor/src/Tensor.ts"
     ],
@@ -1888,9 +1949,41 @@
     "tensor/tests/Tensor.test.ts": [
       "tensor/src/Tensor.ts"
     ],
+    "tensor/tests/broadcasting.test.ts": [
+      "tensor/src/Tensor.ts"
+    ],
+    "tensor/tests/contraction-sequence.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts",
+      "tensor/src/contraction-sequence.ts"
+    ],
+    "tensor/tests/operations/random.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/operations/random.ts",
+      "tensor/src/named-index.ts"
+    ],
+    "tensor/tests/operations/svd.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/operations/svd.ts"
+    ],
     "tensor/tests/package-index.test.ts": [
       "tensor/src/index.ts",
-      "tensor/src/Tensor.ts"
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts",
+      "tensor/src/operations/svd.ts",
+      "tensor/src/operations/random.ts",
+      "tensor/src/contraction-sequence.ts"
+    ],
+    "tensor/tests/reductions.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts"
+    ],
+    "tensor/tests/tensordot.test.ts": [
+      "tensor/src/Tensor.ts",
+      "tensor/src/named-index.ts"
+    ],
+    "autograd/tests/ad-wasm-interop.test.ts": [
+      "autograd/src/tape.ts"
     ],
     "autograd/tests/forward-grad.test.ts": [
       "autograd/src/forward-grad.ts"
@@ -1904,6 +1997,9 @@
       "autograd/src/forward-grad.ts",
       "autograd/src/tape.ts",
       "autograd/src/reverse-grad.ts"
+    ],
+    "autograd/tests/tensor-contract-ad.test.ts": [
+      "autograd/src/tape.ts"
     ],
     "functions/tests/algebra.test.ts": [
       "functions/src/typed/algebra.ts"
@@ -2334,6 +2430,11 @@
     "expression/tests/keywords.test.ts": [
       "expression/src/keywords.ts"
     ],
+    "expression/tests/node-extension.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/utils/is.ts"
+    ],
     "expression/tests/operators.test.ts": [
       "expression/src/operators.ts"
     ],
@@ -2534,5 +2635,1383 @@
     "tests/wasm/parallel-processing.test.ts": [],
     "tests/wasm/typescript-integration.test.ts": [],
     "tests/wasm/wasm-loader.test.ts": []
-  }
+  },
+  "classifiedUntested": [
+    {
+      "file": "assembly/src/algebra/decomposition.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/index.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/approx.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/array.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/bitwise.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/complex-array.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/complex-ops.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/curvefit.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/linalg.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/matrix.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/number-theory.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/optimization.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/polynomial.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/scalar.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/signal.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/special.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/svd.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/ops/tensor.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "assembly/src/types/complex.ts",
+      "category": "assemblyscript_sources"
+    },
+    {
+      "file": "functions/src/algebra/decomposition/lup.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/decomposition/qr.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/decomposition/schur.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/decomposition/slu.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/derivative.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/leafCount.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/lyap.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/polynomialRoot.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/rationalize.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/resolve.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/simplify.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/simplify/util.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/simplify/wildcards.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/simplifyConstant.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/simplifyCore.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/solver/lsolve.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/solver/lsolveAll.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/solver/lusolve.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/solver/usolve.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/solver/usolveAll.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/solver/utils/solveValidation.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csAmd.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csChol.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csCounts.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csCumsum.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csDfs.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csEreach.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csEtree.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csFkeep.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csFlip.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csIpvec.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csLeaf.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csLu.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csMark.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csMarked.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csPermute.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csPost.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csReach.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csSpsolve.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csSqr.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csSymperm.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csTdfs.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sparse/csUnflip.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/sylvester.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/algebra/symbolicEqual.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/abs.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/addScalar.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/cbrt.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/ceil.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/cube.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/divide.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/divideScalar.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/dotDivide.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/dotMultiply.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/dotPow.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/exp.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/expm1.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/fix.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/floor.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/gcd.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/hypot.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/invmod.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/lcm.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/log.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/log10.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/log1p.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/log2.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/mod.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/multiplyScalar.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/norm.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/nthRoot.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/nthRoots.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/pow.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/round.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/sign.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/sqrt.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/square.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/subtract.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/subtractScalar.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/unaryMinus.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/unaryPlus.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/utils/nodeOperations.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/arithmetic/xgcd.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/bitwise/bitAnd.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/bitwise/bitNot.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/bitwise/bitOr.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/bitwise/bitXor.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/bitwise/leftShift.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/bitwise/rightArithShift.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/bitwise/rightLogShift.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/bitwise/useMatrixForArrayScalar.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/combinatorics/bellNumbers.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/combinatorics/catalan.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/combinatorics/composition.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/combinatorics/stirlingS2.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/complex/arg.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/complex/conj.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/complex/im.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/complex/re.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/core/config.ts",
+      "category": "type_only_barrels"
+    },
+    {
+      "file": "functions/src/core/function/typed.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/error/ArgumentsError.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/error/DimensionError.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/error/IndexError.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/expression/operators.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/geometry/distance.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/geometry/intersect.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/logical/and.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/logical/not.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/logical/nullish.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/logical/or.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/logical/xor.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/column.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/concat.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/count.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/cross.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/ctranspose.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/det.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/diag.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/diff.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/dot.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/eigs.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/eigs/complexEigs.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/eigs/realSymmetric.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/expm.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/fft.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/filter.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/flatten.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/forEach.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/getMatrixDataType.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/identity.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/ifft.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/inv.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/kron.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/map.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/mapSlices.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/matrixFromColumns.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/matrixFromFunction.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/matrixFromRows.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/ones.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/partitionSelect.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/pinv.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/range.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/reshape.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/resize.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/rotate.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/rotationMatrix.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/row.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/size.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/sort.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/sqrtm.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/squeeze.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/subset.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/trace.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/transpose.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/matrix/zeros.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/numeric/solveODE.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/arithmetic.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/bitwise.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/combinations.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/constants.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/index.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/logical.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/probability.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/relational.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/trigonometry.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/plain/number/utils.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/bernoulli.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/combinations.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/combinationsWithRep.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/factorial.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/gamma.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/kldivergence.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/lgamma.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/multinomial.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/permutations.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/pickRandom.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/random.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/randomInt.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/util/randomMatrix.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/probability/util/seededRNG.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/compare.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/compareNatural.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/compareText.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/compareUnits.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/deepEqual.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/equal.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/equalScalar.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/equalText.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/larger.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/largerEq.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/smaller.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/smallerEq.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/relational/unequal.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setCartesian.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setDifference.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setDistinct.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setIntersect.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setIsSubset.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setMultiplicity.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setPowerset.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setSize.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setSymDifference.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/set/setUnion.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/signal/freqz.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/signal/zpk2tf.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/special/erf.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/special/zeta.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/corr.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/cumsum.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/mad.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/max.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/mean.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/median.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/min.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/mode.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/prod.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/quantileSeq.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/std.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/sum.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/utils/improveErrorMessage.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/statistics/variance.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/string/bin.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/string/format.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/string/hex.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/string/oct.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/string/print.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/acos.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/acosh.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/acot.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/acoth.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/acsc.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/acsch.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/asec.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/asech.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/asin.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/asinh.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/atan.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/atan2.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/atanh.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/cos.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/cosh.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/cot.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/coth.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/csc.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/csch.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/sec.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/sech.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/sin.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/sinh.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/tan.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/tanh.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/trigonometry/trigUnit.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/bignumber/BigNumber.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/chain/Chain.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/chain/function/chain.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/complex/Complex.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/FibonacciHeap.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/function/index.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/ImmutableDenseMatrix.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/MatrixIndex.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/Spa.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/types.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/broadcast.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo01xDSid.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo02xDS0.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo03xDSf.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo04xSidSid.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo05xSfSf.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo06xS0S0.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo07xSSf.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo08xS0Sid.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo09xS0Sf.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo10xSids.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo11xS0s.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo12xSfs.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo13xDD.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matAlgo14xDs.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/matrix/utils/matrixAlgorithmSuite.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/resultset/ResultSet.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/unit/function/createUnit.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/unit/function/splitUnit.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/unit/function/unit.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/unit/physicalConstants.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/type/unit/Unit.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/types.ts",
+      "category": "type_only_barrels"
+    },
+    {
+      "file": "functions/src/unit/to.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/unit/toBest.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/array.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/bigint.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/bignumber/bitwise.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/bignumber/constants.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/bignumber/formatter.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/bignumber/nearlyEqual.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/clone.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/collection.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/complex.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/customs.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/factory.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/function.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/hasNumericValue.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/is.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/isBounded.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/isFinite.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/isInteger.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/isNaN.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/isNegative.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/isNumeric.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/isPositive.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/isPrime.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/isZero.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/lruQueue.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/map.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/node.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/noop.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/number.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/numeric.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/object.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/optimizeCallback.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/parseNumber.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/print.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/product.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/string.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/switch.ts",
+      "category": "synced_mathjs_functions"
+    },
+    {
+      "file": "functions/src/utils/typeOf.ts",
+      "category": "synced_mathjs_functions"
+    }
+  ]
 }

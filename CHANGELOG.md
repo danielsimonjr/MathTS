@@ -36,6 +36,114 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### ITensor-parity tensor primitives — Phases 1-6 LANDED
+
+Full design at [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md). Six phases, all green.
+
+**Phases 1-3 — commit `a21a844`** (three sonnet subagents in
+parallel, disjoint file scopes):
+
+- **`Index` value type** (`tensor/src/named-index.ts`, NEW —
+  filename is `named-index.ts` not `Index.ts` to keep
+  `forceConsistentCasingInFileNames` on across the monorepo). Every
+  `Index` has an immutable `id: symbol`, `dim`, optional `name` /
+  `tags` / `primeLevel`. Mutators (`prime`/`noprime`/`addTag`/
+  `removeTag`) return new instances. `idx(dim, name?, opts?)`
+  convenience factory. `match(other)` is `id === other.id &&
+  primeLevel === other.primeLevel` — dimension is validated at
+  contraction time, not at matching time.
+- **`Tensor` opt-in `axisLabels`** + `contract(other)` /
+  `replaceIndex` / `axisOf`. `Tensor.contract` requires both
+  operands to carry `axisLabels`, finds shared indices by
+  `Index.matches`, validates dims, delegates to the existing
+  `Tensor.einsum` so worker / WASM dispatch remains intact, and
+  propagates non-shared `axisLabels` to the output. Backwards-
+  compatible: two-arg `new Tensor(shape, data)` calls and existing
+  einsum specs continue to work unchanged.
+- **`tensorSvd`** (`tensor/src/operations/svd.ts`, NEW). Truncated
+  tensor SVD layered on the existing
+  `matrix/src/operations/svd.ts` (WASM-aware fast path). Accepts
+  `{maxdim, cutoff}`; returns `{U, S, V, truncatedDim,
+  truncationError}` with `truncationError` accurate to `1e-12`.
+- **`randomTensor`** (`tensor/src/operations/random.ts`, NEW).
+  `'uniform' | 'normal' | 'orthogonal'` distributions with
+  Mulberry32 seeded PRNG. Orthogonal uses a Gram-Schmidt-with-
+  re-orthogonalisation QR inlined in the file (the matrix
+  package doesn't have a public QR primitive yet — flagged for a
+  separate slice).
+
+Tests landed: 22 Index + 19 Tensor.contract + 15 tensorSvd + 13
+randomTensor = **69 new tests** in Phases 1-3.
+
+**Phases 4-6 — commit `4417836`** (opus + two sonnet subagents
+in parallel, disjoint file scopes):
+
+- **`contractNetwork`** (`tensor/src/contraction-sequence.ts`,
+  NEW). Optimal pairwise-contraction order for a network of
+  tensors with `axisLabels`. Exact bitmask DP for N ≤ 16
+  (O(N · 3^N)); Hendrickson-Sundaram greedy beyond; `'auto'`
+  mode picks. Cost model: `cost = D_shared · D_free_left ·
+  D_free_right`. Notable engineering: the first cut ran the
+  16-tensor exact DP in ~20 s due to an O(|A|·|B|) Index-array
+  scan in the partition hot path. The rewrite uses a
+  canonical-index XOR-safe bitmask stored as two 30-bit halves
+  in `Int32Array` — when each Index appears in ≤ 2 input
+  tensors, the result mask is `leftMask XOR rightMask`
+  (the set of indices appearing an odd number of times). Falls
+  back to the slower Index-array path when an Index appears
+  > 2 times or there are > 60 unique indices. 16-tensor solve
+  now runs in **1.66 s**. DP path is deterministic
+  (lexicographically smaller partition wins ties). 21 new tests.
+- **`TapedTensor.contract` + `TapedTensor.matmul`**
+  (`autograd/src/tape.ts`, MODIFIED). Reverse-mode AD over the
+  Phase-1 contract surface — closes the AD loop UPT v0.7
+  Proposal 8 explicitly needs. Adjoints:
+    contract: dA[aFree, aShared] = Σ_bFree dY[aFree, bFree] ·
+                                    B[bShared, bFree]
+              — implemented by relabelling B's shared axes with
+              A's Index objects so `Tensor.contract`
+              automatically contracts over B's free axes.
+    matmul:   dA = dY · Bᵀ, dB = Aᵀ · dY (classical).
+  Batched matmul (rank ≥ 2 with broadcast batch dims) and its
+  VJPs are direct `Float64Array` loop implementations because
+  the `EinsumSpec` format can't express batch dimensions
+  without summing over them. `_scatterToOriginalAxes()`
+  permutes a contraction gradient back to the input's original
+  axis order via `Tensor.transpose`. 17 new tests with
+  gradient-check tolerances of `1e-7` (FD) and `1e-12` (closed
+  form).
+- **Tensor arithmetic completeness** (`tensor/src/Tensor.ts`,
+  MODIFIED). Six new reductions: `sum / mean / max / min /
+  prod / norm` over an `axis | axis[] | undefined`, with
+  optional `keepDims`. `add / sub / mul` extended to accept
+  `Tensor | number` with NumPy broadcasting (right-align by
+  axis, length-1 broadcasts against any, missing leading axes
+  treated as length-1). `tensordot(other, axes)` for arbitrary
+  axis-pair contractions, delegating to the existing
+  `Tensor.einsum`. New static `Tensor.broadcastShape(a, b)`
+  helper. `axisLabels` propagate through reductions (dropping
+  reduced axes) and `tensordot` (surviving self labels then
+  surviving other labels). Bug fixed: `reduceAxes` had a
+  latent crash where `keepDims=true` would construct a Tensor
+  with mismatched `axisLabels.length` vs `shape.length` — now
+  skips label propagation entirely when `keepDims=true`. One
+  pre-existing test updated to match the new broadcasting
+  error message (broadcasting is now the path previously
+  reserved for hard shape mismatches). 70 new tests across
+  three files (39 reductions + 18 broadcasting + 13 tensordot).
+
+Phases 4-6 total: **108 new tests** (21 + 17 + 70).
+
+Cumulative across all six phases:
+- Tensor test count: 60 → 179 (+119 tests across 12 files).
+- Autograd test count: 12 → 29 (+17 tests across 5 files).
+- `tensor/src/index.ts` re-exports the new symbols: `Index`,
+  `idx`, `tensorSvd`, `randomTensor`, `contractNetwork` plus
+  the supporting types. Phase 6's new `Tensor` methods reach
+  through the existing `export { Tensor }`; Phase 5's
+  `TapedTensor` methods reach through autograd's existing
+  entry.
+
 #### Typed-layer ports (commit `2a141d4`)
 
 - **Bitwise category** (7 ops + helper): `bitAnd`, `bitOr`, `bitXor`,

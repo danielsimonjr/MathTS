@@ -1,16 +1,28 @@
 # Test Coverage Analysis
 
-**Generated**: 2026-05-23
+**Generated**: 2026-05-24
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Total Source Files | 491 |
-| Total Test Files | 176 |
-| Source Files with Tests | 147 |
+| Total Source Files | 495 |
+| Total Test Files | 187 |
+| Source Files with Tests | 151 |
 | Source Files without Tests | 344 |
-| Coverage | 29.9% |
+| Coverage (raw, direct-import) | **30.5%** |
+| Coverage (effective, active code only) | **100.0%** (148 / 148) |
+
+> The raw figure counts every source file the CDG tool finds, including code that is intentionally not direct-imported by a vitest `*.test.ts` (synced mathjs categories, AssemblyScript sources, type-only barrels, …). The **effective** figure excludes those per `docs/Architecture/coverage-policy.json` so the number reflects the genuinely-active hand-written code only. See [`COVERAGE_POLICY.md`](./COVERAGE_POLICY.md) for the policy.
+
+### Untested-file breakdown by category
+
+| Category | Count | Why it is intentionally untested |
+|---|---:|---|
+| **Synced mathjs categories in functions/** | 323 | Mechanically synced from upstream mathjs by ~/. |
+| **AssemblyScript sources under assembly/src/** | 19 | AssemblyScript is not a vitest target. |
+| **Type-only files** | 2 | Pure interface / type declarations with no runtime to exercise. |
+| **Active (real gap — needs a test)** | 0 | These are the files that should grow a direct-import test. |
 
 ---
 
@@ -375,7 +387,7 @@ The following 344 source files are not directly imported by any test file:
 | `src/forward-grad.ts` | `forward-grad.test.ts`, `scaffold.test.ts` |
 | `src/index.ts` | `scaffold.test.ts` |
 | `src/reverse-grad.ts` | `reverse-grad.test.ts`, `scaffold.test.ts` |
-| `src/tape.ts` | `scaffold.test.ts` |
+| `src/tape.ts` | `ad-wasm-interop.test.ts`, `scaffold.test.ts`, `tensor-contract-ad.test.ts` |
 | `src/index.ts` | `compat.test.ts`, `create.test.ts` |
 | `src/shims.ts` | `compat.test.ts`, `create.test.ts`, `shims.test.ts` |
 | `factory/factory.ts` | `factory.test.ts`, `version.test.ts` |
@@ -403,11 +415,11 @@ The following 344 source files are not directly imported by any test file:
 | `node/AssignmentNode.ts` | `AssignmentNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
 | `node/BlockNode.ts` | `BlockNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
 | `node/ConditionalNode.ts` | `ConditionalNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/ConstantNode.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/ConstantNode.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `node-extension.test.ts`, `package-index.test.ts`, `parse.test.ts` |
 | `node/FunctionAssignmentNode.ts` | `FunctionAssignmentNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
 | `node/FunctionNode.ts` | `FunctionNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
 | `node/IndexNode.ts` | `AccessorNode.test.ts`, `AssignmentNode.test.ts`, `IndexNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
-| `node/Node.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
+| `node/Node.ts` | `AccessorNode.test.ts`, `ArrayNode.test.ts`, `AssignmentNode.test.ts`, `BlockNode.test.ts`, `ConditionalNode.test.ts`, `ConstantNode.test.ts`, `FunctionAssignmentNode.test.ts`, `FunctionNode.test.ts`, `IndexNode.test.ts`, `Node.test.ts`, `ObjectNode.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `RangeNode.test.ts`, `RelationalNode.test.ts`, `SymbolNode.test.ts`, `node-extension.test.ts`, `package-index.test.ts`, `parse.test.ts` |
 | `node/ObjectNode.ts` | `ObjectNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
 | `node/OperatorNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
 | `node/ParenthesisNode.ts` | `Node.test.ts`, `OperatorNode.test.ts`, `ParenthesisNode.test.ts`, `package-index.test.ts`, `parse.test.ts` |
@@ -425,7 +437,7 @@ The following 344 source files are not directly imported by any test file:
 | `utils/collection.ts` | `utils-collection.test.ts` |
 | `utils/customs.ts` | `utils-customs.test.ts` |
 | `utils/factory.ts` | `utils-factory.test.ts` |
-| `utils/is.ts` | `utils-is.test.ts` |
+| `utils/is.ts` | `node-extension.test.ts`, `utils-is.test.ts` |
 | `utils/latex.ts` | `utils-latex.test.ts` |
 | `utils/map.ts` | `utils-map.test.ts`, `utils-scope.test.ts` |
 | `utils/number.ts` | `utils-number.test.ts` |
@@ -511,8 +523,12 @@ The following 344 source files are not directly imported by any test file:
 | `strategies/chunk.ts` | `chunk.test.ts`, `package-index.test.ts`, `chunk-extended.test.ts`, `strategies-index.test.ts` |
 | `strategies/index.ts` | `package-index.test.ts`, `strategies-index.test.ts` |
 | `strategies/threshold.ts` | `threshold.test.ts`, `package-index.test.ts`, `strategies-index.test.ts` |
-| `src/Tensor.ts` | `Tensor.matrix-bridge.test.ts`, `Tensor.ops.test.ts`, `Tensor.test.ts`, `package-index.test.ts` |
+| `src/Tensor.ts` | `Tensor-contract.test.ts`, `Tensor.matrix-bridge.test.ts`, `Tensor.ops.test.ts`, `Tensor.test.ts`, `broadcasting.test.ts`, `contraction-sequence.test.ts`, `random.test.ts`, `svd.test.ts`, `package-index.test.ts`, `reductions.test.ts`, `tensordot.test.ts` |
+| `src/contraction-sequence.ts` | `contraction-sequence.test.ts`, `package-index.test.ts` |
 | `src/index.ts` | `package-index.test.ts` |
+| `src/named-index.ts` | `Index.test.ts`, `Tensor-contract.test.ts`, `contraction-sequence.test.ts`, `random.test.ts`, `package-index.test.ts`, `reductions.test.ts`, `tensordot.test.ts` |
+| `operations/random.ts` | `random.test.ts`, `package-index.test.ts` |
+| `operations/svd.ts` | `svd.test.ts`, `package-index.test.ts` |
 | `src/executor.ts` | `executor.test.ts`, `package-index.test.ts` |
 | `src/graph.ts` | `graph.test.ts`, `package-index.test.ts` |
 | `src/index.ts` | `package-index.test.ts` |
@@ -567,13 +583,23 @@ The following 344 source files are not directly imported by any test file:
 | `wasm/operations.test.ts` | 3 files |
 | `wasm/rust-wasm.test.ts` | 5 files |
 | `tests/wasm-fft-fallback.test.ts` | 0 files |
+| `tests/Index.test.ts` | 1 files |
+| `tests/Tensor-contract.test.ts` | 2 files |
 | `tests/Tensor.matrix-bridge.test.ts` | 1 files |
 | `tests/Tensor.ops.test.ts` | 1 files |
 | `tests/Tensor.test.ts` | 1 files |
-| `tests/package-index.test.ts` | 2 files |
+| `tests/broadcasting.test.ts` | 1 files |
+| `tests/contraction-sequence.test.ts` | 3 files |
+| `operations/random.test.ts` | 3 files |
+| `operations/svd.test.ts` | 2 files |
+| `tests/package-index.test.ts` | 6 files |
+| `tests/reductions.test.ts` | 2 files |
+| `tests/tensordot.test.ts` | 2 files |
+| `tests/ad-wasm-interop.test.ts` | 1 files |
 | `tests/forward-grad.test.ts` | 1 files |
 | `tests/reverse-grad.test.ts` | 1 files |
 | `tests/scaffold.test.ts` | 5 files |
+| `tests/tensor-contract-ad.test.ts` | 1 files |
 | `tests/algebra.test.ts` | 1 files |
 | `tests/arithmetic-extended.test.ts` | 2 files |
 | `tests/cas.test.ts` | 1 files |
@@ -653,6 +679,7 @@ The following 344 source files are not directly imported by any test file:
 | `tests/evaluate.test.ts` | 1 files |
 | `tests/evaluator-index.test.ts` | 2 files |
 | `tests/keywords.test.ts` | 1 files |
+| `tests/node-extension.test.ts` | 3 files |
 | `tests/operators.test.ts` | 1 files |
 | `tests/package-index.test.ts` | 27 files |
 | `tests/parse.test.ts` | 17 files |
