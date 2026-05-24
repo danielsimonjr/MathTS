@@ -461,6 +461,91 @@ export function airyBiDispatch(xs: Float64Array): Float64Array {
   return airyBiJS(xs);
 }
 
+// ---------------------------------------------------------------------------
+// lgamma array kernel (Slice 5.8)
+//
+// lgamma(x) = log Gamma(x).  Poles at non-positive integers → +Infinity.
+// Negative non-integer: reflection formula already handled in both Rust and AS.
+// ---------------------------------------------------------------------------
+
+/** JS fallback: lgamma(x) = log Gamma(x) for all x. */
+function _lgamma(x: number): number {
+  if (x <= 0 && x === Math.floor(x)) return Infinity;
+  if (x < 0.5) {
+    const sinPiX = Math.abs(Math.sin(Math.PI * x));
+    if (sinPiX === 0) return Infinity;
+    return Math.log(Math.PI / sinPiX) - _lgamma(1 - x);
+  }
+  const g = 7;
+  const c = [
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
+    1.5056327351493116e-7,
+  ];
+  const xm1 = x - 1;
+  let a = c[0];
+  for (let i = 1; i < g + 2; i++) a += c[i] / (xm1 + i);
+  const t = xm1 + g + 0.5;
+  return 0.5 * Math.log(2 * Math.PI) + (xm1 + 0.5) * Math.log(t) - t + Math.log(a);
+}
+
+/** JS fallback: lgamma(x) applied element-wise. */
+export function lgammaJS(xs: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i = 0; i < xs.length; i++) out[i] = _lgamma(xs[i]);
+  return out;
+}
+
+/**
+ * Dispatch lgamma over an array — Rust WASM above threshold, then AS, then JS.
+ *
+ * For arrays ≥ WASM_SPECIAL_THRESHOLD (1024):
+ *   1. Probe Rust `lgamma_f64` (pointer-style).
+ *   2. If absent, probe AS `lgamma_f64` (typed-array style, suffix `_as`).
+ *   3. Fall back to pure-JS `lgammaJS`.
+ */
+export function lgammaDispatch(xs: Float64Array): Float64Array {
+  const n = xs.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      // Probe Rust (pointer-style)
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['lgamma_f64'] as
+          | RustJ01Fn
+          | undefined;
+        if (typeof rustFn === 'function') {
+          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) {
+              return new Float64Array(outAlloc.array);
+            }
+          } finally {
+            wasmLoader.release(xsAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch {
+        // fall through to AS probe
+      }
+      // Probe AS (typed-array style, suffix `_as` via bundle rename)
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['lgamma_f64_as'] as
+          | ((xs: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') {
+          return asFn(xs);
+        }
+      } catch {
+        // fall through to JS
+      }
+    }
+  }
+  return lgammaJS(xs);
+}
+
 /**
  * Test-only hook — re-exported so tests can reset loader state
  * without importing WasmLoader directly.
@@ -480,6 +565,13 @@ export function resetAiryWasm(): void {
  * Test-only alias for Elliptic reset (uses same singleton).
  */
 export function resetEllipticWasm(): void {
+  wasmLoader.reset();
+}
+
+/**
+ * Test-only alias for lgamma reset (uses same singleton).
+ */
+export function resetLgammaWasm(): void {
   wasmLoader.reset();
 }
 

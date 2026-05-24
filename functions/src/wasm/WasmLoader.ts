@@ -324,6 +324,8 @@ export interface WasmModule {
   zetaArray: (aPtr: number, n: number, resultPtr: number) => void;
   gammaArray: (aPtr: number, n: number, resultPtr: number) => void;
   lgammaArray: (aPtr: number, n: number, resultPtr: number) => void;
+  // Pointer-style lgamma array kernel (Slice 5.8)
+  lgamma_f64: (xsPtr: number, n: number, outPtr: number) => number;
 
   // Selection algorithms
   partitionSelect: (dataPtr: number, n: number, k: number, workPtr: number) => number;
