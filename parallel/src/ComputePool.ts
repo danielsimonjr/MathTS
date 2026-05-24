@@ -91,7 +91,9 @@ export type OpName =
   | 'chiSquareTest'
   | 'kolmogorovSmirnovTest'
   | 'mannWhitneyTest'
-  | 'shapiroWilkTest';
+  | 'shapiroWilkTest'
+  // integration fan-out (Slice 5.10)
+  | 'integrateChunk';
 
 /**
  * Per-op threshold override.  The value is the minimum element count required
@@ -675,6 +677,50 @@ export class ComputePool {
   ): Promise<ParallelResult<Float64Array>> {
     const result = await this.workerPool.applyKernel2(a, b, fnSource);
     return toParallelResult(result);
+  }
+
+  /**
+   * Fan-out Gauss-Legendre quadrature over `workerCount` sub-intervals.
+   *
+   * Partitions `[a, b]` into `workerCount` equal sub-domains and dispatches one
+   * `integrateChunk` worker task per sub-domain.  Each task evaluates the
+   * integrand (supplied as a stringified closure) with the given GL nodes and
+   * weights and returns its partial integral.  The partial sums are aggregated
+   * on the main thread.
+   *
+   * **Closure contract:** `fnSource` must be a self-contained `(x: number) =>
+   * number` expression — no free variables referencing outer scope, because it
+   * is eval'd inside an isolated worker context.  Call-site validation (via
+   * `validateClosureSource`) should have already rejected unsafe closures before
+   * reaching this method.
+   *
+   * @param fnSource    - Stringified integrand, e.g. `"(x) => Math.sin(x)"`
+   * @param a           - Lower integration bound
+   * @param b           - Upper integration bound
+   * @param workerCount - Number of sub-intervals / worker tasks
+   * @param nodes       - GL nodes on [-1, 1]
+   * @param weights     - Corresponding GL weights
+   * @returns Sum of partial integrals = approximate value of ∫ₐᵇ f(x) dx
+   */
+  async integrateFanOut(
+    fnSource: string,
+    a: number,
+    b: number,
+    workerCount: number,
+    nodes: number[],
+    weights: number[]
+  ): Promise<number> {
+    const h = (b - a) / workerCount;
+    const tasks: Promise<number>[] = [];
+    for (let k = 0; k < workerCount; k++) {
+      const subA = a + k * h;
+      const subB = a + (k + 1) * h;
+      tasks.push(
+        this.workerPool.exec<number>('integrateChunk', [fnSource, subA, subB, nodes, weights])
+      );
+    }
+    const partials = await Promise.all(tasks);
+    return partials.reduce((acc, v) => acc + v, 0);
   }
 
   /**

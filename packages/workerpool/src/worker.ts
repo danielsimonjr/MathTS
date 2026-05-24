@@ -876,6 +876,43 @@ function tensordotChunk(
 }
 
 // =============================================================================
+// Integration Fan-out Kernel
+// =============================================================================
+
+/**
+ * Evaluate a Gauss-Legendre quadrature sum on a sub-interval `[subA, subB]`
+ * using a stringified integrand closure.
+ *
+ * Called by `ComputePool.integrateFanOut` when `workerCount > 1`.  Each worker
+ * task receives one sub-domain and returns its partial integral.
+ *
+ * @param fnSource  - Stringified self-contained `(x: number) => number`.
+ *                    Must not reference outer-scope variables (worker isolation).
+ * @param subA      - Lower bound of this worker's sub-interval
+ * @param subB      - Upper bound of this worker's sub-interval
+ * @param nodes     - Gauss-Legendre nodes on [-1, 1]
+ * @param weights   - Corresponding GL weights
+ * @returns Partial integral over [subA, subB]
+ */
+function integrateChunk(
+  fnSource: string,
+  subA: number,
+  subB: number,
+  nodes: number[],
+  weights: number[]
+): number {
+  // eslint-disable-next-line no-eval
+  const f = eval(`(${fnSource})`) as (x: number) => number;
+  const halfWidth = (subB - subA) / 2;
+  const midpoint = (subA + subB) / 2;
+  let sum = 0;
+  for (let i = 0; i < nodes.length; i++) {
+    sum += weights[i] * f(halfWidth * nodes[i] + midpoint);
+  }
+  return halfWidth * sum;
+}
+
+// =============================================================================
 // Register Worker Functions
 // =============================================================================
 
@@ -929,6 +966,9 @@ const workerMethods: Record<string, (...args: any[]) => any> = {
 
   // Tensor contraction
   tensordotChunk,
+
+  // Integration fan-out
+  integrateChunk,
 };
 
 worker(workerMethods);
