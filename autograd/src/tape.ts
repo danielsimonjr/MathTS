@@ -1477,36 +1477,43 @@ export class TapedTensor {
   // ---------------------------------------------------------------------------
 
   /**
-   * Reverse-mode AD over the symmetric eigendecomposition of a rank-2 matrix.
+   * Reverse-mode AD over the eigendecomposition of a rank-2 matrix.
    *
-   * Forward: `A = U · diag(Λ) · U^T` for symmetric A (n×n).
-   *   - `eigvals` has shape [n] (real eigenvalues, in matrix-primitive's order)
-   *   - `eigvecs` has shape [n, n], columns are eigenvectors, U is orthogonal
+   * Symmetric path (`symmetric: true`):
+   *   Forward: `A = U · diag(Λ) · U^T` for symmetric A (n×n).
+   *   Adjoint (Magnus & Neudecker 1999 §10.6.6; PyTorch `linalg_eigh_backward`):
+   *     F[i,j] = 1 / (λ_j − λ_i)   for i ≠ j, 0 otherwise (with degeneracy mask)
+   *     dA_raw = U · (diag(dΛ) + F ∘ (U^T · dU)) · U^T
+   *     dA     = (dA_raw + dA_raw^T) / 2          (symmetrise)
    *
-   * Non-symmetric `eig` is intentionally NOT implemented in this slice — the
-   * general case has complex eigenvalues and substantially harder derivative
-   * formulas. The caller must pass `{ symmetric: true }` (and ensure the
-   * input is actually symmetric).
+   * Non-symmetric path (`symmetric: false`):
+   *   Forward: `A = V · diag(λ) · V^{-1}` (V columns are right eigenvectors).
+   *   Adjoint (Magnus & Neudecker 1999 §10.6 / Giles 2008 §3.2 / Townsend 2016 §4;
+   *   cross-check: PyTorch `linalg_eig_backward`):
+   *     E[i,j] = 1 / (λ_j − λ_i)  for i ≠ j, 0 otherwise (with degeneracy mask)
+   *     dA = V^{-T} · ( E ∘ (V^T · dV) + diag(dλ) ) · V^T
    *
-   * Adjoint (Magnus & Neudecker 1999 §10.6.6; PyTorch `linalg_eigh_backward`
-   * in `aten/src/ATen/native/BatchLinearAlgebra.cpp`):
-   *
-   *   F[i,j] = 1 / (λ_j − λ_i)   for i ≠ j, 0 otherwise (with degeneracy mask)
-   *   dA_raw = U · (diag(dΛ) + F ∘ (U^T · dU)) · U^T
-   *   dA     = (dA_raw + dA_raw^T) / 2          (symmetrise — A was symmetric)
+   *   Restrictions (all enforced — throw a clear error otherwise):
+   *   1. Eigenvalues must be real. The underlying matrix-eig primitive returns
+   *      placeholder eigenvectors (not actual complex vectors) when complex
+   *      eigenvalues arise, so the adjoint formula cannot be evaluated. Real-
+   *      Schur differentiation would require complex arithmetic infrastructure
+   *      throughout the Tape/TapedTensor stack, which is out of scope.
+   *   2. A must be diagonalisable (non-defective). The adjoint assumes V is
+   *      invertible; defective inputs have algebraic > geometric multiplicity
+   *      so V is rank-deficient. Detected by cond_∞(V) > 1e14.
    *
    * Regularisation at repeated eigenvalues (subgradient choice): mask
-   * F[i,j] = 0 when `|λ_i − λ_j| < REL_TOL · max(|λ|)`. REL_TOL = 1e-10. This
-   * produces a stable subgradient at exact degeneracy (finite, not unique
-   * since the true derivative doesn't exist there).
+   * F/E[i,j] = 0 when `|λ_i − λ_j| < REL_TOL · max(|λ|)`. REL_TOL = 1e-10.
    *
-   * Throws if input is not rank-2 or square, or if `symmetric` is not true.
+   * Throws if input is not rank-2 or square, if `symmetric` is missing, or
+   * (non-symmetric path) on complex eigenvalues / defective input.
    */
-  eig(opts: { symmetric: true }): { eigvals: TapedTensor; eigvecs: TapedTensor } {
-    if (!opts || opts.symmetric !== true) {
+  eig(opts: { symmetric: boolean }): { eigvals: TapedTensor; eigvecs: TapedTensor } {
+    if (!opts || typeof opts.symmetric !== 'boolean') {
       throw new Error(
-        'TapedTensor.eig is only implemented for the symmetric path. ' +
-          'Pass { symmetric: true } and ensure the input is symmetric.'
+        'TapedTensor.eig: opts.symmetric must be set to true or false. ' +
+          'Pass { symmetric: true } for symmetric A, { symmetric: false } for general A.'
       );
     }
     if (this.shape.length !== 2 || this.shape[0] !== this.shape[1]) {
@@ -1514,13 +1521,20 @@ export class TapedTensor {
     }
     const n = this.shape[0];
 
+    if (opts.symmetric === true) {
+      return this._eigSymmetric(n);
+    }
+    return this._eigGeneral(n);
+  }
+
+  private _eigSymmetric(n: number): { eigvals: TapedTensor; eigvecs: TapedTensor } {
     const inputT = new Tensor([n, n], new Float64Array(this.primal));
     const eigResult = tensorEig(inputT, [0], { symmetric: true, computeVectors: true });
     const lambdaPrimal = new Float64Array(eigResult.eigenvalues.data);
     if (!eigResult.eigenvectors) {
       throw new Error('TapedTensor.eig: tensorEig did not return eigenvectors');
     }
-    const uPrimal = new Float64Array(eigResult.eigenvectors.data); // [n, n], columns = eigvecs
+    const uPrimal = new Float64Array(eigResult.eigenvectors.data);
 
     const dLambdaBuf = new Float64Array(n);
     const dUBuf = new Float64Array(n * n);
@@ -1534,7 +1548,6 @@ export class TapedTensor {
       }
     };
 
-    // Record eigvals first (runs LAST in reverse → triggers shared work).
     const { id: lId } = this.tape.record([this.id], n, (outputGrad) => {
       for (let i = 0; i < dLambdaBuf.length; i++) dLambdaBuf[i] += outputGrad[i];
       sharedBackward();
@@ -1546,6 +1559,70 @@ export class TapedTensor {
     const lTape = new TapedTensor([n], lambdaPrimal, this.tape, lId);
     const uTape = new TapedTensor([n, n], uPrimal, this.tape, uId);
     return { eigvals: lTape, eigvecs: uTape };
+  }
+
+  private _eigGeneral(n: number): { eigvals: TapedTensor; eigvecs: TapedTensor } {
+    const inputT = new Tensor([n, n], new Float64Array(this.primal));
+    const eigResult = tensorEig(inputT, [0], { symmetric: false, computeVectors: true });
+
+    if (eigResult.eigenvaluesImaginary) {
+      const imData = eigResult.eigenvaluesImaginary.data;
+      for (let i = 0; i < n; i++) {
+        if (imData[i] !== 0) {
+          throw new Error(
+            'TapedTensor.eig({ symmetric: false }): input has complex eigenvalues. ' +
+              'Reverse-mode AD over the general non-symmetric eig is restricted to ' +
+              'real eigenvalues (the underlying matrix primitive does not return ' +
+              'complex eigenvectors). Either symmetrise the input, or restrict to ' +
+              'inputs with a real spectrum.'
+          );
+        }
+      }
+    }
+
+    if (!eigResult.eigenvectors) {
+      throw new Error('TapedTensor.eig: tensorEig did not return eigenvectors');
+    }
+    const lambdaPrimal = new Float64Array(eigResult.eigenvalues.data);
+    const vPrimal = new Float64Array(eigResult.eigenvectors.data);
+
+    // Defective check: compute V^{-1} via LU; if cond_∞(V) > 1e14, throw.
+    // The inverse is needed for the adjoint anyway, so we compute it once
+    // and reuse it.
+    const vInvOrNull = _invertWithCondCheck(vPrimal, n, 1e14);
+    if (vInvOrNull === null) {
+      throw new Error(
+        'TapedTensor.eig({ symmetric: false }): input appears defective ' +
+          '(eigenvector matrix V has cond_∞(V) > 1e14). The general-case adjoint ' +
+          'requires diagonalisability. Consider perturbing the input or using ' +
+          'the symmetric path if A is symmetric.'
+      );
+    }
+    const vInv = vInvOrNull;
+
+    const dLambdaBuf = new Float64Array(n);
+    const dVBuf = new Float64Array(n * n);
+
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+
+    const sharedBackward = (): void => {
+      const dA = _eigGeneralBackward(vPrimal, vInv, lambdaPrimal, dVBuf, dLambdaBuf, n);
+      for (let i = 0; i < thisGradSlot.length; i++) {
+        thisGradSlot[i] += dA[i];
+      }
+    };
+
+    const { id: lId } = this.tape.record([this.id], n, (outputGrad) => {
+      for (let i = 0; i < dLambdaBuf.length; i++) dLambdaBuf[i] += outputGrad[i];
+      sharedBackward();
+    });
+    const { id: vId } = this.tape.record([this.id], n * n, (outputGrad) => {
+      for (let i = 0; i < dVBuf.length; i++) dVBuf[i] += outputGrad[i];
+    });
+
+    const lTape = new TapedTensor([n], lambdaPrimal, this.tape, lId);
+    const vTape = new TapedTensor([n, n], vPrimal, this.tape, vId);
+    return { eigvals: lTape, eigvecs: vTape };
   }
 }
 
@@ -1759,6 +1836,188 @@ function _eigSymBackward(
     }
   }
   return dA;
+}
+
+/**
+ * General (non-symmetric) eigendecomposition reverse-mode adjoint.
+ *
+ * For A = V · diag(λ) · V^{-1} (V columns are right eigenvectors, all real,
+ * each column unit-normalised by the underlying primitive), the adjoint is
+ * (Boeddeker et al. 2017 / arXiv:1701.00392 Eq. 4.77; PyTorch
+ * `linalg_eig_backward` is the canonical implementation):
+ *
+ *   Let VtdV = V^T · dV.
+ *   Correct for unit-norm gauge: VtdV ← VtdV − V^T · V · diag(diag(VtdV))
+ *     (this projects onto the tangent space at V^T·V of column-unit-norm
+ *     matrices; otherwise the formula assumes V's normalisation is a free
+ *     parameter and gives the wrong result for losses sensitive to scaling.)
+ *   E[i,j] = 1 / (λ_j − λ_i)  for i ≠ j, 0 otherwise (with degeneracy mask)
+ *   M = E ∘ VtdV (off-diagonal); M's diagonal is replaced with dλ.
+ *   dA = V^{-T} · M · V^T
+ *
+ * Inputs (row-major Float64Arrays):
+ *   V     : n × n  (columns are right eigenvectors, each unit-norm)
+ *   vInv  : n × n  (V^{-1}, precomputed by caller)
+ *   lam   : n      (real eigenvalues)
+ *   dV    : n × n  (upstream adjoint of V)
+ *   dLam  : n      (upstream adjoint of λ)
+ *
+ * Returns dA (n × n).
+ *
+ * Tolerance: REL_TOL = 1e-10. E[i,j] is zeroed when |λ_j − λ_i| / max(|λ|)
+ * < REL_TOL.
+ */
+function _eigGeneralBackward(
+  V: Float64Array,
+  vInv: Float64Array,
+  lam: Float64Array,
+  dV: Float64Array,
+  dLam: Float64Array,
+  n: number
+): Float64Array {
+  const REL_TOL = 1e-10;
+  let lamMax = 0;
+  for (let i = 0; i < n; i++) {
+    const a = Math.abs(lam[i]);
+    if (a > lamMax) lamMax = a;
+  }
+  const tolAbs = REL_TOL * (lamMax > 0 ? lamMax : 1);
+
+  // VtdV = V^T · dV   (n × n)
+  const VtdV = _matmulMNK(V, dV, n, n, n, true, false);
+
+  // Gauge correction for unit-norm V: subtract V^T · V · diag(diag(VtdV)).
+  // Equivalently: subtract from VtdV[i,j] the value (V^T·V)[i,j] · diag(VtdV)[j].
+  // Compute VtV[i,j] = sum_k V[k,i] * V[k,j] = (V^T · V)[i,j].
+  const VtV = _matmulMNK(V, V, n, n, n, true, false);
+  // Snapshot the diagonal of VtdV BEFORE in-place modification (otherwise the
+  // j-th column lookup reads an already-modified value).
+  const diagVtdV = new Float64Array(n);
+  for (let i = 0; i < n; i++) diagVtdV[i] = VtdV[i * n + i];
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      VtdV[i * n + j] -= VtV[i * n + j] * diagVtdV[j];
+    }
+  }
+
+  // M = diag(dLam) on the diagonal + E ∘ VtdV off-diagonal.
+  const M = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i === j) {
+        M[i * n + j] = dLam[i];
+      } else {
+        const denom = lam[j] - lam[i];
+        if (Math.abs(denom) > tolAbs) {
+          M[i * n + j] = VtdV[i * n + j] / denom;
+        } else {
+          M[i * n + j] = 0;
+        }
+      }
+    }
+  }
+
+  // dA = V^{-T} · M · V^T
+  // V^{-T} is (vInv)^T physically; use the transpose flag in _matmulMNK.
+  const VinvT_M = _matmulMNK(vInv, M, n, n, n, true, false);
+  const dA = _matmulMNK(VinvT_M, V, n, n, n, false, true);
+  return dA;
+}
+
+/**
+ * Compute V^{-1} via partial-pivoting LU and reject defective inputs via a
+ * cond_∞(V) bound.
+ *
+ * Returns the inverse as a row-major Float64Array, OR null if
+ * cond_∞(V) = ||V||_∞ · ||V^{-1}||_∞ exceeds `maxCond`. Also returns null if
+ * a pivot is exactly zero (singular V).
+ */
+function _invertWithCondCheck(V: Float64Array, n: number, maxCond: number): Float64Array | null {
+  const LU = new Float64Array(V);
+  const perm = new Int32Array(n);
+  for (let i = 0; i < n; i++) perm[i] = i;
+
+  let pivotEpsScale = 0;
+  for (let i = 0; i < n * n; i++) {
+    const a = Math.abs(V[i]);
+    if (a > pivotEpsScale) pivotEpsScale = a;
+  }
+  const singularEps = pivotEpsScale === 0 ? 0 : pivotEpsScale * 1e-300;
+
+  for (let k = 0; k < n; k++) {
+    let maxVal = Math.abs(LU[k * n + k]);
+    let maxIdx = k;
+    for (let i = k + 1; i < n; i++) {
+      const v = Math.abs(LU[i * n + k]);
+      if (v > maxVal) {
+        maxVal = v;
+        maxIdx = i;
+      }
+    }
+    if (maxIdx !== k) {
+      for (let j = 0; j < n; j++) {
+        const tmp = LU[k * n + j];
+        LU[k * n + j] = LU[maxIdx * n + j];
+        LU[maxIdx * n + j] = tmp;
+      }
+      const t = perm[k];
+      perm[k] = perm[maxIdx];
+      perm[maxIdx] = t;
+    }
+    const pivot = LU[k * n + k];
+    if (!Number.isFinite(pivot) || Math.abs(pivot) <= singularEps) {
+      return null;
+    }
+    for (let i = k + 1; i < n; i++) {
+      LU[i * n + k] /= pivot;
+      const lik = LU[i * n + k];
+      for (let j = k + 1; j < n; j++) {
+        LU[i * n + j] -= lik * LU[k * n + j];
+      }
+    }
+  }
+
+  // Solve V · X = I (column-by-column) using the LU decomposition.
+  const inv = new Float64Array(n * n);
+  const y = new Float64Array(n);
+  for (let col = 0; col < n; col++) {
+    for (let i = 0; i < n; i++) {
+      // Right-hand side: e_col permuted: b[i] = (i row of perm) == col ? 1 : 0
+      // i.e. b[i] = 1 iff perm[i] === col.
+      y[i] = perm[i] === col ? 1 : 0;
+    }
+    // Forward solve L · y' = b (L is unit lower).
+    for (let i = 0; i < n; i++) {
+      let s = y[i];
+      for (let j = 0; j < i; j++) s -= LU[i * n + j] * y[j];
+      y[i] = s;
+    }
+    // Back solve U · x = y'.
+    for (let i = n - 1; i >= 0; i--) {
+      let s = y[i];
+      for (let j = i + 1; j < n; j++) s -= LU[i * n + j] * inv[j * n + col];
+      inv[i * n + col] = s / LU[i * n + i];
+    }
+  }
+
+  // cond_∞(V) ≈ ||V||_∞ · ||V^{-1}||_∞ (max absolute row sum on each).
+  let normV = 0;
+  let normInv = 0;
+  for (let i = 0; i < n; i++) {
+    let rowV = 0;
+    let rowI = 0;
+    for (let j = 0; j < n; j++) {
+      rowV += Math.abs(V[i * n + j]);
+      const inv_ij = inv[i * n + j];
+      if (!Number.isFinite(inv_ij)) return null;
+      rowI += Math.abs(inv_ij);
+    }
+    if (rowV > normV) normV = rowV;
+    if (rowI > normInv) normInv = rowI;
+  }
+  const cond = normV * normInv;
+  if (!Number.isFinite(cond) || cond > maxCond) return null;
+  return inv;
 }
 
 /**
