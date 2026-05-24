@@ -576,6 +576,21 @@ export interface WasmModule {
   rightArithShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
   rightLogShift_i32_array?: (a: Int32Array, b: Int32Array, result: Int32Array) => void;
 
+  // Polynomial hot-loop kernels (Slice 3.7).
+  // Rust backend: pointer-style (a_ptr, a_len, b_ptr, b_len, out_ptr) → out_len.
+  // AS  backend: typed-array-style (a: Float64Array, b: Float64Array) → Float64Array.
+  poly_mul_f64?: (aPtr: number, aLen: number, bPtr: number, bLen: number, outPtr: number) => number;
+  poly_div_mod_f64?: (
+    numPtr: number,
+    numLen: number,
+    denPtr: number,
+    denLen: number,
+    outPtr: number
+  ) => number;
+  // AS-backend variants (typed-array calling convention).
+  poly_mul_f64_as?: (a: Float64Array, b: Float64Array) => Float64Array;
+  poly_div_mod_f64_as?: (num: Float64Array, den: Float64Array) => Float64Array;
+
   // Dense matrix decompositions exported by the AssemblyScript binary.
   // The Rust binary exposes the same algorithms under `luDecomposition` /
   // `qrDecomposition` / `choleskyDecomposition` / `laInv` / `laDet` (see

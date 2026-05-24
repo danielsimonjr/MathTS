@@ -10,6 +10,12 @@
  * @packageDocumentation
  */
 
+import {
+  polyMulDispatch,
+  polyDivModDispatch,
+  WASM_POLY_THRESHOLD,
+} from '../wasm/poly/wasm-bridge.js';
+
 // =============================================================================
 // Type Aliases
 // =============================================================================
@@ -71,6 +77,7 @@ function trimPoly(coeffs: number[]): number[] {
 /**
  * Polynomial long division: returns [quotient, remainder].
  * Both dividend and divisor are coefficient arrays (index = power).
+ * Routes through the WASM kernel for large inputs.
  */
 function polyDivMod(a: number[], b: number[]): [number[], number[]] {
   const at = trimPoly(a);
@@ -82,6 +89,14 @@ function polyDivMod(a: number[], b: number[]): [number[], number[]] {
 
   if (at.length < bt.length) {
     return [[], [...at]];
+  }
+
+  // WASM fast path for large inputs.
+  if (at.length >= WASM_POLY_THRESHOLD) {
+    const fa = new Float64Array(at);
+    const fb = new Float64Array(bt);
+    const { quotient, remainder } = polyDivModDispatch(fa, fb);
+    return [trimPoly(Array.from(quotient)), trimPoly(Array.from(remainder))];
   }
 
   const remainder = [...at];
@@ -211,6 +226,13 @@ export function polyadd(a: number[], b: number[]): number[] {
  */
 export function polymul(a: number[], b: number[]): number[] {
   if (a.length === 0 || b.length === 0) return [0];
+  // WASM fast path for large inputs.
+  if (a.length >= WASM_POLY_THRESHOLD || b.length >= WASM_POLY_THRESHOLD) {
+    const fa = new Float64Array(a);
+    const fb = new Float64Array(b);
+    const out = polyMulDispatch(fa, fb);
+    return trimPoly(Array.from(out));
+  }
   const result: number[] = new Array(a.length + b.length - 1).fill(0);
   for (let i = 0; i < a.length; i++) {
     for (let j = 0; j < b.length; j++) {

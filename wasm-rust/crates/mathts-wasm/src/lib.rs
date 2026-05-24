@@ -129,6 +129,12 @@ pub use unit::conversion::*;
 pub use utils::checks::*;
 
 // ============================================================
+// Slice 3.7: Polynomial hot-loop kernels
+// ============================================================
+pub mod poly;
+pub use poly::*;
+
+// ============================================================
 // AssemblyScript-compatible wrappers (scalar + array ops)
 // ============================================================
 pub mod compat;
