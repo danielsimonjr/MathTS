@@ -4,6 +4,8 @@
 **Source:** Picks up the 5 forward-tracked items left after Wave 5 closed §D / §B.1 / §B.2 / §C of [`FUNCTION_GAPS_AUDIT.md`](./FUNCTION_GAPS_AUDIT.md). Companion to the four prior Wave proposals.
 **Status as of opening:** Waves 1-5 complete (33 slices across ~30 commits). All §D Tier-4 ranks and all §B.1 / §B.2 / §C playbook items landed. Effective coverage 100% on active code; 0 circular deps; pipeline 19/19 green.
 
+**Status as of closing (2026-05-24):** ✅ **WAVE 6 COMPLETE — ALL 5 SLICES LANDED.** Commits `d0466b3` (6.1), `048e9e1` (6.2), `3aac312` (6.5), `bba468b` (6.3), `2be52f9` (6.4), plus `dc5c050` (manifest regen). Suite: 6308 vitest + 172 WASM integration tests pass / 7 skipped / zero regressions. AS parity for Carlson kernels wired through `assembly/src/index.ts`; `mathts-as.wasm` now in manifest. The entire `FUNCTION_GAPS_AUDIT.md` roadmap is closed.
+
 ## Pre-flight findings (audited the codebase before designing)
 
 - **Schur form already exists internally** in `matrix/src/operations/eig.ts` (line 372: "Extract eigenvalues from quasi-upper-triangular Schur form") but isn't exposed as a public matrix-package primitive. Slice 6.1 either exposes the internal Schur or implements `matrixSchur` standalone.
@@ -20,7 +22,7 @@
 
 ## Tier 1 — Parallel slices (3 agents, disjoint scopes)
 
-### Slice 6.1 — Slice 5.9b: full Higham logm / sqrtm for general matrices
+### Slice 6.1 — Slice 5.9b: full Higham logm / sqrtm for general matrices ✅ LANDED (`d0466b3`)
 
 **Goal:** Lift the Slice 5.9a limitation — non-diagonalisable / complex-eigenvalue / defective matrices currently throw or fall back to the eig-based formula with a warning. This slice implements the Schur-based general-case algorithms per Higham 2008 §11 (logm) and §6 (sqrtm Björck-Hammarling).
 
@@ -43,7 +45,7 @@
 
 **Acceptance:** matrices with negative real eigenvalues, repeated eigenvalues, defective Jordan blocks, and complex eigenvalues all return finite results matching SciPy reference within `1e-10`.
 
-### Slice 6.2 — Non-symmetric `eig` AD (extends Slice 4.8) — **Opus subagent**
+### Slice 6.2 — Non-symmetric `eig` AD (extends Slice 4.8) — **Opus subagent** ✅ LANDED (`048e9e1`)
 
 **Goal:** Lift the symmetric-only restriction on `TapedTensor.eig`. Slice 4.8 throws when `symmetric: false`. This slice implements the general-case eigendecomposition AD using the standard formula (Magnus & Neudecker 1999 §10.6 / Giles 2008 §3.2):
 
@@ -73,7 +75,7 @@ dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T
 
 **Acceptance:** Finite-difference verification at ≥ 5 well-conditioned non-symmetric inputs; clean error on defective inputs; no NaN on near-degenerate.
 
-### Slice 6.5 — WebGPU browser smoke test infrastructure
+### Slice 6.5 — WebGPU browser smoke test infrastructure ✅ LANDED (`3aac312`)
 
 **Goal:** Land the Playwright (or `@vitest/browser`) infrastructure so the WebGPU paths in `functions/src/typed/gpu.ts` and `matrix/src/backends/gpu/*` get one smoke test in a real browser environment. Headless-Node tests can't instantiate a WebGPU adapter today.
 
@@ -91,7 +93,7 @@ dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T
 
 ## Tier 2 — Sequential WASM slices
 
-### Slice 6.3 — `convexHull3D` + auxiliary 3-D predicates WASM
+### Slice 6.3 — `convexHull3D` + auxiliary 3-D predicates WASM ✅ LANDED (`bba468b`)
 
 **Goal:** Add `convexHull3D` to `typed/geometry.ts` via an incremental algorithm (e.g. QuickHull or Chan's). 2-D hull + Delaunay 2-D + Voronoi 2-D + k-d tree are already WASM (per Slice 5.7d + the existing `geometry/advanced.rs`).
 
@@ -107,7 +109,7 @@ dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T
 
 **Threshold:** `≥ 1024 points`.
 
-### Slice 6.4 — Carlson symmetric forms + incomplete elliptic integrals
+### Slice 6.4 — Carlson symmetric forms + incomplete elliptic integrals ✅ LANDED (`2be52f9`)
 
 **Goal:** Implement `RC`/`RD`/`RF`/`RJ` Carlson symmetric forms and the incomplete elliptic integrals `ellipticF(φ, m)`, `ellipticE_incomplete(φ, m)`, `ellipticPi(n, φ, m)`. Carlson forms converge quadratically and avoid the branch-cut headaches of the Legendre form.
 
@@ -139,3 +141,22 @@ dA = V^{-T} · (E ∘ (V^T · dV) + diag(dλ)) · V^T
 - Slice 6.4 — Carlson + incomplete elliptic WASM.
 
 After Wave 6 lands, the entire MathTS gap-closure roadmap from `FUNCTION_GAPS_AUDIT.md` is fully closed. The only forward work left is the dormant synced mathjs upstream sync (tracked in `MATHJS_SYNC_ROADMAP.md`), and the mathjs.org "feature parity ratchet" — neither of which fall under the gap audit's scope.
+
+---
+
+## Wave 6 closing summary (2026-05-24)
+
+**All 5 slices shipped. Roadmap closed.**
+
+| Commit    | Slice | Tests | What landed                                                                  |
+| --------- | ----- | ----- | ---------------------------------------------------------------------------- |
+| `d0466b3` | 6.1   | +19   | Matrix Schur primitive + Higham-2008 general-case logm/sqrtm (Björck-Hammarling) |
+| `048e9e1` | 6.2   | +13   | `TapedTensor.eig` non-symmetric reverse-mode AD (Townsend/Magnus-Neudecker)  |
+| `3aac312` | 6.5   | infra | `@vitest/browser` + Playwright WebGPU smoke harness + CI job                 |
+| `bba468b` | 6.3   | +18   | Rust `convex_hull_3d_wasm` QuickHull-3D kernel + `convexHull3D` dispatch     |
+| `2be52f9` | 6.4   | +41   | Carlson `RC/RD/RF/RJ` + incomplete elliptic `F/E/Π` WASM (Rust + AS parity)  |
+| `dc5c050` | fix   | —     | Manifest SHA-384 regeneration after combined 6.3+6.4 rebuild + AS wiring     |
+
+**Suite delta:** 6249 → 6308 tests (+59), 236 → 238 files (+2). 172 WASM integration tests pass. Zero regressions.
+
+**Security invariants intact:** WASM SHA-384 manifest verification re-validated for both `mathts.wasm` (Rust, 754 KB, primary) and `mathts-as.wasm` (AS, 62 KB, legacy with full Carlson parity).
