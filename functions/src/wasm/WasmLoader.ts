@@ -654,6 +654,14 @@ export interface WasmModule {
     rhs: Float64Array
   ) => Float64Array;
 
+  // Divided-difference kernel (Slice 5.5).
+  // Rust backend: pointer-style
+  //   divided_difference_f64(xs_ptr, ys_ptr, n, out_ptr) → n (or -1 on duplicate xs).
+  // AS  backend: typed-array calling convention.
+  //   divided_difference_f64_as(xs, ys) → Float64Array (length 0 on duplicate xs).
+  divided_difference_f64?: (xsPtr: number, ysPtr: number, n: number, outPtr: number) => number;
+  divided_difference_f64_as?: (xs: Float64Array, ys: Float64Array) => Float64Array;
+
   // Bessel J/Y array kernels (Slice 3.10c-1) + Airy Ai/Bi (Slice 4.9).
   // Rust backend: pointer-style.
   //   bessel_j0_f64(xs_ptr, n, out_ptr) → n (or -1 on error)

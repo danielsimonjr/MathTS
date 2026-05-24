@@ -1,8 +1,10 @@
 /**
- * WASM dispatch bridge for the tridiagonal-solve hot loop (Slice 3.10b).
+ * WASM dispatch bridge for the tridiagonal-solve and divided-difference
+ * hot loops (Slices 3.10b and 5.5).
  *
- * One kernel is exposed:
- *   - `tridiag_solve_f64` — O(n) Thomas algorithm for a tridiagonal system
+ * Two kernels are exposed:
+ *   - `tridiag_solve_f64`      — O(n) Thomas algorithm for a tridiagonal system
+ *   - `divided_difference_f64` — O(n²) Newton divided-difference table
  *
  * Behavior:
  *   - When `wasmLoader.getModule()` returns null (module not loaded or
@@ -31,6 +33,13 @@ import { wasmLoader, type WasmModule } from '../WasmLoader.js';
  * Gated on the length of `diag` (== number of unknowns).
  */
 export const WASM_TRIDIAG_THRESHOLD = 1024;
+
+/**
+ * Knot-count threshold above which we attempt the WASM divided-difference
+ * kernel.  The O(n²) table is large enough to benefit from WASM at ≥ 256
+ * knots; below that, marshal overhead dominates.
+ */
+export const WASM_INTERP_THRESHOLD = 256;
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -193,4 +202,103 @@ export function tridiagSolveDispatch(
  */
 export function resetTridiagWasm(): void {
   wasmLoader.reset();
+}
+
+// ---------------------------------------------------------------------------
+// Divided-difference kernel (Slice 5.5)
+// ---------------------------------------------------------------------------
+
+/**
+ * Pure-JS Newton divided-difference computation — used as the
+ * below-threshold / no-WASM fallback.
+ *
+ * Given n distinct nodes (xs, ys), returns a Float64Array of n Newton-form
+ * coefficients c_0 … c_{n-1} such that:
+ *
+ *   P(x) = c_0 + c_1·(x-x_0) + c_2·(x-x_0)(x-x_1) + …
+ *
+ * Throws `RangeError` when any two x-values are equal (degenerate input).
+ *
+ * @param xs - interpolation nodes (distinct)
+ * @param ys - function values at xs
+ * @returns Newton-form coefficient array of length n
+ */
+export function dividedDifferenceJS(xs: Float64Array, ys: Float64Array): Float64Array {
+  const n = xs.length;
+  const out = new Float64Array(n);
+  for (let i = 0; i < n; i++) out[i] = ys[i];
+
+  for (let j = 1; j < n; j++) {
+    for (let i = n - 1; i >= j; i--) {
+      const denom = xs[i] - xs[i - j];
+      if (denom === 0) {
+        throw new RangeError('divided_difference: duplicate x-values (degenerate input)');
+      }
+      out[i] = (out[i] - out[i - 1]) / denom;
+    }
+  }
+  return out;
+}
+
+// Rust-backend function type signature (pointer-style calling convention).
+type RustDivDiffFn = (xsPtr: number, ysPtr: number, n: number, outPtr: number) => number;
+
+// AS-backend function type signature (typed-array calling convention).
+type ASDivDiffFn = (xs: Float64Array, ys: Float64Array) => Float64Array;
+
+/**
+ * Compute Newton divided-difference coefficients via WASM when
+ * `xs.length` is at or above WASM_INTERP_THRESHOLD, otherwise falls
+ * back to the inline JS implementation.
+ *
+ * @param xs - interpolation nodes (distinct), length n
+ * @param ys - function values at xs, length n
+ * @returns Newton-form coefficient Float64Array of length n
+ * @throws RangeError on duplicate x-values (JS path only; WASM path
+ *         falls back to JS on error return)
+ */
+export function dividedDifferenceDispatch(xs: Float64Array, ys: Float64Array): Float64Array {
+  const n = xs.length;
+  if (n >= WASM_INTERP_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      try {
+        // Try Rust backend first (pointer-style).
+        const rustFn = (wasm as unknown as Record<string, unknown>)['divided_difference_f64'] as
+          | RustDivDiffFn
+          | undefined;
+        if (typeof rustFn === 'function') {
+          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) {
+              return new Float64Array(outAlloc.array);
+            }
+            // written < 0 → duplicate xs → fall through to JS (which will throw)
+          } finally {
+            wasmLoader.release(xsAlloc.ptr, true);
+            wasmLoader.release(ysAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+
+        // Try AS backend (typed-array calling convention, `_as` suffix key).
+        const asFn = (wasm as unknown as Record<string, unknown>)['divided_difference_f64_as'] as
+          | ASDivDiffFn
+          | undefined;
+        if (typeof asFn === 'function') {
+          const result = asFn(xs, ys);
+          if (result.length === n) {
+            return new Float64Array(result);
+          }
+          // length 0 → duplicate xs → fall through to JS (which will throw)
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
+  return dividedDifferenceJS(xs, ys);
 }

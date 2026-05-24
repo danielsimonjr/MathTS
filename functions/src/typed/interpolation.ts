@@ -20,6 +20,11 @@
 
 import { tridiagSolveDispatch } from '../wasm/interpolation/wasm-bridge.js';
 import {
+  dividedDifferenceDispatch,
+  dividedDifferenceJS,
+  WASM_INTERP_THRESHOLD,
+} from '../wasm/interpolation/wasm-bridge.js';
+import {
   polyFitDispatch,
   chebFitDispatch,
   legendreFitDispatch,
@@ -67,7 +72,31 @@ export function linearInterp(xs: number[], ys: number[], x: number): number {
 }
 
 // =============================================================================
-// lagrangeInterp - Lagrange Polynomial Interpolation
+// Internal helper — Newton-form evaluation from divided-difference coefficients
+// =============================================================================
+
+/**
+ * Evaluate the Newton-form interpolating polynomial at `x`.
+ *
+ * Uses Horner's method in the Newton basis:
+ *   P(x) = c[0] + c[1]·(x-x[0]) + c[2]·(x-x[0])(x-x[1]) + …
+ *
+ * @param xs     - Interpolation nodes
+ * @param coeffs - Divided-difference (Newton) coefficients
+ * @param x      - Evaluation point
+ * @returns P(x)
+ */
+function evalNewton(xs: Float64Array, coeffs: Float64Array, x: number): number {
+  const n = coeffs.length;
+  let result = coeffs[n - 1];
+  for (let k = n - 2; k >= 0; k--) {
+    result = result * (x - xs[k]) + coeffs[k];
+  }
+  return result;
+}
+
+// =============================================================================
+// lagrangeInterp - Lagrange / Newton Polynomial Interpolation
 // =============================================================================
 
 /**
@@ -75,6 +104,11 @@ export function linearInterp(xs: number[], ys: number[], x: number): number {
  *
  * Computes the unique polynomial of degree n-1 passing through n data points,
  * evaluated at x.
+ *
+ * When `xs.length >= WASM_INTERP_THRESHOLD` (256), the O(n²)
+ * divided-difference table is computed via the WASM kernel (Rust primary,
+ * AssemblyScript fallback) and the result is evaluated in Newton form.
+ * Below the threshold the classical direct Lagrange formula is used.
  *
  * @param xs - Distinct x-coordinates
  * @param ys - Corresponding y-values
@@ -90,8 +124,21 @@ export function lagrangeInterp(xs: number[], ys: number[], x: number): number {
   }
 
   const n = xs.length;
-  let result = 0;
 
+  // Above threshold: use WASM-dispatched divided-difference → Newton eval.
+  if (n >= WASM_INTERP_THRESHOLD) {
+    const xsF = new Float64Array(xs);
+    const ysF = new Float64Array(ys);
+    try {
+      const coeffs = dividedDifferenceDispatch(xsF, ysF);
+      return evalNewton(xsF, coeffs, x);
+    } catch {
+      // fall through to direct Lagrange below
+    }
+  }
+
+  // Below threshold (or fallback): direct Lagrange formula.
+  let result = 0;
   for (let i = 0; i < n; i++) {
     let basis = 1;
     for (let j = 0; j < n; j++) {
@@ -101,9 +148,58 @@ export function lagrangeInterp(xs: number[], ys: number[], x: number): number {
     }
     result += ys[i] * basis;
   }
-
   return result;
 }
+
+// =============================================================================
+// newtonInterp - Newton Divided-Difference Polynomial Interpolation (Slice 5.5)
+// =============================================================================
+
+/**
+ * Newton's divided-difference polynomial interpolation.
+ *
+ * Evaluates the unique interpolating polynomial of degree n-1 at `x` using
+ * Newton's divided-difference representation.  Mathematically identical to
+ * Lagrange interpolation but computed via a different (and more numerically
+ * efficient) algorithm.
+ *
+ * When `xs.length >= WASM_INTERP_THRESHOLD` (256), the O(n²)
+ * divided-difference table is dispatched to the WASM kernel; otherwise the
+ * pure-JS path runs.
+ *
+ * @param xs - Distinct x-coordinates
+ * @param ys - Corresponding y-values
+ * @param x  - Point to evaluate at
+ * @returns Interpolated value
+ * @throws RangeError when any two xs are equal (degenerate / duplicate nodes)
+ *
+ * @example
+ * newtonInterp([0, 1, 2], [0, 1, 4], 1.5) // => 2.25
+ */
+export function newtonInterp(xs: number[], ys: number[], x: number): number {
+  if (xs.length !== ys.length || xs.length < 1) {
+    throw new Error('newtonInterp requires at least 1 data point with matching lengths');
+  }
+
+  const xsF = new Float64Array(xs);
+  const ysF = new Float64Array(ys);
+
+  // WASM-dispatched divided-difference (falls back to JS below threshold).
+  let coeffs: Float64Array;
+  if (xs.length >= WASM_INTERP_THRESHOLD) {
+    coeffs = dividedDifferenceDispatch(xsF, ysF);
+  } else {
+    coeffs = dividedDifferenceJS(xsF, ysF);
+  }
+
+  return evalNewton(xsF, coeffs, x);
+}
+
+/**
+ * Re-export the WASM_INTERP_THRESHOLD constant for external consumers
+ * that need to know the dispatch boundary.
+ */
+export { WASM_INTERP_THRESHOLD };
 
 // =============================================================================
 // cubicSpline - Natural Cubic Spline
