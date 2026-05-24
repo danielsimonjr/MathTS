@@ -11,6 +11,7 @@
 
 import { wasmLoader } from '../wasm/WasmLoader.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { argsortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 
 // =============================================================================
 // Type Aliases
@@ -133,8 +134,29 @@ export function convexHull(points: number[][]): number[][] {
   if (n <= 1) return points.slice();
   if (n === 2) return points.slice();
 
-  // Sort by x then by y
-  const sorted = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  // Sort by x then by y.
+  // WASM argsort on x-coordinates (primary key) above WASM_SORT_THRESHOLD.
+  let sorted: number[][];
+  if (n >= WASM_SORT_THRESHOLD) {
+    // Build x-coord Float64Array for WASM argsort (primary key).
+    const xs = new Float64Array(n);
+    for (let i = 0; i < n; i++) xs[i] = points[i][0];
+    const idx = argsortF64Dispatch(xs);
+    // Reorder by argsort, then sort ties by y (secondary key — typically few).
+    sorted = Array.from(idx).map((i) => points[i]);
+    // Stable-sort ties by y (JS sort is stable since ES2019).
+    for (let i = 0; i < sorted.length - 1; ) {
+      let j = i + 1;
+      while (j < sorted.length && sorted[j][0] === sorted[i][0]) j++;
+      if (j - i > 1) {
+        const slice = sorted.slice(i, j).sort((a, b) => a[1] - b[1]);
+        for (let k = 0; k < slice.length; k++) sorted[i + k] = slice[k];
+      }
+      i = j;
+    }
+  } else {
+    sorted = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  }
 
   // Cross product of OA and OB vectors
   function cross(o: number[], a: number[], b: number[]): f64 {

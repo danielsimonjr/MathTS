@@ -14,6 +14,7 @@
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -337,9 +338,9 @@ export const parallelStatMedian = mathTyped('parallelStatMedian', {
     if (n === 0) return NaN;
     if (n === 1) return data[0];
 
-    // Sort a copy
+    // Sort a copy — WASM-accelerated above WASM_SORT_THRESHOLD (16 K).
     const sorted = new Float64Array(data);
-    sorted.sort();
+    sortF64Dispatch(sorted);
 
     const mid: i32 = Math.floor(n / 2);
     if (n % 2 === 0) {
@@ -654,9 +655,9 @@ export const parallelStatQuantile = mathTyped('parallelStatQuantile', {
     if (data.length === 0) return NaN;
     if (data.length === 1) return data[0];
 
-    // Sort a copy
+    // Sort a copy — WASM-accelerated above WASM_SORT_THRESHOLD (16 K).
     const sorted = new Float64Array(data);
-    sorted.sort();
+    sortF64Dispatch(sorted);
 
     const pos = (sorted.length - 1) * q;
     const lower = Math.floor(pos);
@@ -678,6 +679,24 @@ export const parallelStatQuantile = mathTyped('parallelStatQuantile', {
     return quantiles.map((q) => parallelStatQuantile(data, q) as number);
   },
 });
+
+// =============================================================================
+// Percentile (thin wrapper on quantile, 0-100 scale — Slice 5.7b)
+// =============================================================================
+
+/**
+ * Compute the p-th percentile of a Float64Array.
+ *
+ * Identical to `parallelStatQuantile(data, p / 100)`.
+ * Uses WASM sort acceleration above WASM_SORT_THRESHOLD elements.
+ *
+ * @param data - Input data array.
+ * @param p    - Percentile in [0, 100].
+ */
+export function parallelStatPercentile(data: Float64Array, p: f64): f64 {
+  if (p < 0 || p > 100) throw new Error('Percentile must be between 0 and 100');
+  return parallelStatQuantile(data, p / 100) as f64;
+}
 
 // =============================================================================
 // Parallel Histogram
@@ -860,6 +879,7 @@ export const typedStatistics = {
   mad: parallelStatMAD,
   cumsum: parallelStatCumsum,
   quantile: parallelStatQuantile,
+  percentile: parallelStatPercentile,
   histogram: parallelStatHistogram,
   quickSelect,
   medianSelect,

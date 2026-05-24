@@ -148,6 +148,12 @@ pub mod bessel;
 pub use bessel::*;
 
 // ============================================================
+// Slice 5.7a: Sort hot-loop kernels (sort_f64, argsort_f64, rank_f64)
+// ============================================================
+pub mod sort;
+pub use sort::*;
+
+// ============================================================
 // AssemblyScript-compatible wrappers (scalar + array ops)
 // ============================================================
 pub mod compat;

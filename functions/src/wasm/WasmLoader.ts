@@ -763,6 +763,19 @@ export interface WasmModule {
     phiStepIm: number
   ) => Float64Array;
 
+  // Sort kernels (Slice 5.7a).
+  // Rust backend: pointer-style ABI.
+  //   sort_f64(ptr, n)              → n (in-place, NaN-last)
+  //   argsort_f64(data_ptr, n, out_ptr) → n
+  //   rank_f64(data_ptr, n, out_ptr)    → n
+  // AS backend: typed-array ABI (no _as suffix — same name, detected by signature).
+  //   sort_f64(data)     → Float64Array
+  //   argsort_f64(data)  → Int32Array
+  //   rank_f64(data)     → Int32Array
+  sort_f64?: (ptr: number, n: number) => number;
+  argsort_f64?: (dataPtr: number, n: number, outPtr: number) => number;
+  rank_f64?: (dataPtr: number, n: number, outPtr: number) => number;
+
   // Dense matrix decompositions exported by the AssemblyScript binary.
   // The Rust binary exposes the same algorithms under `luDecomposition` /
   // `qrDecomposition` / `choleskyDecomposition` / `laInv` / `laDet` (see

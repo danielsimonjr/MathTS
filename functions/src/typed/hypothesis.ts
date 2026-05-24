@@ -31,6 +31,7 @@
  */
 
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 
 // =============================================================================
 // Type Definitions
@@ -733,10 +734,10 @@ export async function kolmogorovSmirnovTest(
   if (sample.length < 1) throw new Error('kolmogorovSmirnovTest: sample must be non-empty');
 
   const n = sample.length;
-  // Sort stays on main thread (O(n log n) — dominant cost)
-  const tmpSorted = [...sample].sort((a, b) => a - b);
+  // Sort — WASM-accelerated above WASM_SORT_THRESHOLD (16 K elements).
   const sorted = new Float64Array(n);
-  for (let i = 0; i < n; i++) sorted[i] = tmpSorted[i];
+  for (let i = 0; i < n; i++) sorted[i] = sample[i];
+  sortF64Dispatch(sorted);
 
   let cdfValues: Float64Array;
 
@@ -870,11 +871,24 @@ export async function mannWhitneyTest(
   const n2 = sample2.length;
   const nTotal = n1 + n2;
 
-  // Combine and rank — sort stays on main thread
+  // Combine and rank — WASM-sort-accelerated above WASM_SORT_THRESHOLD.
   const combined: { value: f64; group: number }[] = [];
   for (const v of sample1) combined.push({ value: v, group: 1 });
   for (const v of sample2) combined.push({ value: v, group: 2 });
-  combined.sort((a, b) => a.value - b.value);
+
+  if (nTotal >= WASM_SORT_THRESHOLD) {
+    // Use WASM argsort on the value vector, then reorder.
+    const vals = new Float64Array(nTotal);
+    for (let k = 0; k < nTotal; k++) vals[k] = combined[k].value;
+    const { argsortF64Dispatch } = await import('../wasm/sort/wasm-bridge.js');
+    const idx = argsortF64Dispatch(vals);
+    const sortedCombined: { value: f64; group: number }[] = new Array(nTotal);
+    for (let k = 0; k < nTotal; k++) sortedCombined[k] = combined[idx[k]];
+    combined.length = 0;
+    for (let k = 0; k < nTotal; k++) combined.push(sortedCombined[k]);
+  } else {
+    combined.sort((a, b) => a.value - b.value);
+  }
 
   // Assign ranks with tie handling
   const ranksArr = new Float64Array(nTotal);
@@ -1031,12 +1045,12 @@ export async function shapiroWilkTest(
   if (n < 3) throw new Error('shapiroWilkTest: need at least 3 observations');
   if (n > 5000) throw new Error('shapiroWilkTest: maximum 5000 observations');
 
-  // Sort stays on main thread
-  const sortedArr = [...sample].sort((a, b) => a - b);
+  // Sort — WASM-accelerated above WASM_SORT_THRESHOLD (16 K elements).
   const sorted = new Float64Array(n);
-  for (let k = 0; k < n; k++) sorted[k] = sortedArr[k];
+  for (let k = 0; k < n; k++) sorted[k] = sample[k];
+  sortF64Dispatch(sorted);
 
-  const m = _mean(sortedArr);
+  const m = _mean(Array.from(sorted));
 
   // Compute S^2
   let ss = 0;
