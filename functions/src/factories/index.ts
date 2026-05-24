@@ -167,12 +167,12 @@ export const map = createMap(factoryScope as any);
 export const size = createSize(factoryScope as any);
 export const squeeze = createSqueeze(factoryScope as any);
 
-// probability
-export const combinations = createCombinations(factoryScope as any);
-export const combinationsWithRep = createCombinationsWithRep(factoryScope as any);
+// probability (synced factories — superseded by typed/probability; kept internal for factoryScope wiring)
+const combinations = createCombinations(factoryScope as any);
+const combinationsWithRep = createCombinationsWithRep(factoryScope as any);
 export const lgamma = createLgamma(factoryScope as any);
-export const pickRandom = createPickRandom(factoryScope as any);
-export const random = createRandom(factoryScope as any);
+const pickRandom = createPickRandom(factoryScope as any);
+const random = createRandom(factoryScope as any);
 
 // relational (synced factory — superseded by typed/relational; kept internal for factoryScope wiring)
 const equalScalar = createEqualScalar(factoryScope as any);
@@ -318,8 +318,8 @@ factoryScope.parseNumberWithConfig = parseNumberWithConfig;
 // arithmetic
 export const divideScalar = createDivideScalar(factoryScope as any);
 
-// probability
-export const randomInt = createRandomInt(factoryScope as any);
+// probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
+const randomInt = createRandomInt(factoryScope as any);
 
 // statistics
 export const mode = createMode(factoryScope as any);
@@ -526,9 +526,9 @@ factoryScope.log = factory_log;
 export const catalan = createCatalan(factoryScope as any);
 factoryScope.catalan = catalan;
 
-// probability
-export const bernoulli = createBernoulli(factoryScope as any);
-factoryScope.bernoulli = bernoulli;
+// probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
+const bernoulli_factory = createBernoulli(factoryScope as any);
+factoryScope.bernoulli = bernoulli_factory;
 
 // signal
 export const zpk2tf = createZpk2tf(factoryScope as any);
@@ -841,8 +841,9 @@ import { createPermutations } from '../probability/permutations.js';
 export const stirlingS2 = createStirlingS2(factoryScope as any);
 factoryScope.stirlingS2 = stirlingS2;
 
-export const permutations = createPermutations(factoryScope as any);
-factoryScope.permutations = permutations;
+// probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
+const permutations_factory = createPermutations(factoryScope as any);
+factoryScope.permutations = permutations_factory;
 
 // ---------------------------------------------------------------------------
 // Tier 9: bellNumbers (unlocked by stirlingS2)
@@ -1172,8 +1173,9 @@ factoryScope.quantileSeq = quantileSeq;
 export const kldivergence = createKldivergence(factoryScope as any);
 factoryScope.kldivergence = kldivergence;
 
-export const multinomial = createMultinomial(factoryScope as any);
-factoryScope.multinomial = multinomial;
+// probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
+const multinomial_factory = createMultinomial(factoryScope as any);
+factoryScope.multinomial = multinomial_factory;
 
 export const freqz = createFreqz(factoryScope as any);
 factoryScope.freqz = freqz;

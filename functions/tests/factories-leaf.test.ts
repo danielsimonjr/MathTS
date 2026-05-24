@@ -13,6 +13,9 @@ import { equalScalar } from '../src/typed/relational.js';
 // format/print moved from factories/ to typed/ — import from the typed layer
 import { format } from '../src/typed/string.js';
 
+// combinations/combinationsWithRep moved from factories/ to typed/ — import from the typed layer
+import { combinations, combinationsWithRep } from '../src/typed/probability.js';
+
 // Import non-conflicting exports directly
 import {
   addScalar,
@@ -21,8 +24,6 @@ import {
   flatten,
   size,
   squeeze,
-  combinations,
-  combinationsWithRep,
   erf,
   clone,
   isNaN as mathIsNaN,

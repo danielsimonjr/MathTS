@@ -3,10 +3,12 @@ import { describe, it, expect } from 'vitest';
 // bin/hex/oct moved from factories/ to typed/ — import them from the typed layer
 import { bin, hex, oct } from '../src/typed/string.js';
 
+// randomInt moved from factories/ to typed/ — import from the typed layer
+import { randomInt } from '../src/typed/probability.js';
+
 import {
   divideScalar,
   parseNumberWithConfig,
-  randomInt,
   mode,
   prod,
   hasNumericValue,
