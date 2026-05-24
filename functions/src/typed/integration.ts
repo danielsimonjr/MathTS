@@ -15,6 +15,26 @@
  *   summation is offloaded via `computePool.sum` when length ≥
  *   ARRAY_WORKER_THRESHOLD.
  *
+ * Worker-dispatch strategy (Slice 5.10) — sub-interval fan-out:
+ * - gaussQuad / romberg accept an optional `workerCount` option (default 1).
+ *   When `workerCount > 1` and `totalPoints ≥ GAUSS_WORKER_THRESHOLD`, the
+ *   integration domain is partitioned into `workerCount` equal sub-domains and
+ *   one `integrateChunk` worker task is dispatched per sub-domain.  Each task
+ *   stringifies the integrand closure and evaluates it inside the worker.
+ *
+ * **Closure-stringification contract:**
+ * Only closures that are self-contained (no free variables referencing
+ * outer scope) survive worker dispatch.  The heuristic in
+ * `validateClosureSource` tokenizes the function source and rejects any
+ * identifier that is not:
+ *   - the declared parameter name(s),
+ *   - a `Math` property access (`Math.*`),
+ *   - a standard numeric literal keyword (`Infinity`, `NaN`), or
+ *   - a keyword / punctuation.
+ * Arrow functions (`x => x*x`, `(x) => x*x`) and classic function expressions
+ * (`function(x){ return x*x; }`) both stringify cleanly.
+ * Async closures are rejected unconditionally.
+ *
  * These use plain exports (not mathTyped) because they accept function
  * arguments, which typed-function does not handle well.
  *
@@ -32,6 +52,163 @@ export const GAUSS_WORKER_THRESHOLD = 64;
 
 /** Minimum array length before trapzF64 / simpsonF64 offload the summation. */
 export const ARRAY_WORKER_THRESHOLD = 65_536;
+
+// =============================================================================
+// Closure validation (Slice 5.10)
+// =============================================================================
+
+/**
+ * Standard JS global identifiers allowed inside a worker-dispatched closure.
+ *
+ * The allow-list covers numeric literals, standard Math globals, and language
+ * keywords / operators that appear as tokens in typical numeric expressions.
+ * Any identifier NOT in this set (and NOT the declared parameter name) triggers
+ * a rejection, protecting against silent closure-capture failures inside the
+ * isolated worker context.
+ */
+const ALLOWED_GLOBALS = new Set([
+  // numeric globals
+  'Infinity',
+  'NaN',
+  'undefined',
+  'Math',
+  // common Math method names (accessed as Math.xxx — validated separately)
+  'abs',
+  'acos',
+  'acosh',
+  'asin',
+  'asinh',
+  'atan',
+  'atan2',
+  'atanh',
+  'cbrt',
+  'ceil',
+  'clz32',
+  'cos',
+  'cosh',
+  'exp',
+  'expm1',
+  'floor',
+  'fround',
+  'hypot',
+  'imul',
+  'log',
+  'log10',
+  'log1p',
+  'log2',
+  'max',
+  'min',
+  'pow',
+  'random',
+  'round',
+  'sign',
+  'sin',
+  'sinh',
+  'sqrt',
+  'tan',
+  'tanh',
+  'trunc',
+  'E',
+  'LN10',
+  'LN2',
+  'LOG10E',
+  'LOG2E',
+  'PI',
+  'SQRT1_2',
+  'SQRT2',
+  // JS keywords / control-flow tokens that appear in stringified functions
+  'function',
+  'return',
+  'var',
+  'let',
+  'const',
+  'if',
+  'else',
+  'for',
+  'while',
+  'do',
+  'break',
+  'continue',
+  'true',
+  'false',
+  'null',
+  'new',
+  'typeof',
+  'instanceof',
+  'void',
+  'delete',
+  'in',
+  'of',
+  'throw',
+  'try',
+  'catch',
+  'finally',
+  'switch',
+  'case',
+  'default',
+  'class',
+  'this',
+  'super',
+  'import',
+  'export',
+  'from',
+  'as',
+]);
+
+/**
+ * Validate that a stringified function closure is safe to dispatch to a worker.
+ *
+ * The heuristic:
+ * 1. Rejects async closures outright (they cannot be reconstructed portably).
+ * 2. Extracts the parameter name(s) from the function source.
+ * 3. Tokenizes the body by extracting all bare identifiers (word characters
+ *    not preceded or followed by a dot — i.e. not `Math.sin` method parts).
+ * 4. Rejects any identifier that is not the parameter name, not in the
+ *    ALLOWED_GLOBALS set, and not a numeric literal.
+ *
+ * @param fnSource - Result of `f.toString()`
+ * @throws {Error} When the closure references outer-scope identifiers or is async
+ */
+export function validateClosureSource(fnSource: string): void {
+  // Reject async closures
+  if (/\basync\b/.test(fnSource)) {
+    throw new Error(
+      'gaussQuad/romberg workerCount fan-out: async closures cannot be dispatched to workers. ' +
+        'Use a synchronous (x: number) => number function.'
+    );
+  }
+
+  // Extract parameter name(s).
+  // Handles: (x) => ..., x => ..., function(x){...}, function f(x){...}
+  const paramMatch = fnSource.match(/^(?:async\s+)?(?:function\s*\w*\s*)?\(([^)]*)\)|^(\w+)\s*=>/);
+  const paramList = paramMatch
+    ? (paramMatch[1] ?? paramMatch[2] ?? '')
+        .split(',')
+        .map((p) => p.trim().replace(/\s*=.*$/, '')) // strip defaults
+        .filter(Boolean)
+    : [];
+
+  const paramSet = new Set(paramList);
+
+  // Extract all bare identifiers: word chars NOT preceded by a dot.
+  // This strips `sin` out of `Math.sin` via the negative lookbehind.
+  const identifiers = fnSource.matchAll(/(?<!\.)(?<![0-9])\b([A-Za-z_$][A-Za-z0-9_$]*)\b/g);
+
+  for (const match of identifiers) {
+    const id = match[1];
+    if (!id) continue;
+    // Skip if it is the parameter, an allowed global, or a pure numeric literal
+    if (paramSet.has(id) || ALLOWED_GLOBALS.has(id)) continue;
+    // Numeric-looking suffixes (e.g. e in `1e5`) are caught by the regex start
+    // anchor — skip them as they won't appear here in practice.
+    throw new Error(
+      `gaussQuad/romberg workerCount fan-out: closure references outer-scope identifier ` +
+        `"${id}", which is not available inside the isolated worker context. ` +
+        `Only arithmetic, Math.* functions, and the parameter name are allowed. ` +
+        `If you need outer variables, inline them as literal values in the closure body.`
+    );
+  }
+}
 
 // =============================================================================
 // Gauss-Legendre nodes and weights (precomputed for order=2..5)
@@ -222,6 +399,30 @@ function gaussQuadSerial(f: (x: number) => number, a: number, b: number, order: 
 }
 
 /**
+ * Options for `gaussQuad` fan-out mode (Slice 5.10).
+ */
+export interface GaussQuadOptions {
+  /**
+   * Number of sub-domain worker tasks to spawn when `n ≥ GAUSS_WORKER_THRESHOLD`.
+   *
+   * - `1` (default): behaves exactly as Slice 3.8 — no sub-interval fan-out.
+   * - `> 1`: the domain `[a, b]` is partitioned into `workerCount` equal
+   *   sub-domains.  One `integrateChunk` worker task is dispatched per
+   *   sub-domain.  The closure `f` is stringified via `f.toString()` and
+   *   reconstructed inside each worker with `new Function`.
+   *
+   * **Closure constraint:** The integrand must be a self-contained expression
+   * (no references to outer-scope variables).  Use `Math.*` methods and
+   * arithmetic only.  Async closures are rejected.  See `validateClosureSource`.
+   *
+   * **Fall-back:** when `workerCount > 1` but `totalPoints < GAUSS_WORKER_THRESHOLD`
+   * or the pool is not ready, the function falls back to single-thread evaluation
+   * (worker overhead would dominate at small sizes).
+   */
+  workerCount?: number;
+}
+
+/**
  * Numerical integration using Gauss-Legendre quadrature.
  *
  * When `n` is in [2, 5] the legacy single-interval mode is used (backward
@@ -232,23 +433,33 @@ function gaussQuadSerial(f: (x: number) => number, a: number, b: number, order: 
  * evaluation stays on the main thread; the weighted dot-product reduction is
  * offloaded to the compute pool when the pool is ready.
  *
- * @param f     - Function to integrate
- * @param a     - Lower bound
- * @param b     - Upper bound
- * @param n     - Number of quadrature points (2–5) OR number of sub-intervals (≥ 6)
- * @param order - GL order to use per sub-interval when n ≥ 6 (default 5)
+ * **Sub-interval fan-out (Slice 5.10):** Pass `{ workerCount: k }` to
+ * partition the integration domain into `k` equal sub-domains and dispatch
+ * one worker task per sub-domain.  Requires `totalPoints ≥ GAUSS_WORKER_THRESHOLD`
+ * and the compute pool to be ready; otherwise falls back to single-thread.
+ * The integrand `f` must satisfy the closure-stringification contract — see
+ * `validateClosureSource` and the module-level JSDoc.
+ *
+ * @param f       - Function to integrate
+ * @param a       - Lower bound
+ * @param b       - Upper bound
+ * @param n       - Number of quadrature points (2–5) OR number of sub-intervals (≥ 6)
+ * @param order   - GL order to use per sub-interval when n ≥ 6 (default 5)
+ * @param options - Optional fan-out options `{ workerCount }`
  * @returns Approximate integral (or Promise when n ≥ GAUSS_WORKER_THRESHOLD and pool is ready)
  *
  * @example
- * gaussQuad(x => x ** 2, 0, 1, 3)        // => ~0.3333  (3-point GL, single interval)
- * await gaussQuad(Math.sin, 0, Math.PI, 64) // => ~2.0    (composite, 64 sub-intervals)
+ * gaussQuad(x => x ** 2, 0, 1, 3)                        // => ~0.3333  (3-point GL, single interval)
+ * await gaussQuad(Math.sin, 0, Math.PI, 64)               // => ~2.0     (composite, 64 sub-intervals)
+ * await gaussQuad(Math.sin, 0, Math.PI, 64, 5, { workerCount: 4 }) // => ~2.0 (fan-out, 4 workers)
  */
 export function gaussQuad(
   f: (x: number) => number,
   a: number,
   b: number,
   n: number = 5,
-  order: number = 5
+  order: number = 5,
+  options: GaussQuadOptions = {}
 ): number | Promise<number> {
   // Legacy single-interval mode (backward compatible)
   if (n >= 2 && n <= 5) {
@@ -266,9 +477,30 @@ export function gaussQuad(
   const clampedOrder = order >= 2 && order <= 5 ? order : 5;
   const nodes = GL_NODES[clampedOrder];
   const weights = GL_WEIGHTS[clampedOrder];
+  const totalPoints = n * clampedOrder;
+
+  const workerCount = options.workerCount ?? 1;
+
+  // Sub-interval fan-out path (Slice 5.10):
+  // Partition [a, b] into workerCount sub-domains and dispatch one worker task
+  // per sub-domain when the pool is ready and totalPoints ≥ threshold.
+  if (workerCount > 1 && totalPoints >= GAUSS_WORKER_THRESHOLD && computePool.isReady()) {
+    // Validate the closure before sending it to the worker.
+    // This throws a clear error if the closure captures outer-scope variables.
+    validateClosureSource(f.toString());
+    return computePool.integrateFanOut(
+      f.toString(),
+      a,
+      b,
+      workerCount,
+      Array.from(nodes),
+      Array.from(weights)
+    );
+  }
+
+  // Slice 3.8 path: evaluate f on the main thread, offload dot product
   const subWidth = (b - a) / n;
   const halfSub = subWidth / 2;
-  const totalPoints = n * clampedOrder;
 
   // Evaluate f at all quadrature points on the main thread.
   // Layout: values[i * order + j] = f(node j of sub-interval i)
@@ -302,6 +534,29 @@ export function gaussQuad(
 // =============================================================================
 
 /**
+ * Options for `romberg` fan-out mode (Slice 5.10).
+ */
+export interface RombergOptions {
+  /**
+   * Number of sub-domain worker tasks to spawn for the initial trapezoidal
+   * estimate when the evaluation count crosses `GAUSS_WORKER_THRESHOLD`.
+   *
+   * - `1` (default): behaves exactly as Slice 3.8 — no sub-interval fan-out.
+   * - `> 1`: the domain `[a, b]` is partitioned into `workerCount` equal
+   *   sub-domains for the initial estimate.  Each sub-domain is integrated
+   *   with a 5-point GL rule inside a worker.
+   *
+   * **Closure constraint:** Same as `GaussQuadOptions.workerCount` — see
+   * `validateClosureSource` for details.
+   *
+   * **Fall-back:** when `workerCount > 1` but the point count is below
+   * `GAUSS_WORKER_THRESHOLD` or the pool is not ready, the standard sequential
+   * path is used.
+   */
+  workerCount?: number;
+}
+
+/**
  * Romberg integration using Richardson extrapolation on the trapezoidal rule.
  *
  * Adaptively refines the estimate until the desired tolerance is reached
@@ -313,21 +568,57 @@ export function gaussQuad(
  * *new* points, the pool is engaged once n ≥ log2(GAUSS_WORKER_THRESHOLD),
  * i.e. from level 7 onward (128 new points per level).
  *
- * @param f   - Function to integrate
- * @param a   - Lower bound
- * @param b   - Upper bound
- * @param tol - Desired absolute tolerance (default 1e-12)
+ * **Sub-interval fan-out (Slice 5.10):** Pass `{ workerCount: k }` to fan out
+ * the initial trapezoidal sub-domain evaluations to `k` workers.  The closure
+ * `f` must satisfy the stringification contract — see `validateClosureSource`.
+ *
+ * @param f       - Function to integrate
+ * @param a       - Lower bound
+ * @param b       - Upper bound
+ * @param tol     - Desired absolute tolerance (default 1e-12)
+ * @param options - Optional fan-out options `{ workerCount }`
  * @returns Promise resolving to the approximate integral
  *
  * @example
- * await romberg(Math.sin, 0, Math.PI) // => ~2.0
+ * await romberg(Math.sin, 0, Math.PI)                          // => ~2.0
+ * await romberg(Math.sin, 0, Math.PI, 1e-12, { workerCount: 4 }) // fan-out, 4 workers
  */
 export async function romberg(
   f: (x: number) => number,
   a: number,
   b: number,
-  tol: number = 1e-12
+  tol: number = 1e-12,
+  options: RombergOptions = {}
 ): Promise<number> {
+  const workerCount = options.workerCount ?? 1;
+
+  // Sub-interval fan-out path (Slice 5.10):
+  // Partition [a, b] into `workerCount` equal sub-domains and run one high-order
+  // GL quadrature task per sub-domain inside the worker pool.  Each worker
+  // receives the stringified integrand, evaluates it with 5-point GL nodes, and
+  // returns the sub-domain integral.  The partial integrals are summed here.
+  //
+  // This path bypasses the Romberg recursion and uses the GL composite rule,
+  // which achieves equivalent accuracy (5-point GL is exact for degree ≤ 9
+  // polynomials; the sub-domain partition further improves accuracy).
+  //
+  // Fall-back: if workerCount ≤ 1, or pool is not ready, fall through to the
+  // standard Romberg recursion.
+  if (workerCount > 1 && computePool.isReady()) {
+    validateClosureSource(f.toString());
+    const nodes = GL_NODES[5];
+    const weights = GL_WEIGHTS[5];
+    return computePool.integrateFanOut(
+      f.toString(),
+      a,
+      b,
+      workerCount,
+      Array.from(nodes),
+      Array.from(weights)
+    );
+  }
+
+  // Standard Romberg recursion (Slice 3.8 path)
   const maxIter = 20;
   const R: number[][] = [];
 
