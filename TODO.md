@@ -47,6 +47,21 @@ Detail:
       in any `package.json` — landing this requires a one-time
       install + config PR before the smoke test can be wired in.
 
+- [ ] **ITensor-parity tensor primitives** — see proposal at
+      [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md).
+      Four phases, three currently in flight:
+
+      | Phase | Deliverable                                                    | Effort   |
+      | ----- | -------------------------------------------------------------- | -------- |
+      | 1     | `Index` value type + `Tensor.contract` (match-by-id)           | ~150 LOC |
+      | 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD | ~80 LOC  |
+      | 3     | `randomTensor(shape, {distribution, seed})` constructors       | ~40 LOC  |
+      | 4     | Optimal contraction-sequence solver — DEFERRED to a follow-up  | ~300 LOC |
+
+      Out of scope per the proposal §6: MPS/MPO/DMRG/TEBD/TDVP (live
+      in UPT or a sibling), quantum-number block-sparse storage,
+      fermionic anticommutation, HDF5 I/O.
+
 ## ✅ Completed
 
 - [x] TypeScript conversion (src/) - 66% coverage, 0 errors
