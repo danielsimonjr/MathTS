@@ -114,6 +114,64 @@ Detail:
       sized chunks in the order suggested by §D rank rows 7, 8, 10,
       10b, 10c (the entries with B-class lineage).
 
+- [ ] **Gap-closure proposal — implementation plan dispatched** —
+      design at [`docs/roadmap/GAP_CLOSURE_PROPOSAL.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL.md).
+      Operationalises the audit's §D sequencing table into 4 tiers
+      with concrete file lists and slice boundaries:
+
+      **Tier 1 (parallel, 5 agents, disjoint scopes):**
+      - [ ] **Slice 1.1** — `TapedTensor.divide` + `TapedTensor.sub`
+            (rank 1). `autograd/src/tape.ts`. Adjoints:
+            `divide(a,b)`: `dA=dY/b`, `dB=-dY·a/b²`; `sub(a,b)`:
+            `dA=dY`, `dB=-dY`.
+      - [ ] **Slice 1.2** — `typed/relational.ts` promotion (rank 2).
+            7 missing exports: `deepEqual`, `unequal`, `compareNatural`,
+            `compareText`, `compareUnits`, `equalScalar`, `equalText`.
+            NEW `functions/src/typed/relational.ts` + tests; strip
+            colliding `export`s from `factories/index.ts`.
+      - [ ] **Slice 1.3** — `ComputePool.divide` (rank 3).
+            `parallel/src/ComputePool.ts` — close the asymmetry with
+            `subtract`. Wire `applyKernel2` with `(x,y) => x/y`.
+      - [ ] **Slice 1.5** — Promote LU + Cholesky to matrix primitives
+            (rank 5). Move inlined Doolittle LU and right-looking
+            Cholesky from `tensor/src/operations/{lu,cholesky}.ts` to
+            new `matrix/src/operations/{lu,cholesky}.ts`; tensor
+            delegates. De-duplication only — no behavioural change.
+      - [ ] **Slice 1.6** — `bench:tensor` suite (rank 6). NEW
+            `tools/benchmark/tensor/{contract,contract-network,tensordot,decompositions}.bench.ts`
+            + root `npm run bench:tensor` script.
+
+      **Tier 2 (follow-up, depends on Slice 1.5):**
+      - [ ] **Slice 2.4** — `tensorPinv` + `tensorSolve` + `tensorKron`
+            (rank 4). NEW `tensor/src/operations/{pinv,solve,kron}.ts`.
+            Composes the now-public `matrix.lu` + `matrix.svd`.
+
+      **Tier 3 (WASM-route, sequenced one at a time):**
+      - [ ] **Slice 3.7** — `typed/algebra.ts` polynomial WASM ports
+            (rank 7). NEW `wasm-rust/crates/<crate>/src/poly.rs` +
+            AS parity + bridge + threshold bench. Wire `polymul`,
+            `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`,
+            `polynomialRemainder`. Starting threshold ≥ 256 coeffs.
+      - [ ] **Slice 3.8** — `typed/integration.ts` worker dispatch
+            (rank 8). `gaussQuad`/`romberg` ≥ 64 sub-intervals;
+            `trapz`/`simpson` ≥ 65,536 samples.
+      - [ ] **Slice 3.10** — `typed/hypothesis.ts` worker dispatch
+            (rank 10). `kolmogorovSmirnovTest`/`mannWhitneyTest`/
+            `shapiroWilkTest`/`chiSquareTest` ≥ 4096 samples.
+      - [ ] **Slice 3.10b** — `typed/interpolation.ts` tridiag-solve
+            WASM (rank 10b). NEW `wasm.tridiagSolveF64` (Thomas
+            algorithm). Wire `cubicSpline`/`pchip`/`akima`.
+            Starting threshold ≥ 1024 knots.
+      - [ ] **Slice 3.10c** — `typed/special.ts` Bessel/Airy WASM
+            family (rank 10c). NEW `wasm.besselJF64`/`besselYF64`/
+            `airyAiF64`/`airyBiF64`. May split into 3.10c-1 (Bessel)
+            + 3.10c-2 (Airy + elliptic) if scope balloons.
+
+      **Tier 4 (deferred, awaiting consumer pressure or blockers):**
+      ranks 9 (probability dedup audit needed), 11 (Tensor.slice
+      family), 12 (TapedTensor decomposition AD), 13 (typed/string.ts),
+      14 (typed/unit.ts — blocked on Unit type in core).
+
 - [x] **ITensor-parity tensor primitives** — see proposal at
       [`docs/roadmap/ITENSOR_PARITY.md`](docs/roadmap/ITENSOR_PARITY.md).
       All six phases LANDED. Phases 1-3 in commit `a21a844`, Phases
