@@ -86,10 +86,10 @@ describe('Tensor — construction + elementwise', () => {
     ).toBe(9);
   });
 
-  it('add throws on shape mismatch', () => {
+  it('add throws on incompatible shapes (non-broadcastable)', () => {
     const a = Tensor.fromNested([1, 2], [2]);
     const b = Tensor.fromNested([1, 2, 3], [3]);
-    expect(() => a.add(b)).toThrow(/shape mismatch/);
+    expect(() => a.add(b)).toThrow(/cannot be broadcast/);
   });
 
   it('constructor throws when data length does not match the shape', () => {

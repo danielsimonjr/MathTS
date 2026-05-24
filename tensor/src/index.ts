@@ -11,3 +11,7 @@ export { tensorSvd } from './operations/svd';
 export type { TensorSvdOpts, TensorSvdResult } from './operations/svd';
 export { randomTensor } from './operations/random';
 export type { RandomTensorOpts } from './operations/random';
+
+// Phase 4: optimal pairwise-contraction order over a tensor network.
+export { contractNetwork } from './contraction-sequence';
+export type { ContractNetworkOpts, ContractNetworkResult } from './contraction-sequence';

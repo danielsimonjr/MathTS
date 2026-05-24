@@ -148,14 +148,36 @@ export class Tensor {
     return new Tensor(this.shape, out);
   }
 
-  add(other: Tensor): Tensor {
-    return this.elementwise(other, 'add', (x, y) => x + y);
+  add(other: Tensor | number): Tensor {
+    if (typeof other === 'number') {
+      const out = new Float64Array(this.data.length);
+      for (let i = 0; i < this.data.length; i++) out[i] = this.data[i] + other;
+      return new Tensor(this.shape, out, this.axisLabels);
+    }
+    if (this.sameShape(other)) {
+      return this.elementwise(other, 'add', (x, y) => x + y);
+    }
+    return Tensor.broadcastOp(this, other, 'add', (x, y) => x + y);
   }
-  sub(other: Tensor): Tensor {
-    return this.elementwise(other, 'sub', (x, y) => x - y);
+  sub(other: Tensor | number): Tensor {
+    if (typeof other === 'number') {
+      const out = new Float64Array(this.data.length);
+      for (let i = 0; i < this.data.length; i++) out[i] = this.data[i] - other;
+      return new Tensor(this.shape, out, this.axisLabels);
+    }
+    if (this.sameShape(other)) {
+      return this.elementwise(other, 'sub', (x, y) => x - y);
+    }
+    return Tensor.broadcastOp(this, other, 'sub', (x, y) => x - y);
   }
-  mul(other: Tensor): Tensor {
-    return this.elementwise(other, 'mul', (x, y) => x * y);
+  mul(other: Tensor | number): Tensor {
+    if (typeof other === 'number') {
+      return this.scale(other);
+    }
+    if (this.sameShape(other)) {
+      return this.elementwise(other, 'mul', (x, y) => x * y);
+    }
+    return Tensor.broadcastOp(this, other, 'mul', (x, y) => x * y);
   }
 
   scale(k: number): Tensor {
@@ -171,6 +193,451 @@ export class Tensor {
       if (a > max) max = a;
     }
     return max;
+  }
+
+  // -------------------------------------------------------------------------
+  // Broadcasting support
+  // -------------------------------------------------------------------------
+
+  /**
+   * Compute the broadcast output shape of two shapes following NumPy rules:
+   * right-align the two shapes; a dimension of 1 broadcasts against any size;
+   * missing leading axes are treated as length-1.
+   * Throws with message including both shape arrays on incompatibility.
+   */
+  static broadcastShape(
+    a: ReadonlyArray<number>,
+    b: ReadonlyArray<number>
+  ): number[] {
+    const rank = Math.max(a.length, b.length);
+    const out = new Array<number>(rank);
+    for (let i = 0; i < rank; i++) {
+      // right-align: index from right
+      const ai = a.length - rank + i;
+      const bi = b.length - rank + i;
+      const da = ai >= 0 ? a[ai] : 1;
+      const db = bi >= 0 ? b[bi] : 1;
+      if (da === db) {
+        out[i] = da;
+      } else if (da === 1) {
+        out[i] = db;
+      } else if (db === 1) {
+        out[i] = da;
+      } else {
+        throw new Error(
+          `shapes [${a}] and [${b}] cannot be broadcast: ` +
+            `dimension mismatch ${da} vs ${db} at axis ${i} of the aligned shape`
+        );
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Apply a binary elementwise op with NumPy-style broadcasting.
+   * Both tensors are read via virtual broadcast indices — no data is copied
+   * until the output is written.
+   */
+  private static broadcastOp(
+    a: Tensor,
+    b: Tensor,
+    _opName: string,
+    f: (x: number, y: number) => number
+  ): Tensor {
+    const outShape = Tensor.broadcastShape(a.shape, b.shape);
+    const rank = outShape.length;
+    const outSize = Tensor.sizeOf(outShape);
+    const aStrides = Tensor.rowMajorStrides(a.shape);
+    const bStrides = Tensor.rowMajorStrides(b.shape);
+
+    // Effective strides for broadcasting: if the dimension in the original
+    // shape is 1 (or the rank is shorter), the stride becomes 0 so repeated
+    // index accesses return the same element.
+    const aRankOffset = rank - a.shape.length;
+    const bRankOffset = rank - b.shape.length;
+    const aEffStrides = new Array<number>(rank).fill(0);
+    const bEffStrides = new Array<number>(rank).fill(0);
+    for (let i = 0; i < rank; i++) {
+      const ai = i - aRankOffset;
+      if (ai >= 0 && a.shape[ai] !== 1) {
+        aEffStrides[i] = aStrides[ai];
+      }
+      const bi = i - bRankOffset;
+      if (bi >= 0 && b.shape[bi] !== 1) {
+        bEffStrides[i] = bStrides[bi];
+      }
+    }
+
+    const out = new Float64Array(outSize);
+    const coords = new Array<number>(rank).fill(0);
+    for (let n = 0; n < outSize; n++) {
+      // compute flat indices for a and b from broadcast coords
+      let aFlat = 0;
+      let bFlat = 0;
+      for (let k = 0; k < rank; k++) {
+        aFlat += coords[k] * aEffStrides[k];
+        bFlat += coords[k] * bEffStrides[k];
+      }
+      out[n] = f(a.data[aFlat], b.data[bFlat]);
+      // increment coords (row-major)
+      for (let k = rank - 1; k >= 0; k--) {
+        if (++coords[k] < outShape[k]) break;
+        coords[k] = 0;
+      }
+    }
+    return new Tensor(outShape, out);
+  }
+
+  // -------------------------------------------------------------------------
+  // Reduction helpers
+  // -------------------------------------------------------------------------
+
+  /**
+   * Generic strided reduction over a set of axes.
+   *
+   * `init` is the neutral element; `combine` folds one new value into the
+   * accumulator; `finalise` (optional) post-processes the accumulator once
+   * all elements have been visited.
+   */
+  private reduceAxes(
+    axes: number[],
+    keepDims: boolean,
+    init: number,
+    combine: (acc: number, val: number) => number,
+    finalise?: (acc: number, count: number) => number
+  ): Tensor {
+    const rank = this.shape.length;
+    const axisSet = new Set(axes);
+
+    // Validate axes
+    for (const ax of axes) {
+      if (!Number.isInteger(ax) || ax < 0 || ax >= rank) {
+        throw new Error(
+          `Tensor.reduce: axis ${ax} out of range for rank-${rank} tensor`
+        );
+      }
+    }
+
+    // Build output shape
+    const outShape: number[] = [];
+    for (let k = 0; k < rank; k++) {
+      if (axisSet.has(k)) {
+        if (keepDims) outShape.push(1);
+        // else omit this axis
+      } else {
+        outShape.push(this.shape[k]);
+      }
+    }
+
+    // How many elements are in the reduced axes?
+    const reduceCount = axes.reduce((prod, ax) => prod * this.shape[ax], 1);
+
+    const outSize = Tensor.sizeOf(outShape);
+    const out = new Float64Array(outSize).fill(init);
+    const outStrides = Tensor.rowMajorStrides(outShape.length > 0 ? outShape : [1]);
+
+    // Iterate over all input elements
+    const inCoords = new Array<number>(rank).fill(0);
+    const inSize = this.data.length;
+    for (let n = 0; n < inSize; n++) {
+      // Compute the output flat index for this input coordinate
+      let outFlat = 0;
+      let outDim = 0;
+      for (let k = 0; k < rank; k++) {
+        if (axisSet.has(k)) {
+          if (keepDims) {
+            // contributes 0 (coordinate is 0 in the kept dim-1 axis)
+            outDim++;
+          }
+          // else: skip
+        } else {
+          outFlat += inCoords[k] * outStrides[outDim];
+          outDim++;
+        }
+      }
+      out[outFlat] = combine(out[outFlat], this.data[n]);
+      // increment inCoords
+      for (let k = rank - 1; k >= 0; k--) {
+        if (++inCoords[k] < this.shape[k]) break;
+        inCoords[k] = 0;
+      }
+    }
+
+    if (finalise !== undefined) {
+      for (let i = 0; i < out.length; i++) {
+        out[i] = finalise(out[i], reduceCount);
+      }
+    }
+
+    // Propagate axisLabels: keep labels for surviving axes only.
+    // With keepDims=true the reduced axes become length-1 slots in outShape,
+    // but we have no label for those slots — so we drop axisLabels entirely
+    // when keepDims is true (the count would not match the output rank).
+    // Without keepDims: carry the surviving labels iff there are any.
+    let resultLabels: ReadonlyArray<Index> | undefined;
+    if (!keepDims && this.axisLabels !== undefined) {
+      const surviving: Index[] = [];
+      for (let k = 0; k < rank; k++) {
+        if (!axisSet.has(k)) {
+          surviving.push(this.axisLabels[k]);
+        }
+      }
+      // Only attach labels when they cover all surviving axes (all non-reduced axes
+      // had labels) — i.e. surviving.length === outShape.length.
+      if (surviving.length === outShape.length) {
+        resultLabels = surviving;
+      }
+    }
+
+    return new Tensor(outShape, out, resultLabels);
+  }
+
+  // -------------------------------------------------------------------------
+  // Public reductions
+  // -------------------------------------------------------------------------
+
+  /**
+   * Sum elements along the given axis/axes (or all axes if omitted).
+   * `keepDims: true` preserves reduced axes as length-1.
+   */
+  sum(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): Tensor {
+    const axes = this.resolveAxes(axis);
+    const keepDims = opts?.keepDims ?? false;
+    return this.reduceAxes(axes, keepDims, 0, (acc, v) => acc + v);
+  }
+
+  /**
+   * Arithmetic mean along the given axis/axes (or all axes if omitted).
+   */
+  mean(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): Tensor {
+    const axes = this.resolveAxes(axis);
+    const keepDims = opts?.keepDims ?? false;
+    return this.reduceAxes(
+      axes,
+      keepDims,
+      0,
+      (acc, v) => acc + v,
+      (acc, count) => acc / count
+    );
+  }
+
+  /**
+   * Element-wise maximum along the given axis/axes (or all axes if omitted).
+   * NaN propagates (matches NumPy default behaviour).
+   */
+  max(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): Tensor {
+    const axes = this.resolveAxes(axis);
+    const keepDims = opts?.keepDims ?? false;
+    return this.reduceAxes(
+      axes,
+      keepDims,
+      -Infinity,
+      (acc, v) => (isNaN(v) ? v : isNaN(acc) ? acc : Math.max(acc, v))
+    );
+  }
+
+  /**
+   * Element-wise minimum along the given axis/axes (or all axes if omitted).
+   * NaN propagates (matches NumPy default behaviour).
+   */
+  min(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): Tensor {
+    const axes = this.resolveAxes(axis);
+    const keepDims = opts?.keepDims ?? false;
+    return this.reduceAxes(
+      axes,
+      keepDims,
+      Infinity,
+      (acc, v) => (isNaN(v) ? v : isNaN(acc) ? acc : Math.min(acc, v))
+    );
+  }
+
+  /**
+   * Product of elements along the given axis/axes (or all axes if omitted).
+   */
+  prod(
+    axis?: number | ReadonlyArray<number>,
+    opts?: { keepDims?: boolean }
+  ): Tensor {
+    const axes = this.resolveAxes(axis);
+    const keepDims = opts?.keepDims ?? false;
+    return this.reduceAxes(axes, keepDims, 1, (acc, v) => acc * v);
+  }
+
+  /**
+   * p-norm of the tensor.
+   *
+   * - `p = 2` (default): Euclidean / Frobenius norm — `sqrt(sum x_i^2)`.
+   * - `p = 'fro'`: alias for p=2 (Frobenius).
+   * - `p = 'inf'`: max of absolute values.
+   * - `p = '-inf'`: min of absolute values.
+   * - numeric p: `(sum |x_i|^p)^(1/p)`.
+   *
+   * When `axis` is given, the norm is computed along that single axis and the
+   * result has rank reduced by 1 (or stays the same with `keepDims`).
+   * When `axis` is omitted, the norm is computed over all elements.
+   */
+  norm(opts?: {
+    p?: number | 'inf' | '-inf' | 'fro';
+    axis?: number;
+    keepDims?: boolean;
+  }): Tensor {
+    const p = opts?.p ?? 2;
+    const keepDims = opts?.keepDims ?? false;
+    const axes = opts?.axis !== undefined ? [opts.axis] : this.resolveAxes(undefined);
+
+    if (p === 'fro' || p === 2) {
+      const sqSum = this.reduceAxes(axes, keepDims, 0, (acc, v) => acc + v * v);
+      const sqrtData = new Float64Array(sqSum.data.length);
+      for (let i = 0; i < sqSum.data.length; i++) sqrtData[i] = Math.sqrt(sqSum.data[i]);
+      return new Tensor(sqSum.shape, sqrtData, sqSum.axisLabels);
+    }
+    if (p === 'inf') {
+      return this.reduceAxes(
+        axes,
+        keepDims,
+        0,
+        (acc, v) => Math.max(acc, Math.abs(v))
+      );
+    }
+    if (p === '-inf') {
+      return this.reduceAxes(
+        axes,
+        keepDims,
+        Infinity,
+        (acc, v) => Math.min(acc, Math.abs(v))
+      );
+    }
+    // General numeric p: (sum |x|^p)^(1/p)
+    const pNum = p as number;
+    const powSum = this.reduceAxes(
+      axes,
+      keepDims,
+      0,
+      (acc, v) => acc + Math.pow(Math.abs(v), pNum)
+    );
+    const invP = 1 / pNum;
+    const result = new Float64Array(powSum.data.length);
+    for (let i = 0; i < powSum.data.length; i++) result[i] = Math.pow(powSum.data[i], invP);
+    return new Tensor(powSum.shape, result, powSum.axisLabels);
+  }
+
+  /**
+   * Generalised dot product (NumPy `tensordot`) over explicitly specified axis pairs.
+   *
+   * `axes[i] = [a, b]` contracts axis `a` of `this` with axis `b` of `other`.
+   * The result shape is `this`'s non-contracted axes followed by `other`'s
+   * non-contracted axes (NumPy convention).
+   *
+   * Delegates to `Tensor.einsum` under the hood.
+   */
+  tensordot(other: Tensor, axes: ReadonlyArray<readonly [number, number]>): Tensor {
+    const selfRank = this.shape.length;
+    const otherRank = other.shape.length;
+
+    // Validate axes
+    const selfContracted = new Set<number>();
+    const otherContracted = new Set<number>();
+    for (const [a, b] of axes) {
+      if (!Number.isInteger(a) || a < 0 || a >= selfRank) {
+        throw new Error(
+          `Tensor.tensordot: axis ${a} of 'this' (rank ${selfRank}) is out of range`
+        );
+      }
+      if (!Number.isInteger(b) || b < 0 || b >= otherRank) {
+        throw new Error(
+          `Tensor.tensordot: axis ${b} of 'other' (rank ${otherRank}) is out of range`
+        );
+      }
+      if (selfContracted.has(a)) {
+        throw new Error(
+          `Tensor.tensordot: duplicate axis ${a} in self contraction list`
+        );
+      }
+      if (otherContracted.has(b)) {
+        throw new Error(
+          `Tensor.tensordot: duplicate axis ${b} in other contraction list`
+        );
+      }
+      if (this.shape[a] !== other.shape[b]) {
+        throw new Error(
+          `Tensor.tensordot: dimension mismatch on contracted axes: ` +
+            `this.shape[${a}]=${this.shape[a]} vs other.shape[${b}]=${other.shape[b]}`
+        );
+      }
+      selfContracted.add(a);
+      otherContracted.add(b);
+    }
+
+    // Build EinsumSpec
+    // contracted axes: pair [0, selfAxis] with [1, otherAxis]
+    const contractions: EinsumSpec['contractions'][number][] = axes.map(([a, b]) => ({
+      pair: [
+        [0, a],
+        [1, b],
+      ] as const,
+    }));
+
+    // free axes: non-contracted self axes first, then non-contracted other axes
+    const free: EinsumSpec['free'][number][] = [];
+    for (let si = 0; si < selfRank; si++) {
+      if (!selfContracted.has(si)) {
+        free.push({ operand: 0, axis: si });
+      }
+    }
+    for (let oi = 0; oi < otherRank; oi++) {
+      if (!otherContracted.has(oi)) {
+        free.push({ operand: 1, axis: oi });
+      }
+    }
+
+    const spec: EinsumSpec = { contractions, free };
+    const result = Tensor.einsum(spec, this, other);
+
+    // Propagate axisLabels: surviving self axes then surviving other axes
+    let resultLabels: Index[] | undefined;
+    if (this.axisLabels !== undefined || other.axisLabels !== undefined) {
+      if (this.axisLabels !== undefined && other.axisLabels !== undefined) {
+        resultLabels = [];
+        for (let si = 0; si < selfRank; si++) {
+          if (!selfContracted.has(si)) {
+            resultLabels.push(this.axisLabels[si]);
+          }
+        }
+        for (let oi = 0; oi < otherRank; oi++) {
+          if (!otherContracted.has(oi)) {
+            resultLabels.push(other.axisLabels[oi]);
+          }
+        }
+      }
+    }
+
+    return new Tensor([...result.shape], result.data, resultLabels);
+  }
+
+  /**
+   * Normalise an `axis` argument into a sorted list of axis indices.
+   * `undefined` ⇒ all axes (reduce everything to a rank-0 scalar).
+   */
+  private resolveAxes(axis: number | ReadonlyArray<number> | undefined): number[] {
+    if (axis === undefined) {
+      return Array.from({ length: this.shape.length }, (_, i) => i);
+    }
+    if (typeof axis === 'number') {
+      return [axis];
+    }
+    return [...axis];
   }
 
   private static forEachIndex(shape: ReadonlyArray<number>, visit: (idx: number[]) => void): void {
