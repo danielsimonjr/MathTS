@@ -11,6 +11,7 @@
  */
 
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { Index } from './named-index.js';
 
 export type NestedArray = number | NestedArray[];
 
@@ -24,15 +25,29 @@ export interface EinsumSpec {
 export class Tensor {
   readonly shape: ReadonlyArray<number>;
   readonly data: Float64Array;
+  /** Optional per-axis Index labels. When set, enables `contract`, `replaceIndex`, `axisOf`. */
+  readonly axisLabels?: ReadonlyArray<Index>;
 
-  constructor(shape: ReadonlyArray<number>, data: Float64Array) {
+  constructor(
+    shape: ReadonlyArray<number>,
+    data: Float64Array,
+    axisLabels?: ReadonlyArray<Index>
+  ) {
     if (data.length !== Tensor.sizeOf(shape)) {
       throw new Error(
         `Tensor: data length ${data.length} does not match shape [${shape}] (size ${Tensor.sizeOf(shape)})`
       );
     }
+    if (axisLabels !== undefined && axisLabels.length !== shape.length) {
+      throw new Error(
+        `Tensor: axisLabels length ${axisLabels.length} does not match rank ${shape.length}`
+      );
+    }
     this.shape = shape;
     this.data = data;
+    if (axisLabels !== undefined) {
+      this.axisLabels = [...axisLabels];
+    }
   }
 
   static sizeOf(shape: ReadonlyArray<number>): number {
@@ -282,5 +297,161 @@ export class Tensor {
       out[Tensor.flatIndex(freeVals, outStrides)] = acc;
     });
     return new Tensor(freeSizes, out);
+  }
+
+  // -------------------------------------------------------------------------
+  // Named-index API (opt-in via axisLabels)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Return the axis position (0-based) of a labelled index.
+   * Throws if the index is not found in `axisLabels`.
+   */
+  axisOf(index: Index): number {
+    if (this.axisLabels === undefined) {
+      throw new Error('Tensor.axisOf: this tensor has no axisLabels');
+    }
+    const pos = this.axisLabels.findIndex((lbl) => lbl.matches(index));
+    if (pos === -1) {
+      throw new Error(`Tensor.axisOf: index ${index.toString()} not found in axisLabels`);
+    }
+    return pos;
+  }
+
+  /**
+   * Return a new Tensor with the same data and shape but with `oldIndex`
+   * swapped for `newIndex` in `axisLabels`.
+   * Throws if `oldIndex` is not found.
+   */
+  replaceIndex(oldIndex: Index, newIndex: Index): Tensor {
+    if (this.axisLabels === undefined) {
+      throw new Error('Tensor.replaceIndex: this tensor has no axisLabels');
+    }
+    const pos = this.axisLabels.findIndex((lbl) => lbl.matches(oldIndex));
+    if (pos === -1) {
+      throw new Error(
+        `Tensor.replaceIndex: index ${oldIndex.toString()} not found in axisLabels`
+      );
+    }
+    const newLabels = [...this.axisLabels];
+    newLabels[pos] = newIndex;
+    return new Tensor([...this.shape], this.data.slice(), newLabels);
+  }
+
+  /**
+   * Contract this tensor with `other` over every shared index (matched by
+   * `Index.matches`). Both operands must carry `axisLabels`.
+   *
+   * The result tensor carries the non-shared axes from `this` followed by
+   * the non-shared axes from `other` as its `axisLabels`.
+   *
+   * Throws:
+   * - If either operand lacks `axisLabels`.
+   * - If there are no shared indices (use `einsum` or an explicit outer product).
+   * - If a shared index has mismatched dimensions on the two operands.
+   */
+  contract(other: Tensor): Tensor {
+    if (this.axisLabels === undefined || other.axisLabels === undefined) {
+      throw new Error('Tensor.contract requires axisLabels on both operands');
+    }
+
+    // Identify shared indices (matched by id + primeLevel).
+    const sharedPairs: Array<{ selfAxis: number; otherAxis: number }> = [];
+    for (let si = 0; si < this.axisLabels.length; si++) {
+      for (let oi = 0; oi < other.axisLabels.length; oi++) {
+        if (this.axisLabels[si].matches(other.axisLabels[oi])) {
+          sharedPairs.push({ selfAxis: si, otherAxis: oi });
+          break; // each self-axis can match at most one other-axis
+        }
+      }
+    }
+
+    if (sharedPairs.length === 0) {
+      throw new Error(
+        'Tensor.contract: no shared indices to contract; use einsum or an explicit outer product'
+      );
+    }
+
+    // Validate dimension agreement on shared axes.
+    for (const { selfAxis, otherAxis } of sharedPairs) {
+      const dSelf = this.shape[selfAxis];
+      const dOther = other.shape[otherAxis];
+      if (dSelf !== dOther) {
+        throw new Error(
+          `Tensor.contract: shared index ${this.axisLabels[selfAxis].toString()} ` +
+            `has dimension ${dSelf} on 'this' but ${dOther} on 'other'`
+        );
+      }
+    }
+
+    // Build an EinsumSpec by assigning a letter to every distinct axis across
+    // both operands.  We use a simple running counter mapped to lower-case
+    // letters (a-z then aa-az etc. — in practice tensors rarely exceed 26 axes).
+    const sharedSelfAxes = new Set(sharedPairs.map((p) => p.selfAxis));
+    const sharedOtherAxes = new Set(sharedPairs.map((p) => p.otherAxis));
+
+    // Map (operand index, axis) → integer letter index.
+    let letterCount = 0;
+    const selfLetters = new Array<number>(this.shape.length).fill(-1);
+    const otherLetters = new Array<number>(other.shape.length).fill(-1);
+
+    // Assign letters to shared axes first so both sides share the same letter.
+    for (const { selfAxis, otherAxis } of sharedPairs) {
+      const letter = letterCount++;
+      selfLetters[selfAxis] = letter;
+      otherLetters[otherAxis] = letter;
+    }
+
+    // Assign letters to free axes.
+    for (let si = 0; si < this.shape.length; si++) {
+      if (!sharedSelfAxes.has(si)) {
+        selfLetters[si] = letterCount++;
+      }
+    }
+    for (let oi = 0; oi < other.shape.length; oi++) {
+      if (!sharedOtherAxes.has(oi)) {
+        otherLetters[oi] = letterCount++;
+      }
+    }
+
+    // Build the EinsumSpec.
+    const contractions: EinsumSpec['contractions'][number][] = sharedPairs.map(
+      ({ selfAxis, otherAxis }) => ({
+        pair: [
+          [0, selfAxis],
+          [1, otherAxis],
+        ] as const,
+      })
+    );
+
+    const free: EinsumSpec['free'][number][] = [];
+    for (let si = 0; si < this.shape.length; si++) {
+      if (!sharedSelfAxes.has(si)) {
+        free.push({ operand: 0, axis: si });
+      }
+    }
+    for (let oi = 0; oi < other.shape.length; oi++) {
+      if (!sharedOtherAxes.has(oi)) {
+        free.push({ operand: 1, axis: oi });
+      }
+    }
+
+    const spec: EinsumSpec = { contractions, free };
+    const result = Tensor.einsum(spec, this, other);
+
+    // Build axisLabels for the result: non-shared from this, then from other.
+    const resultLabels: Index[] = [];
+    for (let si = 0; si < this.axisLabels.length; si++) {
+      if (!sharedSelfAxes.has(si)) {
+        resultLabels.push(this.axisLabels[si]);
+      }
+    }
+    for (let oi = 0; oi < other.axisLabels.length; oi++) {
+      if (!sharedOtherAxes.has(oi)) {
+        resultLabels.push(other.axisLabels[oi]);
+      }
+    }
+
+    return new Tensor([...result.shape], result.data, resultLabels);
   }
 }
