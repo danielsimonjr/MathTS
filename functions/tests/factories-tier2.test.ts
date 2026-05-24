@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
 
+// bin/hex/oct moved from factories/ to typed/ — import them from the typed layer
+import { bin, hex, oct } from '../src/typed/string.js';
+
 import {
   divideScalar,
   parseNumberWithConfig,
   randomInt,
   mode,
   prod,
-  bin,
-  hex,
-  oct,
   hasNumericValue,
   isFinite,
   isZero,
