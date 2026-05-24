@@ -208,7 +208,7 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Threshold starting point:** `minElements = 1024` knots.
 
-### Slice 3.10c — typed/special.ts Bessel/Airy WASM family (rank 10c)
+### Slice 3.10c-1 — ✅ LANDED (Bessel-only) — typed/special.ts Bessel WASM kernels (rank 10c)
 
 **Goal:** Per-element transcendental WASM kernels for the special-function family operating over arrays.
 
@@ -226,7 +226,13 @@ These follow the §B.4 7-step pattern from `FUNCTION_GAPS_AUDIT.md`. Each slice 
 
 **Threshold starting point:** `minElements = 1024`.
 
-**Risk note:** Largest of the Tier-3 slices (~300 LOC across the family). May land in two sub-slices: 3.10c-1 (Bessel) and 3.10c-2 (Airy + elliptic).
+**Risk note:** Largest of the Tier-3 slices (~300 LOC across the family). Landed as two sub-slices per plan: 3.10c-1 (Bessel J/Y, Rust only) is done; 3.10c-2 is deferred.
+
+**Slice 3.10c-2 — TODO (deferred):** Airy Ai/Bi WASM kernels + AssemblyScript parity port for Bessel.
+- Add `airyAi(x)` / `airyBi(x)` scalar functions and array kernels in `wasm-rust/crates/mathts-wasm/src/bessel.rs` (or a new `airy.rs`).
+- Add AS parity in `assembly/src/special.ts`; register `bessel_j0_f64_as` etc. in `WasmLoader.ts`.
+- The bridge in `functions/src/wasm/special/wasm-bridge.ts` is already wired for `_as`-suffix probing — only the AS implementation is missing.
+- Blocked on: no immediate consumer demand; Airy series convergence at large |x| requires asymptotic expansion (different from Bessel).
 
 ## Tier 4 — Deferred
 

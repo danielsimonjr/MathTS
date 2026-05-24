@@ -611,6 +611,22 @@ export interface WasmModule {
     rhs: Float64Array
   ) => Float64Array;
 
+  // Bessel J/Y array kernels (Slice 3.10c-1).
+  // Rust backend: pointer-style.
+  //   bessel_j0_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
+  //   bessel_j1_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
+  //   bessel_j_f64(order, xs_ptr, n_elems, out_ptr) → n_elems (or -1)
+  //   bessel_y0_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
+  //   bessel_y1_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
+  //   bessel_y_f64(order, xs_ptr, n_elems, out_ptr) → n_elems (or -1)
+  // AS backend: not implemented (deferred — see TODO in wasm/special/wasm-bridge.ts).
+  bessel_j0_f64?: (xsPtr: number, n: number, outPtr: number) => number;
+  bessel_j1_f64?: (xsPtr: number, n: number, outPtr: number) => number;
+  bessel_j_f64?: (order: number, xsPtr: number, nElems: number, outPtr: number) => number;
+  bessel_y0_f64?: (xsPtr: number, n: number, outPtr: number) => number;
+  bessel_y1_f64?: (xsPtr: number, n: number, outPtr: number) => number;
+  bessel_y_f64?: (order: number, xsPtr: number, nElems: number, outPtr: number) => number;
+
   // Dense matrix decompositions exported by the AssemblyScript binary.
   // The Rust binary exposes the same algorithms under `luDecomposition` /
   // `qrDecomposition` / `choleskyDecomposition` / `laInv` / `laDet` (see

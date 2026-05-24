@@ -141,6 +141,12 @@ pub mod tridiag;
 pub use tridiag::*;
 
 // ============================================================
+// Slice 3.10c-1: Bessel J/Y array kernels
+// ============================================================
+pub mod bessel;
+pub use bessel::*;
+
+// ============================================================
 // AssemblyScript-compatible wrappers (scalar + array ops)
 // ============================================================
 pub mod compat;
