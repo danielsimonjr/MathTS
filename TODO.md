@@ -386,6 +386,46 @@ Detail:
             offsets per-atom standalone only. +53 core + 15 typed
             tests. Differences from mathjs's Unit class documented.
 
+- [ ] **Wave 6 gap-closure (final cleanup)** — design at
+      [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md).
+      Picks up the 5 forward-tracked items remaining after Wave 5
+      closed the audit's main body. After Wave 6 lands, the
+      FUNCTION_GAPS_AUDIT roadmap is fully closed.
+
+      **Wave 6A Tier 1 (parallel, 3 disjoint agents):**
+      - [ ] **Slice 6.1** — Slice 5.9b: full Higham Schur-based
+            logm/sqrtm for general matrices (complex eigenvalues,
+            defective Jordan blocks). NEW `matrix/src/operations/
+            schur.ts` exposing public Schur primitive (extract from
+            existing internal in eig.ts or implement standalone
+            Francis QR-with-double-shifts). Extend `logm.ts` +
+            `sqrtm.ts` with Schur-Padé and Björck-Hammarling
+            algorithms per Higham 2008 §6, §11.
+      - [ ] **Slice 6.2** (Opus) — Non-symmetric `TapedTensor.eig`
+            AD. Lifts the symmetric-only restriction from Slice 4.8.
+            Implement general-case adjoint per Magnus & Neudecker
+            §10.6 / Townsend (2016) §4. Handle complex eigenvalues,
+            near-degenerate masking (REL_TOL=1e-10), and defective
+            matrices (cond(V) > 1e14 → throw with clear error).
+      - [ ] **Slice 6.5** — WebGPU browser smoke test infrastructure.
+            Install @vitest/browser + playwright; new
+            `vitest.config.browser.ts`; one trivial `gpuMatmul`
+            smoke test on a 4×4 input; CI matrix entry with Mesa
+            lavapipe / DX12 software WebGPU adapter. Scope-balloon
+            escape allowed: commit local plumbing + smoke test
+            even if CI matrix proves fiddly.
+
+      **Wave 6B Tier 2 (sequential WASM, 2 slices):**
+      - [ ] **Slice 6.3** — `convexHull3D` WASM via incremental
+            QuickHull-3D (Barber, Dobkin, Huhdanpaa 1996). 2-D hull
+            + Delaunay 2-D + Voronoi 2-D + k-d tree all already
+            WASM. Threshold ≥ 1024 points.
+      - [ ] **Slice 6.4** — Carlson R-forms (RC/RD/RF/RJ) +
+            incomplete elliptic integrals (ellipticF, ellipticE
+            incomplete, ellipticPi). Quadratically convergent and
+            branch-cut-free. References: Carlson (1995), NR §6.11,
+            DLMF §19. Threshold ≥ 1024 samples.
+
 - [x] **CDG bugfix + post-Wave-3 gap-audit refresh** — Ran
       `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --include-tests`
       to check for issues after Wave-1/2/3 landings. Surfaced and
