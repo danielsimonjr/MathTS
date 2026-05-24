@@ -10,8 +10,18 @@
  * - shapiroWilkTest: Shapiro-Wilk normality test
  * - principalComponentAnalysis: PCA dimensionality reduction
  *
+ * Worker-dispatch policy (Slice 3.10):
+ * - chiSquareTest (1D): element-wise reduction via applyKernel2 + sum above threshold.
+ * - kolmogorovSmirnovTest: sort on main thread; post-sort CDF-compare loop via
+ *   applyKernel (serialised normal-CDF) above threshold when no custom CDF is given.
+ * - mannWhitneyTest: sort on main thread; rank-sum via parallel dot above threshold.
+ * - shapiroWilkTest: sort on main thread; W-numerator dot-product via parallel dot
+ *   above threshold.
+ *
  * @packageDocumentation
  */
+
+import { computePool } from '@danielsimonjr/mathts-parallel';
 
 // =============================================================================
 // Type Definitions
@@ -59,6 +69,17 @@ export interface PCAResult {
   explained: f64[];
   scores: f64[][];
 }
+
+// =============================================================================
+// Worker-dispatch threshold (Slice 3.10)
+// =============================================================================
+
+/**
+ * Minimum sample / category count before routing the statistical computation
+ * (post-sort reductions for KS/MW/SW; element-wise reduction for chiSquare)
+ * through the ComputePool worker pool.
+ */
+const HYPOTHESIS_THRESHOLD = 4096;
 
 // =============================================================================
 // Internal Helpers
@@ -291,16 +312,24 @@ export function studentTTest(sample1: f64[], sample2?: f64[]): TTestResult {
  *   are auto-computed from row totals * col totals / grand total.
  *   chi2 = sum_{i,j} ((O_ij - E_ij)^2 / E_ij), df = (rows-1) * (cols-1).
  *
+ * Worker dispatch (Slice 3.10): For the 1D form with ≥ 4096 categories the
+ * element-wise reduction `(o-e)²/e` is computed via `applyKernel2` + `sum`
+ * on the worker pool. The 2D form stays on the main thread (reduction over a
+ * 2D grid — marshal cost dominates).
+ *
  * @param observed - 1D observed counts, OR 2D contingency table (rows x cols)
  * @param expected - 1D expected counts (required for 1D form; omit for 2D)
- * @returns Chi-square test result
+ * @returns Chi-square test result (Promise resolves when worker dispatch fires)
  *
  * @example
  * chiSquareTest([10, 20, 30], [20, 20, 20])     // 1D goodness-of-fit
  * chiSquareTest([[10, 20], [30, 40]])           // 2D independence test
  */
-export function chiSquareTest(observed: f64[] | f64[][], expected?: f64[]): ChiSquareResult {
-  // 2D contingency table form
+export async function chiSquareTest(
+  observed: f64[] | f64[][],
+  expected?: f64[]
+): Promise<ChiSquareResult> {
+  // 2D contingency table form — stays on main thread
   if (Array.isArray(observed[0])) {
     const obs2d = observed as f64[][];
     const rows = obs2d.length;
@@ -351,13 +380,37 @@ export function chiSquareTest(observed: f64[] | f64[][], expected?: f64[]): ChiS
     throw new Error('chiSquareTest: need at least 2 categories');
   }
 
-  let statistic = 0;
-  for (let i = 0; i < obs1d.length; i++) {
+  // Validate expected values upfront (cannot be deferred to workers)
+  for (let i = 0; i < expected.length; i++) {
     if (expected[i] <= 0) throw new Error('chiSquareTest: expected values must be positive');
-    statistic += (obs1d[i] - expected[i]) ** 2 / expected[i];
   }
 
   const df = obs1d.length - 1;
+
+  // --- Worker-dispatch path: element-wise (o-e)²/e reduction via pool --------
+  if (
+    obs1d.length >= HYPOTHESIS_THRESHOLD &&
+    computePool.shouldParallelize(obs1d.length, 'chiSquareTest')
+  ) {
+    const obsF64 = new Float64Array(obs1d);
+    const expF64 = new Float64Array(expected);
+    // applyKernel2 computes the per-element contribution in parallel
+    const perElem = await computePool.applyKernel2(
+      obsF64,
+      expF64,
+      '(o, e) => (o - e) * (o - e) / e'
+    );
+    const sumResult = await computePool.sum(perElem.result);
+    const statistic = sumResult.result;
+    return { statistic, pValue: _chiSquaredPValue(statistic, df), degreesOfFreedom: df };
+  }
+
+  // --- Sequential fallback ---------------------------------------------------
+  let statistic = 0;
+  for (let i = 0; i < obs1d.length; i++) {
+    statistic += (obs1d[i] - expected[i]) ** 2 / expected[i];
+  }
+
   return { statistic, pValue: _chiSquaredPValue(statistic, df), degreesOfFreedom: df };
 }
 
@@ -435,6 +488,14 @@ export function anova(groups: f64[][]): AnovaResult {
  * One-sample test against the standard normal distribution (default),
  * or provide a custom CDF function.
  *
+ * Worker dispatch (Slice 3.10): When no custom CDF is supplied and
+ * `sample.length >= 4096`, the sort stays on the main thread but the
+ * per-element normal-CDF evaluation is dispatched via `applyKernel`.
+ * Max-reduction of |D+| and |D-| is done on the main thread from the
+ * returned CDF values (O(n) but cheap vs. O(n log n) sort).
+ * When a custom CDF closure is given, the parallel path is skipped
+ * (closures cannot be serialised into worker threads).
+ *
  * @param sample - Array of observations
  * @param cdfFn - CDF function to test against (default: standard normal)
  * @returns K-S test result
@@ -442,16 +503,47 @@ export function anova(groups: f64[][]): AnovaResult {
  * @example
  * kolmogorovSmirnovTest([0.1, 0.5, 0.9], (x) => x) // test against uniform(0,1)
  */
-export function kolmogorovSmirnovTest(sample: f64[], cdfFn?: (x: f64) => f64): KSTestResult {
+export async function kolmogorovSmirnovTest(
+  sample: f64[],
+  cdfFn?: (x: f64) => f64
+): Promise<KSTestResult> {
   if (sample.length < 1) throw new Error('kolmogorovSmirnovTest: sample must be non-empty');
 
-  const cdf = cdfFn || _normalCDF;
   const n = sample.length;
-  const sorted = [...sample].sort((a, b) => a - b);
+  // Sort stays on main thread (O(n log n) — dominant cost)
+  const tmpSorted = [...sample].sort((a, b) => a - b);
+  const sorted = new Float64Array(n);
+  for (let i = 0; i < n; i++) sorted[i] = tmpSorted[i];
 
+  let cdfValues: Float64Array;
+
+  // --- Worker-dispatch path: normal CDF only (no custom closure) -------------
+  if (
+    !cdfFn &&
+    n >= HYPOTHESIS_THRESHOLD &&
+    computePool.shouldParallelize(n, 'kolmogorovSmirnovTest')
+  ) {
+    // Serialize the normal CDF into a worker-safe kernel (no free variables).
+    const kernelSrc =
+      '(x) => { ' +
+      'const sign = x < 0 ? -1 : 1; ' +
+      'const a = Math.abs(x / 1.4142135623730951); ' +
+      'const t = 1.0 / (1.0 + 0.3275911 * a); ' +
+      'const y = 1.0 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a); ' +
+      'return 0.5 * (1 + sign * y); }';
+    const result = await computePool.applyKernel(sorted, kernelSrc);
+    cdfValues = result.result;
+  } else {
+    // --- Sequential path (custom CDF or below threshold) ---------------------
+    const cdf = cdfFn || _normalCDF;
+    cdfValues = new Float64Array(n);
+    for (let i = 0; i < n; i++) cdfValues[i] = cdf(sorted[i]);
+  }
+
+  // Max-reduction of D+ and D- — O(n), stays on main thread
   let dMax = 0;
   for (let i = 0; i < n; i++) {
-    const cdfVal = cdf(sorted[i]);
+    const cdfVal = cdfValues[i];
     const dPlus = Math.abs((i + 1) / n - cdfVal);
     const dMinus = Math.abs(cdfVal - i / n);
     dMax = Math.max(dMax, dPlus, dMinus);
@@ -482,6 +574,10 @@ export function kolmogorovSmirnovTest(sample: f64[], cdfFn?: (x: f64) => f64): K
  * Non-parametric test for whether two independent samples are drawn
  * from the same distribution.
  *
+ * Worker dispatch (Slice 3.10): When the combined sample has ≥ 4096 elements,
+ * the sort stays on the main thread but the rank-sum for group 1 is computed
+ * via a parallel dot-product `dot(ranks, groupIndicator)` on the pool.
+ *
  * @param sample1 - First sample
  * @param sample2 - Second sample
  * @returns Mann-Whitney test result
@@ -489,35 +585,46 @@ export function kolmogorovSmirnovTest(sample: f64[], cdfFn?: (x: f64) => f64): K
  * @example
  * mannWhitneyTest([1, 2, 3], [4, 5, 6])
  */
-export function mannWhitneyTest(sample1: f64[], sample2: f64[]): MannWhitneyResult {
+export async function mannWhitneyTest(sample1: f64[], sample2: f64[]): Promise<MannWhitneyResult> {
   if (sample1.length < 1 || sample2.length < 1) {
     throw new Error('mannWhitneyTest: both samples must be non-empty');
   }
 
   const n1 = sample1.length;
   const n2 = sample2.length;
+  const nTotal = n1 + n2;
 
-  // Combine and rank
+  // Combine and rank — sort stays on main thread
   const combined: { value: f64; group: number }[] = [];
   for (const v of sample1) combined.push({ value: v, group: 1 });
   for (const v of sample2) combined.push({ value: v, group: 2 });
   combined.sort((a, b) => a.value - b.value);
 
   // Assign ranks with tie handling
-  const ranks = new Array(combined.length);
+  const ranksArr = new Float64Array(nTotal);
   let i = 0;
-  while (i < combined.length) {
+  while (i < nTotal) {
     let j = i;
-    while (j < combined.length && combined[j].value === combined[i].value) j++;
+    while (j < nTotal && combined[j].value === combined[i].value) j++;
     const avgRank = (i + 1 + j) / 2;
-    for (let k = i; k < j; k++) ranks[k] = avgRank;
+    for (let k = i; k < j; k++) ranksArr[k] = avgRank;
     i = j;
   }
 
-  // Sum of ranks for group 1
-  let R1 = 0;
-  for (let k = 0; k < combined.length; k++) {
-    if (combined[k].group === 1) R1 += ranks[k];
+  let R1: f64;
+
+  // --- Worker-dispatch path: parallel dot of ranks × group-1 indicator ------
+  if (nTotal >= HYPOTHESIS_THRESHOLD && computePool.shouldParallelize(nTotal, 'mannWhitneyTest')) {
+    const indicator = new Float64Array(nTotal);
+    for (let k = 0; k < nTotal; k++) indicator[k] = combined[k].group === 1 ? 1 : 0;
+    const dotResult = await computePool.dot(ranksArr, indicator);
+    R1 = dotResult.result;
+  } else {
+    // --- Sequential fallback -------------------------------------------------
+    R1 = 0;
+    for (let k = 0; k < nTotal; k++) {
+      if (combined[k].group === 1) R1 += ranksArr[k];
+    }
   }
 
   const U1 = R1 - (n1 * (n1 + 1)) / 2;
@@ -543,19 +650,27 @@ export function mannWhitneyTest(sample1: f64[], sample2: f64[]): MannWhitneyResu
  * Tests the null hypothesis that the data is normally distributed.
  * Implementation uses the simplified algorithm for sample sizes up to 5000.
  *
+ * Worker dispatch (Slice 3.10): When `sample.length >= 4096`, the sort stays
+ * on the main thread but the W-statistic numerator dot-product
+ * `dot(coefficients, sorted_values)` is computed via the pool.
+ *
  * @param sample - Array of observations (3 to 5000 elements)
  * @returns Shapiro-Wilk test result
  *
  * @example
  * shapiroWilkTest([1, 2, 3, 4, 5])
  */
-export function shapiroWilkTest(sample: f64[]): ShapiroWilkResult {
+export async function shapiroWilkTest(sample: f64[]): Promise<ShapiroWilkResult> {
   const n = sample.length;
   if (n < 3) throw new Error('shapiroWilkTest: need at least 3 observations');
   if (n > 5000) throw new Error('shapiroWilkTest: maximum 5000 observations');
 
-  const sorted = [...sample].sort((a, b) => a - b);
-  const m = _mean(sorted);
+  // Sort stays on main thread
+  const sortedArr = [...sample].sort((a, b) => a - b);
+  const sorted = new Float64Array(n);
+  for (let k = 0; k < n; k++) sorted[k] = sortedArr[k];
+
+  const m = _mean(sortedArr);
 
   // Compute S^2
   let ss = 0;
@@ -567,36 +682,42 @@ export function shapiroWilkTest(sample: f64[]): ShapiroWilkResult {
   }
 
   // Compute approximate Shapiro-Wilk coefficients using Blom's expected normal order statistics
-  const a: f64[] = new Array(n).fill(0);
-  for (let i = 0; i < Math.floor(n / 2); i++) {
-    // Approximation for expected normal order statistics
-    const p = (i + 1 - 0.375) / (n + 0.25);
-    // Use probit (inverse normal CDF) approximation
+  const aArr: f64[] = new Array(n).fill(0);
+  for (let idx = 0; idx < Math.floor(n / 2); idx++) {
+    const p = (idx + 1 - 0.375) / (n + 0.25);
     const mi = _approxProbit(p);
-    a[i] = mi;
-    a[n - 1 - i] = -mi;
+    aArr[idx] = mi;
+    aArr[n - 1 - idx] = -mi;
   }
 
   // Normalize coefficients
   let sumA2 = 0;
-  for (const ai of a) sumA2 += ai * ai;
-  const norm = Math.sqrt(sumA2);
-  for (let i = 0; i < n; i++) a[i] /= norm;
+  for (const ai of aArr) sumA2 += ai * ai;
+  const normCoeff = Math.sqrt(sumA2);
+  for (let idx = 0; idx < n; idx++) aArr[idx] /= normCoeff;
 
-  // Compute W statistic
-  let b = 0;
-  for (let i = 0; i < n; i++) {
-    b += a[i] * sorted[i];
+  const aF64 = new Float64Array(aArr);
+
+  let b: f64;
+
+  // --- Worker-dispatch path: parallel dot(a, sorted) -------------------------
+  if (n >= HYPOTHESIS_THRESHOLD && computePool.shouldParallelize(n, 'shapiroWilkTest')) {
+    const dotResult = await computePool.dot(aF64, sorted);
+    b = dotResult.result;
+  } else {
+    // --- Sequential fallback -------------------------------------------------
+    b = 0;
+    for (let idx = 0; idx < n; idx++) b += aF64[idx] * sorted[idx];
   }
+
   const W = (b * b) / ss;
 
-  // Approximate p-value using normal transformation of W
-  // Royston's approximation
+  // Approximate p-value using normal transformation of W (Royston's approximation)
   const lnN = Math.log(n);
   const mu1 = -1.2725 + 1.0521 * lnN;
   const sigma1 = 1.0308 - 0.26758 * lnN;
-  const z = (Math.log(1 - W) - mu1) / sigma1;
-  const pValue = 1 - _normalCDF(z);
+  const zStat = (Math.log(1 - W) - mu1) / sigma1;
+  const pValue = 1 - _normalCDF(zStat);
 
   return { statistic: W, pValue: Math.max(0, Math.min(1, pValue)) };
 }
