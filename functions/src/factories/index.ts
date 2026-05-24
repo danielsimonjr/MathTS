@@ -149,11 +149,11 @@ export const subtractScalar = createSubtractScalar(factoryScope as any);
 // bitwise (synced factory — superseded by typed/bitwise; kept internal for factoryScope wiring)
 const bitNot = createBitNot(factoryScope as any);
 
-// complex
-export const arg = createArg(factoryScope as any);
-export const conj = createConj(factoryScope as any);
-export const im = createIm(factoryScope as any);
-export const re = createRe(factoryScope as any);
+// complex (synced factories — superseded by typed/complex; kept internal for factoryScope wiring)
+const arg = createArg(factoryScope as any);
+const conj = createConj(factoryScope as any);
+const im = createIm(factoryScope as any);
+const re = createRe(factoryScope as any);
 
 // logical (synced factory — superseded by typed/logical; kept internal for factoryScope wiring)
 const not = createNot(factoryScope as any);
@@ -821,7 +821,8 @@ import { createSort } from '../matrix/sort.js';
 export const factorial = createFactorial(factoryScope as any);
 factoryScope.factorial = factorial;
 
-export const setSize = createSetSize(factoryScope as any);
+// setSize (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setSize = createSetSize(factoryScope as any);
 factoryScope.setSize = setSize;
 
 export const sort = createSort(factoryScope as any);
@@ -1174,25 +1175,32 @@ factoryScope.multinomial = multinomial;
 export const freqz = createFreqz(factoryScope as any);
 factoryScope.freqz = freqz;
 
-export const setCartesian = createSetCartesian(factoryScope as any);
+// setCartesian (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setCartesian = createSetCartesian(factoryScope as any);
 factoryScope.setCartesian = setCartesian;
 
-export const setDifference = createSetDifference(factoryScope as any);
+// setDifference (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setDifference = createSetDifference(factoryScope as any);
 factoryScope.setDifference = setDifference;
 
-export const setDistinct = createSetDistinct(factoryScope as any);
+// setDistinct (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setDistinct = createSetDistinct(factoryScope as any);
 factoryScope.setDistinct = setDistinct;
 
-export const setIntersect = createSetIntersect(factoryScope as any);
+// setIntersect (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setIntersect = createSetIntersect(factoryScope as any);
 factoryScope.setIntersect = setIntersect;
 
-export const setIsSubset = createSetIsSubset(factoryScope as any);
+// setIsSubset (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setIsSubset = createSetIsSubset(factoryScope as any);
 factoryScope.setIsSubset = setIsSubset;
 
-export const setMultiplicity = createSetMultiplicity(factoryScope as any);
+// setMultiplicity (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setMultiplicity = createSetMultiplicity(factoryScope as any);
 factoryScope.setMultiplicity = setMultiplicity;
 
-export const setPowerset = createSetPowerset(factoryScope as any);
+// setPowerset (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setPowerset = createSetPowerset(factoryScope as any);
 factoryScope.setPowerset = setPowerset;
 
 export const simplifyCore = createSimplifyCore(factoryScope as any);
@@ -1237,7 +1245,8 @@ factoryScope.mad = mad;
 export const factory_std = createStd(factoryScope as any);
 factoryScope.std = factory_std;
 
-export const setSymDifference = createSetSymDifference(factoryScope as any);
+// setSymDifference (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setSymDifference = createSetSymDifference(factoryScope as any);
 factoryScope.setSymDifference = setSymDifference;
 
 export const simplify = createSimplify(factoryScope as any);
@@ -1262,7 +1271,8 @@ factoryScope.norm = factory_norm;
 export const rationalize = createRationalize(factoryScope as any);
 factoryScope.rationalize = rationalize;
 
-export const setUnion = createSetUnion(factoryScope as any);
+// setUnion (synced factory — superseded by typed/set; kept internal for factoryScope wiring)
+const setUnion = createSetUnion(factoryScope as any);
 factoryScope.setUnion = setUnion;
 
 export const symbolicEqual = createSymbolicEqual(factoryScope as any);
