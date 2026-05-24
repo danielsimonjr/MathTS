@@ -104,6 +104,10 @@ export * from './gpu.js';
 export * from './relational.js';
 export { typedRelational } from './relational.js';
 
+// String formatting functions (bin, hex, oct, format, print)
+export * from './string.js';
+export { typedString } from './string.js';
+
 // =============================================================================
 // Combined Exports
 // =============================================================================

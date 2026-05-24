@@ -180,9 +180,9 @@ const equalScalar = createEqualScalar(factoryScope as any);
 // special
 export const erf = createErf(factoryScope as any);
 
-// string
-export const format = createFormat(factoryScope as any);
-export const print = createPrint(factoryScope as any);
+// string (synced factories — superseded by typed/string; kept internal for factoryScope wiring)
+const format = createFormat(factoryScope as any);
+const print = createPrint(factoryScope as any);
 
 // trigonometry (non-conflicting)
 export const acoth = createAcoth(factoryScope as any);
@@ -325,10 +325,10 @@ export const randomInt = createRandomInt(factoryScope as any);
 export const mode = createMode(factoryScope as any);
 export const prod = createProd(factoryScope as any);
 
-// string
-export const bin = createBin(factoryScope as any);
-export const hex = createHex(factoryScope as any);
-export const oct = createOct(factoryScope as any);
+// string (synced factories — superseded by typed/string; kept internal for factoryScope wiring)
+const bin = createBin(factoryScope as any);
+const hex = createHex(factoryScope as any);
+const oct = createOct(factoryScope as any);
 
 // utils
 export const hasNumericValue = createHasNumericValue(factoryScope as any);

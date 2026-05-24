@@ -17,7 +17,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 
 ## Tier 1 — Parallel slices (5 agents, disjoint scopes)
 
-### Slice 4.1 — `ComputePool` extras: `pow` + `sign` + `tensordot`
+### Slice 4.1 — ✅ LANDED in `73e6ca9` — `ComputePool` extras: `pow` + `sign` + `tensordot`
 
 **Goal:** Close the ComputePool API gaps the §C audit flagged. `pow` and `sign` complete the elementwise-math surface beyond trig; `tensordot` enables `Tensor.tensordot` to route through workers above threshold (which `Tensor.contract` already does via the existing matmul kernel).
 
@@ -33,7 +33,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 
 **Acceptance:** Correctness within 1e-9 of the JS reference for `pow`/`sign`/`tensordot`; mismatched-length / shape-mismatch errors raised cleanly.
 
-### Slice 4.2 — `matrixPinv` — Moore-Penrose pseudoinverse on `DenseMatrix`
+### Slice 4.2 — ✅ LANDED in `8b357cc` — `matrixPinv` — Moore-Penrose pseudoinverse on `DenseMatrix`
 
 **Goal:** Sibling of `tensorPinv` (landed in Slice 2.4 / `70217b7`) on the matrix package. Composes the existing `matrix.svd` primitive with `rcond·max(S)` thresholding.
 
@@ -47,7 +47,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 
 **Acceptance:** Standard Moore-Penrose identities verified within `1e-10`: `A·A⁺·A = A`, `A⁺·A·A⁺ = A⁺`, `(A·A⁺)ᵀ = A·A⁺`, `(A⁺·A)ᵀ = A⁺·A`. Rank-deficient inputs handled (zero singular values dropped).
 
-### Slice 4.3 — `tensor/src/operations/random.ts` QR-cleanup
+### Slice 4.3 — ✅ LANDED in `73e6ca9` + `8b357cc` — `tensor/src/operations/random.ts` QR-cleanup
 
 **Goal:** Internal de-duplication. `random.ts` still has an inline Gram-Schmidt QR for the orthogonal-matrix path; now that `matrix.qr` is public (landed in Slice 1.5), call it instead.
 
@@ -60,7 +60,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 
 **Acceptance:** All existing tests pass unchanged. Random orthogonal matrix path delegates through `matrix.qr` (verified by checking imports / removed inline code).
 
-### Slice 4.4 — `typed/string.ts` promotion (rank 13)
+### Slice 4.4 — ✅ LANDED in `8af250b` — `typed/string.ts` promotion (rank 13)
 
 **Goal:** Promote the 5 remaining string-formatting helpers from the dormant synced layer into active typed/-layer dispatch.
 
@@ -77,7 +77,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 
 **Acceptance:** All 5 ops dispatch typed-only (no parallel/WASM — these are scalar transformations on numbers). Tests cover the standard mathjs formatting behavior (`hex(255) → '0xff'`, `bin(5) → '0b101'`, etc.).
 
-### Slice 4.5 — Polynomial WASM follow-up: `discriminant` + `resultant`
+### Slice 4.5 — ✅ LANDED in `6e9f9c0` — Polynomial WASM follow-up: `discriminant` + `resultant`
 
 **Goal:** Close the gap left at the end of Slice 3.7 — those WASM kernels covered `polymul` / `polynomialGCD` / `polynomialLCM` / `polynomialQuotient` / `polynomialRemainder` but explicitly deferred `discriminant` and `resultant` until a Sylvester-matrix-fill helper landed. Now ship it.
 

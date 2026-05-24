@@ -10,6 +10,9 @@ import { arg, conj, im, re } from '../src/typed/complex.js';
 // equalScalar moved from factories/ to typed/ — import from the typed layer
 import { equalScalar } from '../src/typed/relational.js';
 
+// format/print moved from factories/ to typed/ — import from the typed layer
+import { format } from '../src/typed/string.js';
+
 // Import non-conflicting exports directly
 import {
   addScalar,
@@ -21,7 +24,6 @@ import {
   combinations,
   combinationsWithRep,
   erf,
-  format,
   clone,
   isNaN as mathIsNaN,
   isNegative,
