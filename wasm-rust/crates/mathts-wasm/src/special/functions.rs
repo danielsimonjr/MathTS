@@ -758,3 +758,199 @@ pub unsafe extern "C" fn fresnelS_wasm(x: f64) -> f64 {
     }
     sign * sum
 }
+
+// =============================================================================
+// Airy Functions Ai(x) and Bi(x)
+// =============================================================================
+//
+// Algorithm: split into three ranges.
+//
+// Small |x| (|x| ≤ 4.5) — power series from DLMF §9.2.2:
+//   f(x) = Σ  x^{3k}/(3k)! * prod_{j=1}^{k}(3j-2)   (even terms of Ai/Bi series)
+//   g(x) = Σ  x^{3k+1}/(3k+1)! * prod_{j=1}^{k}(3j-1) (odd terms)
+//   Ai(x) = c1·f(x) − c2·g(x)
+//   Bi(x) = √3·(c1·f(x) + c2·g(x))
+//   c1 = Ai(0) = 1/(3^{2/3}·Γ(2/3)) ≈ 0.35502805388781723926
+//   c2 = −Ai'(0) = 1/(3^{1/3}·Γ(1/3)) ≈ 0.25881940379280679841
+//
+// Large positive x (x > 4.5) — asymptotic expansion (DLMF §9.7.3):
+//   ζ = (2/3)·x^{3/2}
+//   Ai(x) ~ exp(-ζ)/(2√π·x^{1/4}) · Σ (-1)^k·c_k/ζ^k
+//   Bi(x) ~ exp(+ζ)/(√π·x^{1/4})  · Σ       c_k/ζ^k
+//   c_0 = 1, c_1 = 5/72, c_2 = 385/10368, c_3 = 85085/2239488, ...
+//   c_k = prod_{s=1}^{k} (6s-5)(6s-3)(6s-1) / (216·s·k!) (simplified)
+//
+// Large negative x (x < -4.5) — oscillatory asymptotic (DLMF §9.7.7):
+//   θ = ζ − π/4,  ζ = (2/3)·|x|^{3/2}
+//   Ai(x) ~ (sin θ·P + cos θ·Q)/(√π·|x|^{1/4})
+//   Bi(x) ~ (cos θ·P − sin θ·Q)/(√π·|x|^{1/4})  ← with sign change for Bi
+//   P = Σ (-1)^k·d_{2k}/ζ^{2k},  Q = Σ (-1)^k·d_{2k+1}/ζ^{2k+1}
+//   d_k = c_k (same coefficients as above)
+
+/// Precomputed asymptotic coefficients c_k for k = 0..6.
+/// c_k = Γ(3k + 1/2) / (54^k · k! · Γ(k + 1/2))   (DLMF 9.7.1 notation).
+const AIRY_C: [f64; 7] = [
+    1.0,
+    5.0 / 72.0,
+    385.0 / 10368.0,
+    85085.0 / 2239488.0,
+    37182145.0 / 644972544.0,
+    5765760010.25 / 61917364224.0, // ≈ 0.09309
+    1519768071625.0 / 8918845788160.0, // ≈ 0.17036 — truncation acceptable
+];
+
+// Ai(0) = 1/(3^{2/3}·Γ(2/3))
+const AI0: f64 = 0.35502805388781723926;
+// −Ai'(0) = 1/(3^{1/3}·Γ(1/3))
+const AI_PRIME0: f64 = 0.25881940379280679841;
+
+/// Airy function Ai(x).
+pub fn airy_ai(x: f64) -> f64 {
+    const XBIG: f64 = 4.5;
+
+    if x > XBIG {
+        // Large positive — decaying exponential asymptotic
+        let xp = libm::pow(x, 0.25);       // x^{1/4}
+        let x32 = x * libm::sqrt(x);      // x^{3/2}
+        let zeta = (2.0 / 3.0) * x32;
+        // Asymptotic series P = Σ (-1)^k c_k / ζ^k
+        let mut p = 0.0_f64;
+        let mut zk = 1.0_f64; // ζ^k
+        let mut sign = 1.0_f64;
+        for k in 0..AIRY_C.len() {
+            p += sign * AIRY_C[k] / zk;
+            zk *= zeta;
+            sign = -sign;
+        }
+        libm::exp(-zeta) * p / (2.0 * libm::sqrt(PI) * xp)
+    } else if x < -XBIG {
+        // Large negative — oscillatory asymptotic
+        let ax = libm::fabs(x);
+        let axp = libm::pow(ax, 0.25);
+        let ax32 = ax * libm::sqrt(ax);
+        let zeta = (2.0 / 3.0) * ax32;
+        let theta = zeta - PI / 4.0;
+        // P even sum, Q odd sum
+        let mut p = 0.0_f64;
+        let mut q = 0.0_f64;
+        let mut zk = 1.0_f64;
+        let mut sign = 1.0_f64;
+        for k in 0..AIRY_C.len() {
+            if k % 2 == 0 {
+                p += sign * AIRY_C[k] / zk;
+            } else {
+                q += sign * AIRY_C[k] / zk;
+            }
+            zk *= zeta;
+            sign = -sign;
+        }
+        (libm::sin(theta) * p + libm::cos(theta) * q) / (libm::sqrt(PI) * axp)
+    } else {
+        // Small |x| — power series (DLMF §9.2.2)
+        let x3 = x * x * x;
+        let mut f = 1.0_f64;  // Ai(0)/AI0 even part
+        let mut g = x;        // Ai'(0)/(-AI_PRIME0) odd part
+        let mut f_term = 1.0_f64;
+        let mut g_term = x;
+        let mut factorial_f = 1.0_f64; // accumulates (3k)!
+        let mut factorial_g = 1.0_f64; // accumulates (3k+1)!
+        // Series: f(x) = Σ_{k≥1} x^{3k} * Π_{j=1}^k (3j-2) / (3k)!
+        //        g(x) = Σ_{k≥1} x^{3k+1} * Π_{j=1}^k (3j-1) / (3k+1)!
+        let mut prod_f = 1.0_f64; // Π (3j-2)
+        let mut prod_g = 1.0_f64; // Π (3j-1)
+        for k in 1_i32..=30 {
+            let kf = k as f64;
+            // update factorials: (3k)! = (3k-2)!·(3k-1)·(3k-0) ... step by 3
+            factorial_f *= (3.0 * kf - 2.0) * (3.0 * kf - 1.0) * (3.0 * kf);
+            factorial_g *= (3.0 * kf - 1.0) * (3.0 * kf) * (3.0 * kf + 1.0);
+            prod_f *= 3.0 * kf - 2.0;
+            prod_g *= 3.0 * kf - 1.0;
+            f_term *= x3;
+            g_term *= x3;
+            let df = f_term * prod_f / factorial_f;
+            let dg = g_term * prod_g / factorial_g;
+            f += df;
+            g += dg;
+            if libm::fabs(df) < libm::fabs(f) * 1e-16
+                && libm::fabs(dg) < libm::fabs(g) * 1e-16
+            {
+                break;
+            }
+        }
+        AI0 * f - AI_PRIME0 * g
+    }
+}
+
+/// Airy function Bi(x).
+pub fn airy_bi(x: f64) -> f64 {
+    const XBIG: f64 = 4.5;
+    let sqrt3 = libm::sqrt(3.0_f64);
+
+    if x > XBIG {
+        // Large positive — growing exponential asymptotic.
+        // DLMF §9.7.3: Bi(x) ~ exp(ζ)/(√π x^{1/4}) · Σ_{k≥0} c_k/ζ^k  (all positive).
+        let xp = libm::pow(x, 0.25);
+        let x32 = x * libm::sqrt(x);
+        let zeta = (2.0 / 3.0) * x32;
+        let mut p = 0.0_f64;
+        let mut zk = 1.0_f64;
+        for k in 0..AIRY_C.len() {
+            p += AIRY_C[k] / zk;
+            zk *= zeta;
+        }
+        libm::exp(zeta) * p / (libm::sqrt(PI) * xp)
+    } else if x < -XBIG {
+        // Large negative — oscillatory asymptotic.
+        // DLMF §9.7.5: Bi(−ξ) ~ (cos θ P + sin θ Q)/(√π ξ^{1/4}),  θ = ζ + π/4.
+        let ax = libm::fabs(x);
+        let axp = libm::pow(ax, 0.25);
+        let ax32 = ax * libm::sqrt(ax);
+        let zeta = (2.0 / 3.0) * ax32;
+        let theta = zeta + PI / 4.0;
+        let mut p = 0.0_f64;
+        let mut q = 0.0_f64;
+        let mut zk = 1.0_f64;
+        let mut sign = 1.0_f64;
+        for k in 0..AIRY_C.len() {
+            if k % 2 == 0 {
+                p += sign * AIRY_C[k] / zk;
+            } else {
+                q += sign * AIRY_C[k] / zk;
+            }
+            zk *= zeta;
+            sign = -sign;
+        }
+        (libm::cos(theta) * p + libm::sin(theta) * q) / (libm::sqrt(PI) * axp)
+    } else {
+        // Small |x| — power series, same as Ai but scaled by sqrt(3)
+        let x3 = x * x * x;
+        let mut f = 1.0_f64;
+        let mut g = x;
+        let mut f_term = 1.0_f64;
+        let mut g_term = x;
+        let mut factorial_f = 1.0_f64;
+        let mut factorial_g = 1.0_f64;
+        let mut prod_f = 1.0_f64;
+        let mut prod_g = 1.0_f64;
+        for k in 1_i32..=30 {
+            let kf = k as f64;
+            factorial_f *= (3.0 * kf - 2.0) * (3.0 * kf - 1.0) * (3.0 * kf);
+            factorial_g *= (3.0 * kf - 1.0) * (3.0 * kf) * (3.0 * kf + 1.0);
+            prod_f *= 3.0 * kf - 2.0;
+            prod_g *= 3.0 * kf - 1.0;
+            f_term *= x3;
+            g_term *= x3;
+            let df = f_term * prod_f / factorial_f;
+            let dg = g_term * prod_g / factorial_g;
+            f += df;
+            g += dg;
+            if libm::fabs(df) < libm::fabs(f) * 1e-16
+                && libm::fabs(dg) < libm::fabs(g) * 1e-16
+            {
+                break;
+            }
+        }
+        // Bi(x) = sqrt(3) * (AI0 * f + AI_PRIME0 * g)
+        sqrt3 * (AI0 * f + AI_PRIME0 * g)
+    }
+}

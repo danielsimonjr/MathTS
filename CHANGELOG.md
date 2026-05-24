@@ -145,6 +145,34 @@ iterative — that's its precision floor).
     promoted to proper `matrix/src/operations/{lu,cholesky}.ts`
     primitives. Tracked as a future clean-up slice.
 
+#### Gap-closure Wave 4C — two Tier-3 design-heavy slices LANDED
+
+- **Slice 4.8 — commit `fd81cd8`** — `TapedTensor` decomposition AD (rank 12). **Opus subagent.** Three new methods:
+  - **`TapedTensor.tensordot(other, axesA, axesB)`** — direct extension of `contract`'s adjoint with axis-permutation plumbing. Reference: Townsend (2016) §6 + PyTorch's `TensorDotBackward0`.
+  - **`TapedTensor.svd()`** — full SVD AD per Townsend (2016) §3 + PyTorch's `svd_backward`. The C-matrix formula was derived directly from the forward Jacobian.
+  - **`TapedTensor.eig({ symmetric: true })`** — symmetric path only. Reference: Magnus & Neudecker (1999) §10.6.6 + PyTorch's `linalg_eigh_backward`. Non-symmetric `eig` (complex eigenvalues, harder formulas) explicitly throws and stays deferred.
+
+  **Repeated-value handling:** the F-matrix entries `1/(S_j² - S_i²)` (SVD) and `1/(Λ_j - Λ_i)` (eig) are singular at degeneracies. Mask threshold `REL_TOL = 1e-10` (matching PyTorch's f64 convention): entries with `|s_j² - s_i²| < REL_TOL · max(S²)` (or analogous for eigenvalues) are zeroed, producing a subgradient — bounded but not the true derivative at exact degeneracy.
+
+  **Precision surprise:** at exact degeneracy (e.g. `A = diag(2, 2, 5)` with two equal eigenvalues), the matrix-eig primitive returns non-orthogonal duplicate eigenvectors, making `U·diag(Λ)·Uᵀ ≠ A`. This is a primitive limitation that surfaces as a subgradient mismatch — _not_ an autograd bug. Documented inline; one test verifies finiteness + bounded-norm at exact degeneracy and a separate "slightly perturbed" test (eps=1e-3) verifies the smooth formula recovers `2A` to `1e-5`. 33 new tests. `autograd`: 103 → **136 tests** (+33).
+
+- **Slice 4.9 — commit `276a75b`** — Airy `Ai`/`Bi` WASM + AssemblyScript Bessel parity (formerly Slice 3.10c-2 from Wave 3b). Closes the deferred sub-slice cleanly:
+  - **Rust:** NEW scalar `airy_ai(x)` / `airy_bi(x)` in `wasm-rust/crates/mathts-wasm/src/special/functions.rs` — power series for `|x| ≤ 4.5`, 7-term asymptotic for larger `|x|` (DLMF §9.2 and §9.7). ~1e-7 relative error at the crossover. Array kernels `airy_ai_f64` / `airy_bi_f64` in `bessel.rs` + 8 Rust unit tests.
+  - **AssemblyScript:** NEW `assembly/src/special.ts` — full parity port for all 6 Bessel + 2 Airy exports. Solid clean implementation; no 4.9b split needed.
+  - **Bridge:** `functions/src/wasm/special/wasm-bridge.ts` gains `airyAiDispatch` / `airyBiDispatch` with the existing probe-Rust-then-AS-then-JS pattern. All Bessel dispatchers' AS-suffix probe (previously wired-for-but-no-impl) now resolves to the new AS module.
+  - **Bi large-negative-x phase:** the Bi asymptotic uses `θ = ζ + π/4` (DLMF §9.7.5), distinct from Ai's `θ = ζ − π/4`. This was the one precision-sensitive design decision; verified against DLMF reference values at `x = −1, −2`.
+  - `WasmLoader` gained 10 new optional interface entries (`airy_ai_f64`, `airy_bi_f64`, all 8 `_as`-suffix variants). `typed/special.ts` gained `airyAi` / `airyBi` array-overload paths at `WASM_SPECIAL_THRESHOLD = 1024`. 25 new tests. `functions`: 2,150 → **2,171 tests** (+21 net after counting the AS-path duplication adjustments).
+
+**Wave 4 totals (cumulative across 4A + 4B + 4C):**
+
+  - `functions`: 2,036 → **2,171** (+135)
+  - `tensor`: 266 → **323** (+57)
+  - `autograd`: 103 → **136** (+33)
+  - `parallel`: 342 → **355** (+13)
+  - `matrix`: → **556**
+
+Total Wave 4 = 9 slices landed across 9 commits. All §D Tier-4 ranks except 14 (typed/unit.ts — blocked on core `Unit` type) and the deferred B.1/B.2 playbook backlog are now closed. WebGPU browser smoke test remains pending the Playwright infra PR. Pipeline 19/19 turbo tasks green throughout.
+
 #### Gap-closure Wave 4B — two Tier-2 slices LANDED in parallel
 
 Two disjoint Tier-2 slices from [`GAP_CLOSURE_PROPOSAL_WAVE4.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md), dispatched to two sonnet subagents on disjoint scopes:

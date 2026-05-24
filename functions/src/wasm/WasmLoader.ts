@@ -620,7 +620,7 @@ export interface WasmModule {
     rhs: Float64Array
   ) => Float64Array;
 
-  // Bessel J/Y array kernels (Slice 3.10c-1).
+  // Bessel J/Y array kernels (Slice 3.10c-1) + Airy Ai/Bi (Slice 4.9).
   // Rust backend: pointer-style.
   //   bessel_j0_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
   //   bessel_j1_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
@@ -628,13 +628,34 @@ export interface WasmModule {
   //   bessel_y0_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
   //   bessel_y1_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
   //   bessel_y_f64(order, xs_ptr, n_elems, out_ptr) → n_elems (or -1)
-  // AS backend: not implemented (deferred — see TODO in wasm/special/wasm-bridge.ts).
+  //   airy_ai_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
+  //   airy_bi_f64(xs_ptr, n, out_ptr) → n (or -1 on error)
+  // AS backend: typed-array calling convention.
+  //   bessel_j0_f64_as(xs: Float64Array) → Float64Array
+  //   bessel_j1_f64_as(xs: Float64Array) → Float64Array
+  //   bessel_jn_f64_as(n: i32, xs: Float64Array) → Float64Array
+  //   bessel_y0_f64_as(xs: Float64Array) → Float64Array
+  //   bessel_y1_f64_as(xs: Float64Array) → Float64Array
+  //   bessel_yn_f64_as(n: i32, xs: Float64Array) → Float64Array
+  //   airy_ai_f64_as(xs: Float64Array) → Float64Array
+  //   airy_bi_f64_as(xs: Float64Array) → Float64Array
   bessel_j0_f64?: (xsPtr: number, n: number, outPtr: number) => number;
   bessel_j1_f64?: (xsPtr: number, n: number, outPtr: number) => number;
   bessel_j_f64?: (order: number, xsPtr: number, nElems: number, outPtr: number) => number;
   bessel_y0_f64?: (xsPtr: number, n: number, outPtr: number) => number;
   bessel_y1_f64?: (xsPtr: number, n: number, outPtr: number) => number;
   bessel_y_f64?: (order: number, xsPtr: number, nElems: number, outPtr: number) => number;
+  airy_ai_f64?: (xsPtr: number, n: number, outPtr: number) => number;
+  airy_bi_f64?: (xsPtr: number, n: number, outPtr: number) => number;
+  // AS-backend variants (typed-array calling convention, Slice 4.9).
+  bessel_j0_f64_as?: (xs: Float64Array) => Float64Array;
+  bessel_j1_f64_as?: (xs: Float64Array) => Float64Array;
+  bessel_jn_f64_as?: (n: number, xs: Float64Array) => Float64Array;
+  bessel_y0_f64_as?: (xs: Float64Array) => Float64Array;
+  bessel_y1_f64_as?: (xs: Float64Array) => Float64Array;
+  bessel_yn_f64_as?: (n: number, xs: Float64Array) => Float64Array;
+  airy_ai_f64_as?: (xs: Float64Array) => Float64Array;
+  airy_bi_f64_as?: (xs: Float64Array) => Float64Array;
 
   // Dense matrix decompositions exported by the AssemblyScript binary.
   // The Rust binary exposes the same algorithms under `luDecomposition` /

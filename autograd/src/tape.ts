@@ -10,7 +10,7 @@
  * v0.1.0 supports the same ops as DualTensor: add, sub, mul, scale.
  * v0.2.0 adds: contract (named-index), matmul (batched rank-N).
  */
-import { Tensor, Index } from '@danielsimonjr/mathts-tensor';
+import { Tensor, Index, tensorSvd, tensorEig } from '@danielsimonjr/mathts-tensor';
 
 type BackwardFn = (outputGrad: Float64Array) => void;
 
@@ -1117,11 +1117,690 @@ export class TapedTensor {
     });
     return new TapedTensor(this.shape, out, this.tape, id);
   }
+
+  // ---------------------------------------------------------------------------
+  // tensordot — generalised dot product over explicit axis pairs.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Reverse-mode AD over `Tensor.tensordot`.
+   *
+   * `axes[i] = [a, b]` contracts axis `a` of `this` with axis `b` of `other`.
+   * The result shape is `this`'s non-contracted axes (in original order)
+   * followed by `other`'s non-contracted axes (in original order).
+   *
+   * Adjoint derivation (NumPy/PyTorch tensordot backward, see Townsend 2016 §6,
+   * and the canonical PyTorch implementation `TensorDotBackward0` in
+   * `torch/csrc/autograd/generated/Functions.cpp`):
+   *
+   *   Z = tensordot(A, B, axes)
+   *   dA = tensordot(dZ, B, [axes_of_dZ_corresponding_to_B's_free, B's_free])
+   *        then permute back into A's original axis order.
+   *   dB = tensordot(A, dZ, [A's_free, axes_of_dZ_corresponding_to_A's_free])
+   *        then permute back into B's original axis order.
+   *
+   * The axis-permutation bookkeeping is the trickiest part: Tensor.tensordot
+   * produces output axes in the order [A's free axes (original A order),
+   * B's free axes (original B order)] — and after the backward contractions
+   * the survivors come out in B's original (resp. A's original) axis order
+   * for the contracted side, which then needs to be permuted into pair order
+   * (so axis k of the contracted block matches the kth pair) and finally
+   * scattered back into A's (resp. B's) full original axis order.
+   *
+   * For the rank-2 × rank-2 single-axis case (i.e. ordinary matmul A·B with
+   * axes = [[1, 0]]), this reduces to dA = dZ · Bᵀ, dB = Aᵀ · dZ — the same
+   * adjoint as `TapedTensor.matmul`.
+   */
+  tensordot(other: TapedTensor, axes: ReadonlyArray<readonly [number, number]>): TapedTensor {
+    const aShape = [...this.shape];
+    const bShape = [...other.shape];
+    const aRank = aShape.length;
+    const bRank = bShape.length;
+
+    // Validate axes lengths & dims (Tensor.tensordot will also validate).
+    const aContractedInPairOrder: number[] = [];
+    const bContractedInPairOrder: number[] = [];
+    for (const [a, b] of axes) {
+      aContractedInPairOrder.push(a);
+      bContractedInPairOrder.push(b);
+    }
+    const aContractedSet = new Set(aContractedInPairOrder);
+    const bContractedSet = new Set(bContractedInPairOrder);
+
+    // Free axes (in original-axis order).
+    const aFree: number[] = [];
+    for (let i = 0; i < aRank; i++) if (!aContractedSet.has(i)) aFree.push(i);
+    const bFree: number[] = [];
+    for (let i = 0; i < bRank; i++) if (!bContractedSet.has(i)) bFree.push(i);
+
+    // Forward pass.
+    const aPrimalT = new Tensor(aShape, new Float64Array(this.primal));
+    const bPrimalT = new Tensor(bShape, new Float64Array(other.primal));
+    const zPrimal = aPrimalT.tensordot(bPrimalT, axes);
+    const zShape = [...zPrimal.shape];
+    // zShape = [aFree dims (in aFree order), bFree dims (in bFree order)]
+    const naFree = aFree.length;
+    const nbFree = bFree.length;
+
+    // Capture primals for the backward closure.
+    const aPrimalData = new Float64Array(this.primal);
+    const bPrimalData = new Float64Array(other.primal);
+
+    const aGradSlot = this.tape.getInputGrad(this.id)!;
+    const bGradSlot = this.tape.getInputGrad(other.id)!;
+
+    const { id } = this.tape.record(
+      [this.id, other.id],
+      zPrimal.data.length,
+      (outputGrad: Float64Array) => {
+        const dZ = new Tensor(zShape, new Float64Array(outputGrad));
+        const aPrimalTbk = new Tensor(aShape, aPrimalData);
+        const bPrimalTbk = new Tensor(bShape, bPrimalData);
+
+        // -- dA = tensordot(dZ, B, ...) then permute --
+        // We contract dZ's B-free portion (axes naFree..naFree+nbFree-1) with B's bFree axes.
+        // Result has axes:
+        //   first:  dZ's surviving axes = dZ's aFree portion = aFree dims (in aFree order)
+        //   then:   B's surviving axes  = B's bContracted axes (in B's original axis order)
+        const dAaxes: Array<readonly [number, number]> = [];
+        for (let i = 0; i < nbFree; i++) {
+          dAaxes.push([naFree + i, bFree[i]] as const);
+        }
+        const dAPartial = dZ.tensordot(bPrimalTbk, dAaxes);
+        // dAPartial shape: [...aFree dims (in aFree order), ...B's bContracted dims (in B's original order)]
+        // We need to convert B's bContracted axes from "B's original order" to "pair order"
+        // (so kth axis of the contracted block is axes[k][1]) so that we can scatter
+        // them into A's positions axes[k][0].
+
+        // bContractedSortedByOriginal = bContractedInPairOrder sorted ascending
+        // (the order they appear in dAPartial's tail). For each axis in dAPartial's tail,
+        // we know which pair index k it corresponds to via the original-B axis number.
+        const bContractedSortedByOriginal = [...bContractedInPairOrder].sort((x, y) => x - y);
+        // For each position p in the tail (0 ≤ p < nPairs), the original B axis is
+        // bContractedSortedByOriginal[p]. The pair index k for which axes[k][1] === that
+        // B axis tells us this position should land at A axis axes[k][0].
+        const nPairs = aContractedInPairOrder.length;
+
+        // Build perm to put dAPartial's axes in the order
+        //   [aFree[0], aFree[1], ..., aFree[naFree-1],
+        //    axes[0][0], axes[1][0], ..., axes[nPairs-1][0]]
+        // — i.e. A's free axes in aFree-order (already there), then A's contracted axes
+        // in pair order. So we just need to permute the *tail* of dAPartial into pair order.
+        //
+        // After tail permutation, dAPartial_permuted has axes corresponding to
+        // [aFree[0], ..., aFree[naFree-1], aContracted_in_pair_order[0], ...].
+        // We then scatter into A's original axis order: place each at A axis number.
+
+        // First, reorder the tail. tail position p in dAPartial corresponds to original
+        // B axis bContractedSortedByOriginal[p]. We want pair-order: position k holds
+        // original B axis bContractedInPairOrder[k]. So tailPerm[k] = index of
+        // bContractedInPairOrder[k] inside bContractedSortedByOriginal.
+        const tailPerm: number[] = [];
+        for (let k = 0; k < nPairs; k++) {
+          const bOrigAxis = bContractedInPairOrder[k];
+          const idx = bContractedSortedByOriginal.indexOf(bOrigAxis);
+          tailPerm.push(idx);
+        }
+        // Full permutation for dAPartial → dAReordered:
+        //   [0, 1, ..., naFree-1, naFree + tailPerm[0], naFree + tailPerm[1], ...]
+        const dAFirstPerm: number[] = [];
+        for (let i = 0; i < naFree; i++) dAFirstPerm.push(i);
+        for (let k = 0; k < nPairs; k++) dAFirstPerm.push(naFree + tailPerm[k]);
+
+        // Check if first perm is identity to skip the work.
+        const isFirstPermIdentity = dAFirstPerm.every((v, idx) => v === idx);
+        const dAReordered = isFirstPermIdentity ? dAPartial : dAPartial.transpose(dAFirstPerm);
+
+        // Now dAReordered axis k (k < naFree) corresponds to A's axis aFree[k];
+        // dAReordered axis (naFree + k) corresponds to A's axis aContractedInPairOrder[k].
+        // Build the scatter permutation so the output is in A's original axis order:
+        //   targetAxisA = output axis index
+        //   For each A axis a (0..aRank-1):
+        //     if a ∈ aFree: source position = aFree.indexOf(a)
+        //     if a ∈ aContracted: source position = naFree + aContractedInPairOrder.indexOf(a)
+        const scatterA: number[] = new Array(aRank);
+        for (let a = 0; a < aRank; a++) {
+          const freeIdx = aFree.indexOf(a);
+          if (freeIdx !== -1) {
+            scatterA[a] = freeIdx;
+          } else {
+            const contIdx = aContractedInPairOrder.indexOf(a);
+            scatterA[a] = naFree + contIdx;
+          }
+        }
+        const isScatterAIdentity = scatterA.every((v, idx) => v === idx);
+        const dAFinal = isScatterAIdentity ? dAReordered : dAReordered.transpose(scatterA);
+
+        for (let i = 0; i < aGradSlot.length; i++) {
+          aGradSlot[i] += dAFinal.data[i];
+        }
+
+        // -- dB = tensordot(A, dZ, ...) then permute --
+        // We contract A's aFree axes with dZ's A-free portion (axes 0..naFree-1).
+        // Result has axes:
+        //   first:  A's surviving axes = A's aContracted axes (in A's original order)
+        //   then:   dZ's surviving axes = dZ's bFree portion = bFree dims (in bFree order)
+        const dBaxes: Array<readonly [number, number]> = [];
+        for (let i = 0; i < naFree; i++) {
+          dBaxes.push([aFree[i], i] as const);
+        }
+        const dBPartial = aPrimalTbk.tensordot(dZ, dBaxes);
+        // dBPartial shape: [...A's aContracted dims (in A's original order), ...bFree dims (in bFree order)]
+        // Reorder the head (A's aContracted axes) from "A's original order" into "pair order".
+        const aContractedSortedByOriginal = [...aContractedInPairOrder].sort((x, y) => x - y);
+        const dBHeadPerm: number[] = [];
+        for (let k = 0; k < nPairs; k++) {
+          const aOrigAxis = aContractedInPairOrder[k];
+          const idx = aContractedSortedByOriginal.indexOf(aOrigAxis);
+          dBHeadPerm.push(idx);
+        }
+        const dBFirstPerm: number[] = [];
+        for (let k = 0; k < nPairs; k++) dBFirstPerm.push(dBHeadPerm[k]);
+        for (let i = 0; i < nbFree; i++) dBFirstPerm.push(nPairs + i);
+        const isDBFirstPermIdentity = dBFirstPerm.every((v, idx) => v === idx);
+        const dBReordered = isDBFirstPermIdentity ? dBPartial : dBPartial.transpose(dBFirstPerm);
+
+        // Now dBReordered axis k (k < nPairs) corresponds to B's axis bContractedInPairOrder[k];
+        // dBReordered axis (nPairs + k) corresponds to B's axis bFree[k].
+        // Build scatter permutation to put axes in B's original order.
+        const scatterB: number[] = new Array(bRank);
+        for (let b = 0; b < bRank; b++) {
+          const freeIdx = bFree.indexOf(b);
+          if (freeIdx !== -1) {
+            scatterB[b] = nPairs + freeIdx;
+          } else {
+            const contIdx = bContractedInPairOrder.indexOf(b);
+            scatterB[b] = contIdx;
+          }
+        }
+        const isScatterBIdentity = scatterB.every((v, idx) => v === idx);
+        const dBFinal = isScatterBIdentity ? dBReordered : dBReordered.transpose(scatterB);
+
+        for (let i = 0; i < bGradSlot.length; i++) {
+          bGradSlot[i] += dBFinal.data[i];
+        }
+      }
+    );
+
+    return new TapedTensor(zShape, new Float64Array(zPrimal.data), this.tape, id);
+  }
+
+  // ---------------------------------------------------------------------------
+  // SVD — full singular value decomposition on rank-2 input.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Reverse-mode AD over the full SVD of a rank-2 matrix.
+   *
+   * Forward: `A = U · diag(S) · Vt`, where for input shape [m, n], k = min(m, n):
+   *   - U  has shape [m, k]
+   *   - S  has shape [k]
+   *   - Vt has shape [k, n]    (Vt is V^T in the standard A = U Σ V^T convention,
+   *                              i.e. its rows are right-singular-vector components)
+   *
+   * Returned TapedTensors share a single backward closure. When backward()
+   * runs, it pulls dU, dS, dV from each output's gradient slot, assembles
+   * dA, and writes to the input's gradient slot.
+   *
+   * Adjoint (real, distinct nonzero singular values, m = n square case;
+   * extended to rectangular below). Derived directly from the forward
+   * Jacobian; equivalent to PyTorch's `svd_backward`
+   * (`aten/src/ATen/native/BatchLinearAlgebra.cpp`) and Townsend (2016)
+   * "Differentiating the Singular Value Decomposition" §3:
+   *
+   *   Let α = skew(U^T · dU),  β = skew(V^T · dV)        (k×k, antisymmetric)
+   *   Build C (k×k):
+   *     C[i,i] = dS[i]
+   *     C[i,j] = (α[i,j] + β[i,j]) / (s_j − s_i)
+   *            + (α[i,j] − β[i,j]) / (s_j + s_i)         for i ≠ j
+   *   dA_in = U · C · V^T                                 (m×n in-subspace part)
+   *
+   * Rectangular correction (when m > k, i.e. m > n):
+   *   dA += (I − U U^T) · dU · diag(1/s) · V^T
+   * Rectangular correction (when n > k, i.e. n > m):
+   *   dA += U · diag(1/s) · dV^T · (I − V V^T)
+   *
+   * Regularisation at repeated/near-zero singular values (PyTorch-equivalent
+   * subgradient choice): the (i,j) entry of C is masked to 0 whenever
+   * `|s_j − s_i| < REL_TOL · max(|s|)` (the "difference" denominator) or
+   * `|s_j + s_i| < REL_TOL · max(|s|)` (the "sum" denominator, only relevant
+   * when both are ~0). REL_TOL = 1e-10. This makes the gradient a subgradient
+   * at exact degeneracy — finite, but not the unique true derivative (which
+   * does not exist at degeneracies). The rectangular correction also masks
+   * 1/s_i when |s_i| < REL_TOL · max(|s|).
+   *
+   * Throws if input is not rank-2. For rank > 2 inputs the user should
+   * reshape first.
+   */
+  svd(): { U: TapedTensor; S: TapedTensor; V: TapedTensor } {
+    if (this.shape.length !== 2) {
+      throw new Error(
+        `TapedTensor.svd: expected rank-2 input, got rank ${this.shape.length}. ` +
+          `Reshape the tensor to 2-D first.`
+      );
+    }
+    const m = this.shape[0];
+    const n = this.shape[1];
+    const k = Math.min(m, n);
+
+    // Forward pass via tensorSvd with rowAxes = [0] (treat axis 0 as rows).
+    const inputT = new Tensor([m, n], new Float64Array(this.primal));
+    const svdResult = tensorSvd(inputT, [0]);
+    // tensorSvd may truncate. We need the full (untruncated) k = min(m,n).
+    // Verify no truncation happened (no opts → cutoff = 0, maxdim undefined).
+    if (svdResult.truncatedDim !== k) {
+      throw new Error(
+        `TapedTensor.svd: internal — tensorSvd returned truncatedDim=${svdResult.truncatedDim}, ` +
+          `expected ${k}. (A zero singular value was dropped by the default cutoff?)`
+      );
+    }
+
+    const uPrimal = new Float64Array(svdResult.U.data); // [m, k]
+    const sPrimal = new Float64Array(svdResult.S.data); // [k]
+    const vtPrimal = new Float64Array(svdResult.V.data); // [k, n]  (V^T in standard notation)
+
+    // Create the three output TapedTensors, each with its own tape node.
+    // We use a single shared backward closure: each output records a node
+    // whose backward reads from a *shared* state and only runs the shared
+    // computation once (on the last call). To keep the tape semantics
+    // straightforward, we instead have each of U, S, V record a no-op
+    // forward node and gather their gradient slots into a final shared node
+    // that's emitted right after them and depends on this.id only.
+    //
+    // Simpler approach: record three "leaf" outputs U, S, V whose backwards
+    // are no-ops (they merely accumulate the upstream gradient into a
+    // captured slot). Then record one "joiner" node whose inputs are U, S, V
+    // (so its outputGradSlot is unused) and whose backward reads from the
+    // three captured slots and writes to A. The joiner has output size 0
+    // so its slot allocation is fine.
+    //
+    // Wait — the tape backward iterates from last node to first. The joiner
+    // would need to come after all consumers of U, S, V have written to
+    // those slots. We can't enforce that with the current Tape design
+    // (it iterates nodes in record-order). So we adopt a cleaner pattern:
+    // we record one node per output, and the FIRST output to run backward
+    // (i.e. the one with the highest record-order, which is V here) is
+    // responsible for the shared work. Each backward consults the shared
+    // state to know whether the others have flushed.
+    //
+    // Actually the simplest correct approach: each output's backward
+    // captures the **upstream** gradient into a private slot, but defers
+    // the actual computation. We need a barrier: the LAST backward to
+    // run (which is the FIRST recorded, since iteration is reverse) does
+    // the work.
+    //
+    // Order of recording below: U, S, V (S is in the middle). Tape iterates
+    // backward from V → S → U. We want the work done on U's backward (the
+    // last one called), so by then dU, dS, dV are all known.
+
+    // Captured gradient buffers shared across the three nodes.
+    const dUBuf = new Float64Array(m * k);
+    const dSBuf = new Float64Array(k);
+    const dVtBuf = new Float64Array(k * n);
+
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+
+    // The shared backward routine — invoked on the FIRST recorded node (U),
+    // which runs LAST during reverse traversal.
+    const sharedBackward = (): void => {
+      // Assemble dA from dU, dS, dVt, given U (m×k), s (k), Vt (k×n).
+      const dA = _svdBackward(uPrimal, sPrimal, vtPrimal, dUBuf, dSBuf, dVtBuf, m, n, k);
+      for (let i = 0; i < thisGradSlot.length; i++) {
+        thisGradSlot[i] += dA[i];
+      }
+    };
+
+    // Node for U: backward captures incoming dU AND triggers shared work.
+    // Since U is recorded first, it's the LAST to run in reverse traversal.
+    const { id: uId } = this.tape.record([this.id], m * k, (outputGrad) => {
+      // Capture dU first, then run shared work.
+      for (let i = 0; i < dUBuf.length; i++) dUBuf[i] += outputGrad[i];
+      sharedBackward();
+    });
+    // Node for S: backward captures incoming dS.
+    const { id: sId } = this.tape.record([this.id], k, (outputGrad) => {
+      for (let i = 0; i < dSBuf.length; i++) dSBuf[i] += outputGrad[i];
+    });
+    // Node for V (returned as the m×n V^T factor): backward captures dV.
+    const { id: vId } = this.tape.record([this.id], k * n, (outputGrad) => {
+      for (let i = 0; i < dVtBuf.length; i++) dVtBuf[i] += outputGrad[i];
+    });
+
+    const uTape = new TapedTensor([m, k], uPrimal, this.tape, uId);
+    const sTape = new TapedTensor([k], sPrimal, this.tape, sId);
+    const vTape = new TapedTensor([k, n], vtPrimal, this.tape, vId);
+    return { U: uTape, S: sTape, V: vTape };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Symmetric eigendecomposition.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Reverse-mode AD over the symmetric eigendecomposition of a rank-2 matrix.
+   *
+   * Forward: `A = U · diag(Λ) · U^T` for symmetric A (n×n).
+   *   - `eigvals` has shape [n] (real eigenvalues, in matrix-primitive's order)
+   *   - `eigvecs` has shape [n, n], columns are eigenvectors, U is orthogonal
+   *
+   * Non-symmetric `eig` is intentionally NOT implemented in this slice — the
+   * general case has complex eigenvalues and substantially harder derivative
+   * formulas. The caller must pass `{ symmetric: true }` (and ensure the
+   * input is actually symmetric).
+   *
+   * Adjoint (Magnus & Neudecker 1999 §10.6.6; PyTorch `linalg_eigh_backward`
+   * in `aten/src/ATen/native/BatchLinearAlgebra.cpp`):
+   *
+   *   F[i,j] = 1 / (λ_j − λ_i)   for i ≠ j, 0 otherwise (with degeneracy mask)
+   *   dA_raw = U · (diag(dΛ) + F ∘ (U^T · dU)) · U^T
+   *   dA     = (dA_raw + dA_raw^T) / 2          (symmetrise — A was symmetric)
+   *
+   * Regularisation at repeated eigenvalues (subgradient choice): mask
+   * F[i,j] = 0 when `|λ_i − λ_j| < REL_TOL · max(|λ|)`. REL_TOL = 1e-10. This
+   * produces a stable subgradient at exact degeneracy (finite, not unique
+   * since the true derivative doesn't exist there).
+   *
+   * Throws if input is not rank-2 or square, or if `symmetric` is not true.
+   */
+  eig(opts: { symmetric: true }): { eigvals: TapedTensor; eigvecs: TapedTensor } {
+    if (!opts || opts.symmetric !== true) {
+      throw new Error(
+        'TapedTensor.eig is only implemented for the symmetric path. ' +
+          'Pass { symmetric: true } and ensure the input is symmetric.'
+      );
+    }
+    if (this.shape.length !== 2 || this.shape[0] !== this.shape[1]) {
+      throw new Error(`TapedTensor.eig: expected rank-2 square input, got shape [${this.shape}].`);
+    }
+    const n = this.shape[0];
+
+    const inputT = new Tensor([n, n], new Float64Array(this.primal));
+    const eigResult = tensorEig(inputT, [0], { symmetric: true, computeVectors: true });
+    const lambdaPrimal = new Float64Array(eigResult.eigenvalues.data);
+    if (!eigResult.eigenvectors) {
+      throw new Error('TapedTensor.eig: tensorEig did not return eigenvectors');
+    }
+    const uPrimal = new Float64Array(eigResult.eigenvectors.data); // [n, n], columns = eigvecs
+
+    const dLambdaBuf = new Float64Array(n);
+    const dUBuf = new Float64Array(n * n);
+
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+
+    const sharedBackward = (): void => {
+      const dA = _eigSymBackward(uPrimal, lambdaPrimal, dUBuf, dLambdaBuf, n);
+      for (let i = 0; i < thisGradSlot.length; i++) {
+        thisGradSlot[i] += dA[i];
+      }
+    };
+
+    // Record eigvals first (runs LAST in reverse → triggers shared work).
+    const { id: lId } = this.tape.record([this.id], n, (outputGrad) => {
+      for (let i = 0; i < dLambdaBuf.length; i++) dLambdaBuf[i] += outputGrad[i];
+      sharedBackward();
+    });
+    const { id: uId } = this.tape.record([this.id], n * n, (outputGrad) => {
+      for (let i = 0; i < dUBuf.length; i++) dUBuf[i] += outputGrad[i];
+    });
+
+    const lTape = new TapedTensor([n], lambdaPrimal, this.tape, lId);
+    const uTape = new TapedTensor([n, n], uPrimal, this.tape, uId);
+    return { eigvals: lTape, eigvecs: uTape };
+  }
 }
 
 // ---------------------------------------------------------------------------
 // Module-level helpers (not exported; private to this module)
 // ---------------------------------------------------------------------------
+
+/**
+ * SVD reverse-mode adjoint.
+ *
+ * Inputs (row-major Float64Arrays):
+ *   U  : m × k
+ *   s  : k         (singular values, descending)
+ *   Vt : k × n     (Vt = V^T in the standard A = U Σ V^T convention)
+ *   dU : m × k
+ *   dS : k
+ *   dVt: k × n
+ *
+ * Returns dA (m × n).
+ *
+ * Tolerance: REL_TOL = 1e-10. F[i,j] is zeroed when |s_j − s_i| / max(|s|)
+ * < REL_TOL (degenerate / near-degenerate singular pair). Likewise the
+ * "sum" denominator s_j + s_i is masked when both are ~0. The rectangular
+ * 1/s correction terms are masked when s_i / max(|s|) < REL_TOL.
+ */
+function _svdBackward(
+  U: Float64Array,
+  s: Float64Array,
+  Vt: Float64Array,
+  dU: Float64Array,
+  dS: Float64Array,
+  dVt: Float64Array,
+  m: number,
+  n: number,
+  k: number
+): Float64Array {
+  const REL_TOL = 1e-10;
+  let sMax = 0;
+  for (let i = 0; i < k; i++) {
+    const a = Math.abs(s[i]);
+    if (a > sMax) sMax = a;
+  }
+  const tolAbs = REL_TOL * (sMax > 0 ? sMax : 1);
+
+  // Compute V from Vt: V[i, j] = Vt[j, i], shape n × k.
+  const V = new Float64Array(n * k);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < k; j++) {
+      V[i * k + j] = Vt[j * n + i];
+    }
+  }
+  // Compute dV (n × k) from dVt (k × n) by transposing.
+  const dV = new Float64Array(n * k);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < k; j++) {
+      dV[i * k + j] = dVt[j * n + i];
+    }
+  }
+
+  // UtU_grad = U^T · dU  (k × k)
+  const UtdU = _matmulMNK(U, dU, m, k, k, /*aT=*/ true, /*bT=*/ false);
+  // VtdV = V^T · dV  (k × k)
+  const VtdV = _matmulMNK(V, dV, n, k, k, /*aT=*/ true, /*bT=*/ false);
+
+  // skew parts: α = (UtdU − UtdU^T) / 2, β = (VtdV − VtdV^T) / 2
+  // Build C (k × k):
+  //   C[i,i] = dS[i]
+  //   C[i,j] = (α[i,j] + β[i,j]) / (s_j − s_i)
+  //          + (α[i,j] − β[i,j]) / (s_j + s_i)        for i ≠ j
+  // with degeneracy masking on each denominator.
+  const C = new Float64Array(k * k);
+  for (let i = 0; i < k; i++) {
+    for (let j = 0; j < k; j++) {
+      if (i === j) {
+        C[i * k + j] = dS[i];
+      } else {
+        const alpha = (UtdU[i * k + j] - UtdU[j * k + i]) * 0.5;
+        const beta = (VtdV[i * k + j] - VtdV[j * k + i]) * 0.5;
+        const denomDiff = s[j] - s[i];
+        const denomSum = s[j] + s[i];
+        let term = 0;
+        if (Math.abs(denomDiff) > tolAbs) {
+          term += (alpha + beta) / denomDiff;
+        }
+        if (Math.abs(denomSum) > tolAbs) {
+          term += (alpha - beta) / denomSum;
+        }
+        C[i * k + j] = term;
+      }
+    }
+  }
+
+  // dA_in = U · C · V^T  (m × n)
+  // UC = U · C  (m × k)
+  const UC = _matmulMNK(U, C, m, k, k, false, false);
+  // dA_in = UC · Vt  (where Vt is already V^T, shape k × n)
+  const dA = _matmulMNK(UC, Vt, m, k, n, false, false);
+
+  // Rectangular correction: when m > k (i.e. m > n), there's an out-of-subspace
+  // contribution: dA += (I − U U^T) · dU · diag(1/s) · V^T
+  // Equivalently: dU_perp = dU − U · (U^T · dU); then dA += dU_perp · diag(1/s) · V^T.
+  if (m > k) {
+    // dU_perp = dU − U · UtdU   (m × k)
+    const UUtdU = _matmulMNK(U, UtdU, m, k, k, false, false); // (m × k)
+    const dUperp = new Float64Array(m * k);
+    for (let i = 0; i < m * k; i++) dUperp[i] = dU[i] - UUtdU[i];
+    // Scale columns by 1/s_j (masked).
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < k; j++) {
+        const sj = s[j];
+        if (Math.abs(sj) > tolAbs) {
+          dUperp[i * k + j] /= sj;
+        } else {
+          dUperp[i * k + j] = 0;
+        }
+      }
+    }
+    // dA += dUperp · Vt   (m × n)
+    const corr = _matmulMNK(dUperp, Vt, m, k, n, false, false);
+    for (let i = 0; i < dA.length; i++) dA[i] += corr[i];
+  }
+
+  // Rectangular correction: when n > k (i.e. n > m), symmetric for V.
+  // dA += U · diag(1/s) · (dVt − Vt · (V · Vt^T))  -- but easier:
+  // dV_perp = dV − V · (V^T · dV) = dV − V · VtdV    (n × k)
+  // dA += U · diag(1/s) · dV_perp^T
+  if (n > k) {
+    const VVtdV = _matmulMNK(V, VtdV, n, k, k, false, false); // (n × k)
+    const dVperp = new Float64Array(n * k);
+    for (let i = 0; i < n * k; i++) dVperp[i] = dV[i] - VVtdV[i];
+    // Scale columns by 1/s_j (masked).
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < k; j++) {
+        const sj = s[j];
+        if (Math.abs(sj) > tolAbs) {
+          dVperp[i * k + j] /= sj;
+        } else {
+          dVperp[i * k + j] = 0;
+        }
+      }
+    }
+    // dA += U · dVperp^T   (m × n)
+    // U is m × k; dVperp is n × k; dVperp^T is k × n.
+    const corr = _matmulMNK(U, dVperp, m, k, n, false, true);
+    for (let i = 0; i < dA.length; i++) dA[i] += corr[i];
+  }
+
+  return dA;
+}
+
+/**
+ * Symmetric-eigendecomposition reverse-mode adjoint.
+ *
+ * Inputs (row-major Float64Arrays):
+ *   U     : n × n  (columns are eigenvectors; U is orthogonal)
+ *   lam   : n      (eigenvalues, real)
+ *   dU    : n × n  (upstream adjoint of U)
+ *   dLam  : n      (upstream adjoint of λ)
+ *
+ * Returns dA (n × n), symmetrised so the gradient lives on the symmetric
+ * manifold (matching the symmetric primal).
+ *
+ * Tolerance: REL_TOL = 1e-10. F[i,j] is zeroed when |λ_j − λ_i| / max(|λ|)
+ * < REL_TOL.
+ */
+function _eigSymBackward(
+  U: Float64Array,
+  lam: Float64Array,
+  dU: Float64Array,
+  dLam: Float64Array,
+  n: number
+): Float64Array {
+  const REL_TOL = 1e-10;
+  let lamMax = 0;
+  for (let i = 0; i < n; i++) {
+    const a = Math.abs(lam[i]);
+    if (a > lamMax) lamMax = a;
+  }
+  const tolAbs = REL_TOL * (lamMax > 0 ? lamMax : 1);
+
+  // UtdU = U^T · dU   (n × n)
+  const UtdU = _matmulMNK(U, dU, n, n, n, true, false);
+
+  // M = diag(dLam) + F ∘ (U^T · dU)
+  // F[i,j] = 1/(λ_j − λ_i) for i ≠ j, masked at near-degeneracies.
+  const M = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i === j) {
+        M[i * n + j] = dLam[i];
+      } else {
+        const denom = lam[j] - lam[i];
+        if (Math.abs(denom) > tolAbs) {
+          M[i * n + j] = UtdU[i * n + j] / denom;
+        } else {
+          M[i * n + j] = 0;
+        }
+      }
+    }
+  }
+
+  // dA_raw = U · M · U^T   (n × n)
+  const UM = _matmulMNK(U, M, n, n, n, false, false);
+  const dAraw = _matmulMNK(UM, U, n, n, n, false, true);
+
+  // Symmetrise: dA = (dA_raw + dA_raw^T) / 2
+  const dA = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      dA[i * n + j] = (dAraw[i * n + j] + dAraw[j * n + i]) * 0.5;
+    }
+  }
+  return dA;
+}
+
+/**
+ * Plain row-major matrix multiply with optional per-operand transposition.
+ *
+ *   C = (A^aT) · (B^bT)
+ *
+ * Logical dims: A is (M × K) after optional transpose; B is (K × N) after
+ * optional transpose; C is (M × N).
+ *
+ * `aT=true` means the physical A is stored as (K × M) row-major (we treat
+ * it as A^T which is M × K). Likewise for `bT`.
+ */
+function _matmulMNK(
+  A: Float64Array,
+  B: Float64Array,
+  M: number,
+  K: number,
+  N: number,
+  aT: boolean,
+  bT: boolean
+): Float64Array {
+  const C = new Float64Array(M * N);
+  // Logical access helpers:
+  //   aGet(i, q) = A^aT[i, q]
+  //   bGet(q, j) = B^bT[q, j]
+  // If aT=false: A is M × K row-major, A^aT[i, q] = A[i*K + q]
+  // If aT=true:  physical A is K × M row-major, A^T[i, q] = A[q*M + i]
+  // Similarly for B.
+  for (let i = 0; i < M; i++) {
+    for (let j = 0; j < N; j++) {
+      let sum = 0;
+      for (let q = 0; q < K; q++) {
+        const aVal = aT ? A[q * M + i] : A[i * K + q];
+        const bVal = bT ? B[j * K + q] : B[q * N + j];
+        sum += aVal * bVal;
+      }
+      C[i * N + j] = sum;
+    }
+  }
+  return C;
+}
 
 /**
  * Normalise an axis argument to a sorted array of non-negative axis indices.

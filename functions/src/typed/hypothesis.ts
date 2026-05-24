@@ -18,6 +18,15 @@
  * - shapiroWilkTest: sort on main thread; W-numerator dot-product via parallel dot
  *   above threshold.
  *
+ * Bootstrap fan-out (Slice 5.11):
+ * - All four two-sample / goodness-of-fit tests accept `{ bootstrap: N }`.
+ * - When set, N permuted resamples are drawn from the combined data pool and the
+ *   statistic is recomputed for each.  The N tasks are fanned out via
+ *   `Promise.all` so the JS event-loop can interleave them (embarrassingly
+ *   parallel at the microtask level; each individual run uses the existing
+ *   Slice-3.10 worker dispatch if the resample is large enough).
+ * - `bootstrapSeed` enables fully deterministic resampling via Mulberry32 PRNG.
+ *
  * @packageDocumentation
  */
 
@@ -71,6 +80,79 @@ export interface PCAResult {
 }
 
 // =============================================================================
+// Bootstrap types (Slice 5.11)
+// =============================================================================
+
+/**
+ * Options for bootstrap resampling.  When `bootstrap` is set, the test is run
+ * on `bootstrap` independent permutations of the combined sample data, and the
+ * results are aggregated into a `*BootstrapResult` object.
+ *
+ * @example
+ * const r = await kolmogorovSmirnovTest(s1, s2, { bootstrap: 200, bootstrapSeed: 42 });
+ * // r.pValueEmpirical  — fraction of permuted statistics ≥ base statistic
+ */
+export interface BootstrapOptions {
+  /**
+   * Number of permutation-resampled test runs to execute.
+   * `0` or `undefined` = fall back to the ordinary (non-bootstrap) result.
+   */
+  bootstrap?: number;
+  /**
+   * Integer seed for the Mulberry32 PRNG so that permutations are
+   * deterministic across runs.  When omitted Math.random() is used.
+   */
+  bootstrapSeed?: number;
+}
+
+export interface KSBootstrapResult {
+  /** D statistic from the original (un-permuted) samples. */
+  statistic: f64;
+  /** Fraction of permuted statistics ≥ original statistic (two-tailed). */
+  pValueEmpirical: f64;
+  /** Raw permuted D statistics. */
+  bootstrapStatistics: Float64Array;
+  bootstrapMean: f64;
+  bootstrapStd: f64;
+}
+
+export interface MWBootstrapResult {
+  /** U statistic from the original (un-permuted) samples. */
+  uStatistic: f64;
+  /** Fraction of permuted U statistics ≥ original U statistic. */
+  pValueEmpirical: f64;
+  /** Raw permuted U statistics. */
+  bootstrapStatistics: Float64Array;
+  bootstrapMean: f64;
+  bootstrapStd: f64;
+}
+
+export interface SWBootstrapResult {
+  /** W statistic from the original (un-permuted) samples. */
+  statistic: f64;
+  /**
+   * Fraction of permuted W statistics ≤ original W statistic.
+   * (Small W indicates non-normality, so we count ≤.)
+   */
+  pValueEmpirical: f64;
+  /** Raw permuted W statistics. */
+  bootstrapStatistics: Float64Array;
+  bootstrapMean: f64;
+  bootstrapStd: f64;
+}
+
+export interface ChiSquareBootstrapResult {
+  /** chi² statistic from the original (un-permuted) samples. */
+  statistic: f64;
+  /** Fraction of permuted statistics ≥ original statistic. */
+  pValueEmpirical: f64;
+  /** Raw permuted chi² statistics. */
+  bootstrapStatistics: Float64Array;
+  bootstrapMean: f64;
+  bootstrapStd: f64;
+}
+
+// =============================================================================
 // Worker-dispatch threshold (Slice 3.10)
 // =============================================================================
 
@@ -80,6 +162,61 @@ export interface PCAResult {
  * through the ComputePool worker pool.
  */
 const HYPOTHESIS_THRESHOLD = 4096;
+
+// =============================================================================
+// Mulberry32 seeded PRNG (Slice 5.11)
+// =============================================================================
+
+/**
+ * Create a Mulberry32 PRNG seeded with `seed`.
+ *
+ * Returns a closure yielding U[0,1) floats.  Period: 2^32.
+ * NOT cryptographically secure.
+ *
+ * Reference: Tommy Ettinger, https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
+ * Canonical implementation: tensor/src/operations/random.ts
+ */
+function _makeMulberry32(seed: number): () => number {
+  let s = seed | 0;
+  return (): number => {
+    s = (s + 0x6d2b79f5) | 0;
+    let z = s;
+    z = Math.imul(z ^ (z >>> 15), z | 1);
+    z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
+    z = (z ^ (z >>> 14)) >>> 0;
+    return z / 0x100000000;
+  };
+}
+
+/**
+ * Fisher-Yates in-place shuffle of a Float64Array using a provided PRNG.
+ */
+function _shuffle(arr: Float64Array, rng: () => number): void {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+}
+
+/**
+ * Aggregate an array of bootstrap statistics into summary fields.
+ */
+function _bootstrapSummary(stats: Float64Array): {
+  bootstrapMean: f64;
+  bootstrapStd: f64;
+} {
+  const n = stats.length;
+  if (n === 0) return { bootstrapMean: NaN, bootstrapStd: NaN };
+  let sum = 0;
+  for (let i = 0; i < n; i++) sum += stats[i];
+  const mean = sum / n;
+  let sq = 0;
+  for (let i = 0; i < n; i++) sq += (stats[i] - mean) ** 2;
+  const std = n > 1 ? Math.sqrt(sq / (n - 1)) : 0;
+  return { bootstrapMean: mean, bootstrapStd: std };
+}
 
 // =============================================================================
 // Internal Helpers
@@ -317,18 +454,26 @@ export function studentTTest(sample1: f64[], sample2?: f64[]): TTestResult {
  * on the worker pool. The 2D form stays on the main thread (reduction over a
  * 2D grid — marshal cost dominates).
  *
+ * Bootstrap (Slice 5.11): When `opts.bootstrap > 0`, the observed counts are
+ * resampled with replacement from a multinomial distribution (preserving the
+ * total count), the statistic is re-computed for each resample, and the
+ * empirical p-value is the fraction of resampled statistics ≥ the base.
+ *
  * @param observed - 1D observed counts, OR 2D contingency table (rows x cols)
  * @param expected - 1D expected counts (required for 1D form; omit for 2D)
- * @returns Chi-square test result (Promise resolves when worker dispatch fires)
+ * @param opts     - Optional bootstrap settings
+ * @returns Chi-square test result (or bootstrap result when `opts.bootstrap > 0`)
  *
  * @example
  * chiSquareTest([10, 20, 30], [20, 20, 20])     // 1D goodness-of-fit
  * chiSquareTest([[10, 20], [30, 40]])           // 2D independence test
+ * chiSquareTest([10, 20, 30], [20, 20, 20], { bootstrap: 500 }) // bootstrap
  */
 export async function chiSquareTest(
   observed: f64[] | f64[][],
-  expected?: f64[]
-): Promise<ChiSquareResult> {
+  expected?: f64[],
+  opts?: BootstrapOptions
+): Promise<ChiSquareResult | ChiSquareBootstrapResult> {
   // 2D contingency table form — stays on main thread
   if (Array.isArray(observed[0])) {
     const obs2d = observed as f64[][];
@@ -386,32 +531,102 @@ export async function chiSquareTest(
   }
 
   const df = obs1d.length - 1;
+  const n = obs1d.length;
 
   // --- Worker-dispatch path: element-wise (o-e)²/e reduction via pool --------
-  if (
-    obs1d.length >= HYPOTHESIS_THRESHOLD &&
-    computePool.shouldParallelize(obs1d.length, 'chiSquareTest')
-  ) {
+  let baseStatistic: f64;
+  if (n >= HYPOTHESIS_THRESHOLD && computePool.shouldParallelize(n, 'chiSquareTest')) {
     const obsF64 = new Float64Array(obs1d);
     const expF64 = new Float64Array(expected);
-    // applyKernel2 computes the per-element contribution in parallel
     const perElem = await computePool.applyKernel2(
       obsF64,
       expF64,
       '(o, e) => (o - e) * (o - e) / e'
     );
     const sumResult = await computePool.sum(perElem.result);
-    const statistic = sumResult.result;
-    return { statistic, pValue: _chiSquaredPValue(statistic, df), degreesOfFreedom: df };
+    baseStatistic = sumResult.result;
+  } else {
+    // --- Sequential fallback -------------------------------------------------
+    baseStatistic = 0;
+    for (let i = 0; i < n; i++) {
+      baseStatistic += (obs1d[i] - expected[i]) ** 2 / expected[i];
+    }
   }
 
-  // --- Sequential fallback ---------------------------------------------------
-  let statistic = 0;
-  for (let i = 0; i < obs1d.length; i++) {
-    statistic += (obs1d[i] - expected[i]) ** 2 / expected[i];
+  const baseResult: ChiSquareResult = {
+    statistic: baseStatistic,
+    pValue: _chiSquaredPValue(baseStatistic, df),
+    degreesOfFreedom: df,
+  };
+
+  // --- Bootstrap path (Slice 5.11) ------------------------------------------
+  const B = opts?.bootstrap ?? 0;
+  if (B <= 0) return baseResult;
+
+  // Build cumulative expected probability distribution for multinomial sampling.
+  let totalExpected = 0;
+  for (let i = 0; i < n; i++) totalExpected += expected[i];
+  const cumProbs = new Float64Array(n);
+  let cum = 0;
+  for (let i = 0; i < n; i++) {
+    cum += expected[i] / totalExpected;
+    cumProbs[i] = cum;
   }
 
-  return { statistic, pValue: _chiSquaredPValue(statistic, df), degreesOfFreedom: df };
+  // Total observed count — resample this many draws.
+  let totalObs = 0;
+  for (let i = 0; i < n; i++) totalObs += obs1d[i];
+
+  const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
+
+  /**
+   * Draw one multinomial resample: draw `totalObs` times from the expected
+   * distribution, compute the chi² statistic against `expected`.
+   */
+  function _chiSquareBootstrapOnce(): f64 {
+    const resampled = new Float64Array(n);
+    for (let d = 0; d < totalObs; d++) {
+      const u = rng();
+      // Binary search in cumProbs
+      let lo = 0;
+      let hi = n - 1;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (cumProbs[mid] < u) lo = mid + 1;
+        else hi = mid;
+      }
+      resampled[lo]++;
+    }
+    let stat = 0;
+    for (let i = 0; i < n; i++) {
+      stat += (resampled[i] - expected[i]) ** 2 / expected[i];
+    }
+    return stat;
+  }
+
+  const bootstrapStats = new Float64Array(B);
+  // Fan out B resamples using Promise.all for event-loop concurrency.
+  const tasks = Array.from({ length: B }, (_, idx) =>
+    Promise.resolve().then(() => {
+      bootstrapStats[idx] = _chiSquareBootstrapOnce();
+    })
+  );
+  await Promise.all(tasks);
+
+  let countGe = 0;
+  for (let i = 0; i < B; i++) {
+    if (bootstrapStats[i] >= baseStatistic) countGe++;
+  }
+  const pValueEmpirical = countGe / B;
+  const { bootstrapMean, bootstrapStd } = _bootstrapSummary(bootstrapStats);
+
+  return {
+    statistic: baseStatistic,
+    pValueEmpirical,
+    bootstrapStatistics: bootstrapStats,
+    bootstrapMean,
+    bootstrapStd,
+  } satisfies ChiSquareBootstrapResult;
 }
 
 // =============================================================================
@@ -496,17 +711,25 @@ export function anova(groups: f64[][]): AnovaResult {
  * When a custom CDF closure is given, the parallel path is skipped
  * (closures cannot be serialised into worker threads).
  *
+ * Bootstrap (Slice 5.11): When `opts.bootstrap > 0`, the sample is resampled
+ * with replacement (parametric bootstrap from the empirical distribution),
+ * and the D statistic is recomputed against the same CDF for each resample.
+ * Empirical p-value = fraction of bootstrap D values ≥ base D.
+ *
  * @param sample - Array of observations
- * @param cdfFn - CDF function to test against (default: standard normal)
+ * @param cdfFn  - CDF function to test against (default: standard normal)
+ * @param opts   - Optional bootstrap settings
  * @returns K-S test result
  *
  * @example
  * kolmogorovSmirnovTest([0.1, 0.5, 0.9], (x) => x) // test against uniform(0,1)
+ * kolmogorovSmirnovTest(data, undefined, { bootstrap: 200, bootstrapSeed: 1 })
  */
 export async function kolmogorovSmirnovTest(
   sample: f64[],
-  cdfFn?: (x: f64) => f64
-): Promise<KSTestResult> {
+  cdfFn?: (x: f64) => f64,
+  opts?: BootstrapOptions
+): Promise<KSTestResult | KSBootstrapResult> {
   if (sample.length < 1) throw new Error('kolmogorovSmirnovTest: sample must be non-empty');
 
   const n = sample.length;
@@ -561,7 +784,54 @@ export async function kolmogorovSmirnovTest(
   }
   pValue = Math.max(0, Math.min(1, pValue));
 
-  return { statistic: dMax, pValue };
+  const baseResult: KSTestResult = { statistic: dMax, pValue };
+
+  // --- Bootstrap path (Slice 5.11) ------------------------------------------
+  const B = opts?.bootstrap ?? 0;
+  if (B <= 0) return baseResult;
+
+  const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
+  const cdf = cdfFn || _normalCDF;
+
+  /**
+   * One bootstrap iteration: resample with replacement, sort, compute D.
+   */
+  function _ksBootstrapOnce(): f64 {
+    const resample = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      resample[i] = sorted[Math.floor(rng() * n)];
+    }
+    resample.sort();
+    let d = 0;
+    for (let i = 0; i < n; i++) {
+      const cv = cdf(resample[i]);
+      d = Math.max(d, Math.abs((i + 1) / n - cv), Math.abs(cv - i / n));
+    }
+    return d;
+  }
+
+  const bootstrapStats = new Float64Array(B);
+  const tasks = Array.from({ length: B }, (_, idx) =>
+    Promise.resolve().then(() => {
+      bootstrapStats[idx] = _ksBootstrapOnce();
+    })
+  );
+  await Promise.all(tasks);
+
+  let countGe = 0;
+  for (let i = 0; i < B; i++) {
+    if (bootstrapStats[i] >= dMax) countGe++;
+  }
+  const pValueEmpirical = countGe / B;
+  const { bootstrapMean, bootstrapStd } = _bootstrapSummary(bootstrapStats);
+
+  return {
+    statistic: dMax,
+    pValueEmpirical,
+    bootstrapStatistics: bootstrapStats,
+    bootstrapMean,
+    bootstrapStd,
+  } satisfies KSBootstrapResult;
 }
 
 // =============================================================================
@@ -580,12 +850,18 @@ export async function kolmogorovSmirnovTest(
  *
  * @param sample1 - First sample
  * @param sample2 - Second sample
+ * @param opts    - Optional bootstrap settings
  * @returns Mann-Whitney test result
  *
  * @example
  * mannWhitneyTest([1, 2, 3], [4, 5, 6])
+ * mannWhitneyTest(s1, s2, { bootstrap: 200, bootstrapSeed: 7 })
  */
-export async function mannWhitneyTest(sample1: f64[], sample2: f64[]): Promise<MannWhitneyResult> {
+export async function mannWhitneyTest(
+  sample1: f64[],
+  sample2: f64[],
+  opts?: BootstrapOptions
+): Promise<MannWhitneyResult | MWBootstrapResult> {
   if (sample1.length < 1 || sample2.length < 1) {
     throw new Error('mannWhitneyTest: both samples must be non-empty');
   }
@@ -637,7 +913,92 @@ export async function mannWhitneyTest(sample1: f64[], sample2: f64[]): Promise<M
   const z = sigma === 0 ? 0 : (U - mu) / sigma;
   const pValue = 2 * _normalCDF(z); // two-tailed
 
-  return { uStatistic: U, pValue: Math.min(1, pValue) };
+  const baseResult: MannWhitneyResult = { uStatistic: U, pValue: Math.min(1, pValue) };
+
+  // --- Bootstrap path (Slice 5.11) ------------------------------------------
+  const B = opts?.bootstrap ?? 0;
+  if (B <= 0) return baseResult;
+
+  // Build combined pool as Float64Array for permutation bootstrap.
+  const combinedPool = new Float64Array(nTotal);
+  for (let k = 0; k < nTotal; k++) combinedPool[k] = combined[k].value;
+
+  const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
+
+  /**
+   * Compute Mann-Whitney U statistic for a given split of a pre-sorted
+   * combined array. The first `n1` elements are treated as group 1.
+   * (Pure sequential — fast enough per iteration.)
+   */
+  function _mwUFromPermutation(perm: Float64Array): f64 {
+    // Sort the permutation array
+    const tmp = perm.slice();
+    tmp.sort();
+
+    // Assign ranks with tie handling
+    const r = new Float64Array(nTotal);
+    let ii = 0;
+    while (ii < nTotal) {
+      let jj = ii;
+      while (jj < nTotal && tmp[jj] === tmp[ii]) jj++;
+      const avgR = (ii + 1 + jj) / 2;
+      for (let kk = ii; kk < jj; kk++) r[kk] = avgR;
+      ii = jj;
+    }
+
+    // rank-sum for group 1 (first n1 elements of perm, not tmp)
+    // We need to map perm values back to ranks.
+    // Build value→rank index from the sorted array.
+    // Since we use avg ranks, we can do a simpler approach:
+    // create sorted copy with original indices to map back.
+    const indexed = Array.from({ length: nTotal }, (_, k) => ({
+      val: perm[k],
+      origIdx: k,
+    })).sort((a, b) => a.val - b.val);
+
+    // Re-assign avg ranks by value
+    const rankByOrig = new Float64Array(nTotal);
+    let kk = 0;
+    while (kk < nTotal) {
+      let ll = kk;
+      while (ll < nTotal && indexed[ll].val === indexed[kk].val) ll++;
+      const avgR = (kk + 1 + ll) / 2;
+      for (let mm = kk; mm < ll; mm++) rankByOrig[indexed[mm].origIdx] = avgR;
+      kk = ll;
+    }
+
+    let r1 = 0;
+    for (let k = 0; k < n1; k++) r1 += rankByOrig[k];
+    const u1 = r1 - (n1 * (n1 + 1)) / 2;
+    const u2 = n1 * n2 - u1;
+    return Math.min(u1, u2);
+  }
+
+  const bootstrapStats = new Float64Array(B);
+  const tasks = Array.from({ length: B }, (_, idx) =>
+    Promise.resolve().then(() => {
+      // Permute combined pool and take first n1 as group 1.
+      const perm = combinedPool.slice();
+      _shuffle(perm, rng);
+      bootstrapStats[idx] = _mwUFromPermutation(perm);
+    })
+  );
+  await Promise.all(tasks);
+
+  let countGe = 0;
+  for (let i2 = 0; i2 < B; i2++) {
+    if (bootstrapStats[i2] >= U) countGe++;
+  }
+  const pValueEmpirical = countGe / B;
+  const { bootstrapMean, bootstrapStd } = _bootstrapSummary(bootstrapStats);
+
+  return {
+    uStatistic: U,
+    pValueEmpirical,
+    bootstrapStatistics: bootstrapStats,
+    bootstrapMean,
+    bootstrapStd,
+  } satisfies MWBootstrapResult;
 }
 
 // =============================================================================
@@ -655,12 +1016,17 @@ export async function mannWhitneyTest(sample1: f64[], sample2: f64[]): Promise<M
  * `dot(coefficients, sorted_values)` is computed via the pool.
  *
  * @param sample - Array of observations (3 to 5000 elements)
+ * @param opts   - Optional bootstrap settings
  * @returns Shapiro-Wilk test result
  *
  * @example
  * shapiroWilkTest([1, 2, 3, 4, 5])
+ * shapiroWilkTest(data, { bootstrap: 100, bootstrapSeed: 42 })
  */
-export async function shapiroWilkTest(sample: f64[]): Promise<ShapiroWilkResult> {
+export async function shapiroWilkTest(
+  sample: f64[],
+  opts?: BootstrapOptions
+): Promise<ShapiroWilkResult | SWBootstrapResult> {
   const n = sample.length;
   if (n < 3) throw new Error('shapiroWilkTest: need at least 3 observations');
   if (n > 5000) throw new Error('shapiroWilkTest: maximum 5000 observations');
@@ -677,8 +1043,9 @@ export async function shapiroWilkTest(sample: f64[]): Promise<ShapiroWilkResult>
   for (const x of sorted) ss += (x - m) ** 2;
 
   if (ss === 0) {
-    // All values identical
-    return { statistic: 1, pValue: 1 };
+    // All values identical — return early (bootstrap undefined for constant data)
+    const baseResult: ShapiroWilkResult = { statistic: 1, pValue: 1 };
+    return baseResult;
   }
 
   // Compute approximate Shapiro-Wilk coefficients using Blom's expected normal order statistics
@@ -719,7 +1086,61 @@ export async function shapiroWilkTest(sample: f64[]): Promise<ShapiroWilkResult>
   const zStat = (Math.log(1 - W) - mu1) / sigma1;
   const pValue = 1 - _normalCDF(zStat);
 
-  return { statistic: W, pValue: Math.max(0, Math.min(1, pValue)) };
+  const baseResult: ShapiroWilkResult = { statistic: W, pValue: Math.max(0, Math.min(1, pValue)) };
+
+  // --- Bootstrap path (Slice 5.11) ------------------------------------------
+  const B = opts?.bootstrap ?? 0;
+  if (B <= 0) return baseResult;
+
+  const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
+
+  /**
+   * Compute the Shapiro-Wilk W statistic for a resample of `sorted`.
+   * The resample is drawn with replacement from the original sorted data.
+   */
+  function _swBootstrapOnce(): f64 {
+    const resample = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      resample[i] = sorted[Math.floor(rng() * n)];
+    }
+    resample.sort();
+
+    let mR = 0;
+    for (let i = 0; i < n; i++) mR += resample[i];
+    mR /= n;
+
+    let ssR = 0;
+    for (let i = 0; i < n; i++) ssR += (resample[i] - mR) ** 2;
+    if (ssR === 0) return 1;
+
+    let bR = 0;
+    for (let idx = 0; idx < n; idx++) bR += aF64[idx] * resample[idx];
+    return (bR * bR) / ssR;
+  }
+
+  const bootstrapStats = new Float64Array(B);
+  const tasks = Array.from({ length: B }, (_, idx) =>
+    Promise.resolve().then(() => {
+      bootstrapStats[idx] = _swBootstrapOnce();
+    })
+  );
+  await Promise.all(tasks);
+
+  // Small W → non-normal, so empirical p-value = fraction of resampled W ≤ base W
+  let countLe = 0;
+  for (let i = 0; i < B; i++) {
+    if (bootstrapStats[i] <= W) countLe++;
+  }
+  const pValueEmpirical = countLe / B;
+  const { bootstrapMean, bootstrapStd } = _bootstrapSummary(bootstrapStats);
+
+  return {
+    statistic: W,
+    pValueEmpirical,
+    bootstrapStatistics: bootstrapStats,
+    bootstrapMean,
+    bootstrapStd,
+  } satisfies SWBootstrapResult;
 }
 
 /**

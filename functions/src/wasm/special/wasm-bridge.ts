@@ -1,28 +1,28 @@
 /**
- * WASM dispatch bridge for Bessel J/Y array kernels (Slice 3.10c-1).
+ * WASM dispatch bridge for Bessel J/Y and Airy Ai/Bi array kernels.
  *
- * Kernels exposed:
+ * Kernels exposed (Bessel — Slice 3.10c-1; Airy — Slice 4.9):
  *   - `bessel_j0_f64` — J0(x) applied element-wise over a Float64Array
  *   - `bessel_j1_f64` — J1(x) applied element-wise
  *   - `bessel_j_f64`  — J_n(x) applied element-wise (fixed integer order n)
  *   - `bessel_y0_f64` — Y0(x) applied element-wise
  *   - `bessel_y1_f64` — Y1(x) applied element-wise
  *   - `bessel_y_f64`  — Y_n(x) applied element-wise (fixed integer order n)
+ *   - `airy_ai_f64`   — Ai(x) applied element-wise
+ *   - `airy_bi_f64`   — Bi(x) applied element-wise
  *
- * Behavior:
- *   - When `wasmLoader.getModule()` returns null the helper returns the JS
- *     fallback result without throwing.
- *   - When the loaded module exposes the Rust export, operands are marshalled
- *     into WASM-owned memory, the kernel runs, and a JS-side copy is returned.
- *   - AS-backend parity is **deferred** (Slice 3.10c-2 TODO below).  If no
- *     Rust kernel is found the JS fallback runs transparently.
- *   - Any thrown error is swallowed and the JS fallback runs — the WASM tier
- *     is an optimisation, not a correctness requirement.
+ * Dispatch order (for arrays ≥ WASM_SPECIAL_THRESHOLD = 1024 elements):
+ *   1. Probe Rust export (pointer-style ABI).
+ *   2. If absent, probe AS export (`*_as` suffix, typed-array ABI).
+ *   3. Fall back to pure-JS implementation.
  *
- * TODO (Slice 3.10c-2 — deferred): Add AssemblyScript parity port in
- *   `assembly/src/special.ts` and register `bessel_j0_f64_as` etc. in
- *   WasmLoader.ts.  The `_as`-suffix probe below is already wired so the
- *   bridge will automatically pick up the AS variant once it lands.
+ * AS parity (Slice 4.9): `assembly/src/special.ts` implements all 8 kernels
+ *   with the same algorithms.  The `_as`-suffix probes below pick them up
+ *   automatically when the AS WASM binary is loaded
+ *   (MATHJS_WASM_BACKEND=assemblyscript).
+ *
+ * Any thrown error is swallowed and the JS fallback runs — the WASM tier
+ * is an optimisation, not a correctness requirement.
  *
  * Threshold:
  *   The pointer-marshal overhead (2 memcpys in + 1 out) pays off for arrays
@@ -111,11 +111,29 @@ export function besselYnJS(n: number, xs: Float64Array): Float64Array {
   return out;
 }
 
+/** JS fallback: Ai(x) for all x. */
+export function airyAiJS(xs: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i = 0; i < xs.length; i++) {
+    out[i] = _airyAi(xs[i]);
+  }
+  return out;
+}
+
+/** JS fallback: Bi(x) for all x. */
+export function airyBiJS(xs: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i = 0; i < xs.length; i++) {
+    out[i] = _airyBi(xs[i]);
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Public dispatch helpers
 // ---------------------------------------------------------------------------
 
-/** Dispatch J0 over an array — WASM above threshold, JS below. */
+/** Dispatch J0 over an array — Rust WASM above threshold, then AS, then JS. */
 export function besselJ0Dispatch(xs: Float64Array): Float64Array {
   const n = xs.length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
@@ -139,14 +157,22 @@ export function besselJ0Dispatch(xs: Float64Array): Float64Array {
           }
         }
       } catch {
-        // fall through
+        // fall through to AS probe
+      }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_j0_f64_as'] as
+          | ((xs: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') return asFn(xs);
+      } catch {
+        // fall through to JS
       }
     }
   }
   return besselJ0JS(xs);
 }
 
-/** Dispatch J1 over an array — WASM above threshold, JS below. */
+/** Dispatch J1 over an array — Rust WASM above threshold, then AS, then JS. */
 export function besselJ1Dispatch(xs: Float64Array): Float64Array {
   const n = xs.length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
@@ -170,14 +196,22 @@ export function besselJ1Dispatch(xs: Float64Array): Float64Array {
           }
         }
       } catch {
-        // fall through
+        // fall through to AS probe
+      }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_j1_f64_as'] as
+          | ((xs: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') return asFn(xs);
+      } catch {
+        // fall through to JS
       }
     }
   }
   return besselJ1JS(xs);
 }
 
-/** Dispatch J_order over an array — WASM above threshold, JS below. */
+/** Dispatch J_order over an array — Rust WASM, then AS, then JS. */
 export function besselJDispatch(order: number, xs: Float64Array): Float64Array {
   // J0 and J1 have dedicated kernels.
   if (order === 0) return besselJ0Dispatch(xs);
@@ -205,14 +239,22 @@ export function besselJDispatch(order: number, xs: Float64Array): Float64Array {
           }
         }
       } catch {
-        // fall through
+        // fall through to AS probe
+      }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_jn_f64_as'] as
+          | ((n: number, xs: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') return asFn(order, xs);
+      } catch {
+        // fall through to JS
       }
     }
   }
   return besselJnJS(order, xs);
 }
 
-/** Dispatch Y0 over an array — WASM above threshold, JS below. */
+/** Dispatch Y0 over an array — Rust WASM, then AS, then JS. */
 export function besselY0Dispatch(xs: Float64Array): Float64Array {
   const n = xs.length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
@@ -236,14 +278,22 @@ export function besselY0Dispatch(xs: Float64Array): Float64Array {
           }
         }
       } catch {
-        // fall through
+        // fall through to AS probe
+      }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_y0_f64_as'] as
+          | ((xs: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') return asFn(xs);
+      } catch {
+        // fall through to JS
       }
     }
   }
   return besselY0JS(xs);
 }
 
-/** Dispatch Y1 over an array — WASM above threshold, JS below. */
+/** Dispatch Y1 over an array — Rust WASM, then AS, then JS. */
 export function besselY1Dispatch(xs: Float64Array): Float64Array {
   const n = xs.length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
@@ -267,14 +317,22 @@ export function besselY1Dispatch(xs: Float64Array): Float64Array {
           }
         }
       } catch {
-        // fall through
+        // fall through to AS probe
+      }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_y1_f64_as'] as
+          | ((xs: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') return asFn(xs);
+      } catch {
+        // fall through to JS
       }
     }
   }
   return besselY1JS(xs);
 }
 
-/** Dispatch Y_order over an array — WASM above threshold, JS below. */
+/** Dispatch Y_order over an array — Rust WASM, then AS, then JS. */
 export function besselYDispatch(order: number, xs: Float64Array): Float64Array {
   // Y0 and Y1 have dedicated kernels.
   if (order === 0) return besselY0Dispatch(xs);
@@ -302,11 +360,105 @@ export function besselYDispatch(order: number, xs: Float64Array): Float64Array {
           }
         }
       } catch {
-        // fall through
+        // fall through to AS probe
+      }
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_yn_f64_as'] as
+          | ((n: number, xs: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') return asFn(order, xs);
+      } catch {
+        // fall through to JS
       }
     }
   }
   return besselYnJS(order, xs);
+}
+
+/** Dispatch Ai(x) over an array — WASM above threshold, JS below. */
+export function airyAiDispatch(xs: Float64Array): Float64Array {
+  const n = xs.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      // Probe Rust (pointer-style)
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['airy_ai_f64'] as
+          | RustJ01Fn
+          | undefined;
+        if (typeof rustFn === 'function') {
+          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) {
+              return new Float64Array(outAlloc.array);
+            }
+          } finally {
+            wasmLoader.release(xsAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch {
+        // fall through to AS probe
+      }
+      // Probe AS (typed-array style)
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['airy_ai_f64_as'] as
+          | ((xs: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') {
+          return asFn(xs);
+        }
+      } catch {
+        // fall through to JS
+      }
+    }
+  }
+  return airyAiJS(xs);
+}
+
+/** Dispatch Bi(x) over an array — WASM above threshold, JS below. */
+export function airyBiDispatch(xs: Float64Array): Float64Array {
+  const n = xs.length;
+  if (n >= WASM_SPECIAL_THRESHOLD) {
+    const wasm = getWasm();
+    if (wasm) {
+      // Probe Rust (pointer-style)
+      try {
+        const rustFn = (wasm as unknown as Record<string, unknown>)['airy_bi_f64'] as
+          | RustJ01Fn
+          | undefined;
+        if (typeof rustFn === 'function') {
+          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+          try {
+            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
+            if (written === n) {
+              return new Float64Array(outAlloc.array);
+            }
+          } finally {
+            wasmLoader.release(xsAlloc.ptr, true);
+            wasmLoader.release(outAlloc.ptr, true);
+          }
+        }
+      } catch {
+        // fall through to AS probe
+      }
+      // Probe AS (typed-array style)
+      try {
+        const asFn = (wasm as unknown as Record<string, unknown>)['airy_bi_f64_as'] as
+          | ((xs: Float64Array) => Float64Array)
+          | undefined;
+        if (typeof asFn === 'function') {
+          return asFn(xs);
+        }
+      } catch {
+        // fall through to JS
+      }
+    }
+  }
+  return airyBiJS(xs);
 }
 
 /**
@@ -314,6 +466,13 @@ export function besselYDispatch(order: number, xs: Float64Array): Float64Array {
  * without importing WasmLoader directly.
  */
 export function resetBesselWasm(): void {
+  wasmLoader.reset();
+}
+
+/**
+ * Test-only alias for Airy reset (uses same singleton).
+ */
+export function resetAiryWasm(): void {
   wasmLoader.reset();
 }
 
@@ -493,4 +652,157 @@ function _besselYn(n: number, x: number): number {
     yCurr = yNext;
   }
   return sign * yCurr;
+}
+
+// ---------------------------------------------------------------------------
+// Airy scalar implementations (mirrors special/functions.rs :: airy_ai/bi)
+// ---------------------------------------------------------------------------
+
+// Ai(0) = 1/(3^{2/3}·Γ(2/3))
+const _AI0 = 0.35502805388781723926;
+// −Ai′(0) = 1/(3^{1/3}·Γ(1/3))
+const _AI_PRIME0 = 0.25881940379280679841;
+// Switch-over for asymptotic expansion
+const _XBIG = 4.5;
+// Asymptotic coefficients c_k (k = 0..6)
+const _AIRY_C = [
+  1.0,
+  5.0 / 72.0,
+  385.0 / 10368.0,
+  85085.0 / 2239488.0,
+  37182145.0 / 644972544.0,
+  5765760010.25 / 61917364224.0,
+  1519768071625.0 / 8918845788160.0,
+];
+
+/** Airy function Ai(x) — small |x|: power series (DLMF §9.2.2). */
+function _airyAiSeries(x: number): number {
+  const x3 = x * x * x;
+  let f = 1.0;
+  let g = x;
+  let fTerm = 1.0;
+  let gTerm = x;
+  let factF = 1.0;
+  let factG = 1.0;
+  let prodF = 1.0;
+  let prodG = 1.0;
+  for (let k = 1; k <= 30; k++) {
+    factF *= (3 * k - 2) * (3 * k - 1) * (3 * k);
+    factG *= (3 * k - 1) * (3 * k) * (3 * k + 1);
+    prodF *= 3 * k - 2;
+    prodG *= 3 * k - 1;
+    fTerm *= x3;
+    gTerm *= x3;
+    const df = (fTerm * prodF) / factF;
+    const dg = (gTerm * prodG) / factG;
+    f += df;
+    g += dg;
+    if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
+  }
+  return _AI0 * f - _AI_PRIME0 * g;
+}
+
+/** Airy function Ai(x) — large positive x: asymptotic decay (DLMF §9.7.3). */
+function _airyAiLargePos(x: number): number {
+  const xp = Math.pow(x, 0.25);
+  const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
+  let p = 0.0;
+  let zk = 1.0;
+  let sign = 1.0;
+  for (const ck of _AIRY_C) {
+    p += (sign * ck) / zk;
+    zk *= zeta;
+    sign = -sign;
+  }
+  return (Math.exp(-zeta) * p) / (2.0 * Math.sqrt(Math.PI) * xp);
+}
+
+/** Airy function Ai(x) — large negative x: oscillatory asymptotic (DLMF §9.7.5). */
+function _airyAiLargeNeg(x: number): number {
+  const ax = Math.abs(x);
+  const axp = Math.pow(ax, 0.25);
+  const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
+  const theta = zeta - Math.PI / 4.0;
+  let p = 0.0;
+  let q = 0.0;
+  let zk = 1.0;
+  let sign = 1.0;
+  for (let k = 0; k < _AIRY_C.length; k++) {
+    if (k % 2 === 0) p += (sign * _AIRY_C[k]) / zk;
+    else q += (sign * _AIRY_C[k]) / zk;
+    zk *= zeta;
+    sign = -sign;
+  }
+  return (Math.sin(theta) * p + Math.cos(theta) * q) / (Math.sqrt(Math.PI) * axp);
+}
+
+function _airyAi(x: number): number {
+  if (x > _XBIG) return _airyAiLargePos(x);
+  if (x < -_XBIG) return _airyAiLargeNeg(x);
+  return _airyAiSeries(x);
+}
+
+/** Airy function Bi(x) — small |x|: power series. */
+function _airyBiSeries(x: number): number {
+  const x3 = x * x * x;
+  let f = 1.0;
+  let g = x;
+  let fTerm = 1.0;
+  let gTerm = x;
+  let factF = 1.0;
+  let factG = 1.0;
+  let prodF = 1.0;
+  let prodG = 1.0;
+  for (let k = 1; k <= 30; k++) {
+    factF *= (3 * k - 2) * (3 * k - 1) * (3 * k);
+    factG *= (3 * k - 1) * (3 * k) * (3 * k + 1);
+    prodF *= 3 * k - 2;
+    prodG *= 3 * k - 1;
+    fTerm *= x3;
+    gTerm *= x3;
+    const df = (fTerm * prodF) / factF;
+    const dg = (gTerm * prodG) / factG;
+    f += df;
+    g += dg;
+    if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
+  }
+  return Math.sqrt(3.0) * (_AI0 * f + _AI_PRIME0 * g);
+}
+
+/** Airy function Bi(x) — large positive x: asymptotic growth (DLMF §9.7.3). */
+function _airyBiLargePos(x: number): number {
+  const xp = Math.pow(x, 0.25);
+  const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
+  let p = 0.0;
+  let zk = 1.0;
+  for (const ck of _AIRY_C) {
+    p += ck / zk;
+    zk *= zeta;
+  }
+  return (Math.exp(zeta) * p) / (Math.sqrt(Math.PI) * xp);
+}
+
+/** Airy function Bi(x) — large negative x: oscillatory asymptotic (DLMF §9.7.5). */
+function _airyBiLargeNeg(x: number): number {
+  const ax = Math.abs(x);
+  const axp = Math.pow(ax, 0.25);
+  const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
+  const theta = zeta + Math.PI / 4.0;
+  let p = 0.0;
+  let q = 0.0;
+  let zk = 1.0;
+  let sign = 1.0;
+  for (let k = 0; k < _AIRY_C.length; k++) {
+    if (k % 2 === 0) p += (sign * _AIRY_C[k]) / zk;
+    else q += (sign * _AIRY_C[k]) / zk;
+    zk *= zeta;
+    sign = -sign;
+  }
+  return (Math.cos(theta) * p + Math.sin(theta) * q) / (Math.sqrt(Math.PI) * axp);
+}
+
+function _airyBi(x: number): number {
+  if (x > _XBIG) return _airyBiLargePos(x);
+  if (x < -_XBIG) return _airyBiLargeNeg(x);
+  return _airyBiSeries(x);
 }

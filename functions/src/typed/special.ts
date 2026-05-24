@@ -23,6 +23,8 @@ import {
   besselY0Dispatch,
   besselY1Dispatch,
   besselYDispatch,
+  airyAiDispatch,
+  airyBiDispatch,
 } from '../wasm/special/wasm-bridge.js';
 
 // =============================================================================
@@ -746,6 +748,144 @@ function fresnelCScalar(x: f64): f64 {
   return sign * sum;
 }
 
+/** Airy function of the first kind Ai(x). */
+function airyAiScalar(x: f64): f64 {
+  const XBIG = 4.5;
+  const AI0 = 0.35502805388781723926;
+  const AI_PRIME0 = 0.25881940379280679841;
+  // Asymptotic coefficients c_k (k = 0..6)
+  const C = [
+    1.0,
+    5.0 / 72.0,
+    385.0 / 10368.0,
+    85085.0 / 2239488.0,
+    37182145.0 / 644972544.0,
+    5765760010.25 / 61917364224.0,
+    1519768071625.0 / 8918845788160.0,
+  ];
+  if (x > XBIG) {
+    const xp = Math.pow(x, 0.25);
+    const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
+    let p = 0.0,
+      zk = 1.0,
+      sign = 1.0;
+    for (const ck of C) {
+      p += (sign * ck) / zk;
+      zk *= zeta;
+      sign = -sign;
+    }
+    return (Math.exp(-zeta) * p) / (2.0 * Math.sqrt(Math.PI) * xp);
+  }
+  if (x < -XBIG) {
+    const ax = Math.abs(x);
+    const axp = Math.pow(ax, 0.25);
+    const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
+    const theta = zeta - Math.PI / 4.0;
+    let p = 0.0,
+      q = 0.0,
+      zk = 1.0,
+      sign = 1.0;
+    for (let k = 0; k < C.length; k++) {
+      if (k % 2 === 0) p += (sign * C[k]) / zk;
+      else q += (sign * C[k]) / zk;
+      zk *= zeta;
+      sign = -sign;
+    }
+    return (Math.sin(theta) * p + Math.cos(theta) * q) / (Math.sqrt(Math.PI) * axp);
+  }
+  // Power series
+  const x3 = x * x * x;
+  let f = 1.0,
+    g = x,
+    fTerm = 1.0,
+    gTerm = x;
+  let factF = 1.0,
+    factG = 1.0,
+    prodF = 1.0,
+    prodG = 1.0;
+  for (let k = 1; k <= 30; k++) {
+    factF *= (3 * k - 2) * (3 * k - 1) * (3 * k);
+    factG *= (3 * k - 1) * (3 * k) * (3 * k + 1);
+    prodF *= 3 * k - 2;
+    prodG *= 3 * k - 1;
+    fTerm *= x3;
+    gTerm *= x3;
+    const df = (fTerm * prodF) / factF,
+      dg = (gTerm * prodG) / factG;
+    f += df;
+    g += dg;
+    if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
+  }
+  return AI0 * f - AI_PRIME0 * g;
+}
+
+/** Airy function of the second kind Bi(x). */
+function airyBiScalar(x: f64): f64 {
+  const XBIG = 4.5;
+  const AI0 = 0.35502805388781723926;
+  const AI_PRIME0 = 0.25881940379280679841;
+  const C = [
+    1.0,
+    5.0 / 72.0,
+    385.0 / 10368.0,
+    85085.0 / 2239488.0,
+    37182145.0 / 644972544.0,
+    5765760010.25 / 61917364224.0,
+    1519768071625.0 / 8918845788160.0,
+  ];
+  if (x > XBIG) {
+    const xp = Math.pow(x, 0.25);
+    const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
+    let p = 0.0,
+      zk = 1.0;
+    for (const ck of C) {
+      p += ck / zk;
+      zk *= zeta;
+    }
+    return (Math.exp(zeta) * p) / (Math.sqrt(Math.PI) * xp);
+  }
+  if (x < -XBIG) {
+    const ax = Math.abs(x);
+    const axp = Math.pow(ax, 0.25);
+    const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
+    const theta = zeta + Math.PI / 4.0;
+    let p = 0.0,
+      q = 0.0,
+      zk = 1.0,
+      sign = 1.0;
+    for (let k = 0; k < C.length; k++) {
+      if (k % 2 === 0) p += (sign * C[k]) / zk;
+      else q += (sign * C[k]) / zk;
+      zk *= zeta;
+      sign = -sign;
+    }
+    return (Math.cos(theta) * p + Math.sin(theta) * q) / (Math.sqrt(Math.PI) * axp);
+  }
+  const x3 = x * x * x;
+  let f = 1.0,
+    g = x,
+    fTerm = 1.0,
+    gTerm = x;
+  let factF = 1.0,
+    factG = 1.0,
+    prodF = 1.0,
+    prodG = 1.0;
+  for (let k = 1; k <= 30; k++) {
+    factF *= (3 * k - 2) * (3 * k - 1) * (3 * k);
+    factG *= (3 * k - 1) * (3 * k) * (3 * k + 1);
+    prodF *= 3 * k - 2;
+    prodG *= 3 * k - 1;
+    fTerm *= x3;
+    gTerm *= x3;
+    const df = (fTerm * prodF) / factF,
+      dg = (gTerm * prodG) / factG;
+    f += df;
+    g += dg;
+    if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
+  }
+  return Math.sqrt(3.0) * (AI0 * f + AI_PRIME0 * g);
+}
+
 /** Fresnel sine integral S(x). */
 function fresnelSScalar(x: f64): f64 {
   const ax = Math.abs(x);
@@ -1323,6 +1463,63 @@ export const fresnelS = mathTyped('fresnelS', {
 });
 
 // =============================================================================
+// Airy Functions
+// =============================================================================
+
+/**
+ * Airy function of the first kind Ai(x).
+ *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via airy_ai_f64, Slice 4.9; or AS via airy_ai_f64_as).
+ *
+ * Algorithm:
+ *   - |x| ≤ 4.5: power series (DLMF §9.2.2) — ~1e-10 relative error
+ *   - x > 4.5:   decaying asymptotic exp(−ζ)/... (DLMF §9.7.3) — ~1e-7
+ *   - x < −4.5:  oscillatory asymptotic sin/cos (DLMF §9.7.5) — ~1e-7
+ *
+ * Reference values (DLMF §9.2):
+ *   Ai(0) ≈ 0.355028053887817
+ *   Ai(1) ≈ 0.135292416312881
+ *   Ai(−1) ≈ 0.535560883292352
+ *
+ * @param x - Input value, or Float64Array of values
+ * @returns Ai(x)
+ */
+export const airyAi = mathTyped('airyAi', {
+  number: airyAiScalar,
+  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+    if (x.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(airyAiDispatch(x));
+    }
+    return mapArray(x, airyAiScalar, () => kernelSource([airyAiScalar], '(x) => airyAiScalar(x)'));
+  },
+});
+
+/**
+ * Airy function of the second kind Bi(x).
+ *
+ * Arrays of length ≥ WASM_SPECIAL_THRESHOLD (1024) are dispatched to the
+ * WASM kernel (Rust via airy_bi_f64, Slice 4.9; or AS via airy_bi_f64_as).
+ *
+ * Reference values (DLMF §9.2):
+ *   Bi(0) ≈ 0.614926627446001
+ *   Bi(1) ≈ 1.207423594952871
+ *   Bi(−1) ≈ 0.103997389496945
+ *
+ * @param x - Input value, or Float64Array of values
+ * @returns Bi(x)
+ */
+export const airyBi = mathTyped('airyBi', {
+  number: airyBiScalar,
+  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+    if (x.length >= WASM_SPECIAL_THRESHOLD) {
+      return Promise.resolve(airyBiDispatch(x));
+    }
+    return mapArray(x, airyBiScalar, () => kernelSource([airyBiScalar], '(x) => airyBiScalar(x)'));
+  },
+});
+
+// =============================================================================
 // Named Export Collection
 // =============================================================================
 
@@ -1358,4 +1555,6 @@ export const typedSpecial = {
   expIntegralEi,
   fresnelC,
   fresnelS,
+  airyAi,
+  airyBi,
 };

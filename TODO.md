@@ -263,20 +263,27 @@ Detail:
             `scatter`/`pad`/`roll`/`flip` remain deferred to a
             future Slice 4.7b sub-slice.
 
-      **Wave 4 Tier 3 (sequential, design-heavy):**
-      - [ ] **Slice 4.8** — `TapedTensor` decomposition AD (rank 12).
-            **Opus subagent.** AD adjoints for `tensordot`, `svd`,
-            `eig` (symmetric path only — general non-symm deferred).
-            Repeated-value edge cases require subgradient handling
-            per Townsend (2016) / PyTorch's regularisation.
-      - [ ] **Slice 4.9** — Slice 3.10c-2: Airy `Ai`/`Bi` WASM + AS
-            Bessel parity. Closes the deferred sub-slice from
-            3.10c-1; AS-suffix bridge probe is already wired.
+      **Wave 4 Tier 3 (sequential, design-heavy) — ✅ ALL LANDED:**
+      - [x] **Slice 4.8** ✅ `fd81cd8` — `TapedTensor.tensordot` +
+            `.svd` + `.eig({symmetric:true})` reverse-mode AD. Opus
+            agent. References: Townsend (2016), Magnus & Neudecker
+            (1999), PyTorch source. Repeated-value subgradient mask
+            at `REL_TOL = 1e-10`. autograd: 103 → 136 tests (+33).
+            Non-symmetric `eig` AD still deferred (complex eigenvals).
+      - [x] **Slice 4.9** ✅ `276a75b` — Airy `Ai`/`Bi` WASM + full
+            AssemblyScript Bessel parity (closes 3.10c-2). Scalar
+            Airy implemented from scratch: power series for
+            `|x| ≤ 4.5`, 7-term asymptotic for larger (DLMF §9.2 +
+            §9.7); ~1e-7 relative error. AS port full — no 4.9b
+            split needed. `Bi`'s large-negative-x phase
+            (`θ = ζ + π/4` vs Ai's `θ = ζ − π/4`) was the
+            precision-sensitive design call; verified against DLMF.
+            functions: 2150 → 2171 tests (+21).
 
-      **Tier 4 deferred (no agent dispatch):**
+      **Tier 4 deferred (rolled into Wave 5):**
       - [ ] **Slice 4.10** — `typed/unit.ts` (rank 14). Blocked on
             a real `Unit` type in `@danielsimonjr/mathts-core`.
-            One-liner wrappers (`to`, `toBest`) once that lands.
+            Now part of Wave 5 Tier 5 (Slice 5.15, Opus).
       - [ ] **B.1 / B.2 playbook backlog** — 8 WASM-route + 7
             worker-route candidates from
             [`FUNCTION_GAPS_AUDIT.md §B.1`](docs/roadmap/FUNCTION_GAPS_AUDIT.md#b1-wasm-route-playbook--pure-js-functions-worth-porting-to-a-wasm-kernel)
@@ -295,6 +302,64 @@ Detail:
             vitest-browser) infra PR + CI matrix entry with a
             software WebGPU adapter (Mesa lavapipe on Linux or DX12
             on Windows). Infra slice, not implementation.
+
+- [ ] **Wave 5 gap-closure (B.1/B.2 backlog)** — design at
+      [`docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md`](docs/roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md).
+      Picks up the 8 WASM-route + 7 worker-route candidates from
+      the audit §B.1 / §B.2 plus the deferred sub-slices 4.7b
+      (scatter/pad/roll/flip), non-symmetric eig AD, and the core
+      Unit type that unblocks rank 14. 15 slices total across 5
+      tiers:
+
+      **Wave 5A Tier 1 (parallel, 4 disjoint agents):**
+      - [ ] **Slice 5.1** — Tensor scatter/pad/roll/flip (closes
+            4.7b sub-slice). 4 new NumPy-style indexing ops; no
+            WASM.
+      - [ ] **Slice 5.2** — Promote matrixPinv + cond + norm2 +
+            normFro + lowRankApprox + singularValues to typed/.
+            Pure promotion, no new algorithms.
+      - [ ] **Slice 5.10** — typed/integration.ts sub-interval
+            worker fan-out (extends 3.8). Add `workerCount` opt;
+            closure-stringification path.
+      - [ ] **Slice 5.11** — typed/hypothesis.ts bootstrap worker
+            helper (extends 3.10). Add `bootstrap: N` opt to all 4
+            tests.
+
+      **Wave 5B Tier 2 (sequential WASM, 4 slices):**
+      - [ ] **Slice 5.3** — typed/special.ts ellipticK/E WASM via
+            AGM (mirror Airy pattern from 4.9).
+      - [ ] **Slice 5.4** — typed/cas.ts polyFit/chebyshevFit/
+            legendreFit WASM via Vandermonde + existing qr kernel.
+      - [ ] **Slice 5.5** — typed/interpolation.ts lagrange/
+            newtonInterp divided-difference WASM (extends 3.10b).
+      - [ ] **Slice 5.6** — typed/signal.ts spectral-windowing
+            WASM (welchPSD/bartlettPSD/multiTaperPSD + goertzel +
+            chirpZTransform).
+
+      **Wave 5C Tier 3 (sequential larger/design, 3 slices):**
+      - [ ] **Slice 5.7** — wasm.sortF64 kernel + sort-based ops
+            batch (statistics histogram/quantile/percentile;
+            hypothesis KS/MW/SW resort; geometry convexHull/Delaunay).
+      - [ ] **Slice 5.8** — wasm.lgammaF64 + distributions pdf
+            WASM (betaPdf/gammaPdf/studentTPdf/noncentralChi2Pdf).
+      - [ ] **Slice 5.9** — matrixExpm/Logm/Sqrtm primitives
+            (Padé/scaling-and-squaring per Higham 2008) + typed
+            wiring.
+
+      **Wave 5D Tier 4 (parallel worker-route, 3 disjoint agents):**
+      - [ ] **Slice 5.12** — typed/dist-objects.ts batch sampling
+            ≥ 100K via workers.
+      - [ ] **Slice 5.13** — typed/graph.ts centrality random
+            restarts via workers.
+      - [ ] **Slice 5.14** — typed/cas.ts batch fan-out for
+            simplify/derivative/expand/factor.
+
+      **Wave 5E Tier 5 (Opus, single big slice):**
+      - [ ] **Slice 5.15** — core Unit type (7-D dimensional
+            vector + composition + conversion + printing) →
+            unblocks Slice 4.10 / rank 14 typed/unit.ts.
+            Ports algorithm from mathjs's Unit class with cleaner
+            TS shape.
 
 - [x] **CDG bugfix + post-Wave-3 gap-audit refresh** — Ran
       `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --include-tests`

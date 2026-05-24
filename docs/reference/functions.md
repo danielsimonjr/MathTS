@@ -338,6 +338,7 @@ leftShift(1, 4); // 16
 | `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind                            | parallel + WASM (≥1 K) |
 | `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                 | parallel + WASM (≥1 K) |
 | `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                    | parallel               |
+| `airyAi(x)` `airyBi(x)`                     | Airy functions of the first / second kind    | parallel + WASM (≥1 K) |
 | `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                  | parallel               |
 | `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                            | parallel               |
 | `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                      | parallel               |
@@ -366,14 +367,17 @@ leftShift(1, 4); // 16
 - `lambertW` solves `w·e^w = x`; pass `branch = 0` for the principal branch
   (default) or `branch = -1` for the lower real branch on `[-1/e, 0)`.
 - **WASM acceleration:** `besselJ0` / `besselJ1` / `besselJ(n, x)` and
-  `besselY0` / `besselY1` / `besselY(n, x)` route to a Rust WASM kernel for
-  `Float64Array` inputs of length ≥ 1024 (`WASM_SPECIAL_THRESHOLD`). Both
-  paths share the Numerical Recipes §6.5 polynomial-and-recurrence
-  algorithm, so WASM↔JS agreement is bit-identical (J ~1e-7 relative
-  precision; Y near `x = 1` ~5e-4 from the logarithmic-singularity form —
-  inherent to the algorithm). Airy `Ai`/`Bi` and the elliptic integrals
-  are tracked for a follow-up slice (3.10c-2) along with the
-  AssemblyScript parity port.
+  `besselY0` / `besselY1` / `besselY(n, x)` route to Rust+AssemblyScript
+  WASM kernels for `Float64Array` inputs of length ≥ 1024
+  (`WASM_SPECIAL_THRESHOLD`). Both paths share the Numerical Recipes §6.5
+  polynomial-and-recurrence algorithm, so WASM↔JS agreement is
+  bit-identical (J ~1e-7 relative precision; Y near `x = 1` ~5e-4 from
+  the logarithmic-singularity form — inherent to the algorithm).
+  `airyAi(x)` / `airyBi(x)` also route to WASM at the same threshold,
+  using power series for `|x| ≤ 4.5` and a 7-term asymptotic expansion
+  for larger `|x|` (DLMF §9.2 and §9.7), achieving ~1e-7 relative error
+  at the crossover. `ellipticK` / `ellipticE` are still pure-JS and
+  tracked as a future B.1 candidate.
 
 ### Background & History
 

@@ -141,7 +141,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 
 ## Tier 3 — Single-agent design-heavy slices
 
-### Slice 4.8 — `TapedTensor` decomposition AD (rank 12) — **Opus subagent**
+### Slice 4.8 — ✅ LANDED in `fd81cd8` — `TapedTensor` decomposition AD (rank 12)
 
 **Goal:** Reverse-mode AD adjoints for `TapedTensor.tensordot`, `TapedTensor.svd`, `TapedTensor.eig`. Single design-heavy slice — the adjoints have edge cases at repeated singular values / eigenvalues that need explicit handling.
 
@@ -162,7 +162,7 @@ Mirrors the Wave-1/2/3 pattern. Items split into three implementation tiers + on
 - Repeated-eigenvalue / repeated-singular-value cases handled without NaN (test explicitly).
 - Documentation comment at each adjoint citing the reference + the chosen regularization.
 
-### Slice 4.9 — Slice 3.10c-2: Airy `Ai`/`Bi` WASM + AS Bessel parity
+### Slice 4.9 — ✅ LANDED in `276a75b` — Slice 3.10c-2: Airy `Ai`/`Bi` WASM + AS Bessel parity
 
 **Goal:** Close out the WASM-route playbook entry for special functions by adding Airy alongside Bessel, plus the AS parity port for both that was wired-for-but-not-implemented during Slice 3.10c-1 (`572363f`).
 
