@@ -37,7 +37,7 @@ import {
 } from '../src/typed/bitwise.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
-import { WASM_BITWISE_THRESHOLD } from '../src/wasm/bitwise/wasm-bridge.js';
+import { WASM_BITWISE_THRESHOLD, resetBitwiseWasm } from '../src/wasm/bitwise/wasm-bridge.js';
 
 // -----------------------------------------------------------------------------
 // Locate the WASM artifact. Skip the suite entirely if we can't find it.
@@ -196,7 +196,7 @@ describeIfWasm('typed bitwise — WASM dispatch tier (Int32Array, n >= threshold
 
 describe('typed bitwise — WASM fallback when module not loaded', () => {
   beforeAll(() => {
-    wasmLoader.reset(); // ensure no module is loaded
+    resetBitwiseWasm(); // stable wrapper around wasmLoader.reset()
   });
 
   afterAll(async () => {

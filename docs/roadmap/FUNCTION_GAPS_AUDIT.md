@@ -238,3 +238,57 @@ The "Status" column uses three states:
 - **✅ landed in `<commit-sha>`** — done; cite the commit.
 - **⏳ pending** — actionable; pin to a numbered row in section D for prioritisation.
 - **Decided not to pursue** — move to section E with the rationale, do not leave in A/B/C.
+
+## G. Audit refresh — 2026-05-24 (post-Wave-3)
+
+After Wave 1-3 landings, a fresh CDG pass was run to confirm there were no new gaps or regressions. **Two CDG bugs were uncovered and fixed in the same pass:**
+
+1. **Workspace-import edges weren't followed.** `findReachableFiles` and `detectUnused` both only iterated `internalDependencies` (relative imports) and ignored `workspaceDependencies` (npm-scoped cross-package imports). That caused `packages/workerpool/src/index.ts` to be false-flagged as the only "unused file" — `parallel/ComputePool.ts` consumes it via `@danielsimonjr/mathts-workerpool` and CDG didn't see that edge.
+2. **Test-file consumers weren't considered.** When `--include-tests` was set, test files were parsed only for the coverage analysis, not for the unused-export analysis. Test-only consumers (`resetPolyWasm`, `resetTridiagWasm`, JS-fallback helpers like `tridiagSolveJS` / `besselJ0JS`, and threshold constants like `WASM_TRIDIAG_THRESHOLD`) were false-flagged.
+
+Both fixes landed in this same commit batch as `tools/create-dependency-graph/create-dependency-graph.ts`.
+
+### Post-fix CDG metrics
+
+| Metric                  | Before fix | After fix | Δ                     |
+| ----------------------- | ---------: | --------: | --------------------- |
+| Unused files            |          1 |         0 | −1 (false positive)   |
+| Unused exports          |        406 |       308 | −98 (false positives) |
+| Circular dependencies   |          0 |         0 | unchanged             |
+| Effective test coverage |     100.0% |    100.0% | unchanged (163 / 163) |
+| Reachable source files  |        513 |       513 | unchanged             |
+
+Two genuinely-unconsumed test-escape-hatch exports were also flagged and resolved by adding test calls that exercise them:
+
+- `resetBitwiseWasm` — the bitwise WASM-fallback test now calls the stable wrapper (`resetBitwiseWasm`) instead of the raw `wasmLoader.reset()`, matching the pattern from the poly/tridiag slices.
+- `resetBesselWasm` — typed-special-wasm.test.ts grew a new "Suite 4 — fallback when WASM module not loaded" with two tests exercising the reset + JS fallback path.
+
+### Remaining 308 "unused exports" — categorised
+
+Inspection of the post-fix `unused-analysis.md` confirms the remainder breaks down as:
+
+- **201 interface / type declarations (65%)** — public-API type exports consumed by downstream packages (UPT, external apps) and consumer code outside the monorepo. CDG can't see those consumers, so the flag is unavoidable without a deeper public-API manifest.
+- **64 functions (21%)** — public-API helpers + benchmark-only entry points (`tools/benchmark/wasm/*.bench.ts` consumes `tridiagSolveJS`, `besselJ0JS`, etc.; CDG's reachability scope doesn't include `tools/`).
+- **42 constants (14%)** — config defaults, threshold constants exported for consumer tuning.
+- **3 classes (1%)** — public-API class exports.
+
+These are all **legitimate public-API contracts**. A future CDG improvement would be a `public-api-manifest.json` companion to `coverage-policy.json` that lists exports intentionally consumed cross-package boundary so they don't flag.
+
+### New gaps surfaced by this refresh
+
+**None.** The refresh confirms:
+
+- Effective test coverage stays at 100% (no new active code added without a test).
+- No new circular dependencies introduced by Wave 1-3.
+- All Wave 1-3 landed primitives (Bessel/tridiag/poly WASM bridges, tensor decomposition wrappers, typed/relational, ComputePool.divide) trace correctly through reachability after the CDG fixes.
+
+The Tier-4 deferred items from section D remain the only forward work tracked:
+
+- **Rank 9** — `typed/probability.ts` dedup-audit + selective promotion.
+- **Rank 11** — `Tensor.slice` / `gather` / `stack` / `concatenate` family.
+- **Rank 12** — `TapedTensor.tensordot` / `svd` / `eig` AD.
+- **Rank 13** — `typed/string.ts`.
+- **Rank 14** — `typed/unit.ts` (blocked on a `Unit` type in core).
+- **3.10c-2** — Airy `Ai`/`Bi` WASM + AssemblyScript parity for Bessel (the deferred sub-slice from 3.10c).
+
+No new gaps to add. The audit is current as of this refresh.

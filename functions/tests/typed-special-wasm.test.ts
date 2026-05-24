@@ -17,7 +17,7 @@
  * agreement expected since both use the same algorithm).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   WASM_SPECIAL_THRESHOLD,
   besselJ0Dispatch,
@@ -32,6 +32,7 @@ import {
   besselY0JS,
   besselY1JS,
   besselYnJS,
+  resetBesselWasm,
 } from '../src/wasm/special/wasm-bridge.js';
 
 // ---------------------------------------------------------------------------
@@ -326,6 +327,39 @@ describe('typed/special.ts bessel array overloads use bridge', () => {
     const js = besselY0JS(xs);
     for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - js[i])).toBeLessThan(TOL_AGREE);
+    }
+  });
+});
+
+// ===========================================================================
+// Suite 4: Fallback when WASM module not loaded
+// ===========================================================================
+
+describe('Bessel WASM — fallback to JS path (module not loaded)', () => {
+  beforeAll(() => {
+    resetBesselWasm(); // ensure no module is loaded
+  });
+
+  afterAll(() => {
+    resetBesselWasm();
+  });
+
+  it('besselJ0Dispatch above threshold falls back to JS when WASM not loaded', () => {
+    const xs = linspace(0.5, 12.0, WASM_SPECIAL_THRESHOLD);
+    const result = besselJ0Dispatch(xs);
+    const oracle = besselJ0JS(xs);
+    expect(result.length).toBe(oracle.length);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
+    }
+  });
+
+  it('besselYDispatch (n=2) above threshold falls back to JS when WASM not loaded', () => {
+    const xs = linspace(0.5, 12.0, WASM_SPECIAL_THRESHOLD);
+    const result = besselYDispatch(2, xs);
+    const oracle = besselYnJS(2, xs);
+    for (let i = 0; i < xs.length; i++) {
+      expect(Math.abs(result[i] - oracle[i])).toBeLessThan(1e-14);
     }
   });
 });
