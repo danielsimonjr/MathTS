@@ -46,6 +46,7 @@ export type OpName =
   | 'subtract'
   | 'multiply'
   | 'divide'
+  | 'pow'
   | 'scale'
   | 'abs'
   | 'negate'
@@ -57,6 +58,8 @@ export type OpName =
   | 'cos'
   | 'tan'
   | 'sign'
+  // tensor operations
+  | 'tensordot'
   // reductions
   | 'sum'
   | 'mean'
@@ -158,6 +161,7 @@ const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   subtract: 'never',
   multiply: 'never',
   divide: 'never',
+  pow: 'never',
   scale: 'never',
   abs: 'never',
   negate: 'never',
@@ -167,6 +171,8 @@ const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   cos: 'never',
   tan: 'never',
   sign: 'never',
+  // tensor contraction: parallelize when contracted-axis volume >= 8K
+  tensordot: 8_192,
 
   // reductions: overhead dominates
   sum: 'never',
@@ -256,6 +262,137 @@ function toWorkerConfig(config: ComputePoolConfig): Partial<WorkerPoolConfig> {
     idleTimeout: config.workerIdleTimeout,
     taskTimeout: config.taskTimeout,
   };
+}
+
+// =============================================================================
+// tensordot kernel helpers (used by sequential path and exported for tests)
+// =============================================================================
+
+/**
+ * Row-major strides for a shape array.
+ * @internal
+ */
+function _rowMajorStrides(shape: readonly number[]): number[] {
+  const strides = new Array<number>(shape.length);
+  let stride = 1;
+  for (let i = shape.length - 1; i >= 0; i--) {
+    strides[i] = stride;
+    stride *= shape[i];
+  }
+  return strides;
+}
+
+/**
+ * Multi-index to flat index using precomputed strides.
+ * @internal
+ */
+function _flatIndex(idx: readonly number[], strides: readonly number[]): number {
+  let flat = 0;
+  for (let i = 0; i < idx.length; i++) flat += idx[i] * strides[i];
+  return flat;
+}
+
+/**
+ * Iterate over all multi-indices for `sizes` calling `cb(multiIndex)`.
+ * @internal
+ */
+function _forEachIndex(sizes: readonly number[], cb: (idx: number[]) => void): void {
+  const rank = sizes.length;
+  if (rank === 0) {
+    cb([]);
+    return;
+  }
+  const idx = new Array<number>(rank).fill(0);
+  const total = sizes.reduce((a, b) => a * b, 1);
+  for (let n = 0; n < total; n++) {
+    cb(idx.slice());
+    for (let d = rank - 1; d >= 0; d--) {
+      idx[d]++;
+      if (idx[d] < sizes[d]) break;
+      idx[d] = 0;
+    }
+  }
+}
+
+/**
+ * Pure-JS tensordot computation over a contiguous range of output elements
+ * `[outStart, outEnd)`.
+ *
+ * This is the shared inner kernel used by both the sequential fallback path in
+ * `ComputePool.tensordot` and the worker-dispatched `tensordotChunk` handler.
+ * By exporting it and registering it in the worker, we keep the algorithm in
+ * one place and avoid divergence.
+ *
+ * Contracts axis `axesA[i]` of `a` (shape `aShape`) with axis `axesB[i]` of
+ * `b` (shape `bShape`). The result layout is free-A axes first, then free-B
+ * axes (NumPy convention).
+ */
+export function tensordotChunkKernel(
+  a: Float64Array,
+  aShape: readonly number[],
+  b: Float64Array,
+  bShape: readonly number[],
+  axesA: readonly number[],
+  axesB: readonly number[],
+  resultShape: readonly number[],
+  outStart: number,
+  outEnd: number
+): Float64Array {
+  const aStrides = _rowMajorStrides(aShape);
+  const bStrides = _rowMajorStrides(bShape);
+  const outStrides = _rowMajorStrides(resultShape);
+
+  const aRank = aShape.length;
+  const bRank = bShape.length;
+  const contractedAxesA = Array.from(axesA);
+  const contractedAxesB = Array.from(axesB);
+  const contractedSetA = new Set(contractedAxesA);
+  const contractedSetB = new Set(contractedAxesB);
+
+  const aFreeAxes: number[] = [];
+  const bFreeAxes: number[] = [];
+  for (let i = 0; i < aRank; i++) if (!contractedSetA.has(i)) aFreeAxes.push(i);
+  for (let i = 0; i < bRank; i++) if (!contractedSetB.has(i)) bFreeAxes.push(i);
+
+  const contractedSizes = contractedAxesA.map((ax) => aShape[ax]);
+
+  const chunkLen = outEnd - outStart;
+  const result = new Float64Array(chunkLen);
+
+  const outRank = resultShape.length;
+  const outIdx = new Array<number>(outRank);
+
+  for (let outFlat = outStart; outFlat < outEnd; outFlat++) {
+    // Decode flat output index to multi-index
+    let rem = outFlat;
+    for (let d = 0; d < outRank; d++) {
+      outIdx[d] = Math.floor(rem / outStrides[d]);
+      rem -= outIdx[d] * outStrides[d];
+    }
+
+    const aFreeVals = outIdx.slice(0, aFreeAxes.length);
+    const bFreeVals = outIdx.slice(aFreeAxes.length);
+
+    // Sum over contracted axes
+    let acc = 0;
+    _forEachIndex(contractedSizes, (contractVals) => {
+      const aIdx = new Array<number>(aRank).fill(0);
+      for (let fi = 0; fi < aFreeAxes.length; fi++) aIdx[aFreeAxes[fi]] = aFreeVals[fi];
+      for (let ci = 0; ci < contractedAxesA.length; ci++)
+        aIdx[contractedAxesA[ci]] = contractVals[ci];
+
+      const bIdx = new Array<number>(bRank).fill(0);
+      for (let fi = 0; fi < bFreeAxes.length; fi++) bIdx[bFreeAxes[fi]] = bFreeVals[fi];
+      for (let ci = 0; ci < contractedAxesB.length; ci++)
+        bIdx[contractedAxesB[ci]] = contractVals[ci];
+
+      acc += a[_flatIndex(aIdx, aStrides)] * b[_flatIndex(bIdx, bStrides)];
+    });
+
+    result[outFlat - outStart] = acc;
+  }
+
+  return result;
 }
 
 /**
@@ -725,6 +862,192 @@ export class ComputePool {
    */
   async divide(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
     return this.elementwise(a, b, 'divide');
+  }
+
+  /**
+   * Parallel element-wise exponentiation.
+   *
+   * `out[i] = a[i] ** b[i]`
+   *
+   * Delegates to `applyKernel2` with the `Math.pow` kernel. The default
+   * per-op threshold for `pow` is `'never'` (overhead dominates); the
+   * sequential path is taken unless the caller overrides `thresholdByOp.pow`.
+   */
+  async pow(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
+    if (a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+    if (this.shouldParallelize(a.length, 'pow')) {
+      return this.applyKernel2(a, b, '(a, b) => Math.pow(a, b)');
+    }
+    const start = performance.now();
+    const result = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) {
+      result[i] = a[i] ** b[i];
+    }
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
+   * Parallel element-wise sign function.
+   *
+   * `out[i] = Math.sign(data[i])`  →  -1 | 0 | 1, with NaN → NaN (IEEE 754).
+   *
+   * Delegates to `applyKernel` with the `Math.sign` kernel. The default
+   * per-op threshold for `sign` is `'never'` (overhead dominates); the
+   * sequential path is taken unless the caller overrides `thresholdByOp.sign`.
+   */
+  async sign(data: Float64Array): Promise<ParallelResult<Float64Array>> {
+    if (this.shouldParallelize(data.length, 'sign')) {
+      return this.applyKernel(data, '(x) => Math.sign(x)');
+    }
+    const start = performance.now();
+    const result = new Float64Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+      result[i] = Math.sign(data[i]);
+    }
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
+   * General tensor contraction (tensordot) over specified axis pairs.
+   *
+   * Contracts axis `axesA[i]` of `a` with axis `axesB[i]` of `b` for each
+   * pair index `i`. The result shape is the non-contracted axes of `a` followed
+   * by the non-contracted axes of `b` (NumPy convention).
+   *
+   * Parallelization threshold: contracted-axis volume (product of contracted
+   * dimensions) >= 8 192. When parallelized, output elements are distributed
+   * in contiguous slices across workers via the `tensordotChunk` kernel.
+   *
+   * @param a      - Flat row-major Float64Array for tensor A
+   * @param aShape - Shape of tensor A
+   * @param b      - Flat row-major Float64Array for tensor B
+   * @param bShape - Shape of tensor B
+   * @param axesA  - Axes of A to contract (same length as axesB)
+   * @param axesB  - Axes of B to contract (same length as axesA)
+   * @returns `{ data: Float64Array; shape: number[] }` — flat result + result shape
+   */
+  async tensordot(
+    a: Float64Array,
+    aShape: readonly number[],
+    b: Float64Array,
+    bShape: readonly number[],
+    axesA: readonly number[],
+    axesB: readonly number[]
+  ): Promise<ParallelResult<{ data: Float64Array; shape: number[] }>> {
+    if (axesA.length !== axesB.length) {
+      throw new Error(
+        `tensordot: axesA.length (${axesA.length}) !== axesB.length (${axesB.length})`
+      );
+    }
+
+    const aRank = aShape.length;
+    const bRank = bShape.length;
+    const aContracted = new Set<number>();
+    const bContracted = new Set<number>();
+
+    for (let i = 0; i < axesA.length; i++) {
+      const ax = axesA[i];
+      const bx = axesB[i];
+      if (!Number.isInteger(ax) || ax < 0 || ax >= aRank) {
+        throw new Error(`tensordot: axesA[${i}]=${ax} is out of range for aShape (rank ${aRank})`);
+      }
+      if (!Number.isInteger(bx) || bx < 0 || bx >= bRank) {
+        throw new Error(`tensordot: axesB[${i}]=${bx} is out of range for bShape (rank ${bRank})`);
+      }
+      if (aShape[ax] !== bShape[bx]) {
+        throw new Error(
+          `tensordot: dimension mismatch on contracted axes: ` +
+            `aShape[${ax}]=${aShape[ax]} vs bShape[${bx}]=${bShape[bx]}`
+        );
+      }
+      aContracted.add(ax);
+      bContracted.add(bx);
+    }
+
+    // Build result shape: free axes of A then free axes of B
+    const resultShape: number[] = [];
+    for (let i = 0; i < aRank; i++) {
+      if (!aContracted.has(i)) resultShape.push(aShape[i]);
+    }
+    for (let i = 0; i < bRank; i++) {
+      if (!bContracted.has(i)) resultShape.push(bShape[i]);
+    }
+
+    const resultSize = resultShape.reduce((acc, d) => acc * d, 1);
+
+    // Contracted-axis volume determines whether to parallelize
+    const contractedVolume = Array.from(axesA).reduce((acc, ax) => acc * aShape[ax], 1);
+
+    const start = performance.now();
+
+    if (this.shouldParallelize(contractedVolume, 'tensordot') && resultSize > 0) {
+      const chunkSize = this.config.chunkSize;
+      const chunks: Array<[number, number]> = [];
+      for (let i = 0; i < resultSize; i += chunkSize) {
+        chunks.push([i, Math.min(i + chunkSize, resultSize)]);
+      }
+
+      const aShapeArr = Array.from(aShape);
+      const bShapeArr = Array.from(bShape);
+      const axesAArr = Array.from(axesA);
+      const axesBArr = Array.from(axesB);
+
+      const chunkResults = await Promise.all(
+        chunks.map(([outStart, outEnd]) =>
+          this.workerPool.exec<ArrayBuffer>('tensordotChunk', [
+            a.buffer,
+            aShapeArr,
+            b.buffer,
+            bShapeArr,
+            axesAArr,
+            axesBArr,
+            resultShape,
+            outStart,
+            outEnd,
+          ])
+        )
+      );
+
+      const data = new Float64Array(resultSize);
+      let offset = 0;
+      for (const buf of chunkResults) {
+        const chunk = new Float64Array(buf);
+        data.set(chunk, offset);
+        offset += chunk.length;
+      }
+
+      return {
+        result: { data, shape: resultShape },
+        duration: performance.now() - start,
+        chunks: chunks.length,
+        parallelized: true,
+      };
+    }
+
+    // Sequential path
+    const data =
+      resultSize === 0
+        ? new Float64Array(0)
+        : tensordotChunkKernel(a, aShape, b, bShape, axesA, axesB, resultShape, 0, resultSize);
+
+    return {
+      result: { data, shape: resultShape },
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
   }
 
   /**
