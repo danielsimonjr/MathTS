@@ -680,19 +680,25 @@ export class WasmLoader {
     const path = wasmPath || (await this.getDefaultWasmPath());
     const startTime = performance.now();
 
+    const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
+
     if (this.isNode) {
       const fs = await import('fs');
       const { promisify } = await import('util');
       const readFile = promisify(fs.readFile);
       const buffer = await readFile(path);
+      await verifyWasmIntegrity(buffer, path);
       this.compiledModule = await WebAssembly.compile(buffer);
     } else {
-      const response = await fetch(path);
-      // Use streaming compilation in browser for better performance
-      if (typeof WebAssembly.compileStreaming === 'function') {
+      // Browser: streaming compile only when no manifest is present;
+      // otherwise materialize so we can verify the bytes before compile.
+      const manifest = await loadWasmManifest(path);
+      if (!manifest && typeof WebAssembly.compileStreaming === 'function') {
         this.compiledModule = await WebAssembly.compileStreaming(fetch(path));
       } else {
+        const response = await fetch(path);
         const buffer = await response.arrayBuffer();
+        await verifyWasmIntegrity(buffer, path, { manifest });
         this.compiledModule = await WebAssembly.compile(buffer);
       }
     }
@@ -771,10 +777,15 @@ export class WasmLoader {
     const fs = await import('fs');
     const { promisify } = await import('util');
     const readFile = promisify(fs.readFile);
+    const { verifyWasmIntegrity } = await import('./wasm/integrity.js');
 
     const readStart = performance.now();
     const buffer = await readFile(path);
     const readEnd = performance.now();
+
+    // SHA-384 integrity check against sibling wasm-manifest.json.
+    // Throws on tamper; warns and continues when manifest is absent.
+    await verifyWasmIntegrity(buffer, path);
 
     const compileStart = performance.now();
     this.compiledModule = await WebAssembly.compile(buffer);
@@ -796,9 +807,15 @@ export class WasmLoader {
   }
 
   private async loadBrowserWasm(path: string, totalStart: number): Promise<WasmModule> {
-    // Use streaming instantiation in browser for best performance
-    // This allows compilation to start while bytes are still downloading
-    if (typeof WebAssembly.instantiateStreaming === 'function') {
+    const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
+    // Look for the manifest before deciding whether to stream. If a manifest
+    // exists we must materialize the buffer to compute its hash before
+    // compilation - streaming would let an attacker race the bytes past
+    // WebAssembly.compile without being checked.
+    const manifest = await loadWasmManifest(path);
+
+    if (!manifest && typeof WebAssembly.instantiateStreaming === 'function') {
+      // No manifest -> preserve fast streaming path (legacy compat).
       const instStart = performance.now();
       const result = await WebAssembly.instantiateStreaming(fetch(path), this.getImports());
       this.compiledModule = result.module;
@@ -812,11 +829,13 @@ export class WasmLoader {
       return result.instance.exports as unknown as WasmModule;
     }
 
-    // Fallback for older browsers
+    // Either a manifest is present (must verify) or streaming is unavailable.
     const readStart = performance.now();
     const response = await fetch(path);
     const buffer = await response.arrayBuffer();
     const readEnd = performance.now();
+
+    await verifyWasmIntegrity(buffer, path, { manifest });
 
     const compileStart = performance.now();
     this.compiledModule = await WebAssembly.compile(buffer);

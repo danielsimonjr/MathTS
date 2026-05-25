@@ -403,22 +403,32 @@ export class WASMBackend implements MatrixBackend {
     };
 
     const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
+    const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
     let instance: WebAssembly.Instance;
     if (isNode) {
       const fs = await import('fs');
       const { promisify } = await import('util');
       const readFile = promisify(fs.readFile);
       const buffer = await readFile(path);
+      // SHA-384 integrity check against sibling wasm-manifest.json.
+      // Throws on tamper; warns and continues when manifest is absent.
+      await verifyWasmIntegrity(buffer, path);
       const module = await WebAssembly.compile(buffer);
       instance = await WebAssembly.instantiate(module, imports);
-    } else if (typeof WebAssembly.instantiateStreaming === 'function') {
-      const result = await WebAssembly.instantiateStreaming(fetch(path), imports);
-      instance = result.instance;
     } else {
-      const response = await fetch(path);
-      const buffer = await response.arrayBuffer();
-      const module = await WebAssembly.compile(buffer);
-      instance = await WebAssembly.instantiate(module, imports);
+      // Browser: streaming compile only when no manifest is present;
+      // otherwise materialize so we can verify the bytes before compile.
+      const manifest = await loadWasmManifest(path);
+      if (!manifest && typeof WebAssembly.instantiateStreaming === 'function') {
+        const result = await WebAssembly.instantiateStreaming(fetch(path), imports);
+        instance = result.instance;
+      } else {
+        const response = await fetch(path);
+        const buffer = await response.arrayBuffer();
+        await verifyWasmIntegrity(buffer, path, { manifest });
+        const module = await WebAssembly.compile(buffer);
+        instance = await WebAssembly.instantiate(module, imports);
+      }
     }
     return instance.exports as unknown as AsModule;
   }

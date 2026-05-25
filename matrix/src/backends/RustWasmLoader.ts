@@ -260,6 +260,7 @@ export class RustWasmLoader {
       const path = wasmPath || (await this.findWasmPath());
       const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
 
+      const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
       let binarySize = 0;
 
       if (isNode) {
@@ -268,6 +269,10 @@ export class RustWasmLoader {
         const buffer = fs.readFileSync(path);
         binarySize = buffer.byteLength;
         const loadEnd = performance.now();
+
+        // SHA-384 integrity check against sibling wasm-manifest.json.
+        // Throws on tamper; warns and continues when manifest is absent.
+        await verifyWasmIntegrity(buffer, path);
 
         const compileStart = performance.now();
         const module = await WebAssembly.compile(buffer);
@@ -285,15 +290,18 @@ export class RustWasmLoader {
           binarySize,
         };
       } else {
-        // Browser: use streaming compilation
+        // Browser: streaming compile only when no manifest is present;
+        // otherwise materialize so we can verify the bytes before compile.
+        const manifest = await loadWasmManifest(path);
         const instStart = performance.now();
-        if (typeof WebAssembly.instantiateStreaming === 'function') {
+        if (!manifest && typeof WebAssembly.instantiateStreaming === 'function') {
           const result = await WebAssembly.instantiateStreaming(fetch(path), this.getImports());
           this.wasmInstance = result.instance;
         } else {
           const response = await fetch(path);
           const buffer = await response.arrayBuffer();
           binarySize = buffer.byteLength;
+          await verifyWasmIntegrity(buffer, path, { manifest });
           const module = await WebAssembly.compile(buffer);
           this.wasmInstance = await WebAssembly.instantiate(module, this.getImports());
         }
