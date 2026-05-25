@@ -257,7 +257,7 @@ export class RustWasmLoader {
     const totalStart = performance.now();
 
     try {
-      const path = wasmPath || this.findWasmPath();
+      const path = wasmPath || (await this.findWasmPath());
       const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
 
       let binarySize = 0;
@@ -333,20 +333,25 @@ export class RustWasmLoader {
    * Resolve the WASM binary path.
    * Checks several locations relative to the project root.
    */
-  private findWasmPath(): string {
+  private async findWasmPath(): Promise<string> {
     const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
+    const resolvedUrl = new URL(`../../../lib/wasm/mathts.wasm`, import.meta.url);
 
     if (isNode) {
       // Resolve relative to this source file rather than process.cwd() so the
       // path is consistent regardless of where Node was launched from.
       //   <repo-root>/matrix/src/backends/RustWasmLoader.ts
       // → <repo-root>/lib/wasm/mathts.wasm  (3 hops up + lib/wasm/)
-      const primary = new URL(`../../../lib/wasm/mathts.wasm`, import.meta.url).pathname;
-      return primary;
+      //
+      // `.pathname` on Windows yields "/C:/foo/bar.wasm", which fs.readFile
+      // interprets as drive-relative ("C:\C:\foo\..."). fileURLToPath does
+      // the platform-correct conversion.
+      const { fileURLToPath } = await import('node:url');
+      return fileURLToPath(resolvedUrl);
     }
 
     // Browser: the same logical path, but expressed as a fetch-able URL.
-    return new URL(`../../../lib/wasm/mathts.wasm`, import.meta.url).href;
+    return resolvedUrl.href;
   }
 
   private getImports(): WebAssembly.Imports {

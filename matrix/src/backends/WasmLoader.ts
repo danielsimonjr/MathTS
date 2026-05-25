@@ -677,7 +677,7 @@ export class WasmLoader {
   public async precompile(wasmPath?: string): Promise<void> {
     if (this.compiledModule) return;
 
-    const path = wasmPath || this.getDefaultWasmPath();
+    const path = wasmPath || (await this.getDefaultWasmPath());
     const startTime = performance.now();
 
     if (this.isNode) {
@@ -707,7 +707,7 @@ export class WasmLoader {
   }
 
   private async loadModule(wasmPath?: string): Promise<WasmModule> {
-    const path = wasmPath || this.getDefaultWasmPath();
+    const path = wasmPath || (await this.getDefaultWasmPath());
     const totalStart = performance.now();
 
     // If precompiled, use cached module
@@ -742,12 +742,12 @@ export class WasmLoader {
    * so the repo root is three directories up, and the artifact is at
    *   <repo-root>/lib/wasm/mathts[‑as].wasm
    *
-   * Both branches use `new URL(relative, import.meta.url)` which is fully
-   * synchronous and works in Node (ESM) and browsers alike.
-   * In Node we take `.pathname` to get a filesystem path; in the browser we
-   * keep the full `.href` so fetch() can use it directly.
+   * Both branches use `new URL(relative, import.meta.url)` to resolve a
+   * file: URL. In Node we convert via `fileURLToPath` (which correctly
+   * strips the leading slash on Windows so the drive letter is not
+   * doubled); in the browser we keep the full `.href` for fetch().
    */
-  private getDefaultWasmPath(): string {
+  private async getDefaultWasmPath(): Promise<string> {
     const useAS =
       typeof process !== 'undefined' && process.env?.MATHTS_WASM_BACKEND === 'assemblyscript';
 
@@ -758,13 +758,13 @@ export class WasmLoader {
     const resolvedUrl = new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url);
 
     if (this.isNode) {
-      // In Node ESM, import.meta.url is always a file: URL, so .pathname
-      // gives us the absolute filesystem path that readFile() expects.
-      return resolvedUrl.pathname;
-    } else {
-      // In a browser context, return the full href so fetch() can use it.
-      return resolvedUrl.href;
+      // `.pathname` on Windows yields "/C:/foo/bar.wasm", which fs.readFile
+      // interprets as drive-relative ("C:\C:\foo\..."). fileURLToPath does
+      // the platform-correct conversion (and decodes %-escapes).
+      const { fileURLToPath } = await import('node:url');
+      return fileURLToPath(resolvedUrl);
     }
+    return resolvedUrl.href;
   }
 
   private async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {

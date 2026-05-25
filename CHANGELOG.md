@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-05-25)
+
+- **`matrix` `determinantJS` sign for non-2-cycle permutations.** The JS
+  fallback computed permutation parity by counting positions where
+  `perm[i] !== i` — correct only when every cycle is a 2-cycle. For any
+  3-cycle or larger the parity was inverted, so the sign of `det` could
+  come back wrong. Replaced with cycle decomposition
+  `sign(P) = (-1)^(n - cycles)`. Caught by
+  `matrix/tests/wasm/decompositions-as.test.ts > matrix_determinant`
+  (a 3×3 with a single 2-cycle returning ~2 instead of ~1).
+- **Windows doubled-drive WASM path.** `URL.pathname` on a `file:///C:/…`
+  URL yields `/C:/…`, which Node's `fs.readFile` interprets as drive-
+  relative (`C:\C:\…`), so AS WASM module loading silently failed on
+  Windows and every call routed to the JS fallback. The three Node-side
+  callers — `matrix/src/backends/WasmLoader.getDefaultWasmPath`,
+  `RustWasmLoader.findWasmPath`, `WASMBackend.resolveAsWasmPath` — now
+  use `fileURLToPath` for cross-platform-correct conversion. Browser
+  branches still return `.href` for `fetch()`.
+
 > Strands of work since the autograd 0.1.0 release:
 > 1. **WASM gap-analysis sprint** (`EXPANSION_PLAN` W1–W11, PRs #25–#35) — extends
 >    both WASM toolchains (Rust crate primary, AssemblyScript parity) with the

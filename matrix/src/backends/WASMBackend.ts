@@ -349,7 +349,7 @@ export class WASMBackend implements MatrixBackend {
       // subsequent calls, so it would clobber Rust ↔ AS routing in a
       // process that uses both. We compile a fresh AS instance for this
       // backend and let `RustWASMBackend` own the Rust instance.
-      const path = this.config.wasmPath || this.resolveAsWasmPath();
+      const path = this.config.wasmPath || (await this.resolveAsWasmPath());
       const loaded = await this.loadAsModule(path);
 
       if (typeof loaded.__new !== 'function' || typeof loaded.matrix_multiply !== 'function') {
@@ -369,11 +369,19 @@ export class WASMBackend implements MatrixBackend {
 
   /**
    * Resolve the path to the AssemblyScript artifact (`lib/wasm/mathts-as.wasm`).
+   *
+   * On Windows, `URL.pathname` returns "/C:/foo/bar.wasm" which fs.readFile
+   * interprets as drive-relative ("C:\C:\foo\..."). `fileURLToPath` does the
+   * platform-correct conversion.
    */
-  private resolveAsWasmPath(): string {
+  private async resolveAsWasmPath(): Promise<string> {
     const url = new URL(`../../../lib/wasm/mathts-as.wasm`, import.meta.url);
     const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
-    return isNode ? url.pathname : url.href;
+    if (isNode) {
+      const { fileURLToPath } = await import('node:url');
+      return fileURLToPath(url);
+    }
+    return url.href;
   }
 
   /**
@@ -955,11 +963,21 @@ export class WASMBackend implements MatrixBackend {
     let det = 1.0;
     for (let i = 0; i < n; i++) det *= luData[i * n + i];
 
-    let swaps = 0;
+    // Permutation parity via cycle decomposition: sign(P) = (-1)^(n - cycles).
+    // Counting positions where perm[i] !== i is only correct when every cycle
+    // is a 2-cycle; a 3-cycle has three non-fixed-points (even) but odd parity.
+    const visited = new Uint8Array(n);
+    let cycles = 0;
     for (let i = 0; i < n; i++) {
-      if (perm[i] !== i) swaps++;
+      if (visited[i]) continue;
+      cycles++;
+      let j = i;
+      while (!visited[j]) {
+        visited[j] = 1;
+        j = perm[j];
+      }
     }
-    return swaps % 2 === 0 ? det : -det;
+    return (n - cycles) % 2 === 0 ? det : -det;
   }
 
   async choleskyDecomposition(a: DenseMatrix): Promise<{
