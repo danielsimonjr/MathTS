@@ -301,7 +301,11 @@ describe('contractNetwork — greedy vs exact equivalence', () => {
 // ---------------------------------------------------------------------------
 
 describe('contractNetwork — 16-tensor exact solve', () => {
-  it('completes a 16-tensor exact DP in under 10 seconds', () => {
+  // Vitest 4 API: options go in the 2nd argument, function in the 3rd.
+  // Vitest's default test timeout is 5000ms; the 16-tensor DP takes ~5.7s, so
+  // without the per-test override the test would be killed before the
+  // `elapsed < 10_000` assertion ran.
+  it('completes a 16-tensor exact DP in under 10 seconds', { timeout: 15_000 }, () => {
     // Linear chain of 16 tensors: T0[a0,a1] - T1[a1,a2] - ... - T15[a15,a16].
     // All intermediate indices have small dim (2) to keep memory tractable.
     const labels: Index[] = [];
