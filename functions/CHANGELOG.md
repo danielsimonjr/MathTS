@@ -1,5 +1,40 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.1
+
+### Patch Changes
+
+- Fix functions WASM loader artifact filenames + path resolution.
+
+  `functions/src/wasm/WasmLoader.ts` carried two legacy-mathjs artifacts
+  of the mathjs-to-MathTS rebrand:
+  - It referenced `mathjs-as.wasm` / `mathjs.wasm` instead of the actual
+    artifacts `mathts-as.wasm` / `mathts.wasm`. The loader never found
+    its binaries, `getModule()` returned null, and consumers
+    (`functions/src/typed/{numeric,geometry,signal}.ts`) silently fell
+    back to JS with no warning. Every release of mathts-functions since
+    the rebrand has shipped with these three modules' WASM paths
+    unreachable.
+  - The Node branch used `'./lib/wasm/...'` (CWD-relative). Only worked
+    when Node launched from the repo root — same pattern matrix fixed in
+    the prior release.
+
+  Now resolves through `fileURLToPath(new URL('../../../lib/wasm/...',
+import.meta.url))`, mirroring matrix's loaders. The env-var check
+  accepts both `MATHTS_WASM_BACKEND` (canonical) and the legacy
+  `MATHJS_WASM_BACKEND` for one release. `getDefaultWasmPath` is now
+  async; the two callers (`precompile`, `loadModule`) await it.
+
+  Note: this fix alone doesn't ship WASM artifacts inside the npm
+  tarball — the cross-package dist-hop issue (audit B-3) is a separate
+  build-pipeline change. Once that lands, end-users of mathts-functions
+  will get the WASM-accelerated paths that were wired but unreachable
+  since the rebrand.
+
+- Updated dependencies [3d218f5]
+- Updated dependencies
+  - @danielsimonjr/mathts-matrix@0.1.3
+
 ## 0.2.0
 
 ### Minor Changes

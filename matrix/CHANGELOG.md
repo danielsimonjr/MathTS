@@ -1,5 +1,49 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.1.3
+
+### Patch Changes
+
+- 3d218f5: Fix matrix WASM JS-fallback determinant sign and Windows WASM-loader path.
+  - **`determinantJS` sign bug.** The JS fallback computed the permutation parity
+    by counting positions where `perm[i] !== i`. That matches actual transposition
+    count only when every cycle is a 2-cycle; for any 3-cycle (or larger) it gives
+    the wrong parity. Replaced with cycle-decomposition: `sign(P) = (-1)^(n - cycles)`.
+    Caught by `tests/wasm/decompositions-as.test.ts > matrix_determinant ...` for
+    a 3×3 with a single 2-cycle that surfaced the off-by-`±2` regression.
+  - **Windows doubled-drive path.** `URL.pathname` of a `file:///C:/...` URL is
+    `/C:/...`, which `fs.readFile` then resolves as drive-relative
+    (`C:\C:\...`). All three callers (`WasmLoader.getDefaultWasmPath`,
+    `RustWasmLoader.findWasmPath`, `WASMBackend.resolveAsWasmPath`) now use
+    `fileURLToPath` for the Node branch, which is cross-platform correct and
+    decodes URL %-escapes. Browser branches continue to return `.href` for
+    `fetch()`.
+
+- Add SHA-384 integrity verification to all three matrix WASM load paths.
+
+  `CLAUDE.md` documents the invariant: "functions/src/wasm/WasmLoader.ts
+  and assembly/src/bindings/wasm-loader.ts both hash the .wasm buffer and
+  compare to wasm-manifest.json before compile/instantiate." matrix's three
+  loaders (WasmLoader.loadNodeWasm / loadBrowserWasm / precompile,
+  RustWasmLoader.doLoad, WASMBackend.loadAsModule) all skipped this check
+  — closed by adding `await verifyWasmIntegrity(buffer, path)` before every
+  `WebAssembly.compile`. Browser streaming paths now refuse to stream when
+  a manifest is present (streaming would race past `compile` un-verified).
+
+  The matrix helper at `matrix/src/backends/wasm/integrity.ts` is a copy
+  of the functions equivalent — matrix can't import functions's copy
+  because functions depends on matrix (would create a dep cycle).
+
+  Also closes the manifest-staleness bug surfaced when this change was
+  landed: `wasm-rust/scripts/build.sh` now invokes
+  `tools/generate-wasm-manifest.mjs` after copying the binary, so every
+  Rust rebuild keeps the manifest in sync with the artifact it produced.
+  Without this step, the new integrity check would reject every load after
+  a rebuild.
+
+  Regression test at `matrix/tests/security/wasm-integrity.test.ts`
+  mirrors `functions/tests/security/wasm-integrity.test.ts`.
+
 ## 0.1.1
 
 ### Patch Changes
