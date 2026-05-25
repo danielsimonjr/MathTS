@@ -1,7 +1,7 @@
 # MathTS TODO
 
 Generated: 2026-01-13
-Updated: 2026-05-24
+Updated: 2026-05-25
 Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 > **Current State:** 444+ functions, 545 factory functions, 21 categories. 9,263 tests passing, 0 failing. Full function reference: https://danielsimonjr.github.io/mathjs/
@@ -17,24 +17,112 @@ non-decision).
 
 | #   | Item                                                     | Deps | Complexity  | Owner / next step                                                                |
 | --- | -------------------------------------------------------- | ---- | ----------- | -------------------------------------------------------------------------------- |
-| 1   | **Cut a release for the [Unreleased] CHANGELOG section** | 0    | Low (admin) | Run `npx changeset version` consuming the pending `.changeset/*.md`, tag, push. |
+| 1   | **Cut a release for the [Unreleased] CHANGELOG section** | 0    | Low (admin) | ✅ Done 2026-05-25 — 6 packages published; GitHub Releases + tags pushed.        |
+| 2   | **Delete the npm token copy in Dropbox-synced folder**   | 0    | Trivial     | `Remove-Item C:\Users\danie\Dropbox\Github\npm_key.txt` after confirming token is in `~/.npmrc` and `NPM_TOKEN` env var (it is). |
+| 3   | **Consolidate npm token storage to one source of truth** | 0    | Low         | Token is currently in `~/.npmrc` (literal), `Mathts/.npmrc` (literal, gitignored), and `NPM_TOKEN` env var. Decide one canonical home and remove the others — `NPM_TOKEN` is the cleanest. |
+| 4   | **Delete stale `.npmrc.bak-*` files**                    | 0    | Trivial     | Two backups left from the 2026-05-25 token rotation: `~/.npmrc.bak-20260525-141127` and `Mathts/.npmrc.bak-20260525-141201`. Both contain revoked tokens. |
+| 5   | **Mathematical-correctness audit (external-oracle pass)**| 0    | Medium      | Per the 2026-05-25 audit's "What was NOT audited": tests verify "what we computed" matches "what we expected", but neither catches shared misunderstandings. Cross-check a representative spread of functions against scipy / mpmath / Wolfram. |
+| 6   | **Address the audit B-3 through B-10 findings**          | 5    | Variable    | See `BUG_AUDIT_2026-05-25.md` — cross-package WASM dist-hop (B-3), 3 SVD `it.skip` failures (B-4), mathjs upstream drift (B-5), turbo dep advisory (B-7), AssignmentNode FIXME (B-8), Unit.ts `@ts-nocheck` (B-9), Rust unused_assignments warnings (B-10). |
+| 7   | **Fix tensor test timeout regression**                   | 0    | Trivial     | `tensor/tests/contraction-sequence.test.ts:304` asserts `elapsed < 10_000ms` for a 16-tensor exact DP, but vitest's default test timeout is 5000ms. The test takes ~5.7s on this machine and gets killed at 5s before the assertion runs. Fix: `it('...', () => { ... }, { timeout: 15_000 })`. |
 
 Detail:
 
-- [ ] **Cut a release for the `[Unreleased]` CHANGELOG section.** The
-      `[Unreleased]` block has grown to 600+ lines covering six
-      distinct strands of work since the `autograd 0.1.0` tag
-      (2026-05-15): the WASM gap-analysis sprint, the mathjs JS→AS
-      port workflow, the parallel-execution remediation, the typed-
-      layer expansion + repo-wide cleanup, the CDG-driven coverage
-      push, and the six-wave gap-closure programme (now complete
-      with Wave 6 on 2026-05-24). A pending changeset already sits
-      at `.changeset/parallel-execution-remediation.md`. Worth
-      tagging the cumulative work as a labelled cut (probably
-      `0.2.0` given the breadth of breaking API changes) so the
-      changelog history is browsable. Mechanical — pick a version
-      via the Changesets config in `.changeset/`, run the version
-      bump, commit, push, tag.
+- [x] **Cut a release for the `[Unreleased]` CHANGELOG section.** ✅ Done 2026-05-25.
+      Six packages published to npm with matching GitHub Releases:
+      - `@danielsimonjr/mathts-matrix@0.1.3` — determinant parity fix,
+        Windows WASM-loader path fix, SHA-384 integrity verification across
+        all three load paths, build-script-driven manifest auto-regen.
+      - `@danielsimonjr/mathts-functions@0.2.1` — WASM loader artifact
+        filename + path resolution fix.
+      - `@danielsimonjr/mathts-functions@0.2.0` — parallel-execution
+        remediation (worker pool kernel loading, Float64Array chunking,
+        parallel ops across distribution / special / signal / matrix-decomp
+        layers, GPU primitives).
+      - `@danielsimonjr/mathts-parallel@0.2.0` — ComputePool kernels
+        (`applyKernel` / `applyKernel2` / `fftBatch`).
+      - `@danielsimonjr/mathts-workerpool@0.2.0` — kernel script loading
+        fix, batched-FFT kernel.
+      - `@danielsimonjr/mathts-wasm@0.1.3` and
+        `@danielsimonjr/mathts-expression@0.2.0` — version bumps from
+        prior workspace changes that hadn't been published yet; published
+        in this round to align git tags with npm.
+
+      Commits: `3d218f5` (H-1+H-2), `b507fb7` (0.2.0 release), `4e390e8`
+      (S-1+B-6), `d795846` (B-1+B-2), `31a4893` (matrix 0.1.3 + functions
+      0.2.1 release).
+
+- [ ] **Delete the npm token copy in Dropbox-synced folder.**
+      `C:\Users\danie\Dropbox\Github\npm_key.txt` still holds the
+      automation token in plaintext. Tokens in cloud-synced folders are
+      a leak risk — anyone with Dropbox session access reads it. The
+      token is now in `~/.npmrc`, `Mathts/.npmrc` (gitignored), and the
+      persistent `NPM_TOKEN` env var, so the Dropbox copy is fully
+      redundant. Run `Remove-Item C:\Users\danie\Dropbox\Github\npm_key.txt`.
+
+- [ ] **Consolidate npm token storage to one source of truth.**
+      Same token currently lives in three places:
+      - `~/.npmrc` (literal, user-scope)
+      - `Mathts/.npmrc` (literal, project-scope, gitignored)
+      - `NPM_TOKEN` env var (persistent, user-scope, set 2026-05-25)
+
+      Token rotation later means touching all three. Recommended:
+      keep `NPM_TOKEN` env var as canonical, change `~/.npmrc` to
+      `//registry.npmjs.org/:_authToken=${NPM_TOKEN}` (npm 7+ expands
+      `${VAR}` syntax), delete `Mathts/.npmrc` (project-scope file is
+      gitignored but redundant — user-scope already covers it).
+
+- [ ] **Delete stale `.npmrc.bak-*` files.** Created 2026-05-25 when
+      rotating from the revoked token to the working one:
+      - `C:\Users\danie\.npmrc.bak-20260525-141127`
+      - `C:\Users\danie\Dropbox\Github\Mathts\.npmrc.bak-20260525-141201`
+
+      Both contain revoked tokens — useless for auth but still
+      token-shaped material. Safe to delete.
+
+- [ ] **Mathematical-correctness audit (external-oracle pass).** The
+      2026-05-25 audit (`BUG_AUDIT_2026-05-25.md`) explicitly flagged
+      this as the largest gap: tests pass, but they only verify "what
+      we computed" matches "what we expected" — neither side is checked
+      against a known-good oracle. A representative spread of functions
+      against scipy / mpmath / Wolfram would catch shared misunderstandings
+      that the internal test suite is blind to. Suggested scope: pick
+      ~20 functions across categories (special functions, FFT/signal,
+      decompositions, statistics, probability distributions, units),
+      cross-check against scipy or mpmath at a randomised input set,
+      log mean and max relative error.
+
+- [ ] **Address the audit B-3 through B-10 findings.** Open after the
+      mathematical-correctness pass. Per `BUG_AUDIT_2026-05-25.md`:
+      - **B-3 (medium):** Cross-package WASM dist-hop — `matrix/dist/`
+        consumers (functions, expression, compat) see wrong relative
+        path. Needs a build-pipeline change (copy `lib/wasm/*.wasm`
+        into `matrix/dist/wasm/` during build).
+      - **B-4 (medium):** Three SVD `it.skip` cases at
+        `matrix/tests/decomposition/svd.test.ts:180,461,480` —
+        tall-matrix, 5x5 stability, 4x6 transpose handling.
+      - **B-5 (medium):** 35 commits of mathjs upstream drift
+        (including "6 CRITICAL, 6 HIGH" PR-review fixes); audit
+        which apply to MathTS-synced code.
+      - **B-7 (low):** `npm audit fix` for the `turbo` < 2.9.14
+        dev-dep advisories (CSRF + Yarn Berry LCE).
+      - **B-8 (low):** Resolve or document the `?matrix` FIXME at
+        `expression/src/node/AssignmentNode.ts:12`.
+      - **B-9 (informational):** Decide whether to delete
+        `core/src/types/unit/Unit.ts` (dormant, `@ts-nocheck`'d).
+      - **B-10 (informational):** `cargo fix --lib -p mathts-wasm`
+        for the 8 `unused_assignments` warnings in
+        `crates/mathts-wasm/src/numeric/interpolation.rs`.
+
+- [ ] **Fix tensor test timeout regression.** Surfaced during the
+      2026-05-25 release verification.
+      `tensor/tests/contraction-sequence.test.ts:304` —
+      `'completes a 16-tensor exact DP in under 10 seconds'`. The test
+      asserts `elapsed < 10_000ms` but vitest's default test timeout is
+      `5000ms`. On this machine the contraction consistently takes
+      ~5.7s, so vitest kills the test at 5s before the assertion can
+      run. Two-line fix: `it('completes a 16-tensor exact DP in under
+      10 seconds', () => { ... }, { timeout: 15_000 });`. Pre-existing
+      bug, not introduced by any recent change.
 
 - [x] **Add a browser smoke test for the WebGPU paths.** ✅ LANDED
       via Wave-6 Slice 6.5 (`3aac312`). `@vitest/browser` +
