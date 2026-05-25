@@ -919,7 +919,7 @@ export class WasmLoader {
   public async precompile(wasmPath?: string): Promise<void> {
     if (this.compiledModule) return;
 
-    const path = wasmPath || this.getDefaultWasmPath();
+    const path = wasmPath || (await this.getDefaultWasmPath());
     const startTime = performance.now();
 
     if (this.isNode) {
@@ -951,7 +951,7 @@ export class WasmLoader {
   }
 
   private async loadModule(wasmPath?: string): Promise<WasmModule> {
-    const path = wasmPath || this.getDefaultWasmPath();
+    const path = wasmPath || (await this.getDefaultWasmPath());
     const totalStart = performance.now();
 
     // If precompiled, use cached module
@@ -977,19 +977,34 @@ export class WasmLoader {
 
   /**
    * Get the WASM binary path based on the selected backend.
-   * Set MATHJS_WASM_BACKEND=assemblyscript to use the AS binary.
+   * Set MATHTS_WASM_BACKEND=assemblyscript to use the AS binary.
    * Default is Rust (after migration cutover).
+   *
+   * Filenames were renamed from mathjs.wasm / mathjs-as.wasm during the
+   * mathjs-to-MathTS rebrand; the legacy MATHJS_WASM_BACKEND env var
+   * still works for one release for backward compatibility.
+   *
+   * Returns an async result because the Node branch dynamically imports
+   * `node:url` (fileURLToPath) so the path is resolved relative to this
+   * source file's location rather than process.cwd().
    */
-  private getDefaultWasmPath(): string {
+  private async getDefaultWasmPath(): Promise<string> {
     const useAS =
-      typeof process !== 'undefined' && process.env?.MATHJS_WASM_BACKEND === 'assemblyscript';
+      typeof process !== 'undefined' &&
+      (process.env?.MATHTS_WASM_BACKEND === 'assemblyscript' ||
+        process.env?.MATHJS_WASM_BACKEND === 'assemblyscript');
+
+    const wasmFile = useAS ? 'mathts-as.wasm' : 'mathts.wasm';
+    const resolvedUrl = new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url);
 
     if (this.isNode) {
-      return useAS ? './lib/wasm/mathjs-as.wasm' : './lib/wasm/mathjs.wasm';
-    } else {
-      const wasmFile = useAS ? 'mathjs-as.wasm' : 'mathjs.wasm';
-      return new URL(`../../lib/wasm/${wasmFile}`, import.meta.url).href;
+      // `.pathname` on Windows yields "/C:/foo/bar.wasm", which fs.readFile
+      // interprets as drive-relative ("C:\C:\foo\..."). fileURLToPath does
+      // the platform-correct conversion (and decodes %-escapes).
+      const { fileURLToPath } = await import('node:url');
+      return fileURLToPath(resolvedUrl);
     }
+    return resolvedUrl.href;
   }
 
   private async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {
