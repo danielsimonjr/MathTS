@@ -15,23 +15,7 @@
 
 import { wasmLoader, type WasmModule } from './WasmLoader.js';
 
-// TODO: ParallelMatrix integration pending proper package export from @danielsimonjr/mathts-parallel
-// import { ParallelMatrix } from '@danielsimonjr/mathts-parallel'
-// Stub implementation until parallel package is properly integrated
-const ParallelMatrix = {
-  multiply: (
-    _aData: number[] | Float64Array,
-    aRows: number,
-    _aCols: number,
-    _bData: number[] | Float64Array,
-    _bRows: number,
-    bCols: number
-  ): Promise<Float64Array> => {
-    // Fallback: return empty result; real implementation in @danielsimonjr/mathts-parallel
-    return Promise.resolve(new Float64Array(aRows * bCols));
-  },
-  terminate: (): Promise<void> => Promise.resolve(),
-};
+import { ParallelMatrix } from '@danielsimonjr/mathts-parallel';
 
 export interface MatrixOptions {
   useWasm?: boolean;

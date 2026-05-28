@@ -157,3 +157,4 @@ export interface PoolStats {
   pendingTasks: number;
   activeTasks: number;
 }
+export { ParallelMatrix } from './ParallelMatrix.js';
