@@ -99,9 +99,10 @@ export function extend<T extends Record<string, any>, U extends Record<string, a
  * @returns {Object}
  */
 export function deepExtend<T extends Record<string, any>>(a: T, b: Record<string, any>): T {
-  // TODO: add support for Arrays to deepExtend
   if (Array.isArray(b)) {
-    throw new TypeError('Arrays are not supported by deepExtend');
+    if (!Array.isArray(a)) {
+      throw new TypeError('Cannot merge array into non-array');
+    }
   }
 
   for (const prop in b) {
@@ -118,7 +119,10 @@ export function deepExtend<T extends Record<string, any>>(a: T, b: Record<string
           (a as any)[prop] = b[prop];
         }
       } else if (Array.isArray(b[prop])) {
-        throw new TypeError('Arrays are not supported by deepExtend');
+        if (!Array.isArray((a as any)[prop])) {
+          (a as any)[prop] = [] as any;
+        }
+        deepExtend((a as any)[prop], b[prop]);
       } else {
         (a as any)[prop] = b[prop];
       }

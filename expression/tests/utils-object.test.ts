@@ -119,12 +119,14 @@ describe('deepExtend', () => {
     expect(a.x).toBe(99);
   });
 
-  it('throws for array values in b', () => {
-    expect(() => deepExtend({} as any, { arr: [1, 2] } as any)).toThrow();
+  it('merges arrays', () => {
+    const a: any = { arr: [1, { y: 2 }] };
+    deepExtend(a, { arr: [3, { z: 4 }] });
+    expect(a.arr).toEqual([3, { y: 2, z: 4 }]);
   });
 
-  it('throws when b itself is an array', () => {
-    expect(() => deepExtend({} as any, [1, 2] as any)).toThrow('Arrays are not supported');
+  it('throws when b itself is an array and a is not', () => {
+    expect(() => deepExtend({} as any, [1, 2] as any)).toThrow('Cannot merge array into non-array');
   });
 });
 
