@@ -1,5 +1,5 @@
 import { factory } from '../utils/factory.js';
-import { isInteger } from '../utils/number.js';
+import { isInteger, isPowZeroAtInfinity } from '../utils/number.js';
 import { arraySize as size } from '../utils/array.js';
 import { powNumber } from '../plain/number/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -210,11 +210,9 @@ export const createPow = /* #__PURE__ */ factory(
       if (isInteger(y) || x >= 0 || config.predictable) {
         return powNumber(x, y);
       } else {
-        // TODO: the following infinity checks are duplicated from powNumber. Deduplicate this somehow
-
         // x^Infinity === 0 if -1 < x < 1
         // A real number 0 is returned instead of complex(0)
-        if ((x * x < 1 && y === Infinity) || (x * x > 1 && y === -Infinity)) {
+        if (isPowZeroAtInfinity(x, y)) {
           return 0;
         }
 
