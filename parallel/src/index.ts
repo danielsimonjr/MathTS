@@ -22,6 +22,13 @@ export {
 export type { ComputePoolConfig, ParallelResult, OpName, OpThreshold } from './ComputePool.js';
 
 // =============================================================================
+// Parallel Matrix
+// =============================================================================
+
+export { ParallelMatrix } from './ParallelMatrix.js';
+export type { ParallelConfig, MatrixData } from './ParallelMatrix.js';
+
+// =============================================================================
 // Operations
 // =============================================================================
 
