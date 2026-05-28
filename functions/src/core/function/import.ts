@@ -133,11 +133,10 @@ export function importFactory(
           }
         }
       } else if (isFactory(value) || name !== undefined) {
-        const flatName = isFactory(value)
-          ? isTransformFunctionFactory(value)
-            ? value.fn + '.transform' // TODO: this is ugly
-            : value.fn
-          : (name as string);
+        let flatName = name as string;
+        if (isFactory(value)) {
+          flatName = isTransformFunctionFactory(value) ? `${value.fn}.transform` : value.fn;
+        }
 
         // we allow importing the same function twice if it points to the same implementation
         if (
