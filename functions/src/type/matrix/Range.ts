@@ -83,6 +83,11 @@ export const createRangeClass = /* #__PURE__ */ factory(
        */
       step: number;
 
+      /**
+       * Cache for the primitive value of the Range
+       */
+      private _cache?: number[];
+
       constructor(
         start?: number | bigint | BigNumberLike | null,
         end?: number | bigint | BigNumberLike | null,
@@ -312,8 +317,10 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @returns {Array} array
        */
       valueOf(): number[] {
-        // TODO: implement a caching mechanism for range.valueOf()
-        return this.toArray();
+        if (this._cache === undefined) {
+          this._cache = this.toArray();
+        }
+        return this._cache;
       }
 
       /**
