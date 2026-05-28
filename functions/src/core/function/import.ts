@@ -188,7 +188,6 @@ export function importFactory(
    * @private
    */
   function _import(name: string, value: ImportableValue, options: ImportOptions): void {
-    // TODO: refactor this function, it's to complicated and contains duplicate code
     let importValue: unknown = value;
     if (options.wrap && typeof importValue === 'function') {
       // create a wrapper around the function
@@ -204,6 +203,8 @@ export function importFactory(
     }
 
     const existingValue = math[name];
+    let canImport = false;
+
     if (typed.isTypedFunction(existingValue) && typed.isTypedFunction(importValue)) {
       const typedImportValue = importValue as TypedFunction;
       if (options.override) {
@@ -213,7 +214,18 @@ export function importFactory(
         // merge the existing and typed function
         importValue = typed(existingValue as TypedFunction, typedImportValue);
       }
+      canImport = true;
+    } else {
+      const isDefined = existingValue !== undefined;
+      const isValuelessUnit = math.Unit?.isValuelessUnit(name);
+      if (!isDefined && !isValuelessUnit) {
+        canImport = true;
+      } else if (options.override) {
+        canImport = true;
+      }
+    }
 
+    if (canImport) {
       math[name] = importValue;
       delete importedFactories[name];
 
@@ -221,23 +233,7 @@ export function importFactory(
       math.emit('import', name, function resolver() {
         return importValue;
       });
-      return;
-    }
-
-    const isDefined = math[name] !== undefined;
-    const isValuelessUnit = math.Unit?.isValuelessUnit(name);
-    if ((!isDefined && !isValuelessUnit) || options.override) {
-      math[name] = importValue;
-      delete importedFactories[name];
-
-      _importTransform(name, importValue);
-      math.emit('import', name, function resolver() {
-        return importValue;
-      });
-      return;
-    }
-
-    if (!options.silent) {
+    } else if (!options.silent) {
       throw new Error('Cannot import "' + name + '": already exists');
     }
   }
