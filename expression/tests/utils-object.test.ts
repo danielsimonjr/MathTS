@@ -119,12 +119,32 @@ describe('deepExtend', () => {
     expect(a.x).toBe(99);
   });
 
-  it('throws for array values in b', () => {
-    expect(() => deepExtend({} as any, { arr: [1, 2] } as any)).toThrow();
+  it('deep extends array values in b', () => {
+    const a: any = {};
+    deepExtend(a, { arr: [1, 2] });
+    expect(a).toEqual({ arr: [1, 2] });
   });
 
-  it('throws when b itself is an array', () => {
-    expect(() => deepExtend({} as any, [1, 2] as any)).toThrow('Arrays are not supported');
+  it('deep extends array values over existing array values in a', () => {
+    const a: any = { arr: [1, 2] };
+    deepExtend(a, { arr: [3, 4, 5] });
+    expect(a).toEqual({ arr: [3, 4, 5] });
+  });
+
+  it('deep extends arrays with nested objects', () => {
+    const a: any = { arr: [{ x: 1 }] };
+    deepExtend(a, { arr: [{ y: 2 }] });
+    expect(a).toEqual({ arr: [{ x: 1, y: 2 }] });
+  });
+
+  it('throws when b itself is an array and a is not', () => {
+    expect(() => deepExtend({} as any, [1, 2] as any)).toThrow('Cannot extend an object with an array');
+  });
+
+  it('deep extends when both a and b are arrays', () => {
+    const a: any = [1, 2];
+    deepExtend(a, [3, 4, 5]);
+    expect(a).toEqual([3, 4, 5]);
   });
 });
 
