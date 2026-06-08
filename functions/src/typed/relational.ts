@@ -21,6 +21,7 @@
  * @packageDocumentation
  */
 
+// @ts-ignore — no bundled type declarations for javascript-natural-sort
 import naturalSort from 'javascript-natural-sort';
 import { mathTyped, Complex, BigNumber, Fraction } from '@danielsimonjr/mathts-core';
 import { nearlyEqual } from '../utils/number.js';
