@@ -7,26 +7,14 @@ import { getPrecedence } from '../operators.js';
 import type { MathNode } from './Node.js';
 
 const name = 'AssignmentNode';
-const dependencies = [
-  'subset',
-  '?matrix', // FIXME: should not be needed at all, should be handled by subset
-  'Node',
-];
+const dependencies = ['subset', 'Node'];
 
 export const createAssignmentNode = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    subset,
-    matrix,
-    Node,
-  }: {
-    subset: any;
-    matrix: any;
-    Node: new (...args: any[]) => MathNode;
-  }) => {
+  ({ subset, Node }: { subset: any; Node: new (...args: any[]) => MathNode }) => {
     const access = accessFactory({ subset });
-    const assign = assignFactory({ subset, matrix });
+    const assign = assignFactory({ subset });
 
     /*
      * Is parenthesis needed?
