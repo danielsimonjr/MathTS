@@ -2313,7 +2313,7 @@ function _casSimplifyOne(expr: string): string {
   r = r.replace(/\s*\+\s*0\b/g, '');
 
   // 0*anything → 0
-  r = r.replace(/\b0\s*\*\s*[^+\-]*/g, '0');
+  r = r.replace(/\b0\s*\*\s*[^+-]*/g, '0');
 
   // Evaluate pure-numeric expressions (digits, operators, parens)
   const numericPattern = /^[\d\s+\-*/().^]+$/;
@@ -2735,7 +2735,7 @@ export function casSimplify(
       r = r.replace(/\s*\*\s*1\b/g, '');
       r = r.replace(/\b0\s*\+\s*/g, '');
       r = r.replace(/\s*\+\s*0\b/g, '');
-      r = r.replace(/\b0\s*\*\s*[^+\-]*/g, '0');
+      r = r.replace(/\b0\s*\*\s*[^+-]*/g, '0');
       if (/^[\d\s+\-*/().^]+$/.test(r)) {
         try {
           const jsExpr = r.replace(/\^/g, '**');
