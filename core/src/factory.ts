@@ -122,11 +122,51 @@ export function sortFactories(
     factoriesByName[name] = factory;
   });
 
+  // Separate step: Check all factories for cycles before sorting.
+  // This avoids repeating cycle checks during the O(N^2) insertion sort.
+  const checkedForCycles = new Set<string>();
+
+  function checkCycles(
+    fact: FactoryFunction | LegacyFactory,
+    visiting: Set<string>,
+    visited: Set<string>
+  ) {
+    if (isFactory(fact)) {
+      const factName = fact.fn;
+
+      if (visiting.has(factName)) {
+        throw new Error(`Circular dependency detected: ${factName}`);
+      }
+
+      if (visited.has(factName)) {
+        return;
+      }
+
+      visiting.add(factName);
+
+      fact.dependencies.forEach((d) => {
+        const depFactory = factoriesByName[d];
+        if (depFactory) {
+          checkCycles(depFactory, visiting, visited);
+        }
+      });
+
+      visiting.delete(factName);
+      visited.add(factName);
+    }
+  }
+
+  // Verify there are no cycles anywhere in the graph
+  factories.forEach((factory) => {
+    if (isFactory(factory)) {
+      checkCycles(factory, new Set(), checkedForCycles);
+    }
+  });
+
   function containsDependency(
     factory: FactoryFunction | LegacyFactory,
     dependency: FactoryFunction | LegacyFactory
   ): boolean {
-    // TODO: detect circular references
     if (isFactory(factory)) {
       const depName = isFactory(dependency) ? dependency.fn : dependency.name;
       if (factory.dependencies.includes(depName)) {
