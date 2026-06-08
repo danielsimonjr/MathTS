@@ -14,7 +14,7 @@
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
-import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
+import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
