@@ -203,7 +203,6 @@ export function scatter<T>(
         if (update && f) {
           // copy value to workspace calling callback function
           x[i] = inverse ? f(avalues[k], value) : f(value, avalues[k]);
-          // function was called on current row
           u[i] = mark;
         } else {
           // copy value to workspace
@@ -214,7 +213,6 @@ export function scatter<T>(
         if (f) {
           x[i] = inverse ? f(avalues[k], x[i]) : f(x[i], avalues[k]);
         }
-        // function was called on current row
         u[i] = mark;
       }
     }
@@ -230,7 +228,6 @@ export function scatter<T>(
         // add i to pattern of C
         cindex.push(i);
       } else {
-        // indicate function was called on current row
         u[i] = mark;
       }
     }
