@@ -124,7 +124,7 @@ export function deepExtend<T extends Record<string, unknown>>(a: T, b: Record<st
         if (!Array.isArray(aValue)) {
           (a as Record<string, unknown>)[prop] = [] as unknown;
         }
-        deepExtend((a as Record<string, unknown>)[prop] as Record<string, unknown>, bValue as Record<string, unknown>);
+        deepExtend((a as Record<string, unknown>)[prop] as unknown as Record<string, unknown>, bValue as unknown as Record<string, unknown>);
       } else {
         (a as Record<string, unknown>)[prop] = bValue;
       }

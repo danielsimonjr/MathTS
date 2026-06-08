@@ -1206,7 +1206,7 @@ export const singularValues = mathTyped('singularValues', {
  */
 export const matrixExpm = mathTyped('matrixExpm', {
   DenseMatrix: (A: Parameters<typeof matrixExpmPrimitive>[0]) => matrixExpmPrimitive(A),
-  'DenseMatrix, Object': (A: Parameters<typeof matrixExpmPrimitive>[0], _opts: ExpmOptions) =>
+  'DenseMatrix, Object': (A: Parameters<typeof matrixExpmPrimitive>[0], opts: ExpmOptions) =>
     matrixExpmPrimitive(A),
   Array: (A: number[][]) => {
     const D = DenseMatrix.fromArray(A);

@@ -320,16 +320,16 @@ factoryScope.parseNumberWithConfig = parseNumberWithConfig;
 export const divideScalar = createDivideScalar(factoryScope as any);
 
 // probability (synced factory — superseded by typed/probability; kept internal for factoryScope wiring)
-const _randomInt = createRandomInt(factoryScope as any);
+const randomInt = createRandomInt(factoryScope as any);
 
 // statistics
 export const mode = createMode(factoryScope as any);
 export const prod = createProd(factoryScope as any);
 
 // string (synced factories — superseded by typed/string; kept internal for factoryScope wiring)
-const _bin = createBin(factoryScope as any);
-const _hex = createHex(factoryScope as any);
-const _oct = createOct(factoryScope as any);
+const bin = createBin(factoryScope as any);
+const hex = createHex(factoryScope as any);
+const oct = createOct(factoryScope as any);
 
 // utils
 export const hasNumericValue = createHasNumericValue(factoryScope as any);

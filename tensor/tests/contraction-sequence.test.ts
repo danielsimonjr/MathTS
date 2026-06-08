@@ -305,7 +305,7 @@ describe('contractNetwork — 16-tensor exact solve', () => {
   // Vitest's default test timeout is 5000ms; the 16-tensor DP takes ~5.7s, so
   // without the per-test override the test would be killed before the
   // `elapsed < 10_000` assertion ran.
-  it('completes a 16-tensor exact DP without hanging (CI-tolerant)', { timeout: 30_000 }, () => {
+  it('completes a 16-tensor exact DP in under 10 seconds', { timeout: 15_000 }, () => {
     // Linear chain of 16 tensors: T0[a0,a1] - T1[a1,a2] - ... - T15[a15,a16].
     // All intermediate indices have small dim (2) to keep memory tractable.
     const labels: Index[] = [];
@@ -318,10 +318,7 @@ describe('contractNetwork — 16-tensor exact solve', () => {
     const res = contractNetwork(tensors, { algorithm: 'exact' });
     const elapsed = Date.now() - start;
     expect(res.result.shape).toEqual([2, 2]); // free axes: a0 and a16
-    // Coarse regression guard, generously sized for shared CI runners (nominal
-    // ~5.7s locally). The 30s test timeout is the real hang guard; a tight
-    // wall-clock bound here just flakes under CI load (observed ~11s).
-    expect(elapsed).toBeLessThan(25_000);
+    expect(elapsed).toBeLessThan(10_000);
   });
 });
 
