@@ -7,6 +7,7 @@ import { memoize } from '../../utils/function.js';
 import { endsWith } from '../../utils/string.js';
 import { clone, hasOwnProperty } from '../../utils/object.js';
 import { createBigNumberPi as createPi } from '../../utils/bignumber/constants.js';
+import { warnOnce } from '../../utils/log.js';
 
 const name = 'Unit';
 const dependencies = [
@@ -1040,9 +1041,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * @memberof Unit
      * @param {string | Unit} valuelessUnit    For example 'cm' or 'inch'
      * @return {number} Returns the unit value as number.
+     * @deprecated Use Unit.toNumeric instead.
      */
-    // TODO: deprecate Unit.toNumber? It's always better to use toNumeric
     Unit.prototype.toNumber = function (valuelessUnit: any) {
+      warnOnce('Unit.toNumber is deprecated. Use Unit.toNumeric instead.');
       return toNumber(this.toNumeric(valuelessUnit));
     };
 
