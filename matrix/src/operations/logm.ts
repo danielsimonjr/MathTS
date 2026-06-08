@@ -158,8 +158,6 @@ function matSqrt(A: number[][]): number[][] {
 // 16-point Gauss-Legendre nodes and weights on [0,1]
 // Source: standard GL quadrature tables (Abramowitz & Stegun or DLMF §3.5)
 // Transformed from [-1,1] to [0,1]: x_i = (1 + t_i)/2, w_i = w_i/2
-/* eslint-disable no-loss-of-precision -- intentional full-precision Gauss-Legendre
-   quadrature constants; the extra digits round to the nearest IEEE-754 double. */
 const GL16_NODES = [
   0.00529953674226076, 0.02771248846338012, 0.06718439880608424, 0.12229779582258389,
   0.19106187500306076, 0.27099161117837625, 0.35919822461709316, 0.45249373519380166,
@@ -172,7 +170,6 @@ const GL16_WEIGHTS = [
   0.09472530522753626, 0.09130170752246166, 0.08457825969750125, 0.07479799440828515,
   0.06231448562776694, 0.04757925584079793, 0.03112676196932377, 0.01357622970130523,
 ];
-/* eslint-enable no-loss-of-precision */
 
 /** Solve (M) * x = b where M is n×n and b is n×1 (returns x). */
 function solveCol(M: number[][], b: number[]): number[] {

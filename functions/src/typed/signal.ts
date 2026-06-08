@@ -21,8 +21,11 @@ import { wasmLoader } from '../wasm/WasmLoader.js';
 import {
   applyWindowDispatch,
   bartlettPSDDispatch,
+  bartlettPSDJS,
   chirpZTransformDispatch,
+  chirpZTransformJS,
   goertzelDispatch,
+  goertzelJS,
   welchPSDDispatch,
   welchPSDJS,
   WASM_SIGNAL_THRESHOLD,

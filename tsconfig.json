@@ -5,7 +5,8 @@
     "paths": {
       "@danielsimonjr/mathts-core": ["packages/core/src"],
       "@danielsimonjr/mathts-matrix": ["packages/matrix/src"],
-      "@danielsimonjr/mathts-workbook": ["packages/workbook/src"]
+      "@danielsimonjr/mathts-workbook": ["packages/workbook/src"],
+      "@danielsimonjr/mathts-parallel": ["parallel/src"]
     }
   },
   "references": [],

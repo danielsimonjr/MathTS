@@ -1,5 +1,3 @@
-/* eslint-disable no-loss-of-precision -- special-function math constants (Airy, etc.)
-   are written at full precision and round to the nearest IEEE-754 double. */
 /**
  * Typed Special Functions
  *

@@ -30,6 +30,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+// @ts-ignore — no bundled type declarations for seedrandom
 import seedrandom from 'seedrandom';
 
 // =============================================================================
