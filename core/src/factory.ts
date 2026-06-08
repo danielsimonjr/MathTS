@@ -1,4 +1,5 @@
 import { pickShallow } from './object.js';
+import { MathjsError } from './error/MathjsError.js';
 
 /**
  * Type for a factory function that creates instances
@@ -254,8 +255,7 @@ export function assertDependencies(
       (dependency) => scope[dependency] === undefined
     );
 
-    // TODO: create a custom error class for this, a MathjsError or something like that
-    throw new Error(
+    throw new MathjsError(
       `Cannot create function "${name}", ` +
         `some dependencies are missing: ${missingDependencies.map((d) => `"${d}"`).join(', ')}.`
     );
