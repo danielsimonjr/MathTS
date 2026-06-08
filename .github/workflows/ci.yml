@@ -16,8 +16,12 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      # Independent legs so one Node version failing doesn't cancel the others.
+      fail-fast: false
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        # Node 18 reached EOL 2026-04 and the toolchain uses Node 20+ APIs
+        # (e.g. util.styleText), so 18.x is no longer supported/tested.
+        node-version: [20.x, 22.x]
 
     steps:
       - name: Checkout
