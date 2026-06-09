@@ -136,7 +136,6 @@ export function importFactory(typed: any, load: any, math: any, importedFactorie
    * @private
    */
   function _import(name: any, value: any, options: any) {
-    // TODO: refactor this function, it's to complicated and contains duplicate code
     if (options.wrap && typeof value === 'function') {
       // create a wrapper around the function
       value = _wrap(value);
@@ -157,33 +156,25 @@ export function importFactory(typed: any, load: any, math: any, importedFactorie
         // merge the existing and typed function
         value = typed(math[name], value);
       }
+    } else {
+      const isDefined = math[name] !== undefined;
+      const isValuelessUnit = math.Unit?.isValuelessUnit(name);
 
-      math[name] = value;
-      delete importedFactories[name];
-
-      _importTransform(name, value);
-      math.emit('import', name, function resolver() {
-        return value;
-      });
-      return;
+      if ((isDefined || isValuelessUnit) && !options.override) {
+        if (!options.silent) {
+          throw new Error('Cannot import "' + name + '": already exists');
+        }
+        return;
+      }
     }
 
-    const isDefined = math[name] !== undefined;
-    const isValuelessUnit = math.Unit?.isValuelessUnit(name);
-    if ((!isDefined && !isValuelessUnit) || options.override) {
-      math[name] = value;
-      delete importedFactories[name];
+    math[name] = value;
+    delete importedFactories[name];
 
-      _importTransform(name, value);
-      math.emit('import', name, function resolver() {
-        return value;
-      });
-      return;
-    }
-
-    if (!options.silent) {
-      throw new Error('Cannot import "' + name + '": already exists');
-    }
+    _importTransform(name, value);
+    math.emit('import', name, function resolver() {
+      return value;
+    });
   }
 
   function _importTransform(name: any, value: any) {

@@ -44,22 +44,13 @@ function mockSubset(obj: any, index: any, value: any): any {
     const i = index._i;
     return obj.substring(0, i) + value + obj.substring(i + 1);
   }
+  if (Array.isArray(obj)) {
+    return mockMatrix.subset(obj, index, value).valueOf();
+  }
   throw new Error('Not supported by mock subset');
 }
 
-// matrix factory: wraps arrays into the mock
-function mockMatrixFactory(data: any[]) {
-  return {
-    subset(index: any, value: any) {
-      return mockMatrix.subset(data, index, value);
-    },
-    valueOf() {
-      return data;
-    },
-  };
-}
-
-const assign = assignFactory({ subset: mockSubset, matrix: mockMatrixFactory });
+const assign = assignFactory({ subset: mockSubset });
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 

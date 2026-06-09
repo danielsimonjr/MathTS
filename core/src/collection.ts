@@ -1,5 +1,5 @@
 import { isCollection, isMatrix } from './is.js';
-import { IndexError } from '../error/IndexError.js';
+import { DimensionError } from '../error/DimensionError.js';
 import { arraySize, deepMap as arrayDeepMap, deepForEach as arrayDeepForEach } from './array.js';
 import { _switch } from './switch.js';
 
@@ -96,8 +96,7 @@ export function reduce(
 ): any[] | Matrix {
   const size = Array.isArray(mat) ? arraySize(mat) : (mat as Matrix).size();
   if (dim < 0 || dim >= size.length) {
-    // TODO: would be more clear when throwing a DimensionError here
-    throw new IndexError(dim, 0, size.length) as any;
+    throw new DimensionError(dim, size.length, '<') as any;
   }
 
   if (isMatrix(mat)) {

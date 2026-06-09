@@ -46,7 +46,7 @@ async function loadManifest(wasmPath: string): Promise<WasmManifest | null> {
   try {
     if (isNode) {
       const fs = await import('fs');
-      const text = fs.readFileSync(manifestPath, 'utf8');
+      const text = await fs.promises.readFile(manifestPath, 'utf8');
       return JSON.parse(text) as WasmManifest;
     } else {
       const res = await fetch(manifestPath);
@@ -182,7 +182,7 @@ export async function loadWasm(source: string | BufferSource): Promise<MathTSWas
       const fs = await import('fs');
       const path = await import('path');
       const resolved = path.resolve(source);
-      const buffer = fs.readFileSync(resolved);
+      const buffer = await fs.promises.readFile(resolved);
       await verifyWasm(buffer, resolved);
       wasmModule = await WebAssembly.compile(buffer);
     }

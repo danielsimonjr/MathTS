@@ -1,6 +1,6 @@
-import { isBigInt, isBigNumber } from '../../utils/is.js';
-import { format, sign, nearlyEqual } from '../../utils/number.js';
-import { factory } from '../../utils/factory.js';
+import { isBigInt, isBigNumber } from '../../is.js';
+import { format, sign, nearlyEqual } from '../../number.js';
+import { factory } from '../../factory.js';
 
 // BigNumber type (avoid circular dependency)
 interface BigNumber {
@@ -106,6 +106,14 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * Step size for the range
        */
       step: number;
+
+      /**
+       * Cached primitive array representation
+       */
+      private _cache: number[] | null = null;
+      private _cacheStart?: number;
+      private _cacheEnd?: number;
+      private _cacheStep?: number;
 
       constructor(
         start?: number | bigint | BigNumber | null,
@@ -336,8 +344,20 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @returns {Array} array
        */
       valueOf(): number[] {
-        // TODO: implement a caching mechanism for range.valueOf()
-        return this.toArray();
+        if (
+          this._cache !== null &&
+          this.start === this._cacheStart &&
+          this.end === this._cacheEnd &&
+          this.step === this._cacheStep
+        ) {
+          return this._cache;
+        }
+
+        this._cache = this.toArray();
+        this._cacheStart = this.start;
+        this._cacheEnd = this.end;
+        this._cacheStep = this.step;
+        return this._cache;
       }
 
       /**

@@ -16,7 +16,6 @@ const IndexNode = createIndexNode({ Node, size: () => [] });
 // Minimal subset/matrix for AssignmentNode compilation
 const AssignmentNode = createAssignmentNode({
   subset: () => {},
-  matrix: undefined,
   Node,
 });
 
