@@ -113,7 +113,6 @@ interface Dependencies {
 // for small arrays. The existing JavaScript implementation with Chirp-Z transform
 // is already well-optimized. WASM acceleration is most beneficial for large
 // power-of-2 sized arrays with pure number inputs.
-// TODO: Add WASM acceleration for large power-of-2 FFTs
 
 const name = 'fft';
 const dependencies = [
