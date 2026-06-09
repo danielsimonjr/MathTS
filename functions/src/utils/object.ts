@@ -98,29 +98,62 @@ export function extend<T extends Record<string, unknown>, U extends Record<strin
  * @param {Object} b
  * @returns {Object}
  */
-export function deepExtend<T extends Record<string, unknown>>(a: T, b: Record<string, unknown>): T {
-  // TODO: add support for Arrays to deepExtend
+export function deepExtend<T>(a: T, b: unknown): T {
   if (Array.isArray(b)) {
-    throw new TypeError('Arrays are not supported by deepExtend');
+    if (!Array.isArray(a)) {
+      throw new TypeError('Cannot extend an object with an array');
+    }
+    for (let i = 0; i < b.length; i++) {
+      const bValue = b[i];
+      if (bValue && (bValue as object).constructor === Object) {
+        if ((a as unknown[])[i] === undefined) {
+          (a as unknown[])[i] = {};
+        }
+        if ((a as unknown[])[i] && ((a as unknown[])[i] as object).constructor === Object) {
+          deepExtend((a as unknown[])[i], bValue);
+        } else {
+          (a as unknown[])[i] = bValue;
+        }
+      } else if (Array.isArray(bValue)) {
+        if ((a as unknown[])[i] === undefined) {
+          (a as unknown[])[i] = [];
+        }
+        if (Array.isArray((a as unknown[])[i])) {
+          deepExtend((a as unknown[])[i], bValue);
+        } else {
+          (a as unknown[])[i] = clone(bValue);
+        }
+      } else {
+        (a as unknown[])[i] = bValue;
+      }
+    }
+    return a;
   }
 
-  for (const prop in b) {
+  for (const prop in b as Record<string, unknown>) {
     // We check against prop not being in Object.prototype or Function.prototype
     // to prevent polluting for example Object.__proto__.
     if (hasOwnProperty(b, prop) && !(prop in Object.prototype) && !(prop in Function.prototype)) {
-      const bValue = b[prop];
+      const bValue = (b as Record<string, unknown>)[prop];
       const aValue = (a as Record<string, unknown>)[prop];
       if (bValue && (bValue as object).constructor === Object) {
         if (aValue === undefined) {
           (a as Record<string, unknown>)[prop] = {};
         }
         if (aValue && (aValue as object).constructor === Object) {
-          deepExtend(aValue as Record<string, unknown>, bValue as Record<string, unknown>);
+          deepExtend(aValue, bValue);
         } else {
           (a as Record<string, unknown>)[prop] = bValue;
         }
       } else if (Array.isArray(bValue)) {
-        throw new TypeError('Arrays are not supported by deepExtend');
+        if (aValue === undefined) {
+          (a as Record<string, unknown>)[prop] = [];
+        }
+        if (Array.isArray(aValue)) {
+          deepExtend(aValue, bValue);
+        } else {
+          (a as Record<string, unknown>)[prop] = clone(bValue);
+        }
       } else {
         (a as Record<string, unknown>)[prop] = bValue;
       }
