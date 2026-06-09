@@ -15,23 +15,16 @@
 
 import { wasmLoader, type WasmModule } from './WasmLoader.js';
 
-// TODO: ParallelMatrix integration pending proper package export from @danielsimonjr/mathts-parallel
-// import { ParallelMatrix } from '@danielsimonjr/mathts-parallel'
-// Stub implementation until parallel package is properly integrated
-const ParallelMatrix = {
-  multiply: (
-    _aData: number[] | Float64Array,
-    aRows: number,
-    _aCols: number,
-    _bData: number[] | Float64Array,
-    _bRows: number,
-    bCols: number
-  ): Promise<Float64Array> => {
-    // Fallback: return empty result; real implementation in @danielsimonjr/mathts-parallel
-    return Promise.resolve(new Float64Array(aRows * bCols));
-  },
-  terminate: (): Promise<void> => Promise.resolve(),
-};
+// The parallel package eagerly constructs a `computePool` worker-pool singleton
+// at import time. We import it lazily (dynamic import inside the parallel branch
+// and cleanup) so the worker module graph stays out of the common JS/WASM code
+// paths — and out of test workers that never opt into parallel.
+type ParallelModule = typeof import('@danielsimonjr/mathts-parallel');
+let parallelModulePromise: Promise<ParallelModule> | null = null;
+function loadParallel(): Promise<ParallelModule> {
+  parallelModulePromise ??= import('@danielsimonjr/mathts-parallel');
+  return parallelModulePromise;
+}
 
 export interface MatrixOptions {
   useWasm?: boolean;
@@ -126,7 +119,11 @@ export class MatrixWasmBridge {
     // Matrix multiply is O(n³), so WASM benefits even at smaller sizes
     if (opts.useParallel && outputElements >= WasmThresholds.parallel) {
       // Very large matrices: use parallel processing
-      return ParallelMatrix.multiply(aData, aRows, aCols, bData, bRows, bCols);
+      const aArr = aData instanceof Float64Array ? aData : new Float64Array(aData);
+      const bArr = bData instanceof Float64Array ? bData : new Float64Array(bData);
+      const { parallelMatmul } = await loadParallel();
+      const result = await parallelMatmul(aArr, aRows, aCols, bArr, bCols);
+      return result.result;
     } else if (opts.useWasm && this.wasmModule && totalElements >= wasmThreshold) {
       // Medium/large matrices: use WASM with SIMD
       return this.multiplyWasm(aData, aRows, aCols, bData, bRows, bCols, true);
@@ -883,7 +880,12 @@ export class MatrixWasmBridge {
    * Cleanup resources
    */
   public static async cleanup(): Promise<void> {
-    await ParallelMatrix.terminate();
+    // Only tear down the pool if it was actually loaded; importing it here just
+    // to terminate would needlessly spin up the worker singleton.
+    if (parallelModulePromise) {
+      const { computePool } = await parallelModulePromise;
+      await computePool.terminate();
+    }
     if (this.wasmModule) {
       wasmLoader.collect();
     }
