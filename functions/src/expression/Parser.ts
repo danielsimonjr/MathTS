@@ -1,3 +1,4 @@
+import { ArgumentsError } from '../error/ArgumentsError.js';
 import { factory } from '../utils/factory.js';
 import { isFunction } from '../utils/is.js';
 import { createEmptyMap, toObject } from '../utils/map.js';
@@ -88,7 +89,10 @@ export const createParserClass = /* #__PURE__ */ factory(
      * @throws {Error}
      */
     Parser.prototype.evaluate = function (this: any, expr: string | string[]): any {
-      // TODO: validate arguments
+      if (arguments.length !== 1) {
+        throw new ArgumentsError('evaluate', arguments.length, 1);
+      }
+
       return evaluate(expr, this.scope);
     };
 
@@ -99,7 +103,10 @@ export const createParserClass = /* #__PURE__ */ factory(
      * @return {* | undefined} value
      */
     Parser.prototype.get = function (this: any, name: string): any {
-      // TODO: validate arguments
+      if (arguments.length !== 1) {
+        throw new ArgumentsError('get', arguments.length, 1);
+      }
+
       if (this.scope.has(name)) {
         return this.scope.get(name);
       }

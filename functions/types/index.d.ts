@@ -4477,6 +4477,7 @@ export interface Unit {
   to(unit: string | Unit): Unit;
   toBest(): Unit;
   toBest(units?: string[] | Unit[], options?: object): Unit;
+  /** @deprecated Use Unit.toNumeric instead. */
   toNumber(unit?: string): number;
   toNumeric(unit?: string): number | Fraction | BigNumber;
   toSI(): Unit;

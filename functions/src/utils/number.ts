@@ -175,6 +175,16 @@ export const expm1 =
   };
 
 /**
+ * Check if x^y is 0 due to infinity
+ * @param x The base
+ * @param y The exponent
+ * @returns true if x^y is 0 due to infinity
+ */
+export function isPowZeroAtInfinity(x: number, y: number): boolean {
+  return (x * x < 1 && y === Infinity) || (x * x > 1 && y === -Infinity);
+}
+
+/**
  * Formats a number in a given base
  * @param n    The number to format
  * @param base The base (2, 8, or 16)

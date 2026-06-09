@@ -156,12 +156,9 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
           validate(this._data, this._size);
           this._datatype = datatype || constructorData.datatype;
         } else if (isArray(data)) {
-          // replace nested Matrices with Arrays
-          this._data = preprocess(data as MatrixData);
-          // get the dimensions of the array
-          this._size = arraySize(this._data);
-          // verify the dimensions of the array, TODO: compute size while processing array
-          validate(this._data, this._size);
+          // replace nested Matrices with Arrays, calculate and validate size
+          this._size = [];
+          this._data = preprocess(data as MatrixData, this._size, 0, true);
           // data type unknown
           this._datatype = datatype;
         } else if (data) {
@@ -1178,21 +1175,42 @@ export const createDenseMatrixClass = /* #__PURE__ */ factory(
 
     /**
      * Preprocess data, which can be an Array or DenseMatrix with nested Arrays and
-     * Matrices. Clones all (nested) Arrays, and replaces all nested Matrices with Arrays
+     * Matrices. Clones all (nested) Arrays, and replaces all nested Matrices with Arrays,
+     * while also calculating and validating the array size.
      * @memberof DenseMatrix
      * @param {Array | Matrix} data
+     * @param {number[]} size
+     * @param {number} dim
+     * @param {boolean} isFirst
      * @return {Array} data
      */
-    function preprocess(data: MatrixData | Matrix): MatrixData {
+    function preprocess(data: MatrixData | Matrix, size: number[], dim: number, isFirst: boolean): MatrixData {
       if (isMatrix(data)) {
-        return preprocess(data.valueOf());
+        return preprocess(data.valueOf(), size, dim, isFirst);
       }
 
       if (isArray(data)) {
-        return (data as any[]).map(preprocess);
+        const arrayData = data as any[];
+        if (isFirst) {
+          size.push(arrayData.length);
+        } else if (dim >= size.length) {
+          throw new DimensionError(size.length + 1, size.length, '>');
+        } else if (arrayData.length !== size[dim]) {
+          throw new DimensionError(arrayData.length, size[dim]);
+        }
+
+        const mapData = new Array(arrayData.length);
+        for (let i = 0; i < arrayData.length; i++) {
+          mapData[i] = preprocess(arrayData[i], size, dim + 1, isFirst && i === 0);
+        }
+        return mapData;
       }
 
-      return data;
+      if (dim < size.length) {
+        throw new DimensionError(size.length - 1, size.length, '<');
+      }
+
+      return data as MatrixData;
     }
 
     return DenseMatrix;

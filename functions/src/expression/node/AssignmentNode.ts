@@ -9,7 +9,6 @@ import type { MathNode, Scope, CompileFunction, StringOptions } from './Node.js'
 const name = 'AssignmentNode';
 const dependencies = [
   'subset',
-  '?matrix', // FIXME: should not be needed at all, should be handled by subset
   'Node',
 ];
 
@@ -50,25 +49,19 @@ interface MathNamespace {
 type SubsetFunction = (value: unknown, index: unknown, replacement?: unknown) => unknown;
 
 /**
- * Matrix function type for creating matrices
- */
-type MatrixFunction = (data: unknown) => unknown;
-
-/**
  * Dependencies for AssignmentNode
  */
 interface AssignmentNodeDependencies {
   subset: SubsetFunction;
-  matrix?: MatrixFunction;
   Node: new () => MathNode;
 }
 
 export const createAssignmentNode = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ subset, matrix, Node }: AssignmentNodeDependencies) => {
+  ({ subset, Node }: AssignmentNodeDependencies) => {
     const access = accessFactory({ subset });
-    const assign = assignFactory({ subset, matrix });
+    const assign = assignFactory({ subset });
 
     /*
      * Is parenthesis needed?
