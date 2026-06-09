@@ -8,6 +8,8 @@
  */
 
 import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
+import * as arithmetic from './dense/arithmetic.js';
+import * as reduction from './dense/reduction.js';
 
 /**
  * Dense matrix implementation using Float64Array
@@ -329,13 +331,7 @@ export class DenseMatrix extends Matrix<number> {
    */
   add(other: Matrix<number>): DenseMatrix {
     this.checkDimensionsMatch(other);
-    const result = new Float64Array(this.rows * this.cols);
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        result[i * this.cols + j] = this.get(i, j) + other.get(i, j);
-      }
-    }
-    return new DenseMatrix(this.rows, this.cols, result);
+    return new DenseMatrix(this.rows, this.cols, arithmetic.add(this, other));
   }
 
   /**
@@ -343,13 +339,7 @@ export class DenseMatrix extends Matrix<number> {
    */
   subtract(other: Matrix<number>): DenseMatrix {
     this.checkDimensionsMatch(other);
-    const result = new Float64Array(this.rows * this.cols);
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        result[i * this.cols + j] = this.get(i, j) - other.get(i, j);
-      }
-    }
-    return new DenseMatrix(this.rows, this.cols, result);
+    return new DenseMatrix(this.rows, this.cols, arithmetic.subtract(this, other));
   }
 
   /**
@@ -357,13 +347,7 @@ export class DenseMatrix extends Matrix<number> {
    */
   multiplyElementwise(other: Matrix<number>): DenseMatrix {
     this.checkDimensionsMatch(other);
-    const result = new Float64Array(this.rows * this.cols);
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        result[i * this.cols + j] = this.get(i, j) * other.get(i, j);
-      }
-    }
-    return new DenseMatrix(this.rows, this.cols, result);
+    return new DenseMatrix(this.rows, this.cols, arithmetic.multiplyElementwise(this, other));
   }
 
   /**
@@ -371,45 +355,21 @@ export class DenseMatrix extends Matrix<number> {
    */
   multiply(other: Matrix<number>): DenseMatrix {
     this.checkMultiplyDimensions(other);
-    const result = new Float64Array(this.rows * other.cols);
-
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < other.cols; j++) {
-        let sum = 0;
-        for (let k = 0; k < this.cols; k++) {
-          sum += this.get(i, k) * other.get(k, j);
-        }
-        result[i * other.cols + j] = sum;
-      }
-    }
-
-    return new DenseMatrix(this.rows, other.cols, result);
+    return new DenseMatrix(this.rows, other.cols, arithmetic.multiply(this, other));
   }
 
   /**
    * Scalar multiplication
    */
   scale(scalar: number): DenseMatrix {
-    const result = new Float64Array(this.rows * this.cols);
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        result[i * this.cols + j] = this.get(i, j) * scalar;
-      }
-    }
-    return new DenseMatrix(this.rows, this.cols, result);
+    return new DenseMatrix(this.rows, this.cols, arithmetic.scale(this, scalar));
   }
 
   /**
    * Matrix transpose
    */
   transpose(): DenseMatrix {
-    const result = new Float64Array(this.cols * this.rows);
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        result[j * this.rows + i] = this.get(i, j);
-      }
-    }
-    return new DenseMatrix(this.cols, this.rows, result);
+    return new DenseMatrix(this.cols, this.rows, arithmetic.transpose(this));
   }
 
   /**
@@ -427,76 +387,42 @@ export class DenseMatrix extends Matrix<number> {
    * Sum of all elements
    */
   sum(): number {
-    let total = 0;
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        total += this.get(i, j);
-      }
-    }
-    return total;
+    return reduction.sum(this);
   }
 
   /**
    * Mean of all elements
    */
   mean(): number {
-    return this.sum() / this.length;
+    return reduction.mean(this);
   }
 
   /**
    * Minimum element
    */
   min(): number {
-    let minVal = Infinity;
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        const val = this.get(i, j);
-        if (val < minVal) minVal = val;
-      }
-    }
-    return minVal;
+    return reduction.min(this);
   }
 
   /**
    * Maximum element
    */
   max(): number {
-    let maxVal = -Infinity;
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        const val = this.get(i, j);
-        if (val > maxVal) maxVal = val;
-      }
-    }
-    return maxVal;
+    return reduction.max(this);
   }
 
   /**
    * Frobenius norm (sqrt of sum of squared elements)
    */
   norm(): number {
-    let sum = 0;
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < this.cols; j++) {
-        const val = this.get(i, j);
-        sum += val * val;
-      }
-    }
-    return Math.sqrt(sum);
+    return reduction.norm(this);
   }
 
   /**
    * Trace (sum of diagonal elements)
    */
   trace(): number {
-    if (!this.isSquare) {
-      throw new Error('Trace is only defined for square matrices');
-    }
-    let sum = 0;
-    for (let i = 0; i < this.rows; i++) {
-      sum += this.get(i, i);
-    }
-    return sum;
+    return reduction.trace(this);
   }
 
   // =========================================================================
