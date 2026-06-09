@@ -185,15 +185,7 @@ export const createCbrt = /* #__PURE__ */ factory(
           x.value = unaryMinus(x.value);
         }
 
-        // TODO: create a helper function for this
-        let third: unknown;
-        if (isBigNumber(x.value)) {
-          third = new BigNumber(1).div(3);
-        } else if (isFraction(x.value)) {
-          third = new Fraction(1, 3);
-        } else {
-          third = 1 / 3;
-        }
+        const third = _getThird(x.value);
 
         const result = x.pow(third);
 
@@ -202,6 +194,22 @@ export const createCbrt = /* #__PURE__ */ factory(
         }
 
         return result;
+      }
+    }
+
+    /**
+     * Get the 1/3 exponent based on the value type
+     * @param {unknown} value
+     * @returns {unknown} Returns the 1/3 exponent
+     * @private
+     */
+    function _getThird(value: unknown): unknown {
+      if (isBigNumber(value)) {
+        return new BigNumber(1).div(3);
+      } else if (isFraction(value)) {
+        return new Fraction(1, 3);
+      } else {
+        return 1 / 3;
       }
     }
   }

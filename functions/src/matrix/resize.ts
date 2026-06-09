@@ -1,12 +1,12 @@
 import { isBigNumber, isMatrix } from '../utils/is.js';
 import { DimensionError } from '../error/DimensionError.js';
-import { ArgumentsError } from '../error/ArgumentsError.js';
 import { isInteger } from '../utils/number.js';
 import { format } from '../utils/string.js';
 import { clone } from '../utils/object.js';
 import { resize as arrayResize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import type { MathJsConfig } from '../core/config.js';
+import type { TypedFunction } from '../core/function/typed.js';
 
 interface MatrixType {
   valueOf(): any[];
@@ -18,17 +18,18 @@ interface MatrixConstructor {
 }
 
 interface ResizeDependencies {
+  typed: TypedFunction;
   config: MathJsConfig;
   matrix: MatrixConstructor;
 }
 
 const name = 'resize';
-const dependencies = ['config', 'matrix'];
+const dependencies = ['typed', 'config', 'matrix'];
 
 export const createResize = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ config, matrix }: ResizeDependencies) => {
+  ({ typed, config, matrix }: ResizeDependencies) => {
     /**
      * Resize a matrix
      *
@@ -55,11 +56,17 @@ export const createResize = /* #__PURE__ */ factory(
      *                                           defaultValue = ' '
      * @return {* | Array | Matrix} A resized clone of matrix `x`
      */
-    // TODO: rework resize to a typed-function
-    return function resize(x: any, size: any, defaultValue?: any): any {
-      if (arguments.length !== 2 && arguments.length !== 3) {
-        throw new ArgumentsError('resize', arguments.length, 2, 3);
+    return typed(name, {
+      'any, Array | Matrix': function (x: any, size: any): any {
+        return _resize(x, size);
+      },
+
+      'any, Array | Matrix, any': function (x: any, size: any, defaultValue: any): any {
+        return _resize(x, size, defaultValue);
       }
+    });
+
+    function _resize(x: any, size: any, defaultValue?: any): any {
 
       if (isMatrix(size)) {
         size = size.valueOf(); // get Array

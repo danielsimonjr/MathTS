@@ -1,4 +1,14 @@
-import { cbrt, expm1, isInteger, log10, log1p, log2, sign, toFixed } from '../../utils/number.js';
+import {
+  cbrt,
+  expm1,
+  isInteger,
+  log10,
+  log1p,
+  log2,
+  sign,
+  toFixed,
+  isPowZeroAtInfinity,
+} from '../../utils/number.js';
 
 const n1 = 'number';
 const n2 = 'number, number';
@@ -295,7 +305,7 @@ xgcdNumber.signature = n2;
 export function powNumber(x: number, y: number): number {
   // x^Infinity === 0 if -1 < x < 1
   // A real number 0 is returned instead of complex(0)
-  if ((x * x < 1 && y === Infinity) || (x * x > 1 && y === -Infinity)) {
+  if (isPowZeroAtInfinity(x, y)) {
     return 0;
   }
 
