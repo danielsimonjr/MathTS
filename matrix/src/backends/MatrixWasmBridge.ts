@@ -14,7 +14,17 @@
  */
 
 import { wasmLoader, type WasmModule } from './WasmLoader.js';
-import { parallelMatmul, computePool } from '@danielsimonjr/mathts-parallel';
+
+// The parallel package eagerly constructs a `computePool` worker-pool singleton
+// at import time. We import it lazily (dynamic import inside the parallel branch
+// and cleanup) so the worker module graph stays out of the common JS/WASM code
+// paths — and out of test workers that never opt into parallel.
+type ParallelModule = typeof import('@danielsimonjr/mathts-parallel');
+let parallelModulePromise: Promise<ParallelModule> | null = null;
+function loadParallel(): Promise<ParallelModule> {
+  parallelModulePromise ??= import('@danielsimonjr/mathts-parallel');
+  return parallelModulePromise;
+}
 
 export interface MatrixOptions {
   useWasm?: boolean;
@@ -111,6 +121,7 @@ export class MatrixWasmBridge {
       // Very large matrices: use parallel processing
       const aArr = aData instanceof Float64Array ? aData : new Float64Array(aData);
       const bArr = bData instanceof Float64Array ? bData : new Float64Array(bData);
+      const { parallelMatmul } = await loadParallel();
       const result = await parallelMatmul(aArr, aRows, aCols, bArr, bCols);
       return result.result;
     } else if (opts.useWasm && this.wasmModule && totalElements >= wasmThreshold) {
@@ -869,7 +880,12 @@ export class MatrixWasmBridge {
    * Cleanup resources
    */
   public static async cleanup(): Promise<void> {
-    await computePool.terminate();
+    // Only tear down the pool if it was actually loaded; importing it here just
+    // to terminate would needlessly spin up the worker singleton.
+    if (parallelModulePromise) {
+      const { computePool } = await parallelModulePromise;
+      await computePool.terminate();
+    }
     if (this.wasmModule) {
       wasmLoader.collect();
     }
