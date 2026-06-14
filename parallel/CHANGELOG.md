@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.2.1
+
+### Patch Changes
+
+- Pin `@danielsimonjr/mathts-workerpool` to an exact version instead of `*`, so a matched package set always installs together.
+
+
 ## 0.2.0
 
 ### Minor Changes
