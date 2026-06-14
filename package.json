@@ -19,6 +19,7 @@
     "units",
     "numbers",
     "ast",
+    "evaluator",
     "parallel",
     "workbook",
     "assembly",
