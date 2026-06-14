@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.3
+
+### Patch Changes
+
+- Re-pin `@danielsimonjr/mathts-expression` to `0.2.2` (which now exports `createParser`) so the matched MathTS package set resolves a single `expression` version.
+
 ## 0.2.2
 
 ### Patch Changes

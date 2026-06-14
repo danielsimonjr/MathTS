@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-compat
 
+## 0.1.4
+
+### Patch Changes
+
+- Re-pin `@danielsimonjr/mathts-functions` to `0.2.3` to keep the matched MathTS package set on a single `expression`/`functions` version.
+
 ## 0.1.3
 
 ### Patch Changes
