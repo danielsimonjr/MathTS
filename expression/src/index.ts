@@ -11,6 +11,7 @@ export * from './keywords.js';
 export * from './operators.js';
 export * from './parse.js';
 export * from './Parser.js';
+export { createParser } from './function/parser.js';
 export * from './Help.js';
 export * from './compiler/index.js';
 export * from './evaluator/index.js';

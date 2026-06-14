@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-expression
 
+## 0.2.2
+
+### Patch Changes
+
+- Export `createParser` (the `math.parser()` instance factory) from the package entry. It was already implemented in `src/function/parser.js` but absent from the public index; this makes the stateful, scope-aware Parser instance factory available to consumers (and to the new `@danielsimonjr/mathts-parser` package).
+
 ## 0.2.1
 
 ### Patch Changes

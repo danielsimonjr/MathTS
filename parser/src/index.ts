@@ -25,6 +25,7 @@ export {
   // Parser entry points
   createParse,
   createParserClass,
+  createParser,
 
   // AST node constructors produced by the parser
   createNode,

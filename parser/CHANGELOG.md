@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-parser
 
+## 0.1.1
+
+### Patch Changes
+
+- Also re-export `createParser` (the `math.parser()` instance factory), now that `@danielsimonjr/mathts-expression@0.2.2` exposes it from its public entry. Re-pinned the expression dependency to `0.2.2`.
+
 ## 0.1.0
 
 ### Minor Changes

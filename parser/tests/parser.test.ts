@@ -23,6 +23,12 @@ describe('@danielsimonjr/mathts-parser re-export surface', () => {
     expect((parser.createParserClass as any).fn).toBe('Parser');
   });
 
+  it('exposes the parser() instance factory', () => {
+    expect(typeof parser.createParser).toBe('function');
+    expect((parser.createParser as any).isFactory).toBe(true);
+    expect((parser.createParser as any).fn).toBe('parser');
+  });
+
   it('exposes the AST node constructors the parser produces', () => {
     const nodeFactories = [
       parser.createNode,

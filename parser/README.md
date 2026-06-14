@@ -18,6 +18,7 @@ npm install @danielsimonjr/mathts-parser
 
 - `createParse` — factory for the `parse` function (string → AST).
 - `createParserClass` — factory for the `Parser` class (stateful, scope-aware).
+- `createParser` — factory for the `parser()` instance (a `Parser` with its own scope).
 - AST node constructors produced by parsing: `createNode`, `createConstantNode`,
   `createOperatorNode`, `createSymbolNode`, `createFunctionNode`, … and the rest.
 - Operator/keyword metadata: `keywords`, `properties`, `getPrecedence`,
