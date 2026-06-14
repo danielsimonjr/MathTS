@@ -15,6 +15,7 @@
     "autograd",
     "functions",
     "expression",
+    "parser",
     "parallel",
     "workbook",
     "assembly",
