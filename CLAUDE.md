@@ -209,6 +209,8 @@ The script:
 ## Known Issues
 
 - `assembly/` WASM build emits AS235 warnings for exported classes (cosmetic — WASM can only export functions, not classes)
+- **Residual dev-only `esbuild` advisory (GHSA-gv7w-rqvm-qjhr).** Patched esbuild is `0.28.1`, but the latest `tsup` (8.5.1) pins `esbuild@^0.27.0`, so the root `overrides` (`esbuild: ^0.28.1`) patches `vite`/everything else but cannot force `tsup`'s nested copy without risking the bundler. `npm audit fix --force` "fixes" this by *downgrading* tsup to 6.5.0 (still vulnerable) — do **not** run it. esbuild ships in no published package and the exploit needs a malicious `NPM_CONFIG_REGISTRY` at install time, so this is accepted until tsup supports esbuild 0.28. Re-evaluate when `tsup@>=8.6` (esbuild `^0.28`) ships.
+- **WASM JS-fallback on Node 26.** With no Rust toolchain present, `build:wasm:rust` is skipped and loaders log `ENOENT … lib/wasm/*.wasm`, then fall back to the pure-JS backend (tests stay green). AssemblyScript `asc` build and all 12 turbo build tasks succeed on Node 26.3.0.
 
 ## Tools
 

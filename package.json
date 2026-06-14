@@ -60,7 +60,7 @@
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "prettier": "^3.0.0",
-    "turbo": "^2.0.0",
+    "turbo": "^2.9.18",
     "typescript": "^5.3.0",
     "typescript-eslint": "^8.0.0",
     "vitest": "^4.1.5"
@@ -99,6 +99,6 @@
     "workerpool": "github:danielsimonjr/workerpool"
   },
   "overrides": {
-    "esbuild": "^0.25.0"
+    "esbuild": "^0.28.1"
   }
 }
