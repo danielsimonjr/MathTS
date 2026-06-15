@@ -86,7 +86,7 @@ core, matrix, functions, parallel ← compat
 
 All packages use `tsup src/index.ts --format esm --dts --clean` except:
 
-- **functions**: no `--dts` flag (build is `tsup src/index.ts --format esm --clean`)
+- **functions**: JS bundle via tsup (no `--dts` — rollup-dts can't bundle the graph), then declarations via `tsc -p tsconfig.dts.json` (a `.d.ts` tree). Build is `tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json`. It DOES ship types (as of 0.2.4).
 - **workbook**: builds two entry points (`src/index.ts` and `src/cli.ts`)
 - **assembly**: AssemblyScript build (`asc src/index.ts`) + TypeScript bindings (`tsc -p tsconfig.bindings.json`)
 
@@ -204,7 +204,7 @@ The script:
 
 **Last sync**: mathjs commit `55dea0d71` (2026-04-02; commit message marks `[15.3.4]` but the tag was never pushed — `package.json` version was `15.2.0`). Upstream then performed a TS-split at `e62bcd749` (2026-04-10) removing all `.ts` files from mathjs. Post-split, the sync script's `.ts → .ts` model cannot pull mathjs's new work; further upstream additions require JS→TS porting (see `tools/mathjs-port/`).
 
-**Important**: Synced files are dormant — they are NOT exported from `functions/src/index.ts`. Only `functions/src/typed/` contains active implementations. The synced code has ~700 upstream type errors (missing casts, AssemblyScript types) that exist in mathjs itself — `functions/tsconfig.json` uses `strict: false` to allow compilation.
+**Important**: Synced files are dormant — they are NOT exported from `functions/src/index.ts`. Only `functions/src/typed/` (plus the activated `factories/`) is in the build graph. The dormant synced code carries upstream type errors (missing casts, AssemblyScript types) that exist in mathjs itself, so `functions/tsconfig.json` uses `strict: false`. The **active graph** (everything reachable from `src/index.ts`), however, is type-clean: `tsc --noEmit` reports 0 errors, and `tsc -p tsconfig.dts.json` emits the published `.d.ts` tree. (The old "no types, ~700 errors blocks --dts" note was stale — the real blocker was one TS4023 on `evaluate`, fixed via `ReturnType<typeof createEvaluate>`.)
 
 ## Known Issues
 
