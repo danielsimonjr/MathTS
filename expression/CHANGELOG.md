@@ -1,5 +1,27 @@
 # @danielsimonjr/mathts-expression
 
+## Unreleased
+
+### Tests
+
+- Raise vitest line coverage of the active expression modules to ≥90% (overall
+  subtotal ~96%). Added test suites for the parser grammar, AST node
+  construction / `_compile` / `toString` / `toTex` / `toHTML` rendering
+  (Operator, Function, Accessor, Index, Assignment, Conditional, Constant nodes
+  and the base `Node`), the tree-walking compiler, the standalone evaluator's
+  AST validator, the `function/` typed-function factories (`compile`,
+  `evaluate`, `parser`, `help`), the `Help` class, and the `utils/` helpers
+  (array, collection, number, bignumber formatter, string, object, factory).
+  Added a shared `tests/helpers/bootstrap.ts` that wires node constructors and
+  `parse`/`evaluate` from source so coverage attributes to `expression/src`.
+  Added the active expression modules to the root `vitest.config.ts` coverage
+  allowlist. Two files remain below 90% for documented reasons: `utils/number.ts`
+  (dead `Math.*` polyfill fallback bodies that never execute on modern
+  runtimes) and `utils/bignumber/formatter.ts` (binary/octal/hex BigNumber
+  formatting that the current core `BigNumber` does not support). No production
+  code changed; the security sandbox invariants are preserved and additionally
+  asserted.
+
 ## 0.2.2
 
 ### Patch Changes
