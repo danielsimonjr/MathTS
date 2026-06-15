@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-parallel
 
+## Unreleased
+
+### Tests
+
+- Raised line coverage of the active parallel modules to ≥90% (parallel subtotal
+  ~67% → ~99%). Added worker-dispatched (parallel-path) tests for `ComputePool`
+  (`pow`/`sign`/`tensordot` via `applyKernel`, the `integrateFanOut` /
+  `distributionSampleFanOut` fan-outs, `fftBatch`, `distanceMatrix`,
+  `applyKernel`/`applyKernel2`, `prod`, `exec`, the `workerCount` getter, and the
+  remaining bitwise length-mismatch guards) and for `ParallelMatrix`
+  (`multiply`/`add`/`subtract`/`elementMultiply`/`scale`/`dotProduct`/`sum`/
+  `transpose` parallel and sequential paths, SharedArrayBuffer toggle, `getStats`,
+  and live-pool reconfiguration). Filled the `ThresholdDispatcher.calculateChunks`
+  per-category branches, the unbalanced `chunkArray` path, and `parallelTan`.
+  All new tests assert parallel results against a sequential oracle.
+- De-flaked the `WorkerPool.execute()` timeout test: removed the brittle
+  `elapsed >= 40ms` wall-clock lower bound (a scheduling/`Date.now()`-resolution
+  race) and kept the correctness contract (rejects with a timeout error + the
+  hung worker is terminated), relying on the test timeout as the hang guard.
+
 ## 0.2.1
 
 ### Patch Changes

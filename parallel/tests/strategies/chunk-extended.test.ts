@@ -82,6 +82,20 @@ describe('chunkArray', () => {
     const total = result.chunks.reduce((s, c) => s + c.length, 0);
     expect(total).toBe(10000);
   });
+
+  it('should chunk large array unbalanced (fixed chunk size)', () => {
+    const data = Array.from({ length: 10000 }, (_, i) => i);
+    const result = chunkArray(data, { minChunkSize: 2500, maxChunks: 4, balanced: false });
+    expect(result.numChunks).toBeGreaterThan(1);
+    const total = result.chunks.reduce((s, c) => s + c.length, 0);
+    expect(total).toBe(10000);
+    // Unbalanced chunks preserve contiguous order and full coverage.
+    expect(result.chunks.flat()).toEqual(data);
+    // chunkInfo metadata is contiguous.
+    for (let i = 0; i < result.chunkInfo.length; i++) {
+      expect(result.chunkInfo[i].chunkIndex).toBe(i);
+    }
+  });
 });
 
 describe('mergeFloat64Chunks', () => {
@@ -103,6 +117,11 @@ describe('mergeFloat64Chunks', () => {
 describe('mergeArrayChunks', () => {
   it('should return empty for no chunks', () => {
     expect(mergeArrayChunks([])).toEqual([]);
+  });
+
+  it('should return a single chunk as-is', () => {
+    const c = [1, 2, 3];
+    expect(mergeArrayChunks([c])).toBe(c);
   });
 
   it('should merge multiple chunks', () => {
