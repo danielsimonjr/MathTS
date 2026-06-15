@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-workbook
 
+## 0.1.6
+
+### Patch Changes
+
+- Re-pin `@danielsimonjr/mathts-functions` to `0.2.5` (special-function fixes) for the matched set.
+
 ## Unreleased
 
 ### Tests

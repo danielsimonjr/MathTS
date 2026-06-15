@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.5
+
+### Patch Changes
+
+- Fix `besselY1`, `cosIntegral` (Ci), and `airyAi`/`airyBi` returning wrong values (corrupted coefficients / divergent asymptotic series) in `src/typed/special.ts`, with regression tests. Raised `typed/` line coverage to 92%.
+
 ## Unreleased
 
 ### Tests
