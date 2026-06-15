@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-compat
 
+## 0.1.7
+
+### Patch Changes
+
+- Matched-set repin to `@danielsimonjr/mathts-core@0.1.4` (adds BigNumber `toBinary`/`toOctal`/`toHexadecimal`) and updated internal pins.
+
 ## 0.1.6
 
 ### Patch Changes

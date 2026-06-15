@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-evaluator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Standalone compiler + evaluator for MathTS expressions, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,8 +31,8 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-core": "0.1.3",
-    "@danielsimonjr/mathts-expression": "0.2.2",
+    "@danielsimonjr/mathts-core": "0.1.4",
+    "@danielsimonjr/mathts-expression": "0.2.3",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {
