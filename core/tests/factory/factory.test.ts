@@ -203,5 +203,20 @@ describe('Factory Pattern', () => {
       // Restore
       math.configure({ precision: oldConfig.precision });
     });
+
+    it('should register and retrieve a factory via math.register/math.get', () => {
+      const negFactory: FactoryFunction = createFactory('mathConvNeg', ['typed'], ({ typed }) =>
+        typed('mathConvNeg', { number: (a: number) => -a })
+      );
+      math.register(negFactory);
+      // math.register delegates to the shared global registry.
+      expect(registry.has('mathConvNeg')).toBe(true);
+      const fn = math.get('mathConvNeg') as (a: number) => number;
+      expect(fn(5)).toBe(-5);
+    });
+
+    it('should throw from math.get for an unknown name', () => {
+      expect(() => math.get('definitelyNotRegistered')).toThrow(/Unknown function/);
+    });
   });
 });

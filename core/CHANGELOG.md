@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## [Unreleased]
+
+### Tests
+
+- Raise vitest line coverage of the active core modules from ~80% to ~99% (every active file now ≥98%). Added 4 supplementary test files — `tests/types/complex-coverage.test.ts`, `tests/types/fraction-coverage.test.ts`, `tests/types/bignumber-coverage.test.ts`, `tests/typed/mathts-typed-coverage.test.ts` — plus `math.register`/`math.get` cases in `tests/factory/factory.test.ts`. These exercise previously-untested branches: `Complex` scalar-argument arithmetic, `format()` precision/notation paths, reciprocal/inverse trig & hyperbolic functions; `Fraction` scalar arithmetic, parse dispatch, continued-fraction round-trips, and integer floor/ceil short-circuits; `BigNumber` special-value (NaN/±Infinity/zero) branches across conversions, arithmetic, comparison, rounding modes, trig/hyperbolic/transcendental helpers, the `.e` getter, and the Decimal.js-compat aliases; and `mathts-typed` WASM init helpers, every `MATHTS_CONVERSIONS` convert callback, the duck-typed `isUnit`/`isMatrix`/`isDenseMatrix`/`isSparseMatrix` guards, and the full `TypeRegistry` lifecycle. No source changes — behavior-asserting tests only.
+
 ## 0.1.3
 
 ### Patch Changes
