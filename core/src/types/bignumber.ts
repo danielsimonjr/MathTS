@@ -470,6 +470,61 @@ export class BigNumber implements MathTSValue {
     return 0n;
   }
 
+  /**
+   * Binary string representation, e.g. `255 -> '0b11111111'`, `0.5 -> '0b0.1'`.
+   * Mirrors Decimal.js `toBinary()`. Negatives carry a leading `-`.
+   */
+  toBinary(): string {
+    return this.toRadixString(2, '0b');
+  }
+
+  /**
+   * Octal string representation, e.g. `8 -> '0o10'`.
+   * Mirrors Decimal.js `toOctal()`.
+   */
+  toOctal(): string {
+    return this.toRadixString(8, '0o');
+  }
+
+  /**
+   * Hexadecimal string representation, e.g. `255 -> '0xff'`, `10.5 -> '0xa.8'`.
+   * Mirrors Decimal.js `toHexadecimal()`.
+   */
+  toHexadecimal(): string {
+    return this.toRadixString(16, '0x');
+  }
+
+  /**
+   * Shared radix formatter for {@link toBinary}/{@link toOctal}/{@link toHexadecimal}.
+   * Integers and terminating fractions are exact; a non-terminating fraction is
+   * truncated at `maxFractionDigits` radix digits (a safety bound — the common
+   * use is integer formatting).
+   */
+  private toRadixString(radix: number, prefix: string, maxFractionDigits = 1100): string {
+    if (this._isNaN) return 'NaN';
+    if (this._isInfinite) return (this._sign < 0 ? '-' : '') + 'Infinity';
+    if (this._sign === 0) return prefix + '0';
+
+    const negative = this._sign < 0;
+    const absVal = this.abs();
+    const intPart = absVal.toBigInt(); // floor of |value|
+    let out = prefix + intPart.toString(radix);
+
+    let frac = absVal.subtract(BigNumber.fromBigInt(intPart));
+    if (!frac.isZero()) {
+      const radixBN = BigNumber.fromNumber(radix);
+      let digits = '';
+      for (let i = 0; i < maxFractionDigits && !frac.isZero(); i++) {
+        frac = frac.multiply(radixBN);
+        const digit = frac.toBigInt(); // 0 .. radix-1
+        digits += Number(digit).toString(radix);
+        frac = frac.subtract(BigNumber.fromBigInt(digit));
+      }
+      out += '.' + digits;
+    }
+    return (negative ? '-' : '') + out;
+  }
+
   // ============================================================
   // Arithmetic Operations
   // ============================================================

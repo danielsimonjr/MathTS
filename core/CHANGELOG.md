@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.1.4
+
+### Minor Changes
+
+- Add `BigNumber.toBinary()`, `toOctal()`, and `toHexadecimal()` (Decimal.js-compatible: `0b`/`0o`/`0x` prefixes, leading `-` for negatives, exact for integers and terminating fractions). These complete the radix-formatting surface the expression formatter's hex/bin/oct BigNumber path depends on.
+
 ## [Unreleased]
 
 ### Tests
