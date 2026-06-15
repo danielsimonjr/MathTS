@@ -16,7 +16,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { DenseMatrix } from '../../src/types/DenseMatrix.js';
-import { matrixSqrtm } from '../../src/operations/sqrtm.js';
+import { matrixSqrtm, matrixSqrtNewtonInternal } from '../../src/operations/sqrtm.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -260,5 +260,47 @@ describe('matrixSqrtm', () => {
     expect(Math.abs(Rarr[1][1] - Math.sqrt(3))).toBeLessThan(1e-8);
     // U_01 = T_01 / (U_00 + U_11) = 1 / (2*sqrt(3))
     expect(Math.abs(Rarr[0][1] - 1 / (2 * Math.sqrt(3)))).toBeLessThan(1e-8);
+  });
+
+  // ---------------------------------------------------------------------------
+  // General eig-fallback path (sqrtmGeneral): reached when the Schur path
+  // returns null (negative 1×1 diagonal block on a NON-symmetric matrix).
+  // ---------------------------------------------------------------------------
+
+  it('16. Non-symmetric matrix with a negative eigenvalue → eig fallback throws', () => {
+    // Upper-triangular, eigenvalues -2 and -3, not symmetric. sqrtmSchur returns
+    // null (negative 1×1 block) → sqrtmGeneral runs its eigenvalue validation.
+    const A = DenseMatrix.fromArray([
+      [-2, 1],
+      [0, -3],
+    ]);
+    expect(() => matrixSqrtm(A)).toThrow(/negative eigenvalue|not real|not supported/i);
+  });
+
+  it('17. matrixSqrtNewtonInternal converges for a matrix near the identity', () => {
+    // Exercises the exported Newton iteration directly (used by logm).
+    const A = [
+      [1.2, 0.1],
+      [0.0, 1.3],
+    ];
+    const Y = matrixSqrtNewtonInternal(A);
+    // Y·Y ≈ A
+    const n = 2;
+    for (let i = 0; i < n; i++)
+      for (let j = 0; j < n; j++) {
+        let s = 0;
+        for (let k = 0; k < n; k++) s += Y[i][k] * Y[k][j];
+        expect(s).toBeCloseTo(A[i][j], 8);
+      }
+  });
+
+  it('18. matrixSqrtNewtonInternal returns identity-root for the identity', () => {
+    const Y = matrixSqrtNewtonInternal([
+      [1, 0],
+      [0, 1],
+    ]);
+    expect(Y[0][0]).toBeCloseTo(1, 10);
+    expect(Y[1][1]).toBeCloseTo(1, 10);
+    expect(Y[0][1]).toBeCloseTo(0, 10);
   });
 });

@@ -1,5 +1,41 @@
 # @danielsimonjr/mathts-matrix
 
+## Unreleased
+
+### Tests
+
+- Raised vitest line coverage of the active matrix modules from ~70% to **94%
+  subtotal** (every active file ≥ its reachable ceiling). New / expanded suites:
+  - `operations/qr.test.ts` — full coverage of the Gram-Schmidt QR (0% → 100%):
+    reduced/full modes, tall/wide/1×1, rank-deficient and all-zero fallbacks,
+    `A = Q·R` reconstruction + `Qᵀ·Q = I` + upper-triangularity.
+  - `backends/Backend.test.ts` (registry select/init/hints) and
+    `backends/BackendManager.test.ts` (operation routing, error-fallback,
+    adaptive-threshold tuning, config sync) — both ~15–56% → ≥96%.
+  - `backends/WASMBackend-as.test.ts` — loads the real AssemblyScript artifact by
+    explicit path so the managed-runtime allocation cache + every matrix/array
+    kernel + the LU/QR/inverse/determinant/Cholesky decomposition kernels run
+    against live WASM (52% → 96%), cross-checked vs JSBackend + math identities.
+  - `backends/WasmLoader-as.test.ts`, `WasmLoader-browser.test.ts` — AS managed
+    allocation, a hand-assembled no-runtime module to drive the Rust bump
+    allocator, and the browser load/precompile arms via stubbed `fetch` /
+    `instantiateStreaming` (38% → 89%).
+  - `operations/svd-wasm-mock.test.ts`, `operations/eig-wasm-mock.test.ts`,
+    `wasm/fft-wasm-mock.test.ts` — inject fake WASM loaders/modules to exercise
+    the WASM-dispatch branches (which otherwise need the unbuilt Rust artifact),
+    asserting correct marshalling and JS-fallback-on-failure behavior.
+  - `security/wasm-integrity.test.ts` — added the manifest-missing-entry and the
+    browser SHA-384 / `fetch`-manifest code paths (77% → 100%).
+  - Extended `operations/{sqrtm,schur,logm}.test.ts` with edge cases
+    (non-square/empty inputs, negative/complex-eigenvalue error paths, larger
+    double-shift Schur sweeps, the exported Newton square-root helper).
+  - No production code changed; the WASM SHA-384 integrity invariant is preserved.
+  - Documented dead/unreachable code surfaced by this pass (no behavior change):
+    `schur.ts#qrStepSingle` (the QR-step dispatch can only ever reach the
+    double-shift branch), `logm.ts#logmEig` + inverse-scaling loop (the Schur-Padé
+    path handles every real-eigenvalue case, and complex cases throw earlier in
+    validation), and the never-populated AS memory pool in `WasmLoader.ts`.
+
 ## 0.1.4
 
 ### Patch Changes
