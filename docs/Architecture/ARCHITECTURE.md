@@ -1,23 +1,24 @@
 # MathTS Architecture
 
-**Generated**: 2026-05-23
+**Generated**: 2026-06-15
 
 ## System Overview
 
-MathTS is an npm workspaces monorepo with **12 packages**, all ESM-only (ES2022).
-Turborepo orchestrates builds across the workspace. tsup bundles each package.
-A Cargo crate (`wasm-rust`) provides the primary WASM backend but is not an npm package.
+MathTS is an npm workspaces monorepo with **22 packages**, all ESM-only (ES2022).
+Turborepo orchestrates builds across the workspace. tsup bundles each package
+(`functions` emits its `.d.ts` tree via `tsc`). A Cargo crate (`wasm-rust`)
+provides the primary WASM backend but is not an npm package.
 
-- **491 reachable TypeScript files** (out of 1,394 total; 903 dormant synced from mathjs)
-- **124,615 lines of code** (reachable scope)
-- **2,898 total exports** (728 re-exports)
-- **164 test files** — 135 of 491 source files have direct coverage (27.5%)
-- **0 circular import dependencies**
-- **All 12 packages build, and all 11 TypeScript packages typecheck with 0
-  errors** under `tsc --noEmit`. (`functions` uses `strict: false` for its
-  synced mathjs code; the other 10 are strict. The 12th package, `assembly`,
-  is AssemblyScript and is checked by `asc`.) The 599 pre-existing type errors
-  formerly in `functions` have all been resolved.
+- **554 reachable TypeScript files** (out of ~1,457 total; ~903 dormant synced from mathjs)
+- **147,773 lines of code** (reachable scope)
+- **3,461 total exports** (1,057 re-exports)
+- **0 runtime circular dependencies** (2 type-only cycles remain, both in `matrix`)
+- **All 22 packages build, and all 21 TypeScript packages typecheck with 0
+  errors** under `tsc --noEmit`. (`functions` and the thin re-export packages use
+  `strict: false`; the core compute packages are strict. The 22nd package,
+  `assembly`, is AssemblyScript and is checked by `asc`.) `functions` now ships
+  TypeScript declarations (emitted via `tsc`); its formerly-noted ~700 type
+  errors were stale — the active graph is clean.
 
 ## Package Dependency Graph
 
@@ -28,8 +29,14 @@ workerpool --> parallel ------+           |
                     ^                     |
                     +---------------------+
                matrix --> tensor --> autograd
-               core --> workbook
+               functions --> workbook
                core, matrix, functions, parallel --> compat
+
+Focused re-export packages (leaf; each depends only on the package it re-exports):
+               core       --> numbers, units
+               expression --> parser, ast, evaluator
+               matrix     --> linalg
+               functions  --> arithmetic, trigonometry, statistics, signal
 ```
 
 ### Cross-Package Import Counts
@@ -41,11 +48,32 @@ workerpool --> parallel ------+           |
 | functions | @danielsimonjr/mathts-core (5), @danielsimonjr/mathts-parallel (4)                                                                                                          |
 | parallel  | @danielsimonjr/mathts-workerpool (1), @danielsimonjr/mathts-parallel (1)                                                                                                    |
 | compat    | @danielsimonjr/mathts-core (3), @danielsimonjr/mathts-compat (2), @danielsimonjr/mathts-matrix (2), @danielsimonjr/mathts-parallel (1), @danielsimonjr/mathts-functions (1) |
+| parser       | @danielsimonjr/mathts-expression (1)                                                                                                                                     |
+| ast          | @danielsimonjr/mathts-expression (1)                                                                                                                                     |
+| evaluator    | @danielsimonjr/mathts-expression (1)                                                                                                                                     |
+| units        | @danielsimonjr/mathts-core (1)                                                                                                                                          |
+| numbers      | @danielsimonjr/mathts-core (1)                                                                                                                                          |
+| linalg       | @danielsimonjr/mathts-matrix (1)                                                                                                                                        |
+| arithmetic   | @danielsimonjr/mathts-functions (1)                                                                                                                                    |
+| trigonometry | @danielsimonjr/mathts-functions (1)                                                                                                                                    |
+| statistics   | @danielsimonjr/mathts-functions (1)                                                                                                                                    |
+| signal       | @danielsimonjr/mathts-functions (1)                                                                                                                                    |
+
+The 10 packages above are thin re-export entry points (one re-export each). The
+table omits other workspace packages (`tensor`, `autograd`, `workbook`, …) that
+import only their single upstream — see the generated `DEPENDENCY_GRAPH.md` for the
+complete per-file breakdown.
 
 ### Circular Dependencies
 
-The dependency-graph report detects **0 import cycles**. Seven cycles flagged
-by the 2026-05-22 report were all eliminated:
+The dependency-graph report detects **0 runtime import cycles**. Two **type-only**
+cycles remain, both inside `matrix` (these are erased at compile time and don't
+affect runtime load order):
+
+- `matrix/src/types/DenseMatrix.ts` ↔ `matrix/src/types/dense/arithmetic.ts`
+- `matrix/src/types/DenseMatrix.ts` ↔ `matrix/src/types/dense/reduction.ts`
+
+Seven cycles flagged by the 2026-05-22 report were all eliminated:
 
 | Former cycle                                                                        | Fix                                                                                                                                                                 |
 | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -55,7 +83,8 @@ by the 2026-05-22 report were all eliminated:
 | `matrix/src/types/`: `DenseMatrix ↔ SparseMatrix`                                   | `DenseMatrix` dropped its `import type { SparseMatrix }`; `toSparse()` is typed as the `Matrix` base (the `SparseMatrix` subtype is still loaded lazily at runtime) |
 | `matrix/src/backends/`: `BackendManager ↔ config`                                   | the `OperationType` type moved from `BackendManager.ts` to `config.ts` (the lower-level module); `config.ts` no longer imports `BackendManager`                     |
 
-No package has any remaining runtime or type-only cycle.
+No package has any remaining **runtime** cycle; the only residual cycles are the
+two type-only ones in `matrix` noted above.
 
 ## Core Systems
 

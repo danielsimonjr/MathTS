@@ -53,6 +53,8 @@ npm run test:coverage
 
 ### Workspaces (in `package.json`)
 
+22 npm workspace packages (+ `wasm-rust/`, a Cargo workspace, not an npm package):
+
 ```
 packages/typed-function/   # @danielsimonjr/mathts-typed-function - forked type dispatch system
 packages/workerpool/       # @danielsimonjr/mathts-workerpool - forked worker pool management
@@ -67,6 +69,18 @@ workbook/                  # @danielsimonjr/mathts-workbook - .mtsw notebook run
 assembly/                  # @danielsimonjr/mathts-wasm - AssemblyScript WASM (build: asbuild:debug/release)
 wasm-rust/                 # Rust WASM workspace (Cargo, not an npm workspace) — built via build:wasm:rust
 compat/                    # @danielsimonjr/mathts-compat - mathjs API compatibility shim
+
+# Focused re-export packages (thin entry points; no duplicated implementation):
+parser/                    # @danielsimonjr/mathts-parser - expression parser surface (re-exports expression)
+ast/                       # @danielsimonjr/mathts-ast - expression AST node constructors (re-exports expression)
+evaluator/                 # @danielsimonjr/mathts-evaluator - compile/evaluate (re-exports expression)
+units/                     # @danielsimonjr/mathts-units - Unit / dimensional analysis (re-exports core)
+numbers/                   # @danielsimonjr/mathts-numbers - Complex/Fraction/BigNumber (re-exports core)
+linalg/                    # @danielsimonjr/mathts-linalg - matrix decompositions (re-exports matrix)
+arithmetic/                # @danielsimonjr/mathts-arithmetic - arithmetic domain (re-exports functions)
+trigonometry/              # @danielsimonjr/mathts-trigonometry - trigonometry domain (re-exports functions)
+statistics/                # @danielsimonjr/mathts-statistics - statistics domain (re-exports functions)
+signal/                    # @danielsimonjr/mathts-signal - signal-processing domain (re-exports functions)
 ```
 
 ### Dependency Graph
@@ -78,8 +92,14 @@ workerpool ← parallel ─────┘         │
                    ↑                  │
                    └──────────────────┘
 matrix ← tensor ← autograd
-core ← workbook
+functions ← workbook
 core, matrix, functions, parallel ← compat
+
+# Focused re-export packages (leaf; depend only on the package they re-export):
+core       ← numbers, units
+expression ← parser, ast, evaluator
+matrix     ← linalg
+functions  ← arithmetic, trigonometry, statistics, signal
 ```
 
 ### Package Build Details

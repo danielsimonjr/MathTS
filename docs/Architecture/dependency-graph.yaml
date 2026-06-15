@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-05-24'
-  totalFiles: 513
-  totalModules: 58
-  totalExports: 2971
+  lastUpdated: "2026-06-15"
+  totalFiles: 554
+  totalModules: 69
+  totalExports: 3461
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -30,6 +30,36 @@ entryPoints:
   - file: expression/src/index.ts
     type: main
     description: Expression parsing and evaluation for MathTS.
+  - file: parser/src/index.ts
+    type: main
+    description: Standalone expression parser for MathTS. This package re-exports the parser
+  - file: units/src/index.ts
+    type: main
+    description: Standalone units & dimensional analysis for MathTS. Re-exports the unit system
+  - file: numbers/src/index.ts
+    type: main
+    description: Standalone numeric types for MathTS. Re-exports `Complex`, `Fraction`, and
+  - file: ast/src/index.ts
+    type: main
+    description: Standalone AST node constructors for MathTS expressions. Re-exports the
+  - file: evaluator/src/index.ts
+    type: main
+    description: Standalone compiler + evaluator for MathTS expressions. Re-exports the
+  - file: linalg/src/index.ts
+    type: main
+    description: Standalone linear-algebra decompositions for MathTS. Re-exports the matrix
+  - file: arithmetic/src/index.ts
+    type: main
+    description: Standalone arithmetic functions for MathTS. Re-exports the `arithmetic` typed-function domain
+  - file: trigonometry/src/index.ts
+    type: main
+    description: Standalone trigonometric functions for MathTS. Re-exports the `trigonometry` typed-function domain
+  - file: statistics/src/index.ts
+    type: main
+    description: Standalone statistics functions for MathTS. Re-exports the `statistics` typed-function domain
+  - file: signal/src/index.ts
+    type: main
+    description: Standalone signal-processing functions for MathTS. Re-exports the `signal` typed-function domain
   - file: parallel/src/index.ts
     type: main
     description: WebWorker parallelization for MathTS computations.
@@ -314,6 +344,29 @@ modules:
             - BIGNUMBER_LN2
             - BIGNUMBER_LN10
           reExport: true
+        - file: ./types/unit.js
+          imports:
+            - Unit
+            - isUnit
+            - DimensionMismatchError
+            - UnitParseError
+            - DIMENSIONLESS
+            - dim
+          reExport: true
+        - file: ./types/unit-definitions.js
+          imports:
+            - BASE_UNITS
+            - DERIVED_UNITS
+            - ALL_UNITS
+            - UNIT_ALIASES
+            - getUnitDef
+          reExport: true
+        - file: ./types/unit-prefixes.js
+          imports:
+            - SI_PREFIXES
+            - BEST_PREFIXES
+            - getPrefix
+          reExport: true
         - file: ./typed/index.js
           imports:
             - mathTyped
@@ -374,6 +427,20 @@ modules:
         - BIGNUMBER_E
         - BIGNUMBER_LN2
         - BIGNUMBER_LN10
+        - Unit
+        - isUnit
+        - DimensionMismatchError
+        - UnitParseError
+        - DIMENSIONLESS
+        - dim
+        - BASE_UNITS
+        - DERIVED_UNITS
+        - ALL_UNITS
+        - UNIT_ALIASES
+        - getUnitDef
+        - SI_PREFIXES
+        - BEST_PREFIXES
+        - getPrefix
         - mathTyped
         - createMathTSTyped
         - typed
@@ -394,7 +461,6 @@ modules:
         - isMatrix
         - isDenseMatrix
         - isSparseMatrix
-        - isUnit
         - initTypedWasm
         - isTypedWasmAvailable
         - registerNativeTypes
@@ -429,6 +495,20 @@ modules:
         - BIGNUMBER_E
         - BIGNUMBER_LN2
         - BIGNUMBER_LN10
+        - Unit
+        - isUnit
+        - DimensionMismatchError
+        - UnitParseError
+        - DIMENSIONLESS
+        - dim
+        - BASE_UNITS
+        - DERIVED_UNITS
+        - ALL_UNITS
+        - UNIT_ALIASES
+        - getUnitDef
+        - SI_PREFIXES
+        - BEST_PREFIXES
+        - getPrefix
         - mathTyped
         - createMathTSTyped
         - typed
@@ -449,7 +529,6 @@ modules:
         - isMatrix
         - isDenseMatrix
         - isSparseMatrix
-        - isUnit
         - initTypedWasm
         - isTypedWasmAvailable
         - registerNativeTypes
@@ -792,6 +871,79 @@ modules:
         - IFraction
         - IBigNumber
         - MatrixDimensions
+    core/src/types/unit-definitions.ts:
+      description: Unit definitions for the Unit type.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - DIMENSIONLESS
+        - BASE_UNITS
+        - DERIVED_UNITS
+        - ALL_UNITS
+        - UNIT_ALIASES
+        - dim
+        - getUnitDef
+      interfaces:
+        - Dimensions
+        - UnitDef
+      functions:
+        - dim
+        - getUnitDef
+      constants:
+        - DIMENSIONLESS
+        - BASE_UNITS
+        - DERIVED_UNITS
+        - ALL_UNITS
+        - UNIT_ALIASES
+    core/src/types/unit-prefixes.ts:
+      description: SI prefixes for the Unit type.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - SI_PREFIXES
+        - SI_PREFIX_KEYS
+        - BEST_PREFIXES
+        - getPrefix
+      functions:
+        - getPrefix
+      constants:
+        - SI_PREFIXES
+        - SI_PREFIX_KEYS
+        - BEST_PREFIXES
+    core/src/types/unit.ts:
+      description: Unit type — dimensional analysis, composition, conversion, and pretty-print.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./unit-definitions.js
+          imports:
+            - ALL_UNITS
+            - DIMENSIONLESS
+            - Dimensions
+            - UNIT_ALIASES
+            - UnitDef
+            - dim
+            - getUnitDef
+        - file: ./unit-prefixes.js
+          imports:
+            - BEST_PREFIXES
+            - SI_PREFIXES
+            - SI_PREFIX_KEYS
+      exports:
+        - DIMENSIONLESS
+        - dim
+        - isUnit
+        - DimensionMismatchError
+        - UnitParseError
+        - Unit
+      classes:
+        - DimensionMismatchError
+        - UnitParseError
+        - Unit
+      functions:
+        - isUnit
   matrix/backends:
     matrix/src/backends/Backend.ts:
       description: Matrix Backend Interface
@@ -854,219 +1006,6 @@ modules:
       constants:
         - DEFAULT_EXTENDED_HINTS
         - backendManager
-    matrix/src/backends/GPUBackend.ts:
-      description: GPU Backend for Matrix Operations
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./gpu/index.js
-          imports:
-            - GPUContext
-            - GPUContextOptions
-            - getGlobalGPUContext
-            - BufferPool
-            - ShaderManager
-            - hasWebGPU
-            - detectGPUCapabilities
-            - getRecommendedWorkgroupSize
-            - GPUCapabilities
-      exports:
-        - getGlobalGPUBackend
-        - initializeGlobalGPUBackend
-        - destroyGlobalGPUBackend
-        - GPUBackend
-      classes:
-        - GPUBackend
-      interfaces:
-        - GPUBackendOptions
-      functions:
-        - getGlobalGPUBackend
-        - initializeGlobalGPUBackend
-        - destroyGlobalGPUBackend
-    matrix/src/backends/GPUMatrixBackend.ts:
-      description: GPU Matrix Backend Adapter
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./Backend.js
-          imports:
-            - MatrixBackend
-            - BackendType
-          typeOnly: true
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./JSBackend.js
-          imports:
-            - jsBackend
-        - file: ./GPUBackend.js
-          imports:
-            - GPUBackend
-            - getGlobalGPUBackend
-            - initializeGlobalGPUBackend
-            - GPUBackendOptions
-        - file: ./gpu/index.js
-          imports:
-            - hasWebGPU
-            - detectGPUCapabilities
-            - GPUCapabilities
-      exports:
-        - gpuMatrixBackend
-        - createGPUMatrixBackend
-        - GPUMatrixBackend
-      classes:
-        - GPUMatrixBackend
-      interfaces:
-        - GPUMatrixBackendConfig
-      functions:
-        - createGPUMatrixBackend
-      constants:
-        - gpuMatrixBackend
-    matrix/src/backends/JSBackend.ts:
-      description: Pure TypeScript Matrix Backend
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./Backend.js
-          imports:
-            - MatrixBackend
-            - BackendType
-          typeOnly: true
-      exports:
-        - jsBackend
-        - JSBackend
-      classes:
-        - JSBackend
-      constants:
-        - jsBackend
-    matrix/src/backends/ParallelBackend.ts:
-      description: Parallel Matrix Backend
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./Backend.js
-          imports:
-            - BackendType
-          typeOnly: true
-      exports:
-        - parallelBackend
-        - createParallelBackend
-        - ParallelBackend
-      classes:
-        - ParallelBackend
-      interfaces:
-        - ParallelBackendConfig
-      functions:
-        - createParallelBackend
-      constants:
-        - parallelBackend
-    matrix/src/backends/RustWASMBackend.ts:
-      description: Rust WASM Matrix Backend
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./Backend.js
-          imports:
-            - MatrixBackend
-            - BackendType
-          typeOnly: true
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./JSBackend.js
-          imports:
-            - jsBackend
-        - file: ./RustWasmLoader.js
-          imports:
-            - rustWasmLoader
-            - RustWasmExports
-      exports:
-        - rustWasmBackend
-        - createRustWASMBackend
-        - RustWASMBackend
-      classes:
-        - RustWASMBackend
-      interfaces:
-        - RustWASMBackendConfig
-      functions:
-        - createRustWASMBackend
-      constants:
-        - rustWasmBackend
-    matrix/src/backends/RustWasmLoader.ts:
-      description: Rust WASM Loader
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - rustWasmLoader
-        - initRustWasm
-        - RustWasmLoader
-      classes:
-        - RustWasmLoader
-      interfaces:
-        - RustWasmExports
-        - RustLoadingMetrics
-      functions:
-        - initRustWasm
-      constants:
-        - rustWasmLoader
-    matrix/src/backends/WASMBackend.ts:
-      description: WASM Matrix Backend (AssemblyScript)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./Backend.js
-          imports:
-            - MatrixBackend
-            - BackendType
-          typeOnly: true
-        - file: ../types/DenseMatrix.js
-          imports:
-            - DenseMatrix
-        - file: ./JSBackend.js
-          imports:
-            - jsBackend
-        - file: ./wasm/detect.js
-          imports:
-            - detectWasmFeatures
-            - WasmFeatures
-      exports:
-        - wasmBackend
-        - createWASMBackend
-        - WASMBackend
-      classes:
-        - WASMBackend
-      interfaces:
-        - WASMBackendConfig
-      functions:
-        - createWASMBackend
-      constants:
-        - wasmBackend
-    matrix/src/backends/WasmLoader.ts:
-      description: WASM Loader - Loads and manages WebAssembly modules
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - wasmLoader
-        - initWasm
-        - WasmLoader
-      classes:
-        - WasmLoader
-      interfaces:
-        - WasmModule
-        - Allocation
-        - LoadingMetrics
-      functions:
-        - initWasm
-      constants:
-        - wasmLoader
     matrix/src/backends/gpu/BatchExecutor.ts:
       description: GPU Batch Executor
       externalDependencies: []
@@ -1106,6 +1045,30 @@ modules:
         - BufferPool
       interfaces:
         - BufferPoolOptions
+    matrix/src/backends/gpu/detect.ts:
+      description: WebGPU Detection and Capability Checking
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - hasWebGPU
+        - isBrowser
+        - getGPUAdapter
+        - detectGPUCapabilities
+        - isGPUSuitableForMatrixOps
+        - getRecommendedWorkgroupSize
+        - getMaxMatrixSize
+      interfaces:
+        - GPUAdapterInfo
+        - GPUCapabilities
+      functions:
+        - hasWebGPU
+        - isBrowser
+        - getGPUAdapter
+        - detectGPUCapabilities
+        - isGPUSuitableForMatrixOps
+        - getRecommendedWorkgroupSize
+        - getMaxMatrixSize
     matrix/src/backends/gpu/GPUContext.ts:
       description: WebGPU Context Management
       externalDependencies: []
@@ -1131,72 +1094,6 @@ modules:
         - getGlobalGPUContext
         - initializeGlobalGPU
         - destroyGlobalGPU
-    matrix/src/backends/gpu/ShaderManager.ts:
-      description: GPU Shader Manager
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./GPUContext.js
-          imports:
-            - GPUContext
-      exports:
-        - BUILTIN_SHADERS
-        - ShaderManager
-      classes:
-        - ShaderManager
-      interfaces:
-        - ShaderSource
-        - PipelineConfig
-      constants:
-        - BUILTIN_SHADERS
-    matrix/src/backends/gpu/Sync.ts:
-      description: GPU-CPU Synchronization Strategy
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./GPUContext.js
-          imports:
-            - GPUContext
-          typeOnly: true
-        - file: ./BufferPool.js
-          imports:
-            - BufferPool
-          typeOnly: true
-      exports:
-        - createSyncManager
-        - SyncManager
-      classes:
-        - SyncManager
-      interfaces:
-        - TransferRequest
-        - TransferResult
-        - SyncConfig
-      functions:
-        - createSyncManager
-    matrix/src/backends/gpu/detect.ts:
-      description: WebGPU Detection and Capability Checking
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - hasWebGPU
-        - isBrowser
-        - getGPUAdapter
-        - detectGPUCapabilities
-        - isGPUSuitableForMatrixOps
-        - getRecommendedWorkgroupSize
-        - getMaxMatrixSize
-      interfaces:
-        - GPUAdapterInfo
-        - GPUCapabilities
-      functions:
-        - hasWebGPU
-        - isBrowser
-        - getGPUAdapter
-        - detectGPUCapabilities
-        - isGPUSuitableForMatrixOps
-        - getRecommendedWorkgroupSize
-        - getMaxMatrixSize
     matrix/src/backends/gpu/index.ts:
       description: GPU Backend Exports
       externalDependencies: []
@@ -1324,6 +1221,116 @@ modules:
         - TransferRequest
         - TransferResult
         - SyncConfig
+    matrix/src/backends/gpu/ShaderManager.ts:
+      description: GPU Shader Manager
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./GPUContext.js
+          imports:
+            - GPUContext
+      exports:
+        - BUILTIN_SHADERS
+        - ShaderManager
+      classes:
+        - ShaderManager
+      interfaces:
+        - ShaderSource
+        - PipelineConfig
+      constants:
+        - BUILTIN_SHADERS
+    matrix/src/backends/gpu/Sync.ts:
+      description: GPU-CPU Synchronization Strategy
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./GPUContext.js
+          imports:
+            - GPUContext
+          typeOnly: true
+        - file: ./BufferPool.js
+          imports:
+            - BufferPool
+          typeOnly: true
+      exports:
+        - createSyncManager
+        - SyncManager
+      classes:
+        - SyncManager
+      interfaces:
+        - TransferRequest
+        - TransferResult
+        - SyncConfig
+      functions:
+        - createSyncManager
+    matrix/src/backends/GPUBackend.ts:
+      description: GPU Backend for Matrix Operations
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./gpu/index.js
+          imports:
+            - GPUContext
+            - GPUContextOptions
+            - getGlobalGPUContext
+            - BufferPool
+            - ShaderManager
+            - hasWebGPU
+            - detectGPUCapabilities
+            - getRecommendedWorkgroupSize
+            - GPUCapabilities
+      exports:
+        - getGlobalGPUBackend
+        - initializeGlobalGPUBackend
+        - destroyGlobalGPUBackend
+        - GPUBackend
+      classes:
+        - GPUBackend
+      interfaces:
+        - GPUBackendOptions
+      functions:
+        - getGlobalGPUBackend
+        - initializeGlobalGPUBackend
+        - destroyGlobalGPUBackend
+    matrix/src/backends/GPUMatrixBackend.ts:
+      description: GPU Matrix Backend Adapter
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./Backend.js
+          imports:
+            - MatrixBackend
+            - BackendType
+          typeOnly: true
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./JSBackend.js
+          imports:
+            - jsBackend
+        - file: ./GPUBackend.js
+          imports:
+            - GPUBackend
+            - getGlobalGPUBackend
+            - initializeGlobalGPUBackend
+            - GPUBackendOptions
+        - file: ./gpu/index.js
+          imports:
+            - hasWebGPU
+            - detectGPUCapabilities
+            - GPUCapabilities
+      exports:
+        - gpuMatrixBackend
+        - createGPUMatrixBackend
+        - GPUMatrixBackend
+      classes:
+        - GPUMatrixBackend
+      interfaces:
+        - GPUMatrixBackendConfig
+      functions:
+        - createGPUMatrixBackend
+      constants:
+        - gpuMatrixBackend
     matrix/src/backends/index.ts:
       description: Matrix Backend Exports
       externalDependencies: []
@@ -1532,6 +1539,100 @@ modules:
         - BatchExecutor
         - SyncManager
         - createSyncManager
+    matrix/src/backends/JSBackend.ts:
+      description: Pure TypeScript Matrix Backend
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./Backend.js
+          imports:
+            - MatrixBackend
+            - BackendType
+          typeOnly: true
+      exports:
+        - jsBackend
+        - JSBackend
+      classes:
+        - JSBackend
+      constants:
+        - jsBackend
+    matrix/src/backends/ParallelBackend.ts:
+      description: Parallel Matrix Backend
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./Backend.js
+          imports:
+            - BackendType
+          typeOnly: true
+      exports:
+        - parallelBackend
+        - createParallelBackend
+        - ParallelBackend
+      classes:
+        - ParallelBackend
+      interfaces:
+        - ParallelBackendConfig
+      functions:
+        - createParallelBackend
+      constants:
+        - parallelBackend
+    matrix/src/backends/RustWASMBackend.ts:
+      description: Rust WASM Matrix Backend
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./Backend.js
+          imports:
+            - MatrixBackend
+            - BackendType
+          typeOnly: true
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./JSBackend.js
+          imports:
+            - jsBackend
+        - file: ./RustWasmLoader.js
+          imports:
+            - rustWasmLoader
+            - RustWasmExports
+      exports:
+        - rustWasmBackend
+        - createRustWASMBackend
+        - RustWASMBackend
+      classes:
+        - RustWASMBackend
+      interfaces:
+        - RustWASMBackendConfig
+      functions:
+        - createRustWASMBackend
+      constants:
+        - rustWasmBackend
+    matrix/src/backends/RustWasmLoader.ts:
+      description: Rust WASM Loader
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - rustWasmLoader
+        - initRustWasm
+        - RustWasmLoader
+      classes:
+        - RustWasmLoader
+      interfaces:
+        - RustWasmExports
+        - RustLoadingMetrics
+      functions:
+        - initRustWasm
+      constants:
+        - rustWasmLoader
     matrix/src/backends/wasm/detect.ts:
       description: WASM Feature Detection
       externalDependencies: []
@@ -1653,6 +1754,57 @@ modules:
         - isPowerOf2
         - nextPowerOf2
         - isWasmFFTAvailable
+    matrix/src/backends/WASMBackend.ts:
+      description: WASM Matrix Backend (AssemblyScript)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./Backend.js
+          imports:
+            - MatrixBackend
+            - BackendType
+          typeOnly: true
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./JSBackend.js
+          imports:
+            - jsBackend
+        - file: ./wasm/detect.js
+          imports:
+            - detectWasmFeatures
+            - WasmFeatures
+      exports:
+        - wasmBackend
+        - createWASMBackend
+        - WASMBackend
+      classes:
+        - WASMBackend
+      interfaces:
+        - WASMBackendConfig
+      functions:
+        - createWASMBackend
+      constants:
+        - wasmBackend
+    matrix/src/backends/WasmLoader.ts:
+      description: WASM Loader - Loads and manages WebAssembly modules
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - wasmLoader
+        - initWasm
+        - WasmLoader
+      classes:
+        - WasmLoader
+      interfaces:
+        - WasmModule
+        - Allocation
+        - LoadingMetrics
+      functions:
+        - initWasm
+      constants:
+        - wasmLoader
   matrix:
     matrix/src/config.ts:
       description: MathTS Matrix Configuration
@@ -1708,31 +1860,31 @@ modules:
       internalDependencies:
         - file: ./types/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./backends/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./operations/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./typed-operations.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./parallel-matrix.js
           imports:
-            - '*'
+            - "*"
           reExport: true
       exports: []
       reExported:
-        - '* from ./types/index.js'
-        - '* from ./backends/index.js'
-        - '* from ./operations/index.js'
-        - '* from ./typed-operations.js'
-        - '* from ./parallel-matrix.js'
+        - "* from ./types/index.js"
+        - "* from ./backends/index.js"
+        - "* from ./operations/index.js"
+        - "* from ./typed-operations.js"
+        - "* from ./parallel-matrix.js"
     matrix/src/parallel-matrix.ts:
       description: Parallel-First Matrix Operations
       externalDependencies: []
@@ -1952,6 +2104,20 @@ modules:
         - eig
         - eigvals
         - powerIteration
+    matrix/src/operations/expm.ts:
+      description: Matrix Exponential — Scaling-and-Squaring with Padé-13 Approximant
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+      exports:
+        - matrixExpm
+      interfaces:
+        - ExpmOptions
+      functions:
+        - matrixExpm
     matrix/src/operations/index.ts:
       description: Matrix Operations
       externalDependencies: []
@@ -1987,6 +2153,11 @@ modules:
           imports:
             - svdWasm
           reExport: true
+        - file: ./pinv.js
+          imports:
+            - pinv
+            - PinvOptions
+          reExport: true
         - file: ./qr.js
           imports:
             - qr
@@ -2002,6 +2173,27 @@ modules:
           imports:
             - cholesky
             - CholeskyResult
+          reExport: true
+        - file: ./expm.js
+          imports:
+            - matrixExpm
+            - ExpmOptions
+          reExport: true
+        - file: ./logm.js
+          imports:
+            - matrixLogm
+            - LogmOptions
+          reExport: true
+        - file: ./sqrtm.js
+          imports:
+            - matrixSqrtm
+            - SqrtmOptions
+          reExport: true
+        - file: ./schur.js
+          imports:
+            - matrixSchur
+            - SchurResult
+            - SchurOptions
           reExport: true
       exports:
         - eig
@@ -2022,6 +2214,7 @@ modules:
         - eigvalsWasm
         - spectralRadiusWasm
         - svdWasm
+        - PinvOptions
         - qr
         - QRResult
         - QROptions
@@ -2029,6 +2222,15 @@ modules:
         - LUResult
         - cholesky
         - CholeskyResult
+        - matrixExpm
+        - ExpmOptions
+        - matrixLogm
+        - LogmOptions
+        - matrixSqrtm
+        - SqrtmOptions
+        - matrixSchur
+        - SchurResult
+        - SchurOptions
       reExported:
         - eig
         - eigvals
@@ -2048,6 +2250,7 @@ modules:
         - eigvalsWasm
         - spectralRadiusWasm
         - svdWasm
+        - PinvOptions
         - qr
         - QRResult
         - QROptions
@@ -2055,6 +2258,35 @@ modules:
         - LUResult
         - cholesky
         - CholeskyResult
+        - matrixExpm
+        - ExpmOptions
+        - matrixLogm
+        - LogmOptions
+        - matrixSqrtm
+        - SqrtmOptions
+        - matrixSchur
+        - SchurResult
+        - SchurOptions
+    matrix/src/operations/logm.ts:
+      description: Matrix Logarithm — Schur-Padé inverse scaling-and-squaring (Slices 5.9a + 6.1)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./eig.js
+          imports:
+            - eig
+        - file: ./schur.js
+          imports:
+            - schurInternal
+      exports:
+        - matrixLogm
+      interfaces:
+        - LogmOptions
+      functions:
+        - matrixLogm
     matrix/src/operations/lu.ts:
       description: LU Decomposition (DenseMatrix primitive)
       externalDependencies: []
@@ -2069,6 +2301,23 @@ modules:
         - LUResult
       functions:
         - lu
+    matrix/src/operations/pinv.ts:
+      description: Moore-Penrose Pseudoinverse (DenseMatrix primitive)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./svd.js
+          imports:
+            - svd
+      exports:
+        - pinv
+      interfaces:
+        - PinvOptions
+      functions:
+        - pinv
     matrix/src/operations/qr.ts:
       description: QR Decomposition (DenseMatrix primitive)
       externalDependencies: []
@@ -2084,6 +2333,45 @@ modules:
         - QROptions
       functions:
         - qr
+    matrix/src/operations/schur.ts:
+      description: Schur Decomposition — Francis QR with double shifts (Slice 6.1)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+      exports:
+        - matrixSchur
+        - schurInternal
+      interfaces:
+        - SchurResult
+        - SchurOptions
+      functions:
+        - matrixSchur
+        - schurInternal
+    matrix/src/operations/sqrtm.ts:
+      description: Matrix Square Root — Hybrid approach (Slices 5.9a + 6.1)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+        - file: ./eig.js
+          imports:
+            - eig
+        - file: ./schur.js
+          imports:
+            - schurInternal
+      exports:
+        - matrixSqrtm
+        - matrixSqrtNewtonInternal
+      interfaces:
+        - SqrtmOptions
+      functions:
+        - matrixSqrtm
+        - matrixSqrtNewtonInternal
     matrix/src/operations/svd-wasm.ts:
       description: WASM-accelerated Singular Value Decomposition.
       externalDependencies: []
@@ -2126,6 +2414,56 @@ modules:
         - norm2
         - normFro
   matrix/types:
+    matrix/src/types/dense/arithmetic.ts:
+      description: arithmetic module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../DenseMatrix.js
+          imports:
+            - DenseMatrix
+          typeOnly: true
+        - file: ../Matrix.js
+          imports:
+            - Matrix
+          typeOnly: true
+      exports:
+        - add
+        - subtract
+        - multiplyElementwise
+        - multiply
+        - scale
+        - transpose
+      functions:
+        - add
+        - subtract
+        - multiplyElementwise
+        - multiply
+        - scale
+        - transpose
+    matrix/src/types/dense/reduction.ts:
+      description: reduction module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../DenseMatrix.js
+          imports:
+            - DenseMatrix
+          typeOnly: true
+      exports:
+        - sum
+        - mean
+        - min
+        - max
+        - norm
+        - trace
+      functions:
+        - sum
+        - mean
+        - min
+        - max
+        - norm
+        - trace
     matrix/src/types/DenseMatrix.ts:
       description: Dense Matrix Implementation
       externalDependencies: []
@@ -2136,6 +2474,12 @@ modules:
             - Matrix
             - MatrixEntry
             - SliceSpec
+        - file: ./dense/arithmetic.js
+          imports:
+            - "* as arithmetic"
+        - file: ./dense/reduction.js
+          imports:
+            - "* as reduction"
       exports:
         - isDenseMatrix
         - DenseMatrix
@@ -2143,40 +2487,6 @@ modules:
         - DenseMatrix
       functions:
         - isDenseMatrix
-    matrix/src/types/Matrix.ts:
-      description: Matrix Base Class
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - isMatrix
-      interfaces:
-        - MatrixDimensions
-        - MatrixIndex
-        - SliceSpec
-        - MatrixEntry
-      functions:
-        - isMatrix
-    matrix/src/types/SparseMatrix.ts:
-      description: Sparse Matrix Implementation (CSR Format)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./Matrix.js
-          imports:
-            - Matrix
-            - MatrixEntry
-            - SliceSpec
-        - file: ./DenseMatrix.js
-          imports:
-            - DenseMatrix
-      exports:
-        - isSparseMatrix
-        - SparseMatrix
-      classes:
-        - SparseMatrix
-      functions:
-        - isSparseMatrix
     matrix/src/types/index.ts:
       description: Matrix Type Exports
       externalDependencies: []
@@ -2211,21 +2521,41 @@ modules:
         - isDenseMatrix
         - SparseMatrix
         - isSparseMatrix
-  tensor:
-    tensor/src/Tensor.ts:
-      description: Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
+    matrix/src/types/Matrix.ts:
+      description: Matrix Base Class
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - isMatrix
+      interfaces:
+        - MatrixDimensions
+        - MatrixIndex
+        - SliceSpec
+        - MatrixEntry
+      functions:
+        - isMatrix
+    matrix/src/types/SparseMatrix.ts:
+      description: Sparse Matrix Implementation (CSR Format)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./named-index.js
+        - file: ./Matrix.js
           imports:
-            - Index
+            - Matrix
+            - MatrixEntry
+            - SliceSpec
+        - file: ./DenseMatrix.js
+          imports:
+            - DenseMatrix
       exports:
-        - Tensor
+        - isSparseMatrix
+        - SparseMatrix
       classes:
-        - Tensor
-      interfaces:
-        - EinsumSpec
+        - SparseMatrix
+      functions:
+        - isSparseMatrix
+  tensor:
     tensor/src/contraction-sequence.ts:
       description: contractNetwork — given an ordered list of Tensors (each carrying
       externalDependencies: []
@@ -2298,6 +2628,38 @@ modules:
           imports:
             - tensorKron
           reExport: true
+        - file: ./operations/slice
+          imports:
+            - slice
+          reExport: true
+        - file: ./operations/gather
+          imports:
+            - gather
+          reExport: true
+        - file: ./operations/stack
+          imports:
+            - stack
+          reExport: true
+        - file: ./operations/concatenate
+          imports:
+            - concatenate
+          reExport: true
+        - file: ./operations/scatter
+          imports:
+            - scatter
+          reExport: true
+        - file: ./operations/pad
+          imports:
+            - pad
+          reExport: true
+        - file: ./operations/roll
+          imports:
+            - roll
+          reExport: true
+        - file: ./operations/flip
+          imports:
+            - flip
+          reExport: true
       exports:
         - Tensor
         - Index
@@ -2312,6 +2674,14 @@ modules:
         - tensorPinv
         - tensorSolve
         - tensorKron
+        - slice
+        - gather
+        - stack
+        - concatenate
+        - scatter
+        - pad
+        - roll
+        - flip
       reExported:
         - Tensor
         - Index
@@ -2326,6 +2696,14 @@ modules:
         - tensorPinv
         - tensorSolve
         - tensorKron
+        - slice
+        - gather
+        - stack
+        - concatenate
+        - scatter
+        - pad
+        - roll
+        - flip
     tensor/src/named-index.ts:
       description: Index — an immutable value type carrying a unique identity, a dimension,
       externalDependencies: []
@@ -2340,6 +2718,20 @@ modules:
         - IndexOpts
       functions:
         - idx
+    tensor/src/Tensor.ts:
+      description: Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./named-index.js
+          imports:
+            - Index
+      exports:
+        - Tensor
+      classes:
+        - Tensor
+      interfaces:
+        - EinsumSpec
   tensor/operations:
     tensor/src/operations/cholesky.ts:
       description: tensorCholesky — Cholesky decomposition for symmetric positive-definite
@@ -2359,6 +2751,21 @@ modules:
         - TensorCholeskyResult
       functions:
         - tensorCholesky
+    tensor/src/operations/concatenate.ts:
+      description: concatenate — join tensors along an existing axis (NumPy `concatenate`).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../Tensor.js
+          imports:
+            - Tensor
+        - file: ../named-index.js
+          imports:
+            - Index
+      exports:
+        - concatenate
+      functions:
+        - concatenate
     tensor/src/operations/eig.ts:
       description: tensorEig — eigenvalue / eigenvector decomposition for rank-N tensors.
       externalDependencies: []
@@ -2374,6 +2781,36 @@ modules:
         - TensorEigResult
       functions:
         - tensorEig
+    tensor/src/operations/flip.ts:
+      description: flip — reverse element order along given axes.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../Tensor.js
+          imports:
+            - Tensor
+        - file: ../named-index.js
+          imports:
+            - Index
+      exports:
+        - flip
+      functions:
+        - flip
+    tensor/src/operations/gather.ts:
+      description: gather — pull elements along one axis (NumPy `take` / JAX `gather`).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../Tensor.js
+          imports:
+            - Tensor
+        - file: ../named-index.js
+          imports:
+            - Index
+      exports:
+        - gather
+      functions:
+        - gather
     tensor/src/operations/kron.ts:
       description: tensorKron — Kronecker product for rank-N tensors.
       externalDependencies: []
@@ -2409,6 +2846,23 @@ modules:
         - TensorLUOpts
       functions:
         - tensorLU
+    tensor/src/operations/pad.ts:
+      description: pad — pad each axis by [before, after] amounts.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../Tensor.js
+          imports:
+            - Tensor
+        - file: ../named-index.js
+          imports:
+            - Index
+      exports:
+        - pad
+      interfaces:
+        - PadOptions
+      functions:
+        - pad
     tensor/src/operations/pinv.ts:
       description: tensorPinv — Moore-Penrose pseudoinverse for rank-N tensors.
       externalDependencies: []
@@ -2461,6 +2915,55 @@ modules:
         - RandomTensorOpts
       functions:
         - randomTensor
+    tensor/src/operations/roll.ts:
+      description: roll — cyclic shift along given axes.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../Tensor.js
+          imports:
+            - Tensor
+        - file: ../named-index.js
+          imports:
+            - Index
+      exports:
+        - roll
+      functions:
+        - roll
+    tensor/src/operations/scatter.ts:
+      description: scatter — inverse of gather. Writes `updates` into a copy of `t` at the
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../Tensor.js
+          imports:
+            - Tensor
+        - file: ../named-index.js
+          imports:
+            - Index
+      exports:
+        - scatter
+      interfaces:
+        - ScatterOpts
+      functions:
+        - scatter
+    tensor/src/operations/slice.ts:
+      description: slice — extract a sub-tensor by per-axis [start, stop, step] ranges.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../Tensor.js
+          imports:
+            - Tensor
+        - file: ../named-index.js
+          imports:
+            - Index
+      exports:
+        - slice
+      interfaces:
+        - SliceRange
+      functions:
+        - slice
     tensor/src/operations/solve.ts:
       description: tensorSolve — named-index linear solver for rank-N tensors.
       externalDependencies: []
@@ -2479,6 +2982,23 @@ modules:
         - TensorSolveResult
       functions:
         - tensorSolve
+    tensor/src/operations/stack.ts:
+      description: stack — stack same-shape tensors along a new axis (NumPy `stack`).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../Tensor.js
+          imports:
+            - Tensor
+        - file: ../named-index.js
+          imports:
+            - Index
+      exports:
+        - stack
+      interfaces:
+        - StackOpts
+      functions:
+        - stack
     tensor/src/operations/svd.ts:
       description: tensorSvd — truncated SVD for rank-N tensors.
       externalDependencies: []
@@ -3898,7 +4418,7 @@ modules:
       constants:
         - createGcd
     functions/src/arithmetic/hypot.ts:
-      description: 'Calculate the hypotenuse of a list with values. The hypotenuse is defined as:'
+      description: "Calculate the hypotenuse of a list with values. The hypotenuse is defined as:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -4229,6 +4749,7 @@ modules:
         - file: ../utils/number.js
           imports:
             - isInteger
+            - isPowZeroAtInfinity
         - file: ../utils/array.js
           imports:
             - arraySize
@@ -4290,7 +4811,7 @@ modules:
       constants:
         - createRound
     functions/src/arithmetic/sign.ts:
-      description: 'Compute the sign of a value. The sign of a value x is:'
+      description: "Compute the sign of a value. The sign of a value x is:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -4797,7 +5318,7 @@ modules:
     functions/src/combinatorics/bellNumbers.ts:
       description: >-
         The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose
-        union is
+        union is 
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -5029,7 +5550,7 @@ modules:
       functions:
         - createArgumentsError
     functions/src/error/DimensionError.ts:
-      description: 'Create a range error with the message:'
+      description: "Create a range error with the message:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -5049,6 +5570,15 @@ modules:
         - IndexError
       functions:
         - createIndexError
+    functions/src/error/MathjsError.ts:
+      description: Custom error type for Mathjs errors
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - MathjsError
+      classes:
+        - MathjsError
   functions/expression:
     functions/src/expression/operators.ts:
       description: Returns the first non-parenthesis internal node, but only
@@ -5087,10 +5617,10 @@ modules:
             - factoryScope
         - file: ./index.js
           imports:
-            - '* as activatedFactories'
+            - "* as activatedFactories"
         - file: ../typed/index.js
           imports:
-            - '* as typedFns'
+            - "* as typedFns"
       exports:
         - parse
         - evaluate
@@ -5905,14 +6435,7 @@ modules:
         - map
         - size
         - squeeze
-        - combinations
-        - combinationsWithRep
-        - lgamma
-        - pickRandom
-        - random
         - erf
-        - format
-        - print
         - acoth
         - acsch
         - asech
@@ -5959,12 +6482,8 @@ modules:
         - factory_tanh
         - parseNumberWithConfig
         - divideScalar
-        - randomInt
         - mode
         - prod
-        - bin
-        - hex
-        - oct
         - hasNumericValue
         - isFinite
         - isZero
@@ -5997,7 +6516,6 @@ modules:
         - factory_xgcd
         - factory_log
         - catalan
-        - bernoulli
         - zpk2tf
         - factory_cumsum
         - factory_sum
@@ -6032,7 +6550,6 @@ modules:
         - invmod
         - composition
         - partitionSelect
-        - pinv
         - qr
         - range
         - distance
@@ -6043,7 +6560,6 @@ modules:
         - factorial
         - sort
         - stirlingS2
-        - permutations
         - bellNumbers
         - nodeOperations
         - leafCount
@@ -6075,7 +6591,6 @@ modules:
         - factory_variance
         - quantileSeq
         - kldivergence
-        - multinomial
         - freqz
         - simplifyCore
         - polynomialRoot
@@ -6169,14 +6684,7 @@ modules:
         - map
         - size
         - squeeze
-        - combinations
-        - combinationsWithRep
-        - lgamma
-        - pickRandom
-        - random
         - erf
-        - format
-        - print
         - acoth
         - acsch
         - asech
@@ -6223,12 +6731,8 @@ modules:
         - factory_tanh
         - parseNumberWithConfig
         - divideScalar
-        - randomInt
         - mode
         - prod
-        - bin
-        - hex
-        - oct
         - hasNumericValue
         - isFinite
         - isZero
@@ -6261,7 +6765,6 @@ modules:
         - factory_xgcd
         - factory_log
         - catalan
-        - bernoulli
         - zpk2tf
         - factory_cumsum
         - factory_sum
@@ -6296,7 +6799,6 @@ modules:
         - invmod
         - composition
         - partitionSelect
-        - pinv
         - qr
         - range
         - distance
@@ -6307,7 +6809,6 @@ modules:
         - factorial
         - sort
         - stirlingS2
-        - permutations
         - bellNumbers
         - nodeOperations
         - leafCount
@@ -6339,7 +6840,6 @@ modules:
         - factory_variance
         - quantileSeq
         - kldivergence
-        - multinomial
         - freqz
         - simplifyCore
         - polynomialRoot
@@ -6458,7 +6958,7 @@ modules:
         - factoryScope
   functions/geometry:
     functions/src/geometry/distance.ts:
-      description: 'Calculates:'
+      description: "Calculates:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6518,15 +7018,20 @@ modules:
       internalDependencies:
         - file: ./typed/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./typed/cas.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./factories/index.js
           imports:
-            - '*'
+            - "*"
+          reExport: true
+        - file: ./typed/unit.js
+          imports:
+            - to
+            - toBest
           reExport: true
         - file: ./factories/evaluate.js
           imports:
@@ -6538,6 +7043,8 @@ modules:
             - replacer
           reExport: true
       exports:
+        - to
+        - toBest
         - evaluate
         - compileExpr
         - parse
@@ -6545,9 +7052,11 @@ modules:
         - reviver
         - replacer
       reExported:
-        - '* from ./typed/index.js'
-        - '* from ./typed/cas.js'
-        - '* from ./factories/index.js'
+        - "* from ./typed/index.js"
+        - "* from ./typed/cas.js"
+        - "* from ./factories/index.js"
+        - to
+        - toBest
         - evaluate
         - compileExpr
         - parse
@@ -7306,18 +7815,13 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/is.js
-          imports:
-            - isBigNumber
-        - file: ../utils/number.js
-          imports:
-            - isInteger
-        - file: ../utils/array.js
-          imports:
-            - resize
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./utils/zerosAndOnes.js
+          imports:
+            - createZerosAndOnes
+            - Dependencies
       exports:
         - createOnes
       constants:
@@ -7428,9 +7932,6 @@ modules:
         - file: ../error/DimensionError.js
           imports:
             - DimensionError
-        - file: ../error/ArgumentsError.js
-          imports:
-            - ArgumentsError
         - file: ../utils/number.js
           imports:
             - isInteger
@@ -7449,6 +7950,10 @@ modules:
         - file: ../core/config.js
           imports:
             - MathJsConfig
+          typeOnly: true
+        - file: ../core/function/typed.js
+          imports:
+            - TypedFunction
           typeOnly: true
       exports:
         - createResize
@@ -7643,7 +8148,7 @@ modules:
       constants:
         - createSubset
     functions/src/matrix/trace.ts:
-      description: 'Calculate the trace of a matrix: the sum of the elements on the main'
+      description: "Calculate the trace of a matrix: the sum of the elements on the main"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -7689,23 +8194,44 @@ modules:
         - createTranspose
       constants:
         - createTranspose
+    functions/src/matrix/utils/zerosAndOnes.ts:
+      description: Create an Array or Matrix with zeros or ones
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/is.js
+          imports:
+            - isBigNumber
+        - file: ../../utils/number.js
+          imports:
+            - isInteger
+        - file: ../../utils/array.js
+          imports:
+            - resize
+      exports:
+        - createZerosAndOnes
+      interfaces:
+        - TypedFunction
+        - BigNumberConstructor
+        - BigNumber
+        - MatrixConstructor
+        - Matrix
+        - Config
+        - Dependencies
+      functions:
+        - createZerosAndOnes
     functions/src/matrix/zeros.ts:
       description: Create a matrix filled with zeros. The created matrix can have one or
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/is.js
-          imports:
-            - isBigNumber
-        - file: ../utils/number.js
-          imports:
-            - isInteger
-        - file: ../utils/array.js
-          imports:
-            - resize
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./utils/zerosAndOnes.js
+          imports:
+            - createZerosAndOnes
+            - Dependencies
       exports:
         - createZeros
       constants:
@@ -7755,6 +8281,7 @@ modules:
             - log2
             - sign
             - toFixed
+            - isPowZeroAtInfinity
       exports:
         - absNumber
         - addNumber
@@ -7870,51 +8397,51 @@ modules:
       internalDependencies:
         - file: ./arithmetic.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./bitwise.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./combinations.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./constants.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./logical.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./relational.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./probability.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./utils.js
           imports:
-            - '*'
+            - "*"
           reExport: true
       exports: []
       reExported:
-        - '* from ./arithmetic.js'
-        - '* from ./bitwise.js'
-        - '* from ./combinations.js'
-        - '* from ./constants.js'
-        - '* from ./logical.js'
-        - '* from ./relational.js'
-        - '* from ./probability.js'
-        - '* from ./trigonometry.js'
-        - '* from ./utils.js'
+        - "* from ./arithmetic.js"
+        - "* from ./bitwise.js"
+        - "* from ./combinations.js"
+        - "* from ./constants.js"
+        - "* from ./logical.js"
+        - "* from ./relational.js"
+        - "* from ./probability.js"
+        - "* from ./trigonometry.js"
+        - "* from ./utils.js"
     functions/src/plain/number/logical.ts:
       description: logical module
       externalDependencies: []
@@ -7931,7 +8458,7 @@ modules:
         - xorNumber
         - andNumber
     functions/src/plain/number/probability.ts:
-      description: 'TODO: comment on the variables g and p'
+      description: "TODO: comment on the variables g and p"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -8364,7 +8891,7 @@ modules:
       functions:
         - randomMatrix
     functions/src/probability/util/seededRNG.ts:
-      description: '@ts-ignore - seedrandom may not have type declarations'
+      description: "@ts-ignore - seedrandom may not have type declarations"
       externalDependencies:
         - package: seedrandom
           imports:
@@ -8841,7 +9368,7 @@ modules:
       constants:
         - createSetCartesian
     functions/src/set/setDifference.ts:
-      description: 'Create the difference of two (multi)sets: every element of set1, that is not the element of set2.'
+      description: "Create the difference of two (multi)sets: every element of set1, that is not the element of set2."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10366,6 +10893,27 @@ modules:
         - createFibonacciHeapClass
       constants:
         - createFibonacciHeapClass
+    functions/src/type/matrix/function/index.ts:
+      description: Create an index. An Index can store ranges having start, step, and end
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../../utils/is.js
+          imports:
+            - isBigNumber
+            - isMatrix
+            - isArray
+        - file: ../../../utils/factory.js
+          imports:
+            - factory
+        - file: ../../../core/function/typed.js
+          imports:
+            - TypedFunction
+          typeOnly: true
+      exports:
+        - createIndex
+      constants:
+        - createIndex
     functions/src/type/matrix/ImmutableDenseMatrix.ts:
       description: Interface for Index objects (local copy to avoid circular deps)
       externalDependencies: []
@@ -10446,29 +10994,8 @@ modules:
         - createSpaClass
       constants:
         - createSpaClass
-    functions/src/type/matrix/function/index.ts:
-      description: Create an index. An Index can store ranges having start, step, and end
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../../../utils/is.js
-          imports:
-            - isBigNumber
-            - isMatrix
-            - isArray
-        - file: ../../../utils/factory.js
-          imports:
-            - factory
-        - file: ../../../core/function/typed.js
-          imports:
-            - TypedFunction
-          typeOnly: true
-      exports:
-        - createIndex
-      constants:
-        - createIndex
     functions/src/type/matrix/types.ts:
-      description: 'Type Philosophy:'
+      description: "Type Philosophy:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -10897,36 +11424,6 @@ modules:
         - ResultSetConstructor
       constants:
         - createResultSet
-    functions/src/type/unit/Unit.ts:
-      description: 'A unit can be constructed in the following ways:'
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../../utils/is.js
-          imports:
-            - isComplex
-            - isUnit
-            - typeOf
-        - file: ../../utils/factory.js
-          imports:
-            - factory
-        - file: ../../utils/function.js
-          imports:
-            - memoize
-        - file: ../../utils/string.js
-          imports:
-            - endsWith
-        - file: ../../utils/object.js
-          imports:
-            - clone
-            - hasOwnProperty
-        - file: ../../utils/bignumber/constants.js
-          imports:
-            - createBigNumberPi
-      exports:
-        - createUnitClass
-      constants:
-        - createUnitClass
     functions/src/type/unit/function/createUnit.ts:
       description: Unit definition options
       externalDependencies: []
@@ -11105,6 +11602,39 @@ modules:
         - createPlanckTime
         - createPlanckCharge
         - createPlanckTemperature
+    functions/src/type/unit/Unit.ts:
+      description: "A unit can be constructed in the following ways:"
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/is.js
+          imports:
+            - isComplex
+            - isUnit
+            - typeOf
+        - file: ../../utils/factory.js
+          imports:
+            - factory
+        - file: ../../utils/function.js
+          imports:
+            - memoize
+        - file: ../../utils/string.js
+          imports:
+            - endsWith
+        - file: ../../utils/object.js
+          imports:
+            - clone
+            - hasOwnProperty
+        - file: ../../utils/bignumber/constants.js
+          imports:
+            - createBigNumberPi
+        - file: ../../utils/log.js
+          imports:
+            - warnOnce
+      exports:
+        - createUnitClass
+      constants:
+        - createUnitClass
   functions/typed:
     functions/src/typed/algebra.ts:
       description: Typed Algebra Functions
@@ -11115,6 +11645,8 @@ modules:
           imports:
             - polyMulDispatch
             - polyDivModDispatch
+            - resultantDispatch
+            - discriminantDispatch
             - WASM_POLY_THRESHOLD
       exports:
         - typedAlgebra
@@ -11347,6 +11879,7 @@ modules:
             - parse
             - evaluate
       exports:
+        - CAS_BATCH_THRESHOLD
         - integrate
         - limit
         - partialDerivative
@@ -11378,6 +11911,10 @@ modules:
         - odeGeneral
         - curl
         - inverseLaplaceTransform
+        - casSimplify
+        - casDerivative
+        - casExpand
+        - casFactor
       functions:
         - integrate
         - limit
@@ -11410,6 +11947,20 @@ modules:
         - odeGeneral
         - curl
         - inverseLaplaceTransform
+        - casSimplify
+        - casSimplify
+        - casSimplify
+        - casDerivative
+        - casDerivative
+        - casDerivative
+        - casExpand
+        - casExpand
+        - casExpand
+        - casFactor
+        - casFactor
+        - casFactor
+      constants:
+        - CAS_BATCH_THRESHOLD
     functions/src/typed/combinatorics.ts:
       description: Extended Combinatorics Functions
       externalDependencies: []
@@ -11482,6 +12033,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       exports:
+        - DIST_WORKER_THRESHOLD
         - normalDist
         - betaDist
         - binomialDist
@@ -11495,6 +12047,7 @@ modules:
         - uniformDist
         - weibullDist
       interfaces:
+        - SampleNOptions
         - Distribution
       functions:
         - normalDist
@@ -11509,11 +12062,18 @@ modules:
         - tDist
         - uniformDist
         - weibullDist
+      constants:
+        - DIST_WORKER_THRESHOLD
     functions/src/typed/distributions.ts:
       description: Typed Probability Distribution Functions
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../wasm/special/wasm-bridge.js
+          imports:
+            - WASM_SPECIAL_THRESHOLD
+            - lgammaDispatch
+            - lgammaJS
       exports:
         - normalPDF
         - normalCDF
@@ -11525,6 +12085,10 @@ modules:
         - bernoulliPMF
         - entropy
         - jsDivergence
+        - betaPDF
+        - gammaPDF
+        - studentTPDF
+        - noncentralChi2PDF
         - typedDistributions
       constants:
         - normalPDF
@@ -11537,6 +12101,10 @@ modules:
         - bernoulliPMF
         - entropy
         - jsDivergence
+        - betaPDF
+        - gammaPDF
+        - studentTPDF
+        - noncentralChi2PDF
         - typedDistributions
     functions/src/typed/geometry.ts:
       description: Typed Geometry Functions
@@ -11546,6 +12114,10 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+        - file: ../wasm/sort/wasm-bridge.js
+          imports:
+            - argsortF64Dispatch
+            - WASM_SORT_THRESHOLD
       exports:
         - angle2D
         - angle3D
@@ -11577,6 +12149,7 @@ modules:
         - kdTree
         - kdTreeNearest
         - nearestNeighbor
+        - convexHull3D
         - distanceMatrix
       interfaces:
         - KDTreeNode
@@ -11611,6 +12184,7 @@ modules:
         - kdTree
         - kdTreeNearest
         - nearestNeighbor
+        - convexHull3D
         - distanceMatrix
     functions/src/typed/gpu.ts:
       description: WebGPU-Accelerated Matrix Operations
@@ -11633,6 +12207,7 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       exports:
+        - CENTRALITY_WORKER_THRESHOLD
         - adjacencyMatrix
         - shortestPath
         - minimumSpanningTree
@@ -11641,6 +12216,20 @@ modules:
         - topologicalSort
         - isConnected
         - graphDistance
+        - pageRank
+        - betweennessCentrality
+        - eigenvectorCentrality
+      interfaces:
+        - CentralityRestartOptions
+        - PageRankOptions
+        - PageRankResult
+        - PageRankRestartResult
+        - BetweennessOptions
+        - BetweennessResult
+        - BetweennessRestartResult
+        - EigenvectorOptions
+        - EigenvectorResult
+        - EigenvectorRestartResult
       functions:
         - adjacencyMatrix
         - shortestPath
@@ -11650,11 +12239,20 @@ modules:
         - topologicalSort
         - isConnected
         - graphDistance
+        - pageRank
+        - betweennessCentrality
+        - eigenvectorCentrality
+      constants:
+        - CENTRALITY_WORKER_THRESHOLD
     functions/src/typed/hypothesis.ts:
       description: Statistical Hypothesis Tests
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../wasm/sort/wasm-bridge.js
+          imports:
+            - sortF64Dispatch
+            - WASM_SORT_THRESHOLD
       exports:
         - studentTTest
         - chiSquareTest
@@ -11671,6 +12269,11 @@ modules:
         - MannWhitneyResult
         - ShapiroWilkResult
         - PCAResult
+        - BootstrapOptions
+        - KSBootstrapResult
+        - MWBootstrapResult
+        - SWBootstrapResult
+        - ChiSquareBootstrapResult
       functions:
         - studentTTest
         - chiSquareTest
@@ -11728,93 +12331,108 @@ modules:
         - file: ./algebra.js
           imports:
             - typedAlgebra
+        - file: ./unit.js
+          imports:
+            - typedUnit
         - file: ./arithmetic.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./trigonometry.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./statistics.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./signal.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./bitwise.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./logical.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./complex.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./set.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./special.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./distributions.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./geometry.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./algebra.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./integration.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./interpolation.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./numeric.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./combinatorics.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./graph.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./dist-objects.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./hypothesis.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./matrix-ops.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./gpu.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./relational.js
           imports:
-            - '*'
+            - "*"
+          reExport: true
+        - file: ./string.js
+          imports:
+            - "*"
+          reExport: true
+        - file: ./probability.js
+          imports:
+            - "*"
+          reExport: true
+        - file: ./unit.js
+          imports:
+            - "*"
           reExport: true
         - file: ./arithmetic.js
           imports:
@@ -11860,9 +12478,25 @@ modules:
           imports:
             - typedAlgebra
           reExport: true
+        - file: ./matrix-ops.js
+          imports:
+            - cond
+          reExport: true
         - file: ./relational.js
           imports:
             - typedRelational
+          reExport: true
+        - file: ./string.js
+          imports:
+            - typedString
+          reExport: true
+        - file: ./probability.js
+          imports:
+            - typedProbability
+          reExport: true
+        - file: ./unit.js
+          imports:
+            - typedUnit
           reExport: true
       exports:
         - typedArithmetic
@@ -11876,31 +12510,38 @@ modules:
         - typedSpecial
         - typedDistributions
         - typedAlgebra
+        - cond
         - typedRelational
+        - typedString
+        - typedProbability
+        - typedUnit
         - typedFunctions
       reExported:
-        - '* from ./arithmetic.js'
-        - '* from ./trigonometry.js'
-        - '* from ./statistics.js'
-        - '* from ./signal.js'
-        - '* from ./bitwise.js'
-        - '* from ./logical.js'
-        - '* from ./complex.js'
-        - '* from ./set.js'
-        - '* from ./special.js'
-        - '* from ./distributions.js'
-        - '* from ./geometry.js'
-        - '* from ./algebra.js'
-        - '* from ./integration.js'
-        - '* from ./interpolation.js'
-        - '* from ./numeric.js'
-        - '* from ./combinatorics.js'
-        - '* from ./graph.js'
-        - '* from ./dist-objects.js'
-        - '* from ./hypothesis.js'
-        - '* from ./matrix-ops.js'
-        - '* from ./gpu.js'
-        - '* from ./relational.js'
+        - "* from ./arithmetic.js"
+        - "* from ./trigonometry.js"
+        - "* from ./statistics.js"
+        - "* from ./signal.js"
+        - "* from ./bitwise.js"
+        - "* from ./logical.js"
+        - "* from ./complex.js"
+        - "* from ./set.js"
+        - "* from ./special.js"
+        - "* from ./distributions.js"
+        - "* from ./geometry.js"
+        - "* from ./algebra.js"
+        - "* from ./integration.js"
+        - "* from ./interpolation.js"
+        - "* from ./numeric.js"
+        - "* from ./combinatorics.js"
+        - "* from ./graph.js"
+        - "* from ./dist-objects.js"
+        - "* from ./hypothesis.js"
+        - "* from ./matrix-ops.js"
+        - "* from ./gpu.js"
+        - "* from ./relational.js"
+        - "* from ./string.js"
+        - "* from ./probability.js"
+        - "* from ./unit.js"
         - typedArithmetic
         - typedTrigonometry
         - typedStatistics
@@ -11912,7 +12553,11 @@ modules:
         - typedSpecial
         - typedDistributions
         - typedAlgebra
+        - cond
         - typedRelational
+        - typedString
+        - typedProbability
+        - typedUnit
       constants:
         - typedFunctions
     functions/src/typed/integration.ts:
@@ -11923,13 +12568,18 @@ modules:
       exports:
         - GAUSS_WORKER_THRESHOLD
         - ARRAY_WORKER_THRESHOLD
+        - validateClosureSource
         - trapz
         - trapzF64
         - simpson
         - simpsonF64
         - gaussQuad
         - romberg
+      interfaces:
+        - GaussQuadOptions
+        - RombergOptions
       functions:
+        - validateClosureSource
         - trapz
         - trapzF64
         - simpson
@@ -11947,20 +12597,38 @@ modules:
         - file: ../wasm/interpolation/wasm-bridge.js
           imports:
             - tridiagSolveDispatch
+        - file: ../wasm/interpolation/wasm-bridge.js
+          imports:
+            - dividedDifferenceDispatch
+            - dividedDifferenceJS
+            - WASM_INTERP_THRESHOLD
+        - file: ../wasm/poly/wasm-bridge.js
+          imports:
+            - polyFitDispatch
+            - chebFitDispatch
+            - legendreFitDispatch
+            - WASM_POLY_FIT_THRESHOLD
       exports:
+        - WASM_INTERP_THRESHOLD
         - linearInterp
         - lagrangeInterp
+        - newtonInterp
         - cubicSpline
         - hermiteInterp
         - pchipInterp
         - polyFit
+        - chebyshevFit
+        - legendreFit
       functions:
         - linearInterp
         - lagrangeInterp
+        - newtonInterp
         - cubicSpline
         - hermiteInterp
         - pchipInterp
         - polyFit
+        - chebyshevFit
+        - legendreFit
     functions/src/typed/logical.ts:
       description: Typed Logical Functions
       externalDependencies: []
@@ -11986,6 +12654,15 @@ modules:
       nodeDependencies: []
       internalDependencies: []
       exports:
+        - pinv
+        - cond
+        - norm2
+        - normFro
+        - lowRankApprox
+        - singularValues
+        - matrixExpm
+        - matrixLogm
+        - matrixSqrtm
         - characteristicPolynomial
         - rowReduce
         - matrixRank
@@ -12010,6 +12687,16 @@ modules:
         - matrixLog
         - polarDecomposition
         - jordanForm
+      constants:
+        - pinv
+        - cond
+        - norm2
+        - normFro
+        - lowRankApprox
+        - singularValues
+        - matrixExpm
+        - matrixLogm
+        - matrixSqrtm
     functions/src/typed/numeric.ts:
       description: Typed Numerical Methods Functions
       externalDependencies: []
@@ -12092,6 +12779,37 @@ modules:
         - quadprog
         - linprog
         - solvePDE
+    functions/src/typed/probability.ts:
+      description: Typed Probability & Combinatorics Functions
+      externalDependencies:
+        - package: seedrandom
+          imports:
+            - seedrandom
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - bernoulli
+        - combinations
+        - combinationsWithRep
+        - multinomial
+        - permutations
+        - random
+        - randomInt
+        - pickRandom
+        - typedProbability
+        - seedProbabilityRng
+      functions:
+        - seedProbabilityRng
+      constants:
+        - bernoulli
+        - combinations
+        - combinationsWithRep
+        - multinomial
+        - permutations
+        - random
+        - randomInt
+        - pickRandom
+        - typedProbability
     functions/src/typed/relational.ts:
       description: Typed Relational Functions
       externalDependencies:
@@ -12158,6 +12876,15 @@ modules:
         - file: ../wasm/WasmLoader.js
           imports:
             - wasmLoader
+        - file: ../wasm/signal/wasm-bridge.js
+          imports:
+            - applyWindowDispatch
+            - bartlettPSDDispatch
+            - chirpZTransformDispatch
+            - goertzelDispatch
+            - welchPSDDispatch
+            - welchPSDJS
+            - WASM_SIGNAL_THRESHOLD
       exports:
         - parallelFFT
         - parallelIFFT
@@ -12190,6 +12917,11 @@ modules:
         - windowFunction
         - convolve
         - correlate
+        - welchPSD
+        - bartlettPSD
+        - multiTaperPSD
+        - goertzel
+        - chirpZTransform
         - initializeSignal
         - terminateSignal
       functions:
@@ -12216,6 +12948,11 @@ modules:
         - windowFunction
         - convolve
         - correlate
+        - welchPSD
+        - bartlettPSD
+        - multiTaperPSD
+        - goertzel
+        - chirpZTransform
         - initializeSignal
         - terminateSignal
       constants:
@@ -12241,9 +12978,36 @@ modules:
             - besselY0Dispatch
             - besselY1Dispatch
             - besselYDispatch
+            - airyAiDispatch
+            - airyBiDispatch
+            - ellipticKDispatch
+            - ellipticEDispatch
+            - lgammaDispatch
+            - carlsonRCDispatch
+            - carlsonRFDispatch
+            - carlsonRDDispatch
+            - carlsonRJDispatch
+            - ellipticFIncompleteDispatch
+            - ellipticEIncompleteDispatch
+            - ellipticPiIncompleteDispatch
+            - carlsonRCJS
+            - carlsonRFJS
+            - carlsonRDJS
+            - carlsonRJJS
+            - ellipticFIncompleteJS
+            - ellipticEIncompleteJS
+            - ellipticPiIncompleteJS
+            - carlsonRCScalar
+            - carlsonRFScalar
+            - carlsonRDScalar
+            - carlsonRJScalar
+            - ellipticFIncompleteScalar
+            - ellipticEIncompleteScalar
+            - ellipticPiIncompleteScalar
       exports:
         - erfc
         - erfi
+        - lgamma
         - beta
         - gammainc
         - gammaincp
@@ -12270,10 +13034,20 @@ modules:
         - expIntegralEi
         - fresnelC
         - fresnelS
+        - airyAi
+        - airyBi
+        - carlsonRC
+        - carlsonRF
+        - carlsonRD
+        - carlsonRJ
+        - ellipticF
+        - ellipticEIncomplete
+        - ellipticPi
         - typedSpecial
       constants:
         - erfc
         - erfi
+        - lgamma
         - beta
         - gammainc
         - gammaincp
@@ -12300,12 +13074,24 @@ modules:
         - expIntegralEi
         - fresnelC
         - fresnelS
+        - airyAi
+        - airyBi
+        - carlsonRC
+        - carlsonRF
+        - carlsonRD
+        - carlsonRJ
+        - ellipticF
+        - ellipticEIncomplete
+        - ellipticPi
         - typedSpecial
     functions/src/typed/statistics.ts:
       description: Typed Statistics Functions (Parallel-First)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../wasm/sort/wasm-bridge.js
+          imports:
+            - sortF64Dispatch
       exports:
         - parallelStatSum
         - parallelStatMean
@@ -12325,6 +13111,7 @@ modules:
         - parallelStatQuantile
         - parallelStatHistogram
         - typedStatistics
+        - parallelStatPercentile
         - quickSelect
         - medianSelect
         - minSelect
@@ -12332,6 +13119,7 @@ modules:
         - initializeStatistics
         - terminateStatistics
       functions:
+        - parallelStatPercentile
         - quickSelect
         - medianSelect
         - minSelect
@@ -12357,6 +13145,34 @@ modules:
         - parallelStatQuantile
         - parallelStatHistogram
         - typedStatistics
+    functions/src/typed/string.ts:
+      description: Typed String Formatting Functions
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/string.js
+          imports:
+            - format
+        - file: ../utils/is.js
+          imports:
+            - isString
+        - file: ../utils/print.js
+          imports:
+            - printTemplate
+      exports:
+        - bin
+        - hex
+        - oct
+        - format
+        - print
+        - typedString
+      constants:
+        - bin
+        - hex
+        - oct
+        - format
+        - print
+        - typedString
     functions/src/typed/trigonometry.ts:
       description: Typed Trigonometric Functions (Parallel-First)
       externalDependencies: []
@@ -12413,6 +13229,19 @@ modules:
         - initTypeBridge
       functions:
         - initTypeBridge
+    functions/src/typed/unit.ts:
+      description: Typed Unit Functions
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - to
+        - toBest
+        - typedUnit
+      constants:
+        - to
+        - toBest
+        - typedUnit
   functions/unit:
     functions/src/unit/to.ts:
       description: Change the unit of a value.
@@ -12711,6 +13540,9 @@ modules:
         - file: ./object.js
           imports:
             - pickShallow
+        - file: ../error/MathjsError.js
+          imports:
+            - MathjsError
       exports:
         - factory
         - sortFactories
@@ -12765,7 +13597,7 @@ modules:
       constants:
         - createHasNumericValue
     functions/src/utils/is.ts:
-      description: 'Test whether a value is a collection: an Array or Matrix'
+      description: "Test whether a value is a collection: an Array or Matrix"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -12976,7 +13808,7 @@ modules:
       constants:
         - createIsNaN
     functions/src/utils/isNegative.ts:
-      description: 'Test whether a value is negative: smaller than zero.'
+      description: "Test whether a value is negative: smaller than zero."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -13031,7 +13863,7 @@ modules:
       constants:
         - createIsNumeric
     functions/src/utils/isPositive.ts:
-      description: 'Test whether a value is positive: larger than zero.'
+      description: "Test whether a value is positive: larger than zero."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -13063,7 +13895,7 @@ modules:
       constants:
         - createIsPositive
     functions/src/utils/isPrime.ts:
-      description: 'Test whether a value is prime: has no divisors other than itself and one.'
+      description: "Test whether a value is prime: has no divisors other than itself and one."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -13100,6 +13932,15 @@ modules:
         - createIsZero
       constants:
         - createIsZero
+    functions/src/utils/log.ts:
+      description: Log a console.warn message only once
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - warnOnce
+      constants:
+        - warnOnce
     functions/src/utils/lruQueue.ts:
       description: (c) 2018, Mariusz Nowak
       externalDependencies: []
@@ -13188,6 +14029,7 @@ modules:
         - tanh
         - isInteger
         - safeNumberType
+        - isPowZeroAtInfinity
         - format
         - normalizeFormatOptions
         - splitNumber
@@ -13207,6 +14049,7 @@ modules:
       functions:
         - isInteger
         - safeNumberType
+        - isPowZeroAtInfinity
         - format
         - normalizeFormatOptions
         - splitNumber
@@ -13232,7 +14075,7 @@ modules:
         - sinh
         - tanh
     functions/src/utils/numeric.ts:
-      description: 'Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction.'
+      description: "Convert a numeric input to a specific numeric type: number, BigNumber, bigint, or Fraction."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -13397,28 +14240,6 @@ modules:
       constants:
         - createTypeOf
   functions/wasm:
-    functions/src/wasm/WasmLoader.ts:
-      description: WASM Loader - Loads and manages WebAssembly modules
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./integrity.js
-          imports:
-            - verifyWasmIntegrity
-            - loadWasmManifest
-      exports:
-        - wasmLoader
-        - initWasm
-        - WasmLoader
-      classes:
-        - WasmLoader
-      interfaces:
-        - WasmModule
-        - LoadingMetrics
-      functions:
-        - initWasm
-      constants:
-        - wasmLoader
     functions/src/wasm/bitwise/wasm-bridge.ts:
       description: WASM dispatch bridge for elementwise Int32Array bitwise ops.
       externalDependencies: []
@@ -13455,7 +14276,7 @@ modules:
         - loadWasmManifest
         - verifyWasmIntegrity
     functions/src/wasm/interpolation/wasm-bridge.ts:
-      description: WASM dispatch bridge for the tridiagonal-solve hot loop (Slice 3.10b).
+      description: WASM dispatch bridge for the tridiagonal-solve and divided-difference
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -13465,15 +14286,21 @@ modules:
             - WasmModule
       exports:
         - WASM_TRIDIAG_THRESHOLD
+        - WASM_INTERP_THRESHOLD
         - tridiagSolveJS
         - tridiagSolveDispatch
         - resetTridiagWasm
+        - dividedDifferenceJS
+        - dividedDifferenceDispatch
       functions:
         - tridiagSolveJS
         - tridiagSolveDispatch
         - resetTridiagWasm
+        - dividedDifferenceJS
+        - dividedDifferenceDispatch
       constants:
         - WASM_TRIDIAG_THRESHOLD
+        - WASM_INTERP_THRESHOLD
     functions/src/wasm/poly/wasm-bridge.ts:
       description: WASM dispatch bridge for polynomial hot-loop kernels.
       externalDependencies: []
@@ -13485,17 +14312,88 @@ modules:
             - WasmModule
       exports:
         - WASM_POLY_THRESHOLD
+        - WASM_POLY_FIT_THRESHOLD
         - polyMulDispatch
         - polyDivModDispatch
+        - resultantDispatch
+        - discriminantDispatch
+        - polyFitDispatch
+        - chebFitDispatch
+        - legendreFitDispatch
         - resetPolyWasm
       functions:
         - polyMulDispatch
         - polyDivModDispatch
+        - resultantDispatch
+        - discriminantDispatch
+        - polyFitDispatch
+        - chebFitDispatch
+        - legendreFitDispatch
         - resetPolyWasm
       constants:
         - WASM_POLY_THRESHOLD
+        - WASM_POLY_FIT_THRESHOLD
+    functions/src/wasm/signal/wasm-bridge.ts:
+      description: WASM dispatch bridge for spectral signal kernels — Slice 5.6.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../WasmLoader.js
+          imports:
+            - wasmLoader
+            - WasmModule
+      exports:
+        - WASM_SIGNAL_THRESHOLD
+        - applyWindowJS
+        - goertzelJS
+        - welchPSDJS
+        - bartlettPSDJS
+        - chirpZTransformJS
+        - applyWindowDispatch
+        - welchPSDDispatch
+        - bartlettPSDDispatch
+        - goertzelDispatch
+        - chirpZTransformDispatch
+      functions:
+        - applyWindowJS
+        - goertzelJS
+        - welchPSDJS
+        - bartlettPSDJS
+        - chirpZTransformJS
+        - applyWindowDispatch
+        - welchPSDDispatch
+        - bartlettPSDDispatch
+        - goertzelDispatch
+        - chirpZTransformDispatch
+      constants:
+        - WASM_SIGNAL_THRESHOLD
+    functions/src/wasm/sort/wasm-bridge.ts:
+      description: WASM dispatch bridge for sort kernels — Slice 5.7a.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../WasmLoader.js
+          imports:
+            - wasmLoader
+      exports:
+        - WASM_SORT_THRESHOLD
+        - sortF64JS
+        - argsortF64JS
+        - rankF64JS
+        - sortF64Dispatch
+        - argsortF64Dispatch
+        - rankF64Dispatch
+      functions:
+        - sortF64JS
+        - argsortF64JS
+        - rankF64JS
+        - sortF64Dispatch
+        - argsortF64Dispatch
+        - rankF64Dispatch
+      constants:
+        - WASM_SORT_THRESHOLD
     functions/src/wasm/special/wasm-bridge.ts:
-      description: WASM dispatch bridge for Bessel J/Y array kernels (Slice 3.10c-1).
+      description: WASM dispatch bridge for Bessel J/Y and Airy Ai/Bi array kernels.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -13511,13 +14409,48 @@ modules:
         - besselY0JS
         - besselY1JS
         - besselYnJS
+        - airyAiJS
+        - airyBiJS
         - besselJ0Dispatch
         - besselJ1Dispatch
         - besselJDispatch
         - besselY0Dispatch
         - besselY1Dispatch
         - besselYDispatch
+        - airyAiDispatch
+        - airyBiDispatch
+        - lgammaJS
+        - lgammaDispatch
+        - carlsonRCJS
+        - carlsonRFJS
+        - carlsonRDJS
+        - carlsonRJJS
+        - ellipticFIncompleteJS
+        - ellipticEIncompleteJS
+        - ellipticPiIncompleteJS
+        - carlsonRCScalar
+        - carlsonRFScalar
+        - carlsonRDScalar
+        - carlsonRJScalar
+        - ellipticFIncompleteScalar
+        - ellipticEIncompleteScalar
+        - ellipticPiIncompleteScalar
+        - carlsonRCDispatch
+        - carlsonRFDispatch
+        - carlsonRDDispatch
+        - carlsonRJDispatch
+        - ellipticFIncompleteDispatch
+        - ellipticEIncompleteDispatch
+        - ellipticPiIncompleteDispatch
+        - resetCarlsonWasm
         - resetBesselWasm
+        - resetAiryWasm
+        - resetEllipticWasm
+        - resetLgammaWasm
+        - ellipticKJS
+        - ellipticEJS
+        - ellipticKDispatch
+        - ellipticEDispatch
       functions:
         - besselJ0JS
         - besselJ1JS
@@ -13525,15 +14458,190 @@ modules:
         - besselY0JS
         - besselY1JS
         - besselYnJS
+        - airyAiJS
+        - airyBiJS
         - besselJ0Dispatch
         - besselJ1Dispatch
         - besselJDispatch
         - besselY0Dispatch
         - besselY1Dispatch
         - besselYDispatch
+        - airyAiDispatch
+        - airyBiDispatch
+        - lgammaJS
+        - lgammaDispatch
+        - carlsonRCJS
+        - carlsonRFJS
+        - carlsonRDJS
+        - carlsonRJJS
+        - ellipticFIncompleteJS
+        - ellipticEIncompleteJS
+        - ellipticPiIncompleteJS
+        - carlsonRCScalar
+        - carlsonRFScalar
+        - carlsonRDScalar
+        - carlsonRJScalar
+        - ellipticFIncompleteScalar
+        - ellipticEIncompleteScalar
+        - ellipticPiIncompleteScalar
+        - carlsonRCDispatch
+        - carlsonRFDispatch
+        - carlsonRDDispatch
+        - carlsonRJDispatch
+        - ellipticFIncompleteDispatch
+        - ellipticEIncompleteDispatch
+        - ellipticPiIncompleteDispatch
+        - resetCarlsonWasm
         - resetBesselWasm
+        - resetAiryWasm
+        - resetEllipticWasm
+        - resetLgammaWasm
+        - ellipticKJS
+        - ellipticEJS
+        - ellipticKDispatch
+        - ellipticEDispatch
       constants:
         - WASM_SPECIAL_THRESHOLD
+    functions/src/wasm/WasmLoader.ts:
+      description: WASM Loader - Loads and manages WebAssembly modules
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./integrity.js
+          imports:
+            - verifyWasmIntegrity
+            - loadWasmManifest
+      exports:
+        - wasmLoader
+        - initWasm
+        - WasmLoader
+      classes:
+        - WasmLoader
+      interfaces:
+        - WasmModule
+        - LoadingMetrics
+      functions:
+        - initWasm
+      constants:
+        - wasmLoader
+  expression/compiler:
+    expression/src/compiler/compile.ts:
+      description: Tree-walking AST compiler/evaluator for MathTS expressions.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/map.js
+          imports:
+            - ObjectWrappingMap
+        - file: ../utils/customs.js
+          imports:
+            - getSafeProperty
+            - setSafeProperty
+            - getSafeMethod
+      exports:
+        - compile
+      interfaces:
+        - Scope
+        - CompiledExpression
+      functions:
+        - compile
+    expression/src/compiler/index.ts:
+      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 1 symbols)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./compile.js
+          imports:
+            - compile
+          reExport: true
+      exports:
+        - compile
+      reExported:
+        - compile
+  expression/error:
+    expression/src/error/DimensionError.ts:
+      description: "Create a range error with the message:"
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - DimensionError
+      classes:
+        - DimensionError
+    expression/src/error/IndexError.ts:
+      description: Custom error type for index out of range errors
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - createIndexError
+        - IndexError
+      classes:
+        - IndexError
+      functions:
+        - createIndexError
+    expression/src/error/MathjsError.ts:
+      description: Custom error type for Mathjs errors
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - MathjsError
+      classes:
+        - MathjsError
+  expression/evaluator:
+    expression/src/evaluator/evaluate.ts:
+      description: Expression evaluator for MathTS.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../compiler/compile.js
+          imports:
+            - compile
+        - file: ../compiler/compile.js
+          imports:
+            - CompiledExpression
+            - Scope
+          typeOnly: true
+      exports:
+        - createEvaluate
+        - compileExpression
+      interfaces:
+        - EvaluateOptions
+      functions:
+        - createEvaluate
+        - compileExpression
+    expression/src/evaluator/index.ts:
+      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./evaluate.js
+          imports:
+            - createEvaluate
+            - compileExpression
+          reExport: true
+      exports:
+        - createEvaluate
+        - compileExpression
+      reExported:
+        - createEvaluate
+        - compileExpression
+  expression/function:
+    expression/src/function/parser.ts:
+      description: >-
+        Create a `math.Parser` object that keeps a context of variables and their values, allowing the evaluation of
+        expressions
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/factory.js
+          imports:
+            - factory
+      exports:
+        - createParser
+      constants:
+        - createParser
   expression:
     expression/src/Help.ts:
       description: Documentation object
@@ -13556,25 +14664,6 @@ modules:
         - createHelpClass
       constants:
         - createHelpClass
-    expression/src/Parser.ts:
-      description: Parser contains methods to evaluate or parse expressions, and has a number
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./utils/factory.js
-          imports:
-            - factory
-        - file: ./utils/is.js
-          imports:
-            - isFunction
-        - file: ./utils/map.js
-          imports:
-            - createEmptyMap
-            - toObject
-      exports:
-        - createParserClass
-      constants:
-        - createParserClass
     expression/src/index.ts:
       description: Expression parsing and evaluation for MathTS.
       externalDependencies: []
@@ -13582,35 +14671,39 @@ modules:
       internalDependencies:
         - file: ./types.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./keywords.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./operators.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./parse.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./Parser.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./Help.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./compiler/index.js
           imports:
-            - '*'
+            - "*"
           reExport: true
         - file: ./evaluator/index.js
           imports:
-            - '*'
+            - "*"
+          reExport: true
+        - file: ./function/parser.js
+          imports:
+            - createParser
           reExport: true
         - file: ./node/Node.js
           imports:
@@ -13677,6 +14770,7 @@ modules:
             - createSymbolNode
           reExport: true
       exports:
+        - createParser
         - createNode
         - createAccessorNode
         - createArrayNode
@@ -13694,14 +14788,15 @@ modules:
         - createRelationalNode
         - createSymbolNode
       reExported:
-        - '* from ./types.js'
-        - '* from ./keywords.js'
-        - '* from ./operators.js'
-        - '* from ./parse.js'
-        - '* from ./Parser.js'
-        - '* from ./Help.js'
-        - '* from ./compiler/index.js'
-        - '* from ./evaluator/index.js'
+        - "* from ./types.js"
+        - "* from ./keywords.js"
+        - "* from ./operators.js"
+        - "* from ./parse.js"
+        - "* from ./Parser.js"
+        - "* from ./Help.js"
+        - "* from ./compiler/index.js"
+        - "* from ./evaluator/index.js"
+        - createParser
         - createNode
         - createAccessorNode
         - createArrayNode
@@ -13786,106 +14881,31 @@ modules:
         - createParse
       constants:
         - createParse
+    expression/src/Parser.ts:
+      description: Parser contains methods to evaluate or parse expressions, and has a number
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./utils/factory.js
+          imports:
+            - factory
+        - file: ./utils/is.js
+          imports:
+            - isFunction
+        - file: ./utils/map.js
+          imports:
+            - createEmptyMap
+            - toObject
+      exports:
+        - createParserClass
+      constants:
+        - createParserClass
     expression/src/types.ts:
       description: Type definitions for expression module
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       exports: []
-  expression/compiler:
-    expression/src/compiler/compile.ts:
-      description: Tree-walking AST compiler/evaluator for MathTS expressions.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../utils/map.js
-          imports:
-            - ObjectWrappingMap
-        - file: ../utils/customs.js
-          imports:
-            - getSafeProperty
-            - setSafeProperty
-            - getSafeMethod
-      exports:
-        - compile
-      interfaces:
-        - Scope
-        - CompiledExpression
-      functions:
-        - compile
-    expression/src/compiler/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 1 symbols)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./compile.js
-          imports:
-            - compile
-          reExport: true
-      exports:
-        - compile
-      reExported:
-        - compile
-  expression/error:
-    expression/src/error/DimensionError.ts:
-      description: 'Create a range error with the message:'
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - DimensionError
-      classes:
-        - DimensionError
-    expression/src/error/IndexError.ts:
-      description: Custom error type for index out of range errors
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - createIndexError
-        - IndexError
-      classes:
-        - IndexError
-      functions:
-        - createIndexError
-  expression/evaluator:
-    expression/src/evaluator/evaluate.ts:
-      description: Expression evaluator for MathTS.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../compiler/compile.js
-          imports:
-            - compile
-        - file: ../compiler/compile.js
-          imports:
-            - CompiledExpression
-            - Scope
-          typeOnly: true
-      exports:
-        - createEvaluate
-        - compileExpression
-      interfaces:
-        - EvaluateOptions
-      functions:
-        - createEvaluate
-        - compileExpression
-    expression/src/evaluator/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./evaluate.js
-          imports:
-            - createEvaluate
-            - compileExpression
-          reExport: true
-      exports:
-        - createEvaluate
-        - compileExpression
-      reExported:
-        - createEvaluate
-        - compileExpression
   expression/node:
     expression/src/node/AccessorNode.ts:
       description: Are parenthesis needed?
@@ -14329,7 +15349,7 @@ modules:
       constants:
         - createSymbolNode
     expression/src/node/utils/access.ts:
-      description: 'Retrieve part of an object:'
+      description: "Retrieve part of an object:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14344,7 +15364,7 @@ modules:
       functions:
         - accessFactory
     expression/src/node/utils/assign.ts:
-      description: 'Replace part of an object:'
+      description: "Replace part of an object:"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14545,6 +15565,9 @@ modules:
         - file: ./object.js
           imports:
             - pickShallow
+        - file: ../error/MathjsError.js
+          imports:
+            - MathjsError
       exports:
         - factory
         - sortFactories
@@ -14566,7 +15589,7 @@ modules:
         - isOptionalDependency
         - stripOptionalNotation
     expression/src/utils/is.ts:
-      description: 'Test whether a value is a collection: an Array or Matrix'
+      description: "Test whether a value is a collection: an Array or Matrix"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -14693,7 +15716,7 @@ modules:
       constants:
         - isArray
     expression/src/utils/latex.ts:
-      description: '@ts-ignore - escape-latex may not have type declarations'
+      description: "@ts-ignore - escape-latex may not have type declarations"
       externalDependencies:
         - package: escape-latex
           imports:
@@ -14908,6 +15931,544 @@ modules:
         - _switch
       functions:
         - _switch
+  parser:
+    parser/src/index.ts:
+      description: Standalone expression parser for MathTS. This package re-exports the parser
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - createParse
+        - createParserClass
+        - createParser
+        - createNode
+        - createAccessorNode
+        - createArrayNode
+        - createAssignmentNode
+        - createBlockNode
+        - createConditionalNode
+        - createConstantNode
+        - createFunctionAssignmentNode
+        - createFunctionNode
+        - createIndexNode
+        - createObjectNode
+        - createOperatorNode
+        - createParenthesisNode
+        - createRangeNode
+        - createRelationalNode
+        - createSymbolNode
+        - keywords
+        - properties
+        - getPrecedence
+        - getAssociativity
+        - isAssociativeWith
+        - getOperator
+      reExported:
+        - createParse
+        - createParserClass
+        - createParser
+        - createNode
+        - createAccessorNode
+        - createArrayNode
+        - createAssignmentNode
+        - createBlockNode
+        - createConditionalNode
+        - createConstantNode
+        - createFunctionAssignmentNode
+        - createFunctionNode
+        - createIndexNode
+        - createObjectNode
+        - createOperatorNode
+        - createParenthesisNode
+        - createRangeNode
+        - createRelationalNode
+        - createSymbolNode
+        - keywords
+        - properties
+        - getPrecedence
+        - getAssociativity
+        - isAssociativeWith
+        - getOperator
+        - type * from @danielsimonjr/mathts-expression
+  units:
+    units/src/index.ts:
+      description: Standalone units & dimensional analysis for MathTS. Re-exports the unit system
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Unit
+        - isUnit
+        - isUnitValue
+        - DimensionMismatchError
+        - UnitParseError
+        - DIMENSIONLESS
+        - dim
+        - BASE_UNITS
+        - DERIVED_UNITS
+        - ALL_UNITS
+        - UNIT_ALIASES
+        - getUnitDef
+        - SI_PREFIXES
+        - BEST_PREFIXES
+        - getPrefix
+      reExported:
+        - Unit
+        - isUnit
+        - isUnitValue
+        - DimensionMismatchError
+        - UnitParseError
+        - DIMENSIONLESS
+        - dim
+        - BASE_UNITS
+        - DERIVED_UNITS
+        - ALL_UNITS
+        - UNIT_ALIASES
+        - getUnitDef
+        - SI_PREFIXES
+        - BEST_PREFIXES
+        - getPrefix
+  numbers:
+    numbers/src/index.ts:
+      description: Standalone numeric types for MathTS. Re-exports `Complex`, `Fraction`, and
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - Complex
+        - isComplex
+        - I
+        - COMPLEX_ZERO
+        - COMPLEX_ONE
+        - COMPLEX_NEG_ONE
+        - Fraction
+        - isFraction
+        - FRACTION_ZERO
+        - FRACTION_ONE
+        - FRACTION_NEG_ONE
+        - FRACTION_HALF
+        - FRACTION_THIRD
+        - FRACTION_QUARTER
+        - BigNumber
+        - isBigNumber
+        - BIGNUMBER_ZERO
+        - BIGNUMBER_ONE
+        - BIGNUMBER_NEG_ONE
+        - BIGNUMBER_TEN
+        - BIGNUMBER_PI
+        - BIGNUMBER_E
+        - BIGNUMBER_LN2
+        - BIGNUMBER_LN10
+      reExported:
+        - Complex
+        - isComplex
+        - I
+        - COMPLEX_ZERO
+        - COMPLEX_ONE
+        - COMPLEX_NEG_ONE
+        - Fraction
+        - isFraction
+        - FRACTION_ZERO
+        - FRACTION_ONE
+        - FRACTION_NEG_ONE
+        - FRACTION_HALF
+        - FRACTION_THIRD
+        - FRACTION_QUARTER
+        - BigNumber
+        - isBigNumber
+        - BIGNUMBER_ZERO
+        - BIGNUMBER_ONE
+        - BIGNUMBER_NEG_ONE
+        - BIGNUMBER_TEN
+        - BIGNUMBER_PI
+        - BIGNUMBER_E
+        - BIGNUMBER_LN2
+        - BIGNUMBER_LN10
+  ast:
+    ast/src/index.ts:
+      description: Standalone AST node constructors for MathTS expressions. Re-exports the
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - createNode
+        - createAccessorNode
+        - createArrayNode
+        - createAssignmentNode
+        - createBlockNode
+        - createConditionalNode
+        - createConstantNode
+        - createFunctionAssignmentNode
+        - createFunctionNode
+        - createIndexNode
+        - createObjectNode
+        - createOperatorNode
+        - createParenthesisNode
+        - createRangeNode
+        - createRelationalNode
+        - createSymbolNode
+      reExported:
+        - createNode
+        - createAccessorNode
+        - createArrayNode
+        - createAssignmentNode
+        - createBlockNode
+        - createConditionalNode
+        - createConstantNode
+        - createFunctionAssignmentNode
+        - createFunctionNode
+        - createIndexNode
+        - createObjectNode
+        - createOperatorNode
+        - createParenthesisNode
+        - createRangeNode
+        - createRelationalNode
+        - createSymbolNode
+        - type * from @danielsimonjr/mathts-expression
+  evaluator:
+    evaluator/src/index.ts:
+      description: Standalone compiler + evaluator for MathTS expressions. Re-exports the
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - compile
+        - createEvaluate
+        - compileExpression
+      reExported:
+        - compile
+        - createEvaluate
+        - compileExpression
+  linalg:
+    linalg/src/index.ts:
+      description: Standalone linear-algebra decompositions for MathTS. Re-exports the matrix
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - eig
+        - eigvals
+        - powerIteration
+        - svd
+        - singularValues
+        - pinv
+        - lowRankApprox
+        - cond
+        - norm2
+        - normFro
+        - eigWasm
+        - eigvalsWasm
+        - spectralRadiusWasm
+        - svdWasm
+        - matrixPinv
+        - qr
+        - lu
+        - cholesky
+        - matrixExpm
+        - matrixLogm
+        - matrixSqrtm
+        - matrixSchur
+      reExported:
+        - eig
+        - eigvals
+        - powerIteration
+        - svd
+        - singularValues
+        - pinv
+        - lowRankApprox
+        - cond
+        - norm2
+        - normFro
+        - eigWasm
+        - eigvalsWasm
+        - spectralRadiusWasm
+        - svdWasm
+        - matrixPinv
+        - qr
+        - lu
+        - cholesky
+        - matrixExpm
+        - matrixLogm
+        - matrixSqrtm
+        - matrixSchur
+  arithmetic:
+    arithmetic/src/index.ts:
+      description: Standalone arithmetic functions for MathTS. Re-exports the `arithmetic` typed-function domain
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - add
+        - subtract
+        - multiply
+        - divide
+        - unaryMinus
+        - unaryPlus
+        - abs
+        - sign
+        - pow
+        - sqrt
+        - square
+        - cube
+        - cbrt
+        - nthRoot
+        - exp
+        - log
+        - log10
+        - log2
+        - log1p
+        - expm1
+        - round
+        - floor
+        - ceil
+        - fix
+        - mod
+        - gcd
+        - lcm
+        - xgcd
+        - norm
+        - sinh
+        - cosh
+        - tanh
+        - equal
+        - smaller
+        - larger
+        - smallerEq
+        - largerEq
+        - compare
+        - min
+        - max
+        - sum
+        - mean
+        - variance
+        - std
+        - dot
+        - typedArithmetic
+      reExported:
+        - add
+        - subtract
+        - multiply
+        - divide
+        - unaryMinus
+        - unaryPlus
+        - abs
+        - sign
+        - pow
+        - sqrt
+        - square
+        - cube
+        - cbrt
+        - nthRoot
+        - exp
+        - log
+        - log10
+        - log2
+        - log1p
+        - expm1
+        - round
+        - floor
+        - ceil
+        - fix
+        - mod
+        - gcd
+        - lcm
+        - xgcd
+        - norm
+        - sinh
+        - cosh
+        - tanh
+        - equal
+        - smaller
+        - larger
+        - smallerEq
+        - largerEq
+        - compare
+        - min
+        - max
+        - sum
+        - mean
+        - variance
+        - std
+        - dot
+        - typedArithmetic
+  trigonometry:
+    trigonometry/src/index.ts:
+      description: Standalone trigonometric functions for MathTS. Re-exports the `trigonometry` typed-function domain
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - sin
+        - cos
+        - tan
+        - csc
+        - sec
+        - cot
+        - asin
+        - acos
+        - atan
+        - atan2
+        - acsc
+        - asec
+        - acot
+        - asinh
+        - acosh
+        - atanh
+        - toRadians
+        - toDegrees
+        - hypot
+        - typedTrigonometry
+      reExported:
+        - sin
+        - cos
+        - tan
+        - csc
+        - sec
+        - cot
+        - asin
+        - acos
+        - atan
+        - atan2
+        - acsc
+        - asec
+        - acot
+        - asinh
+        - acosh
+        - atanh
+        - toRadians
+        - toDegrees
+        - hypot
+        - typedTrigonometry
+  statistics:
+    statistics/src/index.ts:
+      description: Standalone statistics functions for MathTS. Re-exports the `statistics` typed-function domain
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - parallelStatSum
+        - parallelStatMean
+        - parallelStatVariance
+        - parallelStatStd
+        - parallelStatMin
+        - parallelStatMax
+        - parallelStatMinMax
+        - parallelStatMedian
+        - parallelStatMode
+        - parallelStatProd
+        - parallelStatNorm
+        - parallelStatDistance
+        - parallelStatCorr
+        - parallelStatMAD
+        - parallelStatCumsum
+        - parallelStatQuantile
+        - parallelStatPercentile
+        - parallelStatHistogram
+        - quickSelect
+        - medianSelect
+        - minSelect
+        - maxSelect
+        - typedStatistics
+      reExported:
+        - parallelStatSum
+        - parallelStatMean
+        - parallelStatVariance
+        - parallelStatStd
+        - parallelStatMin
+        - parallelStatMax
+        - parallelStatMinMax
+        - parallelStatMedian
+        - parallelStatMode
+        - parallelStatProd
+        - parallelStatNorm
+        - parallelStatDistance
+        - parallelStatCorr
+        - parallelStatMAD
+        - parallelStatCumsum
+        - parallelStatQuantile
+        - parallelStatPercentile
+        - parallelStatHistogram
+        - quickSelect
+        - medianSelect
+        - minSelect
+        - maxSelect
+        - typedStatistics
+  signal:
+    signal/src/index.ts:
+      description: Standalone signal-processing functions for MathTS. Re-exports the `signal` typed-function domain
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - parallelFFT
+        - parallelIFFT
+        - parallelFFTMagnitude
+        - parallelFFTPower
+        - parallelConv
+        - parallelXCorr
+        - parallelAutoCorr
+        - crossCorrelation
+        - autoCorrelation
+        - groupDelay
+        - unwrapPhase
+        - dct
+        - idct
+        - dst
+        - idst
+        - dwt
+        - fourier
+        - invFourier
+        - hilbertTransform
+        - periodogram
+        - lowpassFilter
+        - highpassFilter
+        - bandpassFilter
+        - resample
+        - medfilt
+        - windowFunction
+        - convolve
+        - correlate
+        - welchPSD
+        - bartlettPSD
+        - multiTaperPSD
+        - goertzel
+        - chirpZTransform
+        - typedSignal
+      reExported:
+        - parallelFFT
+        - parallelIFFT
+        - parallelFFTMagnitude
+        - parallelFFTPower
+        - parallelConv
+        - parallelXCorr
+        - parallelAutoCorr
+        - crossCorrelation
+        - autoCorrelation
+        - groupDelay
+        - unwrapPhase
+        - dct
+        - idct
+        - dst
+        - idst
+        - dwt
+        - fourier
+        - invFourier
+        - hilbertTransform
+        - periodogram
+        - lowpassFilter
+        - highpassFilter
+        - bandpassFilter
+        - resample
+        - medfilt
+        - windowFunction
+        - convolve
+        - correlate
+        - welchPSD
+        - bartlettPSD
+        - multiTaperPSD
+        - goertzel
+        - chirpZTransform
+        - typedSignal
   parallel:
     parallel/src/ComputePool.ts:
       description: MathTS Compute Pool
@@ -14928,6 +16489,7 @@ modules:
         - DEFAULT_POOL_CONFIG
         - computePool
         - resolveOpThreshold
+        - tensordotChunkKernel
         - ComputePool
       classes:
         - ComputePool
@@ -14936,6 +16498,7 @@ modules:
         - ParallelResult
       functions:
         - resolveOpThreshold
+        - tensordotChunkKernel
       constants:
         - DEFAULT_POOL_CONFIG
         - computePool
@@ -15746,7 +17309,7 @@ modules:
         - DependencyGraph
   assembly/algebra:
     assembly/src/algebra/decomposition.ts:
-      description: 'Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant.'
+      description: "Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant."
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -15967,6 +17530,14 @@ modules:
             - medfilt
             - windowFunction
           reExport: true
+        - file: ./signal
+          imports:
+            - apply_window_f64
+            - welch_psd_f64
+            - bartlett_psd_f64
+            - goertzel_f64
+            - chirp_z_transform_f64
+          reExport: true
         - file: ./ops/linalg
           imports:
             - rowReduce
@@ -16054,10 +17625,41 @@ modules:
           imports:
             - poly_mul_f64
             - poly_div_mod_f64
+            - poly_fit_f64
+            - cheb_fit_f64
+            - legendre_fit_f64
           reExport: true
         - file: ./tridiag
           imports:
             - tridiag_solve_f64
+            - divided_difference_f64
+          reExport: true
+        - file: ./special
+          imports:
+            - bessel_j0_f64
+            - bessel_j1_f64
+            - bessel_jn_f64
+            - bessel_y0_f64
+            - bessel_y1_f64
+            - bessel_yn_f64
+            - airy_ai_f64
+            - airy_bi_f64
+            - elliptic_k_f64
+            - elliptic_e_f64
+            - lgamma_f64
+            - carlson_rc_f64
+            - carlson_rf_f64
+            - carlson_rd_f64
+            - carlson_rj_f64
+            - elliptic_f_incomplete_f64
+            - elliptic_e_incomplete_f64
+            - elliptic_pi_incomplete_f64
+          reExport: true
+        - file: ./sort
+          imports:
+            - sort_f64
+            - argsort_f64
+            - rank_f64
           reExport: true
         - file: ./ops/complex-array
           imports:
@@ -16265,6 +17867,11 @@ modules:
         - resample
         - medfilt
         - windowFunction
+        - apply_window_f64
+        - welch_psd_f64
+        - bartlett_psd_f64
+        - goertzel_f64
+        - chirp_z_transform_f64
         - rowReduce
         - characteristicPolynomial
         - expfit
@@ -16329,7 +17936,32 @@ modules:
         - rightLogShift_i32_array
         - poly_mul_f64
         - poly_div_mod_f64
+        - poly_fit_f64
+        - cheb_fit_f64
+        - legendre_fit_f64
         - tridiag_solve_f64
+        - divided_difference_f64
+        - bessel_j0_f64
+        - bessel_j1_f64
+        - bessel_jn_f64
+        - bessel_y0_f64
+        - bessel_y1_f64
+        - bessel_yn_f64
+        - airy_ai_f64
+        - airy_bi_f64
+        - elliptic_k_f64
+        - elliptic_e_f64
+        - lgamma_f64
+        - carlson_rc_f64
+        - carlson_rf_f64
+        - carlson_rd_f64
+        - carlson_rj_f64
+        - elliptic_f_incomplete_f64
+        - elliptic_e_incomplete_f64
+        - elliptic_pi_incomplete_f64
+        - sort_f64
+        - argsort_f64
+        - rank_f64
         - complex_array_zeros
         - complex_array_ones
         - complex_array_fill
@@ -16533,6 +18165,11 @@ modules:
         - resample
         - medfilt
         - windowFunction
+        - apply_window_f64
+        - welch_psd_f64
+        - bartlett_psd_f64
+        - goertzel_f64
+        - chirp_z_transform_f64
         - rowReduce
         - characteristicPolynomial
         - expfit
@@ -16597,7 +18234,32 @@ modules:
         - rightLogShift_i32_array
         - poly_mul_f64
         - poly_div_mod_f64
+        - poly_fit_f64
+        - cheb_fit_f64
+        - legendre_fit_f64
         - tridiag_solve_f64
+        - divided_difference_f64
+        - bessel_j0_f64
+        - bessel_j1_f64
+        - bessel_jn_f64
+        - bessel_y0_f64
+        - bessel_y1_f64
+        - bessel_yn_f64
+        - airy_ai_f64
+        - airy_bi_f64
+        - elliptic_k_f64
+        - elliptic_e_f64
+        - lgamma_f64
+        - carlson_rc_f64
+        - carlson_rf_f64
+        - carlson_rd_f64
+        - carlson_rj_f64
+        - elliptic_f_incomplete_f64
+        - elliptic_e_incomplete_f64
+        - elliptic_pi_incomplete_f64
+        - sort_f64
+        - argsort_f64
+        - rank_f64
         - complex_array_zeros
         - complex_array_ones
         - complex_array_fill
@@ -16639,9 +18301,92 @@ modules:
       exports:
         - poly_mul_f64
         - poly_div_mod_f64
+        - poly_resultant_f64
+        - poly_fit_f64
+        - cheb_fit_f64
+        - legendre_fit_f64
+        - poly_discriminant_f64
       functions:
         - poly_mul_f64
         - poly_div_mod_f64
+        - poly_resultant_f64
+        - poly_fit_f64
+        - cheb_fit_f64
+        - legendre_fit_f64
+        - poly_discriminant_f64
+    assembly/src/signal.ts:
+      description: Spectral-windowing WASM kernels — AssemblyScript parity port (Slice 5.6).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - apply_window_f64
+        - welch_psd_f64
+        - bartlett_psd_f64
+        - goertzel_f64
+        - chirp_z_transform_f64
+      functions:
+        - apply_window_f64
+        - welch_psd_f64
+        - bartlett_psd_f64
+        - goertzel_f64
+        - chirp_z_transform_f64
+    assembly/src/sort.ts:
+      description: Sort hot-loop kernels — AssemblyScript parity port (Slice 5.7a).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - sort_f64
+        - argsort_f64
+        - rank_f64
+      functions:
+        - sort_f64
+        - argsort_f64
+        - rank_f64
+    assembly/src/special.ts:
+      description: Bessel J/Y, Airy Ai/Bi, lgamma — AssemblyScript parity port.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - lgamma_f64
+        - bessel_j0_f64
+        - bessel_j1_f64
+        - bessel_jn_f64
+        - bessel_y0_f64
+        - bessel_y1_f64
+        - bessel_yn_f64
+        - airy_ai_f64
+        - airy_bi_f64
+        - elliptic_k_f64
+        - elliptic_e_f64
+        - carlson_rc_f64
+        - carlson_rf_f64
+        - carlson_rd_f64
+        - carlson_rj_f64
+        - elliptic_f_incomplete_f64
+        - elliptic_e_incomplete_f64
+        - elliptic_pi_incomplete_f64
+      functions:
+        - lgamma_f64
+        - bessel_j0_f64
+        - bessel_j1_f64
+        - bessel_jn_f64
+        - bessel_y0_f64
+        - bessel_y1_f64
+        - bessel_yn_f64
+        - airy_ai_f64
+        - airy_bi_f64
+        - elliptic_k_f64
+        - elliptic_e_f64
+        - carlson_rc_f64
+        - carlson_rf_f64
+        - carlson_rd_f64
+        - carlson_rj_f64
+        - elliptic_f_incomplete_f64
+        - elliptic_e_incomplete_f64
+        - elliptic_pi_incomplete_f64
     assembly/src/tridiag.ts:
       description: Tridiagonal-solve kernel — AssemblyScript parity port (Slice 3.10b).
       externalDependencies: []
@@ -16649,8 +18394,10 @@ modules:
       internalDependencies: []
       exports:
         - tridiag_solve_f64
+        - divided_difference_f64
       functions:
         - tridiag_solve_f64
+        - divided_difference_f64
   assembly/ops:
     assembly/src/ops/approx.ts:
       description: Rational approximation — AssemblyScript fallback mirroring
@@ -17323,7 +19070,7 @@ modules:
             - shims
         - file: ./shims.js
           imports:
-            - '*'
+            - "*"
           reExport: true
       exports:
         - Complex
@@ -17344,7 +19091,7 @@ modules:
         - all
         - create
       reExported:
-        - '* from ./shims.js'
+        - "* from ./shims.js"
         - Complex
         - Fraction
         - BigNumber
@@ -17496,10 +19243,16 @@ modules:
 dependencyGraph:
   circularDependencies:
     runtime: []
-    typeOnly: []
-    total: 0
+    typeOnly:
+      - - matrix/src/types/DenseMatrix.ts
+        - matrix/src/types/dense/arithmetic.ts
+        - matrix/src/types/DenseMatrix.ts
+      - - matrix/src/types/DenseMatrix.ts
+        - matrix/src/types/dense/reduction.ts
+        - matrix/src/types/DenseMatrix.ts
+    total: 2
     runtimeCount: 0
-    typeOnlyCount: 0
+    typeOnlyCount: 2
   layers:
     - name: Packages/typed-function
       files:
@@ -17526,29 +19279,32 @@ dependencyGraph:
         - core/src/types/complex.ts
         - core/src/types/fraction.ts
         - core/src/types/interfaces.ts
+        - core/src/types/unit-definitions.ts
+        - core/src/types/unit-prefixes.ts
+        - core/src/types/unit.ts
     - name: Matrix/backends
       files:
         - matrix/src/backends/Backend.ts
         - matrix/src/backends/BackendManager.ts
+        - matrix/src/backends/gpu/BatchExecutor.ts
+        - matrix/src/backends/gpu/BufferPool.ts
+        - matrix/src/backends/gpu/detect.ts
+        - matrix/src/backends/gpu/GPUContext.ts
+        - matrix/src/backends/gpu/index.ts
+        - matrix/src/backends/gpu/ShaderManager.ts
+        - matrix/src/backends/gpu/Sync.ts
         - matrix/src/backends/GPUBackend.ts
         - matrix/src/backends/GPUMatrixBackend.ts
+        - matrix/src/backends/index.ts
         - matrix/src/backends/JSBackend.ts
         - matrix/src/backends/ParallelBackend.ts
         - matrix/src/backends/RustWASMBackend.ts
         - matrix/src/backends/RustWasmLoader.ts
-        - matrix/src/backends/WASMBackend.ts
-        - matrix/src/backends/WasmLoader.ts
-        - matrix/src/backends/gpu/BatchExecutor.ts
-        - matrix/src/backends/gpu/BufferPool.ts
-        - matrix/src/backends/gpu/GPUContext.ts
-        - matrix/src/backends/gpu/ShaderManager.ts
-        - matrix/src/backends/gpu/Sync.ts
-        - matrix/src/backends/gpu/detect.ts
-        - matrix/src/backends/gpu/index.ts
-        - matrix/src/backends/index.ts
         - matrix/src/backends/wasm/detect.ts
         - matrix/src/backends/wasm/fft-wasm.ts
         - matrix/src/backends/wasm/index.ts
+        - matrix/src/backends/WASMBackend.ts
+        - matrix/src/backends/WasmLoader.ts
     - name: Matrix
       files:
         - matrix/src/config.ts
@@ -17560,33 +19316,48 @@ dependencyGraph:
         - matrix/src/operations/cholesky.ts
         - matrix/src/operations/eig-wasm.ts
         - matrix/src/operations/eig.ts
+        - matrix/src/operations/expm.ts
         - matrix/src/operations/index.ts
+        - matrix/src/operations/logm.ts
         - matrix/src/operations/lu.ts
+        - matrix/src/operations/pinv.ts
         - matrix/src/operations/qr.ts
+        - matrix/src/operations/schur.ts
+        - matrix/src/operations/sqrtm.ts
         - matrix/src/operations/svd-wasm.ts
         - matrix/src/operations/svd.ts
     - name: Matrix/types
       files:
+        - matrix/src/types/dense/arithmetic.ts
+        - matrix/src/types/dense/reduction.ts
         - matrix/src/types/DenseMatrix.ts
+        - matrix/src/types/index.ts
         - matrix/src/types/Matrix.ts
         - matrix/src/types/SparseMatrix.ts
-        - matrix/src/types/index.ts
     - name: Tensor
       files:
-        - tensor/src/Tensor.ts
         - tensor/src/contraction-sequence.ts
         - tensor/src/index.ts
         - tensor/src/named-index.ts
+        - tensor/src/Tensor.ts
     - name: Tensor/operations
       files:
         - tensor/src/operations/cholesky.ts
+        - tensor/src/operations/concatenate.ts
         - tensor/src/operations/eig.ts
+        - tensor/src/operations/flip.ts
+        - tensor/src/operations/gather.ts
         - tensor/src/operations/kron.ts
         - tensor/src/operations/lu.ts
+        - tensor/src/operations/pad.ts
         - tensor/src/operations/pinv.ts
         - tensor/src/operations/qr.ts
         - tensor/src/operations/random.ts
+        - tensor/src/operations/roll.ts
+        - tensor/src/operations/scatter.ts
+        - tensor/src/operations/slice.ts
         - tensor/src/operations/solve.ts
+        - tensor/src/operations/stack.ts
         - tensor/src/operations/svd.ts
     - name: Autograd
       files:
@@ -17713,6 +19484,7 @@ dependencyGraph:
         - functions/src/error/ArgumentsError.ts
         - functions/src/error/DimensionError.ts
         - functions/src/error/IndexError.ts
+        - functions/src/error/MathjsError.ts
     - name: Functions/expression
       files:
         - functions/src/expression/operators.ts
@@ -17782,6 +19554,7 @@ dependencyGraph:
         - functions/src/matrix/subset.ts
         - functions/src/matrix/trace.ts
         - functions/src/matrix/transpose.ts
+        - functions/src/matrix/utils/zerosAndOnes.ts
         - functions/src/matrix/zeros.ts
     - name: Functions/numeric
       files:
@@ -17907,10 +19680,10 @@ dependencyGraph:
         - functions/src/type/chain/function/chain.ts
         - functions/src/type/complex/Complex.ts
         - functions/src/type/matrix/FibonacciHeap.ts
+        - functions/src/type/matrix/function/index.ts
         - functions/src/type/matrix/ImmutableDenseMatrix.ts
         - functions/src/type/matrix/MatrixIndex.ts
         - functions/src/type/matrix/Spa.ts
-        - functions/src/type/matrix/function/index.ts
         - functions/src/type/matrix/types.ts
         - functions/src/type/matrix/utils/broadcast.ts
         - functions/src/type/matrix/utils/matAlgo01xDSid.ts
@@ -17929,11 +19702,11 @@ dependencyGraph:
         - functions/src/type/matrix/utils/matAlgo14xDs.ts
         - functions/src/type/matrix/utils/matrixAlgorithmSuite.ts
         - functions/src/type/resultset/ResultSet.ts
-        - functions/src/type/unit/Unit.ts
         - functions/src/type/unit/function/createUnit.ts
         - functions/src/type/unit/function/splitUnit.ts
         - functions/src/type/unit/function/unit.ts
         - functions/src/type/unit/physicalConstants.ts
+        - functions/src/type/unit/Unit.ts
     - name: Functions/typed
       files:
         - functions/src/typed/algebra.ts
@@ -17954,13 +19727,16 @@ dependencyGraph:
         - functions/src/typed/logical.ts
         - functions/src/typed/matrix-ops.ts
         - functions/src/typed/numeric.ts
+        - functions/src/typed/probability.ts
         - functions/src/typed/relational.ts
         - functions/src/typed/set.ts
         - functions/src/typed/signal.ts
         - functions/src/typed/special.ts
         - functions/src/typed/statistics.ts
+        - functions/src/typed/string.ts
         - functions/src/typed/trigonometry.ts
         - functions/src/typed/typed-bridge.ts
+        - functions/src/typed/unit.ts
     - name: Functions/unit
       files:
         - functions/src/unit/to.ts
@@ -17990,6 +19766,7 @@ dependencyGraph:
         - functions/src/utils/isPositive.ts
         - functions/src/utils/isPrime.ts
         - functions/src/utils/isZero.ts
+        - functions/src/utils/log.ts
         - functions/src/utils/lruQueue.ts
         - functions/src/utils/map.ts
         - functions/src/utils/node.ts
@@ -18006,21 +19783,14 @@ dependencyGraph:
         - functions/src/utils/typeOf.ts
     - name: Functions/wasm
       files:
-        - functions/src/wasm/WasmLoader.ts
         - functions/src/wasm/bitwise/wasm-bridge.ts
         - functions/src/wasm/integrity.ts
         - functions/src/wasm/interpolation/wasm-bridge.ts
         - functions/src/wasm/poly/wasm-bridge.ts
+        - functions/src/wasm/signal/wasm-bridge.ts
+        - functions/src/wasm/sort/wasm-bridge.ts
         - functions/src/wasm/special/wasm-bridge.ts
-    - name: Expression
-      files:
-        - expression/src/Help.ts
-        - expression/src/Parser.ts
-        - expression/src/index.ts
-        - expression/src/keywords.ts
-        - expression/src/operators.ts
-        - expression/src/parse.ts
-        - expression/src/types.ts
+        - functions/src/wasm/WasmLoader.ts
     - name: Expression/compiler
       files:
         - expression/src/compiler/compile.ts
@@ -18029,10 +19799,23 @@ dependencyGraph:
       files:
         - expression/src/error/DimensionError.ts
         - expression/src/error/IndexError.ts
+        - expression/src/error/MathjsError.ts
     - name: Expression/evaluator
       files:
         - expression/src/evaluator/evaluate.ts
         - expression/src/evaluator/index.ts
+    - name: Expression/function
+      files:
+        - expression/src/function/parser.ts
+    - name: Expression
+      files:
+        - expression/src/Help.ts
+        - expression/src/index.ts
+        - expression/src/keywords.ts
+        - expression/src/operators.ts
+        - expression/src/parse.ts
+        - expression/src/Parser.ts
+        - expression/src/types.ts
     - name: Expression/node
       files:
         - expression/src/node/AccessorNode.ts
@@ -18071,6 +19854,36 @@ dependencyGraph:
         - expression/src/utils/scope.ts
         - expression/src/utils/string.ts
         - expression/src/utils/switch.ts
+    - name: Parser
+      files:
+        - parser/src/index.ts
+    - name: Units
+      files:
+        - units/src/index.ts
+    - name: Numbers
+      files:
+        - numbers/src/index.ts
+    - name: Ast
+      files:
+        - ast/src/index.ts
+    - name: Evaluator
+      files:
+        - evaluator/src/index.ts
+    - name: Linalg
+      files:
+        - linalg/src/index.ts
+    - name: Arithmetic
+      files:
+        - arithmetic/src/index.ts
+    - name: Trigonometry
+      files:
+        - trigonometry/src/index.ts
+    - name: Statistics
+      files:
+        - statistics/src/index.ts
+    - name: Signal
+      files:
+        - signal/src/index.ts
     - name: Parallel
       files:
         - parallel/src/ComputePool.ts
@@ -18104,6 +19917,9 @@ dependencyGraph:
       files:
         - assembly/src/index.ts
         - assembly/src/poly.ts
+        - assembly/src/signal.ts
+        - assembly/src/sort.ts
+        - assembly/src/special.ts
         - assembly/src/tridiag.ts
     - name: Assembly/ops
       files:
@@ -18131,19 +19947,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 513
-  totalModules: 58
-  totalLinesOfCode: 132264
-  totalExports: 2971
-  totalClasses: 46
-  totalInterfaces: 278
-  totalFunctions: 1128
-  totalTypeGuards: 127
+  totalTypeScriptFiles: 554
+  totalModules: 69
+  totalLinesOfCode: 147773
+  totalExports: 3461
+  totalClasses: 51
+  totalInterfaces: 315
+  totalFunctions: 1279
+  totalTypeGuards: 129
   totalEnums: 0
-  totalConstants: 1072
-  totalReExports: 756
-  totalTypeOnlyImports: 353
+  totalConstants: 1115
+  totalReExports: 1057
+  totalTypeOnlyImports: 357
   runtimeCircularDeps: 0
-  typeOnlyCircularDeps: 0
+  typeOnlyCircularDeps: 2
   unusedFilesCount: 0
-  unusedExportsCount: 308
+  unusedExportsCount: 473

@@ -9,7 +9,7 @@ MathTS is a ground-up TypeScript rewrite of [mathjs](https://mathjs.org) package
 ESM-only npm workspaces monorepo. It accelerates computation through two WASM toolchains
 (Rust primary, AssemblyScript secondary), a WebWorker parallel-execution layer
 (`ComputePool`), and an optional WebGPU backend for large matrix operations.
-All 12 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
+All 22 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
 
 ## Contents
 
@@ -46,6 +46,21 @@ npm install @danielsimonjr/mathts-matrix   # DenseMatrix, SparseMatrix
 npm install @danielsimonjr/mathts-parallel  # ComputePool, parallel ops
 npm install @danielsimonjr/mathts-tensor    # rank-N tensors
 npm install @danielsimonjr/mathts-autograd  # forward + reverse-mode AD
+```
+
+Or install a single focused domain — thin re-export packages (no duplicated code):
+
+```bash
+npm install @danielsimonjr/mathts-numbers       # Complex, Fraction, BigNumber
+npm install @danielsimonjr/mathts-units         # Unit / dimensional analysis
+npm install @danielsimonjr/mathts-linalg        # eig, svd, qr, lu, cholesky, schur
+npm install @danielsimonjr/mathts-arithmetic    # add, multiply, sqrt, …
+npm install @danielsimonjr/mathts-trigonometry  # sin, cos, tan, …
+npm install @danielsimonjr/mathts-statistics    # mean, variance, quantile, …
+npm install @danielsimonjr/mathts-signal        # FFT, convolution, filters, …
+npm install @danielsimonjr/mathts-parser        # expression parser
+npm install @danielsimonjr/mathts-ast           # expression AST nodes
+npm install @danielsimonjr/mathts-evaluator     # compile / evaluate expressions
 ```
 
 ---

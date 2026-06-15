@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-05-24
+**Version**: 0.1.0 | **Last Updated**: 2026-06-15
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -51,32 +51,42 @@ This document provides a comprehensive dependency graph of all files, components
 41. [Functions/unit Dependencies](#functions-unit-dependencies)
 42. [Functions/utils Dependencies](#functions-utils-dependencies)
 43. [Functions/wasm Dependencies](#functions-wasm-dependencies)
-44. [Expression Dependencies](#expression-dependencies)
-45. [Expression/compiler Dependencies](#expression-compiler-dependencies)
-46. [Expression/error Dependencies](#expression-error-dependencies)
-47. [Expression/evaluator Dependencies](#expression-evaluator-dependencies)
-48. [Expression/node Dependencies](#expression-node-dependencies)
-49. [Expression/transform Dependencies](#expression-transform-dependencies)
-50. [Expression/utils Dependencies](#expression-utils-dependencies)
-51. [Parallel Dependencies](#parallel-dependencies)
-52. [Parallel/operations Dependencies](#parallel-operations-dependencies)
-53. [Parallel/ops Dependencies](#parallel-ops-dependencies)
-54. [Parallel/strategies Dependencies](#parallel-strategies-dependencies)
-55. [Workbook Dependencies](#workbook-dependencies)
-56. [Assembly/algebra Dependencies](#assembly-algebra-dependencies)
-57. [Assembly Dependencies](#assembly-dependencies)
-58. [Assembly/ops Dependencies](#assembly-ops-dependencies)
-59. [Assembly/types Dependencies](#assembly-types-dependencies)
-60. [Compat Dependencies](#compat-dependencies)
-61. [Dependency Matrix](#dependency-matrix)
-62. [Circular Dependency Analysis](#circular-dependency-analysis)
-63. [Visual Dependency Graph](#visual-dependency-graph)
-64. [Summary Statistics](#summary-statistics)
+44. [Expression/compiler Dependencies](#expression-compiler-dependencies)
+45. [Expression/error Dependencies](#expression-error-dependencies)
+46. [Expression/evaluator Dependencies](#expression-evaluator-dependencies)
+47. [Expression/function Dependencies](#expression-function-dependencies)
+48. [Expression Dependencies](#expression-dependencies)
+49. [Expression/node Dependencies](#expression-node-dependencies)
+50. [Expression/transform Dependencies](#expression-transform-dependencies)
+51. [Expression/utils Dependencies](#expression-utils-dependencies)
+52. [Parser Dependencies](#parser-dependencies)
+53. [Units Dependencies](#units-dependencies)
+54. [Numbers Dependencies](#numbers-dependencies)
+55. [Ast Dependencies](#ast-dependencies)
+56. [Evaluator Dependencies](#evaluator-dependencies)
+57. [Linalg Dependencies](#linalg-dependencies)
+58. [Arithmetic Dependencies](#arithmetic-dependencies)
+59. [Trigonometry Dependencies](#trigonometry-dependencies)
+60. [Statistics Dependencies](#statistics-dependencies)
+61. [Signal Dependencies](#signal-dependencies)
+62. [Parallel Dependencies](#parallel-dependencies)
+63. [Parallel/operations Dependencies](#parallel-operations-dependencies)
+64. [Parallel/ops Dependencies](#parallel-ops-dependencies)
+65. [Parallel/strategies Dependencies](#parallel-strategies-dependencies)
+66. [Workbook Dependencies](#workbook-dependencies)
+67. [Assembly/algebra Dependencies](#assembly-algebra-dependencies)
+68. [Assembly Dependencies](#assembly-dependencies)
+69. [Assembly/ops Dependencies](#assembly-ops-dependencies)
+70. [Assembly/types Dependencies](#assembly-types-dependencies)
+71. [Compat Dependencies](#compat-dependencies)
+72. [Dependency Matrix](#dependency-matrix)
+73. [Circular Dependency Analysis](#circular-dependency-analysis)
+74. [Visual Dependency Graph](#visual-dependency-graph)
+75. [Summary Statistics](#summary-statistics)
 
 ---
 
 <a id="overview"></a>
-
 ## Overview
 
 The codebase is organized into the following modules:
@@ -86,13 +96,13 @@ The codebase is organized into the following modules:
 - **core/factory**: 2 files
 - **core**: 1 file
 - **core/typed**: 3 files
-- **core/types**: 4 files
+- **core/types**: 7 files
 - **matrix/backends**: 21 files
 - **matrix**: 4 files
-- **matrix/operations**: 8 files
-- **matrix/types**: 4 files
+- **matrix/operations**: 13 files
+- **matrix/types**: 6 files
 - **tensor**: 4 files
-- **tensor/operations**: 9 files
+- **tensor/operations**: 17 files
 - **autograd**: 5 files
 - **functions/algebra**: 45 files
 - **functions/arithmetic**: 38 files
@@ -100,13 +110,13 @@ The codebase is organized into the following modules:
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
 - **functions/core**: 2 files
-- **functions/error**: 3 files
+- **functions/error**: 4 files
 - **functions/expression**: 1 file
 - **functions/factories**: 4 files
 - **functions/geometry**: 2 files
 - **functions**: 2 files
 - **functions/logical**: 5 files
-- **functions/matrix**: 44 files
+- **functions/matrix**: 45 files
 - **functions/numeric**: 1 file
 - **functions/plain**: 10 files
 - **functions/probability**: 14 files
@@ -118,24 +128,35 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 25 files
+- **functions/typed**: 28 files
 - **functions/unit**: 2 files
-- **functions/utils**: 37 files
-- **functions/wasm**: 6 files
-- **expression**: 7 files
+- **functions/utils**: 38 files
+- **functions/wasm**: 8 files
 - **expression/compiler**: 2 files
-- **expression/error**: 2 files
+- **expression/error**: 3 files
 - **expression/evaluator**: 2 files
+- **expression/function**: 1 file
+- **expression**: 7 files
 - **expression/node**: 18 files
 - **expression/transform**: 1 file
 - **expression/utils**: 13 files
+- **parser**: 1 file
+- **units**: 1 file
+- **numbers**: 1 file
+- **ast**: 1 file
+- **evaluator**: 1 file
+- **linalg**: 1 file
+- **arithmetic**: 1 file
+- **trigonometry**: 1 file
+- **statistics**: 1 file
+- **signal**: 1 file
 - **parallel**: 2 files
 - **parallel/operations**: 5 files
 - **parallel/ops**: 1 file
 - **parallel/strategies**: 3 files
 - **workbook**: 5 files
 - **assembly/algebra**: 1 file
-- **assembly**: 3 files
+- **assembly**: 6 files
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 2 files
@@ -143,23 +164,32 @@ The codebase is organized into the following modules:
 ---
 
 <a id="package-dependencies"></a>
-
 ## Package Dependencies
 
-| Package                                                             | Depends On                                                                                                                         | Files (Active) | Files (Dormant) |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
-| `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                             | 1              | 1               |
-| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                             | 2              | 2               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                             | 10             | 85              |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 37             | 5               |
-| `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                     | 13             | 0               |
-| `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`                                                                                                     | 5              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 361            | 418             |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | (none)                                                                                                                             | 45             | 382             |
-| `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-workerpool`                                                                                                 | 11             | 4               |
-| `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`                                                                                                  | 5              | 2               |
-| `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                             | 21             | 3               |
-| `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`  | 2              | 1               |
+| Package | Depends On | Files (Active) | Files (Dormant) |
+|---------|------------|----------------|-----------------|
+| `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none) | 1 | 1 |
+| `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`) | (none) | 2 | 3 |
+| `@danielsimonjr/mathts-core` (`core/`) | (none) | 13 | 86 |
+| `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core` | 44 | 5 |
+| `@danielsimonjr/mathts-tensor` (`tensor/`) | `@danielsimonjr/mathts-matrix` | 21 | 0 |
+| `@danielsimonjr/mathts-autograd` (`autograd/`) | `@danielsimonjr/mathts-tensor` | 5 | 0 |
+| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 369 | 417 |
+| `@danielsimonjr/mathts-expression` (`expression/`) | (none) | 47 | 381 |
+| `@danielsimonjr/mathts-parser` (`parser/`) | `@danielsimonjr/mathts-expression` | 1 | 0 |
+| `@danielsimonjr/mathts-units` (`units/`) | `@danielsimonjr/mathts-core` | 1 | 0 |
+| `@danielsimonjr/mathts-numbers` (`numbers/`) | `@danielsimonjr/mathts-core` | 1 | 0 |
+| `@danielsimonjr/mathts-ast` (`ast/`) | `@danielsimonjr/mathts-expression` | 1 | 0 |
+| `@danielsimonjr/mathts-evaluator` (`evaluator/`) | `@danielsimonjr/mathts-expression` | 1 | 0 |
+| `@danielsimonjr/mathts-linalg` (`linalg/`) | `@danielsimonjr/mathts-matrix` | 1 | 0 |
+| `@danielsimonjr/mathts-arithmetic` (`arithmetic/`) | `@danielsimonjr/mathts-functions` | 1 | 0 |
+| `@danielsimonjr/mathts-trigonometry` (`trigonometry/`) | `@danielsimonjr/mathts-functions` | 1 | 0 |
+| `@danielsimonjr/mathts-statistics` (`statistics/`) | `@danielsimonjr/mathts-functions` | 1 | 0 |
+| `@danielsimonjr/mathts-signal` (`signal/`) | `@danielsimonjr/mathts-functions` | 1 | 0 |
+| `@danielsimonjr/mathts-parallel` (`parallel/`) | `@danielsimonjr/mathts-workerpool` | 11 | 4 |
+| `@danielsimonjr/mathts-workbook` (`workbook/`) | `@danielsimonjr/mathts-functions` | 5 | 2 |
+| `@danielsimonjr/mathts-wasm` (`assembly/`) | (none) | 24 | 3 |
+| `@danielsimonjr/mathts-compat` (`compat/`) | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 2 | 1 |
 
 ### Package Dependency Diagram
 
@@ -173,24 +203,44 @@ graph LR
     P5[autograd]
     P6[functions]
     P7[expression]
-    P8[parallel]
-    P9[workbook]
-    P10[assembly]
-    P11[compat]
-    P3 --> P8
+    P8[parser]
+    P9[units]
+    P10[numbers]
+    P11[ast]
+    P12[evaluator]
+    P13[linalg]
+    P14[arithmetic]
+    P15[trigonometry]
+    P16[statistics]
+    P17[signal]
+    P18[parallel]
+    P19[workbook]
+    P20[assembly]
+    P21[compat]
+    P3 --> P18
     P3 --> P2
     P4 --> P3
     P5 --> P4
     P6 --> P7
     P6 --> P2
     P6 --> P3
-    P6 --> P8
-    P8 --> P1
-    P9 --> P6
-    P11 --> P6
-    P11 --> P2
-    P11 --> P3
-    P11 --> P8
+    P6 --> P18
+    P8 --> P7
+    P9 --> P2
+    P10 --> P2
+    P11 --> P7
+    P12 --> P7
+    P13 --> P3
+    P14 --> P6
+    P15 --> P6
+    P16 --> P6
+    P17 --> P6
+    P18 --> P1
+    P19 --> P6
+    P21 --> P6
+    P21 --> P2
+    P21 --> P3
+    P21 --> P18
 ```
 
 ---
@@ -207,7 +257,6 @@ graph LR
 | `typed-function` | `default, create` | Re-export |
 
 **Exports:**
-
 - Classes: `NoMatchingSignatureError`, `TypeConversionError`
 - Interfaces: `TypeDef`, `ExtendedTypeDef`, `ConversionDef`
 - Types: `SignatureMap`, `TypeTest`, `TypeConverter`
@@ -224,7 +273,6 @@ graph LR
 ### `packages/workerpool/src/fft-core.ts` - Shared radix-2 FFT core for @danielsimonjr/mathts-workerpool.
 
 **Exports:**
-
 - Functions: `fftBitReverse`, `fftFrameInPlace`
 
 ---
@@ -242,7 +290,6 @@ graph LR
 | `./fft-core.js` | `fftFrameInPlace` | Import |
 
 **Exports:**
-
 - Classes: `MathWorkerPool`
 - Interfaces: `WorkerpoolCapabilities`, `WasmFeatureStatus`, `WorkerPoolConfig`, `ParallelResult`, `PoolMetrics`, `EnhancedPoolStats`, `TaskOptions`
 - Functions: `canUseWasm`, `canUseSharedMemory`, `transferFloat64`, `transferArrayBuffer`, `transferTypedArray`, `createSharedFloat64Array`, `createSharedBuffer`, `isSharedBuffer`, `getCapabilities`, `initWorkerWasm`, `isWorkerWasmAvailable`, `getWasmFeatures`, `initializePool`, `terminatePool`, `getPoolStats`
@@ -263,7 +310,6 @@ graph LR
 | `../typed/mathts-typed.js` | `mathTyped` | Import |
 
 **Exports:**
-
 - Classes: `FunctionRegistry`
 - Interfaces: `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`
 - Types: `FactoryImport`
@@ -280,7 +326,6 @@ graph LR
 | `./factory.js` | `FunctionRegistry, createFactory, createTypedFunction, registry, math, DEFAULT_CONFIG` | Re-export |
 
 **Exports:**
-
 - Re-exports: `FunctionRegistry`, `createFactory`, `createTypedFunction`, `registry`, `math`, `DEFAULT_CONFIG`
 
 ---
@@ -297,13 +342,15 @@ graph LR
 | `./types/complex.js` | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE` | Re-export |
 | `./types/fraction.js` | `Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER` | Re-export |
 | `./types/bignumber.js` | `BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10` | Re-export |
+| `./types/unit.js` | `Unit, isUnit, DimensionMismatchError, UnitParseError, DIMENSIONLESS, dim` | Re-export |
+| `./types/unit-definitions.js` | `BASE_UNITS, DERIVED_UNITS, ALL_UNITS, UNIT_ALIASES, getUnitDef` | Re-export |
+| `./types/unit-prefixes.js` | `SI_PREFIXES, BEST_PREFIXES, getPrefix` | Re-export |
 | `./typed/index.js` | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes` | Re-export |
 | `./factory/index.js` | `FunctionRegistry, createFactory, registry, math, DEFAULT_CONFIG` | Re-export |
 
 **Exports:**
-
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`
 
 ---
 
@@ -320,7 +367,6 @@ graph LR
 | `./type-bridge.js` | `registerNativeTypes` | Re-export |
 
 **Exports:**
-
 - Re-exports: `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isComplex`, `isFraction`, `isBigNumber`, `isFloat64Array`, `isFloat32Array`, `isInt32Array`, `isUint32Array`, `isUint8Array`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `isUnit`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`
 
 ---
@@ -341,7 +387,6 @@ graph LR
 | `../types/bignumber.js` | `BigNumber, isBigNumber` | Import |
 
 **Exports:**
-
 - Classes: `TypeRegistry`
 - Interfaces: `TypeDef`, `ConversionDef`, `MathTSTypeDef`
 - Functions: `initTypedWasm`, `isTypedWasmAvailable`, `createMathTSTyped`, `createTypedFunction`
@@ -359,7 +404,6 @@ graph LR
 | `../types/bignumber.js` | `BigNumber` | Import |
 
 **Exports:**
-
 - Functions: `registerNativeTypes`
 
 ---
@@ -376,7 +420,6 @@ graph LR
 | `./interfaces` | `Scalar, MathTSValue` | Import (type-only) |
 
 **Exports:**
-
 - Classes: `BigNumber`
 - Interfaces: `BigNumberConfig`
 - Types: `RoundingMode`
@@ -393,7 +436,6 @@ graph LR
 | `./interfaces` | `Scalar, IComplex` | Import (type-only) |
 
 **Exports:**
-
 - Classes: `Complex`
 - Functions: `isComplex`
 - Constants: `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`
@@ -408,7 +450,6 @@ graph LR
 | `./interfaces` | `Scalar, IFraction` | Import (type-only) |
 
 **Exports:**
-
 - Classes: `Fraction`
 - Functions: `isFraction`
 - Constants: `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`
@@ -418,9 +459,39 @@ graph LR
 ### `core/src/types/interfaces.ts` - Base interfaces for MathTS types
 
 **Exports:**
-
 - Interfaces: `MathTSValue`, `Scalar`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`
 - Types: `BackendType`, `NumericType`
+
+---
+
+### `core/src/types/unit-definitions.ts` - Unit definitions for the Unit type.
+
+**Exports:**
+- Interfaces: `Dimensions`, `UnitDef`
+- Functions: `dim`, `getUnitDef`
+- Constants: `DIMENSIONLESS`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`
+
+---
+
+### `core/src/types/unit-prefixes.ts` - SI prefixes for the Unit type.
+
+**Exports:**
+- Functions: `getPrefix`
+- Constants: `SI_PREFIXES`, `SI_PREFIX_KEYS`, `BEST_PREFIXES`
+
+---
+
+### `core/src/types/unit.ts` - Unit type — dimensional analysis, composition, conversion, and pretty-print.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./unit-definitions.js` | `ALL_UNITS, DIMENSIONLESS, Dimensions, UNIT_ALIASES, UnitDef, dim, getUnitDef` | Import |
+| `./unit-prefixes.js` | `BEST_PREFIXES, SI_PREFIXES, SI_PREFIX_KEYS` | Import |
+
+**Exports:**
+- Classes: `DimensionMismatchError`, `UnitParseError`, `Unit`
+- Functions: `isUnit`
 
 ---
 
@@ -436,7 +507,6 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
 
 **Exports:**
-
 - Classes: `BackendRegistry`
 - Interfaces: `BackendHints`, `MatrixBackend`
 - Types: `BackendType`
@@ -456,11 +526,109 @@ graph LR
 | `../config.js` | `getConfig, onConfigChange, MatrixConfig, OperationType` | Import |
 
 **Exports:**
-
 - Classes: `BackendManager`
 - Interfaces: `ExtendedBackendHints`
 - Functions: `createBackendManager`
 - Constants: `DEFAULT_EXTENDED_HINTS`, `backendManager`
+
+---
+
+### `matrix/src/backends/gpu/BatchExecutor.ts` - GPU Batch Executor
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import (type-only) |
+| `./ShaderManager.js` | `ShaderManager` | Import (type-only) |
+| `./BufferPool.js` | `BufferPool` | Import (type-only) |
+
+**Exports:**
+- Classes: `BatchExecutor`
+- Interfaces: `BatchOperation`, `BatchResult`, `BatchOptions`
+- Types: `BatchOperationType`
+
+---
+
+### `matrix/src/backends/gpu/BufferPool.ts` - GPU Buffer Pool
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import |
+
+**Exports:**
+- Classes: `BufferPool`
+- Interfaces: `BufferPoolOptions`
+
+---
+
+### `matrix/src/backends/gpu/detect.ts` - WebGPU Detection and Capability Checking
+
+**Exports:**
+- Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
+- Functions: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
+
+---
+
+### `matrix/src/backends/gpu/GPUContext.ts` - WebGPU Context Management
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
+
+**Exports:**
+- Classes: `GPUContext`
+- Interfaces: `GPUContextOptions`, `DeviceLostEvent`
+- Types: `GPUContextStatus`
+- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
+
+---
+
+### `matrix/src/backends/gpu/index.ts` - GPU Backend Exports
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
+| `./GPUContext.js` | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent` | Re-export |
+| `./BufferPool.js` | `BufferPool, BufferPoolOptions` | Re-export |
+| `./ShaderManager.js` | `ShaderManager, BUILTIN_SHADERS, ShaderSource, PipelineConfig` | Re-export |
+| `./BatchExecutor.js` | `BatchExecutor, BatchOperation, BatchOperationType, BatchResult, BatchOptions` | Re-export |
+| `./Sync.js` | `SyncManager, createSyncManager, SyncStrategy, TransferDirection, TransferRequest, TransferResult, SyncConfig` | Re-export |
+
+**Exports:**
+- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `BUILTIN_SHADERS`, `ShaderSource`, `PipelineConfig`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
+
+---
+
+### `matrix/src/backends/gpu/ShaderManager.ts` - GPU Shader Manager
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import |
+
+**Exports:**
+- Classes: `ShaderManager`
+- Interfaces: `ShaderSource`, `PipelineConfig`
+- Constants: `BUILTIN_SHADERS`
+
+---
+
+### `matrix/src/backends/gpu/Sync.ts` - GPU-CPU Synchronization Strategy
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./GPUContext.js` | `GPUContext` | Import (type-only) |
+| `./BufferPool.js` | `BufferPool` | Import (type-only) |
+
+**Exports:**
+- Classes: `SyncManager`
+- Interfaces: `TransferRequest`, `TransferResult`, `SyncConfig`
+- Types: `SyncStrategy`, `TransferDirection`
+- Functions: `createSyncManager`
 
 ---
 
@@ -472,7 +640,6 @@ graph LR
 | `./gpu/index.js` | `GPUContext, GPUContextOptions, getGlobalGPUContext, BufferPool, ShaderManager, hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUCapabilities` | Import |
 
 **Exports:**
-
 - Classes: `GPUBackend`
 - Interfaces: `GPUBackendOptions`
 - Types: `GPUBackendStatus`
@@ -492,210 +659,10 @@ graph LR
 | `./gpu/index.js` | `hasWebGPU, detectGPUCapabilities, GPUCapabilities` | Import |
 
 **Exports:**
-
 - Classes: `GPUMatrixBackend`
 - Interfaces: `GPUMatrixBackendConfig`
 - Functions: `createGPUMatrixBackend`
 - Constants: `gpuMatrixBackend`
-
----
-
-### `matrix/src/backends/JSBackend.ts` - Pure TypeScript Matrix Backend
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
-| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
-
-**Exports:**
-
-- Classes: `JSBackend`
-- Constants: `jsBackend`
-
----
-
-### `matrix/src/backends/ParallelBackend.ts` - Parallel Matrix Backend
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
-| `./Backend.js` | `BackendType` | Import (type-only) |
-
-**Exports:**
-
-- Classes: `ParallelBackend`
-- Interfaces: `ParallelBackendConfig`
-- Functions: `createParallelBackend`
-- Constants: `parallelBackend`
-
----
-
-### `matrix/src/backends/RustWASMBackend.ts` - Rust WASM Matrix Backend
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
-| `./JSBackend.js` | `jsBackend` | Import |
-| `./RustWasmLoader.js` | `rustWasmLoader, RustWasmExports` | Import |
-
-**Exports:**
-
-- Classes: `RustWASMBackend`
-- Interfaces: `RustWASMBackendConfig`
-- Functions: `createRustWASMBackend`
-- Constants: `rustWasmBackend`
-
----
-
-### `matrix/src/backends/RustWasmLoader.ts` - Rust WASM Loader
-
-**Exports:**
-
-- Classes: `RustWasmLoader`
-- Interfaces: `RustWasmExports`, `RustLoadingMetrics`
-- Functions: `initRustWasm`
-- Constants: `rustWasmLoader`
-
----
-
-### `matrix/src/backends/WASMBackend.ts` - WASM Matrix Backend (AssemblyScript)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
-| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
-| `./JSBackend.js` | `jsBackend` | Import |
-| `./wasm/detect.js` | `detectWasmFeatures, WasmFeatures` | Import |
-
-**Exports:**
-
-- Classes: `WASMBackend`
-- Interfaces: `WASMBackendConfig`
-- Functions: `createWASMBackend`
-- Constants: `wasmBackend`
-
----
-
-### `matrix/src/backends/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
-
-**Exports:**
-
-- Classes: `WasmLoader`
-- Interfaces: `WasmModule`, `Allocation`, `LoadingMetrics`
-- Types: `AllocatorKind`
-- Functions: `initWasm`
-- Constants: `wasmLoader`
-
----
-
-### `matrix/src/backends/gpu/BatchExecutor.ts` - GPU Batch Executor
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import (type-only) |
-| `./ShaderManager.js` | `ShaderManager` | Import (type-only) |
-| `./BufferPool.js` | `BufferPool` | Import (type-only) |
-
-**Exports:**
-
-- Classes: `BatchExecutor`
-- Interfaces: `BatchOperation`, `BatchResult`, `BatchOptions`
-- Types: `BatchOperationType`
-
----
-
-### `matrix/src/backends/gpu/BufferPool.ts` - GPU Buffer Pool
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import |
-
-**Exports:**
-
-- Classes: `BufferPool`
-- Interfaces: `BufferPoolOptions`
-
----
-
-### `matrix/src/backends/gpu/GPUContext.ts` - WebGPU Context Management
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./detect.js` | `hasWebGPU, getGPUAdapter, detectGPUCapabilities, GPUCapabilities` | Import |
-
-**Exports:**
-
-- Classes: `GPUContext`
-- Interfaces: `GPUContextOptions`, `DeviceLostEvent`
-- Types: `GPUContextStatus`
-- Functions: `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`
-
----
-
-### `matrix/src/backends/gpu/ShaderManager.ts` - GPU Shader Manager
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import |
-
-**Exports:**
-
-- Classes: `ShaderManager`
-- Interfaces: `ShaderSource`, `PipelineConfig`
-- Constants: `BUILTIN_SHADERS`
-
----
-
-### `matrix/src/backends/gpu/Sync.ts` - GPU-CPU Synchronization Strategy
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./GPUContext.js` | `GPUContext` | Import (type-only) |
-| `./BufferPool.js` | `BufferPool` | Import (type-only) |
-
-**Exports:**
-
-- Classes: `SyncManager`
-- Interfaces: `TransferRequest`, `TransferResult`, `SyncConfig`
-- Types: `SyncStrategy`, `TransferDirection`
-- Functions: `createSyncManager`
-
----
-
-### `matrix/src/backends/gpu/detect.ts` - WebGPU Detection and Capability Checking
-
-**Exports:**
-
-- Interfaces: `GPUAdapterInfo`, `GPUCapabilities`
-- Functions: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`
-
----
-
-### `matrix/src/backends/gpu/index.ts` - GPU Backend Exports
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./detect.js` | `hasWebGPU, isBrowser, getGPUAdapter, detectGPUCapabilities, isGPUSuitableForMatrixOps, getRecommendedWorkgroupSize, getMaxMatrixSize, GPUAdapterInfo, GPUCapabilities` | Re-export |
-| `./GPUContext.js` | `GPUContext, getGlobalGPUContext, initializeGlobalGPU, destroyGlobalGPU, GPUContextOptions, GPUContextStatus, DeviceLostEvent` | Re-export |
-| `./BufferPool.js` | `BufferPool, BufferPoolOptions` | Re-export |
-| `./ShaderManager.js` | `ShaderManager, BUILTIN_SHADERS, ShaderSource, PipelineConfig` | Re-export |
-| `./BatchExecutor.js` | `BatchExecutor, BatchOperation, BatchOperationType, BatchResult, BatchOptions` | Re-export |
-| `./Sync.js` | `SyncManager, createSyncManager, SyncStrategy, TransferDirection, TransferRequest, TransferResult, SyncConfig` | Re-export |
-
-**Exports:**
-
-- Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPool`, `BufferPoolOptions`, `ShaderManager`, `BUILTIN_SHADERS`, `ShaderSource`, `PipelineConfig`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
 
 ---
 
@@ -717,15 +684,71 @@ graph LR
 | `./gpu/index.js` | `hasWebGPU, detectGPUCapabilities, getRecommendedWorkgroupSize, GPUContext, getGlobalGPUContext, destroyGlobalGPU, BufferPool, ShaderManager, BUILTIN_SHADERS, BatchExecutor, SyncManager, createSyncManager` | Re-export |
 
 **Exports:**
-
 - Re-exports: `BackendRegistry`, `backendRegistry`, `DEFAULT_BACKEND_HINTS`, `JSBackend`, `jsBackend`, `ParallelBackend`, `parallelBackend`, `createParallelBackend`, `ParallelBackendConfig`, `WASMBackend`, `wasmBackend`, `createWASMBackend`, `WASMBackendConfig`, `GPUMatrixBackend`, `gpuMatrixBackend`, `createGPUMatrixBackend`, `GPUMatrixBackendConfig`, `GPUBackend`, `getGlobalGPUBackend`, `initializeGlobalGPUBackend`, `destroyGlobalGPUBackend`, `GPUBackendOptions`, `GPUBackendStatus`, `RustWASMBackend`, `rustWasmBackend`, `createRustWASMBackend`, `RustWASMBackendConfig`, `RustWasmLoader`, `rustWasmLoader`, `initRustWasm`, `RustWasmExports`, `RustLoadingMetrics`, `BackendManager`, `backendManager`, `createBackendManager`, `DEFAULT_EXTENDED_HINTS`, `ExtendedBackendHints`, `OperationType`, `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `hasWebGPU`, `detectGPUCapabilities`, `getRecommendedWorkgroupSize`, `GPUContext`, `getGlobalGPUContext`, `destroyGlobalGPU`, `BufferPool`, `ShaderManager`, `BUILTIN_SHADERS`, `BatchExecutor`, `SyncManager`, `createSyncManager`
+
+---
+
+### `matrix/src/backends/JSBackend.ts` - Pure TypeScript Matrix Backend
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
+
+**Exports:**
+- Classes: `JSBackend`
+- Constants: `jsBackend`
+
+---
+
+### `matrix/src/backends/ParallelBackend.ts` - Parallel Matrix Backend
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./Backend.js` | `BackendType` | Import (type-only) |
+
+**Exports:**
+- Classes: `ParallelBackend`
+- Interfaces: `ParallelBackendConfig`
+- Functions: `createParallelBackend`
+- Constants: `parallelBackend`
+
+---
+
+### `matrix/src/backends/RustWASMBackend.ts` - Rust WASM Matrix Backend
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./JSBackend.js` | `jsBackend` | Import |
+| `./RustWasmLoader.js` | `rustWasmLoader, RustWasmExports` | Import |
+
+**Exports:**
+- Classes: `RustWASMBackend`
+- Interfaces: `RustWASMBackendConfig`
+- Functions: `createRustWASMBackend`
+- Constants: `rustWasmBackend`
+
+---
+
+### `matrix/src/backends/RustWasmLoader.ts` - Rust WASM Loader
+
+**Exports:**
+- Classes: `RustWasmLoader`
+- Interfaces: `RustWasmExports`, `RustLoadingMetrics`
+- Functions: `initRustWasm`
+- Constants: `rustWasmLoader`
 
 ---
 
 ### `matrix/src/backends/wasm/detect.ts` - WASM Feature Detection
 
 **Exports:**
-
 - Interfaces: `WasmFeatures`
 - Functions: `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`
 
@@ -739,7 +762,6 @@ graph LR
 | `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
 
 **Exports:**
-
 - Interfaces: `FFTResult`, `FFTConfig`
 - Types: `FFTBackend`
 - Functions: `isPowerOf2`, `nextPowerOf2`, `fftJS`, `isWasmFFTAvailable`, `fft`, `ifft`, `rfft`, `powerSpectrum`, `magnitudeSpectrum`, `phaseSpectrum`, `convolve`
@@ -755,8 +777,36 @@ graph LR
 | `./fft-wasm.js` | `fft, ifft, rfft, fftJS, convolve, powerSpectrum, magnitudeSpectrum, phaseSpectrum, isPowerOf2, nextPowerOf2, isWasmFFTAvailable` | Re-export |
 
 **Exports:**
-
 - Re-exports: `detectWasmFeatures`, `isWasmAvailable`, `isSharedMemoryAvailable`, `isAtomicsAvailable`, `clearFeatureCache`, `getCachedFeatures`, `fft`, `ifft`, `rfft`, `fftJS`, `convolve`, `powerSpectrum`, `magnitudeSpectrum`, `phaseSpectrum`, `isPowerOf2`, `nextPowerOf2`, `isWasmFFTAvailable`
+
+---
+
+### `matrix/src/backends/WASMBackend.ts` - WASM Matrix Backend (AssemblyScript)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Backend.js` | `MatrixBackend, BackendType` | Import (type-only) |
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./JSBackend.js` | `jsBackend` | Import |
+| `./wasm/detect.js` | `detectWasmFeatures, WasmFeatures` | Import |
+
+**Exports:**
+- Classes: `WASMBackend`
+- Interfaces: `WASMBackendConfig`
+- Functions: `createWASMBackend`
+- Constants: `wasmBackend`
+
+---
+
+### `matrix/src/backends/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
+
+**Exports:**
+- Classes: `WasmLoader`
+- Interfaces: `WasmModule`, `Allocation`, `LoadingMetrics`
+- Types: `AllocatorKind`
+- Functions: `initWasm`
+- Constants: `wasmLoader`
 
 ---
 
@@ -772,7 +822,6 @@ graph LR
 | `./backends/Backend.js` | `BackendType` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `BackendConfig`, `AdaptiveTuningConfig`, `ProfilingConfig`, `MatrixConfig`
 - Types: `OperationType`, `BackendPreference`
 - Functions: `getConfig`, `setConfig`, `resetConfig`, `onConfigChange`, `setBackendPreference`, `setBackendThreshold`, `setBackendEnabled`, `getRecommendedBackend`, `forceBackend`, `enableProfiling`, `disableProfiling`, `enableAdaptiveTuning`, `disableAdaptiveTuning`, `configureAdaptiveTuning`
@@ -792,7 +841,6 @@ graph LR
 | `./parallel-matrix.js` | `*` | Re-export |
 
 **Exports:**
-
 - Re-exports: `* from ./types/index.js`, `* from ./backends/index.js`, `* from ./operations/index.js`, `* from ./typed-operations.js`, `* from ./parallel-matrix.js`
 
 ---
@@ -805,7 +853,6 @@ graph LR
 | `./types/DenseMatrix.js` | `DenseMatrix` | Import |
 
 **Exports:**
-
 - Functions: `initializeParallelMatrix`, `terminateParallelMatrix`
 - Constants: `parallelMatrix`, `parallelIdentity`, `parallelZeros`, `parallelOnes`, `parallelDiag`, `parallelRandom`, `parallelMatrixAdd`, `parallelMatrixSubtract`, `parallelMatrixMultiply`, `parallelDotMultiply`, `parallelMatrixDivide`, `parallelUnaryMinus`, `parallelMatrixTranspose`, `parallelMatrixSum`, `parallelMatrixMean`, `parallelMatrixMin`, `parallelMatrixMax`, `parallelMatrixVariance`, `parallelMatrixStd`, `parallelMatrixNorm`, `parallelMatrixDot`, `parallelMatrixTrace`, `parallelMatrixDistance`, `parallelMatrixAbs`, `parallelMatrixSqrt`, `parallelMatrixSquare`, `parallelMatrixExp`, `parallelMatrixLog`, `parallelMatrixSin`, `parallelMatrixCos`, `parallelMatrixTan`, `parallelMatrixSize`, `parallelMatrixSubset`, `parallelMatrixRow`, `parallelMatrixColumn`, `parallelMatrixDiagonal`, `parallelMatrixMatvec`, `parallelMatrixOuter`, `parallelMatrixHistogram`, `parallelMatrixOperations`
 
@@ -819,7 +866,6 @@ graph LR
 | `./types/DenseMatrix.js` | `DenseMatrix` | Import |
 
 **Exports:**
-
 - Constants: `matrix`, `identity`, `zeros`, `ones`, `diag`, `random`, `add`, `subtract`, `multiply`, `dotMultiply`, `divide`, `unaryMinus`, `transpose`, `sum`, `mean`, `min`, `max`, `norm`, `trace`, `abs`, `sqrt`, `square`, `exp`, `log`, `pow`, `size`, `subset`, `row`, `column`, `diagonal`, `typedMatrixOperations`
 
 ---
@@ -836,7 +882,6 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
 
 **Exports:**
-
 - Interfaces: `CholeskyResult`
 - Functions: `cholesky`
 
@@ -851,7 +896,6 @@ graph LR
 | `../backends/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Functions: `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`
 
 ---
@@ -859,9 +903,21 @@ graph LR
 ### `matrix/src/operations/eig.ts` - Eigenvalue and Eigenvector Decomposition
 
 **Exports:**
-
 - Interfaces: `EigResult`, `EigOptions`
 - Functions: `eig`, `eigvals`, `powerIteration`
+
+---
+
+### `matrix/src/operations/expm.ts` - Matrix Exponential — Scaling-and-Squaring with Padé-13 Approximant
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+
+**Exports:**
+- Interfaces: `ExpmOptions`
+- Functions: `matrixExpm`
 
 ---
 
@@ -874,13 +930,32 @@ graph LR
 | `./svd.js` | `svd, singularValues, pinv, lowRankApprox, cond, norm2, normFro, SVDResult, SVDOptions` | Re-export |
 | `./eig-wasm.js` | `eigWasm, eigvalsWasm, spectralRadiusWasm` | Re-export |
 | `./svd-wasm.js` | `svdWasm` | Re-export |
+| `./pinv.js` | `pinv, PinvOptions` | Re-export |
 | `./qr.js` | `qr, QRResult, QROptions` | Re-export |
 | `./lu.js` | `lu, LUResult` | Re-export |
 | `./cholesky.js` | `cholesky, CholeskyResult` | Re-export |
+| `./expm.js` | `matrixExpm, ExpmOptions` | Re-export |
+| `./logm.js` | `matrixLogm, LogmOptions` | Re-export |
+| `./sqrtm.js` | `matrixSqrtm, SqrtmOptions` | Re-export |
+| `./schur.js` | `matrixSchur, SchurResult, SchurOptions` | Re-export |
 
 **Exports:**
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `qr`, `QRResult`, `QROptions`, `lu`, `LUResult`, `cholesky`, `CholeskyResult`
+---
+
+### `matrix/src/operations/logm.ts` - Matrix Logarithm — Schur-Padé inverse scaling-and-squaring (Slices 5.9a + 6.1)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./eig.js` | `eig` | Import |
+| `./schur.js` | `schurInternal` | Import |
+
+**Exports:**
+- Interfaces: `LogmOptions`
+- Functions: `matrixLogm`
 
 ---
 
@@ -892,9 +967,22 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
 
 **Exports:**
-
 - Interfaces: `LUResult`
 - Functions: `lu`
+
+---
+
+### `matrix/src/operations/pinv.ts` - Moore-Penrose Pseudoinverse (DenseMatrix primitive)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./svd.js` | `svd` | Import |
+
+**Exports:**
+- Interfaces: `PinvOptions`
+- Functions: `pinv`
 
 ---
 
@@ -906,9 +994,36 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import |
 
 **Exports:**
-
 - Interfaces: `QRResult`, `QROptions`
 - Functions: `qr`
+
+---
+
+### `matrix/src/operations/schur.ts` - Schur Decomposition — Francis QR with double shifts (Slice 6.1)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+
+**Exports:**
+- Interfaces: `SchurResult`, `SchurOptions`
+- Functions: `matrixSchur`, `schurInternal`
+
+---
+
+### `matrix/src/operations/sqrtm.ts` - Matrix Square Root — Hybrid approach (Slices 5.9a + 6.1)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/DenseMatrix.js` | `DenseMatrix` | Import |
+| `./eig.js` | `eig` | Import |
+| `./schur.js` | `schurInternal` | Import |
+
+**Exports:**
+- Interfaces: `SqrtmOptions`
+- Functions: `matrixSqrtm`, `matrixSqrtNewtonInternal`
 
 ---
 
@@ -921,7 +1036,6 @@ graph LR
 | `../backends/RustWasmLoader.js` | `RustWasmLoader` | Import |
 
 **Exports:**
-
 - Functions: `svdWasm`
 
 ---
@@ -929,7 +1043,6 @@ graph LR
 ### `matrix/src/operations/svd.ts` - Singular Value Decomposition (SVD)
 
 **Exports:**
-
 - Interfaces: `SVDResult`, `SVDOptions`
 - Functions: `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`
 
@@ -939,24 +1052,63 @@ graph LR
 
 ## Matrix/types Dependencies
 
+### `matrix/src/types/dense/arithmetic.ts` - arithmetic module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../DenseMatrix.js` | `DenseMatrix` | Import (type-only) |
+| `../Matrix.js` | `Matrix` | Import (type-only) |
+
+**Exports:**
+- Functions: `add`, `subtract`, `multiplyElementwise`, `multiply`, `scale`, `transpose`
+
+---
+
+### `matrix/src/types/dense/reduction.ts` - reduction module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../DenseMatrix.js` | `DenseMatrix` | Import (type-only) |
+
+**Exports:**
+- Functions: `sum`, `mean`, `min`, `max`, `norm`, `trace`
+
+---
+
 ### `matrix/src/types/DenseMatrix.ts` - Dense Matrix Implementation
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
 | `./Matrix.js` | `Matrix, MatrixEntry, SliceSpec` | Import |
+| `./dense/arithmetic.js` | `* as arithmetic` | Import |
+| `./dense/reduction.js` | `* as reduction` | Import |
 
 **Exports:**
-
 - Classes: `DenseMatrix`
 - Functions: `isDenseMatrix`
+
+---
+
+### `matrix/src/types/index.ts` - Matrix Type Exports
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./Matrix.js` | `Matrix, isMatrix` | Re-export |
+| `./DenseMatrix.js` | `DenseMatrix, isDenseMatrix` | Re-export |
+| `./SparseMatrix.js` | `SparseMatrix, isSparseMatrix` | Re-export |
+
+**Exports:**
+- Re-exports: `Matrix`, `isMatrix`, `DenseMatrix`, `isDenseMatrix`, `SparseMatrix`, `isSparseMatrix`
 
 ---
 
 ### `matrix/src/types/Matrix.ts` - Matrix Base Class
 
 **Exports:**
-
 - Interfaces: `MatrixDimensions`, `MatrixIndex`, `SliceSpec`, `MatrixEntry`
 - Types: `MatrixType`
 - Functions: `isMatrix`
@@ -972,45 +1124,14 @@ graph LR
 | `./DenseMatrix.js` | `DenseMatrix` | Import |
 
 **Exports:**
-
 - Classes: `SparseMatrix`
 - Functions: `isSparseMatrix`
-
----
-
-### `matrix/src/types/index.ts` - Matrix Type Exports
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./Matrix.js` | `Matrix, isMatrix` | Re-export |
-| `./DenseMatrix.js` | `DenseMatrix, isDenseMatrix` | Re-export |
-| `./SparseMatrix.js` | `SparseMatrix, isSparseMatrix` | Re-export |
-
-**Exports:**
-
-- Re-exports: `Matrix`, `isMatrix`, `DenseMatrix`, `isDenseMatrix`, `SparseMatrix`, `isSparseMatrix`
 
 ---
 
 <a id="tensor-dependencies"></a>
 
 ## Tensor Dependencies
-
-### `tensor/src/Tensor.ts` - Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./named-index.js` | `Index` | Import |
-
-**Exports:**
-
-- Classes: `Tensor`
-- Interfaces: `EinsumSpec`
-- Types: `NestedArray`
-
----
 
 ### `tensor/src/contraction-sequence.ts` - contractNetwork — given an ordered list of Tensors (each carrying
 
@@ -1021,7 +1142,6 @@ graph LR
 | `./named-index.js` | `Index` | Import |
 
 **Exports:**
-
 - Interfaces: `ContractNetworkOpts`, `ContractNetworkResult`
 - Functions: `contractNetwork`
 
@@ -1044,20 +1164,40 @@ graph LR
 | `./operations/pinv` | `tensorPinv` | Re-export |
 | `./operations/solve` | `tensorSolve` | Re-export |
 | `./operations/kron` | `tensorKron` | Re-export |
+| `./operations/slice` | `slice` | Re-export |
+| `./operations/gather` | `gather` | Re-export |
+| `./operations/stack` | `stack` | Re-export |
+| `./operations/concatenate` | `concatenate` | Re-export |
+| `./operations/scatter` | `scatter` | Re-export |
+| `./operations/pad` | `pad` | Re-export |
+| `./operations/roll` | `roll` | Re-export |
+| `./operations/flip` | `flip` | Re-export |
 
 **Exports:**
-
-- Re-exports: `Tensor`, `Index`, `idx`, `tensorSvd`, `randomTensor`, `contractNetwork`, `tensorQr`, `tensorLU`, `tensorCholesky`, `tensorEig`, `tensorPinv`, `tensorSolve`, `tensorKron`
+- Re-exports: `Tensor`, `Index`, `idx`, `tensorSvd`, `randomTensor`, `contractNetwork`, `tensorQr`, `tensorLU`, `tensorCholesky`, `tensorEig`, `tensorPinv`, `tensorSolve`, `tensorKron`, `slice`, `gather`, `stack`, `concatenate`, `scatter`, `pad`, `roll`, `flip`
 
 ---
 
 ### `tensor/src/named-index.ts` - Index — an immutable value type carrying a unique identity, a dimension,
 
 **Exports:**
-
 - Classes: `Index`
 - Interfaces: `IndexOpts`
 - Functions: `idx`
+
+---
+
+### `tensor/src/Tensor.ts` - Tensor — rank-N, Float64Array-backed, row-major dense tensor. The
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./named-index.js` | `Index` | Import |
+
+**Exports:**
+- Classes: `Tensor`
+- Interfaces: `EinsumSpec`
+- Types: `NestedArray`
 
 ---
 
@@ -1074,9 +1214,21 @@ graph LR
 | `../named-index.js` | `Index` | Import |
 
 **Exports:**
-
 - Interfaces: `TensorCholeskyOpts`, `TensorCholeskyResult`
 - Functions: `tensorCholesky`
+
+---
+
+### `tensor/src/operations/concatenate.ts` - concatenate — join tensors along an existing axis (NumPy `concatenate`).
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Tensor.js` | `Tensor` | Import |
+| `../named-index.js` | `Index` | Import |
+
+**Exports:**
+- Functions: `concatenate`
 
 ---
 
@@ -1088,9 +1240,34 @@ graph LR
 | `../Tensor.js` | `Tensor` | Import |
 
 **Exports:**
-
 - Interfaces: `TensorEigOpts`, `TensorEigResult`
 - Functions: `tensorEig`
+
+---
+
+### `tensor/src/operations/flip.ts` - flip — reverse element order along given axes.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Tensor.js` | `Tensor` | Import |
+| `../named-index.js` | `Index` | Import |
+
+**Exports:**
+- Functions: `flip`
+
+---
+
+### `tensor/src/operations/gather.ts` - gather — pull elements along one axis (NumPy `take` / JAX `gather`).
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Tensor.js` | `Tensor` | Import |
+| `../named-index.js` | `Index` | Import |
+
+**Exports:**
+- Functions: `gather`
 
 ---
 
@@ -1103,7 +1280,6 @@ graph LR
 | `../named-index.js` | `Index` | Import |
 
 **Exports:**
-
 - Interfaces: `TensorKronOpts`
 - Functions: `tensorKron`
 
@@ -1118,9 +1294,22 @@ graph LR
 | `../named-index.js` | `Index` | Import |
 
 **Exports:**
-
 - Interfaces: `TensorLUResult`, `TensorLUOpts`
 - Functions: `tensorLU`
+
+---
+
+### `tensor/src/operations/pad.ts` - pad — pad each axis by [before, after] amounts.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Tensor.js` | `Tensor` | Import |
+| `../named-index.js` | `Index` | Import |
+
+**Exports:**
+- Interfaces: `PadOptions`
+- Functions: `pad`
 
 ---
 
@@ -1133,7 +1322,6 @@ graph LR
 | `../named-index.js` | `Index` | Import |
 
 **Exports:**
-
 - Interfaces: `TensorPinvOpts`
 - Functions: `tensorPinv`
 
@@ -1148,7 +1336,6 @@ graph LR
 | `../named-index.js` | `Index` | Import |
 
 **Exports:**
-
 - Interfaces: `TensorQrOpts`, `TensorQrResult`
 - Functions: `tensorQr`
 
@@ -1163,9 +1350,49 @@ graph LR
 | `../named-index.js` | `Index` | Import |
 
 **Exports:**
-
 - Interfaces: `RandomTensorOpts`
 - Functions: `randomTensor`
+
+---
+
+### `tensor/src/operations/roll.ts` - roll — cyclic shift along given axes.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Tensor.js` | `Tensor` | Import |
+| `../named-index.js` | `Index` | Import |
+
+**Exports:**
+- Functions: `roll`
+
+---
+
+### `tensor/src/operations/scatter.ts` - scatter — inverse of gather. Writes `updates` into a copy of `t` at the
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Tensor.js` | `Tensor` | Import |
+| `../named-index.js` | `Index` | Import |
+
+**Exports:**
+- Interfaces: `ScatterOpts`
+- Functions: `scatter`
+
+---
+
+### `tensor/src/operations/slice.ts` - slice — extract a sub-tensor by per-axis [start, stop, step] ranges.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Tensor.js` | `Tensor` | Import |
+| `../named-index.js` | `Index` | Import |
+
+**Exports:**
+- Interfaces: `SliceRange`
+- Functions: `slice`
 
 ---
 
@@ -1178,9 +1405,22 @@ graph LR
 | `../named-index.js` | `Index` | Import |
 
 **Exports:**
-
 - Interfaces: `TensorSolveOpts`, `TensorSolveResult`
 - Functions: `tensorSolve`
+
+---
+
+### `tensor/src/operations/stack.ts` - stack — stack same-shape tensors along a new axis (NumPy `stack`).
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../Tensor.js` | `Tensor` | Import |
+| `../named-index.js` | `Index` | Import |
+
+**Exports:**
+- Interfaces: `StackOpts`
+- Functions: `stack`
 
 ---
 
@@ -1192,7 +1432,6 @@ graph LR
 | `../Tensor.js` | `Tensor` | Import |
 
 **Exports:**
-
 - Interfaces: `TensorSvdOpts`, `TensorSvdResult`
 - Functions: `tensorSvd`
 
@@ -1205,7 +1444,6 @@ graph LR
 ### `autograd/src/dual-tensor.ts` - DualTensor — a Tensor + per-element tangent component for forward-mode AD.
 
 **Exports:**
-
 - Classes: `DualTensor`
 
 ---
@@ -1218,7 +1456,6 @@ graph LR
 | `./dual-tensor.js` | `DualTensor` | Import |
 
 **Exports:**
-
 - Functions: `forwardGrad`
 
 ---
@@ -1234,7 +1471,6 @@ graph LR
 | `./reverse-grad.js` | `reverseGrad` | Re-export |
 
 **Exports:**
-
 - Re-exports: `DualTensor`, `forwardGrad`, `Tape`, `TapedTensor`, `reverseGrad`
 
 ---
@@ -1247,7 +1483,6 @@ graph LR
 | `./tape.js` | `Tape, TapedTensor` | Import |
 
 **Exports:**
-
 - Functions: `reverseGrad`
 
 ---
@@ -1255,7 +1490,6 @@ graph LR
 ### `autograd/src/tape.ts` - Tape — records the sequence of ops during a forward pass so we can
 
 **Exports:**
-
 - Classes: `Tape`, `TapedTensor`
 
 ---
@@ -1274,7 +1508,6 @@ graph LR
 | `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createLup`
 
 ---
@@ -1288,7 +1521,6 @@ graph LR
 | `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createQr`
 
 ---
@@ -1302,7 +1534,6 @@ graph LR
 | `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createSchur`
 
 ---
@@ -1318,7 +1549,6 @@ graph LR
 | `../sparse/csLu.js` | `createCsLu` | Import |
 
 **Exports:**
-
 - Constants: `createSlu`
 
 ---
@@ -1336,7 +1566,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createDerivative`
 
 ---
@@ -1351,7 +1580,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createLeafCount`
 
 ---
@@ -1365,7 +1593,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createLyap`
 
 ---
@@ -1379,7 +1606,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createPolynomialRoot`
 
 ---
@@ -1396,7 +1622,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createRationalize`
 
 ---
@@ -1413,7 +1638,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createResolve`
 
 ---
@@ -1429,7 +1653,6 @@ graph LR
 | `../../utils/node.js` | `MathNode, FunctionNode, OperatorNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createUtil`
 
 ---
@@ -1444,7 +1667,6 @@ graph LR
 | `../../utils/is.js` | `isConstantNode, isSymbolNode` | Re-export |
 
 **Exports:**
-
 - Functions: `isNumericNode`, `isConstantExpression`
 - Re-exports: `isConstantNode`, `isSymbolNode`
 
@@ -1465,7 +1687,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSimplify`
 
 ---
@@ -1483,7 +1704,6 @@ graph LR
 | `../utils/node.js` | `MathNode, ConstantNode, ArrayNode, AccessorNode, IndexNode, ObjectNode, OperatorNode, FunctionNode, ParenthesisNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSimplifyConstant`
 
 ---
@@ -1500,7 +1720,6 @@ graph LR
 | `../utils/node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSimplifyCore`
 
 ---
@@ -1515,7 +1734,6 @@ graph LR
 | `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createLsolve`
 
 ---
@@ -1529,7 +1747,6 @@ graph LR
 | `./utils/solveValidation.js` | `createSolveValidation` | Import |
 
 **Exports:**
-
 - Interfaces: `DenseMatrix`
 - Constants: `createLsolveAll`
 
@@ -1547,7 +1764,6 @@ graph LR
 | `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createLusolve`
 
 ---
@@ -1562,7 +1778,6 @@ graph LR
 | `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createUsolve`
 
 ---
@@ -1576,7 +1791,6 @@ graph LR
 | `./utils/solveValidation.js` | `createSolveValidation` | Import |
 
 **Exports:**
-
 - Interfaces: `DenseMatrix`
 - Constants: `createUsolveAll`
 
@@ -1592,7 +1806,6 @@ graph LR
 | `../../../utils/string.js` | `format` | Import |
 
 **Exports:**
-
 - Functions: `createSolveValidation`
 
 ---
@@ -1610,7 +1823,6 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `SparseMatrixData`
 - Constants: `createCsAmd`
 
@@ -1627,7 +1839,6 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `SparseMatrixData`, `SymbolicAnalysis`, `CholResult`
 - Constants: `createCsChol`
 
@@ -1644,7 +1855,6 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `SparseMatrixData`
 - Constants: `createCsCounts`
 
@@ -1653,7 +1863,6 @@ graph LR
 ### `functions/src/algebra/sparse/csCumsum.ts` - It sets the p[i] equal to the sum of c[0] through c[i-1].
 
 **Exports:**
-
 - Functions: `csCumsum`
 
 ---
@@ -1668,7 +1877,6 @@ graph LR
 | `./csUnflip.js` | `csUnflip` | Import |
 
 **Exports:**
-
 - Functions: `csDfs`
 
 ---
@@ -1682,7 +1890,6 @@ graph LR
 | `./csMarked.js` | `csMarked` | Import |
 
 **Exports:**
-
 - Functions: `csEreach`
 
 ---
@@ -1690,7 +1897,6 @@ graph LR
 ### `functions/src/algebra/sparse/csEtree.ts` - Computes the elimination tree of Matrix A (using triu(A)) or the
 
 **Exports:**
-
 - Functions: `csEtree`
 
 ---
@@ -1698,7 +1904,6 @@ graph LR
 ### `functions/src/algebra/sparse/csFkeep.ts` - Keeps entries in the matrix when the callback function returns true, removes the entry otherwise
 
 **Exports:**
-
 - Functions: `csFkeep`
 
 ---
@@ -1706,7 +1911,6 @@ graph LR
 ### `functions/src/algebra/sparse/csFlip.ts` - This function "flips" its input about the integer -1.
 
 **Exports:**
-
 - Functions: `csFlip`
 
 ---
@@ -1714,7 +1918,6 @@ graph LR
 ### `functions/src/algebra/sparse/csIpvec.ts` - Permutes a vector; x = P'b. In MATLAB notation, x(p)=b.
 
 **Exports:**
-
 - Functions: `csIpvec`
 
 ---
@@ -1722,7 +1925,6 @@ graph LR
 ### `functions/src/algebra/sparse/csLeaf.ts` - This function determines if j is a leaf of the ith row subtree.
 
 **Exports:**
-
 - Functions: `csLeaf`
 
 ---
@@ -1737,7 +1939,6 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `SparseMatrixData`, `SymbolicAnalysis`, `LuResult`
 - Constants: `createCsLu`
 
@@ -1751,7 +1952,6 @@ graph LR
 | `./csFlip.js` | `csFlip` | Import |
 
 **Exports:**
-
 - Functions: `csMark`
 
 ---
@@ -1759,15 +1959,13 @@ graph LR
 ### `functions/src/algebra/sparse/csMarked.ts` - Checks if the node at w[j] is marked
 
 **Exports:**
-
 - Functions: `csMarked`
 
 ---
 
-### `functions/src/algebra/sparse/csPermute.ts` - Permutes a sparse matrix C = P _ A _ Q
+### `functions/src/algebra/sparse/csPermute.ts` - Permutes a sparse matrix C = P * A * Q
 
 **Exports:**
-
 - Functions: `csPermute`
 
 ---
@@ -1780,7 +1978,6 @@ graph LR
 | `./csTdfs.js` | `csTdfs` | Import |
 
 **Exports:**
-
 - Functions: `csPost`
 
 ---
@@ -1795,12 +1992,11 @@ graph LR
 | `./csDfs.js` | `csDfs` | Import |
 
 **Exports:**
-
 - Functions: `csReach`
 
 ---
 
-### `functions/src/algebra/sparse/csSpsolve.ts` - The function csSpsolve() computes the solution to G \* x = bk, where bk is the
+### `functions/src/algebra/sparse/csSpsolve.ts` - The function csSpsolve() computes the solution to G * x = bk, where bk is the
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1810,7 +2006,6 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `SparseMatrixData`
 - Constants: `createCsSpsolve`
 
@@ -1830,7 +2025,6 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `SparseMatrixData`, `SymbolicAnalysis`
 - Constants: `createCsSqr`
 
@@ -1846,7 +2040,6 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `SparseMatrixData`
 - Constants: `createCsSymperm`
 
@@ -1855,7 +2048,6 @@ graph LR
 ### `functions/src/algebra/sparse/csTdfs.ts` - Depth-first search and postorder of a tree rooted at node j
 
 **Exports:**
-
 - Functions: `csTdfs`
 
 ---
@@ -1868,7 +2060,6 @@ graph LR
 | `./csFlip.js` | `csFlip` | Import |
 
 **Exports:**
-
 - Functions: `csUnflip`
 
 ---
@@ -1882,7 +2073,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSylvester`
 
 ---
@@ -1898,7 +2088,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSymbolicEqual`
 
 ---
@@ -1918,7 +2107,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createAbs`
 
 ---
@@ -1933,7 +2121,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createAddScalar`
 
 ---
@@ -1950,7 +2137,6 @@ graph LR
 | `../core/config.js` | `MathJsConfig` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCbrt`
 
 ---
@@ -1976,7 +2162,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCeilNumber`, `createCeil`
 
 ---
@@ -1991,7 +2176,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCube`
 
 ---
@@ -2007,7 +2191,6 @@ graph LR
 | `../type/matrix/utils/matAlgo14xDs.js` | `createMatAlgo14xDs` | Import |
 
 **Exports:**
-
 - Constants: `createDivide`
 
 ---
@@ -2021,7 +2204,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createDivideScalar`
 
 ---
@@ -2041,7 +2223,6 @@ graph LR
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 
 **Exports:**
-
 - Constants: `createDotDivide`
 
 ---
@@ -2059,7 +2240,6 @@ graph LR
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 
 **Exports:**
-
 - Constants: `createDotMultiply`
 
 ---
@@ -2078,7 +2258,6 @@ graph LR
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 
 **Exports:**
-
 - Constants: `createDotPow`
 
 ---
@@ -2093,7 +2272,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createExp`
 
 ---
@@ -2108,7 +2286,6 @@ graph LR
 | `../plain/number/index.js` | `expm1Number` | Import |
 
 **Exports:**
-
 - Constants: `createExpm1`
 
 ---
@@ -2125,7 +2302,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFixNumber`, `createFix`
 
 ---
@@ -2151,7 +2327,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFloorNumber`, `createFloor`
 
 ---
@@ -2174,7 +2349,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createGcd`
 
 ---
@@ -2191,7 +2365,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createHypot`
 
 ---
@@ -2206,7 +2379,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createInvmod`
 
 ---
@@ -2225,7 +2397,6 @@ graph LR
 | `../plain/number/index.js` | `lcmNumber` | Import |
 
 **Exports:**
-
 - Constants: `createLcm`
 
 ---
@@ -2242,7 +2413,6 @@ graph LR
 | `../plain/number/index.js` | `logNumber` | Import |
 
 **Exports:**
-
 - Constants: `createLog`
 
 ---
@@ -2260,7 +2430,6 @@ graph LR
 | `../core/config.js` | `MathJsConfig` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createLog10`
 
 ---
@@ -2277,7 +2446,6 @@ graph LR
 | `../utils/number.js` | `log1p` | Import |
 
 **Exports:**
-
 - Constants: `createLog1p`
 
 ---
@@ -2295,7 +2463,6 @@ graph LR
 | `../core/config.js` | `MathJsConfig` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createLog2`
 
 ---
@@ -2317,7 +2484,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMod`
 
 ---
@@ -2332,7 +2498,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMultiplyScalar`
 
 ---
@@ -2347,7 +2512,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createNorm`
 
 ---
@@ -2367,7 +2531,6 @@ graph LR
 | `../plain/number/index.js` | `nthRootNumber` | Import |
 
 **Exports:**
-
 - Constants: `createNthRoot`, `createNthRootNumber`
 
 ---
@@ -2382,7 +2545,6 @@ graph LR
 | `../core/config.js` | `MathJsConfig` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createNthRoots`
 
 ---
@@ -2393,14 +2555,13 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/factory.js` | `factory` | Import |
-| `../utils/number.js` | `isInteger` | Import |
+| `../utils/number.js` | `isInteger, isPowZeroAtInfinity` | Import |
 | `../utils/array.js` | `arraySize` | Import |
 | `../plain/number/index.js` | `powNumber` | Import |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createPow`
 
 ---
@@ -2422,7 +2583,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createRound`
 
 ---
@@ -2438,7 +2598,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSign`
 
 ---
@@ -2453,7 +2612,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSqrt`
 
 ---
@@ -2468,7 +2626,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSquare`
 
 ---
@@ -2488,7 +2645,6 @@ graph LR
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import |
 
 **Exports:**
-
 - Constants: `createSubtract`
 
 ---
@@ -2503,7 +2659,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSubtractScalar`
 
 ---
@@ -2520,7 +2675,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createUnaryMinus`
 
 ---
@@ -2538,7 +2692,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createUnaryPlus`
 
 ---
@@ -2552,7 +2705,6 @@ graph LR
 | `../../utils/is.js` | `isNode` | Import |
 
 **Exports:**
-
 - Interfaces: `MathNode`
 - Constants: `name`, `dependencies`, `createNodeOperations`
 
@@ -2569,7 +2721,6 @@ graph LR
 | `../plain/number/index.js` | `xgcdNumber` | Import |
 
 **Exports:**
-
 - Constants: `createXgcd`
 
 ---
@@ -2593,7 +2744,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createBitAnd`
 
 ---
@@ -2610,7 +2760,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createBitNot`
 
 ---
@@ -2630,7 +2779,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createBitOr`
 
 ---
@@ -2650,7 +2798,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createBitXor`
 
 ---
@@ -2675,7 +2822,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createLeftShift`
 
 ---
@@ -2700,7 +2846,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createRightArithShift`
 
 ---
@@ -2724,7 +2869,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createRightLogShift`
 
 ---
@@ -2738,7 +2882,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createUseMatrixForArrayScalar`
 
 ---
@@ -2747,7 +2890,7 @@ graph LR
 
 ## Functions/combinatorics Dependencies
 
-### `functions/src/combinatorics/bellNumbers.ts` - The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose union is
+### `functions/src/combinatorics/bellNumbers.ts` - The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose union is 
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2756,7 +2899,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createBellNumbers`
 
 ---
@@ -2770,7 +2912,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCatalan`
 
 ---
@@ -2784,7 +2925,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createComposition`
 
 ---
@@ -2799,7 +2939,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createStirlingS2`
 
 ---
@@ -2818,7 +2957,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createArg`
 
 ---
@@ -2833,7 +2971,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createConj`
 
 ---
@@ -2848,7 +2985,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIm`
 
 ---
@@ -2863,7 +2999,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createRe`
 
 ---
@@ -2875,7 +3010,6 @@ graph LR
 ### `functions/src/core/config.ts` - Configuration interface for math.js
 
 **Exports:**
-
 - Interfaces: `ConfigOptions`
 - Types: `MathJsConfig`
 - Constants: `DEFAULT_CONFIG`
@@ -2897,7 +3031,6 @@ graph LR
 | `../../utils/number.js` | `digits` | Import |
 
 **Exports:**
-
 - Interfaces: `TypedFunction`
 - Types: `TypedSignatures`, `TypeTest`, `TypeConversion`, `TypeDefinition`
 - Constants: `createTyped`
@@ -2911,7 +3044,6 @@ graph LR
 ### `functions/src/error/ArgumentsError.ts` - Custom error type for wrong number of arguments
 
 **Exports:**
-
 - Classes: `ArgumentsError`
 - Functions: `createArgumentsError`
 
@@ -2920,7 +3052,6 @@ graph LR
 ### `functions/src/error/DimensionError.ts` - Create a range error with the message:
 
 **Exports:**
-
 - Classes: `DimensionError`
 
 ---
@@ -2928,9 +3059,15 @@ graph LR
 ### `functions/src/error/IndexError.ts` - Custom error type for index out of range errors
 
 **Exports:**
-
 - Classes: `IndexError`
 - Functions: `createIndexError`
+
+---
+
+### `functions/src/error/MathjsError.ts` - Custom error type for Mathjs errors
+
+**Exports:**
+- Classes: `MathjsError`
 
 ---
 
@@ -2947,7 +3084,6 @@ graph LR
 | `../utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
 
 **Exports:**
-
 - Functions: `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
 - Constants: `properties`
 
@@ -2967,7 +3103,6 @@ graph LR
 | `../typed/index.js` | `* as typedFns` | Import |
 
 **Exports:**
-
 - Functions: `compileExpr`, `parser`, `replacer`, `reviver`
 - Constants: `parse`, `evaluate`
 
@@ -3224,15 +3359,13 @@ graph LR
 | `../type/unit/physicalConstants.js` | `createGravity, createPlanckLength, createPlanckMass, createPlanckTime, createPlanckCharge, createPlanckTemperature, createHartreeEnergy, createQuantumOfCirculation, createRydberg, createThomsonCrossSection, createWeakMixingAngle, createEfimovFactor, createFermiCoupling` | Import |
 
 **Exports:**
-
-- Constants: `addScalar`, `multiplyScalar`, `subtractScalar`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `map`, `size`, `squeeze`, `combinations`, `combinationsWithRep`, `lgamma`, `pickRandom`, `random`, `erf`, `format`, `print`, `acoth`, `acsch`, `asech`, `coth`, `csch`, `sech`, `toBest`, `clone`, `isBounded`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `numeric`, `typeOf`, `factory_abs`, `factory_cube`, `factory_exp`, `factory_expm1`, `factory_log10`, `factory_log2`, `factory_sign`, `factory_sqrt`, `factory_square`, `factory_unaryMinus`, `factory_acos`, `factory_acosh`, `factory_acot`, `factory_acsc`, `factory_asec`, `factory_asin`, `factory_asinh`, `factory_atan`, `factory_atanh`, `factory_cos`, `factory_cosh`, `factory_cot`, `factory_csc`, `factory_sec`, `factory_sin`, `factory_sinh`, `factory_tan`, `factory_tanh`, `parseNumberWithConfig`, `divideScalar`, `randomInt`, `mode`, `prod`, `bin`, `hex`, `oct`, `hasNumericValue`, `isFinite`, `isZero`, `factory_unaryPlus`, `factory_dot`, `factory_transpose`, `factory_ctranspose`, `identity`, `zeros`, `ones`, `diag`, `kron`, `matrixFromFunction`, `matrixFromColumns`, `matrixFromRows`, `count`, `trace`, `det`, `reshape`, `factory_equal`, `isInteger`, `concat`, `mapSlices`, `resize`, `subset`, `inv`, `factory_cbrt`, `nthRoots`, `factory_round`, `factory_xgcd`, `factory_log`, `catalan`, `bernoulli`, `zpk2tf`, `factory_cumsum`, `factory_sum`, `csCounts`, `csSymperm`, `csAmd`, `csSqr`, `lsolve`, `lsolveAll`, `usolve`, `usolveAll`, `factory_compare`, `factory_larger`, `factory_largerEq`, `factory_smaller`, `factory_smallerEq`, `dotDivide`, `dotMultiply`, `factory_gcd`, `factory_lcm`, `factory_log1p`, `factory_mod`, `factory_nthRoot`, `factory_pow`, `factory_ceil`, `factory_floor`, `expm`, `factory_atan2`, `to`, `dotPow`, `factory_fix`, `invmod`, `composition`, `partitionSelect`, `pinv`, `qr`, `range`, `distance`, `gamma`, `factory_max`, `factory_min`, `factory_hypot`, `factorial`, `sort`, `stirlingS2`, `permutations`, `bellNumbers`, `nodeOperations`, `leafCount`, `resolve`, `simplifyConstant`, `simplifyUtil`, `splitUnit`, `fft`, `Chain`, `factory_subtract`, `factory_divide`, `ifft`, `chain`, `factory_createUnit`, `unit`, `column`, `row`, `cross`, `diff`, `sqrtm`, `lup`, `slu`, `csChol`, `csLu`, `csSpsolve`, `intersect`, `factory_mean`, `median`, `factory_variance`, `quantileSeq`, `kldivergence`, `multinomial`, `freqz`, `simplifyCore`, `polynomialRoot`, `solveODE`, `zeta`, `indexFn`, `eigs`, `lusolve`, `corr`, `mad`, `factory_std`, `simplify`, `derivative`, `factory_norm`, `rationalize`, `symbolicEqual`, `rotationMatrix`, `schur`, `rotate`, `sylvester`, `lyap`, `speedOfLight`, `gravitationConstant`, `planckConstant`, `reducedPlanckConstant`, `magneticConstant`, `electricConstant`, `vacuumImpedance`, `coulomb`, `coulombConstant`, `elementaryCharge`, `bohrMagneton`, `conductanceQuantum`, `inverseConductanceQuantum`, `magneticFluxQuantum`, `nuclearMagneton`, `klitzing`, `josephson`, `faraday`, `fineStructure`, `boltzmann`, `gasConstant`, `molarVolume`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `avogadro`, `loschmidt`, `sackurTetrode`, `stefanBoltzmann`, `firstRadiation`, `secondRadiation`, `wienDisplacement`, `electronMass`, `protonMass`, `neutronMass`, `deuteronMass`, `atomicMass`, `bohrRadius`, `classicalElectronRadius`, `gravity`, `planckLength`, `planckMass`, `planckTime`, `planckCharge`, `planckTemperature`, `hartreeEnergy`, `quantumOfCirculation`, `rydberg`, `thomsonCrossSection`, `weakMixingAngle`, `efimovFactor`, `fermiCoupling`, `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `number`, `string`, `boolean`, `bigint`
+- Constants: `addScalar`, `multiplyScalar`, `subtractScalar`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `map`, `size`, `squeeze`, `erf`, `acoth`, `acsch`, `asech`, `coth`, `csch`, `sech`, `toBest`, `clone`, `isBounded`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `numeric`, `typeOf`, `factory_abs`, `factory_cube`, `factory_exp`, `factory_expm1`, `factory_log10`, `factory_log2`, `factory_sign`, `factory_sqrt`, `factory_square`, `factory_unaryMinus`, `factory_acos`, `factory_acosh`, `factory_acot`, `factory_acsc`, `factory_asec`, `factory_asin`, `factory_asinh`, `factory_atan`, `factory_atanh`, `factory_cos`, `factory_cosh`, `factory_cot`, `factory_csc`, `factory_sec`, `factory_sin`, `factory_sinh`, `factory_tan`, `factory_tanh`, `parseNumberWithConfig`, `divideScalar`, `mode`, `prod`, `hasNumericValue`, `isFinite`, `isZero`, `factory_unaryPlus`, `factory_dot`, `factory_transpose`, `factory_ctranspose`, `identity`, `zeros`, `ones`, `diag`, `kron`, `matrixFromFunction`, `matrixFromColumns`, `matrixFromRows`, `count`, `trace`, `det`, `reshape`, `factory_equal`, `isInteger`, `concat`, `mapSlices`, `resize`, `subset`, `inv`, `factory_cbrt`, `nthRoots`, `factory_round`, `factory_xgcd`, `factory_log`, `catalan`, `zpk2tf`, `factory_cumsum`, `factory_sum`, `csCounts`, `csSymperm`, `csAmd`, `csSqr`, `lsolve`, `lsolveAll`, `usolve`, `usolveAll`, `factory_compare`, `factory_larger`, `factory_largerEq`, `factory_smaller`, `factory_smallerEq`, `dotDivide`, `dotMultiply`, `factory_gcd`, `factory_lcm`, `factory_log1p`, `factory_mod`, `factory_nthRoot`, `factory_pow`, `factory_ceil`, `factory_floor`, `expm`, `factory_atan2`, `to`, `dotPow`, `factory_fix`, `invmod`, `composition`, `partitionSelect`, `qr`, `range`, `distance`, `gamma`, `factory_max`, `factory_min`, `factory_hypot`, `factorial`, `sort`, `stirlingS2`, `bellNumbers`, `nodeOperations`, `leafCount`, `resolve`, `simplifyConstant`, `simplifyUtil`, `splitUnit`, `fft`, `Chain`, `factory_subtract`, `factory_divide`, `ifft`, `chain`, `factory_createUnit`, `unit`, `column`, `row`, `cross`, `diff`, `sqrtm`, `lup`, `slu`, `csChol`, `csLu`, `csSpsolve`, `intersect`, `factory_mean`, `median`, `factory_variance`, `quantileSeq`, `kldivergence`, `freqz`, `simplifyCore`, `polynomialRoot`, `solveODE`, `zeta`, `indexFn`, `eigs`, `lusolve`, `corr`, `mad`, `factory_std`, `simplify`, `derivative`, `factory_norm`, `rationalize`, `symbolicEqual`, `rotationMatrix`, `schur`, `rotate`, `sylvester`, `lyap`, `speedOfLight`, `gravitationConstant`, `planckConstant`, `reducedPlanckConstant`, `magneticConstant`, `electricConstant`, `vacuumImpedance`, `coulomb`, `coulombConstant`, `elementaryCharge`, `bohrMagneton`, `conductanceQuantum`, `inverseConductanceQuantum`, `magneticFluxQuantum`, `nuclearMagneton`, `klitzing`, `josephson`, `faraday`, `fineStructure`, `boltzmann`, `gasConstant`, `molarVolume`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `avogadro`, `loschmidt`, `sackurTetrode`, `stefanBoltzmann`, `firstRadiation`, `secondRadiation`, `wienDisplacement`, `electronMass`, `protonMass`, `neutronMass`, `deuteronMass`, `atomicMass`, `bohrRadius`, `classicalElectronRadius`, `gravity`, `planckLength`, `planckMass`, `planckTime`, `planckCharge`, `planckTemperature`, `hartreeEnergy`, `quantumOfCirculation`, `rydberg`, `thomsonCrossSection`, `weakMixingAngle`, `efimovFactor`, `fermiCoupling`, `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `number`, `string`, `boolean`, `bigint`
 
 ---
 
 ### `functions/src/factories/matrix-bridge.ts` - Matrix Compatibility Bridge
 
 **Exports:**
-
 - Classes: `MathJSDenseMatrix`, `MathJSSparseMatrix`
 - Functions: `createMatrixBridge`
 
@@ -3248,7 +3381,6 @@ graph LR
 | `./matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix, createMatrixBridge` | Import |
 
 **Exports:**
-
 - Constants: `factoryScope`
 
 ---
@@ -3269,7 +3401,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createDistance`
 
 ---
@@ -3286,7 +3417,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIntersect`
 
 ---
@@ -3303,18 +3433,17 @@ graph LR
 | `./typed/index.js` | `*` | Re-export |
 | `./typed/cas.js` | `*` | Re-export |
 | `./factories/index.js` | `*` | Re-export |
+| `./typed/unit.js` | `to, toBest` | Re-export |
 | `./factories/evaluate.js` | `evaluate, compileExpr, parse, parser, reviver, replacer` | Re-export |
 
 **Exports:**
-
-- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`
+- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `reviver`, `replacer`
 
 ---
 
 ### `functions/src/types.ts` - Type definitions re-exported for internal use
 
 **Exports:**
-
 - Interfaces: `SparseMatrix`, `Unit`, `MatrixConstructor`
 - Types: `BigNumber`, `Complex`, `Fraction`
 
@@ -3339,7 +3468,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createAnd`
 
 ---
@@ -3355,7 +3483,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createNot`
 
 ---
@@ -3373,7 +3500,6 @@ graph LR
 | `../types.js` | `TypedFunction, Matrix, SparseMatrix, MatrixConstructor, Complex, BigNumber, Fraction, Unit` | Import |
 
 **Exports:**
-
 - Constants: `createNullish`
 
 ---
@@ -3392,7 +3518,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createOr`
 
 ---
@@ -3411,7 +3536,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createXor`
 
 ---
@@ -3431,7 +3555,6 @@ graph LR
 | `../utils/array.js` | `validateIndex` | Import |
 
 **Exports:**
-
 - Constants: `createColumn`
 
 ---
@@ -3449,7 +3572,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createConcat`
 
 ---
@@ -3463,7 +3585,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCount`
 
 ---
@@ -3477,7 +3598,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createCross`
 
 ---
@@ -3491,7 +3611,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCtranspose`
 
 ---
@@ -3514,7 +3633,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createDet`
 
 ---
@@ -3536,7 +3654,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createDiag`
 
 ---
@@ -3552,7 +3669,6 @@ graph LR
 | `../types.js` | `TypedFunction, Matrix, MatrixConstructor` | Import |
 
 **Exports:**
-
 - Constants: `createDiff`
 
 ---
@@ -3566,7 +3682,6 @@ graph LR
 | `../utils/is.js` | `isMatrix` | Import |
 
 **Exports:**
-
 - Constants: `createDot`
 
 ---
@@ -3586,7 +3701,6 @@ graph LR
 | `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Functions: `createComplexEigs`
 
 ---
@@ -3605,7 +3719,6 @@ graph LR
 | `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Functions: `createRealSymmetric`
 
 ---
@@ -3628,7 +3741,6 @@ graph LR
 | `../utils/is.js` | `typeOf, isNumber, isBigNumber, isComplex, isFraction` | Import |
 
 **Exports:**
-
 - Constants: `createEigs`
 
 ---
@@ -3650,7 +3762,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Interfaces: `Matrix`
 - Constants: `createExpm`
 
@@ -3666,7 +3777,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createFft`
 
 ---
@@ -3682,7 +3792,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFilter`
 
 ---
@@ -3697,7 +3806,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFlatten`
 
 ---
@@ -3713,7 +3821,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createForEach`
 
 ---
@@ -3729,7 +3836,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createGetMatrixDataType`
 
 ---
@@ -3745,7 +3851,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createIdentity`
 
 ---
@@ -3761,7 +3866,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createIfft`
 
 ---
@@ -3784,7 +3888,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createInv`
 
 ---
@@ -3799,7 +3902,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createKron`
 
 ---
@@ -3815,7 +3917,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMap`
 
 ---
@@ -3832,7 +3933,6 @@ graph LR
 | `../types.js` | `TypedFunction, Matrix, BigNumber` | Import |
 
 **Exports:**
-
 - Constants: `createMapSlices`
 
 ---
@@ -3845,7 +3945,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createMatrixFromColumns`
 
 ---
@@ -3859,7 +3958,6 @@ graph LR
 | `../types.js` | `TypedFunction, Matrix` | Import |
 
 **Exports:**
-
 - Constants: `createMatrixFromFunction`
 
 ---
@@ -3872,7 +3970,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createMatrixFromRows`
 
 ---
@@ -3882,13 +3979,10 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/is.js` | `isBigNumber` | Import |
-| `../utils/number.js` | `isInteger` | Import |
-| `../utils/array.js` | `resize` | Import |
 | `../utils/factory.js` | `factory` | Import |
+| `./utils/zerosAndOnes.js` | `createZerosAndOnes, Dependencies` | Import |
 
 **Exports:**
-
 - Constants: `createOnes`
 
 ---
@@ -3904,7 +3998,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Constants: `createPartitionSelect`
 
 ---
@@ -3927,7 +4020,6 @@ graph LR
 | `../utils/object.js` | `clone` | Import |
 
 **Exports:**
-
 - Constants: `createPinv`
 
 ---
@@ -3943,7 +4035,6 @@ graph LR
 | `../core/config.js` | `MathJsConfig` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createRange`
 
 ---
@@ -3958,7 +4049,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createReshape`
 
 ---
@@ -3970,16 +4060,15 @@ graph LR
 |------|---------|------|
 | `../utils/is.js` | `isBigNumber, isMatrix` | Import |
 | `../error/DimensionError.js` | `DimensionError` | Import |
-| `../error/ArgumentsError.js` | `ArgumentsError` | Import |
 | `../utils/number.js` | `isInteger` | Import |
 | `../utils/string.js` | `format` | Import |
 | `../utils/object.js` | `clone` | Import |
 | `../utils/array.js` | `resize` | Import |
 | `../utils/factory.js` | `factory` | Import |
 | `../core/config.js` | `MathJsConfig` | Import (type-only) |
+| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createResize`
 
 ---
@@ -3994,7 +4083,6 @@ graph LR
 | `../types.js` | `TypedFunction, Matrix, BigNumber, Complex, Unit` | Import |
 
 **Exports:**
-
 - Constants: `createRotate`
 
 ---
@@ -4010,7 +4098,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createRotationMatrix`
 
 ---
@@ -4026,7 +4113,6 @@ graph LR
 | `../utils/array.js` | `validateIndex` | Import |
 
 **Exports:**
-
 - Constants: `createRow`
 
 ---
@@ -4040,7 +4126,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createSize`
 
 ---
@@ -4055,7 +4140,6 @@ graph LR
 | `../types.js` | `TypedFunction, Matrix` | Import |
 
 **Exports:**
-
 - Constants: `createSort`
 
 ---
@@ -4078,7 +4162,6 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Interfaces: `Matrix`
 - Constants: `createSqrtm`
 
@@ -4095,7 +4178,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSqueeze`
 
 ---
@@ -4113,7 +4195,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createSubset`
 
 ---
@@ -4129,7 +4210,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createTrace`
 
 ---
@@ -4146,8 +4226,22 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createTranspose`
+
+---
+
+### `functions/src/matrix/utils/zerosAndOnes.ts` - Create an Array or Matrix with zeros or ones
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../utils/is.js` | `isBigNumber` | Import |
+| `../../utils/number.js` | `isInteger` | Import |
+| `../../utils/array.js` | `resize` | Import |
+
+**Exports:**
+- Interfaces: `TypedFunction`, `BigNumberConstructor`, `BigNumber`, `MatrixConstructor`, `Matrix`, `Config`, `Dependencies`
+- Functions: `createZerosAndOnes`
 
 ---
 
@@ -4156,13 +4250,10 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/is.js` | `isBigNumber` | Import |
-| `../utils/number.js` | `isInteger` | Import |
-| `../utils/array.js` | `resize` | Import |
 | `../utils/factory.js` | `factory` | Import |
+| `./utils/zerosAndOnes.js` | `createZerosAndOnes, Dependencies` | Import |
 
 **Exports:**
-
 - Constants: `createZeros`
 
 ---
@@ -4182,7 +4273,6 @@ graph LR
 | `../types.js` | `MathNumericType, MathArray, Matrix, Unit, BigNumber` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSolveODE`
 
 ---
@@ -4196,10 +4286,9 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../utils/number.js` | `cbrt, expm1, isInteger, log10, log1p, log2, sign, toFixed` | Import |
+| `../../utils/number.js` | `cbrt, expm1, isInteger, log10, log1p, log2, sign, toFixed, isPowZeroAtInfinity` | Import |
 
 **Exports:**
-
 - Functions: `absNumber`, `addNumber`, `subtractNumber`, `multiplyNumber`, `divideNumber`, `unaryMinusNumber`, `unaryPlusNumber`, `cbrtNumber`, `cubeNumber`, `expNumber`, `expm1Number`, `gcdNumber`, `lcmNumber`, `logNumber`, `log10Number`, `log2Number`, `log1pNumber`, `modNumber`, `nthRootNumber`, `signNumber`, `sqrtNumber`, `squareNumber`, `xgcdNumber`, `powNumber`, `roundNumber`, `normNumber`
 
 ---
@@ -4212,7 +4301,6 @@ graph LR
 | `../../utils/number.js` | `isInteger` | Import |
 
 **Exports:**
-
 - Functions: `bitAndNumber`, `bitNotNumber`, `bitOrNumber`, `bitXorNumber`, `leftShiftNumber`, `rightArithShiftNumber`, `rightLogShiftNumber`
 
 ---
@@ -4226,7 +4314,6 @@ graph LR
 | `../../utils/product.js` | `product` | Import |
 
 **Exports:**
-
 - Functions: `combinationsNumber`
 
 ---
@@ -4234,7 +4321,6 @@ graph LR
 ### `functions/src/plain/number/constants.ts` - constants module
 
 **Exports:**
-
 - Constants: `pi`, `tau`, `e`, `phi`
 
 ---
@@ -4255,7 +4341,6 @@ graph LR
 | `./utils.js` | `*` | Re-export |
 
 **Exports:**
-
 - Re-exports: `* from ./arithmetic.js`, `* from ./bitwise.js`, `* from ./combinations.js`, `* from ./constants.js`, `* from ./logical.js`, `* from ./relational.js`, `* from ./probability.js`, `* from ./trigonometry.js`, `* from ./utils.js`
 
 ---
@@ -4263,7 +4348,6 @@ graph LR
 ### `functions/src/plain/number/logical.ts` - logical module
 
 **Exports:**
-
 - Functions: `notNumber`, `orNumber`, `xorNumber`, `andNumber`
 
 ---
@@ -4277,7 +4361,6 @@ graph LR
 | `../../utils/product.js` | `product` | Import |
 
 **Exports:**
-
 - Functions: `gammaNumber`, `lgammaNumber`
 - Constants: `gammaG`, `gammaP`, `lnSqrt2PI`, `lgammaG`, `lgammaN`, `lgammaSeries`
 
@@ -4286,7 +4369,6 @@ graph LR
 ### `functions/src/plain/number/relational.ts` - Relational operations for plain numbers
 
 **Exports:**
-
 - Functions: `equalNumber`, `unequalNumber`, `smallerNumber`, `smallerEqNumber`, `largerNumber`, `largerEqNumber`, `compareNumber`
 
 ---
@@ -4299,7 +4381,6 @@ graph LR
 | `../../utils/number.js` | `acosh, asinh, atanh, cosh, sign, sinh, tanh` | Import |
 
 **Exports:**
-
 - Functions: `acosNumber`, `acoshNumber`, `acotNumber`, `acothNumber`, `acscNumber`, `acschNumber`, `asecNumber`, `asechNumber`, `asinNumber`, `asinhNumber`, `atanNumber`, `atan2Number`, `atanhNumber`, `cosNumber`, `coshNumber`, `cotNumber`, `cothNumber`, `cscNumber`, `cschNumber`, `secNumber`, `sechNumber`, `sinNumber`, `sinhNumber`, `tanNumber`, `tanhNumber`
 
 ---
@@ -4312,7 +4393,6 @@ graph LR
 | `../../utils/number.js` | `isInteger` | Import |
 
 **Exports:**
-
 - Functions: `isIntegerNumber`, `isNegativeNumber`, `isPositiveNumber`, `isZeroNumber`, `isNaNNumber`
 
 ---
@@ -4332,7 +4412,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createBernoulli`
 
 ---
@@ -4347,7 +4426,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCombinations`
 
 ---
@@ -4363,7 +4441,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCombinationsWithRep`
 
 ---
@@ -4378,7 +4455,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFactorial`
 
 ---
@@ -4395,12 +4471,11 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createGamma`
 
 ---
 
-### `functions/src/probability/kldivergence.ts` - Calculate the Kullback-Leibler (KL) divergence between two distributions
+### `functions/src/probability/kldivergence.ts` - Calculate the Kullback-Leibler (KL) divergence  between two distributions
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -4409,12 +4484,11 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createKldivergence`
 
 ---
 
-### `functions/src/probability/lgamma.ts` - The coefficients are B[2*n]/(2*n*(2*n - 1)) where B[2*n] is the (2\*n)th Bernoulli number. See (1.1) in [1].
+### `functions/src/probability/lgamma.ts` - The coefficients are B[2*n]/(2*n*(2*n - 1)) where B[2*n] is the (2*n)th Bernoulli number. See (1.1) in [1].
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -4426,7 +4500,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createLgamma`
 
 ---
@@ -4441,7 +4514,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMultinomial`
 
 ---
@@ -4457,7 +4529,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createPermutations`
 
 ---
@@ -4475,7 +4546,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createPickRandom`
 
 ---
@@ -4493,7 +4563,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createRandom`, `createRandomNumber`
 
 ---
@@ -4511,7 +4580,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createRandomInt`
 
 ---
@@ -4519,7 +4587,6 @@ graph LR
 ### `functions/src/probability/util/randomMatrix.ts` - This is a util function for generating a random matrix recursively.
 
 **Exports:**
-
 - Functions: `randomMatrix`
 
 ---
@@ -4532,7 +4599,6 @@ graph LR
 | `seedrandom` | `seedrandom` |
 
 **Exports:**
-
 - Functions: `createRng`
 
 ---
@@ -4559,7 +4625,6 @@ graph LR
 | `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCompare`, `createCompareNumber`
 
 ---
@@ -4579,7 +4644,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCompareNatural`
 
 ---
@@ -4595,7 +4659,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCompareText`, `createCompareTextNumber`
 
 ---
@@ -4609,7 +4672,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCompareUnits`
 
 ---
@@ -4623,7 +4685,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createDeepEqual`
 
 ---
@@ -4642,7 +4703,6 @@ graph LR
 | `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createEqual`, `createEqualNumber`
 
 ---
@@ -4661,7 +4721,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import |
 
 **Exports:**
-
 - Constants: `createEqualScalar`, `createEqualScalarNumber`
 
 ---
@@ -4675,7 +4734,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createEqualText`
 
 ---
@@ -4698,7 +4756,6 @@ graph LR
 | `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createLarger`, `createLargerNumber`
 
 ---
@@ -4721,7 +4778,6 @@ graph LR
 | `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createLargerEq`, `createLargerEqNumber`
 
 ---
@@ -4744,7 +4800,6 @@ graph LR
 | `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSmaller`, `createSmallerNumber`
 
 ---
@@ -4767,7 +4822,6 @@ graph LR
 | `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSmallerEq`, `createSmallerEqNumber`
 
 ---
@@ -4787,7 +4841,6 @@ graph LR
 | `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createUnequal`, `createUnequalNumber`
 
 ---
@@ -4807,7 +4860,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetCartesian`
 
 ---
@@ -4823,7 +4875,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetDifference`
 
 ---
@@ -4838,7 +4889,6 @@ graph LR
 | `../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetDistinct`
 
 ---
@@ -4854,7 +4904,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetIntersect`
 
 ---
@@ -4869,7 +4918,6 @@ graph LR
 | `../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetIsSubset`
 
 ---
@@ -4884,7 +4932,6 @@ graph LR
 | `../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetMultiplicity`
 
 ---
@@ -4899,7 +4946,6 @@ graph LR
 | `../../types/index.js` | `MathArray, Matrix, MathNumericType` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetPowerset`
 
 ---
@@ -4914,7 +4960,6 @@ graph LR
 | `../../types/index.js` | `MathArray, Matrix` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetSize`
 
 ---
@@ -4930,7 +4975,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetSymDifference`
 
 ---
@@ -4946,7 +4990,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSetUnion`
 
 ---
@@ -4965,7 +5008,6 @@ graph LR
 | `../types.js` | `Matrix, Complex` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFreqz`
 
 ---
@@ -4979,7 +5021,6 @@ graph LR
 | `../types.js` | `Matrix, Complex` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createZpk2tf`
 
 ---
@@ -5000,7 +5041,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createErf`
 
 ---
@@ -5015,7 +5055,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createZeta`
 
 ---
@@ -5034,7 +5073,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCorr`
 
 ---
@@ -5054,7 +5092,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCumSum`
 
 ---
@@ -5071,7 +5108,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMad`
 
 ---
@@ -5090,7 +5126,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMax`
 
 ---
@@ -5108,7 +5143,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMean`
 
 ---
@@ -5125,7 +5159,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMedian`
 
 ---
@@ -5144,7 +5177,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMin`
 
 ---
@@ -5159,7 +5191,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMode`
 
 ---
@@ -5177,7 +5208,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createProd`
 
 ---
@@ -5193,7 +5223,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createQuantileSeq`
 
 ---
@@ -5209,7 +5238,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createStd`
 
 ---
@@ -5227,7 +5255,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSum`
 
 ---
@@ -5240,7 +5267,6 @@ graph LR
 | `../../utils/is.js` | `typeOf` | Import |
 
 **Exports:**
-
 - Functions: `improveErrorMessage`
 
 ---
@@ -5258,7 +5284,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createVariance`
 
 ---
@@ -5276,7 +5301,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createBin`
 
 ---
@@ -5291,7 +5315,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFormat`
 
 ---
@@ -5305,7 +5328,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createHex`
 
 ---
@@ -5319,7 +5341,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createOct`
 
 ---
@@ -5336,7 +5357,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createPrint`
 
 ---
@@ -5355,7 +5375,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createAcos`
 
 ---
@@ -5373,7 +5392,6 @@ graph LR
 | `../plain/number/index.js` | `acoshNumber` | Import |
 
 **Exports:**
-
 - Constants: `createAcosh`
 
 ---
@@ -5390,7 +5408,6 @@ graph LR
 | `../plain/number/index.js` | `acotNumber` | Import |
 
 **Exports:**
-
 - Constants: `createAcot`
 
 ---
@@ -5408,7 +5425,6 @@ graph LR
 | `../plain/number/index.js` | `acothNumber` | Import |
 
 **Exports:**
-
 - Constants: `createAcoth`
 
 ---
@@ -5426,7 +5442,6 @@ graph LR
 | `../plain/number/index.js` | `acscNumber` | Import |
 
 **Exports:**
-
 - Constants: `createAcsc`
 
 ---
@@ -5443,7 +5458,6 @@ graph LR
 | `../plain/number/index.js` | `acschNumber` | Import |
 
 **Exports:**
-
 - Constants: `createAcsch`
 
 ---
@@ -5461,7 +5475,6 @@ graph LR
 | `../plain/number/index.js` | `asecNumber` | Import |
 
 **Exports:**
-
 - Constants: `createAsec`
 
 ---
@@ -5479,7 +5492,6 @@ graph LR
 | `../plain/number/index.js` | `asechNumber` | Import |
 
 **Exports:**
-
 - Constants: `createAsech`
 
 ---
@@ -5494,7 +5506,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createAsin`
 
 ---
@@ -5511,7 +5522,6 @@ graph LR
 | `../plain/number/index.js` | `asinhNumber` | Import |
 
 **Exports:**
-
 - Constants: `createAsinh`
 
 ---
@@ -5525,7 +5535,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createAtan`
 
 ---
@@ -5546,7 +5555,6 @@ graph LR
 | `../type/matrix/types.js` | `AlgorithmFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createAtan2`
 
 ---
@@ -5564,7 +5572,6 @@ graph LR
 | `../plain/number/index.js` | `atanhNumber` | Import |
 
 **Exports:**
-
 - Constants: `createAtanh`
 
 ---
@@ -5579,7 +5586,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCos`
 
 ---
@@ -5594,7 +5600,6 @@ graph LR
 | `../utils/number.js` | `cosh` | Import |
 
 **Exports:**
-
 - Constants: `createCosh`
 
 ---
@@ -5612,7 +5617,6 @@ graph LR
 | `./trigUnit.js` | `createTrigUnit` | Import |
 
 **Exports:**
-
 - Constants: `createCot`
 
 ---
@@ -5629,7 +5633,6 @@ graph LR
 | `../plain/number/index.js` | `cothNumber` | Import |
 
 **Exports:**
-
 - Constants: `createCoth`
 
 ---
@@ -5647,7 +5650,6 @@ graph LR
 | `./trigUnit.js` | `createTrigUnit` | Import |
 
 **Exports:**
-
 - Constants: `createCsc`
 
 ---
@@ -5664,7 +5666,6 @@ graph LR
 | `../plain/number/index.js` | `cschNumber` | Import |
 
 **Exports:**
-
 - Constants: `createCsch`
 
 ---
@@ -5682,7 +5683,6 @@ graph LR
 | `./trigUnit.js` | `createTrigUnit` | Import |
 
 **Exports:**
-
 - Constants: `createSec`
 
 ---
@@ -5699,7 +5699,6 @@ graph LR
 | `../plain/number/index.js` | `sechNumber` | Import |
 
 **Exports:**
-
 - Constants: `createSech`
 
 ---
@@ -5714,7 +5713,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSin`
 
 ---
@@ -5729,7 +5727,6 @@ graph LR
 | `../plain/number/index.js` | `sinhNumber` | Import |
 
 **Exports:**
-
 - Constants: `createSinh`
 
 ---
@@ -5744,7 +5741,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createTan`
 
 ---
@@ -5759,7 +5755,6 @@ graph LR
 | `../utils/number.js` | `tanh` | Import |
 
 **Exports:**
-
 - Constants: `createTanh`
 
 ---
@@ -5773,7 +5768,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createTrigUnit`
 
 ---
@@ -5795,7 +5789,6 @@ graph LR
 | `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Interfaces: `BigNumberJSON`, `ConfigChangeEvent`, `BigNumberClass`, `BigNumberInstance`
 - Types: `BigNumber`
 - Constants: `createBigNumberClass`
@@ -5814,7 +5807,6 @@ graph LR
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `ChainJSON`, `ChainInstance`, `ChainConstructor`
 - Constants: `createChainClass`
 
@@ -5829,7 +5821,6 @@ graph LR
 | `../../../types.js` | `TypedFunction` | Import |
 
 **Exports:**
-
 - Constants: `createChain`
 
 ---
@@ -5849,7 +5840,6 @@ graph LR
 | `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Interfaces: `ComplexJSON`, `PolarCoordinates`, `ComplexFormatOptions`, `Complex`, `PolarInput`, `AbsArgInput`, `ComplexConstructor`
 - Constants: `createComplexClass`
 
@@ -5864,8 +5854,21 @@ graph LR
 | `./types.js` | `FibonacciHeapNode, MatrixValue` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFibonacciHeapClass`
+
+---
+
+### `functions/src/type/matrix/function/index.ts` - Create an index. An Index can store ranges having start, step, and end
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../utils/is.js` | `isBigNumber, isMatrix, isArray` | Import |
+| `../../../utils/factory.js` | `factory` | Import |
+| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+
+**Exports:**
+- Constants: `createIndex`
 
 ---
 
@@ -5880,7 +5883,6 @@ graph LR
 | `./types.js` | `DenseMatrixData, DataType, MatrixValue, IndexInterface, ImmutableDenseMatrixJSON, ImmutableDenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createImmutableDenseMatrixClass`
 
 ---
@@ -5897,7 +5899,6 @@ graph LR
 | `./types.js` | `IndexJSON, RangeInterface, MatrixValue` | Import (type-only) |
 
 **Exports:**
-
 - Types: `IndexDimension`, `IndexForEachCallback`
 - Constants: `createIndexClass`
 
@@ -5912,30 +5913,13 @@ graph LR
 | `./types.js` | `FibonacciHeapNode, FibonacciHeapInterface, MatrixValue, EqualScalarFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSpaClass`
-
----
-
-### `functions/src/type/matrix/function/index.ts` - Create an index. An Index can store ranges having start, step, and end
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../../utils/is.js` | `isBigNumber, isMatrix, isArray` | Import |
-| `../../../utils/factory.js` | `factory` | Import |
-| `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-
-**Exports:**
-
-- Constants: `createIndex`
 
 ---
 
 ### `functions/src/type/matrix/types.ts` - Type Philosophy:
 
 **Exports:**
-
 - Interfaces: `BigNumberLike`, `ComplexLike`, `FractionLike`, `TypedFunction`, `IndexInterface`, `MatrixInterface`, `DenseMatrixInterface`, `SparseMatrixInterface`, `MatrixFormatOptions`, `DenseMatrixJSON`, `SparseMatrixJSON`, `ImmutableDenseMatrixJSON`, `RangeJSON`, `IndexJSON`, `MatrixEntry`, `DenseMatrixConstructorData`, `SparseMatrixConstructorData`, `ImmutableDenseMatrixConstructorData`, `MatrixAlgorithmSuiteOptions`, `FibonacciHeapNode`, `FibonacciHeapInterface`, `RangeFormatOptions`, `RangeInterface`
 - Types: `MathNumericValue`, `MatrixValue`, `DataType`, `NestedArray`, `DenseMatrixData`, `MatrixArray`, `MatrixCallback`, `EqualScalarFunction`, `MapCallback`, `ForEachCallback`, `ElementwiseOperation`, `AlgorithmFunction`, `MatrixSignatures`, `RangeForEachCallback`, `RangeMapCallback`
 
@@ -5950,7 +5934,6 @@ graph LR
 | `../../../utils/object.js` | `deepStrictEqual` | Import |
 
 **Exports:**
-
 - Functions: `broadcast`
 
 ---
@@ -5965,7 +5948,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo01xDSid`
 
 ---
@@ -5980,7 +5962,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo02xDS0`
 
 ---
@@ -5995,7 +5976,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo03xDSf`
 
 ---
@@ -6010,7 +5990,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo04xSidSid`
 
 ---
@@ -6025,7 +6004,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo05xSfSf`
 
 ---
@@ -6041,7 +6019,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo06xS0S0`
 
 ---
@@ -6056,7 +6033,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo07xSSf`
 
 ---
@@ -6071,7 +6047,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo08xS0Sid`
 
 ---
@@ -6086,7 +6061,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo09xS0Sf`
 
 ---
@@ -6100,7 +6074,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo10xSids`
 
 ---
@@ -6114,7 +6087,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixCallback, EqualScalarFunction, TypedFunction, SparseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo11xS0s`
 
 ---
@@ -6128,7 +6100,6 @@ graph LR
 | `../types.js` | `DataType, MatrixValue, MatrixArray, MatrixCallback, TypedFunction, DenseMatrixConstructorData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo12xSfs`
 
 ---
@@ -6143,7 +6114,6 @@ graph LR
 | `../types.js` | `DataType, DenseMatrixData, MatrixCallback, TypedFunction, DenseMatrixConstructorData, MatrixValue` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo13xDD`
 
 ---
@@ -6158,7 +6128,6 @@ graph LR
 | `../types.js` | `DataType, DenseMatrixData, MatrixCallback, TypedFunction, DenseMatrixConstructorData, MatrixValue` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatAlgo14xDs`
 
 ---
@@ -6176,7 +6145,6 @@ graph LR
 | `../types.js` | `TypedFunction, MatrixAlgorithmSuiteOptions, MatrixSignatures, MatrixInterface, DenseMatrixData` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createMatrixAlgorithmSuite`
 
 ---
@@ -6189,27 +6157,8 @@ graph LR
 | `../../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Interfaces: `ResultSetJSON`, `ResultSetInstance`, `ResultSetConstructor`
 - Constants: `createResultSet`
-
----
-
-### `functions/src/type/unit/Unit.ts` - A unit can be constructed in the following ways:
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../../utils/is.js` | `isComplex, isUnit, typeOf` | Import |
-| `../../utils/factory.js` | `factory` | Import |
-| `../../utils/function.js` | `memoize` | Import |
-| `../../utils/string.js` | `endsWith` | Import |
-| `../../utils/object.js` | `clone, hasOwnProperty` | Import |
-| `../../utils/bignumber/constants.js` | `createBigNumberPi` | Import |
-
-**Exports:**
-
-- Constants: `createUnitClass`
 
 ---
 
@@ -6222,7 +6171,6 @@ graph LR
 | `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createCreateUnit`
 
 ---
@@ -6236,7 +6184,6 @@ graph LR
 | `../../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createSplitUnit`
 
 ---
@@ -6252,7 +6199,6 @@ graph LR
 | `../../../types.js` | `MathCollection` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createUnitFunction`
 
 ---
@@ -6271,9 +6217,26 @@ graph LR
 | `../../core/config.js` | `MathJsConfig` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `UnitInstance`
 - Constants: `createSpeedOfLight`, `createGravitationConstant`, `createPlanckConstant`, `createReducedPlanckConstant`, `createMagneticConstant`, `createElectricConstant`, `createVacuumImpedance`, `createCoulomb`, `createCoulombConstant`, `createElementaryCharge`, `createBohrMagneton`, `createConductanceQuantum`, `createInverseConductanceQuantum`, `createMagneticFluxQuantum`, `createNuclearMagneton`, `createKlitzing`, `createJosephson`, `createBohrRadius`, `createClassicalElectronRadius`, `createElectronMass`, `createFermiCoupling`, `createFineStructure`, `createHartreeEnergy`, `createProtonMass`, `createDeuteronMass`, `createNeutronMass`, `createQuantumOfCirculation`, `createRydberg`, `createThomsonCrossSection`, `createWeakMixingAngle`, `createEfimovFactor`, `createAtomicMass`, `createAvogadro`, `createBoltzmann`, `createFaraday`, `createFirstRadiation`, `createLoschmidt`, `createGasConstant`, `createMolarPlanckConstant`, `createMolarVolume`, `createSackurTetrode`, `createSecondRadiation`, `createStefanBoltzmann`, `createWienDisplacement`, `createMolarMass`, `createMolarMassC12`, `createGravity`, `createPlanckLength`, `createPlanckMass`, `createPlanckTime`, `createPlanckCharge`, `createPlanckTemperature`
+
+---
+
+### `functions/src/type/unit/Unit.ts` - A unit can be constructed in the following ways:
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../utils/is.js` | `isComplex, isUnit, typeOf` | Import |
+| `../../utils/factory.js` | `factory` | Import |
+| `../../utils/function.js` | `memoize` | Import |
+| `../../utils/string.js` | `endsWith` | Import |
+| `../../utils/object.js` | `clone, hasOwnProperty` | Import |
+| `../../utils/bignumber/constants.js` | `createBigNumberPi` | Import |
+| `../../utils/log.js` | `warnOnce` | Import |
+
+**Exports:**
+- Constants: `createUnitClass`
 
 ---
 
@@ -6286,10 +6249,9 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../wasm/poly/wasm-bridge.js` | `polyMulDispatch, polyDivModDispatch, WASM_POLY_THRESHOLD` | Import |
+| `../wasm/poly/wasm-bridge.js` | `polyMulDispatch, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
 
 **Exports:**
-
 - Functions: `polyval`, `polyadd`, `polymul`, `polyder`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `degree`, `coefficientList`, `discriminant`, `differences`, `variables`, `substitute`, `expand`, `factor`, `collect`, `cancel`, `together`, `apart`, `trigExpand`, `trigReduce`, `trigToExp`, `expToTrig`, `tangentLine`, `reduce`, `combine`, `complexExpand`, `normalForm`, `powerExpand`, `fullSimplify`, `element`, `eliminate`, `symbolicPartialDerivative`, `functionExpand`, `resultant`
 - Constants: `typedAlgebra`
 
@@ -6298,7 +6260,6 @@ graph LR
 ### `functions/src/typed/arithmetic.ts` - Typed Arithmetic Functions (Parallel-First)
 
 **Exports:**
-
 - Functions: `matmul`, `transpose`, `matvec`, `outer`, `initializePool`, `terminatePool`, `shouldParallelize`, `getComputePool`
 - Constants: `add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `abs`, `sign`, `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `mod`, `gcd`, `lcm`, `xgcd`, `norm`, `sinh`, `cosh`, `tanh`, `equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`, `min`, `max`, `sum`, `mean`, `variance`, `std`, `dot`, `typedArithmetic`
 
@@ -6312,7 +6273,6 @@ graph LR
 | `../wasm/bitwise/wasm-bridge.js` | `WASM_BITWISE_THRESHOLD, runBinaryBitwiseWasm, runUnaryBitwiseWasm` | Import |
 
 **Exports:**
-
 - Constants: `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift`, `typedBitwise`
 
 ---
@@ -6325,15 +6285,14 @@ graph LR
 | `../factories/evaluate.js` | `parse, evaluate` | Import |
 
 **Exports:**
-
-- Functions: `integrate`, `limit`, `partialDerivative`, `directionalDerivative`, `gradientSymbolic`, `jacobian`, `laplacian`, `divergence`, `laplace`, `inverseLaplace`, `fourierSeries`, `zTransform`, `taylor`, `multivariateTaylor`, `series`, `seriesCoefficient`, `solve`, `implicitDiff`, `summation`, `symbolicProduct`, `assume`, `getAssumptions`, `clearAssumptions`, `asymptotic`, `groebnerBasis`, `minimalPolynomial`, `toRadicals`, `piecewise`, `odeGeneral`, `curl`, `inverseLaplaceTransform`
+- Functions: `integrate`, `limit`, `partialDerivative`, `directionalDerivative`, `gradientSymbolic`, `jacobian`, `laplacian`, `divergence`, `laplace`, `inverseLaplace`, `fourierSeries`, `zTransform`, `taylor`, `multivariateTaylor`, `series`, `seriesCoefficient`, `solve`, `implicitDiff`, `summation`, `symbolicProduct`, `assume`, `getAssumptions`, `clearAssumptions`, `asymptotic`, `groebnerBasis`, `minimalPolynomial`, `toRadicals`, `piecewise`, `odeGeneral`, `curl`, `inverseLaplaceTransform`, `casSimplify`, `casSimplify`, `casSimplify`, `casDerivative`, `casDerivative`, `casDerivative`, `casExpand`, `casExpand`, `casExpand`, `casFactor`, `casFactor`, `casFactor`
+- Constants: `CAS_BATCH_THRESHOLD`
 
 ---
 
 ### `functions/src/typed/combinatorics.ts` - Extended Combinatorics Functions
 
 **Exports:**
-
 - Constants: `fibonacci`, `lucas`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`, `prime`, `nextPrime`, `primePi`, `primeFactors`, `divisors`, `eulerPhi`, `divisorSigma`, `carmichaelLambda`, `moebiusMu`, `jacobiSymbol`, `chineseRemainder`, `lucasL`, `partitions`, `harmonicNumber`, `integerDigits`
 
 ---
@@ -6341,7 +6300,6 @@ graph LR
 ### `functions/src/typed/complex.ts` - Typed Complex Helper Functions
 
 **Exports:**
-
 - Constants: `arg`, `conj`, `im`, `re`, `typedComplex`
 
 ---
@@ -6349,17 +6307,21 @@ graph LR
 ### `functions/src/typed/dist-objects.ts` - Distribution Objects
 
 **Exports:**
-
-- Interfaces: `Distribution`
+- Interfaces: `SampleNOptions`, `Distribution`
 - Functions: `normalDist`, `betaDist`, `binomialDist`, `chiSquaredDist`, `exponentialDist`, `fDist`, `gammaDist`, `logNormalDist`, `poissonDist`, `tDist`, `uniformDist`, `weibullDist`
+- Constants: `DIST_WORKER_THRESHOLD`
 
 ---
 
 ### `functions/src/typed/distributions.ts` - Typed Probability Distribution Functions
 
-**Exports:**
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../wasm/special/wasm-bridge.js` | `WASM_SPECIAL_THRESHOLD, lgammaDispatch, lgammaJS` | Import |
 
-- Constants: `normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`, `jsDivergence`, `typedDistributions`
+**Exports:**
+- Constants: `normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`, `jsDivergence`, `betaPDF`, `gammaPDF`, `studentTPDF`, `noncentralChi2PDF`, `typedDistributions`
 
 ---
 
@@ -6369,19 +6331,18 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| `../wasm/sort/wasm-bridge.js` | `argsortF64Dispatch, WASM_SORT_THRESHOLD` | Import |
 
 **Exports:**
-
 - Interfaces: `KDTreeNode`
-- Types: `Shape`
-- Functions: `angle2D`, `angle3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`, `pointInPolygon`, `rotateVector2D`, `rotateVector3D`, `reflectVector`, `projectVector`, `distance2D`, `distance3D`, `distanceND`, `distancePointToLine2D`, `intersectLines2D`, `intersectSegments2D`, `area`, `centroid`, `coordinateTransform`, `polygonPerimeter`, `manhattanDistance`, `chebyshevDistance`, `minkowskiDistance`, `delaunayTriangulation`, `voronoiDiagram`, `kdTree`, `kdTreeNearest`, `nearestNeighbor`, `distanceMatrix`
+- Types: `Shape`, `HullFace3D`
+- Functions: `angle2D`, `angle3D`, `cross3D`, `dot3D`, `triangleArea`, `polygonArea`, `convexHull`, `pointInPolygon`, `rotateVector2D`, `rotateVector3D`, `reflectVector`, `projectVector`, `distance2D`, `distance3D`, `distanceND`, `distancePointToLine2D`, `intersectLines2D`, `intersectSegments2D`, `area`, `centroid`, `coordinateTransform`, `polygonPerimeter`, `manhattanDistance`, `chebyshevDistance`, `minkowskiDistance`, `delaunayTriangulation`, `voronoiDiagram`, `kdTree`, `kdTreeNearest`, `nearestNeighbor`, `convexHull3D`, `distanceMatrix`
 
 ---
 
 ### `functions/src/typed/gpu.ts` - WebGPU-Accelerated Matrix Operations
 
 **Exports:**
-
 - Functions: `gpuMatmul`, `gpuAdd`, `gpuTranspose`, `gpuScale`
 
 ---
@@ -6389,16 +6350,21 @@ graph LR
 ### `functions/src/typed/graph.ts` - Graph Theory Functions
 
 **Exports:**
-
-- Functions: `adjacencyMatrix`, `shortestPath`, `minimumSpanningTree`, `connectedComponents`, `stronglyConnectedComponents`, `topologicalSort`, `isConnected`, `graphDistance`
+- Interfaces: `CentralityRestartOptions`, `PageRankOptions`, `PageRankResult`, `PageRankRestartResult`, `BetweennessOptions`, `BetweennessResult`, `BetweennessRestartResult`, `EigenvectorOptions`, `EigenvectorResult`, `EigenvectorRestartResult`
+- Functions: `adjacencyMatrix`, `shortestPath`, `minimumSpanningTree`, `connectedComponents`, `stronglyConnectedComponents`, `topologicalSort`, `isConnected`, `graphDistance`, `pageRank`, `betweennessCentrality`, `eigenvectorCentrality`
+- Constants: `CENTRALITY_WORKER_THRESHOLD`
 
 ---
 
 ### `functions/src/typed/hypothesis.ts` - Statistical Hypothesis Tests
 
-**Exports:**
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch, WASM_SORT_THRESHOLD` | Import |
 
-- Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`
+**Exports:**
+- Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`, `BootstrapOptions`, `KSBootstrapResult`, `MWBootstrapResult`, `SWBootstrapResult`, `ChiSquareBootstrapResult`
 - Functions: `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `principalComponentAnalysis`
 
 ---
@@ -6416,6 +6382,7 @@ graph LR
 | `./special.js` | `typedSpecial` | Import |
 | `./distributions.js` | `typedDistributions` | Import |
 | `./algebra.js` | `typedAlgebra` | Import |
+| `./unit.js` | `typedUnit` | Import |
 | `./arithmetic.js` | `*` | Re-export |
 | `./trigonometry.js` | `*` | Re-export |
 | `./statistics.js` | `*` | Re-export |
@@ -6438,6 +6405,9 @@ graph LR
 | `./matrix-ops.js` | `*` | Re-export |
 | `./gpu.js` | `*` | Re-export |
 | `./relational.js` | `*` | Re-export |
+| `./string.js` | `*` | Re-export |
+| `./probability.js` | `*` | Re-export |
+| `./unit.js` | `*` | Re-export |
 | `./arithmetic.js` | `typedArithmetic` | Re-export |
 | `./trigonometry.js` | `typedTrigonometry` | Re-export |
 | `./statistics.js` | `typedStatistics` | Re-export |
@@ -6449,20 +6419,23 @@ graph LR
 | `./special.js` | `typedSpecial` | Re-export |
 | `./distributions.js` | `typedDistributions` | Re-export |
 | `./algebra.js` | `typedAlgebra` | Re-export |
+| `./matrix-ops.js` | `cond` | Re-export |
 | `./relational.js` | `typedRelational` | Re-export |
+| `./string.js` | `typedString` | Re-export |
+| `./probability.js` | `typedProbability` | Re-export |
+| `./unit.js` | `typedUnit` | Re-export |
 
 **Exports:**
-
 - Constants: `typedFunctions`
-- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `* from ./relational.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `typedAlgebra`, `typedRelational`
+- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `* from ./relational.js`, `* from ./string.js`, `* from ./probability.js`, `* from ./unit.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `typedAlgebra`, `cond`, `typedRelational`, `typedString`, `typedProbability`, `typedUnit`
 
 ---
 
 ### `functions/src/typed/integration.ts` - Numerical Integration Functions
 
 **Exports:**
-
-- Functions: `trapz`, `trapzF64`, `simpson`, `simpsonF64`, `gaussQuad`, `romberg`
+- Interfaces: `GaussQuadOptions`, `RombergOptions`
+- Functions: `validateClosureSource`, `trapz`, `trapzF64`, `simpson`, `simpsonF64`, `gaussQuad`, `romberg`
 - Constants: `GAUSS_WORKER_THRESHOLD`, `ARRAY_WORKER_THRESHOLD`
 
 ---
@@ -6473,17 +6446,17 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../wasm/interpolation/wasm-bridge.js` | `tridiagSolveDispatch` | Import |
+| `../wasm/interpolation/wasm-bridge.js` | `dividedDifferenceDispatch, dividedDifferenceJS, WASM_INTERP_THRESHOLD` | Import |
+| `../wasm/poly/wasm-bridge.js` | `polyFitDispatch, chebFitDispatch, legendreFitDispatch, WASM_POLY_FIT_THRESHOLD` | Import |
 
 **Exports:**
-
-- Functions: `linearInterp`, `lagrangeInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit`
+- Functions: `linearInterp`, `lagrangeInterp`, `newtonInterp`, `cubicSpline`, `hermiteInterp`, `pchipInterp`, `polyFit`, `chebyshevFit`, `legendreFit`
 
 ---
 
 ### `functions/src/typed/logical.ts` - Typed Logical Functions
 
 **Exports:**
-
 - Constants: `not`, `and`, `or`, `xor`, `nullish`, `typedLogical`
 
 ---
@@ -6491,9 +6464,9 @@ graph LR
 ### `functions/src/typed/matrix-ops.ts` - Typed Matrix Operations
 
 **Exports:**
-
 - Interfaces: `CholeskyResult`, `HessenbergResult`, `PolarResult`, `JordanResult`
 - Functions: `characteristicPolynomial`, `rowReduce`, `matrixRank`, `cholesky`, `hessenbergForm`, `matrixPower`, `matrixLog`, `polarDecomposition`, `jordanForm`
+- Constants: `pinv`, `cond`, `norm2`, `normFro`, `lowRankApprox`, `singularValues`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`
 
 ---
 
@@ -6505,9 +6478,21 @@ graph LR
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
 
 **Exports:**
-
 - Interfaces: `FindRootOptions`, `MinimizeOptions`, `ODESolution`
 - Functions: `findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `leastSquares`, `nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`, `bezierCurve`, `bspline`, `loess`, `griddata`, `rbfInterpolate`, `curvefit`, `expfit`, `logfit`, `powerfit`, `solveODESystem`, `stiffODESolver`, `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `cond`, `rank`, `nullspace`, `residue`, `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `solvePDE`
+
+---
+
+### `functions/src/typed/probability.ts` - Typed Probability & Combinatorics Functions
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `seedrandom` | `seedrandom` |
+
+**Exports:**
+- Functions: `seedProbabilityRng`
+- Constants: `bernoulli`, `combinations`, `combinationsWithRep`, `multinomial`, `permutations`, `random`, `randomInt`, `pickRandom`, `typedProbability`
 
 ---
 
@@ -6524,7 +6509,6 @@ graph LR
 | `../utils/number.js` | `nearlyEqual` | Import |
 
 **Exports:**
-
 - Constants: `equalScalar`, `unequal`, `deepEqual`, `compareText`, `equalText`, `compareNatural`, `compareUnits`, `typedRelational`
 
 ---
@@ -6532,7 +6516,6 @@ graph LR
 ### `functions/src/typed/set.ts` - Typed Set Functions
 
 **Exports:**
-
 - Constants: `setUnion`, `setIntersect`, `setDifference`, `setSymDifference`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setDistinct`, `setSize`, `setCartesian`, `typedSet`
 
 ---
@@ -6543,10 +6526,10 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, WASM_SIGNAL_THRESHOLD` | Import |
 
 **Exports:**
-
-- Functions: `crossCorrelation`, `autoCorrelation`, `groupDelay`, `unwrapPhase`, `dct`, `idct`, `dst`, `idst`, `dwt`, `fft2d`, `fourier`, `invFourier`, `hilbertTransform`, `spectrogram`, `periodogram`, `lowpassFilter`, `highpassFilter`, `bandpassFilter`, `resample`, `medfilt`, `windowFunction`, `convolve`, `correlate`, `initializeSignal`, `terminateSignal`
+- Functions: `crossCorrelation`, `autoCorrelation`, `groupDelay`, `unwrapPhase`, `dct`, `idct`, `dst`, `idst`, `dwt`, `fft2d`, `fourier`, `invFourier`, `hilbertTransform`, `spectrogram`, `periodogram`, `lowpassFilter`, `highpassFilter`, `bandpassFilter`, `resample`, `medfilt`, `windowFunction`, `convolve`, `correlate`, `welchPSD`, `bartlettPSD`, `multiTaperPSD`, `goertzel`, `chirpZTransform`, `initializeSignal`, `terminateSignal`
 - Constants: `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `typedSignal`
 
 ---
@@ -6556,28 +6539,44 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../wasm/special/wasm-bridge.js` | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch` | Import |
+| `../wasm/special/wasm-bridge.js` | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
 
 **Exports:**
-
-- Constants: `erfc`, `erfi`, `beta`, `gammainc`, `gammaincp`, `betainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `besselJ`, `besselY`, `besselI`, `besselK`, `ellipticK`, `ellipticE`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `lambertW`, `cosIntegral`, `sinIntegral`, `logIntegral`, `expIntegralEi`, `fresnelC`, `fresnelS`, `typedSpecial`
+- Constants: `erfc`, `erfi`, `lgamma`, `beta`, `gammainc`, `gammaincp`, `betainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `besselJ`, `besselY`, `besselI`, `besselK`, `ellipticK`, `ellipticE`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `lambertW`, `cosIntegral`, `sinIntegral`, `logIntegral`, `expIntegralEi`, `fresnelC`, `fresnelS`, `airyAi`, `airyBi`, `carlsonRC`, `carlsonRF`, `carlsonRD`, `carlsonRJ`, `ellipticF`, `ellipticEIncomplete`, `ellipticPi`, `typedSpecial`
 
 ---
 
 ### `functions/src/typed/statistics.ts` - Typed Statistics Functions (Parallel-First)
 
-**Exports:**
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch` | Import |
 
+**Exports:**
 - Types: `NormalizationType`
-- Functions: `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `initializeStatistics`, `terminateStatistics`
+- Functions: `parallelStatPercentile`, `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `initializeStatistics`, `terminateStatistics`
 - Constants: `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatHistogram`, `typedStatistics`
+
+---
+
+### `functions/src/typed/string.ts` - Typed String Formatting Functions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/string.js` | `format` | Import |
+| `../utils/is.js` | `isString` | Import |
+| `../utils/print.js` | `printTemplate` | Import |
+
+**Exports:**
+- Constants: `bin`, `hex`, `oct`, `format`, `print`, `typedString`
 
 ---
 
 ### `functions/src/typed/trigonometry.ts` - Typed Trigonometric Functions (Parallel-First)
 
 **Exports:**
-
 - Constants: `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `atan2`, `acsc`, `asec`, `acot`, `asinh`, `acosh`, `atanh`, `toRadians`, `toDegrees`, `hypot`, `typedTrigonometry`
 
 ---
@@ -6585,8 +6584,14 @@ graph LR
 ### `functions/src/typed/typed-bridge.ts` - Initialize the type bridge for mathjs factory compatibility.
 
 **Exports:**
-
 - Functions: `initTypeBridge`
+
+---
+
+### `functions/src/typed/unit.ts` - Typed Unit Functions
+
+**Exports:**
+- Constants: `to`, `toBest`, `typedUnit`
 
 ---
 
@@ -6604,7 +6609,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createTo`
 
 ---
@@ -6618,7 +6622,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createToBest`
 
 ---
@@ -6640,7 +6643,6 @@ graph LR
 | `./object.js` | `deepStrictEqual` | Import |
 
 **Exports:**
-
 - Interfaces: `IdentifiedValue`
 - Types: `NestedArray`, `ArrayOrScalar`
 - Functions: `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`
@@ -6650,7 +6652,6 @@ graph LR
 ### `functions/src/utils/bigint.ts` - Build a bigint logarithm function from a number logarithm,
 
 **Exports:**
-
 - Functions: `promoteLogarithm`
 
 ---
@@ -6658,7 +6659,6 @@ graph LR
 ### `functions/src/utils/bignumber/bitwise.ts` - Bitwise and for Bignumbers
 
 **Exports:**
-
 - Functions: `bitAndBigNumber`, `bitNotBigNumber`, `bitOrBigNumber`, `bitwise`, `bitXor`, `leftShiftBigNumber`, `rightArithShiftBigNumber`
 
 ---
@@ -6671,7 +6671,6 @@ graph LR
 | `../function.js` | `memoize` | Import |
 
 **Exports:**
-
 - Constants: `createBigNumberE`, `createBigNumberPhi`, `createBigNumberPi`, `createBigNumberTau`
 
 ---
@@ -6685,7 +6684,6 @@ graph LR
 | `../number.js` | `isInteger, normalizeFormatOptions` | Import |
 
 **Exports:**
-
 - Functions: `format`, `toEngineering`, `toExponential`, `toFixed`
 
 ---
@@ -6693,7 +6691,6 @@ graph LR
 ### `functions/src/utils/bignumber/nearlyEqual.ts` - Compares two BigNumbers.
 
 **Exports:**
-
 - Functions: `nearlyEqual`
 
 ---
@@ -6708,7 +6705,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createClone`
 
 ---
@@ -6724,7 +6720,6 @@ graph LR
 | `./switch.js` | `_switch` | Import |
 
 **Exports:**
-
 - Functions: `containsCollections`, `deepForEach`, `deepMap`, `reduce`, `scatter`
 
 ---
@@ -6737,7 +6732,6 @@ graph LR
 | `./number.js` | `nearlyEqual` | Import |
 
 **Exports:**
-
 - Functions: `complexEquals`
 
 ---
@@ -6759,9 +6753,9 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./object.js` | `pickShallow` | Import |
+| `../error/MathjsError.js` | `MathjsError` | Import |
 
 **Exports:**
-
 - Interfaces: `FactoryFunction`, `LegacyFactory`, `FactoryMeta`
 - Types: `DependencyName`, `CreateFunction`
 - Functions: `factory`, `sortFactories`, `create`, `isFactory`, `assertDependencies`, `isOptionalDependency`, `stripOptionalNotation`
@@ -6776,7 +6770,6 @@ graph LR
 | `./lruQueue.js` | `lruQueue` | Import |
 
 **Exports:**
-
 - Interfaces: `MemoizeCache`, `MemoizedFunction`
 - Functions: `memoize`, `memoizeCompare`
 
@@ -6791,7 +6784,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createHasNumericValue`
 
 ---
@@ -6799,7 +6791,6 @@ graph LR
 ### `functions/src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
 
 **Exports:**
-
 - Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
 - Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
 - Constants: `isArray`
@@ -6816,7 +6807,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIsBounded`
 
 ---
@@ -6831,7 +6821,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIsFinite`
 
 ---
@@ -6846,7 +6835,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIsInteger`
 
 ---
@@ -6862,7 +6850,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIsNaN`
 
 ---
@@ -6881,7 +6868,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIsNegative`
 
 ---
@@ -6897,7 +6883,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIsNumeric`
 
 ---
@@ -6916,7 +6901,6 @@ graph LR
 | `../core/config.js` | `ConfigOptions` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIsPositive`
 
 ---
@@ -6931,7 +6915,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIsPrime`
 
 ---
@@ -6946,15 +6929,20 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createIsZero`
+
+---
+
+### `functions/src/utils/log.ts` - Log a console.warn message only once
+
+**Exports:**
+- Constants: `warnOnce`
 
 ---
 
 ### `functions/src/utils/lruQueue.ts` - (c) 2018, Mariusz Nowak
 
 **Exports:**
-
 - Functions: `lruQueue`
 
 ---
@@ -6968,7 +6956,6 @@ graph LR
 | `./is.js` | `isMap, isObject` | Import |
 
 **Exports:**
-
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
 - Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`
 
@@ -6981,7 +6968,6 @@ graph LR
 ### `functions/src/utils/noop.ts` - noop module
 
 **Exports:**
-
 - Functions: `noBignumber`, `noFraction`, `noMatrix`, `noIndex`, `noSubset`
 
 ---
@@ -6994,9 +6980,8 @@ graph LR
 | `./is.js` | `isBigNumber, isNumber, isObject` | Import |
 
 **Exports:**
-
 - Interfaces: `SplitValue`, `NumberTypeConfig`, `FormatOptions`, `NormalizedFormatOptions`
-- Functions: `isInteger`, `safeNumberType`, `format`, `normalizeFormatOptions`, `splitNumber`, `toEngineering`, `toFixed`, `toExponential`, `toPrecision`, `roundDigits`, `digits`, `nearlyEqual`, `copysign`
+- Functions: `isInteger`, `safeNumberType`, `isPowZeroAtInfinity`, `format`, `normalizeFormatOptions`, `splitNumber`, `toEngineering`, `toFixed`, `toExponential`, `toPrecision`, `roundDigits`, `digits`, `nearlyEqual`, `copysign`
 - Constants: `sign`, `log2`, `log10`, `log1p`, `cbrt`, `expm1`, `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh`
 
 ---
@@ -7011,7 +6996,6 @@ graph LR
 | `../utils/noop.js` | `noBignumber, noFraction` | Import |
 
 **Exports:**
-
 - Constants: `createNumeric`
 
 ---
@@ -7024,7 +7008,6 @@ graph LR
 | `./is.js` | `isBigNumber, isObject` | Import |
 
 **Exports:**
-
 - Functions: `clone`, `mapObject`, `extend`, `deepExtend`, `deepStrictEqual`, `deepFlatten`, `canDefineProperty`, `lazy`, `traverse`, `hasOwnProperty`, `isLegacyFactory`, `get`, `set`, `pick`, `pickShallow`
 
 ---
@@ -7043,7 +7026,6 @@ graph LR
 | `./is.js` | `typeOf` | Import |
 
 **Exports:**
-
 - Functions: `optimizeCallback`
 
 ---
@@ -7056,7 +7038,6 @@ graph LR
 | `./factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createParseNumberWithConfig`
 
 ---
@@ -7064,7 +7045,6 @@ graph LR
 ### `functions/src/utils/print.ts` - print module
 
 **Exports:**
-
 - Constants: `printTemplate`
 
 ---
@@ -7072,7 +7052,6 @@ graph LR
 ### `functions/src/utils/product.ts` - product module
 
 **Exports:**
-
 - Functions: `product`
 
 ---
@@ -7087,7 +7066,6 @@ graph LR
 | `./bignumber/formatter.js` | `format` | Import |
 
 **Exports:**
-
 - Functions: `endsWith`, `format`, `stringify`, `escape`, `compareText`
 
 ---
@@ -7095,7 +7073,6 @@ graph LR
 ### `functions/src/utils/switch.ts` - Transpose a matrix
 
 **Exports:**
-
 - Functions: `_switch`
 
 ---
@@ -7110,7 +7087,6 @@ graph LR
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createTypeOf`
 
 ---
@@ -7118,22 +7094,6 @@ graph LR
 <a id="functions-wasm-dependencies"></a>
 
 ## Functions/wasm Dependencies
-
-### `functions/src/wasm/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./integrity.js` | `verifyWasmIntegrity, loadWasmManifest` | Import |
-
-**Exports:**
-
-- Classes: `WasmLoader`
-- Interfaces: `WasmModule`, `LoadingMetrics`
-- Functions: `initWasm`
-- Constants: `wasmLoader`
-
----
 
 ### `functions/src/wasm/bitwise/wasm-bridge.ts` - WASM dispatch bridge for elementwise Int32Array bitwise ops.
 
@@ -7143,7 +7103,6 @@ graph LR
 | `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
 
 **Exports:**
-
 - Functions: `runBinaryBitwiseWasm`, `runUnaryBitwiseWasm`, `resetBitwiseWasm`
 - Constants: `WASM_BITWISE_THRESHOLD`
 
@@ -7152,13 +7111,12 @@ graph LR
 ### `functions/src/wasm/integrity.ts` - WASM integrity verification — SHA-384 manifest check.
 
 **Exports:**
-
 - Interfaces: `WasmManifest`
 - Functions: `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`
 
 ---
 
-### `functions/src/wasm/interpolation/wasm-bridge.ts` - WASM dispatch bridge for the tridiagonal-solve hot loop (Slice 3.10b).
+### `functions/src/wasm/interpolation/wasm-bridge.ts` - WASM dispatch bridge for the tridiagonal-solve and divided-difference
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7166,9 +7124,8 @@ graph LR
 | `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
 
 **Exports:**
-
-- Functions: `tridiagSolveJS`, `tridiagSolveDispatch`, `resetTridiagWasm`
-- Constants: `WASM_TRIDIAG_THRESHOLD`
+- Functions: `tridiagSolveJS`, `tridiagSolveDispatch`, `resetTridiagWasm`, `dividedDifferenceJS`, `dividedDifferenceDispatch`
+- Constants: `WASM_TRIDIAG_THRESHOLD`, `WASM_INTERP_THRESHOLD`
 
 ---
 
@@ -7180,13 +7137,12 @@ graph LR
 | `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
 
 **Exports:**
-
-- Functions: `polyMulDispatch`, `polyDivModDispatch`, `resetPolyWasm`
-- Constants: `WASM_POLY_THRESHOLD`
+- Functions: `polyMulDispatch`, `polyDivModDispatch`, `resultantDispatch`, `discriminantDispatch`, `polyFitDispatch`, `chebFitDispatch`, `legendreFitDispatch`, `resetPolyWasm`
+- Constants: `WASM_POLY_THRESHOLD`, `WASM_POLY_FIT_THRESHOLD`
 
 ---
 
-### `functions/src/wasm/special/wasm-bridge.ts` - WASM dispatch bridge for Bessel J/Y array kernels (Slice 3.10c-1).
+### `functions/src/wasm/signal/wasm-bridge.ts` - WASM dispatch bridge for spectral signal kernels — Slice 5.6.
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -7194,9 +7150,151 @@ graph LR
 | `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
 
 **Exports:**
+- Functions: `applyWindowJS`, `goertzelJS`, `welchPSDJS`, `bartlettPSDJS`, `chirpZTransformJS`, `applyWindowDispatch`, `welchPSDDispatch`, `bartlettPSDDispatch`, `goertzelDispatch`, `chirpZTransformDispatch`
+- Constants: `WASM_SIGNAL_THRESHOLD`
 
-- Functions: `besselJ0JS`, `besselJ1JS`, `besselJnJS`, `besselY0JS`, `besselY1JS`, `besselYnJS`, `besselJ0Dispatch`, `besselJ1Dispatch`, `besselJDispatch`, `besselY0Dispatch`, `besselY1Dispatch`, `besselYDispatch`, `resetBesselWasm`
+---
+
+### `functions/src/wasm/sort/wasm-bridge.ts` - WASM dispatch bridge for sort kernels — Slice 5.7a.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../WasmLoader.js` | `wasmLoader` | Import |
+
+**Exports:**
+- Functions: `sortF64JS`, `argsortF64JS`, `rankF64JS`, `sortF64Dispatch`, `argsortF64Dispatch`, `rankF64Dispatch`
+- Constants: `WASM_SORT_THRESHOLD`
+
+---
+
+### `functions/src/wasm/special/wasm-bridge.ts` - WASM dispatch bridge for Bessel J/Y and Airy Ai/Bi array kernels.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+
+**Exports:**
+- Functions: `besselJ0JS`, `besselJ1JS`, `besselJnJS`, `besselY0JS`, `besselY1JS`, `besselYnJS`, `airyAiJS`, `airyBiJS`, `besselJ0Dispatch`, `besselJ1Dispatch`, `besselJDispatch`, `besselY0Dispatch`, `besselY1Dispatch`, `besselYDispatch`, `airyAiDispatch`, `airyBiDispatch`, `lgammaJS`, `lgammaDispatch`, `carlsonRCJS`, `carlsonRFJS`, `carlsonRDJS`, `carlsonRJJS`, `ellipticFIncompleteJS`, `ellipticEIncompleteJS`, `ellipticPiIncompleteJS`, `carlsonRCScalar`, `carlsonRFScalar`, `carlsonRDScalar`, `carlsonRJScalar`, `ellipticFIncompleteScalar`, `ellipticEIncompleteScalar`, `ellipticPiIncompleteScalar`, `carlsonRCDispatch`, `carlsonRFDispatch`, `carlsonRDDispatch`, `carlsonRJDispatch`, `ellipticFIncompleteDispatch`, `ellipticEIncompleteDispatch`, `ellipticPiIncompleteDispatch`, `resetCarlsonWasm`, `resetBesselWasm`, `resetAiryWasm`, `resetEllipticWasm`, `resetLgammaWasm`, `ellipticKJS`, `ellipticEJS`, `ellipticKDispatch`, `ellipticEDispatch`
 - Constants: `WASM_SPECIAL_THRESHOLD`
+
+---
+
+### `functions/src/wasm/WasmLoader.ts` - WASM Loader - Loads and manages WebAssembly modules
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./integrity.js` | `verifyWasmIntegrity, loadWasmManifest` | Import |
+
+**Exports:**
+- Classes: `WasmLoader`
+- Interfaces: `WasmModule`, `LoadingMetrics`
+- Functions: `initWasm`
+- Constants: `wasmLoader`
+
+---
+
+<a id="expression-compiler-dependencies"></a>
+
+## Expression/compiler Dependencies
+
+### `expression/src/compiler/compile.ts` - Tree-walking AST compiler/evaluator for MathTS expressions.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/map.js` | `ObjectWrappingMap` | Import |
+| `../utils/customs.js` | `getSafeProperty, setSafeProperty, getSafeMethod` | Import |
+
+**Exports:**
+- Interfaces: `Scope`, `CompiledExpression`
+- Functions: `compile`
+
+---
+
+### `expression/src/compiler/index.ts` - Package entry point for @danielsimonjr/mathts-expression (re-exports 1 symbols)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./compile.js` | `compile` | Re-export |
+
+**Exports:**
+- Re-exports: `compile`
+
+---
+
+<a id="expression-error-dependencies"></a>
+
+## Expression/error Dependencies
+
+### `expression/src/error/DimensionError.ts` - Create a range error with the message:
+
+**Exports:**
+- Classes: `DimensionError`
+
+---
+
+### `expression/src/error/IndexError.ts` - Custom error type for index out of range errors
+
+**Exports:**
+- Classes: `IndexError`
+- Functions: `createIndexError`
+
+---
+
+### `expression/src/error/MathjsError.ts` - Custom error type for Mathjs errors
+
+**Exports:**
+- Classes: `MathjsError`
+
+---
+
+<a id="expression-evaluator-dependencies"></a>
+
+## Expression/evaluator Dependencies
+
+### `expression/src/evaluator/evaluate.ts` - Expression evaluator for MathTS.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../compiler/compile.js` | `compile` | Import |
+| `../compiler/compile.js` | `CompiledExpression, Scope` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `EvaluateOptions`
+- Functions: `createEvaluate`, `compileExpression`
+
+---
+
+### `expression/src/evaluator/index.ts` - Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./evaluate.js` | `createEvaluate, compileExpression` | Re-export |
+
+**Exports:**
+- Re-exports: `createEvaluate`, `compileExpression`
+
+---
+
+<a id="expression-function-dependencies"></a>
+
+## Expression/function Dependencies
+
+### `expression/src/function/parser.ts` - Create a `math.Parser` object that keeps a context of variables and their values, allowing the evaluation of expressions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/factory.js` | `factory` | Import |
+
+**Exports:**
+- Constants: `createParser`
 
 ---
 
@@ -7215,23 +7313,7 @@ graph LR
 | `./utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createHelpClass`
-
----
-
-### `expression/src/Parser.ts` - Parser contains methods to evaluate or parse expressions, and has a number
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./utils/factory.js` | `factory` | Import |
-| `./utils/is.js` | `isFunction` | Import |
-| `./utils/map.js` | `createEmptyMap, toObject` | Import |
-
-**Exports:**
-
-- Constants: `createParserClass`
 
 ---
 
@@ -7248,6 +7330,7 @@ graph LR
 | `./Help.js` | `*` | Re-export |
 | `./compiler/index.js` | `*` | Re-export |
 | `./evaluator/index.js` | `*` | Re-export |
+| `./function/parser.js` | `createParser` | Re-export |
 | `./node/Node.js` | `createNode` | Re-export |
 | `./node/AccessorNode.js` | `createAccessorNode` | Re-export |
 | `./node/ArrayNode.js` | `createArrayNode` | Re-export |
@@ -7266,15 +7349,13 @@ graph LR
 | `./node/SymbolNode.js` | `createSymbolNode` | Re-export |
 
 **Exports:**
-
-- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
+- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `createParser`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
 
 ---
 
 ### `expression/src/keywords.ts` - Reserved keywords not allowed to use in the parser
 
 **Exports:**
-
 - Constants: `keywords`
 
 ---
@@ -7288,7 +7369,6 @@ graph LR
 | `./utils/is.js` | `isConstantNode, isParenthesisNode, rule2Node` | Import |
 
 **Exports:**
-
 - Functions: `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
 - Constants: `properties`
 
@@ -7307,101 +7387,28 @@ graph LR
 | `./node/Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createParse`
+
+---
+
+### `expression/src/Parser.ts` - Parser contains methods to evaluate or parse expressions, and has a number
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./utils/factory.js` | `factory` | Import |
+| `./utils/is.js` | `isFunction` | Import |
+| `./utils/map.js` | `createEmptyMap, toObject` | Import |
+
+**Exports:**
+- Constants: `createParserClass`
 
 ---
 
 ### `expression/src/types.ts` - Type definitions for expression module
 
 **Exports:**
-
 - Types: `TypedFunction`, `TypedFunctionConstructor`
-
----
-
-<a id="expression-compiler-dependencies"></a>
-
-## Expression/compiler Dependencies
-
-### `expression/src/compiler/compile.ts` - Tree-walking AST compiler/evaluator for MathTS expressions.
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../utils/map.js` | `ObjectWrappingMap` | Import |
-| `../utils/customs.js` | `getSafeProperty, setSafeProperty, getSafeMethod` | Import |
-
-**Exports:**
-
-- Interfaces: `Scope`, `CompiledExpression`
-- Functions: `compile`
-
----
-
-### `expression/src/compiler/index.ts` - Package entry point for @danielsimonjr/mathts-expression (re-exports 1 symbols)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./compile.js` | `compile` | Re-export |
-
-**Exports:**
-
-- Re-exports: `compile`
-
----
-
-<a id="expression-error-dependencies"></a>
-
-## Expression/error Dependencies
-
-### `expression/src/error/DimensionError.ts` - Create a range error with the message:
-
-**Exports:**
-
-- Classes: `DimensionError`
-
----
-
-### `expression/src/error/IndexError.ts` - Custom error type for index out of range errors
-
-**Exports:**
-
-- Classes: `IndexError`
-- Functions: `createIndexError`
-
----
-
-<a id="expression-evaluator-dependencies"></a>
-
-## Expression/evaluator Dependencies
-
-### `expression/src/evaluator/evaluate.ts` - Expression evaluator for MathTS.
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../compiler/compile.js` | `compile` | Import |
-| `../compiler/compile.js` | `CompiledExpression, Scope` | Import (type-only) |
-
-**Exports:**
-
-- Interfaces: `EvaluateOptions`
-- Functions: `createEvaluate`, `compileExpression`
-
----
-
-### `expression/src/evaluator/index.ts` - Package entry point for @danielsimonjr/mathts-expression (re-exports 2 symbols)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./evaluate.js` | `createEvaluate, compileExpression` | Re-export |
-
-**Exports:**
-
-- Re-exports: `createEvaluate`, `compileExpression`
 
 ---
 
@@ -7421,7 +7428,6 @@ graph LR
 | `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createAccessorNode`
 
 ---
@@ -7437,7 +7443,6 @@ graph LR
 | `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createArrayNode`
 
 ---
@@ -7456,7 +7461,6 @@ graph LR
 | `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createAssignmentNode`
 
 ---
@@ -7472,7 +7476,6 @@ graph LR
 | `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createBlockNode`
 
 ---
@@ -7488,7 +7491,6 @@ graph LR
 | `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createConditionalNode`
 
 ---
@@ -7505,7 +7507,6 @@ graph LR
 | `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createConstantNode`
 
 ---
@@ -7525,7 +7526,6 @@ graph LR
 | `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFunctionAssignmentNode`
 
 ---
@@ -7545,7 +7545,6 @@ graph LR
 | `./Node.js` | `MathNode` | Import (type-only) |
 
 **Exports:**
-
 - Constants: `createFunctionNode`
 
 ---
@@ -7562,7 +7561,6 @@ graph LR
 | `../utils/string.js` | `escape` | Import |
 
 **Exports:**
-
 - Constants: `createIndexNode`
 
 ---
@@ -7579,7 +7577,6 @@ graph LR
 | `../utils/map.js` | `createMap` | Import |
 
 **Exports:**
-
 - Interfaces: `CompiledExpression`, `StringOptions`
 - Types: `MathNode`
 - Constants: `createNode`
@@ -7598,7 +7595,6 @@ graph LR
 | `../utils/string.js` | `escape, stringify` | Import |
 
 **Exports:**
-
 - Constants: `createObjectNode`
 
 ---
@@ -7618,7 +7614,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createOperatorNode`
 
 ---
@@ -7632,7 +7627,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createParenthesisNode`
 
 ---
@@ -7647,7 +7641,6 @@ graph LR
 | `../operators.js` | `getPrecedence` | Import |
 
 **Exports:**
-
 - Constants: `createRangeNode`
 
 ---
@@ -7664,7 +7657,6 @@ graph LR
 | `../utils/factory.js` | `factory` | Import |
 
 **Exports:**
-
 - Constants: `createRelationalNode`
 
 ---
@@ -7680,7 +7672,6 @@ graph LR
 | `../utils/latex.js` | `toSymbol` | Import |
 
 **Exports:**
-
 - Constants: `createSymbolNode`
 
 ---
@@ -7694,7 +7685,6 @@ graph LR
 | `../../utils/customs.js` | `getSafeProperty` | Import |
 
 **Exports:**
-
 - Functions: `accessFactory`
 
 ---
@@ -7708,7 +7698,6 @@ graph LR
 | `../../utils/customs.js` | `setSafeProperty` | Import |
 
 **Exports:**
-
 - Functions: `assignFactory`
 
 ---
@@ -7725,7 +7714,6 @@ graph LR
 | `../../error/IndexError.js` | `IndexError` | Import |
 
 **Exports:**
-
 - Functions: `errorTransform`
 
 ---
@@ -7747,7 +7735,6 @@ graph LR
 | `./object.js` | `deepStrictEqual` | Import |
 
 **Exports:**
-
 - Interfaces: `IdentifiedValue`
 - Types: `NestedArray`, `ArrayOrScalar`
 - Functions: `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`
@@ -7763,7 +7750,6 @@ graph LR
 | `../number.js` | `isInteger, normalizeFormatOptions` | Import |
 
 **Exports:**
-
 - Functions: `format`, `toEngineering`, `toExponential`, `toFixed`
 
 ---
@@ -7779,7 +7765,6 @@ graph LR
 | `./switch.js` | `_switch` | Import |
 
 **Exports:**
-
 - Functions: `containsCollections`, `deepForEach`, `deepMap`, `reduce`, `scatter`
 
 ---
@@ -7801,9 +7786,9 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `./object.js` | `pickShallow` | Import |
+| `../error/MathjsError.js` | `MathjsError` | Import |
 
 **Exports:**
-
 - Interfaces: `FactoryFunction`, `LegacyFactory`, `FactoryMeta`
 - Types: `DependencyName`, `CreateFunction`
 - Functions: `factory`, `sortFactories`, `create`, `isFactory`, `assertDependencies`, `isOptionalDependency`, `stripOptionalNotation`
@@ -7813,7 +7798,6 @@ graph LR
 ### `expression/src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
 
 **Exports:**
-
 - Interfaces: `BigNumber`, `Complex`, `Fraction`, `Unit`, `Matrix`, `DenseMatrix`, `SparseMatrix`, `Range`, `IndexDimension`, `Index`, `ResultSet`, `Help`, `Chain`, `Node`, `AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`, `PartitionedMap`
 - Functions: `isNumber`, `isBigNumber`, `isBigInt`, `isComplex`, `isFraction`, `isUnit`, `isString`, `isMatrix`, `isCollection`, `isDenseMatrix`, `isSparseMatrix`, `isRange`, `isIndex`, `isBoolean`, `isResultSet`, `isHelp`, `isFunction`, `isDate`, `isRegExp`, `isObject`, `isMap`, `isPartitionedMap`, `isNull`, `isUndefined`, `isAccessorNode`, `isArrayNode`, `isAssignmentNode`, `isBlockNode`, `isConditionalNode`, `isConstantNode`, `rule2Node`, `isFunctionAssignmentNode`, `isFunctionNode`, `isIndexNode`, `isNode`, `isObjectNode`, `isOperatorNode`, `isParenthesisNode`, `isRangeNode`, `isRelationalNode`, `isSymbolNode`, `isChain`, `typeOf`
 - Constants: `isArray`
@@ -7833,7 +7817,6 @@ graph LR
 | `./object.js` | `hasOwnProperty` | Import |
 
 **Exports:**
-
 - Functions: `escapeLatex`, `toSymbol`
 - Constants: `latexSymbols`, `latexOperators`, `latexFunctions`, `defaultTemplate`
 
@@ -7848,7 +7831,6 @@ graph LR
 | `./is.js` | `isMap, isObject` | Import |
 
 **Exports:**
-
 - Classes: `ObjectWrappingMap`, `PartitionedMap`
 - Functions: `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`
 
@@ -7862,7 +7844,6 @@ graph LR
 | `./is.js` | `isBigNumber, isNumber, isObject` | Import |
 
 **Exports:**
-
 - Interfaces: `SplitValue`, `NumberTypeConfig`, `FormatOptions`, `NormalizedFormatOptions`
 - Functions: `isInteger`, `safeNumberType`, `format`, `normalizeFormatOptions`, `splitNumber`, `toEngineering`, `toFixed`, `toExponential`, `toPrecision`, `roundDigits`, `digits`, `nearlyEqual`, `copysign`
 - Constants: `sign`, `log2`, `log10`, `log1p`, `cbrt`, `expm1`, `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh`
@@ -7877,7 +7858,6 @@ graph LR
 | `./is.js` | `isBigNumber, isObject` | Import |
 
 **Exports:**
-
 - Functions: `clone`, `mapObject`, `extend`, `deepExtend`, `deepStrictEqual`, `deepFlatten`, `canDefineProperty`, `lazy`, `traverse`, `hasOwnProperty`, `isLegacyFactory`, `get`, `set`, `pick`, `pickShallow`
 
 ---
@@ -7890,7 +7870,6 @@ graph LR
 | `./map.js` | `ObjectWrappingMap, PartitionedMap` | Import |
 
 **Exports:**
-
 - Functions: `createSubScope`
 
 ---
@@ -7905,7 +7884,6 @@ graph LR
 | `./bignumber/formatter.js` | `format` | Import |
 
 **Exports:**
-
 - Functions: `endsWith`, `format`, `stringify`, `escape`, `compareText`
 
 ---
@@ -7913,8 +7891,117 @@ graph LR
 ### `expression/src/utils/switch.ts` - Transpose a matrix
 
 **Exports:**
-
 - Functions: `_switch`
+
+---
+
+<a id="parser-dependencies"></a>
+
+## Parser Dependencies
+
+### `parser/src/index.ts` - Standalone expression parser for MathTS. This package re-exports the parser
+
+**Exports:**
+- Re-exports: `createParse`, `createParserClass`, `createParser`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `keywords`, `properties`, `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`, `type * from @danielsimonjr/mathts-expression`
+
+---
+
+<a id="units-dependencies"></a>
+
+## Units Dependencies
+
+### `units/src/index.ts` - Standalone units & dimensional analysis for MathTS. Re-exports the unit system
+
+**Exports:**
+- Re-exports: `Unit`, `isUnit`, `isUnitValue`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`
+
+---
+
+<a id="numbers-dependencies"></a>
+
+## Numbers Dependencies
+
+### `numbers/src/index.ts` - Standalone numeric types for MathTS. Re-exports `Complex`, `Fraction`, and
+
+**Exports:**
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`
+
+---
+
+<a id="ast-dependencies"></a>
+
+## Ast Dependencies
+
+### `ast/src/index.ts` - Standalone AST node constructors for MathTS expressions. Re-exports the
+
+**Exports:**
+- Re-exports: `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `type * from @danielsimonjr/mathts-expression`
+
+---
+
+<a id="evaluator-dependencies"></a>
+
+## Evaluator Dependencies
+
+### `evaluator/src/index.ts` - Standalone compiler + evaluator for MathTS expressions. Re-exports the
+
+**Exports:**
+- Re-exports: `compile`, `createEvaluate`, `compileExpression`
+
+---
+
+<a id="linalg-dependencies"></a>
+
+## Linalg Dependencies
+
+### `linalg/src/index.ts` - Standalone linear-algebra decompositions for MathTS. Re-exports the matrix
+
+**Exports:**
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `matrixPinv`, `qr`, `lu`, `cholesky`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `matrixSchur`
+
+---
+
+<a id="arithmetic-dependencies"></a>
+
+## Arithmetic Dependencies
+
+### `arithmetic/src/index.ts` - Standalone arithmetic functions for MathTS. Re-exports the `arithmetic` typed-function domain
+
+**Exports:**
+- Re-exports: `add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `abs`, `sign`, `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `mod`, `gcd`, `lcm`, `xgcd`, `norm`, `sinh`, `cosh`, `tanh`, `equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`, `min`, `max`, `sum`, `mean`, `variance`, `std`, `dot`, `typedArithmetic`
+
+---
+
+<a id="trigonometry-dependencies"></a>
+
+## Trigonometry Dependencies
+
+### `trigonometry/src/index.ts` - Standalone trigonometric functions for MathTS. Re-exports the `trigonometry` typed-function domain
+
+**Exports:**
+- Re-exports: `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `atan2`, `acsc`, `asec`, `acot`, `asinh`, `acosh`, `atanh`, `toRadians`, `toDegrees`, `hypot`, `typedTrigonometry`
+
+---
+
+<a id="statistics-dependencies"></a>
+
+## Statistics Dependencies
+
+### `statistics/src/index.ts` - Standalone statistics functions for MathTS. Re-exports the `statistics` typed-function domain
+
+**Exports:**
+- Re-exports: `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatPercentile`, `parallelStatHistogram`, `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `typedStatistics`
+
+---
+
+<a id="signal-dependencies"></a>
+
+## Signal Dependencies
+
+### `signal/src/index.ts` - Standalone signal-processing functions for MathTS. Re-exports the `signal` typed-function domain
+
+**Exports:**
+- Re-exports: `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `crossCorrelation`, `autoCorrelation`, `groupDelay`, `unwrapPhase`, `dct`, `idct`, `dst`, `idst`, `dwt`, `fourier`, `invFourier`, `hilbertTransform`, `periodogram`, `lowpassFilter`, `highpassFilter`, `bandpassFilter`, `resample`, `medfilt`, `windowFunction`, `convolve`, `correlate`, `welchPSD`, `bartlettPSD`, `multiTaperPSD`, `goertzel`, `chirpZTransform`, `typedSignal`
 
 ---
 
@@ -7930,11 +8017,10 @@ graph LR
 | `./ops/bitwise.js` | `bitAnd, bitOr, bitXor, bitNot, leftShift, rightArithShift, rightLogShift` | Import |
 
 **Exports:**
-
 - Classes: `ComputePool`
 - Interfaces: `ComputePoolConfig`, `ParallelResult`
 - Types: `OpName`, `OpThreshold`
-- Functions: `resolveOpThreshold`
+- Functions: `resolveOpThreshold`, `tensordotChunkKernel`
 - Constants: `DEFAULT_POOL_CONFIG`, `computePool`
 
 ---
@@ -7950,7 +8036,6 @@ graph LR
 | `./strategies/index.js` | `calculateOptimalChunks, chunkFloat64Array, chunkArray, mergeFloat64Chunks, mergeArrayChunks, shouldChunkParallelize, partitionRange, partition2D, ThresholdDispatcher, thresholdDispatcher, shouldParallelize, dispatch, calculateChunks, DEFAULT_THRESHOLDS` | Re-export |
 
 **Exports:**
-
 - Interfaces: `PoolOptions`, `ExecOptions`, `PoolStats`
 - Re-exports: `ComputePool`, `computePool`, `Transfer`, `DEFAULT_POOL_CONFIG`, `resolveOpThreshold`, `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`, `rightLogShift`, `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`, `mergeArrayChunks`, `shouldChunkParallelize`, `partitionRange`, `partition2D`, `ThresholdDispatcher`, `thresholdDispatcher`, `shouldParallelize`, `dispatch`, `calculateChunks`, `DEFAULT_THRESHOLDS`
 
@@ -7969,7 +8054,6 @@ graph LR
 | `../ComputePool.js` | `ParallelResult` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `ElementwiseOptions`
 - Functions: `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`
 
@@ -7986,7 +8070,6 @@ graph LR
 | `./map.js` | `parallelMap, parallelFilter, parallelFind, parallelSort, parallelForEach, parallelSome, parallelEvery, parallelCount, MapOptions` | Re-export |
 
 **Exports:**
-
 - Re-exports: `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`, `MatmulOptions`, `parallelAdd`, `parallelSubtract`, `parallelMultiply`, `parallelDivide`, `parallelScale`, `parallelAbs`, `parallelNegate`, `parallelSquare`, `parallelSqrt`, `parallelExp`, `parallelLog`, `parallelSin`, `parallelCos`, `parallelTan`, `parallelElementwise`, `parallelUnary`, `ElementwiseOptions`, `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`, `ReduceOptions`, `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`, `MapOptions`
 
 ---
@@ -8000,7 +8083,6 @@ graph LR
 | `../ComputePool.js` | `ParallelResult` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `MapOptions`
 - Functions: `parallelMap`, `parallelFilter`, `parallelFind`, `parallelSort`, `parallelForEach`, `parallelSome`, `parallelEvery`, `parallelCount`
 
@@ -8015,7 +8097,6 @@ graph LR
 | `../ComputePool.js` | `ParallelResult` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `MatmulOptions`
 - Functions: `parallelMatmul`, `parallelMatvec`, `parallelTranspose`, `parallelOuter`, `parallelDot`
 
@@ -8030,7 +8111,6 @@ graph LR
 | `../ComputePool.js` | `ParallelResult` | Import (type-only) |
 
 **Exports:**
-
 - Interfaces: `ReduceOptions`
 - Functions: `parallelSum`, `parallelMean`, `parallelMin`, `parallelMax`, `parallelMinMax`, `parallelVariance`, `parallelStd`, `parallelNorm`, `parallelDistance`, `parallelHistogram`, `parallelReduce`
 
@@ -8048,7 +8128,6 @@ graph LR
 | `../strategies/chunk.js` | `calculateOptimalChunks, ChunkOptions` | Import |
 
 **Exports:**
-
 - Types: `BitwiseBinaryOp`
 - Functions: `bitAnd`, `bitOr`, `bitXor`, `leftShift`, `rightArithShift`, `rightLogShift`, `bitNot`
 
@@ -8061,7 +8140,6 @@ graph LR
 ### `parallel/src/strategies/chunk.ts` - Chunking Strategies for Parallel Operations
 
 **Exports:**
-
 - Interfaces: `ChunkResult`, `ChunkInfo`, `ChunkOptions`
 - Functions: `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`, `mergeArrayChunks`, `shouldParallelize`, `memorySizeBytes`, `partitionRange`, `partition2D`
 
@@ -8076,7 +8154,6 @@ graph LR
 | `./threshold.js` | `ThresholdDispatcher, thresholdDispatcher, shouldParallelize, dispatch, calculateChunks, DEFAULT_THRESHOLDS, ThresholdConfig, OperationCategory, ExecutionMode, DispatchResult` | Re-export |
 
 **Exports:**
-
 - Re-exports: `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`, `mergeArrayChunks`, `shouldParallelize`, `partitionRange`, `partition2D`, `ChunkOptions`, `ChunkResult`, `ChunkInfo`, `ThresholdDispatcher`, `thresholdDispatcher`, `dispatch`, `calculateChunks`, `DEFAULT_THRESHOLDS`, `ThresholdConfig`, `OperationCategory`, `ExecutionMode`, `DispatchResult`
 
 ---
@@ -8089,7 +8166,6 @@ graph LR
 | `../ComputePool.js` | `computePool, ComputePool` | Import |
 
 **Exports:**
-
 - Classes: `ThresholdDispatcher`
 - Interfaces: `ThresholdConfig`, `DispatchResult`
 - Types: `OperationCategory`, `ExecutionMode`
@@ -8116,7 +8192,6 @@ graph LR
 | `./graph` | `buildDependencyGraph, getDependents` | Import |
 
 **Exports:**
-
 - Classes: `WorkbookExecutor`
 - Functions: `createExecutor`
 
@@ -8130,7 +8205,6 @@ graph LR
 | `./types` | `Cell, DependencyGraph, DependencyNode` | Import (type-only) |
 
 **Exports:**
-
 - Functions: `buildDependencyGraph`, `topologicalSort`, `getDependents`, `detectCycles`
 
 ---
@@ -8145,7 +8219,6 @@ graph LR
 | `./executor` | `WorkbookExecutor, createExecutor` | Re-export |
 
 **Exports:**
-
 - Constants: `VERSION`
 - Re-exports: `parseWorkbook`, `serializeWorkbook`, `stripOutputs`, `buildDependencyGraph`, `topologicalSort`, `getDependents`, `WorkbookExecutor`, `createExecutor`
 
@@ -8159,7 +8232,6 @@ graph LR
 | `./types` | `Workbook, ParseResult, CellType` | Import (type-only) |
 
 **Exports:**
-
 - Functions: `parseWorkbook`, `serializeWorkbook`, `stripOutputs`
 
 ---
@@ -8167,7 +8239,6 @@ graph LR
 ### `workbook/src/types.ts` - Workbook type definitions
 
 **Exports:**
-
 - Interfaces: `WorkbookMetadata`, `RuntimeConfig`, `Cell`, `Workbook`, `ParseResult`, `WorkbookEvent`, `DependencyNode`, `DependencyGraph`
 - Types: `CellType`, `ExecutionMode`
 
@@ -8180,7 +8251,6 @@ graph LR
 ### `assembly/src/algebra/decomposition.ts` - Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant.
 
 **Exports:**
-
 - Functions: `matrix_lu_decompose`, `matrix_qr_decompose`, `matrix_cholesky`, `matrix_inverse`, `matrix_determinant`
 
 ---
@@ -8204,6 +8274,7 @@ graph LR
 | `./ops/number-theory` | `eulerPhi, divisorSigma, moebiusMu, carmichaelLambda, jacobiSymbol, harmonicNumber, partitions, primeFactors, divisors, integerDigits, chineseRemainder` | Re-export |
 | `./ops/polynomial` | `polyadd, polynomialQuotient, polynomialRemainder, polynomialGCD, polynomialLCM, discriminant, resultant` | Re-export |
 | `./ops/signal` | `resample, medfilt, windowFunction` | Re-export |
+| `./signal` | `apply_window_f64, welch_psd_f64, bartlett_psd_f64, goertzel_f64, chirp_z_transform_f64` | Re-export |
 | `./ops/linalg` | `rowReduce, characteristicPolynomial` | Re-export |
 | `./ops/curvefit` | `expfit, logfit, powerfit` | Re-export |
 | `./ops/optimization` | `quadprog, linprog, nullspace` | Re-export |
@@ -8211,29 +8282,49 @@ graph LR
 | `./ops/tensor` | `tensorTranspose` | Re-export |
 | `./ops/complex-ops` | `complex_add, complex_sub, complex_mul, complex_div, complex_neg, complex_conj, complex_reciprocal, complex_abs, complex_arg, complex_abs_squared, complex_sqrt, complex_pow, complex_cpow, complex_square, complex_cube, complex_exp, complex_log, complex_log10, complex_log2, complex_sin, complex_cos, complex_tan, complex_asin, complex_acos, complex_atan, complex_sinh, complex_cosh, complex_tanh, complex_asinh, complex_acosh, complex_atanh, complex_equals, complex_approx_equals, complex_is_zero, complex_is_real, complex_is_imaginary, complex_is_nan, complex_is_finite, complex_from_real, complex_from_imag, complex_from_polar, complex_to_polar, complex_axpby, complex_distance` | Re-export |
 | `./ops/bitwise` | `bitAnd_i32_array, bitOr_i32_array, bitXor_i32_array, bitNot_i32_array, leftShift_i32_array, rightArithShift_i32_array, rightLogShift_i32_array` | Re-export |
-| `./poly` | `poly_mul_f64, poly_div_mod_f64` | Re-export |
-| `./tridiag` | `tridiag_solve_f64` | Re-export |
+| `./poly` | `poly_mul_f64, poly_div_mod_f64, poly_fit_f64, cheb_fit_f64, legendre_fit_f64` | Re-export |
+| `./tridiag` | `tridiag_solve_f64, divided_difference_f64` | Re-export |
+| `./special` | `bessel_j0_f64, bessel_j1_f64, bessel_jn_f64, bessel_y0_f64, bessel_y1_f64, bessel_yn_f64, airy_ai_f64, airy_bi_f64, elliptic_k_f64, elliptic_e_f64, lgamma_f64, carlson_rc_f64, carlson_rf_f64, carlson_rd_f64, carlson_rj_f64, elliptic_f_incomplete_f64, elliptic_e_incomplete_f64, elliptic_pi_incomplete_f64` | Re-export |
+| `./sort` | `sort_f64, argsort_f64, rank_f64` | Re-export |
 | `./ops/complex-array` | `complex_array_zeros, complex_array_ones, complex_array_fill, complex_array_get, complex_array_set, complex_array_set_parts, complex_array_get_re, complex_array_get_im, complex_array_length, complex_array_add, complex_array_sub, complex_array_mul, complex_array_div, complex_array_scale_real, complex_array_scale_complex, complex_array_neg, complex_array_conj, complex_array_abs, complex_array_arg, complex_array_abs_squared, complex_array_real, complex_array_imag, complex_array_exp, complex_array_log, complex_array_sqrt, complex_array_sum, complex_array_mean, complex_array_dot, complex_array_norm, complex_array_scale_inplace, complex_array_conj_inplace, complex_array_add_inplace, complex_array_copy` | Re-export |
 
 **Exports:**
-
-- Re-exports: `Complex`, `complex`, `complexFromPolar`, `add_f64`, `sub_f64`, `mul_f64`, `div_f64`, `mod_f64`, `neg_f64`, `sqrt_f64`, `pow_f64`, `square_f64`, `cube_f64`, `cbrt_f64`, `nthRoot_f64`, `exp_f64`, `expm1_f64`, `log_f64`, `log1p_f64`, `log10_f64`, `log2_f64`, `sin_f64`, `cos_f64`, `tan_f64`, `asin_f64`, `acos_f64`, `atan_f64`, `atan2_f64`, `sinh_f64`, `cosh_f64`, `tanh_f64`, `asinh_f64`, `acosh_f64`, `atanh_f64`, `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`, `sign_f64`, `min_f64`, `max_f64`, `clamp_f64`, `isNaN_f64`, `isFinite_f64`, `PI`, `E`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `EPSILON`, `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_stddev`, `array_min`, `array_max`, `array_argmin`, `array_argmax`, `array_norm`, `array_norm_l1`, `array_norm_linf`, `array_dot`, `array_add`, `array_sub`, `array_mul`, `array_div`, `array_scale`, `array_add_scalar`, `array_neg`, `array_abs`, `array_sqrt`, `array_square`, `array_exp`, `array_log`, `array_sin`, `array_cos`, `array_axpby`, `array_distance`, `array_cosine_similarity`, `array_scale_inplace`, `array_add_scalar_inplace`, `array_add_inplace`, `array_clamp_inplace`, `array_fill`, `array_copy`, `matrix_zeros`, `matrix_ones`, `matrix_fill`, `matrix_identity`, `matrix_diag`, `matrix_get`, `matrix_set`, `matrix_get_row`, `matrix_get_col`, `matrix_get_diag`, `matrix_add`, `matrix_sub`, `matrix_mul_elementwise`, `matrix_div_elementwise`, `matrix_scale`, `matrix_add_scalar`, `matrix_neg`, `matrix_multiply`, `matrix_vector_multiply`, `vector_matrix_multiply`, `matrix_outer`, `matrix_transpose`, `matrix_sum`, `matrix_mean`, `matrix_min`, `matrix_max`, `matrix_norm_frobenius`, `matrix_trace`, `matrix_sum_rows`, `matrix_sum_cols`, `matrix_is_square`, `matrix_is_symmetric`, `matrix_is_diagonal`, `matrix_is_identity`, `matrix_scale_inplace`, `matrix_add_scalar_inplace`, `matrix_add_inplace`, `matrix_copy`, `matrix_axpy`, `matrix_gemm`, `matrix_gemv`, `matrix_svd`, `matrix_singular_values`, `matrix_lu_decompose`, `matrix_qr_decompose`, `matrix_cholesky`, `matrix_inverse`, `matrix_determinant`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `erfi`, `expIntegralEi`, `sinIntegral`, `cosIntegral`, `logIntegral`, `eulerPhi`, `divisorSigma`, `moebiusMu`, `carmichaelLambda`, `jacobiSymbol`, `harmonicNumber`, `partitions`, `primeFactors`, `divisors`, `integerDigits`, `chineseRemainder`, `polyadd`, `polynomialQuotient`, `polynomialRemainder`, `polynomialGCD`, `polynomialLCM`, `discriminant`, `resultant`, `resample`, `medfilt`, `windowFunction`, `rowReduce`, `characteristicPolynomial`, `expfit`, `logfit`, `powerfit`, `quadprog`, `linprog`, `nullspace`, `residue`, `padeApproximant`, `tensorTranspose`, `complex_add`, `complex_sub`, `complex_mul`, `complex_div`, `complex_neg`, `complex_conj`, `complex_reciprocal`, `complex_abs`, `complex_arg`, `complex_abs_squared`, `complex_sqrt`, `complex_pow`, `complex_cpow`, `complex_square`, `complex_cube`, `complex_exp`, `complex_log`, `complex_log10`, `complex_log2`, `complex_sin`, `complex_cos`, `complex_tan`, `complex_asin`, `complex_acos`, `complex_atan`, `complex_sinh`, `complex_cosh`, `complex_tanh`, `complex_asinh`, `complex_acosh`, `complex_atanh`, `complex_equals`, `complex_approx_equals`, `complex_is_zero`, `complex_is_real`, `complex_is_imaginary`, `complex_is_nan`, `complex_is_finite`, `complex_from_real`, `complex_from_imag`, `complex_from_polar`, `complex_to_polar`, `complex_axpby`, `complex_distance`, `bitAnd_i32_array`, `bitOr_i32_array`, `bitXor_i32_array`, `bitNot_i32_array`, `leftShift_i32_array`, `rightArithShift_i32_array`, `rightLogShift_i32_array`, `poly_mul_f64`, `poly_div_mod_f64`, `tridiag_solve_f64`, `complex_array_zeros`, `complex_array_ones`, `complex_array_fill`, `complex_array_get`, `complex_array_set`, `complex_array_set_parts`, `complex_array_get_re`, `complex_array_get_im`, `complex_array_length`, `complex_array_add`, `complex_array_sub`, `complex_array_mul`, `complex_array_div`, `complex_array_scale_real`, `complex_array_scale_complex`, `complex_array_neg`, `complex_array_conj`, `complex_array_abs`, `complex_array_arg`, `complex_array_abs_squared`, `complex_array_real`, `complex_array_imag`, `complex_array_exp`, `complex_array_log`, `complex_array_sqrt`, `complex_array_sum`, `complex_array_mean`, `complex_array_dot`, `complex_array_norm`, `complex_array_scale_inplace`, `complex_array_conj_inplace`, `complex_array_add_inplace`, `complex_array_copy`
+- Re-exports: `Complex`, `complex`, `complexFromPolar`, `add_f64`, `sub_f64`, `mul_f64`, `div_f64`, `mod_f64`, `neg_f64`, `sqrt_f64`, `pow_f64`, `square_f64`, `cube_f64`, `cbrt_f64`, `nthRoot_f64`, `exp_f64`, `expm1_f64`, `log_f64`, `log1p_f64`, `log10_f64`, `log2_f64`, `sin_f64`, `cos_f64`, `tan_f64`, `asin_f64`, `acos_f64`, `atan_f64`, `atan2_f64`, `sinh_f64`, `cosh_f64`, `tanh_f64`, `asinh_f64`, `acosh_f64`, `atanh_f64`, `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`, `sign_f64`, `min_f64`, `max_f64`, `clamp_f64`, `isNaN_f64`, `isFinite_f64`, `PI`, `E`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `EPSILON`, `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_stddev`, `array_min`, `array_max`, `array_argmin`, `array_argmax`, `array_norm`, `array_norm_l1`, `array_norm_linf`, `array_dot`, `array_add`, `array_sub`, `array_mul`, `array_div`, `array_scale`, `array_add_scalar`, `array_neg`, `array_abs`, `array_sqrt`, `array_square`, `array_exp`, `array_log`, `array_sin`, `array_cos`, `array_axpby`, `array_distance`, `array_cosine_similarity`, `array_scale_inplace`, `array_add_scalar_inplace`, `array_add_inplace`, `array_clamp_inplace`, `array_fill`, `array_copy`, `matrix_zeros`, `matrix_ones`, `matrix_fill`, `matrix_identity`, `matrix_diag`, `matrix_get`, `matrix_set`, `matrix_get_row`, `matrix_get_col`, `matrix_get_diag`, `matrix_add`, `matrix_sub`, `matrix_mul_elementwise`, `matrix_div_elementwise`, `matrix_scale`, `matrix_add_scalar`, `matrix_neg`, `matrix_multiply`, `matrix_vector_multiply`, `vector_matrix_multiply`, `matrix_outer`, `matrix_transpose`, `matrix_sum`, `matrix_mean`, `matrix_min`, `matrix_max`, `matrix_norm_frobenius`, `matrix_trace`, `matrix_sum_rows`, `matrix_sum_cols`, `matrix_is_square`, `matrix_is_symmetric`, `matrix_is_diagonal`, `matrix_is_identity`, `matrix_scale_inplace`, `matrix_add_scalar_inplace`, `matrix_add_inplace`, `matrix_copy`, `matrix_axpy`, `matrix_gemm`, `matrix_gemv`, `matrix_svd`, `matrix_singular_values`, `matrix_lu_decompose`, `matrix_qr_decompose`, `matrix_cholesky`, `matrix_inverse`, `matrix_determinant`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `erfi`, `expIntegralEi`, `sinIntegral`, `cosIntegral`, `logIntegral`, `eulerPhi`, `divisorSigma`, `moebiusMu`, `carmichaelLambda`, `jacobiSymbol`, `harmonicNumber`, `partitions`, `primeFactors`, `divisors`, `integerDigits`, `chineseRemainder`, `polyadd`, `polynomialQuotient`, `polynomialRemainder`, `polynomialGCD`, `polynomialLCM`, `discriminant`, `resultant`, `resample`, `medfilt`, `windowFunction`, `apply_window_f64`, `welch_psd_f64`, `bartlett_psd_f64`, `goertzel_f64`, `chirp_z_transform_f64`, `rowReduce`, `characteristicPolynomial`, `expfit`, `logfit`, `powerfit`, `quadprog`, `linprog`, `nullspace`, `residue`, `padeApproximant`, `tensorTranspose`, `complex_add`, `complex_sub`, `complex_mul`, `complex_div`, `complex_neg`, `complex_conj`, `complex_reciprocal`, `complex_abs`, `complex_arg`, `complex_abs_squared`, `complex_sqrt`, `complex_pow`, `complex_cpow`, `complex_square`, `complex_cube`, `complex_exp`, `complex_log`, `complex_log10`, `complex_log2`, `complex_sin`, `complex_cos`, `complex_tan`, `complex_asin`, `complex_acos`, `complex_atan`, `complex_sinh`, `complex_cosh`, `complex_tanh`, `complex_asinh`, `complex_acosh`, `complex_atanh`, `complex_equals`, `complex_approx_equals`, `complex_is_zero`, `complex_is_real`, `complex_is_imaginary`, `complex_is_nan`, `complex_is_finite`, `complex_from_real`, `complex_from_imag`, `complex_from_polar`, `complex_to_polar`, `complex_axpby`, `complex_distance`, `bitAnd_i32_array`, `bitOr_i32_array`, `bitXor_i32_array`, `bitNot_i32_array`, `leftShift_i32_array`, `rightArithShift_i32_array`, `rightLogShift_i32_array`, `poly_mul_f64`, `poly_div_mod_f64`, `poly_fit_f64`, `cheb_fit_f64`, `legendre_fit_f64`, `tridiag_solve_f64`, `divided_difference_f64`, `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64`, `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`, `airy_ai_f64`, `airy_bi_f64`, `elliptic_k_f64`, `elliptic_e_f64`, `lgamma_f64`, `carlson_rc_f64`, `carlson_rf_f64`, `carlson_rd_f64`, `carlson_rj_f64`, `elliptic_f_incomplete_f64`, `elliptic_e_incomplete_f64`, `elliptic_pi_incomplete_f64`, `sort_f64`, `argsort_f64`, `rank_f64`, `complex_array_zeros`, `complex_array_ones`, `complex_array_fill`, `complex_array_get`, `complex_array_set`, `complex_array_set_parts`, `complex_array_get_re`, `complex_array_get_im`, `complex_array_length`, `complex_array_add`, `complex_array_sub`, `complex_array_mul`, `complex_array_div`, `complex_array_scale_real`, `complex_array_scale_complex`, `complex_array_neg`, `complex_array_conj`, `complex_array_abs`, `complex_array_arg`, `complex_array_abs_squared`, `complex_array_real`, `complex_array_imag`, `complex_array_exp`, `complex_array_log`, `complex_array_sqrt`, `complex_array_sum`, `complex_array_mean`, `complex_array_dot`, `complex_array_norm`, `complex_array_scale_inplace`, `complex_array_conj_inplace`, `complex_array_add_inplace`, `complex_array_copy`
 
 ---
 
 ### `assembly/src/poly.ts` - Polynomial hot-loop kernels — AssemblyScript parity port.
 
 **Exports:**
+- Functions: `poly_mul_f64`, `poly_div_mod_f64`, `poly_resultant_f64`, `poly_fit_f64`, `cheb_fit_f64`, `legendre_fit_f64`, `poly_discriminant_f64`
 
-- Functions: `poly_mul_f64`, `poly_div_mod_f64`
+---
+
+### `assembly/src/signal.ts` - Spectral-windowing WASM kernels — AssemblyScript parity port (Slice 5.6).
+
+**Exports:**
+- Functions: `apply_window_f64`, `welch_psd_f64`, `bartlett_psd_f64`, `goertzel_f64`, `chirp_z_transform_f64`
+
+---
+
+### `assembly/src/sort.ts` - Sort hot-loop kernels — AssemblyScript parity port (Slice 5.7a).
+
+**Exports:**
+- Functions: `sort_f64`, `argsort_f64`, `rank_f64`
+
+---
+
+### `assembly/src/special.ts` - Bessel J/Y, Airy Ai/Bi, lgamma — AssemblyScript parity port.
+
+**Exports:**
+- Functions: `lgamma_f64`, `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64`, `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`, `airy_ai_f64`, `airy_bi_f64`, `elliptic_k_f64`, `elliptic_e_f64`, `carlson_rc_f64`, `carlson_rf_f64`, `carlson_rd_f64`, `carlson_rj_f64`, `elliptic_f_incomplete_f64`, `elliptic_e_incomplete_f64`, `elliptic_pi_incomplete_f64`
 
 ---
 
 ### `assembly/src/tridiag.ts` - Tridiagonal-solve kernel — AssemblyScript parity port (Slice 3.10b).
 
 **Exports:**
-
-- Functions: `tridiag_solve_f64`
+- Functions: `tridiag_solve_f64`, `divided_difference_f64`
 
 ---
 
@@ -8244,7 +8335,6 @@ graph LR
 ### `assembly/src/ops/approx.ts` - Rational approximation — AssemblyScript fallback mirroring
 
 **Exports:**
-
 - Functions: `residue`, `padeApproximant`
 
 ---
@@ -8252,7 +8342,6 @@ graph LR
 ### `assembly/src/ops/array.ts` - Array Operations for AssemblyScript
 
 **Exports:**
-
 - Functions: `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_stddev`, `array_min`, `array_max`, `array_argmin`, `array_argmax`, `array_norm`, `array_norm_l1`, `array_norm_linf`, `array_dot`, `array_add`, `array_sub`, `array_mul`, `array_div`, `array_scale`, `array_add_scalar`, `array_neg`, `array_abs`, `array_sqrt`, `array_square`, `array_exp`, `array_log`, `array_sin`, `array_cos`, `array_axpby`, `array_distance`, `array_cosine_similarity`, `array_scale_inplace`, `array_add_scalar_inplace`, `array_add_inplace`, `array_clamp_inplace`, `array_fill`, `array_copy`
 
 ---
@@ -8260,7 +8349,6 @@ graph LR
 ### `assembly/src/ops/bitwise.ts` - Bitwise Operations for AssemblyScript
 
 **Exports:**
-
 - Functions: `bitAnd_i32_array`, `bitOr_i32_array`, `bitXor_i32_array`, `bitNot_i32_array`, `leftShift_i32_array`, `rightArithShift_i32_array`, `rightLogShift_i32_array`
 
 ---
@@ -8273,7 +8361,6 @@ graph LR
 | `../types/complex` | `Complex` | Import |
 
 **Exports:**
-
 - Functions: `complex_array_zeros`, `complex_array_ones`, `complex_array_fill`, `complex_array_get`, `complex_array_set`, `complex_array_set_parts`, `complex_array_get_re`, `complex_array_get_im`, `complex_array_length`, `complex_array_add`, `complex_array_sub`, `complex_array_mul`, `complex_array_div`, `complex_array_scale_real`, `complex_array_scale_complex`, `complex_array_neg`, `complex_array_conj`, `complex_array_abs`, `complex_array_arg`, `complex_array_abs_squared`, `complex_array_real`, `complex_array_imag`, `complex_array_exp`, `complex_array_log`, `complex_array_sqrt`, `complex_array_sum`, `complex_array_mean`, `complex_array_dot`, `complex_array_norm`, `complex_array_scale_inplace`, `complex_array_conj_inplace`, `complex_array_add_inplace`, `complex_array_copy`
 
 ---
@@ -8286,7 +8373,6 @@ graph LR
 | `../types/complex` | `Complex, complexFromPolar` | Import |
 
 **Exports:**
-
 - Functions: `complex_add`, `complex_sub`, `complex_mul`, `complex_div`, `complex_neg`, `complex_conj`, `complex_reciprocal`, `complex_abs`, `complex_arg`, `complex_abs_squared`, `complex_sqrt`, `complex_pow`, `complex_cpow`, `complex_square`, `complex_cube`, `complex_exp`, `complex_log`, `complex_log10`, `complex_log2`, `complex_sin`, `complex_cos`, `complex_tan`, `complex_asin`, `complex_acos`, `complex_atan`, `complex_sinh`, `complex_cosh`, `complex_tanh`, `complex_asinh`, `complex_acosh`, `complex_atanh`, `complex_equals`, `complex_approx_equals`, `complex_is_zero`, `complex_is_real`, `complex_is_imaginary`, `complex_is_nan`, `complex_is_finite`, `complex_from_real`, `complex_from_imag`, `complex_from_polar`, `complex_to_polar`, `complex_axpby`, `complex_distance`
 
 ---
@@ -8294,7 +8380,6 @@ graph LR
 ### `assembly/src/ops/curvefit.ts` - Log-linearized curve fitting — AssemblyScript fallback mirroring
 
 **Exports:**
-
 - Functions: `expfit`, `logfit`, `powerfit`
 
 ---
@@ -8302,7 +8387,6 @@ graph LR
 ### `assembly/src/ops/linalg.ts` - Extra linear-algebra kernels — AssemblyScript fallback mirroring
 
 **Exports:**
-
 - Functions: `rowReduce`, `characteristicPolynomial`
 
 ---
@@ -8310,7 +8394,6 @@ graph LR
 ### `assembly/src/ops/matrix.ts` - Matrix Operations for AssemblyScript
 
 **Exports:**
-
 - Functions: `matrix_zeros`, `matrix_ones`, `matrix_fill`, `matrix_identity`, `matrix_diag`, `matrix_get`, `matrix_set`, `matrix_get_row`, `matrix_get_col`, `matrix_get_diag`, `matrix_add`, `matrix_sub`, `matrix_mul_elementwise`, `matrix_div_elementwise`, `matrix_scale`, `matrix_add_scalar`, `matrix_neg`, `matrix_multiply`, `matrix_vector_multiply`, `vector_matrix_multiply`, `matrix_outer`, `matrix_transpose`, `matrix_sum`, `matrix_mean`, `matrix_min`, `matrix_max`, `matrix_norm_frobenius`, `matrix_trace`, `matrix_sum_rows`, `matrix_sum_cols`, `matrix_is_square`, `matrix_is_symmetric`, `matrix_is_diagonal`, `matrix_is_identity`, `matrix_scale_inplace`, `matrix_add_scalar_inplace`, `matrix_add_inplace`, `matrix_copy`, `matrix_axpy`, `matrix_gemm`, `matrix_gemv`
 
 ---
@@ -8318,7 +8401,6 @@ graph LR
 ### `assembly/src/ops/number-theory.ts` - Number-theory functions — AssemblyScript fallback mirroring
 
 **Exports:**
-
 - Functions: `eulerPhi`, `divisorSigma`, `moebiusMu`, `carmichaelLambda`, `jacobiSymbol`, `harmonicNumber`, `partitions`, `primeFactors`, `divisors`, `integerDigits`, `chineseRemainder`
 
 ---
@@ -8326,7 +8408,6 @@ graph LR
 ### `assembly/src/ops/optimization.ts` - Optimization kernels — AssemblyScript fallback mirroring
 
 **Exports:**
-
 - Functions: `quadprog`, `linprog`, `nullspace`
 
 ---
@@ -8334,7 +8415,6 @@ graph LR
 ### `assembly/src/ops/polynomial.ts` - Polynomial algebra — AssemblyScript fallback mirroring
 
 **Exports:**
-
 - Functions: `polyadd`, `polynomialQuotient`, `polynomialRemainder`, `polynomialGCD`, `polynomialLCM`, `discriminant`, `resultant`
 
 ---
@@ -8342,7 +8422,6 @@ graph LR
 ### `assembly/src/ops/scalar.ts` - Scalar Operations for AssemblyScript
 
 **Exports:**
-
 - Functions: `add_f64`, `sub_f64`, `mul_f64`, `div_f64`, `mod_f64`, `neg_f64`, `sqrt_f64`, `pow_f64`, `square_f64`, `cube_f64`, `cbrt_f64`, `nthRoot_f64`, `exp_f64`, `expm1_f64`, `log_f64`, `log1p_f64`, `log10_f64`, `log2_f64`, `sin_f64`, `cos_f64`, `tan_f64`, `asin_f64`, `acos_f64`, `atan_f64`, `atan2_f64`, `sinh_f64`, `cosh_f64`, `tanh_f64`, `asinh_f64`, `acosh_f64`, `atanh_f64`, `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`, `sign_f64`, `min_f64`, `max_f64`, `clamp_f64`, `isNaN_f64`, `isFinite_f64`
 - Constants: `PI`, `E`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `EPSILON`
 
@@ -8351,7 +8430,6 @@ graph LR
 ### `assembly/src/ops/signal.ts` - Signal windowing / resampling kernels — AssemblyScript fallback mirroring
 
 **Exports:**
-
 - Functions: `resample`, `medfilt`, `windowFunction`
 
 ---
@@ -8359,7 +8437,6 @@ graph LR
 ### `assembly/src/ops/special.ts` - Orthogonal polynomials and integral special functions — AssemblyScript
 
 **Exports:**
-
 - Functions: `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `erfi`, `expIntegralEi`, `sinIntegral`, `cosIntegral`, `logIntegral`
 
 ---
@@ -8367,7 +8444,6 @@ graph LR
 ### `assembly/src/ops/svd.ts` - Singular Value Decomposition via the one-sided Jacobi algorithm.
 
 **Exports:**
-
 - Functions: `matrix_svd`, `matrix_singular_values`
 
 ---
@@ -8375,7 +8451,6 @@ graph LR
 ### `assembly/src/ops/tensor.ts` - Rank-N tensor operations — AssemblyScript fallback mirroring
 
 **Exports:**
-
 - Functions: `tensorTranspose`
 
 ---
@@ -8387,7 +8462,6 @@ graph LR
 ### `assembly/src/types/complex.ts` - AssemblyScript-compatible Complex Number Implementation
 
 **Exports:**
-
 - Classes: `Complex`
 - Functions: `complex`, `complexFromPolar`, `complexFromReal`, `complexFromImaginary`
 - Constants: `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_I`, `COMPLEX_NEG_ONE`
@@ -8407,7 +8481,6 @@ graph LR
 | `./shims.js` | `*` | Re-export |
 
 **Exports:**
-
 - Interfaces: `MathJSConfig`, `MathInstance`
 - Functions: `create`
 - Constants: `all`
@@ -8418,71 +8491,79 @@ graph LR
 ### `compat/src/shims.ts` - mathjs Compatibility Shims
 
 **Exports:**
-
 - Functions: `complex`, `fraction`, `bignumber`, `matrix`, `sparse`, `asin`, `acos`, `atan`, `atan2`, `conj`, `re`, `im`, `arg`, `transpose`, `det`, `identity`, `zeros`, `ones`, `size`, `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix`
 - Constants: `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log`, `sin`, `cos`, `tan`, `sum`, `mean`, `min`, `max`, `gcd`, `lcm`, `round`, `floor`, `ceil`, `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_`, `shims`
 
 ---
 
 <a id="dependency-matrix"></a>
-
 ## Dependency Matrix
 
 ### File Import/Export Matrix
 
-| File                                                   | Imports From | Exports To |
-| ------------------------------------------------------ | ------------ | ---------- |
-| `functions/src/utils/factory`                          | 1 file       | 262 files  |
-| `functions/src/factories/index`                        | 243 files    | 2 files    |
-| `functions/src/core/function/typed`                    | 3 files      | 181 files  |
-| `functions/src/utils/is`                               | 0 files      | 65 files   |
-| `functions/src/plain/number/index`                     | 9 files      | 52 files   |
-| `functions/src/utils/array`                            | 6 files      | 50 files   |
-| `functions/src/core/config`                            | 0 files      | 52 files   |
-| `functions/src/utils/number`                           | 1 file       | 49 files   |
-| `functions/src/wasm/WasmLoader`                        | 1 file       | 46 files   |
-| `functions/src/utils/collection`                       | 4 files      | 37 files   |
-| `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
-| `functions/src/utils/object`                           | 1 file       | 28 files   |
-| `functions/src/type/matrix/types`                      | 0 files      | 27 files   |
-| `expression/src/utils/is`                              | 0 files      | 25 files   |
-| `functions/src/typed/index`                            | 22 files     | 2 files    |
-| `expression/src/index`                                 | 24 files     | 0 files    |
-| `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
-| `expression/src/utils/factory`                         | 1 file       | 19 files   |
-| `assembly/src/index`                                   | 20 files     | 0 files    |
-| `functions/src/type/bignumber/BigNumber`               | 1 file       | 18 files   |
-| `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
-| `functions/src/utils/string`                           | 3 files      | 16 files   |
-| `functions/src/type/complex/Complex`                   | 3 files      | 15 files   |
-| `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
-| `functions/src/types`                                  | 0 files      | 18 files   |
-| `matrix/src/types/DenseMatrix`                         | 1 file       | 14 files   |
-| `functions/src/error/DimensionError`                   | 0 files      | 15 files   |
-| `expression/src/node/Node`                             | 5 files      | 10 files   |
-| `functions/src/bitwise/leftShift`                      | 13 files     | 1 file     |
-| `functions/src/bitwise/rightArithShift`                | 13 files     | 1 file     |
-| `functions/src/type/matrix/utils/matAlgo02xDS0`        | 3 files      | 11 files   |
-| `functions/src/type/matrix/utils/matAlgo14xDs`         | 3 files      | 11 files   |
-| `functions/src/bitwise/rightLogShift`                  | 12 files     | 1 file     |
-| `functions/src/type/matrix/utils/matAlgo07xSSf`        | 3 files      | 10 files   |
-| `expression/src/utils/customs`                         | 1 file       | 12 files   |
-| `expression/src/utils/string`                          | 3 files      | 10 files   |
-| `matrix/src/backends/index`                            | 11 files     | 1 file     |
-| `tensor/src/Tensor`                                    | 1 file       | 11 files   |
-| `tensor/src/index`                                     | 12 files     | 0 files    |
-| `functions/src/arithmetic/gcd`                         | 11 files     | 1 file     |
+| File | Imports From | Exports To |
+|------|--------------|------------|
+| `functions/src/utils/factory` | 2 files | 262 files |
+| `functions/src/factories/index` | 243 files | 2 files |
+| `functions/src/core/function/typed` | 3 files | 182 files |
+| `functions/src/utils/is` | 0 files | 65 files |
+| `functions/src/plain/number/index` | 9 files | 52 files |
+| `functions/src/utils/array` | 6 files | 49 files |
+| `functions/src/core/config` | 0 files | 52 files |
+| `functions/src/utils/number` | 1 file | 48 files |
+| `functions/src/wasm/WasmLoader` | 1 file | 48 files |
+| `functions/src/utils/collection` | 4 files | 37 files |
+| `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files | 27 files |
+| `functions/src/utils/object` | 1 file | 28 files |
+| `functions/src/type/matrix/types` | 0 files | 27 files |
+| `functions/src/typed/index` | 25 files | 2 files |
+| `expression/src/index` | 25 files | 0 files |
+| `expression/src/utils/is` | 0 files | 25 files |
+| `matrix/src/types/DenseMatrix` | 3 files | 21 files |
+| `assembly/src/index` | 23 files | 0 files |
+| `expression/src/utils/factory` | 2 files | 20 files |
+| `functions/src/type/matrix/utils/matAlgo12xSfs` | 2 files | 19 files |
+| `tensor/src/index` | 20 files | 0 files |
+| `tensor/src/Tensor` | 1 file | 19 files |
+| `functions/src/utils/string` | 3 files | 17 files |
+| `functions/src/type/bignumber/BigNumber` | 1 file | 18 files |
+| `functions/src/type/matrix/utils/matAlgo03xDSf` | 3 files | 16 files |
+| `tensor/src/named-index` | 0 files | 18 files |
+| `functions/src/type/complex/Complex` | 3 files | 15 files |
+| `functions/src/type/matrix/utils/matAlgo11xS0s` | 2 files | 16 files |
+| `functions/src/types` | 0 files | 18 files |
+| `functions/src/error/DimensionError` | 0 files | 15 files |
+| `expression/src/node/Node` | 5 files | 10 files |
+| `functions/src/bitwise/leftShift` | 13 files | 1 file |
+| `functions/src/bitwise/rightArithShift` | 13 files | 1 file |
+| `functions/src/type/matrix/utils/matAlgo02xDS0` | 3 files | 11 files |
+| `functions/src/type/matrix/utils/matAlgo14xDs` | 3 files | 11 files |
+| `matrix/src/operations/index` | 12 files | 1 file |
+| `functions/src/bitwise/rightLogShift` | 12 files | 1 file |
+| `functions/src/type/matrix/utils/matAlgo07xSSf` | 3 files | 10 files |
+| `expression/src/utils/customs` | 1 file | 12 files |
+| `expression/src/utils/string` | 3 files | 10 files |
 
 ---
 
 <a id="circular-dependency-analysis"></a>
-
 ## Circular Dependency Analysis
 
-## **No circular dependencies detected.**
+**2 circular dependencies detected:**
+
+- **Runtime cycles**: 0 (require attention)
+- **Type-only cycles**: 2 (safe, no runtime impact)
+
+### Type-Only Circular Dependencies
+
+These cycles only involve type imports and are safe (erased at runtime):
+
+- matrix/src/types/DenseMatrix.ts -> matrix/src/types/dense/arithmetic.ts -> matrix/src/types/DenseMatrix.ts
+- matrix/src/types/DenseMatrix.ts -> matrix/src/types/dense/reduction.ts -> matrix/src/types/DenseMatrix.ts
+
+---
 
 <a id="visual-dependency-graph"></a>
-
 ## Visual Dependency Graph
 
 ```mermaid
@@ -8516,460 +8597,521 @@ graph TD
         N10[complex]
         N11[fraction]
         N12[interfaces]
+        N13[unit-definitions]
+        N14[unit-prefixes]
+        N15[unit]
     end
 
     subgraph Matrix/backends
-        N13[Backend]
-        N14[BackendManager]
-        N15[GPUBackend]
-        N16[GPUMatrixBackend]
-        N17[JSBackend]
-        N18[ParallelBackend]
-        N19[RustWASMBackend]
-        N20[RustWasmLoader]
-        N21[WASMBackend]
-        N22[WasmLoader]
-        N23[...11 more]
+        N16[Backend]
+        N17[BackendManager]
+        N18[BatchExecutor]
+        N19[BufferPool]
+        N20[detect]
+        N21[GPUContext]
+        N22[index]
+        N23[ShaderManager]
+        N24[Sync]
+        N25[GPUBackend]
+        N26[...11 more]
     end
 
     subgraph Matrix
-        N24[config]
-        N25[index]
-        N26[parallel-matrix]
-        N27[typed-operations]
+        N27[config]
+        N28[index]
+        N29[parallel-matrix]
+        N30[typed-operations]
     end
 
     subgraph Matrix/operations
-        N28[cholesky]
-        N29[eig-wasm]
-        N30[eig]
-        N31[index]
-        N32[lu]
-        N33[qr]
-        N34[svd-wasm]
-        N35[svd]
+        N31[cholesky]
+        N32[eig-wasm]
+        N33[eig]
+        N34[expm]
+        N35[index]
+        N36[logm]
+        N37[lu]
+        N38[pinv]
+        N39[qr]
+        N40[schur]
+        N41[...3 more]
     end
 
     subgraph Matrix/types
-        N36[DenseMatrix]
-        N37[Matrix]
-        N38[SparseMatrix]
-        N39[index]
+        N42[arithmetic]
+        N43[reduction]
+        N44[DenseMatrix]
+        N45[index]
+        N46[Matrix]
+        N47[SparseMatrix]
     end
 
     subgraph Tensor
-        N40[Tensor]
-        N41[contraction-sequence]
-        N42[index]
-        N43[named-index]
+        N48[contraction-sequence]
+        N49[index]
+        N50[named-index]
+        N51[Tensor]
     end
 
     subgraph Tensor/operations
-        N44[cholesky]
-        N45[eig]
-        N46[kron]
-        N47[lu]
-        N48[pinv]
-        N49[qr]
-        N50[random]
-        N51[solve]
-        N52[svd]
+        N52[cholesky]
+        N53[concatenate]
+        N54[eig]
+        N55[flip]
+        N56[gather]
+        N57[kron]
+        N58[lu]
+        N59[pad]
+        N60[pinv]
+        N61[qr]
+        N62[...7 more]
     end
 
     subgraph Autograd
-        N53[dual-tensor]
-        N54[forward-grad]
-        N55[index]
-        N56[reverse-grad]
-        N57[tape]
+        N63[dual-tensor]
+        N64[forward-grad]
+        N65[index]
+        N66[reverse-grad]
+        N67[tape]
     end
 
     subgraph Functions/algebra
-        N58[lup]
-        N59[qr]
-        N60[schur]
-        N61[slu]
-        N62[derivative]
-        N63[leafCount]
-        N64[lyap]
-        N65[polynomialRoot]
-        N66[rationalize]
-        N67[resolve]
-        N68[...35 more]
+        N68[lup]
+        N69[qr]
+        N70[schur]
+        N71[slu]
+        N72[derivative]
+        N73[leafCount]
+        N74[lyap]
+        N75[polynomialRoot]
+        N76[rationalize]
+        N77[resolve]
+        N78[...35 more]
     end
 
     subgraph Functions/arithmetic
-        N69[abs]
-        N70[addScalar]
-        N71[cbrt]
-        N72[ceil]
-        N73[cube]
-        N74[divide]
-        N75[divideScalar]
-        N76[dotDivide]
-        N77[dotMultiply]
-        N78[dotPow]
-        N79[...28 more]
+        N79[abs]
+        N80[addScalar]
+        N81[cbrt]
+        N82[ceil]
+        N83[cube]
+        N84[divide]
+        N85[divideScalar]
+        N86[dotDivide]
+        N87[dotMultiply]
+        N88[dotPow]
+        N89[...28 more]
     end
 
     subgraph Functions/bitwise
-        N80[bitAnd]
-        N81[bitNot]
-        N82[bitOr]
-        N83[bitXor]
-        N84[leftShift]
-        N85[rightArithShift]
-        N86[rightLogShift]
-        N87[useMatrixForArrayScalar]
+        N90[bitAnd]
+        N91[bitNot]
+        N92[bitOr]
+        N93[bitXor]
+        N94[leftShift]
+        N95[rightArithShift]
+        N96[rightLogShift]
+        N97[useMatrixForArrayScalar]
     end
 
     subgraph Functions/combinatorics
-        N88[bellNumbers]
-        N89[catalan]
-        N90[composition]
-        N91[stirlingS2]
+        N98[bellNumbers]
+        N99[catalan]
+        N100[composition]
+        N101[stirlingS2]
     end
 
     subgraph Functions/complex
-        N92[arg]
-        N93[conj]
-        N94[im]
-        N95[re]
+        N102[arg]
+        N103[conj]
+        N104[im]
+        N105[re]
     end
 
     subgraph Functions/core
-        N96[config]
-        N97[typed]
+        N106[config]
+        N107[typed]
     end
 
     subgraph Functions/error
-        N98[ArgumentsError]
-        N99[DimensionError]
-        N100[IndexError]
+        N108[ArgumentsError]
+        N109[DimensionError]
+        N110[IndexError]
+        N111[MathjsError]
     end
 
     subgraph Functions/expression
-        N101[operators]
+        N112[operators]
     end
 
     subgraph Functions/factories
-        N102[evaluate]
-        N103[index]
-        N104[matrix-bridge]
-        N105[scope]
+        N113[evaluate]
+        N114[index]
+        N115[matrix-bridge]
+        N116[scope]
     end
 
     subgraph Functions/geometry
-        N106[distance]
-        N107[intersect]
+        N117[distance]
+        N118[intersect]
     end
 
     subgraph Functions
-        N108[index]
-        N109[types]
+        N119[index]
+        N120[types]
     end
 
     subgraph Functions/logical
-        N110[and]
-        N111[not]
-        N112[nullish]
-        N113[or]
-        N114[xor]
+        N121[and]
+        N122[not]
+        N123[nullish]
+        N124[or]
+        N125[xor]
     end
 
     subgraph Functions/matrix
-        N115[column]
-        N116[concat]
-        N117[count]
-        N118[cross]
-        N119[ctranspose]
-        N120[det]
-        N121[diag]
-        N122[diff]
-        N123[dot]
-        N124[complexEigs]
-        N125[...34 more]
+        N126[column]
+        N127[concat]
+        N128[count]
+        N129[cross]
+        N130[ctranspose]
+        N131[det]
+        N132[diag]
+        N133[diff]
+        N134[dot]
+        N135[complexEigs]
+        N136[...35 more]
     end
 
     subgraph Functions/numeric
-        N126[solveODE]
+        N137[solveODE]
     end
 
     subgraph Functions/plain
-        N127[arithmetic]
-        N128[bitwise]
-        N129[combinations]
-        N130[constants]
-        N131[index]
-        N132[logical]
-        N133[probability]
-        N134[relational]
-        N135[trigonometry]
-        N136[utils]
+        N138[arithmetic]
+        N139[bitwise]
+        N140[combinations]
+        N141[constants]
+        N142[index]
+        N143[logical]
+        N144[probability]
+        N145[relational]
+        N146[trigonometry]
+        N147[utils]
     end
 
     subgraph Functions/probability
-        N137[bernoulli]
-        N138[combinations]
-        N139[combinationsWithRep]
-        N140[factorial]
-        N141[gamma]
-        N142[kldivergence]
-        N143[lgamma]
-        N144[multinomial]
-        N145[permutations]
-        N146[pickRandom]
-        N147[...4 more]
+        N148[bernoulli]
+        N149[combinations]
+        N150[combinationsWithRep]
+        N151[factorial]
+        N152[gamma]
+        N153[kldivergence]
+        N154[lgamma]
+        N155[multinomial]
+        N156[permutations]
+        N157[pickRandom]
+        N158[...4 more]
     end
 
     subgraph Functions/relational
-        N148[compare]
-        N149[compareNatural]
-        N150[compareText]
-        N151[compareUnits]
-        N152[deepEqual]
-        N153[equal]
-        N154[equalScalar]
-        N155[equalText]
-        N156[larger]
-        N157[largerEq]
-        N158[...3 more]
+        N159[compare]
+        N160[compareNatural]
+        N161[compareText]
+        N162[compareUnits]
+        N163[deepEqual]
+        N164[equal]
+        N165[equalScalar]
+        N166[equalText]
+        N167[larger]
+        N168[largerEq]
+        N169[...3 more]
     end
 
     subgraph Functions/set
-        N159[setCartesian]
-        N160[setDifference]
-        N161[setDistinct]
-        N162[setIntersect]
-        N163[setIsSubset]
-        N164[setMultiplicity]
-        N165[setPowerset]
-        N166[setSize]
-        N167[setSymDifference]
-        N168[setUnion]
+        N170[setCartesian]
+        N171[setDifference]
+        N172[setDistinct]
+        N173[setIntersect]
+        N174[setIsSubset]
+        N175[setMultiplicity]
+        N176[setPowerset]
+        N177[setSize]
+        N178[setSymDifference]
+        N179[setUnion]
     end
 
     subgraph Functions/signal
-        N169[freqz]
-        N170[zpk2tf]
+        N180[freqz]
+        N181[zpk2tf]
     end
 
     subgraph Functions/special
-        N171[erf]
-        N172[zeta]
+        N182[erf]
+        N183[zeta]
     end
 
     subgraph Functions/statistics
-        N173[corr]
-        N174[cumsum]
-        N175[mad]
-        N176[max]
-        N177[mean]
-        N178[median]
-        N179[min]
-        N180[mode]
-        N181[prod]
-        N182[quantileSeq]
-        N183[...4 more]
+        N184[corr]
+        N185[cumsum]
+        N186[mad]
+        N187[max]
+        N188[mean]
+        N189[median]
+        N190[min]
+        N191[mode]
+        N192[prod]
+        N193[quantileSeq]
+        N194[...4 more]
     end
 
     subgraph Functions/string
-        N184[bin]
-        N185[format]
-        N186[hex]
-        N187[oct]
-        N188[print]
+        N195[bin]
+        N196[format]
+        N197[hex]
+        N198[oct]
+        N199[print]
     end
 
     subgraph Functions/trigonometry
-        N189[acos]
-        N190[acosh]
-        N191[acot]
-        N192[acoth]
-        N193[acsc]
-        N194[acsch]
-        N195[asec]
-        N196[asech]
-        N197[asin]
-        N198[asinh]
-        N199[...16 more]
+        N200[acos]
+        N201[acosh]
+        N202[acot]
+        N203[acoth]
+        N204[acsc]
+        N205[acsch]
+        N206[asec]
+        N207[asech]
+        N208[asin]
+        N209[asinh]
+        N210[...16 more]
     end
 
     subgraph Functions/type
-        N200[BigNumber]
-        N201[Chain]
-        N202[chain]
-        N203[Complex]
-        N204[FibonacciHeap]
-        N205[ImmutableDenseMatrix]
-        N206[MatrixIndex]
-        N207[Spa]
-        N208[index]
-        N209[types]
-        N210[...22 more]
+        N211[BigNumber]
+        N212[Chain]
+        N213[chain]
+        N214[Complex]
+        N215[FibonacciHeap]
+        N216[index]
+        N217[ImmutableDenseMatrix]
+        N218[MatrixIndex]
+        N219[Spa]
+        N220[types]
+        N221[...22 more]
     end
 
     subgraph Functions/typed
-        N211[algebra]
-        N212[arithmetic]
-        N213[bitwise]
-        N214[cas]
-        N215[combinatorics]
-        N216[complex]
-        N217[dist-objects]
-        N218[distributions]
-        N219[geometry]
-        N220[gpu]
-        N221[...15 more]
+        N222[algebra]
+        N223[arithmetic]
+        N224[bitwise]
+        N225[cas]
+        N226[combinatorics]
+        N227[complex]
+        N228[dist-objects]
+        N229[distributions]
+        N230[geometry]
+        N231[gpu]
+        N232[...18 more]
     end
 
     subgraph Functions/unit
-        N222[to]
-        N223[toBest]
+        N233[to]
+        N234[toBest]
     end
 
     subgraph Functions/utils
-        N224[array]
-        N225[bigint]
-        N226[bitwise]
-        N227[constants]
-        N228[formatter]
-        N229[nearlyEqual]
-        N230[clone]
-        N231[collection]
-        N232[complex]
-        N233[customs]
-        N234[...27 more]
+        N235[array]
+        N236[bigint]
+        N237[bitwise]
+        N238[constants]
+        N239[formatter]
+        N240[nearlyEqual]
+        N241[clone]
+        N242[collection]
+        N243[complex]
+        N244[customs]
+        N245[...28 more]
     end
 
     subgraph Functions/wasm
-        N235[WasmLoader]
-        N236[wasm-bridge]
-        N237[integrity]
-        N238[wasm-bridge]
-        N239[wasm-bridge]
-        N240[wasm-bridge]
-    end
-
-    subgraph Expression
-        N241[Help]
-        N242[Parser]
-        N243[index]
-        N244[keywords]
-        N245[operators]
-        N246[parse]
-        N247[types]
+        N246[wasm-bridge]
+        N247[integrity]
+        N248[wasm-bridge]
+        N249[wasm-bridge]
+        N250[wasm-bridge]
+        N251[wasm-bridge]
+        N252[wasm-bridge]
+        N253[WasmLoader]
     end
 
     subgraph Expression/compiler
-        N248[compile]
-        N249[index]
+        N254[compile]
+        N255[index]
     end
 
     subgraph Expression/error
-        N250[DimensionError]
-        N251[IndexError]
+        N256[DimensionError]
+        N257[IndexError]
+        N258[MathjsError]
     end
 
     subgraph Expression/evaluator
-        N252[evaluate]
-        N253[index]
+        N259[evaluate]
+        N260[index]
+    end
+
+    subgraph Expression/function
+        N261[parser]
+    end
+
+    subgraph Expression
+        N262[Help]
+        N263[index]
+        N264[keywords]
+        N265[operators]
+        N266[parse]
+        N267[Parser]
+        N268[types]
     end
 
     subgraph Expression/node
-        N254[AccessorNode]
-        N255[ArrayNode]
-        N256[AssignmentNode]
-        N257[BlockNode]
-        N258[ConditionalNode]
-        N259[ConstantNode]
-        N260[FunctionAssignmentNode]
-        N261[FunctionNode]
-        N262[IndexNode]
-        N263[Node]
-        N264[...8 more]
+        N269[AccessorNode]
+        N270[ArrayNode]
+        N271[AssignmentNode]
+        N272[BlockNode]
+        N273[ConditionalNode]
+        N274[ConstantNode]
+        N275[FunctionAssignmentNode]
+        N276[FunctionNode]
+        N277[IndexNode]
+        N278[Node]
+        N279[...8 more]
     end
 
     subgraph Expression/transform
-        N265[errorTransform]
+        N280[errorTransform]
     end
 
     subgraph Expression/utils
-        N266[array]
-        N267[formatter]
-        N268[collection]
-        N269[customs]
-        N270[factory]
-        N271[is]
-        N272[latex]
-        N273[map]
-        N274[number]
-        N275[object]
-        N276[...3 more]
+        N281[array]
+        N282[formatter]
+        N283[collection]
+        N284[customs]
+        N285[factory]
+        N286[is]
+        N287[latex]
+        N288[map]
+        N289[number]
+        N290[object]
+        N291[...3 more]
+    end
+
+    subgraph Parser
+        N292[index]
+    end
+
+    subgraph Units
+        N293[index]
+    end
+
+    subgraph Numbers
+        N294[index]
+    end
+
+    subgraph Ast
+        N295[index]
+    end
+
+    subgraph Evaluator
+        N296[index]
+    end
+
+    subgraph Linalg
+        N297[index]
+    end
+
+    subgraph Arithmetic
+        N298[index]
+    end
+
+    subgraph Trigonometry
+        N299[index]
+    end
+
+    subgraph Statistics
+        N300[index]
+    end
+
+    subgraph Signal
+        N301[index]
     end
 
     subgraph Parallel
-        N277[ComputePool]
-        N278[index]
+        N302[ComputePool]
+        N303[index]
     end
 
     subgraph Parallel/operations
-        N279[elementwise]
-        N280[index]
-        N281[map]
-        N282[matmul]
-        N283[reduce]
+        N304[elementwise]
+        N305[index]
+        N306[map]
+        N307[matmul]
+        N308[reduce]
     end
 
     subgraph Parallel/ops
-        N284[bitwise]
+        N309[bitwise]
     end
 
     subgraph Parallel/strategies
-        N285[chunk]
-        N286[index]
-        N287[threshold]
+        N310[chunk]
+        N311[index]
+        N312[threshold]
     end
 
     subgraph Workbook
-        N288[executor]
-        N289[graph]
-        N290[index]
-        N291[parser]
-        N292[types]
+        N313[executor]
+        N314[graph]
+        N315[index]
+        N316[parser]
+        N317[types]
     end
 
     subgraph Assembly/algebra
-        N293[decomposition]
+        N318[decomposition]
     end
 
     subgraph Assembly
-        N294[index]
-        N295[poly]
-        N296[tridiag]
+        N319[index]
+        N320[poly]
+        N321[signal]
+        N322[sort]
+        N323[special]
+        N324[tridiag]
     end
 
     subgraph Assembly/ops
-        N297[approx]
-        N298[array]
-        N299[bitwise]
-        N300[complex-array]
-        N301[complex-ops]
-        N302[curvefit]
-        N303[linalg]
-        N304[matrix]
-        N305[number-theory]
-        N306[optimization]
-        N307[...6 more]
+        N325[approx]
+        N326[array]
+        N327[bitwise]
+        N328[complex-array]
+        N329[complex-ops]
+        N330[curvefit]
+        N331[linalg]
+        N332[matrix]
+        N333[number-theory]
+        N334[optimization]
+        N335[...6 more]
     end
 
     subgraph Assembly/types
-        N308[complex]
+        N336[complex]
     end
 
     subgraph Compat
-        N309[index]
-        N310[shims]
+        N337[index]
+        N338[shims]
     end
 
     N2 --> N1
@@ -8978,6 +9120,9 @@ graph TD
     N5 --> N10
     N5 --> N11
     N5 --> N9
+    N5 --> N15
+    N5 --> N13
+    N5 --> N14
     N5 --> N6
     N5 --> N4
     N6 --> N7
@@ -8991,87 +9136,83 @@ graph TD
     N9 --> N12
     N10 --> N12
     N11 --> N12
-    N13 --> N36
-    N14 --> N36
-    N14 --> N13
-    N14 --> N17
-    N14 --> N24
-    N16 --> N13
-    N16 --> N36
-    N16 --> N17
-    N16 --> N15
-    N17 --> N36
-    N17 --> N13
-    N18 --> N36
-    N18 --> N13
-    N19 --> N13
-    N19 --> N36
-    N19 --> N17
-    N19 --> N20
-    N21 --> N13
-    N21 --> N36
-    N21 --> N17
-    N24 --> N13
-    N25 --> N39
-    N25 --> N31
-    N25 --> N27
-    N25 --> N26
-    N28 --> N36
-    N29 --> N30
-    N29 --> N22
-    N31 --> N30
-    N31 --> N35
-    N31 --> N29
-    N31 --> N34
-    N31 --> N33
-    N31 --> N32
-    N31 --> N28
-    N32 --> N36
-    N33 --> N36
-    N34 --> N35
-    N34 --> N20
-    N26 --> N36
-    N27 --> N36
-    N36 --> N37
-    N38 --> N37
-    N38 --> N36
-    N39 --> N37
-    N39 --> N36
-    N39 --> N38
-    N40 --> N43
-    N41 --> N40
-    N41 --> N43
-    N42 --> N40
-    N42 --> N43
-    N42 --> N52
-    N42 --> N50
-    N42 --> N41
-    N42 --> N49
+    N15 --> N13
+    N15 --> N14
+    N16 --> N44
+    N17 --> N44
+    N17 --> N16
+    N17 --> N27
+    N18 --> N21
+    N18 --> N23
+    N18 --> N19
+    N19 --> N21
+    N21 --> N20
+    N22 --> N20
+    N22 --> N21
+    N22 --> N19
+    N22 --> N23
+    N22 --> N18
+    N22 --> N24
+    N23 --> N21
+    N24 --> N21
+    N24 --> N19
+    N25 --> N22
+    N27 --> N16
+    N28 --> N45
+    N28 --> N35
+    N28 --> N30
+    N28 --> N29
+    N31 --> N44
+    N32 --> N33
+    N34 --> N44
+    N35 --> N33
+    N35 --> N32
+    N35 --> N38
+    N35 --> N39
+    N35 --> N37
+    N35 --> N31
+    N35 --> N34
+    N35 --> N36
+    N35 --> N40
+    N36 --> N44
+    N36 --> N33
+    N36 --> N40
+    N37 --> N44
+    N38 --> N44
+    N39 --> N44
+    N40 --> N44
+    N29 --> N44
+    N30 --> N44
+    N42 --> N44
+    N42 --> N46
+    N43 --> N44
+    N44 --> N46
+    N44 --> N42
+    N44 --> N43
 ```
 
 ---
 
 <a id="summary-statistics"></a>
-
 ## Summary Statistics
 
-| Category                | Count  |
-| ----------------------- | ------ |
-| Total TypeScript Files  | 513    |
-| Total Modules           | 58     |
-| Total Lines of Code     | 132264 |
-| Total Exports           | 2971   |
-| Total Re-exports        | 756    |
-| Total Classes           | 46     |
-| Total Interfaces        | 278    |
-| Total Functions         | 1128   |
-| Total Type Guards       | 127    |
-| Total Enums             | 0      |
-| Type-only Imports       | 353    |
-| Runtime Circular Deps   | 0      |
-| Type-only Circular Deps | 0      |
+| Category | Count |
+|----------|-------|
+| Total TypeScript Files | 554 |
+| Total Modules | 69 |
+| Total Lines of Code | 147773 |
+| Total Exports | 3461 |
+| Total Re-exports | 1057 |
+| Total Classes | 51 |
+| Total Interfaces | 315 |
+| Total Functions | 1279 |
+| Total Type Guards | 129 |
+| Total Enums | 0 |
+| Type-only Imports | 357 |
+| Runtime Circular Deps | 0 |
+| Type-only Circular Deps | 2 |
 
 ---
 
-_Last Updated_: 2026-05-24
-_Version_: 0.1.0
+*Last Updated*: 2026-06-15
+*Version*: 0.1.0
