@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { WorkbookExecutor, createExecutor } from '../src/executor.js';
 import type { Workbook, WorkbookEvent } from '../src/types.js';
 
