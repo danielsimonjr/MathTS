@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 335
+- **Potentially unused exports**: 330
 
 ## Potentially Unused Files
 
@@ -60,7 +60,6 @@ These exports are not imported by any other file in the codebase:
 ### `core/src/typed/mathts-typed.ts`
 
 - `TypeDef` (interface)
-- `ConversionDef` (interface)
 - `MathTSTypeDef` (interface)
 
 ### `core/src/types/bignumber.ts`
@@ -86,10 +85,6 @@ These exports are not imported by any other file in the codebase:
 - `AdaptiveTuningConfig` (interface)
 - `ProfilingConfig` (interface)
 - `BackendPreference` (type)
-
-### `matrix/src/operations/sqrtm.ts`
-
-- `matrixSqrtNewtonInternal` (function)
 
 ### `matrix/src/types/dense/arithmetic.ts`
 
@@ -540,15 +535,9 @@ These exports are not imported by any other file in the codebase:
 
 ### `expression/src/utils/array.ts`
 
-- `validateIndexSourceSize` (function)
-- `isEmptyIndex` (function)
 - `IdentifiedValue` (interface)
 - `NestedArray` (type)
 - `ArrayOrScalar` (type)
-
-### `expression/src/utils/collection.ts`
-
-- `scatter` (function)
 
 ### `expression/src/utils/factory.ts`
 

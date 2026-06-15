@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "generatedAt": "2026-06-15T01:41:19.768Z",
+    "generatedAt": "2026-06-15T04:42:36.493Z",
     "totalSourceFiles": 554,
-    "totalTestFiles": 253,
+    "totalTestFiles": 304,
     "testedCount": 199,
     "untestedCount": 355,
     "coveragePercent": "35.9",
@@ -610,6 +610,7 @@
       "core/tests/version.test.ts"
     ],
     "core/src/typed/mathts-typed.ts": [
+      "core/tests/typed/mathts-typed-coverage.test.ts",
       "core/tests/typed/mathts-typed-extended.test.ts",
       "core/tests/typed/mathts-typed.test.ts",
       "core/tests/version.test.ts"
@@ -620,24 +621,30 @@
     ],
     "core/src/types/bignumber.ts": [
       "core/tests/BigNumber-formatter-api.test.ts",
+      "core/tests/typed/mathts-typed-coverage.test.ts",
       "core/tests/typed/mathts-typed-extended.test.ts",
       "core/tests/typed/mathts-typed.test.ts",
       "core/tests/typed/type-bridge.test.ts",
+      "core/tests/types/bignumber-coverage.test.ts",
       "core/tests/types/bignumber-math.test.ts",
       "core/tests/types/bignumber.test.ts",
       "core/tests/version.test.ts"
     ],
     "core/src/types/complex.ts": [
+      "core/tests/typed/mathts-typed-coverage.test.ts",
       "core/tests/typed/mathts-typed-extended.test.ts",
       "core/tests/typed/mathts-typed.test.ts",
       "core/tests/typed/type-bridge.test.ts",
+      "core/tests/types/complex-coverage.test.ts",
       "core/tests/types/complex.test.ts",
       "core/tests/version.test.ts"
     ],
     "core/src/types/fraction.ts": [
+      "core/tests/typed/mathts-typed-coverage.test.ts",
       "core/tests/typed/mathts-typed-extended.test.ts",
       "core/tests/typed/mathts-typed.test.ts",
       "core/tests/typed/type-bridge.test.ts",
+      "core/tests/types/fraction-coverage.test.ts",
       "core/tests/types/fraction.test.ts",
       "core/tests/version.test.ts"
     ],
@@ -655,12 +662,15 @@
       "core/tests/version.test.ts"
     ],
     "matrix/src/backends/Backend.ts": [
+      "matrix/tests/backends/Backend.test.ts",
+      "matrix/tests/backends/BackendManager.test.ts",
       "matrix/tests/JSBackend.test.ts",
       "matrix/tests/typed-operations.test.ts",
       "matrix/tests/wasm/loading.test.ts",
       "matrix/tests/wasm/rust-wasm.test.ts"
     ],
     "matrix/src/backends/BackendManager.ts": [
+      "matrix/tests/backends/BackendManager.test.ts",
       "matrix/tests/typed-operations.test.ts",
       "matrix/tests/wasm/loading.test.ts",
       "matrix/tests/wasm/rust-wasm.test.ts"
@@ -717,6 +727,7 @@
       "matrix/tests/wasm/loading.test.ts"
     ],
     "matrix/src/backends/JSBackend.ts": [
+      "matrix/tests/backends/WASMBackend-as.test.ts",
       "matrix/tests/JSBackend.test.ts",
       "matrix/tests/typed-operations.test.ts",
       "matrix/tests/wasm/loading.test.ts",
@@ -732,6 +743,7 @@
       "matrix/tests/wasm/rust-wasm.test.ts"
     ],
     "matrix/src/backends/RustWasmLoader.ts": [
+      "matrix/tests/operations/svd-wasm-mock.test.ts",
       "matrix/tests/svd-wasm.test.ts",
       "matrix/tests/typed-operations.test.ts",
       "matrix/tests/wasm/loading.test.ts",
@@ -743,6 +755,7 @@
     ],
     "matrix/src/backends/wasm/fft-wasm.ts": [
       "matrix/tests/typed-operations.test.ts",
+      "matrix/tests/wasm/fft-wasm-mock.test.ts",
       "matrix/tests/wasm/fft-wasm.test.ts",
       "matrix/tests/wasm/loading.test.ts"
     ],
@@ -751,6 +764,7 @@
       "matrix/tests/wasm/loading.test.ts"
     ],
     "matrix/src/backends/WASMBackend.ts": [
+      "matrix/tests/backends/WASMBackend-as.test.ts",
       "matrix/tests/typed-operations.test.ts",
       "matrix/tests/wasm/accuracy.test.ts",
       "matrix/tests/wasm/decompositions-as.test.ts",
@@ -758,11 +772,16 @@
       "matrix/tests/wasm/operations.test.ts"
     ],
     "matrix/src/backends/WasmLoader.ts": [
+      "matrix/tests/backends/WasmLoader-as.test.ts",
+      "matrix/tests/backends/WasmLoader-browser.test.ts",
       "matrix/tests/MatrixWasmBridge.test.ts",
+      "matrix/tests/operations/eig-wasm-mock.test.ts",
+      "matrix/tests/wasm/fft-wasm-mock.test.ts",
       "matrix/tests/wasm/fft-wasm.test.ts",
       "matrix/tests/WasmLoader.test.ts"
     ],
     "matrix/src/config.ts": [
+      "matrix/tests/backends/BackendManager.test.ts",
       "matrix/tests/config.test.ts"
     ],
     "matrix/src/index.ts": [
@@ -774,10 +793,12 @@
     ],
     "matrix/src/operations/eig-wasm.ts": [
       "matrix/tests/decomposition/eig-wasm.test.ts",
+      "matrix/tests/operations/eig-wasm-mock.test.ts",
       "matrix/tests/typed-operations.test.ts"
     ],
     "matrix/src/operations/eig.ts": [
       "matrix/tests/decomposition/eig.test.ts",
+      "matrix/tests/operations/eig-wasm-mock.test.ts",
       "matrix/tests/typed-operations.test.ts"
     ],
     "matrix/src/operations/expm.ts": [
@@ -801,6 +822,7 @@
       "matrix/tests/typed-operations.test.ts"
     ],
     "matrix/src/operations/qr.ts": [
+      "matrix/tests/operations/qr.test.ts",
       "matrix/tests/typed-operations.test.ts"
     ],
     "matrix/src/operations/schur.ts": [
@@ -817,6 +839,7 @@
     ],
     "matrix/src/operations/svd.ts": [
       "matrix/tests/decomposition/svd.test.ts",
+      "matrix/tests/operations/svd-wasm-mock.test.ts",
       "matrix/tests/svd-wasm.test.ts",
       "matrix/tests/typed-operations.test.ts"
     ],
@@ -829,6 +852,9 @@
     "matrix/src/types/dense/arithmetic.ts": [],
     "matrix/src/types/dense/reduction.ts": [],
     "matrix/src/types/DenseMatrix.ts": [
+      "matrix/tests/backends/Backend.test.ts",
+      "matrix/tests/backends/BackendManager.test.ts",
+      "matrix/tests/backends/WASMBackend-as.test.ts",
       "matrix/tests/DenseMatrix.test.ts",
       "matrix/tests/JSBackend.test.ts",
       "matrix/tests/operations/cholesky.test.ts",
@@ -836,6 +862,7 @@
       "matrix/tests/operations/logm.test.ts",
       "matrix/tests/operations/lu.test.ts",
       "matrix/tests/operations/pinv.test.ts",
+      "matrix/tests/operations/qr.test.ts",
       "matrix/tests/operations/schur.test.ts",
       "matrix/tests/operations/sqrtm.test.ts",
       "matrix/tests/sparse/operations.test.ts",
@@ -1116,6 +1143,7 @@
     "functions/src/expression/operators.ts": [],
     "functions/src/factories/evaluate.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-cas.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/evaluate.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
@@ -1123,6 +1151,7 @@
       "functions/tests/parallel-signal.test.ts",
       "functions/tests/typed-arithmetic.test.ts",
       "functions/tests/typed-cas-batch-workers.test.ts",
+      "expression/tests/Parser-extra.test.ts",
       "expression/tests/Parser.test.ts"
     ],
     "functions/src/factories/index.ts": [
@@ -1349,6 +1378,7 @@
     "functions/src/typed/arithmetic.ts": [
       "functions/tests/arithmetic-extended.test.ts",
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-arithmetic.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/parallel-arithmetic-unary.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
@@ -1359,6 +1389,7 @@
     ],
     "functions/src/typed/bitwise.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-bitwise.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/factories-leaf.test.ts",
       "functions/tests/factories-tier4.test.ts",
@@ -1372,6 +1403,7 @@
     "functions/src/typed/cas.ts": [
       "functions/tests/cas.test.ts",
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-cas.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
@@ -1401,6 +1433,7 @@
     ],
     "functions/src/typed/dist-objects.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-dist-objects.test.ts",
       "functions/tests/dist-objects.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
@@ -1420,6 +1453,7 @@
     ],
     "functions/src/typed/geometry.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-geometry.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/geometry-extended.test.ts",
       "functions/tests/geometry.test.ts",
@@ -1472,6 +1506,7 @@
     ],
     "functions/src/typed/integration.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-integration.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/integration.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
@@ -1514,6 +1549,7 @@
     ],
     "functions/src/typed/numeric.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-numeric.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/numeric.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
@@ -1537,6 +1573,7 @@
     ],
     "functions/src/typed/relational.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-relational.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/factories-leaf.test.ts",
       "functions/tests/factories-tier4.test.ts",
@@ -1558,6 +1595,7 @@
     ],
     "functions/src/typed/signal.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-signal.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
@@ -1569,6 +1607,7 @@
     ],
     "functions/src/typed/special.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-special.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
@@ -1579,6 +1618,7 @@
     ],
     "functions/src/typed/statistics.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-statistics.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
@@ -1592,6 +1632,7 @@
     ],
     "functions/src/typed/string.ts": [
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-string.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/factories-leaf.test.ts",
       "functions/tests/factories-tier2.test.ts",
@@ -1604,6 +1645,7 @@
     "functions/src/typed/trigonometry.ts": [
       "functions/tests/arithmetic-extended.test.ts",
       "functions/tests/conversions-parser.test.ts",
+      "functions/tests/cov-trigonometry.test.ts",
       "functions/tests/docs-sync.test.ts",
       "functions/tests/parallel-arithmetic.test.ts",
       "functions/tests/parallel-dispatch.test.ts",
@@ -1692,12 +1734,14 @@
       "functions/tests/typed-special-wasm.test.ts"
     ],
     "functions/src/wasm/WasmLoader.ts": [
+      "functions/tests/cov-signal.test.ts",
       "functions/tests/typed-algebra-wasm.test.ts",
       "functions/tests/typed-bitwise-wasm.test.ts",
       "functions/tests/typed-cas-fit-wasm.test.ts",
       "functions/tests/typed-interpolation-wasm.test.ts"
     ],
     "expression/src/compiler/compile.ts": [
+      "expression/tests/compile-nodes.test.ts",
       "expression/tests/compile.test.ts",
       "expression/tests/compiler-index.test.ts",
       "expression/tests/package-index.test.ts",
@@ -1717,6 +1761,7 @@
     "expression/src/error/MathjsError.ts": [],
     "expression/src/evaluator/evaluate.ts": [
       "expression/tests/evaluate.test.ts",
+      "expression/tests/evaluator-extra.test.ts",
       "expression/tests/evaluator-index.test.ts",
       "expression/tests/package-index.test.ts",
       "expression/tests/security/sandbox.test.ts"
@@ -1726,9 +1771,11 @@
       "expression/tests/package-index.test.ts"
     ],
     "expression/src/function/parser.ts": [
+      "expression/tests/function-factories.test.ts",
       "expression/tests/package-index.test.ts"
     ],
     "expression/src/Help.ts": [
+      "expression/tests/Help-config.test.ts",
       "expression/tests/Help.test.ts",
       "expression/tests/package-index.test.ts"
     ],
@@ -1741,27 +1788,36 @@
     ],
     "expression/src/node/AccessorNode.ts": [
       "expression/tests/AccessorNode.test.ts",
+      "expression/tests/FunctionNode-render.test.ts",
+      "expression/tests/node-group-render.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/ArrayNode.ts": [
       "expression/tests/ArrayNode.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/AssignmentNode.ts": [
       "expression/tests/AssignmentNode.test.ts",
+      "expression/tests/node-group-render.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/BlockNode.ts": [
       "expression/tests/BlockNode.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/ConditionalNode.ts": [
       "expression/tests/ConditionalNode.test.ts",
+      "expression/tests/node-group-render.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/ConstantNode.ts": [
@@ -1772,14 +1828,18 @@
       "expression/tests/ConditionalNode.test.ts",
       "expression/tests/ConstantNode.test.ts",
       "expression/tests/FunctionAssignmentNode.test.ts",
+      "expression/tests/FunctionNode-render.test.ts",
       "expression/tests/FunctionNode.test.ts",
       "expression/tests/IndexNode.test.ts",
       "expression/tests/node-extension.test.ts",
+      "expression/tests/node-group-render.test.ts",
       "expression/tests/Node.test.ts",
       "expression/tests/ObjectNode.test.ts",
+      "expression/tests/OperatorNode-latex.test.ts",
       "expression/tests/OperatorNode.test.ts",
       "expression/tests/package-index.test.ts",
       "expression/tests/ParenthesisNode.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts",
       "expression/tests/RangeNode.test.ts",
       "expression/tests/RelationalNode.test.ts",
@@ -1787,19 +1847,26 @@
     ],
     "expression/src/node/FunctionAssignmentNode.ts": [
       "expression/tests/FunctionAssignmentNode.test.ts",
+      "expression/tests/FunctionNode-render.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/FunctionNode.ts": [
+      "expression/tests/FunctionNode-render.test.ts",
       "expression/tests/FunctionNode.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/IndexNode.ts": [
       "expression/tests/AccessorNode.test.ts",
       "expression/tests/AssignmentNode.test.ts",
+      "expression/tests/FunctionNode-render.test.ts",
       "expression/tests/IndexNode.test.ts",
+      "expression/tests/node-group-render.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/Node.ts": [
@@ -1810,14 +1877,18 @@
       "expression/tests/ConditionalNode.test.ts",
       "expression/tests/ConstantNode.test.ts",
       "expression/tests/FunctionAssignmentNode.test.ts",
+      "expression/tests/FunctionNode-render.test.ts",
       "expression/tests/FunctionNode.test.ts",
       "expression/tests/IndexNode.test.ts",
       "expression/tests/node-extension.test.ts",
+      "expression/tests/node-group-render.test.ts",
       "expression/tests/Node.test.ts",
       "expression/tests/ObjectNode.test.ts",
+      "expression/tests/OperatorNode-latex.test.ts",
       "expression/tests/OperatorNode.test.ts",
       "expression/tests/package-index.test.ts",
       "expression/tests/ParenthesisNode.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts",
       "expression/tests/RangeNode.test.ts",
       "expression/tests/RelationalNode.test.ts",
@@ -1826,29 +1897,37 @@
     "expression/src/node/ObjectNode.ts": [
       "expression/tests/ObjectNode.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/OperatorNode.ts": [
+      "expression/tests/node-group-render.test.ts",
       "expression/tests/Node.test.ts",
+      "expression/tests/OperatorNode-latex.test.ts",
       "expression/tests/OperatorNode.test.ts",
       "expression/tests/package-index.test.ts",
       "expression/tests/ParenthesisNode.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/ParenthesisNode.ts": [
+      "expression/tests/FunctionNode-render.test.ts",
       "expression/tests/Node.test.ts",
       "expression/tests/OperatorNode.test.ts",
       "expression/tests/package-index.test.ts",
       "expression/tests/ParenthesisNode.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/node/RangeNode.ts": [
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts",
       "expression/tests/RangeNode.test.ts"
     ],
     "expression/src/node/RelationalNode.ts": [
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts",
       "expression/tests/RelationalNode.test.ts"
     ],
@@ -1856,12 +1935,16 @@
       "expression/tests/AccessorNode.test.ts",
       "expression/tests/AssignmentNode.test.ts",
       "expression/tests/FunctionAssignmentNode.test.ts",
+      "expression/tests/FunctionNode-render.test.ts",
       "expression/tests/FunctionNode.test.ts",
       "expression/tests/IndexNode.test.ts",
+      "expression/tests/node-group-render.test.ts",
       "expression/tests/Node.test.ts",
       "expression/tests/ObjectNode.test.ts",
+      "expression/tests/OperatorNode-latex.test.ts",
       "expression/tests/OperatorNode.test.ts",
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts",
       "expression/tests/RangeNode.test.ts",
       "expression/tests/SymbolNode.test.ts"
@@ -1878,10 +1961,12 @@
     ],
     "expression/src/parse.ts": [
       "expression/tests/package-index.test.ts",
+      "expression/tests/parse-syntax.test.ts",
       "expression/tests/parse.test.ts"
     ],
     "expression/src/Parser.ts": [
       "expression/tests/package-index.test.ts",
+      "expression/tests/Parser-extra.test.ts",
       "expression/tests/Parser.test.ts"
     ],
     "expression/src/transform/utils/errorTransform.ts": [
@@ -1892,19 +1977,23 @@
       "expression/tests/types.test.ts"
     ],
     "expression/src/utils/array.ts": [
+      "expression/tests/utils-array-extra.test.ts",
       "expression/tests/utils-array.test.ts"
     ],
     "expression/src/utils/bignumber/formatter.ts": [
+      "expression/tests/utils-bignumber-formatter-extra.test.ts",
       "expression/tests/utils-bignumber-formatter.test.ts"
     ],
     "expression/src/utils/collection.ts": [
+      "expression/tests/utils-collection-extra.test.ts",
       "expression/tests/utils-collection.test.ts"
     ],
     "expression/src/utils/customs.ts": [
       "expression/tests/utils-customs.test.ts"
     ],
     "expression/src/utils/factory.ts": [
-      "expression/tests/utils-factory.test.ts"
+      "expression/tests/utils-factory.test.ts",
+      "expression/tests/utils-string-object-factory-extra.test.ts"
     ],
     "expression/src/utils/is.ts": [
       "expression/tests/node-extension.test.ts",
@@ -1918,15 +2007,18 @@
       "expression/tests/utils-scope.test.ts"
     ],
     "expression/src/utils/number.ts": [
+      "expression/tests/utils-number-extra.test.ts",
       "expression/tests/utils-number.test.ts"
     ],
     "expression/src/utils/object.ts": [
-      "expression/tests/utils-object.test.ts"
+      "expression/tests/utils-object.test.ts",
+      "expression/tests/utils-string-object-factory-extra.test.ts"
     ],
     "expression/src/utils/scope.ts": [
       "expression/tests/utils-scope.test.ts"
     ],
     "expression/src/utils/string.ts": [
+      "expression/tests/utils-string-object-factory-extra.test.ts",
       "expression/tests/utils-string.test.ts"
     ],
     "expression/src/utils/switch.ts": [
@@ -1964,11 +2056,13 @@
     ],
     "parallel/src/ComputePool.ts": [
       "parallel/tests/benchmark.test.ts",
+      "parallel/tests/ComputePool.coverage.test.ts",
       "parallel/tests/ComputePool.test.ts",
       "parallel/tests/operations/elementwise.test.ts",
       "parallel/tests/operations/matmul.test.ts",
       "parallel/tests/operations/threshold.test.ts",
-      "parallel/tests/package-index.test.ts"
+      "parallel/tests/package-index.test.ts",
+      "parallel/tests/strategies/threshold-extended.test.ts"
     ],
     "parallel/src/index.ts": [
       "parallel/tests/package-index.test.ts"
@@ -2018,13 +2112,16 @@
     "parallel/src/strategies/threshold.ts": [
       "parallel/tests/operations/threshold.test.ts",
       "parallel/tests/package-index.test.ts",
+      "parallel/tests/strategies/threshold-extended.test.ts",
       "parallel/tests/strategies-index.test.ts"
     ],
     "workbook/src/executor.ts": [
+      "workbook/tests/executor-modes.test.ts",
       "workbook/tests/executor.test.ts",
       "workbook/tests/package-index.test.ts"
     ],
     "workbook/src/graph.ts": [
+      "workbook/tests/graph-cycles.test.ts",
       "workbook/tests/graph.test.ts",
       "workbook/tests/package-index.test.ts"
     ],
@@ -2033,11 +2130,15 @@
     ],
     "workbook/src/parser.ts": [
       "workbook/tests/package-index.test.ts",
+      "workbook/tests/parser-robustness.test.ts",
       "workbook/tests/parser.test.ts"
     ],
     "workbook/src/types.ts": [
+      "workbook/tests/executor-modes.test.ts",
       "workbook/tests/executor.test.ts",
+      "workbook/tests/graph-cycles.test.ts",
       "workbook/tests/graph.test.ts",
+      "workbook/tests/parser-robustness.test.ts",
       "workbook/tests/parser.test.ts"
     ],
     "assembly/src/algebra/decomposition.ts": [],
@@ -2066,11 +2167,15 @@
     "assembly/src/types/complex.ts": [],
     "compat/src/index.ts": [
       "compat/tests/compat.test.ts",
-      "compat/tests/create.test.ts"
+      "compat/tests/coverage-gaps.test.ts",
+      "compat/tests/create.test.ts",
+      "compat/tests/delegation.test.ts"
     ],
     "compat/src/shims.ts": [
       "compat/tests/compat.test.ts",
+      "compat/tests/coverage-gaps.test.ts",
       "compat/tests/create.test.ts",
+      "compat/tests/delegation.test.ts",
       "compat/tests/shims.test.ts"
     ]
   },
@@ -2104,6 +2209,12 @@
     ],
     "core/tests/factory-sort.test.ts": [],
     "core/tests/shared.test.ts": [],
+    "core/tests/typed/mathts-typed-coverage.test.ts": [
+      "core/src/typed/mathts-typed.ts",
+      "core/src/types/complex.ts",
+      "core/src/types/fraction.ts",
+      "core/src/types/bignumber.ts"
+    ],
     "core/tests/typed/mathts-typed-extended.test.ts": [
       "core/src/typed/mathts-typed.ts",
       "core/src/types/complex.ts",
@@ -2122,14 +2233,23 @@
       "core/src/types/bignumber.ts",
       "core/src/typed/type-bridge.ts"
     ],
+    "core/tests/types/bignumber-coverage.test.ts": [
+      "core/src/types/bignumber.ts"
+    ],
     "core/tests/types/bignumber-math.test.ts": [
       "core/src/types/bignumber.ts"
     ],
     "core/tests/types/bignumber.test.ts": [
       "core/src/types/bignumber.ts"
     ],
+    "core/tests/types/complex-coverage.test.ts": [
+      "core/src/types/complex.ts"
+    ],
     "core/tests/types/complex.test.ts": [
       "core/src/types/complex.ts"
+    ],
+    "core/tests/types/fraction-coverage.test.ts": [
+      "core/src/types/fraction.ts"
     ],
     "core/tests/types/fraction.test.ts": [
       "core/src/types/fraction.ts"
@@ -2155,6 +2275,27 @@
       "core/src/typed/mathts-typed.ts",
       "core/src/typed/type-bridge.ts",
       "core/src/factory/factory.ts"
+    ],
+    "matrix/tests/backends/Backend.test.ts": [
+      "matrix/src/backends/Backend.ts",
+      "matrix/src/types/DenseMatrix.ts"
+    ],
+    "matrix/tests/backends/BackendManager.test.ts": [
+      "matrix/src/backends/BackendManager.ts",
+      "matrix/src/types/DenseMatrix.ts",
+      "matrix/src/config.ts",
+      "matrix/src/backends/Backend.ts"
+    ],
+    "matrix/tests/backends/WASMBackend-as.test.ts": [
+      "matrix/src/types/DenseMatrix.ts",
+      "matrix/src/backends/JSBackend.ts",
+      "matrix/src/backends/WASMBackend.ts"
+    ],
+    "matrix/tests/backends/WasmLoader-as.test.ts": [
+      "matrix/src/backends/WasmLoader.ts"
+    ],
+    "matrix/tests/backends/WasmLoader-browser.test.ts": [
+      "matrix/src/backends/WasmLoader.ts"
     ],
     "matrix/tests/config.test.ts": [
       "matrix/src/config.ts"
@@ -2200,6 +2341,11 @@
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/operations/cholesky.ts"
     ],
+    "matrix/tests/operations/eig-wasm-mock.test.ts": [
+      "matrix/src/backends/WasmLoader.ts",
+      "matrix/src/operations/eig-wasm.ts",
+      "matrix/src/operations/eig.ts"
+    ],
     "matrix/tests/operations/expm.test.ts": [
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/operations/expm.ts"
@@ -2217,6 +2363,10 @@
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/operations/pinv.ts"
     ],
+    "matrix/tests/operations/qr.test.ts": [
+      "matrix/src/operations/qr.ts",
+      "matrix/src/types/DenseMatrix.ts"
+    ],
     "matrix/tests/operations/schur.test.ts": [
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/operations/schur.ts"
@@ -2224,6 +2374,10 @@
     "matrix/tests/operations/sqrtm.test.ts": [
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/operations/sqrtm.ts"
+    ],
+    "matrix/tests/operations/svd-wasm-mock.test.ts": [
+      "matrix/src/backends/RustWasmLoader.ts",
+      "matrix/src/operations/svd.ts"
     ],
     "matrix/tests/security/wasm-integrity.test.ts": [],
     "matrix/tests/sparse/operations.test.ts": [
@@ -2288,6 +2442,10 @@
     "matrix/tests/wasm/decompositions-as.test.ts": [
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/backends/WASMBackend.ts"
+    ],
+    "matrix/tests/wasm/fft-wasm-mock.test.ts": [
+      "matrix/src/backends/WasmLoader.ts",
+      "matrix/src/backends/wasm/fft-wasm.ts"
     ],
     "matrix/tests/wasm/fft-wasm.test.ts": [
       "matrix/src/backends/wasm/fft-wasm.ts",
@@ -2547,6 +2705,47 @@
       "functions/src/typed/relational.ts",
       "functions/src/typed/string.ts",
       "functions/src/typed/probability.ts"
+    ],
+    "functions/tests/cov-arithmetic.test.ts": [
+      "functions/src/typed/arithmetic.ts"
+    ],
+    "functions/tests/cov-bitwise.test.ts": [
+      "functions/src/typed/bitwise.ts"
+    ],
+    "functions/tests/cov-cas.test.ts": [
+      "functions/src/factories/evaluate.ts",
+      "functions/src/typed/cas.ts"
+    ],
+    "functions/tests/cov-dist-objects.test.ts": [
+      "functions/src/typed/dist-objects.ts"
+    ],
+    "functions/tests/cov-geometry.test.ts": [
+      "functions/src/typed/geometry.ts"
+    ],
+    "functions/tests/cov-integration.test.ts": [
+      "functions/src/typed/integration.ts"
+    ],
+    "functions/tests/cov-numeric.test.ts": [
+      "functions/src/typed/numeric.ts"
+    ],
+    "functions/tests/cov-relational.test.ts": [
+      "functions/src/typed/relational.ts"
+    ],
+    "functions/tests/cov-signal.test.ts": [
+      "functions/src/wasm/WasmLoader.ts",
+      "functions/src/typed/signal.ts"
+    ],
+    "functions/tests/cov-special.test.ts": [
+      "functions/src/typed/special.ts"
+    ],
+    "functions/tests/cov-statistics.test.ts": [
+      "functions/src/typed/statistics.ts"
+    ],
+    "functions/tests/cov-string.test.ts": [
+      "functions/src/typed/string.ts"
+    ],
+    "functions/tests/cov-trigonometry.test.ts": [
+      "functions/src/typed/trigonometry.ts"
     ],
     "functions/tests/dist-objects.test.ts": [
       "functions/src/typed/dist-objects.ts"
@@ -2960,6 +3159,9 @@
       "expression/src/node/ConstantNode.ts",
       "expression/src/node/BlockNode.ts"
     ],
+    "expression/tests/compile-nodes.test.ts": [
+      "expression/src/compiler/compile.ts"
+    ],
     "expression/tests/compile.test.ts": [
       "expression/src/compiler/compile.ts"
     ],
@@ -2986,9 +3188,15 @@
     "expression/tests/evaluate.test.ts": [
       "expression/src/evaluator/evaluate.ts"
     ],
+    "expression/tests/evaluator-extra.test.ts": [
+      "expression/src/evaluator/evaluate.ts"
+    ],
     "expression/tests/evaluator-index.test.ts": [
       "expression/src/evaluator/index.ts",
       "expression/src/evaluator/evaluate.ts"
+    ],
+    "expression/tests/function-factories.test.ts": [
+      "expression/src/function/parser.ts"
     ],
     "expression/tests/FunctionAssignmentNode.test.ts": [
       "expression/src/node/Node.ts",
@@ -2996,11 +3204,24 @@
       "expression/src/node/SymbolNode.ts",
       "expression/src/node/FunctionAssignmentNode.ts"
     ],
+    "expression/tests/FunctionNode-render.test.ts": [
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/AccessorNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/ParenthesisNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts"
+    ],
     "expression/tests/FunctionNode.test.ts": [
       "expression/src/node/Node.ts",
       "expression/src/node/ConstantNode.ts",
       "expression/src/node/SymbolNode.ts",
       "expression/src/node/FunctionNode.ts"
+    ],
+    "expression/tests/Help-config.test.ts": [
+      "expression/src/Help.ts"
     ],
     "expression/tests/Help.test.ts": [
       "expression/src/Help.ts"
@@ -3022,6 +3243,16 @@
       "expression/src/node/ConstantNode.ts",
       "expression/src/utils/is.ts"
     ],
+    "expression/tests/node-group-render.test.ts": [
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/AccessorNode.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/ConditionalNode.ts"
+    ],
     "expression/tests/Node.test.ts": [
       "expression/src/node/Node.ts",
       "expression/src/node/ConstantNode.ts",
@@ -3035,6 +3266,15 @@
       "expression/src/node/SymbolNode.ts",
       "expression/src/node/ObjectNode.ts"
     ],
+    "expression/tests/OperatorNode-compile.test.ts": [],
+    "expression/tests/OperatorNode-latex.test.ts": [
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/SymbolNode.ts"
+    ],
+    "expression/tests/OperatorNode-paren.test.ts": [],
+    "expression/tests/OperatorNode-render.test.ts": [],
     "expression/tests/OperatorNode.test.ts": [
       "expression/src/node/Node.ts",
       "expression/src/node/ConstantNode.ts",
@@ -3081,6 +3321,25 @@
       "expression/src/node/ParenthesisNode.ts",
       "expression/src/node/OperatorNode.ts"
     ],
+    "expression/tests/parse-syntax.test.ts": [
+      "expression/src/parse.ts",
+      "expression/src/node/Node.ts",
+      "expression/src/node/AccessorNode.ts",
+      "expression/src/node/ArrayNode.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/BlockNode.ts",
+      "expression/src/node/ConditionalNode.ts",
+      "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/ParenthesisNode.ts",
+      "expression/src/node/RangeNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts"
+    ],
     "expression/tests/parse.test.ts": [
       "expression/src/parse.ts",
       "expression/src/node/Node.ts",
@@ -3099,6 +3358,10 @@
       "expression/src/node/RangeNode.ts",
       "expression/src/node/RelationalNode.ts",
       "expression/src/node/SymbolNode.ts"
+    ],
+    "expression/tests/Parser-extra.test.ts": [
+      "expression/src/Parser.ts",
+      "functions/src/factories/evaluate.ts"
     ],
     "expression/tests/Parser.test.ts": [
       "expression/src/Parser.ts",
@@ -3127,11 +3390,20 @@
     "expression/tests/types.test.ts": [
       "expression/src/types.ts"
     ],
+    "expression/tests/utils-array-extra.test.ts": [
+      "expression/src/utils/array.ts"
+    ],
     "expression/tests/utils-array.test.ts": [
       "expression/src/utils/array.ts"
     ],
+    "expression/tests/utils-bignumber-formatter-extra.test.ts": [
+      "expression/src/utils/bignumber/formatter.ts"
+    ],
     "expression/tests/utils-bignumber-formatter.test.ts": [
       "expression/src/utils/bignumber/formatter.ts"
+    ],
+    "expression/tests/utils-collection-extra.test.ts": [
+      "expression/src/utils/collection.ts"
     ],
     "expression/tests/utils-collection.test.ts": [
       "expression/src/utils/collection.ts"
@@ -3151,6 +3423,9 @@
     "expression/tests/utils-map.test.ts": [
       "expression/src/utils/map.ts"
     ],
+    "expression/tests/utils-number-extra.test.ts": [
+      "expression/src/utils/number.ts"
+    ],
     "expression/tests/utils-number.test.ts": [
       "expression/src/utils/number.ts"
     ],
@@ -3160,6 +3435,11 @@
     "expression/tests/utils-scope.test.ts": [
       "expression/src/utils/scope.ts",
       "expression/src/utils/map.ts"
+    ],
+    "expression/tests/utils-string-object-factory-extra.test.ts": [
+      "expression/src/utils/string.ts",
+      "expression/src/utils/object.ts",
+      "expression/src/utils/factory.ts"
     ],
     "expression/tests/utils-string.test.ts": [
       "expression/src/utils/string.ts"
@@ -3205,6 +3485,9 @@
     ],
     "parallel/tests/chunk.test.ts": [
       "parallel/src/strategies/chunk.ts"
+    ],
+    "parallel/tests/ComputePool.coverage.test.ts": [
+      "parallel/src/ComputePool.ts"
     ],
     "parallel/tests/ComputePool.test.ts": [
       "parallel/src/ComputePool.ts"
@@ -3253,9 +3536,14 @@
       "parallel/src/strategies/chunk.ts",
       "parallel/src/strategies/threshold.ts"
     ],
+    "parallel/tests/ParallelMatrix.parallel.test.ts": [],
     "parallel/tests/ParallelMatrix.test.ts": [],
     "parallel/tests/strategies/chunk-extended.test.ts": [
       "parallel/src/strategies/chunk.ts"
+    ],
+    "parallel/tests/strategies/threshold-extended.test.ts": [
+      "parallel/src/strategies/threshold.ts",
+      "parallel/src/ComputePool.ts"
     ],
     "parallel/tests/strategies-index.test.ts": [
       "parallel/src/strategies/index.ts",
@@ -3263,8 +3551,16 @@
       "parallel/src/strategies/threshold.ts"
     ],
     "parallel/tests/WorkerPool.timeout.test.ts": [],
+    "workbook/tests/executor-modes.test.ts": [
+      "workbook/src/executor.ts",
+      "workbook/src/types.ts"
+    ],
     "workbook/tests/executor.test.ts": [
       "workbook/src/executor.ts",
+      "workbook/src/types.ts"
+    ],
+    "workbook/tests/graph-cycles.test.ts": [
+      "workbook/src/graph.ts",
       "workbook/src/types.ts"
     ],
     "workbook/tests/graph.test.ts": [
@@ -3277,6 +3573,10 @@
       "workbook/src/graph.ts",
       "workbook/src/executor.ts"
     ],
+    "workbook/tests/parser-robustness.test.ts": [
+      "workbook/src/parser.ts",
+      "workbook/src/types.ts"
+    ],
     "workbook/tests/parser.test.ts": [
       "workbook/src/parser.ts",
       "workbook/src/types.ts"
@@ -3285,7 +3585,15 @@
       "compat/src/index.ts",
       "compat/src/shims.ts"
     ],
+    "compat/tests/coverage-gaps.test.ts": [
+      "compat/src/index.ts",
+      "compat/src/shims.ts"
+    ],
     "compat/tests/create.test.ts": [
+      "compat/src/index.ts",
+      "compat/src/shims.ts"
+    ],
+    "compat/tests/delegation.test.ts": [
       "compat/src/index.ts",
       "compat/src/shims.ts"
     ],
