@@ -63,6 +63,17 @@ export default defineConfig({
         'workbook/src/types.ts',
         // Compat - all active
         'compat/src/**',
+        // Expression - active modules
+        'expression/src/parse.ts',
+        'expression/src/Parser.ts',
+        'expression/src/operators.ts',
+        'expression/src/keywords.ts',
+        'expression/src/Help.ts',
+        'expression/src/compiler/**',
+        'expression/src/evaluator/**',
+        'expression/src/node/**',
+        'expression/src/function/**',
+        'expression/src/utils/**',
       ],
       exclude: ['node_modules/', 'dist/', '**/*.d.ts', '**/*.config.*', '**/index.ts'],
     },
