@@ -1,0 +1,63 @@
+{
+  "name": "@danielsimonjr/mathts-linalg",
+  "version": "0.1.0",
+  "description": "Standalone linear-algebra decompositions for MathTS (eigen, SVD, QR, LU, Cholesky, Schur, matrix functions), re-exported as a focused package",
+  "author": "Daniel Simon Jr.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "clean": "rm -rf dist",
+    "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
+  },
+  "dependencies": {
+    "@danielsimonjr/mathts-core": "0.1.3",
+    "@danielsimonjr/mathts-matrix": "0.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^4.1.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielsimonjr/mathts",
+    "directory": "linalg"
+  },
+  "keywords": [
+    "math",
+    "typescript",
+    "linear-algebra",
+    "linalg",
+    "svd",
+    "eigenvalue",
+    "qr",
+    "lu",
+    "cholesky",
+    "matrix"
+  ]
+}

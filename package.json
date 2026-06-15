@@ -20,6 +20,7 @@
     "numbers",
     "ast",
     "evaluator",
+    "linalg",
     "parallel",
     "workbook",
     "assembly",
