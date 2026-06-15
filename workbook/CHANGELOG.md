@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-workbook
 
+## Unreleased
+
+### Tests
+
+- Raise vitest line coverage of the active workbook modules to ≥90% (subtotal 99.14%; `executor.ts` 100%, `graph.ts` 100%, `parser.ts` 94.44%, `types.ts` is type-only with no executable statements). Added 27 tests across three new suites: `parser-robustness.test.ts` (parser error/`catch` path via null/undefined/throwing input, cell-type precedence, `stripOutputs` immutability), `executor-modes.test.ts` (sequential/manual stale-suppression, `runAll` topological ordering, multi-dependency scope injection, undefined-dependency skip, YAML data-cell parsing, event ordering, multi-subscriber/double-unsubscribe), and `graph-cycles.test.ts` (3-node cycles, diamond-DAG no-cycle, dangling dependency ids, deduplicated transitive dependents). No production code changed.
+
 ## 0.1.5
 
 ### Patch Changes
