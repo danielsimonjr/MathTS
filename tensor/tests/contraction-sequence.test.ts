@@ -314,14 +314,10 @@ describe('contractNetwork — 16-tensor exact solve', () => {
     for (let i = 0; i < 16; i++) {
       tensors.push(seqTensor([2, 2], [labels[i], labels[i + 1]]));
     }
-    const start = Date.now();
     const res = contractNetwork(tensors, { algorithm: 'exact' });
-    const elapsed = Date.now() - start;
     expect(res.result.shape).toEqual([2, 2]); // free axes: a0 and a16
-    // Coarse regression guard, generously sized for shared CI runners (nominal
-    // ~5.7s locally). The 30s test timeout is the real hang guard; a tight
-    // wall-clock bound here just flakes under CI load (observed ~11s).
-    expect(elapsed).toBeLessThan(25_000);
+    // The 30s per-test timeout (above) is the hang guard. A wall-clock bound
+    // here just flakes under shared-CI load (a ~5.7s op was observed at 11-31s).
   });
 });
 
@@ -348,7 +344,7 @@ describe("contractNetwork — algorithm: 'auto' switching", () => {
     expect(auto.contractionOrder).toEqual(exact.contractionOrder);
   });
 
-  it("falls back to 'greedy' for N >= 17 inputs", () => {
+  it("falls back to 'greedy' for N >= 17 inputs", { timeout: 10_000 }, () => {
     // 17 tensors in a linear chain. The DP would be very expensive
     // (O(3^17) ≈ 129M states) but greedy is fast. We give it a small budget
     // and check that auto completes rapidly — implying greedy fired.
@@ -358,13 +354,14 @@ describe("contractNetwork — algorithm: 'auto' switching", () => {
     for (let i = 0; i < 17; i++) {
       tensors.push(seqTensor([2, 2], [labels[i], labels[i + 1]]));
     }
-    const start = Date.now();
     const res = contractNetwork(tensors, { algorithm: 'auto' });
-    const elapsed = Date.now() - start;
     expect(res.result.shape).toEqual([2, 2]);
-    // Greedy should be very fast on a 17-tensor linear chain (well under 2 s
-    // — the DP would be far slower).
-    expect(elapsed).toBeLessThan(2_000);
+    // Deterministic proof greedy fired (not the exact DP): for N>=17 'auto' must
+    // take the greedy path, so its result must match an explicit greedy run.
+    // (The 10s timeout above also guards against the exact DP wrongly running.)
+    const greedy = contractNetwork(tensors, { algorithm: 'greedy' });
+    expect(res.totalFlops).toBe(greedy.totalFlops);
+    expect(res.contractionOrder).toEqual(greedy.contractionOrder);
   });
 });
 
