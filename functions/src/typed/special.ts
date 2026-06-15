@@ -337,20 +337,26 @@ function besselY1Scalar(x: f64): f64 {
   if (x <= 0) return NaN;
 
   if (x < 8.0) {
+    // Numerical Recipes (2nd ed., §6.5) rational approximation. The previous
+    // coefficients here were corrupted and omitted the leading `x *` factor,
+    // yielding e.g. Y1(5) ≈ -0.377 instead of the correct +0.1479; the values
+    // below are the canonical NR `bessy1` constants.
     const y = x * x;
     const r1 =
-      -0.4900604943e13 +
-      y *
-        (0.127527439e13 +
-          y *
-            (-0.5153486684e11 + y * (0.6227854327e9 + y * (-0.3130827714e7 + y * 0.7374753505e1))));
+      x *
+      (-0.4900604943e13 +
+        y *
+          (0.127527439e13 +
+            y *
+              (-0.5153438139e11 +
+                y * (0.7349264551e9 + y * (-0.4237922726e7 + y * 0.8511937935e4)))));
     const r2 =
       0.249958057e14 +
       y *
         (0.4244419664e12 +
           y *
             (0.3733650367e10 +
-              y * (0.2245976615e8 + y * (0.1038323184e6 + y * (0.3652510261e3 + y * 1.0)))));
+              y * (0.2245904002e8 + y * (0.102042605e6 + y * (0.3549632885e3 + y)))));
     return r1 / r2 + 0.636619772 * (besselJ1Scalar(x) * Math.log(x) - 1.0 / x);
   } else {
     const z = 8.0 / x;
@@ -704,29 +710,55 @@ function cosIntegralScalar(x: f64): f64 {
   if (x <= 0) return NaN;
   const euler = 0.5772156649015329;
 
-  if (x <= 4) {
+  // The convergent power series (DLMF §6.6.4) is accurate in double precision up
+  // to roughly x ~ 35 before catastrophic cancellation degrades it; the older
+  // x <= 4 cutoff handed moderate x to a divergent asymptotic series that
+  // produced wildly wrong values (e.g. Ci(10) overflowed to ~1e20). Use the
+  // convergent series across its reliable range.
+  if (x <= 35) {
     let sum: f64 = 0;
     let term: f64 = 1;
-    for (let n = 1; n < 100; n++) {
+    for (let n = 1; n < 200; n++) {
       term *= (-x * x) / ((2 * n - 1) * (2 * n));
       sum += term / (2 * n);
-      if (Math.abs(term / (2 * n)) < 1e-15) break;
+      if (Math.abs(term / (2 * n)) < Math.abs(sum) * 1e-16) break;
     }
     return euler + Math.log(x) + sum;
   }
 
-  let f: f64 = 0,
-    g: f64 = 0;
+  // Auxiliary functions (DLMF §6.12.1):
+  //   f(x) ~ (1/x) Σ_{n>=0} (-1)^n (2n)!   / x^{2n}
+  //   g(x) ~ (1/x²) Σ_{n>=0} (-1)^n (2n+1)! / x^{2n}
+  // Both series are *divergent* — sum only to the smallest term (standard
+  // asymptotic practice). The successive-term ratios are (2n)(2n-1)/x² for f
+  // and (2n+1)(2n)/x² for g.
+  let f: f64 = 1,
+    g: f64 = 1;
   let fn: f64 = 1,
     gn: f64 = 1;
-  for (let n = 1; n <= 30; n++) {
-    fn *= (-(2 * n - 1) * (2 * n - 2)) / (x * x);
-    gn *= (-(2 * n) * (2 * n - 1)) / (x * x);
-    f += fn;
-    g += gn;
+  let fDone = false,
+    gDone = false;
+  for (let n = 1; n <= 60; n++) {
+    const fnNext = (fn * (-(2 * n) * (2 * n - 1))) / (x * x);
+    const gnNext = (gn * (-(2 * n + 1) * (2 * n))) / (x * x);
+    if (!fDone) {
+      if (Math.abs(fnNext) > Math.abs(fn)) fDone = true;
+      else {
+        fn = fnNext;
+        f += fn;
+      }
+    }
+    if (!gDone) {
+      if (Math.abs(gnNext) > Math.abs(gn)) gDone = true;
+      else {
+        gn = gnNext;
+        g += gn;
+      }
+    }
+    if (fDone && gDone) break;
   }
-  f = (1 + f) / x;
-  g = (1 + g) / x;
+  f = f / x;
+  g = g / (x * x);
   return f * Math.sin(x) - g * Math.cos(x);
 }
 
@@ -799,6 +831,49 @@ function fresnelCScalar(x: f64): f64 {
   return sign * sum;
 }
 
+/**
+ * Airy oscillatory-asymptotic coefficients u_k (DLMF §9.7.1):
+ *   u_0 = 1,  u_k = (6k-5)(6k-3)(6k-1) / (216 k) · u_{k-1}.
+ * Used by the x < -XBIG branches of Ai/Bi. These differ from the c_k used in
+ * the x > XBIG exponential branches.
+ */
+const AIRY_U = ((): number[] => {
+  const u = [1];
+  for (let k = 1; k <= 10; k++) {
+    u.push((u[k - 1] * ((6 * k - 5) * (6 * k - 3) * (6 * k - 1))) / (216 * k));
+  }
+  return u;
+})();
+
+/**
+ * Evaluate the two alternating asymptotic sums used by Ai(-z)/Bi(-z):
+ *   P(ζ) = Σ_k (-1)^k u_{2k}   / ζ^{2k}      (even-index coefficients)
+ *   Q(ζ) = Σ_k (-1)^k u_{2k+1} / ζ^{2k+1}    (odd-index coefficients)
+ * Both series are divergent — each is summed only to its smallest term.
+ */
+function airyAsymPQ(zeta: f64): { p: f64; q: f64 } {
+  let p = 0,
+    q = 0;
+  let pTerm = Infinity,
+    qTerm = Infinity;
+  const half = Math.floor((AIRY_U.length - 1) / 2);
+  for (let k = 0; k <= half; k++) {
+    const sign = k % 2 === 0 ? 1 : -1;
+    const pt = (sign * AIRY_U[2 * k]) / Math.pow(zeta, 2 * k);
+    if (Math.abs(pt) > Math.abs(pTerm)) break;
+    p += pt;
+    pTerm = pt;
+  }
+  for (let k = 0; k <= half - 1; k++) {
+    const sign = k % 2 === 0 ? 1 : -1;
+    const qt = (sign * AIRY_U[2 * k + 1]) / Math.pow(zeta, 2 * k + 1);
+    if (Math.abs(qt) > Math.abs(qTerm)) break;
+    q += qt;
+    qTerm = qt;
+  }
+  return { p, q };
+}
+
 /** Airy function of the first kind Ai(x). */
 function airyAiScalar(x: f64): f64 {
   const XBIG = 4.5;
@@ -828,21 +903,17 @@ function airyAiScalar(x: f64): f64 {
     return (Math.exp(-zeta) * p) / (2.0 * Math.sqrt(Math.PI) * xp);
   }
   if (x < -XBIG) {
+    // Oscillatory asymptotic (DLMF §9.7.9):
+    //   Ai(-z) = π^{-1/2} z^{-1/4} ( cos(ζ-π/4)·P(ζ) + sin(ζ-π/4)·Q(ζ) )
+    // with the u_k-based sums P, Q (NOT the exponential-branch c_k). The old
+    // code reused C[] and a single shared power list, which produced badly
+    // wrong values (e.g. Ai(-5) ≈ 0.138 instead of 0.3508).
     const ax = Math.abs(x);
     const axp = Math.pow(ax, 0.25);
     const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
     const theta = zeta - Math.PI / 4.0;
-    let p = 0.0,
-      q = 0.0,
-      zk = 1.0,
-      sign = 1.0;
-    for (let k = 0; k < C.length; k++) {
-      if (k % 2 === 0) p += (sign * C[k]) / zk;
-      else q += (sign * C[k]) / zk;
-      zk *= zeta;
-      sign = -sign;
-    }
-    return (Math.sin(theta) * p + Math.cos(theta) * q) / (Math.sqrt(Math.PI) * axp);
+    const { p, q } = airyAsymPQ(zeta);
+    return (Math.cos(theta) * p + Math.sin(theta) * q) / (Math.sqrt(Math.PI) * axp);
   }
   // Power series
   const x3 = x * x * x;
@@ -896,21 +967,16 @@ function airyBiScalar(x: f64): f64 {
     return (Math.exp(zeta) * p) / (Math.sqrt(Math.PI) * xp);
   }
   if (x < -XBIG) {
+    // Oscillatory asymptotic (DLMF §9.7.10):
+    //   Bi(-z) = π^{-1/2} z^{-1/4} ( -sin(ζ-π/4)·P(ζ) + cos(ζ-π/4)·Q(ζ) )
+    // with the u_k-based sums P, Q. The old code reused C[] / shared powers and
+    // gave wrong values (e.g. Bi(-5) ≈ 0.104 instead of -0.1384).
     const ax = Math.abs(x);
     const axp = Math.pow(ax, 0.25);
     const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
-    const theta = zeta + Math.PI / 4.0;
-    let p = 0.0,
-      q = 0.0,
-      zk = 1.0,
-      sign = 1.0;
-    for (let k = 0; k < C.length; k++) {
-      if (k % 2 === 0) p += (sign * C[k]) / zk;
-      else q += (sign * C[k]) / zk;
-      zk *= zeta;
-      sign = -sign;
-    }
-    return (Math.cos(theta) * p + Math.sin(theta) * q) / (Math.sqrt(Math.PI) * axp);
+    const theta = zeta - Math.PI / 4.0;
+    const { p, q } = airyAsymPQ(zeta);
+    return (-Math.sin(theta) * p + Math.cos(theta) * q) / (Math.sqrt(Math.PI) * axp);
   }
   const x3 = x * x * x;
   let f = 1.0,
