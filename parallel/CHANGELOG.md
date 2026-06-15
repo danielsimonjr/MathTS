@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.2.2
+
+### Patch Changes
+
+- Switch inter-package dependencies from exact pins to caret (`^`) ranges so compatible patch releases of MathTS packages propagate without a full-tree republish.
+
 ## Unreleased
 
 ### Tests

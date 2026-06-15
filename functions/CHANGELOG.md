@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.7
+
+### Patch Changes
+
+- Switch inter-package dependencies from exact pins to caret (`^`) ranges so compatible patch releases of MathTS packages propagate without a full-tree republish.
+
 ## 0.2.6
 
 ### Patch Changes

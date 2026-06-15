@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-statistics",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Standalone statistics functions for MathTS, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-functions": "0.2.6",
+    "@danielsimonjr/mathts-functions": "^0.2.7",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {
