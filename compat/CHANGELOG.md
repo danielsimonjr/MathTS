@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-compat
 
+## 0.1.5
+
+### Patch Changes
+
+- Re-pin `@danielsimonjr/mathts-functions` to `0.2.4` (which now ships type declarations) to keep the matched MathTS set on one version.
+
 ## 0.1.4
 
 ### Patch Changes

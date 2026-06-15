@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.4
+
+### Patch Changes
+
+- Ship TypeScript declarations. The package now emits a `.d.ts` tree via `tsc` (the JS bundle stays on tsup); previously `--dts` was disabled and the published `types` field pointed at a non-existent file, so consumers got `any`. Fixed a TS4023 (`evaluate` inferred an un-nameable `EvaluateOptions` from `expression`) by annotating `evaluate` with `ReturnType<typeof createEvaluate>`. No runtime change (2502 tests still pass).
+
 ## 0.2.3
 
 ### Patch Changes

@@ -74,7 +74,7 @@ export const parse = (factoryScope as any).parse;
  * evaluate('x^2 + 1', { x: 3 }) // 10
  * ```
  */
-export const evaluate = createEvaluate(parse, mathScope);
+export const evaluate: ReturnType<typeof createEvaluate> = createEvaluate(parse, mathScope);
 
 /**
  * Compile a math expression into a reusable CompiledExpression.
