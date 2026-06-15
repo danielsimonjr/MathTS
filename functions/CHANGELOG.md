@@ -1,5 +1,43 @@
 # @danielsimonjr/mathts-functions
 
+## Unreleased
+
+### Tests
+
+- Raise vitest line coverage of the active typed-dispatch layer (`src/typed/**`)
+  from **77.95% to 92.01%** (subtotal over the coverage-scoped `typed/` files).
+  Added 12 `cov-*.test.ts` suites under `tests/` (~480 new tests) covering the
+  previously-uncovered Complex / Fraction / BigNumber / bigint scalar
+  signatures, mixed-type coercion overloads, sequential (below-threshold)
+  Float64Array fallbacks, error/edge paths, and the worker-dispatch fan-out
+  branches (which the prior suites missed because they never initialized
+  `computePool`). All assertions check real, correct mathematics through the
+  typed dispatch — no coverage-gaming.
+- Every coverage-scoped `typed/` file is now ≥90% line coverage **except**
+  `geometry.ts` (81.9%), `numeric.ts` (86.8%), and `signal.ts` (84.4%), whose
+  remaining uncovered lines are Rust-WASM kernel-dispatch blocks
+  (`if (wasm) { … }`). These are dead in a pure-JS environment because the
+  gitignored `lib/wasm/mathts.wasm` artifact is not built (no Rust toolchain in
+  CI). The new tests cover every JS-reachable branch of those files; the WASM
+  tiers self-skip when the artifact is absent.
+
+### Fixed
+
+- **`special.ts` `besselY1` (small-x, x < 8):** restored the correct
+  Numerical-Recipes `bessy1` rational-approximation coefficients and the
+  missing leading `x *` factor. Previously `Y1(5)` returned ≈ −0.377 instead of
+  the correct +0.1479, which also poisoned `Y_n(5)` via the upward recurrence.
+- **`special.ts` `cosIntegral` (Ci):** the convergent power series is now used
+  across its reliable range (x ≤ 35) instead of handing moderate x to a
+  divergent asymptotic series. Previously `Ci(10)` overflowed to ≈ 6.8e20
+  instead of −0.0455; the large-x asymptotic auxiliary-function coefficients and
+  `1/x²` normalization were also corrected, with smallest-term truncation.
+- **`special.ts` `airyAi` / `airyBi` (negative-x oscillatory asymptotic,
+  x < −4.5):** rewrote the branches to use the correct DLMF §9.7 `u_k`
+  coefficients and phase structure. Previously they reused the wrong
+  exponential-branch `c_k` series, e.g. `Ai(-5)` ≈ 0.138 instead of 0.3508 and
+  `Bi(-5)` with the wrong sign/magnitude.
+
 ## 0.2.4
 
 ### Patch Changes
