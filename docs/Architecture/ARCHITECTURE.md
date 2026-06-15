@@ -12,6 +12,8 @@ provides the primary WASM backend but is not an npm package.
 - **554 reachable TypeScript files** (out of ~1,457 total; ~903 dormant synced from mathjs)
 - **147,773 lines of code** (reachable scope)
 - **3,461 total exports** (1,057 re-exports)
+- **253 test files** — 199 of 554 source files have direct (structural) test coverage
+  (35.9%); see the generated `TEST_COVERAGE.md`
 - **0 runtime circular dependencies** (2 type-only cycles remain, both in `matrix`)
 - **All 22 packages build, and all 21 TypeScript packages typecheck with 0
   errors** under `tsc --noEmit`. (`functions` and the thin re-export packages use
