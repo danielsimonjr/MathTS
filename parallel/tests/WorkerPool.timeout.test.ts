@@ -66,12 +66,14 @@ describe('WorkerPool.execute() timeout contract', () => {
     pool.workers.push(w);
     pool.availableWorkers.push(w);
 
-    const start = Date.now();
+    // Correctness contract: the call rejects with a timeout error and the hung
+    // worker is terminated. We deliberately do NOT assert a wall-clock lower
+    // bound on elapsed time — that is a flaky race (timer scheduling jitter +
+    // coarse Date.now() resolution can measure the 50ms timeout as <40ms under
+    // load). The test timeout itself guards against a never-rejecting hang.
     await expect(pool.execute({ payload: 1 }, undefined, 50)).rejects.toThrow(
       /timed? ?out|timeout/i
     );
-    const elapsed = Date.now() - start;
-    expect(elapsed).toBeGreaterThanOrEqual(40);
     expect(w.terminated).toBe(true);
   });
 

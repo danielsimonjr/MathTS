@@ -19,6 +19,7 @@ import {
   parallelLog,
   parallelSin,
   parallelCos,
+  parallelTan,
   parallelElementwise,
   parallelUnary,
 } from '../../src/operations/elementwise.js';
@@ -172,6 +173,15 @@ describe('Parallel Element-wise Operations', () => {
       expect(result.result[0]).toBeCloseTo(1);
       expect(result.result[1]).toBeCloseTo(0.5);
       expect(result.result[2]).toBeCloseTo(-1);
+    });
+
+    it('should compute tangent', async () => {
+      const data = new Float64Array([0, Math.PI / 4]);
+
+      const result = await parallelTan(data, { pool });
+
+      expect(result.result[0]).toBeCloseTo(0);
+      expect(result.result[1]).toBeCloseTo(1);
     });
 
     it('should use generic unary function', async () => {
