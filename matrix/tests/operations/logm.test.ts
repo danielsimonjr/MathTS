@@ -251,4 +251,51 @@ describe('matrixLogm', () => {
     const arr = logA.toArray();
     for (let i = 0; i < 3; i++) expect(Math.abs(arr[i][i] - Math.log(3))).toBeLessThan(1e-8);
   });
+
+  // ---------------------------------------------------------------------------
+  // Edge cases + eig-fallback validation paths
+  // ---------------------------------------------------------------------------
+
+  it('15. Non-square input throws', () => {
+    const A = DenseMatrix.fromArray([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
+    expect(() => matrixLogm(A)).toThrow(/must be square/);
+  });
+
+  it('16. Empty (0×0) matrix returns an empty result', () => {
+    const A = new DenseMatrix(0, 0, new Float64Array(0));
+    const R = matrixLogm(A);
+    expect(R.rows).toBe(0);
+    expect(R.cols).toBe(0);
+  });
+
+  it('17. Complex eigenvalues (pure rotation): eig-fallback validation throws', () => {
+    // [[0,-1],[1,0]] has eigenvalues ±i. logmSchur returns null for the complex
+    // block → validateEigenvalues() runs and throws the complex-eigenvalue error.
+    const A = DenseMatrix.fromArray([
+      [0, -1],
+      [1, 0],
+    ]);
+    expect(() => matrixLogm(A)).toThrow(/complex eigenvalues|not supported/i);
+  });
+
+  it('18. Complex eigenvalues (general 2×2): throws complex-eigenvalue error', () => {
+    // [[1,-2],[2,1]] has eigenvalues 1 ± 2i.
+    const A = DenseMatrix.fromArray([
+      [1, -2],
+      [2, 1],
+    ]);
+    expect(() => matrixLogm(A)).toThrow(/complex eigenvalues|not supported/i);
+  });
+
+  it('19. Negative real eigenvalue: throws non-positive error', () => {
+    // Diagonal with a negative entry → non-positive eigenvalue.
+    const A = DenseMatrix.fromArray([
+      [-2, 0],
+      [0, 3],
+    ]);
+    expect(() => matrixLogm(A)).toThrow(/non-positive eigenvalue|undefined|not supported/i);
+  });
 });

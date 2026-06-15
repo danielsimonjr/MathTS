@@ -185,4 +185,49 @@ describe('matrixSchur', () => {
     const QtQ = matMulDense(transposeDense(Q), Q);
     expect(frobDiff(QtQ, eye(4))).toBeLessThan(1e-10);
   });
+
+  it('11. Non-square input throws', () => {
+    const A = DenseMatrix.fromArray([
+      [1, 2, 3],
+      [4, 5, 6],
+    ]);
+    expect(() => matrixSchur(A)).toThrow(/must be square/);
+  });
+
+  it('12. Empty (0×0) matrix returns empty Q and T', () => {
+    const A = new DenseMatrix(0, 0, new Float64Array(0));
+    const { Q, T } = matrixSchur(A);
+    expect(Q.rows).toBe(0);
+    expect(T.rows).toBe(0);
+  });
+
+  it('13. Dense 5×5 non-symmetric: multi-step double-shift bulge chase reconstructs A', () => {
+    // A larger general matrix forces several Francis double-shift sweeps with
+    // bulge chasing across the interior (exercises the inner z-update branch).
+    const A = DenseMatrix.fromArray([
+      [4, 1, -2, 2, 1],
+      [1, 2, 0, 1, -1],
+      [-2, 0, 3, -2, 2],
+      [2, 1, -2, -1, 1],
+      [1, -1, 2, 1, 5],
+    ]);
+    const { Q, T } = matrixSchur(A);
+    const QTQt = matMulDense(matMulDense(Q, T), transposeDense(Q));
+    expect(frobDiff(QTQt, A)).toBeLessThan(1e-6);
+    const QtQ = matMulDense(transposeDense(Q), Q);
+    expect(frobDiff(QtQ, eye(5))).toBeLessThan(1e-9);
+  });
+
+  it('14. Dense 6×6 non-symmetric general matrix reconstructs A', () => {
+    const data: number[][] = [];
+    for (let i = 0; i < 6; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < 6; j++) row.push(((i * 7 + j * 3 + 1) % 11) - 5);
+      data.push(row);
+    }
+    const A = DenseMatrix.fromArray(data);
+    const { Q, T } = matrixSchur(A);
+    const QTQt = matMulDense(matMulDense(Q, T), transposeDense(Q));
+    expect(frobDiff(QTQt, A)).toBeLessThan(1e-5);
+  });
 });
