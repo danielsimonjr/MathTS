@@ -1,5 +1,14 @@
 # @danielsimonjr/mathts-compat
 
+## Unreleased
+
+### Tests
+
+- Raise vitest line coverage of `compat/src/**` to 100% (`shims.ts` 159/159 lines, up from 95%). Added 19 tests across two new files:
+  - `tests/coverage-gaps.test.ts` — factory pass-through (same `Fraction`/`BigNumber`/`DenseMatrix`/`SparseMatrix` instance returned unchanged), empty `sparse()` constructor, `det()` edge cases (0x0 empty matrix returns 1, `TypeError` on `SparseMatrix` input, 4x4 singular matrix returns 0 via the LU pivot-underflow path), and `size()` on matrix objects.
+  - `tests/delegation.test.ts` — `create(all)` builds a mathjs-compatible instance whose arithmetic/statistics/rounding/type-creation surface delegates to the core types and functions ops, with per-instance config isolation.
+- Add a `test:coverage` npm script to `compat/package.json` for parity with sibling packages.
+
 ## 0.1.5
 
 ### Patch Changes
