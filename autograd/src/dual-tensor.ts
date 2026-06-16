@@ -126,6 +126,204 @@ export class DualTensor {
     return new DualTensor(this.shape, p, t);
   }
 
+  /**
+   * Elementwise division following the dual-number quotient rule:
+   *   (a, a') / (b, b') = (a/b, (a'·b − a·b') / b²).
+   * The aliased case a.divide(a) is (1, 0).
+   */
+  divide(other: DualTensor): DualTensor {
+    this.checkSameShape(other, 'divide');
+    const p = new Float64Array(this.primal.length);
+    const t = new Float64Array(this.tangent.length);
+    if (this === other) {
+      for (let i = 0; i < p.length; i++) {
+        p[i] = 1;
+        t[i] = 0;
+      }
+    } else {
+      for (let i = 0; i < p.length; i++) {
+        const a = this.primal[i];
+        const b = other.primal[i];
+        p[i] = a / b;
+        t[i] = (this.tangent[i] * b - a * other.tangent[i]) / (b * b);
+      }
+    }
+    return new DualTensor(this.shape, p, t);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Elementwise unary ops (parity with reverse-mode TapedTensor). Each follows
+  // the dual-number rule (a, a') ↦ (f(a), f'(a)·a'), built via the
+  // `_unaryElementwise` helper. `deriv(x, y)` is f'(x) given input x and the
+  // computed output y (so adjoints needing y — exp, tanh, sqrt — stay uniform).
+  // ---------------------------------------------------------------------------
+
+  private _unaryElementwise(
+    primalFn: (x: number) => number,
+    deriv: (x: number, y: number) => number
+  ): DualTensor {
+    const p = new Float64Array(this.primal.length);
+    const t = new Float64Array(this.tangent.length);
+    for (let i = 0; i < p.length; i++) {
+      const y = primalFn(this.primal[i]);
+      p[i] = y;
+      t[i] = deriv(this.primal[i], y) * this.tangent[i];
+    }
+    return new DualTensor(this.shape, p, t);
+  }
+
+  /** Exponential. f'(x) = eˣ = y. */
+  exp(): DualTensor {
+    return this._unaryElementwise(Math.exp, (_x, y) => y);
+  }
+
+  /** Natural logarithm. f'(x) = 1/x. */
+  log(): DualTensor {
+    return this._unaryElementwise(Math.log, (x) => 1 / x);
+  }
+
+  /** Sine. f'(x) = cos(x). */
+  sin(): DualTensor {
+    return this._unaryElementwise(Math.sin, (x) => Math.cos(x));
+  }
+
+  /** Cosine. f'(x) = −sin(x). */
+  cos(): DualTensor {
+    return this._unaryElementwise(Math.cos, (x) => -Math.sin(x));
+  }
+
+  /** Tangent. f'(x) = 1/cos²(x). */
+  tan(): DualTensor {
+    return this._unaryElementwise(Math.tan, (x) => 1 / (Math.cos(x) * Math.cos(x)));
+  }
+
+  /** Square root. f'(x) = 1/(2·y) where y = √x. */
+  sqrt(): DualTensor {
+    return this._unaryElementwise(Math.sqrt, (_x, y) => 1 / (2 * y));
+  }
+
+  /** Square (x²). f'(x) = 2x. */
+  square(): DualTensor {
+    return this._unaryElementwise(
+      (x) => x * x,
+      (x) => 2 * x
+    );
+  }
+
+  /** Reciprocal (1/x). f'(x) = −1/x². */
+  reciprocal(): DualTensor {
+    return this._unaryElementwise(
+      (x) => 1 / x,
+      (x) => -1 / (x * x)
+    );
+  }
+
+  /** Absolute value. f'(x) = sign(x) (subgradient 0 at exact zero). */
+  abs(): DualTensor {
+    return this._unaryElementwise(Math.abs, (x) => Math.sign(x));
+  }
+
+  /** Fixed-exponent power x^k. f'(x) = k·x^(k−1). */
+  pow(k: number): DualTensor {
+    return this._unaryElementwise(
+      (x) => Math.pow(x, k),
+      (x) => k * Math.pow(x, k - 1)
+    );
+  }
+
+  /** Hyperbolic sine. f'(x) = cosh(x). */
+  sinh(): DualTensor {
+    return this._unaryElementwise(Math.sinh, (x) => Math.cosh(x));
+  }
+
+  /** Hyperbolic cosine. f'(x) = sinh(x). */
+  cosh(): DualTensor {
+    return this._unaryElementwise(Math.cosh, (x) => Math.sinh(x));
+  }
+
+  /** Hyperbolic tangent. f'(x) = 1 − tanh²(x) = 1 − y². */
+  tanh(): DualTensor {
+    return this._unaryElementwise(Math.tanh, (_x, y) => 1 - y * y);
+  }
+
+  /** Arcsine. f'(x) = 1/√(1 − x²). */
+  asin(): DualTensor {
+    return this._unaryElementwise(Math.asin, (x) => 1 / Math.sqrt(1 - x * x));
+  }
+
+  /** Arccosine. f'(x) = −1/√(1 − x²). */
+  acos(): DualTensor {
+    return this._unaryElementwise(Math.acos, (x) => -1 / Math.sqrt(1 - x * x));
+  }
+
+  /** Arctangent. f'(x) = 1/(1 + x²). */
+  atan(): DualTensor {
+    return this._unaryElementwise(Math.atan, (x) => 1 / (1 + x * x));
+  }
+
+  /** Inverse hyperbolic sine. f'(x) = 1/√(x² + 1). */
+  asinh(): DualTensor {
+    return this._unaryElementwise(Math.asinh, (x) => 1 / Math.sqrt(x * x + 1));
+  }
+
+  /** Inverse hyperbolic cosine (x ≥ 1). f'(x) = 1/√(x² − 1). */
+  acosh(): DualTensor {
+    return this._unaryElementwise(Math.acosh, (x) => 1 / Math.sqrt(x * x - 1));
+  }
+
+  /** Inverse hyperbolic tangent (|x| < 1). f'(x) = 1/(1 − x²). */
+  atanh(): DualTensor {
+    return this._unaryElementwise(Math.atanh, (x) => 1 / (1 - x * x));
+  }
+
+  /** Base-2 logarithm. f'(x) = 1/(x·ln2). */
+  log2(): DualTensor {
+    return this._unaryElementwise(Math.log2, (x) => 1 / (x * Math.LN2));
+  }
+
+  /** Base-10 logarithm. f'(x) = 1/(x·ln10). */
+  log10(): DualTensor {
+    return this._unaryElementwise(Math.log10, (x) => 1 / (x * Math.LN10));
+  }
+
+  /** log(1 + x). f'(x) = 1/(1 + x). */
+  log1p(): DualTensor {
+    return this._unaryElementwise(Math.log1p, (x) => 1 / (1 + x));
+  }
+
+  /** exp(x) − 1. f'(x) = eˣ = y + 1. */
+  expm1(): DualTensor {
+    return this._unaryElementwise(Math.expm1, (_x, y) => y + 1);
+  }
+
+  /** Cube root. f'(x) = 1/(3·y²) where y = x^(1/3) (→∞ at x = 0). */
+  cbrt(): DualTensor {
+    return this._unaryElementwise(Math.cbrt, (_x, y) => 1 / (3 * y * y));
+  }
+
+  /** Sign (−1/0/+1). f'(x) = 0 almost everywhere. */
+  sign(): DualTensor {
+    return this._unaryElementwise(Math.sign, () => 0);
+  }
+
+  /**
+   * Two-argument arctangent: atan2(this, other), this = y, other = x.
+   * Tangent: (b·a' − a·b') / (a² + b²), with a = this, b = other.
+   */
+  atan2(other: DualTensor): DualTensor {
+    this.checkSameShape(other, 'atan2');
+    const p = new Float64Array(this.primal.length);
+    const t = new Float64Array(this.tangent.length);
+    for (let i = 0; i < p.length; i++) {
+      const a = this.primal[i];
+      const b = other.primal[i];
+      p[i] = Math.atan2(a, b);
+      const d = a * a + b * b;
+      t[i] = (b * this.tangent[i] - a * other.tangent[i]) / d;
+    }
+    return new DualTensor(this.shape, p, t);
+  }
+
   private checkSameShape(other: DualTensor, op: string): void {
     if (
       this.shape.length !== other.shape.length ||

@@ -1119,6 +1119,142 @@ export class TapedTensor {
   }
 
   // ---------------------------------------------------------------------------
+  // Extended elementwise transcendentals (hyperbolic, inverse-trig, log/exp
+  // variants, sign, cbrt, atan2). Each builds a reverse-mode node via the
+  // `_unaryElementwise` helper; `localGrad(x, y)` is dy/dx given input x and
+  // output y. The helper caches both x and y so adjoints that need either
+  // (e.g. tanh needs y, log needs x) are uniform.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Build a reverse-mode node for an elementwise unary op.
+   * @param primalFn forward value y = f(x)
+   * @param localGrad local derivative dy/dx, given x and the computed y
+   */
+  private _unaryElementwise(
+    primalFn: (x: number) => number,
+    localGrad: (x: number, y: number) => number
+  ): TapedTensor {
+    const xData = new Float64Array(this.primal);
+    const out = new Float64Array(xData.length);
+    for (let i = 0; i < out.length; i++) out[i] = primalFn(xData[i]);
+    const yData = new Float64Array(out);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const { id } = this.tape.record([this.id], out.length, (outputGrad) => {
+      for (let i = 0; i < outputGrad.length; i++) {
+        thisGradSlot[i] += outputGrad[i] * localGrad(xData[i], yData[i]);
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  /** Hyperbolic sine. Adjoint: dX = dY · cosh(x). */
+  sinh(): TapedTensor {
+    return this._unaryElementwise(Math.sinh, (x) => Math.cosh(x));
+  }
+
+  /** Hyperbolic cosine. Adjoint: dX = dY · sinh(x). */
+  cosh(): TapedTensor {
+    return this._unaryElementwise(Math.cosh, (x) => Math.sinh(x));
+  }
+
+  /** Hyperbolic tangent. Adjoint: dX = dY · (1 − tanh²(x)) = dY · (1 − y²). */
+  tanh(): TapedTensor {
+    return this._unaryElementwise(Math.tanh, (_x, y) => 1 - y * y);
+  }
+
+  /** Arcsine. Adjoint: dX = dY / √(1 − x²). */
+  asin(): TapedTensor {
+    return this._unaryElementwise(Math.asin, (x) => 1 / Math.sqrt(1 - x * x));
+  }
+
+  /** Arccosine. Adjoint: dX = −dY / √(1 − x²). */
+  acos(): TapedTensor {
+    return this._unaryElementwise(Math.acos, (x) => -1 / Math.sqrt(1 - x * x));
+  }
+
+  /** Arctangent. Adjoint: dX = dY / (1 + x²). */
+  atan(): TapedTensor {
+    return this._unaryElementwise(Math.atan, (x) => 1 / (1 + x * x));
+  }
+
+  /** Inverse hyperbolic sine. Adjoint: dX = dY / √(x² + 1). */
+  asinh(): TapedTensor {
+    return this._unaryElementwise(Math.asinh, (x) => 1 / Math.sqrt(x * x + 1));
+  }
+
+  /** Inverse hyperbolic cosine (x ≥ 1). Adjoint: dX = dY / √(x² − 1). */
+  acosh(): TapedTensor {
+    return this._unaryElementwise(Math.acosh, (x) => 1 / Math.sqrt(x * x - 1));
+  }
+
+  /** Inverse hyperbolic tangent (|x| < 1). Adjoint: dX = dY / (1 − x²). */
+  atanh(): TapedTensor {
+    return this._unaryElementwise(Math.atanh, (x) => 1 / (1 - x * x));
+  }
+
+  /** Base-2 logarithm. Adjoint: dX = dY / (x · ln2). */
+  log2(): TapedTensor {
+    return this._unaryElementwise(Math.log2, (x) => 1 / (x * Math.LN2));
+  }
+
+  /** Base-10 logarithm. Adjoint: dX = dY / (x · ln10). */
+  log10(): TapedTensor {
+    return this._unaryElementwise(Math.log10, (x) => 1 / (x * Math.LN10));
+  }
+
+  /** log(1 + x) (accurate near 0). Adjoint: dX = dY / (1 + x). */
+  log1p(): TapedTensor {
+    return this._unaryElementwise(Math.log1p, (x) => 1 / (1 + x));
+  }
+
+  /** exp(x) − 1 (accurate near 0). Adjoint: dX = dY · eˣ = dY · (y + 1). */
+  expm1(): TapedTensor {
+    return this._unaryElementwise(Math.expm1, (_x, y) => y + 1);
+  }
+
+  /** Cube root. Adjoint: dX = dY / (3 · y²) where y = x^(1/3) (→∞ at x = 0). */
+  cbrt(): TapedTensor {
+    return this._unaryElementwise(Math.cbrt, (_x, y) => 1 / (3 * y * y));
+  }
+
+  /** Sign of x (−1/0/+1). Adjoint: 0 almost everywhere. */
+  sign(): TapedTensor {
+    return this._unaryElementwise(Math.sign, () => 0);
+  }
+
+  /**
+   * Two-argument arctangent: atan2(this, other), with this = y, other = x.
+   *
+   * Adjoints (a = this, b = other, d = a² + b²):
+   *   dA = dY · b / d
+   *   dB = −dY · a / d
+   *
+   * The aliased case atan2(a, a) is locally constant (±π/4 or ±3π/4), so its
+   * gradient is 0 — produced naturally by contributing nothing when aliased
+   * (dA + dB = dY · (b − a)/d = 0 at a = b).
+   */
+  atan2(other: TapedTensor): TapedTensor {
+    this.checkSameShape(other, 'atan2');
+    const a = new Float64Array(this.primal);
+    const b = new Float64Array(other.primal);
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < out.length; i++) out[i] = Math.atan2(a[i], b[i]);
+    const thisGradSlot = this.tape.getInputGrad(this.id)!;
+    const otherGradSlot = this.tape.getInputGrad(other.id)!;
+    const isAliased = this === other;
+    const { id } = this.tape.record([this.id, other.id], out.length, (outputGrad) => {
+      if (isAliased) return; // gradient is 0 for atan2(a, a)
+      for (let i = 0; i < outputGrad.length; i++) {
+        const d = a[i] * a[i] + b[i] * b[i];
+        thisGradSlot[i] += (outputGrad[i] * b[i]) / d;
+        otherGradSlot[i] += (-outputGrad[i] * a[i]) / d;
+      }
+    });
+    return new TapedTensor(this.shape, out, this.tape, id);
+  }
+
+  // ---------------------------------------------------------------------------
   // tensordot — generalised dot product over explicit axis pairs.
   // ---------------------------------------------------------------------------
 
