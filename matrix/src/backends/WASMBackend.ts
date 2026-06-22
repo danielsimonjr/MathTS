@@ -375,13 +375,18 @@ export class WASMBackend implements MatrixBackend {
    * platform-correct conversion.
    */
   private async resolveAsWasmPath(): Promise<string> {
-    const url = new URL(`../../../lib/wasm/mathts-as.wasm`, import.meta.url);
     const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
     if (isNode) {
+      // Preferred: package-relative artifact (dist/wasm/), robust across
+      // monorepo-source and published layouts.
+      const { resolvePackagedWasm } = await import('./wasm/resolve.js');
+      const found = await resolvePackagedWasm(import.meta.url, 'mathts-as.wasm');
+      if (found) return found;
+      // Legacy monorepo fallback (pre-packaging layout).
       const { fileURLToPath } = await import('node:url');
-      return fileURLToPath(url);
+      return fileURLToPath(new URL(`../../../lib/wasm/mathts-as.wasm`, import.meta.url));
     }
-    return url.href;
+    return new URL(`../../../lib/wasm/mathts-as.wasm`, import.meta.url).href;
   }
 
   /**
