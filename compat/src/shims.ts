@@ -43,7 +43,13 @@ import {
   ceil as _ceil,
 } from '@danielsimonjr/mathts-functions';
 
-import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import {
+  DenseMatrix,
+  SparseMatrix,
+  add as _matAdd,
+  subtract as _matSubtract,
+  multiply as _matMultiply,
+} from '@danielsimonjr/mathts-matrix';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)
@@ -148,9 +154,45 @@ export function sparse(data?: number[][]): SparseMatrix {
 // Arithmetic Function Shims
 // =============================================================================
 
-export const add = _add;
-export const subtract = _subtract;
-export const multiply = _multiply;
+// add/subtract/multiply must be matrix-aware for mathjs parity: the
+// functions-package versions are scalar-only and throw on number[][]. Delegate
+// 2-D array / DenseMatrix operands to the matrix package, scalars to functions.
+type MatrixLike = number[][] | DenseMatrix;
+
+const isMatrixLike = (x: unknown): x is MatrixLike =>
+  x instanceof DenseMatrix ||
+  (Array.isArray(x) && x.length > 0 && Array.isArray((x as unknown[])[0]));
+
+const toDenseMatrix = (x: MatrixLike): DenseMatrix =>
+  x instanceof DenseMatrix ? x : DenseMatrix.fromArray(x as number[][]);
+
+const unwrap = (r: unknown): unknown =>
+  r instanceof DenseMatrix ? r.toArray() : r;
+
+const makeArithmetic = (
+  scalarFn: (a: unknown, b: unknown) => unknown,
+  matrixFn: (a: unknown, b: unknown) => unknown,
+) => (a: unknown, b: unknown): unknown => {
+  if (isMatrixLike(a) || isMatrixLike(b)) {
+    const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
+    const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
+    return unwrap(matrixFn(aa, bb));
+  }
+  return scalarFn(a, b);
+};
+
+export const add = makeArithmetic(
+  _add as (a: unknown, b: unknown) => unknown,
+  _matAdd as (a: unknown, b: unknown) => unknown,
+) as typeof _add;
+export const subtract = makeArithmetic(
+  _subtract as (a: unknown, b: unknown) => unknown,
+  _matSubtract as (a: unknown, b: unknown) => unknown,
+) as typeof _subtract;
+export const multiply = makeArithmetic(
+  _multiply as (a: unknown, b: unknown) => unknown,
+  _matMultiply as (a: unknown, b: unknown) => unknown,
+) as typeof _multiply;
 export const divide = _divide;
 export const pow = _pow;
 export const sqrt = _sqrt;
