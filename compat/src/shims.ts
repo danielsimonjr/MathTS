@@ -169,16 +169,35 @@ const toDenseMatrix = (x: MatrixLike): DenseMatrix =>
 const unwrap = (r: unknown): unknown =>
   r instanceof DenseMatrix ? r.toArray() : r;
 
-const makeArithmetic = (
+const applyArithmetic = (
   scalarFn: (a: unknown, b: unknown) => unknown,
   matrixFn: (a: unknown, b: unknown) => unknown,
-) => (a: unknown, b: unknown): unknown => {
+  a: unknown,
+  b: unknown,
+): unknown => {
   if (isMatrixLike(a) || isMatrixLike(b)) {
     const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
     const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
     return unwrap(matrixFn(aa, bb));
   }
   return scalarFn(a, b);
+};
+
+// mathjs `add`/`subtract`/`multiply` are variadic and left-fold over all
+// arguments: add(x, y, z, …) === add(add(x, y), z), …. A 2-arg-only wrapper
+// silently dropped the 3rd+ operand (add(1,2,3) returned 3), which also broke
+// internal callers like polynomialRoot's cubic branch. Fold over every arg.
+const makeArithmetic = (
+  scalarFn: (a: unknown, b: unknown) => unknown,
+  matrixFn: (a: unknown, b: unknown) => unknown,
+) => (...args: unknown[]): unknown => {
+  if (args.length === 0) {
+    throw new TypeError('Too few arguments (expected at least 1)');
+  }
+  if (args.length === 1) {
+    return args[0];
+  }
+  return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next));
 };
 
 export const add = makeArithmetic(

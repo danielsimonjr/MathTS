@@ -74,7 +74,12 @@ export class MathJSDenseMatrix {
     return [...this._size];
   }
 
-  toArray(): number[][] {
+  toArray(): number[][] | number[] {
+    // 1-D matrices (e.g. cbrt(x, true) returning the 3 cube roots) store a
+    // flat _data array; spreading each element would throw "not iterable".
+    if (this._size.length === 1) {
+      return [...(this._data as unknown as number[])];
+    }
     return this._data.map((row) => [...row]);
   }
 
@@ -117,6 +122,14 @@ export class MathJSDenseMatrix {
   map(
     callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => number
   ): MathJSDenseMatrix {
+    if (this._size.length === 1) {
+      const flat = (this._data as unknown as number[]).map((val, i) =>
+        callback(val, [i], this)
+      );
+      const m = new MathJSDenseMatrix(flat as unknown as number[][]);
+      m._size = [...this._size];
+      return m;
+    }
     const result = this._data.map((row, i) => row.map((val, j) => callback(val, [i, j], this)));
     return new MathJSDenseMatrix(result);
   }
@@ -125,6 +138,10 @@ export class MathJSDenseMatrix {
    * Iterate over all elements.
    */
   forEach(callback: (value: number, index: number[], matrix: MathJSDenseMatrix) => void): void {
+    if (this._size.length === 1) {
+      (this._data as unknown as number[]).forEach((val, i) => callback(val, [i], this));
+      return;
+    }
     this._data.forEach((row, i) => {
       row.forEach((val, j) => callback(val, [i, j], this));
     });
@@ -166,7 +183,12 @@ export class MathJSDenseMatrix {
    * Deep clone.
    */
   clone(): MathJSDenseMatrix {
-    const m = new MathJSDenseMatrix(this._data.map((row) => [...row]));
+    const copy =
+      this._size.length === 1
+        ? [...(this._data as unknown as number[])]
+        : this._data.map((row) => [...row]);
+    const m = new MathJSDenseMatrix(copy as unknown as number[][]);
+    m._size = [...this._size];
     m._datatype = this._datatype;
     return m;
   }

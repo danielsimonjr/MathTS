@@ -280,3 +280,36 @@ describe('shims object', () => {
     }
   });
 });
+
+describe('variadic arithmetic (regression: silent arg-dropping)', () => {
+  // Before the fix, add/subtract/multiply were 2-arg-only and silently
+  // dropped the 3rd+ operand (add(1,2,3) === 3). mathjs folds over all args.
+  it('add folds over all scalar arguments', () => {
+    expect(add(1, 2, 3)).toBe(6);
+    expect(add(1, 2, 3, 4)).toBe(10);
+  });
+
+  it('multiply folds over all scalar arguments', () => {
+    expect(multiply(2, 3, 4)).toBe(24);
+    expect(multiply(2, 3, 4, 5)).toBe(120);
+  });
+
+  it('subtract folds left-to-right over all arguments', () => {
+    expect(subtract(10, 2, 3)).toBe(5);
+  });
+
+  it('single argument returns itself', () => {
+    expect(add(7)).toBe(7);
+    expect(multiply(7)).toBe(7);
+  });
+
+  it('two-argument behaviour is unchanged', () => {
+    expect(add(1, 2)).toBe(3);
+    expect(multiply(3, 4)).toBe(12);
+    expect(subtract(10, 4)).toBe(6);
+  });
+
+  it('matrix operands still work with the variadic wrapper', () => {
+    expect(add([[1, 2], [3, 4]], [[5, 6], [7, 8]])).toEqual([[6, 8], [10, 12]]);
+  });
+});

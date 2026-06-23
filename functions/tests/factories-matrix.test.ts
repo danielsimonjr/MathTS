@@ -529,3 +529,40 @@ describe('matrixFromRows factory', () => {
     ]);
   });
 });
+
+describe('MathJSDenseMatrix 1-D handling (regression: row2 is not iterable)', () => {
+  // cbrt(x, true) and similar return 1-D vector matrices whose _data is flat.
+  // toArray/map/forEach/clone must not assume 2-D (which threw on spread).
+  const make1D = () => new MathJSDenseMatrix({ data: [10, 20, 30] as unknown as number[][], size: [3] });
+
+  it('toArray returns the flat array for a 1-D matrix', () => {
+    expect(make1D().toArray()).toEqual([10, 20, 30]);
+  });
+
+  it('map iterates elements with single-axis indices', () => {
+    const indices: number[][] = [];
+    const out = make1D().map((v, idx) => {
+      indices.push(idx);
+      return v + 1;
+    });
+    expect(out.toArray()).toEqual([11, 21, 31]);
+    expect(indices).toEqual([[0], [1], [2]]);
+  });
+
+  it('forEach visits every element once', () => {
+    const seen: number[] = [];
+    make1D().forEach((v) => seen.push(v));
+    expect(seen).toEqual([10, 20, 30]);
+  });
+
+  it('clone preserves 1-D shape and data', () => {
+    const c = make1D().clone();
+    expect(c.size()).toEqual([3]);
+    expect(c.toArray()).toEqual([10, 20, 30]);
+  });
+
+  it('2-D behaviour is unchanged', () => {
+    const m = new MathJSDenseMatrix([[1, 2], [3, 4]]);
+    expect(m.toArray()).toEqual([[1, 2], [3, 4]]);
+  });
+});

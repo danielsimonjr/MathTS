@@ -267,6 +267,31 @@ export class Complex implements IComplex {
     return new Complex(this.re / n, this.im / n);
   }
 
+  // ------------------------------------------------------------
+  // Short-name aliases (mathjs-functions calling convention)
+  //
+  // The functions-package typed-function arithmetic (subtractScalar,
+  // multiplyScalar, divideScalar, …) invokes `.add/.sub/.mul/.div/.neg`
+  // on scalars. A core Complex (e.g. produced by `sqrt(-4)`) can flow into
+  // those code paths, so it must answer to the short names too — otherwise
+  // `x.sub is not a function`. Mirrors the Fraction short-alias fix.
+  // ------------------------------------------------------------
+  sub(other: Scalar): Complex {
+    return this.subtract(other);
+  }
+
+  mul(other: Scalar): Complex {
+    return this.multiply(other);
+  }
+
+  div(other: Scalar): Complex {
+    return this.divide(other);
+  }
+
+  neg(): Complex {
+    return this.negate();
+  }
+
   /**
    * Negation: -(a + bi) = -a - bi
    */

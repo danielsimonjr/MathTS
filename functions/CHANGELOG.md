@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.8
+
+### Patch Changes
+
+- `Complex` (functions-local) gains long-name aliases `subtract`/`multiply`/`divide`/`negate` (symmetric with the short names already present), so a `Complex` of either origin satisfies either calling convention.
+- `MathJSDenseMatrix` now handles 1-D matrices in `toArray`/`map`/`forEach`/`clone` (single-axis indices, flat data). Previously these assumed 2-D and threw `row2 is not iterable` on 1-D results such as `cbrt(x, true)`.
+- Repin to `@danielsimonjr/mathts-core@^0.1.5`.
+
 ## 0.2.7
 
 ### Patch Changes
