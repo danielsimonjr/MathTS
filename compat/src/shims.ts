@@ -231,6 +231,32 @@ export function atan2(y: number, x: number): number {
 
 export const sum = _sum;
 export const mean = _mean;
+
+// std/variance must match mathjs defaults — 'unbiased' (sample, ÷(N-1)). The
+// functions-package versions default to population (÷N) and reject a
+// normalization argument, so compat overrides them for mathjs parity.
+type Normalization = 'unbiased' | 'uncorrected' | 'biased';
+
+function toNumericArray(data: unknown): number[] {
+  if (data instanceof DenseMatrix) return (data.toArray().flat(Infinity) as number[]);
+  if (Array.isArray(data)) return ((data as unknown[]).flat(Infinity) as number[]);
+  return [data as number];
+}
+
+export function variance(data: unknown, normalization: Normalization = 'unbiased'): number {
+  const arr = toNumericArray(data);
+  const n = arr.length;
+  if (n === 0) return NaN;
+  const mu = arr.reduce((s, x) => s + x, 0) / n;
+  const ss = arr.reduce((s, x) => s + (x - mu) * (x - mu), 0);
+  const denom =
+    normalization === 'uncorrected' ? n : normalization === 'biased' ? n + 1 : n > 1 ? n - 1 : n;
+  return ss / denom;
+}
+
+export function std(data: unknown, normalization: Normalization = 'unbiased'): number {
+  return Math.sqrt(variance(data, normalization));
+}
 export const min = _min;
 export const max = _max;
 
@@ -499,6 +525,8 @@ export const shims = {
   // Statistics
   sum,
   mean,
+  std,
+  variance,
   min,
   max,
 
