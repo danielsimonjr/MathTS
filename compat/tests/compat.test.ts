@@ -217,13 +217,16 @@ describe('@danielsimonjr/mathts-compat', () => {
       expect(t.get(0, 1)).toBe(4);
     });
 
-    it('transpose() should work with arrays', () => {
+    it('transpose() should work with arrays (array in → array out, like mathjs)', () => {
       const t = transpose([
         [1, 2],
         [3, 4],
       ]);
 
-      expect(t.get(0, 1)).toBe(3);
+      expect(t).toEqual([
+        [1, 3],
+        [2, 4],
+      ]);
     });
 
     it('det() should compute determinant', () => {

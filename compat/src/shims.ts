@@ -322,11 +322,14 @@ export function arg(c: Complex): number {
 // =============================================================================
 
 /**
- * Transpose matrix (mathjs-compatible)
+ * Transpose matrix (mathjs-compatible). Array in → array out (mathjs returns a
+ * plain nested array for array input, a Matrix for Matrix input).
  */
-export function transpose(m: DenseMatrix | SparseMatrix | number[][]): DenseMatrix | SparseMatrix {
+export function transpose(
+  m: DenseMatrix | SparseMatrix | number[][]
+): DenseMatrix | SparseMatrix | number[][] {
   if (Array.isArray(m)) {
-    return DenseMatrix.fromArray(m).transpose();
+    return DenseMatrix.fromArray(m).transpose().toArray();
   }
   return m.transpose();
 }
