@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-wasm
 
+## 0.1.4
+
+### Patch Changes (Packaging fix)
+
+- Fix package entry points: `main`, `types`, and the `.` export pointed at
+  `build/release.js` / `build/release.d.ts`, which the AssemblyScript build
+  never emits (asconfig's release target outputs `build/mathts.wasm` with ESM
+  bindings `build/mathts.js` / `build/mathts.d.ts`). A direct
+  `import '@danielsimonjr/mathts-wasm'` therefore resolved to a nonexistent
+  file in 0.1.1–0.1.3. Entry points now reference the real `build/mathts.js`
+  / `build/mathts.d.ts`. No source or WASM-binary changes — the `mathts.wasm`
+  binary is byte-identical to 0.1.3.
+
 ## 0.1.3
 
 ### Patch Changes (Security — additive)
