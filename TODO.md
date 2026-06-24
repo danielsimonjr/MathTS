@@ -24,6 +24,7 @@ non-decision).
 | 5   | **Mathematical-correctness audit (external-oracle pass)**| 0    | Medium      | Per the 2026-05-25 audit's "What was NOT audited": tests verify "what we computed" matches "what we expected", but neither catches shared misunderstandings. Cross-check a representative spread of functions against scipy / mpmath / Wolfram. |
 | 6   | **Address the audit B-3 through B-10 findings**          | 5    | Variable    | See `BUG_AUDIT_2026-05-25.md` — cross-package WASM dist-hop (B-3), 3 SVD `it.skip` failures (B-4), mathjs upstream drift (B-5), turbo dep advisory (B-7), AssignmentNode FIXME (B-8), Unit.ts `@ts-nocheck` (B-9), Rust unused_assignments warnings (B-10). |
 | 7   | **Fix tensor test timeout regression**                   | 0    | Trivial     | ✅ Done 2026-05-25 — added `{ timeout: 15_000 }` as the **2nd argument** to `it()` per Vitest 4's API. (The earlier TODO entry suggested `it('...', () => {...}, { timeout })` — the trailing-options form, which was deprecated in Vitest 3 and is a hard error in Vitest 4 with the message *"Signature 'test(name, fn, { ... })' was deprecated in Vitest 3 and removed in Vitest 4. Please, provide options as a second argument instead."*) Test now completes in ~4s. |
+| 8   | **typed-function nested-dispatch bug breaks `polynomialRoot` cubic + `cbrt(x, true)`** | 0 | High (fork) | See "🐞 Known Defects → Open (2026-06-23)" below. Distinct from the 2026-05-22 rest-arg-packing fix. `solve` already sidesteps it; `polynomialRoot`'s cubic branch stays broken until fixed. |
 
 Detail:
 
@@ -813,6 +814,49 @@ below are limited to operations that genuinely clear that bar.
       a separate research effort beyond the existing matrix-op `gpu*` functions.
 
 ## 🐞 Known Defects
+
+### Open (2026-06-23)
+
+- [ ] **typed-function nested-dispatch loses variadic / multi-arg signatures.**
+      A variadic typed-function (e.g. `add`'s `'number, number, ...number'`)
+      dispatches correctly when called at top level but **fails when called from
+      inside another typed-function's active dispatch**. Confirmed by runtime
+      instrumentation of `functions/src/algebra/polynomialRoot.ts`'s cubic branch:
+
+      ```
+      // inside polynomialRoot's impl, same `add` object, consecutive lines:
+      add2(1, 2, 3)            // => 6        (works)
+      add2(5184, 5324, 972)    // => throws "Too many arguments in function
+                               //            add (expected: 2, actual: 3)"
+      // standalone, same values: math.add(5184, 5324, 972) => 11480 (works)
+      // probe: add2 === module add, add2.signatures has the '...number' entry (13 sigs)
+      ```
+
+      This is **distinct from** the 2026-05-22 rest-arg-packing fix (see
+      "🔧 Typed-Layer Expansion → Variadic typed-function dispatch bug"): that one
+      was about `'...T'` arriving as a packed array vs JS spread and is fixed. This
+      one is about the *dispatcher itself* dropping the variadic signature under
+      nested (re-entrant) dispatch — a `typed-function` fork bug
+      (`github:danielsimonjr/typed-function`). Likely affects any function that
+      calls a variadic op while itself mid-dispatch.
+
+- [ ] **`cbrt` is missing its `allRoots` (2-arg) signature.** `cbrt(8, true)`
+      throws "Too many arguments in function cbrt (expected: 1, actual: 2)". Stock
+      mathjs's `cbrt(x, allRoots)` returns all three (complex) cube roots; this
+      port only registered the 1-arg signatures
+      (`['number','Complex','BigNumber','Float64Array']`). Needed by
+      `polynomialRoot`'s cubic branch (`cbrt(Ccubed, true)`).
+
+- [ ] **`polynomialRoot` cubic branch is non-functional** (blocked by the two
+      defects above — 3-arg `add` under nested dispatch **and** missing
+      `cbrt` allRoots). Linear and quadratic work (incl. complex, after the
+      2026-06-23 Complex `.sub`/`.mul`/`.div` alias + 1-D matrix-bridge fixes in
+      `core`/`functions`). The user-facing `solve` (CAS, `functions/src/typed/cas.ts`)
+      does **not** use `polynomialRoot` — it computes degree-≤3 roots in plain
+      arithmetic — so equation-solving is unaffected. Fix order once the
+      typed-function bug is resolved: (1) add `cbrt` allRoots, (2) re-verify
+      `polynomialRoot` cubic, (3) optionally have `solve` delegate to it.
+      Repro lives in math-mcp `CHANGELOG.md` (4.1.1) and `CLAUDE.md`.
 
 ### Fixed (2026-05-22)
 
