@@ -23,6 +23,9 @@
 import { parse, evaluate } from '../factories/evaluate.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { Complex } from '@danielsimonjr/mathts-core';
+// Reuse the Algebra closed-form root finder for degree ≤ 3 (linear/quadratic/
+// cubic, real + complex) instead of duplicating the formulas here.
+import { polynomialRoot } from '../factories/index.js';
 
 // =============================================================================
 // Type Aliases
@@ -909,54 +912,9 @@ export function seriesCoefficient(expr: string, varName: string, x0: f64, k: num
  * solve('x^2 + 2*x + 1', 'x') // => [-1]
  * solve('2*x - 6', 'x')       // => [3]
  */
-/** Real-valued cube root (handles negatives). */
-function realCbrt(x: f64): f64 {
-  return x < 0 ? -Math.pow(-x, 1 / 3) : Math.pow(x, 1 / 3);
-}
-
-/** Exact roots of a·x² + b·x + c (a ≠ 0); real numbers and/or Complex. */
-function quadraticRoots(a: f64, b: f64, c: f64): Array<f64 | Complex> {
-  const disc = b * b - 4 * a * c;
-  if (disc >= 0) {
-    const s = Math.sqrt(disc);
-    return [(-b + s) / (2 * a), (-b - s) / (2 * a)];
-  }
-  const s = Math.sqrt(-disc);
-  const re = -b / (2 * a);
-  const im = s / (2 * a);
-  return [new Complex(re, im), new Complex(re, -im)];
-}
-
-/** Exact roots of a·x³ + b·x² + c·x + d (a ≠ 0), via Cardano / trigonometric form. */
-function cubicRoots(a: f64, b: f64, c: f64, d: f64): Array<f64 | Complex> {
-  const B = b / a;
-  const C = c / a;
-  const D = d / a;
-  // Depressed cubic t³ + p·t + q with x = t − B/3.
-  const p = C - (B * B) / 3;
-  const q = (2 * B * B * B) / 27 - (B * C) / 3 + D;
-  const shift = -B / 3;
-  const disc = (q * q) / 4 + (p * p * p) / 27;
-
-  if (Math.abs(disc) < 1e-12) {
-    if (Math.abs(p) < 1e-12 && Math.abs(q) < 1e-12) return [shift];
-    const u = realCbrt(-q / 2);
-    return [2 * u + shift, -u + shift];
-  }
-  if (disc > 0) {
-    const sq = Math.sqrt(disc);
-    const u = realCbrt(-q / 2 + sq);
-    const v = realCbrt(-q / 2 - sq);
-    const realPart = -(u + v) / 2 + shift;
-    const imagPart = ((u - v) * Math.sqrt(3)) / 2;
-    return [u + v + shift, new Complex(realPart, imagPart), new Complex(realPart, -imagPart)];
-  }
-  // disc < 0 → three distinct real roots (p < 0 here).
-  const m = 2 * Math.sqrt(-p / 3);
-  let arg = ((3 * q) / (2 * p)) * Math.sqrt(-3 / p);
-  arg = Math.max(-1, Math.min(1, arg));
-  const theta = Math.acos(arg) / 3;
-  return [0, 1, 2].map((k) => m * Math.cos(theta - (2 * Math.PI * k) / 3) + shift);
+/** Duck-typed Complex check (works for any Complex-shaped root). */
+function isComplexRoot(r: unknown): r is { re: number; im: number } {
+  return typeof r === 'object' && r !== null && 're' in r && 'im' in r;
 }
 
 /**
@@ -1092,23 +1050,38 @@ export function solve(equation: string, varName: string): Array<f64 | Complex> {
     expr = `${parts[0].trim()} - (${parts[1].trim()})`;
   }
 
-  // Exact path: polynomial of degree ≤ 3.
+  // Exact path: polynomial of degree ≤ 3 — delegate to the Algebra solver
+  // `polynomialRoot` (linear/quadratic/cubic closed form, real + complex).
   const coeffs = polyCoeffsDeg3(expr, varName);
   if (coeffs) {
     const [c0, c1, c2, c3] = coeffs;
     const eps = 1e-9;
-    let raw: Array<f64 | Complex> = [];
-    if (Math.abs(c3) > eps) raw = cubicRoots(c3, c2, c1, c0);
-    else if (Math.abs(c2) > eps) raw = quadraticRoots(c2, c1, c0);
-    else if (Math.abs(c1) > eps) raw = [-c0 / c1];
-    else raw = []; // constant: identity (c0≈0) or no solution — no isolated roots
+    let degree = 0;
+    if (Math.abs(c3) > eps) degree = 3;
+    else if (Math.abs(c2) > eps) degree = 2;
+    else if (Math.abs(c1) > eps) degree = 1;
+
+    if (degree === 0) {
+      // Constant: identity (c0 ≈ 0) or no solution — no isolated roots.
+      return [];
+    }
+
+    let raw: unknown[];
+    try {
+      // polynomialRoot(constant, linear, quadratic?, cubic?) — pass up to degree.
+      const args = [c0, c1, c2, c3].slice(0, degree + 1);
+      raw = (polynomialRoot as (...a: number[]) => unknown[])(...args);
+    } catch {
+      // Fall back to numeric scan if the closed-form solver rejects the input.
+      return numericRealRoots(expr, varName);
+    }
 
     // Clean + dedupe: real roots first (sorted), then complex.
     const reals: f64[] = [];
     const complexRoots: Complex[] = [];
     const seen = new Set<string>();
     for (const r of raw) {
-      if (r instanceof Complex) {
+      if (isComplexRoot(r)) {
         if (Math.abs(r.im) < 1e-10) {
           pushReal(r.re);
         } else {
@@ -1121,7 +1094,7 @@ export function solve(equation: string, varName: string): Array<f64 | Complex> {
           }
         }
       } else {
-        pushReal(r);
+        pushReal(r as f64);
       }
     }
     function cleanComponent(x: f64): f64 {

@@ -74,11 +74,19 @@ export const add = mathTyped('add', {
     return result.result;
   },
 
-  // Variadic addition. NOTE: this repo's typed-function fork delivers
-  // variadic rest args as a single array argument (`fn(a, b, [...rest])`),
-  // so the parameter is declared as a plain array — no JS spread.
-  'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 =>
-    rest.reduce((acc: f64, val: f64): f64 => acc + val, a + b),
+  // Variadic addition over ANY types (mathjs parity). Folds pairwise through the
+  // binary `add`, so Complex / Fraction / BigNumber / mixed arguments work — not
+  // only number. (Needed e.g. by polynomialRoot's `add(b, C, …)` where C is a
+  // complex cube root.) NOTE: this typed-function fork delivers the variadic
+  // rest as a single packed array argument, not via JS spread.
+  'any, any, ...any': (a: unknown, b: unknown, rest: unknown[]): unknown => {
+    const op = add as unknown as (x: unknown, y: unknown) => unknown;
+    let result = op(a, b);
+    for (let i = 0; i < rest.length; i++) {
+      result = op(result, rest[i]);
+    }
+    return result;
+  },
 });
 
 // =============================================================================
@@ -159,9 +167,17 @@ export const multiply = mathTyped('multiply', {
     return result.result;
   },
 
-  // Variadic multiplication (see variadic-add note about rest-array shape).
-  'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 =>
-    rest.reduce((acc: f64, val: f64): f64 => acc * val, a * b),
+  // Variadic multiplication over ANY types (mathjs parity); folds pairwise
+  // through the binary `multiply`. See the variadic-add note above re: types and
+  // the packed-array rest shape.
+  'any, any, ...any': (a: unknown, b: unknown, rest: unknown[]): unknown => {
+    const op = multiply as unknown as (x: unknown, y: unknown) => unknown;
+    let result = op(a, b);
+    for (let i = 0; i < rest.length; i++) {
+      result = op(result, rest[i]);
+    }
+    return result;
+  },
 });
 
 // =============================================================================
