@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-compat
 
+## 0.1.9
+
+### Patch Changes
+
+- `add`/`subtract`/`multiply` are now variadic (mathjs parity): they fold over all arguments instead of dropping the 3rd+ operand. Previously `add(1, 2, 3)` returned `3` and `multiply(2, 3, 4)` returned `6`. Matrix operands and 2-arg calls are unchanged.
+- Repin to `@danielsimonjr/mathts-core@^0.1.5` and `@danielsimonjr/mathts-functions@^0.2.8`.
+
 ## 0.1.8
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.1.5
+
+### Patch Changes
+
+- `Complex` now exposes short-name arithmetic aliases `sub`/`mul`/`div`/`neg` (delegating to `subtract`/`multiply`/`divide`/`negate`). The functions-package typed arithmetic (`subtractScalar`, etc.) calls the short names on scalars; a core `Complex` (e.g. from `sqrt(-4)`) flowing into those paths previously threw `x.sub is not a function`. Mirrors the existing `Fraction` short-alias fix.
+
 ## 0.1.4
 
 ### Minor Changes

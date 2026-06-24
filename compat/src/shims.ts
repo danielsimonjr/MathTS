@@ -43,7 +43,13 @@ import {
   ceil as _ceil,
 } from '@danielsimonjr/mathts-functions';
 
-import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import {
+  DenseMatrix,
+  SparseMatrix,
+  add as _matAdd,
+  subtract as _matSubtract,
+  multiply as _matMultiply,
+} from '@danielsimonjr/mathts-matrix';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)
@@ -148,9 +154,64 @@ export function sparse(data?: number[][]): SparseMatrix {
 // Arithmetic Function Shims
 // =============================================================================
 
-export const add = _add;
-export const subtract = _subtract;
-export const multiply = _multiply;
+// add/subtract/multiply must be matrix-aware for mathjs parity: the
+// functions-package versions are scalar-only and throw on number[][]. Delegate
+// 2-D array / DenseMatrix operands to the matrix package, scalars to functions.
+type MatrixLike = number[][] | DenseMatrix;
+
+const isMatrixLike = (x: unknown): x is MatrixLike =>
+  x instanceof DenseMatrix ||
+  (Array.isArray(x) && x.length > 0 && Array.isArray((x as unknown[])[0]));
+
+const toDenseMatrix = (x: MatrixLike): DenseMatrix =>
+  x instanceof DenseMatrix ? x : DenseMatrix.fromArray(x as number[][]);
+
+const unwrap = (r: unknown): unknown =>
+  r instanceof DenseMatrix ? r.toArray() : r;
+
+const applyArithmetic = (
+  scalarFn: (a: unknown, b: unknown) => unknown,
+  matrixFn: (a: unknown, b: unknown) => unknown,
+  a: unknown,
+  b: unknown,
+): unknown => {
+  if (isMatrixLike(a) || isMatrixLike(b)) {
+    const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
+    const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
+    return unwrap(matrixFn(aa, bb));
+  }
+  return scalarFn(a, b);
+};
+
+// mathjs `add`/`subtract`/`multiply` are variadic and left-fold over all
+// arguments: add(x, y, z, …) === add(add(x, y), z), …. A 2-arg-only wrapper
+// silently dropped the 3rd+ operand (add(1,2,3) returned 3), which also broke
+// internal callers like polynomialRoot's cubic branch. Fold over every arg.
+const makeArithmetic = (
+  scalarFn: (a: unknown, b: unknown) => unknown,
+  matrixFn: (a: unknown, b: unknown) => unknown,
+) => (...args: unknown[]): unknown => {
+  if (args.length === 0) {
+    throw new TypeError('Too few arguments (expected at least 1)');
+  }
+  if (args.length === 1) {
+    return args[0];
+  }
+  return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next));
+};
+
+export const add = makeArithmetic(
+  _add as (a: unknown, b: unknown) => unknown,
+  _matAdd as (a: unknown, b: unknown) => unknown,
+) as typeof _add;
+export const subtract = makeArithmetic(
+  _subtract as (a: unknown, b: unknown) => unknown,
+  _matSubtract as (a: unknown, b: unknown) => unknown,
+) as typeof _subtract;
+export const multiply = makeArithmetic(
+  _multiply as (a: unknown, b: unknown) => unknown,
+  _matMultiply as (a: unknown, b: unknown) => unknown,
+) as typeof _multiply;
 export const divide = _divide;
 export const pow = _pow;
 export const sqrt = _sqrt;
@@ -189,6 +250,32 @@ export function atan2(y: number, x: number): number {
 
 export const sum = _sum;
 export const mean = _mean;
+
+// std/variance must match mathjs defaults — 'unbiased' (sample, ÷(N-1)). The
+// functions-package versions default to population (÷N) and reject a
+// normalization argument, so compat overrides them for mathjs parity.
+type Normalization = 'unbiased' | 'uncorrected' | 'biased';
+
+function toNumericArray(data: unknown): number[] {
+  if (data instanceof DenseMatrix) return (data.toArray().flat(Infinity) as number[]);
+  if (Array.isArray(data)) return ((data as unknown[]).flat(Infinity) as number[]);
+  return [data as number];
+}
+
+export function variance(data: unknown, normalization: Normalization = 'unbiased'): number {
+  const arr = toNumericArray(data);
+  const n = arr.length;
+  if (n === 0) return NaN;
+  const mu = arr.reduce((s, x) => s + x, 0) / n;
+  const ss = arr.reduce((s, x) => s + (x - mu) * (x - mu), 0);
+  const denom =
+    normalization === 'uncorrected' ? n : normalization === 'biased' ? n + 1 : n > 1 ? n - 1 : n;
+  return ss / denom;
+}
+
+export function std(data: unknown, normalization: Normalization = 'unbiased'): number {
+  return Math.sqrt(variance(data, normalization));
+}
 export const min = _min;
 export const max = _max;
 
@@ -254,11 +341,14 @@ export function arg(c: Complex): number {
 // =============================================================================
 
 /**
- * Transpose matrix (mathjs-compatible)
+ * Transpose matrix (mathjs-compatible). Array in → array out (mathjs returns a
+ * plain nested array for array input, a Matrix for Matrix input).
  */
-export function transpose(m: DenseMatrix | SparseMatrix | number[][]): DenseMatrix | SparseMatrix {
+export function transpose(
+  m: DenseMatrix | SparseMatrix | number[][]
+): DenseMatrix | SparseMatrix | number[][] {
   if (Array.isArray(m)) {
-    return DenseMatrix.fromArray(m).transpose();
+    return DenseMatrix.fromArray(m).transpose().toArray();
   }
   return m.transpose();
 }
@@ -457,6 +547,8 @@ export const shims = {
   // Statistics
   sum,
   mean,
+  std,
+  variance,
   min,
   max,
 

@@ -759,18 +759,20 @@ export class WasmLoader {
 
     const wasmFile = useAS ? 'mathts-as.wasm' : 'mathts.wasm';
 
-    // import.meta.url → file://<repo-root>/matrix/src/backends/WasmLoader.ts
-    // Three "../" hops: backends/ → src/ → matrix/ → <repo-root>
-    const resolvedUrl = new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url);
-
     if (this.isNode) {
+      // Preferred: package-relative artifact (dist/wasm/), robust across
+      // monorepo-source and published layouts (see wasm/resolve.ts).
+      const { resolvePackagedWasm } = await import('./wasm/resolve.js');
+      const found = await resolvePackagedWasm(import.meta.url, wasmFile);
+      if (found) return found;
+      // Legacy monorepo fallback: <repo-root>/lib/wasm/<file>.
       // `.pathname` on Windows yields "/C:/foo/bar.wasm", which fs.readFile
       // interprets as drive-relative ("C:\C:\foo\..."). fileURLToPath does
       // the platform-correct conversion (and decodes %-escapes).
       const { fileURLToPath } = await import('node:url');
-      return fileURLToPath(resolvedUrl);
+      return fileURLToPath(new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url));
     }
-    return resolvedUrl.href;
+    return new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url).href;
   }
 
   private async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {

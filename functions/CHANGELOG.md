@@ -1,5 +1,30 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.10
+
+### Fixed
+
+- **`add` / `multiply` are now variadic over any type (mathjs parity).** They previously declared only a `'number, number, ...number'` variadic, so 3+ arguments of `Complex` (or mixed number/Complex) threw `Too many arguments (expected 2, actual 3)`. This silently broke `polynomialRoot`'s cubic branch, whose rawRoots step calls `add(b, C, divide(Delta0, C))` with a complex cube root `C`. The variadic is now `'any, any, ...any'`, folding pairwise through the binary op. (A prior note had misattributed this to a typed-function "nested-dispatch" bug — typed-function was correct; the gap was purely the number-only variadic signature.)
+- **`polynomialRoot`'s cubic branch is functional again** (real, complex, and repeated roots), unblocked by the variadic fix above.
+
+### Changed
+
+- **`solve` (CAS) now delegates degree-≤3 root-finding to `polynomialRoot`** instead of duplicating quadratic/cubic formulas. It retains coefficient extraction, root cleaning (sorted reals then complex), and the numeric fallback for degree ≥ 4 / transcendental equations. Behavior and the public return shape are unchanged.
+
+## 0.2.9
+
+### Minor Changes
+
+- `solve(equation, variable)` (CAS) upgraded from numeric-real-only to a full equation solver: accepts both expression form and `lhs = rhs` form; returns **exact closed-form roots** for polynomials of degree ≤ 3, **including complex conjugates** (`solve('x^2 + 1 = 0', 'x')` → `[Complex(0,1), Complex(0,-1)]`; `solve('x^3 - 8', 'x')` → `[2, Complex(-1, √3), Complex(-1, -√3)]`). Degree ≥ 4 and transcendental equations keep the numeric real-root scan. Real roots are returned first (cleaned of float noise, sorted ascending, deduped) followed by complex roots. The return type widens from `number[]` to `Array<number | Complex>`; existing real-root behavior is unchanged.
+
+## 0.2.8
+
+### Patch Changes
+
+- `Complex` (functions-local) gains long-name aliases `subtract`/`multiply`/`divide`/`negate` (symmetric with the short names already present), so a `Complex` of either origin satisfies either calling convention.
+- `MathJSDenseMatrix` now handles 1-D matrices in `toArray`/`map`/`forEach`/`clone` (single-axis indices, flat data). Previously these assumed 2-D and threw `row2 is not iterable` on 1-D results such as `cbrt(x, true)`.
+- Repin to `@danielsimonjr/mathts-core@^0.1.5`.
+
 ## 0.2.7
 
 ### Patch Changes

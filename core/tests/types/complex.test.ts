@@ -397,3 +397,31 @@ describe('Complex', () => {
     });
   });
 });
+
+describe('Complex short-name aliases (regression: x.sub is not a function)', () => {
+  // The functions-package arithmetic (subtractScalar etc.) calls .sub/.mul/.div/.neg
+  // on scalars; a core Complex flowing into those paths (e.g. from sqrt(-4)) must
+  // answer to the short names too.
+  const a = new Complex(3, 4);
+  const b = new Complex(1, 2);
+
+  it('sub matches subtract', () => {
+    expect(a.sub(b)).toEqual(a.subtract(b));
+    expect(a.sub(b).re).toBe(2);
+    expect(a.sub(b).im).toBe(2);
+  });
+
+  it('mul matches multiply', () => {
+    expect(a.mul(b)).toEqual(a.multiply(b));
+  });
+
+  it('div matches divide', () => {
+    expect(a.div(b)).toEqual(a.divide(b));
+  });
+
+  it('neg matches negate', () => {
+    expect(a.neg()).toEqual(a.negate());
+    expect(a.neg().re).toBe(-3);
+    expect(a.neg().im).toBe(-4);
+  });
+});

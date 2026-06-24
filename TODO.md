@@ -24,6 +24,7 @@ non-decision).
 | 5   | **Mathematical-correctness audit (external-oracle pass)**| 0    | Medium      | Per the 2026-05-25 audit's "What was NOT audited": tests verify "what we computed" matches "what we expected", but neither catches shared misunderstandings. Cross-check a representative spread of functions against scipy / mpmath / Wolfram. |
 | 6   | **Address the audit B-3 through B-10 findings**          | 5    | Variable    | See `BUG_AUDIT_2026-05-25.md` — cross-package WASM dist-hop (B-3), 3 SVD `it.skip` failures (B-4), mathjs upstream drift (B-5), turbo dep advisory (B-7), AssignmentNode FIXME (B-8), Unit.ts `@ts-nocheck` (B-9), Rust unused_assignments warnings (B-10). |
 | 7   | **Fix tensor test timeout regression**                   | 0    | Trivial     | ✅ Done 2026-05-25 — added `{ timeout: 15_000 }` as the **2nd argument** to `it()` per Vitest 4's API. (The earlier TODO entry suggested `it('...', () => {...}, { timeout })` — the trailing-options form, which was deprecated in Vitest 3 and is a hard error in Vitest 4 with the message *"Signature 'test(name, fn, { ... })' was deprecated in Vitest 3 and removed in Vitest 4. Please, provide options as a second argument instead."*) Test now completes in ~4s. |
+| 8   | ~~typed-function nested-dispatch bug breaks `polynomialRoot` cubic~~ | 0 | — | ✅ **RESOLVED 2026-06-23 — and the typed-function diagnosis was WRONG.** Root cause was `typed/arithmetic.ts` `add`/`multiply` declaring only a `number`-variadic; `add(number, Complex, Complex)` (polynomialRoot's `add(b, C, …)`) had no match → "too many arguments". Fixed by making the variadics `'any, any, ...any'` (mathjs parity). typed-function was correct all along. See "🐞 Known Defects → Open (2026-06-23)" below (now corrected). |
 
 Detail:
 
@@ -813,6 +814,42 @@ below are limited to operations that genuinely clear that bar.
       a separate research effort beyond the existing matrix-op `gpu*` functions.
 
 ## 🐞 Known Defects
+
+### Fixed (2026-06-23) — and a retracted misdiagnosis
+
+> **Correction.** An earlier version of this section blamed a "typed-function
+> nested-dispatch bug" for breaking `polynomialRoot`'s cubic. **That diagnosis
+> was wrong.** typed-function was behaving correctly. Runtime instrumentation of
+> the *actual* failing call (the rawRoots step `add(b, C, divide(Delta0, C))`,
+> where `C` is a complex cube root) showed `add` being called as
+> `add(number, Complex, Complex)` — and `add` had no matching signature. The
+> "value-dependent / nested-only" appearance was a red herring: `add(5184,5324,972)`
+> (3 numbers) succeeded via the number variadic; the throw came later at the
+> Complex `add`. It is **type-dependent, not re-entrant**.
+
+- [x] **`add`/`multiply` variadics were `number`-only.** `typed/arithmetic.ts`
+      declared `'number, number, ...number'`, so 3+ arguments of `Complex` (or
+      mixed number/Complex) threw `Too many arguments (expected 2, actual 3)`.
+      Stock mathjs makes `add`/`multiply` variadic over `any` (folding pairwise
+      through the binary op). **Fixed** by replacing the number-variadic with
+      `'any, any, ...any'` that folds through the binary `add`/`multiply`.
+      Regression tests in `functions/tests/typed-variadic.test.ts`.
+
+- [x] **`polynomialRoot` cubic branch now works** (real, complex, and repeated
+      roots) — it was blocked solely by the `add`/`multiply` variadic gap above,
+      not by `cbrt` or typed-function. `cbrt(Ccubed, allRoots)` with a *Complex*
+      `Ccubed` (the only case polynomialRoot's cubic uses) works fine.
+
+- [x] **`math.solve` (CAS) now delegates degree-≤3 to `polynomialRoot`** instead
+      of carrying its own quadratic/cubic formulas — the Algebra solver is the
+      single source of closed-form roots; `solve` keeps coefficient extraction,
+      root cleaning, and the numeric fallback for degree ≥ 4 / transcendental.
+
+- [ ] **(Minor, open) `cbrt(number, allRoots=true)` is still unimplemented.**
+      `cbrt(8, true)` throws "Too many arguments (expected 1, actual 2)"; stock
+      mathjs returns the three complex cube roots. Only the **real-number** 2-arg
+      form is missing — the `Complex` allRoots path used by `polynomialRoot`
+      works. Low priority (no current consumer needs the real-number form).
 
 ### Fixed (2026-05-22)
 

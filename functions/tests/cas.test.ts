@@ -736,3 +736,45 @@ describe('CAS: Advanced', () => {
     });
   });
 });
+
+
+describe("CAS: Solver — enhanced (equations, complex, closed-form)", () => {
+  const isComplexRoot = (r) => r && typeof r === "object" && "im" in r;
+  it("accepts equation form with = sign", () => {
+    const roots = solve("x^2 - 4 = 0", "x");
+    expect(roots).toContain(-2);
+    expect(roots).toContain(2);
+  });
+  it("returns complex conjugate roots for x^2 + 1 = 0", () => {
+    const roots = solve("x^2 + 1 = 0", "x");
+    expect(roots).toHaveLength(2);
+    expect(roots.every(isComplexRoot)).toBe(true);
+    expect(roots[0].im).toBeCloseTo(1, 6);
+    expect(roots[1].im).toBeCloseTo(-1, 6);
+  });
+  it("returns 1 real + 2 complex roots for x^3 - 8 = 0", () => {
+    const roots = solve("x^3 - 8 = 0", "x");
+    expect(roots).toContain(2);
+    const complex = roots.filter(isComplexRoot);
+    expect(complex).toHaveLength(2);
+    expect(complex[0].re).toBeCloseTo(-1, 6);
+    expect(Math.abs(complex[0].im)).toBeCloseTo(Math.sqrt(3), 6);
+  });
+  it("solves x^2 - 2x + 2 = 0 (complex 1 ± i)", () => {
+    const roots = solve("x^2 - 2*x + 2 = 0", "x");
+    expect(roots.every(isComplexRoot)).toBe(true);
+    expect(roots[0].re).toBeCloseTo(1, 6);
+    expect(Math.abs(roots[0].im)).toBeCloseTo(1, 6);
+  });
+  it("falls back to numeric for a quartic (x^4 - 5x^2 + 4)", () => {
+    const roots = solve("x^4 - 5*x^2 + 4", "x");
+    for (const r of [-2, -1, 1, 2]) expect(roots).toContain(r);
+  });
+  it("finds a transcendental root (exp(x) - 2)", () => {
+    const roots = solve("exp(x) - 2", "x");
+    expect(roots.some((r) => typeof r === "number" && Math.abs(r - Math.log(2)) < 1e-4)).toBe(true);
+  });
+  it("throws on multiple = signs", () => {
+    expect(() => solve("x = 1 = 2", "x")).toThrow();
+  });
+});

@@ -190,6 +190,31 @@ export class Complex {
     return new Complex(-this.re, -this.im);
   }
 
+  // ------------------------------------------------------------
+  // Long-name aliases (core / Scalar calling convention)
+  //
+  // Symmetric with the short-name aliases added to the core Complex:
+  // some code paths (and the core Scalar interface) call
+  // `.subtract/.multiply/.divide/.negate`. Provide both naming
+  // conventions on both Complex classes so a Complex of either origin
+  // satisfies either caller.
+  // ------------------------------------------------------------
+  subtract(other: Complex | number): Complex {
+    return this.sub(other);
+  }
+
+  multiply(other: Complex | number): Complex {
+    return this.mul(other);
+  }
+
+  divide(other: Complex | number): Complex {
+    return this.div(other);
+  }
+
+  negate(): Complex {
+    return this.neg();
+  }
+
   /**
    * Absolute value (magnitude)
    */

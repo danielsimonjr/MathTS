@@ -24,7 +24,8 @@
   "scripts": {
     "asbuild:debug": "asc src/index.ts --target debug",
     "asbuild:release": "asc src/index.ts --target release",
-    "asbuild": "npm run asbuild:debug && npm run asbuild:release",
+    "asbuild": "npm run asbuild:debug && npm run asbuild:release && npm run gen:manifest",
+    "gen:manifest": "node scripts/gen-wasm-manifest.mjs",
     "build:bindings": "tsc -p tsconfig.bindings.json",
     "build": "npm run asbuild && npm run build:bindings",
     "clean": "rm -rf build/",

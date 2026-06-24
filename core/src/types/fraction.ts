@@ -315,6 +315,22 @@ export class Fraction implements IFraction {
     return this.divide(Fraction.fromNumber(Number(other.valueOf())));
   }
 
+  // Short-name aliases (mathjs Fraction API). Ported mathjs functions such as
+  // multiplyScalar/subtractScalar/divideScalar call x.mul/x.sub/x.div; without
+  // these, mixed number/Fraction dispatch (e.g. affine unit conversion like
+  // celsius→fahrenheit) threw "x.mul is not a function".
+  mul(other: Scalar): Fraction {
+    return this.multiply(other);
+  }
+
+  sub(other: Scalar): Fraction {
+    return this.subtract(other);
+  }
+
+  div(other: Scalar): Fraction {
+    return this.divide(other);
+  }
+
   /**
    * Negation: -(a/b) = -a/b
    */

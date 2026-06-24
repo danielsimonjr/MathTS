@@ -100,6 +100,8 @@ export interface MathInstance {
   // Statistics
   sum: typeof shims.sum;
   mean: typeof shims.mean;
+  std: typeof shims.std;
+  variance: typeof shims.variance;
   min: typeof shims.min;
   max: typeof shims.max;
 
@@ -217,6 +219,8 @@ export function create(
     // Statistics
     sum: shims.sum,
     mean: shims.mean,
+    std: shims.std,
+    variance: shims.variance,
     min: shims.min,
     max: shims.max,
 

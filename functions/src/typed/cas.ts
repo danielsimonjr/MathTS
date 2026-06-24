@@ -22,6 +22,10 @@
 
 import { parse, evaluate } from '../factories/evaluate.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { Complex } from '@danielsimonjr/mathts-core';
+// Reuse the Algebra closed-form root finder for degree ≤ 3 (linear/quadratic/
+// cubic, real + complex) instead of duplicating the formulas here.
+import { polynomialRoot } from '../factories/index.js';
 
 // =============================================================================
 // Type Aliases
@@ -908,13 +912,54 @@ export function seriesCoefficient(expr: string, varName: string, x0: f64, k: num
  * solve('x^2 + 2*x + 1', 'x') // => [-1]
  * solve('2*x - 6', 'x')       // => [3]
  */
-export function solve(expr: string, varName: string): f64[] {
-  // Try numerical root finding over a range
+/** Duck-typed Complex check (works for any Complex-shaped root). */
+function isComplexRoot(r: unknown): r is { re: number; im: number } {
+  return typeof r === 'object' && r !== null && 're' in r && 'im' in r;
+}
+
+/**
+ * Read [c0,c1,c2,c3] of `expr` in `varName`, confirming it is a polynomial of
+ * degree ≤ 3. Uses Newton forward differences on the integer grid 0..4 (the 4th
+ * difference must vanish) and validates at non-integer points. Returns null if
+ * the expression is not a degree-≤3 polynomial or cannot be evaluated there.
+ */
+function polyCoeffsDeg3(expr: string, varName: string): f64[] | null {
+  const at = (x: f64): f64 => {
+    const v = evalAt(expr, varName, x);
+    return typeof v === 'number' && Number.isFinite(v) ? v : NaN;
+  };
+  try {
+    const f = [0, 1, 2, 3, 4].map(at);
+    if (f.some((v) => !Number.isFinite(v))) return null;
+    const d1 = f[1] - f[0];
+    const d2 = f[2] - 2 * f[1] + f[0];
+    const d3 = f[3] - 3 * f[2] + 3 * f[1] - f[0];
+    const d4 = f[4] - 4 * f[3] + 6 * f[2] - 4 * f[1] + f[0];
+    const scale = Math.max(1, ...f.map(Math.abs));
+    if (Math.abs(d4) > 1e-7 * scale) return null; // degree ≥ 4 (or non-polynomial)
+    const c3 = d3 / 6;
+    const c2 = d2 / 2 - d3 / 2;
+    const c1 = d1 - d2 / 2 + d3 / 3;
+    const c0 = f[0];
+    const coeffs = [c0, c1, c2, c3];
+    // Validate the reconstruction against non-integer sample points.
+    for (const x of [-1.5, 0.5, 2.5, 3.5]) {
+      const recon = c0 + c1 * x + c2 * x * x + c3 * x * x * x;
+      const actual = at(x);
+      if (!Number.isFinite(actual)) return null;
+      if (Math.abs(recon - actual) > 1e-6 * (1 + Math.abs(actual))) return null;
+    }
+    return coeffs;
+  } catch {
+    return null;
+  }
+}
+
+/** Numeric real-root scan (sign change + bisection) — fallback for degree ≥ 4 / transcendental. */
+function numericRealRoots(expr: string, varName: string): f64[] {
   const roots: f64[] = [];
   const seen = new Set<string>();
-
   const addRoot = (r: f64) => {
-    // Clean up near-integer
     const rounded = Math.round(r);
     const clean = Math.abs(r - rounded) < 1e-8 ? rounded : r;
     const key = clean.toFixed(8);
@@ -923,13 +968,10 @@ export function solve(expr: string, varName: string): f64[] {
       roots.push(clean);
     }
   };
-
-  // Scan a range for sign changes and near-zero values
   const ranges = [
     { lo: -100, hi: 100, step: 0.1 },
     { lo: -1000, hi: 1000, step: 1 },
   ];
-
   for (const { lo, hi, step } of ranges) {
     for (let x = lo; x <= hi; x += step) {
       let fa: f64;
@@ -938,23 +980,17 @@ export function solve(expr: string, varName: string): f64[] {
       } catch {
         continue;
       }
-
-      // Check for exact (or near-exact) zero
       if (Math.abs(fa) < 1e-10) {
         addRoot(x);
         continue;
       }
-
-      // Check sign change with next point
       let fb: f64;
       try {
         fb = evalAt(expr, varName, x + step);
       } catch {
         continue;
       }
-
       if (fa * fb < 0) {
-        // Bisection to refine
         let a = x,
           b = x + step;
         let faB = fa;
@@ -978,10 +1014,108 @@ export function solve(expr: string, varName: string): f64[] {
     }
     if (roots.length > 0) break;
   }
-
-  // Sort roots
   roots.sort((a, b) => a - b);
   return roots;
+}
+
+/**
+ * Solve an equation or expression for a variable, returning its distinct roots.
+ *
+ * Accepts either an expression (treated as `expr = 0`) or a full equation with a
+ * single `=` sign. Polynomials of degree ≤ 3 yield exact closed-form roots —
+ * including complex conjugates — while higher-degree and transcendental
+ * equations fall back to a numeric scan for real roots. Real roots are returned
+ * first (cleaned of float noise and sorted ascending), followed by any complex
+ * roots.
+ *
+ * @example
+ * solve('x^2 - 4', 'x')       // => [-2, 2]
+ * solve('x^2 + 1 = 0', 'x')   // => [Complex(0, 1), Complex(0, -1)]
+ * solve('2*x - 6', 'x')       // => [3]
+ * solve('x^3 - 8', 'x')       // => [2, Complex(-1, 1.732…), Complex(-1, -1.732…)]
+ * solve('cos(x)', 'x')        // => numeric real roots
+ *
+ * @param equation - Expression (`expr = 0`) or equation with one `=` sign.
+ * @param varName  - Variable to solve for.
+ * @returns Distinct roots: real numbers (sorted) then Complex.
+ */
+export function solve(equation: string, varName: string): Array<f64 | Complex> {
+  // Normalize "lhs = rhs" to a root-finding expression "lhs - (rhs)".
+  let expr = equation;
+  if (equation.includes('=')) {
+    const parts = equation.split('=');
+    if (parts.length !== 2) {
+      throw new SyntaxError("solve: equation must contain at most one '=' sign");
+    }
+    expr = `${parts[0].trim()} - (${parts[1].trim()})`;
+  }
+
+  // Exact path: polynomial of degree ≤ 3 — delegate to the Algebra solver
+  // `polynomialRoot` (linear/quadratic/cubic closed form, real + complex).
+  const coeffs = polyCoeffsDeg3(expr, varName);
+  if (coeffs) {
+    const [c0, c1, c2, c3] = coeffs;
+    const eps = 1e-9;
+    let degree = 0;
+    if (Math.abs(c3) > eps) degree = 3;
+    else if (Math.abs(c2) > eps) degree = 2;
+    else if (Math.abs(c1) > eps) degree = 1;
+
+    if (degree === 0) {
+      // Constant: identity (c0 ≈ 0) or no solution — no isolated roots.
+      return [];
+    }
+
+    let raw: unknown[];
+    try {
+      // polynomialRoot(constant, linear, quadratic?, cubic?) — pass up to degree.
+      const args = [c0, c1, c2, c3].slice(0, degree + 1);
+      raw = (polynomialRoot as (...a: number[]) => unknown[])(...args);
+    } catch {
+      // Fall back to numeric scan if the closed-form solver rejects the input.
+      return numericRealRoots(expr, varName);
+    }
+
+    // Clean + dedupe: real roots first (sorted), then complex.
+    const reals: f64[] = [];
+    const complexRoots: Complex[] = [];
+    const seen = new Set<string>();
+    for (const r of raw) {
+      if (isComplexRoot(r)) {
+        if (Math.abs(r.im) < 1e-10) {
+          pushReal(r.re);
+        } else {
+          const re = cleanComponent(r.re);
+          const im = cleanComponent(r.im);
+          const key = `${re.toFixed(8)}|${im.toFixed(8)}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            complexRoots.push(new Complex(re, im));
+          }
+        }
+      } else {
+        pushReal(r as f64);
+      }
+    }
+    function cleanComponent(x: f64): f64 {
+      if (Math.abs(x) < 1e-10) return 0;
+      const rounded = Math.round(x);
+      return Math.abs(x - rounded) < 1e-8 ? rounded : x;
+    }
+    function pushReal(x: f64) {
+      const clean = cleanComponent(x);
+      const key = `r${clean.toFixed(8)}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        reals.push(clean);
+      }
+    }
+    reals.sort((a, b) => a - b);
+    return [...reals, ...complexRoots];
+  }
+
+  // Fallback: numeric real roots for degree ≥ 4 / transcendental equations.
+  return numericRealRoots(expr, varName);
 }
 
 /**
