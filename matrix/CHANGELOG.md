@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.1.7
+
+### Patch Changes
+
+- Publish the 2026-06-22 dense-matrix work that was committed after `0.1.6` was published (npm `0.1.6`, dated 2026-06-15, predates these and was stale): direct `Float64Array` access in the dense arithmetic hot loops (≈5× faster 800×800 multiply), and packaging/resolution of the bundled AssemblyScript WASM (`dist/wasm/`) for published/bundled layouts. No API changes.
+
 ## 0.1.6
 
 ### Patch Changes
