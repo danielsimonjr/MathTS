@@ -31,21 +31,48 @@ pub unsafe extern "C" fn erfArray(a_ptr: *const f64, n: i32, result_ptr: *mut f6
     }
 }
 
-/// Complementary error function erfc(x) computed directly to avoid catastrophic cancellation.
-/// Uses Abramowitz & Stegun approximation for 1 - erf(x).
+/// Complementary error function erfc(x).
+/// For the tail (x >= 1.5) uses the Abramowitz & Stegun 7.1.14 continued
+/// fraction (modified Lentz) directly — no 1 - erf cancellation — giving
+/// ~f64 accuracy in place of the legacy 7.1.26 rational (~1e-7).
 #[no_mangle]
 pub extern "C" fn erfc(x: f64) -> f64 {
-    let ax = libm::fabs(x);
-    let t = 1.0 / (1.0 + 0.3275911 * ax);
-    let poly = t
-        * (0.254829592
-            + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
-    let result = poly * libm::exp(-ax * ax);
-    if x < 0.0 {
-        2.0 - result
-    } else {
-        result
+    if x != x {
+        return f64::NAN;
     }
+    if x < 0.0 {
+        return 2.0 - erfc(-x);
+    }
+    if x < 1.5 {
+        // erfc ~ O(1) here, so 1 - erf loses no significant figures (erf is the
+        // accurate statrs implementation).
+        return 1.0 - erf(x);
+    }
+    let tiny = 1e-300_f64;
+    let a = x;
+    let mut f = if a < tiny { tiny } else { a };
+    let mut c = f;
+    let mut d = 0.0_f64;
+    let mut i = 1_i32;
+    while i <= 300 {
+        let ai = i as f64 / 2.0;
+        d = a + ai * d;
+        if d == 0.0 {
+            d = tiny;
+        }
+        d = 1.0 / d;
+        c = a + ai / c;
+        if c == 0.0 {
+            c = tiny;
+        }
+        let delta = c * d;
+        f *= delta;
+        if libm::fabs(delta - 1.0) < 1e-16 {
+            break;
+        }
+        i += 1;
+    }
+    libm::exp(-a * a) / libm::sqrt(PI) / f
 }
 
 /// Compute erfc for an array.
@@ -244,59 +271,151 @@ pub unsafe extern "C" fn digammaArray(a_ptr: *const f64, n: i32, result_ptr: *mu
     }
 }
 
+// =============================================================================
+// Bessel J0/J1/Y0/Y1 — ascending series (|x| <= 13) + Hankel asymptotic.
+// Replaces the legacy NR rational approximations (~1e-7 J, ~1e-4 Y); coefficients
+// generated in-loop. Validated to <1e-9 vs mpmath. Mirrors assembly/src/special.ts.
+// =============================================================================
+const SF_EULER_GAMMA: f64 = 0.5772156649015328606;
+const SF_TWO_OVER_PI: f64 = 0.63661977236758134308;
+const SF_ONE_OVER_PI: f64 = 0.31830988618379067154;
+const BESSEL_SERIES_MAX: f64 = 13.0;
+
+/// Hankel asymptotic for J_nu / Y_nu (nu = 0 or 1), large x.
+fn bessel_hankel(nu: f64, x: f64, want_y: bool) -> f64 {
+    let mu = 4.0 * nu * nu;
+    let mut p = 1.0_f64;
+    let mut q = 0.0_f64;
+    let mut a = 1.0_f64;
+    let mut xk = 1.0_f64;
+    let mut prev_mag = f64::INFINITY;
+    let mut k = 1_i32;
+    while k <= 40 {
+        let t1 = (2 * k - 1) as f64;
+        a = a * (mu - t1 * t1) / (8.0 * k as f64);
+        xk *= x;
+        let t = a / xk;
+        let mag = libm::fabs(t);
+        if mag > prev_mag {
+            break;
+        }
+        prev_mag = mag;
+        let m4 = k & 3;
+        let s = if m4 == 1 || m4 == 0 { 1.0 } else { -1.0 };
+        if k & 1 == 1 {
+            q += s * t;
+        } else {
+            p += s * t;
+        }
+        k += 1;
+    }
+    let chi = x - (nu * 0.5 + 0.25) * PI;
+    let amp = libm::sqrt(2.0 / (PI * x));
+    if want_y {
+        amp * (p * libm::sin(chi) + q * libm::cos(chi))
+    } else {
+        amp * (p * libm::cos(chi) - q * libm::sin(chi))
+    }
+}
+
+fn bessel_j0_series(x: f64) -> f64 {
+    let z = -0.25 * x * x;
+    let mut term = 1.0_f64;
+    let mut sum = 1.0_f64;
+    let mut k = 1_i32;
+    while k <= 80 {
+        term *= z / (k as f64 * k as f64);
+        sum += term;
+        if libm::fabs(term) <= libm::fabs(sum) * 1e-17 {
+            break;
+        }
+        k += 1;
+    }
+    sum
+}
+
+fn bessel_j1_series(x: f64) -> f64 {
+    let z = -0.25 * x * x;
+    let mut term = 1.0_f64;
+    let mut sum = 1.0_f64;
+    let mut k = 1_i32;
+    while k <= 80 {
+        term *= z / (k as f64 * (k as f64 + 1.0));
+        sum += term;
+        if libm::fabs(term) <= libm::fabs(sum) * 1e-17 {
+            break;
+        }
+        k += 1;
+    }
+    0.5 * x * sum
+}
+
+fn bessel_y0_series(x: f64) -> f64 {
+    let z = 0.25 * x * x;
+    let mut u = 1.0_f64;
+    let mut h = 0.0_f64;
+    let mut s = 0.0_f64;
+    let mut sign = 1.0_f64;
+    let mut k = 1_i32;
+    while k <= 80 {
+        u *= z / (k as f64 * k as f64);
+        h += 1.0 / k as f64;
+        let d = sign * h * u;
+        s += d;
+        sign = -sign;
+        if k > 2 && libm::fabs(d) <= libm::fabs(s) * 1e-17 {
+            break;
+        }
+        k += 1;
+    }
+    SF_TWO_OVER_PI * ((libm::log(0.5 * x) + SF_EULER_GAMMA) * bessel_j0_series(x) + s)
+}
+
+fn bessel_y1_series(x: f64) -> f64 {
+    let z = -0.25 * x * x;
+    let mut v = 0.5 * x;
+    let mut hk = 0.0_f64;
+    let mut hk1 = 1.0_f64;
+    let mut s = (hk + hk1) * v;
+    let mut k = 1_i32;
+    while k <= 80 {
+        v *= z / (k as f64 * (k as f64 + 1.0));
+        hk += 1.0 / k as f64;
+        hk1 += 1.0 / (k as f64 + 1.0);
+        let d = (hk + hk1) * v;
+        s += d;
+        if k > 2 && libm::fabs(d) <= libm::fabs(s) * 1e-17 {
+            break;
+        }
+        k += 1;
+    }
+    SF_TWO_OVER_PI * (libm::log(0.5 * x) + SF_EULER_GAMMA) * bessel_j1_series(x)
+        - SF_TWO_OVER_PI / x
+        - SF_ONE_OVER_PI * s
+}
+
 /// Bessel J0(x).
 #[no_mangle]
 pub extern "C" fn besselJ0(x: f64) -> f64 {
-    let x = libm::fabs(x);
-    if x < 8.0 {
-        let y = x * x;
-        let ans1 = 57568490574.0
-            + y * (-13362590354.0
-                + y * (651619640.7 + y * (-11214424.18 + y * (77392.33017 + y * -184.9052456))));
-        let ans2 = 57568490411.0
-            + y * (1029532985.0 + y * (9494680.718 + y * (59272.64853 + y * (267.8532712 + y))));
-        ans1 / ans2
+    let ax = libm::fabs(x);
+    if ax <= BESSEL_SERIES_MAX {
+        bessel_j0_series(ax)
     } else {
-        let z = 8.0 / x;
-        let y = z * z;
-        let xx = x - 0.785398164;
-        let ans1 = 1.0
-            + y * (-0.001098628627
-                + y * (0.00002734510407 + y * (-0.000002073370639 + y * 0.0000002093887211)));
-        let ans2 = -0.01562499995
-            + y * (0.0001430488765
-                + y * (-0.000006911147651 + y * (0.0000007621095161 - y * 0.0000000934935152)));
-        libm::sqrt(0.636619772 / x) * (libm::cos(xx) * ans1 - z * libm::sin(xx) * ans2)
+        bessel_hankel(0.0, ax, false)
     }
 }
 
 /// Bessel J1(x).
 #[no_mangle]
 pub extern "C" fn besselJ1(x: f64) -> f64 {
+    let ax = libm::fabs(x);
     let sign = if x < 0.0 { -1.0 } else { 1.0 };
-    let x = libm::fabs(x);
-    if x < 8.0 {
-        let y = x * x;
-        let ans1 = x
-            * (72362614232.0
-                + y * (-7895059235.0
-                    + y * (242396853.1
-                        + y * (-2972611.439 + y * (15704.4826 + y * -30.16036606)))));
-        let ans2 = 144725228442.0
-            + y * (2300535178.0 + y * (18583304.74 + y * (99447.43394 + y * (376.9991397 + y))));
-        (sign * ans1) / ans2
+    let val = if ax <= BESSEL_SERIES_MAX {
+        bessel_j1_series(ax)
     } else {
-        let z = 8.0 / x;
-        let y = z * z;
-        let xx = x - 2.356194491;
-        let ans1 = 1.0
-            + y * (0.00183105
-                + y * (-0.00003516396496 + y * (0.000002457520174 - y * 0.0000002404127372)));
-        let ans2 = 0.04687499995
-            + y * (-0.0002002690873
-                + y * (0.000008449199096 + y * (-0.0000008820898866 + y * 0.0000001057874125)));
-        sign * libm::sqrt(0.636619772 / x) * (libm::cos(xx) * ans1 - z * libm::sin(xx) * ans2)
-    }
+        bessel_hankel(1.0, ax, false)
+    };
+    sign * val
 }
 
 /// Bessel Y0(x) (x > 0).
@@ -305,25 +424,10 @@ pub extern "C" fn besselY0(x: f64) -> f64 {
     if x <= 0.0 {
         return f64::NAN;
     }
-    if x < 8.0 {
-        let y = x * x;
-        let ans1 = -2957821389.0
-            + y * (7062834065.0
-                + y * (-512359803.6 + y * (10879881.29 + y * (-86327.92757 + y * 228.4622733))));
-        let ans2 = 40076544269.0
-            + y * (745249964.8 + y * (7189466.438 + y * (47447.2647 + y * (226.1030244 + y))));
-        ans1 / ans2 + 0.636619772 * besselJ0(x) * libm::log(x)
+    if x <= BESSEL_SERIES_MAX {
+        bessel_y0_series(x)
     } else {
-        let z = 8.0 / x;
-        let y = z * z;
-        let xx = x - 0.785398164;
-        let ans1 = 1.0
-            + y * (-0.001098628627
-                + y * (0.00002734510407 + y * (-0.000002073370639 + y * 0.0000002093887211)));
-        let ans2 = -0.01562499995
-            + y * (0.0001430488765
-                + y * (-0.000006911147651 + y * (0.0000007621095161 - y * 0.0000000934935152)));
-        libm::sqrt(0.636619772 / x) * (libm::sin(xx) * ans1 + z * libm::cos(xx) * ans2)
+        bessel_hankel(0.0, x, true)
     }
 }
 
@@ -333,29 +437,10 @@ pub extern "C" fn besselY1(x: f64) -> f64 {
     if x <= 0.0 {
         return f64::NAN;
     }
-    if x < 8.0 {
-        let y = x * x;
-        let ans1 = x
-            * (-4900604943000.0
-                + y * (1275274390000.0
-                    + y * (-51534381390.0
-                        + y * (734926455.1 + y * (-4237922.726 + y * 8511.937935)))));
-        let ans2 = 24909857380000.0
-            + y * (424441966400.0
-                + y * (3733650367.0
-                    + y * (22459040.02 + y * (102042.605 + y * (354.9632885 + y)))));
-        ans1 / ans2 + 0.636619772 * (besselJ1(x) * libm::log(x) - 1.0 / x)
+    if x <= BESSEL_SERIES_MAX {
+        bessel_y1_series(x)
     } else {
-        let z = 8.0 / x;
-        let y = z * z;
-        let xx = x - 2.356194491;
-        let ans1 = 1.0
-            + y * (0.00183105
-                + y * (-0.00003516396496 + y * (0.000002457520174 - y * 0.0000002404127372)));
-        let ans2 = 0.04687499995
-            + y * (-0.0002002690873
-                + y * (0.000008449199096 + y * (-0.0000008820898866 + y * 0.0000001057874125)));
-        libm::sqrt(0.636619772 / x) * (libm::sin(xx) * ans1 + z * libm::cos(xx) * ans2)
+        bessel_hankel(1.0, x, true)
     }
 }
 
@@ -379,7 +464,8 @@ pub unsafe extern "C" fn besselJ_wasm(n: i32, x: f64) -> f64 {
         return 0.0;
     }
 
-    let result = if ni <= 20 || libm::fabs(x) > ni as f64 {
+    // Upward recurrence is stable only when x > n; otherwise use Miller backward.
+    let result = if libm::fabs(x) > ni as f64 {
         // Forward recurrence: J_{k+1}(x) = (2k/x) J_k(x) - J_{k-1}(x)
         let mut j_prev = besselJ0(x);
         let mut j_curr = besselJ1(x);
@@ -402,8 +488,9 @@ pub unsafe extern "C" fn besselJ_wasm(n: i32, x: f64) -> f64 {
             let j_prev = (2.0 * (k + 1) as f64 / x) * j_curr - j_next;
             j_next = j_curr;
             j_curr = j_prev;
+            // After the assignments j_curr = J_k and j_next = J_{k+1}; capture J_ni.
             if k == ni {
-                result_val = j_next;
+                result_val = j_curr;
             }
             if k % 2 == 0 {
                 sum += j_curr;
@@ -881,64 +968,97 @@ pub unsafe extern "C" fn fresnelS_wasm(x: f64) -> f64 {
 //   P = Σ (-1)^k·d_{2k}/ζ^{2k},  Q = Σ (-1)^k·d_{2k+1}/ζ^{2k+1}
 //   d_k = c_k (same coefficients as above)
 
-/// Precomputed asymptotic coefficients c_k for k = 0..6.
-/// c_k = Γ(3k + 1/2) / (54^k · k! · Γ(k + 1/2))   (DLMF 9.7.1 notation).
-const AIRY_C: [f64; 7] = [
-    1.0,
-    5.0 / 72.0,
-    385.0 / 10368.0,
-    85085.0 / 2239488.0,
-    37182145.0 / 644972544.0,
-    5765760010.25 / 61917364224.0, // ≈ 0.09309
-    1519768071625.0 / 8918845788160.0, // ≈ 0.17036 — truncation acceptable
-];
-
 // Ai(0) = 1/(3^{2/3}·Γ(2/3))
 const AI0: f64 = 0.35502805388781723926;
 // −Ai'(0) = 1/(3^{1/3}·Γ(1/3))
 const AI_PRIME0: f64 = 0.25881940379280679841;
+// |x| threshold for switching from the series to the asymptotic.
+const AIRY_XBIG: f64 = 5.0;
+
+/// Next asymptotic coefficient u_k from u_{k-1} (DLMF 9.7.2):
+///   u_k = u_{k-1} (6k-5)(6k-3)(6k-1) / ((2k-1) · 216 · k).
+/// (The legacy hardcoded c_5/c_6 were wrong; generation removes that error.)
+#[inline]
+fn airy_u_next(u_prev: f64, k: i32) -> f64 {
+    let kf = k as f64;
+    u_prev * (6.0 * kf - 5.0) * (6.0 * kf - 3.0) * (6.0 * kf - 1.0) / ((2.0 * kf - 1.0) * 216.0 * kf)
+}
+
+/// Large positive x: Ai ~ e^{-ζ}/(2√π x^{1/4}) Σ (-1)^k u_k/ζ^k;
+///                   Bi ~ e^{ζ}/(√π x^{1/4}) Σ u_k/ζ^k.
+fn airy_asym_pos(x: f64, is_ai: bool) -> f64 {
+    let xp = libm::pow(x, 0.25);
+    let zeta = (2.0 / 3.0) * x * libm::sqrt(x);
+    let mut u = 1.0_f64;
+    let mut zk = 1.0_f64;
+    let mut sum = 1.0_f64;
+    let mut prev_mag = f64::INFINITY;
+    let mut k = 1_i32;
+    while k <= 40 {
+        u = airy_u_next(u, k);
+        zk *= zeta;
+        let t = u / zk;
+        if libm::fabs(t) > prev_mag {
+            break;
+        }
+        prev_mag = libm::fabs(t);
+        sum += if is_ai && (k & 1) == 1 { -t } else { t };
+        k += 1;
+    }
+    let sp = libm::sqrt(PI);
+    if is_ai {
+        libm::exp(-zeta) * sum / (2.0 * sp * xp)
+    } else {
+        libm::exp(zeta) * sum / (sp * xp)
+    }
+}
+
+/// Large negative x (oscillatory), θ = ζ − π/4:
+///   P = Σ (-1)^j u_{2j}/ζ^{2j}, Q = Σ (-1)^j u_{2j+1}/ζ^{2j+1};
+///   Ai(-|x|) = (cosθ P + sinθ Q)/(√π |x|^{1/4})   (DLMF 9.7.9)
+///   Bi(-|x|) = (−sinθ P + cosθ Q)/(√π |x|^{1/4})  (DLMF 9.7.10)
+fn airy_asym_neg(x: f64, is_ai: bool) -> f64 {
+    let ax = libm::fabs(x);
+    let axp = libm::pow(ax, 0.25);
+    let zeta = (2.0 / 3.0) * ax * libm::sqrt(ax);
+    let mut u = 1.0_f64;
+    let mut zk = 1.0_f64;
+    let mut pp = 1.0_f64;
+    let mut qq = 0.0_f64;
+    let mut prev_mag = f64::INFINITY;
+    let mut k = 1_i32;
+    while k <= 40 {
+        u = airy_u_next(u, k);
+        zk *= zeta;
+        let t = u / zk;
+        if libm::fabs(t) > prev_mag {
+            break;
+        }
+        prev_mag = libm::fabs(t);
+        let m4 = k & 3;
+        let s = if m4 == 1 || m4 == 0 { 1.0 } else { -1.0 };
+        if k & 1 == 1 {
+            qq += s * t;
+        } else {
+            pp += s * t;
+        }
+        k += 1;
+    }
+    let theta = zeta - PI / 4.0;
+    let sp = libm::sqrt(PI);
+    if is_ai {
+        (libm::cos(theta) * pp + libm::sin(theta) * qq) / (sp * axp)
+    } else {
+        (-libm::sin(theta) * pp + libm::cos(theta) * qq) / (sp * axp)
+    }
+}
 
 /// Airy function Ai(x).
 pub fn airy_ai(x: f64) -> f64 {
-    const XBIG: f64 = 4.5;
-
-    if x > XBIG {
-        // Large positive — decaying exponential asymptotic
-        let xp = libm::pow(x, 0.25);       // x^{1/4}
-        let x32 = x * libm::sqrt(x);      // x^{3/2}
-        let zeta = (2.0 / 3.0) * x32;
-        // Asymptotic series P = Σ (-1)^k c_k / ζ^k
-        let mut p = 0.0_f64;
-        let mut zk = 1.0_f64; // ζ^k
-        let mut sign = 1.0_f64;
-        for k in 0..AIRY_C.len() {
-            p += sign * AIRY_C[k] / zk;
-            zk *= zeta;
-            sign = -sign;
-        }
-        libm::exp(-zeta) * p / (2.0 * libm::sqrt(PI) * xp)
-    } else if x < -XBIG {
-        // Large negative — oscillatory asymptotic
-        let ax = libm::fabs(x);
-        let axp = libm::pow(ax, 0.25);
-        let ax32 = ax * libm::sqrt(ax);
-        let zeta = (2.0 / 3.0) * ax32;
-        let theta = zeta - PI / 4.0;
-        // P even sum, Q odd sum
-        let mut p = 0.0_f64;
-        let mut q = 0.0_f64;
-        let mut zk = 1.0_f64;
-        let mut sign = 1.0_f64;
-        for k in 0..AIRY_C.len() {
-            if k % 2 == 0 {
-                p += sign * AIRY_C[k] / zk;
-            } else {
-                q += sign * AIRY_C[k] / zk;
-            }
-            zk *= zeta;
-            sign = -sign;
-        }
-        (libm::sin(theta) * p + libm::cos(theta) * q) / (libm::sqrt(PI) * axp)
+    if x > AIRY_XBIG {
+        airy_asym_pos(x, true)
+    } else if x < -AIRY_XBIG {
+        airy_asym_neg(x, true)
     } else {
         // Small |x| — power series (DLMF §9.2.2)
         let x3 = x * x * x;
@@ -977,44 +1097,12 @@ pub fn airy_ai(x: f64) -> f64 {
 
 /// Airy function Bi(x).
 pub fn airy_bi(x: f64) -> f64 {
-    const XBIG: f64 = 4.5;
     let sqrt3 = libm::sqrt(3.0_f64);
 
-    if x > XBIG {
-        // Large positive — growing exponential asymptotic.
-        // DLMF §9.7.3: Bi(x) ~ exp(ζ)/(√π x^{1/4}) · Σ_{k≥0} c_k/ζ^k  (all positive).
-        let xp = libm::pow(x, 0.25);
-        let x32 = x * libm::sqrt(x);
-        let zeta = (2.0 / 3.0) * x32;
-        let mut p = 0.0_f64;
-        let mut zk = 1.0_f64;
-        for k in 0..AIRY_C.len() {
-            p += AIRY_C[k] / zk;
-            zk *= zeta;
-        }
-        libm::exp(zeta) * p / (libm::sqrt(PI) * xp)
-    } else if x < -XBIG {
-        // Large negative — oscillatory asymptotic.
-        // DLMF §9.7.5: Bi(−ξ) ~ (cos θ P + sin θ Q)/(√π ξ^{1/4}),  θ = ζ + π/4.
-        let ax = libm::fabs(x);
-        let axp = libm::pow(ax, 0.25);
-        let ax32 = ax * libm::sqrt(ax);
-        let zeta = (2.0 / 3.0) * ax32;
-        let theta = zeta + PI / 4.0;
-        let mut p = 0.0_f64;
-        let mut q = 0.0_f64;
-        let mut zk = 1.0_f64;
-        let mut sign = 1.0_f64;
-        for k in 0..AIRY_C.len() {
-            if k % 2 == 0 {
-                p += sign * AIRY_C[k] / zk;
-            } else {
-                q += sign * AIRY_C[k] / zk;
-            }
-            zk *= zeta;
-            sign = -sign;
-        }
-        (libm::cos(theta) * p + libm::sin(theta) * q) / (libm::sqrt(PI) * axp)
+    if x > AIRY_XBIG {
+        airy_asym_pos(x, false)
+    } else if x < -AIRY_XBIG {
+        airy_asym_neg(x, false)
     } else {
         // Small |x| — power series, same as Ai but scaled by sqrt(3)
         let x3 = x * x * x;

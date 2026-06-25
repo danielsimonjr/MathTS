@@ -1,5 +1,31 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.12
+
+### Added — WASM acceleration now bundled and live
+
+The package now **bundles the Rust wasm** (`dist/wasm/mathts.wasm`) and resolves
+it package-relative, so the special-function array bridges (J/Y/Airy/elliptic/
+Carlson/lgamma, ≥1024 elements) actually run on wasm instead of silently falling
+back to JS. Previously no binary was bundled and the loader's hard-coded
+monorepo-relative path resolved outside the installed package.
+
+- `src/wasm/resolve.ts`: robust `resolvePackagedWasm` (walks up probing
+  `dist/wasm/`), mirroring the matrix package. `WasmLoader` uses it.
+- `scripts/copy-wasm.mjs`: build step copying `lib/wasm/mathts.wasm` +
+  `wasm-manifest.json` into `dist/wasm/`.
+- 10 previously-skipped wasm integration tests now run and pass.
+
+### Fixed — Rust wasm special functions
+
+The bundled Rust kernels carried the **same** special-function bugs as the JS
+path (NR-rational Bessel, unstable `besselJn` recurrence + Miller off-by-one,
+Airy asymptotic coefficient recurrence missing the `(2k-1)` factor with wrong
+hardcoded `c5/c6`, low-accuracy `erfc`). Ported the same fixes to
+`wasm-rust/crates/mathts-wasm/src/{bessel.rs,special/functions.rs}` and rebuilt.
+Verified 90/90 vs mpmath (`tests/diff-wasm-rust.test.mjs`). Enabling wasm
+therefore does **not** regress the special-function accuracy fixed in 0.2.11.
+
 ## 0.2.11
 
 ### Fixed (special-function accuracy)

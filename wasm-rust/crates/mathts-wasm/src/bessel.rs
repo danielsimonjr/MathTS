@@ -46,7 +46,8 @@ fn bessel_j_scalar(n: i32, x: f64) -> f64 {
         return 0.0;
     }
 
-    let result = if ni <= 20 || x.abs() > ni as f64 {
+    // Upward recurrence is stable only when x > n; otherwise use Miller backward.
+    let result = if x.abs() > ni as f64 {
         // Forward recurrence: J_{k+1}(x) = (2k/x)·J_k(x) − J_{k-1}(x)
         let mut j_prev = besselJ0(x);
         let mut j_curr = besselJ1(x);
@@ -69,8 +70,9 @@ fn bessel_j_scalar(n: i32, x: f64) -> f64 {
             let j_prev = (2.0 * (k + 1) as f64 / x) * j_curr - j_next;
             j_next = j_curr;
             j_curr = j_prev;
+            // After the assignments j_curr = J_k and j_next = J_{k+1}; capture J_ni.
             if k == ni {
-                result_val = j_next;
+                result_val = j_curr;
             }
             if k % 2 == 0 {
                 sum += j_curr;

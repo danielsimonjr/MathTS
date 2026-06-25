@@ -16,6 +16,7 @@
  */
 
 import { verifyWasmIntegrity, loadWasmManifest } from './integrity.js';
+import { resolvePackagedWasm } from './resolve.js';
 
 export interface WasmModule {
   // Matrix operations
@@ -995,16 +996,17 @@ export class WasmLoader {
         process.env?.MATHJS_WASM_BACKEND === 'assemblyscript');
 
     const wasmFile = useAS ? 'mathts-as.wasm' : 'mathts.wasm';
-    const resolvedUrl = new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url);
 
     if (this.isNode) {
-      // `.pathname` on Windows yields "/C:/foo/bar.wasm", which fs.readFile
-      // interprets as drive-relative ("C:\C:\foo\..."). fileURLToPath does
-      // the platform-correct conversion (and decodes %-escapes).
+      // Prefer the wasm co-located in the package (dist/wasm/), which works in
+      // both the monorepo and the published layout. Fall back to the legacy
+      // monorepo-relative path if the packaged copy isn't present.
+      const packaged = await resolvePackagedWasm(import.meta.url, wasmFile);
+      if (packaged) return packaged;
       const { fileURLToPath } = await import('node:url');
-      return fileURLToPath(resolvedUrl);
+      return fileURLToPath(new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url));
     }
-    return resolvedUrl.href;
+    return new URL(`../../../lib/wasm/${wasmFile}`, import.meta.url).href;
   }
 
   private async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {
