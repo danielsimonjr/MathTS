@@ -30,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed (2026-06-25)
 
+- **WASM pairing detector — runtime-effectiveness probe added.** Beyond static
+  routing, the dep-graph tool (`npm run docs:deps`) now probes the bundled
+  `functions/dist/wasm/mathts.wasm` (synchronous export read) and each
+  `*Dispatch`'s bridge allocator to report per-function `effectiveBackend` and a
+  `bundledBackend`. Result: of 27 wasm-routed functions, **only 6 actually run
+  wasm** (the elementwise transcendentals); **21 fall back to JS** because their
+  bridge needs the AssemblyScript `__new` allocator, absent from the Rust-only
+  module. This closes the static-vs-runtime gap (routing ≠ execution) directly in
+  the generated `wasm-pairing.{md,json}`.
 - **WASM↔function pairing detector** now classifies routing as `wasm` /
   `parallel` / `js-only` (not just `*Dispatch` vs JS): **27 wasm · 63 parallel ·
   128 js-only** of 218 typed functions. The "parallel" set (worker pool) was

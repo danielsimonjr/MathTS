@@ -2249,11 +2249,17 @@ function generatePackageDependencySection(
  * hand-maintained doc (see docs/Architecture/WASM_ACCELERATION.md).
  */
 type Routing = 'wasm' | 'parallel' | 'wasm+parallel' | 'js-only';
+/** Whether a wasm-routed function actually executes wasm on the *bundled* binary,
+ * or its dispatch bridge falls back to JS (it uses the AssemblyScript `__new`
+ * allocator, absent from a Rust-only module). `unknown` when the bundled wasm or
+ * the dispatch's bridge couldn't be resolved (e.g. dist not built). */
+type EffectiveBackend = 'wasm' | 'js-fallback' | 'unknown';
 interface WasmPairingEntry {
   name: string;
   file: string;
   routing: Routing;
   dispatch: string[];
+  effectiveBackend: EffectiveBackend;
 }
 interface WasmPairing {
   generated: string;
@@ -2261,12 +2267,80 @@ interface WasmPairing {
   acceleratedCount: number; // routes to wasm (wasm or wasm+parallel)
   parallelOnlyCount: number; // worker-parallel, no wasm
   jsOnlyCount: number;
+  /** Of acceleratedCount, how many actually run wasm vs fall back to JS on the
+   * bundled binary (runtime probe of functions/dist/wasm/mathts.wasm exports). */
+  bundledBackend: 'rust' | 'assemblyscript' | 'unknown';
+  wasmEffectiveCount: number;
+  jsFallbackCount: number;
   /** Detection is per-mathTyped-block direct references; routing reached only
    * through helper functions outside the block is not traced (under-reports). */
   accelerated: WasmPairingEntry[];
   parallelOnly: WasmPairingEntry[];
   jsOnly: string[];
   byFile: Record<string, { wasm: number; parallel: number; jsOnly: number }>;
+}
+
+/**
+ * Runtime-effectiveness probe (the dynamic complement to the static routing scan).
+ * A function may *route* to a `*Dispatch` yet still run JS at runtime, because the
+ * dispatch's bridge allocates via the AssemblyScript `__new` runtime, which a
+ * Rust-only wasm module does not export. Determines, per `*Dispatch`, whether it
+ * actually executes wasm on the *bundled* binary, by combining:
+ *   (a) the bundled wasm's export list — does it have `__new`? (read synchronously
+ *       via WebAssembly.Module.exports, no instantiation), and
+ *   (b) whether each dispatch's bridge file makes real AS-allocator call sites
+ *       (call syntax `\.allocateFloat64Array\(`, so comments don't false-positive).
+ */
+function analyzeWasmRuntime(rootDir: string): {
+  bundledBackend: 'rust' | 'assemblyscript' | 'unknown';
+  dispatchWasm: Map<string, boolean | null>;
+} {
+  const dispatchWasm = new Map<string, boolean | null>();
+
+  // Reference the WebAssembly global via a typed shim — the tool's tsconfig
+  // doesn't include the DOM lib, so the global `WebAssembly` name isn't in scope.
+  interface WasmModuleCtor {
+    new (bytes: Uint8Array): object;
+    exports(m: object): Array<{ name: string }>;
+  }
+  const WAModule = (globalThis as unknown as { WebAssembly?: { Module: WasmModuleCtor } })
+    .WebAssembly?.Module;
+
+  let bundledHasNew: boolean | null = null;
+  const wasmPath = join(rootDir, 'functions', 'dist', 'wasm', 'mathts.wasm');
+  if (WAModule && existsSync(wasmPath)) {
+    try {
+      const mod = new WAModule(readFileSync(wasmPath));
+      bundledHasNew = WAModule.exports(mod).some((e) => e.name === '__new');
+    } catch {
+      bundledHasNew = null;
+    }
+  }
+  const bundledBackend =
+    bundledHasNew === null ? 'unknown' : bundledHasNew ? 'assemblyscript' : 'rust';
+
+  const wasmDir = join(rootDir, 'functions', 'src', 'wasm');
+  if (!existsSync(wasmDir)) return { bundledBackend, dispatchWasm };
+  const asAllocRe = /\.(?:allocateFloat64Array|allocateFloat64ArrayEmpty|allocateInt32Array|allocateInt32ArrayEmpty)\(/;
+  const defRe = /\b(?:function|const)\s+(\w+Dispatch)\b/g;
+  const walk = (dir: string): void => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.ts')) {
+        const src = readFileSync(p, 'utf-8');
+        const usesAsAlloc = asAllocRe.test(src);
+        // Runs wasm iff it doesn't need the AS allocator, OR the bundled module
+        // has __new. Unknown when we couldn't read the bundled binary.
+        const runsWasm = bundledHasNew === null ? null : !usesAsAlloc || bundledHasNew;
+        let dm: RegExpExecArray | null;
+        defRe.lastIndex = 0;
+        while ((dm = defRe.exec(src)) !== null) dispatchWasm.set(dm[1], runsWasm);
+      }
+    }
+  };
+  walk(wasmDir);
+  return { bundledBackend, dispatchWasm };
 }
 
 function analyzeWasmPairing(rootDir: string): WasmPairing | null {
@@ -2276,6 +2350,14 @@ function analyzeWasmPairing(rootDir: string): WasmPairing | null {
   ];
   const typedDir = candidates.find((d) => existsSync(d));
   if (!typedDir) return null;
+
+  const { bundledBackend, dispatchWasm } = analyzeWasmRuntime(rootDir);
+  const effectiveOf = (isWasm: boolean, dispatch: string[]): EffectiveBackend => {
+    if (!isWasm) return 'unknown';
+    const vals = dispatch.map((d) => dispatchWasm.get(d));
+    if (vals.some((v) => v === undefined || v === null)) return 'unknown';
+    return vals.every((v) => v === true) ? 'wasm' : 'js-fallback';
+  };
 
   const accelerated: WasmPairingEntry[] = [];
   const parallelOnly: WasmPairingEntry[] = [];
@@ -2316,7 +2398,13 @@ function analyzeWasmPairing(rootDir: string): WasmPairing | null {
           ? 'parallel'
           : 'js-only';
       if (!byFile[fname]) byFile[fname] = { wasm: 0, parallel: 0, jsOnly: 0 };
-      const entry: WasmPairingEntry = { name, file: fname, routing, dispatch };
+      const entry: WasmPairingEntry = {
+        name,
+        file: fname,
+        routing,
+        dispatch,
+        effectiveBackend: effectiveOf(isWasm, dispatch),
+      };
       if (isWasm) {
         accelerated.push(entry);
         byFile[fname].wasm++;
@@ -2339,6 +2427,9 @@ function analyzeWasmPairing(rootDir: string): WasmPairing | null {
     acceleratedCount: accelerated.length,
     parallelOnlyCount: parallelOnly.length,
     jsOnlyCount: jsOnly.length,
+    bundledBackend,
+    wasmEffectiveCount: accelerated.filter((e) => e.effectiveBackend === 'wasm').length,
+    jsFallbackCount: accelerated.filter((e) => e.effectiveBackend === 'js-fallback').length,
     accelerated,
     parallelOnly,
     jsOnly,
@@ -2355,14 +2446,19 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   md += `\`Float64Array\` inputs above threshold; dispatch order is Rust → AS → JS.\n\n`;
   md += `> Detection is per-\`mathTyped\`-block direct references; routing reached only via `;
   md += `helper functions outside the block is not traced, so this can under-report.\n\n`;
-  md += `| Routing | Count |\n| --- | --: |\n`;
+  md += `| Routing (static) | Count |\n| --- | --: |\n`;
   md += `| WASM (incl. wasm+parallel) | ${p.acceleratedCount} |\n`;
   md += `| Parallel only (worker pool) | ${p.parallelOnlyCount} |\n`;
   md += `| JS-only | ${p.jsOnlyCount} |\n`;
   md += `| **Total** | **${p.total}** |\n\n`;
-  md += `## WASM-accelerated functions\n\n| Function | Routing | Bridge dispatch | Module |\n| --- | --- | --- | --- |\n`;
+  md += `**Runtime effectiveness** (probe of the bundled \`functions/dist/wasm/mathts.wasm\`, `;
+  md += `backend: **${p.bundledBackend}**): of the ${p.acceleratedCount} wasm-routed functions, `;
+  md += `**${p.wasmEffectiveCount} actually execute wasm**, **${p.jsFallbackCount} fall back to JS** `;
+  md += `(their dispatch bridge needs the AssemblyScript \`__new\` allocator, absent from a `;
+  md += `Rust-only module — the dispatch's allocate throws and is caught → JS).\n\n`;
+  md += `## WASM-accelerated functions\n\n| Function | Routing | Effective | Bridge dispatch | Module |\n| --- | --- | --- | --- | --- |\n`;
   for (const e of p.accelerated) {
-    md += `| \`${e.name}\` | ${e.routing} | \`${e.dispatch.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
+    md += `| \`${e.name}\` | ${e.routing} | ${e.effectiveBackend} | \`${e.dispatch.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
   }
   md += `\n## Parallel-only functions (worker pool, not WASM)\n\n| Function | Module |\n| --- | --- |\n`;
   for (const e of p.parallelOnly) {
@@ -2373,10 +2469,12 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
     md += `| ${f.replace(/\.ts$/, '')} | ${p.byFile[f].wasm} | ${p.byFile[f].parallel} | ${p.byFile[f].jsOnly} |\n`;
   }
   md += `\n> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `;
-  md += `\`matrix\` package backend (not the typed-API dispatch counted here). Per-op WASM `;
-  md += `for elementwise/reduction kernels was benchmarked and is *slower* than the JS/parallel `;
-  md += `paths once the JS→wasm copy is included (see docs/roadmap/WASM_PAIRING_GAP_PLAN.md); `;
-  md += `parallel-only routing is therefore intentional, not a gap.\n`;
+  md += `\`matrix\` package backend (not the typed-API dispatch counted here). The elementwise `;
+  md += `transcendentals (abs/sin/cos/tan/exp/log) are the wasm-effective set — benchmarked `;
+  md += `1.35–5.1× over JS incl. copy. The js-fallback functions (bessel/airy/elliptic/…) were `;
+  md += `benchmarked too: per-op wasm is break-even-to-slower for them, so the JS fallback is not `;
+  md += `a regression. Reductions/binary-arithmetic stay JS by the same measure. See `;
+  md += `docs/roadmap/WASM_PAIRING_GAP_PLAN.md and the \`bench:elementwise\`/\`bench:special-array\` benches.\n`;
   return md;
 }
 

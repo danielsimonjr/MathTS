@@ -20,24 +20,34 @@ WASM acceleration is **selective and threshold-gated**, not universal:
   JS.
 - **Dispatch order:** Rust WASM → AssemblyScript WASM → JS fallback. The
   `functions` package now **bundles** `dist/wasm/mathts.wasm` (Rust, default
-  backend) and resolves it package-relative, so the bridges are **live** (they
-  previously fell back to JS because no binary was bundled).
+  backend) and resolves it package-relative.
+- **Runtime caveat:** routing to a `*Dispatch` ≠ running wasm. The bundled Rust
+  module exports **no allocator** (`__new` absent), and most bridges allocate via
+  the AssemblyScript `__new` runtime — so their dispatch's allocate throws and is
+  caught → JS. Only the **elementwise bridge** (self-managed scratch over
+  `module.memory`) actually executes wasm on the Rust binary. The dep-graph tool
+  now probes this (`bundledBackend` + per-function `effectiveBackend` in
+  `wasm-pairing.{md,json}`): of 27 wasm-routed functions, **6 run wasm, 21 fall
+  back to JS** — and the 21 were benchmarked as no-win for wasm anyway.
 
 ## `functions` public typed API — 218 functions
 
-| Routing | Count |
-|---|--:|
-| Total public `mathTyped` functions (`functions/src/typed/`) | **218** |
-| WASM (route to a `*Dispatch`) | **27** |
-| Parallel only (worker pool via `computePool`) | **63** |
-| JS-only | **128** |
+| Routing (static) | Count | Effective on bundled Rust binary |
+|---|--:|---|
+| Total public `mathTyped` functions (`functions/src/typed/`) | **218** | |
+| WASM (route to a `*Dispatch`) | **27** | **6 run wasm · 21 fall back to JS** |
+| Parallel only (worker pool via `computePool`) | **63** | worker pool, not wasm |
+| JS-only | **128** | JS |
 
-> Of the 27 WASM functions: 18 special functions, the elementwise
-> transcendentals `abs/sin/cos/tan/exp/log` (wired 0.2.13 — benchmarked
-> 1.35–5.1× over JS incl. copy), plus `noncentralChi2PDF` /
-> `parallelStatMedian` / `parallelStatQuantile`. NOT wired (benchmarked, JS
-> wins once the JS↔wasm copy is included): `sqrt` and the reductions
-> (`sum`/`mean`/`variance`) — V8 JITs those faster than wasm+copy. The
+> The **6 effective-wasm** functions are the elementwise transcendentals
+> `abs/sin/cos/tan/exp/log` (wired 0.2.13, benchmarked 1.35–5.1× over JS incl.
+> copy). The **21 js-fallback** (bessel/airy/elliptic/carlson/lgamma +
+> `noncentralChi2PDF`/`parallelStatMedian`/`parallelStatQuantile`) route to a
+> `*Dispatch` but hit the AS-only allocator and fall back to JS on the Rust
+> binary — and were benchmarked as break-even-to-slower for wasm anyway. NOT
+> wired at all (benchmarked, JS wins once the JS↔wasm copy is included): `sqrt`
+> and the reductions (`sum`/`mean`/`variance`) — V8 JITs those faster than
+> wasm+copy. The
 > remaining "parallel" routing is intentional. See
 > `docs/roadmap/WASM_PAIRING_GAP_PLAN.md` and the `bench:elementwise` /
 > `bench:reduction` benchmarks.

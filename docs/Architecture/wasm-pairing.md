@@ -6,44 +6,46 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 > Detection is per-`mathTyped`-block direct references; routing reached only via helper functions outside the block is not traced, so this can under-report.
 
-| Routing | Count |
+| Routing (static) | Count |
 | --- | --: |
 | WASM (incl. wasm+parallel) | 27 |
 | Parallel only (worker pool) | 63 |
 | JS-only | 128 |
 | **Total** | **218** |
 
+**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts.wasm`, backend: **rust**): of the 27 wasm-routed functions, **6 actually execute wasm**, **21 fall back to JS** (their dispatch bridge needs the AssemblyScript `__new` allocator, absent from a Rust-only module — the dispatch's allocate throws and is caught → JS).
+
 ## WASM-accelerated functions
 
-| Function | Routing | Bridge dispatch | Module |
-| --- | --- | --- | --- |
-| `abs` | wasm+parallel | `elementwiseUnaryDispatch` | arithmetic |
-| `airyAi` | wasm | `airyAiDispatch` | special |
-| `airyBi` | wasm | `airyBiDispatch` | special |
-| `besselJ` | wasm | `besselJDispatch` | special |
-| `besselJ0` | wasm | `besselJ0Dispatch` | special |
-| `besselJ1` | wasm | `besselJ1Dispatch` | special |
-| `besselY` | wasm | `besselYDispatch` | special |
-| `besselY0` | wasm | `besselY0Dispatch` | special |
-| `besselY1` | wasm | `besselY1Dispatch` | special |
-| `carlsonRC` | wasm | `carlsonRCDispatch` | special |
-| `carlsonRD` | wasm | `carlsonRDDispatch` | special |
-| `carlsonRF` | wasm | `carlsonRFDispatch` | special |
-| `carlsonRJ` | wasm | `carlsonRJDispatch` | special |
-| `cos` | wasm+parallel | `elementwiseUnaryDispatch` | trigonometry |
-| `ellipticE` | wasm | `ellipticEDispatch` | special |
-| `ellipticEIncomplete` | wasm | `ellipticEIncompleteDispatch` | special |
-| `ellipticF` | wasm | `ellipticFIncompleteDispatch` | special |
-| `ellipticK` | wasm | `ellipticKDispatch` | special |
-| `ellipticPi` | wasm | `ellipticPiIncompleteDispatch` | special |
-| `exp` | wasm+parallel | `elementwiseUnaryDispatch` | arithmetic |
-| `lgamma` | wasm | `lgammaDispatch` | special |
-| `log` | wasm+parallel | `elementwiseUnaryDispatch` | arithmetic |
-| `noncentralChi2PDF` | wasm | `lgammaDispatch` | distributions |
-| `parallelStatMedian` | wasm | `sortF64Dispatch` | statistics |
-| `parallelStatQuantile` | wasm | `sortF64Dispatch` | statistics |
-| `sin` | wasm+parallel | `elementwiseUnaryDispatch` | trigonometry |
-| `tan` | wasm+parallel | `elementwiseUnaryDispatch` | trigonometry |
+| Function | Routing | Effective | Bridge dispatch | Module |
+| --- | --- | --- | --- | --- |
+| `abs` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
+| `airyAi` | wasm | js-fallback | `airyAiDispatch` | special |
+| `airyBi` | wasm | js-fallback | `airyBiDispatch` | special |
+| `besselJ` | wasm | js-fallback | `besselJDispatch` | special |
+| `besselJ0` | wasm | js-fallback | `besselJ0Dispatch` | special |
+| `besselJ1` | wasm | js-fallback | `besselJ1Dispatch` | special |
+| `besselY` | wasm | js-fallback | `besselYDispatch` | special |
+| `besselY0` | wasm | js-fallback | `besselY0Dispatch` | special |
+| `besselY1` | wasm | js-fallback | `besselY1Dispatch` | special |
+| `carlsonRC` | wasm | js-fallback | `carlsonRCDispatch` | special |
+| `carlsonRD` | wasm | js-fallback | `carlsonRDDispatch` | special |
+| `carlsonRF` | wasm | js-fallback | `carlsonRFDispatch` | special |
+| `carlsonRJ` | wasm | js-fallback | `carlsonRJDispatch` | special |
+| `cos` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
+| `ellipticE` | wasm | js-fallback | `ellipticEDispatch` | special |
+| `ellipticEIncomplete` | wasm | js-fallback | `ellipticEIncompleteDispatch` | special |
+| `ellipticF` | wasm | js-fallback | `ellipticFIncompleteDispatch` | special |
+| `ellipticK` | wasm | js-fallback | `ellipticKDispatch` | special |
+| `ellipticPi` | wasm | js-fallback | `ellipticPiIncompleteDispatch` | special |
+| `exp` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
+| `lgamma` | wasm | js-fallback | `lgammaDispatch` | special |
+| `log` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
+| `noncentralChi2PDF` | wasm | js-fallback | `lgammaDispatch` | distributions |
+| `parallelStatMedian` | wasm | js-fallback | `sortF64Dispatch` | statistics |
+| `parallelStatQuantile` | wasm | js-fallback | `sortF64Dispatch` | statistics |
+| `sin` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
+| `tan` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
 
 ## Parallel-only functions (worker pool, not WASM)
 
@@ -134,4 +136,4 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | trigonometry | 3 | 9 | 7 |
 | unit | 0 | 0 | 2 |
 
-> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here). Per-op WASM for elementwise/reduction kernels was benchmarked and is *slower* than the JS/parallel paths once the JS→wasm copy is included (see docs/roadmap/WASM_PAIRING_GAP_PLAN.md); parallel-only routing is therefore intentional, not a gap.
+> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here). The elementwise transcendentals (abs/sin/cos/tan/exp/log) are the wasm-effective set — benchmarked 1.35–5.1× over JS incl. copy. The js-fallback functions (bessel/airy/elliptic/…) were benchmarked too: per-op wasm is break-even-to-slower for them, so the JS fallback is not a regression. Reductions/binary-arithmetic stay JS by the same measure. See docs/roadmap/WASM_PAIRING_GAP_PLAN.md and the `bench:elementwise`/`bench:special-array` benches.

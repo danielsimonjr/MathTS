@@ -4,6 +4,9 @@
   "acceleratedCount": 27,
   "parallelOnlyCount": 63,
   "jsOnlyCount": 128,
+  "bundledBackend": "rust",
+  "wasmEffectiveCount": 6,
+  "jsFallbackCount": 21,
   "accelerated": [
     {
       "name": "abs",
@@ -11,7 +14,8 @@
       "routing": "wasm+parallel",
       "dispatch": [
         "elementwiseUnaryDispatch"
-      ]
+      ],
+      "effectiveBackend": "wasm"
     },
     {
       "name": "airyAi",
@@ -19,7 +23,8 @@
       "routing": "wasm",
       "dispatch": [
         "airyAiDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "airyBi",
@@ -27,7 +32,8 @@
       "routing": "wasm",
       "dispatch": [
         "airyBiDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "besselJ",
@@ -35,7 +41,8 @@
       "routing": "wasm",
       "dispatch": [
         "besselJDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "besselJ0",
@@ -43,7 +50,8 @@
       "routing": "wasm",
       "dispatch": [
         "besselJ0Dispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "besselJ1",
@@ -51,7 +59,8 @@
       "routing": "wasm",
       "dispatch": [
         "besselJ1Dispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "besselY",
@@ -59,7 +68,8 @@
       "routing": "wasm",
       "dispatch": [
         "besselYDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "besselY0",
@@ -67,7 +77,8 @@
       "routing": "wasm",
       "dispatch": [
         "besselY0Dispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "besselY1",
@@ -75,7 +86,8 @@
       "routing": "wasm",
       "dispatch": [
         "besselY1Dispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "carlsonRC",
@@ -83,7 +95,8 @@
       "routing": "wasm",
       "dispatch": [
         "carlsonRCDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "carlsonRD",
@@ -91,7 +104,8 @@
       "routing": "wasm",
       "dispatch": [
         "carlsonRDDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "carlsonRF",
@@ -99,7 +113,8 @@
       "routing": "wasm",
       "dispatch": [
         "carlsonRFDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "carlsonRJ",
@@ -107,7 +122,8 @@
       "routing": "wasm",
       "dispatch": [
         "carlsonRJDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "cos",
@@ -115,7 +131,8 @@
       "routing": "wasm+parallel",
       "dispatch": [
         "elementwiseUnaryDispatch"
-      ]
+      ],
+      "effectiveBackend": "wasm"
     },
     {
       "name": "ellipticE",
@@ -123,7 +140,8 @@
       "routing": "wasm",
       "dispatch": [
         "ellipticEDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "ellipticEIncomplete",
@@ -131,7 +149,8 @@
       "routing": "wasm",
       "dispatch": [
         "ellipticEIncompleteDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "ellipticF",
@@ -139,7 +158,8 @@
       "routing": "wasm",
       "dispatch": [
         "ellipticFIncompleteDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "ellipticK",
@@ -147,7 +167,8 @@
       "routing": "wasm",
       "dispatch": [
         "ellipticKDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "ellipticPi",
@@ -155,7 +176,8 @@
       "routing": "wasm",
       "dispatch": [
         "ellipticPiIncompleteDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "exp",
@@ -163,7 +185,8 @@
       "routing": "wasm+parallel",
       "dispatch": [
         "elementwiseUnaryDispatch"
-      ]
+      ],
+      "effectiveBackend": "wasm"
     },
     {
       "name": "lgamma",
@@ -171,7 +194,8 @@
       "routing": "wasm",
       "dispatch": [
         "lgammaDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "log",
@@ -179,7 +203,8 @@
       "routing": "wasm+parallel",
       "dispatch": [
         "elementwiseUnaryDispatch"
-      ]
+      ],
+      "effectiveBackend": "wasm"
     },
     {
       "name": "noncentralChi2PDF",
@@ -187,7 +212,8 @@
       "routing": "wasm",
       "dispatch": [
         "lgammaDispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "parallelStatMedian",
@@ -195,7 +221,8 @@
       "routing": "wasm",
       "dispatch": [
         "sortF64Dispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "parallelStatQuantile",
@@ -203,7 +230,8 @@
       "routing": "wasm",
       "dispatch": [
         "sortF64Dispatch"
-      ]
+      ],
+      "effectiveBackend": "js-fallback"
     },
     {
       "name": "sin",
@@ -211,7 +239,8 @@
       "routing": "wasm+parallel",
       "dispatch": [
         "elementwiseUnaryDispatch"
-      ]
+      ],
+      "effectiveBackend": "wasm"
     },
     {
       "name": "tan",
@@ -219,7 +248,8 @@
       "routing": "wasm+parallel",
       "dispatch": [
         "elementwiseUnaryDispatch"
-      ]
+      ],
+      "effectiveBackend": "wasm"
     }
   ],
   "parallelOnly": [
@@ -227,379 +257,442 @@
       "name": "acos",
       "file": "trigonometry.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "acosh",
       "file": "trigonometry.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "add",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "asin",
       "file": "trigonometry.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "asinh",
       "file": "trigonometry.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "atan",
       "file": "trigonometry.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "atanh",
       "file": "trigonometry.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "bitAnd",
       "file": "bitwise.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "bitNot",
       "file": "bitwise.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "bitOr",
       "file": "bitwise.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "bitXor",
       "file": "bitwise.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "cbrt",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "ceil",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "cosh",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "cot",
       "file": "trigonometry.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "csc",
       "file": "trigonometry.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "cube",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "divide",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "dot",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "expm1",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "fix",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "floor",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "leftShift",
       "file": "bitwise.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log10",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log1p",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "log2",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "max",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "mean",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "min",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "multiply",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "norm",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelConv",
       "file": "signal.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelFFT",
       "file": "signal.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelFFTMagnitude",
       "file": "signal.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelFFTPower",
       "file": "signal.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelIFFT",
       "file": "signal.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatCorr",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatDistance",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatHistogram",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatMAD",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatMax",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatMean",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatMin",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatMinMax",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatNorm",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatProd",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatStd",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatSum",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "parallelStatVariance",
       "file": "statistics.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "rightArithShift",
       "file": "bitwise.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "rightLogShift",
       "file": "bitwise.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "round",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sec",
       "file": "trigonometry.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sign",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sinh",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sqrt",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "square",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "std",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "subtract",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "sum",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "tanh",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "unaryMinus",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     },
     {
       "name": "variance",
       "file": "arithmetic.ts",
       "routing": "parallel",
-      "dispatch": []
+      "dispatch": [],
+      "effectiveBackend": "unknown"
     }
   ],
   "jsOnly": [
