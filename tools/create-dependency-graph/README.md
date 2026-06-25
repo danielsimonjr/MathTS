@@ -22,6 +22,9 @@ npx tsx tools/create-dependency-graph.ts
 
 - `docs/Architecture/DEPENDENCY_GRAPH.md` - Markdown documentation
 - `docs/Architecture/dependency-graph.json` - JSON data structure
+- `docs/Architecture/wasm-pairing.md` / `wasm-pairing.json` - WASM accelerator ↔
+  function pairing: which public `mathTyped` functions route to a WASM bridge
+  (`*Dispatch`) vs run pure-JS (generated only when `functions/src/typed/` is in scope)
 
 **Features:**
 

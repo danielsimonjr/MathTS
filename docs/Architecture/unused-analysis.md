@@ -4,14 +4,13 @@
 
 ## Summary
 
-- **Potentially unused files**: 1
-- **Potentially unused exports**: 448
+- **Potentially unused files**: 0
+- **Potentially unused exports**: 473
 
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
 
-- `packages/workerpool/src/index.ts`
 
 ## Potentially Unused Exports
 
@@ -21,12 +20,40 @@ These exports are not imported by any other file in the codebase:
 
 - `fftBitReverse` (function)
 
+### `packages/workerpool/src/index.ts`
+
+- `canUseWasm` (function)
+- `canUseSharedMemory` (function)
+- `transferFloat64` (function)
+- `transferArrayBuffer` (function)
+- `transferTypedArray` (function)
+- `createSharedFloat64Array` (function)
+- `createSharedBuffer` (function)
+- `isSharedBuffer` (function)
+- `getCapabilities` (function)
+- `initWorkerWasm` (function)
+- `isWorkerWasmAvailable` (function)
+- `getWasmFeatures` (function)
+- `initializePool` (function)
+- `terminatePool` (function)
+- `getPoolStats` (function)
+- `WorkerpoolCapabilities` (interface)
+- `WasmFeatureStatus` (interface)
+- `PoolMetrics` (interface)
+- `EnhancedPoolStats` (interface)
+- `DEFAULT_WORKER_CONFIG` (constant)
+- `mathWorkerPool` (constant)
+
 ### `core/src/factory/factory.ts`
 
 - `MathTSConfig` (interface)
 - `FactoryFunction` (interface)
 - `FactoryDependencies` (interface)
 - `FactoryImport` (type)
+
+### `core/src/index.ts`
+
+- `VERSION` (constant)
 
 ### `core/src/typed/mathts-typed.ts`
 
@@ -750,6 +777,12 @@ These exports are not imported by any other file in the codebase:
 - `ComputePoolConfig` (interface)
 - `OpName` (type)
 - `OpThreshold` (type)
+
+### `parallel/src/index.ts`
+
+- `PoolOptions` (interface)
+- `ExecOptions` (interface)
+- `PoolStats` (interface)
 
 ### `parallel/src/ops/bitwise.ts`
 

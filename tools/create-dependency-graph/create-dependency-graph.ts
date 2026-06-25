@@ -2240,6 +2240,115 @@ function generatePackageDependencySection(
 }
 
 /**
+ * WASM-accelerator ↔ function pairing analysis.
+ *
+ * Scans the `functions` package's public typed API (`functions/src/typed/*.ts`)
+ * and determines, per `mathTyped` export, whether it routes to a WASM bridge
+ * (a `*Dispatch` call inside its definition) or runs pure-JS. This makes the
+ * "which functions are WASM-accelerated" map a generated artifact instead of a
+ * hand-maintained doc (see docs/Architecture/WASM_ACCELERATION.md).
+ */
+interface WasmPairingEntry {
+  name: string;
+  file: string;
+  dispatch: string[];
+}
+interface WasmPairing {
+  generated: string;
+  total: number;
+  acceleratedCount: number;
+  jsOnlyCount: number;
+  accelerated: WasmPairingEntry[];
+  jsOnly: string[];
+  byFile: Record<string, { accelerated: number; jsOnly: number }>;
+}
+
+function analyzeWasmPairing(rootDir: string): WasmPairing | null {
+  const candidates = [
+    join(rootDir, 'functions', 'src', 'typed'),
+    join(rootDir, 'src', 'typed'),
+  ];
+  const typedDir = candidates.find((d) => existsSync(d));
+  if (!typedDir) return null;
+
+  const accelerated: WasmPairingEntry[] = [];
+  const jsOnly: string[] = [];
+  const byFile: Record<string, { accelerated: number; jsOnly: number }> = {};
+
+  for (const fname of readdirSync(typedDir)) {
+    if (!fname.endsWith('.ts')) continue;
+    const src = readFileSync(join(typedDir, fname), 'utf-8');
+    const re = /export const (\w+) = mathTyped\(\s*'\w+'\s*,\s*\{/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(src)) !== null) {
+      const name = m[1];
+      // Brace-match the mathTyped({...}) object literal starting at its `{`.
+      let depth = 0;
+      const start = m.index + m[0].length - 1;
+      let end = start;
+      for (let i = start; i < src.length; i++) {
+        const c = src[i];
+        if (c === '{') depth++;
+        else if (c === '}') {
+          depth--;
+          if (depth === 0) {
+            end = i;
+            break;
+          }
+        }
+      }
+      const block = src.slice(start, end + 1);
+      const dispatch = Array.from(new Set(block.match(/\b\w+Dispatch\b/g) ?? [])).sort();
+      if (!byFile[fname]) byFile[fname] = { accelerated: 0, jsOnly: 0 };
+      if (dispatch.length > 0) {
+        accelerated.push({ name, file: fname, dispatch });
+        byFile[fname].accelerated++;
+      } else {
+        jsOnly.push(name);
+        byFile[fname].jsOnly++;
+      }
+    }
+  }
+
+  accelerated.sort((a, b) => a.name.localeCompare(b.name));
+  jsOnly.sort();
+  return {
+    generated: new Date().toISOString().split('T')[0],
+    total: accelerated.length + jsOnly.length,
+    acceleratedCount: accelerated.length,
+    jsOnlyCount: jsOnly.length,
+    accelerated,
+    jsOnly,
+    byFile,
+  };
+}
+
+function generateWasmPairingMarkdown(p: WasmPairing): string {
+  let md = '# WASM Accelerator ↔ Function Pairing\n\n';
+  md += `**Generated**: ${p.generated} (by tools/create-dependency-graph)\n\n`;
+  md += `Public \`mathTyped\` functions in \`functions/src/typed/\` and whether each `;
+  md += `routes to a WASM bridge (\`*Dispatch\`) or runs pure-JS. WASM engages only `;
+  md += `for \`Float64Array\` inputs at/above \`WASM_SPECIAL_THRESHOLD\` (1024); dispatch `;
+  md += `order is Rust → AssemblyScript → JS fallback.\n\n`;
+  md += `| | Count |\n| --- | --: |\n`;
+  md += `| Total public typed functions | ${p.total} |\n`;
+  md += `| WASM-accelerated | ${p.acceleratedCount} |\n`;
+  md += `| JS-only | ${p.jsOnlyCount} |\n\n`;
+  md += `## WASM-accelerated functions\n\n| Function | Bridge dispatch | Module |\n| --- | --- | --- |\n`;
+  for (const e of p.accelerated) {
+    md += `| \`${e.name}\` | \`${e.dispatch.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
+  }
+  md += `\n## Per-module counts\n\n| Module | Accelerated | JS-only |\n| --- | --: | --: |\n`;
+  for (const f of Object.keys(p.byFile).sort()) {
+    md += `| ${f.replace(/\.ts$/, '')} | ${p.byFile[f].accelerated} | ${p.byFile[f].jsOnly} |\n`;
+  }
+  md += `\n> Note: matrix linear-algebra ops are WASM-accelerated separately via the `;
+  md += `\`matrix\` package backend (not the typed-API dispatch counted here), and `;
+  md += `internal poly/signal/sort/interpolation kernels accelerate algebra/numeric paths.\n`;
+  return md;
+}
+
+/**
  * Main function
  */
 async function main(): Promise<void> {
@@ -2533,6 +2642,21 @@ async function main(): Promise<void> {
 
   writeFileSync(unusedReportPath, unusedReport);
   console.log(`\nWritten: ${unusedReportPath}`);
+
+  // WASM accelerator <-> function pairing (generated artifact; replaces the
+  // formerly hand-maintained docs/Architecture/WASM_ACCELERATION.md map).
+  const wasmPairing = analyzeWasmPairing(ROOT_DIR);
+  if (wasmPairing) {
+    writeFileSync(
+      join(OUTPUT_DIR, 'wasm-pairing.json'),
+      JSON.stringify(wasmPairing, null, 2)
+    );
+    writeFileSync(join(OUTPUT_DIR, 'wasm-pairing.md'), generateWasmPairingMarkdown(wasmPairing));
+    console.log(
+      `Written: ${join(OUTPUT_DIR, 'wasm-pairing.md')} ` +
+        `(${wasmPairing.acceleratedCount}/${wasmPairing.total} WASM-accelerated)`
+    );
+  }
 
   // Print test coverage summary if enabled
   if (testCoverage) {

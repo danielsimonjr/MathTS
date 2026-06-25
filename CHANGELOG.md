@@ -21,8 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (NR §6.5 / ~1e-7 / ~5e-4 accuracy and "ellipticK/E still pure-JS" were all
   wrong post-fix; now series+Hankel, <1e-9, and the elliptic/Carlson WASM
   routing documented).
-- Added `docs/Architecture/WASM_ACCELERATION.md` — per-function WASM coverage
-  map (21 of 218 typed functions accelerated).
+- Added `docs/Architecture/WASM_ACCELERATION.md` — narrative WASM coverage doc
+  (thresholds, dispatch order, JS-only families, correctness status).
+
+### Changed (2026-06-25)
+
+- **`tools/create-dependency-graph`**: now emits the WASM accelerator↔function
+  pairing as a generated artifact (`docs/Architecture/wasm-pairing.md` +
+  `wasm-pairing.json`) — scans `functions/src/typed/` `mathTyped` exports for
+  `*Dispatch` routing (21 of 218 accelerated). The per-function table is now
+  tool-generated rather than hand-maintained, so it can't drift;
+  `WASM_ACCELERATION.md` points at it for the authoritative list.
 
 ### Fixed (2026-05-25)
 

@@ -1,0 +1,420 @@
+{
+  "generated": "2026-06-25",
+  "total": 218,
+  "acceleratedCount": 21,
+  "jsOnlyCount": 197,
+  "accelerated": [
+    {
+      "name": "airyAi",
+      "file": "special.ts",
+      "dispatch": [
+        "airyAiDispatch"
+      ]
+    },
+    {
+      "name": "airyBi",
+      "file": "special.ts",
+      "dispatch": [
+        "airyBiDispatch"
+      ]
+    },
+    {
+      "name": "besselJ",
+      "file": "special.ts",
+      "dispatch": [
+        "besselJDispatch"
+      ]
+    },
+    {
+      "name": "besselJ0",
+      "file": "special.ts",
+      "dispatch": [
+        "besselJ0Dispatch"
+      ]
+    },
+    {
+      "name": "besselJ1",
+      "file": "special.ts",
+      "dispatch": [
+        "besselJ1Dispatch"
+      ]
+    },
+    {
+      "name": "besselY",
+      "file": "special.ts",
+      "dispatch": [
+        "besselYDispatch"
+      ]
+    },
+    {
+      "name": "besselY0",
+      "file": "special.ts",
+      "dispatch": [
+        "besselY0Dispatch"
+      ]
+    },
+    {
+      "name": "besselY1",
+      "file": "special.ts",
+      "dispatch": [
+        "besselY1Dispatch"
+      ]
+    },
+    {
+      "name": "carlsonRC",
+      "file": "special.ts",
+      "dispatch": [
+        "carlsonRCDispatch"
+      ]
+    },
+    {
+      "name": "carlsonRD",
+      "file": "special.ts",
+      "dispatch": [
+        "carlsonRDDispatch"
+      ]
+    },
+    {
+      "name": "carlsonRF",
+      "file": "special.ts",
+      "dispatch": [
+        "carlsonRFDispatch"
+      ]
+    },
+    {
+      "name": "carlsonRJ",
+      "file": "special.ts",
+      "dispatch": [
+        "carlsonRJDispatch"
+      ]
+    },
+    {
+      "name": "ellipticE",
+      "file": "special.ts",
+      "dispatch": [
+        "ellipticEDispatch"
+      ]
+    },
+    {
+      "name": "ellipticEIncomplete",
+      "file": "special.ts",
+      "dispatch": [
+        "ellipticEIncompleteDispatch"
+      ]
+    },
+    {
+      "name": "ellipticF",
+      "file": "special.ts",
+      "dispatch": [
+        "ellipticFIncompleteDispatch"
+      ]
+    },
+    {
+      "name": "ellipticK",
+      "file": "special.ts",
+      "dispatch": [
+        "ellipticKDispatch"
+      ]
+    },
+    {
+      "name": "ellipticPi",
+      "file": "special.ts",
+      "dispatch": [
+        "ellipticPiIncompleteDispatch"
+      ]
+    },
+    {
+      "name": "lgamma",
+      "file": "special.ts",
+      "dispatch": [
+        "lgammaDispatch"
+      ]
+    },
+    {
+      "name": "noncentralChi2PDF",
+      "file": "distributions.ts",
+      "dispatch": [
+        "lgammaDispatch"
+      ]
+    },
+    {
+      "name": "parallelStatMedian",
+      "file": "statistics.ts",
+      "dispatch": [
+        "sortF64Dispatch"
+      ]
+    },
+    {
+      "name": "parallelStatQuantile",
+      "file": "statistics.ts",
+      "dispatch": [
+        "sortF64Dispatch"
+      ]
+    }
+  ],
+  "jsOnly": [
+    "abs",
+    "acos",
+    "acosh",
+    "acot",
+    "acsc",
+    "add",
+    "and",
+    "arg",
+    "asec",
+    "asin",
+    "asinh",
+    "atan",
+    "atan2",
+    "atanh",
+    "bernoulli",
+    "bernoulliPMF",
+    "besselI",
+    "besselK",
+    "beta",
+    "betaPDF",
+    "betainc",
+    "bin",
+    "binomialPMF",
+    "bitAnd",
+    "bitNot",
+    "bitOr",
+    "bitXor",
+    "carmichaelLambda",
+    "cbrt",
+    "ceil",
+    "chebyshevT",
+    "chineseRemainder",
+    "combinations",
+    "combinationsWithRep",
+    "compare",
+    "compareNatural",
+    "compareText",
+    "compareUnits",
+    "cond",
+    "conj",
+    "cos",
+    "cosIntegral",
+    "cosh",
+    "cot",
+    "csc",
+    "cube",
+    "deepEqual",
+    "digamma",
+    "divide",
+    "divisorSigma",
+    "divisors",
+    "dot",
+    "doubleFactorial",
+    "entropy",
+    "equal",
+    "equalScalar",
+    "equalText",
+    "erfc",
+    "erfi",
+    "eulerPhi",
+    "exp",
+    "expIntegralEi",
+    "expm1",
+    "exponentialCDF",
+    "exponentialPDF",
+    "fallingFactorial",
+    "fibonacci",
+    "fix",
+    "floor",
+    "format",
+    "fresnelC",
+    "fresnelS",
+    "gammaPDF",
+    "gammainc",
+    "gammaincp",
+    "gcd",
+    "geometricPMF",
+    "harmonicNumber",
+    "hermiteH",
+    "hex",
+    "hypot",
+    "im",
+    "integerDigits",
+    "jacobiSymbol",
+    "jsDivergence",
+    "laguerreL",
+    "lambertW",
+    "larger",
+    "largerEq",
+    "lcm",
+    "leftShift",
+    "legendreP",
+    "log",
+    "log10",
+    "log1p",
+    "log2",
+    "logIntegral",
+    "lowRankApprox",
+    "lucas",
+    "lucasL",
+    "matrixExpm",
+    "matrixLogm",
+    "matrixSqrtm",
+    "max",
+    "mean",
+    "min",
+    "mod",
+    "moebiusMu",
+    "multinomial",
+    "multiply",
+    "nextPrime",
+    "norm",
+    "norm2",
+    "normFro",
+    "normalCDF",
+    "normalPDF",
+    "not",
+    "nthRoot",
+    "nullish",
+    "oct",
+    "or",
+    "parallelAutoCorr",
+    "parallelConv",
+    "parallelFFT",
+    "parallelFFTMagnitude",
+    "parallelFFTPower",
+    "parallelIFFT",
+    "parallelStatCorr",
+    "parallelStatCumsum",
+    "parallelStatDistance",
+    "parallelStatHistogram",
+    "parallelStatMAD",
+    "parallelStatMax",
+    "parallelStatMean",
+    "parallelStatMin",
+    "parallelStatMinMax",
+    "parallelStatMode",
+    "parallelStatNorm",
+    "parallelStatProd",
+    "parallelStatStd",
+    "parallelStatSum",
+    "parallelStatVariance",
+    "parallelXCorr",
+    "partitions",
+    "permutations",
+    "pickRandom",
+    "pinv",
+    "poissonPMF",
+    "pow",
+    "prime",
+    "primeFactors",
+    "primePi",
+    "print",
+    "random",
+    "randomInt",
+    "re",
+    "rightArithShift",
+    "rightLogShift",
+    "risingFactorial",
+    "round",
+    "sec",
+    "setCartesian",
+    "setDifference",
+    "setDistinct",
+    "setIntersect",
+    "setIsSubset",
+    "setMultiplicity",
+    "setPowerset",
+    "setSize",
+    "setSymDifference",
+    "setUnion",
+    "sign",
+    "sin",
+    "sinIntegral",
+    "singularValues",
+    "sinh",
+    "smaller",
+    "smallerEq",
+    "sqrt",
+    "square",
+    "std",
+    "studentTPDF",
+    "subfactorial",
+    "subtract",
+    "sum",
+    "tan",
+    "tanh",
+    "to",
+    "toBest",
+    "toDegrees",
+    "toRadians",
+    "unaryMinus",
+    "unaryPlus",
+    "unequal",
+    "variance",
+    "xgcd",
+    "xor"
+  ],
+  "byFile": {
+    "arithmetic.ts": {
+      "accelerated": 0,
+      "jsOnly": 45
+    },
+    "bitwise.ts": {
+      "accelerated": 0,
+      "jsOnly": 7
+    },
+    "combinatorics.ts": {
+      "accelerated": 0,
+      "jsOnly": 21
+    },
+    "complex.ts": {
+      "accelerated": 0,
+      "jsOnly": 4
+    },
+    "distributions.ts": {
+      "accelerated": 1,
+      "jsOnly": 13
+    },
+    "logical.ts": {
+      "accelerated": 0,
+      "jsOnly": 5
+    },
+    "matrix-ops.ts": {
+      "accelerated": 0,
+      "jsOnly": 9
+    },
+    "probability.ts": {
+      "accelerated": 0,
+      "jsOnly": 8
+    },
+    "relational.ts": {
+      "accelerated": 0,
+      "jsOnly": 7
+    },
+    "set.ts": {
+      "accelerated": 0,
+      "jsOnly": 10
+    },
+    "signal.ts": {
+      "accelerated": 0,
+      "jsOnly": 7
+    },
+    "special.ts": {
+      "accelerated": 18,
+      "jsOnly": 20
+    },
+    "statistics.ts": {
+      "accelerated": 2,
+      "jsOnly": 15
+    },
+    "string.ts": {
+      "accelerated": 0,
+      "jsOnly": 5
+    },
+    "trigonometry.ts": {
+      "accelerated": 0,
+      "jsOnly": 19
+    },
+    "unit.ts": {
+      "accelerated": 0,
+      "jsOnly": 2
+    }
+  }
+}
