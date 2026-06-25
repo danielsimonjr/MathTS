@@ -1,0 +1,1396 @@
+{
+  "target_rel": 1e-09,
+  "hard_fail_rel": 1e-06,
+  "records": [
+    {
+      "name": "erfc",
+      "args": [
+        -1.0
+      ],
+      "expected": 1.8427007929497148
+    },
+    {
+      "name": "erfc",
+      "args": [
+        -0.3
+      ],
+      "expected": 1.3286267594591274
+    },
+    {
+      "name": "erfc",
+      "args": [
+        0.0
+      ],
+      "expected": 1.0
+    },
+    {
+      "name": "erfc",
+      "args": [
+        0.5
+      ],
+      "expected": 0.4795001221869535
+    },
+    {
+      "name": "erfc",
+      "args": [
+        1.0
+      ],
+      "expected": 0.15729920705028513
+    },
+    {
+      "name": "erfc",
+      "args": [
+        2.0
+      ],
+      "expected": 0.004677734981047266
+    },
+    {
+      "name": "erfc",
+      "args": [
+        3.0
+      ],
+      "expected": 2.209049699858544e-05
+    },
+    {
+      "name": "erfi",
+      "args": [
+        -1.0
+      ],
+      "expected": -1.6504257587975428
+    },
+    {
+      "name": "erfi",
+      "args": [
+        0.0
+      ],
+      "expected": 0.0
+    },
+    {
+      "name": "erfi",
+      "args": [
+        0.5
+      ],
+      "expected": 0.614952094696511
+    },
+    {
+      "name": "erfi",
+      "args": [
+        1.0
+      ],
+      "expected": 1.6504257587975428
+    },
+    {
+      "name": "erfi",
+      "args": [
+        2.0
+      ],
+      "expected": 18.564802414575553
+    },
+    {
+      "name": "lgamma",
+      "args": [
+        0.25
+      ],
+      "expected": 1.2880225246980774
+    },
+    {
+      "name": "lgamma",
+      "args": [
+        0.5
+      ],
+      "expected": 0.5723649429247001
+    },
+    {
+      "name": "lgamma",
+      "args": [
+        1.0
+      ],
+      "expected": 0.0
+    },
+    {
+      "name": "lgamma",
+      "args": [
+        1.5
+      ],
+      "expected": -0.12078223763524522
+    },
+    {
+      "name": "lgamma",
+      "args": [
+        2.0
+      ],
+      "expected": 0.0
+    },
+    {
+      "name": "lgamma",
+      "args": [
+        3.5
+      ],
+      "expected": 1.2009736023470743
+    },
+    {
+      "name": "lgamma",
+      "args": [
+        5.0
+      ],
+      "expected": 3.1780538303479458
+    },
+    {
+      "name": "lgamma",
+      "args": [
+        10.0
+      ],
+      "expected": 12.801827480081469
+    },
+    {
+      "name": "digamma",
+      "args": [
+        0.5
+      ],
+      "expected": -1.9635100260214235
+    },
+    {
+      "name": "digamma",
+      "args": [
+        1.0
+      ],
+      "expected": -0.5772156649015329
+    },
+    {
+      "name": "digamma",
+      "args": [
+        2.0
+      ],
+      "expected": 0.42278433509846713
+    },
+    {
+      "name": "digamma",
+      "args": [
+        3.5
+      ],
+      "expected": 1.103156640645243
+    },
+    {
+      "name": "digamma",
+      "args": [
+        5.0
+      ],
+      "expected": 1.5061176684318005
+    },
+    {
+      "name": "digamma",
+      "args": [
+        10.0
+      ],
+      "expected": 2.251752589066721
+    },
+    {
+      "name": "ellipticK",
+      "args": [
+        0.0
+      ],
+      "expected": 1.5707963267948966
+    },
+    {
+      "name": "ellipticK",
+      "args": [
+        0.1
+      ],
+      "expected": 1.6124413487202194
+    },
+    {
+      "name": "ellipticK",
+      "args": [
+        0.5
+      ],
+      "expected": 1.8540746773013719
+    },
+    {
+      "name": "ellipticK",
+      "args": [
+        0.9
+      ],
+      "expected": 2.5780921133481733
+    },
+    {
+      "name": "ellipticK",
+      "args": [
+        0.99
+      ],
+      "expected": 3.695637362989874
+    },
+    {
+      "name": "lambertW",
+      "args": [
+        -0.3
+      ],
+      "expected": -0.4894022271802149
+    },
+    {
+      "name": "lambertW",
+      "args": [
+        0.0
+      ],
+      "expected": 0.0
+    },
+    {
+      "name": "lambertW",
+      "args": [
+        0.5
+      ],
+      "expected": 0.35173371124919584
+    },
+    {
+      "name": "lambertW",
+      "args": [
+        1.0
+      ],
+      "expected": 0.5671432904097838
+    },
+    {
+      "name": "lambertW",
+      "args": [
+        2.0
+      ],
+      "expected": 0.8526055020137255
+    },
+    {
+      "name": "lambertW",
+      "args": [
+        2.718281828459045
+      ],
+      "expected": 1.0
+    },
+    {
+      "name": "sinIntegral",
+      "args": [
+        0.5
+      ],
+      "expected": 0.4931074180430667
+    },
+    {
+      "name": "sinIntegral",
+      "args": [
+        1.0
+      ],
+      "expected": 0.946083070367183
+    },
+    {
+      "name": "sinIntegral",
+      "args": [
+        2.0
+      ],
+      "expected": 1.6054129768026948
+    },
+    {
+      "name": "sinIntegral",
+      "args": [
+        5.0
+      ],
+      "expected": 1.549931244944674
+    },
+    {
+      "name": "sinIntegral",
+      "args": [
+        10.0
+      ],
+      "expected": 1.6583475942188741
+    },
+    {
+      "name": "cosIntegral",
+      "args": [
+        0.5
+      ],
+      "expected": -0.1777840788066129
+    },
+    {
+      "name": "cosIntegral",
+      "args": [
+        1.0
+      ],
+      "expected": 0.33740392290096816
+    },
+    {
+      "name": "cosIntegral",
+      "args": [
+        2.0
+      ],
+      "expected": 0.422980828774865
+    },
+    {
+      "name": "cosIntegral",
+      "args": [
+        5.0
+      ],
+      "expected": -0.19002974965664388
+    },
+    {
+      "name": "cosIntegral",
+      "args": [
+        10.0
+      ],
+      "expected": -0.04545643300445537
+    },
+    {
+      "name": "logIntegral",
+      "args": [
+        2.0
+      ],
+      "expected": 1.045163780117493
+    },
+    {
+      "name": "logIntegral",
+      "args": [
+        5.0
+      ],
+      "expected": 3.634588310032652
+    },
+    {
+      "name": "logIntegral",
+      "args": [
+        10.0
+      ],
+      "expected": 6.165599504787298
+    },
+    {
+      "name": "logIntegral",
+      "args": [
+        100.0
+      ],
+      "expected": 30.12614158407963
+    },
+    {
+      "name": "expIntegralEi",
+      "args": [
+        0.5
+      ],
+      "expected": 0.4542199048631736
+    },
+    {
+      "name": "expIntegralEi",
+      "args": [
+        1.0
+      ],
+      "expected": 1.8951178163559368
+    },
+    {
+      "name": "expIntegralEi",
+      "args": [
+        2.0
+      ],
+      "expected": 4.95423435600189
+    },
+    {
+      "name": "expIntegralEi",
+      "args": [
+        5.0
+      ],
+      "expected": 40.18527535580318
+    },
+    {
+      "name": "fresnelC",
+      "args": [
+        0.5
+      ],
+      "expected": 0.4923442258714464
+    },
+    {
+      "name": "fresnelC",
+      "args": [
+        1.0
+      ],
+      "expected": 0.7798934003768229
+    },
+    {
+      "name": "fresnelC",
+      "args": [
+        2.0
+      ],
+      "expected": 0.48825340607534073
+    },
+    {
+      "name": "fresnelC",
+      "args": [
+        3.0
+      ],
+      "expected": 0.6057207892976856
+    },
+    {
+      "name": "fresnelS",
+      "args": [
+        0.5
+      ],
+      "expected": 0.06473243285999927
+    },
+    {
+      "name": "fresnelS",
+      "args": [
+        1.0
+      ],
+      "expected": 0.43825914739035476
+    },
+    {
+      "name": "fresnelS",
+      "args": [
+        2.0
+      ],
+      "expected": 0.34341567836369824
+    },
+    {
+      "name": "fresnelS",
+      "args": [
+        3.0
+      ],
+      "expected": 0.496312998967375
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        -12.0
+      ],
+      "expected": -0.06655517505437313
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        -8.0
+      ],
+      "expected": -0.0527050503563862
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        -5.0
+      ],
+      "expected": 0.35076100902411433
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        -2.0
+      ],
+      "expected": 0.22740742820168558
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        0.0
+      ],
+      "expected": 0.3550280538878172
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        1.0
+      ],
+      "expected": 0.13529241631288141
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        2.0
+      ],
+      "expected": 0.03492413042327438
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        5.0
+      ],
+      "expected": 0.00010834442813607442
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        8.0
+      ],
+      "expected": 4.6922076160992316e-08
+    },
+    {
+      "name": "airyAi",
+      "args": [
+        12.0
+      ],
+      "expected": 1.3931846888753607e-13
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        -12.0
+      ],
+      "expected": -0.2957199120780731
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        -8.0
+      ],
+      "expected": -0.33125158075113786
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        -5.0
+      ],
+      "expected": -0.13836913490160058
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        -2.0
+      ],
+      "expected": -0.4123025879563985
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        0.0
+      ],
+      "expected": 0.6149266274460007
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        1.0
+      ],
+      "expected": 1.2074235949528713
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        2.0
+      ],
+      "expected": 3.2980949999782148
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        5.0
+      ],
+      "expected": 657.7920441711711
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        8.0
+      ],
+      "expected": 1199586.00412446
+    },
+    {
+      "name": "airyBi",
+      "args": [
+        12.0
+      ],
+      "expected": 329807225829.07416
+    },
+    {
+      "name": "besselJ0",
+      "args": [
+        0.0
+      ],
+      "expected": 1.0
+    },
+    {
+      "name": "besselJ0",
+      "args": [
+        0.5
+      ],
+      "expected": 0.9384698072408129
+    },
+    {
+      "name": "besselJ0",
+      "args": [
+        1.0
+      ],
+      "expected": 0.7651976865579666
+    },
+    {
+      "name": "besselJ0",
+      "args": [
+        2.0
+      ],
+      "expected": 0.22389077914123567
+    },
+    {
+      "name": "besselJ0",
+      "args": [
+        5.0
+      ],
+      "expected": -0.1775967713143383
+    },
+    {
+      "name": "besselJ0",
+      "args": [
+        8.0
+      ],
+      "expected": 0.1716508071375539
+    },
+    {
+      "name": "besselJ0",
+      "args": [
+        10.0
+      ],
+      "expected": -0.24593576445134835
+    },
+    {
+      "name": "besselJ0",
+      "args": [
+        15.0
+      ],
+      "expected": -0.014224472826780772
+    },
+    {
+      "name": "besselJ0",
+      "args": [
+        20.0
+      ],
+      "expected": 0.16702466434058316
+    },
+    {
+      "name": "besselJ1",
+      "args": [
+        0.0
+      ],
+      "expected": 0.0
+    },
+    {
+      "name": "besselJ1",
+      "args": [
+        0.5
+      ],
+      "expected": 0.2422684576748739
+    },
+    {
+      "name": "besselJ1",
+      "args": [
+        1.0
+      ],
+      "expected": 0.4400505857449335
+    },
+    {
+      "name": "besselJ1",
+      "args": [
+        2.0
+      ],
+      "expected": 0.5767248077568734
+    },
+    {
+      "name": "besselJ1",
+      "args": [
+        5.0
+      ],
+      "expected": -0.32757913759146523
+    },
+    {
+      "name": "besselJ1",
+      "args": [
+        8.0
+      ],
+      "expected": 0.23463634685391463
+    },
+    {
+      "name": "besselJ1",
+      "args": [
+        10.0
+      ],
+      "expected": 0.04347274616886144
+    },
+    {
+      "name": "besselJ1",
+      "args": [
+        15.0
+      ],
+      "expected": 0.20510403861352275
+    },
+    {
+      "name": "besselJ1",
+      "args": [
+        20.0
+      ],
+      "expected": 0.06683312417585005
+    },
+    {
+      "name": "besselY0",
+      "args": [
+        0.5
+      ],
+      "expected": -0.44451873350670656
+    },
+    {
+      "name": "besselY0",
+      "args": [
+        1.0
+      ],
+      "expected": 0.08825696421567696
+    },
+    {
+      "name": "besselY0",
+      "args": [
+        2.0
+      ],
+      "expected": 0.5103756726497451
+    },
+    {
+      "name": "besselY0",
+      "args": [
+        5.0
+      ],
+      "expected": -0.30851762524903376
+    },
+    {
+      "name": "besselY0",
+      "args": [
+        8.0
+      ],
+      "expected": 0.22352148938756622
+    },
+    {
+      "name": "besselY0",
+      "args": [
+        10.0
+      ],
+      "expected": 0.055671167283599395
+    },
+    {
+      "name": "besselY0",
+      "args": [
+        15.0
+      ],
+      "expected": 0.20546429603891828
+    },
+    {
+      "name": "besselY0",
+      "args": [
+        20.0
+      ],
+      "expected": 0.06264059680938383
+    },
+    {
+      "name": "besselY1",
+      "args": [
+        0.5
+      ],
+      "expected": -1.471472392670243
+    },
+    {
+      "name": "besselY1",
+      "args": [
+        1.0
+      ],
+      "expected": -0.7812128213002887
+    },
+    {
+      "name": "besselY1",
+      "args": [
+        2.0
+      ],
+      "expected": -0.10703243154093754
+    },
+    {
+      "name": "besselY1",
+      "args": [
+        5.0
+      ],
+      "expected": 0.14786314339122683
+    },
+    {
+      "name": "besselY1",
+      "args": [
+        8.0
+      ],
+      "expected": -0.1580604617312475
+    },
+    {
+      "name": "besselY1",
+      "args": [
+        10.0
+      ],
+      "expected": 0.24901542420695388
+    },
+    {
+      "name": "besselY1",
+      "args": [
+        15.0
+      ],
+      "expected": 0.02107362803687351
+    },
+    {
+      "name": "besselY1",
+      "args": [
+        20.0
+      ],
+      "expected": -0.1655116143625213
+    },
+    {
+      "name": "beta",
+      "args": [
+        2.0,
+        3.0
+      ],
+      "expected": 0.08333333333333333
+    },
+    {
+      "name": "beta",
+      "args": [
+        0.5,
+        0.5
+      ],
+      "expected": 3.141592653589793
+    },
+    {
+      "name": "beta",
+      "args": [
+        1.0,
+        5.0
+      ],
+      "expected": 0.2
+    },
+    {
+      "name": "beta",
+      "args": [
+        2.5,
+        1.5
+      ],
+      "expected": 0.19634954084936207
+    },
+    {
+      "name": "gammainc",
+      "args": [
+        2.0,
+        1.0
+      ],
+      "expected": 0.26424111765711533
+    },
+    {
+      "name": "gammainc",
+      "args": [
+        3.0,
+        5.0
+      ],
+      "expected": 0.8753479805169189
+    },
+    {
+      "name": "gammainc",
+      "args": [
+        0.5,
+        1.0
+      ],
+      "expected": 0.8427007929497149
+    },
+    {
+      "name": "gammainc",
+      "args": [
+        5.0,
+        3.0
+      ],
+      "expected": 0.18473675547622792
+    },
+    {
+      "name": "gammaincp",
+      "args": [
+        2.0,
+        1.0
+      ],
+      "expected": 0.7357588823428847
+    },
+    {
+      "name": "gammaincp",
+      "args": [
+        3.0,
+        5.0
+      ],
+      "expected": 0.12465201948308115
+    },
+    {
+      "name": "gammaincp",
+      "args": [
+        0.5,
+        1.0
+      ],
+      "expected": 0.15729920705028513
+    },
+    {
+      "name": "besselJ",
+      "args": [
+        2.0,
+        1.0
+      ],
+      "expected": 0.11490348493190047
+    },
+    {
+      "name": "besselJ",
+      "args": [
+        2.0,
+        5.0
+      ],
+      "expected": 0.046565116277752214
+    },
+    {
+      "name": "besselJ",
+      "args": [
+        3.0,
+        1.0
+      ],
+      "expected": 0.019563353982668407
+    },
+    {
+      "name": "besselJ",
+      "args": [
+        3.0,
+        10.0
+      ],
+      "expected": 0.058379379305186815
+    },
+    {
+      "name": "besselJ",
+      "args": [
+        5.0,
+        1.0
+      ],
+      "expected": 0.00024975773021123444
+    },
+    {
+      "name": "besselJ",
+      "args": [
+        5.0,
+        5.0
+      ],
+      "expected": 0.26114054612017007
+    },
+    {
+      "name": "besselJ",
+      "args": [
+        5.0,
+        15.0
+      ],
+      "expected": 0.13045613456502955
+    },
+    {
+      "name": "besselY",
+      "args": [
+        2.0,
+        1.0
+      ],
+      "expected": -1.6506826068162543
+    },
+    {
+      "name": "besselY",
+      "args": [
+        2.0,
+        5.0
+      ],
+      "expected": 0.36766288260552454
+    },
+    {
+      "name": "besselY",
+      "args": [
+        3.0,
+        1.0
+      ],
+      "expected": -5.821517605964729
+    },
+    {
+      "name": "besselY",
+      "args": [
+        3.0,
+        10.0
+      ],
+      "expected": -0.2513626571838373
+    },
+    {
+      "name": "besselY",
+      "args": [
+        5.0,
+        5.0
+      ],
+      "expected": -0.4536948224911019
+    },
+    {
+      "name": "besselI",
+      "args": [
+        0.0,
+        1.0
+      ],
+      "expected": 1.2660658777520084
+    },
+    {
+      "name": "besselI",
+      "args": [
+        1.0,
+        2.0
+      ],
+      "expected": 1.590636854637329
+    },
+    {
+      "name": "besselI",
+      "args": [
+        2.0,
+        3.0
+      ],
+      "expected": 2.245212440929951
+    },
+    {
+      "name": "besselI",
+      "args": [
+        3.0,
+        1.0
+      ],
+      "expected": 0.022168424924331902
+    },
+    {
+      "name": "besselK",
+      "args": [
+        0.0,
+        1.0
+      ],
+      "expected": 0.42102443824070834
+    },
+    {
+      "name": "besselK",
+      "args": [
+        1.0,
+        2.0
+      ],
+      "expected": 0.13986588181652243
+    },
+    {
+      "name": "besselK",
+      "args": [
+        2.0,
+        3.0
+      ],
+      "expected": 0.06151045847174204
+    },
+    {
+      "name": "besselK",
+      "args": [
+        3.0,
+        1.0
+      ],
+      "expected": 7.101262824737945
+    },
+    {
+      "name": "chebyshevT",
+      "args": [
+        2.0,
+        0.5
+      ],
+      "expected": -0.5
+    },
+    {
+      "name": "chebyshevT",
+      "args": [
+        3.0,
+        0.3
+      ],
+      "expected": -0.7919999999999999
+    },
+    {
+      "name": "chebyshevT",
+      "args": [
+        5.0,
+        0.7
+      ],
+      "expected": -0.6708799999999998
+    },
+    {
+      "name": "chebyshevT",
+      "args": [
+        8.0,
+        -0.4
+      ],
+      "expected": -0.98868992
+    },
+    {
+      "name": "hermiteH",
+      "args": [
+        2.0,
+        0.5
+      ],
+      "expected": -1.0
+    },
+    {
+      "name": "hermiteH",
+      "args": [
+        3.0,
+        1.0
+      ],
+      "expected": -4.0
+    },
+    {
+      "name": "hermiteH",
+      "args": [
+        5.0,
+        0.7
+      ],
+      "expected": 34.49824
+    },
+    {
+      "name": "laguerreL",
+      "args": [
+        2.0,
+        1.0
+      ],
+      "expected": -0.5
+    },
+    {
+      "name": "laguerreL",
+      "args": [
+        3.0,
+        0.5
+      ],
+      "expected": -0.14583333333333334
+    },
+    {
+      "name": "laguerreL",
+      "args": [
+        5.0,
+        2.0
+      ],
+      "expected": 0.7333333333333333
+    },
+    {
+      "name": "legendreP",
+      "args": [
+        2.0,
+        0.5
+      ],
+      "expected": -0.125
+    },
+    {
+      "name": "legendreP",
+      "args": [
+        3.0,
+        0.3
+      ],
+      "expected": -0.3825
+    },
+    {
+      "name": "legendreP",
+      "args": [
+        5.0,
+        0.7
+      ],
+      "expected": -0.3651987499999999
+    },
+    {
+      "name": "carlsonRC",
+      "args": [
+        1.0,
+        2.0
+      ],
+      "expected": 0.7853981633974483
+    },
+    {
+      "name": "carlsonRC",
+      "args": [
+        0.5,
+        1.0
+      ],
+      "expected": 1.1107207345395915
+    },
+    {
+      "name": "carlsonRC",
+      "args": [
+        2.0,
+        3.0
+      ],
+      "expected": 0.6154797086703874
+    },
+    {
+      "name": "ellipticF",
+      "args": [
+        0.3,
+        0.2
+      ],
+      "expected": 0.3008909959134638
+    },
+    {
+      "name": "ellipticF",
+      "args": [
+        0.7,
+        0.5
+      ],
+      "expected": 0.7287703057181902
+    },
+    {
+      "name": "ellipticF",
+      "args": [
+        1.2,
+        0.8
+      ],
+      "expected": 1.48849568894933
+    },
+    {
+      "name": "ellipticEIncomplete",
+      "args": [
+        0.3,
+        0.2
+      ],
+      "expected": 0.2991137191296
+    },
+    {
+      "name": "ellipticEIncomplete",
+      "args": [
+        0.7,
+        0.5
+      ],
+      "expected": 0.6731891745471288
+    },
+    {
+      "name": "ellipticEIncomplete",
+      "args": [
+        1.2,
+        0.8
+      ],
+      "expected": 0.9988746398384253
+    },
+    {
+      "name": "ellipticE",
+      "args": [
+        0.0
+      ],
+      "expected": 1.5707963267948966
+    },
+    {
+      "name": "ellipticE",
+      "args": [
+        0.1
+      ],
+      "expected": 1.5307576368977631
+    },
+    {
+      "name": "ellipticE",
+      "args": [
+        0.5
+      ],
+      "expected": 1.3506438810476755
+    },
+    {
+      "name": "ellipticE",
+      "args": [
+        0.9
+      ],
+      "expected": 1.1047747327040733
+    },
+    {
+      "name": "betainc",
+      "args": [
+        2.0,
+        3.0,
+        0.5
+      ],
+      "expected": 0.6875
+    },
+    {
+      "name": "betainc",
+      "args": [
+        0.5,
+        0.5,
+        0.3
+      ],
+      "expected": 0.36901011956554536
+    },
+    {
+      "name": "betainc",
+      "args": [
+        5.0,
+        2.0,
+        0.7
+      ],
+      "expected": 0.4201749999999999
+    },
+    {
+      "name": "carlsonRF",
+      "args": [
+        1.0,
+        2.0,
+        3.0
+      ],
+      "expected": 0.7269459354689082
+    },
+    {
+      "name": "carlsonRF",
+      "args": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "expected": 0.9688576532724524
+    },
+    {
+      "name": "carlsonRF",
+      "args": [
+        2.0,
+        3.0,
+        4.0
+      ],
+      "expected": 0.5840828416771517
+    },
+    {
+      "name": "carlsonRD",
+      "args": [
+        1.0,
+        2.0,
+        3.0
+      ],
+      "expected": 0.29046028102899063
+    },
+    {
+      "name": "carlsonRD",
+      "args": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "expected": 0.6176739675072551
+    },
+    {
+      "name": "carlsonRD",
+      "args": [
+        2.0,
+        3.0,
+        4.0
+      ],
+      "expected": 0.16510527294261054
+    },
+    {
+      "name": "ellipticPi",
+      "args": [
+        0.1,
+        0.5,
+        0.3
+      ],
+      "expected": 0.510247777108242
+    },
+    {
+      "name": "ellipticPi",
+      "args": [
+        0.3,
+        1.0,
+        0.6
+      ],
+      "expected": 1.217827838128803
+    },
+    {
+      "name": "carlsonRJ",
+      "args": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ],
+      "expected": 0.23984809974956775
+    },
+    {
+      "name": "carlsonRJ",
+      "args": [
+        0.5,
+        1.0,
+        2.0,
+        3.0
+      ],
+      "expected": 0.46698009947142693
+    }
+  ]
+}

@@ -1,5 +1,34 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.11
+
+### Fixed (special-function accuracy)
+
+A new differential audit (`npm run test:diff`, mpmath goldens, 187 cases)
+found the special-function library carried the same defects as the wasm
+kernels. All now pass to <1e-9. Fixes applied consistently across the three
+implementations: the typed scalars (`src/typed/special.ts`), the worker-
+kernel path, and the wasm-bridge JS fallback (`src/wasm/special/wasm-bridge.ts`).
+
+- **Bessel J0/J1/Y0/Y1**: replaced low-order NR rational approximations
+  (~1e-7 for J, ~1e-4 for Y) with ascending series (|x| <= 13) + Hankel
+  asymptotic.
+- **`besselJ` recurrence**: upward recurrence is unstable for n > x — those
+  cases now use Miller's backward recurrence (was: forward whenever n <= 20,
+  giving up to ~1e-3 error, e.g. J5(1)); fixed a Miller off-by-one that
+  returned J_{n+1}.
+- **`besselK`**: replaced A&S polynomial approximations (~1e-8) with the
+  DLMF 10.31.2 ascending series + asymptotic.
+- **Airy Ai/Bi**: the asymptotic-coefficient recurrence omitted the (2k-1)
+  factor (DLMF 9.7.2), making u_2 onward wrong and corrupting both branches
+  (~1e-4 at Ai(-5)); the positive branch additionally used hardcoded c_5/c_6
+  that were wrong. Coefficients now generated correctly; series threshold
+  raised to |x| = 5 so the crossover stays accurate.
+- **`erfc`**: was `1 - erf`, losing precision in the tail (~6e-8); now uses
+  the Abramowitz & Stegun 7.1.14 continued fraction directly for the tail.
+
+No public API changes.
+
 ## 0.2.10
 
 ### Fixed

@@ -1231,64 +1231,117 @@ export function ellipticEDispatch(ms: Float64Array): Float64Array {
 // These are used by the JS fallback loops so this file is self-contained.
 // ---------------------------------------------------------------------------
 
-function _besselJ0(x: number): number {
-  x = Math.abs(x);
-  if (x < 8.0) {
-    const y = x * x;
-    const a1 =
-      57568490574.0 +
-      y *
-        (-13362590354.0 +
-          y * (651619640.7 + y * (-11214424.18 + y * (77392.33017 + y * -184.9052456))));
-    const a2 =
-      57568490411.0 +
-      y * (1029532985.0 + y * (9494680.718 + y * (59272.64853 + y * (267.8532712 + y))));
-    return a1 / a2;
+// ---------------------------------------------------------------------------
+// Bessel J/Y JS fallback — ascending series (|x| <= 13) + Hankel asymptotic.
+// Mirrors assembly/src/special.ts and functions/src/typed/special.ts (kept in
+// sync; validated to <1e-9 vs mpmath). These run on the main thread, so unlike
+// the special.ts scalars they may share module-level helpers/constants.
+// ---------------------------------------------------------------------------
+const _SF_GAMMA = 0.5772156649015328606;
+const _SF_2_PI = 0.63661977236758134308;
+const _SF_1_PI = 0.31830988618379067154;
+const _BESSEL_SERIES_MAX = 13.0;
+
+function _besselHankel(nu: number, x: number, wantY: boolean): number {
+  const mu = 4 * nu * nu;
+  let P = 1.0;
+  let Q = 0.0;
+  let a = 1.0;
+  let xk = 1.0;
+  let prevMag = Infinity;
+  for (let k = 1; k <= 40; k++) {
+    const t1 = 2 * k - 1;
+    a = (a * (mu - t1 * t1)) / (8 * k);
+    xk *= x;
+    const t = a / xk;
+    if (Math.abs(t) > prevMag) break;
+    prevMag = Math.abs(t);
+    const m4 = k & 3;
+    const s = m4 === 1 || m4 === 0 ? 1.0 : -1.0;
+    if ((k & 1) === 1) Q += s * t;
+    else P += s * t;
   }
-  const z = 8.0 / x;
-  const y = z * z;
-  const xx = x - 0.785398164;
-  const a1 =
-    1.0 +
-    y *
-      (-0.001098628627 +
-        y * (0.00002734510407 + y * (-0.000002073370639 + y * 0.0000002093887211)));
-  const a2 =
-    -0.01562499995 +
-    y *
-      (0.0001430488765 +
-        y * (-0.000006911147651 + y * (0.0000007621095161 - y * 0.0000000934935152)));
-  return Math.sqrt(0.636619772 / x) * (Math.cos(xx) * a1 - z * Math.sin(xx) * a2);
+  const chi = x - (nu * 0.5 + 0.25) * Math.PI;
+  const amp = Math.sqrt(2.0 / (Math.PI * x));
+  return wantY ? amp * (P * Math.sin(chi) + Q * Math.cos(chi)) : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
+}
+
+function _besselJ0Series(x: number): number {
+  const z = -0.25 * x * x;
+  let term = 1.0;
+  let sum = 1.0;
+  for (let k = 1; k <= 80; k++) {
+    term *= z / (k * k);
+    sum += term;
+    if (Math.abs(term) <= Math.abs(sum) * 1e-17) break;
+  }
+  return sum;
+}
+
+function _besselJ1Series(x: number): number {
+  const z = -0.25 * x * x;
+  let term = 1.0;
+  let sum = 1.0;
+  for (let k = 1; k <= 80; k++) {
+    term *= z / (k * (k + 1));
+    sum += term;
+    if (Math.abs(term) <= Math.abs(sum) * 1e-17) break;
+  }
+  return 0.5 * x * sum;
+}
+
+function _besselY0Series(x: number): number {
+  const z = 0.25 * x * x;
+  let u = 1.0;
+  let h = 0.0;
+  let s = 0.0;
+  let sign = 1.0;
+  for (let k = 1; k <= 80; k++) {
+    u *= z / (k * k);
+    h += 1 / k;
+    s += sign * h * u;
+    sign = -sign;
+    if (k > 2 && Math.abs(h * u) <= Math.abs(s) * 1e-17) break;
+  }
+  return _SF_2_PI * ((Math.log(0.5 * x) + _SF_GAMMA) * _besselJ0Series(x) + s);
+}
+
+function _besselY1Series(x: number): number {
+  const z = -0.25 * x * x;
+  let v = 0.5 * x;
+  let hk = 0.0;
+  let hk1 = 1.0;
+  let s = (hk + hk1) * v;
+  for (let k = 1; k <= 80; k++) {
+    v *= z / (k * (k + 1));
+    hk += 1 / k;
+    hk1 += 1 / (k + 1);
+    s += (hk + hk1) * v;
+    if (k > 2 && Math.abs((hk + hk1) * v) <= Math.abs(s) * 1e-17) break;
+  }
+  return _SF_2_PI * (Math.log(0.5 * x) + _SF_GAMMA) * _besselJ1Series(x) - _SF_2_PI / x - _SF_1_PI * s;
+}
+
+function _besselJ0(x: number): number {
+  const ax = Math.abs(x);
+  return ax <= _BESSEL_SERIES_MAX ? _besselJ0Series(ax) : _besselHankel(0, ax, false);
 }
 
 function _besselJ1(x: number): number {
-  const sign = x < 0.0 ? -1.0 : 1.0;
-  x = Math.abs(x);
-  if (x < 8.0) {
-    const y = x * x;
-    const a1 =
-      x *
-      (72362614232.0 +
-        y *
-          (-7895059235.0 +
-            y * (242396853.1 + y * (-2972611.439 + y * (15704.4826 + y * -30.16036606)))));
-    const a2 =
-      144725228442.0 +
-      y * (2300535178.0 + y * (18583304.74 + y * (99447.43394 + y * (376.9991397 + y))));
-    return (sign * a1) / a2;
-  }
-  const z = 8.0 / x;
-  const y = z * z;
-  const xx = x - 2.356194491;
-  const a1 =
-    1.0 +
-    y * (0.00183105 + y * (-0.00003516396496 + y * (0.000002457520174 - y * 0.0000002404127372)));
-  const a2 =
-    0.04687499995 +
-    y *
-      (-0.0002002690873 +
-        y * (0.000008449199096 + y * (-0.0000008820898866 + y * 0.0000001057874125)));
-  return sign * Math.sqrt(0.636619772 / x) * (Math.cos(xx) * a1 - z * Math.sin(xx) * a2);
+  const ax = Math.abs(x);
+  const sign = x < 0 ? -1 : 1;
+  const val = ax <= _BESSEL_SERIES_MAX ? _besselJ1Series(ax) : _besselHankel(1, ax, false);
+  return sign * val;
+}
+
+function _besselY0(x: number): number {
+  if (x <= 0.0) return NaN;
+  return x <= _BESSEL_SERIES_MAX ? _besselY0Series(x) : _besselHankel(0, x, true);
+}
+
+function _besselY1(x: number): number {
+  if (x <= 0.0) return NaN;
+  return x <= _BESSEL_SERIES_MAX ? _besselY1Series(x) : _besselHankel(1, x, true);
 }
 
 function _besselJn(n: number, x: number): number {
@@ -1297,8 +1350,8 @@ function _besselJn(n: number, x: number): number {
   if (ni === 0) return sign * _besselJ0(x);
   if (ni === 1) return sign * _besselJ1(x);
   if (Math.abs(x) < 1e-15) return 0.0;
-  if (ni <= 20 || Math.abs(x) > ni) {
-    // Forward recurrence
+  // Upward recurrence is stable only when x > n; else use Miller's backward.
+  if (Math.abs(x) > ni) {
     let jPrev = _besselJ0(x);
     let jCurr = _besselJ1(x);
     for (let k = 1; k < ni; k++) {
@@ -1308,7 +1361,6 @@ function _besselJn(n: number, x: number): number {
     }
     return sign * jCurr;
   }
-  // Miller backward recurrence
   const extra = Math.max(10, Math.floor(Math.sqrt(40.0 * ni)));
   const nStart = ni + 2 * extra;
   let jNext = 0.0;
@@ -1319,72 +1371,11 @@ function _besselJn(n: number, x: number): number {
     const jPrev = ((2.0 * (k + 1)) / x) * jCurr - jNext;
     jNext = jCurr;
     jCurr = jPrev;
-    if (k === ni) resultVal = jNext;
+    if (k === ni) resultVal = jCurr; // jCurr = J_k after the assignment
     if (k % 2 === 0) sum += jCurr;
   }
   sum = 2.0 * sum - jCurr;
   return sign * (resultVal / sum);
-}
-
-function _besselY0(x: number): number {
-  if (x <= 0.0) return NaN;
-  if (x < 8.0) {
-    const y = x * x;
-    const a1 =
-      -2957821389.0 +
-      y *
-        (7062834065.0 +
-          y * (-512359803.6 + y * (10879881.29 + y * (-86327.92757 + y * 228.4622733))));
-    const a2 =
-      40076544269.0 +
-      y * (745249964.8 + y * (7189466.438 + y * (47447.2647 + y * (226.1030244 + y))));
-    return a1 / a2 + 0.636619772 * _besselJ0(x) * Math.log(x);
-  }
-  const z = 8.0 / x;
-  const y = z * z;
-  const xx = x - 0.785398164;
-  const a1 =
-    1.0 +
-    y *
-      (-0.001098628627 +
-        y * (0.00002734510407 + y * (-0.000002073370639 + y * 0.0000002093887211)));
-  const a2 =
-    -0.01562499995 +
-    y *
-      (0.0001430488765 +
-        y * (-0.000006911147651 + y * (0.0000007621095161 - y * 0.0000000934935152)));
-  return Math.sqrt(0.636619772 / x) * (Math.sin(xx) * a1 + z * Math.cos(xx) * a2);
-}
-
-function _besselY1(x: number): number {
-  if (x <= 0.0) return NaN;
-  if (x < 8.0) {
-    const y = x * x;
-    const a1 =
-      x *
-      (-4900604943000.0 +
-        y *
-          (1275274390000.0 +
-            y * (-51534381390.0 + y * (734926455.1 + y * (-4237922.726 + y * 8511.937935)))));
-    const a2 =
-      24909857380000.0 +
-      y *
-        (424441966400.0 +
-          y * (3733650367.0 + y * (22459040.02 + y * (102042.605 + y * (354.9632885 + y)))));
-    return a1 / a2 + 0.636619772 * (_besselJ1(x) * Math.log(x) - 1.0 / x);
-  }
-  const z = 8.0 / x;
-  const y = z * z;
-  const xx = x - 2.356194491;
-  const a1 =
-    1.0 +
-    y * (0.00183105 + y * (-0.00003516396496 + y * (0.000002457520174 - y * 0.0000002404127372)));
-  const a2 =
-    0.04687499995 +
-    y *
-      (-0.0002002690873 +
-        y * (0.000008449199096 + y * (-0.0000008820898866 + y * 0.0000001057874125)));
-  return Math.sqrt(0.636619772 / x) * (Math.sin(xx) * a1 + z * Math.cos(xx) * a2);
 }
 
 function _besselYn(n: number, x: number): number {
@@ -1393,7 +1384,6 @@ function _besselYn(n: number, x: number): number {
   const sign = n < 0 && ni % 2 !== 0 ? -1.0 : 1.0;
   if (ni === 0) return sign * _besselY0(x);
   if (ni === 1) return sign * _besselY1(x);
-  // Forward recurrence
   let yPrev = _besselY0(x);
   let yCurr = _besselY1(x);
   for (let k = 1; k < ni; k++) {
@@ -1405,27 +1395,20 @@ function _besselYn(n: number, x: number): number {
 }
 
 // ---------------------------------------------------------------------------
-// Airy scalar implementations (mirrors special/functions.rs :: airy_ai/bi)
+// Airy scalar JS fallback — series for |x| <= 5, asymptotic with recurrence-
+// generated u_k coefficients (DLMF 9.7.2) beyond.
 // ---------------------------------------------------------------------------
-
-// Ai(0) = 1/(3^{2/3}·Γ(2/3))
 const _AI0 = 0.35502805388781723926;
-// −Ai′(0) = 1/(3^{1/3}·Γ(1/3))
 const _AI_PRIME0 = 0.25881940379280679841;
-// Switch-over for asymptotic expansion
-const _XBIG = 4.5;
-// Asymptotic coefficients c_k (k = 0..6)
-const _AIRY_C = [
-  1.0,
-  5.0 / 72.0,
-  385.0 / 10368.0,
-  85085.0 / 2239488.0,
-  37182145.0 / 644972544.0,
-  5765760010.25 / 61917364224.0,
-  1519768071625.0 / 8918845788160.0,
-];
+const _XBIG = 5.0;
+const _AIRY_U = ((): number[] => {
+  const u = [1];
+  for (let k = 1; k <= 12; k++) {
+    u.push((u[k - 1] * ((6 * k - 5) * (6 * k - 3) * (6 * k - 1))) / ((2 * k - 1) * 216 * k));
+  }
+  return u;
+})();
 
-/** Airy function Ai(x) — small |x|: power series (DLMF §9.2.2). */
 function _airyAiSeries(x: number): number {
   const x3 = x * x * x;
   let f = 1.0;
@@ -1436,7 +1419,7 @@ function _airyAiSeries(x: number): number {
   let factG = 1.0;
   let prodF = 1.0;
   let prodG = 1.0;
-  for (let k = 1; k <= 30; k++) {
+  for (let k = 1; k <= 40; k++) {
     factF *= (3 * k - 2) * (3 * k - 1) * (3 * k);
     factG *= (3 * k - 1) * (3 * k) * (3 * k + 1);
     prodF *= 3 * k - 2;
@@ -1452,47 +1435,6 @@ function _airyAiSeries(x: number): number {
   return _AI0 * f - _AI_PRIME0 * g;
 }
 
-/** Airy function Ai(x) — large positive x: asymptotic decay (DLMF §9.7.3). */
-function _airyAiLargePos(x: number): number {
-  const xp = Math.pow(x, 0.25);
-  const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
-  let p = 0.0;
-  let zk = 1.0;
-  let sign = 1.0;
-  for (const ck of _AIRY_C) {
-    p += (sign * ck) / zk;
-    zk *= zeta;
-    sign = -sign;
-  }
-  return (Math.exp(-zeta) * p) / (2.0 * Math.sqrt(Math.PI) * xp);
-}
-
-/** Airy function Ai(x) — large negative x: oscillatory asymptotic (DLMF §9.7.5). */
-function _airyAiLargeNeg(x: number): number {
-  const ax = Math.abs(x);
-  const axp = Math.pow(ax, 0.25);
-  const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
-  const theta = zeta - Math.PI / 4.0;
-  let p = 0.0;
-  let q = 0.0;
-  let zk = 1.0;
-  let sign = 1.0;
-  for (let k = 0; k < _AIRY_C.length; k++) {
-    if (k % 2 === 0) p += (sign * _AIRY_C[k]) / zk;
-    else q += (sign * _AIRY_C[k]) / zk;
-    zk *= zeta;
-    sign = -sign;
-  }
-  return (Math.sin(theta) * p + Math.cos(theta) * q) / (Math.sqrt(Math.PI) * axp);
-}
-
-function _airyAi(x: number): number {
-  if (x > _XBIG) return _airyAiLargePos(x);
-  if (x < -_XBIG) return _airyAiLargeNeg(x);
-  return _airyAiSeries(x);
-}
-
-/** Airy function Bi(x) — small |x|: power series. */
 function _airyBiSeries(x: number): number {
   const x3 = x * x * x;
   let f = 1.0;
@@ -1503,7 +1445,7 @@ function _airyBiSeries(x: number): number {
   let factG = 1.0;
   let prodF = 1.0;
   let prodG = 1.0;
-  for (let k = 1; k <= 30; k++) {
+  for (let k = 1; k <= 40; k++) {
     factF *= (3 * k - 2) * (3 * k - 1) * (3 * k);
     factG *= (3 * k - 1) * (3 * k) * (3 * k + 1);
     prodF *= 3 * k - 2;
@@ -1519,40 +1461,65 @@ function _airyBiSeries(x: number): number {
   return Math.sqrt(3.0) * (_AI0 * f + _AI_PRIME0 * g);
 }
 
-/** Airy function Bi(x) — large positive x: asymptotic growth (DLMF §9.7.3). */
-function _airyBiLargePos(x: number): number {
+// Positive x: Ai ~ e^{-z}/(2 sqrt(pi) x^{1/4}) Sum (-1)^k u_k/z^k;
+//             Bi ~ e^{z}/(sqrt(pi) x^{1/4}) Sum u_k/z^k.
+function _airyAsymPos(x: number, isAi: boolean): number {
   const xp = Math.pow(x, 0.25);
   const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
   let p = 0.0;
   let zk = 1.0;
-  for (const ck of _AIRY_C) {
-    p += ck / zk;
-    zk *= zeta;
-  }
-  return (Math.exp(zeta) * p) / (Math.sqrt(Math.PI) * xp);
-}
-
-/** Airy function Bi(x) — large negative x: oscillatory asymptotic (DLMF §9.7.5). */
-function _airyBiLargeNeg(x: number): number {
-  const ax = Math.abs(x);
-  const axp = Math.pow(ax, 0.25);
-  const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
-  const theta = zeta + Math.PI / 4.0;
-  let p = 0.0;
-  let q = 0.0;
-  let zk = 1.0;
   let sign = 1.0;
-  for (let k = 0; k < _AIRY_C.length; k++) {
-    if (k % 2 === 0) p += (sign * _AIRY_C[k]) / zk;
-    else q += (sign * _AIRY_C[k]) / zk;
+  let prevMag = Infinity;
+  for (const uk of _AIRY_U) {
+    const t = uk / zk;
+    if (Math.abs(t) > prevMag) break;
+    prevMag = Math.abs(t);
+    p += isAi ? sign * t : t;
     zk *= zeta;
     sign = -sign;
   }
-  return (Math.cos(theta) * p + Math.sin(theta) * q) / (Math.sqrt(Math.PI) * axp);
+  const sp = Math.sqrt(Math.PI);
+  return isAi ? (Math.exp(-zeta) * p) / (2.0 * sp * xp) : (Math.exp(zeta) * p) / (sp * xp);
+}
+
+// Negative x: theta = z - pi/4; P = Sum (-1)^j u_{2j}/z^{2j}, Q = Sum (-1)^j u_{2j+1}/z^{2j+1}.
+//   Ai(-|x|) = (cos t P + sin t Q)/(sqrt(pi) |x|^{1/4}); Bi(-|x|) = (-sin t P + cos t Q)/...
+function _airyAsymNeg(x: number, isAi: boolean): number {
+  const ax = Math.abs(x);
+  const axp = Math.pow(ax, 0.25);
+  const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
+  let P = 0.0;
+  let Q = 0.0;
+  let pTerm = Infinity;
+  let qTerm = Infinity;
+  const half = Math.floor((_AIRY_U.length - 1) / 2);
+  for (let k = 0; k <= half; k++) {
+    const t = ((k % 2 === 0 ? 1 : -1) * _AIRY_U[2 * k]) / Math.pow(zeta, 2 * k);
+    if (Math.abs(t) > Math.abs(pTerm)) break;
+    P += t;
+    pTerm = t;
+  }
+  for (let k = 0; k <= half - 1; k++) {
+    const t = ((k % 2 === 0 ? 1 : -1) * _AIRY_U[2 * k + 1]) / Math.pow(zeta, 2 * k + 1);
+    if (Math.abs(t) > Math.abs(qTerm)) break;
+    Q += t;
+    qTerm = t;
+  }
+  const theta = zeta - Math.PI / 4.0;
+  const sp = Math.sqrt(Math.PI);
+  return isAi
+    ? (Math.cos(theta) * P + Math.sin(theta) * Q) / (sp * axp)
+    : (-Math.sin(theta) * P + Math.cos(theta) * Q) / (sp * axp);
+}
+
+function _airyAi(x: number): number {
+  if (x > _XBIG) return _airyAsymPos(x, true);
+  if (x < -_XBIG) return _airyAsymNeg(x, true);
+  return _airyAiSeries(x);
 }
 
 function _airyBi(x: number): number {
-  if (x > _XBIG) return _airyBiLargePos(x);
-  if (x < -_XBIG) return _airyBiLargeNeg(x);
+  if (x > _XBIG) return _airyAsymPos(x, false);
+  if (x < -_XBIG) return _airyAsymNeg(x, false);
   return _airyBiSeries(x);
 }

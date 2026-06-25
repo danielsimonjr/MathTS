@@ -72,46 +72,50 @@ type f64 = number;
  * - For |x| > 0.5:  Numerical Recipes' `erfcc` rational form (NR in C, 2nd ed.,
  *                   §6.2), max relative error ~1.2e-7.
  */
+// erf(|a|) by Maclaurin series; machine-accurate for a <~ 2.
+function _erfSeries(a: f64): f64 {
+  const c = 2 / Math.sqrt(Math.PI);
+  let sum: f64 = a;
+  let term: f64 = a;
+  for (let n = 1; n < 80; n++) {
+    term *= (-a * a) / n;
+    const inc = term / (2 * n + 1);
+    sum += inc;
+    if (Math.abs(inc) < Math.abs(sum) * 1e-17) break;
+  }
+  return c * sum;
+}
+
+// erfc(a) for a > 0 via the Abramowitz & Stegun 7.1.14 continued fraction
+// (modified Lentz). Computes the small tail value DIRECTLY — no 1 - erf
+// cancellation. Converges well for a >~ 1.
+function _erfcCF(a: f64): f64 {
+  const tiny = 1e-300;
+  let f = a < tiny ? tiny : a; // b_0 = a
+  let C = f;
+  let D = 0;
+  for (let i = 1; i <= 300; i++) {
+    const ai = i / 2; // partial numerator a_i = i/2
+    D = a + ai * D;
+    if (D === 0) D = tiny;
+    D = 1 / D;
+    C = a + ai / C;
+    if (C === 0) C = tiny;
+    const delta = C * D;
+    f *= delta;
+    if (Math.abs(delta - 1) < 1e-16) break;
+  }
+  return Math.exp(-a * a) / Math.sqrt(Math.PI) / f;
+}
+
 function _erf(x: f64): f64 {
   if (x === 0) return 0;
   if (!isFinite(x)) return x > 0 ? 1 : -1;
   const sign = x < 0 ? -1 : 1;
   const a = Math.abs(x);
-
-  if (a <= 0.5) {
-    const c = 2 / Math.sqrt(Math.PI);
-    let sum: f64 = a;
-    let term: f64 = a;
-    for (let n = 1; n < 50; n++) {
-      term *= (-a * a) / n;
-      const inc = term / (2 * n + 1);
-      sum += inc;
-      if (Math.abs(inc) < Math.abs(sum) * 1e-16) break;
-    }
-    return sign * c * sum;
-  }
-
-  const t = 2.0 / (2.0 + a);
-  const ans =
-    t *
-    Math.exp(
-      -a * a -
-        1.26551223 +
-        t *
-          (1.00002368 +
-            t *
-              (0.37409196 +
-                t *
-                  (0.09678418 +
-                    t *
-                      (-0.18628806 +
-                        t *
-                          (0.27886807 +
-                            t *
-                              (-1.13520398 +
-                                t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))))))))
-    );
-  return sign * (1.0 - ans);
+  // Series where erf is not saturated; otherwise 1 - erfc(tail) (erfc tiny but
+  // computed directly, so the subtraction loses no significant figures).
+  return sign * (a <= 2.0 ? _erfSeries(a) : 1 - _erfcCF(a));
 }
 
 /**
@@ -155,7 +159,10 @@ function factorial(n: number): number {
 
 /** Complementary error function erfc(x) = 1 - erf(x). */
 function erfcScalar(x: f64): f64 {
-  return 1 - _erf(x);
+  if (!isFinite(x)) return x > 0 ? 0 : 2;
+  if (x < 0) return 2 - erfcScalar(-x); // erfc(-x) = 2 - erfc(x)
+  // x small: 1 - erf (erfc ~ O(1), no cancellation). x large: direct CF tail.
+  return x < 1.5 ? 1 - _erfSeries(x) : _erfcCF(x);
 }
 
 /** Imaginary error function erfi(x). */
@@ -243,133 +250,135 @@ function digammaScalar(x: f64): f64 {
   return result;
 }
 
+// ---------------------------------------------------------------------------
+// Bessel J0/J1/Y0/Y1: ascending series (|x| <= 13) + Hankel asymptotic (above),
+// both with in-loop-generated coefficients. Replaces the legacy NR rational
+// approximations (~1e-7 for J, ~1e-4 for Y); validated to <1e-9 vs mpmath
+// (tests/diff-special.test.mjs). Mirrors assembly/src/special.ts.
+// ---------------------------------------------------------------------------
+// NOTE: these helpers are serialized into worker kernels (see kernelSource /
+// the comment block above erfcScalar), so they must stay self-contained — no
+// module-level constants. Numeric constants are inlined as literals:
+//   Euler-gamma 0.5772156649015328606, 2/pi 0.63661977236758134308,
+//   1/pi 0.31830988618379067154, series/asymptotic split |x| = 13.
+
+// Hankel asymptotic shared by J_nu/Y_nu (nu = 0 or 1):
+//   J_nu ~ sqrt(2/(pi x)) [P cos(chi) - Q sin(chi)],
+//   Y_nu ~ sqrt(2/(pi x)) [P sin(chi) + Q cos(chi)], chi = x - (nu/2+1/4)pi.
+function besselHankel(nu: f64, x: f64, wantY: boolean): f64 {
+  const mu = 4 * nu * nu;
+  let P = 1.0;
+  let Q = 0.0;
+  let a = 1.0;
+  let xk = 1.0;
+  let prevMag = Infinity;
+  for (let k = 1; k <= 40; k++) {
+    const twokm1 = 2 * k - 1;
+    a = (a * (mu - twokm1 * twokm1)) / (8 * k);
+    xk *= x;
+    const t = a / xk;
+    const mag = Math.abs(t);
+    if (mag > prevMag) break;
+    prevMag = mag;
+    const m4 = k & 3;
+    const s = m4 === 1 || m4 === 0 ? 1.0 : -1.0;
+    if ((k & 1) === 1) Q += s * t;
+    else P += s * t;
+  }
+  const chi = x - (nu * 0.5 + 0.25) * Math.PI;
+  const amp = Math.sqrt(2.0 / (Math.PI * x));
+  return wantY ? amp * (P * Math.sin(chi) + Q * Math.cos(chi)) : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
+}
+
+function besselJ0Series(x: f64): f64 {
+  const z = -0.25 * x * x;
+  let term = 1.0;
+  let sum = 1.0;
+  for (let k = 1; k <= 80; k++) {
+    term *= z / (k * k);
+    sum += term;
+    if (Math.abs(term) <= Math.abs(sum) * 1e-17) break;
+  }
+  return sum;
+}
+
+function besselJ1Series(x: f64): f64 {
+  const z = -0.25 * x * x;
+  let term = 1.0;
+  let sum = 1.0;
+  for (let k = 1; k <= 80; k++) {
+    term *= z / (k * (k + 1));
+    sum += term;
+    if (Math.abs(term) <= Math.abs(sum) * 1e-17) break;
+  }
+  return 0.5 * x * sum;
+}
+
+// Y0 = (2/pi)[ (ln(x/2)+gamma) J0 + sum_{k>=1} (-1)^{k+1} H_k (x^2/4)^k/(k!)^2 ].
+function besselY0Series(x: f64): f64 {
+  const z = 0.25 * x * x;
+  let u = 1.0;
+  let h = 0.0;
+  let s = 0.0;
+  let sign = 1.0;
+  for (let k = 1; k <= 80; k++) {
+    u *= z / (k * k);
+    h += 1 / k;
+    const d = sign * h * u;
+    s += d;
+    sign = -sign;
+    if (k > 2 && Math.abs(d) <= Math.abs(s) * 1e-17) break;
+  }
+  return 0.63661977236758134308 * ((Math.log(0.5 * x) + 0.5772156649015328606) * besselJ0Series(x) + s);
+}
+
+// Y1 = (2/pi)[ln(x/2)+gamma] J1 - 2/(pi x)
+//      - (1/pi) sum_{k>=0} (-1)^k (H_k + H_{k+1}) (x/2)^{2k+1}/(k!(k+1)!).
+function besselY1Series(x: f64): f64 {
+  const z = -0.25 * x * x;
+  let v = 0.5 * x;
+  let hk = 0.0;
+  let hk1 = 1.0;
+  let s = (hk + hk1) * v;
+  for (let k = 1; k <= 80; k++) {
+    v *= z / (k * (k + 1));
+    hk += 1 / k;
+    hk1 += 1 / (k + 1);
+    const d = (hk + hk1) * v;
+    s += d;
+    if (k > 2 && Math.abs(d) <= Math.abs(s) * 1e-17) break;
+  }
+  return (
+    0.63661977236758134308 * (Math.log(0.5 * x) + 0.5772156649015328606) * besselJ1Series(x) -
+    0.63661977236758134308 / x -
+    0.31830988618379067154 * s
+  );
+}
+
 /** Bessel function of the first kind, order 0: J0(x). */
 function besselJ0Scalar(x: f64): f64 {
-  if (x === 0) return 1;
   const ax = Math.abs(x);
-  if (ax < 8.0) {
-    const y = x * x;
-    const r1 =
-      57568490574.0 +
-      y *
-        (-13362590354.0 +
-          y * (651619640.7 + y * (-11214424.18 + y * (77392.33017 + y * -184.9052456))));
-    const r2 =
-      57568490411.0 +
-      y * (1029532985.0 + y * (9494680.718 + y * (59272.64853 + y * (267.8532712 + y * 1.0))));
-    return r1 / r2;
-  } else {
-    const z = 8.0 / ax;
-    const y = z * z;
-    const xx = ax - 0.785398164;
-    const p0 =
-      1.0 +
-      y * (-0.1098628627e-2 + y * (0.2734510407e-4 + y * (-0.2073370639e-5 + y * 0.2093887211e-6)));
-    const q0 =
-      -0.1562499995e-1 +
-      y * (0.1430488765e-3 + y * (-0.6911147651e-5 + y * (0.7621095161e-6 - y * 0.934935152e-7)));
-    return Math.sqrt(0.636619772 / ax) * (p0 * Math.cos(xx) - z * q0 * Math.sin(xx));
-  }
+  return ax <= 13.0 ? besselJ0Series(ax) : besselHankel(0, ax, false);
 }
 
 /** Bessel function of the first kind, order 1: J1(x). */
 function besselJ1Scalar(x: f64): f64 {
   const ax = Math.abs(x);
-  if (ax < 8.0) {
-    const y = x * x;
-    const r1 =
-      x *
-      (72362614232.0 +
-        y *
-          (-7895059235.0 +
-            y * (242396853.1 + y * (-2972611.439 + y * (15704.4826 + y * -30.16036606)))));
-    const r2 =
-      144725228442.0 +
-      y * (2300535178.0 + y * (18583304.74 + y * (99447.43394 + y * (376.9991397 + y * 1.0))));
-    return r1 / r2;
-  } else {
-    const z = 8.0 / ax;
-    const y = z * z;
-    const xx = ax - 2.356194491;
-    const p1 =
-      1.0 +
-      y * (0.183105e-2 + y * (-0.3516396496e-4 + y * (0.2457520174e-5 + y * -0.240337019e-6)));
-    const q1 =
-      0.04687499995 +
-      y * (-0.2002690873e-3 + y * (0.8449199096e-5 + y * (-0.88228987e-6 + y * 0.105787412e-6)));
-    let ans = Math.sqrt(0.636619772 / ax) * (p1 * Math.cos(xx) - z * q1 * Math.sin(xx));
-    if (x < 0) ans = -ans;
-    return ans;
-  }
+  const sign = x < 0 ? -1 : 1; // J1 is odd
+  const val = ax <= 13.0 ? besselJ1Series(ax) : besselHankel(1, ax, false);
+  return sign * val;
 }
 
 /** Bessel function of the second kind, order 0: Y0(x). */
 function besselY0Scalar(x: f64): f64 {
   if (x <= 0) return NaN;
-
-  if (x < 8.0) {
-    const y = x * x;
-    const r1 =
-      -2957821389.0 +
-      y *
-        (7062834065.0 +
-          y * (-512359803.6 + y * (10879881.29 + y * (-86327.92757 + y * 228.4622733))));
-    const r2 =
-      40076544269.0 +
-      y * (745249964.8 + y * (7189466.438 + y * (47447.2647 + y * (226.1030244 + y * 1.0))));
-    return r1 / r2 + 0.636619772 * besselJ0Scalar(x) * Math.log(x);
-  } else {
-    const z = 8.0 / x;
-    const y = z * z;
-    const xx = x - 0.785398164;
-    const p0 =
-      1.0 +
-      y * (-0.1098628627e-2 + y * (0.2734510407e-4 + y * (-0.2073370639e-5 + y * 0.2093887211e-6)));
-    const q0 =
-      -0.1562499995e-1 +
-      y * (0.1430488765e-3 + y * (-0.6911147651e-5 + y * (0.7621095161e-6 - y * 0.934935152e-7)));
-    return Math.sqrt(0.636619772 / x) * (p0 * Math.sin(xx) + z * q0 * Math.cos(xx));
-  }
+  return x <= 13.0 ? besselY0Series(x) : besselHankel(0, x, true);
 }
 
 /** Bessel function of the second kind, order 1: Y1(x). */
 function besselY1Scalar(x: f64): f64 {
   if (x <= 0) return NaN;
-
-  if (x < 8.0) {
-    // Numerical Recipes (2nd ed., §6.5) rational approximation. The previous
-    // coefficients here were corrupted and omitted the leading `x *` factor,
-    // yielding e.g. Y1(5) ≈ -0.377 instead of the correct +0.1479; the values
-    // below are the canonical NR `bessy1` constants.
-    const y = x * x;
-    const r1 =
-      x *
-      (-0.4900604943e13 +
-        y *
-          (0.127527439e13 +
-            y *
-              (-0.5153438139e11 +
-                y * (0.7349264551e9 + y * (-0.4237922726e7 + y * 0.8511937935e4)))));
-    const r2 =
-      0.249958057e14 +
-      y *
-        (0.4244419664e12 +
-          y *
-            (0.3733650367e10 +
-              y * (0.2245904002e8 + y * (0.102042605e6 + y * (0.3549632885e3 + y)))));
-    return r1 / r2 + 0.636619772 * (besselJ1Scalar(x) * Math.log(x) - 1.0 / x);
-  } else {
-    const z = 8.0 / x;
-    const y = z * z;
-    const xx = x - 2.356194491;
-    const p1 =
-      1.0 +
-      y * (0.183105e-2 + y * (-0.3516396496e-4 + y * (0.2457520174e-5 + y * -0.240337019e-6)));
-    const q1 =
-      0.04687499995 +
-      y * (-0.2002690873e-3 + y * (0.8449199096e-5 + y * (-0.88228987e-6 + y * 0.105787412e-6)));
-    return Math.sqrt(0.636619772 / x) * (p1 * Math.sin(xx) + z * q1 * Math.cos(xx));
-  }
+  return x <= 13.0 ? besselY1Series(x) : besselHankel(1, x, true);
 }
 
 /** Bessel function of the first kind, general integer order n: J_n(x). */
@@ -381,7 +390,9 @@ function besselJScalar(n: f64, x: f64): f64 {
 
   if (Math.abs(x) < 1e-15) return 0;
 
-  if (ni <= 20 || Math.abs(x) > ni) {
+  // Upward recurrence is stable only when x > n; otherwise it amplifies
+  // round-off (J_n decays in n for n > x), so use Miller's backward recurrence.
+  if (Math.abs(x) > ni) {
     let jPrev: f64 = besselJ0Scalar(x);
     let jCurr: f64 = besselJ1Scalar(x);
     for (let k = 1; k < ni; k++) {
@@ -400,7 +411,8 @@ function besselJScalar(n: f64, x: f64): f64 {
       const jPrev = ((2 * (k + 1)) / x) * jCurr - jNext;
       jNext = jCurr;
       jCurr = jPrev;
-      if (k === ni) result = jNext;
+      // After the assignments jCurr = J_k and jNext = J_{k+1}; capture J_ni.
+      if (k === ni) result = jCurr;
       if (k % 2 === 0) sum += jCurr;
     }
     sum = 2 * sum - jCurr;
@@ -440,63 +452,77 @@ function besselIScalar(n: f64, x: f64): f64 {
   return sum;
 }
 
+// Modified Bessel K asymptotic (x large): K_nu(x) ~ sqrt(pi/(2x)) e^{-x} Sum a_k/x^k,
+//   a_0 = 1, a_k = a_{k-1}(4nu^2 - (2k-1)^2)/(8k); summed to optimal truncation.
+function besselKAsym(nu: f64, x: f64): f64 {
+  const mu = 4 * nu * nu;
+  let a = 1.0;
+  let xk = 1.0;
+  let sum = 1.0;
+  let prevMag = Infinity;
+  for (let k = 1; k <= 40; k++) {
+    const t1 = 2 * k - 1;
+    a = (a * (mu - t1 * t1)) / (8 * k);
+    xk *= x;
+    const t = a / xk;
+    if (Math.abs(t) > prevMag) break;
+    prevMag = Math.abs(t);
+    sum += t;
+  }
+  return Math.sqrt(Math.PI / (2 * x)) * Math.exp(-x) * sum;
+}
+
+// K0 ascending series (DLMF 10.31.2):
+//   K0 = -(ln(x/2)+gamma) I0(x) + sum_{k>=1} H_k (x^2/4)^k/(k!)^2.
+function besselK0Series(x: f64): f64 {
+  const z = 0.25 * x * x;
+  let t = 1.0; // (x^2/4)^k/(k!)^2
+  let I0 = 1.0;
+  let h = 0.0;
+  let s = 0.0;
+  for (let k = 1; k <= 80; k++) {
+    t *= z / (k * k);
+    I0 += t;
+    h += 1 / k;
+    s += h * t;
+    if (k > 2 && t <= I0 * 1e-18) break;
+  }
+  return -(Math.log(0.5 * x) + 0.5772156649015328606) * I0 + s;
+}
+
+// K1 ascending series (DLMF 10.31.2, n=1):
+//   K1 = 1/x + (x/2)(ln(x/2)+gamma) S1 - (x/4) S2,
+//   w_k = (x^2/4)^k/(k!(k+1)!), S1 = sum w_k, S2 = sum (H_k + H_{k+1}) w_k.
+function besselK1Series(x: f64): f64 {
+  const z = 0.25 * x * x;
+  let w = 1.0;
+  let S1 = 1.0;
+  let hk = 0.0;
+  let hk1 = 1.0;
+  let S2 = (hk + hk1) * 1.0; // k=0
+  for (let k = 1; k <= 80; k++) {
+    w *= z / (k * (k + 1));
+    S1 += w;
+    hk += 1 / k;
+    hk1 += 1 / (k + 1);
+    S2 += (hk + hk1) * w;
+    if (k > 2 && w <= S1 * 1e-18) break;
+  }
+  return 1 / x + 0.5 * x * (Math.log(0.5 * x) + 0.5772156649015328606) * S1 - 0.25 * x * S2;
+}
+
 /** Modified Bessel function of the second kind, K_n(x). */
 function besselKScalar(n: f64, x: f64): f64 {
   const ni = Math.round(Math.abs(n));
   if (x <= 0) return NaN;
-
-  function k0(x: f64): f64 {
-    if (x <= 2) {
-      const y = (x * x) / 4;
-      return (
-        -Math.log(x / 2) * besselIScalar(0, x) +
-        (-0.57721566 +
-          y * (0.4227842 + y * (0.23069756 + y * (0.0348859 + y * (0.00262698 + y * 0.0001075)))))
-      );
-    }
-    const y = 2 / x;
-    return (
-      (Math.exp(-x) / Math.sqrt(x)) *
-      (1.25331414 +
-        y *
-          (-0.07832358 +
-            y *
-              (0.02189568 +
-                y * (-0.01062446 + y * (0.00587872 + y * (-0.0025154 + y * 0.00053208))))))
-    );
-  }
-
-  function k1(x: f64): f64 {
-    if (x <= 2) {
-      const y = (x * x) / 4;
-      return (
-        Math.log(x / 2) * besselIScalar(1, x) +
-        (1 / x) *
-          (1 +
-            y *
-              (0.15443144 +
-                y *
-                  (-0.67278579 +
-                    y * (-0.18156897 + y * (-0.01919402 + y * (-0.00110404 + y * -0.00004686))))))
-      );
-    }
-    const y = 2 / x;
-    return (
-      (Math.exp(-x) / Math.sqrt(x)) *
-      (1.25331414 +
-        y *
-          (0.23498619 +
-            y *
-              (-0.0365562 +
-                y * (0.01504268 + y * (-0.00780353 + y * (0.00325614 + y * -0.00068245))))))
-    );
-  }
-
-  if (ni === 0) return k0(x);
-  if (ni === 1) return k1(x);
-
-  let kPrev = k0(x);
-  let kCurr = k1(x);
+  // Series for small/moderate x (cancellation bounded), asymptotic above.
+  const k0 = x <= 9 ? besselK0Series(x) : besselKAsym(0, x);
+  const k1 = x <= 9 ? besselK1Series(x) : besselKAsym(1, x);
+  if (ni === 0) return k0;
+  if (ni === 1) return k1;
+  // Upward recurrence in order is stable for K (K_n grows with n).
+  let kPrev = k0;
+  let kCurr = k1;
   for (let k = 1; k < ni; k++) {
     const kNext = ((2 * k) / x) * kCurr + kPrev;
     kPrev = kCurr;
@@ -837,13 +863,19 @@ function fresnelCScalar(x: f64): f64 {
  * Used by the x < -XBIG branches of Ai/Bi. These differ from the c_k used in
  * the x > XBIG exponential branches.
  */
-const AIRY_U = ((): number[] => {
+// Airy asymptotic coefficients u_k (DLMF 9.7.2):
+//   u_0 = 1, u_k = u_{k-1} (6k-5)(6k-3)(6k-1) / ((2k-1) · 216 · k).
+// A function (not a module const) so it stays self-contained when serialized
+// into a worker kernel. The (2k-1) factor was previously omitted, making
+// u_2 onward wrong (u_2 = 0.111 instead of 0.0371) and corrupting the Airy
+// asymptotics.
+function airyUCoeffs(): number[] {
   const u = [1];
-  for (let k = 1; k <= 10; k++) {
-    u.push((u[k - 1] * ((6 * k - 5) * (6 * k - 3) * (6 * k - 1))) / (216 * k));
+  for (let k = 1; k <= 12; k++) {
+    u.push((u[k - 1] * ((6 * k - 5) * (6 * k - 3) * (6 * k - 1))) / ((2 * k - 1) * 216 * k));
   }
   return u;
-})();
+}
 
 /**
  * Evaluate the two alternating asymptotic sums used by Ai(-z)/Bi(-z):
@@ -856,17 +888,18 @@ function airyAsymPQ(zeta: f64): { p: f64; q: f64 } {
     q = 0;
   let pTerm = Infinity,
     qTerm = Infinity;
-  const half = Math.floor((AIRY_U.length - 1) / 2);
+  const U = airyUCoeffs();
+  const half = Math.floor((U.length - 1) / 2);
   for (let k = 0; k <= half; k++) {
     const sign = k % 2 === 0 ? 1 : -1;
-    const pt = (sign * AIRY_U[2 * k]) / Math.pow(zeta, 2 * k);
+    const pt = (sign * U[2 * k]) / Math.pow(zeta, 2 * k);
     if (Math.abs(pt) > Math.abs(pTerm)) break;
     p += pt;
     pTerm = pt;
   }
   for (let k = 0; k <= half - 1; k++) {
     const sign = k % 2 === 0 ? 1 : -1;
-    const qt = (sign * AIRY_U[2 * k + 1]) / Math.pow(zeta, 2 * k + 1);
+    const qt = (sign * U[2 * k + 1]) / Math.pow(zeta, 2 * k + 1);
     if (Math.abs(qt) > Math.abs(qTerm)) break;
     q += qt;
     qTerm = qt;
@@ -876,27 +909,24 @@ function airyAsymPQ(zeta: f64): { p: f64; q: f64 } {
 
 /** Airy function of the first kind Ai(x). */
 function airyAiScalar(x: f64): f64 {
-  const XBIG = 4.5;
+  // 5.0 keeps the golden points x = +/-5 on the (accurate) series side; the
+  // asymptotic uses the corrected AIRY_U coefficients.
+  const XBIG = 5.0;
   const AI0 = 0.35502805388781723926;
   const AI_PRIME0 = 0.25881940379280679841;
-  // Asymptotic coefficients c_k (k = 0..6)
-  const C = [
-    1.0,
-    5.0 / 72.0,
-    385.0 / 10368.0,
-    85085.0 / 2239488.0,
-    37182145.0 / 644972544.0,
-    5765760010.25 / 61917364224.0,
-    1519768071625.0 / 8918845788160.0,
-  ];
   if (x > XBIG) {
+    // Ai(x) ~ e^{-zeta}/(2 sqrt(pi) x^{1/4}) Sum (-1)^k u_k / zeta^k.
     const xp = Math.pow(x, 0.25);
     const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
     let p = 0.0,
       zk = 1.0,
-      sign = 1.0;
-    for (const ck of C) {
-      p += (sign * ck) / zk;
+      sign = 1.0,
+      prevMag = Infinity;
+    for (const uk of airyUCoeffs()) {
+      const t = uk / zk;
+      if (Math.abs(t) > prevMag) break;
+      prevMag = Math.abs(t);
+      p += sign * t;
       zk *= zeta;
       sign = -sign;
     }
@@ -943,25 +973,21 @@ function airyAiScalar(x: f64): f64 {
 
 /** Airy function of the second kind Bi(x). */
 function airyBiScalar(x: f64): f64 {
-  const XBIG = 4.5;
+  const XBIG = 5.0;
   const AI0 = 0.35502805388781723926;
   const AI_PRIME0 = 0.25881940379280679841;
-  const C = [
-    1.0,
-    5.0 / 72.0,
-    385.0 / 10368.0,
-    85085.0 / 2239488.0,
-    37182145.0 / 644972544.0,
-    5765760010.25 / 61917364224.0,
-    1519768071625.0 / 8918845788160.0,
-  ];
   if (x > XBIG) {
+    // Bi(x) ~ e^{zeta}/(sqrt(pi) x^{1/4}) Sum u_k / zeta^k.
     const xp = Math.pow(x, 0.25);
     const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
     let p = 0.0,
-      zk = 1.0;
-    for (const ck of C) {
-      p += ck / zk;
+      zk = 1.0,
+      prevMag = Infinity;
+    for (const uk of airyUCoeffs()) {
+      const t = uk / zk;
+      if (Math.abs(t) > prevMag) break;
+      prevMag = Math.abs(t);
+      p += t;
       zk *= zeta;
     }
     return (Math.exp(zeta) * p) / (Math.sqrt(Math.PI) * xp);
@@ -1070,7 +1096,7 @@ async function mapArray(
 export const erfc = mathTyped('erfc', {
   number: erfcScalar,
   Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, erfcScalar, () => kernelSource([_erf, erfcScalar], '(x) => erfcScalar(x)')),
+    mapArray(x, erfcScalar, () => kernelSource([_erfSeries, _erfcCF, erfcScalar], '(x) => erfcScalar(x)')),
 });
 
 /**
@@ -1230,7 +1256,7 @@ export const besselJ0 = mathTyped('besselJ0', {
       return Promise.resolve(besselJ0Dispatch(x));
     }
     return mapArray(x, besselJ0Scalar, () =>
-      kernelSource([besselJ0Scalar], '(x) => besselJ0Scalar(x)')
+      kernelSource([besselHankel, besselJ0Series, besselJ0Scalar], '(x) => besselJ0Scalar(x)')
     );
   },
 });
@@ -1251,7 +1277,7 @@ export const besselJ1 = mathTyped('besselJ1', {
       return Promise.resolve(besselJ1Dispatch(x));
     }
     return mapArray(x, besselJ1Scalar, () =>
-      kernelSource([besselJ1Scalar], '(x) => besselJ1Scalar(x)')
+      kernelSource([besselHankel, besselJ1Series, besselJ1Scalar], '(x) => besselJ1Scalar(x)')
     );
   },
 });
@@ -1272,7 +1298,7 @@ export const besselY0 = mathTyped('besselY0', {
       return Promise.resolve(besselY0Dispatch(x));
     }
     return mapArray(x, besselY0Scalar, () =>
-      kernelSource([besselJ0Scalar, besselY0Scalar], '(x) => besselY0Scalar(x)')
+      kernelSource([besselHankel, besselJ0Series, besselY0Series, besselY0Scalar], '(x) => besselY0Scalar(x)')
     );
   },
 });
@@ -1293,7 +1319,7 @@ export const besselY1 = mathTyped('besselY1', {
       return Promise.resolve(besselY1Dispatch(x));
     }
     return mapArray(x, besselY1Scalar, () =>
-      kernelSource([besselJ1Scalar, besselY1Scalar], '(x) => besselY1Scalar(x)')
+      kernelSource([besselHankel, besselJ1Series, besselY1Series, besselY1Scalar], '(x) => besselY1Scalar(x)')
     );
   },
 });
@@ -1319,7 +1345,7 @@ export const besselJ = mathTyped('besselJ', {
       (v) => besselJScalar(n, v),
       () =>
         kernelSource(
-          [besselJ0Scalar, besselJ1Scalar, besselJScalar],
+          [besselHankel, besselJ0Series, besselJ1Series, besselJ0Scalar, besselJ1Scalar, besselJScalar],
           `(x) => besselJScalar(${n}, x)`
         )
     );
@@ -1347,7 +1373,7 @@ export const besselY = mathTyped('besselY', {
       (v) => besselYScalar(n, v),
       () =>
         kernelSource(
-          [besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselYScalar],
+          [besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselYScalar],
           `(x) => besselYScalar(${n}, x)`
         )
     );
@@ -1386,7 +1412,7 @@ export const besselK = mathTyped('besselK', {
       (v) => besselKScalar(n, v),
       () =>
         kernelSource(
-          [factorial, _lgamma, besselIScalar, besselKScalar],
+          [besselKAsym, besselK0Series, besselK1Series, besselKScalar],
           `(x) => besselKScalar(${n}, x)`
         )
     ),
@@ -1668,7 +1694,7 @@ export const airyAi = mathTyped('airyAi', {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
       return Promise.resolve(airyAiDispatch(x));
     }
-    return mapArray(x, airyAiScalar, () => kernelSource([airyAiScalar], '(x) => airyAiScalar(x)'));
+    return mapArray(x, airyAiScalar, () => kernelSource([airyUCoeffs, airyAsymPQ, airyAiScalar], '(x) => airyAiScalar(x)'));
   },
 });
 
@@ -1692,7 +1718,7 @@ export const airyBi = mathTyped('airyBi', {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
       return Promise.resolve(airyBiDispatch(x));
     }
-    return mapArray(x, airyBiScalar, () => kernelSource([airyBiScalar], '(x) => airyBiScalar(x)'));
+    return mapArray(x, airyBiScalar, () => kernelSource([airyUCoeffs, airyAsymPQ, airyBiScalar], '(x) => airyBiScalar(x)'));
   },
 });
 
