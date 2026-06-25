@@ -1,0 +1,77 @@
+# WASM Acceleration Coverage
+
+Precise map of which functions are WASM-accelerated vs. pure-JS, across the
+MathTS monorepo. Regenerate the per-function data with
+`functions/tests/audit`-style scans (see scratch tooling) or by grepping
+`*Dispatch` usage in `functions/src/typed/`.
+
+Last updated: 2026-06-25.
+
+## TL;DR
+
+WASM acceleration is **selective and threshold-gated**, not universal:
+
+- **WASM kernels** live in two binaries — the AssemblyScript build
+  (`assembly/` → `mathts-as.wasm`, ~292 `f64` kernels) and the Rust build
+  (`wasm-rust/` → `mathts.wasm`). Both are now numerically verified to <1e-9
+  against mpmath for the special functions.
+- **Threshold:** the `functions` special bridges engage WASM only for arrays of
+  `length >= WASM_SPECIAL_THRESHOLD` (= **1024**). Scalars and small arrays run
+  JS.
+- **Dispatch order:** Rust WASM → AssemblyScript WASM → JS fallback. The
+  `functions` package now **bundles** `dist/wasm/mathts.wasm` (Rust, default
+  backend) and resolves it package-relative, so the bridges are **live** (they
+  previously fell back to JS because no binary was bundled).
+
+## `functions` public typed API — 218 functions
+
+| | Count |
+|---|--:|
+| Total public `mathTyped` functions (`functions/src/typed/`) | **218** |
+| WASM-accelerated (route to a `*Dispatch`) | **21** |
+| JS-only | **197** |
+
+### The 21 WASM-accelerated typed functions
+
+| Function | Bridge dispatch | Module |
+|---|---|---|
+| `besselJ0` `besselJ1` `besselJ` | `besselJ0/J1/JDispatch` | special |
+| `besselY0` `besselY1` `besselY` | `besselY0/Y1/YDispatch` | special |
+| `airyAi` `airyBi` | `airyAi/BiDispatch` | special |
+| `ellipticK` `ellipticE` `ellipticF` `ellipticEIncomplete` `ellipticPi` | `elliptic*Dispatch` | special |
+| `carlsonRC` `carlsonRD` `carlsonRF` `carlsonRJ` | `carlson*Dispatch` | special |
+| `lgamma` | `lgammaDispatch` | special |
+| `noncentralChi2PDF` | `lgammaDispatch` | distributions |
+| `parallelStatMedian` `parallelStatQuantile` | `sortF64Dispatch` | statistics |
+
+### What's JS-only (197)
+
+Whole families have **no** WASM path because they are not numeric-kernel work:
+`arithmetic` (45), `trigonometry` (19), `combinatorics` (21), `set` (10),
+`matrix-ops` typed wrappers (9 — see note), `probability` (8), `relational` (7),
+`bitwise` (7), `logical` (5), `string` (5), `complex` (4), `unit` (2), plus the
+non-accelerated members of `special` (20: `erf`/`erfc`/`erfi`, `gamma`/`beta`/
+`digamma`, `besselI`/`besselK`, orthogonal polynomials, Fresnel, the integral
+functions) and `statistics`/`distributions`.
+
+## Acceleration outside the typed API
+
+- **Matrix linear algebra** is WASM-accelerated via the **`matrix` package**
+  backend (`matrix/src/backends/WASMBackend.ts`, bundling
+  `matrix/dist/wasm/mathts-as.wasm`), not via `functions/src/typed/matrix-ops.ts`.
+  Operations: multiply/gemm, transpose, inverse, determinant, decompositions
+  (LU/QR/Cholesky/SVD), FFT/IFFT — above the matrix backend threshold.
+- **Internal kernels** (`functions/src/wasm/{poly,signal,sort,interpolation,
+  bitwise}/`) accelerate algebra/numeric/interpolation code paths
+  (`poly_mul`, `welch_psd`, `sort_f64`, `tridiag_solve`, divided differences,
+  etc.) where used by solvers and numeric routines, even though those public
+  functions aren't special-function dispatchers.
+
+## Correctness status (2026-06-25)
+
+All WASM special-function kernels (AssemblyScript **and** Rust) and the JS
+fallbacks are verified to <1e-9 vs mpmath after the special-function fixes:
+
+- `mathts-wasm` (AS): `npm run test:diff` — 140/140 special, 30/30 decomposition.
+- `mathts-functions` (JS): `npm run test:diff` — 187/187.
+- Rust wasm: `functions/tests/diff-wasm-rust.test.mjs` — 90/90 (vec1 kernels).

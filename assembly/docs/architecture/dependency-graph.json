@@ -1,11 +1,11 @@
 {
   "metadata": {
     "name": "@danielsimonjr/mathts-wasm",
-    "version": "0.1.0",
-    "lastUpdated": "2026-04-04",
-    "totalFiles": 10,
-    "totalModules": 5,
-    "totalExports": 431
+    "version": "0.1.5",
+    "lastUpdated": "2026-06-25",
+    "totalFiles": 27,
+    "totalModules": 7,
+    "totalExports": 609
   },
   "entryPoints": [
     {
@@ -15,6 +15,28 @@
     }
   ],
   "modules": {
+    "algebra": {
+      "src/algebra/decomposition.ts": {
+        "description": "Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "matrix_lu_decompose",
+          "matrix_qr_decompose",
+          "matrix_cholesky",
+          "matrix_inverse",
+          "matrix_determinant"
+        ],
+        "functions": [
+          "matrix_lu_decompose",
+          "matrix_qr_decompose",
+          "matrix_cholesky",
+          "matrix_inverse",
+          "matrix_determinant"
+        ]
+      }
+    },
     "bindings": {
       "src/bindings/index.ts": {
         "description": "MathTS WASM Bindings",
@@ -23,22 +45,46 @@
         "internalDependencies": [
           {
             "file": "./wasm-loader.js",
-            "imports": ["MathTSWasm", "loadWasm", "loadWasmSync"],
+            "imports": [
+              "MathTSWasm",
+              "loadWasm",
+              "loadWasmSync"
+            ],
             "reExport": true
           }
         ],
-        "exports": ["MathTSWasm", "loadWasm", "loadWasmSync"],
-        "reExported": ["MathTSWasm", "loadWasm", "loadWasmSync"]
+        "exports": [
+          "MathTSWasm",
+          "loadWasm",
+          "loadWasmSync"
+        ],
+        "reExported": [
+          "MathTSWasm",
+          "loadWasm",
+          "loadWasmSync"
+        ]
       },
       "src/bindings/wasm-loader.ts": {
         "description": "WASM Module Loader",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": ["loadWasm", "loadWasmSync", "MathTSWasm"],
-        "classes": ["MathTSWasm"],
-        "interfaces": ["MathTSWasmExports", "MathTSWasmInstance"],
-        "functions": ["loadWasm", "loadWasmSync"]
+        "exports": [
+          "loadWasm",
+          "loadWasmSync",
+          "MathTSWasm"
+        ],
+        "classes": [
+          "MathTSWasm"
+        ],
+        "interfaces": [
+          "MathTSWasmExports",
+          "MathTSWasmInstance"
+        ],
+        "functions": [
+          "loadWasm",
+          "loadWasmSync"
+        ]
       }
     },
     "env": {
@@ -47,8 +93,12 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "exports": ["abort"],
-        "functions": ["abort"]
+        "exports": [
+          "abort"
+        ],
+        "functions": [
+          "abort"
+        ]
       }
     },
     "entry": {
@@ -59,7 +109,11 @@
         "internalDependencies": [
           {
             "file": "./types/complex",
-            "imports": ["Complex", "complex", "complexFromPolar"],
+            "imports": [
+              "Complex",
+              "complex",
+              "complexFromPolar"
+            ],
             "reExport": true
           },
           {
@@ -210,6 +264,131 @@
             "reExport": true
           },
           {
+            "file": "./ops/svd",
+            "imports": [
+              "matrix_svd",
+              "matrix_singular_values"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./algebra/decomposition",
+            "imports": [
+              "matrix_lu_decompose",
+              "matrix_qr_decompose",
+              "matrix_cholesky",
+              "matrix_inverse",
+              "matrix_determinant"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/special",
+            "imports": [
+              "chebyshevT",
+              "hermiteH",
+              "laguerreL",
+              "legendreP",
+              "erfi",
+              "expIntegralEi",
+              "sinIntegral",
+              "cosIntegral",
+              "logIntegral"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/number-theory",
+            "imports": [
+              "eulerPhi",
+              "divisorSigma",
+              "moebiusMu",
+              "carmichaelLambda",
+              "jacobiSymbol",
+              "harmonicNumber",
+              "partitions",
+              "primeFactors",
+              "divisors",
+              "integerDigits",
+              "chineseRemainder"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/polynomial",
+            "imports": [
+              "polyadd",
+              "polynomialQuotient",
+              "polynomialRemainder",
+              "polynomialGCD",
+              "polynomialLCM",
+              "discriminant",
+              "resultant"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/signal",
+            "imports": [
+              "resample",
+              "medfilt",
+              "windowFunction"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./signal",
+            "imports": [
+              "apply_window_f64",
+              "welch_psd_f64",
+              "bartlett_psd_f64",
+              "goertzel_f64",
+              "chirp_z_transform_f64"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/linalg",
+            "imports": [
+              "rowReduce",
+              "characteristicPolynomial"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/curvefit",
+            "imports": [
+              "expfit",
+              "logfit",
+              "powerfit"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/optimization",
+            "imports": [
+              "quadprog",
+              "linprog",
+              "nullspace"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/approx",
+            "imports": [
+              "residue",
+              "padeApproximant"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/tensor",
+            "imports": [
+              "tensorTranspose"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./ops/complex-ops",
             "imports": [
               "complex_add",
@@ -256,6 +435,71 @@
               "complex_to_polar",
               "complex_axpby",
               "complex_distance"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ops/bitwise",
+            "imports": [
+              "bitAnd_i32_array",
+              "bitOr_i32_array",
+              "bitXor_i32_array",
+              "bitNot_i32_array",
+              "leftShift_i32_array",
+              "rightArithShift_i32_array",
+              "rightLogShift_i32_array"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./poly",
+            "imports": [
+              "poly_mul_f64",
+              "poly_div_mod_f64",
+              "poly_fit_f64",
+              "cheb_fit_f64",
+              "legendre_fit_f64"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./tridiag",
+            "imports": [
+              "tridiag_solve_f64",
+              "divided_difference_f64"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./special",
+            "imports": [
+              "bessel_j0_f64",
+              "bessel_j1_f64",
+              "bessel_jn_f64",
+              "bessel_y0_f64",
+              "bessel_y1_f64",
+              "bessel_yn_f64",
+              "airy_ai_f64",
+              "airy_bi_f64",
+              "elliptic_k_f64",
+              "elliptic_e_f64",
+              "lgamma_f64",
+              "carlson_rc_f64",
+              "carlson_rf_f64",
+              "carlson_rd_f64",
+              "carlson_rj_f64",
+              "elliptic_f_incomplete_f64",
+              "elliptic_e_incomplete_f64",
+              "elliptic_pi_incomplete_f64"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./sort",
+            "imports": [
+              "sort_f64",
+              "argsort_f64",
+              "rank_f64"
             ],
             "reExport": true
           },
@@ -432,6 +676,59 @@
           "matrix_axpy",
           "matrix_gemm",
           "matrix_gemv",
+          "matrix_svd",
+          "matrix_singular_values",
+          "matrix_lu_decompose",
+          "matrix_qr_decompose",
+          "matrix_cholesky",
+          "matrix_inverse",
+          "matrix_determinant",
+          "chebyshevT",
+          "hermiteH",
+          "laguerreL",
+          "legendreP",
+          "erfi",
+          "expIntegralEi",
+          "sinIntegral",
+          "cosIntegral",
+          "logIntegral",
+          "eulerPhi",
+          "divisorSigma",
+          "moebiusMu",
+          "carmichaelLambda",
+          "jacobiSymbol",
+          "harmonicNumber",
+          "partitions",
+          "primeFactors",
+          "divisors",
+          "integerDigits",
+          "chineseRemainder",
+          "polyadd",
+          "polynomialQuotient",
+          "polynomialRemainder",
+          "polynomialGCD",
+          "polynomialLCM",
+          "discriminant",
+          "resultant",
+          "resample",
+          "medfilt",
+          "windowFunction",
+          "apply_window_f64",
+          "welch_psd_f64",
+          "bartlett_psd_f64",
+          "goertzel_f64",
+          "chirp_z_transform_f64",
+          "rowReduce",
+          "characteristicPolynomial",
+          "expfit",
+          "logfit",
+          "powerfit",
+          "quadprog",
+          "linprog",
+          "nullspace",
+          "residue",
+          "padeApproximant",
+          "tensorTranspose",
           "complex_add",
           "complex_sub",
           "complex_mul",
@@ -476,6 +773,41 @@
           "complex_to_polar",
           "complex_axpby",
           "complex_distance",
+          "bitAnd_i32_array",
+          "bitOr_i32_array",
+          "bitXor_i32_array",
+          "bitNot_i32_array",
+          "leftShift_i32_array",
+          "rightArithShift_i32_array",
+          "rightLogShift_i32_array",
+          "poly_mul_f64",
+          "poly_div_mod_f64",
+          "poly_fit_f64",
+          "cheb_fit_f64",
+          "legendre_fit_f64",
+          "tridiag_solve_f64",
+          "divided_difference_f64",
+          "bessel_j0_f64",
+          "bessel_j1_f64",
+          "bessel_jn_f64",
+          "bessel_y0_f64",
+          "bessel_y1_f64",
+          "bessel_yn_f64",
+          "airy_ai_f64",
+          "airy_bi_f64",
+          "elliptic_k_f64",
+          "elliptic_e_f64",
+          "lgamma_f64",
+          "carlson_rc_f64",
+          "carlson_rf_f64",
+          "carlson_rd_f64",
+          "carlson_rj_f64",
+          "elliptic_f_incomplete_f64",
+          "elliptic_e_incomplete_f64",
+          "elliptic_pi_incomplete_f64",
+          "sort_f64",
+          "argsort_f64",
+          "rank_f64",
           "complex_array_zeros",
           "complex_array_ones",
           "complex_array_fill",
@@ -643,6 +975,59 @@
           "matrix_axpy",
           "matrix_gemm",
           "matrix_gemv",
+          "matrix_svd",
+          "matrix_singular_values",
+          "matrix_lu_decompose",
+          "matrix_qr_decompose",
+          "matrix_cholesky",
+          "matrix_inverse",
+          "matrix_determinant",
+          "chebyshevT",
+          "hermiteH",
+          "laguerreL",
+          "legendreP",
+          "erfi",
+          "expIntegralEi",
+          "sinIntegral",
+          "cosIntegral",
+          "logIntegral",
+          "eulerPhi",
+          "divisorSigma",
+          "moebiusMu",
+          "carmichaelLambda",
+          "jacobiSymbol",
+          "harmonicNumber",
+          "partitions",
+          "primeFactors",
+          "divisors",
+          "integerDigits",
+          "chineseRemainder",
+          "polyadd",
+          "polynomialQuotient",
+          "polynomialRemainder",
+          "polynomialGCD",
+          "polynomialLCM",
+          "discriminant",
+          "resultant",
+          "resample",
+          "medfilt",
+          "windowFunction",
+          "apply_window_f64",
+          "welch_psd_f64",
+          "bartlett_psd_f64",
+          "goertzel_f64",
+          "chirp_z_transform_f64",
+          "rowReduce",
+          "characteristicPolynomial",
+          "expfit",
+          "logfit",
+          "powerfit",
+          "quadprog",
+          "linprog",
+          "nullspace",
+          "residue",
+          "padeApproximant",
+          "tensorTranspose",
           "complex_add",
           "complex_sub",
           "complex_mul",
@@ -687,6 +1072,41 @@
           "complex_to_polar",
           "complex_axpby",
           "complex_distance",
+          "bitAnd_i32_array",
+          "bitOr_i32_array",
+          "bitXor_i32_array",
+          "bitNot_i32_array",
+          "leftShift_i32_array",
+          "rightArithShift_i32_array",
+          "rightLogShift_i32_array",
+          "poly_mul_f64",
+          "poly_div_mod_f64",
+          "poly_fit_f64",
+          "cheb_fit_f64",
+          "legendre_fit_f64",
+          "tridiag_solve_f64",
+          "divided_difference_f64",
+          "bessel_j0_f64",
+          "bessel_j1_f64",
+          "bessel_jn_f64",
+          "bessel_y0_f64",
+          "bessel_y1_f64",
+          "bessel_yn_f64",
+          "airy_ai_f64",
+          "airy_bi_f64",
+          "elliptic_k_f64",
+          "elliptic_e_f64",
+          "lgamma_f64",
+          "carlson_rc_f64",
+          "carlson_rf_f64",
+          "carlson_rd_f64",
+          "carlson_rj_f64",
+          "elliptic_f_incomplete_f64",
+          "elliptic_e_incomplete_f64",
+          "elliptic_pi_incomplete_f64",
+          "sort_f64",
+          "argsort_f64",
+          "rank_f64",
           "complex_array_zeros",
           "complex_array_ones",
           "complex_array_fill",
@@ -724,6 +1144,20 @@
       }
     },
     "ops": {
+      "src/ops/approx.ts": {
+        "description": "Rational approximation — AssemblyScript fallback mirroring",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "residue",
+          "padeApproximant"
+        ],
+        "functions": [
+          "residue",
+          "padeApproximant"
+        ]
+      },
       "src/ops/array.ts": {
         "description": "Array Operations for AssemblyScript",
         "externalDependencies": [],
@@ -806,6 +1240,30 @@
           "array_copy"
         ]
       },
+      "src/ops/bitwise.ts": {
+        "description": "Bitwise Operations for AssemblyScript",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "bitAnd_i32_array",
+          "bitOr_i32_array",
+          "bitXor_i32_array",
+          "bitNot_i32_array",
+          "leftShift_i32_array",
+          "rightArithShift_i32_array",
+          "rightLogShift_i32_array"
+        ],
+        "functions": [
+          "bitAnd_i32_array",
+          "bitOr_i32_array",
+          "bitXor_i32_array",
+          "bitNot_i32_array",
+          "leftShift_i32_array",
+          "rightArithShift_i32_array",
+          "rightLogShift_i32_array"
+        ]
+      },
       "src/ops/complex-array.ts": {
         "description": "Complex Array Operations for AssemblyScript",
         "externalDependencies": [],
@@ -813,7 +1271,9 @@
         "internalDependencies": [
           {
             "file": "../types/complex",
-            "imports": ["Complex"]
+            "imports": [
+              "Complex"
+            ]
           }
         ],
         "exports": [
@@ -894,7 +1354,10 @@
         "internalDependencies": [
           {
             "file": "../types/complex",
-            "imports": ["Complex", "complexFromPolar"]
+            "imports": [
+              "Complex",
+              "complexFromPolar"
+            ]
           }
         ],
         "exports": [
@@ -988,6 +1451,36 @@
           "complex_to_polar",
           "complex_axpby",
           "complex_distance"
+        ]
+      },
+      "src/ops/curvefit.ts": {
+        "description": "Log-linearized curve fitting — AssemblyScript fallback mirroring",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "expfit",
+          "logfit",
+          "powerfit"
+        ],
+        "functions": [
+          "expfit",
+          "logfit",
+          "powerfit"
+        ]
+      },
+      "src/ops/linalg.ts": {
+        "description": "Extra linear-algebra kernels — AssemblyScript fallback mirroring",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "rowReduce",
+          "characteristicPolynomial"
+        ],
+        "functions": [
+          "rowReduce",
+          "characteristicPolynomial"
         ]
       },
       "src/ops/matrix.ts": {
@@ -1080,6 +1573,78 @@
           "matrix_axpy",
           "matrix_gemm",
           "matrix_gemv"
+        ]
+      },
+      "src/ops/number-theory.ts": {
+        "description": "Number-theory functions — AssemblyScript fallback mirroring",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "eulerPhi",
+          "divisorSigma",
+          "moebiusMu",
+          "carmichaelLambda",
+          "jacobiSymbol",
+          "harmonicNumber",
+          "partitions",
+          "primeFactors",
+          "divisors",
+          "integerDigits",
+          "chineseRemainder"
+        ],
+        "functions": [
+          "eulerPhi",
+          "divisorSigma",
+          "moebiusMu",
+          "carmichaelLambda",
+          "jacobiSymbol",
+          "harmonicNumber",
+          "partitions",
+          "primeFactors",
+          "divisors",
+          "integerDigits",
+          "chineseRemainder"
+        ]
+      },
+      "src/ops/optimization.ts": {
+        "description": "Optimization kernels — AssemblyScript fallback mirroring",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "quadprog",
+          "linprog",
+          "nullspace"
+        ],
+        "functions": [
+          "quadprog",
+          "linprog",
+          "nullspace"
+        ]
+      },
+      "src/ops/polynomial.ts": {
+        "description": "Polynomial algebra — AssemblyScript fallback mirroring",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "polyadd",
+          "polynomialQuotient",
+          "polynomialRemainder",
+          "polynomialGCD",
+          "polynomialLCM",
+          "discriminant",
+          "resultant"
+        ],
+        "functions": [
+          "polyadd",
+          "polynomialQuotient",
+          "polynomialRemainder",
+          "polynomialGCD",
+          "polynomialLCM",
+          "discriminant",
+          "resultant"
         ]
       },
       "src/ops/scalar.ts": {
@@ -1197,6 +1762,198 @@
           "LOG10E",
           "EPSILON"
         ]
+      },
+      "src/ops/signal.ts": {
+        "description": "Signal windowing / resampling kernels — AssemblyScript fallback mirroring",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "resample",
+          "medfilt",
+          "windowFunction"
+        ],
+        "functions": [
+          "resample",
+          "medfilt",
+          "windowFunction"
+        ]
+      },
+      "src/ops/special.ts": {
+        "description": "Orthogonal polynomials and integral special functions — AssemblyScript",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "chebyshevT",
+          "hermiteH",
+          "laguerreL",
+          "legendreP",
+          "erfi",
+          "expIntegralEi",
+          "sinIntegral",
+          "cosIntegral",
+          "logIntegral"
+        ],
+        "functions": [
+          "chebyshevT",
+          "hermiteH",
+          "laguerreL",
+          "legendreP",
+          "erfi",
+          "expIntegralEi",
+          "sinIntegral",
+          "cosIntegral",
+          "logIntegral"
+        ]
+      },
+      "src/ops/svd.ts": {
+        "description": "Singular Value Decomposition via the one-sided Jacobi algorithm.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "matrix_svd",
+          "matrix_singular_values"
+        ],
+        "functions": [
+          "matrix_svd",
+          "matrix_singular_values"
+        ]
+      },
+      "src/ops/tensor.ts": {
+        "description": "Rank-N tensor operations — AssemblyScript fallback mirroring",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "tensorTranspose"
+        ],
+        "functions": [
+          "tensorTranspose"
+        ]
+      }
+    },
+    "root": {
+      "src/poly.ts": {
+        "description": "Polynomial hot-loop kernels — AssemblyScript parity port.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "poly_mul_f64",
+          "poly_div_mod_f64",
+          "poly_resultant_f64",
+          "poly_fit_f64",
+          "cheb_fit_f64",
+          "legendre_fit_f64",
+          "poly_discriminant_f64"
+        ],
+        "functions": [
+          "poly_mul_f64",
+          "poly_div_mod_f64",
+          "poly_resultant_f64",
+          "poly_fit_f64",
+          "cheb_fit_f64",
+          "legendre_fit_f64",
+          "poly_discriminant_f64"
+        ]
+      },
+      "src/signal.ts": {
+        "description": "Spectral-windowing WASM kernels — AssemblyScript parity port (Slice 5.6).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "apply_window_f64",
+          "welch_psd_f64",
+          "bartlett_psd_f64",
+          "goertzel_f64",
+          "chirp_z_transform_f64"
+        ],
+        "functions": [
+          "apply_window_f64",
+          "welch_psd_f64",
+          "bartlett_psd_f64",
+          "goertzel_f64",
+          "chirp_z_transform_f64"
+        ]
+      },
+      "src/sort.ts": {
+        "description": "Sort hot-loop kernels — AssemblyScript parity port (Slice 5.7a).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sort_f64",
+          "argsort_f64",
+          "rank_f64"
+        ],
+        "functions": [
+          "sort_f64",
+          "argsort_f64",
+          "rank_f64"
+        ]
+      },
+      "src/special.ts": {
+        "description": "Bessel J/Y, Airy Ai/Bi, lgamma — AssemblyScript parity port.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "lgamma_f64",
+          "bessel_j0_f64",
+          "bessel_j1_f64",
+          "bessel_jn_f64",
+          "bessel_y0_f64",
+          "bessel_y1_f64",
+          "bessel_yn_f64",
+          "airy_ai_f64",
+          "airy_bi_f64",
+          "elliptic_k_f64",
+          "elliptic_e_f64",
+          "carlson_rc_f64",
+          "carlson_rf_f64",
+          "carlson_rd_f64",
+          "carlson_rj_f64",
+          "elliptic_f_incomplete_f64",
+          "elliptic_e_incomplete_f64",
+          "elliptic_pi_incomplete_f64"
+        ],
+        "functions": [
+          "lgamma_f64",
+          "bessel_j0_f64",
+          "bessel_j1_f64",
+          "bessel_jn_f64",
+          "bessel_y0_f64",
+          "bessel_y1_f64",
+          "bessel_yn_f64",
+          "airy_ai_f64",
+          "airy_bi_f64",
+          "elliptic_k_f64",
+          "elliptic_e_f64",
+          "carlson_rc_f64",
+          "carlson_rf_f64",
+          "carlson_rd_f64",
+          "carlson_rj_f64",
+          "elliptic_f_incomplete_f64",
+          "elliptic_e_incomplete_f64",
+          "elliptic_pi_incomplete_f64"
+        ]
+      },
+      "src/tridiag.ts": {
+        "description": "Tridiagonal-solve kernel — AssemblyScript parity port (Slice 3.10b).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "tridiag_solve_f64",
+          "divided_difference_f64"
+        ],
+        "functions": [
+          "tridiag_solve_f64",
+          "divided_difference_f64"
+        ]
       }
     },
     "types": {
@@ -1216,9 +1973,21 @@
           "complexFromImaginary",
           "Complex"
         ],
-        "classes": ["Complex"],
-        "functions": ["complex", "complexFromPolar", "complexFromReal", "complexFromImaginary"],
-        "constants": ["COMPLEX_ZERO", "COMPLEX_ONE", "COMPLEX_I", "COMPLEX_NEG_ONE"]
+        "classes": [
+          "Complex"
+        ],
+        "functions": [
+          "complex",
+          "complexFromPolar",
+          "complexFromReal",
+          "complexFromImaginary"
+        ],
+        "constants": [
+          "COMPLEX_ZERO",
+          "COMPLEX_ONE",
+          "COMPLEX_I",
+          "COMPLEX_NEG_ONE"
+        ]
       }
     }
   },
@@ -1232,49 +2001,85 @@
     },
     "layers": [
       {
+        "name": "Algebra",
+        "files": [
+          "src/algebra/decomposition.ts"
+        ]
+      },
+      {
         "name": "Bindings",
-        "files": ["src/bindings/index.ts", "src/bindings/wasm-loader.ts"]
+        "files": [
+          "src/bindings/index.ts",
+          "src/bindings/wasm-loader.ts"
+        ]
       },
       {
         "name": "Env",
-        "files": ["src/env/abort.ts"]
+        "files": [
+          "src/env/abort.ts"
+        ]
       },
       {
         "name": "Entry",
-        "files": ["src/index.ts"]
+        "files": [
+          "src/index.ts"
+        ]
       },
       {
         "name": "Ops",
         "files": [
+          "src/ops/approx.ts",
           "src/ops/array.ts",
+          "src/ops/bitwise.ts",
           "src/ops/complex-array.ts",
           "src/ops/complex-ops.ts",
+          "src/ops/curvefit.ts",
+          "src/ops/linalg.ts",
           "src/ops/matrix.ts",
-          "src/ops/scalar.ts"
+          "src/ops/number-theory.ts",
+          "src/ops/optimization.ts",
+          "src/ops/polynomial.ts",
+          "src/ops/scalar.ts",
+          "src/ops/signal.ts",
+          "src/ops/special.ts",
+          "src/ops/svd.ts",
+          "src/ops/tensor.ts"
+        ]
+      },
+      {
+        "name": "Root",
+        "files": [
+          "src/poly.ts",
+          "src/signal.ts",
+          "src/sort.ts",
+          "src/special.ts",
+          "src/tridiag.ts"
         ]
       },
       {
         "name": "Types",
-        "files": ["src/types/complex.ts"]
+        "files": [
+          "src/types/complex.ts"
+        ]
       }
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 10,
-    "totalModules": 5,
-    "totalLinesOfCode": 3324,
-    "totalExports": 431,
+    "totalTypeScriptFiles": 27,
+    "totalModules": 7,
+    "totalLinesOfCode": 7611,
+    "totalExports": 609,
     "totalClasses": 2,
     "totalInterfaces": 2,
-    "totalFunctions": 203,
+    "totalFunctions": 293,
     "totalTypeGuards": 2,
     "totalEnums": 0,
     "totalConstants": 14,
-    "totalReExports": 212,
+    "totalReExports": 300,
     "totalTypeOnlyImports": 0,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 1,
-    "unusedExportsCount": 8
+    "unusedExportsCount": 10
   }
 }

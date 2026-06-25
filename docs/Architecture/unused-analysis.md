@@ -1,54 +1,25 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-06-15
+**Generated**: 2026-06-25
 
 ## Summary
 
-- **Potentially unused files**: 0
-- **Potentially unused exports**: 330
+- **Potentially unused files**: 1
+- **Potentially unused exports**: 448
 
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
 
+- `packages/workerpool/src/index.ts`
 
 ## Potentially Unused Exports
 
 These exports are not imported by any other file in the codebase:
 
-### `packages/typed-function/src/index.ts`
+### `packages/workerpool/src/fft-core.ts`
 
-- `TypeDef` (interface)
-- `ExtendedTypeDef` (interface)
-- `ConversionDef` (interface)
-- `SignatureMap` (type)
-- `TypeTest` (type)
-- `TypeConverter` (type)
-- `isFunction` (constant)
-- `isObject` (constant)
-- `isNull` (constant)
-- `isUndefined` (constant)
-- `isNullOrUndefined` (constant)
-- `isPositiveInteger` (constant)
-- `isNonNegativeInteger` (constant)
-- `isNaN` (constant)
-- `isTypedArray` (constant)
-- `isFloat32Array` (constant)
-- `isInt32Array` (constant)
-- `isUint32Array` (constant)
-- `isArrayBuffer` (constant)
-
-### `packages/workerpool/src/index.ts`
-
-- `canUseWasm` (function)
-- `initWorkerWasm` (function)
-- `isWorkerWasmAvailable` (function)
-- `getWasmFeatures` (function)
-- `initializePool` (function)
-- `terminatePool` (function)
-- `getPoolStats` (function)
-- `WasmFeatureStatus` (interface)
-- `mathWorkerPool` (constant)
+- `fftBitReverse` (function)
 
 ### `core/src/factory/factory.ts`
 
@@ -60,12 +31,22 @@ These exports are not imported by any other file in the codebase:
 ### `core/src/typed/mathts-typed.ts`
 
 - `TypeDef` (interface)
+- `ConversionDef` (interface)
 - `MathTSTypeDef` (interface)
 
 ### `core/src/types/bignumber.ts`
 
 - `BigNumberConfig` (interface)
 - `RoundingMode` (type)
+
+### `core/src/types/interfaces.ts`
+
+- `MatrixBackend` (interface)
+- `IMatrix` (interface)
+- `IBigNumber` (interface)
+- `MatrixDimensions` (interface)
+- `BackendType` (type)
+- `NumericType` (type)
 
 ### `matrix/src/backends/wasm/fft-wasm.ts`
 
@@ -75,16 +56,35 @@ These exports are not imported by any other file in the codebase:
 
 ### `matrix/src/backends/WasmLoader.ts`
 
+- `initWasm` (function)
+- `WasmLoader` (class)
 - `Allocation` (interface)
 - `LoadingMetrics` (interface)
 - `AllocatorKind` (type)
 
 ### `matrix/src/config.ts`
 
+- `setConfig` (function)
+- `resetConfig` (function)
+- `setBackendPreference` (function)
+- `setBackendThreshold` (function)
+- `setBackendEnabled` (function)
+- `getRecommendedBackend` (function)
+- `forceBackend` (function)
+- `enableProfiling` (function)
+- `disableProfiling` (function)
+- `enableAdaptiveTuning` (function)
+- `disableAdaptiveTuning` (function)
+- `configureAdaptiveTuning` (function)
 - `BackendConfig` (interface)
 - `AdaptiveTuningConfig` (interface)
 - `ProfilingConfig` (interface)
 - `BackendPreference` (type)
+- `DEFAULT_CONFIG` (constant)
+
+### `matrix/src/operations/sqrtm.ts`
+
+- `matrixSqrtNewtonInternal` (function)
 
 ### `matrix/src/types/dense/arithmetic.ts`
 
@@ -179,6 +179,7 @@ These exports are not imported by any other file in the codebase:
 
 ### `tensor/src/Tensor.ts`
 
+- `EinsumSpec` (interface)
 - `NestedArray` (type)
 
 ### `functions/src/algebra/solver/lsolveAll.ts`
@@ -510,19 +511,66 @@ These exports are not imported by any other file in the codebase:
 - `stringify` (function)
 - `escape` (function)
 
+### `functions/src/wasm/bitwise/wasm-bridge.ts`
+
+- `resetBitwiseWasm` (function)
+
 ### `functions/src/wasm/integrity.ts`
 
+- `sha384OfBuffer` (function)
 - `WasmManifest` (interface)
+
+### `functions/src/wasm/interpolation/wasm-bridge.ts`
+
+- `tridiagSolveJS` (function)
+- `resetTridiagWasm` (function)
+- `WASM_TRIDIAG_THRESHOLD` (constant)
+
+### `functions/src/wasm/poly/wasm-bridge.ts`
+
+- `resetPolyWasm` (function)
+
+### `functions/src/wasm/signal/wasm-bridge.ts`
+
+- `applyWindowJS` (function)
+- `goertzelJS` (function)
+- `bartlettPSDJS` (function)
+- `chirpZTransformJS` (function)
+
+### `functions/src/wasm/sort/wasm-bridge.ts`
+
+- `sortF64JS` (function)
+- `argsortF64JS` (function)
+- `rankF64JS` (function)
+- `rankF64Dispatch` (function)
 
 ### `functions/src/wasm/special/wasm-bridge.ts`
 
+- `besselJ0JS` (function)
+- `besselJ1JS` (function)
+- `besselJnJS` (function)
+- `besselY0JS` (function)
+- `besselY1JS` (function)
+- `besselYnJS` (function)
+- `airyAiJS` (function)
+- `airyBiJS` (function)
 - `resetCarlsonWasm` (function)
+- `resetBesselWasm` (function)
+- `resetAiryWasm` (function)
+- `resetEllipticWasm` (function)
+- `resetLgammaWasm` (function)
+- `ellipticKJS` (function)
+- `ellipticEJS` (function)
 
 ### `functions/src/wasm/WasmLoader.ts`
 
 - `initWasm` (function)
 - `WasmLoader` (class)
 - `LoadingMetrics` (interface)
+
+### `expression/src/error/IndexError.ts`
+
+- `createIndexError` (function)
 
 ### `expression/src/evaluator/evaluate.ts`
 
@@ -535,12 +583,56 @@ These exports are not imported by any other file in the codebase:
 
 ### `expression/src/utils/array.ts`
 
+- `validate` (function)
+- `validateIndexSourceSize` (function)
+- `validateIndex` (function)
+- `isEmptyIndex` (function)
+- `resize` (function)
+- `reshape` (function)
+- `processSizesWildcard` (function)
+- `squeeze` (function)
+- `unsqueeze` (function)
+- `flatten` (function)
+- `filter` (function)
+- `filterRegExp` (function)
+- `identify` (function)
+- `generalize` (function)
+- `getArrayDataType` (function)
+- `last` (function)
+- `initial` (function)
+- `concat` (function)
+- `broadcastSizes` (function)
+- `checkBroadcastingRules` (function)
+- `broadcastTo` (function)
+- `broadcastArrays` (function)
+- `stretch` (function)
+- `get` (function)
+- `clone` (function)
 - `IdentifiedValue` (interface)
 - `NestedArray` (type)
 - `ArrayOrScalar` (type)
 
+### `expression/src/utils/bignumber/formatter.ts`
+
+- `toEngineering` (function)
+- `toExponential` (function)
+- `toFixed` (function)
+
+### `expression/src/utils/collection.ts`
+
+- `containsCollections` (function)
+- `deepForEach` (function)
+- `reduce` (function)
+- `scatter` (function)
+
 ### `expression/src/utils/factory.ts`
 
+- `sortFactories` (function)
+- `create` (function)
+- `isFactory` (function)
+- `assertDependencies` (function)
+- `isOptionalDependency` (function)
+- `stripOptionalNotation` (function)
 - `FactoryFunction` (interface)
 - `LegacyFactory` (interface)
 - `FactoryMeta` (interface)
@@ -549,6 +641,25 @@ These exports are not imported by any other file in the codebase:
 
 ### `expression/src/utils/is.ts`
 
+- `isBigInt` (function)
+- `isFraction` (function)
+- `isDenseMatrix` (function)
+- `isSparseMatrix` (function)
+- `isRange` (function)
+- `isIndex` (function)
+- `isBoolean` (function)
+- `isResultSet` (function)
+- `isDate` (function)
+- `isRegExp` (function)
+- `isPartitionedMap` (function)
+- `isNull` (function)
+- `isUndefined` (function)
+- `isAssignmentNode` (function)
+- `isBlockNode` (function)
+- `isConditionalNode` (function)
+- `isRangeNode` (function)
+- `isRelationalNode` (function)
+- `isChain` (function)
 - `BigNumber` (interface)
 - `Complex` (interface)
 - `Fraction` (interface)
@@ -577,31 +688,80 @@ These exports are not imported by any other file in the codebase:
 - `SymbolNode` (interface)
 - `PartitionedMap` (interface)
 
+### `expression/src/utils/latex.ts`
+
+- `latexSymbols` (constant)
+
+### `expression/src/utils/map.ts`
+
+- `assign` (function)
+- `isObjectWrappingMap` (function)
+
 ### `expression/src/utils/number.ts`
 
+- `splitNumber` (function)
+- `toEngineering` (function)
+- `toFixed` (function)
+- `toExponential` (function)
+- `toPrecision` (function)
+- `roundDigits` (function)
+- `digits` (function)
+- `nearlyEqual` (function)
+- `copysign` (function)
 - `SplitValue` (interface)
 - `NumberTypeConfig` (interface)
 - `FormatOptions` (interface)
 - `NormalizedFormatOptions` (interface)
+- `sign` (constant)
+- `log2` (constant)
+- `log10` (constant)
+- `log1p` (constant)
+- `cbrt` (constant)
+- `expm1` (constant)
+- `acosh` (constant)
+- `asinh` (constant)
+- `atanh` (constant)
+- `cosh` (constant)
+- `sinh` (constant)
+- `tanh` (constant)
+
+### `expression/src/utils/object.ts`
+
+- `mapObject` (function)
+- `extend` (function)
+- `deepExtend` (function)
+- `deepFlatten` (function)
+- `canDefineProperty` (function)
+- `lazy` (function)
+- `traverse` (function)
+- `isLegacyFactory` (function)
+- `get` (function)
+- `set` (function)
+- `pick` (function)
+
+### `expression/src/utils/string.ts`
+
+- `endsWith` (function)
+- `compareText` (function)
 
 ### `parallel/src/ComputePool.ts`
 
 - `tensordotChunkKernel` (function)
+- `ComputePoolConfig` (interface)
+- `OpName` (type)
 - `OpThreshold` (type)
-
-### `parallel/src/index.ts`
-
-- `PoolOptions` (interface)
-- `ExecOptions` (interface)
-- `PoolStats` (interface)
 
 ### `parallel/src/ops/bitwise.ts`
 
 - `BitwiseBinaryOp` (type)
 
-### `workbook/src/index.ts`
+### `parallel/src/strategies/chunk.ts`
 
-- `VERSION` (constant)
+- `memorySizeBytes` (function)
+
+### `workbook/src/graph.ts`
+
+- `detectCycles` (function)
 
 ### `workbook/src/types.ts`
 
@@ -622,9 +782,4 @@ These exports are not imported by any other file in the codebase:
 - `COMPLEX_ONE` (constant)
 - `COMPLEX_I` (constant)
 - `COMPLEX_NEG_ONE` (constant)
-
-### `compat/src/index.ts`
-
-- `MathJSConfig` (interface)
-- `MathInstance` (interface)
 

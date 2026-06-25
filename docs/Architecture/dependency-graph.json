@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-06-15",
-    "totalFiles": 554,
+    "lastUpdated": "2026-06-25",
+    "totalFiles": 555,
     "totalModules": 69,
-    "totalExports": 3461
+    "totalExports": 3464
   },
   "entryPoints": [
     {
@@ -3106,7 +3106,7 @@
     },
     "matrix/types": {
       "matrix/src/types/dense/arithmetic.ts": {
-        "description": "arithmetic module",
+        "description": "Contiguous row-major view of a matrix's data. Using the flat Float64Array",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -18401,6 +18401,12 @@
               "parse",
               "evaluate"
             ]
+          },
+          {
+            "file": "../factories/index.js",
+            "imports": [
+              "polynomialRoot"
+            ]
           }
         ],
         "exports": [
@@ -21598,6 +21604,18 @@
           "WASM_POLY_FIT_THRESHOLD"
         ]
       },
+      "functions/src/wasm/resolve.ts": {
+        "description": "Robustly locate a packaged `.wasm` artifact across both the monorepo-source",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "resolvePackagedWasm"
+        ],
+        "functions": [
+          "resolvePackagedWasm"
+        ]
+      },
       "functions/src/wasm/signal/wasm-bridge.ts": {
         "description": "WASM dispatch bridge for spectral signal kernels — Slice 5.6.",
         "externalDependencies": [],
@@ -21801,6 +21819,12 @@
             "imports": [
               "verifyWasmIntegrity",
               "loadWasmManifest"
+            ]
+          },
+          {
+            "file": "./resolve.js",
+            "imports": [
+              "resolvePackagedWasm"
             ]
           }
         ],
@@ -27517,6 +27541,8 @@
           "acos",
           "atan",
           "atan2",
+          "variance",
+          "std",
           "conj",
           "re",
           "im",
@@ -27543,6 +27569,8 @@
           "acos",
           "atan",
           "atan2",
+          "variance",
+          "std",
           "conj",
           "re",
           "im",
@@ -28273,6 +28301,7 @@
           "functions/src/wasm/integrity.ts",
           "functions/src/wasm/interpolation/wasm-bridge.ts",
           "functions/src/wasm/poly/wasm-bridge.ts",
+          "functions/src/wasm/resolve.ts",
           "functions/src/wasm/signal/wasm-bridge.ts",
           "functions/src/wasm/sort/wasm-bridge.ts",
           "functions/src/wasm/special/wasm-bridge.ts",
@@ -28521,13 +28550,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 554,
+    "totalTypeScriptFiles": 555,
     "totalModules": 69,
-    "totalLinesOfCode": 147839,
-    "totalExports": 3461,
+    "totalLinesOfCode": 148610,
+    "totalExports": 3464,
     "totalClasses": 51,
     "totalInterfaces": 315,
-    "totalFunctions": 1279,
+    "totalFunctions": 1282,
     "totalTypeGuards": 129,
     "totalEnums": 0,
     "totalConstants": 1115,
@@ -28535,7 +28564,7 @@
     "totalTypeOnlyImports": 357,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 2,
-    "unusedFilesCount": 0,
-    "unusedExportsCount": 330
+    "unusedFilesCount": 1,
+    "unusedExportsCount": 448
   }
 }

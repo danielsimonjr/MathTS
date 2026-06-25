@@ -1,19 +1,16 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-04-04
+**Generated**: 2026-06-25
 
 ## Summary
 
-- **Potentially unused files**: 261
-- **Potentially unused exports**: 152
+- **Potentially unused files**: 257
+- **Potentially unused exports**: 219
 
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
 
-- `src/algebra/sparse/csChol.ts`
-- `src/core/function/config.ts`
-- `src/core/function/import.ts`
 - `src/defaultInstance.ts`
 - `src/expression/embeddedDocs/function/algebra/derivative.ts`
 - `src/expression/embeddedDocs/function/algebra/leafCount.ts`
@@ -239,10 +236,8 @@ These files are not imported by any other file in the codebase:
 - `src/expression/types.ts`
 - `src/factoriesNumber.ts`
 - `src/shared/types.ts`
-- `src/typed/typed-bridge.ts`
 - `src/utils/customs.d.ts`
 - `src/utils/latex.d.ts`
-- `src/utils/log.ts`
 - `src/utils/shared.ts`
 - `src/utils/snapshot.ts`
 - `src/utils/string.d.ts`
@@ -266,6 +261,7 @@ These files are not imported by any other file in the codebase:
 - `src/wasm/numeric/calculus.ts`
 - `src/wasm/numeric/interpolation.ts`
 - `src/wasm/numeric/rational.ts`
+- `src/wasm/numeric/regression.ts`
 - `src/wasm/numeric/rootfinding.ts`
 - `src/wasm/probability/distributions.ts`
 - `src/wasm/trigonometry/basic.ts`
@@ -277,12 +273,54 @@ These files are not imported by any other file in the codebase:
 
 These exports are not imported by any other file in the codebase:
 
+### `src/algebra/solver/lsolveAll.ts`
+
+- `DenseMatrix` (interface)
+
+### `src/algebra/solver/usolveAll.ts`
+
+- `DenseMatrix` (interface)
+
+### `src/algebra/sparse/csAmd.ts`
+
+- `SparseMatrixData` (interface)
+
+### `src/algebra/sparse/csChol.ts`
+
+- `SparseMatrixData` (interface)
+- `SymbolicAnalysis` (interface)
+- `CholResult` (interface)
+
+### `src/algebra/sparse/csCounts.ts`
+
+- `SparseMatrixData` (interface)
+
+### `src/algebra/sparse/csLu.ts`
+
+- `SparseMatrixData` (interface)
+- `SymbolicAnalysis` (interface)
+- `LuResult` (interface)
+
+### `src/algebra/sparse/csSpsolve.ts`
+
+- `SparseMatrixData` (interface)
+
+### `src/algebra/sparse/csSqr.ts`
+
+- `SparseMatrixData` (interface)
+- `SymbolicAnalysis` (interface)
+
+### `src/algebra/sparse/csSymperm.ts`
+
+- `SparseMatrixData` (interface)
+
 ### `src/arithmetic/nthRoot.ts`
 
 - `createNthRootNumber` (constant)
 
 ### `src/arithmetic/utils/nodeOperations.ts`
 
+- `MathNode` (interface)
 - `name` (constant)
 - `dependencies` (constant)
 
@@ -291,6 +329,21 @@ These exports are not imported by any other file in the codebase:
 - `MathJsInstance` (interface)
 - `ImportOptions` (interface)
 - `FactoriesInput` (type)
+
+### `src/core/function/config.ts`
+
+- `ConfigFunction` (interface)
+- `MatrixOption` (type)
+- `NumberOption` (type)
+- `ConfigOptions` (type)
+- `EmitFunction` (type)
+- `MATRIX_OPTIONS` (constant)
+- `NUMBER_OPTIONS` (constant)
+
+### `src/core/function/import.ts`
+
+- `ImportOptions` (interface)
+- `path` (constant)
 
 ### `src/core/function/typed.ts`
 
@@ -319,6 +372,23 @@ These exports are not imported by any other file in the codebase:
 - `MathValue` (type)
 - `PredicateFunction` (type)
 - `TypedCallback` (type)
+
+### `src/matrix/expm.ts`
+
+- `Matrix` (interface)
+
+### `src/matrix/sqrtm.ts`
+
+- `Matrix` (interface)
+
+### `src/matrix/utils/zerosAndOnes.ts`
+
+- `TypedFunction` (interface)
+- `BigNumberConstructor` (interface)
+- `BigNumber` (interface)
+- `MatrixConstructor` (interface)
+- `Matrix` (interface)
+- `Config` (interface)
 
 ### `src/type/bignumber/BigNumber.ts`
 
@@ -377,7 +447,6 @@ These exports are not imported by any other file in the codebase:
 - `SparseMatrixInterface` (interface)
 - `MathNumericValue` (type)
 - `ElementwiseOperation` (type)
-- `AlgorithmFunction` (type)
 
 ### `src/type/resultset/ResultSet.ts`
 
@@ -387,7 +456,7 @@ These exports are not imported by any other file in the codebase:
 
 ### `src/type/unit/physicalConstants.ts`
 
-- `createJosephson` (constant)
+- `UnitInstance` (interface)
 
 ### `src/utils/array.ts`
 
@@ -495,6 +564,10 @@ These exports are not imported by any other file in the codebase:
 - `csLeaf` (function)
 - `csSpsolve` (function)
 
+### `src/wasm/bitwise/wasm-bridge.ts`
+
+- `resetBitwiseWasm` (function)
+
 ### `src/wasm/geometry/operations.ts`
 
 - `intersectLineCircle` (function)
@@ -507,11 +580,27 @@ These exports are not imported by any other file in the codebase:
 - `polygonArea2D` (function)
 - `pointInConvexPolygon2D` (function)
 
+### `src/wasm/integrity.ts`
+
+- `sha384OfBuffer` (function)
+- `WasmManifest` (interface)
+
+### `src/wasm/interpolation/wasm-bridge.ts`
+
+- `tridiagSolveJS` (function)
+- `resetTridiagWasm` (function)
+- `WASM_TRIDIAG_THRESHOLD` (constant)
+
 ### `src/wasm/matrix/linalg.ts`
 
 - `lsolveUnit` (function)
 - `lsolveMultiple` (function)
 - `usolveMultiple` (function)
+- `nullSpace` (function)
+
+### `src/wasm/poly/wasm-bridge.ts`
+
+- `resetPolyWasm` (function)
 
 ### `src/wasm/signal/fft.ts`
 
@@ -520,6 +609,46 @@ These exports are not imported by any other file in the codebase:
 - `phaseSpectrum` (function)
 - `crossCorrelation` (function)
 - `autoCorrelation` (function)
+
+### `src/wasm/signal/wasm-bridge.ts`
+
+- `applyWindowJS` (function)
+- `goertzelJS` (function)
+- `bartlettPSDJS` (function)
+- `chirpZTransformJS` (function)
+
+### `src/wasm/sort/wasm-bridge.ts`
+
+- `sortF64JS` (function)
+- `argsortF64JS` (function)
+- `rankF64JS` (function)
+- `rankF64Dispatch` (function)
+
+### `src/wasm/special/wasm-bridge.ts`
+
+- `besselJ0JS` (function)
+- `besselJ1JS` (function)
+- `besselJnJS` (function)
+- `besselY0JS` (function)
+- `besselY1JS` (function)
+- `besselYnJS` (function)
+- `airyAiJS` (function)
+- `airyBiJS` (function)
+- `resetCarlsonWasm` (function)
+- `resetBesselWasm` (function)
+- `resetAiryWasm` (function)
+- `resetEllipticWasm` (function)
+- `resetLgammaWasm` (function)
+- `ellipticKJS` (function)
+- `ellipticEJS` (function)
+
+### `src/wasm/statistics/basic.ts`
+
+- `movingAverage` (function)
+- `histogramNumBins` (function)
+- `histogramEdges` (function)
+- `linreg` (function)
+- `linregPredict` (function)
 
 ### `src/wasm/statistics/select.ts`
 
@@ -533,3 +662,4 @@ These exports are not imported by any other file in the codebase:
 - `initWasm` (function)
 - `WasmLoader` (class)
 - `LoadingMetrics` (interface)
+
