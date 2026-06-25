@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   routing documented).
 - Added `docs/Architecture/WASM_ACCELERATION.md` — narrative WASM coverage doc
   (thresholds, dispatch order, JS-only families, correctness status).
+- `README.md`: removed changelog artifacts (the `[Unreleased]`/"ready to tag"
+  status note) and the stale hardcoded status snapshot (12/12 packages, 491
+  files, etc.); the Status section now points at the generated reports
+  (OVERVIEW / TEST_COVERAGE / DEPENDENCY_GRAPH / wasm-pairing) as source of truth.
 
 ### Changed (2026-06-25)
 
@@ -32,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `*Dispatch` routing (21 of 218 accelerated). The per-function table is now
   tool-generated rather than hand-maintained, so it can't drift;
   `WASM_ACCELERATION.md` points at it for the authoritative list.
+- Added the missing `docs:deps` npm script
+  (`npx tsx tools/create-dependency-graph/create-dependency-graph.ts --root=.`),
+  which the tool README and root README both referenced but was not wired.
 
 ### Fixed (2026-05-25)
 

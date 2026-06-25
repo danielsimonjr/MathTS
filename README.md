@@ -290,28 +290,25 @@ cd functions && npx vitest run
 
 ## Status
 
-As of 2026-05-23:
+MathTS is an actively developed monorepo of 22 independently-versioned packages.
+The dependency graph has **0 runtime circular dependencies** (verified by
+`tools/create-dependency-graph`, which regenerates the reports below).
 
-| Check                              | Result                          |
-| ---------------------------------- | ------------------------------- |
-| Packages building (`turbo build`)  | 12/12                           |
-| Test tasks green (`turbo test`)    | 19/19                           |
-| TypeScript errors (`tsc --noEmit`) | 0 (all 11 TS packages)          |
-| ESLint errors                      | 0 (all 10 linted packages)      |
-| Circular dependencies              | 0                               |
-| WASM integration tests             | 224/224 passed, 0 failed        |
-| SHA-384 manifest verification      | 5/5 passed                      |
-| Source-file test coverage          | 27.5% (135/491 reachable files) |
+Live metrics — file / export / module counts, per-file test coverage, and the
+WASM↔function pairing — are kept in **generated** reports rather than duplicated
+here (so they can't drift). Regenerate with `npm run docs:deps`:
 
-Detailed coverage breakdown: [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md).
-Full architecture report: [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md).
+| Report | Contents |
+| --- | --- |
+| [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md) | Package & architecture metrics |
+| [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md) | Per-file test coverage |
+| [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md) | Dependency graph |
+| [`docs/Architecture/wasm-pairing.md`](./docs/Architecture/wasm-pairing.md) | WASM accelerator ↔ function pairing |
 
 ### Known open items
 
 - No browser smoke test for WebGPU paths (WebGPU is not available in headless
   Node; needs a CI runner with a software WebGPU backend such as Mesa lavapipe).
-- The `[Unreleased]` changelog section covers four work strands since
-  `autograd 0.1.0` (2026-05-15) and is ready to tag as a versioned release.
 
 See [`TODO.md`](./TODO.md) for the full open-items list.
 

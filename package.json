@@ -47,6 +47,7 @@
     "bench:wasm": "npx tsx tests/benchmark/wasm_rust_vs_as_benchmark.ts",
     "bench:parallel": "npx tsx tools/benchmark/parallel/run.ts",
     "bench:tensor": "npx tsx tools/benchmark/tensor/contract.bench.ts && npx tsx tools/benchmark/tensor/contract-network.bench.ts && npx tsx tools/benchmark/tensor/tensordot.bench.ts && npx tsx tools/benchmark/tensor/decompositions.bench.ts",
+    "docs:deps": "npx tsx tools/create-dependency-graph/create-dependency-graph.ts --root=.",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
