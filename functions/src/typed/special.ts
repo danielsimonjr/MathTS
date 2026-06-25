@@ -17,6 +17,7 @@
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 import {
   WASM_SPECIAL_THRESHOLD,
   besselJ0Dispatch,
@@ -158,7 +159,7 @@ function factorial(n: number): number {
 // =============================================================================
 
 /** Complementary error function erfc(x) = 1 - erf(x). */
-function erfcScalar(x: f64): f64 {
+export function erfcScalar(x: f64): f64 {
   if (!isFinite(x)) return x > 0 ? 0 : 2;
   if (x < 0) return 2 - erfcScalar(-x); // erfc(-x) = 2 - erfc(x)
   // x small: 1 - erf (erfc ~ O(1), no cancellation). x large: direct CF tail.
@@ -1095,8 +1096,11 @@ async function mapArray(
  */
 export const erfc = mathTyped('erfc', {
   number: erfcScalar,
-  Float64Array: (x: Float64Array): Promise<Float64Array> =>
-    mapArray(x, erfcScalar, () => kernelSource([_erfSeries, _erfcCF, erfcScalar], '(x) => erfcScalar(x)')),
+  Float64Array: (x: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('erfc', x);
+    if (wasm) return Promise.resolve(wasm);
+    return mapArray(x, erfcScalar, () => kernelSource([_erfSeries, _erfcCF, erfcScalar], '(x) => erfcScalar(x)'));
+  },
 });
 
 /**

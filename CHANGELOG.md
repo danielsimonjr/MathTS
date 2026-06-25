@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-06-25) — WASM acceleration tripled (3-tier gap-fill)
+
+- Effective-wasm coverage of the typed API went **6 → 18** of 218 functions (39
+  routed), via `mathts-functions` 0.2.14 + 19 new Rust `simd_*_array` kernels.
+  Each tier benchmark-gated (`bench:transcendental`/`bench:fusion`); only
+  measured winners wired:
+  - **Tier 1:** `atan/sinh/tanh/atanh/expm1/log1p/log2/log10/sec/csc/cot`
+    (1.4–5× over JS incl. copy). Losers (`sqrt/cbrt/asin/acos/cosh/asinh/acosh`)
+    left on JS.
+  - **Tier 2:** `erfc` (5–7× — expensive continued-fraction JS scalar).
+  - **Tier 3:** op-fusion `fuseUnaryChain` — array stays resident in wasm across
+    a chain, copy paid once; 2.4–3.1× over JS for a 4-op chain.
+- Pairing regenerated: 39 wasm-routed / 52 parallel / 127 js-only; 18 effective
+  wasm / 21 js-fallback.
+
 ### Documentation (2026-06-25)
 
 - Reconciled the narrative architecture docs against the regenerated

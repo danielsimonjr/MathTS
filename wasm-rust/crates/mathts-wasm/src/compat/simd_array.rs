@@ -241,3 +241,50 @@ pub unsafe extern "C" fn simd_atan2_array(a: *const f64, b: *const f64, out: *mu
         *out.add(i) = libm::atan2(*a.add(i), *b.add(i));
     }
 }
+
+// =============================================================================
+// Extended transcendental array operations (unary, libm-backed).
+// Same (in, out, n) ABI as simd_sin_array. These exist because the JS baselines
+// (Math.asin/sinh/expm1/…) are expensive black-box calls, so libm-in-wasm beats
+// JS even including the JS<->wasm copy — the same property that made
+// abs/sin/cos/tan/exp/log net-faster. Each is benchmark-gated before wiring.
+// =============================================================================
+
+macro_rules! simd_unary_array {
+    ($name:ident, $f:expr) => {
+        #[no_mangle]
+        pub unsafe extern "C" fn $name(a: *const f64, out: *mut f64, n: i32) {
+            for i in 0..n as usize {
+                *out.add(i) = $f(*a.add(i));
+            }
+        }
+    };
+}
+
+// Inverse trig
+simd_unary_array!(simd_asin_array, libm::asin);
+simd_unary_array!(simd_acos_array, libm::acos);
+simd_unary_array!(simd_atan_array, libm::atan);
+// Hyperbolic
+simd_unary_array!(simd_sinh_array, libm::sinh);
+simd_unary_array!(simd_cosh_array, libm::cosh);
+simd_unary_array!(simd_tanh_array, libm::tanh);
+// Inverse hyperbolic
+simd_unary_array!(simd_asinh_array, libm::asinh);
+simd_unary_array!(simd_acosh_array, libm::acosh);
+simd_unary_array!(simd_atanh_array, libm::atanh);
+// Exp/log family
+simd_unary_array!(simd_expm1_array, libm::expm1);
+simd_unary_array!(simd_log1p_array, libm::log1p);
+simd_unary_array!(simd_log2_array, libm::log2);
+simd_unary_array!(simd_log10_array, libm::log10);
+simd_unary_array!(simd_cbrt_array, libm::cbrt);
+// Error functions (Tier 2)
+simd_unary_array!(simd_erf_array, libm::erf);
+simd_unary_array!(simd_erfc_array, libm::erfc);
+
+// Reciprocal trig (no direct libm; derived). cot via cos/sin avoids a divide-by
+// near-zero tan and matches the JS `cos(x)/sin(x)` convention.
+simd_unary_array!(simd_sec_array, |x: f64| 1.0 / libm::cos(x));
+simd_unary_array!(simd_csc_array, |x: f64| 1.0 / libm::sin(x));
+simd_unary_array!(simd_cot_array, |x: f64| libm::cos(x) / libm::sin(x));

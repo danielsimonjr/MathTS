@@ -45,14 +45,34 @@ Executed under dev-workflow + honest-claude. Outcome:
   Unlike `Math.sin`, the JS scalar bessel/airy (series+Hankel/asymptotic) are
   already efficient and JIT'd and do the same flops as the Rust kernels, so the
   JS↔wasm copy is pure overhead. Not wired.
-- **op-fusion** (data resident in WASM across chained ops) remains the lever for
-  the cheap-op cases (reductions, binary arithmetic) — see §5, still open.
-
 > Lesson (rules-for-life #4): never conclude a perf decision by inference —
 > measure each case. The reduction result did NOT generalize to elementwise
 > transcendentals (those WON); and the elementwise win did NOT generalize to
 > special functions (those LOSE — their JS is already fast). Three op classes,
 > three different answers, each knowable only by measuring.
+
+### Three-tier gap-fill — executed 2026-06-25 (functions 0.2.14)
+
+Effective-wasm coverage **6 → 18** of 218 typed functions (39 routed). Each tier
+benchmark-gated; only measured winners wired.
+
+- **Tier 1 — extend the elementwise win (DONE).** Authored 17 new Rust
+  `simd_*_array` kernels; benchmarked (`npm run bench:transcendental`). Wired the
+  11 that win at every size: `atan, sinh, tanh, atanh, expm1, log1p, log2,
+  log10, sec, csc, cot` (1.4–5× over JS incl. copy). Measured losers left on JS:
+  `sqrt, cbrt, asin, acos, cosh, asinh, acosh` (hardware-fast or fast JS).
+- **Tier 2 — expensive js-only specials (DONE for the kernel-backed one).**
+  `erfc` wired — **5–7×** (its JS is a continued-fraction scalar, far costlier
+  than `Math.*`). `digamma/expIntegralEi/sin·cosIntegral` are likely wins too but
+  need *authored + mpmath-validated* Rust scalar kernels (no libm equivalent) —
+  a separate numerical task, not a libm wrapper. `erf` has no public consumer.
+- **Tier 3 — op-fusion (DONE, primitive + public API).** `fuseUnaryChain(ops,
+  xs)` (`functions/src/typed/fused.ts`) keeps the array resident in wasm across a
+  chain, paying the copy once (`elementwiseChainDispatch` ping-pongs two scratch
+  buffers). `npm run bench:fusion`: a 4-op chain runs **2.4–3.1× over JS** and
+  beats per-op sequential dispatch. Remaining integration: auto-fusing chains
+  inside the expression evaluator (so `evaluate('exp(sin(x))')` fuses) — larger,
+  still open.
 
 The task breakdown below is retained as the record of the investigation.
 

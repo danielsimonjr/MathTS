@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: "2026-06-25"
-  totalFiles: 556
+  totalFiles: 557
   totalModules: 69
-  totalExports: 3467
+  totalExports: 3470
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -12112,6 +12112,22 @@ modules:
         - studentTPDF
         - noncentralChi2PDF
         - typedDistributions
+    functions/src/typed/fused.ts:
+      description: Op-fusion public API (Tier 3 of the WASM pairing gap plan).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../wasm/elementwise/wasm-bridge.js
+          imports:
+            - elementwiseChainDispatch
+            - WasmElementwiseOp
+        - file: ./special.js
+          imports:
+            - erfcScalar
+      exports:
+        - fuseUnaryChain
+      functions:
+        - fuseUnaryChain
     functions/src/typed/geometry.ts:
       description: Typed Geometry Functions
       externalDependencies: []
@@ -12376,6 +12392,10 @@ modules:
           imports:
             - "*"
           reExport: true
+        - file: ./fused.js
+          imports:
+            - "*"
+          reExport: true
         - file: ./distributions.js
           imports:
             - "*"
@@ -12532,6 +12552,7 @@ modules:
         - "* from ./complex.js"
         - "* from ./set.js"
         - "* from ./special.js"
+        - "* from ./fused.js"
         - "* from ./distributions.js"
         - "* from ./geometry.js"
         - "* from ./algebra.js"
@@ -12975,6 +12996,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../wasm/elementwise/wasm-bridge.js
+          imports:
+            - elementwiseUnaryDispatch
         - file: ../wasm/special/wasm-bridge.js
           imports:
             - WASM_SPECIAL_THRESHOLD
@@ -13050,6 +13074,9 @@ modules:
         - ellipticEIncomplete
         - ellipticPi
         - typedSpecial
+        - erfcScalar
+      functions:
+        - erfcScalar
       constants:
         - erfc
         - erfi
@@ -14282,8 +14309,10 @@ modules:
         - WASM_ELEMENTWISE_THRESHOLD
         - WASM_ELEMENTWISE_OPS
         - elementwiseUnaryDispatch
+        - elementwiseChainDispatch
       functions:
         - elementwiseUnaryDispatch
+        - elementwiseChainDispatch
       constants:
         - WASM_ELEMENTWISE_THRESHOLD
         - WASM_ELEMENTWISE_OPS
@@ -19760,6 +19789,7 @@ dependencyGraph:
         - functions/src/typed/complex.ts
         - functions/src/typed/dist-objects.ts
         - functions/src/typed/distributions.ts
+        - functions/src/typed/fused.ts
         - functions/src/typed/geometry.ts
         - functions/src/typed/gpu.ts
         - functions/src/typed/graph.ts
@@ -19992,19 +20022,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 556
+  totalTypeScriptFiles: 557
   totalModules: 69
-  totalLinesOfCode: 148708
-  totalExports: 3467
+  totalLinesOfCode: 148851
+  totalExports: 3470
   totalClasses: 51
   totalInterfaces: 315
-  totalFunctions: 1283
+  totalFunctions: 1286
   totalTypeGuards: 129
   totalEnums: 0
   totalConstants: 1117
-  totalReExports: 1057
+  totalReExports: 1058
   totalTypeOnlyImports: 357
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 2
   unusedFilesCount: 0
-  unusedExportsCount: 476
+  unusedExportsCount: 475

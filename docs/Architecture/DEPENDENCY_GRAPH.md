@@ -128,7 +128,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 28 files
+- **functions/typed**: 29 files
 - **functions/unit**: 2 files
 - **functions/utils**: 38 files
 - **functions/wasm**: 10 files
@@ -174,7 +174,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core` | 44 | 6 |
 | `@danielsimonjr/mathts-tensor` (`tensor/`) | `@danielsimonjr/mathts-matrix` | 21 | 0 |
 | `@danielsimonjr/mathts-autograd` (`autograd/`) | `@danielsimonjr/mathts-tensor` | 5 | 0 |
-| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 371 | 417 |
+| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 372 | 417 |
 | `@danielsimonjr/mathts-expression` (`expression/`) | (none) | 47 | 381 |
 | `@danielsimonjr/mathts-parser` (`parser/`) | `@danielsimonjr/mathts-expression` | 1 | 0 |
 | `@danielsimonjr/mathts-units` (`units/`) | `@danielsimonjr/mathts-core` | 1 | 0 |
@@ -6331,6 +6331,19 @@ graph LR
 
 ---
 
+### `functions/src/typed/fused.ts` - Op-fusion public API (Tier 3 of the WASM pairing gap plan).
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseChainDispatch, WasmElementwiseOp` | Import |
+| `./special.js` | `erfcScalar` | Import |
+
+**Exports:**
+- Functions: `fuseUnaryChain`
+
+---
+
 ### `functions/src/typed/geometry.ts` - Typed Geometry Functions
 
 **Internal Dependencies:**
@@ -6398,6 +6411,7 @@ graph LR
 | `./complex.js` | `*` | Re-export |
 | `./set.js` | `*` | Re-export |
 | `./special.js` | `*` | Re-export |
+| `./fused.js` | `*` | Re-export |
 | `./distributions.js` | `*` | Re-export |
 | `./geometry.js` | `*` | Re-export |
 | `./algebra.js` | `*` | Re-export |
@@ -6433,7 +6447,7 @@ graph LR
 
 **Exports:**
 - Constants: `typedFunctions`
-- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `* from ./relational.js`, `* from ./string.js`, `* from ./probability.js`, `* from ./unit.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `typedAlgebra`, `cond`, `typedRelational`, `typedString`, `typedProbability`, `typedUnit`
+- Re-exports: `* from ./arithmetic.js`, `* from ./trigonometry.js`, `* from ./statistics.js`, `* from ./signal.js`, `* from ./bitwise.js`, `* from ./logical.js`, `* from ./complex.js`, `* from ./set.js`, `* from ./special.js`, `* from ./fused.js`, `* from ./distributions.js`, `* from ./geometry.js`, `* from ./algebra.js`, `* from ./integration.js`, `* from ./interpolation.js`, `* from ./numeric.js`, `* from ./combinatorics.js`, `* from ./graph.js`, `* from ./dist-objects.js`, `* from ./hypothesis.js`, `* from ./matrix-ops.js`, `* from ./gpu.js`, `* from ./relational.js`, `* from ./string.js`, `* from ./probability.js`, `* from ./unit.js`, `typedArithmetic`, `typedTrigonometry`, `typedStatistics`, `typedSignal`, `typedBitwise`, `typedLogical`, `typedComplex`, `typedSet`, `typedSpecial`, `typedDistributions`, `typedAlgebra`, `cond`, `typedRelational`, `typedString`, `typedProbability`, `typedUnit`
 
 ---
 
@@ -6545,9 +6559,11 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch` | Import |
 | `../wasm/special/wasm-bridge.js` | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
 
 **Exports:**
+- Functions: `erfcScalar`
 - Constants: `erfc`, `erfi`, `lgamma`, `beta`, `gammainc`, `gammaincp`, `betainc`, `digamma`, `besselJ0`, `besselJ1`, `besselY0`, `besselY1`, `besselJ`, `besselY`, `besselI`, `besselK`, `ellipticK`, `ellipticE`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `lambertW`, `cosIntegral`, `sinIntegral`, `logIntegral`, `expIntegralEi`, `fresnelC`, `fresnelS`, `airyAi`, `airyBi`, `carlsonRC`, `carlsonRF`, `carlsonRD`, `carlsonRJ`, `ellipticF`, `ellipticEIncomplete`, `ellipticPi`, `typedSpecial`
 
 ---
@@ -7128,7 +7144,7 @@ graph LR
 
 **Exports:**
 - Types: `WasmElementwiseOp`
-- Functions: `elementwiseUnaryDispatch`
+- Functions: `elementwiseUnaryDispatch`, `elementwiseChainDispatch`
 - Constants: `WASM_ELEMENTWISE_THRESHOLD`, `WASM_ELEMENTWISE_OPS`
 
 ---
@@ -8548,8 +8564,8 @@ graph LR
 | `functions/src/utils/collection` | 4 files | 37 files |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files | 27 files |
 | `functions/src/utils/object` | 1 file | 28 files |
+| `functions/src/typed/index` | 26 files | 2 files |
 | `functions/src/type/matrix/types` | 0 files | 27 files |
-| `functions/src/typed/index` | 25 files | 2 files |
 | `expression/src/index` | 25 files | 0 files |
 | `expression/src/utils/is` | 0 files | 25 files |
 | `matrix/src/types/DenseMatrix` | 3 files | 21 files |
@@ -8943,9 +8959,9 @@ graph TD
         N227[complex]
         N228[dist-objects]
         N229[distributions]
-        N230[geometry]
-        N231[gpu]
-        N232[...18 more]
+        N230[fused]
+        N231[geometry]
+        N232[...19 more]
     end
 
     subgraph Functions/unit
@@ -9233,14 +9249,14 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 556 |
+| Total TypeScript Files | 557 |
 | Total Modules | 69 |
-| Total Lines of Code | 148708 |
-| Total Exports | 3467 |
-| Total Re-exports | 1057 |
+| Total Lines of Code | 148851 |
+| Total Exports | 3470 |
+| Total Re-exports | 1058 |
 | Total Classes | 51 |
 | Total Interfaces | 315 |
-| Total Functions | 1283 |
+| Total Functions | 1286 |
 | Total Type Guards | 129 |
 | Total Enums | 0 |
 | Type-only Imports | 357 |

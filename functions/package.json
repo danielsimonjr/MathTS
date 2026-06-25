@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-functions",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "Mathematical functions for MathTS - arithmetic, algebra, trigonometry, statistics, and more",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json && node scripts/copy-wasm.mjs",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "test": "vitest run",
-    "test:diff": "node tests/diff-special.test.mjs && node tests/diff-elementwise.test.mjs",
+    "test:diff": "node tests/diff-special.test.mjs && node tests/diff-elementwise.test.mjs && node tests/diff-fusion.test.mjs",
     "golden:gen": "python -X utf8 tests/golden/gen_special_goldens.py",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

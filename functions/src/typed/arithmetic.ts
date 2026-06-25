@@ -442,6 +442,8 @@ export const log10 = mathTyped('log10', {
 
   // Parallel array log10
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('log10', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => Math.log10(x)');
       return r.result;
@@ -462,6 +464,8 @@ export const log2 = mathTyped('log2', {
 
   // Parallel array log2
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('log2', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => Math.log2(x)');
       return r.result;
@@ -480,6 +484,8 @@ export const log1p = mathTyped('log1p', {
 
   // Parallel array log1p
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('log1p', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => Math.log1p(x)');
       return r.result;
@@ -498,6 +504,8 @@ export const expm1 = mathTyped('expm1', {
 
   // Parallel array expm1
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('expm1', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => Math.expm1(x)');
       return r.result;
@@ -726,6 +734,8 @@ export const sinh = mathTyped('sinh', {
 
   // Parallel array sinh
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('sinh', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => Math.sinh(x)');
       return r.result;
@@ -766,6 +776,8 @@ export const tanh = mathTyped('tanh', {
 
   // Parallel array tanh
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('tanh', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => Math.tanh(x)');
       return r.result;

@@ -8,12 +8,12 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 | Routing (static) | Count |
 | --- | --: |
-| WASM (incl. wasm+parallel) | 27 |
-| Parallel only (worker pool) | 63 |
-| JS-only | 128 |
+| WASM (incl. wasm+parallel) | 39 |
+| Parallel only (worker pool) | 52 |
+| JS-only | 127 |
 | **Total** | **218** |
 
-**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts.wasm`, backend: **rust**): of the 27 wasm-routed functions, **6 actually execute wasm**, **21 fall back to JS** (their dispatch bridge needs the AssemblyScript `__new` allocator, absent from a Rust-only module — the dispatch's allocate throws and is caught → JS).
+**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts.wasm`, backend: **rust**): of the 39 wasm-routed functions, **18 actually execute wasm**, **21 fall back to JS** (their dispatch bridge needs the AssemblyScript `__new` allocator, absent from a Rust-only module — the dispatch's allocate throws and is caught → JS).
 
 ## WASM-accelerated functions
 
@@ -22,6 +22,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `abs` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
 | `airyAi` | wasm | js-fallback | `airyAiDispatch` | special |
 | `airyBi` | wasm | js-fallback | `airyBiDispatch` | special |
+| `atan` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
+| `atanh` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
 | `besselJ` | wasm | js-fallback | `besselJDispatch` | special |
 | `besselJ0` | wasm | js-fallback | `besselJ0Dispatch` | special |
 | `besselJ1` | wasm | js-fallback | `besselJ1Dispatch` | special |
@@ -33,19 +35,29 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `carlsonRF` | wasm | js-fallback | `carlsonRFDispatch` | special |
 | `carlsonRJ` | wasm | js-fallback | `carlsonRJDispatch` | special |
 | `cos` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
+| `cot` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
+| `csc` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
 | `ellipticE` | wasm | js-fallback | `ellipticEDispatch` | special |
 | `ellipticEIncomplete` | wasm | js-fallback | `ellipticEIncompleteDispatch` | special |
 | `ellipticF` | wasm | js-fallback | `ellipticFIncompleteDispatch` | special |
 | `ellipticK` | wasm | js-fallback | `ellipticKDispatch` | special |
 | `ellipticPi` | wasm | js-fallback | `ellipticPiIncompleteDispatch` | special |
+| `erfc` | wasm | wasm | `elementwiseUnaryDispatch` | special |
 | `exp` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
+| `expm1` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
 | `lgamma` | wasm | js-fallback | `lgammaDispatch` | special |
 | `log` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
+| `log10` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
+| `log1p` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
+| `log2` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
 | `noncentralChi2PDF` | wasm | js-fallback | `lgammaDispatch` | distributions |
 | `parallelStatMedian` | wasm | js-fallback | `sortF64Dispatch` | statistics |
 | `parallelStatQuantile` | wasm | js-fallback | `sortF64Dispatch` | statistics |
+| `sec` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
 | `sin` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
+| `sinh` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
 | `tan` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
+| `tanh` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
 
 ## Parallel-only functions (worker pool, not WASM)
 
@@ -56,8 +68,6 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `add` | arithmetic |
 | `asin` | trigonometry |
 | `asinh` | trigonometry |
-| `atan` | trigonometry |
-| `atanh` | trigonometry |
 | `bitAnd` | bitwise |
 | `bitNot` | bitwise |
 | `bitOr` | bitwise |
@@ -65,18 +75,12 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `cbrt` | arithmetic |
 | `ceil` | arithmetic |
 | `cosh` | arithmetic |
-| `cot` | trigonometry |
-| `csc` | trigonometry |
 | `cube` | arithmetic |
 | `divide` | arithmetic |
 | `dot` | arithmetic |
-| `expm1` | arithmetic |
 | `fix` | arithmetic |
 | `floor` | arithmetic |
 | `leftShift` | bitwise |
-| `log10` | arithmetic |
-| `log1p` | arithmetic |
-| `log2` | arithmetic |
 | `max` | arithmetic |
 | `mean` | arithmetic |
 | `min` | arithmetic |
@@ -103,15 +107,12 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `rightArithShift` | bitwise |
 | `rightLogShift` | bitwise |
 | `round` | arithmetic |
-| `sec` | trigonometry |
 | `sign` | arithmetic |
-| `sinh` | arithmetic |
 | `sqrt` | arithmetic |
 | `square` | arithmetic |
 | `std` | arithmetic |
 | `subtract` | arithmetic |
 | `sum` | arithmetic |
-| `tanh` | arithmetic |
 | `unaryMinus` | arithmetic |
 | `variance` | arithmetic |
 
@@ -119,7 +120,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 | Module | WASM | Parallel | JS-only |
 | --- | --: | --: | --: |
-| arithmetic | 3 | 29 | 13 |
+| arithmetic | 9 | 23 | 13 |
 | bitwise | 0 | 7 | 0 |
 | combinatorics | 0 | 0 | 21 |
 | complex | 0 | 0 | 4 |
@@ -130,10 +131,10 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | relational | 0 | 0 | 7 |
 | set | 0 | 0 | 10 |
 | signal | 0 | 5 | 2 |
-| special | 18 | 0 | 20 |
+| special | 19 | 0 | 19 |
 | statistics | 2 | 13 | 2 |
 | string | 0 | 0 | 5 |
-| trigonometry | 3 | 9 | 7 |
+| trigonometry | 8 | 4 | 7 |
 | unit | 0 | 0 | 2 |
 
 > Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here). The elementwise transcendentals (abs/sin/cos/tan/exp/log) are the wasm-effective set — benchmarked 1.35–5.1× over JS incl. copy. The js-fallback functions (bessel/airy/elliptic/…) were benchmarked too: per-op wasm is break-even-to-slower for them, so the JS fallback is not a regression. Reductions/binary-arithmetic stay JS by the same measure. See docs/roadmap/WASM_PAIRING_GAP_PLAN.md and the `bench:elementwise`/`bench:special-array` benches.

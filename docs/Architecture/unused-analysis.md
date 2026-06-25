@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 476
+- **Potentially unused exports**: 475
 
 ## Potentially Unused Files
 
@@ -544,7 +544,6 @@ These exports are not imported by any other file in the codebase:
 
 ### `functions/src/wasm/elementwise/wasm-bridge.ts`
 
-- `WasmElementwiseOp` (type)
 - `WASM_ELEMENTWISE_THRESHOLD` (constant)
 - `WASM_ELEMENTWISE_OPS` (constant)
 

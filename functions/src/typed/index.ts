@@ -53,6 +53,7 @@ export { typedSet } from './set.js';
 
 // Special functions (erf, beta, bessel, etc.)
 export * from './special.js';
+export * from './fused.js';
 export { typedSpecial } from './special.js';
 
 // Probability distribution functions

@@ -89,6 +89,8 @@ export const csc = mathTyped('csc', {
 
   // Parallel array csc
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('csc', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => 1 / Math.sin(x)');
       return r.result;
@@ -109,6 +111,8 @@ export const sec = mathTyped('sec', {
 
   // Parallel array sec
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('sec', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => 1 / Math.cos(x)');
       return r.result;
@@ -129,6 +133,8 @@ export const cot = mathTyped('cot', {
 
   // Parallel array cot
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('cot', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => 1 / Math.tan(x)');
       return r.result;
@@ -204,6 +210,8 @@ export const atan = mathTyped('atan', {
 
   // Parallel array atan
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('atan', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => Math.atan(x)');
       return r.result;
@@ -299,6 +307,8 @@ export const atanh = mathTyped('atanh', {
 
   // Parallel array atanh (values outside (-1, 1) produce NaN or ±Infinity, matching Math.atanh behavior)
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('atanh', a);
+    if (wasm) return wasm;
     if (computePool.shouldParallelize(a.length)) {
       const r = await computePool.applyKernel(a, '(x) => Math.atanh(x)');
       return r.result;

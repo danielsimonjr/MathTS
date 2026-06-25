@@ -35,19 +35,24 @@ WASM acceleration is **selective and threshold-gated**, not universal:
 | Routing (static) | Count | Effective on bundled Rust binary |
 |---|--:|---|
 | Total public `mathTyped` functions (`functions/src/typed/`) | **218** | |
-| WASM (route to a `*Dispatch`) | **27** | **6 run wasm · 21 fall back to JS** |
-| Parallel only (worker pool via `computePool`) | **63** | worker pool, not wasm |
-| JS-only | **128** | JS |
+| WASM (route to a `*Dispatch`) | **39** | **18 run wasm · 21 fall back to JS** |
+| Parallel only (worker pool via `computePool`) | **52** | worker pool, not wasm |
+| JS-only | **127** | JS |
 
-> The **6 effective-wasm** functions are the elementwise transcendentals
-> `abs/sin/cos/tan/exp/log` (wired 0.2.13, benchmarked 1.35–5.1× over JS incl.
-> copy). The **21 js-fallback** (bessel/airy/elliptic/carlson/lgamma +
+> The **18 effective-wasm** functions are the elementwise transcendentals:
+> `abs/sin/cos/tan/exp/log` (0.2.13) plus the Tier-1 extension
+> `atan/sinh/tanh/atanh/expm1/log1p/log2/log10/sec/csc/cot` and Tier-2 `erfc`
+> (0.2.14) — each benchmark-confirmed net-faster than JS incl. copy (1.35–7×).
+> The **21 js-fallback** (bessel/airy/elliptic/carlson/lgamma +
 > `noncentralChi2PDF`/`parallelStatMedian`/`parallelStatQuantile`) route to a
 > `*Dispatch` but hit the AS-only allocator and fall back to JS on the Rust
 > binary — and were benchmarked as break-even-to-slower for wasm anyway. NOT
-> wired at all (benchmarked, JS wins once the JS↔wasm copy is included): `sqrt`
-> and the reductions (`sum`/`mean`/`variance`) — V8 JITs those faster than
-> wasm+copy. The
+> wired (benchmarked, JS wins once the JS↔wasm copy is included): `sqrt`, `cbrt`,
+> `asin`, `acos`, `cosh`, `asinh`, `acosh`, and the reductions
+> (`sum`/`mean`/`variance`) — V8 JITs/hardware-accelerates those faster than
+> wasm+copy. **Op-fusion** (`fuseUnaryChain`, 0.2.14) keeps an array resident in
+> wasm across a chain of ops, amortizing the copy — 2.4–3.1× over JS for a 4-op
+> chain. The
 > remaining "parallel" routing is intentional. See
 > `docs/roadmap/WASM_PAIRING_GAP_PLAN.md` and the `bench:elementwise` /
 > `bench:reduction` benchmarks.

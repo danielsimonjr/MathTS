@@ -51,6 +51,8 @@
     "bench:reduction": "node tools/benchmark/wasm/reduction.bench.mjs",
     "bench:elementwise": "node tools/benchmark/wasm/elementwise.bench.mjs",
     "bench:special-array": "npx tsx tools/benchmark/wasm/special-array.bench.mts",
+    "bench:transcendental": "node tools/benchmark/wasm/transcendental.bench.mjs",
+    "bench:fusion": "node tools/benchmark/wasm/fusion.bench.mjs",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",

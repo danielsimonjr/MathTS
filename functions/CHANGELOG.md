@@ -1,5 +1,26 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.14
+
+### Added — WASM acceleration tripled (3-tier gap-fill, effective-wasm 6 → 18)
+
+- **Tier 1 — 11 more transcendentals WASM-accelerated:** `atan, sinh, tanh,
+  atanh, expm1, log1p, log2, log10, sec, csc, cot` over `Float64Array` ≥ 1024 now
+  dispatch to new Rust `simd_*_array` kernels — benchmark-confirmed 1.4–5× over
+  JS incl. the JS↔wasm copy (`npm run bench:transcendental`). Measured losers
+  left on JS (hardware-fast / fast-JS): `sqrt, cbrt, asin, acos, cosh, asinh,
+  acosh`.
+- **Tier 2 — `erfc` WASM-accelerated:** ~5–7× (its JS is a continued-fraction
+  scalar, far costlier than `Math.*`). Verified <1e-12 vs the JS scalar.
+- **Tier 3 — op-fusion:** new `fuseUnaryChain(ops, xs)` keeps an array resident
+  in wasm across a chain of unary ops, paying the JS↔wasm copy **once** instead
+  of per op — 2.4–3.1× over JS for a 4-op chain (`npm run bench:fusion`). Falls
+  back to a sequential JS pass when wasm is unavailable.
+- Requires the Rust wasm rebuilt (`npm run build:wasm:rust`); 19 new
+  `simd_*_array` kernels in `wasm-rust/.../compat/simd_array.rs`. All paths
+  verified correct (`tests/diff-elementwise`, `tests/diff-fusion`); full suite
+  2882 pass.
+
 ## 0.2.13
 
 ### Added — elementwise transcendentals now WASM-accelerated

@@ -21,8 +21,19 @@ import { wasmLoader, type WasmModule } from '../WasmLoader.js';
 /** Element-count threshold above which the WASM kernel beats JS. */
 export const WASM_ELEMENTWISE_THRESHOLD = 1024;
 
-/** Unary ops with a Rust `simd_<op>_array` kernel that is net-faster than JS. */
-export const WASM_ELEMENTWISE_OPS = ['abs', 'sin', 'cos', 'tan', 'exp', 'log'] as const;
+/**
+ * Unary ops with a Rust `simd_<op>_array` kernel that is benchmark-confirmed
+ * net-faster than JS (see tools/benchmark/wasm/{elementwise,transcendental}.bench.mjs).
+ * Excluded after measuring (JS wins): sqrt, cbrt, asin, acos, cosh, asinh, acosh.
+ */
+export const WASM_ELEMENTWISE_OPS = [
+  'abs', 'sin', 'cos', 'tan', 'exp', 'log',
+  // extended transcendentals (Tier 1, all win at every benchmarked size)
+  'atan', 'sinh', 'tanh', 'atanh', 'expm1', 'log1p', 'log2', 'log10', 'sec', 'csc', 'cot',
+  // expensive special with an existing libm kernel (Tier 2, ~5–7× — its JS is a
+  // continued-fraction scalar, far costlier than Math.*)
+  'erfc',
+] as const;
 export type WasmElementwiseOp = (typeof WASM_ELEMENTWISE_OPS)[number];
 
 function getWasm(): WasmModule | null {
@@ -76,6 +87,54 @@ export function elementwiseUnaryDispatch(op: WasmElementwiseOp, xs: Float64Array
     fn(inOff, outOff, n);
     const result = new Float64Array(n);
     result.set(new Float64Array(mem.buffer, outOff, n));
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Op-fusion (Tier 3): apply a *chain* of unary ops with the data resident in
+ * wasm memory the whole time — one copy-in, one copy-out, regardless of chain
+ * length. `fuseUnaryChain([sin, exp])` computes `exp(sin(x))` paying the JS↔wasm
+ * transfer once instead of once per op. Ping-pongs between two scratch buffers
+ * (the simd kernels are out-of-place). Returns null (caller applies the chain in
+ * JS) below threshold, when wasm is unavailable, or any kernel is missing.
+ * Never throws.
+ */
+export function elementwiseChainDispatch(ops: WasmElementwiseOp[], xs: Float64Array): Float64Array | null {
+  const n = xs.length;
+  if (ops.length === 0 || n < WASM_ELEMENTWISE_THRESHOLD) return null;
+  const wasm = getWasm() as unknown as RustModule | null;
+  if (!wasm) return null;
+  const mem = wasm.memory;
+  if (!(mem instanceof WebAssembly.Memory)) return null;
+  const kernels: UnaryArrayFn[] = [];
+  for (const op of ops) {
+    const fn = wasm[`simd_${op}_array`] as UnaryArrayFn | undefined;
+    if (typeof fn !== 'function') return null;
+    kernels.push(fn);
+  }
+
+  try {
+    const need = 2 * n * 8; // two ping-pong buffers
+    if (scratchBase < 0) scratchBase = mem.buffer.byteLength;
+    if (scratchBase + need > mem.buffer.byteLength) {
+      mem.grow(Math.ceil((scratchBase + need - mem.buffer.byteLength) / 65536));
+    }
+    const bufA = scratchBase;
+    const bufB = scratchBase + n * 8;
+    new Float64Array(mem.buffer, bufA, n).set(xs);
+    let cur = bufA;
+    let other = bufB;
+    for (const fn of kernels) {
+      fn(cur, other, n);
+      const t = cur;
+      cur = other;
+      other = t;
+    }
+    const result = new Float64Array(n);
+    result.set(new Float64Array(mem.buffer, cur, n));
     return result;
   } catch {
     return null;

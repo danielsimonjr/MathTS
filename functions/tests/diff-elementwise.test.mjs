@@ -13,6 +13,20 @@ const OPS = [
   ['tan', Math.tan, (i) => (i % 50) * 0.02],
   ['exp', Math.exp, (i) => ((i % 40) - 20) * 0.1],
   ['log', Math.log, (i) => 0.5 + (i % 100) * 0.05],
+  // Tier-1 extended transcendentals (domain-safe generators)
+  ['atan', Math.atan, (i) => -5 + (i % 100) * 0.1],
+  ['sinh', Math.sinh, (i) => -3 + (i % 60) * 0.1],
+  ['tanh', Math.tanh, (i) => -5 + (i % 100) * 0.1],
+  ['atanh', Math.atanh, (i) => -0.99 + (i % 199) * 0.01],
+  ['expm1', Math.expm1, (i) => -2 + (i % 40) * 0.1],
+  ['log1p', Math.log1p, (i) => (i % 100) * 0.05],
+  ['log2', Math.log2, (i) => 0.1 + (i % 100) * 0.1],
+  ['log10', Math.log10, (i) => 0.1 + (i % 100) * 0.1],
+  ['sec', (x) => 1 / Math.cos(x), (i) => -1.4 + (i % 280) * 0.01],
+  ['csc', (x) => 1 / Math.sin(x), (i) => 0.1 + (i % 280) * 0.01],
+  ['cot', (x) => 1 / Math.tan(x), (i) => 0.1 + (i % 130) * 0.01],
+  // Tier-2 special: reference is the package's own erfc scalar (number overload)
+  ['erfc', (x) => fns.erfc(x), (i) => -3 + (i % 120) * 0.05],
 ];
 
 let pass = 0, fail = 0;
