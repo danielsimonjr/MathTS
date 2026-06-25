@@ -112,7 +112,11 @@ export function matrix_lu_decompose(
  * QR decomposition via Householder reflections.
  *
  * `a` is read-only (m*n, row-major) with `m >= n`. Outputs:
- *   - `q_out` (m*m): orthogonal Q
+ *   - `q_out` (m*m): orthogonal factor stored as **Q^T**, i.e. the
+ *     reconstruction is `A = Q^T * R` (NOT `A = Q * R`). This matches the
+ *     matrix-package convention (`WASMBackend.qrDecompositionJS`); callers
+ *     wanting Q itself must transpose `q_out`. See the closing note in the
+ *     body and `assembly/COVERAGE_AUDIT.md` §3a.
  *   - `r_out` (m*n): upper-trapezoidal R (zero below the diagonal)
  *
  * Returns 0 on success.

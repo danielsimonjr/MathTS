@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-wasm",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "MathTS WebAssembly module - high-performance numerical computing",
   "type": "module",
   "main": "build/mathts.js",
@@ -29,7 +29,7 @@
     "build:bindings": "tsc -p tsconfig.bindings.json",
     "build": "npm run asbuild && npm run build:bindings",
     "clean": "rm -rf build/",
-    "test": "node tests/run.js && node tests/svd.test.mjs && node tests/special-numtheory.test.mjs && node tests/polynomial.test.mjs && node tests/signal.test.mjs && node tests/linalg.test.mjs && node tests/curvefit.test.mjs && node tests/optimization.test.mjs && node tests/approx.test.mjs && node tests/tensor.test.mjs",
+    "test": "node tests/run.js && node tests/svd.test.mjs && node tests/special-numtheory.test.mjs && node tests/polynomial.test.mjs && node tests/signal.test.mjs && node tests/linalg.test.mjs && node tests/curvefit.test.mjs && node tests/optimization.test.mjs && node tests/approx.test.mjs && node tests/tensor.test.mjs && npm run test:diff",
     "test:diff": "node tests/diff-special.test.mjs && node tests/diff-decomposition.test.mjs",
     "coverage:matrix": "python -X utf8 tests/audit/coverage_matrix.py",
     "golden:gen": "python -X utf8 tests/golden/generate_goldens.py",

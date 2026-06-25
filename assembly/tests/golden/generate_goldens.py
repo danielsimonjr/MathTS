@@ -40,7 +40,8 @@ def f(x):
 def special_goldens():
     out = {}
 
-    xs_pos = [0.5, 1.0, 2.0, 3.0, 5.0, 10.0, 20.0]
+    # span the series region (<=13), the crossover, and the Hankel asymptotic.
+    xs_pos = [0.5, 1.0, 2.0, 3.0, 5.0, 8.0, 10.0, 12.0, 15.0, 20.0, 30.0]
     out["bessel_j0_f64"] = {"kind": "vec1",
         "cases": [[x, f(mp.besselj(0, x))] for x in [0.0] + xs_pos]}
     out["bessel_j1_f64"] = {"kind": "vec1",
@@ -51,12 +52,13 @@ def special_goldens():
         "cases": [[x, f(mp.bessely(1, x))] for x in xs_pos]}
     out["bessel_jn_f64"] = {"kind": "int_vec1",
         "cases": [[n, x, f(mp.besselj(n, x))]
-                  for n in [2, 3, 5] for x in [1.0, 5.0, 10.0]]}
+                  for n in [2, 3, 5] for x in [1.0, 5.0, 10.0, 15.0]]}
     out["bessel_yn_f64"] = {"kind": "int_vec1",
         "cases": [[n, x, f(mp.bessely(n, x))]
-                  for n in [2, 3, 5] for x in [1.0, 5.0, 10.0]]}
+                  for n in [2, 3, 5] for x in [1.0, 5.0, 10.0, 15.0]]}
 
-    airy_xs = [-5.0, -2.0, -1.0, 0.0, 1.0, 2.0, 5.0]
+    # include the negative/positive asymptotic regions (|x| > 5).
+    airy_xs = [-12.0, -8.0, -5.0, -2.0, -1.0, 0.0, 1.0, 2.0, 5.0, 8.0, 12.0]
     out["airy_ai_f64"] = {"kind": "vec1",
         "cases": [[x, f(mp.airyai(x))] for x in airy_xs]}
     out["airy_bi_f64"] = {"kind": "vec1",
