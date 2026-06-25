@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.1.8
+
+### Changed
+
+- Refreshed the bundled AssemblyScript wasm (`dist/wasm/mathts-as.wasm`) to the
+  fixed `mathts-wasm@0.1.5` build (sha256 `338258aa…`). The previous bundle was
+  built before the special-function accuracy fixes. No behavior change for the
+  matrix package — it exposes only linear-algebra operations (always correct),
+  not the Bessel/Airy kernels that were fixed — this just keeps the embedded
+  binary in sync. Tests: 777 passed.
+
 ## 0.1.7
 
 ### Patch Changes
