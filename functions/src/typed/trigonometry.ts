@@ -15,6 +15,7 @@
 import { mathTyped, Complex, BigNumber } from '@danielsimonjr/mathts-core';
 
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -37,6 +38,8 @@ export const sin = mathTyped('sin', {
 
   // Parallel Float64Array sin
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('sin', a);
+    if (wasm) return wasm;
     const result = await computePool.sin(a);
     return result.result;
   },
@@ -52,6 +55,8 @@ export const cos = mathTyped('cos', {
 
   // Parallel Float64Array cos
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('cos', a);
+    if (wasm) return wasm;
     const result = await computePool.cos(a);
     return result.result;
   },
@@ -67,6 +72,8 @@ export const tan = mathTyped('tan', {
 
   // Parallel Float64Array tan
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('tan', a);
+    if (wasm) return wasm;
     const result = await computePool.tan(a);
     return result.result;
   },

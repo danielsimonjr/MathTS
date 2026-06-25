@@ -8,8 +8,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 | Routing | Count |
 | --- | --: |
-| WASM (incl. wasm+parallel) | 21 |
-| Parallel only (worker pool) | 69 |
+| WASM (incl. wasm+parallel) | 27 |
+| Parallel only (worker pool) | 63 |
 | JS-only | 128 |
 | **Total** | **218** |
 
@@ -17,6 +17,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 | Function | Routing | Bridge dispatch | Module |
 | --- | --- | --- | --- |
+| `abs` | wasm+parallel | `elementwiseUnaryDispatch` | arithmetic |
 | `airyAi` | wasm | `airyAiDispatch` | special |
 | `airyBi` | wasm | `airyBiDispatch` | special |
 | `besselJ` | wasm | `besselJDispatch` | special |
@@ -29,21 +30,25 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `carlsonRD` | wasm | `carlsonRDDispatch` | special |
 | `carlsonRF` | wasm | `carlsonRFDispatch` | special |
 | `carlsonRJ` | wasm | `carlsonRJDispatch` | special |
+| `cos` | wasm+parallel | `elementwiseUnaryDispatch` | trigonometry |
 | `ellipticE` | wasm | `ellipticEDispatch` | special |
 | `ellipticEIncomplete` | wasm | `ellipticEIncompleteDispatch` | special |
 | `ellipticF` | wasm | `ellipticFIncompleteDispatch` | special |
 | `ellipticK` | wasm | `ellipticKDispatch` | special |
 | `ellipticPi` | wasm | `ellipticPiIncompleteDispatch` | special |
+| `exp` | wasm+parallel | `elementwiseUnaryDispatch` | arithmetic |
 | `lgamma` | wasm | `lgammaDispatch` | special |
+| `log` | wasm+parallel | `elementwiseUnaryDispatch` | arithmetic |
 | `noncentralChi2PDF` | wasm | `lgammaDispatch` | distributions |
 | `parallelStatMedian` | wasm | `sortF64Dispatch` | statistics |
 | `parallelStatQuantile` | wasm | `sortF64Dispatch` | statistics |
+| `sin` | wasm+parallel | `elementwiseUnaryDispatch` | trigonometry |
+| `tan` | wasm+parallel | `elementwiseUnaryDispatch` | trigonometry |
 
 ## Parallel-only functions (worker pool, not WASM)
 
 | Function | Module |
 | --- | --- |
-| `abs` | arithmetic |
 | `acos` | trigonometry |
 | `acosh` | trigonometry |
 | `add` | arithmetic |
@@ -57,19 +62,16 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `bitXor` | bitwise |
 | `cbrt` | arithmetic |
 | `ceil` | arithmetic |
-| `cos` | trigonometry |
 | `cosh` | arithmetic |
 | `cot` | trigonometry |
 | `csc` | trigonometry |
 | `cube` | arithmetic |
 | `divide` | arithmetic |
 | `dot` | arithmetic |
-| `exp` | arithmetic |
 | `expm1` | arithmetic |
 | `fix` | arithmetic |
 | `floor` | arithmetic |
 | `leftShift` | bitwise |
-| `log` | arithmetic |
 | `log10` | arithmetic |
 | `log1p` | arithmetic |
 | `log2` | arithmetic |
@@ -101,14 +103,12 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `round` | arithmetic |
 | `sec` | trigonometry |
 | `sign` | arithmetic |
-| `sin` | trigonometry |
 | `sinh` | arithmetic |
 | `sqrt` | arithmetic |
 | `square` | arithmetic |
 | `std` | arithmetic |
 | `subtract` | arithmetic |
 | `sum` | arithmetic |
-| `tan` | trigonometry |
 | `tanh` | arithmetic |
 | `unaryMinus` | arithmetic |
 | `variance` | arithmetic |
@@ -117,7 +117,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 
 | Module | WASM | Parallel | JS-only |
 | --- | --: | --: | --: |
-| arithmetic | 0 | 32 | 13 |
+| arithmetic | 3 | 29 | 13 |
 | bitwise | 0 | 7 | 0 |
 | combinatorics | 0 | 0 | 21 |
 | complex | 0 | 0 | 4 |
@@ -131,7 +131,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | special | 18 | 0 | 20 |
 | statistics | 2 | 13 | 2 |
 | string | 0 | 0 | 5 |
-| trigonometry | 0 | 12 | 7 |
+| trigonometry | 3 | 9 | 7 |
 | unit | 0 | 0 | 2 |
 
 > Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here). Per-op WASM for elementwise/reduction kernels was benchmarked and is *slower* than the JS/parallel paths once the JS→wasm copy is included (see docs/roadmap/WASM_PAIRING_GAP_PLAN.md); parallel-only routing is therefore intentional, not a gap.

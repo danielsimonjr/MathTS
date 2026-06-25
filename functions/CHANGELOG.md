@@ -1,5 +1,27 @@
 # @danielsimonjr/mathts-functions
 
+## 0.2.13
+
+### Added — elementwise transcendentals now WASM-accelerated
+
+`abs`, `sin`, `cos`, `tan`, `exp`, `log` over `Float64Array` (length ≥ 1024)
+now dispatch to the Rust `simd_*_array` kernels instead of plain JS. Benchmarked
+net-faster than JS **including** the JS↔wasm copy (`npm run bench:elementwise`):
+abs 2.7–5.1×, sin 1.6–2.4×, cos 1.6–2.2×, exp 1.4–2.1×, log 1.5–2.2×, tan 1.35–1.9×.
+(`sqrt` excluded — hardware `Math.sqrt` beats wasm+copy; reductions excluded —
+JS JITs `sum`/`mean` faster than wasm+copy.) Correctness verified <1e-12 vs JS
+(`tests/diff-elementwise.test.mjs`).
+
+These ops previously ran in plain JS: their `ComputePool` thresholds are
+`'never'`, so the "parallel" overloads never actually parallelized.
+
+Implementation note: the Rust wasm exports only `memory` (no allocator), and
+the loader's `allocateFloat64Array` is AssemblyScript-only (`__new`), so the new
+`elementwise/wasm-bridge.ts` manages its own JS-side scratch region over
+`module.memory`. (The special-function bridge gracefully falls back to JS for
+the Rust backend for the same allocator reason — a future enhancement, not a
+defect.)
+
 ## 0.2.12
 
 ### Added — WASM acceleration now bundled and live

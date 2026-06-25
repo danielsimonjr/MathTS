@@ -131,7 +131,7 @@ The codebase is organized into the following modules:
 - **functions/typed**: 28 files
 - **functions/unit**: 2 files
 - **functions/utils**: 38 files
-- **functions/wasm**: 9 files
+- **functions/wasm**: 10 files
 - **expression/compiler**: 2 files
 - **expression/error**: 3 files
 - **expression/evaluator**: 2 files
@@ -174,7 +174,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core` | 44 | 6 |
 | `@danielsimonjr/mathts-tensor` (`tensor/`) | `@danielsimonjr/mathts-matrix` | 21 | 0 |
 | `@danielsimonjr/mathts-autograd` (`autograd/`) | `@danielsimonjr/mathts-tensor` | 5 | 0 |
-| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 370 | 417 |
+| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 371 | 417 |
 | `@danielsimonjr/mathts-expression` (`expression/`) | (none) | 47 | 381 |
 | `@danielsimonjr/mathts-parser` (`parser/`) | `@danielsimonjr/mathts-expression` | 1 | 0 |
 | `@danielsimonjr/mathts-units` (`units/`) | `@danielsimonjr/mathts-core` | 1 | 0 |
@@ -6259,6 +6259,11 @@ graph LR
 
 ### `functions/src/typed/arithmetic.ts` - Typed Arithmetic Functions (Parallel-First)
 
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch` | Import |
+
 **Exports:**
 - Functions: `matmul`, `transpose`, `matvec`, `outer`, `initializePool`, `terminatePool`, `shouldParallelize`, `getComputePool`
 - Constants: `add`, `subtract`, `multiply`, `divide`, `unaryMinus`, `unaryPlus`, `abs`, `sign`, `pow`, `sqrt`, `square`, `cube`, `cbrt`, `nthRoot`, `exp`, `log`, `log10`, `log2`, `log1p`, `expm1`, `round`, `floor`, `ceil`, `fix`, `mod`, `gcd`, `lcm`, `xgcd`, `norm`, `sinh`, `cosh`, `tanh`, `equal`, `smaller`, `larger`, `smallerEq`, `largerEq`, `compare`, `min`, `max`, `sum`, `mean`, `variance`, `std`, `dot`, `typedArithmetic`
@@ -6576,6 +6581,11 @@ graph LR
 ---
 
 ### `functions/src/typed/trigonometry.ts` - Typed Trigonometric Functions (Parallel-First)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch` | Import |
 
 **Exports:**
 - Constants: `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `atan2`, `acsc`, `asec`, `acot`, `asinh`, `acosh`, `atanh`, `toRadians`, `toDegrees`, `hypot`, `typedTrigonometry`
@@ -7106,6 +7116,20 @@ graph LR
 **Exports:**
 - Functions: `runBinaryBitwiseWasm`, `runUnaryBitwiseWasm`, `resetBitwiseWasm`
 - Constants: `WASM_BITWISE_THRESHOLD`
+
+---
+
+### `functions/src/wasm/elementwise/wasm-bridge.ts` - WASM bridge for unary elementwise transcendental array ops.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+
+**Exports:**
+- Types: `WasmElementwiseOp`
+- Functions: `elementwiseUnaryDispatch`
+- Constants: `WASM_ELEMENTWISE_THRESHOLD`, `WASM_ELEMENTWISE_OPS`
 
 ---
 
@@ -8519,7 +8543,7 @@ graph LR
 | `functions/src/plain/number/index` | 9 files | 52 files |
 | `functions/src/utils/array` | 6 files | 49 files |
 | `functions/src/core/config` | 0 files | 52 files |
-| `functions/src/wasm/WasmLoader` | 2 files | 48 files |
+| `functions/src/wasm/WasmLoader` | 2 files | 49 files |
 | `functions/src/utils/number` | 1 file | 48 files |
 | `functions/src/utils/collection` | 4 files | 37 files |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files | 27 files |
@@ -8945,183 +8969,184 @@ graph TD
 
     subgraph Functions/wasm
         N246[wasm-bridge]
-        N247[integrity]
-        N248[wasm-bridge]
+        N247[wasm-bridge]
+        N248[integrity]
         N249[wasm-bridge]
-        N250[resolve]
-        N251[wasm-bridge]
+        N250[wasm-bridge]
+        N251[resolve]
         N252[wasm-bridge]
         N253[wasm-bridge]
-        N254[WasmLoader]
+        N254[wasm-bridge]
+        N255[WasmLoader]
     end
 
     subgraph Expression/compiler
-        N255[compile]
-        N256[index]
+        N256[compile]
+        N257[index]
     end
 
     subgraph Expression/error
-        N257[DimensionError]
-        N258[IndexError]
-        N259[MathjsError]
+        N258[DimensionError]
+        N259[IndexError]
+        N260[MathjsError]
     end
 
     subgraph Expression/evaluator
-        N260[evaluate]
-        N261[index]
+        N261[evaluate]
+        N262[index]
     end
 
     subgraph Expression/function
-        N262[parser]
+        N263[parser]
     end
 
     subgraph Expression
-        N263[Help]
-        N264[index]
-        N265[keywords]
-        N266[operators]
-        N267[parse]
-        N268[Parser]
-        N269[types]
+        N264[Help]
+        N265[index]
+        N266[keywords]
+        N267[operators]
+        N268[parse]
+        N269[Parser]
+        N270[types]
     end
 
     subgraph Expression/node
-        N270[AccessorNode]
-        N271[ArrayNode]
-        N272[AssignmentNode]
-        N273[BlockNode]
-        N274[ConditionalNode]
-        N275[ConstantNode]
-        N276[FunctionAssignmentNode]
-        N277[FunctionNode]
-        N278[IndexNode]
-        N279[Node]
-        N280[...8 more]
+        N271[AccessorNode]
+        N272[ArrayNode]
+        N273[AssignmentNode]
+        N274[BlockNode]
+        N275[ConditionalNode]
+        N276[ConstantNode]
+        N277[FunctionAssignmentNode]
+        N278[FunctionNode]
+        N279[IndexNode]
+        N280[Node]
+        N281[...8 more]
     end
 
     subgraph Expression/transform
-        N281[errorTransform]
+        N282[errorTransform]
     end
 
     subgraph Expression/utils
-        N282[array]
-        N283[formatter]
-        N284[collection]
-        N285[customs]
-        N286[factory]
-        N287[is]
-        N288[latex]
-        N289[map]
-        N290[number]
-        N291[object]
-        N292[...3 more]
+        N283[array]
+        N284[formatter]
+        N285[collection]
+        N286[customs]
+        N287[factory]
+        N288[is]
+        N289[latex]
+        N290[map]
+        N291[number]
+        N292[object]
+        N293[...3 more]
     end
 
     subgraph Parser
-        N293[index]
-    end
-
-    subgraph Units
         N294[index]
     end
 
-    subgraph Numbers
+    subgraph Units
         N295[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N296[index]
     end
 
-    subgraph Evaluator
+    subgraph Ast
         N297[index]
     end
 
-    subgraph Linalg
+    subgraph Evaluator
         N298[index]
     end
 
-    subgraph Arithmetic
+    subgraph Linalg
         N299[index]
     end
 
-    subgraph Trigonometry
+    subgraph Arithmetic
         N300[index]
     end
 
-    subgraph Statistics
+    subgraph Trigonometry
         N301[index]
     end
 
-    subgraph Signal
+    subgraph Statistics
         N302[index]
     end
 
+    subgraph Signal
+        N303[index]
+    end
+
     subgraph Parallel
-        N303[ComputePool]
-        N304[index]
+        N304[ComputePool]
+        N305[index]
     end
 
     subgraph Parallel/operations
-        N305[elementwise]
-        N306[index]
-        N307[map]
-        N308[matmul]
-        N309[reduce]
+        N306[elementwise]
+        N307[index]
+        N308[map]
+        N309[matmul]
+        N310[reduce]
     end
 
     subgraph Parallel/ops
-        N310[bitwise]
+        N311[bitwise]
     end
 
     subgraph Parallel/strategies
-        N311[chunk]
-        N312[index]
-        N313[threshold]
+        N312[chunk]
+        N313[index]
+        N314[threshold]
     end
 
     subgraph Workbook
-        N314[executor]
-        N315[graph]
-        N316[index]
-        N317[parser]
-        N318[types]
+        N315[executor]
+        N316[graph]
+        N317[index]
+        N318[parser]
+        N319[types]
     end
 
     subgraph Assembly/algebra
-        N319[decomposition]
+        N320[decomposition]
     end
 
     subgraph Assembly
-        N320[index]
-        N321[poly]
-        N322[signal]
-        N323[sort]
-        N324[special]
-        N325[tridiag]
+        N321[index]
+        N322[poly]
+        N323[signal]
+        N324[sort]
+        N325[special]
+        N326[tridiag]
     end
 
     subgraph Assembly/ops
-        N326[approx]
-        N327[array]
-        N328[bitwise]
-        N329[complex-array]
-        N330[complex-ops]
-        N331[curvefit]
-        N332[linalg]
-        N333[matrix]
-        N334[number-theory]
-        N335[optimization]
-        N336[...6 more]
+        N327[approx]
+        N328[array]
+        N329[bitwise]
+        N330[complex-array]
+        N331[complex-ops]
+        N332[curvefit]
+        N333[linalg]
+        N334[matrix]
+        N335[number-theory]
+        N336[optimization]
+        N337[...6 more]
     end
 
     subgraph Assembly/types
-        N337[complex]
+        N338[complex]
     end
 
     subgraph Compat
-        N338[index]
-        N339[shims]
+        N339[index]
+        N340[shims]
     end
 
     N2 --> N1
@@ -9208,14 +9233,14 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 555 |
+| Total TypeScript Files | 556 |
 | Total Modules | 69 |
-| Total Lines of Code | 148610 |
-| Total Exports | 3464 |
+| Total Lines of Code | 148708 |
+| Total Exports | 3467 |
 | Total Re-exports | 1057 |
 | Total Classes | 51 |
 | Total Interfaces | 315 |
-| Total Functions | 1282 |
+| Total Functions | 1283 |
 | Total Type Guards | 129 |
 | Total Enums | 0 |
 | Type-only Imports | 357 |

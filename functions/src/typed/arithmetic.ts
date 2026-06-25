@@ -15,6 +15,7 @@
 import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 
 import { computePool, ComputePool } from '@danielsimonjr/mathts-parallel';
+import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -259,6 +260,8 @@ export const abs = mathTyped('abs', {
 
   // Parallel array abs
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('abs', a);
+    if (wasm) return wasm;
     const result = await computePool.abs(a);
     return result.result;
   },
@@ -404,6 +407,8 @@ export const exp = mathTyped('exp', {
 
   // Parallel array exp
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('exp', a);
+    if (wasm) return wasm;
     const result = await computePool.exp(a);
     return result.result;
   },
@@ -420,6 +425,8 @@ export const log = mathTyped('log', {
 
   // Parallel array log
   Float64Array: async (a: Float64Array): Promise<Float64Array> => {
+    const wasm = elementwiseUnaryDispatch('log', a);
+    if (wasm) return wasm;
     const result = await computePool.log(a);
     return result.result;
   },

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-06-25",
-    "totalFiles": 555,
+    "totalFiles": 556,
     "totalModules": 69,
-    "totalExports": 3464
+    "totalExports": 3467
   },
   "entryPoints": [
     {
@@ -18239,7 +18239,14 @@
         "description": "Typed Arithmetic Functions (Parallel-First)",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../wasm/elementwise/wasm-bridge.js",
+            "imports": [
+              "elementwiseUnaryDispatch"
+            ]
+          }
+        ],
         "exports": [
           "add",
           "subtract",
@@ -20007,7 +20014,14 @@
         "description": "Typed Trigonometric Functions (Parallel-First)",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../wasm/elementwise/wasm-bridge.js",
+            "imports": [
+              "elementwiseUnaryDispatch"
+            ]
+          }
+        ],
         "exports": [
           "sin",
           "cos",
@@ -21509,6 +21523,32 @@
         ],
         "constants": [
           "WASM_BITWISE_THRESHOLD"
+        ]
+      },
+      "functions/src/wasm/elementwise/wasm-bridge.ts": {
+        "description": "WASM bridge for unary elementwise transcendental array ops.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../WasmLoader.js",
+            "imports": [
+              "wasmLoader",
+              "WasmModule"
+            ]
+          }
+        ],
+        "exports": [
+          "WASM_ELEMENTWISE_THRESHOLD",
+          "WASM_ELEMENTWISE_OPS",
+          "elementwiseUnaryDispatch"
+        ],
+        "functions": [
+          "elementwiseUnaryDispatch"
+        ],
+        "constants": [
+          "WASM_ELEMENTWISE_THRESHOLD",
+          "WASM_ELEMENTWISE_OPS"
         ]
       },
       "functions/src/wasm/integrity.ts": {
@@ -28298,6 +28338,7 @@
         "name": "Functions/wasm",
         "files": [
           "functions/src/wasm/bitwise/wasm-bridge.ts",
+          "functions/src/wasm/elementwise/wasm-bridge.ts",
           "functions/src/wasm/integrity.ts",
           "functions/src/wasm/interpolation/wasm-bridge.ts",
           "functions/src/wasm/poly/wasm-bridge.ts",
@@ -28550,21 +28591,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 555,
+    "totalTypeScriptFiles": 556,
     "totalModules": 69,
-    "totalLinesOfCode": 148610,
-    "totalExports": 3464,
+    "totalLinesOfCode": 148708,
+    "totalExports": 3467,
     "totalClasses": 51,
     "totalInterfaces": 315,
-    "totalFunctions": 1282,
+    "totalFunctions": 1283,
     "totalTypeGuards": 129,
     "totalEnums": 0,
-    "totalConstants": 1115,
+    "totalConstants": 1117,
     "totalReExports": 1057,
     "totalTypeOnlyImports": 357,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 2,
     "unusedFilesCount": 0,
-    "unusedExportsCount": 473
+    "unusedExportsCount": 476
   }
 }

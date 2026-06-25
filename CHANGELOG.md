@@ -31,16 +31,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed (2026-06-25)
 
 - **WASM↔function pairing detector** now classifies routing as `wasm` /
-  `parallel` / `js-only` (not just `*Dispatch` vs JS): **21 wasm · 69 parallel ·
-  128 js-only** of 218 typed functions. The 69 "parallel" (arithmetic/trig/stats
-  array overloads via the worker pool) were previously miscounted as "JS-only".
-- **Decision: per-op WASM for elementwise/reduction kernels is not wired** —
-  the gate benchmark (`tools/benchmark/wasm/reduction.bench.mjs`,
-  `npm run bench:reduction`) shows the Rust reduction kernels run at 0.4–0.7× of
-  plain JS once the JS→wasm copy-in is included (transfer dominates an O(n)
-  reduction). Wiring would regress; the existing parallel/JS routing is
-  intentional. Op-fusion (data resident in WASM across chained ops) is the real
-  lever and remains open. See `docs/roadmap/WASM_PAIRING_GAP_PLAN.md`.
+  `parallel` / `js-only` (not just `*Dispatch` vs JS): **27 wasm · 63 parallel ·
+  128 js-only** of 218 typed functions. The "parallel" set (worker pool) was
+  previously miscounted as "JS-only".
+- **Elementwise transcendentals WIRED to WASM** (`mathts-functions` 0.2.13):
+  `abs/sin/cos/tan/exp/log` over `Float64Array` ≥ 1024 now dispatch to the Rust
+  `simd_*_array` kernels — benchmarked net-faster than JS *including* the
+  JS↔wasm copy (`npm run bench:elementwise`): 1.35–5.1×. (An earlier note here
+  claimed elementwise WASM "would regress" — that was inferred from the
+  reduction result; **measuring** elementwise overturned it: `Math.sin` etc. are
+  expensive enough that libm-in-wasm + 2 copies still wins. `sqrt` and the
+  reductions genuinely lose and stay JS.)
+- **Decision: reduction kernels (`sum`/`mean`/`variance`) NOT wired** —
+  `npm run bench:reduction` shows 0.4–0.7× of plain JS once the copy-in is
+  included (V8 JITs the trivial `+=` loop optimally). Wiring would regress.
+  Op-fusion (data resident in WASM across chained ops) is the real lever for
+  the rest and remains open. See `docs/roadmap/WASM_PAIRING_GAP_PLAN.md`.
 - **`tools/create-dependency-graph`**: now emits the WASM accelerator↔function
   pairing as a generated artifact (`docs/Architecture/wasm-pairing.md` +
   `wasm-pairing.json`) — scans `functions/src/typed/` `mathTyped` exports for

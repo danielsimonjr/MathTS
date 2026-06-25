@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 473
+- **Potentially unused exports**: 476
 
 ## Potentially Unused Files
 
@@ -541,6 +541,12 @@ These exports are not imported by any other file in the codebase:
 ### `functions/src/wasm/bitwise/wasm-bridge.ts`
 
 - `resetBitwiseWasm` (function)
+
+### `functions/src/wasm/elementwise/wasm-bridge.ts`
+
+- `WasmElementwiseOp` (type)
+- `WASM_ELEMENTWISE_THRESHOLD` (constant)
+- `WASM_ELEMENTWISE_OPS` (constant)
 
 ### `functions/src/wasm/integrity.ts`
 

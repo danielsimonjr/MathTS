@@ -15,18 +15,31 @@ Executed under dev-workflow + honest-claude. Outcome:
   `*Dispatch`.
 - **T1 (statistics reductions) — NOT WIRED (would regress).** The reduction
   WASM bridge already exists (`functions/src/wasm/statistics/basic.ts` + Rust
-  kernels) but is dormant; stats route to `computePool`. The decision-gate
-  benchmark (`tools/benchmark/wasm/reduction.bench.mjs`) shows that **with the
-  realistic JS→wasm copy-in included, the Rust reduction kernels are 0.4–0.7×
-  the speed of plain JS** (correctness exact). Copy-in is O(n) and the reduction
-  is O(n), so transfer dominates; V8's JIT'd JS loop wins. Wiring it would make
-  stats slower → not wired, per the "don't wire a path that loses" gate.
-- **T2 / T3 (arithmetic / trig elementwise) — NOT WIRED.** Strictly worse than
-  T1: elementwise returns an array, so it pays copy-**in *and* out** (2×
-  transfer) vs the reduction's single copy that already loses. Not wired.
-- **The real lever is op-fusion** (keep data resident in WASM memory across a
-  chain of ops, amortizing one copy over many), not per-op dispatch — see §5.
-  That is a larger design and remains open.
+  kernels) but is dormant; stats route to `computePool` (threshold `'never'`, so
+  effectively synchronous JS). Decision-gate benchmark
+  (`tools/benchmark/wasm/reduction.bench.mjs`): **with the realistic JS→wasm
+  copy-in, the Rust reduction kernels are 0.4–0.7× the speed of plain JS**
+  (correctness exact). Copy is O(n), reduction is O(n), so transfer dominates and
+  V8's JIT'd `+=` loop wins. Not wired, per "don't wire a path that loses".
+- **T3 (trig/arithmetic elementwise transcendentals) — WIRED (✓ 0.2.13).**
+  *Correction:* an earlier draft of this plan declared T2/T3 "not wired,
+  strictly worse" — that was **inferred** from T1, not measured. Measuring
+  (`tools/benchmark/wasm/elementwise.bench.mjs`) overturned it:
+  `abs/sin/cos/tan/exp/log` over `Float64Array` ≥ 1024 are **1.35–5.1× faster**
+  than JS *including* copy-in **and** copy-out, because `Math.sin` etc. are
+  expensive enough that libm-in-wasm + 2 copies still wins. Wired via
+  `functions/src/wasm/elementwise/wasm-bridge.ts` (Rust `simd_*_array`,
+  self-managed scratch since the Rust module exports only `memory`).
+  `sqrt` excluded (hardware `Math.sqrt` wins, 0.5–0.66×). Verified <1e-12 vs JS.
+- **T2 (binary arithmetic add/sub/mul/div) — NOT WIRED (no kernel).** The Rust
+  wasm has no binary elementwise array kernel (only unary `simd_*_array`);
+  wiring would require new kernels. Deferred to a kernel-authoring task; low
+  priority (binary ops are cheap — like reductions, copy would likely dominate).
+- **op-fusion** (data resident in WASM across chained ops) remains the lever for
+  the cheap-op cases (reductions, binary arithmetic) — see §5, still open.
+
+> Lesson (rules-for-life #4): never conclude a perf decision by inference —
+> measure each case. The reduction result did NOT generalize to transcendentals.
 
 The task breakdown below is retained as the record of the investigation.
 

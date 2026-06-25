@@ -28,15 +28,19 @@ WASM acceleration is **selective and threshold-gated**, not universal:
 | Routing | Count |
 |---|--:|
 | Total public `mathTyped` functions (`functions/src/typed/`) | **218** |
-| WASM (route to a `*Dispatch`) | **21** |
-| Parallel only (worker pool via `computePool`) | **69** |
+| WASM (route to a `*Dispatch`) | **27** |
+| Parallel only (worker pool via `computePool`) | **63** |
 | JS-only | **128** |
 
-> The 69 "parallel" functions (arithmetic/trig/statistics array overloads) are
-> accelerated via the worker pool, not WASM. Per-op WASM for those was
-> benchmarked and is **slower** than the JS/parallel path once the JS→wasm copy
-> is included (`tools/benchmark/wasm/reduction.bench.mjs`); the parallel routing
-> is intentional. See `docs/roadmap/WASM_PAIRING_GAP_PLAN.md`.
+> Of the 27 WASM functions: 18 special functions, the elementwise
+> transcendentals `abs/sin/cos/tan/exp/log` (wired 0.2.13 — benchmarked
+> 1.35–5.1× over JS incl. copy), plus `noncentralChi2PDF` /
+> `parallelStatMedian` / `parallelStatQuantile`. NOT wired (benchmarked, JS
+> wins once the JS↔wasm copy is included): `sqrt` and the reductions
+> (`sum`/`mean`/`variance`) — V8 JITs those faster than wasm+copy. The
+> remaining "parallel" routing is intentional. See
+> `docs/roadmap/WASM_PAIRING_GAP_PLAN.md` and the `bench:elementwise` /
+> `bench:reduction` benchmarks.
 
 ### The 21 WASM-accelerated typed functions
 
