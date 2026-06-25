@@ -2,11 +2,13 @@
   "generated": "2026-06-25",
   "total": 218,
   "acceleratedCount": 21,
-  "jsOnlyCount": 197,
+  "parallelOnlyCount": 69,
+  "jsOnlyCount": 128,
   "accelerated": [
     {
       "name": "airyAi",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "airyAiDispatch"
       ]
@@ -14,6 +16,7 @@
     {
       "name": "airyBi",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "airyBiDispatch"
       ]
@@ -21,6 +24,7 @@
     {
       "name": "besselJ",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "besselJDispatch"
       ]
@@ -28,6 +32,7 @@
     {
       "name": "besselJ0",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "besselJ0Dispatch"
       ]
@@ -35,6 +40,7 @@
     {
       "name": "besselJ1",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "besselJ1Dispatch"
       ]
@@ -42,6 +48,7 @@
     {
       "name": "besselY",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "besselYDispatch"
       ]
@@ -49,6 +56,7 @@
     {
       "name": "besselY0",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "besselY0Dispatch"
       ]
@@ -56,6 +64,7 @@
     {
       "name": "besselY1",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "besselY1Dispatch"
       ]
@@ -63,6 +72,7 @@
     {
       "name": "carlsonRC",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "carlsonRCDispatch"
       ]
@@ -70,6 +80,7 @@
     {
       "name": "carlsonRD",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "carlsonRDDispatch"
       ]
@@ -77,6 +88,7 @@
     {
       "name": "carlsonRF",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "carlsonRFDispatch"
       ]
@@ -84,6 +96,7 @@
     {
       "name": "carlsonRJ",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "carlsonRJDispatch"
       ]
@@ -91,6 +104,7 @@
     {
       "name": "ellipticE",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "ellipticEDispatch"
       ]
@@ -98,6 +112,7 @@
     {
       "name": "ellipticEIncomplete",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "ellipticEIncompleteDispatch"
       ]
@@ -105,6 +120,7 @@
     {
       "name": "ellipticF",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "ellipticFIncompleteDispatch"
       ]
@@ -112,6 +128,7 @@
     {
       "name": "ellipticK",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "ellipticKDispatch"
       ]
@@ -119,6 +136,7 @@
     {
       "name": "ellipticPi",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "ellipticPiIncompleteDispatch"
       ]
@@ -126,6 +144,7 @@
     {
       "name": "lgamma",
       "file": "special.ts",
+      "routing": "wasm",
       "dispatch": [
         "lgammaDispatch"
       ]
@@ -133,6 +152,7 @@
     {
       "name": "noncentralChi2PDF",
       "file": "distributions.ts",
+      "routing": "wasm",
       "dispatch": [
         "lgammaDispatch"
       ]
@@ -140,6 +160,7 @@
     {
       "name": "parallelStatMedian",
       "file": "statistics.ts",
+      "routing": "wasm",
       "dispatch": [
         "sortF64Dispatch"
       ]
@@ -147,26 +168,435 @@
     {
       "name": "parallelStatQuantile",
       "file": "statistics.ts",
+      "routing": "wasm",
       "dispatch": [
         "sortF64Dispatch"
       ]
     }
   ],
+  "parallelOnly": [
+    {
+      "name": "abs",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "acos",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "acosh",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "add",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "asin",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "asinh",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "atan",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "atanh",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "bitAnd",
+      "file": "bitwise.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "bitNot",
+      "file": "bitwise.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "bitOr",
+      "file": "bitwise.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "bitXor",
+      "file": "bitwise.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "cbrt",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "ceil",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "cos",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "cosh",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "cot",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "csc",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "cube",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "divide",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "dot",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "exp",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "expm1",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "fix",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "floor",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "leftShift",
+      "file": "bitwise.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "log",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "log10",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "log1p",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "log2",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "max",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "mean",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "min",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "multiply",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "norm",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelConv",
+      "file": "signal.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelFFT",
+      "file": "signal.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelFFTMagnitude",
+      "file": "signal.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelFFTPower",
+      "file": "signal.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelIFFT",
+      "file": "signal.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatCorr",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatDistance",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatHistogram",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatMAD",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatMax",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatMean",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatMin",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatMinMax",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatNorm",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatProd",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatStd",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatSum",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "parallelStatVariance",
+      "file": "statistics.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "rightArithShift",
+      "file": "bitwise.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "rightLogShift",
+      "file": "bitwise.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "round",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "sec",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "sign",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "sin",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "sinh",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "sqrt",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "square",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "std",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "subtract",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "sum",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "tan",
+      "file": "trigonometry.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "tanh",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "unaryMinus",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    },
+    {
+      "name": "variance",
+      "file": "arithmetic.ts",
+      "routing": "parallel",
+      "dispatch": []
+    }
+  ],
   "jsOnly": [
-    "abs",
-    "acos",
-    "acosh",
     "acot",
     "acsc",
-    "add",
     "and",
     "arg",
     "asec",
-    "asin",
-    "asinh",
-    "atan",
     "atan2",
-    "atanh",
     "bernoulli",
     "bernoulliPMF",
     "besselI",
@@ -176,13 +606,7 @@
     "betainc",
     "bin",
     "binomialPMF",
-    "bitAnd",
-    "bitNot",
-    "bitOr",
-    "bitXor",
     "carmichaelLambda",
-    "cbrt",
-    "ceil",
     "chebyshevT",
     "chineseRemainder",
     "combinations",
@@ -193,18 +617,11 @@
     "compareUnits",
     "cond",
     "conj",
-    "cos",
     "cosIntegral",
-    "cosh",
-    "cot",
-    "csc",
-    "cube",
     "deepEqual",
     "digamma",
-    "divide",
     "divisorSigma",
     "divisors",
-    "dot",
     "doubleFactorial",
     "entropy",
     "equal",
@@ -213,15 +630,11 @@
     "erfc",
     "erfi",
     "eulerPhi",
-    "exp",
     "expIntegralEi",
-    "expm1",
     "exponentialCDF",
     "exponentialPDF",
     "fallingFactorial",
     "fibonacci",
-    "fix",
-    "floor",
     "format",
     "fresnelC",
     "fresnelS",
@@ -243,12 +656,7 @@
     "larger",
     "largerEq",
     "lcm",
-    "leftShift",
     "legendreP",
-    "log",
-    "log10",
-    "log1p",
-    "log2",
     "logIntegral",
     "lowRankApprox",
     "lucas",
@@ -256,15 +664,10 @@
     "matrixExpm",
     "matrixLogm",
     "matrixSqrtm",
-    "max",
-    "mean",
-    "min",
     "mod",
     "moebiusMu",
     "multinomial",
-    "multiply",
     "nextPrime",
-    "norm",
     "norm2",
     "normFro",
     "normalCDF",
@@ -275,26 +678,8 @@
     "oct",
     "or",
     "parallelAutoCorr",
-    "parallelConv",
-    "parallelFFT",
-    "parallelFFTMagnitude",
-    "parallelFFTPower",
-    "parallelIFFT",
-    "parallelStatCorr",
     "parallelStatCumsum",
-    "parallelStatDistance",
-    "parallelStatHistogram",
-    "parallelStatMAD",
-    "parallelStatMax",
-    "parallelStatMean",
-    "parallelStatMin",
-    "parallelStatMinMax",
     "parallelStatMode",
-    "parallelStatNorm",
-    "parallelStatProd",
-    "parallelStatStd",
-    "parallelStatSum",
-    "parallelStatVariance",
     "parallelXCorr",
     "partitions",
     "permutations",
@@ -309,11 +694,7 @@
     "random",
     "randomInt",
     "re",
-    "rightArithShift",
-    "rightLogShift",
     "risingFactorial",
-    "round",
-    "sec",
     "setCartesian",
     "setDifference",
     "setDistinct",
@@ -324,96 +705,100 @@
     "setSize",
     "setSymDifference",
     "setUnion",
-    "sign",
-    "sin",
     "sinIntegral",
     "singularValues",
-    "sinh",
     "smaller",
     "smallerEq",
-    "sqrt",
-    "square",
-    "std",
     "studentTPDF",
     "subfactorial",
-    "subtract",
-    "sum",
-    "tan",
-    "tanh",
     "to",
     "toBest",
     "toDegrees",
     "toRadians",
-    "unaryMinus",
     "unaryPlus",
     "unequal",
-    "variance",
     "xgcd",
     "xor"
   ],
   "byFile": {
     "arithmetic.ts": {
-      "accelerated": 0,
-      "jsOnly": 45
+      "wasm": 0,
+      "parallel": 32,
+      "jsOnly": 13
     },
     "bitwise.ts": {
-      "accelerated": 0,
-      "jsOnly": 7
+      "wasm": 0,
+      "parallel": 7,
+      "jsOnly": 0
     },
     "combinatorics.ts": {
-      "accelerated": 0,
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 21
     },
     "complex.ts": {
-      "accelerated": 0,
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 4
     },
     "distributions.ts": {
-      "accelerated": 1,
+      "wasm": 1,
+      "parallel": 0,
       "jsOnly": 13
     },
     "logical.ts": {
-      "accelerated": 0,
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 5
     },
     "matrix-ops.ts": {
-      "accelerated": 0,
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 9
     },
     "probability.ts": {
-      "accelerated": 0,
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 8
     },
     "relational.ts": {
-      "accelerated": 0,
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 7
     },
     "set.ts": {
-      "accelerated": 0,
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 10
     },
     "signal.ts": {
-      "accelerated": 0,
-      "jsOnly": 7
+      "wasm": 0,
+      "parallel": 5,
+      "jsOnly": 2
     },
     "special.ts": {
-      "accelerated": 18,
+      "wasm": 18,
+      "parallel": 0,
       "jsOnly": 20
     },
     "statistics.ts": {
-      "accelerated": 2,
-      "jsOnly": 15
+      "wasm": 2,
+      "parallel": 13,
+      "jsOnly": 2
     },
     "string.ts": {
-      "accelerated": 0,
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 5
     },
     "trigonometry.ts": {
-      "accelerated": 0,
-      "jsOnly": 19
+      "wasm": 0,
+      "parallel": 12,
+      "jsOnly": 7
     },
     "unit.ts": {
-      "accelerated": 0,
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 2
     }
   }

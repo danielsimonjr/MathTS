@@ -1,7 +1,36 @@
 # WASM↔Function Pairing — Gap-Closure Plan
 
-**Status:** proposed · **Drafted:** 2026-06-25 · **Source of truth for the
-pairing:** `docs/Architecture/wasm-pairing.md` (regenerate: `npm run docs:deps`)
+**Status:** executed 2026-06-25 · **Drafted:** 2026-06-25 · **Source of truth for
+the pairing:** `docs/Architecture/wasm-pairing.md` (regenerate: `npm run docs:deps`)
+
+## Resolution (2026-06-25)
+
+Executed under dev-workflow + honest-claude. Outcome:
+
+- **T4 (detector) — DONE.** `tools/create-dependency-graph` now classifies each
+  typed function as `wasm` / `parallel` / `js-only`. The pairing went from a
+  misleading "21 accelerated / 197 JS-only" to the honest **21 wasm · 69
+  parallel · 128 js-only** — the 69 parallel functions (arithmetic/trig/stats
+  array overloads) were always accelerated via the worker pool, just not via a
+  `*Dispatch`.
+- **T1 (statistics reductions) — NOT WIRED (would regress).** The reduction
+  WASM bridge already exists (`functions/src/wasm/statistics/basic.ts` + Rust
+  kernels) but is dormant; stats route to `computePool`. The decision-gate
+  benchmark (`tools/benchmark/wasm/reduction.bench.mjs`) shows that **with the
+  realistic JS→wasm copy-in included, the Rust reduction kernels are 0.4–0.7×
+  the speed of plain JS** (correctness exact). Copy-in is O(n) and the reduction
+  is O(n), so transfer dominates; V8's JIT'd JS loop wins. Wiring it would make
+  stats slower → not wired, per the "don't wire a path that loses" gate.
+- **T2 / T3 (arithmetic / trig elementwise) — NOT WIRED.** Strictly worse than
+  T1: elementwise returns an array, so it pays copy-**in *and* out** (2×
+  transfer) vs the reduction's single copy that already loses. Not wired.
+- **The real lever is op-fusion** (keep data resident in WASM memory across a
+  chain of ops, amortizing one copy over many), not per-op dispatch — see §5.
+  That is a larger design and remains open.
+
+The task breakdown below is retained as the record of the investigation.
+
+---
 
 This plan closes the gaps between the public typed-function API and the WASM
 acceleration layer. It is **agent-driven**: each task is sized for one subagent

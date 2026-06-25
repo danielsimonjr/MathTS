@@ -2,59 +2,136 @@
 
 **Generated**: 2026-06-25 (by tools/create-dependency-graph)
 
-Public `mathTyped` functions in `functions/src/typed/` and whether each routes to a WASM bridge (`*Dispatch`) or runs pure-JS. WASM engages only for `Float64Array` inputs at/above `WASM_SPECIAL_THRESHOLD` (1024); dispatch order is Rust → AssemblyScript → JS fallback.
+Per public `mathTyped` function in `functions/src/typed/`, its acceleration routing: **wasm** (a `*Dispatch` bridge), **parallel** (worker pool via `computePool`/`shouldParallelize`), or **js-only**. WASM engages for `Float64Array` inputs above threshold; dispatch order is Rust → AS → JS.
 
-| | Count |
+> Detection is per-`mathTyped`-block direct references; routing reached only via helper functions outside the block is not traced, so this can under-report.
+
+| Routing | Count |
 | --- | --: |
-| Total public typed functions | 218 |
-| WASM-accelerated | 21 |
-| JS-only | 197 |
+| WASM (incl. wasm+parallel) | 21 |
+| Parallel only (worker pool) | 69 |
+| JS-only | 128 |
+| **Total** | **218** |
 
 ## WASM-accelerated functions
 
-| Function | Bridge dispatch | Module |
-| --- | --- | --- |
-| `airyAi` | `airyAiDispatch` | special |
-| `airyBi` | `airyBiDispatch` | special |
-| `besselJ` | `besselJDispatch` | special |
-| `besselJ0` | `besselJ0Dispatch` | special |
-| `besselJ1` | `besselJ1Dispatch` | special |
-| `besselY` | `besselYDispatch` | special |
-| `besselY0` | `besselY0Dispatch` | special |
-| `besselY1` | `besselY1Dispatch` | special |
-| `carlsonRC` | `carlsonRCDispatch` | special |
-| `carlsonRD` | `carlsonRDDispatch` | special |
-| `carlsonRF` | `carlsonRFDispatch` | special |
-| `carlsonRJ` | `carlsonRJDispatch` | special |
-| `ellipticE` | `ellipticEDispatch` | special |
-| `ellipticEIncomplete` | `ellipticEIncompleteDispatch` | special |
-| `ellipticF` | `ellipticFIncompleteDispatch` | special |
-| `ellipticK` | `ellipticKDispatch` | special |
-| `ellipticPi` | `ellipticPiIncompleteDispatch` | special |
-| `lgamma` | `lgammaDispatch` | special |
-| `noncentralChi2PDF` | `lgammaDispatch` | distributions |
-| `parallelStatMedian` | `sortF64Dispatch` | statistics |
-| `parallelStatQuantile` | `sortF64Dispatch` | statistics |
+| Function | Routing | Bridge dispatch | Module |
+| --- | --- | --- | --- |
+| `airyAi` | wasm | `airyAiDispatch` | special |
+| `airyBi` | wasm | `airyBiDispatch` | special |
+| `besselJ` | wasm | `besselJDispatch` | special |
+| `besselJ0` | wasm | `besselJ0Dispatch` | special |
+| `besselJ1` | wasm | `besselJ1Dispatch` | special |
+| `besselY` | wasm | `besselYDispatch` | special |
+| `besselY0` | wasm | `besselY0Dispatch` | special |
+| `besselY1` | wasm | `besselY1Dispatch` | special |
+| `carlsonRC` | wasm | `carlsonRCDispatch` | special |
+| `carlsonRD` | wasm | `carlsonRDDispatch` | special |
+| `carlsonRF` | wasm | `carlsonRFDispatch` | special |
+| `carlsonRJ` | wasm | `carlsonRJDispatch` | special |
+| `ellipticE` | wasm | `ellipticEDispatch` | special |
+| `ellipticEIncomplete` | wasm | `ellipticEIncompleteDispatch` | special |
+| `ellipticF` | wasm | `ellipticFIncompleteDispatch` | special |
+| `ellipticK` | wasm | `ellipticKDispatch` | special |
+| `ellipticPi` | wasm | `ellipticPiIncompleteDispatch` | special |
+| `lgamma` | wasm | `lgammaDispatch` | special |
+| `noncentralChi2PDF` | wasm | `lgammaDispatch` | distributions |
+| `parallelStatMedian` | wasm | `sortF64Dispatch` | statistics |
+| `parallelStatQuantile` | wasm | `sortF64Dispatch` | statistics |
+
+## Parallel-only functions (worker pool, not WASM)
+
+| Function | Module |
+| --- | --- |
+| `abs` | arithmetic |
+| `acos` | trigonometry |
+| `acosh` | trigonometry |
+| `add` | arithmetic |
+| `asin` | trigonometry |
+| `asinh` | trigonometry |
+| `atan` | trigonometry |
+| `atanh` | trigonometry |
+| `bitAnd` | bitwise |
+| `bitNot` | bitwise |
+| `bitOr` | bitwise |
+| `bitXor` | bitwise |
+| `cbrt` | arithmetic |
+| `ceil` | arithmetic |
+| `cos` | trigonometry |
+| `cosh` | arithmetic |
+| `cot` | trigonometry |
+| `csc` | trigonometry |
+| `cube` | arithmetic |
+| `divide` | arithmetic |
+| `dot` | arithmetic |
+| `exp` | arithmetic |
+| `expm1` | arithmetic |
+| `fix` | arithmetic |
+| `floor` | arithmetic |
+| `leftShift` | bitwise |
+| `log` | arithmetic |
+| `log10` | arithmetic |
+| `log1p` | arithmetic |
+| `log2` | arithmetic |
+| `max` | arithmetic |
+| `mean` | arithmetic |
+| `min` | arithmetic |
+| `multiply` | arithmetic |
+| `norm` | arithmetic |
+| `parallelConv` | signal |
+| `parallelFFT` | signal |
+| `parallelFFTMagnitude` | signal |
+| `parallelFFTPower` | signal |
+| `parallelIFFT` | signal |
+| `parallelStatCorr` | statistics |
+| `parallelStatDistance` | statistics |
+| `parallelStatHistogram` | statistics |
+| `parallelStatMAD` | statistics |
+| `parallelStatMax` | statistics |
+| `parallelStatMean` | statistics |
+| `parallelStatMin` | statistics |
+| `parallelStatMinMax` | statistics |
+| `parallelStatNorm` | statistics |
+| `parallelStatProd` | statistics |
+| `parallelStatStd` | statistics |
+| `parallelStatSum` | statistics |
+| `parallelStatVariance` | statistics |
+| `rightArithShift` | bitwise |
+| `rightLogShift` | bitwise |
+| `round` | arithmetic |
+| `sec` | trigonometry |
+| `sign` | arithmetic |
+| `sin` | trigonometry |
+| `sinh` | arithmetic |
+| `sqrt` | arithmetic |
+| `square` | arithmetic |
+| `std` | arithmetic |
+| `subtract` | arithmetic |
+| `sum` | arithmetic |
+| `tan` | trigonometry |
+| `tanh` | arithmetic |
+| `unaryMinus` | arithmetic |
+| `variance` | arithmetic |
 
 ## Per-module counts
 
-| Module | Accelerated | JS-only |
-| --- | --: | --: |
-| arithmetic | 0 | 45 |
-| bitwise | 0 | 7 |
-| combinatorics | 0 | 21 |
-| complex | 0 | 4 |
-| distributions | 1 | 13 |
-| logical | 0 | 5 |
-| matrix-ops | 0 | 9 |
-| probability | 0 | 8 |
-| relational | 0 | 7 |
-| set | 0 | 10 |
-| signal | 0 | 7 |
-| special | 18 | 20 |
-| statistics | 2 | 15 |
-| string | 0 | 5 |
-| trigonometry | 0 | 19 |
-| unit | 0 | 2 |
+| Module | WASM | Parallel | JS-only |
+| --- | --: | --: | --: |
+| arithmetic | 0 | 32 | 13 |
+| bitwise | 0 | 7 | 0 |
+| combinatorics | 0 | 0 | 21 |
+| complex | 0 | 0 | 4 |
+| distributions | 1 | 0 | 13 |
+| logical | 0 | 0 | 5 |
+| matrix-ops | 0 | 0 | 9 |
+| probability | 0 | 0 | 8 |
+| relational | 0 | 0 | 7 |
+| set | 0 | 0 | 10 |
+| signal | 0 | 5 | 2 |
+| special | 18 | 0 | 20 |
+| statistics | 2 | 13 | 2 |
+| string | 0 | 0 | 5 |
+| trigonometry | 0 | 12 | 7 |
+| unit | 0 | 0 | 2 |
 
-> Note: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here), and internal poly/signal/sort/interpolation kernels accelerate algebra/numeric paths.
+> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `matrix` package backend (not the typed-API dispatch counted here). Per-op WASM for elementwise/reduction kernels was benchmarked and is *slower* than the JS/parallel paths once the JS→wasm copy is included (see docs/roadmap/WASM_PAIRING_GAP_PLAN.md); parallel-only routing is therefore intentional, not a gap.

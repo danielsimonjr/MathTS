@@ -2248,19 +2248,25 @@ function generatePackageDependencySection(
  * "which functions are WASM-accelerated" map a generated artifact instead of a
  * hand-maintained doc (see docs/Architecture/WASM_ACCELERATION.md).
  */
+type Routing = 'wasm' | 'parallel' | 'wasm+parallel' | 'js-only';
 interface WasmPairingEntry {
   name: string;
   file: string;
+  routing: Routing;
   dispatch: string[];
 }
 interface WasmPairing {
   generated: string;
   total: number;
-  acceleratedCount: number;
+  acceleratedCount: number; // routes to wasm (wasm or wasm+parallel)
+  parallelOnlyCount: number; // worker-parallel, no wasm
   jsOnlyCount: number;
+  /** Detection is per-mathTyped-block direct references; routing reached only
+   * through helper functions outside the block is not traced (under-reports). */
   accelerated: WasmPairingEntry[];
+  parallelOnly: WasmPairingEntry[];
   jsOnly: string[];
-  byFile: Record<string, { accelerated: number; jsOnly: number }>;
+  byFile: Record<string, { wasm: number; parallel: number; jsOnly: number }>;
 }
 
 function analyzeWasmPairing(rootDir: string): WasmPairing | null {
@@ -2272,8 +2278,9 @@ function analyzeWasmPairing(rootDir: string): WasmPairing | null {
   if (!typedDir) return null;
 
   const accelerated: WasmPairingEntry[] = [];
+  const parallelOnly: WasmPairingEntry[] = [];
   const jsOnly: string[] = [];
-  const byFile: Record<string, { accelerated: number; jsOnly: number }> = {};
+  const byFile: Record<string, { wasm: number; parallel: number; jsOnly: number }> = {};
 
   for (const fname of readdirSync(typedDir)) {
     if (!fname.endsWith('.ts')) continue;
@@ -2299,10 +2306,23 @@ function analyzeWasmPairing(rootDir: string): WasmPairing | null {
       }
       const block = src.slice(start, end + 1);
       const dispatch = Array.from(new Set(block.match(/\b\w+Dispatch\b/g) ?? [])).sort();
-      if (!byFile[fname]) byFile[fname] = { accelerated: 0, jsOnly: 0 };
-      if (dispatch.length > 0) {
-        accelerated.push({ name, file: fname, dispatch });
-        byFile[fname].accelerated++;
+      const isWasm = dispatch.length > 0;
+      const isParallel = /\b(computePool|shouldParallelize)\b/.test(block);
+      const routing: Routing = isWasm
+        ? isParallel
+          ? 'wasm+parallel'
+          : 'wasm'
+        : isParallel
+          ? 'parallel'
+          : 'js-only';
+      if (!byFile[fname]) byFile[fname] = { wasm: 0, parallel: 0, jsOnly: 0 };
+      const entry: WasmPairingEntry = { name, file: fname, routing, dispatch };
+      if (isWasm) {
+        accelerated.push(entry);
+        byFile[fname].wasm++;
+      } else if (isParallel) {
+        parallelOnly.push(entry);
+        byFile[fname].parallel++;
       } else {
         jsOnly.push(name);
         byFile[fname].jsOnly++;
@@ -2311,13 +2331,16 @@ function analyzeWasmPairing(rootDir: string): WasmPairing | null {
   }
 
   accelerated.sort((a, b) => a.name.localeCompare(b.name));
+  parallelOnly.sort((a, b) => a.name.localeCompare(b.name));
   jsOnly.sort();
   return {
     generated: new Date().toISOString().split('T')[0],
-    total: accelerated.length + jsOnly.length,
+    total: accelerated.length + parallelOnly.length + jsOnly.length,
     acceleratedCount: accelerated.length,
+    parallelOnlyCount: parallelOnly.length,
     jsOnlyCount: jsOnly.length,
     accelerated,
+    parallelOnly,
     jsOnly,
     byFile,
   };
@@ -2326,25 +2349,34 @@ function analyzeWasmPairing(rootDir: string): WasmPairing | null {
 function generateWasmPairingMarkdown(p: WasmPairing): string {
   let md = '# WASM Accelerator ↔ Function Pairing\n\n';
   md += `**Generated**: ${p.generated} (by tools/create-dependency-graph)\n\n`;
-  md += `Public \`mathTyped\` functions in \`functions/src/typed/\` and whether each `;
-  md += `routes to a WASM bridge (\`*Dispatch\`) or runs pure-JS. WASM engages only `;
-  md += `for \`Float64Array\` inputs at/above \`WASM_SPECIAL_THRESHOLD\` (1024); dispatch `;
-  md += `order is Rust → AssemblyScript → JS fallback.\n\n`;
-  md += `| | Count |\n| --- | --: |\n`;
-  md += `| Total public typed functions | ${p.total} |\n`;
-  md += `| WASM-accelerated | ${p.acceleratedCount} |\n`;
-  md += `| JS-only | ${p.jsOnlyCount} |\n\n`;
-  md += `## WASM-accelerated functions\n\n| Function | Bridge dispatch | Module |\n| --- | --- | --- |\n`;
+  md += `Per public \`mathTyped\` function in \`functions/src/typed/\`, its acceleration `;
+  md += `routing: **wasm** (a \`*Dispatch\` bridge), **parallel** (worker pool via `;
+  md += `\`computePool\`/\`shouldParallelize\`), or **js-only**. WASM engages for `;
+  md += `\`Float64Array\` inputs above threshold; dispatch order is Rust → AS → JS.\n\n`;
+  md += `> Detection is per-\`mathTyped\`-block direct references; routing reached only via `;
+  md += `helper functions outside the block is not traced, so this can under-report.\n\n`;
+  md += `| Routing | Count |\n| --- | --: |\n`;
+  md += `| WASM (incl. wasm+parallel) | ${p.acceleratedCount} |\n`;
+  md += `| Parallel only (worker pool) | ${p.parallelOnlyCount} |\n`;
+  md += `| JS-only | ${p.jsOnlyCount} |\n`;
+  md += `| **Total** | **${p.total}** |\n\n`;
+  md += `## WASM-accelerated functions\n\n| Function | Routing | Bridge dispatch | Module |\n| --- | --- | --- | --- |\n`;
   for (const e of p.accelerated) {
-    md += `| \`${e.name}\` | \`${e.dispatch.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
+    md += `| \`${e.name}\` | ${e.routing} | \`${e.dispatch.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
   }
-  md += `\n## Per-module counts\n\n| Module | Accelerated | JS-only |\n| --- | --: | --: |\n`;
+  md += `\n## Parallel-only functions (worker pool, not WASM)\n\n| Function | Module |\n| --- | --- |\n`;
+  for (const e of p.parallelOnly) {
+    md += `| \`${e.name}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
+  }
+  md += `\n## Per-module counts\n\n| Module | WASM | Parallel | JS-only |\n| --- | --: | --: | --: |\n`;
   for (const f of Object.keys(p.byFile).sort()) {
-    md += `| ${f.replace(/\.ts$/, '')} | ${p.byFile[f].accelerated} | ${p.byFile[f].jsOnly} |\n`;
+    md += `| ${f.replace(/\.ts$/, '')} | ${p.byFile[f].wasm} | ${p.byFile[f].parallel} | ${p.byFile[f].jsOnly} |\n`;
   }
-  md += `\n> Note: matrix linear-algebra ops are WASM-accelerated separately via the `;
-  md += `\`matrix\` package backend (not the typed-API dispatch counted here), and `;
-  md += `internal poly/signal/sort/interpolation kernels accelerate algebra/numeric paths.\n`;
+  md += `\n> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `;
+  md += `\`matrix\` package backend (not the typed-API dispatch counted here). Per-op WASM `;
+  md += `for elementwise/reduction kernels was benchmarked and is *slower* than the JS/parallel `;
+  md += `paths once the JS→wasm copy is included (see docs/roadmap/WASM_PAIRING_GAP_PLAN.md); `;
+  md += `parallel-only routing is therefore intentional, not a gap.\n`;
   return md;
 }
 

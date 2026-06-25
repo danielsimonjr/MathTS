@@ -25,11 +25,18 @@ WASM acceleration is **selective and threshold-gated**, not universal:
 
 ## `functions` public typed API — 218 functions
 
-| | Count |
+| Routing | Count |
 |---|--:|
 | Total public `mathTyped` functions (`functions/src/typed/`) | **218** |
-| WASM-accelerated (route to a `*Dispatch`) | **21** |
-| JS-only | **197** |
+| WASM (route to a `*Dispatch`) | **21** |
+| Parallel only (worker pool via `computePool`) | **69** |
+| JS-only | **128** |
+
+> The 69 "parallel" functions (arithmetic/trig/statistics array overloads) are
+> accelerated via the worker pool, not WASM. Per-op WASM for those was
+> benchmarked and is **slower** than the JS/parallel path once the JS→wasm copy
+> is included (`tools/benchmark/wasm/reduction.bench.mjs`); the parallel routing
+> is intentional. See `docs/roadmap/WASM_PAIRING_GAP_PLAN.md`.
 
 ### The 21 WASM-accelerated typed functions
 

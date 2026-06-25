@@ -30,6 +30,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed (2026-06-25)
 
+- **WASM↔function pairing detector** now classifies routing as `wasm` /
+  `parallel` / `js-only` (not just `*Dispatch` vs JS): **21 wasm · 69 parallel ·
+  128 js-only** of 218 typed functions. The 69 "parallel" (arithmetic/trig/stats
+  array overloads via the worker pool) were previously miscounted as "JS-only".
+- **Decision: per-op WASM for elementwise/reduction kernels is not wired** —
+  the gate benchmark (`tools/benchmark/wasm/reduction.bench.mjs`,
+  `npm run bench:reduction`) shows the Rust reduction kernels run at 0.4–0.7× of
+  plain JS once the JS→wasm copy-in is included (transfer dominates an O(n)
+  reduction). Wiring would regress; the existing parallel/JS routing is
+  intentional. Op-fusion (data resident in WASM across chained ops) is the real
+  lever and remains open. See `docs/roadmap/WASM_PAIRING_GAP_PLAN.md`.
 - **`tools/create-dependency-graph`**: now emits the WASM accelerator↔function
   pairing as a generated artifact (`docs/Architecture/wasm-pairing.md` +
   `wasm-pairing.json`) — scans `functions/src/typed/` `mathTyped` exports for
