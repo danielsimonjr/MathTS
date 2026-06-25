@@ -9,9 +9,9 @@ Executed under dev-workflow + honest-claude. Outcome:
 
 - **T4 (detector) — DONE.** `tools/create-dependency-graph` now classifies each
   typed function as `wasm` / `parallel` / `js-only`. The pairing went from a
-  misleading "21 accelerated / 197 JS-only" to the honest **21 wasm · 69
-  parallel · 128 js-only** — the 69 parallel functions (arithmetic/trig/stats
-  array overloads) were always accelerated via the worker pool, just not via a
+  misleading "21 accelerated / 197 JS-only" to the honest **27 wasm · 63
+  parallel · 128 js-only** (after T3 wired 6 elementwise ops) — the parallel
+  functions were always accelerated via the worker pool, just not via a
   `*Dispatch`.
 - **T1 (statistics reductions) — NOT WIRED (would regress).** The reduction
   WASM bridge already exists (`functions/src/wasm/statistics/basic.ts` + Rust
@@ -35,11 +35,24 @@ Executed under dev-workflow + honest-claude. Outcome:
   wasm has no binary elementwise array kernel (only unary `simd_*_array`);
   wiring would require new kernels. Deferred to a kernel-authoring task; low
   priority (binary ops are cheap — like reductions, copy would likely dominate).
+- **Special functions (bessel/airy/elliptic/…) — NOT WIRED (measured).** They
+  currently fall back to JS for the Rust backend (the loader's allocator is
+  AS-only — correct, not a crash; the special dispatch's allocate is inside its
+  try/catch). Hypothesis: wire them via the elementwise self-scratch pattern for
+  a ~2× win. Decision-gate benchmark
+  (`tools/benchmark/wasm/special-array.bench.mts`, `npm run bench:special-array`)
+  **refuted it**: bessel 0.9–1.2× (break-even), **airy 0.4–0.65× (regresses)**.
+  Unlike `Math.sin`, the JS scalar bessel/airy (series+Hankel/asymptotic) are
+  already efficient and JIT'd and do the same flops as the Rust kernels, so the
+  JS↔wasm copy is pure overhead. Not wired.
 - **op-fusion** (data resident in WASM across chained ops) remains the lever for
   the cheap-op cases (reductions, binary arithmetic) — see §5, still open.
 
 > Lesson (rules-for-life #4): never conclude a perf decision by inference —
-> measure each case. The reduction result did NOT generalize to transcendentals.
+> measure each case. The reduction result did NOT generalize to elementwise
+> transcendentals (those WON); and the elementwise win did NOT generalize to
+> special functions (those LOSE — their JS is already fast). Three op classes,
+> three different answers, each knowable only by measuring.
 
 The task breakdown below is retained as the record of the investigation.
 

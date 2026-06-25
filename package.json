@@ -50,6 +50,7 @@
     "docs:deps": "npx tsx tools/create-dependency-graph/create-dependency-graph.ts --root=.",
     "bench:reduction": "node tools/benchmark/wasm/reduction.bench.mjs",
     "bench:elementwise": "node tools/benchmark/wasm/elementwise.bench.mjs",
+    "bench:special-array": "npx tsx tools/benchmark/wasm/special-array.bench.mts",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
