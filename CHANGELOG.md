@@ -39,6 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the missing `docs:deps` npm script
   (`npx tsx tools/create-dependency-graph/create-dependency-graph.ts --root=.`),
   which the tool README and root README both referenced but was not wired.
+- Added `docs/roadmap/WASM_PAIRING_GAP_PLAN.md` — agent-driven, dev-workflow +
+  honest-claude plan to close the WASM↔function gaps (statistics reductions and
+  arithmetic/trig elementwise route to parallel-JS rather than the existing
+  `array_*` SIMD kernels; the pairing detector is `*Dispatch`-only and
+  under-reports parallel/bridge acceleration).
 
 ### Fixed (2026-05-25)
 
