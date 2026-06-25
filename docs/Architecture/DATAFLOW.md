@@ -191,17 +191,29 @@ They are suitable as building blocks for Monte Carlo sampling loops.
 
 ### Special Functions
 
-Special functions (`erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1`) follow
-the same synchronous scalar flow as distribution functions:
+Special functions (`erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1`,
+`airyAi/Bi`, `ellipticK/E/F/Pi`, `carlsonR*`, `lgamma`) have a synchronous
+**scalar** path and a **`Float64Array` array** path that routes to WASM above
+the element threshold:
 
 ```text
-besselJ0(x)             // Bessel function of the first kind, order 0
-  1. Uses rational polynomial approximation for |x| < 8
-  2. Uses asymptotic expansion for |x| >= 8
-  3. Returns number (always finite for finite input)
+besselJ0(x: number)                     // scalar — synchronous, number -> number
+  1. |x| <= 13: ascending power series   (J0 = sum (-1)^k (x^2/4)^k/(k!)^2)
+  2. |x| > 13:  Hankel asymptotic expansion (coefficients generated in-loop)
+  3. Returns number  (validated <1e-9 vs mpmath)
+
+besselJ0(xs: Float64Array)               // array overload
+  1. xs.length < 1024 (WASM_SPECIAL_THRESHOLD): map the scalar over the array (JS)
+  2. xs.length >= 1024: dispatch to the WASM kernel
+       Rust (bessel_j0_f64) -> AssemblyScript (bessel_j0_f64_as) -> JS fallback
+     The `functions` package bundles the Rust wasm (dist/wasm/mathts.wasm) and
+     resolves it package-relative, so this path is live (not a JS fallback).
 ```
 
-No side effects, no shared state, no async dispatch. All accept `number` and return `number`.
+The scalar path has no side effects, no shared state, no async dispatch. The
+array path returns a `Promise`. All WASM and JS paths agree to <1e-9 (the
+kernels share the same series + Hankel / generated-asymptotic algorithms; see
+`docs/Architecture/WASM_ACCELERATION.md`).
 
 ### Combinatorics Functions
 

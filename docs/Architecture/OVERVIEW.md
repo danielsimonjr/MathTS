@@ -19,16 +19,16 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 
 ## Key Metrics
 
-Metrics below are reachable-file scope (491 active files; 903 dormant synced
-files excluded), per the 2026-05-23 dependency-graph report.
+Metrics below are reachable-file scope (555 active files; 904 dormant synced
+files excluded), per the 2026-06-25 dependency-graph report. Regenerate with
+`tools/create-dependency-graph` for current figures.
 
 | Metric                     | Value                                        |
 | -------------------------- | -------------------------------------------- |
-| Reachable TypeScript Files | 491 (of 1,394 total; 903 dormant)            |
-| Lines of Code              | 124,615 (reachable)                          |
-| Total Exports              | 2,898 (728 re-exports)                       |
-| Test Files                 | 164 (27.5% source-file coverage; 135 of 491) |
-| Modules                    | 57                                           |
+| Reachable TypeScript Files | 555 (of 1,459 total; 904 dormant)            |
+| Lines of Code              | 148,610 (reachable)                          |
+| Total Exports              | 3,464 (1,057 re-exports)                      |
+| Modules                    | 69                                           |
 | Circular Dependencies      | 0                                            |
 | Typed Function Exports     | 374+ (20 modules, including GPU)             |
 | Synced Factory Functions   | 242 (19 categories)                          |
@@ -168,8 +168,8 @@ math.add(1, 2);
 | ---------------------- | ----- |
 | Total synced factories | 242   |
 | Synced categories      | 19    |
-| Dormant files          | 903   |
-| Reachable files        | 491   |
+| Dormant files          | 904   |
+| Reachable files        | 555   |
 
 ### Remaining Barriers
 

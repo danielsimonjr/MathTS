@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation (2026-06-25)
+
+- Reconciled the narrative architecture docs against the regenerated
+  dependency-graph report: `ARCHITECTURE.md` and `OVERVIEW.md` top-line counts
+  updated to current (555 reachable / 904 dormant / 1,459 total files; 3,464
+  reachable exports; 69 modules) — they had drifted and even disagreed with
+  each other (554 vs 491). Per-package breakdown now points to the generated
+  `dependency-graph.json` as source of truth rather than hand-maintained cells.
+- Fixed stale special-function descriptions: `DATAFLOW.md` §3c (`besselJ0` was
+  documented as the old NR rational/|x|<8 algorithm; now series + Hankel, with
+  the live `Float64Array`→WASM path documented) and `docs/reference/functions.md`
+  (NR §6.5 / ~1e-7 / ~5e-4 accuracy and "ellipticK/E still pure-JS" were all
+  wrong post-fix; now series+Hankel, <1e-9, and the elliptic/Carlson WASM
+  routing documented).
+- Added `docs/Architecture/WASM_ACCELERATION.md` — per-function WASM coverage
+  map (21 of 218 typed functions accelerated).
+
 ### Fixed (2026-05-25)
 
 - **`matrix` `determinantJS` sign for non-2-cycle permutations.** The JS

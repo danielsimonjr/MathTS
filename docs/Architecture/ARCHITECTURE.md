@@ -1,6 +1,6 @@
 # MathTS Architecture
 
-**Generated**: 2026-06-15
+**Generated**: 2026-06-25
 
 ## System Overview
 
@@ -9,9 +9,9 @@ Turborepo orchestrates builds across the workspace. tsup bundles each package
 (`functions` emits its `.d.ts` tree via `tsc`). A Cargo crate (`wasm-rust`)
 provides the primary WASM backend but is not an npm package.
 
-- **554 reachable TypeScript files** (out of ~1,457 total; ~903 dormant synced from mathjs)
-- **147,773 lines of code** (reachable scope)
-- **3,461 total exports** (1,057 re-exports)
+- **555 reachable TypeScript files** (out of 1,459 total; 904 dormant synced from mathjs)
+- **148,610 lines of code** (reachable scope)
+- **3,464 total exports** (1,057 re-exports)
 - **253 test files** — 199 of 554 source files have direct (structural) test coverage
   (35.9%); see the generated `TEST_COVERAGE.md`
 - **0 runtime circular dependencies** (2 type-only cycles remain, both in `matrix`)
@@ -259,8 +259,8 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 
 | Metric                               | Value    |
 | ------------------------------------ | -------- |
-| Reachable files (from entry points)  | 491      |
-| Dormant files (synced, not exported) | 903      |
+| Reachable files (from entry points)  | 555      |
+| Dormant files (synced, not exported) | 904      |
 | Total synced factories               | 242      |
 | Synced categories                    | 19       |
 | Type bridge                          | In place |
@@ -287,8 +287,11 @@ Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build 
 ## Module Summary
 
 Source-file counts below are reachable (active) files; dormant synced files are
-excluded. The report counts 491 reachable TypeScript files total across all
-packages, 903 dormant, and 2,898 exports.
+excluded. The report counts 555 reachable TypeScript files total across all
+packages, 904 dormant, and 3,464 exports. The authoritative, always-current
+per-package breakdown is the generated `dependency-graph.json` /
+`DEPENDENCY_GRAPH.md` (regenerate with `tools/create-dependency-graph`); the
+table below is a point-in-time snapshot.
 
 | Package         | Active Files | Dormant Files |
 | --------------- | ------------ | ------------- |
