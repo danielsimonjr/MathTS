@@ -58,7 +58,6 @@ function installFakeSvd(opts: { throwInSvd?: boolean; shortResult?: boolean } = 
     ((ptr: number) => packedByPtr.get(ptr)!) as never
   );
   vi.spyOn(wasmLoader, 'free').mockImplementation(() => {});
-  vi.spyOn(wasmLoader, 'resetRustAllocator').mockImplementation(() => {});
 
   return { fakeModule, allocateFloat64Array };
 }

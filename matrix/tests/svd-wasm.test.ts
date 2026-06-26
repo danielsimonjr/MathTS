@@ -118,7 +118,7 @@ describe('svdWasm', () => {
       [1, 0],
       [0, 1],
     ]);
-    // Informational: 'as' when the AssemblyScript build is present, else null.
-    console.log(`svdWasm backend allocator: ${wasmLoader.getAllocatorKind() ?? 'JS fallback'}`);
+    // Informational: whether the AssemblyScript build is loaded, else JS fallback.
+    console.log(`svdWasm backend: ${wasmLoader.isLoaded() ? 'AssemblyScript WASM' : 'JS fallback'}`);
   });
 });

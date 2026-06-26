@@ -74,7 +74,6 @@ function installFakeFFT(extra: Record<string, unknown> = {}) {
     allocateFloat64ArrayEmpty as never
   );
   vi.spyOn(wasmLoader, 'free').mockImplementation(() => {});
-  vi.spyOn(wasmLoader, 'resetRustAllocator').mockImplementation(() => {});
   return { fakeModule, allocateFloat64Array };
 }
 

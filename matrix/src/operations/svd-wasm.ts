@@ -108,6 +108,5 @@ export async function svdWasm(matrix: number[][], options?: SVDOptions): Promise
     return toThin(svd(matrix, options), k, rankTolerance);
   } finally {
     wasmLoader.free(aAlloc.ptr);
-    wasmLoader.resetRustAllocator();
   }
 }

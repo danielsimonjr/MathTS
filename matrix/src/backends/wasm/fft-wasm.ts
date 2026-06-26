@@ -243,7 +243,6 @@ function fftWasmCore(real: Float64Array, imag: Float64Array, inverse: boolean = 
     return fromInterleaved(resultInterleaved, n);
   } finally {
     wasmLoader.free(alloc.ptr);
-    wasmLoader.resetRustAllocator();
   }
 }
 
@@ -345,7 +344,6 @@ export function rfft(data: Float64Array, config: FFTConfig = {}): FFTResult {
       } finally {
         wasmLoader.free(dataAlloc.ptr);
         wasmLoader.free(resultAlloc.ptr);
-        wasmLoader.resetRustAllocator();
       }
     }
   }
@@ -385,7 +383,6 @@ export function powerSpectrum(real: Float64Array, imag: Float64Array): Float64Ar
         } finally {
           wasmLoader.free(dataAlloc.ptr);
           wasmLoader.free(resultAlloc.ptr);
-          wasmLoader.resetRustAllocator();
         }
       }
     }

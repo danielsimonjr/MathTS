@@ -160,7 +160,6 @@ export async function eigWasm(matrix: number[][], options?: EigOptions): Promise
     return eig(matrix, options);
   } finally {
     wasmLoader.free(matrixAlloc.ptr);
-    wasmLoader.resetRustAllocator();
   }
 }
 
@@ -221,6 +220,5 @@ export async function spectralRadiusWasm(
     return Math.abs(result.value);
   } finally {
     wasmLoader.free(matrixAlloc.ptr);
-    wasmLoader.resetRustAllocator();
   }
 }

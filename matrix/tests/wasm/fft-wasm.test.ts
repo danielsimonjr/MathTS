@@ -345,8 +345,7 @@ describe('fft (wasm backend)', () => {
     await wasmLoader.load();
   });
 
-  it.runIf(wasmAvailable)('loads the AssemblyScript binary (allocator kind "as")', () => {
-    expect(wasmLoader.getAllocatorKind()).toBe('as');
+  it.runIf(wasmAvailable)('loads the AssemblyScript binary', () => {
     const mod = wasmLoader.getModule();
     expect(mod).not.toBeNull();
     expect(typeof mod!.fft).toBe('function');

@@ -50,8 +50,7 @@ describe('heavy ops execute on the AssemblyScript binary (Phase 7b)', () => {
     vi.restoreAllMocks();
   });
 
-  it.runIf(asAvailable)('loads the AS managed runtime (allocator kind "as")', () => {
-    expect(wasmLoader.getAllocatorKind()).toBe('as');
+  it.runIf(asAvailable)('loads the AS managed runtime', () => {
     const mod = wasmLoader.getModule();
     expect(mod).not.toBeNull();
     expect(typeof mod!.matrix_svd).toBe('function');

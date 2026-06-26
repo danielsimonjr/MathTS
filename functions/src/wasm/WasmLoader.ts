@@ -602,18 +602,12 @@ export interface WasmModule {
     denLen: number,
     outPtr: number
   ) => number;
-  // AS-backend variants (typed-array calling convention).
-  poly_mul_f64_as?: (a: Float64Array, b: Float64Array) => Float64Array;
-  poly_div_mod_f64_as?: (num: Float64Array, den: Float64Array) => Float64Array;
 
   // Polynomial scalar kernels (Slice 4.5).
   // Rust backend: pointer-style, returns a scalar f64.
   // AS  backend: typed-array calling convention, returns f64.
   poly_resultant_f64?: (pPtr: number, pLen: number, qPtr: number, qLen: number) => number;
   poly_discriminant_f64?: (pPtr: number, pLen: number) => number;
-  // AS-backend variants (typed-array calling convention).
-  poly_resultant_f64_as?: (p: Float64Array, q: Float64Array) => number;
-  poly_discriminant_f64_as?: (p: Float64Array) => number;
 
   // Polynomial-fit kernels (Slice 5.4).
   // Rust backend: pointer-style.
@@ -645,9 +639,6 @@ export interface WasmModule {
     degree: number,
     outPtr: number
   ) => number;
-  poly_fit_f64_as?: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array;
-  cheb_fit_f64_as?: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array;
-  legendre_fit_f64_as?: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array;
 
   // Tridiagonal-solve kernel (Slice 3.10b).
   // Rust backend: pointer-style
@@ -661,13 +652,6 @@ export interface WasmModule {
     n: number,
     outPtr: number
   ) => number;
-  // AS-backend variant (typed-array calling convention).
-  tridiag_solve_f64_as?: (
-    diag: Float64Array,
-    lower: Float64Array,
-    upper: Float64Array,
-    rhs: Float64Array
-  ) => Float64Array;
 
   // Divided-difference kernel (Slice 5.5).
   // Rust backend: pointer-style
@@ -675,7 +659,6 @@ export interface WasmModule {
   // AS  backend: typed-array calling convention.
   //   divided_difference_f64_as(xs, ys) → Float64Array (length 0 on duplicate xs).
   divided_difference_f64?: (xsPtr: number, ysPtr: number, n: number, outPtr: number) => number;
-  divided_difference_f64_as?: (xs: Float64Array, ys: Float64Array) => Float64Array;
 
   // Bessel J/Y array kernels (Slice 3.10c-1) + Airy Ai/Bi (Slice 4.9).
   // Rust backend: pointer-style.
@@ -713,8 +696,6 @@ export interface WasmModule {
   //   elliptic_e_f64_as(ms: Float64Array) → Float64Array
   elliptic_k_f64?: (msPtr: number, n: number, outPtr: number) => number;
   elliptic_e_f64?: (msPtr: number, n: number, outPtr: number) => number;
-  elliptic_k_f64_as?: (ms: Float64Array) => Float64Array;
-  elliptic_e_f64_as?: (ms: Float64Array) => Float64Array;
   // Carlson symmetric forms + incomplete elliptic integrals (Slice 6.4).
   // Rust backend: pointer-style ABI (all input arrays + count + output pointer).
   //   carlson_rc_f64(xs_ptr, ys_ptr, n, out_ptr)                     → n | -1
@@ -732,22 +713,6 @@ export interface WasmModule {
   elliptic_f_incomplete_f64?: (phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
   elliptic_e_incomplete_f64?: (phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
   elliptic_pi_incomplete_f64?: (nsPtr: number, phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
-  carlson_rc_f64_as?: (xs: Float64Array, ys: Float64Array) => Float64Array;
-  carlson_rf_f64_as?: (xs: Float64Array, ys: Float64Array, zs: Float64Array) => Float64Array;
-  carlson_rd_f64_as?: (xs: Float64Array, ys: Float64Array, zs: Float64Array) => Float64Array;
-  carlson_rj_f64_as?: (xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array) => Float64Array;
-  elliptic_f_incomplete_f64_as?: (phis: Float64Array, ms: Float64Array) => Float64Array;
-  elliptic_e_incomplete_f64_as?: (phis: Float64Array, ms: Float64Array) => Float64Array;
-  elliptic_pi_incomplete_f64_as?: (ns: Float64Array, phis: Float64Array, ms: Float64Array) => Float64Array;
-  // AS-backend variants (typed-array calling convention, Slice 4.9).
-  bessel_j0_f64_as?: (xs: Float64Array) => Float64Array;
-  bessel_j1_f64_as?: (xs: Float64Array) => Float64Array;
-  bessel_jn_f64_as?: (n: number, xs: Float64Array) => Float64Array;
-  bessel_y0_f64_as?: (xs: Float64Array) => Float64Array;
-  bessel_y1_f64_as?: (xs: Float64Array) => Float64Array;
-  bessel_yn_f64_as?: (n: number, xs: Float64Array) => Float64Array;
-  airy_ai_f64_as?: (xs: Float64Array) => Float64Array;
-  airy_bi_f64_as?: (xs: Float64Array) => Float64Array;
 
   // Spectral signal kernels (Slice 5.6).
   // Rust backend: pointer-style ABI.
@@ -784,23 +749,6 @@ export interface WasmModule {
     outRePtr: number,
     outImPtr: number
   ) => number;
-  apply_window_f64_as?: (samples: Float64Array, windowType: number) => number;
-  welch_psd_f64_as?: (
-    samples: Float64Array,
-    frameLength: number,
-    overlap: number,
-    windowType: number
-  ) => Float64Array;
-  bartlett_psd_f64_as?: (samples: Float64Array, frameLength: number) => Float64Array;
-  goertzel_f64_as?: (samples: Float64Array, targetFreq: number, sampleRate: number) => number;
-  chirp_z_transform_f64_as?: (
-    samples: Float64Array,
-    m: number,
-    phiStartRe: number,
-    phiStartIm: number,
-    phiStepRe: number,
-    phiStepIm: number
-  ) => Float64Array;
 
   // Sort kernels (Slice 5.7a).
   // Rust backend: pointer-style ABI.
@@ -977,30 +925,17 @@ export class WasmLoader {
   }
 
   /**
-   * Get the WASM binary path based on the selected backend.
+   * Get the WASM binary path.
    *
-   * Default is the **AssemblyScript** binary (`mathts-as.wasm`) as of the
-   * Rust→AS migration Phase 3a cutover. Set MATHTS_WASM_BACKEND=rust (legacy:
-   * MATHJS_WASM_BACKEND=rust) to load the legacy Rust binary (`mathts.wasm`)
-   * instead — kept available until the Rust toolchain is removed in Phase 5.
-   * The historical `=assemblyscript` value is still honoured (now a no-op, since
-   * AS is the default).
-   *
-   * Filenames were renamed from mathjs.wasm / mathjs-as.wasm during the
-   * mathjs-to-MathTS rebrand; the legacy MATHJS_WASM_BACKEND env var
-   * still works for backward compatibility.
+   * AssemblyScript is the sole WASM backend (`mathts-as.wasm`); the Rust
+   * toolchain was removed in the Rust→AS migration (complete 2026-06-26).
    *
    * Returns an async result because the Node branch dynamically imports
    * `node:url` (fileURLToPath) so the path is resolved relative to this
    * source file's location rather than process.cwd().
    */
   private async getDefaultWasmPath(): Promise<string> {
-    const useRust =
-      typeof process !== 'undefined' &&
-      (process.env?.MATHTS_WASM_BACKEND === 'rust' ||
-        process.env?.MATHJS_WASM_BACKEND === 'rust');
-
-    const wasmFile = useRust ? 'mathts.wasm' : 'mathts-as.wasm';
+    const wasmFile = 'mathts-as.wasm';
 
     if (this.isNode) {
       // Prefer the wasm co-located in the package (dist/wasm/), which works in
