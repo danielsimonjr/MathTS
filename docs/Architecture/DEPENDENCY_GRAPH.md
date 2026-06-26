@@ -1,6 +1,6 @@
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-06-25
+**Version**: 0.1.0 | **Last Updated**: 2026-06-26
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -131,7 +131,7 @@ The codebase is organized into the following modules:
 - **functions/typed**: 29 files
 - **functions/unit**: 2 files
 - **functions/utils**: 38 files
-- **functions/wasm**: 10 files
+- **functions/wasm**: 11 files
 - **expression/compiler**: 2 files
 - **expression/error**: 3 files
 - **expression/evaluator**: 2 files
@@ -156,7 +156,7 @@ The codebase is organized into the following modules:
 - **parallel/strategies**: 3 files
 - **workbook**: 5 files
 - **assembly/algebra**: 1 file
-- **assembly**: 6 files
+- **assembly**: 7 files
 - **assembly/ops**: 16 files
 - **assembly/types**: 1 file
 - **compat**: 2 files
@@ -174,7 +174,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`) | `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core` | 44 | 6 |
 | `@danielsimonjr/mathts-tensor` (`tensor/`) | `@danielsimonjr/mathts-matrix` | 21 | 0 |
 | `@danielsimonjr/mathts-autograd` (`autograd/`) | `@danielsimonjr/mathts-tensor` | 5 | 0 |
-| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 372 | 417 |
+| `@danielsimonjr/mathts-functions` (`functions/`) | `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 373 | 417 |
 | `@danielsimonjr/mathts-expression` (`expression/`) | (none) | 47 | 381 |
 | `@danielsimonjr/mathts-parser` (`parser/`) | `@danielsimonjr/mathts-expression` | 1 | 0 |
 | `@danielsimonjr/mathts-units` (`units/`) | `@danielsimonjr/mathts-core` | 1 | 0 |
@@ -188,7 +188,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-signal` (`signal/`) | `@danielsimonjr/mathts-functions` | 1 | 0 |
 | `@danielsimonjr/mathts-parallel` (`parallel/`) | `@danielsimonjr/mathts-workerpool` | 11 | 4 |
 | `@danielsimonjr/mathts-workbook` (`workbook/`) | `@danielsimonjr/mathts-functions` | 5 | 2 |
-| `@danielsimonjr/mathts-wasm` (`assembly/`) | (none) | 24 | 3 |
+| `@danielsimonjr/mathts-wasm` (`assembly/`) | (none) | 25 | 3 |
 | `@danielsimonjr/mathts-compat` (`compat/`) | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel` | 2 | 1 |
 
 ### Package Dependency Diagram
@@ -7128,10 +7128,25 @@ graph LR
 | File | Imports | Type |
 |------|---------|------|
 | `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+| `../bridges/common.js` | `getWasm, isAsWasm, withAsI32, asReadReturnedI32, RawWasm` | Import |
 
 **Exports:**
 - Functions: `runBinaryBitwiseWasm`, `runUnaryBitwiseWasm`, `resetBitwiseWasm`
 - Constants: `WASM_BITWISE_THRESHOLD`
+
+---
+
+### `functions/src/wasm/bridges/common.ts` - Shared helpers for the WASM dispatch bridges (dup-audit Opportunity #2,
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+
+**Exports:**
+- Interfaces: `RawWasm`
+- Types: `PtrUnaryKernel`
+- Functions: `getWasm`, `isAsWasm`, `resetScratch`, `runUnaryPtr`, `runChainPtr`, `asReadReturnedF64`, `asReadReturnedI32`, `withAsF64`, `withAsI32`, `makeUnaryArrayDispatch`
 
 ---
 
@@ -7140,7 +7155,7 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+| `../bridges/common.js` | `getWasm, runUnaryPtr, runChainPtr, PtrUnaryKernel, RawWasm` | Import |
 
 **Exports:**
 - Types: `WasmElementwiseOp`
@@ -7162,7 +7177,8 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+| `../WasmLoader.js` | `wasmLoader` | Import |
+| `../bridges/common.js` | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
 
 **Exports:**
 - Functions: `tridiagSolveJS`, `tridiagSolveDispatch`, `resetTridiagWasm`, `dividedDifferenceJS`, `dividedDifferenceDispatch`
@@ -7175,7 +7191,8 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+| `../WasmLoader.js` | `wasmLoader` | Import |
+| `../bridges/common.js` | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
 
 **Exports:**
 - Functions: `polyMulDispatch`, `polyDivModDispatch`, `resultantDispatch`, `discriminantDispatch`, `polyFitDispatch`, `chebFitDispatch`, `legendreFitDispatch`, `resetPolyWasm`
@@ -7195,7 +7212,7 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+| `../bridges/common.js` | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
 
 **Exports:**
 - Functions: `applyWindowJS`, `goertzelJS`, `welchPSDJS`, `bartlettPSDJS`, `chirpZTransformJS`, `applyWindowDispatch`, `welchPSDDispatch`, `bartlettPSDDispatch`, `goertzelDispatch`, `chirpZTransformDispatch`
@@ -7208,7 +7225,7 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../WasmLoader.js` | `wasmLoader` | Import |
+| `../bridges/common.js` | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
 
 **Exports:**
 - Functions: `sortF64JS`, `argsortF64JS`, `rankF64JS`, `sortF64Dispatch`, `argsortF64Dispatch`, `rankF64Dispatch`
@@ -7221,11 +7238,12 @@ graph LR
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../WasmLoader.js` | `wasmLoader, WasmModule` | Import |
+| `../WasmLoader.js` | `wasmLoader` | Import |
+| `../bridges/common.js` | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, makeUnaryArrayDispatch, RawWasm` | Import |
 
 **Exports:**
-- Functions: `besselJ0JS`, `besselJ1JS`, `besselJnJS`, `besselY0JS`, `besselY1JS`, `besselYnJS`, `airyAiJS`, `airyBiJS`, `besselJ0Dispatch`, `besselJ1Dispatch`, `besselJDispatch`, `besselY0Dispatch`, `besselY1Dispatch`, `besselYDispatch`, `airyAiDispatch`, `airyBiDispatch`, `lgammaJS`, `lgammaDispatch`, `carlsonRCJS`, `carlsonRFJS`, `carlsonRDJS`, `carlsonRJJS`, `ellipticFIncompleteJS`, `ellipticEIncompleteJS`, `ellipticPiIncompleteJS`, `carlsonRCScalar`, `carlsonRFScalar`, `carlsonRDScalar`, `carlsonRJScalar`, `ellipticFIncompleteScalar`, `ellipticEIncompleteScalar`, `ellipticPiIncompleteScalar`, `carlsonRCDispatch`, `carlsonRFDispatch`, `carlsonRDDispatch`, `carlsonRJDispatch`, `ellipticFIncompleteDispatch`, `ellipticEIncompleteDispatch`, `ellipticPiIncompleteDispatch`, `resetCarlsonWasm`, `resetBesselWasm`, `resetAiryWasm`, `resetEllipticWasm`, `resetLgammaWasm`, `ellipticKJS`, `ellipticEJS`, `ellipticKDispatch`, `ellipticEDispatch`
-- Constants: `WASM_SPECIAL_THRESHOLD`
+- Functions: `besselJ0JS`, `besselJ1JS`, `besselJnJS`, `besselY0JS`, `besselY1JS`, `besselYnJS`, `airyAiJS`, `airyBiJS`, `besselJDispatch`, `besselYDispatch`, `airyAiDispatch`, `airyBiDispatch`, `lgammaJS`, `carlsonRCJS`, `carlsonRFJS`, `carlsonRDJS`, `carlsonRJJS`, `ellipticFIncompleteJS`, `ellipticEIncompleteJS`, `ellipticPiIncompleteJS`, `carlsonRCScalar`, `carlsonRFScalar`, `carlsonRDScalar`, `carlsonRJScalar`, `ellipticFIncompleteScalar`, `ellipticEIncompleteScalar`, `ellipticPiIncompleteScalar`, `carlsonRCDispatch`, `carlsonRFDispatch`, `carlsonRDDispatch`, `carlsonRJDispatch`, `ellipticFIncompleteDispatch`, `ellipticEIncompleteDispatch`, `ellipticPiIncompleteDispatch`, `resetCarlsonWasm`, `resetBesselWasm`, `resetAiryWasm`, `resetEllipticWasm`, `resetLgammaWasm`, `ellipticKJS`, `ellipticEJS`
+- Constants: `WASM_SPECIAL_THRESHOLD`, `besselJ0Dispatch`, `besselJ1Dispatch`, `besselY0Dispatch`, `besselY1Dispatch`, `lgammaDispatch`, `ellipticKDispatch`, `ellipticEDispatch`
 
 ---
 
@@ -8308,6 +8326,13 @@ graph LR
 
 ## Assembly Dependencies
 
+### `assembly/src/elementwise.ts` - Unary elementwise transcendental array kernels — POINTER-ABI AssemblyScript.
+
+**Exports:**
+- Functions: `array_abs_ptr`, `array_sin_ptr`, `array_cos_ptr`, `array_tan_ptr`, `array_exp_ptr`, `array_log_ptr`, `array_atan_ptr`, `array_sinh_ptr`, `array_tanh_ptr`, `array_atanh_ptr`, `array_expm1_ptr`, `array_log1p_ptr`, `array_log2_ptr`, `array_log10_ptr`, `array_sec_ptr`, `array_csc_ptr`, `array_cot_ptr`, `array_erfc_ptr`
+
+---
+
 ### `assembly/src/index.ts` - MathTS AssemblyScript Entry Point
 
 **Internal Dependencies:**
@@ -8331,14 +8356,15 @@ graph LR
 | `./ops/tensor` | `tensorTranspose` | Re-export |
 | `./ops/complex-ops` | `complex_add, complex_sub, complex_mul, complex_div, complex_neg, complex_conj, complex_reciprocal, complex_abs, complex_arg, complex_abs_squared, complex_sqrt, complex_pow, complex_cpow, complex_square, complex_cube, complex_exp, complex_log, complex_log10, complex_log2, complex_sin, complex_cos, complex_tan, complex_asin, complex_acos, complex_atan, complex_sinh, complex_cosh, complex_tanh, complex_asinh, complex_acosh, complex_atanh, complex_equals, complex_approx_equals, complex_is_zero, complex_is_real, complex_is_imaginary, complex_is_nan, complex_is_finite, complex_from_real, complex_from_imag, complex_from_polar, complex_to_polar, complex_axpby, complex_distance` | Re-export |
 | `./ops/bitwise` | `bitAnd_i32_array, bitOr_i32_array, bitXor_i32_array, bitNot_i32_array, leftShift_i32_array, rightArithShift_i32_array, rightLogShift_i32_array` | Re-export |
-| `./poly` | `poly_mul_f64, poly_div_mod_f64, poly_fit_f64, cheb_fit_f64, legendre_fit_f64` | Re-export |
+| `./poly` | `poly_mul_f64, poly_div_mod_f64, poly_fit_f64, cheb_fit_f64, legendre_fit_f64, poly_resultant_f64, poly_discriminant_f64` | Re-export |
+| `./elementwise` | `array_abs_ptr, array_sin_ptr, array_cos_ptr, array_tan_ptr, array_exp_ptr, array_log_ptr, array_atan_ptr, array_sinh_ptr, array_tanh_ptr, array_atanh_ptr, array_expm1_ptr, array_log1p_ptr, array_log2_ptr, array_log10_ptr, array_sec_ptr, array_csc_ptr, array_cot_ptr, array_erfc_ptr` | Re-export |
 | `./tridiag` | `tridiag_solve_f64, divided_difference_f64` | Re-export |
-| `./special` | `bessel_j0_f64, bessel_j1_f64, bessel_jn_f64, bessel_y0_f64, bessel_y1_f64, bessel_yn_f64, airy_ai_f64, airy_bi_f64, elliptic_k_f64, elliptic_e_f64, lgamma_f64, carlson_rc_f64, carlson_rf_f64, carlson_rd_f64, carlson_rj_f64, elliptic_f_incomplete_f64, elliptic_e_incomplete_f64, elliptic_pi_incomplete_f64` | Re-export |
+| `./special` | `bessel_j0_f64, bessel_j1_f64, bessel_jn_f64, bessel_j_f64, bessel_y0_f64, bessel_y1_f64, bessel_yn_f64, bessel_y_f64, airy_ai_f64, airy_bi_f64, elliptic_k_f64, elliptic_e_f64, lgamma_f64, carlson_rc_f64, carlson_rf_f64, carlson_rd_f64, carlson_rj_f64, elliptic_f_incomplete_f64, elliptic_e_incomplete_f64, elliptic_pi_incomplete_f64` | Re-export |
 | `./sort` | `sort_f64, argsort_f64, rank_f64` | Re-export |
 | `./ops/complex-array` | `complex_array_zeros, complex_array_ones, complex_array_fill, complex_array_get, complex_array_set, complex_array_set_parts, complex_array_get_re, complex_array_get_im, complex_array_length, complex_array_add, complex_array_sub, complex_array_mul, complex_array_div, complex_array_scale_real, complex_array_scale_complex, complex_array_neg, complex_array_conj, complex_array_abs, complex_array_arg, complex_array_abs_squared, complex_array_real, complex_array_imag, complex_array_exp, complex_array_log, complex_array_sqrt, complex_array_sum, complex_array_mean, complex_array_dot, complex_array_norm, complex_array_scale_inplace, complex_array_conj_inplace, complex_array_add_inplace, complex_array_copy` | Re-export |
 
 **Exports:**
-- Re-exports: `Complex`, `complex`, `complexFromPolar`, `add_f64`, `sub_f64`, `mul_f64`, `div_f64`, `mod_f64`, `neg_f64`, `sqrt_f64`, `pow_f64`, `square_f64`, `cube_f64`, `cbrt_f64`, `nthRoot_f64`, `exp_f64`, `expm1_f64`, `log_f64`, `log1p_f64`, `log10_f64`, `log2_f64`, `sin_f64`, `cos_f64`, `tan_f64`, `asin_f64`, `acos_f64`, `atan_f64`, `atan2_f64`, `sinh_f64`, `cosh_f64`, `tanh_f64`, `asinh_f64`, `acosh_f64`, `atanh_f64`, `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`, `sign_f64`, `min_f64`, `max_f64`, `clamp_f64`, `isNaN_f64`, `isFinite_f64`, `PI`, `E`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `EPSILON`, `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_stddev`, `array_min`, `array_max`, `array_argmin`, `array_argmax`, `array_norm`, `array_norm_l1`, `array_norm_linf`, `array_dot`, `array_add`, `array_sub`, `array_mul`, `array_div`, `array_scale`, `array_add_scalar`, `array_neg`, `array_abs`, `array_sqrt`, `array_square`, `array_exp`, `array_log`, `array_sin`, `array_cos`, `array_axpby`, `array_distance`, `array_cosine_similarity`, `array_scale_inplace`, `array_add_scalar_inplace`, `array_add_inplace`, `array_clamp_inplace`, `array_fill`, `array_copy`, `matrix_zeros`, `matrix_ones`, `matrix_fill`, `matrix_identity`, `matrix_diag`, `matrix_get`, `matrix_set`, `matrix_get_row`, `matrix_get_col`, `matrix_get_diag`, `matrix_add`, `matrix_sub`, `matrix_mul_elementwise`, `matrix_div_elementwise`, `matrix_scale`, `matrix_add_scalar`, `matrix_neg`, `matrix_multiply`, `matrix_vector_multiply`, `vector_matrix_multiply`, `matrix_outer`, `matrix_transpose`, `matrix_sum`, `matrix_mean`, `matrix_min`, `matrix_max`, `matrix_norm_frobenius`, `matrix_trace`, `matrix_sum_rows`, `matrix_sum_cols`, `matrix_is_square`, `matrix_is_symmetric`, `matrix_is_diagonal`, `matrix_is_identity`, `matrix_scale_inplace`, `matrix_add_scalar_inplace`, `matrix_add_inplace`, `matrix_copy`, `matrix_axpy`, `matrix_gemm`, `matrix_gemv`, `matrix_svd`, `matrix_singular_values`, `matrix_lu_decompose`, `matrix_qr_decompose`, `matrix_cholesky`, `matrix_inverse`, `matrix_determinant`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `erfi`, `expIntegralEi`, `sinIntegral`, `cosIntegral`, `logIntegral`, `eulerPhi`, `divisorSigma`, `moebiusMu`, `carmichaelLambda`, `jacobiSymbol`, `harmonicNumber`, `partitions`, `primeFactors`, `divisors`, `integerDigits`, `chineseRemainder`, `polyadd`, `polynomialQuotient`, `polynomialRemainder`, `polynomialGCD`, `polynomialLCM`, `discriminant`, `resultant`, `resample`, `medfilt`, `windowFunction`, `apply_window_f64`, `welch_psd_f64`, `bartlett_psd_f64`, `goertzel_f64`, `chirp_z_transform_f64`, `rowReduce`, `characteristicPolynomial`, `expfit`, `logfit`, `powerfit`, `quadprog`, `linprog`, `nullspace`, `residue`, `padeApproximant`, `tensorTranspose`, `complex_add`, `complex_sub`, `complex_mul`, `complex_div`, `complex_neg`, `complex_conj`, `complex_reciprocal`, `complex_abs`, `complex_arg`, `complex_abs_squared`, `complex_sqrt`, `complex_pow`, `complex_cpow`, `complex_square`, `complex_cube`, `complex_exp`, `complex_log`, `complex_log10`, `complex_log2`, `complex_sin`, `complex_cos`, `complex_tan`, `complex_asin`, `complex_acos`, `complex_atan`, `complex_sinh`, `complex_cosh`, `complex_tanh`, `complex_asinh`, `complex_acosh`, `complex_atanh`, `complex_equals`, `complex_approx_equals`, `complex_is_zero`, `complex_is_real`, `complex_is_imaginary`, `complex_is_nan`, `complex_is_finite`, `complex_from_real`, `complex_from_imag`, `complex_from_polar`, `complex_to_polar`, `complex_axpby`, `complex_distance`, `bitAnd_i32_array`, `bitOr_i32_array`, `bitXor_i32_array`, `bitNot_i32_array`, `leftShift_i32_array`, `rightArithShift_i32_array`, `rightLogShift_i32_array`, `poly_mul_f64`, `poly_div_mod_f64`, `poly_fit_f64`, `cheb_fit_f64`, `legendre_fit_f64`, `tridiag_solve_f64`, `divided_difference_f64`, `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64`, `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`, `airy_ai_f64`, `airy_bi_f64`, `elliptic_k_f64`, `elliptic_e_f64`, `lgamma_f64`, `carlson_rc_f64`, `carlson_rf_f64`, `carlson_rd_f64`, `carlson_rj_f64`, `elliptic_f_incomplete_f64`, `elliptic_e_incomplete_f64`, `elliptic_pi_incomplete_f64`, `sort_f64`, `argsort_f64`, `rank_f64`, `complex_array_zeros`, `complex_array_ones`, `complex_array_fill`, `complex_array_get`, `complex_array_set`, `complex_array_set_parts`, `complex_array_get_re`, `complex_array_get_im`, `complex_array_length`, `complex_array_add`, `complex_array_sub`, `complex_array_mul`, `complex_array_div`, `complex_array_scale_real`, `complex_array_scale_complex`, `complex_array_neg`, `complex_array_conj`, `complex_array_abs`, `complex_array_arg`, `complex_array_abs_squared`, `complex_array_real`, `complex_array_imag`, `complex_array_exp`, `complex_array_log`, `complex_array_sqrt`, `complex_array_sum`, `complex_array_mean`, `complex_array_dot`, `complex_array_norm`, `complex_array_scale_inplace`, `complex_array_conj_inplace`, `complex_array_add_inplace`, `complex_array_copy`
+- Re-exports: `Complex`, `complex`, `complexFromPolar`, `add_f64`, `sub_f64`, `mul_f64`, `div_f64`, `mod_f64`, `neg_f64`, `sqrt_f64`, `pow_f64`, `square_f64`, `cube_f64`, `cbrt_f64`, `nthRoot_f64`, `exp_f64`, `expm1_f64`, `log_f64`, `log1p_f64`, `log10_f64`, `log2_f64`, `sin_f64`, `cos_f64`, `tan_f64`, `asin_f64`, `acos_f64`, `atan_f64`, `atan2_f64`, `sinh_f64`, `cosh_f64`, `tanh_f64`, `asinh_f64`, `acosh_f64`, `atanh_f64`, `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`, `sign_f64`, `min_f64`, `max_f64`, `clamp_f64`, `isNaN_f64`, `isFinite_f64`, `PI`, `E`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `EPSILON`, `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_stddev`, `array_min`, `array_max`, `array_argmin`, `array_argmax`, `array_norm`, `array_norm_l1`, `array_norm_linf`, `array_dot`, `array_add`, `array_sub`, `array_mul`, `array_div`, `array_scale`, `array_add_scalar`, `array_neg`, `array_abs`, `array_sqrt`, `array_square`, `array_exp`, `array_log`, `array_sin`, `array_cos`, `array_axpby`, `array_distance`, `array_cosine_similarity`, `array_scale_inplace`, `array_add_scalar_inplace`, `array_add_inplace`, `array_clamp_inplace`, `array_fill`, `array_copy`, `matrix_zeros`, `matrix_ones`, `matrix_fill`, `matrix_identity`, `matrix_diag`, `matrix_get`, `matrix_set`, `matrix_get_row`, `matrix_get_col`, `matrix_get_diag`, `matrix_add`, `matrix_sub`, `matrix_mul_elementwise`, `matrix_div_elementwise`, `matrix_scale`, `matrix_add_scalar`, `matrix_neg`, `matrix_multiply`, `matrix_vector_multiply`, `vector_matrix_multiply`, `matrix_outer`, `matrix_transpose`, `matrix_sum`, `matrix_mean`, `matrix_min`, `matrix_max`, `matrix_norm_frobenius`, `matrix_trace`, `matrix_sum_rows`, `matrix_sum_cols`, `matrix_is_square`, `matrix_is_symmetric`, `matrix_is_diagonal`, `matrix_is_identity`, `matrix_scale_inplace`, `matrix_add_scalar_inplace`, `matrix_add_inplace`, `matrix_copy`, `matrix_axpy`, `matrix_gemm`, `matrix_gemv`, `matrix_svd`, `matrix_singular_values`, `matrix_lu_decompose`, `matrix_qr_decompose`, `matrix_cholesky`, `matrix_inverse`, `matrix_determinant`, `chebyshevT`, `hermiteH`, `laguerreL`, `legendreP`, `erfi`, `expIntegralEi`, `sinIntegral`, `cosIntegral`, `logIntegral`, `eulerPhi`, `divisorSigma`, `moebiusMu`, `carmichaelLambda`, `jacobiSymbol`, `harmonicNumber`, `partitions`, `primeFactors`, `divisors`, `integerDigits`, `chineseRemainder`, `polyadd`, `polynomialQuotient`, `polynomialRemainder`, `polynomialGCD`, `polynomialLCM`, `discriminant`, `resultant`, `resample`, `medfilt`, `windowFunction`, `apply_window_f64`, `welch_psd_f64`, `bartlett_psd_f64`, `goertzel_f64`, `chirp_z_transform_f64`, `rowReduce`, `characteristicPolynomial`, `expfit`, `logfit`, `powerfit`, `quadprog`, `linprog`, `nullspace`, `residue`, `padeApproximant`, `tensorTranspose`, `complex_add`, `complex_sub`, `complex_mul`, `complex_div`, `complex_neg`, `complex_conj`, `complex_reciprocal`, `complex_abs`, `complex_arg`, `complex_abs_squared`, `complex_sqrt`, `complex_pow`, `complex_cpow`, `complex_square`, `complex_cube`, `complex_exp`, `complex_log`, `complex_log10`, `complex_log2`, `complex_sin`, `complex_cos`, `complex_tan`, `complex_asin`, `complex_acos`, `complex_atan`, `complex_sinh`, `complex_cosh`, `complex_tanh`, `complex_asinh`, `complex_acosh`, `complex_atanh`, `complex_equals`, `complex_approx_equals`, `complex_is_zero`, `complex_is_real`, `complex_is_imaginary`, `complex_is_nan`, `complex_is_finite`, `complex_from_real`, `complex_from_imag`, `complex_from_polar`, `complex_to_polar`, `complex_axpby`, `complex_distance`, `bitAnd_i32_array`, `bitOr_i32_array`, `bitXor_i32_array`, `bitNot_i32_array`, `leftShift_i32_array`, `rightArithShift_i32_array`, `rightLogShift_i32_array`, `poly_mul_f64`, `poly_div_mod_f64`, `poly_fit_f64`, `cheb_fit_f64`, `legendre_fit_f64`, `poly_resultant_f64`, `poly_discriminant_f64`, `array_abs_ptr`, `array_sin_ptr`, `array_cos_ptr`, `array_tan_ptr`, `array_exp_ptr`, `array_log_ptr`, `array_atan_ptr`, `array_sinh_ptr`, `array_tanh_ptr`, `array_atanh_ptr`, `array_expm1_ptr`, `array_log1p_ptr`, `array_log2_ptr`, `array_log10_ptr`, `array_sec_ptr`, `array_csc_ptr`, `array_cot_ptr`, `array_erfc_ptr`, `tridiag_solve_f64`, `divided_difference_f64`, `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64`, `bessel_j_f64`, `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`, `bessel_y_f64`, `airy_ai_f64`, `airy_bi_f64`, `elliptic_k_f64`, `elliptic_e_f64`, `lgamma_f64`, `carlson_rc_f64`, `carlson_rf_f64`, `carlson_rd_f64`, `carlson_rj_f64`, `elliptic_f_incomplete_f64`, `elliptic_e_incomplete_f64`, `elliptic_pi_incomplete_f64`, `sort_f64`, `argsort_f64`, `rank_f64`, `complex_array_zeros`, `complex_array_ones`, `complex_array_fill`, `complex_array_get`, `complex_array_set`, `complex_array_set_parts`, `complex_array_get_re`, `complex_array_get_im`, `complex_array_length`, `complex_array_add`, `complex_array_sub`, `complex_array_mul`, `complex_array_div`, `complex_array_scale_real`, `complex_array_scale_complex`, `complex_array_neg`, `complex_array_conj`, `complex_array_abs`, `complex_array_arg`, `complex_array_abs_squared`, `complex_array_real`, `complex_array_imag`, `complex_array_exp`, `complex_array_log`, `complex_array_sqrt`, `complex_array_sum`, `complex_array_mean`, `complex_array_dot`, `complex_array_norm`, `complex_array_scale_inplace`, `complex_array_conj_inplace`, `complex_array_add_inplace`, `complex_array_copy`
 
 ---
 
@@ -8366,7 +8392,7 @@ graph LR
 ### `assembly/src/special.ts` - Bessel J/Y, Airy Ai/Bi, lgamma — AssemblyScript parity port.
 
 **Exports:**
-- Functions: `lgamma_f64`, `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64`, `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`, `airy_ai_f64`, `airy_bi_f64`, `elliptic_k_f64`, `elliptic_e_f64`, `carlson_rc_f64`, `carlson_rf_f64`, `carlson_rd_f64`, `carlson_rj_f64`, `elliptic_f_incomplete_f64`, `elliptic_e_incomplete_f64`, `elliptic_pi_incomplete_f64`
+- Functions: `lgamma_f64`, `bessel_j0_f64`, `bessel_j1_f64`, `bessel_jn_f64`, `bessel_y0_f64`, `bessel_y1_f64`, `bessel_yn_f64`, `bessel_j_f64`, `bessel_y_f64`, `airy_ai_f64`, `airy_bi_f64`, `elliptic_k_f64`, `elliptic_e_f64`, `carlson_rc_f64`, `carlson_rf_f64`, `carlson_rd_f64`, `carlson_rj_f64`, `elliptic_f_incomplete_f64`, `elliptic_e_incomplete_f64`, `elliptic_pi_incomplete_f64`
 
 ---
 
@@ -8559,8 +8585,8 @@ graph LR
 | `functions/src/plain/number/index` | 9 files | 52 files |
 | `functions/src/utils/array` | 6 files | 49 files |
 | `functions/src/core/config` | 0 files | 52 files |
-| `functions/src/wasm/WasmLoader` | 2 files | 49 files |
 | `functions/src/utils/number` | 1 file | 48 files |
+| `functions/src/wasm/WasmLoader` | 2 files | 47 files |
 | `functions/src/utils/collection` | 4 files | 37 files |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files | 27 files |
 | `functions/src/utils/object` | 1 file | 28 files |
@@ -8569,7 +8595,7 @@ graph LR
 | `expression/src/index` | 25 files | 0 files |
 | `expression/src/utils/is` | 0 files | 25 files |
 | `matrix/src/types/DenseMatrix` | 3 files | 21 files |
-| `assembly/src/index` | 23 files | 0 files |
+| `assembly/src/index` | 24 files | 0 files |
 | `expression/src/utils/factory` | 2 files | 20 files |
 | `functions/src/type/matrix/utils/matAlgo12xSfs` | 2 files | 19 files |
 | `tensor/src/index` | 20 files | 0 files |
@@ -8985,184 +9011,186 @@ graph TD
 
     subgraph Functions/wasm
         N246[wasm-bridge]
-        N247[wasm-bridge]
-        N248[integrity]
-        N249[wasm-bridge]
+        N247[common]
+        N248[wasm-bridge]
+        N249[integrity]
         N250[wasm-bridge]
-        N251[resolve]
-        N252[wasm-bridge]
+        N251[wasm-bridge]
+        N252[resolve]
         N253[wasm-bridge]
         N254[wasm-bridge]
-        N255[WasmLoader]
+        N255[wasm-bridge]
+        N256[...1 more]
     end
 
     subgraph Expression/compiler
-        N256[compile]
-        N257[index]
+        N257[compile]
+        N258[index]
     end
 
     subgraph Expression/error
-        N258[DimensionError]
-        N259[IndexError]
-        N260[MathjsError]
+        N259[DimensionError]
+        N260[IndexError]
+        N261[MathjsError]
     end
 
     subgraph Expression/evaluator
-        N261[evaluate]
-        N262[index]
+        N262[evaluate]
+        N263[index]
     end
 
     subgraph Expression/function
-        N263[parser]
+        N264[parser]
     end
 
     subgraph Expression
-        N264[Help]
-        N265[index]
-        N266[keywords]
-        N267[operators]
-        N268[parse]
-        N269[Parser]
-        N270[types]
+        N265[Help]
+        N266[index]
+        N267[keywords]
+        N268[operators]
+        N269[parse]
+        N270[Parser]
+        N271[types]
     end
 
     subgraph Expression/node
-        N271[AccessorNode]
-        N272[ArrayNode]
-        N273[AssignmentNode]
-        N274[BlockNode]
-        N275[ConditionalNode]
-        N276[ConstantNode]
-        N277[FunctionAssignmentNode]
-        N278[FunctionNode]
-        N279[IndexNode]
-        N280[Node]
-        N281[...8 more]
+        N272[AccessorNode]
+        N273[ArrayNode]
+        N274[AssignmentNode]
+        N275[BlockNode]
+        N276[ConditionalNode]
+        N277[ConstantNode]
+        N278[FunctionAssignmentNode]
+        N279[FunctionNode]
+        N280[IndexNode]
+        N281[Node]
+        N282[...8 more]
     end
 
     subgraph Expression/transform
-        N282[errorTransform]
+        N283[errorTransform]
     end
 
     subgraph Expression/utils
-        N283[array]
-        N284[formatter]
-        N285[collection]
-        N286[customs]
-        N287[factory]
-        N288[is]
-        N289[latex]
-        N290[map]
-        N291[number]
-        N292[object]
-        N293[...3 more]
+        N284[array]
+        N285[formatter]
+        N286[collection]
+        N287[customs]
+        N288[factory]
+        N289[is]
+        N290[latex]
+        N291[map]
+        N292[number]
+        N293[object]
+        N294[...3 more]
     end
 
     subgraph Parser
-        N294[index]
-    end
-
-    subgraph Units
         N295[index]
     end
 
-    subgraph Numbers
+    subgraph Units
         N296[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N297[index]
     end
 
-    subgraph Evaluator
+    subgraph Ast
         N298[index]
     end
 
-    subgraph Linalg
+    subgraph Evaluator
         N299[index]
     end
 
-    subgraph Arithmetic
+    subgraph Linalg
         N300[index]
     end
 
-    subgraph Trigonometry
+    subgraph Arithmetic
         N301[index]
     end
 
-    subgraph Statistics
+    subgraph Trigonometry
         N302[index]
     end
 
-    subgraph Signal
+    subgraph Statistics
         N303[index]
     end
 
+    subgraph Signal
+        N304[index]
+    end
+
     subgraph Parallel
-        N304[ComputePool]
-        N305[index]
+        N305[ComputePool]
+        N306[index]
     end
 
     subgraph Parallel/operations
-        N306[elementwise]
-        N307[index]
-        N308[map]
-        N309[matmul]
-        N310[reduce]
+        N307[elementwise]
+        N308[index]
+        N309[map]
+        N310[matmul]
+        N311[reduce]
     end
 
     subgraph Parallel/ops
-        N311[bitwise]
+        N312[bitwise]
     end
 
     subgraph Parallel/strategies
-        N312[chunk]
-        N313[index]
-        N314[threshold]
+        N313[chunk]
+        N314[index]
+        N315[threshold]
     end
 
     subgraph Workbook
-        N315[executor]
-        N316[graph]
-        N317[index]
-        N318[parser]
-        N319[types]
+        N316[executor]
+        N317[graph]
+        N318[index]
+        N319[parser]
+        N320[types]
     end
 
     subgraph Assembly/algebra
-        N320[decomposition]
+        N321[decomposition]
     end
 
     subgraph Assembly
-        N321[index]
-        N322[poly]
-        N323[signal]
-        N324[sort]
-        N325[special]
-        N326[tridiag]
+        N322[elementwise]
+        N323[index]
+        N324[poly]
+        N325[signal]
+        N326[sort]
+        N327[special]
+        N328[tridiag]
     end
 
     subgraph Assembly/ops
-        N327[approx]
-        N328[array]
-        N329[bitwise]
-        N330[complex-array]
-        N331[complex-ops]
-        N332[curvefit]
-        N333[linalg]
-        N334[matrix]
-        N335[number-theory]
-        N336[optimization]
-        N337[...6 more]
+        N329[approx]
+        N330[array]
+        N331[bitwise]
+        N332[complex-array]
+        N333[complex-ops]
+        N334[curvefit]
+        N335[linalg]
+        N336[matrix]
+        N337[number-theory]
+        N338[optimization]
+        N339[...6 more]
     end
 
     subgraph Assembly/types
-        N338[complex]
+        N340[complex]
     end
 
     subgraph Compat
-        N339[index]
-        N340[shims]
+        N341[index]
+        N342[shims]
     end
 
     N2 --> N1
@@ -9249,15 +9277,15 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 557 |
+| Total TypeScript Files | 559 |
 | Total Modules | 69 |
-| Total Lines of Code | 148851 |
-| Total Exports | 3470 |
-| Total Re-exports | 1058 |
+| Total Lines of Code | 148397 |
+| Total Exports | 3522 |
+| Total Re-exports | 1080 |
 | Total Classes | 51 |
-| Total Interfaces | 315 |
-| Total Functions | 1286 |
-| Total Type Guards | 129 |
+| Total Interfaces | 316 |
+| Total Functions | 1309 |
+| Total Type Guards | 130 |
 | Total Enums | 0 |
 | Type-only Imports | 357 |
 | Runtime Circular Deps | 0 |
@@ -9265,5 +9293,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-06-25
+*Last Updated*: 2026-06-26
 *Version*: 0.1.0

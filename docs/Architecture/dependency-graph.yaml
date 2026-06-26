@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: "2026-06-25"
-  totalFiles: 557
+  lastUpdated: "2026-06-26"
+  totalFiles: 559
   totalModules: 69
-  totalExports: 3470
+  totalExports: 3522
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14285,6 +14285,13 @@ modules:
           imports:
             - wasmLoader
             - WasmModule
+        - file: ../bridges/common.js
+          imports:
+            - getWasm
+            - isAsWasm
+            - withAsI32
+            - asReadReturnedI32
+            - RawWasm
       exports:
         - WASM_BITWISE_THRESHOLD
         - runBinaryBitwiseWasm
@@ -14296,8 +14303,8 @@ modules:
         - resetBitwiseWasm
       constants:
         - WASM_BITWISE_THRESHOLD
-    functions/src/wasm/elementwise/wasm-bridge.ts:
-      description: WASM bridge for unary elementwise transcendental array ops.
+    functions/src/wasm/bridges/common.ts:
+      description: "Shared helpers for the WASM dispatch bridges (dup-audit Opportunity #2,"
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14305,6 +14312,42 @@ modules:
           imports:
             - wasmLoader
             - WasmModule
+      exports:
+        - getWasm
+        - isAsWasm
+        - resetScratch
+        - runUnaryPtr
+        - runChainPtr
+        - asReadReturnedF64
+        - asReadReturnedI32
+        - withAsF64
+        - withAsI32
+        - makeUnaryArrayDispatch
+      interfaces:
+        - RawWasm
+      functions:
+        - getWasm
+        - isAsWasm
+        - resetScratch
+        - runUnaryPtr
+        - runChainPtr
+        - asReadReturnedF64
+        - asReadReturnedI32
+        - withAsF64
+        - withAsI32
+        - makeUnaryArrayDispatch
+    functions/src/wasm/elementwise/wasm-bridge.ts:
+      description: WASM bridge for unary elementwise transcendental array ops.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../bridges/common.js
+          imports:
+            - getWasm
+            - runUnaryPtr
+            - runChainPtr
+            - PtrUnaryKernel
+            - RawWasm
       exports:
         - WASM_ELEMENTWISE_THRESHOLD
         - WASM_ELEMENTWISE_OPS
@@ -14339,7 +14382,13 @@ modules:
         - file: ../WasmLoader.js
           imports:
             - wasmLoader
-            - WasmModule
+        - file: ../bridges/common.js
+          imports:
+            - getWasm
+            - isAsWasm
+            - withAsF64
+            - asReadReturnedF64
+            - RawWasm
       exports:
         - WASM_TRIDIAG_THRESHOLD
         - WASM_INTERP_THRESHOLD
@@ -14365,7 +14414,13 @@ modules:
         - file: ../WasmLoader.js
           imports:
             - wasmLoader
-            - WasmModule
+        - file: ../bridges/common.js
+          imports:
+            - getWasm
+            - isAsWasm
+            - withAsF64
+            - asReadReturnedF64
+            - RawWasm
       exports:
         - WASM_POLY_THRESHOLD
         - WASM_POLY_FIT_THRESHOLD
@@ -14403,10 +14458,13 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../WasmLoader.js
+        - file: ../bridges/common.js
           imports:
-            - wasmLoader
-            - WasmModule
+            - getWasm
+            - isAsWasm
+            - withAsF64
+            - asReadReturnedF64
+            - RawWasm
       exports:
         - WASM_SIGNAL_THRESHOLD
         - applyWindowJS
@@ -14437,9 +14495,13 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../WasmLoader.js
+        - file: ../bridges/common.js
           imports:
-            - wasmLoader
+            - getWasm
+            - isAsWasm
+            - withAsF64
+            - asReadReturnedF64
+            - RawWasm
       exports:
         - WASM_SORT_THRESHOLD
         - sortF64JS
@@ -14465,9 +14527,23 @@ modules:
         - file: ../WasmLoader.js
           imports:
             - wasmLoader
-            - WasmModule
+        - file: ../bridges/common.js
+          imports:
+            - getWasm
+            - isAsWasm
+            - withAsF64
+            - asReadReturnedF64
+            - makeUnaryArrayDispatch
+            - RawWasm
       exports:
         - WASM_SPECIAL_THRESHOLD
+        - besselJ0Dispatch
+        - besselJ1Dispatch
+        - besselY0Dispatch
+        - besselY1Dispatch
+        - lgammaDispatch
+        - ellipticKDispatch
+        - ellipticEDispatch
         - besselJ0JS
         - besselJ1JS
         - besselJnJS
@@ -14476,16 +14552,11 @@ modules:
         - besselYnJS
         - airyAiJS
         - airyBiJS
-        - besselJ0Dispatch
-        - besselJ1Dispatch
         - besselJDispatch
-        - besselY0Dispatch
-        - besselY1Dispatch
         - besselYDispatch
         - airyAiDispatch
         - airyBiDispatch
         - lgammaJS
-        - lgammaDispatch
         - carlsonRCJS
         - carlsonRFJS
         - carlsonRDJS
@@ -14514,8 +14585,6 @@ modules:
         - resetLgammaWasm
         - ellipticKJS
         - ellipticEJS
-        - ellipticKDispatch
-        - ellipticEDispatch
       functions:
         - besselJ0JS
         - besselJ1JS
@@ -14525,16 +14594,11 @@ modules:
         - besselYnJS
         - airyAiJS
         - airyBiJS
-        - besselJ0Dispatch
-        - besselJ1Dispatch
         - besselJDispatch
-        - besselY0Dispatch
-        - besselY1Dispatch
         - besselYDispatch
         - airyAiDispatch
         - airyBiDispatch
         - lgammaJS
-        - lgammaDispatch
         - carlsonRCJS
         - carlsonRFJS
         - carlsonRDJS
@@ -14563,10 +14627,15 @@ modules:
         - resetLgammaWasm
         - ellipticKJS
         - ellipticEJS
-        - ellipticKDispatch
-        - ellipticEDispatch
       constants:
         - WASM_SPECIAL_THRESHOLD
+        - besselJ0Dispatch
+        - besselJ1Dispatch
+        - besselY0Dispatch
+        - besselY1Dispatch
+        - lgammaDispatch
+        - ellipticKDispatch
+        - ellipticEDispatch
     functions/src/wasm/WasmLoader.ts:
       description: WASM Loader - Loads and manages WebAssembly modules
       externalDependencies: []
@@ -17394,6 +17463,49 @@ modules:
         - matrix_inverse
         - matrix_determinant
   assembly:
+    assembly/src/elementwise.ts:
+      description: Unary elementwise transcendental array kernels — POINTER-ABI AssemblyScript.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - array_abs_ptr
+        - array_sin_ptr
+        - array_cos_ptr
+        - array_tan_ptr
+        - array_exp_ptr
+        - array_log_ptr
+        - array_atan_ptr
+        - array_sinh_ptr
+        - array_tanh_ptr
+        - array_atanh_ptr
+        - array_expm1_ptr
+        - array_log1p_ptr
+        - array_log2_ptr
+        - array_log10_ptr
+        - array_sec_ptr
+        - array_csc_ptr
+        - array_cot_ptr
+        - array_erfc_ptr
+      functions:
+        - array_abs_ptr
+        - array_sin_ptr
+        - array_cos_ptr
+        - array_tan_ptr
+        - array_exp_ptr
+        - array_log_ptr
+        - array_atan_ptr
+        - array_sinh_ptr
+        - array_tanh_ptr
+        - array_atanh_ptr
+        - array_expm1_ptr
+        - array_log1p_ptr
+        - array_log2_ptr
+        - array_log10_ptr
+        - array_sec_ptr
+        - array_csc_ptr
+        - array_cot_ptr
+        - array_erfc_ptr
     assembly/src/index.ts:
       description: MathTS AssemblyScript Entry Point
       externalDependencies: []
@@ -17696,6 +17808,29 @@ modules:
             - poly_fit_f64
             - cheb_fit_f64
             - legendre_fit_f64
+            - poly_resultant_f64
+            - poly_discriminant_f64
+          reExport: true
+        - file: ./elementwise
+          imports:
+            - array_abs_ptr
+            - array_sin_ptr
+            - array_cos_ptr
+            - array_tan_ptr
+            - array_exp_ptr
+            - array_log_ptr
+            - array_atan_ptr
+            - array_sinh_ptr
+            - array_tanh_ptr
+            - array_atanh_ptr
+            - array_expm1_ptr
+            - array_log1p_ptr
+            - array_log2_ptr
+            - array_log10_ptr
+            - array_sec_ptr
+            - array_csc_ptr
+            - array_cot_ptr
+            - array_erfc_ptr
           reExport: true
         - file: ./tridiag
           imports:
@@ -17707,9 +17842,11 @@ modules:
             - bessel_j0_f64
             - bessel_j1_f64
             - bessel_jn_f64
+            - bessel_j_f64
             - bessel_y0_f64
             - bessel_y1_f64
             - bessel_yn_f64
+            - bessel_y_f64
             - airy_ai_f64
             - airy_bi_f64
             - elliptic_k_f64
@@ -18007,14 +18144,36 @@ modules:
         - poly_fit_f64
         - cheb_fit_f64
         - legendre_fit_f64
+        - poly_resultant_f64
+        - poly_discriminant_f64
+        - array_abs_ptr
+        - array_sin_ptr
+        - array_cos_ptr
+        - array_tan_ptr
+        - array_exp_ptr
+        - array_log_ptr
+        - array_atan_ptr
+        - array_sinh_ptr
+        - array_tanh_ptr
+        - array_atanh_ptr
+        - array_expm1_ptr
+        - array_log1p_ptr
+        - array_log2_ptr
+        - array_log10_ptr
+        - array_sec_ptr
+        - array_csc_ptr
+        - array_cot_ptr
+        - array_erfc_ptr
         - tridiag_solve_f64
         - divided_difference_f64
         - bessel_j0_f64
         - bessel_j1_f64
         - bessel_jn_f64
+        - bessel_j_f64
         - bessel_y0_f64
         - bessel_y1_f64
         - bessel_yn_f64
+        - bessel_y_f64
         - airy_ai_f64
         - airy_bi_f64
         - elliptic_k_f64
@@ -18305,14 +18464,36 @@ modules:
         - poly_fit_f64
         - cheb_fit_f64
         - legendre_fit_f64
+        - poly_resultant_f64
+        - poly_discriminant_f64
+        - array_abs_ptr
+        - array_sin_ptr
+        - array_cos_ptr
+        - array_tan_ptr
+        - array_exp_ptr
+        - array_log_ptr
+        - array_atan_ptr
+        - array_sinh_ptr
+        - array_tanh_ptr
+        - array_atanh_ptr
+        - array_expm1_ptr
+        - array_log1p_ptr
+        - array_log2_ptr
+        - array_log10_ptr
+        - array_sec_ptr
+        - array_csc_ptr
+        - array_cot_ptr
+        - array_erfc_ptr
         - tridiag_solve_f64
         - divided_difference_f64
         - bessel_j0_f64
         - bessel_j1_f64
         - bessel_jn_f64
+        - bessel_j_f64
         - bessel_y0_f64
         - bessel_y1_f64
         - bessel_yn_f64
+        - bessel_y_f64
         - airy_ai_f64
         - airy_bi_f64
         - elliptic_k_f64
@@ -18425,6 +18606,8 @@ modules:
         - bessel_y0_f64
         - bessel_y1_f64
         - bessel_yn_f64
+        - bessel_j_f64
+        - bessel_y_f64
         - airy_ai_f64
         - airy_bi_f64
         - elliptic_k_f64
@@ -18444,6 +18627,8 @@ modules:
         - bessel_y0_f64
         - bessel_y1_f64
         - bessel_yn_f64
+        - bessel_j_f64
+        - bessel_y_f64
         - airy_ai_f64
         - airy_bi_f64
         - elliptic_k_f64
@@ -19857,6 +20042,7 @@ dependencyGraph:
     - name: Functions/wasm
       files:
         - functions/src/wasm/bitwise/wasm-bridge.ts
+        - functions/src/wasm/bridges/common.ts
         - functions/src/wasm/elementwise/wasm-bridge.ts
         - functions/src/wasm/integrity.ts
         - functions/src/wasm/interpolation/wasm-bridge.ts
@@ -19990,6 +20176,7 @@ dependencyGraph:
         - assembly/src/algebra/decomposition.ts
     - name: Assembly
       files:
+        - assembly/src/elementwise.ts
         - assembly/src/index.ts
         - assembly/src/poly.ts
         - assembly/src/signal.ts
@@ -20022,19 +20209,19 @@ dependencyGraph:
         - compat/src/index.ts
         - compat/src/shims.ts
 statistics:
-  totalTypeScriptFiles: 557
+  totalTypeScriptFiles: 559
   totalModules: 69
-  totalLinesOfCode: 148851
-  totalExports: 3470
+  totalLinesOfCode: 148397
+  totalExports: 3522
   totalClasses: 51
-  totalInterfaces: 315
-  totalFunctions: 1286
-  totalTypeGuards: 129
+  totalInterfaces: 316
+  totalFunctions: 1309
+  totalTypeGuards: 130
   totalEnums: 0
-  totalConstants: 1117
-  totalReExports: 1058
+  totalConstants: 1124
+  totalReExports: 1080
   totalTypeOnlyImports: 357
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 2
   unusedFilesCount: 0
-  unusedExportsCount: 475
+  unusedExportsCount: 474

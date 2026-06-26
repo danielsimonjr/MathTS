@@ -2256,10 +2256,12 @@ function generatePackageDependencySection(
  * hand-maintained doc (see docs/Architecture/WASM_ACCELERATION.md).
  */
 type Routing = 'wasm' | 'parallel' | 'wasm+parallel' | 'js-only';
-/** Whether a wasm-routed function actually executes wasm on the *bundled* binary,
- * or its dispatch bridge falls back to JS (it uses the AssemblyScript `__new`
- * allocator, absent from a Rust-only module). `unknown` when the bundled wasm or
- * the dispatch's bridge couldn't be resolved (e.g. dist not built). */
+/** Whether a wasm-routed function actually executes wasm on the *bundled* binary
+ * (the AssemblyScript `mathts-as.wasm` the functions package loads by default),
+ * or its dispatch bridge falls back to JS (it has no AS-managed execution path —
+ * e.g. the poly-fit / Airy / argsort+rank kernels deliberately kept on JS pending
+ * the Rust→AS migration Phase 6 fixes). `unknown` when the bundled wasm or the
+ * dispatch's bridge couldn't be resolved (e.g. dist not built). */
 type EffectiveBackend = 'wasm' | 'js-fallback' | 'unknown';
 interface WasmPairingEntry {
   name: string;
@@ -2275,7 +2277,8 @@ interface WasmPairing {
   parallelOnlyCount: number; // worker-parallel, no wasm
   jsOnlyCount: number;
   /** Of acceleratedCount, how many actually run wasm vs fall back to JS on the
-   * bundled binary (runtime probe of functions/dist/wasm/mathts.wasm exports). */
+   * bundled binary (runtime probe of functions/dist/wasm/mathts-as.wasm — the AS
+   * binary the functions package loads by default). */
   bundledBackend: 'rust' | 'assemblyscript' | 'unknown';
   wasmEffectiveCount: number;
   jsFallbackCount: number;
@@ -2290,13 +2293,16 @@ interface WasmPairing {
 /**
  * Runtime-effectiveness probe (the dynamic complement to the static routing scan).
  * A function may *route* to a `*Dispatch` yet still run JS at runtime, because the
- * dispatch's bridge allocates via the AssemblyScript `__new` runtime, which a
- * Rust-only wasm module does not export. Determines, per `*Dispatch`, whether it
- * actually executes wasm on the *bundled* binary, by combining:
- *   (a) the bundled wasm's export list — does it have `__new`? (read synchronously
- *       via WebAssembly.Module.exports, no instantiation), and
- *   (b) whether each dispatch's bridge file makes real AS-allocator call sites
- *       (call syntax `\.allocateFloat64Array\(`, so comments don't false-positive).
+ * dispatch's bridge has no AS-managed execution path (post Phase 5 functions
+ * cutover the bridges dispatch AS→JS only; several `*Dispatch` deliberately stay
+ * on JS — poly fits, Airy, argsort/rank — pending the Phase 6 AS-kernel fixes).
+ * Determines, per `*Dispatch`, whether it actually executes wasm on the *bundled*
+ * binary, by combining:
+ *   (a) the bundled AS wasm's export list — does it have `__new`? (read
+ *       synchronously via WebAssembly.Module.exports, no instantiation), and
+ *   (b) whether each `*Dispatch`'s own body invokes a real AS execution helper
+ *       (`withAsF64`/`withAsI32`/`runUnaryPtr`/`runChainPtr`/`makeUnaryArrayDispatch`,
+ *       directly or via another in-file `*Dispatch` it delegates to).
  */
 /**
  * Read a `.wasm` module's export-name table without instantiating it
@@ -2329,7 +2335,9 @@ function analyzeWasmRuntime(rootDir: string): {
 } {
   const dispatchWasm = new Map<string, boolean | null>();
 
-  const wasmPath = join(rootDir, 'functions', 'dist', 'wasm', 'mathts.wasm');
+  // The functions package loads the AssemblyScript binary by default
+  // (mathts-as.wasm); the runtime probe reads that, not the legacy Rust copy.
+  const wasmPath = join(rootDir, 'functions', 'dist', 'wasm', 'mathts-as.wasm');
   const exports = readWasmExports(wasmPath);
   const bundledHasNew: boolean | null = exports === null ? null : exports.has('__new');
   const bundledBackend =
@@ -2337,8 +2345,12 @@ function analyzeWasmRuntime(rootDir: string): {
 
   const wasmDir = join(rootDir, 'functions', 'src', 'wasm');
   if (!existsSync(wasmDir)) return { bundledBackend, dispatchWasm };
-  const asAllocRe =
-    /\.(?:allocateFloat64Array|allocateFloat64ArrayEmpty|allocateInt32Array|allocateInt32ArrayEmpty)\(/;
+  // A `*Dispatch` actually executes wasm iff its own body invokes one of the AS
+  // execution helpers (directly or via another in-file `*Dispatch` it delegates
+  // to). The bridges are AS→JS only post Phase 5, so this single marker set
+  // captures the genuine wasm path; dispatches with no marker (poly fits, Airy,
+  // argsort/rank) are honest js-fallback.
+  const asExecRe = /\b(?:withAsF64|withAsI32|runUnaryPtr|runChainPtr|makeUnaryArrayDispatch)\b/;
   const defRe = /\b(?:function|const)\s+(\w+Dispatch)\b/g;
   const walk = (dir: string): void => {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -2346,13 +2358,38 @@ function analyzeWasmRuntime(rootDir: string): {
       if (e.isDirectory()) walk(p);
       else if (e.name.endsWith('.ts')) {
         const src = readFileSync(p, 'utf-8');
-        const usesAsAlloc = asAllocRe.test(src);
-        // Runs wasm iff it doesn't need the AS allocator, OR the bundled module
-        // has __new. Unknown when we couldn't read the bundled binary.
-        const runsWasm = bundledHasNew === null ? null : !usesAsAlloc || bundledHasNew;
+        // Slice the file into per-`*Dispatch` segments (def start → next def start).
+        const segs: { name: string; body: string }[] = [];
         let dm: RegExpExecArray | null;
         defRe.lastIndex = 0;
-        while ((dm = defRe.exec(src)) !== null) dispatchWasm.set(dm[1], runsWasm);
+        const marks: { name: string; idx: number }[] = [];
+        while ((dm = defRe.exec(src)) !== null) marks.push({ name: dm[1], idx: dm.index });
+        for (let i = 0; i < marks.length; i++) {
+          const end = i + 1 < marks.length ? marks[i + 1].idx : src.length;
+          segs.push({ name: marks[i].name, body: src.slice(marks[i].idx, end) });
+        }
+        // Initial: does the segment invoke an AS execution helper directly?
+        const usesAs = new Map<string, boolean>();
+        for (const s of segs) usesAs.set(s.name, asExecRe.test(s.body));
+        // Propagate through in-file delegation (e.g. besselJDispatch →
+        // besselOrderDispatch). Fixpoint; depth here is ≤ 2, 3 passes is safe.
+        for (let pass = 0; pass < 3; pass++) {
+          for (const s of segs) {
+            if (usesAs.get(s.name)) continue;
+            for (const other of segs) {
+              if (other.name !== s.name && usesAs.get(other.name) && s.body.includes(other.name)) {
+                usesAs.set(s.name, true);
+                break;
+              }
+            }
+          }
+        }
+        for (const s of segs) {
+          // Unknown when we couldn't read the bundled binary; otherwise the AS
+          // binary has __new, so wasm runs iff the dispatch has an AS exec path.
+          const runsWasm = bundledHasNew === null ? null : bundledHasNew && usesAs.get(s.name)!;
+          dispatchWasm.set(s.name, runsWasm);
+        }
       }
     }
   };
@@ -2457,7 +2494,8 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   md += `Per public \`mathTyped\` function in \`functions/src/typed/\`, its acceleration `;
   md += `routing: **wasm** (a \`*Dispatch\` bridge), **parallel** (worker pool via `;
   md += `\`computePool\`/\`shouldParallelize\`), or **js-only**. WASM engages for `;
-  md += `\`Float64Array\` inputs above threshold; dispatch order is Rust → AS → JS.\n\n`;
+  md += `\`Float64Array\` inputs above threshold; the functions dispatch is AS → JS `;
+  md += `(the legacy Rust path was removed from the functions bridges in the Phase 5 cutover).\n\n`;
   md += `> Detection is per-\`mathTyped\`-block direct references; routing reached only via `;
   md += `helper functions outside the block is not traced, so this can under-report.\n\n`;
   md += `| Routing (static) | Count |\n| --- | --: |\n`;
@@ -2465,11 +2503,11 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   md += `| Parallel only (worker pool) | ${p.parallelOnlyCount} |\n`;
   md += `| JS-only | ${p.jsOnlyCount} |\n`;
   md += `| **Total** | **${p.total}** |\n\n`;
-  md += `**Runtime effectiveness** (probe of the bundled \`functions/dist/wasm/mathts.wasm\`, `;
+  md += `**Runtime effectiveness** (probe of the bundled \`functions/dist/wasm/mathts-as.wasm\`, `;
   md += `backend: **${p.bundledBackend}**): of the ${p.acceleratedCount} wasm-routed functions, `;
   md += `**${p.wasmEffectiveCount} actually execute wasm**, **${p.jsFallbackCount} fall back to JS** `;
-  md += `(their dispatch bridge needs the AssemblyScript \`__new\` allocator, absent from a `;
-  md += `Rust-only module — the dispatch's allocate throws and is caught → JS).\n\n`;
+  md += `(their \`*Dispatch\` has no AS-managed execution path — the poly-fit / Airy / argsort+rank `;
+  md += `kernels are deliberately kept on JS pending the Rust→AS migration Phase 6 fixes).\n\n`;
   md += `## WASM-accelerated functions\n\n| Function | Routing | Effective | Bridge dispatch | Module |\n| --- | --- | --- | --- | --- |\n`;
   for (const e of p.accelerated) {
     md += `| \`${e.name}\` | ${e.routing} | ${e.effectiveBackend} | \`${e.dispatch.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
@@ -2483,12 +2521,13 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
     md += `| ${f.replace(/\.ts$/, '')} | ${p.byFile[f].wasm} | ${p.byFile[f].parallel} | ${p.byFile[f].jsOnly} |\n`;
   }
   md += `\n> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `;
-  md += `\`matrix\` package backend (not the typed-API dispatch counted here). The elementwise `;
-  md += `transcendentals (abs/sin/cos/tan/exp/log) are the wasm-effective set — benchmarked `;
-  md += `1.35–5.1× over JS incl. copy. The js-fallback functions (bessel/airy/elliptic/…) were `;
-  md += `benchmarked too: per-op wasm is break-even-to-slower for them, so the JS fallback is not `;
-  md += `a regression. Reductions/binary-arithmetic stay JS by the same measure. See `;
-  md += `docs/roadmap/WASM_PAIRING_GAP_PLAN.md and the \`bench:elementwise\`/\`bench:special-array\` benches.\n`;
+  md += `\`matrix\` package backend (not the typed-API dispatch counted here), which still uses `;
+  md += `the Rust binary for fft/eig/svd/decomposition — its Rust→AS migration is a separate, `;
+  md += `pending slice. The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS `;
+  md += `special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback `;
+  md += `functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken `;
+  md += `or unstable — the four Rust→AS migration Phase 6 follow-ups. See `;
+  md += `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md and the \`bench:elementwise\`/\`bench:special-array\` benches.\n`;
   return md;
 }
 

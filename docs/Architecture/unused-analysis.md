@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-06-25
+**Generated**: 2026-06-26
 
 ## Summary
 
 - **Potentially unused files**: 0
-- **Potentially unused exports**: 475
+- **Potentially unused exports**: 474
 
 ## Potentially Unused Files
 
@@ -542,6 +542,10 @@ These exports are not imported by any other file in the codebase:
 
 - `resetBitwiseWasm` (function)
 
+### `functions/src/wasm/bridges/common.ts`
+
+- `resetScratch` (function)
+
 ### `functions/src/wasm/elementwise/wasm-bridge.ts`
 
 - `WASM_ELEMENTWISE_THRESHOLD` (constant)
@@ -806,11 +810,6 @@ These exports are not imported by any other file in the codebase:
 - `WorkbookMetadata` (interface)
 - `RuntimeConfig` (interface)
 - `ExecutionMode` (type)
-
-### `assembly/src/poly.ts`
-
-- `poly_resultant_f64` (function)
-- `poly_discriminant_f64` (function)
 
 ### `assembly/src/types/complex.ts`
 
