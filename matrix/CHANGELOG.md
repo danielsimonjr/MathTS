@@ -1,5 +1,26 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.1.9
+
+### Changed
+
+- **Rust→AssemblyScript cutover (Phase 7b).** The matrix package now runs its
+  heavy WASM ops on the AssemblyScript binary and the Rust backend is retired:
+  - `WasmLoader` defaults to `mathts-as.wasm` (opt back into the legacy Rust
+    `mathts.wasm` with `MATHTS_WASM_BACKEND=rust`). SHA-384 integrity
+    verification is unchanged.
+  - `svdWasm` → AS `matrix_svd`; `eigWasm` / `spectralRadiusWasm` → AS
+    `matrix_eig_symmetric` / `matrix_spectral_radius`; FFT → AS `fft` / `rfft`
+    / `powerSpectrum`. Each keeps its JS fallback. Singular values and FFT
+    output are bit-identical to the JS references; eig parity is validated by
+    the `A·v ≈ λ·v` residual.
+  - Removed the `rust-wasm` backend (`RustWASMBackend`, `RustWasmLoader`), its
+    registration, the `'rust-wasm'` `BackendType`, and the dead
+    `rustWasmPreferredOps` / `rustWasmThreshold` routing in `BackendManager`.
+
+  No public API changes to the matrix surface. The `lib/wasm/mathts.wasm` Rust
+  binary is no longer referenced by this package.
+
 ## 0.1.8
 
 ### Changed

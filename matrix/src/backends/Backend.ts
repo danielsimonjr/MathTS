@@ -13,7 +13,7 @@ import { DenseMatrix } from '../types/DenseMatrix.js';
 /**
  * Backend type identifier
  */
-export type BackendType = 'js' | 'wasm' | 'rust-wasm' | 'gpu' | 'parallel';
+export type BackendType = 'js' | 'wasm' | 'gpu' | 'parallel';
 
 /**
  * Backend selection hints

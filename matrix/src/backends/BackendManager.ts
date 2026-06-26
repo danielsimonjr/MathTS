@@ -28,17 +28,11 @@ export type { OperationType };
  */
 export interface ExtendedBackendHints extends BackendHints {
   /** Specific thresholds by operation type */
-  operationThresholds?: Partial<
-    Record<OperationType, { wasm?: number; gpu?: number; rustWasm?: number }>
-  >;
+  operationThresholds?: Partial<Record<OperationType, { wasm?: number; gpu?: number }>>;
   /** Enable automatic SIMD detection for WASM */
   autoSIMD?: boolean;
   /** Fallback to JS on backend failure */
   fallbackOnError?: boolean;
-  /** Minimum elements to use Rust WASM backend (default: 1000) */
-  rustWasmThreshold?: number;
-  /** Operations that always prefer Rust WASM regardless of size */
-  rustWasmPreferredOps?: OperationType[];
 }
 
 /**
@@ -47,15 +41,12 @@ export interface ExtendedBackendHints extends BackendHints {
 export const DEFAULT_EXTENDED_HINTS: Required<ExtendedBackendHints> = {
   ...DEFAULT_BACKEND_HINTS,
   operationThresholds: {
-    multiply: { wasm: 500, gpu: 50000, rustWasm: 1000 },
-    decomposition: { wasm: 100, gpu: 10000, rustWasm: 100 },
-    transpose: { wasm: 2000, gpu: 200000, rustWasm: 2000 },
+    multiply: { wasm: 500, gpu: 50000 },
+    decomposition: { wasm: 100, gpu: 10000 },
+    transpose: { wasm: 2000, gpu: 200000 },
   },
   autoSIMD: true,
   fallbackOnError: true,
-  rustWasmThreshold: 1000,
-  /** Heavy operations that always prefer Rust WASM (faer/rustfft) when available */
-  rustWasmPreferredOps: ['fft', 'eig', 'svd', 'decomposition'],
 };
 
 /**
@@ -181,21 +172,12 @@ export class BackendManager {
    *
    * Selection priority:
    *   1. Preferred backend (if explicitly set)
-   *   2. Heavy operations (fft, eig, svd, decomposition) -> Rust WASM (if loaded)
-   *   3. Elements > gpuThreshold -> GPU (if available)
-   *   4. Elements > rustWasmThreshold -> Rust WASM (if loaded)
-   *   5. Elements > wasmThreshold -> AS WASM (if loaded)
-   *   6. JS fallback
+   *   2. Elements > gpuThreshold -> GPU (if available)
+   *   3. Elements > wasmThreshold -> AS WASM (if loaded)
+   *   4. JS fallback
    */
   selectBackend(elementCount: number, operation?: OperationType): MatrixBackend {
-    const {
-      preferredBackend,
-      operationThresholds,
-      wasmThreshold,
-      gpuThreshold,
-      rustWasmThreshold,
-      rustWasmPreferredOps,
-    } = this.hints;
+    const { preferredBackend, operationThresholds, wasmThreshold, gpuThreshold } = this.hints;
 
     // Check preferred backend first
     if (preferredBackend !== 'js' && backendRegistry.has(preferredBackend)) {
@@ -205,38 +187,20 @@ export class BackendManager {
       }
     }
 
-    // Heavy operations always prefer Rust WASM (faer/rustfft) regardless of size
-    if (
-      operation &&
-      rustWasmPreferredOps?.includes(operation) &&
-      backendRegistry.has('rust-wasm')
-    ) {
-      const rustBackend = backendRegistry.get('rust-wasm');
-      if (rustBackend) return rustBackend;
-    }
-
     // Get operation-specific thresholds
     let wasmThresh = wasmThreshold;
     let gpuThresh = gpuThreshold;
-    let rustWasmThresh = rustWasmThreshold;
 
     if (operation && operationThresholds?.[operation]) {
       const opThresh = operationThresholds[operation];
       if (opThresh?.wasm !== undefined) wasmThresh = opThresh.wasm;
       if (opThresh?.gpu !== undefined) gpuThresh = opThresh.gpu;
-      if (opThresh?.rustWasm !== undefined) rustWasmThresh = opThresh.rustWasm;
     }
 
     // Auto-select based on size thresholds
     if (elementCount >= gpuThresh && backendRegistry.has('gpu')) {
       const gpuBackend = backendRegistry.get('gpu');
       if (gpuBackend) return gpuBackend;
-    }
-
-    // Prefer Rust WASM over AS WASM for large matrices
-    if (elementCount >= rustWasmThresh && backendRegistry.has('rust-wasm')) {
-      const rustBackend = backendRegistry.get('rust-wasm');
-      if (rustBackend) return rustBackend;
     }
 
     if (elementCount >= wasmThresh && backendRegistry.has('wasm')) {
@@ -631,7 +595,6 @@ export class BackendManager {
       const backendUsage: Record<BackendType, number> = {
         js: 0,
         wasm: 0,
-        'rust-wasm': 0,
         gpu: 0,
         parallel: 0,
       };

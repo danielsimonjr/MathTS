@@ -48,11 +48,9 @@ function makeThrowingBackend(type: BackendType): MatrixBackend {
 }
 
 describe('DEFAULT_EXTENDED_HINTS', () => {
-  it('extends the base hints with operation thresholds and rust-wasm preferences', () => {
-    expect(DEFAULT_EXTENDED_HINTS.rustWasmThreshold).toBe(1000);
+  it('extends the base hints with operation thresholds', () => {
     expect(DEFAULT_EXTENDED_HINTS.autoSIMD).toBe(true);
     expect(DEFAULT_EXTENDED_HINTS.fallbackOnError).toBe(true);
-    expect(DEFAULT_EXTENDED_HINTS.rustWasmPreferredOps).toContain('fft');
     expect(DEFAULT_EXTENDED_HINTS.operationThresholds.multiply?.wasm).toBe(500);
   });
 });
@@ -75,8 +73,8 @@ describe('BackendManager — construction & hints', () => {
   });
 
   it('getHints() reflects custom hints passed to the constructor', () => {
-    const custom = createBackendManager({ rustWasmThreshold: 50 });
-    expect(custom.getHints().rustWasmThreshold).toBe(50);
+    const custom = createBackendManager({ wasmThreshold: 50 });
+    expect(custom.getHints().wasmThreshold).toBe(50);
     custom.destroy();
   });
 
@@ -124,15 +122,14 @@ describe('BackendManager — selectBackend / getActiveBackend', () => {
   it('applies operation-specific thresholds without throwing for a known op', () => {
     // decomposition has its own thresholds in DEFAULT_EXTENDED_HINTS
     const sel = mgr.selectBackend(50, 'decomposition');
-    expect(['js', 'wasm', 'rust-wasm', 'gpu']).toContain(sel.type);
+    expect(['js', 'wasm', 'gpu']).toContain(sel.type);
   });
 
-  it('selects a backend for a heavy preferred op (rust-wasm preference branch)', () => {
-    // fft is in rustWasmPreferredOps. When the rust-wasm backend is registered
-    // and reports available, the heavy-op preference picks it even for tiny
-    // inputs; otherwise selection falls through to js. Either is valid.
+  it('selects JS for a tiny heavy op (no rust-wasm preference after Phase 7b)', () => {
+    // Heavy-op routing to a dedicated Rust backend was removed in Phase 7b;
+    // tiny inputs fall through to JS regardless of operation.
     const sel = mgr.selectBackend(10, 'fft');
-    expect(['js', 'rust-wasm']).toContain(sel.type);
+    expect(sel.type).toBe('js');
   });
 });
 
@@ -336,11 +333,12 @@ describe('BackendManager — executeWithFallback', () => {
   });
 
   it('honors a preferred backend that is registered and available', () => {
-    // rust-wasm is registered in the global registry and reports available.
+    // The AS wasm backend is registered in the global registry; when forced and
+    // available it is selected even for tiny inputs.
     const mgr = createBackendManager();
-    mgr.forceBackend('rust-wasm');
-    if (backendRegistry.has('rust-wasm')) {
-      expect(mgr.selectBackend(1).type).toBe('rust-wasm');
+    mgr.forceBackend('wasm');
+    if (backendRegistry.has('wasm')) {
+      expect(mgr.selectBackend(1).type).toBe('wasm');
     }
     mgr.destroy();
   });

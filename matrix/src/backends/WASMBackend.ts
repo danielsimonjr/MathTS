@@ -19,11 +19,12 @@
  *     5. Copy caller data into the buffer
  *     6. `__unpin(buffer)`       — the header now owns the buffer reference
  *
- *   The Rust artifact has no managed runtime and uses a completely different
- *   ABI (camelCase exports, flat-memory raw pointers); for that backend, use
- *   `RustWASMBackend` (from `./RustWASMBackend.ts`).
+ *   The legacy Rust artifact had no managed runtime and used a completely
+ *   different ABI (camelCase exports, flat-memory raw pointers). It was
+ *   retired in Phase 7b; the AssemblyScript binary is now the only WASM
+ *   backend.
  *
- * Naming map (Rust ↔ AssemblyScript) — for cross-backend reference:
+ * Naming map (legacy Rust ↔ AssemblyScript) — kept for historical reference:
  *
  *   Op                  Rust (camelCase, flat ptrs)        AS (snake_case, header refs)
  *   ------------------  ---------------------------------  -------------------------------
@@ -40,9 +41,10 @@
  *   norm                simdNormF64(aPtr,n)                array_norm(a)
  *   dot                 dotProduct(aPtr,bPtr,n)            array_dot(a,b)
  *
- *   AssemblyScript has no LU / QR / Cholesky / inverse / determinant exports,
- *   so those operations fall back to the JS implementation. The Rust backend
- *   has them — route those calls through `RustWASMBackend` if you need WASM.
+ *   AssemblyScript also exports LU / QR / Cholesky / inverse / determinant
+ *   (see assembly/src/algebra/decomposition.ts); the methods below dispatch
+ *   to them when present and fall back to the in-process JS implementation
+ *   otherwise.
  *
  * @packageDocumentation
  */
@@ -305,9 +307,8 @@ const DEFAULT_CONFIG: Required<WASMBackendConfig> = {
 /**
  * WASM Backend for matrix operations (AssemblyScript path).
  *
- * For the Rust path use `RustWASMBackend`. Both implement `MatrixBackend`
- * and report different `type` discriminants ('wasm' vs 'rust-wasm') so that
- * `BackendManager` can route operations to the correct one.
+ * This is the sole WASM backend after Phase 7b retired the Rust path; it
+ * reports `type: 'wasm'` and is registered by `register-backends.ts`.
  */
 export class WASMBackend implements MatrixBackend {
   readonly type: BackendType = 'wasm';
@@ -343,19 +344,17 @@ export class WASMBackend implements MatrixBackend {
     this.features = await detectWasmFeatures();
 
     try {
-      // Load the AS artifact directly. The shared `WasmLoader` singleton
-      // is intentionally avoided here: it caches the first module loaded
-      // and returns the same instance regardless of the path argument on
-      // subsequent calls, so it would clobber Rust ↔ AS routing in a
-      // process that uses both. We compile a fresh AS instance for this
-      // backend and let `RustWASMBackend` own the Rust instance.
+      // Load the AS artifact directly. This backend owns its own instance
+      // (separate from the shared `WasmLoader` singleton that the heavy-op
+      // consumers — svd/eig/fft — use) so element-wise ops and the heavy-op
+      // paths never contend over a single cached module.
       const path = this.config.wasmPath || (await this.resolveAsWasmPath());
       const loaded = await this.loadAsModule(path);
 
       if (typeof loaded.__new !== 'function' || typeof loaded.matrix_multiply !== 'function') {
         console.warn(
           'WASMBackend: loaded module is not the AssemblyScript artifact; falling back to JS. ' +
-            'Pass an explicit wasmPath or use RustWASMBackend for the Rust artifact.'
+            'Pass an explicit wasmPath (the AS binary, mathts-as.wasm).'
         );
         this.wasmModule = null;
         return;

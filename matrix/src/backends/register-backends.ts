@@ -17,12 +17,10 @@
 
 import { backendRegistry } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
-import { rustWasmBackend } from './RustWASMBackend.js';
 import { wasmBackend } from './WASMBackend.js';
 
 backendRegistry.register(jsBackend);
-// Order: register Rust before AS so when `BackendManager.selectBackend`
-// reaches its "elementCount >= rustWasmThresh" branch it finds the Rust
-// backend. AS remains available as a fallback at the lower wasm threshold.
-backendRegistry.register(rustWasmBackend);
+// Phase 7b: the Rust-WASM backend was retired. The AssemblyScript backend
+// (`wasmBackend`) now serves every WASM-accelerated matrix op; heavy ops
+// (svd/eig/fft) reach AS directly via the AS-default WasmLoader.
 backendRegistry.register(wasmBackend);
