@@ -11,61 +11,57 @@ Last updated: 2026-06-25.
 
 WASM acceleration is **selective and threshold-gated**, not universal:
 
-- **WASM kernels** live in two binaries — the AssemblyScript build
-  (`assembly/` → `mathts-as.wasm`, ~292 `f64` kernels) and the Rust build
-  (`wasm-rust/` → `mathts.wasm`). Both are now numerically verified to <1e-9
-  against mpmath for the special functions.
+- **The `functions` package is AssemblyScript-only** (Rust→AS migration Phase 5
+  cutover). It bundles `dist/wasm/mathts-as.wasm` (~292 `f64` kernels), resolves
+  it package-relative, and its dispatch is **AS → JS** (the Rust-pointer branches
+  were removed from the 7 `functions/src/wasm` bridges). The Rust binary
+  (`wasm-rust/` → `mathts.wasm`) is **no longer consumed by `functions`**; it
+  remains for the `matrix` package's heavy ops (fft/eig/svd/decomposition), whose
+  Rust→AS migration is a separate, pending slice. Both binaries are numerically
+  verified to <1e-9 against mpmath for the special functions.
 - **Threshold:** the `functions` special bridges engage WASM only for arrays of
   `length >= WASM_SPECIAL_THRESHOLD` (= **1024**). Scalars and small arrays run
   JS.
-- **Dispatch order:** Rust WASM → AssemblyScript WASM → JS fallback. The
-  `functions` package now **bundles** `dist/wasm/mathts.wasm` (Rust, default
-  backend) and resolves it package-relative.
-- **Runtime caveat:** routing to a `*Dispatch` ≠ running wasm. The bundled Rust
-  module exports **no allocator** (`__new` absent), and most bridges allocate via
-  the AssemblyScript `__new` runtime — so their dispatch's allocate throws and is
-  caught → JS. Only the **elementwise bridge** (self-managed scratch over
-  `module.memory`) actually executes wasm on the Rust binary. The dep-graph tool
-  now probes this (`bundledBackend` + per-function `effectiveBackend` in
-  `wasm-pairing.{md,json}`): of 27 wasm-routed functions, **6 run wasm, 21 fall
-  back to JS** — and the 21 were benchmarked as no-win for wasm anyway.
+- **Runtime caveat:** routing to a `*Dispatch` ≠ running wasm. Four kernel groups
+  deliberately stay on JS because their AS kernels are broken/unstable (the
+  Rust→AS migration **Phase 6** follow-ups): poly fit/cheb/legendre, Airy Ai/Bi
+  (|x|>5), and argsort/rank (the AS sort is unstable; sort itself is O(n²) on
+  dupes). The dep-graph tool probes effectiveness (`bundledBackend` +
+  per-function `effectiveBackend` in `wasm-pairing.{md,json}`): of 39 wasm-routed
+  functions, **37 run wasm, 2 fall back to JS** (the two surfaced are `airyAi`/
+  `airyBi`).
 
 ## `functions` public typed API — 218 functions
 
-| Routing (static) | Count | Effective on bundled Rust binary |
+| Routing (static) | Count | Effective on bundled AS binary |
 |---|--:|---|
 | Total public `mathTyped` functions (`functions/src/typed/`) | **218** | |
-| WASM (route to a `*Dispatch`) | **39** | **18 run wasm · 21 fall back to JS** |
+| WASM (route to a `*Dispatch`) | **39** | **37 run wasm · 2 fall back to JS** |
 | Parallel only (worker pool via `computePool`) | **52** | worker pool, not wasm |
 | JS-only | **127** | JS |
 
-> The **18 effective-wasm** functions are the elementwise transcendentals:
-> `abs/sin/cos/tan/exp/log` (0.2.13) plus the Tier-1 extension
-> `atan/sinh/tanh/atanh/expm1/log1p/log2/log10/sec/csc/cot` and Tier-2 `erfc`
-> (0.2.14) — each benchmark-confirmed net-faster than JS incl. copy (1.35–7×).
-> The **21 js-fallback** (bessel/airy/elliptic/carlson/lgamma +
-> `noncentralChi2PDF`/`parallelStatMedian`/`parallelStatQuantile`) route to a
-> `*Dispatch` but hit the AS-only allocator and fall back to JS on the Rust
-> binary — and were benchmarked as break-even-to-slower for wasm anyway. NOT
-> wired (benchmarked, JS wins once the JS↔wasm copy is included): `sqrt`, `cbrt`,
-> `asin`, `acos`, `cosh`, `asinh`, `acosh`, and the reductions
-> (`sum`/`mean`/`variance`) — V8 JITs/hardware-accelerates those faster than
-> wasm+copy. **Op-fusion** (`fuseUnaryChain`, 0.2.14) keeps an array resident in
-> wasm across a chain of ops, amortizing the copy — 2.4–3.1× over JS for a 4-op
-> chain. The
-> remaining "parallel" routing is intentional. See
-> `docs/roadmap/WASM_PAIRING_GAP_PLAN.md` and the `bench:elementwise` /
+> The effective-wasm set now includes the elementwise transcendentals
+> (`abs/sin/cos/tan/exp/log` + `atan/sinh/tanh/atanh/expm1/log1p/log2/log10/
+> sec/csc/cot` + `erfc`, each benchmark-confirmed net-faster than JS incl. copy,
+> 1.35–7×) **and** the AS special/poly/sort/signal/interpolation kernels
+> (bessel/elliptic/carlson/lgamma, poly mul/div/resultant/discriminant,
+> `sort_f64`, welch/bartlett/goertzel/chirp-z, tridiag/divided-difference) —
+> these now execute on the AS binary (which has the `__new` allocator the bridges
+> use). The **js-fallback** kernels are the Phase-6 follow-ups: poly fits, Airy
+> (|x|>5), argsort/rank. NOT wired (benchmarked, JS wins once the JS↔wasm copy is
+> included): `sqrt`, `cbrt`, `asin`, `acos`, `cosh`, `asinh`, `acosh`, and the
+> reductions (`sum`/`mean`/`variance`) — V8 JITs/hardware-accelerates those faster
+> than wasm+copy. **Op-fusion** (`fuseUnaryChain`, 0.2.14) keeps an array resident
+> in wasm across a chain of ops, amortizing the copy — 2.4–3.1× over JS for a 4-op
+> chain. The remaining "parallel" routing is intentional. See
+> `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md` and the `bench:elementwise` /
 > `bench:reduction` benchmarks.
 
-### The 21 WASM-accelerated typed functions
+### The WASM-accelerated typed functions
 
 The **authoritative, always-current** per-function table is generated by
 `tools/create-dependency-graph` into `docs/Architecture/wasm-pairing.md`
 (+ `wasm-pairing.json`) — regenerate it instead of hand-editing a list here.
-At last generation the accelerated set was: the 18 special functions
-(`besselJ0/J1/J`, `besselY0/Y1/Y`, `airyAi/Bi`, `ellipticK/E/F/EIncomplete/Pi`,
-`carlsonRC/RD/RF/RJ`, `lgamma`) plus `noncentralChi2PDF` (via `lgammaDispatch`)
-and `parallelStatMedian` / `parallelStatQuantile` (via `sortF64Dispatch`).
 
 ### What's JS-only (197)
 

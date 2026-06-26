@@ -184,8 +184,8 @@ Override defaults via `ComputePoolConfig.thresholdByOp` (see
 | `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (16 AST nodes) |
 | `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                    |
 | `@danielsimonjr/mathts-compat`         | mathjs API compatibility shim (`create(all)`)                   |
-| `@danielsimonjr/mathts-wasm`           | AssemblyScript WASM kernels (secondary WASM toolchain)          |
-| `wasm-rust` (Cargo crate)              | Rust WASM primary backend; 1,017 exports; full AS parity        |
+| `@danielsimonjr/mathts-wasm`           | AssemblyScript WASM kernels — the `functions` backend + matrix basic ops |
+| `wasm-rust` (Cargo crate)              | Rust WASM — matrix heavy ops only (fft/eig/svd/decomp); `functions` migrated off Rust to AS (Phase 5) |
 
 ### Dependency graph
 
@@ -218,15 +218,21 @@ resolves per-op thresholds via `thresholdByOp`.
 
 ### WASM backends
 
-Two WASM toolchains coexist and serve different consumers:
+The stack is **TS → AssemblyScript → (WebGPU for matrix)**. The `functions`
+package is **AssemblyScript-only** as of the Rust→AS migration Phase 5 — it
+loads `mathts-as.wasm` and its dispatch is AS→JS (the Rust path was removed from
+its bridges). The `matrix` package still keeps a Rust backend for heavy ops; its
+Rust→AS migration is a separate, pending slice.
 
-| Backend           | Class     | Source              | Exports | Primary use                  |
-| ----------------- | --------- | ------------------- | ------- | ---------------------------- |
-| `WASMBackend`     | AS-only   | `assembly/src/`     | 432     | Element-wise, decompositions |
-| `RustWASMBackend` | Rust-only | `wasm-rust/crates/` | 1,017   | FFT, eig, SVD, number theory |
+| Backend           | Class     | Source              | Binary                | Use                                   |
+| ----------------- | --------- | ------------------- | --------------------- | ------------------------------------- |
+| `WASMBackend`     | AS        | `assembly/src/`     | `mathts-as.wasm`      | Element-wise + basic matrix ops; the `functions` package backend |
+| `RustWASMBackend` | Rust      | `wasm-rust/crates/` | `lib/wasm/mathts.wasm`| matrix heavy ops (FFT, eig, SVD, decomposition) — **migration pending** |
 
 The two backends have clean separate class identities after the Rust/AS split
-(see `matrix/src/backends/register-backends.ts`).
+(see `matrix/src/backends/register-backends.ts`). Four `functions` AS kernels are
+on a JS fallback pending Phase 6 fixes (poly fit/cheb/legendre, Airy Ai/Bi for
+|x|>5, argsort/rank + slow sort).
 
 ### WebGPU (opt-in, f32 only)
 

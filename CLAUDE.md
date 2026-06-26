@@ -25,9 +25,12 @@ npm run lint                # turbo run lint (all packages)
 npm run format              # prettier --write all files
 npm run format:check        # prettier --check (CI)
 
-# WASM builds (Rust primary, AssemblyScript legacy):
+# WASM builds. Rust→AS migration in progress: the `functions` package is now
+# AssemblyScript-only (Rust path removed from its dispatch). `matrix` still uses
+# the Rust binary for heavy ops (fft/eig/svd/decomposition), so build:wasm:rust
+# and the Rust toolchain remain required for matrix until its migration lands.
 npm run build:wasm          # AssemblyScript build (assembly/ package)
-npm run build:wasm:rust     # Rust build via wasm-rust/scripts/build.sh
+npm run build:wasm:rust     # Rust build via wasm-rust/scripts/build.sh (matrix heavy ops)
 npm run build:wasm:all      # Both WASM toolchains
 npm run test:wasm           # AssemblyScript WASM tests
 npm run test:wasm:integration  # Cross-package WASM integration tests (tests/wasm/)
@@ -139,7 +142,8 @@ Three main systems:
 `@danielsimonjr/mathts-matrix` supports three backends with automatic selection via `BackendManager`:
 
 - **JSBackend** - Pure TypeScript (default, always available)
-- **WASMBackend** - Rust WASM primary (source: `wasm-rust/crates/`, 1,000+ exports, full AS parity) or AssemblyScript legacy (source: `assembly/`, >1K elements)
+- **WASMBackend** - AssemblyScript (source: `assembly/`, binary `mathts-as.wasm`, >1K elements) for the elementwise/basic matrix ops
+- **RustWASMBackend** - Rust WASM (source: `wasm-rust/crates/`, binary `lib/wasm/mathts.wasm`) selected by `BackendManager` for the heavy ops (`fft`/`eig`/`svd`/`decomposition`) and large matrices. **Still in use** — `matrix`'s Rust→AS migration is a pending slice (the `functions` package already cut over to AS in the Rust→AS migration Phase 5). Falls back to JS when the Rust binary is absent (no Rust toolchain).
 - **GPUBackend** - WebGPU compute shaders (>100K elements)
 
 ### `@danielsimonjr/mathts-compat` Pattern
@@ -234,7 +238,7 @@ The script:
 
 - `assembly/` WASM build emits AS235 warnings for exported classes (cosmetic — WASM can only export functions, not classes)
 - **Residual dev-only `esbuild` advisory (GHSA-gv7w-rqvm-qjhr).** Patched esbuild is `0.28.1`, but the latest `tsup` (8.5.1) pins `esbuild@^0.27.0`, so the root `overrides` (`esbuild: ^0.28.1`) patches `vite`/everything else but cannot force `tsup`'s nested copy without risking the bundler. `npm audit fix --force` "fixes" this by *downgrading* tsup to 6.5.0 (still vulnerable) — do **not** run it. esbuild ships in no published package and the exploit needs a malicious `NPM_CONFIG_REGISTRY` at install time, so this is accepted until tsup supports esbuild 0.28. Re-evaluate when `tsup@>=8.6` (esbuild `^0.28`) ships.
-- **WASM JS-fallback on Node 26.** With no Rust toolchain present, `build:wasm:rust` is skipped and loaders log `ENOENT … lib/wasm/*.wasm`, then fall back to the pure-JS backend (tests stay green). AssemblyScript `asc` build and all 12 turbo build tasks succeed on Node 26.3.0.
+- **Matrix Rust-backend JS-fallback without a Rust toolchain.** The `functions` package is AssemblyScript-only (it loads `mathts-as.wasm`, built by `build:wasm`), so it is unaffected. But `matrix`'s `RustWASMBackend` loads `lib/wasm/mathts.wasm`; with no Rust toolchain present, `build:wasm:rust` is skipped, the loader logs `ENOENT … lib/wasm/mathts.wasm`, and matrix's heavy ops (fft/eig/svd/decomposition/large multiply) fall back to JS/AS (tests stay green). AssemblyScript `asc` build and all turbo build tasks succeed on Node 26.3.0. (matrix's Rust→AS migration is the remaining slice — see `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md`.)
 
 ## Tools
 

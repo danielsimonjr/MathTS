@@ -2,12 +2,22 @@
 
 MathTS provides a three-tier backend system for matrix operations that automatically selects the optimal implementation based on matrix size and operation type.
 
+> **Rust→AS migration status (2026-06-26).** The overall WASM direction is
+> **TS → AssemblyScript → (WebGPU for matrix)**. The `functions` package has
+> already cut over to **AssemblyScript-only** (loads `mathts-as.wasm`, dispatch
+> AS→JS; Phase 5). The **`matrix` backends below still include a Rust backend**
+> selected for heavy ops (fft/eig/svd/decomposition) and large matrices — its
+> Rust→AS migration is a separate, pending slice, so `wasm-rust/` and
+> `build:wasm:rust` remain. The "Primary"/"Legacy" labels below describe matrix's
+> current backend selection, not a repo-wide default. See
+> `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md`.
+
 ## Backend Types
 
-### 0. Rust WASM Backend (Primary)
+### 0. Rust WASM Backend (matrix heavy ops — migration pending)
 
-- **Status**: Production — primary backend as of April 2026
-- **Best for:** Medium and large matrices (>500 elements); replaces AssemblyScript as the default
+- **Status**: Active in `matrix` for heavy ops (fft/eig/svd/decomposition) and large matrices; **being migrated to AssemblyScript** (the `functions` package already cut over in Phase 5). Requires the Rust toolchain; falls back to JS/AS when `lib/wasm/mathts.wasm` is absent.
+- **Best for:** matrix heavy ops and large matrices (>500 elements)
 - **Binary**: `wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm`
 - **Source**: `wasm-rust/` (Cargo workspace) → `wasm-rust/crates/mathts-wasm/` (94 `.rs` files across 20 category modules)
 - **Exports**: **1,017 functions** via `wasm-bindgen` — 826 core + 192 AssemblyScript compat wrappers (`src/compat/`)
@@ -41,10 +51,10 @@ MATHTS_WASM_BACKEND=rust npx mathts serve
 - **Advantages:** No initialization overhead, always available
 - **Implementation:** Pure TypeScript with standard JavaScript operations
 
-### 2. AssemblyScript WASM Backend (Legacy / Benchmark)
+### 2. AssemblyScript WASM Backend (AS)
 
-- **Status**: Retained for benchmarking comparison only — superseded by Rust WASM backend
-- **Best for:** Medium matrices (1,000 - 100,000 elements) when Rust WASM is unavailable
+- **Status**: Active — the `functions` package's sole WASM backend, and matrix's basic-ops WASM backend. The migration target that Rust will eventually be replaced by.
+- **Best for:** Medium matrices (1,000 - 100,000 elements); basic/element-wise ops
 - **Binary**: `assembly/build/mathts.wasm`
 - **Source**: `assembly/src/` (AssemblyScript modules: `ops`, `types`, `bindings`, `env`)
 - **Advantages:** SIMD optimizations, near-native performance
@@ -251,7 +261,7 @@ const result = backendManager.multiply(a, b); // Never throws
 | Parallel execution | No       | Limited                      | Limited                                 | Yes      |
 | Memory efficiency  | Good     | Good                         | Good                                    | Best     |
 | Browser support    | 100%     | 95%+                         | 95%+                                    | 60%+     |
-| Status             | Fallback | Benchmark                    | **Primary (complete)**                  | Planned  |
+| Status             | Fallback | Active (functions + matrix basic ops) | matrix heavy ops — migration pending | Planned  |
 | Binary location    | —        | `assembly/build/mathts.wasm` | `wasm-rust/target/.../mathts_wasm.wasm` | —        |
 
 ## Troubleshooting

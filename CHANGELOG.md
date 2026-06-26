@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-26) — Rust→AS migration Phase 5: functions WASM dispatch simplified to AS→JS
+
+- **The `functions` package is now AssemblyScript-only.** The dead
+  `isRustWasm`-gated Rust-pointer branches and the dual-name probe scheme were
+  removed from all 7 `functions/src/wasm` bridges (`elementwise`, `special`,
+  `poly`, `sort`, `interpolation`, `signal`, `bitwise`) and from
+  `bridges/common.ts`. Dispatch is now **AS-managed → JS fallback**; the
+  `isRustWasm` / `runRustUnaryF64` helpers and the Rust type aliases are gone.
+  The SHA-384 loader verification and `WasmLoader.getDefaultWasmPath` (incl. the
+  `MATHTS_WASM_BACKEND=rust` opt-in and the Rust differential test) are untouched.
+- **Rust is NOT removed.** `wasm-rust/`, `build:wasm:rust`, and `build:wasm:all`
+  remain: the `matrix` package's `RustWASMBackend`/`RustWasmLoader` still load
+  `lib/wasm/mathts.wasm` for heavy ops (fft/eig/svd/decomposition) and large
+  matrices. matrix's Rust→AS migration + the final Rust deletion are deferred to
+  a follow-up slice (see `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md`).
+- **Dep-graph pairing tool** (`tools/create-dependency-graph`): the runtime
+  probe now reads `functions/dist/wasm/mathts-as.wasm` (the binary functions
+  loads) and detects per-`*Dispatch` AS execution, so `bundledBackend` reports
+  **assemblyscript** and effective-wasm rises **18 → 37**. `--check-wasm-parity`
+  still exits 0 (gap 0 of 26 consumed). Regenerated artifacts committed.
+- **Four kernel groups stay on JS** (the Rust→AS migration **Phase 6**
+  follow-ups, unchanged here): poly fit/cheb/legendre, Airy Ai/Bi (|x|>5),
+  argsort/rank (AS sort unstable; sort O(n²) on dupes).
+- Gates: functions `tsc --noEmit` 0 errors; functions vitest 2909 pass / 0 fail;
+  `wasm-integrity` 5/5; `--check-wasm-parity` exit 0; turbo `build` green.
+
 ### Fixed / Changed (2026-06-26) — Rust→AS migration Phase 3b: repoint functions WASM bridges to AS
 
 - **Fixed the Phase-3a corruption.** With the loader defaulting to the AS binary,
