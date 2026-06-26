@@ -13,15 +13,15 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | JS-only | 127 |
 | **Total** | **218** |
 
-**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 39 wasm-routed functions, **37 actually execute wasm**, **2 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending the Rust→AS migration Phase 6 fixes).
+**Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 39 wasm-routed functions, **39 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending the Rust→AS migration Phase 6 fixes).
 
 ## WASM-accelerated functions
 
 | Function | Routing | Effective | Bridge dispatch | Module |
 | --- | --- | --- | --- | --- |
 | `abs` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | arithmetic |
-| `airyAi` | wasm | js-fallback | `airyAiDispatch` | special |
-| `airyBi` | wasm | js-fallback | `airyBiDispatch` | special |
+| `airyAi` | wasm | wasm | `airyAiDispatch` | special |
+| `airyBi` | wasm | wasm | `airyBiDispatch` | special |
 | `atan` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
 | `atanh` | wasm+parallel | wasm | `elementwiseUnaryDispatch` | trigonometry |
 | `besselJ` | wasm | wasm | `besselJDispatch` | special |

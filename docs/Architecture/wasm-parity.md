@@ -6,8 +6,8 @@ Grounded diff of the Rust kernels the `functions` bridges actually consume again
 
 | Metric | Count |
 | --- | --: |
-| Consumed Rust kernels | 26 |
-| Covered by AS (direct + rename) | 26 |
+| Consumed Rust kernels | 33 |
+| Covered by AS (direct + rename) | 33 |
 | Authoring gap (missing in AS) | 0 |
 
 ## Gap — consumed Rust kernels missing from AS
@@ -23,9 +23,9 @@ _None._
 | Bridge | Consumed | Gap |
 | --- | --: | --: |
 | `interpolation` | 2 | 0 |
-| `poly` | 4 | 0 |
+| `poly` | 7 | 0 |
 | `signal` | 5 | 0 |
-| `sort` | 1 | 0 |
-| `special` | 14 | 0 |
+| `sort` | 3 | 0 |
+| `special` | 16 | 0 |
 
 > Note: a consumed kernel "covered via rename" already exists in AS under a different name (no authoring needed beyond an alias). The true *authoring* gap is the table above. See docs/roadmap/RUST_TO_AS_MIGRATION_PLAN.md (Phase 0/2).

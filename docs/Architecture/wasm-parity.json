@@ -4,11 +4,14 @@
   "asWasm": "matrix/dist/wasm/mathts-as.wasm",
   "rustExportCount": 1122,
   "asExportCount": 324,
-  "consumedCount": 26,
-  "coveredCount": 26,
+  "consumedCount": 33,
+  "coveredCount": 33,
   "gapCount": 0,
   "consumed": [
+    "airy_ai_f64",
+    "airy_bi_f64",
     "apply_window_f64",
+    "argsort_f64",
     "bartlett_psd_f64",
     "bessel_j0_f64",
     "bessel_j1_f64",
@@ -18,6 +21,7 @@
     "carlson_rd_f64",
     "carlson_rf_f64",
     "carlson_rj_f64",
+    "cheb_fit_f64",
     "chirp_z_transform_f64",
     "divided_difference_f64",
     "elliptic_e_f64",
@@ -26,17 +30,23 @@
     "elliptic_k_f64",
     "elliptic_pi_incomplete_f64",
     "goertzel_f64",
+    "legendre_fit_f64",
     "lgamma_f64",
     "poly_discriminant_f64",
     "poly_div_mod_f64",
+    "poly_fit_f64",
     "poly_mul_f64",
     "poly_resultant_f64",
+    "rank_f64",
     "sort_f64",
     "tridiag_solve_f64",
     "welch_psd_f64"
   ],
   "covered": [
+    "airy_ai_f64",
+    "airy_bi_f64",
     "apply_window_f64",
+    "argsort_f64",
     "bartlett_psd_f64",
     "bessel_j0_f64",
     "bessel_j1_f64",
@@ -46,6 +56,7 @@
     "carlson_rd_f64",
     "carlson_rf_f64",
     "carlson_rj_f64",
+    "cheb_fit_f64",
     "chirp_z_transform_f64",
     "divided_difference_f64",
     "elliptic_e_f64",
@@ -54,11 +65,14 @@
     "elliptic_k_f64",
     "elliptic_pi_incomplete_f64",
     "goertzel_f64",
+    "legendre_fit_f64",
     "lgamma_f64",
     "poly_discriminant_f64",
     "poly_div_mod_f64",
+    "poly_fit_f64",
     "poly_mul_f64",
     "poly_resultant_f64",
+    "rank_f64",
     "sort_f64",
     "tridiag_solve_f64",
     "welch_psd_f64"
@@ -75,8 +89,11 @@
     },
     "poly": {
       "consumed": [
+        "cheb_fit_f64",
+        "legendre_fit_f64",
         "poly_discriminant_f64",
         "poly_div_mod_f64",
+        "poly_fit_f64",
         "poly_mul_f64",
         "poly_resultant_f64"
       ],
@@ -94,12 +111,16 @@
     },
     "sort": {
       "consumed": [
+        "argsort_f64",
+        "rank_f64",
         "sort_f64"
       ],
       "gap": []
     },
     "special": {
       "consumed": [
+        "airy_ai_f64",
+        "airy_bi_f64",
         "bessel_j0_f64",
         "bessel_j1_f64",
         "bessel_y0_f64",

@@ -5,8 +5,8 @@
   "parallelOnlyCount": 52,
   "jsOnlyCount": 127,
   "bundledBackend": "assemblyscript",
-  "wasmEffectiveCount": 37,
-  "jsFallbackCount": 2,
+  "wasmEffectiveCount": 39,
+  "jsFallbackCount": 0,
   "accelerated": [
     {
       "name": "abs",
@@ -24,7 +24,7 @@
       "dispatch": [
         "airyAiDispatch"
       ],
-      "effectiveBackend": "js-fallback"
+      "effectiveBackend": "wasm"
     },
     {
       "name": "airyBi",
@@ -33,7 +33,7 @@
       "dispatch": [
         "airyBiDispatch"
       ],
-      "effectiveBackend": "js-fallback"
+      "effectiveBackend": "wasm"
     },
     {
       "name": "atan",

@@ -64,23 +64,37 @@ functions cutover, so the irreversible deletion is deferred.
 > `build:wasm:rust`, it should stay as-is for now (matrix still needs the Rust
 > binary). No workflow change is required for this functions-only cutover.
 
-## The 4 `functions` AS-kernel Phase-6 follow-ups (kept on JS)
+## The 4 `functions` AS-kernel Phase-6 follow-ups — DONE (2026-06-26)
 
-These dispatchers deliberately stay on the JS fallback because the AS kernels are
-broken/unstable. They are the next migration phase, NOT regressions:
+All four dispatchers were fixed at the AS-kernel root cause, validated vs the JS
+reference, and repointed JS→AS (JS fallback retained for the wasm-unavailable
+path). New `*-as-wasm` tests prove each runs on the AS binary and matches JS.
 
-1. **Poly fits** — `polyFitDispatch` / `chebFitDispatch` / `legendreFitDispatch`:
-   the AS QR/normal-equations solver returns near-zero garbage where the JS
-   solver recovers coefficients exactly (e.g. a degree-2 fit of `1−x+0.5x²` over
-   `[−3,3]` returns ~`[0.007,−0.007,0.004]` instead of `[1,−1,0.5]`).
-2. **Airy Ai/Bi** — `airyAiDispatch` / `airyBiDispatch`: the AS asymptotic kernel
-   diverges ~1e-6 (relative) from JS for `|x| > 5`, above the 1e-12 bar.
-3. **argsort / rank** — `argsortF64Dispatch` / `rankF64Dispatch`: the AS sort is
-   **unstable**, so for tied values it returns a different (still valid)
-   permutation than the JS stable reference.
-4. **sort performance** — the AS `sort_f64` is O(n²) on duplicate-heavy input
-   (`sortF64Dispatch` uses it for value-sorts, which are bit-identical, but the
-   kernel itself wants replacing with a robust introsort/mergesort).
+1. ✅ **Poly fits** — `polyFitDispatch` / `chebFitDispatch` / `legendreFitDispatch`.
+   The AS Householder-QR solver (`assembly/src/poly.ts householderQRSolve`)
+   applied each reflection starting at its own pivot column (`c = col`),
+   overwriting the Householder vector before the trailing columns / RHS consumed
+   it. Fixed to start at `c = col + 1`. AS now recovers coefficients to ≈1e-14 vs
+   the JS solver (degrees 2/3/5 over [−3,3]). Repointed above
+   `WASM_POLY_FIT_THRESHOLD`. _(commit: poly fit)_
+2. ✅ **Airy Ai/Bi** — `airyAiDispatch` / `airyBiDispatch`. Capped the AS
+   asymptotic sum at the JS reference's 13-term truncation (`AIRY_U_MAX = 12` in
+   `assembly/src/special.ts`); the AS kernel had run to its own optimal
+   truncation (k≈15 near x≈5), diverging ~1e-7. AS vs JS now agree to ≈4e-16
+   across `|x|>5`. Repointed via `makeUnaryArrayDispatch`. _(commit: airy)_
+3. ✅ **argsort / rank** — `argsortF64Dispatch` / `rankF64Dispatch`. The AS index
+   sort now uses a stable total-order comparator (value NaN-last, then original
+   index), matching the JS stable permutation exactly on tie-heavy + NaN input.
+   Repointed to the AS `argsort_f64` / `rank_f64` kernels. _(commit: sort)_
+4. ✅ **sort performance** — `sortF64Dispatch`. Replaced the AS Lomuto quicksort
+   (O(n²) on duplicate-heavy input) with an introsort (3-way partition +
+   median-of-3 + insertion cutoff + heapsort fallback). Duplicate-heavy 200k
+   sorts in ~16 ms, bit-identical to JS, O(n log n) worst case. _(commit: sort)_
+
+Post-Phase-6 gates (2026-06-26): functions `tsc --noEmit` 0 errors; functions
+vitest **2910 pass / 0 fail** / 31 skipped; `wasm-integrity` 5/5; `--check-wasm-parity`
+exit 0 (0 gap of 33 consumed); turbo `build` green. Effective-wasm pairing rose
+**37 → 39** (39/218 accelerated).
 
 ## Gate results (2026-06-26)
 

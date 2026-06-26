@@ -14501,6 +14501,7 @@ modules:
             - isAsWasm
             - withAsF64
             - asReadReturnedF64
+            - asReadReturnedI32
             - RawWasm
       exports:
         - WASM_SORT_THRESHOLD
@@ -14541,6 +14542,8 @@ modules:
         - besselJ1Dispatch
         - besselY0Dispatch
         - besselY1Dispatch
+        - airyAiDispatch
+        - airyBiDispatch
         - lgammaDispatch
         - ellipticKDispatch
         - ellipticEDispatch
@@ -14554,8 +14557,6 @@ modules:
         - airyBiJS
         - besselJDispatch
         - besselYDispatch
-        - airyAiDispatch
-        - airyBiDispatch
         - lgammaJS
         - carlsonRCJS
         - carlsonRFJS
@@ -14596,8 +14597,6 @@ modules:
         - airyBiJS
         - besselJDispatch
         - besselYDispatch
-        - airyAiDispatch
-        - airyBiDispatch
         - lgammaJS
         - carlsonRCJS
         - carlsonRFJS
@@ -14633,6 +14632,8 @@ modules:
         - besselJ1Dispatch
         - besselY0Dispatch
         - besselY1Dispatch
+        - airyAiDispatch
+        - airyBiDispatch
         - lgammaDispatch
         - ellipticKDispatch
         - ellipticEDispatch
@@ -20211,14 +20212,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 559
   totalModules: 69
-  totalLinesOfCode: 148397
+  totalLinesOfCode: 148610
   totalExports: 3522
   totalClasses: 51
   totalInterfaces: 316
-  totalFunctions: 1309
+  totalFunctions: 1307
   totalTypeGuards: 130
   totalEnums: 0
-  totalConstants: 1124
+  totalConstants: 1126
   totalReExports: 1080
   totalTypeOnlyImports: 357
   runtimeCircularDeps: 0
