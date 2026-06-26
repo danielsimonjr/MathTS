@@ -159,9 +159,10 @@ Options:
   --include-tests    Include test files in dependency analysis
   -t                 Short form of --include-tests
   --all, -a          Include dormant/unreachable files (monorepo mode)
-  --check-wasm-parity  Recompute the Rust→AS consumed-kernel gap and fail (exit 1)
-                       if it drifts from the committed wasm-parity.json snapshot.
-                       Skips the full graph scan. (Phase 0 migration guard.)
+  --check-wasm-parity  Rust→AS migration guard. The migration is complete
+                       (2026-06-26): AssemblyScript is the sole WASM backend, so
+                       with no Rust binary present this exits 0. (Retains the gap
+                       diff only while a legacy Rust binary lingers on disk.)
   --help, -h         Show this help
 
 Monorepo Support:
@@ -2278,8 +2279,8 @@ interface WasmPairing {
   jsOnlyCount: number;
   /** Of acceleratedCount, how many actually run wasm vs fall back to JS on the
    * bundled binary (runtime probe of functions/dist/wasm/mathts-as.wasm — the AS
-   * binary the functions package loads by default). */
-  bundledBackend: 'rust' | 'assemblyscript' | 'unknown';
+   * binary the functions package loads; AssemblyScript is the sole WASM backend). */
+  bundledBackend: 'assemblyscript' | 'unknown';
   wasmEffectiveCount: number;
   jsFallbackCount: number;
   /** Detection is per-mathTyped-block direct references; routing reached only
@@ -2330,18 +2331,18 @@ function readWasmExports(path: string): Set<string> | null {
 }
 
 function analyzeWasmRuntime(rootDir: string): {
-  bundledBackend: 'rust' | 'assemblyscript' | 'unknown';
+  bundledBackend: 'assemblyscript' | 'unknown';
   dispatchWasm: Map<string, boolean | null>;
 } {
   const dispatchWasm = new Map<string, boolean | null>();
 
-  // The functions package loads the AssemblyScript binary by default
-  // (mathts-as.wasm); the runtime probe reads that, not the legacy Rust copy.
+  // AssemblyScript is the sole WASM backend; the functions package loads
+  // mathts-as.wasm. The probe confirms the managed runtime (`__new`) is present.
   const wasmPath = join(rootDir, 'functions', 'dist', 'wasm', 'mathts-as.wasm');
   const exports = readWasmExports(wasmPath);
   const bundledHasNew: boolean | null = exports === null ? null : exports.has('__new');
-  const bundledBackend =
-    bundledHasNew === null ? 'unknown' : bundledHasNew ? 'assemblyscript' : 'rust';
+  const bundledBackend: 'assemblyscript' | 'unknown' =
+    bundledHasNew === true ? 'assemblyscript' : 'unknown';
 
   const wasmDir = join(rootDir, 'functions', 'src', 'wasm');
   if (!existsSync(wasmDir)) return { bundledBackend, dispatchWasm };
@@ -2521,13 +2522,13 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
     md += `| ${f.replace(/\.ts$/, '')} | ${p.byFile[f].wasm} | ${p.byFile[f].parallel} | ${p.byFile[f].jsOnly} |\n`;
   }
   md += `\n> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `;
-  md += `\`matrix\` package backend (not the typed-API dispatch counted here), which still uses `;
-  md += `the Rust binary for fft/eig/svd/decomposition — its Rust→AS migration is a separate, `;
-  md += `pending slice. The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS `;
+  md += `\`matrix\` package backend (not the typed-API dispatch counted here), which runs the `;
+  md += `AssemblyScript binary for fft/eig/svd/decomposition (Rust→AS migration complete `;
+  md += `2026-06-26). The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS `;
   md += `special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback `;
   md += `functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken `;
-  md += `or unstable — the four Rust→AS migration Phase 6 follow-ups. See `;
-  md += `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md and the \`bench:elementwise\`/\`bench:special-array\` benches.\n`;
+  md += `or unstable — tracked follow-ups. See `;
+  md += `docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md and the \`bench:elementwise\`/\`bench:special-array\` benches.\n`;
   return md;
 }
 
@@ -2817,6 +2818,19 @@ function writeWasmParity(parity: WasmParity): void {
  * hidden Rust-only consumer or new AS coverage), 0 if unchanged.
  */
 function runWasmParityCheck(rootDir: string): never {
+  // The Rust→AS migration is complete (2026-06-26): AssemblyScript is the sole
+  // WASM backend and the Rust binary is no longer produced. The guard's job —
+  // tracking the Rust→AS authoring gap — is therefore satisfied by construction
+  // whenever there is no Rust binary to diff against.
+  const rustWasm = join(rootDir, RUST_WASM_REL);
+  if (!existsSync(rustWasm)) {
+    console.log(
+      '✔ wasm-parity: Rust→AS migration complete — AssemblyScript is the sole ' +
+        'WASM backend; no Rust binary to diff. Guard satisfied.'
+    );
+    process.exit(0);
+  }
+
   const fresh = computeWasmParity(rootDir);
   if (!fresh) {
     console.error(
