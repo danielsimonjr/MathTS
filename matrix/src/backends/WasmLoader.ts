@@ -506,6 +506,22 @@ export interface WasmModule {
   matrix_inverse?: (aHdr: number, n: number, resultHdr: number, workHdr: number) => number;
   matrix_determinant?: (aHdr: number, n: number, workHdr: number) => number;
 
+  // Heavy decompositions / spectral kernels exported by the AssemblyScript
+  // binary (assembly/src/ops/{svd,eig}.ts). These RETURN a managed
+  // Float64Array *header* pointer (decode via `readReturnedFloat64Array`),
+  // unlike the Rust binary which used out-parameter pointers. Optional
+  // because the Rust artifact (env override) does not expose them.
+  //
+  //  - matrix_svd(a, m, n)                -> packed [ U(m*k) | S(k) | V(n*k) ], k=min(m,n)
+  //  - matrix_singular_values(a, m, n)    -> S (k), descending
+  //  - matrix_eig_symmetric(a, n)         -> packed [ eigenvalues(n) | eigenvectors(n*n) ]
+  //                                          (eigenvectors as columns: V[i*n+j])
+  //  - matrix_spectral_radius(a, n)       -> f64 (max |eigenvalue|)
+  matrix_svd?: (aHdr: number, m: number, n: number) => number;
+  matrix_singular_values?: (aHdr: number, m: number, n: number) => number;
+  matrix_eig_symmetric?: (aHdr: number, n: number) => number;
+  matrix_spectral_radius?: (aHdr: number, n: number) => number;
+
   // Memory management — present in AS module, absent in Rust module.
   // The loader gates all uses behind a kind discriminant so neither callers
   // nor this interface need an optionality knob; for the Rust module these
@@ -739,8 +755,9 @@ export class WasmLoader {
 
   /**
    * Get the WASM binary path based on the selected backend.
-   * Set MATHTS_WASM_BACKEND=assemblyscript to use the AS binary.
-   * Default is Rust (after migration cutover).
+   * Default is the AssemblyScript binary (`mathts-as.wasm`) after the
+   * Phase 7b cutover; set MATHTS_WASM_BACKEND=rust to opt back into the
+   * legacy Rust binary (`mathts.wasm`).
    *
    * The path is resolved relative to this source file's location so it is
    * CWD-independent.  This file lives at:
@@ -754,10 +771,10 @@ export class WasmLoader {
    * doubled); in the browser we keep the full `.href` for fetch().
    */
   private async getDefaultWasmPath(): Promise<string> {
-    const useAS =
-      typeof process !== 'undefined' && process.env?.MATHTS_WASM_BACKEND === 'assemblyscript';
+    const useRust =
+      typeof process !== 'undefined' && process.env?.MATHTS_WASM_BACKEND === 'rust';
 
-    const wasmFile = useAS ? 'mathts-as.wasm' : 'mathts.wasm';
+    const wasmFile = useRust ? 'mathts.wasm' : 'mathts-as.wasm';
 
     if (this.isNode) {
       // Preferred: package-relative artifact (dist/wasm/), robust across
@@ -987,6 +1004,29 @@ export class WasmLoader {
     const alloc = this.allocateAsFloat64(module, length);
     alloc.array.set(data);
     return alloc;
+  }
+
+  /**
+   * Decode a managed Float64Array RETURNED by an AssemblyScript export
+   * (e.g. `matrix_svd`, `matrix_eig_symmetric`) into a fresh JS copy.
+   *
+   * AS exports that return a `Float64Array` hand back the typed-array
+   * *header* pointer. The header is a 12-byte block laid out as
+   * `[buffer, dataStart, byteLength]` (little-endian u32s) — the same shape
+   * the loader writes in `makeAsFloat64`. We read `dataStart`/`byteLength`
+   * and copy the data region out so it survives any later reuse of WASM
+   * memory. AS-path only; the Rust binary uses out-parameters, never
+   * returns managed arrays.
+   */
+  public readReturnedFloat64Array(headerPtr: number): Float64Array {
+    const module = this.wasmModule;
+    if (!module) throw new Error('WASM module not loaded');
+    const hdr = headerPtr >>> 0;
+    const dv = new DataView(module.memory.buffer);
+    const dataStart = dv.getUint32(hdr + 4, true);
+    const byteLength = dv.getUint32(hdr + 8, true);
+    const view = new Float64Array(module.memory.buffer, dataStart, byteLength >>> 3);
+    return new Float64Array(view);
   }
 
   /**
