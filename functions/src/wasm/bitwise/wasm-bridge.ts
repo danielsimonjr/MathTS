@@ -26,6 +26,14 @@
  */
 
 import { wasmLoader, type WasmModule } from '../WasmLoader.js';
+import {
+  getWasm,
+  isRustWasm,
+  isAsWasm,
+  withAsI32,
+  asReadReturnedI32,
+  type RawWasm,
+} from '../bridges/common.js';
 
 /**
  * Length threshold above which we attempt the WASM dispatch tier. This is
@@ -39,10 +47,6 @@ export const WASM_BITWISE_THRESHOLD = 64 * 1024;
 type BinaryRust = (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
 
 type UnaryRust = (inputPtr: number, resultPtr: number, length: number) => void;
-
-type BinaryAS = (a: Int32Array, b: Int32Array, result: Int32Array) => void;
-
-type UnaryAS = (a: Int32Array, result: Int32Array) => void;
 
 /**
  * Names of the WASM exports we look for, ordered (Rust first, AS
@@ -75,53 +79,16 @@ const UNARY_OPS: Record<string, OpNames> = {
   bitNot: { rust: 'bitNotArray', as: 'bitNot_i32_array' },
 };
 
-function getWasm(): WasmModule | null {
-  try {
-    return wasmLoader.getModule();
-  } catch {
-    return null;
-  }
-}
-
-function getBinaryKernel(
-  op: keyof typeof BINARY_OPS
-): { kind: 'rust'; fn: BinaryRust } | { kind: 'as'; fn: BinaryAS } | null {
-  const wasm = getWasm();
-  if (!wasm) return null;
-  const names = BINARY_OPS[op];
-  const rust = wasm[names.rust] as BinaryRust | undefined;
-  if (typeof rust === 'function') {
-    return { kind: 'rust', fn: rust };
-  }
-  const asFn = wasm[names.as] as BinaryAS | undefined;
-  if (typeof asFn === 'function') {
-    return { kind: 'as', fn: asFn };
-  }
-  return null;
-}
-
-function getUnaryKernel(
-  op: keyof typeof UNARY_OPS
-): { kind: 'rust'; fn: UnaryRust } | { kind: 'as'; fn: UnaryAS } | null {
-  const wasm = getWasm();
-  if (!wasm) return null;
-  const names = UNARY_OPS[op];
-  const rust = wasm[names.rust] as UnaryRust | undefined;
-  if (typeof rust === 'function') {
-    return { kind: 'rust', fn: rust };
-  }
-  const asFn = wasm[names.as] as UnaryAS | undefined;
-  if (typeof asFn === 'function') {
-    return { kind: 'as', fn: asFn };
-  }
-  return null;
-}
-
 /**
  * Run an elementwise binary Int32Array op via WASM. Returns the result
  * (a new `Int32Array` copy) on success, `null` if no kernel is available.
  * Any error from the kernel is swallowed and treated as `null` so the
  * caller falls back to `ComputePool`.
+ *
+ * Backend selection is gated by the binary sentinels (`isRustWasm` /
+ * `isAsWasm`) — the AS binary reuses NEITHER the Rust pointer name nor its ABI:
+ * Rust uses `*Array(aPtr, bPtr, outPtr, n)` (pointer), AS uses
+ * `*_i32_array(a, b, result)` MANAGED (header refs, result is an output param).
  */
 export function runBinaryBitwiseWasm(
   op: keyof typeof BINARY_OPS,
@@ -129,33 +96,35 @@ export function runBinaryBitwiseWasm(
   b: Int32Array
 ): Int32Array | null {
   if (a.length !== b.length) return null;
-  const kernel = getBinaryKernel(op);
-  if (!kernel) return null;
+  const wasm = getWasm() as unknown as RawWasm | null;
+  if (!wasm) return null;
   const n = a.length;
-
+  const names = BINARY_OPS[op];
   try {
-    if (kernel.kind === 'rust') {
+    if (isRustWasm(wasm)) {
+      const fn = wasm[names.rust] as BinaryRust | undefined;
+      if (typeof fn !== 'function') return null;
       const aAlloc = wasmLoader.allocateInt32Array(a);
       const bAlloc = wasmLoader.allocateInt32Array(b);
       const outAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
       try {
-        kernel.fn(aAlloc.ptr, bAlloc.ptr, outAlloc.ptr, n);
-        // Copy out before releasing — the underlying Int32Array view
-        // shares memory with the pool, which may be re-used after release.
+        fn(aAlloc.ptr, bAlloc.ptr, outAlloc.ptr, n);
+        // Copy out before releasing — the underlying view shares pool memory.
         return new Int32Array(outAlloc.array);
       } finally {
         wasmLoader.release(aAlloc.ptr, false);
         wasmLoader.release(bAlloc.ptr, false);
         wasmLoader.release(outAlloc.ptr, false);
       }
-    } else {
-      // AS backend: pass Int32Array references directly. The AS loader
-      // wraps them against module memory. We still copy out so the
-      // result outlives the AS GC pin lifetime.
-      const result = new Int32Array(n);
-      kernel.fn(a, b, result);
-      return result;
     }
+    if (isAsWasm(wasm)) {
+      // AS managed ABI: *_i32_array(a, b, result) writes into the `result` header.
+      return withAsI32(wasm, [a, b, new Int32Array(n)], (mod, [ha, hb, hr]) => {
+        (mod[names.as] as (x: number, y: number, r: number) => void)(ha, hb, hr);
+        return asReadReturnedI32(mod, hr);
+      });
+    }
+    return null;
   } catch {
     return null;
   }
@@ -165,26 +134,32 @@ export function runBinaryBitwiseWasm(
  * Unary variant — currently only `bitNot`.
  */
 export function runUnaryBitwiseWasm(op: keyof typeof UNARY_OPS, a: Int32Array): Int32Array | null {
-  const kernel = getUnaryKernel(op);
-  if (!kernel) return null;
+  const wasm = getWasm() as unknown as RawWasm | null;
+  if (!wasm) return null;
   const n = a.length;
-
+  const names = UNARY_OPS[op];
   try {
-    if (kernel.kind === 'rust') {
+    if (isRustWasm(wasm)) {
+      const fn = wasm[names.rust] as UnaryRust | undefined;
+      if (typeof fn !== 'function') return null;
       const aAlloc = wasmLoader.allocateInt32Array(a);
       const outAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
       try {
-        kernel.fn(aAlloc.ptr, outAlloc.ptr, n);
+        fn(aAlloc.ptr, outAlloc.ptr, n);
         return new Int32Array(outAlloc.array);
       } finally {
         wasmLoader.release(aAlloc.ptr, false);
         wasmLoader.release(outAlloc.ptr, false);
       }
-    } else {
-      const result = new Int32Array(n);
-      kernel.fn(a, result);
-      return result;
     }
+    if (isAsWasm(wasm)) {
+      // AS managed ABI: *_i32_array(a, result) writes into the `result` header.
+      return withAsI32(wasm, [a, new Int32Array(n)], (mod, [ha, hr]) => {
+        (mod[names.as] as (x: number, r: number) => void)(ha, hr);
+        return asReadReturnedI32(mod, hr);
+      });
+    }
+    return null;
   } catch {
     return null;
   }
