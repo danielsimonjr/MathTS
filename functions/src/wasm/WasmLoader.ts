@@ -978,24 +978,29 @@ export class WasmLoader {
 
   /**
    * Get the WASM binary path based on the selected backend.
-   * Set MATHTS_WASM_BACKEND=assemblyscript to use the AS binary.
-   * Default is Rust (after migration cutover).
+   *
+   * Default is the **AssemblyScript** binary (`mathts-as.wasm`) as of the
+   * Rust→AS migration Phase 3a cutover. Set MATHTS_WASM_BACKEND=rust (legacy:
+   * MATHJS_WASM_BACKEND=rust) to load the legacy Rust binary (`mathts.wasm`)
+   * instead — kept available until the Rust toolchain is removed in Phase 5.
+   * The historical `=assemblyscript` value is still honoured (now a no-op, since
+   * AS is the default).
    *
    * Filenames were renamed from mathjs.wasm / mathjs-as.wasm during the
    * mathjs-to-MathTS rebrand; the legacy MATHJS_WASM_BACKEND env var
-   * still works for one release for backward compatibility.
+   * still works for backward compatibility.
    *
    * Returns an async result because the Node branch dynamically imports
    * `node:url` (fileURLToPath) so the path is resolved relative to this
    * source file's location rather than process.cwd().
    */
   private async getDefaultWasmPath(): Promise<string> {
-    const useAS =
+    const useRust =
       typeof process !== 'undefined' &&
-      (process.env?.MATHTS_WASM_BACKEND === 'assemblyscript' ||
-        process.env?.MATHJS_WASM_BACKEND === 'assemblyscript');
+      (process.env?.MATHTS_WASM_BACKEND === 'rust' ||
+        process.env?.MATHJS_WASM_BACKEND === 'rust');
 
-    const wasmFile = useAS ? 'mathts-as.wasm' : 'mathts.wasm';
+    const wasmFile = useRust ? 'mathts.wasm' : 'mathts-as.wasm';
 
     if (this.isNode) {
       // Prefer the wasm co-located in the package (dist/wasm/), which works in
