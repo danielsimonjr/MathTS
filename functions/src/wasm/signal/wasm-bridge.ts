@@ -20,7 +20,15 @@
  * is an optimisation, not a correctness requirement.
  */
 
-import { wasmLoader, type WasmModule } from '../WasmLoader.js';
+import { wasmLoader } from '../WasmLoader.js';
+import {
+  getWasm,
+  isRustWasm,
+  isAsWasm,
+  withAsF64,
+  asReadReturnedF64,
+  type RawWasm,
+} from '../bridges/common.js';
 
 // ---------------------------------------------------------------------------
 // Threshold
@@ -32,14 +40,6 @@ export const WASM_SIGNAL_THRESHOLD = 4096;
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-function getWasm(): WasmModule | null {
-  try {
-    return wasmLoader.getModule();
-  } catch {
-    return null;
-  }
-}
 
 /** Map string window name → integer type code. */
 function windowTypeCode(name: string): number {
@@ -303,32 +303,38 @@ export function chirpZTransformJS(
  */
 export function applyWindowDispatch(samples: Float64Array, windowName: string): void {
   const wt = windowTypeCode(windowName);
-  const wasm = getWasm();
+  const wasm = getWasm() as unknown as RawWasm | null;
   if (wasm) {
-    const rustFn = (wasm as unknown as Record<string, unknown>)['apply_window_f64'];
-    if (typeof rustFn === 'function') {
-      try {
-        const alloc = wasmLoader.allocateFloat64Array(samples);
-        try {
-          (rustFn as (ptr: number, n: number, wt: number) => number)(alloc.ptr, samples.length, wt);
-          samples.set(alloc.array);
-          return;
-        } finally {
-          wasmLoader.free(alloc.ptr);
+    try {
+      if (isRustWasm(wasm)) {
+        // Rust pointer ABI: apply_window_f64(ptr, n, wt) modifies in place.
+        const rustFn = wasm['apply_window_f64'] as
+          | ((ptr: number, n: number, wt: number) => number)
+          | undefined;
+        if (typeof rustFn === 'function') {
+          const alloc = wasmLoader.allocateFloat64Array(samples);
+          try {
+            rustFn(alloc.ptr, samples.length, wt);
+            samples.set(alloc.array);
+            return;
+          } finally {
+            wasmLoader.free(alloc.ptr);
+          }
         }
-      } catch {
-        // fall through
+      } else if (isAsWasm(wasm)) {
+        // AS managed ABI: apply_window_f64(samples, wt) modifies the buffer in
+        // place; read it back from the same header and copy into `samples`.
+        const out = withAsF64(wasm, [samples], (mod, [h]) => {
+          (mod['apply_window_f64'] as (a: number, b: number) => number)(h, wt);
+          return asReadReturnedF64(mod, h);
+        });
+        if (out && out.length === samples.length) {
+          samples.set(out);
+          return;
+        }
       }
-    }
-    // AS backend variant (typed-array ABI; AS returns the modified array from a copy)
-    const asFn = (wasm as unknown as Record<string, unknown>)['apply_window_f64'];
-    if (typeof asFn === 'function') {
-      try {
-        (asFn as (samples: Float64Array, wt: number) => number)(samples, wt);
-        return;
-      } catch {
-        // fall through
-      }
+    } catch {
+      // fall through
     }
   }
   applyWindowJS(samples, wt);
@@ -347,49 +353,49 @@ export function welchPSDDispatch(
   const wt = windowTypeCode(windowName);
 
   if (n >= WASM_SIGNAL_THRESHOLD && n >= frameLength) {
-    const wasm = getWasm();
+    const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm) {
-      const rustFn = (wasm as unknown as Record<string, unknown>)['welch_psd_f64'];
-      if (typeof rustFn === 'function') {
-        try {
-          const psdLen = Math.floor(frameLength / 2) + 1;
-          const inAlloc = wasmLoader.allocateFloat64Array(samples);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(psdLen);
-          try {
-            const ret = (
-              rustFn as (
+      try {
+        if (isRustWasm(wasm)) {
+          const rustFn = wasm['welch_psd_f64'] as
+            | ((
                 samplesPtr: number,
                 n: number,
                 frameLength: number,
                 overlap: number,
                 wt: number,
                 outPtr: number
-              ) => number
-            )(inAlloc.ptr, n, frameLength, overlap, wt, outAlloc.ptr);
-            if (ret === 0) {
-              return new Float64Array(outAlloc.array);
+              ) => number)
+            | undefined;
+          if (typeof rustFn === 'function') {
+            const psdLen = Math.floor(frameLength / 2) + 1;
+            const inAlloc = wasmLoader.allocateFloat64Array(samples);
+            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(psdLen);
+            try {
+              const ret = rustFn(inAlloc.ptr, n, frameLength, overlap, wt, outAlloc.ptr);
+              if (ret === 0) return new Float64Array(outAlloc.array);
+            } finally {
+              wasmLoader.free(inAlloc.ptr);
+              wasmLoader.free(outAlloc.ptr);
             }
-          } finally {
-            wasmLoader.free(inAlloc.ptr);
-            wasmLoader.free(outAlloc.ptr);
           }
-        } catch {
-          // fall through
-        }
-      }
-      // AS backend (typed-array ABI)
-      const asFn = (wasm as unknown as Record<string, unknown>)['welch_psd_f64'];
-      if (typeof asFn === 'function') {
-        try {
-          return (asFn as (s: Float64Array, fl: number, ov: number, wt: number) => Float64Array)(
-            samples,
-            frameLength,
-            overlap,
-            wt
+        } else if (isAsWasm(wasm)) {
+          // AS managed ABI: welch_psd_f64(samples, frameLength, overlap, wt) -> Float64Array.
+          const out = withAsF64(wasm, [samples], (mod, [h]) =>
+            asReadReturnedF64(
+              mod,
+              (mod['welch_psd_f64'] as (s: number, fl: number, ov: number, wt: number) => number)(
+                h,
+                frameLength,
+                overlap,
+                wt
+              )
+            )
           );
-        } catch {
-          // fall through
+          if (out && out.length > 0) return out;
         }
+      } catch {
+        // fall through
       }
     }
   }
@@ -403,42 +409,37 @@ export function bartlettPSDDispatch(samples: Float64Array, frameLength: number):
   const n = samples.length;
 
   if (n >= WASM_SIGNAL_THRESHOLD && n >= frameLength) {
-    const wasm = getWasm();
+    const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm) {
-      const rustFn = (wasm as unknown as Record<string, unknown>)['bartlett_psd_f64'];
-      if (typeof rustFn === 'function') {
-        try {
-          const psdLen = Math.floor(frameLength / 2) + 1;
-          const inAlloc = wasmLoader.allocateFloat64Array(samples);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(psdLen);
-          try {
-            const ret = (
-              rustFn as (
-                samplesPtr: number,
-                n: number,
-                frameLength: number,
-                outPtr: number
-              ) => number
-            )(inAlloc.ptr, n, frameLength, outAlloc.ptr);
-            if (ret === 0) {
-              return new Float64Array(outAlloc.array);
+      try {
+        if (isRustWasm(wasm)) {
+          const rustFn = wasm['bartlett_psd_f64'] as
+            | ((samplesPtr: number, n: number, frameLength: number, outPtr: number) => number)
+            | undefined;
+          if (typeof rustFn === 'function') {
+            const psdLen = Math.floor(frameLength / 2) + 1;
+            const inAlloc = wasmLoader.allocateFloat64Array(samples);
+            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(psdLen);
+            try {
+              const ret = rustFn(inAlloc.ptr, n, frameLength, outAlloc.ptr);
+              if (ret === 0) return new Float64Array(outAlloc.array);
+            } finally {
+              wasmLoader.free(inAlloc.ptr);
+              wasmLoader.free(outAlloc.ptr);
             }
-          } finally {
-            wasmLoader.free(inAlloc.ptr);
-            wasmLoader.free(outAlloc.ptr);
           }
-        } catch {
-          // fall through
+        } else if (isAsWasm(wasm)) {
+          // AS managed ABI: bartlett_psd_f64(samples, frameLength) -> Float64Array.
+          const out = withAsF64(wasm, [samples], (mod, [h]) =>
+            asReadReturnedF64(
+              mod,
+              (mod['bartlett_psd_f64'] as (s: number, fl: number) => number)(h, frameLength)
+            )
+          );
+          if (out && out.length > 0) return out;
         }
-      }
-      // AS backend
-      const asFn = (wasm as unknown as Record<string, unknown>)['bartlett_psd_f64'];
-      if (typeof asFn === 'function') {
-        try {
-          return (asFn as (s: Float64Array, fl: number) => Float64Array)(samples, frameLength);
-        } catch {
-          // fall through
-        }
+      } catch {
+        // fall through
       }
     }
   }
@@ -456,35 +457,34 @@ export function goertzelDispatch(
   const n = samples.length;
 
   if (n >= WASM_SIGNAL_THRESHOLD) {
-    const wasm = getWasm();
+    const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm) {
-      const rustFn = (wasm as unknown as Record<string, unknown>)['goertzel_f64'];
-      if (typeof rustFn === 'function') {
-        try {
-          const inAlloc = wasmLoader.allocateFloat64Array(samples);
-          try {
-            return (
-              rustFn as (ptr: number, n: number, targetFreq: number, sampleRate: number) => number
-            )(inAlloc.ptr, n, targetFreq, sampleRate);
-          } finally {
-            wasmLoader.free(inAlloc.ptr);
+      try {
+        if (isRustWasm(wasm)) {
+          const rustFn = wasm['goertzel_f64'] as
+            | ((ptr: number, n: number, targetFreq: number, sampleRate: number) => number)
+            | undefined;
+          if (typeof rustFn === 'function') {
+            const inAlloc = wasmLoader.allocateFloat64Array(samples);
+            try {
+              return rustFn(inAlloc.ptr, n, targetFreq, sampleRate);
+            } finally {
+              wasmLoader.free(inAlloc.ptr);
+            }
           }
-        } catch {
-          // fall through
-        }
-      }
-      // AS backend
-      const asFn = (wasm as unknown as Record<string, unknown>)['goertzel_f64'];
-      if (typeof asFn === 'function') {
-        try {
-          return (asFn as (s: Float64Array, targetFreq: number, sampleRate: number) => number)(
-            samples,
-            targetFreq,
-            sampleRate
+        } else if (isAsWasm(wasm)) {
+          // AS managed ABI: goertzel_f64(samples, targetFreq, sampleRate) -> f64.
+          const r = withAsF64(wasm, [samples], (mod, [h]) =>
+            (mod['goertzel_f64'] as (s: number, tf: number, sr: number) => number)(
+              h,
+              targetFreq,
+              sampleRate
+            )
           );
-        } catch {
-          // fall through
+          if (r !== null) return r;
         }
+      } catch {
+        // fall through
       }
     }
   }
@@ -505,17 +505,12 @@ export function chirpZTransformDispatch(
   const n = samples.length;
 
   if (Math.max(n, m) >= WASM_SIGNAL_THRESHOLD) {
-    const wasm = getWasm();
+    const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm) {
-      const rustFn = (wasm as unknown as Record<string, unknown>)['chirp_z_transform_f64'];
-      if (typeof rustFn === 'function') {
-        try {
-          const inAlloc = wasmLoader.allocateFloat64Array(samples);
-          const reAlloc = wasmLoader.allocateFloat64ArrayEmpty(m);
-          const imAlloc = wasmLoader.allocateFloat64ArrayEmpty(m);
-          try {
-            const ret = (
-              rustFn as (
+      try {
+        if (isRustWasm(wasm)) {
+          const rustFn = wasm['chirp_z_transform_f64'] as
+            | ((
                 samplesPtr: number,
                 n: number,
                 m: number,
@@ -525,57 +520,65 @@ export function chirpZTransformDispatch(
                 phiStepIm: number,
                 outRePtr: number,
                 outImPtr: number
-              ) => number
-            )(
-              inAlloc.ptr,
-              n,
-              m,
-              phiStartRe,
-              phiStartIm,
-              phiStepRe,
-              phiStepIm,
-              reAlloc.ptr,
-              imAlloc.ptr
-            );
-            if (ret === 0) {
-              return {
-                re: new Float64Array(reAlloc.array),
-                im: new Float64Array(imAlloc.array),
-              };
+              ) => number)
+            | undefined;
+          if (typeof rustFn === 'function') {
+            const inAlloc = wasmLoader.allocateFloat64Array(samples);
+            const reAlloc = wasmLoader.allocateFloat64ArrayEmpty(m);
+            const imAlloc = wasmLoader.allocateFloat64ArrayEmpty(m);
+            try {
+              const ret = rustFn(
+                inAlloc.ptr,
+                n,
+                m,
+                phiStartRe,
+                phiStartIm,
+                phiStepRe,
+                phiStepIm,
+                reAlloc.ptr,
+                imAlloc.ptr
+              );
+              if (ret === 0) {
+                return {
+                  re: new Float64Array(reAlloc.array),
+                  im: new Float64Array(imAlloc.array),
+                };
+              }
+            } finally {
+              wasmLoader.free(inAlloc.ptr);
+              wasmLoader.free(reAlloc.ptr);
+              wasmLoader.free(imAlloc.ptr);
             }
-          } finally {
-            wasmLoader.free(inAlloc.ptr);
-            wasmLoader.free(reAlloc.ptr);
-            wasmLoader.free(imAlloc.ptr);
           }
-        } catch {
-          // fall through
-        }
-      }
-      // AS backend: returns interleaved [re0, im0, ...]
-      const asFn = (wasm as unknown as Record<string, unknown>)['chirp_z_transform_f64'];
-      if (typeof asFn === 'function') {
-        try {
-          const interleaved = (
-            asFn as (
-              s: Float64Array,
-              m: number,
-              psr: number,
-              psi: number,
-              pwr: number,
-              pwi: number
-            ) => Float64Array
-          )(samples, m, phiStartRe, phiStartIm, phiStepRe, phiStepIm);
-          const re = new Float64Array(m);
-          const im = new Float64Array(m);
-          for (let i = 0; i < m; i++) {
-            re[i] = interleaved[i * 2];
-            im[i] = interleaved[i * 2 + 1];
+        } else if (isAsWasm(wasm)) {
+          // AS managed ABI: chirp_z_transform_f64(samples, m, ...) -> interleaved [re0, im0, …].
+          const interleaved = withAsF64(wasm, [samples], (mod, [h]) =>
+            asReadReturnedF64(
+              mod,
+              (
+                mod['chirp_z_transform_f64'] as (
+                  s: number,
+                  m: number,
+                  psr: number,
+                  psi: number,
+                  pwr: number,
+                  pwi: number
+                ) => number
+              )(h, m, phiStartRe, phiStartIm, phiStepRe, phiStepIm)
+            )
+          );
+          if (interleaved && interleaved.length === 2 * m) {
+            const re = new Float64Array(m);
+            const im = new Float64Array(m);
+            for (let i = 0; i < m; i++) {
+              re[i] = interleaved[i * 2];
+              im[i] = interleaved[i * 2 + 1];
+            }
+            return { re, im };
           }
-          return { re, im };
-        } catch {
-          // fall through
         }
+      } catch {
+        // fall through
       }
     }
   }
