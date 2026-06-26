@@ -26,7 +26,15 @@
  *   `tools/benchmark/wasm/tridiag.bench.ts`.
  */
 
-import { wasmLoader, type WasmModule } from '../WasmLoader.js';
+import { wasmLoader } from '../WasmLoader.js';
+import {
+  getWasm,
+  isRustWasm,
+  isAsWasm,
+  withAsF64,
+  asReadReturnedF64,
+  type RawWasm,
+} from '../bridges/common.js';
 
 /**
  * Knot-count threshold above which we attempt the WASM tridiag kernel.
@@ -44,14 +52,6 @@ export const WASM_INTERP_THRESHOLD = 256;
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-function getWasm(): WasmModule | null {
-  try {
-    return wasmLoader.getModule();
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Pure-JS Thomas algorithm — used as the below-threshold / no-WASM fallback.
@@ -111,14 +111,6 @@ type RustTridiagFn = (
   outPtr: number
 ) => number;
 
-// AS-backend function type signature (typed-array calling convention).
-type ASTridiagFn = (
-  diag: Float64Array,
-  lower: Float64Array,
-  upper: Float64Array,
-  rhs: Float64Array
-) => Float64Array;
-
 // ---------------------------------------------------------------------------
 // Public dispatch helper
 // ---------------------------------------------------------------------------
@@ -141,52 +133,53 @@ export function tridiagSolveDispatch(
 ): Float64Array {
   const n = diag.length;
   if (n >= WASM_TRIDIAG_THRESHOLD) {
-    const wasm = getWasm();
+    const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm) {
       try {
-        // Try Rust backend first (pointer-style).
-        const rustFn = (wasm as unknown as Record<string, unknown>)['tridiag_solve_f64'] as
-          | RustTridiagFn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const diagAlloc = wasmLoader.allocateFloat64Array(diag);
-          const lowerAlloc = wasmLoader.allocateFloat64Array(lower);
-          const upperAlloc = wasmLoader.allocateFloat64Array(upper);
-          const rhsAlloc = wasmLoader.allocateFloat64Array(rhs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(
-              diagAlloc.ptr,
-              lowerAlloc.ptr,
-              upperAlloc.ptr,
-              rhsAlloc.ptr,
-              n,
-              outAlloc.ptr
-            );
-            if (written === n) {
-              // Copy out before releasing pool memory.
-              return new Float64Array(outAlloc.array);
+        if (isRustWasm(wasm)) {
+          // Rust pointer ABI: tridiag_solve_f64(diag, lower, upper, rhs, n, out) -> n | -1.
+          const rustFn = wasm['tridiag_solve_f64'] as RustTridiagFn | undefined;
+          if (typeof rustFn === 'function') {
+            const diagAlloc = wasmLoader.allocateFloat64Array(diag);
+            const lowerAlloc = wasmLoader.allocateFloat64Array(lower);
+            const upperAlloc = wasmLoader.allocateFloat64Array(upper);
+            const rhsAlloc = wasmLoader.allocateFloat64Array(rhs);
+            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+            try {
+              const written = rustFn(
+                diagAlloc.ptr,
+                lowerAlloc.ptr,
+                upperAlloc.ptr,
+                rhsAlloc.ptr,
+                n,
+                outAlloc.ptr
+              );
+              if (written === n) return new Float64Array(outAlloc.array);
+              // written < 0 means singular — fall through to JS
+            } finally {
+              wasmLoader.release(diagAlloc.ptr, true);
+              wasmLoader.release(lowerAlloc.ptr, true);
+              wasmLoader.release(upperAlloc.ptr, true);
+              wasmLoader.release(rhsAlloc.ptr, true);
+              wasmLoader.release(outAlloc.ptr, true);
             }
-            // written < 0 means singular — fall through to JS
-          } finally {
-            wasmLoader.release(diagAlloc.ptr, true);
-            wasmLoader.release(lowerAlloc.ptr, true);
-            wasmLoader.release(upperAlloc.ptr, true);
-            wasmLoader.release(rhsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
           }
-        }
-
-        // Try AS backend (typed-array calling convention, `_as` suffix key).
-        const asFn = (wasm as unknown as Record<string, unknown>)['tridiag_solve_f64_as'] as
-          | ASTridiagFn
-          | undefined;
-        if (typeof asFn === 'function') {
-          const result = asFn(diag, lower, upper, rhs);
-          if (result.length === n) {
-            return new Float64Array(result);
-          }
-          // length 0 means singular — fall through to JS
+        } else if (isAsWasm(wasm)) {
+          // AS managed ABI: tridiag_solve_f64(diag, lower, upper, rhs) -> Float64Array
+          // (length 0 on singular).
+          const result = withAsF64(wasm, [diag, lower, upper, rhs], (mod, [hd, hl, hu, hr]) =>
+            asReadReturnedF64(
+              mod,
+              (mod['tridiag_solve_f64'] as (a: number, b: number, c: number, d: number) => number)(
+                hd,
+                hl,
+                hu,
+                hr
+              )
+            )
+          );
+          if (result && result.length === n) return result;
+          // length !== n (singular) — fall through to JS
         }
       } catch {
         // Fall through to JS
@@ -243,9 +236,6 @@ export function dividedDifferenceJS(xs: Float64Array, ys: Float64Array): Float64
 // Rust-backend function type signature (pointer-style calling convention).
 type RustDivDiffFn = (xsPtr: number, ysPtr: number, n: number, outPtr: number) => number;
 
-// AS-backend function type signature (typed-array calling convention).
-type ASDivDiffFn = (xs: Float64Array, ys: Float64Array) => Float64Array;
-
 /**
  * Compute Newton divided-difference coefficients via WASM when
  * `xs.length` is at or above WASM_INTERP_THRESHOLD, otherwise falls
@@ -260,40 +250,37 @@ type ASDivDiffFn = (xs: Float64Array, ys: Float64Array) => Float64Array;
 export function dividedDifferenceDispatch(xs: Float64Array, ys: Float64Array): Float64Array {
   const n = xs.length;
   if (n >= WASM_INTERP_THRESHOLD) {
-    const wasm = getWasm();
+    const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm) {
       try {
-        // Try Rust backend first (pointer-style).
-        const rustFn = (wasm as unknown as Record<string, unknown>)['divided_difference_f64'] as
-          | RustDivDiffFn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
+        if (isRustWasm(wasm)) {
+          // Rust pointer ABI: divided_difference_f64(xs, ys, n, out) -> n | -1.
+          const rustFn = wasm['divided_difference_f64'] as RustDivDiffFn | undefined;
+          if (typeof rustFn === 'function') {
+            const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+            const ysAlloc = wasmLoader.allocateFloat64Array(ys);
+            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+            try {
+              const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, n, outAlloc.ptr);
+              if (written === n) return new Float64Array(outAlloc.array);
+              // written < 0 → duplicate xs → fall through to JS (which will throw)
+            } finally {
+              wasmLoader.release(xsAlloc.ptr, true);
+              wasmLoader.release(ysAlloc.ptr, true);
+              wasmLoader.release(outAlloc.ptr, true);
             }
-            // written < 0 → duplicate xs → fall through to JS (which will throw)
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(ysAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
           }
-        }
-
-        // Try AS backend (typed-array calling convention, `_as` suffix key).
-        const asFn = (wasm as unknown as Record<string, unknown>)['divided_difference_f64_as'] as
-          | ASDivDiffFn
-          | undefined;
-        if (typeof asFn === 'function') {
-          const result = asFn(xs, ys);
-          if (result.length === n) {
-            return new Float64Array(result);
-          }
-          // length 0 → duplicate xs → fall through to JS (which will throw)
+        } else if (isAsWasm(wasm)) {
+          // AS managed ABI: divided_difference_f64(xs, ys) -> Float64Array
+          // (length 0 on duplicate xs).
+          const result = withAsF64(wasm, [xs, ys], (mod, [hx, hy]) =>
+            asReadReturnedF64(
+              mod,
+              (mod['divided_difference_f64'] as (a: number, b: number) => number)(hx, hy)
+            )
+          );
+          if (result && result.length === n) return result;
+          // length !== n → duplicate xs → fall through to JS (which will throw)
         }
       } catch {
         // Fall through to JS
