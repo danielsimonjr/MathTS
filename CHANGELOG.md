@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-06-26) — Rust→AS migration Phase 1 perf spike + ABI decision
+
+- `tools/benchmark/wasm/rust-vs-as-abi.spike.mts` + a pointer-ABI AS prototype
+  (`_spike/array_sin_ptr.{ts,wasm}`): benchmarks Rust vs AS-managed vs AS-pointer
+  with realistic round-trip marshalling. Result + decision in
+  `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE1.md`.
+- **ABI decision: HYBRID.** Managed-AS regresses the hot elementwise path
+  (`array_sin` 1.39× Rust at 131k); pointer-ABI AS matches Rust (0.82–1.16×) →
+  elementwise/fusion uses pointer-ABI AS, special uses managed-AS. All kernels
+  bit-identical (maxdiff 0). ⚠️ AS-managed `sort_f64` measured **29.6× slower** at
+  131k — flagged as a Phase-3 blocker (sort needs pointer-ABI or stays as-is).
+
 ### Documentation (2026-06-26) — agent knowledge base
 
 - Added `AGENTS.md` at the repo root: a cross-agent navigation + behavior hub
