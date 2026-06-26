@@ -35,20 +35,18 @@ export interface RawWasm {
 }
 
 /**
- * Backend-detection sentinels. The AssemblyScript binary exports the
- * pointer-ABI elementwise kernels (`array_<op>_ptr`) and a managed runtime
- * (`__new`); the Rust binary exports `simd_<op>_array` and has no allocator.
+ * AssemblyScript-binary detection sentinel. The AS binary (the binary the
+ * `functions` package bundles and dispatches to) exports the pointer-ABI
+ * elementwise kernels (`array_<op>_ptr`) and a managed runtime (`__new`).
  *
- * These let a bridge tell which binary is loaded so it can avoid mis-calling a
- * same-named export across the two incompatible ABIs (the AS binary reuses
- * several Rust kernel names — e.g. `poly_mul_f64`, `sort_f64` — with a managed
- * calling convention).
+ * This gate lets a bridge confirm the loaded module is the AS binary before
+ * issuing a managed-ABI call. If some other binary is loaded (e.g. the legacy
+ * Rust binary via `MATHTS_WASM_BACKEND=rust`), the gate is false and the bridge
+ * falls back to JS — the `functions` package dispatch is AS→JS only as of the
+ * Rust→AS migration Phase 5 functions cutover.
  */
 export function isAsWasm(wasm: Record<string, unknown> | null | undefined): boolean {
   return !!wasm && typeof wasm['array_sin_ptr'] === 'function';
-}
-export function isRustWasm(wasm: Record<string, unknown> | null | undefined): boolean {
-  return !!wasm && typeof wasm['simd_sin_array'] === 'function';
 }
 
 /** Pointer-ABI unary kernel: `fn(inPtr, outPtr, n)` writes `n` results to `outPtr`. */
@@ -284,43 +282,14 @@ export function withAsI32<T>(
 }
 
 /**
- * Run the Rust pointer-ABI variant of a unary f64 array kernel
- * `fn(inPtr, n, outPtr) -> written`. Returns the `n`-length result, or `null`
- * if the export is missing, `written !== n`, or the call throws. Never throws.
- *
- * Only valid against the Rust binary — callers gate with {@link isRustWasm}.
- */
-export function runRustUnaryF64(
-  wasm: RawWasm,
-  name: string,
-  xs: Float64Array
-): Float64Array | null {
-  const fn = wasm[name] as ((p: number, n: number, o: number) => number) | undefined;
-  if (typeof fn !== 'function') return null;
-  const n = xs.length;
-  const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-  const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-  try {
-    const written = fn(xsAlloc.ptr, n, outAlloc.ptr);
-    return written === n ? new Float64Array(outAlloc.array) : null;
-  } catch {
-    return null;
-  } finally {
-    wasmLoader.release(xsAlloc.ptr, true);
-    wasmLoader.release(outAlloc.ptr, true);
-  }
-}
-
-/**
  * Factory for the dominant special-function bridge shape: a single f64 array in,
- * a same-length f64 array out, sharing ONE export name across both backends
- * (Rust pointer ABI + AS managed ABI). Builds the full
- * threshold → Rust(gated) → AS-managed → JS-fallback dispatch, removing the
- * duplicated alloc/try/release/probe boilerplate (dup-audit Cluster D).
+ * a same-length f64 array out, dispatched to the AS managed kernel `cfg.name`.
+ * Builds the full threshold → AS-managed → JS-fallback dispatch, removing the
+ * duplicated alloc/try/probe boilerplate (dup-audit Cluster D).
  */
 export function makeUnaryArrayDispatch(cfg: {
   threshold: number;
-  /** Export name (identical for the Rust pointer kernel and the AS managed kernel). */
+  /** AS managed kernel export name. */
   name: string;
   /** Pure-JS fallback. */
   js: (xs: Float64Array) => Float64Array;
@@ -328,16 +297,11 @@ export function makeUnaryArrayDispatch(cfg: {
   return (xs: Float64Array): Float64Array => {
     if (xs.length >= cfg.threshold) {
       const wasm = getWasm() as unknown as RawWasm | null;
-      if (wasm) {
-        if (isRustWasm(wasm)) {
-          const out = runRustUnaryF64(wasm, cfg.name, xs);
-          if (out) return out;
-        } else if (isAsWasm(wasm)) {
-          const out = withAsF64(wasm, [xs], (mod, [h]) =>
-            asReadReturnedF64(mod, (mod[cfg.name] as (a: number) => number)(h))
-          );
-          if (out) return out;
-        }
+      if (wasm && isAsWasm(wasm)) {
+        const out = withAsF64(wasm, [xs], (mod, [h]) =>
+          asReadReturnedF64(mod, (mod[cfg.name] as (a: number) => number)(h))
+        );
+        if (out) return out;
       }
     }
     return cfg.js(xs);

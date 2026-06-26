@@ -18,17 +18,18 @@
  *    `ComputePool` fallback still runs — the WASM tier is purely an
  *    optimization, not a correctness requirement.
  *
- * Both backends (Rust primary, AssemblyScript legacy) are supported:
- *   - Rust exports use the `*Array` (binary) and `*ArrayPerElement`
- *     (per-element shift) names with pointer-style arguments.
- *   - AS exports use `*_i32_array` and pass high-level `Int32Array`
- *     references that the AS loader rebinds against module memory.
+ * Backend (AssemblyScript only, as of the Rust→AS migration Phase 5 functions
+ * cutover):
+ *   - AS exports use `*_i32_array` and pass high-level `Int32Array` references
+ *     that the AS loader rebinds against module memory.
+ *   - The legacy Rust `*Array` / `*ArrayPerElement` pointer-ABI path was removed
+ *     from this bridge; under any non-AS binary the helpers return `null` and the
+ *     caller falls back to `ComputePool`.
  */
 
 import { wasmLoader, type WasmModule } from '../WasmLoader.js';
 import {
   getWasm,
-  isRustWasm,
   isAsWasm,
   withAsI32,
   asReadReturnedI32,
@@ -44,39 +45,22 @@ import {
  */
 export const WASM_BITWISE_THRESHOLD = 64 * 1024;
 
-type BinaryRust = (aPtr: number, bPtr: number, resultPtr: number, length: number) => void;
-
-type UnaryRust = (inputPtr: number, resultPtr: number, length: number) => void;
-
-/**
- * Names of the WASM exports we look for, ordered (Rust first, AS
- * second). The first match wins.
- */
+/** AS managed kernel export name for each op. */
 interface OpNames {
-  rust: keyof WasmModule;
   as: keyof WasmModule;
 }
 
 const BINARY_OPS: Record<string, OpNames> = {
-  bitAnd: { rust: 'bitAndArray', as: 'bitAnd_i32_array' },
-  bitOr: { rust: 'bitOrArray', as: 'bitOr_i32_array' },
-  bitXor: { rust: 'bitXorArray', as: 'bitXor_i32_array' },
-  leftShift: {
-    rust: 'leftShiftArrayPerElement',
-    as: 'leftShift_i32_array',
-  },
-  rightArithShift: {
-    rust: 'rightArithShiftArrayPerElement',
-    as: 'rightArithShift_i32_array',
-  },
-  rightLogShift: {
-    rust: 'rightLogShiftArrayPerElement',
-    as: 'rightLogShift_i32_array',
-  },
+  bitAnd: { as: 'bitAnd_i32_array' },
+  bitOr: { as: 'bitOr_i32_array' },
+  bitXor: { as: 'bitXor_i32_array' },
+  leftShift: { as: 'leftShift_i32_array' },
+  rightArithShift: { as: 'rightArithShift_i32_array' },
+  rightLogShift: { as: 'rightLogShift_i32_array' },
 };
 
 const UNARY_OPS: Record<string, OpNames> = {
-  bitNot: { rust: 'bitNotArray', as: 'bitNot_i32_array' },
+  bitNot: { as: 'bitNot_i32_array' },
 };
 
 /**
@@ -85,10 +69,10 @@ const UNARY_OPS: Record<string, OpNames> = {
  * Any error from the kernel is swallowed and treated as `null` so the
  * caller falls back to `ComputePool`.
  *
- * Backend selection is gated by the binary sentinels (`isRustWasm` /
- * `isAsWasm`) — the AS binary reuses NEITHER the Rust pointer name nor its ABI:
- * Rust uses `*Array(aPtr, bPtr, outPtr, n)` (pointer), AS uses
- * `*_i32_array(a, b, result)` MANAGED (header refs, result is an output param).
+ * Backend selection is gated by the AS sentinel (`isAsWasm`): the AS binary
+ * exports `*_i32_array(a, b, result)` MANAGED (header refs, `result` is an output
+ * param). Under any non-AS binary this returns `null` and the caller falls back
+ * to `ComputePool`.
  */
 export function runBinaryBitwiseWasm(
   op: keyof typeof BINARY_OPS,
@@ -97,34 +81,15 @@ export function runBinaryBitwiseWasm(
 ): Int32Array | null {
   if (a.length !== b.length) return null;
   const wasm = getWasm() as unknown as RawWasm | null;
-  if (!wasm) return null;
+  if (!wasm || !isAsWasm(wasm)) return null;
   const n = a.length;
   const names = BINARY_OPS[op];
   try {
-    if (isRustWasm(wasm)) {
-      const fn = wasm[names.rust] as BinaryRust | undefined;
-      if (typeof fn !== 'function') return null;
-      const aAlloc = wasmLoader.allocateInt32Array(a);
-      const bAlloc = wasmLoader.allocateInt32Array(b);
-      const outAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
-      try {
-        fn(aAlloc.ptr, bAlloc.ptr, outAlloc.ptr, n);
-        // Copy out before releasing — the underlying view shares pool memory.
-        return new Int32Array(outAlloc.array);
-      } finally {
-        wasmLoader.release(aAlloc.ptr, false);
-        wasmLoader.release(bAlloc.ptr, false);
-        wasmLoader.release(outAlloc.ptr, false);
-      }
-    }
-    if (isAsWasm(wasm)) {
-      // AS managed ABI: *_i32_array(a, b, result) writes into the `result` header.
-      return withAsI32(wasm, [a, b, new Int32Array(n)], (mod, [ha, hb, hr]) => {
-        (mod[names.as] as (x: number, y: number, r: number) => void)(ha, hb, hr);
-        return asReadReturnedI32(mod, hr);
-      });
-    }
-    return null;
+    // AS managed ABI: *_i32_array(a, b, result) writes into the `result` header.
+    return withAsI32(wasm, [a, b, new Int32Array(n)], (mod, [ha, hb, hr]) => {
+      (mod[names.as] as (x: number, y: number, r: number) => void)(ha, hb, hr);
+      return asReadReturnedI32(mod, hr);
+    });
   } catch {
     return null;
   }
@@ -135,31 +100,15 @@ export function runBinaryBitwiseWasm(
  */
 export function runUnaryBitwiseWasm(op: keyof typeof UNARY_OPS, a: Int32Array): Int32Array | null {
   const wasm = getWasm() as unknown as RawWasm | null;
-  if (!wasm) return null;
+  if (!wasm || !isAsWasm(wasm)) return null;
   const n = a.length;
   const names = UNARY_OPS[op];
   try {
-    if (isRustWasm(wasm)) {
-      const fn = wasm[names.rust] as UnaryRust | undefined;
-      if (typeof fn !== 'function') return null;
-      const aAlloc = wasmLoader.allocateInt32Array(a);
-      const outAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
-      try {
-        fn(aAlloc.ptr, outAlloc.ptr, n);
-        return new Int32Array(outAlloc.array);
-      } finally {
-        wasmLoader.release(aAlloc.ptr, false);
-        wasmLoader.release(outAlloc.ptr, false);
-      }
-    }
-    if (isAsWasm(wasm)) {
-      // AS managed ABI: *_i32_array(a, result) writes into the `result` header.
-      return withAsI32(wasm, [a, new Int32Array(n)], (mod, [ha, hr]) => {
-        (mod[names.as] as (x: number, r: number) => void)(ha, hr);
-        return asReadReturnedI32(mod, hr);
-      });
-    }
-    return null;
+    // AS managed ABI: *_i32_array(a, result) writes into the `result` header.
+    return withAsI32(wasm, [a, new Int32Array(n)], (mod, [ha, hr]) => {
+      (mod[names.as] as (x: number, r: number) => void)(ha, hr);
+      return asReadReturnedI32(mod, hr);
+    });
   } catch {
     return null;
   }

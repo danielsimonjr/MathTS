@@ -6,19 +6,20 @@
  *   - `argsort_f64` — return Int32Array of permutation indices (NaN-last).
  *   - `rank_f64`    — return Int32Array of ranks (0-indexed, NaN-last).
  *
- * Dispatch order (for arrays ≥ WASM_SORT_THRESHOLD = 16 384 elements):
- *   1. Probe Rust export (`sort_f64` / `argsort_f64` / `rank_f64`).
- *   2. If absent, probe AS export (same name, typed-array ABI).
- *   3. Fall back to pure-JS implementation.
+ * Dispatch (for arrays ≥ WASM_SORT_THRESHOLD = 16 384 elements):
+ *   - `sort_f64` uses the AS managed kernel (value-sort is bit-identical to JS).
+ *   - `argsort_f64` / `rank_f64` stay on JS: the AS sort is UNSTABLE, so for
+ *     tied values it returns a different (still valid) permutation than the JS
+ *     stable reference (verified Phase 3b). The legacy Rust stable kernels were
+ *     dropped from this bridge in the Phase 5 AS cutover; re-enable WASM here
+ *     once a stable AS argsort lands (Rust→AS migration Phase 6).
  *
  * Any thrown error is swallowed and the JS fallback runs — WASM is an
  * optimisation, not a correctness requirement.
  */
 
-import { wasmLoader } from '../WasmLoader.js';
 import {
   getWasm,
-  isRustWasm,
   isAsWasm,
   withAsF64,
   asReadReturnedF64,
@@ -92,33 +93,16 @@ export function sortF64Dispatch(data: Float64Array): Float64Array {
 
   if (n >= WASM_SORT_THRESHOLD) {
     const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm) {
+    if (wasm && isAsWasm(wasm)) {
       try {
-        if (isRustWasm(wasm)) {
-          // Rust pointer ABI: sort_f64(ptr, n) sorts in place.
-          const rustFn = wasm['sort_f64'] as ((ptr: number, n: number) => number) | undefined;
-          if (typeof rustFn === 'function') {
-            const alloc = wasmLoader.allocateFloat64Array(data);
-            try {
-              const ret = rustFn(alloc.ptr, n);
-              if (ret >= 0) {
-                data.set(alloc.array);
-                return data;
-              }
-            } finally {
-              wasmLoader.free(alloc.ptr);
-            }
-          }
-        } else if (isAsWasm(wasm)) {
-          // AS managed ABI: sort_f64(data) sorts in place and returns the array.
-          // Value-sort is bit-identical to JS regardless of stability.
-          const sorted = withAsF64(wasm, [data], (mod, [h]) =>
-            asReadReturnedF64(mod, (mod['sort_f64'] as (d: number) => number)(h))
-          );
-          if (sorted && sorted.length === n) {
-            data.set(sorted);
-            return data;
-          }
+        // AS managed ABI: sort_f64(data) sorts in place and returns the array.
+        // Value-sort is bit-identical to JS regardless of stability.
+        const sorted = withAsF64(wasm, [data], (mod, [h]) =>
+          asReadReturnedF64(mod, (mod['sort_f64'] as (d: number) => number)(h))
+        );
+        if (sorted && sorted.length === n) {
+          data.set(sorted);
+          return data;
         }
       } catch {
         // fall through
@@ -129,77 +113,27 @@ export function sortF64Dispatch(data: Float64Array): Float64Array {
 }
 
 /**
- * Return the argsort permutation for `data` (NaN-last).
+ * Return the argsort permutation for `data` (NaN-last) — JS stable sort.
  * After the call, `data[result[0]] ≤ data[result[1]] ≤ …`
- * Uses WASM above {@link WASM_SORT_THRESHOLD}.
+ *
+ * JS-only: the AS argsort_f64 kernel is UNSTABLE, so for tied values it returns
+ * a different (still valid) permutation than the JS stable reference (verified
+ * Phase 3b: 0 diffs on distinct input, ~all-diff on duplicate-heavy input). The
+ * legacy Rust stable kernel was dropped from this bridge in the Phase 5 AS
+ * cutover; re-enable WASM once a stable AS argsort lands (Phase 6).
  */
 export function argsortF64Dispatch(data: Float64Array): Int32Array {
-  const n = data.length;
-
-  if (n >= WASM_SORT_THRESHOLD) {
-    const wasm = getWasm() as unknown as RawWasm | null;
-    // NOTE: only the Rust pointer kernel is used. The AS argsort_f64 kernel is
-    // NOT routed to — it is an UNSTABLE sort, so for tied values it returns a
-    // different (still valid) permutation than the JS stable reference (verified
-    // Phase 3b: 0 diffs on distinct input, ~all-diff on duplicate-heavy input).
-    // Under the AS binary this falls through to the JS stable argsort.
-    if (wasm && isRustWasm(wasm)) {
-      const rustFn = wasm['argsort_f64'] as
-        | ((dataPtr: number, n: number, outPtr: number) => number)
-        | undefined;
-      if (typeof rustFn === 'function') {
-        try {
-          const inAlloc = wasmLoader.allocateFloat64Array(data);
-          const outAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
-          try {
-            const ret = rustFn(inAlloc.ptr, n, outAlloc.ptr);
-            if (ret >= 0) return new Int32Array(outAlloc.array);
-          } finally {
-            wasmLoader.free(inAlloc.ptr);
-            wasmLoader.free(outAlloc.ptr);
-          }
-        } catch {
-          // fall through
-        }
-      }
-    }
-  }
   return argsortF64JS(data);
 }
 
 /**
- * Return the rank array for `data` (0-indexed, NaN-last).
+ * Return the rank array for `data` (0-indexed, NaN-last) — JS stable sort.
  * `result[i]` = position of `data[i]` in the sorted array.
- * Uses WASM above {@link WASM_SORT_THRESHOLD}.
+ *
+ * JS-only for the same reason as {@link argsortF64Dispatch}: the AS rank_f64
+ * kernel derives from the unstable AS sort and disagrees with the JS stable
+ * reference on ties (verified Phase 3b). Re-enable WASM in Phase 6.
  */
 export function rankF64Dispatch(data: Float64Array): Int32Array {
-  const n = data.length;
-
-  if (n >= WASM_SORT_THRESHOLD) {
-    const wasm = getWasm() as unknown as RawWasm | null;
-    // Only the Rust pointer kernel is used; the AS rank_f64 kernel derives from
-    // the unstable AS sort and so disagrees with the JS stable reference on ties
-    // (verified Phase 3b). Under the AS binary this falls through to JS.
-    if (wasm && isRustWasm(wasm)) {
-      const rustFn = wasm['rank_f64'] as
-        | ((dataPtr: number, n: number, outPtr: number) => number)
-        | undefined;
-      if (typeof rustFn === 'function') {
-        try {
-          const inAlloc = wasmLoader.allocateFloat64Array(data);
-          const outAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
-          try {
-            const ret = rustFn(inAlloc.ptr, n, outAlloc.ptr);
-            if (ret >= 0) return new Int32Array(outAlloc.array);
-          } finally {
-            wasmLoader.free(inAlloc.ptr);
-            wasmLoader.free(outAlloc.ptr);
-          }
-        } catch {
-          // fall through
-        }
-      }
-    }
-  }
   return rankF64JS(data);
 }

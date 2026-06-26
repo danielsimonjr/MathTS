@@ -12,14 +12,14 @@
  *   - `airy_bi_f64`   — Bi(x) applied element-wise
  *
  * Dispatch order (for arrays ≥ WASM_SPECIAL_THRESHOLD = 1024 elements):
- *   1. Probe Rust export (pointer-style ABI).
- *   2. If absent, probe AS export (`*_as` suffix, typed-array ABI).
- *   3. Fall back to pure-JS implementation.
+ *   1. AS managed kernel (the binary the functions package bundles).
+ *   2. Fall back to pure-JS implementation.
  *
- * AS parity (Slice 4.9): `assembly/src/special.ts` implements all 8 kernels
- *   with the same algorithms.  The `_as`-suffix probes below pick them up
- *   automatically when the AS WASM binary is loaded
- *   (MATHJS_WASM_BACKEND=assemblyscript).
+ * AS parity (Slice 4.9): `assembly/src/special.ts` implements the Bessel/Y and
+ *   lgamma/elliptic kernels with the same algorithms, validated ≤1e-12 vs the JS
+ *   reference. (Airy is the exception — see `airyAiDispatch`/`airyBiDispatch`,
+ *   which stay on JS pending a Phase 6 AS asymptotic fix.) The legacy Rust
+ *   pointer-ABI path was removed from this bridge in the Phase 5 AS cutover.
  *
  * Any thrown error is swallowed and the JS fallback runs — the WASM tier
  * is an optimisation, not a correctness requirement.
@@ -33,7 +33,6 @@
 import { wasmLoader } from '../WasmLoader.js';
 import {
   getWasm,
-  isRustWasm,
   isAsWasm,
   withAsF64,
   asReadReturnedF64,
@@ -49,12 +48,6 @@ export const WASM_SPECIAL_THRESHOLD = 1024;
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-// Rust-backend function type signatures (pointer-style calling convention).
-// The Carlson R-forms + incomplete-elliptic kernels share the uniform
-// (ptr1..ptrN, n, outPtr) ABI handled generically by `multiArrayDispatch`.
-type RustJ01Fn = (xsPtr: number, n: number, outPtr: number) => number;
-type RustJnFn = (order: number, xsPtr: number, nElems: number, outPtr: number) => number;
 
 // ---------------------------------------------------------------------------
 // Pure-JS fallback implementations
@@ -138,9 +131,9 @@ export function airyBiJS(xs: Float64Array): Float64Array {
 
 /**
  * Dispatch J0/J1/Y0/Y1 — and the order-fixed J_n/Y_n — over an array.
- * Rust pointer kernel (gated) → AS managed kernel → JS. All AS special kernels
- * here bit-/tol-match the JS reference to ≤1e-12 (verified Phase 3b), so they
- * are repointed via the shared `makeUnaryArrayDispatch` factory.
+ * AS managed kernel → JS. All AS special kernels here bit-/tol-match the JS
+ * reference to ≤1e-12 (verified Phase 3b), so they are repointed via the shared
+ * `makeUnaryArrayDispatch` factory.
  */
 export const besselJ0Dispatch = makeUnaryArrayDispatch({
   threshold: WASM_SPECIAL_THRESHOLD,
@@ -157,35 +150,19 @@ export const besselJ1Dispatch = makeUnaryArrayDispatch({
 function besselOrderDispatch(
   order: number,
   xs: Float64Array,
-  rustName: string,
   asName: string,
   js: (n: number, xs: Float64Array) => Float64Array
 ): Float64Array {
   const n = xs.length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
     const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm) {
+    if (wasm && isAsWasm(wasm)) {
       try {
-        if (isRustWasm(wasm)) {
-          const rustFn = wasm[rustName] as RustJnFn | undefined;
-          if (typeof rustFn === 'function') {
-            const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-            try {
-              const written = rustFn(order, xsAlloc.ptr, n, outAlloc.ptr);
-              if (written === n) return new Float64Array(outAlloc.array);
-            } finally {
-              wasmLoader.release(xsAlloc.ptr, true);
-              wasmLoader.release(outAlloc.ptr, true);
-            }
-          }
-        } else if (isAsWasm(wasm)) {
-          // AS managed ABI: <asName>(order, xs) -> Float64Array.
-          const out = withAsF64(wasm, [xs], (mod, [h]) =>
-            asReadReturnedF64(mod, (mod[asName] as (o: number, x: number) => number)(order, h))
-          );
-          if (out) return out;
-        }
+        // AS managed ABI: <asName>(order, xs) -> Float64Array.
+        const out = withAsF64(wasm, [xs], (mod, [h]) =>
+          asReadReturnedF64(mod, (mod[asName] as (o: number, x: number) => number)(order, h))
+        );
+        if (out) return out;
       } catch {
         // fall through to JS
       }
@@ -194,11 +171,11 @@ function besselOrderDispatch(
   return js(order, xs);
 }
 
-/** Dispatch J_order over an array — Rust WASM, then AS managed, then JS. */
+/** Dispatch J_order over an array — AS managed, then JS. */
 export function besselJDispatch(order: number, xs: Float64Array): Float64Array {
   if (order === 0) return besselJ0Dispatch(xs);
   if (order === 1) return besselJ1Dispatch(xs);
-  return besselOrderDispatch(order, xs, 'bessel_j_f64', 'bessel_jn_f64', besselJnJS);
+  return besselOrderDispatch(order, xs, 'bessel_jn_f64', besselJnJS);
 }
 
 export const besselY0Dispatch = makeUnaryArrayDispatch({
@@ -212,63 +189,29 @@ export const besselY1Dispatch = makeUnaryArrayDispatch({
   js: besselY1JS,
 });
 
-/** Dispatch Y_order over an array — Rust WASM, then AS managed, then JS. */
+/** Dispatch Y_order over an array — AS managed, then JS. */
 export function besselYDispatch(order: number, xs: Float64Array): Float64Array {
   if (order === 0) return besselY0Dispatch(xs);
   if (order === 1) return besselY1Dispatch(xs);
-  return besselOrderDispatch(order, xs, 'bessel_y_f64', 'bessel_yn_f64', besselYnJS);
+  return besselOrderDispatch(order, xs, 'bessel_yn_f64', besselYnJS);
 }
 
 /**
- * Dispatch Ai(x) / Bi(x) over an array.
+ * Dispatch Ai(x) / Bi(x) over an array — JS only.
  *
- * The Rust pointer kernel is kept (gated). The AS managed Airy kernels are
- * deliberately NOT routed to: in the asymptotic region (|x|>5) they diverge
- * from the JS reference by ~1e-6 relative (verified Phase 3b) — above the 1e-12
- * bar — so under the AS binary these fall through to the validated JS series /
- * asymptotic implementation. Re-enable once assembly/src's Airy asymptotic
- * matches JS.
+ * The AS managed Airy kernels are deliberately NOT routed to: in the asymptotic
+ * region (|x|>5) they diverge from the JS reference by ~1e-6 relative (verified
+ * Phase 3b) — above the 1e-12 bar — so these run on the validated JS series /
+ * asymptotic implementation. The legacy Rust Airy kernel was dropped from the
+ * functions dispatch in the Phase 5 AS cutover. Re-enable WASM once
+ * assembly/src's Airy asymptotic matches JS (Rust→AS migration Phase 6).
  */
 export function airyAiDispatch(xs: Float64Array): Float64Array {
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm && isRustWasm(wasm)) {
-      const out = runRustUnarySpecial(wasm, 'airy_ai_f64', xs);
-      if (out) return out;
-    }
-  }
   return airyAiJS(xs);
 }
 
 export function airyBiDispatch(xs: Float64Array): Float64Array {
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm && isRustWasm(wasm)) {
-      const out = runRustUnarySpecial(wasm, 'airy_bi_f64', xs);
-      if (out) return out;
-    }
-  }
   return airyBiJS(xs);
-}
-
-/** Rust pointer-ABI runner: `<name>(xsPtr, n, outPtr) -> written`; null unless written===n. */
-function runRustUnarySpecial(wasm: RawWasm, name: string, xs: Float64Array): Float64Array | null {
-  const rustFn = wasm[name] as RustJ01Fn | undefined;
-  if (typeof rustFn !== 'function') return null;
-  const n = xs.length;
-  const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-  const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-  try {
-    const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
-    return written === n ? new Float64Array(outAlloc.array) : null;
-  } catch {
-    return null;
-  } finally {
-    wasmLoader.release(xsAlloc.ptr, true);
-    wasmLoader.release(outAlloc.ptr, true);
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -612,10 +555,9 @@ export function ellipticPiIncompleteScalar(n: number, phi: number, m: number): n
 
 /**
  * Shared multi-array dispatch for the Carlson R-forms and incomplete elliptic
- * integrals. All share the uniform ABI: Rust pointer `fn(ptr1..ptrN, n, outPtr)
- * -> written`; AS managed `fn(h1..hN) -> Float64Array`. Rust is gated behind
- * `isRustWasm`; under AS the managed call is used; otherwise JS. All AS kernels
- * here tol-match the JS reference to ≤1e-12 (verified Phase 3b).
+ * integrals. All share the AS managed ABI: `fn(h1..hN) -> Float64Array`. Under
+ * the AS binary the managed call is used; otherwise JS. All AS kernels here
+ * tol-match the JS reference to ≤1e-12 (verified Phase 3b).
  */
 function multiArrayDispatch(
   name: string,
@@ -625,27 +567,12 @@ function multiArrayDispatch(
   const n = inputs[0].length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
     const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm) {
+    if (wasm && isAsWasm(wasm)) {
       try {
-        if (isRustWasm(wasm)) {
-          const rustFn = wasm[name] as ((...a: number[]) => number) | undefined;
-          if (typeof rustFn === 'function') {
-            const allocs = inputs.map((a) => wasmLoader.allocateFloat64Array(a));
-            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-            try {
-              const written = rustFn(...allocs.map((a) => a.ptr), n, outAlloc.ptr);
-              if (written === n) return new Float64Array(outAlloc.array);
-            } finally {
-              for (const a of allocs) wasmLoader.release(a.ptr, true);
-              wasmLoader.release(outAlloc.ptr, true);
-            }
-          }
-        } else if (isAsWasm(wasm)) {
-          const out = withAsF64(wasm, inputs, (mod, headers) =>
-            asReadReturnedF64(mod, (mod[name] as (...h: number[]) => number)(...headers))
-          );
-          if (out) return out;
-        }
+        const out = withAsF64(wasm, inputs, (mod, headers) =>
+          asReadReturnedF64(mod, (mod[name] as (...h: number[]) => number)(...headers))
+        );
+        if (out) return out;
       } catch {
         /* fall through to JS */
       }
@@ -654,7 +581,7 @@ function multiArrayDispatch(
   return js();
 }
 
-/** Dispatch RC(x, y) element-wise — Rust (gated) → AS managed → JS. */
+/** Dispatch RC(x, y) element-wise — AS managed → JS. */
 export function carlsonRCDispatch(xs: Float64Array, ys: Float64Array): Float64Array {
   return multiArrayDispatch('carlson_rc_f64', [xs, ys], () => carlsonRCJS(xs, ys));
 }

@@ -30,7 +30,6 @@
 import { wasmLoader } from '../WasmLoader.js';
 import {
   getWasm,
-  isRustWasm,
   isAsWasm,
   withAsF64,
   asReadReturnedF64,
@@ -93,24 +92,13 @@ function polyDivModJS(
   };
 }
 
-// Rust-backend function type signatures.
-type RustMulFn = (aPtr: number, aLen: number, bPtr: number, bLen: number, outPtr: number) => number;
-
-type RustDivModFn = (
-  numPtr: number,
-  numLen: number,
-  denPtr: number,
-  denLen: number,
-  outPtr: number
-) => number;
-
 // ---------------------------------------------------------------------------
 // Public dispatch helpers
 // ---------------------------------------------------------------------------
 
 /**
- * Multiply two polynomials `a` and `b` via WASM when either operand
- * length exceeds the threshold, otherwise falls back to inline JS.
+ * Multiply two polynomials `a` and `b` via the AS WASM kernel when either
+ * operand length exceeds the threshold, otherwise falls back to inline JS.
  *
  * Returns a `Float64Array` of length `a.length + b.length - 1`.
  */
@@ -118,35 +106,13 @@ export function polyMulDispatch(a: Float64Array, b: Float64Array): Float64Array 
   const bigEnough = a.length >= WASM_POLY_THRESHOLD || b.length >= WASM_POLY_THRESHOLD;
   if (bigEnough) {
     const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm) {
+    if (wasm && isAsWasm(wasm)) {
       try {
-        if (isRustWasm(wasm)) {
-          // Rust pointer ABI: poly_mul_f64(aPtr, aLen, bPtr, bLen, outPtr).
-          const rustFn = wasm['poly_mul_f64'] as RustMulFn | undefined;
-          if (typeof rustFn === 'function') {
-            const outLen = a.length + b.length - 1;
-            const aAlloc = wasmLoader.allocateFloat64Array(a);
-            const bAlloc = wasmLoader.allocateFloat64Array(b);
-            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(outLen);
-            try {
-              rustFn(aAlloc.ptr, a.length, bAlloc.ptr, b.length, outAlloc.ptr);
-              return new Float64Array(outAlloc.array);
-            } finally {
-              wasmLoader.release(aAlloc.ptr, true);
-              wasmLoader.release(bAlloc.ptr, true);
-              wasmLoader.release(outAlloc.ptr, true);
-            }
-          }
-        } else if (isAsWasm(wasm)) {
-          // AS managed ABI: poly_mul_f64(a, b) -> Float64Array.
-          const out = withAsF64(wasm, [a, b], (mod, [ha, hb]) =>
-            asReadReturnedF64(
-              mod,
-              (mod['poly_mul_f64'] as (x: number, y: number) => number)(ha, hb)
-            )
-          );
-          if (out) return out;
-        }
+        // AS managed ABI: poly_mul_f64(a, b) -> Float64Array.
+        const out = withAsF64(wasm, [a, b], (mod, [ha, hb]) =>
+          asReadReturnedF64(mod, (mod['poly_mul_f64'] as (x: number, y: number) => number)(ha, hb))
+        );
+        if (out) return out;
       } catch {
         // Fall through to JS
       }
@@ -170,58 +136,22 @@ export function polyDivModDispatch(
   const bigEnough = num.length >= WASM_POLY_THRESHOLD;
   if (bigEnough) {
     const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm) {
+    if (wasm && isAsWasm(wasm)) {
       try {
-        if (isRustWasm(wasm)) {
-          const rustFn = wasm['poly_div_mod_f64'] as RustDivModFn | undefined;
-          if (typeof rustFn === 'function') {
-            const qLen = num.length >= den.length ? num.length - den.length + 1 : 0;
-            const rLen = den.length > 1 ? den.length - 1 : 0;
-            const totalLen = qLen + rLen;
-            const maxOutLen = Math.max(totalLen, num.length, 1);
-            const numAlloc = wasmLoader.allocateFloat64Array(num);
-            const denAlloc = wasmLoader.allocateFloat64Array(den);
-            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(maxOutLen);
-            try {
-              const written = rustFn(
-                numAlloc.ptr,
-                num.length,
-                denAlloc.ptr,
-                den.length,
-                outAlloc.ptr
-              );
-              // The Rust kernel writes [quotient (qLen) | remainder (rLen)].
-              const actualQLen = num.length >= den.length ? num.length - den.length + 1 : 0;
-              const actualRLen = written - actualQLen;
-              // Copy out before releasing pool memory.
-              const flatCopy = new Float64Array(written);
-              flatCopy.set(new Float64Array(outAlloc.array.buffer, outAlloc.ptr, written));
-              return {
-                quotient: actualQLen > 0 ? flatCopy.slice(0, actualQLen) : new Float64Array([0]),
-                remainder: actualRLen > 0 ? flatCopy.slice(actualQLen) : new Float64Array([0]),
-              };
-            } finally {
-              wasmLoader.release(numAlloc.ptr, true);
-              wasmLoader.release(denAlloc.ptr, true);
-              wasmLoader.release(outAlloc.ptr, true);
-            }
-          }
-        } else if (isAsWasm(wasm)) {
-          // AS managed ABI: poly_div_mod_f64(num, den) -> [quotient | remainder].
-          const flat = withAsF64(wasm, [num, den], (mod, [hn, hd]) =>
-            asReadReturnedF64(
-              mod,
-              (mod['poly_div_mod_f64'] as (x: number, y: number) => number)(hn, hd)
-            )
-          );
-          if (flat) {
-            const actualQLen = num.length >= den.length ? num.length - den.length + 1 : 0;
-            const actualRLen = flat.length - actualQLen;
-            return {
-              quotient: actualQLen > 0 ? flat.slice(0, actualQLen) : new Float64Array([0]),
-              remainder: actualRLen > 0 ? flat.slice(actualQLen) : new Float64Array([0]),
-            };
-          }
+        // AS managed ABI: poly_div_mod_f64(num, den) -> [quotient | remainder].
+        const flat = withAsF64(wasm, [num, den], (mod, [hn, hd]) =>
+          asReadReturnedF64(
+            mod,
+            (mod['poly_div_mod_f64'] as (x: number, y: number) => number)(hn, hd)
+          )
+        );
+        if (flat) {
+          const actualQLen = num.length >= den.length ? num.length - den.length + 1 : 0;
+          const actualRLen = flat.length - actualQLen;
+          return {
+            quotient: actualQLen > 0 ? flat.slice(0, actualQLen) : new Float64Array([0]),
+            remainder: actualRLen > 0 ? flat.slice(actualQLen) : new Float64Array([0]),
+          };
         }
       } catch {
         // Fall through to JS
@@ -235,10 +165,6 @@ export function polyDivModDispatch(
 // ---------------------------------------------------------------------------
 // Scalar-result dispatch (resultant / discriminant)
 // ---------------------------------------------------------------------------
-
-// Rust-backend function type signatures for scalar kernels.
-type RustResultantFn = (pPtr: number, pLen: number, qPtr: number, qLen: number) => number;
-type RustDiscriminantFn = (pPtr: number, pLen: number) => number;
 
 /** Inline JS resultant — Sylvester-matrix determinant fallback. */
 function resultantJS(p: Float64Array, q: Float64Array): number {
@@ -337,27 +263,13 @@ export function resultantDispatch(p: Float64Array, q: Float64Array): number {
   const bigEnough = p.length >= WASM_POLY_THRESHOLD || q.length >= WASM_POLY_THRESHOLD;
   if (bigEnough) {
     const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm) {
+    if (wasm && isAsWasm(wasm)) {
       try {
-        if (isRustWasm(wasm)) {
-          const rustFn = wasm['poly_resultant_f64'] as RustResultantFn | undefined;
-          if (typeof rustFn === 'function') {
-            const pAlloc = wasmLoader.allocateFloat64Array(p);
-            const qAlloc = wasmLoader.allocateFloat64Array(q);
-            try {
-              return rustFn(pAlloc.ptr, p.length, qAlloc.ptr, q.length);
-            } finally {
-              wasmLoader.release(pAlloc.ptr, true);
-              wasmLoader.release(qAlloc.ptr, true);
-            }
-          }
-        } else if (isAsWasm(wasm)) {
-          // AS managed ABI: poly_resultant_f64(p, q) -> f64.
-          const r = withAsF64(wasm, [p, q], (mod, [hp, hq]) =>
-            (mod['poly_resultant_f64'] as (x: number, y: number) => number)(hp, hq)
-          );
-          if (r !== null) return r;
-        }
+        // AS managed ABI: poly_resultant_f64(p, q) -> f64.
+        const r = withAsF64(wasm, [p, q], (mod, [hp, hq]) =>
+          (mod['poly_resultant_f64'] as (x: number, y: number) => number)(hp, hq)
+        );
+        if (r !== null) return r;
       } catch {
         // Fall through to JS
       }
@@ -374,25 +286,13 @@ export function discriminantDispatch(p: Float64Array): number {
   const bigEnough = p.length >= WASM_POLY_THRESHOLD;
   if (bigEnough) {
     const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm) {
+    if (wasm && isAsWasm(wasm)) {
       try {
-        if (isRustWasm(wasm)) {
-          const rustFn = wasm['poly_discriminant_f64'] as RustDiscriminantFn | undefined;
-          if (typeof rustFn === 'function') {
-            const pAlloc = wasmLoader.allocateFloat64Array(p);
-            try {
-              return rustFn(pAlloc.ptr, p.length);
-            } finally {
-              wasmLoader.release(pAlloc.ptr, true);
-            }
-          }
-        } else if (isAsWasm(wasm)) {
-          // AS managed ABI: poly_discriminant_f64(p) -> f64.
-          const r = withAsF64(wasm, [p], (mod, [hp]) =>
-            (mod['poly_discriminant_f64'] as (x: number) => number)(hp)
-          );
-          if (r !== null) return r;
-        }
+        // AS managed ABI: poly_discriminant_f64(p) -> f64.
+        const r = withAsF64(wasm, [p], (mod, [hp]) =>
+          (mod['poly_discriminant_f64'] as (x: number) => number)(hp)
+        );
+        if (r !== null) return r;
       } catch {
         // Fall through to JS
       }
@@ -412,15 +312,6 @@ export function discriminantDispatch(p: Float64Array): number {
  * factorisation pays off.
  */
 export const WASM_POLY_FIT_THRESHOLD = 1024;
-
-// Rust-backend function type signatures for fit kernels.
-type RustFitFn = (
-  xsPtr: number,
-  ysPtr: number,
-  n: number,
-  degree: number,
-  outPtr: number
-) => number;
 
 /** Internal helper: build normal equations and solve via Cholesky/Gauss (JS fallback). */
 function polyFitJS(
@@ -547,63 +438,29 @@ function legendreFitJSFallback(xs: Float64Array, ys: Float64Array, degree: numbe
 
 /**
  * Generic dispatch helper for fit kernels.
- * Probes for Rust export (`rustName`) first, then AS export (`asName`),
- * then falls back to the provided `jsFallback`.
+ *
+ * Currently JS-only. The AS managed fit kernels (poly_fit_f64 / cheb_fit_f64 /
+ * legendre_fit_f64) are measurably BROKEN — the AS QR/normal-equations solver
+ * returns near-zero garbage where the JS path recovers the coefficients exactly
+ * (verified Phase 3b; e.g. a degree-2 fit of 1−x+0.5x² over [−3,3] returns
+ * ~[0.007,−0.007,0.004] instead of [1,−1,0.5]). The legacy Rust fit kernel was
+ * dropped from the functions dispatch in the Phase 5 AS cutover. So all fits run
+ * on the validated JS solver until assembly/src's fit solver is fixed
+ * (Rust→AS migration Phase 6 follow-up). `WASM_POLY_FIT_THRESHOLD` is retained
+ * for the benchmark/test harness and for re-enabling AS once it is correct.
  */
 function fitDispatch(
   xs: Float64Array,
   ys: Float64Array,
   degree: number,
-  name: string,
   jsFallback: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array
 ): Float64Array {
   if (xs.length !== ys.length) throw new Error('xs and ys must have the same length');
-  const bigEnough = xs.length >= WASM_POLY_FIT_THRESHOLD;
-  if (bigEnough) {
-    const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm) {
-      try {
-        if (isRustWasm(wasm)) {
-          // Rust pointer ABI: <name>(xsPtr, ysPtr, n, degree, outPtr) -> k | -1.
-          const rustFn = wasm[name] as RustFitFn | undefined;
-          if (typeof rustFn === 'function') {
-            const k = degree + 1;
-            const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-            const ysAlloc = wasmLoader.allocateFloat64Array(ys);
-            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(k);
-            try {
-              const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, xs.length, degree, outAlloc.ptr);
-              if (written < 0) {
-                throw new Error(`${name}: rank-deficient or degenerate input`);
-              }
-              return new Float64Array(new Float64Array(outAlloc.array.buffer, outAlloc.ptr, k));
-            } finally {
-              wasmLoader.release(xsAlloc.ptr, true);
-              wasmLoader.release(ysAlloc.ptr, true);
-              wasmLoader.release(outAlloc.ptr, true);
-            }
-          }
-        }
-        // NOTE: the AS managed fit kernels (poly_fit_f64 / cheb_fit_f64 /
-        // legendre_fit_f64) are NOT routed to. They are measurably BROKEN — the
-        // AS QR/normal-equations solver returns near-zero garbage where the JS
-        // path recovers the coefficients exactly (verified Phase 3b; e.g. a
-        // degree-2 fit of 1−x+0.5x² over [−3,3] returns ~[0.007,−0.007,0.004]
-        // instead of [1,−1,0.5]). Under the AS binary we therefore fall through
-        // to the correct JS solver below. The Rust binary's poly-fit ABI is kept
-        // (gated above). Re-enable AS once assembly/src's fit solver is fixed.
-      } catch (e) {
-        // If the error is a rank-deficient message, re-throw it.
-        if (e instanceof Error && e.message.includes('rank-deficient')) throw e;
-        // Otherwise fall through to JS.
-      }
-    }
-  }
   return jsFallback(xs, ys, degree);
 }
 
 /**
- * Fit a polynomial via Vandermonde + QR using WASM when n ≥ threshold.
+ * Fit a polynomial via Vandermonde + normal equations (JS).
  *
  * Returns a `Float64Array` of length `degree + 1` with coefficients
  * `[a0, a1, ..., a_degree]` (constant-first / power-ascending order).
@@ -611,22 +468,22 @@ function fitDispatch(
  * Throws when the system is rank-deficient (e.g. all xs equal).
  */
 export function polyFitDispatch(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
-  return fitDispatch(xs, ys, degree, 'poly_fit_f64', polyFitJSFallback);
+  return fitDispatch(xs, ys, degree, polyFitJSFallback);
 }
 
 /**
- * Fit a Chebyshev-series via Vandermonde + QR using WASM when n ≥ threshold.
+ * Fit a Chebyshev-series via Vandermonde + normal equations (JS).
  *
  * Returns a `Float64Array` of length `degree + 1` with Chebyshev coefficients.
  *
  * Throws when the system is rank-deficient.
  */
 export function chebFitDispatch(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
-  return fitDispatch(xs, ys, degree, 'cheb_fit_f64', chebFitJSFallback);
+  return fitDispatch(xs, ys, degree, chebFitJSFallback);
 }
 
 /**
- * Fit a Legendre-series via Vandermonde + QR using WASM when n ≥ threshold.
+ * Fit a Legendre-series via Vandermonde + normal equations (JS).
  *
  * Returns a `Float64Array` of length `degree + 1` with Legendre coefficients.
  *
@@ -637,7 +494,7 @@ export function legendreFitDispatch(
   ys: Float64Array,
   degree: number
 ): Float64Array {
-  return fitDispatch(xs, ys, degree, 'legendre_fit_f64', legendreFitJSFallback);
+  return fitDispatch(xs, ys, degree, legendreFitJSFallback);
 }
 
 /**
