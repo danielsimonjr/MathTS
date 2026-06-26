@@ -13,11 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`_spike/array_sin_ptr.{ts,wasm}`): benchmarks Rust vs AS-managed vs AS-pointer
   with realistic round-trip marshalling. Result + decision in
   `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE1.md`.
-- **ABI decision: HYBRID.** Managed-AS regresses the hot elementwise path
-  (`array_sin` 1.39× Rust at 131k); pointer-ABI AS matches Rust (0.82–1.16×) →
-  elementwise/fusion uses pointer-ABI AS, special uses managed-AS. All kernels
-  bit-identical (maxdiff 0). ⚠️ AS-managed `sort_f64` measured **29.6× slower** at
-  131k — flagged as a Phase-3 blocker (sort needs pointer-ABI or stays as-is).
+- **ABI decision: HYBRID.** Across runs (n up to 1,000,000, seeded random input),
+  pooled managed-AS `array_sin` is at parity-to-faster than Rust on the hot path
+  (AS-mgd/Rust 0.68–1.18×; the one >1.10 reading was noise, contradicted by
+  0.68/0.73 at the same size), and pointer-ABI AS is the fastest variant
+  (0.51–1.06×). AS does not regress the hot path, so the migration is **not** in the
+  STOP branch. Hybrid is chosen on engineering-churn grounds: the existing lean
+  pointer-based `elementwise/wasm-bridge.ts` takes the pointer-ABI AS kernel as a
+  zero-rewrite drop-in (and it is fastest), while managed-AS (at parity) is used for
+  special/signal/poly/interp/bitwise. All kernels bit-identical (maxdiff 0).
+- ⚠️ Two non-ABI flags: AS `sort_f64` is ~2× slower than Rust on random input and
+  **O(n²) on duplicate-heavy input** (≈28–30× at n≈131k) — a kernel-quality gap
+  (needs introsort/better pivot before the `sort/` bridge is repointed), not an ABI
+  cost; and result-allocating AS kernels (e.g. `bessel_j0_f64`) leak under
+  `--runtime stub` (prefer caller-output-buffer/pointer for hot use).
 
 ### Documentation (2026-06-26) — agent knowledge base
 

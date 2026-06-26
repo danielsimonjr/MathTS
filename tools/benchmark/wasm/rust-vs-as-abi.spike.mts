@@ -26,8 +26,14 @@
  *     -o tools/benchmark/wasm/_spike/array_sin_ptr.wasm \
  *     --runtime stub --optimize --noAssert --exportRuntime
  *
+ * Input: seeded uniform-random in (0,1). Random is the FAIR sort benchmark — the
+ * existing benches' structured sawtooth (0.5+(i%997)*1e-3) is duplicate-heavy and
+ * drives AS's naive `_qsort` into O(n²) (measured 28.7× vs Rust at n=131072); see
+ * the Phase-1 doc's sort caveat. Sin/bessel timing is data-independent, so random
+ * vs sawtooth is irrelevant for those rows.
+ *
  * Reports median ms/op (median of R timed repetitions, each averaging `iters`
- * calls). Honest measurement — no estimates. This is a throwaway spike kept for
+ * calls). Honest measurement — no estimates. Throwaway spike kept for
  * re-runnability; it touches NO production code path.
  */
 import { readFileSync } from 'fs';
@@ -42,12 +48,8 @@ const RUST_PATH = path.join(root, 'functions/dist/wasm/mathts.wasm');
 const AS_PATH = path.join(root, 'matrix/dist/wasm/mathts-as.wasm');
 const AS_PTR_PATH = path.join(here, '_spike/array_sin_ptr.wasm');
 
-// NOTE: the 1_000_000 tier was dropped — the AS-managed cells thrash the stub
-// bump-allocator there (no GC), making the spike hang; the asymptotic per-element
-// ABI ratio is already clear by ~131k. Re-add behind a guarded allocator if a
-// 1M data point is ever needed.
-const SIZES = [1024, 16_384, 131_072];
-const REPS = 5; // timed repetitions; report the median
+const SIZES = [1024, 10_000, 100_000, 1_000_000];
+const REPS = 7; // timed repetitions; report the median
 
 // AS runtime-info ids (from WASMBackend.ts).
 const AS_ID_ARRAY_BUFFER = 1;
@@ -62,7 +64,7 @@ async function instantiate(p: string, imports: WebAssembly.Imports = {}): Promis
   return instance.exports;
 }
 
-// The AS artifact imports env.abort/env.seed + Math/Date (see WASMBackend.ts).
+// The AS artifact imports env.abort (+ tolerates seed/Math/Date; see WASMBackend).
 function asImports(): WebAssembly.Imports {
   return {
     env: {
@@ -87,8 +89,7 @@ function median(xs: number[]): number {
 
 /** Run `call` `iters` times, R reps; return median per-call ms across reps. */
 function timeMedian(call: () => void, iters: number, reps = REPS): number {
-  // warmup
-  for (let i = 0; i < Math.min(iters, 50); i++) call();
+  for (let i = 0; i < Math.min(iters, 30); i++) call(); // warmup
   const per: number[] = [];
   for (let r = 0; r < reps; r++) {
     const t0 = performance.now();
@@ -98,17 +99,22 @@ function timeMedian(call: () => void, iters: number, reps = REPS): number {
   return median(per);
 }
 
+// Seeded uniform-random input in (0,1) — reproducible across ABIs (mulberry32).
 function makeInput(n: number): Float64Array {
   const a = new Float64Array(n);
-  for (let i = 0; i < n; i++) a[i] = 0.5 + (i % 997) * 0.001; // > 0, finite
+  let s = (0x9e3779b9 ^ n) >>> 0;
+  for (let i = 0; i < n; i++) {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    a[i] = ((t ^ (t >>> 14)) >>> 0) / 4294967296 || 1e-9; // in (0,1)
+  }
   return a;
 }
 
+/** Constant-work iteration count: ~2e7 elements per timed loop, clamped. */
 function iterFor(n: number): number {
-  if (n <= 1024) return 3000;
-  if (n <= 10_000) return 1500;
-  if (n <= 100_000) return 300;
-  return 60;
+  return Math.max(12, Math.min(2000, Math.floor(2e7 / n)));
 }
 
 // ---------------------------------------------------------------------------
@@ -196,15 +202,13 @@ function asReadReturned(mod: any, headerPtr: number): Float64Array {
   const dv = new DataView(mod.memory.buffer);
   const dataStart = dv.getUint32((headerPtr >>> 0) + 4, true);
   const byteLength = dv.getUint32((headerPtr >>> 0) + 8, true);
-  const len = byteLength / 8;
-  return new Float64Array(new Float64Array(mod.memory.buffer, dataStart, len));
+  return new Float64Array(new Float64Array(mod.memory.buffer, dataStart, byteLength / 8));
 }
 
 /** AS array_sin(aHdr, resultHdr): pooled in+out, no internal alloc. */
 function asArraySin(mod: any, src: Float64Array): () => void {
-  const n = src.length;
-  const aIn = asAlloc(mod, n);
-  const aOut = asAlloc(mod, n);
+  const aIn = asAlloc(mod, src.length);
+  const aOut = asAlloc(mod, src.length);
   const fn = mod.array_sin as (a: number, r: number) => void;
   return () => {
     asWrite(mod, aIn, src); // copy IN
@@ -215,25 +219,21 @@ function asArraySin(mod: any, src: Float64Array): () => void {
 
 /** AS bessel_j0_f64(xs): returns a freshly-allocated managed array per call. */
 function asBessel(mod: any, src: Float64Array): () => void {
-  const n = src.length;
-  const aIn = asAlloc(mod, n);
+  const aIn = asAlloc(mod, src.length);
   const fn = mod.bessel_j0_f64 as (a: number) => number;
   return () => {
     asWrite(mod, aIn, src);
-    const ret = fn(aIn.headerPtr);
-    return void asReadReturned(mod, ret); // copy OUT
+    return void asReadReturned(mod, fn(aIn.headerPtr)); // copy OUT
   };
 }
 
 /** AS sort_f64(data): in-place, returns same header; copy fresh data each call. */
 function asSort(mod: any, src: Float64Array): () => void {
-  const n = src.length;
-  const aIn = asAlloc(mod, n);
+  const aIn = asAlloc(mod, src.length);
   const fn = mod.sort_f64 as (a: number) => number;
   return () => {
     asWrite(mod, aIn, src); // fresh unsorted in
-    const ret = fn(aIn.headerPtr);
-    return void asReadReturned(mod, ret); // copy OUT
+    return void asReadReturned(mod, fn(aIn.headerPtr)); // copy OUT
   };
 }
 
@@ -241,107 +241,6 @@ function maxAbsDiff(a: Float64Array, b: Float64Array): number {
   let m = 0;
   for (let i = 0; i < a.length; i++) m = Math.max(m, Math.abs(a[i] - b[i]));
   return m;
-}
-
-// ---------------------------------------------------------------------------
-// Run
-// ---------------------------------------------------------------------------
-async function main() {
-  const os = await import('os');
-  console.log('# Phase 1 ABI perf spike — Rust vs AssemblyScript (realistic round-trip)');
-  console.log(
-    `# node ${process.version} | ${os.cpus()[0].model.trim()} | ${os.cpus().length} cores | ${(os.totalmem() / 1e9).toFixed(1)} GB | ${process.platform}`
-  );
-  console.log(`# median of ${REPS} reps, full Float64Array in→wasm→out each call\n`);
-
-  const rust = await instantiate(RUST_PATH);
-  const asPtr = await instantiate(AS_PTR_PATH, {
-    env: {
-      abort: () => {
-        throw new Error('AS-ptr abort');
-      },
-    },
-  });
-
-  // Quick export sanity.
-  for (const [nm, ex, want] of [
-    ['rust', rust, ['simd_sin_array', 'bessel_j0_f64', 'sort_f64', 'memory']],
-    ['as-ptr', asPtr, ['array_sin_ptr', 'memory']],
-  ] as const) {
-    for (const w of want)
-      if (!(w in ex)) throw new Error(`${nm} missing export ${w}`);
-  }
-
-  const header = ['op', 'n', 'Rust ms', 'AS-managed ms', 'AS-ptr ms', 'AS-mgd/Rust', 'AS-ptr/Rust', 'maxdiff'];
-  const rows: string[][] = [];
-
-  for (const op of ['array_sin', 'bessel_j0_f64', 'sort_f64'] as const) {
-    for (const n of SIZES) {
-      const src = makeInput(n);
-      const iters = iterFor(n);
-
-      // Fresh AS instance per cell so the stub-runtime bump allocator never
-      // bloats across cells (bessel allocates a result array per call).
-      const asMod = await instantiate(AS_PATH, asImports());
-
-      let rustMs = NaN,
-        asMgdMs = NaN,
-        asPtrMs = NaN,
-        diff = NaN;
-      let refRust: Float64Array | null = null;
-
-      if (op === 'array_sin') {
-        const rcall = ptrUnary(rust, 'simd_sin_array', src);
-        const mcall = asArraySin(asMod, src);
-        const pcall = ptrUnary(asPtr, 'array_sin_ptr', src);
-        // correctness: AS-managed & AS-ptr vs Rust
-        refRust = captureUnary(rust, 'simd_sin_array', src);
-        const refMgd = captureAsSin(asMod, src);
-        const refPtr = captureUnary(asPtr, 'array_sin_ptr', src);
-        diff = Math.max(maxAbsDiff(refRust, refMgd), maxAbsDiff(refRust, refPtr));
-        rustMs = timeMedian(rcall, iters);
-        asMgdMs = timeMedian(mcall, Math.min(iters, capIters(n, false)));
-        asPtrMs = timeMedian(pcall, iters);
-      } else if (op === 'bessel_j0_f64') {
-        const rcall = ptrBessel(rust, src);
-        const mcall = asBessel(asMod, src);
-        refRust = captureBessel(rust, src);
-        const refMgd = captureAsBessel(asMod, src);
-        diff = maxAbsDiff(refRust, refMgd);
-        rustMs = timeMedian(rcall, iters);
-        // bessel AS allocates internally per call (leaks under stub) → bound.
-        asMgdMs = timeMedian(mcall, capIters(n, true));
-      } else {
-        // sort_f64
-        const rcall = ptrSort(rust, src);
-        const mcall = asSort(asMod, src);
-        const r = captureSort(rust, src);
-        const m = captureAsSort(asMod, src);
-        diff = maxAbsDiff(r, m);
-        rustMs = timeMedian(rcall, iters);
-        asMgdMs = timeMedian(mcall, Math.min(iters, capIters(n, false)));
-      }
-
-      rows.push([
-        op,
-        String(n),
-        rustMs.toFixed(5),
-        asMgdMs.toFixed(5),
-        Number.isNaN(asPtrMs) ? '—' : asPtrMs.toFixed(5),
-        (asMgdMs / rustMs).toFixed(2),
-        Number.isNaN(asPtrMs) ? '—' : (asPtrMs / rustMs).toFixed(2),
-        diff.toExponential(1),
-      ]);
-    }
-  }
-
-  printTable(header, rows);
-}
-
-// Bound iterations so internal managed allocs (bessel) stay < ~160 MB.
-function capIters(n: number, internalAlloc: boolean): number {
-  if (!internalAlloc) return n >= 1_000_000 ? 60 : n >= 100_000 ? 300 : 1500;
-  return Math.max(8, Math.min(iterFor(n), Math.floor(160e6 / (n * 8))));
 }
 
 // One-shot captures for correctness (return the produced array).
@@ -382,6 +281,87 @@ function captureAsSort(mod: any, src: Float64Array): Float64Array {
   const a = asAlloc(mod, src.length);
   asWrite(mod, a, src);
   return asReadReturned(mod, mod.sort_f64(a.headerPtr));
+}
+
+// ---------------------------------------------------------------------------
+// Run
+// ---------------------------------------------------------------------------
+async function main() {
+  const os = await import('os');
+  console.log('# Phase 1 ABI perf spike — Rust vs AssemblyScript (realistic round-trip)');
+  console.log(
+    `# node ${process.version} | ${os.cpus()[0].model.trim()} | ${os.cpus().length} cores | ${(os.totalmem() / 1e9).toFixed(1)} GB | ${process.platform}`
+  );
+  console.log(`# median of ${REPS} reps, full Float64Array in→wasm→out each call`);
+  console.log(`# input: seeded uniform-random in (0,1)\n`);
+
+  const rust = await instantiate(RUST_PATH);
+  const asPtr = await instantiate(AS_PTR_PATH, {
+    env: {
+      abort: () => {
+        throw new Error('AS-ptr abort');
+      },
+    },
+  });
+
+  for (const [nm, ex, want] of [
+    ['rust', rust, ['simd_sin_array', 'bessel_j0_f64', 'sort_f64', 'memory']],
+    ['as-ptr', asPtr, ['array_sin_ptr', 'memory']],
+  ] as const) {
+    for (const w of want) if (!(w in ex)) throw new Error(`${nm} missing export ${w}`);
+  }
+
+  const header = [
+    'op', 'n', 'Rust ms', 'AS-managed ms', 'AS-ptr ms', 'AS-mgd/Rust', 'AS-ptr/Rust', 'maxdiff',
+  ];
+  const rows: string[][] = [];
+
+  for (const op of ['array_sin', 'bessel_j0_f64', 'sort_f64'] as const) {
+    for (const n of SIZES) {
+      const src = makeInput(n);
+      const iters = iterFor(n);
+      // Fresh AS instance per cell so the stub-runtime bump allocator never
+      // bloats across cells (bessel allocates a result array per call).
+      const asMod = await instantiate(AS_PATH, asImports());
+
+      let rustMs = NaN, asMgdMs = NaN, asPtrMs = NaN, diff = NaN;
+
+      if (op === 'array_sin') {
+        const refRust = captureUnary(rust, 'simd_sin_array', src);
+        diff = Math.max(
+          maxAbsDiff(refRust, captureAsSin(asMod, src)),
+          maxAbsDiff(refRust, captureUnary(asPtr, 'array_sin_ptr', src))
+        );
+        rustMs = timeMedian(ptrUnary(rust, 'simd_sin_array', src), iters);
+        asMgdMs = timeMedian(asArraySin(asMod, src), iters);
+        asPtrMs = timeMedian(ptrUnary(asPtr, 'array_sin_ptr', src), iters);
+      } else if (op === 'bessel_j0_f64') {
+        diff = maxAbsDiff(captureBessel(rust, src), captureAsBessel(asMod, src));
+        rustMs = timeMedian(ptrBessel(rust, src), iters);
+        // AS bessel allocates internally per call (leaks under stub runtime);
+        // bound iters so total internal allocation stays < ~160 MB.
+        const besselIters = Math.max(8, Math.min(iters, Math.floor(160e6 / (n * 8))));
+        asMgdMs = timeMedian(asBessel(asMod, src), besselIters);
+      } else {
+        diff = maxAbsDiff(captureSort(rust, src), captureAsSort(asMod, src));
+        rustMs = timeMedian(ptrSort(rust, src), iters);
+        asMgdMs = timeMedian(asSort(asMod, src), iters);
+      }
+
+      rows.push([
+        op,
+        String(n),
+        rustMs.toFixed(5),
+        asMgdMs.toFixed(5),
+        Number.isNaN(asPtrMs) ? '—' : asPtrMs.toFixed(5),
+        (asMgdMs / rustMs).toFixed(2),
+        Number.isNaN(asPtrMs) ? '—' : (asPtrMs / rustMs).toFixed(2),
+        diff.toExponential(1),
+      ]);
+    }
+  }
+
+  printTable(header, rows);
 }
 
 function printTable(header: string[], rows: string[][]) {
