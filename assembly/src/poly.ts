@@ -231,8 +231,15 @@ function householderQRSolve(a: Float64Array, n: i32, k: i32, b: Float64Array): b
     }
     const tau: f64 = 2.0 / vtv;
 
-    // Apply H to columns col..k of A.
-    for (let c: i32 = col; c < k; c++) {
+    // Apply H to columns col+1..k of A.
+    //
+    // The reflection must NOT be applied to column `col` through this generic
+    // loop: doing so overwrites the Householder vector entries a[row*k+col]
+    // (which live in the sub-diagonal of column `col`) before they are consumed
+    // by the remaining columns and the RHS, corrupting every subsequent update.
+    // Column `col` is handled explicitly below (R diagonal = -sign*norm, the
+    // sub-diagonal is zeroed), so we start the loop at col+1.
+    for (let c: i32 = col + 1; c < k; c++) {
       let dot: f64 = u1 * a[col * k + c];
       for (let row: i32 = col + 1; row < n; row++) {
         dot += a[row * k + col] * a[row * k + c];

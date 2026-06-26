@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-06-26) — Rust→AS migration Phase 6: repoint the last 4 functions kernels JS→AS
+
+These four `functions` dispatchers had been left on the JS fallback because the
+AS kernels were broken/imprecise/slow. Each AS kernel was fixed at the root
+cause, validated against the JS reference, and the bridge repointed JS→AS (JS
+fallback retained for the wasm-unavailable path). New `*-as-wasm` tests prove the
+op now executes on the AS binary (call-counter > 0) and matches JS.
+
+- **Poly fits (`polyFit` / `chebyshevFit` / `legendreFit`).** Fixed the AS
+  Householder-QR least-squares solver in `assembly/src/poly.ts`: the reflection
+  loop ran from the pivot column (`c = col`), overwriting the Householder vector
+  entries in that column's sub-diagonal before the trailing columns and the RHS
+  consumed them, corrupting every subsequent update (the solver returned
+  near-zero garbage). It now starts at `c = col + 1` (the pivot column is set
+  explicitly). The AS kernel recovers coefficients to ≈1e-14 vs the JS
+  normal-equations solver (degrees 2/3/5 over [−3,3]); `poly` bridge repointed
+  above `WASM_POLY_FIT_THRESHOLD`.
+
 ### Changed (2026-06-26) — Rust→AS migration Phase 5: functions WASM dispatch simplified to AS→JS
 
 - **The `functions` package is now AssemblyScript-only.** The dead

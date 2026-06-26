@@ -437,25 +437,48 @@ function legendreFitJSFallback(xs: Float64Array, ys: Float64Array, degree: numbe
 }
 
 /**
- * Generic dispatch helper for fit kernels.
+ * Generic dispatch helper for fit kernels — AS managed → JS (Rust→AS Phase 6).
  *
- * Currently JS-only. The AS managed fit kernels (poly_fit_f64 / cheb_fit_f64 /
- * legendre_fit_f64) are measurably BROKEN — the AS QR/normal-equations solver
- * returns near-zero garbage where the JS path recovers the coefficients exactly
- * (verified Phase 3b; e.g. a degree-2 fit of 1−x+0.5x² over [−3,3] returns
- * ~[0.007,−0.007,0.004] instead of [1,−1,0.5]). The legacy Rust fit kernel was
- * dropped from the functions dispatch in the Phase 5 AS cutover. So all fits run
- * on the validated JS solver until assembly/src's fit solver is fixed
- * (Rust→AS migration Phase 6 follow-up). `WASM_POLY_FIT_THRESHOLD` is retained
- * for the benchmark/test harness and for re-enabling AS once it is correct.
+ * The AS managed fit kernels (poly_fit_f64 / cheb_fit_f64 / legendre_fit_f64)
+ * are now CORRECT: the Householder-QR least-squares solver in assembly/src/poly.ts
+ * was fixed (the reflection was being applied to its own pivot column, which
+ * overwrote the Householder vector before the trailing columns and RHS consumed
+ * it — see `householderQRSolve`). It now recovers the coefficients to ≈1e-14 vs
+ * the JS normal-equations solver (verified Phase 6, degrees 2/3/5 over [−3,3]).
+ *
+ * Above {@link WASM_POLY_FIT_THRESHOLD} we marshal (xs, ys) into AS memory and
+ * call the kernel. The AS kernel returns a length-1 [NaN] on rank-deficient /
+ * malformed input; in that case (or any failure) we fall through to the
+ * validated JS solver, which recovers or throws as before.
  */
 function fitDispatch(
   xs: Float64Array,
   ys: Float64Array,
   degree: number,
+  asName: string,
   jsFallback: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array
 ): Float64Array {
   if (xs.length !== ys.length) throw new Error('xs and ys must have the same length');
+
+  if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
+    const wasm = getWasm() as unknown as RawWasm | null;
+    if (wasm && isAsWasm(wasm)) {
+      try {
+        // AS managed ABI: <asName>(xs, ys, degree) -> Float64Array (len degree+1).
+        const out = withAsF64(wasm, [xs, ys], (mod, [hx, hy]) =>
+          asReadReturnedF64(
+            mod,
+            (mod[asName] as (x: number, y: number, d: number) => number)(hx, hy, degree)
+          )
+        );
+        if (out && out.length === degree + 1 && out.every((v) => Number.isFinite(v))) {
+          return out;
+        }
+      } catch {
+        // Fall through to JS
+      }
+    }
+  }
   return jsFallback(xs, ys, degree);
 }
 
@@ -468,7 +491,7 @@ function fitDispatch(
  * Throws when the system is rank-deficient (e.g. all xs equal).
  */
 export function polyFitDispatch(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
-  return fitDispatch(xs, ys, degree, polyFitJSFallback);
+  return fitDispatch(xs, ys, degree, 'poly_fit_f64', polyFitJSFallback);
 }
 
 /**
@@ -479,7 +502,7 @@ export function polyFitDispatch(xs: Float64Array, ys: Float64Array, degree: numb
  * Throws when the system is rank-deficient.
  */
 export function chebFitDispatch(xs: Float64Array, ys: Float64Array, degree: number): Float64Array {
-  return fitDispatch(xs, ys, degree, chebFitJSFallback);
+  return fitDispatch(xs, ys, degree, 'cheb_fit_f64', chebFitJSFallback);
 }
 
 /**
@@ -494,7 +517,7 @@ export function legendreFitDispatch(
   ys: Float64Array,
   degree: number
 ): Float64Array {
-  return fitDispatch(xs, ys, degree, legendreFitJSFallback);
+  return fitDispatch(xs, ys, degree, 'legendre_fit_f64', legendreFitJSFallback);
 }
 
 /**

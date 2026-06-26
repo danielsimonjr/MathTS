@@ -63,6 +63,56 @@ function divModJS(
   return { quotient, remainder: work.slice(0, rLen) };
 }
 
+/** Chebyshev-T basis row [T_0(x)..T_d(x)]. */
+function chebBasis(x: number, k: number): number[] {
+  const row = new Array<number>(k);
+  let tPrev = 1,
+    tCurr = x;
+  row[0] = tPrev;
+  if (k > 1) row[1] = tCurr;
+  for (let j = 2; j < k; j++) {
+    const tNext = 2 * x * tCurr - tPrev;
+    row[j] = tNext;
+    tPrev = tCurr;
+    tCurr = tNext;
+  }
+  return row;
+}
+
+/** Legendre-P basis row [P_0(x)..P_d(x)]. */
+function legendreBasis(x: number, k: number): number[] {
+  const row = new Array<number>(k);
+  let pPrev = 1,
+    pCurr = x;
+  row[0] = pPrev;
+  if (k > 1) row[1] = pCurr;
+  for (let nn = 1; nn < k - 1; nn++) {
+    const pNext = ((2 * nn + 1) * x * pCurr - nn * pPrev) / (nn + 1);
+    row[nn + 1] = pNext;
+    pPrev = pCurr;
+    pCurr = pNext;
+  }
+  return row;
+}
+
+/** Max |fitted(x_i) - y_i| where fitted = Σ coeff_j · basis_j(x_i). */
+function reconstructResidual(
+  xs: Float64Array,
+  ys: Float64Array,
+  coeffs: Float64Array,
+  basis: (x: number, k: number) => number[]
+): number {
+  const k = coeffs.length;
+  let m = 0;
+  for (let i = 0; i < xs.length; i++) {
+    const row = basis(xs[i], k);
+    let yhat = 0;
+    for (let j = 0; j < k; j++) yhat += coeffs[j] * row[j];
+    m = Math.max(m, Math.abs(yhat - ys[i]));
+  }
+  return m;
+}
+
 describeIfAS('poly bridge — AssemblyScript managed dispatch (Phase 3b)', () => {
   beforeAll(async () => {
     wasmLoader.reset();
@@ -153,12 +203,11 @@ describeIfAS('poly bridge — AssemblyScript managed dispatch (Phase 3b)', () =>
     expect(result).toBeCloseTo(4, 6);
   });
 
-  it('polyFit/chebFit/legendreFit stay on the JS solver — the AS fit kernel is broken (n ≥ 1024)', () => {
-    // The AS QR/normal-equations fit solver returns near-zero garbage (verified
-    // Phase 3b), so the bridge intentionally does NOT route fit to the AS kernel
-    // under the AS binary; it falls through to the correct JS solver. This test
-    // pins that decision: the AS kernel must NOT be invoked, and the JS result
-    // must recover the generating polynomial exactly.
+  it('polyFit/chebFit/legendreFit execute the AS QR solver and recover the fit (n ≥ 1024)', () => {
+    // Rust→AS Phase 6: the AS Householder-QR least-squares solver in
+    // assembly/src/poly.ts was fixed (the reflection was corrupting its own
+    // pivot column). The bridge now routes fit to the AS kernel above threshold;
+    // it must be invoked (counter > 0) AND recover the least-squares solution.
     const n = WASM_POLY_FIT_THRESHOLD; // 1024
     const degree = 3;
     const xs = new Float64Array(n);
@@ -169,15 +218,23 @@ describeIfAS('poly bridge — AssemblyScript managed dispatch (Phase 3b)', () =>
       xs[i] = x;
       ys[i] = 2 - 1.5 * x + 0.5 * x * x - 0.25 * x * x * x;
     }
-    const fit = countExportCalls(['poly_fit_f64'], () => polyFitDispatch(xs, ys, degree));
-    expect(fit.counts.poly_fit_f64).toBe(0); // AS fit kernel deliberately NOT used
-    expect(maxAbsDiff(fit.result, new Float64Array([2, -1.5, 0.5, -0.25]))).toBeLessThan(1e-6);
 
+    // polyFit: power-basis coefficients recover the generating polynomial.
+    const fit = countExportCalls(['poly_fit_f64'], () => polyFitDispatch(xs, ys, degree));
+    expect(fit.counts.poly_fit_f64).toBeGreaterThan(0); // proves AS path, not JS fallback
+    expect(maxAbsDiff(fit.result, new Float64Array([2, -1.5, 0.5, -0.25]))).toBeLessThan(1e-9);
+
+    // chebFit / legendreFit: coefficients are in the respective orthogonal basis,
+    // so validate by reconstructing ys from the fitted basis and checking the
+    // residual is ~0 (basis-agnostic proof the AS solver solved the system).
     const cheb = countExportCalls(['cheb_fit_f64'], () => chebFitDispatch(xs, ys, degree));
-    expect(cheb.counts.cheb_fit_f64).toBe(0);
-    const leg = countExportCalls(['legendre_fit_f64'], () => legendreFitDispatch(xs, ys, degree));
-    expect(leg.counts.legendre_fit_f64).toBe(0);
+    expect(cheb.counts.cheb_fit_f64).toBeGreaterThan(0);
     expect(cheb.result.length).toBe(degree + 1);
+    expect(reconstructResidual(xs, ys, cheb.result, chebBasis)).toBeLessThan(1e-9);
+
+    const leg = countExportCalls(['legendre_fit_f64'], () => legendreFitDispatch(xs, ys, degree));
+    expect(leg.counts.legendre_fit_f64).toBeGreaterThan(0);
     expect(leg.result.length).toBe(degree + 1);
+    expect(reconstructResidual(xs, ys, leg.result, legendreBasis)).toBeLessThan(1e-9);
   });
 });
