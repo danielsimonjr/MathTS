@@ -144,4 +144,204 @@ export function runChainPtr(
   }
 }
 
+// ---------------------------------------------------------------------------
+// AssemblyScript managed ABI marshalling (dup-audit Cluster D).
+//
+// The AS binary's special / poly / signal / sort / interpolation / bitwise
+// kernels are MANAGED: they take and return AssemblyScript `Float64Array` /
+// `Int32Array` objects. At the wasm boundary those are *header pointers*, not
+// JS typed arrays — calling them with the Rust pointer-ABI args (raw data ptr +
+// length) silently mis-reads the header and produces garbage (the Phase-3a
+// corruption: poly returned all-zeros for n≥256). These helpers build a real
+// AS array (pinned buffer + header) the way `matrix/src/backends/WASMBackend.ts`
+// (`AsAllocCache`) and `tools/benchmark/wasm/rust-vs-as-abi.spike.mts` do, so a
+// managed kernel can be called correctly from the functions bridges.
+// ---------------------------------------------------------------------------
+
+/** AssemblyScript runtime type ids (see WASMBackend.ts AsAllocCache). */
+const AS_ID_ARRAY_BUFFER = 1;
+const AS_ID_FLOAT64_ARRAY = 5;
+const AS_ID_INT32_ARRAY = 6;
+/** AS typed-array header is { buffer, dataStart, byteLength } = 3 × u32. */
+const AS_HEADER_BYTES = 12;
+
+/** Minimal view of the AS managed runtime exported by the AS binary. */
+interface AsRuntime extends RawWasm {
+  __new: (size: number, id: number) => number;
+  __pin: (ptr: number) => number;
+  __unpin: (ptr: number) => void;
+}
+
+interface AsAlloc {
+  headerPtr: number;
+  bufferPtr: number;
+}
+
+function asAllocHeader(mod: AsRuntime, byteLength: number, typeId: number): AsAlloc {
+  const bufferPtr = (mod.__pin(mod.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0) as number;
+  const headerPtr = (mod.__new(AS_HEADER_BYTES, typeId) >>> 0) as number;
+  mod.__pin(headerPtr);
+  const dv = new DataView(mod.memory.buffer);
+  dv.setUint32(headerPtr + 0, bufferPtr, true); // mm info / buffer
+  dv.setUint32(headerPtr + 4, bufferPtr, true); // dataStart
+  dv.setUint32(headerPtr + 8, byteLength, true); // byteLength
+  return { headerPtr, bufferPtr };
+}
+
+function asUnpin(mod: AsRuntime, a: AsAlloc): void {
+  mod.__unpin(a.headerPtr);
+  mod.__unpin(a.bufferPtr);
+}
+
+/**
+ * Copy a `Float64Array` RETURNED by an AS managed kernel (a header pointer)
+ * into a fresh JS `Float64Array`. Must be called before the source allocation
+ * is released.
+ */
+export function asReadReturnedF64(mod: RawWasm, headerPtr: number): Float64Array {
+  const dv = new DataView(mod.memory.buffer);
+  const dataStart = dv.getUint32((headerPtr >>> 0) + 4, true);
+  const byteLength = dv.getUint32((headerPtr >>> 0) + 8, true);
+  return new Float64Array(new Float64Array(mod.memory.buffer, dataStart, byteLength >>> 3));
+}
+
+/** Int32Array variant of {@link asReadReturnedF64}. */
+export function asReadReturnedI32(mod: RawWasm, headerPtr: number): Int32Array {
+  const dv = new DataView(mod.memory.buffer);
+  const dataStart = dv.getUint32((headerPtr >>> 0) + 4, true);
+  const byteLength = dv.getUint32((headerPtr >>> 0) + 8, true);
+  return new Int32Array(new Int32Array(mod.memory.buffer, dataStart, byteLength >>> 2));
+}
+
+/**
+ * Marshal `inputs` (f64) into AS managed arrays, run `body` with the module and
+ * the header pointers (same order as `inputs`), then release. `body` must read
+ * any AS-returned array (via `asReadReturnedF64` / `asReadReturnedI32`) into a
+ * detached JS copy BEFORE returning — the allocations are unpinned afterward.
+ *
+ * Returns `body`'s result, or `null` on any failure / missing runtime (caller
+ * falls back to JS). Never throws.
+ */
+export function withAsF64<T>(
+  wasm: RawWasm,
+  inputs: Float64Array[],
+  body: (mod: AsRuntime, headers: number[]) => T
+): T | null {
+  const mod = wasm as AsRuntime;
+  if (typeof mod.__new !== 'function' || typeof mod.__unpin !== 'function') return null;
+  const allocs: AsAlloc[] = [];
+  try {
+    const headers: number[] = [];
+    for (const arr of inputs) {
+      const a = asAllocHeader(mod, arr.length * 8, AS_ID_FLOAT64_ARRAY);
+      new Float64Array(mod.memory.buffer, a.bufferPtr, arr.length).set(arr);
+      allocs.push(a);
+      headers.push(a.headerPtr);
+    }
+    return body(mod, headers);
+  } catch {
+    return null;
+  } finally {
+    for (const a of allocs) {
+      try {
+        asUnpin(mod, a);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+}
+
+/** Int32 variant of {@link withAsF64}. */
+export function withAsI32<T>(
+  wasm: RawWasm,
+  inputs: Int32Array[],
+  body: (mod: AsRuntime, headers: number[]) => T
+): T | null {
+  const mod = wasm as AsRuntime;
+  if (typeof mod.__new !== 'function' || typeof mod.__unpin !== 'function') return null;
+  const allocs: AsAlloc[] = [];
+  try {
+    const headers: number[] = [];
+    for (const arr of inputs) {
+      const a = asAllocHeader(mod, arr.length * 4, AS_ID_INT32_ARRAY);
+      new Int32Array(mod.memory.buffer, a.bufferPtr, arr.length).set(arr);
+      allocs.push(a);
+      headers.push(a.headerPtr);
+    }
+    return body(mod, headers);
+  } catch {
+    return null;
+  } finally {
+    for (const a of allocs) {
+      try {
+        asUnpin(mod, a);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+}
+
+/**
+ * Run the Rust pointer-ABI variant of a unary f64 array kernel
+ * `fn(inPtr, n, outPtr) -> written`. Returns the `n`-length result, or `null`
+ * if the export is missing, `written !== n`, or the call throws. Never throws.
+ *
+ * Only valid against the Rust binary — callers gate with {@link isRustWasm}.
+ */
+export function runRustUnaryF64(
+  wasm: RawWasm,
+  name: string,
+  xs: Float64Array
+): Float64Array | null {
+  const fn = wasm[name] as ((p: number, n: number, o: number) => number) | undefined;
+  if (typeof fn !== 'function') return null;
+  const n = xs.length;
+  const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+  const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+  try {
+    const written = fn(xsAlloc.ptr, n, outAlloc.ptr);
+    return written === n ? new Float64Array(outAlloc.array) : null;
+  } catch {
+    return null;
+  } finally {
+    wasmLoader.release(xsAlloc.ptr, true);
+    wasmLoader.release(outAlloc.ptr, true);
+  }
+}
+
+/**
+ * Factory for the dominant special-function bridge shape: a single f64 array in,
+ * a same-length f64 array out, sharing ONE export name across both backends
+ * (Rust pointer ABI + AS managed ABI). Builds the full
+ * threshold → Rust(gated) → AS-managed → JS-fallback dispatch, removing the
+ * duplicated alloc/try/release/probe boilerplate (dup-audit Cluster D).
+ */
+export function makeUnaryArrayDispatch(cfg: {
+  threshold: number;
+  /** Export name (identical for the Rust pointer kernel and the AS managed kernel). */
+  name: string;
+  /** Pure-JS fallback. */
+  js: (xs: Float64Array) => Float64Array;
+}): (xs: Float64Array) => Float64Array {
+  return (xs: Float64Array): Float64Array => {
+    if (xs.length >= cfg.threshold) {
+      const wasm = getWasm() as unknown as RawWasm | null;
+      if (wasm) {
+        if (isRustWasm(wasm)) {
+          const out = runRustUnaryF64(wasm, cfg.name, xs);
+          if (out) return out;
+        } else if (isAsWasm(wasm)) {
+          const out = withAsF64(wasm, [xs], (mod, [h]) =>
+            asReadReturnedF64(mod, (mod[cfg.name] as (a: number) => number)(h))
+          );
+          if (out) return out;
+        }
+      }
+    }
+    return cfg.js(xs);
+  };
+}
+
 export type { WasmModule };
