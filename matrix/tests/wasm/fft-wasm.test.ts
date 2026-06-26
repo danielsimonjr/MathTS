@@ -26,8 +26,11 @@ import {
 import { wasmLoader } from '../../src/backends/WasmLoader.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const rustWasmPath = path.resolve(here, '../../../lib/wasm/mathts.wasm');
-const wasmAvailable = fs.existsSync(rustWasmPath);
+// Phase 7b: the matrix loader defaults to the AssemblyScript binary. Gate the
+// live-WASM round-trip on the AS artifact the loader actually resolves
+// (matrix/dist/wasm/mathts-as.wasm), not the retired Rust copy.
+const asWasmPath = path.resolve(here, '../../dist/wasm/mathts-as.wasm');
+const wasmAvailable = fs.existsSync(asWasmPath);
 
 // =============================================================================
 // Utility: isPowerOf2 / nextPowerOf2
@@ -338,7 +341,15 @@ describe('fft (wasm backend)', () => {
   beforeAll(async () => {
     if (!wasmAvailable) return;
     wasmLoader.reset();
-    await wasmLoader.load(rustWasmPath);
+    // No path arg → loader resolves the AS binary (its Phase 7b default).
+    await wasmLoader.load();
+  });
+
+  it.runIf(wasmAvailable)('loads the AssemblyScript binary (allocator kind "as")', () => {
+    expect(wasmLoader.getAllocatorKind()).toBe('as');
+    const mod = wasmLoader.getModule();
+    expect(mod).not.toBeNull();
+    expect(typeof mod!.fft).toBe('function');
   });
 
   it.runIf(wasmAvailable)('fft + ifft round-trip with WASM backend', () => {

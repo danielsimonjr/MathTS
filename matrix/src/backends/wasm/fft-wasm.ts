@@ -1,11 +1,15 @@
 /**
  * WASM-Accelerated FFT Operations
  *
- * Wraps the Rust WASM FFT exports (interleaved complex format) with a
- * high-level TypeScript API. Falls back to a pure JavaScript Cooley-Tukey
- * radix-2 implementation when WASM is unavailable.
+ * Wraps the AssemblyScript WASM FFT exports (`fft` / `rfft` / `powerSpectrum`,
+ * `assembly/src/ops/fft.ts`, interleaved complex format) with a high-level
+ * TypeScript API. Falls back to a pure JavaScript Cooley-Tukey radix-2
+ * implementation when WASM is unavailable. (Phase 7b: the matrix loader now
+ * defaults to the AS binary; the AS `fft(data, n, inverse)` / `rfft(data, n,
+ * result)` / `powerSpectrum(data, n, result)` call shapes match the consumer
+ * exactly, so this module needed no marshalling changes.)
  *
- * The Rust WASM uses interleaved complex arrays: [re0, im0, re1, im1, ...].
+ * The WASM kernels use interleaved complex arrays: [re0, im0, re1, im1, ...].
  * This module converts between split (separate real/imag) and interleaved
  * formats as needed.
  *
