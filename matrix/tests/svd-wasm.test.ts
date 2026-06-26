@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { svdWasm } from '../src/operations/svd-wasm.js';
 import { svd } from '../src/operations/svd.js';
-import { RustWasmLoader } from '../src/backends/RustWasmLoader.js';
+import { wasmLoader } from '../src/backends/WasmLoader.js';
 
 /**
- * Tests `svdWasm` — the WASM-accelerated thin SVD wired to the Rust crate's
- * `svd` export (EXPANSION/GAP slice 2). Reconstruction checks pass on either
- * path (Rust WASM or the JS fallback), so the suite is environment-robust.
+ * Tests `svdWasm` — the WASM-accelerated thin SVD wired to the AssemblyScript
+ * `matrix_svd` export (Phase 7b). Reconstruction checks pass on either path
+ * (AS WASM or the JS fallback), so the suite is environment-robust.
  */
 function reconstruct(
   U: number[][],
@@ -118,9 +118,7 @@ describe('svdWasm', () => {
       [1, 0],
       [0, 1],
     ]);
-    // Informational: true when the Rust WASM build is present.
-    console.log(
-      `svdWasm backend: ${RustWasmLoader.getInstance().isLoaded ? 'Rust WASM' : 'JS fallback'}`
-    );
+    // Informational: 'as' when the AssemblyScript build is present, else null.
+    console.log(`svdWasm backend allocator: ${wasmLoader.getAllocatorKind() ?? 'JS fallback'}`);
   });
 });

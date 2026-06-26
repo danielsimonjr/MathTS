@@ -1,10 +1,12 @@
 /**
  * WASM-accelerated Singular Value Decomposition.
  *
- * Routes through the Rust WASM crate's direct one-sided Jacobi SVD
- * (`svd` export) for any real `m x n` matrix, and falls back to the
- * synchronous JavaScript Golub-Reinsch {@link svd} when the WASM module is
- * unavailable.
+ * Routes through the AssemblyScript binary's one-sided Jacobi SVD
+ * (`matrix_svd` export, `assembly/src/ops/svd.ts`) for any real `m x n`
+ * matrix, and falls back to the synchronous JavaScript Golub-Reinsch
+ * {@link svd} when the WASM module is unavailable. (Phase 7b: repointed off
+ * the retired Rust crate; singular values are bit-identical to the JS
+ * reference per the 7a parity validation.)
  *
  * Unlike the synchronous {@link svd} (which returns the *full* `m x m` /
  * `n x n` factors), `svdWasm` always returns the **thin / economy** form —
@@ -15,7 +17,7 @@
  */
 
 import { svd, type SVDResult, type SVDOptions } from './svd.js';
-import { RustWasmLoader } from '../backends/RustWasmLoader.js';
+import { wasmLoader } from '../backends/WasmLoader.js';
 
 /** Count singular values above the rank tolerance. */
 function estimateRank(s: number[], rankTolerance: number): number {
@@ -39,7 +41,7 @@ function toThin(full: SVDResult, k: number, rankTolerance: number): SVDResult {
 
 /**
  * WASM-accelerated thin SVD. Always safe to call — falls back to the
- * synchronous JS SVD when the Rust WASM module is not available.
+ * synchronous JS SVD when the AssemblyScript WASM module is not available.
  *
  * @param matrix - Input matrix (m x n) as a row-major 2D array
  * @param options - SVD options; `rankTolerance` controls the rank estimate
@@ -55,37 +57,40 @@ export async function svdWasm(matrix: number[][], options?: SVDOptions): Promise
   const k = Math.min(m, n);
   const rankTolerance = options?.rankTolerance ?? 1e-10;
 
-  const loader = RustWasmLoader.getInstance();
-  const ready = loader.isLoaded || (await loader.load());
-  const wasm = ready ? loader.getExports() : null;
+  // Use the shared (AS-default) loader. Load on first use; any failure
+  // (e.g. binary missing in this environment) drops to the JS fallback.
+  let module = wasmLoader.getModule();
+  if (!module) {
+    try {
+      module = await wasmLoader.load();
+    } catch {
+      module = null;
+    }
+  }
 
-  if (!wasm || typeof wasm.svd !== 'function') {
-    // Rust WASM unavailable — synchronous JS SVD, truncated to the thin form.
+  if (!module || typeof module.matrix_svd !== 'function') {
+    // AS WASM unavailable — synchronous JS SVD, truncated to the thin form.
     return toThin(svd(matrix, options), k, rankTolerance);
   }
 
+  const flat = new Float64Array(m * n);
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) flat[i * n + j] = matrix[i][j];
+  }
+
+  const aAlloc = wasmLoader.allocateFloat64Array(flat);
   try {
-    loader.resetAllocator();
-
-    const flat = new Float64Array(m * n);
-    for (let i = 0; i < m; i++) {
-      for (let j = 0; j < n; j++) flat[i * n + j] = matrix[i][j];
-    }
-
-    const aPtr = loader.writeF64(flat);
-    const uPtr = loader.allocF64(m * k);
-    const sPtr = loader.allocF64(k);
-    const vPtr = loader.allocF64(n * k);
-    const workPtr = loader.allocF64(wasm.svdWorkSize(m, n));
-
-    const status = wasm.svd(aPtr, m, n, uPtr, sPtr, vPtr, workPtr);
-    if (status < 0) {
+    // matrix_svd returns a managed Float64Array header packing
+    // [ U(m*k) | S(k) | V(n*k) ] (U row-major m×k, V row-major n×k).
+    const packedPtr = module.matrix_svd(aAlloc.ptr, m, n);
+    const packed = wasmLoader.readReturnedFloat64Array(packedPtr);
+    if (packed.length < m * k + k + n * k) {
       return toThin(svd(matrix, options), k, rankTolerance);
     }
 
-    const uFlat = loader.readF64(uPtr, m * k);
-    const sFlat = loader.readF64(sPtr, k);
-    const vFlat = loader.readF64(vPtr, n * k);
+    const uFlat = packed.subarray(0, m * k);
+    const sFlat = packed.subarray(m * k, m * k + k);
+    const vFlat = packed.subarray(m * k + k, m * k + k + n * k);
 
     const U: number[][] = [];
     for (let i = 0; i < m; i++) {
@@ -101,5 +106,8 @@ export async function svdWasm(matrix: number[][], options?: SVDOptions): Promise
   } catch {
     // Any marshalling / instantiation failure — fall back to JS.
     return toThin(svd(matrix, options), k, rankTolerance);
+  } finally {
+    wasmLoader.free(aAlloc.ptr);
+    wasmLoader.resetRustAllocator();
   }
 }

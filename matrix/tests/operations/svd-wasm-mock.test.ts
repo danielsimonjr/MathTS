@@ -1,77 +1,66 @@
 /**
  * Tests for the WASM-dispatch branch of matrix/src/operations/svd-wasm.ts.
  *
- * The Rust WASM artifact (lib/wasm/mathts.wasm) is not built in this
- * environment, so the real RustWasmLoader.load() returns false and svdWasm
- * takes the JS fallback (covered by svd-wasm.test.ts). To exercise the
- * WASM-dispatch path (loader.load → getExports → marshalling → status check →
- * read-back), we inject a fake loader whose `svd` export computes a genuine
- * thin SVD (delegating to the JS svd) and writes it into a JS-backed "linear
- * memory". This drives the otherwise-unreachable WASM branch and asserts the
- * marshalled result is mathematically correct (A = U·S·Vᵀ).
+ * In an environment without the AssemblyScript binary, the real loader's
+ * getModule() is null and svdWasm takes the JS fallback (covered by
+ * svd-wasm.test.ts). To exercise the WASM-dispatch path (getModule probe →
+ * matrix_svd presence check → marshalling → readReturnedFloat64Array →
+ * factor reconstruction) deterministically, we install a fake AS module on
+ * the shared wasmLoader whose `matrix_svd` export computes a genuine thin SVD
+ * (delegating to the JS svd) and returns it via the loader's
+ * `readReturnedFloat64Array` decode hook.
  */
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { RustWasmLoader } from '../../src/backends/RustWasmLoader.js';
+import { wasmLoader } from '../../src/backends/WasmLoader.js';
 import { svd } from '../../src/operations/svd.js';
 
 /**
- * A fake Rust WASM loader backed by a ptr→Float64Array store. `svd` computes
- * the thin SVD via the JS implementation and copies the factors into the
- * caller-provided output pointers, mimicking the real Rust export's contract.
+ * Install a fake AS module + spied loader hooks. `matrix_svd` packs the JS
+ * thin SVD as [ U(m*k) | S(k) | V(n*k) ] keyed by a returned sentinel ptr;
+ * `readReturnedFloat64Array` looks the packed result back up.
  */
-function makeFakeLoader(opts: { failStatus?: boolean; throwInSvd?: boolean } = {}) {
-  const store = new Map<number, Float64Array>();
-  let nextPtr = 1;
+function installFakeSvd(opts: { throwInSvd?: boolean; shortResult?: boolean } = {}) {
+  const inputs = new Map<number, Float64Array>();
+  const packedByPtr = new Map<number, Float64Array>();
+  let nextPtr = 8;
 
-  return {
-    isLoaded: false,
-    load: vi.fn(async () => true),
-    resetAllocator: vi.fn(),
-    writeF64: vi.fn((data: Float64Array) => {
+  const allocateFloat64Array = vi.fn((data: number[] | Float64Array) => {
+    const arr = data instanceof Float64Array ? new Float64Array(data) : new Float64Array(data);
+    const ptr = nextPtr++;
+    inputs.set(ptr, arr);
+    return { ptr, dataPtr: ptr, array: arr, length: arr.length, kind: 'as' as const };
+  });
+
+  const fakeModule = {
+    memory: new WebAssembly.Memory({ initial: 1 }),
+    matrix_svd: (aPtr: number, m: number, n: number): number => {
+      if (opts.throwInSvd) throw new Error('marshalling failure');
+      const flat = inputs.get(aPtr)!;
+      const A: number[][] = [];
+      for (let i = 0; i < m; i++) A.push(Array.from(flat.subarray(i * n, i * n + n)));
+      const k = Math.min(m, n);
+      const full = svd(A);
+      const packed = new Float64Array(m * k + k + n * k);
+      for (let i = 0; i < m; i++) for (let t = 0; t < k; t++) packed[i * k + t] = full.U[i][t];
+      for (let t = 0; t < k; t++) packed[m * k + t] = full.S[t];
+      for (let i = 0; i < n; i++)
+        for (let t = 0; t < k; t++) packed[m * k + k + i * k + t] = full.V[i][t];
       const ptr = nextPtr++;
-      store.set(ptr, new Float64Array(data));
+      packedByPtr.set(ptr, opts.shortResult ? packed.subarray(0, 1) : packed);
       return ptr;
-    }),
-    allocF64: vi.fn((len: number) => {
-      const ptr = nextPtr++;
-      store.set(ptr, new Float64Array(len));
-      return ptr;
-    }),
-    readF64: vi.fn((ptr: number, len: number) => {
-      const arr = store.get(ptr)!;
-      return new Float64Array(arr.subarray(0, len));
-    }),
-    getExports: vi.fn(() => ({
-      svdWorkSize: (_m: number, _n: number) => 16,
-      svd: (
-        aPtr: number,
-        m: number,
-        n: number,
-        uPtr: number,
-        sPtr: number,
-        vPtr: number,
-        _workPtr: number
-      ): number => {
-        if (opts.throwInSvd) throw new Error('marshalling failure');
-        if (opts.failStatus) return -1;
-        const flat = store.get(aPtr)!;
-        const A: number[][] = [];
-        for (let i = 0; i < m; i++) {
-          A.push(Array.from(flat.subarray(i * n, i * n + n)));
-        }
-        const k = Math.min(m, n);
-        const full = svd(A);
-        const uOut = store.get(uPtr)!;
-        const sOut = store.get(sPtr)!;
-        const vOut = store.get(vPtr)!;
-        for (let i = 0; i < m; i++) for (let t = 0; t < k; t++) uOut[i * k + t] = full.U[i][t];
-        for (let t = 0; t < k; t++) sOut[t] = full.S[t];
-        for (let i = 0; i < n; i++) for (let t = 0; t < k; t++) vOut[i * k + t] = full.V[i][t];
-        return 0;
-      },
-    })),
+    },
   };
+
+  vi.spyOn(wasmLoader, 'getModule').mockReturnValue(fakeModule as never);
+  vi.spyOn(wasmLoader, 'allocateFloat64Array').mockImplementation(allocateFloat64Array as never);
+  vi.spyOn(wasmLoader, 'readReturnedFloat64Array').mockImplementation(
+    ((ptr: number) => packedByPtr.get(ptr)!) as never
+  );
+  vi.spyOn(wasmLoader, 'free').mockImplementation(() => {});
+  vi.spyOn(wasmLoader, 'resetRustAllocator').mockImplementation(() => {});
+
+  return { fakeModule, allocateFloat64Array };
 }
 
 function reconstruct(U: number[][], S: number[], V: number[][], m: number, n: number, k: number) {
@@ -88,15 +77,13 @@ function reconstruct(U: number[][], S: number[], V: number[][], m: number, n: nu
   return out;
 }
 
-describe('svdWasm — WASM-dispatch branch (mocked loader)', () => {
+describe('svdWasm — WASM-dispatch branch (mocked AS module)', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   it('drives the WASM path and reconstructs A = U·S·Vᵀ', async () => {
-    const fake = makeFakeLoader();
-    vi.spyOn(RustWasmLoader, 'getInstance').mockReturnValue(fake as never);
-    // Re-import to pick up the spied loader inside svdWasm's module scope.
+    const mocks = installFakeSvd();
     const { svdWasm } = await import('../../src/operations/svd-wasm.js');
 
     const A = [
@@ -110,8 +97,7 @@ describe('svdWasm — WASM-dispatch branch (mocked loader)', () => {
     const k = Math.min(m, n);
     const r = await svdWasm(A);
 
-    expect(fake.getExports).toHaveBeenCalled();
-    expect(fake.writeF64).toHaveBeenCalled();
+    expect(mocks.allocateFloat64Array).toHaveBeenCalled();
     expect(r.U.length).toBe(m);
     expect(r.U[0].length).toBe(k);
     expect(r.S.length).toBe(k);
@@ -122,25 +108,8 @@ describe('svdWasm — WASM-dispatch branch (mocked loader)', () => {
       for (let j = 0; j < n; j++) expect(recon[i][j]).toBeCloseTo(A[i][j], 6);
   });
 
-  it('falls back to JS when the WASM svd returns a negative status', async () => {
-    const fake = makeFakeLoader({ failStatus: true });
-    vi.spyOn(RustWasmLoader, 'getInstance').mockReturnValue(fake as never);
-    const { svdWasm } = await import('../../src/operations/svd-wasm.js');
-
-    const A = [
-      [3, 0],
-      [0, 2],
-    ];
-    const r = await svdWasm(A);
-    // JS fallback still yields a valid thin SVD.
-    expect(r.S.length).toBe(2);
-    expect(r.S[0]).toBeCloseTo(3, 6);
-    expect(r.S[1]).toBeCloseTo(2, 6);
-  });
-
   it('falls back to JS when the WASM svd throws during marshalling', async () => {
-    const fake = makeFakeLoader({ throwInSvd: true });
-    vi.spyOn(RustWasmLoader, 'getInstance').mockReturnValue(fake as never);
+    installFakeSvd({ throwInSvd: true });
     const { svdWasm } = await import('../../src/operations/svd-wasm.js');
 
     const A = [
@@ -152,17 +121,18 @@ describe('svdWasm — WASM-dispatch branch (mocked loader)', () => {
     expect(r.S[1]).toBeCloseTo(4, 6);
   });
 
-  it('uses the already-loaded loader (isLoaded short-circuits load())', async () => {
-    const fake = makeFakeLoader();
-    fake.isLoaded = true;
-    vi.spyOn(RustWasmLoader, 'getInstance').mockReturnValue(fake as never);
+  it('falls back to JS when the WASM svd returns a truncated packed array', async () => {
+    installFakeSvd({ shortResult: true });
     const { svdWasm } = await import('../../src/operations/svd-wasm.js');
 
-    await svdWasm([
-      [1, 0],
-      [0, 1],
-    ]);
-    expect(fake.load).not.toHaveBeenCalled();
-    expect(fake.getExports).toHaveBeenCalled();
+    const A = [
+      [3, 0],
+      [0, 2],
+    ];
+    const r = await svdWasm(A);
+    // JS fallback still yields a valid thin SVD.
+    expect(r.S.length).toBe(2);
+    expect(r.S[0]).toBeCloseTo(3, 6);
+    expect(r.S[1]).toBeCloseTo(2, 6);
   });
 });
