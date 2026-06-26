@@ -2,48 +2,17 @@
 
 MathTS provides a three-tier backend system for matrix operations that automatically selects the optimal implementation based on matrix size and operation type.
 
-> **Rust→AS migration status (2026-06-26).** The overall WASM direction is
-> **TS → AssemblyScript → (WebGPU for matrix)**. The `functions` package has
-> already cut over to **AssemblyScript-only** (loads `mathts-as.wasm`, dispatch
-> AS→JS; Phase 5). The **`matrix` backends below still include a Rust backend**
-> selected for heavy ops (fft/eig/svd/decomposition) and large matrices — its
-> Rust→AS migration is a separate, pending slice, so `wasm-rust/` and
-> `build:wasm:rust` remain. The "Primary"/"Legacy" labels below describe matrix's
-> current backend selection, not a repo-wide default. See
-> `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md`.
+> **WASM backend (migration COMPLETE 2026-06-26).** The acceleration path is
+> **TS → AssemblyScript → (WebGPU for matrix)**. AssemblyScript is the **sole
+> WASM backend** for the whole repo — both `functions` and `matrix` load
+> `mathts-as.wasm` (source `assembly/src/`) and dispatch is AS→JS. The
+> Rust→AssemblyScript migration is finished and the Rust toolchain (the
+> `wasm-rust/` Cargo workspace, `build:wasm:rust`/`build:wasm:all`/`bench:wasm`
+> scripts, the dead `MatrixWasmBridge`, and the `MATHTS_WASM_BACKEND=rust` loader
+> opt-in) has been removed. SHA-384 integrity verification of the AS binary is
+> retained. See `docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md`.
 
 ## Backend Types
-
-### 0. Rust WASM Backend (matrix heavy ops — migration pending)
-
-- **Status**: Active in `matrix` for heavy ops (fft/eig/svd/decomposition) and large matrices; **being migrated to AssemblyScript** (the `functions` package already cut over in Phase 5). Requires the Rust toolchain; falls back to JS/AS when `lib/wasm/mathts.wasm` is absent.
-- **Best for:** matrix heavy ops and large matrices (>500 elements)
-- **Binary**: `wasm-rust/target/wasm32-unknown-unknown/release/mathts_wasm.wasm`
-- **Source**: `wasm-rust/` (Cargo workspace) → `wasm-rust/crates/mathts-wasm/` (94 `.rs` files across 20 category modules)
-- **Exports**: **1,017 functions** via `wasm-bindgen` — 826 core + 192 AssemblyScript compat wrappers (`src/compat/`)
-- **AS Parity**: Full AssemblyScript parity achieved. All 432 AS exports are replicated via the compat module, making the Rust backend a complete drop-in replacement
-- **Advantages:** LLVM-optimized, aggressive autovectorization, mature crate ecosystem
-- **Crate dependencies**:
-  - `faer` — dense linear algebra (LU, QR, SVD, eigenvalues)
-  - `rustfft` — FFT and inverse FFT
-  - `statrs` — statistical distributions and special functions
-  - `libm` — portable math without `std` (for WASM no-std targets)
-- **Performance**: 2–55x faster than JavaScript fallback; 1.5–3x faster than AssemblyScript WASM
-
-**Selecting the Rust backend**:
-
-```typescript
-import { setConfig } from '@danielsimonjr/mathts-matrix';
-
-// Rust WASM is the default; this is explicit selection
-setConfig({ backends: { wasm: { engine: 'rust' } } });
-```
-
-Or via environment variable:
-
-```bash
-MATHTS_WASM_BACKEND=rust npx mathts serve
-```
 
 ### 1. JavaScript Backend (JS)
 
@@ -53,22 +22,17 @@ MATHTS_WASM_BACKEND=rust npx mathts serve
 
 ### 2. AssemblyScript WASM Backend (AS)
 
-- **Status**: Active — the `functions` package's sole WASM backend, and matrix's basic-ops WASM backend. The migration target that Rust will eventually be replaced by.
-- **Best for:** Medium matrices (1,000 - 100,000 elements); basic/element-wise ops
-- **Binary**: `assembly/build/mathts.wasm`
+- **Status**: Active — the **sole WASM backend** for the whole repo (functions + matrix). Serves both element-wise/basic ops and the heavy ops (SVD/eig/FFT and all dense decompositions).
+- **Best for:** Medium-to-large matrices (engages above ~1,000 elements); element-wise ops and decompositions
+- **Binary**: `mathts-as.wasm` (built by `npm run build:wasm`)
 - **Source**: `assembly/src/` (AssemblyScript modules: `ops`, `types`, `bindings`, `env`)
 - **Advantages:** SIMD optimizations, near-native performance
 - **Requirements:** WebAssembly support (available in all modern browsers)
+- **Integrity:** the `.wasm` buffer is SHA-384-verified against `wasm-manifest.json` before instantiation
 - **Features:**
   - SIMD acceleration when available
   - Optimized memory management
   - Low-level arithmetic operations
-
-To use the AssemblyScript backend explicitly:
-
-```bash
-MATHTS_WASM_BACKEND=as npx mathts serve
-```
 
 ### 3. WebGPU Backend (GPU)
 
@@ -251,18 +215,18 @@ const result = backendManager.multiply(a, b); // Never throws
 
 ## Backend Comparison
 
-| Feature            | JS       | WASM-AS                      | WASM-Rust                               | GPU      |
-| ------------------ | -------- | ---------------------------- | --------------------------------------- | -------- |
-| Initialization     | Instant  | ~10ms                        | ~15ms                                   | ~100ms   |
-| Small matrices     | Fastest  | Overhead                     | Overhead                                | Overhead |
-| Medium matrices    | Slow     | Fast                         | Faster                                  | Overhead |
-| Large matrices     | Slowest  | Fast                         | Fastest (no GPU)                        | Fastest  |
-| SIMD support       | No       | Yes                          | Yes (LLVM auto)                         | N/A      |
-| Parallel execution | No       | Limited                      | Limited                                 | Yes      |
-| Memory efficiency  | Good     | Good                         | Good                                    | Best     |
-| Browser support    | 100%     | 95%+                         | 95%+                                    | 60%+     |
-| Status             | Fallback | Active (functions + matrix basic ops) | matrix heavy ops — migration pending | Planned  |
-| Binary location    | —        | `assembly/build/mathts.wasm` | `wasm-rust/target/.../mathts_wasm.wasm` | —        |
+| Feature            | JS       | WASM-AS                                | GPU      |
+| ------------------ | -------- | -------------------------------------- | -------- |
+| Initialization     | Instant  | ~10ms                                  | ~100ms   |
+| Small matrices     | Fastest  | Overhead                               | Overhead |
+| Medium matrices    | Slow     | Fast                                   | Overhead |
+| Large matrices     | Slowest  | Fast                                   | Fastest  |
+| SIMD support       | No       | Yes                                    | N/A      |
+| Parallel execution | No       | Limited                                | Yes      |
+| Memory efficiency  | Good     | Good                                   | Best     |
+| Browser support    | 100%     | 95%+                                   | 60%+     |
+| Status             | Fallback | Active (sole WASM backend)             | Planned  |
+| Binary location    | —        | `mathts-as.wasm`                       | —        |
 
 ## Troubleshooting
 

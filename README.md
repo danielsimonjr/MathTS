@@ -6,9 +6,10 @@
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 
 MathTS is a ground-up TypeScript rewrite of [mathjs](https://mathjs.org) packaged as an
-ESM-only npm workspaces monorepo. It accelerates computation through two WASM toolchains
-(Rust primary, AssemblyScript secondary), a WebWorker parallel-execution layer
-(`ComputePool`), and an optional WebGPU backend for large matrix operations.
+ESM-only npm workspaces monorepo. It accelerates computation through an AssemblyScript
+WASM backend, a WebWorker parallel-execution layer (`ComputePool`), and an optional
+WebGPU backend for large matrix operations. The acceleration path is
+**TypeScript → AssemblyScript WASM → WebGPU (matrix)**.
 All 22 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
 
 ## Contents
@@ -133,18 +134,16 @@ await computePool.terminate();
 
 ## Performance
 
-Benchmark numbers from `npm run bench:wasm` (Rust vs JS, 2026-05-23,
-noisy CI container). Source: `tests/benchmark/wasm_rust_vs_as_benchmark.ts`.
+The matrix linear-algebra kernels (matmul, dot product, vector add,
+determinant, and the decompositions) are accelerated by the AssemblyScript
+WASM backend above the per-op size thresholds, with SIMD where available.
+Element-wise transcendentals are dispatched to WASM only where benchmarks
+confirm a net win once the JS↔WASM copy is included (see
+`docs/Architecture/WASM_ACCELERATION.md`).
 
-| Operation   | Rust WASM vs JS | Rust WASM vs AS (matmul >=100x100) |
-| ----------- | --------------- | ---------------------------------- |
-| matmul      | up to 34x       | 3.5x–13.7x                         |
-| dot product | 2.5x–34x range  | —                                  |
-| vector add  | 2.5x–34x range  | —                                  |
-| determinant | 2.5x–34x range  | —                                  |
-
-> Numbers were measured on a shared CI container; results on developer hardware
-> will differ. The 2.5x–34x range spans all four operations across tested sizes.
+> Acceleration is selective and threshold-gated, not universal — small inputs
+> stay in JS where V8 JITs them faster than WASM plus the marshalling cost.
+> Results on developer hardware will differ from CI.
 
 Per-operation worker-pool thresholds (from `npm run bench:parallel`,
 default values in `parallel/src/ComputePool.ts`):
@@ -184,8 +183,7 @@ Override defaults via `ComputePoolConfig.thresholdByOp` (see
 | `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (16 AST nodes) |
 | `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                    |
 | `@danielsimonjr/mathts-compat`         | mathjs API compatibility shim (`create(all)`)                   |
-| `@danielsimonjr/mathts-wasm`           | AssemblyScript WASM kernels — the `functions` backend + matrix basic ops |
-| `wasm-rust` (Cargo crate)              | Rust WASM — matrix heavy ops only (fft/eig/svd/decomp); `functions` migrated off Rust to AS (Phase 5) |
+| `@danielsimonjr/mathts-wasm`           | AssemblyScript WASM kernels — the sole WASM backend (functions + matrix) |
 
 ### Dependency graph
 
@@ -207,7 +205,7 @@ Zero circular dependencies (verified by `tools/create-dependency-graph`).
 For each operation, the runtime selects the fastest available tier:
 
 ```
-WASM (Rust or AS, above size threshold)
+WASM (AssemblyScript, above size threshold)
   -> WebWorker / ComputePool (above per-op threshold)
     -> In-process JavaScript (always available)
 ```
@@ -216,23 +214,20 @@ The `BackendManager` in `@danielsimonjr/mathts-matrix` handles backend
 selection for matrix operations. `ComputePool.shouldParallelize(n, op?)`
 resolves per-op thresholds via `thresholdByOp`.
 
-### WASM backends
+### WASM backend
 
-The stack is **TS → AssemblyScript → (WebGPU for matrix)**. The `functions`
-package is **AssemblyScript-only** as of the Rust→AS migration Phase 5 — it
-loads `mathts-as.wasm` and its dispatch is AS→JS (the Rust path was removed from
-its bridges). The `matrix` package still keeps a Rust backend for heavy ops; its
-Rust→AS migration is a separate, pending slice.
+The stack is **TS → AssemblyScript → (WebGPU for matrix)**. AssemblyScript is the
+**sole WASM backend** for the whole repo as of the completed Rust→AS migration
+(2026-06-26). Both `functions` and `matrix` load `mathts-as.wasm` and dispatch is
+**AS→JS**.
 
-| Backend           | Class     | Source              | Binary                | Use                                   |
-| ----------------- | --------- | ------------------- | --------------------- | ------------------------------------- |
-| `WASMBackend`     | AS        | `assembly/src/`     | `mathts-as.wasm`      | Element-wise + basic matrix ops; the `functions` package backend |
-| `RustWASMBackend` | Rust      | `wasm-rust/crates/` | `lib/wasm/mathts.wasm`| matrix heavy ops (FFT, eig, SVD, decomposition) — **migration pending** |
+| Backend       | Class | Source          | Binary           | Use                                                                              |
+| ------------- | ----- | --------------- | ---------------- | -------------------------------------------------------------------------------- |
+| `WASMBackend` | AS    | `assembly/src/` | `mathts-as.wasm` | Element-wise + all matrix ops (multiply/transpose, FFT, eig, SVD, decompositions) |
 
-The two backends have clean separate class identities after the Rust/AS split
-(see `matrix/src/backends/register-backends.ts`). Four `functions` AS kernels are
-on a JS fallback pending Phase 6 fixes (poly fit/cheb/legendre, Airy Ai/Bi for
-|x|>5, argsort/rank + slow sort).
+SHA-384 integrity verification of the AS binary is enforced before instantiation.
+A few `functions` kernels deliberately stay on the JS fallback where their AS
+kernels are still being stabilized (poly fits, Airy Ai/Bi for |x|>5, argsort/rank).
 
 ### WebGPU (opt-in, f32 only)
 
@@ -265,20 +260,11 @@ npm run typecheck
 # Lint all packages
 npm run lint
 
-# WASM benchmarks (Rust vs AS vs JS)
-npm run bench:wasm
-
 # Parallel-execution break-even benchmarks
 npm run bench:parallel
 
-# Build WASM artifacts (AssemblyScript)
+# Build WASM artifacts (AssemblyScript — the sole WASM backend)
 npm run build:wasm
-
-# Build WASM artifacts (Rust)
-npm run build:wasm:rust
-
-# Build both WASM toolchains
-npm run build:wasm:all
 
 # Format all files
 npm run format

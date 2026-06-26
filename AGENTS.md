@@ -25,8 +25,7 @@ human-facing overview.
 | Coverage | `npm run test:coverage` | whitelist excludes dormant code |
 | One package | `npx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` | |
 | One test file | `npx vitest run <path>` | e.g. `core/tests/utils.test.ts` |
-| WASM (AS) | `npm run build:wasm` | AssemblyScript — the `functions` backend + matrix basic ops |
-| WASM (Rust) | `npm run build:wasm:rust` | matrix heavy ops only (fft/eig/svd/decomp); skipped w/o Rust toolchain → JS fallback |
+| WASM (AS) | `npm run build:wasm` | AssemblyScript — the **sole** WASM backend (functions + matrix); falls back to JS if not built |
 
 **Before claiming "done":** run `npm run typecheck` (must stay 0 errors) and the
 affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
@@ -67,8 +66,7 @@ affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
 | Expression parser/compiler/evaluator | `expression/src/` (wired via `functions/src/factories/evaluate.ts`) |
 | `.mtsw` notebook runtime (parser, graph, executor) | `workbook/src/` |
 | mathjs-compat shim (`create(all)`) | `compat/src/` |
-| AssemblyScript WASM source (the `functions` backend + matrix basic ops) | `assembly/src/` |
-| Rust WASM source (matrix heavy ops only; migration pending) | `wasm-rust/crates/` |
+| AssemblyScript WASM source (the sole WASM backend — functions + matrix) | `assembly/src/` |
 | Forked typed-function / workerpool | `packages/typed-function/`, `packages/workerpool/` |
 | Thin re-export packages (parser, ast, units, linalg, arithmetic, …) | top-level dirs; they re-export, no impl |
 | Architecture / API / inventory docs | `docs/Architecture/`, `docs/api/`, `docs/inventory/` |
@@ -78,19 +76,16 @@ affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
 Dependency graph and per-package details live in **`CLAUDE.md` → Monorepo
 Structure**. Don't duplicate it here — reference it.
 
-> **⚠️ WASM direction of travel (read before touching `wasm-rust/` or AS).**
-> *Today (Rust→AS migration Phase 5, functions cutover COMPLETE):* the
-> **`functions` package is AssemblyScript-only** — it loads `mathts-as.wasm` and
-> its dispatch is **AS→JS** (the Rust-pointer branches were removed from the 7
-> `functions/src/wasm` bridges). **`matrix` still uses the Rust binary**
-> (`lib/wasm/mathts.wasm`) via `RustWASMBackend`/`RustWasmLoader` for the heavy ops
-> (`fft`/`eig`/`svd`/`decomposition`) and large matrices, so `wasm-rust/` +
-> `build:wasm:rust` **remain**. *Remaining work:* migrate `matrix` to AS, then
-> delete Rust (a separate, pending slice — see
-> `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md`). Four `functions` AS kernels are
-> on a JS fallback pending Phase 6 fixes (poly fit/cheb/legendre, Airy Ai/Bi for
-> |x|>5, argsort/rank+slow sort). Don't invest new work in Rust `functions`
-> kernels; for matrix, check the plan before adding Rust.
+> **✅ WASM backend (migration COMPLETE 2026-06-26).** AssemblyScript is the
+> **sole WASM backend** for the whole repo. Both `functions` and `matrix` load
+> the AssemblyScript binary `mathts-as.wasm` (source `assembly/src/`); dispatch is
+> **AS→JS**. The Rust→AssemblyScript migration is finished — the Rust toolchain
+> (the `wasm-rust/` Cargo workspace, `build:wasm:rust`/`build:wasm:all`/`bench:wasm`
+> scripts, the dead `MatrixWasmBridge`, and the `MATHTS_WASM_BACKEND=rust` loader
+> opt-in) has been removed. SHA-384 integrity verification of the AS binary is
+> retained. A few kernels (poly fits, Airy Ai/Bi, argsort/rank) deliberately stay
+> on JS where their AS kernels are still being stabilized. See
+> `docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md`.
 
 ---
 

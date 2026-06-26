@@ -1,5 +1,7 @@
 # Rust → AssemblyScript Migration — Phase 5 (functions cutover) closing note
 
+> **STATUS: COMPLETE (2026-06-26).** The Rust→AssemblyScript WASM migration is finished — AssemblyScript is the sole WASM backend; the Rust toolchain has been removed. See docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md.
+
 **Date:** 2026-06-26 · **Status:** functions cutover COMPLETE; Rust NOT deleted.
 
 See also: [RUST_TO_AS_MIGRATION_PLAN.md](./RUST_TO_AS_MIGRATION_PLAN.md),

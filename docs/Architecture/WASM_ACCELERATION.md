@@ -5,31 +5,29 @@ MathTS monorepo. Regenerate the per-function data with
 `functions/tests/audit`-style scans (see scratch tooling) or by grepping
 `*Dispatch` usage in `functions/src/typed/`.
 
-Last updated: 2026-06-25.
+Last updated: 2026-06-26.
 
 ## TL;DR
 
 WASM acceleration is **selective and threshold-gated**, not universal:
 
-- **The `functions` package is AssemblyScript-only** (Rust→AS migration Phase 5
-  cutover). It bundles `dist/wasm/mathts-as.wasm` (~292 `f64` kernels), resolves
-  it package-relative, and its dispatch is **AS → JS** (the Rust-pointer branches
-  were removed from the 7 `functions/src/wasm` bridges). The Rust binary
-  (`wasm-rust/` → `mathts.wasm`) is **no longer consumed by `functions`**; it
-  remains for the `matrix` package's heavy ops (fft/eig/svd/decomposition), whose
-  Rust→AS migration is a separate, pending slice. Both binaries are numerically
-  verified to <1e-9 against mpmath for the special functions.
+- **AssemblyScript is the sole WASM backend** for the whole repo (Rust→AS
+  migration COMPLETE 2026-06-26). The `functions` package bundles
+  `dist/wasm/mathts-as.wasm` (~292 `f64` kernels), resolves it package-relative,
+  and its dispatch is **AS → JS**. The `matrix` package loads the same
+  AssemblyScript binary for its heavy ops (fft/eig/svd/decomposition). The Rust
+  toolchain (`wasm-rust/`) has been removed. The AS binary is numerically
+  verified to <1e-9 against mpmath for the special functions, and SHA-384
+  integrity-verified before instantiation.
 - **Threshold:** the `functions` special bridges engage WASM only for arrays of
   `length >= WASM_SPECIAL_THRESHOLD` (= **1024**). Scalars and small arrays run
   JS.
-- **Runtime caveat:** routing to a `*Dispatch` ≠ running wasm. Four kernel groups
-  deliberately stay on JS because their AS kernels are broken/unstable (the
-  Rust→AS migration **Phase 6** follow-ups): poly fit/cheb/legendre, Airy Ai/Bi
-  (|x|>5), and argsort/rank (the AS sort is unstable; sort itself is O(n²) on
-  dupes). The dep-graph tool probes effectiveness (`bundledBackend` +
-  per-function `effectiveBackend` in `wasm-pairing.{md,json}`): of 39 wasm-routed
-  functions, **37 run wasm, 2 fall back to JS** (the two surfaced are `airyAi`/
-  `airyBi`).
+- **Runtime caveat:** routing to a `*Dispatch` ≠ running wasm. A few kernel groups
+  deliberately stay on JS where their AS kernels are still being stabilized: poly
+  fit/cheb/legendre, Airy Ai/Bi (|x|>5), and argsort/rank. The dep-graph tool
+  probes effectiveness (`bundledBackend` + per-function `effectiveBackend` in
+  `wasm-pairing.{md,json}`): of 39 wasm-routed functions, **37 run wasm, 2 fall
+  back to JS** (the two surfaced are `airyAi`/`airyBi`).
 
 ## `functions` public typed API — 218 functions
 
@@ -47,14 +45,14 @@ WASM acceleration is **selective and threshold-gated**, not universal:
 > (bessel/elliptic/carlson/lgamma, poly mul/div/resultant/discriminant,
 > `sort_f64`, welch/bartlett/goertzel/chirp-z, tridiag/divided-difference) —
 > these now execute on the AS binary (which has the `__new` allocator the bridges
-> use). The **js-fallback** kernels are the Phase-6 follow-ups: poly fits, Airy
-> (|x|>5), argsort/rank. NOT wired (benchmarked, JS wins once the JS↔wasm copy is
+> use). The **js-fallback** kernels are the ones still being stabilized on AS:
+> poly fits, Airy (|x|>5), argsort/rank. NOT wired (benchmarked, JS wins once the JS↔wasm copy is
 > included): `sqrt`, `cbrt`, `asin`, `acos`, `cosh`, `asinh`, `acosh`, and the
 > reductions (`sum`/`mean`/`variance`) — V8 JITs/hardware-accelerates those faster
 > than wasm+copy. **Op-fusion** (`fuseUnaryChain`, 0.2.14) keeps an array resident
 > in wasm across a chain of ops, amortizing the copy — 2.4–3.1× over JS for a 4-op
 > chain. The remaining "parallel" routing is intentional. See
-> `docs/roadmap/RUST_TO_AS_MIGRATION_PHASE5.md` and the `bench:elementwise` /
+> `docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md` and the `bench:elementwise` /
 > `bench:reduction` benchmarks.
 
 ### The WASM-accelerated typed functions
@@ -86,11 +84,10 @@ functions) and `statistics`/`distributions`.
   etc.) where used by solvers and numeric routines, even though those public
   functions aren't special-function dispatchers.
 
-## Correctness status (2026-06-25)
+## Correctness status (2026-06-26)
 
-All WASM special-function kernels (AssemblyScript **and** Rust) and the JS
-fallbacks are verified to <1e-9 vs mpmath after the special-function fixes:
+All AssemblyScript WASM special-function kernels and the JS fallbacks are
+verified to <1e-9 vs mpmath after the special-function fixes:
 
 - `mathts-wasm` (AS): `npm run test:diff` — 140/140 special, 30/30 decomposition.
 - `mathts-functions` (JS): `npm run test:diff` — 187/187.
-- Rust wasm: `functions/tests/diff-wasm-rust.test.mjs` — 90/90 (vec1 kernels).

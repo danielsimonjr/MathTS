@@ -1,5 +1,7 @@
 # Rust → AssemblyScript Migration — Phase 1 Perf Spike (GATING) Result
 
+> **STATUS: COMPLETE (2026-06-26).** The Rust→AssemblyScript WASM migration is finished — AssemblyScript is the sole WASM backend; the Rust toolchain has been removed. See docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md.
+
 **Status:** complete · **Date:** 2026-06-26 · **Decision: HYBRID ABI** —
 pointer-ABI AS for the hot elementwise + fusion path; managed-array AS for
 special / sort (pending a kernel fix) / signal / poly / interpolation / bitwise.

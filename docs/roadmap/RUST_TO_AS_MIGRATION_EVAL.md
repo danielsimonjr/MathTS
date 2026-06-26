@@ -1,5 +1,7 @@
 # Rust → AssemblyScript Migration — Detailed Evaluation
 
+> **STATUS: COMPLETE (2026-06-26).** The Rust→AssemblyScript WASM migration is finished — AssemblyScript is the sole WASM backend; the Rust toolchain has been removed. See docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md.
+
 **Status:** evaluation (pre-plan) · **Date:** 2026-06-25 · **Goal:** assess
 removing the Rust wasm toolchain (`wasm-rust/`) and serving all `functions`-package
 acceleration from AssemblyScript (`assembly/`), keeping a single TS→AS→WebGPU stack.

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed (2026-06-26) — Rust→AS migration Phase 7c: Rust toolchain deleted (migration COMPLETE)
+
+- **Rust WASM toolchain removed — AssemblyScript is the sole WASM backend
+  (functions + matrix).** With the AS matrix kernels authored (Phase 7a) and
+  wired (Phase 7b), the `matrix` package's last Rust consumer was retired, so the
+  Rust toolchain was deleted: the `wasm-rust/` Cargo workspace, the
+  `build:wasm:rust` / `build:wasm:all` / `bench:wasm` npm scripts, the dead
+  `MatrixWasmBridge`, the `MATHTS_WASM_BACKEND=rust` loader opt-in, and the
+  Rust-vs-AssemblyScript differential benchmark. Both `functions` and `matrix`
+  now load the single AssemblyScript binary `mathts-as.wasm` (source
+  `assembly/src/`); dispatch is AS→JS; the acceleration stack is
+  **TS → AssemblyScript → WebGPU (matrix)**. SHA-384 integrity verification of the
+  AS binary is retained and still enforced. `--check-wasm-parity` now exits 0 by
+  construction (no Rust binary to diff). The migration is COMPLETE — see
+  `docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md`.
+
 ### Added (2026-06-26) — Rust→AS migration Phase 7a: author the two missing AS matrix kernels
 
 The AS binary had parity-clean matrix multiply/transpose, LU/QR/Cholesky/inverse/
