@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-26) — Rust→AS migration Phase 3a: functions loads AS + elementwise repoint
+
+- **`functions` WASM loader now defaults to the AssemblyScript binary**
+  (`mathts-as.wasm`). `WasmLoader.getDefaultWasmPath()` flips the default from
+  Rust → AS; opt back into the legacy Rust binary with
+  `MATHTS_WASM_BACKEND=rust` (still copied/available until Phase 5 removes Rust).
+  `functions/scripts/copy-wasm.mjs` now co-locates **both** binaries into
+  `functions/dist/wasm/` (AS sourced from `matrix/dist/wasm/mathts-as.wasm`,
+  Rust from `lib/wasm/mathts.wasm`) and regenerates a SHA-384
+  `wasm-manifest.json` covering both — so the AS binary's hash is integrity-
+  verified before instantiation (security invariant preserved; the AS binary's
+  `__new` managed runtime makes `allocateFloat64Array` functional).
+- **Elementwise bridge repointed to the AS pointer-ABI kernels**
+  (`functions/src/wasm/elementwise/wasm-bridge.ts`): probes `array_<op>_ptr`
+  instead of the Rust `simd_<op>_array`. Self-managed scratch-region marshalling
+  (zero per-call alloc) is unchanged. JS fallback (return `null`) preserved.
+- **New shared `functions/src/wasm/bridges/common.ts`** (dup-audit Opportunity
+  #2, Clusters C+D): hoists `getWasm()`, the `PtrUnaryKernel` type, AS/Rust
+  backend sentinels (`isAsWasm`/`isRustWasm`), and the scratch-region runners
+  (`runUnaryPtr`/`runChainPtr`/`resetScratch`) out of the elementwise bridge.
+  The remaining bridges adopt it (and an alloc/release `makeDispatch` factory) in
+  Phases 3b/3c.
+- New TDD gate `functions/tests/typed-elementwise-as-wasm.test.ts` proves the AS
+  pointer kernels actually execute (non-null dispatch) and match JS for all 18
+  ops + op-fusion; asserts the loader default resolves to AS.
+- **Known interim risk (3b/3c):** the *other* bridges (special non-bessel / poly
+  / sort / signal / interpolation) still probe Rust pointer-ABI names that the AS
+  binary reuses with a *managed* ABI. Under the new AS default they fall back to
+  JS where they validate outputs (bessel via `written===n`), but `polyMul/
+  resultant/discriminant` lack that guard and would return wrong values for
+  inputs ≥ threshold if a consumer loads the AS default. The existing wasm bridge
+  tests pin the Rust binary by explicit path, so the suite is unaffected; the fix
+  (gate the Rust probe with `isRustWasm`, or repoint) lands in 3b/3c.
+
 ### Added (2026-06-26) — Rust→AS migration Phase 2: AS kernel authoring
 
 - **Elementwise pointer-ABI AS kernels** (`assembly/src/elementwise.ts`):
