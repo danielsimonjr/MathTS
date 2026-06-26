@@ -4,21 +4,19 @@
  * the monorepo and the installed layout. Without this the loader fell back to
  * JS because the wasm was never bundled.
  *
- * As of the Rust→AS migration Phase 3a, the functions loader DEFAULTS to the
- * AssemblyScript binary (`mathts-as.wasm`); the Rust binary (`mathts.wasm`) is
- * still copied so `MATHTS_WASM_BACKEND=rust` and the Rust differential test
- * (tests/diff-wasm-rust.test.mjs) keep working until Phase 5 removes Rust.
+ * AssemblyScript is the sole WASM backend. The functions loader loads the
+ * AssemblyScript binary (`mathts-as.wasm`); the Rust toolchain was removed in
+ * the Rust→AS migration (complete 2026-06-26).
  *
  * Sources:
  *   AS  : <repo>/matrix/dist/wasm/mathts-as.wasm  (built by `npm run build:wasm`,
  *         co-located by matrix/scripts/copy-wasm.mjs — the same artifact matrix uses)
  *         fallback: <repo>/assembly/build/mathts.wasm
- *   Rust: <repo>/lib/wasm/mathts.wasm             (built by `npm run build:wasm:rust`)
  * Dest:   functions/dist/wasm/  (+ a regenerated SHA-384 wasm-manifest.json
- *         covering whichever binaries were copied — verified at load).
+ *         covering the copied binary — verified at load).
  *
- * If a wasm hasn't been built, that binary is skipped (consumers use the JS
- * fallback). A missing AS binary is a warning, since AS is now the default.
+ * If the AS wasm hasn't been built, it is skipped (consumers use the JS
+ * fallback) with a warning.
  */
 import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -38,9 +36,6 @@ const asCandidates = [
 ];
 const asSrc = asCandidates.find(existsSync) ?? null;
 
-// Rust binary source.
-const rustSrc = join(repoRoot, 'lib', 'wasm', 'mathts.wasm');
-
 mkdirSync(outDir, { recursive: true });
 
 const copied = [];
@@ -54,16 +49,6 @@ if (asSrc) {
     `[copy-wasm] AS wasm not found (looked in matrix/dist/wasm + assembly/build) — ` +
       `run \`npm run build:wasm\` first. The functions package defaults to AS; ` +
       `without it consumers fall back to JS.`,
-  );
-}
-
-if (existsSync(rustSrc)) {
-  copyFileSync(rustSrc, join(outDir, 'mathts.wasm'));
-  copied.push('mathts.wasm');
-} else {
-  console.warn(
-    `[copy-wasm] Rust wasm not built at ${rustSrc} — run \`npm run build:wasm:rust\` ` +
-      `to enable MATHTS_WASM_BACKEND=rust. Skipping (AS default is unaffected).`,
   );
 }
 
