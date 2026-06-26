@@ -30,7 +30,16 @@
  *   `tools/benchmark/wasm/special.bench.ts`.
  */
 
-import { wasmLoader, type WasmModule } from '../WasmLoader.js';
+import { wasmLoader } from '../WasmLoader.js';
+import {
+  getWasm,
+  isRustWasm,
+  isAsWasm,
+  withAsF64,
+  asReadReturnedF64,
+  makeUnaryArrayDispatch,
+  type RawWasm,
+} from '../bridges/common.js';
 
 /**
  * Element-count threshold above which we attempt the WASM Bessel kernels.
@@ -41,23 +50,11 @@ export const WASM_SPECIAL_THRESHOLD = 1024;
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-function getWasm(): WasmModule | null {
-  try {
-    return wasmLoader.getModule();
-  } catch {
-    return null;
-  }
-}
-
 // Rust-backend function type signatures (pointer-style calling convention).
+// The Carlson R-forms + incomplete-elliptic kernels share the uniform
+// (ptr1..ptrN, n, outPtr) ABI handled generically by `multiArrayDispatch`.
 type RustJ01Fn = (xsPtr: number, n: number, outPtr: number) => number;
 type RustJnFn = (order: number, xsPtr: number, nElems: number, outPtr: number) => number;
-// Carlson R-form types (multiple input pointer arrays, element-wise).
-type RustRC2Fn = (xsPtr: number, ysPtr: number, n: number, outPtr: number) => number;
-type RustRF3Fn = (xsPtr: number, ysPtr: number, zsPtr: number, n: number, outPtr: number) => number;
-type RustRJ4Fn = (xsPtr: number, ysPtr: number, zsPtr: number, psPtr: number, n: number, outPtr: number) => number;
-type RustIncomplete2Fn = (phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
-type RustPi3Fn = (nsPtr: number, phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
 
 // ---------------------------------------------------------------------------
 // Pure-JS fallback implementations
@@ -139,332 +136,139 @@ export function airyBiJS(xs: Float64Array): Float64Array {
 // Public dispatch helpers
 // ---------------------------------------------------------------------------
 
-/** Dispatch J0 over an array — Rust WASM above threshold, then AS, then JS. */
-export function besselJ0Dispatch(xs: Float64Array): Float64Array {
+/**
+ * Dispatch J0/J1/Y0/Y1 — and the order-fixed J_n/Y_n — over an array.
+ * Rust pointer kernel (gated) → AS managed kernel → JS. All AS special kernels
+ * here bit-/tol-match the JS reference to ≤1e-12 (verified Phase 3b), so they
+ * are repointed via the shared `makeUnaryArrayDispatch` factory.
+ */
+export const besselJ0Dispatch = makeUnaryArrayDispatch({
+  threshold: WASM_SPECIAL_THRESHOLD,
+  name: 'bessel_j0_f64',
+  js: besselJ0JS,
+});
+export const besselJ1Dispatch = makeUnaryArrayDispatch({
+  threshold: WASM_SPECIAL_THRESHOLD,
+  name: 'bessel_j1_f64',
+  js: besselJ1JS,
+});
+
+/** Order-`n` (`n ≥ 2`) variant of an AS managed `<name>(order, xs)` kernel. */
+function besselOrderDispatch(
+  order: number,
+  xs: Float64Array,
+  rustName: string,
+  asName: string,
+  js: (n: number, xs: Float64Array) => Float64Array
+): Float64Array {
   const n = xs.length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
+    const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm) {
       try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['bessel_j0_f64'] as
-          | RustJ01Fn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
+        if (isRustWasm(wasm)) {
+          const rustFn = wasm[rustName] as RustJnFn | undefined;
+          if (typeof rustFn === 'function') {
+            const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+            try {
+              const written = rustFn(order, xsAlloc.ptr, n, outAlloc.ptr);
+              if (written === n) return new Float64Array(outAlloc.array);
+            } finally {
+              wasmLoader.release(xsAlloc.ptr, true);
+              wasmLoader.release(outAlloc.ptr, true);
             }
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
           }
+        } else if (isAsWasm(wasm)) {
+          // AS managed ABI: <asName>(order, xs) -> Float64Array.
+          const out = withAsF64(wasm, [xs], (mod, [h]) =>
+            asReadReturnedF64(mod, (mod[asName] as (o: number, x: number) => number)(order, h))
+          );
+          if (out) return out;
         }
-      } catch {
-        // fall through to AS probe
-      }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_j0_f64_as'] as
-          | ((xs: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') return asFn(xs);
       } catch {
         // fall through to JS
       }
     }
   }
-  return besselJ0JS(xs);
+  return js(order, xs);
 }
 
-/** Dispatch J1 over an array — Rust WASM above threshold, then AS, then JS. */
-export function besselJ1Dispatch(xs: Float64Array): Float64Array {
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['bessel_j1_f64'] as
-          | RustJ01Fn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_j1_f64_as'] as
-          | ((xs: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') return asFn(xs);
-      } catch {
-        // fall through to JS
-      }
-    }
-  }
-  return besselJ1JS(xs);
-}
-
-/** Dispatch J_order over an array — Rust WASM, then AS, then JS. */
+/** Dispatch J_order over an array — Rust WASM, then AS managed, then JS. */
 export function besselJDispatch(order: number, xs: Float64Array): Float64Array {
-  // J0 and J1 have dedicated kernels.
   if (order === 0) return besselJ0Dispatch(xs);
   if (order === 1) return besselJ1Dispatch(xs);
-
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['bessel_j_f64'] as
-          | RustJnFn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(order, xsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_jn_f64_as'] as
-          | ((n: number, xs: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') return asFn(order, xs);
-      } catch {
-        // fall through to JS
-      }
-    }
-  }
-  return besselJnJS(order, xs);
+  return besselOrderDispatch(order, xs, 'bessel_j_f64', 'bessel_jn_f64', besselJnJS);
 }
 
-/** Dispatch Y0 over an array — Rust WASM, then AS, then JS. */
-export function besselY0Dispatch(xs: Float64Array): Float64Array {
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['bessel_y0_f64'] as
-          | RustJ01Fn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_y0_f64_as'] as
-          | ((xs: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') return asFn(xs);
-      } catch {
-        // fall through to JS
-      }
-    }
-  }
-  return besselY0JS(xs);
-}
+export const besselY0Dispatch = makeUnaryArrayDispatch({
+  threshold: WASM_SPECIAL_THRESHOLD,
+  name: 'bessel_y0_f64',
+  js: besselY0JS,
+});
+export const besselY1Dispatch = makeUnaryArrayDispatch({
+  threshold: WASM_SPECIAL_THRESHOLD,
+  name: 'bessel_y1_f64',
+  js: besselY1JS,
+});
 
-/** Dispatch Y1 over an array — Rust WASM, then AS, then JS. */
-export function besselY1Dispatch(xs: Float64Array): Float64Array {
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['bessel_y1_f64'] as
-          | RustJ01Fn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_y1_f64_as'] as
-          | ((xs: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') return asFn(xs);
-      } catch {
-        // fall through to JS
-      }
-    }
-  }
-  return besselY1JS(xs);
-}
-
-/** Dispatch Y_order over an array — Rust WASM, then AS, then JS. */
+/** Dispatch Y_order over an array — Rust WASM, then AS managed, then JS. */
 export function besselYDispatch(order: number, xs: Float64Array): Float64Array {
-  // Y0 and Y1 have dedicated kernels.
   if (order === 0) return besselY0Dispatch(xs);
   if (order === 1) return besselY1Dispatch(xs);
-
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['bessel_y_f64'] as
-          | RustJnFn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(order, xsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['bessel_yn_f64_as'] as
-          | ((n: number, xs: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') return asFn(order, xs);
-      } catch {
-        // fall through to JS
-      }
-    }
-  }
-  return besselYnJS(order, xs);
+  return besselOrderDispatch(order, xs, 'bessel_y_f64', 'bessel_yn_f64', besselYnJS);
 }
 
-/** Dispatch Ai(x) over an array — WASM above threshold, JS below. */
+/**
+ * Dispatch Ai(x) / Bi(x) over an array.
+ *
+ * The Rust pointer kernel is kept (gated). The AS managed Airy kernels are
+ * deliberately NOT routed to: in the asymptotic region (|x|>5) they diverge
+ * from the JS reference by ~1e-6 relative (verified Phase 3b) — above the 1e-12
+ * bar — so under the AS binary these fall through to the validated JS series /
+ * asymptotic implementation. Re-enable once assembly/src's Airy asymptotic
+ * matches JS.
+ */
 export function airyAiDispatch(xs: Float64Array): Float64Array {
   const n = xs.length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      // Probe Rust (pointer-style)
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['airy_ai_f64'] as
-          | RustJ01Fn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      // Probe AS (typed-array style)
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['airy_ai_f64_as'] as
-          | ((xs: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') {
-          return asFn(xs);
-        }
-      } catch {
-        // fall through to JS
-      }
+    const wasm = getWasm() as unknown as RawWasm | null;
+    if (wasm && isRustWasm(wasm)) {
+      const out = runRustUnarySpecial(wasm, 'airy_ai_f64', xs);
+      if (out) return out;
     }
   }
   return airyAiJS(xs);
 }
 
-/** Dispatch Bi(x) over an array — WASM above threshold, JS below. */
 export function airyBiDispatch(xs: Float64Array): Float64Array {
   const n = xs.length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      // Probe Rust (pointer-style)
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['airy_bi_f64'] as
-          | RustJ01Fn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      // Probe AS (typed-array style)
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['airy_bi_f64_as'] as
-          | ((xs: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') {
-          return asFn(xs);
-        }
-      } catch {
-        // fall through to JS
-      }
+    const wasm = getWasm() as unknown as RawWasm | null;
+    if (wasm && isRustWasm(wasm)) {
+      const out = runRustUnarySpecial(wasm, 'airy_bi_f64', xs);
+      if (out) return out;
     }
   }
   return airyBiJS(xs);
+}
+
+/** Rust pointer-ABI runner: `<name>(xsPtr, n, outPtr) -> written`; null unless written===n. */
+function runRustUnarySpecial(wasm: RawWasm, name: string, xs: Float64Array): Float64Array | null {
+  const rustFn = wasm[name] as RustJ01Fn | undefined;
+  if (typeof rustFn !== 'function') return null;
+  const n = xs.length;
+  const xsAlloc = wasmLoader.allocateFloat64Array(xs);
+  const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+  try {
+    const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
+    return written === n ? new Float64Array(outAlloc.array) : null;
+  } catch {
+    return null;
+  } finally {
+    wasmLoader.release(xsAlloc.ptr, true);
+    wasmLoader.release(outAlloc.ptr, true);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -510,47 +314,11 @@ export function lgammaJS(xs: Float64Array): Float64Array {
  *   2. If absent, probe AS `lgamma_f64` (typed-array style, suffix `_as`).
  *   3. Fall back to pure-JS `lgammaJS`.
  */
-export function lgammaDispatch(xs: Float64Array): Float64Array {
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      // Probe Rust (pointer-style)
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['lgamma_f64'] as
-          | RustJ01Fn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      // Probe AS (typed-array style, suffix `_as` via bundle rename)
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['lgamma_f64_as'] as
-          | ((xs: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') {
-          return asFn(xs);
-        }
-      } catch {
-        // fall through to JS
-      }
-    }
-  }
-  return lgammaJS(xs);
-}
+export const lgammaDispatch = makeUnaryArrayDispatch({
+  threshold: WASM_SPECIAL_THRESHOLD,
+  name: 'lgamma_f64',
+  js: lgammaJS,
+});
 
 // ===========================================================================
 // Carlson Symmetric Forms — Slice 6.4
@@ -603,8 +371,9 @@ function _carlsonRF(x: number, y: number, z: number): number {
     if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10 && Math.abs(dz) < 1e-10) {
       const e2 = dx * dy - dz * dz;
       const e3 = dx * dy * dz;
-      return (1.0 + e2 * (-0.1 + (3.0 / 44.0) * e2 - (9.0 / 52.0) * e3) + e3 / 14.0) /
-        Math.sqrt(ave);
+      return (
+        (1.0 + e2 * (-0.1 + (3.0 / 44.0) * e2 - (9.0 / 52.0) * e3) + e3 / 14.0) / Math.sqrt(ave)
+      );
     }
   }
   return 1.0 / Math.sqrt(zz);
@@ -643,10 +412,18 @@ function _carlsonRD(x: number, y: number, z: number): number {
       const e3 = xy * dz + dz * (xz + yz);
       const e4 = xy * z2;
       const e5 = dz * z2 * dz;
-      return 3.0 * sum +
-        (fac * (1.0 + e2 * (-3.0 / 14.0) + e3 / 6.0 + e2 * e2 * (9.0 / 88.0) +
-          e4 * (-45.0 / 132.0) - e5 * (5.0 / 44.0) + e3 * e2 * (-3.0 / 44.0))) /
-        (ave * ave * Math.sqrt(ave));
+      return (
+        3.0 * sum +
+        (fac *
+          (1.0 +
+            e2 * (-3.0 / 14.0) +
+            e3 / 6.0 +
+            e2 * e2 * (9.0 / 88.0) +
+            e4 * (-45.0 / 132.0) -
+            e5 * (5.0 / 44.0) +
+            e3 * e2 * (-3.0 / 44.0))) /
+          (ave * ave * Math.sqrt(ave))
+      );
     }
   }
   return 3.0 * sum + fac / (zz * zz * Math.sqrt(zz));
@@ -678,18 +455,30 @@ function _carlsonRJ(x: number, y: number, z: number, p: number): number {
     const dy = (ave - yy) / ave;
     const dz = (ave - zz) / ave;
     const dp = (ave - pp) / ave;
-    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10 &&
-        Math.abs(dz) < 1e-10 && Math.abs(dp) < 1e-10) {
+    if (
+      Math.abs(dx) < 1e-10 &&
+      Math.abs(dy) < 1e-10 &&
+      Math.abs(dz) < 1e-10 &&
+      Math.abs(dp) < 1e-10
+    ) {
       const xyz = dx * dy + dy * dz + dz * dx;
       const p2 = dp * dp;
       const e2 = xyz - 3.0 * p2;
       const e3 = dx * dy * dz + 2.0 * xyz * dp - 3.0 * p2 * dp;
       const e4 = (2.0 * dx * dy * dz + xyz * dp + 3.0 * p2 * dp) * dp;
       const e5 = dx * dy * dz * p2;
-      return 3.0 * sum +
-        (fac * (1.0 + e2 * (-3.0 / 14.0) + e3 / 6.0 + e2 * e2 * (9.0 / 88.0) -
-          e4 * (45.0 / 132.0) + e5 * (-5.0 / 44.0) + e3 * e2 * (-3.0 / 44.0))) /
-        (ave * ave * Math.sqrt(ave));
+      return (
+        3.0 * sum +
+        (fac *
+          (1.0 +
+            e2 * (-3.0 / 14.0) +
+            e3 / 6.0 +
+            e2 * e2 * (9.0 / 88.0) -
+            e4 * (45.0 / 132.0) +
+            e5 * (-5.0 / 44.0) +
+            e3 * e2 * (-3.0 / 44.0))) /
+          (ave * ave * Math.sqrt(ave))
+      );
     }
   }
   return 3.0 * sum + fac / (pp * pp * Math.sqrt(pp));
@@ -754,7 +543,12 @@ export function carlsonRDJS(xs: Float64Array, ys: Float64Array, zs: Float64Array
   return out;
 }
 
-export function carlsonRJJS(xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array): Float64Array {
+export function carlsonRJJS(
+  xs: Float64Array,
+  ys: Float64Array,
+  zs: Float64Array,
+  ps: Float64Array
+): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) out[i] = _carlsonRJ(xs[i], ys[i], zs[i], ps[i]);
   return out;
@@ -772,7 +566,11 @@ export function ellipticEIncompleteJS(phis: Float64Array, ms: Float64Array): Flo
   return out;
 }
 
-export function ellipticPiIncompleteJS(ns: Float64Array, phis: Float64Array, ms: Float64Array): Float64Array {
+export function ellipticPiIncompleteJS(
+  ns: Float64Array,
+  phis: Float64Array,
+  ms: Float64Array
+): Float64Array {
   const out = new Float64Array(ns.length);
   for (let i = 0; i < ns.length; i++) out[i] = _ellipticPiIncomplete(ns[i], phis[i], ms[i]);
   return out;
@@ -782,13 +580,27 @@ export function ellipticPiIncompleteJS(ns: Float64Array, phis: Float64Array, ms:
 // Scalar exports (for TypedFunction scalar overloads)
 // ---------------------------------------------------------------------------
 
-export function carlsonRCScalar(x: number, y: number): number { return _carlsonRC(x, y); }
-export function carlsonRFScalar(x: number, y: number, z: number): number { return _carlsonRF(x, y, z); }
-export function carlsonRDScalar(x: number, y: number, z: number): number { return _carlsonRD(x, y, z); }
-export function carlsonRJScalar(x: number, y: number, z: number, p: number): number { return _carlsonRJ(x, y, z, p); }
-export function ellipticFIncompleteScalar(phi: number, m: number): number { return _ellipticFIncomplete(phi, m); }
-export function ellipticEIncompleteScalar(phi: number, m: number): number { return _ellipticEIncomplete(phi, m); }
-export function ellipticPiIncompleteScalar(n: number, phi: number, m: number): number { return _ellipticPiIncomplete(n, phi, m); }
+export function carlsonRCScalar(x: number, y: number): number {
+  return _carlsonRC(x, y);
+}
+export function carlsonRFScalar(x: number, y: number, z: number): number {
+  return _carlsonRF(x, y, z);
+}
+export function carlsonRDScalar(x: number, y: number, z: number): number {
+  return _carlsonRD(x, y, z);
+}
+export function carlsonRJScalar(x: number, y: number, z: number, p: number): number {
+  return _carlsonRJ(x, y, z, p);
+}
+export function ellipticFIncompleteScalar(phi: number, m: number): number {
+  return _ellipticFIncomplete(phi, m);
+}
+export function ellipticEIncompleteScalar(phi: number, m: number): number {
+  return _ellipticEIncomplete(phi, m);
+}
+export function ellipticPiIncompleteScalar(n: number, phi: number, m: number): number {
+  return _ellipticPiIncomplete(n, phi, m);
+}
 
 // ---------------------------------------------------------------------------
 // WASM dispatch helpers — Carlson R-forms (Slice 6.4)
@@ -798,238 +610,106 @@ export function ellipticPiIncompleteScalar(n: number, phi: number, m: number): n
 // as the AS exports in assembly/src/special.ts).
 // ---------------------------------------------------------------------------
 
-/** Dispatch RC(x, y) element-wise — Rust WASM ≥ threshold, AS fallback, JS fallback. */
-export function carlsonRCDispatch(xs: Float64Array, ys: Float64Array): Float64Array {
-  const n = xs.length;
+/**
+ * Shared multi-array dispatch for the Carlson R-forms and incomplete elliptic
+ * integrals. All share the uniform ABI: Rust pointer `fn(ptr1..ptrN, n, outPtr)
+ * -> written`; AS managed `fn(h1..hN) -> Float64Array`. Rust is gated behind
+ * `isRustWasm`; under AS the managed call is used; otherwise JS. All AS kernels
+ * here tol-match the JS reference to ≤1e-12 (verified Phase 3b).
+ */
+function multiArrayDispatch(
+  name: string,
+  inputs: Float64Array[],
+  js: () => Float64Array
+): Float64Array {
+  const n = inputs[0].length;
   if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
+    const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm) {
       try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['carlson_rc_f64'] as RustRC2Fn | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) return new Float64Array(outAlloc.array);
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(ysAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
+        if (isRustWasm(wasm)) {
+          const rustFn = wasm[name] as ((...a: number[]) => number) | undefined;
+          if (typeof rustFn === 'function') {
+            const allocs = inputs.map((a) => wasmLoader.allocateFloat64Array(a));
+            const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
+            try {
+              const written = rustFn(...allocs.map((a) => a.ptr), n, outAlloc.ptr);
+              if (written === n) return new Float64Array(outAlloc.array);
+            } finally {
+              for (const a of allocs) wasmLoader.release(a.ptr, true);
+              wasmLoader.release(outAlloc.ptr, true);
+            }
           }
+        } else if (isAsWasm(wasm)) {
+          const out = withAsF64(wasm, inputs, (mod, headers) =>
+            asReadReturnedF64(mod, (mod[name] as (...h: number[]) => number)(...headers))
+          );
+          if (out) return out;
         }
-      } catch { /* fall through */ }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['carlson_rc_f64_as'] as
-          ((xs: Float64Array, ys: Float64Array) => Float64Array) | undefined;
-        if (typeof asFn === 'function') return asFn(xs, ys);
-      } catch { /* fall through */ }
+      } catch {
+        /* fall through to JS */
+      }
     }
   }
-  return carlsonRCJS(xs, ys);
+  return js();
+}
+
+/** Dispatch RC(x, y) element-wise — Rust (gated) → AS managed → JS. */
+export function carlsonRCDispatch(xs: Float64Array, ys: Float64Array): Float64Array {
+  return multiArrayDispatch('carlson_rc_f64', [xs, ys], () => carlsonRCJS(xs, ys));
 }
 
 /** Dispatch RF(x, y, z) element-wise. */
-export function carlsonRFDispatch(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['carlson_rf_f64'] as RustRF3Fn | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
-          const zsAlloc = wasmLoader.allocateFloat64Array(zs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, zsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) return new Float64Array(outAlloc.array);
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(ysAlloc.ptr, true);
-            wasmLoader.release(zsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch { /* fall through */ }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['carlson_rf_f64_as'] as
-          ((xs: Float64Array, ys: Float64Array, zs: Float64Array) => Float64Array) | undefined;
-        if (typeof asFn === 'function') return asFn(xs, ys, zs);
-      } catch { /* fall through */ }
-    }
-  }
-  return carlsonRFJS(xs, ys, zs);
+export function carlsonRFDispatch(
+  xs: Float64Array,
+  ys: Float64Array,
+  zs: Float64Array
+): Float64Array {
+  return multiArrayDispatch('carlson_rf_f64', [xs, ys, zs], () => carlsonRFJS(xs, ys, zs));
 }
 
 /** Dispatch RD(x, y, z) element-wise. */
-export function carlsonRDDispatch(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['carlson_rd_f64'] as RustRF3Fn | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
-          const zsAlloc = wasmLoader.allocateFloat64Array(zs);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, zsAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) return new Float64Array(outAlloc.array);
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(ysAlloc.ptr, true);
-            wasmLoader.release(zsAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch { /* fall through */ }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['carlson_rd_f64_as'] as
-          ((xs: Float64Array, ys: Float64Array, zs: Float64Array) => Float64Array) | undefined;
-        if (typeof asFn === 'function') return asFn(xs, ys, zs);
-      } catch { /* fall through */ }
-    }
-  }
-  return carlsonRDJS(xs, ys, zs);
+export function carlsonRDDispatch(
+  xs: Float64Array,
+  ys: Float64Array,
+  zs: Float64Array
+): Float64Array {
+  return multiArrayDispatch('carlson_rd_f64', [xs, ys, zs], () => carlsonRDJS(xs, ys, zs));
 }
 
 /** Dispatch RJ(x, y, z, p) element-wise. */
-export function carlsonRJDispatch(xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array): Float64Array {
-  const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['carlson_rj_f64'] as RustRJ4Fn | undefined;
-        if (typeof rustFn === 'function') {
-          const xsAlloc = wasmLoader.allocateFloat64Array(xs);
-          const ysAlloc = wasmLoader.allocateFloat64Array(ys);
-          const zsAlloc = wasmLoader.allocateFloat64Array(zs);
-          const psAlloc = wasmLoader.allocateFloat64Array(ps);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(xsAlloc.ptr, ysAlloc.ptr, zsAlloc.ptr, psAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) return new Float64Array(outAlloc.array);
-          } finally {
-            wasmLoader.release(xsAlloc.ptr, true);
-            wasmLoader.release(ysAlloc.ptr, true);
-            wasmLoader.release(zsAlloc.ptr, true);
-            wasmLoader.release(psAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch { /* fall through */ }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['carlson_rj_f64_as'] as
-          ((xs: Float64Array, ys: Float64Array, zs: Float64Array, ps: Float64Array) => Float64Array) | undefined;
-        if (typeof asFn === 'function') return asFn(xs, ys, zs, ps);
-      } catch { /* fall through */ }
-    }
-  }
-  return carlsonRJJS(xs, ys, zs, ps);
+export function carlsonRJDispatch(
+  xs: Float64Array,
+  ys: Float64Array,
+  zs: Float64Array,
+  ps: Float64Array
+): Float64Array {
+  return multiArrayDispatch('carlson_rj_f64', [xs, ys, zs, ps], () => carlsonRJJS(xs, ys, zs, ps));
 }
 
 /** Dispatch F(φ, m) element-wise. */
 export function ellipticFIncompleteDispatch(phis: Float64Array, ms: Float64Array): Float64Array {
-  const n = phis.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_f_incomplete_f64'] as RustIncomplete2Fn | undefined;
-        if (typeof rustFn === 'function') {
-          const phisAlloc = wasmLoader.allocateFloat64Array(phis);
-          const msAlloc = wasmLoader.allocateFloat64Array(ms);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(phisAlloc.ptr, msAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) return new Float64Array(outAlloc.array);
-          } finally {
-            wasmLoader.release(phisAlloc.ptr, true);
-            wasmLoader.release(msAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch { /* fall through */ }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_f_incomplete_f64_as'] as
-          ((phis: Float64Array, ms: Float64Array) => Float64Array) | undefined;
-        if (typeof asFn === 'function') return asFn(phis, ms);
-      } catch { /* fall through */ }
-    }
-  }
-  return ellipticFIncompleteJS(phis, ms);
+  return multiArrayDispatch('elliptic_f_incomplete_f64', [phis, ms], () =>
+    ellipticFIncompleteJS(phis, ms)
+  );
 }
 
 /** Dispatch E(φ, m) (incomplete) element-wise. */
 export function ellipticEIncompleteDispatch(phis: Float64Array, ms: Float64Array): Float64Array {
-  const n = phis.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_e_incomplete_f64'] as RustIncomplete2Fn | undefined;
-        if (typeof rustFn === 'function') {
-          const phisAlloc = wasmLoader.allocateFloat64Array(phis);
-          const msAlloc = wasmLoader.allocateFloat64Array(ms);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(phisAlloc.ptr, msAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) return new Float64Array(outAlloc.array);
-          } finally {
-            wasmLoader.release(phisAlloc.ptr, true);
-            wasmLoader.release(msAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch { /* fall through */ }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_e_incomplete_f64_as'] as
-          ((phis: Float64Array, ms: Float64Array) => Float64Array) | undefined;
-        if (typeof asFn === 'function') return asFn(phis, ms);
-      } catch { /* fall through */ }
-    }
-  }
-  return ellipticEIncompleteJS(phis, ms);
+  return multiArrayDispatch('elliptic_e_incomplete_f64', [phis, ms], () =>
+    ellipticEIncompleteJS(phis, ms)
+  );
 }
 
 /** Dispatch Π(n, φ, m) element-wise. */
-export function ellipticPiIncompleteDispatch(ns: Float64Array, phis: Float64Array, ms: Float64Array): Float64Array {
-  const n = ns.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_pi_incomplete_f64'] as RustPi3Fn | undefined;
-        if (typeof rustFn === 'function') {
-          const nsAlloc = wasmLoader.allocateFloat64Array(ns);
-          const phisAlloc = wasmLoader.allocateFloat64Array(phis);
-          const msAlloc = wasmLoader.allocateFloat64Array(ms);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(nsAlloc.ptr, phisAlloc.ptr, msAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) return new Float64Array(outAlloc.array);
-          } finally {
-            wasmLoader.release(nsAlloc.ptr, true);
-            wasmLoader.release(phisAlloc.ptr, true);
-            wasmLoader.release(msAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch { /* fall through */ }
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_pi_incomplete_f64_as'] as
-          ((ns: Float64Array, phis: Float64Array, ms: Float64Array) => Float64Array) | undefined;
-        if (typeof asFn === 'function') return asFn(ns, phis, ms);
-      } catch { /* fall through */ }
-    }
-  }
-  return ellipticPiIncompleteJS(ns, phis, ms);
+export function ellipticPiIncompleteDispatch(
+  ns: Float64Array,
+  phis: Float64Array,
+  ms: Float64Array
+): Float64Array {
+  return multiArrayDispatch('elliptic_pi_incomplete_f64', [ns, phis, ms], () =>
+    ellipticPiIncompleteJS(ns, phis, ms)
+  );
 }
 
 export function resetCarlsonWasm(): void {
@@ -1140,91 +820,19 @@ export function ellipticEJS(ms: Float64Array): Float64Array {
   return out;
 }
 
-/** Dispatch K(m) over an array — Rust WASM above threshold, then AS, then JS. */
-export function ellipticKDispatch(ms: Float64Array): Float64Array {
-  const n = ms.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      // Probe Rust (pointer-style)
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_k_f64'] as
-          | RustJ01Fn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const msAlloc = wasmLoader.allocateFloat64Array(ms);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(msAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(msAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      // Probe AS (typed-array style)
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_k_f64_as'] as
-          | ((ms: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') {
-          return asFn(ms);
-        }
-      } catch {
-        // fall through to JS
-      }
-    }
-  }
-  return ellipticKJS(ms);
-}
+/** Dispatch K(m) over an array — Rust (gated) → AS managed → JS. */
+export const ellipticKDispatch = makeUnaryArrayDispatch({
+  threshold: WASM_SPECIAL_THRESHOLD,
+  name: 'elliptic_k_f64',
+  js: ellipticKJS,
+});
 
-/** Dispatch E(m) over an array — Rust WASM above threshold, then AS, then JS. */
-export function ellipticEDispatch(ms: Float64Array): Float64Array {
-  const n = ms.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      // Probe Rust (pointer-style)
-      try {
-        const rustFn = (wasm as unknown as Record<string, unknown>)['elliptic_e_f64'] as
-          | RustJ01Fn
-          | undefined;
-        if (typeof rustFn === 'function') {
-          const msAlloc = wasmLoader.allocateFloat64Array(ms);
-          const outAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-          try {
-            const written = rustFn(msAlloc.ptr, n, outAlloc.ptr);
-            if (written === n) {
-              return new Float64Array(outAlloc.array);
-            }
-          } finally {
-            wasmLoader.release(msAlloc.ptr, true);
-            wasmLoader.release(outAlloc.ptr, true);
-          }
-        }
-      } catch {
-        // fall through to AS probe
-      }
-      // Probe AS (typed-array style)
-      try {
-        const asFn = (wasm as unknown as Record<string, unknown>)['elliptic_e_f64_as'] as
-          | ((ms: Float64Array) => Float64Array)
-          | undefined;
-        if (typeof asFn === 'function') {
-          return asFn(ms);
-        }
-      } catch {
-        // fall through to JS
-      }
-    }
-  }
-  return ellipticEJS(ms);
-}
+/** Dispatch E(m) over an array — Rust (gated) → AS managed → JS. */
+export const ellipticEDispatch = makeUnaryArrayDispatch({
+  threshold: WASM_SPECIAL_THRESHOLD,
+  name: 'elliptic_e_f64',
+  js: ellipticEJS,
+});
 
 // ---------------------------------------------------------------------------
 // Internal scalar implementations (mirrors typed/special.ts besselXScalar)
@@ -1263,7 +871,9 @@ function _besselHankel(nu: number, x: number, wantY: boolean): number {
   }
   const chi = x - (nu * 0.5 + 0.25) * Math.PI;
   const amp = Math.sqrt(2.0 / (Math.PI * x));
-  return wantY ? amp * (P * Math.sin(chi) + Q * Math.cos(chi)) : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
+  return wantY
+    ? amp * (P * Math.sin(chi) + Q * Math.cos(chi))
+    : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
 }
 
 function _besselJ0Series(x: number): number {
@@ -1319,7 +929,9 @@ function _besselY1Series(x: number): number {
     s += (hk + hk1) * v;
     if (k > 2 && Math.abs((hk + hk1) * v) <= Math.abs(s) * 1e-17) break;
   }
-  return _SF_2_PI * (Math.log(0.5 * x) + _SF_GAMMA) * _besselJ1Series(x) - _SF_2_PI / x - _SF_1_PI * s;
+  return (
+    _SF_2_PI * (Math.log(0.5 * x) + _SF_GAMMA) * _besselJ1Series(x) - _SF_2_PI / x - _SF_1_PI * s
+  );
 }
 
 function _besselJ0(x: number): number {
