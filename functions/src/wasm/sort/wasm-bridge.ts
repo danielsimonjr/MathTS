@@ -16,6 +16,14 @@
  */
 
 import { wasmLoader } from '../WasmLoader.js';
+import {
+  getWasm,
+  isRustWasm,
+  isAsWasm,
+  withAsF64,
+  asReadReturnedF64,
+  type RawWasm,
+} from '../bridges/common.js';
 
 // ---------------------------------------------------------------------------
 // Threshold
@@ -23,18 +31,6 @@ import { wasmLoader } from '../WasmLoader.js';
 
 /** Minimum element count for WASM acceleration. */
 export const WASM_SORT_THRESHOLD = 16384;
-
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
-function getWasm() {
-  try {
-    return wasmLoader.getModule();
-  } catch {
-    return null;
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Pure-JS fallback implementations
@@ -95,35 +91,37 @@ export function sortF64Dispatch(data: Float64Array): Float64Array {
   const n = data.length;
 
   if (n >= WASM_SORT_THRESHOLD) {
-    const wasm = getWasm();
+    const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm) {
-      // --- Rust pointer-ABI ---
-      const rustFn = (wasm as unknown as Record<string, unknown>)['sort_f64'];
-      if (typeof rustFn === 'function') {
-        try {
-          const alloc = wasmLoader.allocateFloat64Array(data);
-          try {
-            const ret = (rustFn as (ptr: number, n: number) => number)(alloc.ptr, n);
-            if (ret >= 0) {
-              data.set(alloc.array);
-              return data;
+      try {
+        if (isRustWasm(wasm)) {
+          // Rust pointer ABI: sort_f64(ptr, n) sorts in place.
+          const rustFn = wasm['sort_f64'] as ((ptr: number, n: number) => number) | undefined;
+          if (typeof rustFn === 'function') {
+            const alloc = wasmLoader.allocateFloat64Array(data);
+            try {
+              const ret = rustFn(alloc.ptr, n);
+              if (ret >= 0) {
+                data.set(alloc.array);
+                return data;
+              }
+            } finally {
+              wasmLoader.free(alloc.ptr);
             }
-          } finally {
-            wasmLoader.free(alloc.ptr);
           }
-        } catch {
-          // fall through
+        } else if (isAsWasm(wasm)) {
+          // AS managed ABI: sort_f64(data) sorts in place and returns the array.
+          // Value-sort is bit-identical to JS regardless of stability.
+          const sorted = withAsF64(wasm, [data], (mod, [h]) =>
+            asReadReturnedF64(mod, (mod['sort_f64'] as (d: number) => number)(h))
+          );
+          if (sorted && sorted.length === n) {
+            data.set(sorted);
+            return data;
+          }
         }
-      }
-      // --- AS typed-array ABI ---
-      const asFn = (wasm as unknown as Record<string, unknown>)['sort_f64'];
-      if (typeof asFn === 'function') {
-        try {
-          (asFn as (d: Float64Array) => Float64Array)(data);
-          return data;
-        } catch {
-          // fall through
-        }
+      } catch {
+        // fall through
       }
     }
   }
@@ -139,36 +137,27 @@ export function argsortF64Dispatch(data: Float64Array): Int32Array {
   const n = data.length;
 
   if (n >= WASM_SORT_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      // --- Rust pointer-ABI ---
-      const rustFn = (wasm as unknown as Record<string, unknown>)['argsort_f64'];
+    const wasm = getWasm() as unknown as RawWasm | null;
+    // NOTE: only the Rust pointer kernel is used. The AS argsort_f64 kernel is
+    // NOT routed to — it is an UNSTABLE sort, so for tied values it returns a
+    // different (still valid) permutation than the JS stable reference (verified
+    // Phase 3b: 0 diffs on distinct input, ~all-diff on duplicate-heavy input).
+    // Under the AS binary this falls through to the JS stable argsort.
+    if (wasm && isRustWasm(wasm)) {
+      const rustFn = wasm['argsort_f64'] as
+        | ((dataPtr: number, n: number, outPtr: number) => number)
+        | undefined;
       if (typeof rustFn === 'function') {
         try {
           const inAlloc = wasmLoader.allocateFloat64Array(data);
           const outAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
           try {
-            const ret = (rustFn as (dataPtr: number, n: number, outPtr: number) => number)(
-              inAlloc.ptr,
-              n,
-              outAlloc.ptr
-            );
-            if (ret >= 0) {
-              return new Int32Array(outAlloc.array);
-            }
+            const ret = rustFn(inAlloc.ptr, n, outAlloc.ptr);
+            if (ret >= 0) return new Int32Array(outAlloc.array);
           } finally {
             wasmLoader.free(inAlloc.ptr);
             wasmLoader.free(outAlloc.ptr);
           }
-        } catch {
-          // fall through
-        }
-      }
-      // --- AS typed-array ABI ---
-      const asFn = (wasm as unknown as Record<string, unknown>)['argsort_f64'];
-      if (typeof asFn === 'function') {
-        try {
-          return (asFn as (d: Float64Array) => Int32Array)(data);
         } catch {
           // fall through
         }
@@ -187,36 +176,25 @@ export function rankF64Dispatch(data: Float64Array): Int32Array {
   const n = data.length;
 
   if (n >= WASM_SORT_THRESHOLD) {
-    const wasm = getWasm();
-    if (wasm) {
-      // --- Rust pointer-ABI ---
-      const rustFn = (wasm as unknown as Record<string, unknown>)['rank_f64'];
+    const wasm = getWasm() as unknown as RawWasm | null;
+    // Only the Rust pointer kernel is used; the AS rank_f64 kernel derives from
+    // the unstable AS sort and so disagrees with the JS stable reference on ties
+    // (verified Phase 3b). Under the AS binary this falls through to JS.
+    if (wasm && isRustWasm(wasm)) {
+      const rustFn = wasm['rank_f64'] as
+        | ((dataPtr: number, n: number, outPtr: number) => number)
+        | undefined;
       if (typeof rustFn === 'function') {
         try {
           const inAlloc = wasmLoader.allocateFloat64Array(data);
           const outAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
           try {
-            const ret = (rustFn as (dataPtr: number, n: number, outPtr: number) => number)(
-              inAlloc.ptr,
-              n,
-              outAlloc.ptr
-            );
-            if (ret >= 0) {
-              return new Int32Array(outAlloc.array);
-            }
+            const ret = rustFn(inAlloc.ptr, n, outAlloc.ptr);
+            if (ret >= 0) return new Int32Array(outAlloc.array);
           } finally {
             wasmLoader.free(inAlloc.ptr);
             wasmLoader.free(outAlloc.ptr);
           }
-        } catch {
-          // fall through
-        }
-      }
-      // --- AS typed-array ABI ---
-      const asFn = (wasm as unknown as Record<string, unknown>)['rank_f64'];
-      if (typeof asFn === 'function') {
-        try {
-          return (asFn as (d: Float64Array) => Int32Array)(data);
         } catch {
           // fall through
         }

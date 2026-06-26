@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed / Changed (2026-06-26) — Rust→AS migration Phase 3b: repoint functions WASM bridges to AS
+
+- **Fixed the Phase-3a corruption.** With the loader defaulting to the AS binary,
+  the `poly`, `sort`, and `signal` bridges probed the **Rust pointer** export
+  name and called the AS **managed** kernel (header ABI) with pointer args —
+  silently producing all-zeros / NaN / unsorted output for inputs ≥ threshold.
+  Every repointed bridge now gates the Rust pointer path behind `isRustWasm()`
+  and, under the AS binary, marshals through the managed ABI (pinned buffer +
+  header). The JS fallback is always preserved.
+- **New AS managed-ABI marshalling in `bridges/common.ts`** (dup-audit Cluster
+  D): `withAsF64` / `withAsI32` runners, `asReadReturnedF64` / `asReadReturnedI32`,
+  `runRustUnaryF64`, and a `makeUnaryArrayDispatch` factory — adopted across the
+  managed bridges to remove the duplicated alloc/try/release/probe boilerplate.
+- **Repointed to AS managed kernels (tol-/bit-match JS verified):** `special`
+  (Bessel J/Y incl. order-n, lgamma, complete elliptic K/E, Carlson R-forms,
+  incomplete elliptic F/E/Π — all ≤1e-12), `poly` (mul / divmod / resultant /
+  discriminant), `interpolation` (tridiag-solve, divided-difference), `sort`
+  (`sort_f64` only — value-sort is bit-identical), `signal`
+  (apply_window / welch / bartlett / goertzel / chirp-Z), `bitwise`
+  (and/or/xor/not + per-element shifts, `*_i32_array`).
+- **Left on the JS fallback (AS kernel does NOT match JS — honest de-scope):**
+  - **Airy Ai/Bi** — AS asymptotic kernels diverge ~1e-6 from JS for |x|>5.
+  - **poly_fit / cheb_fit / legendre_fit** — the AS QR/normal-equations solver
+    returns near-zero garbage where JS recovers the coefficients exactly.
+  - **argsort_f64 / rank_f64** — the AS sort is **unstable**, so for tied values
+    it returns a different (still valid) permutation than the JS stable
+    reference. Distinct inputs bit-match; duplicate-heavy inputs do not.
+  - The Rust pointer ABI for all of the above is retained (gated) for
+    `MATHTS_WASM_BACKEND=rust`.
+- **Sort interim note (revisit before Phase 5):** the repointed AS `sort_f64` is
+  ~2× slower than Rust on random input and degrades toward O(n²) on
+  duplicate-heavy input (naive pivot). This is the accepted Phase-1
+  de-escalation. Before Phase 5 removes the Rust sort, `assembly/src` needs an
+  introsort / better-pivot (and a stable argsort/rank) so the AS path is both
+  fast and a drop-in for the JS-stable argsort/rank.
+- New per-bridge AS-execution TDD gates (`{poly,special,sort,signal,
+  interpolation,bitwise}-as-wasm.test.ts`) load the AS binary and prove each
+  dispatch executes on the AS kernel (call-counter via a writable module clone,
+  since wasm exports are frozen) and matches the JS reference — the existing
+  bridge tests pin the Rust binary by path and so false-green the AS repoint.
+
 ### Changed (2026-06-26) — Rust→AS migration Phase 3a: functions loads AS + elementwise repoint
 
 - **`functions` WASM loader now defaults to the AssemblyScript binary**
