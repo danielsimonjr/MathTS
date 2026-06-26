@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-06-26) — Rust→AS WASM-parity guard (`--check-wasm-parity`)
+
+- `tools/create-dependency-graph` gained a `--check-wasm-parity` mode (Phase 0 /
+  Task 0.1 of the Rust→AssemblyScript migration). It diffs the Rust kernels the
+  `functions` bridges actually consume against the AS binary's export table and
+  fails (exit 1) if the gap set drifts from the committed `wasm-parity.json`
+  snapshot — turning the migration eval's table into a regenerated guard that
+  catches hidden Rust-only consumers.
+  - New pure, unit-tested helpers: `readWasmExports` (parse-only export-table
+    read, refactored out of the runtime probe), `collectConsumedRustKernels`
+    (static bridge literals + `simd_${op}_array` expansion over
+    `WASM_ELEMENTWISE_OPS`, excluding `_as` probes and op-array pollution),
+    `computeParity`, and `buildRenameMap`.
+  - Emits `docs/Architecture/wasm-parity.{json,md}` (gap grouped by bridge +
+    rename mappings) alongside the existing `wasm-pairing` artifact.
+  - **Grounded findings (corrected the eval):** 7 consuming bridges, not 6 —
+    `bitwise/wasm-bridge.ts` was missed by the eval (7 kernels, all covered in AS
+    under `*_i32_array` renames). **60 consumed Rust kernels, 45 covered (incl.
+    14 renames), authoring gap 15** — the 13 missing elementwise transcendentals
+    (`tan/atan/sinh/tanh/atanh/expm1/log1p/log2/log10/sec/csc/cot/erfc`) + 2
+    general-order bessel (`bessel_j_f64`/`bessel_y_f64`). The 2 poly "renames"
+    (`poly_resultant_f64`→`resultant`, `poly_discriminant_f64`→`discriminant`)
+    are covered-via-rename, so they are not part of the authoring gap — which is
+    why the measured gap is 15, not the eval's pre-counted 17.
+
 ### Added (2026-06-25) — WASM acceleration tripled (3-tier gap-fill)
 
 - Effective-wasm coverage of the typed API went **6 → 18** of 218 functions (39

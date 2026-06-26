@@ -125,6 +125,7 @@ interface CLIOptions {
   root: string;
   includeTests: boolean;
   all: boolean;
+  checkWasmParity: boolean;
 }
 
 // Constants - support CLI argument or current working directory for portability
@@ -134,6 +135,7 @@ function parseCliOptions(): CLIOptions {
     root: process.cwd(),
     includeTests: false,
     all: false,
+    checkWasmParity: false,
   };
 
   for (const arg of args) {
@@ -143,6 +145,8 @@ function parseCliOptions(): CLIOptions {
       options.includeTests = true;
     } else if (arg === '--all' || arg === '-a') {
       options.all = true;
+    } else if (arg === '--check-wasm-parity') {
+      options.checkWasmParity = true;
     } else if (arg === '--help' || arg === '-h') {
       console.log(`
 Dependency Graph Generator
@@ -155,6 +159,9 @@ Options:
   --include-tests    Include test files in dependency analysis
   -t                 Short form of --include-tests
   --all, -a          Include dormant/unreachable files (monorepo mode)
+  --check-wasm-parity  Recompute the Rust→AS consumed-kernel gap and fail (exit 1)
+                       if it drifts from the committed wasm-parity.json snapshot.
+                       Skips the full graph scan. (Phase 0 migration guard.)
   --help, -h         Show this help
 
 Monorepo Support:
@@ -2291,12 +2298,14 @@ interface WasmPairing {
  *   (b) whether each dispatch's bridge file makes real AS-allocator call sites
  *       (call syntax `\.allocateFloat64Array\(`, so comments don't false-positive).
  */
-function analyzeWasmRuntime(rootDir: string): {
-  bundledBackend: 'rust' | 'assemblyscript' | 'unknown';
-  dispatchWasm: Map<string, boolean | null>;
-} {
-  const dispatchWasm = new Map<string, boolean | null>();
-
+/**
+ * Read a `.wasm` module's export-name table without instantiating it
+ * (`WebAssembly.Module.exports` is a parse-only static read — no memory, no
+ * imports, no start function). Returns the set of exported names, or `null` if
+ * the file is missing or can't be parsed (e.g. dist not built). Reused by the
+ * runtime-effectiveness probe and the Rust→AS parity check.
+ */
+function readWasmExports(path: string): Set<string> | null {
   // Reference the WebAssembly global via a typed shim — the tool's tsconfig
   // doesn't include the DOM lib, so the global `WebAssembly` name isn't in scope.
   interface WasmModuleCtor {
@@ -2305,23 +2314,31 @@ function analyzeWasmRuntime(rootDir: string): {
   }
   const WAModule = (globalThis as unknown as { WebAssembly?: { Module: WasmModuleCtor } })
     .WebAssembly?.Module;
-
-  let bundledHasNew: boolean | null = null;
-  const wasmPath = join(rootDir, 'functions', 'dist', 'wasm', 'mathts.wasm');
-  if (WAModule && existsSync(wasmPath)) {
-    try {
-      const mod = new WAModule(readFileSync(wasmPath));
-      bundledHasNew = WAModule.exports(mod).some((e) => e.name === '__new');
-    } catch {
-      bundledHasNew = null;
-    }
+  if (!WAModule || !existsSync(path)) return null;
+  try {
+    const mod = new WAModule(readFileSync(path));
+    return new Set(WAModule.exports(mod).map((e) => e.name));
+  } catch {
+    return null;
   }
+}
+
+function analyzeWasmRuntime(rootDir: string): {
+  bundledBackend: 'rust' | 'assemblyscript' | 'unknown';
+  dispatchWasm: Map<string, boolean | null>;
+} {
+  const dispatchWasm = new Map<string, boolean | null>();
+
+  const wasmPath = join(rootDir, 'functions', 'dist', 'wasm', 'mathts.wasm');
+  const exports = readWasmExports(wasmPath);
+  const bundledHasNew: boolean | null = exports === null ? null : exports.has('__new');
   const bundledBackend =
     bundledHasNew === null ? 'unknown' : bundledHasNew ? 'assemblyscript' : 'rust';
 
   const wasmDir = join(rootDir, 'functions', 'src', 'wasm');
   if (!existsSync(wasmDir)) return { bundledBackend, dispatchWasm };
-  const asAllocRe = /\.(?:allocateFloat64Array|allocateFloat64ArrayEmpty|allocateInt32Array|allocateInt32ArrayEmpty)\(/;
+  const asAllocRe =
+    /\.(?:allocateFloat64Array|allocateFloat64ArrayEmpty|allocateInt32Array|allocateInt32ArrayEmpty)\(/;
   const defRe = /\b(?:function|const)\s+(\w+Dispatch)\b/g;
   const walk = (dir: string): void => {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -2344,10 +2361,7 @@ function analyzeWasmRuntime(rootDir: string): {
 }
 
 function analyzeWasmPairing(rootDir: string): WasmPairing | null {
-  const candidates = [
-    join(rootDir, 'functions', 'src', 'typed'),
-    join(rootDir, 'src', 'typed'),
-  ];
+  const candidates = [join(rootDir, 'functions', 'src', 'typed'), join(rootDir, 'src', 'typed')];
   const typedDir = candidates.find((d) => existsSync(d));
   if (!typedDir) return null;
 
@@ -2478,11 +2492,354 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   return md;
 }
 
+// ============================================================================
+// Rust → AssemblyScript WASM-parity check (docs/roadmap/RUST_TO_AS_MIGRATION_*).
+//
+// The `functions` package consumes a small subset of the Rust wasm kernels via
+// six bridges under functions/src/wasm/**. This section computes, from ground
+// truth (the bridge source + the two `.wasm` export tables), which consumed Rust
+// kernels the AssemblyScript binary (the migration target) already covers and
+// which still need authoring. `--check-wasm-parity` fails CI if that gap set
+// drifts from the committed snapshot, turning the eval's table into a guard.
+// ============================================================================
+
+/** Default locations of the two binaries, relative to repo root. */
+const RUST_WASM_REL = join('functions', 'dist', 'wasm', 'mathts.wasm');
+const AS_WASM_REL = join('matrix', 'dist', 'wasm', 'mathts-as.wasm');
+
+/** Strip block + line comments so markdown code-spans / prose in JSDoc don't get
+ * mis-read as kernel string literals. Kernel names never contain `//` or `/*`. */
+function stripComments(src: string): string {
+  return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+}
+
+/** Extract single/double-quoted identifier literals (the form kernel names are
+ * referenced as in the bridges, e.g. `wasm['bessel_j0_f64']` or the plain-string
+ * fit-kernel args). Backtick template literals (`simd_${op}_array`) are handled
+ * separately via op expansion, so they are intentionally not matched here. */
+function extractStringIdentifiers(src: string): string[] {
+  const out: string[] = [];
+  const re = /(['"])([A-Za-z_][A-Za-z0-9_]*)\1/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src)) !== null) out.push(m[2]);
+  return out;
+}
+
+/** Parse the `WASM_ELEMENTWISE_OPS` const array from the elementwise bridge
+ * source (comment-stripped) into its list of op names. */
+function parseElementwiseOps(elementwiseSrc: string): string[] {
+  const clean = stripComments(elementwiseSrc);
+  const m = clean.match(/WASM_ELEMENTWISE_OPS\s*=\s*\[([\s\S]*?)\]/);
+  if (!m) return [];
+  return extractStringIdentifiers(m[1]);
+}
+
+/**
+ * Per-bridge map of consumed Rust kernels. For each `<bridge>/wasm-bridge.ts`
+ * under `wasmSrcDir`, collect the quoted-identifier literals; for the elementwise
+ * bridge additionally expand `simd_${op}_array` over `WASM_ELEMENTWISE_OPS`.
+ * Then drop `_as` AS-probe names and keep only names that are *real* Rust exports
+ * (so op-name literals like `'abs'`/`'exp'` and prose strings don't pollute).
+ */
+function collectConsumedByBridge(
+  wasmSrcDir: string,
+  rustExports: Set<string>
+): Map<string, Set<string>> {
+  const byBridge = new Map<string, Set<string>>();
+  if (!existsSync(wasmSrcDir)) return byBridge;
+
+  for (const entry of readdirSync(wasmSrcDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const bridgePath = join(wasmSrcDir, entry.name, 'wasm-bridge.ts');
+    if (!existsSync(bridgePath)) continue;
+
+    const raw = readFileSync(bridgePath, 'utf-8');
+    // Strip comments, then drop the `WASM_ELEMENTWISE_OPS = [...]` array literal:
+    // its elements are op *names* (the input to the simd expansion below), not
+    // kernel calls. Several of them ('abs','exp','log',…) are themselves real Rust
+    // scalar exports, so leaving them in would wrongly count them as consumed.
+    const clean = stripComments(raw).replace(/WASM_ELEMENTWISE_OPS\s*=\s*\[[\s\S]*?\]/, '');
+    const candidates = new Set<string>(extractStringIdentifiers(clean));
+
+    // Dynamic kernel names: `simd_${op}_array` expanded over the op const.
+    if (/simd_\$\{[^}]+\}_array/.test(clean)) {
+      for (const op of parseElementwiseOps(raw)) candidates.add(`simd_${op}_array`);
+    }
+
+    const kept = new Set<string>();
+    for (const name of candidates) {
+      if (name.endsWith('_as')) continue; // AS probe, not a Rust kernel
+      if (rustExports.has(name)) kept.add(name); // real Rust export referenced as a kernel
+    }
+    if (kept.size > 0) byBridge.set(entry.name, kept);
+  }
+  return byBridge;
+}
+
+/** Flat union of {@link collectConsumedByBridge} — the consumed-Rust-kernel set. */
+function collectConsumedRustKernels(wasmSrcDir: string, rustExports: Set<string>): Set<string> {
+  const all = new Set<string>();
+  for (const set of collectConsumedByBridge(wasmSrcDir, rustExports).values()) {
+    for (const name of set) all.add(name);
+  }
+  return all;
+}
+
+/** Known Rust-kernel-name → AS-export-name renames (the AS binary exposes the
+ * same functionality under a different name). `simd_<op>_array` → `array_<op>`
+ * is the AS elementwise convention; poly resultant/discriminant dropped the
+ * `poly_`/`_f64` affixes. */
+function buildRenameMap(elementwiseOps: string[]): Record<string, string> {
+  const map: Record<string, string> = {
+    poly_resultant_f64: 'resultant',
+    poly_discriminant_f64: 'discriminant',
+    // Bitwise: Rust camelCase → AS `*_i32_array`, paired explicitly in
+    // functions/src/wasm/bitwise/wasm-bridge.ts (BINARY_OPS / UNARY_OPS).
+    bitAndArray: 'bitAnd_i32_array',
+    bitOrArray: 'bitOr_i32_array',
+    bitXorArray: 'bitXor_i32_array',
+    bitNotArray: 'bitNot_i32_array',
+    leftShiftArrayPerElement: 'leftShift_i32_array',
+    rightArithShiftArrayPerElement: 'rightArithShift_i32_array',
+    rightLogShiftArrayPerElement: 'rightLogShift_i32_array',
+  };
+  for (const op of elementwiseOps) map[`simd_${op}_array`] = `array_${op}`;
+  return map;
+}
+
+interface ParityResult {
+  /** Consumed kernels present in AS (directly or via rename), sorted. */
+  covered: string[];
+  /** Consumed kernels absent from AS under any known name, sorted. */
+  gap: string[];
+  /** Subset of `covered` matched only via the rename map: consumed → AS name. */
+  renamed: Record<string, string>;
+}
+
+/**
+ * A consumed kernel is "covered" if its own name OR its mapped AS name is in the
+ * AS export table. Direct hits take precedence — a kernel covered both directly
+ * and by a rename is reported as a plain cover, not a rename.
+ */
+function computeParity(
+  consumed: Set<string>,
+  asExports: Set<string>,
+  renameMap: Record<string, string>
+): ParityResult {
+  const covered: string[] = [];
+  const gap: string[] = [];
+  const renamed: Record<string, string> = {};
+
+  for (const name of consumed) {
+    if (asExports.has(name)) {
+      covered.push(name);
+    } else if (renameMap[name] && asExports.has(renameMap[name])) {
+      covered.push(name);
+      renamed[name] = renameMap[name];
+    } else {
+      gap.push(name);
+    }
+  }
+  covered.sort();
+  gap.sort();
+  return { covered, gap, renamed };
+}
+
+interface WasmParity {
+  generated: string;
+  rustWasm: string;
+  asWasm: string;
+  rustExportCount: number;
+  asExportCount: number;
+  consumedCount: number;
+  coveredCount: number;
+  gapCount: number;
+  consumed: string[];
+  covered: string[];
+  gap: string[];
+  renamed: Record<string, string>;
+  byBridge: Record<string, { consumed: string[]; gap: string[] }>;
+}
+
+/**
+ * Orchestrate the parity computation from the two on-disk `.wasm` tables and the
+ * bridge sources. Returns `null` if either binary can't be read (dist not built)
+ * — callers decide whether that is a skip (generation) or an error (check mode).
+ */
+function computeWasmParity(rootDir: string): WasmParity | null {
+  const rustWasm = join(rootDir, RUST_WASM_REL);
+  const asWasm = join(rootDir, AS_WASM_REL);
+  const rustExports = readWasmExports(rustWasm);
+  const asExports = readWasmExports(asWasm);
+  if (!rustExports || !asExports) return null;
+
+  const wasmSrcDir = join(rootDir, 'functions', 'src', 'wasm');
+  const elementwiseBridge = join(wasmSrcDir, 'elementwise', 'wasm-bridge.ts');
+  const elementwiseOps = existsSync(elementwiseBridge)
+    ? parseElementwiseOps(readFileSync(elementwiseBridge, 'utf-8'))
+    : [];
+  const renameMap = buildRenameMap(elementwiseOps);
+
+  const byBridgeSets = collectConsumedByBridge(wasmSrcDir, rustExports);
+  const consumed = new Set<string>();
+  for (const set of byBridgeSets.values()) for (const n of set) consumed.add(n);
+
+  const parity = computeParity(consumed, asExports, renameMap);
+  const gapSet = new Set(parity.gap);
+
+  const byBridge: Record<string, { consumed: string[]; gap: string[] }> = {};
+  for (const [bridge, set] of byBridgeSets) {
+    const names = Array.from(set).sort();
+    byBridge[bridge] = {
+      consumed: names,
+      gap: names.filter((n) => gapSet.has(n)),
+    };
+  }
+
+  return {
+    generated: new Date().toISOString().split('T')[0],
+    rustWasm: RUST_WASM_REL.replace(/\\/g, '/'),
+    asWasm: AS_WASM_REL.replace(/\\/g, '/'),
+    rustExportCount: rustExports.size,
+    asExportCount: asExports.size,
+    consumedCount: consumed.size,
+    coveredCount: parity.covered.length,
+    gapCount: parity.gap.length,
+    consumed: Array.from(consumed).sort(),
+    covered: parity.covered,
+    gap: parity.gap,
+    renamed: parity.renamed,
+    byBridge,
+  };
+}
+
+function generateWasmParityMarkdown(p: WasmParity): string {
+  let md = '# Rust → AssemblyScript WASM Parity\n\n';
+  md += `**Generated**: ${p.generated} (by tools/create-dependency-graph)\n\n`;
+  md += `Grounded diff of the Rust kernels the \`functions\` bridges actually consume `;
+  md += `against the AssemblyScript binary's export table (the migration target). `;
+  md += `Sources: Rust \`${p.rustWasm}\` (${p.rustExportCount} exports), AS \`${p.asWasm}\` `;
+  md += `(${p.asExportCount} exports). Regenerate / guard with `;
+  md += `\`npx tsx tools/create-dependency-graph/create-dependency-graph.ts --check-wasm-parity\`.\n\n`;
+  md += `| Metric | Count |\n| --- | --: |\n`;
+  md += `| Consumed Rust kernels | ${p.consumedCount} |\n`;
+  md += `| Covered by AS (direct + rename) | ${p.coveredCount} |\n`;
+  md += `| Authoring gap (missing in AS) | ${p.gapCount} |\n\n`;
+
+  md += `## Gap — consumed Rust kernels missing from AS\n\n`;
+  if (p.gapCount === 0) {
+    md += `_None — AS covers every consumed Rust kernel._\n\n`;
+  } else {
+    md += `Grouped by consuming bridge (\`functions/src/wasm/<bridge>/wasm-bridge.ts\`):\n\n`;
+    md += `| Bridge | Missing AS kernels |\n| --- | --- |\n`;
+    for (const bridge of Object.keys(p.byBridge).sort()) {
+      const gap = p.byBridge[bridge].gap;
+      if (gap.length === 0) continue;
+      md += `| \`${bridge}\` | \`${gap.join('`, `')}\` |\n`;
+    }
+    md += `\n`;
+  }
+
+  md += `## Rename mappings used (consumed Rust name → AS export name)\n\n`;
+  const renames = Object.keys(p.renamed).sort();
+  if (renames.length === 0) {
+    md += `_None._\n\n`;
+  } else {
+    md += `| Consumed Rust kernel | AS export |\n| --- | --- |\n`;
+    for (const k of renames) md += `| \`${k}\` | \`${p.renamed[k]}\` |\n`;
+    md += `\n`;
+  }
+
+  md += `## Consumed kernels per bridge\n\n`;
+  md += `| Bridge | Consumed | Gap |\n| --- | --: | --: |\n`;
+  for (const bridge of Object.keys(p.byBridge).sort()) {
+    md += `| \`${bridge}\` | ${p.byBridge[bridge].consumed.length} | ${p.byBridge[bridge].gap.length} |\n`;
+  }
+  md += `\n> Note: a consumed kernel "covered via rename" already exists in AS under `;
+  md += `a different name (no authoring needed beyond an alias). The true *authoring* `;
+  md += `gap is the table above. See docs/roadmap/RUST_TO_AS_MIGRATION_PLAN.md (Phase 0/2).\n`;
+  return md;
+}
+
+/** Write the parity artifact (json + md) into OUTPUT_DIR. */
+function writeWasmParity(parity: WasmParity): void {
+  writeFileSync(join(OUTPUT_DIR, 'wasm-parity.json'), JSON.stringify(parity, null, 2) + '\n');
+  writeFileSync(join(OUTPUT_DIR, 'wasm-parity.md'), generateWasmParityMarkdown(parity));
+}
+
+/**
+ * `--check-wasm-parity`: recompute the gap and compare it to the committed
+ * `wasm-parity.json` snapshot. Exits 1 if the gap set changed (so CI catches a
+ * hidden Rust-only consumer or new AS coverage), 0 if unchanged.
+ */
+function runWasmParityCheck(rootDir: string): never {
+  const fresh = computeWasmParity(rootDir);
+  if (!fresh) {
+    console.error(
+      '✖ wasm-parity check: could not read one of the .wasm binaries ' +
+        `(${RUST_WASM_REL} / ${AS_WASM_REL}). Build wasm first.`
+    );
+    process.exit(2);
+  }
+
+  const snapshotPath = join(OUTPUT_DIR, 'wasm-parity.json');
+  if (!existsSync(snapshotPath)) {
+    console.error(
+      `✖ wasm-parity check: no committed snapshot at ${snapshotPath}. ` +
+        'Run the generator once (without --check-wasm-parity) and commit it.'
+    );
+    process.exit(2);
+  }
+
+  const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf-8')) as WasmParity;
+  const freshGap = new Set(fresh.gap);
+  const snapGap = new Set(snapshot.gap ?? []);
+  const added = fresh.gap.filter((n) => !snapGap.has(n)); // newly missing in AS
+  const removed = (snapshot.gap ?? []).filter((n) => !freshGap.has(n)); // newly covered
+
+  if (added.length === 0 && removed.length === 0) {
+    console.log(
+      `✔ wasm-parity: gap unchanged (${fresh.gapCount} missing of ` +
+        `${fresh.consumedCount} consumed). AS covers ${fresh.coveredCount}.`
+    );
+    process.exit(0);
+  }
+
+  console.error('✖ wasm-parity: gap set CHANGED vs committed wasm-parity.json');
+  if (added.length > 0) console.error(`  + now missing in AS (regression): ${added.join(', ')}`);
+  if (removed.length > 0)
+    console.error(`  - now covered by AS (update snapshot): ${removed.join(', ')}`);
+  console.error(
+    `  consumed ${snapshot.consumedCount}→${fresh.consumedCount}, ` +
+      `gap ${snapshot.gapCount}→${fresh.gapCount}. ` +
+      'Regenerate: npx tsx tools/create-dependency-graph/create-dependency-graph.ts'
+  );
+  process.exit(1);
+}
+
+export {
+  readWasmExports,
+  collectConsumedRustKernels,
+  collectConsumedByBridge,
+  computeParity,
+  computeWasmParity,
+  buildRenameMap,
+};
+export type { ParityResult, WasmParity };
+
 /**
  * Main function
  */
 async function main(): Promise<void> {
   const cliOptions = parseCliOptions();
+
+  // --check-wasm-parity is a focused guard: recompute the Rust→AS gap and diff it
+  // against the committed snapshot, skipping the heavy full-graph scan.
+  if (cliOptions.checkWasmParity) {
+    if (!existsSync(OUTPUT_DIR)) mkdirSync(OUTPUT_DIR, { recursive: true });
+    runWasmParityCheck(cliOptions.root); // never returns (process.exit)
+  }
+
   console.log('Scanning codebase for dependencies...');
   if (cliOptions.includeTests) {
     console.log('Test file analysis enabled');
@@ -2777,14 +3134,22 @@ async function main(): Promise<void> {
   // formerly hand-maintained docs/Architecture/WASM_ACCELERATION.md map).
   const wasmPairing = analyzeWasmPairing(ROOT_DIR);
   if (wasmPairing) {
-    writeFileSync(
-      join(OUTPUT_DIR, 'wasm-pairing.json'),
-      JSON.stringify(wasmPairing, null, 2)
-    );
+    writeFileSync(join(OUTPUT_DIR, 'wasm-pairing.json'), JSON.stringify(wasmPairing, null, 2));
     writeFileSync(join(OUTPUT_DIR, 'wasm-pairing.md'), generateWasmPairingMarkdown(wasmPairing));
     console.log(
       `Written: ${join(OUTPUT_DIR, 'wasm-pairing.md')} ` +
         `(${wasmPairing.acceleratedCount}/${wasmPairing.total} WASM-accelerated)`
+    );
+  }
+
+  // Rust → AS migration parity guard (docs/roadmap/RUST_TO_AS_MIGRATION_PLAN.md
+  // Phase 0). Emitted like the pairing artifact; --check-wasm-parity diffs it.
+  const wasmParity = computeWasmParity(ROOT_DIR);
+  if (wasmParity) {
+    writeWasmParity(wasmParity);
+    console.log(
+      `Written: ${join(OUTPUT_DIR, 'wasm-parity.md')} ` +
+        `(${wasmParity.gapCount} AS gap of ${wasmParity.consumedCount} consumed Rust kernels)`
     );
   }
 
@@ -2816,4 +3181,10 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(console.error);
+// Only run the generator when executed directly (e.g. `npx tsx … .ts` or the
+// compiled `dist/…js`). When imported by a unit test (parity.test.ts) this guard
+// keeps the heavy codebase scan from running, so the pure helpers below are
+// importable in isolation.
+if (require.main === module) {
+  main().catch(console.error);
+}
