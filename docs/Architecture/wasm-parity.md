@@ -2,52 +2,58 @@
 
 **Generated**: 2026-06-26 (by tools/create-dependency-graph)
 
-Grounded diff of the Rust kernels the `functions` bridges actually consume against the AssemblyScript binary's export table (the migration target). Sources: Rust `functions/dist/wasm/mathts.wasm` (1122 exports), AS `matrix/dist/wasm/mathts-as.wasm` (302 exports). Regenerate / guard with `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --check-wasm-parity`.
+Grounded diff of the Rust kernels the `functions` bridges actually consume against the AssemblyScript binary's export table (the migration target). Sources: Rust `functions/dist/wasm/mathts.wasm` (1122 exports), AS `matrix/dist/wasm/mathts-as.wasm` (324 exports). Regenerate / guard with `npx tsx tools/create-dependency-graph/create-dependency-graph.ts --check-wasm-parity`.
 
-| Metric                          | Count |
-| ------------------------------- | ----: |
-| Consumed Rust kernels           |    60 |
-| Covered by AS (direct + rename) |    45 |
-| Authoring gap (missing in AS)   |    15 |
+| Metric | Count |
+| --- | --: |
+| Consumed Rust kernels | 60 |
+| Covered by AS (direct + rename) | 60 |
+| Authoring gap (missing in AS) | 0 |
 
 ## Gap — consumed Rust kernels missing from AS
 
-Grouped by consuming bridge (`functions/src/wasm/<bridge>/wasm-bridge.ts`):
-
-| Bridge        | Missing AS kernels                                                                                                                                                                                                                                    |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `elementwise` | `simd_atan_array`, `simd_atanh_array`, `simd_cot_array`, `simd_csc_array`, `simd_erfc_array`, `simd_expm1_array`, `simd_log10_array`, `simd_log1p_array`, `simd_log2_array`, `simd_sec_array`, `simd_sinh_array`, `simd_tan_array`, `simd_tanh_array` |
-| `special`     | `bessel_j_f64`, `bessel_y_f64`                                                                                                                                                                                                                        |
+_None — AS covers every consumed Rust kernel._
 
 ## Rename mappings used (consumed Rust name → AS export name)
 
-| Consumed Rust kernel             | AS export                   |
-| -------------------------------- | --------------------------- |
-| `bitAndArray`                    | `bitAnd_i32_array`          |
-| `bitNotArray`                    | `bitNot_i32_array`          |
-| `bitOrArray`                     | `bitOr_i32_array`           |
-| `bitXorArray`                    | `bitXor_i32_array`          |
-| `leftShiftArrayPerElement`       | `leftShift_i32_array`       |
-| `poly_discriminant_f64`          | `discriminant`              |
-| `poly_resultant_f64`             | `resultant`                 |
+| Consumed Rust kernel | AS export |
+| --- | --- |
+| `bitAndArray` | `bitAnd_i32_array` |
+| `bitNotArray` | `bitNot_i32_array` |
+| `bitOrArray` | `bitOr_i32_array` |
+| `bitXorArray` | `bitXor_i32_array` |
+| `leftShiftArrayPerElement` | `leftShift_i32_array` |
 | `rightArithShiftArrayPerElement` | `rightArithShift_i32_array` |
-| `rightLogShiftArrayPerElement`   | `rightLogShift_i32_array`   |
-| `simd_abs_array`                 | `array_abs`                 |
-| `simd_cos_array`                 | `array_cos`                 |
-| `simd_exp_array`                 | `array_exp`                 |
-| `simd_log_array`                 | `array_log`                 |
-| `simd_sin_array`                 | `array_sin`                 |
+| `rightLogShiftArrayPerElement` | `rightLogShift_i32_array` |
+| `simd_abs_array` | `array_abs_ptr` |
+| `simd_atan_array` | `array_atan_ptr` |
+| `simd_atanh_array` | `array_atanh_ptr` |
+| `simd_cos_array` | `array_cos_ptr` |
+| `simd_cot_array` | `array_cot_ptr` |
+| `simd_csc_array` | `array_csc_ptr` |
+| `simd_erfc_array` | `array_erfc_ptr` |
+| `simd_exp_array` | `array_exp_ptr` |
+| `simd_expm1_array` | `array_expm1_ptr` |
+| `simd_log10_array` | `array_log10_ptr` |
+| `simd_log1p_array` | `array_log1p_ptr` |
+| `simd_log2_array` | `array_log2_ptr` |
+| `simd_log_array` | `array_log_ptr` |
+| `simd_sec_array` | `array_sec_ptr` |
+| `simd_sin_array` | `array_sin_ptr` |
+| `simd_sinh_array` | `array_sinh_ptr` |
+| `simd_tan_array` | `array_tan_ptr` |
+| `simd_tanh_array` | `array_tanh_ptr` |
 
 ## Consumed kernels per bridge
 
-| Bridge          | Consumed | Gap |
-| --------------- | -------: | --: |
-| `bitwise`       |        7 |   0 |
-| `elementwise`   |       18 |  13 |
-| `interpolation` |        2 |   0 |
-| `poly`          |        7 |   0 |
-| `signal`        |        5 |   0 |
-| `sort`          |        3 |   0 |
-| `special`       |       18 |   2 |
+| Bridge | Consumed | Gap |
+| --- | --: | --: |
+| `bitwise` | 7 | 0 |
+| `elementwise` | 18 | 0 |
+| `interpolation` | 2 | 0 |
+| `poly` | 7 | 0 |
+| `signal` | 5 | 0 |
+| `sort` | 3 | 0 |
+| `special` | 18 | 0 |
 
-> Note: a consumed kernel "covered via rename" already exists in AS under a different name (no authoring needed beyond an alias). The true _authoring_ gap is the table above. See docs/roadmap/RUST_TO_AS_MIGRATION_PLAN.md (Phase 0/2).
+> Note: a consumed kernel "covered via rename" already exists in AS under a different name (no authoring needed beyond an alias). The true *authoring* gap is the table above. See docs/roadmap/RUST_TO_AS_MIGRATION_PLAN.md (Phase 0/2).

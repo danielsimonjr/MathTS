@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-06-26) — Rust→AS migration Phase 2: AS kernel authoring
+
+- **Elementwise pointer-ABI AS kernels** (`assembly/src/elementwise.ts`):
+  `array_<op>_ptr(inPtr, outPtr, n)` for all 18 `WASM_ELEMENTWISE_OPS`
+  (abs sin cos tan exp log atan sinh tanh atanh expm1 log1p log2 log10 sec csc
+  cot erfc), mirroring the Rust `simd_<op>_array` flat-memory signature so the
+  lean `elementwise/wasm-bridge.ts` drives them unchanged (Phase 3). `erfc` ports
+  the validated A&S 7.1.14 continued-fraction `erfcScalar` (not the cheap
+  rational). The 5 ops with a managed twin (abs/sin/cos/exp/log) are
+  **bit-identical** to `array_<op>`; all 18 are ULP-equal to V8 (`relabs < 4e-16`)
+  vs their JS scalar references.
+- **General integer-order Bessel** `bessel_j_f64` / `bessel_y_f64` exported from
+  `assembly/src/special.ts` (the Rust kernels take a fixed `order: i32`), reusing
+  the existing recurrence/Hankel logic. Validated vs the JS `_besselJn`/`_besselYn`
+  reference to `maxdiff < 1e-16` (orders 2,3,5,8; x∈[0.5,40]).
+- **Poly aliases** `poly_resultant_f64` / `poly_discriminant_f64` now exported from
+  `assembly/src/index.ts` (the impls already existed in `assembly/src/poly.ts`).
+- Validation harness `assembly/tests/phase2-kernels.test.mjs` (wired into the
+  package `test` script) instantiates the release binary raw and checks every new
+  kernel against its JS reference. All pass.
+- **WASM-parity guard updated**: `simd_<op>_array` now maps to `array_<op>_ptr`;
+  `bessel_j_f64`/`bessel_y_f64` and the poly kernels are direct hits. Regenerated
+  `docs/Architecture/wasm-parity.json` — the authoring gap drops **15 → 0** (60/60
+  consumed Rust kernels now covered by AS).
+
 ### Added (2026-06-26) — Rust→AS migration Phase 1 perf spike + ABI decision
 
 - `tools/benchmark/wasm/rust-vs-as-abi.spike.mts` + a pointer-ABI AS prototype

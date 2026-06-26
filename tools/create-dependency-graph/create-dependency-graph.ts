@@ -2603,7 +2603,12 @@ function buildRenameMap(elementwiseOps: string[]): Record<string, string> {
     rightArithShiftArrayPerElement: 'rightArithShift_i32_array',
     rightLogShiftArrayPerElement: 'rightLogShift_i32_array',
   };
-  for (const op of elementwiseOps) map[`simd_${op}_array`] = `array_${op}`;
+  // Phase 2 (Rust→AS migration): the AS elementwise kernels are authored under
+  // the pointer-ABI name `array_<op>_ptr` (mirrors the Rust `simd_<op>_array`
+  // flat-memory signature so the lean bridge drives them unchanged). The 5 ops
+  // with a managed twin (`array_abs/sin/cos/exp/log`) also have a `_ptr` form,
+  // so mapping every simd op uniformly to `_ptr` is correct and forward-looking.
+  for (const op of elementwiseOps) map[`simd_${op}_array`] = `array_${op}_ptr`;
   return map;
 }
 

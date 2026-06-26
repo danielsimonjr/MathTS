@@ -191,9 +191,9 @@ test('collectConsumedRustKernels: extracts 7 real bridges, expands simd, exclude
 
 test('buildRenameMap: covers simd→array, poly, and bitwise renames', () => {
   const map = buildRenameMap(ELEMENTWISE_OPS);
-  // elementwise convention
-  assert.equal(map['simd_sin_array'], 'array_sin');
-  assert.equal(map['simd_erfc_array'], 'array_erfc');
+  // elementwise convention (Phase 2: pointer-ABI AS kernels `array_<op>_ptr`)
+  assert.equal(map['simd_sin_array'], 'array_sin_ptr');
+  assert.equal(map['simd_erfc_array'], 'array_erfc_ptr');
   // poly
   assert.equal(map['poly_resultant_f64'], 'resultant');
   assert.equal(map['poly_discriminant_f64'], 'discriminant');

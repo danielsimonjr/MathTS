@@ -408,7 +408,41 @@ export {
 // Polynomial hot-loop kernels (Slice 3.7) + Fit kernels (Slice 5.4)
 // =============================================================================
 
-export { poly_mul_f64, poly_div_mod_f64, poly_fit_f64, cheb_fit_f64, legendre_fit_f64 } from './poly';
+export {
+  poly_mul_f64,
+  poly_div_mod_f64,
+  poly_fit_f64,
+  cheb_fit_f64,
+  legendre_fit_f64,
+  poly_resultant_f64,
+  poly_discriminant_f64,
+} from './poly';
+
+// =============================================================================
+// Elementwise transcendental array kernels — POINTER-ABI (Phase 2)
+// array_<op>_ptr(inPtr, outPtr, n) for all 18 WASM_ELEMENTWISE_OPS.
+// =============================================================================
+
+export {
+  array_abs_ptr,
+  array_sin_ptr,
+  array_cos_ptr,
+  array_tan_ptr,
+  array_exp_ptr,
+  array_log_ptr,
+  array_atan_ptr,
+  array_sinh_ptr,
+  array_tanh_ptr,
+  array_atanh_ptr,
+  array_expm1_ptr,
+  array_log1p_ptr,
+  array_log2_ptr,
+  array_log10_ptr,
+  array_sec_ptr,
+  array_csc_ptr,
+  array_cot_ptr,
+  array_erfc_ptr,
+} from './elementwise';
 
 // =============================================================================
 // Tridiagonal-solve kernel (Slice 3.10b) + Divided-difference kernel (Slice 5.5)
@@ -425,9 +459,11 @@ export {
   bessel_j0_f64,
   bessel_j1_f64,
   bessel_jn_f64,
+  bessel_j_f64,
   bessel_y0_f64,
   bessel_y1_f64,
   bessel_yn_f64,
+  bessel_y_f64,
   airy_ai_f64,
   airy_bi_f64,
   elliptic_k_f64,

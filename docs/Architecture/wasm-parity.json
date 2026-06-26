@@ -3,10 +3,10 @@
   "rustWasm": "functions/dist/wasm/mathts.wasm",
   "asWasm": "matrix/dist/wasm/mathts-as.wasm",
   "rustExportCount": 1122,
-  "asExportCount": 302,
+  "asExportCount": 324,
   "consumedCount": 60,
-  "coveredCount": 45,
-  "gapCount": 15,
+  "coveredCount": 60,
+  "gapCount": 0,
   "consumed": [
     "airy_ai_f64",
     "airy_bi_f64",
@@ -77,8 +77,10 @@
     "bartlett_psd_f64",
     "bessel_j0_f64",
     "bessel_j1_f64",
+    "bessel_j_f64",
     "bessel_y0_f64",
     "bessel_y1_f64",
+    "bessel_y_f64",
     "bitAndArray",
     "bitNotArray",
     "bitOrArray",
@@ -108,31 +110,28 @@
     "rightArithShiftArrayPerElement",
     "rightLogShiftArrayPerElement",
     "simd_abs_array",
-    "simd_cos_array",
-    "simd_exp_array",
-    "simd_log_array",
-    "simd_sin_array",
-    "sort_f64",
-    "tridiag_solve_f64",
-    "welch_psd_f64"
-  ],
-  "gap": [
-    "bessel_j_f64",
-    "bessel_y_f64",
     "simd_atan_array",
     "simd_atanh_array",
+    "simd_cos_array",
     "simd_cot_array",
     "simd_csc_array",
     "simd_erfc_array",
+    "simd_exp_array",
     "simd_expm1_array",
     "simd_log10_array",
     "simd_log1p_array",
     "simd_log2_array",
+    "simd_log_array",
     "simd_sec_array",
+    "simd_sin_array",
     "simd_sinh_array",
     "simd_tan_array",
-    "simd_tanh_array"
+    "simd_tanh_array",
+    "sort_f64",
+    "tridiag_solve_f64",
+    "welch_psd_f64"
   ],
+  "gap": [],
   "renamed": {
     "bitAndArray": "bitAnd_i32_array",
     "bitOrArray": "bitOr_i32_array",
@@ -141,13 +140,24 @@
     "rightArithShiftArrayPerElement": "rightArithShift_i32_array",
     "rightLogShiftArrayPerElement": "rightLogShift_i32_array",
     "bitNotArray": "bitNot_i32_array",
-    "simd_abs_array": "array_abs",
-    "simd_sin_array": "array_sin",
-    "simd_cos_array": "array_cos",
-    "simd_exp_array": "array_exp",
-    "simd_log_array": "array_log",
-    "poly_resultant_f64": "resultant",
-    "poly_discriminant_f64": "discriminant"
+    "simd_abs_array": "array_abs_ptr",
+    "simd_sin_array": "array_sin_ptr",
+    "simd_cos_array": "array_cos_ptr",
+    "simd_tan_array": "array_tan_ptr",
+    "simd_exp_array": "array_exp_ptr",
+    "simd_log_array": "array_log_ptr",
+    "simd_atan_array": "array_atan_ptr",
+    "simd_sinh_array": "array_sinh_ptr",
+    "simd_tanh_array": "array_tanh_ptr",
+    "simd_atanh_array": "array_atanh_ptr",
+    "simd_expm1_array": "array_expm1_ptr",
+    "simd_log1p_array": "array_log1p_ptr",
+    "simd_log2_array": "array_log2_ptr",
+    "simd_log10_array": "array_log10_ptr",
+    "simd_sec_array": "array_sec_ptr",
+    "simd_csc_array": "array_csc_ptr",
+    "simd_cot_array": "array_cot_ptr",
+    "simd_erfc_array": "array_erfc_ptr"
   },
   "byBridge": {
     "bitwise": {
@@ -183,24 +193,13 @@
         "simd_tan_array",
         "simd_tanh_array"
       ],
-      "gap": [
-        "simd_atan_array",
-        "simd_atanh_array",
-        "simd_cot_array",
-        "simd_csc_array",
-        "simd_erfc_array",
-        "simd_expm1_array",
-        "simd_log10_array",
-        "simd_log1p_array",
-        "simd_log2_array",
-        "simd_sec_array",
-        "simd_sinh_array",
-        "simd_tan_array",
-        "simd_tanh_array"
-      ]
+      "gap": []
     },
     "interpolation": {
-      "consumed": ["divided_difference_f64", "tridiag_solve_f64"],
+      "consumed": [
+        "divided_difference_f64",
+        "tridiag_solve_f64"
+      ],
       "gap": []
     },
     "poly": {
@@ -226,7 +225,11 @@
       "gap": []
     },
     "sort": {
-      "consumed": ["argsort_f64", "rank_f64", "sort_f64"],
+      "consumed": [
+        "argsort_f64",
+        "rank_f64",
+        "sort_f64"
+      ],
       "gap": []
     },
     "special": {
@@ -250,7 +253,7 @@
         "elliptic_pi_incomplete_f64",
         "lgamma_f64"
       ],
-      "gap": ["bessel_j_f64", "bessel_y_f64"]
+      "gap": []
     }
   }
 }

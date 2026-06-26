@@ -499,6 +499,28 @@ export function bessel_yn_f64(n: i32, xs: Float64Array): Float64Array {
   return out;
 }
 
+// ---------------------------------------------------------------------------
+// General-order array exports matching the consumed Rust export names
+// `bessel_j_f64` / `bessel_y_f64`. The Rust kernels take a fixed integer
+// `order` (wasm-rust/.../bessel.rs: `order: i32`), so these reuse the existing
+// integer-order recurrence/Hankel logic (`_besselJn` / `_besselYn`), mirroring
+// the JS general-order reference in functions/src/wasm/special/wasm-bridge.ts.
+// ---------------------------------------------------------------------------
+
+/** Apply J_order(x) element-wise (fixed integer order). */
+export function bessel_j_f64(order: i32, xs: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i: i32 = 0; i < xs.length; i++) out[i] = _besselJn(order, xs[i]);
+  return out;
+}
+
+/** Apply Y_order(x) element-wise (fixed integer order; NaN for x ≤ 0). */
+export function bessel_y_f64(order: i32, xs: Float64Array): Float64Array {
+  const out = new Float64Array(xs.length);
+  for (let i: i32 = 0; i < xs.length; i++) out[i] = _besselYn(order, xs[i]);
+  return out;
+}
+
 // ===========================================================================
 // Array exports — Airy
 // ===========================================================================
