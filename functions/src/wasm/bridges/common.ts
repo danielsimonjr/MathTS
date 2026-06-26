@@ -40,10 +40,9 @@ export interface RawWasm {
  * elementwise kernels (`array_<op>_ptr`) and a managed runtime (`__new`).
  *
  * This gate lets a bridge confirm the loaded module is the AS binary before
- * issuing a managed-ABI call. If some other binary is loaded (e.g. the legacy
- * Rust binary via `MATHTS_WASM_BACKEND=rust`), the gate is false and the bridge
- * falls back to JS — the `functions` package dispatch is AS→JS only as of the
- * Rust→AS migration Phase 5 functions cutover.
+ * issuing a managed-ABI call. If the binary can't be loaded or lacks the AS
+ * exports, the gate is false and the bridge falls back to JS. AssemblyScript is
+ * the sole WASM backend (the Rust→AS migration is complete); dispatch is AS→JS.
  */
 export function isAsWasm(wasm: Record<string, unknown> | null | undefined): boolean {
   return !!wasm && typeof wasm['array_sin_ptr'] === 'function';
