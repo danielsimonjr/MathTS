@@ -6,11 +6,16 @@
  * JavaScript QR-based implementation when WASM is unavailable.
  *
  * WASM acceleration path:
- *   - Symmetric matrices: Jacobi eigenvalue algorithm (Rust WASM)
+ *   - Symmetric matrices: Jacobi eigenvalue algorithm (AssemblyScript
+ *     `matrix_eig_symmetric`, `assembly/src/ops/eig.ts`)
  *   - Non-symmetric matrices: falls back to JS QR algorithm
  *
  * JS fallback path:
  *   - Full QR algorithm with implicit shifts (eig.ts)
+ *
+ * Phase 7b: repointed off the retired Rust crate. The AS kernel packs its
+ * result as `[ eigenvalues(n) | eigenvectors(n*n) ]` with eigenvectors as
+ * COLUMNS (`V[i*n+j]` = component `i` of eigenvector `j`).
  *
  * @packageDocumentation
  */
@@ -81,66 +86,59 @@ export async function eigWasm(matrix: number[][], options?: EigOptions): Promise
     }
   }
 
-  // For small matrices or when WASM is not loaded, use JS fallback
-  const wasmModule = wasmLoader.getModule();
+  // For small matrices or when WASM is not loaded, use JS fallback.
+  // Load the shared (AS-default) loader on first use; failures drop to JS.
+  let module = wasmLoader.getModule();
+  if (!module) {
+    try {
+      module = await wasmLoader.load();
+    } catch {
+      module = null;
+    }
+  }
   const symmetric = isSymmetric(matrix);
 
-  if (!wasmModule || n < WASM_EIG_THRESHOLD || !symmetric) {
+  if (
+    !module ||
+    n < WASM_EIG_THRESHOLD ||
+    !symmetric ||
+    typeof module.matrix_eig_symmetric !== 'function'
+  ) {
     // JS fallback: use the existing QR-based implementation
     return eig(matrix, options);
   }
 
-  // WASM path: Jacobi eigenvalue algorithm for symmetric matrices
-  const tolerance = options?.tolerance ?? 1e-12;
   const computeVectors = options?.computeVectors ?? true;
 
   // Flatten matrix to row-major order
   const flatMatrix = flattenMatrix(matrix);
-
-  // Allocate WASM memory
   const matrixAlloc = wasmLoader.allocateFloat64Array(Array.from(flatMatrix));
-  const eigenvaluesAlloc = wasmLoader.allocateFloat64ArrayEmpty(n);
-  const eigenvectorsAlloc = computeVectors
-    ? wasmLoader.allocateFloat64ArrayEmpty(n * n)
-    : { ptr: 0, array: new Float64Array(0) };
-  const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(2 * n);
 
   try {
-    // Call WASM eigsSymmetric
-    const iterations = wasmModule.eigsSymmetric(
-      matrixAlloc.ptr,
-      n,
-      tolerance,
-      eigenvaluesAlloc.ptr,
-      computeVectors ? eigenvectorsAlloc.ptr : 0,
-      workAlloc.ptr
-    );
-
-    if (iterations < 0) {
-      // WASM failed to converge, fall back to JS
+    // matrix_eig_symmetric returns a managed Float64Array header packing
+    // [ eigenvalues(n) | eigenvectors(n*n) ], eigenvectors as columns.
+    const packedPtr = module.matrix_eig_symmetric(matrixAlloc.ptr, n);
+    const packed = wasmLoader.readReturnedFloat64Array(packedPtr);
+    if (packed.length < n + n * n) {
+      // Unexpected shape — fall back to JS.
       return eig(matrix, options);
     }
 
-    // Read results from WASM memory - re-create views since buffer may have moved
-    const module = wasmLoader.getModule()!;
-    const eigenvaluesResult = new Float64Array(module.memory.buffer, eigenvaluesAlloc.ptr, n);
     const values: Array<{ re: number; im: number }> = [];
-    for (let i = 0; i < n; i++) {
-      values.push({ re: eigenvaluesResult[i], im: 0 });
+    for (let j = 0; j < n; j++) {
+      values.push({ re: packed[j], im: 0 });
     }
 
     let vectors: number[][];
     if (computeVectors) {
-      const eigenvectorsResult = new Float64Array(
-        module.memory.buffer,
-        eigenvectorsAlloc.ptr,
-        n * n
-      );
+      // Eigenvector j is column j: component i is packed[n + i*n + j].
+      // Emit vectors[j] = the j-th eigenvector (row of components), matching
+      // the JS `eig` contract where vectors[k] is the k-th eigenvector.
       vectors = [];
-      for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
         const vec: number[] = [];
-        for (let j = 0; j < n; j++) {
-          vec.push(eigenvectorsResult[i * n + j]);
+        for (let i = 0; i < n; i++) {
+          vec.push(packed[n + i * n + j]);
         }
         vectors.push(vec);
       }
@@ -162,11 +160,7 @@ export async function eigWasm(matrix: number[][], options?: EigOptions): Promise
     return eig(matrix, options);
   } finally {
     wasmLoader.free(matrixAlloc.ptr);
-    wasmLoader.free(eigenvaluesAlloc.ptr);
-    if (computeVectors && eigenvectorsAlloc.ptr !== 0) {
-      wasmLoader.free(eigenvectorsAlloc.ptr);
-    }
-    wasmLoader.free(workAlloc.ptr);
+    wasmLoader.resetRustAllocator();
   }
 }
 
@@ -199,38 +193,34 @@ export async function spectralRadiusWasm(
   options?: { maxIterations?: number; tolerance?: number }
 ): Promise<number> {
   const n = matrix.length;
-  const wasmModule = wasmLoader.getModule();
 
-  if (!wasmModule || n < WASM_EIG_THRESHOLD) {
+  let module = wasmLoader.getModule();
+  if (!module) {
+    try {
+      module = await wasmLoader.load();
+    } catch {
+      module = null;
+    }
+  }
+
+  if (!module || n < WASM_EIG_THRESHOLD || typeof module.matrix_spectral_radius !== 'function') {
     // JS fallback: use power iteration from eig.ts
     const { powerIteration } = await import('./eig.js');
     const result = powerIteration(matrix, options);
     return Math.abs(result.value);
   }
 
-  const maxIterations = options?.maxIterations ?? 1000;
-  const tolerance = options?.tolerance ?? 1e-12;
-
   const flatMatrix = flattenMatrix(matrix);
   const matrixAlloc = wasmLoader.allocateFloat64Array(Array.from(flatMatrix));
-  const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(2 * n);
 
   try {
-    const radius = wasmModule.spectralRadius(
-      matrixAlloc.ptr,
-      n,
-      workAlloc.ptr,
-      maxIterations,
-      tolerance
-    );
-
-    return radius;
+    return module.matrix_spectral_radius(matrixAlloc.ptr, n);
   } catch {
     const { powerIteration } = await import('./eig.js');
     const result = powerIteration(matrix, options);
     return Math.abs(result.value);
   } finally {
     wasmLoader.free(matrixAlloc.ptr);
-    wasmLoader.free(workAlloc.ptr);
+    wasmLoader.resetRustAllocator();
   }
 }

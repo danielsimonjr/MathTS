@@ -1,16 +1,15 @@
 /**
  * Tests for the WASM-dispatch branch of matrix/src/operations/eig-wasm.ts.
  *
- * The AssemblyScript artifact loaded by the matrix WasmLoader does not export
- * `eigsSymmetric`/`spectralRadius` (those live in the Rust crate, which is not
- * built here), and the WASM path only activates for SYMMETRIC matrices of size
- * >= 8. So in the normal environment eigWasm always takes the JS fallback.
- *
- * Here we inject a fake AS module (backed by a real WebAssembly.Memory) plus
- * spied allocator methods so the WASM branch executes end-to-end: allocate →
- * call export → re-read results from the (possibly grown) memory buffer → free.
- * The fake `eigsSymmetric` computes a genuine symmetric eigendecomposition via
- * the JS `eig`, so the marshalled answer is mathematically correct.
+ * In an environment without the AssemblyScript binary the matrix WasmLoader's
+ * getModule() is null and the WASM path only activates for SYMMETRIC matrices
+ * of size >= 8, so eigWasm normally takes the JS fallback. Here we install a
+ * fake AS module exposing `matrix_eig_symmetric` / `matrix_spectral_radius`
+ * (the Phase 7b ABI: a single packed Float64Array return decoded via the
+ * loader's `readReturnedFloat64Array`) so the WASM branch executes end-to-end:
+ * allocate → call export → decode packed [eigenvalues | eigenvectors] → free.
+ * The fake exports compute a genuine symmetric eigendecomposition via the JS
+ * `eig`, so the marshalled answer is mathematically correct.
  */
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
@@ -32,71 +31,48 @@ function symmetric(n: number): number[][] {
 }
 
 /**
- * Install a fake AS WASM module and allocator on the shared wasmLoader.
- * Returns the memory + a ptr→{offset,length} table so the export reads/writes
- * the same backing store the loader hands out.
+ * Install a fake AS WASM module + spied loader hooks. `matrix_eig_symmetric`
+ * returns a sentinel ptr keyed to a packed [eigenvalues(n) | eigenvectors(n*n)]
+ * Float64Array (eigenvectors as COLUMNS, matching the real AS kernel);
+ * `readReturnedFloat64Array` looks it back up.
  */
-function installFakeModule(opts: { failConverge?: boolean; throwInCall?: boolean } = {}) {
-  const memory = new WebAssembly.Memory({ initial: 4 });
-  let bump = 1024;
-  const allocs = new Map<number, { offset: number; length: number }>();
+function installFakeModule(opts: { throwInCall?: boolean; shortResult?: boolean } = {}) {
+  const inputs = new Map<number, Float64Array>();
+  const packedByPtr = new Map<number, Float64Array>();
+  let nextPtr = 8;
 
   const allocateFloat64Array = vi.fn((data: number[] | Float64Array) => {
-    const length = data.length;
-    const offset = bump;
-    bump += length * 8 + 8;
-    const view = new Float64Array(memory.buffer, offset, length);
-    view.set(data);
-    allocs.set(offset, { offset, length });
-    return { ptr: offset, dataPtr: offset, array: view, length, kind: 'as' as const };
-  });
-  const allocateFloat64ArrayEmpty = vi.fn((length: number) => {
-    const offset = bump;
-    bump += length * 8 + 8;
-    allocs.set(offset, { offset, length });
-    return {
-      ptr: offset,
-      dataPtr: offset,
-      array: new Float64Array(memory.buffer, offset, length),
-      length,
-      kind: 'as' as const,
-    };
+    const arr = data instanceof Float64Array ? new Float64Array(data) : new Float64Array(data);
+    const ptr = nextPtr++;
+    inputs.set(ptr, arr);
+    return { ptr, dataPtr: ptr, array: arr, length: arr.length, kind: 'as' as const };
   });
 
+  const packEig = (aPtr: number, n: number): number => {
+    const flat = inputs.get(aPtr)!;
+    const A: number[][] = [];
+    for (let i = 0; i < n; i++) A.push(Array.from(flat.subarray(i * n, i * n + n)));
+    const r = eig(A);
+    const packed = new Float64Array(n + n * n);
+    for (let j = 0; j < n; j++) {
+      packed[j] = r.values[j].re;
+      // Store eigenvector j as a COLUMN: component i at packed[n + i*n + j].
+      for (let i = 0; i < n; i++) packed[n + i * n + j] = r.vectors[j]?.[i] ?? 0;
+    }
+    const ptr = nextPtr++;
+    packedByPtr.set(ptr, opts.shortResult ? packed.subarray(0, 1) : packed);
+    return ptr;
+  };
+
   const fakeModule = {
-    memory,
-    eigsSymmetric: (
-      matrixPtr: number,
-      n: number,
-      _precision: number,
-      eigenvaluesPtr: number,
-      eigenvectorsPtr: number,
-      _workPtr: number
-    ): number => {
+    memory: new WebAssembly.Memory({ initial: 1 }),
+    matrix_eig_symmetric: (aPtr: number, n: number): number => {
       if (opts.throwInCall) throw new Error('wasm trap');
-      if (opts.failConverge) return -1;
-      const flat = new Float64Array(memory.buffer, matrixPtr, n * n);
-      const A: number[][] = [];
-      for (let i = 0; i < n; i++) A.push(Array.from(flat.subarray(i * n, i * n + n)));
-      const r = eig(A);
-      const evals = new Float64Array(memory.buffer, eigenvaluesPtr, n);
-      for (let i = 0; i < n; i++) evals[i] = r.values[i].re;
-      if (eigenvectorsPtr !== 0) {
-        const evecs = new Float64Array(memory.buffer, eigenvectorsPtr, n * n);
-        for (let i = 0; i < n; i++)
-          for (let j = 0; j < n; j++) evecs[i * n + j] = r.vectors[i]?.[j] ?? 0;
-      }
-      return 5; // iterations
+      return packEig(aPtr, n);
     },
-    spectralRadius: (
-      matrixPtr: number,
-      n: number,
-      _workPtr: number,
-      _maxIter: number,
-      _tol: number
-    ): number => {
+    matrix_spectral_radius: (aPtr: number, n: number): number => {
       if (opts.throwInCall) throw new Error('wasm trap');
-      const flat = new Float64Array(memory.buffer, matrixPtr, n * n);
+      const flat = inputs.get(aPtr)!;
       const A: number[][] = [];
       for (let i = 0; i < n; i++) A.push(Array.from(flat.subarray(i * n, i * n + n)));
       const r = eig(A);
@@ -106,12 +82,13 @@ function installFakeModule(opts: { failConverge?: boolean; throwInCall?: boolean
 
   vi.spyOn(wasmLoader, 'getModule').mockReturnValue(fakeModule as never);
   vi.spyOn(wasmLoader, 'allocateFloat64Array').mockImplementation(allocateFloat64Array as never);
-  vi.spyOn(wasmLoader, 'allocateFloat64ArrayEmpty').mockImplementation(
-    allocateFloat64ArrayEmpty as never
+  vi.spyOn(wasmLoader, 'readReturnedFloat64Array').mockImplementation(
+    ((ptr: number) => packedByPtr.get(ptr)!) as never
   );
   vi.spyOn(wasmLoader, 'free').mockImplementation(() => {});
+  vi.spyOn(wasmLoader, 'resetRustAllocator').mockImplementation(() => {});
 
-  return { fakeModule, allocateFloat64Array, allocateFloat64ArrayEmpty };
+  return { fakeModule, allocateFloat64Array };
 }
 
 describe('eigWasm — WASM-dispatch branch (mocked AS module)', () => {
@@ -136,14 +113,31 @@ describe('eigWasm — WASM-dispatch branch (mocked AS module)', () => {
     expect(result.vectors[0]).toHaveLength(8);
   });
 
+  it('each (value, vector) pair satisfies A·v ≈ λ·v', async () => {
+    installFakeModule();
+    const A = symmetric(8);
+    const { values, vectors } = await eigWasm(A);
+    const n = A.length;
+    for (let k = 0; k < n; k++) {
+      const v = vectors[k];
+      const lambda = values[k].re;
+      for (let i = 0; i < n; i++) {
+        let av = 0;
+        for (let j = 0; j < n; j++) av += A[i][j] * v[j];
+        const scale = Math.max(1, Math.abs(av), Math.abs(lambda * v[i]));
+        expect(Math.abs(av - lambda * v[i]) / scale).toBeLessThan(1e-4);
+      }
+    }
+  });
+
   it('skips eigenvector marshalling when computeVectors=false (eigvalsWasm)', async () => {
     installFakeModule();
     const values = await eigvalsWasm(symmetric(8));
     expect(values).toHaveLength(8);
   });
 
-  it('falls back to JS when the WASM call reports non-convergence (status < 0)', async () => {
-    installFakeModule({ failConverge: true });
+  it('falls back to JS when the packed result is malformed (too short)', async () => {
+    installFakeModule({ shortResult: true });
     const A = symmetric(8);
     const result = await eigWasm(A);
     // JS fallback path still returns a full result.
