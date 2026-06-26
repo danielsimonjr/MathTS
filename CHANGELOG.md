@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-06-26) — Rust→AS migration Phase 7a: author the two missing AS matrix kernels
+
+The AS binary had parity-clean matrix multiply/transpose, LU/QR/Cholesky/inverse/
+determinant and SVD, but lacked the two kernels matrix still relied on the JS
+fallback for: symmetric eigendecomposition and a generic complex FFT. Both are
+now authored in `assembly/src/` and validated to parity against the Rust binary
+(`lib/wasm/mathts.wasm`) oracle plus the JS references (no wiring yet — Phase 7b).
+
+- **Symmetric eigensolver** (`assembly/src/ops/eig.ts`): `matrix_eig_symmetric`
+  and `matrix_spectral_radius`. Classic cyclic Jacobi (Numerical-Recipes Schur
+  rotation) for real symmetric matrices. ABI: `matrix_eig_symmetric(a, n)`
+  returns a packed `Float64Array [ eigenvalues(n) | eigenvectors(n*n) ]`,
+  eigenvalues **ascending by absolute value** (matching the Rust binary),
+  eigenvectors as columns (`V[i*n+j]` = component `i` of eigenvector `j`).
+  `matrix_spectral_radius(a, n)` returns max |eigenvalue| (exact, via the full
+  Jacobi solve). Measured parity (release binary, real runs): eigenvalue
+  maxAbsDiff vs Rust ≤ 1.35e-13 (vs the JS Jacobi reference: bit-identical, 0.0)
+  and eigenvector residual ||A·V − V·diag(λ)|| ≤ 3.6e-14 across 4×4 / 16×16 /
+  64×64 random symmetric matrices and a degenerate {2,2,2,5} repeated-eigenvalue
+  case — all well under the 1e-9 target.
+
 ### Fixed (2026-06-26) — Rust→AS migration Phase 6: repoint the last 4 functions kernels JS→AS
 
 These four `functions` dispatchers had been left on the JS fallback because the

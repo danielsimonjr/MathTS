@@ -215,6 +215,12 @@ export {
 export { matrix_svd, matrix_singular_values } from './ops/svd';
 
 // =============================================================================
+// Symmetric Eigendecomposition (Jacobi) + spectral radius
+// =============================================================================
+
+export { matrix_eig_symmetric, matrix_spectral_radius } from './ops/eig';
+
+// =============================================================================
 // Dense Matrix Decompositions (LU, QR, Cholesky, inverse, determinant)
 // =============================================================================
 
