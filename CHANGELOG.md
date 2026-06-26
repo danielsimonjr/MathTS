@@ -27,6 +27,18 @@ now authored in `assembly/src/` and validated to parity against the Rust binary
   and eigenvector residual ||A·V − V·diag(λ)|| ≤ 3.6e-14 across 4×4 / 16×16 /
   64×64 random symmetric matrices and a degenerate {2,2,2,5} repeated-eigenvalue
   case — all well under the 1e-9 target.
+- **FFT** (`assembly/src/ops/fft.ts`): `fft` (in-place forward/inverse on
+  interleaved complex `[re,im,...]`), `rfft` (real→complex), and `powerSpectrum`.
+  Radix-2 Cooley-Tukey, a line-for-line match of the JS `fftJS` fallback (same
+  bit-reversal, twiddle recurrence, direction sign, 1/n inverse scaling). ABI
+  matches the existing matrix WASM consumer call shapes exactly: `fft(ptr, n,
+  inverse)`, `rfft(dataPtr, n, resultPtr)`, `powerSpectrum(dataPtr, n,
+  resultPtr)`. **Power-of-two `n` only** (same constraint as `fftJS`; the matrix
+  JS layer rejects non-power-of-2 before reaching WASM); the inverse transform is
+  `fft(..., inverse=1)` — no separate `ifft`. Measured parity (release binary):
+  forward maxAbsDiff vs JS bit-identical (0.0) and vs Rust ≤ 4.3e-13 on sizes
+  8/64/1024, `ifft(fft(x))` round-trip ≤ 1.8e-14, `rfft` bit-identical to
+  `fftJS(real)`, `powerSpectrum` exact — all under the 1e-12 target.
 
 ### Fixed (2026-06-26) — Rust→AS migration Phase 6: repoint the last 4 functions kernels JS→AS
 

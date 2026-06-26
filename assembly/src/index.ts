@@ -221,6 +221,12 @@ export { matrix_svd, matrix_singular_values } from './ops/svd';
 export { matrix_eig_symmetric, matrix_spectral_radius } from './ops/eig';
 
 // =============================================================================
+// FFT (radix-2 Cooley-Tukey): fft/ifft, rfft, powerSpectrum (interleaved)
+// =============================================================================
+
+export { fft, rfft, powerSpectrum } from './ops/fft';
+
+// =============================================================================
 // Dense Matrix Decompositions (LU, QR, Cholesky, inverse, determinant)
 // =============================================================================
 
