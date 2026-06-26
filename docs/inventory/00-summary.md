@@ -2,6 +2,19 @@
 
 > Generated 2026-04-10 by RLM pipeline with 5 parallel agents.
 > Detailed reports in `01-*` through `05-*` files.
+>
+> ⚠️ **PARTIALLY STALE (verified 2026-06-26).** Since this snapshot, the code has
+> moved on — do not trust these specific claims; see `AGENTS.md` (repo root) for
+> current state:
+> - **mathjs leaf factories are ACTIVATED**, not "dormant" — `functions/src/index.ts`
+>   exports `./factories/index.js`.
+> - **The expression evaluator is WIRED**, not "empty stubs" —
+>   `functions/src/factories/evaluate.ts` exports `evaluate`/`compileExpr`/`parse`.
+> - **Versions vary per package** (0.1.3–0.2.0), not "all v0.1.2".
+> - WASM export counts: Rust **1122** / AS **302** (this doc's figures drifted).
+> - A **Rust→AS migration is planned** (delete Rust, single AS backend) —
+>   `docs/roadmap/RUST_TO_AS_MIGRATION_{EVAL,PLAN}.md`. Not yet executed.
+> The structural maps below (packages, kernels, categories) remain broadly accurate.
 
 ---
 

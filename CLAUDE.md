@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+> See `AGENTS.md` for tool-agnostic rules (build/test, file boundaries, and a
+> "where to find X" navigation map). This file adds Claude-specific invariants
+> and the full monorepo reference.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation (2026-06-26) — agent knowledge base
+
+- Added `AGENTS.md` at the repo root: a cross-agent navigation + behavior hub
+  (build/test commands, a "where to find X" map, the active-vs-dormant code rule,
+  file boundaries, security invariants, and the WASM "direction of travel"
+  pointer). Complements `CLAUDE.md` (now cross-linked) per the agents.md standard.
+- Added `docs/refactoring/DUPLICATION_AUDIT.md`: a grounded, file:line-cited audit
+  of duplicate/near-duplicate code in the active source graph (10 clusters,
+  top-5 consolidation plan; Cluster A special-fn scalar JS↔JS dup flagged as a
+  correctness-drift risk).
+- Flagged `docs/inventory/00-summary.md` as partially stale (factories activated,
+  evaluator wired, per-package versions vary, WASM export counts drifted) with a
+  pointer to `AGENTS.md` for current state.
+
 ### Added (2026-06-26) — Rust→AS WASM-parity guard (`--check-wasm-parity`)
 
 - `tools/create-dependency-graph` gained a `--check-wasm-parity` mode (Phase 0 /
