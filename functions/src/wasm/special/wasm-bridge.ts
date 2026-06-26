@@ -197,22 +197,28 @@ export function besselYDispatch(order: number, xs: Float64Array): Float64Array {
 }
 
 /**
- * Dispatch Ai(x) / Bi(x) over an array — JS only.
+ * Dispatch Ai(x) / Bi(x) over an array — AS managed → JS (Rust→AS Phase 6).
  *
- * The AS managed Airy kernels are deliberately NOT routed to: in the asymptotic
- * region (|x|>5) they diverge from the JS reference by ~1e-6 relative (verified
- * Phase 3b) — above the 1e-12 bar — so these run on the validated JS series /
- * asymptotic implementation. The legacy Rust Airy kernel was dropped from the
- * functions dispatch in the Phase 5 AS cutover. Re-enable WASM once
- * assembly/src's Airy asymptotic matches JS (Rust→AS migration Phase 6).
+ * The AS Airy asymptotic kernel now mirrors the JS reference exactly: its
+ * asymptotic sum is capped at the same 13-term (u_0..u_12) truncation as the
+ * JS `_airyAsymPos` / `_airyAsymNeg` table (see `AIRY_U_MAX` in
+ * assembly/src/special.ts). Previously the AS kernel generated u_k by recurrence
+ * and ran to its own optimal truncation (k≈15 near x≈5), diverging ~1e-7 from
+ * the JS value it is meant to match. With the cap, AS vs JS agree to ≈4e-16
+ * (relative) across the |x|>5 region (verified Phase 6), so these are repointed
+ * via the shared `makeUnaryArrayDispatch` factory (JS fallback retained).
  */
-export function airyAiDispatch(xs: Float64Array): Float64Array {
-  return airyAiJS(xs);
-}
+export const airyAiDispatch = makeUnaryArrayDispatch({
+  threshold: WASM_SPECIAL_THRESHOLD,
+  name: 'airy_ai_f64',
+  js: airyAiJS,
+});
 
-export function airyBiDispatch(xs: Float64Array): Float64Array {
-  return airyBiJS(xs);
-}
+export const airyBiDispatch = makeUnaryArrayDispatch({
+  threshold: WASM_SPECIAL_THRESHOLD,
+  name: 'airy_bi_f64',
+  js: airyBiJS,
+});
 
 // ---------------------------------------------------------------------------
 // lgamma array kernel (Slice 5.8)

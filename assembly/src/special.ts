@@ -312,9 +312,17 @@ function _besselYn(n: i32, x: f64): f64 {
 
 // Asymptotic-series coefficients u_k are generated in-loop by the recurrence
 //   u_0 = 1,  u_k = u_{k-1} (6k-5)(6k-3)(6k-1) / ((2k-1) · 216 · k)
-// (DLMF 9.7.2). The legacy hardcoded constants had wrong u_5/u_6, capping the
-// asymptotic branch at ~1e-7; generation removes that error and lets the series
-// run to its optimal-truncation point.
+// (DLMF 9.7.2). The legacy hardcoded constants had wrong u_5/u_6; generation
+// removes that error.
+//
+// AIRY_U_MAX caps the asymptotic sum at k = 12 so the AS kernel uses EXACTLY the
+// same 13-term (u_0..u_12) truncation as the JS reference (`_airyAsymPos` /
+// `_airyAsymNeg` in functions/src/wasm/special/wasm-bridge.ts, whose `_AIRY_U`
+// table has 13 entries). Both also stop early on the first magnitude increase
+// (optimal-truncation guard), so the two implementations agree to ≈1e-15 across
+// the |x|>5 region. Without the cap, AS would run to k≈15 near x≈5 (its optimal
+// truncation) and diverge ~1e-7 from the JS value it is meant to mirror.
+const AIRY_U_MAX: i32 = 12;
 
 // Ai(0)
 const AI0: f64 = 0.35502805388781723926;
@@ -342,7 +350,7 @@ function _airyAsymptotePos(x: f64, isAi: bool): f64 {
   let zk: f64 = 1.0;
   let sum: f64 = 1.0;
   let prevMag: f64 = Infinity;
-  for (let k: i32 = 1; k <= 40; k++) {
+  for (let k: i32 = 1; k <= AIRY_U_MAX; k++) {
     u = _airyU(u, k);
     zk *= zeta;
     const t: f64 = u / zk;
@@ -368,7 +376,7 @@ function _airyAsymptoteNeg(x: f64, isAi: bool): f64 {
   let P: f64 = 1.0;
   let Q: f64 = 0.0;
   let prevMag: f64 = Infinity;
-  for (let k: i32 = 1; k <= 40; k++) {
+  for (let k: i32 = 1; k <= AIRY_U_MAX; k++) {
     u = _airyU(u, k);
     zk *= zeta;
     const t: f64 = u / zk;

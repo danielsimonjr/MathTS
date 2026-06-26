@@ -32,6 +32,7 @@ import {
   ellipticEIncompleteDispatch,
   ellipticPiIncompleteDispatch,
   airyAiDispatch,
+  airyBiDispatch,
   besselJ0JS,
   besselJ1JS,
   besselJnJS,
@@ -48,6 +49,7 @@ import {
   ellipticEIncompleteJS,
   ellipticPiIncompleteJS,
   airyAiJS,
+  airyBiJS,
 } from '../src/wasm/special/wasm-bridge.js';
 import { AS_WASM_PATH, countExportCalls } from './helpers/wasm-spy.js';
 
@@ -139,11 +141,18 @@ describeIfAS('special bridge — AssemblyScript managed dispatch (Phase 3b)', ()
     }
   });
 
-  it('does NOT route Airy to the AS kernel (asymptotic mismatch) — stays on JS', () => {
-    const xany = fill((i) => -10 + i * 0.02);
-    const { result, counts } = countExportCalls(['airy_ai_f64'], () => airyAiDispatch(xany));
-    expect(counts.airy_ai_f64).toBe(0); // AS Airy deliberately not used
-    expect(relMax(result, airyAiJS(xany))).toBe(0); // identical to JS fallback
+  it('executes the AS Airy kernels and matches JS incl. the |x|>5 asymptotic region', () => {
+    // Grid spans the convergent-series region (|x|≤5) and both asymptotic tails
+    // (|x|>5), which is exactly where the AS kernel used to diverge ~1e-7. After
+    // the AIRY_U_MAX cap it mirrors the JS truncation to ≈4e-16.
+    const xany = fill((i) => -10 + i * 0.02); // [-10, +10.46)
+    const ai = countExportCalls(['airy_ai_f64'], () => airyAiDispatch(xany));
+    expect(ai.counts.airy_ai_f64, 'airy_ai_f64: AS kernel invoked').toBeGreaterThan(0);
+    expect(relMax(ai.result, airyAiJS(xany)), 'airy_ai: AS vs JS').toBeLessThan(1e-9);
+
+    const bi = countExportCalls(['airy_bi_f64'], () => airyBiDispatch(xany));
+    expect(bi.counts.airy_bi_f64, 'airy_bi_f64: AS kernel invoked').toBeGreaterThan(0);
+    expect(relMax(bi.result, airyBiJS(xany)), 'airy_bi: AS vs JS').toBeLessThan(1e-9);
   });
 
   it('below threshold uses JS (no AS kernel call)', () => {

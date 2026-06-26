@@ -24,6 +24,12 @@ op now executes on the AS binary (call-counter > 0) and matches JS.
   explicitly). The AS kernel recovers coefficients to ≈1e-14 vs the JS
   normal-equations solver (degrees 2/3/5 over [−3,3]); `poly` bridge repointed
   above `WASM_POLY_FIT_THRESHOLD`.
+- **Airy Ai/Bi for |x|>5.** Capped the AS asymptotic sum at the same 13-term
+  (u_0..u_12) truncation the JS reference uses (`AIRY_U_MAX` in
+  `assembly/src/special.ts`). The AS kernel had generated u_k by recurrence and
+  run to its own optimal truncation (k≈15 near x≈5), so it diverged ~1e-7 from
+  the JS value it must mirror. With the cap, AS vs JS agree to ≈4e-16 (relative)
+  across the |x|>5 region; `special` bridge repointed via `makeUnaryArrayDispatch`.
 
 ### Changed (2026-06-26) — Rust→AS migration Phase 5: functions WASM dispatch simplified to AS→JS
 
