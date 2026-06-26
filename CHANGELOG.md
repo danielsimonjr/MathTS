@@ -30,6 +30,17 @@ op now executes on the AS binary (call-counter > 0) and matches JS.
   run to its own optimal truncation (k≈15 near x≈5), so it diverged ~1e-7 from
   the JS value it must mirror. With the cap, AS vs JS agree to ≈4e-16 (relative)
   across the |x|>5 region; `special` bridge repointed via `makeUnaryArrayDispatch`.
+- **argsort / rank stability.** Rewrote the AS index sort in `assembly/src/sort.ts`
+  to use a STABLE total-order comparator (value, NaN-last, then original index),
+  so tied values keep their input order — exactly matching the JS stable
+  reference (`Array.prototype.sort`). Verified Phase 6: exact permutation match on
+  tie-heavy + NaN input (16 384 elements). `argsortF64Dispatch` / `rankF64Dispatch`
+  repointed to the AS `argsort_f64` / `rank_f64` kernels (JS fallback retained).
+- **sort_f64 performance.** Replaced the AS Lomuto quicksort (O(n²) on
+  duplicate-heavy input) with an INTROSORT: 3-way (Dutch-national-flag) partition
+  + median-of-3 pivot + insertion-sort cutoff + heapsort fallback past depth
+  2·⌊log2 n⌋. Duplicate-heavy 200 000-element input now sorts in ~16 ms (bit-
+  identical to JS, NaN-last preserved); guaranteed O(n log n) worst case.
 
 ### Changed (2026-06-26) — Rust→AS migration Phase 5: functions WASM dispatch simplified to AS→JS
 

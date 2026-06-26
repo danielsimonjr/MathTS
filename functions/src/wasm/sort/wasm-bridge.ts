@@ -7,12 +7,13 @@
  *   - `rank_f64`    — return Int32Array of ranks (0-indexed, NaN-last).
  *
  * Dispatch (for arrays ≥ WASM_SORT_THRESHOLD = 16 384 elements):
- *   - `sort_f64` uses the AS managed kernel (value-sort is bit-identical to JS).
- *   - `argsort_f64` / `rank_f64` stay on JS: the AS sort is UNSTABLE, so for
- *     tied values it returns a different (still valid) permutation than the JS
- *     stable reference (verified Phase 3b). The legacy Rust stable kernels were
- *     dropped from this bridge in the Phase 5 AS cutover; re-enable WASM here
- *     once a stable AS argsort lands (Rust→AS migration Phase 6).
+ *   - `sort_f64` uses the AS managed kernel — now an INTROSORT (3-way quicksort +
+ *     median-of-3 + heapsort fallback), so duplicate-heavy input is O(n log n)
+ *     (the old Lomuto quicksort degraded to O(n²)); value-sort stays bit-identical.
+ *   - `argsort_f64` / `rank_f64` are repointed to AS (Rust→AS Phase 6): the AS
+ *     index sort now uses a STABLE total-order comparator (value, then original
+ *     index), so for tied values it returns the same permutation as the JS stable
+ *     reference (verified Phase 6 — exact match on tie-heavy + NaN input).
  *
  * Any thrown error is swallowed and the JS fallback runs — WASM is an
  * optimisation, not a correctness requirement.
@@ -23,6 +24,7 @@ import {
   isAsWasm,
   withAsF64,
   asReadReturnedF64,
+  asReadReturnedI32,
   type RawWasm,
 } from '../bridges/common.js';
 
@@ -113,27 +115,57 @@ export function sortF64Dispatch(data: Float64Array): Float64Array {
 }
 
 /**
- * Return the argsort permutation for `data` (NaN-last) — JS stable sort.
- * After the call, `data[result[0]] ≤ data[result[1]] ≤ …`
+ * Return the argsort permutation for `data` (NaN-last) — STABLE.
+ * After the call, `data[result[0]] ≤ data[result[1]] ≤ …`; equal values keep
+ * their original input order, matching the JS stable reference.
  *
- * JS-only: the AS argsort_f64 kernel is UNSTABLE, so for tied values it returns
- * a different (still valid) permutation than the JS stable reference (verified
- * Phase 3b: 0 diffs on distinct input, ~all-diff on duplicate-heavy input). The
- * legacy Rust stable kernel was dropped from this bridge in the Phase 5 AS
- * cutover; re-enable WASM once a stable AS argsort lands (Phase 6).
+ * Uses the AS managed kernel above {@link WASM_SORT_THRESHOLD}: the AS index
+ * sort now breaks value ties by original index (a strict total order), so it
+ * yields the identical permutation to the JS stable sort on tie-heavy input
+ * (verified Phase 6). Falls back to JS when wasm is unavailable / on any error.
  */
 export function argsortF64Dispatch(data: Float64Array): Int32Array {
+  const n = data.length;
+  if (n >= WASM_SORT_THRESHOLD) {
+    const wasm = getWasm() as unknown as RawWasm | null;
+    if (wasm && isAsWasm(wasm)) {
+      try {
+        // AS managed ABI: argsort_f64(data) -> Int32Array of indices.
+        const idx = withAsF64(wasm, [data], (mod, [h]) =>
+          asReadReturnedI32(mod, (mod['argsort_f64'] as (d: number) => number)(h))
+        );
+        if (idx && idx.length === n) return idx;
+      } catch {
+        // fall through
+      }
+    }
+  }
   return argsortF64JS(data);
 }
 
 /**
- * Return the rank array for `data` (0-indexed, NaN-last) — JS stable sort.
+ * Return the rank array for `data` (0-indexed, NaN-last) — STABLE.
  * `result[i]` = position of `data[i]` in the sorted array.
  *
- * JS-only for the same reason as {@link argsortF64Dispatch}: the AS rank_f64
- * kernel derives from the unstable AS sort and disagrees with the JS stable
- * reference on ties (verified Phase 3b). Re-enable WASM in Phase 6.
+ * Uses the AS managed kernel above {@link WASM_SORT_THRESHOLD} (derived from the
+ * stable AS argsort, so it matches the JS stable reference on ties — verified
+ * Phase 6). Falls back to JS when wasm is unavailable / on any error.
  */
 export function rankF64Dispatch(data: Float64Array): Int32Array {
+  const n = data.length;
+  if (n >= WASM_SORT_THRESHOLD) {
+    const wasm = getWasm() as unknown as RawWasm | null;
+    if (wasm && isAsWasm(wasm)) {
+      try {
+        // AS managed ABI: rank_f64(data) -> Int32Array of ranks.
+        const ranks = withAsF64(wasm, [data], (mod, [h]) =>
+          asReadReturnedI32(mod, (mod['rank_f64'] as (d: number) => number)(h))
+        );
+        if (ranks && ranks.length === n) return ranks;
+      } catch {
+        // fall through
+      }
+    }
+  }
   return rankF64JS(data);
 }
