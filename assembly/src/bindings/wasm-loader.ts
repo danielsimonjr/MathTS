@@ -140,10 +140,11 @@ export interface MathTSWasmExports {
   matrix_determinant?(a: Float64Array, n: number, work: Float64Array): number;
 
   // Bitwise operations (Int32Array, elementwise) — AS-backend kernels.
-  // The Rust backend ships an equivalent set under the `*Array` /
-  // `*ArrayPerElement` naming (declared in
-  // functions/src/wasm/WasmLoader.ts's interface); the AS kernels keep
-  // the `_i32_array` suffix to match AS export-name discoverability.
+  // The legacy Rust backend shipped an equivalent set under the `*Array` /
+  // `*ArrayPerElement` naming (still declared, now vestigial, in
+  // functions/src/wasm/WasmLoader.ts's interface; removed in the Rust→AS
+  // migration); the AS kernels keep the `_i32_array` suffix to match AS
+  // export-name discoverability.
   bitAnd_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
   bitOr_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;
   bitXor_i32_array?(a: Int32Array, b: Int32Array, result: Int32Array): void;

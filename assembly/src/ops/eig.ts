@@ -8,8 +8,9 @@
  * allocation-light, and converges to (near) machine precision for symmetric
  * input — eigenvalues land on the diagonal, eigenvectors accumulate in `V`.
  *
- * Sign/order convention (matches the Rust binary so the Phase 7b binding can
- * swap artifacts transparently): eigenvalues are sorted **ascending by
+ * Sign/order convention (kept identical to the original Rust binary so the
+ * Phase 7b binding could swap artifacts transparently during the migration;
+ * retained now for JS-fallback parity): eigenvalues are sorted **ascending by
  * absolute value**; eigenvectors are stored **as columns** of a row-major
  * `n x n` block, i.e. component `i` of eigenvalue `j`'s eigenvector is at
  * `V[i * n + j]`. Eigenvectors match the reference only up to sign/order, so

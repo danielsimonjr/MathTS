@@ -11,12 +11,9 @@
  *   - When `wasmLoader.getModule()` returns null (module not loaded or
  *     load failed), every helper here returns the JS fallback result
  *     without throwing.
- *   - When the loaded module exposes the matching Rust export, we
+ *   - When the loaded AS binary exposes the matching managed export, we
  *     marshal the Float64Array operands into WASM-owned memory, run
  *     the kernel, and return a JS-side copy of the result.
- *   - When only the AS export is present (the AS binary is loaded),
- *     we pass the Float64Array references directly via the `_as`-named
- *     variant (see `WasmModule` interface entries).
  *   - Any thrown error is swallowed and the JS fallback runs — the
  *     WASM tier is an optimisation, not a correctness requirement.
  *

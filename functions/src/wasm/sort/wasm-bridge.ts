@@ -39,7 +39,7 @@ export const WASM_SORT_THRESHOLD = 16384;
 // Pure-JS fallback implementations
 // ---------------------------------------------------------------------------
 
-/** NaN-last comparator matching Rust's cmp_f64_nan_last. */
+/** NaN-last comparator matching the original Rust `cmp_f64_nan_last`. */
 function cmpNanLast(a: number, b: number): number {
   if (a < b) return -1;
   if (a > b) return 1;

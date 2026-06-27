@@ -147,7 +147,7 @@ export function runChainPtr(
 // The AS binary's special / poly / signal / sort / interpolation / bitwise
 // kernels are MANAGED: they take and return AssemblyScript `Float64Array` /
 // `Int32Array` objects. At the wasm boundary those are *header pointers*, not
-// JS typed arrays — calling them with the Rust pointer-ABI args (raw data ptr +
+// JS typed arrays — calling them with pointer-ABI args (raw data ptr +
 // length) silently mis-reads the header and produces garbage (the Phase-3a
 // corruption: poly returned all-zeros for n≥256). These helpers build a real
 // AS array (pinned buffer + header) the way `matrix/src/backends/WASMBackend.ts`

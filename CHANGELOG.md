@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Docs (2026-06-26) — Corrected stale Rust-dispatch comments in active WASM bridges
+
+- Swept every `Rust` mention in the active WASM code (`functions/src/wasm/**`,
+  `assembly/src/**`) and rewrote comments that still described the removed
+  Rust path as the **current** dispatch. The bridges are AS→JS (no Rust probe):
+  - `functions/src/wasm/special/wasm-bridge.ts`: `lgamma`/`K(m)`/`E(m)` doc
+    comments no longer claim a "Rust WASM above threshold, then AS, then JS"
+    3-tier or a "Probe Rust `lgamma_f64` (pointer-style)" step — now AS managed
+    → JS. Carlson multi-array prose and the `functions.rs` lineage reference
+    reframed to AS-managed / historical.
+  - `functions/src/wasm/poly/wasm-bridge.ts`: dropped the "matching Rust export"
+    dispatch branch from the Behavior block (the bridge gates on the AS sentinel).
+  - `functions/src/wasm/bridges/common.ts`: "Rust pointer-ABI args" → "pointer-ABI
+    args" (the contrast is no longer a live backend).
+  - `functions/src/wasm/WasmLoader.ts`: the `WasmModule` kernel-doc blocks now
+    label the vestigial pointer-style fields as "Legacy Rust ABI (removed)" rather
+    than "Rust backend:", and the bitwise/decomposition prose no longer presents a
+    "prefers Rust names" / "The Rust binary exposes…" live path.
+  - `assembly/src/bindings/wasm-loader.ts` + `assembly/src/ops/eig.ts`: present-tense
+    "The Rust backend ships…" / "matches the Rust binary" reworded to past-tense
+    historical/lineage.
+- Comment-only: no executable code, signatures, or behavior changed. Accurate
+  historical / lineage / migration-phase notes ("removed in the Rust→AS migration",
+  "ported from the original Rust impl", "(Rust→AS Phase 6)") were kept as-is.
+  `npm run build:wasm` green (AS235 cosmetic only); `npm run typecheck` 0 errors.
+
 ### Docs (2026-06-26) — Architecture docs refreshed to AS-only post-migration
 
 - Refreshed `docs/Architecture/{ARCHITECTURE,OVERVIEW,DATAFLOW,API}.md` to the

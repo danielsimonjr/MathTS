@@ -242,7 +242,8 @@ export const airyBiDispatch = makeUnaryArrayDispatch({
 // lgamma array kernel (Slice 5.8)
 //
 // lgamma(x) = log Gamma(x).  Poles at non-positive integers → +Infinity.
-// Negative non-integer: reflection formula already handled in both Rust and AS.
+// Negative non-integer: reflection formula already handled in both the AS
+// kernel and the JS fallback.
 // ---------------------------------------------------------------------------
 
 /** JS fallback: lgamma(x) applied element-wise (canonical `_lgamma`). */
@@ -253,12 +254,11 @@ export function lgammaJS(xs: Float64Array): Float64Array {
 }
 
 /**
- * Dispatch lgamma over an array — Rust WASM above threshold, then AS, then JS.
+ * Dispatch lgamma over an array — AS managed above threshold, then JS.
  *
  * For arrays ≥ WASM_SPECIAL_THRESHOLD (1024):
- *   1. Probe Rust `lgamma_f64` (pointer-style).
- *   2. If absent, probe AS `lgamma_f64` (typed-array style, suffix `_as`).
- *   3. Fall back to pure-JS `lgammaJS`.
+ *   1. AS managed `lgamma_f64` kernel (the binary the functions package bundles).
+ *   2. Fall back to pure-JS `lgammaJS`.
  */
 export const lgammaDispatch = makeUnaryArrayDispatch({
   threshold: WASM_SPECIAL_THRESHOLD,
@@ -269,8 +269,8 @@ export const lgammaDispatch = makeUnaryArrayDispatch({
 // ===========================================================================
 // Carlson Symmetric Forms — Slice 6.4
 //
-// JS fallbacks mirror the duplication-theorem algorithm from
-// wasm-rust/crates/mathts-wasm/src/special/functions.rs :: carlson_*.
+// JS fallbacks mirror the duplication-theorem algorithm from the original Rust
+// `special/functions.rs :: carlson_*` (removed in the Rust→AS migration).
 // Numerical Recipes §6.11; tolerance 0.0015; ≤ 30 iterations.
 // ===========================================================================
 
@@ -551,9 +551,9 @@ export function ellipticPiIncompleteScalar(n: number, phi: number, m: number): n
 // ---------------------------------------------------------------------------
 // WASM dispatch helpers — Carlson R-forms (Slice 6.4)
 //
-// Multi-array Rust kernels use pointer-style ABI with multiple input ptrs.
-// AS kernels use typed-array calling convention (same function signatures
-// as the AS exports in assembly/src/special.ts).
+// Multi-array AS kernels use the managed typed-array calling convention (same
+// function signatures as the AS exports in assembly/src/special.ts), marshalled
+// via the shared `withAsF64` helper.
 // ---------------------------------------------------------------------------
 
 /**
@@ -702,14 +702,14 @@ export function ellipticEJS(ms: Float64Array): Float64Array {
   return out;
 }
 
-/** Dispatch K(m) over an array — Rust (gated) → AS managed → JS. */
+/** Dispatch K(m) over an array — AS managed → JS. */
 export const ellipticKDispatch = makeUnaryArrayDispatch({
   threshold: WASM_SPECIAL_THRESHOLD,
   name: 'elliptic_k_f64',
   js: ellipticKJS,
 });
 
-/** Dispatch E(m) over an array — Rust (gated) → AS managed → JS. */
+/** Dispatch E(m) over an array — AS managed → JS. */
 export const ellipticEDispatch = makeUnaryArrayDispatch({
   threshold: WASM_SPECIAL_THRESHOLD,
   name: 'elliptic_e_f64',
