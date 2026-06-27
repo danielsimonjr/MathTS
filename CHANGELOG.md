@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-27) — `functions` now compiles under TypeScript `strict: true`
+
+- Flipped `functions/tsconfig.json` to `strict: true` and fixed all ~430
+  pre-existing strict-mode errors honestly (no `any`/`@ts-ignore`/
+  `@ts-expect-error`; only narrow, commented assertions where provably safe).
+  Behavior-preserving — full `functions` suite unchanged (2902 pass / 41 skip).
+- **Root cause (≈300 of the errors):** typed-function dispatch. The published
+  `SignatureFunction` (`(...args: unknown[]) => unknown`) is correct for
+  output/internal positions but wrong as an *input* type when declaring
+  signatures — under `strictFunctionTypes`, function parameters are
+  contravariant, so concrete-typed implementations (e.g.
+  `(a: number, b: number) => number`) are not assignable to an `unknown[]`
+  parameter list. Introduced `MathTSTyped` / `SignatureImpl` /
+  `SignatureRecord` in `core/src/typed/mathts-typed.ts` (and mirrored
+  input-position param types in `functions/src/core/function/typed.ts` plus the
+  local `typed` types in the solver/divide files) using `(...args: never[]) =>
+  unknown` — the correct top-type for "any function" in an input position —
+  which collapsed the entire `TS2769`/`referToSelf`/`referTo` cluster.
+- Remaining fixes were genuine null-safety guards and narrowing across the
+  activated factory / matrix / algebra layer, real strict null-safety fixes in
+  the path-mapped `expression` sources (precedence handling, closure-captured
+  regex match, etc.), `improveErrorMessage(unknown)`, `noop` helpers returning
+  `never`, ambient declarations for the untyped `seedrandom` /
+  `javascript-natural-sort` deps, and two genuine CSparse port typos fixed at
+  root (`csChol` read its pattern from the wrong array; `csSqr` decremented a
+  numeric offset instead of the workspace slot).
+
 ### Tooling (2026-06-27) — Recreated the AS-vs-JS WASM benchmark suite
 
 - Rebuilt `tools/benchmark/wasm/` from scratch as an **AssemblyScript-vs-JS**

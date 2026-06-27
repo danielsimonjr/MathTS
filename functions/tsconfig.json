@@ -8,7 +8,7 @@
     "noUnusedParameters": false,
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": false,
-    "strict": false,
+    "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {

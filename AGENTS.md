@@ -57,11 +57,13 @@ them: `functions/src/signal/{fft,conv}.ts`, `functions/src/type/local/Decimal.ts
 and the `functions/src/wasm/**` bindings reached via `wasm/index.ts` ←
 `tests/wasm/typescript-integration.test.ts`.
 
-`functions/tsconfig.json` still uses `strict:false`, but **not** because of
-dormant code anymore — the active graph (activated factories + path-mapped
-`expression`/`core`) has ~430 pre-existing strict violations (a separate
-cleanup). Trust the **export surface in `functions/src/index.ts` + a green
-`npm run typecheck`** as the source of truth.
+`functions/tsconfig.json` now uses `strict:true` (flipped 2026-06-27). The
+former ~430 strict violations across the active graph (activated factories +
+path-mapped `expression`/`core`) were fixed honestly — the dominant root cause
+was typed-function dispatch rejecting concrete-typed impls under
+`strictFunctionTypes` (fixed via `MathTSTyped`/`SignatureImpl` using `never[]`
+input-position param types). Trust the **export surface in
+`functions/src/index.ts` + a green `npm run typecheck`** as the source of truth.
 
 > ⚠️ The `docs/inventory/` reports (dated 2026-04-10) are stale: they predate
 > factory activation, evaluator wiring, AND this dormant purge. Do not trust

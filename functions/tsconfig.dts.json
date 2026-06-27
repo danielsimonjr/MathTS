@@ -10,5 +10,5 @@
       "workerpool": ["../parallel/types/workerpool.d.ts"]
     }
   },
-  "include": ["src/index.ts"]
+  "include": ["src/index.ts", "types/**/*.d.ts"]
 }
