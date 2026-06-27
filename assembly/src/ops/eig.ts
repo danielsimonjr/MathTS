@@ -3,7 +3,7 @@
  * cyclic Jacobi algorithm.
  *
  * AssemblyScript counterpart to the Rust `eigsSymmetric` /` spectralRadius`
- * kernels (`wasm-rust/crates/mathts-wasm/src/matrix/eigs.rs`) and the JS
+ * kernels (original Rust `matrix/eigs.rs`) and the JS
  * fallback in `matrix/src/operations/eig.ts`. Jacobi is compact,
  * allocation-light, and converges to (near) machine precision for symmetric
  * input — eigenvalues land on the diagonal, eigenvectors accumulate in `V`.

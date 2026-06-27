@@ -1,8 +1,8 @@
 /**
  * Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant.
  *
- * AssemblyScript port of `wasm-rust/crates/mathts-wasm/src/algebra/
- * decomposition.rs` (which Rust uses directly). The Rust crate operates
+ * AssemblyScript port of the original Rust `algebra/decomposition.rs`
+ * implementation (which Rust used directly). The Rust crate operated
  * on flat-memory pointers + lengths; AS-managed Float64Array / Int32Array
  * arguments carry their own length via the AS runtime header, so the
  * signatures here drop the per-buffer length params and keep `n`/`m` as
@@ -121,7 +121,7 @@ export function matrix_lu_decompose(
  *
  * Returns 0 on success.
  *
- * Algorithm mirrors `wasm-rust/.../decomposition.rs::qrDecomposition`:
+ * Algorithm mirrors the original Rust `decomposition.rs::qrDecomposition`:
  * apply Householder reflectors to a working copy of A (becomes R) and
  * accumulate them into Q starting from the identity. Householder vector
  * `v` is normalized such that `v[0] = 1`; the trailing entries live

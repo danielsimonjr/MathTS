@@ -1,8 +1,8 @@
 /**
  * Sort hot-loop kernels — AssemblyScript parity port (Slice 5.7a).
  *
- * Mirrors the algorithms in:
- *   wasm-rust/crates/mathts-wasm/src/sort.rs
+ * Mirrors the algorithms in the original Rust `sort.rs` implementation
+ * (removed in the Rust→AS migration).
  *
  * Three exported functions:
  *   - `sort_f64`    — in-place ascending sort (NaN-last, typed-array ABI).

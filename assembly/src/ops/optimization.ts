@@ -1,7 +1,7 @@
 /**
- * Optimization kernels — AssemblyScript fallback mirroring
- * `wasm-rust/.../numeric/optimization_ext.rs`: linear programming (simplex),
- * quadratic programming (projected gradient), and null-space basis.
+ * Optimization kernels — AssemblyScript fallback mirroring the original
+ * Rust `numeric/optimization_ext.rs` implementation: linear programming
+ * (simplex), quadratic programming (projected gradient), and null-space basis.
  *
  * Matrices are flat row-major `Float64Array`s with explicit dimensions.
  */

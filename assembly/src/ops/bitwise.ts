@@ -12,8 +12,8 @@
  * (a, result); the shift kernels also take per-element shift counts
  * stored in a parallel `Int32Array`.
  *
- * The legacy scalar bitwise primitives live in the Rust WASM crate
- * (`wasm-rust/crates/mathts-wasm/src/bitwise/operations.rs`); these
+ * The legacy scalar bitwise primitives lived in the original Rust
+ * `bitwise/operations.rs` (removed in the Rust→AS migration); these
  * elementwise variants are what `functions/src/typed/bitwise.ts`
  * dispatches to for large `Int32Array` inputs when the AS backend is
  * selected via `MATHJS_WASM_BACKEND=assemblyscript`.

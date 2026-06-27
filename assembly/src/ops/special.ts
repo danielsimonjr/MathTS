@@ -1,6 +1,7 @@
 /**
  * Orthogonal polynomials and integral special functions — AssemblyScript
- * fallback mirroring `wasm-rust/.../special/{orthogonal,integral}.rs`.
+ * fallback mirroring the original Rust `special/{orthogonal,integral}.rs`
+ * implementation.
  */
 
 const EULER: f64 = 0.5772156649015329;

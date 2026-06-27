@@ -1,6 +1,6 @@
 /**
- * Rational approximation — AssemblyScript fallback mirroring
- * `wasm-rust/.../numeric/approx_ext.rs`: partial-fraction residues and
+ * Rational approximation — AssemblyScript fallback mirroring the original
+ * Rust `numeric/approx_ext.rs` implementation: partial-fraction residues and
  * Padé approximants.
  */
 

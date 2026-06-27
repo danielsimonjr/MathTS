@@ -1,8 +1,8 @@
 /**
  * Polynomial hot-loop kernels — AssemblyScript parity port.
  *
- * These two exports mirror the Rust kernels in
- * `wasm-rust/crates/mathts-wasm/src/poly.rs`.
+ * These two exports mirror the original Rust kernels in `poly.rs`
+ * (removed in the Rust→AS migration).
  *
  * Naming uses snake_case to match the Rust export surface so the
  * bridge can probe for either backend with the same name lookup.

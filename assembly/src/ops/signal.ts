@@ -1,6 +1,6 @@
 /**
  * Signal windowing / resampling kernels — AssemblyScript fallback mirroring
- * `wasm-rust/.../signal/windowing.rs`.
+ * the original Rust `signal/windowing.rs` implementation.
  */
 
 /** Linear-interpolation resampling of `x` from `oldRate` to `newRate`. */

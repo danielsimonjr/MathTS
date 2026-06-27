@@ -14,8 +14,8 @@
  * Returns Float64Array of length n containing the solution x.
  * Returns a zero-length Float64Array on a singular (zero-pivot) system.
  *
- * Mirrors `tridiag_solve_f64` in
- * wasm-rust/crates/mathts-wasm/src/tridiag.rs.
+ * Mirrors `tridiag_solve_f64` in the original Rust `tridiag.rs`
+ * implementation.
  */
 
 export function tridiag_solve_f64(
@@ -88,8 +88,8 @@ export function tridiag_solve_f64(
  * (degenerate / rank-deficient input), matching the AS convention from
  * tridiag_solve_f64.
  *
- * Mirrors `divided_difference_f64` in
- * wasm-rust/crates/mathts-wasm/src/tridiag.rs.
+ * Mirrors `divided_difference_f64` in the original Rust `tridiag.rs`
+ * implementation.
  */
 export function divided_difference_f64(
   xs: Float64Array,

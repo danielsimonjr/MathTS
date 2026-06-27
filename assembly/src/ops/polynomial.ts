@@ -1,6 +1,6 @@
 /**
- * Polynomial algebra — AssemblyScript fallback mirroring
- * `wasm-rust/.../algebra/polynomial_ext.rs`.
+ * Polynomial algebra — AssemblyScript fallback mirroring the original
+ * Rust `algebra/polynomial_ext.rs` implementation.
  *
  * Polynomials are coefficient arrays, constant term first (`index = power`).
  * Functions take and return `Float64Array`; `discriminant` / `resultant`

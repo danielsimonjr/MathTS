@@ -1,6 +1,6 @@
 /**
- * Number-theory functions — AssemblyScript fallback mirroring
- * `wasm-rust/.../combinatorics/number_theory.rs`.
+ * Number-theory functions — AssemblyScript fallback mirroring the original
+ * Rust `combinatorics/number_theory.rs` implementation.
  *
  * Array-valued functions return a `Float64Array` (AssemblyScript manages the
  * memory); `chineseRemainder` takes two `Float64Array`s.
