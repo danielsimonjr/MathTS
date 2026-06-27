@@ -71,6 +71,44 @@ import { BigNumber, isBigNumber as _isBigNumber } from '../types/bignumber.js';
 export type { TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToSelf };
 
 /**
+ * Any concrete implementation accepted when *declaring* a typed signature.
+ *
+ * typed-function's published `SignatureFunction` is `(...args: unknown[]) =>
+ * unknown`, which is correct for *internal/output* positions (where the stored
+ * impl is later CALLED with validated args) but wrong as an *input* type:
+ * under `strictFunctionTypes`, function parameters are contravariant, so a
+ * concrete impl such as `(a: number, b: number) => number` is NOT assignable
+ * to an `unknown[]` parameter list (`unknown` is not assignable to `number`).
+ * The correct top-type for "any function" in an input position uses `never`
+ * parameters — every function is assignable to it because `never` is
+ * assignable to every parameter type. This is exactly the set of values
+ * typed-function genuinely accepts when declaring signatures.
+ */
+export type SignatureImpl = (...args: never[]) => unknown;
+
+/** Signature record accepted by the MathTS typed factory (see {@link SignatureImpl}). */
+export type SignatureRecord = Record<string, SignatureImpl | ReferTo | ReferToSelf>;
+
+/**
+ * The MathTS typed-function factory type.
+ *
+ * Structurally identical to typed-function's {@link TypedInstance} except its
+ * call signatures accept implementations declared with concrete parameter
+ * types (see {@link SignatureImpl}). All instance methods are inherited
+ * unchanged via `Omit<TypedInstance, never>` (a mapped type, which drops the
+ * overly-strict published call signatures while preserving every method).
+ */
+export interface MathTSTyped extends Omit<TypedInstance, never> {
+  (name: string, signatures: SignatureRecord): TypedFunction;
+  (signatures: SignatureRecord): TypedFunction;
+  // Mirror of typed-function's variadic overload (compose/merge form), kept so
+  // `MathTSTyped` remains assignable to `TypedInstance`.
+  (
+    ...args: Array<string | SignatureRecord | TypedFunction | (SignatureImpl & { signature: string })>
+  ): TypedFunction;
+}
+
+/**
  * Type definition for typed-function
  */
 export interface TypeDef {
@@ -471,7 +509,11 @@ export function createMathTSTyped(): TypedInstance {
  * add(1, new Complex(2, 3));              // Complex(3, 3) - auto-converts
  * ```
  */
-export const mathTyped = createMathTSTyped();
+// Safe downcast: `MathTSTyped` only widens the input parameter type of the
+// call signatures (and is itself assignable to `TypedInstance`), so the runtime
+// factory genuinely satisfies it — the published call signature was simply too
+// strict for declaring concrete-typed implementations.
+export const mathTyped: MathTSTyped = createMathTSTyped() as MathTSTyped;
 
 // =============================================================================
 // Re-export typed-function for convenience
