@@ -22,7 +22,7 @@ const CELL_TYPE_KEYS: CellType[] = [
 ];
 
 /** Non-type cell keys that are handled explicitly and excluded from metadata. */
-const RESERVED_CELL_KEYS = ['id', 'depends_on', 'language', 'format'];
+const RESERVED_CELL_KEYS = ['id', 'depends_on', 'language', 'format', 'output', 'error'];
 
 /** Valid MathTS identifier — required for cell ids so by-id dependency refs work. */
 const IDENTIFIER_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
@@ -121,6 +121,8 @@ function mapCell(raw: unknown, index: number, errors: string[]): Cell {
   const cell: Cell = { id, type, content };
   if (dependsOn) cell.dependsOn = dependsOn;
   if (Object.keys(metadata).length > 0) cell.metadata = metadata;
+  if (raw.output !== undefined) cell.output = raw.output;
+  if (raw.error !== undefined) cell.error = String(raw.error);
   return cell;
 }
 
@@ -198,12 +200,53 @@ export function parseWorkbook(content: string): ParseResult {
   }
 }
 
+/** Serialize one cell to its YAML mapping shape (round-trips through mapCell). */
+function serializeCell(cell: Cell): Record<string, unknown> {
+  // Structural keys come from the cell fields, never from metadata.
+  const out: Record<string, unknown> = { [cell.type]: cell.content, id: cell.id };
+  if (cell.dependsOn && cell.dependsOn.length > 0) out.depends_on = cell.dependsOn;
+
+  if (cell.metadata) {
+    for (const [key, value] of Object.entries(cell.metadata)) {
+      // Never let metadata clobber a structural/type key (would brick re-parse).
+      if ((CELL_TYPE_KEYS as string[]).includes(key) || RESERVED_CELL_KEYS.includes(key)) continue;
+      out[key] = value;
+    }
+  }
+
+  if (cell.output !== undefined) out.output = cell.output;
+  if (cell.error !== undefined) out.error = String(cell.error);
+  return out;
+}
+
 /**
- * Serialize a workbook to YAML
+ * Serialize a workbook to YAML that round-trips through {@link parseWorkbook}.
+ *
+ * Structural fidelity (version/metadata/runtime/cells: id/type/content/dependsOn/
+ * metadata) is exact. Persisted `output` values are best-effort: plain
+ * primitives/arrays/objects round-trip exactly (the YAML serializer quotes
+ * scalars that would otherwise re-type); exotic class instances serialize to
+ * their plain shape. Throws only on a structurally invalid workbook.
  */
-export function serializeWorkbook(_workbook: Workbook): string {
-  // TODO: Implement YAML serialization
-  throw new Error('serializeWorkbook not yet implemented');
+export function serializeWorkbook(workbook: Workbook): string {
+  if (!workbook || !Array.isArray(workbook.cells)) {
+    throw new Error('serializeWorkbook: invalid workbook (missing "cells" array)');
+  }
+
+  const runtime: RuntimeConfig = {
+    engine: workbook.runtime?.engine ?? 'mathts',
+    execution: workbook.runtime?.execution ?? 'reactive',
+  };
+  if (workbook.runtime?.timeout !== undefined) runtime.timeout = workbook.runtime.timeout;
+
+  const doc = {
+    version: String(workbook.version ?? '1.0'),
+    metadata: workbook.metadata ?? {},
+    runtime,
+    cells: workbook.cells.map(serializeCell),
+  };
+
+  return stringifyYaml(doc, { lineWidth: 0 });
 }
 
 /**

@@ -161,14 +161,32 @@ cells:
 });
 
 describe('serializeWorkbook', () => {
-  it('should throw not-yet-implemented error', () => {
+  it('should produce a YAML string for a valid workbook', () => {
     const workbook: Workbook = {
       version: '1.0',
-      metadata: {},
+      metadata: { title: 'T' },
       runtime: { engine: 'mathts', execution: 'reactive' },
-      cells: [],
+      cells: [{ id: 'a', type: 'code', content: '1 + 1' }],
     };
-    expect(() => serializeWorkbook(workbook)).toThrow('serializeWorkbook not yet implemented');
+    const yaml = serializeWorkbook(workbook);
+    expect(typeof yaml).toBe('string');
+    expect(yaml).toContain('cells:');
+    expect(yaml).toContain('id: a');
+  });
+
+  it('should throw on a structurally invalid workbook (no cells array)', () => {
+    expect(() => serializeWorkbook({ version: '1.0' } as unknown as Workbook)).toThrow();
+  });
+});
+
+describe('parseWorkbook - output/error round-trip fields', () => {
+  it('should read output/error onto the cell, not into metadata', () => {
+    const wb = parseWorkbook(
+      'cells:\n  - code: "1"\n    id: a\n    output: 42\n    error: "boom"'
+    ).workbook!;
+    expect(wb.cells[0].output).toBe(42);
+    expect(wb.cells[0].error).toBe('boom');
+    expect(wb.cells[0].metadata).toBeUndefined();
   });
 });
 

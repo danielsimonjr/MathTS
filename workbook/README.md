@@ -25,9 +25,22 @@ mtsw validate example.mtsw
 # Print the dependency graph.
 mtsw graph example.mtsw                 # text adjacency
 mtsw graph example.mtsw -f mermaid      # Mermaid `graph TD`
+
+# Scaffold a new workbook (<name>.mtsw) from a template.
+mtsw new my-notebook                    # basic template; refuses to overwrite
+mtsw new my-notebook -t basic --force   # overwrite an existing file
+
+# Strip cell outputs (for git): prints to stdout, or -w to rewrite in place.
+mtsw strip example.mtsw
+mtsw strip example.mtsw -w
+
+# Run and persist outputs back into the file (opt-in; never writes without --write).
+mtsw run example.mtsw --write
 ```
 
 Diagnostics and errors are written to stderr; results (including `--json`) go to stdout, so the exit code can be used in scripts independently of the output.
+
+**Saving / round-trip.** `serializeWorkbook` (and the write commands above) round-trips a workbook through the parser: structure is preserved exactly, and persisted `output` values round-trip best-effort (plain numbers/strings/arrays/objects exactly; exotic types to their plain shape). All writes are **atomic** (temp file + rename). Note that any write path is parse→serialize and therefore **drops YAML comments and re-orders keys** — a CST-preserving in-place rewrite is a future enhancement.
 
 ## Programmatic API
 

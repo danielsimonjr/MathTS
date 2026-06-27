@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { dispatch } from '../src/cli.js';
@@ -125,5 +125,102 @@ describe('cli graph', () => {
     const r = await dispatch(['graph', '-f', 'mermaid', fixture(PASSING)]);
     expect(r.exitCode).toBe(0);
     expect(r.stdout).toMatch(/^graph TD/);
+  });
+});
+
+describe('cli run --write', () => {
+  it('should persist outputs back into the file with --write', async () => {
+    const path = fixture('cells:\n  - code: "2 + 3"\n    id: a');
+    const before = readFileSync(path, 'utf-8');
+    expect(before).not.toContain('output');
+
+    const r = await dispatch(['run', path, '--write']);
+    expect(r.exitCode).toBe(0);
+    const after = readFileSync(path, 'utf-8');
+    expect(after).toContain('output: 5');
+    // stdout stays clean for pipelines; confirmation goes to stderr
+    expect(r.stdout).toBe('');
+    expect(r.stderr).toContain(path);
+  });
+
+  it('should NOT modify the file without --write', async () => {
+    const src = 'cells:\n  - code: "2 + 3"\n    id: a';
+    const path = fixture(src);
+    const r = await dispatch(['run', path]);
+    expect(r.exitCode).toBe(0);
+    expect(readFileSync(path, 'utf-8')).toBe(src);
+  });
+});
+
+describe('cli strip', () => {
+  const WITH_OUTPUTS = 'cells:\n  - code: "2 + 3"\n    id: a\n    output: 5';
+
+  it('should strip outputs to stdout by default (file unchanged)', async () => {
+    const path = fixture(WITH_OUTPUTS);
+    const r = await dispatch(['strip', path]);
+    expect(r.exitCode).toBe(0);
+    expect(r.stdout).toContain('id: a');
+    expect(r.stdout).not.toContain('output');
+    expect(readFileSync(path, 'utf-8')).toBe(WITH_OUTPUTS); // unchanged
+  });
+
+  it('should rewrite the file in place with -w', async () => {
+    const path = fixture(WITH_OUTPUTS);
+    const r = await dispatch(['strip', path, '-w']);
+    expect(r.exitCode).toBe(0);
+    expect(readFileSync(path, 'utf-8')).not.toContain('output');
+    expect(r.stderr).toContain(path);
+  });
+});
+
+describe('cli new', () => {
+  // Keep cwd === d for the WHOLE async operation (await inside the scope).
+  async function inDir<T>(d: string, fn: () => Promise<T>): Promise<T> {
+    const prev = process.cwd();
+    process.chdir(d);
+    try {
+      return await fn();
+    } finally {
+      process.chdir(prev);
+    }
+  }
+
+  it('should scaffold a runnable workbook', async () => {
+    const created = await inDir(dir, () => dispatch(['new', 'demo']));
+    expect(created.exitCode).toBe(0);
+    const content = readFileSync(join(dir, 'demo.mtsw'), 'utf-8');
+    expect(content).toContain('cells:');
+    // the scaffold must itself parse + run clean
+    const run = await inDir(dir, () => dispatch(['run', 'demo.mtsw']));
+    expect(run.exitCode).toBe(0);
+  });
+
+  it('should refuse to overwrite an existing file without --force', async () => {
+    await inDir(dir, () => dispatch(['new', 'dup']));
+    const r = await inDir(dir, () => dispatch(['new', 'dup']));
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr.toLowerCase()).toContain('exists');
+  });
+
+  it('should reject a name containing path separators', async () => {
+    const r = await inDir(dir, () => dispatch(['new', '../evil']));
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr.toLowerCase()).toMatch(/separator|invalid|name/);
+  });
+
+  it('should reject a name containing a colon (Windows drive-relative / ADS)', async () => {
+    const r = await inDir(dir, () => dispatch(['new', 'C:evil']));
+    expect(r.exitCode).toBe(1);
+  });
+
+  it('should reject dot-only names', async () => {
+    const r = await inDir(dir, () => dispatch(['new', '..']));
+    expect(r.exitCode).toBe(1);
+  });
+
+  it('should reject an unknown template', async () => {
+    const r = await inDir(dir, () => dispatch(['new', 'demo2', '-t', 'nope']));
+    expect(r.exitCode).toBe(1);
+    expect(r.stderr.toLowerCase()).toContain('template');
   });
 });
