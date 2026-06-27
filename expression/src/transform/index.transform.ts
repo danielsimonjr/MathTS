@@ -1,20 +1,6 @@
 import { isArray, isBigInt, isBigNumber, isMatrix, isNumber, isRange } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 
-interface Range {
-  start: number;
-  end: number;
-  step: number;
-}
-
-interface BigNumber {
-  toNumber(): number;
-}
-
-interface Matrix {
-  map(callback: (v: any) => any): Matrix;
-}
-
 interface IndexClass {
   new (...args: any[]): any;
   apply(instance: any, args: any[]): void;

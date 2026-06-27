@@ -31,7 +31,7 @@ export const createSubsetTransform = /* #__PURE__ */ factory(
     return typed('subset', {
       '...any': function (args: any[]): any {
         try {
-          return subset.apply(null, args);
+          return subset(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

@@ -36,7 +36,7 @@ export const createMaxTransform = /* #__PURE__ */ factory(
         args = lastDimToZeroBase(args);
 
         try {
-          return max.apply(null, args);
+          return max(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

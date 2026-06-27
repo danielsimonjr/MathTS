@@ -7,10 +7,6 @@ interface TypedFunction<T = any> {
   (...args: any[]): T;
 }
 
-interface BigNumber {
-  minus(x: number): BigNumber;
-}
-
 interface Dependencies {
   typed: TypedFunction;
   isInteger: (x: any) => boolean;
@@ -45,7 +41,7 @@ export const createMapSlicesTransform = /* #__PURE__ */ factory(
         }
 
         try {
-          return mapSlices.apply(null, args);
+          return mapSlices(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

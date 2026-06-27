@@ -35,7 +35,7 @@ export const createDiffTransform = /* #__PURE__ */ factory(
         args = lastDimToZeroBase(args);
 
         try {
-          return diff.apply(null, args);
+          return diff(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

@@ -9,7 +9,7 @@ import { evaluate, parse } from '../../functions/src/factories/evaluate.js';
 
 // The evaluate function from factories takes (expr, scope?) and we need a
 // scope-aware evaluate for the Parser. Wrap to match signature.
-function scopedEvaluate(expr: string | string[], scope: Map<string, any>): any {
+function _scopedEvaluate(expr: string | string[], scope: Map<string, any>): any {
   // Convert Map to plain object for evaluate
   const plainScope: Record<string, any> = {};
   scope.forEach((v, k) => {

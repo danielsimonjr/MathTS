@@ -34,7 +34,7 @@ export const createMeanTransform = /* #__PURE__ */ factory(
         args = lastDimToZeroBase(args);
 
         try {
-          return mean.apply(null, args);
+          return mean(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

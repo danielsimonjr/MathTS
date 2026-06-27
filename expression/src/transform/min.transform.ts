@@ -36,7 +36,7 @@ export const createMinTransform = /* #__PURE__ */ factory(
         args = lastDimToZeroBase(args);
 
         try {
-          return min.apply(null, args);
+          return min(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

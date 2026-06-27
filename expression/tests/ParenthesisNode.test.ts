@@ -13,7 +13,7 @@ const Node = createNode({ mathWithTransform: mathScope });
 const isBounded = (v: any): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const ParenthesisNode = createParenthesisNode({ Node });
-const OperatorNode = createOperatorNode({ Node });
+const _OperatorNode = createOperatorNode({ Node });
 
 function makeConst(v: any) {
   return new ConstantNode(v);

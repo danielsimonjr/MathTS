@@ -46,7 +46,7 @@ export const createVarianceTransform = /* #__PURE__ */ factory(
         args = lastDimToZeroBase(args);
 
         try {
-          return variance.apply(null, args);
+          return variance(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

@@ -41,7 +41,7 @@ export const createColumnTransform = /* #__PURE__ */ factory(
         }
 
         try {
-          return column.apply(null, args);
+          return column(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

@@ -20,7 +20,7 @@ function constantNode(value: any) {
 function symbolNode(name: string) {
   return { type: 'SymbolNode', isSymbolNode: true, name };
 }
-function arrayNode(items: any[]) {
+function _arrayNode(items: any[]) {
   return { type: 'ArrayNode', isArrayNode: true, items };
 }
 function objectNode(properties: Record<string, any>) {

@@ -207,10 +207,15 @@ export const createParserClass = /* #__PURE__ */ factory(
   { isClass: true }
 );
 
-function isExpressionFunction(value: any): boolean {
+/** A compiled expression function carries its source `syntax` and `expr`. */
+type ExpressionFunction = ((...args: unknown[]) => unknown) & {
+  syntax: string;
+  expr: string;
+};
+
+function isExpressionFunction(value: unknown): value is ExpressionFunction {
+  const fn = value as Partial<ExpressionFunction>;
   return (
-    typeof value === 'function' &&
-    typeof value.syntax === 'string' &&
-    typeof value.expr === 'string'
+    typeof value === 'function' && typeof fn.syntax === 'string' && typeof fn.expr === 'string'
   );
 }

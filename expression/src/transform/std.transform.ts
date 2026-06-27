@@ -35,7 +35,7 @@ export const createStdTransform = /* #__PURE__ */ factory(
         args = lastDimToZeroBase(args);
 
         try {
-          return std.apply(null, args);
+          return std(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

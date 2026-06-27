@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-27) — `expression` eslint cleanup (honest typing, in progress)
+
+- Fixed all non-`any` eslint findings in `expression` at root (62 problems incl.
+  16 errors): removed 20 dead `eslint-disable ... no-unmodified-loop-condition`
+  directives in `parse.ts` (and a bare directive in `node/Node.ts`); replaced
+  `.apply(null, args)` with spread calls across 14 `transform/*.ts` adapters
+  (`prefer-spread`); converted `arguments[n]` to named regex-replace callback
+  params in `utils/number.ts` and `utils/bignumber/formatter.ts`
+  (`prefer-rest-params`); removed unused local interfaces/imports in
+  `transform/{concat,cumsum,index,mapSlices}.transform.ts`; annotated an empty
+  `catch` in `utils/object.ts`; switched `@ts-ignore`→`@ts-expect-error` in
+  `utils/latex.ts`; typed `isFunction`'s predicate as a call signature and made
+  `Parser.ts`'s `isExpressionFunction` a real `value is ExpressionFunction` type
+  guard (`no-unsafe-function-type`); and silenced genuinely-unused test
+  scaffolding via `_`-prefix / removal. No runtime behavior changed; expression
+  suite stays green (1966 tests, incl. the sandbox security regression test).
+
 ### Changed (2026-06-27) — `core`, `parallel`, `workerpool` driven to ZERO eslint warnings (honest typing)
 
 - Replaced `@typescript-eslint/no-explicit-any` sites with real types across the

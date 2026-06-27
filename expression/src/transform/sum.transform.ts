@@ -35,7 +35,7 @@ export const createSumTransform = /* #__PURE__ */ factory(
         args = lastDimToZeroBase(args);
 
         try {
-          return sum.apply(null, args);
+          return sum(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

@@ -26,7 +26,7 @@ function opNode(fn: string, args: any[] = [], implicit = false) {
   };
 }
 
-function constantNode(value: any) {
+function _constantNode(value: any) {
   return {
     type: 'ConstantNode',
     isConstantNode: true,
@@ -40,7 +40,7 @@ function constantNode(value: any) {
   };
 }
 
-function symbolNode(name: string) {
+function _symbolNode(name: string) {
   return {
     type: 'SymbolNode',
     isSymbolNode: true,
@@ -54,7 +54,7 @@ function symbolNode(name: string) {
   };
 }
 
-function relationalNode() {
+function _relationalNode() {
   return {
     type: 'RelationalNode',
     isRelationalNode: true,

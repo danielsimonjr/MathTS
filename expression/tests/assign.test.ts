@@ -10,7 +10,7 @@ function makeObjectIndex(prop: string) {
   };
 }
 
-function makeNumericIndex(i: number) {
+function makeNumericIndex(_i: number) {
   return {
     isObjectProperty: () => false,
     getObjectProperty: () => null,

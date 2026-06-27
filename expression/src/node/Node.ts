@@ -148,7 +148,6 @@ export const createNode = /* #__PURE__ */ factory(
        */
       traverse(callback: (node: Node, path: string | null, parent: Node | null) => void): void {
         // execute callback for itself
-        // eslint-disable-next-line
         callback(this, null, null);
 
         // recursively traverse over all children of a node

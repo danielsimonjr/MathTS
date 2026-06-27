@@ -178,11 +178,12 @@ export function format(value: any, options: any) {
       }
 
       // remove trailing zeros after the decimal point
-      return str.replace(/((\.\d*?)(0+))($|e)/, function () {
-        const digits = arguments[2];
-        const e = arguments[4];
-        return digits !== '.' ? digits + e : e;
-      });
+      return str.replace(
+        /((\.\d*?)(0+))($|e)/,
+        function (_match: string, _g1: string, digits: string, _g3: string, e: string) {
+          return digits !== '.' ? digits + e : e;
+        }
+      );
     }
     default:
       throw new Error(

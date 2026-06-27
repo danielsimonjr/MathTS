@@ -339,9 +339,7 @@ export function format(
       // remove trailing zeros after the decimal point
       return toPrecision(value, precision, options as FormatOptions).replace(
         /((\.\d*?)(0+))($|e)/,
-        function () {
-          const digits = arguments[2];
-          const e = arguments[4];
+        function (_match: string, _g1: string, digits: string, _g3: string, e: string) {
           return digits !== '.' ? digits + e : e;
         }
       );

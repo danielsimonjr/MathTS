@@ -83,7 +83,7 @@ export const createRangeTransform = /* #__PURE__ */ factory(
           args.push(true);
         }
 
-        return range.apply(null, args);
+        return range(...args);
       },
     });
   },

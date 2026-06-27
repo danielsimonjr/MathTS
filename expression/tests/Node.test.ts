@@ -20,7 +20,7 @@ const ConstantNode = createConstantNode({
 });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 const OperatorNode = createOperatorNode({ Node });
-const ParenthesisNode = createParenthesisNode({ Node });
+const _ParenthesisNode = createParenthesisNode({ Node });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

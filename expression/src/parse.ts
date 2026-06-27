@@ -511,7 +511,7 @@ export const createParse = /* #__PURE__ */ factory(
     function getTokenSkipNewline(state: ParserState): void {
       do {
         getToken(state);
-      } while (state.token === '\n'); // eslint-disable-line no-unmodified-loop-condition
+      } while (state.token === '\n');
     }
 
     /**
@@ -679,7 +679,6 @@ export const createParse = /* #__PURE__ */ factory(
 
       // TODO: simplify this loop
       while (state.token === '\n' || state.token === ';') {
-        // eslint-disable-line no-unmodified-loop-condition
         if (blocks.length === 0 && node) {
           visible = state.token !== ';';
           blocks.push({ node, visible });
@@ -785,7 +784,6 @@ export const createParse = /* #__PURE__ */ factory(
       let node = parseLogicalOr(state);
 
       while (state.token === '?') {
-        // eslint-disable-line no-unmodified-loop-condition
         // set a conditional level, the range operator will be ignored as long
         // as conditionalLevel === state.nestingLevel.
         const prev = state.conditionalLevel;
@@ -821,7 +819,6 @@ export const createParse = /* #__PURE__ */ factory(
       let node = parseLogicalXor(state);
 
       while (state.token === 'or') {
-        // eslint-disable-line no-unmodified-loop-condition
         getTokenSkipNewline(state);
         node = new OperatorNode('or', 'or', [node, parseLogicalXor(state)]);
       }
@@ -838,7 +835,6 @@ export const createParse = /* #__PURE__ */ factory(
       let node = parseLogicalAnd(state);
 
       while (state.token === 'xor') {
-        // eslint-disable-line no-unmodified-loop-condition
         getTokenSkipNewline(state);
         node = new OperatorNode('xor', 'xor', [node, parseLogicalAnd(state)]);
       }
@@ -855,7 +851,6 @@ export const createParse = /* #__PURE__ */ factory(
       let node = parseBitwiseOr(state);
 
       while (state.token === 'and') {
-        // eslint-disable-line no-unmodified-loop-condition
         getTokenSkipNewline(state);
         node = new OperatorNode('and', 'and', [node, parseBitwiseOr(state)]);
       }
@@ -872,7 +867,6 @@ export const createParse = /* #__PURE__ */ factory(
       let node = parseBitwiseXor(state);
 
       while (state.token === '|') {
-        // eslint-disable-line no-unmodified-loop-condition
         getTokenSkipNewline(state);
         node = new OperatorNode('|', 'bitOr', [node, parseBitwiseXor(state)]);
       }
@@ -889,7 +883,6 @@ export const createParse = /* #__PURE__ */ factory(
       let node = parseBitwiseAnd(state);
 
       while (state.token === '^|') {
-        // eslint-disable-line no-unmodified-loop-condition
         getTokenSkipNewline(state);
         node = new OperatorNode('^|', 'bitXor', [node, parseBitwiseAnd(state)]);
       }
@@ -906,7 +899,6 @@ export const createParse = /* #__PURE__ */ factory(
       let node = parseRelational(state);
 
       while (state.token === '&') {
-        // eslint-disable-line no-unmodified-loop-condition
         getTokenSkipNewline(state);
         node = new OperatorNode('&', 'bitAnd', [node, parseRelational(state)]);
       }
@@ -932,7 +924,6 @@ export const createParse = /* #__PURE__ */ factory(
       };
 
       while (hasOwnProperty(operators, state.token)) {
-        // eslint-disable-line no-unmodified-loop-condition
         const cond = { name: state.token, fn: operators[state.token] };
         conditionals.push(cond);
         getTokenSkipNewline(state);
@@ -1052,7 +1043,6 @@ export const createParse = /* #__PURE__ */ factory(
 
         // parse step and end
         while (state.token === ':' && params.length < 3) {
-          // eslint-disable-line no-unmodified-loop-condition
           getTokenSkipNewline(state);
 
           if (
@@ -1347,7 +1337,6 @@ export const createParse = /* #__PURE__ */ factory(
       let node = parseLeftHandOperators(state);
 
       while (state.token === '??') {
-        // eslint-disable-line no-unmodified-loop-condition
         getTokenSkipNewline(state);
         node = new OperatorNode('??', 'nullish', [node, parseLeftHandOperators(state)]);
       }
@@ -1435,7 +1424,6 @@ export const createParse = /* #__PURE__ */ factory(
 
             // parse a list with parameters
             while ((state.token as string) === ',') {
-              // eslint-disable-line no-unmodified-loop-condition
               getToken(state);
               params.push(parseAssignment(state));
             }
@@ -1510,7 +1498,6 @@ export const createParse = /* #__PURE__ */ factory(
 
       // Iterate and handle chained accessors, including repeated optional chaining
       while (true) {
-        // eslint-disable-line no-unmodified-loop-condition
         // Track whether an optional chaining operator precedes the next accessor
         let optional = false;
 
@@ -1542,7 +1529,6 @@ export const createParse = /* #__PURE__ */ factory(
 
               // parse a list with parameters
               while ((state.token as string) === ',') {
-                // eslint-disable-line no-unmodified-loop-condition
                 getToken(state);
                 params.push(parseAssignment(state));
               }
@@ -1571,7 +1557,6 @@ export const createParse = /* #__PURE__ */ factory(
 
             // parse a list with parameters
             while ((state.token as string) === ',') {
-              // eslint-disable-line no-unmodified-loop-condition
               getToken(state);
               params.push(parseAssignment(state));
             }
@@ -1708,7 +1693,6 @@ export const createParse = /* #__PURE__ */ factory(
 
             // the rows of the matrix are separated by dot-comma's
             while ((state.token as string) === ';') {
-              // eslint-disable-line no-unmodified-loop-condition
               getToken(state);
 
               if ((state.token as string) !== ']') {
@@ -1772,7 +1756,6 @@ export const createParse = /* #__PURE__ */ factory(
       let len = 1;
 
       while (state.token === ',') {
-        // eslint-disable-line no-unmodified-loop-condition
         getToken(state);
 
         // parse expression
@@ -1822,7 +1805,7 @@ export const createParse = /* #__PURE__ */ factory(
             // parse key
             properties[key] = parseAssignment(state);
           }
-        } while ((state.token as string) === ','); // eslint-disable-line no-unmodified-loop-condition
+        } while ((state.token as string) === ',');
 
         if ((state.token as string) !== '}') {
           throw createSyntaxError(state, 'Comma , or bracket } expected after object value');

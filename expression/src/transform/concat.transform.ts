@@ -8,10 +8,6 @@ interface TypedFunction<T = any> {
   find(func: any, signature: string[]): TypedFunction<T>;
 }
 
-interface BigNumber {
-  minus(x: number): BigNumber;
-}
-
 interface Dependencies {
   typed: TypedFunction;
   matrix: (...args: any[]) => any;
@@ -46,7 +42,7 @@ export const createConcatTransform = /* #__PURE__ */ factory(
         }
 
         try {
-          return concat.apply(null, args);
+          return concat(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

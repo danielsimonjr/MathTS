@@ -258,7 +258,9 @@ export function canDefineProperty(): boolean {
       });
       return true;
     }
-  } catch {}
+  } catch {
+    // defineProperty not supported; fall through to return false
+  }
 
   return false;
 }

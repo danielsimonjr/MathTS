@@ -5,7 +5,7 @@ import { createHelpClass } from '../src/Help.js';
 // createHelpClass needs only an `evaluate` function.
 // We provide a minimal mock that evaluates simple expressions.
 
-const mockMathScope: Record<string, any> = {
+const _mockMathScope: Record<string, any> = {
   sin: Math.sin,
   cos: Math.cos,
   sqrt: Math.sqrt,

@@ -6,7 +6,7 @@ import { createIndexNode } from '../src/node/IndexNode.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
 // Minimal index function: returns a mock index object
-function makeIndex(...dims: any[]) {
+function _makeIndex(...dims: any[]) {
   return { dimensions: dims, isIndex: true, isObjectProperty: () => false };
 }
 
@@ -30,7 +30,7 @@ function makeConst(v: any) {
   return new ConstantNode(v);
 }
 
-function makeSym(name: string) {
+function _makeSym(name: string) {
   return new SymbolNode(name);
 }
 

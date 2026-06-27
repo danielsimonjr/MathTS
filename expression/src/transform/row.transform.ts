@@ -41,7 +41,7 @@ export const createRowTransform = /* #__PURE__ */ factory(
         }
 
         try {
-          return row.apply(null, args);
+          return row(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }

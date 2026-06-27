@@ -12,7 +12,7 @@ const mathScope: Record<string, any> = {
 const Node = createNode({ mathWithTransform: mathScope });
 const isBounded = (v: any): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
-const SymbolNode = createSymbolNode({ math: mathScope, Node });
+const _SymbolNode = createSymbolNode({ math: mathScope, Node });
 const ObjectNode = createObjectNode({ Node });
 
 function makeConst(v: any) {

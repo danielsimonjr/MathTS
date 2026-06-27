@@ -295,7 +295,7 @@ export function isHelp(x: unknown): x is Help {
   return obj.constructor?.prototype?.isHelp === true;
 }
 
-export function isFunction(x: unknown): x is Function {
+export function isFunction(x: unknown): x is (...args: unknown[]) => unknown {
   return typeof x === 'function';
 }
 

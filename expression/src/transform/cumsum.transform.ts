@@ -7,10 +7,6 @@ interface TypedFunction<T = any> {
   (...args: any[]): T;
 }
 
-interface BigNumber {
-  minus(x: number): BigNumber;
-}
-
 interface Dependencies {
   typed: TypedFunction;
   add: (...args: any[]) => any;
@@ -46,7 +42,7 @@ export const createCumSumTransform = /* #__PURE__ */ factory(
         }
 
         try {
-          return cumsum.apply(null, args);
+          return cumsum(...args);
         } catch (err) {
           throw errorTransform(err as Error);
         }
