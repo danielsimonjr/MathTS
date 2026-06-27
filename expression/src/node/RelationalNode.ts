@@ -159,12 +159,14 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        */
       _toString(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        // `this` is the RelationalNode being rendered (a registered operator),
+        // so its precedence is never null; only params may lack a precedence.
         const precedence = getPrecedence(
           this as any,
           parenthesis,
           (options && options.implicit) || 'hide',
           undefined
-        );
+        ) as number;
 
         const paramStrings = this.params.map(function (p: Node, _index: number): string {
           const paramPrecedence = getPrecedence(
@@ -219,12 +221,14 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        */
       _toHTML(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        // `this` is the RelationalNode being rendered (a registered operator),
+        // so its precedence is never null; only params may lack a precedence.
         const precedence = getPrecedence(
           this as any,
           parenthesis,
           (options && options.implicit) || 'hide',
           undefined
-        );
+        ) as number;
 
         const paramStrings = this.params.map(function (p: Node, _index: number): string {
           const paramPrecedence = getPrecedence(
@@ -261,12 +265,14 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        */
       _toTex(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+        // `this` is the RelationalNode being rendered (a registered operator),
+        // so its precedence is never null; only params may lack a precedence.
         const precedence = getPrecedence(
           this as any,
           parenthesis,
           (options && options.implicit) || 'hide',
           undefined
-        );
+        ) as number;
 
         const paramStrings = this.params.map(function (p: Node, _index: number): string {
           const paramPrecedence = getPrecedence(

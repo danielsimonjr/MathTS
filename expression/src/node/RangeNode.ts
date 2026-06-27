@@ -52,7 +52,9 @@ export const createRangeNode = /* #__PURE__ */ factory(
       parenthesis: string,
       implicit: string
     ): Parens {
-      const precedence = getPrecedence(node as any, parenthesis, implicit, undefined);
+      // `node` is the RangeNode being rendered (a registered operator), so its
+      // precedence is never null; only start/step/end may lack a precedence.
+      const precedence = getPrecedence(node as any, parenthesis, implicit, undefined) as number;
       const parens: Parens = { start: false, end: false };
 
       const startPrecedence = getPrecedence(node.start as any, parenthesis, implicit, undefined);

@@ -153,7 +153,14 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        */
       _toString(options?: any): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
-        const precedence = getPrecedence(this, parenthesis, options && options.implicit, undefined);
+        // `this` is the ConditionalNode being rendered (a registered operator),
+        // so its precedence is never null; only the branches may lack one.
+        const precedence = getPrecedence(
+          this,
+          parenthesis,
+          options && options.implicit,
+          undefined
+        ) as number;
 
         // Enclose Arguments in parentheses if they are an OperatorNode
         // or have lower or equal precedence
@@ -247,7 +254,14 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        */
       _toHTML(options?: any): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
-        const precedence = getPrecedence(this, parenthesis, options && options.implicit, undefined);
+        // `this` is the ConditionalNode being rendered (a registered operator),
+        // so its precedence is never null; only the branches may lack one.
+        const precedence = getPrecedence(
+          this,
+          parenthesis,
+          options && options.implicit,
+          undefined
+        ) as number;
 
         // Enclose Arguments in parentheses if they are an OperatorNode
         // or have lower or equal precedence

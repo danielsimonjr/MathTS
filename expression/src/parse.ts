@@ -701,7 +701,9 @@ export const createParse = /* #__PURE__ */ factory(
         return new BlockNode(blocks);
       } else {
         if (!node) {
-          node = new ConstantNode(undefined);
+          // ConstantNode is loosely typed (any), so annotate to keep `node`
+          // narrowed to MathNode after this assignment.
+          node = new ConstantNode(undefined) as MathNode;
           if (state.comment) {
             (node as any).comment = state.comment;
           }

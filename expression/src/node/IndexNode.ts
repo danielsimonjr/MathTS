@@ -100,7 +100,9 @@ export const createIndexNode = /* #__PURE__ */ factory(
           this.dimensions,
           function (dimension: Node, i: number): CompileFunction {
             const needsEnd =
-              dimension.filter((node: Node) => node.isSymbolNode && node.name === 'end').length > 0;
+              dimension.filter(
+                (node: Node) => !!(node.isSymbolNode && node.name === 'end')
+              ).length > 0;
 
             if (needsEnd) {
               // SymbolNode 'end' is used inside the index,

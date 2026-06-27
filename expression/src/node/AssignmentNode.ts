@@ -32,7 +32,9 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
         parenthesis = 'keep';
       }
 
-      const precedence = getPrecedence(node, parenthesis, implicit, undefined);
+      // `node` is the AssignmentNode being rendered (a registered operator), so
+      // its precedence is never null; only the value expression may lack one.
+      const precedence = getPrecedence(node, parenthesis, implicit, undefined) as number;
       const exprPrecedence = getPrecedence(node.value, parenthesis, implicit, undefined);
       return parenthesis === 'all' || (exprPrecedence !== null && exprPrecedence <= precedence);
     }

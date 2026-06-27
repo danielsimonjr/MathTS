@@ -78,8 +78,11 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       args: Node[],
       latex: boolean
     ): boolean[] {
-      // precedence of the root OperatorNode
-      const precedence = getPrecedence(root as any, parenthesis, implicit, undefined);
+      // precedence of the root OperatorNode. `root` is always an OperatorNode
+      // with a registered operator identifier when this runs (it is the node
+      // being stringified), so getPrecedence never returns null for it — only
+      // operands may lack a precedence. Narrowed to `number` accordingly.
+      const precedence = getPrecedence(root as any, parenthesis, implicit, undefined) as number;
       const associativity = getAssociativity(root as any, parenthesis);
 
       if (
@@ -103,7 +106,10 @@ export const createOperatorNode = /* #__PURE__ */ factory(
         });
       }
 
-      let result: boolean[];
+      // Initialised to [] so the n-ary `default` branch is definitely assigned;
+      // that branch is only reached for add/multiply (the early return above
+      // handles every other >2-arg operator), so this default is never observed.
+      let result: boolean[] = [];
       switch (args.length) {
         case 0:
           result = [];

@@ -215,11 +215,11 @@ export function isBigInt(x: unknown): x is bigint {
 }
 
 export function isComplex(x: unknown): x is Complex {
-  return (x && typeof x === 'object' && Object.getPrototypeOf(x).isComplex === true) || false;
+  return !!(x && typeof x === 'object' && Object.getPrototypeOf(x).isComplex === true);
 }
 
 export function isFraction(x: unknown): x is Fraction {
-  return (x && typeof x === 'object' && Object.getPrototypeOf(x).isFraction === true) || false;
+  return !!(x && typeof x === 'object' && Object.getPrototypeOf(x).isFraction === true);
 }
 
 export function isUnit(x: unknown): x is Unit {

@@ -32,7 +32,9 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
       parenthesis?: string,
       implicit?: string
     ): boolean {
-      const precedence = getPrecedence(node, parenthesis, implicit, undefined);
+      // `node` is the FunctionAssignmentNode being rendered (a registered
+      // operator), so its precedence is never null; only `expr` may lack one.
+      const precedence = getPrecedence(node, parenthesis, implicit, undefined) as number;
       const exprPrecedence = getPrecedence(node.expr, parenthesis, implicit, undefined);
 
       return parenthesis === 'all' || (exprPrecedence !== null && exprPrecedence <= precedence);

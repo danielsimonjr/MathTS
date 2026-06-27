@@ -47,8 +47,11 @@ export const createFunctionNode = /* #__PURE__ */ factory(
       const regex = /\$(?:\{([a-z_][a-z_0-9]*)(?:\[([0-9]+)\])?\}|\$)/gi;
 
       let inputPos = 0; // position in the input string
-      let match: RegExpExecArray | null;
-      while ((match = regex.exec(template)) !== null) {
+      let matchOrNull: RegExpExecArray | null;
+      while ((matchOrNull = regex.exec(template)) !== null) {
+        // Bind to a const so the non-null narrowing survives inside the nested
+        // map() closure below (a loop-reassigned `let` would widen back to null).
+        const match = matchOrNull;
         // go through all matches
         // add everything in front of the match to the LaTeX string
         latex += template.substring(inputPos, match.index);

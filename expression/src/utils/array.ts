@@ -545,7 +545,9 @@ export function flatten<T>(array: NestedArray<T>, isRectangular: boolean = false
  * @param {function} callback
  */
 export function map<T, U>(array: T[], callback: (value: T, index: number, array: T[]) => U): U[] {
-  return Array.prototype.map.call(array, callback);
+  // `Array.prototype.map.call` types its result as `unknown[]`; the callback
+  // returns `U`, so the mapped array is `U[]`.
+  return Array.prototype.map.call(array, callback) as U[];
 }
 
 /**

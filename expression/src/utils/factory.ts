@@ -260,7 +260,7 @@ export function assertDependencies(
  * @returns true if the dependency is optional
  */
 export function isOptionalDependency(dependency: DependencyName): boolean {
-  return dependency && dependency[0] === '?';
+  return Boolean(dependency && dependency[0] === '?');
 }
 
 /**

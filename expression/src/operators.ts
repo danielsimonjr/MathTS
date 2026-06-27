@@ -335,7 +335,9 @@ export function getPrecedence(_node: any, parenthesis: any, implicit: any, paren
         isConstantNode(unwrapParen(leftArg.args[1], parenthesis))
       )
     ) {
-      precedence += 1;
+      // precedence is non-null here (multiply is always a registered operator);
+      // `?? 0` preserves the original JS `null + 1 === 1` semantics for safety.
+      precedence = (precedence ?? 0) + 1;
     }
   }
   return precedence;
