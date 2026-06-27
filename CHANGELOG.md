@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-26) — dedup `rowMajorStrides` across tensor/autograd (Duplication Audit Cluster H)
+
+- **Canonical home = `Tensor.rowMajorStrides`** in `@danielsimonjr/mathts-tensor`.
+  It was already the established static helper used by 10+ tensor operation files;
+  the four audited copies were verified **byte-for-byte logically identical**
+  (iterate from last axis, `acc=1`, `strides[k]=acc`, `acc*=shape[k]`, return a
+  fresh `number[]`). No divergence found.
+- **Removed two redundant copies**, rewiring all call sites to the canonical:
+  - `tensor/src/operations/kron.ts` — dropped its local `rowMajorStrides`; the 3
+    call sites now use `Tensor.rowMajorStrides` (`Tensor` was already imported).
+  - `autograd/src/tape.ts` — dropped its local `_rowMajorStrides`; the 10 call
+    sites now use `Tensor.rowMajorStrides` (autograd already depends on tensor and
+    imported `Tensor`).
+- **Kept `parallel/src/ComputePool.ts#_rowMajorStrides` by design** (with a
+  verified comment): `@danielsimonjr/mathts-parallel` depends ONLY on
+  `@danielsimonjr/mathts-workerpool` (verified via package.json + grep: zero
+  imports from `tensor`/`core`/`matrix`). Importing the canonical helper would
+  pull the entire tensor/core math stack into this low-level parallelization
+  layer for a 9-line pure, stable function — strictly worse coupling than the
+  small duplicate.
+- Added `tensor/tests/rowMajorStrides.test.ts` (8 focused cases: rank 0–3,
+  leading size-1, size-0 axis collapse, flat-index dot-product equivalence,
+  fresh-array-per-call). Behavior preserved across all suites:
+  tensor 387 (was 379, +8 new), autograd 246 (unchanged), parallel 414
+  (unchanged). `npm run typecheck` 0 errors; `npm run build` 22/22 green.
+
 ### Changed (2026-06-26) — core: disambiguate same-name divergent type guards (Duplication Audit Cluster I)
 
 - **Resolved the only active-source hazard in Cluster I**: `core/src/utils.ts`

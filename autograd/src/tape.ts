@@ -474,8 +474,8 @@ export class TapedTensor {
     const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
       // Build strides for the output shape (which may be keepDims or reduced).
       const outShape = [...outT.shape];
-      const outStrides = _rowMajorStrides(outShape);
-      const inStrides = _rowMajorStrides(inputShape);
+      const outStrides = Tensor.rowMajorStrides(outShape);
+      const inStrides = Tensor.rowMajorStrides(inputShape);
 
       // For each input element, compute the corresponding output flat index.
       const inCoords = new Array<number>(inputShape.length).fill(0);
@@ -531,7 +531,7 @@ export class TapedTensor {
     const thisGradSlot = this.tape.getInputGrad(this.id)!;
     const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
       const outShape = [...outT.shape];
-      const outStrides = _rowMajorStrides(outShape);
+      const outStrides = Tensor.rowMajorStrides(outShape);
 
       const inCoords = new Array<number>(inputShape.length).fill(0);
       for (let n = 0; n < inputSize; n++) {
@@ -587,8 +587,8 @@ export class TapedTensor {
     const thisGradSlot = this.tape.getInputGrad(this.id)!;
     const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
       const outShape = [...outT.shape];
-      const outStrides = _rowMajorStrides(outShape);
-      const inStrides = _rowMajorStrides(inputShape);
+      const outStrides = Tensor.rowMajorStrides(outShape);
+      const inStrides = Tensor.rowMajorStrides(inputShape);
 
       // For each output element, we need the prefix/suffix products of the
       // elements that were reduced into it (to handle zeros robustly).
@@ -672,7 +672,7 @@ export class TapedTensor {
 
     const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
       const outShape = [...outT.shape];
-      const outStrides = _rowMajorStrides(outShape);
+      const outStrides = Tensor.rowMajorStrides(outShape);
 
       // First-wins: track which input flat index achieves the max for each output.
       const argmaxSlot = new Int32Array(outT.data.length).fill(-1);
@@ -733,7 +733,7 @@ export class TapedTensor {
 
     const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
       const outShape = [...outT.shape];
-      const outStrides = _rowMajorStrides(outShape);
+      const outStrides = Tensor.rowMajorStrides(outShape);
 
       // First-wins: track which input flat index achieves the min for each output.
       const argminSlot = new Int32Array(outT.data.length).fill(-1);
@@ -804,7 +804,7 @@ export class TapedTensor {
       const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
         // dX_i = dY * x_i / ‖x‖
         const outShape = [...outT.shape];
-        const outStrides = _rowMajorStrides(outShape);
+        const outStrides = Tensor.rowMajorStrides(outShape);
 
         const inCoords = new Array<number>(inputShape.length).fill(0);
         for (let n = 0; n < primalData.length; n++) {
@@ -836,7 +836,7 @@ export class TapedTensor {
       const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
         // dX_i = dY * sign(x_i)  (subgradient = 0 at exact zero)
         const outShape = [...outT.shape];
-        const outStrides = _rowMajorStrides(outShape);
+        const outStrides = Tensor.rowMajorStrides(outShape);
 
         const inCoords = new Array<number>(inputShape.length).fill(0);
         for (let n = 0; n < primalData.length; n++) {
@@ -866,7 +866,7 @@ export class TapedTensor {
     {
       const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
         const outShape = [...outT.shape];
-        const outStrides = _rowMajorStrides(outShape);
+        const outStrides = Tensor.rowMajorStrides(outShape);
 
         // Track which input index attains the max absolute value for each output slot.
         const argmaxAbsSlot = new Int32Array(outT.data.length).fill(-1);
@@ -2210,20 +2210,6 @@ function _resolveAxes(axis: number | ReadonlyArray<number> | undefined, rank: nu
     return [axis];
   }
   return [...axis].sort((a, b) => a - b);
-}
-
-/**
- * Row-major strides for a given shape.
- * strides[k] = product of shape[k+1..n-1].
- */
-function _rowMajorStrides(shape: ReadonlyArray<number>): number[] {
-  const strides = new Array<number>(shape.length);
-  let acc = 1;
-  for (let k = shape.length - 1; k >= 0; k--) {
-    strides[k] = acc;
-    acc *= shape[k];
-  }
-  return strides;
 }
 
 /**

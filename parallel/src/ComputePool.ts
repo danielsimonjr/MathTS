@@ -278,6 +278,16 @@ function toWorkerConfig(config: ComputePoolConfig): Partial<WorkerPoolConfig> {
 
 /**
  * Row-major strides for a shape array.
+ *
+ * Kept as a local copy deliberately. The canonical implementation is
+ * `Tensor.rowMajorStrides` in `@danielsimonjr/mathts-tensor`, but this package
+ * (`@danielsimonjr/mathts-parallel`) depends ONLY on
+ * `@danielsimonjr/mathts-workerpool` — it has no dependency on `tensor` or
+ * `core`. Importing the canonical helper would pull the entire tensor/core math
+ * stack into this low-level parallelization layer just for a 9-line pure,
+ * stable function (row-major strides are a fixed mathematical definition). That
+ * is worse coupling than this small duplicate, so the copy is retained by
+ * design. See Duplication Audit Cluster H.
  * @internal
  */
 function _rowMajorStrides(shape: readonly number[]): number[] {

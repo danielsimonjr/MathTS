@@ -79,7 +79,7 @@ export function tensorKron(a: Tensor, b: Tensor, opts?: TensorKronOpts): Tensor 
   const outSize = outShape.reduce((acc, d) => acc * d, 1);
 
   // Pre-compute strides for the output (row-major).
-  const outStrides = rowMajorStrides(outShape);
+  const outStrides = Tensor.rowMajorStrides(outShape);
 
   // --- Build padded a and b data arrays (with leading 1-dim padding) ---
   // If we padded the shape, we need to "view" the original data as if leading
@@ -91,8 +91,8 @@ export function tensorKron(a: Tensor, b: Tensor, opts?: TensorKronOpts): Tensor 
   const bData = b.data;
   // Strides for the original tensors (the padded shapes have leading 1s, so
   // the strides are the same as the originals for the non-padded dimensions).
-  const aOrigStrides = rowMajorStrides(aShape.slice(outRank - rankA));
-  const bOrigStrides = rowMajorStrides(bShape.slice(outRank - rankB));
+  const aOrigStrides = Tensor.rowMajorStrides(aShape.slice(outRank - rankA));
+  const bOrigStrides = Tensor.rowMajorStrides(bShape.slice(outRank - rankB));
 
   // Build the result.
   const result = new Float64Array(outSize);
@@ -146,19 +146,4 @@ export function tensorKron(a: Tensor, b: Tensor, opts?: TensorKronOpts): Tensor 
   }
 
   return new Tensor(outShape, result, outLabels);
-}
-
-// ---------------------------------------------------------------------------
-// Internal helper
-// ---------------------------------------------------------------------------
-
-function rowMajorStrides(shape: ReadonlyArray<number>): number[] {
-  const rank = shape.length;
-  const strides = new Array<number>(rank);
-  let acc = 1;
-  for (let k = rank - 1; k >= 0; k--) {
-    strides[k] = acc;
-    acc *= shape[k];
-  }
-  return strides;
 }
