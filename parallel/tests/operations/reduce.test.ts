@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // Mock computePool before importing reduce functions
 vi.mock('../../src/ComputePool.js', () => ({
@@ -76,9 +76,15 @@ vi.mock('../../src/ComputePool.js', () => ({
       const counts = new Array(bins).fill(0);
       return { result: counts, duration: 0, chunks: 1, parallelized: false };
     }),
-    reduce: vi.fn(async (data: Float64Array, fn: any, initial: any) => {
-      return { result: initial, duration: 0, chunks: 1, parallelized: false };
-    }),
+    reduce: vi.fn(
+      async (
+        data: Float64Array,
+        fn: (acc: number, item: number) => number,
+        initial: number
+      ) => {
+        return { result: initial, duration: 0, chunks: 1, parallelized: false };
+      }
+    ),
   },
 }));
 

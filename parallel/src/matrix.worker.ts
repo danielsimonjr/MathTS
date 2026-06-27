@@ -13,22 +13,63 @@
 interface WorkerMessage {
   id: string;
   type: 'task' | 'result' | 'error';
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 
-interface MatrixTask {
-  operation:
-    | 'multiply'
-    | 'add'
-    | 'subtract'
-    | 'scale'
-    | 'elementMultiply'
-    | 'transpose'
-    | 'dot'
-    | 'sum';
-  [key: string]: any;
+/** Numeric payload arrays survive structured clone as either form. */
+type NumericArray = Float64Array | number[];
+
+interface MultiplyPayload {
+  aData: NumericArray;
+  aCols: number;
+  bData: NumericArray;
+  bCols: number;
+  startRow: number;
+  endRow: number;
 }
+
+interface ElementwisePayload {
+  aData: NumericArray;
+  bData: NumericArray;
+  start: number;
+  end: number;
+}
+
+interface ScalePayload {
+  aData: NumericArray;
+  scalar: number;
+  start: number;
+  end: number;
+}
+
+interface TransposePayload {
+  data: NumericArray;
+  cols: number;
+  startRow: number;
+  endRow: number;
+}
+
+interface DotPayload {
+  aData: NumericArray;
+  bData: NumericArray;
+  start: number;
+  end: number;
+}
+
+interface SumPayload {
+  aData: NumericArray;
+  start: number;
+  end: number;
+}
+
+type MatrixTask =
+  | ({ operation: 'multiply' } & MultiplyPayload)
+  | ({ operation: 'add' | 'subtract' | 'elementMultiply' } & ElementwisePayload)
+  | ({ operation: 'scale' } & ScalePayload)
+  | ({ operation: 'transpose' } & TransposePayload)
+  | ({ operation: 'dot' } & DotPayload)
+  | ({ operation: 'sum' } & SumPayload);
 
 // Handle both Node.js worker_threads and browser Web Workers
 const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
@@ -36,7 +77,7 @@ const isNode = typeof process !== 'undefined' && process.versions?.node !== unde
 // In Node worker threads `postMessage` is not a global — replies must go
 // through `parentPort`. Resolved asynchronously below; messages are queued
 // until it is ready.
-let nodeParentPort: { postMessage: (value: any) => void } | null = null;
+let nodeParentPort: { postMessage: (value: unknown) => void } | null = null;
 
 /**
  * Post a message back to the spawning thread, using the correct channel for
@@ -53,12 +94,14 @@ function sendMessage(message: WorkerMessage): void {
 }
 
 // Message handler
-function handleMessage(event: MessageEvent | any): void {
-  const message: WorkerMessage = isNode ? event : event.data;
+function handleMessage(event: MessageEvent<WorkerMessage> | WorkerMessage): void {
+  const message: WorkerMessage = isNode
+    ? (event as WorkerMessage)
+    : (event as MessageEvent<WorkerMessage>).data;
 
   try {
-    const task: MatrixTask = message.data;
-    let result: any;
+    const task = message.data as MatrixTask;
+    let result: Float64Array | number;
 
     switch (task.operation) {
       case 'multiply':
@@ -86,7 +129,9 @@ function handleMessage(event: MessageEvent | any): void {
         result = sumTask(task);
         break;
       default:
-        throw new Error(`Unknown operation: ${task.operation}`);
+        // `task` is `never` here once all variants are handled; cast back to
+        // read the (unexpected) operation for the diagnostic message.
+        throw new Error(`Unknown operation: ${(task as MatrixTask).operation}`);
     }
 
     sendMessage({
@@ -107,7 +152,7 @@ function handleMessage(event: MessageEvent | any): void {
  * Matrix multiplication task: computes rows [startRow, endRow) of C = A * B.
  * Returns the computed row block as a flat Float64Array.
  */
-function multiplyTask(task: any): Float64Array {
+function multiplyTask(task: MultiplyPayload): Float64Array {
   const { aData, aCols, bData, bCols, startRow, endRow } = task;
   const rowCount = endRow - startRow;
   const out = new Float64Array(rowCount * bCols);
@@ -129,7 +174,7 @@ function multiplyTask(task: any): Float64Array {
  * Element-wise binary task: computes op(A[i], B[i]) for i in [start, end).
  * Returns the computed slice as a flat Float64Array.
  */
-function elementwiseTask(task: any, op: (a: number, b: number) => number): Float64Array {
+function elementwiseTask(task: ElementwisePayload, op: (a: number, b: number) => number): Float64Array {
   const { aData, bData, start, end } = task;
   const out = new Float64Array(end - start);
 
@@ -144,7 +189,7 @@ function elementwiseTask(task: any, op: (a: number, b: number) => number): Float
  * Scalar multiplication task: computes A[i] * scalar for i in [start, end).
  * Returns the computed slice as a flat Float64Array.
  */
-function scaleTask(task: any): Float64Array {
+function scaleTask(task: ScalePayload): Float64Array {
   const { aData, scalar, start, end } = task;
   const out = new Float64Array(end - start);
 
@@ -161,7 +206,7 @@ function scaleTask(task: any): Float64Array {
  * (`out[j * rowCount + (i - startRow)] = A[i * cols + j]`); the parent
  * scatters it into the final result.
  */
-function transposeTask(task: any): Float64Array {
+function transposeTask(task: TransposePayload): Float64Array {
   const { data, cols, startRow, endRow } = task;
   const rowCount = endRow - startRow;
   const out = new Float64Array(rowCount * cols);
@@ -178,7 +223,7 @@ function transposeTask(task: any): Float64Array {
 /**
  * Dot product task: sum(A[start:end] * B[start:end]).
  */
-function dotProductTask(task: any): number {
+function dotProductTask(task: DotPayload): number {
   const { aData, bData, start, end } = task;
 
   let sum = 0;
@@ -192,7 +237,7 @@ function dotProductTask(task: any): number {
 /**
  * Sum task: sum(A[start:end]).
  */
-function sumTask(task: any): number {
+function sumTask(task: SumPayload): number {
   const { aData, start, end } = task;
 
   let sum = 0;

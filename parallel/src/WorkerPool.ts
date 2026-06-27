@@ -3,7 +3,7 @@
  * Supports both Node.js (worker_threads) and browser (Web Workers)
  */
 
-interface WorkerTask<T = any, R = any> {
+interface WorkerTask<T = unknown, R = unknown> {
   id: string;
   data: T;
   resolve: (value: R) => void;
@@ -21,7 +21,7 @@ interface WorkerTask<T = any, R = any> {
   worker?: Worker;
 }
 
-interface WorkerMessage<T = any> {
+interface WorkerMessage<T = unknown> {
   id: string;
   type: 'task' | 'result' | 'error';
   data?: T;
@@ -208,16 +208,18 @@ export class WorkerPool {
    *   replacement is spawned, and the returned promise rejects. Pass `0`
    *   or omit to disable the timeout (legacy behaviour).
    */
-  public async execute<T = any, R = any>(
+  public async execute<T = unknown, R = unknown>(
     data: T,
     transferables?: Transferable[],
     timeoutMs?: number
   ): Promise<R> {
     return new Promise<R>((resolve, reject) => {
-      const task: WorkerTask<T, R> = {
+      // The pool stores tasks heterogeneously (WorkerTask<unknown, unknown>);
+      // the worker reply is opaque, so narrow it back to R at this boundary.
+      const task: WorkerTask = {
         id: this.generateTaskId(),
         data,
-        resolve,
+        resolve: (value) => resolve(value as R),
         reject,
         transferables,
       };

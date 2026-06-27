@@ -36,7 +36,7 @@ declare module 'workerpool' {
     debugPortStart?: number;
   }
 
-  export interface WorkerpoolPromise<T, E = unknown> extends Promise<T> {
+  export interface WorkerpoolPromise<T> extends Promise<T> {
     readonly resolved: boolean;
     readonly rejected: boolean;
     readonly pending: boolean;

@@ -14,7 +14,6 @@ import {
   Transfer,
   resolveOpThreshold,
 } from '../src/ComputePool.js';
-import type { ParallelResult, ComputePoolConfig, OpName } from '../src/ComputePool.js';
 
 describe('ComputePool', () => {
   describe('Configuration', () => {

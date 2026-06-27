@@ -7,13 +7,13 @@ describe('parallelCount (no predicate)', () => {
     const result = await parallelCount(data);
     // Without predicate, returns length directly as ParallelResult
     expect(result).toHaveProperty('result');
-    expect((result as any).result).toBe(5);
+    expect(result.result).toBe(5);
   });
 
   it('should handle empty array', async () => {
     const data = new Float64Array([]);
     const result = await parallelCount(data);
-    expect((result as any).result).toBe(0);
+    expect(result.result).toBe(0);
   });
 
   it('should return ParallelResult shape', async () => {

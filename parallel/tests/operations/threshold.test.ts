@@ -191,6 +191,8 @@ describe('Threshold Dispatcher', () => {
       const matmulChunks = dispatcher.calculateChunks(200000, 'matmul');
       const sortChunks = dispatcher.calculateChunks(200000, 'sort');
 
+      // Both categories yield a valid (>= 1) chunk count.
+      expect(matmulChunks).toBeGreaterThanOrEqual(1);
       // Sort typically has fewer chunks due to merge overhead
       expect(sortChunks).toBeLessThanOrEqual(8);
     });

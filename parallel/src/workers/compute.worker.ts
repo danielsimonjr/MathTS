@@ -185,7 +185,6 @@ function distanceChunk(
  * Note: fn is passed as a string and eval'd in the worker context
  */
 function mapChunk<T, R>(chunk: T[], fnString: string): R[] {
-  // eslint-disable-next-line no-eval
   const fn = eval(`(${fnString})`) as (item: T) => R;
   return chunk.map(fn);
 }

@@ -13,11 +13,11 @@ import { WorkerPool } from '../src/WorkerPool.js';
 
 class FakeWorker {
   public terminated = false;
-  public lastMessage: any = null;
-  public onmessage: ((e: any) => void) | null = null;
-  public onerror: ((e: any) => void) | null = null;
+  public lastMessage: unknown = null;
+  public onmessage: ((e: MessageEvent) => void) | null = null;
+  public onerror: ((e: ErrorEvent) => void) | null = null;
   // simulated message events the test will inject
-  postMessage(msg: any) {
+  postMessage(msg: unknown) {
     this.lastMessage = msg;
     // do nothing — hang
   }
@@ -26,23 +26,43 @@ class FakeWorker {
   }
 }
 
+/**
+ * Internal shape of WorkerPool reached by the tests' hand-built instances.
+ * The tests poke private fields and swap createWorker, so they need a
+ * structural view of the pool internals rather than the public class type.
+ */
+interface PoolInternals {
+  workers: FakeWorker[];
+  availableWorkers: FakeWorker[];
+  taskQueue: unknown[];
+  activeTasks: Map<string, unknown>;
+  maxWorkers: number;
+  workerScript: string;
+  isNode: boolean;
+  createdWorkers: FakeWorker[];
+  createWorker(): Promise<FakeWorker>;
+  execute(data: unknown, transferables?: Transferable[], timeoutMs?: number): Promise<unknown>;
+}
+
 class HangingPool extends WorkerPool {
   public createdWorkers: FakeWorker[] = [];
 
-  // Override the private createWorker via prototype hack.
-  // (TypeScript: cast to any, JavaScript: dynamic.)
-  protected async createWorker(): Promise<any> {
+  // Override the protected createWorker to mint hung fakes. FakeWorker only
+  // models the slice of the Worker surface the pool touches, so route the
+  // return through `unknown`.
+  protected async createWorker(): Promise<Worker> {
     const w = new FakeWorker();
     this.createdWorkers.push(w);
-    return w as any;
+    return w as unknown as Worker;
   }
 }
 
 // Patch the WorkerPool prototype so HangingPool's createWorker is reachable.
-(WorkerPool.prototype as any).createWorker = async function () {
-  // default fallback — should not be reached in HangingPool tests
-  throw new Error('createWorker stub not overridden');
-};
+(WorkerPool.prototype as unknown as { createWorker: () => Promise<Worker> }).createWorker =
+  async function () {
+    // default fallback — should not be reached in HangingPool tests
+    throw new Error('createWorker stub not overridden');
+  };
 
 describe('WorkerPool.execute() timeout contract', () => {
   beforeEach(() => {
@@ -50,7 +70,7 @@ describe('WorkerPool.execute() timeout contract', () => {
   });
 
   it('rejects with a timeout error when the worker never replies', async () => {
-    const pool: any = Object.create(HangingPool.prototype);
+    const pool = Object.create(HangingPool.prototype) as PoolInternals;
     pool.workers = [];
     pool.availableWorkers = [];
     pool.taskQueue = [];
@@ -78,7 +98,7 @@ describe('WorkerPool.execute() timeout contract', () => {
   });
 
   it('replaces a terminated worker so the pool stays usable', async () => {
-    const pool: any = Object.create(HangingPool.prototype);
+    const pool = Object.create(HangingPool.prototype) as PoolInternals;
     pool.workers = [];
     pool.availableWorkers = [];
     pool.taskQueue = [];
@@ -89,7 +109,7 @@ describe('WorkerPool.execute() timeout contract', () => {
     pool.createdWorkers = [];
 
     // Override createWorker to mint a new fake on demand.
-    pool.createWorker = async function () {
+    pool.createWorker = async function (this: PoolInternals) {
       const nw = new FakeWorker();
       this.createdWorkers.push(nw);
       return nw;
