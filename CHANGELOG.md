@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-27) — `core`, `parallel`, `workerpool` driven to ZERO eslint warnings (honest typing)
+
+- Replaced `@typescript-eslint/no-explicit-any` sites with real types across the
+  three packages (185 problems → 0): generic worker-boundary payloads typed as
+  `unknown` (`parallel/src/WorkerPool.ts`, `packages/workerpool/src`), matrix
+  worker tasks given a discriminated-union payload type
+  (`parallel/src/matrix.worker.ts`), and the `core` synced-mathjs helpers
+  (`is.ts`, `object.ts`, `number.ts`, `factory.ts`, `types.ts`,
+  `types/matrix/Range.ts`, `error/MathjsError.ts`, `shared.ts`) typed via
+  `unknown` + documented narrowing, structural casts, and shared duck-typing
+  helpers. No runtime behavior changed; core/parallel/workerpool suites stay
+  green (640 / 414 / 87 tests).
+- Fixed the residual rules at root: removed dead `eslint-disable no-eval`
+  directives (rule not enabled), removed unused imports/vars, replaced
+  `this`-aliasing in `BigNumber.pow`/`Fraction.pow` with `this.clone()`, used an
+  arrow callback in `Range.map`, switched an empty `catch (e) {}` to an annotated
+  optional catch, and dropped an unused generic type parameter.
+
 ### Removed (2026-06-27) — vestigial pre-migration AssemblyScript-source from `functions/src/wasm/`
 
 - Deleted **26 files / ~14k LOC** of dead AssemblyScript source written as `.ts`

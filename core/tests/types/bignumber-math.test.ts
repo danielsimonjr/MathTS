@@ -4,13 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  BigNumber,
-  BIGNUMBER_PI,
-  BIGNUMBER_E,
-  BIGNUMBER_LN2,
-  BIGNUMBER_LN10,
-} from '../../src/types/bignumber';
+import { BigNumber, BIGNUMBER_PI, BIGNUMBER_E } from '../../src/types/bignumber';
 
 /** Helper: check BigNumber value is close to expected number */
 function expectCloseTo(bn: BigNumber, expected: number, digits = 10): void {

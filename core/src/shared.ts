@@ -9,6 +9,6 @@
  * @param {Object} object
  * @param {string} property
  */
-export function hasOwnProperty(object: any, property: string): boolean {
-  return object && Object.hasOwnProperty.call(object, property);
+export function hasOwnProperty(object: unknown, property: string): boolean {
+  return !!object && Object.hasOwnProperty.call(object, property);
 }

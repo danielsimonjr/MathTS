@@ -88,10 +88,10 @@ describe('Factory Pattern', () => {
 
     it('should detect circular dependencies', () => {
       const aFactory = createFactory('a', ['typed', 'b'], ({ typed, b }) =>
-        typed('a', { number: (n: number) => (b as any)(n) })
+        typed('a', { number: (n: number) => (b as (n: number) => number)(n) })
       );
       const bFactory = createFactory('b', ['typed', 'a'], ({ typed, a }) =>
-        typed('b', { number: (n: number) => (a as any)(n) })
+        typed('b', { number: (n: number) => (a as (n: number) => number)(n) })
       );
 
       reg.registerAll([aFactory, bFactory]);
@@ -103,7 +103,7 @@ describe('Factory Pattern', () => {
         typed('add', { 'number, number': (a: number, b: number) => a + b })
       );
       const doubleFactory = createFactory('double', ['typed', 'add'], ({ typed, add }) =>
-        typed('double', { number: (n: number) => (add as any)(n, n) })
+        typed('double', { number: (n: number) => (add as (a: number, b: number) => number)(n, n) })
       );
 
       reg.registerAll([addFactory, doubleFactory]);

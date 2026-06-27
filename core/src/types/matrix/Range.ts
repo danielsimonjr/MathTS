@@ -13,12 +13,12 @@ const dependencies: string[] = [];
 /**
  * Callback function for Range forEach operations
  */
-export type RangeForEachCallback = (value: number, index: number[], range: any) => void;
+export type RangeForEachCallback = (value: number, index: number[], range: unknown) => void;
 
 /**
  * Callback function for Range map operations
  */
-export type RangeMapCallback<T> = (value: number, index: number[], range: any) => T;
+export type RangeMapCallback<T> = (value: number, index: number[], range: unknown) => T;
 
 /**
  * Formatting options for Range display
@@ -26,7 +26,7 @@ export type RangeMapCallback<T> = (value: number, index: number[], range: any) =
 export interface RangeFormatOptions {
   precision?: number;
   notation?: 'fixed' | 'exponential' | 'engineering' | 'auto';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -318,9 +318,8 @@ export const createRangeClass = /* #__PURE__ */ factory(
        */
       map<T>(callback: RangeMapCallback<T>): T[] {
         const array: T[] = [];
-        const self = this;
-        this.forEach(function (value, index, obj) {
-          array[index[0]] = callback(value, index, self);
+        this.forEach((value, index) => {
+          array[index[0]] = callback(value, index, this);
         });
         return array;
       }

@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { createRangeClass } from '../../../src/types/matrix/Range.js';
 
-// The createRangeClass is a factory function. Let's mock the dependencies.
-const Range = createRangeClass({} as any) as any;
+// The createRangeClass is a factory function. It has no dependencies, so an
+// empty scope suffices; the returned value is the Range class constructor.
+const Range = createRangeClass({});
 
 describe('Range', () => {
   it('should create a Range correctly', () => {

@@ -23,16 +23,16 @@ export type Fraction = import('fraction.js').default;
 // Matrix-related types
 export interface SparseMatrix {
   type: 'SparseMatrix';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Unit {
   type: 'Unit';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Constructor types
 export interface MatrixConstructor {
-  new (...args: any[]): any;
-  [key: string]: any;
+  new (...args: unknown[]): Matrix;
+  [key: string]: unknown;
 }

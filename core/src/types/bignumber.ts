@@ -673,7 +673,7 @@ export class BigNumber implements MathTSValue {
 
     // Binary exponentiation
     let result = BigNumber.fromNumber(1);
-    let base: BigNumber = this;
+    let base: BigNumber = this.clone();
     let e = exp;
 
     while (e > 0) {

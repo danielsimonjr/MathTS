@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { factory, sortFactories } from '../src/factory.js';
+import { factory, sortFactories, type FactoryFunction } from '../src/factory.js';
 
 describe('sortFactories', () => {
   it('should detect direct circular dependencies', () => {
@@ -24,8 +24,8 @@ describe('sortFactories', () => {
 
     const sorted = sortFactories([fA, fB, fC]);
     expect(sorted.length).toBe(3);
-    expect((sorted[0] as any).fn).toBe('C');
-    expect((sorted[1] as any).fn).toBe('B');
-    expect((sorted[2] as any).fn).toBe('A');
+    expect((sorted[0] as FactoryFunction).fn).toBe('C');
+    expect((sorted[1] as FactoryFunction).fn).toBe('B');
+    expect((sorted[2] as FactoryFunction).fn).toBe('A');
   });
 });

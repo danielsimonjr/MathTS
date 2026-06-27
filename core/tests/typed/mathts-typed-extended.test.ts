@@ -148,7 +148,7 @@ describe('type guard functions', () => {
 describe('TypeRegistry', () => {
   it('should register and check types', () => {
     const registry = new TypeRegistry();
-    registry.registerType('TestType', (x: any) => typeof x === 'symbol');
+    registry.registerType('TestType', (x: unknown) => typeof x === 'symbol');
     expect(registry.hasType('TestType')).toBe(true);
     expect(registry.hasType('NonExistent')).toBe(false);
   });
@@ -216,7 +216,7 @@ describe('MATHTS_CONVERSIONS', () => {
   });
 
   it('should convert boolean to number', () => {
-    const conv = MATHTS_CONVERSIONS.find((c: any) => c.from === 'boolean' && c.to === 'number');
+    const conv = MATHTS_CONVERSIONS.find((c) => c.from === 'boolean' && c.to === 'number');
     expect(conv).toBeDefined();
     expect(conv!.convert(true)).toBe(1);
     expect(conv!.convert(false)).toBe(0);

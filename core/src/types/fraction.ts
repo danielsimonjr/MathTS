@@ -368,7 +368,7 @@ export class Fraction implements IFraction {
     }
     // Use binary exponentiation
     let result = new Fraction(1n, 1n);
-    let base: Fraction = this;
+    let base: Fraction = this.clone();
     let e = exp;
     while (e > 0n) {
       if (e % 2n === 1n) {
