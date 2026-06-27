@@ -5,7 +5,7 @@ import { factory } from '../utils/factory.js';
 import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Type definitions
-import type { BigNumber } from 'bignumber.js';
+import type BigNumber from 'bignumber.js';
 import type Complex from 'complex.js';
 
 /** Scalar types supported by det */

@@ -1,6 +1,6 @@
 import { clone } from '../../utils/object.js';
 import { wasmLoader } from '../../wasm/WasmLoader.js';
-import type { BigNumber } from 'bignumber.js';
+import type BigNumber from 'bignumber.js';
 import type Complex from 'complex.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
@@ -232,7 +232,7 @@ export function createComplexEigs({
   function balance(
     arr: Scalar[][],
     N: number,
-    prec: number | BigNumber,
+    _prec: number | BigNumber,
     type: DataType,
     findVectors: boolean
   ): Scalar[][] | null {

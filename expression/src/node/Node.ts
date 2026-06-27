@@ -392,6 +392,7 @@ export const createNode = /* #__PURE__ */ factory(
               throw new TypeError('Object or function expected as callback');
           }
         }
+        return undefined;
       }
 
       /**

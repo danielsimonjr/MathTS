@@ -66,15 +66,6 @@ interface TypedFunction<T = any> {
   convert(value: any, type: string): any;
 }
 
-interface _MatrixData {
-  data?: any[] | any[][];
-  values?: any[];
-  index?: number[];
-  ptr?: number[];
-  size: number[];
-  datatype?: string;
-}
-
 interface Matrix {
   _data?: any[] | any[][];
   _values?: any[];

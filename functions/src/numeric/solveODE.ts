@@ -246,17 +246,6 @@ export const createSolveODE = /* #__PURE__ */ factory(
           }
         }
 
-        // Helper to read stage from WASM
-        function readStage(stageIdx: number): number[] {
-          const offset = stageIdx * dim;
-          const arr = new Float64Array(wasm!.memory.buffer, stageAlloc.ptr, numStages * dim);
-          const result: number[] = new Array(dim);
-          for (let i = 0; i < dim; i++) {
-            result[i] = arr[offset + i];
-          }
-          return result;
-        }
-
         // Trim step to not overshoot
         function trimStepNum(tn: number, tfn: number, hn: number): number {
           const next = tn + hn;

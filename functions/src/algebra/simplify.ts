@@ -672,9 +672,10 @@ export const createSimplify = /* #__PURE__ */ factory(
         const ruleType = typeof rule;
         switch (ruleType) {
           case 'string':
-            rule = { s: rule as string };
-          /* falls through */
           case 'object':
+            if (ruleType === 'string') {
+              rule = { s: rule as string };
+            }
             newRule = _canonicalizeRule(rule as Exclude<SimplifyRule, string | Function>, context);
             break;
           case 'function':

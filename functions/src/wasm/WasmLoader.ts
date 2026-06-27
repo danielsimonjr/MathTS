@@ -544,12 +544,7 @@ export interface WasmModule {
   //            when viewed from outside the hull.
   // max_faces: capacity of faces_ptr in triangles.
   // Returns number of triangles written, or -1 on overflow.
-  convex_hull_3d_wasm: (
-    ptsPtr: number,
-    nPts: number,
-    facesPtr: number,
-    maxFaces: number
-  ) => number;
+  convex_hull_3d_wasm: (ptsPtr: number, nPts: number, facesPtr: number, maxFaces: number) => number;
 
   // Bitwise operations (Int32, elementwise). Legacy native-pointer ABI fields
   // (removed; declarations retained below for
@@ -707,12 +702,37 @@ export interface WasmModule {
   //   elliptic_pi_incomplete_f64(ns_ptr, phis_ptr, ms_ptr, n, out)   → n | -1
   // AS backend: typed-array calling convention (_as suffix).
   carlson_rc_f64?: (xsPtr: number, ysPtr: number, n: number, outPtr: number) => number;
-  carlson_rf_f64?: (xsPtr: number, ysPtr: number, zsPtr: number, n: number, outPtr: number) => number;
-  carlson_rd_f64?: (xsPtr: number, ysPtr: number, zsPtr: number, n: number, outPtr: number) => number;
-  carlson_rj_f64?: (xsPtr: number, ysPtr: number, zsPtr: number, psPtr: number, n: number, outPtr: number) => number;
+  carlson_rf_f64?: (
+    xsPtr: number,
+    ysPtr: number,
+    zsPtr: number,
+    n: number,
+    outPtr: number
+  ) => number;
+  carlson_rd_f64?: (
+    xsPtr: number,
+    ysPtr: number,
+    zsPtr: number,
+    n: number,
+    outPtr: number
+  ) => number;
+  carlson_rj_f64?: (
+    xsPtr: number,
+    ysPtr: number,
+    zsPtr: number,
+    psPtr: number,
+    n: number,
+    outPtr: number
+  ) => number;
   elliptic_f_incomplete_f64?: (phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
   elliptic_e_incomplete_f64?: (phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
-  elliptic_pi_incomplete_f64?: (nsPtr: number, phisPtr: number, msPtr: number, n: number, outPtr: number) => number;
+  elliptic_pi_incomplete_f64?: (
+    nsPtr: number,
+    phisPtr: number,
+    msPtr: number,
+    n: number,
+    outPtr: number
+  ) => number;
 
   // Spectral signal kernels (Slice 5.6).
   // Legacy native-pointer ABI (removed): pointer-style.
@@ -829,7 +849,6 @@ export class WasmLoader {
   // Memory pool for reusable allocations
   private float64Pool: PoolEntry[] = [];
   private int32Pool: PoolEntry[] = [];
-  private readonly maxPoolSize = 32;
   private readonly poolSizeThreshold = 1024 * 1024; // 1MB max per pool entry
 
   private constructor() {

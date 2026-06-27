@@ -33,9 +33,6 @@ function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float
 }
 
 // Type definitions
-type NestedArray<T = any> = T | NestedArray<T>[];
-type _MatrixData = NestedArray<any>; // eslint-disable-line @typescript-eslint/no-unused-vars
-
 interface TypedFunction<T = any> {
   (...args: any[]): T;
   find(func: any, signature: string[]): TypedFunction<T>;

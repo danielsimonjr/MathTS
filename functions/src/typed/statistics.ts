@@ -46,31 +46,6 @@ function toFloat64Array(arr: number[]): Float64Array {
   return new Float64Array(arr);
 }
 
-/**
- * Welford's online algorithm for variance (stable numerical computation).
- * Currently unused inline — kept for the AS-port path. Prefixed `_` so
- * eslint accepts the intentional retention.
- */
-function _welfordVariance(data: Float64Array): { mean: f64; variance: f64; count: i32 } {
-  const n: i32 = data.length;
-  if (n === 0) {
-    return { mean: NaN, variance: NaN, count: 0 };
-  }
-
-  let mean: f64 = 0;
-  let m2: f64 = 0;
-
-  for (let i: i32 = 0; i < n; i++) {
-    const x: f64 = data[i];
-    const delta: f64 = x - mean;
-    mean += delta / (i + 1);
-    const delta2: f64 = x - mean;
-    m2 += delta * delta2;
-  }
-
-  return { mean, variance: m2 / n, count: n };
-}
-
 // =============================================================================
 // Parallel Sum Functions
 // =============================================================================

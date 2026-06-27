@@ -7,9 +7,6 @@ import { wasmLoader } from '../../wasm/WasmLoader.js';
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 const WASM_LUSOLVE_THRESHOLD = 16; // 4x4 matrix
 
-// Type definitions
-type _MatrixData = any[][]; // eslint-disable-line @typescript-eslint/no-unused-vars
-
 interface TypedFunction<T = any> {
   (...args: any[]): T;
 }

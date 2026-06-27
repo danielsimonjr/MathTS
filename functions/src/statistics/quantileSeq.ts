@@ -186,6 +186,8 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
 
         return isNumber(probOrN) ? probArr : bignumber!(probArr);
       }
+
+      return undefined;
     }
 
     /**

@@ -308,13 +308,6 @@ export class Decimal {
     return new Decimal(value).acos();
   }
 
-  // Helper to convert to BigInt representation
-  private toBigInt(): { coef: bigint; exp: number } {
-    if (!this.d) throw new Error('Cannot convert non-finite to BigInt');
-    const coef = BigInt(this.d.join('')) * BigInt(this.s || 1);
-    return { coef, exp: this.e - this.d.length + 1 };
-  }
-
   // Helper to create from BigInt
   private static fromBigInt(coef: bigint, exp: number): Decimal {
     if (coef === 0n) return new Decimal(0);
@@ -728,10 +721,6 @@ export class Decimal {
     if (!this.d) return new Decimal(this);
 
     const rm = roundingMode ?? globalConfig.rounding;
-
-    // Position in digit array where rounding occurs
-    const _exp = this.e;
-    const _roundAt = places + 1;
 
     // Convert to string, apply rounding, convert back
     const str = this.toString();

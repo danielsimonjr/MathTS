@@ -87,7 +87,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
           // this is a FunctionAssignment argument
           // (like an x when inside the expression of a function
           // assignment `f(x) = ...`)
-          return function (scope: any, args: Record<string, any>, _context: any): any {
+          return function (_scope: any, args: Record<string, any>, _context: any): any {
             return getSafeProperty(args, name);
           };
         } else if (name in math) {

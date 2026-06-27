@@ -51,7 +51,7 @@ type ImportableValue = Function | number | string | boolean | null | object | un
 
 export function importFactory(
   typed: TypedFunction,
-  load: (factory: FactoryFunction) => unknown,
+  _load: (factory: FactoryFunction) => unknown,
   math: MathNamespace,
   importedFactories: Record<string, FactoryFunction>
 ): (functions: unknown, options?: ImportOptions) => void {

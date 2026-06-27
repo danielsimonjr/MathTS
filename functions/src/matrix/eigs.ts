@@ -5,7 +5,7 @@ import { createRealSymmetric } from './eigs/realSymmetric.js';
 import { typeOf, isNumber, isBigNumber, isComplex, isFraction } from '../utils/is.js';
 
 // Type definitions
-import type { BigNumber } from 'bignumber.js';
+import type BigNumber from 'bignumber.js';
 import type Complex from 'complex.js';
 
 /** Scalar types supported by eigs */

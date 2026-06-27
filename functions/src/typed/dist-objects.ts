@@ -248,20 +248,6 @@ function _logFactorial(n: number): f64 {
   return 0.5 * Math.log(2 * Math.PI * n) + n * Math.log(n) - n + 1 / (12 * n);
 }
 
-/**
- * Standard normal CDF using erf.
- */
-function _normalCDF(x: f64): f64 {
-  return 0.5 * (1 + _erf(x / Math.SQRT2));
-}
-
-/**
- * Standard normal quantile using erfInv.
- */
-function _normalQuantile(p: f64): f64 {
-  return Math.SQRT2 * _erfInv(2 * p - 1);
-}
-
 // =============================================================================
 // Batch Sampling Helpers (Slice 5.12)
 // =============================================================================

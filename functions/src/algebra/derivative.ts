@@ -233,7 +233,7 @@ export const createDerivative = /* #__PURE__ */ factory(
       },
 
       'function, SymbolNode, string': function (
-        isConst: (node: MathNode, varName: string) => boolean,
+        _isConst: (node: MathNode, varName: string) => boolean,
         node: SymbolNode,
         varName: string
       ): boolean {
@@ -353,9 +353,10 @@ export const createDerivative = /* #__PURE__ */ factory(
             }
             break;
           case 'log10':
-            arg1 = createConstantNode(10);
-          /* fall through! */
           case 'log':
+            if ((node as any).name === 'log10') {
+              arg1 = createConstantNode(10);
+            }
             if (!arg1 && node.args.length === 1) {
               // d/dx(log(x)) = 1 / x
               funcDerivative = arg0.clone();

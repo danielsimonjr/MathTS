@@ -7,7 +7,6 @@ import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
 import { createMatAlgo04xSidSid } from '../type/matrix/utils/matAlgo04xSidSid.js';
 import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
-import { ArgumentsError } from '../error/ArgumentsError.js';
 import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Minimum array length for WASM to be beneficial

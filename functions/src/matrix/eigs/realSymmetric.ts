@@ -1,6 +1,6 @@
 import { clone } from '../../utils/object.js';
 import { wasmLoader } from '../../wasm/WasmLoader.js';
-import type { BigNumber } from 'bignumber.js';
+import type BigNumber from 'bignumber.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 const WASM_EIGS_THRESHOLD = 16; // 4x4 matrix
@@ -95,7 +95,7 @@ export function createRealSymmetric({
    */
   function main(
     arr: Scalar[][],
-    N: number,
+    _N: number,
     prec: number | BigNumber = config.relTol,
     type: 'number' | 'BigNumber',
     computeVectors: boolean
