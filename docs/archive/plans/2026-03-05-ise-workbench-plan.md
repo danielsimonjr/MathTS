@@ -8,7 +8,7 @@
 
 **Tech Stack:** React 19, TypeScript, Vite, Electron, Plotly.js (graphing), KaTeX (LaTeX rendering), allotment (split panes), Zustand (state), Tailwind CSS, math.js TS+AS+WASM
 
-**Design doc:** `docs/plans/2026-03-05-ise-workbench-design.md`
+**Design doc:** `docs/archive/plans/2026-03-05-ise-workbench-design.md`
 
 ---
 
@@ -2575,7 +2575,7 @@ Implementation: set `layout.xaxis.type` and `layout.yaxis.type` to `'log'` or `'
 > **Goal:** Transform the ISE from a calculator into a document-based environment where expressions are persistent, reorderable cells with dependency tracking. This is the Mathcad-like "live document" model.
 
 **Prerequisites:** Iteration 2 complete
-**Reference:** `docs/plans/2026-03-05-deno-notebook-option.md` (Deno export option)
+**Reference:** `docs/archive/plans/2026-03-05-deno-notebook-option.md` (Deno export option)
 
 ---
 
@@ -2771,7 +2771,7 @@ Convert document cells to Jupyter notebook format with Deno kernel metadata:
 - Kernel spec: `{"name": "deno", "display_name": "Deno", "language": "typescript"}`
 - First cell auto-generates math.js import and setup
 
-**Reference:** `docs/plans/2026-03-05-deno-notebook-option.md`
+**Reference:** `docs/archive/plans/2026-03-05-deno-notebook-option.md`
 
 ---
 

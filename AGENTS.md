@@ -70,7 +70,7 @@ affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
 | Forked typed-function / workerpool | `packages/typed-function/`, `packages/workerpool/` |
 | Thin re-export packages (parser, ast, units, linalg, arithmetic, …) | top-level dirs; they re-export, no impl |
 | Architecture / API / inventory docs | `docs/Architecture/`, `docs/api/`, `docs/inventory/` |
-| Roadmaps, gap analyses, WASM plans | `docs/roadmap/`, `docs/plans/` |
+| Roadmaps, gap analyses, WASM plans | `docs/roadmap/` (active); dated one-off plans archived in `docs/archive/plans/` |
 | Standalone tools (dep-graph, benchmarks, mathjs-port) | `tools/` |
 
 Dependency graph and per-package details live in **`CLAUDE.md` → Monorepo

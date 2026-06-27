@@ -265,4 +265,4 @@ Turbo caches build/test outputs in `node_modules/.cache/turbo/`. The `test` and 
 
 ## Sprint Planning
 
-Sprint JSON files in `docs/Planning/sprints/`: `PHASE_1_SPRINT_1_TODO.json` through `PHASE_6_SPRINT_28_TODO.json`. Architecture docs in `docs/Architecture/Workbook/`.
+Sprint JSON files (historical, all phases complete) are archived in `docs/archive/sprints/`: `PHASE_1_SPRINT_1_TODO.json` through `PHASE_6_SPRINT_28_TODO.json`. Architecture docs in `docs/Architecture/Workbook/`.

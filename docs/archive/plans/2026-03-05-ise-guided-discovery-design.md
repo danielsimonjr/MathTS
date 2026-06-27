@@ -269,4 +269,4 @@ This design directly addresses the gap analysis finding that the ISE's strength 
 
 The application notes also serve as **WASM stress-test scenarios** — each advanced/expert note exercises heavy computation paths (large matrices, FFT, ODE solvers, SVD) that validate the TS+AS+WASM refactor under realistic workloads.
 
-**Reference:** `docs/plans/2026-03-05-ise-gap-analysis.md`
+**Reference:** `docs/archive/plans/2026-03-05-ise-gap-analysis.md`

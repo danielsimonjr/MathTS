@@ -266,6 +266,6 @@ Each phase must pass its exit gate before the next begins.
 
 - **Current WASM docs:** `docs/refactoring/WASM_TODO.md`
 - **AS style guide:** `docs/ASSEMBLYSCRIPT_STYLE_GUIDE.md`
-- **Gap analysis:** `docs/plans/2026-03-05-ise-gap-analysis.md`
+- **Gap analysis:** `docs/archive/plans/2026-03-05-ise-gap-analysis.md`
 - **Rust WASM SIMD:** `core::arch::wasm32` with `#[target_feature(enable = "simd128")]`
 - **nalgebra WASM support:** https://www.nalgebra.rs/docs/user_guide/wasm_and_embedded_targets/

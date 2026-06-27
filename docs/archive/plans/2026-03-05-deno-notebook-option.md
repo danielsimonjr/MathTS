@@ -197,6 +197,6 @@ The hybrid approach maximizes WASM stress-test value while keeping a path to eco
 
 ## Reference
 
-- **Gap Analysis:** `docs/plans/2026-03-05-ise-gap-analysis.md` — Section 2 (Live Document Model)
-- **Guided Discovery:** `docs/plans/2026-03-05-ise-guided-discovery-design.md` — Application notes as notebook content
+- **Gap Analysis:** `docs/archive/plans/2026-03-05-ise-gap-analysis.md` — Section 2 (Live Document Model)
+- **Guided Discovery:** `docs/archive/plans/2026-03-05-ise-guided-discovery-design.md` — Application notes as notebook content
 - **Deno Jupyter Docs:** https://docs.deno.com/runtime/reference/cli/jupyter/

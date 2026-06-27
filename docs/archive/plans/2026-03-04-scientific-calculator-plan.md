@@ -4,7 +4,7 @@
 
 **Goal:** Build a production-quality Electron desktop app that demonstrates the math.js TS+AS+WASM library across five panels: Scientific Calculator, Matrix Lab, Signal Studio, Statistics Dashboard, and Performance Dashboard.
 
-**Architecture:** Electron 33+ with React 19 renderer bundled by Vite. The math.js `Parser` lives in the renderer for synchronous expression evaluation. Heavy WASM computations (matrix ops, FFT, large stats) are dispatched to worker threads via Electron IPC. Zustand manages shared state (parser, engine mode, history, config). See `docs/plans/2026-03-04-scientific-calculator-design.md` for the full design.
+**Architecture:** Electron 33+ with React 19 renderer bundled by Vite. The math.js `Parser` lives in the renderer for synchronous expression evaluation. Heavy WASM computations (matrix ops, FFT, large stats) are dispatched to worker threads via Electron IPC. Zustand manages shared state (parser, engine mode, history, config). See `docs/archive/plans/2026-03-04-scientific-calculator-design.md` for the full design.
 
 **Tech Stack:** Electron 33, React 19, TypeScript, Vite, Zustand, Recharts, Tailwind CSS, math.js (local link)
 
