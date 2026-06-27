@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-26) — dedup special-function scalars + parallel helpers in `functions` (Duplication Audit Clusters A & E)
+
+- **New canonical scalar module `functions/src/wasm/special/scalars.ts`** — the
+  single source of truth for the special-function scalars previously duplicated
+  between `functions/src/typed/special.ts` (scalar/sub-threshold path) and
+  `functions/src/wasm/special/wasm-bridge.ts` (≥-threshold WASM JS fallbacks):
+  `_lgamma`, Bessel J/Y (`besselHankel`, `besselJ*Series`, `besselY*Series`,
+  `besselJ0/J1/Y0/Y1/J/Y` scalars), Airy (`airyUCoeffs`, `airyAsymPQ`,
+  `airyAi/airyBiScalar`), complete elliptic `ellipticK/ellipticECompleteScalar`,
+  plus the `_lgamma`/`factorial` consumers (`beta`, `gammainc`, `gammaincp`,
+  `betainc`, `besselI` scalars). ~420 LOC of duplicate JS removed from the bridge.
+  **`f(x) ≡ f([x])` is now guaranteed** — the scalar and array paths call the same
+  function, closing the silent-drift risk.
+- **Serialization mechanism (verified):** `typed/special.ts` serializes scalar
+  kernels to the worker pool via `Function.prototype.toString()` + `eval`
+  (`packages/workerpool/src/worker.ts`). Plain `import` of the canonical scalars is
+  safe for this because `.toString()` returns source text regardless of module —
+  **provided** the serialized function references only `Math.*`/its args/other
+  same-module functions. The `_lgamma`/`factorial` consumers had to be co-located
+  in `scalars.ts` (not merely imported into `special.ts`) because vitest's SSR
+  transform rewrites a cross-module import reference inside a function body to
+  `__vite_ssr_import_*`, which would break the serialized kernel; a same-module
+  reference stays a bare identifier. No codegen required.
+- **Cluster E:** hoisted the verbatim-duplicated `mapArray` + `kernelSource` into
+  `functions/src/typed/parallel-map.ts`, imported by both `special.ts` and
+  `distributions.ts` (main-thread helpers, never themselves serialized).
+- **Fixed two preexisting numeric divergences** (reconciled to the correct value):
+  - `lgamma` negative non-integers: the `special.ts` copy used bare `sin(πx)` and
+    returned `NaN` (e.g. `lgamma(-0.5)`); the bridge copy used `|sin(πx)|` and was
+    correct (`lgamma` is `log|Γ|`). Canonical adopts the correct `|sin|` form, so
+    the scalar path now returns `ln(2√π)` too.
+  - `besselY` negative orders: the `special.ts` copy ignored them and returned
+    `Y₁`; canonical applies the parity identity `Y₋ₙ(x) = (-1)ⁿ Yₙ(x)`.
+  - Removed dead `_erf` (unused) from `special.ts`.
+- Extended `functions/tests/special.test.ts`: the parallel-overload drift gate now
+  also covers the Airy worker path, plus two regression tests locking the two
+  reconciled divergences. Full `functions` suite: 2902 pass / 41 skip (was 2900);
+  `test:diff` special harness 187/187; typecheck 0 errors; all 22 turbo builds green.
+
 ### Changed (2026-06-26) — dedup `rowMajorStrides` across tensor/autograd (Duplication Audit Cluster H)
 
 - **Canonical home = `Tensor.rowMajorStrides`** in `@danielsimonjr/mathts-tensor`.

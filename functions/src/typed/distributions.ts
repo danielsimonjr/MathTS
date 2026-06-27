@@ -12,8 +12,8 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { computePool } from '@danielsimonjr/mathts-parallel';
 import { WASM_SPECIAL_THRESHOLD, lgammaDispatch, lgammaJS } from '../wasm/special/wasm-bridge.js';
+import { mapArray, kernelSource } from './parallel-map.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -163,37 +163,6 @@ function bernoulliPMFScalar(k: i32, p: f64): f64 {
   if (k === 1) return p;
   if (k === 0) return 1 - p;
   return NaN;
-}
-
-// =============================================================================
-// Parallel Array Evaluation
-// =============================================================================
-
-/**
- * Build a self-contained kernel source string: dependency function
- * declarations followed by an expression that evaluates to `(x) => number`.
- */
-function kernelSource(deps: Array<(...args: never[]) => unknown>, body: string): string {
-  return `(() => {\n${deps.map((d) => d.toString()).join('\n')}\nreturn (${body});\n})()`;
-}
-
-/**
- * Evaluate a scalar distribution function across an array, dispatching large
- * inputs to the worker pool. Falls back to a sequential loop when the pool is
- * not initialized or the input is below the parallel threshold.
- */
-async function mapArray(
-  x: Float64Array,
-  scalar: (v: f64) => f64,
-  buildKernel: () => string
-): Promise<Float64Array> {
-  if (computePool.shouldParallelize(x.length)) {
-    const r = await computePool.applyKernel(x, buildKernel());
-    return r.result;
-  }
-  const out = new Float64Array(x.length);
-  for (let i = 0; i < x.length; i++) out[i] = scalar(x[i]);
-  return out;
 }
 
 // =============================================================================

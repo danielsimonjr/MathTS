@@ -39,6 +39,19 @@ import {
   makeUnaryArrayDispatch,
   type RawWasm,
 } from '../bridges/common.js';
+import {
+  _lgamma,
+  besselJ0Scalar,
+  besselJ1Scalar,
+  besselJScalar,
+  besselY0Scalar,
+  besselY1Scalar,
+  besselYScalar,
+  airyAiScalar,
+  airyBiScalar,
+  ellipticKScalar,
+  ellipticECompleteScalar,
+} from './scalars.js';
 
 /**
  * Element-count threshold above which we attempt the WASM Bessel kernels.
@@ -53,11 +66,16 @@ export const WASM_SPECIAL_THRESHOLD = 1024;
 // Pure-JS fallback implementations
 // ---------------------------------------------------------------------------
 
+// The element-wise JS fallbacks below delegate to the canonical scalars in
+// ./scalars.ts (the single source of truth shared with typed/special.ts), so
+// the ≥-threshold array fallback can never numerically diverge from the scalar
+// / sub-threshold path.
+
 /** JS fallback: J0(x) for all x. */
 export function besselJ0JS(xs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) {
-    out[i] = _besselJ0(xs[i]);
+    out[i] = besselJ0Scalar(xs[i]);
   }
   return out;
 }
@@ -66,7 +84,7 @@ export function besselJ0JS(xs: Float64Array): Float64Array {
 export function besselJ1JS(xs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) {
-    out[i] = _besselJ1(xs[i]);
+    out[i] = besselJ1Scalar(xs[i]);
   }
   return out;
 }
@@ -75,7 +93,7 @@ export function besselJ1JS(xs: Float64Array): Float64Array {
 export function besselJnJS(n: number, xs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) {
-    out[i] = _besselJn(n, xs[i]);
+    out[i] = besselJScalar(n, xs[i]);
   }
   return out;
 }
@@ -84,7 +102,7 @@ export function besselJnJS(n: number, xs: Float64Array): Float64Array {
 export function besselY0JS(xs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) {
-    out[i] = _besselY0(xs[i]);
+    out[i] = besselY0Scalar(xs[i]);
   }
   return out;
 }
@@ -93,7 +111,7 @@ export function besselY0JS(xs: Float64Array): Float64Array {
 export function besselY1JS(xs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) {
-    out[i] = _besselY1(xs[i]);
+    out[i] = besselY1Scalar(xs[i]);
   }
   return out;
 }
@@ -102,7 +120,7 @@ export function besselY1JS(xs: Float64Array): Float64Array {
 export function besselYnJS(n: number, xs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) {
-    out[i] = _besselYn(n, xs[i]);
+    out[i] = besselYScalar(n, xs[i]);
   }
   return out;
 }
@@ -111,7 +129,7 @@ export function besselYnJS(n: number, xs: Float64Array): Float64Array {
 export function airyAiJS(xs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) {
-    out[i] = _airyAi(xs[i]);
+    out[i] = airyAiScalar(xs[i]);
   }
   return out;
 }
@@ -120,7 +138,7 @@ export function airyAiJS(xs: Float64Array): Float64Array {
 export function airyBiJS(xs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) {
-    out[i] = _airyBi(xs[i]);
+    out[i] = airyBiScalar(xs[i]);
   }
   return out;
 }
@@ -227,28 +245,7 @@ export const airyBiDispatch = makeUnaryArrayDispatch({
 // Negative non-integer: reflection formula already handled in both Rust and AS.
 // ---------------------------------------------------------------------------
 
-/** JS fallback: lgamma(x) = log Gamma(x) for all x. */
-function _lgamma(x: number): number {
-  if (x <= 0 && x === Math.floor(x)) return Infinity;
-  if (x < 0.5) {
-    const sinPiX = Math.abs(Math.sin(Math.PI * x));
-    if (sinPiX === 0) return Infinity;
-    return Math.log(Math.PI / sinPiX) - _lgamma(1 - x);
-  }
-  const g = 7;
-  const c = [
-    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
-    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
-    1.5056327351493116e-7,
-  ];
-  const xm1 = x - 1;
-  let a = c[0];
-  for (let i = 1; i < g + 2; i++) a += c[i] / (xm1 + i);
-  const t = xm1 + g + 0.5;
-  return 0.5 * Math.log(2 * Math.PI) + (xm1 + 0.5) * Math.log(t) - t + Math.log(a);
-}
-
-/** JS fallback: lgamma(x) applied element-wise. */
+/** JS fallback: lgamma(x) applied element-wise (canonical `_lgamma`). */
 export function lgammaJS(xs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) out[i] = _lgamma(xs[i]);
@@ -687,68 +684,20 @@ export function resetLgammaWasm(): void {
 // Domain: m ∈ [0, 1).  K(1)=+∞, E(1)=1.  m<0 or m>1 → NaN.
 // ---------------------------------------------------------------------------
 
-/** JS implementation of K(m) — complete elliptic integral of the first kind. */
-function _ellipticK(m: number): number {
-  if (isNaN(m)) return NaN;
-  if (m < 0.0 || m > 1.0) return NaN;
-  if (m === 1.0) return Infinity;
-  if (m === 0.0) return Math.PI / 2.0;
-  let a = 1.0;
-  let b = Math.sqrt(1.0 - m);
-  for (let i = 0; i < 50; i++) {
-    const aNew = (a + b) / 2.0;
-    const bNew = Math.sqrt(a * b);
-    if (Math.abs(aNew - bNew) < 1e-16 * aNew) {
-      a = aNew;
-      break;
-    }
-    a = aNew;
-    b = bNew;
-  }
-  return Math.PI / (2.0 * a);
-}
-
-/** JS implementation of E(m) — complete elliptic integral of the second kind. */
-function _ellipticE(m: number): number {
-  if (isNaN(m)) return NaN;
-  if (m < 0.0 || m > 1.0) return NaN;
-  if (m === 0.0) return Math.PI / 2.0;
-  if (m === 1.0) return 1.0;
-  let a = 1.0;
-  let b = Math.sqrt(1.0 - m);
-  let sum = m; // 2^0 · c_0² = m (c_0 = √m, c_0² = m)
-  let pow2 = 1.0;
-  for (let i = 0; i < 50; i++) {
-    const aNew = (a + b) / 2.0;
-    const bNew = Math.sqrt(a * b);
-    const cNew = (a - b) / 2.0;
-    pow2 *= 2.0;
-    sum += pow2 * cNew * cNew;
-    if (Math.abs(cNew) < 1e-16 * aNew) {
-      a = aNew;
-      break;
-    }
-    a = aNew;
-    b = bNew;
-  }
-  const k = Math.PI / (2.0 * a);
-  return k * (1.0 - 0.5 * sum);
-}
-
-/** JS fallback: K(m) applied element-wise. */
+/** JS fallback: K(m) applied element-wise (canonical `ellipticKScalar`). */
 export function ellipticKJS(ms: Float64Array): Float64Array {
   const out = new Float64Array(ms.length);
   for (let i = 0; i < ms.length; i++) {
-    out[i] = _ellipticK(ms[i]);
+    out[i] = ellipticKScalar(ms[i]);
   }
   return out;
 }
 
-/** JS fallback: E(m) applied element-wise. */
+/** JS fallback: E(m) applied element-wise (canonical `ellipticECompleteScalar`). */
 export function ellipticEJS(ms: Float64Array): Float64Array {
   const out = new Float64Array(ms.length);
   for (let i = 0; i < ms.length; i++) {
-    out[i] = _ellipticE(ms[i]);
+    out[i] = ellipticECompleteScalar(ms[i]);
   }
   return out;
 }
@@ -766,305 +715,3 @@ export const ellipticEDispatch = makeUnaryArrayDispatch({
   name: 'elliptic_e_f64',
   js: ellipticEJS,
 });
-
-// ---------------------------------------------------------------------------
-// Internal scalar implementations (mirrors typed/special.ts besselXScalar)
-// These are used by the JS fallback loops so this file is self-contained.
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Bessel J/Y JS fallback — ascending series (|x| <= 13) + Hankel asymptotic.
-// Mirrors assembly/src/special.ts and functions/src/typed/special.ts (kept in
-// sync; validated to <1e-9 vs mpmath). These run on the main thread, so unlike
-// the special.ts scalars they may share module-level helpers/constants.
-// ---------------------------------------------------------------------------
-const _SF_GAMMA = 0.5772156649015328606;
-const _SF_2_PI = 0.63661977236758134308;
-const _SF_1_PI = 0.31830988618379067154;
-const _BESSEL_SERIES_MAX = 13.0;
-
-function _besselHankel(nu: number, x: number, wantY: boolean): number {
-  const mu = 4 * nu * nu;
-  let P = 1.0;
-  let Q = 0.0;
-  let a = 1.0;
-  let xk = 1.0;
-  let prevMag = Infinity;
-  for (let k = 1; k <= 40; k++) {
-    const t1 = 2 * k - 1;
-    a = (a * (mu - t1 * t1)) / (8 * k);
-    xk *= x;
-    const t = a / xk;
-    if (Math.abs(t) > prevMag) break;
-    prevMag = Math.abs(t);
-    const m4 = k & 3;
-    const s = m4 === 1 || m4 === 0 ? 1.0 : -1.0;
-    if ((k & 1) === 1) Q += s * t;
-    else P += s * t;
-  }
-  const chi = x - (nu * 0.5 + 0.25) * Math.PI;
-  const amp = Math.sqrt(2.0 / (Math.PI * x));
-  return wantY
-    ? amp * (P * Math.sin(chi) + Q * Math.cos(chi))
-    : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
-}
-
-function _besselJ0Series(x: number): number {
-  const z = -0.25 * x * x;
-  let term = 1.0;
-  let sum = 1.0;
-  for (let k = 1; k <= 80; k++) {
-    term *= z / (k * k);
-    sum += term;
-    if (Math.abs(term) <= Math.abs(sum) * 1e-17) break;
-  }
-  return sum;
-}
-
-function _besselJ1Series(x: number): number {
-  const z = -0.25 * x * x;
-  let term = 1.0;
-  let sum = 1.0;
-  for (let k = 1; k <= 80; k++) {
-    term *= z / (k * (k + 1));
-    sum += term;
-    if (Math.abs(term) <= Math.abs(sum) * 1e-17) break;
-  }
-  return 0.5 * x * sum;
-}
-
-function _besselY0Series(x: number): number {
-  const z = 0.25 * x * x;
-  let u = 1.0;
-  let h = 0.0;
-  let s = 0.0;
-  let sign = 1.0;
-  for (let k = 1; k <= 80; k++) {
-    u *= z / (k * k);
-    h += 1 / k;
-    s += sign * h * u;
-    sign = -sign;
-    if (k > 2 && Math.abs(h * u) <= Math.abs(s) * 1e-17) break;
-  }
-  return _SF_2_PI * ((Math.log(0.5 * x) + _SF_GAMMA) * _besselJ0Series(x) + s);
-}
-
-function _besselY1Series(x: number): number {
-  const z = -0.25 * x * x;
-  let v = 0.5 * x;
-  let hk = 0.0;
-  let hk1 = 1.0;
-  let s = (hk + hk1) * v;
-  for (let k = 1; k <= 80; k++) {
-    v *= z / (k * (k + 1));
-    hk += 1 / k;
-    hk1 += 1 / (k + 1);
-    s += (hk + hk1) * v;
-    if (k > 2 && Math.abs((hk + hk1) * v) <= Math.abs(s) * 1e-17) break;
-  }
-  return (
-    _SF_2_PI * (Math.log(0.5 * x) + _SF_GAMMA) * _besselJ1Series(x) - _SF_2_PI / x - _SF_1_PI * s
-  );
-}
-
-function _besselJ0(x: number): number {
-  const ax = Math.abs(x);
-  return ax <= _BESSEL_SERIES_MAX ? _besselJ0Series(ax) : _besselHankel(0, ax, false);
-}
-
-function _besselJ1(x: number): number {
-  const ax = Math.abs(x);
-  const sign = x < 0 ? -1 : 1;
-  const val = ax <= _BESSEL_SERIES_MAX ? _besselJ1Series(ax) : _besselHankel(1, ax, false);
-  return sign * val;
-}
-
-function _besselY0(x: number): number {
-  if (x <= 0.0) return NaN;
-  return x <= _BESSEL_SERIES_MAX ? _besselY0Series(x) : _besselHankel(0, x, true);
-}
-
-function _besselY1(x: number): number {
-  if (x <= 0.0) return NaN;
-  return x <= _BESSEL_SERIES_MAX ? _besselY1Series(x) : _besselHankel(1, x, true);
-}
-
-function _besselJn(n: number, x: number): number {
-  const ni = Math.abs(Math.round(n));
-  const sign = n < 0 && ni % 2 !== 0 ? -1.0 : 1.0;
-  if (ni === 0) return sign * _besselJ0(x);
-  if (ni === 1) return sign * _besselJ1(x);
-  if (Math.abs(x) < 1e-15) return 0.0;
-  // Upward recurrence is stable only when x > n; else use Miller's backward.
-  if (Math.abs(x) > ni) {
-    let jPrev = _besselJ0(x);
-    let jCurr = _besselJ1(x);
-    for (let k = 1; k < ni; k++) {
-      const jNext = ((2.0 * k) / x) * jCurr - jPrev;
-      jPrev = jCurr;
-      jCurr = jNext;
-    }
-    return sign * jCurr;
-  }
-  const extra = Math.max(10, Math.floor(Math.sqrt(40.0 * ni)));
-  const nStart = ni + 2 * extra;
-  let jNext = 0.0;
-  let jCurr = 1.0;
-  let resultVal = 0.0;
-  let sum = 0.0;
-  for (let k = nStart; k >= 0; k--) {
-    const jPrev = ((2.0 * (k + 1)) / x) * jCurr - jNext;
-    jNext = jCurr;
-    jCurr = jPrev;
-    if (k === ni) resultVal = jCurr; // jCurr = J_k after the assignment
-    if (k % 2 === 0) sum += jCurr;
-  }
-  sum = 2.0 * sum - jCurr;
-  return sign * (resultVal / sum);
-}
-
-function _besselYn(n: number, x: number): number {
-  if (x <= 0.0) return NaN;
-  const ni = Math.abs(Math.round(n));
-  const sign = n < 0 && ni % 2 !== 0 ? -1.0 : 1.0;
-  if (ni === 0) return sign * _besselY0(x);
-  if (ni === 1) return sign * _besselY1(x);
-  let yPrev = _besselY0(x);
-  let yCurr = _besselY1(x);
-  for (let k = 1; k < ni; k++) {
-    const yNext = ((2.0 * k) / x) * yCurr - yPrev;
-    yPrev = yCurr;
-    yCurr = yNext;
-  }
-  return sign * yCurr;
-}
-
-// ---------------------------------------------------------------------------
-// Airy scalar JS fallback — series for |x| <= 5, asymptotic with recurrence-
-// generated u_k coefficients (DLMF 9.7.2) beyond.
-// ---------------------------------------------------------------------------
-const _AI0 = 0.35502805388781723926;
-const _AI_PRIME0 = 0.25881940379280679841;
-const _XBIG = 5.0;
-const _AIRY_U = ((): number[] => {
-  const u = [1];
-  for (let k = 1; k <= 12; k++) {
-    u.push((u[k - 1] * ((6 * k - 5) * (6 * k - 3) * (6 * k - 1))) / ((2 * k - 1) * 216 * k));
-  }
-  return u;
-})();
-
-function _airyAiSeries(x: number): number {
-  const x3 = x * x * x;
-  let f = 1.0;
-  let g = x;
-  let fTerm = 1.0;
-  let gTerm = x;
-  let factF = 1.0;
-  let factG = 1.0;
-  let prodF = 1.0;
-  let prodG = 1.0;
-  for (let k = 1; k <= 40; k++) {
-    factF *= (3 * k - 2) * (3 * k - 1) * (3 * k);
-    factG *= (3 * k - 1) * (3 * k) * (3 * k + 1);
-    prodF *= 3 * k - 2;
-    prodG *= 3 * k - 1;
-    fTerm *= x3;
-    gTerm *= x3;
-    const df = (fTerm * prodF) / factF;
-    const dg = (gTerm * prodG) / factG;
-    f += df;
-    g += dg;
-    if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
-  }
-  return _AI0 * f - _AI_PRIME0 * g;
-}
-
-function _airyBiSeries(x: number): number {
-  const x3 = x * x * x;
-  let f = 1.0;
-  let g = x;
-  let fTerm = 1.0;
-  let gTerm = x;
-  let factF = 1.0;
-  let factG = 1.0;
-  let prodF = 1.0;
-  let prodG = 1.0;
-  for (let k = 1; k <= 40; k++) {
-    factF *= (3 * k - 2) * (3 * k - 1) * (3 * k);
-    factG *= (3 * k - 1) * (3 * k) * (3 * k + 1);
-    prodF *= 3 * k - 2;
-    prodG *= 3 * k - 1;
-    fTerm *= x3;
-    gTerm *= x3;
-    const df = (fTerm * prodF) / factF;
-    const dg = (gTerm * prodG) / factG;
-    f += df;
-    g += dg;
-    if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
-  }
-  return Math.sqrt(3.0) * (_AI0 * f + _AI_PRIME0 * g);
-}
-
-// Positive x: Ai ~ e^{-z}/(2 sqrt(pi) x^{1/4}) Sum (-1)^k u_k/z^k;
-//             Bi ~ e^{z}/(sqrt(pi) x^{1/4}) Sum u_k/z^k.
-function _airyAsymPos(x: number, isAi: boolean): number {
-  const xp = Math.pow(x, 0.25);
-  const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
-  let p = 0.0;
-  let zk = 1.0;
-  let sign = 1.0;
-  let prevMag = Infinity;
-  for (const uk of _AIRY_U) {
-    const t = uk / zk;
-    if (Math.abs(t) > prevMag) break;
-    prevMag = Math.abs(t);
-    p += isAi ? sign * t : t;
-    zk *= zeta;
-    sign = -sign;
-  }
-  const sp = Math.sqrt(Math.PI);
-  return isAi ? (Math.exp(-zeta) * p) / (2.0 * sp * xp) : (Math.exp(zeta) * p) / (sp * xp);
-}
-
-// Negative x: theta = z - pi/4; P = Sum (-1)^j u_{2j}/z^{2j}, Q = Sum (-1)^j u_{2j+1}/z^{2j+1}.
-//   Ai(-|x|) = (cos t P + sin t Q)/(sqrt(pi) |x|^{1/4}); Bi(-|x|) = (-sin t P + cos t Q)/...
-function _airyAsymNeg(x: number, isAi: boolean): number {
-  const ax = Math.abs(x);
-  const axp = Math.pow(ax, 0.25);
-  const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
-  let P = 0.0;
-  let Q = 0.0;
-  let pTerm = Infinity;
-  let qTerm = Infinity;
-  const half = Math.floor((_AIRY_U.length - 1) / 2);
-  for (let k = 0; k <= half; k++) {
-    const t = ((k % 2 === 0 ? 1 : -1) * _AIRY_U[2 * k]) / Math.pow(zeta, 2 * k);
-    if (Math.abs(t) > Math.abs(pTerm)) break;
-    P += t;
-    pTerm = t;
-  }
-  for (let k = 0; k <= half - 1; k++) {
-    const t = ((k % 2 === 0 ? 1 : -1) * _AIRY_U[2 * k + 1]) / Math.pow(zeta, 2 * k + 1);
-    if (Math.abs(t) > Math.abs(qTerm)) break;
-    Q += t;
-    qTerm = t;
-  }
-  const theta = zeta - Math.PI / 4.0;
-  const sp = Math.sqrt(Math.PI);
-  return isAi
-    ? (Math.cos(theta) * P + Math.sin(theta) * Q) / (sp * axp)
-    : (-Math.sin(theta) * P + Math.cos(theta) * Q) / (sp * axp);
-}
-
-function _airyAi(x: number): number {
-  if (x > _XBIG) return _airyAsymPos(x, true);
-  if (x < -_XBIG) return _airyAsymNeg(x, true);
-  return _airyAiSeries(x);
-}
-
-function _airyBi(x: number): number {
-  if (x > _XBIG) return _airyAsymPos(x, false);
-  if (x < -_XBIG) return _airyAsymNeg(x, false);
-  return _airyBiSeries(x);
-}

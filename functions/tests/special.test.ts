@@ -4,11 +4,13 @@ import {
   beta,
   gammainc,
   digamma,
+  lgamma,
   besselJ0,
   besselJ1,
   besselY0,
   besselY1,
   besselJ,
+  besselY,
   besselK,
   betainc,
   lambertW,
@@ -18,6 +20,8 @@ import {
   legendreP,
   ellipticK,
   ellipticE,
+  airyAi,
+  airyBi,
 } from '../src/typed/special.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 
@@ -250,6 +254,11 @@ describe('Special function parallel array overloads', () => {
       [erfi(xs) as Promise<Float64Array>, (v) => erfi(v) as number],
       [expIntegralEi(xs) as Promise<Float64Array>, (v) => expIntegralEi(v) as number],
       [fresnelC(xs) as Promise<Float64Array>, (v) => fresnelC(v) as number],
+      // Airy Ai/Bi exercise both the |x|<=5 series and the x>5 asymptotic
+      // branches (sample x reaches ~7.7) through the serialized worker kernel,
+      // guarding the canonical airy scalars against scalar-vs-array drift.
+      [airyAi(xs) as Promise<Float64Array>, (v) => airyAi(v) as number],
+      [airyBi(xs) as Promise<Float64Array>, (v) => airyBi(v) as number],
     ];
     for (const [arrPromise, scalar] of cases) {
       const arr = await arrPromise;
@@ -283,5 +292,27 @@ describe('Special function parallel array overloads', () => {
       expect(ee[i]).toBeCloseTo(ellipticE(ms[i]) as number, 9);
       expect(bt[i]).toBeCloseTo(beta(xs[i], 3) as number, 9);
     }
+  });
+});
+
+// =============================================================================
+// Reconciled scalar divergences (canonical scalars module)
+//
+// These two cases previously differed between the typed/special.ts copy and the
+// WASM-bridge JS-fallback copy; the canonical module reconciles each to the
+// mathematically correct value, so the scalar and array paths now agree.
+// =============================================================================
+
+describe('Reconciled scalar/array divergences', () => {
+  it('lgamma(-0.5) = ln(2√π) (log|Γ|, not NaN)', () => {
+    // The reflection branch must use |sin(πx)| so negative non-integers stay
+    // finite (lgamma is log|Γ(x)|). The old special.ts copy returned NaN here.
+    expect(lgamma(-0.5) as number).toBeCloseTo(1.2655121234846454, 10);
+  });
+
+  it('besselY negative order uses parity Y_{-n}(x) = (-1)^n Y_n(x)', () => {
+    // The old special.ts copy ignored negative orders and returned Y_1.
+    expect(besselY(-2, 3.5) as number).toBeCloseTo(besselY(2, 3.5) as number, 12);
+    expect(besselY(-3, 3.5) as number).toBeCloseTo(-(besselY(3, 3.5) as number), 12);
   });
 });
