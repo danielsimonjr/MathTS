@@ -5,6 +5,15 @@
  * eigenvector extraction using inverse iteration.
  */
 
+import {
+  isSymmetric,
+  eye,
+  cloneMatrix,
+  householder,
+  applyHouseholderLeft,
+  applyHouseholderRight,
+} from './common.js';
+
 /**
  * Result of eigenvalue decomposition
  */
@@ -31,127 +40,6 @@ export interface EigOptions {
 
 const DEFAULT_MAX_ITERATIONS = 1000;
 const DEFAULT_TOLERANCE = 1e-12;
-
-/**
- * Check if a matrix is symmetric
- */
-function isSymmetric(matrix: number[][], tolerance: number = 1e-10): boolean {
-  const n = matrix.length;
-  if (n === 0) return true;
-  if (matrix[0].length !== n) return false;
-
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      if (Math.abs(matrix[i][j] - matrix[j][i]) > tolerance) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-/**
- * Create identity matrix
- */
-function eye(n: number): number[][] {
-  const I = Array.from({ length: n }, () => new Array(n).fill(0));
-  for (let i = 0; i < n; i++) {
-    I[i][i] = 1;
-  }
-  return I;
-}
-
-/**
- * Clone a matrix
- */
-function cloneMatrix(A: number[][]): number[][] {
-  return A.map((row) => [...row]);
-}
-
-/**
- * Compute Householder reflection vector for a column
- */
-function householder(x: number[]): { v: number[]; beta: number } {
-  const n = x.length;
-  let sigma = 0;
-  for (let i = 1; i < n; i++) {
-    sigma += x[i] * x[i];
-  }
-
-  const v = [...x];
-  v[0] = 1;
-
-  if (sigma === 0 && x[0] >= 0) {
-    return { v, beta: 0 };
-  } else if (sigma === 0 && x[0] < 0) {
-    return { v, beta: -2 };
-  } else {
-    const mu = Math.sqrt(x[0] * x[0] + sigma);
-    if (x[0] <= 0) {
-      v[0] = x[0] - mu;
-    } else {
-      v[0] = -sigma / (x[0] + mu);
-    }
-    const beta = (2 * v[0] * v[0]) / (sigma + v[0] * v[0]);
-    const v0 = v[0];
-    for (let i = 0; i < n; i++) {
-      v[i] /= v0;
-    }
-    return { v, beta };
-  }
-}
-
-/**
- * Apply Householder reflection: H = I - beta*v*v'
- * Computes H*A in-place
- */
-function applyHouseholderLeft(
-  A: number[][],
-  v: number[],
-  beta: number,
-  startRow: number,
-  startCol: number
-): void {
-  const n = A[0].length;
-  const len = v.length;
-
-  for (let j = startCol; j < n; j++) {
-    let dot = 0;
-    for (let i = 0; i < len; i++) {
-      dot += v[i] * A[startRow + i][j];
-    }
-    dot *= beta;
-    for (let i = 0; i < len; i++) {
-      A[startRow + i][j] -= dot * v[i];
-    }
-  }
-}
-
-/**
- * Apply Householder reflection: H = I - beta*v*v'
- * Computes A*H in-place
- */
-function applyHouseholderRight(
-  A: number[][],
-  v: number[],
-  beta: number,
-  startRow: number,
-  startCol: number
-): void {
-  const m = A.length;
-  const len = v.length;
-
-  for (let i = startRow; i < m; i++) {
-    let dot = 0;
-    for (let j = 0; j < len; j++) {
-      dot += A[i][startCol + j] * v[j];
-    }
-    dot *= beta;
-    for (let j = 0; j < len; j++) {
-      A[i][startCol + j] -= dot * v[j];
-    }
-  }
-}
 
 /**
  * Reduce matrix to upper Hessenberg form using Householder reflections

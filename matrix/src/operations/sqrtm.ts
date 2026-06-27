@@ -22,39 +22,11 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
 import { schurInternal } from './schur.js';
+import { eye, matMul, transpose } from './common.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-/** Create n × n identity matrix. */
-function eye(n: number): number[][] {
-  return Array.from({ length: n }, (_, i) =>
-    Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
-  );
-}
-
-/** Matrix multiply. */
-function matMul(A: number[][], B: number[][]): number[][] {
-  const m = A.length;
-  const p = A[0].length;
-  const n = B[0].length;
-  const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
-  for (let i = 0; i < m; i++)
-    for (let k = 0; k < p; k++) {
-      const aik = A[i][k];
-      if (aik === 0) continue;
-      for (let j = 0; j < n; j++) C[i][j] += aik * B[k][j];
-    }
-  return C;
-}
-
-/** Transpose a matrix. */
-function transpose(A: number[][]): number[][] {
-  const m = A.length;
-  const n = A[0].length;
-  return Array.from({ length: n }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
-}
 
 /**
  * Symmetrize a matrix: return (A + A^T) / 2.
@@ -448,30 +420,6 @@ function solveLinearSystem(A: number[][], b: number[]): number[] | null {
 }
 
 /**
- * Matrix multiply A × B (plain 2-D arrays).
- * Shared by both sqrtm and the Schur back-rotation.
- */
-function matMulArr(A: number[][], B: number[][]): number[][] {
-  const m = A.length;
-  const p = A[0].length;
-  const n2 = B[0].length;
-  const C: number[][] = Array.from({ length: m }, () => new Array(n2).fill(0));
-  for (let i = 0; i < m; i++)
-    for (let k = 0; k < p; k++) {
-      const aik = A[i][k];
-      if (aik === 0) continue;
-      for (let j = 0; j < n2; j++) C[i][j] += aik * B[k][j];
-    }
-  return C;
-}
-
-function transposeArr(A: number[][]): number[][] {
-  const m = A.length;
-  const n2 = A[0].length;
-  return Array.from({ length: n2 }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
-}
-
-/**
  * Schur-based Björck-Hammarling square root (Higham 2008, Algorithm 6.3).
  *
  * 1. Schur decompose: A = Q · T · Q^T.
@@ -486,8 +434,8 @@ function sqrtmSchur(A: number[][]): number[][] | null {
   if (U === null) return null;
 
   // sqrtm(A) = Q * U * Q^T
-  const Qt = transposeArr(Q);
-  return matMulArr(matMulArr(Q, U), Qt);
+  const Qt = transpose(Q);
+  return matMul(matMul(Q, U), Qt);
 }
 
 // ---------------------------------------------------------------------------

@@ -19,63 +19,11 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
 import { schurInternal } from './schur.js';
+import { eye, matMul, transpose, matScale, normInf, norm1 } from './common.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-/** Create n × n identity matrix. */
-function eye(n: number): number[][] {
-  return Array.from({ length: n }, (_, i) =>
-    Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
-  );
-}
-
-/** Matrix multiply. */
-function matMul(A: number[][], B: number[][]): number[][] {
-  const m = A.length;
-  const p = A[0].length;
-  const n = B[0].length;
-  const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
-  for (let i = 0; i < m; i++)
-    for (let k = 0; k < p; k++) {
-      const aik = A[i][k];
-      if (aik === 0) continue;
-      for (let j = 0; j < n; j++) C[i][j] += aik * B[k][j];
-    }
-  return C;
-}
-
-/** Transpose a matrix. */
-function transpose(A: number[][]): number[][] {
-  const m = A.length;
-  const n = A[0].length;
-  return Array.from({ length: n }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
-}
-
-/** Scale a matrix by a scalar. */
-function matScale(A: number[][], c: number): number[][] {
-  return A.map((row) => row.map((v) => v * c));
-}
-
-/** Infinity-norm (max absolute value — quick proxy for "near I" test). */
-function normInf(A: number[][]): number {
-  let mx = 0;
-  for (const row of A) for (const v of row) if (Math.abs(v) > mx) mx = Math.abs(v);
-  return mx;
-}
-
-/** 1-norm (max column sum). */
-function norm1(A: number[][]): number {
-  const n = A[0].length;
-  let mx = 0;
-  for (let j = 0; j < n; j++) {
-    let s = 0;
-    for (const row of A) s += Math.abs(row[j]);
-    if (s > mx) mx = s;
-  }
-  return mx;
-}
 
 /** Matrix inverse via Gauss-Jordan. Returns null on singular input. */
 function matInv(A: number[][]): number[][] | null {
@@ -279,29 +227,6 @@ function sqrtUpperTriangular(T: number[][]): number[][] | null {
 }
 
 /**
- * Matrix multiply A × B (2-D plain arrays).
- */
-function matMulArr(A: number[][], B: number[][]): number[][] {
-  const m = A.length;
-  const p = A[0].length;
-  const n = B[0].length;
-  const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
-  for (let i = 0; i < m; i++)
-    for (let k = 0; k < p; k++) {
-      const aik = A[i][k];
-      if (aik === 0) continue;
-      for (let j = 0; j < n; j++) C[i][j] += aik * B[k][j];
-    }
-  return C;
-}
-
-function transposeArr(A: number[][]): number[][] {
-  const m = A.length;
-  const n = A[0].length;
-  return Array.from({ length: n }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
-}
-
-/**
  * Check whether a quasi-upper-triangular Schur form T has any 2×2 blocks
  * (i.e. any complex-conjugate eigenvalue pair). Returns true if all diagonal
  * blocks are 1×1 (all real eigenvalues).
@@ -371,8 +296,8 @@ function logmSchur(A: number[][], tol: number): number[][] | null {
   }
 
   // Rotate: logm(A) = Q * logm(T) * Q^T
-  const Qt = transposeArr(Q);
-  return matMulArr(matMulArr(Q, logT), Qt);
+  const Qt = transpose(Q);
+  return matMul(matMul(Q, logT), Qt);
 }
 
 // ---------------------------------------------------------------------------

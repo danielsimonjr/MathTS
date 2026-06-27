@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-26) — matrix: deduplicate decomposition helpers into `operations/common.ts`
+
+- **Extracted the shared `number[][]` helpers duplicated across the matrix
+  decomposition modules into a single `matrix/src/operations/common.ts`**
+  (Duplication Audit Clusters F + G). Canonical exports: `eye`, `cloneMatrix`,
+  `transpose`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`,
+  `normInf`, `norm1`, `householder`, `applyHouseholderLeft`,
+  `applyHouseholderRight`. `eig.ts`, `svd.ts`, `schur.ts`, `expm.ts`, `logm.ts`,
+  `sqrtm.ts`, and `eig-wasm.ts` now import these instead of re-declaring them
+  (~250 LOC of duplication removed). Pure refactor — no behavior change.
+  - **schur's deliberate Householder divergence is preserved**: `householder`
+    takes an optional `degenerateBeta` (default `-2`, matching eig/svd) for the
+    `sigma === 0 && x[0] < 0` branch; schur passes `2`
+    (H = I − 2·e_1·e_1ᵀ = diag(−1, 1, …, 1)) at both its call sites.
+  - svd's Householder appliers previously carried extra explicit end-bound
+    arguments that always equalled the full matrix bounds at every call site;
+    unified to the eig/schur signature with identical behavior.
+  - Added `matrix/tests/operations/common.test.ts` (11 focused unit tests).
+    Full matrix suite: 740 passed / 7 skipped (was 729 / 7 before the new tests).
+
 ### Removed (2026-06-26) — Rust→AS migration Phase 7c: Rust toolchain deleted (migration COMPLETE)
 
 - **Rust WASM toolchain removed — AssemblyScript is the sole WASM backend

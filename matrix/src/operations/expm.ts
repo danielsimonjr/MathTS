@@ -16,6 +16,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import { eye, matMul, matAdd, matSub, matScale, norm1 } from './common.js';
 
 // ---------------------------------------------------------------------------
 // Padé-13 coefficients (Higham 2005, Table 1 / Algorithm 10.20)
@@ -32,64 +33,6 @@ const B = [
 // ---------------------------------------------------------------------------
 // Internal helpers (work on number[][] for generality)
 // ---------------------------------------------------------------------------
-
-/** Create an n × n identity matrix. */
-function eye(n: number): number[][] {
-  return Array.from({ length: n }, (_, i) =>
-    Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
-  );
-}
-
-/** Matrix multiply C = A × B. */
-function matMul(A: number[][], B: number[][]): number[][] {
-  const m = A.length;
-  const p = A[0].length;
-  const n = B[0].length;
-  const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
-  for (let i = 0; i < m; i++) {
-    for (let k = 0; k < p; k++) {
-      const aik = A[i][k];
-      if (aik === 0) continue;
-      for (let j = 0; j < n; j++) C[i][j] += aik * B[k][j];
-    }
-  }
-  return C;
-}
-
-/** Matrix addition A + B (in-place into A). */
-function matAdd(A: number[][], B: number[][]): number[][] {
-  const n = A.length;
-  const r = Array.from({ length: n }, (_, i) =>
-    Array.from({ length: n }, (_, j) => A[i][j] + B[i][j])
-  );
-  return r;
-}
-
-/** Matrix subtraction A - B. */
-function matSub(A: number[][], B: number[][]): number[][] {
-  const n = A.length;
-  return Array.from({ length: n }, (_, i) =>
-    Array.from({ length: n }, (_, j) => A[i][j] - B[i][j])
-  );
-}
-
-/** Scalar multiply: c * A. */
-function matScale(A: number[][], c: number): number[][] {
-  return A.map((row) => row.map((v) => v * c));
-}
-
-/** 1-norm of a matrix (max column sum of absolute values). */
-function norm1(A: number[][]): number {
-  const m = A.length;
-  const n = A[0].length;
-  let maxColSum = 0;
-  for (let j = 0; j < n; j++) {
-    let colSum = 0;
-    for (let i = 0; i < m; i++) colSum += Math.abs(A[i][j]);
-    if (colSum > maxColSum) maxColSum = colSum;
-  }
-  return maxColSum;
-}
 
 /** Solve linear system M*X = N via Gauss-Jordan elimination (returns X). */
 function matSolve(M: number[][], N: number[][]): number[][] {

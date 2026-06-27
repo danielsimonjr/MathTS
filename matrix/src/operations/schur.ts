@@ -15,77 +15,22 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import {
+  eye,
+  cloneMatrix,
+  householder,
+  applyHouseholderLeft,
+  applyHouseholderRight,
+} from './common.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
+//
+// NOTE: schur passes `beta = 2` to `householder` for the degenerate
+// negative-x0 branch (H = I − 2·e_1·e_1ᵀ = diag(−1, 1, ..., 1)) — a deliberate
+// divergence from eig/svd (which use the default −2). Preserved at the two
+// call sites below.
 // ---------------------------------------------------------------------------
-
-function eye(n: number): number[][] {
-  return Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
-}
-
-function cloneMatrix(A: number[][]): number[][] {
-  return A.map((row) => [...row]);
-}
-
-function householder(x: number[]): { v: number[]; beta: number } {
-  const n = x.length;
-  let sigma = 0;
-  for (let i = 1; i < n; i++) sigma += x[i] * x[i];
-
-  const v = [...x];
-  v[0] = 1;
-
-  if (sigma === 0 && x[0] >= 0) {
-    // x is already a positive multiple of e_1 — no reflection needed.
-    return { v, beta: 0 };
-  } else if (sigma === 0 && x[0] < 0) {
-    // x = [x0, 0, ..., 0] with x0 < 0. Reflect to [−x0, 0, ..., 0].
-    // v = e_1, beta = 2 gives H = I − 2*e_1*e_1^T = diag(−1, 1, ..., 1).
-    return { v, beta: 2 };
-  } else {
-    const mu = Math.sqrt(x[0] * x[0] + sigma);
-    v[0] = x[0] <= 0 ? x[0] - mu : -sigma / (x[0] + mu);
-    const beta = (2 * v[0] * v[0]) / (sigma + v[0] * v[0]);
-    const v0 = v[0];
-    for (let i = 0; i < n; i++) v[i] /= v0;
-    return { v, beta };
-  }
-}
-
-function applyHouseholderLeft(
-  A: number[][],
-  v: number[],
-  beta: number,
-  startRow: number,
-  startCol: number
-): void {
-  const n = A[0].length;
-  const len = v.length;
-  for (let j = startCol; j < n; j++) {
-    let dot = 0;
-    for (let i = 0; i < len; i++) dot += v[i] * A[startRow + i][j];
-    dot *= beta;
-    for (let i = 0; i < len; i++) A[startRow + i][j] -= dot * v[i];
-  }
-}
-
-function applyHouseholderRight(
-  A: number[][],
-  v: number[],
-  beta: number,
-  startRow: number,
-  startCol: number
-): void {
-  const m = A.length;
-  const len = v.length;
-  for (let i = startRow; i < m; i++) {
-    let dot = 0;
-    for (let j = 0; j < len; j++) dot += A[i][startCol + j] * v[j];
-    dot *= beta;
-    for (let j = 0; j < len; j++) A[i][startCol + j] -= dot * v[j];
-  }
-}
 
 function hessenbergReduce(A: number[][]): { H: number[][]; Q: number[][] } {
   const n = A.length;
@@ -96,7 +41,7 @@ function hessenbergReduce(A: number[][]): { H: number[][]; Q: number[][] } {
     const x: number[] = [];
     for (let i = k + 1; i < n; i++) x.push(H[i][k]);
 
-    const { v, beta } = householder(x);
+    const { v, beta } = householder(x, 2);
 
     if (beta !== 0) {
       applyHouseholderLeft(H, v, beta, k + 1, k);
@@ -198,7 +143,7 @@ function qrStepDouble(H: number[][], Q: number[][], start: number, end: number):
   let z = H[start + 1][start] * H[start + 2][start + 1];
 
   for (let k = start; k <= end - 2; k++) {
-    const { v, beta } = householder([x, y, z]);
+    const { v, beta } = householder([x, y, z], 2);
 
     const q = Math.max(start, k - 1);
 

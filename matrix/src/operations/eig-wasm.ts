@@ -21,6 +21,7 @@
  */
 
 import { eig, type EigResult, type EigOptions } from './eig.js';
+import { isSymmetric } from './common.js';
 import { wasmLoader } from '../backends/WasmLoader.js';
 
 /**
@@ -29,24 +30,6 @@ import { wasmLoader } from '../backends/WasmLoader.js';
  * exceeds the computational savings.
  */
 const WASM_EIG_THRESHOLD = 8;
-
-/**
- * Check if a matrix is symmetric within tolerance
- */
-function isSymmetric(matrix: number[][], tolerance: number = 1e-10): boolean {
-  const n = matrix.length;
-  if (n === 0) return true;
-  if (matrix[0].length !== n) return false;
-
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      if (Math.abs(matrix[i][j] - matrix[j][i]) > tolerance) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
 
 /**
  * Flatten a 2D matrix to row-major Float64Array

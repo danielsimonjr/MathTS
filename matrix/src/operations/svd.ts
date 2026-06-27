@@ -8,6 +8,14 @@
  *   - V: n x n orthogonal matrix (right singular vectors)
  */
 
+import {
+  eye,
+  cloneMatrix,
+  householder,
+  applyHouseholderLeft,
+  applyHouseholderRight,
+} from './common.js';
+
 /**
  * Result of SVD decomposition
  */
@@ -40,109 +48,6 @@ const DEFAULT_MAX_ITERATIONS = 1000;
 const DEFAULT_TOLERANCE = 1e-12;
 
 /**
- * Create identity matrix
- */
-function eye(n: number): number[][] {
-  const I = Array.from({ length: n }, () => new Array(n).fill(0));
-  for (let i = 0; i < n; i++) {
-    I[i][i] = 1;
-  }
-  return I;
-}
-
-/**
- * Clone a matrix
- */
-function cloneMatrix(A: number[][]): number[][] {
-  return A.map((row) => [...row]);
-}
-
-/**
- * Compute Householder reflection vector
- */
-function householder(x: number[]): { v: number[]; beta: number } {
-  const n = x.length;
-  let sigma = 0;
-  for (let i = 1; i < n; i++) {
-    sigma += x[i] * x[i];
-  }
-
-  const v = [...x];
-  v[0] = 1;
-
-  if (sigma === 0 && x[0] >= 0) {
-    return { v, beta: 0 };
-  } else if (sigma === 0 && x[0] < 0) {
-    return { v, beta: -2 };
-  } else {
-    const mu = Math.sqrt(x[0] * x[0] + sigma);
-    if (x[0] <= 0) {
-      v[0] = x[0] - mu;
-    } else {
-      v[0] = -sigma / (x[0] + mu);
-    }
-    const beta = (2 * v[0] * v[0]) / (sigma + v[0] * v[0]);
-    const v0 = v[0];
-    for (let i = 0; i < n; i++) {
-      v[i] /= v0;
-    }
-    return { v, beta };
-  }
-}
-
-/**
- * Apply Householder from left: (I - beta*v*v') * A
- */
-function applyHouseholderLeft(
-  A: number[][],
-  v: number[],
-  beta: number,
-  startRow: number,
-  startCol: number,
-  _endRow: number,
-  endCol: number
-): void {
-  const len = v.length;
-
-  for (let j = startCol; j < endCol; j++) {
-    let dot = 0;
-    for (let i = 0; i < len; i++) {
-      dot += v[i] * A[startRow + i][j];
-    }
-    dot *= beta;
-    for (let i = 0; i < len; i++) {
-      A[startRow + i][j] -= dot * v[i];
-    }
-  }
-}
-
-/**
- * Apply Householder from right: A * (I - beta*v*v')
- */
-function applyHouseholderRight(
-  A: number[][],
-  v: number[],
-  beta: number,
-  startRow: number,
-  startCol: number,
-  endRow: number,
-  _endCol: number
-): void {
-  const len = v.length;
-
-  for (let i = startRow; i < endRow; i++) {
-    let dot = 0;
-    for (let j = 0; j < len; j++) {
-      dot += A[i][startCol + j] * v[j];
-    }
-    dot *= beta;
-    for (let j = 0; j < len; j++) {
-      A[i][startCol + j] -= dot * v[j];
-    }
-  }
-}
-
-/**
  * Bidiagonalize matrix A to B = U' * A * V
  * Returns bidiagonal B, and orthogonal U, V
  */
@@ -166,8 +71,8 @@ function bidiagonalize(A: number[][]): { B: number[][]; U: number[][]; V: number
       const { v, beta } = householder(col);
 
       if (beta !== 0) {
-        applyHouseholderLeft(B, v, beta, k, k, m, n);
-        applyHouseholderRight(U, v, beta, 0, k, m, m);
+        applyHouseholderLeft(B, v, beta, k, k);
+        applyHouseholderRight(U, v, beta, 0, k);
       }
     }
 
@@ -181,8 +86,8 @@ function bidiagonalize(A: number[][]): { B: number[][]; U: number[][]; V: number
       const { v, beta } = householder(row);
 
       if (beta !== 0) {
-        applyHouseholderRight(B, v, beta, k, k + 1, m, n);
-        applyHouseholderRight(V, v, beta, 0, k + 1, n, n);
+        applyHouseholderRight(B, v, beta, k, k + 1);
+        applyHouseholderRight(V, v, beta, 0, k + 1);
       }
     }
   }
