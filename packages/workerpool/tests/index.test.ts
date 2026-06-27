@@ -15,7 +15,6 @@ import {
   transferArrayBuffer,
   transferTypedArray,
   type EnhancedPoolStats,
-  type PoolMetrics,
   type WorkerpoolCapabilities,
 } from '../src/index.js';
 

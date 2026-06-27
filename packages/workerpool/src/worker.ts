@@ -252,7 +252,6 @@ function applyKernelChunk(
 ): ArrayBuffer {
   const data = new Float64Array(buffer);
   const result = new Float64Array(length);
-  // eslint-disable-next-line no-eval
   const fn = eval(`(${fnSource})`) as (x: number) => number;
   for (let i = 0; i < length; i++) {
     result[i] = fn(data[start + i]);
@@ -276,7 +275,6 @@ function applyKernel2Chunk(
   const a = new Float64Array(aBuffer);
   const b = new Float64Array(bBuffer);
   const result = new Float64Array(length);
-  // eslint-disable-next-line no-eval
   const fn = eval(`(${fnSource})`) as (a: number, b: number) => number;
   for (let i = 0; i < length; i++) {
     result[i] = fn(a[start + i], b[start + i]);
@@ -559,7 +557,6 @@ function outerProductRows(
  * Note: fn is passed as a string and eval'd in the worker context
  */
 function mapChunk<T, R>(chunk: T[], fnString: string): R[] {
-  // eslint-disable-next-line no-eval
   const fn = eval(`(${fnString})`) as (item: T) => R;
   return chunk.map(fn);
 }
@@ -568,7 +565,6 @@ function mapChunk<T, R>(chunk: T[], fnString: string): R[] {
  * Reduce a chunk to a single value
  */
 function reduceChunk<T, R>(chunk: T[], fnString: string, initial: R): R {
-  // eslint-disable-next-line no-eval
   const fn = eval(`(${fnString})`) as (acc: R, item: T) => R;
   return chunk.reduce(fn, initial);
 }
@@ -577,7 +573,6 @@ function reduceChunk<T, R>(chunk: T[], fnString: string, initial: R): R {
  * Filter a chunk based on predicate
  */
 function filterChunk<T>(chunk: T[], predicateString: string): T[] {
-  // eslint-disable-next-line no-eval
   const predicate = eval(`(${predicateString})`) as (item: T) => boolean;
   return chunk.filter(predicate);
 }
@@ -590,7 +585,6 @@ function findChunk<T>(
   predicateString: string,
   chunkOffset: number
 ): { found: boolean; value?: T; index?: number } {
-  // eslint-disable-next-line no-eval
   const predicate = eval(`(${predicateString})`) as (item: T) => boolean;
   const index = chunk.findIndex(predicate);
 
@@ -610,7 +604,6 @@ function findChunk<T>(
  */
 function sortChunk<T>(chunk: T[], compareString?: string): T[] {
   if (compareString) {
-    // eslint-disable-next-line no-eval
     const compare = eval(`(${compareString})`) as (a: T, b: T) => number;
     return [...chunk].sort(compare);
   }
@@ -1056,7 +1049,6 @@ function integrateChunk(
   nodes: number[],
   weights: number[]
 ): number {
-  // eslint-disable-next-line no-eval
   const f = eval(`(${fnSource})`) as (x: number) => number;
   const halfWidth = (subB - subA) / 2;
   const midpoint = (subA + subB) / 2;

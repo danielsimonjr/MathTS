@@ -1658,7 +1658,6 @@ export class MathWorkerPool {
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
-      // eslint-disable-next-line no-eval
       const fn = (0, eval)(`(${fnSource})`) as (x: number) => number;
       const result = new Float64Array(data.length);
       for (let i = 0; i < data.length; i++) {
@@ -1714,7 +1713,6 @@ export class MathWorkerPool {
     const start = performance.now();
 
     if (!this.shouldParallelize(a.length, options)) {
-      // eslint-disable-next-line no-eval
       const fn = (0, eval)(`(${fnSource})`) as (a: number, b: number) => number;
       const result = new Float64Array(a.length);
       for (let i = 0; i < a.length; i++) {
@@ -2248,7 +2246,7 @@ export class MathWorkerPool {
   private kWayMerge<T>(arrays: T[][], compare?: (a: T, b: T) => number): T[] {
     const result: T[] = [];
     const indices = new Array(arrays.length).fill(0);
-    const compareFn = compare ?? ((a: any, b: any) => (a < b ? -1 : a > b ? 1 : 0));
+    const compareFn = compare ?? ((a: T, b: T) => (a < b ? -1 : a > b ? 1 : 0));
 
     while (true) {
       let minIdx = -1;
