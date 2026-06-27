@@ -112,6 +112,7 @@
     "workerpool": "github:danielsimonjr/workerpool"
   },
   "overrides": {
-    "esbuild": "^0.28.1"
+    "esbuild": "^0.28.1",
+    "js-yaml": "^4.3.0"
   }
 }
