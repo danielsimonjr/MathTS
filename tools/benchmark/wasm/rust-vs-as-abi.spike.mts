@@ -2,9 +2,6 @@
  * Phase 1 (GATING) perf spike — Rust vs AssemblyScript WASM, with REALISTIC
  * round-trip marshalling, for the Rust→AS migration ABI decision.
  *
- *   docs/roadmap/RUST_TO_AS_MIGRATION_PLAN.md  → "Phase 1 — Perf spike"
- *   docs/roadmap/RUST_TO_AS_MIGRATION_EVAL.md  → §4 "ABI analysis / The perf risk"
- *
  * Run:  npx tsx tools/benchmark/wasm/rust-vs-as-abi.spike.mts
  *
  * Three representative kernels, n ∈ {1024, 10_000, 100_000, 1_000_000}:

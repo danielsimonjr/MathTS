@@ -1,13 +1,11 @@
 /**
  * WASM bridge for unary elementwise transcendental array ops.
  *
- * The AssemblyScript pointer-ABI kernels `array_<op>_ptr(inPtr, outPtr, n)`
- * (migration Phase 2) are a confirmed drop-in for the legacy Rust
- * `simd_<op>_array(inPtr, outPtr, n)` path — same signature, same self-managed
- * scratch-region marshalling (Phase 1 proved `array_sin_ptr` is bit-identical to
- * the Rust kernel; see docs/roadmap/RUST_TO_AS_MIGRATION_PHASE1.md). They remain
- * net-faster than V8's `Math.*` over a `Float64Array` — even including the
- * JS→wasm copy-in and wasm→JS copy-out — for the expensive transcendentals.
+ * The AssemblyScript pointer-ABI kernels `array_<op>_ptr(inPtr, outPtr, n)` are
+ * the WASM elementwise path: a single signature with self-managed scratch-region
+ * marshalling. They remain net-faster than V8's `Math.*` over a `Float64Array`
+ * — even including the JS→wasm copy-in and wasm→JS copy-out — for the expensive
+ * transcendentals.
  * Benchmarked (`tools/benchmark/wasm/elementwise.bench.mjs`,
  * `npm run bench:elementwise`), n >= 1024, vs plain JS (the current path: these
  * ops have threshold `'never'` in ComputePool, so they run synchronously in JS):

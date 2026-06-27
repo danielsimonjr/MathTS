@@ -159,10 +159,10 @@ Options:
   --include-tests    Include test files in dependency analysis
   -t                 Short form of --include-tests
   --all, -a          Include dormant/unreachable files (monorepo mode)
-  --check-wasm-parity  Rust→AS migration guard. The migration is complete
-                       (2026-06-26): AssemblyScript is the sole WASM backend, so
-                       with no Rust binary present this exits 0. (Retains the gap
-                       diff only while a legacy Rust binary lingers on disk.)
+  --check-wasm-parity  WASM bridge-kernel parity guard. AssemblyScript is the
+                       sole WASM backend; with no second binary to diff this
+                       exits 0. (Diffs the consumed-vs-authored gap only when a
+                       second WASM binary is present on disk.)
   --help, -h         Show this help
 
 Monorepo Support:
@@ -2495,8 +2495,7 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   md += `Per public \`mathTyped\` function in \`functions/src/typed/\`, its acceleration `;
   md += `routing: **wasm** (a \`*Dispatch\` bridge), **parallel** (worker pool via `;
   md += `\`computePool\`/\`shouldParallelize\`), or **js-only**. WASM engages for `;
-  md += `\`Float64Array\` inputs above threshold; the functions dispatch is AS → JS `;
-  md += `(the legacy Rust path was removed from the functions bridges in the Phase 5 cutover).\n\n`;
+  md += `\`Float64Array\` inputs above threshold; the functions dispatch is AS → JS.\n\n`;
   md += `> Detection is per-\`mathTyped\`-block direct references; routing reached only via `;
   md += `helper functions outside the block is not traced, so this can under-report.\n\n`;
   md += `| Routing (static) | Count |\n| --- | --: |\n`;
@@ -2508,7 +2507,7 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   md += `backend: **${p.bundledBackend}**): of the ${p.acceleratedCount} wasm-routed functions, `;
   md += `**${p.wasmEffectiveCount} actually execute wasm**, **${p.jsFallbackCount} fall back to JS** `;
   md += `(their \`*Dispatch\` has no AS-managed execution path — the poly-fit / Airy / argsort+rank `;
-  md += `kernels are deliberately kept on JS pending the Rust→AS migration Phase 6 fixes).\n\n`;
+  md += `kernels are deliberately kept on JS pending AS kernel-stabilization fixes).\n\n`;
   md += `## WASM-accelerated functions\n\n| Function | Routing | Effective | Bridge dispatch | Module |\n| --- | --- | --- | --- | --- |\n`;
   for (const e of p.accelerated) {
     md += `| \`${e.name}\` | ${e.routing} | ${e.effectiveBackend} | \`${e.dispatch.join('`, `')}\` | ${e.file.replace(/\.ts$/, '')} |\n`;
@@ -2523,17 +2522,17 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   }
   md += `\n> Notes: matrix linear-algebra ops are WASM-accelerated separately via the `;
   md += `\`matrix\` package backend (not the typed-API dispatch counted here), which runs the `;
-  md += `AssemblyScript binary for fft/eig/svd/decomposition (Rust→AS migration complete `;
-  md += `2026-06-26). The elementwise transcendentals (abs/sin/cos/tan/exp/log) plus the AS `;
+  md += `AssemblyScript binary for fft/eig/svd/decomposition. The elementwise transcendentals `;
+  md += `(abs/sin/cos/tan/exp/log) plus the AS `;
   md += `special/poly/sort/signal/interp kernels are the wasm-effective set. The js-fallback `;
   md += `functions (poly fits, Airy, argsort/rank) are on JS because their AS kernels are broken `;
   md += `or unstable — tracked follow-ups. See `;
-  md += `docs/roadmap/RUST_TO_AS_MIGRATION_COMPLETE.md and the \`bench:elementwise\`/\`bench:special-array\` benches.\n`;
+  md += `the \`bench:elementwise\`/\`bench:special-array\` benches.\n`;
   return md;
 }
 
 // ============================================================================
-// Rust → AssemblyScript WASM-parity check (docs/roadmap/RUST_TO_AS_MIGRATION_*).
+// WASM-parity check: AssemblyScript bridge-kernel coverage.
 //
 // The `functions` package consumes a small subset of the Rust wasm kernels via
 // six bridges under functions/src/wasm/**. This section computes, from ground
@@ -2759,21 +2758,20 @@ function computeWasmParity(rootDir: string): WasmParity | null {
 }
 
 function generateWasmParityMarkdown(p: WasmParity): string {
-  let md = '# Rust → AssemblyScript WASM Parity\n\n';
+  let md = '# WASM Bridge Kernel Parity\n\n';
   md += `**Generated**: ${p.generated} (by tools/create-dependency-graph)\n\n`;
-  md += `Grounded diff of the Rust kernels the \`functions\` bridges actually consume `;
-  md += `against the AssemblyScript binary's export table (the migration target). `;
-  md += `Sources: Rust \`${p.rustWasm}\` (${p.rustExportCount} exports), AS \`${p.asWasm}\` `;
+  md += `Grounded diff of the kernels the \`functions\` bridges actually consume `;
+  md += `against the AssemblyScript binary's export table. Source: AS \`${p.asWasm}\` `;
   md += `(${p.asExportCount} exports). Regenerate / guard with `;
   md += `\`npx tsx tools/create-dependency-graph/create-dependency-graph.ts --check-wasm-parity\`.\n\n`;
   md += `| Metric | Count |\n| --- | --: |\n`;
-  md += `| Consumed Rust kernels | ${p.consumedCount} |\n`;
+  md += `| Consumed kernels | ${p.consumedCount} |\n`;
   md += `| Covered by AS (direct + rename) | ${p.coveredCount} |\n`;
   md += `| Authoring gap (missing in AS) | ${p.gapCount} |\n\n`;
 
-  md += `## Gap — consumed Rust kernels missing from AS\n\n`;
+  md += `## Gap — consumed kernels missing from AS\n\n`;
   if (p.gapCount === 0) {
-    md += `_None — AS covers every consumed Rust kernel._\n\n`;
+    md += `_None — AS covers every consumed kernel._\n\n`;
   } else {
     md += `Grouped by consuming bridge (\`functions/src/wasm/<bridge>/wasm-bridge.ts\`):\n\n`;
     md += `| Bridge | Missing AS kernels |\n| --- | --- |\n`;
@@ -2785,12 +2783,12 @@ function generateWasmParityMarkdown(p: WasmParity): string {
     md += `\n`;
   }
 
-  md += `## Rename mappings used (consumed Rust name → AS export name)\n\n`;
+  md += `## Rename mappings used (consumed name → AS export name)\n\n`;
   const renames = Object.keys(p.renamed).sort();
   if (renames.length === 0) {
     md += `_None._\n\n`;
   } else {
-    md += `| Consumed Rust kernel | AS export |\n| --- | --- |\n`;
+    md += `| Consumed kernel | AS export |\n| --- | --- |\n`;
     for (const k of renames) md += `| \`${k}\` | \`${p.renamed[k]}\` |\n`;
     md += `\n`;
   }
@@ -2802,7 +2800,7 @@ function generateWasmParityMarkdown(p: WasmParity): string {
   }
   md += `\n> Note: a consumed kernel "covered via rename" already exists in AS under `;
   md += `a different name (no authoring needed beyond an alias). The true *authoring* `;
-  md += `gap is the table above. See docs/roadmap/RUST_TO_AS_MIGRATION_PLAN.md (Phase 0/2).\n`;
+  md += `gap is the table above.\n`;
   return md;
 }
 
@@ -2825,8 +2823,7 @@ function runWasmParityCheck(rootDir: string): never {
   const rustWasm = join(rootDir, RUST_WASM_REL);
   if (!existsSync(rustWasm)) {
     console.log(
-      '✔ wasm-parity: Rust→AS migration complete — AssemblyScript is the sole ' +
-        'WASM backend; no Rust binary to diff. Guard satisfied.'
+      'WASM-parity guard: AssemblyScript is the sole WASM backend; nothing to diff.'
     );
     process.exit(0);
   }
@@ -3200,14 +3197,14 @@ async function main(): Promise<void> {
     );
   }
 
-  // Rust → AS migration parity guard (docs/roadmap/RUST_TO_AS_MIGRATION_PLAN.md
-  // Phase 0). Emitted like the pairing artifact; --check-wasm-parity diffs it.
+  // WASM bridge-kernel parity guard. Emitted like the pairing artifact;
+  // --check-wasm-parity diffs it.
   const wasmParity = computeWasmParity(ROOT_DIR);
   if (wasmParity) {
     writeWasmParity(wasmParity);
     console.log(
       `Written: ${join(OUTPUT_DIR, 'wasm-parity.md')} ` +
-        `(${wasmParity.gapCount} AS gap of ${wasmParity.consumedCount} consumed Rust kernels)`
+        `(${wasmParity.gapCount} AS gap of ${wasmParity.consumedCount} consumed kernels)`
     );
   }
 

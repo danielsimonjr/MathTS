@@ -1,13 +1,13 @@
 /**
  * Unary elementwise transcendental array kernels — POINTER-ABI AssemblyScript.
  *
- * Hybrid-ABI decision (docs/roadmap/RUST_TO_AS_MIGRATION_PHASE1.md): the hot
- * elementwise/fusion path uses a flat-memory pointer ABI that mirrors the Rust
- * `simd_<op>_array(inPtr, outPtr, n)` signature, so the existing lean
+ * Hybrid-ABI decision: the hot elementwise/fusion path uses a flat-memory
+ * pointer ABI — `array_<op>_ptr(inPtr, outPtr, n)` — so the existing lean
  * zero-per-call-alloc bridge (functions/src/wasm/elementwise/wasm-bridge.ts) can
- * drive these AS kernels unchanged. Managed-array (`__new` header) per-call
- * allocation regresses the hot path (1.39× Rust at 131k); the pointer ABI stays
- * at 0.82–1.16× Rust (Phase-1 spike, _spike/array_sin_ptr.ts — promoted here).
+ * drive these AS kernels unchanged. A managed-array (`__new` header) per-call
+ * allocation regresses the hot path, so the pointer ABI is used throughout; it
+ * stays competitive at scale (benchmarked; spike promoted from
+ * _spike/array_sin_ptr.ts).
  *
  * `inPtr` / `outPtr` are byte offsets into linear memory; `n` is the element
  * count. Each kernel is an out-of-place scalar loop: `out[i] = f(in[i])`.
