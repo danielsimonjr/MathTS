@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-27) — `functions` + `expression` now match base on all four lint-grade compiler flags
+
+- Removed the last relaxed overrides from `functions/tsconfig.json`
+  (`noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`,
+  `noFallthroughCasesInSwitch`) and `expression/tsconfig.json` (the first
+  three) so both packages now inherit `tsconfig.base.json`'s `true` for all of
+  them. No package relaxes these anymore. Behavior-preserving — full suites
+  unchanged (`functions` 2902 pass / 41 skip, `expression` 1966 pass).
+- **noUnusedLocals/Parameters:** dropped dead type aliases/interfaces
+  (`_MatrixData` in `lup`/`qr`/`lusolve`/`fft`), redundant `BigNumber` named
+  type-imports (switched the 9 matrix files to the default-import form
+  `import type BigNumber from 'bignumber.js'`, which TS — unlike the named
+  import from an `export =` module — correctly counts as used), dead helper
+  functions (`solveODE` `readStage`; `dist-objects` `_normalCDF`/
+  `_normalQuantile`; `statistics` `_welfordVariance`), an unused private method
+  (`Decimal.toBigInt`) and locals (`Decimal` `_exp`/`_roundAt`), a vestigial
+  `WasmLoader.maxPoolSize` field (the pool-add path was never implemented), and
+  unused imports (`gcd` `ArgumentsError`, `gamma` `wasmLoader`). Side-effecting
+  factory calls in `factories/index.ts` (`createRandomInt`/`createBin`/
+  `createHex`/`createOct`) were kept — only the unused bindings were dropped.
+  Unused positional dispatch/callback params were underscore-prefixed
+  (`derivative` `_isConst`, `import` `_load`, `complexEigs` `_prec`,
+  `realSymmetric` `_N`) rather than removed, preserving signature arity.
+- **noImplicitReturns (real bug-catchers):** `expression` `Node._getCustomString`
+  and `functions` `quantileSeq._quantileSeqProbNumber` each had a code path that
+  fell off the end; added the explicit `return undefined` both already returned
+  implicitly (behavior-preserving).
+- **noFallthroughCasesInSwitch:** the two intentional fallthroughs (`simplify`
+  string→object, `derivative` log10→log) carried `/* falls through */` comments,
+  but TypeScript — unlike ESLint — does **not** honor fallthrough comments; it
+  only permits fallthrough from an *empty* case. Restructured both to
+  empty-case fall-through with an inner guard, preserving behavior exactly.
+
 ### Changed (2026-06-27) — `functions` now compiles under TypeScript `strict: true`
 
 - Flipped `functions/tsconfig.json` to `strict: true` and fixed all ~430
