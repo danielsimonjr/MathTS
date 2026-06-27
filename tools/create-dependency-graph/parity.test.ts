@@ -3,22 +3,22 @@
  *
  * Run with:  npx tsx --test tools/create-dependency-graph/parity.test.ts
  *
- * `computeParity` is tested against in-memory fixtures (no real .wasm needed).
- * `collectConsumedRustKernels` is tested against the *real* seven bridges under
- * functions/src/wasm/ (the eval undercounted them as six — bitwise was missed),
- * with a hand-built rust-export set so the test does not depend on a built .wasm.
+ * All extraction is tested against in-memory / temp fixtures (no real .wasm, and
+ * no dependency on the live bridges). NOTE: the Rust→AS migration is complete, so
+ * the production bridges no longer consume Rust kernels — `collectConsumedRustKernels`
+ * returns ∅ against them now. This guard is retained as a hermetic unit test of the
+ * extraction logic (and a regression check should the extractor ever be reused).
  */
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { join } from 'node:path';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import {
   buildRenameMap,
   collectConsumedRustKernels,
   computeParity,
 } from './create-dependency-graph';
-
-const REPO_ROOT = join(__dirname, '..', '..');
-const WASM_SRC_DIR = join(REPO_ROOT, 'functions', 'src', 'wasm');
 
 // The 18 unary elementwise ops with a Rust `simd_<op>_array` kernel.
 const ELEMENTWISE_OPS = [
@@ -77,116 +77,70 @@ const BITWISE_RUST = [
   'rightLogShiftArrayPerElement',
 ];
 
-test('collectConsumedRustKernels: extracts 7 real bridges, expands simd, excludes _as and op-array pollution', () => {
-  // Hand-built rust export set mirroring the *real* binary: it includes the
-  // bare op scalar exports ('abs','exp','log',…) that the Rust module genuinely
-  // exports. Those appear only inside the WASM_ELEMENTWISE_OPS array (op names,
-  // not kernel calls) and must NOT be counted, even though they pass the
-  // intersection-with-rust filter. Also includes a decoy referenced by no bridge.
-  const rustExports = new Set<string>([
-    // special (6 bessel: j0,j1,j,y0,y1,y — integer-order jn/yn only probed as _as)
-    'bessel_j0_f64',
-    'bessel_j1_f64',
-    'bessel_j_f64',
-    'bessel_y0_f64',
-    'bessel_y1_f64',
-    'bessel_y_f64',
-    'airy_ai_f64',
-    'airy_bi_f64',
-    'carlson_rc_f64',
-    'carlson_rd_f64',
-    'carlson_rf_f64',
-    'carlson_rj_f64',
-    'elliptic_e_f64',
-    'elliptic_e_incomplete_f64',
-    'elliptic_f_incomplete_f64',
-    'elliptic_k_f64',
-    'elliptic_pi_incomplete_f64',
-    'lgamma_f64',
-    // poly
-    'poly_mul_f64',
-    'poly_div_mod_f64',
-    'poly_resultant_f64',
-    'poly_discriminant_f64',
-    'poly_fit_f64',
-    'cheb_fit_f64',
-    'legendre_fit_f64',
-    // signal
-    'apply_window_f64',
-    'welch_psd_f64',
-    'bartlett_psd_f64',
-    'goertzel_f64',
-    'chirp_z_transform_f64',
-    // sort
-    'sort_f64',
-    'argsort_f64',
-    'rank_f64',
-    // interpolation
-    'divided_difference_f64',
-    'tridiag_solve_f64',
-    // bitwise (7 — the 7th bridge the eval missed)
-    ...BITWISE_RUST,
-    // elementwise simd_<op>_array kernels
-    ...ELEMENTWISE_OPS.map((op) => `simd_${op}_array`),
-    // bare op scalar exports that the real Rust module DOES export (pollution risk)
-    'abs',
-    'exp',
-    'log',
-    'log2',
-    'log10',
-    'log1p',
-    'expm1',
-    'erfc',
-    // decoy: a real rust export that no bridge calls
-    'unreferenced_kernel_f64',
-  ]);
+test('collectConsumedRustKernels: static literals + simd expansion; excludes _as, op-array pollution, non-exports', () => {
+  // Hermetic fixture bridge-tree (the live bridges no longer consume Rust). Each
+  // <bridge>/wasm-bridge.ts mirrors the extraction-relevant shapes.
+  const dir = mkdtempSync(join(tmpdir(), 'parity-fixture-'));
+  try {
+    const bridge = (name: string, src: string): void => {
+      mkdirSync(join(dir, name), { recursive: true });
+      writeFileSync(join(dir, name, 'wasm-bridge.ts'), src);
+    };
+    // special: static kernel literals + an `_as` probe + a prose/provenance comment.
+    bridge(
+      'special',
+      [
+        '// mirrors wasm-rust/crates/.../bessel.rs (provenance prose — ignored)',
+        "const a = wasm['bessel_j_f64'];",
+        "const b = wasm['bessel_j0_f64'];",
+        "const probe = wasm['bessel_jn_f64_as'];",
+      ].join('\n')
+    );
+    // elementwise: the op-name array (must NOT pollute) + the dynamic simd expansion.
+    bridge(
+      'elementwise',
+      'export const WASM_ELEMENTWISE_OPS = [' +
+        ELEMENTWISE_OPS.map((o) => `'${o}'`).join(', ') +
+        "] as const;\nconst fn = wasm[`simd_${op}_array`];\n"
+    );
+    // bitwise: camelCase kernel names (the 7th bridge the eval originally missed).
+    bridge('bitwise', BITWISE_RUST.map((n) => `wasm['${n}'];`).join('\n'));
 
-  const consumed = collectConsumedRustKernels(WASM_SRC_DIR, rustExports);
+    const rustExports = new Set<string>([
+      'bessel_j_f64',
+      'bessel_j0_f64',
+      ...ELEMENTWISE_OPS.map((op) => `simd_${op}_array`),
+      ...BITWISE_RUST,
+      // bare op scalar exports the real Rust binary also exports (pollution risk):
+      // they appear only inside WASM_ELEMENTWISE_OPS, so must NOT be counted.
+      ...ELEMENTWISE_OPS,
+      // decoy: a real rust export referenced by no bridge.
+      'unreferenced_kernel_f64',
+    ]);
 
-  // Static literals across the bridges.
-  assert.ok(consumed.has('bessel_j0_f64'));
-  assert.ok(consumed.has('bessel_j_f64'));
-  assert.ok(consumed.has('carlson_rj_f64'));
-  assert.ok(consumed.has('poly_fit_f64'), 'plain-string fit kernel');
-  assert.ok(consumed.has('cheb_fit_f64'));
-  assert.ok(consumed.has('tridiag_solve_f64'));
+    const consumed = collectConsumedRustKernels(dir, rustExports);
 
-  // 7th bridge: bitwise camelCase kernels.
-  for (const name of BITWISE_RUST) assert.ok(consumed.has(name), `bitwise ${name}`);
-
-  // simd_${op}_array expansion over WASM_ELEMENTWISE_OPS.
-  for (const op of ELEMENTWISE_OPS) {
-    assert.ok(consumed.has(`simd_${op}_array`), `expanded simd_${op}_array`);
+    // Static literals.
+    assert.ok(consumed.has('bessel_j_f64'));
+    assert.ok(consumed.has('bessel_j0_f64'));
+    // 7th bridge: bitwise camelCase kernels.
+    for (const name of BITWISE_RUST) assert.ok(consumed.has(name), `bitwise ${name}`);
+    // simd_${op}_array expansion over WASM_ELEMENTWISE_OPS.
+    for (const op of ELEMENTWISE_OPS) {
+      assert.ok(consumed.has(`simd_${op}_array`), `expanded simd_${op}_array`);
+    }
+    // Bare op-name literals must NOT pollute even though Rust exports them.
+    for (const bare of ELEMENTWISE_OPS) assert.ok(!consumed.has(bare), `bare op excluded: ${bare}`);
+    // `_as` probe names are never Rust kernels.
+    for (const name of consumed) assert.ok(!name.endsWith('_as'), `excluded _as name: ${name}`);
+    assert.ok(!consumed.has('bessel_jn_f64'), 'integer-order only referenced as _as probe');
+    // A rust export referenced by no bridge is excluded.
+    assert.ok(!consumed.has('unreferenced_kernel_f64'));
+    // 2 special literals + 18 simd + 7 bitwise = 27.
+    assert.equal(consumed.size, 27);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
-
-  // Bare op-name literals ('abs','exp','log',…) must NOT pollute even though the
-  // real Rust binary exports them — they are op names in the array, not kernel calls.
-  for (const bare of [
-    'abs',
-    'exp',
-    'log',
-    'log2',
-    'log10',
-    'log1p',
-    'expm1',
-    'erfc',
-    'sin',
-    'cos',
-  ]) {
-    assert.ok(!consumed.has(bare), `bare op excluded: ${bare}`);
-  }
-
-  // `_as` probe names are AS probes, never Rust kernels.
-  for (const name of consumed) {
-    assert.ok(!name.endsWith('_as'), `excluded _as name: ${name}`);
-  }
-  assert.ok(!consumed.has('bessel_jn_f64'), 'integer-order only referenced as _as probe');
-
-  // A rust export referenced by no bridge is excluded.
-  assert.ok(!consumed.has('unreferenced_kernel_f64'));
-
-  // 35 literal kernels + 18 simd + 7 bitwise = 60 grounded consumed kernels.
-  assert.equal(consumed.size, 60);
 });
 
 test('buildRenameMap: covers simd→array, poly, and bitwise renames', () => {
