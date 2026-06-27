@@ -2,7 +2,7 @@
  * Tests for the WASM-backed branches of matrix/src/backends/wasm/fft-wasm.ts.
  *
  * The AS artifact loaded here does not export `fft`/`rfft`/`powerSpectrum`
- * (those are Rust-crate exports, not built in this environment), so
+ * (those were legacy-backend exports, not built in this environment), so
  * isWasmFFTAvailable() is false and fft/ifft/rfft/powerSpectrum all take the
  * JS fallback (covered by fft-wasm.test.ts). To exercise the WASM-dispatch
  * code (memory marshalling, in-place transform, re-read from a possibly-grown

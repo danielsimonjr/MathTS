@@ -20,7 +20,7 @@ import { jsBackend } from './JSBackend.js';
 import { wasmBackend } from './WASMBackend.js';
 
 backendRegistry.register(jsBackend);
-// Phase 7b: the Rust-WASM backend was retired. The AssemblyScript backend
-// (`wasmBackend`) now serves every WASM-accelerated matrix op; heavy ops
-// (svd/eig/fft) reach AS directly via the AS-default WasmLoader.
+// Phase 7b: the legacy second WASM backend was retired. The AssemblyScript
+// backend (`wasmBackend`) now serves every WASM-accelerated matrix op; heavy
+// ops (svd/eig/fft) reach AS directly via the AS-default WasmLoader.
 backendRegistry.register(wasmBackend);

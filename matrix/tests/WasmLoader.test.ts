@@ -166,8 +166,8 @@ describe('WasmModule interface — expected export shape', () => {
   // If the file is missing (CI without a built artifact) the test skips
   // dynamically rather than failing.
   //
-  // The `WasmModule` interface in WasmLoader was authored against the Rust-WASM
-  // build, which uses camelCase exports like `multiplyDense`. The AS artifact
+  // The `WasmModule` interface in WasmLoader was authored against the legacy
+  // WASM build, which uses camelCase exports like `multiplyDense`. The AS artifact
   // uses suffixed snake_case (`add_f64`, `sub_f64`, …) and does NOT export
   // `multiplyDense`. So we only assert the things both backends provide:
   // a working WebAssembly.Memory instance and a non-empty function table.

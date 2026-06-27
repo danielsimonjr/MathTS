@@ -1,7 +1,7 @@
 /**
  * Phase 7b proof: the heavy matrix ops (SVD, symmetric eigendecomposition,
  * spectral radius) actually execute on the AssemblyScript binary — not a
- * Rust-pinned path and not a silent JS fallback.
+ * silent JS fallback.
  *
  * Each test loads the real AS artifact through the shared (AS-default)
  * WasmLoader, asserts the allocator kind is 'as' (i.e. the AS managed runtime

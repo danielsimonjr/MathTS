@@ -2,7 +2,7 @@
  * WASM-accelerated Eigendecomposition
  *
  * Provides eigenvalue/eigenvector computation with optional WASM acceleration
- * via the Rust-compiled Jacobi eigenvalue algorithm. Falls back to the pure
+ * via the AssemblyScript-compiled Jacobi eigenvalue algorithm. Falls back to the pure
  * JavaScript QR-based implementation when WASM is unavailable.
  *
  * WASM acceleration path:
@@ -53,7 +53,7 @@ function flattenMatrix(matrix: number[][]): Float64Array {
 /**
  * WASM-accelerated eigendecomposition for symmetric matrices.
  *
- * Uses the Rust Jacobi eigenvalue algorithm when WASM is loaded,
+ * Uses the AssemblyScript Jacobi eigenvalue algorithm when WASM is loaded,
  * otherwise falls back to the JavaScript QR algorithm.
  *
  * @param matrix - Square matrix as 2D array
@@ -210,7 +210,7 @@ export async function eigvalsWasm(
 
 /**
  * WASM-accelerated spectral radius.
- * Uses Rust power iteration when WASM is available.
+ * Uses AssemblyScript power iteration when WASM is available.
  *
  * @param matrix - Square matrix as 2D array
  * @param options - Iteration options

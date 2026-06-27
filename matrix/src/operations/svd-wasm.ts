@@ -4,8 +4,8 @@
  * Routes through the AssemblyScript binary's one-sided Jacobi SVD
  * (`matrix_svd` export, `assembly/src/ops/svd.ts`) for any real `m x n`
  * matrix, and falls back to the synchronous JavaScript Golub-Reinsch
- * {@link svd} when the WASM module is unavailable. (Phase 7b: repointed off
- * the retired Rust crate; singular values are bit-identical to the JS
+ * {@link svd} when the WASM module is unavailable. (Phase 7b: repointed onto
+ * the AssemblyScript binary; singular values are bit-identical to the JS
  * reference per the 7a parity validation.)
  *
  * Unlike the synchronous {@link svd} (which returns the *full* `m x m` /

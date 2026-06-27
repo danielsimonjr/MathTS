@@ -125,8 +125,8 @@ describe('BackendManager — selectBackend / getActiveBackend', () => {
     expect(['js', 'wasm', 'gpu']).toContain(sel.type);
   });
 
-  it('selects JS for a tiny heavy op (no rust-wasm preference after Phase 7b)', () => {
-    // Heavy-op routing to a dedicated Rust backend was removed in Phase 7b;
+  it('selects JS for a tiny heavy op (no dedicated heavy-op backend after Phase 7b)', () => {
+    // Heavy-op routing to a dedicated WASM backend was removed in Phase 7b;
     // tiny inputs fall through to JS regardless of operation.
     const sel = mgr.selectBackend(10, 'fft');
     expect(sel.type).toBe('js');

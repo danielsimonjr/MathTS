@@ -11,8 +11,8 @@
  *
  * AssemblyScript managed-runtime allocation
  * -----------------------------------------
- * AssemblyScript is the sole WASM backend (`mathts-as.wasm`); the Rust
- * toolchain was removed in the Rust→AS migration (complete 2026-06-26).
+ * AssemblyScript is the sole WASM backend (`mathts-as.wasm`); the legacy
+ * second toolchain was removed in the WASM-backend migration (complete 2026-06-26).
  *
  * The AS managed runtime allocates buffers via `__new(byteLength, id)` and
  * its typed-array exports expect a 12-byte *header* pointer (id=5 for
@@ -685,8 +685,8 @@ export class WasmLoader {
 
   /**
    * Get the WASM binary path. AssemblyScript is the sole WASM backend
-   * (`mathts-as.wasm`); the Rust toolchain was removed in the Rust→AS
-   * migration (complete 2026-06-26).
+   * (`mathts-as.wasm`); the legacy second toolchain was removed in the
+   * WASM-backend migration (complete 2026-06-26).
    *
    * The path is resolved relative to this source file's location so it is
    * CWD-independent.  This file lives at:

@@ -146,8 +146,8 @@ describe('AS WASM decomposition kernels', () => {
 
     // The backend's QR API documents that `q` is actually `Q^T` (the
     // Householder reflectors applied to the identity from the left
-    // accumulate as Q^T, matching the legacy JS reference and the Rust
-    // crate). So `Q^T * R = A`, and transposing `q` gives us Q.
+    // accumulate as Q^T, matching the legacy JS reference and the
+    // AssemblyScript binary). So `Q^T * R = A`, and transposing `q` gives us Q.
     const qtData: number[][] = [];
     for (let i = 0; i < q.cols; i++) {
       const row: number[] = [];

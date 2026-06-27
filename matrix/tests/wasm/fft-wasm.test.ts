@@ -1,7 +1,7 @@
 /**
  * Tests for WASM-accelerated FFT operations
  *
- * Tests the JavaScript fallback path since the Rust WASM binary may not
+ * Tests the JavaScript fallback path since the WASM binary may not
  * be available in CI. The FFT correctness tests verify both forward and
  * inverse transforms, convolution, and spectral analysis.
  */
@@ -28,7 +28,7 @@ import { wasmLoader } from '../../src/backends/WasmLoader.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 // Phase 7b: the matrix loader defaults to the AssemblyScript binary. Gate the
 // live-WASM round-trip on the AS artifact the loader actually resolves
-// (matrix/dist/wasm/mathts-as.wasm), not the retired Rust copy.
+// (matrix/dist/wasm/mathts-as.wasm), not the retired legacy copy.
 const asWasmPath = path.resolve(here, '../../dist/wasm/mathts-as.wasm');
 const wasmAvailable = fs.existsSync(asWasmPath);
 
@@ -332,9 +332,9 @@ describe('convolve', () => {
 
 // =============================================================================
 // WASM Backend Round-Trip (exercises the previously-dead bridge path).
-// Before the Rust/AS hybrid-allocator fix landed, these tests crashed in
-// `wasmLoader.allocateFloat64Array` because the Rust artifact (the default)
-// has no `__new` export. They are the live regression guard for that bug.
+// Before the AS hybrid-allocator fix landed, these tests crashed in
+// `wasmLoader.allocateFloat64Array` because the legacy artifact (the former
+// default) had no `__new` export. They are the live regression guard for that bug.
 // =============================================================================
 
 describe('fft (wasm backend)', () => {

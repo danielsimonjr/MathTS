@@ -19,14 +19,14 @@
  *     5. Copy caller data into the buffer
  *     6. `__unpin(buffer)`       — the header now owns the buffer reference
  *
- *   The legacy Rust artifact had no managed runtime and used a completely
+ *   The legacy artifact had no managed runtime and used a completely
  *   different ABI (camelCase exports, flat-memory raw pointers). It was
  *   retired in Phase 7b; the AssemblyScript binary is now the only WASM
  *   backend.
  *
- * Naming map (legacy Rust ↔ AssemblyScript) — kept for historical reference:
+ * Naming map (legacy backend ↔ AssemblyScript) — kept for historical reference:
  *
- *   Op                  Rust (camelCase, flat ptrs)        AS (snake_case, header refs)
+ *   Op                  Legacy (camelCase, flat ptrs)      AS (snake_case, header refs)
  *   ------------------  ---------------------------------  -------------------------------
  *   add                 add(aPtr,bPtr,n,resPtr)            matrix_add(a,b,result)
  *   subtract            subtract(aPtr,bPtr,n,resPtr)       matrix_sub(a,b,result)
@@ -307,7 +307,7 @@ const DEFAULT_CONFIG: Required<WASMBackendConfig> = {
 /**
  * WASM Backend for matrix operations (AssemblyScript path).
  *
- * This is the sole WASM backend after Phase 7b retired the Rust path; it
+ * This is the sole WASM backend after Phase 7b retired the legacy path; it
  * reports `type: 'wasm'` and is registered by `register-backends.ts`.
  */
 export class WASMBackend implements MatrixBackend {
@@ -391,7 +391,7 @@ export class WASMBackend implements MatrixBackend {
   /**
    * Compile + instantiate the AssemblyScript WASM artifact. Each
    * WASMBackend instance owns its own instance — this is intentional so
-   * tests and the Rust backend can coexist in the same process.
+   * tests and multiple backend instances can coexist in the same process.
    */
   private async loadAsModule(path: string): Promise<AsModule> {
     const imports: WebAssembly.Imports = {
@@ -678,7 +678,7 @@ export class WASMBackend implements MatrixBackend {
   // =========================================================================
   // LU / QR / Cholesky / Inverse / Determinant
   // -------------------------------------------------------------------------
-  // AssemblyScript now exports these alongside the Rust binary (see
+  // AssemblyScript exports these (see
   // assembly/src/algebra/decomposition.ts). Each method dispatches to
   // the AS export when the loaded module exposes it; otherwise it falls
   // back to the in-process JS implementation that previously handled

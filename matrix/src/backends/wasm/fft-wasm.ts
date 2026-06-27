@@ -212,7 +212,7 @@ export function isWasmFFTAvailable(): boolean {
 /**
  * Perform FFT using WASM backend
  *
- * The Rust WASM operates on interleaved complex data in-place.
+ * The WASM FFT operates on interleaved complex data in-place.
  * This function handles the conversion and memory management.
  */
 function fftWasmCore(real: Float64Array, imag: Float64Array, inverse: boolean = false): FFTResult {
@@ -234,7 +234,7 @@ function fftWasmCore(real: Float64Array, imag: Float64Array, inverse: boolean = 
 
   try {
     // Call WASM FFT (in-place, interleaved). The function takes whatever
-    // pointer shape the loaded artifact expects (header on AS, flat on Rust).
+    // pointer shape the loaded artifact expects (header on AS).
     module.fft(alloc.ptr, n, inverse ? 1 : 0);
 
     // Read back results from the data region — memory.buffer may have been
