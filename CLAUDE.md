@@ -260,7 +260,7 @@ Uses [Changesets](https://github.com/changesets/changesets) for version manageme
 
 ## Turbo Caching
 
-Turbo caches build/test outputs in `node_modules/.cache/turbo/`. The `test` and `typecheck` tasks depend on `^build` (upstream packages must build first). Use `--force` to bypass cache when debugging stale results.
+Turbo caches build/test outputs in `node_modules/.cache/turbo/`. `typecheck` depends on `^build` (upstream packages built first). `test` and `test:coverage` depend on **`["^build", "build"]`** — a package's own `build` runs before its tests, so `dist/` artifacts (e.g. the co-located `mathts-as.wasm` that `matrix`/`functions` load) exist; without this, a cold `npm run test` fails the wasm-resolution guards (ENOENT on the un-built binary). Use `--force` to bypass cache when debugging stale results.
 
 ## Sprint Planning
 
