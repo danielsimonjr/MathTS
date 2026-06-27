@@ -201,8 +201,10 @@ export function scatter<T>(
         cindex.push(i);
         // x(i) = A, check we need to call function this time
         if (update && f) {
-          // copy value to workspace calling callback function
-          x[i] = inverse ? f(avalues[k], value) : f(value, avalues[k]);
+          // copy value to workspace calling callback function.
+          // `value` is supplied by callers on the `update && f` path that
+          // reaches here, so it is defined where the `T` parameters require it.
+          x[i] = inverse ? f(avalues[k], value as T) : f(value as T, avalues[k]);
           u[i] = mark;
         } else {
           // copy value to workspace

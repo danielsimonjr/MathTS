@@ -15,7 +15,10 @@ interface TypedError extends Error {
  * @param {*} [value]
  * @return {Error}
  */
-export function improveErrorMessage(err: TypedError, fnName: string, value?: unknown): Error {
+export function improveErrorMessage(err: unknown, fnName: string, value?: unknown): Error {
+  // `err` originates from a catch clause (unknown). Treat it as a possible
+  // TypedError; the only field access (`data?.actual`) is optional-chained.
+  const e = err as TypedError;
   // TODO: add information with the index (also needs transform in expression parser)
   let details;
 
@@ -23,7 +26,7 @@ export function improveErrorMessage(err: TypedError, fnName: string, value?: unk
     details =
       value !== undefined
         ? ' (type: ' + typeOf(value) + ', value: ' + JSON.stringify(value) + ')'
-        : ' (type: ' + (err.data?.actual ?? 'unknown') + ')';
+        : ' (type: ' + (e.data?.actual ?? 'unknown') + ')';
 
     return new TypeError('Cannot calculate ' + fnName + ', unexpected type of argument' + details);
   }
@@ -42,5 +45,5 @@ export function improveErrorMessage(err: TypedError, fnName: string, value?: unk
     );
   }
 
-  return err;
+  return e;
 }

@@ -93,8 +93,8 @@ export type TypedSignatures = Record<string, (...args: unknown[]) => unknown>;
  */
 export interface TypedFunction extends Function {
   (...args: unknown[]): unknown;
-  /** The signatures of this typed function */
-  signatures?: TypedSignatures;
+  /** The signatures of this typed function (always present on a typed function) */
+  signatures: TypedSignatures;
   /** Check if a value is a typed function */
   isTypedFunction: (value: unknown) => value is TypedFunction;
   // The callback's *returned* implementation is stored by typed-function and
@@ -118,10 +118,9 @@ export interface TypedFunction extends Function {
   clear: () => void;
   onMismatch: (name: string, args: unknown[], signatures: TypedSignatures) => unknown;
   createError: (name: string, args: unknown[], signatures: TypedSignatures) => Error;
-  find: (
-    fn: TypedFunction,
-    signature: string | string[]
-  ) => ((...args: unknown[]) => unknown) | null;
+  // `find` throws a TypeError when no matching signature exists (it never
+  // returns null), matching typed-function's published `find` contract.
+  find: (fn: TypedFunction, signature: string | string[]) => (...args: unknown[]) => unknown;
   resolve: (
     fn: TypedFunction,
     args: unknown[]
