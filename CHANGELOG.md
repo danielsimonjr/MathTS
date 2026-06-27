@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-26) — core: disambiguate same-name divergent type guards (Duplication Audit Cluster I)
+
+- **Resolved the only active-source hazard in Cluster I**: `core/src/utils.ts`
+  defined `isComplex` (structural `re`/`im` duck-type) and `isMatrix`
+  (`number[][]`) — same names as the **canonical exported guards** but with
+  different predicates. Renamed them to `isComplexLike` and `isMatrixArray` so no
+  two same-named guards with diverging semantics coexist in the package source.
+  Behavior preserved; only the names changed. Updated `core/tests/utils.test.ts`.
+  - Added `core/tests/type-guards.test.ts` (regression guard): asserts the
+    canonical surface — `isComplex`/`isFraction`/`isBigNumber` are `instanceof`
+    checks and `isMatrix` duck-types a Matrix *object* (rows/cols/get/type), NOT
+    a `number[][]` — and that the renamed `utils.ts` variants are structural by
+    name. Core+matrix suites: 1380 passed / 7 skipped (was 1367 / 7).
+  - **Verified, no change required** for the rest of the cluster:
+    - `core/src/index.ts` already exports a *single* canonical guard per type —
+      `isComplex`/`isFraction`/`isBigNumber` (`instanceof`, from `types/*.ts`)
+      and `isMatrix` (duck-type, from `typed/mathts-typed.ts`). No duplication on
+      the public surface.
+    - `core/src/is.ts` is dormant synced-mathjs (not in `core/tsconfig.json`
+      include, not exported, imported only by other dormant synced files). Its
+      duck-typing is intentional (cross-instance / Decimal.js compat per the file
+      header). Collapsing it onto `types/*.ts` would change semantics for the
+      dormant mathjs layer, so it is left intact.
+    - `nearlyEqual` has a `number` form (`core/src/number.ts`) and a `BigNumber`
+      form (`core/src/bignumber/nearlyEqual.ts`); both dormant, type-distinct,
+      and imported via explicit paths — no misrouting.
+    - `matrix/src/types/Matrix.ts#isMatrix` is the matrix package's own canonical
+      guard (`instanceof Matrix` + identical duck-type fallback); it is
+      behavior-equivalent to core's `isMatrix` for every input and does not
+      disagree at runtime, so it is kept as-is (no cross-package coupling added).
+
 ### Changed (2026-06-26) — matrix: deduplicate decomposition helpers into `operations/common.ts`
 
 - **Extracted the shared `number[][]` helpers duplicated across the matrix
